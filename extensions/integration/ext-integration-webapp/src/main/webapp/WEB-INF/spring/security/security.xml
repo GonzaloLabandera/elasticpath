@@ -3,16 +3,16 @@
              xmlns:beans="http://www.springframework.org/schema/beans"
              xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
              xsi:schemaLocation="http://www.springframework.org/schema/beans
-             http://www.springframework.org/schema/beans/spring-beans-3.2.xsd
+             http://www.springframework.org/schema/beans/spring-beans-4.3.xsd
              http://www.springframework.org/schema/security
-             http://www.springframework.org/schema/security/spring-security-3.2.xsd">
+             http://www.springframework.org/schema/security/spring-security-4.2.xsd">
 
 	<http pattern="/status" security="none" />
 	<http pattern="/status/*" security="none" />
 
-    <http path-type="regex">
+    <http request-matcher="regex">
         <intercept-url pattern="^/.*\\?wsdl$" />
-        <intercept-url pattern="/.*" access="ROLE_SUPERUSER,ROLE_WSUSER" requires-channel="${ep.integration.secure.channel}" />
+        <intercept-url pattern="/.*" access="hasAnyRole('ROLE_SUPERUSER','ROLE_WSUSER')" requires-channel="${ep.integration.secure.channel}" />
 
         <port-mappings>
             <port-mapping http="${ep.integration.port.http}" https="${ep.integration.port.https}" />

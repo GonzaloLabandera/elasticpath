@@ -1,5 +1,5 @@
 @Purchases
-Feature: anonymous shopper can complete purchase with payment token
+Feature: Anonymous shopper can complete purchase with payment token
   As a client developer
   I want to allow the shopper to purchase with a newly created payment token
   so they can create a payment token and use it on their purchase
@@ -26,12 +26,9 @@ Feature: anonymous shopper can complete purchase with payment token
     And I fill in payment methods needinfo
     And I fill in billing address needinfo
     When Adding an item with item code <ITEMCODE> and quantity <QUANTITY> to the cart
-    And the HTTP status is OK, created
-    And the order is submitted
-    Then the HTTP status is conflict
-    And I should see validation error message with message type, message id, and debug message
-      | messageType | messageId                            | debugMessage                                          |
-      | error       | purchase.item.insufficient.inventory | Insufficient inventory available for SKU: sony_bt_sku |
+    Then I should see validation error message with message type, message id, and debug message
+      | messageType | messageId                   | debugMessage                                                           |
+      | error       | item.insufficient.inventory | Item '<ITEMCODE>' only has 10 available but <QUANTITY> were requested. |
 
     Examples:
       | ITEMCODE    | QUANTITY |

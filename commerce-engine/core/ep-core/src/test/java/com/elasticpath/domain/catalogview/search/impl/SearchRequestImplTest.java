@@ -404,7 +404,7 @@ public class SearchRequestImplTest {
 			exception = true;
 		}
 		
-		assertEquals(true, exception);	
+		assertTrue(exception);
 	}
 	
 	/**
@@ -419,7 +419,7 @@ public class SearchRequestImplTest {
 			exception = true;
 		}
 		
-		assertEquals(true, exception);	
+		assertTrue(exception);
 	}
 	/**
 	 * Compares two search requests that have different keywords.
@@ -438,7 +438,7 @@ public class SearchRequestImplTest {
 			exception = true;
 		}
 		
-		assertEquals(true, exception);
+		assertTrue(exception);
 	}
 	
 	/**

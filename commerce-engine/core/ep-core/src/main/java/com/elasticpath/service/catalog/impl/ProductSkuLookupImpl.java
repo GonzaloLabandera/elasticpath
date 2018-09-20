@@ -64,12 +64,11 @@ public class ProductSkuLookupImpl implements ProductSkuLookup {
 		}
 
 		List<ProductSku> skus = new ArrayList<>(uidpks.size());
-		nextSku: for (Long skuUid : uidpks) {
+		for (Long skuUid : uidpks) {
 			for (Product product : products) {
 				for (ProductSku sku : product.getProductSkus().values()) {
 					if (sku.getUidPk() == skuUid) {
 						skus.add(sku);
-						continue nextSku;
 					}
 				}
 			}
@@ -107,6 +106,28 @@ public class ProductSkuLookupImpl implements ProductSkuLookup {
 
 	@Override
 	@SuppressWarnings("unchecked")
+	public <P extends ProductSku> List<P> findByGuids(final Collection<String> guids) throws EpServiceException {
+		List<Long> productUids = getProductDao().findUidsBySkuGuids(guids);
+		if (productUids.isEmpty()) {
+			return Collections.emptyList();
+		}
+
+		final List<Product> products = getProductLookup().findByUids(productUids);
+		final List<P> skus = new ArrayList<>(guids.size());
+		for (String guid : guids) {
+			for (Product product : products) {
+				ProductSku sku = product.getSkuByGuid(guid);
+				if (sku != null) {
+					skus.add((P) sku);
+				}
+			}
+		}
+
+		return skus;
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
 	public <P extends ProductSku> P findBySkuCode(final String skuCode) throws EpServiceException {
 		final Long productUid = getProductDao().findUidBySkuCode(skuCode);
 		if (productUid == null) {
@@ -132,12 +153,11 @@ public class ProductSkuLookupImpl implements ProductSkuLookup {
 
 		final List<Product> products = getProductLookup().findByUids(productUids);
 		final List<P> skus = new ArrayList<>(skuCodes.size());
-		nextSku: for (String skuCode : skuCodes) {
+		for (String skuCode : skuCodes) {
 			for (Product product : products) {
 				ProductSku sku = product.getSkuByCode(skuCode);
 				if (sku != null) {
 					skus.add((P) sku);
-					continue nextSku;
 				}
 			}
 		}

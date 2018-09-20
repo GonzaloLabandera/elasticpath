@@ -53,7 +53,7 @@ public class CartOrderServiceImpl implements CartOrderService {
 			throw new EpServiceException("Inconsistent data -- duplicate GUIDs exist -- " + guid);
 		}
 
-		return postProcessing(storeCode, cartOrder);
+		return postProcessing(cartOrder);
 	}
 
 	/**
@@ -62,12 +62,12 @@ public class CartOrderServiceImpl implements CartOrderService {
 	 * @param cartOrder the cartOrder to be processed
 	 * @return the processed CartOrder
 	 */
-	private CartOrder postProcessing(final String storeCode, final CartOrder cartOrder) {
+	private CartOrder postProcessing(final CartOrder cartOrder) {
 		if (cartOrder == null) {
 			return null;
 		}
 
-		boolean cartOrderWasUpdated = getCartOrderShippingInformationSanitizer().sanitize(storeCode, cartOrder);
+		final boolean cartOrderWasUpdated = getCartOrderShippingInformationSanitizer().sanitize(cartOrder);
 		if (cartOrderWasUpdated) {
 			return cartOrderDao.saveOrUpdate(cartOrder);
 		}

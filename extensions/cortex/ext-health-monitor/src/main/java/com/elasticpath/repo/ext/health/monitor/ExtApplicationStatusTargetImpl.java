@@ -7,10 +7,10 @@ import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 
-import com.elasticpath.repo.health.monitoring.Status;
-import com.elasticpath.repo.health.monitoring.StatusType;
-import com.elasticpath.repo.health.monitoring.impl.ApplicationStatusTargetImpl;
-import com.elasticpath.repo.health.monitoring.impl.HttpStatusTargetImpl;
+import com.elasticpath.health.monitoring.Status;
+import com.elasticpath.health.monitoring.StatusType;
+import com.elasticpath.health.monitoring.impl.ApplicationStatusTargetImpl;
+import com.elasticpath.health.monitoring.impl.HttpStatusTargetImpl;
 
 /**
  * Extension class that overrides the default behaviour of ApplicationStatusTargetImpl.
@@ -26,7 +26,7 @@ public class ExtApplicationStatusTargetImpl extends ApplicationStatusTargetImpl 
 	 * Checks the application status by checking the cortex healthcheck url.
 	 *
 	 * @return OK if the setting could be retrieved
-	 * @see com.elasticpath.repo.health.monitoring.impl.AbstractStatusCheckerTarget#check()
+	 * @see com.elasticpath.health.monitoring.impl.AbstractStatusCheckerTarget#check()
 	 */
 	@Override
 	public Status check() {

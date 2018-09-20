@@ -13,7 +13,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.elasticpath.plugin.tax.domain.impl.MutableTaxedItem;
 import com.elasticpath.plugin.tax.domain.impl.TaxableItemImpl;
@@ -48,7 +48,6 @@ public class TaxInclusiveRateApplierTest {
 
 	@Before
 	public void setup() {
-		when(taxRateDescriptorResult.isTaxInclusive()).thenReturn(true);
 		when(taxRateDescriptorResult.getSumOfTaxRates()).thenReturn(TAX_TWENTY_PERCENT);
 		when(taxRateDescriptor.getTaxRateValue()).thenReturn(TAX_TWENTY_PERCENT);
 		when(taxRateDescriptor.getTaxRateDescriptorResult()).thenReturn(taxRateDescriptorResult);

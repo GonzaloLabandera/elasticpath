@@ -7,6 +7,7 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 
 import com.elasticpath.selenium.common.AbstractPageObject;
+import com.elasticpath.selenium.dialogs.AddEditCustomerAddressDialog;
 import com.elasticpath.selenium.dialogs.ConfirmDialog;
 import com.elasticpath.selenium.dialogs.EditItemDetailsDialog;
 import com.elasticpath.selenium.dialogs.MoveItemDialog;
@@ -25,7 +26,10 @@ import com.elasticpath.selenium.wizards.CreateReturnWizard;
 public class OrderEditor extends AbstractPageObject {
 
 	//TODO: the pane-location disappears if re-login to an idled CM. Re-check again when PB-3174 fixed.
-	private static final String EDITOR_PANE_PARENT_CSS = "div[pane-location='editor-pane'] div[active-editor='true'] ";
+	/**
+	 * Page Object Id.
+	 */
+	public static final String EDITOR_PANE_PARENT_CSS = "div[pane-location='editor-pane'] div[active-editor='true'] ";
 	private static final String CANCEL_ORDER_BUTTON_CSS = EDITOR_PANE_PARENT_CSS + "div[widget-id='Cancel Order'][seeable='true']";
 	private static final String EDITOR_BUTTON_CSS = EDITOR_PANE_PARENT_CSS + "div[widget-id='%s'][seeable='true']";
 	private static final String CREATE_REFUND_BUTTON_CSS = EDITOR_PANE_PARENT_CSS + "div[widget-id='Create Refund'][seeable='true']";
@@ -61,6 +65,10 @@ public class OrderEditor extends AbstractPageObject {
 	private static final String RETURNED_SKU_COLUMN_CSS = RETURNED_SKU_TABLE_PARENT_CSS + COLUMN_ID_CSS;
 	private static final int SLEEP_TIME = 500;
 	private static final String SKU_CODE_COLUMN_NAME = "SKU Code";
+	private static final String UNLOCK_ORDER_CSS = "div[automation-id='com.elasticpath.cmclient.fulfillment.FulfillmentMessages"
+			+ ".OrderActionUnlockOrder'][seeable='true']";
+	private static final String SHIPMENT_DISCOUNT_VALUE_CSS = "div[widget-id='Less Shipment Discount:'][widget-type='Text'] "
+			+ "+ div[widget-type='Text'] > input";
 
 	/**
 	 * Constructor.
@@ -69,7 +77,6 @@ public class OrderEditor extends AbstractPageObject {
 	 */
 	public OrderEditor(final WebDriver driver) {
 		super(driver);
-		getWaitDriver().waitForElementToBeVisible(By.cssSelector(EDITOR_PANE_PARENT_CSS));
 	}
 
 	/**
@@ -90,6 +97,18 @@ public class OrderEditor extends AbstractPageObject {
 	public CompleteReturnWizard clickCompleteReturnButton() {
 		clickEditorButton("Complete Return...");
 		return new CompleteReturnWizard(getDriver());
+	}
+
+	/**
+	 * Checks if Editor button in view port.
+	 *
+	 * @param buttonWidgetId String the widget id
+	 * @return boolean
+	 */
+	public boolean isEditorButtonInViewport(final String buttonWidgetId) {
+		getWaitDriver().waitForElementToBeNotStale(String.format(EDITOR_BUTTON_CSS, buttonWidgetId));
+		scrollWidgetIntoView(String.format(EDITOR_BUTTON_CSS, buttonWidgetId));
+		return isElementInViewport(String.format(EDITOR_BUTTON_CSS, buttonWidgetId));
 	}
 
 	/**
@@ -124,6 +143,15 @@ public class OrderEditor extends AbstractPageObject {
 	}
 
 	/**
+	 * Checks if Create Return button in view port.
+	 *
+	 * @return boolean
+	 */
+	public boolean isCreateReturnButtonInViewport() {
+		return isEditorButtonInViewport("Create Return ");
+	}
+
+	/**
 	 * Clicks Create Exchange button.
 	 *
 	 * @return CreateExchangeWizard
@@ -141,6 +169,15 @@ public class OrderEditor extends AbstractPageObject {
 		scrollWidgetIntoView(String.format(EDITOR_BUTTON_CSS, buttonText));
 		clickButton(String.format(EDITOR_BUTTON_CSS, buttonText), buttonText);
 		new ConfirmDialog(getDriver()).clickOKButton("FulfillmentMessages.ShipmentSection_ReleaseShipmentConfirm");
+	}
+
+	/**
+	 * Checks if Release Shipment button in view port.
+	 *
+	 * @return boolean
+	 */
+	public boolean isReleaseShipmentButtonInViewport() {
+		return isEditorButtonInViewport("Release Shipment");
 	}
 
 	/**
@@ -217,7 +254,9 @@ public class OrderEditor extends AbstractPageObject {
 	 * @param tabName the tab name.
 	 */
 	public void clickTab(final String tabName) {
-		click(getWaitDriver().waitForElementToBeClickable(By.cssSelector(String.format(TAB_CSS, tabName))));
+		String cssSelector = String.format(TAB_CSS, tabName);
+		resizeWindow(cssSelector);
+		click(getWaitDriver().waitForElementToBeClickable(By.cssSelector(cssSelector)));
 		switch (tabName) {
 			case "Summary":
 				getWaitDriver().waitForElementToBeVisible(By.cssSelector(ORDER_SUMMARY_TITLE));
@@ -370,7 +409,7 @@ public class OrderEditor extends AbstractPageObject {
 		assertThat(selectItemInDialog(ORDER_DETAIL_SHIPMENT_TABLE_PARENT_CSS, ORDER_DETAIL_SHIPMENT_TABLE_COLUMN_CSS, skuCode, SKU_CODE_COLUMN_NAME))
 				.as("Unable to find order sku - " + skuCode)
 				.isTrue();
-		clickButton(ITEM_DETAIL_BUTTON_CSS, "Item Detail");
+		clickButton(ITEM_DETAIL_BUTTON_CSS, "Item Detail", EditItemDetailsDialog.EDIT_ITEM_DIALOG_PARENT_CSS);
 		return new EditItemDetailsDialog((getDriver()));
 	}
 
@@ -385,5 +424,35 @@ public class OrderEditor extends AbstractPageObject {
 		assertThat(selectItemInEditorPane(RETURNED_SKU_TABLE_PARENT_CSS, RETURNED_SKU_COLUMN_CSS, columnValue, columnName))
 				.as("Unable to find returned sku column value - " + columnValue)
 				.isTrue();
+	}
+
+	/**
+	 * Clicks Edit Address... button.
+	 *
+	 * @return EditAddressDialog
+	 */
+	public AddEditCustomerAddressDialog clickEditAddressButton() {
+		clickEditorButton("Edit Shipping Address...");
+		return new AddEditCustomerAddressDialog(getDriver());
+	}
+
+	/**
+	 * Verify UnLock Order button is not enabled.
+	 */
+	public void verifyUnlockOrderIsNotEnabled() {
+		assertThat(isButtonEnabled(UNLOCK_ORDER_CSS))
+				.as("Order is still locked after saving.")
+				.isFalse();
+	}
+
+	/**
+	 * Verifies Shipment Discount.
+	 *
+	 * @param shipmentDiscount the expected discount value.
+	 */
+	public void verifyShipmentDiscountValue(final String shipmentDiscount) {
+		assertThat(getWaitDriver().waitForElementToBeVisible(By.cssSelector(SHIPMENT_DISCOUNT_VALUE_CSS)).getAttribute(ATTRIBUTE_VALUE))
+				.as("Expected Shipment Discount value does not match.")
+				.isEqualTo(shipmentDiscount);
 	}
 }

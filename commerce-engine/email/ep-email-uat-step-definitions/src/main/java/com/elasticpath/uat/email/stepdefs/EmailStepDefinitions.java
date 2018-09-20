@@ -35,9 +35,12 @@ import org.apache.velocity.tools.generic.DateTool;
 import org.jvnet.mock_javamail.Mailbox;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.TestExecutionListeners;
+import org.springframework.test.context.support.DependencyInjectionTestExecutionListener;
 
 import com.elasticpath.base.exception.EpSystemException;
+import com.elasticpath.cucumber.testexecutionlisteners.CucumberDatabaseTestExecutionListener;
+import com.elasticpath.cucumber.testexecutionlisteners.CucumberJmsRegistrationTestExecutionListener;
 import com.elasticpath.email.EmailDto;
 import com.elasticpath.email.test.support.EmailEnabler;
 import com.elasticpath.email.test.support.EmailSendingMockInterceptor;
@@ -47,7 +50,11 @@ import com.elasticpath.uat.ScenarioContextValueHolder;
 /**
  * Step Definitions for email functionality.
  */
-@ContextConfiguration("classpath:cucumber.xml")
+@TestExecutionListeners(listeners = {
+		CucumberJmsRegistrationTestExecutionListener.class,
+		CucumberDatabaseTestExecutionListener.class,
+		DependencyInjectionTestExecutionListener.class
+})
 public class EmailStepDefinitions {
 
 	private static final String DEFAULT_DATE_FORMAT_STRING = "MMMM d, yyyy";

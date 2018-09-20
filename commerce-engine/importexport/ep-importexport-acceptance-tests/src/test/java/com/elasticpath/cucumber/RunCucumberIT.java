@@ -3,6 +3,7 @@
  */
 package com.elasticpath.cucumber;
 
+import cucumber.api.CucumberOptions;
 import cucumber.api.junit.Cucumber;
 import org.junit.runner.RunWith;
 
@@ -12,7 +13,7 @@ import org.junit.runner.RunWith;
  * This will run all Cucumber features found on the classpath.
  */
 @RunWith(Cucumber.class)
-@Cucumber.Options(format = {"pretty", "html:target/cucumber", "json:target/cucumber.json"})
+@CucumberOptions(format = {"pretty", "html:target/cucumber", "json:target/cucumber.json"})
 public class RunCucumberIT {
 
 }

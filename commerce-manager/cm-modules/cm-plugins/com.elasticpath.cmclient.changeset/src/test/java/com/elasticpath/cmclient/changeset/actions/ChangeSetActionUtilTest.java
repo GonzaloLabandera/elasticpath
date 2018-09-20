@@ -5,8 +5,9 @@ package com.elasticpath.cmclient.changeset.actions;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -27,7 +28,6 @@ import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.ISaveablePart2;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
-import org.eclipse.ui.PartInitException;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
@@ -82,13 +82,12 @@ public class ChangeSetActionUtilTest {
 
 	/**
 	 * Initialise needed variables.
-	 * @throws Exception if things go wrong
 	 */
 	@Before
-	public void setUp() throws Exception {
+	public void setUp() {
 		final ChangeSetObjectStatus status = mock(ChangeSetObjectStatus.class);
 
-		when(changeSetService.getStatus(any(Object.class))).thenReturn(status);
+		when(changeSetService.getStatus(nullable(Object.class))).thenReturn(status);
 		when(knownChangeSet.getGuid()).thenReturn(CHANGE_SET_GUID);
 		when(unknownChangeSet.getGuid()).thenReturn(UNKNOWN_CHANGE_SET_GUID);
 		when(status.isMember(CHANGE_SET_GUID)).thenReturn(true);
@@ -249,8 +248,7 @@ public class ChangeSetActionUtilTest {
 		}
 
 		@Override
-		protected void initEditor(final IEditorSite site, final IEditorInput input)
-				throws PartInitException {
+		protected void initEditor(final IEditorSite site, final IEditorInput input) {
 			//no-op - not using in test
 		}
 

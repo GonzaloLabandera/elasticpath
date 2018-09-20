@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>com.elasticpath</groupId>
 		<artifactId>importexport</artifactId>
-		<version>702.0.0-SNAPSHOT</version>
+		<version>703.0.0-SNAPSHOT</version>
 	</parent>
 
 	<artifactId>ep-importexport-cli</artifactId>
@@ -21,10 +21,6 @@
 			<scope>runtime</scope>
 		</dependency>
 	</dependencies>
-
-	<properties>
-		<dependency.directory>lib</dependency.directory>
-	</properties>
 
 	<profiles>
 		<!-- This profile is triggered when used within m2eclipse and automatically

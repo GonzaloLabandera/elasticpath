@@ -2,7 +2,10 @@
 <beans
 	xmlns="http://www.springframework.org/schema/beans"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+	xmlns:settings="http://www.elasticpath.com/schema/settings"
+	xsi:schemaLocation="
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+		http://www.elasticpath.com/schema/settings http://www.elasticpath.com/schema/settings/settings.xsd
 	">
 
 	<bean id="threadLocalStorage"
@@ -24,12 +27,14 @@
 	<bean id="seoUrlBuilderProxy" class="com.elasticpath.domain.catalogview.impl.SeoUrlBuilderProxy">
 		<property name="storeSeoUrlBuilderFactory" ref="storeSeoUrlBuilderFactory"/>
 	</bean>
-	
+
 	<bean id="paginationService" class="com.elasticpath.service.catalogview.impl.PaginationServiceImpl">
-		<property name="settingsReader" ref="cachedSettingsReader"/>
+		<property name="numberOfItemsPerPageSettingProvider">
+			<settings:setting path="COMMERCE/STORE/CATALOG/catalogViewPagination"/>
+		</property>
 	</bean>
-	
-	<bean id="abstractSearchService" class="com.elasticpath.service.catalogview.impl.AbstractSearchServiceImpl" 
+
+	<bean id="abstractSearchService" class="com.elasticpath.service.catalogview.impl.AbstractSearchServiceImpl"
 			abstract="true">
 		<property name="timeService" ref="timeService" />
 		<property name="categoryLookup" ref="categoryLookup" />
@@ -43,8 +48,14 @@
 		<property name="searchCriteriaFactory" ref="searchCriteriaFactory" />
 		<property name="paginationService" ref="paginationService" />
 		<property name="beanFactory" ref="coreBeanFactory"/>
+		<property name="attributeFilterEnabledSettingValueProvider">
+			<settings:setting path="COMMERCE/STORE/FILTEREDNAVIGATION/attributeFilterEnabled"/>
+		</property>
+		<property name="featuredProductCountSettingValueProvider">
+			<settings:setting path="COMMERCE/STORE/CATALOG/featuredProductCountToDisplay"/>
+		</property>
 	</bean>
-	
+
 	<bean id="searchCriteriaFactory" class="com.elasticpath.service.catalogview.impl.SearchCriteriaFactoryImpl">
 		<property name="synonymGroupService" ref="synonymGroupService"/>
 		<property name="storeConfig" ref="threadLocalStorage"/>

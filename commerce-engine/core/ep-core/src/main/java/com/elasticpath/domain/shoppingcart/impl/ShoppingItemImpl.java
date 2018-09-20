@@ -11,6 +11,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 import javax.persistence.Basic;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -176,60 +177,15 @@ public class ShoppingItemImpl extends AbstractShoppingItemImpl implements CartIt
 	public void setCartUid(final Long cartUid) {
 		this.cartUid = cartUid;
 	}
-	
-	
-	/**
-	 * Get the set of dependent items.
-	 * 
-	 * @return the set of dependent items.
-	 * @param productSkuLookup a product sku lookup
-	 */
+
 	@Transient
 	@Override
 	public List<ShoppingItem> getBundleItems(final ProductSkuLookup productSkuLookup) {
-		List<ShoppingItem> bundleItems = new ArrayList<>();
-		for (ShoppingItem item : getChildItemsInternal()) {
-			// filter out non-bundle items		
-			if (isBundleItem(item, productSkuLookup)) {
-				bundleItems.add(item);
-			}			
-		}
-		return bundleItems;
+		return getChildren().stream()
+				.filter(ShoppingItem::isBundleConstituent)
+				.collect(Collectors.toList());
 	}
 
-	private boolean isBundleItem(final ShoppingItem item, final ProductSkuLookup productSkuLookup) {
-		return isBundle(productSkuLookup) && ((CartItem) item).getCartUid() == null;
-	}
-	
-	/**
-	 * Get the dependent shopping items for this item.
-	 *
-	 * @return list of dependent ShoppingItems
-	 */
-	@Override
-	@Transient
-	public List<ShoppingItem> getDependentItems() {
-		List<ShoppingItem> dependentItems = new ArrayList<>();
-		for (ShoppingItem item : getChildItemsInternal()) {
-			//Bundle items are not in cart, but dependent items are
-			if (((CartItem) item).getCartUid() != null) { 
-				dependentItems.add(item);
-			}
-		}
-		return dependentItems;
-	}
-
-	/**
-	 * Check whether this item has dependent items.
-	 *
-	 * @return true if there are dependent items.
-	 */
-	@Override
-	@Transient
-	public boolean hasDependentItems() {
-		return !getDependentItems().isEmpty();
-	}
-	
 	/**
 	 * Gets the unique identifier for this domain model object.
 	 *
@@ -279,8 +235,6 @@ public class ShoppingItemImpl extends AbstractShoppingItemImpl implements CartIt
 		return super.equals(obj);
 	}
 
-	
-	
 	/**
 	 * Get the recurring prices.
 	 * @return the recurring prices

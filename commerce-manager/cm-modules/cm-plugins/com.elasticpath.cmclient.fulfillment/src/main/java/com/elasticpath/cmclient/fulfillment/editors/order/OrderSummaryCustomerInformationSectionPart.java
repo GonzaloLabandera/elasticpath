@@ -51,7 +51,7 @@ public class OrderSummaryCustomerInformationSectionPart extends AbstractCmClient
 
 	private final Customer customer;
 
-	private Text customerUidText;
+	private Text userIdText;
 
 	private Text customerNameText;
 
@@ -93,8 +93,8 @@ public class OrderSummaryCustomerInformationSectionPart extends AbstractCmClient
 		final IEpLayoutData labelData = this.mainPane.createLayoutData(IEpLayoutData.END, IEpLayoutData.CENTER);
 		final IEpLayoutData fieldData = this.mainPane.createLayoutData(IEpLayoutData.FILL, IEpLayoutData.BEGINNING, true, false);
 
-		customerInformationComposite.addLabelBold(FulfillmentMessages.get().CustomerDetails_CustomerIdLabel, labelData);
-		customerUidText = customerInformationComposite.addTextField(EpState.READ_ONLY, fieldData);
+		customerInformationComposite.addLabelBold(FulfillmentMessages.get().CustomerDetails_UserIdLabel, labelData);
+		userIdText = customerInformationComposite.addTextField(EpState.READ_ONLY, fieldData);
 
 		customerInformationComposite.addLabelBold(FulfillmentMessages.get().OrderSummaryCustomerInformationSection_CustomerName, labelData);
 		customerNameText = customerInformationComposite.addTextField(EpState.READ_ONLY, fieldData);
@@ -141,7 +141,7 @@ public class OrderSummaryCustomerInformationSectionPart extends AbstractCmClient
 
 	@Override
 	protected void populateControls() {
-		this.customerUidText.setText(String.valueOf(this.customer.getUidPk()));
+		this.userIdText.setText(String.valueOf(this.customer.getUserId()));
 		this.customerNameText.setText(this.customer.getFullName());
 		String phoneNumber = ""; //$NON-NLS-1$
 		if (this.customer.getPhoneNumber() != null) {

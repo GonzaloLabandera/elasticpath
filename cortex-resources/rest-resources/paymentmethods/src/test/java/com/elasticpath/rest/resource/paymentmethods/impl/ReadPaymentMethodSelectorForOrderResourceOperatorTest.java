@@ -7,7 +7,7 @@ import static com.elasticpath.rest.chain.ResourceStatusMatcher.containsResourceS
 import static com.elasticpath.rest.test.AssertResourceLink.assertResourceLink;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -27,7 +27,7 @@ import org.junit.runner.RunWith;
 
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.elasticpath.rest.OperationResult;
 import com.elasticpath.rest.ResourceOperation;
@@ -62,7 +62,6 @@ import com.elasticpath.rest.schema.uri.PaymentMethodInfoUriBuilder;
 import com.elasticpath.rest.schema.uri.PaymentMethodInfoUriBuilderFactory;
 import com.elasticpath.rest.schema.uri.PaymentMethodListUriBuilder;
 import com.elasticpath.rest.schema.uri.PaymentMethodListUriBuilderFactory;
-import com.elasticpath.rest.schema.uri.PaymentMethodUriBuilder;
 import com.elasticpath.rest.uri.URIUtil;
 
 
@@ -89,10 +88,7 @@ public final class ReadPaymentMethodSelectorForOrderResourceOperatorTest {
 	private static final String PAYMENT_METHOD_ID_VISA = Base32Util.encode(DECODED_PAYMENT_METHOD_ID_VISA);
 	private static final String DECODED_PAYMENT_METHOD_ID_AMEX = "PAYMENT_METHOD_ID_AMEX";
 	private static final String PAYMENT_METHOD_ID_AMEX = Base32Util.encode(DECODED_PAYMENT_METHOD_ID_AMEX);
-	private static final String PAYMENT_METHOD_ID_UNMATCHED = "PAYMENT_METHOD_ID_UNMATCHED";
 	private static final String PAYMENT_METHOD_LIST_URI = "PAYMENT_METHOD_LIST_URI";
-	private static final String PAYMENT_METHOD_VISA_URI = URIUtil.format(RESOURCE_SERVER_NAME, SCOPE, PAYMENT_METHOD_ID_VISA);
-	private static final String PAYMENT_METHOD_UNMATCHED_URI = URIUtil.format(RESOURCE_SERVER_NAME, SCOPE, PAYMENT_METHOD_ID_UNMATCHED);
 	private static final String USER_ID = "USER_ID";
 	public static final String INFO_URI = "/uri";
 	private static final ResourceOperation READ = TestResourceOperationFactory.createRead(ORDER_URI);
@@ -158,7 +154,6 @@ public final class ReadPaymentMethodSelectorForOrderResourceOperatorTest {
 		shouldBuildPaymentMethodListUri(PAYMENT_METHOD_LIST_URI);
 		shouldBuildReadResourceCommandWithResult(ExecutionResultFactory.<ResourceState<?>>createReadOK(paymentMethods));
 		shouldGetSelectorChosenPaymentMethodLinkWithResult(ExecutionResultFactory.createReadOK(visaPaymentMethodLink));
-		shouldBuildPaymentMethodUri(PAYMENT_METHOD_ID_VISA, PAYMENT_METHOD_VISA_URI);
 		shouldSetNameAndSelfUri(ORDER_URI);
 		shouldBuildSelectorRepresentation(selectorRepresentation);
 
@@ -229,6 +224,7 @@ public final class ReadPaymentMethodSelectorForOrderResourceOperatorTest {
 	 * Test unexpected status from finding selected payment method.
 	 */
 	@Test
+	@SuppressWarnings("rawtypes")
 	public void testUnexpectedStatusFromFindingSelectedPaymentMethod() {
 		ResourceState<OrderEntity> orderRepresentation = createOrderRepresentation();
 
@@ -268,7 +264,6 @@ public final class ReadPaymentMethodSelectorForOrderResourceOperatorTest {
 		shouldBuildPaymentMethodListUri(PAYMENT_METHOD_LIST_URI);
 		shouldBuildReadResourceCommandWithResult(ExecutionResultFactory.<ResourceState<?>>createReadOK(paymentMethods));
 		shouldGetSelectorChosenPaymentMethodLinkWithResult(ExecutionResultFactory.createReadOK(chosenPaymentMethodLink));
-		shouldBuildPaymentMethodUri(PAYMENT_METHOD_ID_UNMATCHED, PAYMENT_METHOD_UNMATCHED_URI);
 		shouldSetNameAndSelfUri(ORDER_URI);
 		shouldBuildSelectorRepresentation(selectorRepresentation);
 
@@ -360,14 +355,6 @@ public final class ReadPaymentMethodSelectorForOrderResourceOperatorTest {
 		when(paymentMethodListUriBuilder.setScope(SCOPE)).thenReturn(paymentMethodListUriBuilder);
 		when(paymentMethodListUriBuilder.build()).thenReturn(result);
 	}
-
-	private void shouldBuildPaymentMethodUri(final String paymentMethodId, final String result) {
-		final PaymentMethodUriBuilder paymentMethodUriBuilder = Mockito.mock(PaymentMethodUriBuilder.class);
-		when(paymentMethodUriBuilder.setScope(SCOPE)).thenReturn(paymentMethodUriBuilder);
-		when(paymentMethodUriBuilder.setPaymentMethodId(paymentMethodId)).thenReturn(paymentMethodUriBuilder);
-		when(paymentMethodUriBuilder.build()).thenReturn(result);
-	}
-
 
 	private void shouldGetSelectorChosenPaymentMethodLinkWithResult(final ExecutionResult<ResourceLink> result) {
 		when(paymentMethodLookup.getSelectorChosenPaymentMethodLink(SCOPE, USER_ID, ORDER_ID)).thenReturn(result);

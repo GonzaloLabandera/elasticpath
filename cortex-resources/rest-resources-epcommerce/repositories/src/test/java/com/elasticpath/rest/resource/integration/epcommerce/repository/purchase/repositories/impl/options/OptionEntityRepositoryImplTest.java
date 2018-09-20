@@ -3,10 +3,11 @@
  */
 package com.elasticpath.rest.resource.integration.epcommerce.repository.purchase.repositories.impl.options;
 
+import static com.elasticpath.rest.resource.integration.epcommerce.repository.ResourceTestConstants.PURCHASE_ID;
+import static com.elasticpath.rest.resource.integration.epcommerce.repository.ResourceTestConstants.SCOPE;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singleton;
-
-import static org.mockito.Mockito.mock;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import java.util.HashMap;
@@ -19,7 +20,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.elasticpath.domain.catalog.ProductSku;
 import com.elasticpath.domain.skuconfiguration.SkuOption;
@@ -29,7 +30,6 @@ import com.elasticpath.rest.definition.purchases.PurchaseLineItemIdentifier;
 import com.elasticpath.rest.definition.purchases.PurchaseLineItemOptionEntity;
 import com.elasticpath.rest.definition.purchases.PurchaseLineItemOptionIdentifier;
 import com.elasticpath.rest.definition.purchases.PurchaseLineItemOptionsIdentifier;
-import com.elasticpath.rest.definition.purchases.PurchaseLineItemsIdentifier;
 import com.elasticpath.rest.id.type.PathIdentifier;
 import com.elasticpath.rest.id.type.StringIdentifier;
 import com.elasticpath.rest.identity.Subject;
@@ -37,7 +37,8 @@ import com.elasticpath.rest.identity.attribute.LocaleSubjectAttribute;
 import com.elasticpath.rest.identity.attribute.SubjectAttribute;
 import com.elasticpath.rest.identity.type.ImmutableSubject;
 import com.elasticpath.rest.resource.ResourceOperationContext;
-import com.elasticpath.rest.resource.integration.epcommerce.repository.sku.ProductSkuRepository;
+import com.elasticpath.rest.resource.integration.epcommerce.repository.IdentifierTestFactory;
+import com.elasticpath.rest.resource.integration.epcommerce.repository.order.OrderRepository;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.transform.impl.ReactiveAdapterImpl;
 
 /**
@@ -52,21 +53,21 @@ public class OptionEntityRepositoryImplTest {
 	private static final String DISPLAY_NAME = "displayName";
 	private static final String OPTION_VALUE_KEY = "optionValueKey";
 	private static final Locale CANADA = Locale.CANADA;
-
-	@InjectMocks
-	private ReactiveAdapterImpl reactiveAdapter;
-	@Mock
-	private ResourceOperationContext resourceOperationContext;
-	@Mock
-	private ProductSkuRepository productSkuRepository;
-	@InjectMocks
-	private OptionEntityRepositoryImpl repository;
 	@Mock
 	private ProductSku productSku;
 	@Mock
 	private SkuOptionValue optionValue;
 	@Mock
 	private SkuOption skuOption;
+	@InjectMocks
+	private ReactiveAdapterImpl reactiveAdapter;
+	@InjectMocks
+	private OptionEntityRepositoryImpl<PurchaseLineItemOptionEntity, PurchaseLineItemOptionIdentifier> repository;
+	@Mock
+	private ResourceOperationContext resourceOperationContext;
+	@Mock
+	private OrderRepository orderRepository;
+
 
 	private PurchaseLineItemOptionIdentifier identifier;
 
@@ -83,7 +84,7 @@ public class OptionEntityRepositoryImplTest {
 		Map<String, SkuOptionValue> map = new HashMap<>();
 		map.put(OPTION_ID, optionValue);
 
-		when(productSkuRepository.getProductSkuWithAttributesByGuidAsSingle(LINE_ITEM_ID)).thenReturn(Single.just(productSku));
+		when(orderRepository.findProductSku(any(), any(), any())).thenReturn(Single.just(productSku));
 		when(productSku.getOptionValueMap()).thenReturn(map);
 
 		PurchaseLineItemOptionEntity result = PurchaseLineItemOptionEntity.builder()
@@ -101,7 +102,7 @@ public class OptionEntityRepositoryImplTest {
 	@Test
 	public void testWithError() {
 		ResourceOperationFailure notFound = ResourceOperationFailure.notFound();
-		when(productSkuRepository.getProductSkuWithAttributesByGuidAsSingle(LINE_ITEM_ID)).thenReturn(Single.error(notFound));
+		when(orderRepository.findProductSku(any(), any(), any())).thenReturn(Single.error(notFound));
 
 		repository.findOne(identifier)
 				.test()
@@ -110,7 +111,7 @@ public class OptionEntityRepositoryImplTest {
 
 	@Test
 	public void testNoOptions() {
-		when(productSkuRepository.getProductSkuWithAttributesByGuidAsSingle(LINE_ITEM_ID)).thenReturn(Single.just(productSku));
+		when(orderRepository.findProductSku(any(), any(), any())).thenReturn(Single.just(productSku));
 		when(productSku.getOptionValueMap()).thenReturn(new HashMap<>());
 
 		repository.findOne(identifier)
@@ -135,7 +136,7 @@ public class OptionEntityRepositoryImplTest {
 
 	private void setUpPurchaseLineItemOptionIdentifier() {
 		PurchaseLineItemIdentifier purchaseLineItem = PurchaseLineItemIdentifier.builder()
-				.withPurchaseLineItems(mock(PurchaseLineItemsIdentifier.class))
+				.withPurchaseLineItems(IdentifierTestFactory.buildPurchaseLineItemsIdentifier(SCOPE, PURCHASE_ID))
 				.withLineItemId(PathIdentifier.of(LINE_ITEM_ID))
 				.build();
 		PurchaseLineItemOptionsIdentifier options = PurchaseLineItemOptionsIdentifier.builder()

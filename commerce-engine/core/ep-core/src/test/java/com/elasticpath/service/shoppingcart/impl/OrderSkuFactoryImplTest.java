@@ -3,17 +3,19 @@
  */
 package com.elasticpath.service.shoppingcart.impl;
 
+import static com.elasticpath.service.shoppingcart.impl.OrderSkuAsShoppingItemPricingSnapshotAction.returnTheSameOrderSkuAsPricingSnapshot;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-
-import static com.elasticpath.service.shoppingcart.impl.OrderSkuAsShoppingItemPricingSnapshotAction.returnTheSameOrderSkuAsPricingSnapshot;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Currency;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -22,6 +24,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import com.google.common.collect.ImmutableMap;
+import org.assertj.core.api.SoftAssertions;
 import org.jmock.Expectations;
 import org.jmock.auto.Mock;
 import org.jmock.integration.junit4.JUnitRuleMockery;
@@ -33,6 +36,7 @@ import org.junit.Test;
 import com.elasticpath.commons.beanframework.BeanFactory;
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.catalog.Price;
+import com.elasticpath.domain.catalog.Product;
 import com.elasticpath.domain.catalog.ProductSku;
 import com.elasticpath.domain.catalog.impl.PriceImpl;
 import com.elasticpath.domain.catalog.impl.ProductBundleImpl;
@@ -47,6 +51,7 @@ import com.elasticpath.domain.shoppingcart.impl.ShoppingItemImpl;
 import com.elasticpath.domain.tax.TaxCode;
 import com.elasticpath.money.Money;
 import com.elasticpath.service.catalog.ProductSkuLookup;
+import com.elasticpath.service.misc.TimeService;
 import com.elasticpath.service.tax.TaxCodeRetriever;
 import com.elasticpath.service.tax.impl.DiscountApportioningCalculatorImpl;
 import com.elasticpath.test.BeanFactoryExpectationsFactory;
@@ -86,6 +91,14 @@ public class OrderSkuFactoryImplTest {
 	private static final BigDecimal THREE = new BigDecimal(3);
 
 	private static final BigDecimal NINE = new BigDecimal(9);
+
+	private static final String GUID_SUFIX = "-guid";
+
+	private static final String DEFAULT_DISPLAY_NAME = "DEFAULT_DISPLAY_NAME";
+
+	private static final String SHOPPING_ITEM_GUID = "SHOPPING_ITEM_GUID";
+
+	private static final String TAX_CODE = "TAX_CODE";
 
 	@Rule
 	public final JUnitRuleMockery context = new JUnitRuleMockery();
@@ -185,6 +198,9 @@ public class OrderSkuFactoryImplTest {
 		childSku.setProduct(new ProductBundleImpl());
 		ShoppingItem child11 = createShoppingItem(ID_ONE_ONE_ONE, BigDecimal.TEN, BigDecimal.TEN, 1);
 
+		child1.setBundleConstituent(true);
+		child11.setBundleConstituent(true);
+
 		root1.addChild(child1);
 		child1.addChild(child11);
 
@@ -209,6 +225,7 @@ public class OrderSkuFactoryImplTest {
 		ProductSku rootSku = productSkuLookup.findByGuid(root1.getSkuGuid());
 		rootSku.setProduct(new ProductBundleImpl());
 		ShoppingItem child1 = createShoppingItem(ID_ONE_ONE, BigDecimal.TEN, BigDecimal.TEN, 1);
+		child1.setBundleConstituent(true);
 
 		root1.addChild(child1);
 
@@ -240,6 +257,9 @@ public class OrderSkuFactoryImplTest {
 		ShoppingItem child1 = createShoppingItem(ID_ONE_ONE, BigDecimal.ONE, BigDecimal.ONE, 1);
 		ShoppingItem child2 = createShoppingItem(ID_ONE_TWO, BigDecimal.TEN, BigDecimal.TEN, 1);
 
+		child1.setBundleConstituent(true);
+		child2.setBundleConstituent(true);
+
 		root1.addChild(child1);
 		root1.addChild(child2);
 
@@ -261,6 +281,9 @@ public class OrderSkuFactoryImplTest {
 		rootSku.setProduct(new ProductBundleImpl());
 		ShoppingItem child1 = createShoppingItem(ID_ONE_ONE, BigDecimal.ONE, BigDecimal.ONE, 1);
 		ShoppingItem child2 = createShoppingItem(ID_ONE_TWO, BigDecimal.ONE, BigDecimal.ONE, 1);
+
+		child1.setBundleConstituent(true);
+		child2.setBundleConstituent(true);
 
 		root1.addChild(child1);
 		root1.addChild(child2);
@@ -297,6 +320,10 @@ public class OrderSkuFactoryImplTest {
 		ShoppingItem root = createShoppingItem(ID_ONE, NINE, NINE, FIVE, true);
 		ShoppingItem child1 = createShoppingItem(ID_ONE_ONE, THREE, THREE, ONE, true);
 		ShoppingItem child12 = createShoppingItem(ID_ONE_ONE_TWO, SEVEN, SEVEN, TWO);
+
+		child1.setBundleConstituent(true);
+		child12.setBundleConstituent(true);
+
 		root.addChild(child1);
 		child1.addChild(child12);
 
@@ -457,10 +484,81 @@ public class OrderSkuFactoryImplTest {
 		assertEquals(unitPrice, orderSku.getUnitPrice());
 	}
 
+	@Test
+	public void testCopyFields() {
+
+		// Given
+		final ProductSku productSku = givenProductSkuLookupWillFindSku(ID_ONE);
+
+		givenTaxCodeForSku(TAX_CODE, productSku);
+
+		ShoppingItem shoppingItem = createShoppingItem(SHOPPING_ITEM_GUID, productSku, BigDecimal.ONE, BigDecimal.ONE, 1, true);
+
+		Date expectedCreatedDate = givenOrderSkuCreatedDate();
+
+		OrderSku orderSku = factory.createSimpleOrderSku();
+
+		// When
+		factory.copyFields(shoppingItem, orderSku, Locale.CANADA);
+
+		// Then
+		SoftAssertions assertSoftly = new SoftAssertions();
+
+		assertSoftly.assertThat(orderSku).isNotNull();
+		assertSoftly.assertThat(orderSku.getCreatedDate()).isEqualTo(expectedCreatedDate);
+		assertSoftly.assertThat(orderSku.getSkuGuid()).isEqualTo(ID_ONE + GUID_SUFIX);
+		assertSoftly.assertThat(orderSku.getSkuCode()).isEqualTo(ID_ONE);
+		assertSoftly.assertThat(orderSku.getDigitalAsset()).isNull();
+		assertSoftly.assertThat(orderSku.getTaxCode()).isEqualTo(TAX_CODE);
+		assertSoftly.assertThat(orderSku.getDisplaySkuOptions()).isEmpty();
+		assertSoftly.assertThat(orderSku.getDisplayName()).isEqualTo(DEFAULT_DISPLAY_NAME);
+		assertSoftly.assertThat(orderSku.getImage()).isNull();
+		assertSoftly.assertThat(orderSku.getOrdering()).isEqualTo(0);
+		assertSoftly.assertThat(orderSku.isBundleConstituent()).isTrue();
+
+		assertSoftly.assertAll();
+
+	}
+
+	private void givenTaxCodeForSku(final String expectedTaxCode, final ProductSku productSku) {
+		TaxCode taxCode = mock(TaxCode.class);
+		when(taxCode.getCode()).thenReturn(expectedTaxCode);
+
+		TaxCodeRetriever taxCodeRetriever = mock(TaxCodeRetriever.class);
+		when(taxCodeRetriever.getEffectiveTaxCode(productSku)).thenReturn(taxCode);
+		factory.setTaxCodeRetriever(taxCodeRetriever);
+	}
+
+	private Date givenOrderSkuCreatedDate() {
+		Date expectedCreatedDate = new Date();
+		TimeService timeService = mock(TimeService.class);
+		when(timeService.getCurrentTime()).thenReturn(expectedCreatedDate);
+		factory.setTimeService(timeService);
+		return expectedCreatedDate;
+	}
+
+	private ShoppingItem createShoppingItem(final String itemGuid, final ProductSku productSku, final BigDecimal totalUnitPrice, final BigDecimal totalUnitDiscount,
+											final int quantity, final boolean bundleConstituent) {
+		ShoppingItem item = new ShoppingItemImpl() {
+			private static final long serialVersionUID = 1950286126608207488L;
+
+			@Override
+			public ItemPricing getLinePricing() {
+				return new ItemPricing(totalUnitPrice, totalUnitDiscount, quantity);
+			}
+		};
+		item.setGuid(itemGuid);
+		item.setSkuGuid(productSku.getGuid());
+
+		item.setBundleConstituent(bundleConstituent);
+
+		return item;
+	}
+
 	private ShoppingItem createShoppingItem(final String guid, final BigDecimal totalUnitPrice, final BigDecimal totalUnitDiscount,
 			final int quantity, final boolean bundle) {
 		final ProductSku sku = new ProductSkuImpl();
-		sku.setGuid(guid + "-guid");
+		sku.setGuid(guid + GUID_SUFIX);
 		sku.setSkuCode(guid);
 		if (bundle) {
 			sku.setProduct(new ProductBundleImpl());
@@ -479,6 +577,20 @@ public class OrderSkuFactoryImplTest {
 		item.setSkuGuid(sku.getGuid());
 
 		return item;
+	}
+
+	private ProductSku givenProductSkuLookupWillFindSku(final String skuCode) {
+		final Product product = mock(Product.class);
+		when(product.getDisplayName(Locale.CANADA)).thenReturn(DEFAULT_DISPLAY_NAME);
+
+		final ProductSku sku = new ProductSkuImpl();
+		sku.setGuid(skuCode + GUID_SUFIX);
+		sku.setSkuCode(skuCode);
+		sku.setProduct(product);
+
+		givenProductSkuLookupWillFindSku(sku);
+
+		return sku;
 	}
 
 	private void givenProductSkuLookupWillFindSku(final ProductSku sku) {

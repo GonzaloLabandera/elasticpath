@@ -4,7 +4,6 @@
 package com.elasticpath.service.payment.converter;
 
 import org.springframework.beans.BeanUtils;
-import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.converter.Converter;
 
 import com.elasticpath.commons.beanframework.BeanFactory;
@@ -12,7 +11,6 @@ import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.order.OrderPayment;
 import com.elasticpath.plugin.payment.PaymentType;
 import com.elasticpath.plugin.payment.dto.OrderPaymentDto;
-import com.elasticpath.plugin.payment.dto.PayerAuthValidationValueDto;
 import com.elasticpath.service.payment.gateway.GiftCertificateOrderPaymentDto;
 
 /**
@@ -23,7 +21,6 @@ public class OrderPaymentToDto implements Converter<OrderPayment, OrderPaymentDt
 
 	@Override
 	public OrderPaymentDto convert(final OrderPayment source) {
-		ConversionService conversionService = beanFactory.getBean(ContextIdNames.CONVERSION_SERVICE);
 		OrderPaymentDto target;
 		if (PaymentType.GIFT_CERTIFICATE.equals(source.getPaymentMethod())) {
 			target = beanFactory.getBean(ContextIdNames.GIFT_CERTIFICATE_ORDER_PAYMENT_DTO);
@@ -31,7 +28,6 @@ public class OrderPaymentToDto implements Converter<OrderPayment, OrderPaymentDt
 		} else {
 			target = beanFactory.getBean(ContextIdNames.ORDER_PAYMENT_DTO);
 		}
-		target.setPayerAuthValidationValueDto(conversionService.convert(source.getPayerAuthValidationValue(), PayerAuthValidationValueDto.class));
 		BeanUtils.copyProperties(source, target);
 		return target;
 	}

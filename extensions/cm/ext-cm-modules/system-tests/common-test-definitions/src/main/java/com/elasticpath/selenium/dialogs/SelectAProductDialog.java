@@ -10,7 +10,10 @@ import org.openqa.selenium.WebDriver;
  */
 public class SelectAProductDialog extends AbstractDialog {
 
-	private static final String SELECT_A_PRODUCT_PARENT_CSS = "div[widget-id='Select a Product'][widget-type='Shell'] ";
+	/**
+	 * CSS selector used to identify the dialog.
+	 */
+	public static final String SELECT_A_PRODUCT_PARENT_CSS = "div[widget-id='Select a Product'][widget-type='Shell'] ";
 	private static final String PRODUCT_CODE_INPUT_CSS = SELECT_A_PRODUCT_PARENT_CSS + "div[widget-id='Product Code'] > input";
 	private static final String PRODUCT_NAME_INPUT_CSS = SELECT_A_PRODUCT_PARENT_CSS + "div[widget-id='Product Name'] > input";
 	private static final String SEARCH_BUTTON_CSS = SELECT_A_PRODUCT_PARENT_CSS + "div[widget-id='Search'][widget-type='Button']";

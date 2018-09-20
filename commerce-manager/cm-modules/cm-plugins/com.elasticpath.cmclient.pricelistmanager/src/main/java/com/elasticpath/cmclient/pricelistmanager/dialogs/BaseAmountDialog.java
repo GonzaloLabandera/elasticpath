@@ -33,6 +33,7 @@ import com.elasticpath.cmclient.core.binding.EpDialogSupport;
 import com.elasticpath.cmclient.core.binding.EpValueBinding;
 import com.elasticpath.cmclient.core.binding.ObservableUpdateValueStrategy;
 import com.elasticpath.cmclient.core.conversion.EpPriceConverter;
+import com.elasticpath.cmclient.core.helpers.BaseAmountDTOCreator;
 import com.elasticpath.cmclient.core.ui.dialog.ProductFinderDialog;
 import com.elasticpath.cmclient.core.ui.dialog.SkuFinderDialog;
 import com.elasticpath.cmclient.core.ui.framework.IEpLayoutData;
@@ -194,7 +195,7 @@ public class BaseAmountDialog extends AbstractPolicyAwareDialog implements Objec
 		this.editMode = editMode;
 		this.priceListController = controller;
 		this.baseAmountDto = baseAmountDTO;
-		this.copyBaseAmountDTO = new BaseAmountDTO(baseAmountDTO);
+		this.copyBaseAmountDTO = BaseAmountDTOCreator.createModel(baseAmountDTO);
 	}
 
 	@Override
@@ -600,13 +601,13 @@ public class BaseAmountDialog extends AbstractPolicyAwareDialog implements Objec
 					new String[]{"Base Amount", objectGuid})); //$NON-NLS-1$
 			}
 			this.editMode = true;
-			this.baseAmountDto = new BaseAmountDTO(this.baseAmountDto);
-			this.copyBaseAmountDTO = new BaseAmountDTO(baseAmountDto);
+			this.baseAmountDto = BaseAmountDTOCreator.createModel(this.baseAmountDto);
+			this.copyBaseAmountDTO = BaseAmountDTOCreator.createModel(baseAmountDto);
 		}
 	}
 
 	private BaseAmountDTO createNewBaseAmount() {
-		BaseAmountDTO baseAmount = new BaseAmountDTO();
+		BaseAmountDTO baseAmount = BaseAmountDTOCreator.createModel();
 		// set new DTO GUID
 		RandomGuid randomGuid = ServiceLocator.getService(ContextIdNames.RANDOM_GUID);
 		baseAmount.setGuid(randomGuid.toString());

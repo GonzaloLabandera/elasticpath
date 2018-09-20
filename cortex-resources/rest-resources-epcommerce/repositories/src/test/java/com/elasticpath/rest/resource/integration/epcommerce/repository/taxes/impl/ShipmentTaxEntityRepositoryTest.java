@@ -4,7 +4,7 @@
 
 package com.elasticpath.rest.resource.integration.epcommerce.repository.taxes.impl;
 
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -16,7 +16,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.core.convert.ConversionService;
 
 import com.elasticpath.domain.order.PhysicalOrderShipment;
@@ -67,9 +67,6 @@ public class ShipmentTaxEntityRepositoryTest {
 	public void elementNotFoundTest() {
 		when(shipmentRepository.find(PURCHASE_ID, SHIPMENT_ID))
 				.thenReturn(Single.error(ResourceOperationFailure.notFound(ShipmentRepositoryImpl.SHIPMENT_NOT_FOUND)));
-
-		TaxesEntity result = mock(TaxesEntity.class);
-		when(conversionService.convert(any(), any())).thenReturn(result);
 
 		repository.findOne(getShipmentTaxIdentifier())
 				.test()

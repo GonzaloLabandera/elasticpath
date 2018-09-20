@@ -3,6 +3,7 @@
  */
 package com.elasticpath.sellingchannel.director.impl;
 
+import static junit.framework.TestCase.assertTrue;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
@@ -10,18 +11,17 @@ import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.Currency;
 
-import org.jmock.Expectations;
-import org.jmock.integration.junit4.JUnitRuleMockery;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+import org.jmock.Expectations;
+import org.jmock.integration.junit4.JUnitRuleMockery;
 
 import com.elasticpath.common.dto.OrderItemDto;
 import com.elasticpath.commons.beanframework.BeanFactory;
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.commons.tree.impl.TreeNodeMemento;
-import com.elasticpath.commons.util.security.StringEncrypter;
 import com.elasticpath.domain.catalog.DigitalAsset;
 import com.elasticpath.domain.catalog.Price;
 import com.elasticpath.domain.catalog.ProductSku;
@@ -67,7 +67,6 @@ public class OrderItemAssemblerImplTest {
 	public final JUnitRuleMockery context = new JUnitRuleMockery();
 	private BeanFactory beanFactory;
 	private BeanFactoryExpectationsFactory expectationsFactory;
-	private StringEncrypter stringEncrypter;
 
 	private final ProductInventoryManagementService inventoryManagementService = context.mock(ProductInventoryManagementService.class);
 	private final ProductSkuLookup productSkuLookup = context.mock(ProductSkuLookup.class);
@@ -94,8 +93,6 @@ public class OrderItemAssemblerImplTest {
 
 		expectationsFactory.allowingBeanFactoryGetBean(ContextIdNames.MONEY_FORMATTER, StandardMoneyFormatter.class);
 
-		stringEncrypter = context.mock(StringEncrypter.class);
-		expectationsFactory.allowingBeanFactoryGetBean("digitalAssetStringEncrypter", stringEncrypter);
 
 		context.checking(new Expectations() { {
 			allowing(storeService).findStoreWithCode(store.getCode()); will(returnValue(store));
@@ -150,7 +147,6 @@ public class OrderItemAssemblerImplTest {
 
 		context.checking(new Expectations() { {
 			allowing(productSkuLookup).findByGuid(productSku.getGuid()); will(returnValue(productSku));
-			allowing(stringEncrypter).encrypt("12345"); will(returnValue("54321"));
 			allowing(inventoryManagementService).getInventory(productSku, warehouse.getUidPk()); will(returnValue(null));
 			allowing(pricingSnapshotService).getPricingSnapshotForOrderSku(orderSku); will(returnValue(orderSku));
 		} });
@@ -166,10 +162,9 @@ public class OrderItemAssemblerImplTest {
 
 		assertEquals("Output should match input", digitalAsset, dto.getDigitalAsset());
 		assertEquals("Output should match input", "display", dto.getDisplayName());
-		assertEquals("Output should match input", "54321", dto.getEncryptedUidPk());
 		assertEquals("Output should match input", "image.jpg", dto.getImage());
 		assertEquals("Output should match input", "skuoptions", dto.getDisplaySkuOptions());
-		assertEquals("Output should match input", true, dto.isAllocated());
+		assertTrue("Output should match input", dto.isAllocated());
 		assertEquals("Output should match input", Money.valueOf("23.45", CAD_CURRENCY), dto.getListPrice());
 		assertEquals("Output should match input", Money.valueOf("12.34", CAD_CURRENCY), dto.getUnitPrice());
 		assertEquals("Output should match input", Money.valueOf("33.33", CAD_CURRENCY), dto
@@ -221,7 +216,6 @@ public class OrderItemAssemblerImplTest {
 
 		context.checking(new Expectations() { {
 			allowing(productSkuLookup).findByGuid(productSku.getGuid()); will(returnValue(productSku));
-			allowing(stringEncrypter).encrypt("12345"); will(returnValue("54321"));
 			allowing(inventoryManagementService).getInventory(productSku, warehouse.getUidPk()); will(returnValue(null));
 			allowing(pricingSnapshotService).getPricingSnapshotForOrderSku(orderSku); will(returnValue(orderSku));
 		} });
@@ -243,10 +237,9 @@ public class OrderItemAssemblerImplTest {
 		OrderItemDto childDto = parentStackMemento.getTreeNode().getChildren().get(0);
 		assertEquals("Output should match input", digitalAsset, childDto.getDigitalAsset());
 		assertEquals("Output should match input", "display", childDto.getDisplayName());
-		assertEquals("Output should match input", "54321", childDto.getEncryptedUidPk());
 		assertEquals("Output should match input", "image.jpg", childDto.getImage());
 		assertEquals("Output should match input", "skuoptions", childDto.getDisplaySkuOptions());
-		assertEquals("Output should match input", true, childDto.isAllocated());
+		assertTrue("Output should match input", childDto.isAllocated());
 		assertEquals("Output should match input", "sku-A", childDto.getSkuCode());
 		assertEquals("Output should match input", THREE, childDto.getQuantity());
 		assertEquals("Output should match input", productSku, childDto.getProductSku());

@@ -11,7 +11,6 @@ import cucumber.api.java.en.Given;
 import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.ContextConfiguration;
 
 import com.elasticpath.common.dto.sellingchannel.ShoppingItemDtoFactory;
 import com.elasticpath.cucumber.category.CategoryStepDefinitionsHelper;
@@ -21,7 +20,6 @@ import com.elasticpath.cucumber.store.StoreStepDefinitionsHelper;
 /**
  * B2BTaxStepDefinitions.
  */
-@ContextConfiguration("/cucumber.xml")
 public class B2BTaxStepDefinitions {
 
 	@Autowired

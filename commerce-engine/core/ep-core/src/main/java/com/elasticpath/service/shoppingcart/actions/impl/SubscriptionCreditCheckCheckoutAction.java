@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) Elastic Path Software Inc., 2016
  */
 package com.elasticpath.service.shoppingcart.actions.impl;
@@ -78,7 +78,6 @@ public class SubscriptionCreditCheckCheckoutAction implements ReversibleCheckout
 																			final OrderPayment templateOrderPayment,
 																			final String transactionType) {
 		OrderPayment orderPayment = getBeanFactory().getBean(ContextIdNames.ORDER_PAYMENT);
-		orderPayment.copyCreditCardInfo(templateOrderPayment);
 		orderPayment.copyTransactionFollowOnInfo(templateOrderPayment);
 		orderPayment.setPaymentForSubscriptions(true);
 		orderPayment.setGatewayToken(templateOrderPayment.getGatewayToken());

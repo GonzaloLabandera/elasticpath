@@ -7,13 +7,14 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
 
-import io.reactivex.Single;
+import io.reactivex.Maybe;
 
 import com.elasticpath.rest.ResourceOperationFailure;
 import com.elasticpath.rest.cache.CacheResult;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.settings.SettingsRepository;
 import com.elasticpath.settings.SettingsReader;
 import com.elasticpath.settings.domain.SettingValue;
+import com.elasticpath.settings.provider.converter.SettingValueTypeConverter;
 
 
 /**
@@ -24,39 +25,50 @@ import com.elasticpath.settings.domain.SettingValue;
 public class SettingsRepositoryImpl implements SettingsRepository {
 
 	private final SettingsReader settingsReader;
+	private final SettingValueTypeConverter settingValueTypeConverter;
 
 	/**
 	 * Instantiates a new settings repository.
 	 *
-	 * @param settingsReader the settings lookup
+	 * @param settingsReader            the settings lookup
+	 * @param settingValueTypeConverter the settings value type converter
 	 */
 	@Inject
 	public SettingsRepositoryImpl(
-			@Named("cachedSettingsReader")
-			final SettingsReader settingsReader) {
+			@Named("cachedSettingsReader") final SettingsReader settingsReader,
+			@Named("settingValueTypeConverter") final SettingValueTypeConverter settingValueTypeConverter) {
 		this.settingsReader = settingsReader;
+		this.settingValueTypeConverter = settingValueTypeConverter;
 	}
-
 
 	@Override
 	@CacheResult
-	public Single<String> getStringSettingValue(final String path, final String context) {
+	public <T> Maybe<T> getSetting(final String path, final String context) {
 		return getSettingValue(path, context)
-				.map(SettingValue::getValue);
+				.flatMap(settingValue -> {
+					final T converted = settingValueTypeConverter.convert(settingValue);
+
+					if (converted == null) {
+						return Maybe.empty();
+					} else {
+						return Maybe.just(converted);
+					}
+				});
 	}
 
 	@SuppressWarnings("PMD.AvoidCatchingThrowable")
-	private Single<SettingValue> getSettingValue(final String path, final String context) {
+	private Maybe<SettingValue> getSettingValue(final String path, final String context) {
 		try {
 			SettingValue settingValue = settingsReader.getSettingValue(path, context);
 			if (settingValue == null) {
-				return Single.error(ResourceOperationFailure.notFound(
+				return Maybe.error(ResourceOperationFailure.notFound(
 						"Setting value for path [" + path + "] and context [" + context + "] is not " + "found"));
 			} else {
-				return Single.just(settingValue);
+				return Maybe.just(settingValue);
 			}
 		} catch (Exception e) {
-			return Single.error(ResourceOperationFailure.serverError("Unable to resolve setting value"));
+			return Maybe.error(ResourceOperationFailure.serverError("Unable to resolve setting value"));
 		}
 	}
+
 }

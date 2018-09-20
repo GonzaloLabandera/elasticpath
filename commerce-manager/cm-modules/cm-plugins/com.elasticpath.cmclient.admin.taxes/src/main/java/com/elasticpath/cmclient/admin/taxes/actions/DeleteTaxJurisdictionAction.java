@@ -3,8 +3,6 @@
  */
 package com.elasticpath.cmclient.admin.taxes.actions;
 
-import java.util.Locale;
-
 import org.apache.log4j.Logger;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -13,6 +11,7 @@ import org.eclipse.osgi.util.NLS;
 
 import com.elasticpath.cmclient.admin.taxes.TaxesMessages;
 import com.elasticpath.cmclient.admin.taxes.views.TaxJurisdictionsListView;
+import com.elasticpath.cmclient.core.CorePlugin;
 import com.elasticpath.cmclient.core.ServiceLocator;
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.misc.Geography;
@@ -52,7 +51,7 @@ public class DeleteTaxJurisdictionAction extends Action {
 				ContextIdNames.TAX_JURISDICTION_SERVICE);
 
 		Geography geography = ServiceLocator.getService(ContextIdNames.GEOGRAPHY);
-		String countryName = geography.getCountryDisplayName(selectedJurisdiction.getRegionCode(), Locale.getDefault());
+		String countryName = geography.getCountryDisplayName(selectedJurisdiction.getRegionCode(), CorePlugin.getDefault().getDefaultLocale());
 
 		if (jurisdictionService.getTaxJurisdictionsInUse().contains(selectedJurisdiction.getUidPk())) {
 			MessageDialog.openInformation(listView.getSite().getShell(), TaxesMessages.get().TaxJurisdictionInUseTitle,

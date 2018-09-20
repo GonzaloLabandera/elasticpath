@@ -3,9 +3,9 @@
  */
 package com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder.impl;
 
-import static org.junit.Assert.assertEquals;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
+import static junit.framework.TestCase.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -19,12 +19,13 @@ import java.util.Collections;
 import java.util.List;
 import javax.persistence.PersistenceException;
 
+import io.reactivex.Single;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.elasticpath.domain.cartorder.CartOrder;
 import com.elasticpath.domain.cartorder.impl.CartOrderImpl;
@@ -36,7 +37,6 @@ import com.elasticpath.persistence.api.EpPersistenceException;
 import com.elasticpath.rest.ResourceOperationFailure;
 import com.elasticpath.rest.ResourceStatus;
 import com.elasticpath.rest.command.ExecutionResult;
-import com.elasticpath.rest.command.ExecutionResultFactory;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder.CartOrderRepository;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder.ShoppingCartRepository;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.transform.impl.ReactiveAdapterImpl;
@@ -85,11 +85,17 @@ public class CartOrderRepositoryImplTest {
 	@Mock
 	private CartOrderCouponAutoApplier cartOrderCouponAutoApplier;
 
+	@Mock
+	private ShoppingCart shoppingCart;
+
 	@Before
 	public void setUp() {
 		allowingValidCartOrder();
+
 		repository = new CartOrderRepositoryImpl(cartOrderService, shoppingCartRepository, cartOrderShippingService, cartOrderCouponService,
 				cartOrderCouponAutoApplier, reactiveAdapter);
+
+		when(shoppingCartRepository.getShoppingCart(CART_GUID)).thenReturn(Single.just(shoppingCart));
 	}
 
 	/**
@@ -352,7 +358,7 @@ public class CartOrderRepositoryImplTest {
 		final ShoppingCart enrichedShoppingCart = mock(ShoppingCart.class, "enriched");
 		when(cartOrderService.findByStoreCodeAndGuid(STORE_CODE, CART_ORDER_GUID)).thenReturn(cartOrder);
 		allowingCartOrderStoreCodeToBe(STORE_CODE);
-		when(shoppingCartRepository.getShoppingCart(CART_GUID)).thenReturn(ExecutionResultFactory.createReadOK(shoppingCart));
+		when(shoppingCartRepository.getShoppingCart(CART_GUID)).thenReturn(Single.just(shoppingCart));
 		when(cartOrderCouponService.populateCouponCodesOnShoppingCart(shoppingCart, cartOrder)).thenReturn(enrichedShoppingCart);
 		when(cartOrderShippingService.populateAddressAndShippingFields(enrichedShoppingCart, cartOrder)).thenReturn(enrichedShoppingCart);
 
@@ -386,14 +392,14 @@ public class CartOrderRepositoryImplTest {
 	public void testGetEnrichedShoppingCartWhenShoppingCartNotFound() {
 		when(cartOrderService.findByStoreCodeAndGuid(STORE_CODE, CART_ORDER_GUID)).thenReturn(cartOrder);
 		allowingCartOrderStoreCodeToBe(STORE_CODE);
-		when(shoppingCartRepository.getShoppingCart(CART_GUID)).thenReturn(ExecutionResultFactory.createNotFound());
-
+		when(shoppingCartRepository.getShoppingCart(CART_GUID)).thenReturn(Single.error(ResourceOperationFailure.notFound("not found")));
 		ExecutionResult<ShoppingCart> result = repository.getEnrichedShoppingCart(STORE_CODE, CART_ORDER_GUID,
-				CartOrderRepository.FindCartOrder.BY_ORDER_GUID);
+					CartOrderRepository.FindCartOrder.BY_ORDER_GUID);
 
 		AssertExecutionResult.assertExecutionResult(result)
 				.isFailure()
 				.resourceStatus(ResourceStatus.NOT_FOUND);
+
 	}
 
 	@Test
@@ -401,7 +407,8 @@ public class CartOrderRepositoryImplTest {
 
 		when(cartOrderService.findByStoreCodeAndGuid(STORE_CODE, CART_ORDER_GUID)).thenReturn(cartOrder);
 		allowingCartOrderStoreCodeToBe(STORE_CODE);
-		when(cartOrderShippingService.updateCartOrderShippingAddress(SHIPPING_ADDRESS_GUID, cartOrder, STORE_CODE)).thenReturn(true);
+		when(cartOrderShippingService.updateCartOrderShippingAddress(SHIPPING_ADDRESS_GUID, shoppingCart, cartOrder)).thenReturn(true);
+		when(shoppingCartRepository.getShoppingCart(CART_GUID)).thenReturn(Single.just(shoppingCart));
 
 		ExecutionResult<Boolean> result = repository.updateShippingAddressOnCartOrder(SHIPPING_ADDRESS_GUID, CART_ORDER_GUID, STORE_CODE);
 
@@ -416,7 +423,7 @@ public class CartOrderRepositoryImplTest {
 
 		when(cartOrderService.findByStoreCodeAndGuid(STORE_CODE, CART_ORDER_GUID)).thenReturn(cartOrder);
 		allowingCartOrderStoreCodeToBe(STORE_CODE);
-		when(cartOrderShippingService.updateCartOrderShippingAddress(SHIPPING_ADDRESS_GUID, cartOrder, STORE_CODE)).thenReturn(true);
+		when(cartOrderShippingService.updateCartOrderShippingAddress(SHIPPING_ADDRESS_GUID, shoppingCart, cartOrder)).thenReturn(true);
 
 		repository.updateShippingAddressOnCartOrderAsSingle(SHIPPING_ADDRESS_GUID, CART_ORDER_GUID, STORE_CODE).toCompletable()
 				.test();
@@ -429,7 +436,8 @@ public class CartOrderRepositoryImplTest {
 
 		when(cartOrderService.findByStoreCodeAndGuid(STORE_CODE, CART_ORDER_GUID)).thenReturn(cartOrder);
 		allowingCartOrderStoreCodeToBe(STORE_CODE);
-		when(cartOrderShippingService.updateCartOrderShippingAddress(SHIPPING_ADDRESS_GUID, cartOrder, STORE_CODE)).thenReturn(false);
+		when(cartOrderShippingService.updateCartOrderShippingAddress(SHIPPING_ADDRESS_GUID, shoppingCart, cartOrder)).thenReturn(false);
+		when(shoppingCartRepository.getShoppingCart(CART_GUID)).thenReturn(Single.just(shoppingCart));
 
 		ExecutionResult<Boolean> result = repository.updateShippingAddressOnCartOrder(SHIPPING_ADDRESS_GUID, CART_ORDER_GUID, STORE_CODE);
 
@@ -444,7 +452,7 @@ public class CartOrderRepositoryImplTest {
 
 		when(cartOrderService.findByStoreCodeAndGuid(STORE_CODE, CART_ORDER_GUID)).thenReturn(cartOrder);
 		allowingCartOrderStoreCodeToBe(STORE_CODE);
-		when(cartOrderShippingService.updateCartOrderShippingAddress(SHIPPING_ADDRESS_GUID, cartOrder, STORE_CODE)).thenReturn(false);
+		when(cartOrderShippingService.updateCartOrderShippingAddress(SHIPPING_ADDRESS_GUID, shoppingCart, cartOrder)).thenReturn(false);
 
 		repository.updateShippingAddressOnCartOrderAsSingle(SHIPPING_ADDRESS_GUID, CART_ORDER_GUID, STORE_CODE).toCompletable()
 				.test();
@@ -458,8 +466,9 @@ public class CartOrderRepositoryImplTest {
 
 		when(cartOrderService.findByStoreCodeAndGuid(STORE_CODE, CART_ORDER_GUID)).thenReturn(cartOrder);
 		allowingCartOrderStoreCodeToBe(STORE_CODE);
-		when(cartOrderShippingService.updateCartOrderShippingAddress(SHIPPING_ADDRESS_GUID, cartOrder, STORE_CODE)).thenReturn(true);
+		when(cartOrderShippingService.updateCartOrderShippingAddress(SHIPPING_ADDRESS_GUID, shoppingCart, cartOrder)).thenReturn(true);
 		when(cartOrderService.saveOrUpdate(cartOrder)).thenThrow(EpPersistenceException.class);
+		when(shoppingCartRepository.getShoppingCart(CART_GUID)).thenReturn(Single.just(shoppingCart));
 
 		ExecutionResult<Boolean> result = repository.updateShippingAddressOnCartOrder(SHIPPING_ADDRESS_GUID, CART_ORDER_GUID, STORE_CODE);
 
@@ -474,7 +483,8 @@ public class CartOrderRepositoryImplTest {
 
 		when(cartOrderService.findByStoreCodeAndGuid(STORE_CODE, CART_ORDER_GUID)).thenReturn(cartOrder);
 		allowingCartOrderStoreCodeToBe(STORE_CODE);
-		when(cartOrderShippingService.updateCartOrderShippingAddress(SHIPPING_ADDRESS_GUID, cartOrder, STORE_CODE)).thenReturn(true);
+
+		when(cartOrderShippingService.updateCartOrderShippingAddress(SHIPPING_ADDRESS_GUID, shoppingCart, cartOrder)).thenReturn(true);
 		when(cartOrderService.saveOrUpdate(cartOrder)).thenThrow(EpPersistenceException.class);
 
 		repository.updateShippingAddressOnCartOrderAsSingle(SHIPPING_ADDRESS_GUID, CART_ORDER_GUID, STORE_CODE).toCompletable()
@@ -493,11 +503,10 @@ public class CartOrderRepositoryImplTest {
 		ExecutionResult<Boolean> booleanExecutionResult = repository.filterAndAutoApplyCoupons(cartOrder, store, customerEmail);
 
 		verify(cartOrderCouponAutoApplier).filterAndAutoApplyCoupons(any(CartOrder.class), any(Store.class), anyString());
-		assertEquals(true, booleanExecutionResult.getData());
+		assertTrue(booleanExecutionResult.getData());
 	}
 
 	private void allowingValidCartOrder() {
-		when(cartOrder.getGuid()).thenReturn(CART_ORDER_GUID);
 		when(cartOrder.getShoppingCartGuid()).thenReturn(CART_GUID);
 	}
 

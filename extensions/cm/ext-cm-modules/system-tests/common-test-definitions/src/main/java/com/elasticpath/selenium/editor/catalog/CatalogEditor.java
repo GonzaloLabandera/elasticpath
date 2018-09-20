@@ -19,7 +19,10 @@ public class CatalogEditor extends AbstractPageObject {
 	private static final String ATTRIBUTE_COLUMN_CSS = ATTRIBUTE_PARENT_CSS + "div[column-id='%s']";
 	private static final String TAB_CSS
 			= "div[automation-id='com.elasticpath.cmclient.catalog.CatalogMessages.Catalog%sPage_Title'][seeable='true']";
-	private static final String BUTTON_CSS
+	/**
+	 * CSS selector template for some buttons in CatalogEditor.
+	 */
+	protected static final String BUTTON_CSS
 			= "div[automation-id='com.elasticpath.cmclient.core.CoreMessages.Button_%s'][seeable='true']";
 	private static final String CATALOG_EDITOR = "div[widget-id='%s'][appearance-id='ctab-item']";
 
@@ -90,9 +93,9 @@ public class CatalogEditor extends AbstractPageObject {
 	 *
 	 * @param buttonName the button name
 	 */
-	public void clickButton(final String buttonName) {
+	/*public void clickButton(final String buttonName) {
 		clickButton(String.format(BUTTON_CSS, buttonName), buttonName);
-	}
+	}*/
 
 	/**
 	 * Clicks add attribute button.
@@ -100,7 +103,7 @@ public class CatalogEditor extends AbstractPageObject {
 	 * @return AddAttributeDialog
 	 */
 	public AddAttributeDialog clickAddAttributeButton() {
-		clickButton("Add");
+		clickButton(String.format(BUTTON_CSS, "Add"), "Add", AddAttributeDialog.ADD_ATTRUBUTE_PARENT_CSS);
 		return new AddAttributeDialog(getDriver());
 	}
 
@@ -110,7 +113,7 @@ public class CatalogEditor extends AbstractPageObject {
 	 * @return EditAttributeDialog
 	 */
 	public EditAttributeDialog clickEditAttributeButton() {
-		clickButton("Edit");
+		clickButton(String.format(BUTTON_CSS, "Edit"), "Edit", EditAttributeDialog.EDIT_ATTRUBUTE_PARENT_CSS);
 		return new EditAttributeDialog(getDriver());
 	}
 
@@ -118,7 +121,7 @@ public class CatalogEditor extends AbstractPageObject {
 	 * Clicks remove attribute button.
 	 */
 	public void clickRemoveAttributeButton() {
-		clickButton("Remove");
+		clickButton(String.format(BUTTON_CSS, "Remove"), "Remove");
 	}
 
 	/**
@@ -127,8 +130,9 @@ public class CatalogEditor extends AbstractPageObject {
 	 * @return AddEditBrandDialog.
 	 */
 	public AddEditBrandDialog clickAddBrandButton() {
-		clickButton("Add");
-		return new AddEditBrandDialog(getDriver(), "Add");
+		final String dialogName = "Add";
+		clickButton(dialogName, String.format(AddEditBrandDialog.ADD_EDIT_BRAND_DIALOGCSS_TEMPLATE, dialogName));
+		return new AddEditBrandDialog(getDriver(), dialogName);
 	}
 
 	/**

@@ -42,7 +42,7 @@ public class CartHasItemsServiceImpl implements CartHasItemsService {
 		Single<ShoppingCart> shoppingCartSingle = cartOrderRepository.findByGuidAsSingle(storeCode, cartOrderGuid)
 				.flatMap(cartOrder -> getShoppingCart(StringIdentifier.of(storeCode), cartOrder));
 
-		return shoppingCartSingle.map(shoppingCart -> shoppingCart.getCartItems().isEmpty());
+		return shoppingCartSingle.map(ShoppingCart::isEmpty);
 	}
 
 	/**

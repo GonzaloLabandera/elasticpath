@@ -3,7 +3,10 @@
  */
 package com.elasticpath.service.catalog.impl;
 
+import static java.util.Collections.emptyList;
+
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -16,7 +19,9 @@ import com.elasticpath.domain.catalog.ProductAssociation;
 import com.elasticpath.domain.catalog.ProductAssociationLoadTuner;
 import com.elasticpath.domain.catalog.ProductAssociationType;
 import com.elasticpath.domain.catalog.ProductLoadTuner;
+import com.elasticpath.domain.catalog.ProductSku;
 import com.elasticpath.domain.catalogview.StoreProduct;
+import com.elasticpath.domain.store.Store;
 import com.elasticpath.persistence.api.LoadTuner;
 import com.elasticpath.service.catalog.ProductAssociationRetrieveStrategy;
 import com.elasticpath.service.catalog.ProductAssociationService;
@@ -444,6 +449,12 @@ public class ProductAssociationServiceImpl extends AbstractEpPersistenceServiceI
 		criteria.setWithinCatalogOnly(withinCatalogOnly);
 
 		return getAssociations(criteria);
+	}
+
+	@Override
+	public Collection<ProductSku> findDependentItemsForSku(final Store store, final ProductSku parentItemSku) {
+		//extension point. simply return empty list for further extension purpose.
+		return emptyList();
 	}
 
 }

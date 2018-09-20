@@ -5,7 +5,7 @@ package com.elasticpath.rest.resource.pagination.transform.impl;
 
 import static com.elasticpath.rest.test.AssertResourceState.assertResourceState;
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Matchers.anyString;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
@@ -18,7 +18,7 @@ import org.junit.runner.RunWith;
 
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.elasticpath.rest.ResourceTypeFactory;
 import com.elasticpath.rest.definition.collections.CollectionsMediaTypes;

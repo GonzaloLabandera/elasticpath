@@ -72,10 +72,7 @@ import com.elasticpath.service.search.query.SortBy;
 import com.elasticpath.service.search.query.SortOrder;
 import com.elasticpath.service.search.query.StandardSortBy;
 import com.elasticpath.service.search.solr.SpellingConstants.SpellingParams;
-import com.elasticpath.settings.SettingsReader;
-import com.elasticpath.settings.domain.SettingValue;
-import com.elasticpath.settings.domain.impl.SettingValueImpl;
-import com.elasticpath.settings.impl.CachedSettingsReaderImpl;
+import com.elasticpath.settings.test.support.SimpleSettingValueProvider;
 
 /**
  * Test {@link SolrQueryFactoryImpl}.
@@ -122,10 +119,6 @@ public class SolrQueryFactoryImplTest {
 
 	private SearchConfigFactory searchConfigFactory;
 	
-	private SettingsReader settingsReader;
-	
-	private SettingValue settingValue;
-
 	private Category category;
 
 	private Catalog catalog;
@@ -174,9 +167,6 @@ public class SolrQueryFactoryImplTest {
 		
 		analyzer = context.mock(Analyzer.class);
 		
-		settingsReader = context.mock(SettingsReader.class);
-		settingValue = context.mock(SettingValue.class);
-
 		context.checking(new Expectations() {
 			{
 				allowing(searchCriteria).getIndexType(); will(returnValue(IndexType.PRODUCT));
@@ -197,9 +187,6 @@ public class SolrQueryFactoryImplTest {
 				allowing(catalog).getCode(); will(returnValue("myCatalogCode"));
 				
 				ignoring(analyzer);
-				
-				allowing(settingsReader).getSettingValue(""); will(returnValue(settingValue));
-				allowing(settingValue).getBooleanValue(); will(returnValue(false));
 			}
 		});
 
@@ -222,8 +209,6 @@ public class SolrQueryFactoryImplTest {
 		facetAdapter.setCategoryService(categoryService);
 		facetAdapter.setIndexUtility(indexUtilityImpl);
 		solrQueryFactoryImpl.setSolrFacetAdapter(facetAdapter);
-		
-		solrQueryFactoryImpl.setSettingsReader(settingsReader);
 	}
 
 	private List<Filter<?>> constructNonStoreAwareFilters() {
@@ -434,7 +419,7 @@ public class SolrQueryFactoryImplTest {
 	
 	/**
 	 * Test method for
-	 * {@link SolrQueryFactoryImpl#composeKeywordQuery(KeywordSearchCriteria, int, int, SearchConfig)}.
+	 * {@link SolrQueryFactoryImpl#composeKeywordQuery(KeywordSearchCriteria, int, int, SearchConfig, boolean)}.
 	 */
 	@Test
 	public void testComposeKeywordQuery() {
@@ -450,35 +435,7 @@ public class SolrQueryFactoryImplTest {
 			}
 		});
 		keywordSearchCriteria.setCatalogCode("catalogCode1");
-		solrQueryFactoryImpl.setSettingsReader(new CachedSettingsReaderImpl() {
-			@Override
-			public SettingValue getSettingValue(final String path) {
-				return new SettingValueImpl() {
-					private static final long serialVersionUID = 1L;
-
-					@Override
-					@SuppressWarnings("PMD.BooleanGetMethodName")
-					public boolean getBooleanValue() {
-						return false;
-					}
-				};
-			}
-			
-			@Override
-			public SettingValue getSettingValue(final String path, final String context) {
-				return new SettingValueImpl() {
-					private static final long serialVersionUID = 1L;
-
-					@Override
-					@SuppressWarnings("PMD.BooleanGetMethodName")
-					public boolean getBooleanValue() {
-						return false;
-					}
-				};
-			}
-			
-			
-		});
+		solrQueryFactoryImpl.setShowBundlesFirstProvider(new SimpleSettingValueProvider<>(false));
 		SolrQuery query = solrQueryFactoryImpl.composeKeywordQuery(keywordSearchCriteria, START_INDEX, MAX_ROWS, searchConfig, false);
 
 		SolrQuery startIndexQuery = new SolrQuery();
@@ -532,7 +489,7 @@ public class SolrQueryFactoryImplTest {
 	}
 	
 	/**
-	 * Test method for {@link SolrQueryFactoryImpl#composeSpellingQuery(String, SearchConfig)}.
+	 * Test method for {@link SolrQueryFactoryImpl#composeSpellingQuery(SpellSuggestionSearchCriteria, SearchConfig)}.
 	 */
 	@Test
 	public void testComposeSpellingQuery() {

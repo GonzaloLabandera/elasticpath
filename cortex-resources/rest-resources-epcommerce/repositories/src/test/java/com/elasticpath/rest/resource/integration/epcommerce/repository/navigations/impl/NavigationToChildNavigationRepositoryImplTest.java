@@ -15,13 +15,12 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.elasticpath.domain.catalog.Category;
 import com.elasticpath.domain.catalog.impl.CategoryImpl;
 import com.elasticpath.rest.definition.navigations.NavigationIdentifier;
 import com.elasticpath.rest.definition.navigations.NavigationsIdentifier;
-import com.elasticpath.rest.id.type.PathIdentifier;
 import com.elasticpath.rest.id.type.StringIdentifier;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.category.CategoryRepository;
 
@@ -45,24 +44,23 @@ public class NavigationToChildNavigationRepositoryImplTest {
 
 	@Test
 	public void checkChildrenNavigationsTest() {
-		NavigationIdentifier parentIdentifier = createNavigationWithId(PARENT_CODE, Collections.emptyList());
-		List<String> parentNodeId = parentIdentifier.getNodeId().getValue();
+		NavigationIdentifier parentIdentifier = createNavigationWithId(PARENT_CODE);
 
-		List<NavigationIdentifier> result = setUpFirstTreeLevel(parentNodeId);
+		List<NavigationIdentifier> result = setUpFirstTreeLevel();
 
 		repository.getElements(parentIdentifier)
 				.test()
 				.assertValueSequence(result);
 	}
 
-	private List<NavigationIdentifier> setUpFirstTreeLevel(final List<String> parentNodeId) {
+	private List<NavigationIdentifier> setUpFirstTreeLevel() {
 		List<Category> categories = ImmutableList.of(
 				createCategoryWithCode(CHILD_1_LEVEL_1),
 				createCategoryWithCode(CHILD_2_LEVEL_1)
 		);
 		List<NavigationIdentifier> result = ImmutableList.of(
-				createSubParentNavigation(parentNodeId),
-				createNavigationWithId(CHILD_2_LEVEL_1, parentNodeId)
+				createNavigationWithId(CHILD_1_LEVEL_1),
+				createNavigationWithId(CHILD_2_LEVEL_1)
 		);
 
 		when(categoryRepository.findChildren(SCOPE, PARENT_CODE))
@@ -71,13 +69,13 @@ public class NavigationToChildNavigationRepositoryImplTest {
 		return result;
 	}
 
-	private List<NavigationIdentifier> setUpSecondTreeLevel(final List<String> parentNodeId) {
+	private List<NavigationIdentifier> setUpSecondTreeLevel() {
 		List<Category> categories = Collections.singletonList(
 				createCategoryWithCode(CHILD_LEVEL_2)
 		);
 
 		List<NavigationIdentifier> result = Collections.singletonList(
-				createNavigationWithId(CHILD_LEVEL_2, createSubParentNavigation(parentNodeId).getNodeId().getValue())
+				createNavigationWithId(CHILD_LEVEL_2)
 		);
 
 		when(categoryRepository.findChildren(SCOPE, CHILD_1_LEVEL_1))
@@ -88,19 +86,16 @@ public class NavigationToChildNavigationRepositoryImplTest {
 
 	@Test
 	public void checkTreeForNavigationTest() {
-		NavigationIdentifier parentIdentifier = createNavigationWithId(PARENT_CODE, Collections.emptyList());
-		List<String> parentNodeId = parentIdentifier.getNodeId().getValue();
+		setUpFirstTreeLevel();
+		List<NavigationIdentifier> result = setUpSecondTreeLevel();
 
-		setUpFirstTreeLevel(parentNodeId);
-		List<NavigationIdentifier> result = setUpSecondTreeLevel(parentNodeId);
-
-		repository.getElements(createSubParentNavigation(parentNodeId))
+		repository.getElements(createSubParentNavigation())
 				.test()
 				.assertValueSequence(result);
 	}
 
-	private NavigationIdentifier createSubParentNavigation(final List<String> parentNodeId) {
-		return createNavigationWithId(CHILD_1_LEVEL_1, parentNodeId);
+	private NavigationIdentifier createSubParentNavigation() {
+		return createNavigationWithId(CHILD_1_LEVEL_1);
 	}
 
 	private CategoryImpl createCategoryWithCode(final String code) {
@@ -109,10 +104,10 @@ public class NavigationToChildNavigationRepositoryImplTest {
 		return category;
 	}
 
-	private NavigationIdentifier createNavigationWithId(final String navigationId, final List<String> parentId) {
+	private NavigationIdentifier createNavigationWithId(final String navigationId) {
 		return NavigationIdentifier.builder()
 				.withNavigations(createNavigations())
-				.withNodeId(PathIdentifier.of(PathIdentifier.of(parentId), navigationId))
+				.withNodeId(StringIdentifier.of(navigationId))
 				.build();
 	}
 
@@ -121,4 +116,5 @@ public class NavigationToChildNavigationRepositoryImplTest {
 				.withScope(StringIdentifier.of(SCOPE))
 				.build();
 	}
+
 }

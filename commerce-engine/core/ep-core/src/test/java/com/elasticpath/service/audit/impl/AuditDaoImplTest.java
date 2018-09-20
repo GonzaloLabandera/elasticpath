@@ -29,8 +29,7 @@ import com.elasticpath.persistence.api.Transaction;
 import com.elasticpath.persistence.openjpa.JpaPersistenceEngine;
 import com.elasticpath.service.changeset.ChangeSetService;
 import com.elasticpath.service.misc.TimeService;
-import com.elasticpath.settings.SettingsReader;
-import com.elasticpath.settings.domain.SettingValue;
+import com.elasticpath.settings.test.support.SimpleSettingValueProvider;
 
 /**
  * Test that the methods of AuditDaoImpl persist and load the audit data as expected.
@@ -70,6 +69,7 @@ public class AuditDaoImplTest {
 		auditDaoImpl = new AuditDaoImpl();
 		auditDaoImpl.setBeanFactory(beanFactory);
 		auditDaoImpl.setPersistenceEngine(persistenceEngine);
+		auditDaoImpl.setChangeSetEnabledProvider(new SimpleSettingValueProvider<>(false));
 	}
 
 	/**
@@ -225,18 +225,11 @@ public class AuditDaoImplTest {
 	 * @param guid the guid of the change set
 	 */
 	public void assertEntityInChangeSet(final Persistable object, final String guid) {
-		final SettingsReader settingsReader = context.mock(SettingsReader.class);
-		final SettingValue settingValue = context.mock(SettingValue.class);
+		auditDaoImpl.setChangeSetEnabledProvider(new SimpleSettingValueProvider<>(true));
+
 		final ChangeSetService changeSetService = context.mock(ChangeSetService.class);
 		context.checking(new Expectations() {
 			{
-				oneOf(beanFactory).getBean(ContextIdNames.SETTINGS_SERVICE);
-					will(returnValue(settingsReader));
-				oneOf(settingsReader).getSettingValue("COMMERCE/SYSTEM/CHANGESETS/enable");
-					will(returnValue(settingValue));
-				oneOf(settingValue).getBooleanValue();
-					will(returnValue(true));
-					
 				oneOf(beanFactory).getBean(ContextIdNames.CHANGESET_SERVICE);
 					will(returnValue(changeSetService));
 				oneOf(changeSetService).findChangeSetGuid(object);

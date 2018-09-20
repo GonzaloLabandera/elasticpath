@@ -3,8 +3,8 @@
     xmlns="http://www.springframework.org/schema/beans"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xmlns:util="http://www.springframework.org/schema/util"
-    xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
-                        http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-3.0.xsd"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+                        http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-4.0.xsd"
 >
 
 	<bean id="syncService" parent="txProxyTemplate">
@@ -113,7 +113,6 @@
 				<entry key="com.elasticpath.domain.customer.Customer"><util:constant static-field="com.elasticpath.service.search.IndexType.CUSTOMER"/></entry>
 				<entry key="com.elasticpath.domain.rules.Rule"><util:constant static-field="com.elasticpath.service.search.IndexType.PROMOTION"/></entry>
 				<entry key="com.elasticpath.domain.cmuser.CmUser"><util:constant static-field="com.elasticpath.service.search.IndexType.CMUSER"/></entry>
-				<entry key="com.elasticpath.domain.shipping.ShippingServiceLevel"><util:constant static-field="com.elasticpath.service.search.IndexType.SHIPPING_SERVICE_LEVEL"/></entry>
 			</map>
 		</property>
 		<property name="beanFactory" ref="coreBeanFactory"/>

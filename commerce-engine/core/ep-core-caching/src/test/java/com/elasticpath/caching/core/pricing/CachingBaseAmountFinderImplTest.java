@@ -4,8 +4,8 @@
 package com.elasticpath.caching.core.pricing;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Matchers.anyCollectionOf;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.anyCollection;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -22,7 +22,7 @@ import com.google.common.collect.ImmutableList;
 
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.elasticpath.cache.Cache;
 import com.elasticpath.domain.catalog.ProductSku;
@@ -102,7 +102,7 @@ public class CachingBaseAmountFinderImplTest {
 
 		// Then
 		assertThat(result).isSameAs(expectedBaseAmounts);
-		verify(cache, never()).put(eq(pricingCacheKey), anyCollectionOf(BaseAmount.class));
+		verify(cache, never()).put(eq(pricingCacheKey), anyCollection());
 		verifyNoMoreInteractions(fallBackFinder);
 
 	}

@@ -3,34 +3,36 @@
  */
 package com.elasticpath.persistence.support.impl;
 
-import static org.junit.Assert.assertEquals;
+import static java.util.Calendar.AUGUST;
+import static java.util.Calendar.DAY_OF_MONTH;
+import static java.util.Calendar.YEAR;
+import static org.assertj.core.api.Assertions.assertThat;
+
+import static com.elasticpath.persistence.support.OrderCriterion.ResultType.ENTITY;
+import static com.elasticpath.service.search.query.SortOrder.ASCENDING;
+import static com.elasticpath.service.search.query.SortOrder.DESCENDING;
+import static com.elasticpath.service.search.query.StandardSortBy.CUSTOMER_NAME;
+import static com.elasticpath.service.search.query.StandardSortBy.DATE;
+import static com.elasticpath.service.search.query.StandardSortBy.ORDER_NUMBER;
+import static com.elasticpath.service.search.query.StandardSortBy.STATUS;
 
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
 import java.util.Set;
-import java.util.TreeMap;
 
 import org.junit.Before;
 import org.junit.Test;
 
-import com.elasticpath.domain.order.AdvancedOrderSearchCriteria;
 import com.elasticpath.domain.order.OrderPaymentStatus;
 import com.elasticpath.domain.order.OrderShipmentStatus;
 import com.elasticpath.domain.order.OrderStatus;
-import com.elasticpath.domain.order.impl.AdvancedOrderSearchCriteriaImpl;
 import com.elasticpath.persistence.support.OrderCriterion.ResultType;
 import com.elasticpath.service.search.query.CustomerSearchCriteria;
 import com.elasticpath.service.search.query.EpInvalidOrderCriterionResultTypeException;
 import com.elasticpath.service.search.query.OrderReturnSearchCriteria;
 import com.elasticpath.service.search.query.OrderSearchCriteria;
-import com.elasticpath.service.search.query.SortOrder;
-import com.elasticpath.service.search.query.StandardSortBy;
 
 /**
  * Test <code>OrderCriterionImpl</code>.
@@ -38,6 +40,7 @@ import com.elasticpath.service.search.query.StandardSortBy;
 public class OrderCriterionImplTest {
 
 	private static final int NO_3 = 3;
+	private static final String SKUCODE = "SKUCODE";
 
 	private OrderCriterionImpl orderCriterionImpl;
 
@@ -49,6 +52,8 @@ public class OrderCriterionImplTest {
 
 	private static final String ZIPCODE = "zipcode";
 
+	private static final String ZIPCODE_UC = "ZIPCODE";
+
 	/**
 	 * Prepares for tests.
 	 */
@@ -58,31 +63,35 @@ public class OrderCriterionImplTest {
 	}
 
 	private String getOrder() {
-		return "select o from OrderImpl as o";
+		return "SELECT o FROM OrderImpl AS o";
 	}
 
 	private String getInnerJoinPayments() {
-		return ", in(o.orderPayments) as op";
+		return " JOIN o.orderPayments AS op";
 	}
 
 	private String getInnerJoinShipments() {
-		return ", in(o.shipments) as os";
+		return " JOIN o.shipments AS os";
 	}
 
 	private String getWhere() {
-		return  " where o = o";
+		return " WHERE";
+	}
+
+	private String getAnd() {
+		return " AND";
 	}
 
 	private String getOrderStatusCondition(final int positionOfParam) {
-		return " and o.status = ?" + positionOfParam;
+		return " o.status = ?" + positionOfParam;
 	}
 
 	private String getPaymentStatusCondition(final int positionOfParam) {
-		return " and op.status = ?" + positionOfParam;
+		return " op.status = ?" + positionOfParam;
 	}
 
 	private String getShipmentStatusCondition(final int positionOfParam) {
-		return " and os.status = ?" + positionOfParam;
+		return " os.status = ?" + positionOfParam;
 	}
 
 	/**
@@ -92,18 +101,22 @@ public class OrderCriterionImplTest {
 	public void testGetStatusCriteria() {
 		final StringBuilder fullQuery = new StringBuilder();
 		fullQuery.append(getOrder()).append(getInnerJoinPayments()).append(getInnerJoinShipments()).append(getWhere());
-		fullQuery.append(getOrderStatusCondition(1)).append(getPaymentStatusCondition(2)).append(getShipmentStatusCondition(NO_3));
+		fullQuery.append(getOrderStatusCondition(1))
+			.append(getAnd()).append(getPaymentStatusCondition(2))
+			.append(getAnd()).append(getShipmentStatusCondition(NO_3));
 
 		final StringBuilder orderStatusQuery = new StringBuilder();
 		orderStatusQuery.append(getOrder()).append(getWhere()).append(getOrderStatusCondition(1));
 
 		final StringBuilder orderPaymentStatusQuery = new StringBuilder();
 		orderPaymentStatusQuery.append(getOrder()).append(getInnerJoinPayments()).append(getWhere());
-		orderPaymentStatusQuery.append(getOrderStatusCondition(1)).append(getPaymentStatusCondition(2));
+		orderPaymentStatusQuery.append(getOrderStatusCondition(1))
+			.append(getAnd()).append(getPaymentStatusCondition(2));
 
 		final StringBuilder orderShipmentStatusQuery = new StringBuilder();
 		orderShipmentStatusQuery.append(getOrder()).append(getInnerJoinShipments()).append(getWhere());
-		orderShipmentStatusQuery.append(getOrderStatusCondition(1)).append(getShipmentStatusCondition(2));
+		orderShipmentStatusQuery.append(getOrderStatusCondition(1))
+			.append(getAnd()).append(getShipmentStatusCondition(2));
 
 		final StringBuilder paymentStatusQuery = new StringBuilder();
 		paymentStatusQuery.append(getOrder()).append(getInnerJoinPayments()).append(getWhere());
@@ -111,23 +124,55 @@ public class OrderCriterionImplTest {
 
 		final StringBuilder paymentShipmentStatusQuery = new StringBuilder();
 		paymentShipmentStatusQuery.append(getOrder()).append(getInnerJoinPayments()).append(getInnerJoinShipments()).append(getWhere());
-		paymentShipmentStatusQuery.append(getPaymentStatusCondition(1)).append(getShipmentStatusCondition(2));
+		paymentShipmentStatusQuery.append(getPaymentStatusCondition(1))
+			.append(getAnd()).append(getShipmentStatusCondition(2));
 
 		final StringBuilder shipmentStatusQuery = new StringBuilder();
 		shipmentStatusQuery.append(getOrder()).append(getInnerJoinShipments()).append(getWhere());
 		shipmentStatusQuery.append(getShipmentStatusCondition(1));
 
 		final StringBuilder noStatusQuery = new StringBuilder();
-		noStatusQuery.append(getOrder()).append(getWhere());
+		noStatusQuery.append(getOrder());
 
-		assertEquals(fullQuery.toString(), orderCriterionImpl.getStatusCriteria(ORDER_STATUS, PAYMENT_STATUS, SHIPMENT_STATUS));
-		assertEquals(orderStatusQuery.toString(), orderCriterionImpl.getStatusCriteria(ORDER_STATUS, null, null));
-		assertEquals(orderPaymentStatusQuery.toString(), orderCriterionImpl.getStatusCriteria(ORDER_STATUS, PAYMENT_STATUS, null));
-		assertEquals(orderShipmentStatusQuery.toString(), orderCriterionImpl.getStatusCriteria(ORDER_STATUS, null, SHIPMENT_STATUS));
-		assertEquals(paymentStatusQuery.toString(), orderCriterionImpl.getStatusCriteria(null, PAYMENT_STATUS, null));
-		assertEquals(paymentShipmentStatusQuery.toString(), orderCriterionImpl.getStatusCriteria(null, PAYMENT_STATUS, SHIPMENT_STATUS));
-		assertEquals(shipmentStatusQuery.toString(), orderCriterionImpl.getStatusCriteria(null, null, SHIPMENT_STATUS));
-		assertEquals(noStatusQuery.toString(), orderCriterionImpl.getStatusCriteria(null, null, null));
+		CriteriaQuery result = orderCriterionImpl.getStatusCriteria(ORDER_STATUS, PAYMENT_STATUS, SHIPMENT_STATUS);
+		assertThat(result.getQuery()).isEqualTo(fullQuery.toString());
+		assertThat(result.getParameters())
+			.containsExactly(ORDER_STATUS, PAYMENT_STATUS, SHIPMENT_STATUS);
+
+		result = orderCriterionImpl.getStatusCriteria(ORDER_STATUS, null, null);
+		assertThat(result.getQuery()).isEqualTo(orderStatusQuery.toString());
+		assertThat(result.getParameters())
+			.containsExactly(ORDER_STATUS);
+
+		result = orderCriterionImpl.getStatusCriteria(ORDER_STATUS, PAYMENT_STATUS, null);
+		assertThat(result.getQuery()).isEqualTo(orderPaymentStatusQuery.toString());
+		assertThat(result.getParameters())
+			.containsExactly(ORDER_STATUS, PAYMENT_STATUS);
+
+		result = orderCriterionImpl.getStatusCriteria(ORDER_STATUS, null, SHIPMENT_STATUS);
+		assertThat(result.getQuery()).isEqualTo(orderShipmentStatusQuery.toString());
+		assertThat(result.getParameters())
+			.containsExactly(ORDER_STATUS, SHIPMENT_STATUS);
+
+		result = orderCriterionImpl.getStatusCriteria(null, PAYMENT_STATUS, null);
+		assertThat(result.getQuery()).isEqualTo(paymentStatusQuery.toString());
+		assertThat(result.getParameters())
+			.containsExactly(PAYMENT_STATUS);
+
+		result = orderCriterionImpl.getStatusCriteria(null, PAYMENT_STATUS, SHIPMENT_STATUS);
+		assertThat(result.getQuery()).isEqualTo(paymentShipmentStatusQuery.toString());
+		assertThat(result.getParameters())
+			.containsExactly(PAYMENT_STATUS, SHIPMENT_STATUS);
+
+		result = orderCriterionImpl.getStatusCriteria(null, null, SHIPMENT_STATUS);
+		assertThat(result.getQuery()).isEqualTo(shipmentStatusQuery.toString());
+		assertThat(result.getParameters())
+			.containsExactly(SHIPMENT_STATUS);
+
+		result = orderCriterionImpl.getStatusCriteria(null, null, null);
+		assertThat(result.getQuery()).isEqualTo(noStatusQuery.toString());
+		assertThat(result.getParameters())
+			.isEmpty();
 	}
 
 	/**
@@ -138,58 +183,16 @@ public class OrderCriterionImplTest {
 		//final String propertyName, final String criteriaValue, final boolean isExactMatch
 		final String propertyName = "email";
 		final String criteriaValue = "test";
-		final String exactMatchQuery = "select o from OrderImpl as o where o.customer." + propertyName + " = '" + criteriaValue + "'";
-		final String fuzzyMatchQuery = "select o from OrderImpl as o where o.customer." + propertyName + " like '%" + criteriaValue + "%'";
+		final String exactMatchQuery = "SELECT o FROM OrderImpl AS o WHERE o.customer." + propertyName + " = ?1";
+		final String fuzzyMatchQuery = "SELECT o FROM OrderImpl AS o WHERE o.customer." + propertyName + " LIKE ?1";
 
-		assertEquals(exactMatchQuery, orderCriterionImpl.getOrderCustomerCriteria(propertyName, criteriaValue, true));
-		assertEquals(fuzzyMatchQuery, orderCriterionImpl.getOrderCustomerCriteria(propertyName, criteriaValue, false));
-	}
+		CriteriaQuery result = orderCriterionImpl.getOrderCustomerCriteria(propertyName, criteriaValue, true);
+		assertThat(result.getQuery()).isEqualTo(exactMatchQuery);
+		assertThat(result.getParameters()).containsExactly(criteriaValue);
 
-	/**
-	 * Test method for 'com.elasticpath.persistence.support.impl.OrderCriterionImpl.getAdvancedOrderCriteria'.
-	 */
-	@Test
-	public void testGetAdvancedOrderCriteria() {
-		final AdvancedOrderSearchCriteria orderSearchCriteria = new AdvancedOrderSearchCriteriaImpl();
-		final String emptySearch = "select o from OrderImpl as o";
-		assertEquals(emptySearch, orderCriterionImpl.getAdvancedOrderCriteria(orderSearchCriteria));
-
-		final Map<String, String> shipmentAddressCriteria = new HashMap<>();
-		shipmentAddressCriteria.put("zipOrPostalCode", "V5Y");
-		orderSearchCriteria.setShipmentAddressCriteria(shipmentAddressCriteria);
-		final String expectedQuery =
-			"select o from OrderImpl as o, in(o.shipments) as os where os.shipmentAddress.zipOrPostalCode like '%V5Y%'";
-		assertEquals(expectedQuery, orderCriterionImpl.getAdvancedOrderCriteria(orderSearchCriteria));
-
-		orderSearchCriteria.setOrderToDate(new Date());
-		final String expectedQuery1 = expectedQuery + " and o.createdDate <= ?1";
-		assertEquals(expectedQuery1, orderCriterionImpl.getAdvancedOrderCriteria(orderSearchCriteria));
-
-		orderSearchCriteria.setOrderStatus(OrderStatus.CANCELLED);
-		Calendar from = new GregorianCalendar(Calendar.YEAR, Calendar.AUGUST, Calendar.DAY_OF_MONTH);
-		orderSearchCriteria.setOrderFromDate(from.getTime());
-		final String expectedQuery2 = expectedQuery + " and o.status = CANCELLED and o.createdDate >= ?1 and o.createdDate <= ?2";
-		assertEquals(expectedQuery2, orderCriterionImpl.getAdvancedOrderCriteria(orderSearchCriteria));
-
-		final Map<String, String> customerCriteriaMap = new TreeMap<>();
-		orderSearchCriteria.setCustomerCriteria(customerCriteriaMap);
-		assertEquals(expectedQuery2, orderCriterionImpl.getAdvancedOrderCriteria(orderSearchCriteria));
-
-		customerCriteriaMap.put("email", "test");
-		customerCriteriaMap.put("firstName", "name");
-		orderSearchCriteria.setCustomerCriteria(customerCriteriaMap);
-		final String expectedQuery3 = expectedQuery2 + " and o.customer.email like '%test%' and o.customer.firstName like '%name%'";
-		assertEquals(expectedQuery3, orderCriterionImpl.getAdvancedOrderCriteria(orderSearchCriteria));
-
-//		orderSearchCriteria.setSkuCode("SKUCODE");
-//		final String expectedQuery4 = expectedQuery3 + " and os.shipmentOrderSkusInternal.skuCode like '%SKUCODE%'";
-//		assertEquals(expectedQuery4, orderCriterionImpl.getAdvancedOrderCriteria(orderSearchCriteria));
-
-		orderSearchCriteria.setShipmentStatus(OrderShipmentStatus.RELEASED);
-		final String expectedQuery5 = expectedQuery3 + " and o.shipments.status = RELEASED";
-		assertEquals(expectedQuery5, orderCriterionImpl.getAdvancedOrderCriteria(orderSearchCriteria));
-
-
+		result = orderCriterionImpl.getOrderCustomerCriteria(propertyName, criteriaValue, false);
+		assertThat(result.getQuery()).isEqualTo(fuzzyMatchQuery);
+		assertThat(result.getParameters()).containsExactly("%" + criteriaValue + "%");
 	}
 
 	/**
@@ -198,44 +201,57 @@ public class OrderCriterionImplTest {
 	@Test
 	public void testGetOrderSearchCriteria() {
 		final OrderSearchCriteria orderSearchCriteria = new OrderSearchCriteria();
-		List<Object> parameters = new LinkedList<>();
 		Set<String> storeCodes = new HashSet<>();
-		final String emptySearch = "select o from OrderImpl as o";
-		assertEquals(emptySearch
-				+ " order by o.orderNumber desc",
-				orderCriterionImpl.getOrderSearchCriteria(orderSearchCriteria, parameters,
-						storeCodes, ResultType.ENTITY));
+		final String emptySearch = "SELECT o FROM OrderImpl AS o";
+
+		CriteriaQuery result = orderCriterionImpl.getOrderSearchCriteria(orderSearchCriteria, storeCodes, ENTITY);
+		assertThat(result.getQuery()).isEqualTo(emptySearch + " ORDER BY o.orderNumber DESC");
 
 		orderSearchCriteria.setOrderToDate(new Date());
-		final String expectedQuery1 = emptySearch + " where o.createdDate <= ?1 order by o.orderNumber desc";
-		assertEquals(expectedQuery1, orderCriterionImpl.getOrderSearchCriteria(orderSearchCriteria, parameters, storeCodes, ResultType.ENTITY));
+		final String expectedQuery1 = emptySearch + " WHERE o.createdDate <= ?1 ORDER BY o.orderNumber DESC";
+		result = orderCriterionImpl.getOrderSearchCriteria(orderSearchCriteria, storeCodes, ENTITY);
+		assertThat(result.getQuery()).isEqualTo(expectedQuery1);
+		assertThat(result.getParameters())
+			.containsExactly(orderSearchCriteria.getOrderToDate());
 
 		orderSearchCriteria.setOrderStatus(OrderStatus.CANCELLED);
-		Calendar from = new GregorianCalendar(Calendar.YEAR, Calendar.AUGUST, Calendar.DAY_OF_MONTH);
+		Calendar from = new GregorianCalendar(YEAR, AUGUST, DAY_OF_MONTH);
 		orderSearchCriteria.setOrderFromDate(from.getTime());
 		final String expectedQuery2 = emptySearch
-			+ " where o.status = ?1 and o.createdDate <= ?2 and o.createdDate >= ?3 order by o.orderNumber desc";
-		assertEquals(expectedQuery2, orderCriterionImpl.getOrderSearchCriteria(orderSearchCriteria, parameters, storeCodes, ResultType.ENTITY));
+									  + " WHERE o.status = ?1 AND o.createdDate <= ?2 AND o.createdDate >= ?3 ORDER BY o.orderNumber DESC";
+		result = orderCriterionImpl.getOrderSearchCriteria(orderSearchCriteria, storeCodes, ENTITY);
+		assertThat(result.getQuery()).isEqualTo(expectedQuery2);
+		assertThat(result.getParameters())
+			.containsExactly(OrderStatus.CANCELLED, orderSearchCriteria.getOrderToDate(), from.getTime());
 
 		orderSearchCriteria.clear();
-		orderSearchCriteria.setSkuCode("SKUCODE");
+		orderSearchCriteria.setSkuCode(SKUCODE);
 		final String expectedQuery4 = emptySearch
-			+ ", in(o.shipments) as os, in(os.shipmentOrderSkusInternal) as sku where sku.skuCode = ?1 order by o.orderNumber desc";
-		assertEquals(expectedQuery4, orderCriterionImpl.getOrderSearchCriteria(orderSearchCriteria, parameters, storeCodes, ResultType.ENTITY));
+			  + " JOIN o.shipments AS os JOIN os.shipmentOrderSkusInternal AS sku WHERE sku.skuCode = ?1 ORDER BY o.orderNumber DESC";
+		result = orderCriterionImpl.getOrderSearchCriteria(orderSearchCriteria, storeCodes, ENTITY);
+		assertThat(result.getQuery()).isEqualTo(expectedQuery4);
+		assertThat(result.getParameters())
+			.containsExactly(SKUCODE);
 
 		orderSearchCriteria.clear();
-		orderSearchCriteria.setSortingOrder(SortOrder.ASCENDING);
-		orderSearchCriteria.setSortingType(StandardSortBy.CUSTOMER_NAME);
+		orderSearchCriteria.setSortingOrder(ASCENDING);
+		orderSearchCriteria.setSortingType(CUSTOMER_NAME);
 		orderSearchCriteria.setShipmentStatus(OrderShipmentStatus.RELEASED);
-		final String expectedQuery5 = emptySearch
-		+ ", in(o.shipments) as os where os.status = ?1 order by o.billingAddress.firstName asc, o.billingAddress.lastName asc, o.orderNumber asc";
-		assertEquals(expectedQuery5, orderCriterionImpl.getOrderSearchCriteria(orderSearchCriteria, parameters, storeCodes, ResultType.ENTITY));
+		final String expectedQuery5 = emptySearch + " JOIN o.shipments AS os WHERE os.status = ?1 ORDER BY o.billingAddress.firstName ASC,"
+			  + " o.billingAddress.lastName ASC, o.orderNumber ASC";
+		result = orderCriterionImpl.getOrderSearchCriteria(orderSearchCriteria, storeCodes, ENTITY);
+		assertThat(result.getQuery()).isEqualTo(expectedQuery5);
+		assertThat(result.getParameters())
+			.containsExactly(OrderShipmentStatus.RELEASED);
 
 		orderSearchCriteria.clear();
 		orderSearchCriteria.setShipmentZipcode(ZIPCODE);
-		final String expectedQuery6 = emptySearch + " where o.billingAddress.zipOrPostalCode LIKE ?1 order by o.billingAddress.firstName asc, "
-										+ "o.billingAddress.lastName asc, o.orderNumber asc";
-		assertEquals(expectedQuery6, orderCriterionImpl.getOrderSearchCriteria(orderSearchCriteria, parameters, storeCodes, ResultType.ENTITY));
+		final String expectedQuery6 = emptySearch + " WHERE UPPER(o.billingAddress.zipOrPostalCode) LIKE ?1 ORDER BY o.billingAddress.firstName ASC, "
+			  + "o.billingAddress.lastName ASC, o.orderNumber ASC";
+		result = orderCriterionImpl.getOrderSearchCriteria(orderSearchCriteria, storeCodes, ENTITY);
+		assertThat(result.getQuery()).isEqualTo(expectedQuery6);
+		assertThat(result.getParameters())
+			.containsExactly("%" + ZIPCODE_UC + "%");
 
 	}
 
@@ -245,48 +261,51 @@ public class OrderCriterionImplTest {
 	@Test
 	public void testGetOrderReturnSearchCriteria() {
 		final OrderReturnSearchCriteria orderReturnSearchCriteria = new OrderReturnSearchCriteria();
-		orderReturnSearchCriteria.setSortingOrder(SortOrder.ASCENDING);
-		List<Object> parameters = new LinkedList<>();
+		orderReturnSearchCriteria.setSortingOrder(ASCENDING);
 
-		final String emptySearch = "select ort from OrderReturnImpl as ort";
-		assertEquals(emptySearch + " order by ort.rmaCode asc",
-				orderCriterionImpl.getOrderReturnSearchCriteria(orderReturnSearchCriteria, parameters, ResultType.ENTITY));
+		final String emptySearch = "SELECT ort FROM OrderReturnImpl AS ort";
+		CriteriaQuery result = orderCriterionImpl.getOrderReturnSearchCriteria(orderReturnSearchCriteria, ENTITY);
+		assertThat(result.getQuery()).isEqualTo(emptySearch + " ORDER BY ort.rmaCode ASC");
+		assertThat(result.getParameters()).isEmpty();
 
 		final String rmaCode = "1";
 		orderReturnSearchCriteria.setRmaCode(rmaCode);
-		final String expectedQuery1 = emptySearch + " where ort.rmaCode = ?1 order by ort.rmaCode asc";
-		assertEquals(expectedQuery1, orderCriterionImpl.getOrderReturnSearchCriteria(orderReturnSearchCriteria, parameters, ResultType.ENTITY));
-		String parameter1 = (String) parameters.get(0);
-		assertEquals(rmaCode, parameter1);
+		final String expectedQuery1 = emptySearch + " WHERE ort.rmaCode = ?1 ORDER BY ort.rmaCode ASC";
+		result = orderCriterionImpl.getOrderReturnSearchCriteria(orderReturnSearchCriteria, ENTITY);
+		assertThat(result.getQuery()).isEqualTo(expectedQuery1);
+		assertThat(result.getParameters())
+			.containsExactly(rmaCode);
 
 		String orderNumber = "100000";
 		orderReturnSearchCriteria.setOrderNumber(orderNumber);
-		final String expectedQuery2 = emptySearch + ", in(ort.order) as o where ort.rmaCode = ?1 and o.orderNumber = ?2 order by ort.rmaCode asc";
-		assertEquals(expectedQuery2, orderCriterionImpl.getOrderReturnSearchCriteria(orderReturnSearchCriteria, parameters, ResultType.ENTITY));
-		String parameter2 = (String) parameters.get(1);
-		assertEquals(orderNumber, parameter2);
+		final String expectedQuery2 = emptySearch + " JOIN ort.order AS o WHERE ort.rmaCode = ?1 AND o.orderNumber = ?2 ORDER BY ort.rmaCode ASC";
+		result = orderCriterionImpl.getOrderReturnSearchCriteria(orderReturnSearchCriteria, ENTITY);
+		assertThat(result.getQuery()).isEqualTo(expectedQuery2);
+		assertThat(result.getParameters())
+			.containsExactly(rmaCode, orderNumber);
 
 		String firstName = "firstName";
 		CustomerSearchCriteria customerSearchCriteria = new CustomerSearchCriteria();
 		customerSearchCriteria.setFirstName(firstName);
 		orderReturnSearchCriteria.setCustomerSearchCriteria(customerSearchCriteria);
 		final String expectedQuery3 = emptySearch
-			+ ", in(ort.order) as o where ort.rmaCode = ?1 and o.orderNumber = ?2 "
-			+ "and o.billingAddress.firstName = ?3 order by ort.rmaCode asc";
-		assertEquals(expectedQuery3, orderCriterionImpl.getOrderReturnSearchCriteria(orderReturnSearchCriteria, parameters, ResultType.ENTITY));
-		String parameter3 = (String) parameters.get(2);
-		assertEquals(firstName, parameter3);
+									  + " JOIN ort.order AS o WHERE ort.rmaCode = ?1 AND o.orderNumber = ?2 "
+									  + "AND o.billingAddress.firstName LIKE ?3 ORDER BY ort.rmaCode ASC";
+		result = orderCriterionImpl.getOrderReturnSearchCriteria(orderReturnSearchCriteria, ENTITY);
+		assertThat(result.getQuery()).isEqualTo(expectedQuery3);
+		assertThat(result.getParameters())
+			.containsExactly(rmaCode, orderNumber, "%" + firstName + "%");
 
 		String lastName = "lastName";
 		customerSearchCriteria.setLastName(lastName);
 		final String expectedQuery4 = emptySearch
-			+ ", in(ort.order) as o where ort.rmaCode = ?1 and o.orderNumber = ?2 "
-			+ "and o.billingAddress.firstName = ?3 and o.billingAddress.lastName = ?4 "
-			+ "order by ort.rmaCode asc";
-		assertEquals(expectedQuery4, orderCriterionImpl.getOrderReturnSearchCriteria(orderReturnSearchCriteria, parameters, ResultType.ENTITY));
-		final int index = 3;
-		String parameter4 = (String) parameters.get(index);
-		assertEquals(lastName, parameter4);
+									  + " JOIN ort.order AS o WHERE ort.rmaCode = ?1 AND o.orderNumber = ?2 "
+									  + "AND o.billingAddress.firstName LIKE ?3 AND o.billingAddress.lastName LIKE ?4 "
+									  + "ORDER BY ort.rmaCode ASC";
+		result = orderCriterionImpl.getOrderReturnSearchCriteria(orderReturnSearchCriteria, ENTITY);
+		assertThat(result.getQuery()).isEqualTo(expectedQuery4);
+		assertThat(result.getParameters())
+			.containsExactly(rmaCode, orderNumber, "%" + firstName + "%", "%" + lastName + "%");
 	}
 
 	/**
@@ -295,29 +314,33 @@ public class OrderCriterionImplTest {
 	@Test
 	public void testGetOrderReturnSearchCriteriaSorting() {
 		final OrderReturnSearchCriteria orderReturnSearchCriteria = new OrderReturnSearchCriteria();
-		orderReturnSearchCriteria.setSortingOrder(SortOrder.ASCENDING);
-		List<Object> parameters = new LinkedList<>();
+		orderReturnSearchCriteria.setSortingOrder(ASCENDING);
 
 		//default rmaCode
-		final String emptySearch = "select ort from OrderReturnImpl as ort";
-		assertEquals(emptySearch + " order by ort.rmaCode asc",
-				orderCriterionImpl.getOrderReturnSearchCriteria(orderReturnSearchCriteria, parameters, ResultType.ENTITY));
+		final String emptySearch = "SELECT ort FROM OrderReturnImpl AS ort";
+		CriteriaQuery results = orderCriterionImpl.getOrderReturnSearchCriteria(orderReturnSearchCriteria, ENTITY);
+		assertThat(results.getQuery())
+			.isEqualTo(emptySearch + " ORDER BY ort.rmaCode ASC");
 
-		orderReturnSearchCriteria.setSortingOrder(SortOrder.DESCENDING);
-		assertEquals(emptySearch + " order by ort.rmaCode desc",
-				orderCriterionImpl.getOrderReturnSearchCriteria(orderReturnSearchCriteria, parameters, ResultType.ENTITY));
+		orderReturnSearchCriteria.setSortingOrder(DESCENDING);
+		results = orderCriterionImpl.getOrderReturnSearchCriteria(orderReturnSearchCriteria, ENTITY);
+		assertThat(results.getQuery())
+			.isEqualTo(emptySearch + " ORDER BY ort.rmaCode DESC");
 
-		orderReturnSearchCriteria.setSortingType(StandardSortBy.ORDER_NUMBER);
-		assertEquals(emptySearch + " order by o.orderNumber desc",
-				orderCriterionImpl.getOrderReturnSearchCriteria(orderReturnSearchCriteria, parameters, ResultType.ENTITY));
+		orderReturnSearchCriteria.setSortingType(ORDER_NUMBER);
+		results = orderCriterionImpl.getOrderReturnSearchCriteria(orderReturnSearchCriteria, ENTITY);
+		assertThat(results.getQuery())
+			.isEqualTo(emptySearch + " ORDER BY o.orderNumber DESC");
 
-		orderReturnSearchCriteria.setSortingType(StandardSortBy.DATE);
-		assertEquals(emptySearch + " order by ort.createdDate desc",
-				orderCriterionImpl.getOrderReturnSearchCriteria(orderReturnSearchCriteria, parameters, ResultType.ENTITY));
+		orderReturnSearchCriteria.setSortingType(DATE);
+		results = orderCriterionImpl.getOrderReturnSearchCriteria(orderReturnSearchCriteria, ENTITY);
+		assertThat(results.getQuery())
+			.isEqualTo(emptySearch + " ORDER BY ort.createdDate DESC");
 
-		orderReturnSearchCriteria.setSortingType(StandardSortBy.STATUS);
-		assertEquals(emptySearch + " order by ort.returnStatus desc",
-				orderCriterionImpl.getOrderReturnSearchCriteria(orderReturnSearchCriteria, parameters, ResultType.ENTITY));
+		orderReturnSearchCriteria.setSortingType(STATUS);
+		results = orderCriterionImpl.getOrderReturnSearchCriteria(orderReturnSearchCriteria, ENTITY);
+		assertThat(results.getQuery())
+			.isEqualTo(emptySearch + " ORDER BY ort.returnStatus DESC");
 	}
 
 	/**
@@ -326,44 +349,77 @@ public class OrderCriterionImplTest {
 	@Test
 	public void testGetSearchCriteriaForOrderNumber() {
 		final OrderSearchCriteria orderSearchCriteria = new OrderSearchCriteria();
-		List<Object> parameters = new LinkedList<>();
 		Set<String> storeCodes = new HashSet<>();
-		final String emptySearch = "select o.orderNumber from OrderImpl as o";
-		assertEquals(emptySearch
-				+ " order by o.orderNumber desc",
-				orderCriterionImpl.getOrderSearchCriteria(orderSearchCriteria, parameters,
-						storeCodes, ResultType.ORDER_NUMBER));
+		final String emptySearch = "SELECT o.orderNumber FROM OrderImpl AS o";
+		CriteriaQuery result = orderCriterionImpl.getOrderSearchCriteria(orderSearchCriteria, storeCodes, ResultType.ORDER_NUMBER);
+		assertThat(result.getQuery()).isEqualTo(emptySearch + " ORDER BY o.orderNumber DESC");
 
 		orderSearchCriteria.setOrderToDate(new Date());
-		final String expectedQuery1 = emptySearch + " where o.createdDate <= ?1 order by o.orderNumber desc";
-		assertEquals(expectedQuery1, orderCriterionImpl.getOrderSearchCriteria(orderSearchCriteria, parameters, storeCodes, ResultType.ORDER_NUMBER));
+		final String expectedQuery1 = emptySearch + " WHERE o.createdDate <= ?1 ORDER BY o.orderNumber DESC";
+		result = orderCriterionImpl.getOrderSearchCriteria(orderSearchCriteria, storeCodes, ResultType.ORDER_NUMBER);
+		assertThat(result.getQuery()).isEqualTo(expectedQuery1);
+		assertThat(result.getParameters())
+			.containsExactly(orderSearchCriteria.getOrderToDate());
 
 		orderSearchCriteria.setOrderStatus(OrderStatus.CANCELLED);
-		Calendar from = new GregorianCalendar(Calendar.YEAR, Calendar.AUGUST, Calendar.DAY_OF_MONTH);
+		Calendar from = new GregorianCalendar(YEAR, AUGUST, DAY_OF_MONTH);
 		orderSearchCriteria.setOrderFromDate(from.getTime());
 		final String expectedQuery2 = emptySearch
-			+ " where o.status = ?1 and o.createdDate <= ?2 and o.createdDate >= ?3 order by o.orderNumber desc";
-		assertEquals(expectedQuery2, orderCriterionImpl.getOrderSearchCriteria(orderSearchCriteria, parameters, storeCodes, ResultType.ORDER_NUMBER));
+			  + " WHERE o.status = ?1 AND o.createdDate <= ?2 AND o.createdDate >= ?3 ORDER BY o.orderNumber DESC";
+		result = orderCriterionImpl.getOrderSearchCriteria(orderSearchCriteria, storeCodes, ResultType.ORDER_NUMBER);
+		assertThat(result.getQuery()).isEqualTo(expectedQuery2);
+		assertThat(result.getParameters())
+			.containsExactly(OrderStatus.CANCELLED, orderSearchCriteria.getOrderToDate(), from.getTime());
 
 		orderSearchCriteria.clear();
-		orderSearchCriteria.setSkuCode("SKUCODE");
+		orderSearchCriteria.setSkuCode(SKUCODE);
 		final String expectedQuery4 = emptySearch
-			+ ", in(o.shipments) as os, in(os.shipmentOrderSkusInternal) as sku where sku.skuCode = ?1 order by o.orderNumber desc";
-		assertEquals(expectedQuery4, orderCriterionImpl.getOrderSearchCriteria(orderSearchCriteria, parameters, storeCodes, ResultType.ORDER_NUMBER));
+			  + " JOIN o.shipments AS os JOIN os.shipmentOrderSkusInternal AS sku WHERE sku.skuCode = ?1 ORDER BY o.orderNumber DESC";
+		result = orderCriterionImpl.getOrderSearchCriteria(orderSearchCriteria, storeCodes, ResultType.ORDER_NUMBER);
+		assertThat(result.getQuery()).isEqualTo(expectedQuery4);
+		assertThat(result.getParameters())
+			.containsExactly(SKUCODE);
 
 		orderSearchCriteria.clear();
-		orderSearchCriteria.setSortingOrder(SortOrder.ASCENDING);
-		orderSearchCriteria.setSortingType(StandardSortBy.CUSTOMER_NAME);
+		orderSearchCriteria.setSortingOrder(ASCENDING);
+		orderSearchCriteria.setSortingType(CUSTOMER_NAME);
 		orderSearchCriteria.setShipmentStatus(OrderShipmentStatus.RELEASED);
 		final String expectedQuery5 = emptySearch
-		+ ", in(o.shipments) as os where os.status = ?1 order by o.billingAddress.firstName asc, o.billingAddress.lastName asc, o.orderNumber asc";
-		assertEquals(expectedQuery5, orderCriterionImpl.getOrderSearchCriteria(orderSearchCriteria, parameters, storeCodes, ResultType.ORDER_NUMBER));
+			  + " JOIN o.shipments AS os WHERE os.status = ?1 ORDER BY o.billingAddress.firstName ASC,"
+			  + " o.billingAddress.lastName ASC, o.orderNumber ASC";
+		result = orderCriterionImpl.getOrderSearchCriteria(orderSearchCriteria, storeCodes, ResultType.ORDER_NUMBER);
+		assertThat(result.getQuery()).isEqualTo(expectedQuery5);
+		assertThat(result.getParameters())
+			.containsExactly(OrderShipmentStatus.RELEASED);
 
 		orderSearchCriteria.clear();
 		orderSearchCriteria.setShipmentZipcode(ZIPCODE);
-		final String expectedQuery6 = emptySearch + " where o.billingAddress.zipOrPostalCode LIKE ?1 order by o.billingAddress.firstName asc, "
-										+ "o.billingAddress.lastName asc, o.orderNumber asc";
-		assertEquals(expectedQuery6, orderCriterionImpl.getOrderSearchCriteria(orderSearchCriteria, parameters, storeCodes, ResultType.ORDER_NUMBER));
+		final String expectedQuery6 = emptySearch + " WHERE UPPER(o.billingAddress.zipOrPostalCode) LIKE ?1 ORDER BY o.billingAddress.firstName ASC, "
+			  + "o.billingAddress.lastName ASC, o.orderNumber ASC";
+		result = orderCriterionImpl.getOrderSearchCriteria(orderSearchCriteria, storeCodes, ResultType.ORDER_NUMBER);
+		assertThat(result.getQuery()).isEqualTo(expectedQuery6);
+		assertThat(result.getParameters())
+			.containsExactly("%" + ZIPCODE_UC + "%");
+
+	}
+
+	@Test
+	public void testGetOrderSearchCriteriaWithCustomerName() {
+		final OrderSearchCriteria orderSearchCriteria = new OrderSearchCriteria();
+		final CustomerSearchCriteria customerSearchCriteria = new CustomerSearchCriteria();
+		customerSearchCriteria.setFirstName("first");
+		customerSearchCriteria.setLastName("last");
+		orderSearchCriteria.setCustomerSearchCriteria(customerSearchCriteria);
+		Set<String> storeCodes = new HashSet<>();
+
+		final String emptySearch = "SELECT o.orderNumber FROM OrderImpl AS o";
+		CriteriaQuery result = orderCriterionImpl.getOrderSearchCriteria(orderSearchCriteria, storeCodes, ResultType.ORDER_NUMBER);
+		assertThat(result.getQuery()).isEqualTo(emptySearch + " LEFT JOIN o.customer.profileValueMap AS cpf "
+			+ "LEFT JOIN o.customer.profileValueMap AS cpl "
+			+ "WHERE cpf.localizedAttributeKey = ?1 AND cpl.localizedAttributeKey = ?2 "
+			+ "AND (UPPER(o.billingAddress.firstName) LIKE ?3 OR UPPER(cpf.shortTextValue) LIKE ?4) "
+			+ "AND (UPPER(o.billingAddress.lastName) LIKE ?5 OR UPPER(cpl.shortTextValue) LIKE ?6) "
+			+ "ORDER BY o.orderNumber DESC");
 
 	}
 
@@ -373,9 +429,8 @@ public class OrderCriterionImplTest {
 	@Test(expected = EpInvalidOrderCriterionResultTypeException.class)
 	public void testGetOrderReturnSearchCriteriaWithException() {
 		final OrderReturnSearchCriteria orderReturnSearchCriteria = new OrderReturnSearchCriteria();
-		orderReturnSearchCriteria.setSortingOrder(SortOrder.ASCENDING);
-		List<Object> parameters = new LinkedList<>();
+		orderReturnSearchCriteria.setSortingOrder(ASCENDING);
 
-		orderCriterionImpl.getOrderReturnSearchCriteria(orderReturnSearchCriteria, parameters, ResultType.ORDER_NUMBER);
+		orderCriterionImpl.getOrderReturnSearchCriteria(orderReturnSearchCriteria, ResultType.ORDER_NUMBER);
 	}
 }

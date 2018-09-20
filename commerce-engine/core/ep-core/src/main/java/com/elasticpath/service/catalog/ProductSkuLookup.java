@@ -35,14 +35,24 @@ public interface ProductSkuLookup {
 	<P extends ProductSku> List<P> findByUids(Collection<Long> uidpks) throws EpServiceException;
 
 	/**
-	 * Find the product sku with the given guid.  Note that the sku code is not the same as the guid.
+	 * Find the product skus with the given guids.  Note that the sku code is not the same as the guid.
 	 *
-	 * @param guid the guid.
+	 * @param guid the sku guid.
 	 * @param <P> the genericized ProductSku sub-class that this finder will return
 	 * @return the sku with the given guid, otherwise null
 	 * @throws com.elasticpath.base.exception.EpServiceException - in case of any errors
 	 */
 	<P extends ProductSku> P findByGuid(String guid) throws EpServiceException;
+
+	/**
+	 * Find the product sku with the given guid.  Note that the sku code is not the same as the guid.
+	 *
+	 * @param guids the sku guids.
+	 * @param <P> the genericized ProductSku sub-class that this finder will return
+	 * @return the sku with the given guid, otherwise null
+	 * @throws com.elasticpath.base.exception.EpServiceException - in case of any errors
+	 */
+	<P extends ProductSku> List<P> findByGuids(Collection<String> guids) throws EpServiceException;
 
 	/**
 	 * Find the product sku with the given sku code.  Note that the sku code is not the same as the guid.
@@ -57,7 +67,7 @@ public interface ProductSkuLookup {
 	/**
 	 * Find the product skus with the given sku codes.  Note that the sku code is not the same as the guid.
 	 *
-	 * @param skuCodes the sku code.
+	 * @param skuCodes the sku codes.
 	 * @param <P> the genericized ProductSku sub-class that this finder will return
 	 * @return the skus that match the given code, otherwise null
 	 * @throws com.elasticpath.base.exception.EpServiceException - in case of any errors

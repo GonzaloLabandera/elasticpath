@@ -14,13 +14,12 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.elasticpath.plugin.tax.domain.impl.MutableTaxedItem;
 import com.elasticpath.plugin.tax.domain.impl.TaxableItemImpl;
 import com.elasticpath.plugin.tax.rate.dto.AppliedTaxValue;
 import com.elasticpath.plugin.tax.rate.dto.MutableTaxRateDescriptor;
-import com.elasticpath.plugin.tax.rate.dto.MutableTaxRateDescriptorResult;
 
 /**
  * Test cases for {@link com.elasticpath.plugin.tax.rate.impl.TaxExclusiveRateApplier}.
@@ -38,8 +37,6 @@ public class TaxExclusiveRateApplierTest {
 	private final MutableTaxedItem taxedItem = new MutableTaxedItem();
 
 	@Mock
-	private MutableTaxRateDescriptorResult taxRateDescriptorResult;
-	@Mock
 	private MutableTaxRateDescriptor taxRateDescriptor;
 	@Mock
 	private TaxableItemImpl taxableItem;
@@ -49,10 +46,7 @@ public class TaxExclusiveRateApplierTest {
 
 	@Before
 	public void setup() {
-		when(taxRateDescriptorResult.isTaxInclusive()).thenReturn(false);
-		when(taxRateDescriptorResult.getSumOfTaxRates()).thenReturn(TWENTY_PERCENT_TAX);
 		when(taxRateDescriptor.getTaxRateValue()).thenReturn(TWENTY_PERCENT_TAX);
-		when(taxRateDescriptor.getTaxRateDescriptorResult()).thenReturn(taxRateDescriptorResult);
 
 		taxedItem.setTaxableItem(taxableItem);
 	}

@@ -162,7 +162,6 @@ public class LastModifiedDateTest extends BasicSpringContextTest {
 		orderService.add(order);
 
 		OrderPaymentImpl orderPayment = getBeanFactory().getBean(ContextIdNames.ORDER_PAYMENT);
-		orderPayment.getCardNumber();
 		orderPayment.setCreatedDate(new Date());
 		orderPayment.setAmount(BigDecimal.ZERO);
 		orderPayment.setOrder(order);

@@ -60,7 +60,7 @@ public class CreateExchangeWizard extends AbstractWizard {
 	 * @return SelectASkuDialog
 	 */
 	public SelectASkuDialog clickAddItemButton() {
-		clickButton(ADD_ITEM_BUTTON_CSS, "Add Item...");
+		clickButton(ADD_ITEM_BUTTON_CSS, "Add Item...", SelectASkuDialog.SELECT_A_SKU_PARENT_CSS);
 		return new SelectASkuDialog(getDriver());
 	}
 

@@ -37,7 +37,17 @@ public class ChangeSetActionToolbar extends AbstractToolbar {
 	 * Clicks add item to change set button.
 	 */
 	public void clickAddItemToChangeSet() {
+		getWaitDriver().waitForButtonToBeEnabled(ADD_ITEM_TO_CHANGE_SET_BUTTON_CSS);
 		clickButton(ADD_ITEM_TO_CHANGE_SET_BUTTON_CSS, "Add to change set");
+	}
+
+	/**
+	 * Returns Add Item to Change Set button css.
+	 *
+	 * @return button css
+	 */
+	public String getAddItemToChangeSetButtonCss() {
+		return ADD_ITEM_TO_CHANGE_SET_BUTTON_CSS;
 	}
 
 }

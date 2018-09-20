@@ -13,7 +13,6 @@ import javax.mail.Message;
 
 import cucumber.api.java.en.Then;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.ContextConfiguration;
 
 import com.elasticpath.test.persister.testscenarios.SimpleStoreScenario;
 import com.elasticpath.uat.ScenarioContextValueHolder;
@@ -21,7 +20,6 @@ import com.elasticpath.uat.ScenarioContextValueHolder;
 /**
  * Step Definitions for Store email functionality.
  */
-@ContextConfiguration("classpath:cucumber.xml")
 public class StoreEmailStepDefinitions {
 
 	@Autowired

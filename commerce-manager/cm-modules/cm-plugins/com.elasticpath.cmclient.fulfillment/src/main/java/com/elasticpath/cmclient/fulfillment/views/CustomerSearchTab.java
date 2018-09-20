@@ -30,7 +30,6 @@ import com.elasticpath.cmclient.core.ui.framework.EpSortingCompositeControl;
 import com.elasticpath.cmclient.core.ui.framework.IEpLayoutComposite;
 import com.elasticpath.cmclient.core.ui.framework.IEpLayoutData;
 import com.elasticpath.cmclient.core.ui.framework.IEpTabFolder;
-import com.elasticpath.cmclient.core.validation.EpValidatorFactory;
 import com.elasticpath.cmclient.fulfillment.FulfillmentMessages;
 import com.elasticpath.cmclient.fulfillment.helpers.CustomerSearchRequestJob;
 import com.elasticpath.cmclient.fulfillment.views.customer.CustomerSearchResultsView;
@@ -45,8 +44,6 @@ import com.elasticpath.service.search.query.StandardSortBy;
 public class CustomerSearchTab implements ISearchTab {
 
 	private static final String EMPTY_STRING = ""; //$NON-NLS-1$
-
-	private Text customerIdText;
 
 	private Text emailUserIdText;
 
@@ -140,10 +137,6 @@ public class CustomerSearchTab implements ISearchTab {
 		searchTermsGroup = parentComposite.addGroup(FulfillmentMessages.get().CustomerSearchTab_SearchTermsGroup, 1, false, data);
 
 
-		searchTermsGroup.addLabelBold(FulfillmentMessages.get().CustomerDetails_CustomerIdLabel, null);
-
-		this.customerIdText = searchTermsGroup.addTextField(epState, data);
-
 		searchTermsGroup.addLabelBold(FulfillmentMessages.get().SearchView_EmailUserId, null);
 
 		this.emailUserIdText = searchTermsGroup.addTextField(epState, data);
@@ -168,9 +161,9 @@ public class CustomerSearchTab implements ISearchTab {
 
 	private void createSortingGroup(final IEpLayoutComposite parentComposite) {
 		this.sortingControl = new EpSortingCompositeControl(parentComposite, searchCriteria);
-		this.sortingControl.addSortTypeItem(FulfillmentMessages.get().CustomerSearchResultsView_CustomerId, StandardSortBy.CUSTOMER_ID);
 		this.sortingControl.addSortTypeItem(FulfillmentMessages.get().CustomerSearchResultsView_DefaultBillingAddress, StandardSortBy.ADDRESS);
-		this.sortingControl.addSortTypeItem(FulfillmentMessages.get().CustomerSearchResultsView_EmailUserId, StandardSortBy.EMAIL, true);
+		this.sortingControl.addSortTypeItem(FulfillmentMessages.get().CustomerSearchResultsView_UserId, StandardSortBy.USER_ID, true);
+		this.sortingControl.addSortTypeItem(FulfillmentMessages.get().CustomerSearchResultsView_EmailUserId, StandardSortBy.EMAIL);
 		this.sortingControl.addSortTypeItem(FulfillmentMessages.get().CustomerSearchResultsView_FirstName, StandardSortBy.FIRST_NAME);
 		this.sortingControl.addSortTypeItem(FulfillmentMessages.get().CustomerSearchResultsView_LastName, StandardSortBy.LAST_NAME);
 		this.sortingControl.addSortTypeItem(FulfillmentMessages.get().CustomerSearchResultsView_TelephoneNum, StandardSortBy.PHONE);
@@ -181,7 +174,6 @@ public class CustomerSearchTab implements ISearchTab {
 	 */
 	private void clearFields() {
 		this.sortingControl.clear();
-		this.customerIdText.setText(EMPTY_STRING);
 		this.emailUserIdText.setText(EMPTY_STRING);
 		this.firstNameText.setText(EMPTY_STRING);
 		this.lastNameText.setText(EMPTY_STRING);
@@ -196,8 +188,8 @@ public class CustomerSearchTab implements ISearchTab {
 	 */
 	@Override
 	public void setFocus() {
-		if (this.customerIdText != null) {
-			this.customerIdText.setFocus();
+		if (this.emailUserIdText != null) {
+			this.emailUserIdText.setFocus();
 		}
 	}
 
@@ -216,11 +208,11 @@ public class CustomerSearchTab implements ISearchTab {
 	}
 	private boolean hasSearchTerms() {
 
-		return hasSearchTermsFor(getTextValueFromTextWidget(customerIdText)) || hasSearchTermsForCustomer();
+		return hasSearchTermsFor(getTextValueFromTextWidget(emailUserIdText)) || hasSearchTermsForCustomer();
 	}
 
 	private boolean hasSearchTermsForCustomer() {
-		return hasSearchTermsFor(getTextValueFromTextWidget(customerIdText)) || hasSearchTermsFor(getTextValueFromTextWidget(emailUserIdText))
+		return hasSearchTermsFor(getTextValueFromTextWidget(emailUserIdText))
 				|| hasSearchTermsFor(getTextValueFromTextWidget(firstNameText)) || hasSearchTermsFor(getTextValueFromTextWidget(lastNameText))
 				|| hasSearchTermsFor(getTextValueFromTextWidget(zipPostalCodeText))
 				|| hasSearchTermsFor(getTextValueFromTextWidget(phoneNumberText));
@@ -282,20 +274,18 @@ public class CustomerSearchTab implements ISearchTab {
 		setSearchStoreCodeList(0);
 		storeCombo.select(0);
 		
-		bindingProvider.bind(context, this.customerIdText, this.getModel(),
-				"customerNumber", EpValidatorFactory.LONG_IGNORE_SPACE, null, true); //$NON-NLS-1$
 		bindingProvider.bind(context, this.emailUserIdText, this.getModel(),
 				"userId", null, null, false); //$NON-NLS-1$
 		bindingProvider.bind(context, this.emailUserIdText, this.getModel(),
-				"email", SearchFieldsValidators.EMAIL_USERID_VALIDATOR, null, false); //$NON-NLS-1$
+				"email", SearchFieldsValidators.EMAIL_PATTERN_USERID_VALIDATOR, null, false); //$NON-NLS-1$
 		bindingProvider.bind(context, this.firstNameText, this.getModel(),
-				"firstName", SearchFieldsValidators.NAME_VALIDATOR, null, true); //$NON-NLS-1$
+				"firstName", null, null, true); //$NON-NLS-1$
 		bindingProvider.bind(context, this.lastNameText, this.getModel(),
-				"lastName", SearchFieldsValidators.NAME_VALIDATOR, null, true); //$NON-NLS-1$
+				"lastName", null, null, true); //$NON-NLS-1$
 		bindingProvider.bind(context, this.zipPostalCodeText, this.getModel(),
-				"zipOrPostalCode", SearchFieldsValidators.ZIP_CODE_VALIDATOR, null, true); //$NON-NLS-1$
+				"zipOrPostalCode", null, null, true); //$NON-NLS-1$
 		bindingProvider.bind(context, this.phoneNumberText, this.getModel(), 
-				"phoneNumber", EpValidatorFactory.PHONE_IGNORE_SPACES, null, true); //$NON-NLS-1$
+				"phoneNumber", null, null, true); //$NON-NLS-1$
 
 	}
 
@@ -345,7 +335,6 @@ public class CustomerSearchTab implements ISearchTab {
 	 */
 	@Override
 	public void setSelectionListener(final SelectionListener listener) {
-		this.customerIdText.addSelectionListener(listener);
 		this.emailUserIdText.addSelectionListener(listener);
 		this.firstNameText.addSelectionListener(listener);
 		this.lastNameText.addSelectionListener(listener);

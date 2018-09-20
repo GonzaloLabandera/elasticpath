@@ -12,8 +12,7 @@ import org.apache.log4j.Logger;
 import com.elasticpath.base.exception.EpServiceException;
 import com.elasticpath.service.misc.TimeService;
 import com.elasticpath.service.order.OrderService;
-import com.elasticpath.settings.SettingsReader;
-import com.elasticpath.settings.domain.SettingValue;
+import com.elasticpath.settings.provider.SettingValueProvider;
 
 /**
  * This class removes Orders which have an OrderStatus of FAILED.
@@ -21,16 +20,11 @@ import com.elasticpath.settings.domain.SettingValue;
  */
 public class FailedOrdersCleanupJob {
 	
-	/** See the setting in TSettingDefinition for information. */
-	public static final String FAILED_ORDER_MAX_HISTORY = "COMMERCE/SYSTEM/FAILEDORDERCLEANUP/maxHistory";
-	
-	/** See the setting in TSettingDefinition for information. */
-	public static final String FAILED_ORDER_BATCH_SIZE = "COMMERCE/SYSTEM/FAILEDORDERCLEANUP/batchSize";
-	
 	private static final Logger LOG = Logger.getLogger(FailedOrdersCleanupJob.class);
 	private OrderService orderService;
 	private TimeService timeService;
-	private SettingsReader settingsReader;
+	private SettingValueProvider<Integer> batchSizeProvider;
+	private SettingValueProvider<Integer> maxDaysHistoryProvider;
 
 	/**
 	 * Removes failed Orders.
@@ -60,8 +54,7 @@ public class FailedOrdersCleanupJob {
 	 * @return The candidate removal date.
 	 */
 	protected Date getCandidateRemovalDate() {
-		final SettingValue maxHistorySetting = getSettingsReader().getSettingValue(FAILED_ORDER_MAX_HISTORY);
-		final int days = maxHistorySetting.getIntegerValue();
+		final int days = getMaxDaysHistoryProvider().get();
 		return DateUtils.addDays(getTimeService().getCurrentTime(), -days);
 	}
 
@@ -69,22 +62,7 @@ public class FailedOrdersCleanupJob {
 	 * @return The batch size.
 	 */
 	protected int getBatchSize() {
-		final SettingValue batchSize = getSettingsReader().getSettingValue(FAILED_ORDER_BATCH_SIZE);
-		return batchSize.getIntegerValue();
-	}
-
-	/**
-	 * @param settingsReader The settings reader.
-	 */
-	public void setSettingsReader(final SettingsReader settingsReader) {
-		this.settingsReader = settingsReader;
-	}
-
-	/**
-	 * @return The settings reader.
-	 */
-	protected SettingsReader getSettingsReader() {
-		return settingsReader;
+		return getBatchSizeProvider().get();
 	}
 
 	/**
@@ -114,4 +92,21 @@ public class FailedOrdersCleanupJob {
 	protected OrderService getOrderService() {
 		return orderService;
 	}
+
+	protected SettingValueProvider<Integer> getBatchSizeProvider() {
+		return batchSizeProvider;
+	}
+
+	public void setBatchSizeProvider(final SettingValueProvider<Integer> batchSizeProvider) {
+		this.batchSizeProvider = batchSizeProvider;
+	}
+
+	protected SettingValueProvider<Integer> getMaxDaysHistoryProvider() {
+		return maxDaysHistoryProvider;
+	}
+
+	public void setMaxDaysHistoryProvider(final SettingValueProvider<Integer> maxDaysHistoryProvider) {
+		this.maxDaysHistoryProvider = maxDaysHistoryProvider;
+	}
+
 }

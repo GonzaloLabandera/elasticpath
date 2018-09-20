@@ -14,7 +14,6 @@ import cucumber.api.java.en.And;
 import cucumber.api.java.en.Given;
 import org.apache.commons.lang.LocaleUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.ContextConfiguration;
 
 import com.elasticpath.domain.builder.customer.CustomerBuilder;
 import com.elasticpath.domain.store.Store;
@@ -25,7 +24,6 @@ import com.elasticpath.uat.ScenarioContextValueHolder;
 /**
  * Step Definitions for Store-based functionality.
  */
-@ContextConfiguration("classpath:cucumber.xml")
 public class StoreStepDefinitions {
 
 	@Autowired

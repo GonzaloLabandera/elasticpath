@@ -15,7 +15,7 @@ import com.elasticpath.domain.order.jobs.OrderLockCleanupJob;
 import com.elasticpath.domain.order.jobs.OrderLockCleanupResult;
 import com.elasticpath.service.misc.TimeService;
 import com.elasticpath.service.order.OrderLockService;
-import com.elasticpath.settings.SettingsService;
+import com.elasticpath.settings.provider.SettingValueProvider;
 
 /**
  * Job which will remove order locks that have expired past a defined amount of time, which
@@ -23,27 +23,25 @@ import com.elasticpath.settings.SettingsService;
  */
 public class OrderLockCleanupJobImpl implements OrderLockCleanupJob {
 
-	private SettingsService settingsService;
-	
 	private OrderLockService orderLockService;
 	
 	private TimeService timeService;
 	
-	private static final String ORDERLOCK_CLEANUP_SETTING = "COMMERCE/SYSTEM/ORDERLOCK/minsBeforeCleanUp";
-	
-	private static final String BATCH_SIZE_SETTING = "COMMERCE/SYSTEM/ORDERLOCK/batchSize";
-	
 	private static final String BATCH_JOB_NAME = "CleanupOrderLocksJob";
 	
 	private static final Logger LOGGER = Logger.getLogger(OrderLockCleanupJobImpl.class);
-	
+
+	private SettingValueProvider<Integer> batchSizeProvider;
+
+	private SettingValueProvider<Integer> staleLockThresholdMinsProvider;
+
 	@Override
 	public OrderLockCleanupResult cleanUpOrderLocks() {
 		final long startTime = System.currentTimeMillis();
 		LOGGER.debug("Start cleanup order locks quartz job at: " + new Date(startTime));
 		
-		int batchSize = getSettingsService().getSettingValue(BATCH_SIZE_SETTING).getIntegerValue(); 
-		int minsToExpireLocks = getSettingsService().getSettingValue(ORDERLOCK_CLEANUP_SETTING).getIntegerValue();
+		final int batchSize = getBatchSize();
+		final int minsToExpireLocks = getStaleLockThresholdMins();
 
 		if (isBatchSizeValid(batchSize) && isMinsToExpireLocksValid(minsToExpireLocks)) {
 			LOGGER.debug("Cleanup order locks quartz job completed in (ms): " + (System.currentTimeMillis() - startTime));
@@ -137,34 +135,47 @@ public class OrderLockCleanupJobImpl implements OrderLockCleanupJob {
 	}
 
 	@Override
-	public SettingsService getSettingsService() {
-		return settingsService;
-	}
-
-	@Override
 	public void setOrderLockService(final OrderLockService orderLockService) {
 		this.orderLockService = orderLockService;
 	}
 
 	@Override
-	public void setSettingsService(final SettingsService settingsService) {
-		this.settingsService = settingsService;
-	}
-
-	/**
-	 * @param timeService the timeService to set
-	 */
-	@Override
 	public void setTimeService(final TimeService timeService) {
 		this.timeService = timeService;
 	}
 
-	/**
-	 * @return the timeService
-	 */
 	@Override
 	public TimeService getTimeService() {
 		return timeService;
+	}
+
+	protected Integer getBatchSize() {
+		return getBatchSizeProvider().get();
+	}
+
+	protected SettingValueProvider<Integer> getBatchSizeProvider() {
+		return batchSizeProvider;
+	}
+
+	public void setBatchSizeProvider(final SettingValueProvider<Integer> batchSizeProvider) {
+		this.batchSizeProvider = batchSizeProvider;
+	}
+
+	protected Integer getStaleLockThresholdMins() {
+		return getStaleLockThresholdMinsProvider().get();
+	}
+
+	protected SettingValueProvider<Integer> getStaleLockThresholdMinsProvider() {
+		return staleLockThresholdMinsProvider;
+	}
+
+	/**
+	 * Sets a provider representing the number of minutes in the past at which locks will be considered stale.
+	 *
+	 * @param staleLockThresholdMinsProvider the number of minutes in the past
+	 */
+	public void setStaleLockThresholdMinsProvider(final SettingValueProvider<Integer> staleLockThresholdMinsProvider) {
+		this.staleLockThresholdMinsProvider = staleLockThresholdMinsProvider;
 	}
 
 }

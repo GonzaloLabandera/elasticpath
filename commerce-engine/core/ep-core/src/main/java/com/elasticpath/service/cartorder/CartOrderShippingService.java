@@ -3,11 +3,7 @@
  */
 package com.elasticpath.service.cartorder;
 
-import java.util.List;
-
 import com.elasticpath.domain.cartorder.CartOrder;
-import com.elasticpath.domain.customer.Address;
-import com.elasticpath.domain.shipping.ShippingServiceLevel;
 import com.elasticpath.domain.shoppingcart.ShoppingCart;
 
 /**
@@ -17,14 +13,14 @@ import com.elasticpath.domain.shoppingcart.ShoppingCart;
 public interface CartOrderShippingService {
 
 	/**
-	 * Update the shipping address on the cart order. This may also update the shipping service level on the cart order.
+	 * Update the shipping address on the cart order. This may also update the shipping option on the cart order.
 	 *
 	 * @param shippingAddressGuid shipping address guid to update on cart
+	 * @param shoppingCart the shopping cart to read from
 	 * @param cartOrder cart order to update
-	 * @param storeCode store code used to look up shipping service levels.
 	 * @return true if cart order shipping address is updated, false otherwise.
 	 */
-	Boolean updateCartOrderShippingAddress(String shippingAddressGuid, CartOrder cartOrder, String storeCode);
+	Boolean updateCartOrderShippingAddress(String shippingAddressGuid, ShoppingCart shoppingCart, CartOrder cartOrder);
 	
 	/**
 	 * Populates the transient fields on the shopping cart using the information in the cart order.
@@ -47,14 +43,4 @@ public interface CartOrderShippingService {
 	 * @return the same shopping cart, now populated with the transient fields.
 	 */
 	ShoppingCart populateAddressAndShippingFields(ShoppingCart shoppingCart, CartOrder cartOrder);
-
-	/**
-	 * Find shipping service levels for given store code and shipping address.
-	 *
-	 * @param storeCode the store code
-	 * @param shippingAddress the shipping address
-	 * @return list of found shipping service levels or empty list
-	 */
-	List<ShippingServiceLevel> findShippingServiceLevels(String storeCode, Address shippingAddress);
-
 }

@@ -84,7 +84,7 @@ public class CheckoutFailingPaymentTest extends BasicSpringContextTest {
 	private ShoppingContextBuilder shoppingContextBuilder;
 
 	/** An anonymous customer, you can use them to make orders. */
-	protected Customer anonymousCustomer;
+	private Customer anonymousCustomer;
 
 	private SimpleStoreScenario scenario;
 
@@ -104,7 +104,7 @@ public class CheckoutFailingPaymentTest extends BasicSpringContextTest {
 
 	/**
 	 * Get a reference to TestApplicationContext for use within the test. Setup scenarios.
-	 * 
+	 *
 	 * @throws Exception when exception
 	 */
 	@Before
@@ -114,14 +114,14 @@ public class CheckoutFailingPaymentTest extends BasicSpringContextTest {
 		scenario.getStore().setPaymentGateways(setUpPaymentGatewayAndProperties());
 
 		anonymousCustomer = persisterFactory.getStoreTestPersister().createDefaultCustomer(scenario.getStore());
-		
+
 		// Reset the payment gateway for each test.
 		NullPaymentGatewayPluginImpl.setFailOnCapture(false);
 		NullPaymentGatewayPluginImpl.setFailOnPreAuthorize(false);
 		NullPaymentGatewayPluginImpl.setFailOnReversePreAuthorization(false);
 		NullPaymentGatewayPluginImpl.setFailOnSale(false);
 	}
-	
+
 	@After
 	public void tearDown() throws Exception {
 		NullPaymentGatewayPluginImpl.setFailOnCapture(false);
@@ -134,7 +134,7 @@ public class CheckoutFailingPaymentTest extends BasicSpringContextTest {
 
 	/**
 	 * Integration test to check that a failed auth on a physical shipment causes the order to have
-	 * a failed status. 
+	 * a failed status.
 	 */
 	@DirtiesDatabase
 	@Test
@@ -152,20 +152,20 @@ public class CheckoutFailingPaymentTest extends BasicSpringContextTest {
 		NullPaymentGatewayPluginImpl.setFailOnPreAuthorize(true);
 
 		CheckoutResults checkoutResult = checkoutService.checkout(shoppingCart,
-																  taxSnapshot,
-																  shoppingContext.getCustomerSession(), templateOrderPayment, false);
+				taxSnapshot,
+				shoppingContext.getCustomerSession(), templateOrderPayment, false);
 		assertTrue("order should fail", checkoutResult.isOrderFailed());
 
 		Order order = checkoutResult.getOrder();
 		assertNotNull("There should have been an order on the checkout results", order);
 		assertTrue("The order should be persistent", order.isPersisted());
 		assertEquals("There should be one payment on the order", 1, order.getOrderPayments().size());
-		
-		Collection<OrderPayment> failedAuths = collectByTypeAndStatus(order.getOrderPayments(), OrderPayment.AUTHORIZATION_TRANSACTION, OrderPaymentStatus.FAILED);
+
+		Collection<OrderPayment> failedAuths = collectByTypeAndStatus(order.getOrderPayments(), OrderPayment.AUTHORIZATION_TRANSACTION,
+				OrderPaymentStatus.FAILED);
 		assertEquals("There should be 1 failed auth", 1, failedAuths.size());
 	}
-	
-	
+
 	/**
 	 * 1. Add digital product and physical product to the shopping cart 2. Checkout. Check payments and shipments. 3. Fail on release shipment 4.
 	 * Check payments Payments should be 2 auths and 1 capture initially when creating the order. After failing to release the shipment there has to
@@ -200,9 +200,10 @@ public class CheckoutFailingPaymentTest extends BasicSpringContextTest {
 		assertOneShipmentWithStatus(order.getPhysicalShipments(), OrderShipmentStatus.INVENTORY_ASSIGNED);
 
 		assertEquals("three payments should exist: 2 auths and 1 capture (for electronic shipment)", 3, order.getOrderPayments().size());
-		Collection<OrderPayment> approvedAuthPayments = collectByTypeAndStatus(order.getOrderPayments(), OrderPayment.AUTHORIZATION_TRANSACTION, OrderPaymentStatus.APPROVED);
+		Collection<OrderPayment> approvedAuthPayments = collectByTypeAndStatus(order.getOrderPayments(), OrderPayment.AUTHORIZATION_TRANSACTION,
+				OrderPaymentStatus.APPROVED);
 		assertEquals("There should be 2 approved auth payments", 2, approvedAuthPayments.size());
-		
+
 		OrderShipment physicalShipment = getFirstShipment(order.getPhysicalShipments());
 
 		// Allow the order to be released
@@ -230,11 +231,13 @@ public class CheckoutFailingPaymentTest extends BasicSpringContextTest {
 		assertEquals("Shipment status shouldn't have changed", OrderShipmentStatus.RELEASED, physicalShipment.getShipmentStatus());
 
 		assertEquals("there should be two payments = 2 auth + 2 capture", 4, order.getOrderPayments().size());
-		
-		Collection<OrderPayment> approvedCaptures = collectByTypeAndStatus(order.getOrderPayments(), OrderPayment.CAPTURE_TRANSACTION, OrderPaymentStatus.APPROVED);
+
+		Collection<OrderPayment> approvedCaptures = collectByTypeAndStatus(order.getOrderPayments(), OrderPayment.CAPTURE_TRANSACTION,
+				OrderPaymentStatus.APPROVED);
 		assertEquals("There should be 1 approved capture", 1, approvedCaptures.size());
-		
-		Collection<OrderPayment> failedCaptures = collectByTypeAndStatus(order.getOrderPayments(), OrderPayment.CAPTURE_TRANSACTION, OrderPaymentStatus.FAILED);
+
+		Collection<OrderPayment> failedCaptures = collectByTypeAndStatus(order.getOrderPayments(), OrderPayment.CAPTURE_TRANSACTION,
+				OrderPaymentStatus.FAILED);
 		assertEquals("There should be 1 failed capture", 1, failedCaptures.size());
 	}
 
@@ -259,7 +262,7 @@ public class CheckoutFailingPaymentTest extends BasicSpringContextTest {
 		// setup the payment gateway not to fail on preAuth and capture payments
 		NullPaymentGatewayPluginImpl.setFailOnCapture(false);
 		NullPaymentGatewayPluginImpl.setFailOnPreAuthorize(false);
-		
+
 		checkoutService.checkout(shoppingCart, taxSnapshot, shoppingContext.getCustomerSession(), templateOrderPayment, true);
 
 		List<Order> ordersList = orderService.findOrderByCustomerGuid(shoppingCart.getShopper().getCustomer().getGuid(), true);
@@ -272,7 +275,8 @@ public class CheckoutFailingPaymentTest extends BasicSpringContextTest {
 
 		// three payments should exist: 2 auths and 1 capture (for electronic shipment)
 		assertEquals("three payments should exist: 2 auths and 1 capture (for electronic shipment)", 3, order.getOrderPayments().size());
-		assertEquals(2, collectByTypeAndStatus(order.getOrderPayments(), OrderPayment.AUTHORIZATION_TRANSACTION, OrderPaymentStatus.APPROVED).size());
+		assertEquals(2,
+				collectByTypeAndStatus(order.getOrderPayments(), OrderPayment.AUTHORIZATION_TRANSACTION, OrderPaymentStatus.APPROVED).size());
 		OrderShipment physicalShipment = getFirstShipment(order.getPhysicalShipments());
 
 		// Release the shipment.
@@ -284,7 +288,7 @@ public class CheckoutFailingPaymentTest extends BasicSpringContextTest {
 
 		assertFalse("The order should not be able to be canceled as one shipment is already shipped", order.isCancellable());
 		try {
-			order = orderService.cancelOrder(order);
+			orderService.cancelOrder(order);
 			fail("Exception should be thrown if the order is not in a state to be cancelled");
 		} catch (EpServiceException expected) {
 			// We expect this
@@ -300,15 +304,18 @@ public class CheckoutFailingPaymentTest extends BasicSpringContextTest {
 
 		assertEquals("there should be two payments = 2 auth + 2 capture", 4, order.getOrderPayments().size());
 
-		Collection<OrderPayment> approvedCaptures = collectByTypeAndStatus(order.getOrderPayments(), OrderPayment.CAPTURE_TRANSACTION, OrderPaymentStatus.APPROVED);
+		Collection<OrderPayment> approvedCaptures = collectByTypeAndStatus(order.getOrderPayments(), OrderPayment.CAPTURE_TRANSACTION,
+				OrderPaymentStatus.APPROVED);
 		assertEquals("There should be 1 approved capture", 1, approvedCaptures.size());
 
-		Collection<OrderPayment> failedCaptures = collectByTypeAndStatus(order.getOrderPayments(), OrderPayment.CAPTURE_TRANSACTION, OrderPaymentStatus.FAILED);
+		Collection<OrderPayment> failedCaptures = collectByTypeAndStatus(order.getOrderPayments(), OrderPayment.CAPTURE_TRANSACTION,
+				OrderPaymentStatus.FAILED);
 		assertEquals("There should be no failed capture", 0, failedCaptures.size());
-		
-		Collection<OrderPayment> approvedReversals = collectByTypeAndStatus(order.getOrderPayments(), OrderPayment.REVERSE_AUTHORIZATION, OrderPaymentStatus.APPROVED);
+
+		Collection<OrderPayment> approvedReversals = collectByTypeAndStatus(order.getOrderPayments(), OrderPayment.REVERSE_AUTHORIZATION,
+				OrderPaymentStatus.APPROVED);
 		assertEquals("There should be 1 approved reversal", 1, approvedReversals.size());
-		
+
 	}
 
 	// =================== UTILITY METHODS ========================= \\
@@ -320,16 +327,10 @@ public class CheckoutFailingPaymentTest extends BasicSpringContextTest {
 	 */
 	private OrderPayment getOrderPayment() {
 		final OrderPayment orderPayment = getBeanFactory().getBean(ContextIdNames.ORDER_PAYMENT);
-		orderPayment.setCardHolderName("test test");
-		orderPayment.setCardType("001");
 		orderPayment.setCreatedDate(new Date());
 		orderPayment.setCurrencyCode("USD");
 		orderPayment.setEmail(anonymousCustomer.getEmail());
-		orderPayment.setExpiryMonth("09");
-		orderPayment.setExpiryYear("10");
-		orderPayment.setPaymentMethod(PaymentType.CREDITCARD);
-		orderPayment.setCvv2Code("1111");
-		orderPayment.setUnencryptedCardNumber("4111111111111111");
+		orderPayment.setPaymentMethod(PaymentType.PAYMENT_TOKEN);
 		return orderPayment;
 	}
 
@@ -361,36 +362,17 @@ public class CheckoutFailingPaymentTest extends BasicSpringContextTest {
 		shoppingCart.initialize();
 		shoppingCart.setBillingAddress(getBillingAddress());
 		shoppingCart.setShippingAddress(getBillingAddress());
-		shoppingCart.setShippingServiceLevelList(Arrays.asList(scenario.getShippingServiceLevel()));
-		shoppingCart.setSelectedShippingServiceLevelUid(scenario.getShippingServiceLevel().getUidPk());
+		shoppingCart.setSelectedShippingOption(scenario.getShippingOption());
 
 		final ShoppingCartService shoppingCartService = getBeanFactory().getBean(ContextIdNames.SHOPPING_CART_SERVICE);
 		shoppingCartService.saveOrUpdate(shoppingCart);
-		
-		return shoppingCart;
-	}
-	
-	/**
-	 * Gets the customer session.
-	 *
-	 * @param shopper the shopper
-	 * @return the customer session
-	 */
-	private CustomerSession getCustomerSession(final Shopper shopper) {
-		final CustomerSession session = TestCustomerSessionFactoryForTestApplication.getInstance().createNewCustomerSessionWithContext(shopper);
-		session.setCreationDate(new Date());
-		session.setCurrency(Currency.getInstance(Locale.US));
-		session.setLastAccessedDate(new Date());
-		session.setGuid("" + System.currentTimeMillis());
-		session.setLocale(Locale.US);
-		session.getShopper().setCustomer(anonymousCustomer);
 
-		return session;
+		return shoppingCart;
 	}
 
 	/**
 	 * Initializes a mock billing address.
-	 * 
+	 *
 	 * @return the Address
 	 */
 	private Address getBillingAddress() {
@@ -412,7 +394,8 @@ public class CheckoutFailingPaymentTest extends BasicSpringContextTest {
 		return gateways;
 	}
 
-	private Collection<OrderPayment> collectByTypeAndStatus(final Set<OrderPayment> orderPayments, final String transactionType, final OrderPaymentStatus expectedStatus) {
+	private Collection<OrderPayment> collectByTypeAndStatus(final Set<OrderPayment> orderPayments, final String transactionType,
+			final OrderPaymentStatus expectedStatus) {
 		List<OrderPayment> payments = new ArrayList<>();
 		for (OrderPayment payment : orderPayments) {
 			if (transactionType.equals(payment.getTransactionType()) && expectedStatus.equals(payment.getStatus())) {
@@ -433,9 +416,8 @@ public class CheckoutFailingPaymentTest extends BasicSpringContextTest {
 	}
 
 	private Product createPhysicalProduct() {
-		Product physicalProduct = persisterFactory.getCatalogTestPersister().createDefaultProductWithSkuAndInventory(scenario.getCatalog(),
+		return persisterFactory.getCatalogTestPersister().createDefaultProductWithSkuAndInventory(scenario.getCatalog(),
 				scenario.getCategory(), scenario.getWarehouse());
-		return physicalProduct;
 	}
 
 	private Product createNonShippableProduct() {

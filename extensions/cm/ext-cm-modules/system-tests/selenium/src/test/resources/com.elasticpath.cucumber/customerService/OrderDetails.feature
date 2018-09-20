@@ -23,3 +23,22 @@ Feature: Order Item Detail
     Examples:
       | SKU        | MESSAGE      | RECIPIENT_EMAIL | RECIPIENT_NAME | SENDER_NAME |
       | berries_20 | Test Message | test@test.com   | Test Recipient | Test Sender |
+
+  Scenario: Order is unlocked when modified order saved
+    Given I have an order for scope mobee with following skus
+      | skuCode                 | quantity |
+      | handsfree_shippable_sku | 1        |
+    When I search and open order editor for the latest order
+    And I update and save the following shipping address for the order
+      | address line 1 | 751 Pike Rd |
+      | phone          | 616 2323231 |
+    Then Unlock Order button is disabled
+
+  Scenario: Verify Order Shipment Discount Value
+    Given there is a 30 percent off cart subtotal coupon blackfriday and sku digital_sku has purchase price of price $20
+    And I create an order for scope mobee with coupon blackfriday for following sku
+      | skuCode     | quantity |
+      | digital_sku | 1        |
+    When I search and open order editor for the latest order
+    And I select Details tab in the Order Editor
+    Then Shipment Discount of 6.00 is present in the order details

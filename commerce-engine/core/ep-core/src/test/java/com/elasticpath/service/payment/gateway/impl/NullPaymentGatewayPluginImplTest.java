@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) Elastic Path Software Inc., 2013
  */
 package com.elasticpath.service.payment.gateway.impl;
@@ -16,9 +16,8 @@ import org.junit.Test;
 import com.elasticpath.plugin.payment.dto.AddressDto;
 import com.elasticpath.plugin.payment.dto.OrderPaymentDto;
 import com.elasticpath.plugin.payment.dto.impl.AddressDtoImpl;
-import com.elasticpath.plugin.payment.dto.impl.CardDetailsPaymentMethodImpl;
 import com.elasticpath.plugin.payment.dto.impl.OrderPaymentDtoImpl;
-import com.elasticpath.plugin.payment.exceptions.CardDeclinedException;
+import com.elasticpath.plugin.payment.dto.impl.TokenPaymentMethodImpl;
 import com.elasticpath.plugin.payment.exceptions.CardErrorException;
 import com.elasticpath.plugin.payment.exceptions.CardExpiredException;
 import com.elasticpath.plugin.payment.transaction.AuthorizationTransactionRequest;
@@ -33,6 +32,8 @@ import com.elasticpath.plugin.payment.transaction.impl.CaptureTransactionRespons
 /**
  * Test for {@link NullPaymentGatewayPluginImpl}.
  */
+// TODO: All credit card validations were removed on PB-2219. Is is important to discuss whether or not there should be any validations for this
+// Plugin and which ones.
 public class NullPaymentGatewayPluginImplTest {
 	private static final String TEST_REQUEST_TOKEN = "testRequestToken";
 	private NullPaymentGatewayPluginImpl nullPaymentGatewayPlugin;
@@ -162,87 +163,6 @@ public class NullPaymentGatewayPluginImplTest {
 		nullPaymentGatewayPlugin.sale(orderPaymentDto, getValidBillingAddress(), null);
 	}		
 	
-	/**
-	 * Ensure exception thrown from pre authorization on expired card.
-	 */
-	@Test(expected = CardExpiredException.class)
-	public void ensureExceptionThrownFromPreAuthorizationOnExpiredCard() {
-		AuthorizationTransactionRequest request = createTestAuthorizationRequest("EXP_AUTH");
-		nullPaymentGatewayPlugin.preAuthorize(request, getValidBillingAddress(), null);
-	}
-	
-	/**
-	 * Ensure exception thrown from pre authorization on declined card.
-	 */
-	@Test(expected = CardDeclinedException.class)
-	public void ensureExceptionThrownFromPreAuthorizationOnDeclinedCard() {
-		AuthorizationTransactionRequest request = createTestAuthorizationRequest("DEC_AUTH");
-		nullPaymentGatewayPlugin.preAuthorize(request, getValidBillingAddress(), null);
-	}
-	
-	/**
-	 * Ensure exception thrown from pre authorization on card error.
-	 */
-	@Test(expected = CardErrorException.class)
-	public void ensureExceptionThrownFromPreAuthorizationOnCardError() {
-		AuthorizationTransactionRequest request = createTestAuthorizationRequest("COM_AUTH");
-		nullPaymentGatewayPlugin.preAuthorize(request, getValidBillingAddress(), null);
-	}	
-	
-	/**
-	 * Ensure exception thrown from reverse pre authorization on expired card.
-	 */
-	@Test(expected = CardExpiredException.class)
-	public void ensureExceptionThrownFromReversePreAuthorizationOnExpiredCard() {
-		orderPaymentDto.setCardHolderName("EXP_REV_AUTH");
-		nullPaymentGatewayPlugin.reversePreAuthorization(orderPaymentDto);
-	}
-	
-	/**
-	 * Ensure exception thrown from reverse pre authorization on declined card.
-	 */
-	@Test(expected = CardDeclinedException.class)
-	public void ensureExceptionThrownFromReversePreAuthorizationOnDeclinedCard() {
-		orderPaymentDto.setCardHolderName("DEC_REV_AUTH");
-		nullPaymentGatewayPlugin.reversePreAuthorization(orderPaymentDto);
-	}
-	
-	/**
-	 * Ensure exception thrown from reverse pre authorization on card error.
-	 */
-	@Test(expected = CardErrorException.class)
-	public void ensureExceptionThrownFromReversePreAuthorizationOnCardError() {
-		orderPaymentDto.setCardHolderName("COM_REV_AUTH");
-		nullPaymentGatewayPlugin.reversePreAuthorization(orderPaymentDto);
-	}	
-	
-	/**
-	 * Ensure exception thrown from refund on expired card.
-	 */
-	@Test(expected = CardExpiredException.class)
-	public void ensureExceptionThrownFromRefundOnExpiredCard() {
-		orderPaymentDto.setCardHolderName("EXP_REFUND");
-		nullPaymentGatewayPlugin.refund(orderPaymentDto, getValidBillingAddress());
-	}
-	
-	/**
-	 * Ensure exception thrown from refundn on declined card.
-	 */
-	@Test(expected = CardDeclinedException.class)
-	public void ensureExceptionThrownFromRefundnOnDeclinedCard() {
-		orderPaymentDto.setCardHolderName("DEC_REFUND");
-		nullPaymentGatewayPlugin.refund(orderPaymentDto, getValidBillingAddress());
-	}
-	
-	/**
-	 * Ensure exception thrown from refund on card error.
-	 */
-	@Test(expected = CardErrorException.class)
-	public void ensureExceptionThrownFromRefundOnCardError() {
-		orderPaymentDto.setCardHolderName("COM_REFUND");
-		nullPaymentGatewayPlugin.refund(orderPaymentDto, getValidBillingAddress());
-	}	
-	
 	private void assertPaymentIsAuthorized(final OrderPaymentDto orderPaymentDto) {
 		assertNotNull(orderPaymentDto.getReferenceId());
 		assertNotNull(orderPaymentDto.getAuthorizationCode());
@@ -265,9 +185,9 @@ public class NullPaymentGatewayPluginImplTest {
 	
 	private AuthorizationTransactionRequest createTestAuthorizationRequest(final String cardHolderName) {
 		AuthorizationTransactionRequest request = new AuthorizationTransactionRequestImpl();
-		CardDetailsPaymentMethodImpl paymentMethod = new CardDetailsPaymentMethodImpl();
-		paymentMethod.setCardHolderName(cardHolderName);
-		
+		TokenPaymentMethodImpl paymentMethod = new TokenPaymentMethodImpl();
+		paymentMethod.setValue(cardHolderName);
+
 		request.setPaymentMethod(paymentMethod);
 		return request;
 	}

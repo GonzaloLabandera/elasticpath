@@ -30,13 +30,13 @@ import com.elasticpath.domain.order.OrderReturnStatus;
 import com.elasticpath.domain.order.OrderReturnType;
 import com.elasticpath.domain.order.PhysicalOrderShipment;
 import com.elasticpath.domain.order.impl.OrderReturnImpl;
-import com.elasticpath.domain.shipping.ShippingServiceLevel;
 import com.elasticpath.domain.shoppingcart.ShoppingItem;
 import com.elasticpath.persistence.api.FetchGroupLoadTuner;
 import com.elasticpath.persistence.support.FetchGroupConstants;
 import com.elasticpath.sellingchannel.director.CartDirector;
 import com.elasticpath.service.order.ReturnAndExchangeService;
 import com.elasticpath.service.order.ReturnExchangeType;
+import com.elasticpath.shipping.connectivity.dto.ShippingOption;
 
 /**
  * Help class for {@link OrderReturnStepDefinitions}.
@@ -53,8 +53,8 @@ public class OrderReturnStepDefinitionsHelper {
 	private ScenarioContextValueHolder<OrderReturn> orderReturnHolder;
 	
 	@Inject
-	@Named("shippingServiceLevelHolder")
-	private ScenarioContextValueHolder<ShippingServiceLevel> shippingServiceLevelHolder;
+	@Named("shippingOptionHolder")
+	private ScenarioContextValueHolder<ShippingOption> shippingOptionHolder;
 	
 	@Autowired
 	private ShoppingCartStepDefinitionsHelper shoppingCartStepDefinitionsHelper;
@@ -160,7 +160,7 @@ public class OrderReturnStepDefinitionsHelper {
 		returnAndExchangeService.populateShoppingCart(
 											orderReturn, 
 											shoppingItems, 
-											shippingServiceLevelHolder.get(),
+											shippingOptionHolder.get(),
 											orderReturn.getOrderReturnAddress());
 		
 		orderReturn.getOrder().setModifiedBy(getEventOriginatorHelper().getSystemOriginator());

@@ -12,6 +12,7 @@ import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.ui.IViewSite;
 import org.eclipse.ui.PartInitException;
 
+import com.elasticpath.cmclient.core.ServiceLocator;
 import com.elasticpath.cmclient.core.CoreImageRegistry;
 import com.elasticpath.cmclient.core.CoreMessages;
 import com.elasticpath.cmclient.core.event.ItemChangeEvent;
@@ -25,11 +26,14 @@ import com.elasticpath.cmclient.fulfillment.FulfillmentPlugin;
 import com.elasticpath.cmclient.fulfillment.event.CustomerEventListener;
 import com.elasticpath.cmclient.fulfillment.event.FulfillmentEventService;
 import com.elasticpath.cmclient.fulfillment.helpers.CustomerSearchRequestJob;
+import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.customer.Customer;
 import com.elasticpath.domain.customer.CustomerAddress;
+import com.elasticpath.domain.store.Store;
 import com.elasticpath.persistence.api.Persistable;
 import com.elasticpath.service.search.query.SortBy;
 import com.elasticpath.service.search.query.StandardSortBy;
+import com.elasticpath.service.store.StoreService;
 
 /**
  * Customer search results view.
@@ -46,17 +50,19 @@ public class CustomerSearchResultsView extends AbstractSortListView implements C
 	// table column constants
 	private static final int COLUMN_IMAGE = 0;
 
-	private static final int COLUMN_CUSTOMERID = 1;
+	private static final int COLUMN_USERID = 1;
 
-	private static final int COLUMN_FIRSTNAME = 2;
+	private static final int COLUMN_STORE_REGISTERED = 2;
 
-	private static final int COLUMN_LASTNAME = 3;
+	private static final int COLUMN_FIRSTNAME = 3;
 
-	private static final int COLUMN_EMAIL = 4;
+	private static final int COLUMN_LASTNAME = 4;
 
-	private static final int COLUMN_ADDRESS = 5;
+	private static final int COLUMN_EMAIL = 5;
 
-	private static final int COLUMN_TELEPHONE = 6;
+	private static final int COLUMN_ADDRESS = 6;
+
+	private static final int COLUMN_TELEPHONE = 7;
 
 	private static final String CUSTOMER_SEARCH_RESULT_TABLE = "Customer Search Result Table";
 
@@ -65,6 +71,8 @@ public class CustomerSearchResultsView extends AbstractSortListView implements C
 	private static final Object[] EMPTY_ARRAY = new Object[0];
 
 	private Object[] objects;
+
+	private StoreService storeService;
 
 	/**
 	 *
@@ -132,23 +140,27 @@ public class CustomerSearchResultsView extends AbstractSortListView implements C
 			final Customer customer = (Customer) element;
 
 			switch (columnIndex) {
-			case COLUMN_ADDRESS:
-				result = this.formAddressString(customer.getPreferredBillingAddress());
-				break;
-			case COLUMN_CUSTOMERID:
-				result = String.valueOf(customer.getUidPk());
-				break;
-			case COLUMN_EMAIL:
-				result = customer.getEmail();
-				break;
-			case COLUMN_FIRSTNAME:
-				result = customer.getFirstName();
-				break;
-			case COLUMN_LASTNAME:
-				result = customer.getLastName();
-				break;
-			case COLUMN_TELEPHONE:
-				result = customer.getPhoneNumber();
+				case COLUMN_ADDRESS:
+					result = this.formAddressString(customer.getPreferredBillingAddress());
+					break;
+				case COLUMN_USERID:
+					result = String.valueOf(customer.getUserId());
+					break;
+				case COLUMN_STORE_REGISTERED:
+					final Store customerStore = getStoreService().findStoreWithCode(customer.getStoreCode());
+					result = customerStore.getName();
+					break;
+				case COLUMN_EMAIL:
+					result = customer.getEmail();
+					break;
+				case COLUMN_FIRSTNAME:
+					result = customer.getFirstName();
+					break;
+				case COLUMN_LASTNAME:
+					result = customer.getLastName();
+					break;
+				case COLUMN_TELEPHONE:
+					result = customer.getPhoneNumber();
 				break;
 			default: // nothing as result by default is ""
 			}
@@ -213,20 +225,22 @@ public class CustomerSearchResultsView extends AbstractSortListView implements C
 
 	@Override
 	protected void initializeTable(final IEpTableViewer epTableViewer) {
-		final int[] widths = new int[] { 21, 90, 90, 90, 130, 270, 90 };
+		final int[] widths = new int[] { 21, 200, 135, 90, 90, 130, 270, 90 };
 		final String[] columnNames = new String[] {
 				StringUtils.EMPTY,
-				FulfillmentMessages.get().CustomerSearchResultsView_CustomerId,
+				FulfillmentMessages.get().CustomerSearchResultsView_UserId,
+				FulfillmentMessages.get().CustomerSearchResultsView_StoreRegistered,
 				FulfillmentMessages.get().CustomerSearchResultsView_FirstName,
 				FulfillmentMessages.get().CustomerSearchResultsView_LastName,
 				FulfillmentMessages.get().CustomerSearchResultsView_EmailUserId,
 				FulfillmentMessages.get().CustomerSearchResultsView_DefaultBillingAddress,
-				FulfillmentMessages.get().CustomerSearchResultsView_TelephoneNum,
+				FulfillmentMessages.get().CustomerSearchResultsView_TelephoneNum
 				
 		};
 		final SortBy[] sortTypes = new SortBy[] {
 				null,
-				StandardSortBy.CUSTOMER_ID,
+				StandardSortBy.USER_ID,
+				StandardSortBy.STORE_CODE,
 				StandardSortBy.FIRST_NAME,
 				StandardSortBy.LAST_NAME,
 				StandardSortBy.EMAIL,
@@ -307,5 +321,18 @@ public class CustomerSearchResultsView extends AbstractSortListView implements C
 	@Override
 	protected String getPartId() {
 		return VIEW_ID;
+	}
+
+
+	/**
+	 * Gets the store service.
+	 *
+	 * @return the store service
+	 */
+	protected StoreService getStoreService() {
+		if (storeService == null) {
+			storeService = ServiceLocator.getService(ContextIdNames.STORE_SERVICE);
+		}
+		return storeService;
 	}
 }

@@ -170,16 +170,31 @@
 				AND cp2.booleanValue = FALSE
 			</query>
         </named-query>
-        <named-query name="OTHER_CUSTOMER_COUNT_BY_USERID_BY_STORE_EXCLUDING_ANONYMOUS">
+          <named-query name="OTHER_CUSTOMER_COUNT_BY_USERID_BY_STORES_EXCLUDING_ANONYMOUS">
 			<query>
-				SELECT count(c.uidPk)
-				FROM CustomerImpl c
-				INNER JOIN c.profileValueMap cp
-				WHERE c.userId = ?1
-				AND UPPER(c.storeCode) = UPPER(?2)
-				AND c.guid &lt;&gt; ?3
-				AND cp.localizedAttributeKey = 'CP_ANONYMOUS_CUST'
-				AND cp.booleanValue = FALSE
+				SELECT COUNT(customer.uidPk)
+				FROM CustomerImpl customer
+				INNER JOIN customer.profileValueMap valueMap, StoreImpl store
+				WHERE customer.userId = ?1
+				AND UPPER(customer.storeCode) = UPPER(store.code)
+				AND customer.guid &lt;&gt; ?2
+				AND valueMap.localizedAttributeKey = 'CP_ANONYMOUS_CUST'
+				AND valueMap.booleanValue = FALSE
+				AND (
+						store.uidPk IN (
+							SELECT associatedIds
+							FROM StoreImpl innerStore
+							INNER JOIN innerStore.associatedStoreUids associatedIds
+							WHERE UPPER(innerStore.code) = UPPER(?3)
+						)
+					OR
+						store.uidPk = (
+							SELECT innerStore.uidPk
+							FROM StoreImpl innerStore
+							WHERE UPPER(innerStore.code) = UPPER(?3)
+						)
+				)
+
 			</query>
         </named-query>
         <named-query name="CUSTOMER_FIND_BY_USERID_IN_STORES">

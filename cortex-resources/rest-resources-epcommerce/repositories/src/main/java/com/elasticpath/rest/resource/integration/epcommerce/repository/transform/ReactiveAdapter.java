@@ -127,10 +127,9 @@ public interface ReactiveAdapter {
 	 * is captured and registered on the Completable's error channel.</p>
 	 *
 	 * @param serviceCall service call
-	 * @param <T>         service call return type
 	 * @return Completable with deferred service call execution
 	 */
-	<T> Completable fromServiceAsCompletable(Callable<T> serviceCall);
+	 Completable fromServiceAsCompletable(Runnable serviceCall);
 
 	/**
 	 * Creates an Observable with a deferred execution of a nullable call.

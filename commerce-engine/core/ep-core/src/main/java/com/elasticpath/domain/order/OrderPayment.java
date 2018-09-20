@@ -7,7 +7,6 @@ import java.math.BigDecimal;
 import java.util.Date;
 
 import com.elasticpath.domain.catalog.GiftCertificate;
-import com.elasticpath.domain.customer.CustomerCreditCard;
 import com.elasticpath.domain.customer.PaymentToken;
 import com.elasticpath.domain.misc.PayerAuthValidationValue;
 import com.elasticpath.money.Money;
@@ -96,62 +95,8 @@ public interface OrderPayment extends Persistable {
 	Date getLastModifiedDate();
 
 	/**
-	 * Get the type/brand of the credit card (e.g. VISA).
-	 *
-	 * @return the cardType
-	 */
-	String getCardType();
-
-	/**
-	 * Set the vendor/brand of the credit card (e.g. VISA).
-	 *
-	 * @param cardType the cardType
-	 */
-	void setCardType(String cardType);
-
-	/**
-	 * Set the card holder name.
-	 *
-	 * @return the name on the card
-	 */
-	String getCardHolderName();
-
-	/**
-	 * Get the card holder name.
-	 *
-	 * @param cardHolderName the name on the card
-	 */
-	void setCardHolderName(String cardHolderName);
-
-	/**
-	 * Set the credit card number.
-	 *
-	 * @param number the credit card number
-	 */
-	void setUnencryptedCardNumber(String number);
-
-	/**
-	 * Decrypts and returns the full credit card number. Access to this method should be restricted.
-	 *
-	 * @return the decrypted credit card number
-	 */
-	String getUnencryptedCardNumber();
-
-	/**
-	 * Decrypts and returns the masked credit card number: ************5381. Useful for displaying in receipts, GUI, order history, etc.
-	 * 
-	 * <strong>This method is now deprecated and simply delegates to {@link #getDisplayValue()}.</strong>
-	 *
-	 * @see {@link #getDisplayValue()}
-	 *
-	 * @return the masked credit card number
-	 */
-	@Deprecated
-	String getMaskedCardNumber();
-
-	/**
 	 * Returns the display value for the payment method used to create this order payment, for example the display value
-	 * of a token, or a masked credit card number.
+	 * of a token.
 	 *
 	 * @return the display value of the payment method
 	 */
@@ -159,90 +104,11 @@ public interface OrderPayment extends Persistable {
 
 	/**
 	 * Sets the display value for the payment method used to create this order payment, for example the display value
-	 * of a token, or a masked credit card number.
+	 * of a token.
 	 *
 	 * @param displayValue the display value of the payment method
 	 */
 	void setDisplayValue(String displayValue);
-
-	/**
-	 * Get the two-digit expiry date year.
-	 *
-	 * @return the expiry date year
-	 */
-	String getExpiryYear();
-
-	/**
-	 * Set the two-digit expiry date year.
-	 *
-	 * @param expiryYear the expiry date year
-	 */
-	void setExpiryYear(String expiryYear);
-
-	/**
-	 * Get the two-digit expiry date month.
-	 *
-	 * @return the two-digit expiry date month
-	 */
-	String getExpiryMonth();
-
-	/**
-	 * Set the expiry two-digit date month.
-	 *
-	 * @param expiryMonth the two digit expiry date month
-	 */
-	void setExpiryMonth(String expiryMonth);
-
-	/**
-	 * Get the card start date Used by some U.K. cards.
-	 *
-	 * @return the start date
-	 */
-	Date getStartDate();
-
-	/**
-	 * Set the cart start date used by some U.K. cards.
-	 *
-	 * @param startDate the start date
-	 */
-	void setStartDate(Date startDate);
-
-	/**
-	 * Get the issue number used by some U.K. cards.
-	 *
-	 * @return the issue number
-	 */
-	String getIssueNumber();
-
-	/**
-	 * Set the issue number used by some U.K. cards.
-	 *
-	 * @param issueNumber the issue number
-	 */
-	void setIssueNumber(String issueNumber);
-
-	/**
-	 * Get the card security code (found near the signature on the back of the card).
-	 *
-	 * @return the card cvv2Code
-	 */
-	String getCvv2Code();
-
-	/**
-	 * Set the security code (found near the signature on the back of the card).
-	 *
-	 * @param cvv2Code the security code
-	 */
-	void setCvv2Code(String cvv2Code);
-
-	/**
-	 * Returns <code>true</code> to indicate that this {@link OrderPayment}'s credit card is stored encrypted;
-	 * <code>false</code> to indicate that the credit card is stored masked.
-	 *
-	 * @return <code>true</code> to indicate that this {@link OrderPayment}'s credit card is stored encrypted;
-	 * <code>false</code> to indicate that the credit card is stored masked.
-	 */
-	boolean isEncryptedCreditCardStored();
 
 	/**
 	 * Get the payment method. A payment method could be the name of the payment processor/gateway.
@@ -417,27 +283,6 @@ public interface OrderPayment extends Persistable {
 	void setGiftCertificate(GiftCertificate giftCertificate);
 
 	/**
-	 * Copy orderPayment's credit card info to <code>this</code> Order Payment.
-	 *
-	 * @param orderPayment the source of credit card info.
-	 */
-	void copyCreditCardInfo(OrderPayment orderPayment);
-
-	/**
-	 * Tells <code>this</code> to use the specified credit card.
-	 *
-	 * @param creditCard the card to use for this order payment.
-	 */
-	void useCreditCard(CustomerCreditCard creditCard);
-
-	/**
-	 * Extract the credit card information in this order payment into a credit card object.
-	 *
-	 * @return a new credit card instance populated with the credit card information
-	 */
-	CustomerCreditCard extractCreditCard();
-
-	/**
 	 * Copy follow on transaction information from orderPayment to <code>this</code> Order Payment.
 	 *
 	 * @param orderPayment the source of Gateway info.
@@ -464,25 +309,6 @@ public interface OrderPayment extends Persistable {
 	 * @param payerAuthValidationValue the payerAuthValidationValue
 	 */
 	void setPayerAuthValidationValue(PayerAuthValidationValue payerAuthValidationValue);
-
-	/**
-	 * Get the encrypted credit cart number.
-	 *
-	 * @return the credit card number.
-	 */
-	String getCardNumber();
-
-	/**
-	 * Clears all security sensitive credit card information.  Does not cleared masked numbers, etc.
-	 */
-	void clearCreditCardData();
-
-	/**
-	 * Flags the credit card data as having been sanitized prior to persistence.
-	 *
-	 * @param isSanitized true if this payment has been sanitized
-	 */
-	void setSanitized(boolean isSanitized);
 
 	/**
 	 * Copies the date that this was last modified.

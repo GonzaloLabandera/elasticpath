@@ -14,7 +14,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.elasticpath.domain.shipping.ShipmentType;
 import com.elasticpath.domain.shoppingcart.ShoppingCart;
@@ -26,6 +26,7 @@ import com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder
 public class DeliveryListRepositoryImplTest {
 
 	private static final String SHIPMENT = "SHIPMENT";
+	private static final String CART_ID = "CART";
 
 	@Mock
 	private ShoppingCartRepository shoppingCartRepository;
@@ -43,9 +44,9 @@ public class DeliveryListRepositoryImplTest {
 		types.add(ShipmentType.SERVICE);
 
 		when(shoppingCart.getShipmentTypes()).thenReturn(types);
-		when(shoppingCartRepository.getDefaultShoppingCart()).thenReturn(Single.just(shoppingCart));
+		when(shoppingCartRepository.getShoppingCart(CART_ID)).thenReturn(Single.just(shoppingCart));
 
-		repository.getShoppingCartDeliveryTypes()
+		repository.getShoppingCartDeliveryTypes(CART_ID)
 				.test()
 				.assertValueCount(1)
 				.assertValues(SHIPMENT);

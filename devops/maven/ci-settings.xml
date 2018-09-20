@@ -19,7 +19,6 @@
 		<activeProfile>activemq-dev-jms</activeProfile>
 		<activeProfile>with-oauth2-resource</activeProfile>
 		<activeProfile>allow-snapshots-from-central</activeProfile>
-		<activeProfile>disable-licensing-check</activeProfile>
 	</activeProfiles>
 
 	<profiles>
@@ -30,12 +29,6 @@
 				<ep.cm.secure.channel>http</ep.cm.secure.channel>
 				<!-- Following properties are required to avoid 'Circular placeholder reference'. -->
 				<ep.smtp.host/>
-			</properties>
-		</profile>
-		<profile>
-			<id>disable-licensing-check</id>
-			<properties>
-				<licensing.skip>true</licensing.skip>
 			</properties>
 		</profile>
 		<profile>

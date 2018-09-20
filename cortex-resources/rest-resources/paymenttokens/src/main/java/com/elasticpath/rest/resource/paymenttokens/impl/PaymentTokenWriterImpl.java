@@ -40,7 +40,7 @@ public class PaymentTokenWriterImpl implements PaymentTokenWriter {
 	}
 
 	@Override
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({"unchecked", "rawtypes"})
 	public ExecutionResult<ResourceState<ResourceEntity>> createPaymentToken(final PaymentTokenEntity paymentTokenEntity,
 			final ResourceState<?> owningRepresentation) {
 

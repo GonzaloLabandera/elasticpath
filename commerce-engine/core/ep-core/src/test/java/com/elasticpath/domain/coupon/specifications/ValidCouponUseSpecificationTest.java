@@ -16,6 +16,7 @@ import com.elasticpath.domain.rules.Coupon;
 import com.elasticpath.domain.rules.Rule;
 import com.elasticpath.service.rules.CouponUsageService;
 import com.elasticpath.service.rules.RuleService;
+import com.elasticpath.service.rules.impl.RuleValidationResultEnum;
 
 /**
  * Coupon validity in cart specification.
@@ -51,7 +52,7 @@ public class ValidCouponUseSpecificationTest {
 
 	@Test
 	public void testWhenCouponIsNullSpecIsNotSatisfied() {
-		boolean result = specification.isSatisfiedBy(createPotentialCouponUsageDTO(null));
+		boolean result = specification.isSatisfiedBy(createPotentialCouponUsageDTO(null)).isSuccess();
 
 		assertFalse("Specification should not be satisfied by null coupon.", result);
 	}
@@ -60,7 +61,7 @@ public class ValidCouponUseSpecificationTest {
 	public void testWhenCouponCodeIsEmptySpecIsNotSatisfied() {
 		setUpCouponCodeForCoupon(StringUtils.EMPTY);
 
-		boolean result = specification.isSatisfiedBy(potentialCouponUse);
+		boolean result = specification.isSatisfiedBy(potentialCouponUse).isSuccess();
 
 		assertFalse("Specification should not be satisfied by null coupon code.", result);
 	}
@@ -68,9 +69,9 @@ public class ValidCouponUseSpecificationTest {
 	@Test
 	public void testWhenRuleIsNotValidSpecIsNotSatisfied() {
 		setUpCouponCodeForCoupon(COUPON_CODE);
-		setUpRuleToBeValid(false);
+		setUpRuleToBeValid(RuleValidationResultEnum.ERROR_UNSPECIFIED);
 
-		boolean result = specification.isSatisfiedBy(potentialCouponUse);
+		boolean result = specification.isSatisfiedBy(potentialCouponUse).isSuccess();
 
 		assertFalse("Specification should not be satisfied by invalid rule.", result);
 	}
@@ -78,10 +79,10 @@ public class ValidCouponUseSpecificationTest {
 	@Test
 	public void testWhenCouponUsageIsInvalidThenSpecIfNotSatisfied() {
 		setUpCouponCodeForCoupon(COUPON_CODE);
-		setUpRuleToBeValid(true);
+		setUpRuleToBeValid(RuleValidationResultEnum.SUCCESS);
 		setUpCouponUsageToBeValidForRule(false);
 
-		boolean result = specification.isSatisfiedBy(potentialCouponUse);
+		boolean result = specification.isSatisfiedBy(potentialCouponUse).isSuccess();
 
 		assertFalse("Specification should not be satisfied by invalid coupon usage.", result);
 	}
@@ -89,15 +90,15 @@ public class ValidCouponUseSpecificationTest {
 	@Test
 	public void testWhenCouponExistsHasValidRuleAndValidCouponUsageSpecIsSatisfied() {
 		setUpCouponCodeForCoupon(COUPON_CODE);
-		setUpRuleToBeValid(true);
+		setUpRuleToBeValid(RuleValidationResultEnum.SUCCESS);
 		setUpCouponUsageToBeValidForRule(true);
 
-		boolean result = specification.isSatisfiedBy(potentialCouponUse);
+		boolean result = specification.isSatisfiedBy(potentialCouponUse).isSuccess();
 
 		assertTrue("Specification should be satisfied by valid potential coupon usage.", result);
 	}
 
-	private Rule setUpRuleToBeValid(final boolean isValid) {
+	private Rule setUpRuleToBeValid(final RuleValidationResultEnum isValid) {
 		final Rule rule = context.mock(Rule.class);
 		context.checking(new Expectations() {
 			{

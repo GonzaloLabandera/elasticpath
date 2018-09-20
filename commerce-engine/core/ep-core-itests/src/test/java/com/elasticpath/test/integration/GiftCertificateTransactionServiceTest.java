@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) Elastic Path Software Inc., 2015
  */
 package com.elasticpath.test.integration;
@@ -261,14 +261,8 @@ public class GiftCertificateTransactionServiceTest extends DbTestCase {
 
 	private GiftCertificateOrderPaymentDto createOrderPayment(final String customerEmail) {
 		GiftCertificateOrderPaymentDto orderPayment = new GiftCertificateOrderPaymentDtoImpl();		
-		orderPayment.setCardHolderName("test test");
-		orderPayment.setCardType("001");
 		orderPayment.setCurrencyCode("USD");
 		orderPayment.setEmail(customerEmail);
-		orderPayment.setExpiryMonth("09");
-		orderPayment.setExpiryYear("10");
-		orderPayment.setCvv2Code("1111");
-		orderPayment.setUnencryptedCardNumber("4111111111111111");
 		return orderPayment;
 	}
 

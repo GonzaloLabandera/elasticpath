@@ -42,7 +42,6 @@ public class OrderCouponToCouponinfoRepository<E extends CouponEntity, I extends
 	 * Coupon not found for the order.
 	 */
 	static final String COUPON_IS_NOT_FOUND = "Coupon is not found for order.";
-	private static final String COUPON_CODE_IS_NOT_VALID = "Coupon code is not valid";
 
 	private CartOrderRepository cartOrderRepository;
 	private ShoppingCartRepository shoppingCartRepository;
@@ -54,13 +53,11 @@ public class OrderCouponToCouponinfoRepository<E extends CouponEntity, I extends
 		String orderId = entity.getParentId();
 		String storeCode = scope.getValue();
 		String couponCode = entity.getCode();
-
 		return cartOrderRepository.findByGuidAsSingle(storeCode, orderId)
-				.flatMap(cartOrder ->
-						shoppingCartRepository.getDefaultShoppingCart()
-								.map(shoppingCart -> shoppingCart.getShopper().getCustomer().getEmail())
-								.flatMap(shopperEmail -> couponRepository.isCouponValidInStore(couponCode, storeCode, shopperEmail))
-								.flatMap(validCoupon -> buildOrderCouponIdentifier(cartOrder, storeCode, couponCode, orderId, validCoupon)));
+				.flatMap(cartOrder -> shoppingCartRepository.getShoppingCart(cartOrder.getShoppingCartGuid())
+						.map(shoppingCart -> shoppingCart.getShopper().getCustomer().getEmail())
+						.flatMap(shopperEmail -> couponRepository.validateCoupon(couponCode, storeCode, shopperEmail)
+								.andThen(buildOrderCouponIdentifier(cartOrder, storeCode, couponCode, orderId))));
 	}
 
 	@Override
@@ -92,19 +89,13 @@ public class OrderCouponToCouponinfoRepository<E extends CouponEntity, I extends
 	 * @param storeCode store code
 	 * @param couponCode coupon code
 	 * @param orderId order itd
-	 * @param validCoupon is coupon valid
 	 * @return submit result of coupon identifier
 	 */
 	protected Single<SubmitResult<OrderCouponIdentifier>> buildOrderCouponIdentifier(
-			final CartOrder cartOrder, final String storeCode,
-			final String couponCode, final String orderId, final Boolean validCoupon) {
-
-		if (validCoupon) {
+			final CartOrder cartOrder, final String storeCode, final String couponCode, final String orderId) {
 			return couponRepository.findByCouponCode(couponCode)
 					.flatMap(coupon -> Single.just(cartOrder.addCoupon(coupon.getCouponCode()))
 							.flatMap(isNewlyAdded -> handleCouponCreation(cartOrder, storeCode, orderId, coupon, isNewlyAdded)));
-		}
-		return Single.error(ResourceOperationFailure.stateFailure(COUPON_CODE_IS_NOT_VALID));
 	}
 
 	/**

@@ -39,16 +39,10 @@ public class OrderPaymentFactory {
 
 	public OrderPayment createTemplateCreditCardOrderPayment() {
 		final OrderPayment orderPayment = beanFactory.getBean(ContextIdNames.ORDER_PAYMENT);
-		orderPayment.setCardHolderName("John Doe");
-		orderPayment.setCardType("001");
 		orderPayment.setCreatedDate(new Date());
 		orderPayment.setCurrencyCode("USD");
 		orderPayment.setEmail("john.doe@elasticpath.com");
-		orderPayment.setExpiryMonth("09");
-		orderPayment.setExpiryYear("2030");
-		orderPayment.setPaymentMethod(PaymentType.CREDITCARD);
-		orderPayment.setCvv2Code("1111");
-		orderPayment.setUnencryptedCardNumber("4111111111111111");
+		orderPayment.setPaymentMethod(PaymentType.CREDITCARD_DIRECT_POST);
 		return orderPayment;
 	}
 }

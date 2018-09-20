@@ -80,5 +80,37 @@
 			</template>
 		</plan>
 
+		<plan>
+			<name>search-navigation-by-code</name>
+			<description><![CDATA[Search for a Navigation item by category code.]]></description>
+			<template>
+				<name>controls.form-control-template</name>
+				<replace>
+					<key>start-resource</key>
+					<value>lookups</value>
+				</replace>
+				<replace>
+					<key>read-form-link</key>
+					<value>navigations.navigationlookupform</value>
+				</replace>
+				<replace>
+					<key>form-resource</key>
+					<value>navigations.navigation-lookup-form</value>
+				</replace>
+				<replace>
+					<key>submit-resource</key>
+					<value>navigations.navigation-lookup-form</value>
+				</replace>
+				<replace>
+					<key>submit-action-link</key>
+					<value>navigations.navigationlookupaction</value>
+				</replace>
+				<replace>
+					<key>submit-result</key>
+					<value>navigations.navigation</value>
+				</replace>
+			</template>
+		</plan>
+
 	</family>
 </definitions>

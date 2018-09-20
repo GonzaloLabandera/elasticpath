@@ -3,11 +3,11 @@ Feature: Promotion with change set
 
   Background:
     Given I sign in to CM as admin user
+    And I go to Change Set
 
   @lockAndFinalize
   Scenario: Add and disable cart promotion with change set
-    And I go to Change Set
-    And I create a new change set ChangeSetCI_Add_CartPromo
+    Given I create a new change set ChangeSetCI_Add_CartPromo
     And I go to Promotions and Shipping
     And I select newly created change set
     When I create cart promotion with following values

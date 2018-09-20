@@ -43,7 +43,7 @@ public class CriteriaMapAvailabilityStrategyImplTest {
 	public void testGetAvailabilityIsNullWhenCriteriaNotInMap() {
 		Product product = new ProductImpl();
 		product.setAvailabilityCriteria(AvailabilityCriteria.AVAILABLE_WHEN_IN_STOCK);
-		Availability availability = strategy.getAvailability(product, true, true, true);
+		Availability availability = strategy.getAvailability(product, true, true);
 		assertNull("The availability should be null if the criteria is not in the map", availability);
 	}
 	
@@ -54,7 +54,7 @@ public class CriteriaMapAvailabilityStrategyImplTest {
 	public void testGetAvailabilityUsesMap() {
 		Product product = new ProductImpl();
 		product.setAvailabilityCriteria(AvailabilityCriteria.ALWAYS_AVAILABLE);
-		Availability availability = strategy.getAvailability(product, true, true, true);
+		Availability availability = strategy.getAvailability(product, true, true);
 		assertEquals("The availability should match the mapped value", Availability.AVAILABLE, availability);
 	}
 

@@ -8,6 +8,7 @@ import com.elasticpath.domain.shopper.Shopper;
 import com.elasticpath.domain.shoppingcart.ShoppingCart;
 import com.elasticpath.service.customer.CustomerService;
 import com.elasticpath.service.shoppingcart.CheckoutService;
+import com.elasticpath.shipping.connectivity.dto.ShippingOption;
 
 /**
  * Interface that provides some methods that deals with business operations during product ordering.
@@ -15,7 +16,7 @@ import com.elasticpath.service.shoppingcart.CheckoutService;
 public interface CustomerOrderingService {
 
 	/**
-	 * Handles changing shipping address for the shopping cart. Shipping service levels are reinitialized. If no shipping service level could be
+	 * Handles changing shipping address for the shopping cart. Shipping options are reinitialized. If no shipping option could be
 	 * found for the shipping address then exception is thrown. If billing address wan't specified then the shipping address will be used as billing
 	 * address.
 	 * 
@@ -33,15 +34,15 @@ public interface CustomerOrderingService {
 	void selectBillingAddress(Shopper shopper, CustomerAddress billingAddress);
 
 	/**
-	 * Set the selectedShippingServiceLevelUid and update the shippingCost correspondingly. If there is no a shipping service level in the shopping
-	 * cart with the specified uid, then EpDomainException will be thrown.
+	 * Selects the shipping option and update the shippingCost correspondingly. If thes shipping option selected is not one of the available
+	 * shipping options in the shopping cart, then {@link com.elasticpath.domain.EpDomainException} will be thrown.
 	 * 
 	 * @param shoppingCart shopping cart to be updated.
-	 * @param selectedSSLUid - the selected ShippingServiceLevel uid.
+	 * @param shippingOption - the {@link ShippingOption} to select.
 	 * @return updated shopping cart.
 	 */
-	ShoppingCart selectShippingServiceLevel(ShoppingCart shoppingCart, long selectedSSLUid);
-	
+	ShoppingCart selectShippingOption(ShoppingCart shoppingCart, ShippingOption shippingOption);
+
 	/**
 	 * Set the checkout service.
 	 * 

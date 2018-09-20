@@ -6,8 +6,11 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 
 import com.elasticpath.selenium.common.AbstractPageObject;
-import com.elasticpath.selenium.dialogs.AddCustomerAddressDialog;
+import com.elasticpath.selenium.dialogs.AddEditCustomerAddressDialog;
 import com.elasticpath.selenium.dialogs.AddCustomerSegmentMembershipDialog;
+import com.elasticpath.selenium.dialogs.ConfirmDialog;
+import com.elasticpath.selenium.setup.SetUp;
+import com.elasticpath.selenium.util.Constants;
 
 
 /**
@@ -32,6 +35,17 @@ public class CustomerEditor extends AbstractPageObject {
 	private static final String ADDRESS_LIST_PARENT_CSS = "div[widget-id='Customer Details Address Table'][widget-type='Table'] ";
 	private static final String ADDRESS_LIST_CSS = ADDRESS_LIST_PARENT_CSS + COLUMN_ID;
 	private static final int SLEEP_TIME = 500;
+	private static final String EDITOR_ELEMENT_PARENT_CSS = "div[automation-id='com.elasticpath.cmclient.fulfillment.FulfillmentMessages";
+	private static final String REMOVE_SEGMENT_CONF_DIALOG_ID = EDITOR_ELEMENT_PARENT_CSS + ".CustomerSegmentsPageDialog_RemoveConfirm']";
+	private static final String VIEW_DATA_POINTS_CSS = EDITOR_ELEMENT_PARENT_CSS + ".ViewDataPoints_Label']";
+	private static final String DELETE_POLICY_DATA_CSS = EDITOR_ELEMENT_PARENT_CSS + ".DeletePolicyData_Title']";
+	private static final String SHOW_DISABLED_DATA_POLICIES = EDITOR_ELEMENT_PARENT_CSS + ".ShowDisabledPolicies_Label'][seeable='true']";
+	private static final String DATA_POLICY_PARENT_CSS = "div[widget-id='Customer Data Policies Table'][widget-type='Table'][seeable='true'] ";
+	private static final String DATA_POLICY_COLUMN_CSS = DATA_POLICY_PARENT_CSS + COLUMN_ID;
+	private static final String DATA_POINT_PARENT_CSS = "div[widget-id='Customer Data Points Table'][widget-type='Table'][seeable='true'] ";
+	private static final String DATA_POINT_COLUMN_CSS = DATA_POINT_PARENT_CSS + COLUMN_ID;
+	private static final String DATA_POINT_LIST_ROW_COLUMN_CSS = DATA_POINT_PARENT_CSS + "div[row-id='%s']";
+	private static final String DATA_POINT_VALUE_COLUMN_CSS = " div[column-num='2']";
 
 	/**
 	 * Constructor.
@@ -48,7 +62,9 @@ public class CustomerEditor extends AbstractPageObject {
 	 * @param tabName the tab name.
 	 */
 	public void clickTab(final String tabName) {
-		click(getWaitDriver().waitForElementToBeClickable(By.cssSelector(String.format(TAB_CSS, tabName))));
+		String cssSelector = String.format(TAB_CSS, tabName);
+		resizeWindow(cssSelector);
+		click(getWaitDriver().waitForElementToBeClickable(By.cssSelector(cssSelector)));
 	}
 
 	/**
@@ -57,28 +73,26 @@ public class CustomerEditor extends AbstractPageObject {
 	 * @return AddSegmentDialog
 	 */
 	public AddCustomerSegmentMembershipDialog clickAddSegmentButton() {
-		clickEditorButton("Add Segment...");
+		clickEditorButton("Add Segment...", AddCustomerSegmentMembershipDialog.CUSTOMER_SEGMENT_MEMBERSHIP_PARENT_CSS);
 		return new AddCustomerSegmentMembershipDialog(getDriver());
 	}
 
 	/**
 	 * Clicks Remove Segment... button.
-	 *
-	 * @return RemoveSegmentDialog
 	 */
-	public AddCustomerSegmentMembershipDialog clickRemoveSegmentButton() {
-		clickEditorButton("Remove Segment...");
-		return new AddCustomerSegmentMembershipDialog(getDriver());
+	public void clickRemoveSegmentButton() {
+		clickEditorButton("Remove Segment...", REMOVE_SEGMENT_CONF_DIALOG_ID);
 	}
 
 	/**
 	 * Clicks button.
 	 *
 	 * @param buttonWidgetId String the widget id
+	 * @param pageObjectId   the page object id
 	 */
-	public void clickEditorButton(final String buttonWidgetId) {
+	public void clickEditorButton(final String buttonWidgetId, final String pageObjectId) {
 		scrollWidgetIntoView(String.format(EDITOR_BUTTON_CSS, buttonWidgetId));
-		clickButton(String.format(EDITOR_BUTTON_CSS, buttonWidgetId), buttonWidgetId);
+		clickButton(String.format(EDITOR_BUTTON_CSS, buttonWidgetId), buttonWidgetId, pageObjectId);
 	}
 
 	/**
@@ -94,6 +108,7 @@ public class CustomerEditor extends AbstractPageObject {
 
 	/**
 	 * Checks if given customer segment exists.
+	 *
 	 * @param customerSegmentName Customer Segment Name.
 	 * @return boolean
 	 */
@@ -149,6 +164,7 @@ public class CustomerEditor extends AbstractPageObject {
 
 	/**
 	 * Inputs phone number.
+	 *
 	 * @param phoneNumber String
 	 */
 	public void enterPhoneNumber(final String phoneNumber) {
@@ -175,13 +191,13 @@ public class CustomerEditor extends AbstractPageObject {
 	}
 
 	/**
-	 * Clicks Add Segment... button.
+	 * Clicks Add Address... button.
 	 *
-	 * @return AddSegmentDialog
+	 * @return AddAddressDialog
 	 */
-	public AddCustomerAddressDialog clickAddAddressButton() {
-		clickEditorButton("Add Address...");
-		return new AddCustomerAddressDialog(getDriver());
+	public AddEditCustomerAddressDialog clickAddAddressButton() {
+		clickEditorButton("Add Address...", AddEditCustomerAddressDialog.CUSTOMER_ADDRESS_PARENT_CSS);
+		return new AddEditCustomerAddressDialog(getDriver());
 	}
 
 	/**
@@ -206,4 +222,104 @@ public class CustomerEditor extends AbstractPageObject {
 				.as("Unable to find address column value - " + columnValue)
 				.isTrue();
 	}
+
+	/**
+	 * Select and Verify Data Policy for Customer.
+	 *
+	 * @param dataPolicyName String
+	 */
+	public void verifyDataPolicyExists(final String dataPolicyName) {
+		assertThat(selectItemInEditorPaneWithScrollBar(DATA_POLICY_PARENT_CSS, DATA_POLICY_COLUMN_CSS, dataPolicyName))
+				.as("Unable to find Data Policy - " + dataPolicyName)
+				.isTrue();
+	}
+
+	/**
+	 * Select Data Point Value for Data Policy.
+	 *
+	 * @param dataPointValue String
+	 */
+	public void selectDataPoint(final String dataPointValue) {
+		assertThat(selectItemInEditorPaneWithScrollBar(DATA_POINT_PARENT_CSS, DATA_POINT_COLUMN_CSS, dataPointValue))
+				.as("Unable to find Data Point Value - " + dataPointValue)
+				.isTrue();
+	}
+
+	/**
+	 * View Data Point values for Customer Data Policy.
+	 *
+	 * @param dataPointName String
+	 */
+	public void verifyDataPointValue(final String dataPointName, final String dataPointValue) {
+		selectDataPoint(dataPointName);
+		assertThat(getDriver().findElement(By.cssSelector(String.format(DATA_POINT_LIST_ROW_COLUMN_CSS, dataPointName)
+				+ DATA_POINT_VALUE_COLUMN_CSS)).getText())
+				.as("Data Point Value not match - " + dataPointName)
+				.isEqualTo(dataPointValue);
+	}
+
+	/**
+	 * Clicks View Data Points button.
+	 */
+	public void clickViewDataPointsButton() {
+		clickEditorButton("View Data Points", VIEW_DATA_POINTS_CSS);
+	}
+
+	/**
+	 * Clicks Delete Policy Data button.
+	 */
+	public void clickDeletePolicyDataButton() {
+		clickEditorButton("Delete Policy Data", DELETE_POLICY_DATA_CSS);
+		new ConfirmDialog(SetUp.getDriver()).clickDeleteButton("FulfillmentMessages.DeletePolicyData_Confirm");
+		new ConfirmDialog(SetUp.getDriver()).clickOKButton("FulfillmentMessages.DeletePolicyData_Title");
+	}
+
+	/**
+	 * Verify Data Points is deleted for Customer Data Policy.
+	 *
+	 * @param dataPointName String
+	 */
+	public void verifyDataPointValueIsEmpty(final String dataPointName) {
+		selectDataPoint(dataPointName);
+		setWebDriverImplicitWait(Constants.IMPLICIT_WAIT_FOR_ELEMENT_NOT_EXISTS);
+		assertThat(isElementPresent(By.cssSelector(String.format(DATA_POINT_LIST_ROW_COLUMN_CSS, dataPointName)
+				+ DATA_POINT_VALUE_COLUMN_CSS)))
+				.as("Data is not deleted for Data Point - " + dataPointName)
+				.isFalse();
+		setWebDriverImplicitWaitToDefault();
+	}
+
+	/**
+	 * Verify Data Points is deleted for Customer Data Policy.
+	 *
+	 * @param dataPointName String
+	 */
+	public void verifyDataPointValueSetToHyphen(final String dataPointName) {
+		selectDataPoint(dataPointName);
+		assertThat(getDriver().findElement(By.cssSelector(String.format(DATA_POINT_LIST_ROW_COLUMN_CSS, dataPointName)
+				+ DATA_POINT_VALUE_COLUMN_CSS)).getText())
+				.as("Data is not deleted for Data Point - " + dataPointName)
+				.isEqualTo("‐");
+	}
+
+	/**
+	 * Select Show disabled data policies.
+	 */
+	public void selectShowDisabledDataPolicy() {
+		click(getWaitDriver().waitForElementToBeClickable(By.cssSelector(SHOW_DISABLED_DATA_POLICIES)));
+	}
+
+	/**
+	 * Verify Data Policy for Customer is not exists.
+	 *
+	 * @param dataPolicyName String
+	 */
+	public void verifyDataPolicyIsNotExists(final String dataPolicyName) {
+		setWebDriverImplicitWait(1);
+		assertThat(verifyItemIsNotInEditorPaneWithScrollBar(DATA_POLICY_PARENT_CSS, DATA_POLICY_COLUMN_CSS, dataPolicyName))
+				.as("Data Policy should not be present - " + dataPolicyName)
+				.isFalse();
+		setWebDriverImplicitWaitToDefault();
+	}
+
 }

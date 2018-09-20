@@ -16,7 +16,7 @@ import org.junit.runner.RunWith;
 
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.elasticpath.domain.cartorder.CartOrder;
 import com.elasticpath.domain.customer.Customer;
@@ -53,11 +53,10 @@ public class CartOrdersDefaultPaymentMethodPopulatorImplTest {
 	@Before
 	public void setUp() {
 		when(mockCustomer.getGuid()).thenReturn(CUSTOMER_GUID);
-		when(mockCartOrder.getGuid()).thenReturn(CART_ORDER_GUID);
 	}
 
 	@Test
-	public void testUpdateAllCartOrdersPaymentMethodsWhenPaymentMethodIsSetAsDefault() throws Exception {
+	public void testUpdateAllCartOrdersPaymentMethodsWhenPaymentMethodIsSetAsDefault() {
 		setUpSuccessfulCartOrderRetrieval();
 		when(mockCartOrder.getPaymentMethod()).thenReturn(null);
 
@@ -68,7 +67,7 @@ public class CartOrdersDefaultPaymentMethodPopulatorImplTest {
 	}
 
 	@Test
-	public void testDoNotUpdateCartOrdersPaymentMethodsWhenPaymentMethodIsExisting() throws Exception {
+	public void testDoNotUpdateCartOrdersPaymentMethodsWhenPaymentMethodIsExisting() {
 		setUpSuccessfulCartOrderRetrieval();
 		when(mockCartOrder.getPaymentMethod()).thenReturn(mockPaymentMethod);
 
@@ -78,9 +77,9 @@ public class CartOrdersDefaultPaymentMethodPopulatorImplTest {
 	}
 
 	@Test
-	public void testNoAddressesSetWhenStoreNotValid() throws Exception {
+	public void testNoAddressesSetWhenStoreNotValid() {
 		when(cartOrderRepository.findCartOrderGuidsByCustomer(STORE_CODE, CUSTOMER_GUID))
-				.thenReturn(ExecutionResultFactory.<Collection<String>>createNotFound());
+				.thenReturn(ExecutionResultFactory.createNotFound());
 
 		cartOrdersDefaultPaymentMethodPopulatorImpl.updateAllCartOrdersPaymentMethods(mockCustomer, mockPaymentMethod, STORE_CODE);
 
@@ -88,8 +87,8 @@ public class CartOrdersDefaultPaymentMethodPopulatorImplTest {
 	}
 
 	@Test
-	public void testNoAddressesSetWhenNoCartOrdersFoundForCustomer() throws Exception {
-		allowingCartOrderGuidsByCustomer(ExecutionResultFactory.<Collection<String>> createNotFound());
+	public void testNoAddressesSetWhenNoCartOrdersFoundForCustomer() {
+		allowingCartOrderGuidsByCustomer(ExecutionResultFactory.createNotFound());
 
 		cartOrdersDefaultPaymentMethodPopulatorImpl.updateAllCartOrdersPaymentMethods(mockCustomer, mockPaymentMethod, STORE_CODE);
 
@@ -97,10 +96,10 @@ public class CartOrdersDefaultPaymentMethodPopulatorImplTest {
 	}
 
 	@Test
-	public void testNoAddressesSetWhenNoCartOrderFoundForGuid() throws Exception {
+	public void testNoAddressesSetWhenNoCartOrderFoundForGuid() {
 		cartOrderGuids.add(CART_ORDER_GUID);
 		allowingCartOrderGuidsByCustomer(ExecutionResultFactory.createReadOK(cartOrderGuids));
-		allowingCartOrderForGuid(ExecutionResultFactory.<CartOrder> createNotFound());
+		allowingCartOrderForGuid(ExecutionResultFactory.createNotFound());
 
 		cartOrdersDefaultPaymentMethodPopulatorImpl.updateAllCartOrdersPaymentMethods(mockCustomer, mockPaymentMethod, STORE_CODE);
 

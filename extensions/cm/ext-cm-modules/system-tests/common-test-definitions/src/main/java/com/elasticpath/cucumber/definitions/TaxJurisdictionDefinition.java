@@ -7,8 +7,8 @@ import cucumber.api.java.en.When;
 
 import com.elasticpath.selenium.dialogs.AddEditTaxDialog;
 import com.elasticpath.selenium.dialogs.CreateEditTaxJurisdictionDialog;
-import com.elasticpath.selenium.framework.util.SeleniumDriverSetup;
 import com.elasticpath.selenium.resultspane.TaxJurisdictionsPane;
+import com.elasticpath.selenium.setup.SetUp;
 import com.elasticpath.selenium.toolbars.ConfigurationActionToolbar;
 import com.elasticpath.selenium.util.Utility;
 
@@ -28,7 +28,7 @@ public class TaxJurisdictionDefinition {
 	 * Constructor for Tax Jurisdiction.
 	 */
 	public TaxJurisdictionDefinition() {
-		configurationActionToolbar = new ConfigurationActionToolbar(SeleniumDriverSetup.getDriver());
+		configurationActionToolbar = new ConfigurationActionToolbar(SetUp.getDriver());
 	}
 
 	/**
@@ -85,9 +85,7 @@ public class TaxJurisdictionDefinition {
 		createEditTaxJurisdictionDialog = taxJurisdictionsPane.clickEditTaxJurisdictionButton(country);
 		createEditTaxJurisdictionDialog.selectItemInTaxTable(taxName);
 
-		addEditTaxDialog = createEditTaxJurisdictionDialog.clickRemoveTax();
-		addEditTaxDialog.clickOK();
-
+		createEditTaxJurisdictionDialog.clickRemoveTax();
 		createEditTaxJurisdictionDialog.clickSave();
 	}
 

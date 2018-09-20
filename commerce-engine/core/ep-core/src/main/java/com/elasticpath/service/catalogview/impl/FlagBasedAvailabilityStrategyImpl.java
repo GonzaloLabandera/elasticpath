@@ -12,7 +12,7 @@ import com.elasticpath.service.catalogview.AvailabilityStrategy;
  */
 public class FlagBasedAvailabilityStrategyImpl implements AvailabilityStrategy {
 	@Override
-	public Availability getAvailability(final Product product, final boolean isAvailable, final boolean isDisplayable, final boolean isPurchasable) {
+	public Availability getAvailability(final Product product, final boolean isAvailable, final boolean isDisplayable) {
 		if (!isAvailable) {
 			return Availability.NOT_AVAILABLE;
 		}

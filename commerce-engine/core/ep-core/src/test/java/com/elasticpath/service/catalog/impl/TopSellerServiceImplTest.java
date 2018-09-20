@@ -31,7 +31,6 @@ import com.elasticpath.service.catalog.CategoryService;
 import com.elasticpath.service.catalog.ProductService;
 import com.elasticpath.service.misc.TimeService;
 import com.elasticpath.service.order.impl.OrderServiceImpl;
-import com.elasticpath.settings.SettingsReader;
 
 /** Test cases for <code>IndexBuildServiceImpl</code>. */
 @SuppressWarnings({ "PMD.TooManyStaticImports" })
@@ -59,9 +58,6 @@ public class TopSellerServiceImplTest {
 				return Collections.emptyList();
 			}
 		};
-
-		SettingsReader reader = context.mock(SettingsReader.class);
-		topSellerService.setSettingsReader(reader);
 
 		timeService = context.mock(TimeService.class);
 		context.checking(new Expectations() {

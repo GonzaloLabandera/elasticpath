@@ -3,6 +3,8 @@
  */
 package com.elasticpath.rest.relos.rs.authentication.epcommerce.transformer.impl;
 
+import static junit.framework.TestCase.assertFalse;
+import static junit.framework.TestCase.assertTrue;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.when;
 
@@ -14,7 +16,7 @@ import org.junit.runner.RunWith;
 
 import org.mockito.Answers;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.elasticpath.domain.customer.Customer;
 import com.elasticpath.rest.identity.util.PrincipalsUtil;
@@ -49,13 +51,13 @@ public class CustomerTransformerTest {
 		assertEquals("The scope should match", SCOPE, user.getRequestedScope());
 		assertEquals("The user name should match", USER_ID, user.getUsername());
 		assertEquals("The principals should match", PrincipalsUtil.createRolePrincipals(roleNames), user.getPrincipals());
-		assertEquals("The account enabled should match which is expected of a customer in status active", true, user.isAccountEnabled());
-		assertEquals("The account locked should match which is expected of a customer in status active", false, user.isAccountLocked());
-		assertEquals("The account expired should match", false, user.isAccountExpired());
+		assertTrue("The account enabled should match which is expected of a customer in status active", user.isAccountEnabled());
+		assertFalse("The account locked should match which is expected of a customer in status active", user.isAccountLocked());
+		assertFalse("The account expired should match", user.isAccountExpired());
 		assertEquals("The guid should match", CUSTOMER_GUID, user.getUserId());
 		assertEquals("The salt should match", SALT, user.getSalt());
-		assertEquals("Account should be enabled", true, user.isAccountEnabled());
-		assertEquals("Account should not be expired", false, user.isAccountExpired());
+		assertTrue("Account should be enabled", user.isAccountEnabled());
+		assertFalse("Account should not be expired", user.isAccountExpired());
 		assertEquals("The passwords should match", ENCODED_PASSWORD, user.getPassword());
 	}
 

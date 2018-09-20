@@ -25,7 +25,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.elasticpath.common.dto.datapolicy.CustomerConsentDTO;
 import com.elasticpath.domain.customer.Customer;
@@ -200,7 +200,6 @@ public class CustomerConsentImporterImplTest {
 
 		when(customerConsentService.findByGuid(CUSTOMER_CONSENT_GUID)).thenReturn(null);
 		when(customerService.findByGuid(CUSTOMER_GUID)).thenReturn(null);
-		when(dataPolicyService.findByGuid(DATA_POLICY_GUID)).thenReturn(mock(DataPolicy.class));
 
 		customerConsentImporterImpl.initialize(new ImportContext(importConfiguration), mockSavingStrategy);
 		boolean status = customerConsentImporterImpl.executeImport(createCustomerConsentDTO());

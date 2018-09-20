@@ -11,7 +11,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.elasticpath.domain.catalog.Product;
 import com.elasticpath.domain.catalog.ProductSku;
 import com.elasticpath.domain.shopper.Shopper;
-import com.elasticpath.domain.shoppingcart.ShoppingItem;
 import com.elasticpath.domain.shoppingcart.WishList;
 import com.elasticpath.domain.store.Store;
 import com.elasticpath.sellingchannel.director.CartDirectorService;

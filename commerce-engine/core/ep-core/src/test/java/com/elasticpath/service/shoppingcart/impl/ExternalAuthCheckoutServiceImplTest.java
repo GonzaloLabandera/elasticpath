@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) Elastic Path Software Inc., 2016
  */
 package com.elasticpath.service.shoppingcart.impl;
@@ -28,10 +28,8 @@ import com.elasticpath.domain.payment.PaymentGateway;
 import com.elasticpath.domain.shopper.Shopper;
 import com.elasticpath.domain.shoppingcart.ShoppingCart;
 import com.elasticpath.domain.shoppingcart.ShoppingCartTaxSnapshot;
-import com.elasticpath.domain.shoppingcart.ShoppingItem;
 import com.elasticpath.plugin.payment.PaymentType;
 import com.elasticpath.plugin.payment.dto.PaymentOptionFormDescriptor;
-import com.elasticpath.service.misc.TimeService;
 import com.elasticpath.service.shoppingcart.ExternalAuthUrls;
 import com.elasticpath.service.shoppingcart.OrderSkuFactory;
 
@@ -44,7 +42,7 @@ public class ExternalAuthCheckoutServiceImplTest {
 	private static final String FINISH_URL = "TEST_FINISH_URL";
 	private static final String REDIRECT_URL = "TEST_REDIRECT_URL";
 
-	private static final PaymentType PAYMENT_TYPE = PaymentType.CREDITCARD;
+	private static final PaymentType PAYMENT_TYPE = PaymentType.CREDITCARD_DIRECT_POST;
 	private static final Currency DEFAULT_CURRENCY = Currency.getInstance("CAD");
 	private static final Locale DEFAULT_LOCALE = Locale.CANADA;
 	private static final long CUSTOMER_UID = 100L;
@@ -82,12 +80,7 @@ public class ExternalAuthCheckoutServiceImplTest {
 	public void setUp() {
 		externalAuthCheckoutServiceImpl.setBeanFactory(beanFactory);
 		externalAuthCheckoutServiceImpl.setOrderSkuFactory(orderSkuFactory);
-		externalAuthCheckoutServiceImpl.setTimeService(new TimeService() {
-			@Override
-			public Date getCurrentTime() {
-				return new Date();
-			}
-		});
+		externalAuthCheckoutServiceImpl.setTimeService(Date::new);
 	}
 
 	@Test
@@ -113,11 +106,11 @@ public class ExternalAuthCheckoutServiceImplTest {
 			allowing(customer).getEmail();
 			allowing(customer).getUidPk(); will(returnValue(CUSTOMER_UID));
 			allowing(shoppingCart).getShopper(); will(returnValue(shopper));
-			allowing(shoppingCart).getCartItems(); will(returnValue(Collections.emptyList()));
+			allowing(shoppingCart).getRootShoppingItems(); will(returnValue(Collections.emptyList()));
 			allowing(shopper).getCustomer(); will(returnValue(customer));
 			allowing(orderShipmentTemplate).setShipmentNumber(with(any(String.class)));
 
-			allowing(orderSkuFactory).createOrderSkus(Collections.<ShoppingItem>emptyList(), pricingSnapshot, DEFAULT_LOCALE);
+			allowing(orderSkuFactory).createOrderSkus(Collections.emptyList(), pricingSnapshot, DEFAULT_LOCALE);
 			will(returnValue(Collections.emptyList()));
 
 			oneOf(pricingSnapshot).getTotal();

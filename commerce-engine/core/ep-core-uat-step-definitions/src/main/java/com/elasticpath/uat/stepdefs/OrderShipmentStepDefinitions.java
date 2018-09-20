@@ -11,7 +11,6 @@ import java.util.List;
 import cucumber.api.java.en.When;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.test.context.ContextConfiguration;
 
 import com.elasticpath.domain.event.EventOriginatorHelper;
 import com.elasticpath.domain.order.Order;
@@ -24,7 +23,6 @@ import com.elasticpath.uat.ScenarioContextValueHolder;
 /**
  * Step Definitions for Order Shipment-based functionality.
  */
-@ContextConfiguration("classpath:cucumber.xml")
 public class OrderShipmentStepDefinitions {
 
 	@Autowired

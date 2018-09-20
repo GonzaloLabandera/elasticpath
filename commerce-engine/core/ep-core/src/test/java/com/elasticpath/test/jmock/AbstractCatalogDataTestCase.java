@@ -4,25 +4,35 @@
  */
 package com.elasticpath.test.jmock;
 
+import static java.util.Arrays.asList;
+
+import static com.elasticpath.domain.misc.impl.DisplayNameComparatorImplTest.LOCALE;
+
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Currency;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Stream;
 
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeMatcher;
 import org.jmock.Expectations;
+import org.jmock.api.Action;
+import org.jmock.api.Invocation;
 import org.jmock.auto.Mock;
+import org.junit.Before;
 
+import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.EpDomainException;
 import com.elasticpath.domain.catalog.AvailabilityCriteria;
 import com.elasticpath.domain.catalog.Catalog;
@@ -34,6 +44,7 @@ import com.elasticpath.domain.catalog.Product;
 import com.elasticpath.domain.catalog.ProductSku;
 import com.elasticpath.domain.catalog.ProductType;
 import com.elasticpath.domain.catalog.impl.CatalogImpl;
+import com.elasticpath.domain.catalog.impl.CatalogLocaleImpl;
 import com.elasticpath.domain.catalog.impl.CategoryImpl;
 import com.elasticpath.domain.catalog.impl.PriceImpl;
 import com.elasticpath.domain.catalog.impl.PriceTierImpl;
@@ -45,16 +56,10 @@ import com.elasticpath.domain.customer.Customer;
 import com.elasticpath.domain.customer.CustomerSession;
 import com.elasticpath.domain.customer.impl.CustomerAddressImpl;
 import com.elasticpath.domain.customer.impl.CustomerImpl;
+import com.elasticpath.domain.misc.impl.LocalizedPropertiesImpl;
 import com.elasticpath.domain.misc.impl.RandomGuidImpl;
-import com.elasticpath.domain.shipping.ShippingCostCalculationMethod;
-import com.elasticpath.domain.shipping.ShippingCostCalculationParameter;
-import com.elasticpath.domain.shipping.ShippingCostCalculationParametersEnum;
-import com.elasticpath.domain.shipping.ShippingRegion;
-import com.elasticpath.domain.shipping.ShippingServiceLevel;
-import com.elasticpath.domain.shipping.impl.FixedBaseAndOrderTotalPercentageMethodImpl;
-import com.elasticpath.domain.shipping.impl.ShippingCostCalculationParameterImpl;
-import com.elasticpath.domain.shipping.impl.ShippingRegionImpl;
-import com.elasticpath.domain.shipping.impl.ShippingServiceLevelImpl;
+import com.elasticpath.domain.order.OrderSku;
+import com.elasticpath.domain.order.impl.OrderSkuImpl;
 import com.elasticpath.domain.shopper.Shopper;
 import com.elasticpath.domain.shoppingcart.ShoppingCart;
 import com.elasticpath.domain.shoppingcart.ShoppingCartPricingSnapshot;
@@ -67,11 +72,15 @@ import com.elasticpath.domain.tax.impl.TaxCodeImpl;
 import com.elasticpath.money.Money;
 import com.elasticpath.service.catalog.ProductService;
 import com.elasticpath.service.catalog.ProductSkuLookup;
+import com.elasticpath.service.misc.TimeService;
 import com.elasticpath.service.shoppingcart.BundleApportioningCalculator;
-import com.elasticpath.service.shoppingcart.ShippableItemsSubtotalCalculator;
 import com.elasticpath.service.shoppingcart.ShoppingItemSubtotalCalculator;
 import com.elasticpath.service.shoppingcart.impl.ItemPricing;
+import com.elasticpath.service.shoppingcart.impl.OrderSkuFactoryImpl;
 import com.elasticpath.service.tax.DiscountApportioningCalculator;
+import com.elasticpath.service.tax.TaxCodeRetriever;
+import com.elasticpath.shipping.connectivity.dto.ShippingOption;
+import com.elasticpath.shipping.connectivity.dto.impl.ShippingOptionImpl;
 import com.elasticpath.test.factory.TestCustomerSessionFactory;
 import com.elasticpath.test.factory.TestShopperFactory;
 import com.elasticpath.test.factory.TestShoppingCartFactory;
@@ -80,9 +89,9 @@ import com.elasticpath.test.factory.TestShoppingCartFactory;
  * This class has the ability to create several interlinked catalog-related mock objects
  * used by several test cases, this class should not be over-used as it previously became
  * a dumping ground, instead please write more specific test cases that mock specifically
- * what the test really needs.
+ * what theg test really needs.
  */
-@SuppressWarnings({ "PMD.ExcessiveImports" })
+@SuppressWarnings({ "PMD.ExcessiveImports", "PMD.CouplingBetweenObjects", "PMD.GodClass" })
 public abstract class AbstractCatalogDataTestCase extends AbstractEPServiceTestCase {
 
 	/**
@@ -115,7 +124,15 @@ public abstract class AbstractCatalogDataTestCase extends AbstractEPServiceTestC
 	 */
 	protected static final String SALES_TAX_CODE_DVDS = "DVDS";
 
-	private static final Currency CURRENCY = Currency.getInstance("CAD");
+	/**
+	 * The primary currency in use by this test.
+	 */
+	protected static final Currency CURRENCY = Currency.getInstance("CAD");
+
+	/**
+	 * The initially selected shipping option set by {@link #updateShippingOptions(ShoppingCartImpl)}.
+	 */
+	protected static final String SELECTED_SHIPPING_OPTION_CODE = "1000";
 
 	private static final String CARTITEM_PRICE_5 = "5";
 
@@ -129,21 +146,90 @@ public abstract class AbstractCatalogDataTestCase extends AbstractEPServiceTestC
 	@Mock private ProductSkuLookup productSkuLookup;
 	@Mock private BundleApportioningCalculator bundleApportioningCalculator;
 	@Mock private DiscountApportioningCalculator discountApportioningCalculator;
-	@Mock private ShippableItemsSubtotalCalculator shippableItemsSubtotalCalculator;
 	@Mock private ShoppingItemSubtotalCalculator shoppingItemSubtotalCalculator;
+	@Mock private TimeService timeService;
 
 	private Catalog masterCatalog;
-	
+
 	private int productTypeMockCounter;
 
-	private ProductSku cartSku;
+	private List<ProductSku> cartSkus;
+	private final Map<String, ProductSku> productSkuLookupGuidToSkuMap = new HashMap<>();
 
 	/**
-	 * A ProductSku, created by #addCartItemsTo().
-	 * @return the first cart item's product sku
+	 * Sets up standard beans in the bean factory as well as the {@link com.elasticpath.service.shoppingcart.OrderSkuFactory}.
+	 *
+	 * @throws Exception if something goes wrong during set up.
 	 */
-	protected ProductSku getCartSku() {
-		return cartSku;
+	@Before
+	public void setUp() throws Exception {
+		super.setUp();
+
+		stubGetBean(ContextIdNames.CATALOG_LOCALE, CatalogLocaleImpl.class);
+		stubGetBean(ContextIdNames.LOCALIZED_PROPERTIES, LocalizedPropertiesImpl.class);
+		stubGetBean(ContextIdNames.ORDER_SKU, OrderSkuImpl.class);
+		stubGetBean(ContextIdNames.PRODUCT_SKU_LOOKUP, getProductSkuLookup());
+		stubGetBean(ContextIdNames.SHOPPING_ITEM_SUBTOTAL_CALCULATOR, getShoppingItemSubtotalCalculator());
+		stubGetBean(ContextIdNames.TIME_SERVICE, getTimeService());
+
+		mockTimeService();
+		mockOrderSkuFactory();
+		mockProductSkuLookup();
+	}
+
+	@SuppressWarnings({"unchecked"})
+	private void mockProductSkuLookup() {
+		context.checking(new Expectations() {
+			{
+				allowing(productSkuLookup).findByGuid(with(any(String.class)));
+				will(new Action() {
+					@Override
+					public void describeTo(final Description description) {
+						description.appendText("Lookup productSku based on guid.");
+					}
+
+					@Override
+					public Object invoke(final Invocation invocation) throws Throwable {
+						return productSkuLookupGuidToSkuMap.get(invocation.getParameter(0));
+					}
+				});
+				allowing(productSkuLookup).findByGuids(with(any(Collection.class)));
+				will(new Action() {
+					@Override
+					public void describeTo(final Description description) {
+						description.appendText("Lookup productSku based on guid.");
+					}
+
+					@Override
+					public Object invoke(final Invocation invocation) throws Throwable {
+						List<ProductSku> results = new ArrayList<>();
+						for (String guid : (Collection<String>) invocation.getParameter(0)) {
+							results.add(productSkuLookupGuidToSkuMap.get(guid));
+						}
+						return results;
+					}
+				});
+			}
+		});
+	}
+
+	protected List<ProductSku> getCartSkus() {
+		return this.cartSkus;
+	}
+	/**
+	 * A non-shippable ProductSku, the second one created by #addCartItemsTo().
+	 * @return the a non-shippable ProductSku - the first one added to cart.
+	 */
+	protected ProductSku getNonShippableSku() {
+		return getCartSkus().get(0);
+	}
+
+	/**
+	 * A shippable ProductSku, created by #addCartItemsTo().
+	 * @return the a shippable ProductSku - the second one added to cart.
+	 */
+	protected ProductSku getShippableSku() {
+		return getCartSkus().get(1);
 	}
 
 	/**
@@ -157,10 +243,10 @@ public abstract class AbstractCatalogDataTestCase extends AbstractEPServiceTestC
 		store.setCatalog(this.getCatalog());
 		return store;
 	}
-	
+
 	/**
 	 * Returns a new <code>ProductSku</code> instance.
-	 * 
+	 *
 	 * @return a new <code>ProductSku</code> instance.
 	 */
 	protected ProductSku getProductSku() {
@@ -171,19 +257,14 @@ public abstract class AbstractCatalogDataTestCase extends AbstractEPServiceTestC
 		productSku.initialize();
 		productSku.setProduct(this.getProduct());
 
-		context.checking(new Expectations() {
-			{
-				allowing(productSkuLookup).findByGuid(productSku.getGuid());
-				will(returnValue(productSku));
-			}
-		});
+		productSkuLookupGuidToSkuMap.put(productSku.getGuid(), productSku);
 		return productSku;
 	}
 
-	
+
 	/**
 	 * Returns a new <code>Price</code> instance.
-	 * 
+	 *
 	 * @return a new <code>Price</code> instance.
 	 */
 	private Price getPrice() {
@@ -197,7 +278,7 @@ public abstract class AbstractCatalogDataTestCase extends AbstractEPServiceTestC
 
 	/**
 	 * Returns a new <code>PriceTier</code> instance.
-	 * 
+	 *
 	 * @return a new <code>PriceTier</code> instance.
 	 */
 	private PriceTier getPriceTier() {
@@ -209,7 +290,7 @@ public abstract class AbstractCatalogDataTestCase extends AbstractEPServiceTestC
 
 	/**
 	 * Returns a new <code>Category</code> instance.
-	 * 
+	 *
 	 * @return a new <code>Category</code> instance.
 	 */
 	protected Category getCategory() {
@@ -280,50 +361,104 @@ public abstract class AbstractCatalogDataTestCase extends AbstractEPServiceTestC
 
 	/**
 	 * Returns a standard shoppingCart, contains a customer, shipping/billing addresses, two
-	 * items, a selected shipping service level and etc.
-	 * 
+	 * items, a selected shipping option and etc.
+	 *
+	 * @return a standard shoppingCart.
+	 */
+	protected ShoppingCartImpl getShoppingCart() {
+		// By default the items added to cart is $65.00 so we'll use that, but some tests override this, hence why we call a parameterized method.
+		// Likewise the shippable subtotal by default is $50
+		return getShoppingCart(new BigDecimal("50.00"), new BigDecimal("65.00"));
+	}
+
+	/**
+	 * Returns a standard shoppingCart, contains a customer, shipping/billing addresses, two
+	 * items, a selected shipping option and etc from given subtotal calculator supplier.
+	 *
+	 * @param shippableSubtotal the subtotal for all shippable items
+	 * @param cartSubtotal the subtotal for all apportioned leaf items
 	 * @return a standard shoppingCart.
 	 */
 	@SuppressWarnings("unchecked")
-	protected ShoppingCartImpl getShoppingCart() {
+	protected ShoppingCartImpl getShoppingCart(final BigDecimal shippableSubtotal, final BigDecimal cartSubtotal) {
 		final ShoppingCartImpl shoppingCart = createNewShoppingCart();
 
-		// Set the cart items with a cart subtotal $65.00.
-		this.addCartItemsTo(shoppingCart);
+		addCartItemsTo(shoppingCart);
 
 		// The cart now contains two cart items:
 		// Item 1: 3qty x $5, shippable
-		// Item 2: 5qty x $10, shippable
+		// Item 2: 5qty x $10, non-shippable
+
+		// First set an expectation for just the shippable items in the cart
+		mockSubtotalForShippableItems(shippableSubtotal);
+		// Next set an expectation for the overall subtotal
+		mockSubtotalCalculatorForAllCartItems(shoppingCart, cartSubtotal);
+
+		updateShippingOptions(shoppingCart);
+
+		return shoppingCart;
+	}
+
+	/**
+	 * Mocks out the shippable subtotal for the given shopping cart.
+	 *
+	 * @param shippableSubtotal the subtotal for all shippable items
+	 */
+	protected void mockSubtotalForShippableItems(final BigDecimal shippableSubtotal) {
 		context.checking(new Expectations() {
 			{
-				allowing(shippableItemsSubtotalCalculator).calculateSubtotalOfShippableItems(
-						with(aCollectionOfShippableShoppingItems()),
+				allowing(shoppingItemSubtotalCalculator).calculate(
+						with(aStreamOfShippableShoppingItems()),
 						with(any(ShoppingCartPricingSnapshot.class)),
 						with(any(Currency.class))
 				);
-				will(returnValue(Money.valueOf(new BigDecimal("65"), CURRENCY)));
+				will(returnValue(Money.valueOf(shippableSubtotal, CURRENCY)));
 			}
 		});
+	}
 
+	/**
+	 * Mocks out the overall subtotal for the given shopping cart.
+	 *
+	 * @param shoppingCart the shopping cart.
+	 * @param cartSubtotal the subtotal for all apportioned leaf items
+	 */
+	protected void mockSubtotalCalculatorForAllCartItems(final ShoppingCart shoppingCart, final BigDecimal cartSubtotal) {
+		context.checking(new Expectations() {
+			{
+				allowing(shoppingItemSubtotalCalculator).calculate(
+						with(shoppingCart.getApportionedLeafItems()),
+						with(any(ShoppingCartPricingSnapshot.class)),
+						with(any(Currency.class))
+				);
+				will(returnValue(Money.valueOf(cartSubtotal, CURRENCY)));
+			}
+		});
+	}
+
+	/**
+	 * Populates available shipping options and selects one.
+	 * @param shoppingCart shopping cart
+	 */
+	protected void updateShippingOptions(final ShoppingCartImpl shoppingCart) {
 		// Shipping cost = $5 fixed + 10% of shippable subtotal value
-		// = $5 + (10% of ((3qty x $5) + (5qty x $10))
-		// = $5 + (10% of ($15 + $50)
-		// = $5 + (10% of $65)
-		// = $5 + $6.50
-		// = $11.50
-		final long selectedSSlUid = 1000;
-		List<ShippingServiceLevel> shippingServiceLevelList = new ArrayList<>();
-		shippingServiceLevelList.add(getShippingServiceLevel(selectedSSlUid));
-		shoppingCart.setShippingServiceLevelList(shippingServiceLevelList);
-		shoppingCart.setSelectedShippingServiceLevelUid(selectedSSlUid);
+		// = $5 + (10% of (5qty x $10))
+		// = $5 + (10% of $50)
+		// = $5 + $5
+		// = $10
 
-		return shoppingCart;
+		final ShippingOption selectedShippingOption = createShippingOption(SELECTED_SHIPPING_OPTION_CODE, BigDecimal.TEN);
+		shoppingCart.setSelectedShippingOption(selectedShippingOption);
+
+		selectedShippingOption.getShippingCost().ifPresent(
+				shippingCost -> shoppingCart.setShippingListPrice(selectedShippingOption.getCode(), shippingCost));
 	}
 
 	private ShoppingCartImpl createNewShoppingCart() {
 		final Shopper shopper = TestShopperFactory.getInstance().createNewShopperWithMemento();
 		final CustomerSession customerSession = createCustomerSessionForShopper(shopper);
 		customerSession.setCurrency(CURRENCY);
+		customerSession.setLocale(LOCALE);
 
 		final ShoppingCartImpl shoppingCart = TestShoppingCartFactory.getInstance().createNewCartWithMemento(
 				customerSession.getShopper(), getMockedStore());
@@ -366,97 +501,105 @@ public abstract class AbstractCatalogDataTestCase extends AbstractEPServiceTestC
 			}
 		});
 
-		List<ShoppingItem> cartItems = new ArrayList<>();
-		ShoppingItem cartItem1 = new ShoppingItemImpl();
-		cartItem1.setGuid(new RandomGuidImpl().toString());
-		cartItem1.setUidPk(Calendar.getInstance().getTimeInMillis());
-		cartSku = getProductSku();
-		cartSku.initialize();
-		cartSku.setUidPk(Calendar.getInstance().getTimeInMillis());
-		cartSku.setSkuCode(SKU_GUID_1);
-		cartSku.setWeight(BigDecimal.ONE);
+		final ShoppingItem cartItem1 = new ShoppingItemImpl();
+		final ProductSku nonShippableSku = getProductSku();
+		populateNonShippableSku(cartItem1, nonShippableSku);
 
-		context.checking(new Expectations() {
-			{
-				allowing(productSkuLookup).findByGuid(cartSku.getGuid());
-				will(returnValue(cartSku));
-			}
-		});
-
-		// create product 1
-		Product productImpl1 = getProduct();
-		productImpl1.setUidPk(PRODUCT_UID_1);
-		productImpl1.setProductSkus(new HashMap<>());
-		ProductTypeImpl productTypeImpl1 = new ProductTypeImpl();
-		TaxCode taxCode1 = new TaxCodeImpl();
-		taxCode1.setCode(SALES_TAX_CODE_BOOKS);
-		taxCode1.setGuid(SALES_TAX_CODE_BOOKS);
-		productTypeImpl1.setTaxCode(taxCode1);
-		productImpl1.setProductType(productTypeImpl1);
-		productImpl1.setAvailabilityCriteria(AvailabilityCriteria.AVAILABLE_WHEN_IN_STOCK);
-		cartSku.setProduct(productImpl1);
-		productImpl1.addOrUpdateSku(cartSku);
-
-		final Money price1 = Money.valueOf(new BigDecimal(CARTITEM_PRICE_5), CURRENCY);
-		Price productSkuPrice = getPrice();
-		productSkuPrice.setCurrency(CURRENCY);
-		productSkuPrice.setListPrice(price1);
-		productSkuPrice.setSalePrice(price1);
-		cartItem1.setSkuGuid(cartSku.getGuid());
-		cartItem1.setPrice(CARTITEM_QTY_3, productSkuPrice);
-		
 		shoppingCart.addCartItem(cartItem1);
-		cartItems.add(cartItem1);
-		
-		ShoppingItem cartItem2 = new ShoppingItemImpl();
-		cartItem2.setUidPk(Calendar.getInstance().getTimeInMillis() / 2);
-		cartItem2.setGuid(new RandomGuidImpl().toString());
-		final ProductSku productSkuImpl2 = getProductSku();
-		productSkuImpl2.initialize();
-		productSkuImpl2.setUidPk(Calendar.getInstance().getTimeInMillis());
-		productSkuImpl2.setSkuCode(SKU_GUID_2);
-		context.checking(new Expectations() {
-			{
-				allowing(productSkuLookup).findByGuid(productSkuImpl2.getGuid());
-				will(returnValue(productSkuImpl2));
-			}
-		});
 
-		// create product 2
-		Product productImpl2 = getProduct();
-		productImpl2.setUidPk(PRODUCT_UID_2);
-		productImpl2.setProductSkus(new HashMap<>());
-		productImpl2.setAvailabilityCriteria(AvailabilityCriteria.AVAILABLE_WHEN_IN_STOCK);
-		ProductTypeImpl productTypeImpl2 = new ProductTypeImpl();
-		TaxCode taxCode2 = new TaxCodeImpl();
-		taxCode2.setCode(SALES_TAX_CODE_DVDS);
-		taxCode2.setGuid(SALES_TAX_CODE_DVDS);
-		productTypeImpl2.setTaxCode(taxCode2);
-		productImpl2.setProductType(productTypeImpl2);
-		productSkuImpl2.setProduct(productImpl2);
-		productImpl2.addOrUpdateSku(productSkuImpl2);
+		final ShoppingItem cartItem2 = new ShoppingItemImpl();
+		final ProductSku shippableSku = getProductSku();
+		populateShippableSku(cartItem2, shippableSku);
 
-		final Money price2 = Money.valueOf(new BigDecimal(CARTITEM_PRICE_10), CURRENCY);
+		shoppingCart.addCartItem(cartItem2);
+
+		cartSkus = asList(nonShippableSku, shippableSku);
+
+		return new ArrayList<>(asList(cartItem1, cartItem2));
+	}
+
+	private void populateNonShippableSku(final ShoppingItem cartItem, final ProductSku nonShippableSku) {
+		cartItem.setGuid(new RandomGuidImpl().toString());
+		cartItem.setUidPk(Calendar.getInstance().getTimeInMillis());
+		nonShippableSku.initialize();
+		nonShippableSku.setUidPk(Calendar.getInstance().getTimeInMillis());
+		nonShippableSku.setSkuCode(SKU_GUID_1);
+		nonShippableSku.setWeight(BigDecimal.ONE);
+		nonShippableSku.setDigital(true);
+		nonShippableSku.setShippable(false);
+
+		productSkuLookupGuidToSkuMap.put(nonShippableSku.getGuid(), nonShippableSku);
+
+		final Product product = getProduct();
+		product.setUidPk(PRODUCT_UID_1);
+		product.setProductSkus(new HashMap<>());
+
+		final TaxCode taxCode = new TaxCodeImpl();
+		taxCode.setCode(SALES_TAX_CODE_BOOKS);
+		taxCode.setGuid(SALES_TAX_CODE_BOOKS);
+
+		final ProductTypeImpl productType = new ProductTypeImpl();
+		productType.setTaxCode(taxCode);
+		product.setProductType(productType);
+		product.setAvailabilityCriteria(AvailabilityCriteria.AVAILABLE_WHEN_IN_STOCK);
+		nonShippableSku.setProduct(product);
+		product.addOrUpdateSku(nonShippableSku);
+
+		final Money price = Money.valueOf(new BigDecimal(CARTITEM_PRICE_5), CURRENCY);
+		Price productSkuPrice = getPrice();
+
+		productSkuPrice.setCurrency(CURRENCY);
+		productSkuPrice.setListPrice(price);
+		productSkuPrice.setSalePrice(price);
+
+		cartItem.setSkuGuid(nonShippableSku.getGuid());
+		cartItem.setPrice(CARTITEM_QTY_3, productSkuPrice);
+	}
+
+	private void populateShippableSku(final ShoppingItem cartItem, final ProductSku shippableSku) {
+		cartItem.setUidPk(Calendar.getInstance().getTimeInMillis() / 2);
+		cartItem.setGuid(new RandomGuidImpl().toString());
+
+		shippableSku.initialize();
+		shippableSku.setUidPk(Calendar.getInstance().getTimeInMillis());
+		shippableSku.setSkuCode(SKU_GUID_2);
+		shippableSku.setDigital(false);
+		shippableSku.setShippable(true);
+		productSkuLookupGuidToSkuMap.put(shippableSku.getGuid(), shippableSku);
+
+		final Product product = getProduct();
+		product.setUidPk(PRODUCT_UID_2);
+		product.setProductSkus(new HashMap<>());
+		product.setAvailabilityCriteria(AvailabilityCriteria.AVAILABLE_WHEN_IN_STOCK);
+
+		final TaxCode taxCode = new TaxCodeImpl();
+		taxCode.setCode(SALES_TAX_CODE_DVDS);
+		taxCode.setGuid(SALES_TAX_CODE_DVDS);
+
+		final ProductTypeImpl productType = new ProductTypeImpl();
+		productType.setTaxCode(taxCode);
+		product.setProductType(productType);
+		shippableSku.setProduct(product);
+		product.addOrUpdateSku(shippableSku);
+
+		final Money price = Money.valueOf(new BigDecimal(CARTITEM_PRICE_10), CURRENCY);
+		final Price productSkuPrice;
+
 		productSkuPrice = getPrice();
 		productSkuPrice.setCurrency(CURRENCY);
-		productSkuPrice.setListPrice(price2);
-		productSkuPrice.setSalePrice(price2);
-		
-		cartItem2.setSkuGuid(productSkuImpl2.getGuid());
-		cartItem2.setPrice(CARTITEM_QTY_5, productSkuPrice);
-		
-		shoppingCart.addCartItem(cartItem2);
-		cartItems.add(cartItem2);
-		
-		return cartItems;
+		productSkuPrice.setListPrice(price);
+		productSkuPrice.setSalePrice(price);
+
+		cartItem.setSkuGuid(shippableSku.getGuid());
+		cartItem.setPrice(CARTITEM_QTY_5, productSkuPrice);
 	}
 
 	/**
 	 * Returns a newly created address.
-	 * 
+	 *
 	 * @return a newly created address
 	 */
-	private Address getAddress() {
+	protected Address getAddress() {
 		Address address = new CustomerAddressImpl();
 		address.setFirstName("Joe");
 		address.setLastName("Doe");
@@ -470,48 +613,44 @@ public abstract class AbstractCatalogDataTestCase extends AbstractEPServiceTestC
 	}
 
 	/**
-	 * Returns a newly created shippingRegion.
-	 * 
-	 * @param regionStr - the region str, i.e. "[CA(AB,BC)][US()]".
-	 * @return a newly created shippingRegion
+	 * Returns a newly created {@link ShippingOption} with given shipping option code.
+	 *
+	 * @param code shipping option code
+	 * @return newly created builder
 	 */
-	private ShippingRegion getShippingRegion(final String regionStr) {
-		ShippingRegionImpl shippingRegionImpl = new ShippingRegionImpl();
-		shippingRegionImpl.setRegionStr(regionStr);
-		return shippingRegionImpl;
+	protected ShippingOption createShippingOption(final String code) {
+		return createShippingOption(code, (Money) null);
 	}
 
 	/**
-	 * Returns a newly created shippingServiceLevel of type
-	 * fixedBaseAndOrderTotalPercentageMethod, with base value 5.0 and 10% of the order total and
-	 * supports shippingRegion CA(AB, BC) and US.
-	 * 
-	 * @param uidPk - the uidPk for the newly created shippingServiceLevel.
-	 * @return a newly created shippingServiceLevel
+	 * Returns a newly created {@link ShippingOption} with given shipping option code and shipping cost.
+	 *
+	 * @param code shipping option code
+	 * @param shippingCost the shipping cost must not be null
+	 * @return newly created builder
 	 */
-	protected ShippingServiceLevel getShippingServiceLevel(final long uidPk) {
-		ShippingServiceLevel shippingServiceLevel = new ShippingServiceLevelImpl();
-		shippingServiceLevel.setUidPk(uidPk);
-		shippingServiceLevel.setCarrier("Fed Ex");
+	protected ShippingOption createShippingOption(final String code, final BigDecimal shippingCost) {
+		return createShippingOption(code, Money.valueOf(shippingCost, CURRENCY));
+	}
 
-		ShippingCostCalculationMethod fixedBaseOrderTotPertMeth = new FixedBaseAndOrderTotalPercentageMethodImpl();
-		ShippingCostCalculationParameter param1 = new ShippingCostCalculationParameterImpl();
-		Set<ShippingCostCalculationParameter> paramSet = new HashSet<>();
-		param1.setKey(ShippingCostCalculationParametersEnum.FIXED_BASE.getKey());
-		param1.setValue("5.0");
-		param1.setCurrency(CURRENCY);
-		paramSet.add(param1);
-		ShippingCostCalculationParameter param2 = new ShippingCostCalculationParameterImpl();
-		param2.setKey(ShippingCostCalculationParametersEnum.PERCENTAGE_OF_ORDER_TOTOAL.getKey());
-		param2.setValue("10");
-		param2.setCurrency(CURRENCY);
-		paramSet.add(param2);
-		fixedBaseOrderTotPertMeth.setParameters(paramSet);
+	/**
+	 * Returns a newly created {@link ShippingOption} with given shipping option code and an optional shipping cost.
+	 *
+	 * @param code shipping option code
+	 * @param shippingCost the shipping cost.
+	 * @return newly created builder
+	 */
+	protected ShippingOption createShippingOption(final String code, final Money shippingCost) {
 
-		shippingServiceLevel.setShippingCostCalculationMethod(fixedBaseOrderTotPertMeth);
-		shippingServiceLevel.setShippingRegion(getShippingRegion("[CA(AB,BC)][US()]"));
+		final ShippingOptionImpl shippingOption = new ShippingOptionImpl();
+		shippingOption.setCode(code);
+		shippingOption.setCarrierCode("Fed Ex");
 
-		return shippingServiceLevel;
+		if (shippingCost != null) {
+			shippingOption.setShippingCost(shippingCost);
+		}
+
+		return shippingOption;
 	}
 
 	/**
@@ -525,13 +664,13 @@ public abstract class AbstractCatalogDataTestCase extends AbstractEPServiceTestC
 			masterCatalog.setMaster(true);
 			masterCatalog.setCode("a master catalog code that no one would ever think of");
 		}
-		
+
 		try {
 			// Supported Currencies
 			final Set<Currency> supportedCatalogCurrencies = new HashSet<>();
 			supportedCatalogCurrencies.add(Currency.getInstance(Locale.CANADA));
 			supportedCatalogCurrencies.add(Currency.getInstance(Locale.US));
-				
+
 			// Supported Locales
 			final Set<Locale> supportedLocales = new HashSet<>();
 			supportedLocales.add(Locale.CANADA);
@@ -542,33 +681,73 @@ public abstract class AbstractCatalogDataTestCase extends AbstractEPServiceTestC
 		} catch (DefaultValueRemovalForbiddenException ex) {
 			throw new EpDomainException("Default locale not set, so this shouldn't happen", ex);
 		}
-		
+
 		return masterCatalog;
 	}
 
 	/**
-	 * A matcher that ensures that the given argument is a {code Collection<ShoppingItem>} in which all shopping items are shippable.
+	 * Mocks the {@link TimeService} interface to return the current local time.
+	 */
+	protected void mockTimeService() {
+		context.checking(new Expectations() {
+			{
+				allowing(timeService).getCurrentTime();
+				will(returnValue(new Date()));
+			}
+		});
+	}
+
+	/**
+	 * Mocks the OrderSku factory with the {@link #SALES_TAX_CODE_BOOKS} tax code.
+	 */
+	protected void mockOrderSkuFactory() {
+		final TaxCodeImpl taxCode = new TaxCodeImpl();
+		taxCode.setCode(SALES_TAX_CODE_BOOKS);
+
+		final TaxCodeRetriever taxCodeRetriever = context.mock(TaxCodeRetriever.class);
+		context.checking(new Expectations() {
+			{
+				allowing(taxCodeRetriever).getEffectiveTaxCode(with(any(ProductSku.class)));
+				will(returnValue(taxCode));
+			}
+		});
+
+		OrderSkuFactoryImpl orderSkuFactory = new OrderSkuFactoryImpl() {
+			@Override
+			protected void copyFields(final ShoppingItem shoppingItem, final OrderSku orderSku, final Locale locale) {
+				super.copyFields(shoppingItem, orderSku, locale);
+
+				orderSku.setGuid("OrderSku-" + shoppingItem.getGuid());
+			}
+		};
+
+		orderSkuFactory.setBeanFactory(getBeanFactory());
+		orderSkuFactory.setTaxCodeRetriever(taxCodeRetriever);
+		orderSkuFactory.setBundleApportioner(getBundleApportioningCalculator());
+		orderSkuFactory.setDiscountApportioner(getDiscountApportioningCalculator());
+		orderSkuFactory.setProductSkuLookup(getProductSkuLookup());
+		orderSkuFactory.setTimeService(getTimeService());
+
+		stubGetBean(ContextIdNames.ORDER_SKU_FACTORY, orderSkuFactory);
+	}
+
+	/**
+	 * Mocks a ProductSku response from the productSkuLookup service for findByGuid and findByGuids calls.
+	 *
+	 * @param productSkuGuid the product sku guid
+	 * @param productSku the product sku
+	 */
+	protected void mockProductSkuLookupByGuid(final String productSkuGuid, final ProductSku productSku) {
+		productSkuLookupGuidToSkuMap.put(productSkuGuid, productSku);
+	}
+
+	/**
+	 * A matcher that ensures that the given argument is a {code Stream<ShoppingItem>} in which all shopping items are shippable.
 	 *
 	 * @return a matcher
 	 */
-	public Matcher<Collection<? extends ShoppingItem>> aCollectionOfShippableShoppingItems() {
-		return new TypeSafeMatcher<Collection<? extends ShoppingItem>>() {
-			@Override
-			protected boolean matchesSafely(final Collection<? extends ShoppingItem> items) {
-				for (final ShoppingItem item : items) {
-					if (!item.isShippable(getProductSkuLookup())) {
-						return false;
-					}
-				}
-
-				return true;
-			}
-
-			@Override
-			public void describeTo(final Description description) {
-				description.appendText("A collection of shippable shopping items");
-			}
-		};
+	public Matcher<Stream<? extends ShoppingItem>> aStreamOfShippableShoppingItems() {
+		return new ShippableStreamMatcher();
 	}
 
 	protected ProductSkuLookup getProductSkuLookup() {
@@ -587,12 +766,26 @@ public abstract class AbstractCatalogDataTestCase extends AbstractEPServiceTestC
 		return productService;
 	}
 
-	protected ShippableItemsSubtotalCalculator getShippableItemsSubtotalCalculator() {
-		return shippableItemsSubtotalCalculator;
-	}
-
 	protected ShoppingItemSubtotalCalculator getShoppingItemSubtotalCalculator() {
 		return shoppingItemSubtotalCalculator;
 	}
 
+	protected TimeService getTimeService() {
+		return this.timeService;
+	}
+
+	/**
+	 * A {@link TypeSafeMatcher} implementation which only matches a Stream of {@link ShoppingItem}s if all elements in that stream are shippable.
+	 */
+	protected class ShippableStreamMatcher extends TypeSafeMatcher<Stream<? extends ShoppingItem>> {
+		@Override
+		protected boolean matchesSafely(final Stream<? extends ShoppingItem> items) {
+			return items.noneMatch(item -> !item.isShippable(getProductSkuLookup()));
+		}
+
+		@Override
+		public void describeTo(final Description description) {
+			description.appendText("A stream of shippable shopping items");
+		}
+	};
 }

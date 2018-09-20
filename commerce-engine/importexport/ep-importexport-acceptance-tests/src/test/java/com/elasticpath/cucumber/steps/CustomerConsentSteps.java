@@ -18,7 +18,6 @@ import java.util.Map;
 import cucumber.api.DataTable;
 import cucumber.api.java.en.Given;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.ContextConfiguration;
 
 import com.elasticpath.common.dto.datapolicy.CustomerConsentDTO;
 import com.elasticpath.commons.beanframework.BeanFactory;
@@ -36,7 +35,6 @@ import com.elasticpath.service.store.StoreService;
 /**
  * Customer consents steps.
  */
-@ContextConfiguration("/integration-context-with-customer-service.xml")
 public class CustomerConsentSteps {
 
 	private static final String DATE_FORMAT = "YYYY-MM-DD hh:mm:ss";

@@ -19,7 +19,7 @@ import org.mockito.Answers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.elasticpath.domain.cartorder.CartOrder;
 import com.elasticpath.domain.customer.Customer;
@@ -30,7 +30,6 @@ import com.elasticpath.rest.command.ExecutionResultFactory;
 import com.elasticpath.rest.relos.rs.events.RoleTransitionEvent;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder.CartOrderRepository;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder.ShoppingCartRepository;
-import com.elasticpath.rest.resource.integration.epcommerce.repository.customer.CustomerRepository;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.store.StoreRepository;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.transform.ExceptionTransformer;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.transform.impl.ReactiveAdapterImpl;
@@ -47,9 +46,6 @@ public class CouponAutoApplyTransitionEventHandlerTest {
 
 	@Mock
 	private CartOrderRepository cartOrderRepository;
-
-	@Mock
-	private CustomerRepository customerRepository;
 
 	@Mock
 	private ShoppingCartRepository shoppingCartRepository;
@@ -80,7 +76,6 @@ public class CouponAutoApplyTransitionEventHandlerTest {
 		when(mockEvent.getNewUserGuid()).thenReturn(NEW_USER_GUID);
 
 		Customer mockCustomer = mock(Customer.class);
-		when(customerRepository.findCustomerByGuid(NEW_USER_GUID)).thenReturn(ExecutionResultFactory.createReadOK(mockCustomer));
 		when(mockCustomer.getEmail()).thenReturn(EMAIL);
 
 		ShoppingCart mockShoppingCart = mock(ShoppingCart.class, Answers.RETURNS_DEEP_STUBS.get());

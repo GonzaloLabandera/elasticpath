@@ -34,6 +34,7 @@ public class CartOrderServiceImplTest {
 	private static final String CART_ORDER_GUID = "CART_ORDER_GUID";
 	private static final String STORE_CODE = "storeCode";
 	private static final String CART_GUID = "CART_GUID";
+
 	@Rule
 	public final JUnitRuleMockery context = new JUnitRuleMockery();
 	private CartOrderServiceImpl cartOrderService;
@@ -121,7 +122,7 @@ public class CartOrderServiceImplTest {
 			{
 				oneOf(persistenceEngine).retrieveByNamedQuery(NAMED_QUERY_ACTIVE_CART_ORDER_BY_STORECODE_AND_GUID, STORE_CODE, CART_ORDER_GUID);
 				will(returnValue(Arrays.asList(cartOrder)));
-				oneOf(cartOrderShippingInformationSanitizer).sanitize(STORE_CODE, cartOrder);
+				oneOf(cartOrderShippingInformationSanitizer).sanitize(cartOrder);
 				will(returnValue(true));
 				oneOf(cartOrderDao).saveOrUpdate(cartOrder);
 			}
@@ -139,7 +140,7 @@ public class CartOrderServiceImplTest {
 			{
 				oneOf(persistenceEngine).retrieveByNamedQuery(NAMED_QUERY_ACTIVE_CART_ORDER_BY_STORECODE_AND_GUID, STORE_CODE, CART_ORDER_GUID);
 				will(returnValue(Arrays.asList(cartOrder)));
-				oneOf(cartOrderShippingInformationSanitizer).sanitize(STORE_CODE, cartOrder);
+				oneOf(cartOrderShippingInformationSanitizer).sanitize(cartOrder);
 				will(returnValue(false));
 			}
 		});
@@ -156,7 +157,7 @@ public class CartOrderServiceImplTest {
 			{
 				oneOf(persistenceEngine).retrieveByNamedQuery(NAMED_QUERY_ACTIVE_CART_ORDER_BY_STORECODE_AND_GUID, STORE_CODE, CART_ORDER_GUID);
 				will(returnValue(Collections.emptyList()));
-				never(cartOrderShippingInformationSanitizer).sanitize(STORE_CODE, cartOrder);
+				never(cartOrderShippingInformationSanitizer).sanitize(cartOrder);
 			}
 		});
 		

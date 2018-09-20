@@ -18,7 +18,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.elasticpath.domain.attribute.Attribute;
 import com.elasticpath.domain.catalog.Catalog;
@@ -154,13 +154,11 @@ public class AttributeDependentExporterImplTest {
 		when(dependentCatalog.getUidPk()).thenReturn(CATALOG_UID);
 		when(otherCatalog.getUidPk()).thenReturn(0L);
 		when(attribute1.getCatalog()).thenReturn(dependentCatalog);
-		when(attribute1.isGlobal()).thenReturn(true);
 
 		when(attribute2.getCatalog()).thenReturn(otherCatalog);
 		when(attribute2.isGlobal()).thenReturn(false);
 
 		when(attribute3.getCatalog()).thenReturn(dependentCatalog);
-		when(attribute3.isGlobal()).thenReturn(false);
 
 		when(attribute4.getCatalog()).thenReturn(otherCatalog);
 		when(attribute4.isGlobal()).thenReturn(true);

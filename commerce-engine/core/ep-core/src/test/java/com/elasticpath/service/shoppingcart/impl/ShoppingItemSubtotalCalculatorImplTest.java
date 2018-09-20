@@ -6,14 +6,11 @@ package com.elasticpath.service.shoppingcart.impl;
 import static org.junit.Assert.assertEquals;
 
 import java.math.BigDecimal;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.Currency;
 import java.util.Locale;
 import java.util.UUID;
+import java.util.stream.Stream;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
 import org.jmock.Expectations;
 import org.jmock.auto.Mock;
 import org.jmock.integration.junit4.JUnitRuleMockery;
@@ -27,7 +24,6 @@ import com.elasticpath.domain.shoppingcart.ShoppingCartPricingSnapshot;
 import com.elasticpath.domain.shoppingcart.ShoppingItem;
 import com.elasticpath.domain.shoppingcart.ShoppingItemPricingSnapshot;
 import com.elasticpath.money.Money;
-import com.elasticpath.service.shoppingcart.PricingSnapshotService;
 
 /**
  * Test the shopping item subtotal calculator implementation.
@@ -40,9 +36,6 @@ public class ShoppingItemSubtotalCalculatorImplTest {
 	public final JUnitRuleMockery context = new JUnitRuleMockery();
 
 	@Mock
-	private PricingSnapshotService pricingSnapshotService;
-
-	@Mock
 	private ShoppingCartPricingSnapshot cartPricingSnapshot;
 
 	private ShoppingItemSubtotalCalculatorImpl calculator;
@@ -50,14 +43,13 @@ public class ShoppingItemSubtotalCalculatorImplTest {
 	@Before
 	public void setUp() throws Exception {
 		calculator = new ShoppingItemSubtotalCalculatorImpl();
-		calculator.setPricingSnapshotService(pricingSnapshotService);
 	}
 
 	@Test
 	public void verifySubtotalZeroWhenNoCartItems() throws Exception {
 		final Money expectedSubtotal = Money.valueOf(BigDecimal.ZERO, CURRENCY);
 
-		final Money actual = calculator.calculate(Collections.<ShoppingItem>emptyList(), cartPricingSnapshot, CURRENCY);
+		final Money actual = calculator.calculate(Stream.empty(), cartPricingSnapshot, CURRENCY);
 
 		assertEquals(expectedSubtotal, actual);
 	}
@@ -71,7 +63,7 @@ public class ShoppingItemSubtotalCalculatorImplTest {
 		final ShoppingItem shoppingItem1 = createShoppingItemWithTotal(shoppingItemMoney1);
 		final ShoppingItem shoppingItem2 = createShoppingItemWithTotal(shoppingItemMoney2);
 
-		final Collection<ShoppingItem> items = ImmutableList.of(shoppingItem1, shoppingItem2);
+		final Stream<ShoppingItem> items = Stream.of(shoppingItem1, shoppingItem2);
 
 		final Money actual = calculator.calculate(items, cartPricingSnapshot, CURRENCY);
 
@@ -87,8 +79,8 @@ public class ShoppingItemSubtotalCalculatorImplTest {
 
 		final OrderSku orderSku1 = createOrderSkuWithTotal(orderSkuMoney1);
 		final OrderSku orderSku2 = createOrderSkuWithTotal(orderSkuMoney2);
-
-		final Money actual = calculator.calculate(ImmutableSet.of(orderSku1, orderSku2), CURRENCY);
+		final Stream<ShoppingItem> items = Stream.of(orderSku1, orderSku2);
+		final Money actual = calculator.calculate(items, cartPricingSnapshot, CURRENCY);
 
 		assertEquals(expectedSubtotal, actual);
 	}
@@ -111,7 +103,7 @@ public class ShoppingItemSubtotalCalculatorImplTest {
 
 		context.checking(new Expectations() {
 			{
-				oneOf(pricingSnapshotService).getPricingSnapshotForOrderSku(orderSku);
+				oneOf(cartPricingSnapshot).getShoppingItemPricingSnapshot(orderSku);
 				will(returnValue(createShoppingItemPricingSnapshotWithTotal(money)));
 			}
 		});

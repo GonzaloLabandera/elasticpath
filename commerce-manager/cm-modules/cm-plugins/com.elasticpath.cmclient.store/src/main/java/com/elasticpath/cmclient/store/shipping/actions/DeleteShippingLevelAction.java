@@ -14,7 +14,7 @@ import com.elasticpath.cmclient.core.CorePlugin;
 import com.elasticpath.cmclient.core.ServiceLocator;
 import com.elasticpath.cmclient.store.shipping.ShippingLevelsMessages;
 import com.elasticpath.cmclient.store.shipping.views.ShippingLevelsSearchResultsView;
-import com.elasticpath.commons.constants.ContextIdNames;
+import com.elasticpath.commons.constants.EpShippingContextIdNames;
 import com.elasticpath.domain.shipping.ShippingServiceLevel;
 import com.elasticpath.service.shipping.ShippingServiceLevelService;
 
@@ -48,7 +48,7 @@ public class DeleteShippingLevelAction extends Action {
 		final ShippingServiceLevel selectedServiceLevel = listView.getSelectedShippingLevel();
 
 		final ShippingServiceLevelService shippingService = ServiceLocator.getService(
-				ContextIdNames.SHIPPING_SERVICE_LEVEL_SERVICE);
+				EpShippingContextIdNames.SHIPPING_SERVICE_LEVEL_SERVICE);
 
 		Shell parent = listView.getSite().getShell();
 
@@ -62,7 +62,7 @@ public class DeleteShippingLevelAction extends Action {
 			return;
 		}
 
-		if (shippingService.isShippingServiceLevelInUse(serviceLevelToDelete.getUidPk())) {
+		if (shippingService.isShippingServiceLevelInUse(serviceLevelToDelete.getCode())) {
 			MessageDialog.openInformation(parent, ShippingLevelsMessages.get().UsedShippingServiceLevelDialogTitle,
 
 					NLS.bind(ShippingLevelsMessages.get().UsedShippingServiceLevelDialogText,

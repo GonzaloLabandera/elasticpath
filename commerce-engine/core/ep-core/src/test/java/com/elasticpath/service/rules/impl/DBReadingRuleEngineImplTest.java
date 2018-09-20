@@ -9,7 +9,7 @@ import static org.junit.Assert.assertSame;
 
 import java.util.Date;
 
-import org.drools.RuleBase;
+import org.drools.core.impl.InternalKnowledgeBase;
 import org.jmock.Expectations;
 import org.jmock.integration.junit4.JUnitRuleMockery;
 import org.jmock.lib.legacy.ClassImposteriser;
@@ -42,9 +42,9 @@ public class DBReadingRuleEngineImplTest {
 
 	private RuleService mockRuleService;
 	
-	private RuleBase mockOldRuleBase;
+	private InternalKnowledgeBase mockOldRuleBase;
 	
-	private RuleBase mockNewRuleBase;
+	private InternalKnowledgeBase mockNewRuleBase;
 	
 	private Store mockStore;
 	
@@ -64,8 +64,8 @@ public class DBReadingRuleEngineImplTest {
 		ruleEngine = new DBReadingRuleEngineImpl();
 		mockRuleService = context.mock(RuleService.class);
 		ruleEngine.setRuleService(mockRuleService);
-		mockOldRuleBase = context.mock(RuleBase.class, "old rule base");
-		mockNewRuleBase = context.mock(RuleBase.class, "new rule base");
+		mockOldRuleBase = context.mock(InternalKnowledgeBase.class, "old rule base");
+		mockNewRuleBase = context.mock(InternalKnowledgeBase.class, "new rule base");
 
 		mockStore = context.mock(Store.class);
 		context.checking(new Expectations() {
@@ -120,7 +120,7 @@ public class DBReadingRuleEngineImplTest {
 	public void testCartRuleInDB() {
 		final Store store = mockStore;
 
-		final RuleBase ruleBase = mockOldRuleBase;
+		final InternalKnowledgeBase ruleBase = mockOldRuleBase;
 		final EpRuleBase mockEpRuleBase = context.mock(EpRuleBase.class);
 		context.checking(new Expectations() {
 			{
@@ -143,7 +143,7 @@ public class DBReadingRuleEngineImplTest {
 	public void testCartRuleCachedNotUpdated() {
 		final Store store = mockStore;
 
-		final RuleBase ruleBase = mockOldRuleBase;
+		final InternalKnowledgeBase ruleBase = mockOldRuleBase;
 		final EpRuleBase mockEpRuleBase = context.mock(EpRuleBase.class);
 		final EpRuleBase epRuleBase = mockEpRuleBase;
 		context.checking(new Expectations() {
@@ -180,7 +180,7 @@ public class DBReadingRuleEngineImplTest {
 	public void testCartRuleCachedAndUpdated() {
 		final Store store = mockStore;
 
-		final RuleBase ruleBase = mockOldRuleBase;
+		final InternalKnowledgeBase ruleBase = mockOldRuleBase;
 		final EpRuleBase mockEpRuleBase = context.mock(EpRuleBase.class);
 		final EpRuleBase epRuleBase = mockEpRuleBase;
 		context.checking(new Expectations() {
@@ -196,7 +196,7 @@ public class DBReadingRuleEngineImplTest {
 		});
 		ruleEngine.getCartRuleBase(store);
 
-		final RuleBase updatedRuleBase = mockNewRuleBase;
+		final InternalKnowledgeBase updatedRuleBase = mockNewRuleBase;
 		final EpRuleBase mockUpdatedEpRuleBase = context.mock(EpRuleBase.class, "updated rule base");
 		final EpRuleBase updatedEpRuleBase = mockUpdatedEpRuleBase;
 		context.checking(new Expectations() {
@@ -247,7 +247,7 @@ public class DBReadingRuleEngineImplTest {
 		final Store store = mockStore;
 		final Catalog catalog = mockCatalog;
 
-		final RuleBase ruleBase = mockOldRuleBase;
+		final InternalKnowledgeBase ruleBase = mockOldRuleBase;
 		final EpRuleBase mockEpRuleBase = context.mock(EpRuleBase.class);
 		final EpRuleBase epRuleBase = mockEpRuleBase;
 		context.checking(new Expectations() {
@@ -272,7 +272,7 @@ public class DBReadingRuleEngineImplTest {
 		final Store store = mockStore;
 		final Catalog catalog = mockCatalog;
 
-		final RuleBase ruleBase = mockOldRuleBase;
+		final InternalKnowledgeBase ruleBase = mockOldRuleBase;
 		final EpRuleBase mockEpRuleBase = context.mock(EpRuleBase.class);
 		final EpRuleBase epRuleBase = mockEpRuleBase;
 		context.checking(new Expectations() {
@@ -310,7 +310,7 @@ public class DBReadingRuleEngineImplTest {
 		final Store store = mockStore;
 		final Catalog catalog = mockCatalog;
 
-		final RuleBase ruleBase = mockOldRuleBase;
+		final InternalKnowledgeBase ruleBase = mockOldRuleBase;
 		final EpRuleBase mockEpRuleBase = context.mock(EpRuleBase.class);
 		final EpRuleBase epRuleBase = mockEpRuleBase;
 		context.checking(new Expectations() {
@@ -325,7 +325,7 @@ public class DBReadingRuleEngineImplTest {
 		});
 		ruleEngine.getCatalogRuleBase(store);
 
-		final RuleBase updatedRuleBase = mockNewRuleBase;
+		final InternalKnowledgeBase updatedRuleBase = mockNewRuleBase;
 		final EpRuleBase mockUpdatedEpRuleBase = context.mock(EpRuleBase.class, "updated rule base");
 		final EpRuleBase updatedEpRuleBase = mockUpdatedEpRuleBase;
 		context.checking(new Expectations() {

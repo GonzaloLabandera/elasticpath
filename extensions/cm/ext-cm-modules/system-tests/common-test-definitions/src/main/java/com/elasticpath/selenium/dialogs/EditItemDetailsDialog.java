@@ -11,7 +11,10 @@ import org.openqa.selenium.WebDriver;
  * Edit Item Details Dialog.
  */
 public class EditItemDetailsDialog extends AbstractDialog {
-	private static final String EDIT_ITEM_DIALOG_PARENT_CSS = "div[automation-id='com.elasticpath.cmclient.fulfillment.FulfillmentMessages"
+	/**
+	 * CSS selector used to identify the dialog.
+	 */
+	public static final String EDIT_ITEM_DIALOG_PARENT_CSS = "div[automation-id='com.elasticpath.cmclient.fulfillment.FulfillmentMessages"
 			+ ".EditItemDetails_WindowTitle'] ";
 	private static final String CONFIGURABLE_FIELD_VALUE_TABLE_CSS = EDIT_ITEM_DIALOG_PARENT_CSS
 			+ "div[widget-id='Field Value Table'][widget-type='Table'][seeable='true']";
@@ -30,6 +33,7 @@ public class EditItemDetailsDialog extends AbstractDialog {
 
 	/**
 	 * Verifies configurable fields values.
+	 *
 	 * @param configurableFieldsMap configurableFieldsMap.
 	 */
 	public void verifyConfigurableFieldValues(final Map<String, String> configurableFieldsMap) {

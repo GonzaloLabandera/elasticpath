@@ -105,4 +105,12 @@ public interface FetchPlanHelper {
 	 * @param fetchMode the fetch mode to use
 	 */
 	void setFetchMode(FetchMode fetchMode);
+
+	/**
+	 * Check if the FetchPlan contains specific fetch group.
+	 *
+	 * @param fetchGroup the fetch group to check
+	 * @return true if contains
+	 */
+	boolean doesPlanContainFetchGroup(String fetchGroup);
 }

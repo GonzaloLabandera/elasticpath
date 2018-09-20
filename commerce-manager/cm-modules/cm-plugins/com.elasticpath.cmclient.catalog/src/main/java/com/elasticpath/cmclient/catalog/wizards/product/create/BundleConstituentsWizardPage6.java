@@ -4,7 +4,6 @@
 package com.elasticpath.cmclient.catalog.wizards.product.create;
 
 import java.util.List;
-import java.util.Locale;
 
 import org.apache.commons.lang.StringUtils;
 import org.eclipse.core.databinding.DataBindingContext;
@@ -32,6 +31,7 @@ import com.elasticpath.cmclient.catalog.dialogs.product.ProductBundleConstituent
 import com.elasticpath.cmclient.catalog.helpers.BundleConstituentTableContentProvider;
 import com.elasticpath.cmclient.catalog.helpers.BundleConstituentTableLabelProvider;
 import com.elasticpath.cmclient.core.CoreImageRegistry;
+import com.elasticpath.cmclient.core.CorePlugin;
 import com.elasticpath.cmclient.core.ServiceLocator;
 import com.elasticpath.cmclient.core.binding.EpControlBindingProvider;
 import com.elasticpath.cmclient.core.binding.EpValueBinding;
@@ -456,7 +456,7 @@ public class BundleConstituentsWizardPage6 extends AbstractEPWizardPage<ProductM
 					if (hasMoreOneBundleInMessage) {
 						incorrectBundleNames.append(NEW_LINE);
 					}
-					incorrectBundleNames.append(constituentProductBundle.getDisplayName(Locale.getDefault()));
+					incorrectBundleNames.append(constituentProductBundle.getDisplayName(CorePlugin.getDefault().getDefaultLocale()));
 					hasMoreOneBundleInMessage = true;
 					incorrectBundlePricing = CatalogMessages.get().getBundleTypeString(constituentProductBundle);
 				}
@@ -482,7 +482,7 @@ public class BundleConstituentsWizardPage6 extends AbstractEPWizardPage<ProductM
 				if (hasMoreOneBundleInMessage) {
 					recurringChargeItems.append(NEW_LINE);
 				}
-				recurringChargeItems.append(constituentItem.getDisplayName(Locale.getDefault()));
+				recurringChargeItems.append(constituentItem.getDisplayName(CorePlugin.getDefault().getDefaultLocale()));
 				hasMoreOneBundleInMessage = true;
 			}
 		}

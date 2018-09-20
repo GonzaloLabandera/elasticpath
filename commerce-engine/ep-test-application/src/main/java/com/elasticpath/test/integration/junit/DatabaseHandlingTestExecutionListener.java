@@ -24,6 +24,33 @@ public class DatabaseHandlingTestExecutionListener extends AbstractTestExecution
 	}
 
 	@Override
+	public final int getOrder() {
+		return 1;
+	}
+
+	@Override
+	public void beforeTestClass(final TestContext testContext) throws Exception {
+		if (LOG.isDebugEnabled()) {
+			LOG.debug("Performing database reset for test context [" + testContext + "].");
+		}
+		DatabaseTestExecutionListenerHelper.resetDatabase(testContext, jndiContextManager);
+	}
+
+	@Override
+	public void beforeTestMethod(final TestContext testContext) throws Exception {
+		final boolean classDirtiesDatabase = testContext.getTestClass().isAnnotationPresent(DirtiesDatabase.class);
+		final boolean methodDirtiesDatabase = testContext.getTestMethod().isAnnotationPresent(DirtiesDatabase.class);
+
+		if (LOG.isDebugEnabled()) {
+			LOG.debug("Performing database reset for test context [" + testContext + "].");
+		}
+
+		if (methodDirtiesDatabase || classDirtiesDatabase) {
+			DatabaseTestExecutionListenerHelper.initializeSnapshot();
+		}
+	}
+
+	@Override
 	public void afterTestMethod(final TestContext testContext) throws Exception {
 		final boolean classDirtiesDatabase = testContext.getTestClass().isAnnotationPresent(DirtiesDatabase.class);
 		final boolean methodDirtiesDatabase = testContext.getTestMethod().isAnnotationPresent(DirtiesDatabase.class);
@@ -35,17 +62,7 @@ public class DatabaseHandlingTestExecutionListener extends AbstractTestExecution
 		}
 
 		if (methodDirtiesDatabase || classDirtiesDatabase) {
-            DatabaseTestExecutionListenerHelper.resetDatabase(testContext, jndiContextManager);
+			DatabaseTestExecutionListenerHelper.resetDatabase(testContext, jndiContextManager);
 		}
 	}
-
-	@Override
-	public void beforeTestClass(final TestContext testContext) throws Exception {
-		if (LOG.isDebugEnabled()) {
-			LOG.debug("Performing database reset for test context [" + testContext + "].");
-		}
-
-        DatabaseTestExecutionListenerHelper.resetDatabase(testContext, jndiContextManager);
-	}
-
 }

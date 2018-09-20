@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) Elastic Path Software Inc., 2016
  */
 package com.elasticpath.importexport.common.marshalling;
@@ -10,20 +10,14 @@ import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 
 import com.elasticpath.common.dto.customer.CustomerDTO;
-import com.elasticpath.common.dto.customer.LegacyCreditCardDTO;
 import com.elasticpath.importexport.common.factory.TestCustomerDTOBuilderFactory;
-import com.elasticpath.importexport.common.factory.TestPaymentDTOBuilderFactory;
 
 /**
  * Test XML unmarshalling of a customer.
  */
 public class CustomerUnmarshallingTest {
-	private static final String TEST_PAYMENT_TOKEN_VALUE = "testPaymentTokenValue";
-	private static final String TEST_IDENTITY = "testIdentity";
-
 	private final XMLUnmarshaller xmlUnmarshaller = new XMLUnmarshaller(CustomerDTO.class);
 	private final TestCustomerDTOBuilderFactory testCustomerDTOBuilderFactory = new TestCustomerDTOBuilderFactory();
-	private final TestPaymentDTOBuilderFactory testPaymentDTOBuilderFactory = new TestPaymentDTOBuilderFactory();
 
 	/**
 	 * Ensures that all currently supported XML elements are unmarshalled.
@@ -36,11 +30,8 @@ public class CustomerUnmarshallingTest {
 		assertTrue("The unmarshalled dto should be an instance of a CustomerDto", outputDto instanceof CustomerDTO);
 		CustomerDTO customerDto = (CustomerDTO) outputDto;
 
-		LegacyCreditCardDTO creditCard = testPaymentDTOBuilderFactory.createLegacyWithIdentity(TEST_IDENTITY).build();
-		creditCard.setDefaultCard(true);
 		CustomerDTO expectedCustomerDto = testCustomerDTOBuilderFactory
 				.createWithPaymentMethods()
-				.withCreditCards(creditCard)
 				.build();
 
 		assertEquals("The unmarshalled customer dto should be the same as expected",
@@ -66,8 +57,6 @@ public class CustomerUnmarshallingTest {
 
 		CustomerDTO expectedCustomerDto = testCustomerDTOBuilderFactory
 				.createWithPaymentMethods()
-				.withDefaultPaymentMethod(testPaymentDTOBuilderFactory.createPaymentTokenWithValue(TEST_PAYMENT_TOKEN_VALUE)
-						.build())
 				.build();
 		assertEquals("The unmarshalled customer dto should be the same as expected",
 				expectedCustomerDto,

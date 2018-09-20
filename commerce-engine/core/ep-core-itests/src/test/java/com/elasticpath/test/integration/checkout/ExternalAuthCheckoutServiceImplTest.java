@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) Elastic Path Software Inc., 2015
  */
 package com.elasticpath.test.integration.checkout;
@@ -159,9 +159,9 @@ public class ExternalAuthCheckoutServiceImplTest extends BasicSpringContextTest 
 		OrderValidator orderValidator1 = OrderValidator.builder()
 				.withStatus(OrderStatus.PARTIALLY_SHIPPED)
 				.withPaymentMatchers(
-						OrderPaymentMatcherFactory.createSuccessfulCreditCardAuthorization(),
-						OrderPaymentMatcherFactory.createSuccessfulCreditCardAuthorization(),
-						OrderPaymentMatcherFactory.createSuccessfulCreditCardCapture())
+						OrderPaymentMatcherFactory.createSuccessfulTokenAuthorization(),
+						OrderPaymentMatcherFactory.createSuccessfulTokenAuthorization(),
+						OrderPaymentMatcherFactory.createSuccessfulTokenCapture())
 				.build();
 		assertThat("The order validation should succeed.", order, orderValidator1);
 
@@ -173,10 +173,10 @@ public class ExternalAuthCheckoutServiceImplTest extends BasicSpringContextTest 
 		OrderValidator orderValidator2 = OrderValidator.builder()
 				.withStatus(OrderStatus.COMPLETED)
 				.withPaymentMatchers(
-						OrderPaymentMatcherFactory.createSuccessfulCreditCardAuthorization(),
-						OrderPaymentMatcherFactory.createSuccessfulCreditCardAuthorization(),
-						OrderPaymentMatcherFactory.createSuccessfulCreditCardCapture(),
-						OrderPaymentMatcherFactory.createSuccessfulCreditCardCapture())
+						OrderPaymentMatcherFactory.createSuccessfulTokenAuthorization(),
+						OrderPaymentMatcherFactory.createSuccessfulTokenAuthorization(),
+						OrderPaymentMatcherFactory.createSuccessfulTokenCapture(),
+						OrderPaymentMatcherFactory.createSuccessfulTokenCapture())
 				.build();
 		assertThat("The order validation should succeed.", updatedOrder, orderValidator2);
 	}
@@ -207,8 +207,8 @@ public class ExternalAuthCheckoutServiceImplTest extends BasicSpringContextTest 
 		OrderValidator orderValidator = OrderValidator.builder()
 				.withStatus(OrderStatus.FAILED)
 				.withPaymentMatchers(
-						OrderPaymentMatcherFactory.createFailedCreditCardAuthorization(),
-						OrderPaymentMatcherFactory.createFailedCreditCardAuthorization())
+						OrderPaymentMatcherFactory.createFailedTokenAuthorization(),
+						OrderPaymentMatcherFactory.createFailedTokenAuthorization())
 				.build();
 		assertThat("The order validation should succeed.", order, orderValidator);
 	}
@@ -246,15 +246,15 @@ public class ExternalAuthCheckoutServiceImplTest extends BasicSpringContextTest 
 		CheckoutResults checkoutResults = externalAuthCheckoutService.checkoutAfterExternalAuth(shoppingCart,
 																								taxSnapshot,
 																								shoppingContext.getCustomerSession(),
-																								PaymentType.CREDITCARD,
+																								PaymentType.PAYMENT_TOKEN,
 																								responseMap);
 		Order order = checkoutResults.getOrder();
 		OrderValidator orderValidator = OrderValidator.builder()
 				.withStatus(OrderStatus.PARTIALLY_SHIPPED)
 				.withPaymentMatchers(
-						OrderPaymentMatcherFactory.createSuccessfulCreditCardAuthorization(),
-						OrderPaymentMatcherFactory.createSuccessfulCreditCardAuthorization(),
-						OrderPaymentMatcherFactory.createSuccessfulCreditCardCapture())
+						OrderPaymentMatcherFactory.createSuccessfulTokenAuthorization(),
+						OrderPaymentMatcherFactory.createSuccessfulTokenAuthorization(),
+						OrderPaymentMatcherFactory.createSuccessfulTokenCapture())
 				.build();
 		assertThat("The order validation should succeed.", order, orderValidator);
 
@@ -266,10 +266,10 @@ public class ExternalAuthCheckoutServiceImplTest extends BasicSpringContextTest 
 		OrderValidator orderValidator2 = OrderValidator.builder()
 				.withStatus(OrderStatus.COMPLETED)
 				.withPaymentMatchers(
-						OrderPaymentMatcherFactory.createSuccessfulCreditCardAuthorization(),
-						OrderPaymentMatcherFactory.createSuccessfulCreditCardAuthorization(),
-						OrderPaymentMatcherFactory.createSuccessfulCreditCardCapture(),
-						OrderPaymentMatcherFactory.createSuccessfulCreditCardCapture())
+						OrderPaymentMatcherFactory.createSuccessfulTokenAuthorization(),
+						OrderPaymentMatcherFactory.createSuccessfulTokenAuthorization(),
+						OrderPaymentMatcherFactory.createSuccessfulTokenCapture(),
+						OrderPaymentMatcherFactory.createSuccessfulTokenCapture())
 				.build();
 		assertThat("The order validation should succeed.", updatedOrder, orderValidator2);
 	}
@@ -307,7 +307,7 @@ public class ExternalAuthCheckoutServiceImplTest extends BasicSpringContextTest 
 
 	private OrderPayment createTestTemplateOrderPayment(final CustomerSession customerSession, final ShoppingCartTaxSnapshot taxSnapshot) {
 		OrderPayment templateOrderPayment = getBeanFactory().getBean(ContextIdNames.ORDER_PAYMENT);
-		templateOrderPayment.setPaymentMethod(PaymentType.CREDITCARD);
+		templateOrderPayment.setPaymentMethod(PaymentType.PAYMENT_TOKEN);
 		templateOrderPayment.setAmount(taxSnapshot.getTotal());
 		templateOrderPayment.setCurrencyCode(customerSession.getCurrency().getCurrencyCode());
 		return templateOrderPayment;

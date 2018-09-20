@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Set;
 import javax.validation.ConstraintViolation;
 
-import com.elasticpath.common.dto.StructuredErrorMessage;
+import com.elasticpath.base.common.dto.StructuredErrorMessage;
 
 /**
  * Transforms multiple {@link javax.validation.ConstraintViolation} to a list of {@link StructuredErrorMessage}.

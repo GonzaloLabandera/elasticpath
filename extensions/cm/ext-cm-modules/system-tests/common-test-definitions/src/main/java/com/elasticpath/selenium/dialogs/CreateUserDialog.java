@@ -10,7 +10,10 @@ import org.openqa.selenium.WebDriver;
  */
 public class CreateUserDialog extends AbstractDialog {
 
-	private static final String CREATE_USER_PARENT_CSS = "div[widget-id='Create User'][widget-type='Shell'] ";
+	/**
+	 * CSS selector used to identify the dialog.
+	 */
+	public static final String CREATE_USER_PARENT_CSS = "div[widget-id='Create User'][widget-type='Shell'] ";
 	private static final String USER_NAME_INPUT_CSS = CREATE_USER_PARENT_CSS + "div[widget-id='User Name'] input";
 	private static final String FIRST_NAME_INPUT_CSS = CREATE_USER_PARENT_CSS + "div[widget-id='First Name'] input";
 	private static final String LAST_NAME_INPUT_CSS = CREATE_USER_PARENT_CSS + "div[widget-id='Last Name'] input";
@@ -100,5 +103,14 @@ public class CreateUserDialog extends AbstractDialog {
 		assertThat(selectItemInDialog(AVAILABLE_ROLES_PARENT_CSS, AVAILABLE_ROLES_COLUMN_CSS, role, "Available Roles"))
 				.as("Unable to find role - " + role)
 				.isTrue();
+	}
+
+	/**
+	 * Checks if the dialog is present.
+	 *
+	 * @return boolean
+	 */
+	public boolean isDialogPresent() {
+		return isElementPresent(By.cssSelector(CREATE_USER_PARENT_CSS));
 	}
 }

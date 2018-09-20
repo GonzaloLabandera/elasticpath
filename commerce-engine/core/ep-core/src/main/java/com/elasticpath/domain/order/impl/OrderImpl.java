@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Currency;
 import java.util.Date;
 import java.util.HashMap;
@@ -20,6 +21,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 import javax.persistence.Basic;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -1184,8 +1187,8 @@ public class OrderImpl extends AbstractListenableEntityImpl implements Order, Pr
 	}
 
 	@Override
-	public ShoppingItem getShoppingItemByGuid(final String itemGuid) {
-		for (ShoppingItem item : getOrderSkus()) {
+	public OrderSku getShoppingItemByGuid(final String itemGuid) {
+		for (final OrderSku item : getOrderSkus()) {
 			if (item.getGuid().equals(itemGuid)) {
 				return item;
 			}
@@ -1695,31 +1698,62 @@ public class OrderImpl extends AbstractListenableEntityImpl implements Order, Pr
 
 	@Override
 	@Transient
-	public Collection<? extends ShoppingItem> getRootShoppingItems() {
-		Set<OrderSku> skus = new HashSet<>();
+	public List<OrderSku> getRootShoppingItems() {
+		final Set<OrderSku> orderSkus = new HashSet<>();
+
 		for (OrderShipment shipment : getAllShipments()) {
 			for (OrderSku orderSku : shipment.getShipmentOrderSkus()) {
 				OrderSku root = orderSku.getRoot();
 				if (root == null) {
-					skus.add(orderSku);
-				} else if (!skus.contains(root)) {
-					skus.add(root);
+					orderSkus.add(orderSku);
+				} else {
+					orderSkus.add(root);
 				}
 			}
 		}
-		return Collections.unmodifiableSet(skus);
+
+		final List<OrderSku> sortedOrderSkuList = new ArrayList<>(orderSkus);
+		sortedOrderSkuList.sort(Comparator.comparing(OrderSku::getOrdering));
+
+		return Collections.unmodifiableList(sortedOrderSkuList);
 	}
 
 	@Override
 	@Transient
-	public Collection<? extends ShoppingItem> getLeafShoppingItems() {
-		Set<OrderSku> skus = new HashSet<>();
-		for (OrderShipment shipment : getAllShipments()) {
-			for (OrderSku orderSku : shipment.getShipmentOrderSkus()) {
-				skus.add(orderSku);
-			}
+	public Collection<OrderSku> getAllShoppingItems() {
+		return getDescendents(getRootShoppingItems(), new ArrayList<>());
+	}
+
+	private Collection<OrderSku> getDescendents(final Collection<OrderSku> orderSkus,
+														  final Collection<OrderSku> results) {
+		for (final OrderSku orderSku : orderSkus) {
+			results.add(orderSku);
+
+			getDescendents(toOrderSkus(orderSku.getChildren()), results);
 		}
-		return Collections.unmodifiableSet(skus);
+
+		return results;
+	}
+
+	private List<OrderSku> toOrderSkus(final List<ShoppingItem> orderSkus) {
+		return orderSkus.stream()
+				.filter(shoppingItem -> {
+					if (!(shoppingItem instanceof OrderSku)) {
+						throw new IllegalArgumentException("Parameter is not an OrderSku");
+					}
+
+					return true;
+				})
+				.map(OrderSku.class::cast)
+				.collect(Collectors.toList());
+	}
+
+	@Override
+	@Transient
+	public Collection<OrderSku> getShoppingItems(final Predicate<OrderSku> shoppingItemPredicate) {
+		return getAllShoppingItems().stream()
+				.filter(shoppingItemPredicate)
+				.collect(Collectors.collectingAndThen(Collectors.toList(), Collections::unmodifiableList));
 	}
 
 	@Override
@@ -1735,6 +1769,7 @@ public class OrderImpl extends AbstractListenableEntityImpl implements Order, Pr
 	}
 
 	@Override
+	@Transient
 	public Set<ShipmentType> getShipmentTypes() {
 		Set<ShipmentType> results = new HashSet<>();
 

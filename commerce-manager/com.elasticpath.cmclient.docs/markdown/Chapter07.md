@@ -266,11 +266,11 @@ Only authorized CSRs may disable customers.
 
 #### Sorting Customer Search Results
 
-By default, customers are listed in the search results by their _Customer ID_. You can re-sort the results by clicking a column header. The results are sorted according to the column header selected.
+By default, customers are listed in the search results by their _User ID_. You can re-sort the results by clicking a column header. The results are sorted according to the column header selected.
 
 You can sort customer search results using the following column headers:
 
-- Customer ID
+- User ID
 - Default Billing Address
 - Email Address
 - First Name

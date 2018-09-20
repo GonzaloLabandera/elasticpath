@@ -7,7 +7,7 @@ import org.openqa.selenium.WebDriver;
 
 
 /**
- * Add and Edit Product Type Wizard.
+ * Add and Edit Product SKU Wizard.
  */
 public class AddSkuWizard extends AbstractWizard {
 

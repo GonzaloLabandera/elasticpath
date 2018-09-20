@@ -40,8 +40,7 @@ import com.elasticpath.service.cmuser.UserRoleService;
 import com.elasticpath.service.order.impl.ReturnAndExchangeServiceImplTest.DummyTimeService;
 import com.elasticpath.service.search.IndexNotificationService;
 import com.elasticpath.service.search.IndexType;
-import com.elasticpath.settings.SettingsService;
-import com.elasticpath.settings.domain.SettingValue;
+import com.elasticpath.settings.test.support.SimpleSettingValueProvider;
 import com.elasticpath.test.jmock.AbstractEPServiceTestCase;
 
 /**
@@ -100,60 +99,18 @@ public class CmUserServiceImplTest extends AbstractEPServiceTestCase {
 
 		mockUserRoleService = context.mock(UserRoleService.class);
 
-		final SettingsService mockSettingsService = context.mock(SettingsService.class);
-
-		final SettingValue mockMaxAgeValue = context.mock(SettingValue.class, "max age setting");
-		context.checking(new Expectations() {
-			{
-				allowing(mockMaxAgeValue).getValue();
-				will(returnValue("90"));
-
-				allowing(mockSettingsService).getSettingValue("COMMERCE/APPSPECIFIC/RCP/maximumPasswordAge");
-				will(returnValue(mockMaxAgeValue));
-			}
-		});
-
-		final SettingValue mockMaxLoginAttempts = context.mock(SettingValue.class, "max login attempts setting");
-		context.checking(new Expectations() {
-			{
-				allowing(mockMaxLoginAttempts).getValue();
-				will(returnValue("6"));
-
-				allowing(mockSettingsService).getSettingValue("COMMERCE/APPSPECIFIC/RCP/accountLockoutThreshold");
-				will(returnValue(mockMaxLoginAttempts));
-			}
-		});
-
-		final SettingValue mockMinPasswordLength = context.mock(SettingValue.class, "min password length setting");
-		context.checking(new Expectations() {
-			{
-				allowing(mockMinPasswordLength).getValue();
-				will(returnValue("8"));
-
-				allowing(mockSettingsService).getSettingValue("COMMERCE/APPSPECIFIC/RCP/minimumPasswordLength");
-				will(returnValue(mockMinPasswordLength));
-			}
-		});
-
-		final SettingValue mockPasswordHistoryLength = context.mock(SettingValue.class, "password history length setting");
-		context.checking(new Expectations() {
-			{
-				allowing(mockPasswordHistoryLength).getValue();
-				will(returnValue("4"));
-
-				allowing(mockSettingsService).getSettingValue("COMMERCE/APPSPECIFIC/RCP/passwordHistoryLength");
-				will(returnValue(mockPasswordHistoryLength));
-			}
-		});
-
-		CmPasswordPolicyImpl cmPasswordPolicy = new CmPasswordPolicyImpl();
-		cmPasswordPolicy.setSettingsService(mockSettingsService);
+		final CmPasswordPolicyImpl cmPasswordPolicy = new CmPasswordPolicyImpl();
 		cmPasswordPolicy.setPasswordGenerator(new PasswordGeneratorImpl());
+
+		final int minimumPasswordLength = 8;
+		final int minimumPasswordHistoryDays = 4;
+
+		cmPasswordPolicy.setMinimumPasswordLengthProvider(new SimpleSettingValueProvider<>(minimumPasswordLength));
 
 		stubGetBean("cmPasswordPolicy", cmPasswordPolicy);
 
-		cmUserServiceImpl.setSettingsService(mockSettingsService);
 		cmUserServiceImpl.setTimeService(new DummyTimeService());
+		cmUserServiceImpl.setMinimumPasswordHistoryLengthDaysProvider(new SimpleSettingValueProvider<>(minimumPasswordHistoryDays));
 	}
 
 	private void userRoleSetup() {

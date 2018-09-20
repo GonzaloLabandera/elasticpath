@@ -14,7 +14,6 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
-import org.eclipse.core.databinding.validation.IValidator;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.swt.SWT;
@@ -33,7 +32,6 @@ import com.elasticpath.cmclient.core.ui.framework.CompositeFactory;
 import com.elasticpath.cmclient.core.ui.framework.EpControlFactory.EpState;
 import com.elasticpath.cmclient.core.ui.framework.IEpLayoutComposite;
 import com.elasticpath.cmclient.core.ui.framework.IEpLayoutData;
-import com.elasticpath.cmclient.core.validation.CompoundValidator;
 import com.elasticpath.cmclient.core.validation.EpValidatorFactory;
 import com.elasticpath.cmclient.reporting.AbstractReportSection;
 import com.elasticpath.cmclient.reporting.common.SavedReportParameters;
@@ -52,15 +50,15 @@ public class CustomerPersonalDataReportSection extends AbstractReportSection {
 	public static final String PARAMETER_STORE_UIDPK = "storeUidPk"; //$NON-NLS-1$
 	/** The key for the "store" query parameter. */
 	public static final String PARAMETER_STORE = "store"; //$NON-NLS-1$
-	/** The key for the "customerID" query parameter. */
-	public static final String PARAMETER_CUSTOMER_ID = "customerID"; //$NON-NLS-1$
+	/** The key for the "userId" query parameter. */
+	public static final String PARAMETER_USER_ID = "userId"; //$NON-NLS-1$
 
 	/** The key for the parameters object. */
 	public static final String PARAMETER_PARAMETERS = "parameters"; //$NON-NLS-1$
 
 	private CCombo storeCombo;
 
-	private Text customerIdText;
+	private Text userIdText;
 
 	private final CustomerPersonalDataParameters parameters = new CustomerPersonalDataParameters();
 	private final ReportAuthorizationUtility reportUtility = new ReportAuthorizationUtility();
@@ -81,11 +79,11 @@ public class CustomerPersonalDataReportSection extends AbstractReportSection {
 			final DataBindingContext context) {
 
 		bindStoreCombo(bindingProvider, context, true);
-		bindCustomerId(bindingProvider, context);
+		bindUserId(bindingProvider, context);
 
 		ModifyListener modifyListener = getModifyListener();
 
-		customerIdText.addModifyListener(modifyListener);
+		userIdText.addModifyListener(modifyListener);
 		storeCombo.addModifyListener(modifyListener);
 	}
 
@@ -105,8 +103,8 @@ public class CustomerPersonalDataReportSection extends AbstractReportSection {
 		parentEpComposite.addLabelBoldRequired(CustomerPersonalDataMessages.get().store, state, null);
 		storeCombo = parentEpComposite.addComboBox(state, data);
 
-		parentEpComposite.addLabelBoldRequired(CustomerPersonalDataMessages.get().customerID,  EpState.EDITABLE, data);
-		customerIdText = parentEpComposite.addTextField(state, data);
+		parentEpComposite.addLabelBoldRequired(CustomerPersonalDataMessages.get().userId,  EpState.EDITABLE, data);
+		userIdText = parentEpComposite.addTextField(state, data);
 
 		populateControls();
 	}
@@ -120,7 +118,7 @@ public class CustomerPersonalDataReportSection extends AbstractReportSection {
 		paramsMap.put(PARAMETER_STORE_UIDPK, parameters.getStoreUidPk());
 		paramsMap.put(PARAMETER_STORE, parameters.getStore());
 
-		paramsMap.put(PARAMETER_CUSTOMER_ID, parameters.getCustomerID());
+		paramsMap.put(PARAMETER_USER_ID, parameters.getUserId());
 
 		paramsMap.put(PARAMETER_PARAMETERS, parameters);
 		return paramsMap;
@@ -139,14 +137,12 @@ public class CustomerPersonalDataReportSection extends AbstractReportSection {
 				CustomerPersonalDataReportPermissions.REPORTING_CUSTOMER_PERSONAL_DATA_MANAGE);
 	}
 
-	private void bindCustomerId(final EpControlBindingProvider bindingProvider, final DataBindingContext context) {
+	private void bindUserId(final EpControlBindingProvider bindingProvider, final DataBindingContext context) {
 
 
-		this.customerIdText.addModifyListener(getModifyListener());
+		this.userIdText.addModifyListener(getModifyListener());
 
-		IValidator validator = new CompoundValidator(EpValidatorFactory.REQUIRED, EpValidatorFactory.LONG_IGNORE_SPACE);
-
-		bindingProvider.bind(context, this.customerIdText, parameters, PARAMETER_CUSTOMER_ID, validator, null, true); //$NON-NLS-1$
+		bindingProvider.bind(context, this.userIdText, parameters, PARAMETER_USER_ID, EpValidatorFactory.REQUIRED, null, true); //$NON-NLS-1$
 	}
 
 	private void bindStoreCombo(final EpControlBindingProvider bindingProvider,
@@ -201,7 +197,7 @@ public class CustomerPersonalDataReportSection extends AbstractReportSection {
 	@Override
 	public boolean isInputValid() {
 		boolean storeSelected = storeCombo.getSelectionIndex() > 0;
-		return storeSelected && StringUtils.isNotBlank(customerIdText.getText()) && super.isInputValid();
+		return storeSelected && StringUtils.isNotBlank(userIdText.getText()) && super.isInputValid();
 	}
 
 	private String[] getStoreNames() {

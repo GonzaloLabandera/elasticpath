@@ -10,6 +10,7 @@ import java.util.List;
 import org.junit.Test;
 
 import com.elasticpath.common.dto.ShoppingItemDto;
+import com.elasticpath.domain.customer.impl.PaymentTokenImpl;
 import com.elasticpath.domain.order.Order;
 import com.elasticpath.domain.order.OrderPayment;
 import com.elasticpath.domain.order.OrderShipment;
@@ -33,7 +34,7 @@ public class TaxOperationShoppingCartCheckoutTest extends AbstractBasicTaxOperat
 		// construct and save new shopping cart
 		final Shopper shopper = customerSession.getShopper();
 		ShoppingCart shoppingCart = persisterFactory.getOrderTestPersister().persistEmptyShoppingCart(address, address, customerSession,
-				scenario.getShippingServiceLevel(), scenario.getStore());
+				scenario.getShippingOption(), scenario.getStore());
 
 		ShoppingItemDto physicalDto = new ShoppingItemDto(shippableProducts.get(0).getDefaultSku().getSkuCode(), 1);
 		ShoppingItemDto electronicDto = new ShoppingItemDto(nonShippableProducts.get(0).getDefaultSku().getSkuCode(), 1);
@@ -41,7 +42,8 @@ public class TaxOperationShoppingCartCheckoutTest extends AbstractBasicTaxOperat
 		cartDirector.addItemToCart(shoppingCart, electronicDto);
 
 		// make new order payment
-		OrderPayment templateOrderPayment = persisterFactory.getOrderTestPersister().createOrderPayment(customer, creditCard);
+		OrderPayment templateOrderPayment = persisterFactory.getOrderTestPersister().createOrderPayment(customer, new PaymentTokenImpl.TokenBuilder()
+				.build());
 
 		// checkout
 		final ShoppingCartPricingSnapshot pricingSnapshot = pricingSnapshotService.getPricingSnapshotForCart(shoppingCart);

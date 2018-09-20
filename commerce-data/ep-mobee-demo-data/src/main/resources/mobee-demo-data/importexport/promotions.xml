@@ -228,7 +228,7 @@
                     <value>100</value>
                 </parameter>
                 <parameter>
-                    <key>shippingServiceLevelCode</key>
+                    <key>shippingOptionCode</key>
                     <value>CanadaPostTwoDays</value>
                 </parameter>
             </parameters>
@@ -586,7 +586,7 @@
         <action type="shippingPercentDiscountAction">
             <parameters>
                 <parameter>
-                    <key>shippingServiceLevelCode</key>
+                    <key>shippingOptionCode</key>
                     <value>FixedPriceWith100PercentOffPromoShippingOption</value>
                 </parameter>
                 <parameter>
@@ -613,7 +613,7 @@
 			<action type="shippingPercentDiscountAction">
 				<parameters>
 					<parameter>
-						<key>shippingServiceLevelCode</key>
+						<key>shippingOptionCode</key>
 						<value>CanadaPostTwoDays</value>
 					</parameter>
 					<parameter>
@@ -736,7 +736,7 @@
 			<action type="shippingAmountDiscountAction">
 				<parameters>
 					<parameter>
-						<key>shippingServiceLevelCode</key>
+						<key>shippingOptionCode</key>
 						<value>CanadaPostExpress</value>
 					</parameter>
 					<parameter>
@@ -1014,5 +1014,41 @@
                 <exceptions/>
             </action>
         </actions>
+    </promotion>
+    <promotion type="Cart">
+        <store_code>MOBEE</store_code>
+        <name>expiredcoupon</name>
+        <displayName>
+            <value language="en">expired coupon</value>
+        </displayName>
+        <code>0531f91b-d2e1-407e-abda-16ab058bcfe5</code>
+        <description></description>
+        <availability>
+            <enabled>true</enabled>
+        </availability>
+        <actions>
+            <action type="cartSubtotalPercentDiscountAction">
+                <parameters>
+                    <parameter>
+                        <key>discountPercent</key>
+                        <value>10</value>
+                    </parameter>
+                </parameters>
+                <exceptions/>
+            </action>
+        </actions>
+        <selling_context>
+            <guid>f483155f-c97f-4954-8d31-6afc4cfa15d3</guid>
+            <name>expiredcoupon</name>
+            <priority>0</priority>
+            <conditions>
+                <condition>
+                    <guid>ce268417-f540-44f5-ae02-35c6b6043e2a</guid>
+                    <name>16264964422786</name>
+                    <condition_string> { AND { SHOPPING_START_TIME.greaterThan (1525213620000L) }  { SHOPPING_START_TIME.lessThan (1525300020000L) }  } </condition_string>
+                    <dictionary_guid>TIME</dictionary_guid>
+                </condition>
+            </conditions>
+        </selling_context>
     </promotion>
 </promotions>

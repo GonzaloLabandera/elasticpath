@@ -40,22 +40,14 @@
             <text-property name="promptText">startDate</text-property>
             <property name="valueType">static</property>
             <property name="isRequired">true</property>
-            <property name="dataType">dateTime</property>
+            <property name="dataType">string</property>
             <property name="controlType">text-box</property>
-            <structure name="format">
-                <property name="category">Medium Date</property>
-                <property name="pattern">Medium Date</property>
-            </structure>
         </scalar-parameter>
         <scalar-parameter name="endDate" id="101">
             <text-property name="promptText">endDate</text-property>
             <property name="valueType">static</property>
-            <property name="dataType">dateTime</property>
+            <property name="dataType">string</property>
             <property name="controlType">text-box</property>
-            <structure name="format">
-                <property name="category">Medium Date</property>
-                <property name="pattern">Medium Date</property>
-            </structure>
         </scalar-parameter>
         <scalar-parameter name="currency" id="102">
             <text-property name="promptText">currency</text-property>

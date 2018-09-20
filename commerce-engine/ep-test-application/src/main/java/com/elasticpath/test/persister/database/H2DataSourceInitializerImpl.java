@@ -12,6 +12,7 @@ import java.util.Properties;
 
 import org.apache.commons.io.FilenameUtils;
 import org.apache.log4j.Logger;
+import org.h2.store.fs.FileUtils;
 
 import com.elasticpath.test.common.exception.DataSourceInitializerException;
 import com.elasticpath.test.persister.TestConfig;
@@ -19,11 +20,11 @@ import com.elasticpath.test.persister.TestConfig;
 /**
  * H2 implementation of AbstractDataSourceInitializer.<br>
  * Runs with the H2 server mode.
- * 
+ *
  * # database configuration settings for H2:<br>
  * db.rdbms=h2<br>
  * db.connection.driver_class=org.h2.Driver<br>
- * 
+ *
  */
 public class H2DataSourceInitializerImpl extends AbstractDataSourceInitializer {
 	private static final Logger LOG = Logger
@@ -105,5 +106,49 @@ public class H2DataSourceInitializerImpl extends AbstractDataSourceInitializer {
 		}
 		return databaseLocation;
 	}
+
+	@Override
+	public void initializeSnapshot() {
+		final String testClassName = getSnapshotFileName();
+		try {
+			if (!FileUtils.exists("memFS:" + testClassName)) {
+				Connection conn = DriverManager.getConnection(getConnectionUrl(), getUsername(), getPassword());
+				Statement stat = conn.createStatement();
+				stat.execute("SCRIPT TO 'memFS:" + testClassName + "'");
+				stat.close();
+				conn.close();
+				LOG.debug("Initialized snapshot - created file: " + testClassName);
+			}
+		} catch (SQLException exception) {
+			LOG.fatal("Failed to initialize snapshot ", exception);
+			throw new DataSourceInitializerException(
+					"Failed to create test database", exception);
+		}
+	}
+
+	@Override
+	public String resetDatabase() throws SQLException {
+		String connectionURL = getConnectionUrl();
+		final String testClassName = getSnapshotFileName();
+		if (FileUtils.exists("memFS:" + testClassName)) {
+
+			Connection conn = DriverManager.getConnection(getConnectionUrl(), getUsername(), getPassword());
+			Statement stat = conn.createStatement();
+
+			stat.execute("DROP ALL OBJECTS");
+			stat.close();
+			conn.close();
+			connectionURL = getConnectionUrl() + ";INIT=runscript from 'memFS:" + testClassName + "'";
+
+			conn = DriverManager.getConnection(connectionURL, getUsername(), getPassword());
+			conn.close();
+
+			LOG.debug("Reset H2 database to existing snapshot");
+		} else {
+			LOG.debug("Drop and create H2 database to fresh instance");
+			dropAndCreateDatabase();
+		}
+		return connectionURL;
+	};
 
 }

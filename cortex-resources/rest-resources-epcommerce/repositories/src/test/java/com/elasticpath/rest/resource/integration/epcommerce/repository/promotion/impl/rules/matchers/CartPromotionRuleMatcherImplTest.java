@@ -6,7 +6,6 @@ package com.elasticpath.rest.resource.integration.epcommerce.repository.promotio
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
 
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -18,7 +17,7 @@ import org.junit.runner.RunWith;
 
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.elasticpath.domain.rules.Rule;
 import com.elasticpath.domain.shoppingcart.PromotionRecordContainer;
@@ -57,9 +56,9 @@ public class CartPromotionRuleMatcherImplTest {
 	}
 
 	@Test
-	public void testFindMatchingAppliedRules() throws Exception {
+	public void testFindMatchingAppliedRules() {
 		when(mockRule.getCode()).thenReturn(RULE_CODE);
-		when(ruleService.findByUids(APPLIED_RULES)).thenReturn(Arrays.asList(mockRule));
+		when(ruleService.findByUids(APPLIED_RULES)).thenReturn(Collections.singletonList(mockRule));
 		when(rulePredicate.isSatisfied(mockRule)).thenReturn(true);
 		when(promotionRecordContainer.getAppliedRules()).thenReturn(APPLIED_RULES);
 
@@ -72,10 +71,9 @@ public class CartPromotionRuleMatcherImplTest {
 	}
 
 	@Test
-	public void testNoRulesOnCart() throws Exception {
-		Set emptySet = Collections.emptySet();
-		when(promotionRecordContainer.getAppliedRules()).thenReturn(emptySet);
-		when(ruleService.findByUids(emptySet)).thenReturn(Collections.emptyList());
+	public void testNoRulesOnCart() {
+		when(promotionRecordContainer.getAppliedRules()).thenReturn(Collections.emptySet());
+		when(ruleService.findByUids(Collections.emptySet())).thenReturn(Collections.emptyList());
 
 		AppliedPromotionRuleAwareShoppingCartPricingSnapshotAdapter cartAdapter
 				= new AppliedPromotionRuleAwareShoppingCartPricingSnapshotAdapter(pricingSnapshot);
@@ -86,9 +84,8 @@ public class CartPromotionRuleMatcherImplTest {
 	}
 
 	@Test
-	public void testNoMatchingRules() throws Exception {
-		when(mockRule.getCode()).thenReturn(RULE_CODE);
-		when(ruleService.findByUids(APPLIED_RULES)).thenReturn(Arrays.asList(mockRule));
+	public void testNoMatchingRules() {
+		when(ruleService.findByUids(APPLIED_RULES)).thenReturn(Collections.singletonList(mockRule));
 		when(rulePredicate.isSatisfied(mockRule)).thenReturn(false);
 		when(promotionRecordContainer.getAppliedRules()).thenReturn(APPLIED_RULES);
 

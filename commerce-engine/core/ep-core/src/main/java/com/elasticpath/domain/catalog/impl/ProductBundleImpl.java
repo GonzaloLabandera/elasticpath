@@ -415,9 +415,6 @@ public class ProductBundleImpl extends ProductImpl implements ProductBundle {
 		}
 	}
 
-
-
-
 	@Override
 	@Column(name = "CALCULATED")
 	public Boolean isCalculated() {
@@ -427,6 +424,41 @@ public class ProductBundleImpl extends ProductImpl implements ProductBundle {
 	@Override
 	public void setCalculated(final Boolean calculated) {
 		this.calculated = calculated;
+	}
+
+	@Override
+	@Transient
+	public boolean isConstituentAutoSelectable(final BundleConstituent bundleConstituent) {
+		return doesBundleSupportAutoSelection() && doesBundleConstituentSupportAutoSelection(bundleConstituent);
+	}
+
+	/**
+	 * Determine if the selection rules on the bundle indicate that the constituents should be automatically selected when added to cart.
+	 * The constituents should be automatically selected if any of the following are true:
+	 * * The selection rule is "Select All".
+	 * * The selection rule is "Select n" and n equals the number of defined constituents.
+	 *
+	 * @return true if the bundle configuration supports auto selection of constituents
+	 */
+	protected boolean doesBundleSupportAutoSelection() {
+		return getSelectionRule() == null
+				|| getSelectionRule().getParameter() == 0
+				|| getSelectionRule().getParameter() == getConstituents().size();
+	}
+
+	/**
+	 * Determine if the bundle constituent supports automatic add to cart.
+	 * The constituent should be automatically selected if any of the following are true:
+	 * * The constituent is a product sku.
+	 * * The constituent is a single-sku product.
+	 * * The constituent is a multi-sku product with only one defined sku.
+	 *
+	 * @param bundleConstituent the bundle constituent to evaluate
+	 * @return true if the bundle constituent configuration supports auto selection
+	 */
+	protected boolean doesBundleConstituentSupportAutoSelection(final BundleConstituent bundleConstituent) {
+		ConstituentItem constituentItem = bundleConstituent.getConstituent();
+		return constituentItem.isProductSku() || (constituentItem.isProduct() && constituentItem.getProduct().getProductSkus().size() == 1);
 	}
 
 	@Override

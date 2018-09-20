@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) Elastic Path Software Inc., 2007
  */
 package com.elasticpath.domain.payment.impl;
@@ -65,13 +65,13 @@ public abstract class AbstractPaymentHandler extends AbstractEpDomainImpl implem
 
 		BigDecimal currentAuthTotal = getCurrentAuthTotal(allAuthPayments);
 
-		/** calculate the amount left. */
+		/* calculate the amount left. */
 		BigDecimal amountLeftToAuthorize = OrderPaymentHelper.calculateFullAuthorizationAmount(
 				orderShipment, getProductSkuLookup()).subtract(currentAuthTotal);
 
 		Collection<OrderPayment> orderPayments = null;
 		if (this.isAmountEligibleForAuthorize(amountLeftToAuthorize)) {
-			/** this handler need to create auth payment. */
+			/* this handler need to create auth payment. */
 			orderPayments = getPreAuthorizedPayments(templateOrderPayment, orderShipment, amountLeftToAuthorize);
 			if (allAuthPayments != null) {
 				allAuthPayments.addAll(orderPayments);
@@ -125,7 +125,7 @@ public abstract class AbstractPaymentHandler extends AbstractEpDomainImpl implem
 		BigDecimal amountLeftToCapture = OrderPaymentHelper.adjustExchangeOrderCaptureAmount(orderShipment).subtract(currentCaptureTotal);
 		Collection<OrderPayment> orderPayments = null;
 		if (isAmountEligibleForCapture(amountLeftToCapture)) {
-			/** this handler need to create capture payment. */
+			/* this handler need to create capture payment. */
 			orderPayments = getCapturePayments(authOrderPayment, orderShipment, amountLeftToCapture);
 			if (currentCapturePayments != null) {
 				currentCapturePayments.addAll(orderPayments);
@@ -248,7 +248,6 @@ public abstract class AbstractPaymentHandler extends AbstractEpDomainImpl implem
 		if (this.isAmountEligibleForAuthorize(amount)) {
 			OrderPayment orderPayment = getNewOrderPayment();
 			orderPayment.setPaymentMethod(templateOrderPayment.getPaymentMethod());
-			orderPayment.copyCreditCardInfo(templateOrderPayment);
 			orderPayment.copyTransactionFollowOnInfo(templateOrderPayment);
 			orderPayment.setGatewayToken(templateOrderPayment.getGatewayToken());
 			orderPayment.setGiftCertificate(templateOrderPayment.getGiftCertificate());
@@ -286,7 +285,6 @@ public abstract class AbstractPaymentHandler extends AbstractEpDomainImpl implem
 
 		OrderPayment capturePayment = getNewOrderPayment();
 		capturePayment.setPaymentMethod(authorizationPayment.getPaymentMethod());
-		capturePayment.copyCreditCardInfo(authorizationPayment);
 		capturePayment.copyTransactionFollowOnInfo(authorizationPayment);
 		capturePayment.setGatewayToken(authorizationPayment.getGatewayToken());
 		capturePayment.setGiftCertificate(authorizationPayment.getGiftCertificate());
@@ -320,7 +318,6 @@ public abstract class AbstractPaymentHandler extends AbstractEpDomainImpl implem
 		if (this.isAmountEligibleForPayment(amount)) {
 			OrderPayment orderPayment = getNewOrderPayment();
 			orderPayment.setPaymentMethod(templateOrderPayment.getPaymentMethod());
-			orderPayment.copyCreditCardInfo(templateOrderPayment);
 			orderPayment.copyTransactionFollowOnInfo(templateOrderPayment);
 			orderPayment.setGatewayToken(templateOrderPayment.getGatewayToken());
 			orderPayment.setGiftCertificate(templateOrderPayment.getGiftCertificate());
@@ -415,7 +412,6 @@ public abstract class AbstractPaymentHandler extends AbstractEpDomainImpl implem
 	
 		OrderPayment orderPayment = getNewOrderPayment();
 		orderPayment.setPaymentMethod(templateOrderPayment.getPaymentMethod());
-		orderPayment.copyCreditCardInfo(templateOrderPayment);
 		orderPayment.copyTransactionFollowOnInfo(templateOrderPayment);
 		orderPayment.setGatewayToken(templateOrderPayment.getGatewayToken());
 		orderPayment.setGiftCertificate(templateOrderPayment.getGiftCertificate());

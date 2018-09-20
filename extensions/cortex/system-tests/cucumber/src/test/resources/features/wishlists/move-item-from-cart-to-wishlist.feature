@@ -24,8 +24,6 @@ Feature: Move item from cart to wishlist
       | bundleWithPhysicalAndDigitalComponents_sku |
       #   Digital item
       | alien_sku                                  |
-       #   Dynamic Bundle
-      | tb_dyn12345sku                             |
        # Back-Order item
       | tt0926084_sku                              |
       # Pre-Order item

@@ -10,22 +10,20 @@ import org.apache.log4j.Logger;
 
 import com.elasticpath.service.customer.AnonymousCustomerCleanupService;
 import com.elasticpath.service.misc.TimeService;
-import com.elasticpath.settings.SettingsReader;
-import com.elasticpath.settings.domain.SettingValue;
+import com.elasticpath.settings.provider.SettingValueProvider;
 
 /**
  * Job to purge anonymous customers.
  */
 public class AnonymousCustomerCleanupJob {
 
-	private static final String ANONYMOUS_CUSTOMER_MAX_HISTORY = "COMMERCE/SYSTEM/ANONYMOUSCUSTOMERCLEANUP/maxHistory";
-	private static final String ANONYMOUS_CUSTOMER_BATCH_SIZE = "COMMERCE/SYSTEM/ANONYMOUSCUSTOMERCLEANUP/batchSize";
-
 	private static final Logger LOG = Logger.getLogger(AnonymousCustomerCleanupJob.class);
 
 	private TimeService timeService;
-	private SettingsReader settingsReader;
 	private AnonymousCustomerCleanupService anonymousCustomerCleanupService;
+
+	private SettingValueProvider<Integer> batchSizeProvider;
+	private SettingValueProvider<Integer> maxDaysHistoryProvider;
 
 	/**
 	 * Purge the anonymous customers.<br>
@@ -58,8 +56,7 @@ public class AnonymousCustomerCleanupJob {
 	 * @return the candidate removal date
 	 */
 	protected Date getCandidateRemovalDate() {
-		final SettingValue maxHistorySetting = getSettingsReader().getSettingValue(ANONYMOUS_CUSTOMER_MAX_HISTORY);
-		final int days = maxHistorySetting.getIntegerValue();
+		final int days = getMaxDaysHistoryProvider().get();
 		return DateUtils.addDays(getTimeService().getCurrentTime(), -days);
 	}
 
@@ -69,16 +66,7 @@ public class AnonymousCustomerCleanupJob {
 	 * @return the batch size
 	 */
 	protected int getBatchSize() {
-		final SettingValue batchSize = getSettingsReader().getSettingValue(ANONYMOUS_CUSTOMER_BATCH_SIZE);
-		return batchSize.getIntegerValue();
-	}
-
-	public void setSettingsReader(final SettingsReader settingsReader) {
-		this.settingsReader = settingsReader;
-	}
-
-	protected SettingsReader getSettingsReader() {
-		return settingsReader;
+		return getBatchSizeProvider().get();
 	}
 
 	public void setTimeService(final TimeService timeService) {
@@ -95,6 +83,22 @@ public class AnonymousCustomerCleanupJob {
 
 	protected AnonymousCustomerCleanupService getAnonymousCustomerCleanupService() {
 		return anonymousCustomerCleanupService;
+	}
+
+	protected SettingValueProvider<Integer> getBatchSizeProvider() {
+		return batchSizeProvider;
+	}
+
+	public void setBatchSizeProvider(final SettingValueProvider<Integer> batchSizeProvider) {
+		this.batchSizeProvider = batchSizeProvider;
+	}
+
+	protected SettingValueProvider<Integer> getMaxDaysHistoryProvider() {
+		return maxDaysHistoryProvider;
+	}
+
+	public void setMaxDaysHistoryProvider(final SettingValueProvider<Integer> maxDaysHistoryProvider) {
+		this.maxDaysHistoryProvider = maxDaysHistoryProvider;
 	}
 
 }

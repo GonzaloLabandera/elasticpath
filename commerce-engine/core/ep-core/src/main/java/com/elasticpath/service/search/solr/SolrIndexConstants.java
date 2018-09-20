@@ -96,6 +96,9 @@ public final class SolrIndexConstants {
 	/** Zip or Postal code. */
 	public static final String ZIP_POSTAL_CODE = "zipPostal";
 
+	/** Zip or Postal code exact. */
+	public static final String ZIP_POSTAL_CODE_EXACT = "zipPostalExact";
+
 	/** Preferred billing address. */
 	public static final String PREFERRED_BILLING_ADDRESS = "preferredBillingAddress";
 
@@ -119,6 +122,9 @@ public final class SolrIndexConstants {
 
 	/** User Id. */
 	public static final String USER_ID = "userId";
+
+	/** User Id exact. */
+	public static final String USER_ID_EXACT = "userIdExact";
 
 	/** User Id and email in one field. */
 	public static final String USERID_AND_EMAIL = "userIdAndEmail";
@@ -233,9 +239,6 @@ public final class SolrIndexConstants {
 
 	/** SOLR core name of the cmuser index. */
 	public static final String CMUSER_SOLR_CORE = "cmuser";
-
-	/** SOLR core name of the shipping service level index. */
-	public static final String SHIPPING_SERVICE_LEVEL_CORE = "shippingservicelevel";
 
 	/** SOLR core name of the SKU index. */
 	public static final String SKU_SOLR_CORE = "sku";
@@ -372,9 +375,6 @@ public final class SolrIndexConstants {
 
 	/** The cmuser index location system property name. */
 	public static final String CMUSER_INDEX_DIR_PROPERTY = SOLR_INDEX_PROPERTY_BASE + CMUSER_SOLR_CORE;
-
-	/** The shipping service level index location system property name. */
-	public static final String SHIPPING_SERVICE_LEVEL_INDEX_DIR_PROPERTY = SOLR_INDEX_PROPERTY_BASE + SHIPPING_SERVICE_LEVEL_CORE;
 
 	/** The SKU index location system property name. */
 	public static final String SKU_INDEX_DIR_PROPERTY = SOLR_INDEX_PROPERTY_BASE + SKU_SOLR_CORE;

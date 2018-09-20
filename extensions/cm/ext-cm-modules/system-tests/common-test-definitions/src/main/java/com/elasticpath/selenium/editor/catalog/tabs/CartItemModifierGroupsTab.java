@@ -37,7 +37,8 @@ public class CartItemModifierGroupsTab extends AbstractPageObject {
 	 * @return AddEditGroupDialog
 	 */
 	public AddEditCartItemModifierGroupDialog clickAddGroupButton() {
-		clickButton("Add");
+		final String buttonName = "Add";
+		clickButton(String.format(BUTTON_CSS, buttonName), buttonName, AddEditCartItemModifierGroupDialog.ADD_CART_ITEM_MODIFIER_GROUP_PARENT_CSS);
 		return new AddEditCartItemModifierGroupDialog(getDriver());
 	}
 
@@ -67,7 +68,8 @@ public class CartItemModifierGroupsTab extends AbstractPageObject {
 	 * @return AddEditGroupDialog
 	 */
 	public AddEditCartItemModifierGroupDialog clickEditGroupButton() {
-		clickButton("Edit");
+		final String buttonName = "Edit";
+		clickButton(String.format(BUTTON_CSS, buttonName), buttonName, AddEditCartItemModifierGroupDialog.ADD_CART_ITEM_MODIFIER_GROUP_PARENT_CSS);
 		return new AddEditCartItemModifierGroupDialog(getDriver());
 	}
 

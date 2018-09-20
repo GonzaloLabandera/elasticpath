@@ -3,7 +3,6 @@ package com.elasticpath.selenium.dialogs;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import org.openqa.selenium.By;
-import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
 
 /**
@@ -26,13 +25,15 @@ public class ErrorDialog extends AbstractDialog {
 	 * @param errMsg the error message.
 	 */
 	public void verifyErrorMessage(final String errMsg) {
+		setWebDriverImplicitWait(2);
 		try {
-			getWaitDriver().waitForElementToBeVisible(By.cssSelector(String.format("div[widget-id*='" + errMsg + "'] ", errMsg)));
+			getDriver().findElement(By.cssSelector("div[widget-id*='" + errMsg + "']"));
 			clickOK();
-		} catch (TimeoutException e) {
+		} catch (Exception e) {
 			assertThat(false)
-					.as("Error message validation failed").isEqualTo(true);
+					.as("Expected error message validation failed - '" + errMsg + "'").isEqualTo(true);
 		}
+		setWebDriverImplicitWaitToDefault();
 	}
 
 }

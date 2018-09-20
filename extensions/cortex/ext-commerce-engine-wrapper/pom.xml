@@ -4,10 +4,9 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<parent>
-		<groupId>com.elasticpath.rest.integration</groupId>
-		<artifactId>cortex-ep-integration-parent</artifactId>
+		<groupId>com.elasticpath.extensions</groupId>
+		<artifactId>ext-cortex-ce-parent</artifactId>
 		<version>0.0.0-SNAPSHOT</version>
-		<relativePath/>
 	</parent>
 
 	<groupId>com.elasticpath.extensions</groupId>
@@ -33,22 +32,16 @@
 	</distributionManagement>
 
 	<properties>
-		<dependency.directory>lib</dependency.directory>
 		<bval.version>0.4</bval.version>
 		<bcprov-jdk14.version>131</bcprov-jdk14.version>
 		<bcmail-jdk14.version>136</bcmail-jdk14.version>
-		<commons-beanutils.version>1.8.3</commons-beanutils.version>
 		<servicemix.commons-collections.version>3.2.1_3</servicemix.commons-collections.version>
 		<commons-poi.version>3.0.1-FINAL</commons-poi.version>
 		<servicemix.ehcache.version>2.6.0_2</servicemix.ehcache.version>
-		<spring-modules-jakarta-commons.version>0.5</spring-modules-jakarta-commons.version>
 		<wstx-asl.version>3.2.9</wstx-asl.version>
 
 		<!-- maven plugins -->
 		<antrun-plugin.version>1.7</antrun-plugin.version>
-		<lifecycle-mapping-plugin.version>1.0.0</lifecycle-mapping-plugin.version>
-		<licensing.skip>true</licensing.skip>
-		<dce.version>702.0.0-SNAPSHOT</dce.version>
 	</properties>
 
 	<build>
@@ -97,6 +90,7 @@
 							javax.crypto.*,
 							javax.management,
 							javax.net.ssl,
+							javax.naming.spi,
 							javax.naming;resolution:=optional,
 							javax.servlet;resolution:=optional,
 							javax.sql.*;resolution:=optional,
@@ -108,6 +102,15 @@
 							com.elasticpath.messaging,
 							com.elasticpath.messaging.factory,
 							com.elasticpath.persistence.api.*,
+							com.elasticpath.commons.beanframework,
+							com.elasticpath.commons.beanframework.impl,
+							com.elasticpath.commons.beanframework.spring,
+							com.elasticpath.shipping.connectivity.dto,
+							com.elasticpath.shipping.connectivity.dto.builder,
+							com.elasticpath.shipping.connectivity.dto.builder.populators,
+							com.elasticpath.shipping.connectivity.dto.builder.populators.impl,
+							com.elasticpath.shipping.connectivity.exceptions,
+							com.elasticpath.shipping.connectivity.service,
 							com.fasterxml.jackson.core,
 							com.fasterxml.jackson.databind,
 							com.google.common.*,
@@ -125,6 +128,7 @@
 							org.osgi.service.blueprint.container,
 							org.springframework.aop,
 							org.springframework.aop.framework,
+							org.springframework.beans.factory.config,
 							org.springframework.*;resolution:=optional,
 							org.w3c.dom,
 							org.w3c.dom.ranges.*,
@@ -191,6 +195,9 @@
 							com.elasticpath.service.attribute.impl;x-internal:=true,
 							com.elasticpath.service.auth.impl;x-internal:=true,
 							com.elasticpath.service.payment.gateway.impl;x-internal:=true,
+							com.elasticpath.service.shipping;x-internal:=true,
+							com.elasticpath.domain.shipping;x-internal:=true,
+							com.elasticpath.commons.constants;x-internal:=true,
 							com.elasticpath.settings.refreshstrategy.impl;x-internal:=true,
 							com.elasticpath.settings.domain.impl;x-internal:=true,
 							com.sun.el.*,
@@ -253,17 +260,16 @@
 			<groupId>org.apache.bval</groupId>
 			<artifactId>org.apache.bval.bundle</artifactId>
 			<version>${bval.version}</version>
+			<exclusions>
+				<exclusion>
+					<groupId>commons-beanutils</groupId>
+					<artifactId>commons-beanutils-core</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>commons-beanutils</groupId>
 			<artifactId>commons-beanutils</artifactId>
-			<version>${commons-beanutils.version}</version>
-			<exclusions>
-				<exclusion>
-					<groupId>commons-logging</groupId>
-					<artifactId>commons-logging</artifactId>
-				</exclusion>
-			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.servicemix.bundles</groupId>
@@ -289,6 +295,18 @@
 					<artifactId>ep-core-order-messaging</artifactId>
 				</exclusion>
 				<exclusion>
+					<groupId>com.elasticpath</groupId>
+					<artifactId>shipping-calculation-connectivity-api</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>com.elasticpath</groupId>
+					<artifactId>shipping-calculation-connectivity-caching</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>com.elasticpath</groupId>
+					<artifactId>ep-bean-framework</artifactId>
+				</exclusion>
+				<exclusion>
 					<groupId>woodstox</groupId>
 					<artifactId>wstx-asl</artifactId>
 				</exclusion>
@@ -309,12 +327,12 @@
 					will detect that core is not compatible.
 				-->
 				<exclusion>
-					<groupId>org.eclipse.gemini</groupId>
-					<artifactId>org.eclipse.gemini.blueprint.io</artifactId>
+					<groupId>org.eclipse.gemini.blueprint</groupId>
+					<artifactId>gemini-blueprint-io</artifactId>
 				</exclusion>
 				<exclusion>
-					<groupId>org.eclipse.gemini</groupId>
-					<artifactId>org.eclipse.gemini.blueprint.core</artifactId>
+					<groupId>org.eclipse.gemini.blueprint</groupId>
+					<artifactId>gemini-blueprint-core</artifactId>
 				</exclusion>
 				<exclusion>
 					<artifactId>spring-security-web</artifactId>
@@ -371,14 +389,6 @@
 				<exclusion>
 					<artifactId>spring-context</artifactId>
 					<groupId>org.springframework</groupId>
-				</exclusion>
-				<exclusion>
-					<artifactId>commons-logging-api</artifactId>
-					<groupId>commons-logging</groupId>
-				</exclusion>
-				<exclusion>
-					<artifactId>commons-logging</artifactId>
-					<groupId>commons-logging</groupId>
 				</exclusion>
 				<exclusion>
 					<artifactId>aopalliance</artifactId>
@@ -475,6 +485,21 @@
 			</exclusions>
 		</dependency>
 		<dependency>
+			<groupId>com.elasticpath</groupId>
+			<artifactId>shipping-calculation-epcommerce</artifactId>
+			<version>${dce.version}</version>
+			<exclusions>
+				<exclusion>
+					<groupId>com.elasticpath</groupId>
+					<artifactId>shipping-calculation-connectivity-api</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>com.elasticpath</groupId>
+					<artifactId>ep-bean-framework</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
 			<groupId>com.elasticpath.extensions</groupId>
 			<artifactId>ext-search</artifactId>
 			<version>0.0.0-SNAPSHOT</version>
@@ -487,6 +512,14 @@
 				<exclusion>
 					<groupId>com.elasticpath</groupId>
 					<artifactId>ep-core-order-messaging</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>com.elasticpath</groupId>
+					<artifactId>shipping-calculation-connectivity-api</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>com.elasticpath</groupId>
+					<artifactId>ep-bean-framework</artifactId>
 				</exclusion>
 				<exclusion>
 					<artifactId>spring-core</artifactId>
@@ -529,10 +562,6 @@
 			<scope>provided</scope>
 			<exclusions>
 				<exclusion>
-					<artifactId>commons-logging</artifactId>
-					<groupId>commons-logging</groupId>
-				</exclusion>
-				<exclusion>
 					<groupId>log4j</groupId>
 					<artifactId>log4j</artifactId>
 				</exclusion>
@@ -544,113 +573,15 @@
 			<version>${wstx-asl.version}</version>
 			<scope>provided</scope>
 		</dependency>
-		<!-- PayPal DoDirect -->
-		<dependency>
-			<groupId>bouncycastle</groupId>
-			<artifactId>bcprov-jdk14</artifactId>
-			<version>${bcprov-jdk14.version}</version>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>bouncycastle</groupId>
-			<artifactId>bcmail-jdk14</artifactId>
-			<version>${bcmail-jdk14.version}</version>
-			<scope>provided</scope>
-		</dependency>
 		<!-- CyberSource WS -->
 		<dependency>
 			<groupId>xerces</groupId>
 			<artifactId>xercesImpl</artifactId>
-			<version>${xerces.version}</version>
 			<scope>provided</scope>
 			<exclusions>
 				<exclusion>
 					<groupId>xml-apis</groupId>
 					<artifactId>xml-apis</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-		<dependency>
-			<groupId>org.springmodules</groupId>
-			<artifactId>spring-modules-jakarta-commons</artifactId>
-			<version>${spring-modules-jakarta-commons.version}</version>
-			<scope>provided</scope>
-			<exclusions>
-				<exclusion>
-					<groupId>xerces</groupId>
-					<artifactId>xercesImpl</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>servletapi</groupId>
-					<artifactId>servletapi</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>javax.servlet</groupId>
-					<artifactId>servlet-api</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>log4j</groupId>
-					<artifactId>log4j</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>commons-lang</groupId>
-					<artifactId>commons-lang</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>commons-validator</groupId>
-					<artifactId>commons-validator</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>commons-collections</groupId>
-					<artifactId>commons-collections</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>dom4j</groupId>
-					<artifactId>dom4j</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>commons-digester</groupId>
-					<artifactId>commons-digester</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>commons-logging</groupId>
-					<artifactId>commons-logging</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>commons-logging</groupId>
-					<artifactId>commons-logging-api</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>xml-apis</groupId>
-					<artifactId>xml-apis</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>org.springframework</groupId>
-					<artifactId>spring-context-support</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>org.springframework</groupId>
-					<artifactId>spring-beans</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>org.springframework</groupId>
-					<artifactId>spring-context</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>org.springframework</groupId>
-					<artifactId>spring-core</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>org.springframework</groupId>
-					<artifactId>spring-web</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>org.springframework</groupId>
-					<artifactId>spring-webmvc</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>org.springframework</groupId>
-					<artifactId>spring-support</artifactId>
 				</exclusion>
 			</exclusions>
 		</dependency>

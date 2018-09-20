@@ -3,7 +3,7 @@
  */
 package com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder.repositories;
 
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -18,7 +18,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.core.convert.ConversionService;
 
 import com.elasticpath.domain.shoppingcart.ShoppingCart;
@@ -48,7 +48,7 @@ public class CartEntityRepositoryImplTest {
 	@Test
 	public void findOne() {
 		CartEntity cartEntity = mock(CartEntity.class);
-		when(shoppingCartRepository.getDefaultShoppingCart()).thenReturn(Single.just(cart));
+		when(shoppingCartRepository.getShoppingCart(CART_ID)).thenReturn(Single.just(cart));
 		when(conversionService.convert(cart, CartEntity.class)).thenReturn(cartEntity);
 
 		repository.findOne(IdentifierTestFactory.buildCartIdentifier(SCOPE, CART_ID))

@@ -1,12 +1,11 @@
 /*
- * Copyright © 2013 Elastic Path Software Inc. All rights reserved.
+ * Copyright © 2018 Elastic Path Software Inc. All rights reserved.
  */
 package com.elasticpath.rest.relos.rs.authentication.springoauth2.impl;
 
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
-
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -24,10 +23,6 @@ import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.UriInfo;
 
 import com.google.common.collect.ImmutableMap;
-
-import com.elasticpath.rest.relos.rs.authentication.springoauth2.OAuthAccessTokenService;
-import com.elasticpath.rest.relos.rs.events.RoleTransitionEvent;
-import com.elasticpath.rest.relos.rs.events.client.EventClient;
 import org.apache.commons.lang3.StringUtils;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -39,11 +34,14 @@ import com.elasticpath.rest.chain.Ensure;
 import com.elasticpath.rest.chain.ExecutionResultChain;
 import com.elasticpath.rest.command.ExecutionResult;
 import com.elasticpath.rest.command.ExecutionResultFactory;
+import com.elasticpath.rest.relos.rs.authentication.client.AuthenticationClient;
 import com.elasticpath.rest.relos.rs.authentication.dto.AuthenticationRequestDto;
 import com.elasticpath.rest.relos.rs.authentication.dto.AuthenticationResponseDto;
-import com.elasticpath.rest.relos.rs.authentication.client.AuthenticationClient;
+import com.elasticpath.rest.relos.rs.authentication.springoauth2.OAuthAccessTokenService;
 import com.elasticpath.rest.relos.rs.authentication.springoauth2.util.AuthHeaderUtil;
 import com.elasticpath.rest.relos.rs.common.ResourceStatusToStatusType;
+import com.elasticpath.rest.relos.rs.events.EventSender;
+import com.elasticpath.rest.relos.rs.events.RoleTransitionEvent;
 import com.elasticpath.rest.relos.rs.jaxrs.JaxRsResource;
 import com.elasticpath.rest.relos.rs.subject.SubjectHeaderConstants;
 import com.elasticpath.rest.util.collection.CollectionUtil;
@@ -67,7 +65,7 @@ public final class OAuth2ResourceImpl implements JaxRsResource {
 	private AuthenticationClient authenticationClient;
 
 	@Reference
-	private EventClient eventClient;
+	private EventSender eventSender;
 
 
 	@Override
@@ -128,9 +126,8 @@ public final class OAuth2ResourceImpl implements JaxRsResource {
 				String authenticatedRole = CollectionUtil.first(responseDto.getRoles());
 
 				if (isRoleTransition(roles, authenticatedRole)) {
-					String baseUri = uriInfo.getBaseUri().toString();
 					RoleTransitionEvent eventEntity = createRoleTransitionEvent(userId, responseDto.getId(), roles, authenticatedRole);
-					eventClient.dispatch(baseUri, scope, eventEntity);
+					eventSender.sendEvent(eventEntity, scope);
 				}
 
 				CacheControl cacheControl = createCacheControl();

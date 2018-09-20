@@ -20,7 +20,7 @@ import com.elasticpath.rest.definition.shipmentdetails.ShippingOptionInfoSelecto
 import com.elasticpath.rest.id.type.CompositeIdentifier;
 import com.elasticpath.rest.id.type.StringIdentifier;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder.CartOrderRepository;
-import com.elasticpath.rest.resource.integration.epcommerce.repository.shipping.ShippingServiceLevelRepository;
+import com.elasticpath.rest.resource.integration.epcommerce.repository.shipping.ShippingOptionRepository;
 import com.elasticpath.rest.selector.Choice;
 import com.elasticpath.rest.selector.ChoiceStatus;
 import com.elasticpath.rest.selector.SelectResult;
@@ -38,7 +38,7 @@ public class ShippingOptionInfoSelectorRepositoryImpl<SI extends ShippingOptionI
 		CI extends ShippingOptionInfoSelectorChoiceIdentifier> implements SelectorRepository<ShippingOptionInfoSelectorIdentifier,
 		ShippingOptionInfoSelectorChoiceIdentifier> {
 
-	private ShippingServiceLevelRepository shippingServiceLevelRepository;
+	private ShippingOptionRepository shippingOptionRepository;
 	private CartOrderRepository cartOrderRepository;
 
 	@Override
@@ -46,7 +46,7 @@ public class ShippingOptionInfoSelectorRepositoryImpl<SI extends ShippingOptionI
 		ShippingOptionInfoIdentifier shippingOptionInfoIdentifier = selectorId.getShippingOptionInfo();
 		String scope = shippingOptionInfoIdentifier.getScope().getValue();
 		Map<String, String> shipmentDetailsId = shippingOptionInfoIdentifier.getShipmentDetailsId().getValue();
-		return shippingServiceLevelRepository.findShippingServiceLevelGuidsForShipment(scope, shipmentDetailsId)
+		return shippingOptionRepository.findShippingOptionCodesForShipment(scope, shipmentDetailsId)
 				.flatMapSingle(shippingOptionId -> buildSelectorChoiceIfExists(selectorId, scope, shipmentDetailsId, shippingOptionId));
 	}
 
@@ -60,7 +60,7 @@ public class ShippingOptionInfoSelectorRepositoryImpl<SI extends ShippingOptionI
 				.withShipmentDetailsId(CompositeIdentifier.of(shipmentDetailsId))
 				.build();
 
-		return shippingServiceLevelRepository.getSelectedShippingOptionIdForShipmentDetails(scope, shipmentDetailsId)
+		return shippingOptionRepository.getSelectedShippingOptionCodeForShipmentDetails(scope, shipmentDetailsId)
 				.map(selectedShippingOptionId -> buildSelectorChoice(selectorId, shippingOptionIdentifier,
 						getChoiceStatus(shippingOptionId, selectedShippingOptionId)))
 				.switchIfEmpty(Maybe.just(buildSelectorChoice(selectorId, shippingOptionIdentifier, getChoiceStatus(shippingOptionId, ""))))
@@ -94,7 +94,7 @@ public class ShippingOptionInfoSelectorRepositoryImpl<SI extends ShippingOptionI
 		ShippingOptionIdentifier shippingOptionIdentifier = shippingOptionInfoSelectorChoiceIdentifier.getShippingOption();
 		String scope = shippingOptionIdentifier.getScope().getValue();
 		Map<String, String> shipmentDetailsid = shippingOptionIdentifier.getShipmentDetailsId().getValue();
-		return shippingServiceLevelRepository.getSelectedShippingOptionIdForShipmentDetails(scope, shipmentDetailsid)
+		return shippingOptionRepository.getSelectedShippingOptionCodeForShipmentDetails(scope, shipmentDetailsid)
 				.map(selectedShippingOptionId -> buildChoice(shippingOptionInfoSelectorChoiceIdentifier, selectedShippingOptionId))
 				.switchIfEmpty(Maybe.just(buildChoice(shippingOptionInfoSelectorChoiceIdentifier, "")))
 				.toSingle();
@@ -138,18 +138,18 @@ public class ShippingOptionInfoSelectorRepositoryImpl<SI extends ShippingOptionI
 	}
 
 	private Single<SelectStatus> updateAndSaveCartOrder(final String shippingOptionId, final CartOrder cartOrder) {
-		if (shippingOptionId.equals(cartOrder.getShippingServiceLevelGuid())) {
+		if (shippingOptionId.equals(cartOrder.getShippingOptionCode())) {
 			return Single.just(SelectStatus.EXISTING);
 		} else {
-			cartOrder.setShippingServiceLevelGuid(shippingOptionId);
+			cartOrder.setShippingOptionCode(shippingOptionId);
 			return cartOrderRepository.saveCartOrderAsSingle(cartOrder)
 					.flatMap(savedCartOrder -> Single.just(SelectStatus.SELECTED));
 		}
 	}
 
 	@Reference
-	public void setShippingServiceLevelRepository(final ShippingServiceLevelRepository shippingServiceLevelRepository) {
-		this.shippingServiceLevelRepository = shippingServiceLevelRepository;
+	public void setShippingOptionRepository(final ShippingOptionRepository shippingOptionRepository) {
+		this.shippingOptionRepository = shippingOptionRepository;
 	}
 
 	@Reference

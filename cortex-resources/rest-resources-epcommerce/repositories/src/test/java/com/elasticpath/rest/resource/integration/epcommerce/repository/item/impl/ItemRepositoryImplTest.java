@@ -6,7 +6,7 @@ package com.elasticpath.rest.resource.integration.epcommerce.repository.item.imp
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -18,7 +18,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.elasticpath.base.exception.EpServiceException;
 import com.elasticpath.domain.catalog.Product;
@@ -70,7 +70,6 @@ public class ItemRepositoryImplTest {
 	@Test
 	public void ensureThatItemIdGeneratedForSkuCanBeUsedToRetrieveIt() {
 		ExecutionResult<String> itemIdResult = itemRepository.getItemIdForSku(productSku);
-		when(mockBundleIdentifier.isBundle(any(Product.class))).thenReturn(false);
 
 		assertEquals(ResourceStatus.READ_OK, itemIdResult.getResourceStatus());
 		String itemId = itemIdResult.getData();
@@ -99,7 +98,7 @@ public class ItemRepositoryImplTest {
 		ExecutionResult<Boolean> isItemBundleResult = itemRepository.isItemBundle(generateItemId(productSku));
 
 		assertEquals(ResourceStatus.READ_OK, isItemBundleResult.getResourceStatus());
-		assertEquals(true, isItemBundleResult.getData());
+		assertTrue(isItemBundleResult.getData());
 	}
 
 	@Test(expected = AssertionError.class)
@@ -178,7 +177,6 @@ public class ItemRepositoryImplTest {
 	}
 
 	private void mockFindProductSkuBySkuGuid(final ProductSku mockProductSku, final String skuGuid) {
-		when(mockProductSku.getGuid()).thenReturn(skuGuid);
 		when(mockProductSkuRepository.getProductSkuWithAttributesByGuid(skuGuid))
 				.thenReturn(ExecutionResultFactory.createReadOK(mockProductSku));
 	}

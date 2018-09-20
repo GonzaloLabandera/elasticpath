@@ -11,7 +11,6 @@ import io.reactivex.Observable;
 import com.elasticpath.rest.definition.navigations.NavigationIdentifier;
 import com.elasticpath.rest.definition.searches.NavigationSearchResultIdentifier;
 import com.elasticpath.rest.definition.searches.NavigationToNavigationSearchResultRelationship;
-import com.elasticpath.rest.definition.searches.SearchesIdentifier;
 import com.elasticpath.rest.helix.data.annotation.RequestIdentifier;
 import com.elasticpath.rest.id.type.IntegerIdentifier;
 
@@ -37,7 +36,6 @@ public class NavigationToNavigationSearchResultRelationshipImpl implements Navig
 	public Observable<NavigationSearchResultIdentifier> onLinkTo() {
 		return Observable.just(
 				NavigationSearchResultIdentifier.builder()
-						.withSearches(SearchesIdentifier.builder().withScope(navigationIdentifier.getNavigations().getScope()).build())
 						.withNavigation(navigationIdentifier)
 						.withPageId(IntegerIdentifier.of(FIRST_PAGE))
 						.build()

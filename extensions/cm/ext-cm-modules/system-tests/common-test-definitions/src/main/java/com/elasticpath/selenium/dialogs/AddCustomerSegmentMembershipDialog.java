@@ -10,7 +10,10 @@ import org.openqa.selenium.WebDriver;
  */
 public class AddCustomerSegmentMembershipDialog extends AbstractDialog {
 
-	private static final String CUSTOMER_SEGMENT_MEMBERSHIP_PARENT_CSS = "div[automation-id='com.elasticpath.cmclient.fulfillment"
+	/**
+	 * CSS selector used to identify the dialog.
+	 */
+	public static final String CUSTOMER_SEGMENT_MEMBERSHIP_PARENT_CSS = "div[automation-id='com.elasticpath.cmclient.fulfillment"
 			+ ".FulfillmentMessages.CustomerSegmentsPageDialog_AddWindowTitle'] ";
 	private static final String CUSTOMER_SEGMENT_NAME_COMBO_CSS = CUSTOMER_SEGMENT_MEMBERSHIP_PARENT_CSS + "div[widget-id='Segment "
 			+ "Name'][widget-type='CCombo']";
@@ -39,6 +42,7 @@ public class AddCustomerSegmentMembershipDialog extends AbstractDialog {
 
 	/**
 	 * Select Customer Segment.
+	 *
 	 * @param segmentName Segment Name.
 	 */
 	public void selectCustomerSegment(final String segmentName) {

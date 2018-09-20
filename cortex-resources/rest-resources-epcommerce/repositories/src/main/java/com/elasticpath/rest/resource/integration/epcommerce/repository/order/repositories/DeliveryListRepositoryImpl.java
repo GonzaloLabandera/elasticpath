@@ -41,7 +41,7 @@ public class DeliveryListRepositoryImpl<I extends DeliveriesIdentifier, LI exten
 
 		return cartOrderRepository.findByGuidAsSingle(storeCode, orderId)
 				.map(CartOrder::getShoppingCartGuid)
-				.flatMapObservable(shoppingCartId -> getShoppingCartDeliveryTypes())
+				.flatMapObservable(this::getShoppingCartDeliveryTypes)
 				.map(deliveryId -> getDeliveryIdentifier(order, deliveryId));
 	}
 
@@ -49,10 +49,11 @@ public class DeliveryListRepositoryImpl<I extends DeliveriesIdentifier, LI exten
 	 * Get delivery types for the cart.
 	 * Currently only one type is supported.
 	 *
+	 * @param shoppingCartId the shopping cart ID.
 	 * @return delivery types
 	 */
-	protected Observable<String> getShoppingCartDeliveryTypes() {
-		return shoppingCartRepository.getDefaultShoppingCart()
+	protected Observable<String> getShoppingCartDeliveryTypes(final String shoppingCartId) {
+		return shoppingCartRepository.getShoppingCart(shoppingCartId)
 				.flatMapObservable(this::getShipmentTypes);
 	}
 

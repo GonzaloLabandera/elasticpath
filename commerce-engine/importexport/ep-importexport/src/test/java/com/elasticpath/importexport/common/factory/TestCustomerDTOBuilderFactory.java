@@ -11,8 +11,8 @@ import com.elasticpath.common.dto.customer.builder.CustomerDTOBuilder;
  */
 public class TestCustomerDTOBuilderFactory {
 	private static final String TEST_GUID = "testGuid";
-	private static final String TEST_IDENTITY = "testIdentity";
 	private static final String TEST_PAYMENT_TOKEN_VALUE = "testPaymentTokenValue";
+	private static final String TEST_PAYMENT_TOKEN_DISPLAY_VALUE = "testPaymentTokenDisplayValue";
 	private final TestPaymentDTOBuilderFactory testPaymentDTOBuilderFactory = new TestPaymentDTOBuilderFactory();
 
 	/**
@@ -31,12 +31,14 @@ public class TestCustomerDTOBuilderFactory {
 	 * @return the {@link CustomerDTOBuilder}
 	 */
 	public CustomerDTOBuilder createWithPaymentMethods() {
-		PaymentMethodDto testCreditCard = testPaymentDTOBuilderFactory.createWithIdentity(TEST_IDENTITY)
-				.build();
 		PaymentMethodDto testPaymentToken = testPaymentDTOBuilderFactory.createPaymentTokenWithValue(TEST_PAYMENT_TOKEN_VALUE)
 				.build();
+		PaymentMethodDto testPaymentToken2 = testPaymentDTOBuilderFactory
+				.createPaymentTokenWithValue(TEST_PAYMENT_TOKEN_VALUE + "2")
+				.withPaymentTokenDisplayValue(TEST_PAYMENT_TOKEN_DISPLAY_VALUE + "2")
+				.build();
 		return create()
-				.withPaymentMethods(testCreditCard, testPaymentToken)
-				.withDefaultPaymentMethod(testCreditCard);
+				.withPaymentMethods(testPaymentToken, testPaymentToken2)
+				.withDefaultPaymentMethod(testPaymentToken);
 	}
 }

@@ -3,6 +3,7 @@
  */
 package com.elasticpath.rest.resource.integration.epcommerce.repository.purchase.repositories.impl.options;
 
+import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 
@@ -16,12 +17,14 @@ import com.elasticpath.domain.skuconfiguration.SkuOption;
 import com.elasticpath.domain.skuconfiguration.SkuOptionValue;
 import com.elasticpath.repository.Repository;
 import com.elasticpath.rest.ResourceOperationFailure;
+import com.elasticpath.rest.definition.purchases.PurchaseIdentifier;
+import com.elasticpath.rest.definition.purchases.PurchaseLineItemIdentifier;
+import com.elasticpath.rest.definition.purchases.PurchaseLineItemOptionIdentifier;
 import com.elasticpath.rest.definition.purchases.PurchaseLineItemOptionValueEntity;
 import com.elasticpath.rest.definition.purchases.PurchaseLineItemOptionValueIdentifier;
-import com.elasticpath.rest.id.type.PathIdentifier;
 import com.elasticpath.rest.identity.util.SubjectUtil;
 import com.elasticpath.rest.resource.ResourceOperationContext;
-import com.elasticpath.rest.resource.integration.epcommerce.repository.sku.ProductSkuRepository;
+import com.elasticpath.rest.resource.integration.epcommerce.repository.order.OrderRepository;
 
 /**
  * Repository to retrieve option Value entities.
@@ -39,16 +42,19 @@ public class OptionValueEntityRepositoryImpl<E extends PurchaseLineItemOptionVal
 	@VisibleForTesting
 	static final String VALUE_NOT_FOUND = "Option value not found.";
 	private ResourceOperationContext resourceOperationContext;
-	private ProductSkuRepository productSkuRepository;
+	private OrderRepository orderRepository;
 
 	@Override
 	public Single<PurchaseLineItemOptionValueEntity> findOne(final PurchaseLineItemOptionValueIdentifier identifier) {
-		String lineItemId = ((PathIdentifier) identifier.getPurchaseLineItemOption().getPurchaseLineItemOptions()
-				.getPurchaseLineItem().getLineItemId()).extractLeafId();
-		String optionId = identifier.getPurchaseLineItemOption().getOptionId().getValue();
+		PurchaseLineItemOptionIdentifier purchaseLineItemOptionIdentifier = identifier.getPurchaseLineItemOption();
+		PurchaseLineItemIdentifier purchaseLineItemIdentifier = purchaseLineItemOptionIdentifier.getPurchaseLineItemOptions().getPurchaseLineItem();
+		List<String> guidPathFromRootItem = purchaseLineItemIdentifier.getLineItemId().getValue();
+		String optionId = purchaseLineItemOptionIdentifier.getOptionId().getValue();
 		String valueId = identifier.getOptionValueId().getValue();
-
-		return productSkuRepository.getProductSkuWithAttributesByGuidAsSingle(lineItemId)
+		PurchaseIdentifier purchaseIdentifier = purchaseLineItemIdentifier.getPurchaseLineItems().getPurchase();
+		String scope = purchaseIdentifier.getPurchases().getScope().getValue();
+		String purchaseId = purchaseIdentifier.getPurchaseId().getValue();
+		return orderRepository.findProductSku(scope, purchaseId, guidPathFromRootItem)
 				.map(productSku -> productSku.getProduct().getProductType())
 				.map(ProductType::getSkuOptions)
 				.flatMap(skuOptions -> findOptionValue(optionId, valueId, skuOptions));
@@ -87,13 +93,12 @@ public class OptionValueEntityRepositoryImpl<E extends PurchaseLineItemOptionVal
 	}
 
 	@Reference
-	public void setProductSkuRepository(final ProductSkuRepository productSkuRepository) {
-		this.productSkuRepository = productSkuRepository;
-	}
-
-	@Reference
 	public void setResourceOperationContext(final ResourceOperationContext resourceOperationContext) {
 		this.resourceOperationContext = resourceOperationContext;
 	}
 
+	@Reference
+	public void setOrderRepository(final OrderRepository orderRepository) {
+		this.orderRepository = orderRepository;
+	}
 }

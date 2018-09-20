@@ -9,6 +9,7 @@ import com.elasticpath.rest.resource.paymenttokens.integration.constants.Payment
 /**
  * Registry to lookup {@link CreatePaymentTokenHandler}s.
  */
+@SuppressWarnings("rawtypes")
 public interface CreatePaymentTokenHandlerRegistry {
 
 	/**

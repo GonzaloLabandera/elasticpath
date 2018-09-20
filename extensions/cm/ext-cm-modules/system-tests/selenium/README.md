@@ -7,9 +7,23 @@ In ext-cm-webapp-runner, run the following:
 mvn clean tomcat7:run-war -Dorg.eclipse.rap.rwt.enableUITests=true
 ```
 
+**Setting up commerce/ep-commerce/extensions/cm/ext-cm-modules/system-tests Project in IntelliJ**
+
+1. Create Project from Existing Sources using the path above.
+2. Select Import project from external model -> Choose maven
+3. Select checkboxes for:
+    * Search for projects recursively
+    * Import Maven projects automatically
+4. Click next until Finish.
+5. Download the Cucumber.java and Cucumber.groovy plugins in IntelliJ
+6. Go to File > Settings > Editor > File type > Cucumber Scenario
+    * add *.feature to the Cucumber Scenario file type.
+
 **Building Project**
-Build the following to download dependencies: commerce-extensions/cm/ext-cm-modules/system-tests
-mvn clean install -DskipAllTests
+
+Build the following projects using this command: mvn clean install -DskipAllTests
+* commerce/ep-commerce/extensions/cm/ext-cm-modules/system-tests
+* commerce/ep-commerce/extensions/cm/ext-cm-modules/system-tests/selenium
 
 **Running Tests:**
 

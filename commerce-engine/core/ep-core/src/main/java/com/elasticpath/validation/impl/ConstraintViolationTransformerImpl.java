@@ -16,7 +16,7 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 
-import com.elasticpath.common.dto.StructuredErrorMessage;
+import com.elasticpath.base.common.dto.StructuredErrorMessage;
 import com.elasticpath.validation.ConstraintViolationTransformer;
 import com.elasticpath.validation.validators.util.DynamicCartItemModifierField;
 

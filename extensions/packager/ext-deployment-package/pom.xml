@@ -13,11 +13,6 @@
 
 	<name>Extension Deployment Package</name>
 
-	<properties>
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<tomcat.version>7.0.81</tomcat.version>
-	</properties>
-
 	<build>
 		<resources>
 			<resource>
@@ -31,7 +26,7 @@
 		<plugins>
 			<plugin>
 				<artifactId>maven-resources-plugin</artifactId>
-				<version>2.4.1</version>
+				<version>${maven-resources-plugin.version}</version>
 				<configuration>
 					<delimiters>
 						<delimiter>@</delimiter>
@@ -47,7 +42,8 @@
 			</plugin>
 			<plugin>
 				<artifactId>maven-assembly-plugin</artifactId>
-				<version>2.4</version>
+				<!-- Override version because 2.5.5 throws java.lang.OutOfMemoryError -->
+				<version>2.5.4</version>
 				<executions>
 					<execution>
 						<id>create-tomcat</id>
@@ -118,13 +114,7 @@
 		<dependency>
 			<groupId>com.elasticpath.rest.relos</groupId>
 			<artifactId>ep-rest-studio</artifactId>
-			<version>${cortex.version}</version>
-			<type>war</type>
-		</dependency>
-		<dependency>
-			<groupId>com.elasticpath.extensions</groupId>
-			<artifactId>ext-batch-webapp</artifactId>
-			<version>${project.version}</version>
+			<version>${api-platform.version}</version>
 			<type>war</type>
 		</dependency>
 		<dependency>
@@ -136,12 +126,6 @@
 		<dependency>
 			<groupId>com.elasticpath.extensions</groupId>
 			<artifactId>ext-integration-webapp</artifactId>
-			<version>${project.version}</version>
-			<type>war</type>
-		</dependency>
-		<dependency>
-			<groupId>com.elasticpath.extensions.cm</groupId>
-			<artifactId>ext-cm-webapp</artifactId>
 			<version>${project.version}</version>
 			<type>war</type>
 		</dependency>
@@ -166,7 +150,7 @@
 		<dependency>
 			<groupId>com.elasticpath.db</groupId>
 			<artifactId>core-schema</artifactId>
-			<version>${platform.version}</version>
+			<version>${dce.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>com.elasticpath.extensions</groupId>
@@ -214,12 +198,12 @@
 		<dependency>
 			<groupId>org.apache.geronimo.specs</groupId>
 			<artifactId>geronimo-j2ee-management_1.1_spec</artifactId>
-			<version>1.0.1</version>
+			<version>${org.apache.geronimo.management.spec.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.geronimo.specs</groupId>
 			<artifactId>geronimo-jms_1.1_spec</artifactId>
-			<version>1.1.1</version>
+			<version>${org.apache.geronimo.specs.version}</version>
 			<scope>compile</scope>
 		</dependency>
 		<dependency>
@@ -244,4 +228,33 @@
 		</dependency>
 
 	</dependencies>
+
+	<profiles>
+		<profile>
+			<!-- When building perf packages, batch and cm wars are not required, because we don't perf test these apps.
+			However, these apps are required for QA boxes
+			-->
+			<id>include-batch-and-cm-wars</id>
+			<activation>
+				<property>
+					<name>exclude.batch.and.cm.wars</name>
+					<value>!true</value>
+				</property>
+			</activation>
+			<dependencies>
+				<dependency>
+					<groupId>com.elasticpath.extensions</groupId>
+					<artifactId>ext-batch-webapp</artifactId>
+					<version>${project.version}</version>
+					<type>war</type>
+				</dependency>
+				<dependency>
+					<groupId>com.elasticpath.extensions.cm</groupId>
+					<artifactId>ext-cm-webapp</artifactId>
+					<version>${project.version}</version>
+					<type>war</type>
+				</dependency>
+			</dependencies>
+		</profile>
+	</profiles>
 </project>

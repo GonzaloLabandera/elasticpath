@@ -1,5 +1,7 @@
 package com.elasticpath.cucumber.definitions;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -10,7 +12,7 @@ import cucumber.api.java.en.When;
 import org.apache.log4j.Logger;
 
 import com.elasticpath.cucumber.util.CortexMacrosTestBase;
-import com.elasticpath.selenium.dialogs.AddCustomerAddressDialog;
+import com.elasticpath.selenium.dialogs.AddEditCustomerAddressDialog;
 import com.elasticpath.selenium.dialogs.CompleteShipmentDialog;
 import com.elasticpath.selenium.dialogs.ConfirmDialog;
 import com.elasticpath.selenium.dialogs.EditItemDetailsDialog;
@@ -20,14 +22,15 @@ import com.elasticpath.selenium.domainobjects.Product;
 import com.elasticpath.selenium.editor.CustomerEditor;
 import com.elasticpath.selenium.editor.OrderEditor;
 import com.elasticpath.selenium.editor.RmaEditor;
-import com.elasticpath.selenium.framework.util.SeleniumDriverSetup;
 import com.elasticpath.selenium.navigations.CustomerService;
 import com.elasticpath.selenium.navigations.ShippingReceiving;
 import com.elasticpath.selenium.resultspane.OrderSearchResultPane;
 import com.elasticpath.selenium.resultspane.RmaSearchResultPane;
+import com.elasticpath.selenium.setup.SetUp;
 import com.elasticpath.selenium.toolbars.ActivityToolbar;
 import com.elasticpath.selenium.toolbars.CustomerServiceActionToolbar;
 import com.elasticpath.selenium.toolbars.ShippingReceivingActionToolbar;
+import com.elasticpath.selenium.util.Constants;
 import com.elasticpath.selenium.wizards.CompleteReturnWizard;
 import com.elasticpath.selenium.wizards.CreateExchangeWizard;
 import com.elasticpath.selenium.wizards.CreateRefundWizard;
@@ -42,7 +45,6 @@ public class OrderDefinition {
 
 	private static final String ORDER_DETAILS_TAB = "Details";
 	private static final String CUSTOMERNAME_COLUUMNNAME = "Customer Name";
-	private static final String ORDER_STATUS_COLUMNNAME = "Order Status";
 	private static final String ORDER_NUMBER_COLUMNNAME = "Order #";
 	private static final Logger LOGGER = Logger.getLogger(OrderDefinition.class);
 	private final CustomerService customerService;
@@ -60,7 +62,7 @@ public class OrderDefinition {
 	private CreateRefundWizard createRefundWizard;
 	private CreateReturnWizard createReturnWizard;
 	private CreateExchangeWizard createExchangeWizard;
-	private AddCustomerAddressDialog addCustomerAddressDialog;
+	private AddEditCustomerAddressDialog addEditCustomerAddressDialog;
 	private CompleteShipmentDialog completeShipmentDialog;
 	private MoveItemDialog moveItemDialog;
 	private SelectASkuDialog selectASkuDialog;
@@ -77,10 +79,10 @@ public class OrderDefinition {
 	 * @param product Product.
 	 */
 	public OrderDefinition(final Product product) {
-		activityToolbar = new ActivityToolbar((SeleniumDriverSetup.getDriver()));
-		shippingReceivingActionToolbar = new ShippingReceivingActionToolbar(SeleniumDriverSetup.getDriver());
-		customerService = new CustomerService(SeleniumDriverSetup.getDriver());
-		customerServiceActionToolbar = new CustomerServiceActionToolbar(SeleniumDriverSetup.getDriver());
+		activityToolbar = new ActivityToolbar((SetUp.getDriver()));
+		shippingReceivingActionToolbar = new ShippingReceivingActionToolbar(SetUp.getDriver());
+		customerService = new CustomerService(SetUp.getDriver());
+		customerServiceActionToolbar = new CustomerServiceActionToolbar(SetUp.getDriver());
 		this.product = product;
 	}
 
@@ -91,8 +93,17 @@ public class OrderDefinition {
 	 */
 	@When("^I search for an order by number (.+)$")
 	public void searchOrderByNumber(final String orderNum) {
+		assertThat(null == orderNum || orderNum.isEmpty()).as("OrderNumber is null or empty because order was not created successfully")
+				.isFalse();
 		customerService.enterOrderNumber(orderNum);
 		orderSearchResultPane = customerService.clickOrderSearch();
+
+		int index = 0;
+		while (!orderSearchResultPane.isOrderInList(orderNum, "Order #") && index < Constants.UUID_END_INDEX) {
+			orderSearchResultPane.sleep(Constants.SLEEP_HALFSECOND_IN_MILLIS);
+			customerService.clickOrderSearch();
+			index++;
+		}
 	}
 
 	/**
@@ -112,7 +123,7 @@ public class OrderDefinition {
 	@When("^I search for the latest orders by email$")
 	public void searchLatestByEmail() {
 		searchAndOpenLatestOrderEditor();
-		customerService.clearInputFields();
+		customerService.clearInputFieldsInOrdersTab();
 		customerService.enterEmailUserID(orderEditor.getCustomerEmail());
 		orderSearchResultPane = customerService.clickOrderSearch();
 	}
@@ -138,21 +149,11 @@ public class OrderDefinition {
 	/**
 	 * Verify customer name in search results pane.
 	 *
-	 * @param orderNumber the order number.
+	 * @param customerName the customer name.
 	 */
 	@Then("^I should see customer name (.+) in search results pane$")
-	public void verifyCustomerNameInSearchResultsPane(final String orderNumber) {
-		orderSearchResultPane.verifyOrderColumnValueAndSelectRow(orderNumber, CUSTOMERNAME_COLUUMNNAME);
-	}
-
-	/**
-	 * Open order editor.
-	 *
-	 * @param orderStatus the order status.
-	 */
-	@And("^I open the order editor for (?:a|an) (.+) order$")
-	public void openOrderEditor(final String orderStatus) {
-		orderEditor = orderSearchResultPane.selectOrderAndOpenOrderEditor(orderStatus, ORDER_STATUS_COLUMNNAME);
+	public void verifyCustomerNameInSearchResultsPane(final String customerName) {
+		orderSearchResultPane.verifyOrderColumnValueAndSelectRow(customerName, CUSTOMERNAME_COLUUMNNAME);
 	}
 
 	/**
@@ -180,16 +181,32 @@ public class OrderDefinition {
 	 */
 	@And("^I click create return button")
 	public void clickCreateReturnButton() {
+		int counter = 0;
+		boolean isButtonInViewPort = orderEditor.isCreateReturnButtonInViewport();
+		while (!isButtonInViewPort && counter < Constants.RETRY_COUNTER_3) {
+			isButtonInViewPort = orderEditor.isCreateReturnButtonInViewport();
+			counter++;
+		}
+
+		assertThat(isButtonInViewPort)
+				.as("Create Return buttton is not in view")
+				.isTrue();
+
 		createReturnWizard = orderEditor.clickCreateReturnButton();
 	}
 
 	/**
 	 * Completes the order.
-	 *
 	 */
 	@And("^I (?:can complete|complete) the order shipment")
 	public void completeOrderShipment() {
 		selectOrderEditorTab(ORDER_DETAILS_TAB);
+
+		int counter = 0;
+		while (!orderEditor.isReleaseShipmentButtonInViewport() && counter < Constants.RETRY_COUNTER_3) {
+			counter++;
+		}
+
 		orderEditor.clickReleaseShipmentButton();
 		activityToolbar.clickShippingReceivingButton();
 		completeShipmentDialog = shippingReceivingActionToolbar.clickCompleteShipmentButton();
@@ -250,9 +267,17 @@ public class OrderDefinition {
 	/**
 	 * Clear input fields.
 	 */
-	@When("^I clear the input fields$")
-	public void clearInputFields() {
-		customerService.clearInputFields();
+	@When("^I clear the input fields in customers tab$")
+	public void clearInputFieldsInCustomersTab() {
+		customerService.clearInputFieldsInCustomersTab();
+	}
+
+	/**
+	 * Clear input fields.
+	 */
+	@When("^I clear the input field in orders tabs$")
+	public void clearInputFieldsInOrdersTab() {
+		customerService.clearInputFieldsInOrdersTab();
 	}
 
 	/**
@@ -262,6 +287,8 @@ public class OrderDefinition {
 	public void searchAndOpenLatestOrderEditor() {
 		String orderNumber = CortexMacrosTestBase.PURCHASE_NUMBER;
 		LOGGER.info("ordernumber.... " + orderNumber);
+		assertThat(null == orderNumber || orderNumber.isEmpty()).as("OrderNumber is null or empty because order was not created successfully")
+				.isFalse();
 		customerService.enterOrderNumber(orderNumber);
 		orderSearchResultPane = customerService.clickOrderSearch();
 		orderEditor = orderSearchResultPane.selectOrderAndOpenOrderEditor(orderNumber, ORDER_NUMBER_COLUMNNAME);
@@ -274,8 +301,8 @@ public class OrderDefinition {
 	public void searchOrderByNumber() {
 		String orderNumber = CortexMacrosTestBase.PURCHASE_NUMBER;
 		LOGGER.info("searching for ordernumber.... " + orderNumber);
-		customerService.enterOrderNumber(orderNumber);
-		orderSearchResultPane = customerService.clickOrderSearch();
+
+		searchOrderByNumber(orderNumber);
 	}
 
 	/**
@@ -519,7 +546,7 @@ public class OrderDefinition {
 	 */
 	@Then("^I click Add Address button$")
 	public void clickAddAddressButton() {
-		addCustomerAddressDialog = customerEditor.clickAddAddressButton();
+		addEditCustomerAddressDialog = customerEditor.clickAddAddressButton();
 	}
 
 	/**
@@ -531,15 +558,15 @@ public class OrderDefinition {
 	public void fillInCustomerAddressDialog(final Map<String, String> addressMap) {
 		this.addressNameToCheck = addressMap.get("first name") + " " + addressMap.get("last name");
 		this.addressPhoneToCheck = addressMap.get("phone");
-		addCustomerAddressDialog.enterFirstName(addressMap.get("first name"));
-		addCustomerAddressDialog.enterLastName(addressMap.get("last name"));
-		addCustomerAddressDialog.enterAddressLine1(addressMap.get("address line 1"));
-		addCustomerAddressDialog.enterCity(addressMap.get("city"));
-		addCustomerAddressDialog.selectState(addressMap.get("state"));
-		addCustomerAddressDialog.enterZip(addressMap.get("zip"));
-		addCustomerAddressDialog.selectCountry(addressMap.get("country"));
-		addCustomerAddressDialog.enterPhone(addressMap.get("phone"));
-		addCustomerAddressDialog.clickSave();
+		addEditCustomerAddressDialog.enterFirstName(addressMap.get("first name"));
+		addEditCustomerAddressDialog.enterLastName(addressMap.get("last name"));
+		addEditCustomerAddressDialog.enterAddressLine1(addressMap.get("address line 1"));
+		addEditCustomerAddressDialog.enterCity(addressMap.get("city"));
+		addEditCustomerAddressDialog.selectState(addressMap.get("state"));
+		addEditCustomerAddressDialog.enterZip(addressMap.get("zip"));
+		addEditCustomerAddressDialog.selectCountry(addressMap.get("country"));
+		addEditCustomerAddressDialog.enterPhone(addressMap.get("phone"));
+		addEditCustomerAddressDialog.clickSave();
 		customerServiceActionToolbar.clickSaveButton();
 	}
 
@@ -614,5 +641,39 @@ public class OrderDefinition {
 	@Then("^the item received quantity shows as (.+)$")
 	public void verifyReceivedQuantity(final String recQuantity) {
 		orderEditor.verifyReturnedSkuColumnValue(recQuantity, "Rec Qty");
+	}
+
+	/**
+	 * Update Shipping Address for the Order.
+	 *
+	 * @param addressMap the address map
+	 */
+	@When("^I update and save the following shipping address for the order$")
+	public void updateOrderShippingAddress(final Map<String, String> addressMap) {
+		selectOrderEditorTab(ORDER_DETAILS_TAB);
+		addEditCustomerAddressDialog = orderEditor.clickEditAddressButton();
+		addEditCustomerAddressDialog.enterAddressLine1(addressMap.get("address line 1"));
+		addEditCustomerAddressDialog.enterPhone(addressMap.get("phone"));
+		addEditCustomerAddressDialog.clickSave();
+		customerServiceActionToolbar.clickSaveButton();
+		customerServiceActionToolbar.clickReloadActiveEditor();
+	}
+
+	/**
+	 * Verify Unlock Order Button.
+	 */
+	@Then("^Unlock Order button is disabled$")
+	public void verifyUnlockOrderButton() {
+		orderEditor.verifyUnlockOrderIsNotEnabled();
+	}
+
+	/**
+	 * Verify Shipment Discount Value.
+	 *
+	 * @param shipmentDiscount String
+	 */
+	@Then("^Shipment Discount of (.+) is present in the order details$")
+	public void verifyShipmentDiscountValue(final String shipmentDiscount) {
+		orderEditor.verifyShipmentDiscountValue(shipmentDiscount);
 	}
 }

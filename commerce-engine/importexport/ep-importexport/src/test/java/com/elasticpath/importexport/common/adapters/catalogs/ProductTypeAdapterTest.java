@@ -11,7 +11,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -22,7 +21,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.elasticpath.commons.beanframework.BeanFactory;
 import com.elasticpath.commons.constants.ContextIdNames;
@@ -67,7 +66,6 @@ public class ProductTypeAdapterTest {
 	public void setUp() throws Exception {
 		when(mockTaxCode.getCode()).thenReturn(PRODUCT_TAX_CODE);
 		when(mockBeanFactory.getBean(ContextIdNames.PRODUCT_TYPE)).thenReturn(new ProductTypeImpl());
-		when(mockCachingService.findSkuOptionByKey(SKUOPTION_KEY)).thenReturn(mockSkuOption);
 		when(mockCachingService.findTaxCodeByCode(PRODUCT_TAX_CODE)).thenReturn(mockTaxCode);
 	}
 
@@ -90,17 +88,17 @@ public class ProductTypeAdapterTest {
 			@Override
 			List<String> createAssignedSkuOptions(final ProductType productType) {
 				assertEquals(mockDomain, productType);
-				return Arrays.asList(ASSIGNED_SKU_OPTION);
+				return Collections.singletonList(ASSIGNED_SKU_OPTION);
 			}
 			@Override
 			List<String> createAssignedSkuAttributes(final ProductType productType) {
 				assertEquals(mockDomain, productType);
-				return Arrays.asList(ASSIGNED_SKU_ATTRIBUTE);
+				return Collections.singletonList(ASSIGNED_SKU_ATTRIBUTE);
 			}
 			@Override
 			List<String> createAssignedAttributes(final ProductType productType) {
 				assertEquals(mockDomain, productType);
-				return Arrays.asList(ASSIGNED_ATTRIBUTE);
+				return Collections.singletonList(ASSIGNED_ATTRIBUTE);
 			}
 		};
 		setUpProductTypeAdapter(productTypeAdapter);
@@ -112,9 +110,9 @@ public class ProductTypeAdapterTest {
 		assertEquals(PRODUCT_TYPE_NAME, productTypeDTO.getName());
 		assertEquals(PRODUCT_TAX_CODE, productTypeDTO.getDefaultTaxCode());
 		
-		assertEquals(Arrays.asList(ASSIGNED_SKU_ATTRIBUTE), productTypeDTO.getMultiSku().getAssignedAttributes());
-		assertEquals(Arrays.asList(ASSIGNED_SKU_OPTION), productTypeDTO.getMultiSku().getAssignedSkuOptions());
-		assertEquals(Arrays.asList(ASSIGNED_ATTRIBUTE), productTypeDTO.getAssignedAttributes());
+		assertEquals(Collections.singletonList(ASSIGNED_SKU_ATTRIBUTE), productTypeDTO.getMultiSku().getAssignedAttributes());
+		assertEquals(Collections.singletonList(ASSIGNED_SKU_OPTION), productTypeDTO.getMultiSku().getAssignedSkuOptions());
+		assertEquals(Collections.singletonList(ASSIGNED_ATTRIBUTE), productTypeDTO.getAssignedAttributes());
 
 		assertThat(productTypeDTO.getAssignedCartItemModifierGroups(), contains(CARTITEM_MODIFIER_GROUP_CODE));
 	}
@@ -136,7 +134,7 @@ public class ProductTypeAdapterTest {
 	private ProductTypeDTO createProductTypeDTO() {
 		final MultiSkuDTO multiSku = new MultiSkuDTO();
 		multiSku.setAssignedAttributes(Collections.emptyList());
-		multiSku.setAssignedSkuOptions(Arrays.asList(SKUOPTION_KEY));
+		multiSku.setAssignedSkuOptions(Collections.singletonList(SKUOPTION_KEY));
 		
 		final ProductTypeDTO dto = new ProductTypeDTO();
 		dto.setName(PRODUCT_TYPE_NAME);
@@ -144,7 +142,7 @@ public class ProductTypeAdapterTest {
 		dto.setDefaultTaxCode(PRODUCT_TAX_CODE);
 		dto.setMultiSku(multiSku);
 		dto.setNoDiscount(Boolean.FALSE);
-		dto.setAssignedCartItemModifierGroups(Arrays.asList(CARTITEM_MODIFIER_GROUP_CODE));
+		dto.setAssignedCartItemModifierGroups(Collections.singletonList(CARTITEM_MODIFIER_GROUP_CODE));
 		return dto;
 	}
 
@@ -266,7 +264,7 @@ public class ProductTypeAdapterTest {
 
 		List<String> result = productTypeAdapter.createAssignedSkuOptions(mockDomain);
 		
-		assertEquals(Arrays.asList(SKUOPTION_KEY), result);
+		assertEquals(Collections.singletonList(SKUOPTION_KEY), result);
 	}
 	
 	/**

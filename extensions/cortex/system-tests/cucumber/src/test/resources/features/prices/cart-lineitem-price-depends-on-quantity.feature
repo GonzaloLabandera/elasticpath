@@ -1,6 +1,6 @@
 @Prices
 
-Feature: Prices - Cart LineItem Price Depends on Quantity (price tiers)
+Feature: Prices - Cart LineItem Price Depends on Quantity 'price tiers'
   As a client developer,
   I want to retrieve tiered pricing,
   to entice shoppers to purchase in larger quantities.

@@ -8,7 +8,6 @@ import cucumber.api.java.en.Given;
 import cucumber.api.java.en.When;
 import org.apache.commons.lang.LocaleUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.ContextConfiguration;
 
 import com.elasticpath.domain.builder.customer.CustomerBuilder;
 import com.elasticpath.domain.customer.Customer;
@@ -19,7 +18,6 @@ import com.elasticpath.uat.ScenarioContextValueHolder;
 /**
  * Step Definitions for Customer-based functionality.
  */
-@ContextConfiguration("classpath:cucumber.xml")
 public class CustomerStepDefinitions {
 
 	@Autowired

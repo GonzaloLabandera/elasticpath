@@ -5,7 +5,7 @@ package com.elasticpath.rest.relos.rs.subject.attribute.epcommerce;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
-import static org.mockito.Matchers.anyString;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
@@ -15,7 +15,6 @@ import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -26,7 +25,7 @@ import com.google.common.collect.Iterators;
 import org.hamcrest.Matchers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.elasticpath.domain.store.Store;
 import com.elasticpath.rest.command.ExecutionResultFactory;
@@ -56,11 +55,6 @@ public class CurrencySubjectAttributeLookupStrategyTest {
 
 	@InjectMocks
 	CurrencySubjectAttributeLookupStrategy classUnderTest;
-
-	@Before
-	public void setup() {
-		when(store.getCode()).thenReturn("store");
-	}
 
 	@Test
 	public void testMissingStore() {
@@ -137,7 +131,6 @@ public class CurrencySubjectAttributeLookupStrategyTest {
 	@Test
 	public void testFindBestCurrencyWhenRequestHasDifferentPreferenceAsStore() {
 		when(store.getSupportedCurrencies()).thenReturn(Arrays.asList(CAD_CURRENCY, USD_CURRENCY));
-		when(store.getDefaultCurrency()).thenReturn(CAD_CURRENCY);
 
 		Currency actual = classUnderTest.findBestSupportedCurrency(USD_CURRENCY, store);
 

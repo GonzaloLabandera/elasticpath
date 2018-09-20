@@ -21,7 +21,7 @@ This report provides a list of data points values stored for a  customer.
 
 3. From the **Store** list, select the store for the report.
 
-4. In the **Customer ID** field, enter the customer's ID.
+4. In the **User ID** field, enter the customer's ID.
 
 8. Select the desired format from the **Report Format** list.  
 

@@ -6,9 +6,9 @@ package com.elasticpath.service.datapolicy.impl;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyCollectionOf;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyCollection;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -29,7 +29,7 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.elasticpath.base.exception.EpSystemException;
 import com.elasticpath.domain.datapolicy.DataPoint;
@@ -321,7 +321,7 @@ public class DataPointValueServiceImplTest {
 		when(mockDataPoint.getDataLocation()).thenReturn(dataPointLocation);
 
 		when(reader.isApplicableTo(dataPointLocation)).thenReturn(true);
-		when(reader.readValues(eq(CUSTOMER_GUID), anyCollectionOf(DataPoint.class))).thenReturn(dataPointValues);
+		when(reader.readValues(eq(CUSTOMER_GUID), anyCollection())).thenReturn(dataPointValues);
 
 		Collection<DataPointValue> actualResult = service.getCustomerDataPointValuesForStoreByPolicyGuid(CUSTOMER_GUID, STORE_CODE, POLICY_GUID);
 
@@ -330,7 +330,7 @@ public class DataPointValueServiceImplTest {
 
 		verify(persistenceEngine).retrieveByNamedQuery(query, CUSTOMER_GUID, STORE_CODE, POLICY_GUID);
 		verify(reader).isApplicableTo(dataPointLocation);
-		verify(reader).readValues(eq(CUSTOMER_GUID), anyCollectionOf(DataPoint.class));
+		verify(reader).readValues(eq(CUSTOMER_GUID), anyCollection());
 	}
 
 }

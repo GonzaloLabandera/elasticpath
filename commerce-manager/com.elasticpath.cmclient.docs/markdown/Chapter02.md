@@ -29,7 +29,7 @@ The Elastic Path Commerce user interface is divided into the following sections.
 
 |Callout | Pane | Description |
 |---  | ---     | ---         |
-| 1 |Toolbar | Contains navigation icons to each activity in the application, and icons for activity-specific actions. The toolbar also contains the **User** menu on the upper right corner of the right panes, with links to the Help documentation, pagination settings, and account password settings. |
+| 1 |Toolbar | Provides navigation icons for each activity in the application, and icons for activity-specific actions. The **User** menu on the upper right corner in the right pane provides links to the Help documentation, pagination settings, time zone settings, and account password settings. |
 | 2| Right Panes | Changes based on the activity. Typically, the top right pane displays search results or a listing of items, and the bottom right pane displays information about a specific item or search result. |
 | 3 | Left Pane | Contains search or navigation options for an activity. |
 

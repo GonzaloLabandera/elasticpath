@@ -8,7 +8,10 @@ import org.openqa.selenium.WebDriver;
  */
 public class EditShortTextMultiValueAttributeDialog extends AbstractDialog {
 
-	private static final String SHORT_TEXT_MULTI_VALUE_DIALOG_CSS = "div[automation-id='com.elasticpath.cmclient.catalog.CatalogMessages"
+	/**
+	 * CSS selector used to identify the dialog.
+	 */
+	public static final String SHORT_TEXT_MULTI_VALUE_DIALOG_CSS = "div[automation-id='com.elasticpath.cmclient.catalog.CatalogMessages"
 			+ ".ShortTextMultiValueDialog_WinTitle'] ";
 	private static final String ADD_VALUE_BUTTON_CSS = "div[automation-id='com.elasticpath.cmclient.catalog.CatalogMessages"
 			+ ".ShortTextMultiValueDialog_AddValue']";
@@ -29,7 +32,7 @@ public class EditShortTextMultiValueAttributeDialog extends AbstractDialog {
 	 * @return the dialog.
 	 */
 	public AddShortTextAttributeDialog clickAddValueButton() {
-		clickButton(ADD_VALUE_BUTTON_CSS, "Add Value");
+		clickButton(ADD_VALUE_BUTTON_CSS, "Add Value", AddShortTextAttributeDialog.ADD_SHORT_TEXT_DIALOG_CSS);
 		return new AddShortTextAttributeDialog(getDriver());
 	}
 

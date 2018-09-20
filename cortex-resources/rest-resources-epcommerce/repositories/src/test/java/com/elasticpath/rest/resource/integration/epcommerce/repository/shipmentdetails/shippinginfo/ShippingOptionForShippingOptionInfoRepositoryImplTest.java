@@ -14,14 +14,14 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.elasticpath.rest.definition.shipmentdetails.ShippingOptionIdentifier;
 import com.elasticpath.rest.definition.shipmentdetails.ShippingOptionInfoIdentifier;
 import com.elasticpath.rest.id.type.CompositeIdentifier;
 import com.elasticpath.rest.id.type.StringIdentifier;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.shipmentdetails.ShipmentDetailsConstants;
-import com.elasticpath.rest.resource.integration.epcommerce.repository.shipping.ShippingServiceLevelRepository;
+import com.elasticpath.rest.resource.integration.epcommerce.repository.shipping.ShippingOptionRepository;
 
 /**
  * Test for {@link ShippingOptionForShippingOptionInfoRepositoryImpl}.
@@ -43,11 +43,11 @@ public class ShippingOptionForShippingOptionInfoRepositoryImplTest {
 	private ShippingOptionForShippingOptionInfoRepositoryImpl<ShippingOptionInfoIdentifier, ShippingOptionIdentifier> repository;
 
 	@Mock
-	private ShippingServiceLevelRepository shippingServiceLevelRepository;
+	private ShippingOptionRepository shippingOptionRepository;
 
 	@Test
 	public void verifyGetElementsReturnsSelectedShippingOptionWhenItExists() {
-		when(shippingServiceLevelRepository.getSelectedShippingOptionIdForShipmentDetails(SCOPE, shipmentDetailsId))
+		when(shippingOptionRepository.getSelectedShippingOptionCodeForShipmentDetails(SCOPE, shipmentDetailsId))
 				.thenReturn(Maybe.just(SELECTED_ID));
 
 		repository.getElements(shippingOptionInfoIdentifier)
@@ -58,7 +58,7 @@ public class ShippingOptionForShippingOptionInfoRepositoryImplTest {
 
 	@Test
 	public void verifyGetElementsReturnsNotFoundWhenSelectedShippingOptionDoesNotExist() {
-		when(shippingServiceLevelRepository.getSelectedShippingOptionIdForShipmentDetails(SCOPE, shipmentDetailsId))
+		when(shippingOptionRepository.getSelectedShippingOptionCodeForShipmentDetails(SCOPE, shipmentDetailsId))
 				.thenReturn(Maybe.empty());
 
 		repository.getElements(shippingOptionInfoIdentifier)

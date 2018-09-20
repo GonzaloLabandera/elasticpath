@@ -9,6 +9,7 @@ import org.junit.runner.RunWith;
  */
 @RunWith(Cucumber.class)
 @CucumberOptions(format = {"pretty", "html:target/cucumber-html-reports/changeset", "json:target/changeset.json"},
+		glue = {"classpath:com.elasticpath.cucumber", "classpath:com.elasticpath.jms.cucumber"},
 		tags = {"@changeset"},
 		features = "src/test/resources/com.elasticpath.cucumber/changeset")
 public class RunChangeSetTestsIT {

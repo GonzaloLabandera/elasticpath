@@ -11,13 +11,8 @@ import java.util.List;
 import cucumber.api.java.Before;
 import cucumber.api.java.en.And;
 import cucumber.api.java.en.When;
-
-import com.google.common.base.Function;
-import com.google.common.collect.Iterables;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.test.context.ContextConfiguration;
 
 import com.elasticpath.common.dto.ShoppingItemDto;
 import com.elasticpath.commons.beanframework.BeanFactory;
@@ -37,7 +32,6 @@ import com.elasticpath.domain.order.OrderReturnType;
 import com.elasticpath.domain.order.OrderShipment;
 import com.elasticpath.domain.order.OrderSku;
 import com.elasticpath.domain.order.PhysicalOrderShipment;
-import com.elasticpath.domain.shipping.ShippingServiceLevel;
 import com.elasticpath.domain.shoppingcart.ShoppingCart;
 import com.elasticpath.domain.shoppingcart.ShoppingItem;
 import com.elasticpath.domain.shoppingcart.ShoppingItemPricingSnapshot;
@@ -46,13 +40,13 @@ import com.elasticpath.service.catalog.ProductSkuLookup;
 import com.elasticpath.service.order.ReturnAndExchangeService;
 import com.elasticpath.service.order.ReturnExchangeType;
 import com.elasticpath.service.shoppingcart.PricingSnapshotService;
+import com.elasticpath.shipping.connectivity.dto.ShippingOption;
 import com.elasticpath.test.persister.testscenarios.SimpleStoreScenario;
 import com.elasticpath.uat.ScenarioContextValueHolder;
 
 /**
  * Step Definitions for order return and exchange functionality.
  */
-@ContextConfiguration("classpath:cucumber.xml")
 public class OrderReturnAndExchangeStepDefinitions {
 
 	@Autowired
@@ -184,14 +178,7 @@ public class OrderReturnAndExchangeStepDefinitions {
 															 final Address shippingAddress) {
 		final SimpleStoreScenario scenario = storeScenarioHolder.get();
 
-		@SuppressWarnings("unchecked")
-		final Collection<ShoppingItem> rootShoppingItemsCollection = (Collection<ShoppingItem>) originalOrder.getRootShoppingItems();
-		final Iterable<OrderSku> orderSkus = Iterables.transform(rootShoppingItemsCollection, new Function<ShoppingItem, OrderSku>() {
-			@Override
-			public OrderSku apply(final ShoppingItem input) {
-				return (OrderSku) input;
-			}
-		});
+		final Collection<OrderSku> orderSkus = originalOrder.getRootShoppingItems();
 
 		final List<ShoppingItem> exchangeCartItems = new ArrayList<>();
 
@@ -209,10 +196,10 @@ public class OrderReturnAndExchangeStepDefinitions {
 			exchangeCartItems.add(replacementItem);
 		}
 
-		final ShippingServiceLevel shippingServiceLevel = scenario.getShippingServiceLevel();
+		final ShippingOption shippingOption = scenario.getShippingOption();
 
 		// this method calls exchangeOrderReturn.setExchangeShoppingCart() with the generated shopping cart
-		return returnAndExchangeService.populateShoppingCart(exchangeOrderReturn, exchangeCartItems, shippingServiceLevel, shippingAddress);
+		return returnAndExchangeService.populateShoppingCart(exchangeOrderReturn, exchangeCartItems, shippingOption, shippingAddress);
 	}
 
 	private void populateOrderReturnSkuQuantityAndReason(final OrderReturn orderReturn) {

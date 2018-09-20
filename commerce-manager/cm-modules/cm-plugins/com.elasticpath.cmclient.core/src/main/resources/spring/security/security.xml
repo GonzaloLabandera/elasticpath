@@ -25,11 +25,11 @@
 
 	<bean id="accessDecisionManager" class="org.springframework.security.access.vote.AffirmativeBased">
 		<property name="allowIfAllAbstainDecisions" value="false" />
-		<property name="decisionVoters">
+		<constructor-arg name="decisionVoters">
 			<list>
 				<ref bean="roleVoter"/>
 			</list>
-		</property>
+		</constructor-arg>
 	</bean>
 
 	<bean id="roleVoter" class="org.springframework.security.access.vote.RoleVoter">

@@ -16,7 +16,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.elasticpath.domain.order.OrderShipment;
 import com.elasticpath.domain.shipping.ShipmentType;
@@ -52,19 +52,16 @@ public class OrderShipmentReleaseFailedEmailProducerTest {
 	private OrderShipmentReleaseFailedEmailProducer producer;
 
 	@Test
-	public void verifyEmailProducerFromEventMessage() throws Exception {
+	public void verifyEmailProducerFromEventMessage() {
 		final EmailDto expectedEmail = EmailDto.builder().build();
 		final String shipmentNumber = "SHIP-001";
 
 		final OrderShipment shipment = mock(OrderShipment.class);
 
-		final Map<String, Object> data = ImmutableMap.<String, Object>of(
+		final Map<String, Object> data = ImmutableMap.of(
 				ERROR_MESSAGE_KEY, ERROR_MESSAGE,
 				ORDER_GUID_KEY, ORDER_GUID, // this is not used by the producer, but real messages will contain this field anyway.
 				SHIPMENT_TYPE_KEY, SHIPMENT_TYPE_NAME);
-
-		when(shipment.getShipmentNumber())
-				.thenReturn(shipmentNumber);
 
 		when(orderService.findOrderShipment(shipmentNumber, ShipmentType.PHYSICAL))
 				.thenReturn(shipment);
@@ -83,7 +80,7 @@ public class OrderShipmentReleaseFailedEmailProducerTest {
 	}
 
 	@Test
-	public void verifyExceptionThrownWhenNoErrorMessageGiven() throws Exception {
+	public void verifyExceptionThrownWhenNoErrorMessageGiven() {
 		final Map<String, Object> data = new HashMap<>();
 		data.put(ERROR_MESSAGE_KEY, null);
 		data.put(SHIPMENT_TYPE_KEY, SHIPMENT_TYPE_NAME);
@@ -94,7 +91,7 @@ public class OrderShipmentReleaseFailedEmailProducerTest {
 	}
 
 	@Test
-	public void verifyExceptionThrownWhenNoShipmentTypeGiven() throws Exception {
+	public void verifyExceptionThrownWhenNoShipmentTypeGiven() {
 		final Map<String, Object> data = new HashMap<>();
 		data.put(ERROR_MESSAGE_KEY, ERROR_MESSAGE);
 		data.put(SHIPMENT_TYPE_KEY, null);

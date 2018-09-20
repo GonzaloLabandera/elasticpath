@@ -3,8 +3,10 @@
  */
 package com.elasticpath.base.money;
 
+import static java.math.BigDecimal.ROUND_HALF_UP;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
@@ -12,6 +14,7 @@ import static org.junit.Assert.assertTrue;
 import java.math.BigDecimal;
 import java.util.Currency;
 import java.util.Locale;
+import java.util.function.Function;
 
 import com.google.common.testing.EqualsTester;
 import org.junit.Test;
@@ -27,6 +30,7 @@ public class MoneyTest {
 	private static final Currency CAD = Currency.getInstance("CAD");
 	private static final Currency JPY = Currency.getInstance("JPY");
 	private static final float FLOAT_DELTA = 0.001F;
+	private static final int SIX = 6;
 
 	@Test
 	public void testEqualsHashCode() {
@@ -199,6 +203,108 @@ public class MoneyTest {
 		Money expectedResult = Money.valueOf("6.00", currency);
 		assertEquals(expectedResult, money1.multiply(new BigDecimal("2")));
 		assertEquals(expectedResult, money1.multiply(2));
+	}
+
+	@Test
+	public void testDivideWithSimpleIntegerDivision() {
+		final Money initialMoney = Money.valueOf("3.00", CAD);
+		final int divisor = 3;
+
+		final Money actualResult = initialMoney.divide(divisor);
+
+		final Money expectedResult = Money.valueOf("1.00", CAD);
+		assertEquals(expectedResult, actualResult);
+	}
+
+	@Test
+	public void testDivideWithSimpleBigDecimalDivision() {
+		final Money initialMoney = Money.valueOf(BigDecimal.TEN, CAD);
+		final BigDecimal divisor = new BigDecimal("2.5");
+
+		final Money actualResult = initialMoney.divide(divisor);
+
+		final Money expectedResult = Money.valueOf("4", CAD);
+		assertEquals(expectedResult, actualResult);
+	}
+
+	@Test
+	public void testDivideWithIntegerDivisionAndUnscaledInput() {
+		// We want to make sure division doesn't lose precision when the input value and divisor have lower precision (e.g. integers)
+
+		// 1 / 6 = 0.16 with the 6 recurring. However it is 0 with integer division and we'll deliberately create a Money using an integer input.
+		final Money initialMoney = Money.valueOf(BigDecimal.ONE, CAD);
+
+		final int initialDivisor = 6;
+		final Money intermediateResult = initialMoney.divide(initialDivisor);
+
+		assertNotEquals("Integer division has likely occurred as value has been rounded to zero", Money.zero(CAD), intermediateResult);
+	}
+
+	@Test
+	public void testDivideWithBigDecimalDivisionAndUnscaledInput() {
+		// We want to make sure division doesn't lose precision when the input value and divisor have zero precision (e.g. integers)
+
+		// 1 / 6 = 0.16 with the 6 recurring. However it is 0 with integer division and we'll deliberately create a Money using an integer input.
+		final Money initialMoney = Money.valueOf(BigDecimal.ONE, CAD);
+
+		final BigDecimal divisor = new BigDecimal("6");
+		final Money intermediateResult = initialMoney.divide(divisor);
+
+		assertNotEquals("Integer division has likely occurred as value has been rounded to zero", Money.zero(CAD), intermediateResult);
+	}
+
+	@Test
+	public void testDivideWithComplexIntegerDivision() {
+		// Test complex division using Money.divide(int) we pass this into a separate test method as Money.divide(BigDecimal) is also tested with it
+		final Function<Money, Money> divisionFunctionUnderTest = money -> money.divide(SIX);
+
+		testDivideWithComplexDivisionDoesNotLosePrecision(divisionFunctionUnderTest);
+	}
+
+	@Test
+	public void testDivideWithComplexBigDecimalDivision() {
+		// Test complex division using Money.divide(BigDecimal) we pass this into a separate test method as Money.divide(int) is also tested with it
+		final Function<Money, Money> divisionFunctionUnderTest = money -> money.divide(new BigDecimal("6"));
+
+		testDivideWithComplexDivisionDoesNotLosePrecision(divisionFunctionUnderTest);
+	}
+
+	protected void testDivideWithComplexDivisionDoesNotLosePrecision(final Function<Money, Money> divideBySixOperationUnderTest) {
+		// We want to make sure that values are divided without losing intermediate precision that is the unscaled version should not
+		// be rounded within the currency's fractional digits (typically 2)
+		// So we construct a scenario below to prove this:
+
+		// 1 / 6 = 0.16 with the 6 recurring we need to make sure this isn't prematurely rounded to 0.17 as part of division
+		// We'll provide the input using 2 decimal places
+		final BigDecimal initialAmount = new BigDecimal("1.00");
+		final Money initialMoney = Money.valueOf(initialAmount, CAD);
+
+		final Money actualIntermediateResult = divideBySixOperationUnderTest.apply(initialMoney);
+
+		// We expect the precision that was used for division is 10 if the Money's BigDecimal doesn't have a higher precision.
+		final int expectedDivisionScale = 10;
+
+		// So the expected value is 0.1666666667 (as rounded to 10dp)
+		final BigDecimal expectedIntermediateAmount = initialAmount
+				.setScale(expectedDivisionScale, ROUND_HALF_UP)
+				.divide(new BigDecimal("6"), ROUND_HALF_UP);
+
+		final Money expectedIntermediateResult = Money.valueOf(expectedIntermediateAmount, CAD);
+
+		// Assert the actual calculated Money is equal to the expected calculated Money
+		assertEquals("The exposed amounts (scaled) by Money likely do not match", expectedIntermediateResult, actualIntermediateResult);
+
+		// Now let's multiply the value by 1000 as this test kindly used an input with 2DP so the intermediate test above may have passed even
+		// with incorrect scaling as it inherited the initial value's scaling. Multiplying by 1000 will flush that out
+		final int multiplier = 1000;
+		final Money finalResult = actualIntermediateResult.multiply(multiplier);
+
+		// 0.1666666667 * 1000 is 166.6666667000, whereas if was prematurely rounded to 0.17 earlier, it would be 170.00
+
+		final BigDecimal expectedFinalAmount = new BigDecimal("166.67");
+		final Money expectedFinalResult = Money.valueOf(expectedFinalAmount, CAD);
+
+		assertEquals(expectedFinalResult, finalResult);
 	}
 	
 	/**

@@ -117,7 +117,6 @@ public class ImportDataTypeCategoryImpl extends AbstractImportDataTypeImpl {
 	private void createImportFieldStartDate() {
 		final String importFieldName = PREFIX_OF_FIELD_NAME + "enableDate";
 		addImportField(importFieldName, new AbstractImportFieldImpl(importFieldName, Date.class.toString(), false, false) {
-
 			private static final long serialVersionUID = 5000000001L;
 
 			@Override
@@ -146,7 +145,6 @@ public class ImportDataTypeCategoryImpl extends AbstractImportDataTypeImpl {
 	private void createImportFieldEndDate() {
 		final String importFieldName = PREFIX_OF_FIELD_NAME + "disableDate";
 		addImportField(importFieldName, new AbstractImportFieldImpl(importFieldName, Date.class.toString(), false, false) {
-
 			private static final long serialVersionUID = 5000000001L;
 
 			@Override

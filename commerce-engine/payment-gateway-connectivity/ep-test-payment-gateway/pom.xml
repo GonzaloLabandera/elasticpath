@@ -5,16 +5,13 @@
 	<parent>
 		<groupId>com.elasticpath</groupId>
 		<artifactId>payment-gateway-connectivity</artifactId>
-		<version>702.0.0-SNAPSHOT</version>
+		<version>703.0.0-SNAPSHOT</version>
 	</parent>
 
 	<artifactId>ep-test-payment-gateway</artifactId>
 	<packaging>jar</packaging>
 	<name>EP Test Payment Gateway</name>
 
-	<properties>
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-	</properties>
 	<dependencies>
 		<dependency>
 			<groupId>junit</groupId>

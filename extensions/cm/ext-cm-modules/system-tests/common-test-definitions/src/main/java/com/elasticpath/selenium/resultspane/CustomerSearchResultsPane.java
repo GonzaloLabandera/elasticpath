@@ -2,7 +2,6 @@ package com.elasticpath.selenium.resultspane;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 
 import com.elasticpath.selenium.common.AbstractPageObject;
@@ -16,8 +15,7 @@ public class CustomerSearchResultsPane extends AbstractPageObject {
 	private static final String CUSTOMER_SEARCH_RESULT_PARENT_CSS = "div[widget-id='Customer Search Result Table'][widget-type='Table'] ";
 	private static final String CUSTOMER_SEARCH_RESULT_LIST_CSS = CUSTOMER_SEARCH_RESULT_PARENT_CSS + "div[parent-widget-id='Customer Search Result"
 			+ " " + "Table'] div[column-id='%s']";
-	private static final String CUSTOMER_EDITOR_TOOLTIP_CSS = "div[automation-id='com.elasticpath.cmclient.fulfillment.FulfillmentMessages."
-			+ "CustomerDetails_Tooltip'][seeable='true']";
+	private static final String CUSTOMER_EDITOR_TOOLTIP_CSS = "div[widget-id*='Customer #']";
 
 	/**
 	 * Constructor.
@@ -44,12 +42,13 @@ public class CustomerSearchResultsPane extends AbstractPageObject {
 	 * Verifies if customer email is in the list.
 	 *
 	 * @param expectedEmailID String
+	 * @param columnName      the column name
 	 * @return boolean
 	 */
-	public boolean isCustomerInList(final String expectedEmailID) {
+	public boolean isCustomerInList(final String expectedEmailID, final String columnName) {
 		setWebDriverImplicitWait(1);
 		boolean customerExists = selectItemInCenterPane(CUSTOMER_SEARCH_RESULT_PARENT_CSS, CUSTOMER_SEARCH_RESULT_LIST_CSS,
-				expectedEmailID, "Email Address");
+				expectedEmailID, columnName);
 		setWebDriverImplicitWaitToDefault();
 		return customerExists;
 	}
@@ -62,8 +61,7 @@ public class CustomerSearchResultsPane extends AbstractPageObject {
 	 */
 	public CustomerEditor selectAndOpenCustomerEditor(final String columnValue) {
 		verifyCustomerExists(columnValue);
-		doubleClick(getSelectedElement());
-		getWaitDriver().waitForElementToBeVisible(By.cssSelector(CUSTOMER_EDITOR_TOOLTIP_CSS));
+		doubleClick(getSelectedElement(), CUSTOMER_EDITOR_TOOLTIP_CSS);
 		return new CustomerEditor(getDriver());
 	}
 

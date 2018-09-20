@@ -18,11 +18,14 @@ import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.misc.LocalizedProperties;
 import com.elasticpath.domain.rules.Rule;
 import com.elasticpath.domain.rules.RuleAction;
+import com.elasticpath.domain.rules.RuleCondition;
+import com.elasticpath.domain.rules.RuleElement;
 import com.elasticpath.domain.rules.RuleParameter;
 import com.elasticpath.domain.rules.RuleScenarios;
 import com.elasticpath.domain.rules.RuleSet;
 import com.elasticpath.domain.sellingcontext.SellingContext;
 import com.elasticpath.domain.store.Store;
+import com.elasticpath.service.PromotionConfigureService;
 import com.elasticpath.service.rules.RuleService;
 import com.elasticpath.service.rules.RuleSetService;
 import com.elasticpath.service.store.StoreService;
@@ -49,6 +52,9 @@ public class RuleServiceImplTest extends BasicSpringContextTest {
 
 	@Autowired
 	private StoreService storeService;
+
+	@Autowired
+	private PromotionConfigureService promotionConfigureService;
 
 	/**
 	 * Test persisting and loading display name.
@@ -169,6 +175,31 @@ public class RuleServiceImplTest extends BasicSpringContextTest {
 		assertThat(loadedRules)
 				.as("The result should contain the expected rules")
 				.contains(activeRuleOne, activeRuleTwo);
+	}
+
+	@DirtiesDatabase
+	@Test
+	public void verifyAllowedLimitRetrievableForGivenRuleId() {
+		final Long expectedAllowedLimit = 5L;
+
+		final SimpleStoreScenario scenario = getTac().useScenario(SimpleStoreScenario.class);
+
+		final Rule rule = createRule(RULE_CODE_ONE, scenario.getStore(), true);
+
+		final RuleCondition condition = getBeanFactory().getBean("limitedUsagePromotionCondition");
+
+		promotionConfigureService.retrieveRuleParameterByKey(condition, RuleParameter.ALLOWED_LIMIT)
+				.setValue(String.valueOf(expectedAllowedLimit));
+
+		promotionConfigureService.retrieveRuleParameterByKey(condition, RuleParameter.LIMITED_USAGE_PROMOTION_ID)
+				.setValue(rule.getCode());
+
+		rule.addCondition(condition);
+
+		final Rule persistedRule = ruleService.add(rule);
+
+		assertThat(ruleService.getAllowedLimit(persistedRule.getUidPk()))
+				.isEqualTo(expectedAllowedLimit);
 	}
 
 	private Rule createRule(final String ruleCode, final Store storeCode, final boolean isEnabled) {

@@ -134,8 +134,8 @@ public class CartItemModifiersRepositoryImpl implements CartItemModifiersReposit
 	}
 
 	@Override
-	public Single<Map<CartItemModifierField, String>> findCartItemModifierValues(final String shoppingItemGuid) {
-		return getShoppingItem(shoppingItemGuid)
+	public Single<Map<CartItemModifierField, String>> findCartItemModifierValues(final String cartId, final String shoppingItemGuid) {
+		return getShoppingItem(cartId, shoppingItemGuid)
 				.flatMap(shoppingItem -> getFieldValues(shoppingItem.getSkuGuid(), shoppingItem.getFields()));
 
 	}
@@ -153,8 +153,8 @@ public class CartItemModifiersRepositoryImpl implements CartItemModifiersReposit
 				.map(cartItemModifierGroups -> getModifierFieldValues(itemData, getCartItemModifierFields(cartItemModifierGroups)));
 	}
 
-	private Single<ShoppingItem> getShoppingItem(final String cartItemGuid) {
-		return shoppingCartRepository.getDefaultShoppingCart()
+	private Single<ShoppingItem> getShoppingItem(final String cartId, final String cartItemGuid) {
+		return shoppingCartRepository.getShoppingCart(cartId)
 				.map(shoppingCart -> shoppingCart.getCartItemByGuid(cartItemGuid));
 	}
 

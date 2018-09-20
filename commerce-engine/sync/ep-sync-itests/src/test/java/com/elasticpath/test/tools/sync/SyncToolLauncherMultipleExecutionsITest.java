@@ -1,3 +1,6 @@
+/*
+ * Copyright (c) Elastic Path Software Inc., 2017
+ */
 package com.elasticpath.test.tools.sync;
 
 import static org.assertj.core.api.Assertions.assertThat;

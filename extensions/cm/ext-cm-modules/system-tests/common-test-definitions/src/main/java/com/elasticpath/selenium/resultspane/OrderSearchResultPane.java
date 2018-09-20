@@ -8,6 +8,9 @@ import org.openqa.selenium.WebElement;
 
 import com.elasticpath.selenium.common.AbstractPageObject;
 import com.elasticpath.selenium.editor.OrderEditor;
+import com.elasticpath.selenium.navigations.CustomerService;
+import com.elasticpath.selenium.setup.SetUp;
+import com.elasticpath.selenium.util.Constants;
 
 /**
  * Order search results pane.
@@ -16,6 +19,7 @@ public class OrderSearchResultPane extends AbstractPageObject {
 	private static final String RESULTS_PANE_PARENT_CSS = "div[pane-location='center-pane-inner'][seeable='true'] ";
 	private static final String RESULTS_LIST_TABLE_PARENT_CSS = RESULTS_PANE_PARENT_CSS + "div[widget-id='Order Search Result Table'] ";
 	private static final String RESULTS_COLUMN_CSS = RESULTS_LIST_TABLE_PARENT_CSS + "div[column-id='%s']";
+	private final CustomerService customerService;
 
 	/**
 	 * Constructor.
@@ -24,6 +28,7 @@ public class OrderSearchResultPane extends AbstractPageObject {
 	 */
 	public OrderSearchResultPane(final WebDriver driver) {
 		super(driver);
+		customerService = new CustomerService(SetUp.getDriver());
 	}
 
 	/**
@@ -33,9 +38,35 @@ public class OrderSearchResultPane extends AbstractPageObject {
 	 * @param columnName  the column number.
 	 */
 	public void verifyOrderColumnValueAndSelectRow(final String columnValue, final String columnName) {
-		assertThat(selectItemInCenterPane(RESULTS_LIST_TABLE_PARENT_CSS, String.format(RESULTS_COLUMN_CSS, columnValue), columnValue, columnName))
-				.as("Unable to find column value - " + columnValue)
+		boolean isOrderInList = isOrderInList(columnValue, columnName);
+
+		int index = 0;
+		while (!isOrderInList && index < Constants.UUID_END_INDEX) {
+			sleep(Constants.SLEEP_HALFSECOND_IN_MILLIS);
+			customerService.clickOrderSearch();
+			isOrderInList = isOrderInList(columnValue, columnName);
+			index++;
+		}
+
+		assertThat(isOrderInList)
+				.as("Order " + columnValue + "does not exist in search result - " + columnName)
 				.isTrue();
+	}
+
+	/**
+	 * Verifies if order exists.
+	 *
+	 * @param columnValue the column value.
+	 * @param columnName  the column number.
+	 * @return true if order is in the last, false otherwise
+	 */
+	public boolean isOrderInList(final String columnValue, final String columnName) {
+		setWebDriverImplicitWait(1);
+		boolean isOrderInList = selectItemInCenterPane(RESULTS_LIST_TABLE_PARENT_CSS, String.format(RESULTS_COLUMN_CSS, columnValue), columnValue,
+				columnName);
+
+		setWebDriverImplicitWaitToDefault();
+		return isOrderInList;
 	}
 
 	/**
@@ -47,7 +78,7 @@ public class OrderSearchResultPane extends AbstractPageObject {
 	 */
 	public OrderEditor selectOrderAndOpenOrderEditor(final String columnValue, final String columnName) {
 		verifyOrderColumnValueAndSelectRow(columnValue, columnName);
-		doubleClick(getSelectedElement());
+		doubleClick(getSelectedElement(), OrderEditor.EDITOR_PANE_PARENT_CSS);
 		return new OrderEditor(getDriver());
 	}
 

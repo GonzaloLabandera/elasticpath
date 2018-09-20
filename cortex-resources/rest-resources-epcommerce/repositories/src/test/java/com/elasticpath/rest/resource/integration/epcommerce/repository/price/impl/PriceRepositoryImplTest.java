@@ -16,7 +16,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.elasticpath.common.dto.ShoppingItemDto;
 import com.elasticpath.common.dto.sellingchannel.ShoppingItemDtoFactory;
@@ -251,8 +251,6 @@ public class PriceRepositoryImplTest {
 
 	private void mockPriceLookupFacadeToReturnPriceForSku(final Price price) {
 		when(mockPriceLookupFacade.getShoppingItemDtoPrice(mockShoppingItemDto, mockStore, mockShopper))
-				.thenReturn(price);
-		when(mockPriceLookupFacade.getPromotedPriceForSku(sku, mockStore, mockShopper))
 				.thenReturn(price);
 	}
 

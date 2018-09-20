@@ -26,16 +26,6 @@
 	</issueManagement>
 
 	<properties>
-		<ws-rs.version>1.1.1</ws-rs.version>
-		<felix.framework.version>5.2.0</felix.framework.version>
-		<gemini.blueprint.version>2.0.0.M02</gemini.blueprint.version>
-		<guava.version>18.0</guava.version>
-		<guice.version>4.0</guice.version>
-		<hamcrest.version>1.3</hamcrest.version>
-		<peaberry.version>1.3</peaberry.version>
-		<powermock.version>1.6.2</powermock.version>
-		<xerces.version>2.9.1</xerces.version>
-
 		<!--Jacoco-->
 		<jacoco.instruction.covered-ratio>0.75</jacoco.instruction.covered-ratio>
 		<jacoco.branch.covered-ratio>0.50</jacoco.branch.covered-ratio>
@@ -43,7 +33,6 @@
 		<jacoco.complexity.covered-ratio>0.75</jacoco.complexity.covered-ratio>
 		<jacoco.method.covered-ratio>0.70</jacoco.method.covered-ratio>
 		<jacoco.class.covered-ratio>0.70</jacoco.class.covered-ratio>
-		<javax.inject.version>1</javax.inject.version>
 	</properties>
 
 	<modules>
@@ -82,265 +71,6 @@
 		<module>wishlists</module>
 	</modules>
 
-	<dependencyManagement>
-		<dependencies>
-			<!-- pin the version of rest-api here so that transitive dependencies don't downgrade rest-api -->
-			<dependency>
-				<groupId>com.elasticpath.rest</groupId>
-				<artifactId>ep-rest-commons</artifactId>
-				<version>${cortex.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>com.elasticpath.rest</groupId>
-				<artifactId>ep-rs-annotated-dispatch</artifactId>
-				<version>${cortex.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>com.elasticpath.rest.resource.cortex</groupId>
-				<artifactId>ep-resource-uribuilder-apis</artifactId>
-				<version>0.0.0-SNAPSHOT</version>
-			</dependency>
-			<dependency>
-				<groupId>com.elasticpath.rest.integration.epcommerce</groupId>
-				<artifactId>ep-rest-repositories-epcommerce</artifactId>
-				<version>0.0.0-SNAPSHOT</version>
-			</dependency>
-			<dependency>
-				<groupId>com.elasticpath.rest.resource.cortex</groupId>
-				<artifactId>ep-resource-pagination-commons</artifactId>
-				<version>0.0.0-SNAPSHOT</version>
-			</dependency>
-			<dependency>
-				<groupId>com.elasticpath.rest.resource.cortex</groupId>
-				<artifactId>ep-resource-test-utils</artifactId>
-				<version>0.0.0-SNAPSHOT</version>
-				<scope>test</scope>
-			</dependency>
-			<dependency>
-				<groupId>org.apache.felix</groupId>
-				<artifactId>org.apache.felix.framework</artifactId>
-				<version>${felix.framework.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.javassist</groupId>
-				<artifactId>javassist</artifactId>
-				<version>${javassist.version}</version>
-			</dependency>
-
-			<dependency>
-				<groupId>com.elasticpath.rest.resource.cortex</groupId>
-				<artifactId>ep-resource-commons</artifactId>
-				<version>0.0.0-SNAPSHOT</version>
-			</dependency>
-			<dependency>
-				<groupId>com.elasticpath.rest.resource.cortex</groupId>
-				<artifactId>ep-resource-payment-method-commons</artifactId>
-				<version>0.0.0-SNAPSHOT</version>
-			</dependency>
-
-			<!-- Generated Resource APIs -->
-			<dependency>
-				<groupId>com.elasticpath.rest.definitions</groupId>
-				<artifactId>ep-resource-collections-api</artifactId>
-				<version>${cortex.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>com.elasticpath.rest.definitions</groupId>
-				<artifactId>ep-resource-controls-api</artifactId>
-				<version>${cortex.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>com.elasticpath.rest.definitions</groupId>
-				<artifactId>ep-resource-addresses-api</artifactId>
-				<version>0.0.0-SNAPSHOT</version>
-			</dependency>
-			<dependency>
-				<groupId>com.elasticpath.rest.definitions</groupId>
-				<artifactId>ep-resource-availabilities-api</artifactId>
-				<version>0.0.0-SNAPSHOT</version>
-			</dependency>
-			<dependency>
-				<groupId>com.elasticpath.rest.definitions</groupId>
-				<artifactId>ep-resource-carts-api</artifactId>
-				<version>0.0.0-SNAPSHOT</version>
-			</dependency>
-			<dependency>
-				<groupId>com.elasticpath.rest.definitions</groupId>
-				<artifactId>ep-resource-wishlists-api</artifactId>
-				<version>0.0.0-SNAPSHOT</version>
-			</dependency>
-			<dependency>
-				<groupId>com.elasticpath.rest.definitions</groupId>
-				<artifactId>ep-resource-totals-api</artifactId>
-				<version>0.0.0-SNAPSHOT</version>
-			</dependency>
-			<dependency>
-				<groupId>com.elasticpath.rest.definitions</groupId>
-				<artifactId>ep-resource-data-policies-api</artifactId>
-				<version>0.0.0-SNAPSHOT</version>
-			</dependency>
-			<dependency>
-				<groupId>com.elasticpath.rest.definitions</groupId>
-				<artifactId>ep-resource-discounts-api</artifactId>
-				<version>0.0.0-SNAPSHOT</version>
-			</dependency>
-			<dependency>
-				<groupId>com.elasticpath.rest.definitions</groupId>
-				<artifactId>ep-resource-geographies-api</artifactId>
-				<version>0.0.0-SNAPSHOT</version>
-			</dependency>
-			<dependency>
-				<groupId>com.elasticpath.rest.definitions</groupId>
-				<artifactId>ep-resource-coupons-api</artifactId>
-				<version>0.0.0-SNAPSHOT</version>
-			</dependency>
-			<dependency>
-				<groupId>com.elasticpath.rest.definitions</groupId>
-				<artifactId>ep-resource-emails-api</artifactId>
-				<version>0.0.0-SNAPSHOT</version>
-			</dependency>
-			<dependency>
-				<groupId>com.elasticpath.rest.definitions</groupId>
-				<artifactId>ep-resource-items-api</artifactId>
-				<version>0.0.0-SNAPSHOT</version>
-			</dependency>
-			<dependency>
-				<groupId>com.elasticpath.rest.definitions</groupId>
-				<artifactId>ep-resource-itemdefinitions-api</artifactId>
-				<version>0.0.0-SNAPSHOT</version>
-			</dependency>
-			<dependency>
-				<groupId>com.elasticpath.rest.definitions</groupId>
-				<artifactId>ep-resource-itemselections-api</artifactId>
-				<version>0.0.0-SNAPSHOT</version>
-			</dependency>
-			<dependency>
-				<groupId>com.elasticpath.rest.definitions</groupId>
-				<artifactId>ep-resource-navigations-api</artifactId>
-				<version>0.0.0-SNAPSHOT</version>
-			</dependency>
-			<dependency>
-				<groupId>com.elasticpath.rest.definitions</groupId>
-				<artifactId>ep-resource-searches-api</artifactId>
-				<version>0.0.0-SNAPSHOT</version>
-			</dependency>
-			<dependency>
-				<groupId>com.elasticpath.rest.definitions</groupId>
-				<artifactId>ep-resource-orders-api</artifactId>
-				<version>0.0.0-SNAPSHOT</version>
-			</dependency>
-			<dependency>
-				<groupId>com.elasticpath.rest.definitions</groupId>
-				<artifactId>ep-resource-payment-tokens-api</artifactId>
-				<version>0.0.0-SNAPSHOT</version>
-			</dependency>
-			<dependency>
-				<groupId>com.elasticpath.rest.definitions</groupId>
-				<artifactId>ep-resource-prices-api</artifactId>
-				<version>0.0.0-SNAPSHOT</version>
-			</dependency>
-			<dependency>
-				<groupId>com.elasticpath.rest.definitions</groupId>
-				<artifactId>ep-resource-profiles-api</artifactId>
-				<version>0.0.0-SNAPSHOT</version>
-			</dependency>
-			<dependency>
-				<groupId>com.elasticpath.rest.definitions</groupId>
-				<artifactId>ep-resource-registrations-api</artifactId>
-				<version>0.0.0-SNAPSHOT</version>
-			</dependency>
-			<dependency>
-				<groupId>com.elasticpath.rest.definitions</groupId>
-				<artifactId>ep-resource-shipment-details-api</artifactId>
-				<version>0.0.0-SNAPSHOT</version>
-			</dependency>
-			<dependency>
-				<groupId>com.elasticpath.rest.definitions</groupId>
-				<artifactId>ep-resource-promotions-api</artifactId>
-				<version>0.0.0-SNAPSHOT</version>
-			</dependency>
-			<dependency>
-				<groupId>com.elasticpath.rest.definitions</groupId>
-				<artifactId>ep-resource-purchases-api</artifactId>
-				<version>0.0.0-SNAPSHOT</version>
-			</dependency>
-			<dependency>
-				<groupId>com.elasticpath.rest.definitions</groupId>
-				<artifactId>ep-resource-recommendations-api</artifactId>
-				<version>0.0.0-SNAPSHOT</version>
-			</dependency>
-			<dependency>
-				<groupId>com.elasticpath.rest.definitions</groupId>
-				<artifactId>ep-resource-shipments-api</artifactId>
-				<version>0.0.0-SNAPSHOT</version>
-			</dependency>
-			<dependency>
-				<groupId>com.elasticpath.rest.definitions</groupId>
-				<artifactId>ep-resource-taxes-api</artifactId>
-				<version>0.0.0-SNAPSHOT</version>
-			</dependency>
-			<dependency>
-				<groupId>com.elasticpath.rest.definitions</groupId>
-				<artifactId>ep-resource-lookups-api</artifactId>
-				<version>0.0.0-SNAPSHOT</version>
-			</dependency>
-			<dependency>
-				<groupId>com.elasticpath.rest.helix</groupId>
-				<artifactId>helix-api</artifactId>
-				<version>${helix-api.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>com.elasticpath.rest.helix</groupId>
-				<artifactId>helix-data-injectors</artifactId>
-				<version>${helix-api.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>com.google.guava</groupId>
-				<artifactId>guava</artifactId>
-				<version>${guava.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>javax.inject</groupId>
-				<artifactId>javax.inject</artifactId>
-				<version>${javax.inject.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>com.google.inject</groupId>
-				<artifactId>guice</artifactId>
-				<version>${guice.version}</version>
-				<scope>provided</scope>
-			</dependency>
-			<dependency>
-				<groupId>com.google.inject.extensions</groupId>
-				<artifactId>guice-multibindings</artifactId>
-				<version>${guice.version}</version>
-				<scope>provided</scope>
-			</dependency>
-			<dependency>
-				<groupId>org.ops4j</groupId>
-				<artifactId>peaberry</artifactId>
-				<version>${peaberry.version}</version>
-				<scope>provided</scope>
-			</dependency>
-			<!-- block xerces from getting into our classpath -->
-			<dependency>
-				<groupId>xerces</groupId>
-				<artifactId>xercesImpl</artifactId>
-				<version>${xerces.version}</version>
-				<scope>provided</scope>
-			</dependency>
-
-			<!-- for Unit testing -->
-			<dependency>
-				<groupId>com.elasticpath.rest.tests</groupId>
-				<artifactId>ep-rest-test-utils</artifactId>
-				<version>${cortex.version}</version>
-				<scope>test</scope>
-			</dependency>
-		</dependencies>
-	</dependencyManagement>
-
-
 	<dependencies>
 		<dependency>
 			<groupId>org.hamcrest</groupId>
@@ -358,11 +88,15 @@
 			<groupId>com.elasticpath.rest.tests</groupId>
 			<artifactId>ep-rest-test-utils</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>org.osgi</groupId>
+			<artifactId>org.osgi.core</artifactId>
+			<version>6.0.0</version>
+		</dependency>
 		<!-- Gemini blueprint is needed by the wiring test to stand up the spring (parse the xsd) while offline. -->
 		<dependency>
-			<groupId>org.eclipse.gemini</groupId>
-			<artifactId>org.eclipse.gemini.blueprint.core</artifactId>
-			<version>${gemini.blueprint.version}</version>
+			<groupId>org.eclipse.gemini.blueprint</groupId>
+			<artifactId>gemini-blueprint-core</artifactId>
 			<scope>test</scope>
 			<!-- Note: We must exclude spring deps here so that we get the correct version from elsewhere. -->
 			<exclusions>
@@ -391,18 +125,6 @@
 					<artifactId>org.springframework.core</artifactId>
 				</exclusion>
 			</exclusions>
-		</dependency>
-		<dependency>
-			<groupId>org.powermock</groupId>
-			<artifactId>powermock-module-junit4</artifactId>
-			<version>${powermock.version}</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.powermock</groupId>
-			<artifactId>powermock-api-mockito</artifactId>
-			<version>${powermock.version}</version>
-			<scope>test</scope>
 		</dependency>
 	</dependencies>
 
@@ -446,7 +168,7 @@
 				<plugin>
 					<groupId>com.elasticpath.rest.helix</groupId>
 					<artifactId>helix-maven-plugin</artifactId>
-					<version>${helix-validator.version}</version>
+					<version>${api-platform.version}</version>
 					<executions>
 						<execution>
 							<goals>

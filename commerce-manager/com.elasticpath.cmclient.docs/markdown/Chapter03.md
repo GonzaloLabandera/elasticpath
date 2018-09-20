@@ -153,7 +153,7 @@ The search settings control the behavior of searching and catalog browsing in El
 | Setting name (path)                         | Description |
 | ---                                         | --- |
 | `COMMERCE/SEARCH/accuracy`                  | Sets the accuracy of spelling suggestions. This value works the same as `minimumSimilarity`. <br/> Default is 0.75. |
-|` COMMERCE/SEARCH/boosts`                    | (Optional) Specifies a comma-separated list of field name/value pairs that specify greater importance to values matched in specific fields. For example: `categoryCode=0.5,productCode=0.5, categoryName_en=2.0,description_en=0.2`/ <br/> By default, all search fields are assigned a boost value of 1.0. |
+|` COMMERCE/SEARCH/boosts`                    | (Optional) Specifies a comma-separated list of field name/value pairs that specify greater importance to values matched in specific fields. For example: `categoryCode=0.5,productCode=0.5,categoryName_en=2.0,description_en=0.2`/ <br/> By default, all search fields are assigned a boost value of 1.0. |
 | `COMMERCE/SEARCH/excludeAttributes`         | (Optional) Specifies a comma-separated list of attribute keys that should be not be included when searching all fields. For example: `A00981,A01012`. <br/>By default, all attributes are included. |
 | `COMMERCE/SEARCH/indexOptimizationInterval` | Specifies how often the index is optimized. Optimization is generally needed only when the index has a large number of updates (adds/deletes). So, if the index is updated frequently, you may want to specify a higher frequency. |
 | `COMMERCE/SEARCH/maxReturnNumber`           | The maximum number of matching items to include in the search results. The default is 0, which specifies no limit. |
@@ -172,7 +172,6 @@ The following indices are used to optimize searching and browsing:
 - Customer
 - Product
 - Promotion
-- Shipping Service Level
 - Sku
 
 Search settings can have different values for each of these indices, depending on the application (Elastic Path Commerce or web services), so they can have a different value for each combination of index and store. As such, the context of a search setting value must specify the index to which it applies and the appropriate application or store.
@@ -539,11 +538,9 @@ Elastic Path Commerce users must change their passwords in the following situati
 
 To change your password, do the following:
 
-1.  On the toolbar, click the **admin** list in the top right corner.
+1.  On the toolbar, in the top right corner, click the **admin** list and select **Change Password**.
 
-2. From the **admin** list, select **Change Password**.
-
-3. In the _Change Password_ dialog box, enter your old password. Then, enter and confirm your new password.
+2. In the _Change Password_ dialog box, enter your old password. Then, enter and confirm your new password.
 
     By default, passwords must meet the following conditions:
 
@@ -553,7 +550,7 @@ To change your password, do the following:
 
     Before changing these settings, ensure that the changes are compatible with your organization&#39;s PCI compliance policy. For more information, see Passwords and PCI Compliance.
 
-4. Click **Save**.
+3. Click **Save**.
 
 ### Passwords and PCI Compliance
 
@@ -563,20 +560,33 @@ For more information, see the PCI SSC web site ( [https://www.pcisecuritystandar
 
 > **Note** :To maintain PCI compliance, the system administration configuration `COMMERCE/APPSPECIFIC/RCP/accountLockoutThresholdsetting` should be kept at the default value of &quot;6&quot;. Increasing the account lockout threshold makes your system non-PCI compliant.
 
-## Pagination Setting
+## Change your display time zone.
 
+Elastic Path Commerce users can change the default time zone setting. By default, Elastic Path Commerce uses the user's browser time zone, which is configured on the user's computer. You can change this setting to match one of the standard UTC offsets.
+
+> **NOTE** : Changing your display time zone does not change the underlying date or time data that is stored in the UTC time.
+
+> Daylight savings time is not enabled for UTC offset time zones. If you use the UTC offset time zones, change the time zone manually when the region transitions in and out of daylight savings.
+
+1.  On the toolbar, in the top right corner, click the **admin** list and select **Set Time Zone**.
+
+2. In the _Change Time Zone_ dialog box, choose "Use custom time zone" from the selection.
+
+3. Choose the custom UTC offset from the drop-down list.
+
+4. Click **Save**.
+
+
+## Pagination Setting
 The _Pagination_ setting in Elastic Path Commerce allows users to change the number of results displayed on the search and filter results screen. Pagination setting changes apply only to the current user.
 
 ### Changing the Pagination Setting
 
-1.  On the toolbar, click the **admin** list in the top right corner.
+1.  On the toolbar, in the top right corner, click the **admin** list and select **Change Pagination Settings**.
 
-2. From the **admin** list, select **Change Pagination Settings**.
+2. In the _Change Pagination Settings_ dialog box, choose the number of results to display per page from the drop-down list.
 
-3. In the _Change Pagination Settings_ dialog box, choose the number of results to display per page from the dropdown list.
-
-4. Click **Save**.
-
+3. Click **Save**.
 ## Session Idle Timeout
 
 By default, users are automatically logged out of Elastic Path Commerce if the session is idle for more than 15 minutes. To change the timeout period, modify the `COMMERCE/APPSPECIFIC/RCP/idleTimeForLock` setting.

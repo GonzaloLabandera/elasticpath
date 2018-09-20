@@ -3,6 +3,8 @@
  */
 package com.elasticpath.domain.customer.impl;
 
+import static junit.framework.TestCase.assertFalse;
+import static junit.framework.TestCase.assertTrue;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
 
@@ -208,9 +210,9 @@ public class AddressImplTest {
 	 */
 	@Test
 	public void testGetCommercialAddress() {
-		assertEquals("Check if commercial address", addressImpl.isCommercialAddress(), false);
+		assertFalse("Check if commercial address", addressImpl.isCommercialAddress());
 		addressImpl.setCommercialAddress(true);
-		assertEquals("Check if commercial address", addressImpl.isCommercialAddress(), true);
+		assertTrue("Check if commercial address", addressImpl.isCommercialAddress());
 	}
 
 	/**

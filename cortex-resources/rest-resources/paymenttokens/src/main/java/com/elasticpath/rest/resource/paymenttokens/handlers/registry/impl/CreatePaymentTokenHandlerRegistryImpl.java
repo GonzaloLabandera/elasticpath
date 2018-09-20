@@ -13,6 +13,7 @@ import com.elasticpath.rest.resource.paymenttokens.handlers.registry.CreatePayme
 /**
  * Implementation of {@link CreatePaymentTokenHandlerRegistry}.
  */
+@SuppressWarnings("rawtypes")
 public class CreatePaymentTokenHandlerRegistryImpl implements CreatePaymentTokenHandlerRegistry {
 	private final List<CreatePaymentTokenHandler> createPaymentTokenHandlers;
 

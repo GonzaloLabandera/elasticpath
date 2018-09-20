@@ -3,6 +3,7 @@
  */
 package com.elasticpath.rest.resource.integration.epcommerce.repository.purchase.repositories.impl.options;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -17,7 +18,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.elasticpath.domain.catalog.ProductSku;
 import com.elasticpath.domain.skuconfiguration.SkuOption;
@@ -31,7 +32,7 @@ import com.elasticpath.rest.id.type.PathIdentifier;
 import com.elasticpath.rest.id.type.StringIdentifier;
 import com.elasticpath.rest.id.util.CompositeIdUtil;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.item.ItemRepository;
-import com.elasticpath.rest.resource.integration.epcommerce.repository.sku.ProductSkuRepository;
+import com.elasticpath.rest.resource.integration.epcommerce.repository.order.OrderRepository;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.transform.impl.ReactiveAdapterImpl;
 
 /**
@@ -50,9 +51,9 @@ public class LineItemToOptionsRepositoryImplTest {
 	@InjectMocks
 	private ReactiveAdapterImpl reactiveAdapter;
 	@Mock
-	private ProductSkuRepository productSkuRepository;
+	private OrderRepository orderRepository;
 	@InjectMocks
-	private LineItemToOptionsRepositoryImpl repository;
+	private LineItemToOptionsRepositoryImpl<PurchaseLineItemIdentifier, PurchaseLineItemOptionsIdentifier> repository;
 
 	@Mock
 	private ProductSku productSku;
@@ -90,7 +91,7 @@ public class LineItemToOptionsRepositoryImplTest {
 	}
 
 	private void setUpSkuRepoAndOptionLookupWithOptions(final Set<SkuOption> options) {
-		when(productSkuRepository.getProductSkuWithAttributesByGuidAsSingle(ITEM_ID)).thenReturn(Single.just(productSku));
+		when(orderRepository.findProductSku(any(), any(), any())).thenReturn(Single.just(productSku));
 		when(productSku.getSkuCode()).thenReturn(SKU_CODE);
 		String encodedSkuCode = getEncodedItemId(SKU_CODE); //This step will be eventually removed
 		when(itemRepository.getSkuOptionsForItemId(encodedSkuCode)).thenReturn(ExecutionResultFactory.createReadOK(options));

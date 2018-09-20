@@ -19,7 +19,6 @@ import cucumber.api.java.en.Given;
 import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.ContextConfiguration;
 
 import com.elasticpath.common.dto.ShoppingItemDto;
 import com.elasticpath.cucumber.ScenarioContextValueHolder;
@@ -41,7 +40,6 @@ import com.elasticpath.test.persister.testscenarios.SimpleStoreScenario;
 /**
  * Step definitions for {@link ShoppingCartDiscountItemContainer} features.
  */
-@ContextConfiguration("/cucumber.xml")
 public class ShoppingCartDiscountItemContainerStepDefinitions {
 
 	@Autowired

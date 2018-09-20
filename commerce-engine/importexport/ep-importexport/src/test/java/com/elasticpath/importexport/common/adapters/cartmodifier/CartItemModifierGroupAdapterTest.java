@@ -15,7 +15,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
 
 import com.elasticpath.common.dto.DisplayValue;
@@ -27,7 +27,6 @@ import com.elasticpath.domain.cartmodifier.CartItemModifierGroupLdf;
 import com.elasticpath.domain.cartmodifier.impl.CartItemModifierFieldImpl;
 import com.elasticpath.domain.cartmodifier.impl.CartItemModifierGroupImpl;
 import com.elasticpath.domain.cartmodifier.impl.CartItemModifierGroupLdfImpl;
-import com.elasticpath.domain.misc.impl.RandomGuidImpl;
 import com.elasticpath.importexport.common.dto.catalogs.CartItemModifierFieldDTO;
 import com.elasticpath.importexport.common.dto.catalogs.CartItemModifierGroupDTO;
 import com.elasticpath.service.cartitemmodifier.CartItemModifierService;
@@ -42,19 +41,18 @@ public class CartItemModifierGroupAdapterTest {
 	private static final String DISPLAY_NAME_1 = "DISPLAY_NAME_1";
 	private static final String CART_ITEM_MODIFIER_CODE = "CART_ITEM_MODIFIER_CODE";
 
-	@InjectMocks private final CartItemModifierGroupAdapter adapter = new CartItemModifierGroupAdapter();
+	@InjectMocks
+	private final CartItemModifierGroupAdapter adapter = new CartItemModifierGroupAdapter();
 
-	@SuppressWarnings("PMD.UnusedPrivateField")
-	@Mock private CartItemModifierFieldAdapter cartItemModifierFieldAdapter;
-	@Mock private BeanFactory beanFactory;
-	@Mock private CartItemModifierService cartItemModifierService;
+	@Mock
+	private BeanFactory beanFactory;
+	@Mock
+	private CartItemModifierService cartItemModifierService;
 
 	@Before
 	public void setUp() {
 		given(beanFactory.getBean(ContextIdNames.CART_ITEM_MODIFIER_GROUP_LDF))
 				.willAnswer((Answer<CartItemModifierGroupLdfImpl>) invocationOnMock -> new CartItemModifierGroupLdfImpl());
-		given(beanFactory.getBean(ContextIdNames.RANDOM_GUID))
-				.willAnswer((Answer<RandomGuidImpl>) invocationOnMock -> new RandomGuidImpl());
 		given(cartItemModifierService.findCartItemModifierFieldByCode(CART_ITEM_MODIFIER_CODE))
 				.willAnswer((Answer<CartItemModifierField>) invocationOnMock -> new CartItemModifierFieldImpl());
 	}

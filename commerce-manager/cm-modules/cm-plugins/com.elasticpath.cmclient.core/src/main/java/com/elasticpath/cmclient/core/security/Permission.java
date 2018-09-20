@@ -11,13 +11,13 @@ package com.elasticpath.cmclient.core.security;
 public class Permission  {
 
 	private final String name;
-	
+
 	private final String description;
-	
+
 	private final String key;
-	
+
 	private final String activityId;
-	
+
 
 	/**
 	 *
@@ -57,7 +57,7 @@ public class Permission  {
 	public String getKey() {
 		return key;
 	}
-	
+
 	/**
 	 *
 	 * @return activity id
@@ -80,5 +80,5 @@ public class Permission  {
 		sBuffer.append("' }");  //$NON-NLS-1$
 		return sBuffer.toString();
 	}
-	
+
 }

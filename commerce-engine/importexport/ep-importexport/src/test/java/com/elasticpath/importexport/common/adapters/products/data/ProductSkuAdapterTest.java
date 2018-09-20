@@ -3,6 +3,7 @@
  */
 package com.elasticpath.importexport.common.adapters.products.data;
 
+import static junit.framework.TestCase.assertTrue;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertSame;
@@ -318,8 +319,8 @@ public class ProductSkuAdapterTest {
 		assertEquals(START_DATE, productSkuDTO.getProductSkuAvailabilityDTO().getStartDate());
 		assertEquals(END_DATE, productSkuDTO.getProductSkuAvailabilityDTO().getEndDate());
 		assertEquals(MAX_DOWNLOAD_TIME, productSkuDTO.getDigitalAssetItem().getMaxDownloadTimes());
-		assertEquals(true, productSkuDTO.getDigitalAssetItem().isEnabled());
-		assertEquals(true, productSkuDTO.getShippableItem().isEnabled());
+		assertTrue(productSkuDTO.getDigitalAssetItem().isEnabled());
+		assertTrue(productSkuDTO.getShippableItem().isEnabled());
 		assertEquals(SKU_OPTION_CODE, productSkuDTO.getSkuOptionList().get(0).getCode());
 		assertEquals(1, productSkuDTO.getSkuOptionList().size());
 		assertEquals(1, productSkuDTO.getAttributeGroupDTO().getAttributeValues().size());

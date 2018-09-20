@@ -11,7 +11,7 @@ Feature: Catalog Browse
     Then Product Listing should contain following products
       | Portable TV     |
       | Samsung Headset |
-    And I open category TV Series to view products list
+    When I open category TV Series to view products list
     Then Product Listing should contain following products
       | House                           |
       | Superheroes                     |

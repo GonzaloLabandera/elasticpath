@@ -6,6 +6,7 @@ package com.elasticpath.domain.sellingcontext;
 import java.util.Map;
 
 import com.elasticpath.persistence.api.Persistable;
+import com.elasticpath.service.rules.impl.RuleValidationResultEnum;
 import com.elasticpath.tags.TagSet;
 import com.elasticpath.tags.domain.ConditionalExpression;
 import com.elasticpath.tags.service.ConditionEvaluatorService;
@@ -86,10 +87,10 @@ public interface SellingContext extends Persistable {
 	 * @param conditionsEvaluationService the evaluation service
 	 * @param tagSet the tag set with condition values
 	 * @param tagDefinitonGuids the dictionaries to use for evaluation (may be null)
-	 * @return true if all conditions are satisfied, false otherwise
+	 * @return SUCCESS if rule is valid for store, validation error type otherwise.
 	 */
-	boolean isSatisfied(ConditionEvaluatorService conditionsEvaluationService,
-			TagSet tagSet, String ... tagDefinitonGuids);
+	RuleValidationResultEnum isSatisfied(ConditionEvaluatorService conditionsEvaluationService,
+										 TagSet tagSet, String ... tagDefinitonGuids);
 
 	/**
 	 * set a condition for this selling context. each condition MUST relate to a

@@ -12,7 +12,6 @@ import io.reactivex.Single;
 
 import com.elasticpath.domain.cartorder.CartOrder;
 import com.elasticpath.domain.customer.Address;
-import com.elasticpath.domain.shipping.ShippingServiceLevel;
 import com.elasticpath.domain.shoppingcart.ShoppingCart;
 import com.elasticpath.domain.store.Store;
 import com.elasticpath.rest.command.ExecutionResult;
@@ -109,15 +108,7 @@ public interface CartOrderRepository {
 	 * @param cartOrder the cart order
 	 * @return Single with the shipping address
 	 */
-	Single<Address> getShippingAddress(CartOrder cartOrder);
-
-	/**
-	 * Gets the shipping address for the given {@link CartOrder}.
-	 *
-	 * @param cartOrder the cart order
-	 * @return Maybe with the shipping address
-	 */
-	Maybe<Address> getShippingAddressAsMaybe(CartOrder cartOrder);
+	Maybe<Address> getShippingAddress(CartOrder cartOrder);
 
 	/**
 	 * Saves/Updates the Cart Order.
@@ -176,7 +167,7 @@ public interface CartOrderRepository {
 	Single<ShoppingCart> getEnrichedShoppingCartSingle(String storeCode, CartOrder cartOrder);
 
 	/**
-	 * Update the shipping address on the cart order. This may affect the selected shipping service level as well.
+	 * Update the shipping address on the cart order. This may affect the selected shipping option as well.
 	 *
 	 * @param shippingAddressGuid shipping address guid.
 	 * @param cartOrderGuid cart order guid.
@@ -187,7 +178,7 @@ public interface CartOrderRepository {
 	ExecutionResult<Boolean> updateShippingAddressOnCartOrder(String shippingAddressGuid, String cartOrderGuid, String storeCode);
 
 	/**
-	 * Update the shipping address on the cart order. This may affect the selected shipping service level as well.
+	 * Update the shipping address on the cart order. This may affect the selected shipping option as well.
 	 *
 	 * @param shippingAddressGuid shipping address guid.
 	 * @param cartOrderGuid       cart order guid.
@@ -215,15 +206,6 @@ public interface CartOrderRepository {
 	 * @return ExecutionResult with cart order
 	 */
 	ExecutionResult<CartOrder> getCartOrder(String storeCode, String guid, FindCartOrder findBy);
-
-	/**
-	 * Get shipping options for given store code and shipping address.
-	 *
-	 * @param storeCode the store code
-	 * @param shippingAddress the shipping address
-	 * @return collection of shipping options
-	 */
-	Collection<ShippingServiceLevel> findShippingServiceLevels(String storeCode, Address shippingAddress);
 
 	/**
 	 * Get shopping cart guid for given store code and cart order guid.

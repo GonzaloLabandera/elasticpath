@@ -28,6 +28,7 @@ import com.elasticpath.domain.pricing.PriceListStack;
 import com.elasticpath.domain.pricing.impl.PriceListStackImpl;
 import com.elasticpath.domain.sellingcontext.SellingContext;
 import com.elasticpath.service.pricing.PriceListAssignmentService;
+import com.elasticpath.service.rules.impl.RuleValidationResultEnum;
 import com.elasticpath.tags.TagSet;
 import com.elasticpath.tags.service.ConditionEvaluatorService;
 
@@ -170,11 +171,11 @@ public class PLAStackLookupStrategyTest {
 			allowing(priceListAssignments.get(2)).getSellingContext(); will(returnValue(pla3sc));
 			
 			allowing(pla1sc).isSatisfied(with(aNull(ConditionEvaluatorService.class)), with(any(TagSet.class)), with(any(String[].class)));
-			will(returnValue(true));
+			will(returnValue(RuleValidationResultEnum.SUCCESS));
 			allowing(pla2sc).isSatisfied(with(aNull(ConditionEvaluatorService.class)), with(any(TagSet.class)), with(any(String[].class)));
-			will(returnValue(false));
+			will(returnValue(RuleValidationResultEnum.ERROR_UNSPECIFIED));
 			allowing(pla3sc).isSatisfied(with(aNull(ConditionEvaluatorService.class)), with(any(TagSet.class)), with(any(String[].class)));
-			will(returnValue(true));
+			will(returnValue(RuleValidationResultEnum.SUCCESS));
 			
 		} });
 		
@@ -211,9 +212,9 @@ public class PLAStackLookupStrategyTest {
 			allowing(priceListAssignments.get(1)).getSellingContext(); will(returnValue(pla2sc));
 			allowing(priceListAssignments.get(2)).getSellingContext(); will(returnValue(pla3sc));
 			
-			allowing(pla1sc).isSatisfied(null, null); will(returnValue(true));
-			allowing(pla2sc).isSatisfied(null, null); will(returnValue(false));
-			allowing(pla3sc).isSatisfied(null, null); will(returnValue(true));
+			allowing(pla1sc).isSatisfied(null, null); will(returnValue(RuleValidationResultEnum.SUCCESS));
+			allowing(pla2sc).isSatisfied(null, null); will(returnValue(RuleValidationResultEnum.ERROR_UNSPECIFIED));
+			allowing(pla3sc).isSatisfied(null, null); will(returnValue(RuleValidationResultEnum.SUCCESS));
 			
 		} });
 		

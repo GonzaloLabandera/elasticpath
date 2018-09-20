@@ -10,7 +10,7 @@ import liquibase.logging.Logger;
  * Version of the MSSQL Database that uses NVARCHAR for VARCHAR fields.
  */
 public class MSSQLDatabase extends liquibase.database.core.MSSQLDatabase {
-	private Logger log = LogFactory.getInstance().getLog();
+	private static final Logger LOGGER = LogFactory.getInstance().getLog();
 
 	// A value of 10 or higher will override the base implementation.
 	private static final int PRIORITY = 10;
@@ -23,7 +23,7 @@ public class MSSQLDatabase extends liquibase.database.core.MSSQLDatabase {
 	@Override
 	public String escapeDataTypeName(final String dataTypeName) {
 		if ("varchar".equals(dataTypeName)) {
-			log.debug("Converting varchar to nvarchar");
+			LOGGER.debug("Converting varchar to nvarchar");
 			return super.escapeDataTypeName("nvarchar");
 		}
 		return super.escapeDataTypeName(dataTypeName);

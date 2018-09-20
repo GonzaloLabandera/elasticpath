@@ -7,9 +7,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
@@ -17,6 +15,7 @@ import org.apache.commons.mail.EmailException;
 import org.apache.velocity.app.VelocityEngine;
 import org.apache.velocity.exception.VelocityException;
 import org.jmock.Expectations;
+import org.jmock.auto.Mock;
 import org.jmock.integration.junit4.JUnitRuleMockery;
 import org.junit.Before;
 import org.junit.Rule;
@@ -31,9 +30,7 @@ import com.elasticpath.email.domain.impl.EmailPropertiesImpl;
 import com.elasticpath.email.producer.spi.composer.util.EmailContextFactory;
 import com.elasticpath.service.catalogview.impl.ThreadLocalStorageImpl;
 import com.elasticpath.service.store.StoreService;
-import com.elasticpath.settings.SettingsReader;
-import com.elasticpath.settings.domain.SettingValue;
-import com.elasticpath.settings.domain.impl.SettingValueImpl;
+import com.elasticpath.settings.provider.SettingValueProvider;
 
 /** Test cases for <code>EmailServiceImpl</code>. */
 public class LegacyEmailComposerImplTest {
@@ -44,15 +41,21 @@ public class LegacyEmailComposerImplTest {
 
 	private EmailProperties emailProperties;
 
-	// private Mailer mockMailer;
-
 	@Rule
 	public final JUnitRuleMockery context = new JUnitRuleMockery();
 
 	private StoreService mockStoreService;
-	private SettingsReader mockSettingService;
 	private StoreMessageSource mockStoreMessageSource;
 	private EmailContextFactory emailContextFactory;
+
+	@Mock
+	private SettingValueProvider<Boolean> emailTextTemplateEnabled;
+
+	@Mock
+	private SettingValueProvider<String> emailGlobalSenderAddress;
+
+	@Mock
+	private SettingValueProvider<String> emailGlobalSenderName;
 
 	/**
 	 * Prepare for the tests.
@@ -61,9 +64,7 @@ public class LegacyEmailComposerImplTest {
 	 */
 	@Before
 	public void setUp() throws Exception {
-
 		emailContextFactory = context.mock(EmailContextFactory.class);
-		mockSettingService = context.mock(SettingsReader.class);
 		mockStoreService = context.mock(StoreService.class);
 		mockStoreMessageSource = context.mock(StoreMessageSource.class);
 
@@ -110,10 +111,6 @@ public class LegacyEmailComposerImplTest {
 	 */
 	@Test
 	public void testSendEmailListStoreSpecificBadStoreCode() {
-		List<String> recipientList = new ArrayList<>();
-		recipientList.add("address1@foo.com");
-		recipientList.add("address2@foo.com");
-		recipientList.add("address3@foo.com");
 		emailProperties.setStoreCode("some store");
 		// expectations
 		context.checking(new Expectations() {
@@ -141,14 +138,6 @@ public class LegacyEmailComposerImplTest {
 		// lets change this to make sure we get the right results
 		emailProperties.setHtmlTemplate(null);
 		emailProperties.setRecipientAddress("whatever@asif.com");
-
-		// test existing store
-		//final long storeUid = 1234L;
-		//Store store = new StoreImpl();
-		//store.setUidPk(storeUid);
-		//store.setCode(emailProperties.getStoreCode());
-		//store.setEmailSenderAddress("test@elasticpath.com");
-		//store.setEmailSenderName("test");
 
 		final Store mockStore = context.mock(Store.class);
 		context.checking(new Expectations() {
@@ -181,9 +170,6 @@ public class LegacyEmailComposerImplTest {
 			{
 				oneOf(mockStoreService).findStoreWithCode(emailProperties.getStoreCode());
 				will(returnValue(null));
-
-		// oneOf(mockSettingService).getSettingValue()
-		// will(returnValue(settingValue));
 			}
 		});
 
@@ -205,24 +191,14 @@ public class LegacyEmailComposerImplTest {
 		emailProperties.setRecipientAddress("whatever@asif.com");
 		emailProperties.setTextOnly(false);
 
-		final SettingValue settingValue = new SettingValueImpl();
-		settingValue.setValue("false");
 		context.checking(new Expectations() {
 			{
-				oneOf(mockSettingService).getSettingValue("COMMERCE/SYSTEM/EMAIL/emailTextTemplateEnabled");
-				will(returnValue(settingValue));
+				oneOf(emailTextTemplateEnabled).get();
+				will(returnValue(false));
 			}
 		});
 
-		emailComposer.setSettingsReader(mockSettingService);
-
-		// test existing store
-		//final long storeUid = 1234L;
-		//Store store = new StoreImpl();
-		//store.setUidPk(storeUid);
-		//store.setCode(emailProperties.getStoreCode());
-		//store.setEmailSenderAddress("test@elasticpath.com");
-		//store.setEmailSenderName("test");
+		emailComposer.setEmailTextTemplateEnabledProvider(emailTextTemplateEnabled);
 
 		final Store mockStore = context.mock(Store.class);
 		context.checking(new Expectations() {
@@ -254,25 +230,21 @@ public class LegacyEmailComposerImplTest {
 		emailProperties.setRecipientAddress("whatever@asif.com");
 		emailProperties.setStoreCode(null);
 
-		final SettingValue emailGlobalSenderAddressSettingValue = new SettingValueImpl();
-		emailGlobalSenderAddressSettingValue.setValue("customerService@SomeDomain.com");
 		context.checking(new Expectations() {
 			{
-				oneOf(mockSettingService).getSettingValue("COMMERCE/SYSTEM/EMAIL/emailGlobalSenderAddress");
-				will(returnValue(emailGlobalSenderAddressSettingValue));
+				oneOf(emailGlobalSenderAddress).get();
+				will(returnValue("customerService@SomeDomain.com"));
 			}
 		});
+		emailComposer.setEmailGlobalSenderAddressProvider(emailGlobalSenderAddress);
 
-		final SettingValue emailGlobalSenderNameSettingValue = new SettingValueImpl();
-		emailGlobalSenderNameSettingValue.setValue("Customer Service");
 		context.checking(new Expectations() {
 			{
-				oneOf(mockSettingService).getSettingValue("COMMERCE/SYSTEM/EMAIL/emailGlobalSenderName");
-				will(returnValue(emailGlobalSenderNameSettingValue));
+				oneOf(emailGlobalSenderName).get();
+				will(returnValue("Customer Service"));
 			}
 		});
-
-		emailComposer.setSettingsReader(mockSettingService);
+		emailComposer.setEmailGlobalSenderNameProvider(emailGlobalSenderName);
 
 		context.checking(new Expectations() { {
 			allowing(emailContextFactory).createVelocityContext(null, emailProperties); will(returnValue(Collections.emptyMap()));

@@ -13,8 +13,6 @@
 			timeToLiveSeconds="1"
 			maxEntriesLocalHeap="10000"
 			eternal="false"
-			overflowToDisk="false"
-			diskPersistent="false"
 			diskExpiryThreadIntervalSeconds="120"
 			memoryStoreEvictionPolicy="LRU"
 			statistics="true"
@@ -25,7 +23,6 @@
 		   timeToLiveSeconds="5"
 		   maxEntriesLocalHeap="10000"
 		   eternal="false"
-		   overflowToDisk="false"
 		   statistics="true"
 	/>
 
@@ -36,7 +33,6 @@
 		   timeToIdleSeconds="5"
 		   timeToLiveSeconds="5"
 		   maxEntriesLocalHeap="10000"
-		   maxElementsOnDisk="10000"
 		   statistics="true"
 	/>
 
@@ -44,7 +40,6 @@
 		   timeToIdleSeconds="5"
 		   timeToLiveSeconds="5"
 		   maxEntriesLocalHeap="10000"
-		   maxElementsOnDisk="10000"
 		   statistics="true"
 	/>
 
@@ -52,7 +47,6 @@
 		   timeToIdleSeconds="5"
 		   timeToLiveSeconds="5"
 		   maxEntriesLocalHeap="10000"
-		   maxElementsOnDisk="10000"
 		   statistics="true"
 	/>
 
@@ -60,15 +54,6 @@
 		   timeToIdleSeconds="5"
 		   timeToLiveSeconds="5"
 		   maxEntriesLocalHeap="10000"
-		   maxElementsOnDisk="10000"
-		   statistics="true"
-	/>
-
-	<cache name="categoryRuleBaseCache"
-		   timeToIdleSeconds="5"
-		   timeToLiveSeconds="5"
-		   maxEntriesLocalHeap="10000"
-		   maxElementsOnDisk="10000"
 		   statistics="true"
 	/>
 
@@ -76,7 +61,6 @@
 		   timeToIdleSeconds="5"
 		   timeToLiveSeconds="5"
 		   maxEntriesLocalHeap="10000"
-		   maxElementsOnDisk="10000"
 		   statistics="true"
 	/>
 
@@ -84,7 +68,6 @@
 		   timeToIdleSeconds="5"
 		   timeToLiveSeconds="5"
 		   maxEntriesLocalHeap="10000"
-		   maxElementsOnDisk="10000"
 		   statistics="true"
 	/>
 
@@ -92,7 +75,6 @@
 		   timeToIdleSeconds="5"
 		   timeToLiveSeconds="5"
 		   maxEntriesLocalHeap="10000"
-		   maxElementsOnDisk="10000"
 		   statistics="true"
 	/>
 
@@ -100,7 +82,6 @@
 		   timeToIdleSeconds="5"
 		   timeToLiveSeconds="5"
 		   maxEntriesLocalHeap="10000"
-		   maxElementsOnDisk="10000"
 		   statistics="true"
 	/>
 
@@ -108,7 +89,6 @@
 		   timeToIdleSeconds="5"
 		   timeToLiveSeconds="5"
 		   maxEntriesLocalHeap="10000"
-		   maxElementsOnDisk="10000"
 		   statistics="true"
 	/>
 
@@ -116,7 +96,6 @@
 		   timeToIdleSeconds="5"
 		   timeToLiveSeconds="5"
 		   maxEntriesLocalHeap="10000"
-		   maxElementsOnDisk="10000"
 		   statistics="true"
 	/>
 
@@ -124,7 +103,6 @@
 		   timeToIdleSeconds="5"
 		   timeToLiveSeconds="5"
 		   maxEntriesLocalHeap="10000"
-		   maxElementsOnDisk="10000"
 		   statistics="true"
 	/>
 
@@ -132,7 +110,6 @@
 		   timeToIdleSeconds="5"
 		   timeToLiveSeconds="5"
 		   maxEntriesLocalHeap="10000"
-		   maxElementsOnDisk="10000"
 		   statistics="true"
 	/>
 
@@ -140,7 +117,6 @@
 		   timeToIdleSeconds="5"
 		   timeToLiveSeconds="5"
 		   maxEntriesLocalHeap="10000"
-		   maxElementsOnDisk="10000"
 		   statistics="true"
 	/>
 
@@ -148,7 +124,6 @@
 		   timeToIdleSeconds="5"
 		   timeToLiveSeconds="5"
 		   maxEntriesLocalHeap="10000"
-		   maxElementsOnDisk="10000"
 		   statistics="true"
 	/>
 
@@ -156,7 +131,6 @@
 		   timeToIdleSeconds="5"
 		   timeToLiveSeconds="5"
 		   maxEntriesLocalHeap="10000"
-		   maxElementsOnDisk="10000"
 		   statistics="true"
 	/>
 
@@ -164,7 +138,6 @@
 		   timeToIdleSeconds="5"
 		   timeToLiveSeconds="5"
 		   maxEntriesLocalHeap="10000"
-		   maxElementsOnDisk="10000"
 		   statistics="true"
 	/>
 
@@ -172,7 +145,6 @@
 		   timeToIdleSeconds="5"
 		   timeToLiveSeconds="5"
 		   maxEntriesLocalHeap="10000"
-		   maxElementsOnDisk="10000"
 		   statistics="true"
 	/>
 
@@ -180,7 +152,6 @@
 		   timeToIdleSeconds="5"
 		   timeToLiveSeconds="5"
 		   maxEntriesLocalHeap="10000"
-		   maxElementsOnDisk="10000"
 		   statistics="true"
 	/>
 
@@ -188,7 +159,6 @@
 		   timeToIdleSeconds="5"
 		   timeToLiveSeconds="5"
 		   maxEntriesLocalHeap="10000"
-		   maxElementsOnDisk="10000"
 		   statistics="true"
 	/>
 
@@ -196,7 +166,6 @@
 		   timeToIdleSeconds="5"
 		   timeToLiveSeconds="5"
 		   maxEntriesLocalHeap="10000"
-		   maxElementsOnDisk="10000"
 		   statistics="true"
 	/>
 
@@ -204,7 +173,6 @@
 		   timeToIdleSeconds="5"
 		   timeToLiveSeconds="5"
 		   maxEntriesLocalHeap="10000"
-		   maxElementsOnDisk="10000"
 		   statistics="true"
 	/>
 
@@ -212,7 +180,6 @@
 		   timeToIdleSeconds="5"
 		   timeToLiveSeconds="5"
 		   maxEntriesLocalHeap="10000"
-		   maxElementsOnDisk="10000"
 		   statistics="true"
 	/>
 
@@ -220,7 +187,6 @@
 		   timeToIdleSeconds="5"
 		   timeToLiveSeconds="5"
 		   maxEntriesLocalHeap="10000"
-		   maxElementsOnDisk="10000"
 		   statistics="true"
 	/>
 
@@ -228,7 +194,6 @@
 		   timeToIdleSeconds="5"
 		   timeToLiveSeconds="5"
 		   maxEntriesLocalHeap="10000"
-		   maxElementsOnDisk="10000"
 		   statistics="true"
 	/>
 
@@ -236,7 +201,6 @@
 		   timeToIdleSeconds="5"
 		   timeToLiveSeconds="5"
 		   maxEntriesLocalHeap="10000"
-		   maxElementsOnDisk="10000"
 		   statistics="true"
 	/>
 
@@ -244,7 +208,6 @@
 		   timeToIdleSeconds="5"
 		   timeToLiveSeconds="5"
 		   maxEntriesLocalHeap="10000"
-		   maxElementsOnDisk="10000"
 		   statistics="true"
 	/>
 

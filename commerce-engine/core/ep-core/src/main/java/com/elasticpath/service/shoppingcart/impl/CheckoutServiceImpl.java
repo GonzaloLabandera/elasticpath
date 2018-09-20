@@ -6,7 +6,10 @@ package com.elasticpath.service.shoppingcart.impl;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 
 import com.elasticpath.base.exception.EpServiceException;
@@ -17,12 +20,12 @@ import com.elasticpath.domain.customer.CustomerSession;
 import com.elasticpath.domain.misc.CheckoutResults;
 import com.elasticpath.domain.order.OrderPayment;
 import com.elasticpath.domain.order.OrderReturn;
-import com.elasticpath.domain.shipping.ShippingServiceLevel;
 import com.elasticpath.domain.shoppingcart.ShoppingCart;
 import com.elasticpath.domain.shoppingcart.ShoppingCartTaxSnapshot;
 import com.elasticpath.plugin.payment.exceptions.PaymentProcessingException;
 import com.elasticpath.service.payment.PaymentStructuredErrorException;
-import com.elasticpath.service.shipping.ShippingServiceLevelService;
+import com.elasticpath.service.shipping.ShippingOptionResult;
+import com.elasticpath.service.shipping.ShippingOptionService;
 import com.elasticpath.service.shoppingcart.CheckoutService;
 import com.elasticpath.service.shoppingcart.actions.CheckoutAction;
 import com.elasticpath.service.shoppingcart.actions.CheckoutActionContext;
@@ -31,6 +34,7 @@ import com.elasticpath.service.shoppingcart.actions.FinalizeCheckoutActionContex
 import com.elasticpath.service.shoppingcart.actions.ReversibleCheckoutAction;
 import com.elasticpath.service.shoppingcart.actions.impl.CheckoutActionContextImpl;
 import com.elasticpath.service.shoppingcart.actions.impl.FinalizeCheckoutActionContextImpl;
+import com.elasticpath.shipping.connectivity.dto.ShippingOption;
 
 /**
  * Provides a service to execute a shopping cart checkout.
@@ -45,34 +49,71 @@ public class CheckoutServiceImpl implements CheckoutService {
 
 	private List<FinalizeCheckoutAction> finalizeActionList = Collections.emptyList();
 
-	private ShippingServiceLevelService shippingServiceLevelService;
+	private ShippingOptionService shippingOptionService;
 
 	private BeanFactory beanFactory;
 
 	@Override
 	public void retrieveShippingOption(final ShoppingCart shoppingCart) {
 		if (shoppingCart.requiresShipping()) {
-			final List<ShippingServiceLevel> validShippingServiceLevels = this.shippingServiceLevelService
-					.retrieveShippingServiceLevel(shoppingCart);
-			shoppingCart.setShippingServiceLevelList(validShippingServiceLevels);
-			if (validShippingServiceLevels.isEmpty()) {
-				shoppingCart.clearSelectedShippingServiceLevel();
-			} else if (!this.isValidShippingServiceLevelId(validShippingServiceLevels, shoppingCart.getSelectedShippingServiceLevel().getUidPk())) {
-				shoppingCart.setSelectedShippingServiceLevelUid(validShippingServiceLevels.get(0).getUidPk());
+
+			// find available shipping option by shipping address and store.
+			final ShippingOptionResult shippingOptionResult = getShippingOptionService().getShippingOptions(shoppingCart);
+
+			if (shippingOptionResult.isSuccessful()) {
+				retrieveShippingOption(shoppingCart, shippingOptionResult);
 			}
 		} else {
-			shoppingCart.setShippingServiceLevelList(null);
-			shoppingCart.clearSelectedShippingServiceLevel();
+			shoppingCart.clearSelectedShippingOption();
 		}
 	}
 
-	private boolean isValidShippingServiceLevelId(final List<ShippingServiceLevel> validServiceLevels, final long selectedId) {
-		for (final ShippingServiceLevel shippingServiceLevel : validServiceLevels) {
-			if (shippingServiceLevel.getUidPk() == selectedId) {
-				return true;
-			}
+	/**
+	 * Retrieves the available shipping options from the successful {@link ShippingOptionResult} given, and if the current one selected is not
+	 * valid, it gets the default one (per {@link ShippingOptionService#getDefaultShippingOption(List)} and selects that one on the shopping cart.
+	 *
+	 * @param shoppingCart         the shopping cart to inspect and update.
+	 * @param shippingOptionResult the successful {@link ShippingOptionResult}.
+	 */
+	protected void retrieveShippingOption(final ShoppingCart shoppingCart, final ShippingOptionResult shippingOptionResult) {
+		final List<ShippingOption> availableShippingOptions = shippingOptionResult.getAvailableShippingOptions();
+
+		if (CollectionUtils.isNotEmpty(availableShippingOptions)) {
+			final String selectedShippingOptionCode = shoppingCart.getSelectedShippingOption().map(ShippingOption::getCode).orElse(null);
+			useDefaultIfSelectedShippingOptionIsInvalid(shoppingCart, selectedShippingOptionCode, availableShippingOptions);
+		} else {
+			shoppingCart.clearSelectedShippingOption();
 		}
-		return false;
+	}
+
+	/**
+	 * Uses default shipping option if selected shipping option is invalid.
+	 *
+	 * @param shoppingCart               the shopping cart
+	 * @param selectedShippingOptionCode the selected shipping option code
+	 * @param availableShippingOptions   available shipping options
+	 */
+	protected void useDefaultIfSelectedShippingOptionIsInvalid(final ShoppingCart shoppingCart,
+															   final String selectedShippingOptionCode,
+															   final List<ShippingOption> availableShippingOptions) {
+		if (!isValidShippingOptionCode(availableShippingOptions, selectedShippingOptionCode)) {
+			final Optional<ShippingOption> defaultShippingOption = shippingOptionService.getDefaultShippingOption(availableShippingOptions);
+			shoppingCart.setSelectedShippingOption(defaultShippingOption.orElse(null));
+		}
+	}
+
+	/**
+	 * Returns whether the the given shipping option code is contained in the list of {@link ShippingOption} objects.
+	 *
+	 * @param validShippingOptions the list of {@link ShippingOption} objects to search.
+	 * @param shippingOptionCode the code to search for.
+	 * @return {@code true} if any of the {@link ShippingOption} object's code match; {@code false} otherwise.
+	 */
+	protected boolean isValidShippingOptionCode(final List<ShippingOption> validShippingOptions, final String shippingOptionCode) {
+		if (StringUtils.isEmpty(shippingOptionCode)) {
+			return false;
+		}
+		return validShippingOptions.stream().anyMatch(shippingOption -> shippingOption.getCode().equals(shippingOptionCode));
 	}
 
 	@Override
@@ -244,8 +285,12 @@ public class CheckoutServiceImpl implements CheckoutService {
 		LOG.debug("Checkout rollback process completed.");
 	}
 
-	public void setShippingServiceLevelService(final ShippingServiceLevelService shippingServiceLevelService) {
-		this.shippingServiceLevelService = shippingServiceLevelService;
+	protected ShippingOptionService getShippingOptionService() {
+		return this.shippingOptionService;
+	}
+
+	public void setShippingOptionService(final ShippingOptionService shippingOptionService) {
+		this.shippingOptionService = shippingOptionService;
 	}
 
 	protected List<CheckoutAction> getSetupActionList() {
@@ -275,4 +320,5 @@ public class CheckoutServiceImpl implements CheckoutService {
 	public void setBeanFactory(final BeanFactory beanFactory) {
 		this.beanFactory = beanFactory;
 	}
+
 }

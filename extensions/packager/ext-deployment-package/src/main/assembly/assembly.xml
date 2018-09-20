@@ -99,15 +99,5 @@
 			</includes>
 			<outputDirectory>.</outputDirectory>
 		</fileSet>
-        
-        <!-- EP config directory -->
-        <fileSet>
-            <directory>${basedir}/src/main/resources/config</directory>
-            <includes>
-                <include>**</include>
-            </includes>
-            <outputDirectory>config</outputDirectory>
-        </fileSet>
-
 	</fileSets>
 </assembly>

@@ -20,7 +20,6 @@ import cucumber.api.java.en.Given;
 import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.ContextConfiguration;
 
 import com.elasticpath.common.dto.datapolicy.DataPointDTO;
 import com.elasticpath.common.dto.datapolicy.DataPolicyDTO;
@@ -38,7 +37,6 @@ import com.elasticpath.importexport.importer.types.ImportStrategyType;
 /**
  * Import data policy steps.
  */
-@ContextConfiguration("/integration-context-mocked-customer-service.xml")
 public class ImportDataPolicySteps {
 
 	private static final String DATA_POLICIES_IMPORT_FILE = "data_policies.xml";

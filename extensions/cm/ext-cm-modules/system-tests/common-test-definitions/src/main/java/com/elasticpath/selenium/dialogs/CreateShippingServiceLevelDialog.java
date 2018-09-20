@@ -11,7 +11,10 @@ import org.openqa.selenium.WebDriver;
  */
 public class CreateShippingServiceLevelDialog extends AbstractDialog {
 
-	private static final String CREATE_SHIPPING_SERVICE_LEVEL_PARENT_CSS = "div[widget-id='Create Shipping Service Level'][widget-type='Shell'] ";
+	/**
+	 * CSS selector used to identify the dialog.
+	 */
+	public static final String CREATE_SHIPPING_SERVICE_LEVEL_PARENT_CSS = "div[widget-id='Create Shipping Service Level'][widget-type='Shell'] ";
 	private static final String STORE_COMBO_CSS = CREATE_SHIPPING_SERVICE_LEVEL_PARENT_CSS + "div[widget-id='Store'][widget-type='CCombo']";
 	private static final String SHIPPING_REGION_COMBO_CSS = CREATE_SHIPPING_SERVICE_LEVEL_PARENT_CSS + "div[widget-id='Shipping "
 			+ "Region'][widget-type='CCombo']";

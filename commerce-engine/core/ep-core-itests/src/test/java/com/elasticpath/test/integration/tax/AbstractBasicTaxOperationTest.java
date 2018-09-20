@@ -1,10 +1,10 @@
-/**
+/*
  * Copyright (c) Elastic Path Software Inc., 2014
  */
 package com.elasticpath.test.integration.tax;
 
 import java.math.BigDecimal;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.Currency;
 import java.util.Date;
 import java.util.HashSet;
@@ -21,7 +21,6 @@ import com.elasticpath.domain.catalog.Product;
 import com.elasticpath.domain.catalog.ProductSku;
 import com.elasticpath.domain.customer.Customer;
 import com.elasticpath.domain.customer.CustomerAddress;
-import com.elasticpath.domain.customer.CustomerCreditCard;
 import com.elasticpath.domain.customer.CustomerSession;
 import com.elasticpath.domain.event.EventOriginatorHelper;
 import com.elasticpath.domain.order.OrderReturn;
@@ -56,15 +55,13 @@ public abstract class AbstractBasicTaxOperationTest extends BasicSpringContextTe
 	protected CheckoutService checkoutService;
 	
 	@Autowired
-	protected PaymentService paymentService;
+	PaymentService paymentService;
 
 	protected Store store;
 
 	protected Customer customer;
 
 	protected CustomerAddress address;
-
-	protected CustomerCreditCard creditCard;
 
 	protected CustomerSession customerSession;
 
@@ -78,15 +75,15 @@ public abstract class AbstractBasicTaxOperationTest extends BasicSpringContextTe
 	@Autowired
 	protected CartDirector cartDirector;
 
-	protected List<Product> shippableProducts;
+	List<Product> shippableProducts;
 	
-	protected List<Product> nonShippableProducts;
+	List<Product> nonShippableProducts;
 
 	@Autowired
 	protected ProductSkuLookup productSkuLookup;
 
 	@Autowired
-	protected StoreService storeService;
+	private StoreService storeService;
 	
 	@Autowired
 	private OrderTaxTestVerifier orderTaxTestVerifier;
@@ -118,13 +115,6 @@ public abstract class AbstractBasicTaxOperationTest extends BasicSpringContextTe
 		address = persisterFactory.getStoreTestPersister().createCustomerAddress("Bond", "James", "1234 Pine Street", "", "Vancouver", "CA", "BC",
 				"V6J5G4", "891312345007");
 		customerSession = persisterFactory.getStoreTestPersister().persistCustomerSessionWithAssociatedEntities(customer);
-		creditCard = persisterFactory.getStoreTestPersister().createCustomerCreditCard(
-				address.getFirstName() + " " + address.getLastName(), 
-				"4111111111111111", 
-				"VISA", 
-				"11", 
-				"2020"
-				);
 	}
 	
 	public void setUpTaxJurisdictionForStore(final Store store, final ShippingRegion shippingRegion) {
@@ -136,7 +126,7 @@ public abstract class AbstractBasicTaxOperationTest extends BasicSpringContextTe
 		final StoreTestPersister storePersister = getTac().getPersistersFactory().getStoreTestPersister();
 		final TaxCodeService taxCodeService = getBeanFactory().getBean(ContextIdNames.TAX_CODE_SERVICE);
 		final TaxCode goodTaxCode = taxCodeService.findByCode("GOODS");
-		storePersister.updateStoreTaxCodes(store, new HashSet<>(Arrays.asList(goodTaxCode)));
+		storePersister.updateStoreTaxCodes(store, new HashSet<>(Collections.singletonList(goodTaxCode)));
 		
 		Map<String, Region> regionMap = shippingRegion.getRegionMap();
 		Region region = regionMap.values().iterator().next();

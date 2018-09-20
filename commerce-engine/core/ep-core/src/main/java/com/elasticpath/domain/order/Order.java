@@ -24,7 +24,7 @@ import com.elasticpath.plugin.tax.domain.TaxExemption;
 /**
  * <code>Order</code> represents a customer's order.
  */
-public interface Order extends Entity, ShoppingItemContainer {
+public interface Order extends Entity, ShoppingItemContainer<OrderSku> {
 
 	/**
 	 * Gets cm user's uid.

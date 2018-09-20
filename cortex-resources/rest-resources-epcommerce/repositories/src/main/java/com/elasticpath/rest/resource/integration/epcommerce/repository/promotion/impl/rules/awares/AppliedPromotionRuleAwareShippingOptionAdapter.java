@@ -5,33 +5,33 @@ package com.elasticpath.rest.resource.integration.epcommerce.repository.promotio
 
 import java.util.Collection;
 
-import com.elasticpath.domain.shipping.ShippingServiceLevel;
 import com.elasticpath.domain.shoppingcart.PromotionRecordContainer;
 import com.elasticpath.domain.shoppingcart.ShoppingCartPricingSnapshot;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.promotion.AppliedPromotionRuleAware;
+import com.elasticpath.shipping.connectivity.dto.ShippingOption;
 
 /**
-* Adapts a ShippingServiceLevel to the AppliedPromotionRuleAware interface.
+* Adapts a ShippingOption to the AppliedPromotionRuleAware interface.
 */
 public class AppliedPromotionRuleAwareShippingOptionAdapter implements AppliedPromotionRuleAware<Long> {
 	private final ShoppingCartPricingSnapshot cartPricingSnapshot;
-	private final ShippingServiceLevel shippingServiceLevel;
+	private final ShippingOption shippingOption;
 
 	/**
 	 * Constructor.
 	 *
 	 * @param cartPricingSnapshot the cart pricing snapshot
-	 * @param shippingServiceLevel The shipping option.
+	 * @param shippingOption The shipping option.
 	 */
 	public AppliedPromotionRuleAwareShippingOptionAdapter(final ShoppingCartPricingSnapshot cartPricingSnapshot,
-															final ShippingServiceLevel shippingServiceLevel) {
+															final ShippingOption shippingOption) {
 		this.cartPricingSnapshot = cartPricingSnapshot;
-		this.shippingServiceLevel = shippingServiceLevel;
+		this.shippingOption = shippingOption;
 	}
 
 	@Override
 	public Collection<Long> getAppliedRules() {
 		final PromotionRecordContainer promotionRecordContainer = cartPricingSnapshot.getPromotionRecordContainer();
-		return promotionRecordContainer.getAppliedRulesByShippingServiceLevel(shippingServiceLevel);
+		return promotionRecordContainer.getAppliedRulesByShippingOption(shippingOption);
 	}
 }

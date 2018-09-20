@@ -63,7 +63,7 @@ public class StoreProductServiceImpl implements StoreProductService {
 	 * Get a store product for the specified product.
 	 *
 	 * @param product the product to get the store product for.
-	 * @param store the store the product belongs to.
+	 * @param store   the store the product belongs to.
 	 * @return the store product
 	 */
 	@Override
@@ -74,8 +74,8 @@ public class StoreProductServiceImpl implements StoreProductService {
 	/**
 	 * Get a list of store products for a specified store.
 	 *
-	 * @param uidPks the uids of the products.
-	 * @param store the store the products belong to.
+	 * @param uidPks                  the uids of the products.
+	 * @param store                   the store the products belong to.
 	 * @param loadProductAssociations true if product associations should be loaded for each product
 	 * @return the store product
 	 */
@@ -102,8 +102,8 @@ public class StoreProductServiceImpl implements StoreProductService {
 	 * Associations are also wrapped for storefront presentation.
 	 *
 	 * @param storeProduct the store product upon which to set the Product Associations
-	 * @param store the store this product belongs to
-	 * @param catalogCode the code for the catalog in which the StoreProduct exists (the store's catalog's code)
+	 * @param store        the store this product belongs to
+	 * @param catalogCode  the code for the catalog in which the StoreProduct exists (the store's catalog's code)
 	 */
 	protected void setStoreProductAssociations(final StoreProduct storeProduct, final Store store, final String catalogCode) {
 		Set<ProductAssociation> associationSet = new HashSet<>();
@@ -128,7 +128,7 @@ public class StoreProductServiceImpl implements StoreProductService {
 
 	@Override
 	public Collection<IndexProduct> getIndexProducts(final Collection<Long> productUids, final Collection<Store> stores,
-			final FetchGroupLoadTuner fetchGroupLoadTuner) {
+													 final FetchGroupLoadTuner fetchGroupLoadTuner) {
 		List<Product> products = productService.findByUidsWithFetchGroupLoadTuner(productUids, fetchGroupLoadTuner);
 		Collection<IndexProduct> indexProducts = new HashSet<>();
 		for (Product product : products) {
@@ -140,9 +140,9 @@ public class StoreProductServiceImpl implements StoreProductService {
 	/**
 	 * Gets the index product.
 	 *
-	 * @param uidPk the product UID
+	 * @param uidPk     the product UID
 	 * @param loadTuner the load tuner
-	 * @param stores a collection of stores for which the product is being indexed
+	 * @param stores    a collection of stores for which the product is being indexed
 	 * @return the IndexProduct instance
 	 */
 	@Override
@@ -206,7 +206,7 @@ public class StoreProductServiceImpl implements StoreProductService {
 	 * Wraps an existing Product in StoreProduct using the default product sku.
 	 *
 	 * @param product the product
-	 * @param store the store
+	 * @param store   the store
 	 * @return {@link StoreProduct}
 	 */
 	protected StoreProduct wrapProduct(final Product product, final Store store) {
@@ -227,13 +227,13 @@ public class StoreProductServiceImpl implements StoreProductService {
 	 * Wraps an existing Product in StoreProduct for the sku with specific uid given all the skus inventory details. The default sku is used if
 	 * there's no sku for a given uid.
 	 *
-	 * @param product the product
-	 * @param store the store
+	 * @param product             the product
+	 * @param store               the store
 	 * @param skuInventoryDetails the sku inventory details map for all skus of the product
 	 * @return {@link StoreProduct}
 	 */
 	protected StoreProduct wrapProduct(final Product product, final Store store,
-			final Map<String, SkuInventoryDetails> skuInventoryDetails) {
+									   final Map<String, SkuInventoryDetails> skuInventoryDetails) {
 		StoreProductImpl storeProductImpl = new StoreProductImpl(product);
 
 		determineSkusAvailability(product.getProductSkus().values(), skuInventoryDetails, storeProductImpl);
@@ -242,7 +242,7 @@ public class StoreProductServiceImpl implements StoreProductService {
 
 	/**
 	 * For the bundle, set all constituents' default skus to be an available sku.
-	 *
+	 * <p>
 	 * If a product constituent's default sku is not available and the constituent has other skus available,
 	 * then the default sku is set to the fist available sku found.
 	 * If a product constituent's default sku is available, nothing is changed.
@@ -250,12 +250,12 @@ public class StoreProductServiceImpl implements StoreProductService {
 	 * If a fixed sku constituent is not available, the sku is not changed even if the parent product has other skus available.
 	 *
 	 * @param bundle the product bundle
-	 * @param store the store
+	 * @param store  the store
 	 */
 	protected void updateBundleConstituentDefaultSkus(final ProductBundle bundle, final Store store) {
 		List<BundleConstituent> constituents = bundle.getConstituents();
 		for (BundleConstituent constituent : constituents) {
-				Product constituentProduct = constituent.getConstituent().getProduct();
+			Product constituentProduct = constituent.getConstituent().getProduct();
 
 			if (constituentProduct instanceof ProductBundle) {
 				updateBundleConstituentDefaultSkus((ProductBundle) constituentProduct, store);
@@ -272,7 +272,7 @@ public class StoreProductServiceImpl implements StoreProductService {
 		boolean isDefaultSkuAvailable = isSkuAvailable(constituentProduct, defaultSku, store);
 		if (!isDefaultSkuAvailable) {
 			for (ProductSku otherSku : constituentProduct.getProductSkus().values()) {
-				boolean isOtherSkuAvailable  = isSkuAvailable(constituentProduct, otherSku, store);
+				boolean isOtherSkuAvailable = isSkuAvailable(constituentProduct, otherSku, store);
 				if (isOtherSkuAvailable) {
 					constituentProduct.setDefaultSku(otherSku);
 					break;
@@ -286,18 +286,22 @@ public class StoreProductServiceImpl implements StoreProductService {
 		return getProductAvailabilityService().isSkuAvailable(product, sku, inventoryDetails);
 	}
 
-	/** For each Sku of a product determine if is in stock and within date ranges.
-	 * @param skus  - the skus.
+	/**
+	 * For each Sku of a product determine if is in stock and within date ranges.
+	 *
+	 * @param skus                - the skus.
 	 * @param skuInventoryDetails - the inventory for the skus
-	 * @param storeProductImpl the wraped product
+	 * @param storeProductImpl    the wraped product
 	 */
 	protected void determineSkusAvailability(final Collection<ProductSku> skus, final Map<String, SkuInventoryDetails> skuInventoryDetails,
-			final StoreProductImpl storeProductImpl) {
+											 final StoreProductImpl storeProductImpl) {
 		for (ProductSku sku : skus) {
 			SkuInventoryDetails inventoryDetails = skuInventoryDetails.get(sku.getSkuCode());
-			storeProductImpl.addInventoryDetails(sku.getSkuCode(), inventoryDetails);
-
-			boolean hasUnallocatedInventory = inventoryDetails.hasSufficientUnallocatedQty();
+			boolean hasUnallocatedInventory = false;
+			if (inventoryDetails != null) {
+				storeProductImpl.addInventoryDetails(sku.getSkuCode(), inventoryDetails);
+				hasUnallocatedInventory = inventoryDetails.hasSufficientUnallocatedQty();
+			}
 			storeProductImpl.setSkuAvailable(sku.getSkuCode(), hasUnallocatedInventory && sku.isWithinDateRange());
 		}
 	}
@@ -307,31 +311,27 @@ public class StoreProductServiceImpl implements StoreProductService {
 	 * then the fields are evaluated based on inventory/availability info for all skus in the product.  If the skuUid is
 	 * not null, then the fields are evaluated based on the given sku only.
 	 *
-	 * @param product the product
-	 * @param store the Store Product's store
-	 * @param storeProductImpl the store product to populate
+	 * @param product             the product
+	 * @param store               the Store Product's store
+	 * @param storeProductImpl    the store product to populate
 	 * @param skuInventoryDetails a Map of sku code to SkuInventoryDetails for the product
-	 *
 	 * @return the store product.
 	 */
 	protected StoreProduct populateProductDetails(final Product product, final Store store, final StoreProductImpl storeProductImpl,
-													final Map<String, SkuInventoryDetails> skuInventoryDetails) {
+												  final Map<String, SkuInventoryDetails> skuInventoryDetails) {
 		if (product.getProductSkus().isEmpty()) {
 			storeProductImpl.setProductDisplayable(false);
 			storeProductImpl.setProductAvailable(false);
-			storeProductImpl.setProductPurchasable(false);
 			storeProductImpl.setProductAvailability(Availability.NOT_AVAILABLE);
 		} else {
 			boolean isAvailable = getProductAvailabilityService().isProductAvailable(
-				product, skuInventoryDetails, true);
+					product, skuInventoryDetails, true);
 			boolean isDisplayable = getProductAvailabilityService().isProductDisplayable(
-				product, store, skuInventoryDetails, true);
-			boolean isPurchasable = isProductPurchasable(product, store, isAvailable, isDisplayable);
+					product, store, skuInventoryDetails, true);
 
 			storeProductImpl.setProductAvailable(isAvailable);
 			storeProductImpl.setProductDisplayable(isDisplayable);
-			storeProductImpl.setProductPurchasable(isPurchasable);
-			storeProductImpl.setProductAvailability(getProductAvailability(product, isAvailable, isDisplayable, isPurchasable));
+			storeProductImpl.setProductAvailability(getProductAvailability(product, isAvailable, isDisplayable));
 
 			for (ProductSku sku : product.getProductSkus().values()) {
 				setSkuDetails(product, store, storeProductImpl, skuInventoryDetails, sku);
@@ -347,33 +347,21 @@ public class StoreProductServiceImpl implements StoreProductService {
 							   final Map<String, SkuInventoryDetails> skuInventoryDetails, final ProductSku sku) {
 		final String skuCode = sku.getSkuCode();
 		SkuInventoryDetails skuInventory = skuInventoryDetails.get(skuCode);
-		boolean isSkuAvailable   = getProductAvailabilityService().isSkuAvailable(product, sku, skuInventory);
+		boolean isSkuAvailable = getProductAvailabilityService().isSkuAvailable(product, sku, skuInventory);
 		boolean isSkuDisplayable = getProductAvailabilityService().isSkuDisplayable(product, sku, store, skuInventory);
-		boolean isSkuPurchasable = isProductPurchasable(product, store, isSkuAvailable, isSkuDisplayable);
 
 		storeProductImpl.setSkuAvailable(skuCode, isSkuAvailable);
-		storeProductImpl.setSkuPurchasable(skuCode, isSkuPurchasable);
 		storeProductImpl.setSkuDisplayable(skuCode, isSkuDisplayable);
-		storeProductImpl.setSkuAvailability(skuCode, getProductAvailability(product, isSkuAvailable, isSkuDisplayable, isSkuPurchasable));
-	}
-
-	/**
-	 * Calculated the inventory details for the product's default sku.
-	 * @param product the product
-	 * @param store the store
-	 * @return the details
-	 */
-	SkuInventoryDetails calculateInventoryDetails(final Product product, final Store store) {
-		ProductSku defaultSku = product.getDefaultSku();
-		return productInventoryShoppingService.getSkuInventoryDetails(defaultSku, store);
+		storeProductImpl.setSkuAvailability(skuCode, getProductAvailability(product, isSkuAvailable, isSkuDisplayable));
 	}
 
 	/**
 	 * Calculated the inventory details for the product's given sku.
+	 *
 	 * @param productSku the product sku
-	 * @param store the store
+	 * @param store      the store
 	 * @return the details
-     * @deprecated in favour of {@code calculateInventoryDetailsForAllSkus}
+	 * @deprecated in favour of {@code calculateInventoryDetailsForAllSkus}
 	 */
 	@Deprecated
 	SkuInventoryDetails calculateInventoryDetails(final ProductSku productSku, final Store store) {
@@ -382,8 +370,9 @@ public class StoreProductServiceImpl implements StoreProductService {
 
 	/**
 	 * Calculated the inventory details for all the skus for a product.
+	 *
 	 * @param product the product
-	 * @param store the store
+	 * @param store   the store
 	 * @return the details
 	 */
 	Map<String, SkuInventoryDetails> calculateInventoryDetailsForAllSkus(final Product product, final Store store) {
@@ -392,8 +381,9 @@ public class StoreProductServiceImpl implements StoreProductService {
 
 	/**
 	 * Calculated the inventory details for all the skus for all products in the list.
+	 *
 	 * @param products the product
-	 * @param store the store
+	 * @param store    the store
 	 * @return a map of product code to map of sku code to sku inventory details
 	 */
 	Map<String, Map<String, SkuInventoryDetails>> calculateInventoryDetailsForAllProductsSkus(final List<Product> products, final Store store) {
@@ -401,40 +391,18 @@ public class StoreProductServiceImpl implements StoreProductService {
 	}
 
 	/**
-	 * Verifies if a product is available to be purchased in a store.
-	 * The implementation verifies that a product is:
-	 *
-	 * <li> displayable
-	 * <li> available
-	 * <li> belongs to the context of this running store
-	 * <li> product is sellable outside of a bundle
-	 *
-	 *
-	 * @param product the product
-	 * @param store the store
-	 * @param isSkuAvailable is the product available
-	 * @param isSkuDisplayable is the product displayable
-	 * @return true if the product is available to be purchased
-	 */
-	protected boolean isProductPurchasable(final Product product, final Store store, final boolean isSkuAvailable, final boolean isSkuDisplayable) {
-		return isSkuDisplayable && isSkuAvailable && product.isInCatalog(store.getCatalog());
-	}
-
-	/**
 	 * Gets the product availability. Calls a set of injected strategies, stopping at the first one that
 	 * returns a non-null result.
 	 *
-	 * @param product the product
-	 * @param isAvailable whether the product is available
+	 * @param product       the product
+	 * @param isAvailable   whether the product is available
 	 * @param isDisplayable whether the product is displayable
-	 * @param isPurchasable whether the product is purchasable
 	 * @return the product availability
 	 */
-	protected Availability getProductAvailability(final Product product, final boolean isAvailable, final boolean isDisplayable,
-													final boolean isPurchasable) {
+	protected Availability getProductAvailability(final Product product, final boolean isAvailable, final boolean isDisplayable) {
 		Availability availability = null;
 		for (AvailabilityStrategy strategy : getAvailabilityStrategies()) {
-			availability = strategy.getAvailability(product, isAvailable, isDisplayable, isPurchasable);
+			availability = strategy.getAvailability(product, isAvailable, isDisplayable);
 			if (availability != null) {
 				break;
 			}

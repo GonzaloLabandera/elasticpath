@@ -12,7 +12,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.elasticpath.domain.order.OrderAddress;
 import com.elasticpath.domain.order.PhysicalOrderShipment;
@@ -57,8 +57,6 @@ public class DestinationForShipmentRepositoryImplTest {
 	public void verifyFindOneReturnsNotFoundWhenOrderShipmentIsNotFound() {
 		when(shipmentRepository.find(ResourceTestConstants.PURCHASE_ID, ResourceTestConstants.SHIPMENT_ID))
 				.thenReturn(Single.error(ResourceOperationFailure.notFound(ShipmentRepositoryImpl.SHIPMENT_NOT_FOUND)));
-		when(physicalOrderShipment.getShipmentAddress()).thenReturn(orderAddress);
-		when(addressTransformer.transformAddressToEntity(orderAddress)).thenReturn(addressEntity);
 
 		repository.findOne(shipmentIdentifier)
 				.test()

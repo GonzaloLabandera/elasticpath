@@ -15,7 +15,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.elasticpath.domain.catalog.ProductSku;
 import com.elasticpath.rest.ResourceOperationFailure;
@@ -56,7 +56,6 @@ public class LineItemToOptionsRepositoryImplTest {
 		when(shipmentRepository.getProductSku(ResourceTestConstants.PURCHASE_ID, ResourceTestConstants.SHIPMENT_ID, ResourceTestConstants
 				.SHIPMENT_LINE_ITEM_ID))
 				.thenReturn(Single.error(ResourceOperationFailure.notFound(errorMsg)));
-		when(productSku.getOptionValueCodes()).thenReturn(codes);
 
 		repository.getElements(shipmentLineItemIdentifier)
 				.test()

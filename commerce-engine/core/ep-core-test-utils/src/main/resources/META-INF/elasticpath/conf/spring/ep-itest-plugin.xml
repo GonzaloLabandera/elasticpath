@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd">
 
 	<bean id="promotionConfigureService" parent="txProxyTemplate">
 		<property name="target">
@@ -51,8 +51,9 @@
 				<property name="timeService" ref="timeService"/>
 				<property name="pricingSnapshotService" ref="pricingSnapshotService"/>
 				<property name="taxSnapshotService" ref="taxSnapshotService"/>
-				<property name="shippableItemsSubtotalCalculator" ref="shippableItemsSubtotalCalculator"/>
 				<property name="orderSkuFactory" ref="orderSkuFactory"/>
+				<property name="shippingCalculationService" ref="shippingCalculationService"/>
+				<property name="pricedShippableItemContainerTransformer" ref="pricedShippableItemContainerFromOrderShipmentTransformer"/>
 			</bean>
 		</property>
 	</bean>

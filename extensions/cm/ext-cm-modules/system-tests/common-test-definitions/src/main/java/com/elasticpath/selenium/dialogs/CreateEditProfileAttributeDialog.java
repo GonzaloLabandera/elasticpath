@@ -10,8 +10,11 @@ import org.openqa.selenium.WebDriver;
  */
 public class CreateEditProfileAttributeDialog extends AbstractDialog {
 
-	private static final String CREATE_EDIT_PROFILE_ATTRIBUTE_DIALOG_CSS = "div[automation-id*='com.elasticpath.cmclient.admin.customers"
-			+ ".AdminCustomersMessages.%sAttribute'] ";
+	/**
+	 * CSS selector used to identify the dialog.
+	 */
+	public static final String CREATE_EDIT_PROFILE_ATTRIBUTE_DIALOG_CSS_TEMPLATE = "div[automation-id*='com.elasticpath.cmclient.admin.customers"
+			+ ".AdminCustomersMessages.%sAttribute'][widget-type='Shell']";
 	private static final String CREATE_EDIT_PROFILE_ATTRIBUTE_PARENT_INPUT_CSS = "div[automation-id='com.elasticpath.cmclient.admin.customers"
 			+ ".AdminCustomersMessages";
 	private static final String PROFILE_ATTRIBUTE_KEY_INPUT_CSS = CREATE_EDIT_PROFILE_ATTRIBUTE_PARENT_INPUT_CSS + ".AttributeKey'] input";
@@ -21,13 +24,17 @@ public class CreateEditProfileAttributeDialog extends AbstractDialog {
 	private static final String SAVE_BUTTON_CSS = "div[automation-id='com.elasticpath.cmclient.core.CoreMessages"
 			+ ".AbstractEpDialog_ButtonSave'][style*='opacity: 1']";
 
+	private final String profileAttributeDialogCSS;
+
 	/**
 	 * Constructor.
 	 *
-	 * @param driver WebDriver which drives this page.
+	 * @param driver     WebDriver which drives this page.
+	 * @param dialogName dialog name
 	 */
-	public CreateEditProfileAttributeDialog(final WebDriver driver) {
+	public CreateEditProfileAttributeDialog(final WebDriver driver, final String dialogName) {
 		super(driver);
+		profileAttributeDialogCSS = String.format(CREATE_EDIT_PROFILE_ATTRIBUTE_DIALOG_CSS_TEMPLATE, dialogName);
 	}
 
 	/**
@@ -64,6 +71,6 @@ public class CreateEditProfileAttributeDialog extends AbstractDialog {
 	 */
 	public void clickSaveButton() {
 		clickButton(SAVE_BUTTON_CSS, "Save");
-		waitTillElementDisappears(By.cssSelector(CREATE_EDIT_PROFILE_ATTRIBUTE_DIALOG_CSS));
+		waitTillElementDisappears(By.cssSelector(profileAttributeDialogCSS));
 	}
 }

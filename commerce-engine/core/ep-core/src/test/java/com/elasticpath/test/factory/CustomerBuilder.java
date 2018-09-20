@@ -20,7 +20,6 @@ import com.elasticpath.commons.constants.WebConstants;
 import com.elasticpath.domain.EpDomainException;
 import com.elasticpath.domain.customer.CustomerAddress;
 import com.elasticpath.domain.customer.CustomerAuthentication;
-import com.elasticpath.domain.customer.CustomerCreditCard;
 import com.elasticpath.domain.customer.CustomerGroup;
 import com.elasticpath.domain.customer.CustomerProfile;
 import com.elasticpath.domain.customer.impl.CustomerImpl;
@@ -202,28 +201,6 @@ class CustomerImplBuilderBase<GeneratorT extends CustomerImplBuilderBase<Generat
 
 	public GeneratorT withStatus(final int aValue) {
 		instance.setStatus(aValue);
-
-		return (GeneratorT) this;
-	}
-
-	public GeneratorT withCreditCards(final List<CustomerCreditCard> aValue) {
-		instance.setCreditCards(aValue);
-
-		return (GeneratorT) this;
-	}
-
-	public GeneratorT withAddedCreditCard(final CustomerCreditCard aValue) {
-		if (instance.getCreditCards() == null) {
-			instance.setCreditCards(new ArrayList<>());
-		}
-
-		instance.getPaymentMethods().add(aValue);
-
-		return (GeneratorT) this;
-	}
-
-	public GeneratorT withPreferredCreditCard(final CustomerCreditCard aValue) {
-		instance.setPreferredCreditCard(aValue);
 
 		return (GeneratorT) this;
 	}

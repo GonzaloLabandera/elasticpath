@@ -13,7 +13,7 @@
 	
 #emailMessage("email.shipConf.shipmentNumber"): $!shipment.shipmentNumber#**#
 #emailMessage("email.shipConf.shippedDate"): $!shipment.shipmentDate#**#
-#emailMessage("email.shipConf.shipmentType"):  $!shipment.getCarrier() -  $!shipment.getServiceLevel()#**#
+#emailMessage("email.shipConf.shipmentType"):  $!shipment.getCarrierName() -  $!shipment.getShippingOptionName()#**#
 #emailMessage("email.shipConf.TrackingNumber"): $!shipment.trackingCode#**#
 
 #if($shippingAddress)

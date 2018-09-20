@@ -21,6 +21,7 @@ import com.elasticpath.cmclient.core.binding.EpBindingConfiguration;
 import com.elasticpath.cmclient.core.binding.EpBindingConfiguration.ValidationErrorLocation;
 import com.elasticpath.cmclient.core.binding.EpControlBindingProvider;
 import com.elasticpath.cmclient.core.conversion.EpStringToBigDecimalConverter;
+import com.elasticpath.cmclient.core.helpers.BaseAmountDTOCreator;
 import com.elasticpath.cmclient.core.ui.framework.AbstractInlineEditingSupport;
 import com.elasticpath.cmclient.pricelistmanager.controller.PriceListEditorController;
 import com.elasticpath.common.dto.pricing.BaseAmountDTO;
@@ -87,7 +88,7 @@ public class BaseAmountEditingSupport extends AbstractInlineEditingSupport {
 		setBinding(bindingProvider.bind(bindingConfig));
 		getViewer().getColumnViewerEditor().addEditorActivationListener(getActivationListener());
 		cellEditor.setValue(cell.getText());
-		oldBaseAmountDTO = new BaseAmountDTO((BaseAmountDTO) cell.getElement());
+		oldBaseAmountDTO = BaseAmountDTOCreator.createModel((BaseAmountDTO) cell.getElement());
 	}
 
 	@Override

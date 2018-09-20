@@ -48,9 +48,6 @@ public final class ContextIdNames {
 	/** bean id for implementation of com.elasticpath.domain.customer.Address. */
 	public static final String CUSTOMER_ADDRESS = "customerAddress";
 
-	/** bean id for implementation of com.elasticpath.domain.customer.CustomerCreditCard. */
-	public static final String CUSTOMER_CREDIT_CARD = "customerCreditCard";
-
 	/** bean id for implementaion of com.elasticpath.service.customer.CustomerRegistrationResult.*/
 	public static final String CUSTOMER_REGISTRATION_RESULT = "customerRegistrationResult";
 
@@ -234,38 +231,8 @@ public final class ContextIdNames {
 	/** bean id for implementation of com.elasticpath.domain.customer.CustomerRole. */
 	public static final String CUSTOMER_ROLE = "customerRole";
 
-	/** bean id for implementation of com.elasticpath.domain.shipping.ShippingRegion. */
-	public static final String SHIPPING_REGION = "shippingRegion";
-
-	/** bean id for implementation of com.elasticpath.domain.shipping.ShippingServiceLevel. */
-	public static final String SHIPPING_SERVICE_LEVEL = "shippingServiceLevel";
-
-	/** bean id for implementation of com.elasticpath.domain.shipping.ShippingServiceLevelDeleted. */
-	public static final String SHIPPING_SERVICE_LEVEL_DELETED = "shippingServiceLevelDeleted";
-
 	/** bean id for implementation of com.elasticpath.domain.Region. */
 	public static final String REGION = "region";
-
-	/** bean id for implementation of com.elasticpath.domain.shipping.ShippingCostCalculationMethod. */
-	public static final String SHIPPING_COST_CALCULATION_METHOD = "shippingCostCalculationMethod";
-
-	/** bean id for implementation of com.elasticpath.domain.shipping.ShippingCostCalculationParameter. */
-	public static final String SHIPPING_COST_CALCULATION_PARAMETER = "shippingCostCalculationParameter";
-
-	/** bean id for implementation of com.elasticpath.domain.shipping.impl.FixedPriceMethodImpl. */
-	public static final String SHIPPING_FIXED_PRICE_METHOD = "fixedPriceMethod";
-
-	/** bean id for implementation of com.elasticpath.domain.shipping.impl.OrderTotalPercentageMethodImpl. */
-	public static final String SHIPPING_TOTAL_PERCENT_METHOD = "orderTotalPercentageMethod";
-
-	/** bean id for implementation of com.elasticpath.domain.shipping.impl.FixedBaseAndOrderTotalPercentageMethodImpl. */
-	public static final String SHIPPING_FIXED_BASE_TOTAL_PERCENT_METHOD = "fixedBaseAndOrderTotalPercentageMethod";
-
-	/** bean id for implementation of com.elasticpath.domain.shipping.impl.CostPerUnitWeightMethodImpl. */
-	public static final String SHIPPING_COST_PER_UNIT_WEIGHT_METHOD = "costPerUnitWeightMethod";
-
-	/** bean id for implementation of com.elasticpath.domain.shipping.impl.FixedBaseAndCostPerUnitWeightMethodImpl. */
-	public static final String SHIPPING_FIXED_BASE_COST_PER_UNIT_WEIGHT_METHOD = "fixedBaseAndCostPerUnitWeightMethod";
 
 	/** bean id for implementation of com.elasticpath.domain.skuConfiguration.SkuOption. */
 	public static final String SKU_OPTION = "skuOption";
@@ -552,12 +519,6 @@ public final class ContextIdNames {
 	/** bean id for implementation of com.elasticpath.service.UserRoleService. */
 	public static final String SKU_CONFIGURATION_SERVICE = "skuConfigurationService";
 
-	/** bean id for implementation of com.elasticpath.service.ShippingREgionService. */
-	public static final String SHIPPING_REGION_SERVICE = "shippingRegionService";
-
-	/** bean id for implementation of com.elasticpath.service.ShippingServiceLevelService. */
-	public static final String SHIPPING_SERVICE_LEVEL_SERVICE = "shippingServiceLevelService";
-
 	/** bean id for implementation of com.elasticpath.service.catalog.ProductLookup. */
 	public static final String PRODUCT_LOOKUP = "productLookup";
 
@@ -741,12 +702,6 @@ public final class ContextIdNames {
 
 	/** bean id for implementation of com.elasticpath.commons.util.PasswordGenerator. */
 	public static final String PASSWORD_GENERATOR = "passwordGenerator";
-
-	/** bean id for implementation of com.elasticpath.commons.util.security.CreditCardEncrypter. */
-	public static final String CREDIT_CARD_ENCRYPTER = "creditCardEncrypter";
-
-	/** bean id for implementation of com.elasticpath.commons.util.security.CardEncrypter. */
-	public static final String CARD_ENCRYPTER = "cardEncrypter";
 
 	/** bean id for implementation of org.springframework.security.authentication.encoding.PasswordEncoder. */
 	public static final String PASSWORDENCODER = "passwordEncoder";
@@ -1114,9 +1069,6 @@ public final class ContextIdNames {
 	/** bean id for implementation of org.apache.lucene.analysis.Analyzer. */
 	public static final String SYNONYM_ANALYZER = "synonymAnalyzer";
 
-	/** bean id for implementation of com.elasticpath.domain.payment.CreditCardPaymentHandler. */
-	public static final String PAYMENT_HANDLER_CREDITCARD = "paymentHandlerCreditCard";
-
 	/** bean id for implementation of com.elasticpath.domain.payment.CreditCardDirectPostPaymentHandler. */
 	public static final String PAYMENT_HANDLER_CREDITCARD_DIRECT_POST = "paymentHandlerCreditCardDirectPost";
 
@@ -1227,9 +1179,6 @@ public final class ContextIdNames {
 
 	/** bean id for {@link com.elasticpath.domain.misc.LocalizedPropertyValue}. */
 	public static final String BRAND_LOCALIZED_PROPERTY_VALUE = "brandLocalizedPropertyValue";
-
-	/** bean id for {@link com.elasticpath.domain.misc.LocalizedPropertyValue}. */
-	public static final String SHIPPING_SERVICE_LEVEL_LOCALIZED_PROPERTY_VALUE = "shippingServiceLevelLocalizedPropertyValue";
 
 	/** bean id for {@link com.elasticpath.domain.misc.LocalizedPropertyValue}. */
 	public static final String SKU_OPTION_LOCALIZED_PROPERTY_VALUE = "skuOptionLocalizedPropertyValue";
@@ -1389,7 +1338,9 @@ public final class ContextIdNames {
 	/** bean id for {@link com.elasticpath.tags.service.ConditionBuilder}. */
 	public static final String TAG_CONDITION_BUILDER = "tagConditionBuilder";
 
-	/** bean id for {@link com.elasticpath.service.search.query.ShippingServiceLevelSearchCriteria}. */
+	/**
+	 * bean id for {@link com.elasticpath.service.search.query.ShippingServiceLevelSearchCriteria}.
+	 */
 	public static final String SHIPPING_SERVICE_LEVEL_SEACRH_CRITERIA = "shippingServiceLevelSearchCriteria";
 
 	/** bean id for {@link com.elasticpath.sfweb.controller.impl.DefaultProductConfigController}. */
@@ -1550,15 +1501,6 @@ public final class ContextIdNames {
 	/** bean id for {@link com.elasticpath.service.changeset.helper.impl.ChangeSetHelperImpl}. */
 	public static final String CHANGESET_HELPER = "changeSetHelper";
 
-	/** bean id for {@link com.elasticpath.domain.catalog.ItemConfigurationMemento}. */
-	public static final String ITEM_CONFIGURATION_MEMENTO = "itemConfigurationMemento";
-
-	/** bean id for {@link com.elasticpath.service.catalog.ItemConfigurationService}. */
-	public static final String ITEM_CONFIGURATION_SERVICE = "itemConfigurationService";
-
-	/** bean id for {@link com.elasticpath.service.catalog.ItemCharacteristicsService}. */
-	public static final String ITEM_CHARACTERISTICS_SERVICE = "itemCharacteristicsService";
-
 	/** bean id for {@link com.elasticpath.service.catalog.ProductCharacteristicsService}. */
 	public static final String PRODUCT_CHARACTERISTICS_SERVICE = "productCharacteristicsService";
 
@@ -1646,9 +1588,6 @@ public final class ContextIdNames {
 	/** bean id for {@link com.elasticpath.service.payment.gateway.GiftCertificateCaptureRequest}. */
 	public static final String GIFT_CERTIFICATE_CAPTURE_REQUEST = "giftCertificateCaptureRequest";
 
-	/** bean id for {@link com.elasticpath.plugin.payment.dto.CardDetailsPaymentMethod}. */
-	public static final String CARD_DETAILS_PAYMENT_METHOD = "cardDetailsPaymentMethod";
-
 	/** bean id for {@link com.elasticpath.plugin.payment.dto.TokenPaymentMethod}. */
 	public static final String TOKEN_PAYMENT_METHOD = "tokenPaymentMethod";
 
@@ -1664,11 +1603,14 @@ public final class ContextIdNames {
 	/** bean id for {@link com.elasticpath.plugin.payment.dto.ShoppingCartDto}. */
 	public static final String SHOPPING_CART_DTO = "shoppingCartDto";
 
-	/** bean id for {@link com.elasticpath.service.shoppingcart.ShippableItemsSubtotalCalculator}. */
-	public static final String SHIPPABLE_ITEMS_SUBTOTAL_CALCULATOR = "shippableItemsSubtotalCalculator";
-
 	/** bean id for {@link com.elasticpath.service.shoppingcart.ShoppingItemSubtotalCalculator}. */
 	public static final String SHOPPING_ITEM_SUBTOTAL_CALCULATOR = "shoppingItemSubtotalCalculator";
+
+    /** bean id for {@link com.elasticpath.service.shoppingcart.OrderSkuSubtotalCalculator}. */
+    public static final String ORDER_SKU_SUBTOTAL_CALCULATOR = "orderSkuSubtotalCalculator";
+
+    /** bean id for {@link java.util.function.Predicate} matching shippable items only. */
+    public static final String SHIPPABLE_ITEM_PREDICATE = "shippableItemPredicate";
 
 	/** bean id for {@link com.elasticpath.domain.shoppingcart.ExchangeItem}. */
 	public static final String EXCHANGE_ITEM = "exchangeItem";
@@ -1705,6 +1647,25 @@ public final class ContextIdNames {
 
 	/** bean id for implementation of com.elasticpath.domain.datapolicy.impl.CustomerConsentImpl. */
 	public static final String CUSTOMER_CONSENT = "customerConsent";
+	/**
+	 * Bean id for Shopping cart validation context.
+	 */
+	public static final String SHOPPING_CART_VALIDATION_CONTEXT = "shoppingCartValidationContext";
+
+	/**
+	 * Bean id for Shopping item validation context.
+	 */
+	public static final String SHOPPING_ITEM_VALIDATION_CONTEXT = "shoppingItemValidationContext";
+
+	/**
+	 * Bean id for Shopping item validation context.
+	 */
+	public static final String SHOPPING_ITEM_DTO_VALIDATION_CONTEXT = "shoppingItemDtoValidationContext";
+
+	/**
+	 * Bean id for Product sku validation context.
+	 */
+	public static final String PRODUCT_SKU_VALIDATION_CONTEXT = "productSkuValidationContext";
 
 	/** bean id for implementation of com.elasticpath.service.datapolicy.impl.DataPolicyServiceImpl. */
 	public static final String DATA_POLICY_SERVICE = "dataPolicyService";
@@ -1719,6 +1680,16 @@ public final class ContextIdNames {
 	public static final String CUSTOMER_CONSENT_SERVICE = "customerConsentService";
 
 
+
+	/** Bean id for {@link com.elasticpath.service.shipping.transformers.impl.ShippingAddressTransformerImpl}. */
+	public static final String SHIPPING_ADDRESS_TRANSFORMER = "shippingAddressTransformer";
+
+	/** Bean id for {@link com.elasticpath.service.shipping.transformers.impl.PricedShippableItemContainerFromOrderShipmentTransformerImpl}. */
+	public static final String PRICED_SHIPPABLE_CONTAINER_FROM_SHIPMENT_TRANSFORMER
+			= "pricedShippableItemContainerFromOrderShipmentTransformer";
+
+	/** Bean id for implementation of {@link com.elasticpath.service.shipping.ShippingOptionService}. */
+	public static final String SHIPPING_OPTION_SERVICE = "shippingOptionService";
 
 	private ContextIdNames() {
 		// Do not instantiate this class

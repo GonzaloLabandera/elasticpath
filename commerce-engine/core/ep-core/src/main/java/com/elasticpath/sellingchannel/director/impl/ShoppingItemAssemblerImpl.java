@@ -7,21 +7,18 @@ import java.util.Collections;
 import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
 import org.springframework.util.CollectionUtils;
 
 import com.elasticpath.base.exception.EpServiceException;
 import com.elasticpath.base.exception.EpSystemException;
 import com.elasticpath.common.dto.ShoppingItemDto;
 import com.elasticpath.common.dto.sellingchannel.ShoppingItemDtoFactory;
-import com.elasticpath.commons.exception.InvalidBundleSelectionException;
 import com.elasticpath.commons.exception.InvalidBundleTreeStructureException;
 import com.elasticpath.domain.catalog.BundleConstituent;
 import com.elasticpath.domain.catalog.ConstituentItem;
 import com.elasticpath.domain.catalog.Product;
 import com.elasticpath.domain.catalog.ProductBundle;
 import com.elasticpath.domain.catalog.ProductSku;
-import com.elasticpath.domain.catalog.SelectionRule;
 import com.elasticpath.domain.shoppingcart.ShoppingItem;
 import com.elasticpath.sellingchannel.ShoppingItemFactory;
 import com.elasticpath.sellingchannel.director.ShoppingItemAssembler;
@@ -33,8 +30,6 @@ import com.elasticpath.service.catalog.ProductSkuLookup;
  */
 @SuppressWarnings("PMD.GodClass")
 public class ShoppingItemAssemblerImpl implements ShoppingItemAssembler {
-
-	private static final Logger LOG = Logger.getLogger(ShoppingItemAssemblerImpl.class);
 
 	private ProductSkuLookup productSkuLookup;
 
@@ -49,7 +44,6 @@ public class ShoppingItemAssemblerImpl implements ShoppingItemAssembler {
 		// special behaviour for the root node
 		Product product = rootSku.getProduct();
 
-		validateShoppingItemDtoWithProduct(shoppingItemDto, product);
 		ShoppingItem root;
 		if (product instanceof ProductBundle) {
 			root = getShoppingItemFactory().createShoppingItem(rootSku, null, shoppingItemDto.getQuantity(), 0,
@@ -63,115 +57,6 @@ public class ShoppingItemAssemblerImpl implements ShoppingItemAssembler {
 		return root;
 	}
 
-	@Override
-	public void validateShoppingItemDto(final ShoppingItemDto shoppingItemDto) {
-		final ProductSku rootSku = getProductSku(shoppingItemDto.getSkuCode());
-		// special behaviour for the root node
-		final Product product = rootSku.getProduct();
-		validateShoppingItemDtoWithProduct(shoppingItemDto, product);
-	}
-
-	private void validateShoppingItemDtoWithProduct(final ShoppingItemDto shoppingItemDto, final Product product) {
-		if (!verifyDtoStructureEqualsBundleStructure(product, shoppingItemDto)) {
-			throw new InvalidBundleTreeStructureException("DTO structure does not correspond to bundle structure.");
-		}
-		if (!verifySelectionRulesFollowed(product, shoppingItemDto)) {
-			throw new InvalidBundleSelectionException((ProductBundle) product, shoppingItemDto);
-		}
-	}
-
-	/**
-	 * Verifies that the given dto's structure is the same as the bundle's structure - no SKUs are specified in the DTO that are not also in the
-	 * Bundle (The trees are mirrors of each other). If the given product is not a bundle, then the DTO's sku is simply verified to be among the
-	 * product's skus.
-	 *
-	 * @param product the product to check
-	 * @param dto the dto to check
-	 * @return true if the trees are consistent, false if not.
-	 */
-	protected boolean verifyDtoStructureEqualsBundleStructure(final Product product, final ShoppingItemDto dto) {
-		if (!(product instanceof ProductBundle) || dto.getConstituents().isEmpty()) {
-			return getSkuFromProduct(product, dto.getSkuCode()) != null;
-		}
-		ProductBundle bundle = (ProductBundle) product;
-		int constituentIndex = 0;
-		for (BundleConstituent bundleItem : bundle.getConstituents()) {
-			ConstituentItem constituent = bundleItem.getConstituent();
-			ShoppingItemDto correspondingDto = dto.getConstituents().get(constituentIndex);
-			if (constituent.isProductSku() && !correspondingDto.getSkuCode().equals(constituent.getCode())) {
-				return false;
-			}
-			if (constituent.isProduct() && !verifyDtoStructureEqualsBundleStructure(constituent.getProduct(), correspondingDto)) {
-				return false;
-			}
-			constituentIndex++;
-		}
-		return true;
-	}
-
-	/**
-	 * Verifies that the given dto's selections match the given product's selection rules. If the given product is not a bundle, then the rules are
-	 * not checked.
-	 *
-	 * @param product the product to check
-	 * @param dto the dto specifying selections
-	 * @return true if the rules are followed, false if there is a violation
-	 */
-	protected boolean verifySelectionRulesFollowed(final Product product, final ShoppingItemDto dto) {
-		if (!(product instanceof ProductBundle) || dto.getConstituents().isEmpty()) {
-			return true;
-		}
-		ProductBundle bundle = (ProductBundle) product;
-		int bundleSelectionRuleParameter = getBundleSelectionRuleParameter(bundle);
-		int constituentIndex = 0;
-		int numberSelectedConstituents = 0;
-		boolean valid = true;
-		for (BundleConstituent bundleItem : bundle.getConstituents()) {
-			ConstituentItem bundleItemProduct = bundleItem.getConstituent();
-			ShoppingItemDto correspondingDto = dto.getConstituents().get(constituentIndex);
-			if (correspondingDto.isSelected()) {
-				numberSelectedConstituents++;
-				if (bundleItem.getConstituent().isBundle()) {
-					// if it's a bundle and it is valid, then this bundle is "selected" and should increase our count.
-					valid = valid && verifySelectionRulesFollowed(bundleItemProduct.getProduct(), correspondingDto);
-				}
-			} else if (!isLeafDto(correspondingDto)) {
-				// nothing should be selected in children
-				valid = valid && !hasSelectedInChildren(correspondingDto);
-			}
-
-			constituentIndex++;
-		}
-		if (bundleSelectionRuleParameter == 0) {
-			bundleSelectionRuleParameter = bundle.getConstituents().size();
-		}
-		return valid && numberSelectedConstituents == bundleSelectionRuleParameter;
-	}
-
-	private boolean hasSelectedInChildren(final ShoppingItemDto correspondingDto) {
-		boolean hasSelected = false;
-		for (ShoppingItemDto constituent : correspondingDto.getConstituents()) {
-			if (isLeafDto(constituent)) {
-				hasSelected = hasSelected || constituent.isSelected();
-			} else {
-				hasSelected = hasSelected || hasSelectedInChildren(constituent);
-			}
-		}
-		return hasSelected;
-	}
-
-	private int getBundleSelectionRuleParameter(final ProductBundle bundle) {
-		int bundleSelectionRuleParameter;
-		SelectionRule selectionRule = bundle.getSelectionRule();
-		if (selectionRule == null) {
-			LOG.debug("Bundle Selection Rule for bundle [" + bundle.getCode() + "] is null. Defaulting to 'Select All'");
-			bundleSelectionRuleParameter = 0;
-		} else {
-			bundleSelectionRuleParameter = selectionRule.getParameter();
-		}
-		return bundleSelectionRuleParameter;
-	}
-
 	/**
 	 * Recursive algorithm to create a tree of {@code ShoppingItem}s.
 	 *
@@ -182,22 +67,17 @@ public class ShoppingItemAssemblerImpl implements ShoppingItemAssembler {
 	 */
 	protected void createShoppingItemTree(final ProductBundle bundle, final ShoppingItemDto parentShoppingItemDto, final ShoppingItem parent,
 			final int parentShipQuantity) {
-		int selectCount = getBundleSelectionRuleParameter(bundle);
-		int selections = 0;
 		int constituentIndex = 0;
 		for (BundleConstituent bundleItem : bundle.getConstituents()) {
 			ConstituentItem constituentProduct = bundleItem.getConstituent();
 			// If we're not at the root of the DTO tree then we need to get the DTO from the parent's constituents, at the
 			// same index of the bundle's constituent list that we're processing
 			ShoppingItemDto thisShoppingItemDto = getShoppingItemDtoMatchingBundleConstituentAtIndex(parentShoppingItemDto, constituentIndex);
-			if (thisShoppingItemDto == null || thisShoppingItemDto.isSelected()) {
-				selections++;
-				if (selectCount > 0 && selections > selectCount) {
-					break;
-				}
+			if (thisShoppingItemDto != null && thisShoppingItemDto.isSelected()) {
 				ProductSku sku = retrieveSkuForShoppingItem(bundleItem, thisShoppingItemDto);
 				ShoppingItem shoppingItem = getShoppingItemFactory().createShoppingItem(sku, null, bundleItem.getQuantity() * parentShipQuantity,
-						constituentIndex, Collections.<String, String>emptyMap());
+						constituentIndex, Collections.emptyMap());
+				shoppingItem.setBundleConstituent(true);
 				parent.addChildItem(shoppingItem);
 				if (constituentProduct.isBundle()) {
 					createShoppingItemTree((ProductBundle) constituentProduct.getProduct(), thisShoppingItemDto, shoppingItem, parentShipQuantity
@@ -206,10 +86,6 @@ public class ShoppingItemAssemblerImpl implements ShoppingItemAssembler {
 			}
 			constituentIndex++;
 		}
-	}
-
-	private boolean isLeafDto(final ShoppingItemDto dto) {
-		return dto.getConstituents().isEmpty();
 	}
 
 	private ShoppingItemDto getShoppingItemDtoMatchingBundleConstituentAtIndex(final ShoppingItemDto parentShoppingItemDto,
@@ -368,7 +244,7 @@ public class ShoppingItemAssemblerImpl implements ShoppingItemAssembler {
 		rootDto.setQuantity(rootItem.getQuantity());
 		rootDto.setGuid(rootItem.getGuid());
 
-		for (ShoppingItem childItem : rootItem.getBundleItems(getProductSkuLookup())) {
+		for (ShoppingItem childItem : rootItem.getChildren()) {
 			ShoppingItemDto foundDto = retrieveAndConfigureChildDtoForShoppingItem(childItem, rootDto.getConstituents());
 
 			if (foundDto != null) {

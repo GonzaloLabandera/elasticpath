@@ -58,9 +58,6 @@
 	<reference id="indexUtility"
 			interface="com.elasticpath.service.search.solr.IndexUtility"/>
 
-	<reference id="itemCharacteristicsService"
-			interface="com.elasticpath.service.catalog.ItemCharacteristicsService"/>
-
 	<reference id="dataPolicyService"
 			   interface="com.elasticpath.service.datapolicy.DataPolicyService"/>
 
@@ -93,8 +90,8 @@
 	<reference id="settingsService"
 			interface="com.elasticpath.settings.SettingsService"/>
 
-	<reference id="shippingServiceLevelService"
-			interface="com.elasticpath.service.shipping.ShippingServiceLevelService"/>
+	<reference id="settingValueTypeConverter"
+			   interface="com.elasticpath.settings.provider.converter.SettingValueTypeConverter"/>
 
 	<reference id="shoppingCartService"
 			interface="com.elasticpath.service.shoppingcart.ShoppingCartService"/>
@@ -188,6 +185,9 @@
 	<reference id="cartItemModifierService"
 			   interface="com.elasticpath.service.cartitemmodifier.CartItemModifierService"/>
 
+	<reference id="shippingOptionService"
+			   interface="com.elasticpath.service.shipping.ShippingOptionService"/>
+
 	<reference id="moneyTransformer"
 			   interface="com.elasticpath.rest.resource.integration.epcommerce.transform.MoneyTransformer"/>
 
@@ -199,6 +199,12 @@
 
 	<reference id="addressTransformer"
 			   interface="com.elasticpath.rest.resource.integration.commons.addresses.transform.AddressTransformer"/>
+
+	<reference id="addProductSkuToCartValidationService"
+			 interface="com.elasticpath.service.shoppingcart.validation.AddProductSkuToCartValidationService"/>
+
+	<reference id="purchaseCartValidationService"
+			 interface="com.elasticpath.service.shoppingcart.validation.PurchaseCartValidationService" />
 
 	<!-- export services -->
 
@@ -259,15 +265,18 @@
 	<service ref="settingsRepository"
 			interface="com.elasticpath.rest.resource.integration.epcommerce.repository.settings.SettingsRepository"/>
 
-	<service ref="shippingServiceLevelRepository"
-			interface="com.elasticpath.rest.resource.integration.epcommerce.repository.shipping.ShippingServiceLevelRepository"/>
+	<service ref="shippingOptionRepository"
+			interface="com.elasticpath.rest.resource.integration.epcommerce.repository.shipping.ShippingOptionRepository"/>
 
 	<service ref="shoppingCartRepository"
 			interface="com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder.ShoppingCartRepository"/>
 
-	<service ref="shoppingItemValidationService"
-			 interface="com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder.ShoppingItemValidationService"/>
-	
+	<service ref="addToCartAdvisorService"
+			 interface="com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder.AddToCartAdvisorService"/>
+
+	<service ref="lineItemIdentifierRepository"
+			 interface="com.elasticpath.rest.resource.integration.epcommerce.repository.carts.lineitems.LineItemIdentifierRepository"/>
+
 	<service ref="skuOptionRepository"
 			interface="com.elasticpath.rest.resource.integration.epcommerce.repository.product.option.SkuOptionRepository"/>
 
@@ -314,6 +323,9 @@
 			 interface="com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder.PricingSnapshotRepository"/>
 
 	<!-- cache key variants -->
+	<service ref="categoryCacheKeyVariants"
+			 interface="com.elasticpath.rest.cache.CacheKeyVariants"/>
+
 	<service ref="customerCacheKeyVariants"
 			interface="com.elasticpath.rest.cache.CacheKeyVariants"/>
 
@@ -355,5 +367,11 @@
 
 	<service ref="appliedPromotionTransformer"
 			 interface="com.elasticpath.rest.resource.integration.epcommerce.repository.promotion.impl.promotions.applied.AppliedPromotionTransformer"/>
+
+	<service ref="globalMessageSource"
+			 interface="org.springframework.context.MessageSource"/>
+
+	<service ref="cartPostProcessor"
+			 interface="com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder.CartPostProcessor"/>
 
 </blueprint>

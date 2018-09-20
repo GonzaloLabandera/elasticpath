@@ -45,11 +45,11 @@ public class ShoppingCartMergerImplTest {
 
 		context.checking(new Expectations() {
 			{
-				allowing(donor).getCartItems();
+				allowing(donor).getRootShoppingItems();
 				allowing(donor).getNumItems();
 				allowing(donor).getPromotionCodes();
 				allowing(donor).getAppliedGiftCertificates();
-				allowing(recipient).getCartItems();
+				allowing(recipient).getRootShoppingItems();
 				allowing(recipient).getNumItems();
 
 				allowing(donor).getCmUserUID();
@@ -62,4 +62,5 @@ public class ShoppingCartMergerImplTest {
 
 		shoppingCartMerger.merge(recipient, donor);
 	}
+
 }

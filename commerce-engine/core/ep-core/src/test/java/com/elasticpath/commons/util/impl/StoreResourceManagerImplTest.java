@@ -25,6 +25,7 @@ import org.apache.velocity.runtime.resource.util.StringResourceRepository;
 import org.jmock.Expectations;
 import org.jmock.Sequence;
 import org.jmock.integration.junit4.JUnitRuleMockery;
+import org.jmock.lib.concurrent.Synchroniser;
 import org.jmock.lib.legacy.ClassImposteriser;
 import org.junit.After;
 import org.junit.Before;
@@ -33,7 +34,7 @@ import org.junit.Test;
 
 import com.elasticpath.commons.util.AssetRepository;
 import com.elasticpath.service.catalogview.StoreConfig;
-import com.elasticpath.settings.domain.SettingValue;
+import com.elasticpath.settings.provider.SettingValueProvider;
 
 /**
  * Test for {@link StoreResourceManagerImpl}.
@@ -47,6 +48,7 @@ public class StoreResourceManagerImplTest {
 	public final JUnitRuleMockery context = new JUnitRuleMockery() {
 		{
 			setImposteriser(ClassImposteriser.INSTANCE);
+			setThreadingPolicy(new Synchroniser());
 		}
 	};
 
@@ -80,6 +82,8 @@ public class StoreResourceManagerImplTest {
 
 	private static final String UTF_8 = "UTF-8";
 
+	private SettingValueProvider<String> themeProvider;
+
 	private static final ResourceLoader STRING_RESOURCE_LOADER = new StringResourceLoader();
 
 	private static final List<String> RESOURCE_NAMES = new ArrayList<>();
@@ -89,10 +93,10 @@ public class StoreResourceManagerImplTest {
 		RESOURCE_NAMES.add(TEST_VM);
 	}
 
-
 	/**
 	 * @throws Exception if something goes wrong
 	 */
+	@SuppressWarnings("unchecked")
 	@Before
 	public void setUp() throws Exception {
 		final List<String> resourceLoaderNames = new ArrayList<>();
@@ -105,6 +109,9 @@ public class StoreResourceManagerImplTest {
 		final StringBuilder loaderID = new StringBuilder(loaderName);
 		loaderID.append('.').append(RuntimeConstants.RESOURCE_LOADER);
 		runtimeConfiguration.addProperty(loaderID + ".instance", STRING_RESOURCE_LOADER);
+
+		themeProvider = context.mock(SettingValueProvider.class);
+		StoreResourceManagerImpl.setStoreThemeProvider(themeProvider);
 
 		final RuntimeServices rsvc = context.mock(RuntimeServices.class);
 		// create a threadlocal
@@ -151,6 +158,8 @@ public class StoreResourceManagerImplTest {
 			repo.removeStringResource(resourceName);
 		}
 		MAIN_INSTANCE_STORE_RESOURCE_MANAGER.invalidate();
+
+		StoreResourceManagerImpl.setStoreThemeProvider(null);
 	}
 
 	/**
@@ -264,7 +273,6 @@ public class StoreResourceManagerImplTest {
 	public void testGetResourceFallbackLogicForStoreResource() {
 		final StoreResourceManagerImpl mockStoreResourceManager = context.mock(StoreResourceManagerImpl.class);
 		final Sequence fallbackSequence = context.sequence("fallback-sequence");
-		final SettingValue themeSettingValue = context.mock(SettingValue.class);
 		final StoreConfig storeConfig = context.mock(StoreConfig.class, "willFallback");
 
 		try {
@@ -289,10 +297,7 @@ public class StoreResourceManagerImplTest {
 					allowing(storeConfig).getStoreCode();
 					will(returnValue(TESTSTORE));
 
-					allowing(storeConfig).getSetting(with(equal("COMMERCE/STORE/theme")));
-					will(returnValue(themeSettingValue));
-
-					allowing(themeSettingValue).getValue();
+					allowing(storeConfig).getSettingValue(themeProvider);
 					will(returnValue(THEME1));
 				}
 			});

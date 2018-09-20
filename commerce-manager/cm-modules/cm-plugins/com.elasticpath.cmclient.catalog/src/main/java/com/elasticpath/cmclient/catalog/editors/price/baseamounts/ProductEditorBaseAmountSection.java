@@ -259,9 +259,10 @@ public class ProductEditorBaseAmountSection extends BaseAmountSection {
 
 	@Override
 	protected void createTableColumns() {
-		super.createTableColumns();
+		createStandardBaseAmountTableColumns();
 		getBaseAmountTableViewer().addTableColumn(PriceListManagerMessages.get().BaseAmount_PaymentSchedule,
 				getTableProperties().getPaymentScheduleWidth());
+		createExtensionColumns();
 	}
 	@Override
 	protected String getPluginId() {

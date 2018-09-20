@@ -27,19 +27,19 @@ public class ShipmentType extends AbstractExtensibleEnum<ShipmentType> {
 	public static final int PHYSICAL_ORDINAL = 0;
 
 	/** Physical shipment shipment type. */
-	public static final ShipmentType PHYSICAL = new ShipmentType(PHYSICAL_ORDINAL, "PHYSICAL");
+	public static final ShipmentType PHYSICAL = new ShipmentType(PHYSICAL_ORDINAL, PHYSICAL_STRING);
 
 	/** Electronic shipment shipment type ordinal. */
 	public static final int ELECTRONIC_ORDINAL = 1;
 
 	/** Electronic shipment shipment type. */
-	public static final ShipmentType ELECTRONIC = new ShipmentType(ELECTRONIC_ORDINAL, "ELECTRONIC");
+	public static final ShipmentType ELECTRONIC = new ShipmentType(ELECTRONIC_ORDINAL, ELECTRONIC_STRING);
 
 	/** Service shipment shipment type ordinal. */
 	public static final int SERVICE_ORDINAL = 2;
 
 	/** Service shipment type. */
-	public static final ShipmentType SERVICE = new ShipmentType(SERVICE_ORDINAL, "SERVICE");
+	public static final ShipmentType SERVICE = new ShipmentType(SERVICE_ORDINAL, SERVICE_STRING);
 
 	/**
 	 * Instantiates a new discount type.

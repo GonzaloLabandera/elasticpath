@@ -17,7 +17,7 @@ import com.elasticpath.inventory.InventoryDto;
 import com.elasticpath.inventory.InventoryFacade;
 import com.elasticpath.inventory.InventoryKey;
 import com.elasticpath.inventory.strategy.InventoryStrategy;
-import com.elasticpath.settings.SettingsReader;
+import com.elasticpath.settings.provider.SettingValueProvider;
 
 /**
  * Out-of-the box implementation of the {@link InventoryFacade}. 
@@ -26,23 +26,13 @@ public class InventoryFacadeImpl implements InventoryFacade {
 	
 	/** The selected strategy. */
 	private InventoryStrategy selectedStrategy;
-	
-	/** */
-	private static final String SETTING_INVENTORY_STRATEGY = "COMMERCE/SYSTEM/INVENTORY/inventoryStrategy";
-	
-	/** */
-	private SettingsReader settingsReader;
-	
+
 	/** The strategies. */
 	private Map<String, InventoryStrategy> strategies = new HashMap<>();
 
-	/**
-	 * @param settingsReader The SettingsReader to set.
-	 */
-	public void setSettingsReader(final SettingsReader settingsReader) {
-		this.settingsReader = settingsReader;
-	}
-	
+	/** Provides the ID of the selected strategy. */
+	private SettingValueProvider<String> inventoryStrategyIdProvider;
+
 	/**
 	 * Sets the strategies, that are mapped to their keys.
 	 *
@@ -125,10 +115,9 @@ public class InventoryFacadeImpl implements InventoryFacade {
 	 * Reads the configured inventory strategy from the settings framework and sets the appropriate Strategy.
 	 */
 	public void init() {
-		String configuredStrategy = settingsReader.getSettingValue(SETTING_INVENTORY_STRATEGY).getValue();
-		selectStrategy(configuredStrategy);
+		selectStrategy(getInventoryStrategyIdProvider().get());
 	}
-	
+
 	/**
 	 * @return capabilities
 	 */
@@ -141,4 +130,17 @@ public class InventoryFacadeImpl implements InventoryFacade {
 	public List<InventoryDto> findLowStockInventories(final Set<String> skuCodes, final long warehouseUid) {		
 		return selectedStrategy.findLowStockInventories(skuCodes, warehouseUid);
 	}
+
+	InventoryStrategy getSelectedInventoryStrategy() {
+		return selectedStrategy;
+	}
+
+	public void setInventoryStrategyIdProvider(final SettingValueProvider<String> inventoryStrategyIdProvider) {
+		this.inventoryStrategyIdProvider = inventoryStrategyIdProvider;
+	}
+
+	protected SettingValueProvider<String> getInventoryStrategyIdProvider() {
+		return inventoryStrategyIdProvider;
+	}
+
 }

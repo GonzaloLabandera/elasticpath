@@ -1,11 +1,20 @@
 package com.elasticpath.cucumber.definitions;
 
+import java.util.Date;
+
 import cucumber.api.Scenario;
 import cucumber.api.java.After;
+import org.apache.log4j.Logger;
 import org.openqa.selenium.OutputType;
 import org.openqa.selenium.TakesScreenshot;
+import org.openqa.selenium.UnhandledAlertException;
+import org.openqa.selenium.logging.LogEntries;
+import org.openqa.selenium.logging.LogEntry;
+import org.openqa.selenium.logging.LogType;
 
-import com.elasticpath.selenium.framework.util.SeleniumDriverSetup;
+import com.elasticpath.selenium.dialogs.ProblemOccurredDialog;
+import com.elasticpath.selenium.setup.PublishEnvSetUp;
+import com.elasticpath.selenium.setup.SetUp;
 import com.elasticpath.selenium.util.Constants;
 
 /**
@@ -13,6 +22,8 @@ import com.elasticpath.selenium.util.Constants;
  */
 public class TestBase {
 	private static boolean screenShotTaken;
+	private static final Logger LOGGER = Logger.getLogger(TestBase.class);
+	private ProblemOccurredDialog problemOccurredDialog;
 
 	/**
 	 * For After hooks, higher order number run first.
@@ -26,12 +37,27 @@ public class TestBase {
 	 */
 	@After(order = 1)
 	public void tearDown(final Scenario scenario) {
-
-		if (scenario.isFailed() && !screenShotTaken) {
-			final byte[] screenshot = ((TakesScreenshot) SeleniumDriverSetup.getDriver()).getScreenshotAs(OutputType.BYTES);
-			scenario.embed(screenshot, "image/png");
+		try {
+			if (scenario.isFailed() && !screenShotTaken) {
+				final byte[] screenshot = ((TakesScreenshot) SetUp.getDriver()).getScreenshotAs(OutputType.BYTES);
+				scenario.embed(screenshot, "image/png");
+			}
+		} catch (UnhandledAlertException uae) {
+			SetUp.getDriver().switchTo().alert().accept();
+		} finally {
+			SetUp.quitDriver();
+			PublishEnvSetUp.quitDriver();
 		}
-		SeleniumDriverSetup.quitDriver();
+	}
+
+	/**
+	 * Captures the logs from the chromeDriver.
+	 */
+	private void analyzeLog() {
+		LogEntries logEntries = SetUp.getDriver().manage().logs().get(LogType.DRIVER);
+		for (LogEntry entry : logEntries) {
+			LOGGER.debug(new Date(entry.getTimestamp()) + " " + entry.getLevel() + " " + entry.getMessage());
+		}
 	}
 
 	/**
@@ -43,9 +69,29 @@ public class TestBase {
 	public void tearDown1(final Scenario scenario) {
 
 		if (scenario.isFailed()) {
-			final byte[] screenshot = ((TakesScreenshot) SeleniumDriverSetup.getDriver()).getScreenshotAs(OutputType.BYTES);
-			scenario.embed(screenshot, "image/png");
-			screenShotTaken = true;
+			handleProblemOccuredDialogPresent();
+
+			LOGGER.debug("START of failure logs for scenario " + scenario.getName());
+			analyzeLog();
+			LOGGER.debug("END of failure logs for scenario " + scenario.getName());
+			try {
+				final byte[] screenshot = ((TakesScreenshot) SetUp.getDriver()).getScreenshotAs(OutputType.BYTES);
+				scenario.embed(screenshot, "image/png");
+				screenShotTaken = true;
+			} catch (UnhandledAlertException uae) {
+				SetUp.getDriver().switchTo().alert().accept();
+			}
+		}
+	}
+
+	/**
+	 * Checks if `Problem Occured` Dialog is present, and if present, clicks the Details
+	 * button on the dialog.
+	 */
+	private void handleProblemOccuredDialogPresent() {
+		problemOccurredDialog = new ProblemOccurredDialog(SetUp.getDriver());
+		if (problemOccurredDialog.isDialogPresent()) {
+			problemOccurredDialog.clickDetailsButton();
 		}
 	}
 }

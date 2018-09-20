@@ -10,7 +10,10 @@ import org.openqa.selenium.WebDriver;
  */
 public class AddEditBrandDialog extends AbstractDialog {
 
-	private static final String ADD_EDIT_BRAND_DIALOGCSS_TEMPLATE = "div[automation-id='com.elasticpath.cmclient.catalog.CatalogMessages"
+	/**
+	 * CSS selector used to identify the dialog.
+	 */
+	public static final String ADD_EDIT_BRAND_DIALOGCSS_TEMPLATE = "div[automation-id='com.elasticpath.cmclient.catalog.CatalogMessages"
 			+ ".BrandAddEditDialog_%sBrand'] ";
 	private static final String BRAND_CODE_INPUT_CSS_TEMPLATE = "div[automation-id='com.elasticpath.cmclient.catalog"
 			+ ".CatalogMessages.BrandAddEditDialog_BrandCode'] input";

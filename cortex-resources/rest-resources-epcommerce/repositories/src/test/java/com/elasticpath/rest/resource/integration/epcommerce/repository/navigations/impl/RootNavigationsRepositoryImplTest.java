@@ -15,13 +15,12 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.elasticpath.domain.catalog.Category;
 import com.elasticpath.domain.catalog.impl.CategoryImpl;
 import com.elasticpath.rest.definition.navigations.NavigationIdentifier;
 import com.elasticpath.rest.definition.navigations.NavigationsIdentifier;
-import com.elasticpath.rest.id.type.PathIdentifier;
 import com.elasticpath.rest.id.type.StringIdentifier;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.category.CategoryRepository;
 
@@ -63,7 +62,7 @@ public class RootNavigationsRepositoryImplTest {
 	private NavigationIdentifier createNavigationIdentifier(final NavigationsIdentifier navigationsIdentifier, final String code) {
 		return NavigationIdentifier.builder()
 				.withNavigations(navigationsIdentifier)
-				.withNodeId(PathIdentifier.of(code))
+				.withNodeId(StringIdentifier.of(code))
 				.build();
 	}
 

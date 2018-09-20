@@ -20,11 +20,10 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.ElasticPath;
-import com.elasticpath.domain.datapolicy.ConsentAction;
 import com.elasticpath.domain.datapolicy.DataPoint;
 import com.elasticpath.domain.datapolicy.DataPolicy;
 import com.elasticpath.persistence.api.PersistenceEngine;
@@ -217,9 +216,6 @@ public class DataPointServiceImplTest {
 
 	@Test
 	public void verifyFindByConsentActionReturnsEmptyMapWhenNoDataPointFound() {
-		when(persistenceEngine.retrieveByNamedQuery(DATAPOINTS_FIND_WITH_REVOKED_CONSENTS_LATEST,
-				ConsentAction.GRANTED, ConsentAction.REVOKED)).thenReturn(Collections.emptyList());
-
 		Map<String, Map<DataPoint, Set<DataPolicy>>> customerDataPoints = dataPointServiceImpl.findWithRevokedConsentsLatest();
 
 		assertThat(customerDataPoints)
@@ -231,8 +227,6 @@ public class DataPointServiceImplTest {
 		String customerGuid = UUID.randomUUID().toString();
 
 		Object[] resultSet = new Object[]{customerGuid, dataPoint1, dataPolicy1};
-
-		when(dataPolicy1.getDataPoints()).thenReturn(Collections.singletonList(dataPoint1));
 
 		when(persistenceEngine.retrieveByNamedQuery(DATAPOINTS_FIND_WITH_REVOKED_CONSENTS_LATEST)).thenReturn(Collections.singletonList(resultSet));
 
@@ -255,9 +249,6 @@ public class DataPointServiceImplTest {
 		Object[] resultSet1 = new Object[]{customerGuid, dataPoint1, dataPolicy1};
 		Object[] resultSet2 = new Object[]{customerGuid, dataPoint1, dataPolicy2};
 
-		when(dataPolicy1.getDataPoints()).thenReturn(Collections.singletonList(dataPoint1));
-		when(dataPolicy2.getDataPoints()).thenReturn(Collections.singletonList(dataPoint1));
-
 		when(persistenceEngine.retrieveByNamedQuery(DATAPOINTS_FIND_WITH_REVOKED_CONSENTS_LATEST)).thenReturn(Arrays.asList(resultSet1, resultSet2));
 
 		Map<String, Map<DataPoint, Set<DataPolicy>>> customerDataPoints = dataPointServiceImpl.findWithRevokedConsentsLatest();
@@ -278,9 +269,6 @@ public class DataPointServiceImplTest {
 
 		Object[] resultSet1 = new Object[]{customerGuid, dataPoint1, dataPolicy1};
 		Object[] resultSet2 = new Object[]{customerGuid, dataPoint2, dataPolicy2};
-
-		when(dataPolicy1.getDataPoints()).thenReturn(Collections.singletonList(dataPoint1));
-		when(dataPolicy2.getDataPoints()).thenReturn(Collections.singletonList(dataPoint2));
 
 		when(persistenceEngine.retrieveByNamedQuery(DATAPOINTS_FIND_WITH_REVOKED_CONSENTS_LATEST)).thenReturn(Arrays.asList(resultSet1, resultSet2));
 

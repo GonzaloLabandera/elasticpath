@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) Elastic Path Software Inc., 2015
  */
 package com.elasticpath.common.dto;
@@ -23,7 +23,6 @@ public class OrderItemDto extends ShoppingItemDto implements TreeNode<OrderItemD
 
 	private DigitalAsset digitalAsset;
 	private String displayName;
-	private String encryptedUidPk;
 	private String image;
 	
 	private String displaySkuOptions;
@@ -64,15 +63,7 @@ public class OrderItemDto extends ShoppingItemDto implements TreeNode<OrderItemD
 	public String getDisplayName() {
 		return displayName;
 	}
-	
-	/**
-	 * Get the encrypted uidPk string.
-	 * 
-	 * @return the encrypted uidPk string
-	 */
-	public String getEncryptedUidPk() {
-		return encryptedUidPk;
-	}
+
 	
 	/**
 	 * Get the product's image path.
@@ -118,7 +109,6 @@ public class OrderItemDto extends ShoppingItemDto implements TreeNode<OrderItemD
 			   && calculatedBundleItem == that.calculatedBundleItem
 			   && Objects.equals(digitalAsset, that.digitalAsset)
 			   && Objects.equals(displayName, that.displayName)
-			   && Objects.equals(encryptedUidPk, that.encryptedUidPk)
 			   && Objects.equals(image, that.image)
 			   && Objects.equals(displaySkuOptions, that.displaySkuOptions)
 			   && Objects.equals(productSku, that.productSku)
@@ -132,7 +122,7 @@ public class OrderItemDto extends ShoppingItemDto implements TreeNode<OrderItemD
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(super.hashCode(), digitalAsset, displayName, encryptedUidPk, image, displaySkuOptions, allocated, productSku, price,
+		return Objects.hash(super.hashCode(), digitalAsset, displayName, image, displaySkuOptions, allocated, productSku, price,
 			listPrice, unitPrice, total, unitLessThanList, dollarSavings, isABundle, inventoryDto, calculatedBundle, calculatedBundleItem);
 	}
 
@@ -185,14 +175,6 @@ public class OrderItemDto extends ShoppingItemDto implements TreeNode<OrderItemD
 		this.digitalAsset = digitalAsset;
 	}
 
-	/**
-	 * 
-	 * @param encryptedUidPk The encrypted uid pk.
-	 */
-	public void setEncryptedUidPk(final String encryptedUidPk) {
-		this.encryptedUidPk = encryptedUidPk;
-		
-	}
 
 	/**
 	 * Getter for {@link Price}.

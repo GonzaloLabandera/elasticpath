@@ -13,7 +13,7 @@ import org.junit.runner.RunWith;
 import org.hamcrest.Matchers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.elasticpath.rest.command.ExecutionResultFactory;
 import com.elasticpath.rest.resource.dispatch.linker.ResourceStateLinkHandler;
@@ -32,6 +32,7 @@ import com.elasticpath.rest.uri.URIUtil;
  * The test of {@link AddComponentsLinkToItemDefinitionCommons}.
  */
 @RunWith(MockitoJUnitRunner.class)
+@SuppressWarnings({"unchecked", "rawtypes"})
 public abstract class AbstractAddComponentsLinkToItemDefinitionStrategyTest <T extends ResourceEntity> {
 
 	static final String SELF_URI = "/mock/self/uri";
@@ -54,7 +55,6 @@ public abstract class AbstractAddComponentsLinkToItemDefinitionStrategyTest <T e
 	 * when the Item Definition has components.
 	 */
 	@Test
-	@SuppressWarnings("unchecked")
 	public void testCreateLinksWithComponents() {
 
 		when(mockComponentLookup.hasComponents(SCOPE, ITEM_ID))
@@ -77,7 +77,6 @@ public abstract class AbstractAddComponentsLinkToItemDefinitionStrategyTest <T e
 	 * when the Item Definition does not have components.
 	 */
 	@Test
-	@SuppressWarnings("unchecked")
 	public void testCreateLinksWithoutComponents() {
 		when(mockComponentLookup.hasComponents(SCOPE, ITEM_ID))
 				.thenReturn(ExecutionResultFactory.createReadOK(false));
@@ -93,7 +92,6 @@ public abstract class AbstractAddComponentsLinkToItemDefinitionStrategyTest <T e
 	 * when the lookup fails.
 	 */
 	@Test
-	@SuppressWarnings("unchecked")
 	public void testCreateLinksWithLookupFailure() {
 		when(mockComponentLookup.hasComponents(SCOPE, ITEM_ID))
 				.thenReturn(ExecutionResultFactory.<Boolean>createNotFound("Failure for test"));
@@ -103,8 +101,5 @@ public abstract class AbstractAddComponentsLinkToItemDefinitionStrategyTest <T e
 
 		assertThat(createdLinks, Matchers.emptyIterable());
 	}
-
-
-
 
 }

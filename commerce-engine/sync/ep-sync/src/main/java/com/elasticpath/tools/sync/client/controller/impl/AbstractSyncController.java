@@ -14,7 +14,6 @@ import com.elasticpath.tools.sync.client.SyncToolConfiguration;
 import com.elasticpath.tools.sync.client.controller.SyncToolController;
 import com.elasticpath.tools.sync.configuration.ConnectionConfiguration;
 import com.elasticpath.tools.sync.exception.SyncToolRuntimeException;
-import com.elasticpath.tools.sync.processing.ObjectProcessingException;
 import com.elasticpath.tools.sync.processing.SerializableObjectListener;
 import com.elasticpath.tools.sync.processing.SyncJobObjectProcessor;
 import com.elasticpath.tools.sync.target.result.Summary;
@@ -89,10 +88,6 @@ public abstract class AbstractSyncController implements SyncToolController {
 		try {
 			loadTransactionJob(eventDistributor, jobConfiguration);
 		} catch (SyncToolRuntimeException exc) {
-			eventDistributor.handleException(exc, summary, null);
-			return summary;
-		} catch (ObjectProcessingException exc) {
-			LOG.error("Error while performing synchronization.", exc);
 			eventDistributor.handleException(exc, summary, null);
 			return summary;
 		} catch (Exception exc) {

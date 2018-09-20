@@ -3,17 +3,21 @@
  */
 package com.elasticpath.service.shoppingcart.impl;
 
+import static java.lang.String.format;
+import static java.util.function.Function.identity;
+import static java.util.stream.Collectors.toMap;
+
 import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
 import com.elasticpath.commons.beanframework.BeanFactory;
@@ -48,7 +52,9 @@ import com.elasticpath.service.rules.RuleService;
 import com.elasticpath.service.shoppingcart.OrderFactory;
 import com.elasticpath.service.shoppingcart.OrderSkuFactory;
 import com.elasticpath.service.shoppingcart.ShoppingItemToPricingSnapshotFunction;
+import com.elasticpath.service.shoppingcart.actions.impl.MissingShippingOptionException;
 import com.elasticpath.service.tax.DiscountApportioningCalculator;
+import com.elasticpath.shipping.connectivity.dto.ShippingOption;
 
 /**
  * Creates Orders from ShoppingCarts.
@@ -221,8 +227,10 @@ public class OrderFactoryImpl implements OrderFactory {
 												final CustomerSession customerSession, final Order order,
 												final boolean isExchangeOrder, final boolean awaitExchangeCompletion) {
 
-		final Collection<OrderSku> rootItems = getOrderSkuFactory().createOrderSkus(shoppingCart.getCartItems(),
-																					taxSnapshot, customerSession.getLocale());
+		final Collection<OrderSku> rootItems = getOrderSkuFactory().createOrderSkus(
+						shoppingCart.getShoppingItems(shoppingItem -> !shoppingItem.isBundleConstituent()),
+						taxSnapshot,
+						customerSession.getLocale());
 
 		final Set<OrderSku> physicalSkus = new HashSet<>();
 		final Set<OrderSku> electronicSkus = new HashSet<>();
@@ -239,8 +247,9 @@ public class OrderFactoryImpl implements OrderFactory {
 			//Apportion discount to individual items
 			final Collection<OrderSku> nonServiceItems = Sets.union(physicalSkus, electronicSkus);
 
-			final Map<? extends ShoppingItem, ShoppingItemPricingSnapshot> nonServiceItemPricingSnapshotMap =
-					Maps.toMap(nonServiceItems, new ShoppingItemToPricingSnapshotFunction(pricingSnapshot));
+			final Map<? extends ShoppingItem, ShoppingItemPricingSnapshot> nonServiceItemPricingSnapshotMap = nonServiceItems.stream()
+					.collect(toMap(identity(),
+								   new ShoppingItemToPricingSnapshotFunction(pricingSnapshot)));
 
 			discountByShoppingItemUid = getDiscountCalculator().apportionDiscountToShoppingItems(pricingSnapshot.getSubtotalDiscountMoney(),
 																								nonServiceItemPricingSnapshotMap);
@@ -251,7 +260,7 @@ public class OrderFactoryImpl implements OrderFactory {
 			final BigDecimal discountForShipment = getDiscountForShipment(discountByShoppingItemUid,
 					physicalSkus, hasPhysicalAndElectronicShoppingItems, pricingSnapshot.getSubtotalDiscount());
 			final OrderShipment physicalShipment = createPhysicalShipment(discountForShipment,
-					shoppingCart, pricingSnapshot, customerSession, physicalSkus, isExchangeOrder, awaitExchangeCompletion);
+					shoppingCart, pricingSnapshot, physicalSkus, isExchangeOrder, awaitExchangeCompletion);
 			physicalShipment.setOrder(order);
 			order.addShipment(physicalShipment);
 		}
@@ -310,29 +319,42 @@ public class OrderFactoryImpl implements OrderFactory {
 	 * @param subtotalDiscount the subtotal discount
 	 * @param shoppingCart the shopping cart
 	 * @param pricingSnapshot the pricing snapshot
-	 * @param customerSession the customer session
 	 * @param orderSkuSet the set of order SKUs
 	 * @param isExchangeOrder whether or not this is an exchange order
 	 * @param awaitExchangeCompletion whether or not to await exchange completion
 	 * @return an order shipment
 	 */
 	private OrderShipment createPhysicalShipment(final BigDecimal subtotalDiscount,
-													final ShoppingCart shoppingCart,
-													final ShoppingCartPricingSnapshot pricingSnapshot,
-													final CustomerSession customerSession,
-													final Set<OrderSku> orderSkuSet,
-													final boolean isExchangeOrder,
-													final boolean awaitExchangeCompletion) {
+												 final ShoppingCart shoppingCart,
+												 final ShoppingCartPricingSnapshot pricingSnapshot,
+												 final Set<OrderSku> orderSkuSet,
+												 final boolean isExchangeOrder,
+												 final boolean awaitExchangeCompletion) {
 		final PhysicalOrderShipment orderShipment = getBean(ContextIdNames.PHYSICAL_ORDER_SHIPMENT);
 		final OrderAddress shippingAddress = getBean(ContextIdNames.ORDER_ADDRESS);
+
 		shippingAddress.init(shoppingCart.getShippingAddress());
 		orderShipment.setShipmentAddress(shippingAddress);
 		orderShipment.setCreatedDate(getTimeService().getCurrentTime());
-		orderShipment.setCarrier(shoppingCart.getSelectedShippingServiceLevel().getCarrier());
-		orderShipment.setServiceLevel(shoppingCart.getSelectedShippingServiceLevel().getDisplayName(customerSession.getLocale(), false));
-		orderShipment.setShippingServiceLevelGuid(shoppingCart.getSelectedShippingServiceLevel().getGuid());
+
+
+		final Optional<ShippingOption> selectedShippingOptionOptional = shoppingCart.getSelectedShippingOption();
+		if (!selectedShippingOptionOptional.isPresent()) {
+			final String errorMessage = format(
+					"No shipping option is selected on the shopping cart (guid: %s) which is required for a physical shipment.",
+					shoppingCart.getGuid());
+			throw new MissingShippingOptionException(errorMessage);
+		}
+
+		final ShippingOption selectedShippingOption = selectedShippingOptionOptional.get();
+		orderShipment.setShippingOptionCode(selectedShippingOption.getCode());
+		orderShipment.setShippingOptionName(selectedShippingOption.getDisplayName(shoppingCart.getShopper().getLocale()).orElse(null));
+		selectedShippingOption.getCarrierCode().ifPresent(orderShipment::setCarrierCode);
+		selectedShippingOption.getCarrierDisplayName().ifPresent(orderShipment::setCarrierName);
+
 		orderShipment.setShippingCost(pricingSnapshot.getShippingCost().getAmount());
 		orderShipment.setBeforeTaxShippingCost(pricingSnapshot.getBeforeTaxShippingCost().getAmount());
+
 		addOrderSkusToShipment(orderSkuSet, orderShipment);
 
 		if (isExchangeOrder && awaitExchangeCompletion) {

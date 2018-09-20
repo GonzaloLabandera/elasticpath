@@ -18,7 +18,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.elasticpath.rest.resource.paymenttokens.handlers.CreatePaymentTokenHandler;
 import com.elasticpath.rest.resource.paymenttokens.handlers.registry.CreatePaymentTokenHandlerRegistry;
@@ -27,6 +27,7 @@ import com.elasticpath.rest.resource.paymenttokens.handlers.registry.CreatePayme
  * Tests the {@link CreatePaymentTokenHandlerRegistryImpl}.
  */
 @RunWith(MockitoJUnitRunner.class)
+@SuppressWarnings("rawtypes")
 public class CreatePaymentTokenHandlerRegistryImplTest {
 	private static final String TEST_REPRESENTATION_TYPE = "testRepresentationType";
 	@Mock

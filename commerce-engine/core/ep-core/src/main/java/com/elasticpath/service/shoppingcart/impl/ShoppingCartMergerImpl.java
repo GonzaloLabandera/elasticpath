@@ -3,8 +3,9 @@
  */
 package com.elasticpath.service.shoppingcart.impl;
 
+import java.util.Collection;
 import java.util.Iterator;
-import java.util.List;
+import java.util.Optional;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.Predicate;
@@ -30,9 +31,8 @@ public class ShoppingCartMergerImpl implements ShoppingCartMerger {
 
 	@Override
 	public final ShoppingCart merge(final ShoppingCart recipient, final ShoppingCart donor) {
-
-		final List<ShoppingItem> recipientItems = recipient.getCartItems();
-		final List<ShoppingItem> donorItems = donor.getCartItems();
+		final Collection<ShoppingItem> recipientItems = recipient.getRootShoppingItems();
+		final Collection<ShoppingItem> donorItems = donor.getRootShoppingItems();
 
 		final boolean recipientHadItems = recipient.getNumItems() > 0;
 		for (Iterator<ShoppingItem> donorItemIterator = donorItems.iterator(); donorItemIterator.hasNext();) {
@@ -62,17 +62,21 @@ public class ShoppingCartMergerImpl implements ShoppingCartMerger {
 	/**
 	 * The donor item will be deleted by JPA, so we make a clone from it, and add it to the recipient cart.
 	 *
-	 * @param shoppingCart the cart to update
+	 * @param recipientCart the cart to update
+	 * @param donorCart the cart providing new line items
 	 * @param donorItem the item to add to the cart
 	 */
 	private void addDonorItemToCart(final ShoppingCart recipientCart, final ShoppingCart donorCart, final ShoppingItem donorItem) {
 
 		ShoppingItemDto dto = shoppingItemAssembler.assembleShoppingItemDtoFrom(donorItem);
 
-		//Determine if donor item has a parent item in the donor cart and find the matching parent in the recepient cart
-		final ShoppingItem donorItemParent = cartDirector.getParentOfDependentItem(donorCart.getCartItems(), donorItem);
-		Predicate matchingShoppingItemPredicate = ShoppingItemPredicateUtils.matchingShoppingItemPredicate(donorItemParent, getProductSkuLookup());
-		ShoppingItem recipientItemParent = (ShoppingItem) CollectionUtils.find(recipientCart.getCartItems(), matchingShoppingItemPredicate);
+		//Determine if donor item has a parent item in the donor cart and find the matching parent in the recipient cart
+		final Optional<ShoppingItem> donorItemParent = cartDirector.getParent(donorCart.getAllShoppingItems(), donorItem);
+		final Predicate matchingShoppingItemPredicate =
+				ShoppingItemPredicateUtils.matchingShoppingItemPredicate(donorItemParent.orElse(null), getProductSkuLookup());
+
+		final ShoppingItem recipientItemParent = (ShoppingItem) CollectionUtils.find(recipientCart.getAllShoppingItems(),
+																					 matchingShoppingItemPredicate);
 
 		cartDirector.addItemToCart(recipientCart, dto, recipientItemParent);
 	}

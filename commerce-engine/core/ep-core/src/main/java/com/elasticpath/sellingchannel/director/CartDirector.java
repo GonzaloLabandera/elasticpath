@@ -3,7 +3,9 @@
  */
 package com.elasticpath.sellingchannel.director;
 
+import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 import com.elasticpath.base.exception.EpServiceException;
 import com.elasticpath.common.dto.ShoppingItemDto;
@@ -59,13 +61,13 @@ public interface CartDirector extends ShoppingCartRefresher {
 	ShoppingItem updateCartItem(ShoppingCart shoppingCart, long itemId, ShoppingItemDto dto);
 
 	/**
-	 * If the child is a dependent item return the parent, otherwise returns null.
+	 * Finds the parent of a given shopping item, if present.
 	 *
 	 * @param cartItems cart items
 	 * @param child shopping child to get parents for
 	 * @return parent item
 	 */
-	ShoppingItem getParentOfDependentItem(List<ShoppingItem> cartItems, ShoppingItem child);
+	Optional<ShoppingItem> getParent(Collection<ShoppingItem> cartItems, ShoppingItem child);
 
 	/**
 	 * Check if the specified child is dependent on an element in the list.
@@ -75,15 +77,6 @@ public interface CartDirector extends ShoppingCartRefresher {
 	 * @return true if there is a parent in the list
 	 */
 	boolean isDependent(List<ShoppingItem> cartItems, ShoppingItem child);
-
-	/**
-	 * Returns true if the given sku can be added to the shopping cart.
-	 *
-	 * @param skuCode the sku code
-	 * @param shoppingCart the shopping cart
-	 * @return true if the sku is allowed to add to cart
-	 */
-	boolean isSkuAllowedAddToCart(String skuCode, ShoppingCart shoppingCart);
 
 	/**
 	 * Reorders and renumbers the shopping cart items in the given shopping cart.
@@ -111,4 +104,5 @@ public interface CartDirector extends ShoppingCartRefresher {
 	 * @return boolean representing whether the items are equivalent
 	 */
 	boolean itemsAreEqual(ShoppingItem shoppingItem, ShoppingItem existingItem);
+
 }

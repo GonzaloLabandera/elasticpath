@@ -6,6 +6,7 @@ import org.openqa.selenium.WebDriver;
 
 import com.elasticpath.selenium.common.AbstractPageObject;
 import com.elasticpath.selenium.dialogs.ConfirmDialog;
+import com.elasticpath.selenium.editor.product.ProductEditor;
 import com.elasticpath.selenium.util.Constants;
 
 /**
@@ -18,6 +19,7 @@ public class CatalogSearchResultPane extends AbstractPageObject {
 	private static final String PRODUCT_SEARCH_RESULT_PARENT_CSS = "div[widget-id='Search Product List'][widget-type='Table'] ";
 	private static final String PRODUCT_SEARCH_RESULT_COLUMN_CSS = PRODUCT_SEARCH_RESULT_PARENT_CSS + "div[column-id='%s']";
 	private static final String PRODUCT_NAME_COLUMNNAME = "Product Name";
+	private static final String PRODUCT_CODE_COLUMNNAME = "Product Code";
 
 
 	/**
@@ -43,6 +45,17 @@ public class CatalogSearchResultPane extends AbstractPageObject {
 	/**
 	 * Verifies if product exists.
 	 *
+	 * @param productCode String
+	 */
+	public void verifyProductCodeExists(final String productCode) {
+		assertThat(selectItemInCenterPane(PRODUCT_SEARCH_RESULT_PARENT_CSS, PRODUCT_SEARCH_RESULT_COLUMN_CSS, productCode, PRODUCT_CODE_COLUMNNAME))
+				.as("Expected Product does not exist in search result - " + productCode)
+				.isTrue();
+	}
+
+	/**
+	 * Verifies if product exists.
+	 *
 	 * @param productName String
 	 * @return boolean
 	 */
@@ -52,6 +65,20 @@ public class CatalogSearchResultPane extends AbstractPageObject {
 				PRODUCT_NAME_COLUMNNAME);
 		setWebDriverImplicitWaitToDefault();
 		return isProdcuctInList;
+	}
+
+	/**
+	 * Verifies if product exists.
+	 *
+	 * @param productCode String
+	 * @return boolean
+	 */
+	public boolean isProductCodeInList(final String productCode) {
+		setWebDriverImplicitWait(1);
+		boolean isProdcuctCodeInList = selectItemInCenterPane(PRODUCT_SEARCH_RESULT_PARENT_CSS, PRODUCT_SEARCH_RESULT_COLUMN_CSS, productCode,
+				PRODUCT_CODE_COLUMNNAME);
+		setWebDriverImplicitWaitToDefault();
+		return isProdcuctCodeInList;
 	}
 
 	/**
@@ -84,5 +111,29 @@ public class CatalogSearchResultPane extends AbstractPageObject {
 	 */
 	public static String getSearchProductResultParentCss() {
 		return PRODUCT_SEARCH_RESULT_PARENT_CSS.trim();
+	}
+
+	/**
+	 * Select product and open editor.
+	 *
+	 * @param productName Product Name.
+	 * @return the order editor.
+	 */
+	public ProductEditor openProductEditor(final String productName) {
+		verifyProductNameExists(productName);
+		doubleClick(getSelectedElement(), ProductEditor.PRODUCT_EDITOR_PARENT_CSS);
+		return new ProductEditor(getDriver());
+	}
+
+	/**
+	 * Select product with given product code and open editor.
+	 *
+	 * @param productCode Product Code.
+	 * @return the order editor.
+	 */
+	public ProductEditor openProductEditorWithCode(final String productCode) {
+		verifyProductCodeExists(productCode);
+		doubleClick(getSelectedElement(), ProductEditor.PRODUCT_EDITOR_PARENT_CSS);
+		return new ProductEditor(getDriver());
 	}
 }

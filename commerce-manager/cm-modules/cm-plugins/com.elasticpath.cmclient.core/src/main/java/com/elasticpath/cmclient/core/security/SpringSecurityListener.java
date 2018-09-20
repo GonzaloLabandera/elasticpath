@@ -5,7 +5,6 @@ package com.elasticpath.cmclient.core.security;
 
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationListener;
-import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.LockedException;
 import org.springframework.security.authentication.event.AuthenticationFailureBadCredentialsEvent;
 
@@ -23,8 +22,9 @@ public class SpringSecurityListener implements ApplicationListener<ApplicationEv
 	@Override
 	public void onApplicationEvent(final ApplicationEvent event) {
 		if (event instanceof AuthenticationFailureBadCredentialsEvent) {
-			final BadCredentialsException exception = (BadCredentialsException) ((AuthenticationFailureBadCredentialsEvent) event).getException();
-			final CmUser cmUser = (CmUser) exception.getExtraInformation();
+			final AuthenticationFailureBadCredentialsEvent badCredentialsEvent = (AuthenticationFailureBadCredentialsEvent) event;
+
+			final CmUser cmUser = (CmUser) badCredentialsEvent.getAuthentication().getDetails();
 			if (cmUser != null) {
 				cmUser.addFailedLoginAttempt();
 				cmUserService.update(cmUser);

@@ -59,9 +59,6 @@ public class IndexType implements Serializable {
 	/** A cmuser index type. */
 	public static final IndexType CMUSER = new IndexType("cmuser");
 
-	/** A shipping service level index type. */
-	public static final IndexType SHIPPING_SERVICE_LEVEL = new IndexType("shippingservicelevel");
-
 	/** A SKU index type. */
 	public static final IndexType SKU = new IndexType(SolrIndexConstants.SKU_SOLR_CORE);
 

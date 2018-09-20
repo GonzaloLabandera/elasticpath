@@ -12,7 +12,7 @@ import org.springframework.context.NoSuchMessageException;
 import com.elasticpath.commons.util.AssetRepository;
 import com.elasticpath.commons.util.MessageSourceCache;
 import com.elasticpath.commons.util.StoreMessageSource;
-import com.elasticpath.settings.SettingsReader;
+import com.elasticpath.settings.provider.SettingValueProvider;
 
 /**
  * Loads messages specific to stores, defined as part of the store's theme.
@@ -28,7 +28,7 @@ public class StoreMessageSourceImpl implements StoreMessageSource {
 	private MessageSource globalMessageSource;
 
 	private AssetRepository assetRepository;
-	private SettingsReader settingsReader;
+	private SettingValueProvider<String> storeThemeCodeProvider;
 
 
 	@Override
@@ -37,7 +37,7 @@ public class StoreMessageSourceImpl implements StoreMessageSource {
 	}
 
 	private String getStoreThemeCode(final String storeCode) {
-		return settingsReader.getSettingValue("COMMERCE/STORE/theme", storeCode).getValue();
+		return getStoreThemeCodeProvider().get(storeCode);
 	}
 
 	/**
@@ -143,10 +143,12 @@ public class StoreMessageSourceImpl implements StoreMessageSource {
 		this.assetRepository = assetRepository;
 	}
 
-	/**
-	 * @param settingsReader the settingsReader to set
-	 */
-	public void setSettingsReader(final SettingsReader settingsReader) {
-		this.settingsReader = settingsReader;
+	protected SettingValueProvider<String> getStoreThemeCodeProvider() {
+		return storeThemeCodeProvider;
 	}
+
+	public void setStoreThemeCodeProvider(final SettingValueProvider<String> storeThemeCodeProvider) {
+		this.storeThemeCodeProvider = storeThemeCodeProvider;
+	}
+
 }

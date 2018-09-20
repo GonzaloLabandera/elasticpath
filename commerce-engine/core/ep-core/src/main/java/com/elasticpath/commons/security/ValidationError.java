@@ -27,7 +27,7 @@ public class ValidationError {
 	 * @param key error key
 	 * @param params params
 	 */
-	public ValidationError(final String key, final Object[] params) { // NOPMD
+	public ValidationError(final String key, final Object... params) { // NOPMD
 		this.key = key;
 		this.params = params;
 	}

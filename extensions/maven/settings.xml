@@ -19,7 +19,6 @@
 		<activeProfile>with-oauth2-resource</activeProfile>
 		<activeProfile>activemq-dev-jms</activeProfile>
 		<activeProfile>allow-snapshots-from-central</activeProfile>
-		<activeProfile>disable-licensing-check</activeProfile>
 	</activeProfiles>
 
 	<profiles>
@@ -62,13 +61,6 @@
 				<ep.local.asset.path>YOUR_PROJECT_DIR/extensions/assets/ext-assets/src/main/assets</ep.local.asset.path>
 				<ep.smtp.host>YOUR_SMTP_HOST</ep.smtp.host>
 				<ep.local.cache.timeout>5</ep.local.cache.timeout>
-			</properties>
-		</profile>
-
-		<profile>
-			<id>disable-licensing-check</id>
-			<properties>
-				<licensing.skip>true</licensing.skip>
 			</properties>
 		</profile>
 

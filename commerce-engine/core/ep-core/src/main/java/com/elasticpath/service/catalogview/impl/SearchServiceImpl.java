@@ -28,7 +28,7 @@ import com.elasticpath.service.search.index.IndexSearchResult;
 import com.elasticpath.service.search.query.CategorySearchCriteria;
 import com.elasticpath.service.search.query.ProductSearchCriteria;
 import com.elasticpath.service.search.solr.SolrIndexConstants;
-import com.elasticpath.settings.domain.SettingValue;
+import com.elasticpath.settings.provider.SettingValueProvider;
 
 /**
  * Represents a default implementation of <code>SearchService</code>.
@@ -39,6 +39,8 @@ public class SearchServiceImpl extends AbstractSearchServiceImpl implements Sear
 	private SearchConfigFactory searchConfigFactory;
 
 	private BeanFactory beanFactory;
+
+	private SettingValueProvider<Boolean> searchCategoriesFirstSettingProvider;
 
 	/**
 	 * <p>Perform searching based on the given search request and returns the search result.</p>
@@ -136,12 +138,9 @@ public class SearchServiceImpl extends AbstractSearchServiceImpl implements Sear
 
 		SearchResult result = (SearchResult) loadHistory(request, history);
 		final String storeCode = shoppingCart.getStore().getCode();
-		final SettingValue searchCategoriesSetting = 
-			getSettingsService().getSettingValue("COMMERCE/STORE/SEARCH/searchCategoriesFirst", storeCode);
-	
+
 		// search categories first
-		if (searchCategoriesSetting != null 
-				&& "true".equalsIgnoreCase(searchCategoriesSetting.getValue()) 
+		if (getSearchCategoriesFirstSettingProvider().get(storeCode)
 				&& !result.isCategoryMatch()) {
 			// we only need 1 result here
 			List<Long> searchedCategoryUids = searchCategoryIndex(request).getResults(0, 1);
@@ -238,4 +237,13 @@ public class SearchServiceImpl extends AbstractSearchServiceImpl implements Sear
 		super.setBeanFactory(beanFactory);
 		this.beanFactory = beanFactory;
 	}
+
+	protected SettingValueProvider<Boolean> getSearchCategoriesFirstSettingProvider() {
+		return searchCategoriesFirstSettingProvider;
+	}
+
+	public void setSearchCategoriesFirstSettingProvider(final SettingValueProvider<Boolean> searchCategoriesFirstSettingProvider) {
+		this.searchCategoriesFirstSettingProvider = searchCategoriesFirstSettingProvider;
+	}
+
 }

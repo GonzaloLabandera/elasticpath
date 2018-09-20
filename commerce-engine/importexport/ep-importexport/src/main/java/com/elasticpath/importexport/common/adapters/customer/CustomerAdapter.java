@@ -7,9 +7,7 @@ import java.util.Set;
 import javax.validation.ConstraintViolation;
 import javax.validation.Validator;
 
-import com.elasticpath.common.dto.assembler.customer.CreditCardFilter;
 import com.elasticpath.common.dto.customer.CustomerDTO;
-import com.elasticpath.common.dto.customer.CustomerDtoAssembler;
 import com.elasticpath.domain.customer.Customer;
 import com.elasticpath.importexport.common.adapters.DtoAssemblerDelegatingAdapter;
 import com.elasticpath.importexport.common.exception.runtime.PopulationRollbackException;
@@ -23,14 +21,6 @@ public class CustomerAdapter extends DtoAssemblerDelegatingAdapter<Customer, Cus
 	
 	private Validator validator;
 	private ConstraintViolationsSummariser summariser;
-	
-	/**
-	 * Sets the filtering style for credit cards.
-	 * @param filter the {@link CreditCardFilter} to set.
-	 */
-	public void setCardFilteringStyle(final CreditCardFilter filter) {
-		((CustomerDtoAssembler) getAssembler()).setCardFilter(filter);
-	}
 
 	@Override
 	public Customer buildDomain(final CustomerDTO source, final Customer target) {

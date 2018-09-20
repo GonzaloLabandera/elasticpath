@@ -3,7 +3,6 @@ package com.elasticpath.cucumber.definitions;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.List;
-import java.util.Map;
 
 import cucumber.api.java.en.And;
 import cucumber.api.java.en.Then;
@@ -12,9 +11,10 @@ import cucumber.api.java.en.When;
 import com.elasticpath.selenium.dialogs.ConfirmDialog;
 import com.elasticpath.selenium.dialogs.CreateShippingServiceLevelDialog;
 import com.elasticpath.selenium.dialogs.EditShippingServiceLevelDialog;
-import com.elasticpath.selenium.framework.util.SeleniumDriverSetup;
+import com.elasticpath.selenium.domainobjects.ShippingServiceLevel;
 import com.elasticpath.selenium.navigations.PromotionsShipping;
 import com.elasticpath.selenium.resultspane.ShippingServiceLevelSearchResultPane;
+import com.elasticpath.selenium.setup.SetUp;
 import com.elasticpath.selenium.util.Constants;
 import com.elasticpath.selenium.util.Utility;
 
@@ -29,13 +29,13 @@ public class ShippingServiceLevelDefinition {
 	private ShippingServiceLevelSearchResultPane shippingServiceLevelSearchResultPane;
 	private CreateShippingServiceLevelDialog createShippingServiceLevelDialog;
 	private EditShippingServiceLevelDialog editShippingServiceLevelDialog;
-	private String shippingServiceLevelCode = "";
+	private ShippingServiceLevel shippingServiceLevel;
 
 	/**
 	 * Constructor.
 	 */
 	public ShippingServiceLevelDefinition() {
-		promotionsShipping = new PromotionsShipping(SeleniumDriverSetup.getDriver());
+		promotionsShipping = new PromotionsShipping(SetUp.getDriver());
 	}
 
 	/**
@@ -82,41 +82,30 @@ public class ShippingServiceLevelDefinition {
 	/**
 	 * Create shipping service level.
 	 *
-	 * @param shippingServiceLevelMap the shipping service levels.
+	 * @param shippingServiceLevelList the shipping service levels.
 	 */
 	@When("^I create shipping service level with following values$")
-	public void createShippingServiceLevel(final Map<String, String> shippingServiceLevelMap) {
-		this.shippingServiceLevelCode = "SSL-" + Utility.getRandomUUID();
-
-		promotionsShipping.clickShippingServiceLevelTab();
-		shippingServiceLevelSearchResultPane = new ShippingServiceLevelSearchResultPane(SeleniumDriverSetup.getDriver());
-		shippingServiceLevelSearchResultPane.clickCreateServiceLevelResultsTab();
-		createShippingServiceLevelDialog = shippingServiceLevelSearchResultPane.clickCreateServiceLevelButton();
-		createShippingServiceLevelDialog.selectStore(shippingServiceLevelMap.get("store"));
-		createShippingServiceLevelDialog.selectShippingRegion(shippingServiceLevelMap.get("shipping region"));
-		createShippingServiceLevelDialog.selectCarrier(shippingServiceLevelMap.get("carrier"));
-		createShippingServiceLevelDialog.enterUniqueCode(this.shippingServiceLevelCode);
-		createShippingServiceLevelDialog.enterName(shippingServiceLevelMap.get("name") + DASH + this.shippingServiceLevelCode);
-		createShippingServiceLevelDialog.enterPropertyValue(shippingServiceLevelMap.get("property value"));
-		createShippingServiceLevelDialog.clickSaveButton();
+	public void createShippingServiceLevel(final List<ShippingServiceLevel> shippingServiceLevelList) {
+		shippingServiceLevel = shippingServiceLevelList.get(0);
+		shippingServiceLevel.setShippingServiceLevelCode("SSL-" + Utility.getRandomUUID());
+		shippingServiceLevel.setName(shippingServiceLevel.getName() + DASH + shippingServiceLevel.getShippingServiceLevelCode());
+		createShippingServiceLevelHelper();
 	}
 
 	/**
-	 * Create shipping service level.
+	 * Shipping service level creation helper method.
 	 */
-	@When("^I have a shipping service level$")
-	public void createShippingServiceLevel() {
-		this.shippingServiceLevelCode = "SSL-" + Utility.getRandomUUID();
+	private void createShippingServiceLevelHelper() {
 		promotionsShipping.clickShippingServiceLevelTab();
-		shippingServiceLevelSearchResultPane = new ShippingServiceLevelSearchResultPane(SeleniumDriverSetup.getDriver());
+		shippingServiceLevelSearchResultPane = new ShippingServiceLevelSearchResultPane(SetUp.getDriver());
 		shippingServiceLevelSearchResultPane.clickCreateServiceLevelResultsTab();
 		createShippingServiceLevelDialog = shippingServiceLevelSearchResultPane.clickCreateServiceLevelButton();
-		createShippingServiceLevelDialog.selectStore("SearchStore");
-		createShippingServiceLevelDialog.selectShippingRegion("USA");
-		createShippingServiceLevelDialog.selectCarrier("Fed Ex");
-		createShippingServiceLevelDialog.enterUniqueCode(this.shippingServiceLevelCode);
-		createShippingServiceLevelDialog.enterName("name" + DASH + this.shippingServiceLevelCode);
-		createShippingServiceLevelDialog.enterPropertyValue("10");
+		createShippingServiceLevelDialog.selectStore(shippingServiceLevel.getStore());
+		createShippingServiceLevelDialog.selectShippingRegion(shippingServiceLevel.getShippingRegion());
+		createShippingServiceLevelDialog.selectCarrier(shippingServiceLevel.getCarrier());
+		createShippingServiceLevelDialog.enterUniqueCode(shippingServiceLevel.getShippingServiceLevelCode());
+		createShippingServiceLevelDialog.enterName(shippingServiceLevel.getName());
+		createShippingServiceLevelDialog.enterPropertyValue(shippingServiceLevel.getPropertyValue());
 		createShippingServiceLevelDialog.clickSaveButton();
 	}
 
@@ -126,28 +115,18 @@ public class ShippingServiceLevelDefinition {
 	@When("^I attempt to create a new shipping service level with the same code$")
 	public void attemptToCreateShippingServiceLevelWithSameCode() {
 		promotionsShipping.clickShippingServiceLevelTab();
-		shippingServiceLevelSearchResultPane = new ShippingServiceLevelSearchResultPane(SeleniumDriverSetup.getDriver());
+		shippingServiceLevelSearchResultPane = new ShippingServiceLevelSearchResultPane(SetUp.getDriver());
 		shippingServiceLevelSearchResultPane.clickCreateServiceLevelResultsTab();
 		createShippingServiceLevelDialog = shippingServiceLevelSearchResultPane.clickCreateServiceLevelButton();
-		createShippingServiceLevelDialog.enterUniqueCode(this.shippingServiceLevelCode);
+		createShippingServiceLevelDialog.enterUniqueCode(shippingServiceLevel.getShippingServiceLevelCode());
 	}
 
 	/**
-	 * Create shipping service level.
+	 * Create shipping service level with the same code as created before in this scenerio.
 	 */
 	@When("^I can create a new shipping service level with the same code$")
 	public void createShippingServiceLevelWithSameCode() {
-		promotionsShipping.clickShippingServiceLevelTab();
-		shippingServiceLevelSearchResultPane = new ShippingServiceLevelSearchResultPane(SeleniumDriverSetup.getDriver());
-		shippingServiceLevelSearchResultPane.clickCreateServiceLevelResultsTab();
-		createShippingServiceLevelDialog = shippingServiceLevelSearchResultPane.clickCreateServiceLevelButton();
-		createShippingServiceLevelDialog.selectStore("SearchStore");
-		createShippingServiceLevelDialog.selectShippingRegion("USA");
-		createShippingServiceLevelDialog.selectCarrier("Fed Ex");
-		createShippingServiceLevelDialog.enterUniqueCode(this.shippingServiceLevelCode);
-		createShippingServiceLevelDialog.enterName("name" + DASH + this.shippingServiceLevelCode);
-		createShippingServiceLevelDialog.enterPropertyValue("10");
-		createShippingServiceLevelDialog.clickSaveButton();
+		createShippingServiceLevelHelper();
 	}
 
 
@@ -182,7 +161,7 @@ public class ShippingServiceLevelDefinition {
 	 */
 	@And("^I verify newly created shipping service level exists$")
 	public void verifyNewShippingServiceLevel() {
-		isShippingServiceLevelInList(this.shippingServiceLevelCode);
+		isShippingServiceLevelInList(shippingServiceLevel.getShippingServiceLevelCode());
 	}
 
 	/**
@@ -190,9 +169,9 @@ public class ShippingServiceLevelDefinition {
 	 */
 	@When("^I delete the newly created shipping service level$")
 	public void deleteNewShippingServiceLevel() {
-		isShippingServiceLevelInList(this.shippingServiceLevelCode);
+		isShippingServiceLevelInList(shippingServiceLevel.getShippingServiceLevelCode());
 		shippingServiceLevelSearchResultPane.clickDeleteServiceLevelButton();
-		new ConfirmDialog(SeleniumDriverSetup.getDriver()).clickOKButton("ShippingLevelsMessages.ConfirmDeleteShippingLevel");
+		new ConfirmDialog(SetUp.getDriver()).clickOKButton("ShippingLevelsMessages.ConfirmDeleteShippingLevel");
 	}
 
 	/**
@@ -201,7 +180,7 @@ public class ShippingServiceLevelDefinition {
 	@And("^I verify shipping service level is deleted$")
 	public void verifyShippingServiceLevelIsDeleted() {
 		shippingServiceLevelSearchResultPane = promotionsShipping.clickShippingServiceSearchButton();
-		shippingServiceLevelSearchResultPane.verifyShippingServiceLevelIsDeleted(this.shippingServiceLevelCode);
+		shippingServiceLevelSearchResultPane.verifyShippingServiceLevelIsDeleted(shippingServiceLevel.getShippingServiceLevelCode());
 	}
 
 	/**
@@ -220,7 +199,7 @@ public class ShippingServiceLevelDefinition {
 	 */
 	@Then("^I open the newly created shipping service level$")
 	public void openNewlyCreatedShippingServiceLevelEditor() {
-		shippingServiceLevelSearchResultPane.selectServiceLevelByCode(this.shippingServiceLevelCode);
+		shippingServiceLevelSearchResultPane.selectServiceLevelByCode(shippingServiceLevel.getShippingServiceLevelCode());
 		editShippingServiceLevelDialog = shippingServiceLevelSearchResultPane.clickOpenServiceLevelResultsTab();
 	}
 

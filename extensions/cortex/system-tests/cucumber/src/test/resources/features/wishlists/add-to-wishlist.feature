@@ -25,8 +25,8 @@ Feature: Add to wishlist
     Then the HTTP status is OK, created
 
     Examples:
-      | ITEMNAME                                      |
-      | physicalProduct                               |
+      | ITEMNAME        |
+      | physicalProduct |
 
   Scenario Outline: Add existing item to wishlist returns correct HTTP status
     Given I have <ITEMNAME> in my default wishlist
@@ -34,8 +34,8 @@ Feature: Add to wishlist
     Then the HTTP status is OK
 
     Examples:
-      | ITEMNAME                                      |
-      | physicalProduct                               |
+      | ITEMNAME        |
+      | physicalProduct |
 
   Scenario Outline: Non-purchaseable item can still be added to wishlist
     Given <ITEMNAME> is not purchaseable
@@ -141,6 +141,6 @@ Feature: Add to wishlist
       | giftCertificate.senderName     | <SENDER_NAME_2>     |
 
     Examples:
-      | ITEMCODE   | MESSAGE_1   | RECIPIENT_EMAIL_1            | RECIPIENT_NAME_1 | SENDER_NAME_1 | QTY_1 | MESSAGE_2 | RECIPIENT_EMAIL_2 | RECIPIENT_NAME_2 | SENDER_NAME_2 |
-      | berries_20 | Hello World | harry.potter@elasticpath.com | Harry Potter     | MOBEE tester  | 1     |           |                   |                  |               |
+      | ITEMCODE   | MESSAGE_1   | RECIPIENT_EMAIL_1            | RECIPIENT_NAME_1 | SENDER_NAME_1 | MESSAGE_2 | RECIPIENT_EMAIL_2 | RECIPIENT_NAME_2 | SENDER_NAME_2 |
+      | berries_20 | Hello World | harry.potter@elasticpath.com | Harry Potter     | MOBEE tester  |           |                   |                  |               |
 

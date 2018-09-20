@@ -47,8 +47,8 @@ import org.eclipse.ui.forms.widgets.Hyperlink;
 
 import com.elasticpath.base.exception.EpServiceException;
 import com.elasticpath.cmclient.core.CoreMessages;
-import com.elasticpath.cmclient.core.ServiceLocator;
 import com.elasticpath.cmclient.core.CorePlugin;
+import com.elasticpath.cmclient.core.ServiceLocator;
 import com.elasticpath.cmclient.core.binding.EpControlBindingProvider;
 import com.elasticpath.cmclient.core.binding.EpValueBinding;
 import com.elasticpath.cmclient.core.binding.ObservableUpdateValueStrategy;
@@ -85,14 +85,14 @@ import com.elasticpath.domain.rules.RuleElementType;
 import com.elasticpath.domain.rules.RuleParameter;
 import com.elasticpath.domain.rules.RuleParameterNumItemsQuantifier;
 import com.elasticpath.domain.rules.RuleScenarios;
-import com.elasticpath.domain.shipping.ShippingServiceLevel;
 import com.elasticpath.domain.store.Store;
 import com.elasticpath.service.catalog.BrandService;
 import com.elasticpath.service.catalog.CategoryLookup;
 import com.elasticpath.service.catalog.ProductLookup;
 import com.elasticpath.service.rules.CouponConfigService;
 import com.elasticpath.service.rules.RuleService;
-import com.elasticpath.service.shipping.ShippingServiceLevelService;
+import com.elasticpath.service.shipping.ShippingOptionService;
+import com.elasticpath.shipping.connectivity.dto.ShippingOption;
 
 /**
  * Helper utility class used to create SWT control objects on the Promotion Rules page.
@@ -635,64 +635,64 @@ public final class PromotionRulesWidgetUtil {
 
 
 	/**
-	 * Adds to the given ruleComposite <code>IEpLayoutComposite</code> a shipping service level combo box.
+	 * Adds to the given ruleComposite <code>IEpLayoutComposite</code> a shipping option combo box.
 	 *
 	 * @param ruleParameter         the <code>RuleParameter</code> object to display
-	 * @param ruleComposite         the <code>IEpLayoutComposite</code> to which the shipping service level combo box should be added to
+	 * @param ruleComposite         the <code>IEpLayoutComposite</code> to which the shipping option combo box should be added to
 	 * @param dataBindingContext    the <code>DataBindingContext</code>
 	 * @param policyActionContainer the <code>PolicyActionContainer</code> managing component state
 	 */
-	public void addShippingServiceLevelCombo(final RuleParameter ruleParameter, final IPolicyTargetLayoutComposite ruleComposite,
+	public void addShippingOptionCombo(final RuleParameter ruleParameter, final IPolicyTargetLayoutComposite ruleComposite,
 											 final DataBindingContext dataBindingContext, final PolicyActionContainer policyActionContainer) {
 		// create the combo box
-		final CCombo shippingLevelCombo = ruleComposite.addComboBox(null, policyActionContainer);
-		shippingLevelCombo.pack();
-
-		final ShippingServiceLevelService shippingServiceLevelService = ServiceLocator.getService(
-				ContextIdNames.SHIPPING_SERVICE_LEVEL_SERVICE);
-		final List<ShippingServiceLevel> shippingServiceLevels = shippingServiceLevelService.findByStoreAndState(store.getCode(), true);
+		final CCombo shippingOptionCombo = ruleComposite.addComboBox(null, policyActionContainer);
+		shippingOptionCombo.pack();
+		final ShippingOptionService shippingOptionService = ServiceLocator.getService(ContextIdNames.SHIPPING_OPTION_SERVICE);
+		final List<ShippingOption> shippingOptions = shippingOptionService.getAllShippingOptions(
+				store.getCode(),
+				CorePlugin.getDefault().getDefaultLocale()).getAvailableShippingOptions();
 
 		// populate the combo box
 		int selectedIndex = 0;
-		int currShippingServiceLevelIndex = 0;
+		int currShippingOptionIndex = 0;
 
-		for (final ShippingServiceLevel currShippingServiceLevels : shippingServiceLevels) {
-			String shippingServiceLevelName = currShippingServiceLevels.getDisplayName(CorePlugin.getDefault().getDefaultLocale(), true);
-			if (shippingServiceLevelName == null) {
-				LOG.debug("ShippingServiceLevelName is null for SSL CODE = " + currShippingServiceLevels.getCode()); //$NON-NLS-1$
-				shippingServiceLevelName = StringUtils.EMPTY;
+		for (final ShippingOption currShippingOption : shippingOptions) {
+			String shippingOptionName = currShippingOption.getDisplayName(CorePlugin.getDefault().getDefaultLocale()).orElse(null);
+			if (shippingOptionName == null) {
+				LOG.debug("ShippingOptionName is null for CODE = " + currShippingOption.getCode()); //$NON-NLS-1$
+				shippingOptionName = StringUtils.EMPTY;
 			}
-			shippingLevelCombo.add(currShippingServiceLevels.getDisplayName(CorePlugin.getDefault().getDefaultLocale(), true));
-			if ((ruleParameter.getValue() != null) && (ruleParameter.getValue().equals(currShippingServiceLevels.getCode()))) {
-				selectedIndex = currShippingServiceLevelIndex;
+			shippingOptionCombo.add(currShippingOption.getDisplayName(CorePlugin.getDefault().getDefaultLocale()).orElse(null));
+			if ((ruleParameter.getValue() != null) && (ruleParameter.getValue().equals(currShippingOption.getCode()))) {
+				selectedIndex = currShippingOptionIndex;
 			}
-			currShippingServiceLevelIndex++;
+			currShippingOptionIndex++;
 		}
-		shippingLevelCombo.select(selectedIndex);
+		shippingOptionCombo.select(selectedIndex);
 
-		// set default value of the rule parameter to the first shipping service level in the combo
+		// set default value of the rule parameter to the first shipping option in the combo
 		if (ruleParameter.getValue() == null) {
-			if (shippingServiceLevels.isEmpty()) {
-				shippingLevelCombo.setEditable(false);
-				shippingLevelCombo.setEnabled(false);
+			if (shippingOptions.isEmpty()) {
+				shippingOptionCombo.setEditable(false);
+				shippingOptionCombo.setEnabled(false);
 				Display.getCurrent().asyncExec(() -> showErrorDialog(PromotionsMessages.get().promotionNotAvailable));
 
 				return;
 			}
-			ruleParameter.setValue(shippingServiceLevels.get(0).getCode());
+			ruleParameter.setValue(shippingOptions.get(0).getCode());
 		}
 
 		// bind the combo box
 		if (ruleParameter != null) {
 			final EpControlBindingProvider bindingProvider = EpControlBindingProvider.getInstance();
-			final EpValueBinding binding = bindingProvider.bind(dataBindingContext, shippingLevelCombo, null, null,
+			final EpValueBinding binding = bindingProvider.bind(dataBindingContext, shippingOptionCombo, null, null,
 					new ObservableUpdateValueStrategy() {
 						@Override
 						protected IStatus doSet(final IObservableValue observableValue, final Object value) {
 							final int selectionIndex = (Integer) value;
 							try {
 								if (selectionIndex >= 0) {
-									ruleParameter.setValue(shippingServiceLevels.get(selectionIndex).getCode());
+									ruleParameter.setValue(shippingOptions.get(selectionIndex).getCode());
 								}
 								return Status.OK_STATUS;
 							} catch (final EpServiceException e) {
@@ -701,7 +701,7 @@ public final class PromotionRulesWidgetUtil {
 						}
 					}, true);
 
-			addDisposeListener(shippingLevelCombo, dataBindingContext, binding);
+			addDisposeListener(shippingOptionCombo, dataBindingContext, binding);
 		}
 	}
 
@@ -1136,7 +1136,7 @@ public final class PromotionRulesWidgetUtil {
 	 * Creates the appropriate SWT widget depending on the type of rule parameter passed.
 	 *
 	 * @param parentWidget          the parent widget, it's either an instance of {@link NewPromotionWizardRulesPage} or
-	 * {@link PromotionRulesDefinitionPart}
+	 *                              {@link PromotionRulesDefinitionPart}
 	 * @param ruleParameter         the <code>RuleParameter</code> object to bind the widget to
 	 * @param parentComposite       the <code>Composite</code> to which the number of items link should be added to
 	 * @param policyActionContainer the policy action container to add to.
@@ -1187,8 +1187,8 @@ public final class PromotionRulesWidgetUtil {
 			case RuleParameter.SKU_CODE_KEY:
 				addSkuFinderLink(ruleParameter, parentComposite, epSectionPart, policyActionContainer, epWizardPage, layoutRefresher);
 				break;
-			case RuleParameter.SHIPPING_SERVICE_LEVEL_CODE_KEY :
-				addShippingServiceLevelCombo(ruleParameter, parentComposite, bindingContext, policyActionContainer);
+			case RuleParameter.SHIPPING_OPTION_CODE_KEY:
+				addShippingOptionCombo(ruleParameter, parentComposite, bindingContext, policyActionContainer);
 				break;
 			case RuleParameter.BOOLEAN_KEY:
 				addBooleanKeyCombo(ruleParameter, parentComposite, bindingContext, policyActionContainer);

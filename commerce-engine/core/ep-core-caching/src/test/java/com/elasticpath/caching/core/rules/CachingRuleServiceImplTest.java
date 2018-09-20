@@ -5,9 +5,9 @@
 package com.elasticpath.caching.core.rules;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Matchers.anyCollectionOf;
-import static org.mockito.Matchers.anyLong;
-import static org.mockito.Matchers.anyString;
+import static org.mockito.ArgumentMatchers.anyCollection;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -17,6 +17,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 import org.junit.Before;
@@ -25,7 +26,7 @@ import org.junit.runner.RunWith;
 
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.elasticpath.cache.Cache;
 import com.elasticpath.domain.rules.Rule;
@@ -124,17 +125,17 @@ public class CachingRuleServiceImplTest {
 		assertThat(actualRuleCodes).isEqualTo(expectedRuleCodes);
 
 		verify(ruleCodesByRuleUidsCache).get(ruleUidPks);
-		verify(decoratedFallbackService, never()).findCodesByUids(anyCollectionOf(Long.class));
-		verify(ruleCodesByRuleUidsCache, never()).put(anyCollectionOf(Long.class), anyCollectionOf(String.class));
+		verify(decoratedFallbackService, never()).findCodesByUids(anyCollection());
+		verify(ruleCodesByRuleUidsCache, never()).put(anyCollection(), anyCollection());
 	}
 
 	@Test
 	public void shouldFindRulesByUidsInDbOnCacheMiss() {
 
 
-		final Collection<Long> ruleUidPks = Arrays.asList(RULE_UIDPK);
+		final Collection<Long> ruleUidPks = Collections.singletonList(RULE_UIDPK);
 
-		final List<Rule> expectedRules = Arrays.asList(rule);
+		final List<Rule> expectedRules = Collections.singletonList(rule);
 
 		when(ruleCodeByRuleUidCache.get(anyLong())).thenReturn(null);
 		when(decoratedFallbackService.findByUids(ruleUidPks)).thenReturn(expectedRules);
@@ -153,14 +154,11 @@ public class CachingRuleServiceImplTest {
 	@Test
 	public void shouldFindRulesByUidsInCacheOnCacheHit() {
 
-		final Collection<Long> ruleUidPks = Arrays.asList(RULE_UIDPK);
-		final List<Rule> expectedRules = Arrays.asList(rule);
+		final Collection<Long> ruleUidPks = Collections.singletonList(RULE_UIDPK);
+		final List<Rule> expectedRules = Collections.singletonList(rule);
 
 		when(ruleCodeByRuleUidCache.get(RULE_UIDPK)).thenReturn(RULE_CODE);
 		when(ruleByRuleCodeCache.get(RULE_CODE)).thenReturn(rule);
-		when(rule.getUidPk()).thenReturn(RULE_UIDPK);
-		when(rule.getCode()).thenReturn(RULE_CODE);
-		when(rule.getName()).thenReturn(RULE_NAME);
 
 		Collection<Rule> actualRules = fixture.findByUids(ruleUidPks);
 
@@ -168,8 +166,8 @@ public class CachingRuleServiceImplTest {
 
 		verify(ruleCodeByRuleUidCache).get(anyLong());
 		verify(ruleByRuleCodeCache).get(anyString());
-		verify(decoratedFallbackService, never()).findCodesByUids(anyCollectionOf(Long.class));
-		verify(ruleCodesByRuleUidsCache, never()).put(anyCollectionOf(Long.class), anyCollectionOf(String.class));
+		verify(decoratedFallbackService, never()).findCodesByUids(anyCollection());
+		verify(ruleCodesByRuleUidsCache, never()).put(anyCollection(), anyCollection());
 	}
 
 	@Test
@@ -357,11 +355,7 @@ public class CachingRuleServiceImplTest {
 
 	@Test
 	public void shouldAddRuleToCache() {
-
 		final Rule newRule = mock(Rule.class);
-
-		when(newRule.getCode()).thenReturn(RULE_CODE);
-		when(newRule.getName()).thenReturn(RULE_NAME);
 		when(decoratedFallbackService.add(newRule)).thenReturn(rule);
 
 		fixture.add(newRule);

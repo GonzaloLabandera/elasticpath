@@ -15,7 +15,6 @@ import org.eclipse.ui.forms.widgets.ExpandableComposite;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.TableWrapData;
 
-import com.elasticpath.cmclient.core.ServiceLocator;
 import com.elasticpath.cmclient.core.binding.EpControlBindingProvider;
 import com.elasticpath.cmclient.core.binding.ObservableUpdateValueStrategy;
 import com.elasticpath.cmclient.core.editors.AbstractCmClientEditorPageSectionPart;
@@ -30,10 +29,7 @@ import com.elasticpath.cmclient.core.validation.EpValidatorFactory;
 import com.elasticpath.cmclient.fulfillment.FulfillmentMessages;
 import com.elasticpath.cmclient.fulfillment.FulfillmentPermissions;
 import com.elasticpath.cmclient.fulfillment.FulfillmentPlugin;
-import com.elasticpath.commons.constants.ContextIdNames;
-import com.elasticpath.commons.constants.WebConstants;
 import com.elasticpath.domain.customer.Customer;
-import com.elasticpath.settings.SettingsService;
 
 /**
  * UI representation of the customer details profile basic section.
@@ -46,9 +42,7 @@ public class CustomerDetailsProfileBasicSection extends AbstractCmClientEditorPa
 
 	private static final String NA_STRING = "N/A"; //$NON-NLS-1$
 
-	private Text customerIDText;
-
-	private Text userIDText;
+	private Text userIdText;
 
 	private CCombo statusCombo;
 
@@ -107,13 +101,8 @@ public class CustomerDetailsProfileBasicSection extends AbstractCmClientEditorPa
 		final IEpLayoutData labelData = this.mainPane.createLayoutData(IEpLayoutData.END, IEpLayoutData.CENTER);
 		final IEpLayoutData fieldData = this.mainPane.createLayoutData(IEpLayoutData.FILL, IEpLayoutData.BEGINNING, true, false);
 
-		this.mainPane.addLabelBold(FulfillmentMessages.get().CustomerDetails_CustomerIdLabel, labelData);
-		this.customerIDText = this.mainPane.addTextField(EpState.READ_ONLY, fieldData);
-
-		if (isUserIDReadOnly()) {
-			this.mainPane.addLabelBold(FulfillmentMessages.get().ProfileBasicSection_UserId, labelData);
-			this.userIDText = this.mainPane.addTextField(EpState.READ_ONLY, fieldData);
-		}
+		this.mainPane.addLabelBold(FulfillmentMessages.get().ProfileBasicSection_UserId, labelData);
+		this.userIdText = this.mainPane.addTextField(EpState.READ_ONLY, fieldData);
 
 		this.mainPane.addLabelBold(FulfillmentMessages.get().ProfileBasicSection_Status, labelData);
 		this.statusCombo = this.mainPane.addComboBox(authorization, fieldData);
@@ -151,10 +140,7 @@ public class CustomerDetailsProfileBasicSection extends AbstractCmClientEditorPa
 
 	@Override
 	protected void populateControls() {
-		this.customerIDText.setText(String.valueOf(this.customer.getUidPk()));
-		if (isUserIDReadOnly()) {
-			this.userIDText.setText(this.customer.getUserId());
-		}
+		this.userIdText.setText(this.customer.getUserId());
 		this.statusCombo.setItems(STATUS_STRINGS);
 
 		this.statusCombo.setText(this.resolveStatusText(this.customer.getStatus()));
@@ -188,12 +174,6 @@ public class CustomerDetailsProfileBasicSection extends AbstractCmClientEditorPa
 	@Override
 	protected void bindControls(final DataBindingContext bindingContext) { //NOPMD complexity
 		final EpControlBindingProvider bindingProvider = EpControlBindingProvider.getInstance();
-
-		// bindingProvider.bind(bindingContext, this.customerIDText, this.customer, "uidPk"); //$NON-NLS-1$
-		if (isUserIDReadOnly()) {
-			bindingProvider.bind(bindingContext, this.userIDText, 
-					this.customer, "userId", EpValidatorFactory.MAX_LENGTH_255, null, true); //$NON-NLS-1$
-		}
 
 		// ---- DOCbindCustomerDetails
 		bindingProvider.bind(bindingContext, this.statusCombo, null, null, new ObservableUpdateValueStrategy() {
@@ -284,13 +264,4 @@ public class CustomerDetailsProfileBasicSection extends AbstractCmClientEditorPa
 		return FulfillmentMessages.get().ProfileBasicSection_Title;
 	}
 
-	private boolean isUserIDReadOnly() {
-		return getUserIdMode() == WebConstants.GENERATE_UNIQUE_PERMANENT_USER_ID_MODE;
-	}
-
-	private int getUserIdMode() {
-		return Integer.parseInt(
-				((SettingsService) ServiceLocator.getService(ContextIdNames.SETTINGS_SERVICE))
-						.getSettingValue("COMMERCE/SYSTEM/userIdMode").getValue());  //$NON-NLS-1$
-	}
 }

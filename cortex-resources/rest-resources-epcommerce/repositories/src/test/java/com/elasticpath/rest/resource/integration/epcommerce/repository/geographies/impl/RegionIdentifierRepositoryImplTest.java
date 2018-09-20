@@ -13,7 +13,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.elasticpath.domain.misc.Geography;
 import com.elasticpath.rest.definition.geographies.CountriesIdentifier;
@@ -62,8 +62,6 @@ public class RegionIdentifierRepositoryImplTest {
 
 	@Test
 	public void shouldGetNoRegions() {
-		when(regionsCodes.iterator()).thenReturn(Iterators.forArray());
-		when(geography.getCountryCodes()).thenReturn(regionsCodes);
 		regionIdentifierRepository.getElements(getRegionsIdentifier())
 				.test()
 				.assertValueCount(0)

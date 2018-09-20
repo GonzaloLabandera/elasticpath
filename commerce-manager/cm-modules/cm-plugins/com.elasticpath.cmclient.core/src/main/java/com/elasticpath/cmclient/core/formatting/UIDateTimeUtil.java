@@ -7,6 +7,7 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.ParsePosition;
 import java.util.Date;
+import java.util.TimeZone;
 
 /**
  * Provides an uniform way to display date & date time all across cm client.
@@ -31,6 +32,14 @@ public interface UIDateTimeUtil {
 	String formatAsDate(Date date, String nullDateRepresentation);
 
 	/**
+	 * Formates date with the given timezone.
+	 * @param date the date to be formatted.
+	 * @param timezone the timezone to use.
+	 * @return the formatted date.
+	 */
+	String formatAsDate(Date date, TimeZone timezone);
+
+	/**
 	 * Formats date & time.
 	 *
 	 * @param date the date to be formatted
@@ -46,6 +55,14 @@ public interface UIDateTimeUtil {
 	 * @return the formatted date
 	 */
 	String formatAsDateTime(Date date, String nullDateRepresentation);
+
+	/**
+	 * Formats date and time with the given timezone.
+	 * @param date the date to be formatted.
+	 * @param timezone the timezone to use.
+	 * @return the formatted date.
+	 */
+	String formatAsDateTime(Date date, TimeZone timezone);
 
 	/**
 	 * Get a formatted date.
@@ -97,4 +114,16 @@ public interface UIDateTimeUtil {
 	 * @return the standard formatters
 	 */
 	DateFormat[] getFormatters();
+
+
+	/**
+	 * Gets the client browser's timezone.
+	 * @return the browser's timezone.
+	 */
+	TimeZone getTimeZoneFromBrowser();
+
+	/**
+	 * Initializes the user's timezone.
+	 */
+	void initializeTimezone();
 }

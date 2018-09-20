@@ -17,7 +17,6 @@ import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.test.context.ContextConfiguration;
 
 import com.elasticpath.domain.catalog.GiftCertificate;
 import com.elasticpath.domain.catalog.ProductSku;
@@ -33,7 +32,6 @@ import com.elasticpath.uat.ScenarioContextValueHolder;
 /**
  * Step Definitions for gift certificate email functionality.
  */
-@ContextConfiguration("classpath:cucumber.xml")
 public class GiftCertificateEmailStepDefinitions {
 
 	@Autowired

@@ -68,8 +68,8 @@ import com.elasticpath.service.search.query.ProductSearchCriteria;
 import com.elasticpath.service.search.query.SortOrder;
 import com.elasticpath.service.search.query.StandardSortBy;
 import com.elasticpath.service.search.solr.IndexUtilityImpl;
-import com.elasticpath.settings.SettingsService;
-import com.elasticpath.settings.domain.SettingValue;
+import com.elasticpath.settings.provider.SettingValueProvider;
+import com.elasticpath.settings.test.support.SimpleSettingValueProvider;
 import com.elasticpath.test.BeanFactoryExpectationsFactory;
 import com.elasticpath.test.factory.TestShopperFactory;
 
@@ -109,7 +109,9 @@ public class SearchServiceImplTest {
 
 	private PaginationService mockPaginationService;
 
-	private SettingsService mockSettingsService;
+	private SettingValueProvider<Boolean> searchCategoriesSettingProvider;
+	private SettingValueProvider<Integer> featuredProductCountSettingValueProvider;
+	private SettingValueProvider<Boolean> attributeFilterEnabledSettingValueProvider;
 
 	private ShoppingCart mockShoppingCart;
 
@@ -166,9 +168,12 @@ public class SearchServiceImplTest {
 		mockPriceListStack = context.mock(PriceListStack.class);
 		mockSearchCriteriaFactory = context.mock(SearchCriteriaFactory.class);
 
+		searchCategoriesSettingProvider = new SimpleSettingValueProvider<>(STORE_CODE, false);
+		attributeFilterEnabledSettingValueProvider = new SimpleSettingValueProvider<>(STORE_CODE, false);
+		featuredProductCountSettingValueProvider = new SimpleSettingValueProvider<>(STORE_CODE, 1);
+
 		// setup other mock dependencies
 		setupMockIndexSearchResult();
-		setupMockSettingsService();
 		setupMockElasticPath();
 		setupMockStoreObjects();
 
@@ -185,8 +190,10 @@ public class SearchServiceImplTest {
 		searchServiceImpl.setPaginationService(mockPaginationService);
 		searchServiceImpl.setIndexUtility(new IndexUtilityImpl());
 		searchServiceImpl.setStoreConfig(mockStoreConfig);
-		searchServiceImpl.setSettingsService(mockSettingsService);
+		searchServiceImpl.setSearchCategoriesFirstSettingProvider(searchCategoriesSettingProvider);
 		searchServiceImpl.setSearchCriteriaFactory(mockSearchCriteriaFactory);
+		searchServiceImpl.setAttributeFilterEnabledSettingValueProvider(attributeFilterEnabledSettingValueProvider);
+		searchServiceImpl.setFeaturedProductCountSettingValueProvider(featuredProductCountSettingValueProvider);
 		context.checking(new Expectations() {
 			{
 
@@ -249,15 +256,10 @@ public class SearchServiceImplTest {
 		});
 
 		mockStoreConfig = context.mock(StoreConfig.class);
-		final SettingValue mockSettingValue = context.mock(SettingValue.class);
 		context.checking(new Expectations() {
 			{
-				allowing(mockSettingValue).getValue();
-				will(returnValue("1"));
-
-
-				allowing(mockStoreConfig).getSetting(with(any(String.class)));
-				will(returnValue(mockSettingValue));
+				allowing(mockStoreConfig).getSettingValue(featuredProductCountSettingValueProvider);
+				will(returnValue(1));
 
 				allowing(mockStoreConfig).getStore();
 				will(returnValue(store));
@@ -300,24 +302,6 @@ public class SearchServiceImplTest {
 			}
 		});
 		mockGetBeanSearchResult();
-	}
-
-	private void setupMockSettingsService() {
-		final SettingValue settingValue = context.mock(SettingValue.class, "searchCategoriesFirst setting");
-		final SettingValue catalogSettingValue = context.mock(SettingValue.class, "catalog setting value");
-		mockSettingsService = context.mock(SettingsService.class);
-		context.checking(new Expectations() {
-			{
-				allowing(settingValue).getValue();
-				will(returnValue("false"));
-
-				allowing(catalogSettingValue).getValue();
-				will(returnValue("50"));
-
-				allowing(mockSettingsService).getSettingValue("COMMERCE/STORE/SEARCH/searchCategoriesFirst", STORE_CODE);
-				will(returnValue(settingValue));
-			}
-		});
 	}
 
 	private void setupMockIndexSearchResult() {

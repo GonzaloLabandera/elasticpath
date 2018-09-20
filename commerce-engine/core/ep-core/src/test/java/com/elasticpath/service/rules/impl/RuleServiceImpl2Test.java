@@ -31,8 +31,11 @@ import com.elasticpath.domain.rules.EpRuleBase;
 import com.elasticpath.domain.rules.Rule;
 import com.elasticpath.domain.rules.impl.EpRuleBaseImpl;
 import com.elasticpath.domain.rules.impl.PromotionRuleImpl;
+import com.elasticpath.domain.sellingcontext.SellingContext;
 import com.elasticpath.domain.store.Store;
 import com.elasticpath.persistence.api.PersistenceEngine;
+import com.elasticpath.tags.TagSet;
+import com.elasticpath.tags.service.ConditionEvaluatorService;
 import com.elasticpath.test.BeanFactoryExpectationsFactory;
 
 /**
@@ -47,14 +50,18 @@ public class RuleServiceImpl2Test {
 
 	private final PersistenceEngine persistenceEngine = context.mock(PersistenceEngine.class);
 
-	private final RuleServiceImpl ruleService = new RuleServiceImpl();
+	private final RuleServiceImpl ruleService = new RuleServiceImpl() {
+		@Override
+		protected ConditionEvaluatorService getConditionEvaluatorService() {
+			return (tags, condition) -> false;
+		}
+	};
 
 	private static final String FIND_RULE_BY_CODE = "RULE_FIND_BY_CODE";
 	private static final String RULE_FIND_BY_COUPON_CODE = "RULE_FIND_BY_COUPON_CODE";
 	private static final String RULE_LIMITED_USE_CONDITION_ID_FIND_BY_COUPON_CODE = "RULE_LIMITED_USE_CONDITION_ID_FIND_BY_COUPON_CODE";
 	private static final String RULE_MAP_BY_PROMO_CODES = "RULE_MAP_BY_PROMO_CODES";
 	private static final String RULE_ID_FIND_BY_COUPON_CODE = "RULE_ID_FIND_BY_COUPON_CODE";
-	private static final String RULE_ALLOWED_LIMIT_FIND_BY_RULE_ID = "RULE_ALLOWED_LIMIT_FIND_BY_RULE_ID";
 
 	private static final String STORE_CODE = "STORE_CODE";
 	private static final String PROMO_CODE = "PROMO_CODE";
@@ -276,16 +283,23 @@ public class RuleServiceImpl2Test {
 				
 				allowing(rule).getStoreCode();
 				will(returnValue(STORE_CODE));
-				
+
+				SellingContext sellingContext = context.mock(SellingContext.class);
+				allowing(sellingContext).isSatisfied(
+						with(Expectations.any(ConditionEvaluatorService.class)),
+						with(Expectations.any(TagSet.class)),
+						with(Expectations.any(String[].class)));
+				will(returnValue(RuleValidationResultEnum.SUCCESS));
+
 				allowing(rule).getSellingContext();
-				will(returnValue(null));
+				will(returnValue(sellingContext));
 				
 				allowing(rule).isWithinDateRange();
 				will(returnValue(true));
 			}
 		});
 		
-		boolean result = ruleService.isRuleValid(rule, STORE_CODE);
+		boolean result = ruleService.isRuleValid(rule, STORE_CODE).isSuccess();
 		
 		assertTrue("Result should be true if rule is in store, enabled, active, and selling context is satisfied.", result);
 	}
@@ -304,23 +318,30 @@ public class RuleServiceImpl2Test {
 				
 				allowing(rule).getStore();
 				will(returnValue(store));
-				
+
+				SellingContext sellingContext = context.mock(SellingContext.class);
+				allowing(sellingContext).isSatisfied(
+						with(Expectations.any(ConditionEvaluatorService.class)),
+						with(Expectations.any(TagSet.class)),
+						with(Expectations.any(String[].class)));
+				will(returnValue(RuleValidationResultEnum.ERROR_EXPIRED));
+
 				allowing(rule).getSellingContext();
-				will(returnValue(null));
+				will(returnValue(sellingContext));
 				
 				allowing(rule).isWithinDateRange();
 				will(returnValue(false));
 			}
 		});
+
+		RuleValidationResultEnum result = ruleService.isRuleValid(rule, STORE_CODE);
 		
-		boolean result = ruleService.isRuleValid(rule, STORE_CODE);
-		
-		assertFalse("Result should be false if rule is not within date range.", result);
+		assertEquals("Result should be ERROR_EXPIRED if rule is not within date range.", RuleValidationResultEnum.ERROR_EXPIRED, result);
 	}
 	
 	@Test
 	public void testRuleCodeIsInvalidWhenNull() {
-		boolean result = ruleService.isRuleValid(null, STORE_CODE);
+		boolean result = ruleService.isRuleValid(null, STORE_CODE).isSuccess();
 		
 		assertFalse("Null rules are not valid", result);
 	}
@@ -338,7 +359,7 @@ public class RuleServiceImpl2Test {
 			}
 		});
 		
-		boolean result = ruleService.isRuleValid(rule, STORE_CODE);
+		boolean result = ruleService.isRuleValid(rule, STORE_CODE).isSuccess();
 		
 		assertFalse("Result should be false if rule is not in store.", result);
 	}
@@ -353,7 +374,7 @@ public class RuleServiceImpl2Test {
 			}
 		});
 		
-		boolean result = ruleService.isRuleValid(rule, STORE_CODE);
+		boolean result = ruleService.isRuleValid(rule, STORE_CODE).isSuccess();
 		
 		assertFalse("Result should be false if rule is not enabled.", result);
 	}
@@ -496,30 +517,4 @@ public class RuleServiceImpl2Test {
 		ruleService.getLimitedUseRule(PROMO_CODE);
 	}
 
-	@Test
-	public void shouldReturnAllowedLimitWhenFoundForGivenRuleId() {
-		final Long ruleUidPk = 1L;
-		final Long allowedLimit = 2L;
-
-		context.checking(new Expectations() { {
-			oneOf(persistenceEngine).retrieveByNamedQuery(RULE_ALLOWED_LIMIT_FIND_BY_RULE_ID, ruleUidPk);
-			will(returnValue(Arrays.asList(allowedLimit)));
-
-		} });
-
-		assertEquals("Returned allowed limit must match expected", allowedLimit, ruleService.getAllowedLimit(ruleUidPk));
-	}
-
-	@Test
-	public void shouldReturnNullWhenAllowedLimitIsNotFoundForGivenRuleId() {
-		final Long ruleUidPk = 1L;
-
-		context.checking(new Expectations() { {
-			oneOf(persistenceEngine).retrieveByNamedQuery(RULE_ALLOWED_LIMIT_FIND_BY_RULE_ID, ruleUidPk);
-			will(returnValue(Collections.emptyList()));
-
-		} });
-
-		assertNull("Returned allowed limit must be null", ruleService.getAllowedLimit(ruleUidPk));
-	}
 }

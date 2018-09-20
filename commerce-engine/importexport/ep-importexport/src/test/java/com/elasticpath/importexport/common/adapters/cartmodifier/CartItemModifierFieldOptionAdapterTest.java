@@ -15,7 +15,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
 
 import com.elasticpath.common.dto.DisplayValue;
@@ -25,7 +25,6 @@ import com.elasticpath.domain.cartmodifier.CartItemModifierFieldOption;
 import com.elasticpath.domain.cartmodifier.CartItemModifierFieldOptionLdf;
 import com.elasticpath.domain.cartmodifier.impl.CartItemModifierFieldOptionImpl;
 import com.elasticpath.domain.cartmodifier.impl.CartItemModifierFieldOptionLdfImpl;
-import com.elasticpath.domain.misc.impl.RandomGuidImpl;
 import com.elasticpath.importexport.common.dto.catalogs.CartItemModifierFieldOptionDTO;
 
 /**
@@ -38,16 +37,16 @@ public class CartItemModifierFieldOptionAdapterTest {
 	private static final int ORDERING = 10;
 	private static final String DISPLAY_NAME_1 = "DISPLAY_NAME_1";
 
-	@InjectMocks private final CartItemModifierFieldOptionAdapter adapter = new CartItemModifierFieldOptionAdapter();
+	@InjectMocks
+	private final CartItemModifierFieldOptionAdapter adapter = new CartItemModifierFieldOptionAdapter();
 
-	@Mock private BeanFactory beanFactory;
+	@Mock
+	private BeanFactory beanFactory;
 
 	@Before
 	public void setUp() {
 		given(beanFactory.getBean(ContextIdNames.CART_ITEM_MODIFIER_OPTION_LDF))
 				.willAnswer((Answer<CartItemModifierFieldOptionLdfImpl>) invocationOnMock -> new CartItemModifierFieldOptionLdfImpl());
-		given(beanFactory.getBean(ContextIdNames.RANDOM_GUID))
-				.willAnswer((Answer<RandomGuidImpl>) invocationOnMock -> new RandomGuidImpl());
 	}
 
 	@Test

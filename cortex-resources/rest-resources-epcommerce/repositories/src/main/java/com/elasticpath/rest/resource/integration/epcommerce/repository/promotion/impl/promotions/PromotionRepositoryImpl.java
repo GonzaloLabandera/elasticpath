@@ -19,7 +19,6 @@ import com.elasticpath.domain.order.Order;
 import com.elasticpath.domain.rules.AppliedRule;
 import com.elasticpath.domain.rules.Coupon;
 import com.elasticpath.domain.rules.Rule;
-import com.elasticpath.domain.shipping.ShippingServiceLevel;
 import com.elasticpath.domain.shoppingcart.PromotionRecordContainer;
 import com.elasticpath.domain.shoppingcart.ShoppingCart;
 import com.elasticpath.domain.shoppingcart.ShoppingCartPricingSnapshot;
@@ -45,6 +44,7 @@ import com.elasticpath.rest.resource.integration.epcommerce.repository.promotion
 import com.elasticpath.rest.resource.integration.epcommerce.repository.transform.ReactiveAdapter;
 import com.elasticpath.rest.util.collection.CollectionUtil;
 import com.elasticpath.service.rules.RuleService;
+import com.elasticpath.shipping.connectivity.dto.ShippingOption;
 
 /**
  * The facade for Coupon related operations.
@@ -111,11 +111,11 @@ public class PromotionRepositoryImpl implements PromotionRepository {
 	@Override
 	@CacheResult
 	public Collection<String> getAppliedShippingPromotions(
-			final ShoppingCartPricingSnapshot pricingSnapshot, final ShippingServiceLevel shippingServiceLevel) {
-		AppliedShippingRulePredicate rulePredicate = new AppliedShippingRulePredicate(pricingSnapshot, shippingServiceLevel);
-		AppliedPromotionRuleAwareShippingOptionAdapter shippingServiceLevelAdapter
-				= new AppliedPromotionRuleAwareShippingOptionAdapter(pricingSnapshot, shippingServiceLevel);
-		return cartPromotionRuleMatcher.findMatchingAppliedRules(shippingServiceLevelAdapter, rulePredicate);
+			final ShoppingCartPricingSnapshot pricingSnapshot, final ShippingOption shippingOption) {
+		AppliedShippingRulePredicate rulePredicate = new AppliedShippingRulePredicate(pricingSnapshot, shippingOption);
+		AppliedPromotionRuleAwareShippingOptionAdapter shippingOptionAdapter
+				= new AppliedPromotionRuleAwareShippingOptionAdapter(pricingSnapshot, shippingOption);
+		return cartPromotionRuleMatcher.findMatchingAppliedRules(shippingOptionAdapter, rulePredicate);
 	}
 
 	@Override

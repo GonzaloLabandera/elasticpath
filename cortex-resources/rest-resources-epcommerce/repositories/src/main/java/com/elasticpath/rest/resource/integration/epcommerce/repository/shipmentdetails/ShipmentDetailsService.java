@@ -14,8 +14,10 @@ public interface ShipmentDetailsService {
 
 	/**
 	 * Retrieve shipment details ids for an order.
-	 * @param cartId	cart id
+	 *
+	 * @param scope the scope.
+	 * @param orderId    cart order id
 	 * @return	shipment details ids
 	 */
-	Single<Map<String, String>> getShipmentDetailsIdForOrder(String cartId);
+	Single<Map<String, String>> getShipmentDetailsIdForOrder(String scope, String orderId);
 }

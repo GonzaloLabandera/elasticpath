@@ -5,13 +5,11 @@ package com.elasticpath.extensions.search.index.status.servlet;
 
 import static org.apache.commons.lang3.CharEncoding.UTF_8;
 
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.StringReader;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.Properties;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
@@ -33,9 +31,7 @@ public final class SolrStatusCheckerHelper {
 	private static final String SOLR_QUERY_STRING = "/product/select?q=*:*";
 
 	private static final String FEATURE = "http://apache.org/xml/features/disallow-doctype-decl";
-
-	private static final String PROPERTY_FILENAME = "module.properties";
-	private static final String PROPERTY_KEY_EP_SEARCH_URL = "ep.search.url";
+	private static final String CONTEXT_URL = "/indexstatus";
 
 	private SolrStatusCheckerHelper() {
 		// Do nothing.
@@ -43,12 +39,14 @@ public final class SolrStatusCheckerHelper {
 
 	/**
 	 * Get the status of the solr server indexing process.
+	 *
+	 * @param url the url of the server.
 	 * @return status of the solr server indexing process.
 	 */
-	public static Boolean isSolrIndexingStarted() {
+	public static Boolean isSolrIndexingStarted(final String url) {
 		Boolean status = false;
 		try {
-			String response = getSolrServerResponse();
+			String response = getSolrServerResponse(url);
 			NodeList nodes = loadXmlFromString(response).getDocumentElement().getChildNodes();
 			for (int i = 0; i < nodes.getLength(); i++) {
 				Node node = nodes.item(i);
@@ -67,11 +65,11 @@ public final class SolrStatusCheckerHelper {
 		return status;
 	}
 
-	private static String getSolrServerResponse() {
+	private static String getSolrServerResponse(final String url) {
 		String responseBody = "";
 		HttpURLConnection httpURLConnection = null;
 		try {
-			URL searchURL = new URL(getSearchUrl());
+			URL searchURL = new URL(getSearchUrl(url));
 			httpURLConnection = (HttpURLConnection) searchURL.openConnection();
 			responseBody = IOUtils.toString(httpURLConnection.getInputStream(), UTF_8);
 		} catch (MalformedURLException mue) {
@@ -94,14 +92,7 @@ public final class SolrStatusCheckerHelper {
 		return builder.parse(inputSource);
 	}
 
-	private static String getSearchUrl() throws IOException {
-		Properties moduleProperties = new Properties();
-		String resourcePath = Thread.currentThread().getContextClassLoader().getResource("").getPath().concat(PROPERTY_FILENAME);
-
-		try (FileInputStream fileInputStream = new FileInputStream(resourcePath)) {
-			moduleProperties.load(fileInputStream);
-			String epSearchUrl = moduleProperties.getProperty(PROPERTY_KEY_EP_SEARCH_URL);
-			return new StringBuilder().append(epSearchUrl).append(SOLR_QUERY_STRING).toString();
-		}
+	private static String getSearchUrl(final String url) throws IOException {
+		return url.replace(CONTEXT_URL, SOLR_QUERY_STRING);
 	}
 }

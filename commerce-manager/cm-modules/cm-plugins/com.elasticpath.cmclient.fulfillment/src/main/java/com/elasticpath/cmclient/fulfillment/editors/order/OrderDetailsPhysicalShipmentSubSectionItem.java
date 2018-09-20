@@ -114,9 +114,9 @@ public class OrderDetailsPhysicalShipmentSubSectionItem implements IPropertyList
 
 	private static final int COLUMN_WIDTH_BUNDLE_NAME = 120;
 	
-	private static final int COLUMN_WIDTH_INVENTORY_STATUS = 120;
+	private static final int COLUMN_WIDTH_INVENTORY_STATUS = 100;
 
-	private static final int COLUMN_WIDTH_SKU_CODE = 84;
+	private static final int COLUMN_WIDTH_SKU_CODE = 120;
 
 	private static final int COLUMN_WIDTH_PRODUCT_NAME = 120;
 
@@ -124,13 +124,11 @@ public class OrderDetailsPhysicalShipmentSubSectionItem implements IPropertyList
 
 	private static final int COLUMN_WIDTH_LIST_PRICE = 80;
 
-	private static final int COLUMN_WIDTH_INVOICE_PRICE = 120;
+	private static final int COLUMN_WIDTH_TOTAL_PRICE = 80;
 
+	private static final int COLUMN_WIDTH_SALE_PRICE = 80;
 
-	
-	private static final int COLUMN_WIDTH_SALE_PRICE = 120;
-
-	private static final int COLUMN_WIDTH_QUANTITY = 40;
+	private static final int COLUMN_WIDTH_QUANTITY = 60;
 
 	private static final int COLUMN_WIDTH_DISCOUNT = 80;
 
@@ -267,7 +265,6 @@ public class OrderDetailsPhysicalShipmentSubSectionItem implements IPropertyList
 				COLUMN_WIDTH_SALE_PRICE);
 		skuUnitPriceColumn.setLabelProvider(getUnitPriceLabelProvider());
 
-
 		final IEpTableColumn skuQuantityColumn = shipmentOrderSkuTable.addTableColumn(FulfillmentMessages.get().ShipmentSection_Quantity,
 				COLUMN_WIDTH_QUANTITY);
 		skuQuantityColumn.setLabelProvider(getQuantityLabelProvider());
@@ -276,32 +273,24 @@ public class OrderDetailsPhysicalShipmentSubSectionItem implements IPropertyList
 					.getDataBindingContext()));
 		}
 
-		
-
-		final IEpTableColumn skuDiscountColumn = shipmentOrderSkuTable.addTableColumn(FulfillmentMessages.get().ShipmentSection_ItemDiscount,
-				COLUMN_WIDTH_DISCOUNT);
+		final IEpTableColumn skuDiscountColumn
+				= shipmentOrderSkuTable.addTableColumn(FulfillmentMessages.get().ShipmentSection_Discount, COLUMN_WIDTH_DISCOUNT);
 		skuDiscountColumn.setLabelProvider(getDiscountLabelProvider());
 		if (editMode) {
 			skuDiscountColumn.setEditingSupport(new InlineDiscountEditingSupport(shipmentOrderSkuTable.getSwtTableViewer(), editor
 					.getDataBindingContext()));
 		}
-		
-		final IEpTableColumn skuInvoicePriceColumn = shipmentOrderSkuTable.addTableColumn(FulfillmentMessages.get().ShipmentSection_InvoicePrice,
-				COLUMN_WIDTH_INVOICE_PRICE);
-		skuInvoicePriceColumn.setLabelProvider(getInvoicePriceLabelProvider());
+		final IEpTableColumn skuTotalPriceColumn
+				= shipmentOrderSkuTable.addTableColumn(FulfillmentMessages.get().ShipmentSection_TotalPrice, COLUMN_WIDTH_TOTAL_PRICE);
+		skuTotalPriceColumn.setLabelProvider(getTotalPriceLabelProvider());
 		if (editMode) {
-			final InlineOrderShipmentPriceEditingSupport editingSupport = new InlineOrderShipmentPriceEditingSupport(
-																				shipmentOrderSkuTable, 
-																				shipment, 
-																				editor.getDataBindingContext());
-			skuInvoicePriceColumn.setEditingSupport(editingSupport);
+			skuTotalPriceColumn.setEditingSupport(
+					new InlineOrderShipmentPriceEditingSupport(shipmentOrderSkuTable, shipment, editor.getDataBindingContext()));
 		}
-
-
 		mainPane.setControlModificationListener(editor);
 	}
 
-	private ColumnLabelProvider getInvoicePriceLabelProvider() {
+	private ColumnLabelProvider getTotalPriceLabelProvider() {
 		return new ColumnLabelProvider() {
 			@Override
 			public String getText(final Object element) {
@@ -313,9 +302,11 @@ public class OrderDetailsPhysicalShipmentSubSectionItem implements IPropertyList
 					return ""; //$NON-NLS-1$
 				}
 				if (pricingSnapshot.getDiscount() == null || pricingSnapshot.getDiscount().getAmount() == null) {
-					invoicePrice = unitPrice;
+					invoicePrice = unitPrice.multiply(new BigDecimal(orderSku.getQuantity()));
 				} else {
-					invoicePrice = unitPrice.subtract(pricingSnapshot.getDiscount().getAmount());
+					BigDecimal totalPrice = unitPrice.multiply(new BigDecimal(orderSku.getQuantity()));
+					BigDecimal totalDiscount = pricingSnapshot.getDiscount().getAmount();
+					invoicePrice = totalPrice.subtract(totalDiscount);
 				}
 				return invoicePrice.toString();
 			}

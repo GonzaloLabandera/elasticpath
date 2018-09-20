@@ -21,13 +21,14 @@ import org.junit.Test;
 
 import com.elasticpath.service.misc.TimeService;
 import com.elasticpath.service.order.OrderService;
-import com.elasticpath.settings.SettingsReader;
-import com.elasticpath.settings.domain.SettingValue;
+import com.elasticpath.settings.provider.SettingValueProvider;
+import com.elasticpath.settings.test.support.SimpleSettingValueProvider;
 
 /**
  * Tests {@link FailedOrdersCleanupJob}.
  */
 public class FailedOrdersCleanupJobTest {
+
 	private static final int DAY = 24;
 	private static final int MONTH = Calendar.DECEMBER;
 	private static final int YEAR = 2011;
@@ -41,9 +42,11 @@ public class FailedOrdersCleanupJobTest {
 	
 	private OrderService orderService;
 	private TimeService timeService;
-	private SettingsReader settingsReader;
 	private FailedOrdersCleanupJob job;
-	
+
+	private final SettingValueProvider<Integer> batchSizeProvider = new SimpleSettingValueProvider<>(BATCH_SIZE);
+	private final SettingValueProvider<Integer> maxDaysHistoryProvider = new SimpleSettingValueProvider<>(MAX_HISTORY_IN_DAYS);
+
 	/**
 	 * Runs before every test case.
 	 */
@@ -51,26 +54,22 @@ public class FailedOrdersCleanupJobTest {
 	public void setUp() {
 		orderService = context.mock(OrderService.class);
 		timeService = context.mock(TimeService.class);
-		settingsReader = context.mock(SettingsReader.class);
 		job = new FailedOrdersCleanupJob();
+		job.setBatchSizeProvider(batchSizeProvider);
+		job.setMaxDaysHistoryProvider(maxDaysHistoryProvider);
 		job.setOrderService(orderService);
-		job.setSettingsReader(settingsReader);
 		job.setTimeService(timeService);
 	}
-	
+
 	/**
 	 * Tests {@link FailedOrdersCleanupJob#getCandidateRemovalDate()}.
 	 */
 	@Test
 	public void testGetCandidateRemovalDate() {
 		final Date now = getDay(YEAR, MONTH, DAY); //using a fixed date instead of new Date() to make sure the code is using timeService
-		final SettingValue maxHistorySettingValue = context.mock(SettingValue.class);
+
 		context.checking(new Expectations() {
 			{
-				allowing(settingsReader).getSettingValue(FailedOrdersCleanupJob.FAILED_ORDER_MAX_HISTORY); 
-					will(returnValue(maxHistorySettingValue));
-				allowing(maxHistorySettingValue).getIntegerValue();
-					will(returnValue(MAX_HISTORY_IN_DAYS));
 				atLeast(1).of(timeService).getCurrentTime(); will(returnValue(now));
 			}
 		});
@@ -78,29 +77,19 @@ public class FailedOrdersCleanupJobTest {
 		Date candidateRemovalDate = job.getCandidateRemovalDate();
 		final Date expectedDay = getDay(YEAR, MONTH, DAY - MAX_HISTORY_IN_DAYS);
 		
-		assertTrue("candidate removal date should be '5' days before 'now' ", DateUtils.isSameDay(expectedDay, candidateRemovalDate));
+		assertTrue("candidate removal date should be '" + MAX_HISTORY_IN_DAYS + "' days before 'now' ",
+				DateUtils.isSameDay(expectedDay, candidateRemovalDate));
 	}
-	
-	
+
 	/**
 	 * Tests {@link FailedOrdersCleanupJob#getBatchSize()}.
 	 */
 	@Test
 	public void testGetBatchSize() {
-		final SettingValue batchSizeValue = context.mock(SettingValue.class);
-		context.checking(new Expectations() {
-			{
-				allowing(settingsReader).getSettingValue(FailedOrdersCleanupJob.FAILED_ORDER_BATCH_SIZE); 
-					will(returnValue(batchSizeValue));
-				allowing(batchSizeValue).getIntegerValue();
-					will(returnValue(BATCH_SIZE));
-			}
-		});
-		
 		int batchSize = job.getBatchSize();
 		assertEquals("batch size should come from the value in the settings", BATCH_SIZE, batchSize);
 	}
-	
+
 	/**
 	 * Tests {@link FailedOrdersCleanupJob#removeFailedOrders()}.
 	 */

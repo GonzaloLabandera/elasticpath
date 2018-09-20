@@ -6,6 +6,10 @@ package com.elasticpath.sellingchannel.director.impl;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -13,20 +17,16 @@ import java.util.Collections;
 import java.util.Currency;
 import java.util.List;
 
-import org.jmock.Expectations;
-import org.jmock.Sequence;
-import org.jmock.auto.Mock;
-import org.jmock.integration.junit4.JUnitRuleMockery;
-import org.junit.After;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
 
-import com.elasticpath.base.exception.EpSystemException;
 import com.elasticpath.common.dto.ShoppingItemDto;
 import com.elasticpath.common.dto.sellingchannel.impl.ShoppingItemDtoFactoryImpl;
 import com.elasticpath.commons.beanframework.BeanFactory;
-import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.catalog.BundleConstituent;
 import com.elasticpath.domain.catalog.Catalog;
 import com.elasticpath.domain.catalog.Price;
@@ -34,15 +34,12 @@ import com.elasticpath.domain.catalog.Product;
 import com.elasticpath.domain.catalog.ProductBundle;
 import com.elasticpath.domain.catalog.ProductSku;
 import com.elasticpath.domain.catalog.ProductType;
-import com.elasticpath.domain.catalog.SelectionRule;
 import com.elasticpath.domain.catalog.impl.BundleConstituentImpl;
 import com.elasticpath.domain.catalog.impl.CatalogImpl;
 import com.elasticpath.domain.catalog.impl.PriceImpl;
-import com.elasticpath.domain.catalog.impl.PricingSchemeImpl;
 import com.elasticpath.domain.catalog.impl.ProductBundleImpl;
 import com.elasticpath.domain.catalog.impl.ProductConstituentImpl;
 import com.elasticpath.domain.catalog.impl.ProductImpl;
-import com.elasticpath.domain.catalog.impl.ProductSkuConstituentImpl;
 import com.elasticpath.domain.catalog.impl.ProductSkuImpl;
 import com.elasticpath.domain.catalog.impl.ProductTypeImpl;
 import com.elasticpath.domain.catalog.impl.SelectionRuleImpl;
@@ -52,18 +49,16 @@ import com.elasticpath.domain.shoppingcart.impl.ShoppingItemImpl;
 import com.elasticpath.domain.store.Store;
 import com.elasticpath.domain.store.impl.StoreImpl;
 import com.elasticpath.money.Money;
-import com.elasticpath.money.StandardMoneyFormatter;
 import com.elasticpath.sellingchannel.ShoppingItemFactory;
-import com.elasticpath.sellingchannel.impl.ShoppingItemFactoryImpl;
-import com.elasticpath.sellingchannel.impl.ShoppingItemRecurringPriceAssemblerImpl;
 import com.elasticpath.service.catalog.ProductLookup;
 import com.elasticpath.service.catalog.ProductSkuLookup;
-import com.elasticpath.test.BeanFactoryExpectationsFactory;
+import com.elasticpath.service.catalog.impl.BundleIdentifierImpl;
 
 /**
  * Verifies the behaviour of the ShoppingItemAssembler.
  */
-@SuppressWarnings({ "PMD.TooManyMethods", "PMD.ExcessiveClassLength", "PMD.ExcessiveImports", "PMD.GodClass" })
+@SuppressWarnings({"PMD.TooManyMethods", "PMD.GodClass"})
+@RunWith(MockitoJUnitRunner.class)
 public class ShoppingItemAssemblerImplTest {
 
 	private static final String SELECTED_SKU = "selectedSku";
@@ -74,54 +69,57 @@ public class ShoppingItemAssemblerImplTest {
 
 	private static final String AAA = "AAA";
 
-	private static final String CCC = "CCC";
+	private static final String BUNDLE_CODE_1 = "BUNDLE_CODE_1";
 
-	private static final String A_BUNDLE_CODE = "A_BUNDLE_CODE";
+	private static final String BUNDLE_SKU_CODE_1 = "BUNDLE_SKU_1";
 
-	private static final String A_BUNDLE_SKU_CODE = "A_BUNDLE_SKU";
+	private static final String BUNDLE_CODE_2 = "BUNDLE_CODE_2";
 
-	private static final String A_PRODUCT_CODE = "A_PRODUCT_CODE";
+	private static final String BUNDLE_SKU_CODE_2 = "BUNDLE_SKU_2";
 
-	private static final String A_PRODUCT_SKU_CODE = "A_PRODUCT_SKU_CODE";
+	private static final String PRODUCT_CODE_1 = "PRODUCT_CODE_1";
 
-	private static final String ANOTHER_PRODUCT_SKU_CODE = "ANOTHER_PRODUCT_SKU_CODE";
+	private static final String PRODUCT_SKU_CODE_1 = "PRODUCT_SKU_CODE_1";
 
-	@Rule
-	public final JUnitRuleMockery context = new JUnitRuleMockery();
+	private static final String PRODUCT_CODE_2 = "PRODUCT_CODE_2";
+
+	private static final String PRODUCT_SKU_CODE_2 = "PRODUCT_SKU_CODE_2";
+
+	private static final String PRODUCT_CODE_3 = "PRODUCT_CODE_3";
+
+	private static final String PRODUCT_SKU_CODE_3 = "PRODUCT_SKU_CODE_3";
 
 	private static final String SKU_B = "SkuB";
 
 	private static final String CURRENCY_CAD = "CAD";
 
+	@Mock
 	private BeanFactory beanFactory;
 
-	private BeanFactoryExpectationsFactory expectationsFactory;
+	@Mock
+	private ProductLookup productLookup;
 
 	@Mock
 	private ProductSkuLookup productSkuLookup;
+
+	@Mock
+	private ShoppingItemFactory shoppingItemFactory;
+
+	@InjectMocks
+	private ShoppingItemAssemblerImpl assembler;
 
 	/**
 	 * Set up required before each test.
 	 */
 	@Before
 	public void setUp() {
-		beanFactory = context.mock(BeanFactory.class);
-		expectationsFactory = new BeanFactoryExpectationsFactory(context, beanFactory);
-		expectationsFactory.allowingBeanFactoryGetBean("productConstituent", ProductConstituentImpl.class);
-		expectationsFactory.allowingBeanFactoryGetBean("productSkuConstituent", ProductSkuConstituentImpl.class);
-		expectationsFactory.allowingBeanFactoryGetBean("shoppingItem", ShoppingItemImpl.class);
-		expectationsFactory.allowingBeanFactoryGetBean("Price", PriceImpl.class);
-		expectationsFactory.allowingBeanFactoryGetBean(ContextIdNames.PRICING_SCHEME, PricingSchemeImpl.class);
-		expectationsFactory.allowingBeanFactoryGetBean(ContextIdNames.MONEY_FORMATTER, StandardMoneyFormatter.class);
+		given(beanFactory.getBean("productConstituent")).will(invocationOnMock -> new ProductConstituentImpl());
 
-		final ShoppingItemRecurringPriceAssemblerImpl recurringPriceAssembler = new ShoppingItemRecurringPriceAssemblerImpl();
-		recurringPriceAssembler.setBeanFactory(beanFactory);
-		expectationsFactory.allowingBeanFactoryGetBean(ContextIdNames.SHOPPING_ITEM_RECURRING_PRICE_ASSEMBLER, recurringPriceAssembler);
-	}
-
-	@After
-	public void tearDown() {
-		expectationsFactory.close();
+		// Yes, this is horrible, but I can only refactor this test so far before I kill myself.
+		ShoppingItemDtoFactoryImpl shoppingItemDtoFactory = new ShoppingItemDtoFactoryImpl();
+		shoppingItemDtoFactory.setProductSkuLookup(productSkuLookup);
+		shoppingItemDtoFactory.setBundleIdentifier(new BundleIdentifierImpl());
+		assembler.setShoppingItemDtoFactory(shoppingItemDtoFactory);
 	}
 
 	/**
@@ -133,40 +131,15 @@ public class ShoppingItemAssemblerImplTest {
 		final Product product = new ProductImpl();
 		sku.setProduct(product);
 
-		final ShoppingItemAssemblerImpl assembler = new ShoppingItemAssemblerImpl() {
-
-			@Override
-			protected boolean verifySelectionRulesFollowed(final Product product, final ShoppingItemDto shoppingItemDto) {
-				return true;
-			}
-
-			@Override
-			protected boolean verifyDtoStructureEqualsBundleStructure(final Product product, final ShoppingItemDto dtoNode) {
-				return true;
-			}
-
-			@Override
-			ProductSku getProductSku(final String currentSkuGuid) {
-				// not testing this part
-				return sku;
-			}
-		};
-
-		final ShoppingItemFactory cartItemFactory = context.mock(ShoppingItemFactory.class);
-		assembler.setShoppingItemFactory(cartItemFactory);
-
 		final Catalog catalog = new CatalogImpl();
 		final Store store = new StoreImpl();
 		store.setCatalog(catalog);
 
 		final ShoppingItem shoppingItem = new ShoppingItemImpl();
 		shoppingItem.setGuid("GUID");
-		context.checking(new Expectations() {
-			{
-				oneOf(cartItemFactory).createShoppingItem(sku, null, 2, 0, Collections.<String, String>emptyMap());
-				will(returnValue(shoppingItem));
-			}
-		});
+
+		given(productSkuLookup.findBySkuCode(anyString())).willReturn(sku);
+		given(shoppingItemFactory.createShoppingItem(sku, null, 2, 0, Collections.emptyMap())).willReturn(shoppingItem);
 
 		final ShoppingItemDto shoppingItemDto = new ShoppingItemDto(SKU_B, 2);
 		shoppingItemDto.setGuid("GUID");
@@ -174,277 +147,49 @@ public class ShoppingItemAssemblerImplTest {
 
 		final ShoppingItem actualShoppingItem = assembler.createShoppingItem(shoppingItemDto);
 
+		verify(shoppingItemFactory).createShoppingItem(sku, null, 2, 0, Collections.emptyMap());
+
 		assertEquals("The cartItem from the delegate should equal the cart item from the factory", shoppingItem, actualShoppingItem);
 
 	}
 
-	/**
-	 * Test verification of bundle selection rules succeeds with a nested bundle. Root bundle is select 1, and nested bundle is select 1, and nested
-	 * constituent (non bundle) is selected.
-	 */
-	@Test
-	public void testValidationOfNestedBundleSelectOnlyConstituentSucceed() {
-		final ProductBundle productBundle = createBundleWithThreeConstituents();
-		productBundle.setSelectionRule(new SelectionRuleImpl(1));
-
-		final ProductBundle nestedProductBundle = createBundleWithThreeConstituents();
-		nestedProductBundle.setSelectionRule(new SelectionRuleImpl(1));
-
-		productBundle.addConstituent(createBundleConstituentFrom(nestedProductBundle));
-
-		final ShoppingItemDto shoppingItemDto = createDtoWithThreeConstituentsAllSelected();
-		shoppingItemDto.getConstituents().get(0).setSelected(false);
-		shoppingItemDto.getConstituents().get(1).setSelected(false);
-		shoppingItemDto.getConstituents().get(2).setSelected(false);
-
-		final ShoppingItemDto nestedShoppingItemDto = createDtoWithThreeConstituentsAllSelected();
-		nestedShoppingItemDto.getConstituents().get(0).setSelected(false);
-		nestedShoppingItemDto.getConstituents().get(1).setSelected(false);
-		shoppingItemDto.addConstituent(nestedShoppingItemDto);
-
-		final ShoppingItemAssemblerImpl assembler = getAssemblerForSelectionRuleTesting();
-		assertTrue(assembler.verifySelectionRulesFollowed(productBundle, shoppingItemDto));
-	}
-
-	/**
-	 * Test verification of bundle selection rules succeeds with a nested bundle. Root bundle is select 1, root-level constituent is selected and
-	 * nested bundle constituents are not selected.
-	 */
-	@Test
-	public void testValidationOfNestedBundleSelectOne() {
-		final ProductBundle productBundle = createBundleWithThreeConstituents();
-		productBundle.setSelectionRule(new SelectionRuleImpl(1));
-
-		final ProductBundle nestedProductBundle = createBundleWithThreeConstituents();
-		nestedProductBundle.setSelectionRule(new SelectionRuleImpl(1));
-
-		productBundle.addConstituent(createBundleConstituentFrom(nestedProductBundle));
-
-		final ShoppingItemDto shoppingItemDto = createDtoWithThreeConstituentsAllSelected();
-		shoppingItemDto.getConstituents().get(0).setSelected(false);
-		shoppingItemDto.getConstituents().get(1).setSelected(false);
-		shoppingItemDto.getConstituents().get(2).setSelected(true);
-
-		final ShoppingItemDto nestedShoppingItemDto = createDtoWithThreeConstituentsAllSelected();
-		nestedShoppingItemDto.setSelected(false);
-		nestedShoppingItemDto.getConstituents().get(0).setSelected(false);
-		nestedShoppingItemDto.getConstituents().get(1).setSelected(false);
-		nestedShoppingItemDto.getConstituents().get(2).setSelected(false);
-		shoppingItemDto.addConstituent(nestedShoppingItemDto);
-
-		final ShoppingItemAssemblerImpl assembler = getAssemblerForSelectionRuleTesting();
-		assertTrue(assembler.verifySelectionRulesFollowed(productBundle, shoppingItemDto));
-	}
-
-	/**
-	 * Test verification of bundle selection rules succeeds with a nested bundle. Root bundle is select 1, and nested bundle is select 1, no root
-	 * bundle constituents are selected and ONE nested bundle constituent is selected.
-	 */
-	@Test
-	public void testValidationOfNestedBundleSelectOneSucceeds() {
-		final ProductBundle productBundle = createBundleWithThreeConstituents();
-		productBundle.setSelectionRule(new SelectionRuleImpl(1));
-
-		final ProductBundle nestedProductBundle = createBundleWithThreeConstituents();
-		nestedProductBundle.setSelectionRule(new SelectionRuleImpl(1));
-
-		productBundle.addConstituent(createBundleConstituentFrom(nestedProductBundle));
-
-		final ShoppingItemDto shoppingItemDto = createDtoWithThreeConstituentsAllSelected();
-		shoppingItemDto.getConstituents().get(2).setSelected(false);
-		shoppingItemDto.getConstituents().get(1).setSelected(false);
-		shoppingItemDto.getConstituents().get(0).setSelected(false);
-
-		final ShoppingItemDto nestedShoppingItemDto = createDtoWithThreeConstituentsAllSelected();
-		nestedShoppingItemDto.getConstituents().get(0).setSelected(false);
-		nestedShoppingItemDto.getConstituents().get(1).setSelected(false);
-		shoppingItemDto.addConstituent(nestedShoppingItemDto);
-
-		final ShoppingItemAssemblerImpl assembler = getAssemblerForSelectionRuleTesting();
-		assertTrue(assembler.verifySelectionRulesFollowed(productBundle, shoppingItemDto));
-	}
-
-	/**
-	 * Test verification of bundle selection rules fails with a nested bundle. Root bundle is select 1, and nested bundle is select 1, no root bundle
-	 * constituents are selected and ALL nested bundle constituents are selected.
-	 */
-	@Test
-	public void testValidationOfNestedBundleSelectOneFail() {
-		final ProductBundle productBundle = createBundleWithThreeConstituents();
-		productBundle.setSelectionRule(new SelectionRuleImpl(1));
-
-		final ProductBundle nestedProductBundle = createBundleWithThreeConstituents();
-		nestedProductBundle.setSelectionRule(new SelectionRuleImpl(1));
-
-		productBundle.addConstituent(createBundleConstituentFrom(nestedProductBundle));
-
-		final ShoppingItemDto shoppingItemDto = createDtoWithThreeConstituentsAllSelected();
-		shoppingItemDto.getConstituents().get(2).setSelected(false);
-		shoppingItemDto.getConstituents().get(1).setSelected(false);
-		shoppingItemDto.getConstituents().get(0).setSelected(false);
-
-		final ShoppingItemDto nestedShoppingItemDto = createDtoWithThreeConstituentsAllSelected();
-		shoppingItemDto.addConstituent(nestedShoppingItemDto);
-
-		final ShoppingItemAssemblerImpl assembler = getAssemblerForSelectionRuleTesting();
-		assertFalse(assembler.verifySelectionRulesFollowed(productBundle, shoppingItemDto));
-	}
-
-	/**
-	 * Test that if a bundle is not selected, none of its children should be selected.
-	 */
-	@Test
-	public void testSelectedChildrenInNonSelectedParentFails() {
-		final ProductBundle productBundle = createBundleWithThreeConstituents();
-		productBundle.setSelectionRule(new SelectionRuleImpl(1));
-
-		final ProductBundle nestedProductBundle = createBundleWithThreeConstituents();
-		nestedProductBundle.setSelectionRule(new SelectionRuleImpl(1));
-
-		productBundle.addConstituent(createBundleConstituentFrom(nestedProductBundle));
-
-		final ShoppingItemDto shoppingItemDto = createDtoWithThreeConstituentsAllSelected();
-		shoppingItemDto.getConstituents().get(1).setSelected(false);
-		shoppingItemDto.getConstituents().get(0).setSelected(false);
-
-		final ShoppingItemDto nestedShoppingItemDto = createDtoWithThreeConstituentsAllSelected();
-		nestedShoppingItemDto.setSelected(false);
-
-		shoppingItemDto.addConstituent(nestedShoppingItemDto);
-
-		final ShoppingItemAssemblerImpl assembler = getAssemblerForSelectionRuleTesting();
-		assertFalse(assembler.verifySelectionRulesFollowed(productBundle, shoppingItemDto));
-	}
-
-	/**
-	 * Test verification of bundle selection rules fails with no nesting, select all.
-	 */
-	@Test
-	public void testValidationForBundleWithNoNestingSelectAllFail() {
-		final ProductBundle productBundle = createBundleWithThreeConstituents();
-		productBundle.setSelectionRule(new SelectionRuleImpl(0));
-		final ShoppingItemDto shoppingItemDto = createDtoWithThreeConstituentsAllSelected();
-		shoppingItemDto.getConstituents().get(1).setSelected(false);
-
-		final ShoppingItemAssemblerImpl assembler = getAssemblerForSelectionRuleTesting();
-		assertFalse(assembler.verifySelectionRulesFollowed(productBundle, shoppingItemDto));
-	}
-
-	/**
-	 * Test verification of bundle selection rules fails with no nesting, select 1.
-	 */
-	@Test
-	public void testValidationForBundleWithNoNestingSelectOneFail() {
-		final ProductBundle productBundle = createBundleWithThreeConstituents();
-		productBundle.setSelectionRule(new SelectionRuleImpl(1));
-		final ShoppingItemDto shoppingItemDto = createDtoWithThreeConstituentsAllSelected();
-		shoppingItemDto.getConstituents().get(1).setSelected(false);
-
-		final ShoppingItemAssemblerImpl assembler = getAssemblerForSelectionRuleTesting();
-		assertFalse(assembler.verifySelectionRulesFollowed(productBundle, shoppingItemDto));
-	}
-
-	/**
-	 * Test verification of bundle selection rules succeeds with no nesting, select 1.
-	 */
-	@Test
-	public void testValidationForBundleWithNoNestingSelectOne() {
-		final ProductBundle productBundle = createBundleWithThreeConstituents();
-		productBundle.setSelectionRule(new SelectionRuleImpl(1));
-		final ShoppingItemDto shoppingItemDto = createDtoWithThreeConstituentsAllSelected();
-		shoppingItemDto.getConstituents().get(1).setSelected(false);
-		shoppingItemDto.getConstituents().get(2).setSelected(false);
-
-		final ShoppingItemAssemblerImpl assembler = getAssemblerForSelectionRuleTesting();
-		assertTrue(assembler.verifySelectionRulesFollowed(productBundle, shoppingItemDto));
-	}
-
-	/**
-	 * Tests verification of bundle selection rules succeeds with no nesting, select all.
-	 */
-	@Test
-	public void testCreateShoppingItemVerifiesBundleSelectionRules() {
-		final ProductBundle productBundle = createBundleWithThreeConstituents();
-		productBundle.setSelectionRule(new SelectionRuleImpl(0));
-		final ShoppingItemDto shoppingItemDto = createDtoWithThreeConstituentsAllSelected();
-		final ShoppingItemAssemblerImpl assembler = getAssemblerForSelectionRuleTesting();
-		assertTrue(assembler.verifySelectionRulesFollowed(productBundle, shoppingItemDto));
-	}
-
 	private ShoppingItemDto createDtoWithThreeConstituentsAllSelected() {
-		final ShoppingItemDto rootDto = new ShoppingItemDto("productCode1", 1);
-		rootDto.addConstituent(createConstituentDto(true));
-		rootDto.addConstituent(createConstituentDto(true));
-		rootDto.addConstituent(createConstituentDto(true));
+		final ShoppingItemDto rootDto = new ShoppingItemDto(BUNDLE_SKU_CODE_1, 1);
+		rootDto.addConstituent(createConstituentDto(PRODUCT_SKU_CODE_1, true));
+		rootDto.addConstituent(createConstituentDto(PRODUCT_SKU_CODE_2, true));
+		rootDto.addConstituent(createConstituentDto(PRODUCT_SKU_CODE_3, true));
 		return rootDto;
 	}
 
-	private ShoppingItemDto createConstituentDto(final boolean selected) {
-		final ShoppingItemDto dto = new ShoppingItemDto("skuCode", 1);
+	private ShoppingItemDto createConstituentDto(final String skuCode, final boolean selected) {
+		final ShoppingItemDto dto = new ShoppingItemDto(skuCode, 1);
 		dto.setSelected(selected);
 		return dto;
 	}
 
-	private BundleConstituent createBundleConstituentFrom(final Product product) {
-		final BundleConstituentImpl constituentBundle = new BundleConstituentImpl();
-		constituentBundle.setConstituent(product);
-		constituentBundle.setQuantity(1);
-		return constituentBundle;
-	}
+	private BundleConstituent createBundleConstituentFrom(final Product product, final int quantity, final int ordering) {
+		given(shoppingItemFactory.createShoppingItem(product.getDefaultSku(), null, quantity, ordering, Collections.emptyMap()))
+				.willReturn(createFakeShoppingItem(product.getDefaultSku().getGuid()));
+		given(productLookup.findByGuid(product.getCode())).willReturn(product);
+		final BundleConstituentImpl constituentBundle = new BundleConstituentImpl() {
+			private static final long serialVersionUID = 1;
 
-	private BundleConstituent createBundleConstituentFromSku(final ProductSku productSku) {
-		final BundleConstituentImpl constituentBundle = new BundleConstituentImpl();
-		constituentBundle.setConstituent(productSku);
-		constituentBundle.setQuantity(1);
+			@Override
+			protected <T> T getBean(final String beanName) {
+				return beanFactory.getBean(beanName);
+			}
+		};
+		constituentBundle.setConstituent(product);
+		constituentBundle.setQuantity(quantity);
 		return constituentBundle;
 	}
 
 	private ProductBundle createBundleWithThreeConstituents() {
-		final ProductBundle rootBundle = new ProductBundleImpl();
-		rootBundle.addConstituent(createBundleConstituentFrom(null));
-		rootBundle.addConstituent(createBundleConstituentFrom(null));
-		rootBundle.addConstituent(createBundleConstituentFrom(null));
+		final ProductBundle rootBundle = createProductBundleWithSkuCode(BUNDLE_CODE_1, BUNDLE_SKU_CODE_1);
+		rootBundle.addConstituent(createBundleConstituentFrom(createProductWithSkuCode(PRODUCT_CODE_1, PRODUCT_SKU_CODE_1), 1, 0));
+		rootBundle.addConstituent(createBundleConstituentFrom(createProductWithSkuCode(PRODUCT_CODE_2, PRODUCT_SKU_CODE_2), 1, 1));
+		rootBundle.addConstituent(createBundleConstituentFrom(createProductWithSkuCode(PRODUCT_CODE_3, PRODUCT_SKU_CODE_3), 1, 2));
 		return rootBundle;
-	}
-
-	/**
-	 * @return
-	 */
-	private ShoppingItemAssemblerImpl getAssemblerForSelectionRuleTesting() {
-		final ShoppingItemAssemblerImpl assembler = new ShoppingItemAssemblerImpl() {
-			@Override
-			ProductSku retrieveSkuForShoppingItem(final BundleConstituent bundleItem, final ShoppingItemDto thisShoppingItemDto) {
-				// not testing this part
-				return new ProductSkuImpl();
-			}
-
-			@Override
-			protected ProductSku getSkuFromProduct(final Product product, final String skuCode) {
-				return new ProductSkuImpl();
-			}
-
-			@Override
-			public ShoppingItemFactory getShoppingItemFactory() {
-				return new ShoppingItemFactoryImpl() {
-					@Override
-					protected ShoppingItem createShoppingItemBean() {
-						return new ShoppingItemImpl();
-					}
-
-					@Override
-					protected void sanityCheck(final ProductSku sku, final Price price) {
-						return;
-					}
-
-					@Override
-					protected int getMinQuantity(final ProductSku sku) {
-						return 1;
-					}
-				};
-			}
-
-		};
-		return assembler;
 	}
 
 	/**
@@ -453,71 +198,39 @@ public class ShoppingItemAssemblerImplTest {
 	 */
 	@Test
 	public void testTraverseAllChildren() {
-
 		final ShoppingItemDto rootShoppingItemDto = new ShoppingItemDto("sku", 1);
-		final ShoppingItemDto childDto1 = new ShoppingItemDto("childDto1", 2);
-		final ShoppingItemDto childDto2 = new ShoppingItemDto("childDto2", 3);
-		final ShoppingItemDto childDto3 = new ShoppingItemDto("childDto3", 4);
+		final ShoppingItemDto childDto1 = new ShoppingItemDto(PRODUCT_SKU_CODE_1, 2);
+		final ShoppingItemDto childDto2 = new ShoppingItemDto(PRODUCT_SKU_CODE_2, 3);
+		final ShoppingItemDto childDto3 = new ShoppingItemDto(PRODUCT_SKU_CODE_3, 4);
 
 		rootShoppingItemDto.addConstituent(childDto1);
 		rootShoppingItemDto.addConstituent(childDto2);
 		rootShoppingItemDto.addConstituent(childDto3);
 
-		final ProductBundle bundle = context.mock(ProductBundle.class);
+		final ProductBundle bundle = mock(ProductBundle.class);
 
 		final List<BundleConstituent> bundleConstituents = new ArrayList<>();
 
-		final BundleConstituent const1 = new BundleConstituentImpl();
-		final Product productA = new ProductImpl();
-		const1.setConstituent(productA);
-		const1.setQuantity(1);
+		final Product productA = createProductWithSkuCode(PRODUCT_CODE_1, PRODUCT_SKU_CODE_1);
+		final BundleConstituent const1 = createBundleConstituentFrom(productA, 1, 0);
 		bundleConstituents.add(const1);
 
-		final BundleConstituent const2 = new BundleConstituentImpl();
-		final Product productB = new ProductImpl();
-		const2.setConstituent(productB);
-		const2.setQuantity(1);
+		final Product productB = createProductWithSkuCode(PRODUCT_CODE_2, PRODUCT_SKU_CODE_2);
+		final BundleConstituent const2 = createBundleConstituentFrom(productB, 1, 1);
 		bundleConstituents.add(const2);
 
-		final BundleConstituent const3 = new BundleConstituentImpl();
-		final Product productC = new ProductImpl();
-		const3.setConstituent(productC);
-		const3.setQuantity(Integer.valueOf(1));
+		final Product productC = createProductWithSkuCode(PRODUCT_CODE_3, PRODUCT_SKU_CODE_3);
+		final BundleConstituent const3 = createBundleConstituentFrom(productC, 1, 2);
 		bundleConstituents.add(const3);
 
-		final ProductSku productSku = context.mock(ProductSku.class);
-		final ShoppingItemAssemblerImpl assembler = new ShoppingItemAssemblerImpl() {
-			@Override
-			ProductSku retrieveSkuForShoppingItem(final BundleConstituent bundleItem, final ShoppingItemDto thisShoppingItemDto) {
-				return productSku;
-			}
-		};
-		final ShoppingItemFactory shoppingItemFactory = context.mock(ShoppingItemFactory.class);
-		assembler.setShoppingItemFactory(shoppingItemFactory);
+		given(bundle.getConstituents()).willReturn(bundleConstituents);
 
-		final Sequence visitSequence = context.sequence("visitSequence");
-		final SelectionRule selectionRule = context.mock(SelectionRule.class);
-
-		context.checking(new Expectations() {
-			{
-				allowing(bundle).getConstituents();
-				will(returnValue(bundleConstituents));
-				allowing(bundle).getSelectionRule();
-				will(returnValue(selectionRule));
-				allowing(selectionRule).getParameter();
-				will(returnValue(0));
-				oneOf(shoppingItemFactory).createShoppingItem(productSku, null, 1, 0, Collections.<String, String>emptyMap());
-				inSequence(visitSequence);
-				oneOf(shoppingItemFactory).createShoppingItem(productSku, null, 1, 1, Collections.<String, String>emptyMap());
-				inSequence(visitSequence);
-				oneOf(shoppingItemFactory).createShoppingItem(productSku, null, 1, 2, Collections.<String, String>emptyMap());
-				inSequence(visitSequence);
-
-			}
-		});
 		final ShoppingItem parent = new ShoppingItemImpl();
 		assembler.createShoppingItemTree(bundle, rootShoppingItemDto, parent, 1);
 
+		verify(shoppingItemFactory).createShoppingItem(productA.getDefaultSku(), null, 1, 0, Collections.emptyMap());
+		verify(shoppingItemFactory).createShoppingItem(productB.getDefaultSku(), null, 1, 1, Collections.emptyMap());
+		verify(shoppingItemFactory).createShoppingItem(productC.getDefaultSku(), null, 1, 2, Collections.emptyMap());
 	}
 
 	/**
@@ -529,56 +242,35 @@ public class ShoppingItemAssemblerImplTest {
 		//
 		// Create ShoppingItemDto Tree
 		//
-		final ShoppingItemDto rootShoppingItemDto = new ShoppingItemDto("sku", 1);
+		final ShoppingItemDto rootShoppingItemDto = new ShoppingItemDto(BUNDLE_SKU_CODE_1, 1);
 
-		final ShoppingItemDto childShoppingItemDto = new ShoppingItemDto("child", 2);
+		final ShoppingItemDto childShoppingItemDto = new ShoppingItemDto(BUNDLE_SKU_CODE_2, 2);
 		childShoppingItemDto.setSelected(true);
 		rootShoppingItemDto.addConstituent(childShoppingItemDto);
 
-		final ShoppingItemDto grandChildShoppingItemDto = new ShoppingItemDto("grandchild", 3);
+		final ShoppingItemDto grandChildShoppingItemDto = new ShoppingItemDto(PRODUCT_SKU_CODE_1, 3);
 		grandChildShoppingItemDto.setSelected(true);
 		childShoppingItemDto.addConstituent(grandChildShoppingItemDto);
 		//
 		// Create ProductBundle Tree
 		//
-		final ProductBundle rootBundle = new ProductBundleImpl();
+		final ProductBundle rootBundle = createProductBundleWithSkuCode(BUNDLE_CODE_1, BUNDLE_SKU_CODE_1);
 		rootBundle.setSelectionRule(new SelectionRuleImpl(0));
-		final ProductBundle childBundle = new ProductBundleImpl();
+		final ProductBundle childBundle = createProductBundleWithSkuCode(BUNDLE_CODE_2, BUNDLE_SKU_CODE_2);
 		childBundle.setSelectionRule(new SelectionRuleImpl(0));
-		final Product grandChildProduct = new ProductImpl();
-		rootBundle.addConstituent(createBundleConstituentFrom(childBundle));
-		childBundle.addConstituent(createBundleConstituentFrom(grandChildProduct));
+		final Product grandChildProduct = createProductWithSkuCode(PRODUCT_CODE_1, PRODUCT_SKU_CODE_1);
+		rootBundle.addConstituent(createBundleConstituentFrom(childBundle, 1, 0));
+		childBundle.addConstituent(createBundleConstituentFrom(grandChildProduct, 1, 0));
 
 		//
 		// Create Assembler implementation for testing
 		//
-		final ProductSku productSku = context.mock(ProductSku.class);
-		final ShoppingItemAssemblerImpl assembler = new ShoppingItemAssemblerImpl() {
-			@Override
-			ProductSku retrieveSkuForShoppingItem(final BundleConstituent bundleItem, final ShoppingItemDto thisShoppingItemDto) {
-				return productSku;
-			}
-		};
-
-		final ShoppingItemFactory shoppingItemFactory = context.mock(ShoppingItemFactory.class);
-		assembler.setShoppingItemFactory(shoppingItemFactory);
-
-		final Sequence visitSequence = context.sequence("visitSequence");
-
-		context.checking(new Expectations() {
-			{
-				// The root ShoppingItem should be passed in, so it won't have to be created
-				oneOf(shoppingItemFactory).createShoppingItem(productSku, null, 1, 0, Collections.<String, String>emptyMap());
-				will(returnValue(new ShoppingItemImpl()));
-				inSequence(visitSequence);
-				oneOf(shoppingItemFactory).createShoppingItem(productSku, null, 1, 0, Collections.<String, String>emptyMap());
-				will(returnValue(new ShoppingItemImpl()));
-				inSequence(visitSequence);
-			}
-		});
+		// The root ShoppingItem should be passed in, so it won't have to be created
 		final ShoppingItem parent = new ShoppingItemImpl();
 		assembler.createShoppingItemTree(rootBundle, rootShoppingItemDto, parent, 1);
 
+		verify(shoppingItemFactory).createShoppingItem(childBundle.getDefaultSku(), null, 1, 0, Collections.emptyMap());
+		verify(shoppingItemFactory).createShoppingItem(grandChildProduct.getDefaultSku(), null, 1, 0, Collections.emptyMap());
 	}
 
 	/**
@@ -587,8 +279,6 @@ public class ShoppingItemAssemblerImplTest {
 	 */
 	@Test
 	public void testProcessNodeMultipleSku() {
-		final ShoppingItemAssemblerImpl assembler = new ShoppingItemAssemblerImpl();
-
 		final ProductSku productSku = new ProductSkuImpl();
 		productSku.setGuid(AAA);
 
@@ -605,110 +295,9 @@ public class ShoppingItemAssemblerImplTest {
 		productSku.setProduct(multiSkuProductWithSkus);
 		multiSkuProductWithSkus.setProductType(productType);
 
-		final ProductLookup productLookup = context.mock(ProductLookup.class);
-		assembler.setProductLookup(productLookup);
-		final ShoppingItemFactory shoppingItemFactory = context.mock(ShoppingItemFactory.class);
-		assembler.setShoppingItemFactory(shoppingItemFactory);
-
-		context.checking(new Expectations() {
-			{
-				oneOf(productLookup).findByGuid(multiSkuProductWithoutSkus.getCode());
-				will(returnValue(multiSkuProductWithSkus));
-			}
-		});
+		given(productLookup.findByGuid(multiSkuProductWithoutSkus.getCode())).willReturn(multiSkuProductWithSkus);
 
 		assembler.getSkuFromProduct(multiSkuProductWithoutSkus, AAA);
-
-	}
-
-	/**
-	 * Test that if a DTO for a bundle product contains reference to a sku that is not in the bundle, then the structure is deemed to be invalid.
-	 */
-	@Test
-	public void testDtoConstituentNotInBundleInvalid() {
-		// Create a bundle with a bundle with a product - each has a sku
-		final ProductBundle rootBundle = new ProductBundleImpl();
-		rootBundle.setCode(AAA);
-		final ProductBundle nestedBundle = new ProductBundleImpl();
-		nestedBundle.setCode(BBB);
-		final Product leafProduct = new ProductImpl();
-		leafProduct.setCode(CCC);
-		final BundleConstituent rootBundleConstituent = new BundleConstituentImpl();
-		rootBundleConstituent.setConstituent(nestedBundle);
-		rootBundle.addConstituent(rootBundleConstituent);
-		final BundleConstituent nestedBundleConstituent = new BundleConstituentImpl();
-		nestedBundleConstituent.setConstituent(leafProduct);
-		nestedBundle.addConstituent(nestedBundleConstituent);
-		final ProductSku rootSku = new ProductSkuImpl();
-		rootSku.setGuid(AAA);
-		rootBundle.addOrUpdateSku(rootSku);
-		final ProductSku nestedSku = new ProductSkuImpl();
-		nestedSku.setGuid(BBB);
-		nestedBundle.addOrUpdateSku(nestedSku);
-		final ProductSku leafSku = new ProductSkuImpl();
-		leafSku.setGuid(CCC);
-		leafProduct.addOrUpdateSku(leafSku);
-		// Create a ShoppingItemDto that mirrors the bundle tree, with a different skucode for the leaf
-		final ShoppingItemDto rootDto = new ShoppingItemDto(AAA, 1);
-		final ShoppingItemDto nestedDto = new ShoppingItemDto(BBB, 1);
-		final ShoppingItemDto leafDto = new ShoppingItemDto("SOMETHING_ELSE", 1);
-		rootDto.addConstituent(nestedDto);
-		nestedDto.addConstituent(leafDto);
-
-		final ShoppingItemAssemblerImpl assembler = new ShoppingItemAssemblerImpl();
-		assertFalse(assembler.verifyDtoStructureEqualsBundleStructure(rootBundle, rootDto));
-	}
-
-	/**
-	 * Test that if a DTO for a non-bundle product specifies a skucode for a sku that doesn't exist in the product, then structure is deemed to be
-	 * invalid.
-	 */
-	@Test
-	public void testDtoSkuNotInBundleInvalid() {
-		final ShoppingItemAssemblerImpl assembler = new ShoppingItemAssemblerImpl() {
-			@Override
-			protected ProductSku getSkuFromProduct(final Product product, final String skuCode) {
-				return null;
-			}
-		};
-
-		final Product product = new ProductImpl();
-		product.setCode(AAA);
-
-		final ShoppingItemDto dto = new ShoppingItemDto(BBB, 1);
-		dto.setProductCode(AAA);
-
-		assertFalse(assembler.verifyDtoStructureEqualsBundleStructure(product, dto));
-	}
-
-	/**
-	 * Tests that if the DTO structure is deemed to be invalid then an exception is thrown.
-	 */
-	@Test(expected = EpSystemException.class)
-	public void testDtoStructureInvalidThrowsException() {
-		final ProductSku productSku = new ProductSkuImpl();
-		final Product product = new ProductImpl();
-		product.addOrUpdateSku(productSku);
-
-		final ShoppingItemDto dto = new ShoppingItemDto(AAA, 1);
-
-		final ShoppingItemAssemblerImpl assembler = new ShoppingItemAssemblerImpl() {
-			@Override
-			ProductSku getProductSku(final String currentSkuGuid) {
-				return productSku;
-			}
-
-			@Override
-			protected boolean verifySelectionRulesFollowed(final Product product, final ShoppingItemDto shoppingItemDto) {
-				return true;
-			}
-
-			@Override
-			protected boolean verifyDtoStructureEqualsBundleStructure(final Product product, final ShoppingItemDto dtoNode) {
-				return false;
-			}
-		};
-		assembler.createShoppingItem(dto);
 	}
 
 	/**
@@ -733,12 +322,8 @@ public class ShoppingItemAssemblerImplTest {
 		nonSelectedSku.setSkuCode(nonSelectedSkuGuid);
 		nonSelectedProduct.addOrUpdateSku(nonSelectedSku);
 
-		final BundleConstituent selectedBundleItem = new BundleConstituentImpl();
-		selectedBundleItem.setQuantity(1);
-		selectedBundleItem.setConstituent(selectedProduct);
-		final BundleConstituent nonSelectedBundleItem = new BundleConstituentImpl();
-		nonSelectedBundleItem.setQuantity(1);
-		nonSelectedBundleItem.setConstituent(nonSelectedProduct);
+		final BundleConstituent selectedBundleItem = createBundleConstituentFrom(selectedProduct, 1, 0);
+		final BundleConstituent nonSelectedBundleItem = createBundleConstituentFrom(nonSelectedProduct, 1, 1);
 
 		final ProductBundle bundle = new ProductBundleImpl();
 		bundle.setSelectionRule(new SelectionRuleImpl(1));
@@ -756,11 +341,10 @@ public class ShoppingItemAssemblerImplTest {
 		shoppingItem.setSkuGuid(bundleSku.getGuid());
 		final ShoppingItem nestedShoppingItem = new TestShoppingItemImpl();
 		nestedShoppingItem.setSkuGuid(selectedSku.getGuid());
+		nestedShoppingItem.setBundleConstituent(true);
 		shoppingItem.addChild(nestedShoppingItem);
+
 		// Assemble the ShoppingItemDto and check it.
-		final ShoppingItemAssemblerImpl assembler = new ShoppingItemAssemblerImpl();
-		assembler.setShoppingItemDtoFactory(new ShoppingItemDtoFactoryImpl());
-		assembler.setProductSkuLookup(productSkuLookup);
 		final ShoppingItemDto dto = assembler.assembleShoppingItemDtoFrom(shoppingItem);
 		assertEquals("DTO should have the same number of constituents as the Bundle", dto.getConstituents().size(), bundle.getConstituents().size());
 		assertEquals("DTO's first sku should be the same as the bundle's first sku.", selectedSkuGuid, dto.getConstituents().get(0).getSkuCode());
@@ -770,26 +354,6 @@ public class ShoppingItemAssemblerImplTest {
 		assertFalse("DTO's second sku should not be selected", dto.getConstituents().get(1).isSelected());
 	}
 
-	/** Test shopping item object overrides getPrice and makeMoney. */
-	class TestShoppingItemImpl extends ShoppingItemImpl {
-		private static final long serialVersionUID = 1L;
-
-		@Override
-		protected Money makeMoney(final BigDecimal amount) {
-			if (amount == null) {
-				return null;
-			}
-			return Money.valueOf(amount, getCurrency());
-		};
-
-		@Override
-		public Price getPrice() {
-			final Price price = new PriceImpl();
-			price.setCurrency(getCurrency());
-			return price;
-		}
-	}
-
 	/**
 	 * Test that when a ShoppingItemDto is configured from a ShoppingItem, the prices and the UIDPK are copied over (recursively through the tree).
 	 * Also check that any items in the ShoppingItem are marked as "selected" on the ShoppingItemDto. A simple parent->child->grandchild is tested to
@@ -797,8 +361,6 @@ public class ShoppingItemAssemblerImplTest {
 	 */
 	@Test
 	public void testConfigureShoppingItemDto() {
-		// ShoppingItemDto rootDto = new ShoppingItemDto(AAA, 1);
-
 		// Create grandChild product/sku
 		final ProductSku grandChildProductSku = new ProductSkuImpl();
 		final Product grandChildProduct = new ProductImpl();
@@ -813,7 +375,7 @@ public class ShoppingItemAssemblerImplTest {
 		childProductSku.setSkuCode(AAA);
 		childProductSku.setGuid(AAA);
 		childProduct.addOrUpdateSku(childProductSku);
-		final BundleConstituent childConstituent = createBundleConstituentFrom(grandChildProduct);
+		final BundleConstituent childConstituent = createBundleConstituentFrom(grandChildProduct, 1, 0);
 		childProduct.addConstituent(childConstituent);
 		// Create root bundle/sku
 		final ProductSku rootSku = new ProductSkuImpl();
@@ -822,7 +384,7 @@ public class ShoppingItemAssemblerImplTest {
 		final ProductBundle productBundle = new ProductBundleImpl();
 		productBundle.setCode("ProdA");
 		productBundle.addOrUpdateSku(rootSku);
-		productBundle.addConstituent(createBundleConstituentFrom(childProduct));
+		productBundle.addConstituent(createBundleConstituentFrom(childProduct, 1, 0));
 
 		// Create shopping item tree
 		final ShoppingItem rootItem = new TestShoppingItemImpl();
@@ -834,41 +396,29 @@ public class ShoppingItemAssemblerImplTest {
 		childItem.setSkuGuid(childProductSku.getGuid());
 		childItem.setUidPk(SHOPPING_ITEM_UIDPK + 1);
 		childItem.setGuid("Child");
+		childItem.setBundleConstituent(true);
 
 		final ShoppingItem grandChildItem = new TestShoppingItemImpl();
 		grandChildItem.setSkuGuid(grandChildProductSku.getGuid());
 		grandChildItem.setUidPk(SHOPPING_ITEM_UIDPK + 2);
 		grandChildItem.setGuid("Grandchild");
-		childItem.addChildItem(grandChildItem);
+		grandChildItem.setBundleConstituent(true);
 
+		childItem.addChildItem(grandChildItem);
 		rootItem.addChildItem(childItem);
 
-		final Price price = context.mock(Price.class);
+		final Price price = mock(Price.class);
 		final Money money = Money.valueOf(BigDecimal.ONE, Currency.getInstance(CURRENCY_CAD));
 
 		givenProductSkuLookupWillFindSku(rootSku, childProductSku, grandChildProductSku);
-		context.checking(new Expectations() {
-			{
-				allowing(price).getCurrency();
-				will(returnValue(Currency.getInstance(CURRENCY_CAD)));
-				allowing(price).getListPrice(1);
-				will(returnValue(money));
-				allowing(price).getSalePrice(1);
-				will(returnValue(money));
-				allowing(price).getComputedPrice(1);
-				will(returnValue(money));
 
-				allowing(price).getPricingScheme();
-				will(returnValue(null));
-
-			}
-		});
+		given(price.getCurrency()).willReturn(Currency.getInstance(CURRENCY_CAD));
+		given(price.getListPrice(1)).willReturn(money);
+		given(price.getSalePrice(1)).willReturn(money);
+		given(price.getComputedPrice(1)).willReturn(money);
+		given(price.getPricingScheme()).willReturn(null);
 
 		rootItem.setPrice(1, price);
-
-		final ShoppingItemAssemblerImpl assembler = new ShoppingItemAssemblerImpl();
-		assembler.setProductSkuLookup(productSkuLookup);
-		assembler.setShoppingItemDtoFactory(new ShoppingItemDtoFactoryImpl());
 
 		final ShoppingItemDto shoppingItemDto = assembler.assembleShoppingItemDtoFrom(rootItem);
 		assertEquals(SKU_B, shoppingItemDto.getSkuCode());
@@ -889,53 +439,7 @@ public class ShoppingItemAssemblerImplTest {
 	}
 
 	/**
-	 * Tests that a {@code ShoppingItem} can be created from a {@code ShoppingItemDto} which has only the root sku code and not the children. This
-	 * code is used when an accessory that is a bundle is added to the cart. <br/>
-	 */
-	@Test
-	public void testCreateChildrenForAccessoryBundle() {
-		final ShoppingItemDto parentShoppingItemDto = new ShoppingItemDto("", 0);
-
-		final ProductBundle bundle = context.mock(ProductBundle.class);
-
-		final List<BundleConstituent> bundleConstituents = new ArrayList<>();
-
-		final BundleConstituent const1 = new BundleConstituentImpl();
-		final Product productA = new ProductImpl();
-		const1.setConstituent(productA);
-		const1.setQuantity(1);
-		bundleConstituents.add(const1);
-
-		final ProductSku productSku = context.mock(ProductSku.class);
-		final ShoppingItemAssemblerImpl assembler = new ShoppingItemAssemblerImpl() {
-			@Override
-			ProductSku retrieveSkuForShoppingItem(final BundleConstituent bundleItem, final ShoppingItemDto thisShoppingItemDto) {
-				return productSku;
-			}
-		};
-
-		final ShoppingItemFactory shoppingItemFactory = context.mock(ShoppingItemFactory.class);
-		assembler.setShoppingItemFactory(shoppingItemFactory);
-		final SelectionRule selectionRule = context.mock(SelectionRule.class);
-		context.checking(new Expectations() {
-			{
-				allowing(bundle).getConstituents();
-				will(returnValue(bundleConstituents));
-				allowing(bundle).getSelectionRule();
-				will(returnValue(selectionRule));
-				allowing(selectionRule).getParameter();
-				will(returnValue(0));
-				oneOf(shoppingItemFactory).createShoppingItem(productSku, null, 1, 0, Collections.<String, String>emptyMap());
-			}
-		});
-		final ShoppingItem parent = new ShoppingItemImpl();
-		assembler.createShoppingItemTree(bundle, parentShoppingItemDto, parent, 1);
-
-	}
-
-	/**
-	 * Tests that no shoppingItems are created for the bundle if no constituents are needed. Top constituent at top level is selected. Nested bundle
-	 * is not.
+	 * Tests that no constituents are added to the cart with the bundle when the selection rule is 1 but there is > 1 bundle constituents defined.
 	 */
 	@Test
 	public void testCreateShoppingItemTreeWhenNestedBundleHasNoSelection() {
@@ -944,7 +448,7 @@ public class ShoppingItemAssemblerImplTest {
 		final ProductBundle nestedProductBundle = createBundleWithThreeConstituents();
 		nestedProductBundle.setSelectionRule(new SelectionRuleImpl(1));
 
-		productBundle.addConstituent(createBundleConstituentFrom(nestedProductBundle));
+		productBundle.addConstituent(createBundleConstituentFrom(nestedProductBundle, 1, 0));
 
 		final ShoppingItemDto shoppingItemDto = createDtoWithThreeConstituentsAllSelected();
 		shoppingItemDto.getConstituents().get(2).setSelected(false);
@@ -956,8 +460,6 @@ public class ShoppingItemAssemblerImplTest {
 		nestedShoppingItemDto.getConstituents().get(1).setSelected(false);
 		nestedShoppingItemDto.getConstituents().get(2).setSelected(false);
 		shoppingItemDto.addConstituent(nestedShoppingItemDto);
-
-		final ShoppingItemAssemblerImpl assembler = getAssemblerForSelectionRuleTesting();
 
 		final ShoppingItemImpl parent = new ShoppingItemImpl() {
 			private static final long serialVersionUID = 1L;
@@ -977,65 +479,36 @@ public class ShoppingItemAssemblerImplTest {
 	@Test
 	public void testShoppingItemContainsOnlySelectedSkusFromDto() {
 		// Create a bundle with two items and a select 1 rule
-		final String selectedSkuGuid = SELECTED_SKU;
-		final String nonSelectedSkuGuid = "nonSelectedSku";
-		final Product selectedProduct = new ProductImpl();
-		final ProductSku selectedSku = new ProductSkuImpl();
-		selectedSku.setSkuCode(selectedSkuGuid);
-		selectedProduct.addOrUpdateSku(selectedSku);
+		final Product selectedProduct = createProductWithSkuCode(PRODUCT_CODE_1, PRODUCT_SKU_CODE_1);
+		final ProductSku selectedSku = selectedProduct.getDefaultSku();
+		final Product nonSelectedProduct = createProductWithSkuCode(PRODUCT_CODE_2, PRODUCT_SKU_CODE_2);
 
-		final Product nonSelectedProduct = new ProductImpl();
-		final ProductSku nonSelectedSku = new ProductSkuImpl();
-		nonSelectedSku.setSkuCode(nonSelectedSkuGuid);
-		nonSelectedProduct.addOrUpdateSku(nonSelectedSku);
+		final BundleConstituent selectedBundleItem = createBundleConstituentFrom(selectedProduct, 1, 0);
+		final BundleConstituent nonSelectedBundleItem = createBundleConstituentFrom(nonSelectedProduct, 1, 1);
 
-		final BundleConstituent selectedBundleItem = new BundleConstituentImpl();
-		selectedBundleItem.setQuantity(1);
-		selectedBundleItem.setConstituent(selectedProduct);
-		final BundleConstituent nonSelectedBundleItem = new BundleConstituentImpl();
-		nonSelectedBundleItem.setQuantity(1);
-		nonSelectedBundleItem.setConstituent(nonSelectedProduct);
-
-		final ProductBundle bundle = new ProductBundleImpl();
-		bundle.setSelectionRule(new SelectionRuleImpl(1));
-		final ProductSku bundleSku = new ProductSkuImpl();
-		bundleSku.setSkuCode("bundleSku");
-		bundle.addOrUpdateSku(bundleSku);
+		final ProductBundle bundle = createProductBundleWithSkuCode(BUNDLE_CODE_1, BUNDLE_SKU_CODE_1);
+		final ProductSku bundleSku = bundle.getDefaultSku();
 		bundle.addConstituent(selectedBundleItem);
 		bundle.addConstituent(nonSelectedBundleItem);
 
 		// Create a DTO matching the bundle, with 1 item selected
-		final ShoppingItemDto rootDto = new ShoppingItemDto("", 1);
-		final ShoppingItemDto selectedDto = new ShoppingItemDto(selectedSkuGuid, 1);
+		final ShoppingItemDto rootDto = new ShoppingItemDto(BUNDLE_SKU_CODE_1, 1);
+		final ShoppingItemDto selectedDto = new ShoppingItemDto(PRODUCT_SKU_CODE_1, 1);
 		selectedDto.setSelected(true);
-		final ShoppingItemDto nonSelectedDto = new ShoppingItemDto(nonSelectedSkuGuid, 1);
+		final ShoppingItemDto nonSelectedDto = new ShoppingItemDto(PRODUCT_SKU_CODE_2, 1);
 		nonSelectedDto.setSelected(false);
 		rootDto.addConstituent(selectedDto);
 		rootDto.addConstituent(nonSelectedDto);
 
+		given(shoppingItemFactory.createShoppingItem(bundle.getDefaultSku(), null, 1, 0, Collections.emptyMap()))
+				.willReturn(createFakeShoppingItem(bundle.getDefaultSku().getGuid()));
+
 		// assemble the ShoppingItem
-		final ShoppingItemAssemblerImpl assembler = new ShoppingItemAssemblerImpl() {
-			@Override
-			protected ProductSku getProductSku(final String skuCode) {
-				if (skuCode.equals(selectedSkuGuid)) {
-					return selectedSku;
-				} else if (skuCode.equals(nonSelectedSkuGuid)) {
-					return nonSelectedSku;
-				}
-				return bundleSku;
-			}
-		};
-		final ShoppingItemFactory shoppingItemFactory = context.mock(ShoppingItemFactory.class);
-		assembler.setShoppingItemFactory(shoppingItemFactory);
-		context.checking(new Expectations() {
-			{
-				// ShoppingItemFactory should only be called TWICE!
-				oneOf(shoppingItemFactory).createShoppingItem(bundleSku, null, 1, 0, Collections.<String, String>emptyMap());
-				oneOf(shoppingItemFactory).createShoppingItem(selectedSku, null, 1, 0, Collections.<String, String>emptyMap());
-			}
-		});
 		assembler.createShoppingItem(rootDto);
-		// Verify that the ShoppingItem only has one item in it (the selected one).
+
+		// ShoppingItemFactory should only be called TWICE!
+		verify(shoppingItemFactory).createShoppingItem(bundleSku, null, 1, 0, Collections.emptyMap());
+		verify(shoppingItemFactory).createShoppingItem(selectedSku, null, 1, 0, Collections.emptyMap());
 	}
 
 	/**
@@ -1064,65 +537,12 @@ public class ShoppingItemAssemblerImplTest {
 		final ShoppingItemDto dto = new ShoppingItemDto(null, 1);
 		dto.setSkuCode(defaultSkuCode);
 
-		context.checking(new Expectations() { {
-			allowing(productSkuLookup).findByGuid(defaultSku.getGuid()); will(returnValue(defaultSku));
-			allowing(productSkuLookup).findByGuid(selectedSku.getGuid()); will(returnValue(selectedSku));
-		}});
+		given(productSkuLookup.findByGuid(selectedSku.getGuid())).willReturn(selectedSku);
 
 		// configure the dto, and check that it's been updated.
-		final ShoppingItemAssemblerImpl assembler = new ShoppingItemAssemblerImpl();
-		assembler.setProductSkuLookup(productSkuLookup);
-
+		String skuCode = assembler.configureShoppingItemDtoFromShoppingItem(dto, shoppingItem).getSkuCode();
 		assertEquals("The DTO should have been updated to reflect the actual sku specified in the ShoppingItem, rather than the"
-				+ "multi-sku product's default sku", selectedSku.getSkuCode(), assembler.configureShoppingItemDtoFromShoppingItem(dto, shoppingItem)
-				.getSkuCode());
-	}
-
-	/**
-	 * Test that when a simple multi-sku product (non-bundle) is in a shoppingItem by itself, the ShoppingItemDto that was created with the product's
-	 * default sku is updated to the sku specified in the shopping item.
-	 */
-	@Test
-	public void testDtoUpdatedToShoppingItemSkuForMultiSkuProducts2() {
-		// Create a multisku product
-		final ProductSku defaultSku = new ProductSkuImpl();
-		final String defaultSkuCode = "defaultSku";
-		defaultSku.setSkuCode(defaultSkuCode);
-		defaultSku.setGuid(defaultSkuCode);
-		final ProductSku selectedSku = new ProductSkuImpl();
-		selectedSku.setSkuCode(SELECTED_SKU);
-		selectedSku.setGuid(SELECTED_SKU);
-		final Product product = new ProductImpl();
-		product.addOrUpdateSku(defaultSku);
-		product.addOrUpdateSku(selectedSku);
-		product.setDefaultSku(defaultSku);
-		product.setCode(A_PRODUCT_CODE);
-
-		final ProductBundle bundle = new ProductBundleImpl();
-		final ProductSku bundleSku = new ProductSkuImpl();
-		final String bundleCode = "bundle";
-		bundleSku.setSkuCode(bundleCode);
-		bundleSku.setGuid(bundleCode);
-		bundle.addOrUpdateSku(bundleSku);
-		bundle.addConstituent(createBundleConstituentFromSku(defaultSku));
-		bundle.addConstituent(createBundleConstituentFromSku(selectedSku));
-		bundle.setSelectionRule(new SelectionRuleImpl(1));
-		bundle.setCode(bundleCode);
-
-		givenProductSkuLookupWillFindSku(defaultSku, selectedSku, bundleSku);
-
-		// configure the dto, and check that it's been updated.
-		final ShoppingItemAssemblerImpl assembler = new ShoppingItemAssemblerImpl();
-		assembler.setShoppingItemDtoFactory(new ShoppingItemDtoFactoryImpl());
-		assembler.setProductSkuLookup(productSkuLookup);
-		final ShoppingItemFactoryImpl shoppingItemFactory = new ShoppingItemFactoryImpl();
-		shoppingItemFactory.setBeanFactory(beanFactory);
-		assembler.setShoppingItemFactory(shoppingItemFactory);
-		final ShoppingItemDto dto = assembler.createShoppingItemDto(bundle, 1);
-		dto.getConstituents().get(1).setSelected(true);
-		final ShoppingItem shoppingItem = assembler.createShoppingItem(dto);
-		assembler.configureShoppingItemDtoFromShoppingItem(dto, shoppingItem);
-		assertTrue(assembler.verifyDtoStructureEqualsBundleStructure(bundle, dto));
+				+ "multi-sku product's default sku", selectedSku.getSkuCode(), skuCode);
 	}
 
 	/**
@@ -1131,28 +551,26 @@ public class ShoppingItemAssemblerImplTest {
 	@Test
 	public void testAssemblingShoppingItemFormBeanWhenOneOfTheTwoSameMultiSkuConstituentsIsSelected() {
 		// given
-		final ProductBundle bundle = createProductBundleWithSkuCode(A_BUNDLE_CODE, A_BUNDLE_SKU_CODE);
-		final Product product = createProductWithSkuCode(A_PRODUCT_CODE, A_PRODUCT_SKU_CODE);
+		final ProductBundle bundle = createProductBundleWithSkuCode(BUNDLE_CODE_1, BUNDLE_SKU_CODE_1);
+		final Product product = createProductWithSkuCode(PRODUCT_CODE_1, PRODUCT_SKU_CODE_1);
 		final ProductSku secondSku = new ProductSkuImpl();
-		secondSku.setSkuCode(ANOTHER_PRODUCT_SKU_CODE);
-		secondSku.setGuid(ANOTHER_PRODUCT_SKU_CODE);
+		secondSku.setSkuCode(PRODUCT_SKU_CODE_2);
+		secondSku.setGuid(PRODUCT_SKU_CODE_2);
 		product.addOrUpdateSku(secondSku);
 
 		givenProductSkuLookupWillFindSku(secondSku);
 
-		bundle.addConstituent(createBundleConstituentFrom(product));
-		bundle.addConstituent(createBundleConstituentFrom(product));
+		bundle.addConstituent(createBundleConstituentFrom(product, 1, 0));
+		bundle.addConstituent(createBundleConstituentFrom(product, 1, 1));
 
-		final ShoppingItem root = createFakeShoppingItem();
-		root.setSkuGuid(bundle.getDefaultSku().getGuid());
+		final ShoppingItem root = createFakeShoppingItem(bundle.getDefaultSku().getGuid());
 
-		final ShoppingItem child1 = createFakeShoppingItem();
-		child1.setSkuGuid(product.getSkuByCode(ANOTHER_PRODUCT_SKU_CODE).getGuid());
+		final ShoppingItem child1 = createFakeShoppingItem(product.getSkuByCode(PRODUCT_SKU_CODE_2).getGuid());
+		child1.setBundleConstituent(true);
 		root.addChildItem(child1);
 
-		final ShoppingItemAssemblerImpl assembler = new ShoppingItemAssemblerImpl();
-		assembler.setShoppingItemDtoFactory(new ShoppingItemDtoFactoryImpl());
-		assembler.setProductSkuLookup(productSkuLookup);
+		given(productSkuLookup.findByGuid(root.getSkuGuid())).willReturn(bundle.getDefaultSku());
+		given(productSkuLookup.findByGuid(child1.getSkuGuid())).willReturn(product.getDefaultSku());
 
 		// test
 		final ShoppingItemDto rootDto = assembler.assembleShoppingItemDtoFrom(root);
@@ -1167,27 +585,20 @@ public class ShoppingItemAssemblerImplTest {
 	@Test
 	public void testAssemblingShoppingItemFormBeanFromShoppingItemWithTwoSameConstituents() {
 		// given
-		final ProductBundle bundle = createProductBundleWithSkuCode(A_BUNDLE_CODE, A_BUNDLE_SKU_CODE);
-		final Product product = createProductWithSkuCode(A_PRODUCT_CODE, A_PRODUCT_SKU_CODE);
-		bundle.addConstituent(createBundleConstituentFrom(product));
-		bundle.addConstituent(createBundleConstituentFrom(product));
+		final ProductBundle bundle = createProductBundleWithSkuCode(BUNDLE_CODE_1, BUNDLE_SKU_CODE_1);
+		final Product product = createProductWithSkuCode(PRODUCT_CODE_1, PRODUCT_SKU_CODE_1);
+		bundle.addConstituent(createBundleConstituentFrom(product, 1, 0));
+		bundle.addConstituent(createBundleConstituentFrom(product, 1, 1));
 
-		final ShoppingItem root = createFakeShoppingItem();
-		root.setSkuGuid(bundle.getDefaultSku().getGuid());
+		final ShoppingItem root = createFakeShoppingItem(bundle.getDefaultSku().getGuid());
 
-		final ShoppingItem child1 = createFakeShoppingItem();
-		child1.setSkuGuid(product.getDefaultSku().getGuid());
+		final ShoppingItem child1 = createFakeShoppingItem(product.getDefaultSku().getGuid());
 		child1.setOrdering(0);
-		final ShoppingItem child2 = createFakeShoppingItem();
-		child2.setSkuGuid(product.getDefaultSku().getGuid());
+		final ShoppingItem child2 = createFakeShoppingItem(product.getDefaultSku().getGuid());
 		child2.setOrdering(1);
 
 		root.addChildItem(child1);
 		root.addChildItem(child2);
-
-		final ShoppingItemAssemblerImpl assembler = new ShoppingItemAssemblerImpl();
-		assembler.setProductSkuLookup(productSkuLookup);
-		assembler.setShoppingItemDtoFactory(new ShoppingItemDtoFactoryImpl());
 
 		// test
 		final ShoppingItemDto rootDto = assembler.assembleShoppingItemDtoFrom(root);
@@ -1196,8 +607,10 @@ public class ShoppingItemAssemblerImplTest {
 		assertTrue(rootDto.getConstituents().get(1).isSelected());
 	}
 
-	private ShoppingItemImpl createFakeShoppingItem() {
-		return new ShoppingItemImpl();
+	private ShoppingItem createFakeShoppingItem(final String skuGuid) {
+		ShoppingItem shoppingItem = new ShoppingItemImpl();
+		shoppingItem.setSkuGuid(skuGuid);
+		return shoppingItem;
 	}
 
 	/**
@@ -1206,30 +619,18 @@ public class ShoppingItemAssemblerImplTest {
 	@Test
 	public void testCreatingShoppingItemFromBundleWithTwoSameConstituents() {
 		// given
-		final ProductBundle bundle = createProductBundleWithSkuCode(A_BUNDLE_CODE, A_BUNDLE_SKU_CODE);
-		final Product constituent1 = createProductWithSkuCode(A_PRODUCT_CODE, A_PRODUCT_SKU_CODE);
-		final Product constituent2 = createProductWithSkuCode(A_PRODUCT_CODE, A_PRODUCT_SKU_CODE);
-		bundle.addConstituent(createBundleConstituentFrom(constituent1));
-		bundle.addConstituent(createBundleConstituentFrom(constituent2));
+		final ProductBundle bundle = createProductBundleWithSkuCode(BUNDLE_CODE_1, BUNDLE_SKU_CODE_1);
+		final Product product1 = createProductWithSkuCode(PRODUCT_CODE_1, PRODUCT_SKU_CODE_1);
+		final Product product2 = createProductWithSkuCode(PRODUCT_CODE_1, PRODUCT_SKU_CODE_1);
+		bundle.addConstituent(createBundleConstituentFrom(product1, 1, 0));
+		bundle.addConstituent(createBundleConstituentFrom(product2, 1, 1));
 
-		final ShoppingItemDto bundleDto = new ShoppingItemDto(A_BUNDLE_SKU_CODE, 1);
-		final ShoppingItemDto childDto1 = new ShoppingItemDto(A_PRODUCT_SKU_CODE, 1);
-		final ShoppingItemDto childDto2 = new ShoppingItemDto(A_PRODUCT_SKU_CODE, 1);
+		final ShoppingItemDto bundleDto = new ShoppingItemDto(BUNDLE_SKU_CODE_1, 1);
+		final ShoppingItemDto childDto1 = new ShoppingItemDto(PRODUCT_SKU_CODE_1, 1);
+		final ShoppingItemDto childDto2 = new ShoppingItemDto(PRODUCT_SKU_CODE_1, 1);
 
 		bundleDto.addConstituent(childDto1);
 		bundleDto.addConstituent(childDto2);
-
-		final ShoppingItemAssemblerImpl assembler = new ShoppingItemAssemblerImpl() {
-			@Override
-			public ShoppingItemFactory getShoppingItemFactory() {
-				return new ShoppingItemFactoryImpl() {
-					@Override
-					protected ShoppingItem createShoppingItemBean() {
-						return new ShoppingItemImpl();
-					}
-				};
-			}
-		};
 
 		// test
 		final ShoppingItemImpl shoppingItem = new ShoppingItemImpl() {
@@ -1240,10 +641,11 @@ public class ShoppingItemAssemblerImplTest {
 				return true;
 			}
 		};
+
 		assembler.createShoppingItemTree(bundle, bundleDto, shoppingItem, 1);
 		assertEquals(2, shoppingItem.getBundleItems(productSkuLookup).size());
-		assertEquals(constituent1.getDefaultSku().getGuid(), shoppingItem.getBundleItems(productSkuLookup).get(0).getSkuGuid());
-		assertEquals(constituent2.getDefaultSku().getGuid(), shoppingItem.getBundleItems(productSkuLookup).get(1).getSkuGuid());
+		assertEquals(product1.getDefaultSku().getGuid(), shoppingItem.getBundleItems(productSkuLookup).get(0).getSkuGuid());
+		assertEquals(product2.getDefaultSku().getGuid(), shoppingItem.getBundleItems(productSkuLookup).get(1).getSkuGuid());
 	}
 
 	private Product createProductWithSkuCode(final String productCode, final String skuCode) {
@@ -1266,21 +668,40 @@ public class ShoppingItemAssemblerImplTest {
 		final ProductSku sku = new ProductSkuImpl();
 		sku.setGuid(new RandomGuidImpl().toString());
 		sku.setSkuCode(skuCode);
-
 		bundle.addOrUpdateSku(sku);
 
 		givenProductSkuLookupWillFindSku(sku);
 		return bundle;
 	}
 
+	protected void givenProductSkuLookupWillFindSku(final ProductSku... skus) {
+		for (ProductSku sku : skus) {
+			given(productSkuLookup.findByGuid(sku.getGuid())).willReturn(sku);
+			given(productSkuLookup.findBySkuCode(sku.getSkuCode())).willReturn(sku);
+		}
+	}
 
-	protected void givenProductSkuLookupWillFindSku(final ProductSku ... skus) {
-		context.checking(new Expectations() { {
-			for (ProductSku sku : skus) {
-				allowing(productSkuLookup).findByGuid(sku.getGuid()); will(returnValue(sku));
-				allowing(productSkuLookup).findBySkuCode(sku.getSkuCode()); will(returnValue(sku));
+	/**
+	 * Test shopping item object overrides getPrice and makeMoney.
+	 */
+	class TestShoppingItemImpl extends ShoppingItemImpl {
+		private static final long serialVersionUID = 1L;
+
+		@Override
+		protected Money makeMoney(final BigDecimal amount) {
+			if (amount == null) {
+				return null;
 			}
-		}});
+			return Money.valueOf(amount, getCurrency());
+		}
+
+
+		@Override
+		public Price getPrice() {
+			final Price price = new PriceImpl();
+			price.setCurrency(getCurrency());
+			return price;
+		}
 	}
 
 }

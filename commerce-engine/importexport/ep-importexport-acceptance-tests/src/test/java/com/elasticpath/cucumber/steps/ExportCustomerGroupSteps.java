@@ -3,6 +3,10 @@
  */
 package com.elasticpath.cucumber.steps;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -17,9 +21,7 @@ import com.google.common.collect.Collections2;
 import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
 import org.apache.commons.collections.CollectionUtils;
-import org.junit.Assert;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.ContextConfiguration;
 
 import com.elasticpath.common.dto.customer.CustomerGroupDTO;
 import com.elasticpath.common.dto.customer.CustomerRoleDTO;
@@ -36,7 +38,6 @@ import com.elasticpath.importexport.exporter.controller.ExportController;
 /**
  * Export customer group steps.
  */
-@ContextConfiguration("/integration-context-mocked-customer-service.xml")
 public class ExportCustomerGroupSteps {
 
 	private static final String CUSTOMER_GROUPS_EXPORT_FILE = "customer_groups.xml";
@@ -86,7 +87,7 @@ public class ExportCustomerGroupSteps {
 	public void parseExportedCustomerGroupData() throws IOException {
 		final File exportedCustomerGroupsFile = new File(exportDirectory, CUSTOMER_GROUPS_EXPORT_FILE);
 
-		Assert.assertTrue(
+		assertTrue(
 				String.format("Exported customer segments file not found: %s", exportedCustomerGroupsFile.getAbsolutePath()),
 				exportedCustomerGroupsFile.exists());
 
@@ -110,11 +111,11 @@ public class ExportCustomerGroupSteps {
 
 		final boolean shouldBeEnabled = "TRUE".equals(enabledString);
 
-		Assert.assertNotNull(
+		assertNotNull(
 				String.format("Customer segment [%s] not found in exported customer segment records", customerGroupName),
 				matchingCustomerGroupDTO);
 
-		Assert.assertEquals(
+		assertEquals(
 				String.format("Customer segment [%s] is exported with incorrect enabled value", customerGroupName),
 				shouldBeEnabled, matchingCustomerGroupDTO.isEnabled());
 	}
@@ -144,7 +145,7 @@ public class ExportCustomerGroupSteps {
 		final CustomerGroupDTO matchingCustomerGroupDTO =
 				findCustomerGroupDTOByName(exportedCustomerGroupsDTO.getCustomerGroups(), customerGroupName);
 
-		Assert.assertNotNull(
+		assertNotNull(
 				String.format("Customer segment [%s] not found in exported customer segment records", customerGroupName),
 				matchingCustomerGroupDTO);
 
@@ -156,7 +157,7 @@ public class ExportCustomerGroupSteps {
 					}
 				});
 
-		Assert.assertTrue(
+		assertTrue(
 				String.format("Customer segment [%s] is exported with incorrect roles", customerGroupName),
 				CollectionUtils.isEqualCollection(expectedAuthorities, exportedGroupAuthorities));
 	}
@@ -189,7 +190,7 @@ public class ExportCustomerGroupSteps {
 	public void ensureManifestIncludesCustomerGroups() throws IOException {
 		final File exportedManifestFile = new File(exportDirectory, MANIFEST_EXPORT_FILE);
 
-		Assert.assertTrue(
+		assertTrue(
 				String.format("Exported manifest file not found: %s", exportedManifestFile.getAbsolutePath()),
 				exportedManifestFile.exists());
 
@@ -197,7 +198,7 @@ public class ExportCustomerGroupSteps {
 		final FileInputStream exportedManifestFileStream = new FileInputStream(exportedManifestFile);
 		final Manifest manifest = manifestUnmarshaller.unmarshall(exportedManifestFileStream);
 
-		Assert.assertTrue(
+		assertTrue(
 				"Manifest file missing customer segments entry",
 				manifest.getResources().contains(CUSTOMER_GROUPS_EXPORT_FILE));
 

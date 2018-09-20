@@ -23,8 +23,8 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 
+import com.elasticpath.base.common.dto.StructuredErrorMessage;
 import com.elasticpath.base.exception.EpSystemException;
-import com.elasticpath.common.dto.StructuredErrorMessage;
 import com.elasticpath.common.pricing.service.PriceLookupFacade;
 import com.elasticpath.commons.beanframework.BeanFactory;
 import com.elasticpath.commons.constants.ContextIdNames;
@@ -364,6 +364,8 @@ public class CalculatedBundleShoppingItemPriceBuilderTest {
 	}
 
 	private List<ShoppingItem> createBundleItems(final ShoppingItem... items) {
+		Arrays.stream(items)
+				.forEach(shoppingItem -> shoppingItem.setBundleConstituent(true));
 		return Arrays.asList(items);
 	}
 

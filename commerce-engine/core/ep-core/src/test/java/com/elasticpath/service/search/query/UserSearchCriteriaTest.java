@@ -3,6 +3,8 @@
  */
 package com.elasticpath.service.search.query;
 
+import static junit.framework.TestCase.assertFalse;
+import static junit.framework.TestCase.assertTrue;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 
@@ -55,7 +57,7 @@ public class UserSearchCriteriaTest {
 	 */
 	@Test
 	public void testClear() {
-		assertSame(true, this.userSearchCriteria.isEmpty());
+		assertTrue(this.userSearchCriteria.isEmpty());
 		userSearchCriteria.setUserStatus(UserStatus.ENABLED);
 		userSearchCriteria.setCatalogCode("Cat01");
 		userSearchCriteria.setStoreCode("Store01");
@@ -63,9 +65,9 @@ public class UserSearchCriteriaTest {
 		userSearchCriteria.setFirstName("Peter");
 		userSearchCriteria.setLastName("Jensen");
 		userSearchCriteria.setUserName("Peter Jensen");
-		assertSame(false, this.userSearchCriteria.isEmpty());
+		assertFalse(this.userSearchCriteria.isEmpty());
 
 		this.userSearchCriteria.clear();
-		assertSame(true, this.userSearchCriteria.isEmpty());
+		assertTrue(this.userSearchCriteria.isEmpty());
 	}
 }

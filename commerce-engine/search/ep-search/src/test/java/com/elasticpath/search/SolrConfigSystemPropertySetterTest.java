@@ -8,7 +8,6 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import static com.elasticpath.service.search.solr.SolrIndexConstants.CATEGORY_INDEX_DIR_PROPERTY;
 import static com.elasticpath.service.search.solr.SolrIndexConstants.PROMOTION_INDEX_DIR_PROPERTY;
-import static com.elasticpath.service.search.solr.SolrIndexConstants.SHIPPING_SERVICE_LEVEL_INDEX_DIR_PROPERTY;
 import static com.elasticpath.service.search.solr.SolrIndexConstants.SKU_INDEX_DIR_PROPERTY;
 
 import java.io.File;
@@ -22,7 +21,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.elasticpath.service.search.IndexType;
 import com.elasticpath.service.search.solr.SolrIndexConstants;
@@ -83,17 +82,14 @@ public class SolrConfigSystemPropertySetterTest {
 	public void verifyIndexDirectoriesSetWhenAbsent() throws Exception {
 		final String categoryIndexDir = "catDir";
 		final String promoIndexDir = "indexDir";
-		final String shippingServiceLevelIndexDir = "sslIndexDir";
 
 		indexTypeSystemPropertyKeyMap.putAll(ImmutableMap.of(
 				IndexType.CATEGORY, CATEGORY_INDEX_DIR_PROPERTY,
-				IndexType.SHIPPING_SERVICE_LEVEL, SHIPPING_SERVICE_LEVEL_INDEX_DIR_PROPERTY,
 				IndexType.PROMOTION, PROMOTION_INDEX_DIR_PROPERTY
 		));
 
 		systemPropertySetter.setIndexDataSubdirectories(ImmutableMap.<IndexType, String>builder()
 				.put(IndexType.CATEGORY, categoryIndexDir)
-				.put(IndexType.SHIPPING_SERVICE_LEVEL, shippingServiceLevelIndexDir)
 				.put(IndexType.PROMOTION, promoIndexDir)
 				.build());
 
@@ -103,9 +99,6 @@ public class SolrConfigSystemPropertySetterTest {
 
 		softly.assertThat(System.getProperty(CATEGORY_INDEX_DIR_PROPERTY))
 				.isEqualTo(indexDir(CONFIGURATION_ROOT_PATH, categoryIndexDir));
-
-		softly.assertThat(System.getProperty(SHIPPING_SERVICE_LEVEL_INDEX_DIR_PROPERTY))
-				.isEqualTo(indexDir(CONFIGURATION_ROOT_PATH, shippingServiceLevelIndexDir));
 
 		softly.assertThat(System.getProperty(PROMOTION_INDEX_DIR_PROPERTY))
 				.isEqualTo(indexDir(CONFIGURATION_ROOT_PATH, promoIndexDir));

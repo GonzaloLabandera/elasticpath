@@ -1,544 +1,329 @@
 /*
- * Copyright (c) Elastic Path Software Inc., 2006
+ * Copyright (c) Elastic Path Software Inc., 2018
  */
+
 package com.elasticpath.persistence.support.impl;
+
+import static java.util.stream.Collectors.toList;
+
+import static com.elasticpath.persistence.openjpa.support.JpqlQueryBuilderWhereGroup.JpqlMatchType.AS_IS;
+import static com.elasticpath.service.search.query.SortOrder.ASCENDING;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.validator.routines.LongValidator;
 
-import com.elasticpath.domain.order.AdvancedOrderSearchCriteria;
+import com.elasticpath.domain.customer.impl.CustomerImpl;
 import com.elasticpath.domain.order.OrderPaymentStatus;
 import com.elasticpath.domain.order.OrderShipmentStatus;
 import com.elasticpath.domain.order.OrderStatus;
+import com.elasticpath.persistence.openjpa.support.JpqlQueryBuilder;
+import com.elasticpath.persistence.openjpa.support.JpqlQueryBuilderWhereGroup;
+import com.elasticpath.persistence.openjpa.support.JpqlQueryBuilderWhereGroup.ConjunctionType;
 import com.elasticpath.persistence.support.OrderCriterion;
 import com.elasticpath.service.search.query.CustomerSearchCriteria;
 import com.elasticpath.service.search.query.EpInvalidOrderCriterionResultTypeException;
 import com.elasticpath.service.search.query.OrderReturnSearchCriteria;
 import com.elasticpath.service.search.query.OrderSearchCriteria;
-import com.elasticpath.service.search.query.SortBy;
-import com.elasticpath.service.search.query.SortOrder;
 import com.elasticpath.service.search.query.StandardSortBy;
 
 /**
- * Implementation of OrderCriterion that constructs the appropriate criteria for order queries.
+ * Implementation of OrderCriterion that constructs the appropriate criteria for order queries
+ * using the JpqlQueryBuilder.
  */
 @SuppressWarnings("PMD.GodClass")
 public class OrderCriterionImpl implements OrderCriterion {
-
-	private static final String ORDER_QUERY = "select o from OrderImpl as o";
-
-	private static final String ORDER_COUNT = "select count (o.uidPk) from OrderImpl as o";
-
-	private static final String ORDER_NUMBER = "select o.orderNumber from OrderImpl as o";
-
-	private static final String ORDER_RETURN_QUERY = "select ort from OrderReturnImpl as ort";
-
-	private static final String ORDER_RETURN_COUNT = "select count (ort.uidPk) from OrderReturnImpl as ort";
-
-	private static final String ORDER_JOIN = ", in(ort.order) as o";
-
-	private static final String ORDER_SHIPMENT_JOIN = ", in(o.shipments) as os";
-
-	private static final String ORDER_RETURN_JOIN = ", in(o.returns) as ort";
-
-	private static final String ORDER_PAYMENT_JOIN = ", in(o.orderPayments) as op";
-
-	private static final String ORDER_SKU_JOIN = ", in(os.shipmentOrderSkusInternal) as sku";
-
-	private static final String ORDER_WHERE_ORDER_NUMBER_EQUALS = " o.orderNumber = ";
-
-	private static final String ORDER_WHERE_TO_DATE = " o.createdDate <= ";
-
-	private static final String ORDER_WHERE_FROM_DATE = " o.createdDate >= ";
-
-	private static final String ORDER_WHERE_ORDER_STATUS_EQUALS = " o.status = ";
-
-	private static final String ORDER_WHERE_ORDER_STATUS_DOES_NOT_EQUALS = " o.status <> ";
-
-	private static final String ORDER_WHERE_STORE_IN = " UPPER(o.storeCode) in (:storeList)";
-
-	private static final String ORDER_WHERE_CUSTOMER_ID_LIKE = " o.customer.userId LIKE ";
-
-	private static final String ORDER_WHERE_CUSTOMER_NUMBER_EQUALS = " o.customer.uidPk = ";
-
-	private static final String ORDER_WHERE_CUSTOMER_GUID_EQUALS = " o.customer.guid = ";
-
-	private static final String ORDER_WHERE_FIRST_NAME_EQUALS = " o.billingAddress.firstName = ";
-
-	private static final String ORDER_WHERE_LAST_NAME_EQUALS = " o.billingAddress.lastName = ";
-
-	private static final String ORDER_WHERE_POSTAL_CODE_LIKE = " o.billingAddress.zipOrPostalCode LIKE ";
-
-	private static final String ORDER_WHERE_PHONE_NUMBER_EQUALS = " o.billingAddress.phoneNumber = ";
-
-	private static final String ORDER_WHERE_SHIPMENT_STATUS_EQUALS = " os.status = ";
-
-	private static final String ORDER_WHERE_ORDER_SKU_EQUALS = " sku.skuCode = ";
-
-	private static final String ORDER_WHERE_RMA_EQUALS = " ort.rmaCode = ";
-
-	private static final String WHERE_CLAUSE = " where";
-
-	private static final String AND_CLAUSE = " and";
+	private static final String ORDER = "OrderImpl";
+	private static final String ORDER_STATUS = "o.status";
+	private static final String ORDER_NUMBER = "o.orderNumber";
+	private static final String CP_SHORT_TEXT_VALUE = "cp.shortTextValue";
 
 	@Override
-	public String getStatusCriteria(final OrderStatus orderStatus, final OrderPaymentStatus paymentStatus, final OrderShipmentStatus shipmentStatus) {
-		final StringBuilder query = new StringBuilder();
-		query.append(ORDER_QUERY);
-		query.append(getStatusInnerJoin(paymentStatus, shipmentStatus));
-		query.append(" where o = o");
-		query.append(getStatusWhereCondition(orderStatus, paymentStatus, shipmentStatus));
-		return query.toString();
-	}
-
-	private String getStatusInnerJoin(final OrderPaymentStatus paymentStatus, final OrderShipmentStatus shipmentStatus) {
-		final StringBuilder query = new StringBuilder();
+	public CriteriaQuery getStatusCriteria(final OrderStatus orderStatus, final OrderPaymentStatus paymentStatus,
+										   final OrderShipmentStatus shipmentStatus) {
+		JpqlQueryBuilder queryBuilder = new JpqlQueryBuilder(ORDER, "o");
+		final JpqlQueryBuilderWhereGroup whereGroup = queryBuilder.getDefaultWhereGroup();
+		appendEqualsClause(whereGroup, ORDER_STATUS, orderStatus);
 		if (paymentStatus != null) {
-			query.append(ORDER_PAYMENT_JOIN);
+			queryBuilder.appendInnerJoin("o.orderPayments", "op");
+			whereGroup.appendWhereEquals("op.status", paymentStatus);
 		}
 		if (shipmentStatus != null) {
-			query.append(ORDER_SHIPMENT_JOIN);
-		}
-		return query.toString();
-	}
-
-	private String getStatusWhereCondition(final OrderStatus orderStatus,
-			final OrderPaymentStatus paymentStatus, final OrderShipmentStatus shipmentStatus) {
-		final StringBuilder query = new StringBuilder();
-		int paramPosition = 1;
-		paramPosition = attachConditionInWhereCaluse(query, ORDER_WHERE_ORDER_STATUS_EQUALS, orderStatus, paramPosition);
-		paramPosition = attachConditionInWhereCaluse(query, " op.status = ", paymentStatus, paramPosition);
-		attachConditionInWhereCaluse(query,  ORDER_WHERE_SHIPMENT_STATUS_EQUALS, shipmentStatus, paramPosition);
-
-		return query.toString();
-	}
-
-	private int attachConditionInWhereCaluse(final StringBuilder query, final String leftSideCondition, final Object rightSideCondition,
-			final int paramPosition) {
-		if (rightSideCondition == null) {
-			return paramPosition;
+			queryBuilder.appendInnerJoin("o.shipments", "os");
+			whereGroup.appendWhereEquals("os.status", shipmentStatus);
 		}
 
-		query.append(AND_CLAUSE).append(leftSideCondition).append('?').append(paramPosition);
-
-		return paramPosition + 1;
+		return new CriteriaQuery(queryBuilder);
 	}
 
 	@Override
-	public String getOrderCustomerProfileCriteria(final String attributeKey, final String attributeValue, final boolean isExactMatch) {
-		final StringBuilder query = new StringBuilder();
-		query.append(ORDER_QUERY);
-		query.append(" inner join o.customer as c inner join c.profileValueMap as cp where cp.localizedAttributeKey = '").append(attributeKey).append(
-		"' and cp.shortTextValue ");
+	public CriteriaQuery getOrderCustomerCriteria(final String propertyName, final String criteriaValue, final boolean isExactMatch) {
+		final JpqlQueryBuilder queryBuilder = new JpqlQueryBuilder(ORDER, "o");
+		final JpqlQueryBuilderWhereGroup whereGroup = queryBuilder.getDefaultWhereGroup();
+		final String fieldName = "o.customer." + propertyName;
 		if (isExactMatch) {
-			query.append(" = '").append(attributeValue).append('\'');
+			whereGroup.appendWhereEquals(fieldName, criteriaValue);
 		} else {
-			query.append(" like '%").append(attributeValue).append("%'"); // NOPMD
+			whereGroup.appendLikeWithWildcards(fieldName, criteriaValue);
 		}
-		return query.toString();
+		return new CriteriaQuery(queryBuilder);
 	}
 
 	@Override
-	public String getOrderCustomerCriteria(final String propertyName, final String criteriaValue, final boolean isExactMatch) {
-		final StringBuilder query = new StringBuilder();
-		query.append(ORDER_QUERY);
-		query.append(" where o.customer.").append(propertyName);
+	public CriteriaQuery getOrderCustomerProfileCriteria(final String attributeKey, final String attributeValue, final boolean isExactMatch) {
+		final JpqlQueryBuilder queryBuilder = new JpqlQueryBuilder(ORDER, "o");
+		final JpqlQueryBuilderWhereGroup whereGroup = queryBuilder.getDefaultWhereGroup();
+		queryBuilder.appendInnerJoin("o.customer", "c");
+		queryBuilder.appendInnerJoin("c.profileValueMap", "cp");
+		whereGroup.appendWhereEquals("cp.localizedAttributeKey", attributeKey);
 		if (isExactMatch) {
-			query.append(" = '").append(criteriaValue).append('\'');
+			whereGroup.appendWhereEquals(CP_SHORT_TEXT_VALUE, attributeValue);
 		} else {
-			query.append(" like '%").append(criteriaValue).append("%'");
+			whereGroup.appendLikeWithWildcards(CP_SHORT_TEXT_VALUE, attributeValue);
 		}
-		return query.toString();
+		return new CriteriaQuery(queryBuilder);
 	}
 
 	@Override
-	public String getOrderGiftCertificateCriteria(final String propertyName, final String criteriaValue, final boolean isExactMatch) {
-		final StringBuilder query = new StringBuilder();
-		query.append(ORDER_QUERY);
-		query.append(" left outer join o.orderPayments as op where op.giftCertificate.").append(propertyName);
+	public CriteriaQuery getOrderGiftCertificateCriteria(final String propertyName, final String criteriaValue, final boolean isExactMatch) {
+		final JpqlQueryBuilder queryBuilder = new JpqlQueryBuilder(ORDER, "o");
+		final JpqlQueryBuilderWhereGroup whereGroup = queryBuilder.getDefaultWhereGroup();
+		final String fieldName = "op.giftCertificate." + propertyName;
+		queryBuilder.appendLeftJoin("o.orderPayments", "op");
 		if (isExactMatch) {
-			query.append(" = '").append(criteriaValue).append('\'');
+			whereGroup.appendWhereEquals(fieldName, criteriaValue);
 		} else {
-			query.append(" like '%").append(criteriaValue).append("%'");
+			whereGroup.appendLikeWithWildcards(fieldName, criteriaValue);
 		}
-		return query.toString();
+		return new CriteriaQuery(queryBuilder);
 	}
 
 	@Override
-	@SuppressWarnings({ "PMD.NPathComplexity", "PMD.ExcessiveMethodLength" })
-	public String getAdvancedOrderCriteria(final AdvancedOrderSearchCriteria orderSearchCriteria) {
-		StringBuilder query;
-		boolean hasFirstCondition = false;
-		int numOfParameter = 0;
+	public CriteriaQuery getOrderSearchCriteria(final OrderSearchCriteria orderSearchCriteria,
+										 final Collection<String> stores, final ResultType resultType) {
+		JpqlQueryBuilder queryBuilder = createOrderQueryBuilder(resultType);
 
-		Map<String, String> shipmentAddressCriteria = orderSearchCriteria.getShipmentAddressCriteria();
+		final CustomerSearchCriteria customerSearchCriteria = orderSearchCriteria.getCustomerSearchCriteria();
+		final OrderShipmentStatus shipmentStatus = orderSearchCriteria.getShipmentStatus();
+		final String skuCode = orderSearchCriteria.getSkuCode();
 
-		if ((shipmentAddressCriteria == null
-				|| shipmentAddressCriteria.isEmpty())
-				&& orderSearchCriteria.getSkuCode() == null) {
-			query = new StringBuilder(ORDER_QUERY);
-		} else {
-			query = new StringBuilder(ORDER_QUERY);
-			query.append(ORDER_SHIPMENT_JOIN);
-
-			if (shipmentAddressCriteria != null
-					&& !shipmentAddressCriteria.isEmpty()) {
-				for (final Map.Entry<String, String> entry : shipmentAddressCriteria.entrySet()) {
-					if (hasFirstCondition) {
-						query.append(AND_CLAUSE);
-					} else {
-						hasFirstCondition = true;
-						query.append(WHERE_CLAUSE);
-					}
-					query.append(" os.shipmentAddress.").append(entry.getKey()).append(" like '%").append(
-						entry.getValue()).append("%'");
-				}
-			}
-			if (orderSearchCriteria.getSkuCode() != null) {
-				if (hasFirstCondition) {
-					query.append(AND_CLAUSE);
-				} else {
-					hasFirstCondition = true;
-					query.append(WHERE_CLAUSE);
-				}
-				query.append(" os.shipmentOrderSkusInternal.skuCode like '%").append(orderSearchCriteria.getSkuCode()).append("%\'");
-			}
+		if (shipmentStatus != null || StringUtils.isNotEmpty(skuCode)) {
+			queryBuilder.appendInnerJoin("o.shipments", "os");
 		}
 
-		if (orderSearchCriteria.getStoreCode() != null) {
-			if (hasFirstCondition) {
-				query.append(AND_CLAUSE);
-			} else {
-				hasFirstCondition = true;
-				query.append(WHERE_CLAUSE);
-			}
-			query.append(" o.storeCode = ").append(orderSearchCriteria.getStoreCode());
-		}
+		final JpqlQueryBuilderWhereGroup whereGroup = queryBuilder.getDefaultWhereGroup();
 
-		if (orderSearchCriteria.getOrderStatus() != null) {
-			if (hasFirstCondition) {
-				query.append(AND_CLAUSE);
-			} else {
-				hasFirstCondition = true;
-				query.append(WHERE_CLAUSE);
-			}
-			query.append(" o.status = ").append(orderSearchCriteria.getOrderStatus());
+		appendEqualsClause(whereGroup, ORDER_NUMBER, orderSearchCriteria.getOrderNumber());
+		appendEqualsClause(whereGroup, ORDER_STATUS, orderSearchCriteria.getOrderStatus());
+		if (orderSearchCriteria.getExcludedOrderStatus() != null) {
+			whereGroup.appendWhere(ORDER_STATUS, "<>", orderSearchCriteria.getExcludedOrderStatus(), AS_IS);
 		}
+		appendEqualsClause(whereGroup, "os.status", orderSearchCriteria.getShipmentStatus());
 
-		if (orderSearchCriteria.getOrderFromDate() != null) {
-			if (hasFirstCondition) {
-				query.append(AND_CLAUSE);
-			} else {
-				hasFirstCondition = true;
-				query.append(WHERE_CLAUSE);
-			}
-			numOfParameter++;
-			query.append(" o.createdDate >= ?").append(numOfParameter);
-		}
+		addCustomerClauses(queryBuilder, customerSearchCriteria, whereGroup);
 
+		appendLikeClause(whereGroup, "UPPER(o.billingAddress.zipOrPostalCode)", StringUtils.upperCase(orderSearchCriteria.getShipmentZipcode()));
+
+		appendEqualsClauseWithJoin(queryBuilder, whereGroup, "os.shipmentOrderSkusInternal", "sku", "sku.skuCode", skuCode);
+		appendEqualsClauseWithJoin(queryBuilder, whereGroup, "o.returns", "ort", "ort.rmaCode", orderSearchCriteria.getRmaCode());
 		if (orderSearchCriteria.getOrderToDate() != null) {
-			if (hasFirstCondition) {
-				query.append(AND_CLAUSE);
-			} else {
-				hasFirstCondition = true;
-				query.append(WHERE_CLAUSE);
-			}
-			numOfParameter++;
-			query.append(" o.createdDate <= ?").append(numOfParameter);
+			whereGroup.appendWhere("o.createdDate", "<=", orderSearchCriteria.getOrderToDate(), AS_IS);
+		}
+		if (orderSearchCriteria.getOrderFromDate() != null) {
+			whereGroup.appendWhere("o.createdDate", ">=", orderSearchCriteria.getOrderFromDate(), AS_IS);
+		}
+		addStoreCodeClauses(orderSearchCriteria, whereGroup);
+
+		if (!ResultType.COUNT.equals(resultType)) {
+			addOrderBy(orderSearchCriteria, queryBuilder);
 		}
 
-		if (orderSearchCriteria.getCustomerCriteria() != null) {
-			for (final String propertyName : orderSearchCriteria.getCustomerCriteria().keySet()) {
-				if (hasFirstCondition) {
-					query.append(AND_CLAUSE);
-				} else {
-					hasFirstCondition = true;
-					query.append(WHERE_CLAUSE);
-				}
-				query.append(" o.customer.").append(propertyName).append(" like '%").append(
-						orderSearchCriteria.getCustomerCriteria().get(propertyName)).append("%'");
-			}
-		}
-
-		if (orderSearchCriteria.getShipmentStatus() != null) {
-			if (hasFirstCondition) {
-				query.append(AND_CLAUSE);
-			} else {
-				query.append(WHERE_CLAUSE);
-			}
-			query.append(" o.shipments.status = ").append(orderSearchCriteria.getShipmentStatus());
-		}
-		return query.toString();
+		return new CriteriaQuery(queryBuilder);
 	}
 
-	@Override
-	@SuppressWarnings({ "PMD.NPathComplexity", "PMD.ExcessiveMethodLength" })
-	public String getOrderSearchCriteria(final OrderSearchCriteria orderSearchCriteria,
-			final List<Object> parameters,
-			final Collection<String> stores,
-			final ResultType resultType) {
-		parameters.clear();
-		stores.clear();
+	private void addCustomerClauses(final JpqlQueryBuilder queryBuilder, final CustomerSearchCriteria customerSearchCriteria,
+									final JpqlQueryBuilderWhereGroup whereGroup) {
+		if (customerSearchCriteria != null) {
+			Long customerNumber = LongValidator.getInstance().validate(customerSearchCriteria.getCustomerNumber());
+			appendEqualsClause(whereGroup, "o.customer.uidPk", customerNumber);
+			appendEqualsClause(whereGroup, "o.customer.guid", customerSearchCriteria.getGuid());
+			appendLikeClause(whereGroup, "UPPER(o.customer.userId)", StringUtils.upperCase(customerSearchCriteria.getUserId()));
 
-		StringBuilder query = startOrderQuery(resultType);
-
-		String filterClause = WHERE_CLAUSE;
-
-		// set up the query joins
-		String rmaCode = orderSearchCriteria.getRmaCode();
-		if (!StringUtils.isEmpty(rmaCode)) {
-			query.append(ORDER_RETURN_JOIN);
-		}
-
-		String shipmentStatus = null;
-		if (orderSearchCriteria.getShipmentStatus() != null) {
-			shipmentStatus = orderSearchCriteria.getShipmentStatus().toString();
-		}
-		String skuCode = orderSearchCriteria.getSkuCode();
-		if (StringUtils.isNotEmpty(shipmentStatus)
-				|| StringUtils.isNotEmpty(skuCode)) {
-			query.append(ORDER_SHIPMENT_JOIN);
-		}
-
-		if (StringUtils.isNotEmpty(skuCode)) {
-			query.append(ORDER_SKU_JOIN);
-		}
-
-		// add the filters
-		filterClause = appendSubQuery(query, filterClause, ORDER_WHERE_ORDER_NUMBER_EQUALS, orderSearchCriteria.getOrderNumber(), parameters);
-
-		filterClause = appendSubQuery(query, filterClause, ORDER_WHERE_ORDER_STATUS_EQUALS, orderSearchCriteria.getOrderStatus(), parameters);
-
-		filterClause = appendSubQuery(query, filterClause, ORDER_WHERE_ORDER_STATUS_DOES_NOT_EQUALS,
-				orderSearchCriteria.getExcludedOrderStatus(), parameters);
-
-		filterClause = appendSubQuery(query, filterClause, ORDER_WHERE_SHIPMENT_STATUS_EQUALS, orderSearchCriteria.getShipmentStatus(), parameters);
-
-		if (orderSearchCriteria.getCustomerSearchCriteria() != null) {
-			String customerNumber = orderSearchCriteria.getCustomerSearchCriteria().getCustomerNumber();
-			if (StringUtils.isNotEmpty(customerNumber)) {
-				filterClause = appendSubQuery(query, filterClause, ORDER_WHERE_CUSTOMER_NUMBER_EQUALS, Long.parseLong(customerNumber));
+			if (StringUtils.isNotEmpty(customerSearchCriteria.getFirstName())) {
+				queryBuilder.appendLeftJoin("o.customer.profileValueMap", "cpf");
+				addFirstNameClause(customerSearchCriteria.getFirstName().toUpperCase(), whereGroup);
 			}
 
-			filterClause = appendSubQuery(query, filterClause, ORDER_WHERE_CUSTOMER_GUID_EQUALS,
-					orderSearchCriteria.getCustomerSearchCriteria().getGuid(), parameters);
+			if (StringUtils.isNotEmpty(customerSearchCriteria.getLastName())) {
+				queryBuilder.appendLeftJoin("o.customer.profileValueMap", "cpl");
+				addLastNameClause(customerSearchCriteria.getLastName().toUpperCase(), whereGroup);
+			}
 
-			filterClause = appendSubLikeQuery(query, filterClause, ORDER_WHERE_CUSTOMER_ID_LIKE,
-					orderSearchCriteria.getCustomerSearchCriteria().getUserId(), parameters);
+			appendLikeClause(whereGroup, "o.billingAddress.phoneNumber", customerSearchCriteria.getPhoneNumber());
 
-			filterClause = appendSubQuery(query, filterClause, ORDER_WHERE_FIRST_NAME_EQUALS,
-					orderSearchCriteria.getCustomerSearchCriteria().getFirstName(), parameters);
-
-			filterClause = appendSubQuery(query, filterClause, ORDER_WHERE_LAST_NAME_EQUALS,
-					orderSearchCriteria.getCustomerSearchCriteria().getLastName(), parameters);
-
-			filterClause = appendSubQuery(query, filterClause, ORDER_WHERE_PHONE_NUMBER_EQUALS,
-					orderSearchCriteria.getCustomerSearchCriteria().getPhoneNumber(), parameters);
 		}
+	}
 
-		// called shipment zip code, but use billing address zip code in query
-		filterClause = appendSubLikeQuery(query, filterClause, ORDER_WHERE_POSTAL_CODE_LIKE, orderSearchCriteria.getShipmentZipcode(), parameters);
-
-		filterClause = appendSubQuery(query, filterClause, ORDER_WHERE_ORDER_SKU_EQUALS, skuCode, parameters);
-
-		filterClause = appendSubQuery(query, filterClause, ORDER_WHERE_RMA_EQUALS, rmaCode, parameters);
-
-		filterClause = appendSubQuery(query, filterClause, ORDER_WHERE_TO_DATE, orderSearchCriteria.getOrderToDate(), parameters);
-
-		filterClause = appendSubQuery(query, filterClause, ORDER_WHERE_FROM_DATE, orderSearchCriteria.getOrderFromDate(), parameters);
-
+	private void addStoreCodeClauses(final OrderSearchCriteria orderSearchCriteria, final JpqlQueryBuilderWhereGroup whereGroup) {
 		Collection<String> codes = orderSearchCriteria.getStoreCodes();
 		if (codes != null && !codes.isEmpty()) {
-			query.append(filterClause);
-			query.append(ORDER_WHERE_STORE_IN);
-			for (String code : codes) {
-				if (code != null) {
-					stores.add(StringUtils.upperCase(code));
-				}
-			}
+			final List<String> ucStoreCodes = codes.stream()
+				.map(StringUtils::upperCase)
+				.collect(toList());
+			whereGroup.appendWhereInCollection("UPPER(o.storeCode)", ucStoreCodes);
 		}
+	}
 
+	private void addFirstNameClause(final String firstName, final JpqlQueryBuilderWhereGroup whereGroup) {
+		whereGroup.appendWhereEquals("cpf.localizedAttributeKey", CustomerImpl.ATT_KEY_CP_FIRST_NAME);
+		final JpqlQueryBuilderWhereGroup firstNameWhere = new JpqlQueryBuilderWhereGroup(ConjunctionType.OR);
+		firstNameWhere.appendLikeWithWildcards("UPPER(o.billingAddress.firstName)", firstName);
+		firstNameWhere.appendLikeWithWildcards("UPPER(cpf.shortTextValue)", firstName);
+		whereGroup.appendWhereGroup(firstNameWhere);
+	}
 
-		if (resultType != ResultType.COUNT) {
-			SortOrder sortOrder = orderSearchCriteria.getSortingOrder();
-			SortBy sortBy = orderSearchCriteria.getSortingType();
-			boolean bAppendOrderNumber = true;
-			query.append(" order by ");
-			switch (sortBy.getOrdinal()) {
+	private void addLastNameClause(final String lastName, final JpqlQueryBuilderWhereGroup whereGroup) {
+		whereGroup.appendWhereEquals("cpl.localizedAttributeKey", CustomerImpl.ATT_KEY_CP_LAST_NAME);
+		final JpqlQueryBuilderWhereGroup lastNameWhere = new JpqlQueryBuilderWhereGroup(ConjunctionType.OR);
+		lastNameWhere.appendLikeWithWildcards("UPPER(o.billingAddress.lastName)", lastName);
+		lastNameWhere.appendLikeWithWildcards("UPPER(cpl.shortTextValue)", lastName);
+		whereGroup.appendWhereGroup(lastNameWhere);
+	}
+
+	/**
+	 * Add the order by clauses based on the search criteria.
+	 *
+	 * @param orderSearchCriteria the criteria that includes the sorting requirements
+	 * @param queryBuilder the query builder being used to build the query
+	 */
+	protected void addOrderBy(final OrderSearchCriteria orderSearchCriteria, final JpqlQueryBuilder queryBuilder) {
+		boolean ascending = ASCENDING.equals(orderSearchCriteria.getSortingOrder());
+		switch (orderSearchCriteria.getSortingType().getOrdinal()) {
 			case StandardSortBy.DATE_ORDINAL:
-				query.append("o.createdDate");
+				queryBuilder.appendOrderBy("o.createdDate", ascending);
 				break;
 			case StandardSortBy.STATUS_ORDINAL:
-				query.append("o.status");
+				queryBuilder.appendOrderBy(ORDER_STATUS, ascending);
 				break;
 			case StandardSortBy.CUSTOMER_ID_ORDINAL:
-				query.append("o.customer.userId");
+				queryBuilder.appendOrderBy("o.customer.userId", ascending);
 				break;
 			case StandardSortBy.CUSTOMER_NAME_ORDINAL:
-				query.append("o.billingAddress.firstName ").append(sortOrder).append(", o.billingAddress.lastName");
+				queryBuilder.appendOrderBy("o.billingAddress.firstName", ascending);
+				queryBuilder.appendOrderBy("o.billingAddress.lastName", ascending);
 				break;
 			case StandardSortBy.PHONE_ORDINAL:
-				query.append("o.billingAddress.phoneNumber");
+				queryBuilder.appendOrderBy("o.billingAddress.phoneNumber", ascending);
 				break;
 			case StandardSortBy.STORE_CODE_ORDINAL:
-				query.append("o.storeCode");
+				queryBuilder.appendOrderBy("o.storeCode", ascending);
 				break;
 			case StandardSortBy.TOTAL_ORDINAL:
-				query.append("o.currency desc, o.total");
+				queryBuilder.appendOrderBy("o.currency", false);
+				queryBuilder.appendOrderBy("o.total", ascending);
 				break;
 			default:
-				query.append("o.orderNumber");
-				bAppendOrderNumber = false;
 				break;
-			}
-			query.append(' ').append(sortOrder);
-			if (bAppendOrderNumber) {
-				query.append(", o.orderNumber ").append(sortOrder);
-			}
 		}
-
-		return query.toString();
+		queryBuilder.appendOrderBy(ORDER_NUMBER, ascending);
 	}
 
-	private StringBuilder startOrderQuery(final ResultType resultType) {
-		StringBuilder query;
-		if (resultType == ResultType.COUNT) {
-			query = new StringBuilder(ORDER_COUNT);
-		} else if (resultType == ResultType.ORDER_NUMBER) {
-			query = new StringBuilder(ORDER_NUMBER);
-		} else {
-			query = new StringBuilder(ORDER_QUERY);
-		}
-		return query;
-	}
-
-	private StringBuilder startOrderReturnQuery(final ResultType resultType) {
-		StringBuilder query;
-		if (resultType == ResultType.COUNT) {
-			query = new StringBuilder(ORDER_RETURN_COUNT);
-		} else if (resultType == ResultType.ENTITY) {
-			query = new StringBuilder(ORDER_RETURN_QUERY);
-		} else {
-			throw new EpInvalidOrderCriterionResultTypeException("Invalid result type for order return.");
-		}
-		return query;
-	}
-
-	private String appendSubQuery(final StringBuilder query, final String filterClause, final String compareClause, final long value) {
-		query.append(filterClause);
-		query.append(compareClause);
-		query.append(value);
-		return AND_CLAUSE;
-	}
-
-	private String appendSubQuery(final StringBuilder query,
-			final String filterClause,
-			final String compareClause,
-			final String value,
-			final List<Object> parameters) {
+	private void appendEqualsClause(final JpqlQueryBuilderWhereGroup whereGroup, final String fieldName, final String value) {
 		if (StringUtils.isNotEmpty(value)) {
-			query.append(filterClause);
-			query.append(compareClause);
-			parameters.add(value);
-			query.append('?').append(parameters.size());
-			return AND_CLAUSE;
+			whereGroup.appendWhereEquals(fieldName, value);
 		}
-		return filterClause;
 	}
 
-	private String appendSubLikeQuery(final StringBuilder query,
-			final String filterClause, final String compareClause,
-			final String value, final List<Object> parameters) {
+
+	private void appendLikeClause(final JpqlQueryBuilderWhereGroup whereGroup, final String fieldName, final String value) {
 		if (StringUtils.isNotEmpty(value)) {
-			query.append(filterClause);
-			query.append(compareClause);
-			parameters.add(value + "%");
-			query.append('?').append(parameters.size());
-			return AND_CLAUSE;
+			whereGroup.appendLikeWithWildcards(fieldName, value);
 		}
-		return filterClause;
 	}
-
-	private String appendSubQuery(final StringBuilder query,
-			final String filterClause,
-			final String compareClause,
-			final Object value,
-			final List<Object> parameters) {
+	private void appendEqualsClause(final JpqlQueryBuilderWhereGroup whereGroup, final String fieldName, final Object value) {
 		if (value != null) {
-			query.append(filterClause);
-			query.append(compareClause);
-			parameters.add(value);
-			query.append('?').append(parameters.size());
-			return AND_CLAUSE;
+			whereGroup.appendWhereEquals(fieldName, value);
 		}
-		return filterClause;
+	}
+
+	private void appendEqualsClauseWithJoin(final JpqlQueryBuilder queryBuilder, final JpqlQueryBuilderWhereGroup whereGroup,
+												 final String relatedField, final String alias,
+												 final String fieldName, final String value) {
+		if (StringUtils.isNotEmpty(value)) {
+			queryBuilder.appendInnerJoin(relatedField, alias);
+			whereGroup.appendWhereEquals(fieldName, value);
+		}
 	}
 
 	@Override
-	public String getOrderReturnSearchCriteria(
-			final OrderReturnSearchCriteria orderReturnSearchCriteria,
-			final List<Object> parameters, final ResultType resultType) {
-		parameters.clear();
+	public CriteriaQuery getOrderReturnSearchCriteria(final OrderReturnSearchCriteria orderReturnSearchCriteria, final ResultType resultType) {
 
-		StringBuilder query = startOrderReturnQuery(resultType);
+		JpqlQueryBuilder queryBuilder = createOrderReturnQueryBuilder(resultType);
 
-		String filterClause = WHERE_CLAUSE;
-
-		// set up the query joins
 		String orderNumber = orderReturnSearchCriteria.getOrderNumber();
-
-		CustomerSearchCriteria customerSearchCriteria = orderReturnSearchCriteria.getCustomerSearchCriteria();
-		String firstName = null;
-		String lastName = null;
-		if (customerSearchCriteria != null) {
-			firstName = customerSearchCriteria.getFirstName();
-			lastName = customerSearchCriteria.getLastName();
+		final boolean hasCustomerCriteria = hasCustomerSearchCriteria(orderReturnSearchCriteria);
+		if (StringUtils.isNotBlank(orderNumber) || hasCustomerCriteria) {
+			queryBuilder.appendInnerJoin("ort.order", "o");
 		}
 
-		if (StringUtils.isNotBlank(orderNumber) || StringUtils.isNotBlank(firstName) || StringUtils.isNotBlank(lastName)) {
-			query.append(ORDER_JOIN);
-		}
-
-		// add the filters
-		String rmaCode = orderReturnSearchCriteria.getRmaCode();
-		filterClause = appendSubQuery(query, filterClause, ORDER_WHERE_RMA_EQUALS, rmaCode, parameters);
-
-		filterClause = appendSubQuery(query, filterClause, ORDER_WHERE_ORDER_NUMBER_EQUALS, orderReturnSearchCriteria.getOrderNumber(), parameters);
-
-		if (orderReturnSearchCriteria.getCustomerSearchCriteria() != null) {
-			filterClause = appendSubQuery(query, filterClause, ORDER_WHERE_FIRST_NAME_EQUALS,
-					orderReturnSearchCriteria.getCustomerSearchCriteria().getFirstName(), parameters);
-
-			appendSubQuery(query, filterClause, ORDER_WHERE_LAST_NAME_EQUALS,
-					orderReturnSearchCriteria.getCustomerSearchCriteria().getLastName(), parameters);
+		final JpqlQueryBuilderWhereGroup whereGroup = queryBuilder.getDefaultWhereGroup();
+		appendEqualsClause(whereGroup, "ort.rmaCode", orderReturnSearchCriteria.getRmaCode());
+		appendEqualsClause(whereGroup, ORDER_NUMBER, orderNumber);
+		if (hasCustomerCriteria) {
+			appendLikeClause(whereGroup, "o.billingAddress.firstName", orderReturnSearchCriteria.getCustomerSearchCriteria().getFirstName());
+			appendLikeClause(whereGroup, "o.billingAddress.lastName", orderReturnSearchCriteria.getCustomerSearchCriteria().getLastName());
 		}
 
 		if (resultType != ResultType.COUNT) {
-			SortOrder sortOrder = orderReturnSearchCriteria.getSortingOrder();
-			SortBy sortBy = orderReturnSearchCriteria.getSortingType();
-			query.append(" order by ");
-			switch (sortBy.getOrdinal()) {
-			case StandardSortBy.DATE_ORDINAL:
-				query.append("ort.createdDate");
-				break;
-			case StandardSortBy.STATUS_ORDINAL:
-				query.append("ort.returnStatus");
-				break;
-			case StandardSortBy.ORDER_NUMBER_ORDINAL:
-				query.append("o.orderNumber");
-				break;
-			default:
-				query.append("ort.rmaCode");
-				break;
+			boolean ascending = ASCENDING.equals(orderReturnSearchCriteria.getSortingOrder());
+			switch (orderReturnSearchCriteria.getSortingType().getOrdinal()) {
+				case StandardSortBy.DATE_ORDINAL:
+					queryBuilder.appendOrderBy("ort.createdDate", ascending);
+					break;
+				case StandardSortBy.STATUS_ORDINAL:
+					queryBuilder.appendOrderBy("ort.returnStatus", ascending);
+					break;
+				case StandardSortBy.ORDER_NUMBER_ORDINAL:
+					queryBuilder.appendOrderBy(ORDER_NUMBER, ascending);
+					break;
+				default:
+					queryBuilder.appendOrderBy("ort.rmaCode", ascending);
+					break;
 			}
-			query.append(' ').append(sortOrder);
 		}
 
-		return query.toString();
+		return new CriteriaQuery(queryBuilder);
 	}
 
+	private boolean hasCustomerSearchCriteria(final OrderReturnSearchCriteria orderReturnSearchCriteria) {
+		CustomerSearchCriteria customerSearchCriteria = orderReturnSearchCriteria.getCustomerSearchCriteria();
+		return customerSearchCriteria != null
+			   && (StringUtils.isNotBlank(customerSearchCriteria.getFirstName()) || StringUtils.isNotBlank(customerSearchCriteria.getLastName()));
+	}
+
+	private JpqlQueryBuilder createOrderQueryBuilder(final ResultType resultType) {
+		if (resultType == ResultType.ORDER_NUMBER) {
+			return new JpqlQueryBuilder(ORDER, "o", ORDER_NUMBER);
+		}
+
+		JpqlQueryBuilder queryBuilder = new JpqlQueryBuilder(ORDER, "o");
+		if (resultType == ResultType.COUNT) {
+			queryBuilder.count();
+		}
+
+		return queryBuilder;
+	}
+
+	private JpqlQueryBuilder createOrderReturnQueryBuilder(final ResultType resultType) {
+		JpqlQueryBuilder queryBuilder = new JpqlQueryBuilder("OrderReturnImpl", "ort");
+		if (resultType == ResultType.COUNT) {
+			queryBuilder.count();
+		} else if (resultType != ResultType.ENTITY) {
+			throw new EpInvalidOrderCriterionResultTypeException("Invalid result type for order return.");
+		}
+		return queryBuilder;
+	}
 
 }

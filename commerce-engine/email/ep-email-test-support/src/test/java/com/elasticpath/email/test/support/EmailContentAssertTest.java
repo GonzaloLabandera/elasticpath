@@ -3,6 +3,7 @@
  */
 package com.elasticpath.email.test.support;
 
+import org.assertj.core.api.Assertions;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -34,13 +35,13 @@ public class EmailContentAssertTest {
 		EmailContentAssert.assertEmailContentContainsOrderNumber(message, "", "20000");
 	}
 
-	@Test(expected = AssertionError.class)
+	@Test
 	public void testAssertEmailContentContainsOrderNumberFailsWhenOrderNumberNotPresentInContents() throws Exception {
 		final String message = "expected exception message";
 
-		expectAssertionErrorWithMessage(message);
-
-		EmailContentAssert.assertEmailContentContainsOrderNumber(message, "foo", "bar");
+		Assertions.assertThatThrownBy(() -> EmailContentAssert.assertEmailContentContainsOrderNumber(message, "foo", "bar"))
+				.isInstanceOf(AssertionError.class)
+				.as(message);
 	}
 
 	@Test

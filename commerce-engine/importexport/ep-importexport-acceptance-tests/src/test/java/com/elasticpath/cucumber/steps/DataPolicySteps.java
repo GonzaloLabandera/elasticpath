@@ -19,7 +19,6 @@ import cucumber.api.DataTable;
 import cucumber.api.java.en.Given;
 import cucumber.api.java.en.Then;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.ContextConfiguration;
 
 import com.elasticpath.domain.builder.datapolicy.DataPolicyBuilder;
 import com.elasticpath.domain.datapolicy.DataPoint;
@@ -33,7 +32,6 @@ import com.elasticpath.service.datapolicy.DataPolicyService;
 /**
  * Data policy steps.
  */
-@ContextConfiguration("/integration-context-mocked-customer-service.xml")
 public class DataPolicySteps {
 
 	/** Number of data point values. */

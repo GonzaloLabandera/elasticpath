@@ -1,5 +1,5 @@
 /**
- * Copyright (c) Elastic Path Software Inc., 2011
+ * Copyright (c) Elastic Path Software Inc., 2018
  */
 package com.elasticpath.validation.service;
 
@@ -14,7 +14,7 @@ public interface ValidationEngine {
 	/**
 	 * Validate a value using declarative constraints provided.
 	 * @param valueToValidate the value to check
-	 * @param constraint the constraints to be applied
+	 * @param constraint the constraint to be validated
 	 * @return validation result object that represents the outcome of validation
 	 */
 	ValidationResult validate(Object valueToValidate,

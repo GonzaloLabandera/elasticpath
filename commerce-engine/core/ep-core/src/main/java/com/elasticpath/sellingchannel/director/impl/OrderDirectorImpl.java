@@ -74,11 +74,11 @@ public class OrderDirectorImpl implements OrderDirector {
 		if (root.getQuantity() > 0) {
 			final int scale = 10;
 			final BigDecimal qty = BigDecimal.valueOf(root.getQuantity());
-			BigDecimal tmpPrice = root.getListPrice().getAmountUnscaled();
+			BigDecimal tmpPrice = root.getListPrice().getRawAmount();
 			BigDecimal price  = tmpPrice.divide(qty, scale, BigDecimal.ROUND_HALF_UP);
 			root.setListPrice(Money.valueOf(price, currency));
 
-			tmpPrice = root.getUnitPrice().getAmountUnscaled();
+			tmpPrice = root.getUnitPrice().getRawAmount();
 			price  = tmpPrice.divide(qty, scale, BigDecimal.ROUND_HALF_UP);
 			root.setUnitPrice(Money.valueOf(price, currency));
 		}

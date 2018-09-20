@@ -5,7 +5,7 @@ package com.elasticpath.domain.rules;
 
 import java.util.Date;
 
-import org.drools.RuleBase;
+import org.kie.api.KieBase;
 
 import com.elasticpath.domain.catalog.Catalog;
 import com.elasticpath.domain.store.Store;
@@ -63,15 +63,15 @@ public interface EpRuleBase extends Persistable {
 	 *
 	 * @return the compiled rule base
 	 */
-	RuleBase getRuleBase();
+	KieBase getRuleBase();
 	
 	/**
 	 * Sets the compiled rule base.
 	 *
 	 * @param ruleBase the compiled rule base
 	 */
-	void setRuleBase(RuleBase ruleBase);
-	
+	void setRuleBase(KieBase ruleBase);
+
 	/**
 	 * Returns the date when the rule base was last modified.
 	 * 

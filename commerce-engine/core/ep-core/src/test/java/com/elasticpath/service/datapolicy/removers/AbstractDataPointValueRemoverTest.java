@@ -5,8 +5,8 @@
 package com.elasticpath.service.datapolicy.removers;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -22,7 +22,6 @@ import org.mockito.Mock;
 
 import com.elasticpath.service.datapolicy.DataPointValueService;
 import com.elasticpath.service.datapolicy.impl.DataPointValue;
-import com.elasticpath.service.search.IndexType;
 
 /**
  * Common test class for all data point value removers.
@@ -55,7 +54,7 @@ public abstract class AbstractDataPointValueRemoverTest {
 		List<DataPointValue> dataPointValues = Collections.singletonList(dpv1);
 		String expectedRemoveQuery = getRemover().getRemoveQuery(dataPointValues);
 
-		when(dataPointValueService.removeValuesByQuery(eq(expectedRemoveQuery), eq(LIST_NAME), eq(uidPks1), any(IndexType.class)))
+		when(dataPointValueService.removeValuesByQuery(eq(expectedRemoveQuery), eq(LIST_NAME), eq(uidPks1), any()))
 			.thenReturn(1);
 
 		int numOfUpdatedRecords = getRemover().removeValues(dataPointValues);
@@ -64,7 +63,7 @@ public abstract class AbstractDataPointValueRemoverTest {
 			.as("One record should be updated")
 			.isEqualTo(1);
 
-		verify(dataPointValueService).removeValuesByQuery(eq(expectedRemoveQuery), eq(LIST_NAME), eq(uidPks1), any(IndexType.class));
+		verify(dataPointValueService).removeValuesByQuery(eq(expectedRemoveQuery), eq(LIST_NAME), eq(uidPks1), any());
 	}
 
 	@Test
@@ -72,7 +71,7 @@ public abstract class AbstractDataPointValueRemoverTest {
 		List<DataPointValue> dataPointValues = Arrays.asList(dpv1, dpv2);
 		String expectedRemoveQuery = getRemover().getRemoveQuery(dataPointValues);
 
-		when(dataPointValueService.removeValuesByQuery(eq(expectedRemoveQuery), eq(LIST_NAME), eq(uidPks2), any(IndexType.class)))
+		when(dataPointValueService.removeValuesByQuery(eq(expectedRemoveQuery), eq(LIST_NAME), eq(uidPks2), any()))
 			.thenReturn(2);
 
 		int numOfUpdatedRecords = getRemover().removeValues(dataPointValues);
@@ -81,7 +80,7 @@ public abstract class AbstractDataPointValueRemoverTest {
 			.as("One record should be updated")
 			.isEqualTo(2);
 
-		verify(dataPointValueService).removeValuesByQuery(eq(expectedRemoveQuery), eq(LIST_NAME), eq(uidPks2), any(IndexType.class));
+		verify(dataPointValueService).removeValuesByQuery(eq(expectedRemoveQuery), eq(LIST_NAME), eq(uidPks2), any());
 	}
 
 	@Test

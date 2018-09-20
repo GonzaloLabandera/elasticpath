@@ -1,13 +1,13 @@
 /**
  * Copyright (c) Elastic Path Software Inc., 2007
  */
+
 package com.elasticpath.cmclient.admin.shipping.dialogs;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.swt.events.ModifyListener;
@@ -18,6 +18,7 @@ import org.eclipse.swt.widgets.Text;
 import com.elasticpath.cmclient.admin.shipping.AdminShippingImageRegistry;
 import com.elasticpath.cmclient.admin.shipping.AdminShippingMessages;
 import com.elasticpath.cmclient.admin.shipping.AdminShippingPlugin;
+import com.elasticpath.cmclient.core.CorePlugin;
 import com.elasticpath.cmclient.core.ServiceLocator;
 import com.elasticpath.cmclient.core.binding.EpControlBindingProvider;
 import com.elasticpath.cmclient.core.binding.EpDialogSupport;
@@ -28,6 +29,7 @@ import com.elasticpath.cmclient.core.ui.framework.IEpLayoutComposite;
 import com.elasticpath.cmclient.core.ui.framework.IEpLayoutData;
 import com.elasticpath.cmclient.core.validation.EpValidatorFactory;
 import com.elasticpath.commons.constants.ContextIdNames;
+import com.elasticpath.commons.constants.EpShippingContextIdNames;
 import com.elasticpath.domain.misc.Geography;
 import com.elasticpath.domain.shipping.Region;
 import com.elasticpath.domain.shipping.ShippingRegion;
@@ -160,7 +162,7 @@ public class ShippingRegionDialog extends AbstractEpDialog {
 				IEpLayoutData.BEGINNING, IEpLayoutData.BEGINNING, false, true));
 
 		EpState state = EpState.EDITABLE;
-		if (((ShippingServiceLevelService) ServiceLocator.getService(ContextIdNames.SHIPPING_SERVICE_LEVEL_SERVICE))
+		if (((ShippingServiceLevelService) ServiceLocator.getService(EpShippingContextIdNames.SHIPPING_SERVICE_LEVEL_SERVICE))
 				.getShippingRegionInUseUidList().contains(shippingRegion.getUidPk())) {
 			state = EpState.READ_ONLY;
 		}
@@ -197,7 +199,7 @@ public class ShippingRegionDialog extends AbstractEpDialog {
 			return true;
 		}
 
-		if (!((ShippingRegionService) ServiceLocator.getService(ContextIdNames.SHIPPING_REGION_SERVICE))
+		if (!((ShippingRegionService) ServiceLocator.getService(EpShippingContextIdNames.SHIPPING_REGION_SERVICE))
 				.nameExists(getShippingRegion())) {
 			return true;
 		}
@@ -262,11 +264,11 @@ public class ShippingRegionDialog extends AbstractEpDialog {
 		List<Country> countries = new ArrayList<>();
 		for (Region region : regionList) {
 			final String countryCode = region.getCountryCode();
-			Country country = new Country(countryCode, getGeography().getCountryDisplayName(countryCode, Locale.getDefault()));
+			Country country = new Country(countryCode, getGeography().getCountryDisplayName(countryCode, CorePlugin.getDefault().getDefaultLocale()));
 			countries.add(country);
 			for (String subCountryCode : region.getSubCountryCodeList()) {
 				Country subCountry = new Country(country, subCountryCode, getGeography().getSubCountryDisplayName(countryCode,
-						subCountryCode, Locale.getDefault()));
+						subCountryCode, CorePlugin.getDefault().getDefaultLocale()));
 				countries.add(subCountry);
 			}
 		}
@@ -277,11 +279,11 @@ public class ShippingRegionDialog extends AbstractEpDialog {
 	private List<Country> findAllCountries() {
 		List<Country> allCountries = new ArrayList<>();
 		for (String countryCode : getGeography().getCountryCodes()) {
-			Country country = new Country(countryCode, getGeography().getCountryDisplayName(countryCode, Locale.getDefault()));
+			Country country = new Country(countryCode, getGeography().getCountryDisplayName(countryCode, CorePlugin.getDefault().getDefaultLocale()));
 			allCountries.add(country);
 			for (String subCountryCode : getGeography().getSubCountryCodes(countryCode)) {
 				Country subCountry = new Country(country, subCountryCode, getGeography().getSubCountryDisplayName(countryCode,
-						subCountryCode, Locale.getDefault()));
+						subCountryCode, CorePlugin.getDefault().getDefaultLocale()));
 				allCountries.add(subCountry);
 			}
 		}

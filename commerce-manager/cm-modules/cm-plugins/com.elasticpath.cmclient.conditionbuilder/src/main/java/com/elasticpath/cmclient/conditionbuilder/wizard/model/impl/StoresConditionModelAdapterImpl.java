@@ -12,6 +12,7 @@ import java.util.Set;
 import com.elasticpath.cmclient.conditionbuilder.adapter.impl.tag.BaseModelAdapterImpl;
 import com.elasticpath.cmclient.conditionbuilder.wizard.conditions.handlers.ConditionHandler;
 import com.elasticpath.cmclient.conditionbuilder.wizard.model.StoresConditionModelAdapter;
+import com.elasticpath.cmclient.core.LoginManager;
 import com.elasticpath.cmclient.core.ServiceLocator;
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.store.Store;
@@ -135,6 +136,6 @@ public class StoresConditionModelAdapterImpl extends BaseModelAdapterImpl<Logica
 	 */
 	public final List<Store> getAllStores() {
 		StoreService storeService = ServiceLocator.getService(ContextIdNames.STORE_SERVICE);
-		return storeService.findAllStores();
+		return storeService.findAllStores(LoginManager.getCmUser());
 	}
 }

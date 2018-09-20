@@ -4,8 +4,6 @@ package com.elasticpath.selenium.util;
  * Extended WaitDriver class to use FluentWait.
  */
 
-import static com.elasticpath.selenium.framework.util.SeleniumDriverSetup.getDriver;
-
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -21,6 +19,7 @@ import org.openqa.selenium.support.ui.FluentWait;
 
 import com.elasticpath.selenium.framework.pages.WaitDriver;
 import com.elasticpath.selenium.framework.util.PropertyManager;
+import com.elasticpath.selenium.setup.SetUp;
 
 /**
  * WebDriverWait helper method class.
@@ -66,6 +65,23 @@ public class FluentWaitDriver extends WaitDriver {
 	 */
 	public List<WebElement> waitForElementsListVisible(final By findBy) {
 		return wait.until(ExpectedConditions.visibilityOfAllElementsLocatedBy(findBy));
+	}
+
+
+	/**
+	 * Sets the wait duration of FluentWait.
+	 *
+	 * @param timeOutInSeconds the duration
+	 */
+	public void setFluentWaitTimer(final long timeOutInSeconds) {
+		wait.withTimeout(timeOutInSeconds, TimeUnit.SECONDS);
+	}
+
+	/**
+	 * Sets the wait duration of FluentWait back to default.
+	 */
+	public void setFluentWaitTimerBackToDefault() {
+		wait.withTimeout(WEBDRIVER_DEFAULT_TIMEOUT, TimeUnit.SECONDS);
 	}
 
 	/**
@@ -143,9 +159,9 @@ public class FluentWaitDriver extends WaitDriver {
 	public Boolean waitForElementToBeInvisible(final By findBy) {
 		//As the element is not in DOM, it takes implicit timeout to complete. We are setting it to 1 second to reduce the wait time when element
 		// not in DOM.
-		getDriver().manage().timeouts().implicitlyWait(Constants.IMPLICIT_WAIT_FOR_ELEMENT_NOT_EXISTS, TimeUnit.SECONDS);
+		SetUp.getDriver().manage().timeouts().implicitlyWait(Constants.IMPLICIT_WAIT_FOR_ELEMENT_NOT_EXISTS, TimeUnit.SECONDS);
 		Boolean until = wait.until(ExpectedConditions.refreshed(ExpectedConditions.invisibilityOfElementLocated(findBy)));
-		getDriver().manage().timeouts().implicitlyWait(WEBDRIVER_DEFAULT_TIMEOUT, TimeUnit.SECONDS);
+		SetUp.getDriver().manage().timeouts().implicitlyWait(WEBDRIVER_DEFAULT_TIMEOUT, TimeUnit.SECONDS);
 		return until;
 	}
 
@@ -163,11 +179,11 @@ public class FluentWaitDriver extends WaitDriver {
 		waitForElementToBePresent(By.cssSelector(elementSelector));
 		waitForElementToBeVisible(By.cssSelector(elementSelector));
 		try {
-			wait.until(driver -> (Boolean) jsDriver.executeScript(" return EPTest.isElementInteractable(\"" + elementSelector + "\");"));
+			return wait.until(driver -> (Boolean) jsDriver.executeScript(" return EPTest.isElementInteractable(\"" + elementSelector + "\");"));
 		} catch (Exception e) {
-			LOGGER.debug(elementSelector   + " - " +  e.getMessage());
+			LOGGER.debug(elementSelector + " - " + e.getMessage());
 		}
-		return true;
+		return false;
 	}
 
 	/**
@@ -187,6 +203,22 @@ public class FluentWaitDriver extends WaitDriver {
 	 */
 	public void waitForButtonToBeEnabled(final String cssSelector) {
 		ExpectedCondition<Boolean> expectation = driver -> (Boolean) ((JavascriptExecutor) driver).executeScript(String.format(
+				"return EPTest.isButtonEnabled(\"%s\");", cssSelector));
+		try {
+			wait.until(expectation);
+		} catch (Exception e) {
+			LOGGER.debug(e.getMessage() + " for element - " + cssSelector);
+		}
+	}
+
+
+	/**
+	 * Waits for button to be disabled.
+	 *
+	 * @param cssSelector the css selector
+	 */
+	public void waitForButtonToBeDisabled(final String cssSelector) {
+		ExpectedCondition<Boolean> expectation = driver -> !(Boolean) ((JavascriptExecutor) driver).executeScript(String.format(
 				"return EPTest.isButtonEnabled(\"%s\");", cssSelector));
 		try {
 			wait.until(expectation);
@@ -253,6 +285,7 @@ public class FluentWaitDriver extends WaitDriver {
 				driver.findElement(By.cssSelector(cssString)).getText();
 
 			} catch (StaleElementReferenceException e) {
+				LOGGER.debug("Element " + cssString + " is stale at this point ");
 				return false;
 			} finally {
 				driver.manage().timeouts().implicitlyWait(WEBDRIVER_DEFAULT_TIMEOUT, TimeUnit.SECONDS);

@@ -74,7 +74,7 @@ public class ShipmentTypeShoppingCartVisitor implements ShoppingCartVisitor, Shi
 			return;
 		}
 
-		if (recurringPricePredicate.apply(pricingSnapshot)) {
+		if (recurringPricePredicate.test(pricingSnapshot)) {
 			serviceSkus.add(item);
 		} else if (item.isShippable(getProductSkuLookup())) {
 			physicalSkus.add(item);

@@ -31,7 +31,6 @@
    <exporter type="WAREHOUSE"/>
    
    <exporter type="CUSTOMER">
-     <option key="CARD_NUMBER_FILTER" value="EMPTY"/>
    </exporter>
    <exporter type="CUSTOMERPROFILE_ATTRIBUTE"/>
    <exporter type="CUSTOMER_GROUP"/>

@@ -5,6 +5,7 @@ package com.elasticpath.domain.skuconfiguration.impl;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.util.HashSet;
@@ -245,15 +246,15 @@ public class SkuOptionValueImplTest {
 		final SkuOptionValueImpl skuOptionValue2 = new SkuOptionValueImpl();
 		skuOptionValue2.setGuid(COMMON_GUID);
 
-		assertEquals(true, skuOptionValue1.equals(skuOptionValue2));
-		assertEquals(true, skuOptionValue2.equals(skuOptionValue1));
+		assertEquals(skuOptionValue1, skuOptionValue2);
+		assertEquals(skuOptionValue2, skuOptionValue1);
 
 		// create an instance that shares the same parent entity equals method
 		final Attribute attribute = new AttributeImpl();
 		attribute.setGuid(COMMON_GUID);
 
-		assertEquals(false, skuOptionValue1.equals(attribute));
-		assertEquals(false, attribute.equals(skuOptionValue1));
+		assertNotEquals(skuOptionValue1, attribute);
+		assertNotEquals(attribute, skuOptionValue1);
 	}
 
 	/**
@@ -266,7 +267,7 @@ public class SkuOptionValueImplTest {
 
 		final SkuOptionValueImpl skuOptionValue2 = null;
 
-		assertEquals(false, skuOptionValue1.equals(skuOptionValue2));
+		assertNotEquals(skuOptionValue1, skuOptionValue2);
 	}
 
 

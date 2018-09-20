@@ -17,6 +17,7 @@ import javax.xml.bind.annotation.XmlType;
 @XmlRootElement(name = LegacyCreditCardDTO.ROOT_ELEMENT)
 @XmlAccessorType(XmlAccessType.NONE)
 @XmlType(propOrder = { })
+@Deprecated
 public class LegacyCreditCardDTO extends CreditCardDTO {
 	/** XML root element name. */
 	public static final String ROOT_ELEMENT = "card";

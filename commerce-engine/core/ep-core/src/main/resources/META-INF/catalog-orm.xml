@@ -371,14 +371,14 @@
 			<query>
 				SELECT c
 				FROM CategoryImpl AS c
-				WHERE c.code = ?1
+				WHERE UPPER(c.code) = UPPER(?1) 
 			</query>
 		</named-query>
 		<named-query name="CATEGORY_SELECT_BY_CODE_AND_CATALOG_CODE">
 			<query>
 				SELECT c
 				FROM CategoryImpl AS c
-				WHERE c.code = ?1
+				WHERE UPPER(c.code) = UPPER(?1) 
 				AND c.catalog.code = ?2
 			</query>
 		</named-query>
@@ -386,7 +386,7 @@
 			<query>
 				SELECT c.uidPk
 				FROM CategoryImpl c
-				WHERE c.code = ?1
+				WHERE UPPER(c.code) = UPPER(?1) 
 				AND c.catalog.uidPk = ?2
 			</query>
 		</named-query>
@@ -394,7 +394,7 @@
 			<query>
 				SELECT c.uidPk
 				FROM CategoryImpl c
-				WHERE c.code = ?1
+				WHERE UPPER(c.code) = UPPER(?1) 
 				AND c.catalog.code = ?2
 			</query>
 		</named-query>
@@ -1417,12 +1417,20 @@
 				WHERE sku.guid = ?1
 			</query>
 		</named-query>
+		<named-query name="PRODUCT_UIDS_BY_SKU_GUIDS">
+			<query>
+				SELECT p.uidPk
+				FROM ProductSkuImpl sku
+				INNER JOIN sku.productInternal p
+				WHERE sku.guid IN (:list)
+			</query>
+		</named-query>
 		<named-query name="PRODUCT_UIDS_BY_SKUCODES">
 			<query>
 				SELECT p.uidPk
 				FROM ProductSkuImpl sku
 				INNER JOIN sku.productInternal p
-				WHERE sku.skuCodeInternal IN (:skuCodes)
+				WHERE sku.skuCodeInternal IN (:list)
 			</query>
 		</named-query>
 		<named-query name="PRODUCTSKU_SELECT_BY_SKUCODE_LIKE_AND_CATEGORY_UIDS">
@@ -1592,21 +1600,6 @@
 			</query>
 		</named-query>
 
-    <!-- Named queries for ItemConfigurationMementoImpl -->
-		<named-query name="FIND_ITEM_CONFIGURATION_BY_GUID">
-			<query>
-				SELECT icm
-				FROM ItemConfigurationMementoImpl icm
-				WHERE icm.guid = ?1
-			</query>
-		</named-query>
-		<named-query name="FIND_ITEM_CONFIGURATION_UID_BY_GUID">
-			<query>
-				SELECT icm.uidPk
-				FROM ItemConfigurationMementoImpl icm
-				WHERE icm.guid = ?1
-			</query>
-		</named-query>
 		<named-query name="NOT_ALWAYS_AVAILABLE_PRODUCT_BY_SKU_CODE">
 			<query>
 				SELECT new com.elasticpath.domain.catalog.impl.ProductSkuImpl(psku.skuCodeInternal,p.availabilityCriteriaInternal)

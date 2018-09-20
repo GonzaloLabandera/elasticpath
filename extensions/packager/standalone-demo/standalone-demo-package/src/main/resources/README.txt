@@ -33,6 +33,12 @@ Default administrator password for Commerce Admin:
 - User ID: admin
 - Password: 111111
 
+SETTING UP THE IMPORT EXPORT TOOL
+---------------------------------
+Before running importexport.sh / importexport.bat make sure the target and source destinations are configured appropriately in the following files:
+- exportconfiguration.xml:     <target>path/to/target/export/destination</target>
+- importconfiguration.xml:     <source>path/to/source/import/destination</source>
+
 TROUBLESHOOTING
 ---------------
 Logs can be found in the following locations: 
@@ -40,6 +46,7 @@ Logs can be found in the following locations:
 - Cortex:              target/logs/ep-cortex.log
 - Search Server:       target/logs/ep-searchserver.log
 - Integration Server:  target/logs/ep-integration.log
+- Import Export Tool:  target/logs/ep-importexport.log
 
 ENABLING EMAIL
 --------------

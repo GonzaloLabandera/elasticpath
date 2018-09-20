@@ -3,6 +3,7 @@
  */
 package com.elasticpath.cmclient.fulfillment.editors.order;
 
+import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
@@ -17,6 +18,7 @@ import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jface.window.Window;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
@@ -45,6 +47,7 @@ import com.elasticpath.cmclient.core.ui.framework.IEpLayoutData;
 import com.elasticpath.cmclient.core.ui.framework.IEpTableColumn;
 import com.elasticpath.cmclient.core.ui.framework.IEpTableViewer;
 import com.elasticpath.cmclient.fulfillment.FulfillmentMessages;
+import com.elasticpath.cmclient.fulfillment.editors.order.dialog.OrderItemFieldValueDialog;
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.commons.util.OrderSkuComparatorFactory;
 import com.elasticpath.domain.catalog.Price;
@@ -54,10 +57,11 @@ import com.elasticpath.domain.catalog.PricingScheme;
 import com.elasticpath.domain.catalog.Product;
 import com.elasticpath.domain.catalog.ProductBundle;
 import com.elasticpath.domain.catalog.ProductSku;
-import com.elasticpath.domain.catalog.SimplePrice;
 import com.elasticpath.domain.order.Order;
 import com.elasticpath.domain.order.OrderShipment;
+import com.elasticpath.domain.order.OrderShipmentStatus;
 import com.elasticpath.domain.order.OrderSku;
+import com.elasticpath.domain.shoppingcart.ShoppingItemPricingSnapshot;
 import com.elasticpath.domain.skuconfiguration.SkuOptionValue;
 import com.elasticpath.money.Money;
 import com.elasticpath.service.catalog.ProductSkuLookup;
@@ -66,7 +70,8 @@ import com.elasticpath.service.shoppingcart.PricingSnapshotService;
 /**
  * Represents the UI of an order shipment.
  */
-public class OrderDetailsRecurringItemsSectionPart extends AbstractCmClientEditorPageSectionPart 
+@SuppressWarnings({"PMD.GodClass", "PMD.ExcessiveImports"})
+public class OrderDetailsRecurringItemsSectionPart extends AbstractCmClientEditorPageSectionPart
 	implements SelectionListener, ISelectionChangedListener {
 	
 	private static final Logger LOG = Logger.getLogger(OrderDetailsRecurringItemsSectionPart.class);
@@ -77,31 +82,31 @@ public class OrderDetailsRecurringItemsSectionPart extends AbstractCmClientEdito
 	
 	private static final int COLUMN_WIDTH_BUNDLE_NAME = 120;
 	
-	private static final int COLUMN_WIDTH_SKU_CODE = 84;
+	private static final int COLUMN_WIDTH_SKU_CODE = 120;
 
-	private static final int COLUMN_WIDTH_PRODUCT_NAME = 141;
+	private static final int COLUMN_WIDTH_PRODUCT_NAME = 120;
 
 	private static final int COLUMN_WIDTH_SKU_OPTION = 80;
 
 	private static final int COLUMN_WIDTH_LIST_PRICE = 80;
-	
-	private static final int COLUMN_WIDTH_PAYMENT_SCHEDULE = 140;
 
-	private static final int COLUMN_WIDTH_INVOICE_PRICE = 80;
+	private static final int COLUMN_WIDTH_SALE_PRICE = 80;
 
-	private static final int COLUMN_WIDTH_QUANTITY = 40;
+	private static final int COLUMN_WIDTH_PAYMENT_SCHEDULE = 130;
+
+	private static final int COLUMN_WIDTH_QUANTITY = 60;
+
+	private static final int COLUMN_WIDTH_DISCOUNT = 80;
+
+	private static final int COLUMN_WIDTH_TOTAL_PRICE = 80;
 
 	private static final String ORDER_DETAILS_RECURRING_ITEMS_TABLE = "Order Details Recurring Items Table"; //$NON-NLS-1$
 
 	private IEpTableViewer shipmentOrderSkuTable;
 
 	private final OrderShipment shipment;
-
-	private IEpLayoutComposite mainPane;
-
-	
 	private Button openProductButton;
-
+	private Button itemDetailButton;
 	private final AbstractCmClientFormEditor editor;
 	private ProductSkuLookup productSkuLookup;
 	private PricingSnapshotService pricingSnapshotService;
@@ -123,7 +128,7 @@ public class OrderDetailsRecurringItemsSectionPart extends AbstractCmClientEdito
 
 	@Override
 	protected void createControls(final Composite client, final FormToolkit toolkit) {
-		mainPane = CompositeFactory.createTableWrapLayoutComposite(client, 2, false);
+		IEpLayoutComposite mainPane = CompositeFactory.createTableWrapLayoutComposite(client, 2, false);
 		mainPane.setLayoutData(new TableWrapData(TableWrapData.FILL, TableWrapData.FILL));
 
 		final IEpLayoutData tableData = mainPane.createLayoutData(IEpLayoutData.FILL, IEpLayoutData.FILL, true, false);
@@ -156,13 +161,21 @@ public class OrderDetailsRecurringItemsSectionPart extends AbstractCmClientEdito
 				COLUMN_WIDTH_LIST_PRICE);
 		skuListPriceColumn.setLabelProvider(new ListPriceColumnLabelProvider());
 
+		final IEpTableColumn skuSalePriceColumn = shipmentOrderSkuTable.addTableColumn(FulfillmentMessages.get().ShipmentSection_SalePrice,
+				COLUMN_WIDTH_SALE_PRICE);
+		skuSalePriceColumn.setLabelProvider(new SalePriceColumnLabelProvider());
+
 		final IEpTableColumn skuQuantityColumn = shipmentOrderSkuTable.addTableColumn(FulfillmentMessages.get().ShipmentSection_Quantity,
 				COLUMN_WIDTH_QUANTITY);
 		skuQuantityColumn.setLabelProvider(new QuantityColumnLabelProvider());
 
-		final IEpTableColumn skuInvoicePriceColumn = shipmentOrderSkuTable.addTableColumn(FulfillmentMessages.get().ShipmentSection_InvoicePrice,
-				COLUMN_WIDTH_INVOICE_PRICE);
-		skuInvoicePriceColumn.setLabelProvider(new InvoicePriceColumnLabelProvider());
+		final IEpTableColumn skuDiscountColumn = shipmentOrderSkuTable.addTableColumn(FulfillmentMessages.get().ShipmentSection_Discount,
+				COLUMN_WIDTH_DISCOUNT);
+		skuDiscountColumn.setLabelProvider(new DiscountColumnLabelProvider());
+
+		final IEpTableColumn skuTotalPriceColumn = shipmentOrderSkuTable.addTableColumn(FulfillmentMessages.get().ShipmentSection_TotalPrice,
+				COLUMN_WIDTH_TOTAL_PRICE);
+		skuTotalPriceColumn.setLabelProvider(new TotalPriceColumnLabelProvider());
 
 		final IEpTableColumn paymentScheduleColumn = shipmentOrderSkuTable.addTableColumn(FulfillmentMessages.get().ShipmentSection_PaymentSchedule,
 				COLUMN_WIDTH_PAYMENT_SCHEDULE);
@@ -176,20 +189,27 @@ public class OrderDetailsRecurringItemsSectionPart extends AbstractCmClientEdito
 				final OrderSku orderSku = getSelectedOrderSku();
 				final ProductSku productSku = getProductSkuLookup().findByGuid(orderSku.getSkuGuid());
 				if (AuthorizationService.getInstance().isAuthorizedForAnyProductCatalog(productSku.getProduct())) {
-	
-					openProductButton.setEnabled(true);						
+					openProductButton.setEnabled(true);
+					itemDetailButton.setEnabled(true);
 
 				}
 				
 			}
 		});
-		
-		
-		openProductButton = mainPane.addPushButton(FulfillmentMessages.get().ShipmentSection_OpenProductButton, CoreImageRegistry
-				.getImage(CoreImageRegistry.PRODUCT), EpState.EDITABLE, mainPane.createLayoutData(IEpLayoutData.FILL, IEpLayoutData.BEGINNING));
+
+		final IEpLayoutData buttonPaneData = mainPane.createLayoutData(IEpLayoutData.FILL, IEpLayoutData.FILL);
+		final IEpLayoutComposite buttonsPane = mainPane.addTableWrapLayoutComposite(1, true, buttonPaneData);
+		final IEpLayoutData buttonData = mainPane.createLayoutData();
+
+		itemDetailButton = buttonsPane.addPushButton(FulfillmentMessages.get().ShipmentSection_ItemDetailButton, CoreImageRegistry
+				.getImage(CoreImageRegistry.PRODUCT), EpState.EDITABLE, buttonData);
+		itemDetailButton.setEnabled(false);
+		itemDetailButton.addSelectionListener(this);
+
+		openProductButton = buttonsPane.addPushButton(FulfillmentMessages.get().ShipmentSection_OpenProductButton, CoreImageRegistry
+				.getImage(CoreImageRegistry.PRODUCT), EpState.EDITABLE, buttonData);
 		openProductButton.setEnabled(false);
 		openProductButton.addSelectionListener(this);
-		
 	}
 
 	
@@ -222,39 +242,78 @@ public class OrderDetailsRecurringItemsSectionPart extends AbstractCmClientEdito
 			return Integer.toString(orderSku.getQuantity());
 		}
 	}
+	/**
+	 * Column label provider.
+	 */
+	private final class DiscountColumnLabelProvider extends ColumnLabelProvider {
+		@Override
+		public String getText(final Object element) {
+			final OrderSku orderSku = (OrderSku) element;
+			return orderSku.getDiscountBigDecimal().toString();
+		}
+	}
 
 	/**
 	 * Column label provider.
 	 */
 	@SuppressWarnings("PMD.AvoidBranchingStatementAsLastInLoop")
-	private final class InvoicePriceColumnLabelProvider extends ColumnLabelProvider {
+	private final class SalePriceColumnLabelProvider extends ColumnLabelProvider {
 		@Override
 		public String getText(final Object element) {
 			final OrderSku orderSku = (OrderSku) element;
-
 			Price price = getPricingSnapshotService().getPricingSnapshotForOrderSku(orderSku).getPrice();
-			
 			PricingScheme pricingScheme = price.getPricingScheme();
-			
 			if (pricingScheme != null) {
-			
 				Collection<PriceSchedule> schedules = pricingScheme.getSchedules(PriceScheduleType.RECURRING);
-				
-				for (PriceSchedule pricingSchedule : schedules) {
-
-					SimplePrice simplePrice = pricingScheme.getSimplePriceForSchedule(pricingSchedule);
-
-					Money lowestPrice = simplePrice.getLowestPrice(orderSku.getQuantity());
-
-					return lowestPrice.getAmountUnscaled().toString();
-				}
-			
+				return schedules.stream()
+						.map(pricingScheme::getSimplePriceForSchedule)
+						.map(simplePrice -> simplePrice.getLowestPrice(orderSku.getQuantity()))
+						.findFirst()
+						.map(Money::getRawAmount)
+						.map(BigDecimal::toString)
+						.orElse("");
 			}
-			
-			
-			// by default return blank
-			
 			return ""; //$NON-NLS-1$
+		}
+	}
+
+	/**
+	 * Column label provider.
+	 */
+	@SuppressWarnings("PMD.AvoidBranchingStatementAsLastInLoop")
+	private final class TotalPriceColumnLabelProvider extends ColumnLabelProvider {
+		@Override
+		public String getText(final Object element) {
+			final OrderSku orderSku = (OrderSku) element;
+			BigDecimal unitPrice = getUnitPrice(orderSku);
+			if (unitPrice == null) {
+				return ""; //$NON-NLS-1$
+			}
+
+			final ShoppingItemPricingSnapshot pricingSnapshot = getPricingSnapshotService().getPricingSnapshotForOrderSku(orderSku);
+			final BigDecimal invoicePrice;
+			if (pricingSnapshot.getDiscount() == null || pricingSnapshot.getDiscount().getAmount() == null) {
+				invoicePrice = unitPrice.multiply(new BigDecimal(orderSku.getQuantity()));
+			} else {
+				BigDecimal totalPrice = unitPrice.multiply(new BigDecimal(orderSku.getQuantity()));
+				BigDecimal totalDiscount = pricingSnapshot.getDiscount().getAmount();
+				invoicePrice = totalPrice.subtract(totalDiscount);
+			}
+			return invoicePrice.toString();
+		}
+
+		private BigDecimal getUnitPrice(final OrderSku orderSku) {
+			Price price = getPricingSnapshotService().getPricingSnapshotForOrderSku(orderSku).getPrice();
+			PricingScheme pricingScheme = price.getPricingScheme();
+			if (pricingScheme != null) {
+				return pricingScheme.getSchedules(PriceScheduleType.RECURRING).stream()
+						.map(pricingScheme::getSimplePriceForSchedule)
+						.map(simplePrice -> simplePrice.getLowestPrice(orderSku.getQuantity()))
+						.findFirst()
+						.map(Money::getRawAmount)
+						.orElse(null);
+			}
+			return null;
 		}
 	}
 
@@ -266,33 +325,22 @@ public class OrderDetailsRecurringItemsSectionPart extends AbstractCmClientEdito
 		@Override
 		public String getText(final Object element) {
 			final OrderSku orderSku = (OrderSku) element;
-
 			Price price = getPricingSnapshotService().getPricingSnapshotForOrderSku(orderSku).getPrice();
-			
 			PricingScheme pricingScheme = price.getPricingScheme();
-			
 			if (pricingScheme != null) {
-			
 				Collection<PriceSchedule> schedules = pricingScheme.getSchedules(PriceScheduleType.RECURRING);
-				
-				for (PriceSchedule pricingSchedule : schedules) {
-
-					SimplePrice simplePrice = pricingScheme.getSimplePriceForSchedule(pricingSchedule);
-
-					Money listPrice = simplePrice.getListPrice(orderSku.getQuantity());
-
-					return listPrice.getAmountUnscaled().toString();
-				}
-			
+				return schedules.stream()
+						.map(pricingScheme::getSimplePriceForSchedule)
+						.map(simplePrice -> simplePrice.getListPrice(orderSku.getQuantity()))
+						.findFirst()
+						.map(Money::getRawAmount)
+						.map(BigDecimal::toString)
+						.orElse("");
 			}
-			
-			// by default return blank
-			
 			return ""; //$NON-NLS-1$
 		}
 	}
-	
-	
+
 	/**
 	 * Column label provider.
 	 */
@@ -384,7 +432,7 @@ public class OrderDetailsRecurringItemsSectionPart extends AbstractCmClientEdito
 	/**
 	 * Content provider for displaying the shipment's <code>OrderSku</code>s.
 	 */
-	private class OrderSkuContentProvider implements IStructuredContentProvider {
+	private static class OrderSkuContentProvider implements IStructuredContentProvider {
 
 		/**
 		 * @param inputElement the element containing the data to be displayed
@@ -402,7 +450,6 @@ public class OrderDetailsRecurringItemsSectionPart extends AbstractCmClientEdito
 		@Override
 		public void dispose() {
 			// not used
-
 		}
 
 		/**
@@ -442,22 +489,32 @@ public class OrderDetailsRecurringItemsSectionPart extends AbstractCmClientEdito
 	 */
 	@Override
 	public void widgetSelected(final SelectionEvent event) {
-		
 		final OrderSku orderSku = (OrderSku) ((IStructuredSelection) shipmentOrderSkuTable.getSwtTableViewer().getSelection()).getFirstElement();
-		
-		try {
-			
-			IWorkbenchPage workbenchPage = editor.getSite().getPage();
-			
-			ProductSku productSku = getProductSkuLookup().findByGuid(orderSku.getSkuGuid());
-			workbenchPage.openEditor(new GuidEditorInput(productSku.getProduct().getGuid(), Product.class), ProductEditor.PART_ID);
-		
-		} catch (final PartInitException exc) {
-			
-			LOG.error("Error opening the Product SKU Editor", exc); //$NON-NLS-1$
+		if (event.getSource() == openProductButton) {
+			try {
+				IWorkbenchPage workbenchPage = editor.getSite().getPage();
+				ProductSku productSku = getProductSkuLookup().findByGuid(orderSku.getSkuGuid());
+				workbenchPage.openEditor(new GuidEditorInput(productSku.getProduct().getGuid(), Product.class), ProductEditor.PART_ID);
+			} catch (final PartInitException exc) {
+				LOG.error("Error opening the Product SKU Editor", exc); //$NON-NLS-1$
+			}
+		} else if (event.getSource() == itemDetailButton) {
+			final ProductSku productSku = getProductSkuLookup().findByGuid(orderSku.getSkuGuid());
+			boolean giftCertificate = productSku.isDigital() && !productSku.isDownloadable();
+			final boolean canEdit = !shipment.getShipmentStatus().equals(OrderShipmentStatus.SHIPPED)
+					&& !giftCertificate;
+			final OrderItemFieldValueDialog attrDialog =
+					OrderItemFieldValueDialog.createOrderItemDataDialog(
+							editor.getSite().getShell(),
+							orderSku,
+							shipment.getOrder(),
+							canEdit
+					);
+			if (attrDialog.open() == Window.OK && attrDialog.isChanged()) {
+				editor.controlModified();
+				((OrderEditor) editor).addOrderShipmentToUpdate(shipment);
+			}
 		}
-	
-		
 	}
 	
 	@Override
@@ -469,8 +526,6 @@ public class OrderDetailsRecurringItemsSectionPart extends AbstractCmClientEdito
 	@Override
 	public void selectionChanged(final SelectionChangedEvent event) {
 		//FIXME: [BB-778]
-
-
 	}
 
 	/**
@@ -482,7 +537,6 @@ public class OrderDetailsRecurringItemsSectionPart extends AbstractCmClientEdito
 		if (productSkuLookup == null) {
 			productSkuLookup = new LocalProductSkuLookup();
 		}
-		
 		return productSkuLookup;
 	}
 

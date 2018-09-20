@@ -10,7 +10,10 @@ import org.openqa.selenium.WebDriver;
  */
 public class MoveItemDialog extends AbstractDialog {
 
-	private static final String MOVE_ITEM_PARENT_CSS = "div[widget-id='Move Item'][widget-type='Shell'] ";
+	/**
+	 * CSS selector used to identify the dialog.
+	 */
+	public static final String MOVE_ITEM_PARENT_CSS = "div[widget-id='Move Item'][widget-type='Shell'] ";
 	private static final String ADDRESS_COMBO_CSS = MOVE_ITEM_PARENT_CSS + "div[widget-id='Address'][widget-type='CCombo']";
 	private static final String SHIPMENT_METHOD_COMBO_CSS = MOVE_ITEM_PARENT_CSS + "div[widget-id='Shipment Method'][widget-type='CCombo']";
 

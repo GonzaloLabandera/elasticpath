@@ -16,7 +16,7 @@ import org.apache.shiro.subject.PrincipalCollection;
 import org.apache.shiro.subject.SimplePrincipalCollection;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.elasticpath.rest.definition.profiles.ProfileIdentifier;
 import com.elasticpath.rest.id.Identifier;
@@ -33,6 +33,7 @@ import static org.mockito.Mockito.when;
  * Test class for {@link ProfileIdParameterStrategy}.
  */
 @RunWith(MockitoJUnitRunner.class)
+@SuppressWarnings({"unchecked", "rawtypes"})
 public final class ProfileIdParameterStrategyTest {
 
 	private static final String TEST_REALM = "testRealm";

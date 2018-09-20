@@ -54,6 +54,32 @@ class CommonMethods {
 				.contains(itemCode)
 	}
 
+	static void verifyDependentLineItemsContainAllConstituents(String purchasableItemSkuCode) {
+		def itemCodes = getConstituentsCodes(purchasableItemSkuCode).toSorted()
+		def dependentLineItemsCodes = getDependentLineItemsCodesList(purchasableItemSkuCode).toSorted()
+
+		def missingCodes = itemCodes - itemCodes.intersect(dependentLineItemsCodes)
+
+		assertThat(missingCodes)
+				.as("The Dependent LineItems do not contain the expected items.")
+				.isEmpty()
+	}
+
+	static getConstituentsCodes(purchasableItemSkuCode) {
+		def itemsCodes = []
+
+		lookup(purchasableItemSkuCode)
+
+		client.definition()
+				.components().findElement {
+			component ->
+				component.standaloneitem().code()
+				itemsCodes.add(client["code"])
+		}
+
+		return itemsCodes
+	}
+
 	static void verifyLineitemsNotContainElementWithDisplayName(String itemDisplayName) {
 		assertThat(getLineitemNamesList())
 				.as("The lineitems contain the unexpected item.")
@@ -71,7 +97,7 @@ class CommonMethods {
 
 		client.body.links.findAll {
 			if (it.rel == "element") {
-				client.GET(it.uri)
+				client.GET(it.href)
 				client.item()
 						.definition()
 				lineItemNames.add(client["display-name"])
@@ -85,12 +111,26 @@ class CommonMethods {
 
 		client.body.links.findAll {
 			if (it.rel == "element") {
-				client.GET(it.uri)
+				client.GET(it.href)
 				client.item()
 						.code()
 				lineItemCodes.add(client["code"])
 			}
 		}
+		return lineItemCodes
+	}
+
+	static List getDependentLineItemsCodesList(String lineItemCode) {
+		def lineItemCodes = []
+
+		client.GET(findCartLineItemUriBySkuCode(lineItemCode))
+				.dependentlineitems()
+				.findElement {
+			lineitem ->
+				lineitem.item().code()
+				lineItemCodes.add(client["code"])
+		}
+
 		return lineItemCodes
 	}
 
@@ -150,7 +190,7 @@ class CommonMethods {
 
 		client.body.links.find {
 			if (it.rel == "element") {
-				client.GET(it.uri)
+				client.GET(it.href)
 				elementResponse = client.save()
 				client.item()
 						.definition()
@@ -171,7 +211,7 @@ class CommonMethods {
 
 		client.body.links.find {
 			if (it.rel == "element") {
-				client.GET(it.uri)
+				client.GET(it.href)
 				elementResponse = client.save()
 				client.item()
 						.code()
@@ -199,7 +239,7 @@ class CommonMethods {
 		client.body.links.find {
 			configMatch = true
 			if (it.rel == "element") {
-				client.GET(it.uri)
+				client.GET(it.href)
 				elementResponse = client.save()
 				client.item()
 				client.code()
@@ -217,7 +257,7 @@ class CommonMethods {
 			def mapList = dataTable.asMap(String, String)
 
 			for (def map : mapList) {
-				configValueMatch = false;
+				configValueMatch = false
 				def key = map.getKey()
 				def value = map.getValue()
 				if (client.body.'configuration'."$key" == value) {
@@ -295,7 +335,7 @@ class CommonMethods {
 				.shippingoptioninfo()
 				.selector()
 
-		def choiceExists = false;
+		def choiceExists = false
 		client.body.links.find {
 			if (it.rel == "choice") {
 				choiceExists = true
@@ -536,7 +576,7 @@ class CommonMethods {
 		def elementResponse
 		client.body.links.find {
 			if (it.rel == linkrel) {
-				client.GET(it.uri)
+				client.GET(it.href)
 				if (client[field] == value) {
 					elementResponse = client.save()
 					elementExists = true
@@ -551,4 +591,41 @@ class CommonMethods {
 		client.resume(elementResponse)
 			.stopIfFailure()
 	}
+
+	static void addBillingAddress() {
+		createAddress("CA", "", "Vancouver", "", "", "555555", "BC",
+				"123 Somestreet", "testFamilyName", "testGivenName")
+		assert client.response.status == 201
+	}
+
+	static def purchaseNumberLookup(def purchaseNumber) {
+		client.GET("/")
+				.lookups()
+				.purchaselookupform()
+				.purchaselookupaction(["purchase-number": purchaseNumber])
+		        .follow()
+				.stopIfFailure()
+	}
+
+
+	static def navigationLookupCode(def categoryCode) {
+		client.GET("/")
+				.lookups()
+				.navigationlookupform()
+				.navigationlookupaction([code: categoryCode])
+				.follow()
+				.stopIfFailure()
+	}
+
+	static def verifyNavigationLinkDoesNotExist(def expectedLink){
+		def expectedLinks = client.body.links.findAll {
+			link ->
+				link.rel == expectedLink
+		}
+		assertThat(expectedLinks)
+				.size()
+				.as("$expectedLink links found but should not exist: $client.body.links")
+				.isEqualTo(0)
+	}
+
 }

@@ -13,7 +13,6 @@ import cucumber.api.java.en.Given;
 import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.ContextConfiguration;
 
 import com.elasticpath.cucumber.ScenarioContextValueHolder;
 import com.elasticpath.domain.catalog.AvailabilityCriteria;
@@ -30,7 +29,6 @@ import com.elasticpath.test.persister.testscenarios.SimpleStoreScenario;
 /**
  * Product steps.
  */
-@ContextConfiguration("/cucumber.xml")
 public class ProductStepDefinitions {
 
 	@Inject

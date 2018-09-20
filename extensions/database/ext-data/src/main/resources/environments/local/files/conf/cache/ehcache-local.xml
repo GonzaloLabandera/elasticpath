@@ -15,8 +15,6 @@
 			timeToLiveSeconds="1"
 			maxEntriesLocalHeap="10000"
 			eternal="false"
-			overflowToDisk="false"
-			diskPersistent="false"
 			diskExpiryThreadIntervalSeconds="120"
 			memoryStoreEvictionPolicy="LRU"
 			statistics="true"
@@ -27,7 +25,6 @@
 		   timeToLiveSeconds="5"
 		   maxEntriesLocalHeap="10000"
 		   eternal="false"
-		   overflowToDisk="false"
 		   statistics="true"
 	/>
 
@@ -38,7 +35,6 @@
 		   timeToIdleSeconds="${ep.local.cache.timeout}"
 		   timeToLiveSeconds="${ep.local.cache.timeout}"
 		   maxEntriesLocalHeap="10000"
-		   maxElementsOnDisk="10000"
 		   statistics="true"
 	/>
 
@@ -46,7 +42,6 @@
 		   timeToIdleSeconds="${ep.local.cache.timeout}"
 		   timeToLiveSeconds="${ep.local.cache.timeout}"
 		   maxEntriesLocalHeap="10000"
-		   maxElementsOnDisk="10000"
 		   statistics="true"
 	/>
 
@@ -54,7 +49,6 @@
 		   timeToIdleSeconds="${ep.local.cache.timeout}"
 		   timeToLiveSeconds="${ep.local.cache.timeout}"
 		   maxEntriesLocalHeap="10000"
-		   maxElementsOnDisk="10000"
 		   statistics="true"
 	/>
 
@@ -62,15 +56,6 @@
 		   timeToIdleSeconds="${ep.local.cache.timeout}"
 		   timeToLiveSeconds="${ep.local.cache.timeout}"
 		   maxEntriesLocalHeap="10000"
-		   maxElementsOnDisk="10000"
-		   statistics="true"
-	/>
-
-	<cache name="categoryRuleBaseCache"
-		   timeToIdleSeconds="${ep.local.cache.timeout}"
-		   timeToLiveSeconds="${ep.local.cache.timeout}"
-		   maxEntriesLocalHeap="10000"
-		   maxElementsOnDisk="10000"
 		   statistics="true"
 	/>
 
@@ -78,7 +63,6 @@
 		   timeToIdleSeconds="${ep.local.cache.timeout}"
 		   timeToLiveSeconds="${ep.local.cache.timeout}"
 		   maxEntriesLocalHeap="10000"
-		   maxElementsOnDisk="10000"
 		   statistics="true"
 	/>
 
@@ -86,7 +70,6 @@
 		   timeToIdleSeconds="${ep.local.cache.timeout}"
 		   timeToLiveSeconds="${ep.local.cache.timeout}"
 		   maxEntriesLocalHeap="10000"
-		   maxElementsOnDisk="10000"
 		   statistics="true"
 	/>
 
@@ -94,7 +77,6 @@
 		   timeToIdleSeconds="${ep.local.cache.timeout}"
 		   timeToLiveSeconds="${ep.local.cache.timeout}"
 		   maxEntriesLocalHeap="10000"
-		   maxElementsOnDisk="10000"
 		   statistics="true"
 	/>
 
@@ -102,7 +84,6 @@
 		   timeToIdleSeconds="${ep.local.cache.timeout}"
 		   timeToLiveSeconds="${ep.local.cache.timeout}"
 		   maxEntriesLocalHeap="10000"
-		   maxElementsOnDisk="10000"
 		   statistics="true"
 	/>
 
@@ -110,7 +91,6 @@
 		   timeToIdleSeconds="${ep.local.cache.timeout}"
 		   timeToLiveSeconds="${ep.local.cache.timeout}"
 		   maxEntriesLocalHeap="10000"
-		   maxElementsOnDisk="10000"
 		   statistics="true"
 	/>
 
@@ -118,7 +98,6 @@
 		   timeToIdleSeconds="${ep.local.cache.timeout}"
 		   timeToLiveSeconds="${ep.local.cache.timeout}"
 		   maxEntriesLocalHeap="10000"
-		   maxElementsOnDisk="10000"
 		   statistics="true"
 	/>
 
@@ -126,7 +105,6 @@
 		   timeToIdleSeconds="${ep.local.cache.timeout}"
 		   timeToLiveSeconds="${ep.local.cache.timeout}"
 		   maxEntriesLocalHeap="10000"
-		   maxElementsOnDisk="10000"
 		   statistics="true"
 	/>
 
@@ -134,7 +112,6 @@
 		   timeToIdleSeconds="${ep.local.cache.timeout}"
 		   timeToLiveSeconds="${ep.local.cache.timeout}"
 		   maxEntriesLocalHeap="10000"
-		   maxElementsOnDisk="10000"
 		   statistics="true"
 	/>
 
@@ -142,7 +119,6 @@
 		   timeToIdleSeconds="${ep.local.cache.timeout}"
 		   timeToLiveSeconds="${ep.local.cache.timeout}"
 		   maxEntriesLocalHeap="10000"
-		   maxElementsOnDisk="10000"
 		   statistics="true"
 	/>
 
@@ -150,7 +126,6 @@
 		   timeToIdleSeconds="${ep.local.cache.timeout}"
 		   timeToLiveSeconds="${ep.local.cache.timeout}"
 		   maxEntriesLocalHeap="10000"
-		   maxElementsOnDisk="10000"
 		   statistics="true"
 	/>
 
@@ -158,7 +133,6 @@
 		   timeToIdleSeconds="${ep.local.cache.timeout}"
 		   timeToLiveSeconds="${ep.local.cache.timeout}"
 		   maxEntriesLocalHeap="10000"
-		   maxElementsOnDisk="10000"
 		   statistics="true"
 	/>
 
@@ -166,7 +140,6 @@
 		   timeToIdleSeconds="${ep.local.cache.timeout}"
 		   timeToLiveSeconds="${ep.local.cache.timeout}"
 		   maxEntriesLocalHeap="10000"
-		   maxElementsOnDisk="10000"
 		   statistics="true"
 	/>
 
@@ -174,7 +147,6 @@
 		   timeToIdleSeconds="${ep.local.cache.timeout}"
 		   timeToLiveSeconds="${ep.local.cache.timeout}"
 		   maxEntriesLocalHeap="10000"
-		   maxElementsOnDisk="10000"
 		   statistics="true"
 	/>
 
@@ -182,7 +154,6 @@
 		   timeToIdleSeconds="${ep.local.cache.timeout}"
 		   timeToLiveSeconds="${ep.local.cache.timeout}"
 		   maxEntriesLocalHeap="10000"
-		   maxElementsOnDisk="10000"
 		   statistics="true"
 	/>
 
@@ -190,7 +161,6 @@
 		   timeToIdleSeconds="${ep.local.cache.timeout}"
 		   timeToLiveSeconds="${ep.local.cache.timeout}"
 		   maxEntriesLocalHeap="10000"
-		   maxElementsOnDisk="10000"
 		   statistics="true"
 	/>
 
@@ -198,7 +168,6 @@
 		   timeToIdleSeconds="${ep.local.cache.timeout}"
 		   timeToLiveSeconds="${ep.local.cache.timeout}"
 		   maxEntriesLocalHeap="10000"
-		   maxElementsOnDisk="10000"
 		   statistics="true"
 	/>
 
@@ -206,7 +175,6 @@
 		   timeToIdleSeconds="${ep.local.cache.timeout}"
 		   timeToLiveSeconds="${ep.local.cache.timeout}"
 		   maxEntriesLocalHeap="10000"
-		   maxElementsOnDisk="10000"
 		   statistics="true"
 	/>
 
@@ -214,7 +182,6 @@
 		   timeToIdleSeconds="${ep.local.cache.timeout}"
 		   timeToLiveSeconds="${ep.local.cache.timeout}"
 		   maxEntriesLocalHeap="10000"
-		   maxElementsOnDisk="10000"
 		   statistics="true"
 	/>
 
@@ -222,7 +189,6 @@
 		   timeToIdleSeconds="${ep.local.cache.timeout}"
 		   timeToLiveSeconds="${ep.local.cache.timeout}"
 		   maxEntriesLocalHeap="10000"
-		   maxElementsOnDisk="10000"
 		   statistics="true"
 	/>
 
@@ -230,7 +196,6 @@
 		   timeToIdleSeconds="${ep.local.cache.timeout}"
 		   timeToLiveSeconds="${ep.local.cache.timeout}"
 		   maxEntriesLocalHeap="10000"
-		   maxElementsOnDisk="10000"
 		   statistics="true"
 	/>
 
@@ -238,7 +203,6 @@
 		   timeToIdleSeconds="${ep.local.cache.timeout}"
 		   timeToLiveSeconds="${ep.local.cache.timeout}"
 		   maxEntriesLocalHeap="10000"
-		   maxElementsOnDisk="10000"
 		   statistics="true"
 	/>
 
@@ -246,7 +210,6 @@
 		   timeToIdleSeconds="${ep.local.cache.timeout}"
 		   timeToLiveSeconds="${ep.local.cache.timeout}"
 		   maxEntriesLocalHeap="10000"
-		   maxElementsOnDisk="10000"
 		   statistics="true"
 	/>
 

@@ -92,7 +92,7 @@
     <!-- Health Monitoring servlet -->
     <servlet>
         <servlet-name>Status servlet</servlet-name>
-        <servlet-class>com.elasticpath.repo.health.monitoring.servlet.StatusCheckerServlet</servlet-class>
+        <servlet-class>com.elasticpath.health.monitoring.servlet.StatusCheckerServlet</servlet-class>
     </servlet>
 
     <servlet-mapping>

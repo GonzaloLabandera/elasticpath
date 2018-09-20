@@ -6,8 +6,8 @@ import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
 
 import com.elasticpath.selenium.editor.StoreEditor;
-import com.elasticpath.selenium.framework.util.SeleniumDriverSetup;
 import com.elasticpath.selenium.resultspane.StoresResultPane;
+import com.elasticpath.selenium.setup.SetUp;
 import com.elasticpath.selenium.toolbars.ConfigurationActionToolbar;
 import com.elasticpath.selenium.util.Utility;
 
@@ -28,7 +28,7 @@ public class StoresDefinition {
 	 * Constructor.
 	 */
 	public StoresDefinition() {
-		configurationActionToolbar = new ConfigurationActionToolbar(SeleniumDriverSetup.getDriver());
+		configurationActionToolbar = new ConfigurationActionToolbar(SetUp.getDriver());
 	}
 
 	/**
@@ -149,6 +149,7 @@ public class StoresDefinition {
 	 */
 	@When("^I change the store state to (.+)$")
 	public void changeStoreState(final String newStoreState) {
+		storeEditor.clickTab("Summary");
 		storeEditor.changeStoreState(newStoreState);
 	}
 
@@ -159,7 +160,6 @@ public class StoresDefinition {
 	 */
 	@Then("^the store list should show (.+) state$")
 	public void verifyStoreState(final String expState) {
-		storeEditor.clickTab("Summary");
 		storesResultPane.verifyStoreState(expState, this.storeCode);
 	}
 
@@ -179,5 +179,13 @@ public class StoresDefinition {
 		storesResultPane.closePane("Stores");
 		clickStores();
 		storesResultPane.verifyStoreDoesntExists(this.storeCode);
+	}
+
+	/**
+	 * Verifies store data policies enable state is true.
+	 */
+	@Then("^Data Policies for the store is enabled$")
+	public void verifyStoreDataPolicyEnabled() {
+		storeEditor.verifyDataPolicyEnabled();
 	}
 }

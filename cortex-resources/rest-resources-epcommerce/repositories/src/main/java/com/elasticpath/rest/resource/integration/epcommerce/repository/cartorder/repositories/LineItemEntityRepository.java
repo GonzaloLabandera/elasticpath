@@ -20,18 +20,17 @@ import com.elasticpath.domain.shoppingcart.ShoppingItem;
 import com.elasticpath.repository.Repository;
 import com.elasticpath.rest.ResourceOperationFailure;
 import com.elasticpath.rest.advise.Message;
-import com.elasticpath.rest.definition.carts.CartIdentifier;
 import com.elasticpath.rest.definition.carts.LineItemConfigurationEntity;
 import com.elasticpath.rest.definition.carts.LineItemEntity;
 import com.elasticpath.rest.definition.carts.LineItemIdentifier;
-import com.elasticpath.rest.definition.carts.LineItemsIdentifier;
 import com.elasticpath.rest.form.SubmitResult;
 import com.elasticpath.rest.form.SubmitStatus;
 import com.elasticpath.rest.id.IdentifierPart;
-import com.elasticpath.rest.id.type.StringIdentifier;
+import com.elasticpath.rest.resource.dispatch.operator.annotation.Default;
+import com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder.AddToCartAdvisorService;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder.CartItemModifiersRepository;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder.ShoppingCartRepository;
-import com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder.ShoppingItemValidationService;
+import com.elasticpath.rest.resource.integration.epcommerce.repository.carts.lineitems.LineItemIdentifierRepository;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.item.ItemRepository;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.sku.ProductSkuRepository;
 
@@ -53,7 +52,9 @@ public class LineItemEntityRepository<E extends LineItemEntity, I extends LineIt
 
 	private CartItemModifiersRepository cartItemModifiersRepository;
 
-	private ShoppingItemValidationService shoppingItemValidationService;
+	private AddToCartAdvisorService addToCartAdvisorService;
+
+	private LineItemIdentifierRepository lineItemIdentifierRepository;
 
 	private static final String INVALID_BUNDLE_CONFIGURATION = "Dynamic Bundle not supported";
 
@@ -62,7 +63,7 @@ public class LineItemEntityRepository<E extends LineItemEntity, I extends LineIt
 		String cartId = identifier.getLineItems().getCart().getCartId().getValue();
 		String lineItemId = identifier.getLineItemId().getValue();
 
-		return shoppingCartRepository.getDefaultShoppingCart()
+		return getShoppingCartForItemIdentifier(identifier)
 				.flatMap(cart -> shoppingCartRepository.getShoppingItem(lineItemId, cart)
 						.flatMap(shoppingItem -> productSkuRepository.getProductSkuWithAttributesByGuidAsSingle(shoppingItem.getSkuGuid())
 								.flatMap(productSku -> itemRepository.getItemIdForSkuAsSingle(productSku)
@@ -79,13 +80,13 @@ public class LineItemEntityRepository<E extends LineItemEntity, I extends LineIt
 	 * @return LineItemEntity
 	 */
 	protected Single<LineItemEntity> buildLineItemEntity(final String cartId, final String lineItemId, final ShoppingItem shoppingItem,
-													   final String itemId) {
+														 final String itemId) {
 		Map<String, String> fields = shoppingItem.getFields();
 		Single<LineItemConfigurationEntity> lineItemConfigurationEntity;
 		if (fields == null) {
 			lineItemConfigurationEntity = Single.just(LineItemConfigurationEntity.builder().build());
 		} else {
-			lineItemConfigurationEntity = cartItemModifiersRepository.findCartItemModifierValues(lineItemId)
+			lineItemConfigurationEntity = cartItemModifiersRepository.findCartItemModifierValues(cartId, lineItemId)
 					.map(this::buildLineItemConfigurationEntity);
 		}
 		return lineItemConfigurationEntity.map(configuration -> LineItemEntity.builder()
@@ -110,8 +111,7 @@ public class LineItemEntityRepository<E extends LineItemEntity, I extends LineIt
 
 	@Override
 	public Single<SubmitResult<LineItemIdentifier>> submit(final LineItemEntity lineItemEntity, final IdentifierPart<String> scope) {
-		return shoppingItemValidationService.validateQuantity(lineItemEntity)
-				.andThen(isItemPurchasable(lineItemEntity, scope))
+		return addToCartAdvisorService.validateLineItemEntity(lineItemEntity)
 				.andThen(addToCart(lineItemEntity));
 	}
 
@@ -123,7 +123,7 @@ public class LineItemEntityRepository<E extends LineItemEntity, I extends LineIt
 	 * @return ResourceOperationFailure if item is not purchasable
 	 */
 	protected Completable isItemPurchasable(final LineItemEntity lineItemEntity, final IdentifierPart<String> scope) {
-		return shoppingItemValidationService.validateItemPurchasable(scope.getValue(), lineItemEntity.getItemId())
+		return addToCartAdvisorService.validateItemPurchasable(scope.getValue(), lineItemEntity.getItemId())
 				.flatMapCompletable(this::getStateFailure);
 	}
 
@@ -139,7 +139,7 @@ public class LineItemEntityRepository<E extends LineItemEntity, I extends LineIt
 				.map(LineItemConfigurationEntity::getDynamicProperties)
 				.orElse(Collections.emptyMap());
 
-		return shoppingCartRepository.getDefaultShoppingCart()
+		return getShoppingCartForItemEntity(lineItemEntity)
 				.flatMap(cart -> shoppingCartRepository.addItemToCart(cart, itemId, lineItemEntity.getQuantity(), fields)
 						.map(shoppingItem -> buildResult(cart, shoppingItem, lineItemEntity)))
 				.onErrorResumeNext(throwable -> {
@@ -149,6 +149,8 @@ public class LineItemEntityRepository<E extends LineItemEntity, I extends LineIt
 					return Single.error(throwable);
 				});
 	}
+
+
 
 	/**
 	 * Build the line item identifier and set the appropriate status.
@@ -164,60 +166,41 @@ public class LineItemEntityRepository<E extends LineItemEntity, I extends LineIt
 				? SubmitStatus.CREATED
 				: SubmitStatus.UPDATED;
 		return SubmitResult.<LineItemIdentifier>builder()
-				.withIdentifier(buildLineItemIdentifier(cart, shoppingItem))
+				.withIdentifier(lineItemIdentifierRepository.buildLineItemIdentifier(cart, shoppingItem))
 				.withStatus(status)
-				.build();
-	}
-	
-	/**
-	 * Build line item identifier.
-	 *
-	 * @param cart         cart
-	 * @param shoppingItem shoppingItem
-	 * @return line item identifier
-	 */
-	protected LineItemIdentifier buildLineItemIdentifier(final ShoppingCart cart, final ShoppingItem shoppingItem) {
-		return LineItemIdentifier.builder()
-				.withLineItemId(StringIdentifier.of(shoppingItem.getGuid()))
-				.withLineItems(LineItemsIdentifier.builder()
-						.withCart(CartIdentifier.builder()
-								.withCartId(StringIdentifier.of(cart.getGuid()))
-								.withScope(StringIdentifier.of(cart.getStore().getCode()))
-								.build())
-						.build())
 				.build();
 	}
 
 	@Override
 	public Completable update(final LineItemEntity lineItemEntity, final LineItemIdentifier identifier) {
-		String scope = identifier.getLineItems().getCart().getScope().getValue();
 		String lineItemId = identifier.getLineItemId().getValue();
-		return shoppingItemValidationService.validateQuantity(lineItemEntity, 0)
-				.andThen(isItemPurchasable(scope, lineItemId))
-				.andThen(performUpdate(lineItemEntity, lineItemId));
+		return addToCartAdvisorService.validateLineItemEntity(lineItemEntity)
+				.andThen(performUpdate(lineItemEntity, lineItemId, identifier));
 	}
 
 	/**
 	 * Validate if the item is purchasable.
 	 *
-	 * @param scope scope 
-	 * @param lineItemId line item id
+	 * @param scope      scope
+	 * @param identifier the identifier.
 	 * @return ResourceOperationFailure if item is not purchasable
 	 */
-	protected Completable isItemPurchasable(final String scope, final String lineItemId) {
-		return shoppingCartRepository.getProductSku(lineItemId)
-				.flatMapCompletable(productSku -> isItemPurchasable(scope, productSku));
+	protected Completable isItemPurchasable(final String scope,  final LineItemIdentifier identifier) {
+		return shoppingCartRepository.getProductSku(identifier.getLineItems().getCart().getCartId().getValue(), identifier.getLineItemId().getValue())
+				.flatMapCompletable(productSku -> isItemPurchasable(scope, identifier.getLineItems().getCart().getCartId().getValue(),  productSku));
 	}
 
 	/**
 	 * Validate if the item is purchasable.
 	 *
-	 * @param scope scope
+	 *
+	 * @param scope      scope
+	 * @param cartId the cartId.
 	 * @param productSku product sku
 	 * @return ResourceOperationFailure if item is not purchasable
 	 */
-	protected Completable isItemPurchasable(final String scope, final ProductSku productSku) {
-		return shoppingItemValidationService.validateItemPurchasable(scope, productSku)
+	protected Completable isItemPurchasable(final String scope, final String cartId, final ProductSku productSku) {
+		return addToCartAdvisorService.validateItemPurchasable(scope, cartId, productSku, null)
 				.flatMapCompletable(this::getStateFailure);
 	}
 
@@ -225,11 +208,12 @@ public class LineItemEntityRepository<E extends LineItemEntity, I extends LineIt
 	 * Update cart line item.
 	 *
 	 * @param lineItemEntity lineItemEntity
-	 * @param lineItemId lineItemId
+	 * @param lineItemId     lineItemId
+	 * @param lineItemIdentifier the identifier.
 	 * @return Completable
 	 */
-	protected Completable performUpdate(final LineItemEntity lineItemEntity, final String lineItemId) {
-		return shoppingCartRepository.getDefaultShoppingCart()
+	protected Completable performUpdate(final LineItemEntity lineItemEntity, final String lineItemId, final LineItemIdentifier lineItemIdentifier) {
+		return getShoppingCartForItemIdentifier(lineItemIdentifier)
 				.flatMapCompletable(cart -> shoppingCartRepository.getShoppingItem(lineItemId, cart)
 						.flatMapCompletable(shoppingItem -> productSkuRepository.getProductSkuWithAttributesByGuidAsSingle(shoppingItem.getSkuGuid())
 								.flatMapCompletable(productSku -> performUpdate(lineItemEntity, cart, shoppingItem, productSku.getSkuCode()))));
@@ -287,8 +271,19 @@ public class LineItemEntityRepository<E extends LineItemEntity, I extends LineIt
 	@Override
 	public Completable delete(final LineItemIdentifier identifier) {
 		String lineItemId = identifier.getLineItemId().getValue();
-		return shoppingCartRepository.getDefaultShoppingCart()
+		return getShoppingCartForItemIdentifier(identifier)
 				.flatMapCompletable(cart -> shoppingCartRepository.removeItemFromCart(cart, lineItemId));
+	}
+
+	private Single<ShoppingCart> getShoppingCartForItemIdentifier(final LineItemIdentifier identifier) {
+
+		return shoppingCartRepository.getShoppingCart(identifier.getLineItems().getCart().getCartId().getValue());
+	}
+
+	private Single<ShoppingCart> getShoppingCartForItemEntity(final LineItemEntity lineItemEntity) {
+		return Default.URI_PART.equals(lineItemEntity.getCartId()) || null == lineItemEntity.getCartId()
+				? shoppingCartRepository.getDefaultShoppingCart()
+				: shoppingCartRepository.getShoppingCart(lineItemEntity.getCartId());
 	}
 
 	@Reference
@@ -312,7 +307,13 @@ public class LineItemEntityRepository<E extends LineItemEntity, I extends LineIt
 	}
 
 	@Reference
-	public void setShoppingItemValidationService(final ShoppingItemValidationService shoppingItemValidationService) {
-		this.shoppingItemValidationService = shoppingItemValidationService;
+	public void setAddToCartAdvisorService(final AddToCartAdvisorService addToCartAdvisorService) {
+		this.addToCartAdvisorService = addToCartAdvisorService;
 	}
+
+	@Reference
+	public void setLineItemIdentifierRepository(final LineItemIdentifierRepository lineItemIdentifierRepository) {
+		this.lineItemIdentifierRepository = lineItemIdentifierRepository;
+	}
+
 }

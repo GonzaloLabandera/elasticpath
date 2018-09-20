@@ -349,7 +349,7 @@ public class CheckoutTestCartBuilder {
 	 */
 	public ShoppingCart build() {
 		final ShoppingCart shoppingCart = persisterFactory.getOrderTestPersister().persistEmptyShoppingCart(address, address, customerSession,
-				scenario.getShippingServiceLevel(), store);
+																											scenario.getShippingOption(), store);
 		for (final ShoppingItemDto dto : shoppingItemDtos) {
 			cartDirector.addItemToCart(shoppingCart, dto);
 		}

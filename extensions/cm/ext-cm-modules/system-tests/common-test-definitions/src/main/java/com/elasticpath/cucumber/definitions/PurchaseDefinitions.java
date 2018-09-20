@@ -18,6 +18,7 @@ public class PurchaseDefinitions {
 
 	/**
 	 * Constructor.
+	 *
 	 * @param product Product.
 	 */
 	public PurchaseDefinitions(final Product product) {
@@ -37,7 +38,37 @@ public class PurchaseDefinitions {
 	}
 
 	/**
+	 * Given Step Details to look test more clear
+	 *
+	 * @param promoName  the Promotion Name
+	 * @param couponCode the Coupon Code Name
+	 * @param skuCode the Sku Code
+	 * @param skuPrice the Sku Price
+	 *
+	 */
+	@And("^there is a (.+) cart subtotal coupon (.+) and sku (.+) has purchase price of price (.+)$")
+	public void givenDefinitionStep(final String promoName, final String couponCode, final String skuCode,final String skuPrice) {
+		// Given Implementation Step
+	}
+
+	/**
+	 * Creates order using coupon in cortex.
+	 *
+	 * @param scope      the scope
+	 * @param paramsList the sku parameter list
+	 * @param couponCode the coupon code
+	 */
+	@And("^I create an order for scope (.+) with coupon (.+) for following sku$")
+	public void createOrderUsingCoupon(final String scope, final String couponCode, final List<AddCartItemParams> paramsList) {
+		String[] couponList = new String[1];
+		couponList[0] = couponCode;
+		PurchaseMacro purchaseMacro = new PurchaseMacro();
+		purchaseMacro.createOrder(scope, paramsList, couponList, null);
+	}
+
+	/**
 	 * Creates purchase for newly created product for given scope.
+	 *
 	 * @param scope the store.
 	 */
 	@When("^I purchase the newly created product for scope (.+)$")

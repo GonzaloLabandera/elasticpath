@@ -4,7 +4,6 @@
 package com.elasticpath.cmclient.admin.warehouses.views;
 
 import java.util.List;
-import java.util.Locale;
 
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.ActionContributionItem;
@@ -22,6 +21,7 @@ import com.elasticpath.cmclient.admin.warehouses.AdminWarehousesPlugin;
 import com.elasticpath.cmclient.admin.warehouses.actions.CreateWarehouseAction;
 import com.elasticpath.cmclient.admin.warehouses.actions.DeleteWarehouseAction;
 import com.elasticpath.cmclient.admin.warehouses.actions.EditWarehouseAction;
+import com.elasticpath.cmclient.core.CorePlugin;
 import com.elasticpath.cmclient.core.ServiceLocator;
 import com.elasticpath.cmclient.core.service.AuthorizationService;
 import com.elasticpath.cmclient.core.ui.framework.IEpTableViewer;
@@ -207,7 +207,7 @@ public class WarehouseListView extends AbstractListView {
 			case WarehouseListView.INDEX_CITY:
 				return warehouse.getAddress().getCity();
 			case WarehouseListView.INDEX_COUNTRY:
-				return geography.getCountryDisplayName(warehouse.getAddress().getCountry(), Locale.getDefault());
+				return geography.getCountryDisplayName(warehouse.getAddress().getCountry(), CorePlugin.getDefault().getDefaultLocale());
 			default:
 				return ""; //$NON-NLS-1$
 			}

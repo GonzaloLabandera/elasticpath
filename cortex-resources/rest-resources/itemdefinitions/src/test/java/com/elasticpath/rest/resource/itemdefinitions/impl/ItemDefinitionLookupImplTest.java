@@ -20,8 +20,7 @@ import org.junit.runner.RunWith;
 import org.apache.commons.lang3.StringUtils;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.elasticpath.rest.ResourceStatus;
 import com.elasticpath.rest.command.ExecutionResult;
@@ -43,8 +42,7 @@ import com.elasticpath.rest.util.collection.CollectionUtil;
 /**
  * Tests the {@link ItemDefinitionLookupImpl}.
  */
-@RunWith(PowerMockRunner.class)
-@PrepareForTest({ItemDefinitionTransformer.class, ItemDefinitionOptionTransformer.class, ItemDefinitionOptionValueTransformer.class})
+@RunWith(MockitoJUnitRunner.class)
 public final class ItemDefinitionLookupImplTest {
 
 	private static final String TEST_COMPONENT_ID = "test_component_id";

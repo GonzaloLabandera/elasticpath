@@ -3,10 +3,7 @@
  */
 package com.elasticpath.rest.resource.integration.epcommerce.repository.purchase.service.impl;
 
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-
-import java.util.Collections;
 
 import io.reactivex.Single;
 import org.junit.Before;
@@ -14,11 +11,10 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.elasticpath.domain.cartorder.CartOrder;
 import com.elasticpath.domain.shoppingcart.ShoppingCart;
-import com.elasticpath.domain.shoppingcart.ShoppingItem;
 import com.elasticpath.rest.definition.orders.OrderIdentifier;
 import com.elasticpath.rest.id.type.StringIdentifier;
 import com.elasticpath.rest.resource.StructuredErrorMessageIdConstants;
@@ -62,7 +58,7 @@ public class CartHasItemsServiceImplTest {
 
 	@Test
 	public void validateCartHasItemsReturnsStructuredErrorMessageForEmptyCart() {
-		when(shoppingCart.getCartItems()).thenReturn(Collections.emptyList());
+		when(shoppingCart.isEmpty()).thenReturn(true);
 
 		cartHasItemsService.validateCartHasItems(orderIdentifier)
 				.test()
@@ -75,8 +71,7 @@ public class CartHasItemsServiceImplTest {
 
 	@Test
 	public void validateCartHasItemsReturnsNothingWhenCartIsNotEmpty() {
-		final ShoppingItem shoppingItem = mock(ShoppingItem.class);
-		when(shoppingCart.getCartItems()).thenReturn(Collections.singletonList(shoppingItem));
+		when(shoppingCart.isEmpty()).thenReturn(false);
 
 		cartHasItemsService.validateCartHasItems(orderIdentifier)
 				.test()
@@ -86,8 +81,7 @@ public class CartHasItemsServiceImplTest {
 
 	@Test
 	public void isCartEmptyReturnsFalseWhenCartIsNotEmpty() {
-		final ShoppingItem shoppingItem = mock(ShoppingItem.class);
-		when(shoppingCart.getCartItems()).thenReturn(Collections.singletonList(shoppingItem));
+		when(shoppingCart.isEmpty()).thenReturn(false);
 
 		cartHasItemsService.isCartEmpty(orderIdentifier)
 				.test()
@@ -97,11 +91,12 @@ public class CartHasItemsServiceImplTest {
 
 	@Test
 	public void isCartEmptyReturnsTrueWhenCartIsEmpty() {
-		when(shoppingCart.getCartItems()).thenReturn(Collections.emptyList());
+		when(shoppingCart.isEmpty()).thenReturn(true);
 
 		cartHasItemsService.isCartEmpty(orderIdentifier)
 				.test()
 				.assertNoErrors()
 				.assertValue(true);
 	}
+
 }

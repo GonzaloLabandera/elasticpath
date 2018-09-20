@@ -37,6 +37,14 @@ The line item identifier. This ID is a unique number assigned by Cortex API when
 			<entity>line-item</entity>
 		</resource>
 
+		<resource>
+			<name>dependent-line-items</name>
+			<description><![CDATA[A collection of a line item's dependent line items.
+			If item B is dependant on item A, and item A is removed from the cart, item B must be removed from the cart.]]></description>
+			<uri>{line-item}/dependents</uri>
+			<list-of>carts.line-item</list-of>
+		</resource>
+
 		<relationship>
 			<name>line-items-for-cart</name>
 			<description><![CDATA[A collection of items that have been added to a cart.]]></description>
@@ -69,6 +77,22 @@ The line item identifier. This ID is a unique number assigned by Cortex API when
 			<rel>list</rel>
 			<from>line-item</from>
 			<to>line-items</to>
+		</relationship>
+
+		<relationship>
+			<name>lineitem-to-dependent-lineitems</name>
+			<description>Link from the cart Line Item resource to its collection of dependent line items.</description>
+			<rel>dependentlineitems</rel>
+			<from>carts.line-item</from>
+			<to>dependent-line-items</to>
+		</relationship>
+
+		<relationship>
+			<name>lineitem-to-parent-lineitem</name>
+			<description>Link from a dependent cart Line Item resource to its parent cart Line Item resource.</description>
+			<rel>parent</rel>
+			<from>carts.line-item</from>
+			<to>carts.line-item</to>
 		</relationship>
 
 		<entity>

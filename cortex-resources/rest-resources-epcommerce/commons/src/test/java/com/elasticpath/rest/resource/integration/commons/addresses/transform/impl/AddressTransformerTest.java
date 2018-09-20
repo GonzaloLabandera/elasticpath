@@ -44,6 +44,8 @@ public class AddressTransformerTest {
 				.withCountryName(COUNTRY)
 				.withRegion(SUB_COUNTRY)
 				.withPostalCode(ZIP_CODE)
+				.withPhoneNumber(null)
+				.withOrganization(null)
 				.build();
 		NameEntity nameEntity = NameEntity.builder()
 				.withGivenName(FIRST_NAME)

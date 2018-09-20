@@ -3,6 +3,7 @@
  */
 package com.elasticpath.domain.factory;
 
+import java.util.Date;
 import java.util.Locale;
 
 import com.elasticpath.domain.customer.CustomerSession;
@@ -10,6 +11,8 @@ import com.elasticpath.domain.customer.CustomerSessionMemento;
 import com.elasticpath.domain.customer.impl.CustomerSessionImpl;
 import com.elasticpath.domain.customer.impl.CustomerSessionMementoImpl;
 import com.elasticpath.domain.shopper.Shopper;
+import com.elasticpath.tags.Tag;
+import com.elasticpath.tags.TagSet;
 
 /**
  * A factory for producing properly constructed CustomerSessions for use in tests.
@@ -18,6 +21,8 @@ import com.elasticpath.domain.shopper.Shopper;
  * be fixed all at once.
  */
 public final class TestCustomerSessionFactoryForTestApplication {
+
+	private static final String SHOPPING_START_TIME_TAG = "SHOPPING_START_TIME";
 
 	/**
 	 * Default private constructor.
@@ -68,6 +73,9 @@ public final class TestCustomerSessionFactoryForTestApplication {
 		customerSession.setCustomerSessionMemento(customerSessionMemento);
 		customerSession.setShopper(shopper);
 		customerSession.setLocale(Locale.CANADA);
+		TagSet tagSet = new TagSet();
+		tagSet.addTag(SHOPPING_START_TIME_TAG, new Tag(new Date().getTime()));
+		customerSession.setCustomerTagSet(tagSet);
 		shopper.updateTransientDataWith(customerSession);
 
 		customerSession.setGuid(TestGuidUtility.getGuid());

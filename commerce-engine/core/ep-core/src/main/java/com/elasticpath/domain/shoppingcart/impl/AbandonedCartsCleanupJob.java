@@ -10,25 +10,21 @@ import org.apache.log4j.Logger;
 
 import com.elasticpath.service.misc.TimeService;
 import com.elasticpath.service.shoppingcart.ShoppingCartCleanupService;
-import com.elasticpath.settings.SettingsReader;
-import com.elasticpath.settings.domain.SettingValue;
+import com.elasticpath.settings.provider.SettingValueProvider;
 
 /**
  * Job to purge abandoned shopping carts.<br>
  */
 public class AbandonedCartsCleanupJob {
 
-	private static final String ABANDONDED_CART_MAX_HISTORY = "COMMERCE/SYSTEM/ABANDONEDCARTCLEANUP/maxHistory";
-
-	private static final String ABANDONDED_CART_BATCH_SIZE = "COMMERCE/SYSTEM/ABANDONEDCARTCLEANUP/batchSize";
-
 	private static final Logger LOG = Logger.getLogger(AbandonedCartsCleanupJob.class);
 
 	private TimeService timeService;
 
-	private SettingsReader settingsReader;
-
 	private ShoppingCartCleanupService shoppingCartCleanupService;
+
+	private SettingValueProvider<Integer> batchSizeProvider;
+	private SettingValueProvider<Integer> maxDaysHistoryProvider;
 
 	/**
 	 * Purge the abandoned shopping carts.<br>
@@ -95,8 +91,7 @@ public class AbandonedCartsCleanupJob {
 	 * @return the candidate removal date
 	 */
 	protected Date getCandidateRemovalDate() {
-		final SettingValue maxHistorySetting = getSettingsReader().getSettingValue(ABANDONDED_CART_MAX_HISTORY);
-		final int days = maxHistorySetting.getIntegerValue();
+		final int days = getMaxDaysHistoryProvider().get();
 		return DateUtils.addDays(getTimeService().getCurrentTime(), -days);
 	}
 
@@ -106,26 +101,7 @@ public class AbandonedCartsCleanupJob {
 	 * @return the batch size
 	 */
 	protected int getBatchSize() {
-		final SettingValue batchSize = getSettingsReader().getSettingValue(ABANDONDED_CART_BATCH_SIZE);
-		return batchSize.getIntegerValue();
-	}
-
-	/**
-	 * Set the settings reader.
-	 *
-	 * @param settingsReader the settings reader
-	 */
-	public void setSettingsReader(final SettingsReader settingsReader) {
-		this.settingsReader = settingsReader;
-	}
-
-	/**
-	 * Get the settings reader.
-	 *
-	 * @return the settings reader.
-	 */
-	protected SettingsReader getSettingsReader() {
-		return settingsReader;
+		return getBatchSizeProvider().get();
 	}
 
 	/**
@@ -163,4 +139,21 @@ public class AbandonedCartsCleanupJob {
 	protected ShoppingCartCleanupService getShoppingCartCleanupService() {
 		return shoppingCartCleanupService;
 	}
+
+	protected SettingValueProvider<Integer> getBatchSizeProvider() {
+		return batchSizeProvider;
+	}
+
+	public void setBatchSizeProvider(final SettingValueProvider<Integer> batchSizeProvider) {
+		this.batchSizeProvider = batchSizeProvider;
+	}
+
+	protected SettingValueProvider<Integer> getMaxDaysHistoryProvider() {
+		return maxDaysHistoryProvider;
+	}
+
+	public void setMaxDaysHistoryProvider(final SettingValueProvider<Integer> maxDaysHistoryProvider) {
+		this.maxDaysHistoryProvider = maxDaysHistoryProvider;
+	}
+
 }

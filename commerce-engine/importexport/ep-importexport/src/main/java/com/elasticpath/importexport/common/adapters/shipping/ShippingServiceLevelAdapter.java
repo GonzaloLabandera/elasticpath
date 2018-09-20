@@ -3,6 +3,7 @@
  */
 package com.elasticpath.importexport.common.adapters.shipping;
 
+import static com.elasticpath.commons.constants.EpShippingContextIdNames.SHIPPING_SERVICE_LEVEL;
 import static com.elasticpath.importexport.common.comparators.ExportComparators.DISPLAY_VALUE_COMPARATOR;
 
 import java.util.ArrayList;
@@ -18,7 +19,6 @@ import java.util.Set;
 import org.apache.commons.lang.StringUtils;
 
 import com.elasticpath.common.dto.DisplayValue;
-import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.misc.LocalizedProperties;
 import com.elasticpath.domain.misc.LocalizedPropertyValue;
 import com.elasticpath.domain.misc.impl.ShippingServiceLevelLocalizedPropertyValueImpl;
@@ -35,7 +35,7 @@ import com.elasticpath.service.shipping.ShippingRegionService;
 import com.elasticpath.service.store.StoreService;
 
 /**
- * Helper class for mediating data between ShippingServiceLevel entitys and dtos. 
+ * Helper class for mediating data between {@link ShippingServiceLevel} entities and dtos.
  *
  */
 public class ShippingServiceLevelAdapter extends AbstractDomainAdapterImpl<ShippingServiceLevel, ShippingServiceLevelDTO>  {
@@ -123,17 +123,17 @@ public class ShippingServiceLevelAdapter extends AbstractDomainAdapterImpl<Shipp
 	private List<ShippingCostCalculationParameterDTO> createShippingCostCalculationParamDtos(final ShippingCostCalculationMethod source) {
 		Set<ShippingCostCalculationParameter> sourceParams = source.getParameters();
 		List<ShippingCostCalculationParameterDTO> targetParams = new ArrayList<>();
-		
+
 		for (ShippingCostCalculationParameter sourceParam : sourceParams) {
 			ShippingCostCalculationParameterDTO target = new ShippingCostCalculationParameterDTO();
-			target.setCurrency(getCurrencyCode(sourceParam)); // NOPMD
+			target.setCurrency(getCurrencyCode(sourceParam));
 			target.setDisplayText(sourceParam.getDisplayText());
 			target.setKey(sourceParam.getKey());
 			target.setValue(sourceParam.getValue());
-			
+
 			targetParams.add(target);
 		}
-		
+
 		return targetParams;
 	}
 	
@@ -149,7 +149,7 @@ public class ShippingServiceLevelAdapter extends AbstractDomainAdapterImpl<Shipp
 	}
 	
 	private ShippingCostCalculationMethod createShippingCostCalculationMethod(final ShippingCostCalculationMethodDTO source) {
-		ShippingCostCalculationMethod target 
+		ShippingCostCalculationMethod target
 			= getBeanFactory().getBean(source.getType());
 		
 		target.setType(source.getType());
@@ -157,11 +157,11 @@ public class ShippingServiceLevelAdapter extends AbstractDomainAdapterImpl<Shipp
 	
 		return target;
 	}
-	
+
 	private Set<ShippingCostCalculationParameter> createShippingCostCalculationParams(final ShippingCostCalculationMethodDTO source) {
 		List<ShippingCostCalculationParameterDTO> sourceParams = source.getShippingCostCalculationParams();
 		Set<ShippingCostCalculationParameter> targetParams = new HashSet<>();
-		
+
 		for (ShippingCostCalculationParameterDTO sourceParam : sourceParams) {
 			ShippingCostCalculationParameter target = new ShippingCostCalculationParameterImpl();
 			if (StringUtils.isNotEmpty(sourceParam.getCurrency())) {
@@ -170,10 +170,10 @@ public class ShippingServiceLevelAdapter extends AbstractDomainAdapterImpl<Shipp
 			target.setDisplayText(sourceParam.getDisplayText());
 			target.setKey(sourceParam.getKey());
 			target.setValue(sourceParam.getValue());
-			
+
 			targetParams.add(target);
 		}
-		
+
 		return targetParams;
 	}
 	
@@ -188,7 +188,7 @@ public class ShippingServiceLevelAdapter extends AbstractDomainAdapterImpl<Shipp
 
 	@Override
 	public ShippingServiceLevel createDomainObject() {
-		return getBeanFactory().getBean(ContextIdNames.SHIPPING_SERVICE_LEVEL);
+		return getBeanFactory().getBean(SHIPPING_SERVICE_LEVEL);
 	}
 	
 	public StoreService getStoreService() {

@@ -14,7 +14,7 @@ import java.util.Set;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.elasticpath.domain.order.Order;
 import com.elasticpath.domain.rules.AppliedRule;
@@ -43,7 +43,7 @@ public class OrderPromotionRuleMatcherImplTest {
 
 
 	@Test
-	public void testFindMatchingAppliedRulesForOrder() throws Exception {
+	public void testFindMatchingAppliedRulesForOrder() {
 		Set<AppliedRule> appliedRules = new HashSet<>(Collections.singleton(mockAppliedRule));
 		appliedRules.add(mockAppliedRule);
 		when(mockAppliedRule.getGuid()).thenReturn(APPLIED_RULE_GUID);
@@ -57,7 +57,7 @@ public class OrderPromotionRuleMatcherImplTest {
 	}
 
 	@Test
-	public void testNoAppliedRulesOnOrder() throws Exception {
+	public void testNoAppliedRulesOnOrder() {
 		Set<AppliedRule> appliedRules = new HashSet<>();
 		when(mockOrder.getAppliedRules()).thenReturn(appliedRules);
 		AppliedPromotionRuleAwareOrderAdapter orderAdapter = new AppliedPromotionRuleAwareOrderAdapter(mockOrder);
@@ -67,10 +67,9 @@ public class OrderPromotionRuleMatcherImplTest {
 	}
 
 	@Test
-	public void testNoMatchingAppliedRulesForOrder() throws Exception {
+	public void testNoMatchingAppliedRulesForOrder() {
 		Set<AppliedRule> appliedRules = new HashSet<>();
 		appliedRules.add(mockAppliedRule);
-		when(mockAppliedRule.getGuid()).thenReturn(APPLIED_RULE_GUID);
 		when(mockOrder.getAppliedRules()).thenReturn(appliedRules);
 		when(mockRulePredicate.isSatisfied(mockAppliedRule)).thenReturn(false);
 

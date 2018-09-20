@@ -6,7 +6,7 @@ package com.elasticpath.rest.resource.paymentmethods.link.impl;
 import static org.hamcrest.Matchers.hasItems;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -18,14 +18,11 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
-import com.elasticpath.rest.command.ExecutionResult;
-import com.elasticpath.rest.command.ExecutionResultFactory;
 import com.elasticpath.rest.definition.controls.ControlsMediaTypes;
 import com.elasticpath.rest.definition.orders.OrderEntity;
 import com.elasticpath.rest.definition.orders.OrdersMediaTypes;
-import com.elasticpath.rest.resource.paymentmethods.PaymentMethodLookup;
 import com.elasticpath.rest.resource.paymentmethods.rel.PaymentMethodRels;
 import com.elasticpath.rest.schema.ResourceLink;
 import com.elasticpath.rest.schema.ResourceLinkFactory;
@@ -47,9 +44,6 @@ public final class AddPaymentMethodLinkToOrderStrategyTest {
 	private static final String SCOPE = "scope";
 	private static final String PAYMENT_METHOD_INFO_URI = "/uri";
 	public static final String THE_CREATED_LINKS_SHOULD_BE_THE_SAME_AS_EXPECTED = "The created links should be the same as expected";
-
-	@Mock
-	private PaymentMethodLookup mockPaymentMethodLookup;
 
 	@Mock
 	private PaymentMethodInfoUriBuilderFactory paymentMethodInfoUriBuilderFactory;
@@ -74,9 +68,6 @@ public final class AddPaymentMethodLinkToOrderStrategyTest {
 	public void testLinkToPaymentMethodsForOrderWithPaymentRequiredAndInfoNeeded() {
 		ResourceState<OrderEntity> orderRepresentation = createOrderRepresentation();
 
-		shouldRequirePayment(ExecutionResultFactory.createReadOK(Boolean.TRUE));
-		shouldPaymentMethodBeSelectedForOrder(ExecutionResultFactory.createReadOK(Boolean.FALSE));
-
 		Collection<ResourceLink> createdLinks =
 				addPaymentMethodLinkToOrderStrategy.getLinks(orderRepresentation);
 
@@ -92,9 +83,6 @@ public final class AddPaymentMethodLinkToOrderStrategyTest {
 	public void testLinkToPaymentMethodsForOrderWithPaymentRequiredAndDefaultSelected() {
 		ResourceState<OrderEntity> orderRepresentation = createOrderRepresentation();
 
-		shouldRequirePayment(ExecutionResultFactory.createReadOK(Boolean.TRUE));
-		shouldPaymentMethodBeSelectedForOrder(ExecutionResultFactory.createReadOK(Boolean.TRUE));
-
 		Collection<ResourceLink> createdLinks =
 				addPaymentMethodLinkToOrderStrategy.getLinks(orderRepresentation);
 
@@ -108,7 +96,6 @@ public final class AddPaymentMethodLinkToOrderStrategyTest {
 	@Test
 	public void testLinkToPaymentMethodsForOrderWithPaymentNotRequired() {
 		ResourceState<OrderEntity> orderRepresentation = createOrderRepresentation();
-		shouldRequirePayment(ExecutionResultFactory.createReadOK(Boolean.FALSE));
 
 		Collection<ResourceLink> createdLinks = addPaymentMethodLinkToOrderStrategy.getLinks(orderRepresentation);
 
@@ -122,7 +109,6 @@ public final class AddPaymentMethodLinkToOrderStrategyTest {
 	@Test
 	public void testLinkToPaymentMethodsForOrderWithPaymentRequiredFailure() {
 		ResourceState<OrderEntity> orderRepresentation = createOrderRepresentation();
-		shouldRequirePayment(ExecutionResultFactory.<Boolean>createNotFound("isPaymentRequired() lookup failed"));
 
 		Collection<ResourceLink> createdLinks =
 				addPaymentMethodLinkToOrderStrategy.getLinks(orderRepresentation);
@@ -168,15 +154,5 @@ public final class AddPaymentMethodLinkToOrderStrategyTest {
 		return ResourceLinkFactory.create(PAYMENT_METHOD_INFO_URI, ControlsMediaTypes.INFO.id(),
 				PaymentMethodRels.PAYMENTMETHODINFO_REL,
 				PaymentMethodRels.ORDER_REV);
-	}
-
-	private void shouldRequirePayment(final ExecutionResult<Boolean> result) {
-		when(mockPaymentMethodLookup.isPaymentRequired(SCOPE, ORDER_ID))
-				.thenReturn(result);
-	}
-
-	private void shouldPaymentMethodBeSelectedForOrder(final ExecutionResult<Boolean> result) {
-		when(mockPaymentMethodLookup.isPaymentMethodSelectedForOrder(SCOPE, ORDER_ID))
-				.thenReturn(result);
 	}
 }

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<feature id="com.elasticpath.cmclient.platform.feature" label="%featureName" version="702.0.0.qualifier" provider-name="%featureProvider">
+<feature id="com.elasticpath.cmclient.platform.feature" label="%featureName" version="703.0.0.qualifier" provider-name="%featureProvider">
 
     <description url="http://www.example.com/description">
         %description
@@ -103,33 +103,34 @@
     <plugin id="com.elasticpath.ep-money" download-size="0" install-size="0" version="0.0.0"/>
     <plugin id="com.elasticpath.ep-persistence-api" download-size="0" install-size="0" version="0.0.0"/>
     <plugin id="com.elasticpath.ep-persistence-openjpa" download-size="0" install-size="0" version="0.0.0"/>
+    <plugin id="com.elasticpath.ep-converters" download-size="0" install-size="0" version="0.0.0"/>
     <plugin id="com.elasticpath.ep-settings" download-size="0" install-size="0" version="0.0.0"/>
 
     <plugin id="com.elasticpath.cmclient.core" download-size="0" install-size="0" version="0.0.0" unpack="false"/>
-    <plugin id="com.elasticpath.cmclient.libs" download-size="0" install-size="0" version="702.0.0.qualifier" unpack="false"/>
-    <plugin id="com.elasticpath.cmclient.testlibs" download-size="0" install-size="0" version="702.0.0.qualifier" unpack="false"/>
+    <plugin id="com.elasticpath.cmclient.libs" download-size="0" install-size="0" version="703.0.0.qualifier" unpack="false"/>
+    <plugin id="com.elasticpath.cmclient.testlibs" download-size="0" install-size="0" version="703.0.0.qualifier" unpack="false"/>
 
-    <plugin id="com.elasticpath.cmclient.policy" download-size="0" install-size="0" version="702.0.0.qualifier" unpack="false"/>
-    <plugin id="com.elasticpath.cmclient.conditionbuilder" download-size="0" install-size="0" version="702.0.0.qualifier" unpack="false"/>
-    <plugin id="com.elasticpath.cmclient.jobs" download-size="0" install-size="0" version="702.0.0.qualifier" unpack="false"/>
-    <plugin id="com.elasticpath.cmclient.pricelistmanager" download-size="0" install-size="0" version="702.0.0.qualifier" unpack="false"/>
-    <plugin id="com.elasticpath.cmclient.catalog" download-size="0" install-size="0" version="702.0.0.qualifier" unpack="false"/>
-    <plugin id="com.elasticpath.cmclient.admin" download-size="0" install-size="0" version="702.0.0.qualifier" unpack="false"/>
-	<plugin id="com.elasticpath.cmclient.admin.users" download-size="0" install-size="0" version="702.0.0.qualifier" unpack="false"/>
-    <plugin id="com.elasticpath.cmclient.admin.configuration" download-size="0" install-size="0" version="702.0.0.qualifier" unpack="false"/>
-    <plugin id="com.elasticpath.cmclient.store" download-size="0" install-size="0" version="702.0.0.qualifier" unpack="false"/>
-    <plugin id="com.elasticpath.cmclient.admin.stores" download-size="0" install-size="0" version="702.0.0.qualifier" unpack="false"/>
-    <plugin id="com.elasticpath.cmclient.admin.taxes" download-size="0" install-size="0" version="702.0.0.qualifier" unpack="false"/>
-    <plugin id="com.elasticpath.cmclient.admin.shipping" download-size="0" install-size="0" version="702.0.0.qualifier" unpack="false"/>
-    <plugin id="com.elasticpath.cmclient.admin.payment" download-size="0" install-size="0" version="702.0.0.qualifier" unpack="false"/>
-    <plugin id="com.elasticpath.cmclient.admin.warehouses" download-size="0" install-size="0" version="702.0.0.qualifier" unpack="false"/>
-    <plugin id="com.elasticpath.cmclient.admin.datapolicies" download-size="0" install-size="0" version="702.0.0.qualifier" unpack="false"/>
-    <plugin id="com.elasticpath.cmclient.fulfillment" download-size="0" install-size="0" version="702.0.0.qualifier" unpack="false"/>
-    <plugin id="com.elasticpath.cmclient.changeset" download-size="0" install-size="0" version="702.0.0.qualifier" unpack="false"/>
-    <plugin id="com.elasticpath.cmclient.warehouse" download-size="0" install-size="0" version="702.0.0.qualifier" unpack="false"/>
-    <plugin id="com.elasticpath.cmclient.advancedsearch" download-size="0" install-size="0" version="702.0.0.qualifier" unpack="false"/>
-    <plugin id="com.elasticpath.cmclient.admin.customers" download-size="0" install-size="0" version="702.0.0.qualifier" unpack="false"/>
-    <plugin id="com.elasticpath.cmclient.ep-local-auth" download-size="0" install-size="0" version="702.0.0.qualifier" unpack="false"/>
+    <plugin id="com.elasticpath.cmclient.policy" download-size="0" install-size="0" version="703.0.0.qualifier" unpack="false"/>
+    <plugin id="com.elasticpath.cmclient.conditionbuilder" download-size="0" install-size="0" version="703.0.0.qualifier" unpack="false"/>
+    <plugin id="com.elasticpath.cmclient.jobs" download-size="0" install-size="0" version="703.0.0.qualifier" unpack="false"/>
+    <plugin id="com.elasticpath.cmclient.pricelistmanager" download-size="0" install-size="0" version="703.0.0.qualifier" unpack="false"/>
+    <plugin id="com.elasticpath.cmclient.catalog" download-size="0" install-size="0" version="703.0.0.qualifier" unpack="false"/>
+    <plugin id="com.elasticpath.cmclient.admin" download-size="0" install-size="0" version="703.0.0.qualifier" unpack="false"/>
+	<plugin id="com.elasticpath.cmclient.admin.users" download-size="0" install-size="0" version="703.0.0.qualifier" unpack="false"/>
+    <plugin id="com.elasticpath.cmclient.admin.configuration" download-size="0" install-size="0" version="703.0.0.qualifier" unpack="false"/>
+    <plugin id="com.elasticpath.cmclient.store" download-size="0" install-size="0" version="703.0.0.qualifier" unpack="false"/>
+    <plugin id="com.elasticpath.cmclient.admin.stores" download-size="0" install-size="0" version="703.0.0.qualifier" unpack="false"/>
+    <plugin id="com.elasticpath.cmclient.admin.taxes" download-size="0" install-size="0" version="703.0.0.qualifier" unpack="false"/>
+    <plugin id="com.elasticpath.cmclient.admin.shipping" download-size="0" install-size="0" version="703.0.0.qualifier" unpack="false"/>
+    <plugin id="com.elasticpath.cmclient.admin.payment" download-size="0" install-size="0" version="703.0.0.qualifier" unpack="false"/>
+    <plugin id="com.elasticpath.cmclient.admin.warehouses" download-size="0" install-size="0" version="703.0.0.qualifier" unpack="false"/>
+    <plugin id="com.elasticpath.cmclient.admin.datapolicies" download-size="0" install-size="0" version="703.0.0.qualifier" unpack="false"/>
+    <plugin id="com.elasticpath.cmclient.fulfillment" download-size="0" install-size="0" version="703.0.0.qualifier" unpack="false"/>
+    <plugin id="com.elasticpath.cmclient.changeset" download-size="0" install-size="0" version="703.0.0.qualifier" unpack="false"/>
+    <plugin id="com.elasticpath.cmclient.warehouse" download-size="0" install-size="0" version="703.0.0.qualifier" unpack="false"/>
+    <plugin id="com.elasticpath.cmclient.advancedsearch" download-size="0" install-size="0" version="703.0.0.qualifier" unpack="false"/>
+    <plugin id="com.elasticpath.cmclient.admin.customers" download-size="0" install-size="0" version="703.0.0.qualifier" unpack="false"/>
+    <plugin id="com.elasticpath.cmclient.ep-local-auth" download-size="0" install-size="0" version="703.0.0.qualifier" unpack="false"/>
     <plugin id="test-util" download-size="0" install-size="0" version="0.0.0" unpack="false"/>
 
     <plugin id="test-util" download-size="0" install-size="0" version="0.0.0" unpack="false"/>
@@ -145,11 +146,11 @@
     <plugin id="org.eclipse.emf.common" download-size="0" install-size="0" version="0.0.0" unpack="false"/>
     <plugin id="org.eclipse.emf.ecore.xmi" download-size="0" install-size="0" version="0.0.0" unpack="false"/>
 
-    <plugin id="com.elasticpath.cmclient.reporting" download-size="0" install-size="0" version="702.0.0.qualifier" unpack="false"/>
-    <plugin id="com.elasticpath.cmclient.reporting.promotionusage" download-size="0" install-size="0" version="702.0.0.qualifier" unpack="false"/>
-    <plugin id="com.elasticpath.cmclient.reporting.ordersbystatus" download-size="0" install-size="0" version="702.0.0.qualifier" unpack="false"/>
-    <plugin id="com.elasticpath.cmclient.reporting.ordersummary" download-size="0" install-size="0" version="702.0.0.qualifier" unpack="false"/>
-    <plugin id="com.elasticpath.cmclient.reporting.returnsandexchanges" download-size="0" install-size="0" version="702.0.0.qualifier" unpack="false"/>
-    <plugin id="com.elasticpath.cmclient.reporting.customerpersonaldata" download-size="0" install-size="0" version="702.0.0.qualifier" unpack="false"/>
+    <plugin id="com.elasticpath.cmclient.reporting" download-size="0" install-size="0" version="703.0.0.qualifier" unpack="false"/>
+    <plugin id="com.elasticpath.cmclient.reporting.promotionusage" download-size="0" install-size="0" version="703.0.0.qualifier" unpack="false"/>
+    <plugin id="com.elasticpath.cmclient.reporting.ordersbystatus" download-size="0" install-size="0" version="703.0.0.qualifier" unpack="false"/>
+    <plugin id="com.elasticpath.cmclient.reporting.ordersummary" download-size="0" install-size="0" version="703.0.0.qualifier" unpack="false"/>
+    <plugin id="com.elasticpath.cmclient.reporting.returnsandexchanges" download-size="0" install-size="0" version="703.0.0.qualifier" unpack="false"/>
+    <plugin id="com.elasticpath.cmclient.reporting.customerpersonaldata" download-size="0" install-size="0" version="703.0.0.qualifier" unpack="false"/>
 
 </feature>

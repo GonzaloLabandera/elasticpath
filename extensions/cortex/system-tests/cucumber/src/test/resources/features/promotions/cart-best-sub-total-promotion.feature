@@ -1,5 +1,5 @@
 @Promotions
-Feature: Applying 2 cart sub total discount to cart and ensuring best discount gets applied to the cart.
+Feature: Applying 2 cart sub total discount to cart and ensuring best discount gets applied to the cart
   As a client developer
   I apply cart discount which is 10% off on cart subtotal by adding an ITEM then applying another discount - blackfriday 30% off.
   Ensure best discount gets applied to cart which is blackfriday - 30%

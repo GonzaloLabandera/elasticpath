@@ -8,8 +8,8 @@
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 		xmlns:util="http://www.springframework.org/schema/util"
 		xsi:schemaLocation="
-				http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
-				http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-3.0.xsd
+				http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+				http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-4.0.xsd
 		">
 
 
@@ -81,9 +81,6 @@
 	<bean id="orderIPAddressReader" class="com.elasticpath.service.datapolicy.readers.OrderIPAddressReader"
 		  parent="abstractDataPointValueReader" depends-on="dataPointValueServiceTarget"/>
 
-	<bean id="orderPaymentCardHolderNameReader" class="com.elasticpath.service.datapolicy.readers.OrderPaymentCardHolderNameReader"
-		  parent="abstractDataPointValueReader" depends-on="dataPointValueServiceTarget"/>
-
 	<bean id="orderPaymentGiftCertificateFieldReader" class="com.elasticpath.service.datapolicy.readers.OrderPaymentGiftCertificateFieldReader"
 		  parent="abstractDataPointValueReader" depends-on="dataPointValueServiceTarget"/>
 
@@ -96,7 +93,6 @@
 		<ref bean="orderDataValueReader"/>
 		<ref bean="orderGiftCertificateFieldReader"/>
 		<ref bean="orderIPAddressReader"/>
-		<ref bean="orderPaymentCardHolderNameReader"/>
 		<ref bean="orderPaymentGiftCertificateFieldReader"/>
 	</util:list>
 
@@ -133,9 +129,6 @@
 	<bean id="orderIPAddressRemover" class="com.elasticpath.service.datapolicy.removers.OrderIPAddressRemover"
 		  parent="abstractDataPointValueRemover" depends-on="dataPointValueServiceTarget"/>
 
-	<bean id="orderPaymentCardHolderNameRemover" class="com.elasticpath.service.datapolicy.removers.OrderPaymentCardHolderNameRemover"
-		  parent="abstractDataPointValueRemover" depends-on="dataPointValueServiceTarget"/>
-
 	<bean id="orderPaymentGiftCertificateFieldRemover" class="com.elasticpath.service.datapolicy.removers.OrderPaymentGiftCertificateFieldRemover"
 		  parent="abstractDataPointValueReader" depends-on="dataPointValueServiceTarget"/>
 
@@ -148,7 +141,6 @@
 		<ref bean="orderDataValueRemover"/>
 		<ref bean="orderGiftCertificateFieldRemover"/>
 		<ref bean="orderIPAddressRemover"/>
-		<ref bean="orderPaymentCardHolderNameRemover"/>
 		<ref bean="orderPaymentGiftCertificateFieldRemover"/>
 	</util:list>
 

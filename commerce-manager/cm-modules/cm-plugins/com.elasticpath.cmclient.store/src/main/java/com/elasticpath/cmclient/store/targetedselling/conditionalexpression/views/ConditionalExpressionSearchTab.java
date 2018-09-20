@@ -6,9 +6,6 @@
  */
 package com.elasticpath.cmclient.store.targetedselling.conditionalexpression.views;
 
-import java.util.Locale;
-
-import com.elasticpath.cmclient.store.views.IStoreMarketingInnerTab;
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ComboViewer;
@@ -17,6 +14,7 @@ import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Text;
 
+import com.elasticpath.cmclient.core.CorePlugin;
 import com.elasticpath.cmclient.core.binding.EpControlBindingProvider;
 import com.elasticpath.cmclient.core.event.EventType;
 import com.elasticpath.cmclient.core.event.UIEvent;
@@ -33,6 +31,7 @@ import com.elasticpath.cmclient.store.targetedselling.conditionalexpression.mode
 import com.elasticpath.cmclient.store.targetedselling.conditionalexpression.model.impl.ConditionalExpressionModelImpl;
 import com.elasticpath.cmclient.store.targetedselling.conditionalexpression.model.impl.TagDefinitionModelBuilderImpl;
 import com.elasticpath.cmclient.store.targetedselling.conditionalexpression.model.impl.TagDictionaryModelBuilderImpl;
+import com.elasticpath.cmclient.store.views.IStoreMarketingInnerTab;
 import com.elasticpath.cmclient.store.views.SearchView;
 import com.elasticpath.tags.domain.TagDefinition;
 import com.elasticpath.tags.domain.TagDictionary;
@@ -128,7 +127,7 @@ public class ConditionalExpressionSearchTab implements IStoreMarketingInnerTab {
 			@Override
 			public String getText(final Object element) {
 				TagDefinition model = (TagDefinition) element;
-				return model.getLocalizedName(Locale.getDefault());
+				return model.getLocalizedName(CorePlugin.getDefault().getDefaultLocale());
 			}
 
 		});

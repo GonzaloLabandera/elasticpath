@@ -42,7 +42,7 @@ public class ShipmentTypeShoppingCartVisitorTest {
 	@Mock private ProductSkuLookup productSkuLookup;
 	private BeanFactoryExpectationsFactory expectationsFactory;
 
-	private ShoppingItem bundleItem;
+	private ShoppingItem itemWithChildren;
 
 	private ShoppingItem electronicItem;
 
@@ -74,7 +74,6 @@ public class ShipmentTypeShoppingCartVisitorTest {
 		productSkuIsShippable.setShippable(true);
 
 		electronicItem = new ShoppingItemImpl() {
-
 			private static final long serialVersionUID = 1L;
 
 			@Override
@@ -90,7 +89,6 @@ public class ShipmentTypeShoppingCartVisitorTest {
 		electronicItem.setSkuGuid(productSkuIsNotShippable.getGuid());
 
 		physicalItem = new ShoppingItemImpl() {
-
 			private static final long serialVersionUID = 1L;
 
 			@Override
@@ -105,8 +103,7 @@ public class ShipmentTypeShoppingCartVisitorTest {
 		};
 		physicalItem.setSkuGuid(productSkuIsShippable.getGuid());
 
-		bundleItem = new ShoppingItemImpl() {
-
+		itemWithChildren = new ShoppingItemImpl() {
 			private static final long serialVersionUID = 1L;
 
 			@Override
@@ -115,13 +112,12 @@ public class ShipmentTypeShoppingCartVisitorTest {
 			}
 
 			@Override
-			public List<ShoppingItem> getBundleItems(final ProductSkuLookup productSkuLookup) {
+			public List<ShoppingItem> getChildren() {
 				return Collections.singletonList(physicalItem);
 			}
 		};
 
 		serviceItem = new ShoppingItemImpl() {
-
 			private static final long serialVersionUID = 1L;
 
 			@Override
@@ -154,17 +150,16 @@ public class ShipmentTypeShoppingCartVisitorTest {
 			private static final long serialVersionUID = 1L;
 
 			@Override
-			public boolean apply(final ShoppingItemPricingSnapshot shoppingItemPricingSnapshot) {
+			public boolean test(final ShoppingItemPricingSnapshot shoppingItemPricingSnapshot) {
 				return true;
 			}
 		};
 
 		ShoppingCart shoppingCart = new ShoppingCartImpl() {
-
 			private static final long serialVersionUID = 1L;
 
 			@Override
-			public List<ShoppingItem> getCartItems() {
+			public List<ShoppingItem> getRootShoppingItems() {
 				return Arrays.asList(serviceItem);
 			}
 		};
@@ -182,12 +177,11 @@ public class ShipmentTypeShoppingCartVisitorTest {
 	@Test
 	public void testElectronicAndBundleWithPhysical() {
 		ShoppingCart shoppingCart = new ShoppingCartImpl() {
-
 			private static final long serialVersionUID = 1L;
 
 			@Override
-			public List<ShoppingItem> getCartItems() {
-				return Arrays.asList(electronicItem, bundleItem);
+			public List<ShoppingItem> getRootShoppingItems() {
+				return Arrays.asList(electronicItem, itemWithChildren);
 			}
 		};
 

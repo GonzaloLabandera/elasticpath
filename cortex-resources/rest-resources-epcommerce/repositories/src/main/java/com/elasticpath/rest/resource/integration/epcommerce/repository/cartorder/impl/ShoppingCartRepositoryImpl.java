@@ -15,7 +15,6 @@ import com.google.common.annotations.VisibleForTesting;
 import io.reactivex.Completable;
 import io.reactivex.Observable;
 import io.reactivex.Single;
-
 import com.elasticpath.common.dto.ShoppingItemDto;
 import com.elasticpath.common.dto.sellingchannel.ShoppingItemDtoFactory;
 import com.elasticpath.domain.catalog.ProductSku;
@@ -27,14 +26,8 @@ import com.elasticpath.domain.shoppingcart.ShoppingItem;
 import com.elasticpath.domain.shoppingcart.WishList;
 import com.elasticpath.rest.cache.CacheRemove;
 import com.elasticpath.rest.cache.CacheResult;
-import com.elasticpath.rest.chain.Assign;
-import com.elasticpath.rest.chain.Ensure;
-import com.elasticpath.rest.chain.ExecutionResultChain;
-import com.elasticpath.rest.chain.OnFailure;
-import com.elasticpath.rest.command.ExecutionResult;
-import com.elasticpath.rest.command.ExecutionResultFactory;
+import com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder.CartPostProcessor;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder.ShoppingCartRepository;
-import com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder.ShoppingItemValidationService;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.customer.CustomerSessionRepository;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.sku.ProductSkuRepository;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.transform.ReactiveAdapter;
@@ -54,7 +47,6 @@ public class ShoppingCartRepositoryImpl implements ShoppingCartRepository {
 	 */
 	@VisibleForTesting
 	public static final String DEFAULT_CART_NOT_FOUND = "Default cart cannot be found.";
-	private static final String CART_WAS_NOT_FOUND = "No cart was found with GUID = %s.";
 
 	/**
 	 * Error message used when line item was not found.
@@ -67,31 +59,28 @@ public class ShoppingCartRepositoryImpl implements ShoppingCartRepository {
 	private final ShoppingItemDtoFactory shoppingItemDtoFactory;
 	private final CartPostProcessor cartPostProcessor;
 	private final ReactiveAdapter reactiveAdapter;
-	private final ShoppingItemValidationService shoppingItemValidationService;
 	private final ProductSkuRepository productSkuRepository;
 
 	/**
 	 * Constructor.
 	 *
-	 * @param shoppingCartService           the shoppingCartService
-	 * @param cartDirectorService           the cart director service
-	 * @param customerSessionRepository     the customer session repo
-	 * @param shoppingItemDtoFactory        the shopping item dto factory
-	 * @param cartPostProcessor             the {@link CartPostProcessor}
-	 * @param reactiveAdapter               the reactive adapter
-	 * @param shoppingItemValidationService the shopping item validation service
-	 * @param productSkuRepository          the product sku repository
+	 * @param shoppingCartService       the shoppingCartService
+	 * @param cartDirectorService       the cart director service
+	 * @param customerSessionRepository the customer session repo
+	 * @param shoppingItemDtoFactory    the shopping item dto factory
+	 * @param cartPostProcessor         the {@link CartPostProcessor}
+	 * @param reactiveAdapter           the reactive adapter
+	 * @param productSkuRepository      the product sku repository
 	 */
 	@Inject
 	@SuppressWarnings("parameternumber")
-	ShoppingCartRepositoryImpl(
+	public ShoppingCartRepositoryImpl(
 			@Named("shoppingCartService") final ShoppingCartService shoppingCartService,
 			@Named("cartDirectorService") final CartDirectorService cartDirectorService,
 			@Named("customerSessionRepository") final CustomerSessionRepository customerSessionRepository,
 			@Named("shoppingItemDtoFactory") final ShoppingItemDtoFactory shoppingItemDtoFactory,
 			@Named("cartPostProcessor") final CartPostProcessor cartPostProcessor,
 			@Named("reactiveAdapter") final ReactiveAdapter reactiveAdapter,
-			@Named("shoppingItemValidationService") final ShoppingItemValidationService shoppingItemValidationService,
 			@Named("productSkuRepository") final ProductSkuRepository productSkuRepository) {
 
 		this.shoppingCartService = shoppingCartService;
@@ -100,10 +89,15 @@ public class ShoppingCartRepositoryImpl implements ShoppingCartRepository {
 		this.shoppingItemDtoFactory = shoppingItemDtoFactory;
 		this.cartPostProcessor = cartPostProcessor;
 		this.reactiveAdapter = reactiveAdapter;
-		this.shoppingItemValidationService = shoppingItemValidationService;
 		this.productSkuRepository = productSkuRepository;
 	}
 
+
+	@Override
+	public Single<String> getDefaultShoppingCartGuid() {
+		return customerSessionRepository.findOrCreateCustomerSessionAsSingle()
+				.flatMap(this::getDefaultCartGuid);
+	}
 
 	@Override
 	public Single<ShoppingCart> getDefaultShoppingCart() {
@@ -118,20 +112,19 @@ public class ShoppingCartRepositoryImpl implements ShoppingCartRepository {
 	}
 
 	@Override
-	@SuppressWarnings("deprecation")
-	public ExecutionResult<ShoppingCart> getShoppingCart(final String cartGuid) {
-		return new ExecutionResultChain() {
-			public ExecutionResult<?> build() {
-				final CustomerSession customerSession = Assign.ifSuccessful(customerSessionRepository.findOrCreateCustomerSession());
-				final ShoppingCart cart = getCartByGuid(cartGuid);
-				Ensure.notNull(cart, OnFailure.returnNotFound(CART_WAS_NOT_FOUND, cartGuid));
-
-				cartPostProcessor.postProcessCart(cart, cart.getShopper(), customerSession);
-
-				return ExecutionResultFactory.createReadOK(cart);
-			}
-		}.execute();
+	public Single<ShoppingCart> getShoppingCart(final String cartGuid) {
+		return getShoppingCartSingle(cartGuid);
 	}
+
+	@CacheResult
+	private Single<ShoppingCart> getShoppingCartSingle(final String cartGuid) {
+		return customerSessionRepository.findOrCreateCustomerSessionAsSingle()
+		.flatMap(customerSession -> getCartByGuid(cartGuid).flatMap(cart -> reactiveAdapter.fromServiceAsSingle(() -> {
+			cartPostProcessor.postProcessCart(cart, cart.getShopper(), customerSession);
+			return cart;
+		})));
+	}
+
 
 	@Override
 	@CacheResult(uniqueIdentifier = "verifyShoppingCartExistsForStore")
@@ -147,14 +140,26 @@ public class ShoppingCartRepositoryImpl implements ShoppingCartRepository {
 		return savedCart;
 	}
 
-	@CacheResult
-	private ShoppingCart getCartByGuid(final String cartGuid) {
-		return shoppingCartService.findByGuid(cartGuid);
+	private Single<ShoppingCart> getCartByGuid(final String cartGuid) {
+		return reactiveAdapter.fromServiceAsSingle(() -> shoppingCartService.findByGuid(cartGuid));
 	}
 
 	private Single<ShoppingCart> getDefaultCart(final CustomerSession customerSession) {
 		return reactiveAdapter.fromServiceAsSingle(() -> getCartForCustomerSession(customerSession), DEFAULT_CART_NOT_FOUND);
 	}
+
+	@CacheResult
+	private Single<String> getDefaultCartGuid(final CustomerSession customerSession) {
+		return reactiveAdapter.fromServiceAsSingle(()
+				-> shoppingCartService.findDefaultShoppingCartGuidByShopper(customerSession.getShopper()));
+	}
+
+	@CacheResult(uniqueIdentifier = "getStoreForCartGuid")
+	private Single<String>  getStoreForCartGuid(final String cartGuid) {
+		return reactiveAdapter.fromServiceAsSingle(()
+				-> shoppingCartService.findStoreCodeByCartGuid(cartGuid), "STORE NOT FOUND");
+	}
+
 
 	@Override
 	@CacheResult
@@ -164,13 +169,19 @@ public class ShoppingCartRepositoryImpl implements ShoppingCartRepository {
 	}
 
 	@Override
+	public Single<String> findStoreForCartGuid(final String cartGuid) {
+		return getStoreForCartGuid(cartGuid);
+	}
+
+
+
+	@Override
 	@CacheRemove(typesToInvalidate = {ShoppingCart.class, ShoppingCartPricingSnapshot.class, ShoppingCartTaxSnapshot.class})
 	public Single<ShoppingItem> addItemToCart(final ShoppingCart cart, final String skuCode, final int quantity, final Map<String, String> fields) {
 		ShoppingItemDto shoppingItemDto = shoppingItemDtoFactory.createDto(skuCode, quantity);
 		shoppingItemDto.setItemFields(fields);
 
-		return shoppingItemValidationService.validate(shoppingItemDto)
-				.andThen(reactiveAdapter.fromServiceAsSingle(() -> cartDirectorService.addItemToCart(cart, shoppingItemDto)));
+		return reactiveAdapter.fromServiceAsSingle(() -> cartDirectorService.addItemToCart(cart, shoppingItemDto));
 	}
 
 	@Override
@@ -179,8 +190,7 @@ public class ShoppingCartRepositoryImpl implements ShoppingCartRepository {
 											   final int quantity, final Map<String, String> fields) {
 		ShoppingItemDto dto = shoppingItemDtoFactory.createDto(skuCode, quantity);
 		dto.setItemFields(fields);
-		return shoppingItemValidationService.validate(dto)
-				.andThen(reactiveAdapter.fromServiceAsSingle(() -> cartDirectorService.moveItemFromWishListToCart(cart, dto, wishlistLineItemGuid)));
+		return reactiveAdapter.fromServiceAsSingle(() -> cartDirectorService.moveItemFromWishListToCart(cart, dto, wishlistLineItemGuid));
 	}
 
 	@Override
@@ -190,8 +200,8 @@ public class ShoppingCartRepositoryImpl implements ShoppingCartRepository {
 
 	@Override
 	@CacheResult
-	public Single<ProductSku> getProductSku(final String lineItemId) {
-		return getDefaultShoppingCart()
+	public Single<ProductSku> getProductSku(final String cartId, final String lineItemId) {
+		return getShoppingCart(cartId)
 				.flatMap(cart -> getShoppingItem(lineItemId, cart))
 				.flatMap(shoppingItem -> productSkuRepository.getProductSkuWithAttributesByGuidAsSingle(shoppingItem.getSkuGuid()));
 	}
@@ -211,22 +221,28 @@ public class ShoppingCartRepositoryImpl implements ShoppingCartRepository {
 		ShoppingItemDto shoppingItemDto = shoppingItemDtoFactory.createDto(skuCode, quantity);
 		shoppingItemDto.setItemFields(itemFields);
 
-		return shoppingItemValidationService.validate(shoppingItemDto)
-				.andThen(reactiveAdapter.fromServiceAsCompletable(() -> cartDirectorService.updateCartItem(cart, shoppingItem.getUidPk(),
-						shoppingItemDto)));
+		return reactiveAdapter.fromServiceAsCompletable(() -> cartDirectorService.updateCartItem(cart, shoppingItem.getUidPk(),
+				shoppingItemDto));
 	}
 
 	@Override
 	@CacheRemove(typesToInvalidate = {ShoppingCart.class, ShoppingCartPricingSnapshot.class, ShoppingCartTaxSnapshot.class})
 	public Completable removeItemFromCart(final ShoppingCart cart, final String shoppingItemGuid) {
+		//LOG.warn("remove Item from Cart");
 		return reactiveAdapter.fromServiceAsCompletable(() -> cartDirectorService.removeItemsFromCart(cart, shoppingItemGuid));
 	}
 
 	@Override
 	@CacheRemove(typesToInvalidate = {ShoppingCart.class, ShoppingCartPricingSnapshot.class, ShoppingCartTaxSnapshot.class})
-	public Completable removeAllItemsFromCart() {
+	public Completable removeAllItemsFromDefaultCart() {
 		return getDefaultShoppingCart()
 				.flatMapCompletable(cart -> reactiveAdapter.fromServiceAsCompletable(() -> cartDirectorService.clearItems(cart)));
+	}
+
+	@Override
+	@CacheRemove(typesToInvalidate = {ShoppingCart.class, ShoppingCartPricingSnapshot.class, ShoppingCartTaxSnapshot.class})
+	public Completable removeAllItemsFromCart(final ShoppingCart cart) {
+		return reactiveAdapter.fromServiceAsCompletable(() -> cartDirectorService.clearItems(cart));
 	}
 
 	@Override

@@ -25,9 +25,9 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
-import com.elasticpath.common.dto.StructuredErrorMessage;
+import com.elasticpath.base.common.dto.StructuredErrorMessage;
 import com.elasticpath.validation.impl.ConstraintViolationTransformerImpl;
 
 /**
@@ -142,10 +142,7 @@ public class ConstraintViolationTransformerImplTest {
 		attributes.put(PAYLOAD_KEY, PAYLOAD_VALUE);
 
 		when(constraintViolation.getMessageTemplate()).thenReturn(JAVAX_VALIDATION_CONSTRAINTS_NOT_NULL_MESSAGE);
-		when(path.toString()).thenReturn(DOMAIN_FIELD_NAME);
 		when(constraintViolation.getMessage()).thenReturn(JAVAX_VALIDATION_CONSTRAINTS_NOT_NULL_MESSAGE);
-		when(constraintViolation.getLeafBean()).thenReturn("invalid-value");
-		when(constraintViolation.getInvalidValue()).thenReturn("invalid-value");
 
 		List<StructuredErrorMessage> result = constraintViolationTransformer.transform(constraintsSet);
 

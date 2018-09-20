@@ -18,7 +18,7 @@ public class CustomerPersonalDataParameters implements ReportParameters {
 	private String store;
 	private Date startDate;
 	private Date endDate;
-	private int customerID;
+	private String userId;
 
 	public String getStore() {
 		return store;
@@ -43,13 +43,12 @@ public class CustomerPersonalDataParameters implements ReportParameters {
 	public void setEndDate(final Date endDate) {
 		this.endDate = endDate;
 	}
-
-	public int getCustomerID() {
-		return customerID;
+	public String getUserId() {
+		return userId;
 	}
 
-	public void setCustomerID(final int customerID) {
-		this.customerID = customerID;
+	public void setUserId(final String userId) {
+		this.userId = userId;
 	}
 
 	public long getStoreUidPk() {

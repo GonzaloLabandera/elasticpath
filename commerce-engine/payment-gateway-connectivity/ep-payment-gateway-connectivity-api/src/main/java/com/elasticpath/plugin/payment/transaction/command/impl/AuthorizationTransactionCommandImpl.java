@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) Elastic Path Software Inc., 2014
  */
 package com.elasticpath.plugin.payment.transaction.command.impl;
@@ -7,10 +7,7 @@ import com.elasticpath.plugin.payment.PaymentGatewayPlugin;
 import com.elasticpath.plugin.payment.capabilities.PreAuthorizeCapability;
 import com.elasticpath.plugin.payment.capabilities.TokenAuthorizationCapability;
 import com.elasticpath.plugin.payment.dto.AddressDto;
-import com.elasticpath.plugin.payment.dto.CardDetailsPaymentMethod;
 import com.elasticpath.plugin.payment.dto.OrderShipmentDto;
-import com.elasticpath.plugin.payment.dto.PaymentMethod;
-import com.elasticpath.plugin.payment.dto.TokenPaymentMethod;
 import com.elasticpath.plugin.payment.exceptions.PaymentOperationNotSupportedException;
 import com.elasticpath.plugin.payment.transaction.AuthorizationTransactionRequest;
 import com.elasticpath.plugin.payment.transaction.AuthorizationTransactionResponse;
@@ -39,23 +36,15 @@ public final class AuthorizationTransactionCommandImpl implements AuthorizationT
 
 	@Override
 	public AuthorizationTransactionResponse execute() {
-		PaymentMethod paymentMethod = authorizationTransactionRequest.getPaymentMethod();
-		
-		if (paymentMethod instanceof CardDetailsPaymentMethod) {
-			PreAuthorizeCapability authorizationCapability = paymentGatewayPlugin.getCapability(PreAuthorizeCapability.class);
-			if (authorizationCapability == null) {
-				throw new PaymentOperationNotSupportedException("Server-side authorization is not supported.");
-			}
+		PreAuthorizeCapability authorizationCapability = paymentGatewayPlugin.getCapability(PreAuthorizeCapability.class);
+		if (authorizationCapability != null) {
 			return authorizationCapability.preAuthorize(authorizationTransactionRequest, billingAddress, orderShipment);
-		} else if (paymentMethod instanceof TokenPaymentMethod) {
-			TokenAuthorizationCapability tokenAuthCapability = paymentGatewayPlugin.getCapability(TokenAuthorizationCapability.class);
-			if (tokenAuthCapability == null) {
-				throw new PaymentOperationNotSupportedException("Token authorization is not supported.");
-			}
-			return tokenAuthCapability.preAuthorize(authorizationTransactionRequest);
-		} else {
-			throw new PaymentOperationNotSupportedException("Server-side authorization is not supported.");
 		}
+		TokenAuthorizationCapability tokenAuthCapability = paymentGatewayPlugin.getCapability(TokenAuthorizationCapability.class);
+		if (tokenAuthCapability != null) {
+			return tokenAuthCapability.preAuthorize(authorizationTransactionRequest);
+		}
+		throw new PaymentOperationNotSupportedException("Server-side authorization is not supported.");
 	}
 	
 	/**

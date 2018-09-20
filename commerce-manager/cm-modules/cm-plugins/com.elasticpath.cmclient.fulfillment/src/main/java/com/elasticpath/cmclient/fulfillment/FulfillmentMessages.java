@@ -72,10 +72,10 @@ public final class FulfillmentMessages {
 
 	public String ProfileAttributesSection_Title;
 
-
 	// ----------------------------------------------------
 	// Global keys
 	// ----------------------------------------------------
+
 	public String CustomerDetailsStatus_Active;
 
 	public String CustomerDetailsStatus_Disabled;
@@ -89,6 +89,8 @@ public final class FulfillmentMessages {
 	public String AddressDialog_Organization;
 
 	public String CustomerDetails_CustomerIdLabel;
+
+	public String CustomerDetails_UserIdLabel;
 
 	public String CustomerDetails_Anonymous;
 
@@ -157,8 +159,6 @@ public final class FulfillmentMessages {
 	public String AddressMainSection_Title;
 
 	public String AddressMainSection_Description;
-
-	public String AddressMainSection_Nickname;
 
 	public String AddressMainSection_Name;
 
@@ -256,12 +256,6 @@ public final class FulfillmentMessages {
 
 	public String ProfileRegistrationSection_TaxExemptionId;
 
-	public String SegmentsPage_Title;
-
-	public String SegmentsPage_Form_Title;
-
-	public String AddressDialog_Nickname;
-
 	public String AddressDialog_FirstName;
 
 	public String AddressDialog_LastName;
@@ -292,15 +286,7 @@ public final class FulfillmentMessages {
 
 	public String AddressDialog_AddAddressTitle;
 
-	public String AddressDialog_EditAddressMessage;
-
-	public String AddressDialog_AddAddressMessage;
-
 	public String AddressDialog_ViewAddressTitle;
-
-	public String AddressDialog_ViewAddressMessage;
-
-	public String AddressDialog_ButtonConfirm;
 
 	// ----------------------------------------------------
 	// Order Editors package
@@ -309,14 +295,6 @@ public final class FulfillmentMessages {
 	public String OrderSummaryPage_Title;
 
 	public String OrderSummaryPage_Form_Title;
-
-	public String OrderSummaryPage_AddNoteBtn;
-
-	public String OrderSummaryPage_CreateReturnBtn;
-
-	public String OrderSummaryPage_CreateExchangeBtn;
-
-	public String OrderSummaryPage_CreateInvoiceBtn;
 
 	public String OrderSummaryPage_EditorDirtyCancelOrder_Title;
 
@@ -329,8 +307,6 @@ public final class FulfillmentMessages {
 	public String OredrSummaryPage_EditorDirtyRemoveHoldOrder_Title;
 
 	public String OrderSummaryPage_EditorDirtyRemoveHoldOrder_Message;
-
-	public String OrderLockingSection_OrderLockedBy;
 
 	public String OrderSummaryOverviewSection_Description;
 
@@ -392,12 +368,6 @@ public final class FulfillmentMessages {
 
 	public String OrderSummaryCustomerInformationSection_EditCustomerBtn;
 
-	public String OrderSummaryStatusSection_Description;
-
-	public String OrderSummaryStatusSection_Title;
-
-	public String OrderSummaryStatusSection_OrderStatus;
-
 	public String OrderSummaryBillingAddressSection_Description;
 
 	public String OrderSummaryBillingAddressSection_Title;
@@ -417,8 +387,6 @@ public final class FulfillmentMessages {
 	public String OrderDetailsErrorResendingGiftCert_Message;
 
 	public String OrderDetailsErrorAddingItem_Title;
-
-	public String OrderDetailsErrorAddingItem_Message;
 
 	public String OrderDetailsErrorAddingBundle_Message;
 
@@ -492,11 +460,9 @@ public final class FulfillmentMessages {
 
 	public String ShipmentSection_PaymentSchedule;
 
-	public String ShipmentSection_InvoicePrice;
-
 	public String ShipmentSection_SalePrice;
 
-	public String ShipmentSection_ItemDiscount;
+	public String ShipmentSection_Discount;
 
 	public String ShipmentSection_Quantity;
 
@@ -507,6 +473,8 @@ public final class FulfillmentMessages {
 	public String ShipmentSection_WaitingForAllocation;
 
 	public String ShipmentSection_AddItemButton;
+
+	public String ShipmentSection_ItemDetailButton;
 
 	public String ShipmentSection_MoveItemButton;
 
@@ -550,12 +518,6 @@ public final class FulfillmentMessages {
 
 	public String ShipmentSection_EditorDirtyReleaseShipmentTitle;
 
-	public String ShipmentSection_ConfirmMoveItem;
-
-	public String ShipmentSection_ConfirmMoveShipment;
-
-	public String ShipmentSection_MoveItemConfirm;
-
 	public String ShipmentSection_EditorDirtyReleaseShipmentMessage1;
 
 	public String ShipmentSection_EditorDirtyReleaseShipmentMessage2;
@@ -568,17 +530,11 @@ public final class FulfillmentMessages {
 
 	public String ShipmentSection_ReleaseShipmentConfirmMessage;
 
-	public String ShipmentSection_CancelReleaseShipmentTitle;
-
 	public String ShipmentSection_CancelShipmentMessage;
 
 	public String ShipmentSection_CancelShipmentTo;
 
 	public String ShipmentSection_CancelShipmentShipment;
-
-	public String ShipmentSection_ReleaseShipmentButEditorDirty;
-
-	public String ShipmentSection_CancelReleaseShipmentMessage;
 
 	public String ShipmentSection_ConfirmRemoveShipment;
 
@@ -600,25 +556,17 @@ public final class FulfillmentMessages {
 
 	public String ShipmentSection_DuplicateProductSkuWarningMessage;
 
-	public String ShipmenSection_GiftCertificate;
-
 	public String ShipmenSection_DigitalGood;
 
 	public String ShipmenSection_GiftCertificateResend;
-
-	public String ShipmentSection_NotActiveShippingLevel;
 
 	public String ShipmentSection_MinimumOrderQuantityOutOfStock;
 
 	public String ElectronicShipmentSection_Title;
 
-	public String ElectronicShipmentSection_To;
-
 	public String ElectronicShipmentSection_Description;
 
 	public String RecurringItemsSection_Title;
-
-	public String OtherItemsSection_Title;
 
 	public String PromotionSection_Title;
 
@@ -636,25 +584,15 @@ public final class FulfillmentMessages {
 
 	public String PromotionSection_PromotionCouponUsage;
 
-	public String PromotionSection_SubTotal;
-
-	public String PromotionSection_OrderDiscount;
-
-	public String PromotionSection_Total;
-
 	public String OrderDataSection_Title;
-	
+
 	public String OrderNotePage_Title;
 
 	public String OrderNotePage_Form_Title;
 
-	public String OrderNoteFilter_Title;
-
 	public String OrderNoteFilter_Label_Note_Type;
 
 	public String OrderNote_Label_Originate;
-
-	public String OrderNoteNotes_Title;
 
 	public String OrderNoteNotes_Description;
 
@@ -664,8 +602,6 @@ public final class FulfillmentMessages {
 
 	public String OrderNoteNotes_DialogTitleOpen;
 
-	public String OrderNoteNotes_DialogTitleView;
-
 	public String OrderNoteNotes_DialogTitleViewAll;
 
 	public String OrderNoteNotes_DialogLabelCreatedBy;
@@ -673,8 +609,6 @@ public final class FulfillmentMessages {
 	public String OrderNoteNotes_DialogLabelCreatedOn;
 
 	public String OrderNoteNotes_DialogLabelNote;
-
-	public String OrderNoteNotes_ViewButton;
 
 	public String OrderNoteNotes_ViewAllButton;
 
@@ -709,7 +643,6 @@ public final class FulfillmentMessages {
 	public String ResendGiftCertDialog_WindowTitle;
 
 	public String ResendGiftCertDialog_Recipient;
-
 	// ----------------------------------------------------
 	// Order payments
 	// ----------------------------------------------------
@@ -752,18 +685,10 @@ public final class FulfillmentMessages {
 
 	public String OrderPaymentHistorySection_ElectronicShipmentId;
 
-	public String OrderPaymentHistorySection_Expires;
-
-	public String OrderPaymentHistorySection_Expires_Seperator;
-
-	public String OrderPaymentHistorySection_NegativeAmountDecorator;
-
 	public String OrderPaymentHistorySection_PaymentTokenDetailsPlaceholder;
-	
 	// ----------------------------------------------------
 	// Order returns and exchanges
 	// ----------------------------------------------------
-
 	public String OrderReturnsPage_Title;
 
 	public String OrderReturnReturnSection_Title;
@@ -802,8 +727,6 @@ public final class FulfillmentMessages {
 
 	public String OrderReturnSection_Notes;
 
-	public String OrderReturnSection_TableTitle_ProductType;
-
 	public String OrderReturnSection_TableTitle_SKUCode;
 
 	public String OrderReturnSection_TableTitle_ProductName;
@@ -817,8 +740,6 @@ public final class FulfillmentMessages {
 	public String OrderReturnSection_TableTitle_ReceivedQty;
 
 	public String OrderReturnSection_TableTitle_ReceivedState;
-
-	public String OrderReturnSection_TableTitle_ReceivedBy;
 
 	public String OrderReturnSection_CancelReturnTitle;
 
@@ -853,7 +774,7 @@ public final class FulfillmentMessages {
 	public String RAESection_EditorDirtyCreateReturnTitle;
 
 	public String RAESection_EditorDirtyCreateReturnMessage;
-	
+
     public String ReturnSection_SubSectionStatus;
 
 	// ----------------------------------------------------
@@ -863,8 +784,6 @@ public final class FulfillmentMessages {
 	public String SearchView_CustomersTab;
 
 	public String SearchView_OrdersTab;
-
-	public String SearchView_ReturnsTab;
 
 	public String SearchView_SearchButton;
 
@@ -886,8 +805,6 @@ public final class FulfillmentMessages {
 
 	public String SearchView_Filter_Stores;
 
-	public String SearchView_Filter_CustomerSegment;
-
 	public String SearchView_AllStore;
 
 	public String CustomerSearchTab_SearchTermsGroup;
@@ -907,6 +824,7 @@ public final class FulfillmentMessages {
 	// ----------------------------------------------------
 	// Order search view tab
 	// ----------------------------------------------------
+
 	public String SearchView_Filter_OrderStatus;
 
 	public String SearchView_Filter_ShipmentStatus;
@@ -919,24 +837,16 @@ public final class FulfillmentMessages {
 
 	public String SearchView_RMA;
 
-	public String SearchView_RMA_Tooltip;
-
 	public String SearchView_FromDate;
 
-	public String SearchView_FromDate_Tooltip;
-
 	public String SearchView_ToDate;
-
-	public String SearchView_ToDate_Tooltip;
 
 	public String Validation_ToDateBeforeFromDate;
 
 	public String Validation_FromDateAfterToDate;
-
 	// ----------------------------------------------------
 	// Customer Views package
 	// ----------------------------------------------------
-
 	public String CustomerSearchResultsView_CustomerId;
 
 	public String CustomerSearchResultsView_LastName;
@@ -949,9 +859,14 @@ public final class FulfillmentMessages {
 
 	public String CustomerSearchResultsView_TelephoneNum;
 
+	public String CustomerSearchResultsView_UserId;
+
+	public String CustomerSearchResultsView_StoreRegistered;
+
 	// ----------------------------------------------------
 	// Order search results Views
 	// ----------------------------------------------------
+
 	public String OrderSearchResultsView_OrderNumber;
 
 	public String OrderSearchResultsView_Store;
@@ -967,6 +882,7 @@ public final class FulfillmentMessages {
 	// ----------------------------------------------------
 	// Return Wizard
 	// ----------------------------------------------------
+
 	public String ReturnWizard_Create_Title;
 
 	public String ReturnWizard_Edit_Title;
@@ -1005,8 +921,6 @@ public final class FulfillmentMessages {
 
 	public String ReturnWizard_PhysicalReturnRequired_Label;
 
-	public String ReturnWizard_Summary_Label;
-
 	public String ReturnWizard_ItemsToBeReturned_Section;
 
 	public String ReturnWizard_Notes_Section;
@@ -1020,8 +934,6 @@ public final class FulfillmentMessages {
 	public String ReturnWizard_SKUOptions_Column;
 
 	public String ReturnWizard_ReturnableQty_Column;
-
-	public String ReturnWizard_UnitPrice_Column;
 
 	public String ReturnWizard_InvoicePrice_Column;
 
@@ -1037,8 +949,6 @@ public final class FulfillmentMessages {
 
 	public String ReturnWizard_ShipmentTotal_Msg;
 
-	public String ReturnWizard_NothingToReturnError_Msg;
-
 	public String ReturnWizard_ProceedError_Title;
 
 	public String ReturnWizard_ProceedError_Msg;
@@ -1046,13 +956,10 @@ public final class FulfillmentMessages {
 	// ----------------------------------------------------
 	// Exchange Wizard
 	// ----------------------------------------------------
+
 	public String ExchangeWizard_Create_Title;
 
 	public String ExchangeWizard_Complete_Title;
-
-	public String ExchangeWizard_Complete_Page_Title;
-
-	public String ExchangeWizard_Create_Page_Title;
 
 	public String ExchangeWizard_ExchangeItemsExchangePage_Message;
 
@@ -1063,8 +970,6 @@ public final class FulfillmentMessages {
 	public String ExchangeWizard_SummaryPage_Message;
 
 	public String ExchangeWizard_ItemsToBeExchanged_Section;
-
-	public String ExchangeWizard_Notes_Section;
 
 	public String ExchangeWizard_ItemsToBeOrdered_Section;
 
@@ -1097,8 +1002,6 @@ public final class FulfillmentMessages {
 	public String ExchangeWizard_AddItem_Button;
 
 	public String ExchangeWizard_RemoveItem_Button;
-
-	public String ExchangeWizard_NewPaymentSource;
 
 	public String ExchangeWizard_OriginalPaymentSource;
 
@@ -1140,10 +1043,6 @@ public final class FulfillmentMessages {
 
 	public String ExchangeWizard_RemoveLineItemConfirmText;
 
-	public String ExchangeWizard_NoLongerExistLineItemTitle;
-
-	public String ExchangeWizard_NoLongerExistLineItemMessage;
-
 	public String ExchangeWizard_ItemsUnavailableTitle;
 
 	public String ExchangeWizard_ItemsUnavailableText;
@@ -1172,9 +1071,9 @@ public final class FulfillmentMessages {
 
 	public String Exchange_AddingItem_NoRecurring_Message;
 
-
 	// ----------------------------------------------------
 	// Refund Wizard
+
 	// ----------------------------------------------------
 
 	public String RefundWizard_Title;
@@ -1193,8 +1092,6 @@ public final class FulfillmentMessages {
 
 	public String RefundWizard_Note_Text;
 
-	public String RefundWizard_ConfirmSection_Title;
-
 	public String RefundWizard_CardDescription;
 
 	public String RefundWizard_PaymentProceedError_Title;
@@ -1206,10 +1103,6 @@ public final class FulfillmentMessages {
 	public String RefundWizard_IncorrectRefundAmount_Message;
 
 	public String RefundWizard_Confirmation_Section;
-
-	public String RefundWizard_Cancel_Title;
-
-	public String RefundWizard_Cancel_Message;
 
 	// ----------------------------------------------------
 	// Capture Wizard
@@ -1260,29 +1153,9 @@ public final class FulfillmentMessages {
 	public String ReAuthWizard_Successful_Message;
 
 	// ----------------------------------------------------
-	// Card control
-	// ----------------------------------------------------
-	public String CardControl_Type;
-
-	public String CardControl_Number;
-
-	public String CardControl_CVV2;
-
-	public String CardControl_StartYear;
-
-	public String CardControl_StartMonth;
-
-	public String CardControl_ExpiryYear;
-
-	public String CardControl_ExpiryMonth;
-
-	public String CardControl_IssueNumber;
-
-	public String CardControl_HolderName;
-
-	// ----------------------------------------------------
 	// PaymentSummary control
 	// ----------------------------------------------------
+
 	public String Additional_Payment_Begin;
 
 	public String Refund_Payment_Begin;
@@ -1296,15 +1169,6 @@ public final class FulfillmentMessages {
 	public String Payment_Confirmation_Number;
 
 	// ----------------------------------------------------
-	// Return edit wizard
-	// ----------------------------------------------------
-	public String ReturnEditWizard_Title;
-
-	public String ReturnEditWizard_SubjectPage_Title;
-
-	public String ReturnEditWizard_SubjectPage_Message;
-
-	// ----------------------------------------------------
 	// Refund Options Composite
 	// ----------------------------------------------------
 	public String RefundOptionsComposite_ReturnToOriginal_RadioButton;
@@ -1316,13 +1180,6 @@ public final class FulfillmentMessages {
 	public String RefundOptionsComposite_CautionHeader_Label;
 
 	public String RefundOptionsSection_Title;
-
-	// ----------------------------------------------------
-	// Gift Certificate
-	// ----------------------------------------------------
-	public String GiftCertificate_Code;
-
-	public String GiftCertificate_Name;
 
 	// ----------------------------------------------------
 	// Resend RMA Email Wizard
@@ -1345,11 +1202,13 @@ public final class FulfillmentMessages {
 	// ----------------------------------------------------
 	// System
 	// ----------------------------------------------------
+
 	public String System;
 
 	// ----------------------------------------------------
 	// Order event filters
 	// ----------------------------------------------------
+
 	public String Event_Type_All;
 
 	public String Event_Type_System;
@@ -1384,8 +1243,6 @@ public final class FulfillmentMessages {
 
 	public String PaymentProcessingCommonError;
 
-	public String UnsupportedPaymentCapabilityError;
-
 	// ----------------------------------------------------
 	// Resend order confirmation email messages
 	// ----------------------------------------------------
@@ -1411,12 +1268,13 @@ public final class FulfillmentMessages {
 	// ----------------------------------------------------
 
 	public String EditItemDetails_WindowTitle;
-	public String EditItemDetails_OrderTitle;
+
 	public String EditItemDetails_OrderSkuTitle;
+
 	public String EditItemDetails_PropertyValue;
+
 	public String EditItemDetails_PropertyKey;
 
-	
 	public String CustomerSegmentsPage_Title;
 	
 	public String CustomerSegmentsPage_FormTitle;
@@ -1437,30 +1295,54 @@ public final class FulfillmentMessages {
 
 	public String ShipmentSection_SubSectionStatus;
 
-	//Data Policy
+	// ----------------------------------------------------
+	// Data Policy.
+	// ----------------------------------------------------
 
 	public String Delete_Label;
+
 	public String DeletePolicyData_Confirm;
+
 	public String DeleteCustomerData_Question;
+
 	public String IncludeDataPointsWithGrantedConsent_Label;
+
 	public String DeletePolicyData_Title;
+
 	public String NoRemovableDataPointValues_Message;
+
 	public String Error_Title;
+
 	public String DataPointValueRemovalError_Message;
+
 	public String DataPointValueSuccessfulDeletion_Message;
+
 	public String CustomerDataPolicies_Title;
+
 	public String ShowDisabledPolicies_Label;
+
 	public String DataPolicyName_Label;
+
 	public String DataPolicyState_Label;
+
 	public String DataPolicyConsentGiven_Label;
+
 	public String DataPolicyConsentUpdated_Label;
+
 	public String ViewDataPoints_Label;
+
 	public String Yes_Text;
+
 	public String No_Text;
+
 	public String DataPointName_Label;
+
 	public String DataPointRemovable_Label;
+
 	public String DataPointValue_Label;
+
 	public String DataPointValueCreated_Label;
+
 	public String DataPointValueLastUpdated_Label;
 
 	// Define the map of enum constants to localized names
@@ -1529,7 +1411,6 @@ public final class FulfillmentMessages {
 		if (error instanceof InsufficientFundException) {
 			return InsufficientFundError;
 		}
-
 			return PaymentProcessingCommonError;
 	}
 
@@ -1577,8 +1458,5 @@ public final class FulfillmentMessages {
 		FulfillmentMessages fulfillmentMessages = LocalizedMessagePostProcessor.getUTF8Encoded(BUNDLE_NAME, FulfillmentMessages.class);
 		fulfillmentMessages.instantiateEnums();
 		return fulfillmentMessages;
-
 	}
-
-
 }

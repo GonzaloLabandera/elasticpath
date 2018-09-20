@@ -2,10 +2,6 @@ package com.elasticpath.selenium.resultspane;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Locale;
-
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -21,10 +17,12 @@ import com.elasticpath.selenium.common.AbstractPageObject;
  */
 public class ReportPane extends AbstractPageObject {
 
+	private static final int SLOW_RUNNING_REPORT_TIME = 60;
 	private String htmlStr;
 	private int numberOfOrders;
 	private static final int PROMO_ORDER_COLUMN_NUMBER = 2;
 	private static final int ORDER_STATUS_TOTAL_COLUMN_NUMBER = 2;
+	private static final String USERID_TEXT = "User ID: ";
 
 	/**
 	 * Constructor.
@@ -89,13 +87,49 @@ public class ReportPane extends AbstractPageObject {
 	}
 
 	/**
+	 * Gets the row by column value.
+	 *
+	 * @param columnValue the column value
+	 * @param tableNumber nested table number, parent starts with 0
+	 * @return row or null
+	 */
+	public Element getRowByColumnPartialValue(final String columnValue, final int tableNumber) {
+
+		if (htmlStr == null) {
+			getHtmBody();
+		}
+
+		Document document = Jsoup.parse(htmlStr);
+		Element table = document.select("table").get(tableNumber);
+		Elements rows = table.select("tr");
+
+		for (Element row : rows) {
+			Elements columns = row.select("td");
+			for (Element column : columns) {
+				if (column.text().contains(columnValue)) {
+					return row;
+				}
+			}
+		}
+
+		assertThat(false)
+				.as("column value '" + columnValue + "' doesn't exist")
+				.isTrue();
+
+		return null;
+	}
+
+
+	/**
 	 * Returns the number of orders for promotion report.
 	 *
 	 * @param columnValue the column value
 	 * @return numberOfOrders the number of orders
 	 */
 	public int getPromoReportNumberOfOrders(final String columnValue) {
+		this.setWebDriverImplicitWait(SLOW_RUNNING_REPORT_TIME);
 		Element row = getRowByColumnValue(columnValue, 1);
+		this.setWebDriverImplicitWaitToDefault();
 		Elements columns = row.select("td");
 		numberOfOrders = Integer.parseInt(columns.get(PROMO_ORDER_COLUMN_NUMBER).text());
 		return numberOfOrders;
@@ -110,7 +144,7 @@ public class ReportPane extends AbstractPageObject {
 	public void verifyPromoReportNumberOfOrders(final String columnValue, final int numberOfOrders) {
 		assertThat(getPromoReportNumberOfOrders(columnValue))
 				.as("Number of orders are not as expected")
-				.isGreaterThanOrEqualTo(numberOfOrders);
+				.isGreaterThan(numberOfOrders);
 	}
 
 	/**
@@ -121,7 +155,7 @@ public class ReportPane extends AbstractPageObject {
 	public int getOrderSummaryReportNumberOfOrders() {
 		Element row = getRowByColumnValue(getFormattedDate(0), 2);
 		Elements columns = row.select("td");
-		numberOfOrders = Integer.parseInt(columns.get(2).text());
+		numberOfOrders = Integer.parseInt(columns.get(1).text());
 		return numberOfOrders;
 	}
 
@@ -133,19 +167,7 @@ public class ReportPane extends AbstractPageObject {
 	public void verifyNumberOfOrdersInOrderSummaryReport(final int numberOfOrders) {
 		assertThat(getOrderSummaryReportNumberOfOrders())
 				.as("Number of orders are not as expected")
-				.isGreaterThanOrEqualTo(numberOfOrders);
-	}
-
-	/**
-	 * Formats the date (26-Sep-2017).
-	 *
-	 * @param numberOfDays number of days to add or subtract from current date
-	 * @return formatted date String
-	 */
-	private String getFormattedDate(final int numberOfDays) {
-		Calendar calendar = Calendar.getInstance();
-		calendar.add(Calendar.DAY_OF_MONTH, numberOfDays);
-		return new SimpleDateFormat("MMM d, yyyy", Locale.ENGLISH).format(calendar.getTime());
+				.isGreaterThan(numberOfOrders);
 	}
 
 	/**
@@ -160,6 +182,7 @@ public class ReportPane extends AbstractPageObject {
 
 	/**
 	 * Verifies the order total in order status report.
+	 *
 	 * @param orderTotal the order total
 	 */
 	public void verifyOrderTotalInOrderStatusReport(final String orderTotal) {
@@ -170,4 +193,66 @@ public class ReportPane extends AbstractPageObject {
 				.isEqualTo(orderTotal);
 	}
 
+	/**
+	 * Verifies the user id Customer Data report.
+	 *
+	 * @param userId customer data report.
+	 */
+	public void verifyReportUserId(final String userId) {
+		String userIDValue = USERID_TEXT + userId;
+		Element row = getRowByColumnPartialValue(userId, 1);
+		assertThat(row.select("td").get(0).text().replace("\u00a0", ""))
+				.as("User Id in Customer Data Report is not as expected ")
+				.isEqualTo(userIDValue);
+	}
+
+	/**
+	 * Verifies Customer Data report content is empty
+	 */
+	public void verifyReportContentIsEmpty() {
+		assertThat(isColumnValuePresent("Data Point Name", 1))
+				.as("Report Content should be empty")
+				.isFalse();
+	}
+
+	/**
+	 * Verifies the Data Points are present for Customer Data report.
+	 *
+	 * @param dataPointValue customer data report.
+	 */
+	public void verifyReportContent(final String dataPointValue) {
+		assertThat(isColumnValuePresent(dataPointValue, 1))
+				.as("Report does not show expected Data Point Value")
+				.isTrue();
+	}
+
+	/**
+	 * Gets the row by column value.
+	 *
+	 * @param columnValue the column value
+	 * @param tableNumber nested table number, parent starts with 0
+	 * @return row or null
+	 */
+	public boolean isColumnValuePresent(final String columnValue, final int tableNumber) {
+
+		if (htmlStr == null) {
+			getHtmBody();
+		}
+
+		Document document = Jsoup.parse(htmlStr);
+		Element table = document.select("table").get(tableNumber);
+		Elements rows = table.select("tr");
+		boolean valuePresent = false;
+		for (Element row : rows) {
+			Elements columns = row.select("td");
+			for (Element column : columns) {
+				if (column.text().equals(columnValue)) {
+					valuePresent = true;
+					break;
+				}
+			}
+		}
+
+		return valuePresent;
+	}
 }

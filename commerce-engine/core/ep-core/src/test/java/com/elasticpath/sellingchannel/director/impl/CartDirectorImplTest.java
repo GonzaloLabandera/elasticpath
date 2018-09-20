@@ -3,11 +3,14 @@
  */
 package com.elasticpath.sellingchannel.director.impl;
 
+import static java.util.Collections.emptyList;
+import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
@@ -18,10 +21,7 @@ import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.Currency;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -32,12 +32,12 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.internal.stubbing.answers.ReturnsArgumentAt;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
 
 import com.elasticpath.common.dto.ShoppingItemDto;
+import com.elasticpath.common.dto.sellingchannel.ShoppingItemDtoFactory;
 import com.elasticpath.common.pricing.service.PriceLookupFacade;
-import com.elasticpath.domain.catalog.Catalog;
 import com.elasticpath.domain.catalog.Price;
 import com.elasticpath.domain.catalog.Product;
 import com.elasticpath.domain.catalog.ProductSku;
@@ -45,7 +45,6 @@ import com.elasticpath.domain.catalog.impl.PriceImpl;
 import com.elasticpath.domain.catalog.impl.ProductImpl;
 import com.elasticpath.domain.catalog.impl.ProductSkuImpl;
 import com.elasticpath.domain.misc.impl.RandomGuidImpl;
-import com.elasticpath.domain.shopper.Shopper;
 import com.elasticpath.domain.shoppingcart.ShoppingCart;
 import com.elasticpath.domain.shoppingcart.ShoppingItem;
 import com.elasticpath.domain.shoppingcart.impl.CartItem;
@@ -53,8 +52,9 @@ import com.elasticpath.domain.shoppingcart.impl.ShoppingItemImpl;
 import com.elasticpath.domain.store.Store;
 import com.elasticpath.money.Money;
 import com.elasticpath.sellingchannel.director.ShoppingItemAssembler;
+import com.elasticpath.service.catalog.ProductAssociationService;
 import com.elasticpath.service.catalog.ProductSkuLookup;
-import com.elasticpath.service.misc.TimeService;
+import com.elasticpath.service.shoppingcart.validation.AddOrUpdateShoppingItemDtoToCartValidationService;
 
 /**
  * Tests the {@code CartDirectorImpl} in isolation.
@@ -65,7 +65,6 @@ public class CartDirectorImplTest {
 
 	private static final String SHOPPING_ITEM_GUID = "shoppingItemGuid";
 	private static final String SKU_CODE = "skuCode";
-	private static final String SKU_CODE_2 = "testSkuCode2";
 	private static final String SKU_123 = "123";
 	private static final String SKU_A = "skuA";
 	private static final String SKU_GUID = "testSkuGuid";
@@ -74,6 +73,7 @@ public class CartDirectorImplTest {
 	private static final Currency CURRENCY_CAD = Currency.getInstance("CAD");
 	private static final int SHOPPING_ITEM_ORDERING = 5;
 	private static final int QUANTITY = 3;
+	private static final String DEPENDENT_SKU_CODE = "testADependentSkuCode";
 
 	@Mock
 	private ProductSkuLookup productSkuLookup;
@@ -88,15 +88,21 @@ public class CartDirectorImplTest {
 	@Mock
 	private ProductSku productSku2;
 	@Mock
-	private Product product;
-	@Mock
 	private ShoppingCart shoppingCart;
 	@Mock
 	private CartItem shoppingItemAlreadyInCart;
 	@Mock
 	private ShoppingItem addedShoppingItem;
 	@Mock
+	private Store store;
+	@Mock
 	private PriceLookupFacade priceLookupFacade;
+	@Mock
+	private ProductAssociationService productAssociationService;
+	@Mock
+	private ShoppingItemDtoFactory shoppingItemDtoFactory;
+	@SuppressWarnings("PMD.UnusedPrivateField")
+	@Mock private AddOrUpdateShoppingItemDtoToCartValidationService validationService;
 
 	private final List<ShoppingItem> itemsInCart = new ArrayList<>();
 	private Integer changeQuantityArgument;
@@ -106,6 +112,9 @@ public class CartDirectorImplTest {
 		cartDirector.setProductSkuLookup(productSkuLookup);
 		cartDirector.setShoppingItemAssembler(shoppingItemAssembler);
 		cartDirector.setPriceLookupFacade(priceLookupFacade);
+		cartDirector.setProductAssociationService(productAssociationService);
+		cartDirector.setShoppingItemDtoFactory(shoppingItemDtoFactory);
+		cartDirector.setValidationService(validationService);
 
 		// Configure class under test to ignore irrelevant code branches
 		doNothing().when(cartDirector).priceShoppingItemWithAdjustments(any(ShoppingCart.class), any(ShoppingItem.class));
@@ -117,9 +126,9 @@ public class CartDirectorImplTest {
 
 		// Dependency and parameter mocking
 		itemsInCart.add(shoppingItemAlreadyInCart);
-		given(shoppingCart.getCartItems()).willReturn(itemsInCart);
-		given(shoppingCart.getCartItems(SKU_CODE)).willReturn(itemsInCart);
+		given(shoppingCart.getAllShoppingItems()).willReturn(itemsInCart);
 		given(shoppingCart.getCartItemsBySkuGuid(SKU_GUID)).willReturn(itemsInCart);
+		given(shoppingCart.getStore()).willReturn(store);
 
 		given(shoppingItemAlreadyInCart.getQuantity()).willReturn(1);
 		given(addedShoppingItem.getQuantity()).willReturn(1);
@@ -129,14 +138,11 @@ public class CartDirectorImplTest {
 
 		given(productSkuLookup.findByGuid(SKU_GUID)).willReturn(productSku);
 		given(productSku.getSkuCode()).willReturn(SKU_CODE);
-		given(productSku.getProduct()).willReturn(product);
-		given(productSku2.getProduct()).willReturn(product);
-		given(product.isNotSoldSeparately()).willReturn(false);
 
-		given(shoppingItemAlreadyInCart.getDependentItems()).willReturn(Collections.emptyList());
-		given(addedShoppingItem.hasPrice()).willReturn(true);
+		given(shoppingItemAlreadyInCart.getChildren()).willReturn(emptyList());
 
 		given(shoppingCart.addShoppingCartItem(any(ShoppingItem.class))).willAnswer(new ReturnsArgumentAt(0));
+		given(productAssociationService.findDependentItemsForSku(eq(store), any(ProductSku.class))).willReturn(emptyList());
 	}
 
 	/**
@@ -145,9 +151,6 @@ public class CartDirectorImplTest {
 	 */
 	@Test
 	public void quantityUpdatedWhenSkuAlreadyInCartAndNotConfigurable() {
-		given(addedShoppingItem.isSameMultiSkuItem(productSkuLookup, shoppingItemAlreadyInCart)).willReturn(true);
-		doNothing().when(cartDirector).priceShoppingItem(any(ShoppingItem.class), any(Store.class), any(Shopper.class));
-
 		cartDirector.addToCart(addedShoppingItem, shoppingCart, null);
 		verify(cartDirector).changeQuantityForCartItem(shoppingItemAlreadyInCart, 2, shoppingCart);
 	}
@@ -158,15 +161,12 @@ public class CartDirectorImplTest {
 	 */
 	@Test
 	public void testAddToCartSkuAlreadyInCartConfigurable() {
-		doNothing().when(cartDirector).priceShoppingItem(any(ShoppingItem.class), any(Store.class), any(Shopper.class));
-
 		final ProductSku productSku = createProductSku(SKU_123);
 
 		when(addedShoppingItem.getSkuGuid()).thenReturn(productSku.getGuid());
-		when(shoppingCart.getCartItem(SKU_123)).thenReturn(shoppingItemAlreadyInCart);
 		when(addedShoppingItem.getQuantity()).thenReturn(1);
-		when(addedShoppingItem.hasPrice()).thenReturn(true);
 
+		verify(cartDirector, never()).addDependentItemsForParentItem(shoppingCart, addedShoppingItem);
 		cartDirector.addToCart(addedShoppingItem, shoppingCart, null);
 		verify(shoppingCart).addShoppingCartItem(addedShoppingItem);
 	}
@@ -183,14 +183,37 @@ public class CartDirectorImplTest {
 		when(shoppingItemAlreadyInCart.getGuid()).thenReturn(SHOPPING_ITEM_GUID);
 		when(shoppingItemAssembler.createShoppingItem(dto)).thenReturn(updatedShoppingItem);
 
-		doReturn(updatedShoppingItem).when(cartDirector).addToCart(eq(updatedShoppingItem), eq(shoppingCart), any(ShoppingItem.class));
-		doNothing().when(cartDirector).priceShoppingItem(eq(addedShoppingItem), any(Store.class), any(Shopper.class));
-		doReturn(shoppingItemAlreadyInCart).when(cartDirector).getCartItem(shoppingCart, itemUid);
+		doReturn(shoppingItemAlreadyInCart).when(shoppingCart).getCartItemById(itemUid);
 
 		assertThat(updatedShoppingItem).isSameAs(cartDirector.updateCartItem(shoppingCart, itemUid, dto));
 
 		verify(shoppingItemAssembler).createShoppingItem(dto);
 		verify(updatedShoppingItem).setGuid(SHOPPING_ITEM_GUID);
+	}
+
+	/**
+	 * Tests that the adding dependent items of given parent item to a cart.
+	 */
+	@Test
+	public void testAddToCartWithDependentSku() {
+
+		final ProductSku parentProductSkuAdded = mock(ProductSku.class, RETURNS_DEEP_STUBS);
+		final ProductSku dependentProductSkuToAdd = mock(ProductSku.class, RETURNS_DEEP_STUBS);
+		final ShoppingItemDto dependentShoppingItemDto = mock(ShoppingItemDto.class);
+		final ShoppingItem dependentShoppingItem = mock(ShoppingItem.class);
+
+		given(addedShoppingItem.getSkuGuid()).willReturn(SKU_GUID);
+		given(productSkuLookup.findByGuid(SKU_GUID)).willReturn(parentProductSkuAdded);
+		given(parentProductSkuAdded.getProduct().isNotSoldSeparately()).willReturn(false);
+		given(productAssociationService.findDependentItemsForSku(store, parentProductSkuAdded)).willReturn(singletonList(dependentProductSkuToAdd));
+		given(dependentProductSkuToAdd.getSkuCode()).willReturn(DEPENDENT_SKU_CODE);
+		given(dependentProductSkuToAdd.getProduct().getMinOrderQty()).willReturn(1);
+		given(shoppingItemDtoFactory.createDto(DEPENDENT_SKU_CODE, 1)).willReturn(dependentShoppingItemDto);
+		given(shoppingItemAssembler.createShoppingItem(dependentShoppingItemDto)).willReturn(dependentShoppingItem);
+
+		cartDirector.addDependentItemsForParentItem(shoppingCart, addedShoppingItem);
+
+		verify(addedShoppingItem).addChildItem(dependentShoppingItem);
 	}
 
 	/**
@@ -288,88 +311,6 @@ public class CartDirectorImplTest {
 		cartDirector.priceShoppingItem(shoppingItemParent, null, null);
 	}
 
-
-	/**
-	 * Test if a sku is allowed to add to cart.
-	 */
-	@Test
-	public void testIsSkuAllowedAddToCart() {
-		final ProductSku sku = mock(ProductSku.class);
-		final Product product = mock(Product.class);
-		final Date currentTime = new Date();
-		final Store store = mock(Store.class);
-		final Catalog catalog = mock(Catalog.class);
-
-		final TimeService timeService = mock(TimeService.class);
-		cartDirector.setTimeService(timeService);
-
-		when(productSkuLookup.findBySkuCode(SKU_CODE)).thenReturn(sku);
-		when(sku.getProduct()).thenReturn(null);
-
-		assertThat(cartDirector.isSkuAllowedAddToCart(SKU_CODE, shoppingCart))
-				.as("Should return false if product cannot be found.")
-				.isFalse();
-
-		when(productSkuLookup.findBySkuCode(SKU_CODE)).thenReturn(sku);
-		when(sku.getProduct()).thenReturn(product);
-		when(product.isHidden()).thenReturn(true);
-
-		assertThat(cartDirector.isSkuAllowedAddToCart(SKU_CODE, shoppingCart))
-				.as("Should return false if product is hidden.")
-				.isFalse();
-
-		when(productSkuLookup.findBySkuCode(SKU_CODE)).thenReturn(sku);
-		when(sku.getProduct()).thenReturn(product);
-		when(product.isHidden()).thenReturn(false);
-		when(timeService.getCurrentTime()).thenReturn(currentTime);
-		when(product.isWithinDateRange(currentTime)).thenReturn(false);
-
-		assertThat(cartDirector.isSkuAllowedAddToCart(SKU_CODE, shoppingCart))
-				.as("Should return false if product is not in date range.")
-				.isFalse();
-
-		when(productSkuLookup.findBySkuCode(SKU_CODE)).thenReturn(sku);
-		when(sku.getProduct()).thenReturn(product);
-		when(product.isHidden()).thenReturn(false);
-		when(timeService.getCurrentTime()).thenReturn(currentTime);
-		when(product.isWithinDateRange(currentTime)).thenReturn(true);
-		when(shoppingCart.getStore()).thenReturn(store);
-		when(store.getCatalog()).thenReturn(catalog);
-		when(product.isInCatalog(catalog)).thenReturn(false);
-
-		assertThat(cartDirector.isSkuAllowedAddToCart(SKU_CODE, shoppingCart))
-				.as("Should return false if the product catalog is not the store catalog.")
-				.isFalse();
-
-		when(productSkuLookup.findBySkuCode(SKU_CODE)).thenReturn(sku);
-		when(sku.getProduct()).thenReturn(product);
-		when(product.isHidden()).thenReturn(false);
-		when(timeService.getCurrentTime()).thenReturn(currentTime);
-		when(product.isWithinDateRange(currentTime)).thenReturn(true);
-		when(shoppingCart.getStore()).thenReturn(store);
-		when(store.getCatalog()).thenReturn(catalog);
-		when(product.isInCatalog(catalog)).thenReturn(true);
-		when(sku.isWithinDateRange(currentTime)).thenReturn(false);
-
-		assertThat(cartDirector.isSkuAllowedAddToCart(SKU_CODE, shoppingCart))
-				.as("Should return false if the sku is not in date range.")
-				.isFalse();
-
-		when(productSkuLookup.findBySkuCode(SKU_CODE)).thenReturn(sku);
-		when(sku.getProduct()).thenReturn(product);
-		when(product.isHidden()).thenReturn(false);
-		when(timeService.getCurrentTime()).thenReturn(currentTime);
-		when(product.isWithinDateRange(currentTime)).thenReturn(true);
-		when(shoppingCart.getStore()).thenReturn(store);
-		when(store.getCatalog()).thenReturn(catalog);
-		when(product.isInCatalog(catalog)).thenReturn(true);
-		when(sku.isWithinDateRange(currentTime)).thenReturn(true);
-
-		assertThat(cartDirector.isSkuAllowedAddToCart(SKU_CODE, shoppingCart))
-				.as("Should be true.")
-				.isTrue();
-	}
-
 	/**
 	 * Tests {@link CartDirectorImpl#retainShoppingItemIdentity(ShoppingItem, ShoppingItem)} for a non-configurable shopping item.
 	 */
@@ -399,14 +340,10 @@ public class CartDirectorImplTest {
 		};
 		final ProductSku sku = createProductSku(skuCode);
 		item.setSkuGuid(sku.getGuid());
-
-		final List<ShoppingItem> cartItems = new ArrayList<>(Arrays.asList(item));
-
-		doNothing().when(cartDirector).refreshShoppingItems(cartItems, shoppingCart);
 	}
 
 	@Test
-	public void verifyClearItemsClearsItems() throws Exception {
+	public void verifyClearItemsClearsItems() {
 		cartDirector.clearItems(shoppingCart);
 		verify(shoppingCart).clearItems();
 	}
@@ -420,6 +357,7 @@ public class CartDirectorImplTest {
 
 		cartDirector.addToCart(addedShoppingItem, shoppingCart, null);
 
+		verify(cartDirector).addDependentItemsForParentItem(shoppingCart, addedShoppingItem);
 		verify(shoppingCart).addShoppingCartItem(addedShoppingItem);
 		verifyQuantityNotChanged();
 	}
@@ -431,20 +369,18 @@ public class CartDirectorImplTest {
 		givenItemHasFieldWithValue(addedShoppingItem, "Key4", "Key4MatchingValue");
 		givenItemHasFieldWithValue(shoppingItemAlreadyInCart, "Key4", "Key4MatchingValue");
 
-		given(addedShoppingItem.isSameMultiSkuItem(productSkuLookup, shoppingItemAlreadyInCart)).willReturn(true);
-
 		cartDirector.addToCart(addedShoppingItem, shoppingCart, null);
 
+		verify(cartDirector, never()).addDependentItemsForParentItem(shoppingCart, addedShoppingItem);
 		verify(shoppingCart, never()).addShoppingCartItem(addedShoppingItem);
 		verifyQuantityChanged(2);
 	}
 
 	@Test
 	public void testAddToCartWithNoCartItemDataIncreasesQuantity() {
-		given(addedShoppingItem.isSameMultiSkuItem(productSkuLookup, shoppingItemAlreadyInCart)).willReturn(true);
-
 		cartDirector.addToCart(addedShoppingItem, shoppingCart, null);
 
+		verify(cartDirector, never()).addDependentItemsForParentItem(shoppingCart, addedShoppingItem);
 		verify(shoppingCart, never()).addShoppingCartItem(addedShoppingItem);
 		verifyQuantityChanged(2);
 	}
@@ -457,10 +393,10 @@ public class CartDirectorImplTest {
 		givenItemHasFieldWithValue(shoppingItemAlreadyInCart, "Key6", "Key6MatchingValue");
 		given(addedShoppingItem.getSkuGuid()).willReturn(SKU_GUID_2);
 		given(productSkuLookup.findByGuid(SKU_GUID_2)).willReturn(productSku2);
-		given(productSku.getSkuCode()).willReturn(SKU_CODE_2);
 
 		cartDirector.addToCart(addedShoppingItem, shoppingCart, null);
 
+		verify(cartDirector).addDependentItemsForParentItem(shoppingCart, addedShoppingItem);
 		verify(shoppingCart).addShoppingCartItem(addedShoppingItem);
 		verifyQuantityNotChanged();
 	}
@@ -472,7 +408,7 @@ public class CartDirectorImplTest {
 
 		given(newShoppingItem.getSkuGuid()).willReturn(SKU_GUID);
 		given(shoppingItemAssembler.createShoppingItem(shoppingItemDto)).willReturn(newShoppingItem);
-		given(shoppingItemAlreadyInCart.getUidPk()).willReturn(CART_ITEM_UID);
+		given(shoppingCart.getCartItemById(CART_ITEM_UID)).willReturn(shoppingItemAlreadyInCart);
 
 		cartDirector.updateCartItem(shoppingCart, CART_ITEM_UID, shoppingItemDto);
 
@@ -488,7 +424,7 @@ public class CartDirectorImplTest {
 
 		given(addedShoppingItem.getSkuGuid()).willReturn(SKU_GUID);
 		given(shoppingItemAssembler.createShoppingItem(shoppingItemDto)).willReturn(addedShoppingItem);
-		given(shoppingItemAlreadyInCart.getUidPk()).willReturn(CART_ITEM_UID);
+		given(shoppingCart.getCartItemById(CART_ITEM_UID)).willReturn(shoppingItemAlreadyInCart);
 
 		String shoppingItemGuid = "testShoppingItemGuid";
 		given(shoppingItemAlreadyInCart.getGuid()).willReturn(shoppingItemGuid);
@@ -509,8 +445,6 @@ public class CartDirectorImplTest {
 		}
 
 		fieldsMap.put(key, value);
-
-		given(mockShoppingItem.getFieldValue(key)).willReturn(value);
 	}
 
 	private void verifyQuantityChanged(final Integer targetQuantity) {

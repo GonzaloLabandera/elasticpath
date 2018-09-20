@@ -131,6 +131,7 @@ public abstract class AbstractShoppingItemImpl extends AbstractLegacyEntityImpl 
 
 	private String guid;
 
+	private boolean bundleConstituent;
 
 	/**
 	 * Return the guid.
@@ -453,20 +454,19 @@ public abstract class AbstractShoppingItemImpl extends AbstractLegacyEntityImpl 
 	@Override
 	@Transient
 	public boolean isShippable(final ProductSkuLookup skuLookup) {
-		boolean shippable = false;
-		if (this.isBundle(skuLookup)) {
-			for (ShoppingItem item : this.getBundleItems(skuLookup)) {
-				if (item.isShippable(skuLookup)) {
-					shippable = true;
-					break;
-				}
-			}
-		} else {
-			ProductSku sku = getProductSku(skuLookup);
-			shippable = sku.isShippable();
+		final ProductSku sku = getProductSku(skuLookup);
+
+		// Bundles are implicitly non-shippable, no matter what its SKU claims.
+		if (!isBundle(skuLookup) && sku.isShippable()) {
+			return true;
 		}
-		
-		return shippable;
+
+		if (!getChildren().isEmpty()) {
+			return getChildren().stream()
+					.anyMatch(shoppingItem -> shoppingItem.isShippable(skuLookup));
+		}
+
+		return false;
 	}
 
 	@Transient
@@ -607,15 +607,15 @@ public abstract class AbstractShoppingItemImpl extends AbstractLegacyEntityImpl 
 			setCurrency(price.getCurrency());
 			Money money = price.getListPrice(getQuantity());
 			if (money != null) {
-				setListUnitPriceInternal(money.getAmountUnscaled());
+				setListUnitPriceInternal(money.getRawAmount());
 			}
 			money = price.getSalePrice(getQuantity());
 			if (money != null) {
-				setSaleUnitPriceInternal(money.getAmountUnscaled());
+				setSaleUnitPriceInternal(money.getRawAmount());
 			}
 			money = price.getComputedPrice(getQuantity());
 			if (money != null) {
-				setPromotedUnitPriceInternal(money.getAmountUnscaled());
+				setPromotedUnitPriceInternal(money.getRawAmount());
 			}
 			if (price.getPricingScheme() != null 
 					&& CollectionUtils.isNotEmpty(price.getPricingScheme().getRecurringSchedules())) {
@@ -939,11 +939,8 @@ public abstract class AbstractShoppingItemImpl extends AbstractLegacyEntityImpl 
 	@Transient
 	public void accept(final ShoppingCartVisitor visitor, final ProductSkuLookup productSkuLookup) {
 		visitor.visit(this, this);
-		if (isBundle(productSkuLookup)) {
-			for (ShoppingItem item : getBundleItems(productSkuLookup)) {
-				item.accept(visitor, productSkuLookup);
-			}
-		}
+
+		getChildren().forEach(shoppingItem -> shoppingItem.accept(visitor, productSkuLookup));
 	}
 
 	@Override
@@ -992,4 +989,17 @@ public abstract class AbstractShoppingItemImpl extends AbstractLegacyEntityImpl 
 	 * @return the record
 	 */
 	protected abstract AbstractItemData createItemData(String name, String value);
+
+	@Basic
+	@Column(name = "BUNDLE_CONSTITUENT", nullable = false)
+	@Override
+	public boolean isBundleConstituent() {
+		return bundleConstituent;
+	}
+
+	@Override
+	public void setBundleConstituent(final boolean bundleConstituent) {
+		this.bundleConstituent = bundleConstituent;
+	}
+
 }

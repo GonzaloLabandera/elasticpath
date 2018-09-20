@@ -7,9 +7,9 @@ import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
 
 import com.elasticpath.selenium.domainobjects.Report;
-import com.elasticpath.selenium.framework.util.SeleniumDriverSetup;
 import com.elasticpath.selenium.navigations.Reporting;
 import com.elasticpath.selenium.resultspane.ReportPane;
+import com.elasticpath.selenium.setup.SetUp;
 
 /**
  * Reporting steps.
@@ -25,7 +25,7 @@ public class ReportingDefinition {
 	 * Constructor.
 	 */
 	public ReportingDefinition() {
-		reporting = new Reporting(SeleniumDriverSetup.getDriver());
+		reporting = new Reporting(SetUp.getDriver());
 		navigationDefinition = new NavigationDefinition();
 	}
 
@@ -166,22 +166,19 @@ public class ReportingDefinition {
 	/**
 	 * Verifies number of orders for Shopping Cart Promotion Usage report.
 	 *
-	 * @param promoName         the promotion name
-	 * @param increasedByNumber number of orders
+	 * @param promoName the promotion name
 	 */
-	@Then("^the number of orders for promotion (.+) should have increased by (\\d+)$")
-	public void verifyOrderNumber(final String promoName, final int increasedByNumber) {
-		reportPane.verifyPromoReportNumberOfOrders(promoName, initialNumberOfOrders + increasedByNumber);
+	@Then("^the number of orders for promotion (.+) should have increased$")
+	public void verifyOrderNumber(final String promoName) {
+		reportPane.verifyPromoReportNumberOfOrders(promoName, initialNumberOfOrders);
 	}
 
 	/**
 	 * Verifies number of orders for Order Summary report.
-	 *
-	 * @param increasedByNumber number of orders
 	 */
-	@Then("^the number of orders for Order Summary report should have increased by (\\d+)$")
-	public void verifyOrderNumber(final int increasedByNumber) {
-		reportPane.verifyNumberOfOrdersInOrderSummaryReport(initialNumberOfOrders + increasedByNumber);
+	@Then("^the number of orders for Order Summary report should have increased$")
+	public void verifyOrderSummaryOrderNumber() {
+		reportPane.verifyNumberOfOrdersInOrderSummaryReport(initialNumberOfOrders);
 	}
 
 	/**
@@ -222,4 +219,61 @@ public class ReportingDefinition {
 		reportPane.verifyOrderTotalInOrderStatusReport(orderTotal);
 	}
 
+	/**
+	 * Enters 'user id' Customer data report.
+	 *
+	 * @param userId customer data report.
+	 */
+	@And("^I run Customer Personal Data report for customer (.+)$")
+	public void enterUserId(final String userId) {
+		reporting.enterUserId(userId);
+		clickRunReportButton();
+	}
+
+	/**
+	 * Enters empty value in user id Customer data report.
+	 */
+	@And("^I enter empty value in User ID$")
+	public void enterEmptyUserId() {
+		reporting.enterUserId(" ");
+	}
+
+	/**
+	 * Verify Validations displayed for User ID.
+	 */
+	@And("^I can see validation error messages for User ID$")
+	public void verifyUserIdValidation() {
+		reporting.verifyUserIdValidation();
+	}
+
+	/**
+	 * Verify 'user id' Customer data report.
+	 *
+	 * @param userId customer data report.
+	 */
+	@And("^the User ID (.+) is in the Customer Personal Data report$")
+	public void verifyReportUserId(final String userId) {
+		reportPane.verifyReportUserId(userId);
+
+	}
+
+	/**
+	 * Verify Customer data report content is empty.
+	 */
+	@And("^the Report is empty$")
+	public void verifyReportContentIsEmpty() {
+		reportPane.verifyReportContentIsEmpty();
+	}
+
+	/**
+	 * Verify Customer data report content.
+	 *
+	 * @param dataPointListValues in customer data report.
+	 */
+	@And("^the Report Content shows following Data Points$")
+	public void verifyReportContent(final List<String> dataPointListValues) {
+		for (String nameField : dataPointListValues) {
+			reportPane.verifyReportContent(nameField);
+		}
+	}
 }

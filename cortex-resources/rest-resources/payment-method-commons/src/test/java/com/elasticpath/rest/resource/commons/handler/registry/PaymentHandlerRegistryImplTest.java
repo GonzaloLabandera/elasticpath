@@ -18,7 +18,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.elasticpath.rest.ResourceTypeFactory;
 import com.elasticpath.rest.resource.commons.handler.PaymentHandler;
@@ -38,13 +38,11 @@ public class PaymentHandlerRegistryImplTest {
 	private PaymentHandler paymentHandler2;
 
 	@Before
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({"unchecked", "rawtypes"})
 	public void setUpCommonExpectationsForTest() {
 		Class testPaymentEntityClass = TestPaymentEntity.class;
-		Class testPaymentEntity2Class = TestPaymentEntity2.class;
 		when(paymentHandler1.handledType()).thenReturn(testPaymentEntityClass);
 		when(paymentHandler1.representationType()).thenReturn(TEST_PAYMENT_TYPE);
-		when(paymentHandler2.handledType()).thenReturn(testPaymentEntity2Class);
 		when(paymentHandler2.representationType()).thenReturn(TEST_PAYMENT_TYPE_2);
 	}
 

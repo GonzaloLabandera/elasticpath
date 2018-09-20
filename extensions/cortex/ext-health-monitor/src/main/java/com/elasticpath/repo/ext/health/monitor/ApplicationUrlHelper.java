@@ -18,6 +18,8 @@ public final class ApplicationUrlHelper {
 	private static String healthCheckUrl;
 	private static final String CORTEX_HEALTHCHECK = "/cortex/healthcheck";
 
+	private static final String CORTEX_HOST = "localhost";
+
 	private ApplicationUrlHelper() {
 		// Do nothing.
 	}
@@ -39,7 +41,7 @@ public final class ApplicationUrlHelper {
 			String newUrl = new StringBuilder()
 					.append(uri.getScheme())
 					.append("://")
-					.append(uri.getHost())
+					.append(CORTEX_HOST)
 					.append(portInfo)
 					.append(CORTEX_HEALTHCHECK)
 					.toString();

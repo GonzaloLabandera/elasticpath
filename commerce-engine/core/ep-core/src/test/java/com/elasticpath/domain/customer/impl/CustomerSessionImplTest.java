@@ -123,7 +123,7 @@ public class CustomerSessionImplTest {
 
 		// reset
 		customerSession.setPriceListStack(pls);
-		assertEquals(VALID_MESSAGE, true, customerSession.isPriceListStackValid());
+		assertTrue(VALID_MESSAGE, customerSession.isPriceListStackValid());
 
 		tagSet.addTag(TAG, new Tag(TAG));
 		assertFalse("Price list stack should be invalid if the tag set changes", customerSession.isPriceListStackValid());
@@ -160,7 +160,7 @@ public class CustomerSessionImplTest {
 
 		// reset
 		customerSession.setPriceListStack(pls);
-		assertEquals("Price  list stack should be valid after being set", true, customerSession.isPriceListStackValid());
+		assertTrue("Price  list stack should be valid after being set", customerSession.isPriceListStackValid());
 
 		tagSet.addTag("CATEGORIES_VISITED", new Tag("1,2,3,4,57"));
 		assertTrue(customerSession.isPriceListStackValid()); // Price list stack should be valid if the tag set changes

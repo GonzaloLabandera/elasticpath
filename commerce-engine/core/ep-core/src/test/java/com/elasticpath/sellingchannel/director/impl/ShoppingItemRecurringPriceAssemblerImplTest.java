@@ -237,16 +237,6 @@ public class ShoppingItemRecurringPriceAssemblerImplTest {
 
 		final ShoppingItemAssemblerImpl assembler = new ShoppingItemAssemblerImpl() {
 			@Override
-			protected boolean verifySelectionRulesFollowed(final Product product, final ShoppingItemDto shoppingItemDto) {
-				return true;
-			}
-
-			@Override
-			protected boolean verifyDtoStructureEqualsBundleStructure(final Product product, final ShoppingItemDto dtoNode) {
-				return true;
-			}
-
-			@Override
 			ProductSku getProductSku(final String currentSkuGuid) {
 				// not testing this part
 				return sku;
@@ -275,7 +265,6 @@ public class ShoppingItemRecurringPriceAssemblerImplTest {
 		final ShoppingItem actualShoppingItem = assembler.createShoppingItem(shoppingItemDto);
 
 		assertEquals("The cartItem from the delegate should equal the cart item from the factory", shoppingItem, actualShoppingItem);
-
 
 		return actualShoppingItem;
 	}

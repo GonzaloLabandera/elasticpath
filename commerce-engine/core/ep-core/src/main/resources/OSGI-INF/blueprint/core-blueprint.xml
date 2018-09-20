@@ -69,6 +69,39 @@
 		<reference-listener ref="storeServiceProxy" bind-method="bindImplementation" unbind-method="unbindImplementation"/>
 	</reference>
 
+	<reference id="shippingCalculationService"
+			   interface="com.elasticpath.shipping.connectivity.service.ShippingCalculationService"
+	           filter="(id=shippingCalculationService)">
+	</reference>
+
+	<reference id="shippingCalculationResultBuilderSupplier"
+			   filter="(id=shippingCalculationResultBuilderSupplier)"
+			   interface="java.util.function.Supplier"/>
+
+	<reference id="shippingOptionBuilderSupplier"
+			   filter="(id=shippingOptionBuilderSupplier)"
+			   interface="java.util.function.Supplier"/>
+
+	<reference id="shippingAddressBuilderSupplier"
+			   filter="(id=shippingAddressBuilderSupplier)"
+			   interface="java.util.function.Supplier"/>
+
+	<reference id="unpricedShippableItemBuilderSupplier"
+			   filter="(id=unpricedShippableItemBuilderSupplier)"
+			   interface="java.util.function.Supplier"/>
+
+	<reference id="unpricedShippableItemContainerBuilderSupplier"
+			   filter="(id=unpricedShippableItemContainerBuilderSupplier)"
+			   interface="java.util.function.Supplier"/>
+
+	<reference id="pricedShippableItemBuilderSupplier"
+			   filter="(id=pricedShippableItemBuilderSupplier)"
+			   interface="java.util.function.Supplier"/>
+
+	<reference id="pricedShippableItemContainerBuilderSupplier"
+			   filter="(id=pricedShippableItemContainerBuilderSupplier)"
+			   interface="java.util.function.Supplier"/>
+
 	<reference id="cachingPriceAdjustmentService"
 			   availability="optional"
 			   interface="com.elasticpath.service.pricing.PriceAdjustmentService"
@@ -157,6 +190,9 @@
 	<service ref="cachedSettingsReader"
 			 interface="com.elasticpath.settings.SettingsReader"/>
 
+	<service ref="settingValueTypeConverter"
+			 interface="com.elasticpath.settings.provider.converter.SettingValueTypeConverter"/>
+
 	<service ref="shopperService"
 			 interface="com.elasticpath.service.shopper.ShopperService" />
 
@@ -179,7 +215,11 @@
 			 interface="com.elasticpath.service.customer.CustomerSessionService" />
 
 	<service ref="coreBeanFactory"
-			 interface="com.elasticpath.commons.beanframework.BeanFactory" />
+			 interface="com.elasticpath.commons.beanframework.BeanFactory" >
+		<service-properties>
+			<entry key="typeArg" value="core" />
+		</service-properties>
+	</service>
 
 	<service ref="storeProductService"
 			 interface="com.elasticpath.service.catalogview.StoreProductService" />
@@ -217,20 +257,11 @@
 	<service ref="cartOrderCouponService"
 			 interface="com.elasticpath.service.cartorder.CartOrderCouponService" />
 
-	<service ref="shippingServiceLevelService"
-			 interface="com.elasticpath.service.shipping.ShippingServiceLevelService"/>
-
 	<service ref="orderService"
 			 interface="com.elasticpath.service.order.OrderService" />
 
 	<service ref="bundleIdentifier"
 			 interface="com.elasticpath.service.catalog.BundleIdentifier"/>
-
-	<service ref="itemConfigurationService"
-			 interface="com.elasticpath.service.catalog.ItemConfigurationService"/>
-
-	<service ref="itemCharacteristicsService"
-			 interface="com.elasticpath.service.catalog.ItemCharacteristicsService" />
 
 	<service ref="dataPolicyService"
 			 interface="com.elasticpath.service.datapolicy.DataPolicyService" />
@@ -350,10 +381,40 @@
 	<service ref="cartItemModifierFieldValidationService"
 			 interface="com.elasticpath.validation.service.CartItemModifierFieldValidationService"/>
 
+	<service ref="shippingServiceLevelService"
+			 interface="com.elasticpath.service.shipping.ShippingServiceLevelService"/>
+
+	<service ref="shippableItemPredicate"
+			 interface="java.util.function.Predicate">
+		<service-properties>
+			<entry key="predicateName" value="shippableItemPredicate"/>
+		</service-properties>
+	</service>
+
+	<service ref="transactionManager" interface="org.springframework.transaction.PlatformTransactionManager"/>
+
+	<service ref="shippingOptionTransformer"
+			 interface="com.elasticpath.service.shipping.ShippingOptionTransformer"/>
+
 	<service ref="nonCachingPriceAdjustmentService" interface="com.elasticpath.service.pricing.PriceAdjustmentService"/>
+
 
 	<service ref="nonCachingPriceListAssignmentService" interface="com.elasticpath.service.pricing.PriceListAssignmentService"/>
 
 	<service ref="nonCachingBaseAmountFinder" interface="com.elasticpath.service.pricing.BaseAmountFinder"/>
+
+	<service ref="coreShippingOptionService"
+			 interface="com.elasticpath.service.shipping.ShippingOptionService">
+		<description>ShippingOptionService</description>
+	</service>
+
+	<service ref="pricedShippableItemContainerTransformer"
+			 interface="com.elasticpath.service.shipping.transformers.PricedShippableItemContainerTransformer"/>
+
+	<service ref="addProductSkuToCartValidationService"
+			 interface="com.elasticpath.service.shoppingcart.validation.AddProductSkuToCartValidationService"/>
+
+	<service ref="purchaseCartValidationService"
+		  interface="com.elasticpath.service.shoppingcart.validation.PurchaseCartValidationService"/>
 
 </blueprint>

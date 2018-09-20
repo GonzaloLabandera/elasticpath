@@ -14,6 +14,7 @@ import java.util.Locale;
 import java.util.Set;
 import java.util.TreeSet;
 
+import com.elasticpath.cmclient.core.CorePlugin;
 import com.elasticpath.cmclient.core.ServiceLocator;
 import com.elasticpath.cmclient.store.targetedselling.TargetedSellingMessages;
 import com.elasticpath.cmclient.store.targetedselling.conditionalexpression.model.ComboViewerModelBuilder;
@@ -62,7 +63,7 @@ public class TagDefinitionModelBuilderImpl implements ComboViewerModelBuilder<Ta
 		@Override
 		public int compare(final TagDefinition tagDefinition1, final TagDefinition tagDefinition2) {
 
-			final Locale defaultLocale = Locale.getDefault();
+			final Locale defaultLocale = CorePlugin.getDefault().getDefaultLocale();
 			if (tagDefinition1 != null && tagDefinition2 != null) {
 				final String localName1 = tagDefinition1.getLocalizedName(defaultLocale);
 				final String localName2 = tagDefinition2.getLocalizedName(defaultLocale);

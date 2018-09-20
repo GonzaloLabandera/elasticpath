@@ -17,16 +17,25 @@ Feature: Add To Cart is disabled for certain items
       | bundle_nopriceitem_sku |
       | noPrice_sku            |
 
-  Scenario Outline: Structured error message appears when trying to add bundle item to cart with a bundle constituent that has no price
-    Given I am logged into scope mobee as a public shopper
-    When I look up an item with code <ITEM>
+  Scenario Outline: Get
+    Given that <LINK> is the url of <TEST>
+    When I GET <LINK>
     And I go to add to cart form
-    Then there is an advisor message with data field <ITEM> and the following fields:
-      | messageType | messageId               | debugMessage                                 | dataField | blocks                 |
-      | error       | cart.item.not.available | Item '<ITEM>' is not available for purchase. | <ITEM>    | addtodefaultcartaction |
+    Then there is an advisor message with the following fields:
+      | messageType | messageId    | debugMessage    | dataField | blocks                 |
+      | error       | <MESSAGE_ID> | <DEBUG_MESSAGE> | <ITEM>    | addtodefaultcartaction |
 
     Examples:
-      | ITEM                   |
-      | bundle_nopriceitem_sku |
+      | TEST                          | LINK                                   | ITEM        | MESSAGE_ID          | DEBUG_MESSAGE                      |
+      | sku that is not store visible | /items/mobee/qgqvhk2hiezdsmzzgfpxg23v= | GA29391_sku | item.not.visible | Item 'GA29391_sku' is not visible. |
 
- #TODO add tests for no inventory and marked as unavailable
+  Scenario Outline: Can't add an item not available
+    Given that <LINK> is the url of <TEST>
+    When I POST request body {"quantity":"1"} to <LINK>
+    Then the operation is identified as conflict
+    And the response message is <DEBUG_MESSAGE>
+
+    Examples:
+      | TEST                                  | LINK                                              | DEBUG_MESSAGE                                                 |
+      | sku that is not part of current scope | /carts/items/mobee/qgqvhk3qom4tiojuhfpxg23v=/form | Item 'ps94949_sku' is not part of the current store's catalog. |
+      | sku that is not store visible         | /carts/items/mobee/qgqvhk2hiezdsmzzgfpxg23v=/form | Item 'GA29391_sku' is not visible.                            |

@@ -73,6 +73,7 @@ public class EventMessageObjectMapperTest {
 				ignoring(module).getModuleName();
 				ignoring(module).version();
 				ignoring(module).setupModule(with(any(Module.SetupContext.class)));
+				ignoring(module).getTypeId();
 			}
 		});
 	}

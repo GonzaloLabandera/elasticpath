@@ -44,7 +44,7 @@ public class SkuOptionsTab extends AbstractPageObject {
 	 * @return AddEditSkuOptionDialog
 	 */
 	public AddEditSkuOptionDialog clickAddSkuOptionButton() {
-		clickButton(SKU_OPTION_ADD_BUTTON, "Add Sku Option");
+		clickButton(SKU_OPTION_ADD_BUTTON, "Add Sku Option", AddEditSkuOptionDialog.ADD_SKU_OPTION_PARENT_CSS);
 		return new AddEditSkuOptionDialog(getDriver());
 	}
 
@@ -125,9 +125,11 @@ public class SkuOptionsTab extends AbstractPageObject {
 	 * @param skuOption the sku option type
 	 */
 	public void verifySkuOptionDelete(final String skuOption) {
+		setWebDriverImplicitWait(1);
 		assertThat(verifyItemIsNotInEditorPaneWithScrollBar(SKU_OPTION_PARENT_CSS, SKU_OPTION_COLUMN_CSS, skuOption))
 				.as("Unable to find sku option - " + skuOption)
 				.isFalse();
+		setWebDriverImplicitWaitToDefault();
 	}
 
 	/**

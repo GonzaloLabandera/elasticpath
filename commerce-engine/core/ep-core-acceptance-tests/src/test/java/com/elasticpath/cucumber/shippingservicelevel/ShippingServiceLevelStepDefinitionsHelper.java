@@ -15,8 +15,10 @@ import com.elasticpath.cucumber.ScenarioContextValueHolder;
 import com.elasticpath.domain.shipping.ShippingRegion;
 import com.elasticpath.domain.shipping.ShippingServiceLevel;
 import com.elasticpath.domain.store.Store;
+import com.elasticpath.service.shipping.ShippingOptionTransformer;
 import com.elasticpath.service.shipping.ShippingRegionService;
 import com.elasticpath.service.shipping.ShippingServiceLevelService;
+import com.elasticpath.shipping.connectivity.dto.ShippingOption;
 import com.elasticpath.test.persister.ShippingRegionTestPersister;
 import com.elasticpath.test.persister.StoreTestPersister;
 import com.elasticpath.test.persister.TestApplicationContext;
@@ -31,8 +33,8 @@ public class ShippingServiceLevelStepDefinitionsHelper {
 	private ScenarioContextValueHolder<Store> storeHolder;
 	
 	@Inject
-	@Named("shippingServiceLevelHolder")
-	private ScenarioContextValueHolder<ShippingServiceLevel> shippingServiceLevelHolder;
+	@Named("shippingOptionHolder")
+	private ScenarioContextValueHolder<ShippingOption> shippingOptionHolder;
 	
 	@Autowired
 	private TestApplicationContext tac;
@@ -42,6 +44,9 @@ public class ShippingServiceLevelStepDefinitionsHelper {
 	
 	@Autowired
 	private ShippingServiceLevelService shippingServiceLevelService;
+
+	@Autowired
+	private ShippingOptionTransformer shippingOptionTransformer;
 	
 	/**
 	 * Sets up shipping service levels for a given store.
@@ -65,9 +70,10 @@ public class ShippingServiceLevelStepDefinitionsHelper {
 					"SSL_CARRIER",
 					properties.get(CucumberConstants.FIELD_PRICE),
 					code);
+
 		}
-		
-		shippingServiceLevelHolder.set(defaultSSL);
+
+		shippingOptionHolder.set(shippingOptionTransformer.transform(defaultSSL, () -> null, storeHolder.get().getDefaultLocale()));
 	}
 	
 	/**

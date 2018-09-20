@@ -4,7 +4,6 @@
 package com.elasticpath.settings.refreshstrategy.impl;
 
 import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.when;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -16,7 +15,7 @@ import org.junit.Before;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Spy;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.elasticpath.settings.domain.SettingValue;
 import com.elasticpath.settings.refreshstrategy.SettingRefreshStrategy;
@@ -30,7 +29,6 @@ public class IntervalRefreshStrategyImplTest extends AbstractSettingRefreshStrat
 
 	private static final String TIMEOUT_PARAM_KEY = "timeout";
 	private static final String TIMEOUT_VALUE_SETTING_PATH = "COMMERCE/Cache/Cache_1";
-	private static final Long TIMEOUT_VALUE = 300000L;
 
 	private static final String SETTING_PARAMS = TIMEOUT_PARAM_KEY + "=" + TIMEOUT_VALUE_SETTING_PATH;
 	private static final Map<String, String> SETTING_PARAMS_MAP = ImmutableMap.of(TIMEOUT_PARAM_KEY, TIMEOUT_VALUE_SETTING_PATH);
@@ -46,11 +44,6 @@ public class IntervalRefreshStrategyImplTest extends AbstractSettingRefreshStrat
 		intervalTimeoutCache = new HashMap<>();
 
 		refreshStrategy.setTimeoutParamKey(TIMEOUT_PARAM_KEY);
-
-		final SettingValue cacheTimeoutSettingValue = mockSettingValue();
-		when(cacheTimeoutSettingValue.getValue()).thenReturn(String.valueOf(TIMEOUT_VALUE));
-
-		when(getSettingsReader().getSettingValue(TIMEOUT_VALUE_SETTING_PATH)).thenReturn(cacheTimeoutSettingValue);
 
 		doReturn(intervalTimeoutCache).when(refreshStrategy).getCache(SETTING_PARAMS_MAP);
 	}

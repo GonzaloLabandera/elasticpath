@@ -3,26 +3,26 @@
  */
 package com.elasticpath.sellingchannel.director.impl;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Matchers.anyString;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Collections;
 import java.util.List;
-import javax.validation.Validator;
+import java.util.UUID;
 
-import org.junit.Before;
+import org.assertj.core.util.Lists;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.elasticpath.common.dto.ShoppingItemDto;
-import com.elasticpath.domain.catalog.Product;
-import com.elasticpath.domain.catalog.ProductSku;
-import com.elasticpath.domain.catalog.ProductType;
 import com.elasticpath.domain.shopper.Shopper;
 import com.elasticpath.domain.shoppingcart.ShoppingCart;
 import com.elasticpath.domain.shoppingcart.ShoppingItem;
@@ -31,13 +31,10 @@ import com.elasticpath.domain.shoppingcart.impl.CartItem;
 import com.elasticpath.domain.shoppingcart.impl.ShoppingItemImpl;
 import com.elasticpath.domain.store.Store;
 import com.elasticpath.sellingchannel.director.CartDirector;
-import com.elasticpath.service.catalog.ProductSkuLookup;
 import com.elasticpath.service.shoppingcart.PricingSnapshotService;
 import com.elasticpath.service.shoppingcart.ShoppingCartService;
 import com.elasticpath.service.shoppingcart.WishListService;
 import com.elasticpath.service.shoppingcart.impl.AddToWishlistResult;
-import com.elasticpath.validation.ConstraintViolationTransformer;
-import com.elasticpath.validation.service.CartItemModifierFieldValidationService;
 
 @RunWith(MockitoJUnitRunner.class)
 public class CartDirectorServiceImplTest {
@@ -46,74 +43,47 @@ public class CartDirectorServiceImplTest {
 	private static final String WISHLIST_LINE_ITEM_GUID = "WISHLIST_LINE_ITEM_GUID";
 	private static final String CART_LINE_ITEM_GUID = "CART_LINE_ITEM_GUID";
 
-	@Mock
-	private CartDirector cartDirector;
-	@Mock
-	private ProductSkuLookup productSkuLookup;
-	@Mock
-	private ShoppingCartService shoppingCartService;
-	@Mock
-	private WishListService wishListService;
-	@Mock
-	private ShoppingCart shoppingCart;
-	@Mock
-	private Shopper shopper;
-	@Mock
-	private Store store;
-	@Mock
-	private WishList wishList;
-	@Mock
-	private PricingSnapshotService pricingSnapshotService;
-	@Mock
-	private Validator validator;
-	@Mock
-	private ConstraintViolationTransformer constraintViolationTransformer;
-	@Mock
-	private CartItemModifierFieldValidationService cartItemModifierFieldValidationService;
+	@Mock private CartDirector cartDirector;
+	@Mock private ShoppingCartService shoppingCartService;
+	@Mock private WishListService wishListService;
+	@Mock private ShoppingCart shoppingCart;
+	@Mock private Shopper shopper;
+	@Mock private Store store;
+	@Mock private WishList wishList;
+	@Mock private PricingSnapshotService pricingSnapshotService;
 
+	@InjectMocks
 	private CartDirectorServiceImpl service;
-
-	@Before
-	public void setUp() {
-		service = new CartDirectorServiceImpl();
-		service.setCartDirector(cartDirector);
-		service.setProductSkuLookup(productSkuLookup);
-		service.setShoppingCartService(shoppingCartService);
-		service.setWishListService(wishListService);
-		service.setPricingSnapshotService(pricingSnapshotService);
-		service.setValidator(validator);
-		service.setConstraintViolationTransformer(constraintViolationTransformer);
-		service.setCartItemModifierFieldValidationService(cartItemModifierFieldValidationService);
-	}
-
-	private void setupAddAndUpdateActions(final ShoppingItemDto dto) {
-		final ProductSku productSku = mock(ProductSku.class);
-		final ProductType productType = mock(ProductType.class);
-		final Product product = mock(Product.class);
-
-		when(validator.validate(dto)).thenReturn(null);
-		when(productSkuLookup.findBySkuCode(dto.getSkuCode())).thenReturn(productSku);
-		when(productType.getCartItemModifierGroups()).thenReturn(Collections.emptySet());
-		when(constraintViolationTransformer.transform(null)).thenReturn(Collections.emptyList());
-		when(product.getProductType()).thenReturn(productType);
-		when(productSku.getProduct()).thenReturn(product);
-
-		when(cartItemModifierFieldValidationService.validate(dto.getItemFields(), Collections.emptySet())).thenReturn(
-				Collections.emptyList());
-	}
 
 	private void setupSaveShoppingCartAction() {
 		when(shoppingCartService.saveOrUpdate(shoppingCart)).thenReturn(shoppingCart);
+	}
+
+	private ShoppingItem givenCartDirectorPersistsShoppingItem(final ShoppingItemDto dto) {
+		final ShoppingItem addedShoppingItem = mock(ShoppingItem.class);
+		final ShoppingItem persistedShoppingItem = mock(ShoppingItem.class);
+
+		final String shoppingItemGuid = UUID.randomUUID().toString();
+		when(addedShoppingItem.getGuid()).thenAnswer(invocation -> shoppingItemGuid);
+
+		when(cartDirector.addItemToCart(shoppingCart, dto)).thenReturn(addedShoppingItem);
+		when(shoppingCart.getCartItemByGuid(shoppingItemGuid))
+				.thenReturn(persistedShoppingItem);
+
+		return persistedShoppingItem;
 	}
 
 	@Test
 	public void testAddItemToCartHappyPath() {
 		final ShoppingItemDto dto = new ShoppingItemDto(SKU_CODE, 1);
 
-		setupAddAndUpdateActions(dto);
 		setupSaveShoppingCartAction();
+		final ShoppingItem expectedShoppingItem = givenCartDirectorPersistsShoppingItem(dto);
 
-		service.addItemToCart(shoppingCart, dto);
+		final ShoppingItem actualShoppingItem = service.addItemToCart(shoppingCart, dto);
+
+		assertThat(actualShoppingItem)
+				.isSameAs(expectedShoppingItem);
 
 		verify(cartDirector).addItemToCart(shoppingCart, dto);
 		expectThatShoppingCartWillBePersisted();
@@ -124,7 +94,6 @@ public class CartDirectorServiceImplTest {
 		final long itemId = 12345L;
 		final ShoppingItemDto dto = new ShoppingItemDto(SKU_CODE, 99);
 
-		setupAddAndUpdateActions(dto);
 		setupSaveShoppingCartAction();
 
 		service.updateCartItem(shoppingCart, itemId, dto);
@@ -144,15 +113,14 @@ public class CartDirectorServiceImplTest {
 
 		final CartItem updatedCartItem = mock(CartItem.class, "updatedRootItem");
 		final CartItem previousDependentItem = mock(CartItem.class, "previousDependentItem");
-		final List<ShoppingItem> childItems = mock(List.class, "previousChildItems");
-		final List<ShoppingItem> cartItems = mock(List.class, "previousCartItems");
+		final List<ShoppingItem> childItems = spy(Lists.newArrayList(previousDependentItem));
 
 		setupThatRootWillBeUpdatedAndDependentAndAssociatedItemsWillBeAdded(
 				rootDto, rootItemId, updatedCartItem, dependentDto, associatedDto);
 
-		when(updatedCartItem.getDependentItems()).thenReturn(Collections.singletonList(previousDependentItem));
+		final String dependentItemGuid = UUID.randomUUID().toString();
+		when(previousDependentItem.getGuid()).thenReturn(dependentItemGuid);
 		when(updatedCartItem.getChildren()).thenReturn(childItems);
-		when(shoppingCart.getCartItems()).thenReturn(cartItems);
 
 		// When
 		service.updateCompoundCartItem(
@@ -163,7 +131,7 @@ public class CartDirectorServiceImplTest {
 		//  Note that previous <em>Associated</em> items are not deleted.
 		//  This is pre-existing behaviour, I have no idea whether or not it is a bug or a feature or neither.
 		verify(childItems).removeAll(Collections.singletonList(previousDependentItem));
-		verify(cartItems).removeAll(Collections.singletonList(previousDependentItem));
+		verify(shoppingCart).removeCartItems(Collections.singleton(dependentItemGuid));
 
 		expectThatShoppingCartWillBePersisted();
 	}
@@ -204,11 +172,22 @@ public class CartDirectorServiceImplTest {
 	@Test
 	public void testAddSkuToWishListHappyPath() {
 		final ShoppingItem shoppingItem = mock(ShoppingItem.class);
+		final ShoppingItem expectedShoppingItem = mock(ShoppingItem.class);
+		final String shoppingItemGuid = UUID.randomUUID().toString();
+		final AddToWishlistResult addToWishListResult = new AddToWishlistResult(expectedShoppingItem, true);
 
+		when(expectedShoppingItem.getGuid()).thenReturn(shoppingItemGuid);
+		when(expectedShoppingItem.getGuid()).thenReturn(shoppingItemGuid);
 		when(cartDirector.createShoppingItem(SKU_CODE, store, 1)).thenReturn(shoppingItem);
 		when(wishListService.findOrCreateWishListByShopper(shopper)).thenReturn(wishList);
+		when(wishListService.addItem(wishList, shoppingItem)).thenReturn(addToWishListResult);
+		when(wishListService.save(wishList)).thenReturn(wishList);
+		when(wishList.getAllItems()).thenReturn(Collections.singletonList(expectedShoppingItem));
 
-		service.addSkuToWishList(SKU_CODE, shopper, store);
+		final ShoppingItem actualShoppingItem = service.addSkuToWishList(SKU_CODE, shopper, store);
+
+		assertThat(actualShoppingItem)
+				.isSameAs(expectedShoppingItem);
 
 		verify(wishListService).addItem(wishList, shoppingItem);
 		expectThatWishListWillBePersisted();
@@ -220,14 +199,21 @@ public class CartDirectorServiceImplTest {
 	@Test
 	public void testMoveItemFromWishListToCart() {
 		final ShoppingItemDto dto = new ShoppingItemDto(SKU_CODE, 1);
+		final ShoppingCart persistedShoppingCart = mock(ShoppingCart.class);
+		final ShoppingItem expectedShoppingItem = mock(ShoppingItem.class);
+		final ShoppingItem persistedShoppingItem = new ShoppingItemImpl();
+		persistedShoppingItem.setGuid(WISHLIST_LINE_ITEM_GUID);
 
-		setupAddAndUpdateActions(dto);
 		when(shoppingCart.getShopper()).thenReturn(shopper);
-		when(cartDirector.isSkuAllowedAddToCart(SKU_CODE, shoppingCart)).thenReturn(true);
-		when(cartDirector.addItemToCart(shoppingCart, dto)).thenReturn(new ShoppingItemImpl());
+		when(cartDirector.addItemToCart(shoppingCart, dto)).thenReturn(persistedShoppingItem);
 		when(wishListService.findOrCreateWishListByShopper(shopper)).thenReturn(wishList);
+		when(shoppingCartService.saveOrUpdate(shoppingCart)).thenReturn(persistedShoppingCart);
+		when(persistedShoppingCart.getCartItemByGuid(WISHLIST_LINE_ITEM_GUID)).thenReturn(expectedShoppingItem);
 
-		service.moveItemFromWishListToCart(shoppingCart, dto, WISHLIST_LINE_ITEM_GUID);
+		final ShoppingItem actualShoppingItem = service.moveItemFromWishListToCart(shoppingCart, dto, WISHLIST_LINE_ITEM_GUID);
+
+		assertThat(actualShoppingItem)
+				.isSameAs(expectedShoppingItem);
 
 		verify(wishList).removeItem(WISHLIST_LINE_ITEM_GUID);
 		expectThatShoppingCartWillBePersisted();
@@ -240,15 +226,21 @@ public class CartDirectorServiceImplTest {
 	@Test
 	public void testMoveItemWithQuantityFromWishListToCart() {
 		final ShoppingItemDto dto = new ShoppingItemDto(SKU_CODE, 2);
-
-		setupAddAndUpdateActions(dto);
+		final ShoppingCart persistedShoppingCart = mock(ShoppingCart.class);
+		final ShoppingItem expectedShoppingItem = mock(ShoppingItem.class);
+		final ShoppingItem persistedShoppingItem = new ShoppingItemImpl();
+		persistedShoppingItem.setGuid(WISHLIST_LINE_ITEM_GUID);
 
 		when(shoppingCart.getShopper()).thenReturn(shopper);
-		when(cartDirector.isSkuAllowedAddToCart(SKU_CODE, shoppingCart)).thenReturn(true);
-		when(cartDirector.addItemToCart(shoppingCart, dto)).thenReturn(new ShoppingItemImpl());
+		when(cartDirector.addItemToCart(shoppingCart, dto)).thenReturn(persistedShoppingItem);
 		when(wishListService.findOrCreateWishListByShopper(shopper)).thenReturn(wishList);
+		when(shoppingCartService.saveOrUpdate(shoppingCart)).thenReturn(persistedShoppingCart);
+		when(persistedShoppingCart.getCartItemByGuid(WISHLIST_LINE_ITEM_GUID)).thenReturn(expectedShoppingItem);
 
-		service.moveItemFromWishListToCart(shoppingCart, dto, WISHLIST_LINE_ITEM_GUID);
+		final ShoppingItem actualShoppingItem = service.moveItemFromWishListToCart(shoppingCart, dto, WISHLIST_LINE_ITEM_GUID);
+
+		assertThat(actualShoppingItem)
+				.isSameAs(expectedShoppingItem);
 
 		expectThatShoppingCartWillBePersisted();
 		verify(wishList).removeItem(WISHLIST_LINE_ITEM_GUID);
@@ -272,7 +264,7 @@ public class CartDirectorServiceImplTest {
 
 		expectThatWishListWillBePersisted();
 		expectThatShoppingCartWillBePersisted();
-		verify(shoppingCart).removeCartItem(anyString());
+		verify(shoppingCart).removeCartItem(any());
 	}
 
 	/**

@@ -18,8 +18,7 @@ import org.junit.Test;
 import com.elasticpath.search.index.solr.service.IndexBuildPolicyContext;
 import com.elasticpath.service.misc.TimeService;
 import com.elasticpath.service.search.IndexType;
-import com.elasticpath.settings.SettingsReader;
-import com.elasticpath.settings.domain.SettingValue;
+import com.elasticpath.settings.provider.SettingValueProvider;
 
 /**
  * Test cases for {@link IndexBuildPolicyImpl}.
@@ -33,29 +32,26 @@ public class IndexBuildPolicyImplTest {
 
 	private TimeService timeService;
 
+	private SettingValueProvider<Integer> settingOptimizationIntervalProvider;
+
 	private IndexBuildPolicyContext indexContext;
 
-	private SettingsReader settingsReader;
-	
-	private SettingValue settingValue;
-	
 	/**
 	 * Sets up the test case.
 	 */
+	@SuppressWarnings("unchecked")
 	@Before
 	public void setUp() {
 		indexPolicy = new IndexBuildPolicyImpl();
 		
 		timeService = context.mock(TimeService.class);
-		settingsReader = context.mock(SettingsReader.class);
+		settingOptimizationIntervalProvider = context.mock(SettingValueProvider.class);
 		indexContext = new IndexBuildPolicyContext();
 		
 		indexContext.setIndexType(IndexType.CATEGORY);
 		
-		settingValue = context.mock(SettingValue.class);
-		
 		indexPolicy.setTimeService(timeService);
-		indexPolicy.setSettingsReader(settingsReader);
+		indexPolicy.setSettingOptimizationIntervalProvider(settingOptimizationIntervalProvider);
 	}
 
 	/**
@@ -65,16 +61,14 @@ public class IndexBuildPolicyImplTest {
 	@Test
 	public void testIsOptimizationRequired() {
 		context.checking(new Expectations() { {
-			oneOf(settingsReader).getSettingValue(IndexBuildPolicyImpl.SETTING_OPTIMIZATION_INTERVAL, IndexType.CATEGORY.getIndexName());
-			will(returnValue(settingValue));
-			oneOf(settingValue).getValue();
-			will(returnValue("1"));
-			
+			oneOf(settingOptimizationIntervalProvider).get(IndexType.CATEGORY.getIndexName());
+			will(returnValue(1));
+
 			exactly(2).of(timeService).getCurrentTime();
 			will(returnValue(new Date()));
 		} });
 		
-		assertFalse("Timeout has not elapsed. Should not be eligibile for optimization", 
+		assertFalse("Timeout has not elapsed. Should not be eligible for optimization",
 				indexPolicy.isOptimizationRequired(indexContext));
 	}
 
@@ -85,25 +79,21 @@ public class IndexBuildPolicyImplTest {
 	@Test
 	public void testIsOptimizationRequiredWhenTimeoutHasElapsed() {
 		context.checking(new Expectations() { {
-			oneOf(settingsReader).getSettingValue(IndexBuildPolicyImpl.SETTING_OPTIMIZATION_INTERVAL, IndexType.CATEGORY.getIndexName());
-			will(returnValue(settingValue));
-			oneOf(settingValue).getValue();
-			will(returnValue("1"));
+			oneOf(settingOptimizationIntervalProvider).get(IndexType.CATEGORY.getIndexName());
+			will(returnValue(1));
 			
 			exactly(2).of(timeService).getCurrentTime();
 			will(returnValue(DateUtils.addMinutes(new Date(), 0)));
 		} });
 		
 		
-		assertFalse("Timeout has not elapsed. Should not be eligibile for optimization", 
+		assertFalse("Timeout has not elapsed. Should not be eligible for optimization",
 				indexPolicy.isOptimizationRequired(indexContext));
 		
 		// the next expectations are set in the future - 2 seconds after the first call
 		context.checking(new Expectations() { {
-			oneOf(settingsReader).getSettingValue(IndexBuildPolicyImpl.SETTING_OPTIMIZATION_INTERVAL, IndexType.CATEGORY.getIndexName());
-			will(returnValue(settingValue));
-			oneOf(settingValue).getValue();
-			will(returnValue("1"));
+			oneOf(settingOptimizationIntervalProvider).get(IndexType.CATEGORY.getIndexName());
+			will(returnValue(1));
 
 			// first invocation is for the check
 			oneOf(timeService).getCurrentTime();
@@ -113,9 +103,8 @@ public class IndexBuildPolicyImplTest {
 			oneOf(timeService).getCurrentTime();
 			will(returnValue(DateUtils.addMinutes(new Date(), 2)));
 		} });
-		assertTrue("Timeout must have elapsed. Should be eligibile for optimization", 
+		assertTrue("Timeout must have elapsed. Should be eligible for optimization",
 				indexPolicy.isOptimizationRequired(indexContext));
-		
 	}
 
 }

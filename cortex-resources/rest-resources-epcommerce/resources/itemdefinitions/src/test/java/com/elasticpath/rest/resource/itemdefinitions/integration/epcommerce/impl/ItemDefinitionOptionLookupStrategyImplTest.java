@@ -7,13 +7,11 @@ import static com.elasticpath.rest.chain.ResourceStatusMatcher.containsResourceS
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Set;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -25,7 +23,7 @@ import junit.framework.TestCase;
 import org.apache.commons.lang3.StringUtils;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.elasticpath.domain.catalog.Product;
 import com.elasticpath.domain.catalog.ProductSku;
@@ -57,7 +55,6 @@ public class ItemDefinitionOptionLookupStrategyImplTest extends TestCase {
 	private static final String OPTION_CODE = "option_code";
 	private static final String OPTION_GUID = "option_guid";
 	private static final String VALUE_CODE = "value_code";
-	private static final String SKU_CODE = "sku_code";
 	private static final String PRODUCT_GUID = "product_guid";
 	private static final String ITEM_ID = "item_id";
 	private static final String INVALID_ITEM_ID = "invalid_item_id";
@@ -84,7 +81,6 @@ public class ItemDefinitionOptionLookupStrategyImplTest extends TestCase {
 	 */
 	@Before
 	public void setUp() {
-		when(mockItemRepository.getSkuCodeForItemId(ITEM_ID)).thenReturn(ExecutionResultFactory.createReadOK(SKU_CODE));
 		Subject subject = TestSubjectFactory.createWithScopeAndUserIdAndLocale(STORE_CODE, USERID, LOCALE);
 		when(mockResourceOperationContext.getSubject()).thenReturn(subject);
 	}
@@ -104,7 +100,7 @@ public class ItemDefinitionOptionLookupStrategyImplTest extends TestCase {
 		ExecutionResult<Collection<String>> result = strategy.findOptionIds(STORE_CODE, ITEM_ID);
 
 		assertTrue(result.isSuccessful());
-		assertTrue(CollectionUtil.containsOnly(Arrays.asList(OPTION_GUID), result.getData()));
+		assertTrue(CollectionUtil.containsOnly(Collections.singletonList(OPTION_GUID), result.getData()));
 	}
 
 	/**
@@ -112,11 +108,8 @@ public class ItemDefinitionOptionLookupStrategyImplTest extends TestCase {
 	 */
 	@Test
 	public void testReadOptionIdsForItemDefinitionWhenNoOptionsFound() {
-		SkuOption mockSkuOption = mock(SkuOption.class);
-
 		when(mockItemRepository.getSkuOptionsForItemId(ITEM_ID))
-				.thenReturn(ExecutionResultFactory.createReadOK(Collections.<SkuOption>emptySet()));
-		when(mockSkuOption.getGuid()).thenReturn(OPTION_GUID);
+				.thenReturn(ExecutionResultFactory.createReadOK(Collections.emptySet()));
 
 		ExecutionResult<Collection<String>> result = strategy.findOptionIds(STORE_CODE, ITEM_ID);
 
@@ -151,7 +144,7 @@ public class ItemDefinitionOptionLookupStrategyImplTest extends TestCase {
 	 */
 	@Test
 	public void testReadItemDefinitionOptionWhenSkuNotFound() {
-		mockItemRepositoryGetProductSkuResult(ExecutionResultFactory.<ProductSku>createNotFound(StringUtils.EMPTY));
+		mockItemRepositoryGetProductSkuResult(ExecutionResultFactory.createNotFound(StringUtils.EMPTY));
 
 		thrown.expect(containsResourceStatus(ResourceStatus.NOT_FOUND));
 
@@ -166,10 +159,8 @@ public class ItemDefinitionOptionLookupStrategyImplTest extends TestCase {
 		ProductSku productSku = new ProductSkuImpl();
 		Map<String, SkuOptionValue> optionValueMap = new HashMap<>();
 		productSku.setOptionValueMap(optionValueMap);
-		ItemDefinitionOptionEntity itemDefinitionOptionEntity = ItemDefinitionOptionEntity.builder().build();
 
 		mockItemRepositoryGetProductSkuResult(ExecutionResultFactory.createReadOK(productSku));
-		when(mockSkuOptionTransformer.transformToEntity(null, LOCALE)).thenReturn(itemDefinitionOptionEntity);
 
 		thrown.expect(containsResourceStatus(ResourceStatus.NOT_FOUND));
 
@@ -211,7 +202,7 @@ public class ItemDefinitionOptionLookupStrategyImplTest extends TestCase {
 	 */
 	@Test
 	public void testReadOptionValueWhenSkuNotFound() {
-		mockItemRepositoryGetProductSkuResult(ExecutionResultFactory.<ProductSku>createNotFound(StringUtils.EMPTY));
+		mockItemRepositoryGetProductSkuResult(ExecutionResultFactory.createNotFound(StringUtils.EMPTY));
 
 		thrown.expect(containsResourceStatus(ResourceStatus.NOT_FOUND));
 
@@ -224,7 +215,7 @@ public class ItemDefinitionOptionLookupStrategyImplTest extends TestCase {
 	@Test
 	public void testFindOptionsIdsWhenSkuCodeResultNotFound() {
 		when(mockItemRepository.getSkuOptionsForItemId(INVALID_ITEM_ID))
-				.thenReturn(ExecutionResultFactory.<Set<SkuOption>>createNotFound());
+				.thenReturn(ExecutionResultFactory.createNotFound());
 
 		thrown.expect(containsResourceStatus(ResourceStatus.NOT_FOUND));
 

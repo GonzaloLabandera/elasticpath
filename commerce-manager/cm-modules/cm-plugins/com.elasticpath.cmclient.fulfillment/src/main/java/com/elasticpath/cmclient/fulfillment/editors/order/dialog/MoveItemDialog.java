@@ -4,8 +4,10 @@
 package com.elasticpath.cmclient.fulfillment.editors.order.dialog;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
@@ -20,9 +22,9 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Spinner;
 
+import com.elasticpath.cmclient.core.CoreImageRegistry;
 import com.elasticpath.cmclient.core.LoginManager;
 import com.elasticpath.cmclient.core.ServiceLocator;
-import com.elasticpath.cmclient.core.CoreImageRegistry;
 import com.elasticpath.cmclient.core.binding.EpControlBindingProvider;
 import com.elasticpath.cmclient.core.binding.ObservableUpdateValueStrategy;
 import com.elasticpath.cmclient.core.editors.AbstractCmClientFormEditor;
@@ -45,16 +47,20 @@ import com.elasticpath.domain.order.OrderShipment;
 import com.elasticpath.domain.order.OrderShipmentStatus;
 import com.elasticpath.domain.order.OrderSku;
 import com.elasticpath.domain.order.PhysicalOrderShipment;
-import com.elasticpath.domain.shipping.ShippingServiceLevel;
 import com.elasticpath.domain.shoppingcart.ShoppingItemPricingSnapshot;
 import com.elasticpath.domain.shoppingcart.ShoppingItemTaxSnapshot;
-import com.elasticpath.money.Money;
 import com.elasticpath.service.catalog.ProductSkuLookup;
 import com.elasticpath.service.misc.TimeService;
-import com.elasticpath.service.shipping.ShippingServiceLevelService;
+import com.elasticpath.service.shipping.transformers.PricedShippableItemContainerFromOrderShipmentTransformer;
+import com.elasticpath.service.shipping.ShippingOptionService;
+import com.elasticpath.service.shoppingcart.OrderSkuSubtotalCalculator;
 import com.elasticpath.service.shoppingcart.PricingSnapshotService;
-import com.elasticpath.service.shoppingcart.ShippableItemsSubtotalCalculator;
 import com.elasticpath.service.shoppingcart.TaxSnapshotService;
+import com.elasticpath.shipping.connectivity.commons.constants.ShippingContextIdNames;
+import com.elasticpath.shipping.connectivity.dto.ShippingOption;
+import com.elasticpath.shipping.connectivity.dto.PricedShippableItem;
+import com.elasticpath.shipping.connectivity.dto.PricedShippableItemContainer;
+import com.elasticpath.shipping.connectivity.service.ShippingCalculationService;
 
 /**
  * Represents the UI for move item dialog.
@@ -63,6 +69,7 @@ import com.elasticpath.service.shoppingcart.TaxSnapshotService;
 public class MoveItemDialog extends AbstractEpDialog {
 
 	private static final int MINIMUM_QUANTITY = 1;
+	private static final int SCALE_FOR_PROPORTION = 10;
 
 	private Button existingShipmentRadio;
 
@@ -78,7 +85,7 @@ public class MoveItemDialog extends AbstractEpDialog {
 
 	private final Order order;
 
-	private List<ShippingServiceLevel> shippingServiceLevels;
+	private List<ShippingOption> shippingOptions;
 
 	private final AbstractCmClientFormEditor editor;
 
@@ -105,7 +112,7 @@ public class MoveItemDialog extends AbstractEpDialog {
 	private PricingSnapshotService pricingSnapshotService;
 	private TaxSnapshotService taxSnapshotService;
 
-	private ShippableItemsSubtotalCalculator shippableItemsSubtotalCalculator;
+	private OrderSkuSubtotalCalculator orderSkuSubtotalCalculator;
 
 	private static final String BLANK = " "; //$NON-NLS-1$
 
@@ -387,15 +394,16 @@ public class MoveItemDialog extends AbstractEpDialog {
 			@Override
 			protected IStatus doSet(final IObservableValue observableValue, final Object newValue) {
 
-				if (shippingServiceLevels != null && shipmentMethodCombo != null) {
-					ShippingServiceLevel newServiceLevel = shippingServiceLevels.get(shipmentMethodCombo.getSelectionIndex());
-					newShipment.setShippingServiceLevelGuid(newServiceLevel.getGuid());
-					newShipment.setCarrier(newServiceLevel.getCarrier());
+				if (shippingOptions != null && shipmentMethodCombo != null) {
+					ShippingOption newShippingOption = shippingOptions.get(shipmentMethodCombo.getSelectionIndex());
+					newShipment.setShippingOptionCode(newShippingOption.getCode());
+					newShipment.setCarrierCode(newShippingOption.getCarrierCode().orElse(null));
+					newShipment.setCarrierName(newShippingOption.getCarrierDisplayName().orElse(null));
 					Integer value = (Integer) newValue;
 					if (value > -1) {
 
-						newShipment.setServiceLevel(shipmentMethodCombo.getItem(value));
-						newShipment.setShippingServiceLevelGuid(shippingServiceLevels.get(value).getGuid());  // ?!?!?!
+						newShipment.setShippingOptionName(shipmentMethodCombo.getItem(value));
+						newShipment.setShippingOptionCode(shippingOptions.get(value).getCode());  // ?!?!?!
 					}
 				}
 
@@ -421,10 +429,17 @@ public class MoveItemDialog extends AbstractEpDialog {
 		newOrderSku.setQuantity(quantityToMove);
 		final int quantityLeftInOldOrderSku = this.orderSku.getQuantity() - quantityToMove;
 		OrderShipment destinationShipment;
-		
+
 		OrderShipment sourceOrderShipment = this.orderSku.getShipment();
 		((OrderEditor) editor).addOrderShipmentToUpdate(sourceOrderShipment);
-		
+
+		BigDecimal amountToMove = this.orderSku.getUnitPrice().multiply(BigDecimal.valueOf(quantityToMove));
+		BigDecimal amountToMoveProportion = amountToMove.divide(physicalOrderShipment.getSubtotal(), SCALE_FOR_PROPORTION, BigDecimal.ROUND_HALF_UP);
+		BigDecimal discountToMove = physicalOrderShipment.getSubtotalDiscount().multiply(amountToMoveProportion).setScale(2,
+				RoundingMode.HALF_UP);
+
+		physicalOrderShipment.setSubtotalDiscount(physicalOrderShipment.getSubtotalDiscount().subtract(discountToMove));
+
 		if (this.existingShipmentRadio.getSelection()) {
 
 			allocateQuantity(this.orderSku, newOrderSku, quantityToMove);
@@ -449,6 +464,8 @@ public class MoveItemDialog extends AbstractEpDialog {
 			if (quantityLeftInOldOrderSku == 0) {
 				this.physicalOrderShipment.removeShipmentOrderSku(this.orderSku, getProductSkuLookup());
 			}
+			existingShipment.setSubtotalDiscount(existingShipment.getSubtotalDiscount().add(discountToMove));
+
 			((OrderEditor) editor).addOrderShipmentToUpdate(existingShipment);
 
 			((OrderEditor) editor).fireRefreshChanges();
@@ -456,7 +473,7 @@ public class MoveItemDialog extends AbstractEpDialog {
 			destinationShipment = existingShipment;
 		} else  { // if (this.newShipmentRadio.getSelection()) MUTUALLY EXCLUSIVE with existingShipmentRadio!
 			this.newShipmentRadio.setSelection(true);
-
+			newShipment.setOrder(order);
 			newShipment.setInclusiveTax(physicalOrderShipment.isInclusiveTax());
 
 			allocateQuantity(this.orderSku, newOrderSku, quantityToMove);
@@ -473,11 +490,14 @@ public class MoveItemDialog extends AbstractEpDialog {
 
 			this.order.addShipment(newShipment);
 			((OrderEditor) editor).addOrderShipmentToNew(newShipment);
-			
+
+			newShipment.setSubtotalDiscount(discountToMove);
+
 			((OrderEditor) editor).fireRefreshChanges();
 			editor.controlModified();
 			destinationShipment = newShipment;
 		}
+		updatePhysicalOrderShipment(physicalOrderShipment);
 		// Log the orderSku move event.
 		OrderEventCmHelper.getOrderEventHelper().logOrderSkuMoved(destinationShipment, newOrderSku);
 		((OrderEditor) editor).fireAddNoteChanges();
@@ -488,23 +508,34 @@ public class MoveItemDialog extends AbstractEpDialog {
 	}
 
 	private String[] getShippingMethods(final OrderAddress address) {
-		shippingServiceLevels = getShippingServiceLevelService().retrieveShippingServiceLevel(order.getStore().getCode(), address);
+		shippingOptions = getShippingOptionService().getShippingOptions(
+				address,
+				order.getStore().getCode(),
+				this.order.getLocale()).getAvailableShippingOptions();
 
-		String[] serviceLevels = new String[shippingServiceLevels.size()];
-		for (int i = 0; i < serviceLevels.length; i++) {
-			serviceLevels[i] = shippingServiceLevels.get(i).getName(this.order.getLocale());
-		}
-		return serviceLevels;
+		return shippingOptions.stream()
+				.map(shippingOption -> shippingOption.getDisplayName(this.order.getLocale()).orElse(null))
+				.collect(Collectors.toList())
+				.stream().toArray(String[]::new);
+
 	}
 
 	private void updatePhysicalOrderShipment(final PhysicalOrderShipment shipment) {
 		shipment.setCreatedDate(getTimeService().getCurrentTime());
-		ShippingServiceLevel serviceLevel = getShippingServiceLevelService().findByGuid(shipment.getShippingServiceLevelGuid());
-		Money shippableItemsSubtotal = getShippableItemsSubtotalCalculator().calculateSubtotalOfShippableItems(shipment.getShipmentOrderSkus(),
-			order.getCurrency());
-		Money shippingCost = serviceLevel.getShippingCostCalculationMethod().calculateShippingCost(shipment.getShipmentOrderSkus(),
-			shippableItemsSubtotal, order.getCurrency(), getProductSkuLookup());
-		shipment.setShippingCost(shippingCost.getAmount());
+
+		final PricedShippableItemContainerFromOrderShipmentTransformer<PricedShippableItem> shippableItemContainerTransformer = ServiceLocator
+				.getService(ContextIdNames.PRICED_SHIPPABLE_CONTAINER_FROM_SHIPMENT_TRANSFORMER);
+
+		final PricedShippableItemContainer<PricedShippableItem> pricedShippableItemContainer = shippableItemContainerTransformer.apply(shipment);
+
+		final List<ShippingOption> shippingOptions = getShippingCalculationService()
+				.getPricedShippingOptions(pricedShippableItemContainer).getAvailableShippingOptions();
+
+		final ShippingOption foundShippingOption = shippingOptions.stream()
+				.filter(shippingOption -> shippingOption.getCode().equals(shipment.getShippingOptionCode()))
+				.findFirst().get();
+
+		shipment.setShippingCost(foundShippingOption.getShippingCost().get().getAmount());
 		shipment.setBeforeTaxShippingCost(BigDecimal.ZERO);
 		shipment.setSubtotalDiscount(BigDecimal.ZERO);
 		shipment.setStatus(physicalOrderShipment.getShipmentStatus());
@@ -539,10 +570,14 @@ public class MoveItemDialog extends AbstractEpDialog {
 		return helper.getCmUserOriginator(LoginManager.getCmUser());
 	}
 
-	protected ShippingServiceLevelService getShippingServiceLevelService() {
-		return (ShippingServiceLevelService) ServiceLocator.getService(ContextIdNames.SHIPPING_SERVICE_LEVEL_SERVICE);
+	protected ShippingOptionService getShippingOptionService() {
+		return ServiceLocator.getService(ContextIdNames.SHIPPING_OPTION_SERVICE);
 	}
-	
+
+	protected ShippingCalculationService getShippingCalculationService() {
+		return ServiceLocator.getService(ShippingContextIdNames.SHIPPING_CALCULATION_SERVICE);
+	}
+
 	/**
 	 * Lazy loads a ProductSkuLookup.
 	 *
@@ -593,15 +628,15 @@ public class MoveItemDialog extends AbstractEpDialog {
 	}
 
 	/**
-	 * Get the shippable items subtotal calculator.
+	 * Get the order sku subtotal calculator.
 	 *
-	 * @return the shippable items subtotal calculator
+	 * @return the order sku subtotal calculator
 	 */
-	protected ShippableItemsSubtotalCalculator getShippableItemsSubtotalCalculator() {
-		if (shippableItemsSubtotalCalculator == null) {
-			shippableItemsSubtotalCalculator = ServiceLocator.getService(ContextIdNames.SHIPPABLE_ITEMS_SUBTOTAL_CALCULATOR);
+	protected OrderSkuSubtotalCalculator getOrderSkuSubtotalCalculator() {
+		if (orderSkuSubtotalCalculator == null) {
+			orderSkuSubtotalCalculator = ServiceLocator.getService(ContextIdNames.ORDER_SKU_SUBTOTAL_CALCULATOR);
 		}
-		return shippableItemsSubtotalCalculator;
+		return orderSkuSubtotalCalculator;
 	}
 }
 

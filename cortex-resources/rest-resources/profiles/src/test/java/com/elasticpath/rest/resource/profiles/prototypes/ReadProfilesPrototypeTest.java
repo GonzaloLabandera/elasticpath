@@ -9,7 +9,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.elasticpath.rest.definition.profiles.ProfileIdentifier;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.customer.impl.ProfileEntityRepositoryImpl;
@@ -24,6 +24,7 @@ public class ReadProfilesPrototypeTest {
 	private ReadProfilePrototype readProfilePrototype;
 
 	@Mock
+	@SuppressWarnings("rawtypes")
 	private ProfileEntityRepositoryImpl profileEntityRepository;
 
 	@Mock

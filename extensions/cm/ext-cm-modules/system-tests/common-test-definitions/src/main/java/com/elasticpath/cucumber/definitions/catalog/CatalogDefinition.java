@@ -18,7 +18,7 @@ import com.elasticpath.selenium.dialogs.AddEditBrandDialog;
 import com.elasticpath.selenium.dialogs.CategoryFinderDialog;
 import com.elasticpath.selenium.dialogs.ConfirmDialog;
 import com.elasticpath.selenium.dialogs.CreateCatalogDialog;
-import com.elasticpath.selenium.dialogs.CreateVirtualCatalogDialog;
+import com.elasticpath.selenium.dialogs.CreateEditVirtualCatalogDialog;
 import com.elasticpath.selenium.dialogs.EditAttributeDialog;
 import com.elasticpath.selenium.dialogs.EditGlobalAttributesDialog;
 import com.elasticpath.selenium.domainobjects.CartItemModifierGroup;
@@ -29,12 +29,13 @@ import com.elasticpath.selenium.domainobjects.ProductType;
 import com.elasticpath.selenium.editor.catalog.CatalogEditor;
 import com.elasticpath.selenium.editor.catalog.tabs.BrandsTab;
 import com.elasticpath.selenium.editor.product.ProductEditor;
-import com.elasticpath.selenium.framework.util.SeleniumDriverSetup;
 import com.elasticpath.selenium.navigations.CatalogManagement;
 import com.elasticpath.selenium.resultspane.CatalogProductListingPane;
 import com.elasticpath.selenium.resultspane.CatalogSearchResultPane;
+import com.elasticpath.selenium.setup.SetUp;
 import com.elasticpath.selenium.toolbars.ActivityToolbar;
 import com.elasticpath.selenium.toolbars.CatalogManagementActionToolbar;
+import com.elasticpath.selenium.toolbars.ChangeSetActionToolbar;
 import com.elasticpath.selenium.util.Constants;
 import com.elasticpath.selenium.util.Utility;
 import com.elasticpath.selenium.wizards.CreateCategoryWizard;
@@ -46,11 +47,12 @@ import com.elasticpath.selenium.wizards.CreateCategoryWizard;
 public class CatalogDefinition {
 	private final CatalogManagement catalogManagement;
 	private final ActivityToolbar activityToolbar;
+	private final ChangeSetActionToolbar changeSetActionToolbar;
 	private CatalogSearchResultPane catalogSearchResultPane;
 	private CatalogProductListingPane catalogProductListingPane;
 	private final CatalogManagementActionToolbar catalogManagementActionToolbar;
 	private CreateCatalogDialog createCatalogDialog;
-	private CreateVirtualCatalogDialog createVirtualCatalogDialog;
+	private CreateEditVirtualCatalogDialog createEditVirtualCatalogDialog;
 	private CreateCategoryWizard createCategoryWizard;
 	private CategoryFinderDialog categoryFinderDialog;
 	private EditGlobalAttributesDialog editGlobalAttributesDialog;
@@ -94,11 +96,12 @@ public class CatalogDefinition {
 							 CartItemModifierGroupTabDefinition
 									 cartItemModifierGroupTabDefinition, final CategoryTypesTabDefinition
 									 categoryTypesTabDefinition, final ProductAndBundleDefinition productAndBundleDefinition) {
-		driver = SeleniumDriverSetup.getDriver();
+		driver = SetUp.getDriver();
 		catalogManagement = new CatalogManagement(driver);
 		catalogManagementActionToolbar = new CatalogManagementActionToolbar(driver);
 		activityToolbar = new ActivityToolbar(driver);
 		brandsTab = new BrandsTab(driver);
+		changeSetActionToolbar = new ChangeSetActionToolbar(driver);
 		this.catalog = catalog;
 		this.category = category;
 		this.linkedCategory = linkedCategory;
@@ -225,6 +228,33 @@ public class CatalogDefinition {
 	}
 
 	/**
+	 * Delete given brand.
+	 *
+	 * @param brandCode brand code to be deleted.
+	 */
+	@When("^I delete the brand (.+)$")
+	public void deleteNewBrandCode(final String brandCode) {
+		deleteBrandCode(brandCode);
+	}
+
+	/**
+	 * Delete newly created brand.
+	 */
+	@When("^I delete the newly create brand$")
+	public void deleteNewBrandCode() {
+		deleteBrandCode(this.catalog.getBrand());
+		this.catalog.setBrand(null);
+	}
+
+	private void deleteBrandCode(final String brandCode) {
+		brandsTab.verifyAndSelectBrand(brandCode);
+		brandsTab.clickRemoveBrandButton();
+		catalogManagementActionToolbar.saveAll();
+		catalogManagementActionToolbar.clickReloadActiveEditor();
+	}
+
+
+	/**
 	 * Verify brand deleted.
 	 */
 	@Then("^The brand is deleted$")
@@ -235,7 +265,7 @@ public class CatalogDefinition {
 	/**
 	 * Verify catalog exists.
 	 */
-	@Then("^newly created (?:virtual catalog|catalog) is in the list$")
+	@Then("^newly (?:created|edited) (?:virtual catalog|catalog) is in the list$")
 	public void verifyCatalogExists() {
 		catalogManagement.clickCatalogRefreshButton();
 		catalogManagement.verifyCatalogExists(this.catalog.getCatalogName());
@@ -246,17 +276,18 @@ public class CatalogDefinition {
 	 *
 	 * @param catalogInfoList catalog details.
 	 */
-	@And("^I create a new virtual catalog with following details$")
+	@And("^(?:I create a|a) new virtual catalog with following details$")
 	public void createVirtualCatalogWithLanguage(final List<Catalog> catalogInfoList) {
+		activityToolbar.clickCatalogManagementButton();
 		for (Catalog catalog : catalogInfoList) {
 			String virtualCatalogCode = Utility.getRandomUUID();
 			this.catalog.setCatalogName(catalog.getCatalogName() + "-" + virtualCatalogCode);
 			this.catalog.setLanguage(catalog.getLanguage());
-			createVirtualCatalogDialog = catalogManagementActionToolbar.clickCreateVirtualCatalogButton();
-			createVirtualCatalogDialog.enterCatalogCode(virtualCatalogCode);
-			createVirtualCatalogDialog.enterCatalogName(this.catalog.getCatalogName());
-			createVirtualCatalogDialog.selectDefaultLanguage(this.catalog.getLanguage());
-			createVirtualCatalogDialog.clickSaveButton();
+			createEditVirtualCatalogDialog = catalogManagementActionToolbar.clickCreateVirtualCatalogButton();
+			createEditVirtualCatalogDialog.enterCatalogCode(virtualCatalogCode);
+			createEditVirtualCatalogDialog.enterCatalogName(this.catalog.getCatalogName());
+			createEditVirtualCatalogDialog.selectDefaultLanguage(this.catalog.getLanguage());
+			createEditVirtualCatalogDialog.clickSaveButton();
 		}
 	}
 
@@ -279,7 +310,19 @@ public class CatalogDefinition {
 	}
 
 	/**
-	 * Delete catalog.
+	 * select and delete existing catalog.
+	 *
+	 * @param catalogName the catalog name.
+	 */
+	@And("^I delete selected catalog (.+) in the list$")
+	public void selectDeleteExistingCatalog(final String catalogName) {
+		activityToolbar.clickCatalogManagementButton();
+		catalogManagement.selectCatalog(catalogName);
+		catalogManagement.rightClickDelete();
+	}
+
+	/**
+	 * Delete newly created catalog.
 	 */
 	@And("^I delete newly created (?:virtual catalog|catalog)$")
 	public void deleteNewlyCreatedCatalog() {
@@ -330,7 +373,7 @@ public class CatalogDefinition {
 	 */
 	@And("^the linked category (.+) (?:should be|is) added to catalog (.+)$")
 	public void verifyLinkedCategoryExists(final String linkedCategory, final String catalog) {
-		catalogManagement.expandCatalog(catalog);
+		catalogManagement.expandCatalogAndVerifyCategory(catalog, linkedCategory);
 		catalogManagement.verifyCategoryExists(linkedCategory);
 		//cleanup category so the test can pass the next time we run it
 		deleteLinkedCategory();
@@ -360,7 +403,7 @@ public class CatalogDefinition {
 //		Need to select category again before right click delete.
 		selectNewCategory();
 		catalogManagement.clickDeleteCategoryIcon();
-		new ConfirmDialog(SeleniumDriverSetup.getDriver()).clickOKButton("CatalogMessages.CatalogBrowseView_Action_DeleteCategoryDialog");
+		new ConfirmDialog(SetUp.getDriver()).clickOKButton("CatalogMessages.CatalogBrowseView_Action_DeleteCategoryDialog");
 	}
 
 	/**
@@ -377,7 +420,7 @@ public class CatalogDefinition {
 	 */
 	public void deleteLinkedCategory() {
 		catalogManagement.clickRemoveLinkedCategoryIcon();
-		new ConfirmDialog(SeleniumDriverSetup.getDriver()).clickOKButton("CatalogMessages.CatalogBrowseView_Action_RemoveLinkedCatDialogTitle");
+		new ConfirmDialog(SetUp.getDriver()).clickOKButton("CatalogMessages.CatalogBrowseView_Action_RemoveLinkedCatDialogTitle");
 	}
 
 	/**
@@ -444,7 +487,7 @@ public class CatalogDefinition {
 	@When("^I add new linked category with changeset to (.+) with following data")
 	public void createNewLinkedCategoryChangeset(final String catalog, final List<String> linkedCategoryInfoList) {
 		selectExistingCatalog(catalog);
-		activityToolbar.addSelectedObjectToChangeSet();
+		changeSetActionToolbar.clickAddItemToChangeSet();
 		this.linkedCategory.setCatalog(catalog);
 		selectExistingCatalog(catalog);
 		categoryFinderDialog = catalogManagement.clickAddLinkedCategoryIcon();
@@ -456,7 +499,7 @@ public class CatalogDefinition {
 		categoryFinderDialog.selectCategory(this.linkedCategory.getLinkedCategoryName());
 		categoryFinderDialog.clickOK();
 		selectCategory(catalog, this.linkedCategory.getLinkedCategoryName());
-		activityToolbar.addSelectedObjectToChangeSet();
+		changeSetActionToolbar.clickAddItemToChangeSet();
 	}
 
 	/**
@@ -488,16 +531,29 @@ public class CatalogDefinition {
 	/**
 	 * verify newly created global attribute exists.
 	 */
-	@Then("^newly created global attribute is in the list$")
+	@Then("^newly (?:created|edited) global attribute is in the list$")
 	public void verifyNewlyCreatedGlobalAttributeExists() {
 		editGlobalAttributesDialog = catalogManagementActionToolbar.clickEditGlobalAttributesButton();
 		editGlobalAttributesDialog.verifyGlobalAttributeValue(this.globalAttributeName);
 	}
 
 	/**
+	 * verify newly created global attribute exists.
+	 */
+	@When("^I edit newly created global attribute name to (.+)$")
+	public void editCreatedGlobalAttribute(final String newGlobalAttributeName) {
+		editGlobalAttributesDialog.selectGlobalAttributeRow(this.globalAttributeName);
+		editAttributeDialog = editGlobalAttributesDialog.clickEditAttributeButton();
+		this.globalAttributeName = newGlobalAttributeName + " " + Utility.getRandomUUID();
+		editAttributeDialog.enterAttributeName(this.globalAttributeName);
+		editAttributeDialog.clickOKButton();
+		editGlobalAttributesDialog.clickSaveButton();
+	}
+
+	/**
 	 * Select new global attribute.
 	 */
-	@And("^I select newly created global attribute in the list$")
+	@And("^I select newly (?:created|edited) global attribute in the list$")
 	public void selectNewGlobalAttribute() {
 		editGlobalAttributesDialog.selectGlobalAttributeRow(this.globalAttributeName);
 	}
@@ -540,13 +596,14 @@ public class CatalogDefinition {
 	}
 
 	/**
-	 * Verify create catalog button is present.
+	 * Open newly created catalog.
 	 */
 	@And("^I open the newly created catalog editor")
 	public void openNewCatalogEditor() {
 		selectNewCatalog();
 		catalogEditor = catalogManagement.clickOpenCatalogCategoryButton();
 	}
+
 
 	/**
 	 * Open selected catalog.
@@ -647,7 +704,7 @@ public class CatalogDefinition {
 		catalogEditor.selectTab("Attributes");
 		catalogEditor.selectCatalogAttributeValue(this.catalog.getAttributeName());
 		catalogEditor.clickRemoveAttributeButton();
-		new ConfirmDialog(SeleniumDriverSetup.getDriver()).clickOKButton("CatalogMessages.CatalogAttributesSection_RemoveDialog");
+		new ConfirmDialog(SetUp.getDriver()).clickOKButton("CatalogMessages.CatalogAttributesSection_RemoveDialog");
 		catalogManagementActionToolbar.saveAll();
 		catalogManagementActionToolbar.clickReloadActiveEditor();
 	}
@@ -675,6 +732,18 @@ public class CatalogDefinition {
 	}
 
 	/**
+	 * Edit virtual catalog name.
+	 */
+	@When("^I edit the virtual catalog name to a different name$")
+	public void editVirtualCatalogName() {
+		createEditVirtualCatalogDialog = catalogManagement.clickOpenVirtualCatalogButton();
+		String virtualCatalogCode = Utility.getRandomUUID();
+		this.catalog.setCatalogName(catalog.getCatalogName() + "-" + virtualCatalogCode);
+		createEditVirtualCatalogDialog.enterCatalogName(this.catalog.getCatalogName());
+		createEditVirtualCatalogDialog.clickSaveButton();
+	}
+
+	/**
 	 * Verify virtual catalog tab present in product tabs
 	 *
 	 * @param product  Product Name.
@@ -687,7 +756,7 @@ public class CatalogDefinition {
 		virtualCategoryName = category;
 		virtualCatalogName = catalog;
 		activityToolbar.clickCatalogManagementButton();
-		catalogManagement.expandCatalog(virtualCatalogName);
+		catalogManagement.expandCatalogAndVerifyCategory(virtualCatalogName, virtualCategoryName);
 		catalogProductListingPane = catalogManagement.doubleClickCategory(virtualCategoryName);
 		catalogProductListingPane.verifyProductNameExists(virtualProductName);
 	}
@@ -733,7 +802,6 @@ public class CatalogDefinition {
 		productEditor.selectTab("MerchandisingAssociation");
 		productEditor.verifyCatalogTabIsPresent(catalogName);
 	}
-
 
 	/**
 	 * Deletes new catalog.
@@ -793,7 +861,7 @@ public class CatalogDefinition {
 		catalogManagement.clickCatalogBrowseTab();
 		catalogManagement.selectCategory(this.category.getCategoryName());
 		catalogManagement.clickDeleteCategoryIcon();
-		new ConfirmDialog(SeleniumDriverSetup.getDriver()).clickOKButton("CatalogMessages.CatalogBrowseView_Action_DeleteCategoryDialog");
+		new ConfirmDialog(SetUp.getDriver()).clickOKButton("CatalogMessages.CatalogBrowseView_Action_DeleteCategoryDialog");
 		if (this.catalog.getCatalogName() != null) {
 			this.categoryTypesTabDefinition.deleteNewCategoryType();
 			this.categoryTypesTabDefinition.verifyNewCategoryTypeDelete();
@@ -809,6 +877,12 @@ public class CatalogDefinition {
 		catalogProductListingPane.clickIncludeProductButton();
 	}
 
+	@After(value = "@cleanupVirtualCatalog", order = Constants.CLEANUP_ORDER_FIRST)
+	public void cleanupVritualCatalog() {
+		deleteNewlyCreatedCatalog();
+		verifyNewlyCreatedCatalogIsDeleted();
+	}
+
 	/**
 	 * Verifies brand name exists.
 	 *
@@ -816,22 +890,25 @@ public class CatalogDefinition {
 	 */
 	@Then("^the brand (.+) is displayed in the brands table$")
 	public void verifyBrandNameExists(final String brandName) {
-		brandsTab.verifyAndSelectBrandByName(brandName);
+		catalogEditor.selectBrandsTab();
+		brandsTab.verifyAndSelectBrandByName(this.catalog.getBrand());
 	}
 
 	/**
-	 * Edits a brand name.
+	 * Edit the brand name for a given brand code.
 	 *
-	 * @param newBrandName String
+	 * @param newBrandName New brand name.
 	 */
-	@When("^I edit the brand name to (.*)$")
-	public void editBrandName(final String newBrandName) {
-		catalogEditor.selectBrandsTab();
+	@And("^I edit brand name to (.+) for the newly added brand$")
+	public void editBrandNameForCode(final String newBrandName) {
+		brandsTab.verifyAndSelectBrand(this.catalog.getBrand());
 		addEditBrandDialog = brandsTab.clickEditBrandButton();
 		addEditBrandDialog.enterBrandName(newBrandName);
+		this.catalog.setBrand(newBrandName);
 		addEditBrandDialog.clickAddButton();
 		saveChanges();
 	}
+
 
 	/**
 	 * Deletes a given brand.
@@ -840,9 +917,19 @@ public class CatalogDefinition {
 	 */
 	@And("^I delete brand (.+)$")
 	public void deleteBrand(final String brandName) {
-		catalogEditor.selectBrandsTab();
-		brandsTab.verifyAndSelectBrandByName(brandName);
-		brandsTab.clickRemoveBrandButton();
+		deleteBrandHelper(brandName);
+		this.catalog.setBrand(null);
+		saveChanges();
+	}
+
+	/**
+	 * Attempt to delete an existing brand.
+	 *
+	 * @param brandName String
+	 */
+	@And("^I attempt to delete an existing brand (.+) used by product$")
+	public void deleteExistingBrand(final String brandName) {
+		deleteBrandHelper(brandName);
 	}
 
 	/**
@@ -856,17 +943,34 @@ public class CatalogDefinition {
 	}
 
 	/**
-	 * Adds a brand with supplied name and code.
+	 * Adds a brand with supplied name.
 	 *
 	 * @param brandName String
-	 * @param brandCode String
 	 */
-	@When("^I add a brand (.+) with code (.+)")
-	public void addBrand(final String brandName, final String brandCode) {
+	@When("^I add a brand (.+)$")
+	public void addBrand(final String brandName) {
+		catalogEditor.selectBrandsTab();
+		addEditBrandDialog = brandsTab.clickAddBrandButton();
+
+		String brandUuid = Utility.getRandomUUID();
+		this.catalog.setBrand(brandName);
+		addEditBrandDialog.enterBrandName(this.catalog.getBrand());
+		addEditBrandDialog.enterBrandCode(this.catalog.getBrand() + brandUuid);
+		addEditBrandDialog.clickAddButtonNoWait();
+		saveChanges();
+	}
+
+	/**
+	 * Adds an existing brand.
+	 *
+	 * @param brandName String
+	 */
+	@When("^I add an existing brand (.+)$")
+	public void addExistingBrand(final String brandName) {
 		catalogEditor.selectBrandsTab();
 		addEditBrandDialog = brandsTab.clickAddBrandButton();
 		addEditBrandDialog.enterBrandName(brandName);
-		addEditBrandDialog.enterBrandCode(brandCode);
+		addEditBrandDialog.enterBrandCode(brandName);
 		addEditBrandDialog.clickAddButtonNoWait();
 	}
 
@@ -897,5 +1001,30 @@ public class CatalogDefinition {
 	@Then("^The brand (.+) is deleted$")
 	public void verifyBrandNameDeleted(final String brandName) {
 		brandsTab.verifyBrandDelete(brandName);
+	}
+
+	/**
+	 * Double clicks the category and adds all category items to a change set.
+	 *
+	 * @param categoryList list of category names
+	 */
+	@And("^I add all products from the following (?:category|categories) to a changeset$")
+	public void addAllCategoryItemsToAChangeSet(final List<String> categoryList) {
+		CatalogProductListingPane.setNumberOfCategoryItems(0);
+		for (String category : categoryList) {
+			catalogProductListingPane = catalogManagement.doubleClickCategory(category);
+			catalogProductListingPane.addAllCategoryItemsToAChangeSet();
+		}
+	}
+
+	/**
+	 * Delete brand method.
+	 *
+	 * @param brandName String
+	 */
+	private void deleteBrandHelper(final String brandName) {
+		catalogEditor.selectBrandsTab();
+		brandsTab.verifyAndSelectBrandByName(brandName);
+		brandsTab.clickRemoveBrandButton();
 	}
 }

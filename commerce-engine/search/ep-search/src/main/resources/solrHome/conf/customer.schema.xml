@@ -251,16 +251,6 @@
         <filter class="solr.TrimFilterFactory" />
       </analyzer>
     </fieldtype>
-
-    <fieldtype name="numbersOnly" stored="false" class="solr.TextField" positionIncrementGap="100">
-      <analyzer>
-        <tokenizer class="solr.KeywordTokenizerFactory"/>
-        <filter class="solr.TrimFilterFactory" />
-        <filter class="solr.PatternReplaceFilterFactory"
-                pattern="([^0-9])" replacement="" replace="all"
-        />
-      </analyzer>
-    </fieldtype>
  </types>
 
 
@@ -282,6 +272,7 @@
 
    <field name="objectUid" type="slong" indexed="true" stored="true" required="true"/>
    <field name="userId" type="text" indexed="true" stored="false" required="true"/>
+   <field name="userIdExact" type="code" indexed="true" stored="false" required="true"/>
    <field name="customerNumber" type="slong" indexed="true" stored="false"/>
    <field name="firstName" type="text" indexed="true" stored="false"/>
    <field name="firstNameExact" type="code" indexed="true" stored="false"/>
@@ -290,8 +281,9 @@
    <field name="email" type="text" indexed="true" stored="false"/>
    <field name="emailExact" type="code" indexed="true" stored="false"/>
    <field name="zipPostal" type="text" indexed="true" stored="false" multiValued="true"/>
+   <field name="zipPostalExact" type="code" indexed="true" stored="false" multiValued="true"/>
    <field name="phoneNumber" type="string" indexed="true" stored="false"/>
-   <field name="phoneNumberExact" type="numbersOnly" indexed="true" stored="false"/>
+   <field name="phoneNumberExact" type="code" indexed="true" stored="false"/>
    <field name="createTime" type="date" indexed="true" stored="false" default="NOW" multiValued="false"/>
    <field name="storeCode" type="code" indexed="true"/>
    <field name="preferredBillingAddress" type="text" indexed="true" stored="false"/>
@@ -350,8 +342,10 @@
         or to add multiple fields to the same field for easier/faster searching.  -->
    <copyField source="objectUid" dest="customerNumber"/>
    <copyField source="firstName" dest="firstNameExact"/>
+  <copyField source="zipPostal" dest="zipPostalExact"/>
    <copyField source="lastName" dest="lastNameExact"/>
    <copyField source="email" dest="emailExact"/>
+   <copyField source="userId" dest="userIdExact"/>
    <copyField source="phoneNumber" dest="phoneNumberExact"/>
    <copyField source="preferredBillingAddress" dest="preferredBillingAddressExact"/>
 

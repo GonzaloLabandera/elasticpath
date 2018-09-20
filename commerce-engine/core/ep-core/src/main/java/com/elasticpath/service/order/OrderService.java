@@ -12,7 +12,6 @@ import java.util.Map;
 import com.elasticpath.base.exception.EpServiceException;
 import com.elasticpath.domain.cmuser.CmUser;
 import com.elasticpath.domain.event.EventOriginator;
-import com.elasticpath.domain.order.AdvancedOrderSearchCriteria;
 import com.elasticpath.domain.order.Order;
 import com.elasticpath.domain.order.OrderAddress;
 import com.elasticpath.domain.order.OrderPayment;
@@ -111,15 +110,6 @@ public interface OrderService extends EpPersistenceService {
 	 * @return list of orders matching the customer's email address.
 	 */
 	List<Order> findOrderByCustomerEmail(String customerEmail, boolean isExactMatch);
-
-	/**
-	 * Advanced order search function based on the orderSearchCriteria and the max number of results to return.
-	 *
-	 * @param orderSearchCriteria the order search criteria.
-	 * @param maxResults the max number of orders to return on search.
-	 * @return the list of orders matching the given criteria.
-	 */
-	List<Order> findOrderAdvanced(AdvancedOrderSearchCriteria orderSearchCriteria, int maxResults);
 
 	/**
 	 * order count function based on the OrderSearchCriteria.

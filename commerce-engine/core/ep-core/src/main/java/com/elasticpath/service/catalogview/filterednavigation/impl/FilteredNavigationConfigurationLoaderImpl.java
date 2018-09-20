@@ -10,13 +10,11 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.elasticpath.commons.beanframework.BeanFactory;
-import com.elasticpath.commons.constants.SeoConstants;
 import com.elasticpath.commons.util.Pair;
 import com.elasticpath.service.catalogview.filterednavigation.FilteredNavigationConfiguration;
 import com.elasticpath.service.catalogview.filterednavigation.FilteredNavigationConfigurationLoader;
 import com.elasticpath.service.catalogview.filterednavigation.FilteredNavigationConfigurationParser;
-import com.elasticpath.settings.SettingsReader;
-import com.elasticpath.settings.domain.SettingValue;
+import com.elasticpath.settings.provider.SettingValueProvider;
 
 /**
  * Loads FilteredNavigationConfiguration (FNC) String from the SettingsService,
@@ -25,37 +23,22 @@ import com.elasticpath.settings.domain.SettingValue;
  */
 public class FilteredNavigationConfigurationLoaderImpl implements FilteredNavigationConfigurationLoader {
 
-	private SettingsReader settingsReader;
-	
 	private BeanFactory beanFactory;
 	
 	/** Injected parser implementation that knows how to parse the configuration document. */
 	private FilteredNavigationConfigurationParser parser;
 	
-	/** The setting definition path to load the configuration from. */
-	private String settingKeyPath;
-	
 	private final Map<String, Pair<String, FilteredNavigationConfiguration>> fncCache =
 		new HashMap<>();
 	
-	private String separatorInTokenSettingKeyPath;
-	
-	private String separatorInToken;
-	
+	private SettingValueProvider<String> separatorInTokenProvider;
 
-	/**
-	 * Loads FilteredNavigationConfiguration (FNC) for a Store represented by the given Store Code.
-	 * 
-	 * @param storeCode the code representing the Store for which FNC should be loaded
-	 * @return the Filtered Navigation Configuration for the given store, or the default FNC
-	 * if one cannot be found for the given store.
-	 */
+	private SettingValueProvider<String> configurationProvider;
+
 	@Override
 	public FilteredNavigationConfiguration loadFilteredNavigationConfiguration(final String storeCode) {
-		// load the separator when we parse the first xml, to not take other separator that might have been updated
 		// this method wasn't put in a spring init-method, due to the cyclic dependencies, that affects the loading
 		// of the jpaPersistenceEngine.
-		initSepartor();
 		final String fncString = getFncString(storeCode);
 		Pair<String, FilteredNavigationConfiguration> cachedValue = fncCache.get(storeCode);
 		if (cachedValue == null || !fncString.equals(cachedValue.getFirst())) {
@@ -66,30 +49,6 @@ public class FilteredNavigationConfigurationLoaderImpl implements FilteredNaviga
 		return cachedValue.getSecond();
 	}
 
-	/**
-	 * Initialize the separator when the first loading is happening.
-	 * Do not reload the separator, because it will cause issue in advance search in SF.
-	 */
-	private void initSepartor() {
-		// load the separatorToken
-		if (separatorInToken != null) {
-			return;
-		}
-		
-		final SettingValue value = settingsReader.getSettingValue(getSeparatorInTokenSettingKeyPath());
-		  
-		if (value == null) {
-			separatorInToken = SeoConstants.DEFAULT_SEPARATOR_IN_TOKEN;
-		} else {
-			separatorInToken = value.getValue();
-		}
-				
-	}
-	/**
-	 *
-	 * @param fncString
-	 * @return
-	 */
 	private FilteredNavigationConfiguration createConfigFromString(final String fncString) {
 		FilteredNavigationConfiguration fnc = createFnc();
 		InputStream configStream = getInputStreamFromString(fncString);
@@ -107,14 +66,14 @@ public class FilteredNavigationConfigurationLoaderImpl implements FilteredNaviga
 	}
 	
 	/**
-	 * Retrieves the FilteredNavigation configuration as a String from the settings service.
+	 * Retrieves the FilteredNavigation configuration as a String.
 	 * @param storeCode the code representing the store for which the FNC should be retrieved
 	 * @return the FNC XML document as a String.
 	 */
 	String getFncString(final String storeCode) {
-		return settingsReader.getSettingValue(getSettingKeyPath(), storeCode).getValue();
+		return getConfigurationProvider().get(storeCode);
 	}
-	
+
 	/**
 	 * Creates a new FNC object using the bean factory.
 	 * @return the new FNC object
@@ -151,53 +110,25 @@ public class FilteredNavigationConfigurationLoaderImpl implements FilteredNaviga
 		this.parser = parser;
 	}
 
-	/**
-	 * @param settingKeyPath the settingKeyPath to set
-	 */
-	public void setSettingKeyPath(final String settingKeyPath) {
-		this.settingKeyPath = settingKeyPath;
-	}
-
-	/**
-	 * @return the settingKeyPath
-	 */
-	public String getSettingKeyPath() {
-		return settingKeyPath;
-	}
-
-	/**
-	 * Sets the {@link SettingsReader} instance to use.
-	 * 
-	 * @param settingsReader {@link SettingsReader} instance to use
-	 */
-	public void setSettingsReader(final SettingsReader settingsReader) {
-		this.settingsReader = settingsReader;
-	}
-
-	
-	
-	/**
-	 * Getter for the setting path.
-	 * @return the inFieldSeparatorSettingKeyPath
-	 */
-	public String getSeparatorInTokenSettingKeyPath() {
-		return separatorInTokenSettingKeyPath;
-	}
-
-	/**
-	 * Setter for the setting path property.
-	 * @param inFieldSeparatorSettingKeyPath the inFieldSeparatorSettingKeyPath to set
-	 */
-	public void setSeparatorInTokenSettingKeyPath(final String inFieldSeparatorSettingKeyPath) {
-		this.separatorInTokenSettingKeyPath = inFieldSeparatorSettingKeyPath;
-	}
-
 	@Override
 	public String getSeparatorInToken() {
-		// call here for the case in which the method loadFilteredNavigationConfiguration was not called first
-		initSepartor();
-		return separatorInToken;
+		return getSeparatorInTokenProvider().get();
 	}
-	
-	
+
+	protected SettingValueProvider<String> getSeparatorInTokenProvider() {
+		return separatorInTokenProvider;
+	}
+
+	public void setSeparatorInTokenProvider(final SettingValueProvider<String> separatorInTokenProvider) {
+		this.separatorInTokenProvider = separatorInTokenProvider;
+	}
+
+	protected SettingValueProvider<String> getConfigurationProvider() {
+		return configurationProvider;
+	}
+
+	public void setConfigurationProvider(final SettingValueProvider<String> configurationProvider) {
+		this.configurationProvider = configurationProvider;
+	}
+
 }

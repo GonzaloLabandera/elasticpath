@@ -21,7 +21,6 @@ import com.elasticpath.rest.definition.items.ItemsIdentifier;
 import com.elasticpath.rest.definition.searches.NavigationSearchResultIdentifier;
 import com.elasticpath.rest.id.IdentifierPart;
 import com.elasticpath.rest.id.type.CompositeIdentifier;
-import com.elasticpath.rest.id.type.PathIdentifier;
 import com.elasticpath.rest.id.type.StringIdentifier;
 import com.elasticpath.rest.id.util.CompositeIdUtil;
 import com.elasticpath.rest.identity.util.SubjectUtil;
@@ -114,8 +113,8 @@ public class NavigationSearchResultPaginationRepository<I extends NavigationSear
 			return Single.error(ResourceOperationFailure.badRequestBody(unknownPageIdErrorMsg));
 		}
 
-		String searchKeyword = ((PathIdentifier) navigationSearchResultIdentifier.getNavigation().getNodeId()).extractLeafId();
-		String scope = String.valueOf(navigationSearchResultIdentifier.getSearches().getScope().getValue());
+		String searchKeyword = navigationSearchResultIdentifier.getNavigation().getNodeId().getValue();
+		String scope = String.valueOf(navigationSearchResultIdentifier.getNavigation().getNavigations().getScope().getValue());
 		return Single.just(new NavigationSearchData(pageId, searchKeyword, scope));
 	}
 
@@ -128,7 +127,7 @@ public class NavigationSearchResultPaginationRepository<I extends NavigationSear
 	protected Single<PaginatedResult> getPaginatedResult(final NavigationSearchData navigationSearchData) {
 		return storeRepository.findStoreAsSingle(navigationSearchData.getScope())
 				.flatMap(store -> categoryRepository
-						.findByGuid(navigationSearchData.getScope(), navigationSearchData.getSearchKeyword())
+						.findByStoreAndCategoryCode(navigationSearchData.getScope(), navigationSearchData.getSearchKeyword())
 						.flatMap(category -> searchByCategory(navigationSearchData, store, category))
 				)
 				.flatMap(paginatedResult -> {

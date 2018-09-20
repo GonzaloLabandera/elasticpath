@@ -66,6 +66,39 @@ Feature: View purchase line item
       | ITEMCODE      | QTY | BOOLEAN | DATE       | DATETIME                  | DECIMAL | EMAIL                        | INTEGER | MULTI_OPTION | SHORT_TEXT | SINGLE_OPTION | ITEM_NAME                                    |
       | mscpwaftblack | 1   | true    | 1996-10-22 | 1996-10-22T03:12:31+04:00 | 13.99   | harry.potter@elasticpath.com | 12      | multiValue1  | hello      | singleValue1  | MultiSkuConfigurableProductWithAllFieldTypes |
 
+  Scenario Outline: Two identical items with different configuration are shown in purchase line items
+    Given I have authenticated as a newly registered shopper
+    When I look up an item with code <ITEMCODE>
+    And I go to add to cart form
+    And I successfully add the item to the cart with quantity 1 and configurable fields:
+      | giftCertificate.message        | <MESSAGE>         |
+      | giftCertificate.recipientEmail | <RECIPIENT_EMAIL> |
+      | giftCertificate.recipientName  | <RECIPIENT_NAME>  |
+      | giftCertificate.senderName     | <SENDER_NAME>     |
+    When I look up an item with code <ITEMCODE>
+    And I go to add to cart form
+    And I successfully add the item to the cart with quantity 1 and configurable fields:
+      | giftCertificate.message        | <MESSAGE_2>         |
+      | giftCertificate.recipientEmail | <RECIPIENT_EMAIL_2> |
+      | giftCertificate.recipientName  | <RECIPIENT_NAME>    |
+      | giftCertificate.senderName     | <SENDER_NAME>       |
+    And I create a purchase and view the purchase details
+    Then the number of purchase lineitems is 2
+    And there exists a purchase line item for item <ITEMCODE> with configurable fields:
+      | giftCertificate.message        | <MESSAGE>         |
+      | giftCertificate.recipientEmail | <RECIPIENT_EMAIL> |
+      | giftCertificate.recipientName  | <RECIPIENT_NAME>  |
+      | giftCertificate.senderName     | <SENDER_NAME>     |
+    And there exists a purchase line item for item <ITEMCODE> with configurable fields:
+      | giftCertificate.message        | <MESSAGE_2>         |
+      | giftCertificate.recipientEmail | <RECIPIENT_EMAIL_2> |
+      | giftCertificate.recipientName  | <RECIPIENT_NAME>    |
+      | giftCertificate.senderName     | <SENDER_NAME>       |
+
+    Examples:
+      | ITEMCODE   | MESSAGE     | RECIPIENT_EMAIL              | RECIPIENT_NAME | SENDER_NAME  | MESSAGE_2     | RECIPIENT_EMAIL_2    |
+      | berries_20 | Hello World | harry.potter@elasticpath.com | Harry Potter   | MOBEE tester | Hello World 2 | test@elasticpath.com |
+
   Scenario Outline: View components and available options of bundle item (2 components: no options, 2 options
     Given I login as a public shopper
     When I add item with code <ITEMCODE> to my cart
@@ -244,5 +277,5 @@ Feature: View purchase line item
     Given I login as a registered shopper
     When I retrieve the purchase form
     Then there are advisor messages with the following fields:
-      | messageType | messageId                     | debugMessage                                     |
-      | error       | purchase.cart.not.purchasable | Shopping cart must not be empty during checkout. |
+      | messageType | messageId  | debugMessage            |
+      | needinfo    | cart.empty | Shopping cart is empty. |

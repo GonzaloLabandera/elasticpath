@@ -5,16 +5,15 @@
 
 	<parent>
 		<groupId>com.elasticpath</groupId>
-		<artifactId>parent</artifactId>
-		<version>702.0.0-SNAPSHOT</version>
-		<relativePath/>
+		<artifactId>commerce-parent</artifactId>
+		<version>703.0.0-SNAPSHOT</version>
 	</parent>
 
 	<groupId>com.elasticpath.cmclient</groupId>
 	<artifactId>cm-parent</artifactId>
 	<packaging>pom</packaging>
 	<name>CM Parent</name>
-	<version>702.0.0-SNAPSHOT</version>
+	<version>703.0.0-SNAPSHOT</version>
 	<description>Builds the Pom-first maven modules, then invokes the manifest-first tycho modules. </description>
 
 	<properties>
@@ -37,6 +36,7 @@
 						<goals>
 							<goal>run</goal>
 						</goals>
+						<phase>install</phase>
 						<configuration>
 							<pom>cm-modules/pom.xml</pom>
 							<goals>${session.goals}</goals>
@@ -49,6 +49,10 @@
 					</execution>
 				</executions>
 				<inherited>false</inherited>
+			</plugin>
+			<plugin>
+				<groupId>org.jacoco</groupId>
+				<artifactId>jacoco-maven-plugin</artifactId>
 			</plugin>
 		</plugins>
 	</build>

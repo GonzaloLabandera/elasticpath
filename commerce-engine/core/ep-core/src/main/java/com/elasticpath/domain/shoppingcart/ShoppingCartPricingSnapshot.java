@@ -5,8 +5,8 @@ package com.elasticpath.domain.shoppingcart;
 
 import java.math.BigDecimal;
 
-import com.elasticpath.domain.shipping.ShippingServiceLevel;
 import com.elasticpath.money.Money;
+import com.elasticpath.shipping.connectivity.dto.ShippingOption;
 
 /**
  * The ShoppingCartPricingSnapshot holds transient calculated pricing information for
@@ -39,14 +39,14 @@ public interface ShoppingCartPricingSnapshot {
 	ShoppingItemPricingSnapshot getShoppingItemPricingSnapshot(ShoppingItem item);
 
 	/**
-	 * Given an {@link ShippingServiceLevel}, returns the corresponding {@link ShippingPricingSnapshot}.
+	 * Given an {@link ShippingOption}, returns the corresponding {@link ShippingPricingSnapshot}.
 	 * If no such snapshot exists, throws an EpServiceException.
 	 *
-	 * @param shippingServiceLevel a shipping service level
+	 * @param shippingOption a shipping option
 	 * @return the corresponding ShippingPricingSnapshot
 	 * @throws com.elasticpath.base.exception.EpServiceException if the corresponding snapshot does not exist
 	 */
-	ShippingPricingSnapshot getShippingPricingSnapshot(ShippingServiceLevel shippingServiceLevel);
+	ShippingPricingSnapshot getShippingPricingSnapshot(ShippingOption shippingOption);
 
 	/**
 	 * Get the subtotal of all items in the cart, excluding any subtotal discounts.

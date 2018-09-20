@@ -51,7 +51,7 @@ Keywords can be up to 500 characters long. Any longer and Cortex API returns sta
 		<resource>
 			<name>navigation-search-result</name>
 			<description><![CDATA[The paged result of navigation search query.]]></description>
-			<uri>{searches}/{navigations.navigation}/{page-id}</uri>
+			<uri>{base.family}/{navigations.navigation}/{page-id}</uri>
 			<paginates>items.item</paginates>
 		</resource>
 

@@ -4,17 +4,12 @@
 	<parent>
 		<groupId>com.elasticpath</groupId>
 		<artifactId>parent</artifactId>
-		<version>702.0.0-SNAPSHOT</version>
+		<version>703.0.0-SNAPSHOT</version>
 	</parent>
 
 	<artifactId>itests-parent</artifactId>
 	<name>Integration Tests Parent</name>
 	<packaging>pom</packaging>
-
-	<properties>
-		<pmd.itest.ruleset>rulesets/pmd-elasticpath-itest-rules.xml</pmd.itest.ruleset>
-		<checkstyle.ruleset>rulesets/checkstyle-elasticpath-itest-rules.xml</checkstyle.ruleset>
-	</properties>
 
 	<dependencies>
 		<dependency>
@@ -65,11 +60,11 @@
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-failsafe-plugin</artifactId>
 						<!-- if you update the below version you might also need to update the version of maven-surefire-report-plugin -->
-						<version>2.16</version>
+						<version>${maven-failsafe-plugin.version}</version>
 						<configuration>
 							<skipTests>${skipITests}</skipTests>
 							<redirectTestOutputToFile>true</redirectTestOutputToFile>
-							<argLine>${java.jvm.opts} -Dorg.apache.camel.jmx.disabled=true</argLine>
+							<argLine>-Dorg.apache.camel.jmx.disabled=true</argLine>
 							<forkCount>0.5C</forkCount>
 							<includes>
 								<include>**/Test*.java</include>

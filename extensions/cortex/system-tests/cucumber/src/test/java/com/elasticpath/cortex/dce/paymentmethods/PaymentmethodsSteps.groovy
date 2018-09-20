@@ -1,16 +1,14 @@
 package com.elasticpath.cortex.dce.paymentmethods
 
+import static org.assertj.core.api.Assertions.assertThat
+
 import static com.elasticpath.cortex.dce.ClasspathFluentRelosClientFactory.client
-import static com.elasticpath.cortex.dce.paymentmethods.PaymentmethodsConstants.*
 import static com.elasticpath.cortex.dce.SharedConstants.*
+import static com.elasticpath.cortex.dce.paymentmethods.PaymentmethodsConstants.*
+import static com.elasticpath.rest.ws.assertions.RelosAssert.*
 
 import cucumber.api.groovy.EN
 import cucumber.api.groovy.Hooks
-
-import static com.elasticpath.rest.ws.assertions.RelosAssert.assertLinkDoesNotExist
-import static com.elasticpath.rest.ws.assertions.RelosAssert.assertLinkExists
-
-import static org.assertj.core.api.Assertions.assertThat
 
 import com.elasticpath.cortex.dce.CommonMethods
 
@@ -18,10 +16,6 @@ this.metaClass.mixin(Hooks)
 this.metaClass.mixin(EN)
 
 String defaultPaymentMethodDisplayValue
-
-Given(~'^I authenticate as a registered shopper who has a credit card as their default payment method$') { ->
-	client.authRegisteredUserByName(CREDITCARD_SCOPE, CC_SCOPE_DEFAULT_TEST_USER)
-}
 
 Given(~'^I authenticate as a registered shopper who has a token as their default payment method$') { ->
 //   default test user has tokens as payment method by default
@@ -84,23 +78,6 @@ Given(~'^a free product was purchased without payment$') { ->
 	client.addtocartform()
 			.addtodefaultcartaction(quantity: 1)
 			.stopIfFailure()
-	CommonMethods.submitPurchase()
-	client.stopIfFailure()
-}
-
-Given(~'^a purchase was made with credit card$') { ->
-	//creditcardscope has been setup with user who has credit card saved
-	client.authRegisteredUserByName(CREDITCARD_SCOPE, CC_SCOPE_DEFAULT_TEST_USER)
-
-	CommonMethods.searchAndOpenItemWithKeyword(PURCHASEABLE_NON_SHIPPABLE_ITEM)
-
-	client.addtocartform()
-			.addtodefaultcartaction(quantity: 1)
-			.stopIfFailure()
-
-	saveCreditCardDetails()
-	saveBillingAddressDetails()
-
 	CommonMethods.submitPurchase()
 	client.stopIfFailure()
 }
@@ -215,17 +192,6 @@ When(~'^I view the purchase$') { ->
 			.stopIfFailure()
 }
 
-When(~'^I retrieve the credit card with cardholdername (.+)$') { def cardHolderName ->
-	client.GET("/")
-			.defaultprofile()
-			.paymentmethods()
-			.findElement {
-		creditcard ->
-			creditcard["cardholder-name"] == cardHolderName
-	}
-	.stopIfFailure()
-}
-
 When(~'^I get the list of payment methods from my profile$') { ->
 	client.GET("/")
 			.defaultprofile()
@@ -304,12 +270,6 @@ When(~'^I complete the purchase for the order$') { ->
 			.stopIfFailure()
 }
 
-Then(~'^I get the default credit card with cardholdername (.+)$') { cardHolderName ->
-	assertThat(client["cardholder-name"])
-			.as("cardholdername is not as expected")
-			.isEqualTo(cardHolderName)
-}
-
 Then(~'^I get the default token (.+)$') { tokenValue ->
 	assertThat(client["display-name"])
 			.as("Default token display-name is not as expected")
@@ -338,7 +298,7 @@ Then(~'^it no longer shows up in his list of saved payment methods on his profil
 	boolean deletedTokenFound = client.body.links.findAll {
 		link -> link.rel == "element"
 	}.any {
-		link -> client.GET(link.uri)["display-name"] == TEST_TOKEN_DISPLAY_VALUE_X
+		link -> client.GET(link.href)["display-name"] == TEST_TOKEN_DISPLAY_VALUE_X
 	}
 
 	assertThat(deletedTokenFound)
@@ -443,24 +403,6 @@ Then(~'^the paymentmeans is a credit card type$') { ->
 			.isEqualTo("purchases.purchase-paymentmean")
 }
 
-And(~'^the credit card information matches the credit card used to create the purchase$') { ->
-	assertThat(client["card-type"])
-			.as("the card-type is not as expected")
-			.isEqualTo(cardtype)
-	assertThat(client["primary-account-number-id"])
-			.as("the primary-account-number-id is not as expected")
-			.isEqualTo(cardnumber)
-	assertThat(client["holder-name"])
-			.as("the holder-name is not as expected")
-			.isEqualTo(cardholdername)
-	assertThat(client["expiry-date"]["month"])
-			.as("the expiry-date month is not as expected")
-			.isEqualTo(expirymonth)
-	assertThat(client["expiry-date"]["year"])
-			.as("the expiry-date year is not as expected")
-			.isEqualTo(expiryyear)
-}
-
 And(~'^the billing address matches the billing address used to create the purchase$') { ->
 	assertThat(client["billing-address"]["address"])
 			.as("the billing-address address is not as expected")
@@ -563,32 +505,6 @@ private saveTokenDetails() {
 	token = client["display-name"]
 }
 
-private saveCreditCardDetails() {
-	client.GET("/")
-			.defaultcart()
-			.order()
-			.paymentmethodinfo()
-			.paymentmethod()
-			.stopIfFailure()
-
-	cardnumber = client["card-number"]
-	cardtype = client["card-type"]
-	cardholdername = client["cardholder-name"]
-	expirymonth = client["expiry-month"]
-	expiryyear = client["expiry-year"]
-}
-
-private saveBillingAddressDetails() {
-	client.GET("/")
-			.defaultcart()
-			.order()
-			.billingaddressinfo()
-			.billingaddress()
-			.stopIfFailure()
-
-	address = client["address"]
-	name = client["name"]
-}
 
 private FindPaymentToken(def tokenDisplayName) {
 	client.findElement {

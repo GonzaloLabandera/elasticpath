@@ -3,14 +3,9 @@
  */
 package com.elasticpath.messaging.camel.itest;
 
-import static org.junit.Assert.assertTrue;
-
-import java.util.concurrent.TimeUnit;
-
 import org.apache.camel.CamelContext;
 import org.apache.camel.Endpoint;
 import org.apache.camel.EndpointInject;
-import org.apache.camel.builder.NotifyBuilder;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.mock.MockEndpoint;
 import org.junit.Test;
@@ -84,18 +79,14 @@ public class ActiveMqVirtualTopicConsumptionITest {
 
 		monitor.expectedMessageCount(expectedNumberOfReceivedMessages);
 
-		final NotifyBuilder notifyBuilder = new NotifyBuilder(context)
-				.whenDone(expectedNumberOfReceivedMessages)
-				.wereSentTo(monitor.getEndpointUri())
-				.create();
-
 		context.addRoutes(new MessageConsumer(consumerEndpointOne));
 		context.addRoutes(new MessageConsumer(consumerEndpointTwo));
 
+		Thread.sleep(SECONDS_TO_WAIT_FOR_MESSAGE_CONSUMPTION);
+
 		context.createProducerTemplate().sendBody(publishingEndpoint, "Message");
 
-		assertTrue("Timed out waiting for messages to be consumed",
-				   notifyBuilder.matches(SECONDS_TO_WAIT_FOR_MESSAGE_CONSUMPTION, TimeUnit.SECONDS));
+		Thread.sleep(SECONDS_TO_WAIT_FOR_MESSAGE_CONSUMPTION);
 
 		monitor.assertIsSatisfied();
 	}
@@ -112,7 +103,7 @@ public class ActiveMqVirtualTopicConsumptionITest {
 		}
 
 		@Override
-		public void configure() throws Exception {
+		public void configure() {
 			from(incomingEndpoint)
 					.to(monitor);
 		}

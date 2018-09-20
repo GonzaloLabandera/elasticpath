@@ -54,11 +54,9 @@ public class XMLUnmarshaller {
 			Schema schema = schemaFactory.newSchema(getClass().getClassLoader().getResource(schemaUrl));
 			unmarshaller.setSchema(schema);
 			unmarshaller.setEventHandler(validationEventHandler);
-		} catch (SAXException e) {
+		} catch (SAXException | JAXBException e) {
 			throw new SyncToolRuntimeException(CONFIGURATION_ERROR, e);
-		} catch (JAXBException e) {
-			throw new SyncToolRuntimeException(CONFIGURATION_ERROR, e);
-		}			
+		}
 	}
 
 	/**

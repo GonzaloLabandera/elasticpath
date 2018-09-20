@@ -26,12 +26,6 @@
     </groups>
     <preferred_shipping_address>2B057A60-C6C3-24B0-163F-20D8965E8A41</preferred_shipping_address>
     <preferred_billing_address>2B057A60-C6C3-24B0-163F-20D8965E8A41</preferred_billing_address>
-    <payment_methods>
-        <credit_card guid="62BB4E3A-BB78-41C8-842A-8D7469E434A6" expiry_month="12" expiry_year="2018" type="Mastercard">
-            <holder_name>Alana Abercombie</holder_name>
-            <card_number>5500000000000004</card_number>
-        </credit_card>
-    </payment_methods>
     <customer_profile>
         <profile_value type="AttributeType_ShortText" key="CP_EMAIL">alana.abercombie@elasticpath.com</profile_value>
         <profile_value type="AttributeType_ShortText" key="CP_FIRST_NAME">Alana</profile_value>
@@ -70,12 +64,6 @@
     </groups>
     <preferred_shipping_address>E5E4854E-EA58-B5A8-C0AA-8574446FDCAA</preferred_shipping_address>
     <preferred_billing_address>E5E4854E-EA58-B5A8-C0AA-8574446FDCAA</preferred_billing_address>
-    <payment_methods>
-        <credit_card guid="9C23434D-A606-429C-ABBD-72B931A3D2A2" expiry_month="12" expiry_year="2018" type="Visa">
-            <holder_name>Alejandra Abrahamian</holder_name>
-            <card_number>4111111111111111</card_number>
-        </credit_card>
-    </payment_methods>
     <customer_profile>
         <profile_value type="AttributeType_ShortText" key="CP_EMAIL">alejandra.abrahamian@elasticpath.com</profile_value>
         <profile_value type="AttributeType_ShortText" key="CP_LAST_NAME">Abrahamian</profile_value>
@@ -114,12 +102,6 @@
     </groups>
     <preferred_shipping_address>C49B4ED6-F146-AAFF-1A1F-134E8576F959</preferred_shipping_address>
     <preferred_billing_address>C49B4ED6-F146-AAFF-1A1F-134E8576F959</preferred_billing_address>
-    <payment_methods>
-        <credit_card guid="872B080D-F601-4B78-9E6F-400C9EFB714D" expiry_month="12" expiry_year="2018" type="Mastercard">
-            <holder_name>Allie Agudelo</holder_name>
-            <card_number>5500000000000004</card_number>
-        </credit_card>
-    </payment_methods>
     <customer_profile>
         <profile_value type="AttributeType_ShortText" key="CP_EMAIL">allie.agudelo@elasticpath.com</profile_value>
         <profile_value type="AttributeType_ShortText" key="CP_LAST_NAME">Agudelo</profile_value>
@@ -158,12 +140,6 @@
     </groups>
     <preferred_shipping_address>470FF5AE-7EF7-E380-4E1E-22A60A596C47</preferred_shipping_address>
     <preferred_billing_address>470FF5AE-7EF7-E380-4E1E-22A60A596C47</preferred_billing_address>
-    <payment_methods>
-        <credit_card guid="D882899C-619D-456E-A5FD-14447130A4BC" expiry_month="12" expiry_year="2018" type="Mastercard">
-            <holder_name>Allyson Akhand</holder_name>
-            <card_number>5500000000000004</card_number>
-        </credit_card>
-    </payment_methods>
     <customer_profile>
         <profile_value type="AttributeType_ShortText" key="CP_FIRST_NAME">Allyson</profile_value>
         <profile_value type="AttributeType_ShortText" key="CP_LAST_NAME">Akhand</profile_value>
@@ -202,12 +178,6 @@
     </groups>
     <preferred_shipping_address>3F6B5F63-8B94-C243-18A3-A324E1B4ECB1</preferred_shipping_address>
     <preferred_billing_address>3F6B5F63-8B94-C243-18A3-A324E1B4ECB1</preferred_billing_address>
-    <payment_methods>
-        <credit_card guid="06B8078D-E860-4199-AB7D-95E33BDE99D9" expiry_month="12" expiry_year="2018" type="Visa">
-            <holder_name>Althea Albor</holder_name>
-            <card_number>4111111111111111</card_number>
-        </credit_card>
-    </payment_methods>
     <customer_profile>
         <profile_value type="AttributeType_ShortText" key="CP_EMAIL">althea.albor@elasticpath.com</profile_value>
         <profile_value type="AttributeType_Date" key="CP_DOB">Mon Jul 29 00:00:00 1940</profile_value>
@@ -246,12 +216,6 @@
     </groups>
     <preferred_shipping_address>F5063907-0048-03FB-37F0-5C1E4DE82501</preferred_shipping_address>
     <preferred_billing_address>F5063907-0048-03FB-37F0-5C1E4DE82501</preferred_billing_address>
-    <payment_methods>
-        <credit_card guid="5812A919-A07A-46C8-8D0C-6530C3151373" expiry_month="12" expiry_year="2018" type="Mastercard">
-            <holder_name>Annabelle Alvirez</holder_name>
-            <card_number>5500000000000004</card_number>
-        </credit_card>
-    </payment_methods>
     <customer_profile>
         <profile_value type="AttributeType_ShortText" key="CP_PHONE">7218783035</profile_value>
         <profile_value type="AttributeType_ShortText" key="CP_PREF_LOCALE">en</profile_value>
@@ -290,12 +254,6 @@
     </groups>
     <preferred_shipping_address>195A77BF-6099-A8D0-ADA0-66A9B7D4A49A</preferred_shipping_address>
     <preferred_billing_address>195A77BF-6099-A8D0-ADA0-66A9B7D4A49A</preferred_billing_address>
-    <payment_methods>
-        <credit_card guid="37CC6F8F-00BB-4B99-BC6E-BED7C61A6209" expiry_month="12" expiry_year="2018" type="Visa">
-            <holder_name>Avis Amous</holder_name>
-            <card_number>4111111111111111</card_number>
-        </credit_card>
-    </payment_methods>
     <customer_profile>
         <profile_value type="AttributeType_Date" key="CP_DOB">Fri Feb 05 00:00:00 1965</profile_value>
         <profile_value type="AttributeType_ShortText" key="CP_PHONE">9392207431</profile_value>
@@ -334,12 +292,6 @@
     </groups>
     <preferred_shipping_address>8CCB5FFE-5856-F4BE-53FE-51103CA1C13D</preferred_shipping_address>
     <preferred_billing_address>8CCB5FFE-5856-F4BE-53FE-51103CA1C13D</preferred_billing_address>
-    <payment_methods>
-        <credit_card guid="0B9FC825-B3EA-49F2-8250-0DA695922028" expiry_month="12" expiry_year="2018" type="Visa">
-            <holder_name>Benita Aquirre</holder_name>
-            <card_number>4111111111111111</card_number>
-        </credit_card>
-    </payment_methods>
     <customer_profile>
         <profile_value type="AttributeType_ShortText" key="CP_PHONE">8758267337</profile_value>
         <profile_value type="AttributeType_Date" key="CP_DOB">Tue Mar 30 00:00:00 1993</profile_value>
@@ -378,12 +330,6 @@
     </groups>
     <preferred_shipping_address>C6C0BCE7-2DD3-8F22-90D2-CEC77667A0CA</preferred_shipping_address>
     <preferred_billing_address>C6C0BCE7-2DD3-8F22-90D2-CEC77667A0CA</preferred_billing_address>
-    <payment_methods>
-        <credit_card guid="DC9FF08C-709D-49C4-A90D-AB1C2B5A0F43" expiry_month="12" expiry_year="2018" type="Mastercard">
-            <holder_name>Carmella Argulewicz</holder_name>
-            <card_number>5500000000000004</card_number>
-        </credit_card>
-    </payment_methods>
     <customer_profile>
         <profile_value type="AttributeType_ShortText" key="CP_EMAIL">carmella.argulewicz@elasticpath.com</profile_value>
         <profile_value type="AttributeType_ShortText" key="CP_PREF_LOCALE">en</profile_value>
@@ -422,12 +368,6 @@
     </groups>
     <preferred_shipping_address>83F7A126-787D-7C8F-E488-D7A0C2901BCF</preferred_shipping_address>
     <preferred_billing_address>83F7A126-787D-7C8F-E488-D7A0C2901BCF</preferred_billing_address>
-    <payment_methods>
-        <credit_card guid="214F1DAD-47FE-4ADD-85BD-882A51B2F312" expiry_month="12" expiry_year="2018" type="Visa">
-            <holder_name>Chandra Arroyano</holder_name>
-            <card_number>4111111111111111</card_number>
-        </credit_card>
-    </payment_methods>
     <customer_profile>
         <profile_value type="AttributeType_ShortText" key="CP_PREF_LOCALE">en</profile_value>
         <profile_value type="AttributeType_ShortText" key="CP_EMAIL">chandra.arroyano@elasticpath.com</profile_value>
@@ -466,12 +406,6 @@
     </groups>
     <preferred_shipping_address>84F567E0-DBCB-2134-762E-78B6B9D89562</preferred_shipping_address>
     <preferred_billing_address>84F567E0-DBCB-2134-762E-78B6B9D89562</preferred_billing_address>
-    <payment_methods>
-        <credit_card guid="72AF86FD-35B5-42E5-B4B7-83E8052DF229" expiry_month="12" expiry_year="2018" type="Mastercard">
-            <holder_name>Clare Artez</holder_name>
-            <card_number>5500000000000004</card_number>
-        </credit_card>
-    </payment_methods>
     <customer_profile>
         <profile_value type="AttributeType_ShortText" key="CP_EMAIL">clare.artez@elasticpath.com</profile_value>
         <profile_value type="AttributeType_ShortText" key="CP_PREF_LOCALE">en</profile_value>
@@ -510,12 +444,6 @@
     </groups>
     <preferred_shipping_address>6A91524B-E865-DC3A-6038-5C4AE3A3A891</preferred_shipping_address>
     <preferred_billing_address>6A91524B-E865-DC3A-6038-5C4AE3A3A891</preferred_billing_address>
-    <payment_methods>
-        <credit_card guid="6642E416-4786-4CE5-A0A0-5A12A0378586" expiry_month="12" expiry_year="2018" type="Mastercard">
-            <holder_name>Darcy Aubel</holder_name>
-            <card_number>5500000000000004</card_number>
-        </credit_card>
-    </payment_methods>
     <customer_profile>
         <profile_value type="AttributeType_ShortText" key="CP_FIRST_NAME">Darcy</profile_value>
         <profile_value type="AttributeType_ShortText" key="CP_EMAIL">darcy.aubel@elasticpath.com</profile_value>
@@ -554,12 +482,6 @@
     </groups>
     <preferred_shipping_address>1814BD16-3053-5B34-7500-5D2F47F91A6C</preferred_shipping_address>
     <preferred_billing_address>1814BD16-3053-5B34-7500-5D2F47F91A6C</preferred_billing_address>
-    <payment_methods>
-        <credit_card guid="716227C3-D99F-4A42-BFF8-418AC3B75EAA" expiry_month="12" expiry_year="2018" type="Visa">
-            <holder_name>Dona Bacman</holder_name>
-            <card_number>4111111111111111</card_number>
-        </credit_card>
-    </payment_methods>
     <customer_profile>
         <profile_value type="AttributeType_ShortText" key="CP_FIRST_NAME">Dona</profile_value>
         <profile_value type="AttributeType_ShortText" key="CP_LAST_NAME">Bacman</profile_value>
@@ -598,12 +520,6 @@
     </groups>
     <preferred_shipping_address>06C2240B-4E0C-3F5A-14A3-3CE5F24D49B1</preferred_shipping_address>
     <preferred_billing_address>06C2240B-4E0C-3F5A-14A3-3CE5F24D49B1</preferred_billing_address>
-    <payment_methods>
-        <credit_card guid="0F65626A-0C92-4815-B0A6-9CF13E29ACEF" expiry_month="12" expiry_year="2018" type="Visa">
-            <holder_name>Earlene Badertscher</holder_name>
-            <card_number>4111111111111111</card_number>
-        </credit_card>
-    </payment_methods>
     <customer_profile>
         <profile_value type="AttributeType_ShortText" key="CP_PHONE">9561914705</profile_value>
         <profile_value type="AttributeType_ShortText" key="CP_FIRST_NAME">Earlene</profile_value>
@@ -642,12 +558,6 @@
     </groups>
     <preferred_shipping_address>0E23F284-74D7-B9BC-3FAD-C6F305331351</preferred_shipping_address>
     <preferred_billing_address>0E23F284-74D7-B9BC-3FAD-C6F305331351</preferred_billing_address>
-    <payment_methods>
-        <credit_card guid="20C3BDF7-2976-4F69-835A-5542120ECBEB" expiry_month="12" expiry_year="2018" type="Visa">
-            <holder_name>Earnestine Bahe</holder_name>
-            <card_number>4111111111111111</card_number>
-        </credit_card>
-    </payment_methods>
     <customer_profile>
         <profile_value type="AttributeType_ShortText" key="CP_PHONE">8304328563</profile_value>
         <profile_value type="AttributeType_ShortText" key="CP_FIRST_NAME">Earnestine</profile_value>
@@ -686,12 +596,6 @@
     </groups>
     <preferred_shipping_address>E08F78B8-E959-EA63-D99E-2AA35A2E979E</preferred_shipping_address>
     <preferred_billing_address>E08F78B8-E959-EA63-D99E-2AA35A2E979E</preferred_billing_address>
-    <payment_methods>
-        <credit_card guid="65609D27-F182-4AAF-96BA-2C3229860C31" expiry_month="12" expiry_year="2018" type="Visa">
-            <holder_name>Edwina Baine</holder_name>
-            <card_number>4111111111111111</card_number>
-        </credit_card>
-    </payment_methods>
     <customer_profile>
         <profile_value type="AttributeType_ShortText" key="CP_PREF_LOCALE">en</profile_value>
         <profile_value type="AttributeType_ShortText" key="CP_LAST_NAME">Baine</profile_value>
@@ -730,12 +634,6 @@
     </groups>
     <preferred_shipping_address>A2940A62-0746-78E4-644F-BD55B7F616BF</preferred_shipping_address>
     <preferred_billing_address>A2940A62-0746-78E4-644F-BD55B7F616BF</preferred_billing_address>
-    <payment_methods>
-        <credit_card guid="1679C018-BC23-44A6-822D-3FEC67979126" expiry_month="12" expiry_year="2018" type="Mastercard">
-            <holder_name>Elinor Bainey</holder_name>
-            <card_number>5500000000000004</card_number>
-        </credit_card>
-    </payment_methods>
     <customer_profile>
         <profile_value type="AttributeType_ShortText" key="CP_EMAIL">elinor.bainey@elasticpath.com</profile_value>
         <profile_value type="AttributeType_ShortText" key="CP_PREF_LOCALE">en</profile_value>
@@ -774,12 +672,6 @@
     </groups>
     <preferred_shipping_address>8BF918D5-7F07-A1E4-FB15-7EB0B3ACECCA</preferred_shipping_address>
     <preferred_billing_address>8BF918D5-7F07-A1E4-FB15-7EB0B3ACECCA</preferred_billing_address>
-    <payment_methods>
-        <credit_card guid="69987BC9-5EFE-4AF5-9BD8-9CEF7066C325" expiry_month="12" expiry_year="2018" type="Mastercard">
-            <holder_name>Elnora Bajek</holder_name>
-            <card_number>5500000000000004</card_number>
-        </credit_card>
-    </payment_methods>
     <customer_profile>
         <profile_value type="AttributeType_ShortText" key="CP_PHONE">4566433727</profile_value>
         <profile_value type="AttributeType_ShortText" key="CP_PREF_LOCALE">en</profile_value>
@@ -818,12 +710,6 @@
     </groups>
     <preferred_shipping_address>0F89C0DE-5939-DEEF-2301-0E40F4B33BB0</preferred_shipping_address>
     <preferred_billing_address>0F89C0DE-5939-DEEF-2301-0E40F4B33BB0</preferred_billing_address>
-    <payment_methods>
-        <credit_card guid="9E1A8877-52C7-4C70-BF08-A5E1726E071D" expiry_month="12" expiry_year="2018" type="Visa">
-            <holder_name>Ericka Bald</holder_name>
-            <card_number>4111111111111111</card_number>
-        </credit_card>
-    </payment_methods>
     <customer_profile>
         <profile_value type="AttributeType_ShortText" key="CP_EMAIL">ericka.bald@elasticpath.com</profile_value>
         <profile_value type="AttributeType_ShortText" key="CP_LAST_NAME">Bald</profile_value>
@@ -862,12 +748,6 @@
     </groups>
     <preferred_shipping_address>8308FE6D-9E42-E97A-4593-E07E8AF32CC5</preferred_shipping_address>
     <preferred_billing_address>8308FE6D-9E42-E97A-4593-E07E8AF32CC5</preferred_billing_address>
-    <payment_methods>
-        <credit_card guid="F028A58B-B0D7-40F6-89B3-3F0D39021EAE" expiry_month="12" expiry_year="2018" type="Mastercard">
-            <holder_name>Esmeralda Ballar</holder_name>
-            <card_number>5500000000000004</card_number>
-        </credit_card>
-    </payment_methods>
     <customer_profile>
         <profile_value type="AttributeType_ShortText" key="CP_LAST_NAME">Ballar</profile_value>
         <profile_value type="AttributeType_ShortText" key="CP_PREF_LOCALE">en</profile_value>
@@ -906,12 +786,6 @@
     </groups>
     <preferred_shipping_address>2A2F16D3-8BD6-6377-772A-FE063B5A99FA</preferred_shipping_address>
     <preferred_billing_address>2A2F16D3-8BD6-6377-772A-FE063B5A99FA</preferred_billing_address>
-    <payment_methods>
-        <credit_card guid="2560EDB1-C4C5-474D-8F35-F90AF22F2EDA" expiry_month="12" expiry_year="2018" type="Visa">
-            <holder_name>Eve Ballesterous</holder_name>
-            <card_number>4111111111111111</card_number>
-        </credit_card>
-    </payment_methods>
     <customer_profile>
         <profile_value type="AttributeType_ShortText" key="CP_EMAIL">eve.ballesterous@elasticpath.com</profile_value>
         <profile_value type="AttributeType_ShortText" key="CP_PREF_LOCALE">en</profile_value>
@@ -950,12 +824,6 @@
     </groups>
     <preferred_shipping_address>D269921F-65AB-84D1-6952-9E786B3F8B02</preferred_shipping_address>
     <preferred_billing_address>D269921F-65AB-84D1-6952-9E786B3F8B02</preferred_billing_address>
-    <payment_methods>
-        <credit_card guid="D1C933CF-9C72-45EE-B120-45DC5CF58F8E" expiry_month="12" expiry_year="2018" type="Visa">
-            <holder_name>Harriett Balzarine</holder_name>
-            <card_number>4111111111111111</card_number>
-        </credit_card>
-    </payment_methods>
     <customer_profile>
         <profile_value type="AttributeType_ShortText" key="CP_PREF_LOCALE">en</profile_value>
         <profile_value type="AttributeType_ShortText" key="CP_LAST_NAME">Balzarine</profile_value>
@@ -994,12 +862,6 @@
     </groups>
     <preferred_shipping_address>D241FB99-C959-35B9-4B8B-E15D3802127E</preferred_shipping_address>
     <preferred_billing_address>D241FB99-C959-35B9-4B8B-E15D3802127E</preferred_billing_address>
-    <payment_methods>
-        <credit_card guid="3A4AEEFB-C5F6-4BD1-9ED7-059C421F28D6" expiry_month="12" expiry_year="2018" type="Mastercard">
-            <holder_name>Hillary Barlak</holder_name>
-            <card_number>5500000000000004</card_number>
-        </credit_card>
-    </payment_methods>
     <customer_profile>
         <profile_value type="AttributeType_ShortText" key="CP_FIRST_NAME">Hillary</profile_value>
         <profile_value type="AttributeType_Date" key="CP_DOB">Tue Jun 30 00:00:00 1964</profile_value>
@@ -1038,12 +900,6 @@
     </groups>
     <preferred_shipping_address>4EF14F88-8F69-C041-8C2F-C75A5191A2FF</preferred_shipping_address>
     <preferred_billing_address>4EF14F88-8F69-C041-8C2F-C75A5191A2FF</preferred_billing_address>
-    <payment_methods>
-        <credit_card guid="950585CF-E1C1-4B8B-8A3B-FFA02EFE8D24" expiry_month="12" expiry_year="2018" type="Mastercard">
-            <holder_name>Jami Baronne</holder_name>
-            <card_number>5500000000000004</card_number>
-        </credit_card>
-    </payment_methods>
     <customer_profile>
         <profile_value type="AttributeType_ShortText" key="CP_LAST_NAME">Baronne</profile_value>
         <profile_value type="AttributeType_ShortText" key="CP_PREF_LOCALE">en</profile_value>
@@ -1082,12 +938,6 @@
     </groups>
     <preferred_shipping_address>E3FFC124-1F3D-342D-5D88-00C4E24F30B9</preferred_shipping_address>
     <preferred_billing_address>E3FFC124-1F3D-342D-5D88-00C4E24F30B9</preferred_billing_address>
-    <payment_methods>
-        <credit_card guid="E3705E12-0A50-42F1-9CB7-C6D0317D37DE" expiry_month="12" expiry_year="2018" type="Mastercard">
-            <holder_name>Jeanie Baseley</holder_name>
-            <card_number>5500000000000004</card_number>
-        </credit_card>
-    </payment_methods>
     <customer_profile>
         <profile_value type="AttributeType_Date" key="CP_DOB">Wed Jan 02 00:00:00 1991</profile_value>
         <profile_value type="AttributeType_ShortText" key="CP_FIRST_NAME">Jeanie</profile_value>
@@ -1126,12 +976,6 @@
     </groups>
     <preferred_shipping_address>3BF079ED-D626-693E-119F-39683448AC64</preferred_shipping_address>
     <preferred_billing_address>3BF079ED-D626-693E-119F-39683448AC64</preferred_billing_address>
-    <payment_methods>
-        <credit_card guid="35A8BCE9-98A5-4151-A78D-470C9807BD3F" expiry_month="12" expiry_year="2018" type="Mastercard">
-            <holder_name>Jerri Baumkirchner</holder_name>
-            <card_number>5500000000000004</card_number>
-        </credit_card>
-    </payment_methods>
     <customer_profile>
         <profile_value type="AttributeType_ShortText" key="CP_PHONE">4822189633</profile_value>
         <profile_value type="AttributeType_ShortText" key="CP_FIRST_NAME">Jerri</profile_value>
@@ -1170,12 +1014,6 @@
     </groups>
     <preferred_shipping_address>A01DDA15-B8E0-D6C2-4DC4-E7F3375B3697</preferred_shipping_address>
     <preferred_billing_address>A01DDA15-B8E0-D6C2-4DC4-E7F3375B3697</preferred_billing_address>
-    <payment_methods>
-        <credit_card guid="70113BED-DA65-4E3C-8DDB-0CB3B8F8422B" expiry_month="12" expiry_year="2018" type="Visa">
-            <holder_name>Julianne Bax</holder_name>
-            <card_number>4111111111111111</card_number>
-        </credit_card>
-    </payment_methods>
     <customer_profile>
         <profile_value type="AttributeType_ShortText" key="CP_EMAIL">julianne.bax@elasticpath.com</profile_value>
         <profile_value type="AttributeType_Date" key="CP_DOB">Thu Apr 05 00:00:00 1945</profile_value>
@@ -1214,12 +1052,6 @@
     </groups>
     <preferred_shipping_address>4D206B7C-61BF-E829-4323-7DE0EBF03891</preferred_shipping_address>
     <preferred_billing_address>4D206B7C-61BF-E829-4323-7DE0EBF03891</preferred_billing_address>
-    <payment_methods>
-        <credit_card guid="EE65DD53-BED1-49B9-B325-3CB04981EA08" expiry_month="12" expiry_year="2018" type="Visa">
-            <holder_name>Kathrine Bedenfield</holder_name>
-            <card_number>4111111111111111</card_number>
-        </credit_card>
-    </payment_methods>
     <customer_profile>
         <profile_value type="AttributeType_ShortText" key="CP_LAST_NAME">Bedenfield</profile_value>
         <profile_value type="AttributeType_ShortText" key="CP_PHONE">1166127850</profile_value>
@@ -1258,12 +1090,6 @@
     </groups>
     <preferred_shipping_address>207BC041-1E69-4E10-CE4F-BADDC21E8856</preferred_shipping_address>
     <preferred_billing_address>207BC041-1E69-4E10-CE4F-BADDC21E8856</preferred_billing_address>
-    <payment_methods>
-        <credit_card guid="81F35F3D-07CE-4A77-884C-93BE9A948809" expiry_month="12" expiry_year="2018" type="Mastercard">
-            <holder_name>Katy Bedolla</holder_name>
-            <card_number>5500000000000004</card_number>
-        </credit_card>
-    </payment_methods>
     <customer_profile>
         <profile_value type="AttributeType_ShortText" key="CP_EMAIL">katy.bedolla@elasticpath.com</profile_value>
         <profile_value type="AttributeType_ShortText" key="CP_PREF_LOCALE">en</profile_value>
@@ -1302,12 +1128,6 @@
     </groups>
     <preferred_shipping_address>5DEDBFE9-50C9-083A-D613-E4B1171A1E82</preferred_shipping_address>
     <preferred_billing_address>5DEDBFE9-50C9-083A-D613-E4B1171A1E82</preferred_billing_address>
-    <payment_methods>
-        <credit_card guid="293CD268-715F-41A7-87B0-A54B74361AB4" expiry_month="12" expiry_year="2018" type="Mastercard">
-            <holder_name>Lenore Behanan</holder_name>
-            <card_number>5500000000000004</card_number>
-        </credit_card>
-    </payment_methods>
     <customer_profile>
         <profile_value type="AttributeType_ShortText" key="CP_PHONE">7172044845</profile_value>
         <profile_value type="AttributeType_Date" key="CP_DOB">Mon Sep 15 00:00:00 1980</profile_value>
@@ -1346,12 +1166,6 @@
     </groups>
     <preferred_shipping_address>A77314A7-1D02-8932-575B-1D3843297F5C</preferred_shipping_address>
     <preferred_billing_address>A77314A7-1D02-8932-575B-1D3843297F5C</preferred_billing_address>
-    <payment_methods>
-        <credit_card guid="1F2E984B-4D45-4931-A5A0-B99132547762" expiry_month="12" expiry_year="2018" type="Visa">
-            <holder_name>Lilia Bening</holder_name>
-            <card_number>4111111111111111</card_number>
-        </credit_card>
-    </payment_methods>
     <customer_profile>
         <profile_value type="AttributeType_ShortText" key="CP_EMAIL">lilia.bening@elasticpath.com</profile_value>
         <profile_value type="AttributeType_ShortText" key="CP_LAST_NAME">Bening</profile_value>
@@ -1390,12 +1204,6 @@
     </groups>
     <preferred_shipping_address>C16C25B9-263E-FD1A-E257-4D617E7C8DC3</preferred_shipping_address>
     <preferred_billing_address>C16C25B9-263E-FD1A-E257-4D617E7C8DC3</preferred_billing_address>
-    <payment_methods>
-        <credit_card guid="751E65AC-A1CF-4E35-8EEF-33CC34AF4AC5" expiry_month="12" expiry_year="2018" type="Visa">
-            <holder_name>Liza Bernatchez</holder_name>
-            <card_number>4111111111111111</card_number>
-        </credit_card>
-    </payment_methods>
     <customer_profile>
         <profile_value type="AttributeType_ShortText" key="CP_EMAIL">liza.bernatchez@elasticpath.com</profile_value>
         <profile_value type="AttributeType_Date" key="CP_DOB">Fri May 21 00:00:00 1976</profile_value>
@@ -1434,12 +1242,6 @@
     </groups>
     <preferred_shipping_address>EB336986-7F56-9C9B-F730-5C36587C2982</preferred_shipping_address>
     <preferred_billing_address>EB336986-7F56-9C9B-F730-5C36587C2982</preferred_billing_address>
-    <payment_methods>
-        <credit_card guid="04B1DA4D-B785-4422-9C64-573F4EB62BAF" expiry_month="12" expiry_year="2018" type="Mastercard">
-            <holder_name>Loraine Berrocal</holder_name>
-            <card_number>5500000000000004</card_number>
-        </credit_card>
-    </payment_methods>
     <customer_profile>
         <profile_value type="AttributeType_ShortText" key="CP_PHONE">125221083</profile_value>
         <profile_value type="AttributeType_Date" key="CP_DOB">Fri Jan 06 00:00:00 1978</profile_value>
@@ -1478,12 +1280,6 @@
     </groups>
     <preferred_shipping_address>E931CA83-948A-1C7B-9269-C4EB72AE2FCA</preferred_shipping_address>
     <preferred_billing_address>E931CA83-948A-1C7B-9269-C4EB72AE2FCA</preferred_billing_address>
-    <payment_methods>
-        <credit_card guid="50826B44-7CF2-4AC5-8E15-561A617F1203" expiry_month="12" expiry_year="2018" type="Visa">
-            <holder_name>Lorrie Bhaskar</holder_name>
-            <card_number>4111111111111111</card_number>
-        </credit_card>
-    </payment_methods>
     <customer_profile>
         <profile_value type="AttributeType_ShortText" key="CP_PHONE">6376009577</profile_value>
         <profile_value type="AttributeType_ShortText" key="CP_PREF_LOCALE">en</profile_value>
@@ -1522,12 +1318,6 @@
     </groups>
     <preferred_shipping_address>7E412614-B03F-1119-93B5-0B6F80E2C184</preferred_shipping_address>
     <preferred_billing_address>7E412614-B03F-1119-93B5-0B6F80E2C184</preferred_billing_address>
-    <payment_methods>
-        <credit_card guid="A143E099-1419-4E44-9B36-6246EAAE614A" expiry_month="12" expiry_year="2018" type="Mastercard">
-            <holder_name>Louisa Biersack</holder_name>
-            <card_number>5500000000000004</card_number>
-        </credit_card>
-    </payment_methods>
     <customer_profile>
         <profile_value type="AttributeType_ShortText" key="CP_PREF_LOCALE">en</profile_value>
         <profile_value type="AttributeType_ShortText" key="CP_LAST_NAME">Biersack</profile_value>
@@ -1566,12 +1356,6 @@
     </groups>
     <preferred_shipping_address>9C076879-E782-97F0-44BE-9EFFF54ECE1A</preferred_shipping_address>
     <preferred_billing_address>9C076879-E782-97F0-44BE-9EFFF54ECE1A</preferred_billing_address>
-    <payment_methods>
-        <credit_card guid="F319FE84-AE68-4C03-A652-0CE4118A3118" expiry_month="12" expiry_year="2018" type="Visa">
-            <holder_name>Malinda Bigusiak</holder_name>
-            <card_number>4111111111111111</card_number>
-        </credit_card>
-    </payment_methods>
     <customer_profile>
         <profile_value type="AttributeType_ShortText" key="CP_FIRST_NAME">Malinda</profile_value>
         <profile_value type="AttributeType_ShortText" key="CP_PHONE">30379536</profile_value>
@@ -1610,12 +1394,6 @@
     </groups>
     <preferred_shipping_address>786C0F2B-E84D-887E-94B8-9913906E3D89</preferred_shipping_address>
     <preferred_billing_address>786C0F2B-E84D-887E-94B8-9913906E3D89</preferred_billing_address>
-    <payment_methods>
-        <credit_card guid="47FC56A1-EBE0-4588-9AE7-4E7ECA89223F" expiry_month="12" expiry_year="2018" type="Mastercard">
-            <holder_name>Mallory Bjerknes</holder_name>
-            <card_number>5500000000000004</card_number>
-        </credit_card>
-    </payment_methods>
     <customer_profile>
         <profile_value type="AttributeType_ShortText" key="CP_PHONE">4191432099</profile_value>
         <profile_value type="AttributeType_ShortText" key="CP_EMAIL">mallory.bjerknes@elasticpath.com</profile_value>
@@ -1654,12 +1432,6 @@
     </groups>
     <preferred_shipping_address>6EB33CC1-8899-602D-C197-BB4A6F33C75E</preferred_shipping_address>
     <preferred_billing_address>6EB33CC1-8899-602D-C197-BB4A6F33C75E</preferred_billing_address>
-    <payment_methods>
-        <credit_card guid="6AC046C4-F8E3-4560-8FC1-43CC9FC41591" expiry_month="12" expiry_year="2018" type="Mastercard">
-            <holder_name>Marcie Blanko</holder_name>
-            <card_number>5500000000000004</card_number>
-        </credit_card>
-    </payment_methods>
     <customer_profile>
         <profile_value type="AttributeType_ShortText" key="CP_FIRST_NAME">Marcie</profile_value>
         <profile_value type="AttributeType_ShortText" key="CP_LAST_NAME">Blanko</profile_value>
@@ -1698,12 +1470,6 @@
     </groups>
     <preferred_shipping_address>1D37EF9E-7180-AEC4-F6A7-563982F53D54</preferred_shipping_address>
     <preferred_billing_address>1D37EF9E-7180-AEC4-F6A7-563982F53D54</preferred_billing_address>
-    <payment_methods>
-        <credit_card guid="D353D921-DB59-4CC2-AABA-DB6140280B19" expiry_month="12" expiry_year="2018" type="Visa">
-            <holder_name>Margery Blanquart</holder_name>
-            <card_number>4111111111111111</card_number>
-        </credit_card>
-    </payment_methods>
     <customer_profile>
         <profile_value type="AttributeType_ShortText" key="CP_EMAIL">margery.blanquart@elasticpath.com</profile_value>
         <profile_value type="AttributeType_ShortText" key="CP_FIRST_NAME">Margery</profile_value>
@@ -1742,12 +1508,6 @@
     </groups>
     <preferred_shipping_address>1FF6DC4E-2BD7-70F0-5F79-A7774C4B0E36</preferred_shipping_address>
     <preferred_billing_address>1FF6DC4E-2BD7-70F0-5F79-A7774C4B0E36</preferred_billing_address>
-    <payment_methods>
-        <credit_card guid="F7B94ADF-A831-4208-B456-11D45841576C" expiry_month="12" expiry_year="2018" type="Mastercard">
-            <holder_name>Maricela Blessett</holder_name>
-            <card_number>5500000000000004</card_number>
-        </credit_card>
-    </payment_methods>
     <customer_profile>
         <profile_value type="AttributeType_ShortText" key="CP_LAST_NAME">Blessett</profile_value>
         <profile_value type="AttributeType_ShortText" key="CP_PHONE">208002382</profile_value>
@@ -1786,12 +1546,6 @@
     </groups>
     <preferred_shipping_address>20589CA4-C6E7-8A52-F35C-AD760DDE7085</preferred_shipping_address>
     <preferred_billing_address>20589CA4-C6E7-8A52-F35C-AD760DDE7085</preferred_billing_address>
-    <payment_methods>
-        <credit_card guid="13915F78-1DF8-4243-96FB-BA09D155741B" expiry_month="12" expiry_year="2018" type="Mastercard">
-            <holder_name>Melisa Blide</holder_name>
-            <card_number>5500000000000004</card_number>
-        </credit_card>
-    </payment_methods>
     <customer_profile>
         <profile_value type="AttributeType_Date" key="CP_DOB">Sun Mar 26 00:00:00 1989</profile_value>
         <profile_value type="AttributeType_ShortText" key="CP_EMAIL">melisa.blide@elasticpath.com</profile_value>
@@ -1830,12 +1584,6 @@
     </groups>
     <preferred_shipping_address>77CC1147-1F39-A0B1-410A-B2DC1DC58DD0</preferred_shipping_address>
     <preferred_billing_address>77CC1147-1F39-A0B1-410A-B2DC1DC58DD0</preferred_billing_address>
-    <payment_methods>
-        <credit_card guid="AF1F88E3-A49B-4DA1-8464-91C5C6C2FF14" expiry_month="12" expiry_year="2018" type="Mastercard">
-            <holder_name>Noemi Bloes</holder_name>
-            <card_number>5500000000000004</card_number>
-        </credit_card>
-    </payment_methods>
     <customer_profile>
         <profile_value type="AttributeType_ShortText" key="CP_LAST_NAME">Bloes</profile_value>
         <profile_value type="AttributeType_ShortText" key="CP_FIRST_NAME">Noemi</profile_value>
@@ -1874,12 +1622,6 @@
     </groups>
     <preferred_shipping_address>9B9CEDD5-3117-FCBD-ED9E-0BDCB815CA00</preferred_shipping_address>
     <preferred_billing_address>9B9CEDD5-3117-FCBD-ED9E-0BDCB815CA00</preferred_billing_address>
-    <payment_methods>
-        <credit_card guid="730B756F-8693-4FB0-9848-3D1B47EBF0AA" expiry_month="12" expiry_year="2018" type="Mastercard">
-            <holder_name>Noreen Borell</holder_name>
-            <card_number>5500000000000004</card_number>
-        </credit_card>
-    </payment_methods>
     <customer_profile>
         <profile_value type="AttributeType_ShortText" key="CP_FIRST_NAME">Noreen</profile_value>
         <profile_value type="AttributeType_ShortText" key="CP_EMAIL">noreen.borell@elasticpath.com</profile_value>
@@ -1918,12 +1660,6 @@
     </groups>
     <preferred_shipping_address>FF9B4307-C3CA-8C20-5439-084838261DAC</preferred_shipping_address>
     <preferred_billing_address>FF9B4307-C3CA-8C20-5439-084838261DAC</preferred_billing_address>
-    <payment_methods>
-        <credit_card guid="6552D6CE-6378-4FB2-BEE2-77F92BA8E0F6" expiry_month="12" expiry_year="2018" type="Mastercard">
-            <holder_name>Pearlie Bosse</holder_name>
-            <card_number>5500000000000004</card_number>
-        </credit_card>
-    </payment_methods>
     <customer_profile>
         <profile_value type="AttributeType_ShortText" key="CP_PHONE">208464726</profile_value>
         <profile_value type="AttributeType_Date" key="CP_DOB">Sun Oct 09 00:00:00 1994</profile_value>
@@ -1962,12 +1698,6 @@
     </groups>
     <preferred_shipping_address>C5E6A962-2C09-F55C-DC25-3C60BD40C79A</preferred_shipping_address>
     <preferred_billing_address>C5E6A962-2C09-F55C-DC25-3C60BD40C79A</preferred_billing_address>
-    <payment_methods>
-        <credit_card guid="10D26386-0A1B-4E7C-8AAC-6D37E39C4759" expiry_month="12" expiry_year="2018" type="Visa">
-            <holder_name>Rae Bourns</holder_name>
-            <card_number>4111111111111111</card_number>
-        </credit_card>
-    </payment_methods>
     <customer_profile>
         <profile_value type="AttributeType_ShortText" key="CP_EMAIL">rae.bourns@elasticpath.com</profile_value>
         <profile_value type="AttributeType_ShortText" key="CP_LAST_NAME">Bourns</profile_value>
@@ -2006,12 +1736,6 @@
     </groups>
     <preferred_shipping_address>08636EEE-DCD7-AD0C-59C8-07F0C7F70FCF</preferred_shipping_address>
     <preferred_billing_address>08636EEE-DCD7-AD0C-59C8-07F0C7F70FCF</preferred_billing_address>
-    <payment_methods>
-        <credit_card guid="A8BAA026-D533-4B57-9555-B9598F84B2C5" expiry_month="12" expiry_year="2018" type="Visa">
-            <holder_name>Rosalinda Brenes</holder_name>
-            <card_number>4111111111111111</card_number>
-        </credit_card>
-    </payment_methods>
     <customer_profile>
         <profile_value type="AttributeType_ShortText" key="CP_PHONE">208872210</profile_value>
         <profile_value type="AttributeType_ShortText" key="CP_PREF_LOCALE">en</profile_value>
@@ -2050,12 +1774,6 @@
     </groups>
     <preferred_shipping_address>5F3B1124-3B97-7A61-E913-C69E29B26145</preferred_shipping_address>
     <preferred_billing_address>5F3B1124-3B97-7A61-E913-C69E29B26145</preferred_billing_address>
-    <payment_methods>
-        <credit_card guid="172DB054-5322-4A67-9691-A8719FB65AFE" expiry_month="12" expiry_year="2018" type="Visa">
-            <holder_name>Roxie Briddick</holder_name>
-            <card_number>4111111111111111</card_number>
-        </credit_card>
-    </payment_methods>
     <customer_profile>
         <profile_value type="AttributeType_ShortText" key="CP_PHONE">208050219</profile_value>
         <profile_value type="AttributeType_ShortText" key="CP_PREF_LOCALE">en</profile_value>
@@ -2094,12 +1812,6 @@
     </groups>
     <preferred_shipping_address>465B935F-ACBC-3101-BED3-1CD736BE083B</preferred_shipping_address>
     <preferred_billing_address>465B935F-ACBC-3101-BED3-1CD736BE083B</preferred_billing_address>
-    <payment_methods>
-        <credit_card guid="6493FE85-CDC9-4C5F-8A27-FCA7325613B7" expiry_month="12" expiry_year="2018" type="Visa">
-            <holder_name>Saundra Briles</holder_name>
-            <card_number>4111111111111111</card_number>
-        </credit_card>
-    </payment_methods>
     <customer_profile>
         <profile_value type="AttributeType_ShortText" key="CP_EMAIL">saundra.briles@elasticpath.com</profile_value>
         <profile_value type="AttributeType_ShortText" key="CP_FIRST_NAME">Saundra</profile_value>
@@ -2138,12 +1850,6 @@
     </groups>
     <preferred_shipping_address>5ED543BB-1EF6-7C3F-74E5-ED313A591D87</preferred_shipping_address>
     <preferred_billing_address>5ED543BB-1EF6-7C3F-74E5-ED313A591D87</preferred_billing_address>
-    <payment_methods>
-        <credit_card guid="531501B8-A71E-403B-951F-9ABBA56A6154" expiry_month="12" expiry_year="2018" type="Visa">
-            <holder_name>Serena Brockmann</holder_name>
-            <card_number>4111111111111111</card_number>
-        </credit_card>
-    </payment_methods>
     <customer_profile>
         <profile_value type="AttributeType_ShortText" key="CP_FIRST_NAME">Serena</profile_value>
         <profile_value type="AttributeType_ShortText" key="CP_EMAIL">serena.brockmann@elasticpath.com</profile_value>
@@ -2180,12 +1886,6 @@
     </groups>
     <preferred_shipping_address>3AA6E353-107E-A290-E857-D687603CF610</preferred_shipping_address>
     <preferred_billing_address>3AA6E353-107E-A290-E857-D687603CF610</preferred_billing_address>
-    <payment_methods>
-        <credit_card guid="CDA004CC-6635-4C24-B6E8-36C712FD45EA" expiry_month="12" expiry_year="2018" type="Visa">
-            <holder_name>Sharron Bumbray</holder_name>
-            <card_number>4111111111111111</card_number>
-        </credit_card>
-    </payment_methods>
     <customer_profile>
         <profile_value type="AttributeType_ShortText" key="CP_EMAIL">sharron.bumbray@elasticpath.com</profile_value>
         <profile_value type="AttributeType_ShortText" key="CP_PREF_LOCALE">en</profile_value>

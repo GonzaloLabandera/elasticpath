@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) Elastic Path Software Inc., 2014
  */
 package com.elasticpath.test.integration.tax;
@@ -18,6 +18,7 @@ import java.util.Set;
 import org.junit.Test;
 
 import com.elasticpath.common.dto.ShoppingItemDto;
+import com.elasticpath.domain.customer.impl.PaymentTokenImpl;
 import com.elasticpath.domain.order.ElectronicOrderShipment;
 import com.elasticpath.domain.order.Order;
 import com.elasticpath.domain.order.OrderAddress;
@@ -53,13 +54,14 @@ public class TaxOperationOrderModificationTest extends AbstractBasicTaxOperation
 		// construct and save new shopping cart
 		final Shopper shopper = customerSession.getShopper();
 		ShoppingCart shoppingCart = persisterFactory.getOrderTestPersister().persistEmptyShoppingCart(address, address, customerSession,
-				scenario.getShippingServiceLevel(), scenario.getStore());
+				scenario.getShippingOption(), scenario.getStore());
 		
 		ShoppingItemDto physicalDto = new ShoppingItemDto(shippableProducts.get(0).getDefaultSku().getSkuCode(), 1);
 		cartDirector.addItemToCart(shoppingCart, physicalDto);
 
 		// make new order payment
-		OrderPayment templateOrderPayment = persisterFactory.getOrderTestPersister().createOrderPayment(customer, creditCard);
+		OrderPayment templateOrderPayment = persisterFactory.getOrderTestPersister().createOrderPayment(customer,
+				new PaymentTokenImpl.TokenBuilder().build());
 
 		final ShoppingCartPricingSnapshot pricingSnapshot = pricingSnapshotService.getPricingSnapshotForCart(shoppingCart);
 		final ShoppingCartTaxSnapshot taxSnapshot = taxSnapshotService.getTaxSnapshotForCart(shoppingCart, pricingSnapshot);
@@ -145,13 +147,14 @@ public class TaxOperationOrderModificationTest extends AbstractBasicTaxOperation
 		// construct new shopping cart
 		final Shopper shopper = customerSession.getShopper();
 		ShoppingCart shoppingCart = persisterFactory.getOrderTestPersister().persistEmptyShoppingCart(address, address, customerSession,
-				scenario.getShippingServiceLevel(), scenario.getStore());
+				scenario.getShippingOption(), scenario.getStore());
 		
 		ShoppingItemDto physicalDto = new ShoppingItemDto(shippableProducts.get(1).getDefaultSku().getSkuCode(), 1);
 		cartDirector.addItemToCart(shoppingCart, physicalDto);
 
 		// make new order payment
-		OrderPayment templateOrderPayment = persisterFactory.getOrderTestPersister().createOrderPayment(customer, creditCard);
+		OrderPayment templateOrderPayment = persisterFactory.getOrderTestPersister().createOrderPayment(customer,
+				new PaymentTokenImpl.TokenBuilder().build());
 
 		// checkout
 		final ShoppingCartPricingSnapshot pricingSnapshot = pricingSnapshotService.getPricingSnapshotForCart(shoppingCart);
@@ -185,7 +188,7 @@ public class TaxOperationOrderModificationTest extends AbstractBasicTaxOperation
 
 		OrderSku newProductOrderSku = getNewProductOrderSku(scenario, "newSku-2");
 		newPhysicalShipment.addShipmentOrderSku(newProductOrderSku);
-		newPhysicalShipment.setShippingServiceLevelGuid(scenario.getShippingServiceLevel().getGuid());
+		newPhysicalShipment.setShippingOptionCode(scenario.getShippingOption().getCode());
 		newPhysicalShipment.setShippingCost(BigDecimal.ONE);
 		newPhysicalShipment.setShipmentAddress(phShipment.getShipmentAddress());
 		
@@ -199,7 +202,8 @@ public class TaxOperationOrderModificationTest extends AbstractBasicTaxOperation
 		OrderPayment lastPayment = paymentService.getAllActiveAuthorizationPayments(phShipment).iterator().next();
 		assertNotNull("There should be a payment for the original shipment", lastPayment);
 		assertSame("Order shipment for last payment should be the original shipment", phShipment, lastPayment.getOrderShipment());
-		assertEquals("payment method should be credit card", PaymentType.CREDITCARD, lastPayment.getPaymentMethod());
+		assertEquals("payment method should be token",
+				PaymentType.PAYMENT_TOKEN, lastPayment.getPaymentMethod());
 		assertEquals("Order shipment should have a total of the original order", originalTotal, phShipment.getTotal());
 
 		PaymentResult paymentResult = paymentService.initializeNewShipmentPayment(newPhysicalShipment, templateOrderPayment);
@@ -234,13 +238,14 @@ public class TaxOperationOrderModificationTest extends AbstractBasicTaxOperation
 		// construct and save new shopping cart
 		final Shopper shopper = customerSession.getShopper();
 		ShoppingCart shoppingCart = persisterFactory.getOrderTestPersister().persistEmptyShoppingCart(address, address, customerSession,
-				scenario.getShippingServiceLevel(), scenario.getStore());
+				scenario.getShippingOption(), scenario.getStore());
 		
 		ShoppingItemDto physicalDto = new ShoppingItemDto(shippableProducts.get(0).getDefaultSku().getSkuCode(), 1);
 		cartDirector.addItemToCart(shoppingCart, physicalDto);
 
 		// make new order payment
-		OrderPayment templateOrderPayment = persisterFactory.getOrderTestPersister().createOrderPayment(customer, creditCard);
+		OrderPayment templateOrderPayment = persisterFactory.getOrderTestPersister().createOrderPayment(customer,
+				new PaymentTokenImpl.TokenBuilder().build());
 
 		// checkout
 		final ShoppingCartPricingSnapshot pricingSnapshot = pricingSnapshotService.getPricingSnapshotForCart(shoppingCart);
@@ -298,7 +303,7 @@ public class TaxOperationOrderModificationTest extends AbstractBasicTaxOperation
 		order = orderService.update(order, taxDocumentModificationContext);
 		order.setModifiedBy(getEventOriginatorHelper().getSystemOriginator());
 
-		phShipment = order.getPhysicalShipments().iterator().next();
+		order.getPhysicalShipments().iterator().next();
 		
 		verifyUpdateTaxDocuments(order, taxDocumentModificationContext);
 	}

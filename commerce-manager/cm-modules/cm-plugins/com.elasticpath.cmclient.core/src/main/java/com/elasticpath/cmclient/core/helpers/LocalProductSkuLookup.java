@@ -40,6 +40,11 @@ public class LocalProductSkuLookup implements ProductSkuLookup {
 	}
 
 	@Override
+	public <P extends ProductSku> List<P> findByGuids(final Collection<String> guids) throws EpServiceException {
+		throw new UnsupportedOperationException(NOT_YET_IMPLEMENTED);
+	}
+
+	@Override
 	public <P extends ProductSku> P findBySkuCode(final String skuCode) throws EpServiceException {
 		throw new UnsupportedOperationException(NOT_YET_IMPLEMENTED);  
 	}

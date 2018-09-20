@@ -5,39 +5,44 @@ package com.elasticpath.domain.cmuser.impl;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
-import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
 import org.jmock.Expectations;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.springframework.security.authentication.encoding.PasswordEncoder;
 
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.commons.exception.EpPasswordValidationException;
-import com.elasticpath.commons.security.impl.CmPasswordPolicyImpl;
-import com.elasticpath.commons.security.impl.MaximumAgePasswordPolicyImpl;
+import com.elasticpath.commons.security.CmPasswordPolicy;
+import com.elasticpath.commons.security.PasswordPolicy;
+import com.elasticpath.commons.security.ValidationError;
+import com.elasticpath.commons.security.ValidationResult;
+import com.elasticpath.domain.cmuser.UserPasswordHistoryItem;
 import com.elasticpath.domain.cmuser.UserPermission;
 import com.elasticpath.domain.cmuser.UserRole;
 import com.elasticpath.service.misc.TimeService;
-import com.elasticpath.settings.SettingsService;
-import com.elasticpath.settings.domain.SettingValue;
 import com.elasticpath.test.jmock.AbstractEPTestCase;
 
 /**
  * Test of the public API of <code>CmUserImpl</code>.
  */
+
 public class CmUserImplTest extends AbstractEPTestCase {
 
 	private CmUserImpl cmUserImpl;
 
 	private PasswordEncoder mockPasswordEncoder;
+
+	@Rule
+	public ExpectedException thrown = ExpectedException.none();
 
 	/**
 	 * Prepares for the next test.
@@ -55,50 +60,7 @@ public class CmUserImplTest extends AbstractEPTestCase {
 		
 		this.mockPasswordEncoder = context.mock(PasswordEncoder.class);
 		stubGetBean(ContextIdNames.CM_PASSWORDENCODER, mockPasswordEncoder);
-		
-		final SettingsService mockSettingsService = context.mock(SettingsService.class);
-		final SettingValue mockMaxAgeValue = context.mock(SettingValue.class, "max age setting value");
-		final SettingValue mockMaxLoginAttempts = context.mock(SettingValue.class, "max login attempts setting value");
-		final SettingValue mockMinPasswordLength = context.mock(SettingValue.class, "min password length setting value");
-		final SettingValue mockPasswordHistoryLength = context.mock(SettingValue.class, "password history length setting value");
-		context.checking(new Expectations() {
-			{
-				allowing(mockMaxAgeValue).getValue();
-				will(returnValue("90"));
 
-				allowing(mockSettingsService).getSettingValue("COMMERCE/APPSPECIFIC/RCP/maximumPasswordAge");
-				will(returnValue(mockMaxAgeValue));
-
-				allowing(mockMaxLoginAttempts).getValue();
-				will(returnValue("6"));
-
-				allowing(mockSettingsService).getSettingValue("COMMERCE/APPSPECIFIC/RCP/accountLockoutThreshold");
-				will(returnValue(mockMaxLoginAttempts));
-
-				allowing(mockMinPasswordLength).getValue();
-				will(returnValue("8"));
-
-				allowing(mockSettingsService).getSettingValue("COMMERCE/APPSPECIFIC/RCP/minimumPasswordLength");
-				will(returnValue(mockMinPasswordLength));
-
-				allowing(mockPasswordHistoryLength).getValue();
-				will(returnValue("3"));
-
-				allowing(mockSettingsService).getSettingValue("COMMERCE/APPSPECIFIC/RCP/passwordHistoryLength");
-				will(returnValue(mockPasswordHistoryLength));
-			}
-		});
-
-		CmPasswordPolicyImpl cmPasswordPolicy = new CmPasswordPolicyImpl();
-		cmPasswordPolicy.setSettingsService(mockSettingsService);
-		cmPasswordPolicy.setBeanFactory(getBeanFactory());
-
-		stubGetBean("cmPasswordPolicy", cmPasswordPolicy);
-
-		MaximumAgePasswordPolicyImpl maximumAgePasswordPolicy = new MaximumAgePasswordPolicyImpl();
-		maximumAgePasswordPolicy.setSettingsService(mockSettingsService);
-
-		stubGetBean("maximumAgePasswordPolicy", maximumAgePasswordPolicy);
 		stubGetBean("userPasswordHistoryItem", UserPasswordHistoryItemImpl.class);
 	}
 
@@ -308,195 +270,109 @@ public class CmUserImplTest extends AbstractEPTestCase {
 		cmUserImpl.addUserRole(cmUserRole);
 		assertFalse(cmUserImpl.isWsAccess());
 	}
-	
-	/**
-	 * Test the password expiration logic.
-	 */
+
 	@Test
-	public void testIsPasswordExpired() {
-		final int maxPasswordAge = 90;
-		final Date date = new Date();
-		
-		CmUserImpl cmUser = new CmUserImpl();
-		Calendar calendar = Calendar.getInstance();
-		calendar.setTime(date);
-		calendar.add(Calendar.DATE, -maxPasswordAge + 1);
-		cmUser.setLastChangedPasswordDate(calendar.getTime());
-		cmUser.setLastLoginDate(date);
-		assertFalse("the password should be expired next day", cmUser.isPasswordExpired());
-		
-		calendar.add(Calendar.DATE, -1);
-		cmUser.setLastChangedPasswordDate(calendar.getTime());
-		cmUser.setLastLoginDate(date);
-		assertTrue("the password expired today", cmUser.isPasswordExpired());
-		
-		calendar.add(Calendar.DATE, -1);
-		cmUser.setLastChangedPasswordDate(calendar.getTime());
-		cmUser.setLastLoginDate(date);
-		assertTrue("the password was expired 1 day ago", cmUser.isPasswordExpired());
+	public void testIsPasswordExpiredTrueWhenMaxAgePasswordPolicyInvalid() {
+		final PasswordPolicy maximumAgePasswordPolicy = context.mock(PasswordPolicy.class, "maxAgePasswordPolicy");
+
+		stubGetBean("maximumAgePasswordPolicy", maximumAgePasswordPolicy);
+
+		context.checking(new Expectations() {
+			{
+				final ValidationResult validationResult = new ValidationResult();
+				validationResult.addError(new ValidationError("foo"));
+
+				oneOf(maximumAgePasswordPolicy).validate(cmUserImpl);
+				will(returnValue(validationResult));
+			}
+		});
+
+		assertTrue("Expected password to be expired when the max age password policy is invalid",
+				   cmUserImpl.isPasswordExpired());
 	}
 
-	/**
-	 * Check that user can't set new password equal to current one.
-	 */
 	@Test
-	public void testSetCheckedClearTextPassword1() {
-		final String currentPassword = "password1";
-		final TimeService timeService = context.mock(TimeService.class);
+	public void testIsPasswordExpiredFalseWhenMaxAgePasswordPolicyValid() {
+		final PasswordPolicy maximumAgePasswordPolicy = context.mock(PasswordPolicy.class, "maxAgePasswordPolicy");
+
+		stubGetBean("maximumAgePasswordPolicy", maximumAgePasswordPolicy);
+
 		context.checking(new Expectations() {
 			{
-				allowing(timeService).getCurrentTime();
+				oneOf(maximumAgePasswordPolicy).validate(cmUserImpl);
+				will(returnValue(new ValidationResult()));
 			}
 		});
-		stubGetBean("timeService", timeService);
-		context.checking(new Expectations() {
-			{
-				allowing(mockPasswordEncoder).encodePassword(currentPassword, null);
-				will(returnValue("encodedPassword"));
-			}
-		});
-		cmUserImpl.setClearTextPassword(currentPassword);
-		cmUserImpl.setPasswordUsingPasswordEncoder(currentPassword);
-		try {
-			cmUserImpl.setCheckedClearTextPassword(currentPassword);
-			fail("CM User's new password can't be equal to his current password.");
-		} catch (EpPasswordValidationException expected) {
-			assertNotNull("Exception must be thrown to indicate password duplication.", expected.getMessage());
-		}
+
+		assertFalse("Expected password not to be expired when the max age password policy is valid",
+					cmUserImpl.isPasswordExpired());
 	}
-	
-	/**
-	 * Check that user can't set new password equal to one of passwords from history or to current
-	 * but can set new password equal to old password which age is bigger then password history length.
-	 * It is important also that passwords are held in order history is built.
-	 */
-	@SuppressWarnings("PMD.ExcessiveMethodLength")
+
 	@Test
-	public void testSetCheckedClearTextPassword2() {
-		final int passwordHistoryLength = 3;
-		final TimeService timeService = context.mock(TimeService.class);
-		context.checking(new Expectations() {
-			{
-				allowing(timeService).getCurrentTime();
-			}
-		});
-		stubGetBean("timeService", timeService);
-		assertEquals("There should be 0 passwords in history after first login.",
-				0, cmUserImpl.getPasswordHistoryItems().size());
+	public void verifySetCheckedClearTextPasswordFailsWhenValidatorRejects() throws Exception {
+		cmUserImpl.setPasswordHistoryItems(Collections.<UserPasswordHistoryItem>emptyList());
 
-		final String initialPassword = "initialPassword0";
-		context.checking(new Expectations() {
-			{
-				allowing(mockPasswordEncoder).encodePassword(initialPassword, null);
-				will(returnValue("encodedInitialPassword"));
-			}
-		});
-		cmUserImpl.setClearTextPassword(initialPassword);
-		cmUserImpl.setPasswordUsingPasswordEncoder(initialPassword);
+		final CmPasswordPolicy cmPasswordPolicy = context.mock(CmPasswordPolicy.class);
 
-		final String newPassword1 = "newPassword1";
-		final String encodedNewPassword1 = "encodedNewPassword1";
-		context.checking(new Expectations() {
-			{
-				allowing(mockPasswordEncoder).encodePassword(newPassword1, null);
-				will(returnValue(encodedNewPassword1));
-			}
-		});
-		cmUserImpl.setCheckedClearTextPassword(newPassword1);
+		stubGetBean("cmPasswordPolicy", cmPasswordPolicy);
 
-		final String newPassword2 = "newPassword2";
-		final String encodedNewPassword2 = "encodedNewPassword2";
 		context.checking(new Expectations() {
 			{
-				allowing(mockPasswordEncoder).encodePassword(newPassword2, null);
-				will(returnValue(encodedNewPassword2));
-			}
-		});
-		cmUserImpl.setCheckedClearTextPassword(newPassword2);
+				final ValidationResult validationResult = new ValidationResult();
+				validationResult.addError(new ValidationError("Invalid"));
 
-		final String newPassword3 = "newPassword3";
-		final String encodedNewPassword3 = "encodedNewPassword3";
-		context.checking(new Expectations() {
-			{
-				allowing(mockPasswordEncoder).encodePassword(newPassword3, null);
-				will(returnValue(encodedNewPassword3));
+				oneOf(cmPasswordPolicy).validate(cmUserImpl);
+				will(returnValue(validationResult));
 			}
 		});
-		cmUserImpl.setCheckedClearTextPassword(newPassword3);
 
-		assertEquals("Password history length should be equal to " + passwordHistoryLength,
-				passwordHistoryLength - 1, cmUserImpl.getPasswordHistoryItems().size());
+		thrown.expect(EpPasswordValidationException.class);
+		thrown.expectMessage("Password didn't pass validation");
 
-		try {
-		context.checking(new Expectations() {
-			{
-			allowing(mockPasswordEncoder).encodePassword(newPassword1, null);
-			will(returnValue(encodedNewPassword1));
-			}
-		});
-			cmUserImpl.setCheckedClearTextPassword(newPassword1);
-			fail("newPassword1 can't be used as new password because it still exists in history");
-		} catch (EpPasswordValidationException expected) {
-			assertNotNull(expected.getMessage());
-		}
-		assertTrue(cmUserImpl.getPasswordHistoryItems().get(0).getOldPassword().equals(encodedNewPassword1));
-		
-		try {
-		context.checking(new Expectations() {
-			{
-			allowing(mockPasswordEncoder).encodePassword(newPassword2, null);
-			will(returnValue(encodedNewPassword2));
-			}
-		});
-			cmUserImpl.setCheckedClearTextPassword(newPassword2);
-			fail("newPassword2 can't be used as new password because it still exists in history");
-		} catch (EpPasswordValidationException expected) {
-			assertNotNull(expected.getMessage());
-		}
-		assertTrue(cmUserImpl.getPasswordHistoryItems().get(1).getOldPassword().equals(encodedNewPassword2));
-		
-		try {
-		context.checking(new Expectations() {
-			{
-			allowing(mockPasswordEncoder).encodePassword(newPassword3, null);
-			will(returnValue(encodedNewPassword3));
-			}
-		});
-			cmUserImpl.setCheckedClearTextPassword(newPassword3);
-			fail("newPassword3 can't be used as new password because it is equal to current user's password");
-		} catch (EpPasswordValidationException expected) {
-			assertNotNull(expected.getMessage());
-		}
-		
-		final String encodedInitialPassword = "encodedInitialPassword";
-		context.checking(new Expectations() {
-			{
-				allowing(mockPasswordEncoder).encodePassword(initialPassword, null);
-				will(returnValue(encodedInitialPassword));
-			}
-		});
-		cmUserImpl.setCheckedClearTextPassword(initialPassword);
-		assertEquals("New password should be set successfuly",
-				encodedInitialPassword, cmUserImpl.getPassword());
+		cmUserImpl.setCheckedClearTextPassword("foo");
 	}
-	
+
+	@Test
+	public void verifySetCheckedClearTextPasswordSucceedsWhenValidatorAccepts() throws Exception {
+		final String newPassword = "new password";
+		final String newPasswordEncoded = "new encoded password";
+
+		cmUserImpl.setPasswordHistoryItems(Collections.<UserPasswordHistoryItem>emptyList());
+
+		final CmPasswordPolicy cmPasswordPolicy = context.mock(CmPasswordPolicy.class);
+
+		givenTimeServiceReturnsCurrentTime();
+		stubGetBean("cmPasswordPolicy", cmPasswordPolicy);
+
+		context.checking(new Expectations() {
+			{
+				allowing(mockPasswordEncoder).encodePassword(newPassword, null);
+				will(returnValue(newPasswordEncoded));
+
+				oneOf(cmPasswordPolicy).validate(cmUserImpl);
+				will(returnValue(new ValidationResult()));
+			}
+		});
+
+		cmUserImpl.setCheckedClearTextPassword(newPassword);
+
+		assertEquals("New password should be set successfully", newPasswordEncoded, cmUserImpl.getPassword());
+	}
+
 	/**
 	 * Tests that the new password is moved to history right after setting it.
 	 */
 	@Test
 	public void testSetCheckedClearTextPassword3() {
 		final String initialPassword = "initialPassword";
-		
-		final TimeService timeService = context.mock(TimeService.class);
-		context.checking(new Expectations() {
-			{
-				allowing(timeService).getCurrentTime();
-			}
-		});
-		stubGetBean("timeService", timeService);
-		context.checking(new Expectations() {
-			{
 
+		final CmPasswordPolicy cmPasswordPolicy = context.mock(CmPasswordPolicy.class);
+
+		givenTimeServiceReturnsCurrentTime();
+		stubGetBean("cmPasswordPolicy", cmPasswordPolicy);
+
+		context.checking(new Expectations() {
+			{
 				allowing(mockPasswordEncoder).encodePassword(initialPassword, null);
 				will(returnValue("encodedInitialPassword"));
 			}
@@ -514,12 +390,33 @@ public class CmUserImplTest extends AbstractEPTestCase {
 			{
 				allowing(mockPasswordEncoder).encodePassword(newPassword, null);
 				will(returnValue(encodedNewPassword));
+
+				allowing(cmPasswordPolicy).validate(cmUserImpl);
+				will(returnValue(new ValidationResult()));
+
+				final int passwordHistoryMinimumLength = 3;
+				allowing(cmPasswordPolicy).getPasswordHistoryLength();
+				will(returnValue(passwordHistoryMinimumLength));
 			}
 		});
 		cmUserImpl.setCheckedClearTextPassword(newPassword);
 		assertEquals("After changing password old should be moved to history",
 				1, cmUserImpl.getPasswordHistoryItems().size());
 		assertEquals("Password in history should be equal to changed password",
-				oldPassword, cmUserImpl.getPasswordHistoryItems().get(0).getOldPassword());
+					 oldPassword, cmUserImpl.getPasswordHistoryItems().get(0).getOldPassword());
 	}
+
+	private void givenTimeServiceReturnsCurrentTime() {
+		final TimeService timeService = context.mock(TimeService.class);
+
+		context.checking(new Expectations() {
+			{
+				allowing(timeService).getCurrentTime();
+				will(returnValue(new Date()));
+			}
+		});
+
+		stubGetBean("timeService", timeService);
+	}
+
 }

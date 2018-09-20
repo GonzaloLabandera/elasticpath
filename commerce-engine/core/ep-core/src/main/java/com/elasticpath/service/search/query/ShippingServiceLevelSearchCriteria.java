@@ -12,32 +12,23 @@ import com.elasticpath.service.search.AbstractSearchCriteriaImpl;
 import com.elasticpath.service.search.IndexType;
 
 /**
- * Represents criteria for <code>ShippingServiceLevel</code> search.
+ * Represents criteria for ShippingServiceLevel DB search.
  */
 @SuppressWarnings("PMD.CyclomaticComplexity")
-public class ShippingServiceLevelSearchCriteria extends AbstractSearchCriteriaImpl { 
+public class ShippingServiceLevelSearchCriteria extends AbstractSearchCriteriaImpl {
 
 	/** Serial version id. */
 	private static final long serialVersionUID = 5000000001L;
 	
 	private String serviceLevelCode;
-	
 	private Boolean activeFlag;
-
 	private String carrier;
-
 	private String region;
-
 	private String serviceLevelName;
-	
 	private String store;
-	
 	private String serviceLevelNameExact;
-	
 	private String regionExact;
-	
 	private String carrierExact;
-	
 	private Set<String> storeExactNames;
 
 	/**
@@ -45,14 +36,15 @@ public class ShippingServiceLevelSearchCriteria extends AbstractSearchCriteriaIm
 	 */
 	@Override
 	public IndexType getIndexType() {
-		return IndexType.SHIPPING_SERVICE_LEVEL;
+		return null;
 	}
 
 	/**
 	 * Optimizes a search criteria by removing unnecessary information.
 	 */
+	@SuppressWarnings("PMD.NPathComplexity")
 	@Override
-	public void optimize() { //NOPMD
+	public void optimize() {
 		if (!isStringValid(serviceLevelCode)) {
 			serviceLevelCode = null;
 		}
@@ -67,10 +59,10 @@ public class ShippingServiceLevelSearchCriteria extends AbstractSearchCriteriaIm
 		}
 		if (!isStringValid(store)) {
 			store = null;
-		}		
+		}
 		if (!isStringValid(serviceLevelNameExact)) {
 			serviceLevelNameExact = null;
-		}		
+		}
 		if (!isStringValid(regionExact)) {
 			regionExact = null;
 		}
@@ -267,6 +259,4 @@ public class ShippingServiceLevelSearchCriteria extends AbstractSearchCriteriaIm
 	public void setStoreExactNames(final Set<String> storeNames) {
 		this.storeExactNames = storeNames;
 	}
-	
-	
 }

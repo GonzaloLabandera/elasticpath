@@ -6,8 +6,10 @@ package com.elasticpath.service.catalog.impl;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -27,6 +29,7 @@ import com.elasticpath.domain.catalog.Product;
 import com.elasticpath.domain.catalog.ProductAssociation;
 import com.elasticpath.domain.catalog.ProductAssociationLoadTuner;
 import com.elasticpath.domain.catalog.ProductAssociationType;
+import com.elasticpath.domain.catalog.ProductSku;
 import com.elasticpath.domain.catalog.impl.ProductAssociationImpl;
 import com.elasticpath.domain.catalogview.StoreProduct;
 import com.elasticpath.domain.catalogview.impl.StoreProductImpl;
@@ -346,6 +349,12 @@ public class ProductAssociationServiceImplTest {
 		});
 
 		productAssociationService.findCountForCriteria(searchCriteria);
+	}
+
+	@Test
+	public void testFindDependentItemsForCartItemNoOp() {
+		Collection<ProductSku> dependentItemsForCartItem = productAssociationService.findDependentItemsForSku(null, null);
+		assertTrue("List of items should be empty.", dependentItemsForCartItem.isEmpty());
 	}
 
 	private ProductAssociationSearchCriteria getTestSearchCriteria() {

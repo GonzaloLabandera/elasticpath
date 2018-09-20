@@ -3,6 +3,10 @@
  */
 package com.elasticpath.service.rules.impl;
 
+import static com.elasticpath.service.rules.impl.RuleValidationResultEnum.ERROR_EXPIRED;
+import static com.elasticpath.service.rules.impl.RuleValidationResultEnum.ERROR_UNSPECIFIED;
+import static com.elasticpath.service.rules.impl.RuleValidationResultEnum.SUCCESS;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -742,13 +746,13 @@ public class RuleServiceImpl extends AbstractEpPersistenceServiceImpl implements
 	public Long getAllowedLimit(final long ruleId) {
 		sanityCheck();
 
-		List<Long> results = getPersistenceEngine().retrieveByNamedQuery("RULE_ALLOWED_LIMIT_FIND_BY_RULE_ID", ruleId);
+		final List<String> results = getPersistenceEngine().retrieveByNamedQuery("RULE_ALLOWED_LIMIT_FIND_BY_RULE_ID", ruleId);
 
 		if (results.isEmpty()) {
 			return null;
 		}
 
-		return results.get(0);
+		return Long.valueOf(results.get(0));
 	}
 
 	/**
@@ -968,40 +972,30 @@ public class RuleServiceImpl extends AbstractEpPersistenceServiceImpl implements
 	}
 
 	@Override
-	public boolean isRuleValid(final Rule rule, final String storeCode) {
+	public RuleValidationResultEnum isRuleValid(final Rule rule, final String storeCode) {
 		if (rule == null) {
-			return false;
+			return ERROR_UNSPECIFIED;
 		}
 		if (!rule.isEnabled()) {
-			return false;
+			return ERROR_UNSPECIFIED;
 		}
 
 		final String storeCodeBelongingToRule =  rule.getStoreCode();
 
 		if (storeCodeBelongingToRule != null && !storeCodeBelongingToRule.equalsIgnoreCase(storeCode)) {
-			return false;
+			return ERROR_UNSPECIFIED;
 		}
 
-		/*
-		 * A rule could have no selling context if it doesn't have any conditions or if the promotion was created before
-		 * tags were introduced. We fallback to the current time to be consistent.
-		 */
-		if (rule.getSellingContext() == null) {
-			if (!rule.isWithinDateRange()) {
-				return false;
-			}
-		} else {
-			/*
-			 * We probably should be using a customer's tag set here, but we have legacy behaviour which depends
-			 * on the current time instead.
-			 */
+		if (rule.getSellingContext() == null && !rule.isWithinDateRange()) {
+			return ERROR_EXPIRED;
+		}
+
+		if (rule.getSellingContext() != null) {
 			TagSet tagSet = new TagSet();
 			tagSet.addTag("SHOPPING_START_TIME", new Tag(new Date().getTime()));
-			if (!rule.getSellingContext().isSatisfied(getConditionEvaluatorService(), tagSet, TagDictionary.DICTIONARY_TIME_GUID)) {
-				return false;
-			}
+			return rule.getSellingContext().isSatisfied(getConditionEvaluatorService(), tagSet, TagDictionary.DICTIONARY_TIME_GUID);
 		}
-		return true;
+		return SUCCESS;
 	}
 
 	@Override

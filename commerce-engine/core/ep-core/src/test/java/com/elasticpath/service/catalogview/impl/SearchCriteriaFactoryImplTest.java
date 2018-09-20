@@ -3,6 +3,7 @@
  */
 package com.elasticpath.service.catalogview.impl;
 
+import static junit.framework.TestCase.assertFalse;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -194,7 +195,7 @@ public class SearchCriteriaFactoryImplTest {
 				.getCatalogCode());
 		assertEquals("The search criteria should contain the store code from the search request.", STORE_CODE, keywordSearchCriteria.getStoreCode());
 		assertEquals("The search criteria should have the same keywords as the search request.", KEYWORDS, keywordSearchCriteria.getKeyword());
-		assertEquals("The search criteria should have isFuzzySearchEnabled set to false.", false, keywordSearchCriteria.isFuzzySearchDisabled());
+		assertFalse("The search criteria should have isFuzzySearchEnabled set to false.", keywordSearchCriteria.isFuzzySearchDisabled());
 		
 	}
 
@@ -202,8 +203,8 @@ public class SearchCriteriaFactoryImplTest {
 		assertEquals("The category name in the search criteria should contain the key words from the search request.", KEYWORDS,
 				categorySearchCriteria.getCategoryName());
 		assertEquals("The search criteria should contain the locale from the search request.", LOCALE, categorySearchCriteria.getLocale());
-		assertEquals("The search criteria should have categoryNameExact set to true.", true, categorySearchCriteria.isCategoryNameExact());
-		assertEquals("The search criteria should have displayableOnly set to true.", true, categorySearchCriteria.isDisplayableOnly());
+		assertTrue("The search criteria should have categoryNameExact set to true.", categorySearchCriteria.isCategoryNameExact());
+		assertTrue("The search criteria should have displayableOnly set to true.", categorySearchCriteria.isDisplayableOnly());
 		assertNotNull("The collection of catalog codes in the search criteria should not be null.", categorySearchCriteria.getCatalogCodes());
 		assertTrue("The collection of catalog codes in the search criteria should contain the catalogCode.", categorySearchCriteria
 				.getCatalogCodes().contains(CATALOG_CODE));

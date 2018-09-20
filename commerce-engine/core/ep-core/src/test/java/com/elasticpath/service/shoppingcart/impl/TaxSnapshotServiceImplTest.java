@@ -5,16 +5,17 @@ package com.elasticpath.service.shoppingcart.impl;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Currency;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
@@ -24,13 +25,9 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.elasticpath.commons.constants.ContextIdNames;
-import com.elasticpath.domain.catalog.ProductSku;
-import com.elasticpath.domain.catalog.impl.CatalogLocaleImpl;
 import com.elasticpath.domain.customer.Address;
 import com.elasticpath.domain.customer.impl.CustomerAddressImpl;
-import com.elasticpath.domain.misc.impl.LocalizedPropertiesImpl;
 import com.elasticpath.domain.order.OrderSku;
-import com.elasticpath.domain.order.impl.OrderSkuImpl;
 import com.elasticpath.domain.shoppingcart.ShoppingCartPricingSnapshot;
 import com.elasticpath.domain.shoppingcart.ShoppingCartTaxSnapshot;
 import com.elasticpath.domain.shoppingcart.ShoppingItem;
@@ -50,15 +47,14 @@ import com.elasticpath.domain.tax.impl.TaxValueImpl;
 import com.elasticpath.money.Money;
 import com.elasticpath.plugin.tax.domain.TaxAddress;
 import com.elasticpath.plugin.tax.domain.TaxOperationContext;
-import com.elasticpath.service.misc.TimeService;
 import com.elasticpath.service.store.StoreService;
 import com.elasticpath.service.tax.TaxCalculationResult;
 import com.elasticpath.service.tax.TaxCalculationService;
-import com.elasticpath.service.tax.TaxCodeRetriever;
 import com.elasticpath.service.tax.adapter.TaxAddressAdapter;
 import com.elasticpath.service.tax.impl.TaxCalculationResultImpl;
 import com.elasticpath.service.tax.impl.TaxCalculationServiceImpl;
 import com.elasticpath.service.tax.impl.TaxJurisdictionServiceImpl;
+import com.elasticpath.shipping.connectivity.dto.ShippingOption;
 import com.elasticpath.test.factory.TestTaxCalculationServiceImpl;
 import com.elasticpath.test.jmock.AbstractCatalogDataTestCase;
 
@@ -87,22 +83,25 @@ public class TaxSnapshotServiceImplTest extends AbstractCatalogDataTestCase {
 	private static final BigDecimal EXCLUSIVE_TOTAL = new BigDecimal("84.87").setScale(2);
 
 	@Mock
+	private ShoppingCartPricingSnapshot cartPricingSnapshot;
+
+	@Mock
+	private ShoppingItemPricingSnapshot itemPricingSnapshot;
+
+	@Mock
 	private TaxCalculationService taxCalculationService;
 
 	private TaxSnapshotServiceImpl taxSnapshotService;
 
+	@SuppressWarnings("unchecked")
 	@Override
 	@Before
 	public void setUp() throws Exception {
 		super.setUp();
-		stubGetBean(ContextIdNames.CATALOG_LOCALE, CatalogLocaleImpl.class);
-		stubGetBean(ContextIdNames.PRODUCT_SKU_LOOKUP, getProductSkuLookup());
-		stubGetBean(ContextIdNames.LOCALIZED_PROPERTIES, LocalizedPropertiesImpl.class);
+
 		stubGetBean(ContextIdNames.TAX_CALCULATION_RESULT, TaxCalculationResultImpl.class);
 		stubGetBean(ContextIdNames.TAX_CATEGORY, TaxCategoryImpl.class);
 		stubGetBean(ContextIdNames.TAX_JURISDICTION, TaxJurisdictionImpl.class);
-		stubGetBean(ContextIdNames.SHOPPING_ITEM_SUBTOTAL_CALCULATOR, ShoppingItemSubtotalCalculatorImpl.class);
-		mockOrderSkuFactory();
 
 		taxSnapshotService = new TaxSnapshotServiceImpl();
 		taxSnapshotService.setBeanFactory(getBeanFactory());
@@ -111,6 +110,17 @@ public class TaxSnapshotServiceImplTest extends AbstractCatalogDataTestCase {
 		taxSnapshotService.setDiscountApportioningCalculator(getDiscountApportioningCalculator());
 		taxSnapshotService.setTaxCalculationService(taxCalculationService);
 
+		// We need to mock this as we have a split shipment scenario and so TaxSnapshotServiceImpl.updateTaxCalculationResult() calls these
+		context.checking(new Expectations() {
+			{
+				allowing(cartPricingSnapshot).getShoppingItemPricingSnapshot(with(any(OrderSku.class)));
+				will(returnValue(itemPricingSnapshot));
+
+				allowing(getDiscountApportioningCalculator()).apportionDiscountToShoppingItems(
+						with(any(Money.class)),
+						with(any(Map.class)));
+			}
+		});
 	}
 
 	/**
@@ -148,13 +158,27 @@ public class TaxSnapshotServiceImplTest extends AbstractCatalogDataTestCase {
 		taxCodes.add(createTaxCode(SALES_TAX_CODE_BOOKS));
 		shoppingCart.getStore().setTaxCodes(taxCodes);
 
-		// set first cart item to be an electronic product (i.e. eBook)
-		getCartSku().setShippable(false);
+		final List<ShoppingItem> shoppingItems = shoppingCart.getRootShoppingItems();
+		assertEquals("Expecting getShoppingCart() to add two items to cart", 2, shoppingItems.size());
+
+		// Expecting that the first item added to cart by getShoppingCart() is non-shippable, and the second is shippable
+		assertFalse("Expecting getShoppingCart() has set the first item in cart as non-shippable",
+					shoppingItems.get(0).isShippable(getProductSkuLookup()));
+		assertTrue("Expecting getShoppingCart() should has set the second item in cart as shippable",
+				   shoppingItems.get(1).isShippable(getProductSkuLookup()));
+
+		// The first item is 3x$5, the second is 5*$10
+
 		// set billing address to be Canada
 		shoppingCart.setBillingAddress(getBillingAddress());
 		// set shipping address to be US
 		shoppingCart.setShippingAddress(getShippingAddress());
-		shoppingCart.setShippingListPrice(shoppingCart.getSelectedShippingServiceLevel().getCode(), Money.valueOf(BigDecimal.TEN, CURRENCY));
+		// set the shipping option and cost, verify the cost is set as expected
+		updateShippingOptions(shoppingCart);
+		final Optional<ShippingOption> selectedShippingOption = shoppingCart.getSelectedShippingOption();
+		assertTrue("Expecting shipping option to be selected on shopping cart", selectedShippingOption.isPresent());
+		assertEquals("Expecting updateShippingOptions() sets shipping price correctly",
+					 new BigDecimal("10.00"), shoppingCart.getShippingListPrice(selectedShippingOption.get().getCode()).getAmount());
 
 		final StoreService storeService = context.mock(StoreService.class);
 		context.checking(new Expectations() {
@@ -166,6 +190,7 @@ public class TaxSnapshotServiceImplTest extends AbstractCatalogDataTestCase {
 		final TaxCalculationServiceImpl taxCalculationService = new TestTaxCalculationServiceImpl();
 		taxCalculationService.setBeanFactory(getBeanFactory());
 		taxCalculationService.setStoreService(storeService);
+
 		final TaxJurisdictionServiceImpl taxJurisdictionService = new TaxJurisdictionServiceImpl();
 		taxJurisdictionService.setPersistenceEngine(getPersistenceEngine());
 		taxCalculationService.setTaxJurisdictionService(taxJurisdictionService);
@@ -186,29 +211,6 @@ public class TaxSnapshotServiceImplTest extends AbstractCatalogDataTestCase {
 
 				allowing(getMockPersistenceEngine()).isCacheEnabled();
 				will(returnValue(false));
-
-				// Shippable subtotal value for Cart Item 2 is 5qty x $10 = $50
-				allowing(getShippableItemsSubtotalCalculator()).calculateSubtotalOfShippableItems(
-					with(any(Collection.class)),
-					with(any(ShoppingCartPricingSnapshot.class)),
-					with(any(Currency.class))
-				);
-				will(returnValue(Money.valueOf(new BigDecimal("50.00"), getMockedStore().getDefaultCurrency())));
-
-				allowing(getDiscountApportioningCalculator()).apportionDiscountToShoppingItems(
-					with(any(Money.class)),
-					with(any(Map.class)));
-
-			}
-		});
-
-		// calculate tax and price
-		final ShoppingCartPricingSnapshot cartPricingSnapshot = context.mock(ShoppingCartPricingSnapshot.class);
-		final ShoppingItemPricingSnapshot itemPricingSnapshot = context.mock(ShoppingItemPricingSnapshot.class);
-		context.checking(new Expectations() {
-			{
-				allowing(cartPricingSnapshot).getShoppingItemPricingSnapshot(with(any(OrderSku.class)));
-				will(returnValue(itemPricingSnapshot));
 			}
 		});
 
@@ -217,8 +219,10 @@ public class TaxSnapshotServiceImplTest extends AbstractCatalogDataTestCase {
 		TaxCalculationResult taxCalculationResult = taxSnapshot.getTaxCalculationResult();
 		Money shippingCostNoTaxes = taxCalculationResult.getBeforeTaxShippingCost();
 		assertEquals(new BigDecimal("10.00"), shippingCostNoTaxes.getAmount());
+
 		Money totalTaxes = taxCalculationResult.getTotalTaxes();
 		Money totalTaxInItemPrice = taxCalculationResult.getTaxInItemPrice();
+
 		assertFalse(taxCalculationResult.isTaxInclusive());
 		assertEquals(BigDecimal.ZERO.setScale(2), totalTaxInItemPrice.getAmount());
 
@@ -245,7 +249,9 @@ public class TaxSnapshotServiceImplTest extends AbstractCatalogDataTestCase {
 		// with FixedBaseAndOrderTotalPercentageMethod for shipping(base: $5.00 and 10% of subtotal).
 		// Billing Address: Joe Doe, 1295 Charleston Road, Mountain View, CA, US, 94043
 		final ShoppingCartImpl shoppingCart = getShoppingCart();
-		shoppingCart.setShippingListPrice(shoppingCart.getSelectedShippingServiceLevel().getCode(), Money.valueOf("11.50", CURRENCY));
+		final Optional<ShippingOption> selectedShippingOption = shoppingCart.getSelectedShippingOption();
+		assertTrue("Expecting shipping option to be selected on shopping cart", selectedShippingOption.isPresent());
+		shoppingCart.setShippingListPrice(selectedShippingOption.get().getCode(), Money.valueOf("11.50", CURRENCY));
 
 		// shoppingCart.setSubtotalDiscount(ORDER_DISCOUNT);
 
@@ -296,8 +302,7 @@ public class TaxSnapshotServiceImplTest extends AbstractCatalogDataTestCase {
 			}
 		});
 
-		final ShoppingCartPricingSnapshot pricingSnapshot = context.mock(ShoppingCartPricingSnapshot.class);
-		final ShoppingCartTaxSnapshot taxSnapshot = taxSnapshotService.getTaxSnapshotForCart(shoppingCart, pricingSnapshot);
+		final ShoppingCartTaxSnapshot taxSnapshot = taxSnapshotService.getTaxSnapshotForCart(shoppingCart, cartPricingSnapshot);
 
 		// tax = 0.39 (shipping tax) + 0.88 (item1 tax: 15/1.0625 * 0.0625) + 5.46 (item2 tax: 50/1.1225 * 0.1225) = 6.73
 		assertEquals(INCLUSIVE_TAX, taxSnapshot.getTaxMap().get(taxCategory1).getAmount());
@@ -317,7 +322,9 @@ public class TaxSnapshotServiceImplTest extends AbstractCatalogDataTestCase {
 	@Test
 	public void testCalculateShoppingCartTaxAndBeforeTaxPricesExclusive() {
 		final ShoppingCartImpl shoppingCart = getShoppingCart();
-		shoppingCart.setShippingListPrice(shoppingCart.getSelectedShippingServiceLevel().getCode(), Money.valueOf("11.50", CURRENCY));
+		final Optional<ShippingOption> selectedShippingOption = shoppingCart.getSelectedShippingOption();
+		assertTrue("Expecting shipping option to be selected on shopping cart", selectedShippingOption.isPresent());
+		shoppingCart.setShippingListPrice(selectedShippingOption.get().getCode(), Money.valueOf("11.50", CURRENCY));
 
 		// TaxCode.SALES_TAX_CODE_SHIPPING: 3.5
 		final TaxCategory taxCategory1 = new TaxCategoryImpl();
@@ -351,8 +358,7 @@ public class TaxSnapshotServiceImplTest extends AbstractCatalogDataTestCase {
 			}
 		});
 
-		final ShoppingCartPricingSnapshot pricingSnapshot = context.mock(ShoppingCartPricingSnapshot.class);
-		final ShoppingCartTaxSnapshot taxSnapshot = taxSnapshotService.getTaxSnapshotForCart(shoppingCart, pricingSnapshot);
+		final ShoppingCartTaxSnapshot taxSnapshot = taxSnapshotService.getTaxSnapshotForCart(shoppingCart, cartPricingSnapshot);
 
 		// tax = 11.50 * 0.035 (shipping tax) + (15 + 50) * 0.1225 = 8.37
 		assertEquals(EXCLUSIVE_TAX, taxSnapshot.getTaxMap().get(taxCategory1).getAmount());
@@ -602,38 +608,6 @@ public class TaxSnapshotServiceImplTest extends AbstractCatalogDataTestCase {
 			}
 		});
 		return result;
-	}
-
-	private void mockOrderSkuFactory() {
-		final TaxCodeImpl taxCode = new TaxCodeImpl();
-		taxCode.setCode(SALES_TAX_CODE_GOODS);
-
-		final TaxCodeRetriever taxCodeRetriever = context.mock(TaxCodeRetriever.class);
-		final TimeService timeService = context.mock(TimeService.class);
-		context.checking(new Expectations() {
-			{
-				allowing(taxCodeRetriever).getEffectiveTaxCode(with(any(ProductSku.class)));
-				will(returnValue(taxCode));
-
-				allowing(timeService).getCurrentTime();
-				will(returnValue(new Date()));
-			}
-		});
-
-		OrderSkuFactoryImpl orderSkuFactory = new OrderSkuFactoryImpl() {
-			@Override
-			protected OrderSku createSimpleOrderSku() {
-				final OrderSkuImpl orderSku = new OrderSkuImpl();
-				orderSku.initialize();
-				return orderSku;
-			}
-		};
-		orderSkuFactory.setTaxCodeRetriever(taxCodeRetriever);
-		orderSkuFactory.setBundleApportioner(getBundleApportioningCalculator());
-		orderSkuFactory.setDiscountApportioner(getDiscountApportioningCalculator());
-		orderSkuFactory.setProductSkuLookup(getProductSkuLookup());
-		orderSkuFactory.setTimeService(timeService);
-		stubGetBean(ContextIdNames.ORDER_SKU_FACTORY, orderSkuFactory);
 	}
 
 }

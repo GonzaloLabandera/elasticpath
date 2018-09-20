@@ -55,55 +55,25 @@
 		<dependency>
 			<groupId>org.osgi</groupId>
 			<artifactId>osgi.core</artifactId>
-			<version>${osgi.core.version}</version>
-			<scope>provided</scope>
 		</dependency>
 
 		<dependency>
 			<groupId>com.elasticpath.rest</groupId>
 			<artifactId>ep-rest-api</artifactId>
-			<version>${cortex-api.version}</version>
 		</dependency>
 
 		<dependency>
 			<groupId>com.elasticpath.rest</groupId>
 			<artifactId>ep-rest-spi</artifactId>
-			<version>${cortex.version}</version>
 		</dependency>
 
 		<dependency>
 			<groupId>com.elasticpath.rest.definitions</groupId>
 			<artifactId>ep-rest-definitions-schema</artifactId>
-			<version>${cortex.version}</version>
 			<!-- contains the XSD -->
 		</dependency>
 
 	</dependencies>
-
-	<dependencyManagement>
-		<dependencies>
-			<dependency>
-				<groupId>com.elasticpath.rest.definitions</groupId>
-				<artifactId>ep-resource-base-api</artifactId>
-				<version>${cortex.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>com.elasticpath.rest.definitions</groupId>
-				<artifactId>ep-resource-collections-api</artifactId>
-				<version>${cortex.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>com.elasticpath.rest.definitions</groupId>
-				<artifactId>ep-resource-controls-api</artifactId>
-				<version>${cortex.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>com.elasticpath.rest</groupId>
-				<artifactId>ep-relos-legacy</artifactId>
-				<version>${cortex.version}</version>
-			</dependency>
-		</dependencies>
-	</dependencyManagement>
 
 	<build>
 		<resources>
@@ -117,7 +87,7 @@
 				<plugin>
 					<groupId>com.elasticpath.rest.definitions</groupId>
 					<artifactId>api-generator-maven-plugin</artifactId>
-					<version>${cortex.version}</version>
+					<version>${api-platform.version}</version>
 					<executions>
 						<execution>
 							<phase>process-resources</phase>

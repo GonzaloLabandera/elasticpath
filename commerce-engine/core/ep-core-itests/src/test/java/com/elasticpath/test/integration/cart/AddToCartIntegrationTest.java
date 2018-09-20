@@ -69,11 +69,11 @@ public class AddToCartIntegrationTest extends AbstractCartIntegrationTestParent 
 
 		final ShoppingItem addedCartItem = cartDirectorService.addItemToCart(shoppingCart, dto);
 		addedCartItem.setFieldValue(key, value);
-		assertEquals(value, shoppingCart.getCartItems().get(0).getFieldValue(key));
+		assertEquals(value, shoppingCart.getRootShoppingItems().iterator().next().getFieldValue(key));
 		shoppingCartService.saveOrUpdate(shoppingCart);
 
 		ShoppingCart retrievedShoppingCart = shoppingCartService.findOrCreateByShopper(customerSession.getShopper());
-		assertTrue(retrievedShoppingCart.getCartItems().size() == 1);
-		assertEquals(value, retrievedShoppingCart.getCartItems().get(0).getFieldValue(key));
+		assertTrue(retrievedShoppingCart.getRootShoppingItems().size() == 1);
+		assertEquals(value, retrievedShoppingCart.getRootShoppingItems().iterator().next().getFieldValue(key));
 	}
 }

@@ -13,7 +13,8 @@ import com.elasticpath.selenium.util.Constants;
  * Stores Result Pane.
  */
 public class StoresResultPane extends AbstractPageObject {
-	private static final String TARGET_STORE_CSS = "div[row-id='%s']";
+	private static final String TARGET_STORE_CSS = "div[automation-id='com.elasticpath.cmclient.admin.stores.views.StoreListView'][seeable='true'] "
+			+ "div[row-id='%s']";
 	private static final String EDIT_STORE_BUTTON_CSS = "div[automation-id='com.elasticpath.cmclient.admin.stores.AdminStoresMessages.EditStore']";
 	private static final String CREATE_STORE_BUTTON_CSS = "div[automation-id='com.elasticpath.cmclient.admin.stores.AdminStoresMessages"
 			+ ".CreateStore']";
@@ -73,8 +74,9 @@ public class StoresResultPane extends AbstractPageObject {
 	 * @param storeCode String
 	 */
 	public void verifyStoreState(final String expState, final String storeCode) {
+		getWaitDriver().waitForTextInElement(String.format(STORE_STATE_CSS, storeCode), expState);
 		assertThat(getDriver().findElement(By.cssSelector(String.format(STORE_STATE_CSS, storeCode))).getText().equals(expState))
-				.as("Pricelist description should be " + expState)
+				.as("Store state should be " + expState)
 				.isTrue();
 	}
 

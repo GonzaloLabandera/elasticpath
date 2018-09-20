@@ -3,9 +3,9 @@
  */
 package com.elasticpath.rest.resource.integration.epcommerce.repository.addresses.repositories;
 
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyBoolean;
-import static org.mockito.Matchers.anyString;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -20,7 +20,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.core.convert.ConversionService;
 
 import com.elasticpath.domain.customer.Customer;
@@ -128,7 +128,6 @@ public class AddressEntityRepositoryImplTest {
 		when(conversionService.convert(addressEntity, CustomerAddress.class)).thenReturn(customerAddress);
 		when(resourceOperationContext.getUserIdentifier()).thenReturn(CUSTOMER_ID);
 		when(customerRepository.getCustomer(CUSTOMER_ID)).thenReturn(Single.just(customer));
-		when(customer.getAddresses()).thenReturn(Collections.emptyList());
 
 		repository.submit(addressEntity, StringIdentifier.of(STORE_CODE))
 				.test()
@@ -244,7 +243,6 @@ public class AddressEntityRepositoryImplTest {
 				.thenReturn(Completable.error(ResourceOperationFailure.badRequestBody(NO_VALID_ADDRESS_FIELDS)));
 		when(resourceOperationContext.getUserIdentifier()).thenReturn(CUSTOMER_ID);
 		when(customerRepository.getCustomer(CUSTOMER_ID)).thenReturn(Single.just(customer));
-		when(customer.getAddressByGuid(ADDRESS_ID)).thenReturn(existingCustomerAddress);
 
 		repository.update(addressEntity, getAddressIdentifier())
 				.test()

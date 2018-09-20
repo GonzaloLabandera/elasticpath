@@ -53,9 +53,7 @@ public interface ShoppingCartService extends EpPersistenceService {
 	 * @param guid the guid for the shopping cart to retrieve
 	 * @return the shopping cart corresponding to the specified guid or null if no matching cart can be found
 	 * @throws EpServiceException - in case of any errors
- 	 * @deprecated This is a legacy method to support Connect. Future calls should get {@link ShoppingCart} via {@link Shopper}
 	 */
-	@Deprecated
 	ShoppingCart findByGuid(String guid) throws EpServiceException;
 
 	/**
@@ -159,4 +157,20 @@ public interface ShoppingCartService extends EpPersistenceService {
 	 * @param context the final checkout action context  {@link FinalizeCheckoutActionContext}
 	 */
 	void disconnectCartFromShopperAndCustomerSession(ShoppingCart oldCart, FinalizeCheckoutActionContext context);
+
+	/**
+	 * Finds the default (active) shopping cart guid for the given Shopper.
+	 * @param shopper the shopper.
+	 * @return the shopping cart guid of the default cart.
+	 * @throws EpServiceException - in case of any errors
+	 */
+	String findDefaultShoppingCartGuidByShopper(Shopper shopper) throws EpServiceException;
+
+
+	/**
+	 *  Finds the store code for the given cart guid.
+	 * @param cartGuid the cart guid.
+	 * @return the storecode.
+	 */
+	String findStoreCodeByCartGuid(String cartGuid);
 }

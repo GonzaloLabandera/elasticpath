@@ -11,7 +11,7 @@ import com.elasticpath.domain.order.Order;
 import com.elasticpath.domain.order.OrderAddress;
 import com.elasticpath.domain.order.OrderSku;
 import com.elasticpath.domain.order.PhysicalOrderShipment;
-import com.elasticpath.domain.shipping.ShippingServiceLevel;
+import com.elasticpath.shipping.connectivity.dto.ShippingOption;
 
 /**
  * Provide Shipments-related business operations such as add, remove and move shipping items.
@@ -133,12 +133,12 @@ public interface ShipmentService {
 	 * @param orderSku sku to be moved
 	 * @param qty quantity to be moved
 	 * @param orderAddress order address
-	 * @param shippingServiceLevel shipping service level
+	 * @param shippingOption shipping option
 	 * @param cmUser user
 	 * @throws EpServiceException in case of any errors
 	 */
 	void moveSkuToNewShipment(PhysicalOrderShipment fromOrderShipment, String orderSku, int qty, OrderAddress orderAddress,
-			ShippingServiceLevel shippingServiceLevel, CmUser cmUser);
+							  ShippingOption shippingOption, CmUser cmUser);
 
 	/**
 	 * Moves the specified sku of the specified quantity from the source shipment to the new shipment.
@@ -147,12 +147,12 @@ public interface ShipmentService {
 	 * @param orderSku sku to be moved
 	 * @param qty quantity to be moved
 	 * @param orderAddress order address
-	 * @param shippingServiceLevel shipping service level
+	 * @param shippingOption shipping option
 	 * @param cmUser user
 	 * @throws EpServiceException in case of any errors
 	 */
 	void moveSkuToNewShipment(PhysicalOrderShipment fromOrderShipment, OrderSku orderSku, int qty, OrderAddress orderAddress,
-			ShippingServiceLevel shippingServiceLevel, CmUser cmUser);
+							  ShippingOption shippingOption, CmUser cmUser);
 
 	/**
 	 * Iterates through all order's shipments and then through a shipment's skus. Processes allocation for the skus.

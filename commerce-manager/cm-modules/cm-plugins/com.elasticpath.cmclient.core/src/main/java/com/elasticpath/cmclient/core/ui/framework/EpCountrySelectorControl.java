@@ -6,13 +6,13 @@ package com.elasticpath.cmclient.core.ui.framework;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Locale;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CCombo;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 
+import com.elasticpath.cmclient.core.CorePlugin;
 import com.elasticpath.cmclient.core.ServiceLocator;
 import com.elasticpath.cmclient.core.ui.framework.EpControlFactory.EpState;
 import com.elasticpath.commons.constants.ContextIdNames;
@@ -44,7 +44,7 @@ public class EpCountrySelectorControl {
 	public EpCountrySelectorControl() {
 		countryList = new ArrayList<>();
 		for (String countryCode : getGeography().getCountryCodes()) {
-			countryList.add(new Country(countryCode, getGeography().getCountryDisplayName(countryCode, Locale.getDefault())));
+			countryList.add(new Country(countryCode, getGeography().getCountryDisplayName(countryCode, CorePlugin.getDefault().getDefaultLocale())));
 		}
 		Collections.sort(countryList);
 	}
@@ -89,7 +89,7 @@ public class EpCountrySelectorControl {
 	 * @param countryCode Country code
 	 */
 	public void selectCountryCombo(final String countryCode) {
-		final String text = getGeography().getCountryDisplayName(countryCode, Locale.getDefault());
+		final String text = getGeography().getCountryDisplayName(countryCode, CorePlugin.getDefault().getDefaultLocale());
 		if (text != null) {
 			countryCombo.setText(text);
 		}
@@ -187,8 +187,11 @@ public class EpCountrySelectorControl {
 
 		statesList = new ArrayList<>();
 		for (String subCountryCode : getGeography().getSubCountryCodes(selectedCountryCode)) {
-			statesList.add(new Country(selectedCountryCode, getGeography().getCountryDisplayName(selectedCountryCode, Locale.getDefault()),
-					subCountryCode, getGeography().getSubCountryDisplayName(selectedCountryCode, subCountryCode, Locale.getDefault())));
+			statesList.add(new Country(
+					selectedCountryCode,
+					getGeography().getCountryDisplayName(selectedCountryCode, CorePlugin.getDefault().getDefaultLocale()),
+					subCountryCode,
+					getGeography().getSubCountryDisplayName(selectedCountryCode, subCountryCode, CorePlugin.getDefault().getDefaultLocale())));
 		}
 		Collections.sort(statesList);
 

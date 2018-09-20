@@ -322,9 +322,13 @@ public class ShoppingCartCleanupServiceImplTest extends BasicSpringContextTest {
 	}
 
 	private ShoppingCart createShoppingCart(final Shopper shopper, final ShoppingCartStatus cartStatus) {
-		final CustomerSession customerSession = customerSessionService.createWithShopper(shopper);
-		customerSession.setCurrency(Currency.getInstance("USD"));
+		Currency currency = Currency.getInstance("USD");
+
+		CustomerSession customerSession = customerSessionService.createWithShopper(shopper);
+		customerSession.setCurrency(currency);
 		customerSession.setLocale(Locale.ENGLISH);
+		customerSession = customerSessionService
+				.initializeCustomerSessionForPricing(customerSession, storeScenario.getStore().getCode(), currency);
 
 		final ShoppingCart shoppingCart = shoppingCartService.findOrCreateByCustomerSession(customerSession);
 		shoppingCart.setStore(storeScenario.getStore());

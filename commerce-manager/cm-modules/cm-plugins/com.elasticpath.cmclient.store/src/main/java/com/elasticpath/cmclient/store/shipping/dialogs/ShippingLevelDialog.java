@@ -32,8 +32,8 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
 import com.elasticpath.cmclient.catalog.CatalogPlugin;
-import com.elasticpath.cmclient.core.ServiceLocator;
 import com.elasticpath.cmclient.core.CoreMessages;
+import com.elasticpath.cmclient.core.ServiceLocator;
 import com.elasticpath.cmclient.core.binding.EpControlBindingProvider;
 import com.elasticpath.cmclient.core.binding.EpDialogSupport;
 import com.elasticpath.cmclient.core.binding.ObservableUpdateValueStrategy;
@@ -51,13 +51,14 @@ import com.elasticpath.cmclient.store.StorePlugin;
 import com.elasticpath.cmclient.store.shipping.ShippingImageRegistry;
 import com.elasticpath.cmclient.store.shipping.ShippingLevelsMessages;
 import com.elasticpath.commons.constants.ContextIdNames;
+import com.elasticpath.commons.constants.EpShippingContextIdNames;
 import com.elasticpath.domain.shipping.ShippingCostCalculationMethod;
 import com.elasticpath.domain.shipping.ShippingCostCalculationParameter;
-import com.elasticpath.domain.shipping.ShippingRegion;
 import com.elasticpath.domain.shipping.ShippingServiceLevel;
+import com.elasticpath.domain.shipping.ShippingRegion;
 import com.elasticpath.domain.store.Store;
-import com.elasticpath.service.shipping.ShippingRegionService;
 import com.elasticpath.service.shipping.ShippingServiceLevelService;
+import com.elasticpath.service.shipping.ShippingRegionService;
 import com.elasticpath.service.store.StoreService;
 import com.elasticpath.settings.SettingsService;
 
@@ -153,10 +154,10 @@ public class ShippingLevelDialog extends AbstractEpDialog { //NOPMD
 
 		storeService = ServiceLocator.getService(ContextIdNames.STORE_SERVICE);
 		shippingRegionService =
-				ServiceLocator.getService(ContextIdNames.SHIPPING_REGION_SERVICE);
+				ServiceLocator.getService(EpShippingContextIdNames.SHIPPING_REGION_SERVICE);
 		shippingServiceLevelService =
 				ServiceLocator.getService(
-						ContextIdNames.SHIPPING_SERVICE_LEVEL_SERVICE);
+						EpShippingContextIdNames.SHIPPING_SERVICE_LEVEL_SERVICE);
 
 		stores = storeService.findAllCompleteStores();
 		AuthorizationService.getInstance().removeUnathorizedStoresFrom(stores);
@@ -331,7 +332,7 @@ public class ShippingLevelDialog extends AbstractEpDialog { //NOPMD
 
 					ShippingCostCalculationParameter parameter =
 							ServiceLocator.getService(
-									ContextIdNames.SHIPPING_COST_CALCULATION_PARAMETER);
+									EpShippingContextIdNames.SHIPPING_COST_CALCULATION_PARAMETER);
 
 					parameter.setKey(originalParameter.getKey());
 					parameter.setCurrency(originalParameter.getCurrency());
@@ -517,7 +518,7 @@ public class ShippingLevelDialog extends AbstractEpDialog { //NOPMD
 	}
 
 	private void populateProperties(final Properties properties, final Iterable<ShippingCostCalculationParameter> parameters) {
-		
+
 		for (ShippingCostCalculationParameter parameter : parameters) {
 			String key = CoreMessages.get().getMessage(parameter.getKey());
 			if (parameter.isCurrencyAware()) {

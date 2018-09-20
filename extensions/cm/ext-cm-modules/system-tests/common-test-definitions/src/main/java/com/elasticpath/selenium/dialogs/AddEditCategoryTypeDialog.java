@@ -10,7 +10,10 @@ import org.openqa.selenium.WebDriver;
  */
 public class AddEditCategoryTypeDialog extends AbstractDialog {
 
-	private static final String ADD_CATEGORY_TYPE_PARENT_CSS
+	/**
+	 * CSS selector used to identify the dialog.
+	 */
+	public static final String ADD_CATEGORY_TYPE_PARENT_CSS
 			= "div[automation-id*='com.elasticpath.cmclient.catalog.CatalogMessages.CategoryTypeAddEditDialog'][widget-type='Shell'] ";
 	private static final String CATEGORY_TYPE_NAME_INPUT_CSS = ADD_CATEGORY_TYPE_PARENT_CSS
 			+ "div[automation-id='com.elasticpath.cmclient.catalog.CatalogMessages.CategoryTypeAddEditDialog_Name'] input";

@@ -102,9 +102,7 @@ public class FilteredNavigationConfigurationXmlParserImpl implements FilteredNav
 		Document doc = null;
 		try {
 			doc = builder.build(intelligentBrowsingXmlStream);
-		} catch (JDOMException e) {
-			LOG.error("Exception parsing intelligent browsing xml configuration.", e);
-		} catch (IOException e) {
+		} catch (JDOMException | IOException e) {
 			LOG.error("Exception parsing intelligent browsing xml configuration.", e);
 		}
 		return doc;

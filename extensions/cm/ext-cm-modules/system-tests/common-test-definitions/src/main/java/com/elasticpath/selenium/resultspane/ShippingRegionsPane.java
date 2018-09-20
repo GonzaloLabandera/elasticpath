@@ -61,8 +61,10 @@ public class ShippingRegionsPane extends AbstractPageObject {
 	 * @return CreateShippingRegionsDialog
 	 */
 	public CreateEditShippingRegionDialog clickCreateShippingRegionsButton() {
-		clickButton(CREATE_SHIPPINGREGIONS_BUTTON_CSS, "Create Shipping Region");
-		return new CreateEditShippingRegionDialog(getDriver(), "Create");
+		final String dialogName = "Create";
+		clickButton(CREATE_SHIPPINGREGIONS_BUTTON_CSS, "Create Shipping Region", String.format(CreateEditShippingRegionDialog
+				.SHIPPING_REGION_PARENT_CSS_TEMPLATE, dialogName));
+		return new CreateEditShippingRegionDialog(getDriver(), dialogName);
 	}
 
 	/**
@@ -90,8 +92,10 @@ public class ShippingRegionsPane extends AbstractPageObject {
 	 * @return CreateShippingRegionsDialog
 	 */
 	public CreateEditShippingRegionDialog clickEditShippingRegionsButton(final String shippingRegionsName) {
+		final String dialogName = "Edit";
 		verifyShippingRegionsIsInList(shippingRegionsName);
-		clickButton(EDIT_SHIPPINGREGIONS_BUTTON_CSS, "Edit Shipping Region");
-		return new CreateEditShippingRegionDialog(getDriver(), "Edit");
+		clickButton(EDIT_SHIPPINGREGIONS_BUTTON_CSS, "Edit Shipping Region", String.format(CreateEditShippingRegionDialog
+				.SHIPPING_REGION_PARENT_CSS_TEMPLATE, dialogName));
+		return new CreateEditShippingRegionDialog(getDriver(), dialogName);
 	}
 }

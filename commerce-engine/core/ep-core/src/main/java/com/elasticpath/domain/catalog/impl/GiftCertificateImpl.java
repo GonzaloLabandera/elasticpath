@@ -28,7 +28,6 @@ import org.apache.openjpa.persistence.Factory;
 import org.apache.openjpa.persistence.jdbc.ForeignKey;
 
 import com.elasticpath.commons.constants.ContextIdNames;
-import com.elasticpath.commons.util.security.CardEncrypter;
 import com.elasticpath.domain.DatabaseLastModifiedDate;
 import com.elasticpath.domain.EpDomainException;
 import com.elasticpath.domain.catalog.GiftCertificate;
@@ -423,7 +422,7 @@ public class GiftCertificateImpl extends AbstractLegacyEntityImpl implements Gif
 	 */
 	@Override
 	public String displayMaskedGiftCertificateCode() {
-		return getCardEncrypter().mask(getGiftCertificateCode());
+		return getGiftCertificateCode();
 	}
 
 	/**
@@ -488,16 +487,6 @@ public class GiftCertificateImpl extends AbstractLegacyEntityImpl implements Gif
 		return Money.valueOf(balance, getGiftCertificateCurrency());
 	}
 	
-	/**
-	 * Gets Card Encrypter. This gets the bean from the factory each time to avoid serialization
-	 * of the encrypter field during remoting.
-	 * 
-	 * @return <code>CardEncrypter</code>
-	 */
-	@Transient
-	protected CardEncrypter getCardEncrypter() {
-		return getBean(ContextIdNames.CARD_ENCRYPTER);
-	}
 
 	@Override
 	public void setOrderGuid(final String orderGuid) {

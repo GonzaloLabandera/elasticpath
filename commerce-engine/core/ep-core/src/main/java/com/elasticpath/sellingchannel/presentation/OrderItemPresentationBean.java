@@ -43,13 +43,6 @@ public interface OrderItemPresentationBean extends TreeNode<OrderItemPresentatio
 	String getDisplayName();
 
 	/**
-	 * Get the encrypted uidPk string.
-	 *
-	 * @return the encrypted uidPk string
-	 */
-	String getEncryptedUidPk();
-
-	/**
 	 * Get the product's image path.
 	 *
 	 * @return the product's image path.
@@ -118,12 +111,6 @@ public interface OrderItemPresentationBean extends TreeNode<OrderItemPresentatio
 	 * @param digitalAsset The digital asset.
 	 */
 	void setDigitalAsset(DigitalAsset digitalAsset);
-
-	/**
-	 *
-	 * @param encryptedUidPk The encrypted uid pk.
-	 */
-	void setEncryptedUidPk(String encryptedUidPk);
 
 	/**
 	 *

@@ -7,7 +7,7 @@
 	<parent>
 		<groupId>com.elasticpath</groupId>
 		<artifactId>itests-parent</artifactId>
-		<version>702.0.0-SNAPSHOT</version>
+		<version>703.0.0-SNAPSHOT</version>
 		<relativePath>../../itests-parent</relativePath>
 	</parent>
 
@@ -15,10 +15,6 @@
 	<packaging>jar</packaging>
 	<name>Settings JUnit Integrations Tests</name>
 	<description>Settings JUnit Integrations Tests</description>
-
-	<properties>
-		<java.jvm.opts>-XX:MaxPermSize=128m -Xmx512m</java.jvm.opts>
-	</properties>
 
 	<dependencies>
 		<dependency>
@@ -28,6 +24,10 @@
 		<dependency>
 			<groupId>com.elasticpath</groupId>
 			<artifactId>ep-settings</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.assertj</groupId>
+			<artifactId>assertj-core</artifactId>
 		</dependency>
 	</dependencies>
 

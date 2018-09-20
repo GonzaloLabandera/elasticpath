@@ -54,5 +54,28 @@
 			</step>
 		</plan>
 
+		<plan>
+			<name>read-purchase-lookup-form</name>
+			<description><![CDATA[Retrieve the purchase lookup form.]]></description>
+			<step>
+				<description><![CDATA[The purchase lookup form.]]></description>
+				<start>lookups.lookups</start>
+				<follow-link>purchaselookupform</follow-link>
+				<result>purchase-lookup-form</result>
+			</step>
+		</plan>
+
+		<plan>
+			<name>lookup-purchase-by-number</name>
+			<description><![CDATA[Look up a purchase by the purchase number.]]></description>
+			<step>
+				<description><![CDATA[Submit the form]]></description>
+				<start>purchase-lookup-form</start>
+				<submit>purchase-lookup-form</submit>
+				<to>purchase-lookup-action</to>
+				<via-link>purchaselookupaction</via-link>
+				<result>purchase</result>
+			</step>
+		</plan>
 	</family>
 </definitions>

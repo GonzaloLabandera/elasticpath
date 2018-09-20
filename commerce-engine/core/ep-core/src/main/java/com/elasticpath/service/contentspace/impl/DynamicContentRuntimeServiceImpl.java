@@ -135,7 +135,7 @@ public class DynamicContentRuntimeServiceImpl implements DynamicContentRuntimeSe
 			return true;
 		}
 		SellingContext sellingContext = getSellingContextRetrievalStrategy().getByGuid(sellingContextGuid);
-		return sellingContext == null || sellingContext.isSatisfied(getConditionEvaluatorService(), tagSet);
+		return sellingContext == null || sellingContext.isSatisfied(getConditionEvaluatorService(), tagSet).isSuccess();
 	}
 	
 	/**

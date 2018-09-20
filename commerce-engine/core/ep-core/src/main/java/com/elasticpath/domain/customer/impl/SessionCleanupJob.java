@@ -1,8 +1,6 @@
 /**
  * Copyright (c) Elastic Path Software Inc., 2015
  */
-/**
- */
 package com.elasticpath.domain.customer.impl;
 
 import java.text.DateFormat;
@@ -22,35 +20,25 @@ import com.elasticpath.service.misc.TimeService;
 import com.elasticpath.service.shopper.ShopperCleanupService;
 import com.elasticpath.service.shoppingcart.ShoppingCartService;
 import com.elasticpath.service.shoppingcart.WishListService;
-import com.elasticpath.settings.SettingsReader;
-import com.elasticpath.settings.domain.SettingValue;
+import com.elasticpath.settings.provider.SettingValueProvider;
 
 /**
  * Job to clean up old customer session & shopping cart records.
  */
 public class SessionCleanupJob {
 
-	/**
-	 * Settings path for maxHistory.
-	 */
-	public static final String SESSION_CLEANUP_MAX_HISTORY = "COMMERCE/SYSTEM/SESSIONCLEANUP/maxHistory";
-
-	/**
-	 * Settings path for batchSize.
-	 */
-	public static final String SESSION_CLEANUP_BATCH_SIZE = "COMMERCE/SYSTEM/SESSIONCLEANUP/batchSize";
-
 	private static final Logger LOG = Logger.getLogger(SessionCleanupJob.class);
 	
 	private TimeService timeService;
-
-	private SettingsReader settingsReader;
 
 	private CustomerSessionCleanupService customerSessionCleanupService;
 	private ShopperCleanupService shopperCleanupService;
 
 	private ShoppingCartService shoppingCartService;
 	private WishListService wishlistService;
+
+	private SettingValueProvider<Integer> batchSizeProvider;
+	private SettingValueProvider<Integer> maxDaysHistoryProvider;
 
 	/**
 	 * Hidden class used to execute methods so that purgeSessionHistory is re-entrant.
@@ -206,14 +194,12 @@ public class SessionCleanupJob {
 	}
 
 	private Date getDeleteBeforeDate() {
-		final SettingValue maxHistorySetting = settingsReader.getSettingValue(SESSION_CLEANUP_MAX_HISTORY);
-		final int maxHistory = maxHistorySetting.getIntegerValue();
+		final int maxHistory = getMaxDaysHistoryProvider().get();
 		return getDaysBeforeDate(maxHistory);
 	}
 
 	private int getBatchSize() {
-		final SettingValue batchSize = settingsReader.getSettingValue(SESSION_CLEANUP_BATCH_SIZE);
-		return batchSize.getIntegerValue();
+		return getBatchSizeProvider().get();
 	}
 
 	/**
@@ -224,24 +210,6 @@ public class SessionCleanupJob {
 	 */
 	protected Date getDaysBeforeDate(final int daysBefore) {
 		return DateUtils.addDays(getTimeService().getCurrentTime(), -daysBefore);
-	}
-
-	/**
-	 * Set the settings reader.
-	 * 
-	 * @param settingsReader the settings reader
-	 */
-	public void setSettingsReader(final SettingsReader settingsReader) {
-		this.settingsReader = settingsReader;
-	}
-
-	/**
-	 * Get the settings reader.
-	 * 
-	 * @return the settings reader.
-	 */
-	public SettingsReader getSettingsReader() {
-		return settingsReader;
 	}
 
 	/**
@@ -306,4 +274,21 @@ public class SessionCleanupJob {
 	public void setWishlistService(final WishListService wishlistService) {
 		this.wishlistService = wishlistService;
 	}
+
+	protected SettingValueProvider<Integer> getBatchSizeProvider() {
+		return batchSizeProvider;
+	}
+
+	public void setBatchSizeProvider(final SettingValueProvider<Integer> batchSizeProvider) {
+		this.batchSizeProvider = batchSizeProvider;
+	}
+
+	protected SettingValueProvider<Integer> getMaxDaysHistoryProvider() {
+		return maxDaysHistoryProvider;
+	}
+
+	public void setMaxDaysHistoryProvider(final SettingValueProvider<Integer> maxDaysHistoryProvider) {
+		this.maxDaysHistoryProvider = maxDaysHistoryProvider;
+	}
+
 }

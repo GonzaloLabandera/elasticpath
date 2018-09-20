@@ -5,7 +5,7 @@ package com.elasticpath.rest.relos.rs.subject.attribute.epcommerce;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
-import static org.mockito.Matchers.anyString;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
@@ -16,7 +16,6 @@ import java.util.stream.Stream;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -28,7 +27,7 @@ import com.google.common.net.HttpHeaders;
 import org.hamcrest.Matchers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.elasticpath.domain.store.Store;
 import com.elasticpath.rest.command.ExecutionResultFactory;
@@ -56,11 +55,6 @@ public class LocaleSubjectAttributeLookupStrategyTest {
 	@InjectMocks
 	private LocaleSubjectAttributeLookupStrategy classUnderTest;
 
-
-	@Before
-	public void setup() {
-		when(store.getCode()).thenReturn("store");
-	}
 
 	@Test
 	public void testMissingStore() {

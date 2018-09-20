@@ -36,46 +36,6 @@
 		<module>ext-database-update</module>
 	</modules>
 
-	<dependencyManagement>
-		<dependencies>
-			<dependency>
-				<groupId>org.liquibase</groupId>
-				<artifactId>liquibase-core</artifactId>
-				<version>${org.liquibase.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.liquibase</groupId>
-				<artifactId>liquibase-maven-plugin</artifactId>
-				<version>${org.liquibase.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>com.elasticpath.db</groupId>
-				<artifactId>liquibase-extensions</artifactId>
-				<version>${platform.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>com.elasticpath.db</groupId>
-				<artifactId>core-schema</artifactId>
-				<version>${platform.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>com.elasticpath.extensions</groupId>
-				<artifactId>ext-importexport</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>com.elasticpath.extensions</groupId>
-				<artifactId>ext-data</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>com.elasticpath.extensions</groupId>
-				<artifactId>ext-data-population-core</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-		</dependencies>
-	</dependencyManagement>
-
 	<build>
 		<!-- stores-parent diff: Inherit licensing-maven-plugin configurations from parent instead -->
 		<pluginManagement>

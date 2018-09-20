@@ -28,22 +28,14 @@
             <text-property name="promptText">startDate</text-property>
             <property name="valueType">static</property>
             <property name="isRequired">true</property>
-            <property name="dataType">dateTime</property>
+            <property name="dataType">string</property>
             <property name="controlType">text-box</property>
-            <structure name="format">
-                <property name="category">Medium Date</property>
-                <property name="pattern">Medium Date</property>
-            </structure>
         </scalar-parameter>
         <scalar-parameter name="endDate" id="101">
             <text-property name="promptText">endDate</text-property>
             <property name="valueType">static</property>
-            <property name="dataType">dateTime</property>
+            <property name="dataType">string</property>
             <property name="controlType">text-box</property>
-            <structure name="format">
-                <property name="category">Medium Date</property>
-                <property name="pattern">Medium Date</property>
-            </structure>
         </scalar-parameter>
         <scalar-parameter name="currency" id="102">
             <text-property name="promptText">currency</text-property>
@@ -106,7 +98,7 @@
                 <structure>
                     <property name="position">4</property>
                     <property name="name">Return Date</property>
-                    <property name="dataType">date-time</property>
+                    <property name="dataType">string</property>
                 </structure>
                 <structure>
                     <property name="position">5</property>
@@ -136,7 +128,7 @@
                 <structure>
                     <property name="position">10</property>
                     <property name="name">Order Created Date</property>
-                    <property name="dataType">date-time</property>
+                    <property name="dataType">string</property>
                 </structure>
                 <structure>
                     <property name="position">11</property>
@@ -416,7 +408,7 @@
                 <structure>
                     <property name="name">Return/Exchange Date</property>
                     <expression name="expression" type="javascript">dataSetRow["Return Date"]</expression>
-                    <property name="dataType">date-time</property>
+                    <property name="dataType">string</property>
                 </structure>
                 <structure>
                     <property name="name">Return Type</property>

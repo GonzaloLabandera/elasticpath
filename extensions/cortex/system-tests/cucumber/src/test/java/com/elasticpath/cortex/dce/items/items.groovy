@@ -1,18 +1,25 @@
 package com.elasticpath.cortex.dce.items
 
-import static com.elasticpath.rest.ws.assertions.RelosAssert.assertLinkExists
-
-import cucumber.api.DataTable
-import org.json.JSONArray
-
 import static com.elasticpath.cortex.dce.ClasspathFluentRelosClientFactory.client
-
-import cucumber.api.groovy.EN
-import cucumber.api.groovy.Hooks
-
+import static com.elasticpath.cortex.dce.ClasspathFluentRelosClientFactory.client
+import static com.elasticpath.cortex.dce.ClasspathFluentRelosClientFactory.client
+import static com.elasticpath.cortex.dce.ClasspathFluentRelosClientFactory.client
+import static com.elasticpath.cortex.dce.ClasspathFluentRelosClientFactory.client
+import static com.elasticpath.cortex.dce.ClasspathFluentRelosClientFactory.client
+import static com.elasticpath.rest.ws.assertions.RelosAssert.assertLinkExists
 import static org.assertj.core.api.Assertions.assertThat
 
+import javax.activation.CommandInfo
+
+import cucumber.api.DataTable
+import cucumber.api.groovy.EN
+import cucumber.api.groovy.Hooks
+import cucumber.api.java.en.And
+
+import org.json.JSONArray
+
 import com.elasticpath.cortex.dce.CommonMethods
+import com.elasticpath.cortex.dce.CommonSteps
 
 this.metaClass.mixin(Hooks)
 this.metaClass.mixin(EN)
@@ -64,13 +71,11 @@ Then(~'I request item with code (.+) in language (.+)') { def itemCode, def loca
 	CommonMethods.lookup(itemCode)
 }
 
-Given(~'item (?:.+) has a (?:.+) of (?:.+) in language (?:.+)') { -> }
+Given(~'(?:item|category) (?:.+) has (?:.+) (?:of|with) (?:.+) in language (?:.+)') { -> }
 
 Given(~'an item with code (?:.+) has an attribute with name (?:.+) with no value defined') { -> }
 
-Given(~'item (?:.+) has an attribute (?:.+) with value (?:.+) in language (?:.+)') { -> }
-
-Given(~'item (?:.+) has no attributes') { -> }
+Given(~'(?:item|category) (?:.+) has no attributes') { -> }
 
 Then(~'the details do not contain an element with name (.+)') { def attributeName ->
 	boolean found = false
@@ -231,4 +236,116 @@ Then(~'I am presented with item having (.+)') { def itemCode ->
 	assertThat(client.body.code)
 			.as("sku code is not as expected")
 			.isEqualTo(itemCode)
+}
+
+Then(~'a bundle with a selection rule of Select All') { -> }
+
+
+When(~'lookup the bundle by (.+) and add the (?:.+) to cart') { def itemCode ->
+	CommonMethods.lookupAndAddToCart(itemCode, 1)
+}
+
+Then(~'the (.+) will be added to cart as a root') { def itemCode ->
+	client.GET("/")
+			.defaultcart()
+			.lineitems()
+			.element()
+			.item()
+			.code()
+
+	assertThat(client.body.code)
+			.as("Item not found for sku code: " + itemCode)
+			.isEqualTo(itemCode)
+}
+
+Then(~'all of the (.+) constituents will be added to cart as DependentLineItems') { def purchasableItemSkuCode ->
+	client.GET("/")
+			.defaultcart()
+			.lineitems()
+			.element()
+			.dependentlineitems()
+
+	CommonMethods.verifyNumberOfElements(3)
+	CommonMethods.verifyDependentLineItemsContainAllConstituents(purchasableItemSkuCode)
+}
+
+Given(~'a cart containing a (.+) and its Constituents') { def itemCode ->
+	CommonMethods.lookupAndAddToCart(itemCode, 1)
+}
+
+When(~'regardless of the type of selection rule of the Bundle, remove the (.+) from the Cart') { def itemCode ->
+	def lineitemUri = CommonMethods.findCartLineItemUriBySkuCode(itemCode)
+	client.DELETE(lineitemUri)
+
+	assertThat(client.response.status)
+			.as("HTTP response status is not as expected")
+			.isEqualTo(204)
+}
+
+Then(~'the Bundle is removed, as well as all of its') { ->
+
+}
+
+Given(~'a non-Bundle Item, lookup the item by (.+) and add the Item to Cart') { def skuCode ->
+	CommonMethods.lookupAndAddToCart(skuCode, 1)
+}
+
+Then(~'the item will be added to cart and will present a link to the DependentLineItems resource, but the resource will be empty') { ->
+	client.GET("/")
+			.defaultcart()
+			.lineitems()
+			.element()
+			.dependentlineitems()
+
+	CommonMethods.verifyNumberOfElements(0)
+}
+
+Given(~'a (.+) in the Cart with Dependent Line Items') { def itemCode ->
+	CommonMethods.lookupAndAddToCart(itemCode, 1)
+}
+
+When(~'navigate to each of their DependentLineItems link') { ->
+
+}
+
+Then(~'the DependentLineItems link will be present, but will be empty on all leaf items') { ->
+	client.GET("/")
+			.defaultcart()
+			.lineitems()
+			.element()
+			.dependentlineitems()
+
+	client.body.links.findAll {
+		if (it.rel == "element") {
+			client.GET(it.href)
+			client.dependentlineitems()
+			CommonMethods.verifyNumberOfElements(0)
+		}
+	}
+}
+
+When(~'all Order need infos solved') { ->
+	CommonMethods.createUniqueAddress()
+	CommonMethods.addTokenToOrder()
+	CommonMethods.addEmail()
+}
+
+And(~'complete the purchase with the') { ->
+	CommonMethods.submitPurchase()
+	client.follow()
+			.stopIfFailure()
+}
+
+Then(~'purchase is completed successfully') { ->
+	assertThat(client.response.status)
+			.as("HTTP response status is not as expected")
+			.isEqualTo(200)
+}
+
+And(~'the LineItems structure in under the created Purchase') { ->
+	client.lineitems()
+			.element()
+			.components()
+			.stopIfFailure()
+	CommonMethods.verifyNumberOfElements(2)
 }

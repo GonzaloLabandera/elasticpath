@@ -3,7 +3,7 @@
  */
 package com.elasticpath.rest.resource.integration.epcommerce.repository.settings;
 
-import io.reactivex.Single;
+import io.reactivex.Maybe;
 
 /**
  * Repository for Settings Values.
@@ -11,11 +11,13 @@ import io.reactivex.Single;
 public interface SettingsRepository {
 
 	/**
-	 * Retrieves the string setting value for a setting path.
+	 * Retrieves the setting value for a setting path.
 	 *
-	 * @param path the path to setting.
-	 * @param context the context.
-	 * @return the string setting value.
+	 * @param path    the path to setting
+	 * @param context the context
+	 * @param <T>     the setting value type
+	 * @return the string setting value
 	 */
-	Single<String> getStringSettingValue(String path, String context);
+	<T> Maybe<T> getSetting(String path, String context);
+
 }

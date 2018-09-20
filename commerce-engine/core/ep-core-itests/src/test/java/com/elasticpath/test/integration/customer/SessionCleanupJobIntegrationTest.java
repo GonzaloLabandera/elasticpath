@@ -37,8 +37,7 @@ import com.elasticpath.service.shopper.ShopperCleanupService;
 import com.elasticpath.service.shopper.ShopperService;
 import com.elasticpath.service.shoppingcart.ShoppingCartService;
 import com.elasticpath.service.shoppingcart.WishListService;
-import com.elasticpath.settings.SettingsService;
-import com.elasticpath.settings.domain.SettingDefinition;
+import com.elasticpath.settings.test.support.SimpleSettingValueProvider;
 import com.elasticpath.test.integration.DirtiesDatabase;
 import com.elasticpath.test.integration.cart.AbstractCartIntegrationTestParent;
 import com.elasticpath.test.persister.testscenarios.SimpleStoreScenario;
@@ -63,6 +62,8 @@ public class SessionCleanupJobIntegrationTest extends AbstractCartIntegrationTes
 
 	private static final int DELETE_BEFORE_NUMBER_OF_DAYS = 20;
 
+	private static final Integer DEFAULT_SESSION_CLEANUP_BATCH_SIZE = 1000;
+
 	@Autowired
 	private CartDirector cartDirector;
 
@@ -86,9 +87,6 @@ public class SessionCleanupJobIntegrationTest extends AbstractCartIntegrationTes
 
 	@Autowired
 	private WishListService wishListService;
-
-	@Autowired
-	private SettingsService settingsService;
 
 	private SessionCleanupJob sessionCleanupJob;
 
@@ -145,9 +143,6 @@ public class SessionCleanupJobIntegrationTest extends AbstractCartIntegrationTes
 	public void setUp() throws Exception {
 		sessionCleanupJob = createSessionCleanupJob();
 		defaultProduct = persistProductWithSku();
-
-		// Setup expected settings.
-		overrideSetting(SessionCleanupJob.SESSION_CLEANUP_MAX_HISTORY, String.valueOf(DELETE_BEFORE_NUMBER_OF_DAYS));
 	}
 
 	private SessionCleanupJob createSessionCleanupJob() {
@@ -156,10 +151,11 @@ public class SessionCleanupJobIntegrationTest extends AbstractCartIntegrationTes
 		SessionCleanupJob sessionCleanupJob = new SessionCleanupJob();
 		sessionCleanupJob.setTimeService(timeService);
 		sessionCleanupJob.setCustomerSessionCleanupService(customerSessionCleanupService);
-		sessionCleanupJob.setSettingsReader(settingsService);
 		sessionCleanupJob.setShoppingCartService(shoppingCartService);
 		sessionCleanupJob.setWishlistService(wishListService);
 		sessionCleanupJob.setShopperCleanupService(shopperCleanupService);
+		sessionCleanupJob.setBatchSizeProvider(new SimpleSettingValueProvider<>(DEFAULT_SESSION_CLEANUP_BATCH_SIZE));
+		sessionCleanupJob.setMaxDaysHistoryProvider(new SimpleSettingValueProvider<>(DELETE_BEFORE_NUMBER_OF_DAYS));
 
 		return sessionCleanupJob;
 	}
@@ -301,7 +297,7 @@ public class SessionCleanupJobIntegrationTest extends AbstractCartIntegrationTes
 		final int cleanupBatchSize = 10;
 		final int expectedLastPassSize = initialSessionBatchSize % cleanupBatchSize;
 
-		overrideSetting(SessionCleanupJob.SESSION_CLEANUP_BATCH_SIZE, String.valueOf(cleanupBatchSize));
+		sessionCleanupJob.setBatchSizeProvider(new SimpleSettingValueProvider<>(cleanupBatchSize));
 
 		for (int i = 0; i < initialSessionBatchSize; i++) {
 			makeScenario(AccessAge.OLD, CustomerType.ANONYMOUS, CartType.NONE, String.valueOf(i), "A", track.deletedSessions, track.deletedShoppers);
@@ -575,12 +571,6 @@ public class SessionCleanupJobIntegrationTest extends AbstractCartIntegrationTes
 			}
 		};
 		return verifier;
-    }
-
-    private void overrideSetting(final String path, final String value) {
-        final SettingDefinition settingDefinition = settingsService.getSettingDefinition(path);
-        settingDefinition.setDefaultValue(value);
-        settingsService.updateSettingDefinition(settingDefinition);
     }
 
     private int getAccessAgeInDays(final AccessAge age) {

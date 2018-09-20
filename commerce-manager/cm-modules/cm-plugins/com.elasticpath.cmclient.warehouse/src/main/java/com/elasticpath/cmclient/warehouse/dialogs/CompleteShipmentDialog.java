@@ -60,7 +60,6 @@ import com.elasticpath.domain.order.OrderShipmentStatus;
 import com.elasticpath.domain.order.OrderSku;
 import com.elasticpath.domain.order.PhysicalOrderShipment;
 import com.elasticpath.domain.shipping.ShipmentType;
-import com.elasticpath.domain.shipping.ShippingServiceLevel;
 import com.elasticpath.domain.store.Warehouse;
 import com.elasticpath.service.catalog.ProductInventoryManagementService;
 import com.elasticpath.service.catalog.ProductSkuLookup;
@@ -68,7 +67,8 @@ import com.elasticpath.service.order.AllocationService;
 import com.elasticpath.service.order.CompleteShipmentFailedException;
 import com.elasticpath.service.order.OrderService;
 import com.elasticpath.service.order.ReleaseShipmentFailedException;
-import com.elasticpath.service.shipping.ShippingServiceLevelService;
+import com.elasticpath.service.shipping.ShippingOptionService;
+import com.elasticpath.shipping.connectivity.dto.ShippingOption;
 
 /**
  * Dialog for creating and editing orderShipment.
@@ -508,7 +508,12 @@ public class CompleteShipmentDialog extends AbstractEpDialog {
 
 		private void repopulate() {
 			PhysicalOrderShipment physicalOrderShipment = orderShipment;
-			ShippingServiceLevel shippingLevel = getShippingServiceLevelService().findByGuid(physicalOrderShipment.getShippingServiceLevelGuid());
+			final List<ShippingOption> shippingOptions = getShippingOptionService().getAllShippingOptions(
+					orderShipment.getOrder().getStore().getCode(),
+					orderShipment.getOrder().getLocale()).getAvailableShippingOptions();
+			final ShippingOption foundShippingOption = shippingOptions.stream()
+					.filter(shippingOption -> shippingOption.getCode().equals(physicalOrderShipment.getShippingOptionCode()))
+					.findFirst().get();
 
 			customerIDText.setText(String.valueOf(orderShipment.getOrder().getCustomer().getUidPk()));
 
@@ -516,7 +521,7 @@ public class CompleteShipmentDialog extends AbstractEpDialog {
 					+ orderShipment.getOrder().getCustomer().getLastName() + WarehouseMessages.COMMA + WarehouseMessages.SPACE
 					+ getBillingAddress(physicalOrderShipment.getShipmentAddress()));
 
-			shippingMethodText.setText(shippingLevel.getName(orderShipment.getOrder().getLocale()));
+			shippingMethodText.setText(foundShippingOption.getDisplayName(orderShipment.getOrder().getLocale()).orElse(null));
 
 			detailsSectionPart.getSection().pack();
 			detailsSectionPart.getManagedForm().getForm().getShell().pack();
@@ -555,10 +560,10 @@ public class CompleteShipmentDialog extends AbstractEpDialog {
 		return productInventoryManagementService;
 	}
 
-	protected ShippingServiceLevelService getShippingServiceLevelService() {
-		return ServiceLocator.getService(ContextIdNames.SHIPPING_SERVICE_LEVEL_SERVICE);
+	protected ShippingOptionService getShippingOptionService() {
+		return ServiceLocator.getService(ContextIdNames.SHIPPING_OPTION_SERVICE);
 	}
-	
+
 	/**
 	 * Lazy loads a ProductSkuLookup.
 	 *

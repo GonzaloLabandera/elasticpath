@@ -12,7 +12,10 @@ import com.elasticpath.selenium.common.AbstractPageObject;
  */
 public class ManageTaxValueDialog extends AbstractPageObject {
 
-	private static final String MANAGE_TAX_VALUE_PARENT_CSS = "div[automation-id*='com.elasticpath.cmclient.admin.taxes.TaxesMessages"
+	/**
+	 * CSS selector used to identify the dialog.
+	 */
+	public static final String MANAGE_TAX_VALUE_PARENT_CSS = "div[automation-id*='com.elasticpath.cmclient.admin.taxes.TaxesMessages"
 			+ ".ManageTaxValuesTitleDialog'][widget-type='Shell'] ";
 	private static final String MANAGE_TAX_VALUE_TAXJURISDICTION_COMBO_CSS = "div[automation-id='com.elasticpath.cmclient.admin.taxes"
 			+ ".TaxesMessages.ManageTaxValuesTaxJurisdictionLabel'][widget-type='CCombo']";
@@ -88,8 +91,10 @@ public class ManageTaxValueDialog extends AbstractPageObject {
 	 * @return AddEditTaxRateDialog
 	 */
 	public AddEditTaxRateDialog clickAddButton() {
-		clickButton(String.format(MANAGE_TAX_VALUE_BUTTON_CSS_TEMPLATE, "Add"), "Add");
-		return new AddEditTaxRateDialog(getDriver(), "Add");
+		final String add = "Add";
+		clickButton(String.format(MANAGE_TAX_VALUE_BUTTON_CSS_TEMPLATE, add), add, String.format(AddEditTaxRateDialog.TAX_RATE_PARENT_CSS_TEMPLATE,
+				add));
+		return new AddEditTaxRateDialog(getDriver(), add);
 	}
 
 	/**
@@ -98,18 +103,17 @@ public class ManageTaxValueDialog extends AbstractPageObject {
 	 * @return AddEditTaxRateDialog
 	 */
 	public AddEditTaxRateDialog clickEditButton() {
-		clickButton(String.format(MANAGE_TAX_VALUE_BUTTON_CSS_TEMPLATE, "Edit"), "Edit");
+		clickButton(String.format(MANAGE_TAX_VALUE_BUTTON_CSS_TEMPLATE, "Edit"), "Edit", AddEditTaxRateDialog.TAX_RATE_PARENT_CSS_TEMPLATE);
 		return new AddEditTaxRateDialog(getDriver(), "Edit");
 	}
 
 	/**
 	 * Clicks Remove button.
-	 *
-	 * @return AddEditTaxRateDialog
 	 */
-	public AddEditTaxRateDialog clickRemoveButton() {
-		clickButton(String.format(MANAGE_TAX_VALUE_BUTTON_CSS_TEMPLATE, "Remove"), "Remove");
-		return new AddEditTaxRateDialog(getDriver(), "Remove");
+	public void clickRemoveButton() {
+		String pageObjectId = "div[automation-id='com.elasticpath.cmclient.admin.taxes.TaxesMessages.ConfirmDeleteTaxValueMsgBoxTitle']";
+		clickButton(String.format(MANAGE_TAX_VALUE_BUTTON_CSS_TEMPLATE, "Remove"), "Remove", pageObjectId);
+		new ConfirmDialog(getDriver()).clickOKButton("com.elasticpath.cmclient.admin.taxes.TaxesMessages.ConfirmDeleteTaxValueMsgBoxTitle");
 	}
 
 	/**

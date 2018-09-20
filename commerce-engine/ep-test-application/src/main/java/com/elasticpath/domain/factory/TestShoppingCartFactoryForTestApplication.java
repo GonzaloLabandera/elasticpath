@@ -51,7 +51,7 @@ public final class TestShoppingCartFactoryForTestApplication {
 		shoppingCart.setShoppingCartMemento(shoppingCartMemento);
 		shoppingCart.setShopper(shopper);
 		shoppingCart.setStore(store);
-		
+
 		shopper.setCurrentShoppingCart(shoppingCart);
 
 		return shoppingCart;

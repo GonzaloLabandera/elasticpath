@@ -21,27 +21,15 @@
             <text-property name="promptText">Start Date</text-property>
             <property name="valueType">static</property>
             <property name="isRequired">false</property>
-            <property name="dataType">dateTime</property>
+            <property name="dataType">string</property>
             <property name="distinct">true</property>
             <property name="controlType">text-box</property>
-            <structure name="format">
-                <property name="category">Short Date</property>
-                <property name="pattern">Short Date</property>
-            </structure>
         </scalar-parameter>
         <scalar-parameter name="endDate" id="46">
             <text-property name="promptText">End Date</text-property>
             <property name="valueType">static</property>
             <property name="isRequired">false</property>
-            <property name="dataType">dateTime</property>
-            <simple-property-list name="defaultValue">
-                <value>2007-09-28T10:45:30.000</value>
-            </simple-property-list>
-            <property name="controlType">text-box</property>
-            <structure name="format">
-                <property name="category">Short Date</property>
-                <property name="pattern">Short Date</property>
-            </structure>
+            <property name="dataType">string</property>
         </scalar-parameter>
         <scalar-parameter name="store" id="385">
             <text-property name="promptText">store</text-property>
@@ -93,7 +81,7 @@
                 <structure>
                     <property name="position">4</property>
                     <property name="name">orderCreatedDate</property>
-                    <property name="dataType">date-time</property>
+                    <property name="dataType">string</property>
                 </structure>
                 <structure>
                     <property name="position">5</property>
@@ -260,7 +248,7 @@
                     <structure>
                         <property name="position">4</property>
                         <property name="name">orderCreatedDate</property>
-                        <property name="dataType">date-time</property>
+                        <property name="dataType">string</property>
                     </structure>
                     <structure>
                         <property name="position">5</property>
@@ -420,7 +408,7 @@ currentRow = null;]]></method>
                 <structure>
                     <property name="name">Order Date/Time</property>
                     <expression name="expression">dataSetRow["orderCreatedDate"]</expression>
-                    <property name="dataType">date-time</property>
+                    <property name="dataType">string</property>
                 </structure>
                 <structure>
                     <property name="name">Currency</property>

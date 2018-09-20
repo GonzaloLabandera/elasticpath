@@ -221,6 +221,15 @@ public class JpqlQueryBuilderWhereGroup {
 	}
 
 	/**
+	 * Indicate whether the where clause is empty.
+	 *
+	 * @return true if the where clause is empty
+	 */
+	public boolean isEmpty() {
+		return whereClauses.isEmpty() && whereGroups.isEmpty();
+	}
+
+	/**
 	 * Data structure for storing where clause information.
 	 */
 	private static class JpqlWhereClause {

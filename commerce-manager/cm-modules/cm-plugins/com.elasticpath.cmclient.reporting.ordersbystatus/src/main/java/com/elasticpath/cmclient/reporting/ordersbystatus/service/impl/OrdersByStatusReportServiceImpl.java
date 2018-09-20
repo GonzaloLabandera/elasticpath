@@ -6,6 +6,7 @@ package com.elasticpath.cmclient.reporting.ordersbystatus.service.impl;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Currency;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -13,6 +14,7 @@ import java.util.Map;
 import org.apache.log4j.Logger;
 
 import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.util.DateTimeUtilFactory;
 import com.elasticpath.cmclient.reporting.ordersbystatus.OrdersByStatusPreparedStatementBuilder;
 import com.elasticpath.cmclient.reporting.ordersbystatus.OrdersByStatusReportMessages;
 import com.elasticpath.cmclient.reporting.ordersbystatus.impl.OrdersByStatusPreparedStatementBuilderImpl;
@@ -51,7 +53,7 @@ public class OrdersByStatusReportServiceImpl {
 	private static final int REPORT_CUSTOMER_EMAIL = 16;
 	private static final int REPORT_CREATED_BY_CSR = 17;
 	private static final int REPORT_ROW_LENGTH = 18;
-	
+
 	/**
 	 * This method is called by BIRT and returns a List of Object[] with columns as defined above.
 	 * 
@@ -118,7 +120,7 @@ public class OrdersByStatusReportServiceImpl {
 			reportList.add(reportRow);
 
 			reportRow[REPORT_ORDER_NUMBER] = orderResult[orderNumberIndex];
-			reportRow[REPORT_CREATED_DATE] = orderResult[createdDateIndex];
+			reportRow[REPORT_CREATED_DATE] = formatDate((Date) orderResult[createdDateIndex]);
 			final OrderStatus orderStatus = OrderStatus.valueOf(orderResult[orderStatusIndex].toString());
 			reportRow[REPORT_STATUS] = OrdersByStatusReportMessages.get().getLocalizedName(orderStatus);
 			reportRow[REPORT_STORE] = orderResult[storeCodeIndex];
@@ -230,5 +232,9 @@ public class OrdersByStatusReportServiceImpl {
 			reportService = ServiceLocator.getService(ContextIdNames.REPORT_SERVICE);
 		}
 		return reportService;
+	}
+
+	private String formatDate(final Date date) {
+		return DateTimeUtilFactory.getDateUtil().formatAsDateTime(date);
 	}
 }

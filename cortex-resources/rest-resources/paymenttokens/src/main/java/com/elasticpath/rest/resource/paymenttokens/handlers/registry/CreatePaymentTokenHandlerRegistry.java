@@ -10,6 +10,7 @@ import com.elasticpath.rest.resource.paymenttokens.handlers.CreatePaymentTokenHa
 /**
  * Registry that looks up {@link CreatePaymentTokenHandler}s.
  */
+@SuppressWarnings("rawtypes")
 public interface CreatePaymentTokenHandlerRegistry {
 
 	/**

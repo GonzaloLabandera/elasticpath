@@ -10,7 +10,10 @@ import com.elasticpath.selenium.common.AbstractPageObject;
  */
 public class CustomerSegmentEditor extends AbstractPageObject {
 
-	private static final String CUSTOMER_SEGMENT_EDITOR_PARENT_CSS = "div[pane-location='editor-pane'] div[active-editor='true'] ";
+	/**
+	 * Page Object Id.
+	 */
+	public static final String CUSTOMER_SEGMENT_EDITOR_PARENT_CSS = "div[pane-location='editor-pane'] div[active-editor='true'] ";
 	private static final String CUSTOMER_SEGMENT_NAME_INPUT_CSS = CUSTOMER_SEGMENT_EDITOR_PARENT_CSS + "div[widget-id='Customer Segment Name'] > "
 			+ "input";
 	private static final String CUSTOMER_SEGMENT_DESCRIPTION_INPUT_CSS = CUSTOMER_SEGMENT_EDITOR_PARENT_CSS + "div[widget-id='Description'] > input";

@@ -5,11 +5,10 @@ package com.elasticpath.rest.resource.itemdefinitions.integration.epcommerce.imp
 
 import static com.elasticpath.rest.chain.ResourceStatusMatcher.containsResourceStatus;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -23,7 +22,7 @@ import org.junit.runner.RunWith;
 import org.apache.commons.lang3.StringUtils;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.elasticpath.domain.attribute.AttributeValue;
 import com.elasticpath.domain.catalog.BundleConstituent;
@@ -50,8 +49,6 @@ import com.elasticpath.rest.util.collection.CollectionUtil;
 public class ItemDefinitionComponentLookupStrategyImplTest {
 
 	private static final String THE_RESULT_SHOULD_BE_SUCCESSFUL = "The result should be successful";
-	private static final String CONSTITUENT_PRODUCT_CODE = "constituent product code";
-	private static final String CONSTITUENT_SKU_CODE = "constituentSkuCode";
 	private static final String ITEM_ID = "item_id";
 	private static final String BUNDLE_CONSTITUENT_GUID = "bundle_constituent_guid";
 	private static final String STANDALONE_CONSTITUENT_ITEM_ID = "standalone constituent item id";
@@ -88,7 +85,6 @@ public class ItemDefinitionComponentLookupStrategyImplTest {
 	@Test
 	public void testFindComponentIdsWhenProductSkuResultSuccessful() {
 		mockSetUpProductAndProductBundle();
-		mockItemConfigIdForItemBundle();
 		mockItemConfigProductSku(ExecutionResultFactory.createReadOK(mockProductSku));
 		when(mockBundle.getConstituents()).thenReturn(Collections.singletonList(mockConstituent));
 		when(mockConstituent.getGuid()).thenReturn(BUNDLE_CONSTITUENT_GUID);
@@ -105,9 +101,8 @@ public class ItemDefinitionComponentLookupStrategyImplTest {
 	 */
 	@Test
 	public void testGetComponentIdsWhenNoItemFound() {
-		mockItemConfigIdForItemBundle();
 		when(mockItemRepository.getSkuForItemId(ITEM_ID))
-				.thenReturn(ExecutionResultFactory.<ProductSku>createNotFound(StringUtils.EMPTY));
+				.thenReturn(ExecutionResultFactory.createNotFound(StringUtils.EMPTY));
 
 		thrown.expect(containsResourceStatus(ResourceStatus.NOT_FOUND));
 
@@ -130,22 +125,19 @@ public class ItemDefinitionComponentLookupStrategyImplTest {
 
 		when(mockProductSku.getProduct()).thenReturn(mockProduct);
 		when(mockItemRepository.asProductBundle(mockProduct)).thenReturn(mockBundle);
-		when(mockBundle.getConstituents()).thenReturn(Arrays.asList(mockBundleConstituent));
+		when(mockBundle.getConstituents()).thenReturn(Collections.singletonList(mockBundleConstituent));
 		when(mockBundleConstituent.getGuid()).thenReturn("Guid");
 		when(mockBundleConstituent.getConstituent()).thenReturn(mockConstituentItem);
 		when(mockConstituentItem.isBundle()).thenReturn(true);
 		when(mockConstituentItem.getProduct()).thenReturn(mockConstituentProduct);
 		when(mockItemRepository.asProductBundle(mockConstituentProduct)).thenReturn(mockProductBundle);
-		when(mockProductBundle.getConstituents()).thenReturn(Arrays.asList(mockConstituent));
+		when(mockProductBundle.getConstituents()).thenReturn(Collections.singletonList(mockConstituent));
 		when(mockConstituent.getGuid()).thenReturn(BUNDLE_CONSTITUENT_GUID);
 		when(mockConstituent.getConstituent()).thenReturn(mockConstituentItem);
 		when(mockConstituentItem.getProductSku()).thenReturn(mockConstituentSku);
-		when(mockConstituentSku.getProduct()).thenReturn(mockConstituentProduct);
-		when(mockConstituentSku.getSkuCode()).thenReturn(CONSTITUENT_SKU_CODE);
 		when(mockItemRepository.getItemIdForSku(mockConstituentSku))
 				.thenReturn(ExecutionResultFactory.createReadOK(STANDALONE_CONSTITUENT_ITEM_ID));
 		when(mockConstituentProduct.getFullAttributeValues(Locale.CANADA)).thenReturn(null);
-		when(mockConstituentProduct.getCode()).thenReturn(CONSTITUENT_PRODUCT_CODE);
 		when(mockConstituentItem.isProductSku()).thenReturn(false);
 
 		ExecutionResult<ItemDefinitionComponentEntity> result = strategy.findComponentById(STORECODE, ITEM_ID,
@@ -158,12 +150,11 @@ public class ItemDefinitionComponentLookupStrategyImplTest {
 	public void testFindComponentByIdWhenItemConfigResultSuccessful() {
 		final Product mockConstituentProduct = mock(Product.class);
 		final AttributeValue mockAttribute = mock(AttributeValue.class);
-		final List<AttributeValue> shoppingItemConsituentList = Arrays.asList(mockAttribute);
+		final List<AttributeValue> shoppingItemConsituentList = Collections.singletonList(mockAttribute);
 
 		mockShopperExpectations();
 		mockSetUpProductAndProductBundle();
 		mockBundleTransformer();
-		mockItemConfigIdForItemBundle();
 		mockItemConfigProductSku(ExecutionResultFactory.createReadOK(mockProductSku));
 		mockItemConfigIdForProductAndSku(ExecutionResultFactory.createReadOK(ITEM_ID));
 		when(mockConstituent.getConstituent()).thenReturn(mockConstituentItem);
@@ -173,7 +164,7 @@ public class ItemDefinitionComponentLookupStrategyImplTest {
 		when(mockBundle.getConstituents()).thenReturn(Collections.singletonList(mockConstituent));
 		when(mockConstituent.getGuid()).thenReturn(BUNDLE_CONSTITUENT_GUID);
 		when(mockConstituentProduct.getFullAttributeValues(Locale.CANADA)).thenReturn(shoppingItemConsituentList);
-		when(mockProductSku.getFullAttributeValues(Locale.CANADA)).thenReturn(Collections.<AttributeValue>emptyList());
+		when(mockProductSku.getFullAttributeValues(Locale.CANADA)).thenReturn(Collections.emptyList());
 
 		ExecutionResult<ItemDefinitionComponentEntity> result = strategy.findComponentById(STORECODE, ITEM_ID,
 				BUNDLE_CONSTITUENT_GUID);
@@ -185,10 +176,9 @@ public class ItemDefinitionComponentLookupStrategyImplTest {
 	public void testFindComponentByIdWhenBundleConstituentNotFound() {
 		mockShopperExpectations();
 		mockSetUpProductAndProductBundle();
-		mockSetUpConstituentProductAndProductBundle();
 		mockItemConfigProductSku(ExecutionResultFactory.createReadOK(mockProductSku));
 
-		when(mockBundle.getConstituents()).thenReturn(Collections.<BundleConstituent>emptyList());
+		when(mockBundle.getConstituents()).thenReturn(Collections.emptyList());
 
 		thrown.expect(containsResourceStatus(ResourceStatus.NOT_FOUND));
 
@@ -197,7 +187,7 @@ public class ItemDefinitionComponentLookupStrategyImplTest {
 
 	@Test
 	public void testFindComponentByIdWhenProductSkuNotFound() {
-		when(mockItemRepository.getSkuForItemId(ITEM_ID)).thenReturn(ExecutionResultFactory.<ProductSku>createNotFound());
+		when(mockItemRepository.getSkuForItemId(ITEM_ID)).thenReturn(ExecutionResultFactory.createNotFound());
 
 		thrown.expect(containsResourceStatus(ResourceStatus.NOT_FOUND));
 
@@ -206,19 +196,7 @@ public class ItemDefinitionComponentLookupStrategyImplTest {
 
 	@Test
 	public void testHasComponentsWhenItemBundleExists() {
-		final Product mockConstituentProduct = mock(Product.class);
-		final ProductSku mockConstituentSku = mock(ProductSku.class);
-
 		when(mockItemRepository.isItemBundle(ITEM_ID)).thenReturn(ExecutionResultFactory.createReadOK(true));
-		when(mockConstituent.getConstituent()).thenReturn(mockConstituentItem);
-		when(mockConstituentItem.getProduct()).thenReturn(mockConstituentProduct);
-		when(mockConstituentItem.getProductSku()).thenReturn(mockConstituentSku);
-		when(mockConstituentSku.getProduct()).thenReturn(mockConstituentProduct);
-		when(mockConstituentSku.getSkuCode()).thenReturn(CONSTITUENT_SKU_CODE);
-		when(mockConstituentItem.isProductSku()).thenReturn(false);
-		when(mockItemRepository.asProductBundle(mockConstituentProduct)).thenReturn(null);
-		when(mockConstituentProduct.getFullAttributeValues(Locale.CANADA)).thenReturn(null);
-		when(mockConstituentProduct.getCode()).thenReturn(CONSTITUENT_PRODUCT_CODE);
 
 		ExecutionResult<Boolean> result = strategy.hasComponents(STORECODE, ITEM_ID);
 
@@ -230,26 +208,9 @@ public class ItemDefinitionComponentLookupStrategyImplTest {
 		when(mockResourceOperationContext.getSubject()).thenReturn(subject);
 	}
 
-
-	private void mockSetUpConstituentProductAndProductBundle() {
-		final Product mockConstituentProduct = mock(Product.class);
-		final ProductSku mockConstituentSku = mock(ProductSku.class);
-
-		when(mockConstituent.getConstituent()).thenReturn(mockConstituentItem);
-		when(mockConstituentItem.getProduct()).thenReturn(mockConstituentProduct);
-		when(mockConstituentItem.getProductSku()).thenReturn(mockConstituentSku);
-		when(mockConstituentSku.getProduct()).thenReturn(mockConstituentProduct);
-		when(mockConstituentSku.getSkuCode()).thenReturn(CONSTITUENT_SKU_CODE);
-		when(mockConstituentItem.isProductSku()).thenReturn(false);
-		when(mockItemRepository.asProductBundle(mockConstituentProduct)).thenReturn(null);
-		when(mockConstituentProduct.getFullAttributeValues(Locale.CANADA)).thenReturn(null);
-		when(mockConstituentProduct.getCode()).thenReturn(CONSTITUENT_PRODUCT_CODE);
-	}
-
 	private void mockSetUpProductAndProductBundle() {
 		when(mockProductSku.getProduct()).thenReturn(mockProduct);
 		when(mockProductSku.getProduct()).thenReturn(mockProduct);
-		when(mockProductSku.getSkuCode()).thenReturn(CONSTITUENT_SKU_CODE);
 		when(mockProductSku.getProduct()).thenReturn(mockProduct);
 		when(mockItemRepository.asProductBundle(mockProduct)).thenReturn(mockBundle);
 	}
@@ -261,11 +222,6 @@ public class ItemDefinitionComponentLookupStrategyImplTest {
 	private void mockItemConfigIdForProductAndSku(final ExecutionResult<String> executionResult) {
 		when(mockItemRepository.getItemIdForSku(mockProductSku)).thenReturn(executionResult);
 	}
-
-	private void mockItemConfigIdForItemBundle() {
-		when(mockItemRepository.isItemBundle(ITEM_ID)).thenReturn(ExecutionResultFactory.createReadOK(true));
-	}
-
 	private void mockBundleTransformer() {
 		final ItemDefinitionComponentEntity entity = ItemDefinitionComponentEntity.builder().build();
 		when(mockBundleConstituentTransformer.transformToEntity(any(BundleConstituentWithAttributesWrapper.class), any(Locale.class)))

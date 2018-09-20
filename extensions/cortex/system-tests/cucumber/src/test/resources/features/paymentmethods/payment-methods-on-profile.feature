@@ -5,20 +5,6 @@ Feature: Payment methods on profile
   I want to manage my payment methods on my profile
   so that checkout can be completed faster
 
-  Scenario: A registered shopper is able to retrieve their default credit card from their profile
-    Given I authenticate as a registered shopper who has a credit card as their default payment method
-    When I retrieve the default payment method on my profile
-    Then I get the default credit card with cardholdername visa card holder
-
-  Scenario: A registered shopper is able to retrieve the details of a credit card saved to their profile
-    Given I authenticate as a registered shopper who has a credit card as their default payment method
-    When I retrieve the credit card with cardholdername visa card holder
-    Then the field card-number has value ************1111
-    And the field card-type has value Visa
-    And the field cardholder-name has value visa card holder
-    And the field expiry-month has value 11
-    And the field expiry-year has value 2020
-
   Scenario: A registered shopper is able to retrieve their default payment token from their profile
     Given I authenticate as a registered shopper who has a token as their default payment method
     When I retrieve the default payment method on my profile

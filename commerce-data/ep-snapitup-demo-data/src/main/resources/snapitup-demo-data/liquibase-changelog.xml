@@ -4,9 +4,12 @@
   logicalFilePath="snapitup-demo-data/liquibase-changelog.xml">
 
 	<changeSet id="import-demo-snapitup-data" author="elasticpath" context="snapitup-data">
+
+		<validCheckSum>ANY</validCheckSum>
+
 		<comment>Initial import of SnapitUp demo catalog. This is temporary data until valid project data is created.</comment>
 
-		<customChange class="com.elasticpath.repo.datapopulation.importexport.ImportExportChange">
+		<customChange class="com.elasticpath.datapopulation.importexport.ImportExportChange">
 			<param name="dataSet" value="snapitup-demo-data" />
 		</customChange>
 	</changeSet>

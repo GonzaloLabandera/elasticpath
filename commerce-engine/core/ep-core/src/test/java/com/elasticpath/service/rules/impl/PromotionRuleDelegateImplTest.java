@@ -3,6 +3,7 @@
  */
 package com.elasticpath.service.rules.impl;  // NOPMD
 
+import static java.util.Collections.singletonList;
 import static org.hamcrest.collection.IsIterableContainingInOrder.contains;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -14,7 +15,6 @@ import static com.elasticpath.test.factory.ShoppingCartStubBuilder.aShoppingItem
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Currency;
 import java.util.Date;
 import java.util.List;
@@ -52,7 +52,6 @@ import com.elasticpath.domain.customer.CustomerSession;
 import com.elasticpath.domain.customer.impl.CustomerGroupImpl;
 import com.elasticpath.domain.discounts.DiscountItemContainer;
 import com.elasticpath.domain.misc.impl.RandomGuidImpl;
-import com.elasticpath.domain.shipping.ShippingServiceLevel;
 import com.elasticpath.domain.shopper.Shopper;
 import com.elasticpath.domain.shoppingcart.DiscountRecord;
 import com.elasticpath.domain.shoppingcart.ShoppingCart;
@@ -65,6 +64,9 @@ import com.elasticpath.persistence.support.impl.FetchGroupLoadTunerImpl;
 import com.elasticpath.service.catalog.ProductService;
 import com.elasticpath.service.catalog.ProductSkuLookup;
 import com.elasticpath.service.rules.PromotionRuleExceptions;
+import com.elasticpath.service.shipping.ShippingOptionResult;
+import com.elasticpath.service.shipping.ShippingOptionService;
+import com.elasticpath.shipping.connectivity.dto.ShippingOption;
 import com.elasticpath.test.BeanFactoryExpectationsFactory;
 
 /** Test cases for <code>PromotionRuleDelegateImpl</code>. */
@@ -117,6 +119,8 @@ public class PromotionRuleDelegateImplTest {
 	private BeanFactoryExpectationsFactory expectationsFactory;
 	@Mock private ProductSkuLookup productSkuLookup;
 	@Mock private ProductService productService;
+	@Mock private ShippingOptionService shippingOptionService;
+	@Mock private ShippingOptionResult shippingOptionResult;
 
 	/**
 	 * Prepare for each test.
@@ -130,6 +134,7 @@ public class PromotionRuleDelegateImplTest {
 		ruleDelegate = new PromotionRuleDelegateImpl();
 		ruleDelegate.setProductSkuLookup(productSkuLookup);
 		ruleDelegate.setProductService(productService);
+		ruleDelegate.setShippingOptionService(shippingOptionService);
 		ruleDelegate.setBeanFactory(beanFactory);
 	}
 
@@ -477,32 +482,34 @@ public class PromotionRuleDelegateImplTest {
 				.withCurrency(CANADIAN)
 				.build();
 
-		final ShippingServiceLevel shippingServiceLevel = context.mock(ShippingServiceLevel.class);
+		final ShippingOption shippingOption = context.mock(ShippingOption.class);
 		final DiscountItemContainer discountItemContainer = context.mock(DiscountItemContainer.class);
 
 		final BigDecimal discountAmount = Money.valueOf(BigDecimal.ONE, CANADIAN).getAmount();
-		final String serviceLevelCode = "SSLCode001";
+		final String shippingOptionCode = "SSLCode001";
 
 		// logic flow driver
-		context.checking(new Expectations() { {
-			allowing(shoppingCart).getShippingServiceLevelList();
-			will(returnValue(Collections.singletonList(shippingServiceLevel)));
+		context.checking(new Expectations() {
+			{
+				oneOf(shippingOption).getCode();
+				will(returnValue(shippingOptionCode));
+			}
+		});
 
-			oneOf(shippingServiceLevel).getCode(); will(returnValue(serviceLevelCode));
-		} });
+		mockShippingOptionServiceToReturnUnpriced(shoppingCart, singletonList(shippingOption));
 
 		// Actual test expectations
 		context.checking(new Expectations() { {
-			// The rule must set the shipping discount on the shipping service level
-			oneOf(discountItemContainer).applyShippingOptionDiscount(shippingServiceLevel, RULE_UID, ACTION_UID, discountAmount);
+			// The rule must set the shipping discount on the shipping option
+			oneOf(discountItemContainer).applyShippingOptionDiscount(shippingOption, RULE_UID, ACTION_UID, discountAmount);
 		} });
 
 		this.ruleDelegate.applyShippingDiscountAmount(
-				shoppingCart, discountItemContainer, RULE_UID, ACTION_UID, discountAmount.toString(), serviceLevelCode, CANADIAN);
+				shoppingCart, discountItemContainer, RULE_UID, ACTION_UID, discountAmount.toString(), shippingOptionCode, CANADIAN);
 	}
 
 	/**
-	 * Test shipping discount amount for selected shipping level in the shopping cart.
+	 * Test shipping discount amount for selected shipping option in the shopping cart.
 	 */
 	@Test
 	public void testApplyShippingDiscountPercent() {
@@ -514,38 +521,38 @@ public class PromotionRuleDelegateImplTest {
 				.withCurrency(CANADIAN)
 				.build();
 
-		final String serviceLevelCode = "SSLCode002";
+		final String shippingOptionCode = "SSLCode002";
 		final BigDecimal price = BigDecimal.TEN;
 		final String discountPercent = "25";
 		final Money shippingDiscountAmount = Money.valueOf("2.50", CANADIAN);
 
-		final ShippingServiceLevel shippingServiceLevel = context.mock(ShippingServiceLevel.class);
-
+		final ShippingOption shippingOption = context.mock(ShippingOption.class);
 		final DiscountItemContainer discountItemContainer = context.mock(DiscountItemContainer.class);
 
 		// logic flow driver
-		context.checking(new Expectations() { {
-			allowing(shoppingCart).getShippingServiceLevelList();
-			will(returnValue(Collections.singletonList(shippingServiceLevel)));
+		context.checking(new Expectations() {
+			{
+				allowing(shippingOption).getCode();
+				will(returnValue(shippingOptionCode));
 
-			allowing(shippingServiceLevel).getCode();
-			will(returnValue(serviceLevelCode));
+				oneOf(discountItemContainer).getPrePromotionPriceAmount(shippingOption);
+				will(returnValue(price));
+			}
+		});
 
-			oneOf(discountItemContainer).getPrePromotionPriceAmount(shippingServiceLevel);
-			will(returnValue(price));
-		} });
+		mockShippingOptionServiceToReturnUnpriced(shoppingCart, singletonList(shippingOption));
 
 		// Actual test expectations
 		context.checking(new Expectations() { {
 			// The rule must be recorded as being applied to the cart
 			final int expectedScale = 2;
-			oneOf(discountItemContainer).applyShippingOptionDiscount(shippingServiceLevel,
+			oneOf(discountItemContainer).applyShippingOptionDiscount(shippingOption,
 					RULE_UID, ACTION_UID, shippingDiscountAmount.getAmount().setScale(expectedScale));
 		} });
 
 		//When
 		this.ruleDelegate.applyShippingDiscountPercent(
-				shoppingCart, discountItemContainer, RULE_UID, ACTION_UID, discountPercent, serviceLevelCode, CANADIAN);
+				shoppingCart, discountItemContainer, RULE_UID, ACTION_UID, discountPercent, shippingOptionCode, CANADIAN);
 	}
 
 	/**
@@ -578,10 +585,11 @@ public class PromotionRuleDelegateImplTest {
 	public void testCartContainsSku() {
 		final ShoppingCart shoppingCart = aCart(context)
 				.with(aShoppingItem(context, productSkuLookup)
-						.withSkuCode(SKU_CODE1)
-						.withQuantity(QTY_5)
-						.withProduct(null)
-						.thatsDiscountable())
+							  .withSkuCode(SKU_CODE1)
+							  .withQuantity(QTY_5)
+							  .withProduct(null)
+							  .thatsDiscountable()
+							  .thatsNotABundleConstituent())
 				.build();
 
 		assertTrue(ruleDelegate.cartContainsSku(shoppingCart, SKU_CODE1, AT_LEAST_QUANTIFIER, 1));
@@ -617,8 +625,11 @@ public class PromotionRuleDelegateImplTest {
 				allowing(shoppingItem).getQuantity();
 				will(returnValue(QTY_10));
 
-				allowing(shoppingCart).getCartItems();
-				will(returnValue(Collections.singletonList(shoppingItem)));
+				allowing(shoppingCart).getAllShoppingItems();
+				will(returnValue(singletonList(shoppingItem)));
+
+				allowing(shoppingItem).isBundleConstituent();
+				will(returnValue(false));
 
 				allowing(discountItemContainer).cartItemEligibleForPromotion(with(shoppingItem), with(any(PromotionRuleExceptions.class)));
 				will(returnValue(true));
@@ -641,7 +652,12 @@ public class PromotionRuleDelegateImplTest {
 		product.setCode(PRODUCT1_CODE);
 
 		final ShoppingCart shoppingCart = aCart(context)
-				.with(aShoppingItem(context, productSkuLookup).withSkuCode(SKU_CODE1).withQuantity(QTY_5).withProduct(product).thatsDiscountable())
+				.with(aShoppingItem(context, productSkuLookup)
+							  .withSkuCode(SKU_CODE1)
+							  .withQuantity(QTY_5)
+							  .withProduct(product)
+							  .thatsDiscountable()
+							  .thatsNotABundleConstituent())
 				.build();
 
 		assertTrue(ruleDelegate.cartContainsProduct(shoppingCart, PRODUCT1_CODE, AT_LEAST_QUANTIFIER, 1, DUMMY_EXCEPTION_STR));
@@ -681,6 +697,9 @@ public class PromotionRuleDelegateImplTest {
 				allowing(shoppingItem).getSkuGuid();
 				will(returnValue(skuGuid));
 
+				allowing(shoppingItem).isBundleConstituent();
+				will(returnValue(false));
+
 				final ProductSku sku = context.mock(ProductSku.class);
 				allowing(productSkuLookup).findByGuid(skuGuid);
 				will(returnValue(sku));
@@ -688,8 +707,8 @@ public class PromotionRuleDelegateImplTest {
 				allowing(sku).getProduct();
 				will(returnValue(product));
 
-				allowing(shoppingCart).getCartItems();
-				will(returnValue(Collections.singletonList(shoppingItem)));
+				allowing(shoppingCart).getAllShoppingItems();
+				will(returnValue(singletonList(shoppingItem)));
 
 				allowing(discountItemContainer).cartItemEligibleForPromotion(with(shoppingItem), with(any(PromotionRuleExceptions.class)));
 				will(returnValue(true));
@@ -814,6 +833,33 @@ public class PromotionRuleDelegateImplTest {
 	public void testCheckEnabled() {
 		assertTrue(ruleDelegate.checkEnabled("true"));
 		assertFalse(ruleDelegate.checkEnabled("false"));
+	}
+
+	private void mockShippingOptionServiceToReturnUnpriced(final ShoppingCart shoppingCart, final List<ShippingOption> shippingOptions) {
+		mockShippingOptionResultToReturn(shippingOptions);
+
+		context.checking(new Expectations() {
+			{
+				allowing(shippingOptionService).getShippingOptions(shoppingCart);
+				will(returnValue(shippingOptionResult));
+				allowing(shoppingCart).getGuid();
+			}
+		});
+	}
+
+	@SuppressWarnings("unchecked")
+	private void mockShippingOptionResultToReturn(final List<ShippingOption> shippingOptions) {
+		context.checking(new Expectations() {
+			{
+				allowing(shippingOptionResult).isSuccessful();
+				will(returnValue(true));
+
+				allowing(shippingOptionResult).throwExceptionIfUnsuccessful(with(any(String.class)), with(any(List.class)));
+
+				allowing(shippingOptionResult).getAvailableShippingOptions();
+				will(returnValue(shippingOptions));
+			}
+		});
 	}
 
 } // NOPMD

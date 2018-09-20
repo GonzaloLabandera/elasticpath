@@ -393,9 +393,7 @@ public class ProductAssociationImpl extends AbstractLegacyEntityImpl implements 
 		ProductAssociation deepCopy;
 		try {
 			deepCopy = this.getClass().newInstance();
-		} catch (IllegalAccessException e) {
-			throw new EpDomainException("Could not create new ProductAssociation", e);
-		} catch (InstantiationException e) {
+		} catch (IllegalAccessException | InstantiationException e) {
 			throw new EpDomainException("Could not create new ProductAssociation", e);
 		}
 

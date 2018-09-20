@@ -3,12 +3,13 @@
  */
 package com.elasticpath.service.tax.impl;
 
+import static java.util.function.Function.identity;
+import static java.util.stream.Collectors.toMap;
+
 import java.math.BigDecimal;
 import java.util.Currency;
 import java.util.Map;
-import java.util.Set;
-
-import com.google.common.collect.Maps;
+import java.util.function.Function;
 
 import com.elasticpath.base.exception.EpServiceException;
 import com.elasticpath.commons.beanframework.BeanFactory;
@@ -38,8 +39,6 @@ import com.elasticpath.plugin.tax.domain.TaxOperationContext;
 import com.elasticpath.plugin.tax.domain.impl.MutableTaxDocument;
 import com.elasticpath.plugin.tax.domain.impl.StringTaxDocumentId;
 import com.elasticpath.plugin.tax.manager.TaxManager;
-import com.elasticpath.service.shoppingcart.OrderSkuToPricingSnapshotFunction;
-import com.elasticpath.service.shoppingcart.PricingSnapshotService;
 import com.elasticpath.service.store.StoreService;
 import com.elasticpath.service.tax.TaxCalculationResult;
 import com.elasticpath.service.tax.TaxCalculationService;
@@ -65,7 +64,7 @@ public class TaxOperationServiceImpl implements TaxOperationService {
 
 	private BeanFactory beanFactory;
 
-	private PricingSnapshotService pricingSnapshotService;
+	private Function<OrderSku, ShoppingItemPricingSnapshot> orderSkuToPricingSnapshotFunction;
 
 	@Override
 	public void deleteDocument(final TaxDocument taxDocument) {
@@ -100,10 +99,9 @@ public class TaxOperationServiceImpl implements TaxOperationService {
 			originAddress = getAddressAdapter().toTaxAddress(defaultWarehouse.getAddress());
 		}
 
-
-		final Set<OrderSku> shipmentOrderSkus = orderShipment.getShipmentOrderSkus();
-		final Map<? extends ShoppingItem, ShoppingItemPricingSnapshot> shipmentOrderSkuPricingMap =
-				Maps.asMap(shipmentOrderSkus, new OrderSkuToPricingSnapshotFunction(pricingSnapshotService));
+		final Map<? extends ShoppingItem, ShoppingItemPricingSnapshot> shipmentOrderSkuPricingMap = orderShipment.getShipmentOrderSkus().stream()
+				.collect(toMap(identity(),
+							   getOrderSkuToPricingSnapshotFunction()));
 
 		return getTaxCalculationService().calculateTaxes(orderShipment.getOrder().getStoreCode(),
 				getAddressAdapter().toTaxAddress(buildTaxAddress(orderShipment)),
@@ -348,12 +346,12 @@ public class TaxOperationServiceImpl implements TaxOperationService {
 		this.addressAdapter = addressAdapter;
 	}
 
-	protected PricingSnapshotService getPricingSnapshotService() {
-		return pricingSnapshotService;
+	protected Function<OrderSku, ShoppingItemPricingSnapshot> getOrderSkuToPricingSnapshotFunction() {
+		return this.orderSkuToPricingSnapshotFunction;
 	}
 
-	public void setPricingSnapshotService(final PricingSnapshotService pricingSnapshotService) {
-		this.pricingSnapshotService = pricingSnapshotService;
+	public void setOrderSkuToPricingSnapshotFunction(final Function<OrderSku, ShoppingItemPricingSnapshot> orderSkuToPricingSnapshotFunction) {
+		this.orderSkuToPricingSnapshotFunction = orderSkuToPricingSnapshotFunction;
 	}
 
 }

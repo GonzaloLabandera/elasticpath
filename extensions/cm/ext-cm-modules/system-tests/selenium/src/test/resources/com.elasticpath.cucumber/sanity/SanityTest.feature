@@ -47,7 +47,7 @@ Feature: Admin user can navigate all activities
       | skuCode                                      | quantity |
       | physical_product_with_lineitem_promotion_sku | 1        |
     And I view the Order Summary report
-    Then the number of orders for Order Summary report should have increased by 1
+    Then the number of orders for Order Summary report should have increased
 
     When I go to Configuration
     And I enter setting name mailHost in filter

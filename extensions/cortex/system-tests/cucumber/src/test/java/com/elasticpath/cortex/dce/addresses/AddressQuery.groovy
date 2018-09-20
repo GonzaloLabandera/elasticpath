@@ -1,10 +1,9 @@
 package com.elasticpath.cortex.dce.addresses
 
-import static org.assertj.core.api.Assertions.assertThat
-
-import static com.elasticpath.cortex.dce.ClasspathFluentRelosClientFactory.client
+import static com.elasticpath.cortex.dce.ClasspathFluentRelosClientFactory.getClient
 import static com.elasticpath.cortex.dce.SharedConstants.*
 import static com.elasticpath.cortex.dce.addresses.AddressConstants.*
+import static org.assertj.core.api.Assertions.assertThat
 
 import cucumber.api.groovy.EN
 import cucumber.api.groovy.Hooks
@@ -54,7 +53,7 @@ And(~'^address element (.+) is identical to the public shopper\'s address$') { i
 	}
 
 	def element = elements[index - 1]
-	client.GET(element.uri)
+	client.GET(element.href)
 
 	assertThat(client.body.address.'country-name')
 			.as("Country name is not as expected")

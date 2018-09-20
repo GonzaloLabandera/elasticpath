@@ -117,6 +117,9 @@
     <importer type="DYNAMICCONTENTDELIVERY">
       <importstrategy>INSERT_OR_UPDATE</importstrategy>
     </importer>
+	  <importer type="CUSTOMER_CONSENT">
+		  <importstrategy>INSERT</importstrategy>
+	  </importer>
   </importstrategy>
   <packager type="NONE"/>
   <retrieval>

@@ -24,7 +24,7 @@ import com.elasticpath.email.producer.spi.composer.util.EmailContextFactory;
 import com.elasticpath.email.util.LegacyEmailComposer;
 import com.elasticpath.service.catalogview.impl.ThreadLocalStorageImpl;
 import com.elasticpath.service.store.StoreService;
-import com.elasticpath.settings.SettingsReader;
+import com.elasticpath.settings.provider.SettingValueProvider;
 
 /**
  * Legacy implementation of {@link LegacyEmailComposer}.
@@ -36,13 +36,7 @@ public class LegacyEmailComposerImpl implements LegacyEmailComposer {
 
 	private static final Logger LOG = Logger.getLogger(LegacyEmailComposerImpl.class);
 
-	private static final String SETTING_GLOBAL_SENDER_ADDRESS = "COMMERCE/SYSTEM/EMAIL/emailGlobalSenderAddress";
-
-	private static final String SETTING_GLOBAL_SENDER_NAME = "COMMERCE/SYSTEM/EMAIL/emailGlobalSenderName";
-
 	private static final String BASE_EMAIL_TEMPLATE_DIR = "email"; // the email folder is hard-coded but the store code is added dynamically
-
-	private SettingsReader settingsReader;
 
 	private StoreService storeService;
 
@@ -52,6 +46,9 @@ public class LegacyEmailComposerImpl implements LegacyEmailComposer {
 	// We need to use the thread local implementation to set storecode on the active thread. Will be picked up by velocity and resource managers
 	private ThreadLocalStorageImpl tlStoreConfig;
 	private EmailContextFactory emailContextFactory;
+	private SettingValueProvider<Boolean> emailTextTemplateEnabledProvider;
+	private SettingValueProvider<String> emailGlobalSenderAddressProvider;
+	private SettingValueProvider<String> emailGlobalSenderNameProvider;
 
 	/**
 	 * Sets the store service required for resolving the store code and sender from <code>EmailProperties</code>.
@@ -60,13 +57,6 @@ public class LegacyEmailComposerImpl implements LegacyEmailComposer {
 	 */
 	public void setStoreService(final StoreService storeService) {
 		this.storeService = storeService;
-	}
-
-	/**
-	 * @param settingsReader the instance of SettingsReader.
-	 */
-	public void setSettingsReader(final SettingsReader settingsReader) {
-		this.settingsReader = settingsReader;
 	}
 
 	/**
@@ -137,9 +127,8 @@ public class LegacyEmailComposerImpl implements LegacyEmailComposer {
 	 */
 	boolean canOnlySendTextEmail(final EmailProperties emailProperties) {
 		return ((emailProperties.isTextOnly() != null) && emailProperties.isTextOnly()) // necessary to preserve old logic in Properties object
-			|| settingsReader.getSettingValue("COMMERCE/SYSTEM/EMAIL/emailTextTemplateEnabled").getBooleanValue();
+				|| getEmailTextTemplateEnabledProvider().get();
 	}
-
 
 	/**
 	 * Compose email content.
@@ -215,31 +204,21 @@ public class LegacyEmailComposerImpl implements LegacyEmailComposer {
 	}
 
 	/**
-	 * Get value of emailSenderName.
+	 * Get the sender name for system emails.
 	 *
-	 * @return the setting value
+	 * @return the sender name for system emails.
 	 */
 	protected String getEmailGlobalSenderName() {
-		return getSystemSettingValue(SETTING_GLOBAL_SENDER_NAME);
+		return getEmailGlobalSenderNameProvider().get();
 	}
 
 	/**
-	 * This implementation calls {@link #getSystemSettingValue(String)}.
+	 * Gets the "from" email address for system emails.
 	 *
-	 * @return the email address to be used as the "from" address for system emails.
+	 * @return the "from" email address for system emails.
 	 */
 	protected String getEmailGlobalSenderAddress() {
-		return getSystemSettingValue(SETTING_GLOBAL_SENDER_ADDRESS);
-	}
-
-	/**
-	 * Retrieves a setting value string with global context from the settings service.
-	 *
-	 * @param key the key to the setting value
-	 * @return the setting value string
-	 */
-	String getSystemSettingValue(final String key) {
-		return settingsReader.getSettingValue(key).getValue();
+		return getEmailGlobalSenderAddressProvider().get();
 	}
 
 	/**
@@ -266,4 +245,29 @@ public class LegacyEmailComposerImpl implements LegacyEmailComposer {
 	public void setEmailContextFactory(final EmailContextFactory emailContextFactory) {
 		this.emailContextFactory = emailContextFactory;
 	}
+
+	protected SettingValueProvider<Boolean> getEmailTextTemplateEnabledProvider() {
+		return emailTextTemplateEnabledProvider;
+	}
+
+	public void setEmailTextTemplateEnabledProvider(final SettingValueProvider<Boolean> emailTextTemplateEnabledProvider) {
+		this.emailTextTemplateEnabledProvider = emailTextTemplateEnabledProvider;
+	}
+
+	protected SettingValueProvider<String> getEmailGlobalSenderAddressProvider() {
+		return emailGlobalSenderAddressProvider;
+	}
+
+	public void setEmailGlobalSenderAddressProvider(final SettingValueProvider<String> emailGlobalSenderAddressProvider) {
+		this.emailGlobalSenderAddressProvider = emailGlobalSenderAddressProvider;
+	}
+
+	protected SettingValueProvider<String> getEmailGlobalSenderNameProvider() {
+		return emailGlobalSenderNameProvider;
+	}
+
+	public void setEmailGlobalSenderNameProvider(final SettingValueProvider<String> emailGlobalSenderNameProvider) {
+		this.emailGlobalSenderNameProvider = emailGlobalSenderNameProvider;
+	}
+
 }

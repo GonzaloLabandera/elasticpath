@@ -40,6 +40,7 @@ import com.elasticpath.commons.constants.GlobalConstants;
 import com.elasticpath.domain.sellingcontext.SellingContext;
 import com.elasticpath.persistence.api.AbstractEntityImpl;
 import com.elasticpath.persistence.support.FetchGroupConstants;
+import com.elasticpath.service.rules.impl.RuleValidationResultEnum;
 import com.elasticpath.tags.TagSet;
 import com.elasticpath.tags.domain.ConditionalExpression;
 import com.elasticpath.tags.domain.TagDictionary;
@@ -290,11 +291,11 @@ public class SellingContextImpl extends AbstractEntityImpl implements SellingCon
 	 * @param conditionsEvaluationService the evaluation service
 	 * @param tagSet the tag set with condition values
 	 * @param tagDefinitonGuids the dictionaries to use for evaluation (may be null)
-	 * @return true if all conditions are satisfied, false otherwise
+	 * @return SUCCESS if rule is valid for store, validation error type otherwise.
 	 */
 	@Override
-	public boolean isSatisfied(final ConditionEvaluatorService conditionsEvaluationService,
-							   final TagSet tagSet, final String ... tagDefinitonGuids) {
+	public RuleValidationResultEnum isSatisfied(final ConditionEvaluatorService conditionsEvaluationService,
+												final TagSet tagSet, final String ... tagDefinitonGuids) {
 		List<String> useDictionaries = getDefaultEvaluationTags();
 
 		if (tagDefinitonGuids != null && tagDefinitonGuids.length > 0) {
@@ -302,10 +303,21 @@ public class SellingContextImpl extends AbstractEntityImpl implements SellingCon
 		}
 
 		boolean satisfied = true;
+		boolean isWithinDateRange = true;
 		for (String tag : useDictionaries) {
-			satisfied &= isConditionSatisfied(conditionsEvaluationService, getCondition(tag), tagSet);
+
+			boolean conditionSatisfied = isConditionSatisfied(conditionsEvaluationService, getCondition(tag), tagSet);
+
+			satisfied &= conditionSatisfied;
+			if (!conditionSatisfied && TagDictionary.DICTIONARY_TIME_GUID.equals(tag)) {
+				isWithinDateRange = false;
+			}
 		}
-		return satisfied;
+		if (satisfied) {
+			return RuleValidationResultEnum.SUCCESS;
+		} else {
+			return isWithinDateRange ? RuleValidationResultEnum.ERROR_UNSPECIFIED : RuleValidationResultEnum.ERROR_EXPIRED;
+		}
 	}
 
 	/**

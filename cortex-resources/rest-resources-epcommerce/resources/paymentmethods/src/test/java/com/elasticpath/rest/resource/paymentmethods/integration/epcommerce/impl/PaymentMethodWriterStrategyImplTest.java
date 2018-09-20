@@ -19,14 +19,14 @@ import org.junit.runner.RunWith;
 
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.elasticpath.domain.cartorder.CartOrder;
 import com.elasticpath.domain.cartorder.impl.CartOrderImpl;
 import com.elasticpath.domain.customer.Customer;
-import com.elasticpath.domain.customer.CustomerCreditCard;
 import com.elasticpath.domain.customer.CustomerPaymentMethods;
-import com.elasticpath.domain.customer.impl.CustomerCreditCardImpl;
+import com.elasticpath.domain.customer.PaymentToken;
+import com.elasticpath.domain.customer.impl.PaymentTokenImpl;
 import com.elasticpath.plugin.payment.dto.PaymentMethod;
 import com.elasticpath.rest.ResourceStatus;
 import com.elasticpath.rest.command.ExecutionResult;
@@ -66,8 +66,8 @@ public class PaymentMethodWriterStrategyImplTest {
 	@Before
 	public void setUpHappyCollaborators() {
 		cartOrder = new CartOrderImpl();
-		paymentMethod = new CustomerCreditCardImpl();
-		((CustomerCreditCard) paymentMethod).setUidPk(Long.valueOf(DECODED_PAYMENT_METHOD_ID));
+		paymentMethod = new PaymentTokenImpl.TokenBuilder().build();
+		((PaymentToken) paymentMethod).setUidPk(Long.valueOf(DECODED_PAYMENT_METHOD_ID));
 
 		when(customer.getPaymentMethods()).thenReturn(customerPaymentMethods);
 		when(customerPaymentMethods.getByUidPk(Long.valueOf(DECODED_PAYMENT_METHOD_ID))).thenReturn(paymentMethod);
@@ -76,11 +76,11 @@ public class PaymentMethodWriterStrategyImplTest {
 		when(resourceOperationContext.getUserIdentifier()).thenReturn(DECODED_PROFILE_ID);
 
 		when(cartOrderRepository.findByGuid(SCOPE, DECODED_ORDER_ID)).thenReturn(ExecutionResultFactory.createReadOK(cartOrder));
-		when(cartOrderRepository.saveCartOrder(cartOrder)).thenReturn(ExecutionResultFactory.<CartOrder>createUpdateOK());
+		when(cartOrderRepository.saveCartOrder(cartOrder)).thenReturn(ExecutionResultFactory.createUpdateOK());
 
 		when(customerRepository.findCustomerByGuid(DECODED_PROFILE_ID)).thenReturn(ExecutionResultFactory.createReadOK(customer));
 
-		when(customerRepository.updateCustomer(customer)).thenReturn(ExecutionResultFactory.<Void>createUpdateOK());
+		when(customerRepository.updateCustomer(customer)).thenReturn(ExecutionResultFactory.createUpdateOK());
 	}
 
 	@Test
@@ -107,7 +107,7 @@ public class PaymentMethodWriterStrategyImplTest {
 	@Test
 	public void ensureNotFoundWhenCustomerWithCartOrderIsNotFound() {
 		when(customerRepository.findCustomerByGuid(DECODED_PROFILE_ID))
-				.thenReturn(ExecutionResultFactory.<Customer>createNotFound());
+				.thenReturn(ExecutionResultFactory.createNotFound());
 		thrown.expect(containsResourceStatus(ResourceStatus.NOT_FOUND));
 
 		paymentMethodWriterStrategy.updatePaymentMethodSelectionForOrder(SCOPE, DECODED_ORDER_ID, DECODED_PAYMENT_METHOD_ID);
@@ -161,7 +161,7 @@ public class PaymentMethodWriterStrategyImplTest {
 	@Test
 	public void ensureStateFailureIsReturnedWhenOrderUpdateFails() {
 		when(cartOrderRepository.saveCartOrder(cartOrder))
-				.thenReturn(ExecutionResultFactory.<CartOrder>createStateFailure(""));
+				.thenReturn(ExecutionResultFactory.createStateFailure(""));
 		thrown.expect(containsResourceStatus(ResourceStatus.STATE_FAILURE));
 
 		paymentMethodWriterStrategy.updatePaymentMethodSelectionForOrder(SCOPE, DECODED_ORDER_ID, DECODED_PAYMENT_METHOD_ID);
@@ -208,7 +208,7 @@ public class PaymentMethodWriterStrategyImplTest {
 	@Test
 	public void ensureServerErrorIsReturnedWhenCustomerFailsToUpdate() {
 		when(customerRepository.updateCustomer(customer))
-				.thenReturn(ExecutionResultFactory.<Void>createServerError(""));
+				.thenReturn(ExecutionResultFactory.createServerError(""));
 		thrown.expect(containsResourceStatus(ResourceStatus.SERVER_ERROR));
 
 		paymentMethodWriterStrategy.deletePaymentMethodForProfile(DECODED_PROFILE_ID, DECODED_PAYMENT_METHOD_ID);
@@ -217,7 +217,7 @@ public class PaymentMethodWriterStrategyImplTest {
 	@Test
 	public void ensureNotFoundWhenCustomerWithPaymentMethodToDeleteNotFound() {
 		when(customerRepository.findCustomerByGuid(DECODED_PROFILE_ID))
-				.thenReturn(ExecutionResultFactory.<Customer>createNotFound());
+				.thenReturn(ExecutionResultFactory.createNotFound());
 		thrown.expect(containsResourceStatus(ResourceStatus.NOT_FOUND));
 
 		paymentMethodWriterStrategy.deletePaymentMethodForProfile(DECODED_PROFILE_ID, DECODED_PAYMENT_METHOD_ID);

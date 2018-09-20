@@ -6,7 +6,7 @@ package com.elasticpath.service.rules.impl;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.drools.RuleBase;
+import org.kie.api.KieBase;
 
 import com.elasticpath.cache.SimpleTimeoutCache;
 import com.elasticpath.domain.rules.EpRuleBase;
@@ -27,7 +27,7 @@ public class DBReadingRuleEngineImpl extends AbstractRuleEngineImpl {
 	private final Map<String, EpRuleBase> catalogRuleBases = new ConcurrentHashMap<>();
 
 	@Override
-	protected RuleBase getCartRuleBase(final Store store) {
+	protected KieBase getCartRuleBase(final Store store) {
 		final String code = store.getCode();
 		EpRuleBase ruleBase;
 
@@ -60,7 +60,7 @@ public class DBReadingRuleEngineImpl extends AbstractRuleEngineImpl {
 	}
 
 	@Override
-	protected RuleBase getCatalogRuleBase(final Store store) {
+	protected KieBase getCatalogRuleBase(final Store store) {
 		final String code = store.getCatalog().getCode();
 
 		Boolean cacheIsValid = cachedCatalogRuleBaseState.get(code);

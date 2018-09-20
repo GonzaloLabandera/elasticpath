@@ -17,12 +17,12 @@ import com.elasticpath.domain.order.OrderPayment;
 import com.elasticpath.domain.order.OrderReturn;
 import com.elasticpath.domain.order.OrderReturnType;
 import com.elasticpath.domain.order.OrderShipment;
-import com.elasticpath.domain.shipping.ShippingServiceLevel;
 import com.elasticpath.domain.shoppingcart.ShoppingCart;
 import com.elasticpath.domain.shoppingcart.ShoppingItem;
 import com.elasticpath.persistence.api.FetchGroupLoadTuner;
 import com.elasticpath.service.EpPersistenceService;
 import com.elasticpath.service.search.query.OrderReturnSearchCriteria;
+import com.elasticpath.shipping.connectivity.dto.ShippingOption;
 
 /**
  * Provides storage and access to <code>OrderReturn</code> objects.
@@ -107,7 +107,6 @@ public interface ReturnAndExchangeService extends EpPersistenceService {
 	 * @return the persisted instance if exists, otherwise null
 	 * @throws EpServiceException - in case of any errors
 	 */
-	@Override
 	Object getObject(long uid) throws EpServiceException;
 
 	/**
@@ -159,27 +158,27 @@ public interface ReturnAndExchangeService extends EpPersistenceService {
 	 *
 	 * @param orderExchange exchange shopping cart will be created for
 	 * @param itemList the list of cart items
-	 * @param shippingServiceLevel shipping service level
+	 * @param shippingOption shipping option
 	 * @param shippingAddress shipping address
 	 * @return recalculated shopping cart.
 	 */
 	ShoppingCart populateShoppingCart(OrderReturn orderExchange, Collection<? extends ShoppingItem> itemList,
-			ShippingServiceLevel shippingServiceLevel, Address shippingAddress);
+									  ShippingOption shippingOption, Address shippingAddress);
 
 	/**
 	 * Populates internal exchange's shopping cart. This exchange shopping cart will be used to create exchange order.
 	 *
 	 * @param orderExchange exchange shopping cart will be created for
 	 * @param itemList the list of cart items
-	 * @param shippingServiceLevel shipping service level
+	 * @param shippingOption shipping option
 	 * @param shippingCost shipping cost for the exchange order
 	 * @param shippingDiscount shipping discount for the exchange order
 	 * @param shippingAddress shipping address
 	 * @return recalculated shopping cart.
 	 */
 	ShoppingCart populateShoppingCart(OrderReturn orderExchange, Collection<? extends ShoppingItem> itemList,
-			ShippingServiceLevel shippingServiceLevel, BigDecimal shippingCost, BigDecimal shippingDiscount,
-			Address shippingAddress);
+									  ShippingOption shippingOption, BigDecimal shippingCost, BigDecimal shippingDiscount,
+									  Address shippingAddress);
 
 	/**
 	 * Gets exchange by order exchange's uidPk.

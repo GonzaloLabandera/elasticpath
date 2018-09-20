@@ -44,6 +44,9 @@
         <named-query name="DELETE_SETTINGVALUES_BY_UID">
         	<query>DELETE FROM SettingValueImpl sv WHERE sv.uidPk IN (:list)</query>
         </named-query>
+        <named-query name="DELETE_SETTINGVALUES_BY_DEFINITION_UID">
+            <query>DELETE FROM SettingValueImpl sv WHERE sv.settingDefinition.uidPk = ?1</query>
+        </named-query>
         <named-query name="SETTING_VALUES_COUNT_BY_PATH_AND_CONTEXT">
         	<query>SELECT COUNT(settingValue.uidPk) FROM SettingValueImpl as settingValue WHERE settingValue.settingDefinition.path = ?1 AND settingValue.context = ?2</query>
         </named-query>

@@ -3,6 +3,8 @@
  */
 package com.elasticpath.cucumber.steps;
 
+import static org.mockito.Mockito.when;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -19,9 +21,7 @@ import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
 import org.apache.commons.collections.CollectionUtils;
 import org.junit.Assert;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.ContextConfiguration;
 
 import com.elasticpath.common.dto.customer.AttributeValueDTO;
 import com.elasticpath.common.dto.customer.CustomerDTO;
@@ -41,12 +41,10 @@ import com.elasticpath.ql.parser.EPQueryType;
 import com.elasticpath.search.searchengine.EpQLSearchEngine;
 import com.elasticpath.search.searchengine.SolrIndexSearchResult;
 import com.elasticpath.service.customer.CustomerGroupService;
-import com.elasticpath.service.customer.CustomerService;
 
 /**
  * Export customer steps.
  */
-@ContextConfiguration("/integration-context-mocked-customer-service.xml")
 public class ExportCustomerSteps {
 
 	private static final String CUSTOMERS_EXPORT_FILE = "customers.xml";
@@ -57,9 +55,6 @@ public class ExportCustomerSteps {
 
 	@Autowired
 	private ExportController exportController;
-
-	@Autowired
-	private CustomerService customerService;
 
 	@Autowired
 	private CustomerGroupService customerGroupService;
@@ -73,7 +68,6 @@ public class ExportCustomerSteps {
 
 	private static int runNumber = 1;
 
-
 	/**
 	 * Export customers with importexport tool.
 	 *
@@ -83,31 +77,30 @@ public class ExportCustomerSteps {
 	public void runExport() throws Exception {
 		exportDirectory =
 				ImportExportTestDirectoryBuilder.newInstance()
-					.withTestName(this.getClass().getSimpleName())
-					.withRunNumber(runNumber++)
-					.build();
+						.withTestName(this.getClass().getSimpleName())
+						.withRunNumber(runNumber++)
+						.build();
 
 		final ArrayList<Long> createdCustomerUids = new ArrayList<>(
-			Collections2.transform(CustomerSteps.getPersistedCustomers(), new Function<Customer, Long>() {
-				@Override
-				public Long apply(final Customer customer) {
-					return customer.getUidPk();
-				}
-			})
+				Collections2.transform(CustomerSteps.getPersistedCustomers(), new Function<Customer, Long>() {
+					@Override
+					public Long apply(final Customer customer) {
+						return customer.getUidPk();
+					}
+				})
 		);
 
 		final SolrIndexSearchResult<Long> customerSearchResult = new SolrIndexSearchResult<>();
 		customerSearchResult.setEpQueryType(EPQueryType.CUSTOMER);
 		customerSearchResult.setResultUids(createdCustomerUids);
 
-		Mockito.when(epQLSearchEngine.<Long>search(CUSTOMER_SEARCH_QUERY)).thenReturn(customerSearchResult);
-		Mockito.when(customerService.findByUids(createdCustomerUids)).thenReturn(CustomerSteps.getPersistedCustomers());
+		when(epQLSearchEngine.<Long>search(CUSTOMER_SEARCH_QUERY)).thenReturn(customerSearchResult);
 
 		final ExportConfiguration exportConfiguration =
 				ExportConfigurationBuilder.newInstance()
-					.setDeliveryTarget(exportDirectory.getPath())
-					.setExporterTypes(Arrays.asList(RequiredJobType.CUSTOMER))
-					.build();
+						.setDeliveryTarget(exportDirectory.getPath())
+						.setExporterTypes(Arrays.asList(RequiredJobType.CUSTOMER))
+						.build();
 
 		final SearchConfiguration searchConfiguration = new SearchConfiguration();
 		searchConfiguration.getQueries().add(new SearchQuery(EPQueryType.CUSTOMER.getTypeName(), CUSTOMER_SEARCH_QUERY));
@@ -139,8 +132,8 @@ public class ExportCustomerSteps {
 	/**
 	 * Ensure the customer is exported with customer groups.
 	 *
-	 * @param customerFirstName the customer first name
-	 * @param customerLastName the customer last name
+	 * @param customerFirstName  the customer first name
+	 * @param customerLastName   the customer last name
 	 * @param customerGroupNames the customer group names
 	 */
 	@Then("^the exported customer record \\[(\\w+) (\\w+)\\] should include associations? to customer segments? \\[([A-Z0-9_,]+)\\]$")
@@ -153,7 +146,7 @@ public class ExportCustomerSteps {
 	 * Ensure the customer is exported with no customer group.
 	 *
 	 * @param customerFirstName the customer first name
-	 * @param customerLastName the customer last name
+	 * @param customerLastName  the customer last name
 	 */
 	@Then("^the exported customer record \\[(\\w+) (\\w+)\\] should have no association to any customer segment$")
 	public void ensureCustomerExportedWithNoCustomerGroup(final String customerFirstName, final String customerLastName) {
@@ -186,18 +179,18 @@ public class ExportCustomerSteps {
 	}
 
 	private CustomerDTO findCustomerDTOByName(final List<CustomerDTO> customerDTOs,
-			final String customerFirstName, final String customerLastName) {
+											  final String customerFirstName, final String customerLastName) {
 
 		final Collection<CustomerDTO> matchingCustomerDTOs =
 				Collections2.filter(customerDTOs,
-					new Predicate<CustomerDTO>() {
-						@Override
-						public boolean apply(final CustomerDTO customerDTO) {
-							final String dtoFirstName = getProfileValueString(customerDTO, CustomerImpl.ATT_KEY_CP_FIRST_NAME);
-							final String dtoLastName = getProfileValueString(customerDTO, CustomerImpl.ATT_KEY_CP_LAST_NAME);
-							return customerFirstName.equals(dtoFirstName) && customerLastName.equals(dtoLastName);
-						}
-					});
+						new Predicate<CustomerDTO>() {
+							@Override
+							public boolean apply(final CustomerDTO customerDTO) {
+								final String dtoFirstName = getProfileValueString(customerDTO, CustomerImpl.ATT_KEY_CP_FIRST_NAME);
+								final String dtoLastName = getProfileValueString(customerDTO, CustomerImpl.ATT_KEY_CP_LAST_NAME);
+								return customerFirstName.equals(dtoFirstName) && customerLastName.equals(dtoLastName);
+							}
+						});
 
 		if (matchingCustomerDTOs.isEmpty()) {
 			return null;

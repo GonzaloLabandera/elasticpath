@@ -14,7 +14,7 @@ import javax.validation.ConstraintViolation;
 
 import com.google.common.collect.Maps;
 
-import com.elasticpath.common.dto.StructuredErrorMessage;
+import com.elasticpath.base.common.dto.StructuredErrorMessage;
 import com.elasticpath.domain.cartmodifier.CartItemModifierField;
 import com.elasticpath.validation.ConstraintViolationTransformer;
 import com.elasticpath.validation.service.CartItemModifierFieldValidationService;
@@ -32,10 +32,6 @@ public class CartItemModifierFieldValidationServiceImpl implements CartItemModif
 	private boolean isRequiredSuppression;
 
 	private ConstraintViolationTransformer constraintViolationTransformer;
-
-	public void setConstraintViolationTransformer(final ConstraintViolationTransformer constraintViolationTransformer) {
-		this.constraintViolationTransformer = constraintViolationTransformer;
-	}
 
 	@Override
 	public List<StructuredErrorMessage> validate(final Map<String, String> itemsToValidate,
@@ -65,6 +61,10 @@ public class CartItemModifierFieldValidationServiceImpl implements CartItemModif
 		}
 
 		return constraintViolationTransformer.transform(violations);
+	}
+
+	public void setConstraintViolationTransformer(final ConstraintViolationTransformer constraintViolationTransformer) {
+		this.constraintViolationTransformer = constraintViolationTransformer;
 	}
 
 	public void setRequiredSuppression(final boolean requiredSuppression) {

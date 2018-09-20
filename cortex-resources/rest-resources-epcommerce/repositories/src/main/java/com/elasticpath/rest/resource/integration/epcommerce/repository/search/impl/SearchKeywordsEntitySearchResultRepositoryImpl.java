@@ -3,8 +3,6 @@
  */
 package com.elasticpath.rest.resource.integration.epcommerce.repository.search.impl;
 
-import java.util.Objects;
-
 import com.google.common.collect.ImmutableMap;
 import io.reactivex.Completable;
 import io.reactivex.Single;
@@ -22,7 +20,6 @@ import com.elasticpath.rest.form.SubmitStatus;
 import com.elasticpath.rest.id.IdentifierPart;
 import com.elasticpath.rest.id.type.CompositeIdentifier;
 import com.elasticpath.rest.id.type.IntegerIdentifier;
-import com.elasticpath.rest.schema.util.ResourceStateUtil;
 
 /**
  * Repository for search keywords entity.
@@ -57,18 +54,9 @@ public class SearchKeywordsEntitySearchResultRepositoryImpl<E extends SearchKeyw
 		}
 
 		Integer pageSize = searchKeywordsEntity.getPageSize();
-		if (pageSize == null) {
-			//May not be an Integer; if it is blank, that is the same as non-existent
-			Object pageSizeObject = ResourceStateUtil.getRawProperty(searchKeywordsEntity, "page-size");
-			if (StringUtils.isNoneBlank(Objects.toString(pageSizeObject, StringUtils.EMPTY))) {
-				return Completable.error(ResourceOperationFailure
-						.badRequestBody("Page size not an integer"));
-			}
-		} else {
-			if (!RANGE.contains(pageSize)) {
-				return Completable.error(ResourceOperationFailure
-						.badRequestBody(String.format("Page Size is outside this range: %s", RANGE)));
-			}
+		if (pageSize != null && !RANGE.contains(pageSize)) {
+			return Completable.error(ResourceOperationFailure
+					.badRequestBody(String.format("Page Size is outside this range: %s", RANGE)));
 		}
 
 		return Completable.complete();

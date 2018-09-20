@@ -1,9 +1,9 @@
 package com.elasticpath.cortex.dce
 
-import static org.assertj.core.api.Assertions.assertThat
-
 import static com.elasticpath.cortex.dce.ClasspathFluentRelosClientFactory.client
 import static com.elasticpath.cortex.dce.CommonAssertion.assertMap
+import static com.elasticpath.rest.ws.assertions.RelosAssert.assertLinkExists
+import static org.assertj.core.api.Assertions.assertThat
 
 import cucumber.api.DataTable
 import cucumber.api.groovy.EN
@@ -31,14 +31,35 @@ Then(~'(?:the operation is identified as|the HTTP status is) (.+)$') { String re
 			.isEqualTo(RESPONSE_MAP[response])
 }
 
+Then(~'(?:.+) fails with status (.+)$') { String response ->
+	assertThat(client.response.status)
+			.as("The response status is not as expected")
+			.isEqualTo(RESPONSE_MAP[response])
+}
+
 Then(~'the HTTP status code is (.+)') { int code ->
 	assertThat(client.response.status)
 			.as("The response status is not as expected")
 			.isEqualTo(code)
 }
 
+Then(~'the response message is (.+)') { String expectedDebugMessage ->
+	def actualDebugMessage = client.response.responseData.messages[0]."debug-message"
+	assertThat(actualDebugMessage)
+			.as("HTTP response message is not as expected")
+			.isEqualTo(expectedDebugMessage)
+}
+
+
 Then(~'^I follow location$') { ->
 	client.follow()
+}
+
+Then(~'I specify the (.*) and follow (?:the link|links) (.+)') { String format, String resources ->
+	/* this step will follow a list of links separated by '->'
+	ie. When I follow links cart -> order -> paymentmethodinfo
+	 */
+	navigateResources(resources, format)
 }
 
 Then(~'I follow (?:the link|links) (.+)') { String resources ->
@@ -57,6 +78,10 @@ Then(~'I navigate links (.+)') { String resources ->
 }
 
 def navigateResources(def resources) {
+	navigateResources(resources, "")
+}
+
+def navigateResources(def resources, def format) {
 	List<String> path = new ArrayList<String>()
 	path.addAll(resources.split("->"))
 
@@ -69,7 +94,13 @@ def navigateResources(def resources) {
 				.as("rel $rel not found")
 				.isGreaterThan(0)
 
-		client.GET(links.get(0).uri)
+		String link = links.get(0).href
+		if (link.contains('?')) {
+			link = link + "&format=" + format
+		} else {
+			link = link + "?format=" + format
+		}
+		client.GET(link)
 				.stopIfFailure()
 	}
 }
@@ -82,7 +113,7 @@ Then(~'open the (element|child) with field (.+) containing (.+)') { def linkrel,
 	elementExists = false
 	client.body.links.find {
 		if (it.rel == linkrel) {
-			client.GET(it.uri)
+			client.GET(it.href)
 			if (client[field].toString().contains(value)) {
 				elementResponse = client.save()
 				elementExists = true
@@ -100,7 +131,7 @@ Then(~'there is an (element|child) with field (.+) of (.+)') { def linkrel, def 
 	def uri = client.body.self.uri
 	client.body.links.find {
 		if (it.rel == linkrel) {
-			client.GET(it.uri)
+			client.GET(it.href)
 			if (client[field] == value) {
 				elementExists = true
 			}
@@ -119,7 +150,7 @@ Then(~'there is an element with field (.+) containing (.+)') { def field, def va
 	def uri = client.body.self.uri
 	client.body.links.find {
 		if (it.rel == "element") {
-			client.GET(it.uri)
+			client.GET(it.href)
 			if (client[field].toString().contains(value)) {
 				elementExists = true
 			}
@@ -137,7 +168,7 @@ Then(~'there is no element with field (.+) of (.+)') { def field, def value ->
 	elementExists = false
 	client.body.links.find {
 		if (it.rel == "element") {
-			client.GET(it.uri)
+			client.GET(it.href)
 			if (client[field] == value) {
 				elementResponse = client.save()
 				elementExists = true
@@ -169,14 +200,40 @@ Then(~'^the field (.+) does not exist') { def field ->
 }
 
 Then(~'there are no (.+) links') { def rel ->
-	def expectedLinks = client.body.links.findAll {
-		link ->
-			link.rel == rel
-	}
-	assertThat(expectedLinks)
-			.size()
-			.as("$rel links found but should not exist: $client.body.links")
-			.isEqualTo(0)
+	CommonMethods.verifyNavigationLinkDoesNotExist(rel)
+}
+
+Then(~'the category (.+) that has no sub-category is at the expected category level and has items') { def displayName ->
+	def navigationDisplayName = client["display-name"]
+	assertThat(navigationDisplayName)
+			.isEqualTo(displayName)
+
+	CommonMethods.verifyNavigationLinkDoesNotExist("parent")
+	CommonMethods.verifyNavigationLinkDoesNotExist("child")
+	assertLinkExists(client, "top")
+	assertLinkExists(client, "items")
+}
+
+Then(~'the category (.+) is at the sub-category level and has items') { def displayName ->
+	def navigationDisplayName = client["display-name"]
+	assertThat(navigationDisplayName)
+			.isEqualTo(displayName)
+
+	assertLinkExists(client, "parent")
+	CommonMethods.verifyNavigationLinkDoesNotExist("child")
+	assertLinkExists(client, "top")
+	assertLinkExists(client, "items")
+}
+
+Then(~'the parent category (.+) that has sub-category is at the expected category level and has items') { def displayName ->
+	def navigationDisplayName = client["display-name"]
+	assertThat(navigationDisplayName)
+			.isEqualTo(displayName)
+
+	CommonMethods.verifyNavigationLinkDoesNotExist("parent")
+	assertLinkExists(client, "child")
+	assertLinkExists(client, "top")
+	assertLinkExists(client, "items")
 }
 
 Then(~'there are (.+) links of rel (.+)') { Integer count, def rel ->
@@ -209,7 +266,7 @@ Then(~'return to the saved (?:.*)') { ->
 }
 
 Then(~'save link rel (?:.*) uri') { ->
-	savedRel = client.body.links[0].uri
+	savedRel = client.body.links[0].href
 }
 
 Then(~'post to the saved (?:.*)') { ->
@@ -294,7 +351,7 @@ public class KeyValue {
 	def getFormMap() {
 		formMap = new HashMap<String, String>()
 		formMap.put(key, value)
-		return formMap;
+		return formMap
 	}
 }
 
@@ -333,17 +390,17 @@ Then(~/I POST to selectaction and follow$/) { ->
 Then(~/^the (.+) array field (.+) contains$/) { String description, String arrayField, DataTable dataTable ->
 	def nameValueList = dataTable.asList(NameValue)
 
-	JSONArray jsonArray = (JSONArray) client[arrayField];
+	JSONArray jsonArray = (JSONArray) client[arrayField]
 
 	for (NameValue NameValue : nameValueList) {
 		def map = NameValue.nameValueMap()
 		map.each {
 			boolean nameValueFound = false
 			if (jsonArray != null) {
-				int len = jsonArray.length();
+				int len = jsonArray.length()
 				for (int i = 0; i < len; i++) {
 					if (jsonArray.get(i).getAt("name") == it.key && jsonArray.get(i).getAt("value").toString().equals(it.value)) {
-						nameValueFound = true;
+						nameValueFound = true
 					}
 				}
 			}
@@ -363,7 +420,7 @@ public class NameValue {
 	def nameValueMap() {
 		nameValueMap = new HashMap<String, String>()
 		nameValueMap.put(name, value)
-		return nameValueMap;
+		return nameValueMap
 	}
 }
 
@@ -379,8 +436,17 @@ Then(~'I POST to (.+) with request body (.+)') { def uri, def body ->
 	client.POST(uri, body)
 			.stopIfFailure()
 }
+
+Then(~'I POST request body (.+) to (.+)') { def body, def uri ->
+	client.POST(uri, body)
+}
+
 Then(~'the response is empty') { ->
 	assertThat(client.body)
 			.as("The response is not empty")
 			.isEqualTo(null)
+}
+
+Then(~'(?:I am shopping in|I switch to) locale (.+) with currency (.+)') { def locale, def currency ->
+	client.headers.put(USER_TRAITS_HEADER, "LOCALE=$locale,CURRENCY=$currency")
 }

@@ -24,5 +24,6 @@
 	<include file="liquibase/core-changelog-7.0.0.xml"/>
 	<include file="liquibase/core-changelog-7.1.0.xml"/>
 	<include file="liquibase/core-changelog-7.2.0.xml"/>
+	<include file="liquibase/core-changelog-7.3.0.xml"/>
 
 </databaseChangeLog>

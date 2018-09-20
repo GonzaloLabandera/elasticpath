@@ -8,7 +8,6 @@ import static org.hamcrest.CoreMatchers.not;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.stub;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
@@ -20,7 +19,7 @@ import org.junit.runner.RunWith;
 
 import org.apache.commons.lang3.StringUtils;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.elasticpath.rest.Operation;
 import com.elasticpath.rest.OperationResult;
@@ -90,7 +89,7 @@ public final class ReadPaymentMethodChoiceResourceOperatorImplTest {
 
 	@Before
 	public void setUp() {
-		stub(readResourceCommandBuilderProvider.get()).toReturn(readResourceCommandBuilder);
+		when(readResourceCommandBuilderProvider.get()).thenReturn(readResourceCommandBuilder);
 		readPaymentMethodChoiceResourceOperator = new ReadPaymentMethodChoiceResourceOperator(RESOURCE_SERVER_NAME, OPERATION_CONTEXT,
 				paymentMethodLookup, readResourceCommandBuilderProvider);
 	}
@@ -202,7 +201,7 @@ public final class ReadPaymentMethodChoiceResourceOperatorImplTest {
 	private ResourceState<LinksEntity> createExpectedChoiceRepresentation(final boolean isPaymentMethodSelected) {
 		Collection<ResourceLink> links = new ArrayList<>();
 		ResourceLink descriptionLink = ResourceLinkFactory.createNoRev(PAYMENT_METHOD_URI,
-				PaymentmethodsMediaTypes.CREDIT_CARD.id(),
+				PaymentmethodsMediaTypes.PAYMENT_TOKEN.id(),
 				SelectorRepresentationRels.DESCRIPTION);
 		links.add(descriptionLink);
 
@@ -229,7 +228,7 @@ public final class ReadPaymentMethodChoiceResourceOperatorImplTest {
 	}
 
 	private ResourceState<?> createPaymentMethodRepresentation() {
-		Self self = SelfFactory.createSelf(PAYMENT_METHOD_URI, PaymentmethodsMediaTypes.CREDIT_CARD.id());
+		Self self = SelfFactory.createSelf(PAYMENT_METHOD_URI, PaymentmethodsMediaTypes.PAYMENT_TOKEN.id());
 		return ResourceState.Builder
 				.create(PaymentMethodEntity.builder().withPaymentMethodId(PAYMENT_METHOD_ID).build())
 				.withSelf(self)

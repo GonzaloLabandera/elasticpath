@@ -6,7 +6,7 @@ package com.elasticpath.rest.resource.paymentmethods.command.impl;
 import static com.elasticpath.rest.chain.ResourceStatusMatcher.containsResourceStatus;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import org.junit.Rule;
@@ -16,7 +16,7 @@ import org.junit.runner.RunWith;
 
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.elasticpath.rest.ResourceStatus;
 import com.elasticpath.rest.chain.BrokenChainException;
@@ -89,11 +89,7 @@ public final class SelectPaymentMethodCommandImplTest {
 	 */
 	@Test(expected = BrokenChainException.class)
 	public void testReadPaymentMethodsFails() {
-		ExecutionResult<Boolean> paymentInfoWriterResult = ExecutionResultFactory.createCreateOKWithData(true, false);
 		ResourceState<OrderEntity> orderRepresentation = createOrderRepresentation(SCOPE, ORDER_ID, ORDER_URI);
-
-		when(paymentMethodWriter.updatePaymentMethodSelectionForOrder(SCOPE, ORDER_ID, PAYMENT_METHOD_ID))
-				.thenReturn(paymentInfoWriterResult);
 
 		ExecutionResult<ResourceState<?>> notFoundResult = ExecutionResultFactory.createNotFound("not found");
 		SelectPaymentMethodCommandImpl selectPaymentInfoCommand =

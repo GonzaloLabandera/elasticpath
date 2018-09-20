@@ -44,6 +44,7 @@ import com.elasticpath.cmclient.core.ui.framework.EpControlFactory.EpState;
 import com.elasticpath.cmclient.core.ui.framework.IEpDateTimePicker;
 import com.elasticpath.cmclient.core.ui.framework.IEpLayoutComposite;
 import com.elasticpath.cmclient.core.ui.framework.IEpLayoutData;
+import com.elasticpath.cmclient.core.util.DateTimeUtilFactory;
 import com.elasticpath.cmclient.core.validation.CompoundValidator;
 import com.elasticpath.cmclient.core.validation.EpValidatorFactory;
 import com.elasticpath.cmclient.reporting.AbstractReportSection;
@@ -366,8 +367,8 @@ public class ReturnsAndExchangesReportSection extends AbstractReportSection {
 
 		paramsMap.put("store", controlParameters.getStore());
 		paramsMap.put("currency", controlParameters.getCurrency().getCurrencyCode());
-		paramsMap.put("startDate", controlParameters.getStartDate());
-		paramsMap.put("endDate", controlParameters.getEndDate());
+		paramsMap.put("startDate", DateTimeUtilFactory.getDateUtil().formatAsDateTime(controlParameters.getStartDate()));
+		paramsMap.put("endDate", DateTimeUtilFactory.getDateUtil().formatAsDateTime(controlParameters.getEndDate()));
 		if (controlParameters.getRmaType() == null) {
 			paramsMap.put("rmaType", null);
 		} else {

@@ -1,7 +1,7 @@
-@notready @ZoomPerformance
+@ZoomPerformance @notready
 Feature: Zoom performance test
 
-  Background:
+  Scenario Outline: Zoom with a big query on a cart with many items should not create DB overhead
     Given I have authenticated as a newly registered shopper
     And I add following items to the cart
       | sony_bt_sku                                                |
@@ -37,12 +37,13 @@ Feature: Zoom performance test
       | transformers04_sku                                         |
       | gravity_sku                                                |
       | alien_sku                                                  |
-
-  Scenario Outline: Zoom with a big query on a cart with many items should not create DB overhead
+    And I start measuring db queries
     When I zoom to cart with a query <LARGE_ZOOM>
-    Then the response time should not be more than 2500ms
+    And I stop measuring db queries
+    Then total number of DB calls should be close to 1730 calls with allowed deviation of 0.5 percent
+    And number of DB calls for table TPRODUCTSKU should be close to 252 calls with allowed deviation of 0.2 percent
 
     # Large zoom query from client project that puts a strain on the backend.
     Examples:
-      | LARGE_ZOOM                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+      | LARGE_ZOOM                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
       | lineitems:element,lineitems:element:item:definition,lineitems:element:item:price,lineitems:element:item:code,lineitems:element:availability,lineitems:element:price,lineitems:element:total,lineitems:element:appliedpromotions,lineitems:element:appliedpromotions:element,lineitems:element:appliedpromotions:element:discountedproductselection:discountedlineitem:item:code,lineitems:element:satisfiedpromotions,lineitems:element:satisfiedpromotions:element,lineitems:element:satisfiedpromotions:element:discountedproductselection,lineitems:element:satisfiedpromotions:element:discountedproductselection:discountableitem:availability,lineitems:element:satisfiedpromotions:element:discountedproductselection:discountableitem:code,lineitems:element:satisfiedpromotions:element:discountedproductselection:discountableitem:definition,lineitems:element:satisfiedpromotions:element:discountedproductselection:discountableitem:price,lineitems:element:satisfiedpromotions:element:discountedproductselection:discountableitem:total,lineitems:element:satisfiedpromotions:element:discountedproductselection:discountableitem:appliedpromotions,lineitems:element:satisfiedpromotions:element:discountedproductselection:discountableitem:appliedpromotions:element,order,order:total,order:tax,order:error,appliedpromotions,appliedpromotions:element,discount |

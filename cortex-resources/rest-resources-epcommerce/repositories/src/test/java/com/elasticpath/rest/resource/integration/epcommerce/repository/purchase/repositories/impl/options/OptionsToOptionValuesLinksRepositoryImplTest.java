@@ -3,7 +3,9 @@
  */
 package com.elasticpath.rest.resource.integration.epcommerce.repository.purchase.repositories.impl.options;
 
-import static org.mockito.Mockito.mock;
+import static com.elasticpath.rest.resource.integration.epcommerce.repository.ResourceTestConstants.PURCHASE_ID;
+import static com.elasticpath.rest.resource.integration.epcommerce.repository.ResourceTestConstants.SCOPE;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import java.util.HashMap;
@@ -16,7 +18,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.elasticpath.domain.catalog.ProductSku;
 import com.elasticpath.domain.skuconfiguration.SkuOptionValue;
@@ -25,10 +27,10 @@ import com.elasticpath.rest.definition.purchases.PurchaseLineItemIdentifier;
 import com.elasticpath.rest.definition.purchases.PurchaseLineItemOptionIdentifier;
 import com.elasticpath.rest.definition.purchases.PurchaseLineItemOptionValueIdentifier;
 import com.elasticpath.rest.definition.purchases.PurchaseLineItemOptionsIdentifier;
-import com.elasticpath.rest.definition.purchases.PurchaseLineItemsIdentifier;
 import com.elasticpath.rest.id.type.PathIdentifier;
 import com.elasticpath.rest.id.type.StringIdentifier;
-import com.elasticpath.rest.resource.integration.epcommerce.repository.sku.ProductSkuRepository;
+import com.elasticpath.rest.resource.integration.epcommerce.repository.IdentifierTestFactory;
+import com.elasticpath.rest.resource.integration.epcommerce.repository.order.OrderRepository;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.transform.impl.ReactiveAdapterImpl;
 
 /**
@@ -41,12 +43,12 @@ public class OptionsToOptionValuesLinksRepositoryImplTest {
 	private static final String SKU_GUID = "skuGuid";
 	private static final String OPTION_VALUE = "optionValue";
 
-	@Mock
-	private ProductSkuRepository productSkuRepository;
 	@InjectMocks
 	private ReactiveAdapterImpl reactiveAdapter;
 	@InjectMocks
-	private OptionsToOptionValuesLinksRepositoryImpl repository;
+	private OptionsToOptionValuesLinksRepositoryImpl<PurchaseLineItemOptionIdentifier, PurchaseLineItemOptionValueIdentifier> repository;
+	@Mock
+	private OrderRepository orderRepository;
 	private PurchaseLineItemOptionIdentifier identifier;
 
 	@Mock
@@ -58,12 +60,12 @@ public class OptionsToOptionValuesLinksRepositoryImplTest {
 	public void setUp() {
 		repository.setReactiveAdapter(reactiveAdapter);
 		setUpPurchaseLineItemOptionIdentifier();
+		when(orderRepository.findProductSku(any(), any(), any())).thenReturn(Single.just(productSku));
 	}
 
 	@Test
 	public void testOptionValueForOptionIdentifier() {
 
-		when(productSkuRepository.getProductSkuWithAttributesByGuidAsSingle(SKU_GUID)).thenReturn(Single.just(productSku));
 		Map<String, SkuOptionValue> optionValueMap = new HashMap<>();
 		optionValueMap.put(OPTION_ID, optionValue);
 		when(productSku.getOptionValueMap()).thenReturn(optionValueMap);
@@ -81,7 +83,6 @@ public class OptionsToOptionValuesLinksRepositoryImplTest {
 	@Test
 	public void testOptionValueNotFoundInMap() {
 
-		when(productSkuRepository.getProductSkuWithAttributesByGuidAsSingle(SKU_GUID)).thenReturn(Single.just(productSku));
 		when(productSku.getOptionValueMap()).thenReturn(new HashMap<>());
 
 		repository.getElements(identifier)
@@ -92,7 +93,7 @@ public class OptionsToOptionValuesLinksRepositoryImplTest {
 	private void setUpPurchaseLineItemOptionIdentifier() {
 		PurchaseLineItemIdentifier purchaseLineItem = PurchaseLineItemIdentifier.builder()
 				.withLineItemId(PathIdentifier.of(SKU_GUID))
-				.withPurchaseLineItems(mock(PurchaseLineItemsIdentifier.class))
+				.withPurchaseLineItems(IdentifierTestFactory.buildPurchaseLineItemsIdentifier(SCOPE, PURCHASE_ID))
 				.build();
 		PurchaseLineItemOptionsIdentifier options = PurchaseLineItemOptionsIdentifier.builder()
 				.withPurchaseLineItem(purchaseLineItem)

@@ -38,7 +38,7 @@ public class ItemIdentifierRepositoryImpl<I extends LineItemIdentifier, LI exten
 		String lineItemId = identifier.getLineItemId().getValue();
 		String scope = identifier.getLineItems().getCart().getScope().getValue();
 
-		return shoppingCartRepository.getProductSku(lineItemId)
+		return shoppingCartRepository.getProductSku(identifier.getLineItems().getCart().getCartId().getValue(), lineItemId)
 				.map(productSku -> itemRepository.getItemIdForProductSku(productSku))
 				.flatMapObservable(itemId -> buildItemIdentifier(scope, itemId).toObservable());
 	}

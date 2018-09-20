@@ -8,7 +8,10 @@ import org.openqa.selenium.WebDriver;
  */
 public class CompleteShipmentDialog extends AbstractDialog {
 
-	private static final String COMPLETE_SHIPMENT_PARENT_CSS = "div[widget-id='Complete Shipment'][widget-type='Shell'] ";
+	/**
+	 * CSS selector used to identify the dialog.
+	 */
+	public static final String COMPLETE_SHIPMENT_PARENT_CSS = "div[widget-id='Complete Shipment'][widget-type='Shell'] ";
 	private static final String SHIPMENT_ID_INPUT_CSS = COMPLETE_SHIPMENT_PARENT_CSS + "div[widget-id='Shipment ID'] input";
 	private static final String VALIDATE_BUTTON_CSS = COMPLETE_SHIPMENT_PARENT_CSS + "div[widget-id='Validate'][widget-type='Button']";
 	private static final String COMPLETE_BUTTON_CSS = COMPLETE_SHIPMENT_PARENT_CSS + "div[widget-id='Complete'][widget-type='Button']";

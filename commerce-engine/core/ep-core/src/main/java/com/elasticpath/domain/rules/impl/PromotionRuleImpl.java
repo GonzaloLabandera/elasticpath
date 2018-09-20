@@ -134,7 +134,7 @@ public class PromotionRuleImpl extends AbstractRuleImpl {
 		for (String agenda : this.getAgendaGroups()) {
 			// When
 			code.append("rule \"" + getCode() + " " + agenda + "\"\n");
-			code.append("\t# rule name: " + getName() + "\n");
+			code.append("\t// rule name: " + getName() + "\n");
 			code.append("\t" + SALIENCE + " " + getSalience() + "\n");
 			code.append("\tagenda-group \"" + agenda + "\"\n");
 			code.append("\twhen\n");

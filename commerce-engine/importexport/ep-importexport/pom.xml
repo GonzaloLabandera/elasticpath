@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>com.elasticpath</groupId>
 		<artifactId>importexport</artifactId>
-		<version>702.0.0-SNAPSHOT</version>
+		<version>703.0.0-SNAPSHOT</version>
 	</parent>
 
 	<artifactId>ep-importexport</artifactId>
@@ -14,8 +14,10 @@
 	<description>Elastic Path Import Export Tool</description>
 
 	<properties>
+		<!-- Override version of jaxb because schemagen does not work with 2.3.0 -->
 		<jaxb.version>2.2.11</jaxb.version>
 	</properties>
+
 	<dependencies>
 		<dependency>
 			<groupId>com.elasticpath</groupId>
@@ -37,7 +39,14 @@
 			<groupId>com.elasticpath</groupId>
 			<artifactId>ep-querylanguage</artifactId>
 		</dependency>
-
+		<dependency>
+			<groupId>com.elasticpath</groupId>
+			<artifactId>shipping-calculation-epcommerce</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.elasticpath</groupId>
+			<artifactId>ep-settings-test-support</artifactId>
+		</dependency>
 		<dependency>
 			<groupId>commons-cli</groupId>
 			<artifactId>commons-cli</artifactId>
@@ -113,10 +122,6 @@
 		<dependency>
 			<groupId>commons-lang</groupId>
 			<artifactId>commons-lang</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>commons-vfs</groupId>
-			<artifactId>commons-vfs</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>log4j</groupId>
@@ -558,9 +563,9 @@
 						<version>1.0b3</version>
 					</dependency>
 					<dependency>
-						<groupId>sun-jaxb</groupId>
+						<groupId>javax.xml.bind</groupId>
 						<artifactId>jaxb-api</artifactId>
-						<version>2.1.4</version>
+						<version>${jaxb.version}</version>
 					</dependency>
 					<dependency>
 						<groupId>com.sun.xml.bind</groupId>
@@ -636,7 +641,7 @@
 						<plugin>
 							<groupId>org.eclipse.m2e</groupId>
 							<artifactId>lifecycle-mapping</artifactId>
-							<version>1.0.0</version>
+							<version>${lifecycle-mapping-plugin.version}</version>
 							<configuration>
 								<lifecycleMappingMetadata>
 									<pluginExecutions>

@@ -563,7 +563,7 @@
 			<guid>AndroidGames|TokeneeCatalog</guid>
             <order>1</order>
             <excluded>false</excluded>
-        </linkedcategory>		
+        </linkedcategory>
     </linkedcategories>
 </category>
 
@@ -629,7 +629,7 @@
 			<guid>IPhoneGames|TokeneeCatalog</guid>
             <order>1</order>
             <excluded>false</excluded>
-        </linkedcategory>		
+        </linkedcategory>
     </linkedcategories>
 </category>
 
@@ -743,7 +743,7 @@
 			<guid>Smartphones|TokeneeCatalog</guid>
             <order>3</order>
             <excluded>false</excluded>
-        </linkedcategory>		
+        </linkedcategory>
     </linkedcategories>
 </category>
 <category mastercatalog="MobileCatalog">

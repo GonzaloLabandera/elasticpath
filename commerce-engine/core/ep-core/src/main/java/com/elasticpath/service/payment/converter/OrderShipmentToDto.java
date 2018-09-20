@@ -34,9 +34,9 @@ public class OrderShipmentToDto implements Converter<OrderShipment, OrderShipmen
 			if (ShipmentType.PHYSICAL.equals(physicalOrderShipment.getOrderShipmentType())) {
 				target.setPhysical(true);
 			}
-			target.setCarrier(physicalOrderShipment.getCarrier());
+			target.setCarrierCode(physicalOrderShipment.getCarrierCode());
 			target.setTrackingCode(physicalOrderShipment.getTrackingCode());
-			target.setServiceLevel(physicalOrderShipment.getServiceLevel());
+			target.setShippingOptionCode(physicalOrderShipment.getShippingOptionCode());
 			target.setShippingCost(physicalOrderShipment.getShippingCost());
 			target.setShippingTax(physicalOrderShipment.getShippingTax());
 		}

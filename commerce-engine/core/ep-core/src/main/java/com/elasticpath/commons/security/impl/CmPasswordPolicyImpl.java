@@ -4,96 +4,47 @@
 package com.elasticpath.commons.security.impl;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import org.springframework.security.authentication.encoding.PasswordEncoder;
 
-import com.elasticpath.commons.beanframework.BeanFactory;
-import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.commons.security.CmPasswordPolicy;
 import com.elasticpath.commons.security.PasswordHolder;
 import com.elasticpath.commons.security.ValidationError;
 import com.elasticpath.commons.security.ValidationResult;
-import com.elasticpath.commons.util.PasswordGenerator;
-import com.elasticpath.domain.cmuser.UserPasswordHistoryItem;
-import com.elasticpath.settings.SettingsService;
+import com.elasticpath.settings.provider.SettingValueProvider;
 
 /**
  * Implementation of <code>CmPasswordPolicy</code> that validates the password for <code>CmUser</code>.
  */
-public class CmPasswordPolicyImpl implements CmPasswordPolicy {
+public class CmPasswordPolicyImpl extends AbstractPasswordPolicyImpl implements CmPasswordPolicy {
 
-	private static final String MIN_PASSWORD_LENGTH = "COMMERCE/APPSPECIFIC/RCP/minimumPasswordLength";
+	private final List<Function<PasswordHolder, ValidationResult>> passwordPolicies;
 
-	private SettingsService settingsService;
+	private PasswordEncoder passwordEncoder;
 
-	private PasswordGenerator passwordGenerator;
-
-	private final List<InternalPolicy> passwordPolicies;
-
-	private BeanFactory beanFactory;
-
-	private final InternalPolicy minimumPasswordLength = new InternalPolicy() {
-		private static final String PASSWORD_VALIDATION_ERROR_MINIMUM_LENGTH = "PasswordValidationError_MinimumLength";
-
-		@Override
-		public ValidationResult validate(final PasswordHolder passwordHolder) {
-			int minimumPasswordLength = Integer.parseInt(getSettingValue(MIN_PASSWORD_LENGTH));
-			if (passwordHolder.getUserPassword().length() < minimumPasswordLength) {
-				ValidationResult validationResult = new ValidationResult();
-				validationResult.addError(new ValidationError(PASSWORD_VALIDATION_ERROR_MINIMUM_LENGTH, new Object[] { minimumPasswordLength }));
-				return validationResult;
-			}
-			return ValidationResult.VALID;
-		}
-	};
-
-	private final InternalPolicy maximumPasswordLength = new InternalPolicy() {
-		@Override
-		public ValidationResult validate(final PasswordHolder passwordHolder) {
-			return ValidationResult.VALID;
-		}
-	};
-
-	private final InternalPolicy containsAlphaNumeric = new InternalPolicy() {
-		private static final String PASSWORD_VALIDATION_ERROR_CONTAINS_ALPHA_NUMERIC = "PasswordValidationError_ContainsAlphaNumeric";
-
-		private static final String LETTERS_AND_NUMBERS_REQUIRED_REG_EXPR = "(?=.*\\d)(?=.*([a-zA-Z])).*"; //$NON-NLS-1$
-
-		private final Pattern pattern = Pattern.compile(LETTERS_AND_NUMBERS_REQUIRED_REG_EXPR);
-
-		@Override
-		public ValidationResult validate(final PasswordHolder passwordHolder) {
-			final Matcher matcher = pattern.matcher(passwordHolder.getUserPassword());
-			if (!matcher.matches()) {
-				return createValidationResultWithError(PASSWORD_VALIDATION_ERROR_CONTAINS_ALPHA_NUMERIC);
-			}
-			return ValidationResult.VALID;
-		}
-	};
-
-	private final InternalPolicy minimumNoRepeatPassword = new MinimumUniquePasswordPolicy();
-
-
-	/**
-	 * <code>InternalPolicy</code>.
-	 */
-	private interface InternalPolicy {
-		ValidationResult validate(PasswordHolder passwordHolder);
-	}
+	private SettingValueProvider<Integer> minimumPasswordHistoryLengthDaysProvider;
 
 	/**
 	 * Constructs the instance of <code>CmPasswordPolicy</code>.
 	 */
 	public CmPasswordPolicyImpl() {
 		super();
+
+		final Supplier<Integer> minimumPasswordLengthSupplier = this::getMinimumPasswordLength;
+		final Supplier<Integer> passwordHistoryLengthSupplier = this::getPasswordHistoryLength;
+		final Supplier<PasswordEncoder> passwordEncoderSupplier = this::getPasswordEncoder;
+
 		passwordPolicies = new ArrayList<>();
-		passwordPolicies.add(minimumPasswordLength);
-		passwordPolicies.add(maximumPasswordLength);
-		passwordPolicies.add(containsAlphaNumeric);
-		passwordPolicies.add(minimumNoRepeatPassword);
+		passwordPolicies.add(new MinimumPasswordLengthPolicy(minimumPasswordLengthSupplier));
+		passwordPolicies.add(new ContainsAlphaNumericPasswordPolicy());
+		passwordPolicies.add(new MinimumUniquePasswordPolicy(passwordEncoderSupplier, passwordHistoryLengthSupplier));
 	}
 
 	@Override
@@ -101,61 +52,10 @@ public class CmPasswordPolicyImpl implements CmPasswordPolicy {
 		return validate(passwordHolder, passwordPolicies);
 	}
 
-
-	/**
-	 * @return settingsService
-	 */
-	public SettingsService getSettingsService() {
-		return settingsService;
-	}
-
-	/**
-	 * @param settingsService <code>SettingsService</code>
-	 */
-	public void setSettingsService(final SettingsService settingsService) {
-		this.settingsService = settingsService;
-	}
-
-	/**
-	 * Gets configured password generator. The <code>minimumPasswordLength</code> is set up properly for that impl.
-	 *
-	 * @return passwordGenerator configured password generator
-	 */
-	@Override
-	public PasswordGenerator getPasswordGenerator() {
-		passwordGenerator.setMinimumPasswordLength(Integer.valueOf(getSettingValue(MIN_PASSWORD_LENGTH)));
-		return passwordGenerator;
-	}
-
-	/**
-	 * @param passwordGenerator <code>passwordGenerator</code>
-	 */
-	public void setPasswordGenerator(final PasswordGenerator passwordGenerator) {
-		this.passwordGenerator = passwordGenerator;
-	}
-
-	/**
-	 * Gets setting value.
-	 *
-	 * @param path the path of the setting
-	 * @return the value for a given path and context
-	 */
-	protected String getSettingValue(final String path) {
-		return settingsService.getSettingValue(path).getValue();
-	}
-
-	private ValidationResult createValidationResultWithError(final String errorKey) {
-		ValidationResult validationResult = new ValidationResult();
-		validationResult.addError(new ValidationError(errorKey));
-		return validationResult;
-	}
-
-	private ValidationResult validate(final PasswordHolder passwordHolder, final List<InternalPolicy> policies) {
-		final List<ValidationResult> validationResults = new ArrayList<>();
-
-		for (final InternalPolicy policy : policies) {
-			validationResults.add(policy.validate(passwordHolder));
-		}
+	private ValidationResult validate(final PasswordHolder passwordHolder, final Collection<Function<PasswordHolder, ValidationResult>> policies) {
+		final List<ValidationResult> validationResults = policies.stream()
+				.map(policy -> policy.apply(passwordHolder))
+				.collect(Collectors.toList());
 
 		final ValidationResult result = new ValidationResult();
 		result.assembleResult(validationResults);
@@ -163,49 +63,130 @@ public class CmPasswordPolicyImpl implements CmPasswordPolicy {
 		return result;
 	}
 
+	protected PasswordEncoder getPasswordEncoder() {
+		return passwordEncoder;
+	}
+
+	public void setPasswordEncoder(final PasswordEncoder passwordEncoder) {
+		this.passwordEncoder = passwordEncoder;
+	}
+
 	@Override
 	public int getPasswordHistoryLength() {
-		return Integer.parseInt(settingsService.getSettingValue("COMMERCE/APPSPECIFIC/RCP/passwordHistoryLength").getValue());
+		return getMinimumPasswordHistoryLengthDaysProvider().get();
+	}
+
+	public void setMinimumPasswordHistoryLengthDaysProvider(final SettingValueProvider<Integer> minimumPasswordHistoryLengthDaysProvider) {
+		this.minimumPasswordHistoryLengthDaysProvider = minimumPasswordHistoryLengthDaysProvider;
+	}
+
+	protected SettingValueProvider<Integer> getMinimumPasswordHistoryLengthDaysProvider() {
+		return minimumPasswordHistoryLengthDaysProvider;
 	}
 
 	/**
-	 * Sets the bean factory object.
-	 *
-	 * @param beanFactory the bean factory instance.
+	 * Password validation policy that enforces a minimum password length.
 	 */
-	public void setBeanFactory(final BeanFactory beanFactory) {
-		this.beanFactory = beanFactory;
-	}
+	protected static class MinimumPasswordLengthPolicy implements Function<PasswordHolder, ValidationResult> {
 
-	/**
-	 * Policy which enforces a minimum password length with no repeat of a previous password.
-	 */
-	private class MinimumUniquePasswordPolicy implements InternalPolicy {
-		private static final String PASSWORD_VALIDATION_ERROR_MINIMUM_NO_REPEAT_PASSWORD = "PasswordValidationError_MinimumNoRepeatPassword";
+		/**
+		 * The key of the message used when a password violates the policy.
+		 */
+		protected static final String PASSWORD_VALIDATION_ERROR_MINIMUM_LENGTH = "PasswordValidationError_MinimumLength";
 
-		private static final String PASSWORD_HISTORY_LENGTH = "COMMERCE/APPSPECIFIC/RCP/passwordHistoryLength";
+		private final Supplier<Integer> minimumPasswordLengthSupplier;
+
+		/**
+		 * Constructor.
+		 *
+		 * @param minimumPasswordLengthSupplier supplies the minimum allowable password length
+		 */
+		protected MinimumPasswordLengthPolicy(final Supplier<Integer> minimumPasswordLengthSupplier) {
+			this.minimumPasswordLengthSupplier = minimumPasswordLengthSupplier;
+		}
 
 		@Override
-		public ValidationResult validate(final PasswordHolder passwordHolder) {
-			final PasswordEncoder passwordEncoder = beanFactory.getBean(ContextIdNames.CM_PASSWORDENCODER);
-			final String encodedPassword = passwordEncoder.encodePassword(passwordHolder.getUserPassword(), null);
-			if (encodedPassword.equals(passwordHolder.getPassword())) {
-				return createPasswordHistoryLengthValidationResult();
+		public ValidationResult apply(final PasswordHolder passwordHolder) {
+			final Integer minimumPasswordLength = minimumPasswordLengthSupplier.get();
+
+			if (passwordHolder.getUserPassword().length() < minimumPasswordLength) {
+				return new ValidationResult(new ValidationError(PASSWORD_VALIDATION_ERROR_MINIMUM_LENGTH, minimumPasswordLength));
 			}
-			for (UserPasswordHistoryItem historyItem : passwordHolder.getPasswordHistoryItems()) {
-				if (historyItem.getOldPassword().equals(encodedPassword)) {
-					return createPasswordHistoryLengthValidationResult();
-				}
-			}
+
 			return ValidationResult.VALID;
 		}
 
-		private ValidationResult createPasswordHistoryLengthValidationResult() {
-			ValidationResult result = new ValidationResult();
-			ValidationError error = new ValidationError(PASSWORD_VALIDATION_ERROR_MINIMUM_NO_REPEAT_PASSWORD, new Object[] { Integer
-				.valueOf(getSettingValue(PASSWORD_HISTORY_LENGTH)) });
-			result.addError(error);
-			return result;
+	}
+
+	/**
+	 * Password validation policy that ensures that passwords contain at least one alphabetic and at least one numeric character.
+	 */
+	protected static class ContainsAlphaNumericPasswordPolicy implements Function<PasswordHolder, ValidationResult> {
+
+		/**
+		 * The key of the message used when a password violates the policy.
+		 */
+		private static final String PASSWORD_VALIDATION_ERROR_CONTAINS_ALPHA_NUMERIC = "PasswordValidationError_ContainsAlphaNumeric";
+
+		private static final String LETTERS_AND_NUMBERS_REQUIRED_REG_EXPR = "(?=.*\\d)(?=.*([a-zA-Z])).*"; //$NON-NLS-1$
+
+		private final Pattern pattern = Pattern.compile(LETTERS_AND_NUMBERS_REQUIRED_REG_EXPR);
+
+		@Override
+		public ValidationResult apply(final PasswordHolder passwordHolder) {
+			final Matcher matcher = pattern.matcher(passwordHolder.getUserPassword());
+
+			if (!matcher.matches()) {
+				return new ValidationResult(new ValidationError(PASSWORD_VALIDATION_ERROR_CONTAINS_ALPHA_NUMERIC));
+			}
+
+			return ValidationResult.VALID;
 		}
 	}
+
+	/**
+	 * Policy that ensures that a password is not identical to previously-used passwords within a given history length.
+	 */
+	protected static class MinimumUniquePasswordPolicy implements Function<PasswordHolder, ValidationResult> {
+		/**
+		 * The key of the message used when a password violates the policy.
+		 */
+		protected static final String PASSWORD_VALIDATION_ERROR_MINIMUM_NO_REPEAT_PASSWORD = "PasswordValidationError_MinimumNoRepeatPassword";
+
+		private final Supplier<PasswordEncoder> passwordEncoderSupplier;
+		private final Supplier<Integer> passwordHistoryLengthSupplier;
+
+		/**
+		 * Constructor.
+		 *
+		 * @param passwordEncoderSupplier       produces {@link PasswordEncoder} instances
+		 * @param passwordHistoryLengthSupplier supplies the number of passwords in the history to check for duplicates, starting with the most
+		 *                                      recent
+		 */
+		protected MinimumUniquePasswordPolicy(final Supplier<PasswordEncoder> passwordEncoderSupplier,
+											  final Supplier<Integer> passwordHistoryLengthSupplier) {
+			this.passwordEncoderSupplier = passwordEncoderSupplier;
+			this.passwordHistoryLengthSupplier = passwordHistoryLengthSupplier;
+		}
+
+		@Override
+		public ValidationResult apply(final PasswordHolder passwordHolder) {
+			final Integer passwordHistoryLength = passwordHistoryLengthSupplier.get();
+			final String encodedPassword = passwordEncoderSupplier.get().encodePassword(passwordHolder.getUserPassword(), null);
+
+			if (encodedPassword.equals(passwordHolder.getPassword())) {
+				return new ValidationResult(new ValidationError(PASSWORD_VALIDATION_ERROR_MINIMUM_NO_REPEAT_PASSWORD, passwordHistoryLength));
+			}
+
+			final boolean match = passwordHolder.getPasswordHistoryItems().stream()
+					.anyMatch(historyItem -> historyItem.getOldPassword().equals(encodedPassword));
+
+			if (match) {
+				return new ValidationResult(new ValidationError(PASSWORD_VALIDATION_ERROR_MINIMUM_NO_REPEAT_PASSWORD, passwordHistoryLength));
+			} else {
+				return ValidationResult.VALID;
+			}
+		}
+	}
+
 }

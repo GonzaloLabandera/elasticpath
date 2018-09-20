@@ -2,8 +2,10 @@
 <beans
 		xmlns="http://www.springframework.org/schema/beans"
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xmlns:settings="http://www.elasticpath.com/schema/settings"
 		xsi:schemaLocation="
-				http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+				http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+				http://www.elasticpath.com/schema/settings http://www.elasticpath.com/schema/settings/settings.xsd
 		">
 
 	<bean id="productTypeDao" class="com.elasticpath.persistence.dao.impl.ProductTypeDaoImpl">
@@ -58,14 +60,6 @@
 	<bean id="skuConfigurationDao" parent="txProxyTemplate">
 		<property name="target">
 			<bean class="com.elasticpath.persistence.impl.SkuConfigurationDaoImpl">
-				<property name="persistenceEngine" ref="persistenceEngine"/>
-			</bean>
-		</property>
-	</bean>
-
-	<bean id="settingsDao" parent="txProxyTemplate">
-		<property name="target">
-			<bean class="com.elasticpath.settings.dao.impl.SettingsDaoImpl">
 				<property name="persistenceEngine" ref="persistenceEngine"/>
 			</bean>
 		</property>
@@ -145,7 +139,6 @@
 	<bean id="customerQueryComposer" class="com.elasticpath.service.search.solr.query.CustomerQueryComposerImpl" parent="abstractQueryComposer"/>
 	<bean id="promotionQueryComposer" class="com.elasticpath.service.search.solr.query.PromotionQueryComposerImpl" parent="abstractQueryComposer"/>
 	<bean id="userQueryComposer" class="com.elasticpath.service.search.solr.query.UserQueryComposerImpl" parent="abstractQueryComposer"/>
-	<bean id="shippingServiceLevelQueryComposer" class="com.elasticpath.service.search.solr.query.ShippingServiceLevelQueryComposerImpl" parent="abstractQueryComposer"/>
 	<bean id="filteredQueryComposer" class="com.elasticpath.service.search.solr.query.FilteredQueryComposerImpl" parent="abstractQueryComposer">
 		<property name="queryComposerFactory" ref="queryComposerFactory"/>
 	</bean>
@@ -165,23 +158,30 @@
 		<property name="solrFacetAdapter" ref="solrFacetAdapter"/>
 		<property name="beanFactory" ref="coreBeanFactory"/>
 		<property name="searchConfigFactory" ref="searchConfigFactory"/>
-		<property name="settingsReader" ref="settingsService"/>
 		<property name="analyzer" ref="queryAnalyzer"/>
+		<property name="showBundlesFirstProvider">
+			<settings:setting path="COMMERCE/STORE/SEARCH/showBundlesFirst"/>
+		</property>
 	</bean>
 
 	<bean id="solrFacetAdapter" class="com.elasticpath.service.search.solr.SolrFacetAdapter">
-		<property name="settingsReader" ref="settingsReader"/>
 		<property name="categoryService" ref="categoryService"/>
 		<property name="analyzer" ref="queryAnalyzer"/>
 		<property name="indexUtility" ref="indexUtility"/>
 		<property name="fncLoader" ref="filteredNavigationConfigurationLoader"/>
+		<property name="attributeFilterEnabledProvider">
+			<settings:setting path="COMMERCE/STORE/FILTEREDNAVIGATION/attributeFilterEnabled"/>
+		</property>
 	</bean>
 
-	<bean id="csvFileReader"
-			class="com.elasticpath.persistence.impl.CsvFileReaderImpl" scope="prototype">
-		<property name="settingsReader" ref="settingsService"/>
+	<bean id="csvFileReaderTemplate" class="com.elasticpath.persistence.impl.CsvFileReaderImpl" scope="prototype" abstract="true">
+		<property name="datafileEncodingProvider">
+			<settings:setting path="COMMERCE/SYSTEM/datafileEncoding"/>
+		</property>
 		<property name="assetRepository" ref="assetRepository"/>
 	</bean>
+
+	<bean id="csvFileReader" parent="csvFileReaderTemplate"/>
 
 	<bean id="baseAmountDtoCsvLineReader" class="com.elasticpath.csvimport.impl.DtoCsvLineReaderImpl"
 			scope="prototype">
@@ -297,7 +297,6 @@
 				<entry key="com.elasticpath.service.search.query.PromotionSearchCriteria" value-ref="promotionQueryComposer"/>
 				<entry key="com.elasticpath.service.search.query.FilteredSearchCriteria" value-ref="filteredQueryComposer"/>
 				<entry key="com.elasticpath.service.search.query.UserSearchCriteria" value-ref="userQueryComposer"/>
-				<entry key="com.elasticpath.service.search.query.ShippingServiceLevelSearchCriteria" value-ref="shippingServiceLevelQueryComposer"/>
 				<entry key="com.elasticpath.service.search.query.LuceneRawSearchCriteria" value-ref="luceneRawQueryComposer"/>
 				<entry key="com.elasticpath.service.search.query.ProductAutocompleteSearchCriteria" value-ref="productAutocompleteQueryComposer"/>
 				<entry key="com.elasticpath.service.search.query.SkuSearchCriteria" value-ref="skuQueryComposer"/>

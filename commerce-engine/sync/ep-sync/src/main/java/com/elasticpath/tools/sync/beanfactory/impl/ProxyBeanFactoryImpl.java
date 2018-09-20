@@ -108,4 +108,24 @@ public class ProxyBeanFactoryImpl extends AbstractBeanFactory {
 		return null;
 	}
 
+	/**
+	 * Find a bean of the given type in the bean store.
+	 *
+	 * @param <T> the bean type
+	 * @param requiredType the required class of the bean
+	 * @return a bean that is of the given type, instantiated with the given environments
+	 * @throws BeansException in case of exception
+	 */
+	@Override
+	@SuppressWarnings("unchecked")
+	public <T> T getBean(final Class<T> requiredType, final Object... objects) throws BeansException {
+		for (Object bean : beanMap.values()) {
+			if (bean.getClass().equals(requiredType)) {
+				return (T) getBean(bean.getClass().toString(), objects);
+			}
+		}
+		return null;
+	}
+
+
 }

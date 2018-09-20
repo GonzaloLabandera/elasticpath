@@ -5,18 +5,11 @@
 	<parent>
 		<groupId>com.elasticpath</groupId>
 		<artifactId>email</artifactId>
-		<version>702.0.0-SNAPSHOT</version>
+		<version>703.0.0-SNAPSHOT</version>
 	</parent>
 
 	<artifactId>ep-dataimport-email-uat</artifactId>
 	<name>Data Import Email User Acceptance Tests</name>
-
-	<properties>
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-		<pmd.itest.ruleset>rulesets/pmd-elasticpath-itest-rules.xml</pmd.itest.ruleset>
-		<checkstyle.ruleset>rulesets/checkstyle-elasticpath-itest-rules.xml</checkstyle.ruleset>
-	</properties>
 
 	<dependencies>
 		<dependency>
@@ -84,16 +77,16 @@
 			<artifactId>camel-test</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>info.cukes</groupId>
+			<groupId>io.cucumber</groupId>
 			<artifactId>cucumber-java</artifactId>
 			<scope>compile</scope>
 		</dependency>
 		<dependency>
-			<groupId>info.cukes</groupId>
+			<groupId>io.cucumber</groupId>
 			<artifactId>cucumber-spring</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>info.cukes</groupId>
+			<groupId>io.cucumber</groupId>
 			<artifactId>cucumber-junit</artifactId>
 		</dependency>
 		<dependency>
@@ -142,7 +135,6 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-failsafe-plugin</artifactId>
 				<configuration>
-					<argLine>${java.jvm.opts}</argLine>
 					<skip>${skipCucumberTests}</skip>
 				</configuration>
 				<executions>

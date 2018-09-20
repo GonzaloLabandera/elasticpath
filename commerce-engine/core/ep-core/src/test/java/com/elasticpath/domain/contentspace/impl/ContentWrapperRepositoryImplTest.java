@@ -20,7 +20,7 @@ import org.junit.Test;
 
 import com.elasticpath.domain.contentspace.ContentWrapper;
 import com.elasticpath.domain.contentspace.ContentWrapperLoader;
-
+import com.elasticpath.settings.test.support.SimpleSettingValueProvider;
 
 /**
  * Tests the content wrapper repository to ensure that it functions as intended.
@@ -68,14 +68,8 @@ public class ContentWrapperRepositoryImplTest {
 	 */
 	@Before
 	public void setUp() {
-		
-		//Override the getLoadInterval method to return the interval specified in this test clas
-		repository = new ContentWrapperRepositoryImpl() {
-			@Override
-			public int getLoadInterval() {
-				return LOAD_INTERVAL;
-			}
-		};
+		repository = new ContentWrapperRepositoryImpl();
+		repository.setLoadIntervalProvider(new SimpleSettingValueProvider<>(LOAD_INTERVAL));
 		
 		//Create a mock missed content wrapper cache, and use a mock content wrapper loader for loading
 		//of content wrappers

@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) Elastic Path Software Inc., 2007
  */
 package com.elasticpath.domain.payment.impl;
@@ -87,7 +87,6 @@ public class PayPalExpressPaymentHandler extends AbstractPaymentHandler {
 		if (amount.compareTo(BigDecimal.ZERO) > 0) {
 			OrderPayment orderPayment = getNewOrderPayment();
 			orderPayment.setPaymentMethod(templateOrderPayment.getPaymentMethod());
-			orderPayment.copyCreditCardInfo(templateOrderPayment);
 			orderPayment.copyTransactionFollowOnInfo(templateOrderPayment);
 			orderPayment.setGatewayToken(templateOrderPayment.getGatewayToken());
 			orderPayment.setGiftCertificate(templateOrderPayment.getGiftCertificate());
@@ -133,7 +132,6 @@ public class PayPalExpressPaymentHandler extends AbstractPaymentHandler {
 
 		OrderPayment capturePayment = getNewOrderPayment();
 		capturePayment.setPaymentMethod(authorizationPayment.getPaymentMethod());
-		capturePayment.copyCreditCardInfo(authorizationPayment);
 		capturePayment.copyTransactionFollowOnInfo(authorizationPayment);
 		capturePayment.setGatewayToken(authorizationPayment.getGatewayToken());
 		capturePayment.setGiftCertificate(authorizationPayment.getGiftCertificate());
@@ -158,9 +156,9 @@ public class PayPalExpressPaymentHandler extends AbstractPaymentHandler {
 	/**
 	 *
 	 *
-	 * @param orderPayment
-	 * @param newAmount
-	 * @return
+	 * @param orderPayment the order payment
+	 * @param amount       the amount
+	 * @return boolean
 	 */
 	@Override
 	public boolean canCapture(final OrderPayment orderPayment, final BigDecimal amount) {

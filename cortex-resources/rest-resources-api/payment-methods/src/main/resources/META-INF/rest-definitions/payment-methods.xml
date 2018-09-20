@@ -6,7 +6,7 @@
 		<description>
 			<![CDATA[
 The Payment Methods resource is responsible for the customer's paymentmethods. This resource lists all the paymentmethods
-defined for the customer either credit cards or payment tokens. Selecting a payment method for a purchase is set
+defined for the customer payment tokens. Selecting a payment method for a purchase is set
 during the purchase's order phase.
 			]]>
 		</description>
@@ -35,10 +35,12 @@ during the purchase's order phase.
 			<name>paymentmethod</name>
 			<description><![CDATA[The payment method.]]></description>
 			<uri>{paymentmethods}/{paymentmethod-id}</uri>
-			<entity>credit-card</entity>
+			<entity>payment-token</entity>
 			<!-- Payment-tokens and payment-methods have a bidirectional dependency because payment-methods
 				emits payment-token entities. This problem will be addressed ,possibly by making payment-methods a linked resource
-				rather than a data list resource. Until then this resoure entity declaration has to be commented out.
+				rather than a data list resource. Until then this resource entity declaration has to be commented out.
+
+				Temporarily resolving this by duplicating the payment-token entity in this resource.
 
 			<entity>paymenttokens.payment-token</entity>
 		-->
@@ -54,7 +56,7 @@ during the purchase's order phase.
 			<name>paymentmethod-for-order</name>
 			<description><![CDATA[The payment method for an order.]]></description>
 			<uri>{base.family}/{orders.order}</uri>
-			<entity>credit-card</entity>
+			<entity>payment-token</entity>
 			<!-- as with payment-method, this resource also vends payment-token. -->
 		</resource>
 
@@ -104,57 +106,25 @@ during the purchase's order phase.
 			</property>
 		</entity>
 
+
+		<!--
+		Temporarily copying payment-token entity from payment-tokens resource to resolve dependency issue.
+
+		-->
 		<entity>
-			<name>credit-card</name>
-			<description><![CDATA[The credit card used for the payment method.]]></description>
+			<name>payment-token</name>
+			<description><![CDATA[The payment token entity.]]></description>
 			<is-a>payment-method</is-a>
 			<property>
-				<name>card-type</name>
-				<description><![CDATA[The credit card type.]]></description>
+				<name>display-name</name>
+				<description><![CDATA[A description of the payment token to be used for display purposes.]]></description>
 				<string/>
 			</property>
 			<property>
-				<name>cardholder-name</name>
-				<description><![CDATA[The credit card holder name.]]></description>
+				<name>token</name>
+				<description><![CDATA[The payment token created by a payment tokenization service.]]></description>
 				<string/>
 			</property>
-			<property>
-				<name>card-number</name>
-				<description><![CDATA[The card number.]]></description>
-				<string/>
-			</property>
-			<property>
-				<name>start-month</name>
-				<description><![CDATA[The start month.]]></description>
-				<string/>
-			</property>
-			<property>
-				<name>start-year</name>
-				<description><![CDATA[The start year.]]></description>
-				<string/>
-			</property>
-			<property>
-				<name>issue-number</name>
-				<description><![CDATA[The issue number.]]></description>
-				<integer/>
-			</property>
-			<property>
-				<name>expiry-month</name>
-				<description><![CDATA[The month of the expiration date.]]></description>
-				<string>
-					<min-length>2</min-length>
-					<max-length>2</max-length>
-				</string>
-			</property>
-			<property>
-				<name>expiry-year</name>
-				<description><![CDATA[The year of the expiration date.]]></description>
-				<string>
-					<min-length>4</min-length>
-					<max-length>4</max-length>
-				</string>
-			</property>
-			<entity-type>elasticpath.paymentmethods.credit-card</entity-type>
 		</entity>
 
 	</family>

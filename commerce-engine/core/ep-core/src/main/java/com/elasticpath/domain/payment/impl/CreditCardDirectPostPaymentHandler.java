@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) Elastic Path Software Inc., 2007
  */
 package com.elasticpath.domain.payment.impl;
@@ -49,7 +49,6 @@ public class CreditCardDirectPostPaymentHandler extends AbstractPaymentHandler {
 
 		OrderPayment orderPayment = getNewOrderPayment();
 		orderPayment.setPaymentMethod(templateOrderPayment.getPaymentMethod());
-		orderPayment.copyCreditCardInfo(templateOrderPayment);
 		orderPayment.copyTransactionFollowOnInfo(templateOrderPayment);
 		orderPayment.setGatewayToken(templateOrderPayment.getGatewayToken());
 		orderPayment.setGiftCertificate(templateOrderPayment.getGiftCertificate());

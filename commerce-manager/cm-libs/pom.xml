@@ -4,21 +4,20 @@
 
 	<parent>
 		<groupId>com.elasticpath</groupId>
-		<artifactId>parent</artifactId>
-		<version>702.0.0-SNAPSHOT</version>
-		<relativePath></relativePath>
+		<artifactId>commerce-parent</artifactId>
+		<version>703.0.0-SNAPSHOT</version>
+		<relativePath>../../pom.xml</relativePath>
 	</parent>
 
 	<groupId>com.elasticpath.cmclient</groupId>
 	<artifactId>cm-libs</artifactId>
-	<version>702.0.0-SNAPSHOT</version>
+	<version>703.0.0-SNAPSHOT</version>
 	<packaging>pom</packaging>
 	<name>CM Libs Parent</name>
 
 	<properties>
-		<!-- Must be relative to $basedir in each child module. -->
-		<dependency.directory>lib</dependency.directory>
 		<osgi-version-qualifier>${maven.build.timestamp}</osgi-version-qualifier>
+		<maven.build.timestamp.format>yyyyMMdd-HHmm</maven.build.timestamp.format>
 	</properties>
 
 	<build>

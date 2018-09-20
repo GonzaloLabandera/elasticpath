@@ -6,6 +6,7 @@ package com.elasticpath.test.integration;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Currency;
 import java.util.Date;
@@ -45,6 +46,8 @@ import com.elasticpath.service.catalog.ProductSkuLookup;
 import com.elasticpath.service.shopper.ShopperService;
 import com.elasticpath.service.shoppingcart.impl.ShoppingCartMergerImpl;
 import com.elasticpath.service.tax.TaxCodeService;
+import com.elasticpath.tags.Tag;
+import com.elasticpath.tags.TagSet;
 import com.elasticpath.test.persister.CatalogTestPersister;
 import com.elasticpath.test.persister.CouponTestPersister;
 import com.elasticpath.test.persister.GiftCertificateTestPersister;
@@ -63,6 +66,7 @@ public class ShoppingCartMergerImplTest extends BasicSpringContextTest {
 	private static final String CURRENT_CART_NAME = "current";
 	private static final String PREVIOUS_CART_NAME = "previous";
 	private static final String BUNDLE_SKU_CODE = "bundleskucode";
+	private static final String SHOPPING_START_TIME_TAG = "SHOPPING_START_TIME";
 
 	private Product camera;
 	private Product bag;
@@ -177,6 +181,9 @@ public class ShoppingCartMergerImplTest extends BasicSpringContextTest {
 		CustomerSessionMemento cMemento = new CustomerSessionMementoImpl();
 		cMemento.setCurrency(TestDataPersisterFactory.DEFAULT_CURRENCY);
 		customerSession.setCustomerSessionMemento(cMemento);
+		TagSet tagSet = new TagSet();
+		tagSet.addTag(SHOPPING_START_TIME_TAG, new Tag(new Date().getTime()));
+		customerSession.setCustomerTagSet(tagSet);
 		return customerSession;
 	}
 
@@ -220,7 +227,7 @@ public class ShoppingCartMergerImplTest extends BasicSpringContextTest {
 
 		final ShoppingCart mergedCart = merger.merge(currentCart, previousCart);
 
-		final List<ShoppingItem> mergedList = mergedCart.getCartItems();
+		final List<ShoppingItem> mergedList = mergedCart.getRootShoppingItems();
 		assertThat(mergedList)
 				.size()
 				.as(NUMBER_OF_ITEMS_IN_THE_SHOPPING_CART)
@@ -240,7 +247,7 @@ public class ShoppingCartMergerImplTest extends BasicSpringContextTest {
 
 		final ShoppingCart mergedCart = merger.merge(currentCart, previousCart);
 
-		final List<ShoppingItem> mergedList = mergedCart.getCartItems();
+		final List<ShoppingItem> mergedList = mergedCart.getRootShoppingItems();
 		assertThat(mergedList)
 				.size()
 				.as(NUMBER_OF_ITEMS_IN_THE_SHOPPING_CART)
@@ -263,7 +270,7 @@ public class ShoppingCartMergerImplTest extends BasicSpringContextTest {
 
 		final ShoppingCart mergedCart = merger.merge(previousCart, currentCart);
 
-		final List<ShoppingItem> mergedList = mergedCart.getCartItems();
+		final List<ShoppingItem> mergedList = mergedCart.getRootShoppingItems();
 		assertThat(mergedList)
 				.size()
 				.as(NUMBER_OF_ITEMS_IN_THE_SHOPPING_CART)
@@ -285,7 +292,7 @@ public class ShoppingCartMergerImplTest extends BasicSpringContextTest {
 
 		final ShoppingCart mergedCart = merger.merge(previousCart, currentCart);
 
-		final List<ShoppingItem> mergedList = mergedCart.getCartItems();
+		final List<ShoppingItem> mergedList = mergedCart.getRootShoppingItems();
 		assertThat(mergedList)
 				.size()
 				.as(NUMBER_OF_ITEMS_IN_THE_SHOPPING_CART)
@@ -310,7 +317,7 @@ public class ShoppingCartMergerImplTest extends BasicSpringContextTest {
 
 		final ShoppingCart mergedCart = merger.merge(currentCart, previousCart);
 
-		final List<ShoppingItem> mergedList = mergedCart.getCartItems();
+		final List<ShoppingItem> mergedList = mergedCart.getRootShoppingItems();
 		assertThat(mergedList)
 				.size()
 				.as(NUMBER_OF_ITEMS_IN_THE_SHOPPING_CART)
@@ -340,7 +347,7 @@ public class ShoppingCartMergerImplTest extends BasicSpringContextTest {
 
 		final ShoppingCart mergedCart = merger.merge(currentCart, previousCart);
 
-		final List<ShoppingItem> mergedList = mergedCart.getCartItems();
+		final List<ShoppingItem> mergedList = mergedCart.getRootShoppingItems();
 		assertThat(mergedList)
 				.size()
 				.as(NUMBER_OF_ITEMS_IN_THE_SHOPPING_CART)
@@ -393,7 +400,7 @@ public class ShoppingCartMergerImplTest extends BasicSpringContextTest {
 
 		final ShoppingCart mergedCart = merger.merge(currentCart, previousCart);
 
-		final List<ShoppingItem> mergedList = mergedCart.getCartItems();
+		final List<ShoppingItem> mergedList = mergedCart.getRootShoppingItems();
 
 		assertThat(mergedList)
 				.size()
@@ -416,7 +423,7 @@ public class ShoppingCartMergerImplTest extends BasicSpringContextTest {
 
 		final ShoppingCart mergedCart = merger.merge(currentCart, previousCart);
 
-		final List<ShoppingItem> mergedList = mergedCart.getCartItems();
+		final List<ShoppingItem> mergedList = mergedCart.getRootShoppingItems();
 		assertThat(mergedList)
 				.size()
 				.as(NUMBER_OF_ITEMS_IN_THE_SHOPPING_CART)
@@ -439,7 +446,7 @@ public class ShoppingCartMergerImplTest extends BasicSpringContextTest {
 
 		final ShoppingCart mergedCart = merger.merge(currentCart, previousCart);
 
-		final List<ShoppingItem> mergedList = mergedCart.getCartItems();
+		final List<ShoppingItem> mergedList = mergedCart.getRootShoppingItems();
 
 		assertItemAndQuantity(mergedList, 0, memoryCardSku, 1);
 	}
@@ -455,7 +462,7 @@ public class ShoppingCartMergerImplTest extends BasicSpringContextTest {
 
 		final ShoppingCart mergedCart = merger.merge(currentCart, previousCart);
 
-		final List<ShoppingItem> mergedList = mergedCart.getCartItems();
+		final List<ShoppingItem> mergedList = mergedCart.getRootShoppingItems();
 		assertThat(mergedList)
 				.size()
 				.as(NUMBER_OF_ITEMS_IN_THE_SHOPPING_CART)
@@ -493,44 +500,6 @@ public class ShoppingCartMergerImplTest extends BasicSpringContextTest {
 				.first()
 				.as("The coupon code should be code applied to the previous cart")
 				.isEqualTo("COUPON");
-	}
-
-	/**
-	 * Test merge preserves not sold separately products when parent item is in the cart.
-	 */
-	@DirtiesDatabase
-	@Test
-	public void testMergePreservesNotSoldSeparatelyProductWhenParentIsInCart() {
-		final ShoppingCart previousCart = buildShoppingCart(PREVIOUS_CART_NAME, siCameraWithWarranty, cameraWarrantyQty1);
-		final ShoppingCart newCart = buildShoppingCart(CURRENT_CART_NAME);
-
-		final ShoppingCart mergedCart = merger.merge(newCart, previousCart);
-
-		final List<ShoppingItem> mergedList = mergedCart.getCartItems();
-
-		assertThat(mergedList)
-				.size()
-				.as(NUMBER_OF_ITEMS_IN_THE_SHOPPING_CART)
-				.isEqualTo(2);
-	}
-
-	/**
-	 * Test merge does not preserve not sold separately products when no parent item in the cart.
-	 */
-	@DirtiesDatabase
-	@Test
-	public void testMergeDoesNotPreserveNotSoldSeparatelyProductWhenParentNotInCart() {
-		final ShoppingCart previousCart = buildShoppingCart(PREVIOUS_CART_NAME, cameraWarrantyQty1);
-		final ShoppingCart newCart = buildShoppingCart(CURRENT_CART_NAME);
-
-		final ShoppingCart mergedCart = merger.merge(newCart, previousCart);
-
-		final List<ShoppingItem> mergedList = mergedCart.getCartItems();
-
-		assertThat(mergedList)
-				.size()
-				.as(NUMBER_OF_ITEMS_IN_THE_SHOPPING_CART)
-				.isEqualTo(0);
 	}
 
 	/**

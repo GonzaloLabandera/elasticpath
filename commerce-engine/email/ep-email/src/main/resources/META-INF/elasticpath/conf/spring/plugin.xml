@@ -2,9 +2,11 @@
 <beans
 		xmlns="http://www.springframework.org/schema/beans"
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xmlns:settings="http://www.elasticpath.com/schema/settings"
 		xsi:schemaLocation="
-				http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
-		">
+			http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+			http://www.elasticpath.com/schema/settings http://www.elasticpath.com/schema/settings/settings.xsd
+	">
 
 	<bean id="emailDataFormat" class="org.apache.camel.component.jackson.JacksonDataFormat">
 		<constructor-arg name="mapper">
@@ -42,8 +44,16 @@
 		<property name="velocityEngineFactory" ref="velocityEngineFactory" />
 		<property name="storeService" ref="storeService" />
 		<property name="storeConfig" ref="threadLocalStorage" />
-		<property name="settingsReader" ref="settingsService" />
 		<property name="storeMessageSource" ref="storeMessageSourceDelegate"/>
+		<property name="emailGlobalSenderAddressProvider">
+			<settings:setting path="COMMERCE/SYSTEM/EMAIL/emailGlobalSenderAddress" />
+		</property>
+		<property name="emailGlobalSenderNameProvider">
+			<settings:setting path="COMMERCE/SYSTEM/EMAIL/emailGlobalSenderName"/>
+		</property>
+		<property name="emailTextTemplateEnabledProvider">
+			<settings:setting path="COMMERCE/SYSTEM/EMAIL/emailTextTemplateEnabled"/>
+		</property>
 	</bean>
 
 	<bean id="legacyEmailComposer" parent="legacyEmailComposerTemplate"/>

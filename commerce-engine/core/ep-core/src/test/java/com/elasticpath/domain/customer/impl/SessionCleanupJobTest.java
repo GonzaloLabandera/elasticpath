@@ -11,8 +11,8 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
-
 import org.jmock.Expectations;
+import org.jmock.auto.Mock;
 import org.jmock.integration.junit4.JUnitRuleMockery;
 import org.junit.Before;
 import org.junit.Rule;
@@ -26,8 +26,7 @@ import com.elasticpath.service.misc.TimeService;
 import com.elasticpath.service.shopper.ShopperCleanupService;
 import com.elasticpath.service.shoppingcart.ShoppingCartService;
 import com.elasticpath.service.shoppingcart.WishListService;
-import com.elasticpath.settings.SettingsReader;
-import com.elasticpath.settings.domain.SettingValue;
+import com.elasticpath.settings.provider.SettingValueProvider;
 
 /**
  * Unit test for SessionCleanupJob. 
@@ -38,15 +37,20 @@ public class SessionCleanupJobTest {
 	private static final int BATCH_SIZE = 1000;
 	private static final long SHOPPER1_UID = 1000L;
 	private static final long SHOPPER2_UID = 1001L;
-	
+
 	@Rule
 	public final JUnitRuleMockery context = new JUnitRuleMockery();
-	private final SettingsReader settingsReader = context.mock(SettingsReader.class);
 	private final TimeService timeService = context.mock(TimeService.class);
 	private final CustomerSessionCleanupService customerSessionCleanupService = context.mock(CustomerSessionCleanupService.class);
 	private final ShopperCleanupService shopperCleanupService = context.mock(ShopperCleanupService.class);
 	private final ShoppingCartService shoppingCartService = context.mock(ShoppingCartService.class);
 	private final WishListService wishlistService = context.mock(WishListService.class);
+
+	@Mock
+	private SettingValueProvider<Integer> batchSizeProvider;
+
+	@Mock
+	private SettingValueProvider<Integer> maxDaysHistoryProvider;
 
 	private SessionCleanupJob job;
 
@@ -56,14 +60,15 @@ public class SessionCleanupJobTest {
 	@Before
 	public void setUp() {
 		job = new SessionCleanupJob();
-		job.setTimeService(timeService);
-		job.setSettingsReader(settingsReader);
+		job.setBatchSizeProvider(batchSizeProvider);
 		job.setCustomerSessionCleanupService(customerSessionCleanupService);
+		job.setMaxDaysHistoryProvider(maxDaysHistoryProvider);
 		job.setShopperCleanupService(shopperCleanupService);
 		job.setShoppingCartService(shoppingCartService);
+		job.setTimeService(timeService);
 		job.setWishlistService(wishlistService);
 	}
-	
+
 	/**
 	 * Test delete before date.
 	 */
@@ -83,8 +88,6 @@ public class SessionCleanupJobTest {
 	public void testPurgeSessionHistory() {
 		final Calendar calendar = configureTimeService();
 		calendar.add(Calendar.DATE, -THIRTY_DAY_HISTORY);
-		final SettingValue maxHistory = context.mock(SettingValue.class, "maxHistory");
-		final SettingValue batchSize = context.mock(SettingValue.class, "batchSize");
 		final List<String> oldGuids = new ArrayList<>();
 		final List<ShopperMemento> orphanedShoppers = Arrays.asList(createAnonymousShopper(SHOPPER1_UID), createRegisteredShopper(SHOPPER2_UID));
 		final List<Long> anonymousUids = Arrays.asList(SHOPPER1_UID);
@@ -92,11 +95,9 @@ public class SessionCleanupJobTest {
 		
 		context.checking(new Expectations() {
 			{
-				oneOf(settingsReader).getSettingValue(SessionCleanupJob.SESSION_CLEANUP_MAX_HISTORY); will(returnValue(maxHistory));
-				oneOf(maxHistory).getIntegerValue(); will(returnValue(THIRTY_DAY_HISTORY));
-				oneOf(settingsReader).getSettingValue(SessionCleanupJob.SESSION_CLEANUP_BATCH_SIZE); will(returnValue(batchSize));
-				oneOf(batchSize).getIntegerValue(); will(returnValue(BATCH_SIZE));
-				
+				oneOf(maxDaysHistoryProvider).get(); will(returnValue(THIRTY_DAY_HISTORY));
+				oneOf(batchSizeProvider).get(); will(returnValue(BATCH_SIZE));
+
 				oneOf(customerSessionCleanupService).getOldCustomerSessionGuids(calendar.getTime(), BATCH_SIZE); will(returnValue(oldGuids));
 				oneOf(customerSessionCleanupService).deleteSessions(oldGuids);
 				

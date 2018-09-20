@@ -3,7 +3,6 @@
  */
 package com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder.repositories;
 
-import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.when;
 
 import static com.elasticpath.rest.resource.integration.epcommerce.repository.ResourceTestConstants.CART_ID;
@@ -16,7 +15,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.elasticpath.domain.catalog.ProductSku;
 import com.elasticpath.rest.definition.carts.LineItemIdentifier;
@@ -44,7 +43,7 @@ public class ItemIdentifierRepositoryImplTest {
 	public void getElements() {
 		LineItemIdentifier lineItemIdentifier = IdentifierTestFactory.buildLineItemIdentifier(SCOPE, CART_ID, LINE_ITEM_ID);
 
-		when(shoppingCartRepository.getProductSku(any())).thenReturn(Single.just(productSku));
+		when(shoppingCartRepository.getProductSku(CART_ID, LINE_ITEM_ID)).thenReturn(Single.just(productSku));
 		when(itemRepository.getItemIdForProductSku(productSku)).thenReturn(ITEM_IDENTIFIER_PART);
 
 		repository.getElements(lineItemIdentifier)

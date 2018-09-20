@@ -1,6 +1,7 @@
 /*
  * Copyright (c) Elastic Path Software Inc., 2011.
  */
+
 package com.elasticpath.test.integration.cartorder;
 
 import static org.junit.Assert.assertEquals;
@@ -28,7 +29,6 @@ import com.elasticpath.domain.cartorder.impl.CartOrderImpl;
 import com.elasticpath.domain.catalog.ProductSku;
 import com.elasticpath.domain.customer.Address;
 import com.elasticpath.domain.customer.Customer;
-import com.elasticpath.domain.customer.CustomerCreditCard;
 import com.elasticpath.domain.customer.CustomerSession;
 import com.elasticpath.domain.customer.PaymentToken;
 import com.elasticpath.domain.customer.impl.AbstractPaymentMethodImpl;
@@ -62,7 +62,7 @@ import com.elasticpath.test.util.Utils;
  */
 public class CartOrderServiceImplTest extends BasicSpringContextTest {
 
-	private static final String INVALID_SHIPPING_SERVICE_LEVEL_GUID = "INVALID_SHIPPING_SERVICE_LEVEL_GUID";
+	private static final String INVALID_SHIPPING_OPTION_CODE = "INVALID_SHIPPING_OPTION_CODE";
 
 	private static final String INVALID_ADDRESS_GUID = "INVALID_ADDRESS_GUID";
 
@@ -80,9 +80,7 @@ public class CartOrderServiceImplTest extends BasicSpringContextTest {
 
 	private static String DEFAULT_SUBCOUNTRY_CODE;
 
-	private static String DEFAULT_SHIPPING_SERVICE_LEVEL_GUID;
-
-	private SimpleStoreScenario scenario;
+	private static String DEFAULT_SHIPPING_OPTION_CODE;
 
 
 	@Autowired
@@ -108,13 +106,13 @@ public class CartOrderServiceImplTest extends BasicSpringContextTest {
 
 	@Autowired
 	private CustomerBuilder customerBuilder;
-	
+
 	@Autowired
 	private PaymentTokenDao paymentTokenDao;
 
 	@Autowired
 	private CatalogTestPersister catalogTestPersister;
-	
+
 	private Store store;
 
 	private ShoppingCart cart;
@@ -134,14 +132,14 @@ public class CartOrderServiceImplTest extends BasicSpringContextTest {
 		billingAddressGuid = Utils.uniqueCode("BAGUID");
 		shippingAddressGuid = Utils.uniqueCode("SAGUID");
 		customerGuid = Utils.uniqueCode("CUSTOMER");
-		scenario = getTac().useScenario(SimpleStoreScenario.class);
+		SimpleStoreScenario scenario = getTac().useScenario(SimpleStoreScenario.class);
 
 		ShippingRegion defaultShippingRegion = scenario.getShippingRegion();
 		Map<String, Region> regionMap = defaultShippingRegion.getRegionMap();
 		Region region = regionMap.values().iterator().next();
 		DEFAULT_COUNTRY_CODE = region.getCountryCode();
 		DEFAULT_SUBCOUNTRY_CODE = region.getSubCountryCodeList().get(0);
-		DEFAULT_SHIPPING_SERVICE_LEVEL_GUID = scenario.getShippingServiceLevel().getGuid();
+		DEFAULT_SHIPPING_OPTION_CODE = scenario.getShippingOption().getCode();
 
 		store = scenario.getStore();
 
@@ -156,75 +154,73 @@ public class CartOrderServiceImplTest extends BasicSpringContextTest {
 	}
 
 	/**
-	 * Ensure valid address and level are not sanitized.
+	 * Ensure valid address and shipping option are not sanitized.
 	 */
 	@Test
-	public void ensureValidAddressAndLevelAreNotSanitized() {
+	public void ensureValidAddressAndShippingOptionAreNotSanitized() {
 		shouldHavePhysicalGoodInCart();
-		CartOrder cartOrder = shouldCreateAndPersistCardOrderWithAddressAndLevelGuids(shippingAddressGuid, DEFAULT_SHIPPING_SERVICE_LEVEL_GUID);
+		CartOrder cartOrder = shouldCreateAndPersistCardOrderWithAddressAndShippingOptionCode(shippingAddressGuid, DEFAULT_SHIPPING_OPTION_CODE);
 
 		CartOrder sanitizedCartOrder = cartOrderService.findByStoreCodeAndGuid(store.getCode(), cartOrder.getGuid());
-		
+
 		assertEquals("Address guid is incorrect.", shippingAddressGuid, sanitizedCartOrder.getShippingAddressGuid());
-		assertEquals("Shipping service level guid is incorrect.", DEFAULT_SHIPPING_SERVICE_LEVEL_GUID, 
-				sanitizedCartOrder.getShippingServiceLevelGuid());
+		assertEquals("Shipping option code is incorrect.", DEFAULT_SHIPPING_OPTION_CODE, sanitizedCartOrder.getShippingOptionCode());
 	}
-	
+
 	/**
 	 * Ensure correct sanitation for null shipping info.
 	 */
 	@Test
 	public void ensureCorrectSanitationForNullShippingInfo() {
 		shouldHavePhysicalGoodInCart();
-		CartOrder cartOrder = shouldCreateAndPersistCardOrderWithAddressAndLevelGuids(null, null);
+		CartOrder cartOrder = shouldCreateAndPersistCardOrderWithAddressAndShippingOptionCode(null, null);
 
 		CartOrder sanitizedCartOrder = cartOrderService.findByStoreCodeAndGuid(store.getCode(), cartOrder.getGuid());
-		
+
 		assertEquals("Address guid should be null.", null, sanitizedCartOrder.getShippingAddressGuid());
-		assertEquals("Shipping service level guid should be null.", null, sanitizedCartOrder.getShippingServiceLevelGuid());
+		assertEquals("Shipping option code should be null.", null, sanitizedCartOrder.getShippingOptionCode());
 	}
-	
+
 	/**
 	 * Ensure correct sanitation for invalid shipping info.
 	 */
 	@Test
 	public void ensureCorrectSanitationForInvalidShippingInfo() {
 		shouldHavePhysicalGoodInCart();
-		CartOrder cartOrder = shouldCreateAndPersistCardOrderWithAddressAndLevelGuids(INVALID_ADDRESS_GUID, INVALID_SHIPPING_SERVICE_LEVEL_GUID);
+		CartOrder cartOrder = shouldCreateAndPersistCardOrderWithAddressAndShippingOptionCode(INVALID_ADDRESS_GUID, INVALID_SHIPPING_OPTION_CODE);
 
 		CartOrder sanitizedCartOrder = cartOrderService.findByStoreCodeAndGuid(store.getCode(), cartOrder.getGuid());
-		
+
 		assertEquals("Address guid should be null.", null, sanitizedCartOrder.getShippingAddressGuid());
-		assertEquals("Shipping service level guid should be null.", null, sanitizedCartOrder.getShippingServiceLevelGuid());
+		assertEquals("Shipping option code should be null.", null, sanitizedCartOrder.getShippingOptionCode());
 	}
-	
+
 	/**
 	 * Ensure correct sanitation for invalid address.
 	 */
 	@Test
 	public void ensureCorrectSanitationForInvalidAddress() {
 		shouldHavePhysicalGoodInCart();
-		CartOrder cartOrder = shouldCreateAndPersistCardOrderWithAddressAndLevelGuids(INVALID_ADDRESS_GUID, DEFAULT_SHIPPING_SERVICE_LEVEL_GUID);
+		CartOrder cartOrder = shouldCreateAndPersistCardOrderWithAddressAndShippingOptionCode(INVALID_ADDRESS_GUID, DEFAULT_SHIPPING_OPTION_CODE);
 
 		CartOrder sanitizedCartOrder = cartOrderService.findByStoreCodeAndGuid(store.getCode(), cartOrder.getGuid());
-		
+
 		assertEquals("Address guid should be null.", null, sanitizedCartOrder.getShippingAddressGuid());
-		assertEquals("Shipping service level guid should be null.", null, sanitizedCartOrder.getShippingServiceLevelGuid());
+		assertEquals("shipping option code guid should be null.", null, sanitizedCartOrder.getShippingOptionCode());
 	}
-		
+
 	/**
-	 * Ensure correct sanitation for invalid shipping service level.
+	 * Ensure correct sanitation for invalid shipping option.
 	 */
 	@Test
-	public void ensureCorrectSanitationForInvalidShippingServiceLevel() {
+	public void ensureCorrectSanitationForInvalidShippingOption() {
 		shouldHavePhysicalGoodInCart();
-		CartOrder cartOrder = shouldCreateAndPersistCardOrderWithAddressAndLevelGuids(shippingAddressGuid,
-				INVALID_SHIPPING_SERVICE_LEVEL_GUID);
+		CartOrder cartOrder = shouldCreateAndPersistCardOrderWithAddressAndShippingOptionCode(shippingAddressGuid, INVALID_SHIPPING_OPTION_CODE);
 
 		CartOrder sanitizedCartOrder = cartOrderService.findByStoreCodeAndGuid(store.getCode(), cartOrder.getGuid());
-		
+
 		assertEquals("Address guid is incorrect.", shippingAddressGuid, sanitizedCartOrder.getShippingAddressGuid());
-		assertEquals("Shipping service level guid should be null.", null, sanitizedCartOrder.getShippingServiceLevelGuid());
+		assertEquals("Shipping option code should be null.", null, sanitizedCartOrder.getShippingOptionCode());
 	}
 
 	/**
@@ -235,7 +231,7 @@ public class CartOrderServiceImplTest extends BasicSpringContextTest {
 		CartOrder cartOrder = beanFactory.getBean(ContextIdNames.CART_ORDER);
 		cartOrder.setBillingAddressGuid(billingAddressGuid);
 		cartOrder.setShippingAddressGuid(shippingAddressGuid);
-		cartOrder.setShippingServiceLevelGuid(DEFAULT_SHIPPING_SERVICE_LEVEL_GUID);
+		cartOrder.setShippingOptionCode(DEFAULT_SHIPPING_OPTION_CODE);
 		cartOrder.setShoppingCartGuid(cartGuid);
 
 		PaymentToken token = getPersistedToken();
@@ -247,12 +243,12 @@ public class CartOrderServiceImplTest extends BasicSpringContextTest {
 
 		assertEquals("Customer billing address guid was not persisted", billingAddressGuid, retrievedCartOrder.getBillingAddressGuid());
 		assertEquals("Customer shipping address guid was not persisted", shippingAddressGuid, retrievedCartOrder.getShippingAddressGuid());
-		assertEquals("Shipping service level guid was not persisted", DEFAULT_SHIPPING_SERVICE_LEVEL_GUID, retrievedCartOrder.getShippingServiceLevelGuid());
+		assertEquals("Shipping shipping option code was not persisted", DEFAULT_SHIPPING_OPTION_CODE, retrievedCartOrder.getShippingOptionCode());
 		assertEquals("Shopping cart guid was not persisted", cartGuid, retrievedCartOrder.getShoppingCartGuid());
 		PaymentToken persistedPaymentToken = (PaymentToken) retrievedCartOrder.getPaymentMethod();
 		assertEquals("Payment method value was not persisted", token.getValue(), persistedPaymentToken.getValue());
 		assertEquals("Payment method display value was not persisted", token.getDisplayValue(), persistedPaymentToken.getDisplayValue());
-		
+
 		assertEquals("The persisted cart order was not identical to expected cart order", cartOrder, retrievedCartOrder);
 	}
 
@@ -263,6 +259,7 @@ public class CartOrderServiceImplTest extends BasicSpringContextTest {
 	public void ensureSuccessfulPersistenceOfNewPaymentMethodOnNewCartOrder() {
 		CartOrder cartOrder = beanFactory.getBean(ContextIdNames.CART_ORDER);
 		cartOrder.setShoppingCartGuid(cartGuid);
+		cartOrder.setShippingAddressGuid(shippingAddressGuid);
 		PaymentToken token = new PaymentTokenImpl.TokenBuilder().withDisplayValue("displayValue").withValue("value").build();
 		cartOrder.usePaymentMethod(token);
 		cartOrderService.saveOrUpdate(cartOrder);
@@ -280,19 +277,20 @@ public class CartOrderServiceImplTest extends BasicSpringContextTest {
 	public void ensureSuccessfulPersistenceOfNewPaymentMethodOnExistingCartOrder() {
 		CartOrder cartOrder = beanFactory.getBean(ContextIdNames.CART_ORDER);
 		cartOrder.setShoppingCartGuid(cartGuid);
+		cartOrder.setShippingAddressGuid(shippingAddressGuid);
 		cartOrderService.saveOrUpdate(cartOrder);
-		
+
 		CartOrder retrievedCartOrder = cartOrderService.findByStoreCodeAndGuid(store.getCode(), cartOrder.getGuid());
 		PaymentToken token = new PaymentTokenImpl.TokenBuilder().withDisplayValue("displayValue").withValue("value").build();
 		retrievedCartOrder.usePaymentMethod(token);
 		cartOrderService.saveOrUpdate(retrievedCartOrder);
-		
+
 		CartOrder updatedCartOrder = cartOrderService.findByStoreCodeAndGuid(store.getCode(), cartOrder.getGuid());
-		PaymentToken retrievedPaymentToken = (PaymentToken)updatedCartOrder.getPaymentMethod();
+		PaymentToken retrievedPaymentToken = (PaymentToken) updatedCartOrder.getPaymentMethod();
 		assertEquals("Retrieved payment token display value does not match", token.getDisplayValue(), retrievedPaymentToken.getDisplayValue());
 		assertEquals("Retrieved payment token value does not match", token.getValue(), retrievedPaymentToken.getValue());
 	}
-	
+
 	/**
 	 * Ensure deletion of cart order does not delete customer payment method.
 	 */
@@ -306,28 +304,28 @@ public class CartOrderServiceImplTest extends BasicSpringContextTest {
 		customer.getPaymentMethods().setDefault(paymentMethod);
 		customer = customerService.update(customer);
 		PaymentMethod persistedPaymentMethod = customer.getPaymentMethods().getDefault();
-		
+
 		cartOrder.usePaymentMethod(persistedPaymentMethod);
 		cartOrder = cartOrderService.saveOrUpdate(cartOrder);
-		
+
 		cartOrderService.remove(cartOrder);
 		Customer updatedCustomer = customerService.findByGuid(customer.getGuid());
-		assertEquals("Payment method was not retained on Customer after CartOrder deletion.", persistedPaymentMethod, updatedCustomer.getPaymentMethods().getDefault());
+		assertEquals("Payment method was not retained on Customer after CartOrder deletion.", persistedPaymentMethod,
+				updatedCustomer.getPaymentMethods().getDefault());
 	}
-	
 
 	@Test
 	@SuppressWarnings("rawtypes")
 	public void ensureNullingPaymentTokenOnCartOrderRemovesOrphanToken() {
 		PaymentToken paymentToken = new PaymentTokenImpl.TokenBuilder().withDisplayValue("displayValue").withValue("value").build();
-		
+
 		CartOrder cartOrder = beanFactory.getBean(ContextIdNames.CART_ORDER);
 		cartOrder.setShoppingCartGuid(cartGuid);
 		cartOrder.usePaymentMethod(paymentToken);
 		cartOrder = cartOrderService.saveOrUpdate(cartOrder);
 		AbstractPaymentMethodImpl<?> persistedPaymentMethod = (AbstractPaymentMethodImpl<?>) cartOrder.getPaymentMethod();
 		cartOrder.clearPaymentMethod();
-		cartOrder = cartOrderService.saveOrUpdate(cartOrder);
+		cartOrderService.saveOrUpdate(cartOrder);
 		PaymentToken retrievedPaymentMethod = paymentTokenDao.get(persistedPaymentMethod.getUidPk());
 		assertNull("Orphaned payment token should be deleted", retrievedPaymentMethod);
 	}
@@ -448,85 +446,19 @@ public class CartOrderServiceImplTest extends BasicSpringContextTest {
 		cartOrderService.removeIfExistsByShoppingCart(cart);
 	}
 
-
-	/**
-	 * Test create if not exists with default billing address and credit card.
-	 */
-	@Test
-	public void testCreateIfNotExistsWithDefaultBillingAddressAndCreditCard() {
-		cartOrderService.createOrderIfPossible(cart);
-		CartOrder cartOrder = cartOrderService.findByShoppingCartGuid(cartGuid);
-
-		assertEquals("Customer preferred billing address guid and cart order billing address guid should be equal.",
-				customer.getPreferredBillingAddress().getGuid(), cartOrder.getBillingAddressGuid());
-		assertEquals("Customer credit card and cart order payment method should be equal.",
-				customer.getCreditCards().get(0), cartOrder.getPaymentMethod());
-	}
-
 	/**
 	 * Test create if not exists with default billing address.
 	 */
 	@Test
 	public void testCreateIfNotExistsWithDefaultBillingAddress() {
-		customer.setCreditCards(new ArrayList<>());
+		customer.getPaymentMethods().clear();
 		customer = customerService.update(customer);
 		cartOrderService.createOrderIfPossible(cart);
 		CartOrder cartOrder = cartOrderService.findByShoppingCartGuid(cartGuid);
 
 		assertEquals("Customer preferred billing address guid and cart order billing address guid should be equal.",
 				customer.getPreferredBillingAddress().getGuid(), cartOrder.getBillingAddressGuid());
-		assertNull("card order payment method should be null.", cartOrder.getPaymentMethod());
-	}
-
-	/**
-	 * Test clearing customer credit cards.
-	 */
-	@Test
-	public void testClearingCustomerCreditCards() {
-		List<Long> creditCardUidsBeforeRemoval = getCreditCardUids();
-
-		customer.setCreditCards(new ArrayList<>());
-		customer = customerService.update(customer);
-		assertEquals("No credit cards should be saved on updated Customer.", 0, customer.getCreditCards().size());
-		customer = customerService.get(customer.getUidPk());
-		assertEquals("No credit cards should be saved on persisted Customer.", 0, customer.getCreditCards().size());
-
-		List<CustomerCreditCard> orphanedCreditCards = findCreditCardsByUids(creditCardUidsBeforeRemoval);
-		assertTrue("deleted credit cards should not be orphaned", orphanedCreditCards.isEmpty());
-	}
-
-	private List<Long> getCreditCardUids() {
-		List<CustomerCreditCard> creditCards = customer.getCreditCards();
-		List<Long> creditCardUids = new ArrayList<>();
-		for (CustomerCreditCard creditCard : creditCards) {
-			creditCardUids.add(creditCard.getUidPk());
-		}
-		return creditCardUids;
-	}
-
-	private List<CustomerCreditCard> findCreditCardsByUids(final List<Long> creditCardUids) {
-		final String selectCreditCardsByUidPks = "SELECT cc FROM CustomerCreditCardImpl cc WHERE cc.uidPk in (:creditCardUids)";
-		return persistenceEngine.retrieveWithNamedParameters(
-				selectCreditCardsByUidPks,
-				Collections.singletonMap("creditCardUids", creditCardUids));
-	}
-
-
-	/**
-	 * Assert that the {@link CartOrderService#createOrderIfPossible(com.elasticpath.domain.shoppingcart.ShoppingCart))}  will create a CartOrder with default payment method GUID, and the billing
-	 * address GUID is null because the Customer has no default billing address.
-	 */
-	@Test
-	public void testCreateIfNotExistsWithDefaultCreditCard() {
-		customer.setPreferredBillingAddress(null);
-		customer = customerService.update(customer);
-
-		cartOrderService.createOrderIfPossible(cart);
-		CartOrder cartOrder = cartOrderService.findByShoppingCartGuid(cartGuid);
-
-		assertNull("card order billing address guid should be null.", cartOrder.getBillingAddressGuid());
-		assertEquals("Customer credit card payment method and cart order payment method should be equal.",
-							customer.getCreditCards().get(0), cartOrder.getPaymentMethod());
+		assertNull("cart order payment method should be null.", cartOrder.getPaymentMethod());
 	}
 
 	/**
@@ -536,7 +468,7 @@ public class CartOrderServiceImplTest extends BasicSpringContextTest {
 	@Test
 	public void testCreateIfNotExistsWithNoDefaults() {
 		customer.setPreferredBillingAddress(null);
-		customer.setCreditCards(new ArrayList<>());
+		customer.getPaymentMethods().clear();
 		customer = customerService.update(customer);
 
 		cartOrderService.createOrderIfPossible(cart);
@@ -618,7 +550,8 @@ public class CartOrderServiceImplTest extends BasicSpringContextTest {
 		shopper = shopperService.save(shopper);
 
 		// TODO: Handrolling customer session is probably not a good idea
-		final CustomerSession customerSession = TestCustomerSessionFactoryForTestApplication.getInstance().createNewCustomerSessionWithContext(shopper);
+		final CustomerSession customerSession = TestCustomerSessionFactoryForTestApplication.getInstance()
+				.createNewCustomerSessionWithContext(shopper);
 		customerSession.setCurrency(Currency.getInstance("USD"));
 		final ShoppingCartImpl shoppingCart = getBean(ContextIdNames.SHOPPING_CART);
 		shoppingCart.setShopper(shopper);
@@ -630,12 +563,12 @@ public class CartOrderServiceImplTest extends BasicSpringContextTest {
 	}
 
 	private CartOrder createAndSaveCartOrder() {
-		
+
 		CartOrder cartOrder = new CartOrderImpl();
 		cartOrder.setGuid(cartOrderGuid);
 		cartOrder.setBillingAddressGuid(billingAddressGuid);
 		cartOrder.setShippingAddressGuid(shippingAddressGuid);
-		cartOrder.setShippingServiceLevelGuid(DEFAULT_SHIPPING_SERVICE_LEVEL_GUID);
+		cartOrder.setShippingOptionCode(DEFAULT_SHIPPING_OPTION_CODE);
 		cartOrder.setShoppingCartGuid(cartGuid);
 
 		cartOrder.usePaymentMethod(getPersistedToken());
@@ -649,18 +582,18 @@ public class CartOrderServiceImplTest extends BasicSpringContextTest {
 	private PaymentToken getPersistedToken() {
 
 		PaymentToken token = new PaymentTokenImpl.TokenBuilder()
-			.withDisplayValue("**** **** **** 1234")
-			.withGatewayGuid("1234")
-			.withValue("token-value")
-			.build();
-		
+				.withDisplayValue("**** **** **** 1234")
+				.withGatewayGuid("1234")
+				.withValue("token-value")
+				.build();
+
 		Customer customer = customerBuilder.withStoreCode(store.getCode())
 				.withGuid(customerGuid)
 				.withPaymentMethods(token)
 				.build();
-		
+
 		customer = customerService.add(customer);
-		
+
 		token = (PaymentToken) customer.getPaymentMethods().all().iterator().next();
 		return token;
 	}
@@ -672,30 +605,31 @@ public class CartOrderServiceImplTest extends BasicSpringContextTest {
 		address.setSubCountry(DEFAULT_SUBCOUNTRY_CODE);
 		return addressDao.saveOrUpdate(address);
 	}
-	
+
 	private ShoppingCart loadShoppingCart() {
 		return shoppingCartService.findByGuid(cartGuid);
 	}
-	
+
 	private void shouldHavePhysicalGoodInCart() {
-        final ShoppingItemDto dto = new ShoppingItemDto(shippableProductSku.getSkuCode(), 1);
+		final ShoppingItemDto dto = new ShoppingItemDto(shippableProductSku.getSkuCode(), 1);
 		cartDirector.addItemToCart(cart, dto);
 		cart = shoppingCartService.saveOrUpdate(cart);
-    }
-    
-	private CartOrder shouldCreateAndPersistCardOrderWithAddressAndLevelGuids(final String shippingAddressGuid, final String shippingServiceLevelGuid) {
+	}
+
+	private CartOrder shouldCreateAndPersistCardOrderWithAddressAndShippingOptionCode(final String shippingAddressGuid,
+			final String shippingOptionCode) {
 		cartOrderService.createOrderIfPossible(cart);
 		CartOrder cartOrder = cartOrderService.findByShoppingCartGuid(cartGuid);
 		cartOrder.setShippingAddressGuid(shippingAddressGuid);
-		cartOrder.setShippingServiceLevelGuid(shippingServiceLevelGuid);
+		cartOrder.setShippingOptionCode(shippingOptionCode);
 
 		cartOrderService.saveOrUpdate(cartOrder);
 		return cartOrder;
 	}
-	
+
 	private <T> T getBean(final String name) {
 		return getBeanFactory().getBean(name);
 	}
 
 }
- 
+

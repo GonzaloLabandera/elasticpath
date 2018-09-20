@@ -32,7 +32,6 @@ import com.elasticpath.rest.form.SubmitStatus;
 import com.elasticpath.rest.id.IdentifierPart;
 import com.elasticpath.rest.id.type.StringIdentifier;
 import com.elasticpath.rest.resource.ResourceOperationContext;
-import com.elasticpath.rest.resource.integration.epcommerce.repository.availabilities.ItemAvailabilityValidationService;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder.CartOrderRepository;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder.PricingSnapshotRepository;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.customer.CustomerSessionRepository;
@@ -71,8 +70,6 @@ public class PurchaseEntityRepositoryImpl<E extends PurchaseEntity, I extends Pu
 	private ConversionService conversionService;
 
 	private CartHasItemsService cartHasItemsService;
-
-	private ItemAvailabilityValidationService itemAvailabilityValidationService;
 
 	@Override
 	public Single<PurchaseEntity> findOne(final PurchaseIdentifier identifier) {
@@ -119,9 +116,7 @@ public class PurchaseEntityRepositoryImpl<E extends PurchaseEntity, I extends Pu
 				.withScope(scope)
 				.build();
 
-		return cartHasItemsService.isCartEmpty(identifier).flatMap(isCartEmpty ->
-				isCartEmpty ? Single.just(false) : itemAvailabilityValidationService.validateItemUnavailable(identifier).isEmpty()
-						.flatMap(Single::just));
+		return cartHasItemsService.isCartEmpty(identifier).map(isCartEmpty -> !isCartEmpty);
 	}
 
 	/**
@@ -187,30 +182,30 @@ public class PurchaseEntityRepositoryImpl<E extends PurchaseEntity, I extends Pu
 	protected Single<OrderPayment> createOrderPaymentFromCartOrder(final CartOrder cartOrder) {
 		PaymentMethod paymentMethod = cartOrder.getPaymentMethod();
 		if (paymentMethod == null) {
-			return createEmptyCreditCardOrderPaymentForZeroTotalPurchase();
+			return createEmptyPaymentTokenOrderPaymentForZeroTotalPurchase();
 		} else {
 			return purchaseRepository.getOrderPaymentFromPaymentMethod(paymentMethod);
 		}
 	}
 
 	/**
-	 * Create an empty credit card order payment.
+	 * Create an empty paymentToken order payment.
 	 *
-	 * @return empty credit card order payment
+	 * @return empty paymentToken order payment
 	 */
-	protected Single<OrderPayment> createEmptyCreditCardOrderPaymentForZeroTotalPurchase() {
+	protected Single<OrderPayment> createEmptyPaymentTokenOrderPaymentForZeroTotalPurchase() {
 		return purchaseRepository.createNewOrderPaymentEntity()
-				.map(this::setOrderPaymentAsCreditCard);
+				.map(this::setOrderPaymentAsPaymentToken);
 	}
 
 	/**
-	 * Set the Order payment method as a credit card.
+	 * Set the Order payment method as a payment token.
 	 *
 	 * @param orderPayment orderPayment
 	 * @return orderPayment
 	 */
-	protected OrderPayment setOrderPaymentAsCreditCard(final OrderPayment orderPayment) {
-		orderPayment.setPaymentMethod(PaymentType.CREDITCARD);
+	protected OrderPayment setOrderPaymentAsPaymentToken(final OrderPayment orderPayment) {
+		orderPayment.setPaymentMethod(PaymentType.PAYMENT_TOKEN);
 		return orderPayment;
 	}
 
@@ -302,8 +297,5 @@ public class PurchaseEntityRepositoryImpl<E extends PurchaseEntity, I extends Pu
 		this.cartHasItemsService = cartHasItemsService;
 	}
 
-	@Reference
-	public void setItemAvailabilityValidationService(final ItemAvailabilityValidationService itemAvailabilityValidationService) {
-		this.itemAvailabilityValidationService = itemAvailabilityValidationService;
-	}
+
 }

@@ -3,6 +3,7 @@
  */
 package com.elasticpath.tools.sync.client.controller.impl;
 
+import net.sf.ehcache.CacheManager;
 import org.apache.log4j.Logger;
 
 import com.elasticpath.commons.constants.ContextIdNames;
@@ -61,6 +62,10 @@ public class FullController extends AbstractSyncController {
 	 */
 	@Override
 	protected void loadTransactionJob(final SerializableObjectListener objectListener, final SyncJobConfiguration syncJobConfiguration) {
+		//Clear the cache before the run, incase running in webapp (persistent) environment.
+		clearCache();
+
+		//perform initial lookups to build JobDescriptor
 		final JobDescriptor jobDescriptor = buildJobDescriptor(syncJobConfiguration);
 
 		final PersistenceEngine sourcePersistenceEngine = getSyncBeanFactory().getSourceBean(ContextIdNames.PERSISTENCE_ENGINE);
@@ -80,9 +85,9 @@ public class FullController extends AbstractSyncController {
 		if (sourceObjectCache.supportsPreloading()) {
 			for (final TransactionJobUnit jobUnit : transactionJob.getTransactionJobUnits()) {
 				for (final TransactionJobDescriptorEntry entry : jobUnit.getJobDescriptorEntries()) {
-
+					//Load from source system to a temporary mem location instead of disk.
+					//used later (in super.synchronize) to push to target system
 					sourceObjectCache.load(entry.getGuid(), entry.getType());
-
 				}
 			}
 		}
@@ -91,12 +96,21 @@ public class FullController extends AbstractSyncController {
 
 		// notify the listener of the new objects
 		for (final SerializableObject object : transactionJob) {
+			//process the object, take it from src object Cache and put it in target.
 			objectListener.processObject(object);
 			if (object instanceof JobEntry) {
 				final JobEntry entry = (JobEntry) object;
 				sourceObjectCache.remove(entry.getGuid(), entry.getType());
 			}
 		}
+	}
+
+	/**
+	 * Clears the caches, useful for running multiple DST runs in a row without restarting/clearing the context.
+	 */
+	protected void clearCache() {
+		CacheManager cacheManager = getSyncBeanFactory().getSourceBean("epEhcacheManager");
+		cacheManager.clearAll();
 	}
 
 	/**

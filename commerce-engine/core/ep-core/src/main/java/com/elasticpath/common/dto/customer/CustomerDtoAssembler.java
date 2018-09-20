@@ -1,22 +1,20 @@
-/**
+/*
  * Copyright (c) Elastic Path Software Inc., 2016
  */
 package com.elasticpath.common.dto.customer;
 
-import org.apache.commons.lang.BooleanUtils;
+import static java.util.Optional.ofNullable;
+
+import java.util.Objects;
 
 import com.elasticpath.common.dto.AddressDTO;
 import com.elasticpath.common.dto.assembler.AbstractDtoAssembler;
-import com.elasticpath.common.dto.assembler.customer.BuiltinFilters;
-import com.elasticpath.common.dto.assembler.customer.CreditCardFilter;
-import com.elasticpath.common.dto.customer.transformer.CreditCardDTOTransformer;
 import com.elasticpath.common.dto.customer.transformer.PaymentTokenDTOTransformer;
 import com.elasticpath.commons.beanframework.BeanFactory;
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.attribute.CustomerProfileValue;
 import com.elasticpath.domain.customer.Customer;
 import com.elasticpath.domain.customer.CustomerAddress;
-import com.elasticpath.domain.customer.CustomerCreditCard;
 import com.elasticpath.domain.customer.CustomerGroup;
 import com.elasticpath.domain.customer.PaymentToken;
 import com.elasticpath.plugin.payment.dto.PaymentMethod;
@@ -33,8 +31,6 @@ public class CustomerDtoAssembler extends AbstractDtoAssembler<CustomerDTO, Cust
 
 	private CustomerGroupService customerGroupService;
 
-	private CreditCardFilter cardFilter;
-	private CreditCardDTOTransformer credtCardDTOTransformer;
 	private PaymentTokenDTOTransformer paymentTokenDTOTransformer;
 
 	@Override
@@ -154,7 +150,6 @@ public class CustomerDtoAssembler extends AbstractDtoAssembler<CustomerDTO, Cust
 
 		target.setUserId(source.getUserId());
 		target.setFirstTimeBuyer(source.isFirstTimeBuyer());
-		populateLegacyDomainCreditCards(source, target);
 		populateDomainPaymentMethods(source, target);
 		populateDefaultPaymentMethod(source, target);
 
@@ -199,10 +194,10 @@ public class CustomerDtoAssembler extends AbstractDtoAssembler<CustomerDTO, Cust
 	}
 
 	private void populateDomainPaymentMethods(final CustomerDTO source, final Customer target) {
-		for (PaymentMethodDto sourcePaymentMethod : source.getPaymentMethods()) {
-			PaymentMethod targetPaymentMethod = transformPaymentMethodDtoToDomain(sourcePaymentMethod);
-			target.getPaymentMethods().add(targetPaymentMethod);
-		}
+		source.getPaymentMethods().stream()
+				.map(this::transformPaymentMethodDtoToDomain)
+				.filter(Objects::nonNull)
+				.forEach(targetPaymentMethod -> target.getPaymentMethods().add(targetPaymentMethod));
 	}
 
 	private void populateDefaultPaymentMethod(final CustomerDTO source, final Customer target) {
@@ -211,38 +206,14 @@ public class CustomerDtoAssembler extends AbstractDtoAssembler<CustomerDTO, Cust
 		if (defaultPaymentMethod != null) {
 			PaymentMethodDto defaultPaymentMethodSource = defaultPaymentMethod.getPaymentMethod();
 			PaymentMethod targetDefaultPaymentMethod = transformPaymentMethodDtoToDomain(defaultPaymentMethodSource);
-			target.getPaymentMethods().setDefault(targetDefaultPaymentMethod);
-		}
-	}
-
-	private void populateLegacyDomainCreditCards(final CustomerDTO source, final Customer target) {
-		if (source.getCreditCards() == null) {
-			return;
-		}
-
-		for (LegacyCreditCardDTO sourceCard : source.getCreditCards()) {
-			for (CustomerCreditCard card : target.getCreditCards()) {
-				if (sourceCard.getGuid().equals(card.getGuid())) {
-					target.getPaymentMethods().remove(card);
-					break;
-				}
-			}
-
-			CustomerCreditCard targetCard = getCredtCardDTOTransformer().transformToDomain(sourceCard);
-
-			if (BooleanUtils.isTrue(sourceCard.isDefaultCard())) {
-				target.getPaymentMethods().setDefault(targetCard);
-			} else {
-				target.getPaymentMethods().add(targetCard);
-			}
+			ofNullable(targetDefaultPaymentMethod)
+					.ifPresent(paymentMethod -> target.getPaymentMethods().setDefault(targetDefaultPaymentMethod));
 		}
 	}
 
 	private PaymentMethod transformPaymentMethodDtoToDomain(final PaymentMethodDto paymentMethodDto) {
 		PaymentMethod transformedPaymentMethod = null;
-		if (paymentMethodDto instanceof CreditCardDTO) {
-			transformedPaymentMethod = getCredtCardDTOTransformer().transformToDomain((CreditCardDTO) paymentMethodDto);
-		} else if (paymentMethodDto instanceof PaymentTokenDto) {
+		if (paymentMethodDto instanceof PaymentTokenDto) {
 			transformedPaymentMethod = getPaymentTokenDTOTransformer().transformToDomain((PaymentTokenDto) paymentMethodDto);
 		}
 
@@ -251,10 +222,7 @@ public class CustomerDtoAssembler extends AbstractDtoAssembler<CustomerDTO, Cust
 
 	private PaymentMethodDto transformPaymentMethodToDto(final PaymentMethod paymentMethod) {
 		PaymentMethodDto transformedPaymentMethodDto = null;
-		if (paymentMethod instanceof CustomerCreditCard) {
-			CreditCardDTO nonFilteredCreditCardDto = getCredtCardDTOTransformer().transformToDto((CustomerCreditCard) paymentMethod);
-			transformedPaymentMethodDto = getCardFilter().filter(nonFilteredCreditCardDto);
-		} else if (paymentMethod instanceof PaymentToken) {
+		if (paymentMethod instanceof PaymentToken) {
 			transformedPaymentMethodDto = getPaymentTokenDTOTransformer().transformToDto((PaymentToken) paymentMethod);
 		}
 
@@ -283,27 +251,6 @@ public class CustomerDtoAssembler extends AbstractDtoAssembler<CustomerDTO, Cust
 		return getBeanFactory().getBean(ContextIdNames.CUSTOMER_ADDRESS);
 	}
 
-	protected CustomerCreditCard getCustomerCreditCard() {
-		return getBeanFactory().getBean(ContextIdNames.CUSTOMER_CREDIT_CARD);
-	}
-
-	public void setCardFilter(final CreditCardFilter filter) {
-		cardFilter = filter;
-	}
-
-	/**
-	 * Gets the card filter. <br>
-	 * If a card filter not set then use the {@link BuiltinFilters.EMPTYING} filter.
-	 *
-	 * @return the card filter
-	 */
-	protected CreditCardFilter getCardFilter() {
-		if (cardFilter == null) {
-			cardFilter = BuiltinFilters.EMPTYING;
-		}
-		return cardFilter;
-	}
-
 	public void setBeanFactory(final BeanFactory beanFactory) {
 		this.beanFactory = beanFactory;
 	}
@@ -318,14 +265,6 @@ public class CustomerDtoAssembler extends AbstractDtoAssembler<CustomerDTO, Cust
 
 	protected CustomerGroupService getCustomerGroupService() {
 		return customerGroupService;
-	}
-
-	public void setCreditCardDTOTransformer(final CreditCardDTOTransformer creditCardDTOTransformer) {
-		this.credtCardDTOTransformer = creditCardDTOTransformer;
-	}
-
-	protected CreditCardDTOTransformer getCredtCardDTOTransformer() {
-		return this.credtCardDTOTransformer;
 	}
 
 	public void setPaymentTokenDTOTransformer(final PaymentTokenDTOTransformer paymentTokenDTOTransformer) {

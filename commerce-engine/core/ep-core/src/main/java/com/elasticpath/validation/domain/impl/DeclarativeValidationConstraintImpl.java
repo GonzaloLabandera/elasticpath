@@ -69,7 +69,6 @@ public class DeclarativeValidationConstraintImpl extends AbstractEpDomainImpl im
 	private LocalizedProperties localizedProperties;
 	private Map<String, LocalizedPropertyValue> localizedPropertiesMap = new HashMap<>();
 
-
 	@Override
 	@Basic
 	@Column(name = "VALIDATION_CONSTRAINT", nullable = false)

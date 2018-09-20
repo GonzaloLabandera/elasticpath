@@ -7,24 +7,27 @@ import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import com.elasticpath.domain.EpDomain;
 import com.elasticpath.domain.ShoppingItemContainer;
 import com.elasticpath.domain.catalog.GiftCertificate;
 import com.elasticpath.domain.catalog.Product;
+import com.elasticpath.domain.catalog.ProductSku;
 import com.elasticpath.domain.catalog.StoreObject;
 import com.elasticpath.domain.customer.Address;
 import com.elasticpath.domain.customer.CustomerSession;
 import com.elasticpath.domain.order.Order;
-import com.elasticpath.domain.shipping.ShippingServiceLevel;
 import com.elasticpath.domain.shopper.Shopper;
 import com.elasticpath.plugin.tax.domain.TaxExemption;
+import com.elasticpath.shipping.connectivity.dto.ShippingOption;
 
 /**
  * <code>ShoppingCart</code> represents a shopping cart of a <code>Customer</code>.
  */
-public interface ShoppingCart extends EpDomain, StoreObject, ShoppingItemContainer {
+public interface ShoppingCart extends EpDomain, StoreObject, ShoppingItemContainer<ShoppingItem> {
 
 	/**
 	 * Return the guid.
@@ -69,13 +72,6 @@ public interface ShoppingCart extends EpDomain, StoreObject, ShoppingItemContain
 	void setCustomerSession(CustomerSession customerSession);
 
 	/**
-	 * Get the cart items in the shopping cart.
-	 *
-	 * @return the cart items in the shopping cart
-	 */
-	List<ShoppingItem> getCartItems();
-
-	/**
 	 * Get the products in the shopping cart.
 	 *
 	 * @return the products in the shopping cart
@@ -117,12 +113,11 @@ public interface ShoppingCart extends EpDomain, StoreObject, ShoppingItemContain
 	void removeCartItem(String lineItemGuid);
 
 	/**
-	 * Get the first cart item by the sku code of its SKU.
+	 * Remove zero or many items from the cart.
 	 *
-	 * @param skuCode the sku code of the SKU in the cart item to be retrieved.
-	 * @return the corresponding <code>ShoppingItem</code> or null if not found
+	 * @param lineItemGuid the guids of the <code>CartItem</code> instances to remove
 	 */
-	ShoppingItem getCartItem(String skuCode);
+	void removeCartItems(Collection<String> lineItemGuid);
 
 	/**
 	 * Get the all cart items by the sku code of its SKU.
@@ -139,6 +134,12 @@ public interface ShoppingCart extends EpDomain, StoreObject, ShoppingItemContain
 	 * @return the corresponding list of <code>ShoppingItem</code> found
 	 */
 	List<ShoppingItem> getCartItemsBySkuGuid(String skuGuid);
+
+	/**
+	 * Indicates whether or not a shopping cart contains shopping items.
+	 * @return true if the shopping cart contains no shopping items
+	 */
+	boolean isEmpty();
 
 	/**
 	 * Return the number of items in the shopping cart.
@@ -204,41 +205,23 @@ public interface ShoppingCart extends EpDomain, StoreObject, ShoppingItemContain
 	Order getCompletedOrder();
 
 	/**
-	 * Return the list of shippingServiceLevel list available based on the current shopping cart info.
+	 * Get the currently selected shipping option if set.
 	 *
-	 * @return the list of shippingServiceLevel list available
-	 *         based on the current shopping cart info.
-     *         It is guaranteed to be not null.
+	 * @return the selected shipping option, or {@link Optional#empty()} if not set.
 	 */
-	List<ShippingServiceLevel> getShippingServiceLevelList();
+	Optional<ShippingOption> getSelectedShippingOption();
 
 	/**
-	 * Set the list of shippingServiceLevel list available based on the current shopping cart info.
+	 * Sets the currently selected shipping option.
 	 *
-	 * @param shippingServiceLevelList the list of shippingServiceLevel
-	 *        list available based on the current shopping cart info.
-     *        If parameter value is null the list will be cleared.
+	 * @param selectedShippingOption the shipping option selected.
 	 */
-	void setShippingServiceLevelList(List<ShippingServiceLevel> shippingServiceLevelList);
+	void setSelectedShippingOption(ShippingOption selectedShippingOption);
 
 	/**
-	 * Get the selectedShippingServiceLevel.
-	 *
-	 * @return the selected ShippingServiceLevel.
+	 * Clears the selected shipping option as well as any calculated shipping costs.
 	 */
-	ShippingServiceLevel getSelectedShippingServiceLevel();
-
-	/**
-	 * Set the selectedShippingServiceLevelUid and update the shippingCost correspondingly.
-	 *
-	 * @param selectedSSLUid - the selected ShippingServiceLevel uid.
-	 */
-	void setSelectedShippingServiceLevelUid(long selectedSSLUid);
-
-	/**
-	 * Resets the selected <code>ShippingServiceLevel</code> to null.
-	 */
-	void clearSelectedShippingServiceLevel();
+	void clearSelectedShippingOption();
 
 	/**
 	 * Get the totalWeight of items in <code>ShoppingCart</code>.
@@ -342,14 +325,6 @@ public interface ShoppingCart extends EpDomain, StoreObject, ShoppingItemContain
 	 * @param estimateMode true when estimating shipping and taxes; otherwise, false.
 	 */
 	void setEstimateMode(boolean estimateMode);
-
-	/**
-	 * Get all the items in the shopping cart, including the
-	 * ShoppingCartItems, WishListItems, GiftCertificateItems.
-	 *
-	 * @return an unmodifiable list of all the items in the shopping cart
-	 */
-	List<ShoppingItem> getAllItems();
 
 	/**
 	 * Indicates that the given rule was applied by the promotion rule engine.
@@ -532,4 +507,10 @@ public interface ShoppingCart extends EpDomain, StoreObject, ShoppingItemContain
 	 */
 	boolean isActive();
 
+	/**
+	 * Looks up the ProductSku related to each ShoppingItem in the cart and returns a map associating the two.
+	 *
+	 * @return a map of ShoppingItems in the cart, associated to the related ProductSku
+	 */
+	Map<ShoppingItem, ProductSku> getShoppingItemProductSkuMap();
 }

@@ -89,13 +89,8 @@ public class ThreadLocalStorageImpl implements StoreConfig {
 		this.settingsService = settingsService;
 	}
 
-	/**
-	 * Get the setting identified by the given path for the store associated with this configuration.
-	 * @param path the unique identifier to the setting definition
-	 * @return the requested setting value, or null if it cannot be found
-	 * @throws EpServiceException on error
-	 */
 	@Override
+	@Deprecated
 	public SettingValue getSetting(final String path) {
 		if (getStoreCode() == null) {
 			throw new EpServiceException("StoreCode has not been set in this thread.");

@@ -5,9 +5,9 @@ package com.elasticpath.rest.resource.integration.epcommerce.repository.transfor
 
 import java.util.List;
 
-import com.elasticpath.commons.exception.EpValidationException;
+import com.elasticpath.base.exception.structured.EpValidationException;
+import com.elasticpath.base.exception.structured.StructuredErrorMessageException;
 import com.elasticpath.commons.exception.InvalidBusinessStateException;
-import com.elasticpath.commons.exception.StructuredErrorMessageException;
 import com.elasticpath.commons.exception.UnavailableException;
 import com.elasticpath.rest.ResourceOperationFailure;
 import com.elasticpath.rest.advise.Message;
@@ -61,7 +61,7 @@ public interface ExceptionTransformer {
 	<T> ExecutionResult<T> getExecutionResult(InvalidBusinessStateException error);
 
 	/**
-	 * Get a list of {@link Message} from a list of {@link com.elasticpath.common.dto.StructuredErrorMessage}.
+	 * Get a list of {@link Message} from a list of {@link com.elasticpath.base.common.dto.StructuredErrorMessage}.
 	 *
 	 * @param error the StructuredErrorMessageException
 	 * @return messages

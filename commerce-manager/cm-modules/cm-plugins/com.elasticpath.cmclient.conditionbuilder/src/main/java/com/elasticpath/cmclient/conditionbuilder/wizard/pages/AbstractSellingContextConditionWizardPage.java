@@ -3,6 +3,7 @@
  */
 package com.elasticpath.cmclient.conditionbuilder.wizard.pages;
 
+import java.util.HashSet;
 import java.util.List;
 
 import org.eclipse.core.databinding.DataBindingContext;
@@ -22,6 +23,7 @@ import com.elasticpath.cmclient.conditionbuilder.adapter.impl.tag.BaseModelAdapt
 import com.elasticpath.cmclient.conditionbuilder.plugin.ConditionBuilderMessages;
 import com.elasticpath.cmclient.conditionbuilder.wizard.conditioncomposite.SavedConditionComposite;
 import com.elasticpath.cmclient.conditionbuilder.wizard.conditions.handlers.ConditionHandler;
+import com.elasticpath.cmclient.core.LoginManager;
 import com.elasticpath.cmclient.core.ServiceLocator;
 import com.elasticpath.cmclient.core.binding.EpControlBindingProvider;
 import com.elasticpath.cmclient.core.binding.EpWizardPageSupport;
@@ -31,6 +33,9 @@ import com.elasticpath.cmclient.policy.ui.AbstractPolicyAwareWizardPage;
 import com.elasticpath.cmclient.policy.ui.IPolicyTargetLayoutComposite;
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.sellingcontext.SellingContext;
+import com.elasticpath.domain.store.Store;
+import com.elasticpath.service.store.StoreService;
+import com.elasticpath.tags.domain.Condition;
 import com.elasticpath.tags.domain.ConditionalExpression;
 import com.elasticpath.tags.domain.LogicalOperator;
 import com.elasticpath.tags.service.InvalidConditionTreeException;
@@ -41,11 +46,16 @@ import com.elasticpath.tags.service.InvalidConditionTreeException;
  *
  * @param <T> - class that extends {@link SellingContext}.
  */
+@SuppressWarnings("PMD.GodClass")
 public abstract class AbstractSellingContextConditionWizardPage<T extends  SellingContext> extends AbstractPolicyAwareWizardPage<SellingContext> {
 
 	private static final int WIDTH_HINT_100 = 100;
 
 	private static final int HORIZONTAL_INDENT_10 = 10;
+
+	private static final String SELLING_CHANNEL = "SELLING_CHANNEL";
+
+	private static final String EQUAL_TO = "equalTo";
 
 	private EpWizardPageSupport epWizardPageSupport;
 
@@ -323,13 +333,7 @@ public abstract class AbstractSellingContextConditionWizardPage<T extends  Selli
 		ConditionalExpression conditionalExpression = 
 			getModel().getCondition(tagDictionaryGuid);
 
-		if (conditionalExpression == null || conditionalExpression.isNamed()) {
-			conditionalExpression = ServiceLocator.getService(ContextIdNames.CONDITIONAL_EXPRESSION);
-			conditionalExpression.setName(String.valueOf(System.nanoTime()));
-			conditionalExpression.setTagDictionaryGuid(tagDictionaryGuid);
-		}
-
-		this.modelAdapter = new BaseModelAdapterImpl<>(conditionalExpression);
+		createModelAdapter(conditionalExpression);
 		
 		// do not need "saved conditions" composite any more
 		GridData layoutData = (GridData) savedConditionsComposite.getLayoutData();
@@ -343,6 +347,17 @@ public abstract class AbstractSellingContextConditionWizardPage<T extends  Selli
 		this.conditionBuilderComposite.getSwtComposite().setVisible(true);
 		
 		mainComposite.layout();
+	}
+
+	private void createModelAdapter(final ConditionalExpression conditionalExpression) {
+		ConditionalExpression newConditionalExpression = conditionalExpression;
+		if (newConditionalExpression == null || newConditionalExpression.isNamed()) {
+			newConditionalExpression = ServiceLocator.getService(ContextIdNames.CONDITIONAL_EXPRESSION);
+			newConditionalExpression.setName(String.valueOf(System.nanoTime()));
+			newConditionalExpression.setTagDictionaryGuid(tagDictionaryGuid);
+		}
+
+		this.modelAdapter = new BaseModelAdapterImpl<>(newConditionalExpression);
 	}
 
 	/**
@@ -371,10 +386,36 @@ public abstract class AbstractSellingContextConditionWizardPage<T extends  Selli
 	 */
 	public BaseModelAdapter<ConditionalExpression> getModelAdapter() throws InvalidConditionTreeException {
 		if (this.radioButtonCreateConditions.getSelection()) {
-			String conditionString = conditionHandler.convertLogicalOperatorToConditionExpressionString(logicalOperator);
-			modelAdapter.getModel().setConditionString(conditionString);
+			setConditions();
 		}
 		return modelAdapter;
+	}
+
+	private void setConditions() throws InvalidConditionTreeException {
+		String conditionString = conditionHandler.convertLogicalOperatorToConditionExpressionString(logicalOperator);
+		modelAdapter.getModel().setConditionString(conditionString);
+	}
+
+	/**
+	 * For the Stores page, we want to restrict store assignment to the stores that the cm user can access.
+	 * @return a ConditionalExpression containing the conditions
+	 * @throws InvalidConditionTreeException when the conditions are invalid
+	 */
+	public ConditionalExpression getConditionalExpressionForStores() throws InvalidConditionTreeException {
+		if (this.radioButtonAll.getSelection() && logicalOperator != null) {
+			for (Condition condition : new HashSet<>(logicalOperator.getConditions())) {
+				logicalOperator.removeCondition(condition);
+			}
+			StoreService storeService = ServiceLocator.getService(ContextIdNames.STORE_SERVICE);
+			List<Store> stores = storeService.findAllStores(LoginManager.getCmUser());
+			for (Store store : stores) {
+				Condition condition = conditionHandler.buildCondition(SELLING_CHANNEL, EQUAL_TO, store.getCode());
+				logicalOperator.addCondition(condition);
+			}
+			createModelAdapter(modelAdapter.getModel());
+		}
+		setConditions();
+		return modelAdapter.getModel();
 	}
 	
 	/**

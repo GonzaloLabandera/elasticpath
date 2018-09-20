@@ -4,10 +4,12 @@
 package com.elasticpath.cmclient.reporting.customerpersonaldata.service.impl;
 
 import java.util.Collection;
+import java.util.Date;
 import java.util.Map;
 
 import com.elasticpath.cmclient.core.ServiceLocator;
 import com.elasticpath.cmclient.core.helpers.extenders.PluginHelper;
+import com.elasticpath.cmclient.core.util.DateTimeUtilFactory;
 import com.elasticpath.cmclient.reporting.ReportTypeManager;
 import com.elasticpath.cmclient.reporting.ReportingPlugin;
 import com.elasticpath.cmclient.reporting.customerpersonaldata.CustomerPersonalDataReportPlugin;
@@ -17,9 +19,12 @@ import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.service.datapolicy.CustomerPersonalDataReportingService;
 
 /**
-* The service provides data reqiored for the "Customer Personal Data" report.
+* The service provides data required for the "Customer Personal Data" report.
 */
 public class CustomerPersonalDataServiceImpl {
+
+	private static final int CREATED_INDEX = 3;
+	private static final int LAST_MODIFED_INDEX = 4;
 
 	private CustomerPersonalDataParameters parameters;
 	private static final String ATTR_NAME = "name";
@@ -40,8 +45,17 @@ public class CustomerPersonalDataServiceImpl {
 
 		final CustomerPersonalDataParameters params = getParameters();
 
-		return getCustomerPersonalDataReportingService().getData(params.getStore(), Long.valueOf(params.getCustomerID()));
+		Collection<Object[]> data = getCustomerPersonalDataReportingService().getData(params.getStore(), params.getUserId());
+		data.forEach(datum ->  {
+			datum[CREATED_INDEX] = formatDateTime((Date) datum[CREATED_INDEX]);
+			datum[LAST_MODIFED_INDEX] = formatDateTime((Date) datum[LAST_MODIFED_INDEX]);
+		});
+		return data;
 
+	}
+
+	private String formatDateTime(final Date date) {
+		return DateTimeUtilFactory.getDateUtil().formatAsDateTime(date);
 	}
 
 	private CustomerPersonalDataReportingService getCustomerPersonalDataReportingService() {

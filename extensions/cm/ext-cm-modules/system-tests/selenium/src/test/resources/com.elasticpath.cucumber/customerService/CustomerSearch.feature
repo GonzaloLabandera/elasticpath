@@ -21,10 +21,5 @@ Feature: Customer Search
     Then I should see customer with email ID <EMAIL> in result list
 
     Examples:
-      | EMAIL                    | PHONE_NUMBER   | PHONE_NUMBER_SEARCH_VALUES |
-      | view_subs_user@itest.com | (604) 555-6666 | (604) 555-6666             |
-      | view_subs_user@itest.com | (604) 555-6666 | (604)555-6666              |
-      | view_subs_user@itest.com | (604) 555-6666 | 6045556666                 |
-      | view_subs_user@itest.com | (604) 555-6666 | 604-555-6666               |
-      | view_subs_user@itest.com | 604 555 6666   | 6045556666                 |
-      | view_subs_user@itest.com | 604-555-6666   | 6045556666                 |
+      | EMAIL                    | PHONE_NUMBER | PHONE_NUMBER_SEARCH_VALUES |
+      | view_subs_user@itest.com | 6045556666   | 6045556666                 |

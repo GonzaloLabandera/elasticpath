@@ -48,6 +48,7 @@ import com.elasticpath.service.search.query.ProductSearchCriteria;
 import com.elasticpath.service.search.solr.IndexUtility;
 import com.elasticpath.settings.domain.SettingValue;
 import com.elasticpath.settings.domain.impl.SettingValueImpl;
+import com.elasticpath.settings.test.support.SimpleSettingValueProvider;
 import com.elasticpath.test.BeanFactoryExpectationsFactory;
 import com.elasticpath.test.factory.TestCustomerSessionFactory;
 
@@ -99,6 +100,8 @@ public class AdvancedSearchServiceImplTest {
 
 	private BeanFactory beanFactory;
 
+	private SimpleSettingValueProvider<Integer> featuredProductCountSettingValueProvider;
+
 	/**
 	 * The setup steps.
 	 */
@@ -146,6 +149,9 @@ public class AdvancedSearchServiceImplTest {
 
 		mockIndexSearchResult = context.mock(IndexSearchResult.class);
 
+		featuredProductCountSettingValueProvider = new SimpleSettingValueProvider<>(STORE_CODE, FEATURED_PRODUCTS_COUNT);
+		advancedSearchService.setFeaturedProductCountSettingValueProvider(featuredProductCountSettingValueProvider);
+
 		context.checking(new Expectations() {
 			{
 
@@ -158,8 +164,8 @@ public class AdvancedSearchServiceImplTest {
 				allowing(mockStoreConfig).getStoreCode();
 				will(returnValue(STORE_CODE));
 
-				allowing(mockStoreConfig).getSetting("COMMERCE/STORE/CATALOG/featuredProductCountToDisplay");
-				will(returnValue(value));
+				allowing(mockStoreConfig).getSettingValue(featuredProductCountSettingValueProvider);
+				will(returnValue(FEATURED_PRODUCTS_COUNT));
 
 				allowing(mockShoppingCart).getStore();
 				will(returnValue(store));

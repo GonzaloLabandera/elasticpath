@@ -17,7 +17,6 @@ import javax.mail.Message;
 import cucumber.api.java.en.And;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.test.context.ContextConfiguration;
 
 import com.elasticpath.domain.builder.WishListBuilder;
 import com.elasticpath.domain.catalog.ProductSku;
@@ -30,7 +29,6 @@ import com.elasticpath.uat.ScenarioContextValueHolder;
 /**
  * Step Definitions for Wish List email-based functionality.
  */
-@ContextConfiguration("classpath:cucumber.xml")
 public class WishListEmailStepDefinitions {
 
 	@Autowired

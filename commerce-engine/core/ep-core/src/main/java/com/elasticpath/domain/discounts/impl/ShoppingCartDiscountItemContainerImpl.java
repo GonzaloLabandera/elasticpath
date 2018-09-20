@@ -12,8 +12,10 @@ import java.util.Comparator;
 import java.util.Currency;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.function.Predicate;
+import java.util.stream.Stream;
 
-import com.elasticpath.sellingchannel.ProductUnavailableException;
 import org.apache.log4j.Logger;
 
 import com.elasticpath.common.dto.ShoppingItemDto;
@@ -23,17 +25,18 @@ import com.elasticpath.domain.catalog.Category;
 import com.elasticpath.domain.catalog.Product;
 import com.elasticpath.domain.catalog.ProductSku;
 import com.elasticpath.domain.discounts.ShoppingCartDiscountItemContainer;
-import com.elasticpath.domain.shipping.ShippingServiceLevel;
 import com.elasticpath.domain.shoppingcart.PriceCalculator;
 import com.elasticpath.domain.shoppingcart.ShoppingCart;
 import com.elasticpath.domain.shoppingcart.ShoppingItem;
 import com.elasticpath.domain.shoppingcart.impl.ShoppingCartImpl;
 import com.elasticpath.domain.shoppingcart.impl.ShoppingItemImpl;
 import com.elasticpath.money.Money;
+import com.elasticpath.sellingchannel.ProductUnavailableException;
 import com.elasticpath.sellingchannel.director.CartDirector;
 import com.elasticpath.service.catalog.ProductSkuLookup;
 import com.elasticpath.service.rules.PromotionRuleExceptions;
-import com.elasticpath.service.shoppingcart.ShippableItemsSubtotalCalculator;
+import com.elasticpath.service.shoppingcart.ShoppingItemSubtotalCalculator;
+import com.elasticpath.shipping.connectivity.dto.ShippingOption;
 
 /**
  * A shopping cart discount item container where the discounts can be applied
@@ -51,7 +54,8 @@ public class ShoppingCartDiscountItemContainerImpl implements ShoppingCartDiscou
 	private CartDirector cartDirector;
 	private ShoppingItemDtoFactory shoppingItemDtoFactory;
 	private ProductSkuLookup productSkuLookup;
-	private ShippableItemsSubtotalCalculator shippableItemsSubtotalCalculator;
+	private ShoppingItemSubtotalCalculator shoppingItemsSubtotalCalculator;
+	private Predicate<ShoppingItem> shippableItemPredicate;
 
 	@Override
 	public void recordRuleApplied(final long ruleId, final long actionId,
@@ -67,7 +71,19 @@ public class ShoppingCartDiscountItemContainerImpl implements ShoppingCartDiscou
 
 	@Override
 	public List<ShoppingItem> getItemsLowestToHighestPrice() {
-		return sort(filteredCartItems(cart.getCartItems()), new LowestToHighestPriceComparator());
+		final Collection<? extends ShoppingItem> shoppingItems = cart.getShoppingItems(
+				shoppingItem -> !shoppingItem.isBundleConstituent()
+						&& getShoppingItemImpl(shoppingItem).canReceiveCartPromotion(getProductSkuLookup()));
+		return sort(shoppingItems, new LowestToHighestPriceComparator());
+	}
+
+	@Override
+	public Optional<ShoppingItem> getLowestPricedShoppingItemForSku(final String skuCode) {
+		final List<ShoppingItem> cartItems = cart.getCartItems(skuCode);
+
+		return getItemsLowestToHighestPrice().stream()
+				.filter(cartItems::contains)
+				.findFirst();
 	}
 
 	/**
@@ -85,8 +101,7 @@ public class ShoppingCartDiscountItemContainerImpl implements ShoppingCartDiscou
 		}
 	}
 
-	private List<ShoppingItem> sort(final List<? extends ShoppingItem> cartItems,
-			final Comparator<ShoppingItem> comparator) {
+	private List<ShoppingItem> sort(final Collection<? extends ShoppingItem> cartItems, final Comparator<ShoppingItem> comparator) {
 		final List<ShoppingItem> sortedCartItems = new ArrayList<>();
 		sortedCartItems.addAll(cartItems);
 		Collections.sort(sortedCartItems, comparator);
@@ -165,24 +180,22 @@ public class ShoppingCartDiscountItemContainerImpl implements ShoppingCartDiscou
 
 	@Override
 	public ShoppingItem addCartItem(final String skuCode, final int numItems) {
-		ShoppingItem cartItem = cart.getCartItem(skuCode);
-		if (cartItem == null && !cart.isCartItemRemoved(skuCode)) {
-			ShoppingItemDto dto;
-			dto = getShoppingItemDtoFactory().createDto(skuCode, numItems);
+		if (cart.isCartItemRemoved(skuCode)) {
+			return null;
+		} else {
+			final ShoppingItemDto dto = getShoppingItemDtoFactory().createDto(skuCode, numItems);
 			try {
-				cartItem = getCartDirector().addItemToCart(getShoppingCart(), dto);
+				return getCartDirector().addItemToCart(getShoppingCart(), dto);
 			} catch (final ProductUnavailableException e) {
 				LOG.error(e.getMessage());
 				return null;
 			}
 		}
-
-		return cartItem;
 	}
 
 	@Override
-	public BigDecimal getPrePromotionPriceAmount(final ShippingServiceLevel shippingServiceLevel) {
-		return getShoppingCartImpl().getShippingListPrice(shippingServiceLevel.getCode()).getAmount();
+	public BigDecimal getPrePromotionPriceAmount(final ShippingOption shippingOption) {
+		return getShoppingCartImpl().getShippingListPrice(shippingOption.getCode()).getAmount();
 	}
 
 	@Override
@@ -191,11 +204,11 @@ public class ShoppingCartDiscountItemContainerImpl implements ShoppingCartDiscou
 	}
 
 	@Override
-	public void applyShippingOptionDiscount(final ShippingServiceLevel shippingServiceLevel,
-												final long ruleId,
-												final long actionId,
-												final BigDecimal discount) {
-		getShoppingCartImpl().setShippingDiscountIfLower(shippingServiceLevel.getCode(), ruleId, actionId, Money.valueOf(discount, getCurrency()));
+	public void applyShippingOptionDiscount(final ShippingOption shippingOption,
+											final long ruleId,
+											final long actionId,
+											final BigDecimal discount) {
+		getShoppingCartImpl().setShippingDiscountIfLower(shippingOption.getCode(), ruleId, actionId, Money.valueOf(discount, getCurrency()));
 	}
 
 	@Override
@@ -205,23 +218,18 @@ public class ShoppingCartDiscountItemContainerImpl implements ShoppingCartDiscou
 
 	@Override
 	public BigDecimal calculateSubtotalOfDiscountableItemsExcluding(final PromotionRuleExceptions promotionRuleExceptions) {
-		BigDecimal discountableAmount = BigDecimal.ZERO.setScale(currency.getDefaultFractionDigits());
-
-		for (final ShoppingItem cartItem : cart.getAllItems()) {
-			if (cartItemEligibleForPromotion(cartItem, promotionRuleExceptions)) {
-				discountableAmount = discountableAmount.add(getPriceCalc(cartItem).withCartDiscounts().getAmount());
-			}
-		}
-
-		return discountableAmount;
+		return cart.getShoppingItems(shoppingItem -> !shoppingItem.isBundleConstituent()).stream()
+				.filter(shoppingItem -> cartItemEligibleForPromotion(shoppingItem, promotionRuleExceptions))
+				.map(shoppingItem -> getPriceCalc(shoppingItem).withCartDiscounts().getAmount())
+				.reduce(BigDecimal.ZERO.setScale(currency.getDefaultFractionDigits()), BigDecimal::add);
 	}
 
 	@Override
 	public BigDecimal calculateSubtotalOfShippableItems() {
 		final Collection<ShoppingItem> shoppingItems = getShoppingCart().getApportionedLeafItems();
 
-		final Money shippableSubtotal =
-				getShippableItemsSubtotalCalculator().calculateSubtotalOfShippableItems(shoppingItems, getShoppingCartImpl(), getCurrency());
+		final Stream<ShoppingItem> shippableShoppingItems = shoppingItems.stream().filter(getShippableItemPredicate());
+		final Money shippableSubtotal = getShoppingItemsSubtotalCalculator().calculate(shippableShoppingItems, getShoppingCartImpl(), getCurrency());
 
 		return shippableSubtotal.getAmount();
 	}
@@ -282,16 +290,6 @@ public class ShoppingCartDiscountItemContainerImpl implements ShoppingCartDiscou
 		this.cart = cart;
 	}
 
-	private List<ShoppingItem> filteredCartItems(final List<ShoppingItem> unfiltered) {
-		final List<ShoppingItem> filtered = new java.util.LinkedList<>();
-		for (final ShoppingItem item : unfiltered) {
-			if (getShoppingItemImpl(item).canReceiveCartPromotion(getProductSkuLookup())) {
-				filtered.add(item);
-			}
-		}
-		return filtered;
-	}
-
 	protected CartDirector getCartDirector() {
 		return cartDirector;
 	}
@@ -325,12 +323,19 @@ public class ShoppingCartDiscountItemContainerImpl implements ShoppingCartDiscou
 		this.currency = currency;
 	}
 
-	public void setShippableItemsSubtotalCalculator(final ShippableItemsSubtotalCalculator shippableItemsSubtotalCalculator) {
-		this.shippableItemsSubtotalCalculator = shippableItemsSubtotalCalculator;
+	protected ShoppingItemSubtotalCalculator getShoppingItemsSubtotalCalculator() {
+		return this.shoppingItemsSubtotalCalculator;
 	}
 
-	protected ShippableItemsSubtotalCalculator getShippableItemsSubtotalCalculator() {
-		return shippableItemsSubtotalCalculator;
+	public void setShoppingItemsSubtotalCalculator(final ShoppingItemSubtotalCalculator shoppingItemsSubtotalCalculator) {
+		this.shoppingItemsSubtotalCalculator = shoppingItemsSubtotalCalculator;
 	}
 
+	protected Predicate<ShoppingItem> getShippableItemPredicate() {
+		return this.shippableItemPredicate;
+	}
+
+	public void setShippableItemPredicate(final Predicate<ShoppingItem> shippableItemPredicate) {
+		this.shippableItemPredicate = shippableItemPredicate;
+	}
 }

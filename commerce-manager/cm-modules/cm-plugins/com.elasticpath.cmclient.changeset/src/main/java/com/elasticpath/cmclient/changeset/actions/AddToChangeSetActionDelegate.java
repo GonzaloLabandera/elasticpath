@@ -5,7 +5,6 @@ package com.elasticpath.cmclient.changeset.actions;
 
 import java.math.BigDecimal;
 import java.util.Collection;
-import java.util.Locale;
 
 import org.apache.commons.lang.ObjectUtils;
 import org.apache.commons.lang.StringUtils;
@@ -37,6 +36,7 @@ import com.elasticpath.cmclient.changeset.helpers.SupportedEditorCondition;
 import com.elasticpath.cmclient.changeset.helpers.impl.ChangeSetPermissionsHelperImpl;
 import com.elasticpath.cmclient.changeset.support.SupportedComponent;
 import com.elasticpath.cmclient.changeset.support.SupportedComponentsExtPoint;
+import com.elasticpath.cmclient.core.CorePlugin;
 import com.elasticpath.cmclient.core.ServiceLocator;
 import com.elasticpath.cmclient.core.editors.AbstractCmClientFormEditor;
 import com.elasticpath.cmclient.core.event.ChangeSetMemberSelectionProvider;
@@ -262,9 +262,9 @@ public class AddToChangeSetActionDelegate extends ActionDelegate implements IWor
 
 		if (changeSetMemberObject != null) {
 			if (changeSetObjectSelection instanceof Product) {
-				name = ((Product) changeSetObjectSelection).getDisplayName(Locale.getDefault());
+				name = ((Product) changeSetObjectSelection).getDisplayName(CorePlugin.getDefault().getDefaultLocale());
 			} else if (changeSetObjectSelection instanceof Category) {
-				name = ((Category) changeSetObjectSelection).getDisplayName(Locale.getDefault());
+				name = ((Category) changeSetObjectSelection).getDisplayName(CorePlugin.getDefault().getDefaultLocale());
 			} else if (changeSetObjectSelection instanceof Catalog) {
 				name = ((Catalog) changeSetObjectSelection).getName();
 			} else if (changeSetObjectSelection instanceof Rule) {
@@ -288,7 +288,7 @@ public class AddToChangeSetActionDelegate extends ActionDelegate implements IWor
 			} else if (changeSetObjectSelection instanceof SkuOption) {
 				name = ((SkuOption) changeSetObjectSelection).getOptionKey();
 			} else if (changeSetObjectSelection instanceof Brand) {
-				name = ((Brand) changeSetObjectSelection).getDisplayName(Locale.getDefault(), true);
+				name = ((Brand) changeSetObjectSelection).getDisplayName(CorePlugin.getDefault().getDefaultLocale(), true);
 			} else if (changeSetObjectSelection instanceof ProductType) {
 				name = ((ProductType) changeSetObjectSelection).getName();
 			} else if (changeSetObjectSelection instanceof CartItemModifierGroup) {

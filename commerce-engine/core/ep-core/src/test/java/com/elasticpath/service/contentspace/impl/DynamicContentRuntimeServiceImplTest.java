@@ -20,6 +20,7 @@ import com.elasticpath.domain.contentspace.DynamicContent;
 import com.elasticpath.domain.sellingcontext.SellingContext;
 import com.elasticpath.domain.targetedselling.DynamicContentDelivery;
 import com.elasticpath.service.contentspace.DynamicContentResolutionException;
+import com.elasticpath.service.rules.impl.RuleValidationResultEnum;
 import com.elasticpath.service.sellingcontext.SellingContextRetrievalStrategy;
 import com.elasticpath.service.targetedselling.DynamicContentDeliveryService;
 import com.elasticpath.service.targetedselling.DynamicContentResolutionAlgorithm;
@@ -155,7 +156,7 @@ public class DynamicContentRuntimeServiceImplTest  {
 			oneOf(mockDynamicContentDeliveryService).findByContentSpaceName(CONTENT_SPACE_1); will(returnValue(validList));
 			allowing(validDelivery1).getSellingContextGuid(); will(returnValue(sellingContextGuid));
 			oneOf(mockSellingContextRetrievalStrategy).getByGuid(sellingContextGuid); will(returnValue(falseContext1));
-			oneOf(falseContext1).isSatisfied(mockConditionEvaluatorService, TAG_CLOUD); will(returnValue(false));
+			oneOf(falseContext1).isSatisfied(mockConditionEvaluatorService, TAG_CLOUD); will(returnValue(RuleValidationResultEnum.ERROR_UNSPECIFIED));
 			oneOf(mockSimpleTimeoutCache).get(CONTENT_SPACE_1);	will(returnValue(null));
 			oneOf(mockSimpleTimeoutCache).put(CONTENT_SPACE_1, validList);
 		} });

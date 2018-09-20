@@ -20,7 +20,7 @@ import org.junit.runner.RunWith;
 
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.elasticpath.rest.definition.controls.ControlsMediaTypes;
 import com.elasticpath.rest.definition.controls.InfoEntity;

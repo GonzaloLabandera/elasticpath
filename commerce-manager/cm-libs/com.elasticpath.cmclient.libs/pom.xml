@@ -5,17 +5,13 @@
 	<parent>
 		<groupId>com.elasticpath.cmclient</groupId>
 		<artifactId>cm-libs</artifactId>
-		<version>702.0.0-SNAPSHOT</version>
+		<version>703.0.0-SNAPSHOT</version>
 	</parent>
 
 	<artifactId>com.elasticpath.cmclient.libs</artifactId>
 	<packaging>bundle</packaging>
 	<name>CM OSGi Wrapper For 3rd Party Libs</name>
 	<description>A bucket of JAR files wrapped with an OSGi manifest for use within CM's OSGi environment.</description>
-
-	<properties>
-		<ep.health.monitoring.version>1.1.2.20171228014437-844ef</ep.health.monitoring.version>
-	</properties>
 
 	<build>
 		<plugins>
@@ -30,7 +26,7 @@
 						<Eclipse-BuddyPolicy>registered</Eclipse-BuddyPolicy>
 						<Bundle-Name>%pluginName</Bundle-Name>
 						<Bundle-Vendor>%pluginProvider</Bundle-Vendor>
-						<Embed-Dependency>!(ep-core|ep-base|ep-cache|ep-money|ep-persistence-api|ep-persistence-openjpa|ep-settings|javax.servlet-api
+						<Embed-Dependency>!(ep-core|ep-base|ep-cache|ep-money|ep-persistence-api|ep-persistence-openjpa|ep-settings|ep-converters|javax.servlet-api
 							|stax-api);scope=compile|runtime</Embed-Dependency>
 						<Embed-Transitive>true</Embed-Transitive>
 						<_exportcontents>
@@ -51,8 +47,22 @@
 							com.elasticpath.messaging.*,
 							com.elasticpath.core.messaging.*,
 							com.elasticpath.repo.*,
+							com.elasticpath.health.monitoring.*,
 							com.elasticpath.domain.rules.impl;x-internal:=true,
 							com.elasticpath.domain.discounts.impl;x-internal:=true,
+							com.elasticpath.commons.beanframework,
+							com.elasticpath.commons.beanframework.spring,
+							com.elasticpath.commons.constants,
+							com.elasticpath.domain.shipping,
+							com.elasticpath.service.shipping,
+							com.elasticpath.service.shipping.transformers,
+							com.elasticpath.service.shipping.transformers.visitors,
+							com.elasticpath.shipping.connectivity.commons,
+							com.elasticpath.shipping.connectivity.commons.constants,
+							com.elasticpath.shipping.connectivity.service,
+							com.elasticpath.shipping.connectivity.dto,
+							com.elasticpath.shipping.connectivity.dto.builder,
+							com.elasticpath.shipping.connectivity.dto.builder.populators,
 							*.impl,
 							!com.elasticpath.*,
 							*
@@ -121,6 +131,26 @@
 		</dependency>
 		<dependency>
 			<groupId>com.elasticpath</groupId>
+			<artifactId>shipping-calculation-connectivity-api</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.elasticpath</groupId>
+			<artifactId>shipping-calculation-connectivity-caching</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.elasticpath</groupId>
+			<artifactId>shipping-calculation-plugin-epcommerce</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.elasticpath</groupId>
+			<artifactId>shipping-calculation-epcommerce</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.elasticpath</groupId>
+			<artifactId>ep-bean-framework</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.elasticpath</groupId>
 			<artifactId>ep-search</artifactId>
 			<exclusions>
 				<exclusion>
@@ -137,7 +167,6 @@
 		<dependency>
 			<groupId>org.apache.poi</groupId>
 			<artifactId>poi</artifactId>
-			<version>3.0.1-FINAL</version>
 		</dependency>
 		<dependency>
 			<groupId>org.codehaus.woodstox</groupId>
@@ -146,7 +175,6 @@
 		<dependency>
 			<groupId>org.springframework.batch</groupId>
 			<artifactId>spring-batch-core</artifactId>
-			<version>2.1.9.RELEASE</version>
 			<exclusions>
 				<exclusion>
 					<groupId>org.codehaus.jettison</groupId>
@@ -157,16 +185,10 @@
 		<dependency>
 			<groupId>org.json</groupId>
 			<artifactId>json</artifactId>
-			<version>20170516</version>
-		</dependency>
-		<dependency>
-			<groupId>javax.servlet</groupId>
-			<artifactId>javax.servlet-api</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>stax</groupId>
 			<artifactId>stax-api</artifactId>
-			<version>1.0.1</version>
 		</dependency>
 		<dependency>
 			<groupId>com.elasticpath</groupId>
@@ -197,19 +219,16 @@
 			<artifactId>quartz</artifactId>
 		</dependency>
 		<dependency>
-		   <groupId>com.elasticpath.repo</groupId>
+		   <groupId>com.elasticpath</groupId>
 		   <artifactId>ep-health-monitoring</artifactId>
-		   <version>${ep.health.monitoring.version}</version>
 		</dependency>
 		<dependency>
-		   <groupId>com.elasticpath.repo</groupId>
+		   <groupId>com.elasticpath</groupId>
 		   <artifactId>ep-health-monitoring-plugin-core</artifactId>
-		   <version>${ep.health.monitoring.version}</version>
 		</dependency>
 		<dependency>
-		   <groupId>com.elasticpath.repo</groupId>
+		   <groupId>com.elasticpath</groupId>
 		   <artifactId>ep-health-monitoring-plugin-jms</artifactId>
-		   <version>${ep.health.monitoring.version}</version>
 		</dependency>
 
 	</dependencies>

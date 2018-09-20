@@ -1,5 +1,5 @@
 /*
- * Copyright © 2017 Elastic Path Software Inc. All rights reserved.
+ * Copyright © 2018 Elastic Path Software Inc. All rights reserved.
  */
 package com.elasticpath.rest.resource.integration.epcommerce.repository.shipmentdetails;
 
@@ -25,7 +25,7 @@ public class ShipmentDetailsIdParameterServiceImpl implements ShipmentDetailsIdP
 	@Override
 	public Observable<IdentifierPart<Map<String, String>>> findShipmentDetailsIds(final String scope, final String userId) {
 		return cartOrderRepository.findCartOrderGuidsByCustomerAsObservable(scope, userId)
-				.flatMapSingle(cartId -> shipmentDetailsService.getShipmentDetailsIdForOrder(cartId))
+				.flatMapSingle(orderId -> shipmentDetailsService.getShipmentDetailsIdForOrder(scope, orderId))
 				.map(fieldValueMap -> (IdentifierPart<Map<String, String>>) CompositeIdentifier.of(fieldValueMap))
 				.onErrorResumeNext(Observable.empty());
 	}

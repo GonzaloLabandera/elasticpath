@@ -52,13 +52,6 @@ purchasability. For example, in Elastic Path Commerce Engine the following state
 			<to>availability-for-item</to>
 		</relationship>
 
-		<advisor>
-			<name>order-availability</name>
-			<description>Order purchase check that items are available</description>
-			<linked-to>availability-for-cart-line-item</linked-to>
-			<advises>orders.order</advises>
-		</advisor>
-
 		<entity>
 			<name>availability</name>
 			<description><![CDATA[The availability information for an item.]]></description>

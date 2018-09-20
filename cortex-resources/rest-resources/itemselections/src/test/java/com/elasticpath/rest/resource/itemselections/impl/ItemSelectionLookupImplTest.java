@@ -17,8 +17,7 @@ import org.junit.runner.RunWith;
 import org.apache.commons.lang3.StringUtils;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.elasticpath.rest.ResourceStatus;
 import com.elasticpath.rest.ResourceTypeFactory;
@@ -34,8 +33,7 @@ import com.elasticpath.rest.schema.ResourceState;
 /**
  * The test for {@link ItemSelectionLookupImpl}.
  */
-@RunWith(PowerMockRunner.class)
-@PrepareForTest(ItemSelectionOptionValuesTransformer.class)
+@RunWith(MockitoJUnitRunner.class)
 public final class ItemSelectionLookupImplTest {
 
 	private static final String OPERATION_SHOULD_BE_SUCCESSFUL = "Operation should be successful";

@@ -82,7 +82,7 @@ import com.elasticpath.plugin.payment.transaction.service.PaymentGatewayTransact
  */
 @Entity
 @Table(name = PaymentGatewayImpl.TABLE_NAME)
-@DataCache(enabled = true)
+@DataCache
 @SuppressWarnings({ "PMD.ExcessiveImports", "PMD.GodClass", "PMD.CouplingBetweenObjects" })
 public class PaymentGatewayImpl extends AbstractLegacyPersistenceImpl implements CreditCardPaymentGateway,
 	PayPalExpressPaymentGateway {
@@ -324,9 +324,7 @@ public class PaymentGatewayImpl extends AbstractLegacyPersistenceImpl implements
 		PaymentGatewayPlugin plugin = pluginFactory.createUnconfiguredPluginGatewayPlugin(type);
 		if (null != plugin) {
 			Collection<String> parameters = plugin.getConfigurationParameters();
-			for (String parameter : parameters) {
-				defaultPropertyKeys.add(parameter);
-			}
+			defaultPropertyKeys.addAll(parameters);
 		}
 
 		return defaultPropertyKeys;
@@ -420,7 +418,7 @@ public class PaymentGatewayImpl extends AbstractLegacyPersistenceImpl implements
 		}
 
 			OrderPaymentDto orderPaymentDto = getConversionService().convert(orderPayment, OrderPaymentDto.class);
-			paypalExpressCapability.authorizeOrder(orderPaymentDto, orderPaymentDto, orderPaymentDto);
+			paypalExpressCapability.authorizeOrder(orderPaymentDto, orderPaymentDto);
 			updateOrderPaymentWithResponse(orderPaymentDto, orderPayment);
 	}
 
@@ -436,7 +434,7 @@ public class PaymentGatewayImpl extends AbstractLegacyPersistenceImpl implements
 			if (billingAddress != null) {
 				addressDto = getConversionService().convert(billingAddress, AddressDto.class);
 			}
-			paypalExpressCapability.order(orderPaymentDto, orderPaymentDto, orderPaymentDto, addressDto);
+			paypalExpressCapability.order(orderPaymentDto, orderPaymentDto, addressDto);
 			updateOrderPaymentWithResponse(orderPaymentDto, payment);
 	}
 

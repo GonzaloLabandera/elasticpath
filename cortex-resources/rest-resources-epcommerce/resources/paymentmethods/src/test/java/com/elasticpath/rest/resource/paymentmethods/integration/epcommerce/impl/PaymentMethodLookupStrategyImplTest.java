@@ -10,9 +10,9 @@ import static org.hamcrest.CoreMatchers.hasItem;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.isNull;
-import static org.mockito.Matchers.same;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.ArgumentMatchers.same;
 import static org.mockito.Mockito.RETURNS_DEFAULTS;
 import static org.mockito.Mockito.RETURNS_SMART_NULLS;
 import static org.mockito.Mockito.never;
@@ -32,7 +32,7 @@ import org.junit.runner.RunWith;
 
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.elasticpath.domain.cartorder.CartOrder;
 import com.elasticpath.domain.cartorder.impl.CartOrderImpl;
@@ -109,7 +109,7 @@ public class PaymentMethodLookupStrategyImplTest {
 	 */
 	@Test
 	public void testGetSelectedPaymentMethodForOrderWhenCartOrderNotFound() {
-		shouldFindByGuidWithResult(ExecutionResultFactory.<CartOrder>createNotFound());
+		shouldFindByGuidWithResult(ExecutionResultFactory.createNotFound());
 		thrown.expect(containsResourceStatus(ResourceStatus.NOT_FOUND));
 
 		paymentMethodLookupStrategy.getOrderPaymentMethod(STORE_CODE, ORDER_GUID);
@@ -213,7 +213,7 @@ public class PaymentMethodLookupStrategyImplTest {
 	@Test
 	public void testGetPaymentMethodIdsByCustomerGuidWithRepositoryFailure() {
 		shouldFindPaymentMethodsForCustomerGuidWithResult(
-				ExecutionResultFactory.<CustomerPaymentMethods>createNotFound(PAYMENT_METHODS_NOT_FOUND));
+				ExecutionResultFactory.createNotFound(PAYMENT_METHODS_NOT_FOUND));
 		setupUserIdentifier(CUSTOMER_GUID);
 
 		paymentMethodLookupStrategy.getPaymentMethodIds(STORE_CODE, CUSTOMER_GUID);
@@ -250,7 +250,7 @@ public class PaymentMethodLookupStrategyImplTest {
 	@Test
 	public void testGetPaymentMethodsForUserWithRepositoryFailure() {
 		shouldFindPaymentMethodsForCustomerGuidWithResult(
-				ExecutionResultFactory.<CustomerPaymentMethods>createNotFound(PAYMENT_METHODS_NOT_FOUND));
+				ExecutionResultFactory.createNotFound(PAYMENT_METHODS_NOT_FOUND));
 		setupUserIdentifier(CUSTOMER_GUID);
 		thrown.expect(containsResourceStatus(ResourceStatus.NOT_FOUND));
 
@@ -281,7 +281,7 @@ public class PaymentMethodLookupStrategyImplTest {
 	 */
 	@Test
 	public void testGetPaymentMethodWhenPaymentMethodNotFound() {
-		shouldFindPaymentMethodByCustomerGuidAndCardGuidWithResult(ExecutionResultFactory.<PaymentMethod>createNotFound());
+		shouldFindPaymentMethodByCustomerGuidAndCardGuidWithResult(ExecutionResultFactory.createNotFound());
 		setupUserIdentifier(CUSTOMER_GUID);
 
 		thrown.expect(containsResourceStatus(ResourceStatus.NOT_FOUND));
@@ -291,7 +291,7 @@ public class PaymentMethodLookupStrategyImplTest {
 
 	@Test
 	public void ensureSelectorChosenAttemptsToFindOrder() {
-		when(cartOrderRepository.findByGuid(STORE_CODE, ORDER_GUID)).thenReturn(ExecutionResultFactory.<CartOrder>createNotFound());
+		when(cartOrderRepository.findByGuid(STORE_CODE, ORDER_GUID)).thenReturn(ExecutionResultFactory.createNotFound());
 		thrown.expect(containsResourceStatus(ResourceStatus.NOT_FOUND));
 
 		paymentMethodLookupStrategy.getSelectorChosenPaymentMethod(STORE_CODE, CUSTOMER_GUID, ORDER_GUID);
@@ -300,7 +300,7 @@ public class PaymentMethodLookupStrategyImplTest {
 
 	@Test
 	public void ensureSelectorChosenReturnsNotFoundWhenOrderNotFound() {
-		when(cartOrderRepository.findByGuid(STORE_CODE, ORDER_GUID)).thenReturn(ExecutionResultFactory.<CartOrder>createNotFound());
+		when(cartOrderRepository.findByGuid(STORE_CODE, ORDER_GUID)).thenReturn(ExecutionResultFactory.createNotFound());
 		thrown.expect(containsResourceStatus(ResourceStatus.NOT_FOUND));
 
 		paymentMethodLookupStrategy.getSelectorChosenPaymentMethod(STORE_CODE, CUSTOMER_GUID, ORDER_GUID);
@@ -311,7 +311,7 @@ public class PaymentMethodLookupStrategyImplTest {
 		final CartOrder cartOrder = createCartOrderWithPaymentMethod();
 		shouldFindByGuidWithResult(ExecutionResultFactory.createReadOK(cartOrder));
 		when(customerPaymentMethodsRepository.findPaymentMethodsByCustomerGuid(CUSTOMER_GUID))
-				.thenReturn(ExecutionResultFactory.<CustomerPaymentMethods>createNotFound());
+				.thenReturn(ExecutionResultFactory.createNotFound());
 		thrown.expect(containsResourceStatus(ResourceStatus.NOT_FOUND));
 
 		paymentMethodLookupStrategy.getSelectorChosenPaymentMethod(STORE_CODE, CUSTOMER_GUID, ORDER_GUID);
@@ -323,7 +323,7 @@ public class PaymentMethodLookupStrategyImplTest {
 		final CartOrder cartOrder = createCartOrderWithPaymentMethod();
 		shouldFindByGuidWithResult(ExecutionResultFactory.createReadOK(cartOrder));
 		when(customerPaymentMethodsRepository.findPaymentMethodsByCustomerGuid(CUSTOMER_GUID))
-				.thenReturn(ExecutionResultFactory.<CustomerPaymentMethods>createNotFound());
+				.thenReturn(ExecutionResultFactory.createNotFound());
 		thrown.expect(containsResourceStatus(ResourceStatus.NOT_FOUND));
 
 		paymentMethodLookupStrategy.getSelectorChosenPaymentMethod(STORE_CODE, CUSTOMER_GUID, ORDER_GUID);
@@ -349,8 +349,6 @@ public class PaymentMethodLookupStrategyImplTest {
 	public void ensureSelectorChosenReturnsNotFoundWhenOrderHasNoPaymentMethod() {
 		final CartOrder cartOrder = createCartOrderWithoutPaymentMethod();
 		shouldFindByGuidWithResult(ExecutionResultFactory.createReadOK(cartOrder));
-		when(customerPaymentMethodsRepository.findPaymentMethodsByCustomerGuid(CUSTOMER_GUID))
-				.thenReturn(ExecutionResultFactory.createReadOK(customerPaymentMethods));
 		thrown.expect(containsResourceStatus(ResourceStatus.NOT_FOUND));
 
 		paymentMethodLookupStrategy.getSelectorChosenPaymentMethod(STORE_CODE, CUSTOMER_GUID, ORDER_GUID);
@@ -428,7 +426,6 @@ public class PaymentMethodLookupStrategyImplTest {
 	}
 
 	private CartOrder createCartOrderWithPaymentMethod() {
-		when(abstractPaymentMethod.copy()).thenReturn(abstractPaymentMethod);
 		when(cartOrder.getPaymentMethod()).thenReturn(abstractPaymentMethod);
 		return cartOrder;
 	}

@@ -14,7 +14,6 @@
 	<name>Extension Import/Export Tool CLI</name>
 
 	<properties>
-		<dependency.directory>lib</dependency.directory>
 		<data.location>${project.build.directory}/exported/data</data.location>
 	</properties>
 
@@ -42,13 +41,6 @@
 					<artifactId>${epdb.maven.artifactId}</artifactId>
 					<version>${epdb.maven.version}</version>
 				</dependency>
-
-				<!-- Include JDBC driver dependency -->
-				<dependency>
-					<groupId>${epdb.maven.groupId}</groupId>
-					<artifactId>${epdb.maven.artifactId}</artifactId>
-					<version>${epdb.maven.version}</version>
-				</dependency>
 			</dependencies>
 			<build>
 				<plugins>
@@ -69,7 +61,6 @@
 							<arguments>
 								<argument>-Xms256m</argument>
 								<argument>-Xmx1024m</argument>
-								<argument>-XX:MaxPermSize=256m</argument>
 								<argument>-agentlib:jdwp=transport=dt_socket,address=${ep.debug.port},server=y,suspend=n</argument>
 								<argument>-classpath</argument>
 								<classpath/>
@@ -93,13 +84,6 @@
 					<artifactId>${epdb.maven.artifactId}</artifactId>
 					<version>${epdb.maven.version}</version>
 				</dependency>
-
-				<!-- Include JDBC driver dependency -->
-				<dependency>
-					<groupId>${epdb.maven.groupId}</groupId>
-					<artifactId>${epdb.maven.artifactId}</artifactId>
-					<version>${epdb.maven.version}</version>
-				</dependency>
 			</dependencies>
 			<build>
 				<plugins>
@@ -120,7 +104,6 @@
 							<arguments>
 								<argument>-Xms256m</argument>
 								<argument>-Xmx1024m</argument>
-								<argument>-XX:MaxPermSize=256m</argument>
 								<argument>-agentlib:jdwp=transport=dt_socket,address=${ep.debug.port},server=y,suspend=n</argument>
 								<argument>-Djava.compiler=NONE</argument>
 								<argument>-classpath</argument>
@@ -152,15 +135,7 @@
 					<artifactId>${epdb.maven.artifactId}</artifactId>
 					<version>${epdb.maven.version}</version>
 				</dependency>
-
-		<!-- Include JDBC driver dependency -->
-		<dependency>
-			<groupId>${epdb.maven.groupId}</groupId>
-			<artifactId>${epdb.maven.artifactId}</artifactId>
-			<version>${epdb.maven.version}</version>
-		</dependency>
 			</dependencies>
-
 		</profile>
 	</profiles>
 

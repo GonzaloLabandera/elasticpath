@@ -7,7 +7,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
+import java.io.ObjectOutput;
 import java.util.Date;
 import java.util.zip.Deflater;
 import java.util.zip.ZipEntry;
@@ -34,9 +34,9 @@ import org.apache.openjpa.persistence.Factory;
 import org.apache.openjpa.persistence.Persistent;
 import org.apache.openjpa.persistence.Type;
 import org.apache.openjpa.persistence.jdbc.ForeignKey;
-import org.drools.RuleBase;
-import org.drools.common.DroolsObjectInputStream;
-import org.drools.common.DroolsObjectOutputStream;
+import org.drools.core.common.DroolsObjectInputStream;
+import org.drools.core.common.DroolsObjectOutputStream;
+import org.kie.api.KieBase;
 
 import com.elasticpath.domain.DatabaseLastModifiedDate;
 import com.elasticpath.domain.EpDomainException;
@@ -65,7 +65,7 @@ public class EpRuleBaseImpl extends AbstractPersistableImpl implements EpRuleBas
 
 	private long uidPk;
 
-	private RuleBase ruleBase;
+	private KieBase ruleBase;
 
 	private Store store;
 
@@ -87,7 +87,7 @@ public class EpRuleBaseImpl extends AbstractPersistableImpl implements EpRuleBas
 	@Externalizer("com.elasticpath.domain.rules.impl.EpRuleBaseImpl.externalizeRuleBase")
 	@Factory("com.elasticpath.domain.rules.impl.EpRuleBaseImpl.ruleBaseFactory")
 	@Type(byte[].class)
-	public RuleBase getRuleBase() {
+	public KieBase getRuleBase() {
 		return ruleBase;
 	}
 
@@ -97,7 +97,7 @@ public class EpRuleBaseImpl extends AbstractPersistableImpl implements EpRuleBas
 	 * @param ruleBase the compiled rule base
 	 */
 	@Override
-	public void setRuleBase(final RuleBase ruleBase) {
+	public void setRuleBase(final KieBase ruleBase) {
 		this.ruleBase = ruleBase;
 	}
 
@@ -112,11 +112,11 @@ public class EpRuleBaseImpl extends AbstractPersistableImpl implements EpRuleBas
 	 * @return the rule base represented by the stream
 	 * @throws EpDomainException if there are any errors reading from the string
 	 */
-	public static RuleBase ruleBaseFactory(final byte[] ruleBaseStream) {
+	public static KieBase ruleBaseFactory(final byte[] ruleBaseStream) {
 		try (final ZipInputStream zippedFile = getZipInputStream(ruleBaseStream);
 			 final ObjectInputStream input = new DroolsObjectInputStream(zippedFile, EpRuleBaseImpl.class.getClassLoader())
 		) {
-			return (RuleBase) input.readObject();
+			return (KieBase) input.readObject();
 		} catch (IOException | ClassNotFoundException e) {
 			throw new EpDomainException("Fatal error reading rule base", e);
 		}
@@ -154,12 +154,11 @@ public class EpRuleBaseImpl extends AbstractPersistableImpl implements EpRuleBas
 	 * @param ruleBase the rule base to externalize
 	 * @return the externalized zipped array
 	 */
-	public static byte[] externalizeRuleBase(final RuleBase ruleBase) {
-		ObjectOutputStream output = null;
+	public static byte[] externalizeRuleBase(final KieBase ruleBase) {
 		try (final ByteArrayOutputStream result = new ByteArrayOutputStream();
-			 final ZipOutputStream zippedFile = createZipOutputStream(result)
+			 final ZipOutputStream zippedFile = createZipOutputStream(result);
+			 final ObjectOutput output = new DroolsObjectOutputStream(zippedFile)
 		) {
-			output = new DroolsObjectOutputStream(zippedFile);
 			output.writeObject(ruleBase);
 
 			zippedFile.closeEntry();

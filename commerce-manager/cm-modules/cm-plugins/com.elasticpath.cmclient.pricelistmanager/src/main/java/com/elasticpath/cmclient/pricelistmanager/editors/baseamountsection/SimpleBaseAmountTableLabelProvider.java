@@ -24,14 +24,19 @@ class SimpleBaseAmountTableLabelProvider extends LabelProvider implements ITable
 	private final BaseAmountSection baseAmountSection;
 	private final PriceListEditorController controller;
 	
+	private final int baseColumnCount;
+
 	/**
 	 * Constructor.
 	 * @param baseAmountSection - parent <code>BaseAmountSection</code>
 	 * @param controller price list editor controller
+	 * @param baseColumnCount TODO
 	 */
-	SimpleBaseAmountTableLabelProvider(final BaseAmountSection baseAmountSection, final PriceListEditorController controller) {
+	SimpleBaseAmountTableLabelProvider(
+			final BaseAmountSection baseAmountSection, final PriceListEditorController controller, final int baseColumnCount) {
 		this.baseAmountSection = baseAmountSection;
 		this.controller = controller;
+		this.baseColumnCount = baseColumnCount;
 	}
 	
 	private static final int COL_UNSAVED_CHANGES = 0;
@@ -90,7 +95,13 @@ class SimpleBaseAmountTableLabelProvider extends LabelProvider implements ITable
 	 */
 	@Override
 	public String getColumnText(final Object element, final int columnIndex) {
+		// If the columnIndex is in the extensions range get it.
+		if (columnIndex >= this.baseColumnCount) {
+			return baseAmountSection.getExtensionColumnText(element, columnIndex);
+		}
+		
 		final BaseAmountDTO baDto = (BaseAmountDTO) element;
+		
 		switch (columnIndex) {
 		case COL_INDEX_QTY:
 			Integer quantity = 0;
@@ -103,7 +114,7 @@ class SimpleBaseAmountTableLabelProvider extends LabelProvider implements ITable
 		case COL_INDEX_SALE:
 			return formatUnits(baDto.getSaleValue());
 		default:
-			return baseAmountSection.getExtensionColumnText(element, columnIndex);
+			return "";  //$NON-NLS-1$
 		}
 	}
 

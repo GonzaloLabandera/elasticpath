@@ -79,12 +79,23 @@ public class JpqlQueryBuilderTest extends BasicSpringContextTest {
 	}
 
 	/**
-	 * Test that a builder utilizing distict will execute without errors.
+	 * Test that a builder utilizing distinct will execute without errors.
 	 */
 	@Test
 	public void testBuilderWithDistinct() {
 		JpqlQueryBuilder query = new JpqlQueryBuilder(CUST_TABLE, CUST_ALIAS);
 		query.distinct();
+
+		persistenceEngine.retrieve(query.buildQuery(), query.buildParameterList().toArray());
+	}
+
+	/**
+	 * Test that a builder utilizing count will execute without errors.
+	 */
+	@Test
+	public void testBuilderWithCount() {
+		JpqlQueryBuilder query = new JpqlQueryBuilder(CUST_TABLE, CUST_ALIAS);
+		query.count();
 
 		persistenceEngine.retrieve(query.buildQuery(), query.buildParameterList().toArray());
 	}

@@ -21,8 +21,7 @@ import com.elasticpath.plugin.payment.PaymentGatewayType;
 import com.elasticpath.service.payment.GiftCertificateTransactionService;
 import com.elasticpath.service.payment.gateway.impl.GiftCertificatePaymentGatewayPluginImpl;
 import com.elasticpath.service.payment.gateway.impl.UnresolvablePaymentGatewayPluginImpl;
-import com.elasticpath.settings.SettingsReader;
-import com.elasticpath.settings.domain.SettingValue;
+import com.elasticpath.settings.provider.SettingValueProvider;
 
 /**
  * Default implementation of <code>PaymentGatewayFactory</code>.
@@ -31,15 +30,13 @@ public class PaymentGatewayFactoryImpl implements PaymentGatewayFactory {
 
 	private static final Logger LOG = Logger.getLogger(PaymentGatewayFactoryImpl.class);
 	
-	private static final String CERT_PATH_SETTING = "COMMERCE/SYSTEM/PAYMENTGATEWAY/certificatesDirectory";
-
 	// plugin type -> class of PaymentGatewayPlugin
 	private final Map<String, Class<? extends PaymentGatewayPlugin>> gatewayClassesByType =
 		new HashMap<>();
 
-	private SettingsReader settingsReader;
-
 	private BeanFactory beanFactory;
+	
+	private SettingValueProvider<String> certificatePathPrefixProvider;
 
 	private GiftCertificateTransactionService giftCertificateTransactionService;
 
@@ -105,9 +102,7 @@ public class PaymentGatewayFactoryImpl implements PaymentGatewayFactory {
 				((GiftCertificatePaymentGatewayPluginImpl) plugin).setGiftCertificateTransactionService(giftCertificateTransactionService);
 			}
 			return plugin;
-		} catch (InstantiationException e) {
-			throw new EpSystemException("Failed to create payment gateway plugin :" + clazz, e);
-		} catch (IllegalAccessException e) {
+		} catch (InstantiationException | IllegalAccessException e) {
 			throw new EpSystemException("Failed to create payment gateway plugin :" + clazz, e);
 		}
 	}
@@ -129,26 +124,9 @@ public class PaymentGatewayFactoryImpl implements PaymentGatewayFactory {
 	 * @return the path prefix
 	 */
 	protected String getCertificatePathPrefix() {
-		SettingValue value = getSettingsReader().getSettingValue(CERT_PATH_SETTING);
-		if (value == null) {
-			return null;
-		}
-		String path = value.getValue();
+		final String path = getCertificatePathPrefixProvider().get();
 		LOG.debug("Certificate path prefix: " + path);
 		return path;
-	}
-
-	/**
-	 * Get the settings reader.
-	 * 
-	 * @return the settings reader
-	 */
-	protected SettingsReader getSettingsReader() {
-		return settingsReader;
-	}
-
-	public void setSettingsReader(final SettingsReader settingsReader) {
-		this.settingsReader = settingsReader;
 	}
 
 	/**
@@ -171,4 +149,13 @@ public class PaymentGatewayFactoryImpl implements PaymentGatewayFactory {
 	public void setBeanFactory(final BeanFactory beanFactory) {
 		this.beanFactory = beanFactory;
 	}
+
+	protected SettingValueProvider<String> getCertificatePathPrefixProvider() {
+		return certificatePathPrefixProvider;
+	}
+
+	public void setCertificatePathPrefixProvider(final SettingValueProvider<String> certificatePathPrefixProvider) {
+		this.certificatePathPrefixProvider = certificatePathPrefixProvider;
+	}
+
 }

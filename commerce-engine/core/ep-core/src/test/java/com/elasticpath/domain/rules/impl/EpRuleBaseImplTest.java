@@ -11,14 +11,17 @@ import java.io.ByteArrayOutputStream;
 import java.io.Externalizable;
 import java.io.StringReader;
 
-import org.drools.RuleBase;
-import org.drools.RuleBaseFactory;
-import org.drools.WorkingMemory;
-import org.drools.common.DroolsObjectInputStream;
-import org.drools.common.DroolsObjectOutputStream;
-import org.drools.compiler.PackageBuilder;
-import org.drools.rule.Package;
+import org.drools.core.WorkingMemory;
+import org.drools.core.common.DroolsObjectInputStream;
+import org.drools.core.common.DroolsObjectOutputStream;
+import org.drools.core.impl.InternalKnowledgeBase;
+import org.drools.core.impl.KnowledgeBaseFactory;
 import org.junit.Test;
+import org.kie.api.KieBase;
+import org.kie.api.io.ResourceType;
+import org.kie.internal.builder.KnowledgeBuilder;
+import org.kie.internal.builder.KnowledgeBuilderFactory;
+import org.kie.internal.io.ResourceFactory;
 
 /**
  * Test case for {@link EpRuleBaseImpl}.
@@ -27,19 +30,19 @@ public class EpRuleBaseImplTest {
 
 
 	/**
-	 * Test method for externalizers of {@link EpRuleBaseImpl} for the Reteoo {@link RuleBase}s
+	 * Test method for externalizers of {@link EpRuleBaseImpl} for the Reteoo {@link InternalKnowledgeBase}s
 	 * it stores.
 	 *
 	 * @throws Exception in case of any errors
 	 */
 	@Test
 	public void testRuleBaseExternalizersReteoo() throws Exception {
-		final RuleBase ruleBase = RuleBaseFactory.newRuleBase(RuleBase.RETEOO);
+		final InternalKnowledgeBase ruleBase = KnowledgeBaseFactory.newKnowledgeBase(KnowledgeBaseFactory.newKnowledgeBaseConfiguration());
 
 		addDefaultRuleToRuleBase(ruleBase);
 		testDefaultRule(ruleBase);
 
-		final RuleBase serializedRuleBase = EpRuleBaseImpl.ruleBaseFactory(EpRuleBaseImpl.externalizeRuleBase(ruleBase));
+		final KieBase serializedRuleBase = EpRuleBaseImpl.ruleBaseFactory(EpRuleBaseImpl.externalizeRuleBase(ruleBase));
 		testDefaultRule(serializedRuleBase);
 	}
 
@@ -51,39 +54,42 @@ public class EpRuleBaseImplTest {
 	 */
 	@Test
 	public void testWriteReadDifferentRuleBase() throws Exception {
-		RuleBase reteooRuleBase1 = RuleBaseFactory.newRuleBase(RuleBase.RETEOO);
+		InternalKnowledgeBase reteooRuleBase1 = KnowledgeBaseFactory.newKnowledgeBase(KnowledgeBaseFactory.newKnowledgeBaseConfiguration());
 
 		addDefaultRuleToRuleBase(reteooRuleBase1);
 
 		// Test to make sure the rule works with the leaps type rule base
 		testDefaultRule(reteooRuleBase1);
 
-		Externalizable leapsExternalRuleBase = reteooRuleBase1;
+		Externalizable leapsExternalRuleBase = (Externalizable) reteooRuleBase1;
 		ByteArrayOutputStream output = new ByteArrayOutputStream();
 		DroolsObjectOutputStream outputStream = new DroolsObjectOutputStream(output);
 		leapsExternalRuleBase.writeExternal(outputStream);
 		outputStream.close();
 
-		RuleBase reteooRuleBase = RuleBaseFactory.newRuleBase(RuleBase.RETEOO);
-		Externalizable reteooExternalRuleBase = reteooRuleBase;
+		InternalKnowledgeBase reteooRuleBase = KnowledgeBaseFactory.newKnowledgeBase(KnowledgeBaseFactory.newKnowledgeBaseConfiguration());
+		Externalizable reteooExternalRuleBase = (Externalizable) reteooRuleBase;
 		reteooExternalRuleBase.readExternal(new DroolsObjectInputStream(
-			new ByteArrayInputStream(output.toByteArray()), EpRuleBaseImpl.class.getClassLoader()));
+				new ByteArrayInputStream(output.toByteArray()), EpRuleBaseImpl.class.getClassLoader()));
 
 		testDefaultRule(reteooRuleBase);
 	}
 
-	private void testDefaultRule(final RuleBase reteooRuleBase1) {
-		TestClass reteooTester1 = new TestClass();
+	private void testDefaultRule(final KieBase reteooRuleBase1) {
+		final TestClass reteooTester1 = new TestClass();
 		assertFalse(reteooTester1.isResult());
+
 		reteooTester1.setResult(true);
-		WorkingMemory leapsMemory = reteooRuleBase1.newStatefulSession();
+
+		final WorkingMemory leapsMemory = (WorkingMemory) reteooRuleBase1.newKieSession();
 		leapsMemory.insert(reteooTester1);
 		leapsMemory.fireAllRules();
+
 		assertTrue(reteooTester1.isResult());
 	}
 
 	@SuppressWarnings("PMD.ConsecutiveLiteralAppends")
-	private void addDefaultRuleToRuleBase(final RuleBase reteooRuleBase1) throws Exception {
+	private void addDefaultRuleToRuleBase(final InternalKnowledgeBase reteooRuleBase1) throws Exception {
 		final StringBuilder source = new StringBuilder("package test\n\n");
 		source.append("import " + TestClass.class.getName().replace('$', '.') + ";\n");
 		source.append("rule \"test rule\"\n");
@@ -94,11 +100,10 @@ public class EpRuleBaseImplTest {
 		source.append("tester.setResult(true);\n");
 		source.append("end");
 
+		final KnowledgeBuilder builder = KnowledgeBuilderFactory.newKnowledgeBuilder();
+		builder.add(ResourceFactory.newReaderResource(new StringReader(source.toString())), ResourceType.DRL);
 
-		PackageBuilder builder = new PackageBuilder();
-		builder.addPackageFromDrl(new StringReader(source.toString()));
-		Package pkg = builder.getPackage();
-		reteooRuleBase1.addPackage(pkg);
+		reteooRuleBase1.addPackages(builder.getKnowledgePackages());
 	}
 
 	/**

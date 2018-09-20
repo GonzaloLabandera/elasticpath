@@ -15,17 +15,6 @@ public class PaymentType extends AbstractExtensibleEnum<PaymentType> implements 
 	private static final long serialVersionUID = 50002L;
 
 	/**
-	* Credit card payment type ordinal.
-	*/
-	public static final int CREDITCARD_ORDINAL = 1;
-
-	/**
-	 * Credit card payment type.
-	 */
-	public static final PaymentType CREDITCARD = new PaymentType(CREDITCARD_ORDINAL, "CREDITCARD",
-			"paymentType.creditCard", PaymentGatewayType.CREDITCARD);
-
-	/**
 	 * PayPal Express payment type ordinal.
 	 *
 	 * @deprecated Use HOSTED_PAGE_PAYPAL_EXPRESS_ORDINAL instead.

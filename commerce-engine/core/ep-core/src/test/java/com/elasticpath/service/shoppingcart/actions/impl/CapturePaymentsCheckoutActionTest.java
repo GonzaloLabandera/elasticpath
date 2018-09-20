@@ -4,8 +4,8 @@
 package com.elasticpath.service.shoppingcart.actions.impl;
 
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -20,7 +20,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.elasticpath.domain.order.Order;
 import com.elasticpath.domain.order.OrderPayment;
@@ -46,7 +46,7 @@ public class CapturePaymentsCheckoutActionTest {
 
 
 	@Test
-	public void verifyCaptureNotTriggeredWhenOnHold() throws Exception {
+	public void verifyCaptureNotTriggeredWhenOnHold() {
 		final Order order = mock(Order.class);
 		final CheckoutActionContext checkoutActionContext = mock(CheckoutActionContext.class);
 		given(checkoutActionContext.getOrder()).willReturn(order);
@@ -59,7 +59,7 @@ public class CapturePaymentsCheckoutActionTest {
 	}
 
 	@Test
-	public void verifyCaptureTriggeredWhenCreated() throws Exception {
+	public void verifyCaptureTriggeredWhenCreated() {
 		final Order order = mock(Order.class);
 		final Order updatedOrder = mock(Order.class);
 		final CheckoutActionContext checkoutActionContext = mock(CheckoutActionContext.class);
@@ -75,7 +75,7 @@ public class CapturePaymentsCheckoutActionTest {
 	}
 
 	@Test
-	public void verifyTransientOrderPaymentPropertiesArePreserved() throws Exception {
+	public void verifyTransientOrderPaymentPropertiesArePreserved() {
 		final Order order = mock(Order.class);
 		final Order updatedOrder = mock(Order.class);
 		final OrderPayment orderPayment = new OrderPaymentImpl();
@@ -88,7 +88,6 @@ public class CapturePaymentsCheckoutActionTest {
 		when(actionContext.getOrderPaymentList()).thenReturn(orderPayments);
 
 		when(order.getStatus()).thenReturn(OrderStatus.CREATED);
-		when(orderService.releaseOrder(eq(order))).thenReturn(updatedOrder);
 		when(orderService.update(eq(order))).thenReturn(updatedOrder);
 
 		checkoutAction.execute(actionContext);

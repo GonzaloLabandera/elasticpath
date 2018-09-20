@@ -8,6 +8,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.log4j.Logger;
 
@@ -15,9 +17,10 @@ import com.elasticpath.cucumber.definitions.PerformanceDefinitions;
 import com.elasticpath.selenium.framework.util.PropertyManager;
 
 /**
- * DBConnector.
+ * DB Connector class for connecting to and querying the database.
  */
 public class DBConnector {
+
 	private static final Logger LOGGER = Logger.getLogger(PerformanceDefinitions.class);
 	private Statement statement;
 	private ResultSet resultSet;
@@ -30,7 +33,7 @@ public class DBConnector {
 	 *
 	 * @return the connection
 	 */
-	private Connection getDBConnection() {
+	public Connection getDBConnection() {
 		String dbUrl = propertyManager.getProperty("db.connection.url");
 		String dbClass = propertyManager.getProperty("db.connection.driver.class");
 		String dbUser = propertyManager.getProperty("db.connection.username");
@@ -95,6 +98,31 @@ public class DBConnector {
 	}
 
 	/**
+	 * Return the name of all stores.
+	 *
+	 * @return stores
+	 */
+	public List<String> getAllStores() {
+		List<String> stores = new ArrayList<>();
+		try {
+			connection = this.getDBConnection();
+			statement = connection.createStatement();
+			resultSet = statement.executeQuery("SELECT NAME FROM elasticpathdb.TSTORE WHERE STORE_STATE != 0 ORDER BY NAME");
+
+			while (resultSet.next()) {
+				stores.add(resultSet.getString("NAME"));
+			}
+
+		} catch (SQLException e) {
+			LOGGER.error(e);
+		} finally {
+			this.closeAll();
+		}
+		return stores;
+	}
+
+
+	/**
 	 * Close connection.
 	 */
 	public void closeAll() {
@@ -114,5 +142,45 @@ public class DBConnector {
 		} catch (SQLException e) {
 			LOGGER.error(e);
 		}
+	}
+
+	protected static Logger getLOGGER() {
+		return LOGGER;
+	}
+
+	protected Statement getStatement() {
+		return statement;
+	}
+
+	protected void setStatement(final Statement statement) {
+		this.statement = statement;
+	}
+
+	protected ResultSet getResultSet() {
+		return resultSet;
+	}
+
+	protected void setResultSet(final ResultSet resultSet) {
+		this.resultSet = resultSet;
+	}
+
+	protected Connection getConnection() {
+		return connection;
+	}
+
+	protected void setConnection(final Connection connection) {
+		this.connection = connection;
+	}
+
+	protected PreparedStatement getPreparedStatement() {
+		return preparedStatement;
+	}
+
+	protected void setPreparedStatement(final PreparedStatement preparedStatement) {
+		this.preparedStatement = preparedStatement;
+	}
+
+	protected PropertyManager getPropertyManager() {
+		return propertyManager;
 	}
 }

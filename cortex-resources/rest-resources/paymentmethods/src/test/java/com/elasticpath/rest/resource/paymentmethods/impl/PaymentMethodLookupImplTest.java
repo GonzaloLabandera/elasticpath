@@ -26,7 +26,7 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.elasticpath.rest.ResourceStatus;
 import com.elasticpath.rest.ResourceTypeFactory;
@@ -156,7 +156,6 @@ public final class PaymentMethodLookupImplTest {
 	public void ensureFindSelectedPaymentMethodForOrderTransformsSelectedPaymentMethod() {
 		PaymentMethodEntity paymentMethodEntity = ResourceTypeFactory.createResourceEntity(PaymentMethodEntity.class);
 		shouldFindSelectedPaymentMethodForOrderWithPaymentMethod(paymentMethodEntity);
-		shouldTransformPaymentMethod(paymentMethodEntity);
 
 		paymentMethodsLookup.findSelectedPaymentMethodForOrder(orderRepresentation);
 
@@ -426,11 +425,6 @@ public final class PaymentMethodLookupImplTest {
 	private void shouldFindSelectorChosenPaymentMethodForOrderWithPaymentMethod(final PaymentMethodEntity paymentMethod) {
 		when(mockPaymentMethodLookupStrategy.getSelectorChosenPaymentMethod(SCOPE, USER_ID, DECODED_ORDER_ID)).thenReturn(
 				ExecutionResultFactory.createReadOK(paymentMethod));
-	}
-
-	private void shouldTransformPaymentMethod(final PaymentMethodEntity paymentMethodEntity) {
-		when(mockPaymentMethodTransformer.transformToRepresentation(SCOPE, paymentMethodEntity))
-				.thenReturn(ResourceState.Builder.create(paymentMethodEntity).withScope(SCOPE).build());
 	}
 
 	private void shouldTransformPaymentMethodForOrder(final PaymentMethodEntity paymentMethodEntity) {

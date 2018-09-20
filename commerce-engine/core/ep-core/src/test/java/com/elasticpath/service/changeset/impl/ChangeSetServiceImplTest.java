@@ -4,6 +4,7 @@
 package com.elasticpath.service.changeset.impl;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -42,11 +43,13 @@ import com.elasticpath.service.changeset.ChangeSetPolicy;
 import com.elasticpath.service.changeset.ChangeSetPolicyException;
 import com.elasticpath.service.changeset.dao.ChangeSetDao;
 import com.elasticpath.service.changeset.dao.ChangeSetMemberDao;
+import com.elasticpath.settings.test.support.SimpleSettingValueProvider;
 import com.elasticpath.test.BeanFactoryExpectationsFactory;
 
 /**
  * Tests for {@link com.elasticpath.service.changeset.impl.ChangeSetServiceImpl}.
  */
+@SuppressWarnings("PMD.TooManyMethods")
 public class ChangeSetServiceImplTest {
 	private static final String CHANGE_SET_GUID = "changeSetId1";
 
@@ -776,4 +779,19 @@ public class ChangeSetServiceImplTest {
 		assertNotNull(retMap);
 		assertTrue("Expect empty map", retMap.isEmpty());
 	}
+
+	@Test
+	public void verifyChangeSetsAreEnabledTrueWhenProviderReturnsTrue() throws Exception {
+		changeSetService.setChangeSetEnabledProvider(new SimpleSettingValueProvider<>(true));
+		assertTrue("Expected Change Set functionality to be enabled when the configured provider returns true",
+				   changeSetService.isChangeSetEnabled());
+	}
+
+	@Test
+	public void verifyChangeSetsNotEnabledWhenProviderReturnsFalse() throws Exception {
+		changeSetService.setChangeSetEnabledProvider(new SimpleSettingValueProvider<>(false));
+		assertFalse("Expected Change Set functionality to be disabled when the configured provider returns false",
+					changeSetService.isChangeSetEnabled());
+	}
+
 }

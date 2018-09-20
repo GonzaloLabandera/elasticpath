@@ -14,7 +14,6 @@ import cucumber.api.java.en.When;
 import org.apache.camel.builder.NotifyBuilder;
 import org.jvnet.mock_javamail.Mailbox;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.ContextConfiguration;
 
 import com.elasticpath.domain.builder.CmUserBuilder;
 import com.elasticpath.domain.cmuser.CmUser;
@@ -25,7 +24,6 @@ import com.elasticpath.uat.ScenarioContextValueHolder;
 /**
  * Step Definitions for CM User-based functionality.
  */
-@ContextConfiguration("classpath:cucumber.xml")
 public class CmUserStepDefinitions {
 
 	@Autowired

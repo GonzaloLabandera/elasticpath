@@ -254,6 +254,7 @@ public class OrderSkuFactoryImpl implements OrderSkuFactory {
 		orderSku.setTaxCode(getTaxCode(productSku));
 		orderSku.setDisplaySkuOptions(getSkuOptionsDisplayString(productSku, locale));
 		orderSku.setDisplayName(product.getDisplayName(locale));
+		orderSku.setBundleConstituent(shoppingItem.isBundleConstituent());
 		if (productSku.getImage() != null) {
 			orderSku.setImage(productSku.getImage());
 		}
@@ -281,13 +282,13 @@ public class OrderSkuFactoryImpl implements OrderSkuFactory {
 		orderSku.setPrice(item.getQuantity(), taxSnapshot.getPricingSnapshot().getPrice());
 		final Money unitPrice = taxSnapshot.getPricingSnapshot().getPriceCalc().forUnitPrice().getMoney();
 		if (unitPrice != null) {
-			orderSku.setUnitPrice(unitPrice.getAmountUnscaled());
+			orderSku.setUnitPrice(unitPrice.getRawAmount());
 		}
 
 		orderSku.setTaxAmount(taxSnapshot.getTaxAmount());
 
 		if (taxSnapshot.getPricingSnapshot().getDiscount() != null) {
-			orderSku.setDiscountBigDecimal(taxSnapshot.getPricingSnapshot().getDiscount().getAmountUnscaled());
+			orderSku.setDiscountBigDecimal(taxSnapshot.getPricingSnapshot().getDiscount().getRawAmount());
 		}
 	}
 

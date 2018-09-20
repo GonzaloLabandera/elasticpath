@@ -33,7 +33,7 @@ public class ShippingAmountDiscountActionImpl extends AbstractRuleActionImpl {
 	
 	private static final RuleElementType RULE_ELEMENT_TYPE = RuleElementType.SHIPPING_AMOUNT_DISCOUNT_ACTION;
 
-	private static final String[] PARAMETER_KEYS = new String[] { RuleParameter.DISCOUNT_AMOUNT_KEY, RuleParameter.SHIPPING_SERVICE_LEVEL_CODE_KEY };
+	private static final String[] PARAMETER_KEYS = new String[] { RuleParameter.DISCOUNT_AMOUNT_KEY, RuleParameter.SHIPPING_OPTION_CODE_KEY};
 
 	private static final DiscountType DISCOUNT_TYPE = DiscountType.SHIPPING_DISCOUNT;
 
@@ -105,7 +105,7 @@ public class ShippingAmountDiscountActionImpl extends AbstractRuleActionImpl {
 		code.append(this.getUidPk()).append("L, \"");
 		code.append(this.getParamValue(RuleParameter.DISCOUNT_AMOUNT_KEY));
 		code.append("\", \"");
-		code.append(this.getParamValue(RuleParameter.SHIPPING_SERVICE_LEVEL_CODE_KEY));
+		code.append(this.getParamValue(RuleParameter.SHIPPING_OPTION_CODE_KEY));
 		code.append("\", currency);\n");
 		return code.toString();
 	}
@@ -125,7 +125,7 @@ public class ShippingAmountDiscountActionImpl extends AbstractRuleActionImpl {
 		}
 
 		
-		String sslCode = this.getParamValue(RuleParameter.SHIPPING_SERVICE_LEVEL_CODE_KEY);
+		String sslCode = this.getParamValue(RuleParameter.SHIPPING_OPTION_CODE_KEY);
 		if (Strings.isNullOrEmpty(sslCode)) {
 			throw new EpDomainException("Invalid Shipping Method code parameter. Missing");
 		}

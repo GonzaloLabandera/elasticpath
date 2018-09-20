@@ -8,6 +8,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import com.google.common.base.Function;
@@ -21,11 +22,11 @@ import org.apache.commons.lang3.StringUtils;
 
 import com.elasticpath.domain.rules.Rule;
 import com.elasticpath.domain.rules.RuleAction;
-import com.elasticpath.domain.shipping.ShippingServiceLevel;
 import com.elasticpath.domain.shoppingcart.DiscountRecord;
 import com.elasticpath.domain.shoppingcart.MutablePromotionRecordContainer;
 import com.elasticpath.domain.shoppingcart.ShoppingCart;
 import com.elasticpath.domain.shoppingcart.ShoppingItem;
+import com.elasticpath.shipping.connectivity.dto.ShippingOption;
 
 /**
  * Keep track of applied discount records by rules and actions.
@@ -123,12 +124,12 @@ public class PromotionRecordContainerImpl implements MutablePromotionRecordConta
 	}
 
 	@Override
-	public Set<Long> getAppliedRulesByShippingServiceLevel(final ShippingServiceLevel shippingServiceLevel) {
+	public Set<Long> getAppliedRulesByShippingOption(final ShippingOption shippingOption) {
 		return FluentIterable.from(discountRecordTable.cellSet())
 				.filter(Predicates.compose(new IsShippingRecordTypePredicate(), new TableCellToDiscountRecordFunction()))
-				.filter(Predicates.compose(new MatchesShippingServiceLevelPredicate(shippingServiceLevel),
-											new TableCellToShippingDiscountRecordFunction()))
-				.filter(Predicates.compose(getPredicateForShippingServiceLevelAppliedRules(), new TableCellToShippingDiscountRecordFunction()))
+				.filter(Predicates.compose(new MatchesShippingOptionPredicate(shippingOption),
+										   new TableCellToShippingDiscountRecordFunction()))
+				.filter(Predicates.compose(getPredicateForShippingOptionAppliedRules(), new TableCellToShippingDiscountRecordFunction()))
 				.transform(new TableCellToRowKeyFunction())
 				.toSet();
 	}
@@ -183,24 +184,24 @@ public class PromotionRecordContainerImpl implements MutablePromotionRecordConta
 	}
 
 	/**
-	 * Predicate that returns true if the given shipping discount record matches the provided shipping service level.
+	 * Predicate that returns true if the given shipping discount record matches the provided shipping option.
 	 */
-	private static class MatchesShippingServiceLevelPredicate implements Predicate<ShippingDiscountRecordImpl> {
+	private static class MatchesShippingOptionPredicate implements Predicate<ShippingDiscountRecordImpl> {
 
-		private final ShippingServiceLevel shippingServiceLevel;
+		private final ShippingOption shippingOption;
 
 		/**
 		 * Constructor.
 		 *
-		 * @param shippingServiceLevel the shipping service level against which inputs will be compared
+		 * @param shippingOption the shipping option against which inputs will be compared
 		 */
-		MatchesShippingServiceLevelPredicate(final ShippingServiceLevel shippingServiceLevel) {
-			this.shippingServiceLevel = shippingServiceLevel;
+		MatchesShippingOptionPredicate(final ShippingOption shippingOption) {
+			this.shippingOption = shippingOption;
 		}
 
 		@Override
 		public boolean apply(final ShippingDiscountRecordImpl input) {
-			return input.getShippingLevelCode().equals(shippingServiceLevel.getCode());
+			return input.getShippingOptionCode().equals(shippingOption.getCode());
 		}
 
 	}
@@ -212,32 +213,26 @@ public class PromotionRecordContainerImpl implements MutablePromotionRecordConta
 	 * @return a predicate instance
 	 */
 	protected Predicate<DiscountRecord> getPredicateForShoppingCartAppliedRules() {
-		return new Predicate<DiscountRecord>() {
-			@Override
-			public boolean apply(final DiscountRecord input) {
-				if (input instanceof ShippingDiscountRecordImpl) {
-					return ((ShippingDiscountRecordImpl) input).getShippingLevelCode()
-							.equals(shoppingCart.getSelectedShippingServiceLevel().getCode());
-				}
+		return input -> {
+			if (input instanceof ShippingDiscountRecordImpl) {
+				final Optional<ShippingOption> selectedShippingOption = shoppingCart.getSelectedShippingOption();
 
-				return true;
+				return selectedShippingOption.isPresent()
+						&& ((ShippingDiscountRecordImpl) input).getShippingOptionCode().equals(selectedShippingOption.get().getCode());
 			}
+
+			return true;
 		};
 	}
 
 	/**
 	 * Factory method for returning a predicate instance used to filter the records returned by
-	 * {@link #getAppliedRulesByShippingServiceLevel(ShippingServiceLevel)}.
+	 * {@link #getAppliedRulesByShippingOption(ShippingOption)}.
 	 *
 	 * @return a predicate instance
 	 */
-	protected Predicate<ShippingDiscountRecordImpl> getPredicateForShippingServiceLevelAppliedRules() {
-		return new Predicate<ShippingDiscountRecordImpl>() {
-			@Override
-			public boolean apply(final ShippingDiscountRecordImpl input) {
-				return !input.isSuperceded();
-			}
-		};
+	protected Predicate<ShippingDiscountRecordImpl> getPredicateForShippingOptionAppliedRules() {
+		return input -> !input.isSuperceded();
 	}
 
 }

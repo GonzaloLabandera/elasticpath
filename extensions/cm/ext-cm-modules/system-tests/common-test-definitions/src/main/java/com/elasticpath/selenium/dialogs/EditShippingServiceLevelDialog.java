@@ -10,7 +10,10 @@ import org.openqa.selenium.WebDriver;
  */
 public class EditShippingServiceLevelDialog extends AbstractDialog {
 
-	private static final String EDIT_SHIPPING_SERVICE_LEVEL_PARENT_CSS = "div[widget-id='Edit Shipping Service Level'][widget-type='Shell'] ";
+	/**
+	 * CSS selector used to identify the dialog.
+	 */
+	public static final String EDIT_SHIPPING_SERVICE_LEVEL_PARENT_CSS = "div[widget-id='Edit Shipping Service Level'][widget-type='Shell'] ";
 	private static final String CARRIER_COMBO_CSS = EDIT_SHIPPING_SERVICE_LEVEL_PARENT_CSS + "div[widget-id='Carrier'][widget-type='CCombo']";
 	private static final String NAME_INPUT_CSS = EDIT_SHIPPING_SERVICE_LEVEL_PARENT_CSS + "div[widget-id=''] > input";
 	private static final String PROPERTIES_TABLE_PARENT_CSS = EDIT_SHIPPING_SERVICE_LEVEL_PARENT_CSS + "div[widget-id='Property Table'] ";

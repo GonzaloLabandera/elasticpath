@@ -4,12 +4,11 @@
 package com.elasticpath.domain.shoppingcart.impl;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Currency;
+import java.util.stream.Collectors;
 
 import org.jmock.Expectations;
 import org.jmock.auto.Mock;
@@ -75,19 +74,9 @@ public class ShoppingItemImplTest {
 		item.addChildItem(child1);
 		item.addChildItem(child2);
 
-		assertEquals("Should be two separate items", 2, item
-				.getDependentItems().size());
-	}
-
-	/** Test for testHasDependentCartItems(). */
-	@Test
-	public void testHasDependentCartItems() {
-		CartItem cartItemImpl = createShoppingItem();
-		CartItem dependentCartItem = createShoppingItem();
-		dependentCartItem.setCartUid(CART_UID);
-		assertFalse(cartItemImpl.hasDependentItems());
-		cartItemImpl.addChildItem(dependentCartItem);
-		assertTrue(cartItemImpl.hasDependentItems());
+		assertEquals("Should be two separate items", 2, item.getChildren().stream()
+				.filter(shoppingItem -> !shoppingItem.isBundleConstituent())
+				.collect(Collectors.toList()).size());
 	}
 
 	/**
@@ -126,7 +115,7 @@ public class ShoppingItemImplTest {
 		// Rounding of the discount
 		item.applyDiscount(unroundedDiscount, productSkuLookup);
 
-		BigDecimal actualUnscaledDiscount = item.getDiscount().getAmountUnscaled();
+		BigDecimal actualUnscaledDiscount = item.getDiscount().getRawAmount();
 		assertEquals("Discount not rounded correctly", expectedDiscount, actualUnscaledDiscount);
 
 		// Ensure the additional scaling by the Money object does not interfere with the expected value

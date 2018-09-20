@@ -14,7 +14,7 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.elasticpath.domain.order.Order;
 import com.elasticpath.domain.order.OrderStatus;
@@ -34,7 +34,7 @@ public class InitiateFulfilmentCheckoutActionTest {
 	private InitiateFulfilmentCheckoutAction checkoutAction;
 
 	@Test
-	public void verifyFulfilmentNotTriggeredWhenAwaitingExchange() throws Exception {
+	public void verifyFulfilmentNotTriggeredWhenAwaitingExchange() {
 		final Order order = mock(Order.class);
 		final CheckoutActionContext actionContext = createCheckoutActionContext(order);
 
@@ -46,7 +46,7 @@ public class InitiateFulfilmentCheckoutActionTest {
 	}
 
 	@Test
-	public void verifyFulfilmentTriggeredWhenNotAwaitingExchangeAndNotOnHold() throws Exception {
+	public void verifyFulfilmentTriggeredWhenNotAwaitingExchangeAndNotOnHold() {
 		final Order order = mock(Order.class);
 		final Order updatedOrder = mock(Order.class);
 		final CheckoutActionContext actionContext = createCheckoutActionContext(order);
@@ -64,13 +64,11 @@ public class InitiateFulfilmentCheckoutActionTest {
 
 
 	@Test
-	public void verifyFulfilmentNotTriggeredWhenOnHold() throws Exception {
+	public void verifyFulfilmentNotTriggeredWhenOnHold() {
 		final Order order = mock(Order.class);
-		final Order updatedOrder = mock(Order.class);
 		final CheckoutActionContext actionContext = createCheckoutActionContext(order);
 
 		when(order.getStatus()).thenReturn(OrderStatus.ONHOLD);
-		when(orderService.releaseOrder(order)).thenReturn(updatedOrder);
 
 		checkoutAction.execute(actionContext);
 

@@ -17,7 +17,7 @@ import org.junit.runner.RunWith;
 
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.elasticpath.base.exception.EpServiceException;
 import com.elasticpath.domain.catalog.ProductBundle;
@@ -74,8 +74,6 @@ public class ProductSkuRepositoryImplTest {
 
 	@Test
 	public void testGetProductSkuWithAttributesByGuidNotFound() {
-		when(productSkuLookup.findBySkuCode(SKU_CODE)).thenReturn(null);
-
 		ExecutionResult<ProductSku> result = repository.getProductSkuWithAttributesByGuid(SKU_GUID);
 
 		assertThat(result.isFailure()).isTrue();

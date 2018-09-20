@@ -46,7 +46,7 @@ public class ShippingPercentDiscountActionImplTest extends AbstractTestRuleEleme
 		RuleParameter ruleParameter = new RuleParameterImpl(RuleParameter.DISCOUNT_PERCENT_KEY, DISCOUNT_PERCENT);
 		parameterSet.add(ruleParameter);
 
-		ruleParameter = new RuleParameterImpl(RuleParameter.SHIPPING_SERVICE_LEVEL_CODE_KEY, SHIPPING_METHOD_CODE);
+		ruleParameter = new RuleParameterImpl(RuleParameter.SHIPPING_OPTION_CODE_KEY, SHIPPING_METHOD_CODE);
 		parameterSet.add(ruleParameter);
 
 		return parameterSet;
@@ -77,7 +77,7 @@ public class ShippingPercentDiscountActionImplTest extends AbstractTestRuleEleme
 		parameterSet.add(ruleParameter);
 
 		ruleParameter = new RuleParameterImpl();
-		ruleParameter.setKey(RuleParameter.SHIPPING_SERVICE_LEVEL_CODE_KEY);
+		ruleParameter.setKey(RuleParameter.SHIPPING_OPTION_CODE_KEY);
 		ruleParameter.setValue(SHIPPING_METHOD_CODE);
 		parameterSet.add(ruleParameter);
 
@@ -107,7 +107,7 @@ public class ShippingPercentDiscountActionImplTest extends AbstractTestRuleEleme
 		parameterSet.add(ruleParameter);
 
 		ruleParameter = new RuleParameterImpl();
-		ruleParameter.setKey(RuleParameter.SHIPPING_SERVICE_LEVEL_CODE_KEY);
+		ruleParameter.setKey(RuleParameter.SHIPPING_OPTION_CODE_KEY);
 		ruleParameter.setValue(SHIPPING_METHOD_CODE);
 		parameterSet.add(ruleParameter);
 
@@ -137,7 +137,7 @@ public class ShippingPercentDiscountActionImplTest extends AbstractTestRuleEleme
 		parameterSet.add(ruleParameter);
 
 		ruleParameter = new RuleParameterImpl();
-		ruleParameter.setKey(RuleParameter.SHIPPING_SERVICE_LEVEL_CODE_KEY);
+		ruleParameter.setKey(RuleParameter.SHIPPING_OPTION_CODE_KEY);
 		ruleParameter.setValue(SHIPPING_METHOD_CODE);
 		parameterSet.add(ruleParameter);
 
@@ -160,7 +160,7 @@ public class ShippingPercentDiscountActionImplTest extends AbstractTestRuleEleme
 		parameterSet.add(ruleParameter);
 
 		ruleParameter = new RuleParameterImpl();
-		ruleParameter.setKey(RuleParameter.SHIPPING_SERVICE_LEVEL_CODE_KEY);
+		ruleParameter.setKey(RuleParameter.SHIPPING_OPTION_CODE_KEY);
 		ruleParameter.setValue(SHIPPING_METHOD_CODE);
 		parameterSet.add(ruleParameter);
 
@@ -177,7 +177,7 @@ public class ShippingPercentDiscountActionImplTest extends AbstractTestRuleEleme
 
 	/**
 	 * Test case for validate().
-	 * Shipping service level 0 means "ANY" shipping service level.
+	 * Shipping option 0 means "ANY" shipping option.
 	 */
 	@Test
 	public void testValidation5() {
@@ -191,7 +191,7 @@ public class ShippingPercentDiscountActionImplTest extends AbstractTestRuleEleme
 		parameterSet.add(ruleParameter);
 
 		ruleParameter = new RuleParameterImpl();
-		ruleParameter.setKey(RuleParameter.SHIPPING_SERVICE_LEVEL_CODE_KEY);
+		ruleParameter.setKey(RuleParameter.SHIPPING_OPTION_CODE_KEY);
 		ruleParameter.setValue("0");
 		parameterSet.add(ruleParameter);
 

@@ -10,7 +10,7 @@ public abstract class AbstractAddEditSkuOptionDialog extends AbstractDialog {
 	/**
 	 * Constant for the sku option dialog shell css.
 	 */
-	protected static final String ADD_SKU_OPTION_PARENT_CSS
+	public static final String ADD_SKU_OPTION_PARENT_CSS
 			= "div[automation-id*='com.elasticpath.cmclient.catalog.CatalogMessages.SKUOptionAddDialog'][widget-type='Shell'] ";
 	private static final String SKU_OPTION_CODE_INPUT_CSS = ADD_SKU_OPTION_PARENT_CSS
 			+ "div[automation-id='com.elasticpath.cmclient.catalog.CatalogMessages.SKUOptionAddDialog_Code'] input";

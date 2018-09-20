@@ -49,7 +49,7 @@ public class CouponAutoApplierServiceImpl implements CouponAutoApplierService {
 
 	/**
 	 * Get valid customer email specific coupon codes.
-	 * 
+	 *
 	 * @param store store
 	 * @param customerEmailAddress customer address, or null if none.
 	 * @return List of coupon codes corresponding to valid customer email specific coupons.
@@ -64,7 +64,7 @@ public class CouponAutoApplierServiceImpl implements CouponAutoApplierService {
 				final String couponCode = usage.getCoupon().getCouponCode();
 				Coupon coupon = couponService.findByCouponCode(couponCode);
 				PotentialCouponUse potentialCouponUse = new PotentialCouponUse(coupon, store.getCode(), customerEmailAddress);
-				if (usage.isActiveInCart() && getValidCouponUseSpecification().isSatisfiedBy(potentialCouponUse)) {
+				if (usage.isActiveInCart() && getValidCouponUseSpecification().isSatisfiedBy(potentialCouponUse).isSuccess()) {
 					userSpecificCoupons.add(couponCode);
 				}
 			}
@@ -74,7 +74,7 @@ public class CouponAutoApplierServiceImpl implements CouponAutoApplierService {
 
 	/**
 	 * Return coupons codes for coupons which are invalid in the list of coupons.
-	 * 
+	 *
 	 * @param coupons coupons to filter invalid coupons out of.
 	 * @param storeCode store code
 	 * @param customerEmailAddress customer address, or null if none
@@ -85,7 +85,7 @@ public class CouponAutoApplierServiceImpl implements CouponAutoApplierService {
 		for (String couponCode : coupons) {
 			Coupon coupon = couponService.findByCouponCode(couponCode);
 			PotentialCouponUse potentialCouponUse = new PotentialCouponUse(coupon, storeCode, customerEmailAddress);
-			if (!getValidCouponUseSpecification().isSatisfiedBy(potentialCouponUse)) {
+			if (!getValidCouponUseSpecification().isSatisfiedBy(potentialCouponUse).isSuccess()) {
 				couponsToRemove.add(couponCode);
 			}
 		}
@@ -94,7 +94,7 @@ public class CouponAutoApplierServiceImpl implements CouponAutoApplierService {
 
 	/**
 	 * Return coupon codes for coupons which are user specific.
-	 * 
+	 *
 	 * @param coupons Coupons to filter through.
 	 * @return coupons in the list of coupons passed in which are user specific.
 	 */

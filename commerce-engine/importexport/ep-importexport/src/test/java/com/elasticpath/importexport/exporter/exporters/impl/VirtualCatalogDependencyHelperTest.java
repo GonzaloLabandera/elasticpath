@@ -16,7 +16,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.elasticpath.domain.catalog.Catalog;
 import com.elasticpath.domain.catalog.Category;
@@ -28,7 +28,6 @@ import com.elasticpath.importexport.exporter.context.DependencyRegistry;
  */
 @RunWith(MockitoJUnitRunner.class)
 public class VirtualCatalogDependencyHelperTest {
-	private static final String CATALOG_GUID = "92609843-6266-4365-a9bc-a53743cd0ec9";
 
 	private VirtualCatalogDependencyHelper dependencyHelper;
 
@@ -48,11 +47,10 @@ public class VirtualCatalogDependencyHelperTest {
 	public void setUp() {
 		dependencyHelper = new VirtualCatalogDependencyHelper();
 
-		dependencyRegistry = new DependencyRegistry(Arrays.<Class<?>>asList(Catalog.class, Category.class, CategoryType.class, Object.class));
+		dependencyRegistry = new DependencyRegistry(Arrays.asList(Catalog.class, Category.class, CategoryType.class, Object.class));
 
 		when(category.getCatalog()).thenReturn(catalog);
 		when(catalog.isMaster()).thenReturn(true);
-		when(catalog.getGuid()).thenReturn(CATALOG_GUID);
 	}
 
 	/**

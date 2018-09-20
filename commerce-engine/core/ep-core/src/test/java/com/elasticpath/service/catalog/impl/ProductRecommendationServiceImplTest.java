@@ -15,6 +15,9 @@ import java.util.Set;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.elasticpath.settings.provider.SettingValueProvider;
+import com.elasticpath.settings.test.support.SimpleSettingValueProvider;
+
 /**
  * Test cases for the <code>ProductRecommendationService</code>.
  */
@@ -57,7 +60,11 @@ public class ProductRecommendationServiceImplTest {
 	private static final int MAX_RECOMMENDATIONS = 4;
 	
 	private static final String TEST_STORE_CODE = "TestStoreCode";
-	
+
+	private SettingValueProvider<Integer> maxHistoryDaysSettingProvider;
+
+	private SettingValueProvider<Integer> maxRecommendationsSettingProvider;
+
 	/**
 	 * Prepare for the tests.
 	 * 
@@ -65,16 +72,12 @@ public class ProductRecommendationServiceImplTest {
 	 */
 	@Before
 	public void setUp() throws Exception {
-		productRecommendationService = new ProductRecommendationServiceImpl() {
-			@Override
-			int getMaxOrderHistoryDays(final String storeCode) {
-				return MAX_HISTORY_DAYS;
-			}
-			@Override
-			int getMaxRecommendations(final String storeCode) {
-				return MAX_RECOMMENDATIONS;
-			}
-		};
+		maxRecommendationsSettingProvider = new SimpleSettingValueProvider<>(TEST_STORE_CODE, MAX_RECOMMENDATIONS);
+		maxHistoryDaysSettingProvider = new SimpleSettingValueProvider<>(TEST_STORE_CODE, MAX_HISTORY_DAYS);
+
+		productRecommendationService = new ProductRecommendationServiceImpl();
+		productRecommendationService.setMaxHistoryDaysSettingProvider(maxHistoryDaysSettingProvider);
+		productRecommendationService.setMaxRecommendationsSettingProvider(maxRecommendationsSettingProvider);
 	}
 
 	/**
@@ -127,14 +130,13 @@ public class ProductRecommendationServiceImplTest {
 		Set<Long> cust4Set = customerToProductsPurchasedMap.get(CUST4);
 		assertEquals(1, cust4Set.size());
 		assertTrue(cust4Set.contains(PRODUCT7));
-
 	}
 
 	/**
 	 * Test that the product recommendations are being correctly computed.
 	 */
 	@Test
-	public void testProductRecommendationCalculation() {	
+	public void testProductRecommendationCalculation() {
 		// Create and set the record of customer purchases
 		Map<Long, Set<Long>> customerToProductsPurchasedMap = 
 			productRecommendationService.createCustomerToPurchasedProductsMap(getCustomerPurchaseData());

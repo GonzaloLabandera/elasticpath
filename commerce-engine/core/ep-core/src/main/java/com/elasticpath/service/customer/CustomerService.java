@@ -281,7 +281,7 @@ public interface CustomerService extends EpPersistenceService {
 	 * 
 	 * @param addressUid See above.
 	 * @return See above.
-	 * @see com.elasticpath.service.customer.dao.impl.CustomerAddressDao
+	 * @see com.elasticpath.service.customer.dao.CustomerAddressDao
 	 */
 	CustomerAddress getCustomerAddress(long addressUid);
 
@@ -370,7 +370,7 @@ public interface CustomerService extends EpPersistenceService {
 	Customer findByUserId(String userId, String storeCode, boolean includeAnonymous) throws EpServiceException;
 
 	/**
-	 * Return the mode to generate user Id. 1 - Use user email as user Id, this is default value. 2 - Generate unique premanent user Id, currently
+	 * Return the mode to generate user Id. 1 - Use user email as user Id, this is default value. 2 - Generate unique permanent user Id, currently
 	 * will append a random four digit suffix to email address, and use it as User Id. The user Id is created when the customer is created first
 	 * time. Later on, when the customer change the email address, the user Id will not be changed. 3 - Independent email and user Id
 	 * 

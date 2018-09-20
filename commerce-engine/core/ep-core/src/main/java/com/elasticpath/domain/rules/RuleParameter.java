@@ -39,8 +39,8 @@ public interface RuleParameter extends Persistable {
 	/** SKU code. */
 	String SKU_CODE_KEY = "skuCode";
 
-	/** Shipping service level code. */
-	String SHIPPING_SERVICE_LEVEL_CODE_KEY = "shippingServiceLevelCode";
+	/** Shipping option code. */
+	String SHIPPING_OPTION_CODE_KEY = "shippingOptionCode";
 
 	/** Boolean parameter value must be "true" or "false". */
 	String BOOLEAN_KEY = "booleanCondition";

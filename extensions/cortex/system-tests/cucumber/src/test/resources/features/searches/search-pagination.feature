@@ -49,8 +49,6 @@ Feature: Search pagination feature
     Then the HTTP status is bad request
     When I POST to the search form the keyword "movie" with page-size -1
     Then the HTTP status is bad request
-    When I POST to the search form the keyword "movie" with page-size asdf
-    Then the HTTP status is bad request
     When I POST to the search form with a 5000 char keyword
     Then the HTTP status is bad request
 

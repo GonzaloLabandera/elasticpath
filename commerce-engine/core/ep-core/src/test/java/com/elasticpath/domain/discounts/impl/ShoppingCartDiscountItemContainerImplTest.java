@@ -3,78 +3,82 @@
  */
 package com.elasticpath.domain.discounts.impl;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
-import java.util.Collection;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Currency;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.function.Predicate;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import org.jmock.Expectations;
-import org.jmock.auto.Mock;
-import org.jmock.integration.junit4.JUnitRuleMockery;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
 
+import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.catalog.Catalog;
 import com.elasticpath.domain.catalog.Category;
 import com.elasticpath.domain.catalog.Price;
 import com.elasticpath.domain.catalog.Product;
 import com.elasticpath.domain.catalog.ProductSku;
+import com.elasticpath.domain.catalog.ProductType;
 import com.elasticpath.domain.catalog.impl.PriceImpl;
-import com.elasticpath.domain.shipping.ShippingServiceLevel;
 import com.elasticpath.domain.shoppingcart.ShoppingCart;
 import com.elasticpath.domain.shoppingcart.ShoppingItem;
 import com.elasticpath.domain.shoppingcart.impl.ShoppingCartImpl;
+import com.elasticpath.domain.shoppingcart.impl.ShoppingCartMementoImpl;
 import com.elasticpath.domain.shoppingcart.impl.ShoppingItemImpl;
 import com.elasticpath.domain.store.Store;
 import com.elasticpath.money.Money;
 import com.elasticpath.service.catalog.ProductSkuLookup;
 import com.elasticpath.service.rules.PromotionRuleExceptions;
-import com.elasticpath.service.shoppingcart.ShippableItemsSubtotalCalculator;
+import com.elasticpath.service.shoppingcart.ShippableItemPredicate;
+import com.elasticpath.shipping.connectivity.dto.ShippingOption;
+import com.elasticpath.test.jmock.AbstractCatalogDataTestCase;
 
 /**
  * Test cases for <code>ShoppingCartDiscountItemContainerImpl</code>.
  */
 @SuppressWarnings("PMD.TooManyMethods")
-public class ShoppingCartDiscountItemContainerImplTest {
+public class ShoppingCartDiscountItemContainerImplTest extends AbstractCatalogDataTestCase {
 
 	private static final long ACTION_UID = 123L;
 	private static final long RULE_UID = 456L;
 
-	@Rule
-	public final JUnitRuleMockery context = new JUnitRuleMockery();
-
-	@Mock
-	private ProductSkuLookup productSkuLookup;
-
-	@Mock
-	private ShippableItemsSubtotalCalculator shippableItemsSubtotalCalculator;
-
-	private static final Currency USD = Currency.getInstance("USD");
 	private static final BigDecimal BIG_D_30 = new BigDecimal(30);
 	private static final BigDecimal BIG_D_20 = new BigDecimal(20);
 	private static final BigDecimal BIG_D_10 = new BigDecimal("10.00");
 	private static final String SKU_GUID = UUID.randomUUID().toString();
+	private static final String SKU_CODE = "MySKU0001";
 
 	private ShoppingCartDiscountItemContainerImpl container;
 
 	@Before
-	public void setUp() {
+	public void setUp() throws Exception {
+		super.setUp();
+
+		final ProductSkuLookup productSkuLookup = getProductSkuLookup();
+
 		container = new ShoppingCartDiscountItemContainerImpl();
 		container.setProductSkuLookup(productSkuLookup);
-		container.setCurrency(USD);
-		container.setShippableItemsSubtotalCalculator(shippableItemsSubtotalCalculator);
+		container.setCurrency(CURRENCY);
+		container.setShoppingItemsSubtotalCalculator(getShoppingItemSubtotalCalculator());
+		container.setShippableItemPredicate(new ShippableItemPredicate<>(productSkuLookup));
+
+		stubGetBean(ContextIdNames.SHOPPING_CART_MEMENTO, ShoppingCartMementoImpl.class);
 	}
 
 	/**
@@ -201,10 +205,10 @@ public class ShoppingCartDiscountItemContainerImplTest {
 	@Test
 	public void testDiscountItemGetPriceAmount() {
 		final ShoppingCart shoppingCart = context.mock(ShoppingCart.class);
-		final Money money = Money.valueOf(BIG_D_10, USD);
+		final Money money = Money.valueOf(BIG_D_10, CURRENCY);
 
 		final ShoppingItem cartItem = new ShoppingItemImpl();
-		cartItem.setPrice(1, createPrice(money.getAmount(), money.getAmount(), USD, 1));
+		cartItem.setPrice(1, createPrice(money.getAmount(), money.getAmount(), CURRENCY, 1));
 
 		container.setShoppingCart(shoppingCart);
 
@@ -221,8 +225,8 @@ public class ShoppingCartDiscountItemContainerImplTest {
 		container.setShoppingCart(shoppingCart);
 		final ShoppingItem cartItem = createDiscountableShoppingItem();
 
-		cartItem.setPrice(1, createPrice(BIG_D_30, BIG_D_20, USD, 1));
-		cartItem.applyDiscount(BigDecimal.TEN, productSkuLookup);
+		cartItem.setPrice(1, createPrice(BIG_D_30, BIG_D_20, CURRENCY, 1));
+		cartItem.applyDiscount(BigDecimal.TEN, getProductSkuLookup());
 
 		assertEquals("container.getPriceAmount(cartItem) does not match expected value after discount applied",
 				BigDecimal.TEN.compareTo(container.getPriceAmount(cartItem)), 0);
@@ -238,7 +242,7 @@ public class ShoppingCartDiscountItemContainerImplTest {
 		container.setShoppingCart(shoppingCart);
 		final ShoppingItem cartItem = createDiscountableShoppingItem();
 
-		cartItem.setPrice(1, createPrice(BIG_D_30, BIG_D_20, USD, 1));
+		cartItem.setPrice(1, createPrice(BIG_D_30, BIG_D_20, CURRENCY, 1));
 
 		assertEquals("container.getPriceAmount(cartItem) does not match expected value",
 				BIG_D_20.compareTo(container.getPriceAmount(cartItem)), 0);
@@ -247,20 +251,16 @@ public class ShoppingCartDiscountItemContainerImplTest {
 	@Test
 	public void verifyCalculateSubtotalOfDiscountableItemsAddsAmountsOfDiscountableItems() throws Exception {
 		final ShoppingItem shoppingItem1 = createDiscountableShoppingItem();
-		shoppingItem1.setPrice(1, createPrice(BIG_D_10, BIG_D_10, USD, 1));
+		shoppingItem1.setPrice(1, createPrice(BIG_D_10, BIG_D_10, CURRENCY, 1));
 
 		final ShoppingItem shoppingItem2 = createDiscountableShoppingItem();
-		shoppingItem2.setPrice(1, createPrice(BIG_D_20, BIG_D_20, USD, 1));
+		shoppingItem2.setPrice(1, createPrice(BIG_D_20, BIG_D_20, CURRENCY, 1));
 
-		final BigDecimal expectedDiscountableAmount = BIG_D_30.setScale(USD.getDefaultFractionDigits());
+		final BigDecimal expectedDiscountableAmount = BIG_D_30.setScale(CURRENCY.getDefaultFractionDigits());
 
 		final ShoppingCart shoppingCart = context.mock(ShoppingCart.class);
-		context.checking(new Expectations() {
-			{
-				allowing(shoppingCart).getAllItems();
-				will(returnValue(ImmutableList.of(shoppingItem1, shoppingItem2)));
-			}
-		});
+		allowingShoppingCartWithAnyPredicateWillReturn(shoppingCart, shoppingItem1, shoppingItem2);
+
 		createProductSkuFor(shoppingItem1);
 		createProductSkuFor(shoppingItem2);
 
@@ -276,18 +276,14 @@ public class ShoppingCartDiscountItemContainerImplTest {
 	@Test
 	public void verifyCalculateSubtotalOfDiscountableItemsIncludesExistingDiscounts() throws Exception {
 		final ShoppingItem shoppingItem = createDiscountableShoppingItem();
-		shoppingItem.setPrice(1, createPrice(BIG_D_30, BIG_D_30, USD, 1));
+		shoppingItem.setPrice(1, createPrice(BIG_D_30, BIG_D_30, CURRENCY, 1));
 		shoppingItem.applyDiscount(BIG_D_10, null);
 
-		final BigDecimal expectedDiscountableAmount = BIG_D_20.setScale(USD.getDefaultFractionDigits());
+		final BigDecimal expectedDiscountableAmount = BIG_D_20.setScale(CURRENCY.getDefaultFractionDigits());
 
 		final ShoppingCart shoppingCart = context.mock(ShoppingCart.class);
-		context.checking(new Expectations() {
-			{
-				allowing(shoppingCart).getAllItems();
-				will(returnValue(ImmutableList.of(shoppingItem)));
-			}
-		});
+		allowingShoppingCartWithAnyPredicateWillReturn(shoppingCart, shoppingItem);
+
 		createProductSkuFor(shoppingItem);
 
 		container.setShoppingCart(shoppingCart);
@@ -300,46 +296,29 @@ public class ShoppingCartDiscountItemContainerImplTest {
 	}
 
 	@Test
+	@SuppressWarnings("unchecked")
 	public void verifyCalculateSubtotalOfShippableItemsDelegatesToCalculator() throws Exception {
-		final Money expectedSubtotalMoney = Money.valueOf(BigDecimal.TEN, USD);
-		final Collection<ShoppingItem> cartItems = Collections.emptySet();
+		final BigDecimal expectedShippableSubtotal = BigDecimal.ONE.setScale(CURRENCY.getDefaultFractionDigits());
 
-		final ShoppingCartImpl shoppingCart = new ShoppingCartImpl() {
-			private static final long serialVersionUID = -2258051200781740169L;
+		// Deliberately use a different subtotal for shippable items as for all items to make sure the right subtotal is requested
+		final ShoppingCart shoppingCart = getShoppingCart(expectedShippableSubtotal, BigDecimal.TEN);
 
-			@Override
-			public Collection<ShoppingItem> getApportionedLeafItems() {
-				return cartItems;
-			}
-		};
-
-		context.checking(new Expectations() {
-			{
-				oneOf(shippableItemsSubtotalCalculator).calculateSubtotalOfShippableItems(cartItems, shoppingCart, USD);
-				will(returnValue(expectedSubtotalMoney));
-			}
-		});
 		container.setShoppingCart(shoppingCart);
 
-		final BigDecimal actualSubtotal = container.calculateSubtotalOfShippableItems();
-
-		assertEquals(expectedSubtotalMoney.getAmount(), actualSubtotal);
+		final BigDecimal actualShippableSubtotal = container.calculateSubtotalOfShippableItems();
+		assertEquals(expectedShippableSubtotal, actualShippableSubtotal);
 	}
 
 	@Test
 	public void verifyCalculateSubtotalOfDiscountableItemsAddsAllQuantityUnits() throws Exception {
 		final ShoppingItem shoppingItem = createDiscountableShoppingItem();
-		shoppingItem.setPrice(2, createPrice(BIG_D_10, BIG_D_10, USD, 1));
+		shoppingItem.setPrice(2, createPrice(BIG_D_10, BIG_D_10, CURRENCY, 1));
 
-		final BigDecimal expectedDiscountableAmount = BIG_D_20.setScale(USD.getDefaultFractionDigits());
+		final BigDecimal expectedDiscountableAmount = BIG_D_20.setScale(CURRENCY.getDefaultFractionDigits());
 
 		final ShoppingCart shoppingCart = context.mock(ShoppingCart.class);
-		context.checking(new Expectations() {
-			{
-				allowing(shoppingCart).getAllItems();
-				will(returnValue(ImmutableList.of(shoppingItem)));
-			}
-		});
+		allowingShoppingCartWithAnyPredicateWillReturn(shoppingCart, shoppingItem);
+
 		createProductSkuFor(shoppingItem);
 
 		container.setShoppingCart(shoppingCart);
@@ -354,17 +333,13 @@ public class ShoppingCartDiscountItemContainerImplTest {
 	@Test
 	public void verifyCalculateSubtotalOfDiscountableItemsIgnoresNonDiscountableItems() throws Exception {
 		final ShoppingItem shoppingItem1 = createNonDiscountableShoppingItem();
-		shoppingItem1.setPrice(1, createPrice(BIG_D_10, BIG_D_10, USD, 1));
+		shoppingItem1.setPrice(1, createPrice(BIG_D_10, BIG_D_10, CURRENCY, 1));
 
-		final BigDecimal expectedDiscountableAmount = BigDecimal.ZERO.setScale(USD.getDefaultFractionDigits());
+		final BigDecimal expectedDiscountableAmount = BigDecimal.ZERO.setScale(CURRENCY.getDefaultFractionDigits());
 
 		final ShoppingCart shoppingCart = context.mock(ShoppingCart.class);
-		context.checking(new Expectations() {
-			{
-				allowing(shoppingCart).getAllItems();
-				will(returnValue(ImmutableList.of(shoppingItem1)));
-			}
-		});
+		allowingShoppingCartWithAnyPredicateWillReturn(shoppingCart, shoppingItem1);
+
 
 		container.setShoppingCart(shoppingCart);
 
@@ -381,14 +356,14 @@ public class ShoppingCartDiscountItemContainerImplTest {
 		final String skuGuid2 = UUID.randomUUID().toString();
 
 		final ShoppingItem shoppingItem1 = createDiscountableShoppingItem();
-		shoppingItem1.setPrice(1, createPrice(BIG_D_10, BIG_D_10, USD, 1));
+		shoppingItem1.setPrice(1, createPrice(BIG_D_10, BIG_D_10, CURRENCY, 1));
 		shoppingItem1.setSkuGuid(skuGuid1);
 
 		final ShoppingItem shoppingItem2 = createDiscountableShoppingItem();
-		shoppingItem2.setPrice(1, createPrice(BIG_D_20, BIG_D_20, USD, 1));
+		shoppingItem2.setPrice(1, createPrice(BIG_D_20, BIG_D_20, CURRENCY, 1));
 		shoppingItem2.setSkuGuid(skuGuid2);
 
-		final BigDecimal expectedDiscountableAmount = BIG_D_10.setScale(USD.getDefaultFractionDigits());
+		final BigDecimal expectedDiscountableAmount = BIG_D_10.setScale(CURRENCY.getDefaultFractionDigits());
 
 		final ShoppingCart shoppingCart = context.mock(ShoppingCart.class);
 		final PromotionRuleExceptions promotionRuleExceptions = context.mock(PromotionRuleExceptions.class);
@@ -397,11 +372,10 @@ public class ShoppingCartDiscountItemContainerImplTest {
 		final ProductSku sku1 = createProductSkuFor(shoppingItem1, product);
 		final ProductSku sku2 = createProductSkuFor(shoppingItem2, product);
 
+		allowingShoppingCartWithAnyPredicateWillReturn(shoppingCart, shoppingItem1, shoppingItem2);
+
 		context.checking(new Expectations() {
 			{
-				allowing(shoppingCart).getAllItems();
-				will(returnValue(ImmutableList.of(shoppingItem1, shoppingItem2)));
-
 				final Store store = context.mock(Store.class);
 				final Catalog catalog = context.mock(Catalog.class);
 
@@ -441,8 +415,8 @@ public class ShoppingCartDiscountItemContainerImplTest {
 		// Given a shopping item with List Price $30, Computed Price $25
 		final ShoppingItem shoppingItem = createDiscountableShoppingItem();
 		final BigDecimal computedPrice = new BigDecimal("25.00");
-		final Price price = createPrice(BIG_D_30, BIG_D_30, USD, 1);
-		price.setComputedPriceIfLower(Money.valueOf(computedPrice, USD));
+		final Price price = createPrice(BIG_D_30, BIG_D_30, CURRENCY, 1);
+		price.setComputedPriceIfLower(Money.valueOf(computedPrice, CURRENCY));
 		shoppingItem.setPrice(1, price);
 
 		// And the shopping item has a Cart Promo Discount of $10
@@ -461,8 +435,8 @@ public class ShoppingCartDiscountItemContainerImplTest {
 		// Given a shopping item with List Price $30, Computed Price $25
 		final ShoppingItem shoppingItem = createDiscountableShoppingItem();
 		final BigDecimal computedPrice = new BigDecimal("25.00");
-		final Price price = createPrice(BIG_D_30, BIG_D_30, USD, 1);
-		price.setComputedPriceIfLower(Money.valueOf(computedPrice, USD));
+		final Price price = createPrice(BIG_D_30, BIG_D_30, CURRENCY, 1);
+		price.setComputedPriceIfLower(Money.valueOf(computedPrice, CURRENCY));
 		shoppingItem.setPrice(2, price);
 
 		// And the shopping item has a quantity of 2
@@ -484,7 +458,7 @@ public class ShoppingCartDiscountItemContainerImplTest {
 		final PromotionRuleExceptions exceptions = context.mock(PromotionRuleExceptions.class);
 		context.checking(new Expectations() {
 			{
-				allowing(productSkuLookup).findByGuid(SKU_GUID);
+				allowing(getProductSkuLookup()).findByGuid(SKU_GUID);
 				will(returnValue(null));
 			}
 		});
@@ -500,17 +474,14 @@ public class ShoppingCartDiscountItemContainerImplTest {
 		discountableShoppingItem.setSkuGuid(SKU_GUID);
 
 		final PromotionRuleExceptions exceptions = context.mock(PromotionRuleExceptions.class);
+		final ProductSku sku = context.mock(ProductSku.class);
 		context.checking(new Expectations() {
 			{
-				final ProductSku sku = context.mock(ProductSku.class);
-
-				allowing(productSkuLookup).findByGuid(SKU_GUID);
-				will(returnValue(sku));
-
 				oneOf(exceptions).isSkuExcluded(sku);
 				will(returnValue(true));
 			}
 		});
+		mockProductSkuLookupByGuid(SKU_GUID, sku);
 
 		final boolean eligible = container.cartItemEligibleForPromotion(discountableShoppingItem, exceptions);
 
@@ -612,25 +583,25 @@ public class ShoppingCartDiscountItemContainerImplTest {
 	}
 
 	@Test
-	public void verifyPrePromotionPriceForShippingServiceLevelIsObtainedFromShoppingCart() throws Exception {
-		final String shippingServiceLevelCode = "SHIP001";
-		final ShippingServiceLevel shippingServiceLevel = context.mock(ShippingServiceLevel.class);
+	public void verifyPrePromotionPriceForShippingOptionIsObtainedFromShoppingCart() throws Exception {
+		final String shippingOptionCode = "SHIP001";
+		final ShippingOption shippingOption = context.mock(ShippingOption.class);
 
 		context.checking(new Expectations() {
 			{
-				allowing(shippingServiceLevel).getCode();
-				will(returnValue(shippingServiceLevelCode));
+				allowing(shippingOption).getCode();
+				will(returnValue(shippingOptionCode));
 			}
 		});
 
-		final Money shippingAmount = Money.valueOf(BigDecimal.TEN, USD);
+		final Money shippingAmount = Money.valueOf(BigDecimal.TEN, CURRENCY);
 
 		final ShoppingCartImpl cart = new ShoppingCartImpl();
-		cart.setShippingListPrice(shippingServiceLevelCode, shippingAmount);
+		cart.setShippingListPrice(shippingOptionCode, shippingAmount);
 
 		container.setShoppingCart(cart);
 
-		final BigDecimal actualShippingAmount = container.getPrePromotionPriceAmount(shippingServiceLevel);
+		final BigDecimal actualShippingAmount = container.getPrePromotionPriceAmount(shippingOption);
 
 		assertEquals("Expected shipping amount to be retrieved from the cart's store of shipping list prices",
 				shippingAmount.getAmount(), actualShippingAmount);
@@ -638,14 +609,14 @@ public class ShoppingCartDiscountItemContainerImplTest {
 
 	@Test
 	public void verifyApplyShippingDiscountSetsToShoppingCart() throws Exception {
-		final String expectedShippingServiceLevelCode = "SHIP001";
-		final ShippingServiceLevel shippingServiceLevel = context.mock(ShippingServiceLevel.class);
+		final String expectedShippingOptionCode = "SHIP001";
+		final ShippingOption shippingOption = context.mock(ShippingOption.class);
 		final BigDecimal discount = BIG_D_10;
 
 		context.checking(new Expectations() {
 			{
-				allowing(shippingServiceLevel).getCode();
-				will(returnValue(expectedShippingServiceLevelCode));
+				allowing(shippingOption).getCode();
+				will(returnValue(expectedShippingOptionCode));
 			}
 		});
 
@@ -655,22 +626,86 @@ public class ShoppingCartDiscountItemContainerImplTest {
 
 			@Override
 			public void setShippingDiscountIfLower(
-					final String actualShippingServiceLevelCode,
+					final String actualShippingOptionCode,
 					final long ruleId,
 					final long actionId,
 					final Money discountAmount) {
-				assertSame(expectedShippingServiceLevelCode, actualShippingServiceLevelCode);
+				assertSame(expectedShippingOptionCode, actualShippingOptionCode);
 				assertEquals(RULE_UID, ruleId);
 				assertEquals(ACTION_UID, actionId);
-				assertEquals(Money.valueOf(discount, USD), discountAmount);
+				assertEquals(Money.valueOf(discount, CURRENCY), discountAmount);
 				delegateMethodInvoked[0] = true;
 			}
 		};
 		container.setShoppingCart(cart);
 
-		container.applyShippingOptionDiscount(shippingServiceLevel, RULE_UID, ACTION_UID, discount);
+		container.applyShippingOptionDiscount(shippingOption, RULE_UID, ACTION_UID, discount);
 
 		assertTrue("Method ShoppingCart.setShippingDiscountIfLower never invoked", delegateMethodInvoked[0]);
+	}
+
+	@Test
+	public void verifyGetLowestPricedShoppingItemForSkuReturnsEmptyOptionalWhenNoMatchingItemExists() {
+		final ShoppingCart shoppingCart = new ShoppingCartImpl();
+		final String productSkuGuid = UUID.randomUUID().toString();
+
+		final ProductSkuLookup productSkuLookup = mock(ProductSkuLookup.class);
+		final ProductSku productSku = createMockProductSku(productSkuGuid, "NONMATCHINGSKU001");
+
+		final ShoppingItem nonMatchingShoppingItem = createShoppingItemForSku(productSkuGuid);
+
+		when(productSkuLookup.findByGuids(Collections.singleton(productSkuGuid))).thenReturn(Collections.singletonList(productSku));
+
+		mockProductSkuLookupByGuid(productSkuGuid, productSku);
+
+		shoppingCart.addShoppingCartItem(nonMatchingShoppingItem);
+
+		container.setShoppingCart(shoppingCart);
+
+		assertThat(container.getLowestPricedShoppingItemForSku(SKU_CODE))
+				.isEmpty();
+	}
+
+	@Test
+	public void verifyGetLowestPricedShoppingItemForSkuReturnsShoppingItemWhenOneExists() {
+		final ShoppingCart shoppingCart = new ShoppingCartImpl();
+
+		final String nonMatchingSkuCode = "NONMATCHSKU001";
+		final String matchingSkuCode = "MATCHSKU001";
+
+		final String nonMatchingProductSkuGuid = UUID.randomUUID().toString();
+		final String matchingProductSkuGuid = UUID.randomUUID().toString();
+
+		final ProductSku matchingProductSku = createMockProductSku(matchingProductSkuGuid, matchingSkuCode);
+		final ProductSku nonMatchingProductSku = createMockProductSku(nonMatchingProductSkuGuid, nonMatchingSkuCode);
+
+		final ShoppingItem nonMatchingShoppingItem = createShoppingItemForSku(nonMatchingProductSkuGuid);
+		final ShoppingItem matchingShoppingItem1 = createShoppingItemForSku(matchingProductSkuGuid);
+		final ShoppingItem matchingShoppingItem2 = createShoppingItemForSku(matchingProductSkuGuid);
+
+		final ProductSkuLookup productSkuLookup = mock(ProductSkuLookup.class);
+		when(productSkuLookup.findByGuids(ImmutableList.of(matchingProductSkuGuid, nonMatchingProductSkuGuid)))
+				.thenReturn(ImmutableList.of(matchingProductSku, nonMatchingProductSku));
+
+		shoppingCart.addShoppingCartItem(nonMatchingShoppingItem);
+		shoppingCart.addShoppingCartItem(matchingShoppingItem1);
+		shoppingCart.addShoppingCartItem(matchingShoppingItem2);
+
+		container = new ShoppingCartDiscountItemContainerImpl() {
+			@Override
+			public List<ShoppingItem> getItemsLowestToHighestPrice() {
+				return ImmutableList.of(matchingShoppingItem2, nonMatchingShoppingItem, matchingShoppingItem1);
+			}
+		};
+
+		container.setProductSkuLookup(getProductSkuLookup());
+		container.setCurrency(CURRENCY);
+		container.setShoppingItemsSubtotalCalculator(getShoppingItemSubtotalCalculator());
+		container.setShippableItemPredicate(new ShippableItemPredicate<>(getProductSkuLookup()));
+		container.setShoppingCart(shoppingCart);
+
+		assertThat(container.getLowestPricedShoppingItemForSku(matchingSkuCode))
+				.contains(matchingShoppingItem2);
 	}
 
 	/**
@@ -721,11 +756,10 @@ public class ShoppingCartDiscountItemContainerImplTest {
 			{
 				allowing(productSku).getGuid();
 				will(returnValue(skuGuid));
-
-				allowing(productSkuLookup).findByGuid(skuGuid);
-				will(returnValue(productSku));
 			}
 		});
+
+		mockProductSkuLookupByGuid(skuGuid, productSku);
 
 		return productSku;
 	}
@@ -741,6 +775,43 @@ public class ShoppingCartDiscountItemContainerImplTest {
 		});
 
 		return productSku;
+	}
+
+	@SuppressWarnings("unchecked")
+	private void allowingShoppingCartWithAnyPredicateWillReturn(final ShoppingCart shoppingCart, final ShoppingItem... shoppingItems) {
+		context.checking(new Expectations() {
+			{
+				allowing(shoppingCart).getShoppingItems(with(any(Predicate.class)));
+				will(returnValue(Arrays.asList(shoppingItems)));
+			}
+		});
+	}
+
+	private ProductSku createMockProductSku(final String skuGuid, final String skuCode) {
+		final ProductSku productSku = mock(ProductSku.class, "Product SKU " + skuCode);
+		final Product product = mock(Product.class, "Product " + UUID.randomUUID().toString());
+		final ProductType productType = mock(ProductType.class, "Product Type" + UUID.randomUUID().toString());
+
+		mockProductSkuLookupByGuid(skuGuid, productSku);
+
+		when(productSku.getGuid()).thenReturn(skuGuid);
+		when(productSku.getSkuCode()).thenReturn(skuCode);
+		when(productSku.getProduct()).thenReturn(product);
+
+		when(product.getProductType()).thenReturn(productType);
+
+		when(productType.isExcludedFromDiscount()).thenReturn(false);
+
+		return productSku;
+	}
+
+	private ShoppingItem createShoppingItemForSku(final String skuGuid) {
+		final ShoppingItem shoppingItem = new ShoppingItemImpl();
+		shoppingItem.setSkuGuid(skuGuid);
+		shoppingItem.setBundleConstituent(false);
+		shoppingItem.setGuid(UUID.randomUUID().toString());
+
+		return shoppingItem;
 	}
 
 }

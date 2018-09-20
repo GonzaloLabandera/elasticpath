@@ -18,7 +18,6 @@ import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.commons.lang.builder.ToStringStyle;
 import org.apache.openjpa.persistence.DataCache;
 
-import com.elasticpath.commons.util.security.StringEncrypter;
 import com.elasticpath.domain.catalog.DigitalAsset;
 import com.elasticpath.domain.impl.AbstractLegacyPersistenceImpl;
 
@@ -44,8 +43,6 @@ public class DigitalAssetImpl extends AbstractLegacyPersistenceImpl implements D
 	private int expiryDays;
 
 	private int maxDownloadTimes;
-
-	private String encryptedUidPk;
 
 	private long uidPk;
 
@@ -132,23 +129,6 @@ public class DigitalAssetImpl extends AbstractLegacyPersistenceImpl implements D
 	@Override
 	public int hashCode() {
 		return Objects.hashCode(fileName);
-	}
-
-	/**
-	 * Get the encrypted uidPk string.
-	 *
-	 * @return the encrypted uidPk string
-	 */
-	@Override
-	@Transient
-	public String getEncryptedUidPk() {
-
-		if (encryptedUidPk == null || encryptedUidPk.length() == 0) {
-			StringEncrypter stringEncrypter = getBean("digitalAssetStringEncrypter");
-			encryptedUidPk = stringEncrypter.encrypt(String.valueOf(getUidPk()));
-		}
-		return encryptedUidPk;
-
 	}
 
 	/**

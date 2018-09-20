@@ -8,8 +8,8 @@ import static org.junit.Assert.assertSame;
 import java.util.Collection;
 import java.util.Map;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import org.jmock.Expectations;
 import org.jmock.auto.Mock;
@@ -27,6 +27,7 @@ import com.elasticpath.domain.shoppingcart.FrequencyAndRecurringPrice;
 import com.elasticpath.domain.shoppingcart.FrequencyAndRecurringPriceFactory;
 import com.elasticpath.domain.shoppingcart.ShoppingItem;
 import com.elasticpath.domain.shoppingcart.ShoppingItemPricingSnapshot;
+import com.elasticpath.service.shoppingcart.OrderSkuToPricingSnapshotFunction;
 import com.elasticpath.service.shoppingcart.PricingSnapshotService;
 
 public class OrderPresentationHelperImplTest {
@@ -55,7 +56,7 @@ public class OrderPresentationHelperImplTest {
 				return frequencyAndRecurringPriceFactory;
 			}
 		};
-		orderPresentationHelper.setPricingSnapshotService(pricingSnapshotService);
+		orderPresentationHelper.setOrderSkuToPricingSnapshotFunction(new OrderSkuToPricingSnapshotFunction(pricingSnapshotService));
 	}
 
 	@Test
@@ -69,7 +70,7 @@ public class OrderPresentationHelperImplTest {
 		final ShoppingItemPricingSnapshot itemPricingSnapshot1 = context.mock(ShoppingItemPricingSnapshot.class, "Snapshot1");
 		final ShoppingItemPricingSnapshot itemPricingSnapshot2 = context.mock(ShoppingItemPricingSnapshot.class, "Snapshot2");
 
-		final Collection<? extends ShoppingItem> orderSkus = ImmutableSet.of(orderSku1, orderSku2);
+		final Collection<? extends ShoppingItem> orderSkus = ImmutableList.of(orderSku1, orderSku2);
 
 		final Map<? extends ShoppingItem, ShoppingItemPricingSnapshot> shoppingItemPricingSnapshotMap = ImmutableMap.of(
 				orderSku1, itemPricingSnapshot1,

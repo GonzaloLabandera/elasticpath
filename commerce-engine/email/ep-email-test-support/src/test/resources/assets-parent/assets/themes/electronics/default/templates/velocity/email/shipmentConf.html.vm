@@ -15,10 +15,10 @@
 	#emailMessage("email.shipConf.re") $order.getOrderNumber()
 
 	#emailMessage("email.shipConf.message")#**#
-		
+
 	#emailMessage("email.shipConf.shipmentNumber"): $!shipment.shipmentNumber#**#
 	#emailMessage("email.shipConf.shippedDate"): $!shipment.shipmentDate#**#
-	#emailMessage("email.shipConf.shipmentType"):  $!shipment.getCarrier() -  $!shipment.getServiceLevel()#**#
+	#emailMessage("email.shipConf.shipmentType"):  $!shipment.getCarrierName() - $!shipment.getShippingOptionName()#**#
 	#emailMessage("email.shipConf.TrackingNumber"): $!shipment.trackingCode#**#
 
 	#if($shippingAddress)
@@ -39,7 +39,7 @@
 	#set ($unitPrice = "#displayPriceForLocale($orderItemFormBean.getUnitPriceMoney(), $order.locale)")
 	#set ($onSale = $!orderItemFormBean.getUnitPriceMoney().lessThan($orderItemFormBean.getListPriceMoney()))
 	## Display skucode
-	$orderItemFormBean.skuCode $orderItemFormBean.displayName 
+	$orderItemFormBean.skuCode $orderItemFormBean.displayName
 	#if($!orderItemFormBean.getDisplaySkuOptions())
 	$!orderItemFormBean.getDisplaySkuOptions()
 	#end
@@ -59,7 +59,7 @@
 
 
 	#emailMessage("email.shipConf.subtotal"): #displayPriceForLocale($shipment.getItemSubtotalMoney(), $order.locale)#**#
-	#emailMessage("email.shipConf.shipping"): #if($!shipment.getShippingCostMoney().getAmount().setScale(0,0).intValue()>0) displayPriceForLocale($shipment.getShippingCostMoney(), $order.locale) #else N/A #end#**#	
+	#emailMessage("email.shipConf.shipping"): #if($!shipment.getShippingCostMoney().getAmount().setScale(0,0).intValue()>0) displayPriceForLocale($shipment.getShippingCostMoney(), $order.locale) #else N/A #end#**#
 	#if($shipment.hasSubtotalDiscount()&&!$shipment.isInclusiveTax())
 	#emailMessage("email.shipConf.shipmentDiscount"): #displayPriceForLocale($order.getSubtotalDiscountMoney(), $order.locale)#**#
 	#end

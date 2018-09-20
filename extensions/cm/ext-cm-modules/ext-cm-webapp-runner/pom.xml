@@ -17,7 +17,9 @@
 
 	<properties>
 		<skipTests>true</skipTests>
+		<ep.database.timezone>UTC</ep.database.timezone>
 		<cm.contextFilePath>${project.build.directory}/tomcatconf/context.xml</cm.contextFilePath>
+		<epdb.jdbc.properties>serverTimezone=${ep.database.timezone};useLegacyDatetimeCode=false</epdb.jdbc.properties>
 	</properties>
 
 	<build>
@@ -98,12 +100,7 @@
 					<dependency>
 						<groupId>org.apache.geronimo.specs</groupId>
 						<artifactId>geronimo-j2ee-management_1.1_spec</artifactId>
-						<version>1.0.1</version>
-					</dependency>
-					<dependency>
-						<groupId>org.apache.geronimo.specs</groupId>
-						<artifactId>geronimo-jms_1.1_spec</artifactId>
-						<version>1.1.1</version>
+						<version>${org.apache.geronimo.management.spec.version}</version>
 					</dependency>
 					<dependency>
 						<groupId>org.fusesource.hawtbuf</groupId>

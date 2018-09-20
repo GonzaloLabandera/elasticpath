@@ -19,7 +19,6 @@ public class DataPointLocationEnum extends AbstractExtensibleEnum<DataPointLocat
 	private static final Map<String, String> SUPPORTED_ADDRESS_FIELDS = new TreeMap<>();
 	private static final Map<String, String> SUPPORTED_ORDER_PAYMENT_GIFT_CERTIFICATE_FIELDS = new TreeMap<>();
 	private static final Map<String, String> SUPPORTED_ORDER_FIELDS = new TreeMap<>();
-	private static final Map<String, String> SUPPORTED_ORDER_PAYMENT_CARD_HOLDER_FIELDS = new TreeMap<>();
 
 	static {
 		SUPPORTED_ADDRESS_FIELDS.put("FIRST_NAME", "firstName");
@@ -34,7 +33,6 @@ public class DataPointLocationEnum extends AbstractExtensibleEnum<DataPointLocat
 
 		SUPPORTED_ORDER_FIELDS.put("ORDER_IP_ADDRESS", "ipAddress");
 
-		SUPPORTED_ORDER_PAYMENT_CARD_HOLDER_FIELDS.put("ORDER_PAYMENT_CARD_HOLDER_NAME", "cardHolderName");
 	}
 	/**
 	 * Ordinal constant for CART_GIFT_CERTIFICATE.
@@ -76,10 +74,6 @@ public class DataPointLocationEnum extends AbstractExtensibleEnum<DataPointLocat
 	 */
 	public static final int ORDER_IP_ADDRESS_ORDINAL = 8;
 
-	/**
-	 * Ordinal constant for ORDER_PAYMENT_CARD_HOLDER_NAME.
-	 */
-	public static final int ORDER_PAYMENT_CARD_HOLDER_NAME_ORDINAL = 9;
 
 	/**
 	 * Ordinal constant for ORDER_PAYMENT_GIFT_CERTIFICATE.
@@ -131,12 +125,6 @@ public class DataPointLocationEnum extends AbstractExtensibleEnum<DataPointLocat
 	 */
 	public static final DataPointLocationEnum ORDER_IP_ADDRESS = new DataPointLocationEnum(ORDER_IP_ADDRESS_ORDINAL,
 		"ORDER_IP_ADDRESS", SUPPORTED_ORDER_FIELDS);
-
-	/**
-	 * Data point location for order payment card holder name.
-	 */
-	public static final DataPointLocationEnum ORDER_PAYMENT_CARD_HOLDER_NAME = new DataPointLocationEnum(ORDER_PAYMENT_CARD_HOLDER_NAME_ORDINAL,
-		"ORDER_PAYMENT_CARD_HOLDER_NAME", SUPPORTED_ORDER_PAYMENT_CARD_HOLDER_FIELDS);
 
 	/**
 	 * Data point location for order payment gift certificate.

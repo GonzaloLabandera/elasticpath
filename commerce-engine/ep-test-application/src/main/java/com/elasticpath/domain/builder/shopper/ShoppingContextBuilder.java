@@ -13,12 +13,16 @@ import com.elasticpath.domain.builder.DomainObjectBuilder;
 import com.elasticpath.domain.customer.Customer;
 import com.elasticpath.domain.customer.CustomerSession;
 import com.elasticpath.domain.shopper.Shopper;
+import com.elasticpath.tags.Tag;
+import com.elasticpath.tags.TagSet;
 import com.elasticpath.test.util.Utils;
 
 /**
  * A builder that builds {@link ShoppingContext}s for testing purposes.
  */
 public class ShoppingContextBuilder implements DomainObjectBuilder<ShoppingContext> {
+
+	private static final String SHOPPING_START_TIME_TAG = "SHOPPING_START_TIME";
 
 	private final BeanFactory beanFactory;
 
@@ -82,6 +86,9 @@ public class ShoppingContextBuilder implements DomainObjectBuilder<ShoppingConte
 		customerSession.setLastAccessedDate(new Date());
 		customerSession.setGuid(Utils.uniqueCode("session"));
 		customerSession.setLocale(Locale.US);
+		TagSet tagSet = new TagSet();
+		tagSet.addTag(SHOPPING_START_TIME_TAG, new Tag(new Date().getTime()));
+		customerSession.setCustomerTagSet(tagSet);
 
 		return customerSession;
 	}

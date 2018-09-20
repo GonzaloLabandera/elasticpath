@@ -1,10 +1,13 @@
 package com.elasticpath.selenium.navigations;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 
 import com.elasticpath.selenium.resultspane.CustomerSearchResultsPane;
 import com.elasticpath.selenium.resultspane.OrderSearchResultPane;
+import com.elasticpath.selenium.util.Constants;
 
 /**
  * Customer Service Page.
@@ -18,7 +21,8 @@ public class CustomerService extends AbstractNavigation {
 			+ ".FulfillmentMessages.SearchView_EmailUserId'] > input";
 	private static final String PHONE_INPUT_CSS = ACTIVE_LEFT_PANE + "div[automation-id='com.elasticpath.cmclient.fulfillment"
 			+ ".FulfillmentMessages.SearchView_PhoneNumber'] > input";
-	private static final String ORDER_NUMBER_INPUT_CSS = ACTIVE_LEFT_PANE + "div[widget-id='Order Number'] > input";
+	private static final String ORDER_NUMBER_INPUT_CSS = ACTIVE_LEFT_PANE + "div[automation-id='com.elasticpath.cmclient.fulfillment"
+			+ ".FulfillmentMessages.SearchView_OrderNumber'] > input";
 	private static final String SEARCH_BUTTON_CSS = "div[pane-location='left-pane-inner'] div[widget-id='Search'][seeable='true']";
 	private static final String CLEAR_BUTTON_CSS
 			= "div[pane-location='left-pane-inner'] "
@@ -64,7 +68,10 @@ public class CustomerService extends AbstractNavigation {
 	 * Clicks Customer tab.
 	 */
 	public void clickCustomersTab() {
-		getWaitDriver().waitForElementToBeInteractable(CUSTOMERS_TAB_CSS);
+		assertThat(getWaitDriver().waitForElementToBeInteractable(CUSTOMERS_TAB_CSS))
+				.as("Customer tab is not interactable")
+				.isTrue();
+
 		click(getWaitDriver().waitForElementToBeClickable(By.cssSelector(CUSTOMERS_TAB_CSS)));
 	}
 
@@ -80,6 +87,7 @@ public class CustomerService extends AbstractNavigation {
 
 	/**
 	 * Enters customer phone number in search.
+	 *
 	 * @param phoneNumber String
 	 */
 	public void enterPhoneNumber(final String phoneNumber) {
@@ -98,9 +106,26 @@ public class CustomerService extends AbstractNavigation {
 	}
 
 	/**
-	 * Clear the input fields.
+	 * Clear the input fields in customers tab.
 	 */
-	public void clearInputFields() {
+	public void clearInputFieldsInCustomersTab() {
 		clickButton(CLEAR_BUTTON_CSS, "Clear");
+		int count = 0;
+		while (!isElementFocused(EMAIL_USERID_INPUT_CSS) && count < Constants.RETRY_COUNTER_5) {
+			sleep(Constants.SLEEP_HALFSECOND_IN_MILLIS);
+			count++;
+		}
+	}
+
+	/**
+	 * Clear the input fields in orders tab.
+	 */
+	public void clearInputFieldsInOrdersTab() {
+		clickButton(CLEAR_BUTTON_CSS, "Clear");
+		int count = 0;
+		while (!isElementFocused(ORDER_NUMBER_INPUT_CSS) && count < Constants.RETRY_COUNTER_5) {
+			sleep(Constants.SLEEP_HALFSECOND_IN_MILLIS);
+			count++;
+		}
 	}
 }

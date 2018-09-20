@@ -22,7 +22,7 @@ import com.elasticpath.ql.parser.EPQueryType;
 import com.elasticpath.service.shipping.ShippingServiceLevelService;
 
 /**
- * Exporter for ShippingServiceLevel objects.  
+ * Exporter for {@link ShippingServiceLevel} objects.
  */
 public class ShippingServiceLevelExporterImpl extends AbstractExporterImpl<ShippingServiceLevel, ShippingServiceLevelDTO, String> {
 
@@ -78,12 +78,12 @@ public class ShippingServiceLevelExporterImpl extends AbstractExporterImpl<Shipp
 		LOG.info("Shipping Service Level Export \n\t" + shippingServiceLevelGuids.size()
 				+ " Shipping Service Level GUIDs found for export [" + shippingServiceLevelGuids + "]");
 	}
-	
+
 	@Override
 	protected Class<? extends ShippingServiceLevelDTO> getDtoClass() {
 		return ShippingServiceLevelDTO.class;
 	}
-	
+
 	@Override
 	public Class<?>[] getDependentClasses() {
 		return new Class<?>[] { ShippingServiceLevel.class };
@@ -105,12 +105,12 @@ public class ShippingServiceLevelExporterImpl extends AbstractExporterImpl<Shipp
 	public void setDomainAdapter(final DomainAdapter<ShippingServiceLevel, ShippingServiceLevelDTO> domainAdapter) {
 		this.domainAdapter = domainAdapter;
 	}
-	
+
 	@Override
 	protected DomainAdapter<ShippingServiceLevel, ShippingServiceLevelDTO> getDomainAdapter() {
 		return domainAdapter;
 	}
-	
+
 	public ShippingServiceLevelService getShippingServiceLevelService() {
 		return shippingServiceLevelService;
 	}
@@ -118,5 +118,5 @@ public class ShippingServiceLevelExporterImpl extends AbstractExporterImpl<Shipp
 	public void setShippingServiceLevelService(final ShippingServiceLevelService shippingServiceLevelService) {
 		this.shippingServiceLevelService = shippingServiceLevelService;
 	}
-	
+
 }

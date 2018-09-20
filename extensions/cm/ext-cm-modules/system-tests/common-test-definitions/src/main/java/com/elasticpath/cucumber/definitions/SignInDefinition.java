@@ -3,22 +3,27 @@ package com.elasticpath.cucumber.definitions;
 import cucumber.api.java.en.Given;
 import cucumber.api.java.en.Then;
 
-import com.elasticpath.selenium.common.CM;
 import com.elasticpath.selenium.dialogs.SignInDialog;
+import com.elasticpath.selenium.domainobjects.DST;
 import com.elasticpath.selenium.framework.util.PropertyManager;
-import com.elasticpath.selenium.framework.util.SeleniumDriverSetup;
+import com.elasticpath.selenium.setup.PublishEnvSetUp;
+import com.elasticpath.selenium.setup.SetUp;
 
 /**
  * Sign In steps.
  */
 public class SignInDefinition {
-	private SignInDialog signInDialog;
+	private final SignInDialog signInDialog;
+	private final String adminID;
+	private final String adminPassword;
 
 	/**
 	 * Constructor.
 	 */
 	public SignInDefinition() {
-		signInDialog = new SignInDialog(SeleniumDriverSetup.getDriver());
+		signInDialog = new SignInDialog(SetUp.getDriver());
+		adminID = PropertyManager.getInstance().getProperty("admin.id");
+		adminPassword = PropertyManager.getInstance().getProperty("cm.password");
 	}
 
 	/**
@@ -26,12 +31,24 @@ public class SignInDefinition {
 	 */
 	@Given("^I sign in to CM as admin user$")
 	public void signInAsAdmin() {
-		String adminID = PropertyManager.getInstance().getProperty("admin_id");
-		String adminPassword = PropertyManager.getInstance().getProperty("cm_password");
+		signInDialog.initialSignIn(adminID, adminPassword);
+	}
 
-		signIn(adminID, adminPassword);
-		//TODO - do we need change set isEnabled check?
+	/**
+	 * Sign In Author CM as admin user.
+	 */
+	@Given("^I sign in to the author environment CM as admin user$")
+	public void signInToAuthor() {
+		new DST();
+		signInDialog.initialSignIn(adminID, adminPassword);
+	}
 
+	/**
+	 * Sign In to publish environment CM as admin user.
+	 */
+	@Given("^I sign in to the publish environment CM as admin user$")
+	public void signInToPublishServerAsAdmin() {
+		new SignInDialog(PublishEnvSetUp.getDriver()).signInToPublish(adminID, adminPassword);
 	}
 
 	/**
@@ -39,10 +56,10 @@ public class SignInDefinition {
 	 */
 	@Given("^I sign in to CM as CSR user$")
 	public void signInAsCSR() {
-		String csrID = PropertyManager.getInstance().getProperty("csr_id");
-		String csrPassword = PropertyManager.getInstance().getProperty("csr_password");
+		String csrID = PropertyManager.getInstance().getProperty("csr.id");
+		String csrPassword = PropertyManager.getInstance().getProperty("csr.password");
 
-		signIn(csrID, csrPassword);
+		signInDialog.initialSignIn(csrID, csrPassword);
 	}
 
 	/**
@@ -51,21 +68,43 @@ public class SignInDefinition {
 	 * @param username the username.
 	 * @param password the password.
 	 */
-	@Given("^I attempt to sign in to CM as (.*) with password (.+)$")
+	@Given("^I attempt to sign in with invalid credentials to CM as (.*) with password (.+)$")
 	public void attemptSignInAsUser(final String username, final String password) {
-		signIn(username, password);
+		signInDialog.performSignInWithInvalidCredentials(username, password);
 	}
 
 	/**
-	 * Sign In CM per given credentials and verify successfully signed in.
+	 * Sign in to CM per given credentials and verify successfully signed in.
 	 *
 	 * @param username the username.
 	 * @param password the password.
 	 */
-	@Then("^I(?: sign in| should be able to sign in again) to CM as (.*) with password (.+)$")
+	@Then("^I sign in to CM as (.*) with password (.+)$")
 	public void signInAsUser(final String username, final String password) {
-		signIn(username, password);
-		signInDialog.verifySignInSuccessful();
+		signInDialog.initialSignIn(username, password);
+	}
+
+
+	/**
+	 * Sign in to CM per given credentials and verify successfully signed in.
+	 *
+	 * @param username the username.
+	 * @param password the password.
+	 */
+	@Then("^I attempt sign in with disabled user (.*) with password (.+)$")
+	public void attemptSignInWithDisabledUser(final String username, final String password) {
+		signInDialog.signIn(username, password);
+	}
+
+	/**
+	 * Sign in to CM again after logging out and verify successfully signed in.
+	 *
+	 * @param username the username.
+	 * @param password the password.
+	 */
+	@Then("^I (?:should be able to sign in again|sign in again) to CM as (.*) with password (.+)$")
+	public void signInAgain(final String username, final String password) {
+		signInDialog.performSignIn(username, password);
 	}
 
 	/**
@@ -74,20 +113,6 @@ public class SignInDefinition {
 	@Then("^I should not be able to sign in$")
 	public void verifySignInError() {
 		signInDialog.verifySignInFailed();
-	}
-
-	/**
-	 * Sign in.
-	 *
-	 * @param username the username.
-	 * @param password the password.
-	 */
-	private void signIn(final String username, final String password) {
-		CM commerceManager = new CM(SeleniumDriverSetup.getDriver());
-		signInDialog = commerceManager.openCM();
-		signInDialog.enterUsername(username);
-		signInDialog.enterPassword(password);
-		signInDialog.clickSignIn();
 	}
 
 }

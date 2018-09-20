@@ -3,12 +3,18 @@
  */
 package com.elasticpath.test.persister.testscenarios;
 
+import static com.elasticpath.commons.constants.EpShippingContextIdNames.SHIPPING_OPTION_TRANSFORMER;
+
+import java.util.Locale;
+
 import com.elasticpath.domain.catalog.Catalog;
 import com.elasticpath.domain.catalog.Category;
 import com.elasticpath.domain.shipping.ShippingRegion;
 import com.elasticpath.domain.shipping.ShippingServiceLevel;
 import com.elasticpath.domain.store.Store;
 import com.elasticpath.domain.store.Warehouse;
+import com.elasticpath.service.shipping.ShippingOptionTransformer;
+import com.elasticpath.shipping.connectivity.dto.ShippingOption;
 import com.elasticpath.test.persister.StoreTestPersister;
 
 /**
@@ -30,8 +36,12 @@ public class SimpleStoreScenario extends AbstractScenario {
 	/** The only shipping region supported by this store. */
 	protected ShippingRegion shippingRegion;
 
-	/** The only shipping service level supported by this store. */
+	/**
+	 * The only shipping service level supported by this store.
+	 */
 	protected ShippingServiceLevel shippingServiceLevel;
+
+	protected ShippingOptionTransformer shippingOptionTransformer;
 
 	public SimpleStoreScenario() {
 		super();
@@ -42,6 +52,7 @@ public class SimpleStoreScenario extends AbstractScenario {
 	 */
 	@Override
 	public void initialize() {
+		shippingOptionTransformer = getBeanFactory().getBean(SHIPPING_OPTION_TRANSFORMER);
 		catalog = getDataPersisterFactory().getCatalogTestPersister().persistDefaultMasterCatalog();
 		warehouse = getDataPersisterFactory().getStoreTestPersister().persistDefaultWarehouse();
 		store = getDataPersisterFactory().getStoreTestPersister().persistDefaultStore(catalog, warehouse);
@@ -49,6 +60,7 @@ public class SimpleStoreScenario extends AbstractScenario {
 		shippingRegion = getDataPersisterFactory().getStoreTestPersister().getShippingRegion(StoreTestPersister.DEFAULT_SHIPPING_REGION_NAME);
 		shippingServiceLevel = getDataPersisterFactory().getStoreTestPersister().persistDefaultShippingServiceLevel(store);
 		store.setCatalog(catalog);
+
 	}
 
 	/**
@@ -95,9 +107,16 @@ public class SimpleStoreScenario extends AbstractScenario {
 	}
 
 	/**
-	 * @return the shippingServiceLevel
+	 * @return the shipping option.
 	 */
-	public ShippingServiceLevel getShippingServiceLevel() {
-		return shippingServiceLevel;
+	public ShippingOption getShippingOption() {
+		return getShippingOption(store.getDefaultLocale());
+	}
+
+	/**
+	 * @return the shipping option.
+	 */
+	public ShippingOption getShippingOption(final Locale locale) {
+		return shippingOptionTransformer.transform(shippingServiceLevel, () -> null, locale);
 	}
 }

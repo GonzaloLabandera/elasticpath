@@ -122,7 +122,7 @@
 <configuration_setting>
     <name_space>COMMERCE/SYSTEM/EMAIL/emailTextTemplateEnabled</name_space>
     <description>Determines whether to use the plain text template for sending store emails. Set to true to use the plain text template or false to use the HTML template.</description>
-    <default_value type="boolean">false</default_value>
+    <default_value type="Boolean">false</default_value>
     <max_overrides>1</max_overrides>
     <setting_metadata>
         <value key="environmentSpecific">false</value>
@@ -184,7 +184,7 @@
 <configuration_setting>
     <name_space>COMMERCE/STORE/SEARCH/searchCategoriesFirst</name_space>
     <description>When set to true, searches in the storefront will search categories before searching products, and if a category match is found, the first matching category page is displayed instead of the search results page.</description>
-    <default_value type="boolean">true</default_value>
+    <default_value type="Boolean">true</default_value>
     <max_overrides>-1</max_overrides>
     <setting_metadata>
         <value key="environmentSpecific">false</value>
@@ -399,7 +399,7 @@
 <configuration_setting>
     <name_space>COMMERCE/SEARCH/minimumResultsThreshold</name_space>
     <description>Used by the spell checker. Results that are below or equal to this number will trigger a spelling suggestion lookup.</description>
-    <default_value type="String">10</default_value>
+    <default_value type="Integer">10</default_value>
     <max_overrides>-1</max_overrides>
     <setting_metadata>
         <value key="environmentSpecific">false</value>
@@ -410,7 +410,7 @@
 <configuration_setting>
     <name_space>COMMERCE/SEARCH/prefixLength</name_space>
     <description>Used for fuzzy searching. Specifies the number of characters at the start of the search term that must be the same in potential matches.</description>
-    <default_value type="String">0</default_value>
+    <default_value type="Integer">0</default_value>
     <max_overrides>-1</max_overrides>
     <setting_metadata>
         <value key="environmentSpecific">false</value>
@@ -465,7 +465,7 @@
 <configuration_setting>
     <name_space>COMMERCE/SEARCH/maximumResultsThreshold</name_space>
     <description>Used by the spell checker. Results that are above or equal to this number will trigger a spelling suggestion lookup.</description>
-    <default_value type="String">10000</default_value>
+    <default_value type="Integer">10000</default_value>
     <max_overrides>-1</max_overrides>
     <setting_metadata>
         <value key="environmentSpecific">false</value>
@@ -476,7 +476,7 @@
 <configuration_setting>
     <name_space>COMMERCE/SEARCH/maximumSuggestionsPerWord</name_space>
     <description>Used by the spell checker. The maximum number of spelling suggestions to return.</description>
-    <default_value type="String">3</default_value>
+    <default_value type="Integer">3</default_value>
     <max_overrides>-1</max_overrides>
     <setting_metadata>
         <value key="environmentSpecific">false</value>
@@ -487,7 +487,7 @@
 <configuration_setting>
     <name_space>COMMERCE/SEARCH/accuracy</name_space>
     <description>Sets the accuracy of spelling suggestions. This value works the same as COMMERCE/SEARCH/minimumSimilarity.</description>
-    <default_value type="String">0.75</default_value>
+    <default_value type="BigDecimal">0.75</default_value>
     <max_overrides>-1</max_overrides>
     <setting_metadata>
         <value key="environmentSpecific">false</value>
@@ -716,28 +716,6 @@
 </configuration_setting>
 
 <configuration_setting>
-    <name_space>COMMERCE/SYSTEM/MESSAGING/CHANGESETS/channelUri</name_space>
-    <description>The URI of the channel on which Changeset Event messages are sent and received.  Please note that changes will not take effect until the application(s) using this setting have been restarted.</description>
-    <default_value type="String">${jms.queue.ep.changesets:jms:queue:ep.changesets}</default_value>
-    <max_overrides>1</max_overrides>
-    <setting_metadata>
-        <value key="environmentSpecific">false</value>
-        <value key="apiRefreshStrategy">application</value>
-    </setting_metadata>
-</configuration_setting>
-
-<configuration_setting>
-    <name_space>COMMERCE/SYSTEM/MESSAGING/ORDERS/channelUri</name_space>
-    <description>The URI of the channel on which Order Event messages are sent and received.  Please note that changes will not take effect until the application(s) using this setting have been restarted.</description>
-    <default_value type="String">${jms.topic.ep.orders:jms:topic:ep.orders}</default_value>
-    <max_overrides>1</max_overrides>
-    <setting_metadata>
-        <value key="environmentSpecific">false</value>
-        <value key="apiRefreshStrategy">application</value>
-    </setting_metadata>
-</configuration_setting>
-
-<configuration_setting>
     <name_space>COMMERCE/SYSTEM/ANONYMOUSCUSTOMERCLEANUP/batchSize</name_space>
     <description>The maximum number of anonymous customers to cleanup in one transaction.</description>
     <default_value type="Integer">1000</default_value>
@@ -853,17 +831,6 @@
 </configuration_setting>
 
 <configuration_setting>
-    <name_space>COMMERCE/SYSTEM/MESSAGING/DATAIMPORT/channelUri</name_space>
-    <description>The URI of the channel on which Data Import Event messages are sent and received</description>
-    <default_value type="String">${jms.topic.ep.dataimport:jms:topic:ep.dataimport}</default_value>
-    <max_overrides>1</max_overrides>
-    <setting_metadata>
-        <value key="environmentSpecific">false</value>
-        <value key="apiRefreshStrategy">application</value>
-    </setting_metadata>
-</configuration_setting>
-
-<configuration_setting>
     <name_space>COMMERCE/SYSTEM/EMAIL/channelUri</name_space>
     <description>The URI of the channel on which Email messages are sent and received.  Please note that changes will not take effect until the application(s) using this setting have been restarted.</description>
     <default_value type="String">${jms.ep.emails:jms:ep.emails}</default_value>
@@ -886,42 +853,9 @@
 </configuration_setting>
 
 <configuration_setting>
-    <name_space>COMMERCE/SYSTEM/MESSAGING/GIFTCERTIFICATES/channelUri</name_space>
-    <description>The URI of the channel on which Gift Certificate Event messages are sent and received.  Please note that changes will not take effect until the application(s) using this setting are restarted.</description>
-    <default_value type="String">${jms.topic.ep.giftcertificates:jms:topic:ep.giftcertificates}</default_value>
-    <max_overrides>1</max_overrides>
-    <setting_metadata>
-        <value key="environmentSpecific">false</value>
-        <value key="apiRefreshStrategy">application</value>
-    </setting_metadata>
-</configuration_setting>
-
-<configuration_setting>
     <name_space>COMMERCE/SYSTEM/EMAIL/deadLetterChannelUri</name_space>
     <description>The URI of the channel on which Email messages are stored if email submission is unsuccessful</description>
     <default_value type="String">${jms.ep.emails.dlq:jms:ep.emails.dlq}</default_value>
-    <max_overrides>1</max_overrides>
-    <setting_metadata>
-        <value key="environmentSpecific">false</value>
-        <value key="apiRefreshStrategy">application</value>
-    </setting_metadata>
-</configuration_setting>
-
-<configuration_setting>
-    <name_space>COMMERCE/SYSTEM/MESSAGING/CMUSERS/channelUri</name_space>
-    <description>The URI of the channel on which CM User Event messages are sent and received</description>
-    <default_value type="String">${jms.topic.ep.cmusers:jms:topic:ep.cmusers}</default_value>
-    <max_overrides>1</max_overrides>
-    <setting_metadata>
-        <value key="environmentSpecific">false</value>
-        <value key="apiRefreshStrategy">application</value>
-    </setting_metadata>
-</configuration_setting>
-
-<configuration_setting>
-    <name_space>COMMERCE/SYSTEM/MESSAGING/CUSTOMERS/channelUri</name_space>
-    <description>The URI of the channel on which Customer Event messages are sent and received.  Please note that changes will not take effect until the application(s) using this setting have been restarted.</description>
-    <default_value type="String">${jms.topic.ep.customers:jms:topic:ep.customers}</default_value>
     <max_overrides>1</max_overrides>
     <setting_metadata>
         <value key="environmentSpecific">false</value>

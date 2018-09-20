@@ -3,9 +3,12 @@
  */
 package com.elasticpath.domain.event.impl;
 
-import java.util.Map;
+import static java.lang.String.format;
 
-import org.apache.commons.lang.StringUtils;
+import java.util.Map;
+import java.util.Optional;
+
+import org.apache.commons.lang3.StringUtils;
 
 import com.elasticpath.base.exception.EpSystemException;
 import com.elasticpath.commons.beanframework.BeanFactory;
@@ -24,13 +27,11 @@ import com.elasticpath.domain.order.OrderReturn;
 import com.elasticpath.domain.order.OrderShipment;
 import com.elasticpath.domain.order.OrderSku;
 import com.elasticpath.domain.order.PhysicalOrderShipment;
-import com.elasticpath.domain.shipping.ShippingServiceLevel;
 import com.elasticpath.domain.shoppingcart.ShoppingItemPricingSnapshot;
 import com.elasticpath.money.Money;
 import com.elasticpath.money.MoneyFormatter;
 import com.elasticpath.plugin.payment.PaymentType;
 import com.elasticpath.service.misc.TimeService;
-import com.elasticpath.service.shipping.ShippingServiceLevelService;
 import com.elasticpath.service.shoppingcart.PricingSnapshotService;
 
 /**
@@ -93,7 +94,6 @@ public class OrderEventHelperImpl implements OrderEventHelper {
 	private TimeService timeService;
 	private MoneyFormatter moneyFormatter;
 	private BeanFactory beanFactory;
-	private ShippingServiceLevelService shippingServiceLevelService;
 	private PricingSnapshotService pricingSnapshotService;
 
 	/**
@@ -106,11 +106,21 @@ public class OrderEventHelperImpl implements OrderEventHelper {
 
 		EventOriginator originator = getEventOriginator(order);
 
-		String detail = String.format("Order is placed by %1$s.", order.getCustomer().getFullName());
-
-		OrderEvent orderEvent = createOrderEvent(detail, TITLE_ORDER_PLACED, originator);
+		OrderEvent orderEvent = createOrderEvent(getOrderPlacedDetail(order), TITLE_ORDER_PLACED, originator);
 
 		order.addOrderEvent(orderEvent);
+	}
+
+	/**
+	 * Extension point.
+	 *
+	 * Gets detail by populating the full name of customer in order who placed the order.
+	 *
+	 * @param order the order
+	 * @return the detail wording for order placed event.
+	 */
+	protected String getOrderPlacedDetail(final Order order) {
+		return format("Order is placed by %1$s.", order.getCustomer().getFullName());
 	}
 
 	/**
@@ -141,7 +151,7 @@ public class OrderEventHelperImpl implements OrderEventHelper {
 
 		EventOriginator originator = getEventOriginator(order);
 
-		String detail = String.format("Order shipment #%1$s is released.", shipment.getShipmentNumber());
+		String detail = format("Order shipment #%1$s is released.", shipment.getShipmentNumber());
 
 		OrderEvent orderEvent = createOrderEvent(detail, TITLE_ORDER_SHIPMENT_RELEASED, originator);
 
@@ -159,7 +169,7 @@ public class OrderEventHelperImpl implements OrderEventHelper {
 
 		EventOriginator originator = getEventOriginator(order);
 
-		String detail = String.format("Order shipment #%1$s is canceled.", shipment.getShipmentNumber());
+		String detail = format("Order shipment #%1$s is canceled.", shipment.getShipmentNumber());
 
 		OrderEvent orderEvent = createOrderEvent(detail, TITLE_ORDER_SHIPMENT_CANCELED, originator);
 
@@ -265,7 +275,7 @@ public class OrderEventHelperImpl implements OrderEventHelper {
 		if (listUnitPrice != null) {
 			currencyCodeANDMoneyValueAndSymbol = moneyFormatter.formatCurrency(listUnitPrice, order.getLocale());
 		}
-		String detail = String.format("New Sku (%1$s @ %2$s of %3$s) is added to the shipment #%5$s, order total changed to %4$s.",
+		String detail = format("New Sku (%1$s @ %2$s of %3$s) is added to the shipment #%5$s, order total changed to %4$s.",
 				orderSku.getQuantity(), currencyCodeANDMoneyValueAndSymbol,	getOrderSkuDisplay(orderSku),
 				moneyFormatter.formatCurrency(order.getTotalMoney(), order.getLocale()), shipment.getShipmentNumber());
 
@@ -285,7 +295,7 @@ public class OrderEventHelperImpl implements OrderEventHelper {
 		final Order order = shipment.getOrder();
 		EventOriginator originator = getEventOriginator(order);
 
-		String detail = String.format("Sku (%1$s of %2$s) is removed from the shipment #%4$s, order total changed to %3$s.", orderSku.getQuantity(),
+		String detail = format("Sku (%1$s of %2$s) is removed from the shipment #%4$s, order total changed to %3$s.", orderSku.getQuantity(),
 				getOrderSkuDisplay(orderSku),
 				getMoneyFormatter().formatCurrency(order.getTotalMoney(), order.getLocale()),
 				shipment.getShipmentNumber());
@@ -307,8 +317,8 @@ public class OrderEventHelperImpl implements OrderEventHelper {
 		final Order order = shipment.getOrder();
 		EventOriginator originator = getEventOriginator(order);
 
-		String detail = String.format("Sku (%1$s of %2$s) is moved to shipment #%3$s.", orderSku.getQuantity(), getOrderSkuDisplay(orderSku
-		), orderSku.getShipment().getShipmentNumber());
+		String detail = format("Sku (%1$s of %2$s) is moved to shipment #%3$s.", orderSku.getQuantity(), getOrderSkuDisplay(orderSku),
+				orderSku.getShipment().getShipmentNumber());
 
 		OrderEvent orderEvent = createOrderEvent(detail, TITLE_SKU_MOVED, originator);
 
@@ -328,7 +338,7 @@ public class OrderEventHelperImpl implements OrderEventHelper {
 		final Order order = shipment.getOrder();
 		EventOriginator originator = getEventOriginator(order);
 
-		String detail = String.format("Sku (%1$s of %2$s) is changed on the shipment #%4$s, order total changed to %3$s.", quantity,
+		String detail = format("Sku (%1$s of %2$s) is changed on the shipment #%4$s, order total changed to %3$s.", quantity,
 				getOrderSkuDisplay(orderSku),
 				getMoneyFormatter().formatCurrency(order.getTotalMoney(), order.getLocale()),
 				shipment.getShipmentNumber());
@@ -349,9 +359,12 @@ public class OrderEventHelperImpl implements OrderEventHelper {
 
 		EventOriginator originator = getEventOriginator(order);
 
-		final ShippingServiceLevel shippingServiceLevel = getShippingServiceLevelService().findByGuid(shipment.getShippingServiceLevelGuid());
-		String detail = String.format("Shipping method on #%1$s is changed to %2$s.",
-				shipment.getShipmentNumber(), shippingServiceLevel.getDisplayName(order.getLocale(), true));
+		String carrierCodeString = Optional.ofNullable(shipment.getCarrierCode())
+				.map(carrierCode -> format("; Carrier Code: %s", carrierCode))
+				.orElse(StringUtils.EMPTY);
+
+		String detail = format("Shipping method on #%1$s is changed to '%2$s' [Shipping Option Code: %3$s%4$s].",
+				shipment.getShipmentNumber(), shipment.getShippingOptionName(), shipment.getShippingOptionCode(), carrierCodeString);
 
 		OrderEvent orderEvent = createOrderEvent(detail, TITLE_SHIPPING_METHOD_CHANGED, originator);
 
@@ -369,7 +382,7 @@ public class OrderEventHelperImpl implements OrderEventHelper {
 
 		EventOriginator originator = getEventOriginator(order);
 
-		String detail = String.format("Shipping address on #%1$s is changed to: %2$s.", shipment.getShipmentNumber(), shipment.getShipmentAddress());
+		String detail = format("Shipping address on #%1$s is changed to: %2$s.", shipment.getShipmentNumber(), shipment.getShipmentAddress());
 
 		OrderEvent orderEvent = createOrderEvent(detail, TITLE_SHIPPING_ADDRESS_CHANGED, originator);
 
@@ -386,7 +399,7 @@ public class OrderEventHelperImpl implements OrderEventHelper {
 
 		EventOriginator originator = getEventOriginator(order);
 
-		String detail = String.format("Order status changed to %1$s.", order.getStatus());
+		String detail = format("Order status changed to %1$s.", order.getStatus());
 
 		OrderEvent orderEvent = createOrderEvent(detail, TITLE_ORDER_ON_HOLD, originator);
 
@@ -403,7 +416,7 @@ public class OrderEventHelperImpl implements OrderEventHelper {
 
 		EventOriginator originator = getEventOriginator(order);
 
-		String detail = String.format("Order status changed to %1$s.", order.getStatus());
+		String detail = format("Order status changed to %1$s.", order.getStatus());
 
 		OrderEvent orderEvent = createOrderEvent(detail, TITLE_ORDER_HOLD_RELEASED, originator);
 
@@ -474,7 +487,7 @@ public class OrderEventHelperImpl implements OrderEventHelper {
 
 		EventOriginator originator = getEventOriginator(order);
 
-		String detail = String.format("Stock received on order return with RMA code #%1$s.", orderReturn.getRmaCode());
+		String detail = format("Stock received on order return with RMA code #%1$s.", orderReturn.getRmaCode());
 
 		OrderEvent orderEvent = createOrderEvent(detail, TITLE_RETURN_STOCK_RECEIVED, originator);
 
@@ -492,7 +505,7 @@ public class OrderEventHelperImpl implements OrderEventHelper {
 
 		EventOriginator originator = getEventOriginator(order);
 
-		String detail = String.format("Order return with RMA code #%1$s is changed.", orderReturn.getRmaCode());
+		String detail = format("Order return with RMA code #%1$s is changed.", orderReturn.getRmaCode());
 
 		OrderEvent orderEvent = createOrderEvent(detail, TITLE_RETURN_CHANGED, originator);
 
@@ -510,7 +523,7 @@ public class OrderEventHelperImpl implements OrderEventHelper {
 
 		EventOriginator originator = getEventOriginator(order);
 
-		String detail = String.format("Order return with RMA code #%1$s is canceled.", orderReturn.getRmaCode());
+		String detail = format("Order return with RMA code #%1$s is canceled.", orderReturn.getRmaCode());
 
 		OrderEvent orderEvent = createOrderEvent(detail, TITLE_RETURN_CANCELED, originator);
 
@@ -528,7 +541,7 @@ public class OrderEventHelperImpl implements OrderEventHelper {
 
 		EventOriginator originator = getEventOriginator(order);
 
-		String detail = String.format("Order return with RMA code #%1$s is completed.", orderReturn.getRmaCode());
+		String detail = format("Order return with RMA code #%1$s is completed.", orderReturn.getRmaCode());
 
 		OrderEvent orderEvent = createOrderEvent(detail, TITLE_RETURN_COMPLETED, originator);
 
@@ -561,7 +574,7 @@ public class OrderEventHelperImpl implements OrderEventHelper {
 
 		EventOriginator originator = getEventOriginator(order);
 
-		String detail = String.format("Order exchange #%1$s is canceled.", orderExchange.getRmaCode());
+		String detail = format("Order exchange #%1$s is canceled.", orderExchange.getRmaCode());
 
 		OrderEvent orderEvent = createOrderEvent(detail, TITLE_EXCHANGE_CANCELED, originator);
 
@@ -579,7 +592,7 @@ public class OrderEventHelperImpl implements OrderEventHelper {
 
 		EventOriginator originator = getEventOriginator(order);
 
-		String detail = String.format("Order exchange #%1$s is completed.", orderExchange.getRmaCode());
+		String detail = format("Order exchange #%1$s is completed.", orderExchange.getRmaCode());
 
 		OrderEvent orderEvent = createOrderEvent(detail, TITLE_EXCHANGE_COMPLETED, originator);
 
@@ -655,14 +668,6 @@ public class OrderEventHelperImpl implements OrderEventHelper {
 
 	public void setBeanFactory(final BeanFactory beanFactory) {
 		this.beanFactory = beanFactory;
-	}
-
-	protected ShippingServiceLevelService getShippingServiceLevelService() {
-		return shippingServiceLevelService;
-	}
-
-	public void setShippingServiceLevelService(final ShippingServiceLevelService shippingServiceLevelService) {
-		this.shippingServiceLevelService = shippingServiceLevelService;
 	}
 
 	protected PricingSnapshotService getPricingSnapshotService() {

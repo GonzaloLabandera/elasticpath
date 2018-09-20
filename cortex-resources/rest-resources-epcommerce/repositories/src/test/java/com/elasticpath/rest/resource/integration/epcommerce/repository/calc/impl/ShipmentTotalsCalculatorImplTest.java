@@ -15,7 +15,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.internal.util.collections.Sets;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.elasticpath.domain.order.OrderSku;
 import com.elasticpath.domain.order.PhysicalOrderShipment;
@@ -69,7 +69,6 @@ public class ShipmentTotalsCalculatorImplTest {
 
 	@Test
 	public void testCalculateTotalForShipmentNotFound() {
-		when(physicalOrderShipment.getTotalMoney()).thenReturn(TEN_CAD);
 		when(shipmentRepository.find(EXISTS_GUID, SHIPMENT_GUID))
 				.thenReturn(Single.error(ResourceOperationFailure.notFound(ShipmentRepositoryImpl.SHIPMENT_NOT_FOUND)));
 		calculator.calculateTotalForShipment(EXISTS_GUID, SHIPMENT_GUID)

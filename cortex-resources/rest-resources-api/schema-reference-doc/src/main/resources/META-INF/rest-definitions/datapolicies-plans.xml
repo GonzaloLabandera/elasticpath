@@ -7,11 +7,11 @@
 			<name>read-data-policies-for-store-from-profile</name>
 			<description>
 				<![CDATA[
-				Retrieve the list of data policies for a given store from a customer profile, based on the data policy segments header(s).
+				Retrieve the list of data policies for a store from a customer profile, based on the data policy segment header(s).
 				]]>
 			</description>
 			<step>
-				<description><![CDATA[Read data policies for a given store.]]></description>
+				<description><![CDATA[Read data policies for a store.]]></description>
 				<start>profiles.profile</start>
 				<follow-link>data-policies</follow-link>
 				<link-back>profile</link-back>
@@ -22,7 +22,7 @@
 			<name>read-data-policies-for-store-from-root</name>
 			<description>
 				<![CDATA[
-				Retrieve the list of data policies for a given store from root, based on the data policy segments header(s).
+				Retrieve the list of data policies for a store from root, based on the data policy segment header(s).
 				]]>
 			</description>
 			<step>
@@ -35,7 +35,7 @@
 			<name>read-data-policy</name>
 			<description>
 				<![CDATA[
-				Retrieve a given data policy, assuming the appropriate data policy segments header(s).
+				Retrieves a data policy if a valid data policy segment is provided.
 				]]>
 			</description>
 			<step>
@@ -50,7 +50,7 @@
 			<name>read-data-policy-consent-form</name>
 			<description>
 				<![CDATA[
-				Retrieve a data policy consent form for a given data policy.
+				Retrieve a data policy consent form for a data policy.
 				]]>
 			</description>
 			<step>
@@ -63,7 +63,7 @@
 		</plan>
 		<plan>
 			<name>add-data-policy-consent</name>
-			<description><![CDATA[Add data policy consent for a given customer.]]></description>
+			<description><![CDATA[Add data policy consent for a customer.]]></description>
 			<template>
 				<name>controls.form-control-template</name>
 				<replace>

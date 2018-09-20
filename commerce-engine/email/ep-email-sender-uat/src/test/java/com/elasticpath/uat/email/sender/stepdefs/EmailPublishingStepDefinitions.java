@@ -9,18 +9,15 @@ import static org.junit.Assert.assertNotNull;
 
 import java.io.InputStream;
 import java.net.URL;
-
 import javax.activation.MimetypesFileTypeMap;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import cucumber.api.java.After;
 import cucumber.api.java.Before;
 import cucumber.api.java.en.Given;
 import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import org.apache.camel.Exchange;
 import org.apache.camel.component.mock.MockEndpoint;
 import org.apache.camel.model.ModelCamelContext;
@@ -30,7 +27,6 @@ import org.apache.commons.io.IOUtils;
 import org.jvnet.mock_javamail.Mailbox;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.test.context.ContextConfiguration;
 
 import com.elasticpath.email.EmailDto;
 import com.elasticpath.email.test.support.EmailSendingMockInterceptor;
@@ -39,7 +35,6 @@ import com.elasticpath.uat.ScenarioContextValueHolder;
 /**
  * Steps definition for publishing emails.
  */
-@ContextConfiguration("classpath:cucumber.xml")
 public class EmailPublishingStepDefinitions {
 
 	private static final String FROM = "Sender Sendingman <sender@elasticpath.com>";

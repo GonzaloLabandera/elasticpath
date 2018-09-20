@@ -25,6 +25,7 @@ import org.apache.commons.lang.math.NumberUtils;
 import org.apache.openjpa.persistence.DataCache;
 import org.apache.openjpa.persistence.Externalizer;
 import org.apache.openjpa.persistence.Factory;
+import org.apache.openjpa.persistence.jdbc.ForeignKey;
 
 import com.elasticpath.settings.domain.SettingDefinition;
 import com.elasticpath.settings.domain.SettingValue;
@@ -102,6 +103,7 @@ public class SettingValueImpl implements SettingValue {
 	 */
 	@ManyToOne(optional = false, targetEntity = SettingDefinitionImpl.class, cascade = { CascadeType.REFRESH })
 	@JoinColumn(name = "SETTING_DEFINITION_UID", nullable = false)
+	@ForeignKey
 	protected SettingDefinition getSettingDefinition() {
 		return settingDefinition;
 	}

@@ -1,19 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<beans xmlns="http://www.springframework.org/schema/beans"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xmlns:util="http://www.springframework.org/schema/util"
+<beans
+		xmlns="http://www.springframework.org/schema/beans"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xmlns:util="http://www.springframework.org/schema/util"
+		xmlns:settings="http://www.elasticpath.com/schema/settings"
+		xsi:schemaLocation="
+			http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+			http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-4.0.xsd
+			http://www.elasticpath.com/schema/settings http://www.elasticpath.com/schema/settings/settings.xsd
+		">
 
-	xsi:schemaLocation="
-		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
-		http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-3.0.xsd
-	">
-
-	<bean id="servicePreInterceptors" class="java.util.ArrayList" />
+	<bean id="servicePreInterceptors" class="java.util.ArrayList"/>
 
 	<import resource="classpath*:spring/prototypes/prototypes.xml"/>
 	<import resource="classpath*:spring/models/domainModel.xml" />
 	<import resource="classpath*:spring/dataaccess/dao.xml" />
-	<import resource="classpath*:spring/settings/ep-settings.xml" />
 	<import resource="classpath*:spring/service/service.xml" />
 
 	<bean id="eventMessageFactory" class="com.elasticpath.commons.beanframework.NoOpProxyFactoryBean">
@@ -50,6 +51,7 @@
 
 	</util:map>
 
+	<bean id="persistenceUnitManager" parent="basePersistenceUnitManager"/>
 	<bean id="entityManagerFactory" parent="abstractEntityManagerFactory"/>
 
 	<bean id="propertyPlaceholderConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
@@ -83,8 +85,6 @@
 		<property name="storeConfig" ref="threadLocalStorage" />
 		<property name="beanFactory" ref="coreBeanFactory" />
 	</bean>
-
-	<bean id="shoppingItemDtoFactory" class="com.elasticpath.common.dto.sellingchannel.impl.ShoppingItemDtoFactoryImpl" />
 
 	<bean id="productLoadTunerForBrowsingAndSearch" class="com.elasticpath.domain.catalog.impl.StoreProductLoadTunerImpl" scope="prototype" parent="epDomain">
 		<property name="loadingDefaultCategory">
@@ -223,18 +223,12 @@
 	<bean id="storeMessageSource" class="com.elasticpath.commons.util.impl.StoreThemeMessageSource">
 		<property name="storeConfig" ref="threadLocalStorage" />
 		<property name="storeMessageSource" ref="storeMessageSourceDelegate" />
+		<property name="storeThemeProvider">
+			<settings:setting path="COMMERCE/STORE/theme"/>
+		</property>
 	</bean>
 
-	<bean id="storeMessageSourceDelegate" class="com.elasticpath.commons.util.impl.StoreMessageSourceImpl">
-		<property name="messageSourceCache">
-			<ref bean="messageSourceCache" />
-		</property>
-		<property name="globalMessageSource">
-			<ref bean="globalMessageSource" />
-		</property>
-		<property name="assetRepository" ref="assetRepository" />
-		<property name="settingsReader" ref="settingsService" />
-	</bean>
+	<bean id="storeMessageSourceDelegate" parent="storeMessageSourceTemplate"/>
 
 	<bean id="globalMessageSource" class="org.springframework.context.support.ReloadableResourceBundleMessageSource">
 		<property name="basenames">
@@ -262,9 +256,12 @@
 	</bean>
 
 	<bean id="storeResourceManager" class="com.elasticpath.commons.util.impl.StoreResourceManagerImpl"
-			factory-method="getInstance" destroy-method="destroy">
-		<property name="storeConfig" ref="threadLocalStorage" />
-		<property name="assetRepository" ref="assetRepository" />
+		  factory-method="getInstance" destroy-method="destroy">
+		<property name="storeConfig" ref="threadLocalStorage"/>
+		<property name="assetRepository" ref="assetRepository"/>
+		<property name="storeThemeProvider">
+			<settings:setting path="COMMERCE/STORE/theme"/>
+		</property>
 	</bean>
 
 	<bean id="abstractImportJobRunner" class="com.elasticpath.service.dataimport.impl.AbstractImportJobRunnerImpl" scope="prototype">
@@ -622,7 +619,9 @@
 				</entry>
 			</map>
 		</property>
-        <property name="settingsReader" ref="settingsService"/>
+		<property name="contentWrappersLocationProvider">
+			<settings:setting path="COMMERCE/SYSTEM/ASSETS/contentWrappersLocation"/>
+		</property>
 	</bean>
 
 	<bean id="importJobProcessor" parent="txProxyTemplate">
@@ -646,8 +645,13 @@
 				<property name="importNotificationDao" ref="importNotificationDao" />
 				<property name="importJobStatusDao" ref="importJobStatusDao" />
 				<property name="staleImportNotificationProcessor" ref="staleImportJobProcessor" />
-				<property name="settingsReader" ref="settingsService" />
 				<property name="timeService" ref="timeService" />
+				<property name="maximumImportJobAgeDaysProvider">
+					<settings:setting path="COMMERCE/SYSTEM/IMPORT/importJobMaxAge"/>
+				</property>
+				<property name="staleImportJobStatusThresholdMinsProvider">
+					<settings:setting path="COMMERCE/SYSTEM/IMPORT/staleImportJobTimeout"/>
+				</property>
 			</bean>
 		</property>
 	</bean>
@@ -658,11 +662,16 @@
 
 	<bean id="sessionCleanupJob" class="com.elasticpath.domain.customer.impl.SessionCleanupJob">
 		<property name="timeService" ref="timeService" />
-		<property name="settingsReader" ref="settingsService" />
 		<property name="customerSessionCleanupService" ref="customerSessionCleanupService" />
 		<property name="shopperCleanupService" ref="shopperCleanupService" />
 		<property name="wishlistService" ref="wishListService" />
 		<property name="shoppingCartService" ref="shoppingCartService" />
+		<property name="batchSizeProvider">
+			<settings:setting path="COMMERCE/SYSTEM/SESSIONCLEANUP/batchSize"/>
+		</property>
+		<property name="maxDaysHistoryProvider">
+			<settings:setting path="COMMERCE/SYSTEM/SESSIONCLEANUP/maxHistory"/>
+		</property>
 	</bean>
 
 	<!-- Defined only on ServiceSf.xml.vm - productViewService should be replaced with StoreProductService -->

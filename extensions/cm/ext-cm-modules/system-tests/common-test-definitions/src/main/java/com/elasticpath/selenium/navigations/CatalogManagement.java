@@ -7,6 +7,7 @@ import org.openqa.selenium.WebDriver;
 
 import com.elasticpath.selenium.dialogs.CategoryFinderDialog;
 import com.elasticpath.selenium.dialogs.ConfirmDialog;
+import com.elasticpath.selenium.dialogs.CreateEditVirtualCatalogDialog;
 import com.elasticpath.selenium.editor.CategoryEditor;
 import com.elasticpath.selenium.editor.catalog.CatalogEditor;
 import com.elasticpath.selenium.resultspane.CatalogProductListingPane;
@@ -31,6 +32,8 @@ public class CatalogManagement extends AbstractNavigation {
 	private static final String CREATE_BUNDLE_BUTTON_CSS = "div[widget-id='Create Bundle'][widget-type='ToolItem']";
 	private static final String PRODUCT_NAME_SEARCH_INPUT_CSS = LEFT_PANE_INNER_PARENT_CSS
 			+ "div[automation-id='com.elasticpath.cmclient.catalog.CatalogMessages.SearchView_Search_Label_ProductName'] > input";
+	private static final String PRODUCT_CODE_SEARCH_INPUT_CSS = LEFT_PANE_INNER_PARENT_CSS
+			+ "div[automation-id='com.elasticpath.cmclient.catalog.CatalogMessages.SearchView_Search_Label_ProductCode'] > input";
 	private static final String DELETE_CSS = "div[widget-id='Delete'][seeable='true']";
 	private static final String REMOVE_LINKED_CATEGORY_CSS = "div[automation-id='com.elasticpath.cmclient.catalog.CatalogMessages."
 			+ "CatalogBrowseView_Action_RemoveLinkedCategory'][seeable='true']";
@@ -38,9 +41,9 @@ public class CatalogManagement extends AbstractNavigation {
 	private static final String OPEN_CATALOG_CATEGORY_EDITOR_ICON_CSS
 			= "div[widget-id='Catalog Browse ToolBar'][widget-type='ToolBar'] div[widget-id='Open...']";
 	private static final String CATALOG_BROWSE_TOOLBAR = "div[widget-id='Catalog Browse ToolBar'][widget-type='ToolBar'] ";
-	private static final String CATALOG_SEARCH_TAB_CSS = "div[widget-id*='Sea'][appearance-id='ctab-item'][seeable='true']";
+	private static final String CATALOG_SEARCH_TAB_CSS = "div[widget-id^='Sea'][appearance-id='ctab-item'][seeable='true']";
 	private static final String CATALOG_BROWSE_TAB_CSS = "div[pane-location='left-pane-outer'] "
-			+ "div[widget-id*='Ca'][appearance-id='ctab-item'][seeable='true']";
+			+ "div[widget-id^='Ca'][appearance-id='ctab-item'][seeable='true']";
 	private static final String PRODUCT_SKU_SEARCH_BUTTON_CSS = LEFT_PANE_INNER_PARENT_CSS + "div[widget-id='Search'][seeable='true']";
 	private static final String CREATE_CATEGORY_BUTTON_CSS = CATALOG_BROWSE_TOOLBAR + "div[automation-id='com.elasticpath.cmclient.catalog"
 			+ ".CatalogMessages.CatalogBrowseView_Action_CreateCategory'][seeable='true']";
@@ -75,6 +78,7 @@ public class CatalogManagement extends AbstractNavigation {
 	 */
 	public void clickCatalogSearchTab() {
 		getWaitDriver().waitForElementToBeInteractable(CATALOG_SEARCH_TAB_CSS);
+		getWaitDriver().waitForElementToBeVisible(By.cssSelector(CATALOG_SEARCH_TAB_CSS));
 		click(getWaitDriver().waitForElementToBeClickable(By.cssSelector(CATALOG_SEARCH_TAB_CSS)));
 	}
 
@@ -85,6 +89,15 @@ public class CatalogManagement extends AbstractNavigation {
 	 */
 	public void enterProductName(final String productName) {
 		clearAndType(PRODUCT_NAME_SEARCH_INPUT_CSS, productName);
+	}
+
+	/**
+	 * Enters product code for search.
+	 *
+	 * @param productCode the product code.
+	 */
+	public void enterProductCode(final String productCode) {
+		clearAndType(PRODUCT_CODE_SEARCH_INPUT_CSS, productCode);
 	}
 
 	/**
@@ -105,6 +118,17 @@ public class CatalogManagement extends AbstractNavigation {
 	public void expandCatalog(final String catalogName) {
 		click(getWaitDriver().waitForElementToBeClickable(By.cssSelector(String.format(CATALOG_EXPAND_ICON_CSS, catalogName))));
 		sleep(SLEEP_TIME_IN_MILLI);
+	}
+
+	/**
+	 * Expands the catalog and verifies the catalog was expanded by looking for a category in the catalog.
+	 *
+	 * @param catalogName  the catalog name.
+	 * @param categoryName the category name
+	 */
+	public void expandCatalogAndVerifyCategory(final String catalogName, final String categoryName) {
+		expandTreeAndVerifyItem(String.format(CATALOG_EXPAND_ICON_CSS, catalogName), String.format(CATALOG_BROWSE_TREE_ITEM_CSS,
+				categoryName));
 	}
 
 	/**
@@ -147,7 +171,7 @@ public class CatalogManagement extends AbstractNavigation {
 	 * @param categoryName the category name.
 	 */
 	public void selectCategoryInCatalog(final String catalogName, final String categoryName) {
-		expandCatalog(catalogName);
+		expandCatalogAndVerifyCategory(catalogName, categoryName);
 		assertThat(selectCatalogTreeItem(categoryName))
 				.as("Unable to find category - " + categoryName)
 				.isTrue();
@@ -190,7 +214,7 @@ public class CatalogManagement extends AbstractNavigation {
 	 * @return The confirm dialog
 	 */
 	public ConfirmDialog rightClickDelete() {
-		rightClick();
+		rightClick(By.cssSelector(RIGHT_CLICK_DELETE_CSS));
 		click(getWaitDriver().waitForElementToBeClickable(By.cssSelector(RIGHT_CLICK_DELETE_CSS)));
 		return new ConfirmDialog(getDriver());
 	}
@@ -199,7 +223,7 @@ public class CatalogManagement extends AbstractNavigation {
 	 * Right click and select 'Delete' will display unable to delete error dialog.
 	 */
 	public void rightClickDeleteDisplaysError() {
-		rightClick();
+		rightClick(By.cssSelector(RIGHT_CLICK_DELETE_CSS));
 		click(getWaitDriver().waitForElementToBeClickable(By.cssSelector(RIGHT_CLICK_DELETE_CSS)));
 	}
 
@@ -242,7 +266,7 @@ public class CatalogManagement extends AbstractNavigation {
 	 * @return the category wizard.
 	 */
 	public CreateCategoryWizard rightClickAndSelectCreateCategory() {
-		rightClick();
+		rightClick(By.cssSelector(CREATE_CATEGORY_BUTTON_CSS));
 		click(getWaitDriver().waitForElementToBeClickable(By.cssSelector(CREATE_CATEGORY_BUTTON_CSS)));
 		return new CreateCategoryWizard(getDriver());
 	}
@@ -254,10 +278,9 @@ public class CatalogManagement extends AbstractNavigation {
 	 * @return the pane.
 	 */
 	public CatalogProductListingPane doubleClickCategory(final String categoryName) {
-		waitForElementToLoad(getDriver().findElement(By.cssSelector(String.format(CATALOG_BROWSE_TREE_ITEM_CSS, categoryName))), Constants
-				.SLEEP_HALFSECOND_IN_MILLIS);
+		waitForElementToLoad(getDriver().findElement(By.cssSelector(String.format(CATALOG_BROWSE_TREE_ITEM_CSS, categoryName))));
 		setWebDriverImplicitWait(1);
-		if (isElementPresent(By.cssSelector(CatalogProductListingPane.getProductTableParentCss()))) {
+		if (isElementPresent(By.cssSelector(CatalogProductListingPane.PRODUCT_TABLE_PARENT_CSS.trim()))) {
 			closePane("Product Listing");
 		}
 		setWebDriverImplicitWaitToDefault();
@@ -266,7 +289,7 @@ public class CatalogManagement extends AbstractNavigation {
 		doubleClick(getDriver().findElement(By.cssSelector(String.format(CATALOG_BROWSE_TREE_ITEM_CSS, categoryName))));
 
 		int counter = 0;
-		while (!isResultPanePresent(CatalogProductListingPane.getProductTableParentCss()) && counter < Constants.RETRY_COUNTER) {
+		while (!isResultPanePresent(CatalogProductListingPane.PRODUCT_TABLE_PARENT_CSS.trim()) && counter < Constants.RETRY_COUNTER_3) {
 			sleep(Constants.SLEEP_HALFSECOND_IN_MILLIS);
 			getWaitDriver().waitForElementToBeInteractable(String.format(CATALOG_BROWSE_TREE_ITEM_CSS, categoryName));
 			doubleClick(getDriver().findElement(By.cssSelector(String.format(CATALOG_BROWSE_TREE_ITEM_CSS, categoryName))));
@@ -293,7 +316,7 @@ public class CatalogManagement extends AbstractNavigation {
 	 * @return the confirm dialog.
 	 */
 	public ConfirmDialog clickDeleteCategoryIcon() {
-		rightClick();
+		rightClick(By.cssSelector(DELETE_CSS));
 		click(getWaitDriver().waitForElementToBeClickable(By.cssSelector(DELETE_CSS)));
 		return new ConfirmDialog(getDriver());
 	}
@@ -305,7 +328,7 @@ public class CatalogManagement extends AbstractNavigation {
 	 * @return the confirm dialog.
 	 */
 	public ConfirmDialog clickRemoveLinkedCategoryIcon() {
-		rightClick();
+		rightClick(By.cssSelector(REMOVE_LINKED_CATEGORY_CSS));
 		click(getWaitDriver().waitForElementToBeClickable(By.cssSelector(REMOVE_LINKED_CATEGORY_CSS)));
 		return new ConfirmDialog(getDriver());
 	}
@@ -344,10 +367,21 @@ public class CatalogManagement extends AbstractNavigation {
 	}
 
 	/**
+	 * Clicks Open Catalog/Category button.
+	 *
+	 * @return The virtual catalog dialog
+	 */
+	public CreateEditVirtualCatalogDialog clickOpenVirtualCatalogButton() {
+		final String dialogName = "Edit";
+		clickButton(OPEN_CATALOG_CATEGORY_BUTTON_CSS, "Open...", String.format(CreateEditVirtualCatalogDialog
+				.CREATE_EDIT_VIRTUAL_CATALOG_PARENT_CSS_TEMPLATE, dialogName));
+		return new CreateEditVirtualCatalogDialog(getDriver(), dialogName);
+	}
+
+	/**
 	 * Clicks on Catalog browse refresh button.
 	 */
 	public void clickCatalogRefreshButton() {
 		clickButton(CATALOG_BROWSE_REFRESH_BUTTON_CSS, "Refresh Catalog Tree");
 	}
-
 }

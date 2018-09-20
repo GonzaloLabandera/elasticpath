@@ -6,13 +6,12 @@
  */
 package com.elasticpath.sellingchannel.presentation.impl;
 
-import java.util.HashMap;
+import static java.util.function.Function.identity;
+import static java.util.stream.Collectors.toMap;
+
 import java.util.List;
 import java.util.Map;
-
-import com.google.common.base.Function;
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Maps;
+import java.util.function.Function;
 
 import com.elasticpath.common.dto.OrderItemDto;
 import com.elasticpath.domain.order.Order;
@@ -21,14 +20,11 @@ import com.elasticpath.domain.order.OrderSku;
 import com.elasticpath.domain.quantity.Quantity;
 import com.elasticpath.domain.shoppingcart.FrequencyAndRecurringPrice;
 import com.elasticpath.domain.shoppingcart.FrequencyAndRecurringPriceFactory;
-import com.elasticpath.domain.shoppingcart.ShoppingItem;
 import com.elasticpath.domain.shoppingcart.ShoppingItemPricingSnapshot;
 import com.elasticpath.sellingchannel.director.OrderDirector;
 import com.elasticpath.sellingchannel.presentation.OrderItemDtoListMapper;
 import com.elasticpath.sellingchannel.presentation.OrderItemPresentationBean;
 import com.elasticpath.sellingchannel.presentation.OrderPresentationHelper;
-import com.elasticpath.service.shoppingcart.OrderSkuToPricingSnapshotFunction;
-import com.elasticpath.service.shoppingcart.PricingSnapshotService;
 
 /**
  * Provides functions to help translate Orders into beans for presentation in Velocity templates
@@ -40,23 +36,16 @@ public class OrderPresentationHelperImpl implements OrderPresentationHelper {
 
 	private OrderItemDtoListMapper orderItemDtoListMapper;
 
-	private PricingSnapshotService pricingSnapshotService;
+	private Function<OrderSku, ShoppingItemPricingSnapshot> orderSkuToPricingSnapshotFunction;
 
 	/**
 	 * Creates a map of ShipmentNumber to OrderItemPresentationBean for the given Order.
 	 * @param order an order.
 	 * @return order item presentation bean map for an order.
 	 */
-	@Override
 	public Map<Long, List<? extends OrderItemPresentationBean>> createOrderItemFormBeanMap(final Order order) {
-		Map<Long, List<? extends OrderItemPresentationBean>> orderItemPresentationBeanMap =
-			new HashMap<>();
-
-		for (OrderShipment shipment : order.getAllShipments()) {
-			orderItemPresentationBeanMap.put(shipment.getUidPk(), createOrderItemFormBeanList(shipment));
-		}
-
-		return orderItemPresentationBeanMap;
+		return order.getAllShipments().stream()
+				.collect(toMap(OrderShipment::getUidPk, this::createOrderItemFormBeanList));
 	}
 
 	/**
@@ -97,15 +86,10 @@ public class OrderPresentationHelperImpl implements OrderPresentationHelper {
 			return null;
 		}
 
-		final Iterable<OrderSku> orderSkus = Iterables.transform(order.getRootShoppingItems(), new Function<ShoppingItem, OrderSku>() {
-			@Override
-			public OrderSku apply(final ShoppingItem input) {
-				return (OrderSku) input;
-			}
-		});
-
-		final Map<OrderSku, ShoppingItemPricingSnapshot> itemPricingSnapshotMap =
-				Maps.toMap(orderSkus, new OrderSkuToPricingSnapshotFunction(getPricingSnapshotService()));
+		final Map<OrderSku, ShoppingItemPricingSnapshot> itemPricingSnapshotMap = order.getRootShoppingItems().stream()
+				.map(OrderSku.class::cast)
+				.collect(toMap(identity(),
+							   getOrderSkuToPricingSnapshotFunction()));
 
 		return createFrequencyAndRecurringPriceFactory().getFrequencyMap(itemPricingSnapshotMap);
 	}
@@ -119,12 +103,11 @@ public class OrderPresentationHelperImpl implements OrderPresentationHelper {
 		return new FrequencyAndRecurringPriceFactory();
 	}
 
-	protected PricingSnapshotService getPricingSnapshotService() {
-		return pricingSnapshotService;
+	protected Function<OrderSku, ShoppingItemPricingSnapshot> getOrderSkuToPricingSnapshotFunction() {
+		return this.orderSkuToPricingSnapshotFunction;
 	}
 
-	public void setPricingSnapshotService(final PricingSnapshotService pricingSnapshotService) {
-		this.pricingSnapshotService = pricingSnapshotService;
+	public void setOrderSkuToPricingSnapshotFunction(final Function<OrderSku, ShoppingItemPricingSnapshot> orderSkuToPricingSnapshotFunction) {
+		this.orderSkuToPricingSnapshotFunction = orderSkuToPricingSnapshotFunction;
 	}
-
 }

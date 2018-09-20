@@ -26,7 +26,6 @@ import com.elasticpath.service.misc.FetchPlanHelper;
 import com.elasticpath.service.search.IndexNotificationService;
 import com.elasticpath.service.search.query.ProductSearchCriteria;
 import com.elasticpath.service.search.query.SearchCriteria;
-import com.elasticpath.service.search.query.ShippingServiceLevelSearchCriteria;
 import com.elasticpath.service.store.StoreService;
 
 /**
@@ -86,30 +85,7 @@ public class StoreServiceImpl extends AbstractEpPersistenceServiceImpl implement
 	protected List<SearchCriteria> buildUpdateSearchCriteriaList(final Store store) {
 		final List<SearchCriteria> updateSearchCriteriaList = new ArrayList<>();
 		updateSearchCriteriaList.add(buildProductUpdateCriteria(store));
-		updateSearchCriteriaList.add(buildShippingServiceLevelUpdateCriteria(store));
 		return updateSearchCriteriaList;
-	}
-
-	/**
-	 * Builds the shipping service level update criteria if it is necessary to update shipping service levels which belong to given store.
-	 *
-	 * @param storeBeforePersistence the given store
-	 * @return update criteria that determined the shipping service levels for which update is required or null if there are no shipping service
-	 *         levels which should be updated
-	 */
-	protected SearchCriteria buildShippingServiceLevelUpdateCriteria(final Store storeBeforePersistence) {
-		boolean updateShippingServiceLevelsRequired = storeBeforePersistence.isPersisted() && !isIncompleteStore(storeBeforePersistence);
-		if (updateShippingServiceLevelsRequired) {
-			final String persistedStoreName = getPersistedStoreName(storeBeforePersistence.getUidPk());
-			if (storeBeforePersistence.getName().equals(persistedStoreName)) {
-				return null;
-			}
-
-			ShippingServiceLevelSearchCriteria shippingSearchCriteria = getBean(ContextIdNames.SHIPPING_SERVICE_LEVEL_SEACRH_CRITERIA);
-			shippingSearchCriteria.setStore(persistedStoreName);
-			return shippingSearchCriteria;
-		}
-		return null;
 	}
 
 	/**
@@ -428,11 +404,8 @@ public class StoreServiceImpl extends AbstractEpPersistenceServiceImpl implement
 	 * @param user who requested stores.
 	 * @return a list of all stores
 	 * @throws EpServiceException in case of any error
-	 * @deprecated use {@link #findAllCompleteStores()} or {@link #findAllStores()},
-	 * and filter for authorization.
 	 */
 	@Override
-	@Deprecated
 	public List<Store> findAllStores(final CmUser user) throws EpServiceException {
 		sanityCheck();
 		if (user == null) {

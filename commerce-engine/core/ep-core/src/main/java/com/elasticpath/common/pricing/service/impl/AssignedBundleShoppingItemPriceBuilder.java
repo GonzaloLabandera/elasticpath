@@ -3,13 +3,17 @@
  */
 package com.elasticpath.common.pricing.service.impl;
 
+import static java.util.Arrays.asList;
+
 import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.elasticpath.common.dto.StructuredErrorMessage;
+import com.google.common.collect.ImmutableMap;
+
+import com.elasticpath.base.common.dto.StructuredErrorMessage;
 import com.elasticpath.common.pricing.service.BundleShoppingItemPriceBuilder;
 import com.elasticpath.common.pricing.service.PriceLookupFacade;
 import com.elasticpath.commons.exception.InvalidProductStructureException;
@@ -26,9 +30,6 @@ import com.elasticpath.domain.shoppingcart.ShoppingItem;
 import com.elasticpath.domain.store.Store;
 import com.elasticpath.sellingchannel.ProductUnavailableException;
 import com.elasticpath.service.catalog.ProductSkuLookup;
-import com.google.common.collect.ImmutableMap;
-
-import static java.util.Arrays.asList;
 
 /**
  * Implementation of BundlePriceCalculator strategy.

@@ -3,7 +3,7 @@
  */
 package com.elasticpath.rest.resource.integration.epcommerce.repository.settings.impl;
 
-import io.reactivex.Single;
+import io.reactivex.Maybe;
 import org.jmock.Expectations;
 import org.jmock.integration.junit4.JUnitRuleMockery;
 import org.junit.Rule;
@@ -16,6 +16,7 @@ import com.elasticpath.rest.ResourceStatus;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.settings.SettingsRepository;
 import com.elasticpath.settings.SettingsReader;
 import com.elasticpath.settings.domain.SettingValue;
+import com.elasticpath.settings.provider.converter.SettingValueTypeConverter;
 
 /**
  * Test that {@link SettingsRepositoryImpl} behaves as expected.
@@ -29,8 +30,9 @@ public class SettingsRepositoryImplTest {
 	public final JUnitRuleMockery context = MockeryFactory.newRuleInstance();
 
 	private final SettingsReader settingsReader = context.mock(SettingsReader.class);
+	private final SettingValueTypeConverter settingValueTypeConverter = context.mock(SettingValueTypeConverter.class);
 
-	private final SettingsRepository repository = new SettingsRepositoryImpl(settingsReader);
+	private final SettingsRepository repository = new SettingsRepositoryImpl(settingsReader, settingValueTypeConverter);
 
 	/**
 	 * Test the behaviour of get string setting value.
@@ -42,15 +44,38 @@ public class SettingsRepositoryImplTest {
 			{
 				oneOf(settingsReader).getSettingValue(SETTING_PATH, STORE_CODE);
 				will(returnValue(mockSettingValue));
-				oneOf(mockSettingValue).getValue();
+				oneOf(settingValueTypeConverter).convert(mockSettingValue);
 				will(returnValue("some value"));
 			}
 		});
 
-		repository.getStringSettingValue(SETTING_PATH, STORE_CODE)
+		repository.getSetting(SETTING_PATH, STORE_CODE)
 				.test()
 				.assertNoErrors()
 				.assertValue("some value");
+	}
+
+	/**
+	 * Test the behaviour of get integer setting value.
+	 */
+	@Test
+	public void testGetIntegerSettingValue() {
+		final SettingValue mockSettingValue = context.mock(SettingValue.class);
+		final Integer value = 123;
+
+		context.checking(new Expectations() {
+			{
+				oneOf(settingsReader).getSettingValue(SETTING_PATH, STORE_CODE);
+				will(returnValue(mockSettingValue));
+				oneOf(settingValueTypeConverter).convert(mockSettingValue);
+				will(returnValue(value));
+			}
+		});
+
+		repository.getSetting(SETTING_PATH, STORE_CODE)
+				.test()
+				.assertNoErrors()
+				.assertValue(value);
 	}
 
 	/**
@@ -65,10 +90,29 @@ public class SettingsRepositoryImplTest {
 			}
 		});
 
-		Single<String> result = repository.getStringSettingValue(SETTING_PATH, STORE_CODE);
+		final Maybe<String> result = repository.getSetting(SETTING_PATH, STORE_CODE);
 		result.test()
 				.assertError(ResourceOperationFailure.class)
 				.assertError(throwable -> ResourceStatus.SERVER_ERROR.equals(((ResourceOperationFailure) throwable).getResourceStatus()));
+	}
+
+	@Test
+	public void testGetStringSettingValueNullReturnsSuccessWithNullData() {
+		final SettingValue mockSettingValue = context.mock(SettingValue.class);
+
+		context.checking(new Expectations() {
+			{
+				oneOf(settingsReader).getSettingValue(SETTING_PATH, STORE_CODE);
+				will(returnValue(mockSettingValue));
+				oneOf(settingValueTypeConverter).convert(mockSettingValue);
+				will(returnValue(null));
+			}
+		});
+
+		repository.getSetting(SETTING_PATH, STORE_CODE)
+				.test()
+				.assertNoErrors()
+				.assertNoValues();
 	}
 
 }

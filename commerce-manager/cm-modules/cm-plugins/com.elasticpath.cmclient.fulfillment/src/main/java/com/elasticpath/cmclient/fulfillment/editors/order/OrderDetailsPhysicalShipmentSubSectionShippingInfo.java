@@ -5,6 +5,8 @@ package com.elasticpath.cmclient.fulfillment.editors.order;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
+import java.util.stream.Collectors;
 
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
@@ -22,10 +24,10 @@ import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.Section;
 import org.eclipse.ui.forms.widgets.TableWrapData;
 
-import com.elasticpath.cmclient.core.LoginManager;
-import com.elasticpath.cmclient.core.ServiceLocator;
 import com.elasticpath.cmclient.core.CoreImageRegistry;
 import com.elasticpath.cmclient.core.CorePlugin;
+import com.elasticpath.cmclient.core.LoginManager;
+import com.elasticpath.cmclient.core.ServiceLocator;
 import com.elasticpath.cmclient.core.binding.EpControlBindingProvider;
 import com.elasticpath.cmclient.core.binding.ObservableUpdateValueStrategy;
 import com.elasticpath.cmclient.core.editors.AbstractCmClientFormEditor;
@@ -45,15 +47,20 @@ import com.elasticpath.domain.order.Order;
 import com.elasticpath.domain.order.OrderAddress;
 import com.elasticpath.domain.order.OrderShipmentStatus;
 import com.elasticpath.domain.order.PhysicalOrderShipment;
-import com.elasticpath.domain.shipping.ShippingServiceLevel;
-import com.elasticpath.service.shipping.ShippingServiceLevelService;
+import com.elasticpath.service.shipping.ShippingOptionService;
+import com.elasticpath.service.shipping.transformers.PricedShippableItemContainerFromOrderShipmentTransformer;
+import com.elasticpath.shipping.connectivity.commons.constants.ShippingContextIdNames;
+import com.elasticpath.shipping.connectivity.dto.PricedShippableItem;
+import com.elasticpath.shipping.connectivity.dto.PricedShippableItemContainer;
+import com.elasticpath.shipping.connectivity.dto.ShippingOption;
+import com.elasticpath.shipping.connectivity.service.ShippingCalculationService;
 
 /**
  * Represents the physical shipment shipping information sub section.
  */
 public class OrderDetailsPhysicalShipmentSubSectionShippingInfo implements IPropertyListener, SelectionListener {
 
-	private CCombo shippingServiceLevelComboBox;
+	private CCombo shippingOptionComboBox;
 
 	private CCombo shippingAddressComboBox;
 
@@ -65,7 +72,7 @@ public class OrderDetailsPhysicalShipmentSubSectionShippingInfo implements IProp
 
 	private final List<Address> addressList;
 
-	private List<ShippingServiceLevel> shippingServiceLevels;
+	private List<ShippingOption> shippingOptions;
 
 	private Button editShipAddressButton;
 
@@ -159,8 +166,8 @@ public class OrderDetailsPhysicalShipmentSubSectionShippingInfo implements IProp
 		this.editShipAddressButton.addSelectionListener(this);
 		shippingInfoPane.addLabelBold(FulfillmentMessages.get().ShipmentSection_ShippingMethod, shippingInfoPaneData);
 		shippingInfoPane.addEmptyComponent(shippingInfoPaneData);
-		this.shippingServiceLevelComboBox = shippingInfoPane.addComboBox(getStateFromPermissions(), shippingInfoData);
-		this.shippingServiceLevelComboBox.addSelectionListener(this);
+		this.shippingOptionComboBox = shippingInfoPane.addComboBox(getStateFromPermissions(), shippingInfoData);
+		this.shippingOptionComboBox.addSelectionListener(this);
 	}
 
 	/**
@@ -170,9 +177,9 @@ public class OrderDetailsPhysicalShipmentSubSectionShippingInfo implements IProp
 		this.shippingAddressComboBox.setItems(getShippingAddressListAsArray());
 		this.shippingAddressComboBox.select(0);
 
-		this.shippingServiceLevelComboBox.setItems(getShippingMethodListAsArray(shipment.getShipmentAddress()));
-		this.shippingServiceLevelComboBox.add(FulfillmentMessages.get().ShipmentSection_ShippingMethodComboBoxSelectAMethod, 0);
-		this.shippingServiceLevelComboBox.select(getSelectedShipMethodIndex());
+		this.shippingOptionComboBox.setItems(getShippingOptionListAsArray(shipment.getShipmentAddress()));
+		this.shippingOptionComboBox.add(FulfillmentMessages.get().ShipmentSection_ShippingMethodComboBoxSelectAMethod, 0);
+		this.shippingOptionComboBox.select(getSelectedShipOptionIndex());
 
 	}
 
@@ -185,7 +192,7 @@ public class OrderDetailsPhysicalShipmentSubSectionShippingInfo implements IProp
 		// bind the combo box
 		final EpControlBindingProvider bindingProvider = EpControlBindingProvider.getInstance();
 
-		bindingProvider.bind(context, shippingServiceLevelComboBox, EpValidatorFactory.REQUIRED_COMBO_FIRST_ELEMENT_NOT_VALID, null,
+		bindingProvider.bind(context, shippingOptionComboBox, EpValidatorFactory.REQUIRED_COMBO_FIRST_ELEMENT_NOT_VALID, null,
 				new ObservableUpdateValueStrategy() {
 					@Override
 					protected IStatus doSet(final IObservableValue observableValue, final Object value) {
@@ -194,12 +201,29 @@ public class OrderDetailsPhysicalShipmentSubSectionShippingInfo implements IProp
 							editor.controlModified();
 							return Status.CANCEL_STATUS;
 						}
-						final ShippingServiceLevel selectedLevel = shippingServiceLevels.get(selectedIndex - 1);
-						final String oldLevel = shipment.getShippingServiceLevelGuid();
-						if (!selectedLevel.getGuid().equals(oldLevel)) {  // NOPMD  '!='
-							shipment.setShippingServiceLevelGuid(selectedLevel.getGuid());
-							shipment.setCarrier(selectedLevel.getCarrier());
-							shipment.setServiceLevel(selectedLevel.getDisplayName(CorePlugin.getDefault().getDefaultLocale(), true));
+						final ShippingOption selectedShippingOption = shippingOptions.get(selectedIndex - 1);
+						final String oldShippingOptionCode = shipment.getShippingOptionCode();
+						if (!selectedShippingOption.getCode().equals(oldShippingOptionCode)) {  // NOPMD  '!='
+							shipment.setShippingOptionCode(selectedShippingOption.getCode());
+							shipment.setCarrierCode(selectedShippingOption.getCarrierCode().orElse(null));
+							shipment.setCarrierName(selectedShippingOption.getCarrierDisplayName().orElse(null));
+							shipment.setShippingOptionName(selectedShippingOption
+									.getDisplayName(CorePlugin.getDefault().getDefaultLocale()).orElse(null));
+							final PricedShippableItemContainerFromOrderShipmentTransformer<PricedShippableItem> shippableItemContainerTransformer
+									= ServiceLocator.getService(ContextIdNames.PRICED_SHIPPABLE_CONTAINER_FROM_SHIPMENT_TRANSFORMER);
+
+							final PricedShippableItemContainer<PricedShippableItem> pricedShippableItemContainer
+									= shippableItemContainerTransformer.apply(shipment);
+
+							final List<ShippingOption> shippingOptions
+									= ((ShippingCalculationService) ServiceLocator.getService(ShippingContextIdNames.SHIPPING_CALCULATION_SERVICE))
+									.getPricedShippingOptions(pricedShippableItemContainer).getAvailableShippingOptions();
+
+							final ShippingOption foundShippingOption = shippingOptions.stream()
+									.filter(shippingOption -> shippingOption.getCode().equals(shipment.getShippingOptionCode()))
+									.findFirst().get();
+
+							shipment.setShippingCost(foundShippingOption.getShippingCost().get().getAmount());
 							fireShippingMethodChangeEvent();
 						}
 						return Status.OK_STATUS;
@@ -306,7 +330,7 @@ public class OrderDetailsPhysicalShipmentSubSectionShippingInfo implements IProp
 	 */
 	private void fireChangeEvent() {
 		editor.controlModified();
-		// fire changes to editor to notify summary sub section about address/service level change event
+		// fire changes to editor to notify summary sub section about address/service option change event
 		((OrderEditor) editor).fireShipmentAddressMethodChanges();
 	}
 	// ---- DOCwidgetSelected
@@ -319,13 +343,13 @@ public class OrderDetailsPhysicalShipmentSubSectionShippingInfo implements IProp
 	 */
 	private void refreshShippingMethodComboBox(final OrderAddress selectedShipAddress) {
 
-		final String previousLevel = shipment.getShippingServiceLevelGuid();
+		final String previousShippingOptionCode = shipment.getShippingOptionCode();
 		// repopulate the method combo, and get a list of shipping method according to region specified in the address
-		shippingServiceLevelComboBox.setItems(getShippingMethodListAsArray(selectedShipAddress));
-		shippingServiceLevelComboBox.add(FulfillmentMessages.get().ShipmentSection_ShippingMethodComboBoxSelectAMethod, 0);
+		shippingOptionComboBox.setItems(getShippingOptionListAsArray(selectedShipAddress));
+		shippingOptionComboBox.add(FulfillmentMessages.get().ShipmentSection_ShippingMethodComboBoxSelectAMethod, 0);
 		// check if the service method stored in domain object is in the new list
-		final int index = getSelectedShipMethodIndex(previousLevel);
-		shippingServiceLevelComboBox.select(index);
+		final int index = getSelectedShipOptionIndex(previousShippingOptionCode);
+		shippingOptionComboBox.select(index);
 	}
 
 	/**
@@ -344,40 +368,39 @@ public class OrderDetailsPhysicalShipmentSubSectionShippingInfo implements IProp
 	}
 
 	/**
-	 * It gets a list of shipping service level for a given address and returns a list as an array.
+	 * It gets a list of shipping options for a given address and returns a list as an array.
 	 *
 	 * @param address the ship address
-	 * @return String[] of shipping service level for that address
+	 * @return String[] of shipping option names for that address
 	 */
-	private String[] getShippingMethodListAsArray(final OrderAddress address) {
-		final ShippingServiceLevelService serviceLevel = ServiceLocator.getService(
-				ContextIdNames.SHIPPING_SERVICE_LEVEL_SERVICE);
+	private String[] getShippingOptionListAsArray(final OrderAddress address) {
+		final ShippingOptionService shippingOptionService = ServiceLocator.getService(ContextIdNames.SHIPPING_OPTION_SERVICE);
+		shippingOptions = shippingOptionService.getShippingOptions(
+				address,
+				order.getStoreCode(),
+				order.getLocale()).getAvailableShippingOptions();
 
-		shippingServiceLevels = serviceLevel.retrieveShippingServiceLevel(order.getStoreCode(), address);
-
-		final String[] serviceLevels = new String[shippingServiceLevels.size()];
-		for (int i = 0; i < shippingServiceLevels.size(); i++) {
-			serviceLevels[i] = retrieveServiceLevelName(shippingServiceLevels.get(i));
-		}
-		return serviceLevels;
+		return shippingOptions.stream()
+				.map(shippingOption -> retrieveShippingOptionName(shippingOption, order.getLocale()))
+				.collect(Collectors.toList())
+				.stream()
+				.toArray(String[]::new);
 	}
 
 	/**
-	 * Gets the name of the given ShippingServiceLevel for the current user's locale, and
+	 * Gets the name of the given shipping option for the current user's locale, and
 	 * appends a message to the name if the SSL is not active.
-	 * @param shippingServiceLevel the shipping service level
-	 * @return the display name of the shipping service level
+	 *
+	 * @param shippingOption the shipping option
+	 * @param locale the locale
+	 * @return the display name of the shipping option
 	 */
-	private String retrieveServiceLevelName(final ShippingServiceLevel shippingServiceLevel) {
-		String name = shippingServiceLevel.getDisplayName(CorePlugin.getDefault().getDefaultLocale(), true);
+	private String retrieveShippingOptionName(final ShippingOption shippingOption, final Locale locale) {
+		String name = shippingOption.getDisplayName(locale).orElse(null);
 		if (name == null) {
-			name = shippingServiceLevel.getCarrier();
+			name = shippingOption.getCarrierCode().orElse(null);
 		}
-		StringBuilder serviceLevelName = new StringBuilder(name);
-		if (!shippingServiceLevel.isEnabled()) {
-			serviceLevelName.append(" [").append(FulfillmentMessages.get().ShipmentSection_NotActiveShippingLevel).append(']');
-		}
-		return serviceLevelName.toString();
+		return name;
 	}
 
 	/**
@@ -385,20 +408,20 @@ public class OrderDetailsPhysicalShipmentSubSectionShippingInfo implements IProp
 	 *
 	 * @return index of the shipping method from the list of shipping method
 	 */
-	private int getSelectedShipMethodIndex() {
-		final String serviceLevelGuid = shipment.getShippingServiceLevelGuid();
-		if (serviceLevelGuid == null) {
+	private int getSelectedShipOptionIndex() {
+		final String shippingOptionCode = shipment.getShippingOptionCode();
+		if (shippingOptionCode == null) {
 			return 0;
 		}
 
-		return getSelectedShipMethodIndex(serviceLevelGuid);
+		return getSelectedShipOptionIndex(shippingOptionCode);
 	}
 
-	private int getSelectedShipMethodIndex(final String serviceLevelGuid) {
+	private int getSelectedShipOptionIndex(final String shippingOptionCode) {
 		int index = 0;
-		for (ShippingServiceLevel shippingServiceLevel : shippingServiceLevels) {
-			if (serviceLevelGuid.equals(shippingServiceLevel.getGuid())) {
-				// because of the first item is not in the service level list, needs to add it back for indexing
+		for (ShippingOption shippingOption : shippingOptions) {
+			if (shippingOptionCode.equals(shippingOption.getCode())) {
+				// because of the first item is not in the shipping option list, needs to add it back for indexing
 				index++;
 				return index;
 			}

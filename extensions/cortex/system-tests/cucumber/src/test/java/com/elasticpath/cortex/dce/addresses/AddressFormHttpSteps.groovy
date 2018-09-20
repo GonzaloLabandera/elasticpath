@@ -1,12 +1,11 @@
 package com.elasticpath.cortex.dce.addresses
 
-import cucumber.api.DataTable
-
-import static com.elasticpath.cortex.dce.addresses.AddressConstants.goToAddressForm
-
-import static com.elasticpath.cortex.dce.ClasspathFluentRelosClientFactory.client
 import static org.assertj.core.api.Assertions.assertThat
 
+import static com.elasticpath.cortex.dce.ClasspathFluentRelosClientFactory.client
+import static com.elasticpath.cortex.dce.addresses.AddressConstants.goToAddressForm
+
+import cucumber.api.DataTable
 import cucumber.api.groovy.EN
 import cucumber.api.groovy.Hooks
 
@@ -18,7 +17,7 @@ When(~'I go to registered shopper profile addresses$') { ->
 			.defaultprofile()
 			.addresses()
 			.element()
-	return client.body.links[0].uri
+	return client.body.links[0].href
 }
 
 When(~'I update address via put with country (.*), locality (.*), postal code (.*), region (.*), street address (.*), family name (.*), given name (.*)$') {

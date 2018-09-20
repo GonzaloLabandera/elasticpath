@@ -376,42 +376,5 @@
         <type>MasterCard</type>
     </credit_card_types>
 </store>
-<store code="creditcardscope" enabled="true">
-    <globalization timeZone="Europe/London" country="AU" sub_country="" content_encoding="UTF-8" default_locale="en" default_currency="CAD"/>
-    <url>${creditcardscope.store.url}</url>
-    <name>creditcardscope</name>
-    <state>200</state>
-    <type>B2B</type>
-    <description>this is a store that uses credit card for the purpose of testing credit card payment in Cortex</description>
-    <catalog>Mobile</catalog>
-    <display_out_of_stock>false</display_out_of_stock>
-    <email_sender_name>admin@creditcardscope.com</email_sender_name>
-    <email_sender_address>admin@creditcardscope.com</email_sender_address>
-    <store_admin_email>admin@creditcardscope.com</store_admin_email>
-    <credit_card_cvv2_enabled>true</credit_card_cvv2_enabled>
-    <store_full_credit_cards>false</store_full_credit_cards>
-    <locales>
-        <locale>en</locale>
-    </locales>
-    <currencies>
-        <currency>CAD</currency>
-    </currencies>
-    <warehouses>
-        <warehouse>MOBEE_Warehouse</warehouse>
-    </warehouses>
-    <tax_codes>
-        <guid>502</guid>
-    </tax_codes>
-    <tax_jurisdictions>
-        <jurisdiction>CATaxJurisdiction</jurisdiction>
-    </tax_jurisdictions>
-    <payment_gateways>
-        <gateway>DemoTokenPaymentProcessor</gateway>
-    </payment_gateways>
-    <credit_card_types>
-        <type>American Express</type>
-        <type>Visa</type>
-        <type>MasterCard</type>
-    </credit_card_types>
-</store>
+
 </stores>

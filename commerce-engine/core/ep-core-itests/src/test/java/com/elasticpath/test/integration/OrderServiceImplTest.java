@@ -1,8 +1,26 @@
 /**
- * Copyright (c) Elastic Path Software Inc., 2007
+ * Copyright (c) Elastic Path Software Inc., 2018
  */
+
 package com.elasticpath.test.integration;
 
+import static com.elasticpath.commons.constants.ContextIdNames.ORDER_SEARCH_CRITERIA;
+import static com.elasticpath.domain.catalog.AvailabilityCriteria.AVAILABLE_WHEN_IN_STOCK;
+import static com.elasticpath.domain.catalog.InventoryEventType.STOCK_ADJUSTMENT;
+import static com.elasticpath.domain.customer.impl.PaymentTokenImpl.TokenBuilder;
+import static com.elasticpath.domain.order.OrderPayment.AUTHORIZATION_TRANSACTION;
+import static com.elasticpath.domain.order.OrderPayment.CAPTURE_TRANSACTION;
+import static com.elasticpath.domain.order.OrderPayment.REVERSE_AUTHORIZATION;
+import static com.elasticpath.domain.order.OrderPaymentStatus.APPROVED;
+import static com.elasticpath.domain.order.OrderShipmentStatus.FAILED_ORDER;
+import static com.elasticpath.domain.order.OrderShipmentStatus.INVENTORY_ASSIGNED;
+import static com.elasticpath.domain.order.OrderShipmentStatus.RELEASED;
+import static com.elasticpath.domain.order.OrderStatus.CANCELLED;
+import static com.elasticpath.domain.order.OrderStatus.FAILED;
+import static com.elasticpath.domain.order.OrderStatus.IN_PROGRESS;
+import static com.elasticpath.domain.order.OrderStatus.ONHOLD;
+import static com.elasticpath.domain.shipping.ShipmentType.PHYSICAL;
+import static com.elasticpath.plugin.payment.PaymentType.PAYMENT_TOKEN;
 import static com.google.common.base.Predicates.equalTo;
 import static com.google.common.collect.Iterables.find;
 import static java.lang.System.currentTimeMillis;
@@ -16,26 +34,6 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-
-import static com.elasticpath.commons.constants.ContextIdNames.ORDER_SEARCH_CRITERIA;
-import static com.elasticpath.domain.catalog.AvailabilityCriteria.ALWAYS_AVAILABLE;
-import static com.elasticpath.domain.catalog.AvailabilityCriteria.AVAILABLE_WHEN_IN_STOCK;
-import static com.elasticpath.domain.catalog.InventoryEventType.STOCK_ADJUSTMENT;
-import static com.elasticpath.domain.order.OrderPayment.AUTHORIZATION_TRANSACTION;
-import static com.elasticpath.domain.order.OrderPayment.CAPTURE_TRANSACTION;
-import static com.elasticpath.domain.order.OrderPayment.REVERSE_AUTHORIZATION;
-import static com.elasticpath.domain.order.OrderPaymentStatus.APPROVED;
-import static com.elasticpath.domain.order.OrderShipmentStatus.FAILED_ORDER;
-import static com.elasticpath.domain.order.OrderShipmentStatus.INVENTORY_ASSIGNED;
-import static com.elasticpath.domain.order.OrderShipmentStatus.RELEASED;
-import static com.elasticpath.domain.order.OrderShipmentStatus.SHIPPED;
-import static com.elasticpath.domain.order.OrderStatus.CANCELLED;
-import static com.elasticpath.domain.order.OrderStatus.COMPLETED;
-import static com.elasticpath.domain.order.OrderStatus.FAILED;
-import static com.elasticpath.domain.order.OrderStatus.IN_PROGRESS;
-import static com.elasticpath.domain.order.OrderStatus.ONHOLD;
-import static com.elasticpath.domain.shipping.ShipmentType.PHYSICAL;
-import static com.elasticpath.plugin.payment.PaymentType.CREDITCARD;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -77,11 +75,11 @@ import com.elasticpath.domain.catalog.ProductSku;
 import com.elasticpath.domain.catalog.impl.InventoryAuditImpl;
 import com.elasticpath.domain.customer.Customer;
 import com.elasticpath.domain.customer.CustomerAddress;
-import com.elasticpath.domain.customer.CustomerCreditCard;
 import com.elasticpath.domain.customer.CustomerSession;
+import com.elasticpath.domain.customer.PaymentToken;
+import com.elasticpath.domain.customer.impl.PaymentTokenImpl;
 import com.elasticpath.domain.event.EventOriginatorHelper;
 import com.elasticpath.domain.event.impl.EventOriginatorHelperImpl;
-import com.elasticpath.domain.order.ElectronicOrderShipment;
 import com.elasticpath.domain.order.Order;
 import com.elasticpath.domain.order.OrderPayment;
 import com.elasticpath.domain.order.OrderShipment;
@@ -103,7 +101,6 @@ import com.elasticpath.domain.shoppingcart.ShoppingCartPricingSnapshot;
 import com.elasticpath.domain.shoppingcart.ShoppingCartTaxSnapshot;
 import com.elasticpath.domain.shoppingcart.ShoppingItem;
 import com.elasticpath.domain.store.Store;
-import com.elasticpath.inventory.InventoryCommand;
 import com.elasticpath.inventory.InventoryDto;
 import com.elasticpath.inventory.InventoryFacade;
 import com.elasticpath.messaging.EventMessage;
@@ -170,8 +167,6 @@ public class OrderServiceImplTest extends BasicSpringContextTest {
 
 	private CustomerAddress address;
 
-	private CustomerCreditCard creditCard;
-
 	private CustomerSession customerSession;
 
 	private SimpleStoreScenario scenario;
@@ -191,8 +186,6 @@ public class OrderServiceImplTest extends BasicSpringContextTest {
 
 	private Shopper shopper;
 
-	private ShoppingCart shoppingCart;
-
 	@Autowired
 	private PersistenceEngine persistenceEngine;
 	@Autowired
@@ -201,13 +194,13 @@ public class OrderServiceImplTest extends BasicSpringContextTest {
 	private TimeService timeService;
 
 	@EndpointInject(uri = "mock:orders/events", context = ORDER_MESSAGING_CAMEL_CONTEXT)
-	protected MockEndpoint mockOrderEventEndpoint;
+	private MockEndpoint mockOrderEventEndpoint;
 
 	@EndpointInject(ref = "epOrderMessagingOrderEventExternalEndpoint")
-	protected Endpoint orderEventOutgoingEndpoint;
+	private Endpoint orderEventOutgoingEndpoint;
 
 	@Autowired
-	protected DataFormat eventMessageDataFormat;
+	private DataFormat eventMessageDataFormat;
 
 	private List<ReversibleCheckoutAction> reversibleCheckoutActions;
 	private final ReversibleCheckoutAction failingAction = new ReversibleCheckoutAction() {
@@ -225,15 +218,24 @@ public class OrderServiceImplTest extends BasicSpringContextTest {
 		}
 	};
 
-	@Autowired private ProductInventoryManagementService productInventoryManagementService;
-	@Autowired private ProductService productService;
-	@Autowired private CamelContextMessagePurger camelContextMessagePurger;
-	@Autowired private CatalogTestPersister catalogTestPersister;
-	@Autowired private ProductSkuLookup productSkuLookup;
-	@Autowired private PricingSnapshotService pricingSnapshotService;
-	@Autowired private TaxSnapshotService taxSnapshotService;
-	@Autowired private EventOriginatorHelper eventOriginatorHelper;
-	@Autowired private EntityManager em;
+	@Autowired
+	private ProductInventoryManagementService productInventoryManagementService;
+	@Autowired
+	private ProductService productService;
+	@Autowired
+	private CamelContextMessagePurger camelContextMessagePurger;
+	@Autowired
+	private CatalogTestPersister catalogTestPersister;
+	@Autowired
+	private ProductSkuLookup productSkuLookup;
+	@Autowired
+	private PricingSnapshotService pricingSnapshotService;
+	@Autowired
+	private TaxSnapshotService taxSnapshotService;
+	@Autowired
+	private EventOriginatorHelper eventOriginatorHelper;
+	@Autowired
+	private EntityManager em;
 
 	/**
 	 * Get a reference to TestApplicationContext for use within the test. Setup scenarios.
@@ -251,7 +253,6 @@ public class OrderServiceImplTest extends BasicSpringContextTest {
 				"V6J5G4", "891312345007");
 		customerSession = persisterFactory.getStoreTestPersister().persistCustomerSessionWithAssociatedEntities(customer);
 		shopper = customerSession.getShopper();
-		creditCard = persisterFactory.getStoreTestPersister().createCustomerCreditCard(address.getFirstName() + " " + address.getLastName(), "4111111111111111", "VISA", "11", "2020");
 		reversibleCheckoutActions = getBeanFactory().getBean("reversibleActions");
 	}
 
@@ -288,12 +289,13 @@ public class OrderServiceImplTest extends BasicSpringContextTest {
 		final Shopper shopper = customerSession.getShopper();
 		ShoppingCart shoppingCart = givenASimpleShoppingCart();
 
-		assertNotNull("Shopping cart should contain items", shoppingCart.getCartItems());
-		assertThat(shoppingCart.getCartItems().size()).as("There should be 1 item in the shopping cart").isEqualTo(1);
+		assertNotNull("Shopping cart should contain items", shoppingCart.getRootShoppingItems());
+		assertThat(shoppingCart.getRootShoppingItems()).as("There should be 1 item in the shopping cart").hasSize(1);
 		ProductSku productSku = product.getDefaultSku();
 
 		// make new order payment
-		OrderPayment templateOrderPayment = persisterFactory.getOrderTestPersister().createOrderPayment(customer, creditCard);
+		OrderPayment templateOrderPayment = persisterFactory.getOrderTestPersister().createOrderPayment(customer, new TokenBuilder()
+				.build());
 
 		// checkout
 		assertCustomerEmailEqualsShopperCustomerEmail(shopper);
@@ -305,13 +307,13 @@ public class OrderServiceImplTest extends BasicSpringContextTest {
 
 		// only one order should have been created by the checkout service
 		List<Order> ordersList = orderService.findOrderByCustomerGuid(shopper.getCustomer().getGuid(), true);
-		assertThat(ordersList.size()).as("There should be 1 item in the order").isEqualTo(1);
+		assertThat(ordersList).as("There should be 1 item in the order").hasSize(1);
 		Order order = ordersList.iterator().next();
 
 		assertNotNull("We should be able to find the warehouse for this order", order.getStore().getWarehouses().get(0));
 		long warehouseUidPk = order.getStore().getWarehouses().get(0).getUidPk();
 		assertThat(store.getWarehouses().get(0).getUidPk()).as("Order warehouse should be same as the original product").isEqualTo(warehouseUidPk);
-		assertThat(order.getRootShoppingItems().size()).as("There should be 1 sku in the order").isEqualTo(1);
+		assertThat(order.getRootShoppingItems()).as("There should be 1 sku in the order").hasSize(1);
 		ShoppingItem orderSku = order.getRootShoppingItems().iterator().next();
 		assertThat(orderSku.getSkuGuid()).as("The order sku guid should match the original sku guid").isEqualTo(productSku.getGuid());
 
@@ -331,17 +333,18 @@ public class OrderServiceImplTest extends BasicSpringContextTest {
 		// construct and save new shopping cart
 		final Shopper shopper = customerSession.getShopper();
 		ShoppingCart shoppingCart = persisterFactory.getOrderTestPersister().persistEmptyShoppingCart(address, address, customerSession,
-				scenario.getShippingServiceLevel(), scenario.getStore());
+				scenario.getShippingOption(), scenario.getStore());
 
 		ProductSku productSku = product.getDefaultSku();
 		ShoppingItemDto dto = new ShoppingItemDto(productSku.getSkuCode(), 1);
 		cartDirector.addItemToCart(shoppingCart, dto);
 
-		assertNotNull("Shopping cart should contain items", shoppingCart.getCartItems());
-		assertThat(shoppingCart.getCartItems().size()).as("There should be 1 item in the shopping cart").isEqualTo(1);
+		assertNotNull("Shopping cart should contain items", shoppingCart.getRootShoppingItems());
+		assertThat(shoppingCart.getRootShoppingItems()).as("There should be 1 item in the shopping cart").hasSize(1);
 
 		// make new order payment
-		OrderPayment templateOrderPayment = persisterFactory.getOrderTestPersister().createOrderPayment(customer, creditCard);
+		PaymentToken paymentToken = new PaymentTokenImpl.TokenBuilder().build();
+		OrderPayment templateOrderPayment = persisterFactory.getOrderTestPersister().createOrderPayment(customer, paymentToken);
 
 		// checkout
 		assertCustomerEmailEqualsShopperCustomerEmail(shopper);
@@ -353,16 +356,15 @@ public class OrderServiceImplTest extends BasicSpringContextTest {
 
 		// only one order should have been created by the checkout service
 		List<Order> ordersList = orderService.findOrderByCustomerGuid(shopper.getCustomer().getGuid(), true);
-		assertThat(ordersList.size()).as("There should be 1 item in the order").isEqualTo(1);
+		assertThat(ordersList).as("There should be 1 item in the order").hasSize(1);
 		Order order = ordersList.iterator().next();
 
 		assertThat(FAILED).as("The order should be in the failed state after checkout reversal").isEqualTo(order.getStatus());
 
-		assertThat(order.getRootShoppingItems().size()).as("There should be 1 sku in the order").isEqualTo(1);
+		assertThat(order.getRootShoppingItems()).as("There should be 1 sku in the order").hasSize(1);
 		ShoppingItem orderSku = order.getRootShoppingItems().iterator().next();
 		assertThat(orderSku.getSkuGuid()).as("The order sku guid should match the original sku guid").isEqualTo(productSku.getGuid());
 	}
-
 
 	/**
 	 * Test cancelling an order.
@@ -384,11 +386,11 @@ public class OrderServiceImplTest extends BasicSpringContextTest {
 
 		// two shipments should have been created
 		List<OrderShipment> shipments = order.getAllShipments();
-		assertThat(shipments.size()).isEqualTo(1);
+		assertThat(shipments).hasSize(1);
 
 		// check payments
 		Set<OrderPayment> payments = order.getOrderPayments();
-		assertThat(payments.size()).isEqualTo(1);
+		assertThat(payments).hasSize(1);
 		OrderPayment authPayment = payments.iterator().next();
 		assertThat(authPayment.getAmount().doubleValue()).isEqualTo(order.getTotal().doubleValue());
 
@@ -399,7 +401,7 @@ public class OrderServiceImplTest extends BasicSpringContextTest {
 		assertThat(order.getStatus()).isEqualTo(CANCELLED);
 
 		// 1 auth + 1 reverse auth payments should have been conducted
-		assertThat(order.getOrderPayments().size()).isEqualTo(2);
+		assertThat(order.getOrderPayments()).hasSize(2);
 
 		OrderPayment reverseAuth = null;
 		for (OrderPayment payment : order.getOrderPayments()) {
@@ -423,7 +425,8 @@ public class OrderServiceImplTest extends BasicSpringContextTest {
 		ShoppingCart shoppingCart = givenASimpleShoppingCart();
 
 		// make new order payment
-		OrderPayment templateOrderPayment = persisterFactory.getOrderTestPersister().createOrderPayment(customer, creditCard);
+		OrderPayment templateOrderPayment = persisterFactory.getOrderTestPersister().createOrderPayment(customer, new TokenBuilder()
+				.build());
 
 		// checkout
 		assertCustomerEmailEqualsShopperCustomerEmail(shopper);
@@ -435,16 +438,16 @@ public class OrderServiceImplTest extends BasicSpringContextTest {
 
 		// only one order should have been created by the checkout service
 		List<Order> ordersList = orderService.findOrderByCustomerGuid(shopper.getCustomer().getGuid(), true);
-		assertThat(ordersList.size()).isEqualTo(1);
+		assertThat(ordersList).hasSize(1);
 		Order order = ordersList.iterator().next();
 
 		// one shipment should have been created
 		List<OrderShipment> shipments = order.getAllShipments();
-		assertThat(shipments.size()).isEqualTo(1);
+		assertThat(shipments).hasSize(1);
 
 		// check payments
 		Set<OrderPayment> payments = order.getOrderPayments();
-		assertThat(payments.size()).isEqualTo(1);
+		assertThat(payments).hasSize(1);
 		OrderPayment authPayment = payments.iterator().next();
 		assertThat(authPayment.getAmount().doubleValue()).isEqualTo(order.getTotal().doubleValue());
 
@@ -457,7 +460,7 @@ public class OrderServiceImplTest extends BasicSpringContextTest {
 		assertThat(order.getStatus()).isEqualTo(CANCELLED);
 
 		// 1 auth + 1 reverse auth payments should have been conducted
-		assertThat(order.getOrderPayments().size()).isEqualTo(2);
+		assertThat(order.getOrderPayments()).hasSize(2);
 
 		OrderPayment reverseAuth = null;
 		for (OrderPayment payment : order.getOrderPayments()) {
@@ -471,46 +474,6 @@ public class OrderServiceImplTest extends BasicSpringContextTest {
 	}
 
 	/**
-	 * Test order status is completed when order has one non-shippable shipment and one canceled physical shipment.
-	 *
-	 * TODO - Investigate intermittent failure of this test (NullPointerException at ElectronicOrderShipmentImpl.java:89)
-	 */
-	@Ignore
-	@Test
-	public void testOrderStatusCompletedWithMultipleShipments() {
-		// construct and save new shopping cart
-		final Shopper shopper = customerSession.getShopper();
-		ShoppingCart shoppingCart = givenASimpleShoppingCart();
-
-		Product electronicProduct = persisterFactory.getCatalogTestPersister().createDefaultProductWithSkuAndInventory(scenario.getCatalog(),
-				scenario.getCategory(), scenario.getWarehouse());
-		electronicProduct.getDefaultSku().setShippable(false);
-		electronicProduct = productService.saveOrUpdate(electronicProduct);
-
-		ShoppingItemDto electronicDto = new ShoppingItemDto(electronicProduct.getDefaultSku().getSkuCode(), 2);
-		cartDirector.addItemToCart(shoppingCart, electronicDto);
-
-		// make new order payment
-		whenCheckoutIsDone(shoppingCart);
-
-		List<Order> ordersList = orderService.findOrderByCustomerGuid(shopper.getCustomer().getGuid(), true);
-		Order order = ordersList.iterator().next();
-
-		// two shipments should have been created
-		List<OrderShipment> shipments = order.getAllShipments();
-		assertThat(shipments.size()).isEqualTo(2);
-
-		PhysicalOrderShipment phShipment = order.getPhysicalShipments().iterator().next();
-		phShipment = orderService.cancelOrderShipment(phShipment);
-
-		ElectronicOrderShipment elecShipment = order.getElectronicShipments().iterator().next();
-		assertThat(elecShipment.getShipmentStatus()).isEqualTo(SHIPPED);
-
-		assertThat(phShipment.getShipmentStatus()).isEqualTo(OrderShipmentStatus.CANCELLED);
-		assertThat(order.getStatus()).isEqualTo(COMPLETED);
-	}
-
-	/**
 	 * Test augmenting the shipment total.
 	 */
 	@Test
@@ -520,7 +483,8 @@ public class OrderServiceImplTest extends BasicSpringContextTest {
 		ShoppingCart shoppingCart = givenASimpleShoppingCart();
 
 		// make new order payment
-		OrderPayment templateOrderPayment = persisterFactory.getOrderTestPersister().createOrderPayment(customer, creditCard);
+		OrderPayment templateOrderPayment = persisterFactory.getOrderTestPersister().createOrderPayment(customer, new TokenBuilder()
+				.build());
 
 		// checkout
 		assertCustomerEmailEqualsShopperCustomerEmail(shopper);
@@ -531,17 +495,17 @@ public class OrderServiceImplTest extends BasicSpringContextTest {
 		checkoutService.checkout(shoppingCart, taxSnapshot, customerSession, templateOrderPayment, true);
 
 		List<Order> ordersList = orderService.findOrderByCustomerGuid(shopper.getCustomer().getGuid(), true);
-		assertThat(ordersList.size()).as("only one order should have been created by the checkout service").isEqualTo(1);
+		assertThat(ordersList).as("only one order should have been created by the checkout service").hasSize(1);
 		Order order = ordersList.iterator().next();
 
 		order.setModifiedBy(getEventOriginatorHelper().getSystemOriginator());
 		assertNotNull("Order should have a modified by value", order.getModifiedBy());
 
 		List<OrderShipment> shipments = order.getAllShipments();
-		assertThat(shipments.size()).as("one shipment should have been created").isEqualTo(1);
+		assertThat(shipments).as("one shipment should have been created").hasSize(1);
 
 		Set<OrderPayment> payments = order.getOrderPayments();
-		assertThat(payments.size()).as("there should be one payment").isEqualTo(1);
+		assertThat(payments).as("there should be one payment").hasSize(1);
 		OrderPayment authPayment = payments.iterator().next();
 		assertEquals("payment total should be for full amount of order", order.getTotal().doubleValue(), authPayment.getAmount().doubleValue(), 0);
 
@@ -572,8 +536,8 @@ public class OrderServiceImplTest extends BasicSpringContextTest {
 		phShipment = (PhysicalOrderShipment) orderService.processReleaseShipment(phShipment);
 
 		final int expectedPayments = 3;
-		assertThat(order.getOrderPayments().size()).as("there should be 3 payments : 1 auth + 1 reverse auth + 1 new auth (new amount)")
-				.isEqualTo(expectedPayments);
+		assertThat(order.getOrderPayments()).as("there should be 3 payments : 1 auth + 1 reverse auth + 1 new auth (new amount)").hasSize
+				(expectedPayments);
 
 		OrderPayment reverseAuth = null;
 		OrderPayment newAuth = null;
@@ -607,7 +571,8 @@ public class OrderServiceImplTest extends BasicSpringContextTest {
 		ShoppingCart shoppingCart = givenASimpleShoppingCart();
 
 		// make new order payment
-		OrderPayment templateOrderPayment = persisterFactory.getOrderTestPersister().createOrderPayment(customer, creditCard);
+		OrderPayment templateOrderPayment = persisterFactory.getOrderTestPersister().createOrderPayment(customer, new TokenBuilder()
+				.build());
 
 		// checkout
 		assertCustomerEmailEqualsShopperCustomerEmail(shopper);
@@ -618,14 +583,14 @@ public class OrderServiceImplTest extends BasicSpringContextTest {
 		checkoutService.checkout(shoppingCart, taxSnapshot, customerSession, templateOrderPayment, true);
 
 		List<Order> ordersList = orderService.findOrderByCustomerGuid(shopper.getCustomer().getGuid(), true);
-		assertThat(ordersList.size()).as("Only one order should have been created by the checkout service").isEqualTo(1);
+		assertThat(ordersList).as("Only one order should have been created by the checkout service").hasSize(1);
 		Order order = ordersList.iterator().next();
 
 		List<OrderShipment> shipments = order.getAllShipments();
-		assertThat(shipments.size()).as("one shipment should have been created").isEqualTo(1);
+		assertThat(shipments).as("one shipment should have been created").hasSize(1);
 
 		Set<OrderPayment> payments = order.getOrderPayments();
-		assertThat(payments.size()).as("there should be one payment").isEqualTo(1);
+		assertThat(payments).as("there should be one payment").hasSize(1);
 
 		OrderPayment authPayment = payments.iterator().next();
 		BigDecimal originalTotal = order.getTotal();
@@ -642,19 +607,18 @@ public class OrderServiceImplTest extends BasicSpringContextTest {
 
 		OrderSku newProductOrderSku = getNewProductOrderSku();
 		newPhysicalShipment.addShipmentOrderSku(newProductOrderSku);
-		newPhysicalShipment.setShippingServiceLevelGuid(scenario.getShippingServiceLevel().getGuid());
+		newPhysicalShipment.setShippingOptionCode(scenario.getShippingOption().getCode());
 		newPhysicalShipment.setShippingCost(ONE);
 
 		order.addShipment(newPhysicalShipment);
 		assertTrue("the new shipment total should be > 0", ZERO.compareTo(newPhysicalShipment.getTotal()) < 0);
-		assertThat(order.getPhysicalShipments().size()).as("the order should now have 2 physical shipments").isEqualTo(2);
+		assertThat(order.getPhysicalShipments()).as("the order should now have 2 physical shipments").hasSize(2);
 
 		templateOrderPayment.setAmount(newPhysicalShipment.getTotal());
 
 		OrderPayment lastPayment = paymentService.getAllActiveAuthorizationPayments(phShipment).iterator().next();
 		assertNotNull("There should be a payment for the original shipment", lastPayment);
 		assertSame("Order shipment for last payment should be the original shipment", phShipment, lastPayment.getOrderShipment());
-		assertThat(lastPayment.getPaymentMethod()).as("payment method should be credit card").isEqualTo(CREDITCARD);
 		assertThat(phShipment.getTotal()).as("Order shipment should have a total of the original order").isEqualTo(originalTotal);
 
 		phShipment.getOrder().setModifiedBy(getEventOriginatorHelper().getSystemOriginator());
@@ -670,7 +634,7 @@ public class OrderServiceImplTest extends BasicSpringContextTest {
 		phShipment = order.getPhysicalShipments().iterator().next();
 		orderService.processReleaseShipment(phShipment);
 
-		assertThat(order.getOrderPayments().size()).as("There should be 2 payments: 1 auth + 1 new auth (new amount)").isEqualTo(2);
+		assertThat(order.getOrderPayments()).as("There should be 2 payments: 1 auth + 1 new auth (new amount)").hasSize(2);
 
 		OrderPayment newAuth = null;
 		for (OrderPayment payment : order.getOrderPayments()) {
@@ -700,7 +664,7 @@ public class OrderServiceImplTest extends BasicSpringContextTest {
 
 		// two shipments should have been created
 		List<OrderShipment> shipments = order.getAllShipments();
-		assertThat(shipments.size()).isEqualTo(1);
+		assertThat(shipments).hasSize(1);
 
 		// Make a list of productCodes that were in the shopping cart
 		List<String> shoppingCartProductCodes = new ArrayList<>();
@@ -735,14 +699,7 @@ public class OrderServiceImplTest extends BasicSpringContextTest {
 
 		// two shipments should have been created
 		List<OrderShipment> shipments = order.getAllShipments();
-		assertThat(shipments.size()).isEqualTo(1);
-
-		// Make a list of productCodes that were in the shopping cart
-		List<String> orderProductCodes = new ArrayList<>();
-		for (OrderSku orderSku : shipments.get(0).getShipmentOrderSkus()) {
-			ProductSku sku = productSkuLookup.findByGuid(orderSku.getSkuGuid());
-			orderProductCodes.add(sku.getProduct().getCode());
-		}
+		assertThat(shipments).hasSize(1);
 
 		// Make sure we get that list back
 		final int fourMinutesInMillis = 240000;
@@ -765,7 +722,7 @@ public class OrderServiceImplTest extends BasicSpringContextTest {
 
 		// two shipments should have been created
 		List<OrderShipment> shipments = order.getAllShipments();
-		assertThat(shipments.size()).isEqualTo(1);
+		assertThat(shipments).hasSize(1);
 
 		// Make a list of productCodes that were in the shopping cart
 		List<String> orderProductCodes = new ArrayList<>();
@@ -794,7 +751,7 @@ public class OrderServiceImplTest extends BasicSpringContextTest {
 		// construct and save new shopping cart
 		Order order = createOrder();
 		order.failOrder();
-		order = orderService.update(order);
+		orderService.update(order);
 
 		// Make sure we get that list back
 		PurchaseHistorySearchCriteria criteria = createPurchaseHistorySearchCriteria(null, //no from date
@@ -814,13 +771,13 @@ public class OrderServiceImplTest extends BasicSpringContextTest {
 
 		String customerGuid = shopper.getCustomer().getGuid();
 		List<Order> orderByCustomerGuid = orderService.findOrderByCustomerGuid(customerGuid, true);
-		assertThat(orderByCustomerGuid.size()).as("There should be 1 order found").isEqualTo(1);
+		assertThat(orderByCustomerGuid).as("There should be 1 order found").hasSize(1);
 		assertThat(orderByCustomerGuid.get(0)).as("The order should be the one we created").isEqualTo(order);
 		List<Order> orderByOtherCustomer = orderService.findOrderByCustomerGuid(INVALID_GUID, true);
 		assertTrue("There should be no orders found when customer guid does not match.", orderByOtherCustomer.isEmpty());
 
 		order.failOrder();
-		order = orderService.update(order);
+		orderService.update(order);
 
 		orderByCustomerGuid = orderService.findOrderByCustomerGuid(customerGuid, true);
 		assertTrue("There should be no orders found", orderByCustomerGuid.isEmpty());
@@ -835,13 +792,13 @@ public class OrderServiceImplTest extends BasicSpringContextTest {
 
 		String customerGuid = shopper.getCustomer().getGuid();
 		List<Order> orderByCustomerGuid = orderService.findOrdersByCustomerGuidAndStoreCode(customerGuid, store.getCode(), true);
-		assertThat(orderByCustomerGuid.size()).as("There should be 1 order found").isEqualTo(1);
+		assertThat(orderByCustomerGuid).as("There should be 1 order found").hasSize(1);
 		assertThat(orderByCustomerGuid.get(0)).as("The order should be the one we created").isEqualTo(order);
 		List<Order> orderByOtherCustomer = orderService.findOrdersByCustomerGuidAndStoreCode(INVALID_GUID, store.getCode(), true);
 		assertTrue("There should be no orders found when customer guid does not match.", orderByOtherCustomer.isEmpty());
 
 		order.failOrder();
-		order = orderService.update(order);
+		orderService.update(order);
 
 		orderByCustomerGuid = orderService.findOrdersByCustomerGuidAndStoreCode(customerGuid, store.getCode(), true);
 		assertTrue("There should be no orders found", orderByCustomerGuid.isEmpty());
@@ -856,7 +813,7 @@ public class OrderServiceImplTest extends BasicSpringContextTest {
 
 		String customerGuid = shopper.getCustomer().getGuid();
 		List<Order> retrievedOrders = orderService.findOrdersByCustomerGuidAndStoreCode(customerGuid, store.getCode(), false);
-		assertThat(retrievedOrders.size()).as("There should be 1 order found").isEqualTo(1);
+		assertThat(retrievedOrders).as("There should be 1 order found").hasSize(1);
 
 		Order retrievedOrder = retrievedOrders.get(0);
 		assertThat(retrievedOrder.getOrderNumber()).as("The order number should be the one we created").isEqualTo(order.getOrderNumber());
@@ -872,13 +829,14 @@ public class OrderServiceImplTest extends BasicSpringContextTest {
 	}
 
 	private Order createOrder() {
-		shoppingCart = persisterFactory.getOrderTestPersister().persistEmptyShoppingCart(address, address, customerSession,
-				scenario.getShippingServiceLevel(), scenario.getStore());
+		ShoppingCart shoppingCart = persisterFactory.getOrderTestPersister().persistEmptyShoppingCart(address, address, customerSession,
+				scenario.getShippingOption(), scenario.getStore());
 		ShoppingItemDto dto = new ShoppingItemDto(product.getDefaultSku().getSkuCode(), 1);
 		cartDirector.addItemToCart(shoppingCart, dto);
 
 		// make new order payment
-		OrderPayment templateOrderPayment = persisterFactory.getOrderTestPersister().createOrderPayment(customer, creditCard);
+		OrderPayment templateOrderPayment = persisterFactory.getOrderTestPersister().createOrderPayment(customer, new TokenBuilder()
+				.build());
 
 		// checkout
 		assertCustomerEmailEqualsShopperCustomerEmail(shopper);
@@ -890,9 +848,8 @@ public class OrderServiceImplTest extends BasicSpringContextTest {
 
 		// only one order should have been created by the checkout service
 		List<Order> ordersList = orderService.findOrderByCustomerGuid(shopper.getCustomer().getGuid(), true);
-		assertThat(ordersList.size()).isEqualTo(1);
-		Order order = ordersList.iterator().next();
-		return order;
+		assertThat(ordersList).hasSize(1);
+		return ordersList.iterator().next();
 	}
 
 	/**
@@ -905,7 +862,8 @@ public class OrderServiceImplTest extends BasicSpringContextTest {
 		ShoppingCart shoppingCart = givenASimpleShoppingCart();
 
 		// make new order payment
-		OrderPayment templateOrderPayment = persisterFactory.getOrderTestPersister().createOrderPayment(customer, creditCard);
+		OrderPayment templateOrderPayment = persisterFactory.getOrderTestPersister().createOrderPayment(customer, new TokenBuilder()
+				.build());
 
 		// checkout
 		assertCustomerEmailEqualsShopperCustomerEmail(shopper);
@@ -917,107 +875,22 @@ public class OrderServiceImplTest extends BasicSpringContextTest {
 
 		// only one order should have been created by the checkout service
 		List<Order> ordersList = orderService.findOrderByCustomerGuid(shopper.getCustomer().getGuid(), true);
-		assertThat(ordersList.size()).isEqualTo(1);
+		assertThat(ordersList).hasSize(1);
 		Order order = ordersList.iterator().next();
 
 		// two shipments should have been created
 		List<OrderShipment> shipments = order.getAllShipments();
-		assertThat(shipments.size()).isEqualTo(1);
+		assertThat(shipments).hasSize(1);
 
 		// check payments
 		Set<OrderPayment> payments = order.getOrderPayments();
-		assertThat(payments.size()).isEqualTo(1);
+		assertThat(payments).hasSize(1);
 		OrderPayment authPayment = payments.iterator().next();
 		assertThat(authPayment.getAmount().doubleValue()).isEqualTo(order.getTotal().doubleValue());
 
 		assertThat(order.getStatus()).isEqualTo(IN_PROGRESS);
 		order = orderService.get(order.getUidPk());
 		assertThat(order.getStatus()).isEqualTo(IN_PROGRESS);
-	}
-
-	/*
-	The test is ignored because it's not applicable for always available products.
-	The decision whether returned InventoryDto should be null or "zero" (i.e. new DTO instance)
-	 is still pending. In any case, the test should be modified properly and adapted
-	 in case of always available products.
-	 */
-	/**
-	 * Tests release shipment with product which is always available.
-	 *
-	 */
-	@Test
-	@Ignore
-	public void testReleaseOrderShipmentProductAlwaysAvailable() {
-		product = persisterFactory.getCatalogTestPersister().createDefaultProductWithSkuAndInventory(scenario.getCatalog(), scenario.getCategory(),
-				scenario.getWarehouse());
-		product.setAvailabilityCriteria(ALWAYS_AVAILABLE);
-		product = productService.saveOrUpdate(product);
-
-		final int qty5 = 5;
-		InventoryDto inventoryDto = productInventoryManagementService.getInventory(
-				product.getDefaultSku(),
-				scenario.getWarehouse().getUidPk());
-		int removeFromStock = -95; //we need to set qty on hand to 5, so need to adjust it from default 100 to 5
-		InventoryCommand adjustInventoryCommand = inventoryFacade.getInventoryCommandFactory()
-				.getAdjustInventoryCommand(inventoryDto.getInventoryKey(), removeFromStock);
-		inventoryFacade.executeInventoryCommand(adjustInventoryCommand);
-
-		ShoppingCart shoppingCart = persisterFactory.getOrderTestPersister().persistEmptyShoppingCart(address, address, customerSession,
-				scenario.getShippingServiceLevel(), scenario.getStore());
-		ShoppingItemDto dto = new ShoppingItemDto(product.getDefaultSku().getSkuCode(), 2);
-		cartDirector.addItemToCart(shoppingCart, dto);
-
-		OrderPayment orderPayment = new OrderPaymentImpl();
-		orderPayment.setPaymentMethod(CREDITCARD);
-
-		// checkout
-
-		final ShoppingCartPricingSnapshot pricingSnapshot = pricingSnapshotService.getPricingSnapshotForCart(shoppingCart);
-		final ShoppingCartTaxSnapshot taxSnapshot = taxSnapshotService.getTaxSnapshotForCart(shoppingCart, pricingSnapshot);
-
-		checkoutService.checkout(shoppingCart, taxSnapshot, customerSession, orderPayment, true);
-
-		inventoryDto = productInventoryManagementService.getInventory(
-				inventoryDto.getSkuCode(), inventoryDto.getWarehouseUid());
-
-		// check allocation status
-		assertThat(inventoryDto.getAvailableQuantityInStock()).isEqualTo(qty5);
-		assertThat(inventoryDto.getAllocatedQuantity()).isEqualTo(0);
-
-		Order order = shoppingCart.getCompletedOrder();
-
-		List<PhysicalOrderShipment> physicalShipments = order.getPhysicalShipments();
-		assertThat(physicalShipments.size()).as("Only one shipment should exist").isEqualTo(1);
-		PhysicalOrderShipment shipment = physicalShipments.iterator().next();
-
-		Set<OrderSku> shipmentOrderSkus = shipment.getShipmentOrderSkus();
-		assertThat(shipmentOrderSkus.size()).as("One product was checked out only").isEqualTo(1);
-		OrderSku orderSku = shipmentOrderSkus.iterator().next();
-		assertThat(orderSku.getAllocatedQuantity()).as("Quantity of two products was checked out").isEqualTo(2);
-		inventoryDto = productInventoryManagementService.getInventory(
-				orderSku.getSkuCode(),
-				scenario.getWarehouse().getUidPk());
-
-		// check allocation status
-		assertThat(inventoryDto.getAllocatedQuantity()).as("Two allocated quantity on the inventory should not have changed").isEqualTo(0);
-
-		order = orderService.get(order.getUidPk());
-
-		assertThat(order.getAllShipments().iterator().next()
-				.getShipmentStatus()).as("Order state should be inventory assigned").isEqualTo(INVENTORY_ASSIGNED);
-
-		order.setModifiedBy(getEventOriginatorHelper().getSystemOriginator());
-		shipment = (PhysicalOrderShipment) order.getAllShipments().iterator().next();
-		shipment = (PhysicalOrderShipment) orderService.processReleaseShipment(shipment);
-
-		assertThat(shipment.getShipmentStatus()).as("After order release state should be RELEASED").isEqualTo(RELEASED);
-
-		orderSku = shipment.getShipmentOrderSkus().iterator().next();
-
-		assertThat(orderSku.getAllocatedQuantity()).as("The allocated order sku quantity must have been increased by 2").isEqualTo(2);
-
-		assertThat(orderService.getAwaitingShipmentsCount(scenario.getWarehouse())).as("The number of orders awaiting shipment should be 1")
-				.isEqualTo(new Long(1));
 	}
 
 	/**
@@ -1054,12 +927,12 @@ public class OrderServiceImplTest extends BasicSpringContextTest {
 		assertThat(product.getAvailabilityCriteria()).isEqualTo(availabilityCriteria);
 
 		ShoppingCart shoppingCart = persisterFactory.getOrderTestPersister().persistEmptyShoppingCart(address, address, customerSession,
-				scenario.getShippingServiceLevel(), scenario.getStore());
+				scenario.getShippingOption(), scenario.getStore());
 		ShoppingItemDto dto = new ShoppingItemDto(product.getDefaultSku().getSkuCode(), 2);
 		cartDirector.addItemToCart(shoppingCart, dto);
 
 		OrderPayment orderPayment = new OrderPaymentImpl();
-		orderPayment.setPaymentMethod(CREDITCARD);
+		orderPayment.setPaymentMethod(PAYMENT_TOKEN);
 
 		// checkout
 		final ShoppingCartPricingSnapshot pricingSnapshot = pricingSnapshotService.getPricingSnapshotForCart(shoppingCart);
@@ -1077,11 +950,11 @@ public class OrderServiceImplTest extends BasicSpringContextTest {
 		Order order = shoppingCart.getCompletedOrder();
 
 		List<PhysicalOrderShipment> physicalShipments = order.getPhysicalShipments();
-		assertThat(physicalShipments.size()).isEqualTo(1);
+		assertThat(physicalShipments).hasSize(1);
 		PhysicalOrderShipment shipment = physicalShipments.iterator().next();
 
 		Set<OrderSku> shipmentOrderSkus = shipment.getShipmentOrderSkus();
-		assertThat(shipmentOrderSkus.size()).as("One product was checked out only").isEqualTo(1);
+		assertThat(shipmentOrderSkus).as("One product was checked out only").hasSize(1);
 		OrderSku orderSku = shipmentOrderSkus.iterator().next();
 		assertThat(orderSku.getAllocatedQuantity()).as("Quantity of two products was checked out").isEqualTo(2);
 		inventoryDto = productInventoryManagementService.getInventory(
@@ -1139,9 +1012,6 @@ public class OrderServiceImplTest extends BasicSpringContextTest {
 		return criteria;
 	}
 
-	/**
-	 * @return
-	 */
 	private OrderSku getNewProductOrderSku() {
 		Product newProduct = persisterFactory.getCatalogTestPersister().createDefaultProductWithSkuAndInventory(scenario.getCatalog(),
 				scenario.getCategory(), scenario.getWarehouse());
@@ -1198,7 +1068,7 @@ public class OrderServiceImplTest extends BasicSpringContextTest {
 		criteria.setStoreCodes(storeCodes);
 
 		List<Order> results = orderService.findOrdersBySearchCriteria(criteria, 0, MAX_RESULTS);
-		assertThat(results.size()).as("One order should have been found").isEqualTo(1);
+		assertThat(results).as("One order should have been found").hasSize(1);
 		assertThat(results.get(0)).as("The search result should be the expected order").isEqualTo(order);
 	}
 
@@ -1216,7 +1086,7 @@ public class OrderServiceImplTest extends BasicSpringContextTest {
 		criteria.setStoreCodes(storeCodes);
 
 		List<Order> results = orderService.findOrdersBySearchCriteria(criteria, 0, MAX_RESULTS);
-		assertThat(results.size()).as("No order should have been found").isEqualTo(0);
+		assertThat(results).as("No order should have been found").hasSize(0);
 	}
 
 	/**
@@ -1232,7 +1102,7 @@ public class OrderServiceImplTest extends BasicSpringContextTest {
 		criteria.setStoreCodes(storeCodes);
 
 		List<Order> results = orderService.findOrdersBySearchCriteria(criteria, 0, MAX_RESULTS);
-		assertThat(results.size()).as("One order should have been found").isEqualTo(1);
+		assertThat(results).as("One order should have been found").hasSize(1);
 		assertThat(results.get(0)).as("The search result should be the expected order").isEqualTo(order);
 	}
 
@@ -1267,7 +1137,8 @@ public class OrderServiceImplTest extends BasicSpringContextTest {
 		ShoppingCart shoppingCart = givenASimpleShoppingCart();
 
 		// make new order payment
-		OrderPayment templateOrderPayment = persisterFactory.getOrderTestPersister().createOrderPayment(customer, creditCard);
+		OrderPayment templateOrderPayment = persisterFactory.getOrderTestPersister().createOrderPayment(customer, new TokenBuilder()
+				.build());
 
 		// checkout
 		assertCustomerEmailEqualsShopperCustomerEmail(shopper);
@@ -1279,7 +1150,7 @@ public class OrderServiceImplTest extends BasicSpringContextTest {
 
 		// only one order should have been created by the checkout service
 		List<Order> ordersList = orderService.findOrderByCustomerGuid(shopper.getCustomer().getGuid(), true);
-		assertThat(ordersList.size()).isEqualTo(1);
+		assertThat(ordersList).hasSize(1);
 		final Order order = ordersList.get(0);
 
 		try {
@@ -1344,7 +1215,7 @@ public class OrderServiceImplTest extends BasicSpringContextTest {
 		assertTrue("There should be no failed orders", failedOrders.isEmpty());
 
 		failedOrders = orderService.getFailedOrderUids(now, maxResults);
-		assertThat(failedOrders.size()).as("There should be one order returned").isEqualTo(1);
+		assertThat(failedOrders).as("There should be one order returned").hasSize(1);
 
 		Long failedOrderUid = failedOrders.get(0);
 		assertThat(failedOrderUid.longValue()).as("The failed order should be the we updated").isEqualTo(order.getUidPk());
@@ -1368,7 +1239,7 @@ public class OrderServiceImplTest extends BasicSpringContextTest {
 		}
 		Date now = timeService.getCurrentTime();
 		List<Long> failedOrders = orderService.getFailedOrderUids(now, maxResults);
-		assertThat(failedOrders.size()).as("The method should return exactly maxResults results").isEqualTo(maxResults);
+		assertThat(failedOrders).as("The method should return exactly maxResults results").hasSize(maxResults);
 	}
 
 	/**
@@ -1457,7 +1328,7 @@ public class OrderServiceImplTest extends BasicSpringContextTest {
 		Order order = createOrder();
 
 		List<String> orderNumbers = orderService.findOrderNumbersByCustomerGuid(storeCode, customerGuid);
-		assertThat(orderNumbers.size()).as("There should be exactly one order found.").isEqualTo(1);
+		assertThat(orderNumbers).as("There should be exactly one order found.").hasSize(1);
 		assertTrue("The order number should match the one we just created.", orderNumbers.contains(order.getOrderNumber()));
 	}
 
@@ -1487,70 +1358,23 @@ public class OrderServiceImplTest extends BasicSpringContextTest {
 				orderNumbers.isEmpty());
 	}
 
-	@DirtiesDatabase
-	@Test
-	public void ensureAddRemovesCreditCardDataIfStoreDoesNotAllowIt() {
-		store.setStoreFullCreditCardsEnabled(false);
-		store = storeService.saveOrUpdate(store);
 
-		Order order = createOrder();
-		assertNull("Credit card data should not have been persisted", order.getOrderPayment().getCardNumber());
-	}
-
-	@DirtiesDatabase
-	@Test
-	public void ensureAddPreservesCreditCardDataIfStoreAllowsIt() {
-		store.setStoreFullCreditCardsEnabled(true);
-		store = storeService.saveOrUpdate(store);
-
-		Order order = createOrder();
-		assertThat(order.getOrderPayment().getCardNumber()).as("Credit card data should have been persisted")
-				.isEqualTo(customer.getPreferredCreditCard().getCardNumber());
-	}
-
-	@DirtiesDatabase
-	@Test
-	public void ensureUpdateRemovesCreditCardDataIfStoreDoesNotAllowIt() {
-		store.setStoreFullCreditCardsEnabled(false);
-		store = storeService.saveOrUpdate(store);
-
-		Order order = createOrder();
-		order.getOrderPayment().setUnencryptedCardNumber("12345");
-		order.getOrderPayment().setExpiryMonth("13");
-
-		order = orderService.update(order);
-		assertNull("Credit card data should not have been persisted", order.getOrderPayment().getCardNumber());
-	}
-
-	@DirtiesDatabase
-	@Test
-	public void ensureUpdatePreservesCreditCardDataIfStoreRequiresIt() {
-		store.setStoreFullCreditCardsEnabled(true);
-		store = storeService.saveOrUpdate(store);
-
-		Order order = createOrder();
-		order.getOrderPayment().setUnencryptedCardNumber("12345");
-		order.getOrderPayment().setExpiryMonth("13");
-
-		order = orderService.update(order);
-		assertThat(order.getOrderPayment().getUnencryptedCardNumber()).as("Credit card data should have been persisted").isEqualTo("12345");
-	}
 
 	/**
 	 * This test currently fails because the isSanitized variable is @Transient and its state is lost between the Merge operation
 	 * and when OpenJPA flushes the tx.  As a result, there's no way to ensure that updates cannot indirectly modify an OrderPayment
 	 * (including change the credit card number) and that encrypted credit card number possibly being persisted if the user
 	 * insists on bypassing the OrderService.
-	 *
+	 * <p>
 	 * On the other hand, a) users should not be bypassing the OrderService.update() method and b) I can't think of any valid reasons
-	 * why anyone should be modifying OrderPayments anyways.  Deleting, maybe.  But Modifying?  
+	 * why anyone should be modifying OrderPayments anyways.  Deleting, maybe.  But Modifying?
 	 */
 	@DirtiesDatabase
 	@Ignore
 	@Test(expected = TransactionSystemException.class)
 	public void ensureThatDirectlyUpdatingPaymentsWithoutGoingThroughTheOrderServiceIsStrictlyForbidden() {
 		Order order = createOrder();
-		order.getOrderPayment().setExpiryMonth("13");
+		order.getOrderPayment();
 
 		//  Simulate an update through something other than the OrderService
 		PersistenceSession session = persistenceEngine.getPersistenceSession();
@@ -1587,7 +1411,7 @@ public class OrderServiceImplTest extends BasicSpringContextTest {
 		OrderPayment origAuth = order.getOrderPayment();
 		OrderPayment capture = result.getProcessedPayments().iterator().next();
 
-		assertThat(result.getProcessedPayments().size()).as("One payments should have been processed").isEqualTo(1);
+		assertThat(result.getProcessedPayments()).as("One payments should have been processed").hasSize(1);
 		assertThat(capture.getReferenceId()).as("Original auth should now be captured").isEqualTo(origAuth.getReferenceId());
 		assertThat(capture.getTransactionType()).as("Process payment should have captured").isEqualTo(CAPTURE_TRANSACTION);
 	}
@@ -1640,12 +1464,12 @@ public class OrderServiceImplTest extends BasicSpringContextTest {
 		// Then
 		// only one order should have been created by the checkout
 		List<Order> ordersList = orderService.findOrderByCustomerGuid(shopper.getCustomer().getGuid(), true);
-		assertThat(ordersList.size()).isEqualTo(1);
+		assertThat(ordersList).hasSize(1);
 		Order order = ordersList.iterator().next();
 
 		// one shipment should have been created
 		List<OrderShipment> shipments = order.getAllShipments();
-		assertThat(shipments.size()).isEqualTo(1);
+		assertThat(shipments).hasSize(1);
 
 		// Order is on hold
 		assertThat(order.getStatus()).isEqualTo(ONHOLD);
@@ -1671,7 +1495,8 @@ public class OrderServiceImplTest extends BasicSpringContextTest {
 	}
 
 	private void whenCheckoutIsDone(final ShoppingCart shoppingCart) {
-		OrderPayment templateOrderPayment = persisterFactory.getOrderTestPersister().createOrderPayment(customer, creditCard);
+		OrderPayment templateOrderPayment = persisterFactory.getOrderTestPersister().createOrderPayment(customer, new PaymentTokenImpl.TokenBuilder()
+				.build());
 
 		// checkout
 		final ShoppingCartPricingSnapshot pricingSnapshot = pricingSnapshotService.getPricingSnapshotForCart(shoppingCart);
@@ -1682,7 +1507,7 @@ public class OrderServiceImplTest extends BasicSpringContextTest {
 
 	private ShoppingCart givenASimpleShoppingCart() {
 		ShoppingCart shoppingCart = persisterFactory.getOrderTestPersister().persistEmptyShoppingCart(address, address, customerSession,
-				scenario.getShippingServiceLevel(), scenario.getStore());
+				scenario.getShippingOption(), scenario.getStore());
 		ShoppingItemDto shoppingItemDto = new ShoppingItemDto(product.getDefaultSku().getSkuCode(), 1);
 		cartDirector.addItemToCart(shoppingCart, shoppingItemDto);
 		return shoppingCart;

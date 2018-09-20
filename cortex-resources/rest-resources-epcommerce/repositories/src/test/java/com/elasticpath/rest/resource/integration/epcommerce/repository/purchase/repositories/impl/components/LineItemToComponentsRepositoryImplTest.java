@@ -3,16 +3,21 @@
  */
 package com.elasticpath.rest.resource.integration.epcommerce.repository.purchase.repositories.impl.components;
 
+import static com.elasticpath.rest.resource.integration.epcommerce.repository.IdentifierTestFactory.buildPurchaseLineItemIdentifier;
+import static com.elasticpath.rest.resource.integration.epcommerce.repository.ResourceTestConstants.PURCHASE_ID;
+import static com.elasticpath.rest.resource.integration.epcommerce.repository.ResourceTestConstants.SCOPE;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.util.List;
+
+import com.google.common.collect.ImmutableList;
 import io.reactivex.Single;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.elasticpath.domain.catalog.Product;
 import com.elasticpath.domain.catalog.ProductBundle;
@@ -20,9 +25,7 @@ import com.elasticpath.domain.catalog.ProductSku;
 import com.elasticpath.domain.catalogview.StoreProduct;
 import com.elasticpath.rest.definition.purchases.PurchaseLineItemComponentsIdentifier;
 import com.elasticpath.rest.definition.purchases.PurchaseLineItemIdentifier;
-import com.elasticpath.rest.definition.purchases.PurchaseLineItemsIdentifier;
-import com.elasticpath.rest.id.type.PathIdentifier;
-import com.elasticpath.rest.resource.integration.epcommerce.repository.sku.ProductSkuRepository;
+import com.elasticpath.rest.resource.integration.epcommerce.repository.order.OrderRepository;
 
 /**
  * Test for the  {@link LineItemToComponentsRepositoryImpl}.
@@ -30,62 +33,45 @@ import com.elasticpath.rest.resource.integration.epcommerce.repository.sku.Produ
 @RunWith(MockitoJUnitRunner.class)
 public class LineItemToComponentsRepositoryImplTest {
 
-	private static final String LINE_ITEM_ID = "line item id";
+	private final List<String> lineItemIds = ImmutableList.of("id", "id2");
+
 	@Mock
-	private ProductSkuRepository productSkuRepository;
+	private ProductSku productSku;
 
 	@InjectMocks
 	private LineItemToComponentsRepositoryImpl<PurchaseLineItemIdentifier, PurchaseLineItemComponentsIdentifier> repository;
 
-	@Before
-	public void setUp() {
-		repository.setProductSkuRepository(productSkuRepository);
+	@Mock
+	private OrderRepository orderRepository;
+
+	private final PurchaseLineItemIdentifier purchaseLineItemIdentifier = buildPurchaseLineItemIdentifier(SCOPE, PURCHASE_ID, lineItemIds);
+
+	@Test
+	public void testGetElementsWithComponentsReturnAnIdentifier() {
+		Product product = mock(ProductBundle.class);
+
+		mockDependencies(product);
+
+		repository.getElements(purchaseLineItemIdentifier)
+				.test()
+				.assertNoErrors()
+				.assertValueCount(1);
 	}
 
 	@Test
-	public void componentsInsideOfBundleTest() {
+	public void testGetElementsWithoutComponentsReturnEmpty() {
+		Product product = mock(StoreProduct.class);
 
-		Product bundle = mock(ProductBundle.class);
+		mockDependencies(product);
 
-		performSetupWithProduct(bundle);
-
-		PurchaseLineItemIdentifier identifier = getPurchaseLineItemIdentifier();
-
-		repository.getElements(identifier)
+		repository.getElements(purchaseLineItemIdentifier)
 				.test()
-				.assertValue(PurchaseLineItemComponentsIdentifier.builder()
-						.withPurchaseLineItem(identifier)
-						.build());
-	}
-
-	@Test
-	public void noComponentsForLineItemTest() {
-
-		Product storeProduct = mock(StoreProduct.class);
-
-		performSetupWithProduct(storeProduct);
-
-		PurchaseLineItemIdentifier identifier = getPurchaseLineItemIdentifier();
-
-		repository.getElements(identifier)
-				.test()
+				.assertNoErrors()
 				.assertValueCount(0);
 	}
 
-	private PurchaseLineItemIdentifier getPurchaseLineItemIdentifier() {
-		PurchaseLineItemsIdentifier lineItems = mock(PurchaseLineItemsIdentifier.class);
-		return PurchaseLineItemIdentifier.builder()
-				.withLineItemId(PathIdentifier.of(LINE_ITEM_ID))
-				.withPurchaseLineItems(lineItems)
-				.build();
-	}
-
-	private void performSetupWithProduct(final Product product) {
-		ProductSku productSku = mock(ProductSku.class);
-
+	private void mockDependencies(final Product product) {
+		when(orderRepository.findProductSku(SCOPE, PURCHASE_ID, lineItemIds)).thenReturn(Single.just(productSku));
 		when(productSku.getProduct()).thenReturn(product);
-
-		when(productSkuRepository.getProductSkuWithAttributesByGuidAsSingle(LINE_ITEM_ID))
-				.thenReturn(Single.just(productSku));
 	}
 }

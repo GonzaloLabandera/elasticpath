@@ -3,14 +3,24 @@
  */
 package com.elasticpath.service.impl;
 
+import static java.lang.String.format;
+import static java.util.Collections.singletonList;
+
+import com.google.common.collect.ImmutableMap;
+import org.apache.commons.collections.CollectionUtils;
+
 import com.elasticpath.base.exception.EpServiceException;
+import com.elasticpath.base.common.dto.StructuredErrorMessage;
 import com.elasticpath.domain.customer.Customer;
 import com.elasticpath.domain.customer.CustomerAddress;
 import com.elasticpath.domain.shopper.Shopper;
 import com.elasticpath.domain.shoppingcart.ShoppingCart;
 import com.elasticpath.service.CustomerOrderingService;
 import com.elasticpath.service.customer.CustomerService;
+import com.elasticpath.service.shipping.ShippingOptionResult;
+import com.elasticpath.service.shipping.ShippingOptionService;
 import com.elasticpath.service.shoppingcart.CheckoutService;
+import com.elasticpath.shipping.connectivity.dto.ShippingOption;
 
 /**
  * Provides a high-level service for customer ordering controllers (used only in FIT tests).
@@ -20,6 +30,8 @@ public class CustomerOrderingServiceImpl implements CustomerOrderingService {
 	private CheckoutService checkoutService;
 
 	private CustomerService customerService;
+
+	private ShippingOptionService shippingOptionService;
 
 	@Override
 	public void selectShippingAddress(final Shopper shopper, final CustomerAddress shippingAddress) {
@@ -31,8 +43,23 @@ public class CustomerOrderingServiceImpl implements CustomerOrderingService {
 
 		// Throw the exception if no shipping service is provided for the selected address
 		checkoutService.retrieveShippingOption(shoppingCart);
-		if (shoppingCart.getShippingServiceLevelList().isEmpty()) {
-			throw new EpServiceException("No shipping service level could be found for the shipping address " + shippingAddress);
+
+		final ShippingOptionResult shippingOptionResult = shippingOptionService.getShippingOptions(shoppingCart);
+		final String errorMessage = format("Unable to get available shipping options for the given cart with guid '%s'. "
+						+ "So cannot validate shipping address.",
+				shoppingCart.getGuid());
+		shippingOptionResult.throwExceptionIfUnsuccessful(
+				errorMessage,
+				singletonList(
+						new StructuredErrorMessage(
+								"shippingoptions.unavailable",
+								errorMessage,
+								ImmutableMap.of(
+										"cart-id", shoppingCart.getGuid())
+						)
+				));
+		if (CollectionUtils.isEmpty(shippingOptionResult.getAvailableShippingOptions())) {
+			throw new EpServiceException("No shipping option could be found for the shipping address " + shippingAddress);
 		}
 
 		final Customer customer = shopper.getCustomer();
@@ -76,8 +103,8 @@ public class CustomerOrderingServiceImpl implements CustomerOrderingService {
 	}
 
 	@Override
-	public ShoppingCart selectShippingServiceLevel(final ShoppingCart shoppingCart, final long selectedSSLUid) {
-		shoppingCart.setSelectedShippingServiceLevelUid(selectedSSLUid);
+	public ShoppingCart selectShippingOption(final ShoppingCart shoppingCart, final ShippingOption shippingOption) {
+		shoppingCart.setSelectedShippingOption(shippingOption);
 		return shoppingCart;
 	}
 
@@ -89,6 +116,10 @@ public class CustomerOrderingServiceImpl implements CustomerOrderingService {
 	@Override
 	public void setCustomerService(final CustomerService customerService) {
 		this.customerService = customerService;
+	}
+
+	public void setShippingOptionService(final ShippingOptionService shippingOptionService) {
+		this.shippingOptionService = shippingOptionService;
 	}
 
 }

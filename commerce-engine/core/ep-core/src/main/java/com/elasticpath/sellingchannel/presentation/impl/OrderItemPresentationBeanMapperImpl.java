@@ -53,7 +53,6 @@ public class OrderItemPresentationBeanMapperImpl implements OrderItemPresentatio
 			destDocument.setAllocated(sourceNode.isAllocated());
 			destDocument.setProductSku(sourceNode.getProductSku());
 			destDocument.setDigitalAsset(sourceNode.getDigitalAsset());
-			destDocument.setEncryptedUidPk(sourceNode.getEncryptedUidPk());
 			destDocument.setListPriceMoney(sourceNode.getListPrice());
 			destDocument.setUnitPriceMoney(sourceNode.getUnitPrice());
 			destDocument.setPrice(sourceNode.getPrice());

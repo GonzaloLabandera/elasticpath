@@ -1,30 +1,33 @@
 @smoketest @catalogManagement @catalog
-Feature: Create Brand for existing catalog
+Feature: Catalog Brand Management
 
   Background:
     Given I sign in to CM as admin user
-    When I go to Catalog Management
+    And I go to Catalog Management
 
-  Scenario: Update, Delete new brand for an existing catalog
-    When I select catalog Rock Jam in the list
-    And I open the selected catalog
-    And I add a brand My Test Brand with code TestBrand
-    And I save my changes
-    Then the brand My Test Brand is displayed in the brands table
-    When I edit the brand name to newnamehere
-    Then the brand newnamehere is displayed in the brands table
-    When I delete brand newnamehere
-    And I save my changes
-    Then The brand newnamehere is deleted
+  @cleanupCatalog
+  Scenario: Update, Edit, Delete new brand for an existing catalog
+    Given I create a new catalog with following details
+      | catalogName   | language |
+      | ATest Catalog | English  |
+    And I go to Catalog Management
+    And I open the newly created catalog editor
+    When I add a brand testBrand
+    Then the brand testBrand is displayed in the brands table
+
+    When I edit brand name to newBrandName for the newly added brand
+    Then the brand newBrandName is displayed in the brands table
+    When I delete brand newBrandName
+    Then The brand newBrandName is deleted
 
   Scenario: Unable to add duplicate brand if it already exists
     When I select catalog Mobile Catalog in the list
     And I open the selected catalog
-    And I add a brand Disney with code Disney
+    And I add an existing brand Disney
     Then an error message of A brand with the code you provided already exists. It cannot be added. is displayed in the add dialog
 
   Scenario: Unable to delete a brand already used by a product
     When I select catalog Mobile Catalog in the list
     And I open the selected catalog
-    And I delete brand Samsung
+    And I attempt to delete an existing brand Samsung used by product
     Then an error message of The following brand is currently in use. It cannot be removed. is displayed

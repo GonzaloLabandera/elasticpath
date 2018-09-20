@@ -10,7 +10,7 @@ import javax.inject.Singleton;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.elasticpath.commons.converter.ConversionMalformedValueException;
+import com.elasticpath.converter.ConversionMalformedValueException;
 import com.elasticpath.rest.identity.Subject;
 import com.elasticpath.rest.identity.attribute.UserTraitSubjectAttribute;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.customer.UserTraitsToTagSetTransformer;

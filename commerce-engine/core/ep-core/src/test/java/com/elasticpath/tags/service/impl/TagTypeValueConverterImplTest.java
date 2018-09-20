@@ -14,8 +14,8 @@ import org.jmock.integration.junit4.JUnitRuleMockery;
 import org.junit.Rule;
 import org.junit.Test;
 
-import com.elasticpath.commons.converter.ConversionMalformedValueException;
-import com.elasticpath.commons.converter.StringToTypeConverter;
+import com.elasticpath.converter.ConversionMalformedValueException;
+import com.elasticpath.converter.StringToTypeConverter;
 import com.elasticpath.tags.domain.TagDefinition;
 import com.elasticpath.tags.domain.TagValueType;
 

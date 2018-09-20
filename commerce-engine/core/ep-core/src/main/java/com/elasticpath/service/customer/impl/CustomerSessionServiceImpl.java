@@ -220,8 +220,8 @@ public class CustomerSessionServiceImpl extends AbstractEpPersistenceServiceImpl
 	public CustomerSession createWithShopper(final Shopper shopper) {
 		final CustomerSession customerSession = create();
 
-		shopper.updateTransientDataWith(customerSession);
 		customerSession.setShopper(shopper);
+		shopper.updateTransientDataWith(customerSession);
 
 		return customerSession;
 	}

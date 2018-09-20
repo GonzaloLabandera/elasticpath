@@ -39,13 +39,6 @@ public interface StoreProduct extends Product {
 	boolean isProductDisplayable();
 
 	/**
-	 * Verifies that a product could be purchased in the current store the product exists in.
-	 *
-	 * @return true if the product is available to be purchased
-	 */
-	boolean isProductPurchasable();
-
-	/**
 	 * Gets the message availability code for a sku belonging to this product.
 	 *
 	 * @param skuUid the product sku UIDPK
@@ -146,14 +139,6 @@ public interface StoreProduct extends Product {
 	 * @return the availability of the product
 	 */
 	Availability getProductAvailability();
-
-	/**
-	 * Determines whether the sku with the given code is purchasable.
-	 *
-	 * @param skuCode the code of the sku to check
-	 * @return true is the sku is purchasable
-	 */
-	boolean isSkuPurchasable(String skuCode);
 
 	/**
 	 * Determines whether the sku with the given code is displayable.

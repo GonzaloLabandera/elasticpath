@@ -6,43 +6,41 @@ package com.elasticpath.common.dto.sellingchannel.impl;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.BDDMockito.given;
 
-import java.math.BigDecimal;
-import java.util.Currency;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.jmock.Expectations;
-import org.jmock.integration.junit4.JUnitRuleMockery;
-import org.junit.After;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.elasticpath.common.dto.ShoppingItemDto;
 import com.elasticpath.commons.beanframework.BeanFactory;
 import com.elasticpath.domain.catalog.BundleConstituent;
 import com.elasticpath.domain.catalog.ItemConfiguration;
-import com.elasticpath.domain.catalog.Price;
 import com.elasticpath.domain.catalog.Product;
 import com.elasticpath.domain.catalog.ProductBundle;
 import com.elasticpath.domain.catalog.ProductSku;
 import com.elasticpath.domain.catalog.impl.BundleConstituentImpl;
 import com.elasticpath.domain.catalog.impl.ItemConfigurationImpl;
-import com.elasticpath.domain.catalog.impl.PriceImpl;
 import com.elasticpath.domain.catalog.impl.ProductBundleImpl;
 import com.elasticpath.domain.catalog.impl.ProductConstituentImpl;
 import com.elasticpath.domain.catalog.impl.ProductImpl;
 import com.elasticpath.domain.catalog.impl.ProductSkuConstituentImpl;
 import com.elasticpath.domain.catalog.impl.ProductSkuImpl;
 import com.elasticpath.domain.catalog.impl.SelectionRuleImpl;
-import com.elasticpath.domain.shoppingcart.impl.ShoppingItemImpl;
-import com.elasticpath.money.Money;
-import com.elasticpath.test.BeanFactoryExpectationsFactory;
+import com.elasticpath.domain.misc.impl.RandomGuidImpl;
+import com.elasticpath.service.catalog.ProductSkuLookup;
+import com.elasticpath.service.catalog.impl.BundleIdentifierImpl;
 
 /**
  * Tests for ShoppingItemDtoFactoryImpl.
  */
+@RunWith(MockitoJUnitRunner.class)
 public class ShoppingItemDtoFactoryImplTest {
 	private static final String PROD_A = "ProdA";
 	private static final String AAA = "AAA";
@@ -51,25 +49,28 @@ public class ShoppingItemDtoFactoryImplTest {
 	private static final String SKU_B = "SkuB";
 	private static final String SKU_C = "SkuC";
 	private static final String SKU_D = "SkuD";
-	private static final String CURRENCY_CAD = "CAD";
 
-	@Rule
-	public final JUnitRuleMockery context = new JUnitRuleMockery();
+	private static final String BUNDLE_CODE = "BUNDLE_CODE";
+	private static final String PRODUCT_CODE = "PRODUCT_CODE";
+
+	@Mock
 	private BeanFactory beanFactory;
-	private BeanFactoryExpectationsFactory expectationsFactory;
+
+	@Mock
+	private ProductSkuLookup productSkuLookup;
+
+	@InjectMocks
+	private ShoppingItemDtoFactoryImpl factory;
 
 	/**
 	 * Set up required before each test.
 	 */
 	@Before
 	public void setUp() {
-		beanFactory = context.mock(BeanFactory.class);
-		expectationsFactory = new BeanFactoryExpectationsFactory(context, beanFactory);
-	}
+		given(beanFactory.getBean("productConstituent")).will(invocationOnMock -> new ProductConstituentImpl());
+		given(beanFactory.getBean("productSkuConstituent")).will(invocationOnMock -> new ProductSkuConstituentImpl());
 
-	@After
-	public void tearDown() {
-		expectationsFactory.close();
+		factory.setBundleIdentifier(new BundleIdentifierImpl());
 	}
 
 	/**
@@ -83,37 +84,19 @@ public class ShoppingItemDtoFactoryImplTest {
 		final String selectedSkuGuid = "selectedSku";
 		final String nonSelectedSkuGuid = "nonSelectedSku";
 		final String bundleSkuGuid = "bundleSku";
-		final Product selectedProduct = new ProductImpl();
-		final ProductSku selectedSku = new ProductSkuImpl();
-		selectedSku.setSkuCode(selectedSkuGuid);
-		selectedProduct.addOrUpdateSku(selectedSku);
 
-		final Product nonSelectedProduct = new ProductImpl();
-		final ProductSku nonSelectedSku = new ProductSkuImpl();
-		nonSelectedSku.setSkuCode(nonSelectedSkuGuid);
-		nonSelectedProduct.addOrUpdateSku(nonSelectedSku);
-		nonSelectedSku.setProduct(nonSelectedProduct);
+		final Product selectedProduct = createProductWithSkuCode(PRODUCT_CODE, selectedSkuGuid);
+		final Product nonSelectedProduct = createProductWithSkuCode(PRODUCT_CODE, nonSelectedSkuGuid);
 
-		expectationsFactory.allowingBeanFactoryGetBean("productConstituent", ProductConstituentImpl.class);
-		expectationsFactory.allowingBeanFactoryGetBean("productSkuConstituent", ProductSkuConstituentImpl.class);
+		final BundleConstituent selectedBundleItem = createBundleConstituentFrom(selectedProduct, 1);
+		final BundleConstituent nonSelectedBundleItem = createBundleConstituentFrom(nonSelectedProduct.getDefaultSku(), 1);
 
-		final BundleConstituent selectedBundleItem = new BundleConstituentImpl();
-		selectedBundleItem.setQuantity(1);
-		selectedBundleItem.setConstituent(selectedProduct);
-		final BundleConstituent nonSelectedBundleItem = new BundleConstituentImpl();
-		nonSelectedBundleItem.setQuantity(1);
-		nonSelectedBundleItem.setConstituent(nonSelectedSku);
-
-		final ProductBundle bundle = new ProductBundleImpl();
+		final ProductBundle bundle = createProductBundleWithSkuCode(BUNDLE_CODE, bundleSkuGuid);
 		bundle.setSelectionRule(new SelectionRuleImpl(1));
-		final ProductSku bundleSku = new ProductSkuImpl();
-		bundleSku.setSkuCode(bundleSkuGuid);
-		bundle.addOrUpdateSku(bundleSku);
 		bundle.addConstituent(selectedBundleItem);
 		bundle.addConstituent(nonSelectedBundleItem);
 
 		//Assemble the ShoppingItemDto and check it.
-		ShoppingItemDtoFactoryImpl factory = new ShoppingItemDtoFactoryImpl();
 		ShoppingItemDto dto = factory.createDto(bundle, 1);
 		assertEquals("DTO should have the same number of constituents as the Bundle",
 				dto.getConstituents().size(), bundle.getConstituents().size());
@@ -134,26 +117,6 @@ public class ShoppingItemDtoFactoryImplTest {
 		assertEquals(dto.hashCode(), dto2.hashCode());
 	}
 
-	/** Test shopping item object overrides getPrice and makeMoney. */
-	class TestShoppingItemImpl extends ShoppingItemImpl {
-		private static final long serialVersionUID = -7939481597705476320L;
-
-		@Override
-		protected Money makeMoney(final BigDecimal amount) {
-			if (amount == null) {
-				return null;
-			}
-			return Money.valueOf(amount, getCurrency());
-		}
-
-		@Override
-		public Price getPrice() {
-			Price price = new PriceImpl();
-			price.setCurrency(getCurrency());
-			return price;
-		}
-	}
-
 	/**
 	 * Tests that a {@code ShoppingItemDto} can be created from a {@code ProductBundle}.
 	 * A simple parent->child->grandchild is tested to check recursion.
@@ -161,41 +124,16 @@ public class ShoppingItemDtoFactoryImplTest {
 	@Test
 	public void testCreateShoppingItemDto() {
 		//Create grandChild product/sku
-		ProductSku grandChildProductSku = new ProductSkuImpl();
-		Product grandChildProduct = new ProductImpl();
-		grandChildProduct.setCode("ProdC");
-		grandChildProduct.addOrUpdateSku(grandChildProductSku);
-		grandChildProductSku.setSkuCode(BBB);
+		Product grandChildProduct = createProductWithSkuCode("ProdC", BBB);
+
 		//Create child product(Bundle)/sku
-		ProductSku childProductSku = new ProductSkuImpl();
-		ProductBundle childProduct = new ProductBundleImpl();
-		childProduct.setCode("ProdB");
-		childProduct.addOrUpdateSku(childProductSku);
-		childProductSku.setSkuCode(AAA);
+		ProductBundle childProduct = createProductBundleWithSkuCode("ProdB", AAA);
+		childProduct.addConstituent(createBundleConstituentFrom(grandChildProduct, 1));
 
-		expectationsFactory.allowingBeanFactoryGetBean("productConstituent", ProductConstituentImpl.class);
-
-		BundleConstituent childConstituent = createBundleConstituentFrom(grandChildProduct);
-		childProduct.addConstituent(childConstituent);
 		//Create root bundle/sku
-		ProductSku rootSku = new ProductSkuImpl();
-		rootSku.setSkuCode(SKU_B);
-		ProductBundle productBundle = new ProductBundleImpl();
-		productBundle.setCode(PROD_A);
-		productBundle.addOrUpdateSku(rootSku);
-		productBundle.addConstituent(createBundleConstituentFrom(childProduct));
+		ProductBundle productBundle = createProductBundleWithSkuCode(PROD_A, SKU_B);
+		productBundle.addConstituent(createBundleConstituentFrom(childProduct, 1));
 
-		final Price price = context.mock(Price.class);
-		final Money money = Money.valueOf(BigDecimal.ONE, Currency.getInstance(CURRENCY_CAD));
-
-		context.checking(new Expectations() { {
-			allowing(price).getCurrency(); will(returnValue(Currency.getInstance(CURRENCY_CAD)));
-			allowing(price).getListPrice(1); will(returnValue(money));
-			allowing(price).getSalePrice(1); will(returnValue(money));
-			allowing(price).getComputedPrice(1); will(returnValue(money));
-		} });
-
-		ShoppingItemDtoFactoryImpl factory = new ShoppingItemDtoFactoryImpl();
 		ShoppingItemDto shoppingItemDto = factory.createDto(productBundle, 1);
 		assertEquals(SKU_B, shoppingItemDto.getSkuCode());
 		assertEquals(PROD_A, shoppingItemDto.getProductCode());
@@ -218,12 +156,34 @@ public class ShoppingItemDtoFactoryImplTest {
 		return product.getCode() + "_CG";
 	}
 
-	private BundleConstituent createBundleConstituentFrom(final Product product) {
-		final BundleConstituentImpl constituentBundle = new BundleConstituentImpl();
-		constituentBundle.setConstituent(product);
-		constituentBundle.setQuantity(1);
-		constituentBundle.setGuid(createBundleConstituentGuid(product));
-		return constituentBundle;
+	private BundleConstituent createBundleConstituentFrom(final Product product, final int quantity) {
+		final BundleConstituentImpl bundleConstituent = new BundleConstituentImpl() {
+			private static final long serialVersionUID = 1;
+
+			@Override
+			protected <T> T getBean(final String beanName) {
+				return beanFactory.getBean(beanName);
+			}
+		};
+		bundleConstituent.initialize();
+		bundleConstituent.setConstituent(product);
+		bundleConstituent.setQuantity(quantity);
+		return bundleConstituent;
+	}
+
+	private BundleConstituent createBundleConstituentFrom(final ProductSku productSku, final int quantity) {
+		final BundleConstituentImpl bundleConstituent = new BundleConstituentImpl() {
+			private static final long serialVersionUID = 1;
+
+			@Override
+			protected <T> T getBean(final String beanName) {
+				return beanFactory.getBean(beanName);
+			}
+		};
+		bundleConstituent.initialize();
+		bundleConstituent.setConstituent(productSku);
+		bundleConstituent.setQuantity(quantity);
+		return bundleConstituent;
 	}
 
 	/**
@@ -232,15 +192,11 @@ public class ShoppingItemDtoFactoryImplTest {
 	@Test
 	public void testItemConfigurationForProduct() {
 		final String selectedSkuGuid = "selectedSku";
-		final Product selectedProduct = new ProductImpl();
-		final ProductSku selectedSku = new ProductSkuImpl();
-		selectedSku.setSkuCode(selectedSkuGuid);
-		selectedProduct.addOrUpdateSku(selectedSku);
+		final Product selectedProduct = createProductWithSkuCode(PRODUCT_CODE, selectedSkuGuid);
 
 		ItemConfigurationImpl itemConfiguration =
 				new ItemConfigurationImpl(selectedSkuGuid, new HashMap<>(), true, null);
 
-		ShoppingItemDtoFactoryImpl factory = new ShoppingItemDtoFactoryImpl();
 		ShoppingItemDto dtoFromProduct = factory.createDto(selectedProduct, 1);
 		ShoppingItemDto dtoFromItemConfiguration = factory.createDto(selectedProduct, 1, itemConfiguration);
 
@@ -254,33 +210,16 @@ public class ShoppingItemDtoFactoryImplTest {
 	 */
 	@Test
 	public void testItemConfigurationForProductBundle() {
-		expectationsFactory.allowingBeanFactoryGetBean("productConstituent", ProductConstituentImpl.class);
-
 		// childProductSkuC and childProductSkuD assembly.
-		ProductSku childProductSkuC = new ProductSkuImpl();
-		childProductSkuC.setSkuCode(SKU_C);
-		ProductSku childProductSkuD = new ProductSkuImpl();
-		childProductSkuD.setSkuCode(SKU_D);
-		Product childProductCD = new ProductImpl();
-		childProductCD.setCode("ProdCD");
-		childProductCD.addOrUpdateSku(childProductSkuC);
-		childProductCD.addOrUpdateSku(childProductSkuD);
+		Product childProductCD = createProductWithSkuCode("ProdCD", SKU_C, SKU_D);
 
 		// childProductSkuB assembly.
-		ProductSku childProductSkuB = new ProductSkuImpl();
-		childProductSkuB.setSkuCode(SKU_B);
-		ProductBundle childProductB = new ProductBundleImpl();
-		childProductB.setCode("ProdB");
-		childProductB.addOrUpdateSku(childProductSkuB);
+		ProductBundle childProductB = createProductBundleWithSkuCode("ProdB", SKU_B);
 
 		// rootSku assembly.
-		ProductSku rootSku = new ProductSkuImpl();
-		rootSku.setSkuCode(SKU_A);
-		ProductBundle rootBundle = new ProductBundleImpl();
-		rootBundle.setCode(PROD_A);
-		rootBundle.addOrUpdateSku(rootSku);
-		rootBundle.addConstituent(createBundleConstituentFrom(childProductB));
-		rootBundle.addConstituent(createBundleConstituentFrom(childProductCD));
+		ProductBundle rootBundle = createProductBundleWithSkuCode(PROD_A, SKU_A);
+		rootBundle.addConstituent(createBundleConstituentFrom(childProductB, 1));
+		rootBundle.addConstituent(createBundleConstituentFrom(childProductCD, 1));
 
 		// expected ShoppingItemDto assembly.
 		ShoppingItemDto expectedDtoC = new ShoppingItemDto(SKU_D, 1);
@@ -309,9 +248,43 @@ public class ShoppingItemDtoFactoryImplTest {
 		ItemConfigurationImpl itemConfigurationA = new ItemConfigurationImpl(SKU_A, childrenMap, true, createBundleConstituentGuid(rootBundle));
 
 		// Give the ItemConfiguration to the factory and get back the generated ShoppingItemDto.
-		ShoppingItemDtoFactoryImpl factory = new ShoppingItemDtoFactoryImpl();
 		ShoppingItemDto dtoFromItemConfiguration = factory.createDto(rootBundle, 1, itemConfigurationA);
 		assertEquals(expectedDtoA, dtoFromItemConfiguration);
 		assertEquals(expectedDtoA.hashCode(), dtoFromItemConfiguration.hashCode());
 	}
+
+	private Product createProductWithSkuCode(final String productCode, final String... skuCodes) {
+		final Product product = new ProductImpl();
+		product.setCode(productCode);
+
+		for (String skuCode : skuCodes) {
+			final ProductSku sku = new ProductSkuImpl();
+			sku.initialize();
+			sku.setSkuCode(skuCode);
+			product.addOrUpdateSku(sku);
+			givenProductSkuLookupWillFindSku(sku);
+		}
+
+		return product;
+	}
+
+	private ProductBundle createProductBundleWithSkuCode(final String bundleCode, final String skuCode) {
+		final ProductBundle bundle = new ProductBundleImpl();
+		bundle.setCode(bundleCode);
+
+		final ProductSku sku = new ProductSkuImpl();
+		sku.setGuid(new RandomGuidImpl().toString());
+		sku.setSkuCode(skuCode);
+		bundle.addOrUpdateSku(sku);
+
+		givenProductSkuLookupWillFindSku(sku);
+		return bundle;
+	}
+
+	protected void givenProductSkuLookupWillFindSku(final ProductSku... skus) {
+		for (ProductSku sku : skus) {
+			given(productSkuLookup.findBySkuCode(sku.getSkuCode())).willReturn(sku);
+		}
+	}
+
 }

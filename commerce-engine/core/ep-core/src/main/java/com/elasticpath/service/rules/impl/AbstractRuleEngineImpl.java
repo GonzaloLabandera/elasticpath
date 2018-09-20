@@ -10,17 +10,20 @@ import java.util.Currency;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import org.apache.log4j.Logger;
-import org.drools.QueryResult;
-import org.drools.QueryResults;
-import org.drools.RuleBase;
-import org.drools.RuleBaseConfiguration;
-import org.drools.RuleBaseFactory;
-import org.drools.SessionConfiguration;
-import org.drools.StatefulSession;
-import org.drools.WorkingMemory;
-import org.drools.impl.EnvironmentFactory;
+import org.drools.core.RuleBaseConfiguration;
+import org.drools.core.SessionConfiguration;
+import org.drools.core.WorkingMemory;
+import org.drools.core.impl.EnvironmentFactory;
+import org.drools.core.impl.InternalKnowledgeBase;
+import org.drools.core.impl.KnowledgeBaseFactory;
+import org.kie.api.KieBase;
+import org.kie.api.runtime.KieSession;
+import org.kie.api.runtime.rule.EntryPoint;
+import org.kie.api.runtime.rule.QueryResults;
+import org.kie.api.runtime.rule.QueryResultsRow;
 
 import com.elasticpath.cache.SimpleTimeoutCache;
 import com.elasticpath.commons.beanframework.BeanFactory;
@@ -87,21 +90,19 @@ public abstract class AbstractRuleEngineImpl implements EpRuleEngine {
 
 		SessionConfiguration sessionConfiguration = statefulSessionConfiguration.get(SESSION_CONFIGURATION_ID);
 		if (sessionConfiguration == null) {
-			sessionConfiguration = new SessionConfiguration();
+			sessionConfiguration = SessionConfiguration.newInstance();
 			statefulSessionConfiguration.put(SESSION_CONFIGURATION_ID, sessionConfiguration);
 		}
 
-		StatefulSession workingMemory = getCatalogRuleBase(store).newStatefulSession(sessionConfiguration, EnvironmentFactory.newEnvironment());
+		final WorkingMemory workingMemory = toWorkingMemory(getCatalogRuleBase(store)
+				.newKieSession(sessionConfiguration, EnvironmentFactory.newEnvironment()));
 
 		try {
 			assertObject(workingMemory, promotionRuleDelegate);
 			assertObject(workingMemory, activeCurrency);
-
 			assertObject(workingMemory, prices);
 
-			for (Product product : products) {
-				assertObject(workingMemory, product);
-			}
+			products.forEach(product -> assertObject(workingMemory, product));
 
 			workingMemory.setFocus(RuleAction.DEFAULT_AGENDA_GROUP);
 			workingMemory.fireAllRules();
@@ -136,12 +137,13 @@ public abstract class AbstractRuleEngineImpl implements EpRuleEngine {
 
 			SessionConfiguration sessionConfiguration = statefulSessionConfiguration.get(SESSION_CONFIGURATION_ID);
 			if (sessionConfiguration == null) {
-				sessionConfiguration = new SessionConfiguration();
+				sessionConfiguration = SessionConfiguration.newInstance();
 				statefulSessionConfiguration.put(SESSION_CONFIGURATION_ID, sessionConfiguration);
 			}
 
-			StatefulSession workingMemory = getCartRuleBase(shoppingCart.getStore()).newStatefulSession(sessionConfiguration,
-																										EnvironmentFactory.newEnvironment());
+			final WorkingMemory workingMemory = toWorkingMemory(getCartRuleBase(shoppingCart.getStore())
+					.newKieSession(sessionConfiguration, EnvironmentFactory.newEnvironment()));
+
 			final DiscountItemContainer shoppingCartDiscountItemContainer = createShoppingCartDiscountItemContainer(shoppingCart, activeCurrency);
 
 			try {
@@ -149,14 +151,16 @@ public abstract class AbstractRuleEngineImpl implements EpRuleEngine {
 				assertObject(workingMemory, shoppingCart);
 				assertObject(workingMemory, activeCurrency);
 				assertObject(workingMemory, shoppingCartDiscountItemContainer);
-				for (long ruleId : uidPks) {
-					assertObject(workingMemory, new ActiveRuleImpl(ruleId));
-				}
+
+				uidPks.forEach(ruleId -> assertObject(workingMemory, new ActiveRuleImpl(ruleId)));
+
 				workingMemory.setFocus(agendaGroup);
 				workingMemory.fireAllRules();
-				QueryResults queryResults = workingMemory.getQueryResults(RuleSet.QUERY_NAME);
+
+				final QueryResults queryResults = workingMemory.getQueryResults(RuleSet.QUERY_NAME);
+
 				applyDiscount(queryResults, shoppingCartDiscountItemContainer);
-			} catch (IllegalArgumentException e) {
+			} catch (final RuntimeException e) {
 				if (LOG.isDebugEnabled()) {
 					LOG.debug("Rule Engine could not get query results", e);
 				}
@@ -164,6 +168,27 @@ public abstract class AbstractRuleEngineImpl implements EpRuleEngine {
 				workingMemory.dispose();
 			}
 		}
+	}
+
+	/**
+	 * <p>Converts a {@link KieSession} to a {@link WorkingMemory}.</p>
+	 * <p>The current version of Drools/KIE makes use of the class {@link org.drools.core.impl.StatefulKnowledgeSessionImpl} which implements both
+	 * of these interfaces. This method depends on this to be true, as it throws an {@link IllegalStateException} if simply casting to the target
+	 * interface is not possible.</p>
+	 *
+	 * @param kieSession the KieSession to convert to a WorkingMemory
+	 * @return a WorkingMemory instance
+	 */
+	private WorkingMemory toWorkingMemory(final KieSession kieSession) {
+		Objects.requireNonNull(kieSession);
+
+		if (kieSession instanceof WorkingMemory) {
+			return (WorkingMemory) kieSession;
+		}
+
+		throw new IllegalStateException("The KieSession implementation class ["
+				+ kieSession.getClass()
+				+ "] does not implement org.drools.core.WorkingMemory.");
 	}
 
 	/**
@@ -187,8 +212,8 @@ public abstract class AbstractRuleEngineImpl implements EpRuleEngine {
 		TagSet tagSet = shopper.getTagSet();
 		for (Object[] obj : sellingContextsWithRuleUidPks) {
 			final SellingContext scxt = (SellingContext) obj[1];
-			if (scxt == null || scxt.isSatisfied(
-					conditionEvaluatorService, tagSet, TagDictionary.DICTIONARY_PROMOTIONS_SHOPPER_GUID, TagDictionary.DICTIONARY_TIME_GUID)) {
+			if (scxt == null || scxt.isSatisfied(conditionEvaluatorService, tagSet, TagDictionary.DICTIONARY_PROMOTIONS_SHOPPER_GUID,
+					TagDictionary.DICTIONARY_TIME_GUID).isSuccess()) {
 				ruleIds.add((Long) obj[0]);
 			}
 		}
@@ -222,7 +247,7 @@ public abstract class AbstractRuleEngineImpl implements EpRuleEngine {
 		if (queryResults == null) {
 			return;
 		}
-		for (Iterator<QueryResult> it = queryResults.iterator(); it.hasNext();) {
+		for (Iterator<QueryResultsRow> it = queryResults.iterator(); it.hasNext();) {
 			Discount discount = (Discount) it.next().get(RuleSet.DISCOUNT_NAME);
 			discount.apply(discountItemContainer);
 		}
@@ -248,8 +273,8 @@ public abstract class AbstractRuleEngineImpl implements EpRuleEngine {
 	 *
 	 * @return the newly created Drools rulebase
 	 */
-	protected RuleBase createRuleBase() {
-		return RuleBaseFactory.newRuleBase(createRuleConfiguration());
+	protected InternalKnowledgeBase createRuleBase() {
+		return KnowledgeBaseFactory.newKnowledgeBase(createRuleConfiguration());
 	}
 
 	/**
@@ -266,31 +291,31 @@ public abstract class AbstractRuleEngineImpl implements EpRuleEngine {
 	}
 
 	/**
-	 * Gets the catalog {@link RuleBase} associated with the given {@link Store} s catalog.
+	 * Gets the catalog {@link KieBase} associated with the given {@link Store} s catalog.
 	 *
 	 * @param store the store to get the catalog from
-	 * @return a {@link RuleBase} for the given {@link Store}
+	 * @return a {@link KieBase} for the given {@link Store}
 	 */
-	protected abstract RuleBase getCatalogRuleBase(Store store);
+	protected abstract KieBase getCatalogRuleBase(Store store);
 
 	/**
-	 * Gets the cart {@link RuleBase} associated with the given {@link Store}.
+	 * Gets the cart {@link KieBase} associated with the given {@link Store}.
 	 *
 	 * @param store the store to get the rule base for
-	 * @return a {@link RuleBase} for the given {@link Store}
+	 * @return a {@link KieBase} for the given {@link Store}
 	 */
-	protected abstract RuleBase getCartRuleBase(Store store);
+	protected abstract KieBase getCartRuleBase(Store store);
 
 	/**
-	 * Assert the given object into the given working memory.
+	 * Assert the given object into the given Drools runtime entry point.
 	 * <p>
 	 * Note: don't try to do refactoring by removing this method. This method is put here to make profiling easier.
 	 *
-	 * @param workingMemory the working memory
+	 * @param entryPoint the Drools runtime entry point
 	 * @param object the object
 	 */
-	private void assertObject(final WorkingMemory workingMemory, final Object object) {
-		workingMemory.insert(object);
+	private void assertObject(final EntryPoint entryPoint, final Object object) {
+		entryPoint.insert(object);
 	}
 
 	/**

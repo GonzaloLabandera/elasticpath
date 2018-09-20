@@ -7,7 +7,6 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.ConcurrentModificationException;
 import java.util.Currency;
 import java.util.Date;
 import java.util.HashMap;
@@ -61,14 +60,6 @@ import com.elasticpath.service.store.StoreService;
  */
 @SuppressWarnings({ "PMD.TooManyMethods", "PMD.GodClass" })
 public class ProductSolrInputDocumentCreator extends AbstractDocumentCreatingTask<IndexProduct> {
-
-	private static final int DEFAULT_PRICE_LOOKUP_DELAY_BETWEEN_RETRIES = 654;
-
-	private static final int MAXIMUM_PRICE_LOOKUP_RETRIES = 8;
-
-	private int priceLookupDelayBetweenRetries = DEFAULT_PRICE_LOOKUP_DELAY_BETWEEN_RETRIES;
-
-	private int maximumPriceLookupRetries = MAXIMUM_PRICE_LOOKUP_RETRIES;
 
 	private static final Logger LOG = Logger.getLogger(ProductSolrInputDocumentCreator.class);
 
@@ -569,49 +560,7 @@ public class ProductSolrInputDocumentCreator extends AbstractDocumentCreatingTas
 		singleStack.addPriceList(priceListDescriptor.getGuid());
 		singleStack.setCurrency(Currency.getInstance(priceListDescriptor.getCurrencyCode()));
 
-		// There is an existing bug in the Drools version we are currently using (5.0.1)
-		// See: https://issues.jboss.org/browse/JBRULES-2418
-		// It generates ConcurrentModificationExceptions in the multithreaded Search Index building pipeline (JP-604)
-		// This bug appears to have been fixed in version 5.1.0.
-		// When we upgrade to version 5.1.0, the following exception handling code should no longer be necessary and should be removed.
-		Price priceFromLookup = null;
-		int retryCount = 0;
-
-		Exception thrownException = null;
-
-		while (retryCount < maximumPriceLookupRetries) {
-			thrownException = null;
-
-			try {
-				priceFromLookup = getPromotedPriceLookupService().getProductPrice(product, singleStack, store,
-																				baseAmountDataSourceFactory);
-			} catch (final ConcurrentModificationException concurrentModificationException) {
-				LOG.info("Working around ConcurrentModificationException likely due to JBRULES-2418 while looking up price - Retrying shortly.");
-				thrownException = concurrentModificationException;
-			}
-
-			if (thrownException == null) {
-				break;
-			}
-			sleepBetweenRetries();
-			++retryCount;
-		}
-
-		if (thrownException != null) {
-			LOG.error("Could not recover from repeated ConcurrentModificationExceptions due to JBRULES-2418.  Returning null for priceLookup("
-					+ product + ").", thrownException);
-		}
-		return priceFromLookup;
-	}
-
-	private void sleepBetweenRetries() {
-		try {
-			Thread.sleep(priceLookupDelayBetweenRetries);
-		} catch (final InterruptedException interruptedException) {
-			// nothing should be interrupting document creation.
-			LOG.debug("Product price lookup retry interrupted", interruptedException.getCause());
-			Thread.currentThread().interrupt();
-		}
+		return getPromotedPriceLookupService().getProductPrice(product, singleStack, store, baseAmountDataSourceFactory);
 	}
 
 	/**
@@ -983,14 +932,6 @@ public class ProductSolrInputDocumentCreator extends AbstractDocumentCreatingTas
 	 */
 	public BeanFactory getBeanFactory() {
 		return beanFactory;
-	}
-
-	public void setPriceLookupDelayBetweenRetries(final int priceLookupDelayBetweenRetries) {
-		this.priceLookupDelayBetweenRetries = priceLookupDelayBetweenRetries;
-	}
-
-	public void setMaximumPriceLookupRetries(final int maximumPriceLookupRetries) {
-		this.maximumPriceLookupRetries = maximumPriceLookupRetries;
 	}
 
 }

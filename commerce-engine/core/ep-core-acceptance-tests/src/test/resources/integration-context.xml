@@ -1,9 +1,14 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<beans xmlns="http://www.springframework.org/schema/beans"
-		xmlns:context="http://www.springframework.org/schema/context"
+<?xml version='1.0' encoding='UTF-8'?>
+<beans
+		xmlns="http://www.springframework.org/schema/beans"
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-		xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
-                http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd">
+		xmlns:context="http://www.springframework.org/schema/context"
+		xmlns:settings="http://www.elasticpath.com/schema/settings"
+		xsi:schemaLocation="
+			http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+			http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.0.xsd
+			http://www.elasticpath.com/schema/settings http://www.elasticpath.com/schema/settings/settings.xsd
+	">
 
     <context:component-scan base-package="checkout" />
     <context:annotation-config />
@@ -16,11 +21,16 @@
 			<bean class="com.elasticpath.service.catalog.impl.ProductRecommendationServiceImpl">
 				<property name="productService" ref="productService"/>
 				<property name="productAssociationService" ref="productAssociationService"/>
-				<property name="settingsReader" ref="settingsService"/>
 				<property name="storeService" ref="nonCachingStoreService"/>
 				<property name="persistenceEngine" ref="persistenceEngine"/>
 				<property name="elasticPath" ref="elasticPath"/>
 				<property name="timeService" ref="timeService"/>
+				<property name="maxHistoryDaysSettingProvider">
+					<settings:setting path="COMMERCE/STORE/PRODUCTRECOMMENDATIONS/numberOrderHistoryDays"/>
+				</property>
+				<property name="maxRecommendationsSettingProvider">
+					<settings:setting path="COMMERCE/STORE/PRODUCTRECOMMENDATIONS/numberMaxRecommendations"/>
+				</property>
 			</bean>
 		</property>
 	</bean>

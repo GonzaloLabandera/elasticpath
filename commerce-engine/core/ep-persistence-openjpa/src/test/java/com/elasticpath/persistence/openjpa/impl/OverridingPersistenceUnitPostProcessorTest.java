@@ -6,7 +6,6 @@ package com.elasticpath.persistence.openjpa.impl;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.hasEntry;
 import static org.hamcrest.Matchers.not;
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
@@ -23,18 +22,13 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Map;
 import java.util.Properties;
-import javax.sql.DataSource;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
-import org.jmock.Expectations;
-import org.jmock.auto.Mock;
 import org.jmock.integration.junit4.JUnitRuleMockery;
 import org.junit.Rule;
 import org.junit.Test;
-import org.springframework.jdbc.datasource.lookup.DataSourceLookup;
-import org.springframework.orm.jpa.persistenceunit.DefaultPersistenceUnitManager;
 import org.springframework.orm.jpa.persistenceunit.MutablePersistenceUnitInfo;
 
 /**
@@ -44,9 +38,6 @@ public class OverridingPersistenceUnitPostProcessorTest {
 
 	@Rule
 	public final JUnitRuleMockery context = new JUnitRuleMockery();
-
-	@Mock
-	private DataSourceLookup dataSourceLookup;
 
 	@Test
 	@SuppressWarnings("PMD.AvoidCatchingNPE")
@@ -170,46 +161,11 @@ public class OverridingPersistenceUnitPostProcessorTest {
 		assertFalse("The default value of exclude unlisted classes should be false", persistenceUnitInfo.excludeUnlistedClasses());
 	}
 
-	/**
-	 * Verify that the processor sets a named JtaDataSource on the persistence unit.
-	 */
-	@Test
-	public void testSetJtaDataSource() {
-		MutablePersistenceUnitInfo persistenceUnitInfo = givenAPersistenceUnit();
-		DataSource dataSource = givenADataSourceOfName("datasource");
-
-		OverridingPersistenceUnitPostProcessor processor = givenAnOverridingProcessor();
-		processor.setJtaDataSource("datasource");
-
-		whenTheProcessorIsCalled(processor, persistenceUnitInfo);
-		assertEquals("The datasource should be the one matching the name", dataSource, persistenceUnitInfo.getJtaDataSource());
-	}
-
-	/**
-	 * Verify that the processor sets a named NonJtaDataSource on the persistence unit.
-	 */
-	@Test
-	public void testSetNonJtaDataSource() {
-		MutablePersistenceUnitInfo persistenceUnitInfo = givenAPersistenceUnit();
-		DataSource dataSource = givenADataSourceOfName("datasource2");
-
-		OverridingPersistenceUnitPostProcessor processor = givenAnOverridingProcessor();
-		processor.setNonJtaDataSource("datasource2");
-
-		whenTheProcessorIsCalled(processor, persistenceUnitInfo);
-		assertEquals("The datasource should be the one matching the name", dataSource, persistenceUnitInfo.getNonJtaDataSource());
-	}
-
 	// Methods to set up expectations
 
 	private OverridingPersistenceUnitPostProcessor givenAnOverridingProcessor() {
 		OverridingPersistenceUnitPostProcessor processor = new OverridingPersistenceUnitPostProcessor();
 		processor.setPersistenceUnitName(PERSISTENCE_UNIT_NAME);
-
-		DefaultPersistenceUnitManager persistenceUnitManager = new DefaultPersistenceUnitManager();
-		persistenceUnitManager.setDataSourceLookup(dataSourceLookup);
-		processor.setPersistenceUnitManager(persistenceUnitManager);
-
 		return processor;
 	}
 
@@ -222,14 +178,5 @@ public class OverridingPersistenceUnitPostProcessorTest {
 		return persistenceUnitInfo;
 	}
 
-	private DataSource givenADataSourceOfName(final String dataSourceName) {
-		final DataSource dataSource = context.mock(DataSource.class, dataSourceName);
-		context.checking(new Expectations() {
-			{
-				oneOf(dataSourceLookup).getDataSource(dataSourceName); will(returnValue(dataSource));
-			}
-		});
-		return dataSource;
-	}
 
 }

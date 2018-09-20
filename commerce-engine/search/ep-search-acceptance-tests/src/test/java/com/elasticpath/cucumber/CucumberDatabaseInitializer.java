@@ -12,16 +12,18 @@ import com.elasticpath.cucumber.testexecutionlisteners.CucumberDatabaseTestExecu
 import com.elasticpath.cucumber.testexecutionlisteners.CucumberJmsRegistrationTestExecutionListener;
 
 /**
- *  Test database initialization.
+ * Test database initialization.
  */
+
 @ContextConfiguration("/cucumber.xml")
-@TestExecutionListeners({
-	CucumberJmsRegistrationTestExecutionListener.class,
-	CucumberDatabaseTestExecutionListener.class,
-	DependencyInjectionTestExecutionListener.class
+@TestExecutionListeners(listeners = {
+		CucumberDatabaseTestExecutionListener.class,
+		CucumberJmsRegistrationTestExecutionListener.class,
+		DependencyInjectionTestExecutionListener.class
 })
 public class CucumberDatabaseInitializer {
-	
+
+
 	/**
 	 * Uses Before annotation with a lower number of order to execute database initialization for every scenario before
 	 * other Before methods hooked for tags.

@@ -9,10 +9,11 @@ import static org.mockito.Mockito.when;
 
 import java.util.UUID;
 
+import org.apache.commons.lang.StringUtils;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.core.convert.converter.Converter;
 
 import com.elasticpath.domain.customer.Customer;
@@ -30,10 +31,10 @@ public class ProfileEntityConverterTest {
 	private final Converter<Customer, ProfileEntity> converter = new ProfileEntityConverter();
 
 	@Test
-	public void ensureConvertChangesNullsToEmptyStrings() {
+	public void testForValidConversion() {
 		when(customer.getGuid()).thenReturn(UUID.randomUUID().toString());
-		when(customer.getFirstName()).thenReturn(null);
-		when(customer.getLastName()).thenReturn(null);
+		when(customer.getFirstName()).thenReturn(StringUtils.EMPTY);
+		when(customer.getLastName()).thenReturn(StringUtils.EMPTY);
 
 		ProfileEntity result = converter.convert(customer);
 		assertThat(result.getGivenName()).isEmpty();

@@ -3,6 +3,8 @@
  */
 package com.elasticpath.rest.resource.integration.epcommerce.repository;
 
+import java.util.List;
+
 import com.google.common.collect.ImmutableMap;
 
 import com.elasticpath.rest.definition.carts.CartIdentifier;
@@ -17,6 +19,8 @@ import com.elasticpath.rest.definition.prices.PriceForItemIdentifier;
 import com.elasticpath.rest.definition.prices.PriceForItemdefinitionIdentifier;
 import com.elasticpath.rest.definition.prices.PriceForShipmentLineItemIdentifier;
 import com.elasticpath.rest.definition.purchases.PurchaseIdentifier;
+import com.elasticpath.rest.definition.purchases.PurchaseLineItemIdentifier;
+import com.elasticpath.rest.definition.purchases.PurchaseLineItemsIdentifier;
 import com.elasticpath.rest.definition.purchases.PurchasesIdentifier;
 import com.elasticpath.rest.definition.shipments.ShipmentIdentifier;
 import com.elasticpath.rest.definition.shipments.ShipmentLineItemIdentifier;
@@ -25,6 +29,7 @@ import com.elasticpath.rest.definition.shipments.ShipmentLineItemOptionsIdentifi
 import com.elasticpath.rest.definition.shipments.ShipmentLineItemsIdentifier;
 import com.elasticpath.rest.definition.shipments.ShipmentsIdentifier;
 import com.elasticpath.rest.id.type.CompositeIdentifier;
+import com.elasticpath.rest.id.type.PathIdentifier;
 import com.elasticpath.rest.id.type.StringIdentifier;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.item.ItemRepository;
 
@@ -304,6 +309,33 @@ public final class IdentifierTestFactory {
 		return OrderIdentifier.builder()
 				.withOrderId(StringIdentifier.of(orderId))
 				.withScope(StringIdentifier.of(scope))
+				.build();
+	}
+
+	/**
+	 * Builds a PurchaseLineItemsIdentifier.
+	 * @param scope scope
+	 * @param purchaseId purchase id
+	 * @return PurchaseLineItemsIdentifier
+	 */
+	public static PurchaseLineItemsIdentifier buildPurchaseLineItemsIdentifier(final String scope, final String purchaseId) {
+		return PurchaseLineItemsIdentifier.builder()
+				.withPurchase(buildPurchaseIdentifier(scope, purchaseId))
+				.build();
+	}
+
+	/**
+	 * Builds a PurchaseLineItemIdentifier.
+	 * @param scope scope
+	 * @param purchaseId purchase id
+	 * @param lineItemIds line item ids
+	 * @return PurchaseLineItemIdentifier
+	 */
+	public static PurchaseLineItemIdentifier buildPurchaseLineItemIdentifier(final String scope, final String purchaseId,
+																			 final List<String> lineItemIds) {
+		return PurchaseLineItemIdentifier.builder()
+				.withLineItemId(PathIdentifier.of(lineItemIds))
+				.withPurchaseLineItems(buildPurchaseLineItemsIdentifier(scope, purchaseId))
 				.build();
 	}
 

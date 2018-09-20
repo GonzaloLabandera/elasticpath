@@ -41,6 +41,7 @@ import com.elasticpath.cmclient.catalog.editors.price.model.PriceAdjustmentModel
 import com.elasticpath.cmclient.catalog.editors.price.model.PriceAdjustmentSummaryCalculator;
 import com.elasticpath.cmclient.catalog.editors.product.ProductEditor;
 import com.elasticpath.cmclient.catalog.helpers.EventManager;
+import com.elasticpath.cmclient.core.CorePlugin;
 import com.elasticpath.cmclient.core.editors.GuidEditorInput;
 import com.elasticpath.cmclient.core.service.ChangeSetEventService;
 import com.elasticpath.cmclient.core.ui.framework.AutoResizeTreeTableLayout;
@@ -442,7 +443,7 @@ public class PriceAdjustmentTree extends AbstractStatePolicyTargetImpl {
 				case SKU_CONFIGURATION_COLUMN:
 					if (priceAdjustmentModel.getBundleConstituent().getConstituent().isProductSku()) {
 						displayString = priceAdjustmentModel.getBundleConstituent().getConstituent().getProductSku()
-								.getDisplayName(Locale.getDefault());
+								.getDisplayName(CorePlugin.getDefault().getDefaultLocale());
 					}
 					break;
 				case QUANTITY_COLUMN:

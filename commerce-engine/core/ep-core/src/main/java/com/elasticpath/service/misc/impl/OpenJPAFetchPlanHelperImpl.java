@@ -497,4 +497,12 @@ public class OpenJPAFetchPlanHelperImpl extends AbstractEpPersistenceServiceImpl
 		}
 	}
 
+	@Override
+	public boolean doesPlanContainFetchGroup(final String fetchGroup) {
+		if (getFetchPlan() == null || getFetchPlan().getFetchGroups() == null) {
+			return false;
+		}
+		return getFetchPlan().getFetchGroups().contains(fetchGroup);
+	}
+
 }

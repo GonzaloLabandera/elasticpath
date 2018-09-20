@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) Elastic Path Software Inc., 2015
  */
 package com.elasticpath.importexport.exporter.exporters.impl;
@@ -8,7 +8,6 @@ import java.util.List;
 
 import org.apache.log4j.Logger;
 
-import com.elasticpath.common.dto.assembler.customer.BuiltinFilters;
 import com.elasticpath.common.dto.customer.CustomerDTO;
 import com.elasticpath.domain.customer.Customer;
 import com.elasticpath.domain.customer.CustomerGroup;
@@ -37,9 +36,6 @@ public class CustomerExporter extends AbstractExporterImpl<Customer, CustomerDTO
 	private CustomerService customerService;
 
 	private ImportExportSearcher importExportSearcher;
-	
-	/** Name for the card number filter. */
-	public static final String CARD_NUMBER_FILTER = "CARD_NUMBER_FILTER";
 
 	@Override
 	public JobType getJobType() {
@@ -53,8 +49,6 @@ public class CustomerExporter extends AbstractExporterImpl<Customer, CustomerDTO
 
 	@Override
 	protected void initializeExporter(final ExportContext context) throws ConfigurationException {
-		configureCardFilter(getCardFilterOption(context));
-		
 		List<Long> customerUids = getImportExportSearcher().searchUids(getContext().getSearchConfiguration(), EPQueryType.CUSTOMER);
 		customerGuids = new ArrayList<>(customerUids.size());
 		
@@ -65,50 +59,6 @@ public class CustomerExporter extends AbstractExporterImpl<Customer, CustomerDTO
 		}
 		
 		LOG.info("The list for " + customerGuids.size() + " customers retrieved from the database.");
-	}
-
-	private String getCardFilterOption(final ExportContext context) {
-
-		// any of these methods may return null, so a check is necessary at each call.
-		// otherwise a try-catch block would be necessary to catch the possible null pointer exceptions.
-		String emptyString = "";
-		
-		if (context == null) {
-			return emptyString;
-		}
-		
-		if (context.getExportConfiguration() == null) {
-			return emptyString;
-		}
-
-		if (context.getExportConfiguration().getExporterConfiguration() == null) {
-			return emptyString;
-		}
-
-		String cardNumberFilterOption = context.getExportConfiguration().getExporterConfiguration().getOption(CARD_NUMBER_FILTER);
-		
-		if (cardNumberFilterOption == null) {
-			return emptyString;
-		} 
-
-		return cardNumberFilterOption;
-		
-	}
-
-	/**
-	 * Pass the desired {@code CreditCardFilter} to the DtoAssembler.
-	 * If the given option is "STATIC" then use BuiltinFilters.STATIC.
-	 * Else use BuiltinFilters.EMPTYING.
-	 * 
-	 * @param option The credit card filter option.
-	 * @see BuiltinFilters
-	 */
-	public void configureCardFilter(final String option) {
-		if ("STATIC".equalsIgnoreCase(option)) {
-			customerAdapter.setCardFilteringStyle(BuiltinFilters.STATIC);
-		} else {
-			customerAdapter.setCardFilteringStyle(BuiltinFilters.EMPTYING);
-		}
 	}
 
 	@Override

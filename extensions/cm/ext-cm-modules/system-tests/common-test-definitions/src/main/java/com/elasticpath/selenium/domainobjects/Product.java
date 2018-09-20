@@ -12,6 +12,7 @@ public class Product {
 	private String catalog;
 	private String category;
 	private String productName;
+	private String productCode;
 	private String productType;
 	private String taxCode;
 	private String brand;
@@ -26,9 +27,62 @@ public class Product {
 	private String shippableType;
 	private String priceList;
 	private String listPrice;
-	private String bundlePricing;
-	private String codesList;
+	private String skuCodeList;
 	private String skuOption;
+	private String bundlePricing;
+	private String bundleProductSKUList;
+	private String bundleSelectionRule;
+	private String bundleSelectionRuleValue;
+
+	public String getBundleSelectionRule() {
+		return bundleSelectionRule;
+	}
+
+	public void setBundleSelectionRule(final String bundleSelectionRule) {
+		this.bundleSelectionRule = bundleSelectionRule;
+	}
+
+	public String getBundleSelectionRuleValue() {
+		return bundleSelectionRuleValue;
+	}
+
+	public void setBundleSelectionRuleValue(final String bundleSelectionRuleValue) {
+		this.bundleSelectionRuleValue = bundleSelectionRuleValue;
+	}
+
+	public String getBundleProductSKUCodes() {
+		return bundleProductSKUList;
+	}
+
+	public void setBundleProductSKUCodes(final String bundleProductSKUList) {
+		this.bundleProductSKUList = bundleProductSKUList;
+	}
+
+	/**
+	 * Gets Bundle Product Codes List.
+	 *
+	 * @return productSkuCodeList.
+	 */
+	public List<String> getBundleProductSKUList() {
+		List<String> productSkuCodeList = new ArrayList<>();
+		if (bundleProductSKUList == null) {
+			return null;
+		} else {
+			String[] skuCodes = bundleProductSKUList.split(",");
+			for (String product : skuCodes) {
+				productSkuCodeList.add(product);
+			}
+			return productSkuCodeList;
+		}
+	}
+
+	public String getBundlePricing() {
+		return bundlePricing;
+	}
+
+	public void setBundlePricing(final String bundlePricing) {
+		this.bundlePricing = bundlePricing;
+	}
 
 
 	public String getSkuCode() {
@@ -41,25 +95,25 @@ public class Product {
 
 	private String skuCode;
 
-	public String getProductCodes() {
-		return codesList;
+	public String getProductSKUCodes() {
+		return skuCodeList;
 	}
 
-	public void setProductCodes(final String codesList) {
-		this.codesList = codesList;
+	public void setProductSKUCodes(final String codesList) {
+		this.skuCodeList = codesList;
 	}
 
 	/**
-	 * Gets Product Codes List.
+	 * Gets SKU Codes List.
 	 *
-	 * @return codesList.
+	 * @return productSkuCodeList.
 	 */
-	public List<String> getProductCodeList() {
+	public List<String> getSKUCodeList() {
 		List<String> productSkuCodeList = new ArrayList<>();
-		if (codesList == null) {
+		if (skuCodeList == null) {
 			return null;
 		} else {
-			String[] skuCodes = codesList.split(",");
+			String[] skuCodes = skuCodeList.split(",");
 			for (String product : skuCodes) {
 				productSkuCodeList.add(product);
 			}
@@ -203,19 +257,19 @@ public class Product {
 		this.listPrice = listPrice;
 	}
 
-	public String getBundlePricing() {
-		return bundlePricing;
-	}
-
-	public void setBundlePricing(final String bundlePricing) {
-		this.bundlePricing = bundlePricing;
-	}
-
 	public String getSKUOption() {
 		return skuOption;
 	}
 
 	public void setSKUOption(final String skuOption) {
 		this.skuOption = skuOption;
+	}
+
+	public String getProductCode() {
+		return productCode;
+	}
+
+	public void setProductCode(final String productCode) {
+		this.productCode = productCode;
 	}
 }

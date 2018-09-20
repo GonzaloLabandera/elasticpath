@@ -10,8 +10,11 @@ import org.openqa.selenium.WebDriver;
  */
 public class CreateEditWarehouseDialog extends AbstractDialog {
 
-	private static final String CREATE_EDIT_WAREHOUSE_DIALOG_CSS = "div[automation-id*='com.elasticpath.cmclient.admin.warehouses"
-			+ ".AdminWarehousesMessages.%sWarehouse'] ";
+	/**
+	 * CSS selector used to identify the dialog.
+	 */
+	public static final String CREATE_EDIT_WAREHOUSE_DIALOG_CSS_TEMPLATE = "div[automation-id*='com.elasticpath.cmclient.admin.warehouses"
+			+ ".AdminWarehousesMessages.%sWarehouse'][widget-type='Shell'] ";
 	private static final String CREATE_EDIT_WAREHOUSE_PARENT_INPUT_CSS = "div[automation-id='com.elasticpath.cmclient.admin.warehouses"
 			+ ".AdminWarehousesMessages";
 	private static final String WAREHOUSE_CODE_INPUT_CSS = CREATE_EDIT_WAREHOUSE_PARENT_INPUT_CSS + ".WarehouseCode'] input";
@@ -24,13 +27,17 @@ public class CreateEditWarehouseDialog extends AbstractDialog {
 	private static final String SAVE_BUTTON_CSS = "div[automation-id='com.elasticpath.cmclient.core.CoreMessages"
 			+ ".AbstractEpDialog_ButtonSave'][style*='opacity: 1']";
 
+	private final String createEditWarehouseDialogCss;
+
 	/**
 	 * Constructor.
 	 *
-	 * @param driver WebDriver which drives this page.
+	 * @param driver     WebDriver which drives this page.
+	 * @param dialogName dialog name.
 	 */
-	public CreateEditWarehouseDialog(final WebDriver driver) {
+	public CreateEditWarehouseDialog(final WebDriver driver, final String dialogName) {
 		super(driver);
+		createEditWarehouseDialogCss = String.format(CREATE_EDIT_WAREHOUSE_DIALOG_CSS_TEMPLATE, dialogName);
 	}
 
 	/**
@@ -105,6 +112,6 @@ public class CreateEditWarehouseDialog extends AbstractDialog {
 	 */
 	public void clickSaveButton() {
 		clickButton(SAVE_BUTTON_CSS, "Save");
-		waitTillElementDisappears(By.cssSelector(CREATE_EDIT_WAREHOUSE_DIALOG_CSS));
+		waitTillElementDisappears(By.cssSelector(createEditWarehouseDialogCss));
 	}
 }

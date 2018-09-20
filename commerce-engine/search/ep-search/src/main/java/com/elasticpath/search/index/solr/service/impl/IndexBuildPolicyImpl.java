@@ -13,17 +13,12 @@ import com.elasticpath.search.index.solr.service.IndexBuildPolicy;
 import com.elasticpath.search.index.solr.service.IndexBuildPolicyContext;
 import com.elasticpath.service.misc.TimeService;
 import com.elasticpath.service.search.IndexType;
-import com.elasticpath.settings.SettingsReader;
+import com.elasticpath.settings.provider.SettingValueProvider;
 
 /**
  * The default implementation of an {@link IndexBuildPolicy}.
  */
 public class IndexBuildPolicyImpl implements IndexBuildPolicy {
-
-	/**
-	 * The setting value for the optimization interval.
-	 */
-	static final String SETTING_OPTIMIZATION_INTERVAL = "COMMERCE/SEARCH/indexOptimizationInterval";
 
 	/**
 	 * Specifies the maximum number of docs to add to a collection before adding to the SOLR server.
@@ -37,17 +32,16 @@ public class IndexBuildPolicyImpl implements IndexBuildPolicy {
 
 	private TimeService timeService;
 	
-	private SettingsReader settingsReader;
-
 	private final Map<IndexType, Date> lastOptimizationTimeMap = new HashMap<>();
-	
-	
+
+	private SettingValueProvider<Integer> settingOptimizationIntervalProvider;
+
 	/**
 	 * Checks the current time and the last optimization time.
 	 * 
 	 * @param context the index policy context
 	 * @return true if the current time is after the time of 
-	 * 		the last optimization request plus the defined {@link #secondsUntilNextOptimization}
+	 * 		the last optimization request plus the defined {@link #getMinutesUntilNextOptimization}
 	 */
 	@Override
 	public boolean isOptimizationRequired(final IndexBuildPolicyContext context) {
@@ -103,23 +97,7 @@ public class IndexBuildPolicyImpl implements IndexBuildPolicy {
 	 * @return number of seconds
 	 */
 	protected int getMinutesUntilNextOptimization(final String context) {
-		return Integer.parseInt(settingsReader.getSettingValue(SETTING_OPTIMIZATION_INTERVAL, context).getValue());
-	}
-
-	/**
-	 *
-	 * @return the settingsReader
-	 */
-	protected SettingsReader getSettingsReader() {
-		return settingsReader;
-	}
-
-	/**
-	 *
-	 * @param settingsReader the settingsReader to set
-	 */
-	public void setSettingsReader(final SettingsReader settingsReader) {
-		this.settingsReader = settingsReader;
+		return getSettingOptimizationIntervalProvider().get(context);
 	}
 
 	/**
@@ -184,6 +162,14 @@ public class IndexBuildPolicyImpl implements IndexBuildPolicy {
 		return lastOptimizationTimeMap;
 	}
 
-	
+
+	public void setSettingOptimizationIntervalProvider(final SettingValueProvider<Integer> settingOptimizationIntervalProvider) {
+		this.settingOptimizationIntervalProvider = settingOptimizationIntervalProvider;
+	}
+
+	protected SettingValueProvider<Integer> getSettingOptimizationIntervalProvider() {
+		return settingOptimizationIntervalProvider;
+	}
+
 }
 

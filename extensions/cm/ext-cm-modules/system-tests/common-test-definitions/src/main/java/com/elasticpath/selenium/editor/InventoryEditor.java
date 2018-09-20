@@ -57,7 +57,7 @@ public class InventoryEditor extends AbstractPageObject {
 	 * @return the quantity on hand.
 	 */
 	public int getQuantityOnHand() {
-		getWaitDriver().waitForElementsToBeNotStale(getDriver().findElements(By.cssSelector(QUANTITY_ON_HAND_CSS)));
+		getWaitDriver().waitForElementToBeNotStale(QUANTITY_ON_HAND_CSS);
 		return Integer.parseInt(getWaitDriver().waitForElementToBeVisible(By.cssSelector(QUANTITY_ON_HAND_CSS)).getText());
 	}
 
@@ -67,7 +67,7 @@ public class InventoryEditor extends AbstractPageObject {
 	 * @param updatedQuantity the updated quantity
 	 */
 	public void verifyQuantityUpdate(final int updatedQuantity) {
-		getWaitDriver().waitForElementsToBeNotStale(getDriver().findElements(By.cssSelector(QUANTITY_ON_HAND_CSS)));
+		getWaitDriver().waitForElementToBeNotStale(QUANTITY_ON_HAND_CSS);
 		LOGGER.info("---------- waitForTextInElement - expected value: " + updatedQuantity);
 		LOGGER.info("---------- waitForTextInElement - actual value  : "
 				+ getDriver().findElement(By.cssSelector(QUANTITY_ON_HAND_CSS)).getText());

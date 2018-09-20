@@ -24,6 +24,7 @@ import com.elasticpath.jms.utilities.KeyValue;
 public class RawJsonDefinitions {
 
 	private List<JSONObject> jsonObjectList;
+
 	private final JmsTestFactory jmsTestFactory = JmsTestFactory.getInstance("ep-test-plugin.properties");
 
 	/**
@@ -89,4 +90,7 @@ public class RawJsonDefinitions {
 		RawJsonTestFacade.verifyJsonValues(jsonObjectList, "", key, value);
 	}
 
+	public List<JSONObject> getJsonObjectList() {
+		return jsonObjectList;
+	}
 }

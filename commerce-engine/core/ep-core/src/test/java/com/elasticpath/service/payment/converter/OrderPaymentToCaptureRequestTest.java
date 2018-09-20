@@ -41,8 +41,6 @@ public class OrderPaymentToCaptureRequestTest {
 	@Rule
 	public final JUnitRuleMockery context = new JUnitRuleMockery();
 
-	private BeanFactory beanFactory;
-	private BeanFactoryExpectationsFactory expectationsFactory;
 	private final OrderPaymentToCaptureRequest orderPaymentToCaptureRequest = new OrderPaymentToCaptureRequest();
 	private final MoneyDto moneyDto = new MoneyDtoImpl();
 	private final GiftCertificate giftCertificate = new GiftCertificateImpl();
@@ -50,8 +48,8 @@ public class OrderPaymentToCaptureRequestTest {
 
 	@Before
 	public void setUp() throws Exception {
-		beanFactory = context.mock(BeanFactory.class);
-		expectationsFactory = new BeanFactoryExpectationsFactory(context, beanFactory);
+		BeanFactory beanFactory = context.mock(BeanFactory.class);
+		BeanFactoryExpectationsFactory expectationsFactory = new BeanFactoryExpectationsFactory(context, beanFactory);
 		expectationsFactory.allowingBeanFactoryGetBean(ContextIdNames.CONVERSION_SERVICE, mockConversionService);
 		expectationsFactory.allowingBeanFactoryGetBean(ContextIdNames.CAPTURE_TRANSACTION_REQUEST, CaptureTransactionRequestImpl.class);
 		expectationsFactory.allowingBeanFactoryGetBean(ContextIdNames.GIFT_CERTIFICATE_CAPTURE_REQUEST, GiftCertificateCaptureRequestImpl.class);
@@ -62,22 +60,6 @@ public class OrderPaymentToCaptureRequestTest {
 				will(returnValue(moneyDto));
 			}
 		});
-	}
-
-	@Test
-	public void testConvertForCreditCard() throws Exception {
-		OrderPayment source = new OrderPaymentImpl();
-		source.setPaymentMethod(PaymentType.CREDITCARD);
-		source.setRequestToken(REQUESTTOKEN);
-		source.setAuthorizationCode(AUTHORIZATIONCODE);
-		source.setReferenceId(REFERENCEID);
-		source.setAmount(AMOUNT);
-		source.setCurrencyCode(CURRENCYCODE);
-		CaptureTransactionRequest target = orderPaymentToCaptureRequest.convert(source);
-		assertEquals(REQUESTTOKEN, target.getRequestToken());
-		assertEquals(AUTHORIZATIONCODE, target.getAuthorizationCode());
-		assertEquals(REFERENCEID, target.getReferenceId());
-		assertEquals(moneyDto, target.getMoney());
 	}
 
 	@Test

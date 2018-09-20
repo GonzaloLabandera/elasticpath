@@ -23,7 +23,6 @@ import cucumber.api.java.en.Given;
 import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.ContextConfiguration;
 
 import com.elasticpath.commons.beanframework.BeanFactory;
 import com.elasticpath.commons.constants.ContextIdNames;
@@ -51,7 +50,6 @@ import com.elasticpath.uat.ScenarioContextValueHolder;
 /**
  * Step Definitions for verifying Data Import emails.
  */
-@ContextConfiguration("classpath:cucumber.xml")
 public class DataImportStepDefinitions {
 
 	/** CSV file text strings qualifier. */

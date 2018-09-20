@@ -17,7 +17,6 @@ import com.elasticpath.commons.beanframework.BeanFactory;
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.customer.Customer;
 import com.elasticpath.domain.customer.CustomerAddress;
-import com.elasticpath.domain.customer.CustomerCreditCard;
 import com.elasticpath.domain.store.Store;
 import com.elasticpath.persistence.api.PersistenceEngine;
 import com.elasticpath.persistence.api.PersistenceSessionFilterSupport;
@@ -127,10 +126,6 @@ public class JpaPersistenceSessionFilterSupportImplTest extends BasicSpringConte
 		address2.setCountry("CA");
 
 		customer.addAddress(address);
-		customer.addAddress(address2);
-
-		CustomerCreditCard creditCard = beanFactory.getBean(ContextIdNames.CUSTOMER_CREDIT_CARD);
-		creditCard.setCardNumber("4111");
 
 		return customerService.add(customer);
 	}

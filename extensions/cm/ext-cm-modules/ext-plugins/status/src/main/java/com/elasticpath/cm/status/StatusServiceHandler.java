@@ -4,8 +4,8 @@
 package com.elasticpath.cm.status;
 
 import com.elasticpath.cmclient.core.ServiceLocator;
-import com.elasticpath.repo.health.monitoring.ServerStatusChecker;
-import com.elasticpath.repo.health.monitoring.StatusChecker;
+import com.elasticpath.health.monitoring.ServerStatusChecker;
+import com.elasticpath.health.monitoring.StatusChecker;
 import org.eclipse.rap.rwt.service.ServiceHandler;
 
 import javax.servlet.ServletException;

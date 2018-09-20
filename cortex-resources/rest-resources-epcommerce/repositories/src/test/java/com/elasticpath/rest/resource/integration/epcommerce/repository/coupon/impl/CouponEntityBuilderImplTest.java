@@ -8,7 +8,7 @@ import static com.elasticpath.rest.resource.integration.epcommerce.repository.Re
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.elasticpath.domain.rules.AppliedCoupon;
 import com.elasticpath.domain.rules.Coupon;

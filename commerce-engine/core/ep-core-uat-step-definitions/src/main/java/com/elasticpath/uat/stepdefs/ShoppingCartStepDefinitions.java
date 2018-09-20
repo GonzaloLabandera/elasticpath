@@ -7,7 +7,6 @@ import cucumber.api.java.Before;
 import cucumber.api.java.en.Given;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.test.context.ContextConfiguration;
 
 import com.elasticpath.domain.builder.checkout.CheckoutTestCartBuilder;
 import com.elasticpath.domain.builder.customer.CustomerBuilder;
@@ -17,7 +16,6 @@ import com.elasticpath.uat.ScenarioContextValueHolder;
 /**
  * Step Definitions for Shopping Cart-based functionality.
  */
-@ContextConfiguration("classpath:cucumber.xml")
 public class ShoppingCartStepDefinitions {
 
 	@Autowired

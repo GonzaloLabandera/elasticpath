@@ -38,10 +38,8 @@ public class StoreProductImpl extends AbstractWrappedProductImpl implements Stor
 
 	private boolean productAvailable;
 	private boolean productDisplayable;
-	private boolean productPurchasable;
 
 	private final Map<String, Boolean> skuAvailableMap = new HashMap<>();
-	private final Map<String, Boolean> skuPurchasableMap = new HashMap<>();
 	private final Map<String, Boolean> skuDisplayableMap = new HashMap<>();
 	private Set<ProductAssociation> productAssociations = new HashSet<>();
 
@@ -71,21 +69,12 @@ public class StoreProductImpl extends AbstractWrappedProductImpl implements Stor
 		return productDisplayable;
 	}
 
-	@Override
-	public boolean isProductPurchasable() {
-		return productPurchasable;
-	}
-
 	public void setProductAvailable(final boolean productAvailable) {
 		this.productAvailable = productAvailable;
 	}
 
 	public void setProductDisplayable(final boolean productDisplayable) {
 		this.productDisplayable = productDisplayable;
-	}
-
-	public void setProductPurchasable(final boolean productPurchasable) {
-		this.productPurchasable = productPurchasable;
 	}
 
 	/**
@@ -143,16 +132,6 @@ public class StoreProductImpl extends AbstractWrappedProductImpl implements Stor
 	 */
 	public void setSkuAvailable(final String skuCode, final boolean skuAvailable) {
 		skuAvailableMap.put(skuCode, skuAvailable);
-	}
-
-	/**
-	 * Sets the purchasability for the SKU with the given skuCode.
-	 *
-	 * @param skuCode the SKU code
-	 * @param skuPurchasable true if SKU is purchasable
-	 */
-	public void setSkuPurchasable(final String skuCode, final boolean skuPurchasable) {
-		skuPurchasableMap.put(skuCode, skuPurchasable);
 	}
 
 	/**
@@ -335,11 +314,6 @@ public class StoreProductImpl extends AbstractWrappedProductImpl implements Stor
 	@Override
 	public Availability getProductAvailability() {
 		return productAvailability;
-	}
-
-	@Override
-	public boolean isSkuPurchasable(final String skuCode) {
-		return skuPurchasableMap.getOrDefault(skuCode, Boolean.FALSE);
 	}
 
 	@Override

@@ -16,7 +16,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.GrantedAuthorityImpl;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 import com.elasticpath.domain.customer.Customer;
 import com.elasticpath.service.customer.CustomerService;
@@ -45,7 +45,7 @@ public class UpgradingCustomerDaoAuthenticationProviderTest {
 		authentication = context.mock(Authentication.class);
 		customer = context.mock(Customer.class);
 		grantedAuthorities = new ArrayList<>();
-		grantedAuthorities.add(new GrantedAuthorityImpl("role"));
+		grantedAuthorities.add(new SimpleGrantedAuthority("role"));
 		upgradingCustomerDaoAuthenticationProvider = new UpgradingCustomerDaoAuthenticationProvider();
 		upgradingCustomerDaoAuthenticationProvider.setCustomerService(customerService);
 	}

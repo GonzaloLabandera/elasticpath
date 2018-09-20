@@ -8,7 +8,10 @@ import org.openqa.selenium.WebDriver;
  */
 public class CreateChangeSetDialog extends AbstractDialog {
 
-	private static final String CREATE_CHANGE_SET_PARENT_CSS = "div[automation-id='com.elasticpath.cmclient.changeset.ChangeSetMessages"
+	/**
+	 * CSS selector used to identify the dialog.
+	 */
+	public static final String CREATE_CHANGE_SET_PARENT_CSS = "div[automation-id='com.elasticpath.cmclient.changeset.ChangeSetMessages"
 			+ ".CreateChangeSetWizard_Title'] ";
 	private static final String CHANGE_SET_NAME_INPUT_CSS = CREATE_CHANGE_SET_PARENT_CSS
 			+ "div[automation-id='com.elasticpath.cmclient.changeset.ChangeSetMessages.ChangeSetEditor_ChangeSet_Name'] input";

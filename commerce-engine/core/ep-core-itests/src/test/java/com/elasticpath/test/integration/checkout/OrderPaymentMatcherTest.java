@@ -67,7 +67,7 @@ public class OrderPaymentMatcherTest {
 		OrderPayment orderPaymentWithWrongPaymentType = new OrderPaymentImpl();
 		orderPaymentWithWrongPaymentType.setTransactionType(OrderPayment.AUTHORIZATION_TRANSACTION);
 		orderPaymentWithWrongPaymentType.setStatus(OrderPaymentStatus.APPROVED);
-		orderPaymentWithWrongPaymentType.setPaymentMethod(PaymentType.CREDITCARD);		
+		orderPaymentWithWrongPaymentType.setPaymentMethod(PaymentType.CREDITCARD_DIRECT_POST);
 		assertFalse("Matcher should not match payment", matcher.matches(orderPaymentWithWrongPaymentType));		
 	}
 	

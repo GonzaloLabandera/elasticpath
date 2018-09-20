@@ -7,7 +7,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 import org.jmock.Expectations;
 import org.jmock.integration.junit4.JUnitRuleMockery;
@@ -55,36 +54,19 @@ public class ConditionValidationFacadeImplTest  {
 	/**
 	 * Test that ensures that null condition as argument is not allowed.
 	 */
-	@Test
+	@Test(expected = IllegalArgumentException.class)
 	public void testValidateSingleNullCondition() {
-
-		try {
-
 			final Condition condition = null;
 			validationFacade.validate(condition);
-
-			fail("Must not evaluate on null conditions");
-		} catch (IllegalArgumentException iae) {
-			assertNotNull(true);
-		}
-
 	}
 
 	/**
 	 * Test that ensures that null as tag definition of condition as argument is not allowed.
 	 */
-	@Test
+	@Test(expected = IllegalArgumentException.class)
 	public void testValidateSingleNullTagDefinitionOfCondition() {
-
-		try {
-
 			final Condition condition = new Condition(null, "", "");
 			validationFacade.validate(condition);
-
-			fail("Must not evaluate on conditions with null tag definition");
-		} catch (IllegalArgumentException iae) {
-			assertNotNull(true);
-		}
 
 	}
 
@@ -92,11 +74,8 @@ public class ConditionValidationFacadeImplTest  {
 	 * Test that ensures that null as tag value type of a tag definition of condition as argument
 	 * is not allowed.
 	 */
-	@Test
+	@Test(expected = IllegalArgumentException.class)
 	public void testValidateSingleNullTagValueTypeOfTagDefinitionOfCondition() {
-
-		try {
-
 			final TagDefinition tagDefinition = context.mock(TagDefinition.class, "tagDefinition");
 
 			context.checking(new Expectations() { {
@@ -105,12 +84,6 @@ public class ConditionValidationFacadeImplTest  {
 
 			final Condition condition = new Condition(tagDefinition, "", "");
 			validationFacade.validate(condition);
-
-			fail("Must not evaluate on conditions with null tag definition");
-		} catch (IllegalArgumentException iae) {
-			assertNotNull(true);
-		}
-
 	}
 
 	/**
@@ -138,19 +111,10 @@ public class ConditionValidationFacadeImplTest  {
 	/**
 	 * Test that ensures that null logical trees as argument is not allowed.
 	 */
-	@Test
+	@Test(expected = IllegalArgumentException.class)
 	public void testValidateTreeNullOperator() {
-
-		try {
-
 			final LogicalOperator tree = null;
 			validationFacade.validateTree(tree);
-
-			fail("Must not evaluate on null root nodes");
-		} catch (IllegalArgumentException iae) {
-			assertNotNull(true);
-		}
-
 	}
 
 	/**

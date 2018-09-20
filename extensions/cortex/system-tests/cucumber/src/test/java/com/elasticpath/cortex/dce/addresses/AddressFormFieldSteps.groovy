@@ -44,7 +44,7 @@ And(~'^link does not have rev$') { ->
 }
 
 And(~'^link has uri to addresses$') { ->
-	def link_uri = client.body.links[0].uri
+	def link_uri = client.body.links[0].href
 	def last_part = link_uri.split('/')[-1]
 	assertThat(last_part)
 			.as("Link is not as expected")

@@ -48,10 +48,6 @@ public final class PaymentsComparatorFactory {
 				.compare(payment1, payment2);
 
 			if (initial == 0) {
-				if (PaymentType.CREDITCARD.equals(payment1.getPaymentMethod())) {
-					return new CreditCardOrderPaymentComparator().compare(payment1, payment2);
-				}
-
 				if (PaymentType.GIFT_CERTIFICATE.equals(payment1.getPaymentMethod())) {
 					return new GiftCertificateOrderPaymentComparator().compare(payment1, payment2);
 				}

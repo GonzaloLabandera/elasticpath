@@ -31,11 +31,7 @@ public class DefaultBeanCreator implements BeanCreator {
 	Persistable constructObject(final Class<?> clazz) {
 		try {
 			return (Persistable) clazz.newInstance();
-		} catch (final ClassCastException e) {
-			throw new SyncToolRuntimeException("Failed to construct class :" + clazz, e);
-		} catch (final InstantiationException e) {
-			throw new SyncToolRuntimeException("Failed to construct class :" + clazz, e);
-		} catch (final IllegalAccessException e) {
+		} catch (final ClassCastException | InstantiationException | IllegalAccessException e) {
 			throw new SyncToolRuntimeException("Failed to construct class :" + clazz, e);
 		}
 	}

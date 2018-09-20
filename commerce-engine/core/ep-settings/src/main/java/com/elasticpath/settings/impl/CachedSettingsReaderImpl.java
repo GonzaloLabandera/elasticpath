@@ -13,6 +13,7 @@ import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.factory.DisposableBean;
 
+import com.elasticpath.base.exception.EpServiceException;
 import com.elasticpath.settings.SettingsReader;
 import com.elasticpath.settings.SettingsService;
 import com.elasticpath.settings.domain.SettingDefinition;
@@ -87,6 +88,11 @@ public class CachedSettingsReaderImpl implements SettingsReader, DisposableBean 
 		if (settingData == null) {
 			// NOTE: If you change the strategy in a setting's metadata, the changes will not be picked up here until the application is restarted
 			final SettingDefinition settingDef = getSettingsService().getSettingDefinition(path);
+
+			if (settingDef == null) {
+				throw new EpServiceException("No setting definition exists for path [" + path + "]");
+			}
+
 			final SettingMetadata refreshStrategyMetadata = settingDef.getMetadata().get(getRefreshStrategyKey());
 			SettingRefreshStrategy strategy = null;
 			String refreshStrategyParams = null;

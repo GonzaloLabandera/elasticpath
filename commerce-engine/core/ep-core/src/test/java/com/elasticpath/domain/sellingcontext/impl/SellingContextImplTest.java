@@ -14,6 +14,7 @@ import org.junit.Test;
 
 import com.elasticpath.base.exception.EpServiceException;
 import com.elasticpath.domain.sellingcontext.SellingContext;
+import com.elasticpath.service.rules.impl.RuleValidationResultEnum;
 import com.elasticpath.tags.TagSet;
 import com.elasticpath.tags.domain.ConditionalExpression;
 import com.elasticpath.tags.domain.TagDictionary;
@@ -60,7 +61,7 @@ public class SellingContextImplTest  {
 	 */
 	@Test
 	public void testAllConditionsNull() {
-		assertEquals(true, sellingContext.isSatisfied(mockConditionEvaluatorService, TAG_SET));
+		assertEquals(RuleValidationResultEnum.SUCCESS, sellingContext.isSatisfied(mockConditionEvaluatorService, TAG_SET));
 	}
 
 	/**
@@ -69,7 +70,7 @@ public class SellingContextImplTest  {
 	@Test
 	public void testAllConditionsTrue() {
 		givenThreeConditionsInTheSellingContext(true, true, true);
-		assertEquals(true, sellingContext.isSatisfied(mockConditionEvaluatorService, TAG_SET));
+		assertEquals(RuleValidationResultEnum.SUCCESS, sellingContext.isSatisfied(mockConditionEvaluatorService, TAG_SET));
 	}
 
 	/**
@@ -78,13 +79,13 @@ public class SellingContextImplTest  {
 	@Test
 	public void testAtLeastOneConditionFalse() {
 		givenThreeConditionsInTheSellingContext(false, true, true);
-		assertEquals(false, sellingContext.isSatisfied(mockConditionEvaluatorService, TAG_SET));
+		assertEquals(RuleValidationResultEnum.ERROR_UNSPECIFIED, sellingContext.isSatisfied(mockConditionEvaluatorService, TAG_SET));
 
 		givenThreeConditionsInTheSellingContext(true, false, true);
-		assertEquals(false, sellingContext.isSatisfied(mockConditionEvaluatorService, TAG_SET));
+		assertEquals(RuleValidationResultEnum.ERROR_UNSPECIFIED, sellingContext.isSatisfied(mockConditionEvaluatorService, TAG_SET));
 
 		givenThreeConditionsInTheSellingContext(true, true, false);
-		assertEquals(false, sellingContext.isSatisfied(mockConditionEvaluatorService, TAG_SET));
+		assertEquals(RuleValidationResultEnum.ERROR_UNSPECIFIED, sellingContext.isSatisfied(mockConditionEvaluatorService, TAG_SET));
 
 		// TODO: I think the original tester was going for rough coverage of ordering, not
 		// exhaustive testing of the &= operator over the 3 expressions.
@@ -117,7 +118,7 @@ public class SellingContextImplTest  {
 
 		// Check that the sellingcontext is not satisfied with the expression evaluation results in an error.
 		assertFalse("SellingContext should not be satisfied when an expression evaluation error occurs",
-				sellingContext.isSatisfied(mockConditionEvaluatorService, TAG_SET));
+				sellingContext.isSatisfied(mockConditionEvaluatorService, TAG_SET).isSuccess());
 	}
 
 	private void givenThreeConditionsInTheSellingContext(final boolean isExpr1Satisfied,

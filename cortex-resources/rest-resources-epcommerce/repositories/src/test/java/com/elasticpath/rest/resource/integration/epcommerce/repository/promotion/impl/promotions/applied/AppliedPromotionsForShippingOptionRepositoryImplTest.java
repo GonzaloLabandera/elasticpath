@@ -3,7 +3,9 @@
  */
 package com.elasticpath.rest.resource.integration.epcommerce.repository.promotion.impl.promotions.applied;
 
-import static org.mockito.Matchers.any;
+import static java.util.Collections.singletonList;
+
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import static com.elasticpath.rest.resource.integration.epcommerce.repository.ErrorCheckPredicate.createErrorCheckPredicate;
@@ -11,17 +13,17 @@ import static com.elasticpath.rest.resource.integration.epcommerce.repository.pr
 		.buildAppliedPromotionsForShippingOptionIdentifier;
 
 import java.util.Collections;
-import java.util.List;
 
 import com.google.common.collect.ImmutableList;
 import io.reactivex.Single;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Answers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
-import com.elasticpath.domain.shipping.ShippingServiceLevel;
 import com.elasticpath.domain.shoppingcart.ShoppingCart;
 import com.elasticpath.domain.shoppingcart.ShoppingCartPricingSnapshot;
 import com.elasticpath.rest.ResourceOperationFailure;
@@ -32,7 +34,9 @@ import com.elasticpath.rest.resource.integration.epcommerce.repository.ResourceT
 import com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder.CartOrderRepository;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder.PricingSnapshotRepository;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.promotion.PromotionRepository;
-import com.elasticpath.rest.resource.integration.epcommerce.repository.shipping.ShippingServiceLevelRepository;
+import com.elasticpath.rest.resource.integration.epcommerce.repository.shipping.ShippingOptionRepository;
+import com.elasticpath.service.shipping.ShippingOptionService;
+import com.elasticpath.shipping.connectivity.dto.ShippingOption;
 
 /**
  * Test for {@link AppliedPromotionsForShippingOptionRepositoryImpl}.
@@ -42,10 +46,8 @@ public class AppliedPromotionsForShippingOptionRepositoryImplTest {
 
 	private final AppliedPromotionsForShippingOptionIdentifier identifier = buildAppliedPromotionsForShippingOptionIdentifier();
 
-	private final List<ShippingServiceLevel> shippingServiceLevels = ImmutableList.of();
-
 	@Mock
-	private ShippingServiceLevel shippingServiceLevel;
+	private ShippingOption shippingOption;
 
 	@Mock
 	private ShoppingCart shoppingCart;
@@ -60,13 +62,23 @@ public class AppliedPromotionsForShippingOptionRepositoryImplTest {
 	private CartOrderRepository cartOrderRepository;
 
 	@Mock
-	private ShippingServiceLevelRepository shippingServiceLevelRepository;
+	private ShippingOptionRepository shippingOptionRepository;
 
 	@Mock
 	private PricingSnapshotRepository pricingSnapshotRepository;
 
 	@Mock
 	private PromotionRepository promotionRepository;
+
+	@Mock(answer = Answers.RETURNS_DEEP_STUBS)
+	private ShippingOptionService shippingOptionService;
+
+	@Before
+	public void setUp() {
+
+		when(shippingOptionService.getShippingOptions(shoppingCart).getAvailableShippingOptions()).thenReturn(singletonList(shippingOption));
+
+	}
 
 	@Test
 	public void verifyGetElementsReturnNotFoundWhenShoppingCartNotFound() {
@@ -91,12 +103,11 @@ public class AppliedPromotionsForShippingOptionRepositoryImplTest {
 	}
 
 	@Test
-	public void verifyGetElementsReturnEmptyWhenShippingServiceLevelNotFound() {
+	public void verifyGetElementsReturnEmptyWhenShippingOptionNotFound() {
 		when(cartOrderRepository.getEnrichedShoppingCartForShipments(ResourceTestConstants.SCOPE, ResourceTestConstants.SHIPMENT_DETAILS_ID))
 				.thenReturn(Single.just(shoppingCart));
 		when(pricingSnapshotRepository.getShoppingCartPricingSnapshotSingle(shoppingCart)).thenReturn(Single.just(shoppingCartPricingSnapshot));
-		when(shoppingCart.getShippingServiceLevelList()).thenReturn(shippingServiceLevels);
-		when(shippingServiceLevelRepository.getShippingServiceLevel(any(), any()))
+		when(shippingOptionRepository.getShippingOption(any(), any()))
 				.thenReturn(Single.error(ResourceOperationFailure.notFound(ResourceTestConstants.NOT_FOUND)));
 
 		repository.getElements(identifier)
@@ -109,10 +120,9 @@ public class AppliedPromotionsForShippingOptionRepositoryImplTest {
 		when(cartOrderRepository.getEnrichedShoppingCartForShipments(ResourceTestConstants.SCOPE, ResourceTestConstants.SHIPMENT_DETAILS_ID))
 				.thenReturn(Single.just(shoppingCart));
 		when(pricingSnapshotRepository.getShoppingCartPricingSnapshotSingle(shoppingCart)).thenReturn(Single.just(shoppingCartPricingSnapshot));
-		when(shoppingCart.getShippingServiceLevelList()).thenReturn(shippingServiceLevels);
-		when(shippingServiceLevelRepository.getShippingServiceLevel(any(), any()))
-				.thenReturn(Single.just(shippingServiceLevel));
-		when(promotionRepository.getAppliedShippingPromotions(shoppingCartPricingSnapshot, shippingServiceLevel))
+		when(shippingOptionRepository.getShippingOption(any(), any()))
+				.thenReturn(Single.just(shippingOption));
+		when(promotionRepository.getAppliedShippingPromotions(shoppingCartPricingSnapshot, shippingOption))
 				.thenReturn(Collections.emptyList());
 
 		repository.getElements(identifier)
@@ -126,10 +136,9 @@ public class AppliedPromotionsForShippingOptionRepositoryImplTest {
 		when(cartOrderRepository.getEnrichedShoppingCartForShipments(ResourceTestConstants.SCOPE, ResourceTestConstants.SHIPMENT_DETAILS_ID))
 				.thenReturn(Single.just(shoppingCart));
 		when(pricingSnapshotRepository.getShoppingCartPricingSnapshotSingle(shoppingCart)).thenReturn(Single.just(shoppingCartPricingSnapshot));
-		when(shoppingCart.getShippingServiceLevelList()).thenReturn(shippingServiceLevels);
-		when(shippingServiceLevelRepository.getShippingServiceLevel(any(), any()))
-				.thenReturn(Single.just(shippingServiceLevel));
-		when(promotionRepository.getAppliedShippingPromotions(shoppingCartPricingSnapshot, shippingServiceLevel))
+		when(shippingOptionRepository.getShippingOption(any(), any()))
+				.thenReturn(Single.just(shippingOption));
+		when(promotionRepository.getAppliedShippingPromotions(shoppingCartPricingSnapshot, shippingOption))
 				.thenReturn(ImmutableList.of("0", "1"));
 
 		repository.getElements(identifier)

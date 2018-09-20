@@ -17,7 +17,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.elasticpath.domain.catalog.Product;
 import com.elasticpath.domain.catalog.ProductSku;
@@ -210,7 +210,6 @@ public class StoreProductRepositoryImplTest {
 
 	@Test
 	public void testFindStoreThenNullProductCache() {
-		when(mockStoreRepository.findStoreAsSingle(SCOPE)).thenReturn(Single.just(store));
 		when(mockProductLookup.findByGuid(PRODUCT_GUID_1)).thenReturn(null);
 
 		ExecutionResult<StoreProduct> result = storeProductRepository
@@ -224,7 +223,6 @@ public class StoreProductRepositoryImplTest {
 
 	@Test
 	public void testSingleFindStoreThenNullProductCache() {
-		when(mockStoreRepository.findStoreAsSingle(SCOPE)).thenReturn(Single.just(store));
 		when(mockProductLookup.findByGuid(PRODUCT_GUID_1)).thenReturn(null);
 
 		storeProductRepository.findDisplayableStoreProductWithAttributesByProductGuidAsSingle(SCOPE, PRODUCT_GUID_1)
@@ -307,11 +305,8 @@ public class StoreProductRepositoryImplTest {
 
 	@Test
 	public void testFindBySkuGuidWhenProductSkuIsNotFound() {
-		when(mockProductSku.getProduct()).thenReturn(product1);
 		when(mockProductSkuRepository.getProductSkuWithAttributesByGuidAsSingle(SKU_GUID))
 				.thenReturn(Single.error(ResourceOperationFailure.notFound()));
-		when(mockStoreRepository.findStoreAsSingle(SCOPE)).thenReturn(Single.just(store));
-		when(mockStoreProductService.getProductForStore(product1, store)).thenReturn(storeProduct);
 
 		storeProductRepository.findDisplayableStoreProductWithAttributesBySkuGuid(SCOPE, SKU_GUID)
 				.test()

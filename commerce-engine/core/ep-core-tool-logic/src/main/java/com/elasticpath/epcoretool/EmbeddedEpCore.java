@@ -43,6 +43,8 @@ public class EmbeddedEpCore {
 
 	private XmlBeanFactory beanFactory;
 
+	private static final Logger LOGGER = Logger.getRootLogger();
+
 	/**
 	 * The constructor for this will fully initialize a Spring application context with the beans in epcore in it and get the database ready to go.
 	 */
@@ -208,14 +210,13 @@ public class EmbeddedEpCore {
 	 * Configure log4j.
 	 */
 	private void configureLog4j() {
-		Logger rootLogger = Logger.getRootLogger();
 
-		if (rootLogger.getAllAppenders().hasMoreElements()) {
+		if (LOGGER.getAllAppenders().hasMoreElements()) {
 			return;
 		}
 
-		rootLogger.setLevel(Level.WARN);
-		rootLogger.addAppender(new ConsoleAppender(new PatternLayout("%-5p [%t]: %m%n")));
+		LOGGER.setLevel(Level.WARN);
+		LOGGER.addAppender(new ConsoleAppender(new PatternLayout("%-5p [%t]: %m%n")));
 
 	}
 

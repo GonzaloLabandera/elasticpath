@@ -30,7 +30,6 @@ import com.elasticpath.domain.catalog.ProductType;
 import com.elasticpath.domain.catalog.impl.PriceImpl;
 import com.elasticpath.domain.catalog.impl.PriceTierImpl;
 import com.elasticpath.domain.catalog.impl.ProductTypeImpl;
-import com.elasticpath.domain.catalogview.StoreProduct;
 import com.elasticpath.domain.misc.impl.RandomGuidImpl;
 import com.elasticpath.domain.shoppingcart.ShoppingItem;
 import com.elasticpath.domain.shoppingcart.impl.ShoppingItemImpl;
@@ -178,8 +177,6 @@ public class ShoppingItemFactoryImplTest {
 
 		final Product product = context.mock(Product.class);
 
-		final StoreProduct storeProduct = context.mock(StoreProduct.class);
-
 		final BeanFactory beanFactory = context.mock(BeanFactory.class);
 		factory.setBeanFactory(beanFactory);
 
@@ -202,7 +199,6 @@ public class ShoppingItemFactoryImplTest {
 				allowing(productSku).getGuid();
 				will(returnValue(skuGuid));
 				oneOf(product).getCode(); will(returnValue("ProductA"));
-				allowing(storeProduct).isProductPurchasable();	will(returnValue(true));
 				allowing(beanFactory).getBean("shoppingItem"); will(returnValue(shoppingItem));
 				allowing(product).getProductType();	will(returnValue(productType));
 				allowing(productType).getName(); will(returnValue("Gift Certificates"));

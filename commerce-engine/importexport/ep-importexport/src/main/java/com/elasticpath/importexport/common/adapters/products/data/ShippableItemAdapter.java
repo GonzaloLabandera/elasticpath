@@ -10,15 +10,16 @@ import com.elasticpath.importexport.common.adapters.AbstractDomainAdapterImpl;
 import com.elasticpath.importexport.common.dto.products.ShippableItemDTO;
 import com.elasticpath.importexport.common.dto.products.UnitDTO;
 import com.elasticpath.importexport.common.exception.runtime.PopulationRuntimeException;
-import com.elasticpath.settings.SettingsReader;
+import com.elasticpath.settings.provider.SettingValueProvider;
 
 /**
  * The implementation of <code>DomainAdapter</code> interface. It is responsible for data transformation between <code>ProductSku</code>
  * and <code>ShippableItemDTO</code> objects.
  */
 public class ShippableItemAdapter extends AbstractDomainAdapterImpl<ProductSku, ShippableItemDTO> {
-	
-	private SettingsReader settingsReader;
+
+	private SettingValueProvider<String> lengthUnitsProvider;
+	private SettingValueProvider<String> weightUnitsProvider;
 
 	@Override
 	public void populateDomain(final ShippableItemDTO source, final ProductSku target) {
@@ -52,8 +53,8 @@ public class ShippableItemAdapter extends AbstractDomainAdapterImpl<ProductSku, 
 	public void populateDTO(final ProductSku source, final ShippableItemDTO target) {
 		target.setEnabled(source.isShippable());
 		if (source.isShippable()) {
-			final String unitsWeight = getSettingsReader().getSettingValue("COMMERCE/SYSTEM/UNITS/weight").getValue();
-			final String unitsLength = getSettingsReader().getSettingValue("COMMERCE/SYSTEM/UNITS/length").getValue();
+			final String unitsWeight = getWeightUnitsProvider().get();
+			final String unitsLength = getLengthUnitsProvider().get();
 			target.setWeight(new UnitDTO(unitsWeight, source.getWeight()));
 			target.setWidth(new UnitDTO(unitsLength, source.getWidth()));
 			target.setLength(new UnitDTO(unitsLength, source.getLength()));
@@ -61,11 +62,20 @@ public class ShippableItemAdapter extends AbstractDomainAdapterImpl<ProductSku, 
 		}
 	}
 
-	public void setSettingsReader(final SettingsReader settingsReader) {
-		this.settingsReader = settingsReader;
+	public void setLengthUnitsProvider(final SettingValueProvider<String> lengthUnitsProvider) {
+		this.lengthUnitsProvider = lengthUnitsProvider;
 	}
 
-	protected SettingsReader getSettingsReader() {
-		return settingsReader;
+	protected SettingValueProvider<String> getLengthUnitsProvider() {
+		return lengthUnitsProvider;
 	}
+
+	public void setWeightUnitsProvider(final SettingValueProvider<String> weightUnitsProvider) {
+		this.weightUnitsProvider = weightUnitsProvider;
+	}
+
+	protected SettingValueProvider<String> getWeightUnitsProvider() {
+		return weightUnitsProvider;
+	}
+
 }

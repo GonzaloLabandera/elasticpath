@@ -47,14 +47,14 @@ public interface CartOrder extends Entity {
 	void setShippingAddressGuid(String shippingAddressGuid);
 
 	/**
-	 * @return The shipping service level GUID.
+	 * @return The shipping option code.
 	 */
-	String getShippingServiceLevelGuid();
+	String getShippingOptionCode();
 
 	/**
-	 * @param shippingServiceLevelGuid The shipping service level GUID.
+	 * @param shippingOptionCode The shipping option code.
 	 */
-	void setShippingServiceLevelGuid(String shippingServiceLevelGuid);
+	void setShippingOptionCode(String shippingOptionCode);
 
 	/**
 	 * Gets the payment method.

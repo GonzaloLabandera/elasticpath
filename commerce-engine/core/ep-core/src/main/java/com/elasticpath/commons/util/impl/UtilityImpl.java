@@ -22,7 +22,7 @@ import com.elasticpath.commons.util.Utility;
 import com.elasticpath.domain.store.CreditCardType;
 import com.elasticpath.domain.store.Store;
 import com.elasticpath.service.store.StoreService;
-import com.elasticpath.settings.SettingsReader;
+import com.elasticpath.settings.provider.SettingValueProvider;
 
 /**
  * The default implementation of <code>Utility</code>.
@@ -39,11 +39,10 @@ public class UtilityImpl implements Utility {
 
 	private static final Map<String, String> YEAR_MAP;
 
-	private static final String SETTING_LOCALE_DATE_FORMAT = "COMMERCE/SYSTEM/localeDateFormat";
 	private static final Map<Character, Character> WESTERN_TO_ENGLISH_MAP = new HashMap<>();
 
 	private BeanFactory beanFactory;
-	private SettingsReader settingsReader;
+	private SettingValueProvider<String> defaultDateFormatPatternProvider;
 
 	static {
 		MONTH_MAP = new LinkedHashMap<>();
@@ -105,7 +104,7 @@ public class UtilityImpl implements Utility {
 	 * @throws com.elasticpath.base.exception.EpServiceException if the locale date format setting cannot be retrieved for any reason
 	 */
 	protected String getDefaultDateFormatPattern() {
-		return getSettingsReader().getSettingValue(SETTING_LOCALE_DATE_FORMAT, "").getValue();
+		return getDefaultDateFormatPatternProvider().get();
 	}
 
 	/**
@@ -200,11 +199,12 @@ public class UtilityImpl implements Utility {
 		this.beanFactory = beanFactory;
 	}
 
-	protected SettingsReader getSettingsReader() {
-		return settingsReader;
+	protected SettingValueProvider<String> getDefaultDateFormatPatternProvider() {
+		return defaultDateFormatPatternProvider;
 	}
 
-	public void setSettingsReader(final SettingsReader settingsReader) {
-		this.settingsReader = settingsReader;
+	public void setDefaultDateFormatPatternProvider(final SettingValueProvider<String> defaultDateFormatPatternProvider) {
+		this.defaultDateFormatPatternProvider = defaultDateFormatPatternProvider;
 	}
+
 }

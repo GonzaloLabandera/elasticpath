@@ -179,13 +179,6 @@ public interface OrderSku extends ShoppingItem, ListenableObject {
 	BigDecimal getSavings();
 
 	/**
-	 * Get the encrypted uidPk string.
-	 * 
-	 * @return the encrypted uidPk string
-	 */
-	String getEncryptedUidPk();
-
-	/**
 	 * Gets the digital asset belong to this order SKU.
 	 * 
 	 * @return the digital asset belong to this order SKU
@@ -331,4 +324,5 @@ public interface OrderSku extends ShoppingItem, ListenableObject {
 	 */
 	@Deprecated
 	BigDecimal getInvoiceItemAmount();
+
 }

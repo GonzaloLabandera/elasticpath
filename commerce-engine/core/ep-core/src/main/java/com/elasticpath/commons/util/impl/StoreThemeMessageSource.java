@@ -12,7 +12,7 @@ import org.springframework.context.support.AbstractMessageSource;
 import com.elasticpath.base.exception.EpSystemException;
 import com.elasticpath.commons.util.StoreMessageSource;
 import com.elasticpath.service.catalogview.StoreConfig;
-import com.elasticpath.settings.domain.SettingValue;
+import com.elasticpath.settings.provider.SettingValueProvider;
 
 /**
  * Custom message resource to retrieve properties from property file sets according to store/theme.
@@ -25,6 +25,8 @@ public class StoreThemeMessageSource extends AbstractMessageSource {
 	private StoreConfig storeConfig;
 
 	private StoreMessageSource storeMessageSource;
+
+	private SettingValueProvider<String> storeThemeProvider;
 
 	/**
 	 * Finds properties without arguments.
@@ -56,15 +58,12 @@ public class StoreThemeMessageSource extends AbstractMessageSource {
 	 * @return the store's theme code
 	 */
 	protected String getThemeCode() {
-		SettingValue settingValue = storeConfig.getSetting("COMMERCE/STORE/theme");
-		if (settingValue == null) {
-			throw new EpSystemException("StoreConfig missing setting 'COMMERCE/STORE/theme' for store: " + storeConfig.getStoreCode());
-		}
+		final String themeCode = storeConfig.getSettingValue(getStoreThemeProvider());
 
-		String themeCode = settingValue.getValue();
 		if (StringUtils.isBlank(themeCode)) {
 			throw new EpSystemException("StoreConfig missing setting 'COMMERCE/STORE/theme' for store: " + storeConfig.getStoreCode());
 		}
+
 		return themeCode;
 	}
 
@@ -106,6 +105,14 @@ public class StoreThemeMessageSource extends AbstractMessageSource {
 	 */
 	public void setStoreConfig(final StoreConfig storeConfig) {
 		this.storeConfig = storeConfig;
+	}
+
+	public void setStoreThemeProvider(final SettingValueProvider<String> storeThemeProvider) {
+		this.storeThemeProvider = storeThemeProvider;
+	}
+
+	protected SettingValueProvider<String> getStoreThemeProvider() {
+		return storeThemeProvider;
 	}
 
 }

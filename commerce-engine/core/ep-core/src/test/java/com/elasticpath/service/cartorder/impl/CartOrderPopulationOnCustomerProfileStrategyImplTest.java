@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) Elastic Path Software Inc., 2014
  */
 package com.elasticpath.service.cartorder.impl;
@@ -18,11 +18,9 @@ import com.elasticpath.domain.cartorder.CartOrder;
 import com.elasticpath.domain.cartorder.impl.CartOrderImpl;
 import com.elasticpath.domain.customer.Customer;
 import com.elasticpath.domain.customer.CustomerAddress;
-import com.elasticpath.domain.customer.CustomerCreditCard;
 import com.elasticpath.domain.customer.CustomerPaymentMethods;
 import com.elasticpath.domain.customer.PaymentToken;
 import com.elasticpath.domain.customer.impl.CustomerAddressImpl;
-import com.elasticpath.domain.customer.impl.CustomerCreditCardImpl;
 import com.elasticpath.domain.customer.impl.PaymentTokenImpl;
 import com.elasticpath.domain.shopper.Shopper;
 import com.elasticpath.domain.shoppingcart.ShoppingCart;
@@ -39,8 +37,6 @@ public class CartOrderPopulationOnCustomerProfileStrategyImplTest {
 
 	private static final String CART_GUID = "CART_GUID";
 
-	private static final String CREDIT_CARD_GUID = "CREDIT_CARD_GUID";
-	
 	private static final String STORE_CODE = "STORE_CODE";
 
 	private final CartOrderPopulationOnCustomerProfileStrategyImpl strategy = new CartOrderPopulationOnCustomerProfileStrategyImpl();
@@ -104,12 +100,12 @@ public class CartOrderPopulationOnCustomerProfileStrategyImplTest {
 	public void testCreateCartOrder() {
 		shouldContainBillingAddress(customerAddress);
 		shouldContainShippingAddress(customerAddress);
-		CustomerCreditCard defaultCreditCard = createDefaultCreditCard();
-		shouldHaveDefaultPaymentMethod(defaultCreditCard);
+		PaymentMethod paymentMethod = createPaymentMethod();
+		shouldHaveDefaultPaymentMethod(paymentMethod);
 
 		CartOrder result = strategy.createCartOrder(shoppingCart);
 		assertEquals("Customer address GUIDs should be equal.", CUSTOMER_ADDRESS_GUID, result.getBillingAddressGuid());
-		assertEquals("Persisted payment method should be the customer's default payment method.", defaultCreditCard,
+		assertEquals("Persisted payment method should be the customer's default payment method.", paymentMethod,
 				result.getPaymentMethod());
 	}
 
@@ -134,12 +130,12 @@ public class CartOrderPopulationOnCustomerProfileStrategyImplTest {
 	public void testCreateCartOrderWithoutDefaultBillingAddress() {
 		shouldContainBillingAddress(null);
 		shouldContainShippingAddress(customerAddress);
-		CustomerCreditCard defaultCreditCard = createDefaultCreditCard();
-		shouldHaveDefaultPaymentMethod(defaultCreditCard);
+		PaymentMethod paymentMethod = createPaymentMethod();
+		shouldHaveDefaultPaymentMethod(paymentMethod);
 
 		CartOrder result = strategy.createCartOrder(shoppingCart);
 		assertNull("Customer billing address GUID should be null.", result.getBillingAddressGuid());
-		assertEquals("Persisted payment method should be the customer's default payment method.", defaultCreditCard,
+		assertEquals("Persisted payment method should be the customer's default payment method.", paymentMethod,
 				result.getPaymentMethod());
 	}
 
@@ -150,12 +146,12 @@ public class CartOrderPopulationOnCustomerProfileStrategyImplTest {
 	public void testCreateCartOrderWithoutDefaultShippingAddress() {
 		shouldContainBillingAddress(customerAddress);
 		shouldContainShippingAddress(null);
-		CustomerCreditCard defaultCreditCard = createDefaultCreditCard();
-		shouldHaveDefaultPaymentMethod(defaultCreditCard);
+		PaymentMethod paymentMethod = createPaymentMethod();
+		shouldHaveDefaultPaymentMethod(paymentMethod);
 
 		CartOrder result = strategy.createCartOrder(shoppingCart);
 		assertNull("Customer shipping address GUID should be null.", result.getShippingAddressGuid());
-		assertEquals("Persisted payment method should be the customer's default payment method.", defaultCreditCard,
+		assertEquals("Persisted payment method should be the customer's default payment method.", paymentMethod,
 				result.getPaymentMethod());
 	}
 	
@@ -166,8 +162,8 @@ public class CartOrderPopulationOnCustomerProfileStrategyImplTest {
 	public void testCreateCartOrderWithDefaultShippingAddress() {
 		shouldContainBillingAddress(customerAddress);
 		shouldContainShippingAddress(customerAddress);
-		CustomerCreditCard defaultCreditCard = createDefaultCreditCard();
-		shouldHaveDefaultPaymentMethod(defaultCreditCard);
+		PaymentMethod paymentMethod = createPaymentMethod();
+		shouldHaveDefaultPaymentMethod(paymentMethod);
 
 		strategy.createCartOrder(shoppingCart);
 		
@@ -210,20 +206,21 @@ public class CartOrderPopulationOnCustomerProfileStrategyImplTest {
 				will(returnValue(customerAddress));
 
 				if (customerAddress == null) {
-					never(cartOrderShippingService).updateCartOrderShippingAddress(with(any(String.class)), with(any(CartOrder.class)),
-							with(any(String.class)));
+					never(cartOrderShippingService).updateCartOrderShippingAddress(with(any(String.class)),
+							with(any(ShoppingCart.class)),
+							with(any(CartOrder.class))
+					);
 				} else {
-					oneOf(cartOrderShippingService).updateCartOrderShippingAddress(with(CUSTOMER_ADDRESS_GUID), with(any(CartOrder.class)),
-							with(any(String.class)));
+					oneOf(cartOrderShippingService).updateCartOrderShippingAddress(with(CUSTOMER_ADDRESS_GUID),
+							with(any(ShoppingCart.class)),
+							with(any(CartOrder.class)));
 				}
 			}
 		});
 	}
 
-	private CustomerCreditCard createDefaultCreditCard() {
-		final CustomerCreditCard creditCard = new CustomerCreditCardImpl();
-		creditCard.setGuid(CREDIT_CARD_GUID);
-		return creditCard;
+	private PaymentMethod createPaymentMethod() {
+		return new PaymentTokenImpl.TokenBuilder().build();
 	}
 	
 	

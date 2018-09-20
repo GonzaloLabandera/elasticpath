@@ -7,18 +7,22 @@ import cucumber.api.java.en.And;
 import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
 
+import com.elasticpath.selenium.dialogs.AddEditBrandDialog;
 import com.elasticpath.selenium.dialogs.CreateChangeSetDialog;
+import com.elasticpath.selenium.dialogs.MoveSelectedObjectsDialog;
 import com.elasticpath.selenium.domainobjects.CartItemModifierGroup;
 import com.elasticpath.selenium.domainobjects.Catalog;
 import com.elasticpath.selenium.domainobjects.Category;
 import com.elasticpath.selenium.domainobjects.CategoryType;
+import com.elasticpath.selenium.domainobjects.DST;
 import com.elasticpath.selenium.domainobjects.LinkedCategory;
 import com.elasticpath.selenium.domainobjects.Product;
 import com.elasticpath.selenium.domainobjects.ProductType;
 import com.elasticpath.selenium.editor.ChangeSetEditor;
-import com.elasticpath.selenium.framework.util.SeleniumDriverSetup;
 import com.elasticpath.selenium.navigations.ChangeSet;
+import com.elasticpath.selenium.resultspane.CatalogProductListingPane;
 import com.elasticpath.selenium.resultspane.ChangeSetSearchResultPane;
+import com.elasticpath.selenium.setup.SetUp;
 import com.elasticpath.selenium.toolbars.ActivityToolbar;
 import com.elasticpath.selenium.toolbars.ChangeSetActionToolbar;
 import com.elasticpath.selenium.util.Constants;
@@ -27,7 +31,7 @@ import com.elasticpath.selenium.util.Utility;
 /**
  * Change set steps.
  */
-@SuppressWarnings({"PMD.TooManyMethods"})
+@SuppressWarnings({"PMD.TooManyMethods", "PMD.GodClass"})
 public class ChangeSetDefinition {
 	private final ChangeSetActionToolbar changeSetActionToolbar;
 	private final ChangeSet changeSet;
@@ -36,6 +40,7 @@ public class ChangeSetDefinition {
 	private CreateChangeSetDialog createChangeSetDialog;
 	private ChangeSetEditor changeSetEditor;
 	private String changeSetName = "";
+	private String secondChangeSetName = "";
 	private static final String OBJECT_NAME = "Object Name";
 	private final ProductType productType;
 	private final CartItemModifierGroup cartItemModifierGroup;
@@ -46,6 +51,9 @@ public class ChangeSetDefinition {
 	private String changeSetEditedName;
 	private final Product product;
 	private static final int RETRY_COUNTER = 3;
+	private final DST dst;
+	private AddEditBrandDialog addEditBrandDialog;
+	private final ProductAndBundleDefinition productAndBundleDefinition;
 
 	/**
 	 * Constructor.
@@ -58,11 +66,13 @@ public class ChangeSetDefinition {
 	 * @param categoryType          CategoryType.
 	 * @param product               Product.
 	 */
-	public ChangeSetDefinition(final ProductType productType, final CartItemModifierGroup cartItemModifierGroup, final Catalog catalog, final
-	Category category, final LinkedCategory linkedCategory, final CategoryType categoryType, final Product product) {
-		changeSetActionToolbar = new ChangeSetActionToolbar(SeleniumDriverSetup.getDriver());
-		changeSet = new ChangeSet(SeleniumDriverSetup.getDriver());
-		activityToolbar = new ActivityToolbar(SeleniumDriverSetup.getDriver());
+	//	CHECKSTYLE:OFF: checkstyle:too many parameters
+	public ChangeSetDefinition(final ProductType productType, final CartItemModifierGroup cartItemModifierGroup, final Catalog catalog,
+							   final Category category, final LinkedCategory linkedCategory, final CategoryType categoryType, final Product product,
+							   final ProductAndBundleDefinition productAndBundleDefinition, final DST dst) {
+		changeSetActionToolbar = new ChangeSetActionToolbar(SetUp.getDriver());
+		changeSet = new ChangeSet(SetUp.getDriver());
+		activityToolbar = new ActivityToolbar(SetUp.getDriver());
 		this.productType = productType;
 		this.cartItemModifierGroup = cartItemModifierGroup;
 		this.catalog = catalog;
@@ -70,6 +80,8 @@ public class ChangeSetDefinition {
 		this.linkedCategory = linkedCategory;
 		this.categoryType = categoryType;
 		this.product = product;
+		this.productAndBundleDefinition = productAndBundleDefinition;
+		this.dst = dst;
 	}
 
 	/**
@@ -108,6 +120,21 @@ public class ChangeSetDefinition {
 		createChangeSet(changeSetName);
 		searchChangeSetByName(this.changeSetName);
 		changeSetEditor = changeSetSearchResultPane.openChangeSetEditor(this.changeSetName);
+		changeSetEditor.selectObjectsTab();
+	}
+
+
+	/**
+	 * Creates a second change set.
+	 *
+	 * @param changeSetName the change set name
+	 **/
+	@And("^I create a second change set (.+)$")
+	public void createSecondChangeSetAndOpenEditor(final String changeSetName) {
+		createSecondChangeSet(changeSetName);
+		searchChangeSetByName(this.secondChangeSetName);
+		changeSetEditor = changeSetSearchResultPane.openChangeSetEditor(this.secondChangeSetName);
+		changeSetEditor.selectObjectsTab();
 	}
 
 	/**
@@ -117,6 +144,7 @@ public class ChangeSetDefinition {
 	 **/
 	@And("^I change the changeset name to (.+)$")
 	public void editChangeSetName(final String newName) {
+		changeSetEditor.selectSummaryTab();
 		this.changeSetEditedName = newName + "_" + Utility.getRandomUUID();
 		changeSetEditor.changeName(this.changeSetEditedName);
 		changeSetActionToolbar.saveAll();
@@ -141,15 +169,49 @@ public class ChangeSetDefinition {
 	@And("^I create and select the newly created change set (.+)$")
 	public void createAndSelectChangeSet(final String changeSetName) {
 		createChangeSetAndOpenEditor(changeSetName);
+		if (dst != null) {
+			changeSetEditor.setChangeSetGuid(dst);
+			changeSetEditor.selectObjectsTab();
+		}
 		selectChangeSet(this.changeSetName);
 	}
 
 	/**
 	 * Selects newly created change set.
 	 **/
-	@And("^I select newly created change set$")
+	@And("^I select (?:newly created|latest) change set$")
 	public void selectNewChangeSet() {
 		selectChangeSet(this.changeSetName);
+	}
+
+	/**
+	 * Selects second change set.
+	 **/
+	@And("^I select second change set$")
+	public void selectSecondChangeSet() {
+		changeSetActionToolbar.selectChangeSet(changeSetName);
+	}
+
+	/**
+	 * Selects object with the given name to the second changeset.
+	 **/
+	@And("^I select and move (.+) object to the second changeset$")
+	public void selectAndMoveObject(final String objectName) {
+		changeSetEditor.selectObjectInChangeSet(objectName);
+		MoveSelectedObjectsDialog moveSelectedObjectsDialog = changeSetEditor.clickMoveSelectedObjectsButton();
+		moveSelectedObjectsDialog.selectChangeSetfromTable(this.secondChangeSetName);
+		moveSelectedObjectsDialog.clickMoveButton();
+	}
+
+	/**
+	 * Selects object with the given name to the second changeset.
+	 **/
+	@Then("^the second changeSet should contain object (.+)$")
+	public void verifyObjectExistsInSecondChangeset(final String objectName) {
+		selectSecondChangeSetEditor();
+		changeSetEditor.selectObjectsTab();
+		changeSetActionToolbar.clickReloadActiveEditor();
+		changeSetEditor.verifyObjectExists(objectName, OBJECT_NAME);
 	}
 
 	/**
@@ -174,7 +236,7 @@ public class ChangeSetDefinition {
 	/**
 	 * Verifies price list in change set.
 	 **/
-	@Then("^I should see (?:newly created|deleted) price list in the change set$")
+	@Then("^I should see (?:newly created|deleted|edited) price list in the change set$")
 	public void verifyNewPriceListInChangeSet() {
 		changeSetEditor.selectObjectsTab();
 		changeSetActionToolbar.clickReloadActiveEditor();
@@ -197,7 +259,7 @@ public class ChangeSetDefinition {
 	/**
 	 * Verifies price list assignment in change set.
 	 **/
-	@Then("^I should see (?:newly created|deleted) price list assignment in the change set$")
+	@Then("^I should see (?:newly created|deleted|edited) price list assignment in the change set$")
 	public void verifyNewPriceListAssignmentInChangeSet() {
 		changeSetEditor.selectObjectsTab();
 		changeSetActionToolbar.clickReloadActiveEditor();
@@ -260,7 +322,7 @@ public class ChangeSetDefinition {
 	/**
 	 * Verifies product in change set.
 	 **/
-	@Then("^I should see (?:newly created|deleted) (?:product|bundle) in the change set$")
+	@Then("^I should see (?:newly created|deleted|edited) (?:product|bundle) in the change set$")
 	public void verifyProductInChangeSet() {
 		selectNewChangeSetEditor();
 		changeSetActionToolbar.clickReloadActiveEditor();
@@ -269,9 +331,35 @@ public class ChangeSetDefinition {
 	}
 
 	/**
+	 * Verifies existing product in change set object.
+	 *
+	 * @param existingProductName the product name
+	 **/
+	@Then("^I should see product (.+) in the change set$")
+	public void verifyExistingProductInChangeSet(final String existingProductName) {
+		selectNewChangeSetEditor();
+		changeSetActionToolbar.clickReloadActiveEditor();
+		changeSetEditor.selectObjectsTab();
+		changeSetEditor.verifyObjectExists(existingProductName, OBJECT_NAME);
+	}
+
+	/**
+	 * Verifies existing product in change set with the given change set name.
+	 *
+	 * @param existingProductName the product name
+	 **/
+	@Then("^I should see product (.+) in the second changeset$")
+	public void verifyExistingProductInSecondChangeSet(final String existingProductName) {
+		selectSecondChangeSetEditor();
+		changeSetActionToolbar.clickReloadActiveEditor();
+		changeSetEditor.selectObjectsTab();
+		changeSetEditor.verifyObjectExists(existingProductName, OBJECT_NAME);
+	}
+
+	/**
 	 * Verifies catalog attribute in change set.
 	 **/
-	@Then("^I should see (?:newly created and edited|deleted) catalog attribute in the change set$")
+	@Then("^I should see the (?:newly created|edited|deleted) catalog attribute in the change set$")
 	public void verifyCatalogAttributeInChangeSet() {
 		selectNewChangeSetEditor();
 		changeSetActionToolbar.clickReloadActiveEditor();
@@ -290,15 +378,84 @@ public class ChangeSetDefinition {
 	}
 
 	/**
+	 * Verifies sku options in change set.
+	 **/
+	@Then("^I should see the (?:newly created|edited|deleted) sku option in the change set$")
+	public void verifySkuOptionInChangeSet() {
+		selectNewChangeSetEditor();
+		changeSetActionToolbar.clickReloadActiveEditor();
+		changeSetEditor.selectObjectsTab();
+		changeSetEditor.verifyObjectExists(this.product.getSKUOption(), OBJECT_NAME);
+	}
+
+	/**
+	 * Search, select and product to the change set.
+	 *
+	 * @param productName the product name
+	 **/
+	@When("^I add product (.+) to the change set$")
+	public void addProductToChangeset(final String productName) {
+		productAndBundleDefinition.searchForProductByName(productName);
+		clickAddItemToChangeSetButton();
+	}
+
+
+	/**
 	 * Locks and Finalizes change set.
 	 */
-	@After("@lockAndFinalize")
+	@After(value = "@lockAndFinalize", order = Constants.CLEANUP_ORDER_FOURTH)
 	public void lockAndFinalizeNewChangeSet() {
+		searchAndLockNewChangeSet();
+		searchChangeSetByName(this.changeSetName);
+		changeSetSearchResultPane.clickFinalizedButton();
+		verifyChangeSetStatus("Finalized");
+	}
+
+	/**
+	 * Locks and Finalizes change set.
+	 */
+	@After(value = "@lockAndFinalizeSecond", order = Constants.CLEANUP_ORDER_FOURTH)
+	public void lockAndFinalizeSecondChangeSet() {
+		searchAndLockSecondChangeSet();
+		searchChangeSetByName(this.secondChangeSetName);
+		changeSetSearchResultPane.clickFinalizedButton();
+		verifyChangeSetStatusSecond("Finalized");
+	}
+
+	/**
+	 * Locks and Publishes change set.
+	 */
+	public void lockAndPublishNewChangeSet() {
+		searchAndLockNewChangeSet();
+		searchChangeSetByName(this.changeSetName);
+		changeSetSearchResultPane.clickPublishButton();
+	}
+
+	/**
+	 * Locks change set.
+	 */
+	public void searchAndLockNewChangeSet() {
 		activityToolbar.clickChangeSetButton();
 		searchChangeSetByName(this.changeSetName);
 		changeSetSearchResultPane.clickLockButton();
-		searchChangeSetByName(this.changeSetName);
-		changeSetSearchResultPane.clickFinalizedButton();
+	}
+
+	/**
+	 * Locks change set.
+	 */
+	public void searchAndLockSecondChangeSet() {
+		activityToolbar.clickChangeSetButton();
+		searchChangeSetByName(this.secondChangeSetName);
+		changeSetSearchResultPane.clickLockButton();
+	}
+
+	/**
+	 * Locks and Publishes latest change set.
+	 **/
+	@And("^I lock and publish latest change set")
+	public void lockAndPublishChangeSet() {
+		activityToolbar.clickChangeSetButton();
+		lockAndPublishNewChangeSet();
 	}
 
 	/**
@@ -337,6 +494,16 @@ public class ChangeSetDefinition {
 	}
 
 	/**
+	 * Unlocks change set.
+	 **/
+	@When("^I unlock the latest change set")
+	public void unlockNewChangeSet() {
+		activityToolbar.clickChangeSetButton();
+		changeSetSearchResultPane.selectChangeSet(this.changeSetName);
+		changeSetSearchResultPane.clickUnlockButton();
+	}
+
+	/**
 	 * Finalizes change set.
 	 **/
 	@When("^I finalize the latest change set")
@@ -349,11 +516,21 @@ public class ChangeSetDefinition {
 	/**
 	 * Verifies change set status.
 	 *
-	 * @param changeSetStatus the change set name
+	 * @param changeSetStatus the change set status
 	 **/
 	@Then("^the change set status should be (.+)")
 	public void verifyChangeSetStatus(final String changeSetStatus) {
 		changeSetSearchResultPane.verifyChangeSetStatus(this.changeSetName, changeSetStatus);
+	}
+
+	/**
+	 * Verifies change set status of second change set
+	 *
+	 * @param changeSetStatus the change set status
+	 **/
+	@Then("^the second change set status should be (.+)")
+	public void verifyChangeSetStatusSecond(final String changeSetStatus) {
+		changeSetSearchResultPane.verifyChangeSetStatus(this.secondChangeSetName, changeSetStatus);
 	}
 
 	/**
@@ -365,12 +542,92 @@ public class ChangeSetDefinition {
 	}
 
 	/**
+	 * Selects first change set's editor.
+	 **/
+	@And("^I select the first change set's editor")
+	public void selectFirstChangeSetEditor() {
+		changeSetEditor.selectChangeSetEditor(this.changeSetName);
+	}
+
+	/**
+	 * Selects second change set's editor.
+	 **/
+	@And("^I select the second change set's editor")
+	public void selectSecondChangeSetEditor() {
+		changeSetEditor.selectChangeSetEditor(this.secondChangeSetName);
+	}
+
+	/**
 	 * Adds price list to change set.
 	 **/
 	@And("^I add newly created price list to the change set")
 	public void addPriceListToChangeSet() {
 		activityToolbar.clickPriceListManagementButton();
 		selectChangeSet(this.changeSetName);
+	}
+
+	/**
+	 * Descriptive step.
+	 */
+	@And("^the user (?:admin|csruser) (?:does not |does )have changeset permission$")
+	public void doNothing() {
+		//Descriptive step
+	}
+
+	/**
+	 * Verifies brand in change set.
+	 *
+	 * @param brandName brand name
+	 */
+	@Then("^I should see (?:deleted|edited) brand (.+) in the change set$")
+	public void verifyBrandInChangeSet(final String brandName) {
+		verifyBrandExistsInChangeSetEditor(brandName);
+	}
+
+	/**
+	 * click on Open Change Set to verify updated brand name.
+	 *
+	 * @param brandName brand name
+	 */
+	@When("^I open object in the changeset for (.+)$")
+	public void clickOpenObjectInChangeSet(final String brandName) {
+		verifyBrandExistsInChangeSetEditor(brandName);
+		addEditBrandDialog = changeSetEditor.clickOpenObjectButton();
+	}
+
+	/**
+	 * Edit Brand name from change set.
+	 *
+	 * @param newBrandName New brand name.
+	 */
+	@When("^I change brand name to (.+)$")
+	public void editBrandNameInChangeSet(final String newBrandName) {
+		addEditBrandDialog.enterBrandName(newBrandName);
+		this.catalog.setBrand(newBrandName);
+		addEditBrandDialog.clickAddButton();
+	}
+
+	/**
+	 * Verifies brand in change set.
+	 */
+	@Then("^I should see (?:newly created|edited|deleted) brand in the change set$")
+	public void verifyNewBrandInChangeSet() {
+		verifyBrandExistsInChangeSetEditor(this.catalog.getBrand());
+	}
+
+	private void verifyBrandExistsInChangeSetEditor(final String brandname) {
+		selectNewChangeSetEditor();
+		changeSetEditor.selectObjectsTab();
+		changeSetActionToolbar.clickReloadActiveEditor();
+		changeSetEditor.verifyObjectExists(brandname, OBJECT_NAME);
+	}
+
+	/**
+	 * Descriptive step.
+	 */
+	@Then("^total number of change set objects should match the number of category items added to the change set$")
+	public void verifyNumberOfCategoryItems() {
+		changeSetEditor.verifyNumberOfChangeSetObjects(CatalogProductListingPane.getNumberOfCategoryItems());
 	}
 
 	/**
@@ -388,9 +645,21 @@ public class ChangeSetDefinition {
 	}
 
 	/**
+	 * Create change set.
+	 *
+	 * @param changeSetName change set name
+	 */
+	private void createSecondChangeSet(final String changeSetName) {
+		clickCreateButton();
+		this.secondChangeSetName = changeSetName + "_" + Utility.getRandomUUID();
+		createChangeSetDialog.enterChangeSetName(this.secondChangeSetName);
+		createChangeSetDialog.clickFinishButton();
+	}
+
+	/**
 	 * Searches change set by name.
 	 *
-	 * @param changeSetName
+	 * @param changeSetName string variable for change set name.
 	 */
 	private void searchChangeSetByName(final String changeSetName) {
 		int counter = 0;

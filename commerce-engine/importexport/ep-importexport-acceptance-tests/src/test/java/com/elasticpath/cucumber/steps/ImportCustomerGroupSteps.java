@@ -10,14 +10,10 @@ import java.util.List;
 
 import cucumber.api.java.en.Given;
 import cucumber.api.java.en.When;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.ContextConfiguration;
 
 import com.elasticpath.common.dto.customer.CustomerGroupDTO;
 import com.elasticpath.commons.util.TestDomainMarshaller;
-import com.elasticpath.domain.customer.CustomerGroup;
 import com.elasticpath.importexport.builder.ImportConfigurationBuilder;
 import com.elasticpath.importexport.builder.ImportExportTestDirectoryBuilder;
 import com.elasticpath.importexport.common.dto.customer.CustomerGroupsDTO;
@@ -25,15 +21,11 @@ import com.elasticpath.importexport.common.manifest.Manifest;
 import com.elasticpath.importexport.common.types.JobType;
 import com.elasticpath.importexport.importer.configuration.ImportConfiguration;
 import com.elasticpath.importexport.importer.controller.ImportController;
-import com.elasticpath.importexport.importer.importers.impl.SavingManager;
 import com.elasticpath.importexport.importer.types.ImportStrategyType;
-import com.elasticpath.persistence.api.Persistable;
-import com.elasticpath.service.customer.CustomerGroupService;
 
 /**
  * Import customer group steps.
  */
-@ContextConfiguration("/integration-context-mocked-customer-service.xml")
 public class ImportCustomerGroupSteps {
 
 	private static final String CUSTOMER_GROUPS_IMPORT_FILE = "customer_groups.xml";
@@ -41,13 +33,7 @@ public class ImportCustomerGroupSteps {
 	private static final String MANIFEST_EXPORT_FILE = "manifest.xml";
 
 	@Autowired
-	private CustomerGroupService customerGroupService;
-
-	@Autowired
 	private ImportController importController;
-
-	@Autowired
-	private SavingManager<Persistable> savingManager;
 
 	private CustomerGroupsDTO customerGroupsDtoForImport;
 
@@ -143,18 +129,6 @@ public class ImportCustomerGroupSteps {
 
 		importController.loadConfiguration(importConfiguration);
 		importController.executeImport();
-
-		final ArgumentCaptor<CustomerGroup> savedCustomerGroupCaptor = ArgumentCaptor.forClass(CustomerGroup.class);
-		Mockito.verify(savingManager, Mockito.atLeast(0)).save(savedCustomerGroupCaptor.capture());
-		for (CustomerGroup customerGroup : savedCustomerGroupCaptor.getAllValues()) {
-			customerGroupService.add(customerGroup);
-		}
-
-		final ArgumentCaptor<CustomerGroup> updatedCustomerGroupCaptor = ArgumentCaptor.forClass(CustomerGroup.class);
-		Mockito.verify(savingManager, Mockito.atLeast(0)).update(updatedCustomerGroupCaptor.capture());
-		for (CustomerGroup customerGroup : updatedCustomerGroupCaptor.getAllValues()) {
-			customerGroupService.update(customerGroup);
-		}
 	}
 
 }

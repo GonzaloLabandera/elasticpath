@@ -6,7 +6,6 @@ package com.elasticpath.plugin.payment.capabilities;
 import java.util.Map;
 
 import com.elasticpath.plugin.payment.dto.AddressDto;
-import com.elasticpath.plugin.payment.dto.CardDetailsPaymentMethod;
 import com.elasticpath.plugin.payment.dto.MoneyDto;
 import com.elasticpath.plugin.payment.dto.ShoppingCartDto;
 import com.elasticpath.plugin.payment.transaction.PaymentTransactionResponse;
@@ -50,19 +49,16 @@ public interface PaypalExpressCapability extends PaymentGatewayCapability {
 	/**
 	 * Pre-authorize a payment on an existing order.
 	 *
-	 * @param orderPayment the payment to be captured
 	 * @param inResponse the response object to update
 	 * @param money the money to charge
 	 * @return PaymentTransactionResponse the gateway response
 	 * @throws com.elasticpath.plugin.payment.exceptions.PaymentGatewayException if the payment processing fails
 	 */
-	PaymentTransactionResponse authorizeOrder(CardDetailsPaymentMethod orderPayment, PaymentTransactionResponse inResponse,
-			MoneyDto money);
+	PaymentTransactionResponse authorizeOrder(PaymentTransactionResponse inResponse, MoneyDto money);
 
 	/**
 	 * Verify sufficient funds exist for a payment, but don't put a hold on them.
 	 *
-	 * @param payment the payment to be verified
 	 * @param billingAddress the name and address of the person being billed
 	 * @param inResponse the response object to update
 	 * @param money the money to charge
@@ -72,6 +68,6 @@ public interface PaypalExpressCapability extends PaymentGatewayCapability {
 	 * @throws com.elasticpath.plugin.payment.exceptions.CardErrorException if there was an error processing the given information
 	 * @throws com.elasticpath.plugin.payment.exceptions.PaymentGatewayException if the payment processing fails
 	 */
-	PaymentTransactionResponse order(CardDetailsPaymentMethod payment, MoneyDto money, PaymentTransactionResponse inResponse,
+	PaymentTransactionResponse order(MoneyDto money, PaymentTransactionResponse inResponse,
 			AddressDto billingAddress);
 }

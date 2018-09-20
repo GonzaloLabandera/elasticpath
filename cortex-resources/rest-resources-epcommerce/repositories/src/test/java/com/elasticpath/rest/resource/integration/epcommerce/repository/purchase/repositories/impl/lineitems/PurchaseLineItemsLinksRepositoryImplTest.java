@@ -3,25 +3,23 @@
  */
 package com.elasticpath.rest.resource.integration.epcommerce.repository.purchase.repositories.impl.lineitems;
 
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.when;
 
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
 import io.reactivex.Single;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.elasticpath.domain.order.Order;
-import com.elasticpath.domain.shoppingcart.ShoppingItem;
+import com.elasticpath.domain.order.OrderSku;
 import com.elasticpath.rest.definition.purchases.PurchaseIdentifier;
 import com.elasticpath.rest.definition.purchases.PurchaseLineItemIdentifier;
 import com.elasticpath.rest.definition.purchases.PurchaseLineItemsIdentifier;
@@ -44,15 +42,15 @@ public class PurchaseLineItemsLinksRepositoryImplTest {
 	private OrderRepository orderRepository;
 
 	@InjectMocks
-	private PurchaseLineItemsLinksRepositoryImpl repository;
+	private PurchaseLineItemsLinksRepositoryImpl<PurchaseLineItemsIdentifier, PurchaseLineItemIdentifier> repository;
 	private PurchaseLineItemsIdentifier identifier;
 
 	@Mock
 	private Order order;
 	@Mock
-	private ShoppingItem item1;
+	private OrderSku item1;
 	@Mock
-	private ShoppingItem item2;
+	private OrderSku item2;
 
 	@Before
 	public void setUp() {
@@ -61,12 +59,11 @@ public class PurchaseLineItemsLinksRepositoryImplTest {
 
 	@Test
 	public void testTwoLinksPresent() {
-
 		when(orderRepository.findByGuidAsSingle(SCOPE, PURCHASE_ID)).thenReturn(Single.just(order));
-		Mockito.<Collection<? extends ShoppingItem>>when(order.getRootShoppingItems()).thenReturn(ImmutableSet.of(item1, item2));
+		doReturn(ImmutableList.of(item1, item2)).when(order).getRootShoppingItems();
 
-		when(item1.getSkuGuid()).thenReturn(SKU_1);
-		when(item2.getSkuGuid()).thenReturn(SKU_2);
+		when(item1.getGuid()).thenReturn(SKU_1);
+		when(item2.getGuid()).thenReturn(SKU_2);
 
 		List<PurchaseLineItemIdentifier> result = ImmutableList.of(
 				buildPurchaseLineItemIdentifier(SKU_1),
@@ -80,11 +77,10 @@ public class PurchaseLineItemsLinksRepositoryImplTest {
 
 	@Test
 	public void testOneLinkPresent() {
-
 		when(orderRepository.findByGuidAsSingle(SCOPE, PURCHASE_ID)).thenReturn(Single.just(order));
-		Mockito.<Collection<? extends ShoppingItem>>when(order.getRootShoppingItems()).thenReturn(ImmutableSet.of(item1));
+		doReturn(ImmutableList.of(item1)).when(order).getRootShoppingItems();
 
-		when(item1.getSkuGuid()).thenReturn(SKU_1);
+		when(item1.getGuid()).thenReturn(SKU_1);
 
 		List<PurchaseLineItemIdentifier> result = ImmutableList.of(
 				buildPurchaseLineItemIdentifier(SKU_1)
@@ -98,7 +94,7 @@ public class PurchaseLineItemsLinksRepositoryImplTest {
 	@Test
 	public void testNoLinkPresent() {
 		when(orderRepository.findByGuidAsSingle(SCOPE, PURCHASE_ID)).thenReturn(Single.just(order));
-		Mockito.<Collection<? extends ShoppingItem>>when(order.getRootShoppingItems()).thenReturn(Collections.emptyList());
+		doReturn(Collections.emptyList()).when(order).getRootShoppingItems();
 
 		repository.getElements(identifier)
 				.test()

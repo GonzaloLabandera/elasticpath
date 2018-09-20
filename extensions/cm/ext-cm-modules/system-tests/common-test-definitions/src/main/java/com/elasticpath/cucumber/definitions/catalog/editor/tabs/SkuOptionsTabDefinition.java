@@ -8,8 +8,9 @@ import org.openqa.selenium.WebDriver;
 import com.elasticpath.selenium.dialogs.AddEditSkuOptionDialog;
 import com.elasticpath.selenium.dialogs.AddEditSkuOptionValueDialog;
 import com.elasticpath.selenium.dialogs.ConfirmDialog;
+import com.elasticpath.selenium.domainobjects.Product;
 import com.elasticpath.selenium.editor.catalog.tabs.SkuOptionsTab;
-import com.elasticpath.selenium.framework.util.SeleniumDriverSetup;
+import com.elasticpath.selenium.setup.SetUp;
 import com.elasticpath.selenium.toolbars.AbstractToolbar;
 import com.elasticpath.selenium.toolbars.CatalogManagementActionToolbar;
 import com.elasticpath.selenium.util.Utility;
@@ -23,14 +24,18 @@ public class SkuOptionsTabDefinition {
 	private AddEditSkuOptionDialog addEditSkuOptionDialog;
 	private final AbstractToolbar catalogManagementActionToolbar;
 	private final SkuOptionsTab skuOptionsTab;
+	private final Product product;
 
 	/**
 	 * Constructor.
+	 *
+	 * @param product variable for the product
 	 */
-	public SkuOptionsTabDefinition() {
-		final WebDriver driver = SeleniumDriverSetup.getDriver();
+	public SkuOptionsTabDefinition(final Product product) {
+		final WebDriver driver = SetUp.getDriver();
 		this.catalogManagementActionToolbar = new CatalogManagementActionToolbar(driver);
 		this.skuOptionsTab = new SkuOptionsTab(driver);
+		this.product = product;
 	}
 
 	/**
@@ -43,6 +48,7 @@ public class SkuOptionsTabDefinition {
 	public void createSkuOption(final String skuOptionCode, final String displayName) {
 		addEditSkuOptionDialog = skuOptionsTab.clickAddSkuOptionButton();
 		String skuOptionCodeRandom = skuOptionCode + Utility.getRandomUUID();
+		this.product.setSKUOption(skuOptionCodeRandom);
 		addEditSkuOptionDialog.enterSkuOptionCode(skuOptionCodeRandom);
 		addEditSkuOptionDialog.enterSkuOptionDisplayName(displayName);
 		addEditSkuOptionDialog.clickAddButton();
@@ -88,7 +94,7 @@ public class SkuOptionsTabDefinition {
 		skuOptionsTab.selectTab("SkuOptions");
 		skuOptionsTab.selectSkuOption(addEditSkuOptionDialog.getCode());
 		skuOptionsTab.clickRemoveSkuOptionButton();
-		new ConfirmDialog(SeleniumDriverSetup.getDriver()).clickOKButton("CatalogMessages.CatalogSkuOptionsSection_RemoveSelectionDialog");
+		new ConfirmDialog(SetUp.getDriver()).clickOKButton("CatalogMessages.CatalogSkuOptionsSection_RemoveSelectionDialog");
 		catalogManagementActionToolbar.saveAll();
 		catalogManagementActionToolbar.clickReloadActiveEditor();
 	}

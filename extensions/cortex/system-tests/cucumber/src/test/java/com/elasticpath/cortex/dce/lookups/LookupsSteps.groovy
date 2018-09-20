@@ -26,7 +26,7 @@ When(~/^I look up an item with code (.+?)$/) { String skuCode ->
 	CommonMethods.lookup(skuCode)
 }
 
-When(~/^I look up an out of scope item (.+?)$/) { String skuCode ->
+When(~/^I look up an (?:invalid|out of scope) item (.+?)$/) { String skuCode ->
 	itemLookupByInvalidCode(skuCode)
 }
 
@@ -143,10 +143,50 @@ Then(~'^a batch of (.*) items is returned$') { final int numberOfItems ->
 			.isEqualTo(numberOfItems)
 }
 
+Then(~'^the batch lookup returns the correct (.+)$') { String skuCodes ->
+	List<String> sku_codes = Eval.me(skuCodes)
+	def elementResponse = client.save()
+
+	assertThat(client.body.links.size())
+			.as("Number of elements is not as expected")
+			.isEqualTo(sku_codes.size())
+	
+	for (String skucode : sku_codes) {
+		boolean itemExists = false
+		client.resume(elementResponse)
+
+		client.body.links.find {
+			if (it.rel == "element") {
+				client.GET(it.href)
+				client.code()
+				if (client["code"] == skucode) {
+					itemExists = true
+				}
+			}
+		}
+		assertThat(itemExists)
+				.as("Item not found for sku code: " + skucode)
+				.isTrue()
+	}
+}
+
 When(~'I submit the invalid item uri (.+)$') { String uri ->
 	client.GET(uri)
 			.stopIfFailure()
 }
+
+
+When(~/^I cannot add to cart line item with code (.+?) with quantity (\d+)$/) { String itemCode, int qty ->
+	CommonMethods.lookup(itemCode)
+	client.addtocartform()
+			.addtodefaultcartaction(quantity: qty)
+			.stopIfFailure()
+	assertThat(client.response.status)
+			.as("The response status is not as expected")
+			.isEqualTo(400)
+
+}
+
 
 public static void itemLookupByInvalidCode(final String itemCode) {
 	client.GET("/")

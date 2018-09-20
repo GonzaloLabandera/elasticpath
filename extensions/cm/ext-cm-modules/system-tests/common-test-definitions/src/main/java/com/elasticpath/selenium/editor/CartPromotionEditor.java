@@ -12,11 +12,18 @@ import com.elasticpath.selenium.common.AbstractPageObject;
  */
 public class CartPromotionEditor extends AbstractPageObject {
 
+	/**
+	 * Editor Pane CSS.
+	 */
+	public static final String EDITOR_PANE_PARENT_CSS = "div[pane-location='editor-pane'] div[active-editor='true'] ";
+	/**
+	 * Page Object Id CSS.
+	 */
+	public static final String CART_PROMOTION_EDITOR_PAGE_OBJECT_ID = "div[automation-id*='com.elasticpath.cmclient.store.promotions.editors']";
 	private static final String STATE_INPUT_CSS =
 			"div[automation-id='com.elasticpath.cmclient.store.promotions.PromotionsMessages.PromoStoreRules_State'] > input";
 	private static final String ENABLE_ICON_CSS = "div[widget-type='Button'] > div[style*='1882de9d.png']";
 	private static final String TAB_CSS = "div[widget-id='%s'][seeable='true']";
-	private static final String EDITOR_PANE_PARENT_CSS = "div[pane-location='editor-pane'] div[active-editor='true'] ";
 	private static final String COUPON_TABLE_PARENT_CSS = EDITOR_PANE_PARENT_CSS + "div[widget-id='Coupon Usage'] ";
 	private static final String COUPON_COLUMN_CSS = COUPON_TABLE_PARENT_CSS + "div[column-id='%s']";
 	private static final String EDIT_COUPON_CSS = "div[widget-id='Edit...']";
@@ -60,7 +67,9 @@ public class CartPromotionEditor extends AbstractPageObject {
 	 * @param couponCode status
 	 */
 	public void suspendCartPromotionCoupon(final String couponCode) {
-		click(getWaitDriver().waitForElementToBeClickable(By.cssSelector(String.format(TAB_CSS, "Coupon Codes"))));
+		String cssSelector = String.format(TAB_CSS, "Coupon Codes");
+		resizeWindow(cssSelector);
+		click(getWaitDriver().waitForElementToBeClickable(By.cssSelector(cssSelector)));
 		verifyAndSelectCouponCode(couponCode);
 		clickButton(EDIT_COUPON_CSS, "Edit");
 		selectStatus("Suspended");

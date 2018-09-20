@@ -1,9 +1,7 @@
-/**
+/*
  * Copyright (c) Elastic Path Software Inc., 2013
  */
 package com.elasticpath.importexport.exporter.exporters.impl;
-
-import java.util.ArrayList;
 
 import com.elasticpath.common.dto.customer.CustomerDTO;
 import com.elasticpath.commons.exception.EpUnsupportedOperationException;
@@ -19,7 +17,7 @@ import com.elasticpath.service.customer.CustomerService;
  */
 public class CustomerCollectionsStrategy implements CollectionsStrategy<Customer, CustomerDTO> {
 
-	private final boolean clearAddresses, clearGroups, clearCreditCards, clearPaymentMethods;
+	private final boolean clearAddresses, clearGroups, clearPaymentMethods;
 
 	private final CustomerService customerService;
 
@@ -37,8 +35,6 @@ public class CustomerCollectionsStrategy implements CollectionsStrategy<Customer
 				CollectionStrategyType.CLEAR_COLLECTION);
 		clearGroups = importerConfiguration.getCollectionStrategyType(DependentElementType.CUSTOMER_GROUPS).equals(
 				CollectionStrategyType.CLEAR_COLLECTION);
-		clearCreditCards = importerConfiguration.getCollectionStrategyType(DependentElementType.CREDIT_CARDS).equals(
-				CollectionStrategyType.CLEAR_COLLECTION);
 
 		clearPaymentMethods = importerConfiguration.getCollectionStrategyType(DependentElementType.PAYMENT_METHODS).equals(
 				CollectionStrategyType.CLEAR_COLLECTION);
@@ -49,10 +45,6 @@ public class CustomerCollectionsStrategy implements CollectionsStrategy<Customer
 
 		if (clearAddresses) {
 			customer.getAddresses().clear();
-		}
-
-		if (clearCreditCards) {
-			customer.setCreditCards(new ArrayList<>());
 		}
 
 		if (clearPaymentMethods) {

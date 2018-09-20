@@ -7,8 +7,8 @@
 	xmlns="http://www.springframework.org/schema/beans"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xmlns:util="http://www.springframework.org/schema/util"
-	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
-						http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-3.0.xsd">
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+						http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-4.0.xsd">
 
 	<import resource="import-jobs.xml"/>
 
@@ -28,7 +28,7 @@
 		<ref bean="staleFileCleanupJobTrigger"/>
 	</util:list>
 
-	<bean id="processImportJobTrigger" class="org.springframework.scheduling.quartz.SimpleTriggerBean">
+	<bean id="processImportJobTrigger" class="org.springframework.scheduling.quartz.SimpleTriggerFactoryBean">
 		<property name="jobDetail" ref="processImportJob"/>
 		<!-- Start delay in milliseconds: server will wait for this long before starting to process import jobs -->
 		<property name="startDelay" value="10000" />
@@ -36,14 +36,14 @@
 		<property name="repeatInterval" value="5000" />
 	</bean>
 
-	<bean id="importCSVFileCleanupTrigger" class="org.springframework.scheduling.quartz.CronTriggerBean">
+	<bean id="importCSVFileCleanupTrigger" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
 		<property name="jobDetail" ref="importCSVFileCleanupProcessorJob"/>
 		<!-- run every day at midnight -->
 		<property name="cronExpression" value="0 0 0 * * ?"/>
 	</bean>
 
 	<bean id="staleFileCleanupJobTrigger"
-		  class="org.springframework.scheduling.quartz.CronTriggerBean">
+		  class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
 		<property name="jobDetail">
 			<ref bean="staleFileCleanupJob"/>
 		</property>

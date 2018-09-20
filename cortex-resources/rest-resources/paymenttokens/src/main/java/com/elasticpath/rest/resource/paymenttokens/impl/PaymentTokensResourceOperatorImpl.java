@@ -93,7 +93,7 @@ public final class PaymentTokensResourceOperatorImpl implements ResourceOperator
 	 */
 	@Path(AnyResourceUri.PATH_PART)
 	@OperationType(Operation.CREATE)
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({"unchecked", "rawtypes"})
 	public OperationResult processCreatePaymentTokenForOrder(
 			@AnyResourceUri
 			final ResourceState<OrderEntity> order,
@@ -113,7 +113,7 @@ public final class PaymentTokensResourceOperatorImpl implements ResourceOperator
 	 */
 	@Path(Scope.PATH_PART)
 	@OperationType(Operation.CREATE)
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({"unchecked", "rawtypes"})
 	public OperationResult processCreatePaymentTokenForProfile(
 			@Scope
 			final String scope,
@@ -187,7 +187,7 @@ public final class PaymentTokensResourceOperatorImpl implements ResourceOperator
 				.setResourceUri(profileUri)
 				.setExpectedType(ProfilesMediaTypes.PROFILE.id())
 				.build();
-		ResourceState<?> resourceState = (ResourceState<?>) Assign.ifSuccessful(readOrderCommand.execute());
+		ResourceState<?> resourceState = Assign.ifSuccessful(readOrderCommand.execute());
 		ProfileEntity profileEntity = ResourceTypeFactory.adaptResourceEntity(resourceState.getEntity(), ProfileEntity.class);
 		return ResourceState.Builder.create(profileEntity)
 				.withScope(resourceState.getScope())

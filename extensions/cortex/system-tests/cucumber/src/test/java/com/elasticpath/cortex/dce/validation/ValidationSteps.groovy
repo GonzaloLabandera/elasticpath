@@ -45,15 +45,15 @@ Then(~'I should see validation error message with message type, message id, debu
 		boolean messageExists = false;
 		client.body.messages.each { message ->
 			if (message.data.'field-name' == structureError.getFieldName()) {
-				assertThat(structureError.getMessageType())
+				assertThat(message.'type')
 						.as("Error type is not as expected")
-						.isEqualTo(message.'type')
-				assertThat(structureError.getMessageId())
+						.isEqualTo(structureError.getMessageType())
+				assertThat(message.'id')
 						.as("Error Id is not as expected")
-						.isEqualTo(message.'id')
-				assertThat(structureError.getDebugMessage())
+						.isEqualTo(structureError.getMessageId())
+				assertThat(message.'debug-message')
 						.as("Debug Message is not as expected")
-						.isEqualTo(message.'debug-message')
+						.isEqualTo(structureError.getDebugMessage())
 				messageExists = true
 				return true
 			}

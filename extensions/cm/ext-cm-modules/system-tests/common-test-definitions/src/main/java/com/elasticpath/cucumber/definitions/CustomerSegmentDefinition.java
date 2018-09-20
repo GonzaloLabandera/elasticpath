@@ -7,19 +7,19 @@ import cucumber.api.java.en.Given;
 import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
 
+import com.elasticpath.cucumber.macros.AuthenticationMacro;
+import com.elasticpath.cucumber.macros.ItemMacro;
 import com.elasticpath.selenium.dialogs.AddCustomerSegmentMembershipDialog;
 import com.elasticpath.selenium.dialogs.ConfirmDialog;
 import com.elasticpath.selenium.editor.CustomerEditor;
 import com.elasticpath.selenium.editor.CustomerSegmentEditor;
-import com.elasticpath.selenium.framework.util.SeleniumDriverSetup;
 import com.elasticpath.selenium.resultspane.CustomerSegmentResultPane;
+import com.elasticpath.selenium.setup.SetUp;
 import com.elasticpath.selenium.toolbars.ActivityToolbar;
 import com.elasticpath.selenium.toolbars.ConfigurationActionToolbar;
 import com.elasticpath.selenium.toolbars.CustomerServiceActionToolbar;
 import com.elasticpath.selenium.util.Constants;
 import com.elasticpath.selenium.util.Utility;
-import com.elasticpath.cucumber.macros.ItemMacro;
-import com.elasticpath.cucumber.macros.AuthenticationMacro;
 
 /**
  * Customer Segment step definitions.
@@ -42,11 +42,11 @@ public class CustomerSegmentDefinition {
 	 * Constructor.
 	 */
 	public CustomerSegmentDefinition() {
-		configurationActionToolbar = new ConfigurationActionToolbar(SeleniumDriverSetup.getDriver());
-		customerEditor = new CustomerEditor(SeleniumDriverSetup.getDriver());
-		addCustomerSegmentMembershipDialog = new AddCustomerSegmentMembershipDialog(SeleniumDriverSetup.getDriver());
-		activityToolbar = new ActivityToolbar(SeleniumDriverSetup.getDriver());
-		customerServiceActionToolbar = new CustomerServiceActionToolbar(SeleniumDriverSetup.getDriver());
+		configurationActionToolbar = new ConfigurationActionToolbar(SetUp.getDriver());
+		customerEditor = new CustomerEditor(SetUp.getDriver());
+		addCustomerSegmentMembershipDialog = new AddCustomerSegmentMembershipDialog(SetUp.getDriver());
+		activityToolbar = new ActivityToolbar(SetUp.getDriver());
+		customerServiceActionToolbar = new CustomerServiceActionToolbar(SetUp.getDriver());
 		navigationDefinition = new NavigationDefinition();
 		customerDefinition = new CustomerDefinition();
 	}
@@ -97,9 +97,9 @@ public class CustomerSegmentDefinition {
 		addCustomerSegmentMembershipDialog.clickSave();
 		customerEditor.selectCustomerSegment(this.uniqueCustomerSegmentName);
 		customerEditor.clickRemoveSegmentButton();
-		new ConfirmDialog(SeleniumDriverSetup.getDriver()).clickOKButton("FulfillmentMessages.CustomerSegmentsPageDialog_RemoveConfirm");
+		new ConfirmDialog(SetUp.getDriver()).clickOKButton("FulfillmentMessages.CustomerSegmentsPageDialog_RemoveConfirm");
 		customerEditor.closeCustomerEditor();
-		new ConfirmDialog(SeleniumDriverSetup.getDriver()).clickNoButton("CoreMessages.AbstractCmClientFormEditor_OkTitle_save");
+		new ConfirmDialog(SetUp.getDriver()).clickNoButton("CoreMessages.AbstractCmClientFormEditor_OkTitle_save");
 	}
 
 	/**
@@ -133,11 +133,12 @@ public class CustomerSegmentDefinition {
 
 	/**
 	 * Verifies item price that is depending on customer segment.
-	 * @param customerID Customer ID.
+	 *
+	 * @param customerID          Customer ID.
 	 * @param customerSegmentName Customer segment.
-	 * @param price item price.
-	 * @param sku item sku code.
-	 * @param store store.
+	 * @param price               item price.
+	 * @param sku                 item sku code.
+	 * @param store               store.
 	 */
 	@Given("^a customer (.+) who is member of segment (.+) that has item price (.+) for sku (.+) in store (.+)$")
 	public void verifyItemPricePerCustomerSegment(final String customerID, final String customerSegmentName, final String price, final String sku,
@@ -148,10 +149,11 @@ public class CustomerSegmentDefinition {
 
 	/**
 	 * Verifies item price for registered customer.
-	 * @param sku item sku code.
-	 * @param price item price.
+	 *
+	 * @param sku        item sku code.
+	 * @param price      item price.
 	 * @param customerID Customer ID.
-	 * @param store store.
+	 * @param store      store.
 	 */
 	@Then("^the item price for sku (.+) is (.+) when customer (.+) retrieve the item price in store (.+)$")
 	public void verifyItemPrice(final String sku, final String price, final String customerID, final String store) {
@@ -170,6 +172,7 @@ public class CustomerSegmentDefinition {
 
 	/**
 	 * Remove Customer Segment.
+	 *
 	 * @param segmentName Segment Name.
 	 * @param customerID  Customer ID.
 	 */
@@ -182,13 +185,14 @@ public class CustomerSegmentDefinition {
 		this.customerSegmentName = segmentName;
 		customerEditor.selectCustomerSegment(segmentName);
 		customerEditor.clickRemoveSegmentButton();
-		new ConfirmDialog(SeleniumDriverSetup.getDriver()).clickOKButton("FulfillmentMessages.CustomerSegmentsPageDialog_RemoveConfirm");
+		new ConfirmDialog(SetUp.getDriver()).clickOKButton("FulfillmentMessages.CustomerSegmentsPageDialog_RemoveConfirm");
 		customerServiceActionToolbar.clickSaveButton();
 		configurationActionToolbar.clickReloadActiveEditor();
 	}
 
 	/**
 	 * Add Customer Segment.
+	 *
 	 * @param segmentName Segment Name.
 	 */
 	@When("^I add segment (.+)$")
@@ -205,6 +209,7 @@ public class CustomerSegmentDefinition {
 	 */
 	@After(value = "@resetCustomerSegment", order = Constants.CLEANUP_ORDER_FIRST)
 	public void resetCustomerSegment() {
+		customerEditor.closeCustomerEditor();
 		customerDefinition.openCustomerEditor(this.customerID);
 		customerDefinition.selectCustomerEditorTab("Customer Segments");
 		if (!customerEditor.isCustomerSegmentExists(this.customerSegmentName)) {

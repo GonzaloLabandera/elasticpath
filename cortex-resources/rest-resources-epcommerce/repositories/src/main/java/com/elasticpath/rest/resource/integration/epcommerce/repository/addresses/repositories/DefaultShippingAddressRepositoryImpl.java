@@ -37,7 +37,7 @@ public class DefaultShippingAddressRepositoryImpl<AI extends DefaultShippingAddr
 		String userGuid = resourceOperationContext.getUserIdentifier();
 		AddressesIdentifier addressesIdentifier = defaultShippingAddressIdentifier.getShippingAddresses().getAddresses();
 		return customerRepository.getCustomer(userGuid)
-				.flatMap(customer -> reactiveAdapter.fromServiceAsSingle(customer::getPreferredBillingAddress))
+				.flatMap(customer -> reactiveAdapter.fromServiceAsSingle(customer::getPreferredShippingAddress))
 				.map(address -> AddressIdentifier.builder()
 						.withAddresses(addressesIdentifier)
 						.withAddressId(StringIdentifier.of(address.getGuid()))

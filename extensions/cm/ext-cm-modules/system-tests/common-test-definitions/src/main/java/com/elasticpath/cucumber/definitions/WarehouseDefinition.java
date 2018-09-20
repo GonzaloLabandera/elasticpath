@@ -8,9 +8,9 @@ import cucumber.api.java.en.When;
 
 import com.elasticpath.selenium.dialogs.CreateEditWarehouseDialog;
 import com.elasticpath.selenium.editor.StoreEditor;
-import com.elasticpath.selenium.framework.util.SeleniumDriverSetup;
 import com.elasticpath.selenium.resultspane.StoresResultPane;
 import com.elasticpath.selenium.resultspane.WarehousesPane;
+import com.elasticpath.selenium.setup.SetUp;
 import com.elasticpath.selenium.toolbars.ActivityToolbar;
 import com.elasticpath.selenium.toolbars.ConfigurationActionToolbar;
 import com.elasticpath.selenium.toolbars.ShippingReceivingActionToolbar;
@@ -33,13 +33,13 @@ public class WarehouseDefinition {
 	 * Constructor.
 	 */
 	public WarehouseDefinition() {
-		configurationActionToolbar = new ConfigurationActionToolbar(SeleniumDriverSetup.getDriver());
-		activityToolbar = new ActivityToolbar((SeleniumDriverSetup.getDriver()));
-		shippingReceivingActionToolbar = new ShippingReceivingActionToolbar(SeleniumDriverSetup.getDriver());
+		configurationActionToolbar = new ConfigurationActionToolbar(SetUp.getDriver());
+		activityToolbar = new ActivityToolbar((SetUp.getDriver()));
+		shippingReceivingActionToolbar = new ShippingReceivingActionToolbar(SetUp.getDriver());
 	}
 
 	/**
-	 * Click user roles.
+	 * Click Warehouse link.
 	 */
 	@When("^I go to Warehouses$")
 	public void clickUserRoles() {

@@ -14,7 +14,6 @@ import cucumber.api.java.en.Given;
 import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.ContextConfiguration;
 
 import com.elasticpath.cucumber.ScenarioContextValueHolder;
 import com.elasticpath.domain.builder.checkout.CheckoutTestCartBuilder;
@@ -47,7 +46,6 @@ import com.elasticpath.test.util.Utils;
 /**
  * Steps for the savedTokenPaymentMethodsForACustomer feature.
  */
-@ContextConfiguration("/cucumber.xml")
 public class SavedTokenPaymentMethodsForACustomerSteps {
 	private static final String TOKEN_DISPLAY_VALUE = "**** **** **** 1234";
 	private static final String TOKEN_DISPLAY_VALUE2 = "**** **** **** 5678";

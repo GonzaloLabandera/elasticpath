@@ -6,7 +6,7 @@ import cucumber.api.java.en.Then;
 
 import com.elasticpath.selenium.dialogs.ErrorDialog;
 import com.elasticpath.selenium.dialogs.ValidationErrorsDialog;
-import com.elasticpath.selenium.framework.util.SeleniumDriverSetup;
+import com.elasticpath.selenium.setup.SetUp;
 
 /**
  * Common definitions.
@@ -20,7 +20,7 @@ public class CommonDefinition {
 	 */
 	@Then("^I should see error (.+)$")
 	public void verifyErrorMessage(final String errMsg) {
-		new ValidationErrorsDialog(SeleniumDriverSetup.getDriver()).verifyErrorMessage(errMsg);
+		new ValidationErrorsDialog(SetUp.getDriver()).verifyErrorMessage(errMsg);
 	}
 
 	/**
@@ -30,7 +30,7 @@ public class CommonDefinition {
 	 */
 	@Then("^I should see following error messages?$")
 	public void verifyErrorMessages(final List<String> errMsgList) {
-		new ValidationErrorsDialog(SeleniumDriverSetup.getDriver()).verifyAllErrorMessages(errMsgList);
+		new ValidationErrorsDialog(SetUp.getDriver()).verifyAllErrorMessages(errMsgList);
 	}
 
 	/**
@@ -40,7 +40,7 @@ public class CommonDefinition {
 	 */
 	@Then("^I should see the following error: (.+)$")
 	public void verifyGenericErrorMessage(final String errMsg) {
-		new ErrorDialog(SeleniumDriverSetup.getDriver()).verifyErrorMessage(errMsg);
+		new ErrorDialog(SetUp.getDriver()).verifyErrorMessage(errMsg);
 	}
 
 }

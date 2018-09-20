@@ -6,7 +6,7 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 
 import com.elasticpath.selenium.dialogs.CreateCatalogDialog;
-import com.elasticpath.selenium.dialogs.CreateVirtualCatalogDialog;
+import com.elasticpath.selenium.dialogs.CreateEditVirtualCatalogDialog;
 import com.elasticpath.selenium.dialogs.EditGlobalAttributesDialog;
 
 /**
@@ -37,18 +37,20 @@ public class CatalogManagementActionToolbar extends AbstractToolbar {
 	 * @return CreateCatalogDialog
 	 */
 	public CreateCatalogDialog clickCreateCatalogButton() {
-		clickButton(CREATE_CATALOG_BUTTON_CSS, "Create Catalog");
+		clickButton(CREATE_CATALOG_BUTTON_CSS, "Create Catalog", CreateCatalogDialog.CREATE_CATALOG_PARENT_CSS);
 		return new CreateCatalogDialog(getDriver());
 	}
 
 	/**
 	 * Clicks Create Virtual Catalog button.
 	 *
-	 * @return CreateVirtualCatalogDialog
+	 * @return CreateEditVirtualCatalogDialog
 	 */
-	public CreateVirtualCatalogDialog clickCreateVirtualCatalogButton() {
-		clickButton(CREATE_VIRTUAL_CATALOG_BUTTON_CSS, "Create Virtual Catalog");
-		return new CreateVirtualCatalogDialog(getDriver());
+	public CreateEditVirtualCatalogDialog clickCreateVirtualCatalogButton() {
+		final String dialogName = "Create";
+		clickButton(CREATE_VIRTUAL_CATALOG_BUTTON_CSS, "Create Virtual Catalog", String.format(CreateEditVirtualCatalogDialog
+				.CREATE_EDIT_VIRTUAL_CATALOG_PARENT_CSS_TEMPLATE, dialogName));
+		return new CreateEditVirtualCatalogDialog(getDriver(), dialogName);
 	}
 
 	/**
@@ -57,7 +59,7 @@ public class CatalogManagementActionToolbar extends AbstractToolbar {
 	 * @return EditGlobalAttributesDialog
 	 */
 	public EditGlobalAttributesDialog clickEditGlobalAttributesButton() {
-		clickButton(EDIT_GLOBAL_ATTRIBUTE_BUTTON_CSS, "Edit Global Attribute");
+		clickButton(EDIT_GLOBAL_ATTRIBUTE_BUTTON_CSS, "Edit Global Attribute", EditGlobalAttributesDialog.EDIT_GLOBAL_ATTRIBUTES_PARENT_CSS);
 		return new EditGlobalAttributesDialog(getDriver());
 	}
 

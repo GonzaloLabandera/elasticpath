@@ -10,7 +10,7 @@ import com.google.common.collect.Lists;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.elasticpath.rest.definition.lookups.BatchItemsFormIdentifier;
 import com.elasticpath.rest.definition.lookups.BatchItemsIdentifier;

@@ -33,7 +33,6 @@
 		<!-- <activeProfile>oracle-dev-db</activeProfile> -->
 		<activeProfile>with-oauth2-resource</activeProfile>
 		<activeProfile>activemq-dev-jms</activeProfile>
-		<activeProfile>disable-licensing-check</activeProfile>
 	</activeProfiles>
 
 	<profiles>
@@ -76,13 +75,7 @@
 				<ep.local.asset.path>YOUR_PROJECT_DIR/extensions/assets/ext-assets/src/main/assets</ep.local.asset.path>
 				<ep.smtp.host>YOUR_SMTP_HOST</ep.smtp.host>
 				<ep.local.cache.timeout>5</ep.local.cache.timeout>
-			</properties>
-		</profile>
-
-		<profile>
-			<id>disable-licensing-check</id>
-			<properties>
-				<licensing.skip>true</licensing.skip>
+				<ep.database.timezone>PST</ep.database.timezone>
 			</properties>
 		</profile>
 
@@ -150,16 +143,6 @@
 					</snapshots>
 				</repository>
 				<repository>
-					<id>public-jboss</id>
-					<url>http://repository.jboss.org/nexus/content/groups/public-jboss/</url>
-					<releases>
-						<enabled>true</enabled>
-					</releases>
-					<snapshots>
-						<enabled>false</enabled>
-					</snapshots>
-				</repository>
-				<repository>
 					<id>sonatype</id>
 					<url>https://repository.sonatype.org/content/groups/forge/</url>
 					<releases>
@@ -170,28 +153,8 @@
 					</snapshots>
 				</repository>
 				<repository>
-					<id>wakaleo</id>
-					<url>http://www.wakaleo.com/maven/repos/</url>
-					<releases>
-						<enabled>true</enabled>
-					</releases>
-					<snapshots>
-						<enabled>false</enabled>
-					</snapshots>
-				</repository>
-				<repository>
 					<id>springsource-external</id>
 					<url>http://repository.springsource.com/maven/bundles/external/</url>
-					<releases>
-						<enabled>true</enabled>
-					</releases>
-					<snapshots>
-						<enabled>false</enabled>
-					</snapshots>
-				</repository>
-				<repository>
-					<id>springsource-zodiac-milestone</id>
-					<url>http://zodiac.springsource.com/maven/bundles/milestone/</url>
 					<releases>
 						<enabled>true</enabled>
 					</releases>
@@ -212,6 +175,16 @@
 				<repository>
 					<id>adobe-public</id>
 					<url>http://repo.adobe.com/nexus/content/groups/public/</url>
+					<releases>
+						<enabled>true</enabled>
+					</releases>
+					<snapshots>
+						<enabled>false</enabled>
+					</snapshots>
+				</repository>
+				<repository>
+					<id>groovy-maven</id>
+					<url>https://dl.bintray.com/groovy/maven/</url>
 					<releases>
 						<enabled>true</enabled>
 					</releases>
@@ -282,16 +255,6 @@
 					</snapshots>
 				</pluginRepository>
 				<pluginRepository>
-					<id>public-jboss</id>
-					<url>http://repository.jboss.org/nexus/content/groups/public-jboss/</url>
-					<releases>
-						<enabled>true</enabled>
-					</releases>
-					<snapshots>
-						<enabled>false</enabled>
-					</snapshots>
-				</pluginRepository>
-				<pluginRepository>
 					<id>sonatype</id>
 					<url>https://repository.sonatype.org/content/groups/forge/</url>
 					<releases>
@@ -302,28 +265,8 @@
 					</snapshots>
 				</pluginRepository>
 				<pluginRepository>
-					<id>wakaleo</id>
-					<url>http://www.wakaleo.com/maven/repos/</url>
-					<releases>
-						<enabled>true</enabled>
-					</releases>
-					<snapshots>
-						<enabled>false</enabled>
-					</snapshots>
-				</pluginRepository>
-				<pluginRepository>
 					<id>springsource-external</id>
 					<url>http://repository.springsource.com/maven/bundles/external/</url>
-					<releases>
-						<enabled>true</enabled>
-					</releases>
-					<snapshots>
-						<enabled>false</enabled>
-					</snapshots>
-				</pluginRepository>
-				<pluginRepository>
-					<id>springsource-zodiac-milestone</id>
-					<url>http://zodiac.springsource.com/maven/bundles/milestone/</url>
 					<releases>
 						<enabled>true</enabled>
 					</releases>
@@ -344,6 +287,16 @@
 				<pluginRepository>
 					<id>adobe-public</id>
 					<url>http://repo.adobe.com/nexus/content/groups/public/</url>
+					<releases>
+						<enabled>true</enabled>
+					</releases>
+					<snapshots>
+						<enabled>false</enabled>
+					</snapshots>
+				</pluginRepository>
+				<pluginRepository>
+					<id>groovy-maven</id>
+					<url>https://dl.bintray.com/groovy/maven/</url>
 					<releases>
 						<enabled>true</enabled>
 					</releases>

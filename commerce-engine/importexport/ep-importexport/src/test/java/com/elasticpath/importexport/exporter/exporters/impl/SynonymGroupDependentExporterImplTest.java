@@ -18,9 +18,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
-import com.elasticpath.domain.catalog.Catalog;
 import com.elasticpath.domain.search.SynonymGroup;
 import com.elasticpath.importexport.common.exception.ConfigurationException;
 import com.elasticpath.importexport.exporter.configuration.ExportConfiguration;
@@ -90,21 +89,7 @@ public class SynonymGroupDependentExporterImplTest {
 		registry.addGuidDependency(SynonymGroup.class, synonymGroup1Guid);
 		registry.addGuidDependencies(SynonymGroup.class, new TreeSet<>(Arrays.asList(synonymGroup2Guid, synonymGroup3Guid)));
 
-		final SynonymGroup synonymGroup1 = mock(SynonymGroup.class, "synonymGroup-1");
-		final SynonymGroup synonymGroup2 = mock(SynonymGroup.class, "synonymGroup-2");
-		final SynonymGroup synonymGroup3 = mock(SynonymGroup.class, "synonymGroup-3");
-
 		when(dependentExporterFilter.isFiltered(CATALOG_UID)).thenReturn(false);
-
-		Catalog dependentCatalog = mock(Catalog.class, "dependentCatalog");
-		Catalog otherCatalog = mock(Catalog.class, "otherCatalog");
-
-		when(dependentCatalog.getUidPk()).thenReturn(CATALOG_UID);
-		when(otherCatalog.getUidPk()).thenReturn(0L);
-
-		when(synonymGroup1.getCatalog()).thenReturn(dependentCatalog);
-		when(synonymGroup2.getCatalog()).thenReturn(otherCatalog);
-		when(synonymGroup3.getCatalog()).thenReturn(dependentCatalog);
 
 		List<SynonymGroup> result = synonymGroupExporter.findDependentObjects(CATALOG_UID);
 

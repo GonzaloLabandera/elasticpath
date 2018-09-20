@@ -20,7 +20,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.elasticpath.domain.attribute.Attribute;
 import com.elasticpath.domain.attribute.AttributeGroup;
@@ -134,7 +134,6 @@ public class ProductTypeDependentExporterImplTest {
 	private ProductType mockProductType(final String name, final String guid, final Catalog catalog, final SkuOption... skuOption) {
 		final ProductType productType = mock(ProductType.class, name);
 
-		when(productType.getGuid()).thenReturn(guid);
 		when(productType.getCatalog()).thenReturn(catalog);
 		when(productType.getSkuOptions()).thenReturn(new HashSet<>(Arrays.asList(skuOption)));
 		when(productTypeService.findByGuid(guid)).thenReturn(productType);

@@ -1,26 +1,36 @@
-/**
+/*
  * Copyright (c) Elastic Path Software Inc., 2014
  */
 package com.elasticpath.cucumber.shoppingcart;
 
+import static java.lang.String.format;
+import static java.util.Collections.singletonList;
+
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+
 import javax.inject.Inject;
 import javax.inject.Named;
+
+import com.google.common.collect.ImmutableMap;
+
+import cucumber.api.DataTable;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.elasticpath.common.dto.ShoppingItemDto;
+import com.elasticpath.base.common.dto.StructuredErrorMessage;
 import com.elasticpath.cucumber.ScenarioContextValueHolder;
 import com.elasticpath.domain.builder.shopper.ShoppingContext;
 import com.elasticpath.domain.builder.shopper.ShoppingContextBuilder;
 import com.elasticpath.domain.customer.Customer;
 import com.elasticpath.domain.customer.CustomerAddress;
 import com.elasticpath.domain.customer.CustomerSession;
+import com.elasticpath.domain.customer.PaymentToken;
 import com.elasticpath.domain.misc.CheckoutResults;
 import com.elasticpath.domain.order.Order;
 import com.elasticpath.domain.order.OrderPayment;
-import com.elasticpath.domain.shipping.ShippingServiceLevel;
 import com.elasticpath.domain.shoppingcart.ShoppingCart;
 import com.elasticpath.domain.shoppingcart.ShoppingCartPricingSnapshot;
 import com.elasticpath.domain.shoppingcart.ShoppingCartTaxSnapshot;
@@ -28,10 +38,12 @@ import com.elasticpath.domain.shoppingcart.ShoppingItem;
 import com.elasticpath.domain.store.Store;
 import com.elasticpath.persister.ShoppingContextPersister;
 import com.elasticpath.sellingchannel.director.CartDirector;
-import com.elasticpath.service.shipping.ShippingServiceLevelService;
+import com.elasticpath.service.shipping.ShippingOptionResult;
+import com.elasticpath.service.shipping.ShippingOptionService;
 import com.elasticpath.service.shoppingcart.CheckoutService;
 import com.elasticpath.service.shoppingcart.PricingSnapshotService;
 import com.elasticpath.service.shoppingcart.TaxSnapshotService;
+import com.elasticpath.shipping.connectivity.dto.ShippingOption;
 import com.elasticpath.test.persister.OrderTestPersister;
 import com.elasticpath.test.persister.StoreTestPersister;
 import com.elasticpath.test.persister.TestApplicationContext;
@@ -47,8 +59,8 @@ public class ShoppingCartStepDefinitionsHelper {
 	private ScenarioContextValueHolder<Store> storeHolder;
 	
 	@Inject
-	@Named("shippingServiceLevelHolder")
-	private ScenarioContextValueHolder<ShippingServiceLevel> shippingServiceLevelHolder;
+	@Named("shippingOptionHolder")
+	private ScenarioContextValueHolder<ShippingOption> shippingOptionHolder;
 	
 	@Inject
 	@Named("customerHolder")
@@ -69,7 +81,7 @@ public class ShoppingCartStepDefinitionsHelper {
 	private CartDirector cartDirector;
 	
 	@Autowired
-	private ShippingServiceLevelService shippingServiceLevelService;
+	private ShippingOptionService shippingOptionService;
 	
 	@Autowired
 	private CheckoutService checkoutService;
@@ -115,7 +127,7 @@ public class ShoppingCartStepDefinitionsHelper {
 
 		return orderTestPersister.persistEmptyShoppingCart(
 				customer.getPreferredBillingAddress(), customer.getPreferredShippingAddress(), customerSession,
-				shippingServiceLevelHolder.get(),
+				shippingOptionHolder.get(),
 				storeHolder.get());
 	}
 
@@ -153,21 +165,30 @@ public class ShoppingCartStepDefinitionsHelper {
 	public void setDeliveryOption(final String deliveryOption) {
 		
 		final ShoppingCart shoppingCart = getShoppingCart();
+		final ShippingOptionResult shippingOptionResult = shippingOptionService.getShippingOptions(shoppingCart);
+		final String errorMessage = format("Unable to get available shipping options for the given cart with guid '%s'. "
+						+ "So cannot set a selected one.",
+				shoppingCart.getGuid());
+		shippingOptionResult.throwExceptionIfUnsuccessful(
+				errorMessage,
+				singletonList(
+						new StructuredErrorMessage(
+								"shippingoptions.unavailable",
+								errorMessage,
+								ImmutableMap.of(
+										"cart-id", shoppingCart.getGuid())
+						)
+				));
 
-		final List<ShippingServiceLevel> shippingServiceLevels = shippingServiceLevelService.retrieveShippingServiceLevel(
-				storeHolder.get().getCode(), shoppingCart.getShippingAddress());
-
-		if (shippingServiceLevels.isEmpty()) {
+		final List<ShippingOption> availableOptions = shippingOptionResult.getAvailableShippingOptions();
+		if (availableOptions.isEmpty()) {
 			return;
 		}
 		
-		shoppingCart.setShippingServiceLevelList(shippingServiceLevels);
-
-		for (final ShippingServiceLevel shippingServiceLevel : shippingServiceLevels) {
-			if (shippingServiceLevel.getCode().equals(deliveryOption)) {
-				shoppingCart.setSelectedShippingServiceLevelUid(shippingServiceLevel.getUidPk());
-			}
-		}
+		availableOptions.stream()
+				.filter(option -> option.getCode().equals(deliveryOption))
+				.findFirst()
+				.ifPresent(shoppingCart::setSelectedShippingOption);
 	}
 
 	/**
@@ -198,7 +219,7 @@ public class ShoppingCartStepDefinitionsHelper {
 		final ShoppingCart shoppingCart = getShoppingCart();
 		
 		final OrderPayment orderPayment = tac.getPersistersFactory().getOrderTestPersister().createOrderPayment(
-			customer, customer.getCreditCards().get(0));
+			customer, (PaymentToken) customer.getPaymentMethods().getDefault());
 
 		final ShoppingContext shoppingContext = shoppingContextBuilder.withCustomer(customer)
 				.build();
@@ -226,5 +247,18 @@ public class ShoppingCartStepDefinitionsHelper {
 
 		return lineItems;
 	}
-	
+
+	/**
+	 * Convert a Gherkin data table into ShoppingItemDtos. We do this instead of taking a List<ShoppingItemDto> because
+	 * Cucumber does some weirdness in which the constructor/static initializers are not executed.
+	 * @param dataTable a data table representing the Shopping Item Dtos
+	 * @return a list of ShoppingItemDto objects
+	 */
+	public List<ShoppingItemDto> convertDataTableToShoppingItemDtos(final DataTable dataTable) {
+		List<ShoppingItemDto> shoppingItemDtoList = new ArrayList<>();
+		for (Map<String, String> row : dataTable.asMaps(String.class, String.class)) {
+			shoppingItemDtoList.add(new ShoppingItemDto(row.get("skuCode"), Integer.valueOf(row.get("quantity"))));
+		}
+		return shoppingItemDtoList;
+	}
 }

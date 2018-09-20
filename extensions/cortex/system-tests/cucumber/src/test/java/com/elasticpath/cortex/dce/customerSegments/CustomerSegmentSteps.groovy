@@ -35,10 +35,31 @@ When(~'^I go to item price') { ->
 	client.price()
 }
 
+And(~'I view the line item price') { ->
+	client.item()
+			.price()
+			.stopIfFailure()
+}
+
 And(~/^the line-item has list amount: (.+?), currency: (.+?) and display: (.+?)$/) {
 	String listAmount, String listCurrency, String listDisplay ->
 		def listPrice = client.body.'list-price'
 		assertCost(listPrice, listAmount, listCurrency, listDisplay)
+}
+
+And(~/^the item list price currency is (.+) and the display is (.+)$/) { String listCurrency, String listDisplay ->
+	client.item()
+			.price()
+			.stopIfFailure()
+	def listPrice = client.body.'list-price'
+	String listAmount = client.body.'list-price'[0].amount
+	assertCost(listPrice, listAmount, listCurrency, listDisplay)
+}
+
+And(~/^the item purchase price currency is (.+) and the display is (.+)$/) { String purchaseCurrency, String purchaseDisplay ->
+	def purchasePrice = client.body.'purchase-price'
+	String purchaseAmount = client.body.'purchase-price'[0].amount
+	assertCost(purchasePrice, purchaseAmount, purchaseCurrency, purchaseDisplay)
 }
 
 And(~/^the line-item has purchase amount: (.+?), currency: (.+?) and display: (.+?)$/) {

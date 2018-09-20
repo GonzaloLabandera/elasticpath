@@ -3,14 +3,7 @@
  */
 package com.elasticpath.cucumber.customer;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-
-import java.util.Arrays;
-
-import org.apache.commons.collections.CollectionUtils;
-import org.hamcrest.Matchers;
-import org.junit.Assert;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import com.elasticpath.domain.customer.Customer;
 import com.elasticpath.plugin.payment.dto.PaymentMethod;
@@ -60,14 +53,18 @@ class CustomerPaymentMethodsValidator {
 	 */
 	public void validate() {
 		if (paymentMethods != null && paymentMethods.length > 0) {
-			assertTrue(CollectionUtils.isEqualCollection(customer.getPaymentMethods().all(), Arrays.asList(paymentMethods)));
+			assertThat(customer.getPaymentMethods().all())
+					.containsExactlyInAnyOrder(paymentMethods);
 		} else {
-			Assert.assertThat("The persisted customer should have no payment methods", customer.getPaymentMethods().all(),
-					Matchers.empty());
+			assertThat(customer.getPaymentMethods().all())
+					.as("The persisted customer should have no payment methods")
+					.isEmpty();
 		}
 
-		assertEquals(
-				"The persisted default payment method should be the one specified or the first one in the list of payment methods in the "
-						+ "xml representation of the customer", defaultPaymentMethod, customer.getPaymentMethods().getDefault());
+		assertThat(customer.getPaymentMethods().getDefault())
+				.as("The persisted default payment method should be the one specified or the first one in the list of payment methods in the "
+				+ "xml representation of the customer")
+				.isEqualTo(defaultPaymentMethod);
+
 	}
 }

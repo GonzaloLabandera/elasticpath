@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>com.elasticpath</groupId>
 		<artifactId>parent</artifactId>
-		<version>702.0.0-SNAPSHOT</version>
+		<version>703.0.0-SNAPSHOT</version>
 	</parent>
 
 	<groupId>com.elasticpath.db</groupId>
@@ -12,26 +12,6 @@
 	<packaging>pom</packaging>
 
 	<name>Database Parent</name>
-
-	<dependencyManagement>
-		<dependencies>
-			<dependency>
-				<groupId>com.elasticpath.db</groupId>
-				<artifactId>core-schema</artifactId>
-				<version>702.0.0-SNAPSHOT</version>
-			</dependency>
-			<dependency>
-				<groupId>com.elasticpath.db</groupId>
-				<artifactId>liquibase-extensions</artifactId>
-				<version>702.0.0-SNAPSHOT</version>
-			</dependency>
-			<dependency>
-				<groupId>com.elasticpath.db</groupId>
-				<artifactId>schema-documentation</artifactId>
-				<version>702.0.0-SNAPSHOT</version>
-			</dependency>
-		</dependencies>
-	</dependencyManagement>
 
 	<build>
 		<pluginManagement>

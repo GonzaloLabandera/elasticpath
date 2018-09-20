@@ -5,20 +5,18 @@ package com.elasticpath.cucumber.shoppingcart;
 
 import java.util.List;
 
+import cucumber.api.DataTable;
 import cucumber.api.java.en.And;
 import cucumber.api.java.en.Given;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.ContextConfiguration;
 
 import com.elasticpath.common.dto.AddressDTO;
-import com.elasticpath.common.dto.ShoppingItemDto;
 import com.elasticpath.cucumber.customer.CustomerStepDefinitionsHelper;
 
 /**
  * Shopping cart test step definitions class.
  * 
  */
-@ContextConfiguration("/cucumber.xml")
 public class ShoppingCartStepDefinitions {
 	
 	@Autowired
@@ -51,23 +49,23 @@ public class ShoppingCartStepDefinitions {
 	/**
 	 * Adds the given shopping items to the shopping cart.
 	 *
-	 * @param shoppingItems shopping items
+	 * @param dataTable shopping items
 	 */
 	@Given("^the customer adds these items to the shopping cart$")
-	public void addItems(final List<ShoppingItemDto> shoppingItems) {
-		shoppingCartStepDefinitionsHelper.addItems(shoppingItems);
+	public void addItems(final DataTable dataTable) {
+		shoppingCartStepDefinitionsHelper.addItems(shoppingCartStepDefinitionsHelper.convertDataTableToShoppingItemDtos(dataTable));
 	}
 	
 	/**
 	 * Adds items to the shopping cart of the current test context, and checkout out an order from the shopping cart. 
 	 *
-	 * @param itemDtos items
+	 * @param dataTable items
 	 */
 	@Given("^the customer purchases these items$")
-	public void purchasesItems(final List<ShoppingItemDto> itemDtos) {
-		shoppingCartStepDefinitionsHelper.purchaseItems(itemDtos);
+	public void purchasesItems(final DataTable dataTable) {
+		shoppingCartStepDefinitionsHelper.purchaseItems(shoppingCartStepDefinitionsHelper.convertDataTableToShoppingItemDtos(dataTable));
 	}
-	
+
 	/**
 	 * Selects delivery option for the shopping cart of the current test context.
 	 *

@@ -127,10 +127,7 @@ public interface StoreService extends EpPersistenceService {
 	 * @param user who requested stores.
 	 * @return a list of all stores
 	 * @throws EpServiceException in case of any error
-	 * @deprecated use {@link #findAllCompleteStores()} or {@link #findAllStores()},
-	 * and filter for authorization.
 	 */
-	@Deprecated
 	List<Store> findAllStores(CmUser user) throws EpServiceException;
 
 	/**

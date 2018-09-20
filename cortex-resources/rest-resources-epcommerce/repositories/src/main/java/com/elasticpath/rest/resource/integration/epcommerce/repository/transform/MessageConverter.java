@@ -8,7 +8,7 @@ import javax.inject.Singleton;
 
 import org.springframework.core.convert.converter.Converter;
 
-import com.elasticpath.common.dto.StructuredErrorMessage;
+import com.elasticpath.base.common.dto.StructuredErrorMessage;
 import com.elasticpath.rest.advise.Message;
 
 

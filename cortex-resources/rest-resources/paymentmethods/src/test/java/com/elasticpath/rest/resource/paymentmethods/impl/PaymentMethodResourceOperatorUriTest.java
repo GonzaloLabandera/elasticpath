@@ -12,8 +12,7 @@ import org.junit.runner.RunWith;
 
 import org.mockito.Mock;
 import org.mockito.Spy;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.elasticpath.rest.OperationResult;
 import com.elasticpath.rest.ResourceOperation;
@@ -27,9 +26,7 @@ import com.elasticpath.rest.uri.URIUtil;
 /**
  * Tests Payment Methods Resource URIs.
  */
-@RunWith(PowerMockRunner.class)
-@PrepareForTest({ PaymentMethodResourceOperatorImpl.class,
-		DefaultPaymentMethodResourceOperatorImpl.class})
+@RunWith(MockitoJUnitRunner.class)
 public final class PaymentMethodResourceOperatorUriTest extends AbstractResourceOperatorUriTest {
 
 	private static final String PAYMENTMETHODS_RESOURCE_NAME = "paymentmethods";

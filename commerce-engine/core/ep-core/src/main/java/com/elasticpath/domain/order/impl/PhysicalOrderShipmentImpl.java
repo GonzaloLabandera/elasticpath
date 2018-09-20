@@ -4,7 +4,6 @@
 package com.elasticpath.domain.order.impl;
 
 import java.math.BigDecimal;
-import java.util.Currency;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
@@ -33,16 +32,12 @@ import com.elasticpath.domain.order.OrderShipmentStatus;
 import com.elasticpath.domain.order.OrderSku;
 import com.elasticpath.domain.order.PhysicalOrderShipment;
 import com.elasticpath.domain.shipping.ShipmentType;
-import com.elasticpath.domain.shipping.ShippingCostCalculationMethod;
-import com.elasticpath.domain.shipping.ShippingServiceLevel;
 import com.elasticpath.domain.shoppingcart.ShoppingItemPricingSnapshot;
 import com.elasticpath.domain.shoppingcart.ShoppingItemTaxSnapshot;
 import com.elasticpath.money.Money;
 import com.elasticpath.persistence.support.FetchGroupConstants;
 import com.elasticpath.service.catalog.ProductSkuLookup;
-import com.elasticpath.service.shipping.ShippingServiceLevelService;
 import com.elasticpath.service.shoppingcart.PricingSnapshotService;
-import com.elasticpath.service.shoppingcart.ShippableItemsSubtotalCalculator;
 import com.elasticpath.service.shoppingcart.TaxSnapshotService;
 import com.elasticpath.service.tax.TaxCalculationResult;
 import com.elasticpath.service.tax.TaxOperationService;
@@ -54,8 +49,8 @@ import com.elasticpath.service.tax.TaxOperationService;
 @DiscriminatorValue(ShipmentType.PHYSICAL_STRING)
 @FetchGroups({
 		@FetchGroup(name = FetchGroupConstants.ORDER_INDEX, attributes = { @FetchAttribute(name = "shipmentAddressInternal") }),
-		@FetchGroup(name = FetchGroupConstants.ORDER_DEFAULT, attributes = { @FetchAttribute(name = "shipmentAddressInternal"),
-				@FetchAttribute(name = "shippingServiceLevelGuidInternal") }, fetchGroups = { FetchGroupConstants.DEFAULT }, postLoad = true) })
+		@FetchGroup(name = FetchGroupConstants.ORDER_DEFAULT, attributes = { @FetchAttribute(name = "shipmentAddressInternal") },
+				fetchGroups = { FetchGroupConstants.DEFAULT }, postLoad = true) })
 @DataCache(enabled = false)
 @SuppressWarnings("PMD.GodClass")
 public class PhysicalOrderShipmentImpl extends AbstractOrderShipmentImpl implements PhysicalOrderShipment {
@@ -65,23 +60,16 @@ public class PhysicalOrderShipmentImpl extends AbstractOrderShipmentImpl impleme
 
 	private static final Logger LOG = Logger.getLogger(PhysicalOrderShipmentImpl.class);
 
-	private String carrier;
-
-	private String serviceLevel;
-
+	private String carrierCode;
+	private String carrierName;
+	private String shippingOptionCode;
+	private String shippingOptionName;
 	private String trackingCode;
-
 	private BigDecimal shippingCost = BigDecimal.ZERO.setScale(DECIMAL_SCALE);
-
 	private BigDecimal beforeTaxShippingCost;
-
 	private BigDecimal shippingTax;
-
 	private OrderAddress shipmentAddress;
-
 	private BigDecimal shippingSubtotal;
-
-	private String shippingServiceLevelGuid;
 
 	private final Set<OrderSku> shipmentRemovedOrderSkus = new HashSet<>();
 
@@ -225,26 +213,46 @@ public class PhysicalOrderShipmentImpl extends AbstractOrderShipmentImpl impleme
 
 	@Override
 	@Basic
-	@Column(name = "CARRIER")
-	public String getCarrier() {
-		return carrier;
+	@Column(name = "CARRIER_CODE")
+	public String getCarrierCode() {
+		return carrierCode;
 	}
 
 	@Override
-	public void setCarrier(final String carrier) {
-		this.carrier = carrier;
+	public void setCarrierCode(final String carrierCode) {
+		this.carrierCode = carrierCode;
 	}
 
 	@Override
 	@Basic
-	@Column(name = "SERVICE_LEVEL")
-	public String getServiceLevel() {
-		return serviceLevel;
+	@Column(name = "CARRIER_NAME")
+	public String getCarrierName() {
+		return carrierName;
 	}
 
 	@Override
-	public void setServiceLevel(final String serviceLevel) {
-		this.serviceLevel = serviceLevel;
+	public void setCarrierName(final String carrierName) {
+		this.carrierName = carrierName;
+	}
+
+	@Basic
+	@Column(name = "SHIPPING_OPTION_CODE")
+	public String getShippingOptionCode() {
+		return shippingOptionCode;
+	}
+
+	public void setShippingOptionCode(final String shippingOptionCode) {
+		this.shippingOptionCode = shippingOptionCode;
+	}
+
+	@Basic
+	@Column(name = "SHIPPING_OPTION_NAME")
+	public String getShippingOptionName() {
+		return shippingOptionName;
+	}
+
+	public void setShippingOptionName(final String shippingOptionName) {
+		this.shippingOptionName = shippingOptionName;
 	}
 
 	@Override
@@ -257,28 +265,6 @@ public class PhysicalOrderShipmentImpl extends AbstractOrderShipmentImpl impleme
 	@Override
 	public void setTrackingCode(final String trackingCode) {
 		this.trackingCode = trackingCode;
-	}
-
-	@Basic
-	@Column(name = "SERVICE_LEVEL_GUID", nullable = true)
-	protected String getShippingServiceLevelGuidInternal() {
-		return shippingServiceLevelGuid;
-	}
-
-	protected void setShippingServiceLevelGuidInternal(final String shippingServiceLevelGuid) {
-		this.shippingServiceLevelGuid = shippingServiceLevelGuid;
-	}
-
-	@Transient
-	@Override
-	public String getShippingServiceLevelGuid() {
-		return getShippingServiceLevelGuidInternal();
-	}
-
-	@Override
-	public void setShippingServiceLevelGuid(final String shippingServiceLevelGuid) {
-		setShippingServiceLevelGuidInternal(shippingServiceLevelGuid);
-		recalculateShippingCost();
 	}
 
 	/**
@@ -354,22 +340,6 @@ public class PhysicalOrderShipmentImpl extends AbstractOrderShipmentImpl impleme
 		TaxOperationService taxOperationService = getBean(ContextIdNames.TAX_OPERATION_SERVICE);
 
 		return taxOperationService.calculateTaxes(this);
-	}
-
-	private void recalculateShippingCost() {
-		if (isRecalculationEnabled()) {
-			final ShippableItemsSubtotalCalculator shippableItemsSubtotalCalculator = getBean(ContextIdNames.SHIPPABLE_ITEMS_SUBTOTAL_CALCULATOR);
-			final ShippingServiceLevel serviceLevel = getShippingServiceLevelService().findByGuid(getShippingServiceLevelGuid());
-
-			final Currency currency = getOrder().getCurrency();
-			final Money shippableItemsSubtotal = shippableItemsSubtotalCalculator.calculateSubtotalOfShippableItems(getShipmentOrderSkus(), currency);
-
-			final ShippingCostCalculationMethod shippingCostCalculationMethod = serviceLevel.getShippingCostCalculationMethod();
-			final Money shippingCost = shippingCostCalculationMethod.calculateShippingCost(
-					getShipmentOrderSkus(), shippableItemsSubtotal, currency, getProductSkuLookup());
-
-			setShippingCost(shippingCost.getAmount());
-		}
 	}
 
 	@Override
@@ -479,8 +449,10 @@ public class PhysicalOrderShipmentImpl extends AbstractOrderShipmentImpl impleme
 	@Override
 	public String toString() {
 		return new ToStringBuilder(this, ToStringStyle.MULTI_LINE_STYLE)
-			.append("carrier", getCarrier())
-			.append("serviceLevel", getServiceLevel())
+			.append("carrierCode", getCarrierCode())
+			.append("carrierName", getCarrierName())
+			.append("shippingOptionCode", getShippingOptionCode())
+			.append("shippingOptionName", getShippingOptionName())
 			.append("trackingCode", getTrackingCode())
 			.append("shippingCost", getShippingCost())
 			.append("beforeTaxShippingCost", getBeforeTaxShippingCost())
@@ -488,15 +460,6 @@ public class PhysicalOrderShipmentImpl extends AbstractOrderShipmentImpl impleme
 			.append("shipmentAddress", getShipmentAddress())
 			.appendSuper(super.toString())
 			.toString();
-	}
-
-	/**
-	 * Returns the shipping service level service, retrieved from the global bean factory.  Sorry.
-	 * @return the shipping service level service.
-	 */
-	@Transient
-	protected ShippingServiceLevelService getShippingServiceLevelService() {
-		return getBean(ContextIdNames.SHIPPING_SERVICE_LEVEL_SERVICE);
 	}
 
 	/**

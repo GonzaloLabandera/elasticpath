@@ -48,6 +48,7 @@
     </categorytypes>
     <producttypes>
         <producttype>
+            <guid>5e8dfd31-863e-4483-9129-3bf041a438f0</guid>
             <name>Movies_DVD_Multisku</name>
             <assignedattributes>
                 <attributekey>B00001</attributekey>
@@ -64,6 +65,7 @@
             <nodiscount>false</nodiscount>
         </producttype>
         <producttype>
+            <guid>4037ae9d-99c1-42db-b220-7eecfc979b10</guid>
             <name>Movies_DVD</name>
             <assignedattributes>
                 <attributekey>B00001</attributekey>
@@ -74,6 +76,7 @@
             <nodiscount>false</nodiscount>
         </producttype>
         <producttype>
+            <guid>4026c29d-67b7-4d75-9dcc-9f2b60ff20ca</guid>
             <name>Music</name>
             <assignedattributes/>
             <defaulttaxcode>NONE</defaulttaxcode>
@@ -680,7 +683,7 @@
             <required>false</required>
             <multivalue>false</multivalue>
             <global>false</global>
-        </attribute>		
+        </attribute>
     </attributes>
     <categorytypes>
         <categorytype>
@@ -768,12 +771,14 @@
     </categorytypes>
     <producttypes>
         <producttype>
+            <guid>a738a602-0a06-492f-ab6f-9fe483e570f8</guid>
             <name>Headset</name>
             <assignedattributes/>
             <defaulttaxcode>NONE</defaulttaxcode>
             <nodiscount>false</nodiscount>
         </producttype>
         <producttype>
+            <guid>0069c189-c243-4e23-a857-9a4dff1d3c9f</guid>
             <name>Phones</name>
             <assignedattributes>
                 <attributekey>product_image</attributekey>
@@ -786,6 +791,7 @@
             <nodiscount>false</nodiscount>
         </producttype>
         <producttype>
+            <guid>0f845d27-a0d1-4ad6-9753-0c656c0939ab</guid>
             <name>Movies</name>
             <assignedattributes>
                 <attributekey>A00003</attributekey>
@@ -805,6 +811,7 @@
             <nodiscount>false</nodiscount>
         </producttype>
         <producttype>
+            <guid>73296dff-2faf-47ec-bd52-a166255b644d</guid>
             <name>Movies_MultiSku</name>
             <assignedattributes>
                 <attributekey>A00003</attributekey>
@@ -839,6 +846,7 @@
             <nodiscount>false</nodiscount>
         </producttype>
         <producttype>
+            <guid>32e06045-53dc-46f9-800c-372055d3db38</guid>
             <name>Movies_MultiSku_VidQuality</name>
             <assignedattributes>
                 <attributekey>A00003</attributekey>
@@ -867,6 +875,7 @@
             <nodiscount>false</nodiscount>
         </producttype>
         <producttype>
+            <guid>a7a84409-b418-4b39-997b-8b6ece5eaee3</guid>
             <name>TV</name>
             <assignedattributes/>
             <defaulttaxcode>NONE</defaulttaxcode>
@@ -881,24 +890,28 @@
             <nodiscount>false</nodiscount>
         </producttype>
         <producttype>
+            <guid>c679992c-9d20-4b85-8048-5682ffab2f91</guid>
             <name>TVPack</name>
             <assignedattributes/>
             <defaulttaxcode>NONE</defaulttaxcode>
             <nodiscount>false</nodiscount>
         </producttype>
         <producttype>
+            <guid>cf5eb98e-6d71-47b3-9408-d03657170c74</guid>
             <name>Games</name>
             <assignedattributes/>
             <defaulttaxcode>NONE</defaulttaxcode>
             <nodiscount>false</nodiscount>
         </producttype>
         <producttype>
+            <guid>d163b25d-892d-46c0-8412-6621d7d92125</guid>
             <name>GamesPack</name>
             <assignedattributes/>
             <defaulttaxcode>NONE</defaulttaxcode>
             <nodiscount>false</nodiscount>
         </producttype>
         <producttype>
+            <guid>a7531d0f-34af-4b11-ac2a-166959fdaca2</guid>
             <name>Accessories_Multisku</name>
             <assignedattributes/>
             <defaulttaxcode>NONE</defaulttaxcode>
@@ -914,12 +927,14 @@
             <nodiscount>false</nodiscount>
         </producttype>
         <producttype>
+            <guid>80900ce2-081c-4c62-a518-bf5a76af7be4</guid>
             <name>PhysicalBundle</name>
             <assignedattributes/>
             <defaulttaxcode>NONE</defaulttaxcode>
             <nodiscount>false</nodiscount>
         </producttype>
         <producttype>
+            <guid>4fe9e351-b5ce-4dbd-a47a-ee2ceb2d6e2b</guid>
             <name>Gift Certificate</name>
             <assignedattributes>
                 <attributekey>description</attributekey>

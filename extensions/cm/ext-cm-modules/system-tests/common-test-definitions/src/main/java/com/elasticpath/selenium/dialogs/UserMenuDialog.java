@@ -8,9 +8,13 @@ import org.openqa.selenium.WebDriver;
  */
 public class UserMenuDialog extends AbstractDialog {
 
-	private static final String LOGOUT_CSS = "div[appearance-id='menu'] div[seeable='true'][widget-id='Logout']";
+	/**
+	 * CSS selector used to identify the dialog.
+	 */
+	public static final String LOGOUT_CSS = "div[appearance-id='menu'] div[seeable='true'][widget-id='Logout']";
 	private static final String CHANGE_PAGINATION_CSS = "div[appearance-id='menu'] div[seeable='true'][widget-id='Change Pagination Settings']";
 	private static final String CHANGE_PASSWORD_CSS = "div[appearance-id='menu'] div[seeable='true'][widget-id='Change Password']";
+	private static final String CHANGE_TIMEZONE_CSS = "div[appearance-id='menu'] div[seeable='true'][widget-id='Set Time Zone']";
 
 
 	/**
@@ -49,5 +53,15 @@ public class UserMenuDialog extends AbstractDialog {
 	public ChangePasswordDialog clickChangePassword() {
 		click(getWaitDriver().waitForElementToBeClickable(By.cssSelector(CHANGE_PASSWORD_CSS)));
 		return new ChangePasswordDialog(getDriver());
+	}
+
+	/**
+	 * Clicks Change Timezone.
+	 *
+	 * @return ChangeTimezoneDialog
+	 */
+	public ChangeTimezoneDialog clickChangeTimezone() {
+		click(getWaitDriver().waitForElementToBeClickable(By.cssSelector(CHANGE_TIMEZONE_CSS)));
+		return new ChangeTimezoneDialog(getDriver());
 	}
 }

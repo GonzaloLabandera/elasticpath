@@ -46,7 +46,6 @@ import com.elasticpath.service.misc.FetchPlanHelper;
 import com.elasticpath.service.search.IndexNotificationService;
 import com.elasticpath.service.search.query.ProductSearchCriteria;
 import com.elasticpath.service.search.query.SearchCriteria;
-import com.elasticpath.service.search.query.ShippingServiceLevelSearchCriteria;
 import com.elasticpath.service.store.StoreService;
 import com.elasticpath.test.BeanFactoryExpectationsFactory;
 
@@ -164,105 +163,6 @@ public class StoreServiceImplTest {
 
 
 		storeServiceImpl.notifyObjectsByUpdateCriteria(result);
-	}
-
-	/**
-	 * Tests buildUpdateSearchCriteriaList() method for given store.
-	 */
-	@Test
-	public void testBuildUpdateSearchCriteriaList() {
-		final SearchCriteria productSearchCriteria = new ProductSearchCriteria();
-		final SearchCriteria sslSearchCriteria = new ShippingServiceLevelSearchCriteria();
-
-		storeServiceImpl = new StoreServiceImpl() {
-			@Override
-			protected SearchCriteria buildProductUpdateCriteria(final Store storeBeforePersistence) {
-				return productSearchCriteria;
-			}
-
-			@Override
-			protected SearchCriteria buildShippingServiceLevelUpdateCriteria(final Store storeBeforePersistence) {
-				return sslSearchCriteria;
-			}
-		};
-
-		final List<SearchCriteria> buildUpdateSearchCriteriaList = storeServiceImpl.buildUpdateSearchCriteriaList(null);
-		assertEquals(2, buildUpdateSearchCriteriaList.size());
-		assertSame(productSearchCriteria, buildUpdateSearchCriteriaList.get(0));
-		assertSame(sslSearchCriteria, buildUpdateSearchCriteriaList.get(1));
-	}
-
-	/**
-	 * Tests buildShippingServiceLevelUpdateCriteria() method in case of incomplete store.
-	 */
-	@Test
-	public void testBuildShippingServiceLevelUpdateCriteriaIncompleteStore() {
-		StoreImpl storeImpl = new StoreImpl();
-		storeImpl.setStoreState(StoreState.UNDER_CONSTRUCTION);
-		assertNull(storeServiceImpl.buildShippingServiceLevelUpdateCriteria(storeImpl));
-
-		storeImpl.setUidPk(1L);
-		assertNull(storeServiceImpl.buildShippingServiceLevelUpdateCriteria(storeImpl));
-	}
-
-	/**
-	 * Tests buildShippingServiceLevelUpdateCriteria() method in case of complete not persisted store.
-	 */
-	@Test
-	public void testBuildShippingServiceLevelUpdateCriteriaCompleteNotPersistedStore() {
-		StoreImpl storeImpl = new StoreImpl();
-		storeImpl.setStoreState(StoreState.OPEN);
-		assertNull(storeServiceImpl.buildShippingServiceLevelUpdateCriteria(storeImpl));
-	}
-
-	/**
-	 * Tests buildShippingServiceLevelUpdateCriteria() method in case of complete persisted store if name of store was not changed.
-	 */
-	@Test
-	public void testBuildShippingServiceLevelUpdateCriteriaCompletePersistedStoreNameNotChanged() {
-		final String storeName = "storeName";
-
-		final StoreImpl storeImpl = new StoreImpl();
-		storeImpl.setUidPk(1L);
-		storeImpl.setStoreState(StoreState.OPEN);
-		storeImpl.setName(storeName);
-
-		context.checking(new Expectations() {
-			{
-				oneOf(persistenceEngine).retrieveByNamedQuery(STORE_NAME, storeImpl.getUidPk());
-				will(returnValue(Arrays.asList(storeName)));
-			}
-		});
-
-		assertNull(storeServiceImpl.buildShippingServiceLevelUpdateCriteria(storeImpl));
-	}
-
-	/**
-	 * Tests buildShippingServiceLevelUpdateCriteria() method in case of complete persisted store if name of store was changed.
-	 */
-	@Test
-	public void testBuildShippingServiceLevelUpdateCriteriaCompletePersistedStoreNameChanged() {
-		final String storeName = "storeName";
-		final String oldStoreName = "oldName";
-
-		final StoreImpl storeImpl = new StoreImpl();
-		storeImpl.setUidPk(1L);
-		storeImpl.setStoreState(StoreState.OPEN);
-		storeImpl.setName(storeName);
-
-		context.checking(new Expectations() {
-			{
-				oneOf(beanFactory).getBean(with(equal(ContextIdNames.SHIPPING_SERVICE_LEVEL_SEACRH_CRITERIA)));
-				will(returnValue(new ShippingServiceLevelSearchCriteria()));
-				oneOf(persistenceEngine).retrieveByNamedQuery(STORE_NAME, storeImpl.getUidPk());
-				will(returnValue(Arrays.asList(oldStoreName)));
-			}
-		});
-
-		SearchCriteria serviceLevelUpdateCriteria = storeServiceImpl.buildShippingServiceLevelUpdateCriteria(storeImpl);
-		assertNotNull(serviceLevelUpdateCriteria);
-		assertTrue(serviceLevelUpdateCriteria instanceof ShippingServiceLevelSearchCriteria);
-		assertEquals(oldStoreName, ((ShippingServiceLevelSearchCriteria) serviceLevelUpdateCriteria).getStore());
 	}
 
 	/**

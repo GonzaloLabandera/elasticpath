@@ -14,9 +14,7 @@ import org.junit.runner.RunWith;
  */
 @RunWith(Cucumber.class)
 @CucumberOptions(
-		format = {"pretty", "html:target/cucumber", "json:target/cucumber.json"},
-		glue = "com.elasticpath.uat",
-		tags = "~@ignore"
+		format = {"pretty", "html:target/cucumber", "json:target/cucumber.json" }, glue = "com.elasticpath.uat"
 )
 public class RunCucumberIT {
 

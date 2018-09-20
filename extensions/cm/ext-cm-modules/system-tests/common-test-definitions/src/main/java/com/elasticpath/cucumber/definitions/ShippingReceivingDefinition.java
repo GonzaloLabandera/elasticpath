@@ -5,8 +5,8 @@ import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
 
 import com.elasticpath.selenium.editor.InventoryEditor;
-import com.elasticpath.selenium.framework.util.SeleniumDriverSetup;
 import com.elasticpath.selenium.navigations.ShippingReceiving;
+import com.elasticpath.selenium.setup.SetUp;
 import com.elasticpath.selenium.toolbars.ShippingReceivingActionToolbar;
 
 /**
@@ -22,8 +22,8 @@ public class ShippingReceivingDefinition {
 	 * Cosntructor.
 	 */
 	public ShippingReceivingDefinition() {
-		shippingReceiving = new ShippingReceiving(SeleniumDriverSetup.getDriver());
-		shippingReceivingActionToolbar = new ShippingReceivingActionToolbar(SeleniumDriverSetup.getDriver());
+		shippingReceiving = new ShippingReceiving(SetUp.getDriver());
+		shippingReceivingActionToolbar = new ShippingReceivingActionToolbar(SetUp.getDriver());
 	}
 
 	/**
@@ -75,6 +75,7 @@ public class ShippingReceivingDefinition {
 		inventoryEditor.selectAdjustment(adjustmentType);
 		inventoryEditor.enterQuantity(units);
 		shippingReceivingActionToolbar.saveAll();
+		shippingReceivingActionToolbar.clickReloadActiveEditor();
 
 		if ("Add Stock".equals(adjustmentType)) {
 			inventoryEditor.verifyQuantityUpdate(quantityOnHand + Integer.valueOf(units));

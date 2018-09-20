@@ -50,6 +50,7 @@ import com.elasticpath.test.persister.testscenarios.SimpleStoreScenario;
 public final class AnonymousCustomerCleanupServiceImplTest extends BasicSpringContextTest {
 
 	private static final String ANONYMOUS_ID = "public@ep-cortex.com";
+	private static final String ANONYMOUS_EMAIL = "john.doe@elasticpath.com";
 	private static final int EXPECTED_MAX_HISTORY = 60;
 
 	@Autowired
@@ -212,7 +213,7 @@ public final class AnonymousCustomerCleanupServiceImplTest extends BasicSpringCo
 		Customer customer = storeTestPersister.createDefaultCustomer(storeScenario.getStore());
 		customer.setAnonymous(anonymous);
 
-		customer.setEmail(ANONYMOUS_ID);
+		customer.setEmail(ANONYMOUS_EMAIL);
 		if (customer.getUserId() == null) {
 			customer.setUserId(ANONYMOUS_ID);
 		}

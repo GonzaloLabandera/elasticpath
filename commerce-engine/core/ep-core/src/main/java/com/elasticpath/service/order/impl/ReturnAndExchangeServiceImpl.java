@@ -3,23 +3,29 @@
  */
 package com.elasticpath.service.order.impl;
 
+import static java.lang.String.format;
+import static java.util.Collections.singletonList;
+
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import javax.persistence.OptimisticLockException;
 
+import com.google.common.collect.ImmutableMap;
+
+import com.elasticpath.base.common.dto.StructuredErrorMessage;
 import com.elasticpath.base.exception.EpServiceException;
 import com.elasticpath.base.exception.EpSystemException;
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.commons.handlers.order.OrderShipmentHandler;
 import com.elasticpath.commons.handlers.order.OrderShipmentHandlerFactory;
 import com.elasticpath.core.messaging.order.OrderEventType;
+import com.elasticpath.domain.EpDomainException;
 import com.elasticpath.domain.cmuser.CmUser;
 import com.elasticpath.domain.customer.Address;
 import com.elasticpath.domain.customer.CustomerSession;
@@ -36,7 +42,6 @@ import com.elasticpath.domain.order.OrderShipment;
 import com.elasticpath.domain.order.OrderShipmentStatus;
 import com.elasticpath.domain.order.OrderSku;
 import com.elasticpath.domain.order.OrderStatus;
-import com.elasticpath.domain.shipping.ShippingServiceLevel;
 import com.elasticpath.domain.shopper.Shopper;
 import com.elasticpath.domain.shoppingcart.ShoppingCart;
 import com.elasticpath.domain.shoppingcart.ShoppingCartPricingSnapshot;
@@ -51,6 +56,7 @@ import com.elasticpath.persistence.api.FetchGroupLoadTuner;
 import com.elasticpath.persistence.support.FetchGroupConstants;
 import com.elasticpath.persistence.support.OrderCriterion;
 import com.elasticpath.persistence.support.OrderCriterion.ResultType;
+import com.elasticpath.persistence.support.impl.CriteriaQuery;
 import com.elasticpath.plugin.payment.PaymentType;
 import com.elasticpath.plugin.payment.exceptions.PaymentGatewayException;
 import com.elasticpath.service.catalog.ProductSkuLookup;
@@ -67,7 +73,8 @@ import com.elasticpath.service.order.ReturnExchangeType;
 import com.elasticpath.service.payment.PaymentResult;
 import com.elasticpath.service.payment.PaymentService;
 import com.elasticpath.service.search.query.OrderReturnSearchCriteria;
-import com.elasticpath.service.shipping.ShippingServiceLevelService;
+import com.elasticpath.service.shipping.ShippingOptionResult;
+import com.elasticpath.service.shipping.ShippingOptionService;
 import com.elasticpath.service.shopper.ShopperService;
 import com.elasticpath.service.shoppingcart.CheckoutService;
 import com.elasticpath.service.shoppingcart.PricingSnapshotService;
@@ -77,6 +84,7 @@ import com.elasticpath.service.tax.ReturnTaxOperationService;
 import com.elasticpath.service.tax.TaxDocumentModificationContext;
 import com.elasticpath.service.tax.TaxDocumentModificationType;
 import com.elasticpath.service.tax.TaxOperationService;
+import com.elasticpath.shipping.connectivity.dto.ShippingOption;
 
 /**
  * Provides storage and access to <code>OrderReturn</code> objects.
@@ -112,7 +120,7 @@ public class ReturnAndExchangeServiceImpl extends AbstractEpPersistenceServiceIm
 
 	private ShopperService shopperService;
 
-	private ShippingServiceLevelService shippingServiceLevelService;
+	private ShippingOptionService shippingOptionService;
 
 	private CustomerSessionService customerSessionService;
 
@@ -469,15 +477,15 @@ public class ReturnAndExchangeServiceImpl extends AbstractEpPersistenceServiceIm
 
 	@Override
 	public ShoppingCart populateShoppingCart(final OrderReturn exchangeOrder, final Collection<? extends ShoppingItem> itemList,
-			final ShippingServiceLevel shippingServiceLevel, final Address shippingAddress) {
-		return populateShoppingCart(exchangeOrder, itemList, shippingServiceLevel, CALCULATE_SHIPPING_COST, CALCULATE_SHIPPING_DISCOUNT,
-				shippingAddress);
+											 final ShippingOption shippingOption, final Address shippingAddress) {
+		return populateShoppingCart(exchangeOrder, itemList, shippingOption, CALCULATE_SHIPPING_COST, CALCULATE_SHIPPING_DISCOUNT,
+									shippingAddress);
 	}
 
 	@Override
 	public ShoppingCart populateShoppingCart(final OrderReturn exchange, final Collection<? extends ShoppingItem> itemList,
-			final ShippingServiceLevel shippingServiceLevel, final BigDecimal shippingCost, final BigDecimal shippingDiscount,
-			final Address shippingAddress) {
+											 final ShippingOption shippingOption, final BigDecimal shippingCost, final BigDecimal shippingDiscount,
+											 final Address shippingAddress) {
 
 		ShoppingCart shoppingCart = exchange.getExchangeShoppingCart();
 		if (shoppingCart == null) {
@@ -492,10 +500,33 @@ public class ReturnAndExchangeServiceImpl extends AbstractEpPersistenceServiceIm
 
 		shoppingCart.setShippingAddress(shippingAddress);
 
-		final List<ShippingServiceLevel> validShippingServiceLevels = shippingServiceLevelService.retrieveShippingServiceLevel(shoppingCart);
-		shoppingCart.setShippingServiceLevelList(validShippingServiceLevels);
+		if (shippingOption != null) {
+			final ShippingOptionResult shippingOptionResult = shippingOptionService.getShippingOptions(shoppingCart);
 
-		shoppingCart.setSelectedShippingServiceLevelUid(shippingServiceLevel.getUidPk());
+			final String errorMessage = format("Unable to get available shipping options for the given cart with guid '%s'. "
+							+ "Shipping option cannot be validated.",
+					shoppingCart.getGuid());
+			shippingOptionResult.throwExceptionIfUnsuccessful(
+					errorMessage,
+					singletonList(
+							new StructuredErrorMessage(
+									"shippingoptions.unavailable",
+									errorMessage,
+									ImmutableMap.of(
+											"cart-id", shoppingCart.getGuid(),
+											"shipping-option", shippingOption.getCode()))
+					));
+
+			final List<ShippingOption> validShippingOptions = shippingOptionResult.getAvailableShippingOptions();
+
+			if (shippingOptionResult.getAvailableShippingOptions().stream()
+					.noneMatch(element -> element.getCode().equals(shippingOption.getCode()))) {
+				throw new EpDomainException(format("Shipping option '%s' is not a valid available shipping option. Valid shipping options: %s",
+												   shippingOption.getCode(), validShippingOptions));
+			}
+
+			shoppingCart.setSelectedShippingOption(shippingOption);
+		}
 
 		/*
 		 * Workaround to prevent shopping cart from removing product sku items. see MSC-5254
@@ -537,8 +568,11 @@ public class ReturnAndExchangeServiceImpl extends AbstractEpPersistenceServiceIm
 	}
 
 	private CustomerSession createCustomerSessionForOrder(final Order order) {
+		final Store store = getStoreService().findStoreWithCode(order.getStoreCode());
 		final Shopper shopper = shopperService.findOrCreateShopper(order.getCustomer(), order.getStoreCode());
-		return customerSessionService.createWithShopper(shopper);
+		CustomerSession customerSessionWithShopper = customerSessionService.createWithShopper(shopper);
+		return customerSessionService.initializeCustomerSessionForPricing(customerSessionWithShopper,
+				store.getCode(), order.getCurrency());
 	}
 
 	@Override
@@ -755,8 +789,7 @@ public class ReturnAndExchangeServiceImpl extends AbstractEpPersistenceServiceIm
 			final int maxResults) {
 		sanityCheck();
 		final OrderCriterion orderCriterion = getBean(ContextIdNames.ORDER_CRITERION);
-		List<Object> parameters = new LinkedList<>();
-		String query = orderCriterion.getOrderReturnSearchCriteria(orderReturnSearchCriteria, parameters, ResultType.ENTITY);
+		CriteriaQuery query = orderCriterion.getOrderReturnSearchCriteria(orderReturnSearchCriteria, ResultType.ENTITY);
 
 		List<OrderReturn> orderReturnList = null;
 
@@ -764,10 +797,10 @@ public class ReturnAndExchangeServiceImpl extends AbstractEpPersistenceServiceIm
 		loadTuner.addFetchGroup(FetchGroupConstants.ORDER_RETURN_INDEX);
 		fetchPlanHelper.configureFetchGroupLoadTuner(loadTuner);
 
-		if (parameters.isEmpty()) {
-			orderReturnList = getPersistenceEngine().retrieve(query);
+		if (query.getParameters().isEmpty()) {
+			orderReturnList = getPersistenceEngine().retrieve(query.getQuery());
 		} else {
-			orderReturnList = getPersistenceEngine().retrieve(query, parameters.toArray());
+			orderReturnList = getPersistenceEngine().retrieve(query.getQuery(), query.getParameters().toArray());
 		}
 
 		fetchPlanHelper.clearFetchPlan();
@@ -780,18 +813,17 @@ public class ReturnAndExchangeServiceImpl extends AbstractEpPersistenceServiceIm
 			final OrderReturnSearchCriteria orderReturnSearchCriteria) {
 		sanityCheck();
 		final OrderCriterion orderCriterion = getBean(ContextIdNames.ORDER_CRITERION);
-		List<Object> parameters = new LinkedList<>();
-		String query = orderCriterion.getOrderReturnSearchCriteria(orderReturnSearchCriteria, parameters, ResultType.COUNT);
+		CriteriaQuery query = orderCriterion.getOrderReturnSearchCriteria(orderReturnSearchCriteria, ResultType.COUNT);
 		List<Long> orderCount = null;
 
 		FetchGroupLoadTuner loadTuner = getBean(ContextIdNames.FETCH_GROUP_LOAD_TUNER);
 		loadTuner.addFetchGroup(FetchGroupConstants.ORDER_RETURN_INDEX);
 		fetchPlanHelper.configureFetchGroupLoadTuner(loadTuner);
 
-		if (parameters.isEmpty()) {
-			orderCount = getPersistenceEngine().retrieve(query);
+		if (query.getParameters().isEmpty()) {
+			orderCount = getPersistenceEngine().retrieve(query.getQuery());
 		} else {
-			orderCount = getPersistenceEngine().retrieve(query, parameters.toArray());
+			orderCount = getPersistenceEngine().retrieve(query.getQuery(), query.getParameters().toArray());
 		}
 
 		fetchPlanHelper.clearFetchPlan();
@@ -936,8 +968,8 @@ public class ReturnAndExchangeServiceImpl extends AbstractEpPersistenceServiceIm
 		this.paymentService = paymentService;
 	}
 
-	public void setShippingServiceLevelService(final ShippingServiceLevelService shippingServiceLevelService) {
-		this.shippingServiceLevelService = shippingServiceLevelService;
+	public void setShippingOptionService(final ShippingOptionService shippingOptionService) {
+		this.shippingOptionService = shippingOptionService;
 	}
 
 	public void setCustomerSessionService(final CustomerSessionService customerSessionService) {
@@ -1027,4 +1059,5 @@ public class ReturnAndExchangeServiceImpl extends AbstractEpPersistenceServiceIm
 	public void setTaxSnapshotService(final TaxSnapshotService taxSnapshotService) {
 		this.taxSnapshotService = taxSnapshotService;
 	}
+
 }

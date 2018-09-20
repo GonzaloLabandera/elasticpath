@@ -29,6 +29,7 @@ import org.junit.Rule;
 import org.junit.Test;
 
 import com.elasticpath.common.dto.SkuInventoryDetails;
+import com.elasticpath.base.common.dto.StructuredErrorMessage;
 import com.elasticpath.commons.beanframework.BeanFactory;
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.catalog.Availability;
@@ -79,6 +80,10 @@ public class StoreProductServiceImplTest {
 	private static final int DEFAULT_CATALOG_UIDPK = 1234;
 	private static final String TEST_STORE_CODE = "testStoreCode";
 	private static final String SKU = "SKU";
+
+	public static final StructuredErrorMessage STRUCTURED_ERROR_MESSAGE
+			= new StructuredErrorMessage("error.id", "error.message", Collections.emptyMap());
+
 	private final StoreProductServiceImpl storeProductServiceImpl = new StoreProductServiceImpl();
 	private static final int SIXTY_SECONDS = 60 * 1000;
 	private static final String DEFAULT_SKU_CODE = "defaultSku";
@@ -98,6 +103,7 @@ public class StoreProductServiceImplTest {
 
 	/**
 	 * Sets up the test case.
+	 *
 	 * @throws Exception on error
 	 */
 	@Before
@@ -146,7 +152,7 @@ public class StoreProductServiceImplTest {
 		targetSku.setSkuCode("ABC");
 
 		final ProductAssociationImpl assoc1 = new ProductAssociationImpl();
-		assoc1.setStartDate(new Date(System.currentTimeMillis()	- SIXTY_SECONDS));
+		assoc1.setStartDate(new Date(System.currentTimeMillis() - SIXTY_SECONDS));
 		assoc1.setAssociationType(assocType);
 		assoc1.setTargetProduct(targetProduct);
 
@@ -183,37 +189,38 @@ public class StoreProductServiceImplTest {
 		criteria.setCatalogCode("catalog1");
 		criteria.setWithinCatalogOnly(true);
 
-		StoreProductServiceImpl service = new StoreProductServiceImpl();
-		service.setBundleIdentifier(bundleIdentifier);
-		service.setAvailabilityStrategies(Collections.<AvailabilityStrategy>emptyList());
-		service.setProductAvailabilityService(availabilityService);
-		service.setProductInventoryShoppingService(productInventoryShoppingService);
+		storeProductServiceImpl.setAvailabilityStrategies(Collections.<AvailabilityStrategy>emptyList());
 
 		final ProductAssociationRetrieveStrategy productAssociationRetrieveStrategy = context.mock(ProductAssociationRetrieveStrategy.class);
-		service.setProductAssociationRetrieveStrategy(productAssociationRetrieveStrategy);
+		storeProductServiceImpl.setProductAssociationRetrieveStrategy(productAssociationRetrieveStrategy);
 
-		context.checking(new Expectations() { {
-			Map<String, SkuInventoryDetails> skuInventoryMap = Collections.singletonMap("ABC", inventoryDetails);
+		context.checking(new Expectations() {
+			{
+				Map<String, SkuInventoryDetails> skuInventoryMap = Collections.singletonMap("ABC", inventoryDetails);
 
-			oneOf(productInventoryShoppingService).getSkuInventoryDetailsForAllSkus(targetProduct, store);
-			will(returnValue(skuInventoryMap));
+				oneOf(productInventoryShoppingService).getSkuInventoryDetailsForAllSkus(targetProduct, store);
+				will(returnValue(skuInventoryMap));
 
-			oneOf(productAssociationRetrieveStrategy).getAssociations(criteria);
-			will(returnValue(assocSet));
+				oneOf(productAssociationRetrieveStrategy).getAssociations(criteria);
+				will(returnValue(assocSet));
 
-			allowing(allocationService).hasSufficientUnallocatedQty(targetSku, warehouse.getUidPk(), targetProduct.getMinOrderQty());
-			will(returnValue(true));
+				allowing(allocationService).hasSufficientUnallocatedQty(targetSku, warehouse.getUidPk(), targetProduct.getMinOrderQty());
+				will(returnValue(true));
 
-			allowing(availabilityService).isProductAvailable(targetProduct, skuInventoryMap, true); will(returnValue(true));
-			allowing(availabilityService).isProductDisplayable(
-					targetProduct, store, skuInventoryMap, true); will(returnValue(true));
-			allowing(availabilityService).isSkuAvailable(targetProduct, targetSku, inventoryDetails); will(returnValue(true));
-			allowing(availabilityService).isSkuDisplayable(
-				targetProduct, targetSku, store, inventoryDetails); will(returnValue(true));
-		}
+				allowing(availabilityService).isProductAvailable(targetProduct, skuInventoryMap, true);
+				will(returnValue(true));
+				allowing(availabilityService).isProductDisplayable(
+						targetProduct, store, skuInventoryMap, true);
+				will(returnValue(true));
+				allowing(availabilityService).isSkuAvailable(targetProduct, targetSku, inventoryDetails);
+				will(returnValue(true));
+				allowing(availabilityService).isSkuDisplayable(
+						targetProduct, targetSku, store, inventoryDetails);
+				will(returnValue(true));
+			}
 		});
 
-		service.setStoreProductAssociations(storeProduct, store, "catalog1");
+		storeProductServiceImpl.setStoreProductAssociations(storeProduct, store, "catalog1");
 
 		final Set<ProductAssociation> associationsByType = storeProduct.getAssociationsByType(assocType);
 		assertEquals("Expected exactly one ProductAssociation", 1, associationsByType.size());
@@ -398,15 +405,16 @@ public class StoreProductServiceImplTest {
 		final Product product = new ProductImpl();
 		final Store store = new StoreImpl();
 
-		context.checking(new Expectations() { {
-			oneOf(productInventoryShoppingService).getSkuInventoryDetailsForAllSkus(product, store);
-			will(returnValue(Collections.emptyMap()));
-		} });
+		context.checking(new Expectations() {
+			{
+				oneOf(productInventoryShoppingService).getSkuInventoryDetailsForAllSkus(product, store);
+				will(returnValue(Collections.emptyMap()));
+			}
+		});
 		StoreProduct storeProduct = storeProductServiceImpl.getProductForStore(product, store);
 
 		assertFalse(storeProduct.isProductAvailable());
 		assertFalse(storeProduct.isProductDisplayable());
-		assertFalse(storeProduct.isProductPurchasable());
 	}
 
 	@Test
@@ -424,32 +432,33 @@ public class StoreProductServiceImplTest {
 		final SkuInventoryDetails skuInventory = new SkuInventoryDetails();
 		final ImmutableMap<String, SkuInventoryDetails> skuInventoryMap = ImmutableMap.of("sku", skuInventory);
 
-		context.checking(new Expectations() { {
-			oneOf(productLookup).findByUid(with(product.getUidPk()));
-			will(returnValue(product));
+		context.checking(new Expectations() {
+			{
+				oneOf(productLookup).findByUid(with(product.getUidPk()));
+				will(returnValue(product));
 
-			oneOf(productInventoryShoppingService).getSkuInventoryDetailsForAllSkus(product, store);
-			will(returnValue(skuInventoryMap));
+				oneOf(productInventoryShoppingService).getSkuInventoryDetailsForAllSkus(product, store);
+				will(returnValue(skuInventoryMap));
 
-			oneOf(availabilityService).isProductAvailable(product, skuInventoryMap, true);
-			will(returnValue(true));
-			oneOf(availabilityService).isProductDisplayable(product, store, skuInventoryMap, true);
-			will(returnValue(true));
-			oneOf(availabilityService).isSkuAvailable(product, sku, skuInventory);
-			will(returnValue(true));
-			oneOf(availabilityService).isSkuDisplayable(product, sku, store, skuInventory);
-			will(returnValue(true));
+				oneOf(availabilityService).isProductAvailable(product, skuInventoryMap, true);
+				will(returnValue(true));
+				oneOf(availabilityService).isProductDisplayable(product, store, skuInventoryMap, true);
+				will(returnValue(true));
+				oneOf(availabilityService).isSkuAvailable(product, sku, skuInventory);
+				will(returnValue(true));
+				oneOf(availabilityService).isSkuDisplayable(product, sku, store, skuInventory);
+				will(returnValue(true));
 
-			exactly(2).of(availabilityStrategy).getAvailability(product, true, true, false);
-			will(returnValue(Availability.AVAILABLE));
-		} });
+				exactly(2).of(availabilityStrategy).getAvailability(product, true, true);
+				will(returnValue(Availability.AVAILABLE));
+			}
+		});
 
 		final boolean loadProductAssociations = false;
 		StoreProduct storeProduct = storeProductServiceImpl.getProductForStore(
 				product.getUidPk(), store, loadProductAssociations);
 		assertTrue(storeProduct.isSkuAvailable(sku.getSkuCode()));
 		assertTrue(storeProduct.isSkuDisplayable(sku.getSkuCode()));
-		assertFalse("Product is not in catalog", storeProduct.isProductPurchasable());
 	}
 
 	/**
@@ -515,28 +524,30 @@ public class StoreProductServiceImplTest {
 
 		storeProductServiceImpl.setProductService(productService);
 
-		context.checking(new Expectations() { {
-			oneOf(productService).findByUidsWithFetchGroupLoadTuner(PRODUCT_UIDS, null); will(returnValue(retrievedProductsWithSkus));
+		context.checking(new Expectations() {
+			{
+				oneOf(productService).findByUidsWithFetchGroupLoadTuner(PRODUCT_UIDS, null);
+				will(returnValue(retrievedProductsWithSkus));
 
-			allowing(productInventoryShoppingService).getSkuInventoryDetailsForAllSkus(with(any(Product.class)), with(createTestStore()));
-			will(returnValue(defaultInventoryDetails));
+				allowing(productInventoryShoppingService).getSkuInventoryDetailsForAllSkus(with(any(Product.class)), with(createTestStore()));
+				will(returnValue(defaultInventoryDetails));
 
-			Store store = stores.get(0);
-			oneOf(availabilityService).isProductAvailable(retrievedProductsWithSkus.get(0), defaultInventoryDetails, false);
-			will(returnValue(true));
-			oneOf(availabilityService).isProductDisplayable(retrievedProductsWithSkus.get(0), store, defaultInventoryDetails, false);
-			will(returnValue(true));
+				Store store = stores.get(0);
+				oneOf(availabilityService).isProductAvailable(retrievedProductsWithSkus.get(0), defaultInventoryDetails, false);
+				will(returnValue(true));
+				oneOf(availabilityService).isProductDisplayable(retrievedProductsWithSkus.get(0), store, defaultInventoryDetails, false);
+				will(returnValue(true));
 
-			oneOf(availabilityService).isProductAvailable(retrievedProductsWithSkus.get(1), defaultInventoryDetails, false);
-			will(returnValue(true));
-			oneOf(availabilityService).isProductDisplayable(retrievedProductsWithSkus.get(0), store, defaultInventoryDetails, false);
-			will(returnValue(true));
+				oneOf(availabilityService).isProductAvailable(retrievedProductsWithSkus.get(1), defaultInventoryDetails, false);
+				will(returnValue(true));
+				oneOf(availabilityService).isProductDisplayable(retrievedProductsWithSkus.get(0), store, defaultInventoryDetails, false);
+				will(returnValue(true));
 
-			oneOf(availabilityService).isProductAvailable(retrievedProductsWithSkus.get(2), defaultInventoryDetails, false);
-			will(returnValue(true));
-			oneOf(availabilityService).isProductDisplayable(retrievedProductsWithSkus.get(0), store, defaultInventoryDetails, false);
-			will(returnValue(true));
-		}
+				oneOf(availabilityService).isProductAvailable(retrievedProductsWithSkus.get(2), defaultInventoryDetails, false);
+				will(returnValue(true));
+				oneOf(availabilityService).isProductDisplayable(retrievedProductsWithSkus.get(0), store, defaultInventoryDetails, false);
+				will(returnValue(true));
+			}
 		});
 
 		final Collection<IndexProduct> retrievedIndexProducts = storeProductServiceImpl.getIndexProducts(PRODUCT_UIDS, stores, null);
@@ -570,26 +581,28 @@ public class StoreProductServiceImplTest {
 
 		storeProductServiceImpl.setProductService(productService);
 
-		context.checking(new Expectations() { {
-			oneOf(productService).findByUidsWithFetchGroupLoadTuner(PRODUCT_UIDS, null); will(returnValue(retrievedProductsWithSkus));
+		context.checking(new Expectations() {
+			{
+				oneOf(productService).findByUidsWithFetchGroupLoadTuner(PRODUCT_UIDS, null);
+				will(returnValue(retrievedProductsWithSkus));
 
-			allowing(productInventoryShoppingService).getSkuInventoryDetailsForAllSkus(with(any(Product.class)), with(createTestStore()));
-			will(returnValue(defaultInventoryDetails));
+				allowing(productInventoryShoppingService).getSkuInventoryDetailsForAllSkus(with(any(Product.class)), with(createTestStore()));
+				will(returnValue(defaultInventoryDetails));
 
-			Store store = stores.get(0);
-			oneOf(availabilityService).isProductAvailable(retrievedProductsWithSkus.get(0), defaultInventoryDetails, false);
-			will(returnValue(false));
-			oneOf(availabilityService).isProductDisplayable(retrievedProductsWithSkus.get(0), store, defaultInventoryDetails, false);
-			will(returnValue(false));
-			oneOf(availabilityService).isProductAvailable(retrievedProductsWithSkus.get(1), defaultInventoryDetails, false);
-			will(returnValue(false));
-			oneOf(availabilityService).isProductDisplayable(retrievedProductsWithSkus.get(1), store, defaultInventoryDetails, false);
-			will(returnValue(false));
-			oneOf(availabilityService).isProductAvailable(retrievedProductsWithSkus.get(2), defaultInventoryDetails, false);
-			will(returnValue(false));
-			oneOf(availabilityService).isProductDisplayable(retrievedProductsWithSkus.get(2), store, defaultInventoryDetails, false);
-			will(returnValue(false));
-		}
+				Store store = stores.get(0);
+				oneOf(availabilityService).isProductAvailable(retrievedProductsWithSkus.get(0), defaultInventoryDetails, false);
+				will(returnValue(false));
+				oneOf(availabilityService).isProductDisplayable(retrievedProductsWithSkus.get(0), store, defaultInventoryDetails, false);
+				will(returnValue(false));
+				oneOf(availabilityService).isProductAvailable(retrievedProductsWithSkus.get(1), defaultInventoryDetails, false);
+				will(returnValue(false));
+				oneOf(availabilityService).isProductDisplayable(retrievedProductsWithSkus.get(1), store, defaultInventoryDetails, false);
+				will(returnValue(false));
+				oneOf(availabilityService).isProductAvailable(retrievedProductsWithSkus.get(2), defaultInventoryDetails, false);
+				will(returnValue(false));
+				oneOf(availabilityService).isProductDisplayable(retrievedProductsWithSkus.get(2), store, defaultInventoryDetails, false);
+				will(returnValue(false));
+			}
 		});
 
 		final Collection<IndexProduct> retrievedIndexProducts = storeProductServiceImpl.getIndexProducts(PRODUCT_UIDS, stores, null);
@@ -627,7 +640,7 @@ public class StoreProductServiceImplTest {
 				oneOf(availabilityService).isSkuDisplayable(product, sku, store, skuInventoryDetails);
 				will(returnValue(false));
 
-				exactly(2).of(availabilityStrategy).getAvailability(product, true, false, false);
+				exactly(2).of(availabilityStrategy).getAvailability(product, true, false);
 				will(returnValue(Availability.AVAILABLE));
 			}
 		});
@@ -680,7 +693,7 @@ public class StoreProductServiceImplTest {
 				will(returnValue(false));
 				oneOf(availabilityService).isSkuDisplayable(product, sku, store, skuInventoryDetails);
 				will(returnValue(false));
-				exactly(2).of(availabilityStrategy).getAvailability(product, true, false, false);
+				exactly(2).of(availabilityStrategy).getAvailability(product, true, false);
 				will(returnValue(null));
 			}
 		});
@@ -725,7 +738,8 @@ public class StoreProductServiceImplTest {
 
 		storeProductServiceImpl.updateBundleConstituentDefaultSkus(bundle, store);
 
-		assertEquals("The constituent's default sku should have changed.", OTHER_SKU_CODE, constituent.getConstituent().getProductSku().getSkuCode());
+		assertEquals("The constituent's default sku should have changed.", OTHER_SKU_CODE,
+				constituent.getConstituent().getProductSku().getSkuCode());
 	}
 
 	/**
@@ -830,8 +844,8 @@ public class StoreProductServiceImplTest {
 
 		IndexProduct indexProduct = storeProductServiceImpl.createIndexProduct(product, Collections.singletonList(store));
 
-		assertEquals("The product should not be available for purchase", false, indexProduct.isAvailable(store.getCode()));
-		assertEquals("The product should not be displayable", false, indexProduct.isDisplayable(store.getCode()));
+		assertFalse("The product should not be available for purchase", indexProduct.isAvailable(store.getCode()));
+		assertFalse("The product should not be displayable", indexProduct.isDisplayable(store.getCode()));
 	}
 
 	/**
@@ -850,8 +864,8 @@ public class StoreProductServiceImplTest {
 
 		IndexProduct indexProduct = storeProductServiceImpl.createIndexProduct(bundle, Collections.singletonList(store));
 
-		assertEquals("The bundle should be available for purchase", true, indexProduct.isAvailable(store.getCode()));
-		assertEquals("The bundle should be displayable", true, indexProduct.isDisplayable(store.getCode()));
+		assertTrue("The bundle should be available for purchase", indexProduct.isAvailable(store.getCode()));
+		assertTrue("The bundle should be displayable", indexProduct.isDisplayable(store.getCode()));
 	}
 
 	//=================================================================================================
@@ -872,8 +886,10 @@ public class StoreProductServiceImplTest {
 				oneOf(productInventoryShoppingService).getSkuInventoryDetailsForAllSkus(bundle, store);
 				will(returnValue(skuInventoryDetailsMap));
 
-				oneOf(availabilityService).isProductAvailable(bundle, skuInventoryDetailsMap, false); will(returnValue(true));
-				oneOf(availabilityService).isProductDisplayable(bundle, store, skuInventoryDetailsMap, false); will(returnValue(true));
+				oneOf(availabilityService).isProductAvailable(bundle, skuInventoryDetailsMap, false);
+				will(returnValue(true));
+				oneOf(availabilityService).isProductDisplayable(bundle, store, skuInventoryDetailsMap, false);
+				will(returnValue(true));
 			}
 		});
 	}

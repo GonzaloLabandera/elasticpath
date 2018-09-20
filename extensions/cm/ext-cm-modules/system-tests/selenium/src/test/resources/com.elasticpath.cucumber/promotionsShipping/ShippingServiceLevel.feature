@@ -14,11 +14,8 @@ Feature: Shipping Service Level
   Scenario Outline: Create, read, update and delete shipping service level
     When I go to Promotions and Shipping
     And I create shipping service level with following values
-      | store           | SearchStore           |
-      | shipping region | USA                   |
-      | carrier         | Fed Ex                |
-      | name            | Test Shipping Service |
-      | property value  | 25                    |
+      | store       | shipping region | carrier | name                  | property value |
+      | SearchStore | USA             | Fed Ex  | Test Shipping Service | 25             |
     Then I verify newly created shipping service level exists
     When I open the newly created shipping service level
     And I edit the shipping service level name to <UPDATED_NAME>
@@ -34,7 +31,9 @@ Feature: Shipping Service Level
 
   Scenario: Shipping Service Level codes must be unique
     Given I go to Promotions and Shipping
-    And I have a shipping service level
+    And I create shipping service level with following values
+      | store       | shipping region | carrier | name                  | property value |
+      | SearchStore | USA             | Fed Ex  | Test Shipping Service | 10             |
     When I attempt to create a new shipping service level with the same code
     Then I should see following create shipping service level validation alert
       | A Shipping Service Level with the code you provided already exists. Enter another code. |

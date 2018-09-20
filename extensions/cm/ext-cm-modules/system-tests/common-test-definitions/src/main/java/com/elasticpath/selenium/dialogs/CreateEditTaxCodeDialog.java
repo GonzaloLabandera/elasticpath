@@ -11,7 +11,10 @@ public class CreateEditTaxCodeDialog extends AbstractDialog {
 	private final String taxCodeParentCSS;
 	private final String taxCodeNameInputCSS;
 	private final String saveButtonCSS;
-	private static final String TAXCODE_PARENT_CSS_TEMPLATE =
+	/**
+	 * CSS selector used to identify the dialog.
+	 */
+	public static final String TAXCODE_PARENT_CSS_TEMPLATE =
 			"div[automation-id*='com.elasticpath.cmclient.admin.taxes.TaxesMessages.%sTaxCode'][widget-type='Shell'] ";
 	private static final String TAXCODES_NAME_INPUT_CSS_TEMPLATE =
 			"div[automation-id='com.elasticpath.cmclient.admin.taxes.TaxesMessages.TaxCode'] input";

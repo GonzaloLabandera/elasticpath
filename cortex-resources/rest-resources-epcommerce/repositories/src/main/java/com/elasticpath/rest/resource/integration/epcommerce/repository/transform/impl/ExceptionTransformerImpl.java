@@ -11,9 +11,9 @@ import javax.inject.Singleton;
 
 import org.springframework.core.convert.ConversionService;
 
-import com.elasticpath.commons.exception.EpValidationException;
+import com.elasticpath.base.exception.structured.EpValidationException;
+import com.elasticpath.base.exception.structured.StructuredErrorMessageException;
 import com.elasticpath.commons.exception.InvalidBusinessStateException;
-import com.elasticpath.commons.exception.StructuredErrorMessageException;
 import com.elasticpath.commons.exception.UnavailableException;
 import com.elasticpath.rest.ResourceOperationFailure;
 import com.elasticpath.rest.advise.Message;
@@ -82,7 +82,7 @@ public class ExceptionTransformerImpl implements ExceptionTransformer {
 	}
 
 	private List<Message> getMessages(final EpValidationException error) {
-		return structuredErrorMessageTransformer.transform(error.getStructuredErrorMessages());
+		return structuredErrorMessageTransformer.transform(error.getStructuredErrorMessages(), null);
 	}
 
 }

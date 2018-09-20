@@ -16,7 +16,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.elasticpath.domain.cartorder.CartOrder;
 import com.elasticpath.domain.customer.Address;
@@ -24,6 +24,7 @@ import com.elasticpath.domain.shipping.ShipmentType;
 import com.elasticpath.domain.shoppingcart.ShoppingCart;
 import com.elasticpath.rest.ResourceOperationFailure;
 import com.elasticpath.rest.ResourceStatus;
+import com.elasticpath.rest.command.ExecutionResultFactory;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder.CartOrderRepository;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder.ShoppingCartRepository;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder.impl.ShoppingCartRepositoryImpl;
@@ -38,6 +39,7 @@ public class DestinationInfoServiceImplTest {
 	private static final String ORDER_ID = "orderId";
 	private static final String SCOPE = "scope";
 	private static final String SELECTED_ID = "addressId";
+	private static final String CART_ID = "cartID";
 
 	private final Set<ShipmentType> electronic = ImmutableSet.of(ShipmentType.ELECTRONIC);
 	private final Set<ShipmentType> physical = ImmutableSet.of(ShipmentType.PHYSICAL);
@@ -61,19 +63,26 @@ public class DestinationInfoServiceImplTest {
 	private ShoppingCartRepository shoppingCartRepository;
 
 	private void mockShoppingCart(final Set<ShipmentType> shipmentTypes) {
-		when(shoppingCartRepository.getDefaultShoppingCart()).thenReturn(Single.just(shoppingCart));
+		when(cartOrder.getShoppingCartGuid()).thenReturn(CART_ID);
+		when(shoppingCartRepository.getShoppingCart(CART_ID)).thenReturn(Single.just(shoppingCart));
 		when(shoppingCart.getShipmentTypes()).thenReturn(shipmentTypes);
 	}
 
 	private void mockCartOrder() {
+		when(cartOrder.getShoppingCartGuid()).thenReturn(CART_ID);
+
+		when(cartOrderRepository.getCartOrder(SCOPE, ORDER_ID, CartOrderRepository.FindCartOrder.BY_ORDER_GUID))
+				.thenReturn(ExecutionResultFactory.createReadOK(cartOrder));
 		when(cartOrderRepository.findByGuidAsSingle(SCOPE, ORDER_ID)).thenReturn(Single.just(cartOrder));
-		when(cartOrderRepository.getShippingAddressAsMaybe(cartOrder)).thenReturn(Maybe.just(address));
+		when(cartOrderRepository.getShippingAddress(cartOrder)).thenReturn(Maybe.just(address));
 		when(address.getGuid()).thenReturn(SELECTED_ID);
 	}
 
 	@Test
 	public void verifyValidateOrderIsShippableReturnsFalseIfOrderHasNoShippableItems() {
 		mockShoppingCart(electronic);
+		when(cartOrderRepository.getCartOrder(SCOPE, ORDER_ID, CartOrderRepository.FindCartOrder.BY_ORDER_GUID))
+				.thenReturn(ExecutionResultFactory.createReadOK(cartOrder));
 
 		destinationInfoService.validateOrderIsShippable(SCOPE, ORDER_ID)
 				.test()
@@ -84,7 +93,8 @@ public class DestinationInfoServiceImplTest {
 	@Test
 	public void verifyValidateOrderIsShippableReturnsTrueIfOrderHasShippableItems() {
 		mockShoppingCart(physical);
-
+		when(cartOrderRepository.getCartOrder(SCOPE, ORDER_ID, CartOrderRepository.FindCartOrder.BY_ORDER_GUID))
+				.thenReturn(ExecutionResultFactory.createReadOK(cartOrder));
 		destinationInfoService.validateOrderIsShippable(SCOPE, ORDER_ID)
 				.test()
 				.assertNoErrors()
@@ -93,11 +103,9 @@ public class DestinationInfoServiceImplTest {
 
 	@Test
 	public void verifyGetSelectedAddressGuidIfShippableReturnsNotFoundWhenDefaultCartNotFound() {
-		when(shoppingCartRepository.getDefaultShoppingCart())
+		when(shoppingCartRepository.getShoppingCart(CART_ID))
 				.thenReturn(Single.error(ResourceOperationFailure.notFound(ShoppingCartRepositoryImpl.DEFAULT_CART_NOT_FOUND)));
-		when(shoppingCart.getShipmentTypes()).thenReturn(physical);
 		mockCartOrder();
-		when(address.getGuid()).thenReturn(SELECTED_ID);
 
 		destinationInfoService.getSelectedAddressGuidIfShippable(SCOPE, ORDER_ID)
 				.test()
@@ -108,7 +116,6 @@ public class DestinationInfoServiceImplTest {
 	public void verifyGetSelectedAddressGuidIfShippableReturnsNotFoundWhenOrderNotShippable() {
 		mockShoppingCart(electronic);
 		mockCartOrder();
-		when(address.getGuid()).thenReturn(SELECTED_ID);
 
 		destinationInfoService.getSelectedAddressGuidIfShippable(SCOPE, ORDER_ID)
 				.test()
@@ -117,10 +124,13 @@ public class DestinationInfoServiceImplTest {
 
 	@Test
 	public void verifyGetSelectedAddressGuidIfShippableReturnsEmptyWhenThereIsNoSelectedAddress() {
-		when(shoppingCartRepository.getDefaultShoppingCart()).thenReturn(Single.just(shoppingCart));
+		when(shoppingCartRepository.getShoppingCart(CART_ID)).thenReturn(Single.just(shoppingCart));
 		when(shoppingCart.getShipmentTypes()).thenReturn(physical);
 		when(cartOrderRepository.findByGuidAsSingle(SCOPE, ORDER_ID)).thenReturn(Single.just(cartOrder));
-		when(cartOrderRepository.getShippingAddressAsMaybe(cartOrder)).thenReturn(Maybe.empty());
+		when(cartOrderRepository.getShippingAddress(cartOrder)).thenReturn(Maybe.empty());
+		when(cartOrder.getShoppingCartGuid()).thenReturn(CART_ID);
+		when(cartOrderRepository.getCartOrder(SCOPE, ORDER_ID, CartOrderRepository.FindCartOrder.BY_ORDER_GUID))
+				.thenReturn(ExecutionResultFactory.createReadOK(cartOrder));
 
 		destinationInfoService.getSelectedAddressGuidIfShippable(SCOPE, ORDER_ID)
 				.test()
@@ -130,7 +140,7 @@ public class DestinationInfoServiceImplTest {
 
 	@Test
 	public void verifyGetSelectedAddressGuidIfShippableReturnsAddressWhenThereIsASelectedAddress() {
-		when(shoppingCartRepository.getDefaultShoppingCart()).thenReturn(Single.just(shoppingCart));
+		when(shoppingCartRepository.getShoppingCart(CART_ID)).thenReturn(Single.just(shoppingCart));
 		when(shoppingCart.getShipmentTypes()).thenReturn(physical);
 		mockCartOrder();
 

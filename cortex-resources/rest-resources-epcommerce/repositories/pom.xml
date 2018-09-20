@@ -16,7 +16,6 @@
 	<description>Elastic Path REST - Resources Integration Commerce Engine Repositories</description>
 
 	<properties>
-		<aspectj.rt.version>1.8.9</aspectj.rt.version>
 		<aspectj.maven.plugin.version>1.8</aspectj.maven.plugin.version>
 		<aspectj.compiliance.level>1.8</aspectj.compiliance.level>
 
@@ -32,6 +31,10 @@
 			<groupId>org.osgi</groupId>
 			<artifactId>osgi.core</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>io.reactivex.rxjava2</groupId>
+			<artifactId>rxjava</artifactId>
+		</dependency>
 
 		<dependency>
 			<groupId>com.elasticpath.rest.helix</groupId>
@@ -46,97 +49,81 @@
 		<dependency>
 			<groupId>com.elasticpath.rest.definitions</groupId>
 			<artifactId>ep-resource-coupons-api</artifactId>
-			<version>0.0.0-SNAPSHOT</version>
 		</dependency>
 
 		<dependency>
 			<groupId>com.elasticpath.rest.definitions</groupId>
 			<artifactId>ep-resource-orders-api</artifactId>
-			<version>0.0.0-SNAPSHOT</version>
 		</dependency>
 
 		<dependency>
 			<groupId>com.elasticpath.rest.definitions</groupId>
 			<artifactId>ep-resource-wishlists-api</artifactId>
-			<version>0.0.0-SNAPSHOT</version>
 		</dependency>
 
 		<dependency>
 			<groupId>com.elasticpath.rest.definitions</groupId>
 			<artifactId>ep-resource-registrations-api</artifactId>
-			<version>0.0.0-SNAPSHOT</version>
 		</dependency>
 
 		<dependency>
 			<groupId>com.elasticpath.rest.definitions</groupId>
 			<artifactId>ep-resource-prices-api</artifactId>
-			<version>0.0.0-SNAPSHOT</version>
 		</dependency>
 
 		<dependency>
 			<groupId>com.elasticpath.rest.definitions</groupId>
 			<artifactId>ep-resource-geographies-api</artifactId>
-			<version>0.0.0-SNAPSHOT</version>
 		</dependency>
 
 		<dependency>
 			<groupId>com.elasticpath.rest.definitions</groupId>
 			<artifactId>ep-resource-taxes-api</artifactId>
-			<version>0.0.0-SNAPSHOT</version>
 		</dependency>
 
 		<dependency>
 			<groupId>com.elasticpath.rest.definitions</groupId>
 			<artifactId>ep-resource-totals-api</artifactId>
-			<version>0.0.0-SNAPSHOT</version>
 		</dependency>
 
 		<dependency>
 			<groupId>com.elasticpath.rest.definitions</groupId>
 			<artifactId>ep-resource-emails-api</artifactId>
-			<version>0.0.0-SNAPSHOT</version>
 		</dependency>
 
 		<dependency>
 			<groupId>com.elasticpath.rest.definitions</groupId>
 			<artifactId>ep-resource-availabilities-api</artifactId>
-			<version>0.0.0-SNAPSHOT</version>
 		</dependency>
 
 		<dependency>
 			<groupId>com.elasticpath.rest.definitions</groupId>
 			<artifactId>ep-resource-discounts-api</artifactId>
-			<version>0.0.0-SNAPSHOT</version>
 		</dependency>
 
 		<dependency>
 			<groupId>com.elasticpath.rest.definitions</groupId>
 			<artifactId>ep-resource-data-policies-api</artifactId>
-			<version>0.0.0-SNAPSHOT</version>
 		</dependency>
 
 		<dependency>
 			<groupId>com.elasticpath.rest.definitions</groupId>
 			<artifactId>ep-resource-searches-api</artifactId>
-			<version>0.0.0-SNAPSHOT</version>
 		</dependency>
 
 		<dependency>
 			<groupId>com.elasticpath.rest.definitions</groupId>
 			<artifactId>ep-resource-lookups-api</artifactId>
-			<version>0.0.0-SNAPSHOT</version>
 		</dependency>
 
 		<dependency>
 			<groupId>com.elasticpath.rest.definitions</groupId>
 			<artifactId>ep-resource-promotions-api</artifactId>
-			<version>0.0.0-SNAPSHOT</version>
 		</dependency>
 
 		<dependency>
 			<groupId>com.elasticpath.rest.definitions</groupId>
 			<artifactId>ep-resource-recommendations-api</artifactId>
-			<version>0.0.0-SNAPSHOT</version>
 		</dependency>
 
 		<dependency>
@@ -150,6 +137,11 @@
 		</dependency>
 
 		<dependency>
+			<groupId>com.elasticpath</groupId>
+			<artifactId>ep-converters</artifactId>
+		</dependency>
+
+		<dependency>
 			<groupId>org.apache.servicemix.bundles</groupId>
 			<artifactId>org.apache.servicemix.bundles.aspectj</artifactId>
 		</dependency>
@@ -158,7 +150,6 @@
 		<dependency>
 			<groupId>com.elasticpath.rest</groupId>
 			<artifactId>ep-rest-spi-impl</artifactId>
-			<version>${cortex.version}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
@@ -183,11 +174,14 @@
 		<dependency>
 			<groupId>org.aspectj</groupId>
 			<artifactId>aspectjrt</artifactId>
-			<version>${aspectj.rt.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.codehaus.groovy</groupId>
 			<artifactId>groovy-all</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.elasticpath</groupId>
+			<artifactId>shipping-calculation-connectivity-api</artifactId>
 		</dependency>
 	</dependencies>
 
@@ -231,13 +225,18 @@
 							org.aopalliance.aop,
 							org.springframework.aop,
 							org.springframework.aop.framework,
+							org.springframework.beans.factory.config,
 							org.springframework.context.annotation,
 							org.springframework.context.weaving,
+							com.elasticpath.converter,
 							com.elasticpath.rest.id.transform.type,
 							org.aspectj.runtime.internal,
 							com.google.common.annotations,
 							org.aspectj.runtime.reflect,
 							com.sun.el,
+							com.elasticpath.commons.beanframework,
+							com.elasticpath.shipping.connectivity.dto,
+							com.elasticpath.service.shipping,
 							*
 						</Import-Package>
 					</instructions>
@@ -254,6 +253,14 @@
 			<plugin>
 				<groupId>org.jacoco</groupId>
 				<artifactId>jacoco-maven-plugin</artifactId>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<configuration>
+					<source>1.8</source>
+					<target>1.8</target>
+				</configuration>
 			</plugin>
 		</plugins>
 	</build>

@@ -35,8 +35,7 @@ import com.elasticpath.service.changeset.ChangeSetPolicyException;
 import com.elasticpath.service.changeset.ChangeSetService;
 import com.elasticpath.service.changeset.dao.ChangeSetDao;
 import com.elasticpath.service.changeset.dao.ChangeSetMemberDao;
-import com.elasticpath.settings.SettingsReader;
-import com.elasticpath.settings.domain.SettingValue;
+import com.elasticpath.settings.provider.SettingValueProvider;
 
 /**
  * This service manages change sets and their members.
@@ -52,36 +51,14 @@ public class ChangeSetServiceImpl implements ChangeSetService {
 
 	private ChangeSetDao changeSetDao;
 
-	private SettingsReader settingsReader;
+	private SettingValueProvider<Boolean> changeSetEnabledProvider;
 
 	private BeanFactory beanFactory;
 
-	/**
-	 * Set the settings reader.
-	 *
-	 * @param settingsReader the settings reader instance
-	 */
-	public void setSettingsReader(final SettingsReader settingsReader) {
-		this.settingsReader = settingsReader;
-	}
-
-	/**
-	 * determine is change set enabled.
-	 *
-	 * @return true if change set is enabled
-	 */
 	@Override
 	public boolean isChangeSetEnabled() {
-		boolean changeSetsEnabled = false;
-		SettingValue settingValue = settingsReader.getSettingValue("COMMERCE/SYSTEM/CHANGESETS/enable");
-		if (settingValue == null) {
-			changeSetsEnabled = false;
-		} else {
-			changeSetsEnabled = settingValue.getBooleanValue();
-		}
-		return changeSetsEnabled;
+		return changeSetEnabledProvider.get();
 	}
-
 
 	@Override
 	public void addObjectToChangeSet(final String changeSetGuid,
@@ -564,4 +541,13 @@ public class ChangeSetServiceImpl implements ChangeSetService {
 	public void setBeanFactory(final BeanFactory beanFactory) {
 		this.beanFactory = beanFactory;
 	}
+
+	public void setChangeSetEnabledProvider(final SettingValueProvider<Boolean> changeSetEnabledProvider) {
+		this.changeSetEnabledProvider = changeSetEnabledProvider;
+	}
+
+	protected SettingValueProvider<Boolean> getChangeSetEnabledProvider() {
+		return changeSetEnabledProvider;
+	}
+
 }

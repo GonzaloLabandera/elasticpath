@@ -57,12 +57,7 @@
 	<repositories>
 		<repository>
 			<id>RAP</id>
-			<url>http://download.eclipse.org/rt/rap/3.2</url>
-			<layout>p2</layout>
-		</repository>
-		<repository>
-			<id>NeonRepository</id>
-			<url>http://download.eclipse.org/releases/neon</url>
+			<url>http://download.eclipse.org/rt/rap/3.4</url>
 			<layout>p2</layout>
 		</repository>
 		<repository>

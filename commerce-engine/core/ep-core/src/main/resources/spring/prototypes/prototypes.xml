@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-		xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
+		xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd">
 
 	<bean id="initializableBeanPostProcessor" class="com.elasticpath.domain.impl.InitializableBeanPostProcessorImpl"/>
 
@@ -48,7 +48,6 @@
 	<bean id="customerGroup" scope="prototype" class="com.elasticpath.domain.customer.impl.CustomerGroupImpl"/>
 	<bean id="customerRole" scope="prototype" class="com.elasticpath.domain.customer.impl.CustomerRoleImpl"/>
 	<bean id="customerAddress" scope="prototype" class="com.elasticpath.domain.customer.impl.CustomerAddressImpl"/>
-	<bean id="customerCreditCard" scope="prototype" class="com.elasticpath.domain.customer.impl.CustomerCreditCardImpl"/>
     <bean id="customerRegistrationResult" scope="prototype" class="com.elasticpath.service.customer.impl.CustomerRegistrationResultImpl" />
 	<bean id="abstractCategory" scope="prototype" class="com.elasticpath.domain.catalog.impl.AbstractCategoryImpl"/>
 	<bean id="category" scope="prototype" class="com.elasticpath.domain.catalog.impl.CategoryImpl"/>
@@ -128,7 +127,8 @@
 		<property name="cartDirector" ref="cartDirector"/>
 		<property name="productSkuLookup" ref="productSkuLookup"/>
 		<property name="shoppingItemDtoFactory" ref="shoppingItemDtoFactory"/>
-		<property name="shippableItemsSubtotalCalculator" ref="shippableItemsSubtotalCalculator"/>
+		<property name="shoppingItemsSubtotalCalculator" ref="shoppingItemSubtotalCalculator"/>
+		<property name="shippableItemPredicate" ref="shippableItemPredicate"/>
 	</bean>
 	<bean id="skuException" scope="prototype" class="com.elasticpath.domain.rules.impl.SkuExceptionImpl"/>
 	<bean id="productException" scope="prototype" class="com.elasticpath.domain.rules.impl.ProductExceptionImpl"/>
@@ -137,18 +137,6 @@
 	<bean id="localizedProperties" scope="prototype" class="com.elasticpath.domain.misc.impl.LocalizedPropertiesImpl"/>
 	<bean id="brand" scope="prototype" class="com.elasticpath.domain.catalog.impl.BrandImpl"/>
 
-	<bean id="shippingRegion" scope="prototype" class="com.elasticpath.domain.shipping.impl.ShippingRegionImpl"/>
-	<bean id="shippingServiceLevel" scope="prototype" class="com.elasticpath.domain.shipping.impl.ShippingServiceLevelImpl"/>
-	<bean id="fixedPriceMethod" scope="prototype" class="com.elasticpath.domain.shipping.impl.FixedPriceMethodImpl"/>
-	<bean id="orderTotalPercentageMethod" scope="prototype" class="com.elasticpath.domain.shipping.impl.OrderTotalPercentageMethodImpl"/>
-	<bean id="fixedBaseAndOrderTotalPercentageMethod"
-			scope="prototype" class="com.elasticpath.domain.shipping.impl.FixedBaseAndOrderTotalPercentageMethodImpl"/>
-	<bean id="costPerUnitWeightMethod" scope="prototype" class="com.elasticpath.domain.shipping.impl.CostPerUnitWeightMethodImpl"/>
-	<bean id="fixedBaseAndCostPerUnitWeightMethod"
-			scope="prototype" class="com.elasticpath.domain.shipping.impl.FixedBaseAndCostPerUnitWeightMethodImpl"/>
-	<bean id="shippingCostCalculationParameter"
-			scope="prototype" class="com.elasticpath.domain.shipping.impl.ShippingCostCalculationParameterImpl"/>
-	<bean id="region" scope="prototype" class="com.elasticpath.domain.shipping.impl.RegionImpl"/>
 	<bean id="searchRequest" scope="prototype" class="com.elasticpath.domain.catalogview.search.impl.SearchRequestImpl"/>
 	<bean id="searchResult" scope="prototype" class="com.elasticpath.domain.catalogview.search.impl.SearchResultImpl"/>
 	<bean id="browsingRequest" scope="prototype" class="com.elasticpath.domain.catalogview.browsing.impl.BrowsingRequestImpl"/>
@@ -206,7 +194,6 @@
 	<bean id="filterBucketComparator" scope="prototype" class="com.elasticpath.domain.misc.impl.FilterBucketComparatorImpl"/>
 	<bean id="filterOptionComparetoComparator"
 			scope="prototype" class="com.elasticpath.domain.catalogview.impl.FilterOptionCompareToComparatorImpl"/>
-	<bean id="regionCodeComparator" scope="prototype" class="com.elasticpath.domain.misc.impl.RegionCodeComparatorImpl"/>
 	<bean id="digitalAsset" scope="prototype" class="com.elasticpath.domain.catalog.impl.DigitalAssetImpl"/>
 	<bean id="digitalAssetAudit" scope="prototype" class="com.elasticpath.domain.catalog.impl.DigitalAssetAuditImpl"/>
 	<bean id="viewHistory" scope="prototype" class="com.elasticpath.domain.shoppingcart.impl.ViewHistoryImpl"/>
@@ -251,9 +238,6 @@
 	<bean id="synonymGroup" scope="prototype" class="com.elasticpath.domain.search.impl.SynonymGroupImpl"/>
 	<bean id="synonym" scope="prototype" class="com.elasticpath.domain.search.impl.SynonymImpl"/>
 	<bean id="paymentResult" scope="prototype" class="com.elasticpath.service.payment.impl.PaymentResultImpl"/>
-	<bean id="paymentHandlerCreditCard" scope="prototype" class="com.elasticpath.domain.payment.impl.CreditCardPaymentHandler">
-		<property name="productSkuLookup" ref="productSkuLookup"/>
-	</bean>
 	<bean id="paymentHandlerCreditCardDirectPost" scope="prototype" class="com.elasticpath.domain.payment.impl.CreditCardDirectPostPaymentHandler">
 		<property name="productSkuLookup" ref="productSkuLookup"/>
 	</bean>
@@ -284,7 +268,6 @@
 	<bean id="advancedSearchQuery" scope="prototype" class="com.elasticpath.domain.advancedsearch.impl.AdvancedSearchQueryImpl"/>
 	<bean id="filteredNavigationConfiguration"
 			scope="prototype" class="com.elasticpath.service.catalogview.filterednavigation.impl.FilteredNavigationConfigurationImpl"/>
-	<bean id="fileSystemManager" scope="prototype" class="com.elasticpath.commons.util.impl.VfsFileSystemManagerImpl"/>
 	<bean id="updateStoreCommand" scope="prototype" class="com.elasticpath.service.command.impl.UpdateStoreCommandImpl">
 		<property name="updateStoreCommandResult" ref="updateStoreCommandResult"/>
 	</bean>
@@ -293,8 +276,6 @@
 	<bean id="connectionInfo" scope="prototype" class="com.elasticpath.domain.impl.FileSystemConnectionInfoImpl"/>
 	<bean id="contentWrapper" scope="prototype" class="com.elasticpath.domain.contentspace.impl.ContentWrapperImpl"/>
 	<bean id="brandLocalizedPropertyValue" scope="prototype" class="com.elasticpath.domain.misc.impl.BrandLocalizedPropertyValueImpl"/>
-	<bean id="shippingServiceLevelLocalizedPropertyValue"
-			scope="prototype" class="com.elasticpath.domain.misc.impl.ShippingServiceLevelLocalizedPropertyValueImpl"/>
 	<bean id="skuOptionLocalizedPropertyValue"
 			scope="prototype" class="com.elasticpath.domain.misc.impl.SkuOptionLocalizedPropertyValueImpl"/>
 	<bean id="skuOptionValueLocalizedPropertyValue"
@@ -353,7 +334,6 @@
 	<bean id="serviceOrderShipment" scope="prototype" class="com.elasticpath.domain.order.impl.ServiceOrderShipmentImpl"/>
 	<bean id="oAuth2AccessTokenMemento" scope="prototype" class="com.elasticpath.domain.auth.impl.OAuth2AccessTokenMementoImpl"/>
 	<bean id="cartOrder" scope="prototype" class="com.elasticpath.domain.cartorder.impl.CartOrderImpl"/>
-	<bean id="itemConfigurationMemento" scope="prototype" class="com.elasticpath.domain.catalog.impl.ItemConfigurationMementoImpl"/>
 	<bean id="searchTermsMemento" scope="prototype" class="com.elasticpath.domain.search.query.impl.SearchTermsMementoImpl"/>
 	<bean id="searchTerms" scope="prototype" class="com.elasticpath.domain.search.query.impl.SearchTermsImpl"/>
 	<bean id="searchTermsActivity" scope="prototype" class="com.elasticpath.domain.search.query.impl.SearchTermsActivityImpl"/>
@@ -372,7 +352,6 @@
 	<bean id="giftCertificateAuthorizationRequest" scope="prototype" class="com.elasticpath.service.payment.gateway.impl.GiftCertificateAuthorizationRequestImpl"/>
 	<bean id="captureTransactionRequest" scope="prototype" class="com.elasticpath.plugin.payment.transaction.impl.CaptureTransactionRequestImpl"/>
 	<bean id="giftCertificateCaptureRequest" scope="prototype" class="com.elasticpath.service.payment.gateway.impl.GiftCertificateCaptureRequestImpl"/>
-	<bean id="cardDetailsPaymentMethod" scope="prototype" class="com.elasticpath.plugin.payment.dto.impl.CardDetailsPaymentMethodImpl"/>
 	<bean id="tokenPaymentMethod" scope="prototype" class="com.elasticpath.plugin.payment.dto.impl.TokenPaymentMethodImpl"/>
 	<bean id="orderSkuDto" scope="prototype" class="com.elasticpath.plugin.payment.dto.impl.OrderSkuDtoImpl"/>
 	<bean id="orderShipmentDto" scope="prototype" class="com.elasticpath.plugin.payment.dto.impl.OrderShipmentDtoImpl"/>
@@ -394,4 +373,13 @@
 	<bean id="dataPoint" scope="prototype" class="com.elasticpath.domain.datapolicy.impl.DataPointImpl"/>
 	<bean id="dataPolicy" scope="prototype" class="com.elasticpath.domain.datapolicy.impl.DataPolicyImpl"/>
 	<bean id="customerConsent" scope="prototype" class="com.elasticpath.domain.datapolicy.impl.CustomerConsentImpl"/>
+
+	<!-- Shipping Calculation -->
+	<bean id="shippingOptionResult" scope="prototype" class="com.elasticpath.service.shipping.impl.ShippingOptionResultImpl" />
+
+	<!-- Validation framework -->
+	<bean id="productSkuValidationContext" scope="prototype" class="com.elasticpath.service.shoppingcart.validation.impl.ProductSkuValidationContextImpl"/>
+	<bean id="shoppingItemDtoValidationContext" scope="prototype" class="com.elasticpath.service.shoppingcart.validation.impl.ShoppingItemDtoValidationContextImpl"/>
+	<bean id="shoppingItemValidationContext" scope="prototype" class="com.elasticpath.service.shoppingcart.validation.impl.ShoppingItemValidationContextImpl"/>
+	<bean id="shoppingCartValidationContext" scope="prototype" class="com.elasticpath.service.shoppingcart.validation.impl.ShoppingCartValidationContextImpl"/>
 </beans>

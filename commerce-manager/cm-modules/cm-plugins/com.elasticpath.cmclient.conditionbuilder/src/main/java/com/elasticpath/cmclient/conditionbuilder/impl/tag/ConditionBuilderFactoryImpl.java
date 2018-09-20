@@ -30,9 +30,13 @@ import com.elasticpath.cmclient.conditionbuilder.component.ActionEventListener;
 import com.elasticpath.cmclient.conditionbuilder.component.ConditionBlockComposite;
 import com.elasticpath.cmclient.conditionbuilder.component.ConditionRowComposite;
 import com.elasticpath.cmclient.conditionbuilder.component.TopLevelComposite;
+import com.elasticpath.cmclient.conditionbuilder.extenders.ConditionBuilderPluginHelper;
+import com.elasticpath.cmclient.conditionbuilder.extenders.ConditionRowCompositeCreator;
 import com.elasticpath.cmclient.conditionbuilder.valueeditor.ConditionRowValueFactory;
 import com.elasticpath.cmclient.conditionbuilder.valueeditor.ConditionRowValueFactoryImpl;
+import com.elasticpath.cmclient.core.CorePlugin;
 import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.helpers.ConditionCreator;
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.tags.domain.Condition;
 import com.elasticpath.tags.domain.LogicalOperator;
@@ -53,7 +57,7 @@ public class ConditionBuilderFactoryImpl
 	implements ConditionBuilderFactory<LogicalOperator, Condition, TagDefinition, TagOperator, LogicalOperatorType, TagGroup> {
 
 	private static final int HORIZONTAL_INDENT = 3;
-	private Locale locale = Locale.getDefault();
+	private Locale locale = CorePlugin.getDefault().getDefaultLocale();
 	private GenericService<TagOperator> tagOperatorService;
 	private String addButtonText = "add condition"; //$NON-NLS-1$
 	private String conditionBuilderTitle;
@@ -123,7 +127,8 @@ public class ConditionBuilderFactoryImpl
 		// listener for add the child row composite
 		result.addListenerForAdd(object -> {
 			// create new condition
-			Condition condition = new Condition(object, null, "");  //$NON-NLS-1$
+			Condition condition = ConditionCreator.createModel(object, null, ""); //$NON-NLS-1$ 
+
 			model.addCondition(condition);
 			// create new UI row
 			ConditionBuilderFactoryImpl.this.createConditionRowComposite(result, swtStyle, condition);
@@ -147,14 +152,28 @@ public class ConditionBuilderFactoryImpl
 		final ConditionModelAdapter<Condition, TagOperator> 
 			conditionModelAdapter = this.createConditionModelAdapter(model);
 		
-		final ConditionRowComposite<Condition, TagOperator, LogicalOperator, LogicalOperatorType> 
+		ConditionRowComposite<Condition, TagOperator, LogicalOperator, LogicalOperatorType> result; 
+		
+		ConditionRowCompositeCreator<Condition, TagOperator, LogicalOperator, LogicalOperatorType> compositeCreator =
+				ConditionBuilderPluginHelper.getRowCompositeCreator(model.getTagDefinition());
+		
+		if (compositeCreator == null) {
 			result = new ConditionRowComposite<>(
-            parent.getContainerComposite(),
-            swtStyle,
-            conditionModelAdapter,
-            parent.getModel(),
-            this.dataBindingContext,
-            conditionRowValueFactory);
+		            parent.getContainerComposite(),
+		            swtStyle,
+		            conditionModelAdapter,
+		            parent.getModel(),
+		            this.dataBindingContext,
+		            conditionRowValueFactory);
+		} else {
+			result = compositeCreator.createConditionRowComposite(
+		            parent.getContainerComposite(),
+		            swtStyle,
+		            conditionModelAdapter,
+		            parent.getModel(),
+		            this.dataBindingContext,
+		            conditionRowValueFactory);
+		}
 
 		result.setLayoutData(layoutData);
 		parent.getModel().addCondition(model);
@@ -223,7 +242,7 @@ public class ConditionBuilderFactoryImpl
 	 */
 	private class TagOperatorComparator implements Comparator<TagOperator> {
 
-		private final Locale locale = Locale.getDefault();
+		private final Locale locale = CorePlugin.getDefault().getDefaultLocale();
 		
 		@Override
 		public int compare(final TagOperator left, final TagOperator right) {
@@ -235,7 +254,8 @@ public class ConditionBuilderFactoryImpl
 	@Override
 	public ConditionModelAdapter<Condition, TagOperator> createConditionModelAdapter(final Condition model) {
 		
-		ConditionModelAdapterImpl adapter = new ConditionModelAdapterImpl(model);
+		// This cast may a bit of a hack, but we have to rely on extension plugins extending the impl class.
+		ConditionModelAdapterImpl adapter = (ConditionModelAdapterImpl) ConditionBuilderPluginHelper.createAdapter(model);
 		adapter.setResourceAdapterForOperator(resourceAdapterFactory.getResourceAdapter(TagOperator.class));
 		adapter.setResourceAdapterForTagDefinition(resourceAdapterFactory.getResourceAdapter(TagDefinition.class));
 		adapter.setTagOperatorService(this.tagOperatorService);

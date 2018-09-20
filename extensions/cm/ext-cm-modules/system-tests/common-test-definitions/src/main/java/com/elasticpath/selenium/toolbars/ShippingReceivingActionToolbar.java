@@ -42,7 +42,7 @@ public class ShippingReceivingActionToolbar extends AbstractToolbar {
 	 * @return CompleteShipmentDialog
 	 */
 	public CompleteShipmentDialog clickCompleteShipmentButton() {
-		clickButton(COMPLETE_SHIPMENT_BUTTON_CSS, "Complete Shipment");
+		clickButton(COMPLETE_SHIPMENT_BUTTON_CSS, "Complete Shipment", CompleteShipmentDialog.COMPLETE_SHIPMENT_PARENT_CSS);
 		return new CompleteShipmentDialog(getDriver());
 	}
 

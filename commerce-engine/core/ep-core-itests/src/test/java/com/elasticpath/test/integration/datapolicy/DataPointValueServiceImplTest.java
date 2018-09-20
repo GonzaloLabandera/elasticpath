@@ -174,7 +174,7 @@ public class DataPointValueServiceImplTest extends AbstractDataPolicyTest {
 		String dataPointKey = "PHONE_NUMBER";
 		String expectedDataPointValue = "12345678";
 
-		Order order = createOrderWithCreditCardPaymentAndGiftCertificateProduct(false);
+		Order order = createOrderWithGiftCertificateProduct(false);
 
 		OrderAddress orderAddress = new OrderAddressImpl();
 		fillAddressInstance(orderAddress);
@@ -196,7 +196,7 @@ public class DataPointValueServiceImplTest extends AbstractDataPolicyTest {
 		String dataPointKey = "ORDER_IP_ADDRESS";
 		String expectedDataPointValue = "127.0.0.1";
 
-		Order order = createOrderWithCreditCardPaymentAndGiftCertificateProduct(false);
+		Order order = createOrderWithGiftCertificateProduct(false);
 
 		order.setIpAddress(expectedDataPointValue);
 		orderService.update(order);
@@ -215,7 +215,7 @@ public class DataPointValueServiceImplTest extends AbstractDataPolicyTest {
 		String dataPointKey = "ORDER_DATA_KEY";
 		String expectedDataPointValue = "Order Data Value";
 
-		Order order = createOrderWithCreditCardPaymentAndGiftCertificateProduct(false);
+		Order order = createOrderWithGiftCertificateProduct(false);
 
 		order.setFieldValue(dataPointKey, expectedDataPointValue);
 		orderService.update(order);
@@ -228,21 +228,6 @@ public class DataPointValueServiceImplTest extends AbstractDataPolicyTest {
 		assertActualDataPointValues(dataPointValues, expectedDataPointValue);
 	}
 
-	@Test
-	@DirtiesDatabase
-	public void shouldGetDataPointValueForOrderPaymentCardHolderName() {
-		String dataPointKey = "ORDER_PAYMENT_CARD_HOLDER_NAME";
-		String expectedDataPointValue = "Card Holder";
-
-		createOrderWithCreditCardPaymentAndGiftCertificateProduct(false);
-
-		Map<String, Collection<DataPoint>> customerGuidToDataPoints = createMapWithDataPoints(DATA_POINT_NAME, dataPointKey,
-			DataPointLocationEnum.ORDER_PAYMENT_CARD_HOLDER_NAME.getName());
-
-		Collection<DataPointValue> dataPointValues = dataPointValueService.getValues(customerGuidToDataPoints);
-
-		assertActualDataPointValues(dataPointValues, expectedDataPointValue);
-	}
 
 	@Test
 	@DirtiesDatabase
@@ -250,7 +235,7 @@ public class DataPointValueServiceImplTest extends AbstractDataPolicyTest {
 		String dataPointKey = "giftCertificate.recipientEmail";
 
 		//given an order with a gift certificate product
-		createOrderWithCreditCardPaymentAndGiftCertificateProduct(true);
+		createOrderWithGiftCertificateProduct(true);
 
 		Map<String, Collection<DataPoint>> customerGuidToDataPoints = createMapWithDataPoints(DATA_POINT_NAME, dataPointKey,
 			DataPointLocationEnum.ORDER_GIFT_CERTIFICATE.getName());
@@ -273,7 +258,7 @@ public class DataPointValueServiceImplTest extends AbstractDataPolicyTest {
 		String expectedDataPointValue = customer.getFullName();
 
 		//given an order with a gift certificate product
-		createOrderWithCreditCardPaymentAndGiftCertificateProduct(true);
+		createOrderWithGiftCertificateProduct(true);
 
 		Map<String, Collection<DataPoint>> customerGuidToDataPoints = createMapWithDataPoints(DATA_POINT_NAME, dataPointKey,
 			DataPointLocationEnum.ORDER_PAYMENT_GIFT_CERTIFICATE.getName());
@@ -419,7 +404,7 @@ public class DataPointValueServiceImplTest extends AbstractDataPolicyTest {
 		String dataPointKey = "PHONE_NUMBER";
 		String expectedDataPointValue = "12345678";
 
-		Order order = createOrderWithCreditCardPaymentAndGiftCertificateProduct(false);
+		Order order = createOrderWithGiftCertificateProduct(false);
 
 		OrderAddress orderAddress = new OrderAddressImpl();
 		fillAddressInstance(orderAddress);
@@ -453,7 +438,7 @@ public class DataPointValueServiceImplTest extends AbstractDataPolicyTest {
 		String dataPointKey = "ORDER_IP_ADDRESS";
 		String expectedDataPointValue = "127.0.0.1";
 
-		Order order = createOrderWithCreditCardPaymentAndGiftCertificateProduct(false);
+		Order order = createOrderWithGiftCertificateProduct(false);
 
 		order.setIpAddress(expectedDataPointValue);
 		order = orderService.update(order);
@@ -484,7 +469,7 @@ public class DataPointValueServiceImplTest extends AbstractDataPolicyTest {
 		String dataPointKey = "ORDER_DATA_KEY";
 		String expectedDataPointValue = "Order Data Value";
 
-		Order order = createOrderWithCreditCardPaymentAndGiftCertificateProduct(false);
+		Order order = createOrderWithGiftCertificateProduct(false);
 
 		order.setFieldValue(dataPointKey, expectedDataPointValue);
 		order = orderService.update(order);
@@ -509,35 +494,6 @@ public class DataPointValueServiceImplTest extends AbstractDataPolicyTest {
 			.isNull();
 	}
 
-	@Test
-	@DirtiesDatabase
-	public void shouldDeleteOrderPaymentCardHolderName() {
-		String dataPointKey = "ORDER_PAYMENT_CARD_HOLDER_NAME";
-		String expectedDataPointValue = "Card Holder";
-
-		Order order = createOrderWithCreditCardPaymentAndGiftCertificateProduct(false);
-
-		OrderPayment orderPayment = order.getOrderPayment();
-
-		assertThat(orderPayment.getCardHolderName())
-			.as("The current and expected data point values must be equal")
-			.isEqualTo(expectedDataPointValue);
-
-		DataPointValue dataPointValue = createDataPointValueForRemoval(orderPayment.getUidPk(),
-			DataPointLocationEnum.ORDER_PAYMENT_CARD_HOLDER_NAME.getName(), dataPointKey, null);
-
-		int numOfDeleteValues = dataPointValueService.removeValues(Collections.singletonList(dataPointValue));
-
-		assertThat(numOfDeleteValues)
-			.as("The data point values must be deleted")
-			.isEqualTo(1);
-
-		Order updatedOrder = orderService.findOrderByOrderNumber(order.getOrderNumber());
-
-		assertThat(updatedOrder.getOrderPayment().getCardHolderName())
-			.as("The field must be empty")
-			.isEqualTo(HYPHEN);
-	}
 
 	@Test
 	@DirtiesDatabase
@@ -546,7 +502,7 @@ public class DataPointValueServiceImplTest extends AbstractDataPolicyTest {
 		String expectedDataPointValue = customer.getFullName();
 
 		//given an order with a gift certificate product
-		Order createdOrder = createOrderWithCreditCardPaymentAndGiftCertificateProduct(true);
+		Order createdOrder = createOrderWithGiftCertificateProduct(true);
 		String orderGiftCertificateSenderName = createdOrder.getAllShipments().get(0).getShipmentOrderSkus().iterator().next().getFieldValue(dataPointKey);
 
 		assertThat(orderGiftCertificateSenderName)
@@ -585,7 +541,7 @@ public class DataPointValueServiceImplTest extends AbstractDataPolicyTest {
 		List<Long> gcUIdPKs = Collections.singletonList(200000L);
 
 		//given an order with a gift certificate product
-		createOrderWithCreditCardPaymentAndGiftCertificateProduct(true);
+		createOrderWithGiftCertificateProduct(true);
 
 		GiftCertificate giftCertificate = giftCertificateService.findByUids(gcUIdPKs).get(0);
 
@@ -621,7 +577,7 @@ public class DataPointValueServiceImplTest extends AbstractDataPolicyTest {
 		return dataPointValue;
 	}
 	private String getCartGiftCertificateFieldValue(final ShoppingCart cart, final String fieldName) {
-		return cart.getAllItems().get(0).getFieldValue(fieldName);
+		return cart.getRootShoppingItems().iterator().next().getFieldValue(fieldName);
 	}
 
 	private void fillAddressInstance(final Address addressInstance) {
@@ -639,22 +595,20 @@ public class DataPointValueServiceImplTest extends AbstractDataPolicyTest {
 		addressInstance.setPhoneNumber("12345678");
 	}
 
-	private Order createOrderWithCreditCardPaymentAndGiftCertificateProduct(final boolean toCheckout) {
-		OrderPayment ccPayment = new OrderPaymentImpl();
 
-		ccPayment.setPaymentMethod(PaymentType.CREDITCARD);
-		ccPayment.setAmount(BigDecimal.valueOf(1223L));
-		ccPayment.setCreatedDate(new Date());
-		ccPayment.setStatus(OrderPaymentStatus.APPROVED);
-		ccPayment.setEmail("xx@email.com");
-		ccPayment.setUnencryptedCardNumber("4111111111111111");
-		ccPayment.setCardHolderName("Card Holder");
-		ccPayment.setCvv2Code("123");
+	private Order createOrderWithGiftCertificateProduct(final boolean toCheckout) {
+		OrderPayment orderPayment = new OrderPaymentImpl();
+
+		orderPayment.setPaymentMethod(PaymentType.PAYMENT_TOKEN);
+		orderPayment.setAmount(BigDecimal.valueOf(1223L));
+		orderPayment.setCreatedDate(new Date());
+		orderPayment.setStatus(OrderPaymentStatus.APPROVED);
+		orderPayment.setEmail("xx@email.com");
 
 		OrderBuilder gcOrderBuilder =  orderBuilder.withCheckoutTestCartBuilder(checkoutTestCartBuilder)
 			.withShoppingContext(shoppingContext)
 			.withGiftCertificateProduct()
-			.withTemplateOrderPayment(ccPayment);
+			.withTemplateOrderPayment(orderPayment);
 
 		return toCheckout ? gcOrderBuilder.checkout() : gcOrderBuilder.build();
 	}

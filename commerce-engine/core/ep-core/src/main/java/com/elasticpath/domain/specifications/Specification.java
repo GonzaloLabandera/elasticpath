@@ -3,6 +3,8 @@
  */
 package com.elasticpath.domain.specifications;
 
+import com.elasticpath.service.rules.impl.RuleValidationResultEnum;
+
 /**
  * Common interface for specifications on domain objects.
  * @param <O> Object which to check specification against.
@@ -13,8 +15,8 @@ public interface Specification<O> {
 	 * Returns true if the specification is satisfied by the object.
 	 *
 	 * @param object the object to check the specification against.
-	 * @return true if the specification is satisfied by the object, false otherwise.
+	 * @return RuleValidationResultEnum.
 	 */
-	boolean isSatisfiedBy(O object);
+	RuleValidationResultEnum isSatisfiedBy(O object);
 
 }

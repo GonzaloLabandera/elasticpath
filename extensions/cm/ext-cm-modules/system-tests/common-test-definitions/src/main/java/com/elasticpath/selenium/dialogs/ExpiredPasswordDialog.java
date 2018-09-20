@@ -12,7 +12,10 @@ import com.elasticpath.selenium.common.CM;
  */
 public class ExpiredPasswordDialog extends AbstractDialog {
 
-	private static final String EXPIRED_PASSWORD_PARENT_CSS = "div[widget-id='Elastic Path Commerce - Password Expired']";
+	/**
+	 * CSS selector used to identify the dialog.
+	 */
+	public static final String EXPIRED_PASSWORD_PARENT_CSS = "div[widget-id='Elastic Path Commerce - Password Expired']";
 	private static final String CURRENT_PASSWORD_INPUT_CSS = "div[widget-id='Current Password'] input";
 	private static final String NEW_PASSWORD_INPUT_CSS = "div[widget-id='New Password'] input";
 	private static final String CONFIRM_NEW_PASSWORD_INPUT_CSS = "div[widget-id='Confirm New Password'] input";

@@ -3,6 +3,7 @@
  */
 package com.elasticpath.service.catalog;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
@@ -12,7 +13,9 @@ import com.elasticpath.domain.catalog.ProductAssociation;
 import com.elasticpath.domain.catalog.ProductAssociationLoadTuner;
 import com.elasticpath.domain.catalog.ProductAssociationType;
 import com.elasticpath.domain.catalog.ProductLoadTuner;
+import com.elasticpath.domain.catalog.ProductSku;
 import com.elasticpath.domain.catalogview.StoreProduct;
+import com.elasticpath.domain.store.Store;
 import com.elasticpath.persistence.api.LoadTuner;
 import com.elasticpath.service.EpPersistenceService;
 import com.elasticpath.service.search.query.ProductAssociationSearchCriteria;
@@ -211,4 +214,12 @@ public interface ProductAssociationService extends EpPersistenceService {
 	Set<ProductAssociation> getAssociationsByType(String sourceProductCode, ProductAssociationType associationType, String catalogCode,
 			boolean withinCatalogOnly);
 
+	/**
+	 * Gets all dependent items for the given store and item sku.
+	 *
+	 * @param store         The {@link Store}
+	 * @param parentItemSku The {@link ProductSku} of parent item
+	 * @return a collection of {@link ProductSku}s dependent on given parent item sku. never {@code null}.
+	 */
+	Collection<ProductSku> findDependentItemsForSku(Store store, ProductSku parentItemSku);
 }

@@ -4,12 +4,10 @@
 package com.elasticpath.service.payment.converter;
 
 import org.springframework.beans.BeanUtils;
-import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.converter.Converter;
 
 import com.elasticpath.commons.beanframework.BeanFactory;
 import com.elasticpath.commons.constants.ContextIdNames;
-import com.elasticpath.domain.misc.PayerAuthValidationValue;
 import com.elasticpath.domain.order.OrderPayment;
 import com.elasticpath.plugin.payment.dto.OrderPaymentDto;
 
@@ -21,10 +19,7 @@ public class DtoToOrderPayment implements Converter<OrderPaymentDto, OrderPaymen
 
 	@Override
 	public OrderPayment convert(final OrderPaymentDto source) {
-		ConversionService conversionService = beanFactory.getBean(ContextIdNames.CONVERSION_SERVICE);
-
 		OrderPayment target = beanFactory.getBean(ContextIdNames.ORDER_PAYMENT);
-		target.setPayerAuthValidationValue(conversionService.convert(source.getPayerAuthValidationValueDto(), PayerAuthValidationValue.class));
 		BeanUtils.copyProperties(source, target);
 		return target;
 	}

@@ -11,7 +11,7 @@ import com.elasticpath.selenium.domainobjects.CartItemModifierGroup;
 import com.elasticpath.selenium.domainobjects.ProductType;
 import com.elasticpath.selenium.editor.catalog.CatalogEditor;
 import com.elasticpath.selenium.editor.catalog.tabs.ProductTypeTab;
-import com.elasticpath.selenium.framework.util.SeleniumDriverSetup;
+import com.elasticpath.selenium.setup.SetUp;
 import com.elasticpath.selenium.toolbars.CatalogManagementActionToolbar;
 import com.elasticpath.selenium.util.Utility;
 import com.elasticpath.selenium.wizards.AddEditProductTypeWizard;
@@ -30,11 +30,12 @@ public class ProductTypesTabDefinition {
 
 	/**
 	 * Constructor.
+	 *
 	 * @param cartItemModifierGroup Cart Item Modifier Group.
-	 * @param productType    ProductType to be used in current session.
+	 * @param productType           ProductType to be used in current session.
 	 */
 	public ProductTypesTabDefinition(final CartItemModifierGroup cartItemModifierGroup, final ProductType productType) {
-		final WebDriver driver = SeleniumDriverSetup.getDriver();
+		final WebDriver driver = SetUp.getDriver();
 		this.productTypeTab = new ProductTypeTab(driver);
 		this.catalogManagementActionToolbar = new CatalogManagementActionToolbar(driver);
 		this.catalogEditor = new CatalogEditor(driver);
@@ -94,7 +95,7 @@ public class ProductTypesTabDefinition {
 		productTypeTab.selectTab("ProductTypes");
 		productTypeTab.selectProductType(this.productType.getProductTypeName());
 		productTypeTab.clickRemoveProductTypeButton();
-		new ConfirmDialog(SeleniumDriverSetup.getDriver()).clickOKButton("CatalogMessages.CatalogProductTypesSection_RemoveDialog");
+		new ConfirmDialog(SetUp.getDriver()).clickOKButton("CatalogMessages.CatalogProductTypesSection_RemoveDialog");
 		catalogManagementActionToolbar.saveAll();
 		catalogManagementActionToolbar.clickReloadActiveEditor();
 	}

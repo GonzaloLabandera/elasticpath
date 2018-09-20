@@ -16,16 +16,6 @@ import javax.xml.bind.annotation.XmlRootElement;
 @XmlRootElement(name = "connectionconfiguration")
 public class ConnectionConfiguration {
 
-	/**
-	 * A constant for a remote type of connection configuration.
-	 */
-	public static final String TYPE_LOCAL = "local";
-	
-	/**
-	 * A constant for a remote type of connection configuration.
-	 */
-	public static final String TYPE_REMOTE = "remote";
-	
 	@XmlAttribute(required = true)
 	private String type;
 

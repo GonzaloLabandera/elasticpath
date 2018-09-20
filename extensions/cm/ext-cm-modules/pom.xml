@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
 	<parent>
@@ -18,12 +18,10 @@
 	<name>Extension CM Parent</name>
 
 	<modules>
-		<module>ext-cm-repository</module>
 		<module>ext-plugins</module>
 		<module>ext-target-platform</module>
 		<module>ext-cm-webapp</module>
-		<module>system-tests/common-test-definitions</module>
-
+		<module>system-tests</module>
 	</modules>
 
 	<properties>
@@ -39,12 +37,7 @@
 	<repositories>
 		<repository>
 			<id>RAP</id>
-			<url>http://download.eclipse.org/rt/rap/3.2</url>
-			<layout>p2</layout>
-		</repository>
-		<repository>
-			<id>NeonRepository</id>
-			<url>http://download.eclipse.org/releases/neon</url>
+			<url>http://download.eclipse.org/rt/rap/3.4</url>
 			<layout>p2</layout>
 		</repository>
 		<repository>
@@ -56,77 +49,43 @@
 
 	<dependencyManagement>
 		<dependencies>
-			<dependency>
-				<groupId>com.elasticpath.extensions.cm</groupId>
-				<artifactId>ext-cm-repository</artifactId>
-				<version>${cmclient.platform.feature.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>com.elasticpath.cmclient</groupId>
-				<artifactId>com.elasticpath.cmclient.platform.feature</artifactId>
-				<version>${cmclient.platform.feature.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>com.elasticpath.extensions.cm</groupId>
-				<artifactId>ext-target-platform</artifactId>
-				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>com.elasticpath.extensions.cm</groupId>
-				<artifactId>ext-cm-feature</artifactId>
-				<version>${project.version}</version>
-			</dependency>
+			<!-- Need the following to make invoker generate proper reactor order -->
 			<dependency>
 				<groupId>com.elasticpath.extensions.cm</groupId>
 				<artifactId>ext-cm-libs</artifactId>
 				<version>${project.version}</version>
 			</dependency>
-			<dependency>
-				<groupId>com.elasticpath.cmclient</groupId>
-				<artifactId>cm-p2-repository</artifactId>
-				<type>zip</type>
-				<version>${cmclient.platform.feature.version}</version>
-			</dependency>
 		</dependencies>
 	</dependencyManagement>
-
-	<dependencies>
-		<dependency>
-			<groupId>com.elasticpath.cmclient</groupId>
-			<artifactId>cm-p2-repository</artifactId>
-			<version>${cmclient.platform.feature.version}</version>
-			<type>zip</type>
-		</dependency>
-	</dependencies>
 
 	<build>
 		<pluginManagement>
 			<plugins>
-					<plugin>
-						<groupId>org.eclipse.m2e</groupId>
-						<artifactId>lifecycle-mapping</artifactId>
-						<version>1.0.0</version>
-						<configuration>
-							<lifecycleMappingMetadata>
-								<pluginExecutions>
-									<pluginExecution>
-										<pluginExecutionFilter>
-											<groupId>com.elasticpath.extensions.cm</groupId>
-											<artifactId>ext-cm-repository</artifactId>
-											<goals>
-												<goal>resources:resources</goal>
-											</goals>
-										</pluginExecutionFilter>
-										<action>
-											<execute>
-												<runOnIncremental>true</runOnIncremental>
-											</execute >
-										</action>
-									</pluginExecution>
-								</pluginExecutions>
-							</lifecycleMappingMetadata>
-						</configuration>
-					</plugin>
+				<plugin>
+					<groupId>org.eclipse.m2e</groupId>
+					<artifactId>lifecycle-mapping</artifactId>
+					<version>${lifecycle-mapping-plugin.version}</version>
+					<configuration>
+						<lifecycleMappingMetadata>
+							<pluginExecutions>
+								<pluginExecution>
+									<pluginExecutionFilter>
+										<groupId>com.elasticpath.extensions.cm</groupId>
+										<artifactId>ext-cm-repository</artifactId>
+										<goals>
+											<goal>resources:resources</goal>
+										</goals>
+									</pluginExecutionFilter>
+									<action>
+										<execute>
+											<runOnIncremental>true</runOnIncremental>
+										</execute>
+									</action>
+								</pluginExecution>
+							</pluginExecutions>
+						</lifecycleMappingMetadata>
+					</configuration>
+				</plugin>
 
 				<plugin>
 					<groupId>org.eclipse.tycho.extras</groupId>
@@ -210,7 +169,7 @@
 			<plugin>
 				<groupId>org.eclipse.m2e</groupId>
 				<artifactId>lifecycle-mapping</artifactId>
-				<version>1.0.0</version>
+				<version>${lifecycle-mapping-plugin.version}</version>
 				<configuration>
 					<lifecycleMappingMetadata>
 						<pluginExecutions>
@@ -225,7 +184,7 @@
 								<action>
 									<execute>
 										<runOnIncremental>true</runOnIncremental>
-									</execute >
+									</execute>
 								</action>
 							</pluginExecution>
 						</pluginExecutions>

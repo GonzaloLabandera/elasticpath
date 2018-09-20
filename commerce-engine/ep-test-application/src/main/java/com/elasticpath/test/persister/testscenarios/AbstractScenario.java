@@ -5,12 +5,16 @@ package com.elasticpath.test.persister.testscenarios;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
+import com.elasticpath.commons.beanframework.BeanFactory;
 import com.elasticpath.test.persister.TestDataPersisterFactory;
 
 /**
  * Represents abstract scenario.
  */
 public abstract class AbstractScenario {
+
+	@Autowired
+	private BeanFactory beanFactory;
 
 	@Autowired
 	private TestDataPersisterFactory dataPersisterFactory;
@@ -23,5 +27,9 @@ public abstract class AbstractScenario {
 
 	protected TestDataPersisterFactory getDataPersisterFactory() {
 		return dataPersisterFactory;
+	}
+
+	protected BeanFactory getBeanFactory() {
+		return beanFactory;
 	}
 }

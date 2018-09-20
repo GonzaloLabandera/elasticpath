@@ -18,6 +18,7 @@ import com.elasticpath.commons.util.AssetRepository;
 import com.elasticpath.commons.util.InvalidatableCache;
 import com.elasticpath.commons.util.StoreVelocityConfigHelper;
 import com.elasticpath.service.catalogview.StoreConfig;
+import com.elasticpath.settings.provider.SettingValueProvider;
 
 /**
  * Provides a resource manager for velocity that can serve store-specific resources with a fallback strategy.
@@ -28,6 +29,8 @@ public class StoreResourceManagerImpl extends ResourceManagerImpl implements Inv
 	private static final Logger LOG = Logger.getLogger(StoreResourceManagerImpl.class);
 
 	private static StoreConfig storeConfig;
+
+	private static SettingValueProvider<String> storeThemeProvider;
 
 	private static ConcurrentMap<String, StoreResourceManagerImpl> instanceMap = new ConcurrentHashMap<>();
 
@@ -295,7 +298,7 @@ public class StoreResourceManagerImpl extends ResourceManagerImpl implements Inv
 	 * @return the store's theme
 	 */
 	String getStoreTheme() {
-		return getStoreConfig().getSetting("COMMERCE/STORE/theme").getValue();
+		return getStoreConfig().getSettingValue(getStoreThemeProvider());
 	}
 
 	/**
@@ -335,6 +338,28 @@ public class StoreResourceManagerImpl extends ResourceManagerImpl implements Inv
 	 */
 	public void setAssetRepository(final AssetRepository assetRepository) {
 		this.assetRepository = assetRepository;
+	}
+
+	/**
+	 * Sets the Store Theme setting value provider.
+	 *
+	 * @param storeThemeProviderParam the Store Theme setting value provider
+	 */
+	public static void setStoreThemeProvider(final SettingValueProvider<String> storeThemeProviderParam) {
+		synchronized (StoreResourceManagerImpl.class) {
+			storeThemeProvider = storeThemeProviderParam;
+		}
+	}
+
+	/**
+	 * Returns the Store Theme setting value provider.
+	 *
+	 * @return the Store Theme setting value provider
+	 */
+	protected static SettingValueProvider<String> getStoreThemeProvider() {
+		synchronized (StoreResourceManagerImpl.class) {
+			return storeThemeProvider;
+		}
 	}
 
 	/**

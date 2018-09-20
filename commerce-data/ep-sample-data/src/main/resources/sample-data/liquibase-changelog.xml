@@ -5,9 +5,11 @@
 
 	<changeSet id="import-sample-data" author="elasticpath" context="sample-data">
 
+		<validCheckSum>ANY</validCheckSum>
+
 		<comment>Initial import of Cortex sample data catalog. This is temporary data until valid project data is created.</comment>
 
-		<customChange class="com.elasticpath.repo.datapopulation.importexport.ImportExportChange">
+		<customChange class="com.elasticpath.datapopulation.importexport.ImportExportChange">
 			<param name="dataSet" value="sample-data" />
 		</customChange>
 	</changeSet>

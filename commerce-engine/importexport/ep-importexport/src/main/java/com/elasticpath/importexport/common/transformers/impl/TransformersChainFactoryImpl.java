@@ -29,11 +29,7 @@ public class TransformersChainFactoryImpl implements TransformersChainFactory {
 				Class<?> clazz = Class.forName(configuration.getClassName());
 				chainedTransformers.add((Transformer) clazz.newInstance());
 				
-			} catch (ClassNotFoundException e) {
-				throw new ConfigurationException(e);
-			} catch (InstantiationException e) {
-				throw new ConfigurationException(e);
-			} catch (IllegalAccessException e) {
+			} catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
 				throw new ConfigurationException(e);
 			}
 		}

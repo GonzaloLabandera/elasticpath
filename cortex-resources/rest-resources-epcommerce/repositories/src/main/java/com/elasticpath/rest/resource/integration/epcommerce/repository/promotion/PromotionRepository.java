@@ -11,10 +11,10 @@ import io.reactivex.Single;
 import com.elasticpath.domain.order.Order;
 import com.elasticpath.domain.rules.Coupon;
 import com.elasticpath.domain.rules.Rule;
-import com.elasticpath.domain.shipping.ShippingServiceLevel;
 import com.elasticpath.domain.shoppingcart.ShoppingCart;
 import com.elasticpath.domain.shoppingcart.ShoppingCartPricingSnapshot;
 import com.elasticpath.rest.definition.promotions.PromotionEntity;
+import com.elasticpath.shipping.connectivity.dto.ShippingOption;
 
 /**
  * The facade for {@link com.elasticpath.domain.rules.Coupon} related operations.
@@ -32,7 +32,7 @@ public interface PromotionRepository {
 	/**
 	 * <p>
 	 * Gets the list of shipping promotions applied to a particular shipping
-	 * service level in the context of a shopping cart.
+	 * option in the context of a shopping cart.
 	 * </p>
 	 * <p>
 	 * The context of the shopping cart is required because the out of the box
@@ -40,11 +40,11 @@ public interface PromotionRepository {
 	 * </p>
 	 *
 	 * @param cartPricingSnapshot  The shopping cart pricing snapshot.
-	 * @param shippingServiceLevel The shipping service level.
+	 * @param shippingOption The shipping option.
 	 * @return Promotion guids for shipping promos applied to the shipping
-	 * service level in the context of the shopping cart.  Maybe be empty if no promotions apply.
+	 * option in the context of the shopping cart.  Maybe be empty if no promotions apply.
 	 */
-	Collection<String> getAppliedShippingPromotions(ShoppingCartPricingSnapshot cartPricingSnapshot, ShippingServiceLevel shippingServiceLevel);
+	Collection<String> getAppliedShippingPromotions(ShoppingCartPricingSnapshot cartPricingSnapshot, ShippingOption shippingOption);
 
 	/**
 	 * <p>

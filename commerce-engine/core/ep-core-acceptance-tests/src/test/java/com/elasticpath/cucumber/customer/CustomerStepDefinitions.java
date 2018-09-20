@@ -9,12 +9,10 @@ import java.util.Map;
 import cucumber.api.DataTable;
 import cucumber.api.java.en.Given;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.ContextConfiguration;
 
 /**
  * Store test step definitions class.
  */
-@ContextConfiguration("/cucumber.xml")
 public class CustomerStepDefinitions {
 
 	@Autowired

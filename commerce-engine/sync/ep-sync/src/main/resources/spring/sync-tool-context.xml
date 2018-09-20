@@ -114,11 +114,6 @@
 						<property name="pathToXmlFile" value="spring/sync-target-local-context.xml" />
 					</bean>
 				</entry>
-				<entry key="remote.source">
-					<bean class="com.elasticpath.tools.sync.beanfactory.impl.RemoteContextInitializerImpl">
-						<property name="pathToXmlFile" value="spring/sync-source-remote-context.xml" />
-					</bean>
-				</entry>
 			</map>
 		</property>
 	</bean>

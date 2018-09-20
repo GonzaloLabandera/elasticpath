@@ -109,3 +109,15 @@ Feature: Price List
     Examples:
       | product-name |
       | Finding Nemo |
+
+  Scenario Outline: Search and filter price list
+    Given I search for price list
+    And I open price list Mobile Price List in editor
+    When I search the price list with prices from <searchFromPrice> and to <SearchToPrice>
+    Then I should see <expSearchResults> prices returned
+    When I filter the price list with prices from <filterFromPrice> and to <filterToPrice>
+    Then I should see <expFilterResults> prices returned
+
+    Examples:
+      | searchFromPrice | SearchToPrice | expSearchResults | filterFromPrice | filterToPrice | expFilterResults |
+      | 1               | 3             | 4                | 2               | 3             | 1                |

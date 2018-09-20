@@ -6,7 +6,10 @@ package com.elasticpath.rest.resource.integration.epcommerce.repository.cartorde
 import io.reactivex.Single;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import com.elasticpath.domain.shoppingcart.ShoppingCart;
 import com.elasticpath.repository.AliasRepository;
 import com.elasticpath.rest.definition.carts.CartIdentifier;
 import com.elasticpath.rest.definition.carts.DefaultCartIdentifier;
@@ -22,16 +25,23 @@ import com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder
 @Component
 public class DefaultCartIdentifierRepositoryImpl<AI extends DefaultCartIdentifier, I extends CartIdentifier>
 		implements AliasRepository<DefaultCartIdentifier, CartIdentifier> {
+	private static final Logger LOG = LoggerFactory.getLogger(DefaultCartIdentifierRepositoryImpl.class);
 
 	private ShoppingCartRepository shoppingCartRepository;
 
 	@Override
 	public Single<CartIdentifier> resolve(final DefaultCartIdentifier defaultCartIdentifier) {
-		return shoppingCartRepository.getDefaultShoppingCart()
-				.flatMap(cart -> Single.just(CartIdentifier.builder()
-						.withCartId(StringIdentifier.of(cart.getGuid()))
+		return shoppingCartRepository.getDefaultShoppingCartGuid()
+				.onErrorResumeNext(this::getFallback)
+				.flatMap(cartGuid -> Single.just(CartIdentifier.builder()
+						.withCartId(StringIdentifier.of(cartGuid))
 						.withScope(defaultCartIdentifier.getScope())
 						.build()));
+	}
+
+	private Single<String> getFallback(final Throwable throwable) {
+		LOG.debug("Error getting default cart guid.", throwable);
+		return shoppingCartRepository.getDefaultShoppingCart().map(ShoppingCart::getGuid);
 	}
 
 	@Reference

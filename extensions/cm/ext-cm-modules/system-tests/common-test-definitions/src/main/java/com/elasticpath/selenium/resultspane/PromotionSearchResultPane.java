@@ -41,7 +41,7 @@ public class PromotionSearchResultPane extends AbstractPageObject {
 	 * @return the catalog promotion editor.
 	 */
 	public CatalogPromotionEditor openCatalogPromotionEditor() {
-		doubleClick(getSelectedElement());
+		doubleClick(getSelectedElement(), CatalogPromotionEditor.ACTIVE_EDITOR_PARENT_CSS);
 		return new CatalogPromotionEditor(getDriver());
 	}
 
@@ -75,7 +75,7 @@ public class PromotionSearchResultPane extends AbstractPageObject {
 	 * @return Cart promotion editor.
 	 */
 	public CartPromotionEditor openCartPromotionEditor() {
-		doubleClick(getSelectedElement());
+		doubleClick(getSelectedElement(), CartPromotionEditor.CART_PROMOTION_EDITOR_PAGE_OBJECT_ID);
 		return new CartPromotionEditor(getDriver());
 	}
 

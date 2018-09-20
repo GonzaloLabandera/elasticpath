@@ -2,7 +2,7 @@ package com.elasticpath.cucumber.definitions;
 
 import cucumber.api.java.en.And;
 
-import com.elasticpath.selenium.framework.util.SeleniumDriverSetup;
+import com.elasticpath.selenium.setup.SetUp;
 import com.elasticpath.selenium.toolbars.CustomerServiceActionToolbar;
 
 /**
@@ -15,7 +15,7 @@ public class CustomerServiceDefinition {
 	 * Constructor.
 	 */
 	public CustomerServiceDefinition() {
-		customerServiceActionToolbar = new CustomerServiceActionToolbar(SeleniumDriverSetup.getDriver());
+		customerServiceActionToolbar = new CustomerServiceActionToolbar(SetUp.getDriver());
 	}
 
 	/**

@@ -31,7 +31,7 @@ import com.elasticpath.service.misc.FetchPlanHelper;
 import com.elasticpath.service.misc.TimeService;
 import com.elasticpath.service.search.IndexNotificationService;
 import com.elasticpath.service.search.IndexType;
-import com.elasticpath.settings.SettingsService;
+import com.elasticpath.settings.provider.SettingValueProvider;
 
 /**
  * The default implementation of <code>CmUserService</code>.
@@ -42,8 +42,6 @@ public class CmUserServiceImpl extends AbstractEpPersistenceServiceImpl implemen
 	private FetchPlanHelper fetchPlanHelper;
 
 	private TimeService timeService;
-
-	private SettingsService settingsService;
 
 	private static final String USER_FIELD_STORES = "stores"; //$NON-NLS-1$
 
@@ -56,6 +54,8 @@ public class CmUserServiceImpl extends AbstractEpPersistenceServiceImpl implemen
 	private EventMessageFactory eventMessageFactory;
 
 	private EventMessagePublisher eventMessagePublisher;
+
+	private SettingValueProvider<Integer> minimumPasswordHistoryLengthDaysProvider;
 
 	/**
 	 * List of fields for eager fetching.
@@ -108,8 +108,7 @@ public class CmUserServiceImpl extends AbstractEpPersistenceServiceImpl implemen
 	}
 
 	private void removeExtraPasswordItems(final CmUser cmUser) {
-		int surplus = cmUser.getPasswordHistoryItems().size()
-				- Integer.parseInt(settingsService.getSettingValue("COMMERCE/APPSPECIFIC/RCP/passwordHistoryLength").getValue());
+		int surplus = cmUser.getPasswordHistoryItems().size() - getMinimumPasswordHistoryLengthDaysProvider().get();
 		while (surplus > 0) {
 			cmUser.getPasswordHistoryItems().remove(0);
 			surplus--;
@@ -347,24 +346,6 @@ public class CmUserServiceImpl extends AbstractEpPersistenceServiceImpl implemen
 		this.timeService = timeService;
 	}
 
-	/**
-	 * Gets settings service.
-	 *
-	 * @return <code>SettingsService</code>
-	 */
-	public SettingsService getSettingsService() {
-		return settingsService;
-	}
-
-	/**
-	 * Sets settings service.
-	 *
-	 * @param settingsService <code>SettingsService</code>
-	 */
-	public void setSettingsService(final SettingsService settingsService) {
-		this.settingsService = settingsService;
-	}
-
 	@Override
 	public CmUser findByGuid(final String guid) {
 		sanityCheck();
@@ -420,9 +401,6 @@ public class CmUserServiceImpl extends AbstractEpPersistenceServiceImpl implemen
 		}
 	}
 
-	/**
-	 * @param indexNotificationService instance to set
-	 */
 	public void setIndexNotificationService(
 			final IndexNotificationService indexNotificationService) {
 		this.indexNotificationService = indexNotificationService;
@@ -442,6 +420,14 @@ public class CmUserServiceImpl extends AbstractEpPersistenceServiceImpl implemen
 
 	public void setEventMessagePublisher(final EventMessagePublisher eventMessagePublisher) {
 		this.eventMessagePublisher = eventMessagePublisher;
+	}
+
+	public void setMinimumPasswordHistoryLengthDaysProvider(final SettingValueProvider<Integer> minimumPasswordHistoryLengthDaysProvider) {
+		this.minimumPasswordHistoryLengthDaysProvider = minimumPasswordHistoryLengthDaysProvider;
+	}
+
+	protected SettingValueProvider<Integer> getMinimumPasswordHistoryLengthDaysProvider() {
+		return minimumPasswordHistoryLengthDaysProvider;
 	}
 
 }

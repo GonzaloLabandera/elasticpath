@@ -15,7 +15,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.elasticpath.cache.Cache;
 import com.elasticpath.domain.catalog.Catalog;
@@ -128,8 +128,6 @@ public class CachingPriceListAssignmentServiceImplTest {
 
 	@Test
 	public void verifyListByCatalogAndCurrencyCodeReturnsPLAListFromCacheOnCacheHit() {
-		when(fallbackService.listByCatalogAndCurrencyCode(CATALOG_CODE, CURRENCY_CODE, INCLUDE_HIDDEN))
-				.thenReturn(notCachedPriceListAssignments);
 		when(priceListAssignmentsByCatalogAndCurrencyCodeCache.get(CATALOG_CURRENCY_TRUE_KEY)).thenReturn(cachedPriceListAssignments);
 
 		assertThat(cachingPriceListAssignmentService.listByCatalogAndCurrencyCode(CATALOG_CODE, CURRENCY_CODE, INCLUDE_HIDDEN))

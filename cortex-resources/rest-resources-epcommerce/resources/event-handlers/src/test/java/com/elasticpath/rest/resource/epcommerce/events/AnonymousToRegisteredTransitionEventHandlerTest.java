@@ -16,7 +16,7 @@ import org.junit.runner.RunWith;
 
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.elasticpath.domain.customer.Customer;
 import com.elasticpath.domain.customer.CustomerSession;
@@ -41,9 +41,6 @@ public class AnonymousToRegisteredTransitionEventHandlerTest {
 	private RoleTransitionEvent mockRoleTransitionEvent;
 
 	@Mock
-	private Customer mockDonorCustomer;
-
-	@Mock
 	private Customer mockRecipientCustomer;
 
 	@Mock
@@ -62,7 +59,6 @@ public class AnonymousToRegisteredTransitionEventHandlerTest {
 	@Test
 	public void testOldRoleNotSameAsNewRoleShouldNotMerge() throws Exception {
 		when(mockRoleTransitionEvent.getOldRole()).thenReturn("nonExistentRole");
-		when(mockRoleTransitionEvent.getNewRole()).thenReturn("nonExistentRole");
 
 		classToTest.handleEvent(SCOPE, mockRoleTransitionEvent);
 
@@ -93,11 +89,9 @@ public class AnonymousToRegisteredTransitionEventHandlerTest {
 	}
 
 	private void mockGUIDTransition() {
-		ExecutionResult<Customer> donorCustomer = ExecutionResultFactory.createReadOK(mockDonorCustomer);
 		ExecutionResult<Customer> recipientCustomer = ExecutionResultFactory.createReadOK(mockRecipientCustomer);
 		when(mockRoleTransitionEvent.getOldUserGuid()).thenReturn(OLD_USER_GUID);
 		when(mockRoleTransitionEvent.getNewUserGuid()).thenReturn(NEW_USER_GUID);
-		when(customerRepository.findCustomerByGuid(OLD_USER_GUID)).thenReturn(donorCustomer);
 		when(customerRepository.findCustomerByGuid(NEW_USER_GUID)).thenReturn(recipientCustomer);
 	}
 

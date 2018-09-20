@@ -21,7 +21,6 @@ import com.elasticpath.domain.catalog.LocaleDependantFields;
 import com.elasticpath.domain.catalog.Product;
 import com.elasticpath.domain.catalog.impl.BrandImpl;
 import com.elasticpath.domain.catalog.impl.CatalogLocaleFallbackPolicyFactory;
-import com.elasticpath.domain.catalog.impl.CatalogLocaleImpl;
 import com.elasticpath.domain.catalog.impl.CategoryLocaleDependantFieldsImpl;
 import com.elasticpath.domain.catalog.impl.ProductImpl;
 import com.elasticpath.domain.catalog.impl.ProductLocaleDependantFieldsImpl;
@@ -70,8 +69,7 @@ public class SeoUrlBuilderImplTest extends AbstractCatalogDataTestCase {
 	@Override
 	public void setUp() throws Exception {
 		super.setUp();
-		stubGetBean(ContextIdNames.CATALOG_LOCALE, CatalogLocaleImpl.class);
-		stubGetBean(ContextIdNames.LOCALIZED_PROPERTIES, LocalizedPropertiesImpl.class);
+
 		stubGetBean(ContextIdNames.UTILITY, UtilityImpl.class);
 
 		CatalogLocaleFallbackPolicyFactory localePolicyFactory = new CatalogLocaleFallbackPolicyFactory();

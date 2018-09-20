@@ -57,7 +57,7 @@ import com.elasticpath.service.search.query.SortBy;
 import com.elasticpath.service.search.query.SortOrder;
 import com.elasticpath.service.search.query.StandardSortBy;
 import com.elasticpath.service.search.solr.SpellingConstants.SpellingParams;
-import com.elasticpath.settings.SettingsReader;
+import com.elasticpath.settings.provider.SettingValueProvider;
 
 /**
  * Factory class to create SOLR queries.
@@ -77,8 +77,6 @@ public class SolrQueryFactoryImpl implements SolrQueryFactory {
 
 	private static final Pattern ALL_DOCS_PATTERN = Pattern.compile("\\Q" + ALL_DOCS_QUERY + "\\E(?!\\:)", Pattern.MULTILINE);
 
-	private static final String SHOW_BUNDLES_FIRST_SETTING_PATH = "COMMERCE/STORE/SEARCH/showBundlesFirst";
-
 	private static final String CONSTITUENT_COUNT_SCALE_FORMULA = "_val_:\"linear(constituentCount, 100, 1)\"";
 
 	private static final int BOOST_SCALE = 4;
@@ -91,7 +89,7 @@ public class SolrQueryFactoryImpl implements SolrQueryFactory {
 
 	private BeanFactory beanFactory;
 
-	private SettingsReader settingsReader;
+	private SettingValueProvider<Boolean> showBundlesFirstProvider;
 
 	private Analyzer analyzer;
 
@@ -287,7 +285,7 @@ public class SolrQueryFactoryImpl implements SolrQueryFactory {
 		if (criteria instanceof StoreAwareSearchCriteria) {
 			storeContext = ((StoreAwareSearchCriteria) criteria).getStoreCode();
 		}
-		if (getSettingsReader().getSettingValue(SHOW_BUNDLES_FIRST_SETTING_PATH, storeContext).getBooleanValue()) {
+		if (getShowBundlesFirstProvider().get(storeContext)) {
 			query.set("bq", CONSTITUENT_COUNT_SCALE_FORMULA);
 		}
 	}
@@ -564,6 +562,14 @@ public class SolrQueryFactoryImpl implements SolrQueryFactory {
 		this.solrFacetAdapter = solrFacetAdapter;
 	}
 
+	protected SettingValueProvider<Boolean> getShowBundlesFirstProvider() {
+		return showBundlesFirstProvider;
+	}
+
+	public void setShowBundlesFirstProvider(final SettingValueProvider<Boolean> showBundlesFirstProvider) {
+		this.showBundlesFirstProvider = showBundlesFirstProvider;
+	}
+
 	/**
 	 * Creates the fields specific to a product search in the SF.
 	 */
@@ -665,20 +671,6 @@ public class SolrQueryFactoryImpl implements SolrQueryFactory {
 	 */
 	public void setBeanFactory(final BeanFactory beanFactory) {
 		this.beanFactory = beanFactory;
-	}
-
-	/**
-	 * @param settingsReader for reading settings
-	 */
-	public void setSettingsReader(final SettingsReader settingsReader) {
-		this.settingsReader = settingsReader;
-	}
-
-	/**
-	 * @return the settings reader
-	 */
-	public SettingsReader getSettingsReader() {
-		return settingsReader;
 	}
 
 	/**

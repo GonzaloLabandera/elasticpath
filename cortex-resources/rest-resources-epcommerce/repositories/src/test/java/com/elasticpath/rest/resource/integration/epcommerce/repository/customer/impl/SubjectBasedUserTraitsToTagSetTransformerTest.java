@@ -5,7 +5,7 @@ package com.elasticpath.rest.resource.integration.epcommerce.repository.customer
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.anyString;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -18,9 +18,9 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
-import com.elasticpath.commons.converter.ConversionMalformedValueException;
+import com.elasticpath.converter.ConversionMalformedValueException;
 import com.elasticpath.rest.identity.Subject;
 import com.elasticpath.rest.identity.attribute.SubjectAttribute;
 import com.elasticpath.rest.identity.attribute.UserTraitSubjectAttribute;

@@ -6,9 +6,7 @@ package com.elasticpath.persistence.openjpa.impl;
 import java.net.URL;
 import java.util.List;
 import java.util.Map;
-import javax.sql.DataSource;
 
-import org.springframework.orm.jpa.persistenceunit.DefaultPersistenceUnitManager;
 import org.springframework.orm.jpa.persistenceunit.MutablePersistenceUnitInfo;
 import org.springframework.orm.jpa.persistenceunit.PersistenceUnitPostProcessor;
 
@@ -24,9 +22,6 @@ public class OverridingPersistenceUnitPostProcessor implements PersistenceUnitPo
 	private List<URL> excludedJarFileUrls;
 	private Map<String, String> propertyOverrides;
 	private Boolean excludeUnlistedClasses;
-	private DefaultPersistenceUnitManager persistenceUnitManager;
-	private String jtaDataSource;
-	private String nonJtaDataSource;
 
 	@Override
 	public void postProcessPersistenceUnitInfo(final MutablePersistenceUnitInfo persistenceUnitInfo) {
@@ -50,14 +45,6 @@ public class OverridingPersistenceUnitPostProcessor implements PersistenceUnitPo
 		}
 		if (excludeUnlistedClasses != null) {
 			persistenceUnitInfo.setExcludeUnlistedClasses(excludeUnlistedClasses);
-		}
-		if (jtaDataSource != null) {
-			DataSource dataSource = persistenceUnitManager.getDataSourceLookup().getDataSource(jtaDataSource.trim());
-			persistenceUnitInfo.setJtaDataSource(dataSource);
-		}
-		if (nonJtaDataSource != null) {
-			DataSource dataSource = persistenceUnitManager.getDataSourceLookup().getDataSource(nonJtaDataSource.trim());
-			persistenceUnitInfo.setNonJtaDataSource(dataSource);
 		}
 	}
 
@@ -85,15 +72,4 @@ public class OverridingPersistenceUnitPostProcessor implements PersistenceUnitPo
 		this.excludeUnlistedClasses = excludeUnlistedClasses;
 	}
 	
-	public void setPersistenceUnitManager(final DefaultPersistenceUnitManager persistenceUnitManager) {
-		this.persistenceUnitManager = persistenceUnitManager;
-	}
-
-	public void setJtaDataSource(final String jtaDataSource) {
-		this.jtaDataSource = jtaDataSource;
-	}
-
-	public void setNonJtaDataSource(final String nonJtaDataSource) {
-		this.nonJtaDataSource = nonJtaDataSource;
-	}
 }

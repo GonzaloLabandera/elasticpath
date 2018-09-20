@@ -10,11 +10,11 @@ import java.util.Set;
 import javax.validation.ConstraintViolation;
 import javax.validation.Validator;
 
+import com.elasticpath.base.common.dto.StructuredErrorMessage;
 import com.elasticpath.base.exception.EpSystemException;
-import com.elasticpath.common.dto.StructuredErrorMessage;
+import com.elasticpath.base.exception.structured.EpValidationException;
 import com.elasticpath.commons.beanframework.BeanFactory;
 import com.elasticpath.commons.constants.ContextIdNames;
-import com.elasticpath.commons.exception.EpValidationException;
 import com.elasticpath.core.messaging.customer.CustomerEventType;
 import com.elasticpath.domain.customer.Customer;
 import com.elasticpath.messaging.EventMessage;

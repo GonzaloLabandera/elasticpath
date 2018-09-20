@@ -35,6 +35,7 @@ import org.eclipse.swt.widgets.Monitor;
 import org.eclipse.swt.widgets.Shell;
 
 import com.elasticpath.cmclient.core.CoreMessages;
+import com.elasticpath.cmclient.core.formatting.TimeZoneInfo;
 import com.elasticpath.cmclient.core.ui.framework.IEpDateTimePicker;
 
 /**
@@ -348,6 +349,7 @@ public class EpDateTime extends Dialog implements SelectionListener {
 		calendar.set(Calendar.SECOND, 0);
 		
 		calendar.set(year, month, day, hours, minutes);
+		calendar.setTimeZone(TimeZoneInfo.getInstance().getTimezone());
 		return calendar.getTime();
 	}
 
@@ -364,6 +366,8 @@ public class EpDateTime extends Dialog implements SelectionListener {
 			return;
 		}
 		Calendar calendar = Calendar.getInstance();
+		calendar.setTimeZone(TimeZoneInfo.getInstance().getTimezone());
+
 		calendar.setTime(aDate);
 		date = aDate;
 		int year = calendar.get(Calendar.YEAR);

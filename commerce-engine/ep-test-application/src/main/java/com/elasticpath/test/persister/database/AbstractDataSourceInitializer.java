@@ -30,7 +30,7 @@ import com.elasticpath.test.persister.TestConfig;
 public abstract class AbstractDataSourceInitializer implements DataSourceInitializer {
 
 	private static final Logger LOG = Logger.getLogger(AbstractDataSourceInitializer.class);
-	
+
 	protected final String rdbms;
 
 	private final String databaseName;
@@ -51,13 +51,13 @@ public abstract class AbstractDataSourceInitializer implements DataSourceInitial
 	protected final String dbaPassword;
 
 	private final Class<? extends Driver> driverClass;
-	
+
 	/** The directory where the database initialization scripts are to be found. */
 	protected final String scriptDir;
 
 	/**
 	 * Set initial parameters.
-	 * 
+	 *
 	 * @param properties the properties.
 	 */
 	public AbstractDataSourceInitializer(final Properties properties) {
@@ -72,7 +72,7 @@ public abstract class AbstractDataSourceInitializer implements DataSourceInitial
 		//dba username and password
 		dbaUsername = properties.getProperty(TestConfig.PROPERTY_DB_DBA_USERNAME);
 		dbaPassword = properties.getProperty(TestConfig.PROPERTY_DB_DBA_PASSWORD);
-		
+
 		String driverClassName = properties.getProperty(TestConfig.PROPERTY_DB_CONNECTION_DRIVER_CLASS);
 		try {
 			driverClass = loadDriverClass(driverClassName);
@@ -81,10 +81,10 @@ public abstract class AbstractDataSourceInitializer implements DataSourceInitial
 		}
 	}
 
-    @SuppressWarnings("unchecked")
-    private Class<? extends Driver> loadDriverClass(final String driverClassName) throws ClassNotFoundException {
-        return (Class<? extends Driver>) Class.forName(driverClassName);
-    }
+	@SuppressWarnings("unchecked")
+	private Class<? extends Driver> loadDriverClass(final String driverClassName) throws ClassNotFoundException {
+		return (Class<? extends Driver>) Class.forName(driverClassName);
+	}
 
 	/**
 	 * @return database name
@@ -95,17 +95,17 @@ public abstract class AbstractDataSourceInitializer implements DataSourceInitial
 
 	/**
 	 * Get user name.
-	 * 
+	 *
 	 * @return the user name
 	 */
 	@Override
 	public String getUsername() {
 		return username;
 	}
-	
+
 	/**
 	 * Get DBA user name.
-	 * 
+	 *
 	 * @return the user name
 	 */
 	public String getDbaUsername() {
@@ -114,17 +114,17 @@ public abstract class AbstractDataSourceInitializer implements DataSourceInitial
 
 	/**
 	 * Get user password.
-	 * 
+	 *
 	 * @return the password
 	 */
 	@Override
 	public String getPassword() {
 		return password;
 	}
-	
+
 	/**
 	 * Get DBA password.
-	 * 
+	 *
 	 * @return the password
 	 */
 	public String getDbaPassword() {
@@ -137,6 +137,27 @@ public abstract class AbstractDataSourceInitializer implements DataSourceInitial
 	}
 
 	/**
+	 * Initialize the snapshot for the database.
+	 */
+	@Override
+	public void initializeSnapshot() {
+		//to be overridden when needed.
+	};
+
+	/**
+	 * Reset the database.
+	 *
+	 * @return the connection url for the jdbc bind.
+	 * @throws SQLException if there was a problem with the database connection.
+	 */
+	@Override
+	public String resetDatabase() throws SQLException {
+		LOG.debug("Drop and create database to fresh instance");
+		dropAndCreateDatabase();
+		return getConnectionUrl();
+	};
+
+	/**
 	 * Subclasses can call this to hide some boilerplate code.
 	 * @param connection the connection to close.
 	 * @throws DataSourceInitializerException if there was a problem closing the connection.
@@ -145,7 +166,7 @@ public abstract class AbstractDataSourceInitializer implements DataSourceInitial
 		if (connection == null) {
 			return;
 		}
-		
+
 		try {
 			connection.close();
 		} catch (SQLException sqle) {
@@ -153,7 +174,7 @@ public abstract class AbstractDataSourceInitializer implements DataSourceInitial
 			throw new DataSourceInitializerException("Failed to close connection", sqle);
 		}
 	}
-	
+
 	/**
 	 * Subclasses can call this to hide some boilerplate code.
 	 * @param statement the statement to close.
@@ -163,7 +184,7 @@ public abstract class AbstractDataSourceInitializer implements DataSourceInitial
 		if (statement == null) {
 			return;
 		}
-		
+
 		try {
 			statement.close();
 		} catch (SQLException sqle) {
@@ -181,5 +202,12 @@ public abstract class AbstractDataSourceInitializer implements DataSourceInitial
 	protected String getSystemConnectionUrl() {
 		return "jdbc:" + rdbms + "://" + host + ":" + port;
 	}
-  	
+
+	/**
+	 * Get the snapshots file name.
+	 */
+	protected String getSnapshotFileName() {
+		return "snapshot.sql";
+	}
+
 }

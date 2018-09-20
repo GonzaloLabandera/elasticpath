@@ -4,8 +4,7 @@
 package com.elasticpath.service.order.impl;
 
 import java.io.Serializable;
-
-import com.google.common.base.Predicate;
+import java.util.function.Predicate;
 
 import com.elasticpath.domain.catalog.PriceScheduleType;
 import com.elasticpath.domain.shoppingcart.ShoppingItemPricingSnapshot;
@@ -24,7 +23,7 @@ public class ShoppingItemHasRecurringPricePredicate implements Predicate<Shoppin
 	 * @return true if the item has recurring price
 	 */
 	@Override
-	public boolean apply(final ShoppingItemPricingSnapshot shoppingItemPricingSnapshot) {
+	public boolean test(final ShoppingItemPricingSnapshot shoppingItemPricingSnapshot) {
 		return shoppingItemPricingSnapshot.getPrice() != null
 				&& shoppingItemPricingSnapshot.getPrice().getPricingScheme() != null
 				&& !shoppingItemPricingSnapshot.getPrice().getPricingScheme().getSchedules(PriceScheduleType.RECURRING).isEmpty();

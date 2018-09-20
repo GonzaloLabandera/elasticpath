@@ -17,11 +17,6 @@ Scenario: Update a customer's list of payment methods without a default specifie
   When I execute the import
   Then  the customer will be updated with payment methods A,B, and C and A will be chosen as the default
 
-Scenario: Import credit cards using the legacy credit card format
-  Given a customer exists
-  And an import with credit cards A,B and C and C is the default using the legacy format
-  When I execute the import
-  Then the customer will be updated with credit cards A,B and C and C will be chosen as the default
 
 Scenario: Clear the list of payment methods for a customer
   Given a customer exists with payment methods

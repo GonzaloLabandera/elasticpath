@@ -3,6 +3,8 @@
  */
 package com.elasticpath.cucumber.testexecutionlisteners;
 
+import java.sql.SQLException;
+
 import org.apache.log4j.Logger;
 import org.springframework.test.context.TestContext;
 import org.springframework.test.context.support.AbstractTestExecutionListener;
@@ -17,19 +19,47 @@ public class CucumberDatabaseTestExecutionListener extends AbstractTestExecution
 
 	private static final Logger LOG = Logger.getLogger(CucumberDatabaseTestExecutionListener.class);
 
+	@Override
+	public final int getOrder() {
+		return 1;
+	}
+
 	private final JndiContextManager jndiContextManager;
 
 	public CucumberDatabaseTestExecutionListener() {
 		jndiContextManager = JndiContextManager.createJndiContextManager();
+		try {
+			DatabaseTestExecutionListenerHelper.resetDatabase(null, jndiContextManager);
+		} catch (SQLException e) {
+			LOG.error("Error initalizing CucumberDatabaseTestExecutionListener.", e);
+		}
 	}
 
-    @Override
-    public void prepareTestInstance(final TestContext testContext) throws Exception {
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("performing database reset for test context [" + testContext + "].");
-        }
+	@Override
+	public void beforeTestClass(final TestContext testContext) throws Exception {
+		if (LOG.isDebugEnabled()) {
+			LOG.debug("performing database reset for test context [" + testContext + "].");
+		}
 
-        DatabaseTestExecutionListenerHelper.resetDatabase(testContext, jndiContextManager);
-    }
+		DatabaseTestExecutionListenerHelper.initializeSnapshot();
+	}
+
+	@Override
+	public void prepareTestInstance(final TestContext testContext) throws Exception {
+		if (LOG.isDebugEnabled()) {
+			LOG.debug("performing database reset for test context [" + testContext + "].");
+		}
+
+		DatabaseTestExecutionListenerHelper.resetDatabase(testContext, jndiContextManager);
+	}
+
+	@Override
+	public void afterTestClass(final TestContext testContext) throws Exception {
+		if (LOG.isDebugEnabled()) {
+			LOG.debug("performing database reset for test context [" + testContext + "].");
+		}
+
+		DatabaseTestExecutionListenerHelper.resetDatabase(testContext, jndiContextManager);
+	}
 
 }

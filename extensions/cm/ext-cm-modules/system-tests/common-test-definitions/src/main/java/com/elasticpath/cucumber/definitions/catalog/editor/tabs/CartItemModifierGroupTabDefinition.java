@@ -17,7 +17,7 @@ import com.elasticpath.selenium.domainobjects.CartItemModifierGroup;
 import com.elasticpath.selenium.editor.catalog.CatalogEditor;
 import com.elasticpath.selenium.editor.catalog.tabs.CartItemModifierGroupsTab;
 import com.elasticpath.selenium.editor.catalog.tabs.ProductTypeTab;
-import com.elasticpath.selenium.framework.util.SeleniumDriverSetup;
+import com.elasticpath.selenium.setup.SetUp;
 import com.elasticpath.selenium.toolbars.CatalogManagementActionToolbar;
 import com.elasticpath.selenium.util.Utility;
 import com.elasticpath.selenium.wizards.AddEditProductTypeWizard;
@@ -38,12 +38,13 @@ public class CartItemModifierGroupTabDefinition {
 
 	/**
 	 * Constructor.
+	 *
 	 * @param cartItemModifierGroup     Cart Item Modifier Group object to be used in this session.
 	 * @param cartItemModiferGroupField Cart Item Modifier Group Field to be used in this session.
 	 */
 	public CartItemModifierGroupTabDefinition(final CartItemModifierGroup cartItemModifierGroup, final CartItemModiferGroupField
 			cartItemModiferGroupField) {
-		final WebDriver driver = SeleniumDriverSetup.getDriver();
+		final WebDriver driver = SetUp.getDriver();
 		this.catalogManagementActionToolbar = new CatalogManagementActionToolbar(driver);
 		this.cartItemModifierGroupsTab = new CartItemModifierGroupsTab(driver);
 		this.catalogEditor = new CatalogEditor(driver);
@@ -223,7 +224,7 @@ public class CartItemModifierGroupTabDefinition {
 		cartItemModifierGroupsTab.selectTab("CartItemModifierGroups");
 		cartItemModifierGroupsTab.selectGroup(this.cartItemModifierGroup.getGroupCode());
 		cartItemModifierGroupsTab.clickRemoveGroupButton();
-		new ConfirmDialog(SeleniumDriverSetup.getDriver()).clickOKButton("CatalogCartItemModifierGroupsSection_RemoveDialog");
+		new ConfirmDialog(SetUp.getDriver()).clickOKButton("CatalogCartItemModifierGroupsSection_RemoveDialog");
 		catalogManagementActionToolbar.saveAll();
 		catalogManagementActionToolbar.clickReloadActiveEditor();
 	}

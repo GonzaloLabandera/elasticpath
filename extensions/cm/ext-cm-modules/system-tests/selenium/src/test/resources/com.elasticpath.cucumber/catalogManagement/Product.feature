@@ -1,5 +1,5 @@
 @smoketest @catalogManagement @product
-Feature: Create Product
+Feature: Create New Product
 
   Background:
     Given I sign in to CM as admin user
@@ -23,7 +23,7 @@ Feature: Create Product
 
   Scenario: Create and Delete new GiftCertificate Sku product for existing category
     When I create new product with following attributes
-      | catalog        | category         | productName | productType      | taxCode | brand | storeVisible | availability     | shippableType | codesList                          | skuOption               |
+      | catalog        | category         | productName | productType      | taxCode | brand | storeVisible | availability     | shippableType | skuCodeList                        | skuOption               |
       | Mobile Catalog | Gift Certificate | Product     | Gift Certificate | NONE    | none  | true         | Always available | Digital Asset | TWENTY_VALUE - 20,FIFTY_VALUE - 50 | berries_theme - Berries |
     Then the newly created product is in the list
     When I delete the newly created product
@@ -50,7 +50,7 @@ Feature: Create Product
     When I create new category of the new category type
       | categoryName   | storeVisible | attrLongTextName     | attrLongTextValue   | attrDecimalName | attrDecimalValue | attrShortTextName | attrShortTextValue   |
       | ATest Category | true         | Category Description | long text attribute | Category Rating | 1.1              | Name              | short text attribute |
-    When I create new product with following attributes
+    And I create new product with following attributes
       | productName | taxCode | brand  | storeVisible | availability     | shippableType |
       | TestProduct | DIGITAL | Disney | true         | Always available | Digital Asset |
     Then the newly created product is in the list

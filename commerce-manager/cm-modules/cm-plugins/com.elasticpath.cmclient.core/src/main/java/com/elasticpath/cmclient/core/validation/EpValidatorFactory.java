@@ -24,7 +24,6 @@ import com.elasticpath.cmclient.core.CoreMessages;
 import com.elasticpath.cmclient.core.CorePlugin;
 import com.elasticpath.cmclient.core.ui.framework.IEpDateTimePicker;
 import com.elasticpath.cmclient.core.util.DateTimeUtilFactory;
-import com.elasticpath.commons.validator.impl.EpCreditCardValidator;
 
 
 /**
@@ -40,7 +39,7 @@ import com.elasticpath.commons.validator.impl.EpCreditCardValidator;
  * result of the validation to be OK.
  */
 @SuppressWarnings({ "PMD.ExcessiveClassLength", "PMD.TooManyMethods", "PMD.GodClass", "PMD.PrematureDeclaration" })
-public class EpValidatorFactory {
+public final class EpValidatorFactory {
 
 	private static final int LIMIT_DAY = 31;
 
@@ -49,8 +48,6 @@ public class EpValidatorFactory {
 	private static final int LIMIT_YEAR = 2999;
 
 	private static final Date UP_LIMIT_DATE;
-
-	private static EpCreditCardValidator creditCardValidator;
 
 	private static final String REG_EXPRESSION_STRING_MAXLEN_30 = "^([a-zA-Z_0-9]|[-]){0,30}$"; //$NON-NLS-1$
 
@@ -66,11 +63,23 @@ public class EpValidatorFactory {
 	private static final String NO_SPECIAL_CHARS_EXCEPT_DASH_REG_EXPR =
 		"[^!$%&@#<>`~';:,/={}\\+\\*\\\\^\\(\\)\\[\\]\\{\\}\\|\\\"\\?]*"; //$NON-NLS-1$
 
+	private static final String NO_SPECIAL_CHARS_EXCEPT_APOSTROPHE_REG_EXPR =
+		"[^!$%&@#<>~;:,/={}\\+\\*\\\\^\\(\\)\\[\\]\\{\\}\\|\\\"\\?]*"; //$NON-NLS-1$
+
+	private static final String NO_SPECIAL_CHARS_EXCEPT_AT_SIGN_REG_EXPR =
+		"[^!$%&#<>`~';:,/={}\\+\\*\\\\^\\(\\)\\[\\]\\{\\}\\|\\\"\\?]*"; //$NON-NLS-1$
+
 	/**
 	 * Phone numbers can be of length 7-50 composing of any numeric digits or symbols ()./+ and space.
 	 * The same validation regex expression is used in the storefront validation.xml
 	 */
-	private static final String PHONE_REG_EXP = "^(([0-9]|\\s|-|\\)|\\(|\\+)){7,50}$"; //$NON-NLS-1$
+	private static final String PHONE_REG_EXP = "^(([0-9]|\\s|-|\\)|\\(|\\+|\\.)){7,50}$"; //$NON-NLS-1$
+
+	/**
+	 * Phone numbers can be of length 3-50 composing of any numeric digits or symbols ()./+ and space.
+	 * The same validation regex expression is used in the storefront validation.xml
+	 */
+	private static final String PHONE_PATTERN_REG_EXP = "^(([0-9]|\\s|-|\\)|\\(|\\+|\\.)){3,50}$"; //$NON-NLS-1$
 
 	private static final String NUMBER_VALIDATION_ERROR_STRING = "Number to validate must be a String or Integer"; //$NON-NLS-1$
 
@@ -104,6 +113,11 @@ public class EpValidatorFactory {
 					null);
 		}
 	};
+
+	//private constructor.
+	private EpValidatorFactory() {
+
+	}
 
 	/** Verifies that an email address is well-formatted. */
 	public static final IValidator EMAIL = new IValidator() {
@@ -462,9 +476,17 @@ public class EpValidatorFactory {
 	public static final IValidator PHONE_REQUIRED = new RegularExpressionValidator(
 			PHONE_REG_EXP, CoreMessages.get().EpValidatorFactory_PhoneValid);
 
+	/** Checks that the input is a phone number pattern, can be from a blank text, but must parse into a number. */
+	public static final IValidator PHONE_PATTERN_REQUIRED = new RegularExpressionValidator(
+			PHONE_PATTERN_REG_EXP, CoreMessages.get().EpValidatorFactory_PhoneValid);
+
 	/** Checks that the input is a phone number - may be blank or have leading or trailing spaces. */
 	public static final IValidator PHONE_IGNORE_SPACES = new GenericStringPatternValidator(
 			PHONE_REQUIRED, CoreMessages.get().EpValidatorFactory_PhoneValid);
+
+	/** Checks that the input is a phone number pattern - may be blank or have leading or trailing spaces. */
+	public static final IValidator PHONE_PATTERN_IGNORE_SPACES = new GenericStringPatternValidator(
+			PHONE_PATTERN_REQUIRED, CoreMessages.get().EpValidatorFactory_PhoneValid);
 
 	/** Checks that the input is a fax number, can be from a blank text, but must parse into a number. */
 	public static final IValidator FAX_REQUIRED = new RegularExpressionValidator(
@@ -543,40 +565,6 @@ public class EpValidatorFactory {
 		}
 	};
 
-	/** Checks that the input can be validated against the commons credit card validator. */
-	public static final IValidator CREDIT_CARD = new IValidator() {
-
-		private static final int MIN_LENGTH = 14;
-
-		public IStatus validate(final Object value) {
-			String stringValue = ""; //$NON-NLS-1$
-			boolean isValid = false;
-			if (value instanceof String) {
-				stringValue = (String) value;
-			} else {
-				throw new IllegalArgumentException(NUMBER_VALIDATION_ERROR_STRING);
-			}
-
-			try {
-				if (stringValue.length() < MIN_LENGTH) {
-					return new Status(IStatus.ERROR, CorePlugin.PLUGIN_ID, IStatus.ERROR,
-							CoreMessages.get().EpValidatorFactory_CreditCardValid, null);
-				}
-				if (!"".equals(stringValue)) { //$NON-NLS-1$
-					isValid = creditCardValidator.isCreditCardValid(stringValue);
-				}
-			} catch (NumberFormatException nfe) {
-				return new Status(IStatus.ERROR, CorePlugin.PLUGIN_ID, IStatus.ERROR,
-						CoreMessages.get().EpValidatorFactory_CreditCardValid, null);
-
-			}
-			if (!isValid) {
-				return new Status(IStatus.ERROR, CorePlugin.PLUGIN_ID, IStatus.ERROR,
-						CoreMessages.get().EpValidatorFactory_CreditCardValid, null);
-			}
-			return Status.OK_STATUS;
-		}
-	};
 
 	/** Checks that the input is a valid percent value that is greater than 0 and no more than 100. */
 	public static final IValidator PERCENTAGE = new IValidator() {
@@ -596,17 +584,20 @@ public class EpValidatorFactory {
 			double doubleValue = 0;
 			try {
 				if (stringValue.length() < MIN_LENGTH) {
-					return new Status(IStatus.ERROR, CorePlugin.PLUGIN_ID, IStatus.ERROR, CoreMessages.get().EpValidatorFactory_Percent, null);
+					return new Status(IStatus.ERROR, CorePlugin.PLUGIN_ID, IStatus.ERROR,
+							CoreMessages.get().EpValidatorFactory_Percent, null);
 				}
 				if (!"".equals(stringValue)) { //$NON-NLS-1$
 					doubleValue = Double.parseDouble(stringValue);
 				}
 			} catch (NumberFormatException nfe) {
-				return new Status(IStatus.ERROR, CorePlugin.PLUGIN_ID, IStatus.ERROR, CoreMessages.get().EpValidatorFactory_Percent, null);
+				return new Status(IStatus.ERROR, CorePlugin.PLUGIN_ID, IStatus.ERROR,
+						CoreMessages.get().EpValidatorFactory_Percent, null);
 
 			}
 			if (doubleValue <= MIN_PERCENTAGE_EXCLUSIVE || doubleValue > MAX_PERCENTAGE_INCLUSIVE) {
-				return new Status(IStatus.ERROR, CorePlugin.PLUGIN_ID, IStatus.ERROR, CoreMessages.get().EpValidatorFactory_Percent, null);
+				return new Status(IStatus.ERROR, CorePlugin.PLUGIN_ID, IStatus.ERROR,
+						CoreMessages.get().EpValidatorFactory_Percent, null);
 			}
 			return Status.OK_STATUS;
 		}
@@ -628,17 +619,20 @@ public class EpValidatorFactory {
 			long longValue = 0;
 			try {
 				if (stringValue.length() < MIN_LENGTH) {
-					return new Status(IStatus.ERROR, CorePlugin.PLUGIN_ID, IStatus.ERROR, CoreMessages.get().EpValidatorFactory_Month, null);
+					return new Status(IStatus.ERROR, CorePlugin.PLUGIN_ID, IStatus.ERROR,
+							CoreMessages.get().EpValidatorFactory_Month, null);
 				}
 				if (!"".equals(stringValue)) { //$NON-NLS-1$
 					longValue = Long.parseLong(stringValue);
 				}
 			} catch (NumberFormatException nfe) {
-				return new Status(IStatus.ERROR, CorePlugin.PLUGIN_ID, IStatus.ERROR, CoreMessages.get().EpValidatorFactory_Month, null);
+				return new Status(IStatus.ERROR, CorePlugin.PLUGIN_ID, IStatus.ERROR,
+						CoreMessages.get().EpValidatorFactory_Month, null);
 
 			}
 			if (longValue <= 0 || longValue > MONTH_MAX) {
-				return new Status(IStatus.ERROR, CorePlugin.PLUGIN_ID, IStatus.ERROR, CoreMessages.get().EpValidatorFactory_Month, null);
+				return new Status(IStatus.ERROR, CorePlugin.PLUGIN_ID, IStatus.ERROR,
+						CoreMessages.get().EpValidatorFactory_Month, null);
 			}
 			return Status.OK_STATUS;
 		}
@@ -668,17 +662,20 @@ public class EpValidatorFactory {
 			long longValue = 0;
 			try {
 				if (stringValue.length() < MIN_LENGTH) {
-					return new Status(IStatus.ERROR, CorePlugin.PLUGIN_ID, IStatus.ERROR, CoreMessages.get().EpValidatorFactory_Year, null);
+					return new Status(IStatus.ERROR, CorePlugin.PLUGIN_ID, IStatus.ERROR,
+							CoreMessages.get().EpValidatorFactory_Year, null);
 				}
 				if (!"".equals(stringValue)) { //$NON-NLS-1$
 					longValue = Long.parseLong(stringValue);
 				}
 			} catch (final NumberFormatException nfe) {
-				return new Status(IStatus.ERROR, CorePlugin.PLUGIN_ID, IStatus.ERROR, CoreMessages.get().EpValidatorFactory_Year, null);
+				return new Status(IStatus.ERROR, CorePlugin.PLUGIN_ID, IStatus.ERROR,
+						CoreMessages.get().EpValidatorFactory_Year, null);
 
 			}
 			if (longValue < minYear || longValue > YEAR_MAX) {
-				return new Status(IStatus.ERROR, CorePlugin.PLUGIN_ID, IStatus.ERROR, CoreMessages.get().EpValidatorFactory_Year, null);
+				return new Status(IStatus.ERROR, CorePlugin.PLUGIN_ID, IStatus.ERROR,
+						CoreMessages.get().EpValidatorFactory_Year, null);
 			}
 			return Status.OK_STATUS;
 		}
@@ -711,7 +708,7 @@ public class EpValidatorFactory {
 			CoreMessages.get().EpValidatorFactory_ProductName);
 
 	/** Validate required product name.*/
-	public static final IValidator PRODUCT_NAME_REQUIRED =  new CompoundValidator(new IValidator[]{PRODUCT_NAME, REQUIRED});
+	public static final IValidator PRODUCT_NAME_REQUIRED =  new CompoundValidator(PRODUCT_NAME, REQUIRED);
 
 	/** Validates that string contains at least one letter and one digit. */
 	public static final IValidator LETTER_AND_DIGIT_REQUIRED = new RegularExpressionValidator(LETTERS_AND_NUMBERS_REQUIRED_REG_EXPR,
@@ -736,93 +733,112 @@ public class EpValidatorFactory {
 	};
 
 	/** Compound Validator - required password. */
-	public static final IValidator PASSWORD = new CompoundValidator(new IValidator[] { PASSWORD_MIN_LENGTH_8, REQUIRED, NO_SPACES });
+	public static final IValidator PASSWORD = new CompoundValidator(PASSWORD_MIN_LENGTH_8, REQUIRED, NO_SPACES);
 
 	/** Compound Validator - for new password. */
-	public static final IValidator NEW_PASSWORD = new CompoundValidator(new IValidator[] { PASSWORD_MIN_LENGTH_8, NO_SPACES,
-			LETTER_AND_DIGIT_REQUIRED });
+	public static final IValidator NEW_PASSWORD =
+			new CompoundValidator(PASSWORD_MIN_LENGTH_8, NO_SPACES, LETTER_AND_DIGIT_REQUIRED);
 
 	/** Compound Validator - required email address. */
-	public static final IValidator EMAIL_REQUIRED = new CompoundValidator(new IValidator[]{EMAIL, REQUIRED});
+	public static final IValidator EMAIL_REQUIRED = new CompoundValidator(EMAIL, REQUIRED);
 
 	/** Compound validator - validates 100-character string fields that are required and have no leading spaces. */
-	public static final IValidator STRING_100_REQUIRED = new CompoundValidator(new IValidator[]{MAX_LENGTH_100, REQUIRED });
+	public static final IValidator STRING_100_REQUIRED = new CompoundValidator(MAX_LENGTH_100, REQUIRED);
 
 	/** Compound validator - validates 255-character string fields that are required and have no leading spaces. */
-	public static final IValidator STRING_255_REQUIRED = new CompoundValidator(new IValidator[]{MAX_LENGTH_255, REQUIRED });
+	public static final IValidator STRING_255_REQUIRED = new CompoundValidator(MAX_LENGTH_255, REQUIRED);
 
 	/** Compound validator - validates 100-character string fields that are required and have no spaces within. */
-	public static final IValidator STRING_100_NOSPACES_REQUIRED = new CompoundValidator(new IValidator[]{MAX_LENGTH_100, NO_SPACES, REQUIRED });
+	public static final IValidator STRING_100_NOSPACES_REQUIRED = new CompoundValidator(MAX_LENGTH_100, NO_SPACES, REQUIRED);
 
 	/** Compound validator - validates 255-character string fields that are required and have no spaces within. */
-	public static final IValidator STRING_255_NOSPACES_REQUIRED = new CompoundValidator(new IValidator[]{MAX_LENGTH_255, NO_SPACES, REQUIRED });
+	public static final IValidator STRING_255_NOSPACES_REQUIRED = new CompoundValidator(MAX_LENGTH_255, NO_SPACES, REQUIRED);
 
 	/** Compount validator - validates 65,535-character string fields that are required. */
-	public static final IValidator STRING_65535_REQUIRED = new CompoundValidator(new IValidator[] {MAX_LENGTH_65535, REQUIRED });
+	public static final IValidator STRING_65535_REQUIRED = new CompoundValidator(MAX_LENGTH_65535, REQUIRED);
 
 	/** Compount validator - validates 65535*5-character string fields that are required (especially for XML file uploads). */
-	public static final IValidator STRING_65535X5_REQUIRED = new CompoundValidator(new IValidator[] {MAX_LENGTH_65535X5, REQUIRED });
+	public static final IValidator STRING_65535X5_REQUIRED = new CompoundValidator(MAX_LENGTH_65535X5, REQUIRED);
 
 	/** Compound Validator - requires date. */
-	public static final IValidator DATE_REQUIRED = new CompoundValidator(new IValidator[] { DATE, REQUIRED });
+	public static final IValidator DATE_REQUIRED = new CompoundValidator(DATE, REQUIRED);
 
 	/** Compound Validator - requires date & time. */
-	public static final IValidator DATE_TIME_REQUIRED = new CompoundValidator(new IValidator[] { DATE_TIME, REQUIRED });
+	public static final IValidator DATE_TIME_REQUIRED = new CompoundValidator(DATE_TIME, REQUIRED);
 
 	/** Compound Validator - requires price. */
-	public static final IValidator PRICE_REQUIRED = new CompoundValidator(new IValidator[] { BIG_DECIMAL, REQUIRED });
+	public static final IValidator PRICE_REQUIRED = new CompoundValidator(BIG_DECIMAL, REQUIRED);
 
 	/** Compound Validator - requires decimal. */
-	public static final IValidator BIG_DECIMAL_REQUIRED = new CompoundValidator(new IValidator[] { BIG_DECIMAL, REQUIRED });
+	public static final IValidator BIG_DECIMAL_REQUIRED = new CompoundValidator(BIG_DECIMAL, REQUIRED);
 
 	/** Compound Validator - requires non-negative decimal. */
-	public static final IValidator NON_NEGATIVE_BIG_DECIMAL_REQUIRED = new CompoundValidator(new IValidator[] {
-			NON_NEGATIVE_BIG_DECIMAL, REQUIRED });
+	public static final IValidator NON_NEGATIVE_BIG_DECIMAL_REQUIRED =
+			new CompoundValidator(NON_NEGATIVE_BIG_DECIMAL, REQUIRED);
 
 	/** Compound Validator - requires non-negative high scale decimal. */
-	public static final IValidator NON_NEGATIVE_HIGH_PRECISION_BIG_DECIMAL_REQUIRED = new CompoundValidator(new IValidator[] {
-			NON_NEGATIVE_HIGH_SCALE_BIG_DECIMAL, REQUIRED });
+	public static final IValidator NON_NEGATIVE_HIGH_PRECISION_BIG_DECIMAL_REQUIRED =
+			new CompoundValidator(NON_NEGATIVE_HIGH_SCALE_BIG_DECIMAL, REQUIRED);
 
 	/** Compound Validator - requires non-negative non-zero decimal. */
-	public static final IValidator NON_NEGATIVE_NON_ZERO_BIG_DECIMAL_REQUIRED = new CompoundValidator(new IValidator[] {
-		NON_NEGATIVE_NON_ZERO_BIG_DECIMAL, REQUIRED});
+	public static final IValidator NON_NEGATIVE_NON_ZERO_BIG_DECIMAL_REQUIRED =
+			new CompoundValidator(NON_NEGATIVE_NON_ZERO_BIG_DECIMAL, REQUIRED);
 
 	/** Compound Validator - folder name. */
-	public static final IValidator FOLDER_NAME_REQUIRED = new CompoundValidator(new IValidator[] { FOLDER_NAME, REQUIRED });
+	public static final IValidator FOLDER_NAME_REQUIRED = new CompoundValidator(FOLDER_NAME, REQUIRED);
 
 	/** Compound Validator - Positive integer, required. */
-	public static final IValidator POSITIVE_INTEGER_REQUIRED = new CompoundValidator(new IValidator[] { POSITIVE_INTEGER, REQUIRED });
+	public static final IValidator POSITIVE_INTEGER_REQUIRED = new CompoundValidator(POSITIVE_INTEGER, REQUIRED);
 
 	/** Compound Validator - Percentage, decimal, required. */
-	public static final IValidator PERCENTAGE_REQUIRED = new CompoundValidator(new IValidator[] { PERCENTAGE, REQUIRED });
+	public static final IValidator PERCENTAGE_REQUIRED = new CompoundValidator(PERCENTAGE, REQUIRED);
 
 	/** validator for attribute key creation. */
 	public static final IValidator ATTRIBUTE_KEY = new CompoundValidator(
-			new IValidator[] {new RegularExpressionValidator(REG_EXPRESSION_STRING, CoreMessages.get().EpValidatorFactory_AttributeKey),
-					MAX_LENGTH_255,  REQUIRED, NO_SPACES});
+			new RegularExpressionValidator(REG_EXPRESSION_STRING, CoreMessages.get().EpValidatorFactory_AttributeKey),
+			MAX_LENGTH_255, REQUIRED, NO_SPACES);
 
 	/** validator for attribute name creation. */
 	public static final IValidator ATTRIBUTE_NAME = new CompoundValidator(
-			new IValidator[] {new RegularExpressionValidator(REG_EXPRESSION_STRING, CoreMessages.get().EpValidatorFactory_AttributeName),
-					MAX_LENGTH_255,  REQUIRED});
+			new RegularExpressionValidator(REG_EXPRESSION_STRING, CoreMessages.get().EpValidatorFactory_AttributeName),
+			MAX_LENGTH_255, REQUIRED);
 
 	/** validator for non usage of special characters. */
 	public static final IValidator NO_SPECIAL_CHARACTERS = new CompoundValidator(
-			new IValidator[] {new RegularExpressionValidator(NO_SPECIAL_CHARS_REG_EXPR, CoreMessages.get().EpValidatorFactory_NoSpecialCharacters),
-					MAX_LENGTH_255 });
+			new RegularExpressionValidator(NO_SPECIAL_CHARS_REG_EXPR, CoreMessages.get().EpValidatorFactory_NoSpecialCharacters),
+			MAX_LENGTH_255);
 
-	/** validator for non usage of special characters. */
+	/**
+	 * validator for non usage of special characters.
+	 */
 	public static final IValidator NO_SPECIAL_CHARACTERS_EXCEPT_DASH = new CompoundValidator(
-		new IValidator[]{new RegularExpressionValidator(NO_SPECIAL_CHARS_EXCEPT_DASH_REG_EXPR,
+			new RegularExpressionValidator(NO_SPECIAL_CHARS_EXCEPT_DASH_REG_EXPR,
 					CoreMessages.get().EpValidatorFactory_NoSpecialCharacters),
-					MAX_LENGTH_255 });
+			MAX_LENGTH_255);
+
+/**
+	 * validator for non usage of special characters.
+	 */
+	public static final IValidator NO_SPECIAL_CHARACTERS_EXCEPT_APOSTROPHE = new CompoundValidator(
+			new RegularExpressionValidator(NO_SPECIAL_CHARS_EXCEPT_APOSTROPHE_REG_EXPR,
+					CoreMessages.get().EpValidatorFactory_NoSpecialCharacters),
+			MAX_LENGTH_255);
+
+	/**
+	 * validator for non usage of special characters (except @ sign).
+	 */
+	public static final IValidator NO_SPECIAL_CHARACTERS_EXCEPT_AT_SIGN = new CompoundValidator(
+			new RegularExpressionValidator(NO_SPECIAL_CHARS_EXCEPT_AT_SIGN_REG_EXPR,
+					CoreMessages.get().EpValidatorFactory_NoSpecialCharacters),
+			MAX_LENGTH_255);
 
 	/** Validate codes.*/
 
 	/**
 	 * Validate product code.
 	 */
-	public static final IValidator PRODUCT_CODE_NOT_REQUIRED = new CompoundValidator(MAX_LENGTH_64, NO_SPACES, NO_SPECIAL_CHARACTERS_EXCEPT_DASH);
+	public static final IValidator PRODUCT_CODE_NOT_REQUIRED =
+			new CompoundValidator(MAX_LENGTH_64, NO_SPACES, NO_SPECIAL_CHARACTERS_EXCEPT_DASH);
 
 	/**
 	 * Validate product code.
@@ -867,7 +883,8 @@ public class EpValidatorFactory {
 	/**
 	 * Validate Cart Item Modifier Group Field Option value.
 	 */
-	public static final IValidator CARTITEM_MODIFIER_OPTION_VALUE = new CompoundValidator(MAX_LENGTH_64, REQUIRED, NO_SPACES, NO_SPECIAL_CHARACTERS);
+	public static final IValidator CARTITEM_MODIFIER_OPTION_VALUE =
+			new CompoundValidator(MAX_LENGTH_64, REQUIRED, NO_SPACES, NO_SPECIAL_CHARACTERS);
 
 	/**
 	 * Validate Cart Item Modifier Group Field code.
@@ -989,14 +1006,6 @@ public class EpValidatorFactory {
 		};
 	}
 
-	/**
-	 * Injector method for setting the credit card validator instance.
-	 *
-	 * @param creditCardValidator the credit card validator
-	 */
-	public void setCreditCardValidator(final EpCreditCardValidator creditCardValidator) {
-		EpValidatorFactory.creditCardValidator = creditCardValidator;
-	}
 
 	/**
 	 * Validator class for valid currency code.

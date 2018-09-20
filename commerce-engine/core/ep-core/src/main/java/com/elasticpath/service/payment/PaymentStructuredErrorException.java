@@ -7,8 +7,8 @@ import static java.util.Arrays.asList;
 
 import java.util.List;
 
+import com.elasticpath.base.common.dto.StructuredErrorMessage;
 import com.elasticpath.base.exception.EpSystemException;
-import com.elasticpath.common.dto.StructuredErrorMessage;
 import com.elasticpath.commons.exception.InvalidBusinessStateException;
 import com.elasticpath.plugin.payment.exceptions.PaymentProcessingException;
 

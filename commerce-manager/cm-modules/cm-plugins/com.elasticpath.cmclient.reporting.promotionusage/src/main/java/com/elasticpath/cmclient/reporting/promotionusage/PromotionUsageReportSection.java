@@ -35,6 +35,7 @@ import com.elasticpath.cmclient.core.ui.framework.EpControlFactory.EpState;
 import com.elasticpath.cmclient.core.ui.framework.IEpDateTimePicker;
 import com.elasticpath.cmclient.core.ui.framework.IEpLayoutComposite;
 import com.elasticpath.cmclient.core.ui.framework.IEpLayoutData;
+import com.elasticpath.cmclient.core.util.DateTimeUtilFactory;
 import com.elasticpath.cmclient.core.validation.CompoundValidator;
 import com.elasticpath.cmclient.core.validation.EpValidatorFactory;
 import com.elasticpath.cmclient.reporting.AbstractReportSection;
@@ -134,8 +135,8 @@ public class PromotionUsageReportSection extends AbstractReportSection {
 	public Map<String, Object> getParameters() {
 		final int paramsLength = 5;
 		Map<String, Object> paramsMap = new LinkedHashMap<>(paramsLength);
-		paramsMap.put(PARAMETER_END_DATE, parameters.getEndDate());
-		paramsMap.put(PARAMETER_START_DATE, parameters.getStartDate());
+		paramsMap.put(PARAMETER_END_DATE, DateTimeUtilFactory.getDateUtil().formatAsDateTime(parameters.getEndDate()));
+		paramsMap.put(PARAMETER_START_DATE, DateTimeUtilFactory.getDateUtil().formatAsDateTime(parameters.getStartDate()));
 		paramsMap.put(PARAMETER_STORE_UIDPK, parameters.getStoreUidPk());
 		paramsMap.put(PARAMETER_STORE, parameters.getStore());
 		paramsMap.put(PARAMETER_PARAMETERS, parameters);

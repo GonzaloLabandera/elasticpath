@@ -20,7 +20,10 @@ import com.elasticpath.commons.util.impl.StringEscapeUtilityImpl;
  */
 public class QueryAnalyzerImpl extends AnalyzerImpl {
 
-	private static final char QUOTE_CHAR = '"';
+	/**
+	 * Quote char.
+	 */
+	protected static final char QUOTE_CHAR = '"';
 
 	private static final Pattern WHITESPACE_PATTERN = Pattern.compile("\\s", Pattern.MULTILINE);
 
@@ -29,7 +32,7 @@ public class QueryAnalyzerImpl extends AnalyzerImpl {
 	private static final char[] ILLEGAL_END_CHARS = new char[] { '\\', ';' };
 
 	private static final Analyzer ANALYZER = new SimpleAnalyzer(SolrIndexConstants.LUCENE_MATCH_VERSION);
-	
+
 	private static final ThreadLocal<QueryParser> QUERY_PARSER = new ThreadLocal<>();
 
 	@Override
@@ -49,14 +52,13 @@ public class QueryAnalyzerImpl extends AnalyzerImpl {
 	/**
 	 * Analyze and parse the given string. Returns a trimmed instance of the string if not null, otherwise
 	 * the empty string.  Also escapes all quotes in the string.
-	 * 
+	 *
 	 * @param string the string value to analyze
 	 * @param isEscapeAllQuotes flag to force all quotes, matched and unmatched, to be escaped
 	 * @return the analyzed parsed text
 	 */
 	private String parseResult(final String string, final boolean isEscapeAllQuotes) {
 		String workingString = string;
-
 		for (int i = 0; i < ILLEGAL_END_CHARS.length; ++i) {
 			while (workingString.endsWith(String.valueOf(ILLEGAL_END_CHARS[i]))) {
 				workingString = workingString.substring(0, workingString.length() - 1);
@@ -102,8 +104,12 @@ public class QueryAnalyzerImpl extends AnalyzerImpl {
 		builder.append(QUOTE_CHAR).append(workingString).append(QUOTE_CHAR);
 		return builder.toString();
 	}
-	
-	private QueryParser getParser() {
+
+	/**
+	 * Get parser object.
+	 * @return parser object
+	 */
+	protected QueryParser getParser() {
 		if (QUERY_PARSER.get() == null) {
 			QUERY_PARSER.set(new QueryParser(SolrIndexConstants.LUCENE_MATCH_VERSION, "text", ANALYZER));
 		}

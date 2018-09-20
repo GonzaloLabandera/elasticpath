@@ -2,7 +2,7 @@
 Feature: Invalid signin
 
   Scenario Outline: Invalid sign in to CM
-    When I attempt to sign in to CM as <INVALID_ID> with password <INVALID_PASSWORD>
+    When I attempt to sign in with invalid credentials to CM as <INVALID_ID> with password <INVALID_PASSWORD>
     Then I should not be able to sign in
 
     Examples:

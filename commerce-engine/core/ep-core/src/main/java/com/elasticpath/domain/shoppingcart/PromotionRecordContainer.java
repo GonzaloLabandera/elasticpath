@@ -10,7 +10,7 @@ import java.util.Set;
 
 import com.elasticpath.domain.rules.Rule;
 import com.elasticpath.domain.rules.RuleAction;
-import com.elasticpath.domain.shipping.ShippingServiceLevel;
+import com.elasticpath.shipping.connectivity.dto.ShippingOption;
 
 /**
  * Keep track of applied discount records by rules and actions.
@@ -42,12 +42,12 @@ public interface PromotionRecordContainer extends Serializable {
 	Collection<Long> getAppliedRulesByLineItem(String lineItemId);
 
 	/**
-	 * Get the set of rules that have been applied to the given Shipping Service Level.
+	 * Get the set of rules that have been applied to the given shipping option.
 	 *
-	 * @param shippingServiceLevel the shipping service level to examine for applied rules
+	 * @param shippingOption the shipping option to examine for applied rules
 	 * @return a set of {@code Long} Rule UidPks
 	 */
-	Set<Long> getAppliedRulesByShippingServiceLevel(ShippingServiceLevel shippingServiceLevel);
+	Set<Long> getAppliedRulesByShippingOption(ShippingOption shippingOption);
 
 	/**
 	 * Get the set of rules that have been applied to the cart.

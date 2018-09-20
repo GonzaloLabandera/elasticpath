@@ -9,6 +9,18 @@ import static com.elasticpath.cortex.dce.CommonAssertion.assertCost
 this.metaClass.mixin(Hooks)
 this.metaClass.mixin(EN)
 
+Given(~'^an item with cost of (.+) and shipping cost is (.+) percent of order total$') { cost, percentage ->
+	//	non-implementation step
+}
+
+Given(~'^a shipping option (.+) has cost of (.+)$') { shippingOption, amount ->
+	//	non-implementation step
+}
+
+Given(~'^a shipping promotion (.+) for the shipping option (.+)$') { promotion, shippingOption ->
+	//	non-implementation step
+}
+
 Given(~'^I select a shipping option (.+)$') { String optionName ->
 	client.GET("/")
 			.defaultcart()

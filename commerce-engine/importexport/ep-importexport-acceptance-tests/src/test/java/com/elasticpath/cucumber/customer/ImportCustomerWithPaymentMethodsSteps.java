@@ -1,12 +1,9 @@
-/**
+/*
  * Copyright (c) Elastic Path Software Inc., 2015
  */
 package com.elasticpath.cucumber.customer;
 
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.net.URL;
 import java.util.Arrays;
@@ -20,21 +17,12 @@ import cucumber.api.java.en.And;
 import cucumber.api.java.en.Given;
 import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
-import org.hamcrest.Matchers;
-import org.junit.Assert;
-import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.TestExecutionListeners;
-import org.springframework.test.context.support.DependencyInjectionTestExecutionListener;
 
-import com.elasticpath.common.dto.customer.CreditCardDTO;
 import com.elasticpath.common.dto.customer.CustomerDTO;
-import com.elasticpath.common.dto.customer.LegacyCreditCardDTO;
 import com.elasticpath.common.dto.customer.PaymentMethodDto;
 import com.elasticpath.common.dto.customer.PaymentTokenDto;
 import com.elasticpath.common.dto.customer.builder.CustomerDTOBuilder;
-import com.elasticpath.common.dto.customer.transformer.CreditCardDTOTransformer;
 import com.elasticpath.common.dto.customer.transformer.PaymentTokenDTOTransformer;
 import com.elasticpath.commons.util.TestDomainMarshaller;
 import com.elasticpath.domain.builder.customer.CustomerBuilder;
@@ -55,45 +43,35 @@ import com.elasticpath.importexport.importer.configuration.ImportConfiguration;
 import com.elasticpath.importexport.importer.configuration.ImporterConfiguration;
 import com.elasticpath.importexport.importer.configuration.RetrievalConfiguration;
 import com.elasticpath.importexport.importer.controller.ImportController;
-import com.elasticpath.importexport.importer.importers.impl.SavingManager;
 import com.elasticpath.importexport.importer.types.CollectionStrategyType;
 import com.elasticpath.importexport.importer.types.DependentElementType;
 import com.elasticpath.importexport.importer.types.ImportStrategyType;
-import com.elasticpath.persistence.api.FetchGroupLoadTuner;
-import com.elasticpath.persistence.api.Persistable;
 import com.elasticpath.plugin.payment.dto.PaymentMethod;
 import com.elasticpath.service.customer.CustomerGroupService;
 import com.elasticpath.service.customer.CustomerService;
+import com.elasticpath.service.store.StoreService;
 
 /**
  * Steps for the import customer with payment methods feature.
  */
-@ContextConfiguration("/integration-context-mocked-customer-service.xml")
-@TestExecutionListeners({
-		DependencyInjectionTestExecutionListener.class
-})
+
 @SuppressWarnings("PMD.TooManyFields")
 public class ImportCustomerWithPaymentMethodsSteps {
-	private static final String TEST_STORE_CODE = "testStoreCode";
 	private static final String TEST_PASSWORD = "testPassword";
 	private static final String TEST_SALT = "testSalt";
 	private static final String TEST_DISPLAY_VALUE = "testDisplayValue";
-	private static final String TEST_CARD_NUMBER = "testCardNumber";
 	private static final String TEST_DISPLAY_VALUE_2 = "testDisplayValue2";
-	private static final String TEST_USER_ID = "testUserId";
+	private static final String TEST_USER_ID = "testUser@email.com";
+	private static final String TEST_EMAIL = TEST_USER_ID;
 	private static final String TEST_GUID = "testGuid";
-
-	@Autowired
-	private CustomerService customerService;
+	private static final String TEST_FIRST_NAME = "testFirstName";
+	private static final String TEST_LAST_NAME = "testLastName";
 
 	@Autowired
 	private CustomerGroupService customerGroupService;
 
 	@Autowired
 	private ImportController importController;
-
-	@Autowired
-	private SavingManager<Persistable> savingManager;
 
 	@Autowired
 	private CustomerBuilder customerBuilder;
@@ -108,15 +86,16 @@ public class ImportCustomerWithPaymentMethodsSteps {
 	private PaymentTokenDTOTransformer paymentTokenDTOTransformer;
 
 	@Autowired
-	private CreditCardDTOTransformer creditCardDTOTransformer;
-
-	@Autowired
 	private TestPaymentMethodBuilderFactory testPaymentMethodBuilderFactory;
 
 	@Autowired
 	private TestPaymentDTOBuilderFactory paymentDTOBuilderFactory;
 
-	private Customer existingCustomer;
+	@Autowired
+	private StoreService storeService;
+
+	@Autowired
+	private CustomerService customerService;
 
 	private ImportConfiguration importConfiguration;
 
@@ -124,9 +103,6 @@ public class ImportCustomerWithPaymentMethodsSteps {
 	private PaymentMethodDto testPaymentMethodB;
 	private PaymentMethodDto testPaymentMethodC;
 
-	private LegacyCreditCardDTO legacyCreditCardA;
-	private LegacyCreditCardDTO legacyCreditCardB;
-	private LegacyCreditCardDTO legacyCreditCardC;
 	private Summary summary;
 
 	private String customersFilePath;
@@ -160,8 +136,7 @@ public class ImportCustomerWithPaymentMethodsSteps {
 	 */
 	@Given("^a customer exists$")
 	public void createACustomerWithNoPaymentMethods() {
-		existingCustomer = createPersistedCustomerWithPaymentMethods();
-		when(customerService.findByGuid(eq(existingCustomer.getGuid()), any(FetchGroupLoadTuner.class))).thenReturn(existingCustomer);
+		createPersistedCustomerWithPaymentMethods();
 	}
 
 	/**
@@ -171,11 +146,8 @@ public class ImportCustomerWithPaymentMethodsSteps {
 	public void createACustomerWithPaymentMethods() {
 		PaymentMethod paymentMethod = testPaymentMethodBuilderFactory.createPaymentTokenBuilderWithIdentity(TEST_DISPLAY_VALUE).build();
 		PaymentMethod paymentMethod2 = testPaymentMethodBuilderFactory.createPaymentTokenBuilderWithIdentity(TEST_DISPLAY_VALUE_2).build();
-		PaymentMethod paymentMethod3 = testPaymentMethodBuilderFactory.createCreditCardBuilderWithIdentity(TEST_CARD_NUMBER).build();
 
-		existingCustomer = createPersistedCustomerWithPaymentMethods(paymentMethod, paymentMethod2, paymentMethod3);
-
-		when(customerService.findByGuid(eq(existingCustomer.getGuid()), any(FetchGroupLoadTuner.class))).thenReturn(existingCustomer);
+		createPersistedCustomerWithPaymentMethods(paymentMethod, paymentMethod2);
 	}
 
 	/**
@@ -185,7 +157,7 @@ public class ImportCustomerWithPaymentMethodsSteps {
 	 */
 	@And("^an import with payment methods A,B and C and C is the default$")
 	public void setupImportFileForCustomerWithPaymentMethodsAndDefault() throws Exception {
-		CustomerDTO customerDTO = createCustomerDTOWithPaymentMethodsAndDefault(Arrays.<PaymentMethodDto>asList(testPaymentMethodA,
+		CustomerDTO customerDTO = createCustomerDTOWithPaymentMethodsAndDefault(Arrays.asList(testPaymentMethodA,
 				testPaymentMethodB, testPaymentMethodC), testPaymentMethodC);
 		createXmlRepresentationOfCustomerAndConfigureImport(customerDTO);
 	}
@@ -197,7 +169,7 @@ public class ImportCustomerWithPaymentMethodsSteps {
 	 */
 	@And("^an import with payment methods A,B and C and no default payment method$")
 	public void setupImportFileForCustomerWithPaymentMethodsAndNoDefault() throws Exception {
-		CustomerDTO customerDTO = createCustomerDTOWithPaymentMethodsAndDefault(Arrays.<PaymentMethodDto>asList(testPaymentMethodA, 
+		CustomerDTO customerDTO = createCustomerDTOWithPaymentMethodsAndDefault(Arrays.asList(testPaymentMethodA,
 				testPaymentMethodB, testPaymentMethodC), null);
 
 		createXmlRepresentationOfCustomerAndConfigureImport(customerDTO);
@@ -210,14 +182,14 @@ public class ImportCustomerWithPaymentMethodsSteps {
 	 */
 	@And("^an import configured with a RETAIN_COLLECTION collection strategy for payment methods$")
 	public void setupImportFileForCustomerWithRetainCollectionForPaymentMethods() throws Exception {
-		CustomerDTO customerDTO = createCustomerDTOWithPaymentMethodsAndDefault(Arrays.<PaymentMethodDto>asList(testPaymentMethodA, 
+		CustomerDTO customerDTO = createCustomerDTOWithPaymentMethodsAndDefault(Arrays.asList(testPaymentMethodA,
 				testPaymentMethodB, testPaymentMethodC), null);
 
 		createXmlRepresentationOfCustomerAndConfigureImport(customerDTO);
 		ImporterConfiguration importerConfiguration = importConfiguration.getImporterConfiguration(JobType.CUSTOMER);
 
 		HashMap<DependentElementType, DependentElementConfiguration> dependentElementTypeMap =
-			new HashMap<>();
+				new HashMap<>();
 		DependentElementConfiguration dependentElementConfiguration = new DependentElementConfiguration();
 		dependentElementConfiguration.setDependentElementType(DependentElementType.PAYMENT_METHODS);
 		dependentElementConfiguration.setCollectionStrategyType(CollectionStrategyType.RETAIN_COLLECTION);
@@ -227,31 +199,13 @@ public class ImportCustomerWithPaymentMethodsSteps {
 	}
 
 	/**
-	 * Setup a legacy format XML representation of a customer with 3 credit cards.
-	 *
-	 * @throws Exception in case of error
-	 */
-	@And("^an import with credit cards A,B and C and C is the default using the legacy format$")
-	public void setupImportFileForCustomerWithCreditCardsUsingLegacyFormat() throws Exception {
-		legacyCreditCardA = paymentDTOBuilderFactory.createLegacyWithIdentity("A").build();
-		legacyCreditCardB = paymentDTOBuilderFactory.createLegacyWithIdentity("B").build();
-		legacyCreditCardC = paymentDTOBuilderFactory.createLegacyWithIdentity("C").build();
-		legacyCreditCardC.setDefaultCard(true);
-
-		CustomerDTO customerDTO = createCustomerDTOWithPaymentMethodsAndDefault(Collections.<PaymentMethodDto>emptyList(), null);
-		customerDTO.setCreditCards(Arrays.asList(legacyCreditCardA, legacyCreditCardB, legacyCreditCardC));
-
-		createXmlRepresentationOfCustomerAndConfigureImport(customerDTO);
-	}
-
-	/**
 	 * Setup an XML representation of a customer with no payment methods.
 	 *
 	 * @throws Exception in case of error
 	 */
 	@And("^an import with an empty collection of payment methods$")
 	public void setupImportFilerForCustomerWithNoPaymentMethods() throws Exception {
-		CustomerDTO customerDTO = createCustomerDTOWithPaymentMethodsAndDefault(Collections.<PaymentMethodDto>emptyList(), null);
+		CustomerDTO customerDTO = createCustomerDTOWithPaymentMethodsAndDefault(Collections.emptyList(), null);
 
 		createXmlRepresentationOfCustomerAndConfigureImport(customerDTO);
 	}
@@ -302,23 +256,6 @@ public class ImportCustomerWithPaymentMethodsSteps {
 	}
 
 	/**
-	 * Ensure the customer has the expected credit cards and default.
-	 */
-	@Then("^the customer will be updated with credit cards A,B and C and C will be chosen as the default$")
-	public void ensureImportedCustomerHasListOfCreditCardsAndFirstCreditCardSelectedAsDefault() {
-		PaymentMethod expectedCreditCard = transformToPaymentMethod(legacyCreditCardA);
-		PaymentMethod expectedCreditCard2 = transformToPaymentMethod(legacyCreditCardB);
-		PaymentMethod expectedCreditCard3 = transformToPaymentMethod(legacyCreditCardC);
-
-		Customer persistedCustomer = getCustomerUpdated();
-
-		new CustomerPaymentMethodsValidator(persistedCustomer)
-				.withPaymentMethods(expectedCreditCard, expectedCreditCard2, expectedCreditCard3)
-				.withDefaultPaymentMethod(expectedCreditCard3)
-				.validate();
-	}
-
-	/**
 	 * Ensure the customer has no payment methods.
 	 */
 	@Then("^the customer is updated and has no payment methods$")
@@ -336,34 +273,43 @@ public class ImportCustomerWithPaymentMethodsSteps {
 	 */
 	@Then("^an unsupported operation exception is thrown$")
 	public void ensureUnsupportedOperationExceptionIsThrown() {
-		Assert.assertTrue("The import should have failed.", summary.failuresExist());
+		assertThat(summary.failuresExist())
+				.as("The import should have failed.")
+				.isTrue();
+
 		List<Message> failures = summary.getFailures();
 
-		Assert.assertEquals("There should only be two failure messages", 2, failures.size());
-		Assert.assertThat(failures.get(0).getException().getMessage(), Matchers.containsString("Only CLEAR_COLLECTION is currently supported"));
+		assertThat(failures.size())
+				.as("There should only be two failure messages")
+				.isEqualTo(2);
+
+		assertThat(failures.get(0).getException().getMessage())
+				.contains("Only CLEAR_COLLECTION is currently supported");
 	}
 
 	private Customer getCustomerUpdated() {
-		ArgumentCaptor <Customer> persistedCustomer = ArgumentCaptor.forClass(Customer.class);
-		verify(savingManager).update(persistedCustomer.capture());
-		verify(customerService).findByGuid(eq(existingCustomer.getGuid()), any(FetchGroupLoadTuner.class));
-		return persistedCustomer.getValue();
+		return customerService.findByGuid(TEST_GUID);
 	}
 
 	private Customer createPersistedCustomerWithPaymentMethods(final PaymentMethod... paymentMethods) {
-		return customerBuilder
+		final Customer customer = customerBuilder.newInstance()
 				.withGuid(TEST_GUID)
-				.withUidPk(1L)
+				.withFirstName(TEST_FIRST_NAME)
+				.withLastName(TEST_LAST_NAME)
+				.withEmail(TEST_EMAIL)
+				.withStoreCode(storeService.findAllStores().get(0).getCode())
 				.withPaymentMethods(paymentMethods)
 				.build();
+
+		return customerService.add(customer);
 	}
 
 	private CustomerDTO createCustomerDTOWithPaymentMethodsAndDefault(final List<PaymentMethodDto> paymentMethodDtos,
-			final PaymentMethodDto defaultPaymentMethod) {
+																	  final PaymentMethodDto defaultPaymentMethod) {
 		return new CustomerDTOBuilder().withGuid(TEST_GUID)
 				.withCreationDate(new Date())
 				.withLastEditDate(new Date())
-				.withStoreCode(TEST_STORE_CODE)
+				.withStoreCode(storeService.findAllStores().get(0).getCode())
 				.withUserId(TEST_USER_ID)
 				.withPaymentMethods(paymentMethodDtos.toArray(new PaymentMethodDto[paymentMethodDtos.size()]))
 				.withDefaultPaymentMethod(defaultPaymentMethod)
@@ -373,9 +319,7 @@ public class ImportCustomerWithPaymentMethodsSteps {
 	}
 
 	private PaymentMethod transformToPaymentMethod(final PaymentMethodDto paymentMethodDto) {
-		if (paymentMethodDto instanceof CreditCardDTO) {
-			return creditCardDTOTransformer.transformToDomain((CreditCardDTO) paymentMethodDto);
-		} else if (paymentMethodDto instanceof PaymentTokenDto) {
+		if (paymentMethodDto instanceof PaymentTokenDto) {
 			return paymentTokenDTOTransformer.transformToDomain((PaymentTokenDto) paymentMethodDto);
 		} else {
 			return null;

@@ -10,6 +10,7 @@ import com.elasticpath.selenium.dialogs.BasePriceEditorDialog;
 import com.elasticpath.selenium.dialogs.EditDecimalValueAttributeDialog;
 import com.elasticpath.selenium.dialogs.EditIntegerValueAttributeDialog;
 import com.elasticpath.selenium.dialogs.EditShortTextMultiValueAttributeDialog;
+import com.elasticpath.selenium.util.Constants;
 
 /**
  * Create Product Dialog.
@@ -142,7 +143,7 @@ public class CreateProductWizard extends AbstractWizard {
 	 * Check store visible box.
 	 */
 	public void checkStoreVisibleBox() {
-		click(getDriver().findElement(By.xpath("//div[contains(text(), 'Store Visible')]/../../following-sibling::div[1]/div")));
+		click(getWaitDriver().waitForElementToBeClickable(By.xpath("//div[contains(text(), 'Store Visible')]/../../following-sibling::div[1]/div")));
 	}
 
 	/**
@@ -215,7 +216,7 @@ public class CreateProductWizard extends AbstractWizard {
 	 * @return the edit short text multi value attribute dialog.
 	 */
 	public EditShortTextMultiValueAttributeDialog clickEditAttributeButtonShortTextMultiValue() {
-		clickEditAttributeValueButton();
+		clickEditAttributeValueButton(EditShortTextMultiValueAttributeDialog.SHORT_TEXT_MULTI_VALUE_DIALOG_CSS);
 		return new EditShortTextMultiValueAttributeDialog(getDriver());
 	}
 
@@ -225,7 +226,7 @@ public class CreateProductWizard extends AbstractWizard {
 	 * @return the dialog.
 	 */
 	public EditIntegerValueAttributeDialog clickEditAttributeButtonIntegerValue() {
-		clickEditAttributeValueButton();
+		clickEditAttributeValueButton(EditIntegerValueAttributeDialog.PARENT_INTEGER_VALUE_CSS);
 		return new EditIntegerValueAttributeDialog(getDriver());
 	}
 
@@ -235,12 +236,12 @@ public class CreateProductWizard extends AbstractWizard {
 	 * @return the dialog.
 	 */
 	public EditDecimalValueAttributeDialog clickEditAttributeButtonDecimalValue() {
-		clickEditAttributeValueButton();
+		clickEditAttributeValueButton(EditDecimalValueAttributeDialog.PARENT_DECIMAL_VALUE_CSS);
 		return new EditDecimalValueAttributeDialog(getDriver());
 	}
 
-	private void clickEditAttributeValueButton() {
-		clickButton(EDIT_ATTRIBUTE_VALUE_BUTTON_CSS, "Edit Attribute Value...");
+	private void clickEditAttributeValueButton(final String pageObjectId) {
+		clickButton(EDIT_ATTRIBUTE_VALUE_BUTTON_CSS, "Edit Attribute Value...", pageObjectId);
 	}
 
 	/**
@@ -256,7 +257,7 @@ public class CreateProductWizard extends AbstractWizard {
 	 * @return the base price editor dialog.
 	 */
 	public BasePriceEditorDialog clickAddBasePriceButton() {
-		clickButton(ADD_BASE_PRICE_BUTTON_CSS, "Add Price...");
+		clickButton(ADD_BASE_PRICE_BUTTON_CSS, "Add Price...", BasePriceEditorDialog.PARENT_BASE_PRICE_EDITOR_CSS);
 		return new BasePriceEditorDialog(getDriver());
 	}
 
@@ -266,7 +267,7 @@ public class CreateProductWizard extends AbstractWizard {
 	 * @return boolean
 	 */
 	public boolean isAddSKUButtonPresent() {
-		setWebDriverImplicitWait(1);
+		setWebDriverImplicitWait(Constants.IMPLICIT_WAIT_FOR_ELEMENT_FIVE_SECONDS);
 		boolean isPresent = isElementPresent(By.cssSelector(ADD_SKU_BUTTON_CSS));
 		setWebDriverImplicitWaitToDefault();
 		return isPresent;

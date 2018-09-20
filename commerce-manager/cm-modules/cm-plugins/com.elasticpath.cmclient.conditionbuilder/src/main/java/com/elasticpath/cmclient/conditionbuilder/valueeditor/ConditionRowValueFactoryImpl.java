@@ -156,7 +156,7 @@ public class ConditionRowValueFactoryImpl implements ConditionRowValueFactory {
 
 		final Text text = controlFactory.createTextField(parent, swtStyle | SWT.FLAT | SWT.BORDER, EpControlFactory.EpState.EDITABLE);
 
-		final Locale locale = Locale.getDefault();
+		final Locale locale = CorePlugin.getDefault().getDefaultLocale();
 
 		final EpValueBinding valueBinding;
 
@@ -237,7 +237,7 @@ public class ConditionRowValueFactoryImpl implements ConditionRowValueFactory {
 			cmb.setText(nameByValue);
 		}
 
-		final Locale locale = Locale.getDefault();
+		final Locale locale = CorePlugin.getDefault().getDefaultLocale();
 
 		final EpValueBinding valueBinding = BINDING_PROVIDER.bind(
 			dataBindingContext,

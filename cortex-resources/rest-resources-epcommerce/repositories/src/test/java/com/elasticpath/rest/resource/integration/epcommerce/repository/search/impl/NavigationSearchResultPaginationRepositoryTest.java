@@ -3,10 +3,9 @@
  */
 package com.elasticpath.rest.resource.integration.epcommerce.repository.search.impl;
 
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyInt;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.stub;
 import static org.mockito.Mockito.when;
 
 import java.util.Collections;
@@ -17,7 +16,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.elasticpath.domain.catalog.Catalog;
 import com.elasticpath.domain.catalog.Category;
@@ -28,10 +27,8 @@ import com.elasticpath.rest.definition.items.ItemIdentifier;
 import com.elasticpath.rest.definition.navigations.NavigationIdentifier;
 import com.elasticpath.rest.definition.navigations.NavigationsIdentifier;
 import com.elasticpath.rest.definition.searches.NavigationSearchResultIdentifier;
-import com.elasticpath.rest.definition.searches.SearchesIdentifier;
 import com.elasticpath.rest.id.IdentifierPart;
 import com.elasticpath.rest.id.type.IntegerIdentifier;
-import com.elasticpath.rest.id.type.PathIdentifier;
 import com.elasticpath.rest.id.type.StringIdentifier;
 import com.elasticpath.rest.identity.Subject;
 import com.elasticpath.rest.identity.TestSubjectFactory;
@@ -74,16 +71,14 @@ public class NavigationSearchResultPaginationRepositoryTest {
 		NavigationSearchResultIdentifier navigationSearchResultIdentifier = NavigationSearchResultIdentifier
 				.builder()
 				.withNavigation(NavigationIdentifier.builder()
-						.withNodeId(PathIdentifier.of("node"))
+						.withNodeId(StringIdentifier.of("node"))
 						.withNavigations(
 								NavigationsIdentifier.builder().withScope(SCOPE).build()
 						)
 						.build()
 				)
 				.withPageId(IntegerIdentifier.of(1))
-				.withSearches(
-						SearchesIdentifier.builder().withScope(SCOPE).build()
-				).build();
+				.build();
 
 		paginationRepository.validateSearchData(navigationSearchResultIdentifier)
 				.test()
@@ -97,7 +92,7 @@ public class NavigationSearchResultPaginationRepositoryTest {
 		NavigationSearchResultIdentifier navigationSearchResultIdentifier = NavigationSearchResultIdentifier
 				.builder()
 				.withNavigation(NavigationIdentifier.builder()
-						.withNodeId(PathIdentifier.of("node"))
+						.withNodeId(StringIdentifier.of("node"))
 						.withNavigations(NavigationsIdentifier.builder().withScope(
 								SCOPE
 
@@ -106,10 +101,7 @@ public class NavigationSearchResultPaginationRepositoryTest {
 						.build()
 				)
 				.withPageId(IntegerIdentifier.of(-1))
-				.withSearches(SearchesIdentifier.builder()
-						.withScope(SCOPE)
-						.build()
-				).build();
+				.build();
 
 		paginationRepository.validateSearchData(navigationSearchResultIdentifier)
 				.test()
@@ -126,7 +118,7 @@ public class NavigationSearchResultPaginationRepositoryTest {
 	@Test
 	public void testFindItemByCategory() {
 		Catalog catalog = createMockCatalog();
-		Store store = createMockStore(catalog);
+		Store store = createMockStore();
 		Category category = createMockCategory(catalog);
 		PaginatedResult searchResult = new PaginatedResult(Collections.singleton(ITEM_ID1), 1, PAGE_SIZE, PAGE_SIZE);
 
@@ -153,7 +145,7 @@ public class NavigationSearchResultPaginationRepositoryTest {
 		NavigationSearchResultIdentifier navigationSearchResultIdentifier = NavigationSearchResultIdentifier
 				.builder()
 				.withNavigation(NavigationIdentifier.builder()
-						.withNodeId(PathIdentifier.of(CATEGORY_CODE))
+						.withNodeId(StringIdentifier.of(CATEGORY_CODE))
 						.withNavigations(
 								NavigationsIdentifier.builder().withScope(
 										StringIdentifier.of(STORE_CODE)
@@ -162,14 +154,10 @@ public class NavigationSearchResultPaginationRepositoryTest {
 						.build()
 				)
 				.withPageId(IntegerIdentifier.of(1))
-				.withSearches(
-						SearchesIdentifier.builder().withScope(
-								StringIdentifier.of(STORE_CODE)
-						).build()
-				).build();
+				.build();
 
 		Catalog catalog = createMockCatalog();
-		Store store = createMockStore(catalog);
+		Store store = createMockStore();
 		Category category = createMockCategory(catalog);
 		PaginatedResult searchResult = new PaginatedResult(Collections.singleton(ITEM_ID1), 1, PAGE_SIZE, PAGE_SIZE);
 
@@ -196,7 +184,7 @@ public class NavigationSearchResultPaginationRepositoryTest {
 		NavigationSearchResultIdentifier navigationSearchResultIdentifier = NavigationSearchResultIdentifier
 				.builder()
 				.withNavigation(NavigationIdentifier.builder()
-						.withNodeId(PathIdentifier.of(CATEGORY_CODE))
+						.withNodeId(StringIdentifier.of(CATEGORY_CODE))
 						.withNavigations(
 								NavigationsIdentifier.builder().withScope(
 										StringIdentifier.of(STORE_CODE)
@@ -205,14 +193,10 @@ public class NavigationSearchResultPaginationRepositoryTest {
 						.build()
 				)
 				.withPageId(IntegerIdentifier.of(1))
-				.withSearches(
-						SearchesIdentifier.builder().withScope(
-								StringIdentifier.of(STORE_CODE)
-						).build()
-				).build();
+				.build();
 
 		Catalog catalog = createMockCatalog();
-		Store store = createMockStore(catalog);
+		Store store = createMockStore();
 		Category category = createMockCategory(catalog);
 		PaginatedResult searchResult = new PaginatedResult(Collections.singleton(ITEM_ID1), 1, PAGE_SIZE, PAGE_SIZE);
 
@@ -234,13 +218,12 @@ public class NavigationSearchResultPaginationRepositoryTest {
 	 */
 	@Test
 	public void testFindItemByCategoryWithCategoryNotFound() {
-		Catalog catalog = createMockCatalog();
-		Store store = createMockStore(catalog);
+		Store store = createMockStore();
 
 		shouldFindSubject();
 		shouldFindStoreWithResult(Single.just(store));
 		shouldGetDefaultPageSizeWithResult(Single.just(PAGE_SIZE));
-		when(categoryRepository.findByGuid(STORE_CODE, CATEGORY_CODE)).thenReturn(Single.error(OPERATION_FAILURE));
+		when(categoryRepository.findByStoreAndCategoryCode(STORE_CODE, CATEGORY_CODE)).thenReturn(Single.error(OPERATION_FAILURE));
 
 		paginationRepository.getPaginatedResult(new NavigationSearchData(0, CATEGORY_CODE, STORE_CODE))
 				.test()
@@ -269,7 +252,7 @@ public class NavigationSearchResultPaginationRepositoryTest {
 	@Test
 	public void testFindItemByCategoryWithInvalidPageSizeFromSettingsRepository() {
 		Catalog catalog = createMockCatalog();
-		Store store = createMockStore(catalog);
+		Store store = createMockStore();
 		Category category = createMockCategory(catalog);
 
 		shouldFindSubject();
@@ -291,7 +274,7 @@ public class NavigationSearchResultPaginationRepositoryTest {
 	@Test
 	public void testFindItemByCategoryWithSearchFailure() {
 		Catalog catalog = createMockCatalog();
-		Store store = createMockStore(catalog);
+		Store store = createMockStore();
 		Category category = createMockCategory(catalog);
 
 		shouldFindSubject();
@@ -314,7 +297,7 @@ public class NavigationSearchResultPaginationRepositoryTest {
 	@Test
 	public void testFindItemByCategoryWithInvalidPage() {
 		Catalog catalog = createMockCatalog();
-		Store store = createMockStore(catalog);
+		Store store = createMockStore();
 		Category category = createMockCategory(catalog);
 		PaginatedResult searchResult = new PaginatedResult(Collections.singleton(ITEM_ID1), 1, PAGE_SIZE, PAGE_SIZE);
 
@@ -351,7 +334,7 @@ public class NavigationSearchResultPaginationRepositoryTest {
 	}
 
 	private void shouldFindByGuid(final Category category) {
-		when(categoryRepository.findByGuid(STORE_CODE, CATEGORY_CODE)).thenReturn(Single.just(category));
+		when(categoryRepository.findByStoreAndCategoryCode(STORE_CODE, CATEGORY_CODE)).thenReturn(Single.just(category));
 	}
 
 	private Catalog createMockCatalog() {
@@ -361,17 +344,16 @@ public class NavigationSearchResultPaginationRepositoryTest {
 		return catalog;
 	}
 
-	private Store createMockStore(final Catalog catalog) {
+	private Store createMockStore() {
 		final Store store = mock(Store.class);
-		stub(store.getCatalog()).toReturn(catalog);
-		stub(store.getCode()).toReturn(STORE_CODE);
+		when(store.getCode()).thenReturn(STORE_CODE);
 
 		return store;
 	}
 
 	private Category createMockCategory(final Catalog catalog) {
 		final Category category = mock(Category.class);
-		stub(category.getCatalog()).toReturn(catalog);
+		when(category.getCatalog()).thenReturn(catalog);
 
 		return category;
 	}

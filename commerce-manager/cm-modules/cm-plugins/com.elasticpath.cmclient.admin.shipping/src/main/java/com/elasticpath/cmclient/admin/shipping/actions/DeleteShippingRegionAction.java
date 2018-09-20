@@ -14,16 +14,16 @@ import org.eclipse.swt.widgets.Shell;
 import com.elasticpath.cmclient.admin.shipping.AdminShippingMessages;
 import com.elasticpath.cmclient.admin.shipping.views.ShippingRegionListView;
 import com.elasticpath.cmclient.core.ServiceLocator;
-import com.elasticpath.commons.constants.ContextIdNames;
-import com.elasticpath.service.shipping.ShippingRegionService;
+import com.elasticpath.commons.constants.EpShippingContextIdNames;
 import com.elasticpath.service.shipping.ShippingServiceLevelService;
+import com.elasticpath.service.shipping.ShippingRegionService;
 
 /**
  * Delete shipping region action.
  */
 public class DeleteShippingRegionAction extends Action {
 	private final ShippingRegionListView listView;
-	
+
 	private final ShippingServiceLevelService serviceLevelService;
 
 	private final ShippingRegionService shippingRegionService;
@@ -40,9 +40,9 @@ public class DeleteShippingRegionAction extends Action {
 		this.listView = listView;
 
 		serviceLevelService = ServiceLocator.getService(
-				ContextIdNames.SHIPPING_SERVICE_LEVEL_SERVICE);
+				EpShippingContextIdNames.SHIPPING_SERVICE_LEVEL_SERVICE);
 		shippingRegionService = ServiceLocator.getService(
-				ContextIdNames.SHIPPING_REGION_SERVICE);
+				EpShippingContextIdNames.SHIPPING_REGION_SERVICE);
 	}
 
 	@Override

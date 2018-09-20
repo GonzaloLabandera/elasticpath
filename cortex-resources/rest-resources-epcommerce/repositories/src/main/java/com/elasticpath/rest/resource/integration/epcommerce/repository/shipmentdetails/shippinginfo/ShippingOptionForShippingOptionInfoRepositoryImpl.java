@@ -14,7 +14,7 @@ import com.elasticpath.rest.definition.shipmentdetails.ShippingOptionIdentifier;
 import com.elasticpath.rest.definition.shipmentdetails.ShippingOptionInfoIdentifier;
 import com.elasticpath.rest.id.IdentifierPart;
 import com.elasticpath.rest.id.type.StringIdentifier;
-import com.elasticpath.rest.resource.integration.epcommerce.repository.shipping.ShippingServiceLevelRepository;
+import com.elasticpath.rest.resource.integration.epcommerce.repository.shipping.ShippingOptionRepository;
 
 /**
  * Repository for retrieving shipping option for shipping option info.
@@ -26,13 +26,13 @@ import com.elasticpath.rest.resource.integration.epcommerce.repository.shipping.
 public class ShippingOptionForShippingOptionInfoRepositoryImpl<I extends ShippingOptionInfoIdentifier, LI extends ShippingOptionIdentifier>
 		implements LinksRepository<ShippingOptionInfoIdentifier, ShippingOptionIdentifier> {
 
-	private ShippingServiceLevelRepository shippingServiceLevelRepository;
+	private ShippingOptionRepository shippingOptionRepository;
 
 	@Override
 	public Observable<ShippingOptionIdentifier> getElements(final ShippingOptionInfoIdentifier identifier) {
 		IdentifierPart<Map<String, String>> shipmentDetailsId = identifier.getShipmentDetailsId();
 		IdentifierPart<String> scope = identifier.getScope();
-		return shippingServiceLevelRepository.getSelectedShippingOptionIdForShipmentDetails(scope.getValue(), shipmentDetailsId.getValue())
+		return shippingOptionRepository.getSelectedShippingOptionCodeForShipmentDetails(scope.getValue(), shipmentDetailsId.getValue())
 				.map(shippingOptionId -> ShippingOptionIdentifier.builder()
 						.withShipmentDetailsId(shipmentDetailsId)
 						.withScope(scope)
@@ -42,7 +42,7 @@ public class ShippingOptionForShippingOptionInfoRepositoryImpl<I extends Shippin
 	}
 
 	@Reference
-	public void setShippingServiceLevelRepository(final ShippingServiceLevelRepository shippingServiceLevelRepository) {
-		this.shippingServiceLevelRepository = shippingServiceLevelRepository;
+	public void setShippingOptionRepository(final ShippingOptionRepository shippingOptionRepository) {
+		this.shippingOptionRepository = shippingOptionRepository;
 	}
 }

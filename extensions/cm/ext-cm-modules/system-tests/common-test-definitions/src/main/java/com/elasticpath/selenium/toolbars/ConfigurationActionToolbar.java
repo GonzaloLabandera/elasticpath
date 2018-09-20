@@ -11,16 +11,20 @@ import com.elasticpath.selenium.resultspane.CustomerSegmentResultPane;
 import com.elasticpath.selenium.resultspane.ProfileAttributePane;
 import com.elasticpath.selenium.resultspane.ShippingRegionsPane;
 import com.elasticpath.selenium.resultspane.StoresResultPane;
+import com.elasticpath.selenium.resultspane.SystemConfigurationResultPane;
 import com.elasticpath.selenium.resultspane.TaxCodesPane;
 import com.elasticpath.selenium.resultspane.TaxJurisdictionsPane;
 import com.elasticpath.selenium.resultspane.UserRolesResultPane;
 import com.elasticpath.selenium.resultspane.WarehousesPane;
+import com.elasticpath.selenium.resultspane.DataPolicyResultPane;
 
 /**
  * Configuration Toolbar.
  */
 public class ConfigurationActionToolbar extends AbstractToolbar {
 
+	private static final String SYSTEM_CONFIGURATION = "div[automation-id='com.elasticpath.cmclient.admin.configuration.AdminConfigurationMessages"
+			+ ".ConfigurationAdminSection_SystemConfiguration']";
 	private static final String USER_ROLES_LINK_CSS = "div[automation-id='com.elasticpath.cmclient.admin.users"
 			+ ".AdminUsersMessages.UserAdminSection_RoleAdmin']";
 	private static final String WAREHOUSE_LINK_CSS = "div[automation-id='com.elasticpath.cmclient.admin.warehouses.AdminWarehousesMessages"
@@ -41,6 +45,9 @@ public class ConfigurationActionToolbar extends AbstractToolbar {
 			+ ".TaxesAdminSection_ManageTaxValues']";
 	private static final String CUSTOMER_SEGMENT_LINK_CSS = "div[automation-id='com.elasticpath.cmclient.admin.customers.AdminCustomersMessages"
 			+ ".CustomerAdminSection_CustomerSegments']";
+	private static final String CONFIGURATION_SECTION_LINK_CSS = "div[widget-id='%s']";
+	private static final String DATA_POLICY_LINK_CSS = "div[automation-id='com.elasticpath.cmclient.admin.datapolicies.AdminDataPoliciesMessages"
+			+ ".DataPoliciesAdminSection_DataPolicies']";
 
 	/**
 	 * Constructor.
@@ -49,6 +56,15 @@ public class ConfigurationActionToolbar extends AbstractToolbar {
 	 */
 	public ConfigurationActionToolbar(final WebDriver driver) {
 		super(driver);
+	}
+
+	/**
+	 * Clicks System Configuration.
+	 * @return SystemConfigurationResultPane
+	 */
+	public SystemConfigurationResultPane clickSystemConfiguration() {
+		click(getWaitDriver().waitForElementToBeClickable(By.cssSelector(SYSTEM_CONFIGURATION)));
+		return new SystemConfigurationResultPane(getDriver());
 	}
 
 	/**
@@ -166,5 +182,35 @@ public class ConfigurationActionToolbar extends AbstractToolbar {
 	public void clickSaveButton() {
 		clickButton(SAVE_BUTTON_CSS, "Save Button");
 		getWaitDriver().waitForElementToBeClickable(By.cssSelector(RELOAD_ACTIVE_EDITOR_BUTTON_CSS));
+	}
+
+	/**
+	 * Clicks on Data Policies link.
+	 *
+	 * @return DataPolicyResultPane
+	 */
+	public DataPolicyResultPane clickDataPolicies() {
+		click(getWaitDriver().waitForElementToBeClickable(By.cssSelector(DATA_POLICY_LINK_CSS)));
+		return new DataPolicyResultPane(getDriver());
+	}
+
+	/**
+	 * Verify other configuration links are not clickable.
+	 * @param configuration String
+	 */
+	public void verifyConfigLinksDisabled(final String configuration) {
+		assertThat(isButtonEnabled(String.format(CONFIGURATION_SECTION_LINK_CSS, configuration)))
+				.as("Unexpected configuration enabled - " + configuration)
+				.isFalse();
+	}
+
+	/**
+	 * Verify other configuration links are clickable.
+	 * @param configuration String
+	 */
+	public void verifyConfigLinksEnabled(final String configuration) {
+		assertThat(isButtonEnabled(String.format(CONFIGURATION_SECTION_LINK_CSS, configuration)))
+				.as("Expected configuration disabled - " + configuration)
+				.isTrue();
 	}
 }

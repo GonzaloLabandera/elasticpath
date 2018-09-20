@@ -120,5 +120,20 @@
 		</coupons>
 		<coupon_usages/>
 	</coupon_set>
+	<coupon_set>
+		<coupon_config>
+			<rule_code>0531f91b-d2e1-407e-abda-16ab058bcfe5</rule_code>
+			<coupon_config_code>481d880b-15ae-4292-9f2a-b6bbe1cdb48d</coupon_config_code>
+			<coupon_usage_type>limitPerCoupon</coupon_usage_type>
+			<usage_limit>2147483647</usage_limit>
+			<duration_days>60</duration_days>
+			<limited_duration>false</limited_duration>
+			<multi_use_per_order>false</multi_use_per_order>
+		</coupon_config>
+		<coupons>
+			<coupon_code>expiredcoupon</coupon_code>
+		</coupons>
+		<coupon_usages/>
+	</coupon_set>
 
 </coupon_sets>

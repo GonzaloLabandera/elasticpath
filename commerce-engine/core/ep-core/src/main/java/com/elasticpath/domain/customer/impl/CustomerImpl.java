@@ -14,6 +14,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import java.util.StringTokenizer;
 import javax.persistence.Basic;
 import javax.persistence.CascadeType;
@@ -37,8 +38,6 @@ import javax.persistence.TemporalType;
 import javax.persistence.Transient;
 
 import com.google.common.base.Objects;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Iterables;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.apache.openjpa.persistence.DataCache;
@@ -60,7 +59,6 @@ import com.elasticpath.domain.attribute.impl.CustomerProfileValueImpl;
 import com.elasticpath.domain.customer.Customer;
 import com.elasticpath.domain.customer.CustomerAddress;
 import com.elasticpath.domain.customer.CustomerAuthentication;
-import com.elasticpath.domain.customer.CustomerCreditCard;
 import com.elasticpath.domain.customer.CustomerGroup;
 import com.elasticpath.domain.customer.CustomerProfile;
 import com.elasticpath.domain.impl.AbstractLegacyEntityImpl;
@@ -531,7 +529,7 @@ public class CustomerImpl extends AbstractLegacyEntityImpl implements Customer {
 	public boolean isAnonymous() {
 		Boolean anonymous = (Boolean) getCustomerProfile().getProfileValue(ATT_KEY_CP_ANONYMOUS_CUST);
 
-		return Objects.firstNonNull(anonymous, false);
+		return Optional.ofNullable(anonymous).orElse(false);
 	}
 
 	@Override
@@ -797,82 +795,8 @@ public class CustomerImpl extends AbstractLegacyEntityImpl implements Customer {
 
 	@Override
 	@Transient
-	public CustomerCreditCard getCreditCardByUid(final long creditCardUid) {
-		for (CustomerCreditCard currCreditCard : getCreditCards()) {
-			if (currCreditCard.getUidPk() == creditCardUid) {
-				return currCreditCard;
-			}
-		}
-		return null;
-	}
-
-	@Override
-	@Transient
-	public CustomerCreditCard getCreditCardByGuid(final String creditCardGuid) {
-		for (CustomerCreditCard currentCreditCard : getCreditCards()) {
-			if (StringUtils.equals(creditCardGuid, currentCreditCard.getGuid())) {
-				return currentCreditCard;
-			}
-		}
-		return null;
-	}
-
-	@Override
-	@Transient
-	public CustomerCreditCard getPreferredCreditCard() {
-		if (getPaymentMethods().getDefault() instanceof CustomerCreditCard) {
-			return (CustomerCreditCard) getPaymentMethods().getDefault();
-		}
-		return null;
-	}
-
-	@Override
-	@Transient
 	public CustomerPaymentMethodsImpl getPaymentMethods() {
 		return new CustomerPaymentMethodsImpl(this);
-	}
-
-	@Override
-	@Transient
-	public List<CustomerCreditCard> getCreditCards() {
-		return ImmutableList.copyOf(
-				Iterables.filter(getPaymentMethods().all(), CustomerCreditCard.class));
-	}
-
-	@Override
-	public void setCreditCards(final List<CustomerCreditCard> creditCards) {
-		checkNotNull(creditCards, "creditCards to set was null");
-
-		getPaymentMethods().removeAll(new ArrayList<>(getCreditCards()));
-		getPaymentMethods().addAll(new ArrayList<>(creditCards));
-	}
-
-	@Override
-	public void addCreditCard(final CustomerCreditCard creditCard) {
-		checkNotNull(creditCard, "creditCard to add was null");
-
-		getPaymentMethods().add(creditCard);
-	}
-
-	@Override
-	public void removeCreditCard(final CustomerCreditCard creditCard) {
-		checkNotNull(creditCard, "creditCard to remove was null");
-
-		getPaymentMethods().remove(creditCard);
-	}
-
-	/**
-	 * {@inheritDoc} <br>
-	 * Note that if the card is not already in the customer's set of cards it will be added.
-	 */
-	@Override
-	public void updateCreditCard(final CustomerCreditCard creditCard) {
-		addCreditCard(creditCard);
-	}
-
-	@Override
-	public void setPreferredCreditCard(final CustomerCreditCard preferredCreditCard) {
-		getPaymentMethods().setDefault(preferredCreditCard);
 	}
 
 	@Override
@@ -943,7 +867,7 @@ public class CustomerImpl extends AbstractLegacyEntityImpl implements Customer {
 	@Transient
 	public boolean isToBeNotified() {
 		Boolean toBeNotified = (Boolean) getCustomerProfile().getProfileValue(ATT_KEY_CP_BE_NOTIFIED);
-		return Objects.firstNonNull(toBeNotified, false);
+		return Optional.ofNullable(toBeNotified).orElse(false);
 	}
 
 	@Override
@@ -983,7 +907,7 @@ public class CustomerImpl extends AbstractLegacyEntityImpl implements Customer {
 	public boolean isHtmlEmailPreferred() {
 		Boolean isHtmlEmailPreferred = (Boolean) getCustomerProfile().getProfileValue(ATT_KEY_CP_HTML_EMAIL);
 
-		return Objects.firstNonNull(isHtmlEmailPreferred, false);
+		return Optional.ofNullable(isHtmlEmailPreferred).orElse(false);
 	}
 
 	@Override
@@ -1091,7 +1015,7 @@ public class CustomerImpl extends AbstractLegacyEntityImpl implements Customer {
 	 * Sets the list of payment methods. Method visibility set to private because this is only required by OpenJPA.
 	 * @param paymentMethods the list of payment methods
 	 */
-	@SuppressWarnings("PMD.UnusedPrivateMethod")
+	@SuppressWarnings({"PMD.UnusedPrivateMethod", "unused"})
 	protected void setPaymentMethodsInternal(final Collection<PaymentMethod> paymentMethods) {
 		this.paymentMethods = paymentMethods;
 	}

@@ -1,37 +1,46 @@
-/**
+/*
  * Copyright (c) Elastic Path Software Inc., 2013
  */
+
 package com.elasticpath.service.impl;
+
+import static java.lang.String.format;
+import static java.util.Collections.singletonList;
 
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import com.google.common.collect.ImmutableMap;
 import org.apache.commons.lang.StringUtils;
 
 import com.elasticpath.base.exception.EpServiceException;
 import com.elasticpath.common.dto.ShoppingItemDto;
+import com.elasticpath.commons.beanframework.BeanFactory;
 import com.elasticpath.commons.constants.ContextIdNames;
-import com.elasticpath.domain.ElasticPath;
+import com.elasticpath.base.common.dto.StructuredErrorMessage;
 import com.elasticpath.domain.catalog.ProductSku;
 import com.elasticpath.domain.customer.Customer;
 import com.elasticpath.domain.customer.CustomerAddress;
-import com.elasticpath.domain.customer.CustomerCreditCard;
+import com.elasticpath.domain.customer.PaymentToken;
 import com.elasticpath.domain.order.Order;
 import com.elasticpath.domain.order.OrderPayment;
-import com.elasticpath.domain.shipping.ShippingServiceLevel;
 import com.elasticpath.domain.shopper.Shopper;
 import com.elasticpath.domain.shoppingcart.ShoppingCart;
 import com.elasticpath.domain.store.Store;
 import com.elasticpath.domain.testcontext.ShoppingTestData;
 import com.elasticpath.plugin.payment.PaymentType;
+import com.elasticpath.plugin.payment.dto.PaymentMethod;
 import com.elasticpath.sellingchannel.director.CartDirector;
 import com.elasticpath.service.CustomerAuthenticationService;
 import com.elasticpath.service.CustomerOrderingService;
 import com.elasticpath.service.OrderConfigurationService;
 import com.elasticpath.service.order.OrderService;
+import com.elasticpath.service.shipping.ShippingOptionResult;
+import com.elasticpath.service.shipping.ShippingOptionService;
 import com.elasticpath.service.shopper.ShopperService;
+import com.elasticpath.shipping.connectivity.dto.ShippingOption;
 
 /**
  * Service to help configure the order creation for <code>OrderFitFixture</code>.
@@ -46,16 +55,18 @@ public class OrderConfigurationServiceImpl implements OrderConfigurationService 
 
 	private OrderService orderService;
 
-	private ElasticPath elasticPath;
-
 	private CartDirector cartDirector;
+
+	private BeanFactory beanFactory;
+
+	private ShippingOptionService shippingOptionService;
 
 	/**
 	 * Creates the shopping cart for given customer with given sku.
 	 *
-	 * @param store the store to create the shopping cart in. May be different than the customer store.
+	 * @param store    the store to create the shopping cart in. May be different than the customer store.
 	 * @param customer the customer
-	 * @param skuMap the sku to add to shopping cart
+	 * @param skuMap   the sku to add to shopping cart
 	 * @return new shopping cart
 	 */
 	@Override
@@ -72,32 +83,24 @@ public class OrderConfigurationServiceImpl implements OrderConfigurationService 
 	/**
 	 * Selects the customer billing and shipping addresses for given shopping cart.
 	 *
-	 * @param shopper the shopper
+	 * @param shopper               the shopper
 	 * @param streetShippingAddress the street of shipping address
-	 * @param streetBillingAddress the street of billing address
+	 * @param streetBillingAddress  the street of billing address
 	 */
 	@Override
 	public void selectCustomerAddressesToShoppingCart(final Shopper shopper, final String streetShippingAddress,
-													  final String streetBillingAddress) {
+			final String streetBillingAddress) {
 
 		ShoppingCart shoppingCartToEdit = shopper.getCurrentShoppingCart();
 		selectCustomerAddressByStreet(shopper.getCustomer(), shoppingCartToEdit, streetShippingAddress,
-				new CustomerAddressSelector() {
-					@Override
-					public void selectCustomerAddress(final ShoppingCart shoppingCart, final CustomerAddress customerAddress) {
-						if (shoppingCart.requiresShipping()) {
-							customerOrderingService.selectShippingAddress(shopper, customerAddress);
-						}
+				(shoppingCart, customerAddress) -> {
+					if (shoppingCart.requiresShipping()) {
+						customerOrderingService.selectShippingAddress(shopper, customerAddress);
 					}
 				});
 
 		selectCustomerAddressByStreet(shopper.getCustomer(), shoppingCartToEdit, streetBillingAddress,
-				new CustomerAddressSelector() {
-					@Override
-					public void selectCustomerAddress(final ShoppingCart shoppingCart, final CustomerAddress customerAddress) {
-						customerOrderingService.selectBillingAddress(shopper, customerAddress);
-					}
-				});
+				(shoppingCart, customerAddress) -> customerOrderingService.selectBillingAddress(shopper, customerAddress));
 
 	}
 
@@ -117,54 +120,62 @@ public class OrderConfigurationServiceImpl implements OrderConfigurationService 
 		throw new EpServiceException("Selected address could not be found");
 	}
 
-	/**
-	 * Selects the shipping service level in given shopping cart.
-	 *
-	 * @param shoppingCart the shoppign cart
-	 * @param locale the default store locale
-	 * @param shippingServiceLevelName the shipping service level name
-	 * @return modified shopping cart
-	 */
 	@Override
-	public ShoppingCart selectShippingServiceLevel(final ShoppingCart shoppingCart, final Locale locale, final String shippingServiceLevelName) {
-		if (StringUtils.isEmpty(shippingServiceLevelName)) {
+	public ShoppingCart selectShippingOption(final ShoppingCart shoppingCart, final String shippingOptionName) {
+		if (StringUtils.isEmpty(shippingOptionName)) {
 			return shoppingCart;
 		}
 
-		for (ShippingServiceLevel shippingServiceLevel : shoppingCart.getShippingServiceLevelList()) {
-			if (shippingServiceLevelName.equals(shippingServiceLevel.getDisplayName(locale, true))) {
-				return customerOrderingService.selectShippingServiceLevel(shoppingCart, shippingServiceLevel.getUidPk());
+		final ShippingOptionResult shippingOptionResult = getShippingOptionService().getShippingOptions(shoppingCart);
+		final String errorMessage = format("Unable to get available shipping options for the given cart with guid '%s'. So cannot select one.",
+				shoppingCart.getGuid());
+		shippingOptionResult.throwExceptionIfUnsuccessful(
+				errorMessage,
+				singletonList(
+						new StructuredErrorMessage(
+								"shippingoptions.unavailable",
+								errorMessage,
+								ImmutableMap.of(
+										"cart-id", shoppingCart.getGuid())
+						)
+				));
+		final Locale locale = shoppingCart.getShopper().getLocale();
+		for (ShippingOption shippingOption : shippingOptionResult.getAvailableShippingOptions()) {
+			if (StringUtils.equals(shippingOptionName, shippingOption.getDisplayName(locale).orElse(null))) {
+				return customerOrderingService.selectShippingOption(shoppingCart, shippingOption);
 			}
 		}
-		throw new EpServiceException("Selected shipping service level could not be found");
+
+		throw new EpServiceException("Selected shipping option could not be found");
 	}
 
 	/**
-	 * Creates the order payment based on customer credit card.
+	 * Creates the order payment based on payment token value.
 	 *
-	 * @param customer the customer
-	 * @param cardHolderName the card holder name for card that will be used for payment creation
+	 * @param customer   the customer
+	 * @param tokenValue the token value
 	 * @return the order payment
 	 */
 	@Override
-	public OrderPayment createOrderPayment(final Customer customer, final String cardHolderName) {
-		for (CustomerCreditCard creditCard : customer.getCreditCards()) {
-			if (creditCard.getCardHolderName().equals(cardHolderName)) {
-				final OrderPayment orderPayment = elasticPath.getBean(ContextIdNames.ORDER_PAYMENT);
-				orderPayment.setCardType(creditCard.getCardType());
-				orderPayment.setCardHolderName(creditCard.getCardHolderName());
-				orderPayment.setUnencryptedCardNumber(creditCard.getUnencryptedCardNumber());
-				orderPayment.setCvv2Code(creditCard.getSecurityCode());
-				orderPayment.setExpiryMonth(creditCard.getExpiryMonth());
-				orderPayment.setExpiryYear(creditCard.getExpiryYear());
-				orderPayment.setPaymentMethod(PaymentType.CREDITCARD);
-				return orderPayment;
+	public OrderPayment createOrderPayment(final Customer customer, final String tokenValue) {
+		for (PaymentMethod paymentMethod : customer.getPaymentMethods().all()) {
+			if (paymentMethod instanceof PaymentToken) {
+				PaymentToken paymentToken = (PaymentToken) paymentMethod;
+				if (paymentToken.getValue().equals(tokenValue)) {
+					final OrderPayment orderPayment = beanFactory.getBean(ContextIdNames.ORDER_PAYMENT);
+					orderPayment.setDisplayValue(paymentToken.getDisplayValue());
+					orderPayment.setPaymentMethod(PaymentType.PAYMENT_TOKEN);
+					return orderPayment;
+				}
 			}
 		}
 
-		throw new EpServiceException("Selected card holder name could not be found");
+		throw new EpServiceException("Selected token value could not be found");
 	}
 
+	public void setBeanFactory(final BeanFactory beanFactory) {
+		this.beanFactory = beanFactory;
+	}
 	/**
 	 * This interface represents methods for selection customer address for given shopping cart.
 	 */
@@ -173,7 +184,7 @@ public class OrderConfigurationServiceImpl implements OrderConfigurationService 
 		/**
 		 * Selects the customer address for given shopping cart.
 		 *
-		 * @param shoppingCart the shopping cart
+		 * @param shoppingCart    the shopping cart
 		 * @param customerAddress the customer address to select
 		 */
 		void selectCustomerAddress(ShoppingCart shoppingCart, CustomerAddress customerAddress);
@@ -189,10 +200,6 @@ public class OrderConfigurationServiceImpl implements OrderConfigurationService 
 
 	public void setOrderService(final OrderService orderService) {
 		this.orderService = orderService;
-	}
-
-	public void setElasticPath(final ElasticPath elasticPath) {
-		this.elasticPath = elasticPath;
 	}
 
 	@Override
@@ -213,4 +220,13 @@ public class OrderConfigurationServiceImpl implements OrderConfigurationService 
 	public ShopperService getShopperService() {
 		return shopperService;
 	}
+
+	protected ShippingOptionService getShippingOptionService() {
+		return this.shippingOptionService;
+	}
+
+	public void setShippingOptionService(final ShippingOptionService shippingOptionService) {
+		this.shippingOptionService = shippingOptionService;
+	}
+
 }

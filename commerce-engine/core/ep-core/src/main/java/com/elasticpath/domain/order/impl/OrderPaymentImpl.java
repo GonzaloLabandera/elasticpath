@@ -4,7 +4,6 @@
 package com.elasticpath.domain.order.impl;
 
 import java.math.BigDecimal;
-import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Currency;
@@ -13,7 +12,6 @@ import java.util.Locale;
 import javax.persistence.Basic;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
-import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
@@ -23,7 +21,6 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.persistence.PrePersist;
 import javax.persistence.Table;
 import javax.persistence.TableGenerator;
 import javax.persistence.Temporal;
@@ -33,7 +30,6 @@ import javax.persistence.Transient;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.commons.lang.builder.ToStringStyle;
-import org.apache.commons.lang.math.NumberUtils;
 import org.apache.openjpa.persistence.DataCache;
 import org.apache.openjpa.persistence.Externalizer;
 import org.apache.openjpa.persistence.Factory;
@@ -43,15 +39,10 @@ import org.apache.openjpa.persistence.FetchGroups;
 import org.apache.openjpa.persistence.Persistent;
 import org.apache.openjpa.persistence.jdbc.ForeignKey;
 
-import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.commons.exception.EpDateBindException;
-import com.elasticpath.commons.exception.EpNonConsistentDomainFieldException;
-import com.elasticpath.commons.util.impl.ConverterUtils;
 import com.elasticpath.domain.DatabaseLastModifiedDate;
-import com.elasticpath.domain.EpDomainException;
 import com.elasticpath.domain.catalog.GiftCertificate;
 import com.elasticpath.domain.catalog.impl.GiftCertificateImpl;
-import com.elasticpath.domain.customer.CustomerCreditCard;
 import com.elasticpath.domain.customer.PaymentToken;
 import com.elasticpath.domain.customer.impl.PaymentTokenImpl;
 import com.elasticpath.domain.impl.AbstractLegacyPersistenceImpl;
@@ -77,11 +68,7 @@ import com.elasticpath.plugin.payment.PaymentType;
 	@FetchGroup(name = FetchGroupConstants.ORDER_DEFAULT, attributes = {
 		@FetchAttribute(name = "paymentMethod"),
 		@FetchAttribute(name = "displayValue"),
-		@FetchAttribute(name = "expiryMonth"),
-		@FetchAttribute(name = "expiryYear"),
-		@FetchAttribute(name = "currencyCode"),
-		@FetchAttribute(name = "cardType"),
-		@FetchAttribute(name = "internalCreditCardNumber")
+		@FetchAttribute(name = "currencyCode")
 	}, postLoad = true)
 })
 @SuppressWarnings({ "PMD.TooManyFields", "PMD.CyclomaticComplexity", "PMD.GodClass" })
@@ -92,36 +79,14 @@ public class OrderPaymentImpl extends AbstractLegacyPersistenceImpl implements O
 
 	private static final int SHORT_TEXT_LENGTH = 50;
 
-	private static final int YEAR_LENGTH = 4;
-
 	private static final int CURRENCY_LENGTH = 10;
 
 	private static final int TRANS_TYPE_LENGTH = 20;
-
-	private static final String DATE_FORMAT = "dd/MM/yyyy";
-
-	private static final String FIRST_DAY = "01"; //$NON-NLS-1$
-
-	private static final String DATE_SEPARATOR = "/"; //$NON-NLS-1$
 
 	/**
 	 * The name of the table & generator to use for persistence.
 	 */
 	public static final String TABLE_NAME = "TORDERPAYMENT";
-
-	private String cardType;
-
-	private String cardHolderName;
-
-	private String expiryMonth;
-
-	private String expiryYear;
-
-	private Date startDate;
-
-	private String issueNumber;
-
-	private String cvv2Code;
 
 	private BigDecimal amount;
 
@@ -159,40 +124,11 @@ public class OrderPaymentImpl extends AbstractLegacyPersistenceImpl implements O
 
 	private OrderShipment orderShipment;
 
-	private CreditCardNumber creditCardNumber;
-	
 	private Date lastModifiedDate;
 	
 	private boolean paymentForSubscriptions;
 
 	private String displayValue;
-
-	@Transient
-	private CreditCardNumber getCreditCardNumber() {
-		if (this.getInternalCreditCardNumber() == null) {
-			this.setInternalCreditCardNumber(new CreditCardNumber());
-		}		
-		return this.getInternalCreditCardNumber();
-	}
-	
-	/**
-	 * Gets the internal credit card number.
-	 *
-	 * @return the internal credit card number
-	 */
-	@Embedded
-	protected CreditCardNumber getInternalCreditCardNumber() {
-		return this.creditCardNumber;
-	}
-	
-	/**
-	 * Sets the internal credit card number.
-	 *
-	 * @param creditCardNumber the new internal credit card number
-	 */
-	protected void setInternalCreditCardNumber(final CreditCardNumber creditCardNumber) {
-		this.creditCardNumber = creditCardNumber;
-	}
 
 	@Override
 	@ManyToOne(targetEntity = OrderImpl.class, cascade = { CascadeType.REFRESH, CascadeType.MERGE }, fetch = FetchType.EAGER, optional = false)
@@ -255,86 +191,13 @@ public class OrderPaymentImpl extends AbstractLegacyPersistenceImpl implements O
 	}
 
 	/**
-	 * Get the vendor/brand of the credit card (e.g. VISA).
-	 * 
-	 * @return the type
+	 * Gets display value.
+	 *
+	 * @return the display value
 	 */
 	@Override
 	@Basic
-	@Column(name = "CARD_TYPE", length = SHORT_TEXT_LENGTH)
-	public String getCardType() {
-		return this.cardType;
-	}
-
-	/**
-	 * Set the vendor/brand of the credit card (e.g. VISA).
-	 * 
-	 * @param cardType the card type
-	 */
-	@Override
-	public void setCardType(final String cardType) {
-		this.cardType = cardType;
-	}
-
-	/**
-	 * Set the card holder name.
-	 * 
-	 * @return the name on the card
-	 */
-	@Override
-	@Basic
-	@Column(name = "CARD_HOLDER_NAME", length = MEDIUM_TEXT_LENGTH)
-	public String getCardHolderName() {
-		return this.cardHolderName;
-	}
-
-	/**
-	 * Get the card holder name.
-	 * 
-	 * @param cardHolderName the name on the card
-	 */
-	@Override
-	public void setCardHolderName(final String cardHolderName) {
-		this.cardHolderName = cardHolderName;
-	}
-
-	/**
-	 * Get the encrypted credit cart number.
-	 * 
-	 * @return the credit card number.
-	 */
-	@Override
-	@Transient
-	public String getCardNumber() {
-		return this.getCreditCardNumber().getEncryptedCardNumber();
-	}
-
-	/**
-	 * Decrypts and returns the full credit card number. Access to this method should be restricted.
-	 * 
-	 * @return the decrypted credit card number
-	 */
-	@Override
-	@Transient
-	public String getUnencryptedCardNumber() {
-		return this.getCreditCardNumber().getFullCardNumber();
-	}
-	
-	/**
-	 * Decrypts and returns the masked credit card number: ************5381. Useful for displaying in receipts, GUI, order
-	 * history, etc.
-	 * 
-	 * @return the masked credit card number
-	 */
-	@Override
-	@Transient
-	public String getMaskedCardNumber() {
-		return getDisplayValue();
-	}
-
-	@Override
-	@Basic
-	@Column(name = "MASKED_CARD_NUMBER")
+	@Column(name = "DISPLAY_VALUE")
 	public String getDisplayValue() {
 		return displayValue;
 	}
@@ -342,92 +205,6 @@ public class OrderPaymentImpl extends AbstractLegacyPersistenceImpl implements O
 	@Override
 	public void setDisplayValue(final String displayValue) {
 		this.displayValue = displayValue;
-	}
-
-	/**
-	 * Set the credit card number.
-	 * 
-	 * @param number the credit card number
-	 */
-	@Override
-	@Transient
-	public void setUnencryptedCardNumber(final String number) {
-		// we need this field for spring validation. can we overcome this problem?
-		this.getCreditCardNumber().setFullCardNumber(number);
-		setDisplayValue(getCreditCardNumber().getMaskedCardNumber());
-	}
-
-	/**
-	 * Get the two-digit expiry date year.
-	 * 
-	 * @return the expiry date year
-	 */
-	@Override
-	@Basic
-	@Column(name = "EXPIRY_YEAR", length = YEAR_LENGTH)
-	public String getExpiryYear() {
-		checkDate();
-		return this.expiryYear;
-	}
-
-	/**
-	 * Set the two-digit expiry date year.
-	 * 
-	 * @param expiryYear the expiry date year
-	 */
-	@Override
-	public void setExpiryYear(final String expiryYear) {
-		checkDate();
-		this.expiryYear = expiryYear;
-	}
-
-	/**
-	 * Get the two-digit expiry date month.
-	 * 
-	 * @return the two-digit expiry date month
-	 */
-	@Override
-	@Basic
-	@Column(name = "EXPIRY_MONTH", length = 2)
-	public String getExpiryMonth() {
-		checkDate();
-		return this.expiryMonth;
-	}
-
-	/**
-	 * Set the expiry two-digit date month.
-	 * 
-	 * @param expiryMonth the two digit expiry date month
-	 */
-	@Override
-	public void setExpiryMonth(final String expiryMonth) {
-		checkDate();
-		this.expiryMonth = expiryMonth;
-	}
-
-	/**
-	 * Get the card start date Used by some U.K. cards.
-	 * 
-	 * @return the start date
-	 */
-	@Override
-	@Basic
-	@Temporal(TemporalType.DATE)
-	@Column(name = "START_DATE")
-	public Date getStartDate() {
-		checkDate();
-		return this.startDate;
-	}
-
-	/**
-	 * Set the cart start date used by some U.K. cards.
-	 * 
-	 * @param startDate the start date
-	 */
-	@Override
-	public void setStartDate(final Date startDate) {
-		checkDate();
-		this.startDate = startDate;
 	}
 	
 	/**
@@ -449,62 +226,6 @@ public class OrderPaymentImpl extends AbstractLegacyPersistenceImpl implements O
 			}
 		}
 		return null;
-	}
-
-	/**
-	 * Get the issue number used by some U.K. cards.
-	 * 
-	 * @return the issue number
-	 */
-	@Override
-	@Basic
-	@Column(name = "ISSUE_NUMBER", length = MEDIUM_TEXT_LENGTH)
-	public String getIssueNumber() {
-		return this.issueNumber;
-	}
-
-	/**
-	 * Set the issue number used by some U.K. cards.
-	 * 
-	 * @param issueNumber the issue number
-	 */
-	@Override
-	public void setIssueNumber(final String issueNumber) {
-		this.issueNumber = issueNumber;
-	}
-
-	/**
-	 * Get the card security code (found near the signature on the back of the card).
-	 * 
-	 * @return the card security code
-	 */
-	@Override
-	@Transient
-	public String getCvv2Code() {
-		return this.cvv2Code;
-	}
-
-	/**
-	 * Set the security code (found near the signature on the back of the card).
-	 * 
-	 * @param cvv2Code the security code
-	 */
-	@Override
-	public void setCvv2Code(final String cvv2Code) {
-		this.cvv2Code = cvv2Code;
-	}
-
-	/**
-	 * Returns <code>true</code> to indicate that this {@link OrderPayment}'s credit card is stored encrypted;
-	 * <code>false</code> to indicate that the credit card is stored masked.
-	 * 
-	 * @return <code>true</code> to indicate that this {@link OrderPayment}'s credit card is stored encrypted;
-	 * <code>false</code> to indicate that the credit card is stored masked.
-	 */
-	@Override
-	@Transient
-	public boolean isEncryptedCreditCardStored() {
-		return this.getUnencryptedCardNumber() != null;
 	}
 
 	/**
@@ -805,72 +526,6 @@ public class OrderPaymentImpl extends AbstractLegacyPersistenceImpl implements O
 	}
 
 	/**
-	 * Copy orderPayment's credit card info to <code>this</code> Order Payment.
-	 * 
-	 * @param orderPayment the source of credit card info.
-	 */
-	@Override
-	public void copyCreditCardInfo(final OrderPayment orderPayment) {
-		setCardHolderName(orderPayment.getCardHolderName());
-		setCardType(orderPayment.getCardType());
-		setExpiryMonth(orderPayment.getExpiryMonth());
-		setExpiryYear(orderPayment.getExpiryYear());
-		setCvv2Code(orderPayment.getCvv2Code());
-		
-		if (orderPayment.getUnencryptedCardNumber() == null) {
-			setDisplayValue(orderPayment.getDisplayValue());
-		} else {
-			setUnencryptedCardNumber(orderPayment.getUnencryptedCardNumber());
-		}
-
-		setStartDate(orderPayment.getStartDate());
-		setIssueNumber(orderPayment.getIssueNumber());
-	}
-
-	/**
-	 * Tells <code>this</code> to use the specified credit card.
-	 * 
-	 * @param creditCard the card to use for this order payment.
-	 */
-	@Override
-	public void useCreditCard(final CustomerCreditCard creditCard) {
-		setPaymentMethod(PaymentType.CREDITCARD);
-		setCardHolderName(creditCard.getCardHolderName());
-		setCardType(creditCard.getCardType());
-		setExpiryMonth(creditCard.getExpiryMonth());
-		setExpiryYear(creditCard.getExpiryYear());
-		setCvv2Code(creditCard.getSecurityCode());
-		setUnencryptedCardNumber(creditCard.getUnencryptedCardNumber());
-		setStartDate(createDate(creditCard.getStartMonth(), creditCard.getStartYear()));
-		setIssueNumber(String.valueOf(creditCard.getIssueNumber()));
-	}
-
-	/**
-	 * Extract the credit card information in this order payment into a credit card object.
-	 * 
-	 * @return a new credit card instance populated with the credit card information
-	 */
-	@Override
-	public CustomerCreditCard extractCreditCard() {
-		final CustomerCreditCard newCreditCard = getBean(ContextIdNames.CUSTOMER_CREDIT_CARD);
-		newCreditCard.setCardHolderName(getCardHolderName());
-		newCreditCard.setCardNumber(getUnencryptedCardNumber());
-		newCreditCard.setCardType(getCardType());
-		newCreditCard.setSecurityCode(getCvv2Code());
-		newCreditCard.setExpiryMonth(getExpiryMonth());
-		newCreditCard.setExpiryYear(getExpiryYear());
-		if (getStartDate() != null) {
-			newCreditCard.setStartMonth(ConverterUtils.date2String(getStartDate(), "MM", Locale.getDefault())); // NOPMD
-			newCreditCard.setStartYear(ConverterUtils.date2String(getStartDate(), "yyyy", Locale.getDefault())); // NOPMD
-		}
-		if (isActual(getIssueNumber())) {
-			newCreditCard.setIssueNumber(NumberUtils.toInt(getIssueNumber()));
-		}
-		newCreditCard.encrypt();
-		return newCreditCard;
-	}
-
-	/**
 	 * Copy orderPayment's Gateway info to <code>this</code> Order Payment.
 	 * 
 	 * @param orderPayment the source of Gateway info.
@@ -884,24 +539,6 @@ public class OrderPaymentImpl extends AbstractLegacyPersistenceImpl implements O
 		setEmail(orderPayment.getEmail());
 		setDisplayValue(orderPayment.getDisplayValue());
 		setRequestToken(orderPayment.getRequestToken());
-	}
-
-	/**
-	 * Clears all security sensitive credit card information.  Does not cleared masked numbers, etc.
-	 */
-	@Override
-	public void clearCreditCardData() {
-		getCreditCardNumber().setEncryptedCardNumber(null);
-	}
-
-	/**
-	 * Flags the credit card data as having been sanitized prior to persistence.
-	 *
-	 * @param isSanitized true if this payment has been sanitized
-	 */
-	@Override
-	public void setSanitized(final boolean isSanitized) {
-		getCreditCardNumber().setSanitized(isSanitized);
 	}
 
 	/**
@@ -960,7 +597,7 @@ public class OrderPaymentImpl extends AbstractLegacyPersistenceImpl implements O
 
 	@Override
 	@Basic
-	@Column(name = "PAYMENT_FOR_SUBSCRIPTIONS", nullable = true)
+	@Column(name = "PAYMENT_FOR_SUBSCRIPTIONS")
 	public boolean isPaymentForSubscriptions() {
 		return paymentForSubscriptions;
 	}
@@ -968,17 +605,6 @@ public class OrderPaymentImpl extends AbstractLegacyPersistenceImpl implements O
 	@Override
 	public void setPaymentForSubscriptions(final boolean paymentForSubscriptions) {
 		this.paymentForSubscriptions = paymentForSubscriptions;
-	}
-
-	/**
-	 * Ensures that any Credit card details ave been properly sanitized by the OrderService prior
-	 * to persistence.
-	 */
-	@PrePersist
-	protected void ensurePaymentHasBeenSanitized() {
-		if (getCreditCardNumber().getEncryptedCardNumber() != null && !getCreditCardNumber().isSanitized()) {
-			throw new EpDomainException("ERROR: Illegal State detected. Credit Card details were not sanitized prior to OrderPayment persistence.");
-		}
 	}
 
 	/**
@@ -997,28 +623,6 @@ public class OrderPaymentImpl extends AbstractLegacyPersistenceImpl implements O
 				.append("createdDate", getCreatedDate())
 				.append("email", getEmail())
 				.toString();
-	}
-
-	@SuppressWarnings("PMD.NPathComplexity")
-	private void checkDate() throws EpNonConsistentDomainFieldException {
-		if (startDate == null || !isActual(expiryMonth) || !isActual(expiryYear)) {
-			return;
-		}
-		DateFormat dateFormat = new SimpleDateFormat(DATE_FORMAT); // NOPMD
-		Date expiryDateAsDate;
-		try {
-			expiryDateAsDate = dateFormat.parse(FIRST_DAY + DATE_SEPARATOR + expiryMonth + DATE_SEPARATOR + expiryYear);
-		} catch (ParseException e) {
-			throw new EpNonConsistentDomainFieldException("Expiry month or year is incorrect", e);
-		}
-
-		// check expiry date and started date
-		if (!startDate.before(expiryDateAsDate)) {
-			throw new EpNonConsistentDomainFieldException("Expiry date's month must be greater than start date's month.");
-		}
-		if (startDate.after(new Date())) {
-			throw new EpNonConsistentDomainFieldException("Start date is after the current date.");
-		}
 	}
 
 	/**

@@ -12,6 +12,7 @@ import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.PartInitException;
 
+import com.elasticpath.cmclient.catalog.CatalogImageRegistry;
 import com.elasticpath.cmclient.catalog.CatalogMessages;
 import com.elasticpath.cmclient.catalog.CatalogPermissions;
 import com.elasticpath.cmclient.catalog.CatalogPlugin;
@@ -56,6 +57,10 @@ public class CategoryEditor extends AbstractPolicyAwareFormEditor {
 		categoryService = ServiceLocator.getService(ContextIdNames.CATEGORY_SERVICE);
 
 		pageContainer = addPolicyActionContainer("categoryEditor"); //$NON-NLS-1$
+
+		if (getCategory().isLinked()) {
+			setEditorTitleImage(CatalogImageRegistry.CATEGORY_LINKED.createImage());
+		}
 	}
 
 	@Override

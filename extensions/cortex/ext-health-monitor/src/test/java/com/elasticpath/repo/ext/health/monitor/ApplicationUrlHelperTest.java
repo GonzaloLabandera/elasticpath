@@ -19,6 +19,8 @@ public class ApplicationUrlHelperTest {
 	private static final String STATUS_INFO_URL = "http://localhost:9080/cortex/status/info.html";
 	private static final String STATUS_JSON_URL = "http://localhost:9080/cortex/status/info.json";
 
+	private static final String CORTEX_HEALTH_CHECK_URL = "http://localhost/cortex/healthcheck";
+
 	@Test
 	public void extractAndSetHealthCheckUrlForStatus() {
 		ApplicationUrlHelper.extractAndSetHealthCheckUrl(STATUS_URL);
@@ -40,13 +42,13 @@ public class ApplicationUrlHelperTest {
 	@Test
 	public void extractAndSetHealthCheckUrlForDuplicatedStatusString() {
 		ApplicationUrlHelper.extractAndSetHealthCheckUrl("http://status.test.com/status");
-		assertEquals(INCORRECT_URL_GENERATED, "http://status.test.com/cortex/healthcheck", ApplicationUrlHelper.getHealthCheckUrl());
+		assertEquals(INCORRECT_URL_GENERATED, CORTEX_HEALTH_CHECK_URL, ApplicationUrlHelper.getHealthCheckUrl());
 	}
 
 	@Test
 	public void extractAndSetHealthCheckUrlForDuplicatedStatusStringAtTheEnd() {
 		ApplicationUrlHelper.extractAndSetHealthCheckUrl("http://status.test.com/status/status");
-		assertEquals(INCORRECT_URL_GENERATED, "http://status.test.com/cortex/healthcheck", ApplicationUrlHelper.getHealthCheckUrl());
+		assertEquals(INCORRECT_URL_GENERATED, CORTEX_HEALTH_CHECK_URL, ApplicationUrlHelper.getHealthCheckUrl());
 	}
 
 }

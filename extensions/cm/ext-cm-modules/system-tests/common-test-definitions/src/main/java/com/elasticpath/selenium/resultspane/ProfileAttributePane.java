@@ -72,8 +72,10 @@ public class ProfileAttributePane extends AbstractPageObject {
 	 * @return Profile Atrribute pane
 	 */
 	public CreateEditProfileAttributeDialog clickCreateProfileAttributeButton() {
-		clickButton(CREATE_PROFILE_ATTRIBUTE_BUTTON_CSS, "Create Attribute");
-		return new CreateEditProfileAttributeDialog(getDriver());
+		final String dialogName = "Create";
+		clickButton(CREATE_PROFILE_ATTRIBUTE_BUTTON_CSS, "Create Attribute", String.format(CreateEditProfileAttributeDialog
+				.CREATE_EDIT_PROFILE_ATTRIBUTE_DIALOG_CSS_TEMPLATE, dialogName));
+		return new CreateEditProfileAttributeDialog(getDriver(), dialogName);
 	}
 
 	/**
@@ -91,8 +93,10 @@ public class ProfileAttributePane extends AbstractPageObject {
 	 */
 	public CreateEditProfileAttributeDialog clickEditProfileAttributeButton(final String profileAttributeName) {
 		verifyProfileAttributeExists(profileAttributeName);
-		clickButton(EDIT_PROFILE_ATTRIBUTE_BUTTON_CSS, "Edit Attribute");
-		return new CreateEditProfileAttributeDialog(getDriver());
+		final String dialogName = "Edit";
+		clickButton(EDIT_PROFILE_ATTRIBUTE_BUTTON_CSS, "Edit Attribute", String.format(CreateEditProfileAttributeDialog
+				.CREATE_EDIT_PROFILE_ATTRIBUTE_DIALOG_CSS_TEMPLATE, dialogName));
+		return new CreateEditProfileAttributeDialog(getDriver(), dialogName);
 	}
 
 }

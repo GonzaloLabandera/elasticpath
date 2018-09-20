@@ -184,12 +184,13 @@ public class CustomerAuthenticationServiceImpl implements CustomerAuthentication
 		//it get ripped of from the shopper service
 		shopper.setCustomer(customer);
 
-		final CustomerSession customerSession = customerSessionService.createWithShopper(shopper);
+		CustomerSession customerSession = customerSessionService.createWithShopper(shopper);
 		customerSession.setCreationDate(new Date());
 		customerSession.setLastAccessedDate(new Date());
 		customerSession.setLocale(store.getDefaultLocale());
 		customerSession.setCurrency(store.getDefaultCurrency());
 		customerSession.setGuid(customerSessionGuid);
+		customerSession = customerSessionService.initializeCustomerSessionForPricing(customerSession, store.getCode(), store.getDefaultCurrency());
 
 		customerSessionService.add(customerSession);
 		createOrLoadShoppingCart(customerSession, store, customer);
@@ -270,12 +271,6 @@ public class CustomerAuthenticationServiceImpl implements CustomerAuthentication
 		return shoppingCart;
 	}
 
-	/**
-	 * Attempts to write a cookie.
-	 *
-	 * @param inResponse the servlet response
-	 * @return The guid value of the cookie or null if the cookie could not be written
-	 */
 	private String obtainCustomerSessionGuid() {
 		return UUID.randomUUID().toString();
 	}

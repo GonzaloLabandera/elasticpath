@@ -11,9 +11,9 @@ import com.elasticpath.cmclient.conditionbuilder.wizard.pages.AbstractSellingCon
 import com.elasticpath.cmclient.conditionbuilder.wizard.pages.SellingContextConditionShopperWizardPage;
 import com.elasticpath.cmclient.conditionbuilder.wizard.pages.SellingContextConditionStoresWizardPage;
 import com.elasticpath.cmclient.conditionbuilder.wizard.pages.SellingContextConditionTimeWizardPage;
-import com.elasticpath.cmclient.core.ServiceLocator;
 import com.elasticpath.cmclient.core.CoreMessages;
 import com.elasticpath.cmclient.core.ObjectGuidReceiver;
+import com.elasticpath.cmclient.core.ServiceLocator;
 import com.elasticpath.cmclient.core.event.EventType;
 import com.elasticpath.cmclient.core.helpers.ChangeSetHelper;
 import com.elasticpath.cmclient.core.ui.IChangeSetEditorAware;
@@ -178,7 +178,7 @@ public class PriceListAssignmentWizard extends
 		}
 		ConditionalExpression storesCE = null;
 		try {
-			storesCE = this.storesPage.getModelAdapter().getModel();
+			storesCE = this.storesPage.getConditionalExpressionForStores();
 		} catch (InvalidConditionTreeException icte) {
 			hasInvalidConditions = true;
 			errorMessage.append(icte.getLocalizedMessage());

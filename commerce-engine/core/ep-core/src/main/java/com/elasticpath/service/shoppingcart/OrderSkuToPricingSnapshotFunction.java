@@ -3,22 +3,23 @@
  */
 package com.elasticpath.service.shoppingcart;
 
-import com.google.common.base.Function;
+import java.util.function.Function;
 
 import com.elasticpath.domain.order.OrderSku;
 import com.elasticpath.domain.shoppingcart.ShoppingItemPricingSnapshot;
 
 /**
- * <p>Guava function to convert from a {@link OrderSku} to a {@link ShoppingItemPricingSnapshot}, with use of a {@link PricingSnapshotService}.</p>
+ * <p>{@link Function} to convert from a {@link OrderSku} to a {@link ShoppingItemPricingSnapshot}, with use of a {@link PricingSnapshotService}.</p>
  * <p>This is useful when converting a collection of {@link OrderSku}s and a {@link PricingSnapshotService} to a
  * <code>Map&lt;ShoppingItem, ShoppingItemPricingSnapshot&gt;</code>.</p>
  * <p>Sample usage:
  * <pre>
  *     PricingSnapshotService pricingSnapshotService = ...;
- *     Collection<OrderSku> orderSkus = ...;
+ *     Collection&lt;OrderSku&gt; orderSkus = ...;
  *
- *     Map<? extends ShoppingItem, ShoppingItemPricingSnapshot> shoppingItemPricingSnapshotMap =
- *     		Maps.toMap(orderSkus, new OrderSkuToPricingSnapshotFunction(pricingSnapshotService));
+ *     Map&lt;OrderSku, ShoppingItemPricingSnapshot&gt; itemPricingSnapshotMap = orderSkus.stream()
+ *             .collect(toMap(identity(),
+ *                            new OrderSkuToPricingSnapshotFunction(pricingSnapshotService)));
  * </pre>
  * </p>
  */

@@ -4,7 +4,9 @@
 package com.elasticpath.domain.catalog.impl;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -23,20 +25,21 @@ import com.elasticpath.domain.catalog.BundleConstituent;
 import com.elasticpath.domain.catalog.Product;
 import com.elasticpath.domain.catalog.ProductBundle;
 import com.elasticpath.domain.catalog.ProductSku;
+import com.elasticpath.domain.catalog.SelectionRule;
 import com.elasticpath.test.BeanFactoryExpectationsFactory;
 
 /**
  * Test that the methods of ProductBundleImpl behave as expected.
  */
-@SuppressWarnings("PMD.TooManyMethods")
+@SuppressWarnings({"PMD.TooManyMethods", "PMD.GodClass"})
 public class ProductBundleImplTest {
-	private ProductBundleImpl bundle;
 
 	private static final Date FEBRUARY_28TH_2009 = getDate(2009, Calendar.FEBRUARY, 28);
 	private static final Date JANUARY_28TH_2009 = getDate(2009, Calendar.JANUARY, 28);
 	private static final Date OCT_28TH_2009 = getDate(2009, Calendar.OCTOBER, 28);
-
 	private static final int NUMBER = 3;
+
+	private ProductBundleImpl bundle;
 
 	@Rule
 	public final JUnitRuleMockery context = new JUnitRuleMockery();
@@ -59,6 +62,7 @@ public class ProductBundleImplTest {
 		bundle = new ProductBundleImpl();
 		setupConstituent(bundle);
 		expectationsFactory.allowingBeanFactoryGetBean("productConstituent", ProductConstituentImpl.class);
+		expectationsFactory.allowingBeanFactoryGetBean("productSkuConstituent", ProductSkuConstituentImpl.class);
 	}
 
 	@After
@@ -465,7 +469,7 @@ public class ProductBundleImplTest {
 		const1.setConstituent(child1);
 		bundle.addConstituent(const1);
 
-		assertEquals(true, bundle.isHidden());
+		assertTrue(bundle.isHidden());
 	}
 
 	/** */
@@ -480,7 +484,7 @@ public class ProductBundleImplTest {
 		const1.setConstituent(child1);
 		bundle.addConstituent(const1);
 
-		assertEquals(true, bundle.isHidden());
+		assertTrue(bundle.isHidden());
 	}
 
 	/** */
@@ -501,7 +505,7 @@ public class ProductBundleImplTest {
 		const2.setConstituent(child2);
 		bundle.addConstituent(const2);
 
-		assertEquals(true, bundle.isHidden());
+		assertTrue(bundle.isHidden());
 	}
 
 	/** */
@@ -528,7 +532,7 @@ public class ProductBundleImplTest {
 		const2.setConstituent(child2);
 		bundle.addConstituent(const2);
 
-		assertEquals(true, bundle.isHidden());
+		assertTrue(bundle.isHidden());
 	}
 
 	/** */
@@ -555,7 +559,7 @@ public class ProductBundleImplTest {
 		const2.setConstituent(child2);
 		bundle.addConstituent(const2);
 
-		assertEquals(true, bundle.isHidden());
+		assertTrue(bundle.isHidden());
 	}
 
 	/** */
@@ -576,7 +580,7 @@ public class ProductBundleImplTest {
 		const2.setConstituent(child2);
 		bundle.addConstituent(const2);
 
-		assertEquals(true, bundle.isHidden());
+		assertTrue(bundle.isHidden());
 	}
 
 	/** */
@@ -597,7 +601,7 @@ public class ProductBundleImplTest {
 		const2.setConstituent(child2);
 		bundle.addConstituent(const2);
 
-		assertEquals(false, bundle.isHidden());
+		assertFalse(bundle.isHidden());
 	}
 
 	/** */
@@ -626,10 +630,10 @@ public class ProductBundleImplTest {
 
 		bundle.setHidden(true);
 
-		assertEquals(true, bundle.isBundleHidden());
-		assertEquals(false, child1.isBundleHidden());
-		assertEquals(true, child11.isHidden());
-		assertEquals(true, child1.isHidden());
+		assertTrue(bundle.isBundleHidden());
+		assertFalse(child1.isBundleHidden());
+		assertTrue(child11.isHidden());
+		assertTrue(child1.isHidden());
 	}
 
 	/**
@@ -673,4 +677,129 @@ public class ProductBundleImplTest {
 		Date endDate = bundleWithSku.getEndDate();
 		assertEquals("The bundle end date should be the sku's date", FEBRUARY_28TH_2009, endDate);
 	}
+
+	/**
+	 * Test that all constituents of a bundle with a null selection rule are auto-selectable.
+	 */
+	@Test
+	public void testAutoSelectableConsituentWhenSelectionRuleIsNull() {
+		ProductBundle bundle = new ProductBundleImpl();
+		BundleConstituent bundleConstituent1 = createBundleProductSkuConstituent();
+		bundle.addConstituent(bundleConstituent1);
+		BundleConstituent bundleConstituent2 = createBundleProductSkuConstituent();
+		bundle.addConstituent(bundleConstituent2);
+
+		assertTrue(bundle.isConstituentAutoSelectable(bundleConstituent1));
+		assertTrue(bundle.isConstituentAutoSelectable(bundleConstituent2));
+	}
+
+	/**
+	 * Test that all constituents of a bundle with selection rule 0 are auto-selectable.
+	 */
+	@Test
+	public void testAutoSelectableConsituentWhenSelectionRuleIsZero() {
+		final SelectionRule selectionRule = new SelectionRuleImpl();
+		selectionRule.setParameter(0);
+
+		ProductBundle bundle = new ProductBundleImpl();
+		bundle.setSelectionRule(selectionRule);
+		BundleConstituent bundleConstituent1 = createBundleProductSkuConstituent();
+		bundle.addConstituent(bundleConstituent1);
+		BundleConstituent bundleConstituent2 = createBundleProductSkuConstituent();
+		bundle.addConstituent(bundleConstituent2);
+
+		assertTrue(bundle.isConstituentAutoSelectable(bundleConstituent1));
+		assertTrue(bundle.isConstituentAutoSelectable(bundleConstituent2));
+	}
+
+	/**
+	 * Test that the constituent of a bundle with one constituent and selection rule 1 is auto-selectable.
+	 */
+	@Test
+	public void testAutoSelectableConsituentWhenSelectionRuleIsEqualToConstituents() {
+		final SelectionRule selectionRule = new SelectionRuleImpl();
+		selectionRule.setParameter(1);
+
+		ProductBundle bundle = new ProductBundleImpl();
+		bundle.setSelectionRule(selectionRule);
+		BundleConstituent bundleConstituent1 = createBundleProductSkuConstituent();
+		bundle.addConstituent(bundleConstituent1);
+		assertTrue(bundle.isConstituentAutoSelectable(bundleConstituent1));
+	}
+
+	/**
+	 * Test that the constituents of a bundle with more than one constituent and selection rule 1 are not auto-selectable.
+	 */
+	@Test
+	public void testAutoSelectableConsituentWhenSelectionRuleIsLessThanConstituents() {
+		final SelectionRule selectionRule = new SelectionRuleImpl();
+		selectionRule.setParameter(1);
+
+		ProductBundle bundle = new ProductBundleImpl();
+		bundle.setSelectionRule(selectionRule);
+		BundleConstituent bundleConstituent1 = createBundleProductSkuConstituent();
+		bundle.addConstituent(bundleConstituent1);
+		BundleConstituent bundleConstituent2 = createBundleProductSkuConstituent();
+		bundle.addConstituent(bundleConstituent2);
+		assertFalse(bundle.isConstituentAutoSelectable(bundleConstituent1));
+		assertFalse(bundle.isConstituentAutoSelectable(bundleConstituent2));
+	}
+
+	/**
+	 * Test that multi-sku constituents of a bundle with selection rule 0 are not auto-selectable.
+	 */
+	@Test
+	public void testAutoSelectableMultiSkuConsituentWhenSelectionRuleIsZero() {
+		final SelectionRule selectionRule = new SelectionRuleImpl();
+		selectionRule.setParameter(0);
+
+		ProductBundle bundle = new ProductBundleImpl();
+		bundle.setSelectionRule(selectionRule);
+		BundleConstituent bundleConstituent1 = createBundleMultiSkuProductConstituent();
+		bundle.addConstituent(bundleConstituent1);
+		BundleConstituent bundleConstituent2 = createBundleProductSkuConstituent();
+		bundle.addConstituent(bundleConstituent2);
+		BundleConstituent bundleConstituent3 = createBundleSingleSkuProductConstituent();
+		bundle.addConstituent(bundleConstituent3);
+
+		assertFalse(bundle.isConstituentAutoSelectable(bundleConstituent1));
+		assertTrue(bundle.isConstituentAutoSelectable(bundleConstituent2));
+		assertTrue(bundle.isConstituentAutoSelectable(bundleConstituent3));
+	}
+
+	private BundleConstituent createBundleSingleSkuProductConstituent() {
+		Product product = new ProductImpl();
+		ProductSku productSku1 = new ProductSkuImpl();
+		product.addOrUpdateSku(productSku1);
+
+		BundleConstituent constituent = new BundleConstituentImpl();
+		constituent.setConstituent(product);
+
+		return constituent;
+	}
+
+	private BundleConstituent createBundleMultiSkuProductConstituent() {
+		Product product = new ProductImpl();
+		ProductSku productSku1 = new ProductSkuImpl();
+		productSku1.setSkuCode("SKU_CODE_1");
+		product.addOrUpdateSku(productSku1);
+		ProductSku productSku2 = new ProductSkuImpl();
+		productSku2.setSkuCode("SKU_CODE_2");
+		product.addOrUpdateSku(productSku2);
+
+		BundleConstituent constituent = new BundleConstituentImpl();
+		constituent.setConstituent(product);
+
+		return constituent;
+	}
+
+	private BundleConstituent createBundleProductSkuConstituent() {
+		ProductSku productSku = new ProductSkuImpl();
+
+		BundleConstituent constituent = new BundleConstituentImpl();
+		constituent.setConstituent(productSku);
+
+		return constituent;
+	}
+
 }

@@ -8,7 +8,7 @@
 
 	<!-- Then run the importexport changeset, qualify the changeset id using a property to allow it to be run multiple times if the qualifier changes, or just once if not -->
 	<changeSet id="ext-importexport-rel-1.1-data${importexport.rel-1.1-data.qualifier}" author="com.elasticpath.extensions">
-		<customChange class="com.elasticpath.repo.datapopulation.importexport.ImportExportChange">
+		<customChange class="com.elasticpath.datapopulation.importexport.ImportExportChange">
 			<param name="dataSet" value="rel-1.1-data" />
 		</customChange>
 	</changeSet>

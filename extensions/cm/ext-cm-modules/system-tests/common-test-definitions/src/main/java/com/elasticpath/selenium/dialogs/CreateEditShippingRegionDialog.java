@@ -14,7 +14,10 @@ public class CreateEditShippingRegionDialog extends AbstractDialog {
 	private final String shippingRegionsNameInputCSS;
 	private final String shippingRegionsCountryCSS;
 	private final String saveButtonCSS;
-	private static final String SHIPPING_REGION_PARENT_CSS_TEMPLATE = "div[automation-id*='com.elasticpath.cmclient.admin"
+	/**
+	 * CSS selector used to identify the dialog.
+	 */
+	public static final String SHIPPING_REGION_PARENT_CSS_TEMPLATE = "div[automation-id*='com.elasticpath.cmclient.admin"
 			+ ".shipping.AdminShippingMessages.%sShippingRegionTitle'] ";
 	private static final String SHIPPING_REGIONS_NAME_INPUT_CSS_TEMPLATE = "div[automation-id='com.elasticpath.cmclient.admin.shipping"
 			+ ".AdminShippingMessages.RegionNameLabel'] input";

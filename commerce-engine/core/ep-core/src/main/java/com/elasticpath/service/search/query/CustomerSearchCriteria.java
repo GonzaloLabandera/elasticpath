@@ -226,10 +226,7 @@ public class CustomerSearchCriteria extends AbstractSearchCriteriaImpl {
 		if (!isStringValid(email)) {
 			email = null;
 		}
-		if (isStringValid(phoneNumber)) {
-			// Removed non-numeric characters.
-			phoneNumber = phoneNumber.replaceAll("\\D+", "");
-		} else {
+		if (!isStringValid(phoneNumber)) {
 			phoneNumber = null;
 		}
 		if (!isStringValid(userId)) {

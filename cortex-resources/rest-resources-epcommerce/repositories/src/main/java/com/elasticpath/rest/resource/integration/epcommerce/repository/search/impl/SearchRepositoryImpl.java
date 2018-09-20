@@ -5,6 +5,7 @@ package com.elasticpath.rest.resource.integration.epcommerce.repository.search.i
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 import io.reactivex.Single;
 import org.osgi.service.component.annotations.Component;
@@ -31,7 +32,10 @@ import com.elasticpath.service.search.solr.IndexUtility;
 @Component
 public class SearchRepositoryImpl implements SearchRepository {
 
-	private static final String DEFAULT_PAGINATION_VALUE_ERROR = "Default pagination value for '%s' is invalid: '%s'";
+	private static final String DEFAULT_PAGINATION_VALUE_NO_SETTING_FOUND_ERROR =
+			"Error encountered while retrieving default pagination setting with context '%s'";
+	private static final String DEFAULT_PAGINATION_VALUE_NO_VALUE_ERROR = "No default pagination value for '%s' is defined";
+	private static final String DEFAULT_PAGINATION_VALUE_INVALID_VALUE_ERROR = "Default pagination value for '%s' is invalid: '%s'";
 	private static final String PAGINATION_SETTING = "COMMERCE/STORE/listPagination";
 
 	private SettingsRepository settingsRepository;
@@ -74,27 +78,25 @@ public class SearchRepositoryImpl implements SearchRepository {
 	@Override
 	@CacheResult
 	public Single<Integer> getDefaultPageSize(final String storeCode) {
-		return settingsRepository.getStringSettingValue(PAGINATION_SETTING, storeCode)
+		return settingsRepository.<Integer>getSetting(PAGINATION_SETTING, storeCode)
+				.toSingle()
+				.onErrorResumeNext(throwable -> {
+					if (throwable instanceof NoSuchElementException) {
+						return Single.error(ResourceOperationFailure.notFound(String.format(DEFAULT_PAGINATION_VALUE_NO_VALUE_ERROR, storeCode)));
+					} else {
+						return Single.error(ResourceOperationFailure.serverError(
+								String.format(DEFAULT_PAGINATION_VALUE_NO_SETTING_FOUND_ERROR, storeCode)));
+					}
+				})
 				.flatMap(paginationSetting -> getPaginationValue(storeCode, paginationSetting));
 	}
 
-	private Single<Integer> getPaginationValue(final String storeCode, final String paginationSetting) {
-		Integer paginationValue = parseInteger(paginationSetting);
+	private Single<Integer> getPaginationValue(final String storeCode, final Integer paginationValue) {
 		if (paginationValue == null || !NumberUtil.isPositive(paginationValue)) {
 			return Single.error(ResourceOperationFailure.serverError(
-					String.format(DEFAULT_PAGINATION_VALUE_ERROR, storeCode, paginationSetting)
-			));
+					String.format(DEFAULT_PAGINATION_VALUE_INVALID_VALUE_ERROR, storeCode, paginationValue)));
 		}
 		return Single.just(paginationValue);
-	}
-
-
-	private Integer parseInteger(final String string) {
-		try {
-			return Integer.parseInt(string);
-		} catch (NumberFormatException e) {
-			return null;
-		}
 	}
 
 	@Override

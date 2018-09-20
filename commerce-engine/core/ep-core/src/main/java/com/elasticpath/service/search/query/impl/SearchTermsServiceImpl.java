@@ -102,9 +102,7 @@ public class SearchTermsServiceImpl implements SearchTermsService {
 		Class<SearchTerms> searchTermsClass = getPrototypeBeanFactory().getBeanImplClass(ContextIdNames.SEARCH_TERMS);
 		try {
 			return getObjectMapper().readValue(representation, searchTermsClass);
-		} catch (JsonParseException e) {
-			throw new EpSystemException(CANNOT_DESERIALIZE_JSON + searchTermsClass.getName(), e);
-		} catch (JsonMappingException e) {
+		} catch (JsonParseException | JsonMappingException e) {
 			throw new EpSystemException(CANNOT_DESERIALIZE_JSON + searchTermsClass.getName(), e);
 		} catch (IOException e) {
 			throw new EpSystemException(CANNOT_DESERIALIZE_JSON + searchTermsClass.getName(), e);
@@ -121,9 +119,7 @@ public class SearchTermsServiceImpl implements SearchTermsService {
 	protected String serializeSearchTerms(final SearchTerms searchTerms) {
 		try {
 			return getObjectMapper().writeValueAsString(searchTerms);
-		} catch (JsonGenerationException e) {
-			throw new EpSystemException(CANNOT_SERIALIZE_THE_OBJECT_INTO_JSON, e);
-		} catch (JsonMappingException e) {
+		} catch (JsonGenerationException | JsonMappingException e) {
 			throw new EpSystemException(CANNOT_SERIALIZE_THE_OBJECT_INTO_JSON, e);
 		} catch (IOException e) {
 			throw new EpSystemException(CANNOT_SERIALIZE_THE_OBJECT_INTO_JSON, e);

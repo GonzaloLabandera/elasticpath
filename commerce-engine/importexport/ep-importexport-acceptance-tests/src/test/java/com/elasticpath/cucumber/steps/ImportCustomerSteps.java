@@ -14,10 +14,7 @@ import java.util.Set;
 
 import cucumber.api.java.en.Given;
 import cucumber.api.java.en.When;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.ContextConfiguration;
 
 import com.elasticpath.common.dto.customer.AttributeValueDTO;
 import com.elasticpath.common.dto.customer.CustomerDTO;
@@ -33,15 +30,13 @@ import com.elasticpath.importexport.common.manifest.Manifest;
 import com.elasticpath.importexport.common.types.JobType;
 import com.elasticpath.importexport.importer.configuration.ImportConfiguration;
 import com.elasticpath.importexport.importer.controller.ImportController;
-import com.elasticpath.importexport.importer.importers.impl.SavingManager;
 import com.elasticpath.importexport.importer.types.ImportStrategyType;
-import com.elasticpath.persistence.api.Persistable;
 import com.elasticpath.service.customer.CustomerGroupService;
+import com.elasticpath.service.store.StoreService;
 
 /**
  * Import customer steps.
  */
-@ContextConfiguration("/integration-context-mocked-customer-service.xml")
 public class ImportCustomerSteps {
 
 	private static final String CUSTOMERS_IMPORT_FILE = "customers.xml";
@@ -52,10 +47,10 @@ public class ImportCustomerSteps {
 	private CustomerGroupService customerGroupService;
 
 	@Autowired
-	private ImportController importController;
+	private StoreService storeService;
 
 	@Autowired
-	private SavingManager<Persistable> savingManager;
+	private ImportController importController;
 
 	private CustomersDTO customersDtoForImport;
 
@@ -102,8 +97,8 @@ public class ImportCustomerSteps {
 
 		final CustomerDTO customerDTO = new CustomerDTO();
 		customerDTO.setGuid(CustomerSteps.generateCustomerGuidFromName(customerFirstName, customerLastName));
-		customerDTO.setUserId(String.format("userid_%s_%s", customerFirstName, customerLastName));
-		customerDTO.setStoreCode("storecode");
+		customerDTO.setUserId(String.format("%s.%s@elasticpath.com", customerFirstName, customerLastName));
+		customerDTO.setStoreCode(storeService.findAllStores().get(0).getCode());
 		customerDTO.setStatus(Customer.STATUS_ACTIVE);
 		customerDTO.setCreationDate(new Date());
 		customerDTO.setLastEditDate(new Date());
@@ -168,17 +163,6 @@ public class ImportCustomerSteps {
 		importController.loadConfiguration(importConfiguration);
 		importController.executeImport();
 
-		final ArgumentCaptor<Customer> savedCustomerCaptor = ArgumentCaptor.forClass(Customer.class);
-		Mockito.verify(savingManager, Mockito.atLeast(0)).save(savedCustomerCaptor.capture());
-		for (Customer customer : savedCustomerCaptor.getAllValues()) {
-			CustomerSteps.addCustomer(customer);
-		}
-
-		final ArgumentCaptor<Customer> updatedCustomerCaptor = ArgumentCaptor.forClass(Customer.class);
-		Mockito.verify(savingManager, Mockito.atLeast(0)).update(updatedCustomerCaptor.capture());
-		for (Customer customer : updatedCustomerCaptor.getAllValues()) {
-			CustomerSteps.updateCustomer(customer);
-		}
 	}
 
 }

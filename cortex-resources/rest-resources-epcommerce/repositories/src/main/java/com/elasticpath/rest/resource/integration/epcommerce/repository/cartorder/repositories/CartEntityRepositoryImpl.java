@@ -35,7 +35,7 @@ public class CartEntityRepositoryImpl<E extends CartEntity, I extends CartIdenti
 
 	@Override
 	public Single<CartEntity> findOne(final CartIdentifier cartIdentifier) {
-		return shoppingCartRepository.getDefaultShoppingCart()
+		return shoppingCartRepository.getShoppingCart(cartIdentifier.getCartId().getValue())
 				.map(shoppingCart -> conversionService.convert(shoppingCart, CartEntity.class));
 	}
 

@@ -25,8 +25,7 @@ import com.elasticpath.service.dataimport.StaleImportNotificationProcessor;
 import com.elasticpath.service.dataimport.dao.ImportJobStatusDao;
 import com.elasticpath.service.dataimport.dao.ImportNotificationDao;
 import com.elasticpath.service.misc.TimeService;
-import com.elasticpath.settings.SettingsReader;
-import com.elasticpath.settings.domain.SettingValue;
+import com.elasticpath.settings.provider.SettingValueProvider;
 
 /**
  * The default implementation of {@link ImportJobCleanupProcessor}.
@@ -42,16 +41,6 @@ public class ImportJobCleanupProcessorImpl implements ImportJobCleanupProcessor 
 	 */
 	private static final Logger LOG = Logger.getLogger(ImportJobCleanupProcessorImpl.class);
 
-	/**
-	 * The import job max age setting path.
-	 */
-	public static final String SETTING_IMPORT_JOB_MAX_AGE = "COMMERCE/SYSTEM/IMPORT/importJobMaxAge";
-
-	/**
-	 * The import job timeout before a job is considered stale.
-	 */
-	public static final String SETTING_IMPORT_JOB_STALE_TIMEOUT = "COMMERCE/SYSTEM/IMPORT/staleImportJobTimeout";
-
 	private static final long MILLI = 1000;
 	private static final long ONE_DAY_MILLIS = 24 * 60 * 60 * MILLI;
 
@@ -59,32 +48,31 @@ public class ImportJobCleanupProcessorImpl implements ImportJobCleanupProcessor 
 
 	private ImportJobStatusDao importJobStatusDao;
 
-	private SettingsReader settingsReader;
-
 	private TimeService timeService;
 
 	private StaleImportNotificationProcessor staleImportNotificationProcessor;
 
 	private AssetRepository assetRepository;
 
+	private SettingValueProvider<Integer> maximumImportJobAgeDaysProvider;
+
+	private SettingValueProvider<Integer> staleImportJobStatusThresholdMinsProvider;
+
 	@Override
 	public int cleanupImportJobData() {
 		final long startTime = System.currentTimeMillis();
 		LOG.debug("Start cleanup import job quartz job at: " + new Date(startTime));
 
-
-		SettingValue importJobMaxAgeValue = getSettingsReader().getSettingValue(SETTING_IMPORT_JOB_MAX_AGE);
-		if (importJobMaxAgeValue == null) {
-			throw new EpSystemException("Missing setting value for import job max age: " + SETTING_IMPORT_JOB_MAX_AGE);
-		}
-
 		int importJobsAffected = 0;
-		// get a list of all processed launch notifications (success or failure of the process is not applicable)
-		List<ImportNotification> notifications =
+
+		final int importJobMaxAgeSeconds = getMaximumImportJobAgeDaysProvider().get();
+
+		// get a list of all processed launch notifications (success or failure of the process is not applicable) 
+		List<ImportNotification> notifications = 
 			importNotificationDao.findByActionAndState(ImportAction.LAUNCH_IMPORT, ImportNotificationState.PROCESSED);
 
 		for (ImportNotification notification : notifications) {
-			importJobsAffected += processNotifications(importJobMaxAgeValue, notification);
+			importJobsAffected += processNotifications(importJobMaxAgeSeconds, notification);
 		}
 
 		// also delete old import job attempts that failed validation or were cancelled by the user before a launch
@@ -92,7 +80,7 @@ public class ImportJobCleanupProcessorImpl implements ImportJobCleanupProcessor 
 		List<ImportJobStatus> importJobStatusList = importJobStatusDao.findByState(ImportJobState.QUEUED_FOR_VALIDATION);
 
 		for (ImportJobStatus importJobStatus : importJobStatusList) {
-			importJobsAffected += processValidationStates(importJobMaxAgeValue, importJobStatus);
+			importJobsAffected += processValidationStates(importJobMaxAgeSeconds, importJobStatus);
 		}
 
 		LOG.debug("Import jobs cleaned up: " + importJobsAffected);
@@ -101,8 +89,7 @@ public class ImportJobCleanupProcessorImpl implements ImportJobCleanupProcessor 
 		return importJobsAffected;
 	}
 
-	private int processValidationStates(final SettingValue importJobMaxAgeValue, final ImportJobStatus importJobStatus) {
-
+	private int processValidationStates(final int importJobMaxAgeSeconds, final ImportJobStatus importJobStatus) {
 		Date importTime = importJobStatus.getEndTime();
 		if (importTime == null) {
 			// let's not assume that the end time has always been set
@@ -114,8 +101,9 @@ public class ImportJobCleanupProcessorImpl implements ImportJobCleanupProcessor 
 					+ importJobStatus.getProcessId());
 		}
 
+		final boolean maxAgeExceeded = isMaxAgeExceeded(importJobMaxAgeSeconds, importTime.getTime());
+
 		int importJobsAffected = 0;
-		boolean maxAgeExceeded = isMaxAgeExceeded(importJobMaxAgeValue, importTime.getTime());
 
 		if (maxAgeExceeded) {
 			// bump up affected jobs counter
@@ -127,12 +115,12 @@ public class ImportJobCleanupProcessorImpl implements ImportJobCleanupProcessor 
 		return importJobsAffected;
 	}
 
-	private int processNotifications(final SettingValue importJobMaxAgeValue, final ImportNotification notification) {
+	private int processNotifications(final int importJobMaxAgeSeconds, final ImportNotification notification) {
 		int importJobsAffected = 0;
 
 		// the import job has remained in the system too long if the
 		// current time is past the maximum age of the notification
-		boolean maxAgeExceeded = isMaxAgeExceeded(importJobMaxAgeValue, notification.getDateCreated().getTime());
+		boolean maxAgeExceeded = isMaxAgeExceeded(importJobMaxAgeSeconds, notification.getDateCreated().getTime());
 
 		if (maxAgeExceeded) {
 			// bump up affected jobs counter
@@ -159,11 +147,9 @@ public class ImportJobCleanupProcessorImpl implements ImportJobCleanupProcessor 
 		return importJobsAffected;
 	}
 
-	private boolean isMaxAgeExceeded(final SettingValue importJobMaxAgeValue, final long dateCreated) {
+	private boolean isMaxAgeExceeded(final int importJobMaxAgeInSeconds, final long dateCreated) {
 		long now = timeService.getCurrentTime().getTime();
-		long importJobMaxAgeInSeconds = Long.parseLong(importJobMaxAgeValue.getValue());
 		long maxAge = dateCreated + importJobMaxAgeInSeconds * MILLI;
-
 		return now > maxAge;
 	}
 
@@ -200,20 +186,6 @@ public class ImportJobCleanupProcessorImpl implements ImportJobCleanupProcessor 
 	}
 
 	/**
-	 * @param settingsReader the settingsReader to set
-	 */
-	public void setSettingsReader(final SettingsReader settingsReader) {
-		this.settingsReader = settingsReader;
-	}
-
-	/**
-	 * @return the settingsReader
-	 */
-	public SettingsReader getSettingsReader() {
-		return settingsReader;
-	}
-
-	/**
 	 * @return the timeService
 	 */
 	public TimeService getTimeService() {
@@ -227,9 +199,6 @@ public class ImportJobCleanupProcessorImpl implements ImportJobCleanupProcessor 
 		this.timeService = timeService;
 	}
 
-	/**
-	 * Finds and processes all stale import jobs.
-	 */
 	@Override
 	public void processStaleImportJobs() {
 		final long startTime = System.currentTimeMillis();
@@ -272,8 +241,7 @@ public class ImportJobCleanupProcessorImpl implements ImportJobCleanupProcessor 
 	 * @return stale import job timeout in minutes
 	 */
 	protected int getStaleImportJobTimeoutInMinutes() {
-		String staleImportJobTimeout = getSettingsReader().getSettingValue(SETTING_IMPORT_JOB_STALE_TIMEOUT).getValue();
-		return Integer.parseInt(staleImportJobTimeout);
+		return getStaleImportJobStatusThresholdMinsProvider().get();
 	}
 
 	/**
@@ -340,4 +308,21 @@ public class ImportJobCleanupProcessorImpl implements ImportJobCleanupProcessor 
 	public void setAssetRepository(final AssetRepository assetRepository) {
 		this.assetRepository = assetRepository;
 	}
+
+	public void setMaximumImportJobAgeDaysProvider(final SettingValueProvider<Integer> maximumImportJobAgeDaysProvider) {
+		this.maximumImportJobAgeDaysProvider = maximumImportJobAgeDaysProvider;
+	}
+
+	protected SettingValueProvider<Integer> getMaximumImportJobAgeDaysProvider() {
+		return maximumImportJobAgeDaysProvider;
+	}
+
+	public void setStaleImportJobStatusThresholdMinsProvider(final SettingValueProvider<Integer> staleImportJobStatusThresholdMinsProvider) {
+		this.staleImportJobStatusThresholdMinsProvider = staleImportJobStatusThresholdMinsProvider;
+	}
+
+	protected SettingValueProvider<Integer> getStaleImportJobStatusThresholdMinsProvider() {
+		return staleImportJobStatusThresholdMinsProvider;
+	}
+
 }

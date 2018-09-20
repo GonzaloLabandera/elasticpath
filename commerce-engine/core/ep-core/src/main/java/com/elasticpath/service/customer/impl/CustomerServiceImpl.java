@@ -23,13 +23,13 @@ import com.google.common.collect.ImmutableMap;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
+import com.elasticpath.base.common.dto.StructuredErrorMessage;
 import com.elasticpath.base.exception.EpServiceException;
 import com.elasticpath.base.exception.EpSystemException;
-import com.elasticpath.common.dto.StructuredErrorMessage;
+import com.elasticpath.base.exception.structured.EpValidationException;
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.commons.constants.WebConstants;
 import com.elasticpath.commons.exception.EmailExistException;
-import com.elasticpath.commons.exception.EpValidationException;
 import com.elasticpath.commons.exception.UserIdExistException;
 import com.elasticpath.commons.exception.UserIdNonExistException;
 import com.elasticpath.commons.exception.UserStatusInactiveException;
@@ -41,7 +41,6 @@ import com.elasticpath.domain.customer.CustomerAuthentication;
 import com.elasticpath.domain.customer.CustomerDeleted;
 import com.elasticpath.domain.customer.CustomerGroup;
 import com.elasticpath.domain.customer.CustomerMessageIds;
-import com.elasticpath.domain.order.OrderMessageIds;
 import com.elasticpath.domain.store.Store;
 import com.elasticpath.messaging.EventMessage;
 import com.elasticpath.messaging.EventMessagePublisher;
@@ -59,7 +58,9 @@ import com.elasticpath.service.search.IndexNotificationService;
 import com.elasticpath.service.search.IndexType;
 import com.elasticpath.service.shopper.ShopperCleanupService;
 import com.elasticpath.service.store.StoreService;
+import com.elasticpath.settings.MalformedSettingValueException;
 import com.elasticpath.settings.SettingsReader;
+import com.elasticpath.settings.provider.SettingValueProvider;
 import com.elasticpath.validation.ConstraintViolationTransformer;
 
 /**
@@ -69,6 +70,8 @@ import com.elasticpath.validation.ConstraintViolationTransformer;
 public class CustomerServiceImpl extends AbstractEpPersistenceServiceImpl implements CustomerService {
 
 	private static final String STRUCTURED_ERROR_MESSAGE_DATA_FIELD_UNDEFINED = "undefined";
+
+	private static final String USER_ACCOUNT_NOT_ACTIVE = "purchase.user.account.not.active";
 
 	private CustomerGroupService customerGroupService;
 
@@ -100,6 +103,8 @@ public class CustomerServiceImpl extends AbstractEpPersistenceServiceImpl implem
 
 	// Turn off line too long PMD warning
 	private ConstraintViolationTransformer constraintViolationTransformer; //NOPMD
+
+	private SettingValueProvider<Integer> userIdModeProvider;
 
 
 	public void setValidator(final Validator validator) {
@@ -539,7 +544,7 @@ public class CustomerServiceImpl extends AbstractEpPersistenceServiceImpl implem
 	 * @throws EpServiceException - in case of any errors
 	 */
 	@Override
-	public Customer findByUserId(final String userId, final String storeCode, final boolean includeAnonymous) throws EpServiceException {
+    	public Customer findByUserId(final String userId, final String storeCode, final boolean includeAnonymous) throws EpServiceException {
 		sanityCheck();
 		if (userId == null || storeCode == null) {
 			throw new EpServiceException("Cannot retrieve customer without userId or store");
@@ -743,18 +748,13 @@ public class CustomerServiceImpl extends AbstractEpPersistenceServiceImpl implem
 		if (customer.getUserId() == null) {
 			return false;
 		}
-		boolean userIdExists = false;
-
-		final List<Long> results = getPersistenceEngine().retrieveByNamedQuery("OTHER_CUSTOMER_COUNT_BY_USERID_BY_STORE_EXCLUDING_ANONYMOUS",
+		List<Long> results = getPersistenceEngine().retrieveByNamedQuery(
+				"OTHER_CUSTOMER_COUNT_BY_USERID_BY_STORES_EXCLUDING_ANONYMOUS",
 				customer.getUserId(),
-				storeCode,
-				customer.getGuid());
+				customer.getGuid(),
+				storeCode);
 
-		if (results.get(0) > 0) {
-			// there is another customer have same userId but different Guid
-			userIdExists = true;
-		}
-		return userIdExists;
+		return results.get(0) > 0;
 	}
 
 	/**
@@ -901,7 +901,7 @@ public class CustomerServiceImpl extends AbstractEpPersistenceServiceImpl implem
 						errorMessage,
 						asList(
 								new StructuredErrorMessage(
-										OrderMessageIds.USER_ACCOUNT_NOT_ACTIVE,
+										USER_ACCOUNT_NOT_ACTIVE,
 										errorMessage,
 										ImmutableMap.of("user-id", String.valueOf(customer.getUserId()))
 								)
@@ -1017,24 +1017,13 @@ public class CustomerServiceImpl extends AbstractEpPersistenceServiceImpl implem
 		}
 	}
 
-	/**
-	 * Return the mode to generate user Id. 1 - Use user email as user Id, this is default value. 2 - Generate unique permanent user Id, currently
-	 * will append a random four digit suffix to email address, and use it as User Id. The user Id is created when the customer is created first
-	 * time. Later on, when the customer change the email address, the user Id will not be changed. e.g. customer email address is a@a.com, the user
-	 * Id would be a@a.comXXXX, where XXXX is a random generated string. 3 - Independent email and user Id
-	 *
-	 * @return the flag to indicate how to generate user Id
-	 */
 	@Override
 	public int getUserIdMode() {
-		int userIdMode;
-		String userIdModeStr = getSettingsReader().getSettingValue("COMMERCE/SYSTEM/userIdMode").getValue();
-		if (userIdModeStr == null) {
-			userIdMode = WebConstants.USE_EMAIL_AS_USER_ID_MODE; // default value
-		} else {
-			userIdMode = Integer.parseInt(userIdModeStr);
+		try {
+			return getUserIdModeProvider().get();
+		} catch (final MalformedSettingValueException e) {
+			return WebConstants.USE_EMAIL_AS_USER_ID_MODE; // default value
 		}
-		return userIdMode;
 	}
 
 	private CustomerService getCustomerService() {
@@ -1086,6 +1075,14 @@ public class CustomerServiceImpl extends AbstractEpPersistenceServiceImpl implem
 
 	protected EventMessagePublisher getEventMessagePublisher() {
 		return eventMessagePublisher;
+	}
+
+	public void setUserIdModeProvider(final SettingValueProvider<Integer> userIdModeProvider) {
+		this.userIdModeProvider = userIdModeProvider;
+	}
+
+	protected SettingValueProvider<Integer> getUserIdModeProvider() {
+		return userIdModeProvider;
 	}
 
 }

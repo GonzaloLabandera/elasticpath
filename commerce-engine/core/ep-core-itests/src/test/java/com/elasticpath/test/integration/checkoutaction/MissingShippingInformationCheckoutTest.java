@@ -1,11 +1,12 @@
 /**
  * Copyright (c) Elastic Path Software Inc., 2012
  */
+
 package com.elasticpath.test.integration.checkoutaction;
 
 import static org.junit.Assert.assertFalse;
 
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.Currency;
 import java.util.Date;
 import java.util.HashSet;
@@ -15,6 +16,7 @@ import java.util.Set;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
+
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.elasticpath.common.dto.sellingchannel.ShoppingItemDtoFactory;
@@ -25,13 +27,10 @@ import com.elasticpath.domain.catalog.Product;
 import com.elasticpath.domain.customer.Address;
 import com.elasticpath.domain.customer.Customer;
 import com.elasticpath.domain.customer.CustomerSession;
-import com.elasticpath.domain.factory.TestCustomerSessionFactoryForTestApplication;
 import com.elasticpath.domain.factory.TestShoppingCartFactoryForTestApplication;
 import com.elasticpath.domain.misc.CheckoutResults;
 import com.elasticpath.domain.order.OrderPayment;
 import com.elasticpath.domain.payment.PaymentGateway;
-import com.elasticpath.domain.shipping.ShippingServiceLevel;
-import com.elasticpath.domain.shopper.Shopper;
 import com.elasticpath.domain.shoppingcart.ShoppingCart;
 import com.elasticpath.domain.shoppingcart.ShoppingCartPricingSnapshot;
 import com.elasticpath.domain.shoppingcart.ShoppingCartTaxSnapshot;
@@ -44,9 +43,7 @@ import com.elasticpath.service.shopper.ShopperService;
 import com.elasticpath.service.shoppingcart.CheckoutService;
 import com.elasticpath.service.shoppingcart.PricingSnapshotService;
 import com.elasticpath.service.shoppingcart.TaxSnapshotService;
-import com.elasticpath.service.shoppingcart.actions.impl.InvalidShippingServiceLevelException;
-import com.elasticpath.service.shoppingcart.actions.impl.MissingShippingAddressException;
-import com.elasticpath.service.shoppingcart.actions.impl.MissingShippingServiceLevelException;
+import com.elasticpath.service.shoppingcart.actions.exception.CheckoutValidationException;
 import com.elasticpath.test.integration.BasicSpringContextTest;
 import com.elasticpath.test.integration.DirtiesDatabase;
 import com.elasticpath.test.persister.testscenarios.SimpleStoreScenario;
@@ -62,10 +59,10 @@ public class MissingShippingInformationCheckoutTest extends BasicSpringContextTe
 
 	@Autowired
 	private ShopperService shopperService;
-	
+
 	@Autowired
 	private CartDirector cartDirector;
-	
+
 	@Autowired
 	private ShoppingItemDtoFactory shoppingItemDtoFactory;
 	@Autowired
@@ -81,7 +78,7 @@ public class MissingShippingInformationCheckoutTest extends BasicSpringContextTe
 
 	private ShoppingCart shoppingCart;
 
-	protected Customer anonymousCustomer;
+	private Customer anonymousCustomer;
 	private ShoppingContext shoppingContext;
 
 	/**
@@ -102,7 +99,7 @@ public class MissingShippingInformationCheckoutTest extends BasicSpringContextTe
 				.build();
 		shopperService.save(shoppingContext.getShopper());
 		shoppingCart = createEmptyShoppingCartWithScenarioStore();
-		
+
 		// Reset the payment gateway for each test.
 		NullPaymentGatewayPluginImpl.setFailOnCapture(false);
 		NullPaymentGatewayPluginImpl.setFailOnPreAuthorize(false);
@@ -116,21 +113,21 @@ public class MissingShippingInformationCheckoutTest extends BasicSpringContextTe
 	@DirtiesDatabase
 	@Test
 	public void checkoutValidCartWithPhysicalGoods() {
-		setupValidShippingServiceOnCart(shoppingCart);
+		setupValidShippingOptionOnCart(shoppingCart);
 		cartDirector.addItemToCart(shoppingCart, shoppingItemDtoFactory.createDto(createPhysicalProduct(), 1));
 
 		final ShoppingCartPricingSnapshot pricingSnapshot = pricingSnapshotService.getPricingSnapshotForCart(shoppingCart);
 		final ShoppingCartTaxSnapshot taxSnapshot = taxSnapshotService.getTaxSnapshotForCart(shoppingCart, pricingSnapshot);
 
 		CheckoutResults checkoutResult = checkoutService.checkout(shoppingCart,
-																  taxSnapshot,
-																  shoppingContext.getCustomerSession(),
-																  getOrderPayment(),
-																  false);
+				taxSnapshot,
+				shoppingContext.getCustomerSession(),
+				getOrderPayment(),
+				false);
 
 		assertFalse("Order should succeed.", checkoutResult.isOrderFailed());
 	}
-	
+
 	/**
 	 * Integration test to check the happy path for check out of a valid cart with non-physical goods.
 	 */
@@ -138,72 +135,49 @@ public class MissingShippingInformationCheckoutTest extends BasicSpringContextTe
 	@DirtiesDatabase
 	@Test
 	public void checkoutValidCartWithNonPhysicalGoods() {
-		setupValidShippingServiceOnCart(shoppingCart);
+		setupValidShippingOptionOnCart(shoppingCart);
 		cartDirector.addItemToCart(shoppingCart, shoppingItemDtoFactory.createDto(createNonShippableProduct(), 1));
 
 		final ShoppingCartPricingSnapshot pricingSnapshot = pricingSnapshotService.getPricingSnapshotForCart(shoppingCart);
 		final ShoppingCartTaxSnapshot taxSnapshot = taxSnapshotService.getTaxSnapshotForCart(shoppingCart, pricingSnapshot);
 
 		CheckoutResults checkoutResult = checkoutService.checkout(shoppingCart,
-																  taxSnapshot,
-																  shoppingContext.getCustomerSession(),
-																  getOrderPayment(),
-																  false);
+				taxSnapshot,
+				shoppingContext.getCustomerSession(),
+				getOrderPayment(),
+				false);
 
 		assertFalse("Order should succeed.", checkoutResult.isOrderFailed());
 	}
-	
+
 	/**
-	 * Checkout cart with missing shipping address.
+	 * Checkout cart with a selected shipping option, but missing shipping address.
+	 * <p>
+	 * This is an unlikely scenario as a shipping address is required to obtain the valid shipping options, and so select one.
+	 * However this test ensures that the checkout process will absolutely ensure that a shipping address has been set
+	 * in case it is has been cleared somehow after a shipping option has been selected.
 	 */
 	@DirtiesDatabase
-	@Test(expected = MissingShippingAddressException.class)
+	@Test(expected = CheckoutValidationException.class)
 	public void checkoutCartWithMissingShippingAddress() {
-		setupValidShippingServiceOnCart(shoppingCart);
+		// Given I have set up a shipping option on the cart, added an item to cart, and calculated pricing
+		setupValidShippingOptionOnCart(shoppingCart);
 		cartDirector.addItemToCart(shoppingCart, shoppingItemDtoFactory.createDto(createPhysicalProduct(), 1));
+
+		final ShoppingCartPricingSnapshot pricingSnapshot = pricingSnapshotService.getPricingSnapshotForCart(shoppingCart);
+		final ShoppingCartTaxSnapshot taxSnapshot = taxSnapshotService.getTaxSnapshotForCart(shoppingCart, pricingSnapshot);
+
+		// When I set the shipping address to null and checkout
 		shoppingCart.setShippingAddress(null);
-
-		final ShoppingCartPricingSnapshot pricingSnapshot = pricingSnapshotService.getPricingSnapshotForCart(shoppingCart);
-		final ShoppingCartTaxSnapshot taxSnapshot = taxSnapshotService.getTaxSnapshotForCart(shoppingCart, pricingSnapshot);
-
 		checkoutService.checkout(shoppingCart, taxSnapshot, shoppingContext.getCustomerSession(), getOrderPayment(), true);
+
+		// Then I get a MissingShippingAddressException thrown
 	}
-	
-	/**
-	 * Checkout cart with missing shipping service level.
-	 */
-	@DirtiesDatabase
-	@Test(expected = MissingShippingServiceLevelException.class)
-	public void checkoutCartWithMissingShippingServiceLevel() {
-		cartDirector.addItemToCart(shoppingCart, shoppingItemDtoFactory.createDto(createPhysicalProduct(), 1));
 
-		final ShoppingCartPricingSnapshot pricingSnapshot = pricingSnapshotService.getPricingSnapshotForCart(shoppingCart);
-		final ShoppingCartTaxSnapshot taxSnapshot = taxSnapshotService.getTaxSnapshotForCart(shoppingCart, pricingSnapshot);
-
-		checkoutService.checkout(shoppingCart, taxSnapshot, shoppingContext.getCustomerSession(), getOrderPayment(), true);
-	}
-	
-	/**
-	 * Checkout cart with invalid shipping service level.
-	 * Note: there are checks to validate the selected {@link ShippingServiceLevel} against the list of levels set on the cart.
-	 * This test works around that by changing the list to one that doesn't include cart's selected service level.
-	 */
-	@DirtiesDatabase
-	@Test(expected = InvalidShippingServiceLevelException.class)
-	public void checkoutCartWithInvalidShippingServiceLevel() {
-		setupInvalidShippingServiceLevelOnCart(shoppingCart);
-		cartDirector.addItemToCart(shoppingCart, shoppingItemDtoFactory.createDto(createPhysicalProduct(), 1));
-
-		final ShoppingCartPricingSnapshot pricingSnapshot = pricingSnapshotService.getPricingSnapshotForCart(shoppingCart);
-		final ShoppingCartTaxSnapshot taxSnapshot = taxSnapshotService.getTaxSnapshotForCart(shoppingCart, pricingSnapshot);
-
-		checkoutService.checkout(shoppingCart, taxSnapshot, shoppingContext.getCustomerSession(), getOrderPayment(), true);
-	}
-	
 	private ShoppingCart createEmptyShoppingCartWithScenarioStore() {
 		final ShoppingCart shoppingCart = TestShoppingCartFactoryForTestApplication.getInstance().createNewCartWithMemento(
 				shoppingContext.getShopper(), scenario.getStore());
-		
+
 		final CustomerSession customerSession = shoppingContext.getCustomerSession();
 		customerSession.setCurrency(Currency.getInstance(Locale.US));
 
@@ -213,51 +187,18 @@ public class MissingShippingInformationCheckoutTest extends BasicSpringContextTe
 		shoppingCart.setShippingAddress(getAddress());
 		return shoppingCart;
 	}
-	
-	private void setupValidShippingServiceOnCart(final ShoppingCart shoppingCart) {
-		shoppingCart.setShippingServiceLevelList(Arrays.asList(scenario.getShippingServiceLevel()));
-		shoppingCart.setSelectedShippingServiceLevelUid(scenario.getShippingServiceLevel().getUidPk());
-	}
 
-	private void setupInvalidShippingServiceLevelOnCart(final ShoppingCart shoppingCart) {
-		shoppingCart.setShippingServiceLevelList(Arrays.asList(getInvalidShippingServiceLevel()));
-	}
-
-	private ShippingServiceLevel getInvalidShippingServiceLevel() {
-		getTac().getPersistersFactory().getStoreTestPersister().persistShippingRegion("INVALID_SHIPPING_REGION_NAME", "INVALID_REGION");
-		ShippingServiceLevel invalidShippingServiceLevel = 
-			getTac().getPersistersFactory().getStoreTestPersister().persistShippingServiceLevelFixedPriceCalcMethod(scenario.getStore(), 
-																									"INVALID_SHIPPING_REGION_NAME",
-																									"2 Business Days (Canada Post - Regular Parcel)", 
-																									"INVALID", 
-																									"5.00");
-		return invalidShippingServiceLevel;
+	private void setupValidShippingOptionOnCart(final ShoppingCart shoppingCart) {
+		shoppingCart.setSelectedShippingOption(scenario.getShippingOption());
 	}
 
 	private OrderPayment getOrderPayment() {
 		final OrderPayment orderPayment = getBeanFactory().getBean(ContextIdNames.ORDER_PAYMENT);
-		orderPayment.setCardHolderName("test test");
-		orderPayment.setCardType("001");
 		orderPayment.setCreatedDate(new Date());
 		orderPayment.setCurrencyCode("USD");
 		orderPayment.setEmail(anonymousCustomer.getEmail());
-		orderPayment.setExpiryMonth("09");
-		orderPayment.setExpiryYear("10");
-		orderPayment.setPaymentMethod(PaymentType.CREDITCARD);
-		orderPayment.setCvv2Code("1111");
-		orderPayment.setUnencryptedCardNumber("4111111111111111");
+		orderPayment.setPaymentMethod(PaymentType.CREDITCARD_DIRECT_POST);
 		return orderPayment;
-	}
-	
-	private CustomerSession getCustomerSessionForShopper(final Shopper shopper) {
-		final CustomerSession session = TestCustomerSessionFactoryForTestApplication.getInstance().createNewCustomerSessionWithContext(shopper);
-		session.setCreationDate(new Date());
-		session.setCurrency(Currency.getInstance(Locale.US));
-		session.setLastAccessedDate(new Date());
-		session.setGuid("" + System.currentTimeMillis());
-		session.setLocale(Locale.US);
-		session.getShopper().setCustomer(anonymousCustomer);
-		return session;
 	}
 
 	private Address getAddress() {
@@ -280,11 +221,10 @@ public class MissingShippingInformationCheckoutTest extends BasicSpringContextTe
 	}
 
 	private Product createPhysicalProduct() {
-		Product physicalProduct = getTac().getPersistersFactory().getCatalogTestPersister().createDefaultProductWithSkuAndInventory(scenario.getCatalog(),
+		return getTac().getPersistersFactory().getCatalogTestPersister().createDefaultProductWithSkuAndInventory(scenario.getCatalog(),
 				scenario.getCategory(), scenario.getWarehouse());
-		return physicalProduct;
 	}
-	
+
 	private Product createNonShippableProduct() {
 		Product digitalProduct = createPhysicalProduct();
 		digitalProduct.getDefaultSku().setShippable(false);

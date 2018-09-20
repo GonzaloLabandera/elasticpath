@@ -319,27 +319,6 @@
         </conditions>
     </selling_context>
 </price_list_assignment>
-<price_list_assignment>
-    <guid>2b5b9261-ba35-4847-a17d-9dd03f9e8246</guid>
-    <name>credit card prices</name>
-    <priority>5</priority>
-    <catalog_guid>Mobile</catalog_guid>
-    <price_list_guid>1A971BA1-D81F-A164-0FF0-53817D83B107</price_list_guid>
-    <selling_context>
-        <guid>cceeb02b-c4ea-4985-950d-1fd03b7efac3</guid>
-        <name>SELLING_CONTEXT_NAME_null</name>
-        <description>SELLING_CONTEXT_DESCR_null</description>
-        <priority>0</priority>
-        <conditions>
-            <condition>
-                <guid>7afbf5d0-00ac-4c3b-b1f9-f6cb0efb6b25</guid>
-                <name>792647554772345</name>
-                <condition_string> { OR { SELLING_CHANNEL.equalTo 'creditcardscope' }  } </condition_string>
-                <dictionary_guid>STORES</dictionary_guid>
-            </condition>
-        </conditions>
-    </selling_context>
-</price_list_assignment>
 
 <price_list_assignment>
     <guid>041df9d3-2dbe-4e8e-863d-57d2eb8990f6</guid>

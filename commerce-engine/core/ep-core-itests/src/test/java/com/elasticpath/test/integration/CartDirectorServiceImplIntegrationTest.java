@@ -61,7 +61,7 @@ public class CartDirectorServiceImplIntegrationTest extends DbTestCase {
 		ShoppingCart shoppingCart = createFullShoppingCart();
 		shoppingCart = service.saveOrUpdate(shoppingCart);
 
-		final ShoppingItem item = shoppingCart.getAllItems().iterator().next();
+		final ShoppingItem item = shoppingCart.getRootShoppingItems().iterator().next();
 		final ProductSku sku = productSkuLookup.findByGuid(item.getSkuGuid());
 		final Product product = sku.getProduct();
 		persisterFactory.getCatalogTestPersister().addOrUpdateProductBaseAmount(scenario.getCatalog(), product, BigDecimal.ONE, BigDecimal.ONE,
@@ -84,7 +84,7 @@ public class CartDirectorServiceImplIntegrationTest extends DbTestCase {
         ShoppingCart shoppingCart = createFullShoppingCart();
         shoppingCart = service.saveOrUpdate(shoppingCart);
 
-        final ShoppingItem item = shoppingCart.getAllItems().iterator().next();
+        final ShoppingItem item = shoppingCart.getRootShoppingItems().iterator().next();
         final String itemGuid = item.getGuid();
         
         assertEquals(2, item.getQuantity());
@@ -110,7 +110,7 @@ public class CartDirectorServiceImplIntegrationTest extends DbTestCase {
 		final ShoppingCart emptyShoppingCart = cartDirectorService.clearItems(shoppingCart);
 
 		// Then the cart is empty
-		assertThat(emptyShoppingCart.getAllItems(), empty());
+		assertThat(emptyShoppingCart.getRootShoppingItems(), empty());
 	}
 
 	/**

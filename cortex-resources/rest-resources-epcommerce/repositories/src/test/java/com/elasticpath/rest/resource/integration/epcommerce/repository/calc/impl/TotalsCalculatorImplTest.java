@@ -16,9 +16,8 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
-import com.elasticpath.domain.cartorder.CartOrder;
 import com.elasticpath.domain.catalog.Price;
 import com.elasticpath.domain.shoppingcart.PriceCalculator;
 import com.elasticpath.domain.shoppingcart.ShoppingCart;
@@ -62,15 +61,12 @@ public class TotalsCalculatorImplTest {
 
 	@Test
 	public void ensureTotalIsCalculatedBeforeTotalIsReadForShoppingCartWithNoSubtotalDiscount() {
-		CartOrder cartOrder = mock(CartOrder.class);
-		when(cartOrder.getGuid()).thenReturn(EXISTS_GUID);
 		when(cartOrderRepository.getEnrichedShoppingCartSingle(STORE_CODE, EXISTS_GUID, CartOrderRepository.FindCartOrder.BY_CART_GUID))
 				.thenReturn(Single.just(shoppingCart));
 		when(pricingSnapshotRepository.getShoppingCartPricingSnapshotSingle(shoppingCart))
 				.thenReturn(Single.just(cartPricingSnapshot));
 
 		when(cartPricingSnapshot.getSubtotalMoney()).thenReturn(TEN_CAD);
-		when(cartPricingSnapshot.getSubtotalDiscountMoney()).thenReturn(ZERO_CAD);
 
 		calculator.calculateTotalForShoppingCart(STORE_CODE, EXISTS_GUID)
 				.test()
@@ -80,12 +76,8 @@ public class TotalsCalculatorImplTest {
 
 	@Test
 	public void ensureErrorPropagationOfFailedGetShoppingCartWhenCalculatingShoppingCartTotal() {
-		CartOrder cartOrder = mock(CartOrder.class);
-		when(cartOrder.getGuid()).thenReturn(NOT_EXISTS_GUID);
 		when(cartOrderRepository.getEnrichedShoppingCartSingle(STORE_CODE, NOT_EXISTS_GUID, CartOrderRepository.FindCartOrder.BY_CART_GUID))
 				.thenReturn(Single.error(ResourceOperationFailure.notFound()));
-		when(pricingSnapshotRepository.getShoppingCartPricingSnapshot(shoppingCart))
-				.thenReturn(ExecutionResultFactory.createReadOK(cartPricingSnapshot));
 
 		calculator.calculateTotalForShoppingCart(STORE_CODE, NOT_EXISTS_GUID)
 				.test()
@@ -109,8 +101,6 @@ public class TotalsCalculatorImplTest {
 	public void ensureErrorPropagationOfFailedGetCartWhenCalculatingCartOrderTotal() {
 		when(cartOrderRepository.getEnrichedShoppingCartSingle(STORE_CODE, NOT_EXISTS_GUID, CartOrderRepository.FindCartOrder.BY_ORDER_GUID))
 				.thenReturn(Single.error(ResourceOperationFailure.notFound()));
-		when(pricingSnapshotRepository.getShoppingCartPricingSnapshot(shoppingCart))
-				.thenReturn(ExecutionResultFactory.createReadOK(cartPricingSnapshot));
 
 		calculator.calculateTotalForCartOrder(STORE_CODE, NOT_EXISTS_GUID)
 				.test()
@@ -119,8 +109,6 @@ public class TotalsCalculatorImplTest {
 
 	@Test
 	public void testCalculateTotalForShoppingCart() {
-		CartOrder cartOrder = mock(CartOrder.class);
-		when(cartOrder.getGuid()).thenReturn(EXISTS_GUID);
 		when(cartOrderRepository.getEnrichedShoppingCartSingle(STORE_CODE, EXISTS_GUID, CartOrderRepository.FindCartOrder.BY_CART_GUID))
 				.thenReturn(Single.just(shoppingCart));
 		when(pricingSnapshotRepository.getShoppingCartPricingSnapshotSingle(shoppingCart))
@@ -154,15 +142,11 @@ public class TotalsCalculatorImplTest {
 
 	@Test
 	public void testCalculateTotalForLineItem() {
-		CartOrder cartOrder = mock(CartOrder.class);
-		when(cartOrder.getGuid()).thenReturn(EXISTS_GUID);
 		ShoppingCart shoppingCart = mock(ShoppingCart.class);
 		when(cartOrderRepository.getEnrichedShoppingCartSingle(STORE_CODE, EXISTS_GUID, CartOrderRepository.FindCartOrder.BY_CART_GUID))
 				.thenReturn(Single.just(shoppingCart));
 		when(pricingSnapshotRepository.getShoppingCartPricingSnapshotSingle(shoppingCart))
 				.thenReturn(Single.just(cartPricingSnapshot));
-
-		when(cartPricingSnapshot.getSubtotalMoney()).thenReturn(ZERO_CAD);
 
 		ShoppingItem mockShoppingItem = mockGetShoppingItem(shoppingCart);
 		mockShoppingItemExpectations(mockShoppingItem, ZERO_CAD);

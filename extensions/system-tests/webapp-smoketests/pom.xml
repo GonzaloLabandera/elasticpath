@@ -14,7 +14,7 @@
 	<description>This project will spin up cargo, h2, storefront, search, and batch server to do a self-containted smoketest.</description>
 
 	<properties>
-		<cargo.jvmargs>-ea -XX:MaxPermSize=512M -Xmx1024m -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.ssl=false
+		<cargo.jvmargs>-ea -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.ssl=false
 			-Dcom.sun.management.jmxremote.authenticate=false</cargo.jvmargs>
 		<start.remote.jmx.port>7000</start.remote.jmx.port>
 		<stop.remote.jmx.port>7001</stop.remote.jmx.port>
@@ -22,7 +22,6 @@
 		<cargo.wait>false</cargo.wait>
 		<ep.activemq.configUri>broker:(tcp://localhost:${ep.activemq.port})?useJmx=true&amp;persistent=false&amp;useShutdownHook=false</ep.activemq.configUri>
 		<ep.jms.url>tcp://localhost:${ep.activemq.port}</ep.jms.url>
-		<licensing.skip>true</licensing.skip>
 		<ep.activemq.context>/jms</ep.activemq.context>
 		<cargo.timeout>300000</cargo.timeout>
 		<ping.timeout>600000</ping.timeout>
@@ -246,7 +245,7 @@
 						<artifactId>maven-failsafe-plugin</artifactId>
 						<configuration>
 							<redirectTestOutputToFile>true</redirectTestOutputToFile>
-							<argLine>${java.jvm.opts} -Dorg.apache.camel.jmx.disabled=true</argLine>
+							<argLine>-Dorg.apache.camel.jmx.disabled=true</argLine>
 							<includes>
 								<include>**/*Test.java</include>
 							</includes>
@@ -366,7 +365,6 @@
 		<dependency>
 			<groupId>org.fusesource.hawtbuf</groupId>
 			<artifactId>hawtbuf</artifactId>
-			<version>${hawtbuf.version}</version>
 			<scope>runtime</scope>
 		</dependency>
 		<dependency>
@@ -379,6 +377,12 @@
 			<groupId>org.apache.camel</groupId>
 			<artifactId>camel-jms</artifactId>
 			<version>${org.apache.camel.version}</version>
+			<exclusions>
+				<exclusion>
+					<groupId>org.apache.geronimo.specs</groupId>
+					<artifactId>geronimo-jms_2.0_spec</artifactId>
+				</exclusion>
+			</exclusions>
 			<scope>runtime</scope>
 		</dependency>
 		<dependency>
@@ -403,7 +407,6 @@
 		<dependency>
 			<groupId>org.apache.geronimo.specs</groupId>
 			<artifactId>geronimo-jms_1.1_spec</artifactId>
-			<version>${org.apache.geronimo.specs.version}</version>
 			<scope>runtime</scope>
 		</dependency>
 		<dependency>
@@ -433,7 +436,7 @@
 		<dependency>
 			<groupId>org.apache.geronimo.specs</groupId>
 			<artifactId>geronimo-j2ee-management_1.1_spec</artifactId>
-			<version>1.0.1</version>
+			<version>${org.apache.geronimo.management.spec.version}</version>
 			<scope>runtime</scope>
 		</dependency>
 		<dependency>
@@ -518,10 +521,6 @@
 								<dependency>
 									<groupId>org.slf4j</groupId>
 									<artifactId>slf4j-api</artifactId>
-								</dependency>
-								<dependency>
-									<groupId>org.slf4j</groupId>
-									<artifactId>slf4j-log4j12</artifactId>
 								</dependency>
 								<dependency>
 									<groupId>log4j</groupId>
@@ -683,7 +682,7 @@
 				<plugin>
 					<groupId>org.eclipse.m2e</groupId>
 					<artifactId>lifecycle-mapping</artifactId>
-					<version>1.0.0</version>
+					<version>${lifecycle-mapping-plugin.version}</version>
 					<configuration>
 						<lifecycleMappingMetadata>
 							<pluginExecutions>

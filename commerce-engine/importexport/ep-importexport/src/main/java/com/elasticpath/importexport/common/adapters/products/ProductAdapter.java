@@ -113,11 +113,7 @@ public class ProductAdapter extends AbstractDomainAdapterImpl<Product, ProductDT
 			productAvailabilityAdapter.populateDomain(productDto.getProductAvailability(), productDomain);
 			populateDomainProductSkus(productDto, productDomain);
 			attributeGroupAdapter.populateDomain(productDto.getProductAttributes(), productDomain.getAttributeValueGroup());
-		} catch (PopulationRollbackException exception) {
-			// Report that the product failed to import
-			LOG.error(new Message("IE-10320", productDomain.getCode()));
-			throw exception;
-		} catch (PopulationRuntimeException exception) {
+		} catch (PopulationRollbackException | PopulationRuntimeException exception) {
 			// Report that the product failed to import
 			LOG.error(new Message("IE-10320", productDomain.getCode()));
 			throw exception;

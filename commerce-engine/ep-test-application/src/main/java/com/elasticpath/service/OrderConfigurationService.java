@@ -4,7 +4,6 @@
 package com.elasticpath.service;
 
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 
 import com.elasticpath.domain.catalog.ProductSku;
@@ -43,23 +42,22 @@ public interface OrderConfigurationService {
 			String streetBillingAddress);
 
 	/**
-	 * Selects the shipping service level in given shopping cart.
+	 * Selects the shipping option in given shopping cart.
 	 *
 	 * @param shoppingCart the shoppign cart
-	 * @param locale the default store locale
-	 * @param shippingServiceLevelName the shipping service level name
+	 * @param shippingOptionName the shipping option name to use
 	 * @return modified shopping cart
 	 */
-	ShoppingCart selectShippingServiceLevel(ShoppingCart shoppingCart, Locale locale, String shippingServiceLevelName);
+	ShoppingCart selectShippingOption(ShoppingCart shoppingCart, String shippingOptionName);
 
 	/**
-	 * Creates the order payment based on customer credit card.
+	 * Creates the order payment based on payment token value.
 	 *
-	 * @param customer the customer
-	 * @param cardHolderName the card holder name for card that will be used for payment creation
+	 * @param customer   the customer
+	 * @param tokenValue the token value
 	 * @return the order payment
 	 */
-	OrderPayment createOrderPayment(Customer customer, String cardHolderName);
+	OrderPayment createOrderPayment(Customer customer, String tokenValue);
 
 	/**
 	 * Gets the list of orders by customer email.

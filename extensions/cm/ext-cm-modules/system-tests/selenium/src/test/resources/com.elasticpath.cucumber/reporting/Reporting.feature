@@ -15,7 +15,7 @@ Feature: Reporting
       | skuCode    | quantity   |
       | <sku-code> | <quantity> |
     And I view the <report-type> report
-    Then the number of orders for promotion <promo-name> should have increased by 1
+    Then the number of orders for promotion <promo-name> should have increased
 
     Examples:
       | report-type                   | store | promo-name                              | scope | sku-code                                     | quantity |
@@ -35,7 +35,7 @@ Feature: Reporting
       | skuCode    | quantity   |
       | <sku-code> | <quantity> |
     And I view the <report-type> report
-    Then the number of orders for Order Summary report should have increased by 1
+    Then the number of orders for Order Summary report should have increased
 
     Examples:
       | report-type   | store | currency | order-status         | scope | sku-code                                     | quantity |
@@ -52,8 +52,7 @@ Feature: Reporting
     And I select following report options
       | reportType    | store   | currency   |
       | <report-type> | <store> | <currency> |
-    And I enter dates and run the report
-    When I view the <report-type> report
+    When I enter dates and run the report
     Then Returns And Exchanges report should contain the returned order number
 
     Examples:
@@ -68,8 +67,7 @@ Feature: Reporting
     And I select following report options
       | reportType    | store   | currency   | orderStatus |
       | <report-type> | <store> | <currency> | Complete    |
-    And I enter dates and run the report
-    When I view the <report-type> report
+    When I enter dates and run the report
     Then the latest order total should be <order-total> in Order Status report
 
     Examples:

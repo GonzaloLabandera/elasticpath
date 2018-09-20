@@ -16,7 +16,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.stubbing.Answer;
 
 import com.elasticpath.common.dto.DisplayValue;
@@ -27,7 +27,6 @@ import com.elasticpath.domain.cartmodifier.CartItemModifierFieldLdf;
 import com.elasticpath.domain.cartmodifier.CartItemModifierType;
 import com.elasticpath.domain.cartmodifier.impl.CartItemModifierFieldImpl;
 import com.elasticpath.domain.cartmodifier.impl.CartItemModifierFieldLdfImpl;
-import com.elasticpath.domain.misc.impl.RandomGuidImpl;
 import com.elasticpath.importexport.common.dto.catalogs.CartItemModifierFieldDTO;
 
 /**
@@ -41,18 +40,16 @@ public class CartItemModifierFieldAdapterTest {
 	private static final int ORDERING = 10;
 	private static final int MAX_SIZE = 5;
 
-	@SuppressWarnings("PMD.UnusedPrivateField")
-	@Mock private CartItemModifierFieldOptionAdapter cartItemModifierFieldOptionAdapter;
-	@Mock private BeanFactory beanFactory;
+	@Mock
+	private BeanFactory beanFactory;
 
-	@InjectMocks private final CartItemModifierFieldAdapter adapter = new CartItemModifierFieldAdapter();
+	@InjectMocks
+	private final CartItemModifierFieldAdapter adapter = new CartItemModifierFieldAdapter();
 
 	@Before
 	public void setUp() {
 		given(beanFactory.getBean(ContextIdNames.CART_ITEM_MODIFIER_FIELD_LDF))
 				.willAnswer((Answer<CartItemModifierFieldLdfImpl>) invocationOnMock -> new CartItemModifierFieldLdfImpl());
-		given(beanFactory.getBean(ContextIdNames.RANDOM_GUID))
-				.willAnswer((Answer<RandomGuidImpl>) invocationOnMock -> new RandomGuidImpl());
 	}
 
 	@Test

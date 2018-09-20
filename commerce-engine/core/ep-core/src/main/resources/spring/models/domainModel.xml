@@ -2,8 +2,8 @@
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns:util="http://www.springframework.org/schema/util"
-       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
-                           http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-3.0.xsd"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+                           http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-4.0.xsd"
 >
 
 
@@ -12,8 +12,7 @@
     <!--====================================================================-->
 
 	<bean id="coreBeanFactory" primary="true"
-		class="com.elasticpath.domain.impl.ApplicationContextBackedBeanFactoryImpl">
-	</bean>
+		  class="com.elasticpath.commons.beanframework.impl.ApplicationContextBackedBeanFactoryImpl"/>
 
 	<bean id="coreMessageSource"
 		class="com.elasticpath.domain.impl.DefaultMessageSourceImpl" />
@@ -327,24 +326,6 @@
 		<constructor-arg value="English"/>
 	</bean>
 
-	<bean id="creditCardValidator" class="com.elasticpath.commons.validator.impl.EpCreditCardValidator">
-		<property name="creditCardTypes">
-			<list value-type="">
-				<bean id="validatorDinersClub" class="com.elasticpath.commons.validator.impl.EpCreditCardType">
-					<property name="prefixes" value="300,301,302,303,304,305,36,38"/>
-					<property name="supportedLengths" value="14"/>
-				</bean>
-				<bean id="validatorLaser" class="com.elasticpath.commons.validator.impl.EpCreditCardType">
-					<property name="prefixes" value="6304,6706,6771,6709"/>
-					<property name="supportedLengths" value="16,17,18,19"/>
-				</bean>
-				<bean id="validatorJCB" class="com.elasticpath.commons.validator.impl.EpCreditCardType">
-					<property name="prefixes" value="35,1800,2131"/>
-					<property name="supportedLengths" value="15,16"/>
-				</bean>
-			</list>
-		</property>
-	</bean>
 
 	<bean id="categoryGuidUtil" class="com.elasticpath.commons.util.CategoryGuidUtil"/>
 
@@ -352,7 +333,7 @@
 	<bean id="cartAnySkuAmountDiscountAction"
 			class="com.elasticpath.domain.rules.impl.CartAnySkuAmountDiscountActionImpl"
 			scope="prototype">
-		<property name="salience" value="3"/>
+		<property name="salience" value="1"/>
 	</bean>
 	<bean id="cartAnySkuPercentDiscountAction"
 			class="com.elasticpath.domain.rules.impl.CartAnySkuPercentDiscountActionImpl"
@@ -362,7 +343,7 @@
 	<bean id="cartCategoryAmountDiscountAction"
 			class="com.elasticpath.domain.rules.impl.CartCategoryAmountDiscountActionImpl"
 			scope="prototype">
-		<property name="salience" value="3"/>
+		<property name="salience" value="1"/>
 	</bean>
 	<bean id="cartCategoryPercentDiscountAction"
 			class="com.elasticpath.domain.rules.impl.CartCategoryPercentDiscountActionImpl"
@@ -372,7 +353,7 @@
 	<bean id="cartNFreeSkusAction"
 			class="com.elasticpath.domain.rules.impl.CartNFreeSkusActionImpl"
 			scope="prototype">
-		<property name="salience" value="1"/>
+		<property name="salience" value="3"/>
 	</bean>
 	<bean id="cartNthProductPercentDiscountAction"
 			class="com.elasticpath.domain.rules.impl.CartNthProductPercentDiscountActionImpl"
@@ -382,7 +363,7 @@
 	<bean id="cartProductAmountDiscountAction"
 			class="com.elasticpath.domain.rules.impl.CartProductAmountDiscountActionImpl"
 			scope="prototype">
-		<property name="salience" value="3"/>
+		<property name="salience" value="1"/>
 	</bean>
 	<bean id="cartProductPercentDiscountAction"
 			class="com.elasticpath.domain.rules.impl.CartProductPercentDiscountActionImpl"
@@ -392,7 +373,7 @@
 	<bean id="cartSkuAmountDiscountAction"
 			class="com.elasticpath.domain.rules.impl.CartSkuAmountDiscountActionImpl"
 			scope="prototype">
-		<property name="salience" value="3"/>
+		<property name="salience" value="1"/>
 	</bean>
 	<bean id="cartSkuPercentDiscountAction"
 			class="com.elasticpath.domain.rules.impl.CartSkuPercentDiscountActionImpl"
@@ -402,17 +383,17 @@
 	<bean id="cartSubtotalAmountDiscountAction"
 			class="com.elasticpath.domain.rules.impl.CartSubtotalAmountDiscountActionImpl"
 			scope="prototype">
-		<property name="salience" value="3"/>
+		<property name="salience" value="1"/>
 	</bean>
 	<bean id="cartSubtotalPercentDiscountAction"
 			class="com.elasticpath.domain.rules.impl.CartSubtotalPercentDiscountActionImpl"
 			scope="prototype">
-		<property name="salience" value="10"/>
+		<property name="salience" value="0"/>
 	</bean>
 	<bean id="catalogCurrencyAmountDiscountAction"
 			class="com.elasticpath.domain.rules.impl.CatalogCurrencyAmountDiscountActionImpl"
 			scope="prototype">
-		<property name="salience" value="3"/>
+		<property name="salience" value="1"/>
 	</bean>
 	<bean id="catalogCurrencyPercentDiscountAction"
 			class="com.elasticpath.domain.rules.impl.CatalogCurrencyPercentDiscountActionImpl"

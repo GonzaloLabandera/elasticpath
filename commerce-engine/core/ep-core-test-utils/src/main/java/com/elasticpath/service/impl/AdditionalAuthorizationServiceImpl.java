@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) Elastic Path Software Inc., 2014
  */
 package com.elasticpath.service.impl;
@@ -104,13 +104,11 @@ public class AdditionalAuthorizationServiceImpl implements AdditionalAuthorizati
 	 */
 	@Override
 	public ReAuthorizationItem setNewPaymentInformation(final ReAuthorizationItem reAuthorizationItem, final OrderPayment orderPayment) {
-		reAuthorizationItem.setNewPayment((OrderPayment) elasticPath.getBean(ContextIdNames.ORDER_PAYMENT));
+		reAuthorizationItem.setNewPayment(elasticPath.getBean(ContextIdNames.ORDER_PAYMENT));
 		final Order order = reAuthorizationItem.getShipment().getOrder();
 		final Store store = getStoreService().findStoreWithCode(order.getStoreCode());
 		final PaymentGateway paymentGateway = store.getPaymentGatewayMap().get(orderPayment.getPaymentMethod().getPaymentGatewayType());
-		if (PaymentGatewayType.CREDITCARD.equals(paymentGateway.getPaymentGatewayType())) {
-			reAuthorizationItem.getNewPayment().copyCreditCardInfo(orderPayment);
-		} else if (PaymentGatewayType.GIFT_CERTIFICATE.equals(paymentGateway.getPaymentGatewayType())) {
+		if (PaymentGatewayType.GIFT_CERTIFICATE.equals(paymentGateway.getPaymentGatewayType())) {
 			reAuthorizationItem.getNewPayment().setGiftCertificate(orderPayment.getGiftCertificate());
 		}
 		reAuthorizationItem.getNewPayment().copyTransactionFollowOnInfo(orderPayment);

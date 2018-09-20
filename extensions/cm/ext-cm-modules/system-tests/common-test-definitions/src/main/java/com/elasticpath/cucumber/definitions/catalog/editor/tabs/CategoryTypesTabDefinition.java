@@ -15,8 +15,8 @@ import com.elasticpath.selenium.domainobjects.Category;
 import com.elasticpath.selenium.domainobjects.CategoryType;
 import com.elasticpath.selenium.editor.CategoryEditor;
 import com.elasticpath.selenium.editor.catalog.tabs.CategoryTypesTab;
-import com.elasticpath.selenium.framework.util.SeleniumDriverSetup;
 import com.elasticpath.selenium.navigations.CatalogManagement;
+import com.elasticpath.selenium.setup.SetUp;
 import com.elasticpath.selenium.toolbars.CatalogManagementActionToolbar;
 import com.elasticpath.selenium.util.Utility;
 import com.elasticpath.selenium.wizards.CreateCategoryWizard;
@@ -46,7 +46,7 @@ public class CategoryTypesTabDefinition {
 	 * @param categoryType Category Type oebject.
 	 */
 	public CategoryTypesTabDefinition(final Catalog catalog, final Category category, final CategoryType categoryType) {
-		final WebDriver driver = SeleniumDriverSetup.getDriver();
+		final WebDriver driver = SetUp.getDriver();
 		this.categoryTypesTab = new CategoryTypesTab(driver);
 		this.catalogManagementActionToolbar = new CatalogManagementActionToolbar(driver);
 		catalogManagement = new CatalogManagement(driver);
@@ -187,7 +187,7 @@ public class CategoryTypesTabDefinition {
 		categoryTypesTab.selectTab("CategoryTypes");
 		categoryTypesTab.selectCategoryType(this.categoryType.getCategoryTypeName());
 		categoryTypesTab.clickRemoveCategoryTypeButton();
-		new ConfirmDialog(SeleniumDriverSetup.getDriver()).clickOKButton("CatalogMessages.CatalogCategoryTypesSection_RemoveDialog");
+		new ConfirmDialog(SetUp.getDriver()).clickOKButton("CatalogMessages.CatalogCategoryTypesSection_RemoveDialog");
 		catalogManagementActionToolbar.saveAll();
 		catalogManagementActionToolbar.clickReloadActiveEditor();
 	}

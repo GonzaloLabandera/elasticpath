@@ -7,9 +7,11 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 
 /**
- * Represents the result of a validation on an {@link com.elasticpath.domain.catalog.ItemConfiguration.ItemConfiguration}.
+ * Represents the result of a validation on an {@link com.elasticpath.domain.catalog.ItemConfiguration}.
  */
 public class ItemConfigurationValidationResult {
 
@@ -65,6 +67,11 @@ public class ItemConfigurationValidationResult {
 	@Override
 	public int hashCode() {
 		return Objects.hash(status, errorPath);
+	}
+
+	@Override
+	public String toString() {
+		return ToStringBuilder.reflectionToString(this, ToStringStyle.SHORT_PREFIX_STYLE);
 	}
 
 	/**

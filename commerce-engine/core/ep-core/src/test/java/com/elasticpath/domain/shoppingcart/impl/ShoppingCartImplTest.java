@@ -9,7 +9,6 @@ import static org.hamcrest.core.IsInstanceOf.instanceOf;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
@@ -26,9 +25,9 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.UUID;
 
-import com.google.common.collect.ImmutableList;
 import org.hamcrest.Matchers;
 import org.jmock.Expectations;
 import org.junit.Test;
@@ -36,14 +35,12 @@ import org.junit.Test;
 import com.elasticpath.base.exception.EpServiceException;
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.commons.util.impl.UtilityImpl;
-import com.elasticpath.domain.EpDomainException;
 import com.elasticpath.domain.catalog.AvailabilityCriteria;
 import com.elasticpath.domain.catalog.GiftCertificate;
 import com.elasticpath.domain.catalog.Price;
 import com.elasticpath.domain.catalog.Product;
 import com.elasticpath.domain.catalog.ProductSku;
 import com.elasticpath.domain.catalog.ProductType;
-import com.elasticpath.domain.catalog.impl.CatalogLocaleImpl;
 import com.elasticpath.domain.catalog.impl.GiftCertificateImpl;
 import com.elasticpath.domain.catalog.impl.PriceImpl;
 import com.elasticpath.domain.catalog.impl.ProductImpl;
@@ -58,25 +55,18 @@ import com.elasticpath.domain.misc.LocalizedProperties;
 import com.elasticpath.domain.misc.LocalizedPropertyValue;
 import com.elasticpath.domain.misc.impl.BrandLocalizedPropertyValueImpl;
 import com.elasticpath.domain.misc.impl.LocalizedPropertiesImpl;
-import com.elasticpath.domain.order.OrderSku;
-import com.elasticpath.domain.order.impl.OrderSkuImpl;
-import com.elasticpath.domain.shipping.ShippingCostCalculationMethod;
-import com.elasticpath.domain.shipping.ShippingServiceLevel;
-import com.elasticpath.domain.shipping.impl.ShippingServiceLevelImpl;
 import com.elasticpath.domain.shopper.Shopper;
 import com.elasticpath.domain.shopper.impl.ShopperImpl;
 import com.elasticpath.domain.shopper.impl.ShopperMementoImpl;
 import com.elasticpath.domain.shoppingcart.DiscountRecord;
 import com.elasticpath.domain.shoppingcart.ShippingPricingSnapshot;
 import com.elasticpath.domain.shoppingcart.ShoppingCart;
-import com.elasticpath.domain.shoppingcart.ShoppingCartPricingSnapshot;
 import com.elasticpath.domain.shoppingcart.ShoppingItem;
 import com.elasticpath.domain.shoppingcart.ShoppingItemPricingSnapshot;
 import com.elasticpath.domain.store.Store;
 import com.elasticpath.domain.store.impl.StoreImpl;
 import com.elasticpath.domain.tax.TaxCategory;
 import com.elasticpath.domain.tax.impl.TaxCategoryImpl;
-import com.elasticpath.domain.tax.impl.TaxCodeImpl;
 import com.elasticpath.domain.tax.impl.TaxJurisdictionImpl;
 import com.elasticpath.inventory.InventoryDto;
 import com.elasticpath.inventory.impl.InventoryDtoImpl;
@@ -85,15 +75,13 @@ import com.elasticpath.money.StandardMoneyFormatter;
 import com.elasticpath.plugin.payment.exceptions.PaymentProcessingException;
 import com.elasticpath.service.catalog.impl.GiftCertificateServiceImpl;
 import com.elasticpath.service.catalog.impl.ProductInventoryManagementServiceImpl;
-import com.elasticpath.service.misc.TimeService;
 import com.elasticpath.service.order.impl.AllocationServiceImpl;
 import com.elasticpath.service.shoppingcart.impl.ItemPricing;
-import com.elasticpath.service.shoppingcart.impl.OrderSkuFactoryImpl;
 import com.elasticpath.service.tax.TaxCalculationResult;
-import com.elasticpath.service.tax.TaxCodeRetriever;
 import com.elasticpath.service.tax.adapter.TaxAddressAdapter;
 import com.elasticpath.service.tax.impl.TaxCalculationResultImpl;
 import com.elasticpath.settings.impl.SettingsServiceImpl;
+import com.elasticpath.shipping.connectivity.dto.ShippingOption;
 import com.elasticpath.test.factory.TestCustomerSessionFactory;
 import com.elasticpath.test.factory.TestShopperFactory;
 import com.elasticpath.test.jmock.AbstractCatalogDataTestCase;
@@ -108,25 +96,19 @@ public class ShoppingCartImplTest extends AbstractCatalogDataTestCase {
 	private static final String CODE = "Code ";
 	private static final int NUM_UNIQUE_RULES = 3;
 	private static final Locale DEFAULT_LOCALE = Locale.CANADA;
-	private static final String EP_DOMAIN_EXCEPTION_EXPECTED = "EpDomainException expected.";
-	private static final String PRICE_1 = "5";
 	private static final String PRICE_2 = "10";
 	private static final int INVALID_UID_2 = 987654;
 	private static final int INVALID_UID_1 = -23;
 	private static final int QTY_3 = 3;
 	private static final int QTY_5 = 5;
-	private ShoppingCartImpl shoppingCart;
-	private static final Currency CAD = Currency.getInstance("CAD");
-	private static final long TEST_SHIPPINGSERVICELEVEL_UID = 100;
-	private static final long TEST_INVALID_SHIPPINGSERVICELEVEL_UID = 101;
 	private static final long RULE_UID_1 = 1;
 	private static final long RULE_UID_2 = 2;
 	private static final long RULE_UID_3 = 3;
 
-	private static final String SALES_TAX_CODE_GOODS = "GOODS";
 	private static final long RULE_ID = 123L;
 	private static final long ACTION_ID = 456L;
 
+	private ShoppingCartImpl shoppingCart;
 
 	private long nextUid = 1;
 
@@ -140,17 +122,12 @@ public class ShoppingCartImplTest extends AbstractCatalogDataTestCase {
 	public void setUp() throws Exception {
 		super.setUp();
 
-		stubGetBean(ContextIdNames.CATALOG_LOCALE, CatalogLocaleImpl.class);
 		stubGetBean(ContextIdNames.CUSTOMER_AUTHENTICATION, CustomerAuthenticationImpl.class);
-		stubGetBean(ContextIdNames.LOCALIZED_PROPERTIES, LocalizedPropertiesImpl.class);
 		stubGetBean(ContextIdNames.MONEY_FORMATTER, StandardMoneyFormatter.class);
-		stubGetBean(ContextIdNames.PRODUCT_SKU_LOOKUP, getProductSkuLookup());
 		stubGetBean(ContextIdNames.SHOPPING_CART_MEMENTO, ShoppingCartMementoImpl.class);
 		stubGetBean(ContextIdNames.TAX_CATEGORY, TaxCategoryImpl.class);
 		stubGetBean(ContextIdNames.TAX_CALCULATION_RESULT, TaxCalculationResultImpl.class);
 		stubGetBean(ContextIdNames.TAX_JURISDICTION, TaxJurisdictionImpl.class);
-		stubGetBean(ContextIdNames.SHIPPABLE_ITEMS_SUBTOTAL_CALCULATOR, getShippableItemsSubtotalCalculator());
-		stubGetBean(ContextIdNames.SHOPPING_ITEM_SUBTOTAL_CALCULATOR, getShoppingItemSubtotalCalculator());
 
 		stubGetBean(ContextIdNames.UTILITY, new UtilityImpl());
 		stubGetBean("settingsService", new SettingsServiceImpl());
@@ -158,53 +135,21 @@ public class ShoppingCartImplTest extends AbstractCatalogDataTestCase {
 		TaxAddressAdapter adapter = new TaxAddressAdapter();
 		stubGetBean(ContextIdNames.TAX_ADDRESS_ADAPTER, adapter);
 
-		mockOrderSkuFactory();
-
 		shoppingCart = new ShoppingCartImpl();
 
 		initializeShoppingCart(shoppingCart);
 
 		stubGetBean(ContextIdNames.GIFT_CERTIFICATE_SERVICE,
-				new GiftCertificateServiceImpl() {
-					@Override
-					public BigDecimal getBalance(final GiftCertificate giftCertificate) {
-						return giftCertificate.getPurchaseAmount();
-					}
-				});
+					new GiftCertificateServiceImpl() {
+						@Override
+						public BigDecimal getBalance(final GiftCertificate giftCertificate) {
+							return giftCertificate.getPurchaseAmount();
+						}
+					});
 
 		AllocationServiceImpl allocationServiceImpl = new AllocationServiceImpl();
 		allocationServiceImpl.setProductInventoryManagementService(new ProductInventoryManagementServiceImpl());
 		stubGetBean(ContextIdNames.ALLOCATION_SERVICE, allocationServiceImpl);
-	}
-
-	private void mockOrderSkuFactory() {
-		final TaxCodeImpl taxCode = new TaxCodeImpl();
-		taxCode.setCode(SALES_TAX_CODE_GOODS);
-
-		final TaxCodeRetriever taxCodeRetriever = context.mock(TaxCodeRetriever.class);
-		final TimeService timeService = context.mock(TimeService.class);
-		context.checking(new Expectations() {
-			{
-				allowing(taxCodeRetriever).getEffectiveTaxCode(with(any(ProductSku.class)));
-				will(returnValue(taxCode));
-
-				allowing(timeService).getCurrentTime();
-				will(returnValue(new Date()));
-			}
-		});
-
-		OrderSkuFactoryImpl orderSkuFactory = new OrderSkuFactoryImpl() {
-			@Override
-			protected OrderSku createSimpleOrderSku() {
-				return new OrderSkuImpl();
-			}
-		};
-		orderSkuFactory.setTaxCodeRetriever(taxCodeRetriever);
-		orderSkuFactory.setBundleApportioner(getBundleApportioningCalculator());
-		orderSkuFactory.setDiscountApportioner(getDiscountApportioningCalculator());
-		orderSkuFactory.setProductSkuLookup(getProductSkuLookup());
-		orderSkuFactory.setTimeService(timeService);
-		stubGetBean(ContextIdNames.ORDER_SKU_FACTORY, orderSkuFactory);
 	}
 
 	/**
@@ -213,7 +158,7 @@ public class ShoppingCartImplTest extends AbstractCatalogDataTestCase {
 	private void initializeShoppingCart(final ShoppingCart shoppingCart) {
 		final Shopper shopper = TestShopperFactory.getInstance().createNewShopperWithMemento();
 		final CustomerSession customerSession = TestCustomerSessionFactory.getInstance().createNewCustomerSessionWithContext(shopper);
-		customerSession.setCurrency(CAD);
+		customerSession.setCurrency(CURRENCY);
 		customerSession.setLocale(DEFAULT_LOCALE);
 
 		shoppingCart.setCustomerSession(customerSession);
@@ -243,6 +188,7 @@ public class ShoppingCartImplTest extends AbstractCatalogDataTestCase {
 		List<ShoppingItem> cartItems = new ArrayList<>();
 		ShoppingItem cartItem = new ShoppingItemImpl();
 		cartItem.setUidPk(getUniqueUid());
+		cartItem.setGuid("guid-" + cartItem.getUidPk());
 
 		final ProductSkuImpl productSkuImpl = new ProductSkuImpl();
 		productSkuImpl.initialize();
@@ -264,13 +210,13 @@ public class ShoppingCartImplTest extends AbstractCatalogDataTestCase {
 		context.checking(new Expectations() {
 			{
 				allowing(productType).getTaxCode();
-				allowing(getProductSkuLookup()).findByGuid(productSkuImpl.getGuid()); will(returnValue(productSkuImpl));
 				allowing(getBundleApportioningCalculator()).apportion(with(any(ItemPricing.class)), with(any(Map.class)));
 				will(returnValue(Collections.emptyMap()));
 				allowing(getDiscountApportioningCalculator()).calculateApportionedAmounts(with(any(BigDecimal.class)), with(any(Map.class)));
 				will(returnValue(Collections.emptyMap()));
 			}
 		});
+		mockProductSkuLookupByGuid(productSkuImpl.getGuid(), productSkuImpl);
 		productImpl.setProductType(productType);
 
 		productSkuImpl.setProduct(productImpl);
@@ -278,9 +224,9 @@ public class ShoppingCartImplTest extends AbstractCatalogDataTestCase {
 
 		cartItem.setSkuGuid(productSkuImpl.getGuid());
 		Price zeroPrice = new PriceImpl();
-		zeroPrice.setCurrency(CAD);
-		zeroPrice.setListPrice(Money.valueOf(BigDecimal.ZERO, CAD));
-		zeroPrice.setSalePrice(Money.valueOf(BigDecimal.ZERO, CAD));
+		zeroPrice.setCurrency(CURRENCY);
+		zeroPrice.setListPrice(Money.valueOf(BigDecimal.ZERO, CURRENCY));
+		zeroPrice.setSalePrice(Money.valueOf(BigDecimal.ZERO, CURRENCY));
 
 		cartItem.setPrice(QTY_5, zeroPrice);
 
@@ -288,11 +234,12 @@ public class ShoppingCartImplTest extends AbstractCatalogDataTestCase {
 		cartItems.add(cartItem);
 
 		Price price = new PriceImpl();
-		price.setCurrency(CAD);
-		price.setListPrice(Money.valueOf(PRICE_2, CAD));
-		price.setSalePrice(Money.valueOf(PRICE_2, CAD));
+		price.setCurrency(CURRENCY);
+		price.setListPrice(Money.valueOf(PRICE_2, CURRENCY));
+		price.setSalePrice(Money.valueOf(PRICE_2, CURRENCY));
 		cartItem = new ShoppingItemImpl();
 		cartItem.setUidPk(getUniqueUid());
+		cartItem.setGuid("guid-" + cartItem.getUidPk());
 		final ProductSkuImpl productSkuImpl2 = new ProductSkuImpl();
 		productSkuImpl2.initialize();
 		productSkuImpl2.setProduct(productImpl);
@@ -307,11 +254,7 @@ public class ShoppingCartImplTest extends AbstractCatalogDataTestCase {
 		productSkuImpl2.setProduct(getProduct());
 		productSkuImpl2.setStartDate(new Date());
 
-		context.checking(new Expectations() {
-			{
-				allowing(getProductSkuLookup()).findByGuid(productSkuImpl2.getGuid()); will(returnValue(productSkuImpl2));
-			}
-		});
+		mockProductSkuLookupByGuid(productSkuImpl2.getGuid(), productSkuImpl2);
 
 		cartItem.setSkuGuid(productSkuImpl2.getGuid());
 		cartItem.setPrice(QTY_3, price);
@@ -326,10 +269,9 @@ public class ShoppingCartImplTest extends AbstractCatalogDataTestCase {
 	 */
 	@Test
 	public void testGetSetCartItems() {
-
 		List<ShoppingItem> cartItems = addCartItemsTo(shoppingCart);
 
-		assertEquals(cartItems, shoppingCart.getCartItems());
+		assertEquals(cartItems, shoppingCart.getRootShoppingItems());
 	}
 
 	/**
@@ -347,6 +289,20 @@ public class ShoppingCartImplTest extends AbstractCatalogDataTestCase {
 	}
 
 	/**
+	 * Verifies that if a subtotal discount has been set previously, when the cart items are cleared, that the subtotal discount is also cleared.
+	 */
+	@Test
+	public void testSubtotalDiscountIsClearedWhenItemsAreClearedFromCart() {
+		ShoppingCartImpl shoppingCart = getShoppingCart();
+
+		shoppingCart.setSubtotalDiscount(BigDecimal.TEN, RULE_ID, ACTION_ID);
+		shoppingCart.clearItems();
+
+		// Cart subtotal is now zero, so should the discount be.
+		assertEquals(BigDecimal.ZERO, shoppingCart.getSubtotalDiscount());
+	}
+
+	/**
 	 * Test Add an item to the cart.
 	 */
 	@Test
@@ -359,20 +315,15 @@ public class ShoppingCartImplTest extends AbstractCatalogDataTestCase {
 		productSku.setSkuCode(CODE + this.getUniqueUid());
 		productSku.setGuid(productSku.getSkuCode() + "-guid");
 		newItem.setSkuGuid(productSku.getGuid());
-		context.checking(new Expectations() {
-			{
-				allowing(getProductSkuLookup()).findByGuid(productSku.getGuid());
-				will(returnValue(productSku));
-			}
-		});
+		mockProductSkuLookupByGuid(productSku.getGuid(), productSku);
 
 		Price price = new PriceImpl();
-		price.setCurrency(CAD);
-		price.setListPrice(Money.valueOf(PRICE_2, CAD));
-		price.setSalePrice(Money.valueOf(PRICE_2, CAD));
+		price.setCurrency(CURRENCY);
+		price.setListPrice(Money.valueOf(PRICE_2, CURRENCY));
+		price.setSalePrice(Money.valueOf(PRICE_2, CURRENCY));
 		newItem.setPrice(1, price);
 		shoppingCart.addCartItem(newItem);
-		assertTrue(shoppingCart.getCartItems().contains(newItem));
+		assertTrue(shoppingCart.getRootShoppingItems().contains(newItem));
 	}
 
 	/**
@@ -387,13 +338,13 @@ public class ShoppingCartImplTest extends AbstractCatalogDataTestCase {
 		shoppingCart.removeCartItem(INVALID_UID_1);
 		shoppingCart.removeCartItem(INVALID_UID_2);
 
-		assertEquals(numCartItemObjects, shoppingCart.getCartItems().size());
+		assertEquals(numCartItemObjects, shoppingCart.getRootShoppingItems().size());
 
 		long skuUidToRemove = cartItems.get(0).getUidPk();
 		shoppingCart.removeCartItem(skuUidToRemove);
 		shoppingCart.removeCartItem(skuUidToRemove);
 
-		assertEquals(numCartItemObjects - 1, shoppingCart.getCartItems().size());
+		assertEquals(numCartItemObjects - 1, shoppingCart.getRootShoppingItems().size());
 	}
 
 	/**
@@ -406,12 +357,12 @@ public class ShoppingCartImplTest extends AbstractCatalogDataTestCase {
 		ShoppingItem dependentItem = cartItems.get(1);
 
 		// Test non-dependent behaviour
-		assertEquals(2, shoppingCart.getCartItems().size());
+		assertEquals(2, shoppingCart.getRootShoppingItems().size());
 		shoppingCart.removeCartItem(primaryItem.getUidPk());
 
-		assertEquals(1, shoppingCart.getCartItems().size());
+		assertEquals(1, shoppingCart.getRootShoppingItems().size());
 		shoppingCart.removeCartItem(dependentItem.getUidPk());
-		assertEquals(0, shoppingCart.getCartItems().size());
+		assertEquals(0, shoppingCart.getRootShoppingItems().size());
 	}
 
 	/**
@@ -429,8 +380,8 @@ public class ShoppingCartImplTest extends AbstractCatalogDataTestCase {
 	 * Get the subtotal of all items in the cart.
 	 */
 	@Test
-	public void testGetSubTotal() {
-		applyTaxCalculationResult(shoppingCart);
+	public void testGetSubtotal() {
+		mockSubtotalCalculatorForAllCartItems(shoppingCart, BigDecimal.TEN);
 
 		assertNotNull(shoppingCart.getSubtotalMoney());
 		assertTrue(BigDecimal.ZERO.compareTo(shoppingCart.getSubtotalMoney().getAmount()) < 0);
@@ -441,10 +392,10 @@ public class ShoppingCartImplTest extends AbstractCatalogDataTestCase {
 	 */
 	@Test
 	public void testGetTotal() {
-		applyTaxCalculationResult(shoppingCart);
+		mockSubtotalCalculatorForAllCartItems(shoppingCart, BigDecimal.TEN);
 
 		assertNotNull(shoppingCart.getTotalMoney());
-		assertTrue(BigDecimal.ZERO.compareTo(shoppingCart.getTotalMoney().getAmount()) < 0);
+		assertTrue("Total should not be zero", BigDecimal.ZERO.compareTo(shoppingCart.getTotalMoney().getAmount()) < 0);
 	}
 
 	/**
@@ -452,17 +403,18 @@ public class ShoppingCartImplTest extends AbstractCatalogDataTestCase {
 	 */
 	@Test
 	public void testGetTotalBiggerGCAmount() {
-		applyTaxCalculationResult(shoppingCart);
+		final ShoppingCartImpl shoppingCart = getShoppingCart();
 
 		final StoreImpl store = new StoreImpl();
-
 		shoppingCart.setStore(store);
 
-		GiftCertificate giftCertificate = mockGiftCertificate(store, new BigDecimal("1000"), shoppingCart.getCustomerSession().getCurrency());
+		final BigDecimal giftCertificateAmount = shoppingCart.getTotal().add(BigDecimal.TEN);
+		final GiftCertificate giftCertificate = mockGiftCertificate(store, giftCertificateAmount, shoppingCart.getCustomerSession().getCurrency());
 		shoppingCart.applyGiftCertificate(giftCertificate);
 
 		assertNotNull(shoppingCart.getTotalMoney());
-		assertEquals(0, BigDecimal.ZERO.compareTo(shoppingCart.getTotalMoney().getAmount()));
+		assertEquals("Total should be zero if we apply a GC with a balance greater than the total previously",
+					 0, BigDecimal.ZERO.compareTo(shoppingCart.getTotalMoney().getAmount()));
 	}
 
 	private long getUniqueUid() {
@@ -476,104 +428,7 @@ public class ShoppingCartImplTest extends AbstractCatalogDataTestCase {
 	public void testGetShippingCost() {
 		assertNotNull(this.shoppingCart.getShippingCost());
 		assertEquals("Shipping cost should compare to zero.",
-				0, BigDecimal.ZERO.compareTo(this.shoppingCart.getShippingCost().getAmount()));
-	}
-
-	/**
-	 * Test setShippingServiceLevelList() method.
-	 */
-	@Test
-	public void testGetSetShippingServiceLevelList() {
-		assertNotNull(this.shoppingCart.getShippingServiceLevelList());
-		final List<ShippingServiceLevel> shippingServiceLevleList = new ArrayList<>();
-		shoppingCart.setShippingServiceLevelList(shippingServiceLevleList);
-		assertEquals(shippingServiceLevleList, this.shoppingCart.getShippingServiceLevelList());
-	}
-
-	/**
-	 * Test get/setSelectedShippingServiceLevelUid() method.
-	 */
-	@SuppressWarnings("unchecked")
-	@Test
-	public void testGetSetSelectedShippingServiceLevelUid() {
-
-		shoppingCart = new ShoppingCartImpl() {
-			private static final long serialVersionUID = 9092521286498956021L;
-
-			@Override
-			public boolean requiresShipping() {
-				return true;
-			}
-		};
-		initializeShoppingCart(shoppingCart);
-
-		assertNull(this.shoppingCart.getSelectedShippingServiceLevel());
-
-		// expectation
-		try {
-			shoppingCart.setSelectedShippingServiceLevelUid(TEST_SHIPPINGSERVICELEVEL_UID);
-			fail(EP_DOMAIN_EXCEPTION_EXPECTED);
-		} catch (final EpDomainException e) {
-			assertNotNull(e);
-			// Success!
-		}
-
-		context.checking(new Expectations() {
-			{
-				allowing(getShippableItemsSubtotalCalculator()).calculateSubtotalOfShippableItems(with(any(Collection.class)),
-						with(any(ShoppingCartPricingSnapshot.class)),
-						with(any(Currency.class)));
-				will(returnValue(Money.valueOf(BigDecimal.ZERO, getMockedStore().getDefaultCurrency())));
-			}
-		});
-
-		// set valid shippingServiceLevelList
-		final Money shippingCost = Money.valueOf(PRICE_1, CAD);
-		this.shoppingCart.setShippingServiceLevelList(getShippingServiceLevelList(shippingCost));
-		this.shoppingCart.setShippingListPrice(shoppingCart.getSelectedShippingServiceLevel().getCode(), shippingCost);
-
-		// expectation
-		try {
-			shoppingCart.setSelectedShippingServiceLevelUid(TEST_INVALID_SHIPPINGSERVICELEVEL_UID);
-			fail(EP_DOMAIN_EXCEPTION_EXPECTED);
-		} catch (final EpDomainException e) {
-			assertNotNull(e);
-			// Success!
-		}
-
-		// reset the list, should not lose selected level, but should clear the discount
-		this.shoppingCart.setShippingServiceLevelList(getShippingServiceLevelList(shippingCost));
-		assertNotNull("resetting service levels lost the selected level", shoppingCart.getSelectedShippingServiceLevel());
-		assertEquals("shipping discount not cleared", shippingCost, shoppingCart.getShippingCost());
-	}
-
-	/**
-	 * Get a list of shipping service levels.
-	 *
-	 * @param shippingCost the shipping cost
-	 * @return a list containing a service level with the specified shipping cost
-	 */
-	@SuppressWarnings("unchecked")
-	private List<ShippingServiceLevel> getShippingServiceLevelList(final Money shippingCost) {
-		final List<ShippingServiceLevel> shippingServiceLevelList = new ArrayList<>();
-		final ShippingServiceLevel shippingServiceLevel = new ShippingServiceLevelImpl();
-		shippingServiceLevel.setUidPk(TEST_SHIPPINGSERVICELEVEL_UID);
-
-		final ShippingCostCalculationMethod shippingCostCalculationMethod = context.mock(ShippingCostCalculationMethod.class,
-				"ShippingCostCalculationMethod-" + getUniqueUid());
-		context.checking(new Expectations() {
-			{
-				allowing(shippingCostCalculationMethod).calculateShippingCost(with(any(Collection.class)),
-						with(any(Money.class)),
-						with(equal(shoppingCart.getCustomerSession().getCurrency())),
-						with(equal(getProductSkuLookup())));
-				will(returnValue(shippingCost));
-			}
-		});
-
-		shippingServiceLevel.setShippingCostCalculationMethod(shippingCostCalculationMethod);
-		shippingServiceLevelList.add(shippingServiceLevel);
-		return shippingServiceLevelList;
+					 0, BigDecimal.ZERO.compareTo(this.shoppingCart.getShippingCost().getAmount()));
 	}
 
 	/**
@@ -613,6 +468,9 @@ public class ShoppingCartImplTest extends AbstractCatalogDataTestCase {
 				{
 					allowing(item).isShippable(getProductSkuLookup());
 					will(returnValue(shippable));
+
+					allowing(item).getChildren();
+					will(returnValue(new ArrayList<>()));
 				}
 			});
 			cartItems.add(item);
@@ -621,7 +479,7 @@ public class ShoppingCartImplTest extends AbstractCatalogDataTestCase {
 			private static final long serialVersionUID = -8497118209873625320L;
 
 			@Override
-			public List<ShoppingItem> getCartItems() {
+			public List<ShoppingItem> getRootShoppingItems() {
 				return cartItems;
 			}
 		};
@@ -730,18 +588,18 @@ public class ShoppingCartImplTest extends AbstractCatalogDataTestCase {
 				will(returnValue(shippableProductSku.getGuid()));
 				allowing(shippableItem).getQuantity();
 				will(returnValue(quantity1));
+				allowing(shippableItem).getChildren();
+				will(returnValue(new ArrayList<>()));
+				allowing(nonShippableItem).getChildren();
+				will(returnValue(new ArrayList<>()));
 
 				allowing(nonShippableItem).getSkuGuid();
 				will(returnValue(nonShippableProductSku.getGuid()));
-
-				allowing(getProductSkuLookup()).findByGuid(shippableProductSku.getGuid());
-				will(returnValue(shippableProductSku));
-
-				allowing(getProductSkuLookup()).findByGuid(nonShippableProductSku.getGuid());
-				will(returnValue(nonShippableProductSku));
 			}
 		});
 
+		mockProductSkuLookupByGuid(shippableProductSku.getGuid(), shippableProductSku);
+		mockProductSkuLookupByGuid(nonShippableProductSku.getGuid(), nonShippableProductSku);
 
 		final List<ShoppingItem> cartItems = new ArrayList<>();
 		cartItems.add(shippableItem);
@@ -751,7 +609,7 @@ public class ShoppingCartImplTest extends AbstractCatalogDataTestCase {
 			private static final long serialVersionUID = -9139751788820519457L;
 
 			@Override
-			public List<ShoppingItem> getCartItems() {
+			public List<ShoppingItem> getRootShoppingItems() {
 				return cartItems;
 			}
 		};
@@ -778,12 +636,11 @@ public class ShoppingCartImplTest extends AbstractCatalogDataTestCase {
 	}
 
 	/**
-	 * Test method for setting the subtotal discount.
+	 * Verifies calling setSubtotalDiscount() with a lower discount than a previously set subtotal discount is not applied.
 	 */
 	@Test
-	public void testSetSubtotalDiscount1() {
-		ShoppingCartImpl shoppingCart = getShoppingCart();
-		applyTaxCalculationResult(shoppingCart);
+	public void testSetSubtotalDiscountWithLowerDiscountThanExistingIsSuperceded() {
+		mockSubtotalCalculatorForAllCartItems(shoppingCart, BigDecimal.TEN);
 
 		BigDecimal highDiscount = new BigDecimal("6");
 		BigDecimal lowDiscount = new BigDecimal("5");
@@ -795,60 +652,44 @@ public class ShoppingCartImplTest extends AbstractCatalogDataTestCase {
 	}
 
 	/**
-	 * Test method for setting the subtotal discount.
+	 * Verifies calling setSubtotalDiscount() with a higher discount than a previously set subtotal discount is applied.
 	 */
 	@Test
-	public void testSetSubtotalDiscount2() {
-		ShoppingCartImpl shoppingCart = getShoppingCart();
-		applyTaxCalculationResult(shoppingCart);
+	public void testSetSubtotalDiscountWithHigherDiscountThanExistingIsApplied() {
+		mockSubtotalCalculatorForAllCartItems(shoppingCart, BigDecimal.TEN);
 
 		BigDecimal lowDiscount = new BigDecimal("5");
 		BigDecimal highDiscount = new BigDecimal("6");
 
-		shoppingCart.setSubtotalDiscount(highDiscount, RULE_ID, ACTION_ID);
 		shoppingCart.setSubtotalDiscount(lowDiscount, RULE_ID, ACTION_ID);
+		shoppingCart.setSubtotalDiscount(highDiscount, RULE_ID, ACTION_ID);
 
 		assertEquals(highDiscount, shoppingCart.getSubtotalDiscount());
 	}
 
 	/**
-	 * Test method for setting the subtotal discount.
+	 * Verifies calling setSubtotalDiscount() with a discount when the subtotal is zero does not apply the discount.
 	 */
 	@Test
-	public void testSetSubtotalDiscount3() {
-		final ShoppingCartImpl shoppingCart = getShoppingCart();
-		final Currency currency = shoppingCart.getCustomerSession().getCurrency();
-		applyTaxCalculationResult(shoppingCart);
+	public void testSetSubtotalDiscountWithAZeroSubtotalDoesNotApply() {
+		mockSubtotalCalculatorForAllCartItems(shoppingCart, BigDecimal.ZERO);
 
-		BigDecimal highDiscount = BigDecimal.TEN.setScale(2);
-		BigDecimal lowDiscount = new BigDecimal("5.00");
-
-		shoppingCart.setSubtotalDiscount(highDiscount, RULE_ID, ACTION_ID);
-		shoppingCart.clearItems();
-
-		context.checking(new Expectations() {
-			{
-				allowing(getShoppingItemSubtotalCalculator()).calculate(Collections.<ShoppingItem>emptyList(), shoppingCart, currency);
-				will(returnValue(Money.valueOf(BigDecimal.ZERO, currency)));
-			}
-		});
-
-		shoppingCart.setSubtotalDiscount(lowDiscount, RULE_ID, ACTION_ID);
+		final BigDecimal discount = BigDecimal.TEN;
+		shoppingCart.setSubtotalDiscount(discount, RULE_ID, ACTION_ID);
 
 		// Cart subtotal is zero, so can't set the subtotal discount above.
 		assertEquals(BigDecimal.ZERO, shoppingCart.getSubtotalDiscount());
 	}
 
 	/**
-	 * Test method for setting the subtotal discount.
+	 * Verifies calling setSubtotalDiscount() with a discount higher than the subtotal is limited to the subtotal amount and doesn't exceed it.
 	 */
 	@Test
-	public void testSetSubtotalDiscount4() {
-		ShoppingCartImpl shoppingCart = getShoppingCart();
-		applyTaxCalculationResult(shoppingCart);
+	public void testSetSubtotalDiscountToGreaterThanSubtotalIsLimitedToSubtotalAmount() {
+		mockSubtotalCalculatorForAllCartItems(shoppingCart, BigDecimal.TEN);
 
-		BigDecimal hugeDiscount = new BigDecimal("1000000");
 		BigDecimal subtotal = shoppingCart.getSubtotal();
+		BigDecimal hugeDiscount = subtotal.add(new BigDecimal("1000.00"));
 
 		shoppingCart.setSubtotalDiscount(hugeDiscount, RULE_ID, ACTION_ID);
 
@@ -864,8 +705,8 @@ public class ShoppingCartImplTest extends AbstractCatalogDataTestCase {
 		final CustomerSession customerSession = shoppingCart.getCustomerSession();
 
 		GiftCertificate giftCertificate = mockGiftCertificate(shoppingCart.getStore(),
-				BigDecimal.TEN,
-				customerSession.getCurrency());
+															  BigDecimal.TEN,
+															  customerSession.getCurrency());
 		shoppingCart.applyGiftCertificate(giftCertificate);
 		assertTrue(shoppingCart.getAppliedGiftCertificates().contains(giftCertificate));
 	}
@@ -918,12 +759,12 @@ public class ShoppingCartImplTest extends AbstractCatalogDataTestCase {
 		final BigDecimal balance = BigDecimal.ZERO;
 
 		stubGetBean(ContextIdNames.GIFT_CERTIFICATE_SERVICE,
-				new GiftCertificateServiceImpl() {
-					@Override
-					public BigDecimal getBalance(final GiftCertificate giftCertificate) {
-						return balance;
-					}
-				});
+					new GiftCertificateServiceImpl() {
+						@Override
+						public BigDecimal getBalance(final GiftCertificate giftCertificate) {
+							return balance;
+						}
+					});
 
 		final ShoppingCart shoppingCart = getShoppingCart();
 		final CustomerSession customerSession = shoppingCart.getCustomerSession();
@@ -949,7 +790,7 @@ public class ShoppingCartImplTest extends AbstractCatalogDataTestCase {
 
 		Currency currency = Currency.getInstance(Locale.ITALY);
 		assertThat("Shopping cart currency must not be the gift certificate currency", customerSession.getCurrency(),
-				Matchers.not(equalTo(currency)));
+				   Matchers.not(equalTo(currency)));
 		GiftCertificate giftCertificate = mockGiftCertificate(shoppingCart.getStore(), BigDecimal.TEN, currency);
 
 		try {
@@ -971,11 +812,11 @@ public class ShoppingCartImplTest extends AbstractCatalogDataTestCase {
 
 		shoppingCart.setStore(new StoreImpl());
 		GiftCertificate giftCertificate = mockGiftCertificate(shoppingCart.getStore(), BigDecimal.TEN,
-				shoppingCart.getCustomerSession().getCurrency());
+															  shoppingCart.getCustomerSession().getCurrency());
 		shoppingCart.applyGiftCertificate(giftCertificate);
 
 		assertEquals("The redeemed GC amount should be not more than the shopping cart total",
-				BigDecimal.ONE, shoppingCart.getGiftCertificateDiscount());
+					 BigDecimal.ONE, shoppingCart.getGiftCertificateDiscount());
 	}
 
 	/**
@@ -988,11 +829,11 @@ public class ShoppingCartImplTest extends AbstractCatalogDataTestCase {
 		shoppingCart.setStore(new StoreImpl());
 
 		GiftCertificate giftCertificate = mockGiftCertificate(shoppingCart.getStore(), BigDecimal.TEN,
-				shoppingCart.getCustomerSession().getCurrency());
+															  shoppingCart.getCustomerSession().getCurrency());
 		shoppingCart.applyGiftCertificate(giftCertificate);
 
 		assertEquals("The redeemed GC amount should exactly its amount when total > GC amount",
-				BigDecimal.TEN, shoppingCart.getGiftCertificateDiscount());
+					 BigDecimal.TEN, shoppingCart.getGiftCertificateDiscount());
 	}
 
 
@@ -1043,17 +884,17 @@ public class ShoppingCartImplTest extends AbstractCatalogDataTestCase {
 		giftCertificate2.setStore(shoppingCart.getStore());
 
 		stubGetBean(ContextIdNames.GIFT_CERTIFICATE_SERVICE,
-				new GiftCertificateServiceImpl() {
-					@Override
-					public BigDecimal getBalance(final GiftCertificate giftCert) {
-						if (giftCert.getUidPk() == uidPkGc1) {
-							return giftCertificate.getPurchaseAmount();
-						} else if (giftCert.getUidPk() == uidPkGc2) {
-							return giftCertificate2.getPurchaseAmount();
+					new GiftCertificateServiceImpl() {
+						@Override
+						public BigDecimal getBalance(final GiftCertificate giftCert) {
+							if (giftCert.getUidPk() == uidPkGc1) {
+								return giftCertificate.getPurchaseAmount();
+							} else if (giftCert.getUidPk() == uidPkGc2) {
+								return giftCertificate2.getPurchaseAmount();
+							}
+							return null;
 						}
-						return null;
-					}
-				});
+					});
 
 		shoppingCart.applyGiftCertificate(giftCertificate2);
 
@@ -1084,33 +925,30 @@ public class ShoppingCartImplTest extends AbstractCatalogDataTestCase {
 	 */
 	@Test
 	public void testIsCartItemRemoved() {
-		ShoppingCart shoppingCart = getShoppingCart();
+		ShoppingCartImpl shoppingCart = getShoppingCart();
 
-		ShoppingItem cartItemToRemove = shoppingCart.getCartItems().iterator().next();
-		assertEquals("Sanity Check", getCartSku().getGuid(), cartItemToRemove.getSkuGuid());
+		ShoppingItem cartItemToRemove = shoppingCart.getRootShoppingItems().get(0);
+		ProductSku cartSkuToRemove = getCartSkus().get(0);
 
-		assertFalse(shoppingCart.isCartItemRemoved(getCartSku().getSkuCode()));
+		assertEquals("Sanity Check", cartSkuToRemove.getGuid(), cartItemToRemove.getSkuGuid());
+
+		assertFalse(shoppingCart.isCartItemRemoved(cartSkuToRemove.getSkuCode()));
 
 		shoppingCart.removeCartItem(cartItemToRemove.getUidPk());
 
-		assertTrue(shoppingCart.isCartItemRemoved(getCartSku().getSkuCode()));
+		assertTrue(shoppingCart.isCartItemRemoved(cartSkuToRemove.getSkuCode()));
 	}
 
 	/**
 	 * Tests that a hasSubtotalDiscount() works as expected.
 	 */
 	@Test
+	@SuppressWarnings("unchecked")
 	public void testHasSubtotalDiscountWithZeroValue() {
-		final Currency currency = shoppingCart.getCustomerSession().getCurrency();
-		context.checking(new Expectations() {
-			{
-				allowing(getShoppingItemSubtotalCalculator()).calculate(Collections.<ShoppingItem>emptyList(), shoppingCart, currency);
-				will(returnValue(Money.valueOf(BigDecimal.ZERO, currency)));
-			}
-		});
+		mockSubtotalCalculatorForAllCartItems(shoppingCart, BigDecimal.ZERO);
+
 		shoppingCart.setSubtotalDiscount(BigDecimal.ZERO.setScale(2), RULE_ID, ACTION_ID);
 		assertFalse("The discount is 0 and therefore no discount exists", shoppingCart.hasSubtotalDiscount());
-
 	}
 
 	/**
@@ -1118,6 +956,8 @@ public class ShoppingCartImplTest extends AbstractCatalogDataTestCase {
 	 */
 	@Test
 	public void testSetSubtotalDiscountNullValue() {
+		mockSubtotalCalculatorForAllCartItems(shoppingCart, BigDecimal.ZERO);
+
 		try {
 			shoppingCart.setSubtotalDiscount(null, RULE_ID, ACTION_ID);
 			fail("should not be possible to set discount to null");
@@ -1133,7 +973,7 @@ public class ShoppingCartImplTest extends AbstractCatalogDataTestCase {
 	 */
 	@Test
 	public void testSubtotalDiscountNonZeroValue() {
-		applyTaxCalculationResult(shoppingCart);
+		mockSubtotalCalculatorForAllCartItems(shoppingCart, BigDecimal.TEN);
 
 		assertTrue(BigDecimal.ZERO.compareTo(shoppingCart.getSubtotal()) < 0);
 
@@ -1144,6 +984,7 @@ public class ShoppingCartImplTest extends AbstractCatalogDataTestCase {
 	/**
 	 *
 	 */
+	@SuppressWarnings("unchecked")
 	private TaxCalculationResult applyTaxCalculationResult(final ShoppingCartImpl shoppingCart) {
 		final TaxCalculationResultImpl taxCalculationResult = new TaxCalculationResultImpl();
 		final Currency currency = shoppingCart.getCustomerSession().getCurrency();
@@ -1151,13 +992,6 @@ public class ShoppingCartImplTest extends AbstractCatalogDataTestCase {
 		taxCalculationResult.setBeforeTaxSubTotalWithoutDiscount(Money.valueOf(BigDecimal.TEN, currency));
 		taxCalculationResult.setBeforeTaxSubTotal(Money.valueOf("9", currency));
 		shoppingCart.setTaxCalculationResult(taxCalculationResult);
-
-		context.checking(new Expectations() {
-			{
-				allowing(getShoppingItemSubtotalCalculator()).calculate(shoppingCart.getApportionedLeafItems(), shoppingCart, currency);
-				will(returnValue(Money.valueOf("9", currency)));
-			}
-		});
 
 		return taxCalculationResult;
 	}
@@ -1167,10 +1001,10 @@ public class ShoppingCartImplTest extends AbstractCatalogDataTestCase {
 	 */
 	@Test
 	public void testGetAllItems() {
-		assertTrue(shoppingCart.getAllItems().isEmpty());
+		assertTrue(shoppingCart.getAllShoppingItems().isEmpty());
 
 		try {
-			shoppingCart.getAllItems().clear();
+			shoppingCart.getAllShoppingItems().clear();
 			fail("The items collection should be unmodifiable");
 		} catch (Exception exc) {
 			assertNotNull(exc);
@@ -1299,7 +1133,7 @@ public class ShoppingCartImplTest extends AbstractCatalogDataTestCase {
 	@Test
 	public void testGetCartItemsWithNullItemsFromMemento() {
 		shoppingCart.getShoppingCartMemento().setAllItems(null);
-		List<ShoppingItem> allItems = shoppingCart.getAllItems();
+		Collection<ShoppingItem> allItems = shoppingCart.getAllShoppingItems();
 		assertTrue("The returned list should be empty", allItems.isEmpty());
 	}
 
@@ -1314,8 +1148,8 @@ public class ShoppingCartImplTest extends AbstractCatalogDataTestCase {
 	}
 
 	@Test(expected = EpServiceException.class)
-	public void verifyGettingPricingSnapshotForUnknownShippingServiceLevelThrows() throws Exception {
-		shoppingCart.getShippingPricingSnapshot(getShippingServiceLevel(1));
+	public void verifyGettingPricingSnapshotForUnknownShippingOptionThrows() throws Exception {
+		shoppingCart.getShippingPricingSnapshot(createShippingOption("1"));
 	}
 
 	@Test
@@ -1323,36 +1157,36 @@ public class ShoppingCartImplTest extends AbstractCatalogDataTestCase {
 		final long ruleId = 1;
 		final long actionId = 2;
 
-		final String shippingServiceLevelCode1 = "SHIP001";
-		final String shippingServiceLevelCode2 = "SHIP002";
-		final String shippingServiceLevelCode3 = "SHIP003";
+		final String shippingOptionCode1 = "SHIP001";
+		final String shippingOptionCode2 = "SHIP002";
+		final String shippingOptionCode3 = "SHIP003";
 
-		final ShippingServiceLevel shippingServiceLevel1 = createShippingServiceLevel(shippingServiceLevelCode1);
-		final ShippingServiceLevel shippingServiceLevel2 = createShippingServiceLevel(shippingServiceLevelCode2);
-		final ShippingServiceLevel shippingServiceLevel3 = createShippingServiceLevel(shippingServiceLevelCode3);
+		final ShippingOption shippingOption1 = createShippingOption(shippingOptionCode1);
+		final ShippingOption shippingOption2 = createShippingOption(shippingOptionCode2);
+		final ShippingOption shippingOption3 = createShippingOption(shippingOptionCode3);
 
-		final Money zeroDollars = Money.valueOf(BigDecimal.ZERO, CAD);
-		final Money oneDollar = Money.valueOf(BigDecimal.ONE, CAD);
-		final Money nineDollars = Money.valueOf(new BigDecimal("9"), CAD);
-		final Money tenDollars = Money.valueOf(BigDecimal.TEN, CAD);
-		final Money ninetyDollars = Money.valueOf(new BigDecimal("90"), CAD);
-		final Money hundredDollars = Money.valueOf(new BigDecimal("100"), CAD);
+		final Money zeroDollars = Money.valueOf(BigDecimal.ZERO, CURRENCY);
+		final Money oneDollar = Money.valueOf(BigDecimal.ONE, CURRENCY);
+		final Money nineDollars = Money.valueOf(new BigDecimal("9"), CURRENCY);
+		final Money tenDollars = Money.valueOf(BigDecimal.TEN, CURRENCY);
+		final Money ninetyDollars = Money.valueOf(new BigDecimal("90"), CURRENCY);
+		final Money hundredDollars = Money.valueOf(new BigDecimal("100"), CURRENCY);
 
 		// $0 list, null discount
-		shoppingCart.setShippingListPrice(shippingServiceLevelCode1, zeroDollars);
+		shoppingCart.setShippingListPrice(shippingOptionCode1, zeroDollars);
 
 		// $10 list, $1 discount
-		shoppingCart.setShippingListPrice(shippingServiceLevelCode2, tenDollars);
-		shoppingCart.setShippingDiscountIfLower(shippingServiceLevelCode2, ruleId, actionId, oneDollar);
+		shoppingCart.setShippingListPrice(shippingOptionCode2, tenDollars);
+		shoppingCart.setShippingDiscountIfLower(shippingOptionCode2, ruleId, actionId, oneDollar);
 
 		// $100 list, $10 discount
-		shoppingCart.setShippingListPrice(shippingServiceLevelCode3, hundredDollars);
-		shoppingCart.setShippingDiscountIfLower(shippingServiceLevelCode3, ruleId, actionId, tenDollars);
+		shoppingCart.setShippingListPrice(shippingOptionCode3, hundredDollars);
+		shoppingCart.setShippingDiscountIfLower(shippingOptionCode3, ruleId, actionId, tenDollars);
 
 
-		final ShippingPricingSnapshot shippingPricingSnapshot1 = shoppingCart.getShippingPricingSnapshot(shippingServiceLevel1);
-		final ShippingPricingSnapshot shippingPricingSnapshot2 = shoppingCart.getShippingPricingSnapshot(shippingServiceLevel2);
-		final ShippingPricingSnapshot shippingPricingSnapshot3 = shoppingCart.getShippingPricingSnapshot(shippingServiceLevel3);
+		final ShippingPricingSnapshot shippingPricingSnapshot1 = shoppingCart.getShippingPricingSnapshot(shippingOption1);
+		final ShippingPricingSnapshot shippingPricingSnapshot2 = shoppingCart.getShippingPricingSnapshot(shippingOption2);
+		final ShippingPricingSnapshot shippingPricingSnapshot3 = shoppingCart.getShippingPricingSnapshot(shippingOption3);
 
 		assertEquals(zeroDollars, shippingPricingSnapshot1.getShippingListPrice());
 		assertEquals(zeroDollars, shippingPricingSnapshot1.getShippingPromotedPrice());
@@ -1372,25 +1206,25 @@ public class ShoppingCartImplTest extends AbstractCatalogDataTestCase {
 		final long ruleId = 1;
 		final long actionId = 2;
 
-		final Money zeroDollars = Money.valueOf(BigDecimal.ZERO, CAD);
-		final Money oneDollar = Money.valueOf(BigDecimal.ONE, CAD);
-		final Money tenDollars = Money.valueOf(BigDecimal.TEN, CAD);
+		final Money zeroDollars = Money.valueOf(BigDecimal.ZERO, CURRENCY);
+		final Money oneDollar = Money.valueOf(BigDecimal.ONE, CURRENCY);
+		final Money tenDollars = Money.valueOf(BigDecimal.TEN, CURRENCY);
 
-		final String shippingServiceLevelCode = "SHIP001";
+		final String shippingOptionCode = "SHIP001";
 
-		final ShippingServiceLevel shippingServiceLevel = createShippingServiceLevel(shippingServiceLevelCode);
-		shoppingCart.setShippingListPrice(shippingServiceLevelCode, zeroDollars);
+		final ShippingOption shippingOption = createShippingOption(shippingOptionCode);
+		shoppingCart.setShippingListPrice(shippingOptionCode, zeroDollars);
 
-		shoppingCart.setShippingDiscountIfLower(shippingServiceLevelCode, ruleId, actionId, zeroDollars);
-		assertEquals(zeroDollars, shoppingCart.getShippingPricingSnapshot(shippingServiceLevel).getShippingDiscountAmount());
+		shoppingCart.setShippingDiscountIfLower(shippingOptionCode, ruleId, actionId, zeroDollars);
+		assertEquals(zeroDollars, shoppingCart.getShippingPricingSnapshot(shippingOption).getShippingDiscountAmount());
 
 		// Better discount, new value should be $10
-		shoppingCart.setShippingDiscountIfLower(shippingServiceLevelCode, ruleId, actionId, tenDollars);
-		assertEquals(tenDollars, shoppingCart.getShippingPricingSnapshot(shippingServiceLevel).getShippingDiscountAmount());
+		shoppingCart.setShippingDiscountIfLower(shippingOptionCode, ruleId, actionId, tenDollars);
+		assertEquals(tenDollars, shoppingCart.getShippingPricingSnapshot(shippingOption).getShippingDiscountAmount());
 
 		// Not as good discount, value should remain at $10
-		shoppingCart.setShippingDiscountIfLower(shippingServiceLevelCode, ruleId, actionId, oneDollar);
-		assertEquals(tenDollars, shoppingCart.getShippingPricingSnapshot(shippingServiceLevel).getShippingDiscountAmount());
+		shoppingCart.setShippingDiscountIfLower(shippingOptionCode, ruleId, actionId, oneDollar);
+		assertEquals(tenDollars, shoppingCart.getShippingPricingSnapshot(shippingOption).getShippingDiscountAmount());
 	}
 
 	/**
@@ -1401,13 +1235,13 @@ public class ShoppingCartImplTest extends AbstractCatalogDataTestCase {
 		final long ruleId1 = 1L;
 		final long ruleId2 = 2L;
 
-		final String shippingServiceLevelCode = UUID.randomUUID().toString();
+		final String shippingOption = UUID.randomUUID().toString();
 
-		final Money existingDiscount = Money.valueOf(BigDecimal.ONE, CAD);
-		shoppingCart.setShippingDiscountIfLower(shippingServiceLevelCode, ruleId1, ACTION_ID, existingDiscount);
+		final Money existingDiscount = Money.valueOf(BigDecimal.ONE, CURRENCY);
+		shoppingCart.setShippingDiscountIfLower(shippingOption, ruleId1, ACTION_ID, existingDiscount);
 
-		final Money betterDiscount = Money.valueOf(BigDecimal.TEN, CAD);
-		shoppingCart.setShippingDiscountIfLower(shippingServiceLevelCode, ruleId2, ACTION_ID, betterDiscount);
+		final Money betterDiscount = Money.valueOf(BigDecimal.TEN, CURRENCY);
+		shoppingCart.setShippingDiscountIfLower(shippingOption, ruleId2, ACTION_ID, betterDiscount);
 
 		final PromotionRecordContainerImpl promotionRecordContainer = (PromotionRecordContainerImpl) shoppingCart.getPromotionRecordContainer();
 
@@ -1418,20 +1252,20 @@ public class ShoppingCartImplTest extends AbstractCatalogDataTestCase {
 
 
 	/**
-	 * Shipping discounts that are valid and applied should mark existing records for this SSL as superseded.
+	 * Shipping discounts that are valid and applied should mark existing records for this shipping options as superseded.
 	 */
 	@Test
-	public void verifyApplyShippingDiscountMarksExistingRecordsWithSameServiceLevelAsSupersededWhenBetterDiscount() {
+	public void verifyApplyShippingDiscountMarksExistingRecordsWithSameShippingOptionAsSupersededWhenBetterDiscount() {
 		final long ruleId1 = 1L;
 		final long ruleId2 = 2L;
 
-		final String shippingServiceLevelCode = UUID.randomUUID().toString();
+		final String shippingOptionCode = UUID.randomUUID().toString();
 
-		final Money existingDiscount = Money.valueOf(BigDecimal.ONE, CAD);
-		shoppingCart.setShippingDiscountIfLower(shippingServiceLevelCode, ruleId1, ACTION_ID, existingDiscount);
+		final Money existingDiscount = Money.valueOf(BigDecimal.ONE, CURRENCY);
+		shoppingCart.setShippingDiscountIfLower(shippingOptionCode, ruleId1, ACTION_ID, existingDiscount);
 
-		final Money betterDiscount = Money.valueOf(BigDecimal.TEN, CAD);
-		shoppingCart.setShippingDiscountIfLower(shippingServiceLevelCode, ruleId2, ACTION_ID, betterDiscount);
+		final Money betterDiscount = Money.valueOf(BigDecimal.TEN, CURRENCY);
+		shoppingCart.setShippingDiscountIfLower(shippingOptionCode, ruleId2, ACTION_ID, betterDiscount);
 
 		final PromotionRecordContainerImpl promotionRecordContainer = (PromotionRecordContainerImpl) shoppingCart.getPromotionRecordContainer();
 
@@ -1440,27 +1274,27 @@ public class ShoppingCartImplTest extends AbstractCatalogDataTestCase {
 	}
 
 	/**
-	 * Shipping discounts that are valid and applied should not mark existing records for other SSLs as superseded.
+	 * Shipping discounts that are valid and applied should not mark existing records for other shipping options as superseded.
 	 */
 	@Test
-	public void verifyApplyShippingDiscountDoesNotMarkExistingRecordsWithDifferentServiceLevelAsSuperseded() {
+	public void verifyApplyShippingDiscountDoesNotMarkExistingRecordsWithDifferentShippingOptionAsSuperseded() {
 		final long ruleId1 = 1L;
 		final long ruleId2 = 2L;
 
-		final String shippingServiceLevelCode1 = UUID.randomUUID().toString();
-		final String shippingServiceLevelCode2 = UUID.randomUUID().toString();
+		final String shippingOptionCode1 = UUID.randomUUID().toString();
+		final String shippingOptionCode2 = UUID.randomUUID().toString();
 
-		final Money existingDiscount = Money.valueOf(BigDecimal.ONE, CAD);
-		shoppingCart.setShippingDiscountIfLower(shippingServiceLevelCode1, ruleId1, ACTION_ID, existingDiscount);
+		final Money existingDiscount = Money.valueOf(BigDecimal.ONE, CURRENCY);
+		shoppingCart.setShippingDiscountIfLower(shippingOptionCode1, ruleId1, ACTION_ID, existingDiscount);
 
-		final Money betterDiscount = Money.valueOf(BigDecimal.TEN, CAD);
-		shoppingCart.setShippingDiscountIfLower(shippingServiceLevelCode2, ruleId2, ACTION_ID, betterDiscount);
+		final Money betterDiscount = Money.valueOf(BigDecimal.TEN, CURRENCY);
+		shoppingCart.setShippingDiscountIfLower(shippingOptionCode2, ruleId2, ACTION_ID, betterDiscount);
 
 		final PromotionRecordContainerImpl promotionRecordContainer = (PromotionRecordContainerImpl) shoppingCart.getPromotionRecordContainer();
 
 		final DiscountRecord discountRecord = promotionRecordContainer.getDiscountRecord(ruleId1, ACTION_ID);
 		assertFalse("Expected existing discount not to be marked as superseded when a better discount is applied to a different shipping service "
-				+ "level", discountRecord.isSuperceded());
+							+ "level", discountRecord.isSuperceded());
 	}
 
 	/**
@@ -1471,13 +1305,13 @@ public class ShoppingCartImplTest extends AbstractCatalogDataTestCase {
 		final long ruleId1 = 1L;
 		final long ruleId2 = 2L;
 
-		final String shippingServiceLevelCode = UUID.randomUUID().toString();
+		final String shippingOptionCode = UUID.randomUUID().toString();
 
-		final Money existingDiscount = Money.valueOf(BigDecimal.TEN, CAD);
-		shoppingCart.setShippingDiscountIfLower(shippingServiceLevelCode, ruleId1, ACTION_ID, existingDiscount);
+		final Money existingDiscount = Money.valueOf(BigDecimal.TEN, CURRENCY);
+		shoppingCart.setShippingDiscountIfLower(shippingOptionCode, ruleId1, ACTION_ID, existingDiscount);
 
-		final Money worseDiscount = Money.valueOf(BigDecimal.ONE, CAD);
-		shoppingCart.setShippingDiscountIfLower(shippingServiceLevelCode, ruleId2, ACTION_ID, worseDiscount);
+		final Money worseDiscount = Money.valueOf(BigDecimal.ONE, CURRENCY);
+		shoppingCart.setShippingDiscountIfLower(shippingOptionCode, ruleId2, ACTION_ID, worseDiscount);
 
 		final PromotionRecordContainerImpl promotionRecordContainer = (PromotionRecordContainerImpl) shoppingCart.getPromotionRecordContainer();
 
@@ -1486,15 +1320,15 @@ public class ShoppingCartImplTest extends AbstractCatalogDataTestCase {
 	}
 
 	@Test
-	public void verifyApplyShippingDiscountNoOpsWhenSameServiceLevelAndDiscountAmount() throws Exception {
+	public void verifyApplyShippingDiscountNoOpsWhenSameShippingOptionAndDiscountAmount() throws Exception {
 		final long ruleId = 1L;
 
-		final String shippingServiceLevelCode = UUID.randomUUID().toString();
+		final String shippingOptionCode = UUID.randomUUID().toString();
 
-		final Money existingDiscount = Money.valueOf(BigDecimal.TEN, CAD);
-		shoppingCart.setShippingDiscountIfLower(shippingServiceLevelCode, ruleId, ACTION_ID, existingDiscount);
+		final Money existingDiscount = Money.valueOf(BigDecimal.TEN, CURRENCY);
+		shoppingCart.setShippingDiscountIfLower(shippingOptionCode, ruleId, ACTION_ID, existingDiscount);
 
-		shoppingCart.setShippingDiscountIfLower(shippingServiceLevelCode, ruleId, ACTION_ID, existingDiscount);
+		shoppingCart.setShippingDiscountIfLower(shippingOptionCode, ruleId, ACTION_ID, existingDiscount);
 
 		final PromotionRecordContainerImpl promotionRecordContainer = (PromotionRecordContainerImpl) shoppingCart.getPromotionRecordContainer();
 
@@ -1503,69 +1337,62 @@ public class ShoppingCartImplTest extends AbstractCatalogDataTestCase {
 	}
 
 	@Test
-	public void verifyGetShippingCostReturnsValueFromSnapshotOfSelectedServiceLevel() throws Exception {
-		final long shippingServiceLevelSelectedUidpk = 1L;
-		final long shippingServiceLevelNotSelectedUidpk = 2L;
+	public void verifyGetShippingCostReturnsValueFromSnapshotOfSelectedShippingOption() throws Exception {
+		final String shippingOptionCodeSelected = "SHIP001";
+		final String shippingOptionCodeNotSelected = "SHIP002";
 
-		final String shippingServiceLevelCodeSelected = "SHIP001";
-		final String shippingServiceLevelCodeNotSelected = "SHIP002";
-
-		final ShippingServiceLevel shippingServiceLevelSelected = createShippingServiceLevel(shippingServiceLevelCodeSelected);
-		final ShippingServiceLevel shippingServiceLevelNotSelected = createShippingServiceLevel(shippingServiceLevelCodeNotSelected);
+		final ShippingOption shippingOptionSelected = createShippingOption(shippingOptionCodeSelected);
+		final ShippingOption shippingOptionLevelNotSelected = createShippingOption(shippingOptionCodeNotSelected);
 
 		context.checking(new Expectations() {
 			{
-				allowing(shippingServiceLevelSelected).getUidPk();
-				will(returnValue(shippingServiceLevelSelectedUidpk));
+				allowing(shippingOptionSelected).getCode();
+				will(returnValue(shippingOptionCodeSelected));
 
-				allowing(shippingServiceLevelNotSelected).getUidPk();
-				will(returnValue(shippingServiceLevelNotSelectedUidpk));
+				allowing(shippingOptionLevelNotSelected).getCode();
+				will(returnValue(shippingOptionCodeNotSelected));
 			}
 		});
 
 		shoppingCart.addShoppingCartItem(createShippableShoppingItem());
-		shoppingCart.setShippingServiceLevelList(ImmutableList.of(shippingServiceLevelNotSelected, shippingServiceLevelSelected));
 
-		final Money oneDollar = Money.valueOf(BigDecimal.ONE, CAD);
-		final Money tenDollars = Money.valueOf(BigDecimal.TEN, CAD);
+		final Money oneDollar = Money.valueOf(BigDecimal.ONE, CURRENCY);
+		final Money tenDollars = Money.valueOf(BigDecimal.TEN, CURRENCY);
 
-		shoppingCart.setShippingListPrice(shippingServiceLevelCodeSelected, oneDollar);
-		shoppingCart.setShippingListPrice(shippingServiceLevelCodeNotSelected, tenDollars);
+		shoppingCart.setShippingListPrice(shippingOptionCodeSelected, oneDollar);
+		shoppingCart.setShippingListPrice(shippingOptionCodeNotSelected, tenDollars);
 
-		shoppingCart.setSelectedShippingServiceLevelUid(shippingServiceLevelSelectedUidpk);
+		shoppingCart.setSelectedShippingOption(shippingOptionSelected);
 
-		assertEquals("Expected shipping cost to equal the amount from the snapshot of the selected shipping service level",
-				oneDollar, shoppingCart.getShippingCost());
+		assertEquals("Expected shipping cost to equal the amount from the snapshot of the selected shipping option",
+					 oneDollar, shoppingCart.getShippingCost());
 	}
 
 	@Test
 	public void verifyGetShippingCostReturnsOverrideIfPresent() throws Exception {
-		final long shippingServiceLevelSelectedUidpk = 1L;
-
-		final String shippingServiceLevelCodeSelected = "SHIP001";
-		final ShippingServiceLevel shippingServiceLevelSelected = createShippingServiceLevel(shippingServiceLevelCodeSelected);
+		final String shippingOptionCodeSelected = "SHIP001";
+		final ShippingOption shippingOptionSelected = createShippingOption(shippingOptionCodeSelected);
 
 		context.checking(new Expectations() {
 			{
-				allowing(shippingServiceLevelSelected).getUidPk();
-				will(returnValue(shippingServiceLevelSelectedUidpk));
+				allowing(shippingOptionSelected).getCode();
+				will(returnValue(shippingOptionCodeSelected));
 			}
 		});
 
 		shoppingCart.addShoppingCartItem(createShippableShoppingItem());
-		shoppingCart.setShippingServiceLevelList(ImmutableList.of(shippingServiceLevelSelected));
 
-		final Money oneDollar = Money.valueOf(BigDecimal.ONE, CAD);
-		final Money tenDollars = Money.valueOf(BigDecimal.TEN, CAD);
+		final Money oneDollar = Money.valueOf(BigDecimal.ONE, CURRENCY);
+		final Money tenDollars = Money.valueOf(BigDecimal.TEN, CURRENCY);
 
-		shoppingCart.setShippingListPrice(shippingServiceLevelCodeSelected, oneDollar);
+		shoppingCart.setShippingListPrice(shippingOptionCodeSelected, oneDollar);
 
-		shoppingCart.setSelectedShippingServiceLevelUid(shippingServiceLevelSelectedUidpk);
+		shoppingCart.setSelectedShippingOption(shippingOptionSelected);
 
 		shoppingCart.setShippingCostOverride(tenDollars.getAmount());
 
-		assertEquals("Expected shipping cost to ignore the amount from the selected shipping service level, and instead return the override value",
-				tenDollars, shoppingCart.getShippingCost());
+		assertEquals("Expected shipping cost to ignore the amount from the selected shipping option, and instead return the override value",
+					 tenDollars, shoppingCart.getShippingCost());
 	}
 
 	@Test
@@ -1573,10 +1400,8 @@ public class ShoppingCartImplTest extends AbstractCatalogDataTestCase {
 		final ShoppingItem shoppingItem = createNonShippableShoppingItem();
 		shoppingCart.addShoppingCartItem(shoppingItem);
 
-		shoppingCart.setShippingServiceLevelList(Collections.singletonList(context.mock(ShippingServiceLevel.class)));
-
 		assertEquals("Expected a flat shipping cost of $0.00 when the cart does not contain any shippable items",
-				Money.valueOf(BigDecimal.ZERO, CAD), shoppingCart.getShippingCost());
+					 Money.valueOf(BigDecimal.ZERO, CURRENCY), shoppingCart.getShippingCost());
 	}
 
 	@Test
@@ -1587,13 +1412,13 @@ public class ShoppingCartImplTest extends AbstractCatalogDataTestCase {
 
 		shoppingCart.setSubtotalDiscountOverride(subtotalDiscountAmount);
 
-		final TaxCalculationResult taxCalculationResult = applyTaxCalculationResult(shoppingCart);
-		taxCalculationResult.setBeforeTaxSubTotal(Money.valueOf(subtotalAmount, CAD));
+		mockSubtotalCalculatorForAllCartItems(shoppingCart, subtotalAmount);
 
 		assertEquals("Expected total to be zero when discount greater than the subtotal", subtotalAfterDiscount, shoppingCart.getTotal());
 	}
 
 	@Test
+	@SuppressWarnings("unchecked")
 	public void verifyExplicitlySetSubtotalAmountSubtractedFromTotal() throws Exception {
 		final BigDecimal subtotalAmount = new BigDecimal("10.00");
 		final BigDecimal subtotalDiscountAmount = new BigDecimal("1.00");
@@ -1601,13 +1426,7 @@ public class ShoppingCartImplTest extends AbstractCatalogDataTestCase {
 
 		shoppingCart.setSubtotalDiscountOverride(subtotalDiscountAmount);
 
-		final Currency currency = shoppingCart.getCustomerSession().getCurrency();
-		context.checking(new Expectations() {
-			{
-				allowing(getShoppingItemSubtotalCalculator()).calculate(shoppingCart.getApportionedLeafItems(), shoppingCart, currency);
-				will(returnValue(Money.valueOf(subtotalAmount, currency)));
-			}
-		});
+		mockSubtotalCalculatorForAllCartItems(shoppingCart, subtotalAmount);
 
 		assertEquals("Expected discount to be subtracted from total", subtotalAfterDiscount, shoppingCart.getTotal());
 	}
@@ -1633,18 +1452,61 @@ public class ShoppingCartImplTest extends AbstractCatalogDataTestCase {
 		shoppingCart.setSubtotalDiscount(subtotalDiscountAmount, RULE_ID, ACTION_ID);
 	}
 
-	protected ShippingServiceLevel createShippingServiceLevel(final String shippingServiceLevelCode) {
-		final ShippingServiceLevel shippingServiceLevel =
-				context.mock(ShippingServiceLevel.class, "Shipping Service Level " + UUID.randomUUID());
+	@Test
+	public void verifyClearingShippingAddressClearsShippingOptions() {
+		// Given we have a shopping cart with a shipping address and shipping options set up
+		final ShoppingCartImpl shoppingCart = getShoppingCart();
+		final Optional<ShippingOption> selectedShippingOption = shoppingCart.getSelectedShippingOption();
+
+		assertNotNull("The shipping address should be set on the cart", shoppingCart.getShippingAddress());
+		assertTrue("The shopping cart should have a shipping option selected", selectedShippingOption.isPresent());
+		assertEquals("The shopping cart should have the specific shipping option selected", SELECTED_SHIPPING_OPTION_CODE,
+					 selectedShippingOption.get().getCode());
+		assertNotNull("The shipping price should be calculated whilst the shipping address is set",
+					  shoppingCart.getShippingListPrice(SELECTED_SHIPPING_OPTION_CODE));
+
+		// When we clear the shipping address
+		shoppingCart.setShippingAddress(null);
+
+		// Then the selected and available shipping options should be cleared as no longer valid
+		assertFalse("Selected shipping option should be cleared after the shipping address has been cleared.",
+					shoppingCart.getSelectedShippingOption().isPresent());
+	}
+
+	@Test
+	public void verifySettingDifferentShippingAddressClearsShippingOptions() {
+		// Given we have a shopping cart with a shipping address and shipping options set up
+		final ShoppingCartImpl shoppingCart = getShoppingCart();
+		final Optional<ShippingOption> selectedShippingOption = shoppingCart.getSelectedShippingOption();
+
+		assertNotNull("The shipping address should be set on the cart", shoppingCart.getShippingAddress());
+		assertTrue("The shopping cart should have a shipping option selected", selectedShippingOption.isPresent());
+		assertEquals("The shopping cart should have the specific shipping option selected", SELECTED_SHIPPING_OPTION_CODE,
+					 selectedShippingOption.get().getCode());
+		assertNotNull("The shipping price should be calculated whilst the shipping address is set",
+					  shoppingCart.getShippingListPrice(SELECTED_SHIPPING_OPTION_CODE));
+
+		// When we set the shipping address to a different address
+		final Address differentAddress = getAddress();
+		differentAddress.setCountry("FR");
+		shoppingCart.setShippingAddress(differentAddress);
+
+		// Then the selected and available shipping options should be cleared as no longer valid
+		assertFalse("Selected shipping option should be cleared after the shipping address has been cleared.",
+				   shoppingCart.getSelectedShippingOption().isPresent());
+	}
+
+	protected ShippingOption createShippingOption(final String shippingOptionCode) {
+		final ShippingOption shippingOption = context.mock(ShippingOption.class, "Shipping Option " + UUID.randomUUID().toString());
 
 		context.checking(new Expectations() {
 			{
-				allowing(shippingServiceLevel).getCode();
-				will(returnValue(shippingServiceLevelCode));
+				allowing(shippingOption).getCode();
+				will(returnValue(shippingOptionCode));
 			}
 		});
 
-		return shippingServiceLevel;
+		return shippingOption;
 	}
 
 	private ShoppingItem createShippableShoppingItem() {
@@ -1675,7 +1537,7 @@ public class ShoppingCartImplTest extends AbstractCatalogDataTestCase {
 
 	private ShoppingItem createBasicMockShoppingItem() {
 		final String guid = UUID.randomUUID().toString();
-		final String skuGuid = UUID.randomUUID().toString();
+		final String skuGuid = getProductSku().getGuid();
 
 		final ShoppingItem shoppingItem = context.mock(ShoppingItem.class, "Shopping Item " + guid);
 
@@ -1687,7 +1549,8 @@ public class ShoppingCartImplTest extends AbstractCatalogDataTestCase {
 				allowing(shoppingItem).getSkuGuid();
 				will(returnValue(skuGuid));
 
-				ignoring(getProductSkuLookup()).findByGuid(skuGuid);
+				allowing(shoppingItem).getChildren();
+				will(returnValue(new ArrayList<>()));
 			}
 		});
 

@@ -8,9 +8,9 @@ import static org.hamcrest.collection.IsEmptyCollection.empty;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Matchers.startsWith;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.startsWith;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
@@ -30,7 +30,7 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.elasticpath.common.dto.DisplayValue;
 import com.elasticpath.domain.attribute.Attribute;
@@ -75,7 +75,7 @@ public class AttributeValuesAdapterTest {
 	}
 
 	@Test
-	public void verifyLocaleDependentAttributeValuesAddedToDto() throws Exception {
+	public void verifyLocaleDependentAttributeValuesAddedToDto() {
 		final String attributeName = "attribute_name";
 		final int numOfTestLocaleStrings = 100;
 
@@ -116,7 +116,7 @@ public class AttributeValuesAdapterTest {
 	}
 
 	@Test
-	public void verifyLocaleDependentAttributeValuesNotAddedToDtoWhenAttributeNotLocaleDependent() throws Exception {
+	public void verifyLocaleDependentAttributeValuesNotAddedToDtoWhenAttributeNotLocaleDependent() {
 		final String attributeName = "attribute_name";
 		final Attribute attribute = createAttribute(attributeName);
 
@@ -146,7 +146,7 @@ public class AttributeValuesAdapterTest {
 	}
 
 	@Test
-	public void verifyNonLocaleDependentAttributeValuesPopulatedToDtoWithoutLanguage() throws Exception {
+	public void verifyNonLocaleDependentAttributeValuesPopulatedToDtoWithoutLanguage() {
 		final String[] unlocalisedAttributeKeys = {
 			"I'm not a locale",
 			"Neither am I.",
@@ -189,7 +189,7 @@ public class AttributeValuesAdapterTest {
 	}
 
 	@Test
-	public void verifyDtoWithoutDisplayLanguagePopulatedToDomainWithoutLanguage() throws Exception {
+	public void verifyDtoWithoutDisplayLanguagePopulatedToDomainWithoutLanguage() {
 		final String attributeKey = "attribute.name";
 
 		final List<DisplayValue> displayValues = Collections.singletonList(new DisplayValue(null, "val1"));
@@ -223,7 +223,7 @@ public class AttributeValuesAdapterTest {
 	}
 
 	@Test
-	public void verifyLocalisedAttributeValueDomainObjsAreCreatedUsingLanguageTag() throws Exception {
+	public void verifyLocalisedAttributeValueDomainObjsAreCreatedUsingLanguageTag() {
 		final AttributeValuesDTO dto = new AttributeValuesDTO();
 
 		final String attributeKey = "attribute.name";
@@ -276,7 +276,7 @@ public class AttributeValuesAdapterTest {
 	}
 
 	@Test
-	public void verifyLocalesNotSupportedByCatalogAreSkippedWhenCreatingDomainObjs() throws Exception {
+	public void verifyLocalesNotSupportedByCatalogAreSkippedWhenCreatingDomainObjs() {
 		final AttributeValuesDTO dto = new AttributeValuesDTO();
 
 		final String attributeKey = "attribute.name";
@@ -340,10 +340,7 @@ public class AttributeValuesAdapterTest {
 	private AttributeValue createAttributeMock(final Attribute attribute, final String attributeName, final String localeLanguageTag) {
 		final AttributeValue attributeValue = Mockito.mock(AttributeValue.class, "AttrVal." + UUID.randomUUID());
 
-
-		if (localeLanguageTag == null) {
-			when(attributeValue.getLocalizedAttributeKey()).thenReturn(attributeName);
-		} else {
+		if (localeLanguageTag != null) {
 			when(attributeValue.getLocalizedAttributeKey()).thenReturn(attributeName + "_" + localeLanguageTag);
 		}
 

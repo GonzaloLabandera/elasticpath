@@ -1,5 +1,5 @@
 /*
- * Copyright (c) Elastic Path Software Inc., 2006
+ * Copyright (c) Elastic Path Software Inc., 2018
  */
 package com.elasticpath.web.context.impl;
 
@@ -20,7 +20,6 @@ import com.elasticpath.commons.beanframework.BeanFactory;
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.commons.constants.WebConstants;
 import com.elasticpath.commons.util.impl.VelocityGeographyHelperImpl;
-import com.elasticpath.commons.validator.impl.EpFieldChecks;
 import com.elasticpath.domain.ElasticPath;
 import com.elasticpath.domain.misc.Geography;
 import com.elasticpath.persistence.api.PersistenceEngine;
@@ -38,7 +37,7 @@ import com.elasticpath.persistence.api.PersistenceEngine;
  */
 public class EpContextConfigListener implements ServletContextListener {
 	/** Logger. * */
-	protected static final Logger LOG = Logger.getLogger(EpContextConfigListener.class);
+	private static final Logger LOG = Logger.getLogger(EpContextConfigListener.class);
 
 	private BeanFactory beanFactory;
 
@@ -61,16 +60,10 @@ public class EpContextConfigListener implements ServletContextListener {
 			servletContext.setAttribute(WebConstants.GEOGRAPHY_HELPER,
 					new VelocityGeographyHelperImpl(this.<Geography>getBean(ContextIdNames.GEOGRAPHY)));
 
-			// inject static initializers
-			doStaticInjection((BeanFactory) webApplicationContext.getBean("coreBeanFactory"));
 		} catch (final Exception e) {
 			LOG.error("Caught an exception.", e);
 			throw new EpSystemException("Listener initialization failed.", e);
 		}
-	}
-
-	private void doStaticInjection(final BeanFactory beanFactory) {
-		EpFieldChecks.setGeography((Geography) beanFactory.getBean(ContextIdNames.GEOGRAPHY));
 	}
 
 	/**

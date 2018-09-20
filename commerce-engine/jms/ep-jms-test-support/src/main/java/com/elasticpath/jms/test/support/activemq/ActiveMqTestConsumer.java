@@ -96,6 +96,30 @@ public class ActiveMqTestConsumer implements JmsTestConsumer {
 		return jsonObjectList;
 	}
 
+	@Override
+	public List<TextMessage> readText() {
+		return readText(readTimeout);
+	}
+
+	@Override
+	public List<TextMessage> readText(final long readTimeout) {
+
+		List<TextMessage> txtMessageList = new ArrayList<>();
+
+		try {
+			List<Message> messages = getMessages(readTimeout);
+			for (Message message : messages) {
+				TextMessage txtMessage = (TextMessage) message;
+				txtMessageList.add(txtMessage);
+				LOGGER.debug("txtMessage: " + txtMessage);
+			}
+
+		} catch (Exception e) {
+			LOGGER.debug(e.getMessage());
+		}
+		return txtMessageList;
+	}
+
 	private List<Message> getMessages(final long readTimeout) {
 		List<Message> messages = new ArrayList<>();
 		try {

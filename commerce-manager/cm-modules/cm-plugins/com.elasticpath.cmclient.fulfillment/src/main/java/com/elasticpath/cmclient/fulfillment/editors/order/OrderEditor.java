@@ -337,7 +337,6 @@ public class OrderEditor extends AbstractCmClientFormEditor {
 			}
 		} finally {
 			monitor.done();
-			fireRefreshChanges();
 		}
 	}
 

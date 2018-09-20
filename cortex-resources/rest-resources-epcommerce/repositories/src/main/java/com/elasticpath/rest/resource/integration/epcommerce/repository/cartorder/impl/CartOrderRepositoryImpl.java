@@ -19,7 +19,6 @@ import org.slf4j.LoggerFactory;
 
 import com.elasticpath.domain.cartorder.CartOrder;
 import com.elasticpath.domain.customer.Address;
-import com.elasticpath.domain.shipping.ShippingServiceLevel;
 import com.elasticpath.domain.shoppingcart.ShoppingCart;
 import com.elasticpath.domain.shoppingcart.ShoppingCartPricingSnapshot;
 import com.elasticpath.domain.shoppingcart.ShoppingCartTaxSnapshot;
@@ -62,12 +61,6 @@ public class CartOrderRepositoryImpl implements CartOrderRepository {
 	 */
 	@VisibleForTesting
 	public static final String NO_CART_ORDERS_FOR_CUSTOMER = "No cart orders for customer with GUID %s were found in store %s.";
-
-	/**
-	 * Error message when shipping address not found.
-	 */
-	@VisibleForTesting
-	public static final String NO_SHIPPING_ADDRESS_FOUND = "No shipping address found.";
 
 	private final CartOrderService coreCartOrderService;
 	private final CartOrderCouponService coreCartOrderCouponService;
@@ -186,18 +179,13 @@ public class CartOrderRepositoryImpl implements CartOrderRepository {
 		return reactiveAdapter.fromServiceAsMaybe(() -> coreCartOrderService.getBillingAddress(cartOrder), Maybe.empty());
 	}
 
-	@Override
-	public Single<Address> getShippingAddress(final CartOrder cartOrder) {
-		return reactiveAdapter.fromServiceAsSingle(() -> getShippingAddressForCartOrder(cartOrder), NO_SHIPPING_ADDRESS_FOUND);
-	}
-
 	@CacheResult
 	private Address getShippingAddressForCartOrder(final CartOrder cartOrder) {
 		return coreCartOrderService.getShippingAddress(cartOrder);
 	}
 
 	@Override
-	public Maybe<Address> getShippingAddressAsMaybe(final CartOrder cartOrder) {
+	public Maybe<Address> getShippingAddress(final CartOrder cartOrder) {
 		return reactiveAdapter.fromServiceAsMaybe(() -> getShippingAddressForCartOrder(cartOrder), Maybe.empty());
 	}
 
@@ -243,16 +231,15 @@ public class CartOrderRepositoryImpl implements CartOrderRepository {
 
 	@Override
 	public ExecutionResult<ShoppingCart> getEnrichedShoppingCart(final String storeCode, final String guid, final FindCartOrder findBy) {
-		return new ExecutionResultChain() {
-			public ExecutionResult<?> build() {
-				final CartOrder cartOrder = Assign.ifSuccessful(getCartOrder(storeCode, guid, findBy));
-				ShoppingCart shoppingCart = Assign.ifSuccessful(shoppingCartRepository.getShoppingCart(cartOrder.getShoppingCartGuid()));
-				ShoppingCart enrichedShoppingCart = coreCartOrderCouponService.populateCouponCodesOnShoppingCart(shoppingCart, cartOrder);
-				enrichedShoppingCart = coreCartOrderShippingService.populateAddressAndShippingFields(enrichedShoppingCart, cartOrder);
+			return getEnrichedShoppingCartSingle(storeCode, guid, findBy)
+						.map(this::createExecutionResult)
+						.onErrorReturnItem(ExecutionResultFactory.createNotFound())
+						.blockingGet();
 
-				return ExecutionResultFactory.createReadOK(enrichedShoppingCart);
-			}
-		}.execute();
+	}
+
+	private ExecutionResult<ShoppingCart> createExecutionResult(final ShoppingCart enrichedShoppingCartResult) {
+		return ExecutionResultFactory.createReadOK(enrichedShoppingCartResult);
 	}
 
 	@Override
@@ -272,7 +259,7 @@ public class CartOrderRepositoryImpl implements CartOrderRepository {
 	@Override
 	@CacheResult(uniqueIdentifier = "enrichedCart")
 	public Single<ShoppingCart> getEnrichedShoppingCartSingle(final String storeCode, final CartOrder cartOrder) {
-		return shoppingCartRepository.getDefaultShoppingCart()
+		return shoppingCartRepository.getShoppingCart(cartOrder.getShoppingCartGuid())
 				// update the coupon codes on the shopping cart.
 				.map(shoppingCart -> coreCartOrderCouponService.populateCouponCodesOnShoppingCart(shoppingCart, cartOrder))
 				// Update shipping information on the cart as shipping info is transient.
@@ -283,10 +270,12 @@ public class CartOrderRepositoryImpl implements CartOrderRepository {
 	@CacheRemove(typesToInvalidate = {Address.class})
 	public ExecutionResult<Boolean> updateShippingAddressOnCartOrder(final String shippingAddressGuid, final String cartOrderGuid,
 																	 final String storeCode) {
+
 		return new ExecutionResultChain() {
 			public ExecutionResult<?> build() {
 				CartOrder cartOrder = Assign.ifSuccessful(findByGuid(storeCode, cartOrderGuid));
-				boolean updatedAddress = coreCartOrderShippingService.updateCartOrderShippingAddress(shippingAddressGuid, cartOrder, storeCode);
+				final ShoppingCart shoppingCart = shoppingCartRepository.getShoppingCart(cartOrder.getShoppingCartGuid()).blockingGet();
+				boolean updatedAddress = coreCartOrderShippingService.updateCartOrderShippingAddress(shippingAddressGuid, shoppingCart, cartOrder);
 				if (updatedAddress) {
 					Ensure.successful(saveCartOrder(cartOrder));
 				}
@@ -300,13 +289,13 @@ public class CartOrderRepositoryImpl implements CartOrderRepository {
 	public Single<Boolean> updateShippingAddressOnCartOrderAsSingle(final String shippingAddressGuid, final String cartOrderGuid,
 																	final String storeCode) {
 		return findByGuidAsSingle(storeCode, cartOrderGuid)
-				.flatMap(cartOrder -> updateCartOrderShippingAddress(shippingAddressGuid, storeCode, cartOrder));
+				.flatMap(cartOrder -> updateCartOrderShippingAddress(shippingAddressGuid, cartOrder));
 	}
 
 
-	private Single<Boolean> updateCartOrderShippingAddress(final String shippingAddressGuid, final String storeCode, final CartOrder cartOrder) {
-		return reactiveAdapter.fromServiceAsSingle(
-				() -> coreCartOrderShippingService.updateCartOrderShippingAddress(shippingAddressGuid, cartOrder, storeCode))
+	private Single<Boolean> updateCartOrderShippingAddress(final String shippingAddressGuid, final CartOrder cartOrder) {
+		return  shoppingCartRepository.getShoppingCart(cartOrder.getShoppingCartGuid())
+				.map(cart -> coreCartOrderShippingService.updateCartOrderShippingAddress(shippingAddressGuid, cart, cartOrder))
 				.flatMap(isAddressUpdated -> saveCartOrderIfAddressUpdated(cartOrder, isAddressUpdated));
 	}
 
@@ -329,12 +318,6 @@ public class CartOrderRepositoryImpl implements CartOrderRepository {
 				return ExecutionResultFactory.createReadOK(isCouponsApplied);
 			}
 		}.execute();
-	}
-
-	@Override
-	@CacheResult
-	public Collection<ShippingServiceLevel> findShippingServiceLevels(final String storeCode, final Address shippingAddress) {
-		return coreCartOrderShippingService.findShippingServiceLevels(storeCode, shippingAddress);
 	}
 
 	@Override

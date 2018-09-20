@@ -7,7 +7,7 @@
 	<parent>
 		<groupId>com.elasticpath</groupId>
 		<artifactId>itests-parent</artifactId>
-		<version>702.0.0-SNAPSHOT</version>
+		<version>703.0.0-SNAPSHOT</version>
 		<relativePath>../../itests-parent</relativePath>
 	</parent>
 
@@ -15,10 +15,6 @@
 	<packaging>jar</packaging>
 	<name>Messaging Camel Implementation Integration Tests</name>
 	<description>Elastic Path Messaging Implementation Integrations Tests</description>
-
-	<properties>
-		<java.jvm.opts>-XX:MaxPermSize=128m -Xmx512m</java.jvm.opts>
-	</properties>
 
 	<dependencies>
 		<dependency>

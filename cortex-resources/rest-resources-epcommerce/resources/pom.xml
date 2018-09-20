@@ -65,21 +65,18 @@
 		<dependency>
 			<groupId>xerces</groupId>
 			<artifactId>xercesImpl</artifactId>
-			<version>${xerces.version}</version>
 			<scope>provided</scope>
 		</dependency>
 
 		<dependency>
 			<groupId>com.elasticpath.rest.tests</groupId>
 			<artifactId>ep-rest-test-utils</artifactId>
-			<version>${cortex.version}</version>
 			<scope>test</scope>
 		</dependency>
 
 		<dependency>
 			<groupId>org.javassist</groupId>
 			<artifactId>javassist</artifactId>
-			<version>${javassist.version}</version>
 			<scope>test</scope>
 		</dependency>
 

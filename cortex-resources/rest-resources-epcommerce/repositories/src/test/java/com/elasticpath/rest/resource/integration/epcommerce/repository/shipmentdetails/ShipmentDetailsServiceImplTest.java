@@ -13,12 +13,13 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.elasticpath.domain.shipping.ShipmentType;
 import com.elasticpath.domain.shoppingcart.ShoppingCart;
 import com.elasticpath.rest.ResourceOperationFailure;
 import com.elasticpath.rest.ResourceStatus;
+import com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder.CartOrderRepository;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder.ShoppingCartRepository;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder.impl.ShoppingCartRepositoryImpl;
 
@@ -28,7 +29,9 @@ import com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder
 @RunWith(MockitoJUnitRunner.class)
 public class ShipmentDetailsServiceImplTest {
 
+	private static final String ORDERID = "orderId";
 	private static final String CART_ID = "cartId";
+	private static final String SCOPE = "scope";
 
 	@Mock
 	private ShoppingCart shoppingCart;
@@ -39,35 +42,46 @@ public class ShipmentDetailsServiceImplTest {
 	@Mock
 	private ShoppingCartRepository shoppingCartRepository;
 
+	@Mock
+	private CartOrderRepository cartOrderRepository;
+
 	@Test
 	public void verifyGetShipmentDetailsIdsForOrderReturnsNotFoundWhenShoppingCartIsNotFound() {
-		when(shoppingCartRepository.getDefaultShoppingCart())
-				.thenReturn(Single.error(ResourceOperationFailure.notFound(ShoppingCartRepositoryImpl.DEFAULT_CART_NOT_FOUND)));
+		when(cartOrderRepository.getShoppingCartGuid(SCOPE, ORDERID))
+				.thenReturn(CART_ID);
+		when(shoppingCartRepository.getShoppingCart(CART_ID))
+				.thenReturn(Single.error(ResourceOperationFailure.notFound((ShoppingCartRepositoryImpl.DEFAULT_CART_NOT_FOUND))));
 
-		shipmentDetailsService.getShipmentDetailsIdForOrder(CART_ID)
+
+		shipmentDetailsService.getShipmentDetailsIdForOrder(SCOPE, ORDERID)
 				.test()
 				.assertError(createErrorCheckPredicate(ShoppingCartRepositoryImpl.DEFAULT_CART_NOT_FOUND, ResourceStatus.NOT_FOUND));
 	}
 
 	@Test
 	public void verifyGetShipmentDetailsIdsForOrderReturnsNotFoundWhenOrderIsNotShippable() {
-		when(shoppingCartRepository.getDefaultShoppingCart()).thenReturn(Single.just(shoppingCart));
+		when(cartOrderRepository.getShoppingCartGuid(SCOPE, ORDERID))
+				.thenReturn(CART_ID);
+		when(shoppingCartRepository.getShoppingCart(CART_ID))
+			.thenReturn(Single.just(shoppingCart));
 		when(shoppingCart.getShipmentTypes()).thenReturn(ImmutableSet.of(ShipmentType.ELECTRONIC));
 
-		shipmentDetailsService.getShipmentDetailsIdForOrder(CART_ID)
+		shipmentDetailsService.getShipmentDetailsIdForOrder(SCOPE, ORDERID)
 				.test()
 				.assertError(createErrorCheckPredicate(ShipmentDetailsServiceImpl.COULD_NOT_FIND_SHIPMENT, ResourceStatus.NOT_FOUND));
 	}
 
 	@Test
 	public void verifyGetShipmentDetailsIdsForOrderReturnsMap() {
-		when(shoppingCartRepository.getDefaultShoppingCart()).thenReturn(Single.just(shoppingCart));
+		when(cartOrderRepository.getShoppingCartGuid(SCOPE, ORDERID))
+				.thenReturn(CART_ID);
+		when(shoppingCartRepository.getShoppingCart(CART_ID)).thenReturn(Single.just(shoppingCart));
 		when(shoppingCart.getShipmentTypes()).thenReturn(ImmutableSet.of(ShipmentType.PHYSICAL));
 
-		shipmentDetailsService.getShipmentDetailsIdForOrder(CART_ID)
+		shipmentDetailsService.getShipmentDetailsIdForOrder(SCOPE, ORDERID)
 				.test()
 				.assertNoErrors()
-				.assertValue(shipmentDetailsId -> shipmentDetailsId.get(ShipmentDetailsConstants.ORDER_ID).equals(CART_ID)
+				.assertValue(shipmentDetailsId -> shipmentDetailsId.get(ShipmentDetailsConstants.ORDER_ID).equals(ORDERID)
 						&& shipmentDetailsId.get(ShipmentDetailsConstants.DELIVERY_ID).equals(ShipmentDetailsConstants.SHIPMENT_TYPE));
 	}
 }

@@ -28,12 +28,10 @@
 		<dependency>
 			<groupId>com.elasticpath</groupId>
 			<artifactId>ep-core</artifactId>
-			<version>${platform.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.json</groupId>
 			<artifactId>json</artifactId>
-			<version>20140107</version>
 		</dependency>
 	</dependencies>
 

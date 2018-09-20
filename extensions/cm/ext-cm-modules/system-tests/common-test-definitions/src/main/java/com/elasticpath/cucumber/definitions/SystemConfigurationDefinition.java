@@ -3,20 +3,31 @@ package com.elasticpath.cucumber.definitions;
 import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
 
-import com.elasticpath.selenium.framework.util.SeleniumDriverSetup;
 import com.elasticpath.selenium.resultspane.SystemConfigurationResultPane;
+import com.elasticpath.selenium.setup.SetUp;
+import com.elasticpath.selenium.toolbars.ConfigurationActionToolbar;
 
 /**
  * System Configuration step definitions.
  */
 public class SystemConfigurationDefinition {
-	private final SystemConfigurationResultPane systemConfigurationResultPane;
+	private SystemConfigurationResultPane systemConfigurationResultPane;
+	private final ConfigurationActionToolbar configurationActionToolbar;
 
 	/**
 	 * Constructor.
 	 */
 	public SystemConfigurationDefinition() {
-		systemConfigurationResultPane = new SystemConfigurationResultPane(SeleniumDriverSetup.getDriver());
+		configurationActionToolbar = new ConfigurationActionToolbar(SetUp.getDriver());
+		systemConfigurationResultPane = new SystemConfigurationResultPane(SetUp.getDriver());
+	}
+
+	/**
+	 * Open System Configuration.
+	 */
+	@When("^I go to System Configuration$")
+	public void openSystemConfiguration() {
+		systemConfigurationResultPane = configurationActionToolbar.clickSystemConfiguration();
 	}
 
 	/**
@@ -35,8 +46,21 @@ public class SystemConfigurationDefinition {
 	 * @param settingName String
 	 */
 	@Then("^I should see setting (.+) in the filter result$")
-	public void verfiySettingNameExists(final String settingName) {
-		systemConfigurationResultPane.verifySettingName(settingName);
+	public void selectSettingName(final String settingName) {
+		systemConfigurationResultPane.selectSettingName(settingName);
+	}
+
+	/**
+	 * Verify setting Defined values.
+	 *
+	 * @param storeCode    the store code
+	 * @param settingValue String
+	 */
+	@Then("^Defined Value for Store (.+) is (.+)$")
+	public void verifyDefinedSettingValue(final String storeCode, final String settingValue) {
+		systemConfigurationResultPane.maximizeSystemConfigurationWindow();
+		systemConfigurationResultPane.verifyDefinedSettingValue(storeCode, settingValue);
+		systemConfigurationResultPane.restoreSystemConfigurationWindow();
 	}
 
 }

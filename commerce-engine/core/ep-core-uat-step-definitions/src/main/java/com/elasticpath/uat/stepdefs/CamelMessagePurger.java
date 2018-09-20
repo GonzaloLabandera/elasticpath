@@ -9,14 +9,12 @@ import cucumber.api.java.After;
 import cucumber.api.java.Before;
 import org.apache.camel.CamelContext;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.ContextConfiguration;
 
 import com.elasticpath.messaging.camel.test.support.CamelContextMessagePurger;
 
 /**
  * Responsible for purging messages created within the UAT test context.
  */
-@ContextConfiguration("classpath:cucumber.xml")
 public class CamelMessagePurger {
 
 	@Autowired(required = false)

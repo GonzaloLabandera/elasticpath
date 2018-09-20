@@ -5,8 +5,8 @@ package com.elasticpath.service.impl;
 
 import java.math.BigDecimal;
 import java.util.Collections;
-import java.util.Currency;
 import java.util.Iterator;
+import java.util.List;
 
 import com.elasticpath.base.exception.EpServiceException;
 import com.elasticpath.common.pricing.service.PriceLookupFacade;
@@ -28,8 +28,6 @@ import com.elasticpath.domain.order.OrderAddress;
 import com.elasticpath.domain.order.OrderShipmentStatus;
 import com.elasticpath.domain.order.OrderSku;
 import com.elasticpath.domain.order.PhysicalOrderShipment;
-import com.elasticpath.domain.shipping.ShippingCostCalculationMethod;
-import com.elasticpath.domain.shipping.ShippingServiceLevel;
 import com.elasticpath.domain.shoppingcart.ShoppingItemPricingSnapshot;
 import com.elasticpath.domain.shoppingcart.ShoppingItemTaxSnapshot;
 import com.elasticpath.domain.skuconfiguration.SkuOptionValue;
@@ -37,19 +35,22 @@ import com.elasticpath.domain.store.Store;
 import com.elasticpath.domain.store.Warehouse;
 import com.elasticpath.domain.testcontext.ShoppingTestData;
 import com.elasticpath.inventory.InventoryDto;
-import com.elasticpath.money.Money;
 import com.elasticpath.service.ShipmentService;
 import com.elasticpath.service.catalog.ProductInventoryManagementService;
 import com.elasticpath.service.catalog.ProductLookup;
 import com.elasticpath.service.catalog.ProductSkuLookup;
 import com.elasticpath.service.misc.TimeService;
 import com.elasticpath.service.order.AllocationService;
+import com.elasticpath.service.shipping.transformers.PricedShippableItemContainerFromOrderShipmentTransformer;
 import com.elasticpath.service.shoppingcart.OrderSkuFactory;
 import com.elasticpath.service.shoppingcart.PricingSnapshotService;
-import com.elasticpath.service.shoppingcart.ShippableItemsSubtotalCalculator;
 import com.elasticpath.service.shoppingcart.TaxSnapshotService;
 import com.elasticpath.service.store.StoreService;
 import com.elasticpath.service.tax.TaxCodeRetriever;
+import com.elasticpath.shipping.connectivity.dto.PricedShippableItem;
+import com.elasticpath.shipping.connectivity.dto.PricedShippableItemContainer;
+import com.elasticpath.shipping.connectivity.dto.ShippingOption;
+import com.elasticpath.shipping.connectivity.service.ShippingCalculationService;
 
 /**
  * @inheritDoc
@@ -61,6 +62,7 @@ public class ShipmentServiceImpl implements ShipmentService {
 	private static final String SPACE = " "; //$NON-NLS-1$
 
 	private BeanFactory beanFactory;
+
 	private AllocationService allocationService;
 	private EventOriginatorHelper eventOriginatorHelper;
 	private PriceLookupFacade priceLookupFacade;
@@ -72,9 +74,10 @@ public class ShipmentServiceImpl implements ShipmentService {
 	private TimeService timeService;
 	private PricingSnapshotService pricingSnapshotService;
 	private TaxSnapshotService taxSnapshotService;
-	private ShippableItemsSubtotalCalculator shippableItemsSubtotalCalculator;
-
 	private OrderSkuFactory orderSkuFactory;
+
+	private ShippingCalculationService shippingCalculationService;
+	private PricedShippableItemContainerFromOrderShipmentTransformer<PricedShippableItem> pricedShippableItemContainerTransformer;
 
 	@Override
 	public OrderSku addItem(final PhysicalOrderShipment shipment, final ProductSku productSku, final CmUser cmUser) throws EpServiceException {
@@ -154,52 +157,48 @@ public class ShipmentServiceImpl implements ShipmentService {
 
 	@Override
 	public void moveSkuToNewShipment(final PhysicalOrderShipment fromOrderShipment, final String orderSku, final int quantityToMove,
-			final OrderAddress orderAddress, final ShippingServiceLevel shippingServiceLevel, final CmUser cmUser) {
+									 final OrderAddress orderAddress, final ShippingOption shippingOption, final CmUser cmUser) {
 
 		moveSkuToNewShipment(fromOrderShipment, getOrderSkuBySkuCode(fromOrderShipment, orderSku), quantityToMove, orderAddress,
-				shippingServiceLevel, cmUser);
+							 shippingOption, cmUser);
 	}
 
 	@Override
 	public void moveSkuToNewShipment(final PhysicalOrderShipment fromOrderShipment, final OrderSku orderSku, final int quantityToMove,
-			final OrderAddress orderAddress, final ShippingServiceLevel shippingServiceLevel, final CmUser cmUser) {
-		PhysicalOrderShipment newShipment = getBeanFactory().getBean(ContextIdNames.PHYSICAL_ORDER_SHIPMENT);
+									 final OrderAddress orderAddress, final ShippingOption shippingOption, final CmUser cmUser) {
+		final PhysicalOrderShipment newShipment = getBeanFactory().getBean(ContextIdNames.PHYSICAL_ORDER_SHIPMENT);
 
-		OrderAddress newOrderAddress = getBeanFactory().getBean(ContextIdNames.ORDER_ADDRESS);
+		final OrderAddress newOrderAddress = getBeanFactory().getBean(ContextIdNames.ORDER_ADDRESS);
 		newOrderAddress.copyFrom(orderAddress);
-		newShipment.setShipmentAddress(newOrderAddress);
-		newShipment.setShippingServiceLevelGuid(shippingServiceLevel.getGuid());
-		newShipment.setCarrier(shippingServiceLevel.getCarrier());
-		newShipment.setServiceLevel(shippingServiceLevel.getDisplayName(fromOrderShipment.getOrder().getLocale(), true));
 
-		OrderSku newOrderSku = getBeanFactory().getBean(ContextIdNames.ORDER_SKU);
+		newShipment.setShipmentAddress(newOrderAddress);
+		newShipment.setShippingOptionCode(shippingOption.getCode());
+		newShipment.setShippingOptionName(shippingOption.getDisplayName(fromOrderShipment.getOrder().getLocale()).orElse(null));
+
+		shippingOption.getCarrierCode().ifPresent(newShipment::setCarrierCode);
+		shippingOption.getCarrierDisplayName().ifPresent(newShipment::setCarrierName);
+
+		final OrderSku newOrderSku = getBeanFactory().getBean(ContextIdNames.ORDER_SKU);
+
 		// get a copy of order sku to avoid JPA issue when deleting and adding order sku with same UIDPK
 		final ShoppingItemPricingSnapshot pricingSnapshot = getPricingSnapshotService().getPricingSnapshotForOrderSku(orderSku);
 		final ShoppingItemTaxSnapshot taxSnapshot = getTaxSnapshotService().getTaxSnapshotForOrderSku(orderSku, pricingSnapshot);
+
 		newOrderSku.copyFrom(orderSku, getProductSkuLookup(), taxSnapshot);
 		newOrderSku.setQuantity(quantityToMove);
+
 		final int quantityLeftInOldOrderSku = orderSku.getQuantity() - quantityToMove;
 
 		allocateQuantity(orderSku, newOrderSku, quantityToMove);
 		orderSku.setQuantity(quantityLeftInOldOrderSku);
 
 		newShipment.addShipmentOrderSku(newOrderSku);
-
 		newShipment.setCreatedDate(getTimeService().getCurrentTime());
 
-		final Currency currency = fromOrderShipment.getOrder().getCurrency();
-
-		final Money shippableItemsSubtotal =
-				getShippableItemsSubtotalCalculator().calculateSubtotalOfShippableItems(newShipment.getShipmentOrderSkus(), currency);
-
-		final ShippingCostCalculationMethod shippingCostCalculationMethod = shippingServiceLevel.getShippingCostCalculationMethod();
-		final Money shippingCost = shippingCostCalculationMethod.calculateShippingCost(newShipment.getShipmentOrderSkus(),
-																						shippableItemsSubtotal,
-																						currency,
-																						getProductSkuLookup());
-		newShipment.setShippingCost(shippingCost.getAmount());
+		shippingOption.getShippingCost().ifPresent(shippingCost -> newShipment.setShippingCost(shippingCost.getAmount()));
 		newShipment.setBeforeTaxShippingCost(BigDecimal.ZERO);
 		newShipment.setSubtotalDiscount(BigDecimal.ZERO);
+
 		newShipment.setStatus(fromOrderShipment.getShipmentStatus());
 
 		if (quantityLeftInOldOrderSku == 0) {
@@ -207,6 +206,21 @@ public class ShipmentServiceImpl implements ShipmentService {
 		}
 
 		fromOrderShipment.getOrder().addShipment(newShipment);
+		final PricedShippableItemContainer<PricedShippableItem> pricedShippableItemContainer
+				= pricedShippableItemContainerTransformer.apply(newShipment);
+
+		final List<ShippingOption> availableShippingOptions = shippingCalculationService
+				.getPricedShippingOptions(pricedShippableItemContainer)
+				.getAvailableShippingOptions();
+
+		// set shipping cost if exists matched shipping option and populated with shipping cost.
+		availableShippingOptions.stream().
+				filter(shippingOption1 -> shippingOption.getCode().equals(shippingOption1.getCode()))
+				.findFirst().ifPresent(
+				pricedShippingOption -> pricedShippingOption.getShippingCost().ifPresent(
+						shippingCost -> newShipment.setShippingCost(shippingCost.getAmount()))
+		);
+
 
 		fromOrderShipment.getOrder().setModifiedBy(getEventOriginator(cmUser));
 	}
@@ -447,7 +461,7 @@ public class ShipmentServiceImpl implements ShipmentService {
 	 * Whether an item with productSku exists in the shipment.
 	 *
 	 * @param shipment the shipment to check
-	 * @param skuCode the sku code
+	 * @param skuCode  the sku code
 	 * @return true if item exists.
 	 */
 	private boolean isItemExists(final PhysicalOrderShipment shipment, final String skuCode) {
@@ -609,20 +623,16 @@ public class ShipmentServiceImpl implements ShipmentService {
 		this.taxSnapshotService = taxSnapshotService;
 	}
 
-	protected ShippableItemsSubtotalCalculator getShippableItemsSubtotalCalculator() {
-		return shippableItemsSubtotalCalculator;
-	}
-
-	public void setShippableItemsSubtotalCalculator(final ShippableItemsSubtotalCalculator shippableItemsSubtotalCalculator) {
-		this.shippableItemsSubtotalCalculator = shippableItemsSubtotalCalculator;
-	}
-
 	protected OrderSkuFactory getOrderSkuFactory() {
 		return orderSkuFactory;
 	}
 
 	public void setOrderSkuFactory(final OrderSkuFactory orderSkuFactory) {
 		this.orderSkuFactory = orderSkuFactory;
+	}
+
+	protected TimeService getTimeService() {
+		return timeService;
 	}
 
 	/**
@@ -634,7 +644,20 @@ public class ShipmentServiceImpl implements ShipmentService {
 		this.timeService = timeService;
 	}
 
-	protected TimeService getTimeService() {
-		return timeService;
+	protected ShippingCalculationService getShippingCalculationService() {
+		return this.shippingCalculationService;
+	}
+
+	public void setShippingCalculationService(final ShippingCalculationService shippingCalculationService) {
+		this.shippingCalculationService = shippingCalculationService;
+	}
+
+	protected PricedShippableItemContainerFromOrderShipmentTransformer<PricedShippableItem> getPricedShippableItemContainerTransformer() {
+		return this.pricedShippableItemContainerTransformer;
+	}
+
+	public void setPricedShippableItemContainerTransformer(
+			final PricedShippableItemContainerFromOrderShipmentTransformer<PricedShippableItem> shippableItemContainerTransformer) {
+		this.pricedShippableItemContainerTransformer = shippableItemContainerTransformer;
 	}
 }

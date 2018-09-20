@@ -67,35 +67,55 @@ function set_parent_version() {
   exec_sed "\#<parent>#,\#</parent># s|<version>.*</version>|<version>${version}</version>|" "${pom_file}"
 }
 
-# Install commerce engine parent POM which Maven would otherwise complain about not existing in a clean build environment
-function install_commerce_engine_parent_pom() {
+# Install bill-of-materials POM which Maven would otherwise complain about not existing in a clean build environment
+function install_bom_pom() {
   local project_dir="$1"
   local maven_settings="$2"
 
-  mvn ${maven_settings} clean install -N -f "${project_dir}/commerce-engine/pom.xml"
+  mvn ${maven_settings} clean install -N -f "${project_dir}/bill-of-materials/pom.xml"
 }
 
-# Install cortex-resources parent POM which Maven would otherwise complain about not existing in a clean build environment
-function install_cortex_resources_parent_pom() {
+function set_bom_version() {
   local project_dir="$1"
   local maven_settings="$2"
+  local platform_version="$3"
 
-  mvn ${maven_settings} clean install -N -f "${project_dir}/cortex-resources/pom.xml"
-  mvn ${maven_settings} clean install -N -f "${project_dir}/cortex-resources/rest-resources-epcommerce/pom.xml"
-}
+  # SET PROJECT VERSION
 
-# Install extension parent POM which Maven would otherwise complain about not existing in a clean build environment
-function install_extensions_parent_pom() {
-  local project_dir="$1"
-  local maven_settings="$2"
-
-  mvn ${maven_settings} clean install -N -f "${project_dir}/extensions/pom.xml"
+  mvn ${maven_settings} org.codehaus.mojo:versions-maven-plugin:2.1:set org.codehaus.mojo:versions-maven-plugin:2.1:commit \
+    -f "${project_dir}/bill-of-materials/pom.xml" \
+    -DnewVersion="${platform_version}" \
+     --non-recursive
 }
 
 function set_commerce_parent_version() {
   local project_dir="$1"
   local maven_settings="$2"
   local platform_version="$3"
+
+  # SET DOWNSTREAM REFERENCES
+
+  # commerce-data
+  set_parent_version "${platform_version}" "${project_dir}/commerce-data/pom.xml"
+
+  # commerce-engine
+  set_parent_version "${platform_version}" "${project_dir}/commerce-engine/pom.xml"
+
+  # commerce-manager
+  set_parent_version "${platform_version}" "${project_dir}/commerce-manager/pom.xml"
+  set_parent_version "${platform_version}" "${project_dir}/commerce-manager/cm-libs/pom.xml"
+
+  # cortex-resources
+  set_parent_version "${platform_version}" "${project_dir}/cortex-resources/pom.xml"
+
+  # extensions
+  set_parent_version "${platform_version}" "${project_dir}/extensions/pom.xml"
+
+  # devops
+  set_parent_version "${platform_version}" "${project_dir}/devops/pom.xml"
+
+  # health-monitoring
+  set_parent_version "${platform_version}" "${project_dir}/health-monitoring/pom.xml"
 
   # SET PROJECT VERSION
 
@@ -112,29 +132,12 @@ function set_commerce_engine_version() {
 
   # SET DOWNSTREAM REFERENCES
 
-  # commerce-manager
-  mvn ${maven_settings} org.eclipse.tycho:ep-tycho-versions-plugin:set-version \
-    -f "${project_dir}/commerce-manager/cm-modules/pom.xml" \
-    -Dtycho.mode=maven \
-    -DnewVersion="${platform_version}" \
-    -Dartifacts=com.elasticpath:ep-settings,com.elasticpath:ep-persistence-openjpa,com.elasticpath:ep-persistence-api,com.elasticpath:ep-base,com.elasticpath:ep-cache,com.elasticpath:ep-core,ep-geoip-demo
-
-  set_parent_version "${platform_version}" "${project_dir}/commerce-manager/pom.xml"
-  set_parent_version "${platform_version}" "${project_dir}/commerce-manager/cm-libs/pom.xml"
-  set_parent_version "${platform_version}" "${project_dir}/commerce-manager/cm-modules/pom.xml"
-  set_parent_version "${platform_version}" "${project_dir}/commerce-manager/com.elasticpath.cmclient.docs/pom.xml"
-
-  # cortex-resources
-  set_property_version "dce.version" "${platform_version}" "${project_dir}/cortex-resources/pom.xml"
-
   # extensions
-  set_parent_version "${platform_version}" "${project_dir}/extensions/pom.xml"
+  set_property_version "dce.version" "${platform_version}" "${project_dir}/extensions/pom.xml"
 
-  set_property_version "platform.version" "${platform_version}" "${project_dir}/extensions/pom.xml"
-  set_property_version "dce.version"      "${platform_version}" "${project_dir}/extensions/cortex/pom.xml"
-  set_property_version "dce.version"      "${platform_version}" "${project_dir}/extensions/cortex/ext-commerce-engine-wrapper/pom.xml"
-  set_property_version "dce.version"      "${platform_version}" "${project_dir}/extensions/cortex/ext-cortex-webapp/pom.xml"
-  set_property_version "dce.version"      "${platform_version}" "${project_dir}/extensions/cortex/system-tests/cucumber/pom.xml"
+  # SET BOM REFERENCES
+
+  set_property_version "dce.version" "${platform_version}" "${project_dir}/bill-of-materials/pom.xml"
 
   # SET PROJECT VERSION
 
@@ -153,6 +156,12 @@ function set_commerce_manager_version() {
   # extensions
   set_property_version "cmclient.platform.feature.version" "${platform_version}" "${project_dir}/extensions/pom.xml"
 
+  # SET REFERENCES IN BOM AND PARENT
+
+  set_property_version "cmclient.version"                  "${platform_version}" "${project_dir}/pom.xml"
+  set_property_version "cmclient.version"                  "${platform_version}" "${project_dir}/bill-of-materials/pom.xml"
+  set_property_version "cmclient.platform.feature.version" "${platform_version}" "${project_dir}/bill-of-materials/pom.xml"
+
   # SET PROJECT VERSION
 
   # Update cm-libs POM version
@@ -166,8 +175,9 @@ function set_commerce_manager_version() {
     -DnewVersion="${platform_version}"
 
   # Update top-level POM version
-  mvn ${maven_settings} org.codehaus.mojo:versions-maven-plugin:2.1:set org.codehaus.mojo:versions-maven-plugin:2.1:commit \
+  mvn ${maven_settings} org.eclipse.tycho:tycho-versions-plugin:0.17.0:set-version \
     -f "${project_dir}/commerce-manager/pom.xml" \
+    -Dtycho.mode=maven \
     -DnewVersion="${platform_version}"
 
   # Update non-Tycho dependencies version
@@ -176,12 +186,6 @@ function set_commerce_manager_version() {
     -Dtycho.mode=maven \
     -DnewVersion="${platform_version}" \
     -Dartifacts=com.elasticpath.cmclient:com.elasticpath.cmclient.libs,com.elasticpath.cmclient:com.elasticpath.cmclient.testlibs
-
-  # Update Tycho project version
-  mvn ${maven_settings} org.eclipse.tycho:tycho-versions-plugin:0.17.0:set-version \
-    -f "${project_dir}/commerce-manager/cm-modules/pom.xml" \
-    -Dtycho.mode=maven \
-    -DnewVersion="${platform_version}"
 }
 
 function set_cortex_resources_version() {
@@ -189,10 +193,10 @@ function set_cortex_resources_version() {
   local maven_settings="$2"
   local extensions_version="$3"
 
-  # SET DOWNSTREAM REFERENCES
+  # SET REFERENCES IN BOM AND PARENT
 
-  # extensions
-  set_property_version "cortex.ep.integration.version" "${extensions_version}" "${project_dir}/extensions/cortex/pom.xml"
+  set_property_version "cortex.ep.integration.version" "${extensions_version}" "${project_dir}/pom.xml"
+  set_property_version "cortex.ep.integration.version" "${extensions_version}" "${project_dir}/bill-of-materials/pom.xml"
 
   # SET PROJECT VERSION
 
@@ -201,7 +205,6 @@ function set_cortex_resources_version() {
     -DnewVersion="${extensions_version}"
 }
 
-
 function set_commerce_data_version() {
   local project_dir="$1"
   local maven_settings="$2"
@@ -209,13 +212,33 @@ function set_commerce_data_version() {
 
   # SET DOWNSTREAM REFERENCES
 
-  # extensions
-  set_property_version "ep.commerce.data.version" "${platform_version}" "${project_dir}/extensions/pom.xml"
+  # commerce-data
+  set_property_version "ep.commerce.data.version" "${platform_version}" "${project_dir}/pom.xml"
+
+  # data-population
+  set_property_version "ep.data.population.version" "${platform_version}" "${project_dir}/pom.xml"
 
   # SET PROJECT VERSION
 
   mvn ${maven_settings} org.codehaus.mojo:versions-maven-plugin:2.1:set org.codehaus.mojo:versions-maven-plugin:2.1:commit \
     -f "${project_dir}/commerce-data/pom.xml" \
+    -DnewVersion="${platform_version}"
+}
+
+function set_health_monitoring_version() {
+  local project_dir="$1"
+  local maven_settings="$2"
+  local platform_version="$3"
+
+  # SET DOWNSTREAM REFERENCES
+
+  # Set reference in bill-of-materials
+  set_property_version "ep.health.monitoring.version" "${platform_version}" "${project_dir}/bill-of-materials/pom.xml"
+
+  # SET PROJECT VERSION
+
+  mvn ${maven_settings} org.codehaus.mojo:versions-maven-plugin:2.1:set org.codehaus.mojo:versions-maven-plugin:2.1:commit \
+    -f "${project_dir}/health-monitoring/pom.xml" \
     -DnewVersion="${platform_version}"
 }
 
@@ -228,6 +251,10 @@ function set_extensions_version() {
 
   # devops
   set_parent_version "${extensions_version}" "${project_dir}/devops/pom.xml"
+
+  # SET BOM REFERENCES
+
+  set_property_version "commerce.extensions.version" "${extensions_version}" "${project_dir}/bill-of-materials/pom.xml"
 
   # SET PROJECT VERSION
 
@@ -244,36 +271,21 @@ function set_extensions_version() {
     -Dtycho.mode=maven \
     -DnewVersion="${extensions_version}"
 
+  # Update parent versions of modules not in main reactor
+  set_parent_version "${extensions_version}" "${project_dir}/extensions/cm/ext-cm-modules/system-tests/pom.xml"
   set_parent_version "${extensions_version}" "${project_dir}/extensions/cm/ext-cm-modules/system-tests/selenium/pom.xml"
   set_parent_version "${extensions_version}" "${project_dir}/extensions/cm/ext-cm-modules/ext-cm-webapp-runner/pom.xml"
+  set_parent_version "${extensions_version}" "${project_dir}/extensions/cm/ext-cm-modules/ext-system-tests/pom.xml"
+  set_parent_version "${extensions_version}" "${project_dir}/extensions/cm/ext-cm-modules/ext-system-tests/selenium/pom.xml"
 
   # Set project version
   mvn ${maven_settings} org.codehaus.mojo:versions-maven-plugin:2.1:set org.codehaus.mojo:versions-maven-plugin:2.1:commit \
     -f "${project_dir}/extensions/pom.xml" \
     -DnewVersion="${extensions_version}"
 
-  # Set project's Cortex version (separated due to POM hierarchy)
-  mvn ${maven_settings} org.codehaus.mojo:versions-maven-plugin:2.1:set org.codehaus.mojo:versions-maven-plugin:2.1:commit \
-    -f "${project_dir}/extensions/cortex/pom.xml" \
-    -DnewVersion="${extensions_version}"
-
-  mvn ${maven_settings} org.codehaus.mojo:versions-maven-plugin:2.1:set org.codehaus.mojo:versions-maven-plugin:2.1:commit \
-    -f "${project_dir}/extensions/cortex/ext-commerce-engine-wrapper/pom.xml" \
-    -DnewVersion="${extensions_version}"
-
-  mvn ${maven_settings} org.codehaus.mojo:versions-maven-plugin:2.1:set org.codehaus.mojo:versions-maven-plugin:2.1:commit \
-    -f "${project_dir}/extensions/cortex/ext-cortex-webapp/pom.xml" \
-    -DnewVersion="${extensions_version}"
-
-  mvn ${maven_settings} org.codehaus.mojo:versions-maven-plugin:2.1:set org.codehaus.mojo:versions-maven-plugin:2.1:commit \
-    -f "${project_dir}/extensions/cortex/system-tests/cucumber/pom.xml" \
-    -DnewVersion="${extensions_version}"
-
-  set_property_version "ep-commerce-engine-wrapper-version" "${extensions_version}" "${project_dir}/extensions/cortex/ext-cortex-webapp/pom.xml"
-
-  set_parent_version "${extensions_version}" "${project_dir}/extensions/cm/ext-cm-modules/pom.xml"
-  set_parent_version "${extensions_version}" "${project_dir}/extensions/cm/pom.xml"
-
+  # Update parent versions of modules not in main reactor
+  set_parent_version "${extensions_version}" "${project_dir}/extensions/cortex/ext-system-tests/pom.xml"
+  set_parent_version "${extensions_version}" "${project_dir}/extensions/cortex/ext-system-tests/cucumber/pom.xml"
 }
 
 function set_devops_version() {
@@ -341,29 +353,25 @@ function main() {
   # Set project versions
   # Start setting versions from leaf nodes of a dependency tree to avoid having
   # to build projects in between set version steps.
-  install_commerce_engine_parent_pom "${project_base_dir}" "${maven_settings}"
-
-  install_cortex_resources_parent_pom "${project_base_dir}" "${maven_settings}"
-
-  install_extensions_parent_pom "${project_base_dir}" "${maven_settings}"
+  install_bom_pom "${project_base_dir}" "${maven_settings}"
 
   set_devops_version "${project_base_dir}" "${maven_settings}" "${EXTENSION_VERSION}"
 
   set_extensions_version "${project_base_dir}" "${maven_settings}" "${EXTENSION_VERSION}"
 
-  install_extensions_parent_pom "${project_base_dir}" "${maven_settings}"
-
   set_commerce_data_version "${project_base_dir}" "${maven_settings}" "${PLATFORM_VERSION}"
 
   set_cortex_resources_version "${project_base_dir}" "${maven_settings}" "${EXTENSION_VERSION}"
-
-  install_cortex_resources_parent_pom "${project_base_dir}" "${maven_settings}"
 
   set_commerce_manager_version "${project_base_dir}" "${maven_settings}" "${PLATFORM_VERSION}"
 
   set_commerce_engine_version "${project_base_dir}" "${maven_settings}" "${PLATFORM_VERSION}"
 
-  install_commerce_engine_parent_pom "${project_base_dir}" "${maven_settings}"
+  set_health_monitoring_version "${project_base_dir}" "${maven_settings}" "${PLATFORM_VERSION}"
+
+  set_bom_version "${project_base_dir}" "${maven_settings}" "${PLATFORM_VERSION}"
+
+  install_bom_pom "${project_base_dir}" "${maven_settings}"
 
   set_commerce_parent_version "${project_base_dir}" "${maven_settings}" "${PLATFORM_VERSION}"
 

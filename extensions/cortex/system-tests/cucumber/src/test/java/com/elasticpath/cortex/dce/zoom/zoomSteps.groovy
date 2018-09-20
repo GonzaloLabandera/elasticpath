@@ -1,14 +1,16 @@
 package com.elasticpath.cortex.dce.zoom
 
-import static org.assertj.core.api.Assertions.assertThat
-
 import static com.elasticpath.cortex.dce.ClasspathFluentRelosClientFactory.client
+import static org.assertj.core.api.Assertions.assertThat
 
 import com.jayway.jsonpath.JsonPath
 import com.jayway.jsonpath.PathNotFoundException
+import cucumber.api.PendingException
 import cucumber.api.groovy.EN
 import cucumber.api.groovy.Hooks
-import org.apache.commons.lang.time.StopWatch
+import org.assertj.core.data.Percentage
+
+import com.elasticpath.cortex.dce.DatabaseAnalyzerClient
 
 this.metaClass.mixin(Hooks)
 this.metaClass.mixin(EN)
@@ -19,19 +21,30 @@ this.metaClass.mixin(EN)
 def ZOOM_ITEM
 def SAVED_RESPONSE
 
-StopWatch timer = new StopWatch()
-
-When(~'^I zoom to cart with a query (.+)') { def zoom ->
-	timer.reset()
-	timer.start()
-	client.GET("/carts/mobee/default?zoom=$zoom")
-	timer.stop()
+When(~'^I start measuring db queries') { ->
+	DatabaseAnalyzerClient.instance.start()
 }
 
-Then(~'^the response time should not be more than (\\d+)ms$') { long milliseconds ->
-	assertThat(timer.getTime())
-			.as("Expected response time is $milliseconds")
-			.isLessThan(milliseconds)
+When(~'^I stop measuring db queries') { ->
+	DatabaseAnalyzerClient.instance.stop()
+}
+
+Then(~/^total number of DB calls should be close to (\d+) calls with allowed deviation of (\d+.\d+) percent$/) { int dbcalls, double percentage ->
+	int totalDbCalls = DatabaseAnalyzerClient.instance.getOverallDBCalls()
+
+	assertThat(totalDbCalls)
+			.isCloseTo(dbcalls, Percentage.withPercentage(percentage))
+}
+
+When(~'^I zoom to cart with a query (.+)') { def zoom ->
+	client.GET("/carts/mobee/default?zoom=$zoom")
+}
+
+And(~/^number of DB calls for table (.+) should be close to (\d+) calls with allowed deviation of (\d+.\d+) percent$/) { String table, int dbcalls, double percentage ->
+	int totalDbCalls = DatabaseAnalyzerClient.instance.getDBCallsByTableName(table)
+
+	assertThat(totalDbCalls)
+			.isCloseTo(dbcalls, Percentage.withPercentage(percentage))
 }
 
 Then(~'I inspect the zoom object (.+)') { def jsonpath ->
@@ -115,7 +128,22 @@ Then(~'save the zoomed response') { ->
 	SAVED_RESPONSE = ZOOM_ITEM
 }
 
+Then(~'In the given format (.*) the response is identical to the saved response') { String format ->
+
+	def body = client.body
+
+	if (format.contains("zoom.noself")) {
+		body.remove('self')
+		SAVED_RESPONSE.remove('self')
+	}
+
+	assertThat(body)
+			.as("The response is not as expected")
+			.isEqualTo(SAVED_RESPONSE)
+}
+
 Then(~'the response is identical to the saved response') { ->
+
 	assertThat(client.body)
 			.as("The response is not as expected")
 			.isEqualTo(SAVED_RESPONSE)

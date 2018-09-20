@@ -55,6 +55,8 @@ public class StoreEditor extends AbstractPageObject {
 			+ ".ChangeStoreState'][seeable='true']";
 	private static final String STORE_STATE_OPTION_CSS = "div[widget-id='%s'][seeable='true']";
 	private static final String STORE_STATE_CHANGE_CONFIRMATION_BUTTON_CSS = "div[widget-id='Confirm Store State Change'] div[widget-id='OK']";
+	private static final String STORE_ENABLED_DATA_POLICY_CSS = "div[automation-id='com.elasticpath.cmclient.admin.stores.AdminStoresMessages"
+			+ ".EnableDataPolicies'] +div";
 
 	/**
 	 * Constructor.
@@ -162,7 +164,9 @@ public class StoreEditor extends AbstractPageObject {
 	 * @param tabName the tab name.
 	 */
 	public void clickTab(final String tabName) {
-		clickButton(String.format(TAB_CSS, tabName), tabName);
+		String cssSelector = String.format(TAB_CSS, tabName);
+		resizeWindow(cssSelector);
+		click(getDriver().findElement(By.cssSelector(cssSelector)));
 	}
 
 	/**
@@ -281,6 +285,15 @@ public class StoreEditor extends AbstractPageObject {
 	public void verifyWarehouseName(final String warehouseName) {
 		assertThat(getWaitDriver().waitForElementToBeVisible(By.cssSelector(String.format(WAREHOUSE_NAME_BUTTON_CSS, warehouseName))).isDisplayed())
 				.as("Expected warehouse name is not present.")
+				.isTrue();
+	}
+
+	/**
+	 * Verify Data Policies is enabled/checked.
+	 */
+	public void verifyDataPolicyEnabled() {
+		assertThat(isSelected(STORE_ENABLED_DATA_POLICY_CSS))
+				.as("Data Policies is not enabled.")
 				.isTrue();
 	}
 }

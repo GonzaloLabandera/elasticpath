@@ -14,7 +14,7 @@ import com.elasticpath.cucumber.testexecutionlisteners.CucumberJmsRegistrationTe
 /**
  *  Test database initialization.
  */
-@TestExecutionListeners({
+@TestExecutionListeners(listeners = {
 	CucumberJmsRegistrationTestExecutionListener.class,
 	CucumberDatabaseTestExecutionListener.class,
 	DependencyInjectionTestExecutionListener.class

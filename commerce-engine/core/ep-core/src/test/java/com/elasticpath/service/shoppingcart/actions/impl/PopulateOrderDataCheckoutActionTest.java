@@ -9,6 +9,7 @@ import static org.junit.Assert.assertFalse;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 import org.jmock.Expectations;
 import org.jmock.integration.junit4.JUnitRuleMockery;
@@ -59,12 +60,13 @@ public class PopulateOrderDataCheckoutActionTest {
 		item.setSkuGuid(sku.getGuid());
 		shopper.setShopperMemento(new ShopperMementoImpl());
 		shopper.setCustomer(customer);
+		shopper.setGuid(UUID.randomUUID().toString());
 		shopper.getCache().putItem("FOO", "BAR");
 
 		context.checking(new Expectations() { {
 			allowing(customer).getGender(); will(returnValue('F'));
 			allowing(shoppingCart).getShopper(); will(returnValue(shopper));
-			allowing(shoppingCart).getCartItems(); will(returnValue(Collections.singletonList(item)));
+			allowing(shoppingCart).getRootShoppingItems(); will(returnValue(Collections.singletonList(item)));
 			allowing(pricingSnapshot).getPromotionRecordContainer(); will(returnValue(promotionRecordContainer));
 			allowing(taxSnapshot).getShoppingCartPricingSnapshot(); will(returnValue(pricingSnapshot));
 		} });
@@ -165,7 +167,7 @@ public class PopulateOrderDataCheckoutActionTest {
 	private Map<String, String> createSampleOrderDataProperties() {
 		Map<String, String> orderDataProperties = new HashMap<>();
 		orderDataProperties.put("gender",  "shoppingCart.shopper.customer.gender");           // Simple Property
-		orderDataProperties.put("skuGuid", "shoppingCart.cartItems[0].skuGuid");              // Indexed Property
+		orderDataProperties.put("skuGuid", "shoppingCart.rootShoppingItems[0].skuGuid");      // Indexed Property
 		orderDataProperties.put("foo",     "shoppingCart.shopper.cache.item(FOO)");           // Mapped Property
 
 		return orderDataProperties;

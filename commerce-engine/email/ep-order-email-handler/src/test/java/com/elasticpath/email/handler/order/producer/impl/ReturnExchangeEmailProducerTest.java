@@ -17,7 +17,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.elasticpath.domain.order.OrderReturn;
 import com.elasticpath.email.EmailDto;
@@ -49,7 +49,7 @@ public class ReturnExchangeEmailProducerTest {
 	private ReturnExchangeEmailProducer emailProducer;
 
 	@Test
-	public void verifyThatReturnExchangeEmailCreatedFromUid() throws Exception {
+	public void verifyThatReturnExchangeEmailCreatedFromUid() {
 		final String recipient = "recipient@elasticpath.com";
 		final OrderReturn orderReturn = mock(OrderReturn.class);
 
@@ -64,9 +64,6 @@ public class ReturnExchangeEmailProducerTest {
 
 		when(returnAndExchangeService.findByUids(uids))
 				.thenReturn(orderReturns);
-
-		when(orderReturn.getPhysicalReturn())
-				.thenReturn(true);
 
 		when(returnExchangeEmailPropertyHelper.getOrderReturnEmailProperties(orderReturn))
 				.thenReturn(emailProperties);
@@ -82,7 +79,7 @@ public class ReturnExchangeEmailProducerTest {
 	}
 
 	@Test
-	public void verifyExceptionIsThrownWhenNoOrderReturnUid() throws Exception {
+	public void verifyExceptionIsThrownWhenNoOrderReturnUid() {
 		final Map<String, Object> emailData = createValidAdditionalData(ORDER_RETURN_UID, "foo");
 		emailData.remove(UID_KEY);
 
@@ -91,7 +88,7 @@ public class ReturnExchangeEmailProducerTest {
 	}
 
 	@Test
-	public void verifyThatReturnExchangeEmailCreatedWhenPhysicalReturnIsNotRequired() throws Exception {
+	public void verifyThatReturnExchangeEmailCreatedWhenPhysicalReturnIsNotRequired() {
 		final String recipient = "recipient@elasticpath.com";
 
 		final EmailDto expectedEmail = EmailDto.builder()
@@ -107,9 +104,6 @@ public class ReturnExchangeEmailProducerTest {
 
 		when(returnAndExchangeService.findByUids(uids))
 				.thenReturn(orderReturns);
-
-		when(orderReturn.getPhysicalReturn())
-				.thenReturn(false);
 
 		when(returnExchangeEmailPropertyHelper.getOrderReturnEmailProperties(orderReturn))
 				.thenReturn(emailProperties);
@@ -127,7 +121,7 @@ public class ReturnExchangeEmailProducerTest {
 	}
 
 	@Test
-	public void verifyThatEmailSuppliedInDataWillOverrideOriginalRecipientAddress() throws Exception {
+	public void verifyThatEmailSuppliedInDataWillOverrideOriginalRecipientAddress() {
 		final String originalRecipient = "original.recipient@elasticpath.com";
 		final String overrideRecipient = "override.recipient@elasticpath.com";
 
@@ -148,9 +142,6 @@ public class ReturnExchangeEmailProducerTest {
 
 		when(returnAndExchangeService.findByUids(uids))
 				.thenReturn(orderReturns);
-
-		when(orderReturn.getPhysicalReturn())
-				.thenReturn(false);
 
 		when(returnExchangeEmailPropertyHelper.getOrderReturnEmailProperties(orderReturn))
 				.thenReturn(emailProperties);

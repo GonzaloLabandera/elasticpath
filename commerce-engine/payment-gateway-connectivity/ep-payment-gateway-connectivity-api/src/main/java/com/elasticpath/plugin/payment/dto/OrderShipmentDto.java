@@ -26,18 +26,18 @@ public interface OrderShipmentDto {
 	void setPhysical(boolean physical);
 
 	/**
-	 * Gets the carrier.
+	 * Gets the carrier code.
 	 *
-	 * @return Returns the carrier.
+	 * @return Returns the carrier code.
 	 */
-	String getCarrier();
+	String getCarrierCode();
 
 	/**
-	 * Sets the carrier.
+	 * Sets the carrier code.
 	 *
-	 * @param carrier The carrier to set.
+	 * @param carrierCode The carrier to set.
 	 */
-	void setCarrier(String carrier);
+	void setCarrierCode(String carrierCode);
 
 	/**
 	 * Gets the tracking code.
@@ -54,18 +54,18 @@ public interface OrderShipmentDto {
 	void setTrackingCode(String trackingCode);
 
 	/**
-	 * Gets the service level.
+	 * Gets the shipping option code.
 	 *
-	 * @return Returns the serviceLevel.
+	 * @return Returns the shippingOption code.
 	 */
-	String getServiceLevel();
+	String getShippingOptionCode();
 
 	/**
-	 * Sets the service level.
+	 * Sets the shipping option code.
 	 *
-	 * @param serviceLevel The serviceLevel to set.
+	 * @param shippingOptionCode The shippingOptionCode to set.
 	 */
-	void setServiceLevel(String serviceLevel);
+	void setShippingOptionCode(String shippingOptionCode);
 
 	/**
 	 * Get the shipping cost in <code>BigDecimal</code>.

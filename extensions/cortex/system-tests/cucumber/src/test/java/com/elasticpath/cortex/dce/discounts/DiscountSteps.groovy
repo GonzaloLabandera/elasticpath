@@ -33,6 +33,16 @@ Then(~'^the cart discount fields has amount: (.+?), currency: (.+?) and display:
 
 }
 
+And(~/^the cart discount has currency (.+) and display (.+)$/) { def expectedCurrency, def expectedDisplayName ->
+	client.GET("/")
+			.defaultcart()
+			.discount()
+
+	def listDiscountElement = client.body.discount
+	String expectedAmount = client.body.discount[0].amount
+	assertCost(listDiscountElement, expectedAmount, expectedCurrency, expectedDisplayName)
+}
+
 Then(~'^the cart discount amount is (.+?)$') {
 	String expectedDisplay ->
 		client.GET("/")

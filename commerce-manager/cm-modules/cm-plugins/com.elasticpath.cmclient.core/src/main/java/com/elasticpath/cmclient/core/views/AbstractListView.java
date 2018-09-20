@@ -46,10 +46,10 @@ import com.elasticpath.cmclient.core.ui.framework.impl.EpTableViewer;
  * Provides the abstract functionality for a SearchResults view, including navigation buttons and navigation labels in the view's toolbar.
  */
 @SuppressWarnings({ "PMD.TooManyMethods", "PMD.GodClass" })
-public abstract class AbstractListView extends AbstractCmClientView 
+public abstract class AbstractListView extends AbstractCmClientView
 	implements NavigationEventListener, PaginationChangeListener, PaginationSupport  {
 	/**
-	 * 
+	 *
 	 */
 	private static final int MARGIN_BOTTOM = 5;
 
@@ -140,9 +140,9 @@ public abstract class AbstractListView extends AbstractCmClientView
 		IEpLayoutData imageLayoutData = epErrorComposite.createLayoutData(IEpLayoutData.END, IEpLayoutData.CENTER);
 		((GridData) imageLayoutData.getSwtLayoutData()).grabExcessHorizontalSpace = true;
 		epErrorComposite.addImage(CoreImageRegistry.getImage(CoreImageRegistry.IMAGE_WARNING_SMALL), imageLayoutData);
-		
+
 		// error label
-		IEpLayoutData labelLayoutData = epErrorComposite.createLayoutData(IEpLayoutData.BEGINNING, IEpLayoutData.CENTER); 
+		IEpLayoutData labelLayoutData = epErrorComposite.createLayoutData(IEpLayoutData.BEGINNING, IEpLayoutData.CENTER);
 		((GridData) labelLayoutData.getSwtLayoutData()).grabExcessHorizontalSpace = true;
 		errorLabel = epErrorComposite.addLabel(" ", labelLayoutData); //$NON-NLS-1$
 
@@ -150,7 +150,7 @@ public abstract class AbstractListView extends AbstractCmClientView
 
 		final IEpLayoutData tableLayoutData = layoutComposite.createLayoutData(IEpLayoutData.FILL, IEpLayoutData.FILL, true, true);
 		IEpTableViewer epTableViewer;
-		
+
 		if (checkable) {
 			epTableViewer = new EpTableViewer(layoutComposite.addCheckboxTableViewer(EpState.READ_ONLY, tableLayoutData, true, tableName), false);
 		} else {
@@ -184,10 +184,20 @@ public abstract class AbstractListView extends AbstractCmClientView
 			getNavigationService().registerNavigationEventListener(this);
 		}
 
+		initializeViewToolbarPost();
+
 		// new
 		getToolbarManager().update(true);
 		layoutComposite.getSwtComposite().layout();
 		updateNavigationComponents();
+	}
+
+	/**
+	 * Extension for post initializing view tool bar, ie. after navigation bar.
+	 */
+	protected void initializeViewToolbarPost() {
+		// do nothing for extension
+		// put control creation code here
 	}
 
 	/**
@@ -220,7 +230,7 @@ public abstract class AbstractListView extends AbstractCmClientView
 
 	/**
 	 * Get this view's underlying {@link TableViewer}.
-	 * 
+	 *
 	 * @return this view's underlying TableViewer
 	 */
 	public TableViewer getViewer() {
@@ -229,7 +239,7 @@ public abstract class AbstractListView extends AbstractCmClientView
 
 	/**
 	 * Adds a double click listener to the Viewer, which invokes the run method of the given action.
-	 * 
+	 *
 	 * @param doubleClickAction the action whose run method should be invoked upon double-click
 	 */
 	public void addDoubleClickAction(final Action doubleClickAction) {
@@ -266,28 +276,28 @@ public abstract class AbstractListView extends AbstractCmClientView
 
 	/**
 	 * Get the array of objects that will be used as input to the view's TableViewer.
-	 * 
+	 *
 	 * @return array of objects that will be used as input to the view's TableViewer
 	 */
 	protected abstract Object[] getViewInput();
 
 	/**
 	 * Initializes the TableViewer's internal Table. Sets the column headers, etc.
-	 * 
+	 *
 	 * @param epTableViewer the viewer's Table object
 	 */
 	protected abstract void initializeTable(final IEpTableViewer epTableViewer);
 
 	/**
 	 * Get this view's TableViewer's label provider. Subclasses must provide their own <code>LabelProvider</code>.
-	 * 
+	 *
 	 * @return this viewer's LabelProvider
 	 */
 	protected abstract ITableLabelProvider getViewLabelProvider();
 
 	/**
 	 * Get this view's ContentProvider. If subclasses don't specify their own ContentProvider this will return a default one.
-	 * 
+	 *
 	 * @return the view's ContentProvider.
 	 */
 	protected IStructuredContentProvider getViewContentProvider() {
@@ -296,7 +306,7 @@ public abstract class AbstractListView extends AbstractCmClientView
 
 	/**
 	 * Get the number of results that the view could show if there were no paging.
-	 * 
+	 *
 	 * @return the resultsCount
 	 */
 	public int getResultsCount() {
@@ -305,7 +315,7 @@ public abstract class AbstractListView extends AbstractCmClientView
 
 	/**
 	 * Set the number of results that the view could show if there were no paging.
-	 * 
+	 *
 	 * @param resultsCount the resultsCount
 	 */
 	public void setResultsCount(final int resultsCount) {
@@ -315,7 +325,7 @@ public abstract class AbstractListView extends AbstractCmClientView
 	/**
 	 * Get the index within the search results count at which this view will start displaying results (the index of the result at the top of this
 	 * page of results).
-	 * 
+	 *
 	 * @return the results start index
 	 */
 	public int getResultsStartIndex() {
@@ -325,7 +335,7 @@ public abstract class AbstractListView extends AbstractCmClientView
 	/**
 	 * Set the index within the search results count at which this view will start displaying results (the index of the result at the top of this
 	 * page of results).
-	 * 
+	 *
 	 * @param resultsStartIndex the startIndex
 	 */
 	public void setResultsStartIndex(final int resultsStartIndex) {
@@ -334,13 +344,13 @@ public abstract class AbstractListView extends AbstractCmClientView
 
 	/**
 	 * Get the number of results to show on a page.
-	 * 
+	 *
 	 * @return the number of results to show on a page
 	 */
 	public int getResultsPaging() {
 		return resultsPaging;
 	}
-	
+
 	@Override
 	public void fireNavigationEvent(final NavigationType navigationType, final Object[] args) {
 		getNavigationService().fireNavigationEvent(new NavigationEvent(viewer, navigationType, args));
@@ -348,8 +358,8 @@ public abstract class AbstractListView extends AbstractCmClientView
 
 	/**
 	 * Creates the view toolbar navigation components.
-	 * 
-	 * @param toolBarManager toolbar manager 
+	 *
+	 * @param toolBarManager toolbar manager
 	 */
 	protected void initializeToolbarNavigationComponents(final IToolBarManager toolBarManager) {
 		paginationControl = new PaginationContributionControl(toolBarManager, this);
@@ -408,9 +418,9 @@ public abstract class AbstractListView extends AbstractCmClientView
 		}
 	}
 
-	
 
-	
+
+
 
 	/**
 	 * @return
@@ -424,7 +434,7 @@ public abstract class AbstractListView extends AbstractCmClientView
 
 	/**
 	 * Called by the <code>NavigationEventService</code> when <code>NavigationEvent</code>s occur.
-	 * 
+	 *
 	 * @param event the NavigationEvent
 	 */
 	public void navigationChanged(final NavigationEvent event) {
@@ -442,7 +452,7 @@ public abstract class AbstractListView extends AbstractCmClientView
 			int toPage = ((Integer) event.getArgs()[0]).intValue();
 			navigateTo(toPage);
 		}
-		
+
 		updateNavigationComponents();
 	}
 
@@ -483,10 +493,10 @@ public abstract class AbstractListView extends AbstractCmClientView
 		}
 		refreshViewerInput();
 	}
-	
+
 	/**
 	 * Go to the specific page passed in.
-	 * 
+	 *
 	 * @param pageNumber the page number
 	 */
 	protected void navigateTo(final int pageNumber) {
@@ -496,7 +506,7 @@ public abstract class AbstractListView extends AbstractCmClientView
 
 	/**
 	 * get the page start index by page number.
-	 * 
+	 *
 	 * @param pageNumber the page number
 	 * @param itemsPerPage item number per page
 	 * @return the start index
@@ -507,7 +517,7 @@ public abstract class AbstractListView extends AbstractCmClientView
 
 	/**
 	 * Get the list of objects for current page.
-	 * 
+	 *
 	 * @param objects the list of results
 	 * @param startIndex the current page starting index
 	 * @param paging the amount to page
@@ -535,7 +545,7 @@ public abstract class AbstractListView extends AbstractCmClientView
 
 	/**
 	 * Shows a message above the table within an expandable composite. The message needs to be hidden manually.
-	 * 
+	 *
 	 * @param message the message to be shown
 	 */
 	public void showMessage(final String message) {
@@ -553,12 +563,12 @@ public abstract class AbstractListView extends AbstractCmClientView
 			layoutComposite.getSwtComposite().layout();
 		}
 	}
-	
+
 	@Override
 	public void paginationChange(final int newValue) {
 		resultsPaging = newValue;
 		refreshViewerInput();
-		
+
 		updateNavigationComponents();
 	}
 

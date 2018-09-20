@@ -5,17 +5,13 @@
 	<parent>
 		<groupId>com.elasticpath</groupId>
 		<artifactId>itests-parent</artifactId>
-		<version>702.0.0-SNAPSHOT</version>
+		<version>703.0.0-SNAPSHOT</version>
 		<relativePath>../../itests-parent</relativePath>
 	</parent>
 	<modelVersion>4.0.0</modelVersion>
 
 	<artifactId>ep-persistence-openjpa-itests</artifactId>
 	<name>EP Persistence Openjpa ITests</name>
-
-	<properties>
-		<java.jvm.opts>-XX:MaxPermSize=128m -Xmx512m</java.jvm.opts>
-	</properties>
 
 	<dependencies>
 

@@ -1,13 +1,12 @@
 package com.elasticpath.cortex.dce.addresses
 
-import cucumber.api.groovy.EN
-import cucumber.api.groovy.Hooks
+import static org.assertj.core.api.Assertions.assertThat
 
 import static com.elasticpath.cortex.dce.ClasspathFluentRelosClientFactory.client
-import static com.elasticpath.cortex.dce.addresses.AddressConstants.ADDRESS_LINK_TYPE
-import static com.elasticpath.cortex.dce.addresses.AddressConstants.goToAddress
+import static com.elasticpath.cortex.dce.addresses.AddressConstants.*
 
-import static org.assertj.core.api.Assertions.assertThat
+import cucumber.api.groovy.EN
+import cucumber.api.groovy.Hooks
 
 this.metaClass.mixin(Hooks)
 this.metaClass.mixin(EN)
@@ -36,6 +35,6 @@ And(~'there is a link to a specific address$') { ->
 
 private String getAddressUri() {
 	goToAddress()
-	String uri = client.body.links[0].uri
+	String uri = client.body.links[0].href
 	return uri
 }

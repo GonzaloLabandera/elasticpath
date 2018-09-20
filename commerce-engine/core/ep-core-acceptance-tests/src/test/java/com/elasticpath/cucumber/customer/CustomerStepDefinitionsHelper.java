@@ -69,7 +69,8 @@ public class CustomerStepDefinitionsHelper {
 		);
 		customerAddress.setCreationDate(Utils.getDate(customerAddressMap.get("creationDate")));
 		customerAddress.setLastModifiedDate(Utils.getDate(customerAddressMap.get("lastModifiedDate")));
-		customerHolder.set(tac.getPersistersFactory().getStoreTestPersister().createCustomerWithAddress(storeHolder.get(), customerAddress));
+		customerHolder.set(tac.getPersistersFactory().getStoreTestPersister().
+				createCustomerWithAddress(customerAddressMap.get("guid"), storeHolder.get(), customerAddress));
 	}
 
 	/**

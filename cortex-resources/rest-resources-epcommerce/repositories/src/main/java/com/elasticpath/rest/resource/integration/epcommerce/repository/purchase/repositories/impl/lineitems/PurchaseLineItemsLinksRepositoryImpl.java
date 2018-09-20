@@ -47,7 +47,7 @@ public class PurchaseLineItemsLinksRepositoryImpl<I extends PurchaseLineItemsIde
 	 */
 	protected PurchaseLineItemIdentifier buildPurchaseLineItemIdentifier(final PurchaseIdentifier purchaseIdentifier, final ShoppingItem lineItem) {
 		return PurchaseLineItemIdentifier.builder()
-				.withLineItemId(PathIdentifier.of(lineItem.getSkuGuid()))
+				.withLineItemId(PathIdentifier.of(lineItem.getGuid()))
 				.withPurchaseLineItems(PurchaseLineItemsIdentifier.builder()
 						.withPurchase(purchaseIdentifier)
 						.build())

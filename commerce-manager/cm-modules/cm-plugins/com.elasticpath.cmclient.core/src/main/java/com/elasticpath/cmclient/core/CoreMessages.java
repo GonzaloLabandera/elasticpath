@@ -10,7 +10,7 @@ import java.lang.reflect.Field;
 /**
  * Messages class for the core plugin.
  */
-@SuppressWarnings({ "PMD.TooManyFields", "PMD.ExcessivePublicCount", "PMD.VariableNamingConventions" })
+@SuppressWarnings({ "PMD.TooManyFields", "PMD.ExcessivePublicCount", "PMD.VariableNamingConventions", "PMD.SuspiciousConstantFieldName" })
 public final class CoreMessages {
 	private static final String BUNDLE_NAME = "com.elasticpath.cmclient.core.CorePluginResources"; //$NON-NLS-1$
 
@@ -532,7 +532,15 @@ public final class CoreMessages {
 	public String ChangePaginationDialog_WindowTitle;
 	public String ChangePaginationDialog_Description;
 	public String ChangePaginationDialog_ResultsPerPage;
-	
+
+	public String ChangeTimezoneDialog_Title;
+	public String ChangeTimezoneDialog_WindowTitle;
+	public String ChangeTimezoneDialog_CurrentTime;
+	public String ChangeTimezoneDialog_Description;
+	public String ChangeTimezoneDialog_Browser;
+	public String ChangeTimezoneDialog_Custom;
+
+
 	public String RefreshAction_Name;
 	public String RefreshAction_Tooltip;
 	
@@ -669,51 +677,38 @@ public final class CoreMessages {
 	public String ValueType_Category;
 	public String ValueType_HTML;
 
-	
-	//GMT time zone offset
-	public String GMTminus12colon00;
-	public String GMTminus11colon00;
-	public String GMTminus10colon00;
-	public String GMTminus09colon00;
-	public String GMTminus09colon30;
-	public String GMTminus08colon00;
-	public String GMTminus07colon00;
-	public String GMTminus06colon00;
-	public String GMTminus05colon00;
-	public String GMTminus04colon30;
-	public String GMTminus04colon00;
-	public String GMTminus03colon30;
-	public String GMTminus03colon00;
-	public String GMTminus02colon00;
-	public String GMTminus01colon00;
-	public String GMTplus00colon00; 
-	public String GMTplus01colon00; 
-	public String GMTplus02colon00; 
-	public String GMTplus03colon00; 
-	public String GMTplus03colon07; 
-	public String GMTplus03colon30; 
-	public String GMTplus04colon00; 
-	public String GMTplus04colon30; 
-	public String GMTplus05colon00; 
-	public String GMTplus05colon30; 
-	public String GMTplus05colon45; 
-	public String GMTplus06colon00; 
-	public String GMTplus06colon30; 
-	public String GMTplus07colon00; 
-	public String GMTplus08colon00;
-	public String GMTplus08colon30;
-	public String GMTplus08colon45;
-	public String GMTplus09colon00; 
-	public String GMTplus09colon30; 
-	public String GMTplus10colon00;
-	public String GMTplus10colon30;
-	public String GMTplus11colon00;
-	public String GMTplus11colon30;
-	public String GMTplus12colon00; 
-	public String GMTplus12colon45; 
-	public String GMTplus13colon00; 
-	public String GMTplus14colon00;
-	
+
+	// Timezones
+	public String UTCp12;
+	public String UTCp11;
+	public String UTCp10;
+	public String UTCp9;
+	public String UTCp8;
+	public String UTCp7;
+	public String UTCp6;
+	public String UTCp5;
+	public String UTCp4;
+	public String UTCp3;
+	public String UTCp2;
+	public String UTCp1;
+	public String UTC;
+	public String UTCm1;
+	public String UTCm2;
+	public String UTCm3;
+	public String UTCm4;
+	public String UTCm5;
+	public String UTCm6;
+	public String UTCm7;
+	public String UTCm8;
+	public String UTCm9;
+	public String UTCm10;
+	public String UTCm11;
+	public String UTCm12;
+	public String IST;
+	public String ACT;
+
+
+
 	/**
 	 * Return a message String given the message key.
 	 *

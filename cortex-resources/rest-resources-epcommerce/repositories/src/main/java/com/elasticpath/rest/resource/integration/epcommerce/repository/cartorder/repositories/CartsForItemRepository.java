@@ -12,6 +12,8 @@ import com.elasticpath.domain.shoppingcart.ShoppingCart;
 import com.elasticpath.repository.LinksRepository;
 import com.elasticpath.rest.definition.carts.CartIdentifier;
 import com.elasticpath.rest.definition.items.ItemIdentifier;
+import com.elasticpath.rest.id.Identifier;
+import com.elasticpath.rest.id.transform.IdentifierTransformer;
 import com.elasticpath.rest.id.transform.IdentifierTransformerProvider;
 import com.elasticpath.rest.id.type.StringIdentifier;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder.ShoppingCartRepository;
@@ -36,7 +38,8 @@ public class CartsForItemRepository<I extends ItemIdentifier, LI extends CartIde
 	@Override
 	public Observable<CartIdentifier> getElements(final ItemIdentifier itemIdentifier) {
 		//Deep down item repository expects an encoded id
-		String encodedItemId = identifierTransformerProvider.forUriPart(ItemIdentifier.ITEM_ID).identifierToUri(itemIdentifier.getItemId());
+		final IdentifierTransformer<Identifier> identifierIdentifierTransformer = identifierTransformerProvider.forUriPart(ItemIdentifier.ITEM_ID);
+		String encodedItemId = identifierIdentifierTransformer.identifierToUri(itemIdentifier.getItemId());
 		return shoppingCartRepository.getDefaultShoppingCart()
 				.flatMapObservable(cart -> itemRepository.getSkuForItemIdAsSingle(encodedItemId)
 						.flatMapObservable(productSku -> getCartContainingProductSku(cart, productSku)));
@@ -50,7 +53,7 @@ public class CartsForItemRepository<I extends ItemIdentifier, LI extends CartIde
 	 * @return CartIdentifier
 	 */
 	protected Observable<CartIdentifier> getCartContainingProductSku(final ShoppingCart cart, final ProductSku productSku) {
-		if (cart == null || productSku == null || cart.getCartItem(productSku.getSkuCode()) == null) {
+		if (cart == null || productSku == null || cart.getCartItems(productSku.getSkuCode()).isEmpty()) {
 			return Observable.empty();
 		} else {
 			return Observable.just(CartIdentifier.builder()

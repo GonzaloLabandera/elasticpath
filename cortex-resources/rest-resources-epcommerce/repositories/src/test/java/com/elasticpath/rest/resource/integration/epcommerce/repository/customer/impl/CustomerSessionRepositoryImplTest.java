@@ -16,10 +16,9 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.elasticpath.base.exception.EpServiceException;
-import com.elasticpath.domain.catalog.Catalog;
 import com.elasticpath.domain.customer.Customer;
 import com.elasticpath.domain.customer.CustomerSession;
 import com.elasticpath.domain.shopper.Shopper;
@@ -46,7 +45,6 @@ public class CustomerSessionRepositoryImplTest {
 	private static final String RESULT_SHOULD_BE_A_FAILURE = "Result should be a failure";
 	private static final String USER_GUID = "userGuid";
 	private static final String STORE_CODE = "StoreCode";
-	private static final String CATALOG_CODE = "CatalogCode";
 	private static final String TAG_KEY = "tag";
 	private static final Locale LOCALE = Locale.CANADA;
 	private static final Currency CURRENCY = Currency.getInstance(LOCALE);
@@ -61,8 +59,6 @@ public class CustomerSessionRepositoryImplTest {
 	private CustomerSession mockCustomerSession;
 	@Mock
 	private Customer mockCustomer;
-	@Mock
-	private Catalog mockCatalog;
 	@Mock
 	private ShopperService shopperService;
 	@Mock
@@ -87,7 +83,6 @@ public class CustomerSessionRepositoryImplTest {
 	@Before
 	public void setUp() {
 		mockCreateCustomerSessionWithShopper();
-		mockCreatePricingAndCatalogue();
 	}
 
 	@Test
@@ -99,12 +94,9 @@ public class CustomerSessionRepositoryImplTest {
 		tagSet.addTag(TAG_KEY, tag);
 
 		when(resourceOperationContext.getUserIdentifier()).thenReturn(USER_GUID);
-		when(mockCustomer.getGuid()).thenReturn(USER_GUID);
 		when(shopperService.findByCustomerGuidAndStoreCode(USER_GUID, STORE_CODE)).thenReturn(mockShopper);
 		when(storeRepository.findStore(STORE_CODE)).thenReturn(ExecutionResultFactory.createReadOK(mockStore));
-		when(mockShopper.getStoreCode()).thenReturn(STORE_CODE);
 		when(mockShopper.getCustomer()).thenReturn(mockCustomer);
-		when(mockCustomer.getStoreCode()).thenReturn(STORE_CODE);
 		when(mockStore.getCode()).thenReturn(STORE_CODE);
 		when(mockStore.getDefaultLocale()).thenReturn(LOCALE);
 		when(mockStore.getDefaultCurrency()).thenReturn(CURRENCY);
@@ -127,12 +119,10 @@ public class CustomerSessionRepositoryImplTest {
 		TagSet tagSet = new TagSet();
 		tagSet.addTag(TAG_KEY, tag);
 
-		when(mockCustomer.getGuid()).thenReturn(USER_GUID);
 		when(shopperService.findByCustomerGuid(USER_GUID)).thenReturn(mockShopper);
 		when(storeRepository.findStore(STORE_CODE)).thenReturn(ExecutionResultFactory.createReadOK(mockStore));
 		when(mockShopper.getStoreCode()).thenReturn(STORE_CODE);
 		when(mockShopper.getCustomer()).thenReturn(mockCustomer);
-		when(mockCustomer.getStoreCode()).thenReturn(STORE_CODE);
 		when(mockStore.getCode()).thenReturn(STORE_CODE);
 		when(mockStore.getDefaultLocale()).thenReturn(LOCALE);
 		when(mockStore.getDefaultCurrency()).thenReturn(CURRENCY);
@@ -150,12 +140,8 @@ public class CustomerSessionRepositoryImplTest {
 	public void testFindOrCreateCustomerSessionWhenCustomerNotFound() {
 		setupSubject();
 		when(resourceOperationContext.getUserIdentifier()).thenReturn(USER_GUID);
-		TagSet tagSet = new TagSet();
 
-		when(mockCustomer.getGuid()).thenReturn(USER_GUID);
 		when(customerService.findByGuid(USER_GUID)).thenReturn(mockCustomer);
-		when(shopperService.findOrCreateShopper(mockCustomer, STORE_CODE)).thenReturn(null);
-		when(tagSetFactory.createTagSet(mockCustomer)).thenReturn(tagSet);
 
 		ExecutionResult<CustomerSession> result = customerSessionRepository.findOrCreateCustomerSession();
 
@@ -167,12 +153,8 @@ public class CustomerSessionRepositoryImplTest {
 	public void testFindOrCreateCustomerSessionWhenExceptionIsThrown() {
 		setupSubject();
 		when(resourceOperationContext.getUserIdentifier()).thenReturn(USER_GUID);
-		TagSet tagSet = new TagSet();
 
-		when(mockCustomer.getGuid()).thenReturn(USER_GUID);
 		when(customerService.findByGuid(USER_GUID)).thenThrow(new EpServiceException("Error in customer service"));
-		when(storeRepository.findStore(STORE_CODE)).thenReturn(ExecutionResultFactory.createReadOK(mockStore));
-		when(tagSetFactory.createTagSet(mockCustomer)).thenReturn(tagSet);
 
 		ExecutionResult<CustomerSession> result = customerSessionRepository.findOrCreateCustomerSession();
 
@@ -184,10 +166,7 @@ public class CustomerSessionRepositoryImplTest {
 	public void testCreateCustomerSessionWhenStoreLookupNotFoundExpectedResultIsFailure() {
 		setupSubject();
 
-		when(resourceOperationContext.getUserIdentifier()).thenReturn(USER_GUID);
 		when(mockCustomer.getGuid()).thenReturn(USER_GUID);
-		when(storeRepository.findStore(STORE_CODE)).thenReturn(ExecutionResultFactory.createNotFound());
-		when(mockStore.getCode()).thenReturn(STORE_CODE);
 
 		ExecutionResult<CustomerSession> result = customerSessionRepository.findCustomerSessionByGuid(mockCustomer.getGuid());
 
@@ -198,17 +177,12 @@ public class CustomerSessionRepositoryImplTest {
 	@Test
 	public void testCreateCustomerSessionWhenExceptionIsThrownExpectedResultIsFailure() {
 		setupSubject();
-		when(resourceOperationContext.getUserIdentifier()).thenReturn(USER_GUID);
 		when(shopperService.findByCustomerGuidAndStoreCode(USER_GUID, STORE_CODE)).thenReturn(mockShopper);
-		when(mockShopper.getStoreCode()).thenReturn(STORE_CODE);
 		when(mockShopper.getCustomer()).thenReturn(mockCustomer);
 		when(mockCustomer.getGuid()).thenReturn(USER_GUID);
-		when(mockCustomer.getStoreCode()).thenReturn(STORE_CODE);
 		when(storeRepository.findStore(STORE_CODE)).thenReturn(ExecutionResultFactory.createReadOK(mockStore));
 		when(mockStore.getCode()).thenReturn(STORE_CODE);
 		when(mockStore.getDefaultLocale()).thenReturn(LOCALE);
-		when(customerSessionService.initializeCustomerSessionForPricing(mockCustomerSession, STORE_CODE, null))
-				.thenThrow(new EpServiceException(""));
 
 		ExecutionResult<CustomerSession> result = customerSessionRepository.findCustomerSessionByGuid(mockCustomer.getGuid());
 
@@ -263,14 +237,7 @@ public class CustomerSessionRepositoryImplTest {
 
 		when(customerService.findByGuid(USER_GUID)).thenReturn(mockCustomer);
 		when(customerSessionService.createWithShopper(mockShopper)).thenReturn(mockCustomerSession);
-		when(mockCustomerSession.getCurrency()).thenReturn(CURRENCY);
 		when(mockCustomerSession.getCustomerTagSet()).thenReturn(sessionTagSet);
-		when(mockCustomerSession.isPriceListStackValid()).thenReturn(false);
-	}
-
-	private void mockCreatePricingAndCatalogue() {
-		when(mockCatalog.getCode()).thenReturn(CATALOG_CODE);
-		when(mockStore.getCatalog()).thenReturn(mockCatalog);
 	}
 
 	private void setupSubject() {

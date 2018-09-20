@@ -24,15 +24,19 @@ class BaseAmountTableLabelProvider extends LabelProvider implements ITableLabelP
 	private final BaseAmountSection baseAmountSection;
 
 	private final PriceListEditorController controller;
+	
+	private final int baseColumnCount;
 
 	/**
 	 * Constructor.
 	 * @param baseAmountSection - parent <code>BaseAmountSection</code>
 	 * @param controller - <code>PriceListEditorController</code> instance.
+	 * @param baseColumnCount - the base column count.
 	 */
-	BaseAmountTableLabelProvider(final BaseAmountSection baseAmountSection, final PriceListEditorController controller) {
+	BaseAmountTableLabelProvider(final BaseAmountSection baseAmountSection, final PriceListEditorController controller, final int baseColumnCount) {
 		this.baseAmountSection = baseAmountSection;
 		this.controller = controller;
+		this.baseColumnCount = baseColumnCount;
 	}
 
 	private static final int COL_IS_LOCKED = 0;
@@ -119,6 +123,11 @@ class BaseAmountTableLabelProvider extends LabelProvider implements ITableLabelP
 	 */
 	@Override
 	public String getColumnText(final Object element, final int columnIndex) {
+		// If the columnIndex is in the extensions range get it.
+		if (columnIndex >= this.baseColumnCount) {
+			return baseAmountSection.getExtensionColumnText(element, columnIndex);
+		}
+		
 		final BaseAmountDTO baDto = (BaseAmountDTO) element;
 		switch (columnIndex) {
 		case COL_INDEX_PRODUCT_NAME:
@@ -156,7 +165,7 @@ class BaseAmountTableLabelProvider extends LabelProvider implements ITableLabelP
 		case COL_INDEX_PAYMENT_SCHEDULE:
 			return getPaymentScheduleMessage(baDto);
 		default:
-			return baseAmountSection.getExtensionColumnText(element, columnIndex);
+			return "";  //$NON-NLS-1$
 		}
 	}
 

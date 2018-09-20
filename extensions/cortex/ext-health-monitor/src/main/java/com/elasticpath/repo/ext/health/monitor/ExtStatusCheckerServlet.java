@@ -8,7 +8,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.elasticpath.repo.health.monitoring.servlet.StatusCheckerServlet;
+import com.elasticpath.health.monitoring.servlet.StatusCheckerServlet;
 
 /**
  * Extension servlet for overriding the default behaviour of StatusCheckerServlet.
@@ -18,7 +18,7 @@ public class ExtStatusCheckerServlet extends StatusCheckerServlet {
 	/**
 	 * {@inheritDoc}
 	 *
-	 * @see com.elasticpath.repo.health.monitoring.servlet.StatusCheckerServlet#doGet(HttpServletRequest, HttpServletResponse)
+	 * @see com.elasticpath.health.monitoring.servlet.StatusCheckerServlet#doGet(HttpServletRequest, HttpServletResponse)
 	 */
 	@Override
 	protected void doGet(final HttpServletRequest request, final HttpServletResponse response) throws ServletException, IOException {

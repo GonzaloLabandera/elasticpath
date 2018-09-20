@@ -130,7 +130,7 @@ see [Select Shipping Choice](#shipmentdetails_select-shipping-choice)
 				<![CDATA[
 Uses a Selector to choose the shipping option for the order. The shipping option is how the order will be
 shipped, i.e. (FedEx, Canada Post, etc). The shipping options available for your shipment depend on which shipping regions
-and shipping service levels are configured for your store. Check with your store's administrator for more information on
+and shipping options are configured for your store. Check with your store's administrator for more information on
 these options.
 				]]>
 			</description>

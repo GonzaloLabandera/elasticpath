@@ -13,7 +13,10 @@ import org.openqa.selenium.WebElement;
  */
 public class ValidationErrorsDialog extends AbstractDialog {
 
-	private static final String ERROR_PARENT_CSS = "div[widget-id*='Error'] ";
+	/**
+	 * CSS selector used to identify the dialog.
+	 */
+	public static final String ERROR_PARENT_CSS = "div[widget-id*='Error'] ";
 	private static final String ERROR_DIV_CSS = ERROR_PARENT_CSS + "div[widget-id*='%s'] > div";
 
 	/**

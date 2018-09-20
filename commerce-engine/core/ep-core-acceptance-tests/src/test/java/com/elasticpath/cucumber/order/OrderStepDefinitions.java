@@ -8,17 +8,15 @@ import java.util.List;
 import cucumber.api.DataTable;
 import cucumber.api.java.en.When;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.ContextConfiguration;
 
 import com.elasticpath.common.dto.AddressDTO;
-import com.elasticpath.common.dto.ShoppingItemDto;
 import com.elasticpath.cucumber.customer.CustomerStepDefinitionsHelper;
+import com.elasticpath.cucumber.shoppingcart.ShoppingCartStepDefinitionsHelper;
 
 /**
  * Order test step definitions class.
  * 
  */
-@ContextConfiguration("/cucumber.xml")
 public class OrderStepDefinitions {
 	
 	@Autowired
@@ -26,6 +24,9 @@ public class OrderStepDefinitions {
 	
 	@Autowired
 	private CustomerStepDefinitionsHelper customerStepDefinitionsHelper;
+
+	@Autowired
+	private ShoppingCartStepDefinitionsHelper shoppingCartStepDefinitionsHelper;
 	
 	/**
 	 * Releases order physical shipments, and complete order of the current test context. 
@@ -57,31 +58,32 @@ public class OrderStepDefinitions {
 	/**
 	 * Adds items to a physical order shipment.
 	 *
-	 * @param itemDtos items
+	 * @param dataTable items
 	 */
 	@When("^the order physical shipment is modified by adding these items$")
-	public void addItemsToOrderPhysicalShipment(final List<ShoppingItemDto> itemDtos) {
-		orderStepDefinitionsHelper.addItemsToPhysicalShipment(itemDtos);
+	public void addItemsToOrderPhysicalShipment(final DataTable dataTable) {
+		orderStepDefinitionsHelper.addItemsToPhysicalShipment(shoppingCartStepDefinitionsHelper.convertDataTableToShoppingItemDtos(dataTable));
 	}
 	
 	/**
 	 * Removes items from a physical order shipment.
 	 *
-	 * @param itemDtos items
+	 * @param dataTable items
 	 */
 	@When("^the order physical shipment is modified by removing these items$")
-	public void removeItemsFromOrderPhysicalShipment(final List<ShoppingItemDto> itemDtos) {
-		orderStepDefinitionsHelper.removeItemsFromPhysicalShipment(itemDtos);
+	public void removeItemsFromOrderPhysicalShipment(final DataTable dataTable) {
+		orderStepDefinitionsHelper.removeItemsFromPhysicalShipment(shoppingCartStepDefinitionsHelper.convertDataTableToShoppingItemDtos(dataTable));
 	}
 	
 	/**
 	 * Changes item quantities of a physical order shipment.
 	 *
-	 * @param itemDtos items
+	 * @param dataTable items
 	 */
 	@When("^the order physical shipment is modified by changing these items quantities$")
-	public void changeItemQuantitiesOfOrderPhysicalShipment(final List<ShoppingItemDto> itemDtos) {
-		orderStepDefinitionsHelper.changeItemQuantitiesOfPhysicalShipment(itemDtos);
+	public void changeItemQuantitiesOfOrderPhysicalShipment(final DataTable dataTable) {
+		orderStepDefinitionsHelper
+				.changeItemQuantitiesOfPhysicalShipment(shoppingCartStepDefinitionsHelper.convertDataTableToShoppingItemDtos(dataTable));
 	}
 	
 	/**
@@ -132,10 +134,11 @@ public class OrderStepDefinitions {
 	/**
 	 * Moves items from an existing physical shipment to a new physical shipment.
 	 *
-	 * @param itemDtos item dtos
+	 * @param dataTable item dtos
 	 */
 	@When("^the order physical shipment is modified by moving these items into a new shipment$")
-	public void moveItemsToNewShipmentFromOrderPhysicalShipment(final List<ShoppingItemDto> itemDtos) {
-		orderStepDefinitionsHelper.moveItemsToNewShipmentFromOrderPhysicalShipment(itemDtos);
+	public void moveItemsToNewShipmentFromOrderPhysicalShipment(final DataTable dataTable) {
+		orderStepDefinitionsHelper
+				.moveItemsToNewShipmentFromOrderPhysicalShipment(shoppingCartStepDefinitionsHelper.convertDataTableToShoppingItemDtos(dataTable));
 	}
 }

@@ -51,10 +51,11 @@ public class SearchIndexStatusCheckerServlet extends HttpServlet {
 
 		response.setHeader("Cache-Control", "no-cache");
 
+
 		if (searchIndexCompleted) {
 			response.sendError(HttpURLConnection.HTTP_OK);
 		} else {
-			if (SolrStatusCheckerHelper.isSolrIndexingStarted() && !isSearchCurrentlyIndexing()) {
+			if (SolrStatusCheckerHelper.isSolrIndexingStarted(request.getRequestURL().toString()) && !isSearchCurrentlyIndexing()) {
 				response.sendError(HttpURLConnection.HTTP_OK);
 				searchIndexCompleted = true;
 			} else {

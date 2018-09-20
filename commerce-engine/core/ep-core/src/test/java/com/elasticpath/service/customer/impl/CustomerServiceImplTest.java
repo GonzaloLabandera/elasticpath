@@ -5,8 +5,8 @@ package com.elasticpath.service.customer.impl;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
@@ -20,25 +20,28 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
+
 import javax.validation.ConstraintViolation;
 import javax.validation.Validator;
 
-import com.google.common.collect.ImmutableMap;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
+import com.google.common.collect.ImmutableMap;
+
 import org.mockito.InjectMocks;
 import org.mockito.Matchers;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.Spy;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
+import com.elasticpath.base.common.dto.StructuredErrorMessage;
 import com.elasticpath.base.exception.EpServiceException;
-import com.elasticpath.common.dto.StructuredErrorMessage;
+import com.elasticpath.base.exception.structured.EpValidationException;
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.commons.constants.WebConstants;
-import com.elasticpath.commons.exception.EpValidationException;
 import com.elasticpath.commons.exception.UserIdExistException;
 import com.elasticpath.commons.exception.UserIdNonExistException;
 import com.elasticpath.commons.exception.UserStatusInactiveException;
@@ -50,7 +53,6 @@ import com.elasticpath.domain.customer.CustomerAuthentication;
 import com.elasticpath.domain.customer.CustomerDeleted;
 import com.elasticpath.domain.customer.CustomerGroup;
 import com.elasticpath.domain.customer.CustomerMessageIds;
-import com.elasticpath.domain.order.OrderMessageIds;
 import com.elasticpath.domain.store.Store;
 import com.elasticpath.messaging.EventMessage;
 import com.elasticpath.messaging.EventMessagePublisher;
@@ -66,6 +68,8 @@ import com.elasticpath.service.search.IndexNotificationService;
 import com.elasticpath.service.search.IndexType;
 import com.elasticpath.service.shopper.ShopperCleanupService;
 import com.elasticpath.service.store.StoreService;
+import com.elasticpath.settings.MalformedSettingValueException;
+import com.elasticpath.settings.provider.SettingValueProvider;
 import com.elasticpath.validation.ConstraintViolationTransformer;
 
 /**
@@ -225,7 +229,6 @@ public class CustomerServiceImplTest {
 	public void updateAnonymousCustomerWithDefaultUserIdModeUpdatesAndReturnsCustomer() {
 		when(customer.isAnonymous()).thenReturn(true);
 		doReturn(WebConstants.USE_EMAIL_AS_USER_ID_MODE).when(customerServiceImpl).getUserIdMode();
-		doReturn(true).when(customerServiceImpl).userIdExistsInStore(customer, TEST_STORE_CODE);
 		when(persistenceEngine.update(customer)).thenReturn(customer);
 
 		assertThat(customerServiceImpl.update(customer)).isEqualTo(customer);
@@ -611,7 +614,7 @@ public class CustomerServiceImplTest {
 
 		assertThat(customerServiceImpl.changePasswordAndSendEmail(customer, NEW_PASSWORD)).isEqualTo(customer);
 		verify(customerServiceImpl).setPassword(customer, NEW_PASSWORD);
-		verify(eventMessagePublisher).publish(any(EventMessage.class));
+		verify(eventMessagePublisher).publish(any());
 	}
 
 	/**
@@ -668,7 +671,7 @@ public class CustomerServiceImplTest {
 
 		verify(userIdentityService).setPassword(USER_ID, password);
 		verify(customerServiceImpl).update(customer);
-		verify(eventMessagePublisher).publish(any(EventMessage.class));
+		verify(eventMessagePublisher).publish(any());
 	}
 
 	/**
@@ -927,7 +930,7 @@ public class CustomerServiceImplTest {
 		String errorMessage = "Customer account " + USER_ID + " is not active.";
 
 		StructuredErrorMessage structuredErrorMessage = new StructuredErrorMessage(
-				OrderMessageIds.USER_ACCOUNT_NOT_ACTIVE,
+				"purchase.user.account.not.active",
 				errorMessage,
 				ImmutableMap.of(USER_ID_FIELD, USER_ID));
 
@@ -935,6 +938,25 @@ public class CustomerServiceImplTest {
 				.isInstanceOf(UserStatusInactiveException.class)
 				.hasMessage(errorMessage)
 				.hasFieldOrPropertyWithValue(STRUCTURED_ERROR_MESSAGES, Collections.singletonList(structuredErrorMessage));
+	}
+
+	@Test
+	public void verifyUserIdModeUsesEmailAddressByDefault() throws Exception {
+		customerServiceImpl.setUserIdModeProvider(new SettingValueProvider<Integer>() {
+			@Override
+			public Integer get() {
+				throw new MalformedSettingValueException("Null setting values can't be converted to integers");
+			}
+
+			@Override
+			public Integer get(final String context) {
+				throw new MalformedSettingValueException("Null setting values can't be converted to integers");
+			}
+		});
+
+		assertThat(customerServiceImpl.getUserIdMode())
+				.as("Expected WebConstants.USE_EMAIL_AS_USER_ID_MODE by default")
+				.isEqualTo(WebConstants.USE_EMAIL_AS_USER_ID_MODE);
 	}
 
 	/**

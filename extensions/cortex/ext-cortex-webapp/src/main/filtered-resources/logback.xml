@@ -15,6 +15,13 @@
 	</contextListener>
 
 	<appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+		<if condition='isDefined("ep.logback.console.threshold")'>
+			<then>
+				<filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+					<level>INFO</level>
+				</filter>
+			</then>
+		</if>
 		<encoder>
 			<pattern>%cyan(${CONTEXT_NAME}:) %-6relative [%10.10thread] %highlight(%-5level) %green(%40.40class) - %message%n</pattern>
 		</encoder>

@@ -18,6 +18,7 @@ public class CucumberJmsRegistrationTestExecutionListener extends AbstractTestEx
 
 	public CucumberJmsRegistrationTestExecutionListener() {
 		activeMqConnectionFactoryJndiBinder = new ActiveMqConnectionFactoryJndiBinderImpl(JndiContextManager.createJndiContextManager());
+		activeMqConnectionFactoryJndiBinder.bindNewActiveMqConnectionFactory();
 	}
 
 	@Override

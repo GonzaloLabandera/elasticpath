@@ -21,6 +21,11 @@ public final class CMContextIdNames {
 	public static final String UI_DATE_FORMATTER = "uiDateFormatter";
 
 	/**
+	 * Timezone formats.
+	 */
+	public static final String TIMEZONE_FORMAT_MAP = "timezoneFormattingMap";
+
+	/**
 	 * Credit Card Formatter.
 	 */
 	public static final String CREDIT_CARD_VALIDATOR = "creditCardValidator";

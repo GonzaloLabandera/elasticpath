@@ -88,7 +88,9 @@ public class SellingContextTest extends DbTestCase {
 
 
 		assertNotNull(sellingContextList);
-		assertEquals(2, sellingContextList.size());
+
+		// Database already contains a selling context that the Simple Store Scenario creates.
+		assertEquals(3, sellingContextList.size());
 	}
 
 	/**

@@ -7,10 +7,7 @@ import static org.junit.Assert.assertEquals;
 
 import java.math.BigDecimal;
 
-import org.jmock.Expectations;
-import org.jmock.integration.junit4.JUnitRuleMockery;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
 
 import com.elasticpath.domain.catalog.ProductSku;
@@ -18,8 +15,7 @@ import com.elasticpath.domain.catalog.impl.ProductSkuImpl;
 import com.elasticpath.importexport.common.dto.products.ShippableItemDTO;
 import com.elasticpath.importexport.common.dto.products.UnitDTO;
 import com.elasticpath.importexport.common.exception.runtime.PopulationRuntimeException;
-import com.elasticpath.settings.SettingsReader;
-import com.elasticpath.settings.domain.SettingValue;
+import com.elasticpath.settings.test.support.SimpleSettingValueProvider;
 
 /**
  * Test for ShippableItemAdapter class.
@@ -40,32 +36,11 @@ public class ShippableItemAdapterTest {
 
 	private ShippableItemAdapter shippableItemAdapter;
 
-	@Rule
-	public final JUnitRuleMockery context = new JUnitRuleMockery();
-
-	private SettingsReader mockSettingsReader;
-
 	@Before
 	public void setUp() throws Exception {
-		final SettingValue unitsWeightSettingValue = context.mock(SettingValue.class, "weights");
-		mockSettingsReader = context.mock(SettingsReader.class);
-		final SettingValue unitsLengthSettingValue = context.mock(SettingValue.class, "lengths");
-		context.checking(new Expectations() {
-			{
-				allowing(unitsWeightSettingValue).getValue();
-				will(returnValue("KG"));
-				allowing(mockSettingsReader).getSettingValue("COMMERCE/SYSTEM/UNITS/weight");
-				will(returnValue(unitsWeightSettingValue));
-
-				allowing(unitsLengthSettingValue).getValue();
-				will(returnValue("CM"));
-				allowing(mockSettingsReader).getSettingValue("COMMERCE/SYSTEM/UNITS/length");
-				will(returnValue(unitsLengthSettingValue));
-			}
-		});
-
 		shippableItemAdapter = new ShippableItemAdapter();
-		shippableItemAdapter.setSettingsReader(mockSettingsReader);
+		shippableItemAdapter.setLengthUnitsProvider(new SimpleSettingValueProvider<>("CM"));
+		shippableItemAdapter.setWeightUnitsProvider(new SimpleSettingValueProvider<>("KG"));
 	}
 
 	/**
@@ -79,7 +54,7 @@ public class ShippableItemAdapterTest {
 	}
 
 	/**
-	 * Test method for 'com.elasticpath.importexport.common.adapters.products.data.ShippableItemAdapter.populateDTO(ProductSku, ShippableItemDTO)'.
+	 * Test method for 'ShippableItemAdapter.populateDTO(ProductSku, ShippableItemDTO)'.
 	 */
 	@Test
 	public void testPopulateDTO() {
@@ -107,7 +82,7 @@ public class ShippableItemAdapterTest {
 	}
 
 	/**
-	 * Test method for 'com.elasticpath.importexport.common.adapters.products.data.ShippableItemAdapter.populateDomain(ShippableItemDTO,
+	 * Test method for 'ShippableItemAdapter.populateDomain(ShippableItemDTO,
 	 * ProductSku)'.
 	 */
 	@Test

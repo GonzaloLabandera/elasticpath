@@ -26,7 +26,7 @@ public class FlagBasedAvailabilityStrategyImplTest {
 	@Test
 	public void testNotAvailableWhenFlagIsFalse() {
 		Product product = new ProductImpl();
-		final Availability availability = strategy.getAvailability(product, false, false, false);
+		final Availability availability = strategy.getAvailability(product, false, false);
 		assertEquals("The result should be NOT_AVAILABLE", Availability.NOT_AVAILABLE, availability);
 	}
 
@@ -36,7 +36,7 @@ public class FlagBasedAvailabilityStrategyImplTest {
 	@Test
 	public void testNullWhenFlagIsTrue() {
 		Product product = new ProductImpl();
-		final Availability availability = strategy.getAvailability(product, true, false, false);
+		final Availability availability = strategy.getAvailability(product, true, false);
 		assertNull("The result should be null", availability);
 
 	}

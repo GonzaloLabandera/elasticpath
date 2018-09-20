@@ -7,16 +7,12 @@
 	<parent>
 		<artifactId>core</artifactId>
 		<groupId>com.elasticpath</groupId>
-		<version>702.0.0-SNAPSHOT</version>
+		<version>703.0.0-SNAPSHOT</version>
 	</parent>
 
 	<artifactId>openjpa-osgi-wrapper</artifactId>
 	<packaging>bundle</packaging>
 	<name>Elastic Path OpenJPA libs</name>
-
-	<properties>
-		<dependency.directory>lib</dependency.directory>
-	</properties>
 
 	<dependencies>
 		<dependency>
@@ -123,6 +119,7 @@
 							net.sf.ehcache.*,
 							net.sf.ehcache.management,
 							org.springframework.*;resolution:=optional,
+							org.springframework.context.support,
 							org.springframework.cache.ehcache,
 							org.springframework.beans.factory.config,
 							org.springframework.jmx.support,

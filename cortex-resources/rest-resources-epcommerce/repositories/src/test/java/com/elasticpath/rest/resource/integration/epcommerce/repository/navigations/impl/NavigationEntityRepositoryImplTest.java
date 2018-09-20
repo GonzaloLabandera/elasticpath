@@ -16,7 +16,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.elasticpath.domain.attribute.AttributeGroup;
 import com.elasticpath.domain.attribute.AttributeValue;
@@ -27,7 +27,6 @@ import com.elasticpath.rest.definition.base.DetailsEntity;
 import com.elasticpath.rest.definition.navigations.NavigationEntity;
 import com.elasticpath.rest.definition.navigations.NavigationIdentifier;
 import com.elasticpath.rest.definition.navigations.NavigationsIdentifier;
-import com.elasticpath.rest.id.type.PathIdentifier;
 import com.elasticpath.rest.id.type.StringIdentifier;
 import com.elasticpath.rest.identity.Subject;
 import com.elasticpath.rest.identity.TestSubjectFactory;
@@ -61,7 +60,7 @@ public class NavigationEntityRepositoryImplTest {
 
 	@Test
 	public void checkNavigationWithNoDescription() {
-		NavigationIdentifier navigationIdentifier = createNavigationWithId(PARENT_CODE, Collections.emptyList());
+		NavigationIdentifier navigationIdentifier = createNavigationWithId(PARENT_CODE);
 
 		NavigationEntity result = NavigationEntity.builder()
 				.withNodeId(PARENT_CODE)
@@ -78,7 +77,7 @@ public class NavigationEntityRepositoryImplTest {
 
 	@Test
 	public void checkNavigationDescription() {
-		NavigationIdentifier navigationIdentifier = createNavigationWithId(PARENT_CODE, Collections.emptyList());
+		NavigationIdentifier navigationIdentifier = createNavigationWithId(PARENT_CODE);
 
 		DetailsEntity details = mock(DetailsEntity.class);
 		NavigationEntity result = NavigationEntity.builder()
@@ -102,7 +101,7 @@ public class NavigationEntityRepositoryImplTest {
 		Category category = mock(Category.class);
 
 		when(resourceOperationContext.getSubject()).thenReturn(subject);
-		when(categoryRepository.findByGuid(SCOPE, PARENT_CODE)).thenReturn(Single.just(category));
+		when(categoryRepository.findByStoreAndCategoryCode(SCOPE, PARENT_CODE)).thenReturn(Single.just(category));
 		mockGetAttributeValuesWhichReturns(category, returnValue);
 		when(category.getDisplayName(TEST_LOCALE)).thenReturn(DISPLAY_NAME);
 		when(category.getCode()).thenReturn(PARENT_CODE);
@@ -119,10 +118,10 @@ public class NavigationEntityRepositoryImplTest {
 		when(attributeValueGroup.getAttributeValues(attributeGroup, TEST_LOCALE)).thenReturn(returnValue);
 	}
 
-	private NavigationIdentifier createNavigationWithId(final String navigationId, final List<String> parentId) {
+	private NavigationIdentifier createNavigationWithId(final String navigationId) {
 		return NavigationIdentifier.builder()
 				.withNavigations(createNavigations())
-				.withNodeId(PathIdentifier.of(PathIdentifier.of(parentId), navigationId))
+				.withNodeId(StringIdentifier.of(navigationId))
 				.build();
 	}
 

@@ -14,7 +14,7 @@ import org.apache.commons.lang3.StringUtils
  */
 class ClasspathFluentRelosClientFactory {
 
-	private static FluentRelosClient client;
+	public static FluentRelosClient client;
 
 	public static currentScope;
 

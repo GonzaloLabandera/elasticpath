@@ -5,8 +5,7 @@
 package com.elasticpath.rest.resource.integration.epcommerce.repository.purchase.repositories.impl;
 
 import static java.util.Arrays.asList;
-
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -15,12 +14,12 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
+import com.elasticpath.base.common.dto.StructuredErrorMessage;
 import com.elasticpath.base.exception.EpServiceException;
-import com.elasticpath.common.dto.StructuredErrorMessage;
+import com.elasticpath.base.exception.structured.EpValidationException;
 import com.elasticpath.commons.beanframework.BeanFactory;
-import com.elasticpath.commons.exception.EpValidationException;
 import com.elasticpath.commons.exception.InvalidBusinessStateException;
 import com.elasticpath.domain.catalog.AvailabilityException;
 import com.elasticpath.domain.customer.CustomerSession;
@@ -172,4 +171,5 @@ public class PurchaseRepositoryImplTest {
 				.test()
 				.assertError(ResourceOperationFailure.notFound("No PaymentMethodTransformer for payment method: " + paymentMethod));
 	}
+
 }

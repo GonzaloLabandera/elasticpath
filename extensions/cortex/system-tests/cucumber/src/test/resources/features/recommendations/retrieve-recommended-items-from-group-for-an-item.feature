@@ -1,5 +1,5 @@
 @Recommendations
-Feature: Retrieve recommended items from groups for an item.
+Feature: Retrieve recommended items from groups for an item
 
   Background:
     Given I login as a public shopper

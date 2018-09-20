@@ -7,14 +7,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import java.util.Collections;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.elasticpath.domain.store.Store;
 import com.elasticpath.domain.store.StoreState;
@@ -48,7 +46,7 @@ public class StoreRepositoryImplTest {
 
 	@Test
 	public void testIsStoreCodeEnabled() {
-		Store mockStore = createMockStore(STORE_CODE, true, StoreState.OPEN);
+		Store mockStore = createMockStore(true, StoreState.OPEN);
 		when(storeService.findStoreWithCode(STORE_CODE)).thenReturn(mockStore);
 
 		ExecutionResult<Boolean> result = storeRepository.isStoreCodeEnabled(STORE_CODE);
@@ -57,9 +55,8 @@ public class StoreRepositoryImplTest {
 		assertThat(result.getData()).isTrue();
 	}
 
-	private Store createMockStore(final String storeCode, final boolean isEnabled, final StoreState storeState) {
+	private Store createMockStore(final boolean isEnabled, final StoreState storeState) {
 		Store mockStore = mock(Store.class);
-		when(mockStore.getCode()).thenReturn(storeCode);
 		when(mockStore.isEnabled()).thenReturn(isEnabled);
 		when(mockStore.getStoreState()).thenReturn(storeState);
 		return mockStore;
@@ -67,7 +64,7 @@ public class StoreRepositoryImplTest {
 
 	@Test
 	public void testStoreCodeDisabled() {
-		Store mockStore = createMockStore(STORE_CODE, true, StoreState.RESTRICTED);
+		Store mockStore = createMockStore(true, StoreState.RESTRICTED);
 		when(storeService.findStoreWithCode(STORE_CODE)).thenReturn(mockStore);
 
 		ExecutionResult<Boolean> result = storeRepository.isStoreCodeEnabled(STORE_CODE);
@@ -78,7 +75,7 @@ public class StoreRepositoryImplTest {
 
 	@Test
 	public void testBuildingStoreCodesWithAStoreWithNoCodeWhileSearchingForValidEnabledStore() {
-		Store mockStore2 = createMockStore(STORE_CODE, true, StoreState.RESTRICTED);
+		Store mockStore2 = createMockStore(true, StoreState.RESTRICTED);
 		when(storeService.findStoreWithCode(STORE_CODE)).thenReturn(mockStore2);
 
 		ExecutionResult<Boolean> result = storeRepository.isStoreCodeEnabled(STORE_CODE);
@@ -92,10 +89,6 @@ public class StoreRepositoryImplTest {
 	 */
 	@Test
 	public void testIsStoreCodeEnabledWithAnInvalidStoreCode() {
-		Store mockStore = createMockStore(STORE_CODE, true, StoreState.OPEN);
-
-		when(storeService.findStoreWithCode(STORE_CODE)).thenReturn(mockStore);
-
 		ExecutionResult<Boolean> result = storeRepository.isStoreCodeEnabled(INVALID_STORE_CODE);
 
 		assertThat(result.isFailure()).isTrue();
@@ -114,7 +107,7 @@ public class StoreRepositoryImplTest {
 
 	@Test
 	public void testIsStoreCodeEnabledWhenStoreDisabled() {
-		Store mockStore = createMockStore(STORE_CODE, false, StoreState.OPEN);
+		Store mockStore = createMockStore(false, StoreState.OPEN);
 
 		when(storeService.findStoreWithCode(STORE_CODE)).thenReturn(mockStore);
 
@@ -126,7 +119,7 @@ public class StoreRepositoryImplTest {
 
 	@Test
 	public void shouldFindStore() {
-		Store mockStore = createMockStore(STORE_CODE, true, StoreState.OPEN);
+		Store mockStore = createMockStore(true, StoreState.OPEN);
 		when(storeService.findStoreWithCode(STORE_CODE)).thenReturn(mockStore);
 
 		ExecutionResult<Store> result = storeRepository.findStore(STORE_CODE);
@@ -138,9 +131,6 @@ public class StoreRepositoryImplTest {
 
 	@Test
 	public void testFindStoreWithInvalidStoreCode() {
-		Store mockStore = createMockStore(STORE_CODE, true, StoreState.OPEN);
-		when(storeService.findStoreWithCode(STORE_CODE)).thenReturn(mockStore);
-
 		ExecutionResult<Store> result = storeRepository.findStore(INVALID_STORE_CODE);
 
 		assertThat(result.isFailure()).isTrue();
@@ -149,9 +139,6 @@ public class StoreRepositoryImplTest {
 
 	@Test
 	public void testFindStoreWhenFindStoreByCodeFails() {
-		Store mockStore = createMockStore(STORE_CODE, true, StoreState.OPEN);
-
-		when(storeService.findAllStores()).thenReturn(Collections.singletonList(mockStore));
 		when(storeService.findStoreWithCode(STORE_CODE)).thenReturn(null);
 
 		ExecutionResult<Store> result = storeRepository.findStore(STORE_CODE);

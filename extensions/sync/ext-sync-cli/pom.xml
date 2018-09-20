@@ -13,10 +13,6 @@
 
 	<name>Extension Data Sync Tool CLI</name>
 
-	<properties>
-		<dependency.directory>lib</dependency.directory>
-	</properties>
-
 	<dependencies>
 		<dependency>
 			<groupId>com.elasticpath.extensions</groupId>
@@ -41,12 +37,6 @@
 					<artifactId>${epdb.maven.artifactId}</artifactId>
 					<version>${epdb.maven.version}</version>
 				</dependency>
-		<!-- Include JDBC driver dependency -->
-		<dependency>
-			<groupId>${epdb.maven.groupId}</groupId>
-			<artifactId>${epdb.maven.artifactId}</artifactId>
-			<version>${epdb.maven.version}</version>
-		</dependency>
 			</dependencies>
 			<build>
 				<plugins>
@@ -57,8 +47,6 @@
 							<executable>java</executable>
 							<arguments>
 								<argument>-Xms256m</argument>
-								<argument>-Xmx1024m</argument>
-								<argument>-XX:MaxPermSize=256m</argument>
 								<argument>-agentlib:jdwp=transport=dt_socket,address=${ep.debug.port},server=y,suspend=n</argument>
 								<argument>-Xint</argument>
 								<argument>-classpath</argument>
@@ -92,12 +80,6 @@
 					<artifactId>${epdb.maven.artifactId}</artifactId>
 					<version>${epdb.maven.version}</version>
 				</dependency>
-		<!-- Include JDBC driver dependency -->
-		<dependency>
-			<groupId>${epdb.maven.groupId}</groupId>
-			<artifactId>${epdb.maven.artifactId}</artifactId>
-			<version>${epdb.maven.version}</version>
-		</dependency>
 			</dependencies>
 		</profile>
 	</profiles>

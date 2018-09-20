@@ -79,7 +79,7 @@ public class PriceListsResultPane extends AbstractPageObject {
 	 */
 	public PriceListEditor openPriceListEditor(final String priceListName) {
 		verifyPriceListExists(priceListName);
-		doubleClick(getSelectedElement());
+		doubleClick(getSelectedElement(), PriceListEditor.PRICE_LIST_EDITOR_PARENT_CSS);
 		return new PriceListEditor(getDriver());
 	}
 
@@ -89,7 +89,7 @@ public class PriceListsResultPane extends AbstractPageObject {
 	 * @return the price list editor.
 	 */
 	public PriceListEditor openSelectedPriceListEditor() {
-		doubleClick(getSelectedElement());
+		doubleClick(getSelectedElement(), PriceListEditor.PRICE_LIST_EDITOR_PARENT_CSS);
 		return new PriceListEditor(getDriver());
 	}
 

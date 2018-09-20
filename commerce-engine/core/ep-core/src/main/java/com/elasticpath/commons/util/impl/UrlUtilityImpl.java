@@ -80,9 +80,7 @@ public class UrlUtilityImpl implements UrlUtility {
 			// create the URLCodec every time this method is invoked 
 			// to avoid synchronization problems
 			decodedName = new URLCodec().decode(url, this.encoding);
-		} catch (UnsupportedEncodingException exc) {
-			decodedName = url;
-		} catch (DecoderException exc) {
+		} catch (UnsupportedEncodingException | DecoderException  exc) {
 			decodedName = url;
 		}
 		return decodedName;

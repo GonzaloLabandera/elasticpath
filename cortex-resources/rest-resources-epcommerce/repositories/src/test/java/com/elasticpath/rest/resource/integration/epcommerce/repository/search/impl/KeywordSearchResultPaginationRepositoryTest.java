@@ -3,10 +3,9 @@
  */
 package com.elasticpath.rest.resource.integration.epcommerce.repository.search.impl;
 
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyInt;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.stub;
 import static org.mockito.Mockito.when;
 
 import java.util.Collection;
@@ -20,7 +19,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.elasticpath.domain.catalog.Catalog;
 import com.elasticpath.domain.store.Store;
@@ -341,14 +340,14 @@ public class KeywordSearchResultPaginationRepositoryTest {
 
 	private Catalog createMockCatalog() {
 		Catalog catalog = mock(Catalog.class);
-		stub(catalog.getCode()).toReturn(CATALOG_CODE);
+		when(catalog.getCode()).thenReturn(CATALOG_CODE);
 
 		return catalog;
 	}
 
 	private Store createMockStore(final Catalog catalog) {
 		Store store = mock(Store.class);
-		stub(store.getCatalog()).toReturn(catalog);
+		when(store.getCatalog()).thenReturn(catalog);
 
 		return store;
 	}

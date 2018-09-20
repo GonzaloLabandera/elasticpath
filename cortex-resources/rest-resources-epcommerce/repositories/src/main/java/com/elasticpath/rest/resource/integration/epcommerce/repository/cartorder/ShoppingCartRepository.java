@@ -12,7 +12,6 @@ import io.reactivex.Single;
 import com.elasticpath.domain.catalog.ProductSku;
 import com.elasticpath.domain.shoppingcart.ShoppingCart;
 import com.elasticpath.domain.shoppingcart.ShoppingItem;
-import com.elasticpath.rest.command.ExecutionResult;
 import com.elasticpath.service.shoppingcart.impl.AddToWishlistResult;
 
 /**
@@ -23,9 +22,15 @@ public interface ShoppingCartRepository {
 	/**
 	 * Gets the default shopping cart.
 	 *
-	 * @return ExecutionResult with the default shopping cart
+	 * @return Single with the default shopping cart
 	 */
 	Single<ShoppingCart> getDefaultShoppingCart();
+
+	/**
+	 * Gets the default shopping cart GUID.
+	 * @return Single with the cart guid.
+	 */
+	Single<String> getDefaultShoppingCartGuid();
 
 	/**
 	 * Gets the default shopping cart for the customer.
@@ -40,10 +45,8 @@ public interface ShoppingCartRepository {
 	 *
 	 * @param cartGuid the cart guid
 	 * @return ExecutionResult with the shopping cart
-	 * @deprecated use getDefaultShoppingCart
 	 */
-	@Deprecated
-	ExecutionResult<ShoppingCart> getShoppingCart(String cartGuid);
+	Single<ShoppingCart> getShoppingCart(String cartGuid);
 
 	/**
 	 * Check if the shopping cart with the specified guid is valid for the current scope.
@@ -98,10 +101,12 @@ public interface ShoppingCartRepository {
 	/**
 	 * Get the product sku in the shopping cart.
 	 *
+	 *
+	 * @param cartId the shopping cart identifer.
 	 * @param lineItemId the line item id
 	 * @return product sku
 	 */
-	Single<ProductSku> getProductSku(String lineItemId);
+	Single<ProductSku> getProductSku(String cartId, String lineItemId);
 
 	/**
 	 * Find the shopping item for the lineItemId.
@@ -137,8 +142,15 @@ public interface ShoppingCartRepository {
 	 *
 	 * @return the whether the operation was successful.
 	 */
-	Completable removeAllItemsFromCart();
+	Completable removeAllItemsFromDefaultCart();
 
+
+	/**
+	 * Removes all existing items from the cart.
+	 * @param  cart the cart.
+	 * @return the whether the operation was successful.
+	 */
+	Completable removeAllItemsFromCart(ShoppingCart cart);
 	/**
 	 * Find All of the shopping carts for this customer.
 	 *
@@ -147,4 +159,11 @@ public interface ShoppingCartRepository {
 	 * @return Collection of cart GUID's
 	 */
 	Observable<String> findAllCarts(String customerGuid, String storeCode);
+
+	/**
+	 * Finds the storecode for the given cart guid.
+	 * @param cartGuid the cart guid.
+	 * @return the storecode.
+	 */
+	Single<String> findStoreForCartGuid(String cartGuid);
 }

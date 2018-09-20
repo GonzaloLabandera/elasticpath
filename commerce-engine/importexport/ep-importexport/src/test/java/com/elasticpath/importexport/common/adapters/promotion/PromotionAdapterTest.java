@@ -269,7 +269,7 @@ public class PromotionAdapterTest {
 
 		AvailabilityDTO availabilityDTO = promotionAdapter.createAvailabilityDTO(rule);
 
-		assertEquals(true, availabilityDTO.getEnabled());
+		assertTrue(availabilityDTO.getEnabled());
 		assertEquals(START_DATE, availabilityDTO.getEnableDate());
 		assertEquals(END_DATE, availabilityDTO.getDisableDate());
 	}

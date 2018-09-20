@@ -6,7 +6,7 @@
 	<changeSet id="smoketest-importexport-test-data" author="com.elasticpath.extensions" context="smoketest-data">
 		<comment>Import of the test data</comment>
 
-		<customChange class="com.elasticpath.repo.datapopulation.importexport.ImportExportChange">
+		<customChange class="com.elasticpath.datapopulation.importexport.ImportExportChange">
 			<param name="dataSet" value="test-data" />
 		</customChange>
 	</changeSet>

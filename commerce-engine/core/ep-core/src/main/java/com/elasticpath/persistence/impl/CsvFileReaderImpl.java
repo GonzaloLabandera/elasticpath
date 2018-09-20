@@ -20,7 +20,7 @@ import com.elasticpath.commons.util.AssetRepository;
 import com.elasticpath.commons.util.csv.CSVFileUtil;
 import com.elasticpath.persistence.CsvFileReader;
 import com.elasticpath.persistence.api.EpPersistenceException;
-import com.elasticpath.settings.SettingsReader;
+import com.elasticpath.settings.provider.SettingValueProvider;
 
 /**
  * Represent a csv file reader and writer.
@@ -44,11 +44,10 @@ public class CsvFileReaderImpl implements CsvFileReader {
 
 	private char textQualifier = DEFAULT_TEXT_QUALIFIER;
 
-	private SettingsReader settingsReader;
 	private AssetRepository assetRepository;
 
-	private static final String SETTING_DATAFILE_ENCODING = "COMMERCE/SYSTEM/datafileEncoding";
-	
+	private SettingValueProvider<String> datafileEncodingProvider;
+
 	/**
 	 * Open a csv file.
 	 * Calls {@link #getDatafileEncoding()} to get the character set in which
@@ -97,7 +96,7 @@ public class CsvFileReaderImpl implements CsvFileReader {
 			throw new EpPersistenceException("Encoding not supported.", e);
 		}
 	}
-	
+
 	/**
 	 * Gets the character set in which the data file is expected to be encoded.
 	 * This implementation retrieves the data file encoding from the Settings Reader. 
@@ -105,7 +104,7 @@ public class CsvFileReaderImpl implements CsvFileReader {
 	 * @throws com.elasticpath.base.exception.EpServiceException if there is a problem retrieving the setting
 	 */
 	protected String getDatafileEncoding() {
-		return getSettingsReader().getSettingValue(SETTING_DATAFILE_ENCODING).getValue();
+		return getDatafileEncodingProvider().get();
 	}
 
 	/**
@@ -194,20 +193,6 @@ public class CsvFileReaderImpl implements CsvFileReader {
 		return result;
 	}
 
-	/**
-	 * @return the settingsReader
-	 */
-	public SettingsReader getSettingsReader() {
-		return settingsReader;
-	}
-
-	/**
-	 * @param settingsReader the settingsReader to set
-	 */
-	public void setSettingsReader(final SettingsReader settingsReader) {
-		this.settingsReader = settingsReader;
-	}
-
 	@Override
 	public int getTotalRows() throws EpPersistenceException {
 		int totalRows = 0;
@@ -220,6 +205,14 @@ public class CsvFileReaderImpl implements CsvFileReader {
 		}
 		// exclude the title line
 		return totalRows - 1;
+	}
+
+	public void setDatafileEncodingProvider(final SettingValueProvider<String> datafileEncodingProvider) {
+		this.datafileEncodingProvider = datafileEncodingProvider;
+	}
+
+	protected SettingValueProvider<String> getDatafileEncodingProvider() {
+		return datafileEncodingProvider;
 	}
 
 	@Override

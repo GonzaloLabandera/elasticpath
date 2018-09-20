@@ -22,4 +22,4 @@ if [ "$1" = "debug" ] || [ "$IE_DEBUG" = "true" ]; then
   fi
 fi
 
-"$JAVA_HOME"/bin/java -cp "$IE_CLASSPATH" -Xmx512m -XX:PermSize=256m -XX:MaxPermSize=512m $DEBUG_PARMS com.elasticpath.importexport.client.Index $@
+"$JAVA_HOME"/bin/java -cp "$IE_CLASSPATH" -Xmx512m $DEBUG_PARMS com.elasticpath.importexport.client.Index $@

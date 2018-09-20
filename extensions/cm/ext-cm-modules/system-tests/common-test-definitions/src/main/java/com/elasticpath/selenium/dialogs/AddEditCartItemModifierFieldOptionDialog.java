@@ -10,7 +10,7 @@ public class AddEditCartItemModifierFieldOptionDialog extends AbstractDialog {
 	/**
 	 * Constant for the sku option dialog shell css.
 	 */
-	protected static final String ADD_FIELD_OPTION_PARENT_CSS
+	public static final String ADD_FIELD_OPTION_PARENT_CSS
 			= "div[automation-id*='com.elasticpath.cmclient.catalog.CatalogMessages."
 			+ "AddEditCartItemModifierFieldOptionDialog_WinIitle'][widget-type='Shell'] ";
 	private static final String FIELD_OPTION_CODE_INPUT_CSS = ADD_FIELD_OPTION_PARENT_CSS

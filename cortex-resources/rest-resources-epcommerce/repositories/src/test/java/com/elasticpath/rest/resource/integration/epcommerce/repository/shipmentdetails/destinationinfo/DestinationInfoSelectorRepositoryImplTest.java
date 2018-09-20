@@ -18,7 +18,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.elasticpath.repository.Repository;
 import com.elasticpath.rest.ResourceOperationFailure;
@@ -132,7 +132,6 @@ public class DestinationInfoSelectorRepositoryImplTest {
 	public void verifyGetChoiceReturnsNotFoundWhenAddressCannotBeFound() {
 		when(addressRepository.findOne(addressIdentifier))
 				.thenReturn(Single.error(ResourceOperationFailure.notFound(AddressEntityRepositoryImpl.ADDRESS_NOT_FOUND)));
-		when(destinationInfoService.getSelectedAddressGuidIfShippable(SCOPE, ORDER_ID)).thenReturn(Maybe.just(SELECTED_ID));
 
 		repository.getChoice(selectorChoiceIdentifier)
 				.test()

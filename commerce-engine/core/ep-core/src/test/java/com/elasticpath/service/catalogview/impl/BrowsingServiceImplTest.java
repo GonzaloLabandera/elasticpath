@@ -72,6 +72,8 @@ import com.elasticpath.settings.SettingsService;
 import com.elasticpath.settings.domain.SettingValue;
 import com.elasticpath.settings.domain.impl.SettingDefinitionImpl;
 import com.elasticpath.settings.impl.SettingValueFactoryWithDefinitionImpl;
+import com.elasticpath.settings.provider.SettingValueProvider;
+import com.elasticpath.settings.test.support.SimpleSettingValueProvider;
 import com.elasticpath.test.factory.TestShopperFactory;
 import com.elasticpath.test.jmock.AbstractEPServiceTestCase;
 
@@ -119,12 +121,15 @@ public class BrowsingServiceImplTest extends AbstractEPServiceTestCase {
 		super.setUp();
 		stubGetBean("filterFactory", FilterFactory.class);
 		stubGetBean(ContextIdNames.BROWSING_RESULT, BrowsingResultImpl.class);
-		browsingServiceImpl = new BrowsingServiceImpl() {
-			@Override
-			boolean isAttributeFilterEnabled() {
-				return true;
-			}
-		};
+		browsingServiceImpl = new BrowsingServiceImpl();
+
+		final String storeCode = getMockedStore().getCode();
+
+		final SettingValueProvider<Boolean> attributeFilterEnabledSettingValueProvider = new SimpleSettingValueProvider<>(storeCode, true);
+		final SettingValueProvider<Integer> featuredProductCountSettingValueProvider = new SimpleSettingValueProvider<>(storeCode, 1);
+
+		browsingServiceImpl.setAttributeFilterEnabledSettingValueProvider(attributeFilterEnabledSettingValueProvider);
+		browsingServiceImpl.setFeaturedProductCountSettingValueProvider(featuredProductCountSettingValueProvider);
 
 		mockCategoryLookup = context.mock(CategoryLookup.class);
 		browsingServiceImpl.setCategoryLookup(mockCategoryLookup);
@@ -194,7 +199,7 @@ public class BrowsingServiceImplTest extends AbstractEPServiceTestCase {
 		mockSettingsService = context.mock(SettingsService.class);
 		context.checking(new Expectations() {
 			{
-				allowing(mockSettingsService).getSettingValue("COMMERCE/STORE/CATALOG/catalogViewPagination", getMockedStore().getCode());
+				allowing(mockSettingsService).getSettingValue("COMMERCE/STORE/CATALOG/catalogViewPagination", storeCode);
 				will(returnValue(settingValue));
 
 				allowing(mockShoppingCart).getStore();
@@ -212,14 +217,17 @@ public class BrowsingServiceImplTest extends AbstractEPServiceTestCase {
 		value.setValue("1");
 		context.checking(new Expectations() {
 			{
-				allowing(mockStoreConfig).getSetting(with(any(String.class)));
-				will(returnValue(value));
+				allowing(mockStoreConfig).getSettingValue(attributeFilterEnabledSettingValueProvider);
+				will(returnValue(attributeFilterEnabledSettingValueProvider.get(storeCode)));
+
+				allowing(mockStoreConfig).getSettingValue(featuredProductCountSettingValueProvider);
+				will(returnValue(featuredProductCountSettingValueProvider.get(storeCode)));
 
 				allowing(mockStoreConfig).getStore();
 				will(returnValue(getMockedStore()));
 
 				allowing(mockStoreConfig).getStoreCode();
-				will(returnValue(getMockedStore().getCode()));
+				will(returnValue(storeCode));
 			}
 		});
 		browsingServiceImpl.setStoreConfig(mockStoreConfig);

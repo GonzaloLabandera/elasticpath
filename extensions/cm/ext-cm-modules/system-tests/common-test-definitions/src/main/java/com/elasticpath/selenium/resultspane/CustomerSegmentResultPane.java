@@ -45,7 +45,7 @@ public class CustomerSegmentResultPane extends AbstractPageObject {
 	 */
 	public CustomerSegmentEditor openCustomerSegmentEditor(final String customerSegmentName) {
 		verifyCustomerSegmentsExists(customerSegmentName);
-		doubleClick(getSelectedElement());
+		doubleClick(getSelectedElement(), CustomerSegmentEditor.CUSTOMER_SEGMENT_EDITOR_PARENT_CSS);
 		return new CustomerSegmentEditor(getDriver());
 	}
 

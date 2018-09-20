@@ -3,8 +3,6 @@
  */
 package com.elasticpath.cmclient.admin.taxes.actions;
 
-import java.util.Locale;
-
 import org.apache.log4j.Logger;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -14,6 +12,7 @@ import org.eclipse.osgi.util.NLS;
 import com.elasticpath.cmclient.admin.taxes.TaxesMessages;
 import com.elasticpath.cmclient.admin.taxes.dialogs.TaxJurisdictionDialog;
 import com.elasticpath.cmclient.admin.taxes.views.TaxJurisdictionsListView;
+import com.elasticpath.cmclient.core.CorePlugin;
 import com.elasticpath.cmclient.core.ServiceLocator;
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.misc.Geography;
@@ -56,7 +55,7 @@ public class EditTaxJurisdictionAction extends Action {
 
 		if (taxJurisdictionToEdit == null) {
 			Geography geography = ServiceLocator.getService(ContextIdNames.GEOGRAPHY);
-			String countryName = geography.getCountryDisplayName(selectedTaxJurisdiction.getRegionCode(), Locale.getDefault());
+			String countryName = geography.getCountryDisplayName(selectedTaxJurisdiction.getRegionCode(), CorePlugin.getDefault().getDefaultLocale());
 			MessageDialog.openInformation(listView.getSite().getShell(), TaxesMessages.get().NoLongerExistTaxJurisdictionMsgBoxTitle,
 
 					NLS.bind(TaxesMessages.get().NoLongerExistTaxJurisdictionMsgBoxText,

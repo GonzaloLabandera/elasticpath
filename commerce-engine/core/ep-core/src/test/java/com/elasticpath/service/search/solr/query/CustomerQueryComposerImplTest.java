@@ -6,6 +6,9 @@ package com.elasticpath.service.search.solr.query;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 
+import static com.elasticpath.service.search.solr.query.QueryComposerHelper.escape;
+import static com.elasticpath.service.search.solr.query.QueryComposerHelper.escapeAndAddWildcards;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -27,8 +30,6 @@ import com.elasticpath.service.search.solr.SolrIndexConstants;
  * Test case for {@link CustomerQueryComposerImpl}.
  */
 public class CustomerQueryComposerImplTest extends QueryComposerTestCase {
-
-	private static final String WHITESPACE_REGEX = "\\s";
 
 	private CustomerQueryComposerImpl customerQueryComposerImpl;
 
@@ -60,9 +61,9 @@ public class CustomerQueryComposerImplTest extends QueryComposerTestCase {
 		searchCriteria.setFirstName(firstName);
 
 		Query query = customerQueryComposerImpl.composeQuery(searchCriteria, getSearchConfig());
-		assertQueryContains(query, SolrIndexConstants.FIRST_NAME, firstName.split(WHITESPACE_REGEX));
+		assertQueryContains(query, SolrIndexConstants.FIRST_NAME_EXACT, escapeAndAddWildcards(firstName));
 		query = customerQueryComposerImpl.composeFuzzyQuery(searchCriteria, getSearchConfig());
-		assertQueryContainsFuzzy(query, SolrIndexConstants.FIRST_NAME, firstName.split(WHITESPACE_REGEX));
+		assertQueryContains(query, SolrIndexConstants.FIRST_NAME_EXACT, escapeAndAddWildcards(firstName));
 	}
 
 	/**
@@ -74,9 +75,9 @@ public class CustomerQueryComposerImplTest extends QueryComposerTestCase {
 		searchCriteria.setLastName(lastName);
 
 		Query query = customerQueryComposerImpl.composeQuery(searchCriteria, getSearchConfig());
-		assertQueryContains(query, SolrIndexConstants.LAST_NAME, lastName.split(WHITESPACE_REGEX));
+		assertQueryContains(query, SolrIndexConstants.LAST_NAME_EXACT, escapeAndAddWildcards(lastName));
 		query = customerQueryComposerImpl.composeFuzzyQuery(searchCriteria, getSearchConfig());
-		assertQueryContainsFuzzy(query, SolrIndexConstants.LAST_NAME, lastName.split(WHITESPACE_REGEX));
+		assertQueryContains(query, SolrIndexConstants.LAST_NAME_EXACT, escapeAndAddWildcards(lastName));
 	}
 
 	/**
@@ -88,9 +89,9 @@ public class CustomerQueryComposerImplTest extends QueryComposerTestCase {
 		searchCriteria.setEmail(email);
 
 		Query query = customerQueryComposerImpl.composeQuery(searchCriteria, getSearchConfig());
-		assertQueryContains(query, SolrIndexConstants.EMAIL, email);
+		assertQueryContains(query, SolrIndexConstants.EMAIL_EXACT, escapeAndAddWildcards(email));
 		query = customerQueryComposerImpl.composeFuzzyQuery(searchCriteria, getSearchConfig());
-		assertQueryContainsFuzzy(query, SolrIndexConstants.EMAIL, email);
+		assertQueryContains(query, SolrIndexConstants.EMAIL_EXACT, escapeAndAddWildcards(email));
 	}
 
 	
@@ -106,20 +107,20 @@ public class CustomerQueryComposerImplTest extends QueryComposerTestCase {
 		searchCriteria.setEmail(email);
 		
 		Query query = customerQueryComposerImpl.composeQuery(searchCriteria, getSearchConfig());
-		assertQueryContains(query, SolrIndexConstants.EMAIL, email);
-		assertQueryContains(query, SolrIndexConstants.USER_ID, userId);
+		assertQueryContains(query, SolrIndexConstants.EMAIL_EXACT, escapeAndAddWildcards(email));
+		assertQueryContains(query, SolrIndexConstants.USER_ID_EXACT, escapeAndAddWildcards(userId));
 		query = customerQueryComposerImpl.composeFuzzyQuery(searchCriteria, getSearchConfig());
-		assertQueryContainsFuzzy(query, SolrIndexConstants.EMAIL, email);
-		assertQueryContainsFuzzy(query, SolrIndexConstants.USER_ID, userId);
+		assertQueryContains(query, SolrIndexConstants.EMAIL_EXACT, escapeAndAddWildcards(email));
+		assertQueryContains(query, SolrIndexConstants.USER_ID_EXACT, escapeAndAddWildcards(userId));
 
 		searchCriteria.setUserIdAndEmailMutualSearch(false);
 		
 		query = customerQueryComposerImpl.composeQuery(searchCriteria, getSearchConfig());
-		assertQueryContains(query, SolrIndexConstants.EMAIL, email);
-		assertQueryContains(query, SolrIndexConstants.USER_ID, userId);
+		assertQueryContains(query, SolrIndexConstants.EMAIL_EXACT, escapeAndAddWildcards(email));
+		assertQueryContains(query, SolrIndexConstants.USER_ID_EXACT, escapeAndAddWildcards(userId));
 		query = customerQueryComposerImpl.composeFuzzyQuery(searchCriteria, getSearchConfig());
-		assertQueryContainsFuzzy(query, SolrIndexConstants.EMAIL, email);
-		assertQueryContainsFuzzy(query, SolrIndexConstants.USER_ID, userId);
+		assertQueryContains(query, SolrIndexConstants.EMAIL_EXACT, escapeAndAddWildcards(email));
+		assertQueryContains(query, SolrIndexConstants.USER_ID_EXACT, escapeAndAddWildcards(userId));
 
 	}
 
@@ -132,9 +133,9 @@ public class CustomerQueryComposerImplTest extends QueryComposerTestCase {
 		searchCriteria.setCustomerNumber(customerNumber);
 
 		Query query = customerQueryComposerImpl.composeQuery(searchCriteria, getSearchConfig());
-		assertQueryContains(query, SolrIndexConstants.CUSTOMER_NUMBER, customerNumber);
+		assertQueryContains(query, SolrIndexConstants.CUSTOMER_NUMBER, escape(customerNumber));
 		query = customerQueryComposerImpl.composeFuzzyQuery(searchCriteria, getSearchConfig());
-		assertQueryContainsNotFuzzy(query, SolrIndexConstants.CUSTOMER_NUMBER, customerNumber);
+		assertQueryContainsNotFuzzy(query, SolrIndexConstants.CUSTOMER_NUMBER, escape(customerNumber));
 	}
 
 	/**
@@ -146,9 +147,9 @@ public class CustomerQueryComposerImplTest extends QueryComposerTestCase {
 		searchCriteria.setPhoneNumber(phoneNumber);
 
 		Query query = customerQueryComposerImpl.composeQuery(searchCriteria, getSearchConfig());
-		assertQueryContains(query, SolrIndexConstants.PHONE_NUMBER_EXACT, phoneNumber);
+		assertQueryContains(query, SolrIndexConstants.PHONE_NUMBER_EXACT, escapeAndAddWildcards(phoneNumber));
 		query = customerQueryComposerImpl.composeFuzzyQuery(searchCriteria, getSearchConfig());
-		assertQueryContainsNotFuzzy(query, SolrIndexConstants.PHONE_NUMBER_EXACT, phoneNumber);
+		assertQueryContainsNotFuzzy(query, SolrIndexConstants.PHONE_NUMBER_EXACT, escapeAndAddWildcards(phoneNumber));
 	}
 
 	/**

@@ -645,8 +645,13 @@
     <skus>
         <sku guid="BEA7EEF7-C825-C00C-5981-DFEF6BD61A41">
             <code>tt0926084_sku</code>
-            <shippable enabled="false"/>
-            <digitalasset enabled="true"/>
+            <shippable enabled="true">
+            	<weight units="KG">0</weight>
+        		<width units="CM">0</width>
+    			<length units="CM">0</length>
+    			<height units="CM">0</height>
+        	</shippable>
+            <digitalasset enabled="false"/>
         </sku>
     </skus>
     <seo>
@@ -5128,7 +5133,7 @@
         <minorderqty>1</minorderqty>
         <availabilityrule>AVAILABLE_FOR_PRE_ORDER</availabilityrule>
         <orderlimit>0</orderlimit>
-        <expectedreleasedate>2013-12-25T00:00:00-08:00</expectedreleasedate>
+        <expectedreleasedate>2040-12-25T00:00:00-08:00</expectedreleasedate>
     </availability>
     <attributes/>
     <skus>
@@ -7105,7 +7110,7 @@ L'écran est également très bien. L'iPhone 5 conserve la technologie d'afficha
 			</description>
 		</seo>
 	</product>
-    
+
 <product>
     <code>singleSkuConfigurableAll</code>
     <name>

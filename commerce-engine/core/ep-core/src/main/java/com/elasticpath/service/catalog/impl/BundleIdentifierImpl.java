@@ -33,6 +33,20 @@ public class BundleIdentifierImpl implements BundleIdentifier {
 		return isCalculatedBundle(productSku.getProduct());
 	}
 
+	@Override
+	public boolean isAssignedBundle(final Product product) {
+		ProductBundle bundle = typeSafeAsProductBundle(product);
+		if (bundle == null) {
+			return false;
+		}
+		return !bundle.isCalculated();
+	}
+
+	@Override
+	public boolean isAssignedBundle(final ProductSku productSku) {
+		return isAssignedBundle(productSku.getProduct());
+	}
+
 	/**
 	 * @param product the product to be casted
 	 * @return a ProductBundle

@@ -3,7 +3,7 @@
  */
 package com.elasticpath.persistence.impl;
 
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -17,19 +17,14 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
-import com.elasticpath.commons.beanframework.BeanFactory;
-import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.DatabaseCreationDate;
 import com.elasticpath.domain.DatabaseLastModifiedDate;
 import com.elasticpath.service.misc.TimeService;
 
 @RunWith(MockitoJUnitRunner.class)
 public class DatabaseTimestampsEntityListenerTest {
-
-	@Mock
-	private BeanFactory beanFactory;
 	@Mock
 	private TimeService timeService;
 	@Mock
@@ -42,7 +37,6 @@ public class DatabaseTimestampsEntityListenerTest {
 	@Before
 	public void setUp() throws Exception {
 		currentTime = new Date();
-		when(beanFactory.getBean(ContextIdNames.TIME_SERVICE)).thenReturn(timeService);
 		when(timeService.getCurrentTime()).thenReturn(currentTime);
 	}
 
@@ -92,8 +86,6 @@ public class DatabaseTimestampsEntityListenerTest {
 
 	@Test
 	public void testBeforePersistEventWillSetLastModifiedDate() {
-		when(entity.pcIsDirty()).thenReturn(true);
-
 		LifecycleEvent event = new LifecycleEvent(entity, LifecycleEvent.BEFORE_PERSIST);
 		databaseTimestampsEntityListener.eventOccurred(event);
 

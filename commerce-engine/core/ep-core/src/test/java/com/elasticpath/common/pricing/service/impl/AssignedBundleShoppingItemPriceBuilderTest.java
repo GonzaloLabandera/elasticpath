@@ -17,9 +17,9 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
-import com.elasticpath.common.dto.StructuredErrorMessage;
+import com.elasticpath.base.common.dto.StructuredErrorMessage;
 import com.elasticpath.commons.exception.InvalidProductStructureException;
 import com.elasticpath.domain.catalog.BundleConstituent;
 import com.elasticpath.domain.catalog.ConstituentItem;
@@ -117,7 +117,6 @@ public class AssignedBundleShoppingItemPriceBuilderTest {
 
 	@Test
 	public void verifyInvalidProductStructureExceptionThrownWhenAssignedBundleNestedConstituentIsNotABundle() {
-		final ProductBundle childProductBundle = mock(ProductBundle.class);
 		final ShoppingItem childItem = mock(ShoppingItem.class);
 		final BundleConstituent childConstituentItem = mock(BundleConstituent.class);
 
@@ -127,7 +126,6 @@ public class AssignedBundleShoppingItemPriceBuilderTest {
 		when(childItem.getChildren()).thenReturn(Collections.singletonList(missingConstituentItem));
 
 		when(rootProductBundle.getConstituents()).thenReturn(Collections.singletonList(childConstituentItem));
-		when(childProductBundle.getConstituents()).thenReturn(Collections.emptyList());
 
 		when(childConstituentItem.getConstituent()).thenReturn(missingProductConstituentItem);
 

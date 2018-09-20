@@ -1,12 +1,20 @@
-/**
+/*
  * Copyright (c) Elastic Path Software Inc., 2016
  */
+
 package com.elasticpath.test.persister;
+
+import static com.elasticpath.commons.constants.EpShippingContextIdNames.SHIPPING_OPTION_TRANSFORMER;
+import static com.elasticpath.commons.constants.EpShippingContextIdNames.SHIPPING_REGION;
+import static com.elasticpath.commons.constants.EpShippingContextIdNames.SHIPPING_REGION_SERVICE;
+import static com.elasticpath.commons.constants.EpShippingContextIdNames.SHIPPING_SERVICE_LEVEL;
+import static com.elasticpath.commons.constants.EpShippingContextIdNames.SHIPPING_SERVICE_LEVEL_SERVICE;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Currency;
 import java.util.Date;
 import java.util.HashSet;
@@ -17,6 +25,8 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.TimeZone;
 
+import org.apache.commons.lang3.StringUtils;
+
 import com.elasticpath.commons.beanframework.BeanFactory;
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.catalog.Catalog;
@@ -26,8 +36,9 @@ import com.elasticpath.domain.cmuser.CmUser;
 import com.elasticpath.domain.cmuser.impl.CmUserImpl;
 import com.elasticpath.domain.customer.Customer;
 import com.elasticpath.domain.customer.CustomerAddress;
-import com.elasticpath.domain.customer.CustomerCreditCard;
 import com.elasticpath.domain.customer.CustomerSession;
+import com.elasticpath.domain.customer.PaymentToken;
+import com.elasticpath.domain.customer.impl.PaymentTokenImpl;
 import com.elasticpath.domain.factory.TestCustomerSessionFactoryForTestApplication;
 import com.elasticpath.domain.factory.TestShopperFactoryForTestApplication;
 import com.elasticpath.domain.misc.impl.RandomGuidImpl;
@@ -50,17 +61,19 @@ import com.elasticpath.domain.store.Warehouse;
 import com.elasticpath.domain.store.WarehouseAddress;
 import com.elasticpath.domain.store.impl.WarehouseAddressImpl;
 import com.elasticpath.domain.tax.TaxCode;
+import com.elasticpath.money.Money;
 import com.elasticpath.service.cmuser.CmUserService;
 import com.elasticpath.service.customer.CustomerService;
 import com.elasticpath.service.customer.CustomerSessionService;
 import com.elasticpath.service.payment.PaymentGatewayService;
+import com.elasticpath.service.shipping.ShippingOptionTransformer;
 import com.elasticpath.service.shipping.ShippingRegionService;
 import com.elasticpath.service.shipping.ShippingServiceLevelService;
 import com.elasticpath.service.shopper.ShopperService;
 import com.elasticpath.service.shoppingcart.ShoppingCartService;
 import com.elasticpath.service.store.StoreService;
 import com.elasticpath.service.store.WarehouseService;
-import com.elasticpath.test.builders.CustomerCreditCardBuilder;
+import com.elasticpath.shipping.connectivity.dto.ShippingOption;
 import com.elasticpath.test.util.Utils;
 
 /**
@@ -79,7 +92,9 @@ public class StoreTestPersister {
 
 	private static final String STORE_CODE = "Test Store";
 
-	/** The default shipping region name to use in tests.*/
+	/**
+	 * The default shipping region name to use in tests.
+	 */
 	public static final String DEFAULT_SHIPPING_REGION_NAME = "Canada";
 
 	private final BeanFactory beanFactory;
@@ -91,6 +106,8 @@ public class StoreTestPersister {
 	private final CustomerSessionService customerSessionService;
 
 	private final ShippingServiceLevelService shippingServiceLevelService;
+
+	private final ShippingOptionTransformer shippingOptionTransformer;
 
 	private final ShopperService shopperService;
 
@@ -104,7 +121,7 @@ public class StoreTestPersister {
 
 	private final GiftCertificateTestPersister giftCertificateTestPersister;
 
-	final List<Currency> shippingServiceLevelCurrencies = new ArrayList<>();
+	private final List<Currency> shippingServiceLevelCurrencies = new ArrayList<>();
 
 	/**
 	 * Constructor initializes necessary services and beanFactory.
@@ -114,13 +131,14 @@ public class StoreTestPersister {
 	public StoreTestPersister(final BeanFactory beanFactory) {
 		this.beanFactory = beanFactory;
 		paymentGatewayService = beanFactory.getBean(ContextIdNames.PAYMENT_GATEWAY_SERVICE);
-		regionService = beanFactory.getBean(ContextIdNames.SHIPPING_REGION_SERVICE);
+		regionService = beanFactory.getBean(SHIPPING_REGION_SERVICE);
 		warehouseService = beanFactory.getBean(ContextIdNames.WAREHOUSE_SERVICE);
 		customerService = beanFactory.getBean(ContextIdNames.CUSTOMER_SERVICE);
 		customerSessionService = beanFactory.getBean("customerSessionService");
 		shopperService = beanFactory.getBean("shopperService");
 		shoppingCartService = beanFactory.getBean(ContextIdNames.SHOPPING_CART_SERVICE);
-		shippingServiceLevelService = beanFactory.getBean(ContextIdNames.SHIPPING_SERVICE_LEVEL_SERVICE);
+		shippingServiceLevelService = beanFactory.getBean(SHIPPING_SERVICE_LEVEL_SERVICE);
+		shippingOptionTransformer = beanFactory.getBean(SHIPPING_OPTION_TRANSFORMER);
 		storeService = beanFactory.getBean(ContextIdNames.STORE_SERVICE);
 
 		giftCertificateTestPersister = new GiftCertificateTestPersister(beanFactory);
@@ -133,7 +151,7 @@ public class StoreTestPersister {
 	/**
 	 * Persists the default store as defined in this class.
 	 *
-	 * @param catalog the catalog to associate with the default test store
+	 * @param catalog   the catalog to associate with the default test store
 	 * @param warehouse the warehouse to associate with the default test store
 	 * @return The persisted store
 	 */
@@ -153,14 +171,14 @@ public class StoreTestPersister {
 	/**
 	 * Create a persisted warehouse.
 	 *
-	 * @param warehouseCode the warehouse code
-	 * @param warehouseName the warehouse name
+	 * @param warehouseCode      the warehouse code
+	 * @param warehouseName      the warehouse name
 	 * @param warehousePickDelay the warehouse pick delay
-	 * @param city the city
-	 * @param country the country
-	 * @param street1 the street
-	 * @param subcountry the subcountry
-	 * @param zip the zip
+	 * @param city               the city
+	 * @param country            the country
+	 * @param street1            the street
+	 * @param subcountry         the subcountry
+	 * @param zip                the zip
 	 * @return the warehouse
 	 */
 	public Warehouse persistWarehouse(final String warehouseCode, final String warehouseName, final int warehousePickDelay, final String city,
@@ -200,54 +218,69 @@ public class StoreTestPersister {
 	 */
 	public void persistDefaultCustomers(final Store store) {
 		final CustomerAddress address1 = createCustomerAddress("Bond", "James", "1234 Pine Street", "", "Vancouver", "CA", "BC", "V6J5G4",
-		"891312345007");
+				"891312345007");
 		final CustomerAddress address2 = createCustomerAddress("Bond", "James", "28 Main Street", "", "Toronto", "CA", "ON", "K6J5G4",
-		"912348724938");
-		final CustomerCreditCard creditCard1 = createCustomerCreditCard(address1.getFirstName() + " " + address1.getLastName(), "4111111111111111", "VISA", "11", "2020");
-		persistCustomerSessionWithAssociatedEntities(persistCustomer(store, "james@bond.com", creditCard1, address1, address2));
+				"912348724938");
+		final PaymentToken paymentToken1 = createCustomerPaymentToken("testPaymentToken1");
+		persistCustomerSessionWithAssociatedEntities(persistCustomer(null, store, "james@bond.com", paymentToken1, address1, address2));
 
 		final CustomerAddress address3 = createCustomerAddress("John", "Smith", "73 Oak Street", "", "Washington", "US", "WA", "832901",
-		"782390129353");
+				"782390129353");
 		final CustomerAddress address4 = createCustomerAddress("John", "Smith", "11 Peace Street", "", "New York", "US", "NY", "818923",
-		"728930174927");
-		final CustomerCreditCard creditCard2 = createCustomerCreditCard(address3.getFirstName() + " " + address3.getLastName(), "4111111111111111", "VISA", "11", "2020");
-		persistCustomerSessionWithAssociatedEntities(persistCustomer(store, "john@smith.com", creditCard2, address3, address4));
+				"728930174927");
+		final PaymentToken paymentToken2 = createCustomerPaymentToken("testPaymentToken2");
+		persistCustomerSessionWithAssociatedEntities(persistCustomer(null, store, "john@smith.com", paymentToken2, address3, address4));
 	}
 
 	/**
 	 * <p>Persist default shipping service levels.</p>
-	 *
+	 * <p>
 	 * <b>Shipping Regions</b> available in <b>Canada</b>: [CA (AB, BC, MB, NB, NL, NT, NS, NU, ON, PE, QC, SK, YT) ] </br></br>Available
 	 * <b>Shipping Service Levels</b> with the fixed price calculation method:
 	 * <li>Display name: <b>2 Business Days (Canada Post - Regular Parcel)</b>, carrier: <b>Canada Post</b>, price: <b>7.00</b></li>
 	 * <li>Display name: <b>1 Business Day (Canada Post - Xpresspost)</b>, carrier: <b>Canada Post</b>, price: <b>9.30</b></li>
 	 * <li>Display name: <b>Next Business Day (Canada Post - Priority Courier)</b>, carrier: <b>Canada Post</b>, price: <b>16.00</b></li>
+	 *
 	 * @param store the store
 	 */
 	public void persistDefaultShippingServiceLevels(final Store store) {
 		persistShippingServiceLevelFixedPriceCalcMethod(store, DEFAULT_SHIPPING_REGION_NAME, "2 Business Days (Canada Post - Regular Parcel)",
-				CANADA_POST, "7.00");
+				CANADA_POST, "7.00", null);
 		persistShippingServiceLevelFixedPriceCalcMethod(store, DEFAULT_SHIPPING_REGION_NAME, "1 Business Day (Canada Post - Xpresspost)",
-				CANADA_POST, "9.30");
+				CANADA_POST, "9.30", null);
 		persistShippingServiceLevelFixedPriceCalcMethod(store, DEFAULT_SHIPPING_REGION_NAME, "Next Business Day (Canada Post - Priority Courier)",
-				CANADA_POST, "16.00");
+				CANADA_POST, "16.00", null);
 	}
 
 	/**
-	 * Persist the default shipping service level.
+	 * Persist the default shipping option.
+	 *
+	 * @param store the store
+	 * @return the shipping option
+	 */
+	public ShippingOption persistDefaultShippingOption(final Store store) {
+		final ShippingServiceLevel shippingServiceLevel = persistDefaultShippingServiceLevel(store);
+		// fixed shipping price.
+		return shippingOptionTransformer.transform(shippingServiceLevel,
+				() -> Money.valueOf(new BigDecimal("7.00"), Currency.getInstance(Locale.US)), store.getDefaultLocale());
+	}
+
+	/**
+	 * Persist the default shipping service level with given locale.
+	 *
 	 * @param store the store
 	 * @return the shipping service level
 	 */
 	public ShippingServiceLevel persistDefaultShippingServiceLevel(final Store store) {
 		return persistShippingServiceLevelFixedPriceCalcMethod(store, DEFAULT_SHIPPING_REGION_NAME,
-				"2 Business Days (Canada Post - Regular Parcel)", CANADA_POST, "7.00");
+				"2 Business Days (Canada Post - Regular Parcel)", CANADA_POST, "7.00", null);
 	}
 
 	/**
 	 * Persist a customer with the given email.
 	 *
-	 * @param store the store customer to be registered in
-	 * @param email unique email within the store
+	 * @param store    the store customer to be registered in
+	 * @param email    unique email within the store
 	 * @param password customer password
 	 * @return persisted customer
 	 */
@@ -270,14 +303,14 @@ public class StoreTestPersister {
 	/**
 	 * Persist a customer with the given email.
 	 *
-	 * @param store the store customer to be registered in
-	 * @param email unique email within the store
+	 * @param store             the store customer to be registered in
+	 * @param email             unique email within the store
 	 * @param customerAddresses array of available customer addresses
-	 * @param creditCard customer's credit card
+	 * @param paymentToken the payment token.
 	 * @return persisted customer
 	 */
-	public Customer persistCustomer(final Store store, final String email, final CustomerCreditCard creditCard,
-			final CustomerAddress... customerAddresses) {
+	public Customer persistCustomer(final String guid, final Store store, final String email, final PaymentToken paymentToken,
+									final CustomerAddress... customerAddresses) {
 		final Customer customer = beanFactory.getBean(ContextIdNames.CUSTOMER);
 		customer.setFirstName("Test");
 		customer.setLastName("Test");
@@ -286,29 +319,43 @@ public class StoreTestPersister {
 		customer.setLastEditDate(new Date());
 		customer.setStatus(Customer.STATUS_ACTIVE);
 		customer.setAnonymous(false);
-		customer.setGuid(new RandomGuidImpl().toString());
+		customer.setGuid(StringUtils.isNotEmpty(guid) ? guid : new RandomGuidImpl().toString());
 		customer.setEmail(email);
 		customer.setStoreCode(store.getCode());
 		customer.setPreferredBillingAddress(customerAddresses[0]);
 		for (final CustomerAddress address : customerAddresses) {
 			customer.addAddress(address);
 		}
-		customer.addCreditCard(creditCard);
+
+		customer.getPaymentMethods().setDefault(createCustomerPaymentToken("test"));
 		return customerService.add(customer);
+	}
+	/**
+	 * Create customer payment token payment token.
+	 *
+	 * @param tokenValue the token value
+	 * @return the payment token
+	 */
+	public PaymentToken createCustomerPaymentToken(final String tokenValue) {
+		PaymentTokenImpl.TokenBuilder tokenBuilder = new PaymentTokenImpl.TokenBuilder();
+		return tokenBuilder
+				.withDisplayValue(tokenValue)
+				.withValue(tokenValue)
+				.build();
 	}
 
 	/**
 	 * Creates Customer Address without saving it into database.
 	 *
-	 * @param lastName the last name
+	 * @param lastName  the last name
 	 * @param firstName the first name
-	 * @param street1 the street line 1
-	 * @param street2 the street line 2
-	 * @param city the city
-	 * @param country the country
-	 * @param state the state
-	 * @param zip the zip
-	 * @param phone the phone number
+	 * @param street1   the street line 1
+	 * @param street2   the street line 2
+	 * @param city      the city
+	 * @param country   the country
+	 * @param state     the state
+	 * @param zip       the zip
+	 * @param phone     the phone number
 	 * @return the customer address
 	 */
 	public CustomerAddress createCustomerAddress(final String lastName, final String firstName, final String street1, final String street2,
@@ -326,28 +373,6 @@ public class StoreTestPersister {
 		customerAddress.setPhoneNumber(phone);
 		return customerAddress;
 	}
-	/**
-	 * Create customer credit card.
-	 *
-	 * @param cardHolderName the card holder name
-	 * @param cardNumber the card number
-	 * @param cardType the card type
-	 * @param expiryMonth the month expiration
-	 * @param expiryYear the year expiration
-	 * @return the customer credit card
-	 */
-	public CustomerCreditCard createCustomerCreditCard(final String cardHolderName, final String cardNumber, final String cardType,
-			final String expiryMonth, final String expiryYear) {
-		CustomerCreditCard creditCard = new CustomerCreditCardBuilder(beanFactory)
-				.withCardHolderName(cardHolderName)
-				.withCardNumber(cardNumber)
-				.withCardType(cardType)
-				.withExpiryMonth(expiryMonth)
-				.withExpiryYear(expiryYear).build();
-
-		creditCard.encrypt();
-		return creditCard;
-	}
 
 	/**
 	 * Persist the Customer Session.
@@ -356,20 +381,23 @@ public class StoreTestPersister {
 	 * @return persisted customerSession
 	 */
 	public CustomerSession persistCustomerSessionWithAssociatedEntities(final Customer customer) {
+		Currency currency = Currency.getInstance(Locale.US);
+
 		final Shopper shopper = TestShopperFactoryForTestApplication.getInstance().createNewShopperWithMemento();
 		shopper.setCustomer(customer);
 		shopper.setStoreCode(customer.getStoreCode());
 		shopperService.save(shopper);
 		ShoppingCart shoppingCart = shoppingCartService.findOrCreateByShopper(shopper);
 
-		final CustomerSession session = TestCustomerSessionFactoryForTestApplication.getInstance().createNewCustomerSessionWithContext(shopper);
+		CustomerSession session = TestCustomerSessionFactoryForTestApplication.getInstance().createNewCustomerSessionWithContext(shopper);
 		session.setShopper(shopper);
 		session.setCreationDate(new Date());
-		session.setCurrency(Currency.getInstance(Locale.US));
+		session.setCurrency(currency);
 		session.setLastAccessedDate(new Date());
 		session.setGuid(Utils.uniqueCode("session"));
 		session.setLocale(Locale.US);
 		customerSessionService.add(session);
+		session = customerSessionService.initializeCustomerSessionForPricing(session, customer.getStoreCode(), currency);
 
 		shoppingCart.setCustomerSession(session);
 
@@ -400,6 +428,7 @@ public class StoreTestPersister {
 	/**
 	 * Get the instance of CmUser which name is "cmuser".
 	 * This method avoids generating a mocked cmUser in database for tests.
+	 *
 	 * @return the instance of CmUser
 	 */
 	public CmUser getCmUser() {
@@ -475,22 +504,22 @@ public class StoreTestPersister {
 	/**
 	 * Create persisted shipping service level without any calculation method..
 	 *
-	 * @param store the store which provides customers with persisted shipping service level
+	 * @param store              the store which provides customers with persisted shipping service level
 	 * @param shippingRegionName the name of existed shipping region
-	 * @param displayNames the display names for the store's locales
-	 * @param carrier the carrier String name
-	 * @param methodType shipping cost calculation method
-	 * @param properties properties of the shipping service level
-	 * @param code shipping service level code
-	 * @param enabled if shipping service level is enabled or not
+	 * @param displayNames       the display names for the store's locales
+	 * @param carrier            the carrier String name
+	 * @param methodType         shipping cost calculation method
+	 * @param properties         properties of the shipping service level
+	 * @param code               shipping service level code
+	 * @param enabled            if shipping service level is enabled or not
 	 * @return persisted shipping service level
 	 */
 	public ShippingServiceLevel persistShippingServiceLevel(final Store store, final String shippingRegionName,
-			final Map<Locale, String> displayNames, final String carrier, final String methodType,
-			final Properties properties, final String code, final boolean enabled) {
-		final ShippingRegionService shippingRegionService = beanFactory.getBean(ContextIdNames.SHIPPING_REGION_SERVICE);
+															final Map<Locale, String> displayNames, final String carrier, final String methodType,
+															final Properties properties, final String code, final boolean enabled) {
+		final ShippingRegionService shippingRegionService = beanFactory.getBean(SHIPPING_REGION_SERVICE);
 		final ShippingRegion shippingRegion = shippingRegionService.findByName(shippingRegionName);
-		final ShippingServiceLevel level = beanFactory.getBean(ContextIdNames.SHIPPING_SERVICE_LEVEL);
+		final ShippingServiceLevel level = beanFactory.getBean(SHIPPING_SERVICE_LEVEL);
 		level.setGuid(Utils.uniqueCode("service_level"));
 		level.setCarrier(carrier);
 		if (code == null) {
@@ -514,33 +543,35 @@ public class StoreTestPersister {
 	/**
 	 * Create persisted shipping service level for fixed price method only. Code is autogenerated.
 	 *
-	 * @param store the store which provides customers with persisted shipping serivce level
+	 * @param store              the store which provides customers with persisted shipping serivce level
 	 * @param shippingRegionName the name of existed shipping region
-	 * @param displayName the display name for the store's default locale
-	 * @param carrier the carrier String name
+	 * @param displayName        the display name for the store's default locale
+	 * @param carrier            the carrier String name
 	 * @param shippingPriceValue price value for the default fixed price calculation method.
 	 * @return persisted shipping service level
 	 */
 	public ShippingServiceLevel persistShippingServiceLevelFixedPriceCalcMethod(final Store store, final String shippingRegionName,
-			final String displayName, final String carrier, final String shippingPriceValue) {
+																				final String displayName, final String carrier, final String shippingPriceValue) {
 		return persistShippingServiceLevelFixedPriceCalcMethod(store, shippingRegionName, displayName, carrier, shippingPriceValue, null);
 	}
+
 	/**
 	 * Create persisted shipping service level for fixed price method only.
 	 *
-	 * @param store the store which provides customers with persisted shipping serivce level
+	 * @param store              the store which provides customers with persisted shipping serivce level
 	 * @param shippingRegionName the name of existed shipping region
-	 * @param displayName the display name for the store's default locale
-	 * @param carrier the carrier String name
+	 * @param displayName        the display name for the store's default locale
+	 * @param carrier            the carrier String name
 	 * @param shippingPriceValue price value for the default fixed price calculation method.
-	 * @param code shipping service level code
+	 * @param code               shipping service level code
 	 * @return persisted shipping service level
 	 */
 	public ShippingServiceLevel persistShippingServiceLevelFixedPriceCalcMethod(final Store store, final String shippingRegionName,
-			final String displayName, final String carrier, final String shippingPriceValue, final String code) {
-		final ShippingRegionService shippingRegionService = beanFactory.getBean(ContextIdNames.SHIPPING_REGION_SERVICE);
+																				final String displayName, final String carrier, final String shippingPriceValue, final String code) {
+
+		final ShippingRegionService shippingRegionService = beanFactory.getBean(SHIPPING_REGION_SERVICE);
 		final ShippingRegion shippingRegion = shippingRegionService.findByName(shippingRegionName);
-		final ShippingServiceLevel level = beanFactory.getBean(ContextIdNames.SHIPPING_SERVICE_LEVEL);
+		final ShippingServiceLevel level = beanFactory.getBean(SHIPPING_SERVICE_LEVEL);
 		level.setGuid(Utils.uniqueCode("service_level"));
 		level.setCarrier(carrier);
 		if (code == null) {
@@ -559,6 +590,7 @@ public class StoreTestPersister {
 
 	/**
 	 * Deletes shipping service level identified by code.
+	 *
 	 * @param code ssl code
 	 * @return true if the ssl was removed
 	 */
@@ -574,15 +606,16 @@ public class StoreTestPersister {
 	/**
 	 * Persist the store.
 	 *
-	 * @param catalog the catalog
-	 * @param warehouse the warehouse
-	 * @param storeCode the store code
+	 * @param catalog      the catalog
+	 * @param warehouse    the warehouse
+	 * @param storeCode    the store code
 	 * @param currencyCode the currency code
 	 * @return the persisted store
 	 */
 	public Store persistStore(final Catalog catalog, final Warehouse warehouse, final String storeCode, final String currencyCode) {
 		final Store store = persistStore(catalog, warehouse, storeCode, currencyCode, USA, USA,
-				Arrays.asList(TestDataPersisterFactory.DEFAULT_LOCALE), "Email Sender", "tests@beanFactory.com", Utils.uniqueCode("storename"),
+				Arrays.asList(TestDataPersisterFactory.DEFAULT_LOCALE), "Email Sender", "tests@beanFactory.com",
+				Utils.uniqueCode("storename"),
 				TimeZone.getDefault(), "storeurl", "email@test.com", "", "UTF-8", true, true, true, true);
 		final Set<PaymentGateway> paymentGateways = new HashSet<>();
 		paymentGateways.add(persistDefaultPaymentGateway());
@@ -595,10 +628,10 @@ public class StoreTestPersister {
 	 * Creates a persisted store with given catalog, warehouse, store code
 	 * store name, and currency code.
 	 *
-	 * @param catalog the catalog to set
-	 * @param warehouse the warehouse to set
-	 * @param storeCode the store code to set
-	 * @param storeName the store name to set
+	 * @param catalog      the catalog to set
+	 * @param warehouse    the warehouse to set
+	 * @param storeCode    the store code to set
+	 * @param storeName    the store name to set
 	 * @param currencyCode the currency code to set
 	 * @return the store if save was successful
 	 */
@@ -616,28 +649,28 @@ public class StoreTestPersister {
 
 	/**
 	 * Create a persisted store with the given catalog and warehouse.
-	 *
+	 * <p>
 	 * Stores are in open state for tests.
 	 *
-	 * @param catalog the catalog to use for this store
-	 * @param warehouse the warehouse to use for this store
-	 * @param storeCode the store code
-	 * @param currencyCode the currency code
-	 * @param country the country
-	 * @param subCountry the sub country
-	 * @param locales the locales
-	 * @param emailSenderName the email sender name
-	 * @param emailSenderAddress the email sender address
-	 * @param storeName the store name
-	 * @param timeZone the time zone
-	 * @param storeUrl the store URL
-	 * @param adminEmailAddress the admin email address
-	 * @param description the description
-	 * @param contentEncoding the content encoding
-	 * @param creditCardCvv2Enabled the ccv enabled flag
-	 * @param displayOutOfStock the display out of stock flag
+	 * @param catalog                           the catalog to use for this store
+	 * @param warehouse                         the warehouse to use for this store
+	 * @param storeCode                         the store code
+	 * @param currencyCode                      the currency code
+	 * @param country                           the country
+	 * @param subCountry                        the sub country
+	 * @param locales                           the locales
+	 * @param emailSenderName                   the email sender name
+	 * @param emailSenderAddress                the email sender address
+	 * @param storeName                         the store name
+	 * @param timeZone                          the time zone
+	 * @param storeUrl                          the store URL
+	 * @param adminEmailAddress                 the admin email address
+	 * @param description                       the description
+	 * @param contentEncoding                   the content encoding
+	 * @param creditCardCvv2Enabled             the ccv enabled flag
+	 * @param displayOutOfStock                 the display out of stock flag
 	 * @param savingCreditCardWithOrdersEnabled the saving credit card with orders enabled flag
-	 * @param enabled the store enabled flag
+	 * @param enabled                           the store enabled flag
 	 * @return the persisted store
 	 */
 	public Store persistStore(final Catalog catalog, final Warehouse warehouse, final String storeCode,
@@ -691,7 +724,7 @@ public class StoreTestPersister {
 	/**
 	 * Updated the specified store with the associated tax codes and persists it to the database.
 	 *
-	 * @param store to be updated with the set tax codes
+	 * @param store    to be updated with the set tax codes
 	 * @param taxCodes to associate with the specified store
 	 * @return the store that has been persisted
 	 */
@@ -703,7 +736,7 @@ public class StoreTestPersister {
 	/**
 	 * Update the store Payment gateways.
 	 *
-	 * @param store the store
+	 * @param store           the store
 	 * @param paymentGateways the payment gateways
 	 * @return the updated store with the payment gateways
 	 */
@@ -715,7 +748,7 @@ public class StoreTestPersister {
 	/**
 	 * Update store currency.
 	 *
-	 * @param store the store
+	 * @param store        the store
 	 * @param currencyCode the currency code
 	 * @return the store with the currency code updated
 	 */
@@ -783,7 +816,7 @@ public class StoreTestPersister {
 	public Customer createDefaultCustomer(final Store store) {
 		final CustomerAddress address = createCustomerAddress(
 				"Bond", "James", "1234 Pine Street", "", "Vancouver", "CA", "BC", "V6JT2N", "891312345007");
-		return createCustomerWithAddress(store, address);
+		return createCustomerWithAddress(null, store, address);
 	}
 
 	/**
@@ -792,8 +825,8 @@ public class StoreTestPersister {
 	 * @param store the store
 	 * @return a customer
 	 */
-	public Customer createCustomerWithAddress(final Store store, final CustomerAddress customerAddress) {
-		final CustomerCreditCard creditCard = createCustomerCreditCard(customerAddress.getFirstName() + " " + customerAddress.getLastName(), "4111111111111111", "VISA", "11", "2020");
+	public Customer createCustomerWithAddress(final String customerGuid, final Store store, final CustomerAddress customerAddress) {
+		final PaymentToken paymentToken = createCustomerPaymentToken("");
 		Customer customer = null;
 		String randomEmail = null;
 		//if there is already a customer with the 'random' email the persistCustomer call will fail,
@@ -804,7 +837,7 @@ public class StoreTestPersister {
 		}
 		while (customer != null);
 
-		return persistCustomer(store, randomEmail, creditCard, customerAddress);
+		return persistCustomer(customerGuid, store, randomEmail, paymentToken, customerAddress);
 	}
 
 	public Customer getCustomerByGuid(final String customerGuid) {
@@ -815,16 +848,16 @@ public class StoreTestPersister {
 	 * Create persisted gift certificate with specified <code>store</code> and purchase amount.
 	 * GC code, theme, and currency are defaulted.
 	 *
-	 * @param store in which this certificate can be used
+	 * @param store          in which this certificate can be used
 	 * @param purchaseAmount the purchase amount of persisted certificate
 	 * @return persisted gift certificate
 	 * @deprecated Use {@link GiftCertificateTestPersister#persistGiftCertificate(Store, String, String, String,
-			BigDecimal,String, String, String, Customer, String, Date, Date, String, String)}
+	 * BigDecimal, String, String, String, Customer, String, Date, Date, String, String)}
 	 */
 	@Deprecated
 	public GiftCertificate persistGiftCertificate(final Store store, final BigDecimal purchaseAmount) {
 		return giftCertificateTestPersister.persistGiftCertificate(
-				store, null,  Utils.uniqueCode("GCATLEAST18CHARS"), "USD", purchaseAmount,
+				store, null, Utils.uniqueCode("GCATLEAST18CHARS"), "USD", purchaseAmount,
 				null, null, "SomeTheme", null, null, new Date(), null, null, null);
 	}
 
@@ -833,19 +866,19 @@ public class StoreTestPersister {
 	 * and purchase amount in specified currency.
 	 * GC theme is defaulted.
 	 *
-	 * @param gcCode the GC's Code
-	 * @param store the store in which the GC is purchased
-	 * @param currencyCode the GC's currency code
+	 * @param gcCode         the GC's Code
+	 * @param store          the store in which the GC is purchased
+	 * @param currencyCode   the GC's currency code
 	 * @param purchaseAmount the purchase amount of persisted certificate
 	 * @return persisted gift certificate
 	 * @deprecated Use {@link GiftCertificateTestPersister#persistGiftCertificate(Store, String, String, String,
-			BigDecimal,String, String, String, Customer, String, Date, Date, String, String)}
+	 * BigDecimal, String, String, String, Customer, String, Date, Date, String, String)}
 	 */
 	@Deprecated
 	public GiftCertificate persistGiftCertificate(final Store store, final String gcCode, final String currencyCode,
 			final BigDecimal purchaseAmount) {
 		return giftCertificateTestPersister.persistGiftCertificate(
-				store, null,  gcCode, currencyCode, purchaseAmount, null,
+				store, null, gcCode, currencyCode, purchaseAmount, null,
 				null, "SomeTheme", null, null, new Date(), null, null, null);
 	}
 
@@ -854,20 +887,20 @@ public class StoreTestPersister {
 	 * purchase amount in specified <code>currency</code>, and creation date.
 	 * GC theme is defaulted.
 	 *
-	 * @param gcCode the GC's Code
-	 * @param store the store in which the GC is purchased
-	 * @param currencyCode the GC's currency code
+	 * @param gcCode         the GC's Code
+	 * @param store          the store in which the GC is purchased
+	 * @param currencyCode   the GC's currency code
 	 * @param purchaseAmount the purchase amount of persisted certificate
-	 * @param creationDate the date of GC creation
+	 * @param creationDate   the date of GC creation
 	 * @return persisted gift certificate
 	 * @deprecated Use {@link GiftCertificateTestPersister#persistGiftCertificate(Store, String, String, String,
-			BigDecimal,String, String, String, Customer, String, Date, Date, String, String)}
+	 * BigDecimal, String, String, String, Customer, String, Date, Date, String, String)}
 	 */
 	@Deprecated
 	public GiftCertificate persistGiftCertificate(final Store store, final String gcCode, final String currencyCode,
 			final BigDecimal purchaseAmount, final Date creationDate) {
 		return giftCertificateTestPersister.persistGiftCertificate(
-				store, null,  gcCode, currencyCode, purchaseAmount, null,
+				store, null, gcCode, currencyCode, purchaseAmount, null,
 				null, "SomeTheme", null, null, creationDate, null, null, null);
 	}
 
@@ -875,16 +908,15 @@ public class StoreTestPersister {
 	 * Create persisted shipping region.
 	 *
 	 * @param regionName region name
-	 * @param regionStr region string
+	 * @param regionStr  region string
 	 * @return persisted shipping region
 	 */
 	public ShippingRegion persistShippingRegion(final String regionName, final String regionStr) {
-		final ShippingRegionService shippingRegionService = beanFactory.getBean(ContextIdNames.SHIPPING_REGION_SERVICE);
-		final ShippingRegionImpl shippingRegion = beanFactory.getBean(ContextIdNames.SHIPPING_REGION);
+		final ShippingRegionService shippingRegionService = beanFactory.getBean(SHIPPING_REGION_SERVICE);
+		final ShippingRegionImpl shippingRegion = beanFactory.getBean(SHIPPING_REGION);
 		shippingRegion.setName(regionName);
 		shippingRegion.setRegionStr(regionStr);
 
 		return shippingRegionService.add(shippingRegion);
 	}
-
 }

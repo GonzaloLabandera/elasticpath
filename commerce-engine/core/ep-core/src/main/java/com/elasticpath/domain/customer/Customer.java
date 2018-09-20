@@ -429,68 +429,6 @@ public interface Customer extends Entity, UserDetails, DatabaseLastModifiedDate,
 	CustomerAddress getAddressByGuid(String addressGuid);
 
 	/**
-	 * Returns the customer's credit card with the matching UID. <br>
-	 * If no matching credit card is found then null is returned.
-	 *
-	 * @param creditCardUid the uidPk of the credit card to be retrieved
-	 * @return a <code>CustomerCreditCard</code> or <code>null</code> if no matching credit card is found
-	 */
-	CustomerCreditCard getCreditCardByUid(long creditCardUid);
-
-	/**
-	 * Gets the credit card by GUID. <br>
-	 * If no matching credit card is found then null is returned.
-	 *
-	 * @param creditCardGuid the credit card guid
-	 * @return a <code>CustomerCreditCard</code> or <code>null</code> if no matching credit card is found
-	 */
-	CustomerCreditCard getCreditCardByGuid(String creditCardGuid);
-
-	/**
-	 * Gets the default credit card.
-	 * @return the default credit card, null if no default card is present.
-	 */
-	CustomerCreditCard getPreferredCreditCard();
-
-	/**
-	 * @return the customer's credit cards
-	 */
-	List<CustomerCreditCard> getCreditCards();
-
-	/**
-	 * @param creditCards the credit cards to set
-	 */
-	void setCreditCards(List<CustomerCreditCard> creditCards);
-
-	/**
-	 * Add a credit card to this customer.
-	 *
-	 * @param creditCard the credit card to add
-	 */
-	void addCreditCard(CustomerCreditCard creditCard);
-
-	/**
-	 * Removes a <code>CustomerCreditCard</code> from the list of credit cards.
-	 *
-	 * @param creditCard the credit card to remove.
-	 */
-	void removeCreditCard(CustomerCreditCard creditCard);
-
-	/**
-	 * Notifies a <code>Customer</code> that a credit card has been updated (The credit card default flags will be set accordingly).
-	 *
-	 * @param creditCard the credit card that was updated
-	 */
-	void updateCreditCard(CustomerCreditCard creditCard);
-
-	/**
-	 * Sets the customer's default (preferred) credit card.
-	 *
-	 * @param preferredCreditCard the credit card to be used by default
-	 */
-	void setPreferredCreditCard(CustomerCreditCard preferredCreditCard);
-
-	/**
 	 * Get the customer profile.
 	 *
 	 * @return the domain model's <code>CustomerProfile</code>

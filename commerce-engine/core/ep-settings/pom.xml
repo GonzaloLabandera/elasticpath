@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>com.elasticpath</groupId>
 		<artifactId>core</artifactId>
-		<version>702.0.0-SNAPSHOT</version>
+		<version>703.0.0-SNAPSHOT</version>
 	</parent>
 
 	<artifactId>ep-settings</artifactId>
@@ -23,12 +23,12 @@
 			<artifactId>ep-persistence-api</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>commons-lang</groupId>
-			<artifactId>commons-lang</artifactId>
+			<groupId>com.elasticpath</groupId>
+			<artifactId>ep-converters</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.apache.commons</groupId>
-			<artifactId>commons-lang3</artifactId>
+			<groupId>commons-lang</groupId>
+			<artifactId>commons-lang</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework</groupId>
@@ -65,6 +65,20 @@
 	</dependencies>
 
 	<build>
+		<resources>
+			<resource>
+				<directory>src/main/java</directory>
+				<includes>
+					<include>**/*.xsd</include>
+				</includes>
+			</resource>
+			<resource>
+				<directory>src/main/resources</directory>
+				<includes>
+					<include>**/*</include>
+				</includes>
+			</resource>
+		</resources>
 		<plugins>
 			<plugin>
 				<artifactId>maven-checkstyle-plugin</artifactId>
@@ -79,6 +93,29 @@
 					<instructions>
 						<!-- required for WebCM -->
 						<Eclipse-RegisterBuddy>com.elasticpath.cmclient.libs</Eclipse-RegisterBuddy>
+
+						<Import-Package>
+							com.elasticpath.base.exception,
+							com.elasticpath.converter,
+							com.elasticpath.persistence.api,
+							javax.persistence,
+							org.apache.commons.lang,
+							org.apache.commons.lang.math,
+							org.apache.commons.lang3,
+							org.apache.commons.lang3.tuple,
+							org.apache.log4j,
+							org.apache.openjpa.enhance,
+							org.apache.openjpa.persistence,
+							org.apache.openjpa.persistence.jdbc,
+							org.apache.openjpa.util,
+							org.springframework.beans.factory,
+							org.springframework.beans.factory.annotation,
+							org.springframework.beans.factory.config,
+							org.springframework.beans.factory.support,
+							org.springframework.beans.factory.xml,
+							org.springframework.util,
+							org.w3c.dom
+						</Import-Package>
 
 						<!-- need to export impl packages for cmclient due to PrototypeBeanFactory -->
 						<Export-Package>com.elasticpath.settings.*</Export-Package>

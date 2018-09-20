@@ -52,7 +52,7 @@
 
 		<entity>
 			<name>code</name>
-			<description><![CDATA[The item sku code]]></description>
+			<description><![CDATA[The item SKU code.]]></description>
 			<property>
 				<name>code</name>
 				<description><![CDATA[The sku code.]]></description>

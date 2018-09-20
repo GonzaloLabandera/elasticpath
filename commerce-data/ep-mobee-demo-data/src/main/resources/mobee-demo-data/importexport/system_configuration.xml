@@ -65,17 +65,6 @@
 </configuration_setting>
 
 <configuration_setting>
-    <name_space>COMMERCE/SYSTEM/MESSAGING/GIFTCERTIFICATES/channelUri</name_space>
-    <description>The URI of the channel on which Gift Certificate Event messages are sent and received.  Please note that changes will not take effect until the application(s) using this setting are restarted.</description>
-    <default_value type="String">jms:topic:ep.giftcertificates</default_value>
-    <max_overrides>1</max_overrides>
-    <setting_metadata>
-        <value key="environmentSpecific">false</value>
-        <value key="apiRefreshStrategy">application</value>
-    </setting_metadata>
-</configuration_setting>
-
-<configuration_setting>
 	<name_space>COMMERCE/STORE/enableDataPolicies</name_space>
 	<description>Set to true if data policies are enabled for the store.</description>
 	<default_value type="Boolean">false</default_value>

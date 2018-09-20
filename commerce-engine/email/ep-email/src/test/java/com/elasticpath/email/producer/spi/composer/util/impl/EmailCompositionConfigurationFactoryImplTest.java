@@ -4,20 +4,17 @@
 package com.elasticpath.email.producer.spi.composer.util.impl;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-
-import java.util.Locale;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
-import com.elasticpath.commons.util.StoreMessageSource;
 import com.elasticpath.domain.store.Store;
 import com.elasticpath.email.domain.EmailProperties;
 import com.elasticpath.email.domain.impl.EmailPropertiesImpl;
@@ -39,9 +36,6 @@ public class EmailCompositionConfigurationFactoryImplTest {
 	private SettingsReader settingsReader;
 
 	@Mock
-	private StoreMessageSource storeMessageSource;
-
-	@Mock
 	private Store store;
 
 	@InjectMocks
@@ -51,13 +45,10 @@ public class EmailCompositionConfigurationFactoryImplTest {
 	public void setUp() {
 		when(settingsReader.getSettingValue(any(String.class)))
 				.thenReturn(mock(SettingValue.class));
-
-		when(storeMessageSource.getMessage(any(String.class), any(String.class), any(Locale.class)))
-				.thenReturn(null);
 	}
 
 	@Test
-	public void verifyFactoryCreatesNewInstanceWithStore() throws Exception {
+	public void verifyFactoryCreatesNewInstanceWithStore() {
 		final String storeCode = "MYSTORE";
 
 		when(storeService.findStoreWithCode(storeCode)).thenReturn(store);
@@ -71,7 +62,7 @@ public class EmailCompositionConfigurationFactoryImplTest {
 	}
 
 	@Test
-	public void verifyFactoryCreatesNewInstanceWithStoreNotFound() throws Exception {
+	public void verifyFactoryCreatesNewInstanceWithStoreNotFound() {
 		final String storeCode = "MYSTORE";
 
 		// We have a store code, but no such store exists
@@ -86,7 +77,7 @@ public class EmailCompositionConfigurationFactoryImplTest {
 	}
 
 	@Test
-	public void verifyFactoryCreatesNewInstanceWithoutStore() throws Exception {
+	public void verifyFactoryCreatesNewInstanceWithoutStore() {
 		final EmailProperties emailProperties = new EmailPropertiesImpl();
 
 		// No store code set

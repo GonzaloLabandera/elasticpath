@@ -86,7 +86,7 @@ public class CreateCategoryWizard extends AbstractWizard {
 	 * @return the dialog.
 	 */
 	public EditLongTextAttributeDialog clickEditAttributeButtonLongText() {
-		clickEditAttributeValueButton();
+		clickEditAttributeValueButton(EditLongTextAttributeDialog.PARENT_EDIT_LONG_TEXT_CSS);
 		return new EditLongTextAttributeDialog(getDriver());
 	}
 
@@ -96,7 +96,7 @@ public class CreateCategoryWizard extends AbstractWizard {
 	 * @return the dialog.
 	 */
 	public EditDecimalValueAttributeDialog clickEditAttributeButtonDecimalValue() {
-		clickEditAttributeValueButton();
+		clickEditAttributeValueButton(EditDecimalValueAttributeDialog.PARENT_DECIMAL_VALUE_CSS);
 		return new EditDecimalValueAttributeDialog(getDriver());
 	}
 
@@ -106,15 +106,15 @@ public class CreateCategoryWizard extends AbstractWizard {
 	 * @return the dialog.
 	 */
 	public EditShortTextAttributeDialog clickEditAttributeButtonShortText() {
-		clickEditAttributeValueButton();
+		clickEditAttributeValueButton(EditShortTextAttributeDialog.PARENT_EDIT_SHORT_TEXT_CSS);
 		return new EditShortTextAttributeDialog(getDriver());
 	}
 
 	/**
 	 * Clicks the Edit Attribute Value button.
 	 */
-	private void clickEditAttributeValueButton() {
-		clickButton(EDIT_ATTRIBUTE_VALUE_BUTTON_CSS, "Edit Attribute Value");
+	private void clickEditAttributeValueButton(final String pageObjectId) {
+		clickButton(EDIT_ATTRIBUTE_VALUE_BUTTON_CSS, "Edit Attribute Value", pageObjectId);
 	}
 
 	/**

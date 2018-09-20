@@ -3,10 +3,10 @@
  */
 package com.elasticpath.service.catalogview.impl;
 
-import org.apache.commons.lang.math.NumberUtils;
+import com.google.common.base.MoreObjects;
 
 import com.elasticpath.service.catalogview.PaginationService;
-import com.elasticpath.settings.SettingsReader;
+import com.elasticpath.settings.provider.SettingValueProvider;
 
 /**
  * Paginates. 
@@ -14,8 +14,8 @@ import com.elasticpath.settings.SettingsReader;
 public class PaginationServiceImpl implements PaginationService {
 	private static final int DEFAULT_PAGINATION_VALUE = 20;
 
-	private SettingsReader settingsReader;
-	
+	private SettingValueProvider<Integer> numberOfItemsPerPageSettingProvider;
+
 	/**
 	 * Calculate last page number.
 	 * @param numberOfResults are the number of results returned
@@ -54,23 +54,17 @@ public class PaginationServiceImpl implements PaginationService {
 	 */
 	@Override
 	public int getNumberOfItemsPerPage(final String storeCode) {
-		String pagination = getSettingsReader().getSettingValue("COMMERCE/STORE/CATALOG/catalogViewPagination", storeCode).getValue();		
-		return NumberUtils.toInt(pagination, DEFAULT_PAGINATION_VALUE);
+		final Integer configuredPaginationValue = getNumberOfItemsPerPageSettingProvider().get(storeCode);
+
+		return MoreObjects.firstNonNull(configuredPaginationValue, DEFAULT_PAGINATION_VALUE);
 	}
-	
-	/**
-	 * Sets the Settings Reader.
-	 * @param settingsReader the settings reader
-	 */
-	public void setSettingsReader(final SettingsReader settingsReader) {
-		this.settingsReader = settingsReader;
+
+	protected SettingValueProvider<Integer> getNumberOfItemsPerPageSettingProvider() {
+		return numberOfItemsPerPageSettingProvider;
 	}
-	
-	/**
-	 * Gets the Settings Reader.
-	 * @return the settings reader
-	 */
-	public SettingsReader getSettingsReader() {
-		return this.settingsReader;
+
+	public void setNumberOfItemsPerPageSettingProvider(final SettingValueProvider<Integer> numberOfItemsPerPageSettingProvider) {
+		this.numberOfItemsPerPageSettingProvider = numberOfItemsPerPageSettingProvider;
 	}
+
 }

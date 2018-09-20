@@ -48,10 +48,7 @@ public class InventoryJournalRollupJobImpl {
 		for (InventoryKey inventoryKey : inventoryKeys) {
 			try {
 				inventoryJournalRollupService.processRollup(inventoryKey);
-			} catch (JpaSystemException e) {
-				log(inventoryKey, e);
-				break;
-			} catch (JpaOptimisticLockingFailureException e) {
+			} catch (JpaSystemException | JpaOptimisticLockingFailureException e) {
 				log(inventoryKey, e);
 				break;
 			}

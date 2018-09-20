@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) Elastic Path Software Inc., 2014
  */
 package com.elasticpath.test.integration.tax;
@@ -18,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import com.elasticpath.common.dto.ShoppingItemDto;
 import com.elasticpath.commons.constants.ContextIdNames;
+import com.elasticpath.domain.customer.impl.PaymentTokenImpl;
 import com.elasticpath.domain.misc.PropertyBased;
 import com.elasticpath.domain.order.Order;
 import com.elasticpath.domain.order.OrderPayment;
@@ -70,7 +71,7 @@ public class ReturnTaxOperationTest extends AbstractBasicTaxOperationTest {
 	 * setupPropertyForReason.
 	 */
 	private void setupPropertyForReason() {
-		final PropertyBased propertyBased = (PropertyBased) getBeanFactory().getBean(ContextIdNames.ORDER_RETURN_SKU_REASON);
+		final PropertyBased propertyBased = getBeanFactory().getBean(ContextIdNames.ORDER_RETURN_SKU_REASON);
 
 		Map<String, Properties> propertiesMap = new HashMap<>();
 
@@ -92,13 +93,14 @@ public class ReturnTaxOperationTest extends AbstractBasicTaxOperationTest {
 		// construct and save new shopping cart
 		final Shopper shopper = customerSession.getShopper();
 		ShoppingCart shoppingCart = persisterFactory.getOrderTestPersister().persistEmptyShoppingCart(address, address, customerSession,
-				scenario.getShippingServiceLevel(), scenario.getStore());
+				scenario.getShippingOption(), scenario.getStore());
 		
 		ShoppingItemDto physicalDto = new ShoppingItemDto(shippableProducts.get(0).getDefaultSku().getSkuCode(), 1);
 		cartDirector.addItemToCart(shoppingCart, physicalDto);
 
 		// make new order payment
-		OrderPayment templateOrderPayment = persisterFactory.getOrderTestPersister().createOrderPayment(customer, creditCard);
+		OrderPayment templateOrderPayment = persisterFactory.getOrderTestPersister().createOrderPayment(customer, new PaymentTokenImpl.TokenBuilder()
+				.build());
 
 		final ShoppingCartPricingSnapshot pricingSnapshot = pricingSnapshotService.getPricingSnapshotForCart(shoppingCart);
 		final ShoppingCartTaxSnapshot taxSnapshot = taxSnapshotService.getTaxSnapshotForCart(shoppingCart, pricingSnapshot);
@@ -146,13 +148,14 @@ public class ReturnTaxOperationTest extends AbstractBasicTaxOperationTest {
 		// construct and save new shopping cart
 		final Shopper shopper = customerSession.getShopper();
 		ShoppingCart shoppingCart = persisterFactory.getOrderTestPersister().persistEmptyShoppingCart(address, address, customerSession,
-				scenario.getShippingServiceLevel(), scenario.getStore());
+				scenario.getShippingOption(), scenario.getStore());
 		
 		ShoppingItemDto physicalDto = new ShoppingItemDto(shippableProducts.get(0).getDefaultSku().getSkuCode(), 1);
 		cartDirector.addItemToCart(shoppingCart, physicalDto);
 
 		// make new order payment
-		OrderPayment templateOrderPayment = persisterFactory.getOrderTestPersister().createOrderPayment(customer, creditCard);
+		OrderPayment templateOrderPayment = persisterFactory.getOrderTestPersister().createOrderPayment(customer, new PaymentTokenImpl.TokenBuilder()
+				.build());
 
 		final ShoppingCartPricingSnapshot pricingSnapshot = pricingSnapshotService.getPricingSnapshotForCart(shoppingCart);
 		final ShoppingCartTaxSnapshot taxSnapshot = taxSnapshotService.getTaxSnapshotForCart(shoppingCart, pricingSnapshot);
@@ -193,7 +196,7 @@ public class ReturnTaxOperationTest extends AbstractBasicTaxOperationTest {
 		verifyTaxDocumentForOrderReturn(persistedOrderReturn, store);
 		
 		// cancle the order return
-		FetchGroupLoadTuner tuner = (FetchGroupLoadTuner) getBeanFactory().getBean(ContextIdNames.FETCH_GROUP_LOAD_TUNER);
+		FetchGroupLoadTuner tuner = getBeanFactory().getBean(ContextIdNames.FETCH_GROUP_LOAD_TUNER);
 		tuner.addFetchGroup(FetchGroupConstants.ORDER_INDEX, 
 			FetchGroupConstants.ORDER_NOTES, 
 			FetchGroupConstants.ALL);
@@ -214,13 +217,14 @@ public class ReturnTaxOperationTest extends AbstractBasicTaxOperationTest {
 		// construct and save new shopping cart
 		final Shopper shopper = customerSession.getShopper();
 		ShoppingCart shoppingCart = persisterFactory.getOrderTestPersister().persistEmptyShoppingCart(address, address, customerSession,
-				scenario.getShippingServiceLevel(), scenario.getStore());
+				scenario.getShippingOption(), scenario.getStore());
 		
 		ShoppingItemDto physicalDto = new ShoppingItemDto(shippableProducts.get(0).getDefaultSku().getSkuCode(), 1);
 		cartDirector.addItemToCart(shoppingCart, physicalDto);
 
 		// make new order payment
-		OrderPayment templateOrderPayment = persisterFactory.getOrderTestPersister().createOrderPayment(customer, creditCard);
+		OrderPayment templateOrderPayment = persisterFactory.getOrderTestPersister().createOrderPayment(customer, new PaymentTokenImpl.TokenBuilder()
+				.build());
 
 		final ShoppingCartPricingSnapshot pricingSnapshot = pricingSnapshotService.getPricingSnapshotForCart(shoppingCart);
 		final ShoppingCartTaxSnapshot taxSnapshot = taxSnapshotService.getTaxSnapshotForCart(shoppingCart, pricingSnapshot);
@@ -261,7 +265,7 @@ public class ReturnTaxOperationTest extends AbstractBasicTaxOperationTest {
 		verifyTaxDocumentForOrderReturn(persistedOrderReturn, store);
 		
 		// cancle the order return
-		FetchGroupLoadTuner tuner = (FetchGroupLoadTuner) getBeanFactory().getBean(ContextIdNames.FETCH_GROUP_LOAD_TUNER);
+		FetchGroupLoadTuner tuner = getBeanFactory().getBean(ContextIdNames.FETCH_GROUP_LOAD_TUNER);
 		tuner.addFetchGroup(FetchGroupConstants.ORDER_INDEX, 
 			FetchGroupConstants.ORDER_NOTES, 
 			FetchGroupConstants.ALL);

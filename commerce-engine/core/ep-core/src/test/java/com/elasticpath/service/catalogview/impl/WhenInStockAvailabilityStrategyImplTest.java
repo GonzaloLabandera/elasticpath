@@ -28,7 +28,7 @@ public class WhenInStockAvailabilityStrategyImplTest {
 	public void testGetAvailabilityIsNullForNonStockRelatedCriteria() {
 		Product product = new ProductImpl();
 		product.setAvailabilityCriteria(AvailabilityCriteria.AVAILABLE_FOR_PRE_ORDER);
-		Availability availability = strategy.getAvailability(product, true, true, true);
+		Availability availability = strategy.getAvailability(product, true, true);
 		assertNull("A Null should be returned when using a non stock-related criteria", availability);
 	}
 	
@@ -39,7 +39,7 @@ public class WhenInStockAvailabilityStrategyImplTest {
 	public void testGetAvailabilityWhenNotAvailable() {
 		Product product = new ProductImpl();
 		product.setAvailabilityCriteria(AvailabilityCriteria.AVAILABLE_WHEN_IN_STOCK);
-		Availability availability = strategy.getAvailability(product, false, true, true);
+		Availability availability = strategy.getAvailability(product, false, true);
 		assertEquals("The product should not be available", Availability.NOT_AVAILABLE, availability);
 	}
 	
@@ -50,7 +50,7 @@ public class WhenInStockAvailabilityStrategyImplTest {
 	public void testGetAvailabilityWhenInStock() {
 		Product product = new ProductImpl();
 		product.setAvailabilityCriteria(AvailabilityCriteria.AVAILABLE_WHEN_IN_STOCK);
-		Availability availability = strategy.getAvailability(product, true, true, true);
+		Availability availability = strategy.getAvailability(product, true, true);
 		assertEquals("The product should be available", Availability.AVAILABLE, availability);
 	}
 

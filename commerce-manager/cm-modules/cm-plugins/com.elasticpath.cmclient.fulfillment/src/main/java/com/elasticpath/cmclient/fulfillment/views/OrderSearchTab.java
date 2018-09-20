@@ -20,8 +20,8 @@ import org.eclipse.ui.forms.events.HyperlinkAdapter;
 import org.eclipse.ui.forms.events.HyperlinkEvent;
 import org.eclipse.ui.forms.widgets.ImageHyperlink;
 
-import com.elasticpath.cmclient.core.ServiceLocator;
 import com.elasticpath.cmclient.core.CoreImageRegistry;
+import com.elasticpath.cmclient.core.ServiceLocator;
 import com.elasticpath.cmclient.core.binding.EpControlBindingProvider;
 import com.elasticpath.cmclient.core.binding.ObservableUpdateValueStrategy;
 import com.elasticpath.cmclient.core.search.SafeSearchCodes;
@@ -60,8 +60,6 @@ public class OrderSearchTab implements ISearchTab {
 	private static final String EMPTY_STRING = ""; //$NON-NLS-1$
 
 	private Text orderNumberText;
-
-	private Text customerIdText;
 
 	private Text emailUserIdText;
 
@@ -254,9 +252,6 @@ public class OrderSearchTab implements ISearchTab {
 	}
 
 	private void createSearchTermsGroupCustomer(final IEpLayoutData data, final IEpLayoutComposite searchTermsGroup) {
-		searchTermsGroup.addLabelBold(FulfillmentMessages.get().CustomerDetails_CustomerIdLabel, data);
-		this.customerIdText = searchTermsGroup.addTextField(epState, data);
-
 		searchTermsGroup.addLabelBold(FulfillmentMessages.get().SearchView_EmailUserId, data);
 		this.emailUserIdText = searchTermsGroup.addTextField(epState, data);
 
@@ -285,7 +280,6 @@ public class OrderSearchTab implements ISearchTab {
 
 	private void clearFields() {
 		this.orderNumberText.setText(EMPTY_STRING);
-		this.customerIdText.setText(EMPTY_STRING);
 		this.emailUserIdText.setText(EMPTY_STRING);
 		this.firstNameText.setText(EMPTY_STRING);
 		this.lastNameText.setText(EMPTY_STRING);
@@ -434,19 +428,17 @@ public class OrderSearchTab implements ISearchTab {
 		}});
 		toDatePicker.bind(context, toDateValidator, getModel(), "orderToDate"); //$NON-NLS-1$
 
-		bindingProvider.bind(context, this.customerIdText, this.getModel().getCustomerSearchCriteria(),
-				"customerNumber", EpValidatorFactory.LONG_IGNORE_SPACE, null, true); //$NON-NLS-1$
 		bindingProvider.bind(context, this.emailUserIdText, this.getModel().getCustomerSearchCriteria(), "userId", null, null, true); //$NON-NLS-1$
 		bindingProvider.bind(context, this.emailUserIdText, this.getModel().getCustomerSearchCriteria(),
-				"email", SearchFieldsValidators.EMAIL_USERID_VALIDATOR, null, true); //$NON-NLS-1$
+				"email", SearchFieldsValidators.EMAIL_PATTERN_USERID_VALIDATOR, null, true); //$NON-NLS-1$
 		bindingProvider.bind(context, this.firstNameText, this.getModel().getCustomerSearchCriteria(),
-				"firstName", SearchFieldsValidators.NAME_VALIDATOR, null, true); //$NON-NLS-1$
+				"firstName", null, null, true); //$NON-NLS-1$
 		bindingProvider.bind(context, this.lastNameText, this.getModel().getCustomerSearchCriteria(),
-				"lastName", SearchFieldsValidators.NAME_VALIDATOR, null, true); //$NON-NLS-1$
+				"lastName", null, null, true); //$NON-NLS-1$
 		bindingProvider.bind(context, this.zipPostalCodeText, this.getModel(),
-				"shipmentZipcode", SearchFieldsValidators.ZIP_CODE_VALIDATOR, null, true); //$NON-NLS-1$
+				"shipmentZipcode", null, null, true); //$NON-NLS-1$
 		bindingProvider.bind(context, this.phoneNumberText, this.getModel().getCustomerSearchCriteria(),
-				"phoneNumber", EpValidatorFactory.PHONE_IGNORE_SPACES, null, true); //$NON-NLS-1$
+				"phoneNumber", null, null, true); //$NON-NLS-1$
 	}
 	
 	@Override
@@ -473,7 +465,6 @@ public class OrderSearchTab implements ISearchTab {
 		this.orderNumberText.addSelectionListener(listener);
 		this.containsSkuText.addSelectionListener(listener);
 		this.rmaText.addSelectionListener(listener);
-		this.customerIdText.addSelectionListener(listener);
 		this.emailUserIdText.addSelectionListener(listener);
 		this.firstNameText.addSelectionListener(listener);
 		this.lastNameText.addSelectionListener(listener);

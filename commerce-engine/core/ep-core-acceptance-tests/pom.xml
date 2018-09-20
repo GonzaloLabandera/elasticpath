@@ -5,29 +5,23 @@
 	<parent>
 		<groupId>com.elasticpath</groupId>
 		<artifactId>core</artifactId>
-		<version>702.0.0-SNAPSHOT</version>
+		<version>703.0.0-SNAPSHOT</version>
 	</parent>
 
 	<artifactId>ep-core-acceptance-tests</artifactId>
 	<name>EP Core Acceptance Tests</name>
 
-	<properties>
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-		<java.jvm.opts>-XX:MaxPermSize=512m -Xmx1024m</java.jvm.opts>
-	</properties>
-
 	<dependencies>
 		<dependency>
-			<groupId>info.cukes</groupId>
+			<groupId>io.cucumber</groupId>
 			<artifactId>cucumber-spring</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>info.cukes</groupId>
+			<groupId>io.cucumber</groupId>
 			<artifactId>cucumber-java</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>info.cukes</groupId>
+			<groupId>io.cucumber</groupId>
 			<artifactId>cucumber-junit</artifactId>
 		</dependency>
 		<dependency>
@@ -107,6 +101,10 @@
 			<artifactId>ep-messaging-camel</artifactId>
 			<scope>runtime</scope>
 		</dependency>
+		<dependency>
+			<groupId>com.elasticpath</groupId>
+			<artifactId>shipping-calculation-plugin-epcommerce</artifactId>
+		</dependency>
 	</dependencies>
 
 	<build>
@@ -127,7 +125,7 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-failsafe-plugin</artifactId>
 				<configuration>
-					<argLine>${java.jvm.opts} -Dorg.apache.camel.jmx.disabled=true</argLine>
+					<argLine>-Dorg.apache.camel.jmx.disabled=true</argLine>
 					<forkCount>0.5C</forkCount>
 					<skip>${skipCucumberTests}</skip>
 				</configuration>

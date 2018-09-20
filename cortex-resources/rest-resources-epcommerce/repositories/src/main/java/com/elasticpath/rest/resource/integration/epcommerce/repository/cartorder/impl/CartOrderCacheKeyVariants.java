@@ -5,7 +5,6 @@ package com.elasticpath.rest.resource.integration.epcommerce.repository.cartorde
 
 import java.util.Arrays;
 import java.util.Collection;
-
 import javax.inject.Named;
 import javax.inject.Singleton;
 
@@ -22,8 +21,8 @@ public class CartOrderCacheKeyVariants implements CacheKeyVariants<CartOrder> {
 	@Override
 	public Collection<Object[]> get(final CartOrder objectToCache) {
 		return Arrays.asList(
-				new Object[] { objectToCache.getGuid() },
-				new Object[] { objectToCache.getShoppingCartGuid() }
+				new Object[] {objectToCache.getGuid()},
+				new Object[] {objectToCache.getShoppingCartGuid()}
 		);
 	}
 

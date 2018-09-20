@@ -195,6 +195,44 @@ public class ProductSkuLookupImplTest {
 	}
 
 	@Test
+	public void testFindBySkuGuidsHappyPath() {
+		//  Given
+		context.checking(new Expectations() {
+			{
+				allowing(productDao).findUidsBySkuGuids(Arrays.asList(SKU_GUID, SKU2_GUID));
+				will(returnValue(Arrays.asList(PRODUCT_UID, PRODUCT2_UID)));
+
+				allowing(productLookup).findByUids(Arrays.asList(PRODUCT_UID, PRODUCT2_UID));
+				will(returnValue(Arrays.asList(product1, product2)));
+			}
+		});
+
+		// When
+		List<ProductSku> found = skuLookup.findByGuids(Arrays.asList(SKU_GUID, SKU2_GUID));
+
+		// Then
+		assertEquals("Skus should have been found and returned from the sku lookup",
+				Arrays.asList(sku1, sku2), found);
+	}
+
+	@Test
+	public void testFindBySkuGuidsWhenGuidsNotFound() {
+		//  Given
+		context.checking(new Expectations() {
+			{
+				allowing(productDao).findUidsBySkuGuids(Arrays.asList(SKU_GUID, SKU2_GUID));
+				will(returnValue(Arrays.asList()));
+			}
+		});
+
+		// When
+		List<ProductSku> found = skuLookup.findByGuids(Arrays.asList(SKU_GUID, SKU2_GUID));
+
+		// Then
+		assertEquals("Skus should not have been found", Collections.<ProductSku>emptyList(), found);
+	}
+
+	@Test
 	public void testFindBySkuCodeHappyPath() {
 		//  Given
 		context.checking(new Expectations() {
@@ -230,7 +268,6 @@ public class ProductSkuLookupImplTest {
 		// Then
 		assertNull("Sku should not have been found", found);
 	}
-
 
 	@Test
 	public void testFindBySkuCodesHappyPath() {

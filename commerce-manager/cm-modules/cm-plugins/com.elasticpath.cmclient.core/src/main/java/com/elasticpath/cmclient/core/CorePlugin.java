@@ -13,6 +13,7 @@ import java.util.Set;
 
 import org.apache.log4j.Logger;
 import org.eclipse.rap.rwt.RWT;
+import org.eclipse.rap.rwt.client.service.ClientInfo;
 import org.eclipse.rap.rwt.service.UISession;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
@@ -89,8 +90,13 @@ public class CorePlugin extends AbstractUIPlugin {
 	 * @return the current value of the default locale for this instance of the JVM.
 	 */
 	public Locale getDefaultLocale() {
-		return Locale.getDefault();
+		Locale locale = RWT.getClient().getService(ClientInfo.class).getLocale();
+		if (locale == null) {
+			return Locale.getDefault();
+		}
+		return locale;
 	}
+
 
 	private void createApplicationContext() {
 		LOG.debug("Initializing Spring Application Context"); //$NON-NLS-1$

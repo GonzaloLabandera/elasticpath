@@ -183,7 +183,7 @@ public class ProductTypeImpl extends AbstractLegacyEntityImpl implements Product
 			}
 
 		};
-		java.util.Collections.sort(sortedSkuOptionList, comparator);
+		sortedSkuOptionList.sort(comparator);
 		return sortedSkuOptionList;
 	}
 
@@ -191,13 +191,9 @@ public class ProductTypeImpl extends AbstractLegacyEntityImpl implements Product
 	public List<SkuOption> getSortedSkuOptionList(final ProductSku defaultSku) {
 
 		final List<SkuOption> sortedSkuOptionList = new ArrayList<>(this.getSkuOptions(defaultSku));
-		java.util.Collections.sort(sortedSkuOptionList, new Comparator<SkuOption>() {
-			@Override
-			public int compare(final SkuOption skuOption1, final SkuOption skuOption2) {
-				final Locale defaultLocale = ProductTypeImpl.this.getCatalog().getDefaultLocale();
-				return skuOption1.getDisplayName(defaultLocale, true).compareTo(skuOption2.getDisplayName(defaultLocale, true));
-			}
-
+		sortedSkuOptionList.sort((skuOption1, skuOption2) -> {
+			final Locale defaultLocale = ProductTypeImpl.this.getCatalog().getDefaultLocale();
+			return skuOption1.getDisplayName(defaultLocale, true).compareTo(skuOption2.getDisplayName(defaultLocale, true));
 		});
 		return sortedSkuOptionList;
 	}

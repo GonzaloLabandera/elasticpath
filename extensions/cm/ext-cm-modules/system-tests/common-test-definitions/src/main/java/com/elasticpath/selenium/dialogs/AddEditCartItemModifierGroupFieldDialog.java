@@ -14,7 +14,10 @@ import com.elasticpath.selenium.util.Utility;
  * Add Edit Cart Item Modifier Group Field Dialog.
  */
 public class AddEditCartItemModifierGroupFieldDialog extends AbstractDialog {
-	private static final String ADD_CART_ITEM_MODIFIER_FIELD_PARENT_CSS
+	/**
+	 * CSS selector used to identify the dialog.
+	 */
+	public static final String ADD_CART_ITEM_MODIFIER_FIELD_PARENT_CSS
 			= "div[automation-id*='com.elasticpath.cmclient.catalog.CatalogMessages."
 			+ "CatalogCartItemModifierGroupsSectionAddEditDialog_WinIitle'][widget-type='Shell'] ";
 	private static final String DISPLAY_NAME_INPUT_CSS = ADD_CART_ITEM_MODIFIER_FIELD_PARENT_CSS
@@ -113,7 +116,7 @@ public class AddEditCartItemModifierGroupFieldDialog extends AbstractDialog {
 	 * @return AddEditCartItemModifierFieldOptionDialog
 	 */
 	private AddEditCartItemModifierFieldOptionDialog clickAddOptionButton() {
-		clickButton("Add Option");
+		clickButton("Add Option", new String[]{AddEditCartItemModifierFieldOptionDialog.ADD_FIELD_OPTION_PARENT_CSS});
 		return new AddEditCartItemModifierFieldOptionDialog(getDriver());
 	}
 
@@ -123,7 +126,7 @@ public class AddEditCartItemModifierGroupFieldDialog extends AbstractDialog {
 	 * @return AddEditCartItemModifierFieldOptionDialog
 	 */
 	public AddEditCartItemModifierFieldOptionDialog clickEditOptionButton() {
-		clickButton("Edit Option");
+		clickButton("Edit Option", new String[]{AddEditCartItemModifierFieldOptionDialog.ADD_FIELD_OPTION_PARENT_CSS});
 		return new AddEditCartItemModifierFieldOptionDialog(getDriver());
 	}
 
@@ -133,7 +136,7 @@ public class AddEditCartItemModifierGroupFieldDialog extends AbstractDialog {
 	 * @return AddEditCartItemModifierFieldOptionDialog
 	 */
 	public AddEditCartItemModifierFieldOptionDialog clickRemoveOptionButton() {
-		clickButton("Remove Option");
+		clickButton("Remove Option", new String[]{AddEditCartItemModifierFieldOptionDialog.ADD_FIELD_OPTION_PARENT_CSS});
 		return new AddEditCartItemModifierFieldOptionDialog(getDriver());
 	}
 
@@ -208,9 +211,10 @@ public class AddEditCartItemModifierGroupFieldDialog extends AbstractDialog {
 	/**
 	 * Clicks button.
 	 *
-	 * @param buttonName the button name
+	 * @param buttonName   the button name
+	 * @param pageObjectId optional argument page object id
 	 */
-	public void clickButton(final String buttonName) {
+	public void clickButton(final String buttonName, final String... pageObjectId) {
 		String buttonNameLowerCase = buttonName.toLowerCase(Locale.ENGLISH);
 		String buttonCss;
 		switch (buttonNameLowerCase) {
@@ -233,8 +237,11 @@ public class AddEditCartItemModifierGroupFieldDialog extends AbstractDialog {
 				fail("the specified button does not exist in this dialog. Please check button text");
 				return;
 		}
-
-		clickButton(String.format(buttonCss, buttonNameLowerCase), buttonName);
+		if (pageObjectId.length > 0) {
+			clickButton(String.format(buttonCss, buttonNameLowerCase), buttonName, pageObjectId[0]);
+		} else {
+			clickButton(String.format(buttonCss, buttonNameLowerCase), buttonName);
+		}
 	}
 
 }

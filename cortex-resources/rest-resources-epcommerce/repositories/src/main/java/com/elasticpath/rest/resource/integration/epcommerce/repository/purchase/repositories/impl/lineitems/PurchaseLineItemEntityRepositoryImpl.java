@@ -11,26 +11,23 @@ import java.util.Locale;
 import java.util.Map;
 
 import com.google.common.collect.Lists;
-import io.reactivex.Observable;
 import io.reactivex.Single;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
 import com.elasticpath.domain.cartmodifier.CartItemModifierField;
 import com.elasticpath.domain.catalog.ProductSku;
-import com.elasticpath.domain.order.Order;
 import com.elasticpath.domain.order.OrderShipment;
 import com.elasticpath.domain.order.OrderSku;
 import com.elasticpath.domain.shoppingcart.ShoppingItem;
 import com.elasticpath.money.Money;
 import com.elasticpath.repository.Repository;
 import com.elasticpath.rest.Builder;
-import com.elasticpath.rest.ResourceOperationFailure;
 import com.elasticpath.rest.definition.base.CostEntity;
+import com.elasticpath.rest.definition.purchases.PurchaseIdentifier;
 import com.elasticpath.rest.definition.purchases.PurchaseLineItemConfigurationEntity;
 import com.elasticpath.rest.definition.purchases.PurchaseLineItemEntity;
 import com.elasticpath.rest.definition.purchases.PurchaseLineItemIdentifier;
-import com.elasticpath.rest.id.type.PathIdentifier;
 import com.elasticpath.rest.identity.util.SubjectUtil;
 import com.elasticpath.rest.resource.ResourceOperationContext;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder.CartItemModifiersRepository;
@@ -50,9 +47,6 @@ import com.elasticpath.rest.resource.integration.epcommerce.transform.MoneyTrans
 public class PurchaseLineItemEntityRepositoryImpl<E extends PurchaseLineItemEntity, I extends PurchaseLineItemIdentifier>
 		implements Repository<PurchaseLineItemEntity, PurchaseLineItemIdentifier> {
 
-	private static final String LINE_ITEM_NOT_FOUND = "Line item not found";
-	private static final String CAST_ERROR = "Shopping item is not a OrderSku";
-
 	private OrderRepository orderRepository;
 	private MoneyTransformer moneyTransformer;
 	private ResourceOperationContext resourceOperationContext;
@@ -63,56 +57,13 @@ public class PurchaseLineItemEntityRepositoryImpl<E extends PurchaseLineItemEnti
 
 	@Override
 	public Single<PurchaseLineItemEntity> findOne(final PurchaseLineItemIdentifier identifier) {
-		String scope = identifier.getPurchaseLineItems().getPurchase().getPurchases().getScope().getValue();
-		String purchasesId = identifier.getPurchaseLineItems().getPurchase().getPurchaseId().getValue();
-		String lineItemId = ((PathIdentifier) identifier.getLineItemId()).extractLeafId();
+		PurchaseIdentifier purchaseIdentifier = identifier.getPurchaseLineItems().getPurchase();
+		String scope = purchaseIdentifier.getPurchases().getScope().getValue();
+		String purchaseId = purchaseIdentifier.getPurchaseId().getValue();
+		List<String> guidPathFromRootItem = identifier.getLineItemId().getValue();
 		Locale locale = SubjectUtil.getLocale(resourceOperationContext.getSubject());
-		
-		return orderRepository.findByGuidAsSingle(scope, purchasesId)
-				.flatMap(order -> getOrderSku(lineItemId, order))
+		return orderRepository.findOrderSku(scope, purchaseId, guidPathFromRootItem)
 				.flatMap(orderSku -> buildLineItemEntity(orderSku, locale));
-	}
-
-	/**
-	 * Get order sku.
-	 *
-	 * @param lineItemId id of the line item
-	 * @param order      order
-	 * @return order sku
-	 */
-	protected Single<OrderSku> getOrderSku(final String lineItemId, final Order order) {
-		return getAllShoppingItems(order.getRootShoppingItems())
-				.filter(shoppingItem -> shoppingItem.getSkuGuid().equals(lineItemId))
-				.firstOrError()
-				.onErrorResumeNext(Single.error(ResourceOperationFailure.notFound(LINE_ITEM_NOT_FOUND)))
-				.flatMap(this::castToOrderSku);
-	}
-
-	/**
-	 * Casts Shopping Item to Order sku.
-	 *
-	 * @param shoppingItem shopping item
-	 * @return order sku or cast error
-	 */
-	protected Single<OrderSku> castToOrderSku(final ShoppingItem shoppingItem) {
-		if (shoppingItem instanceof OrderSku) {
-			return Single.just((OrderSku) shoppingItem);
-		}
-		return Single.error(ResourceOperationFailure.serverError(CAST_ERROR));
-	}
-
-	/**
-	 * Remove this method when core provides a method to get a particular shopping item from an order given a guid. <br>
-	 * We are using this because we cannot retrieve a nested bundle by guid.
-	 *
-	 * @param shoppingItems The collection of shopping items to examine.
-	 * @return The processed collection.
-	 */
-	protected Observable<ShoppingItem> getAllShoppingItems(final Collection<? extends ShoppingItem> shoppingItems) {
-		return Observable.fromIterable(shoppingItems)
-				.flatMap(item -> getAllShoppingItems(item.getChildren())
-						.mergeWith(Observable.just(item)));
-
 	}
 
 	/**

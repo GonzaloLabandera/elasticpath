@@ -166,7 +166,7 @@ When(~'^I view a selected shipping option with promotions$') { ->
 			.stopIfFailure()
 }
 
-When(~'^I view an unselected shipping option promotions (.+)$') { String shippingOptionWithWithOutPromo ->
+When(~'^I view an unselected shipping option (.+)$') { String shippingOptionWithWithOutPromo ->
 	// Assume that we start on the shipping option selector.
 	client.findChoice {
 		shippingoption ->
@@ -183,7 +183,7 @@ And(~'^a personalisation header triggers a cart promotion$') { ->
 	CommonMethods.addPersonalisationHeader("CUSTOMER_AGE_YEARS", "50")
 }
 
-When(~'^I view an unselected shipping option (.+) with personalised shipping promotions$') { String shippingOption ->
+When(~'^I view the unselected shipping option (.+) with personalised shipping promotions$') { String shippingOption ->
 	CommonMethods.addPersonalisationHeader("REFERRING_URL", "personalisedshippingpromos.elasticpath.net")
 	// NOTE: Destination is already selected because this was a new user and
 	// the first address gets selected as default.

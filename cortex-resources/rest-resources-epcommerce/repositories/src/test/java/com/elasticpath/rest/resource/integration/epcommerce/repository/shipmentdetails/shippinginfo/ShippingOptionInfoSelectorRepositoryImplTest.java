@@ -21,7 +21,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.elasticpath.domain.cartorder.CartOrder;
 import com.elasticpath.rest.ResourceOperationFailure;
@@ -35,8 +35,8 @@ import com.elasticpath.rest.id.type.CompositeIdentifier;
 import com.elasticpath.rest.id.type.StringIdentifier;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder.CartOrderRepository;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.shipmentdetails.ShipmentDetailsConstants;
-import com.elasticpath.rest.resource.integration.epcommerce.repository.shipping.ShippingServiceLevelRepository;
-import com.elasticpath.rest.resource.integration.epcommerce.repository.shipping.impl.ShippingServiceLevelRepositoryImpl;
+import com.elasticpath.rest.resource.integration.epcommerce.repository.shipping.ShippingOptionRepository;
+import com.elasticpath.rest.resource.integration.epcommerce.repository.shipping.impl.ShippingOptionRepositoryImpl;
 import com.elasticpath.rest.selector.ChoiceStatus;
 
 /**
@@ -81,21 +81,19 @@ public class ShippingOptionInfoSelectorRepositoryImplTest {
 	private ShippingOptionInfoSelectorRepositoryImpl<ShippingOptionInfoSelectorIdentifier, ShippingOptionInfoSelectorChoiceIdentifier> repository;
 
 	@Mock
-	private ShippingServiceLevelRepository shippingServiceLevelRepository;
+	private ShippingOptionRepository shippingOptionRepository;
 
 	@Mock
 	private CartOrderRepository cartOrderRepository;
 
 	@Test
 	public void verifyGetChoicesReturnsNotFoundWhenNoShippingIdsAreFound() {
-		when(shippingServiceLevelRepository.findShippingServiceLevelGuidsForShipment(SCOPE, shipmentDetailsId))
-				.thenReturn(Observable.error(ResourceOperationFailure.notFound(ShippingServiceLevelRepositoryImpl.SHIPPING_OPTIONS_NOT_FOUND)));
-		when(shippingServiceLevelRepository.getSelectedShippingOptionIdForShipmentDetails(SCOPE, shipmentDetailsId))
-				.thenReturn(Maybe.just(SELECTED_ID));
+		when(shippingOptionRepository.findShippingOptionCodesForShipment(SCOPE, shipmentDetailsId))
+				.thenReturn(Observable.error(ResourceOperationFailure.notFound(ShippingOptionRepositoryImpl.SHIPPING_OPTIONS_NOT_FOUND)));
 
 		repository.getChoices(selectorIdentifier)
 				.test()
-				.assertError(createErrorCheckPredicate(ShippingServiceLevelRepositoryImpl.SHIPPING_OPTIONS_NOT_FOUND, ResourceStatus.NOT_FOUND));
+				.assertError(createErrorCheckPredicate(ShippingOptionRepositoryImpl.SHIPPING_OPTIONS_NOT_FOUND, ResourceStatus.NOT_FOUND));
 	}
 
 	@Test
@@ -104,9 +102,9 @@ public class ShippingOptionInfoSelectorRepositoryImplTest {
 		shippingOptionIdentifiers.add(SELECTED_ID);
 		shippingOptionIdentifiers.add(NOT_SELECTED);
 
-		when(shippingServiceLevelRepository.findShippingServiceLevelGuidsForShipment(SCOPE, shipmentDetailsId))
+		when(shippingOptionRepository.findShippingOptionCodesForShipment(SCOPE, shipmentDetailsId))
 				.thenReturn(Observable.fromIterable(shippingOptionIdentifiers));
-		when(shippingServiceLevelRepository.getSelectedShippingOptionIdForShipmentDetails(SCOPE, shipmentDetailsId))
+		when(shippingOptionRepository.getSelectedShippingOptionCodeForShipmentDetails(SCOPE, shipmentDetailsId))
 				.thenReturn(Maybe.just(SELECTED_ID));
 
 		repository.getChoices(selectorIdentifier)
@@ -123,9 +121,9 @@ public class ShippingOptionInfoSelectorRepositoryImplTest {
 		shippingOptionIdentifiers.add(SELECTED_ID);
 		shippingOptionIdentifiers.add(NOT_SELECTED);
 
-		when(shippingServiceLevelRepository.findShippingServiceLevelGuidsForShipment(SCOPE, shipmentDetailsId))
+		when(shippingOptionRepository.findShippingOptionCodesForShipment(SCOPE, shipmentDetailsId))
 				.thenReturn(Observable.fromIterable(shippingOptionIdentifiers));
-		when(shippingServiceLevelRepository.getSelectedShippingOptionIdForShipmentDetails(SCOPE, shipmentDetailsId)).thenReturn(Maybe.empty());
+		when(shippingOptionRepository.getSelectedShippingOptionCodeForShipmentDetails(SCOPE, shipmentDetailsId)).thenReturn(Maybe.empty());
 
 		repository.getChoices(selectorIdentifier)
 				.test()
@@ -137,7 +135,7 @@ public class ShippingOptionInfoSelectorRepositoryImplTest {
 
 	@Test
 	public void verifyGetChoiceReturnsChoosableWhenNoSelectedIdIsFound() {
-		when(shippingServiceLevelRepository.getSelectedShippingOptionIdForShipmentDetails(SCOPE, shipmentDetailsId)).thenReturn(Maybe.empty());
+		when(shippingOptionRepository.getSelectedShippingOptionCodeForShipmentDetails(SCOPE, shipmentDetailsId)).thenReturn(Maybe.empty());
 
 		repository.getChoice(choiceIdentifier)
 				.test()
@@ -147,7 +145,7 @@ public class ShippingOptionInfoSelectorRepositoryImplTest {
 
 	@Test
 	public void verifyGetChoiceReturnsChoosableWhenShippingOptionIsNotSelected() {
-		when(shippingServiceLevelRepository.getSelectedShippingOptionIdForShipmentDetails(SCOPE, shipmentDetailsId))
+		when(shippingOptionRepository.getSelectedShippingOptionCodeForShipmentDetails(SCOPE, shipmentDetailsId))
 				.thenReturn(Maybe.just(NOT_SELECTED));
 
 		repository.getChoice(choiceIdentifier)
@@ -158,7 +156,7 @@ public class ShippingOptionInfoSelectorRepositoryImplTest {
 
 	@Test
 	public void verifyGetChoiceReturnsChosenWhenShippingOptionIsSelected() {
-		when(shippingServiceLevelRepository.getSelectedShippingOptionIdForShipmentDetails(SCOPE, shipmentDetailsId))
+		when(shippingOptionRepository.getSelectedShippingOptionCodeForShipmentDetails(SCOPE, shipmentDetailsId))
 				.thenReturn(Maybe.just(SELECTED_ID));
 
 		repository.getChoice(choiceIdentifier)
@@ -177,7 +175,7 @@ public class ShippingOptionInfoSelectorRepositoryImplTest {
 				.assertNoErrors()
 				.assertComplete();
 
-		verify(cartOrder).setShippingServiceLevelGuid(SELECTED_ID);
+		verify(cartOrder).setShippingOptionCode(SELECTED_ID);
 		verify(cartOrderRepository).saveCartOrderAsSingle(cartOrder);
 	}
 
@@ -186,7 +184,6 @@ public class ShippingOptionInfoSelectorRepositoryImplTest {
 		String errorMsg = String.format(ORDER_WITH_GUID_NOT_FOUND, ORDER_ID, SCOPE);
 		when(cartOrderRepository.findByShipmentDetailsId(SCOPE, shipmentDetailsId))
 				.thenReturn(Single.error(ResourceOperationFailure.notFound(errorMsg)));
-		when(cartOrderRepository.saveCartOrderAsSingle(cartOrder)).thenReturn(Single.just(cartOrder));
 
 		repository.selectChoice(choiceIdentifier)
 				.test()

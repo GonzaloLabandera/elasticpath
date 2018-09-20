@@ -3,6 +3,7 @@
  */
 package com.elasticpath.commons.security;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -13,6 +14,7 @@ import java.util.Map;
  * <code>ValidationResult</code> represents result of validation made by <code>PasswordPolicy</code>.
  */
 public class ValidationResult {
+
 	private Map<String, ValidationError> errors;
 
 	/**
@@ -25,6 +27,18 @@ public class ValidationResult {
 	 */
 	public ValidationResult() {
 		errors = new HashMap<>();
+	}
+
+	/**
+	 * Constructs the instance of the class.
+	 *
+	 * @param errors validation errors
+	 */
+	public ValidationResult(final ValidationError... errors) {
+		this.errors = new HashMap<>();
+
+		Arrays.stream(errors)
+				.forEach(this::addError);
 	}
 
 	/**
@@ -80,4 +94,5 @@ public class ValidationResult {
 		validationResult.errors = Collections.unmodifiableMap(new HashMap<String, ValidationError>(0));
 		return validationResult;
 	}
+
 }

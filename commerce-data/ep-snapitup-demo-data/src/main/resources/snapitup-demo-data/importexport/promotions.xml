@@ -93,7 +93,7 @@
         <action type="shippingPercentDiscountAction">
             <parameters>
                 <parameter>
-                    <key>shippingServiceLevelCode</key>
+                    <key>shippingOptionCode</key>
                     <value>SLRWORLD_USPSGround</value>
                 </parameter>
                 <parameter>
@@ -133,7 +133,7 @@
         <action type="shippingPercentDiscountAction">
             <parameters>
                 <parameter>
-                    <key>shippingServiceLevelCode</key>
+                    <key>shippingOptionCode</key>
                     <value>SNAPITUP_USPSGround</value>
                 </parameter>
                 <parameter>
@@ -173,7 +173,7 @@
         <action type="shippingPercentDiscountAction">
             <parameters>
                 <parameter>
-                    <key>shippingServiceLevelCode</key>
+                    <key>shippingOptionCode</key>
                     <value>SNAPITUPUK_RoyalMail2ndClass</value>
                 </parameter>
                 <parameter>

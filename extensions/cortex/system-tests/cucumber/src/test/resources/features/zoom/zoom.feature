@@ -18,19 +18,41 @@ Feature: Zoom
     And the zoom object contains path self.type
     And the zoom object contains path links
 
+  Scenario: Zoom does not contain self when not omitted
+    Given I GET /navigations/mobee?zoom=element:items:element&format=zoom.noself
+    When I inspect the zoom object _element[0]._items[0]._element[0]
+    Then the zoom object does not contain path self
+
+  Scenario: Zoom contains standard links when requested
+    Given I GET /navigations/mobee?zoom=element:items:element&format=standardlinks
+    When I inspect the zoom object _element[0]._items[0]._element[0]
+    Then the zoom object does not contain path links[0].uri
+    And the zoom object does not contain path links[0].rev
+    And the zoom object contains path links[0].href
+    And the zoom object contains path links[0].type
+    And the zoom object contains path links[0].rel
+
   Scenario: Zoom is case Insensitive
     Given I GET /navigations/mobee?zoom=element
     And save the zoom response
     When I GET /navigations/mobee?zoom=eLeMeNt
     Then the response is identical to the saved response
 
-  Scenario: Single zoom object is identical to non-zoomed object
-    Given I GET /geographies/mobee/countries?zoom=element
+  Scenario Outline: Single zoom object is identical to non-zoomed object
+    Given I GET /geographies/mobee/countries?zoom=element&format=<FORMAT>
     And I inspect the zoom object _element[0]
     And save the zoomed response
     When I GET /geographies/mobee/countries
-    And I follow links element
-    Then the response is identical to the saved response
+    And I specify the <FORMAT> and follow the link element
+    Then In the given format <FORMAT> the response is identical to the saved response
+
+    Examples:
+      | FORMAT                    |
+      |                           |
+      | standardlinks             |
+      | zoom.noself               |
+      | standardlinks,zoom.noself |
+    
 
   Scenario: Multiple zoom object is identical to non-zoomed object
     Given I GET /carts/mobee/default?zoom=lineitems,total

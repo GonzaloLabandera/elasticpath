@@ -44,6 +44,7 @@ public class SingleSelectorResourceStateBuilderTest {
 		SelectorEntity expectedEntity = SelectorEntity.builder()
 				.withName(NAME)
 				.withSelectionRule(SELECTION_RULE)
+				.withSelectorId(null)
 				.build();
 		Self expectedSelf = SelfFactory.createSelf(SELECTOR_URI);
 

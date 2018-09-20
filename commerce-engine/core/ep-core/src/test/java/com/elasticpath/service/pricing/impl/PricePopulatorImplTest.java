@@ -3,6 +3,8 @@
  */
 package com.elasticpath.service.pricing.impl;
 
+import static junit.framework.TestCase.assertFalse;
+import static junit.framework.TestCase.assertTrue;
 import static org.junit.Assert.assertEquals;
 
 import java.math.BigDecimal;
@@ -69,7 +71,7 @@ public class PricePopulatorImplTest {
 		Currency currency = Currency.getInstance(Locale.CANADA);
 		Price price = beanFactory.getBean(ContextIdNames.PRICE);
 		boolean found = pricePopulator.populatePriceFromBaseAmounts(amounts, currency, price);
-		assertEquals(found, false);
+		assertFalse(found);
 	}
 
 	/**
@@ -87,7 +89,7 @@ public class PricePopulatorImplTest {
 		Currency currency = Currency.getInstance(Locale.CANADA);
 		Price price = beanFactory.getBean(ContextIdNames.PRICE);
 		boolean found = pricePopulator.populatePriceFromBaseAmounts(amounts, currency, price);
-		assertEquals(found, false);
+		assertFalse(found);
 	}
 
 	/**
@@ -109,7 +111,7 @@ public class PricePopulatorImplTest {
 		Currency currency = Currency.getInstance(Locale.CANADA);
 		Price price = beanFactory.getBean(ContextIdNames.PRICE);
 		boolean found = pricePopulator.populatePriceFromBaseAmounts(amounts, currency, price);
-		assertEquals(found, true);
+		assertTrue(found);
 		assertEquals(1, price.getPriceTiers().size());
 	}
 	/**
@@ -131,7 +133,7 @@ public class PricePopulatorImplTest {
 		Currency currency = Currency.getInstance(Locale.CANADA);
 		Price price = beanFactory.getBean(ContextIdNames.PRICE);
 		boolean found = pricePopulator.populatePriceFromBaseAmounts(amounts, currency, price);
-		assertEquals(found, true);
+		assertTrue(found);
 		assertEquals(2, price.getPriceTiers().size());
 
 		assertEquals(Money.valueOf("9.99", currency), price

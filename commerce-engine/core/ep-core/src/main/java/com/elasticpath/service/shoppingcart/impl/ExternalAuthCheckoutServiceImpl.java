@@ -74,10 +74,15 @@ public class ExternalAuthCheckoutServiceImpl implements ExternalAuthCheckoutServ
 																		final CustomerSession customerSession) {
 		OrderShipment orderShipment = getBeanFactory().getBean(ContextIdNames.TEMPLATE_ORDER_SHIPMENT);
 		orderShipment.setShipmentNumber(generatePaymentReferenceNumber(shoppingCart));
-		Collection<OrderSku> orderSkus = orderSkuFactory.createOrderSkus(shoppingCart.getCartItems(), pricingSnapshot, customerSession.getLocale());
+
+		Collection<OrderSku> orderSkus = orderSkuFactory.createOrderSkus(shoppingCart.getRootShoppingItems(),
+																		 pricingSnapshot,
+																		 customerSession.getLocale());
+
 		for (OrderSku orderSku : orderSkus) {
 			orderShipment.addShipmentOrderSku(orderSku);
 		}
+
 		return orderShipment;
 	}
 

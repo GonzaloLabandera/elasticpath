@@ -82,7 +82,6 @@ import com.elasticpath.domain.order.Order;
 import com.elasticpath.domain.order.OrderAddress;
 import com.elasticpath.domain.order.OrderReturn;
 import com.elasticpath.domain.order.OrderReturnSku;
-import com.elasticpath.domain.shipping.ShippingServiceLevel;
 import com.elasticpath.domain.shoppingcart.ExchangeItem;
 import com.elasticpath.domain.shoppingcart.ShoppingCart;
 import com.elasticpath.domain.shoppingcart.ShoppingCartPricingSnapshot;
@@ -93,12 +92,13 @@ import com.elasticpath.domain.tax.TaxJurisdiction;
 import com.elasticpath.money.Money;
 import com.elasticpath.service.catalog.ProductSkuLookup;
 import com.elasticpath.service.order.ReturnAndExchangeService;
-import com.elasticpath.service.shipping.ShippingServiceLevelService;
 import com.elasticpath.service.shoppingcart.PricingSnapshotService;
 import com.elasticpath.service.shoppingcart.TaxSnapshotService;
 import com.elasticpath.service.tax.TaxCalculationResult;
 import com.elasticpath.service.tax.TaxJurisdictionService;
 import com.elasticpath.service.tax.adapter.TaxAddressAdapter;
+import com.elasticpath.shipping.connectivity.dto.ShippingOption;
+import com.elasticpath.service.shipping.ShippingOptionService;
 
 /**
  * Order new items exchange wizard page.
@@ -125,8 +125,7 @@ public class ExchangeOrderItemsPage extends AbstractEPWizardPage<OrderReturn> {
 	/** Address to deliver order exchange. */
 	private OrderAddress shippingAddress;
 
-	/** Shipping type to deliver order exchange. */
-	private ShippingServiceLevel shippingServiceLevel;
+	private ShippingOption shippingOption;
 
 	private BigDecimal shippingCost;
 
@@ -168,7 +167,6 @@ public class ExchangeOrderItemsPage extends AbstractEPWizardPage<OrderReturn> {
 		super(1, true, pageName, new DataBindingContext());
 		this.cartItems = new ArrayList<>();
 		orderExchangeService = ServiceLocator.getService(ContextIdNames.ORDER_RETURN_SERVICE);
-		shippingServiceLevel = ServiceLocator.getService(ContextIdNames.SHIPPING_SERVICE_LEVEL);
 		taxJurisdictionService = ServiceLocator.getService(ContextIdNames.TAX_JURISDICTION_SERVICE);
 		setMessage(message);
 	}
@@ -255,27 +253,27 @@ public class ExchangeOrderItemsPage extends AbstractEPWizardPage<OrderReturn> {
 		if (isAbleToPopulate()) {
 			int sizeBeforePopulating = cartItems.size();
 			switch (step) {
-			case SHIPPING_METHOD_MODIFIED:
-				shoppingCart = orderExchangeService.populateShoppingCart(getModel(), cartItems, shippingServiceLevel,
-						shippingAddress);
-				break;
-			case SHIPPING_ADDRESS_MODIFIED:
+				case SHIPPING_METHOD_MODIFIED:
+					shoppingCart = orderExchangeService.populateShoppingCart(getModel(), cartItems, shippingOption,
+							shippingAddress);
+					break;
+				case SHIPPING_ADDRESS_MODIFIED:
 
-				break;
-			case SHIPMENT_DISCOUNT_MODIFIED:
-				shoppingCart = orderExchangeService.populateShoppingCart(getModel(), cartItems, shippingServiceLevel,
-						shippingCost, shipmentDiscount, shippingAddress);
-				break;
-			case SHIPPING_COST_MODIFIED:
-				shoppingCart = orderExchangeService.populateShoppingCart(getModel(), cartItems, shippingServiceLevel,
-						shippingCost, shipmentDiscount, shippingAddress);
-				break;
-			case SHOPPING_CART_MODIFIED:
-				shoppingCart = orderExchangeService.populateShoppingCart(getModel(), cartItems, shippingServiceLevel,
-						shippingAddress);
-				break;
-			default:
-				break;
+					break;
+				case SHIPMENT_DISCOUNT_MODIFIED:
+					shoppingCart = orderExchangeService.populateShoppingCart(getModel(), cartItems, shippingOption,
+							shippingCost, shipmentDiscount, shippingAddress);
+					break;
+				case SHIPPING_COST_MODIFIED:
+					shoppingCart = orderExchangeService.populateShoppingCart(getModel(), cartItems, shippingOption,
+							shippingCost, shipmentDiscount, shippingAddress);
+					break;
+				case SHOPPING_CART_MODIFIED:
+					shoppingCart = orderExchangeService.populateShoppingCart(getModel(), cartItems, shippingOption,
+							shippingAddress);
+					break;
+				default:
+					break;
 			}
 
 			shoppingCart.setCmUserUID(LoginManager.getCmUserId());
@@ -284,15 +282,15 @@ public class ExchangeOrderItemsPage extends AbstractEPWizardPage<OrderReturn> {
 			getModel().setExchangeShoppingCart(shoppingCart, taxSnapshot);
 			getModel().setExchangeCustomerSession(shoppingCart.getCustomerSession());
 
-			LOG.debug(sizeBeforePopulating + "   " + shoppingCart.getCartItems().size()); //$NON-NLS-1$
+			LOG.debug(sizeBeforePopulating + "   " + shoppingCart.getRootShoppingItems().size()); //$NON-NLS-1$
 			// --- workaround decision of bug when CartItem was removed from shopping cart(if it unavailable)
-			if (shoppingCart.getCartItems().size() != sizeBeforePopulating) {
+			if (shoppingCart.getRootShoppingItems().size() != sizeBeforePopulating) {
 				MessageDialog.openInformation(this.getShell(), FulfillmentMessages.get().ExchangeWizard_ItemsUnavailableTitle,
 						FulfillmentMessages.get().ExchangeWizard_ItemsUnavailableText);
-				orderedItemsTableViewer.setInput(shoppingCart.getCartItems());
+				orderedItemsTableViewer.setInput(shoppingCart.getRootShoppingItems());
 				refreshCartItems();
 			}
-			if (!shoppingCart.getCartItems().isEmpty()) {
+			if (!shoppingCart.getRootShoppingItems().isEmpty()) {
 				summarySection.updatePrices();
 				//refresh the controls
 				summarySection.getParent().layout(true, true);
@@ -562,8 +560,8 @@ public class ExchangeOrderItemsPage extends AbstractEPWizardPage<OrderReturn> {
 			for (ExchangeItem orderSku : cartItems) {
 				if (orderSku.getListUnitPrice() == null && orderSku.getSaleUnitPrice() == null) {
 					setErrorMessage(
-						NLS.bind(FulfillmentMessages.get().Exchange_AddingItem_Message_NoPrice,
-						new Object[]{getProductSku(orderSku).getSkuCode()}));
+							NLS.bind(FulfillmentMessages.get().Exchange_AddingItem_Message_NoPrice,
+									new Object[]{getProductSku(orderSku).getSkuCode()}));
 					return false;
 				}
 			}
@@ -732,7 +730,7 @@ public class ExchangeOrderItemsPage extends AbstractEPWizardPage<OrderReturn> {
 			shippingMethodCombo.addSelectionListener(new SelectionAdapter() {
 				@Override
 				public void widgetSelected(final SelectionEvent event) {
-					shippingServiceLevel = (ShippingServiceLevel) shippingMethodCombo.getData(shippingMethodCombo.getText());
+					shippingOption = (ShippingOption) shippingMethodCombo.getData(shippingMethodCombo.getText());
 					populateShoppingCart(OrderPopulateStep.SHIPPING_METHOD_MODIFIED);
 					if (isShippingAddressSelected()) {
 						setErrorMessage(null);
@@ -749,14 +747,14 @@ public class ExchangeOrderItemsPage extends AbstractEPWizardPage<OrderReturn> {
 			shippingMethodCombo.add(defaultMethodPrompt);
 			shippingMethodCombo.select(0);
 
-			ShippingServiceLevelService serviceLevelService = ServiceLocator.getService(
-					ContextIdNames.SHIPPING_SERVICE_LEVEL_SERVICE);
-
-			List<ShippingServiceLevel> methodList =
-				serviceLevelService.retrieveShippingServiceLevel(getOrder().getStore().getCode(), shippingAddress);
-			for (ShippingServiceLevel shippingServiceLevel : methodList) {
-				String methodName = shippingServiceLevel.getDisplayName(getOrder().getLocale(), true);
-				shippingMethodCombo.setData(methodName, shippingServiceLevel);
+			final ShippingOptionService shippingOptionService = ServiceLocator.getService(ContextIdNames.SHIPPING_OPTION_SERVICE);
+			final List<ShippingOption> shippingOptions = shippingOptionService.getShippingOptions(shippingAddress,
+					getOrder().getStore().getCode(),
+					getOrder().getLocale())
+					.getAvailableShippingOptions();
+			for (ShippingOption availableShippingOption : shippingOptions) {
+				String methodName = availableShippingOption.getDisplayName(getOrder().getLocale()).orElse(null);
+				shippingMethodCombo.setData(methodName, availableShippingOption);
 				shippingMethodCombo.add(methodName);
 			}
 		}

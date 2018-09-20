@@ -72,8 +72,7 @@ public class ShippingReceiving extends AbstractNavigation {
 	 *
 	 * @return RmaSearchResultsPane
 	 */
-	public RmaSearchResultPane
-	clickReturnsSearch() {
+	public RmaSearchResultPane clickReturnsSearch() {
 		clickButton(SEARCH_BUTTON_CSS, "Search");
 		return new RmaSearchResultPane(getDriver());
 	}

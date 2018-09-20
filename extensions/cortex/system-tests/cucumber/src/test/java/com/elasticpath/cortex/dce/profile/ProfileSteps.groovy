@@ -29,9 +29,9 @@ When(~'^I authenticate with newly created shopper$') { ->
 			.stopIfFailure()
 }
 
-When(~'^I create a new shopper profile with family-name (.*), given-name (.*), password (.*), and existing user name (.+)$') {
-	String familyName, String givenName, String password, String existingUserName ->
-		registerShopper(DEFAULT_SCOPE, familyName, givenName, password, existingUserName)
+When(~'^I create a new shopper profile with family-name (.*), given-name (.*), password (.*), and user name (.+) in scope (.+)$') {
+	String familyName, String givenName, String password, String existingUserName, String scope ->
+		registerShopper(scope, familyName, givenName, password, existingUserName)
 				.stopIfFailure()
 }
 

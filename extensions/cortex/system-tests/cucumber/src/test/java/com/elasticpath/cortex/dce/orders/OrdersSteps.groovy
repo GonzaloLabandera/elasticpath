@@ -4,9 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat
 
 import static com.elasticpath.cortex.dce.ClasspathFluentRelosClientFactory.client
 import static com.elasticpath.cortex.dce.ClasspathFluentRelosClientFactory.currentScope
-import static com.elasticpath.cortex.dce.SharedConstants.CREDITCARD_SCOPE
 import static com.elasticpath.cortex.dce.SharedConstants.TEST_EMAIL_VALUE
-import static com.elasticpath.cortex.dce.orders.OrderConstants.CREDITCARD_SCOPE_SHOPPER
 import static com.elasticpath.cortex.dce.orders.OrderConstants.SEARCHABLE_PRODUCT
 import static com.elasticpath.rest.ws.assertions.RelosAssert.assertLinkDoesNotExist
 import static com.elasticpath.rest.ws.assertions.RelosAssert.assertLinkExists
@@ -19,28 +17,6 @@ import com.elasticpath.cortex.dce.CommonMethods
 this.metaClass.mixin(Hooks)
 this.metaClass.mixin(EN)
 
-Given(~'^I have selected a credit card that would trigger a failed order$') { ->
-	client.authRegisteredUserByName(CREDITCARD_SCOPE, CREDITCARD_SCOPE_SHOPPER)
-
-	CommonMethods.searchAndOpenItemWithKeyword(SEARCHABLE_PRODUCT)
-	client.addtocartform()
-			.addtodefaultcartaction(quantity: 1)
-			.stopIfFailure()
-
-	client.GET("/")
-			.defaultcart()
-			.order()
-			.paymentmethodinfo()
-			.selector()
-			.findChoiceOrChosen {
-		creditcard ->
-			def description = creditcard.description()
-			description["cardholder-name"] == "EXP_AUTH"
-	}
-	.stopIfFailure()
-	CommonMethods.selectIfNotAlreadySelected();
-
-}
 
 When(~'^I submit the order$') { ->
 	CommonMethods.submitPurchase()
@@ -95,19 +71,6 @@ And(~'^I retrieve the order taxes$') { ->
 	assertLinkExists(client, "tax")
 
 	client.tax()
-			.stopIfFailure()
-}
-
-Given(~'^I modify my payment method to another credit card$') { ->
-	client.authRegisteredUserByName(CREDITCARD_SCOPE, CREDITCARD_SCOPE_SHOPPER)
-
-	client.GET("/")
-			.defaultcart()
-			.order()
-			.paymentmethodinfo()
-			.selector()
-			.choice()
-			.selectaction()
 			.stopIfFailure()
 }
 

@@ -3,6 +3,8 @@
  */
 package com.elasticpath.rest.resource.integration.epcommerce.repository.purchase.repositories.impl.options;
 
+import java.util.List;
+
 import com.google.common.collect.ImmutableSortedMap;
 import io.reactivex.Observable;
 import io.reactivex.Single;
@@ -11,12 +13,12 @@ import org.osgi.service.component.annotations.Reference;
 
 import com.elasticpath.domain.catalog.ProductSku;
 import com.elasticpath.repository.LinksRepository;
+import com.elasticpath.rest.definition.purchases.PurchaseIdentifier;
 import com.elasticpath.rest.definition.purchases.PurchaseLineItemIdentifier;
 import com.elasticpath.rest.definition.purchases.PurchaseLineItemOptionsIdentifier;
-import com.elasticpath.rest.id.type.PathIdentifier;
 import com.elasticpath.rest.id.util.CompositeIdUtil;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.item.ItemRepository;
-import com.elasticpath.rest.resource.integration.epcommerce.repository.sku.ProductSkuRepository;
+import com.elasticpath.rest.resource.integration.epcommerce.repository.order.OrderRepository;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.transform.ReactiveAdapter;
 
 /**
@@ -31,26 +33,26 @@ public class LineItemToOptionsRepositoryImpl<I extends PurchaseLineItemIdentifie
 
 	private ItemRepository itemRepository;
 	private ReactiveAdapter reactiveAdapter;
-
-	private ProductSkuRepository productSkuRepository;
+	private OrderRepository orderRepository;
 
 	@Override
 	public Observable<PurchaseLineItemOptionsIdentifier> getElements(final PurchaseLineItemIdentifier identifier) {
-		String lineItemId = ((PathIdentifier) identifier.getLineItemId()).extractLeafId(); //which is item guid
-
-		return productSkuRepository.getProductSkuWithAttributesByGuidAsSingle(lineItemId)
+		PurchaseIdentifier purchaseIdentifier = identifier.getPurchaseLineItems().getPurchase();
+		List<String> guidPathFromRootItem = identifier.getLineItemId().getValue();
+		String scope = purchaseIdentifier.getPurchases().getScope().getValue();
+		String purchaseId = purchaseIdentifier.getPurchaseId().getValue();
+		return orderRepository.findProductSku(scope, purchaseId, guidPathFromRootItem)
 				.map(ProductSku::getSkuCode)
 				.map(this::encodeItemId)
 				.flatMap(this::doesSkuContainOptions)
-				.flatMapObservable(containsOptions -> {
-					if (containsOptions) {
-						return Observable.just(PurchaseLineItemOptionsIdentifier.builder()
-								.withPurchaseLineItem(identifier)
-								.build());
-					}
+				.flatMapObservable(containsOptions -> containsOptions ? buildPurchaseLineItemOptionsIdentifier(identifier) : Observable.empty())
+				.onErrorResumeNext(Observable.empty());
+	}
 
-					return Observable.empty();
-				});
+	private Observable<PurchaseLineItemOptionsIdentifier> buildPurchaseLineItemOptionsIdentifier(final PurchaseLineItemIdentifier identifier) {
+		return Observable.just(PurchaseLineItemOptionsIdentifier.builder()
+				.withPurchaseLineItem(identifier)
+				.build());
 	}
 
 	private String encodeItemId(final String skuCode) {
@@ -82,8 +84,7 @@ public class LineItemToOptionsRepositoryImpl<I extends PurchaseLineItemIdentifie
 	}
 
 	@Reference
-	public void setProductSkuRepository(final ProductSkuRepository productSkuRepository) {
-		this.productSkuRepository = productSkuRepository;
+	public void setOrderRepository(final OrderRepository orderRepository) {
+		this.orderRepository = orderRepository;
 	}
-
 }

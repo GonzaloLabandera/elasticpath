@@ -40,6 +40,22 @@
 				AND sc.status = 'ACTIVE'
 			</query>
 		</named-query>
+	<named-query name="ACTIVE_SHOPPING_CARTGUID_FIND_BY_SHOPPER_UID">
+		<query>
+			SELECT sc.guid
+			FROM ShoppingCartMementoImpl sc
+			WHERE sc.shopperUid = ?1
+			AND sc.status = 'ACTIVE'
+		</query>
+	</named-query>
+	<named-query name="STORE_BY_CARTGUID">
+		<query>
+			SELECT sc.storeCode
+			FROM ShoppingCartMementoImpl sc
+			WHERE sc.guid = ?1
+		</query>
+	</named-query>
+
 		<named-query name="ACTIVE_SHOPPING_CART_GUID_FIND_BY_CUSTOMER_AND_STORE">
 			<query>
 				SELECT sc.guid

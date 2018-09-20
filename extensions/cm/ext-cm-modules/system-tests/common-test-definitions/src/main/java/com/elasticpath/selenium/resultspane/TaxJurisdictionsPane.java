@@ -8,6 +8,7 @@ import org.openqa.selenium.WebDriver;
 import com.elasticpath.selenium.common.AbstractPageObject;
 import com.elasticpath.selenium.dialogs.ConfirmDialog;
 import com.elasticpath.selenium.dialogs.CreateEditTaxJurisdictionDialog;
+import com.elasticpath.selenium.util.Constants;
 
 /**
  * Tax Jurisdictions Pane class.
@@ -47,7 +48,7 @@ public class TaxJurisdictionsPane extends AbstractPageObject {
 	 * @param taxJurisdictionCountry String
 	 */
 	public void verifyTaxCodeIsNotInList(final String taxJurisdictionCountry) {
-		setWebDriverImplicitWait(1);
+		setWebDriverImplicitWait(Constants.IMPLICIT_WAIT_FOR_ELEMENT_NOT_EXISTS);
 		assertThat(verifyItemIsNotInCenterPaneWithoutPagination(TAX_JURISDICTION_LIST_PARENT_CSS, TAX_JURISDICTION_LIST_CSS, taxJurisdictionCountry,
 				"Tax Jurisdiction Country"))
 				.as("Delete failed, Tax Jurisdiction Country is still in the list - " + taxJurisdictionCountry)
@@ -61,8 +62,10 @@ public class TaxJurisdictionsPane extends AbstractPageObject {
 	 * @return CreateEditTaxJurisdictionDialog
 	 */
 	public CreateEditTaxJurisdictionDialog clickCreateTaxJurisdictionButton() {
-		clickButton(CREATE_TAXJURISDICTION_BUTTON_CSS, "Create Tax Jurisdiction");
-		return new CreateEditTaxJurisdictionDialog(getDriver(), "Create");
+		final String dialogName = "Create";
+		clickButton(CREATE_TAXJURISDICTION_BUTTON_CSS, "Create Tax Jurisdiction", String.format(CreateEditTaxJurisdictionDialog
+				.TAXJURISDICTION_PARENT_CSS_TEMPLATE, dialogName));
+		return new CreateEditTaxJurisdictionDialog(getDriver(), dialogName);
 	}
 
 	/**
@@ -90,9 +93,11 @@ public class TaxJurisdictionsPane extends AbstractPageObject {
 	 * @return CreateEditTaxJurisdictionDialog
 	 */
 	public CreateEditTaxJurisdictionDialog clickEditTaxJurisdictionButton(final String taxJurisdictionCountry) {
+		final String dialogName = "Edit";
 		verifyTaxJurisdictionIsInList(taxJurisdictionCountry);
-		clickButton(EDIT_TAXJURISDICTION_BUTTON_CSS, "Edit Tax Jurisdiction");
-		return new CreateEditTaxJurisdictionDialog(getDriver(), "Edit");
+		clickButton(EDIT_TAXJURISDICTION_BUTTON_CSS, "Edit Tax Jurisdiction", String.format(CreateEditTaxJurisdictionDialog
+				.TAXJURISDICTION_PARENT_CSS_TEMPLATE, dialogName));
+		return new CreateEditTaxJurisdictionDialog(getDriver(), dialogName);
 	}
 
 }

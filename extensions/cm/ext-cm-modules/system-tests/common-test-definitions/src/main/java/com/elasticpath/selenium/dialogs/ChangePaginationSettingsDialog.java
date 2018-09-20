@@ -7,7 +7,10 @@ import org.openqa.selenium.WebDriver;
  * Change Pagination Settings Dialog.
  */
 public class ChangePaginationSettingsDialog extends AbstractDialog {
-	private static final String RESULTS_PER_PAGE_CSS = "div[widget-id=\"[CCombo]Results per Page:\"] input[type=\"text\"]";
+	/**
+	 * CSS selector used to identify the dialog.
+	 */
+	public static final String RESULTS_PER_PAGE_CSS = "div[widget-id=\"[CCombo]Results per Page:\"] input[type=\"text\"]";
 
 	/**
 	 * Constructor.

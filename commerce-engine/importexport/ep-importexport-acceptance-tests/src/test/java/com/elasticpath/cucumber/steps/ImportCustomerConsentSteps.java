@@ -17,7 +17,6 @@ import cucumber.api.java.en.Given;
 import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.ContextConfiguration;
 
 import com.elasticpath.common.dto.datapolicy.CustomerConsentDTO;
 import com.elasticpath.domain.builder.datapolicy.CustomerConsentBuilder;
@@ -38,7 +37,6 @@ import com.elasticpath.service.datapolicy.DataPolicyService;
 /**
  * Import customer consent steps.
  */
-@ContextConfiguration("/integration-context-with-customer-service.xml")
 public class ImportCustomerConsentSteps {
 
 	private static final String CUSTOMER_CONSENTS_IMPORT_FILE = "customer_consents.xml";

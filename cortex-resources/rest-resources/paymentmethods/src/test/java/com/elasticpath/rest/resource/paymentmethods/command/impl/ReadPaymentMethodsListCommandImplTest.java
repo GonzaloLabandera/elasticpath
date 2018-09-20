@@ -22,7 +22,7 @@ import org.junit.runner.RunWith;
 
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.elasticpath.rest.Operation;
 import com.elasticpath.rest.ResourceStatus;
@@ -197,7 +197,7 @@ public final class ReadPaymentMethodsListCommandImplTest {
 
 	private ResourceLink createDefaultPaymentMethodElementLink() {
 		String paymentMethodUri = URIUtil.format(RESOURCE_NAME, SCOPE, Default.URI_PART);
-		return ResourceLinkFactory.create(paymentMethodUri, PaymentmethodsMediaTypes.CREDIT_CARD.id(),
+		return ResourceLinkFactory.create(paymentMethodUri, PaymentmethodsMediaTypes.PAYMENT_TOKEN.id(),
 				PaymentMethodRels.DEFAULT_REL, ListElementRels.LIST);
 	}
 
@@ -220,6 +220,7 @@ public final class ReadPaymentMethodsListCommandImplTest {
 				ExecutionResultFactory.createReadOK(expectedPaymentMethodLinks));
 	}
 
+	@SuppressWarnings("unchecked")
 	private void shouldNotFindDefaultPaymentMethod() {
 		when(mockDefaultPaymentMethodLookup.getDefaultPaymentMethodElementLink(SCOPE, USER_ID))
 				.thenThrow(BrokenChainException.class);

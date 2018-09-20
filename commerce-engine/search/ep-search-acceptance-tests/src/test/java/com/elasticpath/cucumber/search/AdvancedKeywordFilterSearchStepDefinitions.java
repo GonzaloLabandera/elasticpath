@@ -8,12 +8,10 @@ import cucumber.api.java.en.Given;
 import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.ContextConfiguration;
 
 /**
  * Definition for the Advanced Keyword Search Filter feature.
  */
-@ContextConfiguration("/cucumber.xml")
 public class AdvancedKeywordFilterSearchStepDefinitions {
 
 	@Autowired

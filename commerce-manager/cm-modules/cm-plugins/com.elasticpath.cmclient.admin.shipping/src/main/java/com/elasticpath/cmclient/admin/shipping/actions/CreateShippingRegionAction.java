@@ -9,7 +9,7 @@ import org.eclipse.jface.resource.ImageDescriptor;
 import com.elasticpath.cmclient.admin.shipping.dialogs.ShippingRegionDialog;
 import com.elasticpath.cmclient.admin.shipping.views.ShippingRegionListView;
 import com.elasticpath.cmclient.core.ServiceLocator;
-import com.elasticpath.commons.constants.ContextIdNames;
+import com.elasticpath.commons.constants.EpShippingContextIdNames;
 import com.elasticpath.domain.shipping.ShippingRegion;
 import com.elasticpath.service.shipping.ShippingRegionService;
 
@@ -34,11 +34,11 @@ public class CreateShippingRegionAction extends Action {
 
 	@Override
 	public void run() {
-		ShippingRegion shippingRegion = ServiceLocator.getService(ContextIdNames.SHIPPING_REGION);
+		ShippingRegion shippingRegion = ServiceLocator.getService(EpShippingContextIdNames.SHIPPING_REGION);
 
 		if (ShippingRegionDialog.openCreateDialog(listView.getSite().getShell(), shippingRegion)) {
 			ShippingRegionService shippingRegionService = ServiceLocator.getService(
-					ContextIdNames.SHIPPING_REGION_SERVICE);
+					EpShippingContextIdNames.SHIPPING_REGION_SERVICE);
 
 			shippingRegionService.add(shippingRegion);
 			listView.refreshViewerInput();

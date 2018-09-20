@@ -39,7 +39,7 @@ public class CodeEntityItemIdentifierRepositoryImpl<E extends CodeEntity, I exte
 	@Override
 	public Single<CodeEntity> findOne(final ItemIdentifier itemIdentifier) {
 
-		String code = ((Map) itemIdentifier.getItemId().getValue()).get(ItemRepository.SKU_CODE_KEY).toString();
+		String code = (itemIdentifier.getItemId().getValue()).get(ItemRepository.SKU_CODE_KEY);
 
 		return Single.just(CodeEntity.builder()
 				.withCode(code)

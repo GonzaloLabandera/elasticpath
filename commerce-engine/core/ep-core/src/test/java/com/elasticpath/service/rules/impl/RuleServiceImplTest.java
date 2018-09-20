@@ -3,6 +3,8 @@
  */
 package com.elasticpath.service.rules.impl;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -20,6 +22,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
+import com.google.common.collect.ImmutableList;
 import org.apache.commons.lang.StringUtils;
 import org.jmock.Expectations;
 import org.jmock.Sequence;
@@ -46,7 +49,6 @@ import com.elasticpath.persistence.api.FetchGroupLoadTuner;
 import com.elasticpath.persistence.api.PersistenceEngine;
 import com.elasticpath.service.ProcessingHook;
 import com.elasticpath.service.misc.FetchPlanHelper;
-import com.elasticpath.service.misc.TimeService;
 import com.elasticpath.service.rules.CouponConfigService;
 import com.elasticpath.service.rules.RuleSetService;
 import com.elasticpath.service.search.IndexNotificationService;
@@ -62,20 +64,15 @@ public class RuleServiceImplTest extends AbstractCatalogDataTestCase {
 
 	private static final String SERVICE_EXCEPTION_EXPECTED = "EpServiceException expected.";
 
-	private static final Date MOCKED_CURRENT_TIME = new Date();
-
 	private RuleServiceImpl ruleServiceImpl;
 
 	private PersistenceEngine mockPersistenceEngine;
 
 	private RuleSetService mockRuleSetService;
 
-	private TimeService mockTimeService;
-
 	private IndexNotificationService mockIndexNotificationService;
 
 	private FetchPlanHelper mockFetchPlanHelper;
-
 
 	/**
 	 * Prepares for tests.
@@ -103,14 +100,7 @@ public class RuleServiceImplTest extends AbstractCatalogDataTestCase {
 			}
 		});
 
-		mockTimeService = context.mock(TimeService.class);
-		context.checking(new Expectations() {
-			{
-				allowing(mockTimeService).getCurrentTime();
-				will(returnValue(MOCKED_CURRENT_TIME));
-			}
-		});
-		ruleServiceImpl.setTimeService(mockTimeService);
+		ruleServiceImpl.setTimeService(getTimeService());
 
 		// Mock up the rule set service
 		mockRuleSetService = context.mock(RuleSetService.class);
@@ -693,6 +683,59 @@ Tested by FIT?
 		assertNotNull("Display names should have been found", res);
 		assertEquals("There should be 1 display name", 1, res.size());
 		assertEquals("The promo should map to an empty string display name", StringUtils.EMPTY, res.get(promo1));
+	}
+
+	@Test
+	public void verifyGetAllowedLimitReturnsNullWhenNoLimit() {
+		final long ruleId = 123L;
+
+		final List<String> allowedLimits = Collections.emptyList();
+
+		context.checking(new Expectations() {
+			{
+				oneOf(mockPersistenceEngine).retrieveByNamedQuery("RULE_ALLOWED_LIMIT_FIND_BY_RULE_ID", ruleId);
+				will(returnValue(allowedLimits));
+			}
+		});
+
+		assertThat(ruleServiceImpl.getAllowedLimit(ruleId))
+				.isNull();
+	}
+
+	@Test
+	public void verifyGetAllowedLimitReturnsFirstAllowedLimit() {
+		final long ruleId = 123L;
+		final Long expectedAllowedLimit = 456L;
+
+		final List<String> allowedLimits = ImmutableList.of(
+				String.valueOf(expectedAllowedLimit), "1", "2");
+
+		context.checking(new Expectations() {
+			{
+				oneOf(mockPersistenceEngine).retrieveByNamedQuery("RULE_ALLOWED_LIMIT_FIND_BY_RULE_ID", ruleId);
+				will(returnValue(allowedLimits));
+			}
+		});
+
+		assertThat(ruleServiceImpl.getAllowedLimit(ruleId))
+				.isEqualTo(expectedAllowedLimit);
+	}
+
+	@Test
+	public void verifyGetAllowedLimitThrowsNumberFormatExceptionWhenNotANumber() {
+		final long ruleId = 123L;
+
+		final List<String> allowedLimits = Collections.singletonList("NotANumber");
+
+		context.checking(new Expectations() {
+			{
+				oneOf(mockPersistenceEngine).retrieveByNamedQuery("RULE_ALLOWED_LIMIT_FIND_BY_RULE_ID", ruleId);
+				will(returnValue(allowedLimits));
+			}
+		});
+
+		assertThatThrownBy(() -> ruleServiceImpl.getAllowedLimit(ruleId))
+				.isInstanceOf(NumberFormatException.class);
 	}
 
 	@Override

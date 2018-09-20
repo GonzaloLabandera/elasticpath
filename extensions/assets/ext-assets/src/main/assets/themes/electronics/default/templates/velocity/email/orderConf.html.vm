@@ -140,7 +140,7 @@
                                                 </tr>
                                                 <tr class="shipment-details" id="shipping-method">
                                                     <td class="title">#emailMessage("email.orderConf.shipping.method"):</td>
-                                                    <td class="value" id="address">$shipment.serviceLevel</td>
+                                                    <td class="value" id="address">$shipment.shippingOptionName</td>
                                                 </tr>
                                             </table>
                                         #elseif ($shipment.orderShipmentType == "SERVICE")

@@ -15,6 +15,7 @@ import com.elasticpath.cmclient.core.helpers.ApplicationServiceHandlerRegistrar;
 import com.elasticpath.cmclient.core.helpers.EPTestUtilFactory;
 import com.elasticpath.cmclient.core.helpers.TestIdMapManager;
 import com.elasticpath.cmclient.core.helpers.TestIdUtil;
+import com.elasticpath.cmclient.core.util.DateTimeUtilFactory;
 
 /**
  * This is an entry point class used for initialization of service handlers, widget utils etc
@@ -48,6 +49,7 @@ public class ApplicationStarter implements IApplication {
 			//register service handlers on application level
 			ApplicationServiceHandlerRegistrar.getApplicationInstance();
 			ApplicationLockManager.getInstance().start();
+			DateTimeUtilFactory.getDateUtil().initializeTimezone();
 
 			//TODO: Is this still necessary?
 			if (UITestUtil.isEnabled()) {

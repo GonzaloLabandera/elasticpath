@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) Elastic Path Software Inc., 2014
  */
 package com.elasticpath.service.payment.gateway.impl;
@@ -25,7 +25,6 @@ import com.elasticpath.plugin.payment.capabilities.SaleCapability;
 import com.elasticpath.plugin.payment.capabilities.TokenAuthorizationCapability;
 import com.elasticpath.plugin.payment.capabilities.VoidCaptureCapability;
 import com.elasticpath.plugin.payment.dto.AddressDto;
-import com.elasticpath.plugin.payment.dto.CardDetailsPaymentMethod;
 import com.elasticpath.plugin.payment.dto.OrderPaymentDto;
 import com.elasticpath.plugin.payment.dto.OrderShipmentDto;
 import com.elasticpath.plugin.payment.dto.PayerAuthenticationEnrollmentResultDto;
@@ -37,7 +36,6 @@ import com.elasticpath.plugin.payment.dto.PaymentOptionFormRowDescriptorBuilder;
 import com.elasticpath.plugin.payment.dto.ShoppingCartDto;
 import com.elasticpath.plugin.payment.dto.impl.OrderPaymentDtoImpl;
 import com.elasticpath.plugin.payment.dto.impl.PayerAuthenticationEnrollmentResultDtoImpl;
-import com.elasticpath.plugin.payment.exceptions.CardDeclinedException;
 import com.elasticpath.plugin.payment.exceptions.CardErrorException;
 import com.elasticpath.plugin.payment.exceptions.CardExpiredException;
 import com.elasticpath.plugin.payment.spi.AbstractCreditCardPaymentGatewayPluginSPI;
@@ -63,8 +61,6 @@ public class NullExternalAuthPaymentGatewayPluginImpl extends AbstractCreditCard
 	 * Serial version id.
 	 */
 	public static final long serialVersionUID = 5000000001L;
-
-	private static final String TESTING_EXCEPTION_MESSAGE = "Testing exception";
 
 	private static final String NULL_AUTH_CODE_PREFIX = "AuthCode";
 	private static final String NULL_REQUEST_TOKEN_PREFIX = "RequestToken";
@@ -116,7 +112,6 @@ public class NullExternalAuthPaymentGatewayPluginImpl extends AbstractCreditCard
 		}
 		final String amount = authorizationTransactionRequest.getMoney().getAmount().setScale(2, BigDecimal.ROUND_FLOOR).toString();
 		final String currencyCode = authorizationTransactionRequest.getMoney().getCurrencyCode().toLowerCase();
-		final CardDetailsPaymentMethod paymentMethod = (CardDetailsPaymentMethod) authorizationTransactionRequest.getPaymentMethod();
 
 		// Card type selection row
 		PaymentOptionFormRowDescriptor newCardCardTypeRow = new PaymentOptionFormRowDescriptorBuilder("billingandreview.paymentmethod")
@@ -141,20 +136,18 @@ public class NullExternalAuthPaymentGatewayPluginImpl extends AbstractCreditCard
 
 		// Security code row
 		PaymentOptionFormRowDescriptor newCardSecurityCardRow = new PaymentOptionFormRowDescriptorBuilder("billingandreview.securitycode")
-				.withTextField("cvvCode", false, true, MIN_SECURITYCODE_LENGTH, MAX_SECURITYCODE_LENGTH)
+				.withTextField(FIELD_CVV_CODE, false, true, MIN_SECURITYCODE_LENGTH, MAX_SECURITYCODE_LENGTH)
 				.build();
 
 		// Create form descriptor
-		return new PaymentOptionFormDescriptorBuilder("billingandreview.newCreditCard", PaymentType.CREDITCARD)
+		return new PaymentOptionFormDescriptorBuilder("billingandreview.newCreditCard", PaymentType.PAYMENT_TOKEN)
 				.withVisibleRow(newCardCardTypeRow)
 				.withVisibleRow(newCardCardholderRow)
 				.withVisibleRow(newCardCardNumberRow)
 				.withVisibleRow(newCardExpiryRow)
 				.withVisibleRow(newCardSecurityCardRow)
-				.withHiddenField("email", paymentMethod.getEmail())
 				.withHiddenField("amount", amount)
 				.withHiddenField("currencyCode", currencyCode)
-				.withHiddenField("ipAddress", paymentMethod.getIpAddress())
 				.withPostAction(finishExternalAuthUrl)
 				.build();
 	}
@@ -165,17 +158,10 @@ public class NullExternalAuthPaymentGatewayPluginImpl extends AbstractCreditCard
 			throw new NullPointerException("responseMap is null");
 		}
 
-		final Map<String, String> codeToCardTypeMap = getMapOfCardTypesToCardCodes().inverse();
 		final OrderPaymentDto orderPayment = new OrderPaymentDtoImpl();
 		orderPayment.setAuthorizationCode(getAuthCode());
 		orderPayment.setRequestToken(getRequestToken());
-		orderPayment.setCardType(codeToCardTypeMap.get(responseMap.get(FIELD_CARD_TYPE)));
-		orderPayment.setUnencryptedCardNumber(responseMap.get(FIELD_CARD_NUMBER));
-		orderPayment.setExpiryMonth(responseMap.get(FIELD_EXPIRY_MONTH));
-		orderPayment.setExpiryYear(responseMap.get(FIELD_EXPIRY_YEAR));
-		orderPayment.setCardHolderName(responseMap.get(FIELD_CARD_HOLDER));
 		orderPayment.setEmail(responseMap.get("email"));
-		orderPayment.setIpAddress(responseMap.get("ipAddress"));
 		orderPayment.setAmount(new BigDecimal(responseMap.get("amount")));
 		orderPayment.setCurrencyCode(responseMap.get("currencyCode"));
 		return orderPayment;
@@ -266,16 +252,6 @@ public class NullExternalAuthPaymentGatewayPluginImpl extends AbstractCreditCard
 			throw new CardExpiredException("Card has expired meanwhile");
 		}
 
-		if ("EXP_REV_AUTH".equals(payment.getCardHolderName())) {
-			throw new CardExpiredException(TESTING_EXCEPTION_MESSAGE);
-		}
-		if ("DEC_REV_AUTH".equals(payment.getCardHolderName())) {
-			throw new CardDeclinedException(TESTING_EXCEPTION_MESSAGE);
-		}
-		if ("COM_REV_AUTH".equals(payment.getCardHolderName())) {
-			throw new CardErrorException(TESTING_EXCEPTION_MESSAGE);
-		}
-
 		payment.setReferenceId(getReferenceId());
 	}
 
@@ -316,15 +292,6 @@ public class NullExternalAuthPaymentGatewayPluginImpl extends AbstractCreditCard
 	 */
 	@Override
 	public void refund(final OrderPaymentDto payment, final AddressDto billingAddress) {
-		if ("EXP_REFUND".equals(payment.getCardHolderName())) {
-			throw new CardExpiredException(TESTING_EXCEPTION_MESSAGE);
-		}
-		if ("DEC_REFUND".equals(payment.getCardHolderName())) {
-			throw new CardDeclinedException(TESTING_EXCEPTION_MESSAGE);
-		}
-		if ("COM_REFUND".equals(payment.getCardHolderName())) {
-			throw new CardErrorException(TESTING_EXCEPTION_MESSAGE);
-		}
 		payment.setReferenceId(getReferenceId());
 		payment.setAuthorizationCode(NULL_REFUND_ID_PREFIX + randomGenerator.nextInt());
 	}

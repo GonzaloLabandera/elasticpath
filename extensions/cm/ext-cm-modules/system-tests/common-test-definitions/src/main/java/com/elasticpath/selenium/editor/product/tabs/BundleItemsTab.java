@@ -13,8 +13,10 @@ import com.elasticpath.selenium.util.Constants;
  * Bundle Items Tab class.
  */
 public class BundleItemsTab extends AbstractPageObject {
-
-	private static final String BUNDLE_ITEM_PARENT_CSS = "div[widget-id='Constituents'][widget-type='Table'] ";
+	/**
+	 * Page Object Id.
+	 */
+	public static final String BUNDLE_ITEM_PARENT_CSS = "div[widget-id='Constituents'][widget-type='Table'] ";
 	private static final String BUNDLE_ITEM_COLUMN_CSS = BUNDLE_ITEM_PARENT_CSS + "div[column-id='%s']";
 	private static final String BUNDLE_ITEM_EDIT_BUTTON =
 			"[automation-id='com.elasticpath.cmclient.catalog.CatalogMessages.ProductEditorContituentSection_EditButton']";
@@ -33,7 +35,11 @@ public class BundleItemsTab extends AbstractPageObject {
 					+ "div[widget-id='Quantity'] input";
 	private static final String TAB_CSS
 			= "div[automation-id='com.elasticpath.cmclient.catalog.CatalogMessages.Product%sPage_Title'][seeable='true']";
-
+	private static final String BUNDLE_SELECTION_RULE_PARAMETER_CSS = "div[automation-id='com.elasticpath.cmclient.catalog.CatalogMessages"
+			+ ".Bundle_Selection_Parameter'] input";
+	private static final String BUNDLE_SELECTION_RULE_CCOMBO_CSS = "div[automation-id='com.elasticpath.cmclient.catalog.CatalogMessages"
+			+ ".Bundle_Selection_Rule'][widget-type='CCombo'][seeable='true']";
+	private static final String BUNDLE_SELECTION_RULE_SELECTED_VALUE_CSS = BUNDLE_SELECTION_RULE_CCOMBO_CSS + "  div[appearance-id='ccombo-field']";
 
 	/**
 	 * constructor.
@@ -50,7 +56,7 @@ public class BundleItemsTab extends AbstractPageObject {
 	 * @return AddItemDialog
 	 */
 	public AddItemDialog clickAddBundleItemButton() {
-		clickButton(BUNDLE_ITEM_ADD_BUTTON, "Add Item");
+		clickButton(BUNDLE_ITEM_ADD_BUTTON, "Add Item", AddItemDialog.ADD_ITEM_PARENT_CSS);
 		return new AddItemDialog(getDriver());
 	}
 
@@ -145,4 +151,46 @@ public class BundleItemsTab extends AbstractPageObject {
 		click(getWaitDriver().waitForElementToBeClickable(By.cssSelector(String.format(TAB_CSS, tabName))));
 	}
 
+
+	/**
+	 * Verify bundle selection rule.
+	 *
+	 * @param expSelectionRule Expected selection rule.
+	 */
+	public void verifyBundleSelectionRule(final String expSelectionRule) {
+		assertThat(getWaitDriver().waitForElementToBeVisible(By.cssSelector(BUNDLE_SELECTION_RULE_SELECTED_VALUE_CSS)).getAttribute("widget-id"))
+				.as("Bundle selection rule  verification failed")
+				.isEqualTo(expSelectionRule);
+	}
+
+	/**
+	 * Verify bundle selection rule parameter.
+	 *
+	 * @param expSelectionParameter Expected selection rule parameter.
+	 */
+	public void verifyBundleSelectionParameter(final String expSelectionParameter) {
+		assertThat(getWaitDriver().waitForElementToBeVisible(By.cssSelector(BUNDLE_SELECTION_RULE_PARAMETER_CSS)).getAttribute("value"))
+				.as("Bundle selection rule parameter verification failed")
+				.isEqualTo(expSelectionParameter);
+	}
+
+	/**
+	 * Edit the value of the bundle selection rule parameter.
+	 *
+	 * @param selectionParameter New value for selection parameter.
+	 */
+	public void editSelectionParameter(final String selectionParameter) {
+		clearAndType(BUNDLE_SELECTION_RULE_PARAMETER_CSS, selectionParameter);
+	}
+
+	/**
+	 * Select the bundle selection rule.
+	 *
+	 * @param selectionRule Selection rule.
+	 */
+	public void editSelectionRule(final String selectionRule) {
+		assertThat(selectComboBoxItem(BUNDLE_SELECTION_RULE_CCOMBO_CSS, selectionRule))
+				.as("Unable to find selection rule - " + selectionRule)
+				.isTrue();
+	}
 }

@@ -2,8 +2,8 @@ package com.elasticpath.extensions.datapopulation.mojo;
 
 import java.io.File;
 
-import com.elasticpath.repo.datapopulation.core.DataPopulationContextInitializer;
-import com.elasticpath.repo.datapopulation.core.context.configurer.FilterActionConfiguration;
+import com.elasticpath.datapopulation.core.DataPopulationContextInitializer;
+import com.elasticpath.datapopulation.core.context.configurer.FilterActionConfiguration;
 import org.apache.log4j.ConsoleAppender;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
@@ -18,7 +18,7 @@ import org.codehaus.plexus.util.StringUtils;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.context.ApplicationContext;
 
-import com.elasticpath.repo.datapopulation.core.DataPopulationCore;
+import com.elasticpath.datapopulation.core.DataPopulationCore;
 
 /**
  * The main maven plugin runner for data population. Provides validation on the directory inputs.

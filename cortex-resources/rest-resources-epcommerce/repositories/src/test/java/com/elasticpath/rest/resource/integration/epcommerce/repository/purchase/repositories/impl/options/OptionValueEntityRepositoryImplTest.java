@@ -3,11 +3,12 @@
  */
 package com.elasticpath.rest.resource.integration.epcommerce.repository.purchase.repositories.impl.options;
 
+import static com.elasticpath.rest.resource.integration.epcommerce.repository.ResourceTestConstants.PURCHASE_ID;
+import static com.elasticpath.rest.resource.integration.epcommerce.repository.ResourceTestConstants.SCOPE;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singleton;
 import static java.util.Locale.CANADA;
-
-import static org.mockito.Mockito.mock;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import java.util.HashSet;
@@ -19,7 +20,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.elasticpath.domain.catalog.Product;
 import com.elasticpath.domain.catalog.ProductSku;
@@ -32,7 +33,6 @@ import com.elasticpath.rest.definition.purchases.PurchaseLineItemOptionIdentifie
 import com.elasticpath.rest.definition.purchases.PurchaseLineItemOptionValueEntity;
 import com.elasticpath.rest.definition.purchases.PurchaseLineItemOptionValueIdentifier;
 import com.elasticpath.rest.definition.purchases.PurchaseLineItemOptionsIdentifier;
-import com.elasticpath.rest.definition.purchases.PurchaseLineItemsIdentifier;
 import com.elasticpath.rest.id.type.PathIdentifier;
 import com.elasticpath.rest.id.type.StringIdentifier;
 import com.elasticpath.rest.identity.Subject;
@@ -40,7 +40,8 @@ import com.elasticpath.rest.identity.attribute.LocaleSubjectAttribute;
 import com.elasticpath.rest.identity.attribute.SubjectAttribute;
 import com.elasticpath.rest.identity.type.ImmutableSubject;
 import com.elasticpath.rest.resource.ResourceOperationContext;
-import com.elasticpath.rest.resource.integration.epcommerce.repository.sku.ProductSkuRepository;
+import com.elasticpath.rest.resource.integration.epcommerce.repository.IdentifierTestFactory;
+import com.elasticpath.rest.resource.integration.epcommerce.repository.order.OrderRepository;
 
 /**
  * Test for the  {@link OptionValueEntityRepositoryImpl}.
@@ -57,14 +58,14 @@ public class OptionValueEntityRepositoryImplTest {
 	@Mock
 	private ResourceOperationContext resourceOperationContext;
 	@Mock
-	private ProductSkuRepository productSkuRepository;
+	private OrderRepository orderRepository;
 
 	@InjectMocks
-	private OptionValueEntityRepositoryImpl repository;
+	private OptionValueEntityRepositoryImpl<PurchaseLineItemOptionValueEntity, PurchaseLineItemOptionValueIdentifier> repository;
 	private PurchaseLineItemOptionValueIdentifier identifier;
 
 	@Mock
-	private ProductSku skuProduct;
+	private ProductSku productSku;
 	@Mock
 	private Product product;
 	@Mock
@@ -130,9 +131,7 @@ public class OptionValueEntityRepositoryImplTest {
 	public void testOptionValueWithSuccess() {
 
 		Set<SkuOption> skuOptions = new HashSet<>();
-		skuOptions.add(skuOption1);
 		skuOptions.add(skuOption2);
-		when(skuOption1.getOptionKey()).thenReturn(RANDOM_OPTION_KEY);
 		when(skuOption2.getOptionKey()).thenReturn(OPTION_ID);
 
 		when(skuOption2.getOptionValue(OPTION_VALUE)).thenReturn(skuOptionValue);
@@ -152,8 +151,8 @@ public class OptionValueEntityRepositoryImplTest {
 	}
 
 	private void setUpProductSkuOptions(final Set<SkuOption> skuOptions) {
-		when(productSkuRepository.getProductSkuWithAttributesByGuidAsSingle(LINE_ITEM_ID)).thenReturn(Single.just(skuProduct));
-		when(skuProduct.getProduct()).thenReturn(product);
+		when(orderRepository.findProductSku(any(), any(), any())).thenReturn(Single.just(productSku));
+		when(productSku.getProduct()).thenReturn(product);
 		when(product.getProductType()).thenReturn(productType);
 		when(productType.getSkuOptions()).thenReturn(skuOptions);
 	}
@@ -167,7 +166,7 @@ public class OptionValueEntityRepositoryImplTest {
 	private void setUpPurchaseLineItemOptionValueIdentifier() {
 		PurchaseLineItemIdentifier purchaseLineItem = PurchaseLineItemIdentifier.builder()
 				.withLineItemId(PathIdentifier.of(LINE_ITEM_ID))
-				.withPurchaseLineItems(mock(PurchaseLineItemsIdentifier.class))
+				.withPurchaseLineItems(IdentifierTestFactory.buildPurchaseLineItemsIdentifier(SCOPE, PURCHASE_ID))
 				.build();
 		PurchaseLineItemOptionsIdentifier options = PurchaseLineItemOptionsIdentifier.builder()
 				.withPurchaseLineItem(purchaseLineItem)

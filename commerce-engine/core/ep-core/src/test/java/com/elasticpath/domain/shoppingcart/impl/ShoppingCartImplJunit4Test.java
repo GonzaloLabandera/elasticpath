@@ -3,7 +3,6 @@
  */
 package com.elasticpath.domain.shoppingcart.impl;
 
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
@@ -38,8 +37,6 @@ import com.elasticpath.domain.rules.impl.CouponImpl;
 import com.elasticpath.domain.rules.impl.CouponUsageImpl;
 import com.elasticpath.domain.rules.impl.PromotionRuleImpl;
 import com.elasticpath.domain.rules.impl.ShippingAmountDiscountActionImpl;
-import com.elasticpath.domain.shipping.ShippingServiceLevel;
-import com.elasticpath.domain.shipping.impl.ShippingServiceLevelImpl;
 import com.elasticpath.domain.shopper.Shopper;
 import com.elasticpath.domain.shoppingcart.DiscountRecord;
 import com.elasticpath.domain.shoppingcart.ShoppingCart;
@@ -55,6 +52,9 @@ import com.elasticpath.service.catalog.ProductSkuLookup;
 import com.elasticpath.service.rules.CouponService;
 import com.elasticpath.service.rules.CouponUsageService;
 import com.elasticpath.service.rules.RuleService;
+import com.elasticpath.service.rules.impl.RuleValidationResultEnum;
+import com.elasticpath.shipping.connectivity.dto.ShippingOption;
+import com.elasticpath.shipping.connectivity.dto.impl.ShippingOptionImpl;
 import com.elasticpath.test.BeanFactoryExpectationsFactory;
 
 /**
@@ -108,6 +108,8 @@ public class ShoppingCartImplJunit4Test {
 				allowing(cartItem2).getSkuGuid(); will(returnValue(productSku2.getGuid()));
 				allowing(cartItem1).getGuid(); will(returnValue(CART_ITEM_1_GUID));
 				allowing(cartItem2).getGuid(); will(returnValue(CART_ITEM_2_GUID));
+				allowing(cartItem1).getOrdering(); will(returnValue(1));
+				allowing(cartItem2).getOrdering(); will(returnValue(2));
 
 				allowing(productSkuLookup).findByGuid(productSku1.getGuid());
 				will(returnValue(productSku1));
@@ -118,7 +120,7 @@ public class ShoppingCartImplJunit4Test {
 			shoppingCart.addCartItem(cartItem1);
 			shoppingCart.addCartItem(cartItem2);
 
-			final String expected = new String("11111"); // NOPMD: to test correctness of string comparison we need an object
+			final String expected = "11111";
 			ShoppingItem returnedCartItem1 = shoppingCart.getCartItemByGuid(expected);
 
 			assertEquals("The item found should be the same as the item added.", cartItem1, returnedCartItem1);
@@ -241,17 +243,11 @@ public class ShoppingCartImplJunit4Test {
 		RuleAction ruleAction = new ShippingAmountDiscountActionImpl();
 		ruleAction.setUidPk(ACTION_UID);
 
-		final String shippingServiceLevelCode = "Shipping001";
-		final long shippingServiceLevelUid = 123L;
-		final ShippingServiceLevel shippingServiceLevel = new ShippingServiceLevelImpl();
-		shippingServiceLevel.setCode(shippingServiceLevelCode);
-		shippingServiceLevel.setUidPk(shippingServiceLevelUid);
-
-		shoppingCart.getShippingServiceLevelList().add(shippingServiceLevel);
-		shoppingCart.setSelectedShippingServiceLevelUid(shippingServiceLevelUid);
+		final String shippingOptionCode = "Shipping001";
+		shoppingCart.setSelectedShippingOption(createShippingOption(shippingOptionCode));
 
 		Money discountAmount = Money.valueOf(new BigDecimal(DISCOUNT_0_50), Currency.getInstance(Locale.CANADA));
-		shoppingCart.setShippingDiscountIfLower(shippingServiceLevelCode, RULE_UID, ACTION_UID, discountAmount);
+		shoppingCart.setShippingDiscountIfLower(shippingOptionCode, RULE_UID, ACTION_UID, discountAmount);
 
 		assertTrue("ShoppingCart should have applied the rule",
 				shoppingCart.getPromotionRecordContainer().getAppliedRules().contains(new Long(RULE_UID)));
@@ -347,20 +343,14 @@ public class ShoppingCartImplJunit4Test {
 		RuleAction ruleAction2 = new ShippingAmountDiscountActionImpl();
 		ruleAction2.setUidPk(ACTION_UID2);
 
-		final String shippingServiceLevelCode = "Shipping_Code_001";
-		final long shippingServiceLevelUid = 123L;
-		final ShippingServiceLevel shippingServiceLevel = new ShippingServiceLevelImpl();
-		shippingServiceLevel.setCode(shippingServiceLevelCode);
-		shippingServiceLevel.setUidPk(shippingServiceLevelUid);
-
-		shoppingCart.getShippingServiceLevelList().add(shippingServiceLevel);
-		shoppingCart.setSelectedShippingServiceLevelUid(shippingServiceLevelUid);
+		final String shippingOptionCode = "Shipping_Code_001";
+		shoppingCart.setSelectedShippingOption(createShippingOption(shippingOptionCode));
 
 		final Money discountAmount = Money.valueOf(new BigDecimal(DISCOUNT_0_50), CAD);
-		shoppingCart.setShippingDiscountIfLower(shippingServiceLevelCode, RULE_UID, ACTION_UID, discountAmount);
+		shoppingCart.setShippingDiscountIfLower(shippingOptionCode, RULE_UID, ACTION_UID, discountAmount);
 
 		final Money discountAmount2 = Money.valueOf(new BigDecimal("0.25"), CAD);
-		shoppingCart.setShippingDiscountIfLower(shippingServiceLevelCode, RULE_UID, ACTION_UID2, discountAmount2);
+		shoppingCart.setShippingDiscountIfLower(shippingOptionCode, RULE_UID, ACTION_UID2, discountAmount2);
 
 		assertTrue("ShoppingCart should have applied the rule",
 				shoppingCart.getPromotionRecordContainer().getAppliedRules().contains(new Long(RULE_UID)));
@@ -493,7 +483,7 @@ public class ShoppingCartImplJunit4Test {
 				oneOf(customer).isAnonymous(); will(returnValue(false));
 
 				oneOf(couponService).findByCouponCode(code); will(returnValue(coupon));
-				oneOf(spec).isSatisfiedBy(with(any(PotentialCouponUse.class))); will(returnValue(true));
+				oneOf(spec).isSatisfiedBy(with(any(PotentialCouponUse.class))); will(returnValue(RuleValidationResultEnum.SUCCESS));
 				oneOf(ruleService).getLimitedUseRule(code); will(returnValue(rule));
 				oneOf(rule).hasLimitedUseCondition(); will(returnValue(true));
 				oneOf(couponConfig).getUsageType(); will(returnValue(CouponUsageType.LIMIT_PER_ANY_USER));
@@ -543,7 +533,7 @@ public class ShoppingCartImplJunit4Test {
 				oneOf(customer).isAnonymous(); will(returnValue(true));
 
 				oneOf(couponService).findByCouponCode(code); will(returnValue(coupon));
-				oneOf(spec).isSatisfiedBy(with(any(PotentialCouponUse.class))); will(returnValue(true));
+				oneOf(spec).isSatisfiedBy(with(any(PotentialCouponUse.class))); will(returnValue(RuleValidationResultEnum.SUCCESS));
 				oneOf(ruleService).getLimitedUseRule(code); will(returnValue(rule));
 				oneOf(rule).hasLimitedUseCondition(); will(returnValue(true));
 
@@ -586,6 +576,12 @@ public class ShoppingCartImplJunit4Test {
 
 		shoppingCart.setShopper(shopper);
 		return customer;
+	}
+
+	private ShippingOption createShippingOption(final String shippingOptionCode) {
+		final ShippingOptionImpl shippingOption = new ShippingOptionImpl();
+		shippingOption.setCode(shippingOptionCode);
+		return shippingOption;
 	}
 }
 

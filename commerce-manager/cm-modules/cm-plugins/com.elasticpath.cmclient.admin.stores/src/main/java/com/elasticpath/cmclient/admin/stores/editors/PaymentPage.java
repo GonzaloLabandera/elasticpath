@@ -34,7 +34,7 @@ public class PaymentPage extends AbstractStorePage {
 		final Composite body = managedForm.getForm().getBody();
 		final IEpLayoutComposite creditCardSectionComposite = createCreditCardSectionComposite(body);
 
-		new CreditCardSection(editor, this.isEditable())
+		new PaymentGatewaySection(editor, this.isEditable())
 				.initialize(creditCardSectionComposite.getSwtComposite(), managedForm.getToolkit(), getEditor()
 				.getDataBindingContext());
 		new AlternativePaymentTypesSection(editor, this.isEditable()).initialize(body, managedForm.getToolkit(), getEditor().getDataBindingContext());

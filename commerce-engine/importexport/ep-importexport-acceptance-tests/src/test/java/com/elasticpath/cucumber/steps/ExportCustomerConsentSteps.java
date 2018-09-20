@@ -16,7 +16,6 @@ import cucumber.api.DataTable;
 import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.ContextConfiguration;
 
 import com.elasticpath.common.dto.datapolicy.CustomerConsentDTO;
 import com.elasticpath.importexport.builder.ExportConfigurationBuilder;
@@ -32,7 +31,6 @@ import com.elasticpath.importexport.exporter.controller.ExportController;
 /**
  * Export customer consents.
  */
-@ContextConfiguration("/integration-context-with-customer-service.xml")
 public class ExportCustomerConsentSteps {
 
 	private static final String CUSTOMER_CONSENT_EXPORT_FILE = "customer_consents.xml";

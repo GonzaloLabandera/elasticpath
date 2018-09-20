@@ -15,7 +15,6 @@ import org.junit.Test;
 
 import com.elasticpath.domain.customer.Address;
 import com.elasticpath.domain.order.OrderPayment;
-import com.elasticpath.plugin.payment.PaymentType;
 
 /**
  * Test cases for <code>AbstractCreditCardPaymentGatewayImpl</code>.
@@ -27,15 +26,6 @@ public class AbstractCreditCardPaymentGatewayImplTest {
 	public void setUp() throws Exception {
 		gatewayImpl = new AbstractCreditCardPaymentGatewayImpl() {
 			private static final long serialVersionUID = 8239095928673034744L;
-
-			/**
-			 * Get the type of this payment gateway.
-			 * 
-			 * @return the payment type
-			 */
-			public PaymentType getPaymentType() {
-				return PaymentType.CREDITCARD;
-			}
 
 			/**
 			 * Pre-authorize a payment.
@@ -84,7 +74,6 @@ public class AbstractCreditCardPaymentGatewayImplTest {
 			 * card info because the auth codes are not valid (Cybersource).
 			 * 
 			 * @param payment the payment that was previously pre-authorized
-			 * @return a result code from <code>TransactionResult</code>.
 			 */
 			@Override
 			public void reversePreAuthorization(final OrderPayment payment) {

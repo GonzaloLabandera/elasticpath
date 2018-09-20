@@ -12,8 +12,7 @@ import org.junit.runner.RunWith;
 
 import org.mockito.Mock;
 import org.mockito.Spy;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.elasticpath.rest.OperationResult;
 import com.elasticpath.rest.ResourceOperation;
@@ -26,8 +25,7 @@ import com.elasticpath.rest.uri.URIUtil;
  * Tests {@link PaymentTokensResourceOperatorImpl} resource operation uris.
  */
 @SuppressWarnings("PMD.TestClassWithoutTestCases")
-@RunWith(PowerMockRunner.class)
-@PrepareForTest({ PaymentTokensResourceOperatorImpl.class })
+@RunWith(MockitoJUnitRunner.class)
 public class PaymentTokensResourceOperatorUriTest extends AbstractResourceOperatorUriTest {
 	private static final String PAYMENT_TOKENS_RESOURCE_NAME = "paymenttokens";
 	public static final String SCOPE = "scope";

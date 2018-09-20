@@ -4,12 +4,11 @@
 package com.elasticpath.persistence.support;
 
 import java.util.Collection;
-import java.util.List;
 
-import com.elasticpath.domain.order.AdvancedOrderSearchCriteria;
 import com.elasticpath.domain.order.OrderPaymentStatus;
 import com.elasticpath.domain.order.OrderShipmentStatus;
 import com.elasticpath.domain.order.OrderStatus;
+import com.elasticpath.persistence.support.impl.CriteriaQuery;
 import com.elasticpath.service.search.query.OrderReturnSearchCriteria;
 import com.elasticpath.service.search.query.OrderSearchCriteria;
 
@@ -41,7 +40,7 @@ public interface OrderCriterion {
 	 * @param shipmentStatus the status of the shipment
 	 * @return the criteria used to query by status
 	 */
-	String getStatusCriteria(OrderStatus orderStatus, OrderPaymentStatus paymentStatus, OrderShipmentStatus shipmentStatus);
+	CriteriaQuery getStatusCriteria(OrderStatus orderStatus, OrderPaymentStatus paymentStatus, OrderShipmentStatus shipmentStatus);
 
 	/**
 	 * Returns the criteria used to query by customer property of String type, i.e. 'email', 'firstName', 'lastName' etc.
@@ -51,7 +50,7 @@ public interface OrderCriterion {
 	 * @param isExactMatch true for doing an exact match; false for doing a fuzzy match.
 	 * @return the criteria used to query by order.
 	 */
-	String getOrderCustomerCriteria(String propertyName, String criteriaValue, boolean isExactMatch);
+	CriteriaQuery getOrderCustomerCriteria(String propertyName, String criteriaValue, boolean isExactMatch);
 
 	/**
 	 * Returns the criteria used to query by customer profile value such as 'CP_EMAIL'.
@@ -61,15 +60,7 @@ public interface OrderCriterion {
 	 * @param isExactMatch true for doing an exact match; false for doing a fuzzy match.
 	 * @return the criteria used to query by order.
 	 */
-	String getOrderCustomerProfileCriteria(String attributeKey, String attributeValue, boolean isExactMatch);
-
-	/**
-	 * Return the criteria used for advanced order search. Search criteria cover order properties, order customerProperties
-	 *
-	 * @param orderSearchCriteria the order search criteria.
-	 * @return the criteria used to complete advaned order search
-	 */
-	String getAdvancedOrderCriteria(AdvancedOrderSearchCriteria orderSearchCriteria);
+	CriteriaQuery getOrderCustomerProfileCriteria(String attributeKey, String attributeValue, boolean isExactMatch);
 
 	/**
 	 * Returns the criteria used to query by giftCertificate with name and value type, i.e. 'giftCertificateCode'.
@@ -79,32 +70,26 @@ public interface OrderCriterion {
 	 * @param isExactMatch true for doing an exact match; false for doing a fuzzy match.
 	 * @return the criteria used to query by order.
 	 */
-	String getOrderGiftCertificateCriteria(String propertyName, String criteriaValue, boolean isExactMatch);
+	CriteriaQuery getOrderGiftCertificateCriteria(String propertyName, String criteriaValue, boolean isExactMatch);
 
 	/**
 	 * Return the criteria used for order search.
 	 *
 	 * @param orderSearchCriteria the order search criteria.
-	 * @param parameters the query parameters to be returned
 	 * @param stores the list of store filters to be returned
 	 * @param resultType the result type
-	 * @return the query string used to complete order search
+	 * @return the criteria used to complete order search
 	 */
-	String getOrderSearchCriteria(OrderSearchCriteria orderSearchCriteria,
-			List<Object> parameters,
-			Collection<String> stores,
-			ResultType resultType);
+	CriteriaQuery getOrderSearchCriteria(OrderSearchCriteria orderSearchCriteria,
+			Collection<String> stores, ResultType resultType);
 
 
 	/**
 	 * Return the criteria used for order return search.
 	 *
 	 * @param orderReturnSearchCriteria the order return search criteria.
-	 * @param parameters the query parameters to be returned
 	 * @param resultType the result type
 	 * @return the query string used to complete order return search
 	 */
-	String getOrderReturnSearchCriteria(
-			OrderReturnSearchCriteria orderReturnSearchCriteria,
-			List<Object> parameters, ResultType resultType);
+	CriteriaQuery getOrderReturnSearchCriteria(OrderReturnSearchCriteria orderReturnSearchCriteria, ResultType resultType);
 }

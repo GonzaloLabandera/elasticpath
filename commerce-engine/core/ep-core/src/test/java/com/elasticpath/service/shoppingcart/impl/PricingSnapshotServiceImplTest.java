@@ -3,68 +3,64 @@
  */
 package com.elasticpath.service.shoppingcart.impl;
 
+import static java.util.Collections.singletonList;
+
 import static org.hamcrest.Matchers.contains;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
 
 import java.math.BigDecimal;
 import java.util.Collection;
-import java.util.Currency;
-import java.util.Date;
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 
-import com.google.common.collect.Iterables;
+import org.junit.Before;
+import org.junit.Test;
 import org.jmock.Expectations;
 import org.jmock.api.Invocation;
 import org.jmock.auto.Mock;
 import org.jmock.lib.action.CustomAction;
-import org.junit.Before;
-import org.junit.Test;
 
-import com.elasticpath.commons.constants.ContextIdNames;
+import com.google.common.collect.Iterables;
+
+import org.apache.log4j.Logger;
+
+import com.elasticpath.base.exception.EpServiceException;
 import com.elasticpath.domain.catalog.Price;
 import com.elasticpath.domain.catalog.Product;
-import com.elasticpath.domain.catalog.ProductSku;
-import com.elasticpath.domain.catalog.impl.CatalogLocaleImpl;
 import com.elasticpath.domain.catalog.impl.ProductImpl;
-import com.elasticpath.domain.misc.impl.LocalizedPropertiesImpl;
 import com.elasticpath.domain.order.OrderSku;
 import com.elasticpath.domain.order.impl.OrderSkuImpl;
-import com.elasticpath.domain.shipping.ShippingCostCalculationMethod;
-import com.elasticpath.domain.shipping.ShippingServiceLevel;
 import com.elasticpath.domain.shoppingcart.DiscountRecord;
 import com.elasticpath.domain.shoppingcart.PromotionRecordContainer;
 import com.elasticpath.domain.shoppingcart.ShippingPricingSnapshot;
+import com.elasticpath.domain.shoppingcart.ShoppingCart;
 import com.elasticpath.domain.shoppingcart.ShoppingCartPricingSnapshot;
 import com.elasticpath.domain.shoppingcart.ShoppingItem;
 import com.elasticpath.domain.shoppingcart.ShoppingItemPricingSnapshot;
 import com.elasticpath.domain.shoppingcart.impl.CatalogItemDiscountRecordImpl;
 import com.elasticpath.domain.shoppingcart.impl.ShoppingCartImpl;
-import com.elasticpath.domain.tax.impl.TaxCodeImpl;
 import com.elasticpath.money.Money;
 import com.elasticpath.plugin.tax.domain.TaxAddress;
 import com.elasticpath.plugin.tax.domain.TaxOperationContext;
 import com.elasticpath.sellingchannel.director.CartDirector;
-import com.elasticpath.service.catalog.ProductSkuLookup;
-import com.elasticpath.service.misc.TimeService;
 import com.elasticpath.service.rules.EpRuleEngine;
+import com.elasticpath.service.shipping.transformers.PricedShippableItemContainerTransformer;
 import com.elasticpath.service.tax.TaxCalculationResult;
 import com.elasticpath.service.tax.TaxCalculationService;
-import com.elasticpath.service.tax.TaxCodeRetriever;
+import com.elasticpath.shipping.connectivity.dto.PricedShippableItemContainer;
+import com.elasticpath.shipping.connectivity.dto.ShippingCalculationResult;
+import com.elasticpath.shipping.connectivity.dto.ShippingOption;
+import com.elasticpath.shipping.connectivity.service.ShippingCalculationService;
 import com.elasticpath.test.jmock.AbstractCatalogDataTestCase;
 
-@SuppressWarnings({ "PMD.ExcessiveImports", "PMD.TestClassWithoutTestCases" })
+@SuppressWarnings({"PMD.ExcessiveImports", "PMD.TestClassWithoutTestCases", "unchecked"})
 public class PricingSnapshotServiceImplTest extends AbstractCatalogDataTestCase {
-
-	private static final String CAD = "CAD";
-	private static final Currency CURRENCY = Currency.getInstance(CAD);
-
-	private static final BigDecimal SUBTOTAL = new BigDecimal("65").setScale(2);
-
-	private static final String SALES_TAX_CODE_GOODS = "GOODS";
 
 	@Mock
 	private EpRuleEngine ruleEngine;
@@ -77,22 +73,31 @@ public class PricingSnapshotServiceImplTest extends AbstractCatalogDataTestCase 
 
 	private PricingSnapshotServiceImpl pricingSnapshotService;
 
+	@Mock
+	private ShippingCalculationService shippingCalculationService;
+
+	@Mock
+	private ShippingCalculationResult shippingCalculationResult;
+
+	@Mock
+	private PricedShippableItemContainer<?> pricedShippableItemContainer;
+
+	@Mock
+	private PricedShippableItemContainerTransformer pricedShippableItemContainerTransformer;
+
 	@Before
 	@Override
 	public void setUp() throws Exception {
 		super.setUp();
-		stubGetBean(ContextIdNames.CATALOG_LOCALE, CatalogLocaleImpl.class);
-		stubGetBean(ContextIdNames.LOCALIZED_PROPERTIES, LocalizedPropertiesImpl.class);
-		stubGetBean(ContextIdNames.PRODUCT_SKU_LOOKUP, getProductSkuLookup());
-		stubGetBean(ContextIdNames.SHIPPABLE_ITEMS_SUBTOTAL_CALCULATOR, getShippableItemsSubtotalCalculator());
-		mockOrderSkuFactory();
 
 		pricingSnapshotService = new PricingSnapshotServiceImpl();
 		pricingSnapshotService.setBeanFactory(getBeanFactory());
 		pricingSnapshotService.setCartDirector(cartDirector);
 		pricingSnapshotService.setProductSkuLookup(getProductSkuLookup());
 		pricingSnapshotService.setRuleEngine(ruleEngine);
-		pricingSnapshotService.setShippableItemsSubtotalCalculator(getShippableItemsSubtotalCalculator());
+		pricingSnapshotService.setShippingCalculationService(shippingCalculationService);
+		pricingSnapshotService.setPricedShippableItemContainerTransformer(pricedShippableItemContainerTransformer);
+
 	}
 
 	@SuppressWarnings("unchecked")
@@ -134,7 +139,7 @@ public class PricingSnapshotServiceImplTest extends AbstractCatalogDataTestCase 
 				will(new CustomAction("Adding catalogue promotions to cart items") {
 					@Override
 					public Object invoke(final Invocation invocation) throws Throwable {
-						final ShoppingItem shoppingItem = Iterables.getFirst(shoppingCart.getAllItems(), null);
+						final ShoppingItem shoppingItem = Iterables.getFirst(shoppingCart.getAllShoppingItems(), null);
 
 						if (shoppingItem != null) {
 							final ShoppingItemPricingSnapshot shoppingItemPricingSnapshot =
@@ -149,8 +154,15 @@ public class PricingSnapshotServiceImplTest extends AbstractCatalogDataTestCase 
 
 				allowing(ruleEngine).fireOrderPromotionRules(shoppingCart, shoppingCart.getCustomerSession());
 				allowing(ruleEngine).fireOrderPromotionSubtotalRules(shoppingCart, shoppingCart.getCustomerSession());
+
+				allowing(pricedShippableItemContainerTransformer).apply(with(any(ShoppingCart.class)), with(any(ShoppingCartPricingSnapshot.class)));
+				will(returnValue(pricedShippableItemContainer));
+				allowing(shippingCalculationService).getPricedShippingOptions(pricedShippableItemContainer);
+				will(returnValue(shippingCalculationResult));
 			}
 		});
+
+		mockShippingOptionServiceGetPricedShippingOptions(Collections.emptyList());
 
 		final ShoppingCartPricingSnapshot pricingSnapshot = pricingSnapshotService.getPricingSnapshotForCart(shoppingCart);
 
@@ -172,18 +184,6 @@ public class PricingSnapshotServiceImplTest extends AbstractCatalogDataTestCase 
 	@Test
 	public void verifyPrePromotionShippingCostsCalculatedAndSet() throws Exception {
 		final ShoppingCartImpl shoppingCart = getShoppingCart();
-
-		final String newShippingServiceLevelCode = "SHIP0001";
-		final ShippingServiceLevel newShippingServiceLevel = context.mock(ShippingServiceLevel.class);
-		final ShippingCostCalculationMethod shippingCostCalculationMethod = context.mock(ShippingCostCalculationMethod.class);
-
-		final List<ShippingServiceLevel> shippingServiceLevelList = shoppingCart.getShippingServiceLevelList();
-		shoppingCart.clearSelectedShippingServiceLevel();
-		shippingServiceLevelList.clear();
-		shippingServiceLevelList.add(newShippingServiceLevel);
-		shoppingCart.setShippingServiceLevelList(shippingServiceLevelList);
-
-		final Money shippingAmount = Money.valueOf(BigDecimal.TEN, CURRENCY);
 
 		final TaxCalculationResult taxCalculationResult = context.mock(TaxCalculationResult.class);
 		context.checking(new Expectations() {
@@ -214,32 +214,203 @@ public class PricingSnapshotServiceImplTest extends AbstractCatalogDataTestCase 
 				allowing(ruleEngine).fireOrderPromotionRules(shoppingCart, shoppingCart.getCustomerSession());
 				allowing(ruleEngine).fireOrderPromotionSubtotalRules(shoppingCart, shoppingCart.getCustomerSession());
 
-				allowing(newShippingServiceLevel).getShippingCostCalculationMethod();
-				will(returnValue(shippingCostCalculationMethod));
+				allowing(pricedShippableItemContainerTransformer).apply(with(any(ShoppingCart.class)), with(any(ShoppingCartPricingSnapshot.class)));
+				will(returnValue(pricedShippableItemContainer));
+				allowing(shippingCalculationService).getPricedShippingOptions(pricedShippableItemContainer);
+				will(returnValue(shippingCalculationResult));
 
-				allowing(newShippingServiceLevel).getCode();
-				will(returnValue(newShippingServiceLevelCode));
-
-				allowing(getShippableItemsSubtotalCalculator()).calculateSubtotalOfShippableItems(
-						with(any(Collection.class)),
-						with(any(ShoppingCartPricingSnapshot.class)),
-						with(any(Currency.class)));
-				will(returnValue(Money.valueOf(SUBTOTAL, CURRENCY)));
-
-				allowing(shippingCostCalculationMethod).calculateShippingCost(
-						with(any(Collection.class)),
-						with(Money.valueOf(SUBTOTAL, CURRENCY)),
-						with(any(Currency.class)),
-						with(any(ProductSkuLookup.class)));
-				will(returnValue(shippingAmount));
 			}
 		});
 
+		final String newShippingOptionCode = "SHIP0001";
+		final Money shippingAmount = Money.valueOf(BigDecimal.TEN, CURRENCY);
+		final ShippingOption newShippingOption = mockAvailableShippingOption(newShippingOptionCode, shippingAmount);
+
 		final ShoppingCartPricingSnapshot pricingSnapshot = pricingSnapshotService.getPricingSnapshotForCart(shoppingCart);
 
-		final ShippingPricingSnapshot shippingPricingSnapshot = pricingSnapshot.getShippingPricingSnapshot(newShippingServiceLevel);
+		final ShippingPricingSnapshot shippingPricingSnapshot = pricingSnapshot.getShippingPricingSnapshot(newShippingOption);
 		assertEquals(shippingAmount, shippingPricingSnapshot.getShippingListPrice());
 		assertEquals(shippingAmount, shippingPricingSnapshot.getShippingPromotedPrice());
+	}
+
+	@Test
+	public void verifyCachedShippingPricesClearedWhenShippingAddressCleared() {
+		// Given we have a shopping cart with a shipping address and shipping options set up
+		final ShoppingCart shoppingCart = getShoppingCart();
+
+		context.checking(new Expectations() {
+			{
+				allowing(cartDirector).refresh(shoppingCart);
+				allowing(ruleEngine).fireOrderPromotionRules(shoppingCart, shoppingCart.getCustomerSession());
+				allowing(ruleEngine).fireOrderPromotionSubtotalRules(shoppingCart, shoppingCart.getCustomerSession());
+				allowing(pricedShippableItemContainerTransformer).apply(with(any(ShoppingCart.class)), with(any(ShoppingCartPricingSnapshot.class)));
+				will(returnValue(pricedShippableItemContainer));
+				allowing(shippingCalculationService).getPricedShippingOptions(pricedShippableItemContainer);
+				will(returnValue(shippingCalculationResult));
+			}
+		});
+
+		final String shippingOptionCode = "SHIP0001";
+		final Money shippingAmount = Money.valueOf(BigDecimal.TEN, CURRENCY);
+		final ShippingOption shippingOption = mockAvailableShippingOption(shippingOptionCode, shippingAmount);
+
+		// And the pricing snapshot returns a shipping pricing snapshot associated with it
+		ShoppingCartPricingSnapshot pricingSnapshot = pricingSnapshotService.getPricingSnapshotForCart(shoppingCart);
+		ShippingPricingSnapshot shippingPricingSnapshot = pricingSnapshot.getShippingPricingSnapshot(shippingOption);
+		assertEquals("The shipping price should be set initially", shippingAmount, shippingPricingSnapshot.getShippingListPrice());
+
+		// When we clear the shipping address
+		shoppingCart.setShippingAddress(null);
+
+		// Then when we get the shipping cost it should be zero
+		pricingSnapshot = pricingSnapshotService.getPricingSnapshotForCart(shoppingCart);
+
+		assertEquals("The shipping cost should now be zero as no shipping address has been set",
+				0, pricingSnapshot.getShippingCost().getAmount().compareTo(BigDecimal.ZERO));
+
+		// And when we get the shipping pricing snapshot directly, it should no longer be available
+		boolean pricingSnapshotSucceeded = true;
+		try {
+			pricingSnapshot.getShippingPricingSnapshot(shippingOption);
+		} catch (final EpServiceException e) {
+			// Expecting the exception here, but not in the getShippingPricingSnapshot() call earlier so we manually check this invocation
+			pricingSnapshotSucceeded = false;
+		}
+
+		if (pricingSnapshotSucceeded) {
+			fail("The shipping pricing snapshot should no longer be available as the shipping address is null");
+		}
+	}
+
+	@Test
+	public void verifyErrorCauseSuppressedWhenStrategyIndicatesTo() {
+		// Given we have a shopping cart with a shipping address and shipping options set up
+		final ShoppingCart shoppingCart = getShoppingCart();
+
+		context.checking(new Expectations() {
+			{
+				allowing(cartDirector).refresh(shoppingCart);
+				allowing(ruleEngine).fireOrderPromotionRules(shoppingCart, shoppingCart.getCustomerSession());
+				allowing(ruleEngine).fireOrderPromotionSubtotalRules(shoppingCart, shoppingCart.getCustomerSession());
+				allowing(pricedShippableItemContainerTransformer).apply(with(any(ShoppingCart.class)), with(any(ShoppingCartPricingSnapshot.class)));
+				will(returnValue(pricedShippableItemContainer));
+				allowing(shippingCalculationService).getPricedShippingOptions(pricedShippableItemContainer);
+				will(returnValue(shippingCalculationResult));
+			}
+		});
+
+		mockShippingOptionServiceGetPricedShippingOptions(new Throwable());
+
+		// And we do not have a selected shipping option (so we log an error rather than throw an exception)
+		shoppingCart.clearSelectedShippingOption();
+
+		// And the exception to be thrown is marked as loggable by the predicate
+		pricingSnapshotService.setShippingOptionResultExceptionLogPredicate(throwable -> true);
+
+		context.checking(new Expectations() {
+			{
+				oneOf(shippingCalculationResult).logError(with(any(Logger.class)), with(any(String.class)), with(true));
+			}
+		});
+
+		// When we call the ShoppingCartPricingSnapshot service it logs a message without the cause (and so satisfies the expectation above)
+		pricingSnapshotService.getPricingSnapshotForCart(shoppingCart);
+	}
+
+	@Test
+	public void verifyErrorCauseThrownWhenStrategyIndicatesTo() {
+		// Given we have a shopping cart with a shipping address and shipping options set up
+		final ShoppingCart shoppingCart = getShoppingCart();
+
+		context.checking(new Expectations() {
+			{
+				allowing(cartDirector).refresh(shoppingCart);
+				allowing(ruleEngine).fireOrderPromotionRules(shoppingCart, shoppingCart.getCustomerSession());
+				allowing(ruleEngine).fireOrderPromotionSubtotalRules(shoppingCart, shoppingCart.getCustomerSession());
+				allowing(pricedShippableItemContainerTransformer).apply(with(any(ShoppingCart.class)), with(any(ShoppingCartPricingSnapshot.class)));
+				will(returnValue(pricedShippableItemContainer));
+				allowing(shippingCalculationService).getPricedShippingOptions(pricedShippableItemContainer);
+				will(returnValue(shippingCalculationResult));
+			}
+		});
+
+		mockShippingOptionServiceGetPricedShippingOptions(new Throwable());
+
+		// And we do not have a selected shipping option (so we log an error rather than throw an exception)
+		shoppingCart.clearSelectedShippingOption();
+
+		// And the exception to be thrown is marked as not loggable by the predicate
+		pricingSnapshotService.setShippingOptionResultExceptionLogPredicate(throwable -> false);
+
+		context.checking(new Expectations() {
+			{
+				oneOf(shippingCalculationResult).logError(with(any(Logger.class)), with(any(String.class)), with(false));
+			}
+		});
+
+		// When we call the ShoppingCartPricingSnapshot service it logs a message with the cause (and so satisfies the expectation above)
+		pricingSnapshotService.getPricingSnapshotForCart(shoppingCart);
+	}
+
+	private ShippingOption mockAvailableShippingOption(final String shippingOptionCode, final Money shippingOptionCost) {
+		final ShippingOption result = mockShippingOption(shippingOptionCode, shippingOptionCost);
+
+		mockShippingOptionServiceGetPricedShippingOptions(singletonList(result));
+
+		return result;
+	}
+
+	private ShippingOption mockShippingOption(final String shippingOptionCode, final Money shippingOptionCost) {
+		final ShippingOption newShippingOption = context.mock(ShippingOption.class);
+
+		context.checking(new Expectations() {
+			{
+				allowing(newShippingOption).getCode();
+				will(returnValue(shippingOptionCode));
+
+				allowing(newShippingOption).getShippingCost();
+				will(returnValue(Optional.of(shippingOptionCost)));
+			}
+		});
+
+		return newShippingOption;
+	}
+
+	@SuppressWarnings("unchecked")
+	private void mockShippingOptionServiceGetPricedShippingOptions(final List<ShippingOption> shippingOptionList) {
+		context.checking(new Expectations() {
+			{
+				allowing(shippingCalculationResult).isSuccessful();
+				will(returnValue(true));
+
+				allowing(shippingCalculationResult).getAvailableShippingOptions();
+				will(returnValue(shippingOptionList));
+
+				allowing(shippingCalculationService).getPricedShippingOptions(pricedShippableItemContainer);
+				will(returnValue(shippingCalculationResult));
+			}
+		});
+	}
+
+	@SuppressWarnings("unchecked")
+	private void mockShippingOptionServiceGetPricedShippingOptions(final Throwable cause) {
+		final ShippingCalculationResult.ErrorInformation errorInformation = context.mock(ShippingCalculationResult.ErrorInformation.class);
+
+		context.checking(new Expectations() {
+			{
+				allowing(shippingCalculationResult).isSuccessful();
+				will(returnValue(false));
+
+				allowing(shippingCalculationResult).getErrorInformation();
+				will(returnValue(Optional.of(errorInformation)));
+
+				allowing(errorInformation).getCause();
+				will(returnValue(Optional.of(cause)));
+
+				allowing(shippingCalculationService).getPricedShippingOptions(pricedShippableItemContainer);
+				will(returnValue(shippingCalculationResult));
+			}
+		});
 	}
 
 	@Override
@@ -252,36 +423,6 @@ public class PricingSnapshotServiceImplTest extends AbstractCatalogDataTestCase 
 				return "Test Display Name";
 			}
 		};
-	}
-
-	private void mockOrderSkuFactory() {
-		final TaxCodeImpl taxCode = new TaxCodeImpl();
-		taxCode.setCode(SALES_TAX_CODE_GOODS);
-
-		final TaxCodeRetriever taxCodeRetriever = context.mock(TaxCodeRetriever.class);
-		final TimeService timeService = context.mock(TimeService.class);
-		context.checking(new Expectations() {
-			{
-				allowing(taxCodeRetriever).getEffectiveTaxCode(with(any(ProductSku.class)));
-				will(returnValue(taxCode));
-
-				allowing(timeService).getCurrentTime();
-				will(returnValue(new Date()));
-			}
-		});
-
-		OrderSkuFactoryImpl orderSkuFactory = new OrderSkuFactoryImpl() {
-			@Override
-			protected OrderSku createSimpleOrderSku() {
-				return new OrderSkuImpl();
-			}
-		};
-		orderSkuFactory.setTaxCodeRetriever(taxCodeRetriever);
-		orderSkuFactory.setBundleApportioner(getBundleApportioningCalculator());
-		orderSkuFactory.setDiscountApportioner(getDiscountApportioningCalculator());
-		orderSkuFactory.setProductSkuLookup(getProductSkuLookup());
-		orderSkuFactory.setTimeService(timeService);
-		stubGetBean(ContextIdNames.ORDER_SKU_FACTORY, orderSkuFactory);
 	}
 
 }

@@ -16,7 +16,7 @@ import io.reactivex.ObservableSource;
 import io.reactivex.Single;
 import io.reactivex.functions.Function;
 
-import com.elasticpath.commons.exception.EpValidationException;
+import com.elasticpath.base.exception.structured.EpValidationException;
 import com.elasticpath.commons.exception.InvalidBusinessStateException;
 import com.elasticpath.commons.exception.UnavailableException;
 import com.elasticpath.rest.ResourceOperationFailure;
@@ -96,8 +96,8 @@ public class ReactiveAdapterImpl implements ReactiveAdapter {
 	}
 
 	@Override
-	public <T> Completable fromServiceAsCompletable(final Callable<T> serviceCall) {
-		return Completable.fromCallable(serviceCall)
+	public Completable fromServiceAsCompletable(final Runnable serviceCall) {
+		return Completable.fromRunnable(serviceCall)
 				.onErrorResumeNext(handleServiceExceptionsAsCompletable());
 	}
 

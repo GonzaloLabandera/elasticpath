@@ -4,7 +4,7 @@
 
 ## Overview
 
-The following table describes the permissions that can be assigned to user soles in Elastic Path Commerce.
+The following table describes the permissions that can be assigned to user roles in Elastic Path Commerce.
 
 ## Catalog Management
 

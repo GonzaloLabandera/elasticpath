@@ -17,7 +17,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.elasticpath.domain.customer.Customer;
 import com.elasticpath.domain.customer.CustomerSession;
@@ -27,7 +27,6 @@ import com.elasticpath.domain.datapolicy.DataPolicy;
 import com.elasticpath.domain.datapolicy.impl.CustomerConsentImpl;
 import com.elasticpath.domain.datapolicy.impl.DataPolicyImpl;
 import com.elasticpath.domain.shopper.Shopper;
-import com.elasticpath.domain.shoppingcart.ShoppingCart;
 import com.elasticpath.service.datapolicy.CustomerConsentService;
 
 /**
@@ -100,8 +99,6 @@ public class CustomerConsentMergerForShopperUpdatesTest {
 
 		Shopper registeredShopper = createRegisteredCustomerWithConsents();
 
-		when(customerSession.getShopper()).thenReturn(registeredShopper);
-
 		customerConsentMergerForShopperUpdates.invalidateShopper(customerSession, anonymousShopper);
 
 		verify(customerConsentService, never()).updateCustomerGuids(
@@ -117,8 +114,6 @@ public class CustomerConsentMergerForShopperUpdatesTest {
 
 		Shopper registeredShopper = createRegisteredCustomerWithConsents();
 
-		when(customerSession.getShopper()).thenReturn(registeredShopper);
-
 		customerConsentMergerForShopperUpdates.invalidateShopper(customerSession, anonymousShopper);
 
 		verify(customerConsentService, never()).updateCustomerGuids(
@@ -129,12 +124,10 @@ public class CustomerConsentMergerForShopperUpdatesTest {
 	private Shopper createShopper(final String customerGuid, final List<CustomerConsent> customerConsent, final boolean anonymous) {
 		final Shopper shopper = mock(Shopper.class, customerGuid + "Shopper");
 		final Customer customer = mock(Customer.class, customerGuid + CUSTOMER);
-		final ShoppingCart shoppingCart = mock(ShoppingCart.class, customerGuid + "Cart");
 
 		when(shopper.getCustomer()).thenReturn(customer);
 		when(customer.isAnonymous()).thenReturn(anonymous);
 		when(customer.getGuid()).thenReturn(customerGuid);
-		when(shopper.getCurrentShoppingCart()).thenReturn(shoppingCart);
 
 		when(customerConsentService.findByCustomerGuid(customerGuid)).thenReturn(customerConsent);
 		return shopper;

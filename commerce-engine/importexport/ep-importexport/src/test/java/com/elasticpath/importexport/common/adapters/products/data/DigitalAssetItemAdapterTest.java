@@ -6,6 +6,7 @@
  */
 package com.elasticpath.importexport.common.adapters.products.data;
 
+import static junit.framework.TestCase.assertTrue;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
@@ -142,7 +143,7 @@ public class DigitalAssetItemAdapterTest {
 		DigitalAssetItemDTO digitalAssetItemDTO = new DigitalAssetItemDTO();
 		digitalAssetItemAdapter.populateDTO(mockProductSku, digitalAssetItemDTO);
 		
-		assertEquals(true, digitalAssetItemDTO.isEnabled());
+		assertTrue(digitalAssetItemDTO.isEnabled());
 		assertEquals(FILE_NAME, digitalAssetItemDTO.getFileName());
 		assertEquals(EXPIRY_DAYS, digitalAssetItemDTO.getExpiryDays());
 		assertEquals(MAX_DOWNLOAD_TIMES, digitalAssetItemDTO.getMaxDownloadTimes());

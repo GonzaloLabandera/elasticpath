@@ -8,29 +8,33 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Currency;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javax.persistence.Transient;
 
+import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
 import org.apache.commons.lang.ObjectUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
 import com.elasticpath.base.exception.EpServiceException;
 import com.elasticpath.commons.constants.ContextIdNames;
-import com.elasticpath.domain.EpDomainException;
 import com.elasticpath.domain.catalog.GiftCertificate;
 import com.elasticpath.domain.catalog.Product;
 import com.elasticpath.domain.catalog.ProductSku;
@@ -46,7 +50,6 @@ import com.elasticpath.domain.rules.CouponUsage;
 import com.elasticpath.domain.rules.CouponUsageType;
 import com.elasticpath.domain.rules.Rule;
 import com.elasticpath.domain.shipping.ShipmentType;
-import com.elasticpath.domain.shipping.ShippingServiceLevel;
 import com.elasticpath.domain.shipping.evaluator.impl.ShoppingCartShipmentTypeEvaluator;
 import com.elasticpath.domain.shopper.Shopper;
 import com.elasticpath.domain.shoppingcart.DiscountRecord;
@@ -80,10 +83,10 @@ import com.elasticpath.service.rules.CouponService;
 import com.elasticpath.service.rules.CouponUsageService;
 import com.elasticpath.service.rules.RuleService;
 import com.elasticpath.service.shoppingcart.OrderSkuFactory;
-import com.elasticpath.service.shoppingcart.ShippableItemsSubtotalCalculator;
 import com.elasticpath.service.shoppingcart.ShoppingItemSubtotalCalculator;
 import com.elasticpath.service.tax.DiscountApportioningCalculator;
 import com.elasticpath.service.tax.TaxCalculationResult;
+import com.elasticpath.shipping.connectivity.dto.ShippingOption;
 
 /**
  * A Shopping Cart contains both transient and persistable data. Since some persistence layers, upon merge or update, will return a brand new
@@ -112,9 +115,7 @@ public class ShoppingCartImpl extends AbstractEpDomainImpl implements ShoppingCa
 
 	private Order completedOrder;
 
-	private List<ShippingServiceLevel> shippingServiceLevelList = new ArrayList<>();
-
-	private ShippingServiceLevel selectedShippingServiceLevel;
+	private ShippingOption selectedShippingOption;
 
 	/** The map of rule id to promotion codes added to the cart. */
 	private final Map<Long, Set<String>> promotionCodes = new HashMap<>();
@@ -166,6 +167,9 @@ public class ShoppingCartImpl extends AbstractEpDomainImpl implements ShoppingCa
 	private boolean mergedNotification;
 
 	private boolean itemWithNoTierOneFromWishList;
+
+	private transient ShoppingItemSubtotalCalculator shoppingItemSubtotalCalculator;
+	private transient Predicate<ShoppingItem> shippableItemPredicate;
 
 	private final ShoppingItemHasRecurringPricePredicate shoppingItemHasRecurringPricePredicate;
 
@@ -236,9 +240,9 @@ public class ShoppingCartImpl extends AbstractEpDomainImpl implements ShoppingCa
 	}
 
 	/**
-	 * Get the map of shipping service levels to shipping pricing.
+	 * Get the map of shipping options to shipping pricing.
 	 *
-	 * @return the map of shipping service levels to shipping pricing
+	 * @return the map of shipping options to shipping pricing
 	 */
 	protected Map<String, ShippingPricing> getShippingPricingMap() {
 		return shippingPricingMap;
@@ -248,7 +252,7 @@ public class ShoppingCartImpl extends AbstractEpDomainImpl implements ShoppingCa
 	 * Add the gift certificate to the set which will be redeemed.
 	 *
 	 * @param giftCertificate the gift certificate to be redeemed.
-	 * @throws EpDomainException when the currency mismatch or balance is zero.
+	 * @throws {@link com.elasticpath.domain.EpDomainException} when the currency mismatch or balance is zero.
 	 */
 	@Override
 	public void applyGiftCertificate(final GiftCertificate giftCertificate) {
@@ -307,13 +311,61 @@ public class ShoppingCartImpl extends AbstractEpDomainImpl implements ShoppingCa
 	}
 
 	/**
-	 * Get the cart items in the shopping cart.
+	 * Returns a stream of all shopping items from all depths of the shopping item tree, including dependent items, bundles, and bundle
+	 * constituents.
 	 *
-	 * @return the cart items in the shopping cart
+	 * @return a stream of shopping items
+	 * @see #getRootShoppingItems()
+	 * @see #getAllShoppingItems()
 	 */
+	protected Stream<ShoppingItem> getAllShoppingItemsStream() {
+		return flatten(getRootShoppingItems(), item -> item.getChildren().stream());
+	}
+
 	@Override
-	public List<ShoppingItem> getCartItems() {
-		return getCartMementoItems(getShoppingCartMemento());
+	public Collection<ShoppingItem> getAllShoppingItems() {
+		return getAllShoppingItemsStream()
+				.collect(Collectors.collectingAndThen(Collectors.toList(), Collections::unmodifiableList));
+	}
+
+	@Override
+	public Collection<ShoppingItem> getShoppingItems(final Predicate<ShoppingItem> shoppingItemPredicate) {
+		return getAllShoppingItemsStream()
+				.filter(shoppingItemPredicate)
+				.collect(Collectors.collectingAndThen(Collectors.toList(), Collections::unmodifiableList));
+	}
+
+	/**
+	 * Flattens the tree of shopping items into a single stream.
+	 *
+	 * @param items a collection of {@link ShoppingItem}
+	 * @param itemTraversalStreamFunction the function used to traverse the sub-items of each shopping item
+	 * @return a Stream of shopping items
+	 */
+	protected Stream<ShoppingItem> flatten(final Collection<? extends ShoppingItem> items,
+										   final Function<ShoppingItem, Stream<? extends ShoppingItem>> itemTraversalStreamFunction) {
+
+		return Stream.concat(items.stream(), flattenInternal(items, itemTraversalStreamFunction));
+	}
+
+	/**
+	 * <p>Recursive method that traverses a collection of shopping items via the provided function.</p>
+	 * <p>Callers should <em>not</em> call this directly, but instead call {@link #flatten(Collection, Function)}.</p>
+	 *
+	 * @param items a a collection of {@link ShoppingItem}
+	 * @param itemTraversalStreamFunction the function used to traverse the sub-items of each shopping item
+	 * @return a Stream of shopping items
+	 */
+	protected Stream<ShoppingItem> flattenInternal(final Collection<? extends ShoppingItem> items,
+												   final Function<ShoppingItem, Stream<? extends ShoppingItem>> itemTraversalStreamFunction) {
+		final Stream<ShoppingItem> childrenStream = items.stream().flatMap(itemTraversalStreamFunction);
+
+		final Stream<ShoppingItem> recursiveDescendantsStream = items.stream().flatMap(
+				item -> flattenInternal(itemTraversalStreamFunction.apply(item)
+												.collect(Collectors.collectingAndThen(Collectors.toList(), Collections::unmodifiableList)),
+										itemTraversalStreamFunction));
+
+		return Stream.concat(childrenStream, recursiveDescendantsStream);
 	}
 
 	/**
@@ -324,9 +376,9 @@ public class ShoppingCartImpl extends AbstractEpDomainImpl implements ShoppingCa
 	@Override
 	public List<Product> getCartProducts() {
 		List<Product> cartProducts = new ArrayList<>();
-		for (ShoppingItem cartItem : getCartItems()) {
-			ProductSku sku = getProductSkuLookup().findByGuid(cartItem.getSkuGuid());
-			cartProducts.add(sku.getProduct());
+		for (Map.Entry<ShoppingItem, ProductSku> mapEntry : getShoppingItemProductSkuMap().entrySet()) {
+			ProductSku productSku = mapEntry.getValue();
+			cartProducts.add(productSku.getProduct());
 		}
 		return cartProducts;
 	}
@@ -346,7 +398,7 @@ public class ShoppingCartImpl extends AbstractEpDomainImpl implements ShoppingCa
 		if (isCartItem(cartItem)) {
 			((CartItem) cartItem).setCartUid(getShoppingCartMemento().getUidPk());
 		}
-		this.getCartItems().add(cartItem);
+		getCartMementoItems(getShoppingCartMemento()).add(cartItem);
 
 		// if we get a cart item manually added by a customer we should remove it from the list of manually removed cart items
 		ProductSku cartItemSku = getProductSkuLookup().findByGuid(cartItem.getSkuGuid());
@@ -369,12 +421,11 @@ public class ShoppingCartImpl extends AbstractEpDomainImpl implements ShoppingCa
 	 */
 	@Override
 	public void removeCartItem(final long itemUid) {
-		for (ShoppingItem cartItem : getCartItems()) {
-			if (cartItem.getUidPk() == itemUid) {
-				internalRemoveCartItem(cartItem, true);
-				break;
-			}
-		}
+		final Optional<? extends ShoppingItem> optionalShoppingItem = getAllShoppingItemsStream()
+				.filter(shoppingItem -> shoppingItem.getUidPk() == itemUid)
+				.findAny();
+
+		optionalShoppingItem.ifPresent(shoppingItem -> internalRemoveCartItem(shoppingItem, true));
 
 		// should clear the shipping and tax estimation.
 		estimateMode = false;
@@ -387,17 +438,26 @@ public class ShoppingCartImpl extends AbstractEpDomainImpl implements ShoppingCa
 	 */
 	@Override
 	public void removeCartItem(final String lineItemGuid) {
-		for (ShoppingItem cartItem : getCartItems()) {
-			if (cartItem.getGuid().equals(lineItemGuid)) {
-				internalRemoveCartItem(cartItem, true);
-				break;
-			}
-		}
+		final Optional<? extends ShoppingItem> optionalShoppingItem = getAllShoppingItemsStream()
+				.filter(shoppingItem -> shoppingItem.getGuid().equals(lineItemGuid))
+				.findAny();
+
+		optionalShoppingItem.ifPresent(shoppingItem -> internalRemoveCartItem(shoppingItem, true));
 
 		// should clear the shipping and tax estimation.
 		estimateMode = false;
 	}
-	
+
+	@Override
+	public void removeCartItems(final Collection<String> lineItemGuids) {
+		getAllShoppingItemsStream()
+				.filter(shoppingItem -> lineItemGuids.contains(shoppingItem.getGuid()))
+				.forEach(shoppingItem -> internalRemoveCartItem(shoppingItem, true));
+
+		// should clear the shipping and tax estimation.
+		estimateMode = false;
+	}
+
 	/**
 	 * Get the cart items that have been removed from the shopping cart.
 	 *
@@ -409,16 +469,17 @@ public class ShoppingCartImpl extends AbstractEpDomainImpl implements ShoppingCa
 
 	private void internalRemoveCartItem(final ShoppingItem currItem, final boolean addToRemovedList) {
 		// Remove any cross-referenced dependent items
-		for (ShoppingItem item : getCartItems()) {
+		final List<ShoppingItem> cartItems = getCartMementoItems(getShoppingCartMemento());
+		for (ShoppingItem item : cartItems) {
 			item.getChildren().remove(currItem);
 		}
 		// cleanup warranties and other dependent cart items
 		for (ShoppingItem item : currItem.getChildren()) {
-			getCartItems().remove(item);
+			cartItems.remove(item);
 		}
 		// TOD0: write test to determine if JPA will delete dependent items, when the parent is deleted
 		currItem.getChildren().clear();
-		getCartItems().remove(currItem);
+		cartItems.remove(currItem);
 
 		if (addToRemovedList) {
 			// saves the removed cart item so that it does not get back if a promotion has a rule to add a free product
@@ -427,19 +488,17 @@ public class ShoppingCartImpl extends AbstractEpDomainImpl implements ShoppingCa
 		}
 	}
 
-	/**
-	 * Return the number of items in the shopping cart.
-	 *
-	 * @return the number of items
-	 */
+	@Override
+	public boolean isEmpty() {
+		return getRootShoppingItems().isEmpty();
+	}
+
 	@Override
 	public int getNumItems() {
-		int numItems = 0;
-
-		for (ShoppingItem currCartItem : getCartItems()) {
-			numItems += currCartItem.getQuantity();
-		}
-		return numItems;
+		return getAllShoppingItemsStream()
+				.filter(shoppingItem -> !shoppingItem.isBundleConstituent())
+				.mapToInt(ShoppingItem::getQuantity)
+				.sum();
 	}
 
 	@Override
@@ -538,8 +597,9 @@ public class ShoppingCartImpl extends AbstractEpDomainImpl implements ShoppingCa
 
 		BigDecimal actualDiscountAmount = discountAmount;
 		// Prevent clients from setting the discount greater than the subtotal
-		if (actualDiscountAmount.compareTo(getSubtotal()) > 0) {
-			actualDiscountAmount = getSubtotal();
+		final BigDecimal subtotal = getSubtotal();
+		if (actualDiscountAmount.compareTo(subtotal) > 0) {
+			actualDiscountAmount = subtotal;
 			LOG.warn("Attempt to set subtotal discount greater than subtotal");
 
 			if (actualDiscountAmount.compareTo(BigDecimal.ZERO) == 0) {
@@ -583,11 +643,11 @@ public class ShoppingCartImpl extends AbstractEpDomainImpl implements ShoppingCa
 		}
 	}
 
-	private void supersedePreviousDiscountRecordsForShippingServiceLevel(final String shippingServiceLevelCode) {
+	private void supersedePreviousDiscountRecordsForShippingOption(final String shippingOptionCode) {
 		for (DiscountRecord existingDiscountRecord : promotionRecordContainer.getAllDiscountRecords()) {
 			if (existingDiscountRecord instanceof ShippingDiscountRecordImpl) {
 				final ShippingDiscountRecordImpl existingShippingDiscountRecord = (ShippingDiscountRecordImpl) existingDiscountRecord;
-				if (existingShippingDiscountRecord.getShippingLevelCode().equals(shippingServiceLevelCode)) {
+				if (existingShippingDiscountRecord.getShippingOptionCode().equals(shippingOptionCode)) {
 					supersedeDiscountRecord(existingShippingDiscountRecord);
 				}
 			}
@@ -689,9 +749,7 @@ public class ShoppingCartImpl extends AbstractEpDomainImpl implements ShoppingCa
 		subtotalDiscount = BigDecimal.ZERO;
 
 		// Clear discounts associated with any items that may be in the cart
-		for (ShoppingItem currCartItem : getCartItems()) {
-			currCartItem.clearDiscount();
-		}
+		getAllShoppingItemsStream().forEach(ShoppingItem::clearDiscount);
 	}
 
 	/**
@@ -700,7 +758,7 @@ public class ShoppingCartImpl extends AbstractEpDomainImpl implements ShoppingCa
 	@Override
 	public void clearItems() {
 		taxCalculationResult = getNewTaxCalculationResult();
-		getCartItems().clear();
+		getCartMementoItems(getShoppingCartMemento()).clear();
 		promotionCodes.clear();
 		clearPromotions();
 		getAppliedGiftCertificates().clear();
@@ -723,8 +781,7 @@ public class ShoppingCartImpl extends AbstractEpDomainImpl implements ShoppingCa
 			estimateMode = false;
 			setShippingAddress(null);
 			setBillingAddress(null);
-			getShippingServiceLevelList().clear();
-			selectedShippingServiceLevel = null;
+			clearSelectedShippingOption();
 		}
 	}
 
@@ -735,6 +792,10 @@ public class ShoppingCartImpl extends AbstractEpDomainImpl implements ShoppingCa
 	 */
 	@Override
 	public void setShippingAddress(final Address address) {
+		// Clears available and selected shipping options if the address has changed since they need to be recalculated
+		if (!Objects.equal(shippingAddress, address)) {
+			clearSelectedShippingOption();
+		}
 		shippingAddress = address;
 	}
 
@@ -799,108 +860,31 @@ public class ShoppingCartImpl extends AbstractEpDomainImpl implements ShoppingCa
 			return createMoney(shippingCostOverride);
 		}
 
-		if (!requiresShipping() || getShippingServiceLevelList().isEmpty()) {
-			return createMoney(BigDecimal.ZERO);
+		final Optional<ShippingOption> optSelectedShippingOption = getSelectedShippingOption();
+		if (requiresShipping() && optSelectedShippingOption.isPresent()) {
+			// Return the shippingCost in cart for the selected shipping option
+			return getShippingPricingSnapshot(optSelectedShippingOption.get()).getShippingPromotedPrice();
 		}
 
-		// update the shippingCost in cart for the selected service level
-		if (getSelectedShippingServiceLevel() != null) {
-			return getShippingPricingSnapshot(selectedShippingServiceLevel).getShippingPromotedPrice();
-		}
-
-		throw new EpDomainException("No valid shipping service level was selected");
+		return createMoney(BigDecimal.ZERO);
 	}
-
-	/**
-	 * Return the list of shippingServiceLevel list available based on the current shopping cart info.
-	 *
-	 * @return the list of shippingServiceLevel list available based on the current shopping cart info.
-	 */
-	@Override
-	public List<ShippingServiceLevel> getShippingServiceLevelList() {
-		return shippingServiceLevelList;
-	}
-
-	/**
-	 * Set the list of shippingServiceLevel list available based on the current shopping cart info.
-	 *
-	 * @param shippingServiceLevelList the list of shippingServiceLevel list available based on the current shopping cart info.
-	 */
-	@Override
-	public void setShippingServiceLevelList(final List<ShippingServiceLevel> shippingServiceLevelList) {
-
-		if (shippingServiceLevelList == null || shippingServiceLevelList.isEmpty()) {
-			getShippingServiceLevelList().clear();
-		} else {
-			this.shippingServiceLevelList = shippingServiceLevelList;
-			if (!this.shippingServiceLevelList.isEmpty() && !validShippingServiceLevelSelected()) {
-				// Set the first service level as the default if no service level has been set
-				selectedShippingServiceLevel = shippingServiceLevelList.get(0);
-			}
-		}
-	}
-
-	/**
-	 * Returns true if the shopping cart currently has a shipping service level selected that is in the list of valid shipping service levels.
-	 *
-	 * @return true if a valid service level is selected
-	 */
-	private boolean validShippingServiceLevelSelected() {
-		if (selectedShippingServiceLevel != null) {
-			for (ShippingServiceLevel currServiceLevel : getShippingServiceLevelList()) {
-				if (currServiceLevel.getUidPk() == selectedShippingServiceLevel.getUidPk()) {
-					selectedShippingServiceLevel = currServiceLevel;
-					return true;
-				}
-			}
-		}
-		return false;
-	}
-
-	/**
-	 * Get the selectedShippingServiceLevel.
-	 *
-	 * @return the selected ShippingServiceLevel.
-	 */
 
 	@Override
-	public ShippingServiceLevel getSelectedShippingServiceLevel() {
-		return selectedShippingServiceLevel;
+	public Optional<ShippingOption> getSelectedShippingOption() {
+		return Optional.ofNullable(selectedShippingOption);
+	}
+
+	@Override
+	public void setSelectedShippingOption(final ShippingOption selectedShippingOption) {
+		this.selectedShippingOption = selectedShippingOption;
 	}
 
 	/**
-	 * Set the selectedShippingServiceLevelUid and update the shippingCost correspondingly.
-	 *
-	 * @param selectedShippingServiceLevelUid - the selected ShippingServiceLevel uid.
-	 * @throws EpDomainException - if something goes wrong.
+	 * Resets the selected shipping option to {code null}.
 	 */
 	@Override
-	public void setSelectedShippingServiceLevelUid(final long selectedShippingServiceLevelUid) throws EpDomainException {
-		if (getShippingServiceLevelList().isEmpty()) {
-			throw new EpDomainException("Must set available shippingServiceLevelList first");
-		}
-
-		// Check that the specified shipping service level is valid
-		// boolean shippingServiceLevelFound = false;
-		selectedShippingServiceLevel = null;
-		for (ShippingServiceLevel shippingServiceLevel : getShippingServiceLevelList()) {
-			if (shippingServiceLevel.getUidPk() == selectedShippingServiceLevelUid) {
-				selectedShippingServiceLevel = shippingServiceLevel;
-				break;
-			}
-		}
-
-		if (selectedShippingServiceLevel == null) {
-			throw new EpDomainException("No valid shipping service level was selected");
-		}
-	}
-
-	/**
-	 * Resets the selected <code>ShippingServiceLevel</code> to null.
-	 */
-	@Override
-	public void clearSelectedShippingServiceLevel() {
-		selectedShippingServiceLevel = null;
+	public void clearSelectedShippingOption() {
+		setSelectedShippingOption(null);
 	}
 
 	/**
@@ -911,19 +895,23 @@ public class ShoppingCartImpl extends AbstractEpDomainImpl implements ShoppingCa
 
 	@Override
 	public BigDecimal getTotalWeight() {
-		BigDecimal totWeight = BigDecimal.ZERO;
+		return getShoppingItemProductSkuMap().entrySet().stream()
+				.filter(entry -> entry.getValue().isShippable())
+				.filter(entry -> entry.getValue().getWeight() != null)
+				.filter(entry -> entry.getValue().getWeight().compareTo(BigDecimal.ZERO) > 0)
+				.map(entry -> getWeight(entry.getValue(), entry.getKey().getQuantity()))
+				.reduce(BigDecimal.ZERO, BigDecimal::add);
+	}
 
-		for (ShoppingItem currItem : this.getCartItems()) {
-			ProductSku currItemSku = getProductSkuLookup().findByGuid(currItem.getSkuGuid());
-			if (currItemSku.isShippable()) {
-				BigDecimal currItemWeight = currItemSku.getWeight();
-				if (currItemWeight != null && currItemWeight.compareTo(BigDecimal.ZERO) > 0) {
-					totWeight = totWeight.add(currItemWeight.multiply(BigDecimal.valueOf(currItem.getQuantity())));
-				}
-			}
-		}
-
-		return totWeight;
+	/**
+	 * Calculates the weight for a certain quantity of a given product SKU.
+	 *
+	 * @param productSku the SKU
+	 * @param quantity the quantity of the SKU to calculate
+	 * @return the weight
+	 */
+	protected BigDecimal getWeight(final ProductSku productSku, final int quantity) {
+		return productSku.getWeight().multiply(BigDecimal.valueOf(quantity));
 	}
 
 	/**
@@ -933,31 +921,8 @@ public class ShoppingCartImpl extends AbstractEpDomainImpl implements ShoppingCa
 	 */
 	@Override
 	public boolean requiresShipping() {
-		boolean shoppingCartShippable = false;
-		for (ShoppingItem currItem : this.getCartItems()) {
-			if (currItem.isShippable(getProductSkuLookup())) {
-				shoppingCartShippable = true;
-				break;
-			}
-		}
-		return shoppingCartShippable;
-	}
-
-	/**
-	 * Get a cart item by the sku code of its SKU.
-	 *
-	 * @param skuCode the sku code of the SKU in the cart item to be retrieved.
-	 * @return the corresponding item or null if not found
-	 */
-	@Override
-	public ShoppingItem getCartItem(final String skuCode) {
-		for (ShoppingItem cartItem : getCartItems()) {
-			ProductSku sku = getProductSkuLookup().findByGuid(cartItem.getSkuGuid());
-			if (sku.getSkuCode().equals(skuCode)) {
-				return cartItem;
-			}
-		}
-		return null;
+		return getAllShoppingItemsStream()
+				.anyMatch(shoppingItem -> shoppingItem.isShippable(getProductSkuLookup()));
 	}
 
 	/**
@@ -968,25 +933,17 @@ public class ShoppingCartImpl extends AbstractEpDomainImpl implements ShoppingCa
 	 */
 	@Override
 	public List<ShoppingItem> getCartItems(final String skuCode) {
-		List<ShoppingItem> existingItems = new ArrayList<>();
-		for (ShoppingItem cartItem : getCartItems()) {
-			ProductSku sku = getProductSkuLookup().findByGuid(cartItem.getSkuGuid());
-			if (sku.getSkuCode().equals(skuCode)) {
-				existingItems.add(cartItem);
-			}
-		}
-		return existingItems;
+		return getShoppingItemProductSkuMap().entrySet().stream()
+				.filter(entry -> entry.getValue().getSkuCode().equals(skuCode))
+				.map(Map.Entry::getKey)
+				.collect(Collectors.toList());
 	}
 
 	@Override
 	public List<ShoppingItem> getCartItemsBySkuGuid(final String skuGuid) {
-		List<ShoppingItem> existingItems = new ArrayList<>();
-		for (ShoppingItem cartItem : getCartItems()) {
-			if (cartItem.getSkuGuid().equals(skuGuid)) {
-				existingItems.add(cartItem);
-			}
-		}
-		return existingItems;
+		return getAllShoppingItemsStream()
+				.filter(shoppingItem -> shoppingItem.getSkuGuid().equals(skuGuid))
+				.collect(Collectors.toList());
 	}
 
 	/**
@@ -1079,13 +1036,9 @@ public class ShoppingCartImpl extends AbstractEpDomainImpl implements ShoppingCa
 	}
 
 	private void flattenOrderSkuTree(final Collection<? extends ShoppingItem> rootItems, final Collection<ShoppingItem> leafCollection) {
-		for (ShoppingItem orderSku : rootItems) {
-			if (orderSku.isBundle(getProductSkuLookup())) {
-				getLeafItems(orderSku, leafCollection);
-			} else {
-				leafCollection.add(orderSku);
-			}
-		}
+		flatten(rootItems, item -> item.getChildren().stream())
+				.filter(shoppingItem -> !shoppingItem.isBundle(getProductSkuLookup()))
+				.forEach(leafCollection::add);
 	}
 
 	/**
@@ -1096,12 +1049,10 @@ public class ShoppingCartImpl extends AbstractEpDomainImpl implements ShoppingCa
 	 */
 	@Override
 	public ShoppingItem getCartItemById(final long cartItemId) {
-		for (ShoppingItem currCartItem : this.getCartItems()) {
-			if (currCartItem.getUidPk() == cartItemId) {
-				return currCartItem;
-			}
-		}
-		return null;
+		return getAllShoppingItemsStream()
+				.filter(shoppingItem -> shoppingItem.getUidPk() == cartItemId)
+				.findAny()
+				.orElse(null);
 	}
 
 	/**
@@ -1116,12 +1067,10 @@ public class ShoppingCartImpl extends AbstractEpDomainImpl implements ShoppingCa
 
 	@Override
 	public ShoppingItem getShoppingItemByGuid(final String itemGuid) {
-		for (ShoppingItem item : this.getCartItems()) {
-			if (item.getGuid().equals(itemGuid)) {
-				return item;
-			}
-		}
-		return null;
+		return getAllShoppingItemsStream()
+				.filter(shoppingItem -> shoppingItem.getGuid().equals(itemGuid))
+				.findAny()
+				.orElse(null);
 	}
 
 	/**
@@ -1152,40 +1101,47 @@ public class ShoppingCartImpl extends AbstractEpDomainImpl implements ShoppingCa
 	}
 
 	/**
-	 * Sets the list price (i.e. regular price, prior to promotions) of a shipping service level.
+	 * Sets the list price (i.e. regular price, prior to promotions) of a shipping option.
 	 *
-	 * @param shippingServiceLevelCode the code corresponding to the shipping service level for which pricing should be set
+	 * @param shippingOptionCode the code corresponding to the shipping option for which pricing should be set
 	 * @param listPrice the list price
 	 */
-	public void setShippingListPrice(final String shippingServiceLevelCode, final Money listPrice) {
-		final ShippingPricing shippingPricing = findShippingPricing(shippingServiceLevelCode);
+	public void setShippingListPrice(final String shippingOptionCode, final Money listPrice) {
+		final ShippingPricing shippingPricing = findShippingPricing(shippingOptionCode);
 		shippingPricing.setListPrice(listPrice);
 	}
 
 	/**
-	 * Sets the shipping discount for a specified shipping service level, if lower than the existing discount.
+	 * Clears any stored list prices for shipping options.
+	 */
+	public void clearShippingListPrices() {
+		getShippingPricingMap().clear();
+	}
+
+	/**
+	 * Sets the shipping discount for a specified shipping option, if lower than the existing discount.
 	 *
-	 * @param shippingServiceLevelCode the shipping service level
+	 * @param shippingOptionCode the shipping option
 	 * @param ruleId the ID of the rule that triggered this shipping discount
 	 * @param actionId the ID of the action that triggered this shipping discount
 	 * @param discountAmount the amount of the shipping discount
 	 */
-	public void setShippingDiscountIfLower(final String shippingServiceLevelCode,
-											final long ruleId,
-											final long actionId,
-											final Money discountAmount) {
-		final DiscountRecord discountRecord = new ShippingDiscountRecordImpl(shippingServiceLevelCode, ruleId, actionId, discountAmount.getAmount());
+	public void setShippingDiscountIfLower(final String shippingOptionCode,
+										   final long ruleId,
+										   final long actionId,
+										   final Money discountAmount) {
+		final DiscountRecord discountRecord = new ShippingDiscountRecordImpl(shippingOptionCode, ruleId, actionId, discountAmount.getAmount());
 		final DiscountRecord existingDiscountRecord = promotionRecordContainer.getDiscountRecord(ruleId, actionId);
 
 		if (discountRecord.equals(existingDiscountRecord)) {
 			return;
 		}
 
-		final ShippingPricing shippingPricing = findShippingPricing(shippingServiceLevelCode);
+		final ShippingPricing shippingPricing = findShippingPricing(shippingOptionCode);
 
 		if (shippingPricing.getDiscountAmount() == null || shippingPricing.getDiscountAmount().compareTo(discountAmount) < 0) {
 			shippingPricing.setDiscountAmount(discountAmount);
-			supersedePreviousDiscountRecordsForShippingServiceLevel(shippingServiceLevelCode);
+			supersedePreviousDiscountRecordsForShippingOption(shippingOptionCode);
 		} else {
 			supersedeDiscountRecord(discountRecord);
 		}
@@ -1194,35 +1150,35 @@ public class ShoppingCartImpl extends AbstractEpDomainImpl implements ShoppingCa
 	}
 
 	/**
-	 * Finds a {@link ShippingPricing} corresponding to the given {@link ShippingServiceLevel#getCode() Shipping Service Level code}.  If one can not
+	 * Finds a {@link ShippingPricing} corresponding to the given {@link ShippingOption#getCode() Shipping Option code}.  If one can not
 	 * be found,  a new instance will be created and returned.
 	 *
-	 * @param shippingServiceLevelCode the code corresponding to the shipping service level for which pricing should be found
+	 * @param shippingOptionCode the code corresponding to the shipping option for which pricing should be found
 	 * @return a {@link ShippingPricing} instance; never {@code null}
 	 */
-	private ShippingPricing findShippingPricing(final String shippingServiceLevelCode) {
-		ShippingPricing shippingPricing = getShippingPricingMap().get(shippingServiceLevelCode);
+	private ShippingPricing findShippingPricing(final String shippingOptionCode) {
+		ShippingPricing shippingPricing = getShippingPricingMap().get(shippingOptionCode);
 
 		if (shippingPricing == null) {
-			shippingPricing = new ShippingPricing(shippingServiceLevelCode);
-			getShippingPricingMap().put(shippingServiceLevelCode, shippingPricing);
+			shippingPricing = new ShippingPricing(shippingOptionCode);
+			getShippingPricingMap().put(shippingOptionCode, shippingPricing);
 		}
 
 		return shippingPricing;
 	}
 
 	/**
-	 * Returns the currently-set list price for the given {@link ShippingServiceLevel#getCode() Shipping Service Leve code}.
+	 * Returns the currently-set list price for the given {@link ShippingOption#getCode() Shipping Option code}.
 	 *
-	 * @param shippingServiceLevelCode the code corresponding to the shipping service level for which pricing should be found
+	 * @param shippingOptionCode the code corresponding to the shipping option for which pricing should be found
 	 * @return the list price
-	 * @throws com.elasticpath.base.exception.EpServiceException if pricing for the corresponding shipping serivce level does not exist
+	 * @throws com.elasticpath.base.exception.EpServiceException if pricing for the corresponding shipping option does not exist
 	 */
-	public Money getShippingListPrice(final String shippingServiceLevelCode) {
-		final ShippingPricing shippingPricing = getShippingPricingMap().get(shippingServiceLevelCode);
+	public Money getShippingListPrice(final String shippingOptionCode) {
+		final ShippingPricing shippingPricing = getShippingPricingMap().get(shippingOptionCode);
 
 		if (shippingPricing == null) {
-			throw new EpServiceException("Pricing not available for Shipping Service Level [" + shippingServiceLevelCode + "]");
+			throw new EpServiceException("Pricing not available for Shipping Option [" + shippingOptionCode + "]");
 		}
 
 		return shippingPricing.getListPrice();
@@ -1284,7 +1240,7 @@ public class ShoppingCartImpl extends AbstractEpDomainImpl implements ShoppingCa
 		for (Coupon coupon : couponCodeToCoupon.values()) {
 			potentialCouponUse = new PotentialCouponUse(coupon, storeCode, customerEmailAddress);
 
-			if (getValidCouponUseSpecification().isSatisfiedBy(potentialCouponUse)) {
+			if (getValidCouponUseSpecification().isSatisfiedBy(potentialCouponUse).isSuccess()) {
 
 				couponCode = coupon.getCouponCode();
 				limitedUseRule = couponCodeToLimitedUseRule.get(couponCode);
@@ -1317,7 +1273,7 @@ public class ShoppingCartImpl extends AbstractEpDomainImpl implements ShoppingCa
 		}
 
 		PotentialCouponUse potentialCouponUse = new PotentialCouponUse(coupon, getStore().getCode(), getCustomerEmailAddress());
-		if (!getValidCouponUseSpecification().isSatisfiedBy(potentialCouponUse)) {
+		if (!getValidCouponUseSpecification().isSatisfiedBy(potentialCouponUse).isSuccess()) {
 			return false;
 		}
 
@@ -1510,16 +1466,6 @@ public class ShoppingCartImpl extends AbstractEpDomainImpl implements ShoppingCa
 	}
 
 	/**
-	 * Get all the items in the shopping cart.
-	 *
-	 * @return an unmodifiable list of all the items in the shopping cart
-	 */
-	@Override
-	public List<ShoppingItem> getAllItems() {
-		return Collections.unmodifiableList(getCartItems());
-	}
-
-	/**
 	 * Return the guid.
 	 *
 	 * @return the guid.
@@ -1689,31 +1635,10 @@ public class ShoppingCartImpl extends AbstractEpDomainImpl implements ShoppingCa
 	}
 
 	@Override
-	public Collection<? extends ShoppingItem> getRootShoppingItems() {
-		return Collections.unmodifiableList(getCartItems());
-	}
-
-	@Override
-	public Collection<? extends ShoppingItem> getLeafShoppingItems() {
-		List<ShoppingItem> leaves = new ArrayList<>();
-		for (ShoppingItem item : getCartItems()) {
-			if (item.isBundle(getProductSkuLookup())) {
-				getLeafItems(item, leaves);
-			} else {
-				leaves.add(item);
-			}
-		}
-		return Collections.unmodifiableList(leaves);
-	}
-
-	private void getLeafItems(final ShoppingItem bundleItem, final Collection<ShoppingItem> leafCollection) {
-		for (ShoppingItem item : bundleItem.getBundleItems(getProductSkuLookup())) {
-			if (item.isBundle(getProductSkuLookup())) {
-				getLeafItems(item, leafCollection);
-			} else {
-				leafCollection.add(item);
-			}
-		}
+	public List<ShoppingItem> getRootShoppingItems() {
+		return getCartMementoItems(getShoppingCartMemento()).stream()
+				.sorted(Comparator.comparing(ShoppingItem::getOrdering))
+				.collect(Collectors.collectingAndThen(Collectors.toList(), Collections::unmodifiableList));
 	}
 
 	/**
@@ -1724,14 +1649,15 @@ public class ShoppingCartImpl extends AbstractEpDomainImpl implements ShoppingCa
 	@Override
 	public Collection<ShoppingItem> getApportionedLeafItems() {
 		OrderSkuFactory orderSkuFactory = getBean(ContextIdNames.ORDER_SKU_FACTORY);
-		Collection<OrderSku> rootItems = orderSkuFactory.createOrderSkus(getCartItems(), this, getCustomerSession().getLocale());
+		Collection<OrderSku> rootItems = orderSkuFactory.createOrderSkus(this.getShoppingItems(shoppingItem -> !shoppingItem.isBundleConstituent()),
+				this, getCustomerSession().getLocale());
 		Collection<ShoppingItem> leafItems = new ArrayList<>();
 		flattenOrderSkuTree(rootItems, leafItems);
 		return leafItems;
 	}
 
 	private List<ShoppingItem> getCartMementoItems(final ShoppingList memento) {
-		List<ShoppingItem> items = Objects.firstNonNull(memento.getAllItems(), ImmutableList.<ShoppingItem>of());
+		List<ShoppingItem> items = MoreObjects.firstNonNull(memento.getAllItems(), ImmutableList.<ShoppingItem>of());
 
 		for (ShoppingItem item : items) {
 			if (isCartItem(item)) {
@@ -1811,8 +1737,9 @@ public class ShoppingCartImpl extends AbstractEpDomainImpl implements ShoppingCa
 
 	@Override
 	public boolean hasRecurringPricedShoppingItems() {
-		return Iterables.any(
-				Lists.transform(getCartItems(), this::getShoppingItemPricingSnapshot), getShoppingItemHasRecurringPricePredicate());
+		return getAllShoppingItemsStream()
+				.map(this::getShoppingItemPricingSnapshot)
+				.anyMatch(getShoppingItemHasRecurringPricePredicate());
 	}
 
 	@Override
@@ -1841,18 +1768,18 @@ public class ShoppingCartImpl extends AbstractEpDomainImpl implements ShoppingCa
 	@Transient
 	public void accept(final ShoppingCartVisitor visitor) {
 		visitor.visit(this);
-		for (ShoppingItem item : getCartItems()) {
-			item.accept(visitor, getProductSkuLookup());
-		}
+
+		getAllShoppingItems().forEach(
+				shoppingItem -> visitor.visit(shoppingItem, getShoppingItemPricingSnapshot(shoppingItem)));
 	}
 
 	@Override
 	public Set<ShipmentType> getShipmentTypes() {
-		ShoppingCartShipmentTypeEvaluator evaluator = getBean(ContextIdNames.SHOPPING_CART_SHIPMENT_TYPE_EVALUATOR);
+		final ShoppingCartShipmentTypeEvaluator evaluator = getBean(ContextIdNames.SHOPPING_CART_SHIPMENT_TYPE_EVALUATOR);
 
-		for (ShoppingItem item : getLeafShoppingItems()) {
-			item.accept(evaluator, getProductSkuLookup());
-		}
+		getAllShoppingItemsStream()
+				.filter(shoppingItem -> !shoppingItem.isBundle(getProductSkuLookup()))
+				.forEach(shoppingItem -> shoppingItem.accept(evaluator, getProductSkuLookup()));
 
 		return evaluator.getShipmentTypes();
 	}
@@ -1868,11 +1795,11 @@ public class ShoppingCartImpl extends AbstractEpDomainImpl implements ShoppingCa
 	}
 
 	@Override
-	public ShippingPricingSnapshot getShippingPricingSnapshot(final ShippingServiceLevel shippingServiceLevel) {
-		final ShippingPricing shippingPricing = getShippingPricingMap().get(shippingServiceLevel.getCode());
+	public ShippingPricingSnapshot getShippingPricingSnapshot(final ShippingOption shippingOption) {
+		final ShippingPricing shippingPricing = getShippingPricingMap().get(shippingOption.getCode());
 
 		if (shippingPricing == null) {
-			throw new EpServiceException("Pricing not available for Shipping Service Level [" + shippingServiceLevel.getCode() + "]");
+			throw new EpServiceException("Pricing not available for Shipping Option [" + shippingOption.getCode() + "]");
 		}
 
 		return new ImmutableShippingPricingSnapshot(shippingPricing, customerSession.getCurrency());
@@ -1886,6 +1813,20 @@ public class ShoppingCartImpl extends AbstractEpDomainImpl implements ShoppingCa
 	@Override
 	public boolean isActive() {
 		return ShoppingCartStatus.ACTIVE.equals(getShoppingCartMemento().getStatus());
+	}
+
+	@Override
+	public Map<ShoppingItem, ProductSku> getShoppingItemProductSkuMap() {
+		final List<String> productSkuGuids = getAllShoppingItemsStream()
+				.map(ShoppingItem::getSkuGuid)
+				.distinct()
+				.collect(Collectors.toList());
+
+		final Map<String, ProductSku> productSkuMap = getProductSkuLookup().findByGuids(productSkuGuids).stream()
+				.collect(Collectors.toMap(ProductSku::getGuid, productSku -> productSku));
+
+		return getAllShoppingItemsStream()
+				.collect(Collectors.toMap(item -> item, item -> productSkuMap.get(item.getSkuGuid())));
 	}
 
 	/**
@@ -1938,18 +1879,42 @@ public class ShoppingCartImpl extends AbstractEpDomainImpl implements ShoppingCa
 	 * @return the subtotal
 	 */
 	protected Money getSubtotalOfShippableItems(final Collection<ShoppingItem> shoppingItems) {
-		final ShippableItemsSubtotalCalculator shippableItemsSubtotalCalculator = getBean(ContextIdNames.SHIPPABLE_ITEMS_SUBTOTAL_CALCULATOR);
-		return shippableItemsSubtotalCalculator.calculateSubtotalOfShippableItems(shoppingItems, this, getCustomerSession().getCurrency());
+		final Stream<ShoppingItem> shippableShoppingItems = shoppingItems.stream().filter(getShippableItemPredicate());
+		return getShoppingItemSubtotalCalculator().calculate(shippableShoppingItems, this, getCustomerSession().getCurrency());
 	}
 
 	/**
-	 * Represents the pricing for a particular shipping service level.
+	 * Returns the shopping item subtotal calculator in use.
+	 *
+	 * @return the shopping item subtotal calculator in use, never {@code null}.
+	 */
+	protected ShoppingItemSubtotalCalculator getShoppingItemSubtotalCalculator() {
+		if (this.shoppingItemSubtotalCalculator == null) {
+			this.shoppingItemSubtotalCalculator = getBean(ContextIdNames.SHOPPING_ITEM_SUBTOTAL_CALCULATOR);
+		}
+		return this.shoppingItemSubtotalCalculator;
+	}
+
+	/**
+	 * Returns predicate matching shippable items only.
+	 *
+	 * @return the predicate
+	 */
+	protected Predicate<ShoppingItem> getShippableItemPredicate() {
+		if (this.shippableItemPredicate == null) {
+			this.shippableItemPredicate = getBean(ContextIdNames.SHIPPABLE_ITEM_PREDICATE);
+		}
+		return this.shippableItemPredicate;
+	}
+
+	/**
+	 * Represents the pricing for a particular shipping option.
 	 */
 	protected static class ShippingPricing implements Serializable {
 
 		private static final long serialVersionUID = 6610873674008111850L;
 
-		private final String shippingServiceLevelCode;
+		private final String shippingOptionCode;
 
 		private Money listPrice;
 		private Money discountAmount;
@@ -1957,14 +1922,14 @@ public class ShoppingCartImpl extends AbstractEpDomainImpl implements ShoppingCa
 		/**
 		 * Constructor.
 		 *
-		 * @param shippingServiceLevelCode the shipping service level code
+		 * @param shippingOptionCode the shipping option code
 		 */
-		public ShippingPricing(final String shippingServiceLevelCode) {
-			this.shippingServiceLevelCode = shippingServiceLevelCode;
+		public ShippingPricing(final String shippingOptionCode) {
+			this.shippingOptionCode = shippingOptionCode;
 		}
 
-		public String getShippingServiceLevel() {
-			return shippingServiceLevelCode;
+		public String getShippingOptionCode() {
+			return shippingOptionCode;
 		}
 
 		public Money getListPrice() {
@@ -2030,8 +1995,5 @@ public class ShoppingCartImpl extends AbstractEpDomainImpl implements ShoppingCa
 
 	}
 
-	protected ShoppingItemSubtotalCalculator getShoppingItemSubtotalCalculator() {
-		return getBean(ContextIdNames.SHOPPING_ITEM_SUBTOTAL_CALCULATOR);
-	}
 }
 

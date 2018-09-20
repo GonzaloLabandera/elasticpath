@@ -121,6 +121,7 @@ public class CategoryEditor extends AbstractPageObject {
 	public void checkCategoryStoreVisibilityFalse() {
 		setWebDriverImplicitWait(Constants.IMPLICIT_WAIT_FOR_ELEMENT_NOT_EXISTS);
 		try {
+			getDriver().findElement(By.cssSelector(CATEGORY_NAME_INPUT_CSS)).click();
 			getDriver().findElement(By.cssSelector(STORE_VISIBLE_UNCHECKED));
 		} catch (Exception e) {
 			assertThat(false)
@@ -141,7 +142,7 @@ public class CategoryEditor extends AbstractPageObject {
 		assertThat(selectItemInDialog(ATTRIBUTE_PARENT_CSS, ATTRIBUTE_COLUMN_CSS, attributeName, "Name"))
 				.as("Unable to find setting - " + attributeName)
 				.isTrue();
-		clickButton(ATTRIBUTE_EDIT_VALUE_BUTTON_CSS, "Edit Value Button");
+		clickButton(ATTRIBUTE_EDIT_VALUE_BUTTON_CSS, "Edit Value Button", EditLongTextAttributeDialog.PARENT_EDIT_LONG_TEXT_CSS);
 		return new EditLongTextAttributeDialog(getDriver());
 	}
 

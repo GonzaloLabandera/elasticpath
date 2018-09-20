@@ -76,7 +76,7 @@ public class CouponAutoApplierServiceImplTest {
 	@Test
 	public void testFilterKeepsUserSpecificCoupons() {
 		allowingCouponToBeUserSpecific(true);
-		allowingCouponToBeValid(true);
+		allowingCouponToBeValid(RuleValidationResultEnum.SUCCESS);
 
 		Set<String> result = applierService.filterValidCouponsForCustomer(new HashSet<>(Arrays.asList(COUPON_CODE)),
 				mockStore, EMAIL);
@@ -88,7 +88,7 @@ public class CouponAutoApplierServiceImplTest {
 	@Test
 	public void testFilterKeepsInvalidCoupons() {
 		allowingCouponToBeUserSpecific(false);
-		allowingCouponToBeValid(false);
+		allowingCouponToBeValid(RuleValidationResultEnum.ERROR_UNSPECIFIED);
 
 		Set<String> result = applierService.filterValidCouponsForCustomer(new HashSet<>(Arrays.asList(COUPON_CODE)),
 				mockStore, EMAIL);
@@ -111,7 +111,7 @@ public class CouponAutoApplierServiceImplTest {
 	public void testRetrieveCouponsForAutoApplyDoesNotReturnInvalidCoupons() {
 		setUpCouponUsageServiceToReturnCouponUsages();
 		allowingCouponUsageToBeActiveInCart(true);
-		allowingCouponToBeValid(false);
+		allowingCouponToBeValid(RuleValidationResultEnum.ERROR_UNSPECIFIED);
 
 		Set<String> result = applierService.retrieveCouponsApplicableToAutoApply(mockStore, EMAIL);
 
@@ -122,7 +122,7 @@ public class CouponAutoApplierServiceImplTest {
 	public void testRetrieveCouponsForAutoApplyDoesReturnsActiveAndValidCouponsEligibleForCustomer() {
 		setUpCouponUsageServiceToReturnCouponUsages();
 		allowingCouponUsageToBeActiveInCart(true);
-		allowingCouponToBeValid(true);
+		allowingCouponToBeValid(RuleValidationResultEnum.SUCCESS);
 
 		Set<String> result = applierService.retrieveCouponsApplicableToAutoApply(mockStore, EMAIL);
 
@@ -154,7 +154,7 @@ public class CouponAutoApplierServiceImplTest {
 		});
 	}
 
-	private void allowingCouponToBeValid(final boolean isValid) {
+	private void allowingCouponToBeValid(final RuleValidationResultEnum isValid) {
 		context.checking(new Expectations() {
 			{
 				allowing(mockValidCouponUseSpecification).isSatisfiedBy(with(any(PotentialCouponUse.class)));

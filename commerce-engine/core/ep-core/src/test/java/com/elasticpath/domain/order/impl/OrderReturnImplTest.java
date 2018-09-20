@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) Elastic Path Software Inc., 2016
  */
 package com.elasticpath.domain.order.impl;
@@ -102,8 +102,6 @@ public class OrderReturnImplTest extends AbstractEPServiceTestCase {
 
 	private static final BigDecimal ITEM_TAX = new BigDecimal("5.72");
 
-	private static final String CARD_HOLDER_NAME = "John";
-
 	private static final BigDecimal PRODUCT_PRICE = new BigDecimal("44");
 
 	private static final String REGION_CODE_CA = "CA";
@@ -117,8 +115,6 @@ public class OrderReturnImplTest extends AbstractEPServiceTestCase {
 	private static final String TAX_CODE = "GOODS";
 
 	private static final BigDecimal SHIPPING_COST = new BigDecimal("8");
-
-	private ReturnTaxOperationServiceImpl returnTaxOperationService;
 
 	private StoreService storeService;
 
@@ -152,7 +148,7 @@ public class OrderReturnImplTest extends AbstractEPServiceTestCase {
 		orderReturn.initialize();
 		orderReturn.setOrderReturnAddress(mockOrderAddress());
 
-		/** setup order. */
+		/* setup order. */
 		setupOrder();
 
 		orderReturn.setOrder(orderImpl);
@@ -165,7 +161,7 @@ public class OrderReturnImplTest extends AbstractEPServiceTestCase {
 		orderService.setPersistenceEngine(getPersistenceEngine());
 		stubGetBean(ContextIdNames.ORDER_SERVICE, orderService);
 
-		returnTaxOperationService = new ReturnTaxOperationServiceImpl();
+		ReturnTaxOperationServiceImpl returnTaxOperationService = new ReturnTaxOperationServiceImpl();
 		returnTaxOperationService.setProductSkuLookup(productSkuLookup);
 		returnTaxOperationService.setPricingSnapshotService(pricingSnapshotService);
 
@@ -312,9 +308,9 @@ public class OrderReturnImplTest extends AbstractEPServiceTestCase {
 	@Test
 	public void testGetSetPhysicalReturn() {
 		orderReturn.setPhysicalReturn(true);
-		assertEquals(true, orderReturn.getPhysicalReturn());
+		assertTrue(orderReturn.getPhysicalReturn());
 		orderReturn.setPhysicalReturn(false);
-		assertEquals(false, orderReturn.getPhysicalReturn());
+		assertFalse(orderReturn.getPhysicalReturn());
 	}
 
 	/**
@@ -900,7 +896,6 @@ public class OrderReturnImplTest extends AbstractEPServiceTestCase {
 	private Set<OrderPayment> mockOrderPayments() {
 		final OrderPayment orderPayment = new OrderPaymentImpl();
 		orderPayment.setTransactionType(OrderPayment.CAPTURE_TRANSACTION);
-		orderPayment.setCardHolderName(CARD_HOLDER_NAME);
 		final Set<OrderPayment> paymentSet = new HashSet<>();
 		paymentSet.add(orderPayment);
 		return paymentSet;

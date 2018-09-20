@@ -57,8 +57,10 @@ public interface CheckoutService {
 							OrderPayment orderPayment, boolean throwExceptions);
 
 	/**
-	 * Retrieve the valid shippingServiceLevels based on the given shoppingCart,
-	 * and set the first one of the valid shippingServiceLevels as the selected shipping option by default.
+	 * Retrieve the valid shipping options based on the given shoppingCart, and if the current shipping option is not valid it sets the default one
+	 * (as per {@link com.elasticpath.service.shipping.ShippingOptionService#getDefaultShippingOption(java.util.List)},
+	 * if any) on the shopping cart.
+	 *
 	 * @param shoppingCart the current shopping cart.
 	 */
 	void retrieveShippingOption(ShoppingCart shoppingCart);

@@ -34,4 +34,5 @@
     <resource>cmusers.xml</resource>
 	<resource>shipping_regions.xml</resource>
     <resource>shipping_service_levels.xml</resource>
+    <resource>customer_consents.xml</resource>
 </manifest>

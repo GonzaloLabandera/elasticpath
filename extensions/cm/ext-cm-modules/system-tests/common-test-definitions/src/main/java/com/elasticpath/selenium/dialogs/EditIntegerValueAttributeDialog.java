@@ -8,7 +8,10 @@ import org.openqa.selenium.WebDriver;
  */
 public class EditIntegerValueAttributeDialog extends AbstractDialog {
 
-	private static final String PARENT_INTEGER_VALUE_CSS = "div[widget-id='Edit Integer Value'][widget-type='Shell'] ";
+	/**
+	 * CSS selector used to identify the dialog.
+	 */
+	public static final String PARENT_INTEGER_VALUE_CSS = "div[widget-id='Edit Integer Value'][widget-type='Shell'] ";
 	private static final String INPUT_CSS = PARENT_INTEGER_VALUE_CSS + "input";
 	private static final String OK_BUTTON_CSS = PARENT_INTEGER_VALUE_CSS + "div[widget-id='OK']";
 

@@ -9,10 +9,11 @@ import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.Currency;
 import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.inject.Named;
 
-import com.google.common.collect.Maps;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.elasticpath.cucumber.ScenarioContextValueHolder;
@@ -150,9 +151,13 @@ public class B2BTaxStepDefinitionsHelper {
 		final TaxAddress originAddress = taxAddressAdapter.toTaxAddress(store.getWarehouse().getAddress());
 
 		final ShoppingCartPricingSnapshot cartPricingSnapshot = pricingSnapshotService.getPricingSnapshotForCart(shoppingCart);
-		final Collection<? extends ShoppingItem> shoppingItems = shoppingCart.getAllItems();
-		final Map<? extends ShoppingItem, ShoppingItemPricingSnapshot> shoppingItemPricingSnapshotMap =
-				Maps.toMap(shoppingItems, new ShoppingItemToPricingSnapshotFunction(cartPricingSnapshot));
+		final Collection<ShoppingItem> shoppingItems = shoppingCart.getAllShoppingItems();
+
+		final Map<? extends ShoppingItem, ShoppingItemPricingSnapshot> shoppingItemPricingSnapshotMap = shoppingItems.stream()
+				.collect(Collectors.toMap(
+						Function.identity(),
+						new ShoppingItemToPricingSnapshotFunction(cartPricingSnapshot)
+				));
 
 		final TaxOperationContext taxOperationContext  = TaxOperationContextBuilder
 				.newBuilder()

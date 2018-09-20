@@ -3,6 +3,7 @@
  */
 package com.elasticpath.rest.resource.integration.epcommerce.personalization.impl;
 
+import static junit.framework.TestCase.assertFalse;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
@@ -14,7 +15,7 @@ import org.junit.runner.RunWith;
 
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.elasticpath.domain.customer.Customer;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.customer.CustomerRepository;
@@ -58,7 +59,7 @@ public class CustomerFirstTimeBuyerTagStrategyTest {
 
 		assertTrue(ATTR_PRESENT_MSG, result.isPresent());
 		Tag actual = result.get();
-		assertEquals("First time buyer tag should be true", true, actual.getValue());
+		assertTrue("First time buyer tag should be true", (boolean) actual.getValue());
 	}
 
 	@Test
@@ -72,6 +73,6 @@ public class CustomerFirstTimeBuyerTagStrategyTest {
 
 		assertTrue(ATTR_PRESENT_MSG, result.isPresent());
 		Tag actual = result.get();
-		assertEquals("First time buyer tag should be false", false, actual.getValue());
+		assertFalse("First time buyer tag should be false", (boolean) actual.getValue());
 	}
 }

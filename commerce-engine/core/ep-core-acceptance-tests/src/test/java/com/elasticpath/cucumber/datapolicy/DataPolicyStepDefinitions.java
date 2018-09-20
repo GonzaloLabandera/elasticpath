@@ -23,7 +23,6 @@ import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.test.context.ContextConfiguration;
 
 import com.elasticpath.cucumber.ScenarioContextValueHolder;
 import com.elasticpath.domain.attribute.CustomerProfileValue;
@@ -50,7 +49,6 @@ import com.elasticpath.test.util.Utils;
 /**
  * Data policy test step definitions class.
  */
-@ContextConfiguration("/cucumber.xml")
 public class DataPolicyStepDefinitions {
 
 	/**
@@ -177,16 +175,18 @@ public class DataPolicyStepDefinitions {
 	/**
 	 * Ensure the data point values processed by job.
 	 *
+	 * @param customerGuid customer guid.
 	 * @param dataPointGuid  data point guid.
 	 * @param dataPointValue expected data point value.
 	 */
-	@Then("^the data point value with data point guid \\[([a-zA-Z0-9_]+)\\] should have value \\[([a-zA-Z0-9_‐]+)\\]$")
-	public void ensureDataPointValue(final String dataPointGuid, final String dataPointValue) {
+	@Then("^the data point value with customer guid \\[([a-zA-Z0-9_]+)\\] and data point guid \\[([a-zA-Z0-9_]+)\\] should have value \\["
+			+ "([a-zA-Z0-9_‐]+)\\]$")
+	public void ensureDataPointValue(final String customerGuid, final String dataPointGuid, final String dataPointValue) {
 
 		DataPoint dataPoint = dataPointService.findByGuid(dataPointGuid);
 
 		Map<String, List<DataPoint>> dataPointMap = new HashMap<>();
-		dataPointMap.put(customerHolder.get().getGuid(), Collections.singletonList(dataPoint));
+		dataPointMap.put(customerGuid, Collections.singletonList(dataPoint));
 
 		Collection<DataPointValue> dataPointValues = dataPointValueService.getValues(dataPointMap);
 
@@ -200,11 +200,12 @@ public class DataPolicyStepDefinitions {
 	/**
 	 * Ensure the customer profile data point value processed by job.
 	 *
+	 * @param customerGuid the customer guid.
 	 * @param dataPointKey data point key.
 	 */
-	@Then("^the customer profile data point value with data point key \\[([A-Z_]+)\\] has been deleted$")
-	public void ensureCustomerProfileDataPointValue(final String dataPointKey) {
-		Customer customer = customerService.get(customerHolder.get().getUidPk());
+	@Then("^the customer profile data point value with customer guid \\[([a-zA-Z0-9_]+)\\] and data point key \\[([A-Z_]+)\\] has been deleted$")
+	public void ensureCustomerProfileDataPointValue(final String customerGuid, final String dataPointKey) {
+		Customer customer = customerService.findByGuid(customerGuid);
 		Map<String, CustomerProfileValue> profileValueMap = customer.getProfileValueMap();
 		assertThat(profileValueMap.get(dataPointKey))
 				.as("Expected customer profile data point value not match")
@@ -313,7 +314,7 @@ public class DataPolicyStepDefinitions {
 			customerConsent.setDataPolicy(dataPolicy);
 			customerConsent.setAction(ConsentAction.valueOf(properties.get("action")));
 			customerConsent.setConsentDate(Utils.getDate(properties.get("consentDate")));
-			customerConsent.setCustomerGuid(customerHolder.get().getGuid());
+			customerConsent.setCustomerGuid(properties.get("customerGuid"));
 
 			customerConsentService.save(customerConsent);
 		}

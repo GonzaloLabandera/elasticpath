@@ -20,8 +20,7 @@ import com.elasticpath.persistence.openjpa.JpaPersistenceEngine;
 import com.elasticpath.service.audit.AuditDao;
 import com.elasticpath.service.changeset.ChangeSetService;
 import com.elasticpath.service.misc.TimeService;
-import com.elasticpath.settings.SettingsReader;
-import com.elasticpath.settings.domain.SettingValue;
+import com.elasticpath.settings.provider.SettingValueProvider;
 
 /**
  * DAO methods for Audit transactions, operations and data changed records.
@@ -29,11 +28,11 @@ import com.elasticpath.settings.domain.SettingValue;
 public class AuditDaoImpl implements AuditDao {
 
 	private JpaPersistenceEngine persistenceEngine;
-	
+
 	private BeanFactory beanFactory;
 
-	private static final String SETTING_CHANGESET_ENABLED = "COMMERCE/SYSTEM/CHANGESETS/enable";
-	
+	private SettingValueProvider<Boolean> changeSetEnabledProvider;
+
 	@Override
 	public void persistDataChanged(final Persistable object, final String fieldName, final ChangeType changeType, 
 			final String oldValue, final String newValue, final ChangeOperation operation) {
@@ -119,18 +118,10 @@ public class AuditDaoImpl implements AuditDao {
 	/**
 	 * Checks if change sets are enabled.
 	 *
-	 * @return True, if change sets are enabled.
+	 * @return true, if change sets are enabled.
 	 */
 	protected boolean isChangeSetsEnabled() {
-		boolean changeSetsEnabled = false;
-
-		SettingsReader settingsReader = getBeanFactory().getBean("settingsService"); //$NON-NLS-1$
-		SettingValue settingValue = settingsReader.getSettingValue(SETTING_CHANGESET_ENABLED);
-		if (settingValue != null) {
-			changeSetsEnabled = settingValue.getBooleanValue();
-		}
-
-		return changeSetsEnabled;
+		return getChangeSetEnabledProvider().get();
 	}
 
 	@Override
@@ -205,5 +196,12 @@ public class AuditDaoImpl implements AuditDao {
 		return beanFactory;
 	}
 
+	public void setChangeSetEnabledProvider(final SettingValueProvider<Boolean> changeSetEnabledProvider) {
+		this.changeSetEnabledProvider = changeSetEnabledProvider;
+	}
+
+	protected SettingValueProvider<Boolean> getChangeSetEnabledProvider() {
+		return changeSetEnabledProvider;
+	}
 
 }

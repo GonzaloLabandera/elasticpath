@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) Elastic Path Software Inc., 2013
  */
 package com.elasticpath.common.dto.customer;
@@ -14,6 +14,8 @@ import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.commons.lang.builder.ToStringBuilder;
 
+import com.elasticpath.common.dto.Dto;
+
 /**
  * JAXB DTO of a customer's credit card. Remember that the card # may not actually be in here.
  *
@@ -27,28 +29,29 @@ import org.apache.commons.lang.builder.ToStringBuilder;
 @XmlRootElement(name = CreditCardDTO.ROOT_ELEMENT)
 @XmlAccessorType(XmlAccessType.NONE)
 @XmlType(propOrder = { })
-public class CreditCardDTO extends PaymentMethodDto implements Comparable<CreditCardDTO> {
+@Deprecated
+public class CreditCardDTO extends PaymentMethodDto implements Comparable<CreditCardDTO>, Dto {
 	/** XML root element name. */
 	public static final String ROOT_ELEMENT = "credit_card";
 
 	private static final long serialVersionUID = 1L;
 
-	@XmlAttribute(name = "type", required = true)
+	@XmlAttribute(name = "type")
 	private String cardType;
 
-	@XmlAttribute(name = "expiry_year", required = true)
+	@XmlAttribute(name = "expiry_year")
 	private String expiryYear;
 
-	@XmlAttribute(name = "expiry_month", required = true)
+	@XmlAttribute(name = "expiry_month")
 	private String expiryMonth;
 
-	@XmlAttribute(name = "guid", required = true)
+	@XmlAttribute(name = "guid")
 	private String guid;
 
-	@XmlElement(name = "holder_name", required = true)
+	@XmlElement(name = "holder_name")
 	private String cardHolderName;
 
-	@XmlElement(name = "card_number", required = true)
+	@XmlElement(name = "card_number")
 	private String cardNumber;
 
 	@XmlElement(name = "start_year")
@@ -157,7 +160,6 @@ public class CreditCardDTO extends PaymentMethodDto implements Comparable<Credit
 	 * @param otherCreditCardDTO The other CreditCardDTO.
 	 * @return Negative int if this DTO's GUID is less than the given DTO's GUID, zero if they are the same, etc.
 	 */
-	@Override
 	public int compareTo(final CreditCardDTO otherCreditCardDTO) {
 		if (otherCreditCardDTO == null) {
 			throw new IllegalArgumentException();

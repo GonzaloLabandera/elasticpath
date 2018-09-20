@@ -90,6 +90,21 @@ public class PriceListAssignmentsResultPane extends AbstractPageObject {
 				.isTrue();
 	}
 
+
+	/**
+	 * Verifies if price list assignment exists.
+	 *
+	 * @param priceListAssignment String
+	 * @return boolean
+	 */
+	public boolean isPLAInList(final String priceListAssignment) {
+		setWebDriverImplicitWait(1);
+		boolean isPLAInList = selectItemInCenterPane(PRICE_LIST_ASSIGNMENT_TABLE_CSS, PRICE_LIST_ASSIGNMENT_COLUMN_CSS, priceListAssignment,
+				PRICE_LIST_ASSIGNMENT_COLUMN_NAME);
+		setWebDriverImplicitWaitToDefault();
+		return isPLAInList;
+	}
+
 	/**
 	 * Selects Price List Assignments.
 	 *

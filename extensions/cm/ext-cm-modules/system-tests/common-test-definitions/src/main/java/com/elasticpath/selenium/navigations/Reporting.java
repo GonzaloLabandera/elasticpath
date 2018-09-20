@@ -2,12 +2,9 @@ package com.elasticpath.selenium.navigations;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Locale;
+import static com.elasticpath.selenium.util.Constants.IMPLICIT_WAIT_FOR_ELEMENT_FIVE_SECONDS;
 
 import org.openqa.selenium.By;
-import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
@@ -33,8 +30,9 @@ public class Reporting extends AbstractNavigation {
 	private static final String RUN_REPORT_BUTTON_CSS = "div[automation-id='com.elasticpath.cmclient.reporting.ReportingMessages.runReport']";
 	private static final String ORDER_STATUS_CHECKBOX_ROW_CSS = ACTIVE_LEFT_PANE + "div[widget-id='%s']";
 	private static final String ORDER_STATUS_CHECKBOX_CSS = ORDER_STATUS_CHECKBOX_ROW_CSS + " > div";
-
+	private static final String USER_ID_CSS = "div[automation-id*='userId'][widget-type='Text'] > input";
 	private static final String CURRENCY_COMBO_CSS = "div[automation-id*='currency'][widget-type='CCombo']";
+	private static final String USER_ID_FIELD_VALIDATIONS_CSS =  "div[automation-id='com.elasticpath.cmclient.core.CoreMessages.EpValidatorFactory_ValueRequired']";
 
 
 	/**
@@ -75,6 +73,9 @@ public class Reporting extends AbstractNavigation {
 			toDateAutomationId = String.format(toDateAutomationId, automationId);
 			toDateInputCss = String.format(toDateInputCss, automationId);
 		}
+		else if ("Customer Personal Data".equals(reportType)) {
+			automationId = "customerpersonaldata.CustomerPersonalDataMessages";
+		}
 
 	}
 
@@ -107,7 +108,7 @@ public class Reporting extends AbstractNavigation {
 		getWaitDriver().waitForElementToBeInteractable(FROM_DATE_INPUT_CSS);
 		WebElement fromDateElement = getDriver().findElement(By.cssSelector(FROM_DATE_INPUT_CSS));
 		fromDateElement.clear();
-		enterDateWithJavaScript(FROM_DATE_INPUT_CSS, getFormattedDate(-1));
+		enterDateWithJavaScript(FROM_DATE_INPUT_CSS, getFormattedDateTime(-1));
 		updateDateField(fromDateElement);
 	}
 
@@ -118,7 +119,7 @@ public class Reporting extends AbstractNavigation {
 		getWaitDriver().waitForElementToBeInteractable(toDateInputCss);
 		WebElement toDateElement = getDriver().findElement(By.cssSelector(toDateInputCss));
 		toDateElement.clear();
-		enterDateWithJavaScript(toDateInputCss, getFormattedDate(1));
+		enterDateWithJavaScript(toDateInputCss, getFormattedDateTime(1));
 		updateDateField(toDateElement);
 	}
 
@@ -126,29 +127,6 @@ public class Reporting extends AbstractNavigation {
 		element.click();
 		element.sendKeys(Keys.SPACE);
 		element.sendKeys(Keys.BACK_SPACE);
-	}
-
-	/**
-	 * Sets value for date field.
-	 *
-	 * @param cssSelector date field css selector
-	 * @param date        formatted date string
-	 */
-	private void enterDateWithJavaScript(final String cssSelector, final String date) {
-		JavascriptExecutor jse = (JavascriptExecutor) getDriver();
-		jse.executeScript("document.querySelector(\"" + cssSelector + "\").value = '" + date + "';");
-	}
-
-	/**
-	 * Formats the date (Sep 26, 2017 9:32 AM).
-	 *
-	 * @param numberOfDays number of days to add or subtract from current date
-	 * @return formatted date String
-	 */
-	private String getFormattedDate(final int numberOfDays) {
-		Calendar calendar = Calendar.getInstance();
-		calendar.add(Calendar.DAY_OF_MONTH, numberOfDays);
-		return new SimpleDateFormat("MMM d, yyyy h:mm a", Locale.ENGLISH).format(calendar.getTime());
 	}
 
 	/**
@@ -182,6 +160,26 @@ public class Reporting extends AbstractNavigation {
 		if (isChecked(String.format(ORDER_STATUS_CHECKBOX_ROW_CSS, orderStatus))) {
 			click(getDriver().findElement(By.cssSelector(String.format(ORDER_STATUS_CHECKBOX_CSS, orderStatus))));
 		}
+	}
+
+	/**
+	 * Input User id.
+	 *
+	 * @param userId customer data report.
+	 */
+	public void enterUserId(final String userId) {
+		clearAndType(USER_ID_CSS, userId);
+	}
+
+	/**
+	 * Verify Validations displayed for User ID.
+	 */
+	public void verifyUserIdValidation() {
+		setWebDriverImplicitWait(IMPLICIT_WAIT_FOR_ELEMENT_FIVE_SECONDS);
+		assertThat(isElementPresent(By.cssSelector(USER_ID_FIELD_VALIDATIONS_CSS)))
+				.as("Unable to find Use ID validation message")
+				.isTrue();
+		setWebDriverImplicitWaitToDefault();
 	}
 
 }

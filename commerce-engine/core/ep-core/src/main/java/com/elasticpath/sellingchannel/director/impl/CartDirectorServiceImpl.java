@@ -3,41 +3,22 @@
  */
 package com.elasticpath.sellingchannel.director.impl;
 
-import static java.util.Arrays.asList;
-
-import java.util.LinkedHashSet;
-import java.util.LinkedList;
+import java.util.Collection;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
-import javax.validation.ConstraintViolation;
-import javax.validation.Validator;
-
-import com.google.common.collect.ImmutableMap;
 
 import com.elasticpath.common.dto.ShoppingItemDto;
-import com.elasticpath.common.dto.StructuredErrorMessage;
-import com.elasticpath.commons.exception.EpValidationException;
-import com.elasticpath.domain.cartmodifier.CartItemModifierField;
-import com.elasticpath.domain.cartmodifier.CartItemModifierGroup;
-import com.elasticpath.domain.catalog.ProductSku;
 import com.elasticpath.domain.shopper.Shopper;
 import com.elasticpath.domain.shoppingcart.ShoppingCart;
-import com.elasticpath.domain.shoppingcart.ShoppingCartMessageIds;
 import com.elasticpath.domain.shoppingcart.ShoppingItem;
 import com.elasticpath.domain.shoppingcart.WishList;
-import com.elasticpath.domain.shoppingcart.impl.CartItem;
 import com.elasticpath.domain.store.Store;
-import com.elasticpath.sellingchannel.ProductUnavailableException;
 import com.elasticpath.sellingchannel.director.CartDirector;
 import com.elasticpath.sellingchannel.director.CartDirectorService;
-import com.elasticpath.service.catalog.ProductSkuLookup;
 import com.elasticpath.service.shoppingcart.PricingSnapshotService;
 import com.elasticpath.service.shoppingcart.ShoppingCartService;
 import com.elasticpath.service.shoppingcart.WishListService;
 import com.elasticpath.service.shoppingcart.impl.AddToWishlistResult;
-import com.elasticpath.validation.ConstraintViolationTransformer;
-import com.elasticpath.validation.service.CartItemModifierFieldValidationService;
 
 /**
  * Service which wraps CartDirector's shopping cart update functionality within Container managed
@@ -50,72 +31,22 @@ public class CartDirectorServiceImpl implements CartDirectorService {
 	private CartDirector cartDirector;
 	private WishListService wishListService;
 	private ShoppingCartService shoppingCartService;
-	private ProductSkuLookup productSkuLookup;
 	private PricingSnapshotService pricingSnapshotService;
-
-	private Validator validator;
-	private ConstraintViolationTransformer constraintViolationTransformer;
-	private CartItemModifierFieldValidationService cartItemModifierFieldValidationService;
-
-	public void setValidator(final Validator validator) {
-		this.validator = validator;
-	}
-
-	public void setConstraintViolationTransformer(
-			final ConstraintViolationTransformer constraintViolationTransformer) {
-		this.constraintViolationTransformer = constraintViolationTransformer;
-	}
-
-	public void setCartItemModifierFieldValidationService(final CartItemModifierFieldValidationService cartItemModifierFieldValidationService) {
-		this.cartItemModifierFieldValidationService = cartItemModifierFieldValidationService;
-	}
 
 	@Override
 	public ShoppingItem addItemToCart(final ShoppingCart shoppingCart, final ShoppingItemDto dto) {
-		validateAddAndUpdateCartItem(dto);
+		final ShoppingItem shoppingItem = getCartDirector().addItemToCart(shoppingCart, dto);
 
-		ShoppingItem shoppingItem = getCartDirector().addItemToCart(shoppingCart, dto);
+		final ShoppingCart persistedShoppingCart = saveShoppingCart(shoppingCart);
 
-		saveShoppingCart(shoppingCart);
-
-		return shoppingItem;
+		return persistedShoppingCart.getCartItemByGuid(shoppingItem.getGuid());
 	}
 
 	@Override
 	public ShoppingCart updateCartItem(final ShoppingCart shoppingCart, final long itemId, final ShoppingItemDto dto) {
-		validateAddAndUpdateCartItem(dto);
-
 		getCartDirector().updateCartItem(shoppingCart, itemId, dto);
 
 		return saveShoppingCart(shoppingCart);
-	}
-
-	private void validateAddAndUpdateCartItem(final ShoppingItemDto dto) {
-
-		List<StructuredErrorMessage> commerceMessageList = new LinkedList<>();
-		commerceMessageList.addAll(validateDomainBean(dto));
-		commerceMessageList.addAll(performDynamicValidation(dto));
-
-		if (!commerceMessageList.isEmpty()) {
-			throw new EpValidationException("CartItem validation failure.", commerceMessageList);
-		}
-	}
-
-	private List<StructuredErrorMessage> performDynamicValidation(final ShoppingItemDto dto) {
-		ProductSku productSku = productSkuLookup.findBySkuCode(dto.getSkuCode());
-		Set<CartItemModifierGroup> cartItemModifierGroups = productSku.getProduct().getProductType().getCartItemModifierGroups();
-		return cartItemModifierFieldValidationService.validate(dto.getItemFields(), getCartItemModifierFields(cartItemModifierGroups));
-	}
-
-	private List<StructuredErrorMessage> validateDomainBean(final ShoppingItemDto dto) {
-		Set<ConstraintViolation<ShoppingItemDto>> shoppingViolations = validator.validate(dto);
-		return constraintViolationTransformer.transform(shoppingViolations);
-	}
-
-	private Set<CartItemModifierField> getCartItemModifierFields(final Set<CartItemModifierGroup> cartItemModifierGroups) {
-		return cartItemModifierGroups.stream().map(CartItemModifierGroup::getCartItemModifierFields)
-				.flatMap(Set::stream)
-				.collect(Collectors.toCollection(LinkedHashSet::new));
 	}
 
 	@Override
@@ -127,9 +58,17 @@ public class CartDirectorServiceImpl implements CartDirectorService {
 			parentItem = cartDirector.updateCartItem(shoppingCart, rootItemId, rootItemDto);
 
 			// remove existing dependents, we will add back newly selected dependents below
-			final List<ShoppingItem> dependents = ((CartItem) parentItem).getDependentItems();
+			final List<ShoppingItem> dependents = parentItem.getChildren().stream()
+					.filter(shoppingItem -> !shoppingItem.isBundleConstituent())
+					.collect(Collectors.toList());
+
 			parentItem.getChildren().removeAll(dependents);
-			shoppingCart.getCartItems().removeAll(dependents);
+
+			final Collection<String> dependentGuids = dependents.stream()
+					.map(ShoppingItem::getGuid)
+					.collect(Collectors.toSet());
+
+			shoppingCart.removeCartItems(dependentGuids);
 		} else {
 			parentItem = cartDirector.addItemToCart(shoppingCart, rootItemDto, null);
 		}
@@ -173,31 +112,17 @@ public class CartDirectorServiceImpl implements CartDirectorService {
 		ShoppingItem item = getCartDirector().createShoppingItem(skuCode, store, 1);
 
 		WishList wishList = getWishListService().findOrCreateWishListByShopper(shopper);
-		getWishListService().addItem(wishList, item);
-		getWishListService().save(wishList);
+		final AddToWishlistResult result = getWishListService().addItem(wishList, item);
+		final WishList persistedWishList = getWishListService().save(wishList);
 
-		return item;
+		return persistedWishList.getAllItems().stream()
+				.filter(shoppingItem -> shoppingItem.getGuid().equals(result.getShoppingItem().getGuid()))
+				.findAny()
+				.orElse(null);
 	}
 
 	@Override
 	public ShoppingItem moveItemFromWishListToCart(final ShoppingCart shoppingCart, final ShoppingItemDto dto, final String wishlistLineItemGuid) {
-
-		if (!getCartDirector().isSkuAllowedAddToCart(dto.getSkuCode(), shoppingCart)) {
-			String errorMessage = "Item is not purchasable and cannot be added to cart";
-			throw new ProductUnavailableException(
-					errorMessage,
-					asList(
-							new StructuredErrorMessage(
-									ShoppingCartMessageIds.ITEM_NOT_AVAILABLE,
-									errorMessage,
-									ImmutableMap.of("item-code", dto.getSkuCode())
-							)
-					)
-			);
-		}
-
-		validateAddAndUpdateCartItem(dto);
-
 		WishList wishList = getWishListService().findOrCreateWishListByShopper(shoppingCart.getShopper());
 		wishList.removeItem(wishlistLineItemGuid);
 		getWishListService().save(wishList);
@@ -208,9 +133,9 @@ public class CartDirectorServiceImpl implements CartDirectorService {
 			shoppingCart.setItemWithNoTierOneFromWishList(true);
 		}
 
-		saveShoppingCart(shoppingCart);
+		final ShoppingCart persistedShoppingCart = saveShoppingCart(shoppingCart);
 
-		return shoppingItem;
+		return persistedShoppingCart.getCartItemByGuid(shoppingItem.getGuid());
 	}
 
 	@Override
@@ -268,14 +193,6 @@ public class CartDirectorServiceImpl implements CartDirectorService {
 
 	public void setShoppingCartService(final ShoppingCartService shoppingCartService) {
 		this.shoppingCartService = shoppingCartService;
-	}
-
-	protected ProductSkuLookup getProductSkuLookup() {
-		return productSkuLookup;
-	}
-
-	public void setProductSkuLookup(final ProductSkuLookup productSkuLookup) {
-		this.productSkuLookup = productSkuLookup;
 	}
 
 	protected PricingSnapshotService getPricingSnapshotService() {

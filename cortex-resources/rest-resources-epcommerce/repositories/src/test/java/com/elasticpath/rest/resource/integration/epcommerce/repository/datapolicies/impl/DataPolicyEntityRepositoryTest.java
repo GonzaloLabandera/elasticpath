@@ -3,12 +3,13 @@
  */
 package com.elasticpath.rest.resource.integration.epcommerce.repository.datapolicies.impl;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import static com.elasticpath.rest.resource.integration.epcommerce.repository.ResourceTestConstants.USER_ID;
 import static com.elasticpath.rest.resource.integration.epcommerce.repository.datapolicies.impl.DataPolicyRepositoryTest.DATA_POLICY_NAME;
-import static com.elasticpath.rest.resource.integration.epcommerce.repository.datapolicies.impl.DataPolicyRepositoryTest.DATA_POLICY_SEGMENTS;
-import static com.elasticpath.rest.resource.integration.epcommerce.repository.datapolicies.impl.DataPolicyRepositoryTest.GLOBAL_DATA_POLICY_NAME;
 import static com.elasticpath.rest.resource.integration.epcommerce.repository.datapolicies.impl.DataPolicyRepositoryTest.KEY_1;
 import static com.elasticpath.rest.resource.integration.epcommerce.repository.datapolicies.impl.DataPolicyRepositoryTest.KEY_2;
 import static com.elasticpath.rest.resource.integration.epcommerce.repository.datapolicies.impl.DataPolicyRepositoryTest.POLICY_GUID_1;
@@ -16,6 +17,7 @@ import static com.elasticpath.rest.resource.integration.epcommerce.repository.da
 import static com.elasticpath.rest.resource.integration.epcommerce.repository.datapolicies.impl.DataPolicyRepositoryTest.SCOPE;
 
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -28,11 +30,12 @@ import org.junit.runner.RunWith;
 import org.mockito.Answers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.elasticpath.domain.datapolicy.ConsentAction;
 import com.elasticpath.domain.datapolicy.CustomerConsent;
 import com.elasticpath.domain.datapolicy.DataPolicy;
+import com.elasticpath.domain.datapolicy.DataPolicyState;
 import com.elasticpath.rest.ResourceOperationFailure;
 import com.elasticpath.rest.definition.datapolicies.DataPoliciesIdentifier;
 import com.elasticpath.rest.definition.datapolicies.DataPolicyConsentFormIdentifier;
@@ -74,13 +77,11 @@ public class DataPolicyEntityRepositoryTest {
 
 	@Before
 	public void initialize() {
-		when(subjectAttribute.getType()).thenReturn(DATA_POLICY_SEGMENTS);
-		when(subjectAttribute.getValue()).thenReturn(DATA_POLICY_NAME);
 		when(resourceOperationContext.getSubject().getAttributes()).thenReturn(Collections.singletonList(subjectAttribute));
 		when(resourceOperationContext.getUserIdentifier()).thenReturn(USER_ID);
 
-		dataPolicy1 = DataPolicyRepositoryTest.createMockDataPolicy(POLICY_GUID_1, KEY_1, DATA_POLICY_NAME, GLOBAL_DATA_POLICY_NAME);
-		dataPolicy2 = DataPolicyRepositoryTest.createMockDataPolicy(POLICY_GUID_2, KEY_2, DATA_POLICY_NAME);
+		dataPolicy1 = createMockDataPolicy(POLICY_GUID_1, KEY_1);
+		dataPolicy2 = createMockDataPolicy(POLICY_GUID_2, KEY_2);
 
 		ResourceIdentifier dataPolicyIdentifier = createDataPolicyConsentFormIdentifier(dataPolicy1, SCOPE);
 
@@ -95,7 +96,6 @@ public class DataPolicyEntityRepositoryTest {
 				.thenReturn(Single.just(dataPolicy1));
 		when(dataPolicyRepository.createCustomerConsentForDataPolicy(USER_ID, dataPolicy1, dataPolicyEntity))
 				.thenReturn(Single.just(customerConsent));
-		when(dataPolicyRepository.setAndSaveConsentOnCustomerConsent(dataPolicyEntity, customerConsent)).thenReturn(Single.just(customerConsent));
 
 		SubmitResult<DataPolicyIdentifier> submitResult = SubmitResult.<DataPolicyIdentifier>builder()
 				.withStatus(SubmitStatus.UPDATED)
@@ -250,5 +250,15 @@ public class DataPolicyEntityRepositoryTest {
 		return DataPolicyConsentFormIdentifier.builder()
 				.withDataPolicy(createDataPolicyIdentifier(dataPolicy, scope))
 				.build();
+	}
+
+	private static DataPolicy createMockDataPolicy(final String guid, final String referenceKey) {
+		DataPolicy dataPolicy = mock(DataPolicy.class, RETURNS_DEEP_STUBS);
+		when(dataPolicy.getState().getOrdinal()).thenReturn(DataPolicyState.ACTIVE_ORDINAL);
+		when(dataPolicy.getPolicyName()).thenReturn(POLICY_GUID_1);
+		when(dataPolicy.getStartDate().before(any(Date.class))).thenReturn(true);
+		when(dataPolicy.getGuid()).thenReturn(guid);
+		when(dataPolicy.getReferenceKey()).thenReturn(referenceKey);
+		return dataPolicy;
 	}
 }

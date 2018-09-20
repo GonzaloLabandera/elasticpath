@@ -2,9 +2,11 @@
 <beans xmlns="http://www.springframework.org/schema/beans"
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 		xmlns:util="http://www.springframework.org/schema/util"
+		xmlns:settings="http://www.elasticpath.com/schema/settings"
 		xsi:schemaLocation="
-				http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
-				http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-3.0.xsd
+				http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+				http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-4.0.xsd
+				http://www.elasticpath.com/schema/settings http://www.elasticpath.com/schema/settings/settings.xsd
 		">
 
 	<!-- empty for use in extension projects -->
@@ -20,7 +22,6 @@
 	</util:list>
 
 	<bean id="defaultOverridingPersistenceUnitPostProcessor" class="com.elasticpath.persistence.openjpa.impl.OverridingPersistenceUnitPostProcessor">
-		<property name="persistenceUnitManager" ref="persistenceUnitManager"/>
 		<property name="persistenceUnitName" value="commerce-persistence-unit"/>
 		<property name="excludedMappingFiles" ref="persistenceMappingExcludedFiles"/>
 		<property name="excludedManagedClassNames" ref="persistenceMappingExcludedClasses"/>
@@ -31,10 +32,14 @@
 
 	<alias name="defaultOverridingPersistenceUnitPostProcessor" alias="overridingPersistenceUnitPostProcessor"/>
 
-	<bean id="persistenceUnitManager" class="com.elasticpath.persistence.openjpa.impl.OverrideAllowingPersistenceUnitManager">
+	<bean id="basePersistenceUnitManager" class="com.elasticpath.persistence.openjpa.impl.OverrideAllowingPersistenceUnitManager">
 		<property name="defaultPersistenceUnitName" value="commerce-persistence-unit"/>
 		<property name="persistenceXmlLocation" value="classpath*:META-INF/jpa-persistence.xml"/>
 		<property name="persistenceUnitPostProcessors" ref="persistenceUnitPostProcessors"/>
+	</bean>
+
+	<bean id="persistenceUnitManager" parent="basePersistenceUnitManager">
+		<property name="defaultDataSource" ref="dataSource"/>
 	</bean>
 
 	<!--  These listeners will be attached by the factory to every EntityManager on creation.
@@ -57,9 +62,7 @@
 	</bean>
 
 	<!-- Entity Manager Factory -->
-	<bean id="entityManagerFactory" parent="abstractEntityManagerFactory" depends-on="elasticPath,coreBeanFactory">
-		<property name="dataSource" ref="dataSource"/>
-	</bean>
+	<bean id="entityManagerFactory" parent="abstractEntityManagerFactory" depends-on="elasticPath,coreBeanFactory"/>
 
 	<bean id="sharedEntityManager" class="org.springframework.orm.jpa.support.SharedEntityManagerBean">
 		<property name="entityManagerFactory">
@@ -155,6 +158,9 @@
 	<bean id="auditDao" class="com.elasticpath.service.audit.impl.AuditDaoImpl">
 		<property name="beanFactory" ref="coreBeanFactory"/>
 		<property name="persistenceEngine" ref="persistenceEngineTarget"/>
+		<property name="changeSetEnabledProvider">
+			<settings:setting path="COMMERCE/SYSTEM/CHANGESETS/enable"/>
+		</property>
 	</bean>
 
 	<util:list id="postLoadStrategyBeanIds">
@@ -179,7 +185,7 @@
 		<property name="proxyInterfaces"
 				  value="com.elasticpath.persistence.api.PersistenceEngine,com.elasticpath.persistence.openjpa.JpaPersistenceEngine"/>
 		<property name="target">
-			<ref local="persistenceEngineTarget"/>
+			<ref bean="persistenceEngineTarget"/>
 		</property>
 	</bean>
 

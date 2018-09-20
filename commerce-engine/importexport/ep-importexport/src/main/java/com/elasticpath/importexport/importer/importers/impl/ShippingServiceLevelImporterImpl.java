@@ -9,7 +9,7 @@ import com.elasticpath.importexport.common.dto.shipping.ShippingServiceLevelDTO;
 import com.elasticpath.service.shipping.ShippingServiceLevelService;
 
 /**
- * Imports shipping service levels. 
+ * Imports {@link ShippingServiceLevel}s.
  */
 public class ShippingServiceLevelImporterImpl extends AbstractImporterImpl<ShippingServiceLevel, ShippingServiceLevelDTO> {
 

@@ -9,7 +9,6 @@ import cucumber.api.java.After;
 import cucumber.api.java.Before;
 import org.apache.camel.CamelContext;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.support.DependencyInjectionTestExecutionListener;
 
@@ -19,12 +18,11 @@ import com.elasticpath.cucumber.testexecutionlisteners.CucumberJmsRegistrationTe
 /**
  * Responsible for setup and tear down of the UAT test context.
  */
-@TestExecutionListeners({
+@TestExecutionListeners(listeners = {
 		CucumberJmsRegistrationTestExecutionListener.class,
 		CucumberDatabaseTestExecutionListener.class,
 		DependencyInjectionTestExecutionListener.class
 })
-@ContextConfiguration("classpath:cucumber.xml")
 public class TestContextInitialiser {
 
 	@Autowired

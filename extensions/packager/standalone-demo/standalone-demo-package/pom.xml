@@ -62,12 +62,12 @@
 		<dependency>
 			<groupId>org.apache.geronimo.specs</groupId>
 			<artifactId>geronimo-j2ee-management_1.1_spec</artifactId>
-			<version>1.0.1</version>
+			<version>${org.apache.geronimo.management.spec.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.geronimo.specs</groupId>
 			<artifactId>geronimo-jms_1.1_spec</artifactId>
-			<version>1.1.1</version>
+			<version>${org.apache.geronimo.specs.version}</version>
 			<scope>compile</scope>
 		</dependency>
 		<dependency>
@@ -173,7 +173,7 @@
 								<artifactItem>
 									<groupId>com.elasticpath.rest.relos</groupId>
 									<artifactId>ep-rest-studio</artifactId>
-									<version>${cortex.version}</version>
+									<version>${api-platform.version}</version>
 									<overWrite>true</overWrite>
 									<type>war</type>
 									<!-- Studio intentionally lives in the cortex container. -->
@@ -379,7 +379,7 @@
 			</plugin>
 			<plugin>
 				<artifactId>maven-assembly-plugin</artifactId>
-				<version>2.5</version>
+				<version>${maven-assembly-plugin.version}</version>
 				<configuration>
 					<archiverConfig>
 						<defaultDirectoryMode>493</defaultDirectoryMode>

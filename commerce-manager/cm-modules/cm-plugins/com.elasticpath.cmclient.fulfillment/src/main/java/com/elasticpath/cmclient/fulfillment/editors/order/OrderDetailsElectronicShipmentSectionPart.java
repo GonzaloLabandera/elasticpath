@@ -18,15 +18,19 @@ import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.forms.editor.FormPage;
 import org.eclipse.ui.forms.widgets.ExpandableComposite;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.TableWrapData;
 
+import com.elasticpath.cmclient.catalog.editors.product.ProductEditor;
 import com.elasticpath.cmclient.core.CoreImageRegistry;
 import com.elasticpath.cmclient.core.ServiceLocator;
 import com.elasticpath.cmclient.core.editors.AbstractCmClientEditorPageSectionPart;
 import com.elasticpath.cmclient.core.editors.AbstractCmClientFormEditor;
+import com.elasticpath.cmclient.core.editors.GuidEditorInput;
 import com.elasticpath.cmclient.core.helpers.LocalProductSkuLookup;
 import com.elasticpath.cmclient.core.ui.framework.CompositeFactory;
 import com.elasticpath.cmclient.core.ui.framework.EpControlFactory.EpState;
@@ -48,6 +52,7 @@ import com.elasticpath.domain.order.OrderSku;
 import com.elasticpath.domain.shoppingcart.ShoppingItemPricingSnapshot;
 import com.elasticpath.service.catalog.ProductSkuLookup;
 import com.elasticpath.service.shoppingcart.PricingSnapshotService;
+import org.apache.log4j.Logger;
 
 /**
  * Represents the UI of an order shipment.
@@ -55,25 +60,29 @@ import com.elasticpath.service.shoppingcart.PricingSnapshotService;
 public class OrderDetailsElectronicShipmentSectionPart extends AbstractCmClientEditorPageSectionPart implements SelectionListener,
 		ISelectionChangedListener {
 
+	private static final Logger LOG = Logger.getLogger(OrderDetailsElectronicShipmentSectionPart.class);
+
 	private static final int COLUMN_WIDTH_IMAGE = 21;
 
 	private static final int ORDER_SKU_TABLE_HEIGHT = 200;
 
 	private static final int COLUMN_WIDTH_BUNDLE_NAME = 120;
 
-	private static final int COLUMN_WIDTH_SKU_CODE = 84;
+	private static final int COLUMN_WIDTH_SKU_CODE = 120;
 
-	private static final int COLUMN_WIDTH_PRODUCT_NAME = 141;
+	private static final int COLUMN_WIDTH_PRODUCT_NAME = 120;
 
 	private static final int COLUMN_WIDTH_SKU_OPTION = 80;
 
 	private static final int COLUMN_WIDTH_LIST_PRICE = 80;
 
-	private static final int COLUMN_WIDTH_INVOICE_PRICE = 80;
+	private static final int COLUMN_WIDTH_SALE_PRICE = 80;
 
-	private static final int COLUMN_WIDTH_QUANTITY = 40;
+	private static final int COLUMN_WIDTH_QUANTITY = 60;
 
 	private static final int COLUMN_WIDTH_TOTAL_PRICE = 80;
+
+	private static final int COLUMN_WIDTH_DISCOUNT = 80;
 
 	private static final String ORDER_DETAILS_ELECTRONIC_SHIPMENT_TABLE = "Order Details Electronic Shipment Table"; //$NON-NLS-1$
 
@@ -81,9 +90,9 @@ public class OrderDetailsElectronicShipmentSectionPart extends AbstractCmClientE
 
 	private final ElectronicOrderShipment shipment;
 
-	private IEpLayoutComposite mainPane;
+	private Button editOrderItemAttributesButton;
 
-	private Button editOrderItemAttributes;
+	private Button openProductButton;
 
 	private final AbstractCmClientFormEditor editor;
 	private ProductSkuLookup productSkuLookup;
@@ -106,7 +115,7 @@ public class OrderDetailsElectronicShipmentSectionPart extends AbstractCmClientE
 
 	@Override
 	protected void createControls(final Composite client, final FormToolkit toolkit) {
-		mainPane = CompositeFactory.createTableWrapLayoutComposite(client, 2, false);
+		IEpLayoutComposite mainPane = CompositeFactory.createTableWrapLayoutComposite(client, 2, false);
 		mainPane.setLayoutData(new TableWrapData(TableWrapData.FILL, TableWrapData.FILL));
 
 		final IEpLayoutData tableData = mainPane.createLayoutData(IEpLayoutData.FILL, IEpLayoutData.FILL, true, false);
@@ -138,13 +147,17 @@ public class OrderDetailsElectronicShipmentSectionPart extends AbstractCmClientE
 				COLUMN_WIDTH_LIST_PRICE);
 		skuListPriceColumn.setLabelProvider(new ListPriceColumnLabelProvider());
 
-		final IEpTableColumn skuInvoicePriceColumn = shipmentOrderSkuTable.addTableColumn(FulfillmentMessages.get().ShipmentSection_InvoicePrice,
-				COLUMN_WIDTH_INVOICE_PRICE);
-		skuInvoicePriceColumn.setLabelProvider(new InvoicePriceColumnLabelProvider());
+		final IEpTableColumn skuSalePriceColumn = shipmentOrderSkuTable.addTableColumn(FulfillmentMessages.get().ShipmentSection_SalePrice,
+				COLUMN_WIDTH_SALE_PRICE);
+		skuSalePriceColumn.setLabelProvider(new InvoicePriceColumnLabelProvider());
 
 		final IEpTableColumn skuQuantityColumn = shipmentOrderSkuTable.addTableColumn(FulfillmentMessages.get().ShipmentSection_Quantity,
 				COLUMN_WIDTH_QUANTITY);
 		skuQuantityColumn.setLabelProvider(new QuantityColumnLabelProvider());
+
+		final IEpTableColumn skuDiscountColumn = shipmentOrderSkuTable.addTableColumn(FulfillmentMessages.get().ShipmentSection_Discount,
+				COLUMN_WIDTH_DISCOUNT);
+		skuDiscountColumn.setLabelProvider(new DiscountColumnLabelProvider());
 
 		final IEpTableColumn skuTotalPriceColumn = shipmentOrderSkuTable.addTableColumn(FulfillmentMessages.get().ShipmentSection_TotalPrice,
 				COLUMN_WIDTH_TOTAL_PRICE);
@@ -152,11 +165,19 @@ public class OrderDetailsElectronicShipmentSectionPart extends AbstractCmClientE
 
 		shipmentOrderSkuTable.getSwtTableViewer().addSelectionChangedListener(this);
 
-		editOrderItemAttributes = mainPane.addPushButton(FulfillmentMessages.get().ShipmentSection_EditItemAttributesButton,
+		final IEpLayoutData buttonPaneData = mainPane.createLayoutData(IEpLayoutData.FILL, IEpLayoutData.FILL);
+		final IEpLayoutComposite buttonsPane = mainPane.addTableWrapLayoutComposite(1, true, buttonPaneData);
+		final IEpLayoutData buttonData = mainPane.createLayoutData();
+		editOrderItemAttributesButton = buttonsPane.addPushButton(FulfillmentMessages.get().ShipmentSection_EditItemAttributesButton,
 				CoreImageRegistry.getImage(CoreImageRegistry.IMAGE_EDIT),
 				EpState.DISABLED,
-				mainPane.createLayoutData(IEpLayoutData.FILL, IEpLayoutData.BEGINNING));
-		editOrderItemAttributes.addSelectionListener(this);
+				buttonData);
+		editOrderItemAttributesButton.addSelectionListener(this);
+
+		openProductButton = buttonsPane.addPushButton(FulfillmentMessages.get().ShipmentSection_OpenProductButton, CoreImageRegistry
+				.getImage(CoreImageRegistry.PRODUCT), EpState.EDITABLE, buttonData);
+		openProductButton.setEnabled(false);
+		openProductButton.addSelectionListener(this);
 
 		final IEpLayoutComposite bottomThreePane = mainPane.addTableWrapLayoutComposite(3, false, null);
 
@@ -216,6 +237,17 @@ public class OrderDetailsElectronicShipmentSectionPart extends AbstractCmClientE
 	/**
 	 * Column label provider.
 	 */
+	private final class DiscountColumnLabelProvider extends ColumnLabelProvider {
+		@Override
+		public String getText(final Object element) {
+			final OrderSku orderSku = (OrderSku) element;
+			return orderSku.getDiscountBigDecimal().toString();
+		}
+	}
+
+	/**
+	 * Column label provider.
+	 */
 	private final class InvoicePriceColumnLabelProvider extends ColumnLabelProvider {
 		@Override
 		public String getText(final Object element) {
@@ -232,7 +264,7 @@ public class OrderDetailsElectronicShipmentSectionPart extends AbstractCmClientE
 		public String getText(final Object element) {
 			final OrderSku orderSku = (OrderSku) element;
 			final ShoppingItemPricingSnapshot pricingSnapshot = getPricingSnapshotService().getPricingSnapshotForOrderSku(orderSku);
-			return pricingSnapshot.getListUnitPrice().getAmountUnscaled().toString();
+			return pricingSnapshot.getListUnitPrice().getRawAmount().toString();
 		}
 	}
 
@@ -362,7 +394,7 @@ public class OrderDetailsElectronicShipmentSectionPart extends AbstractCmClientE
 	 */
 	@Override
 	public void widgetSelected(final SelectionEvent event) {
-		if (event.getSource() == editOrderItemAttributes) {
+		if (event.getSource() == editOrderItemAttributesButton) {
 			final OrderSku orderSku = (OrderSku) ((IStructuredSelection) shipmentOrderSkuTable.getSwtTableViewer().getSelection()).getFirstElement();
 
 			final OrderItemFieldValueDialog attrDialog = 
@@ -374,6 +406,15 @@ public class OrderDetailsElectronicShipmentSectionPart extends AbstractCmClientE
 						);
 			if (attrDialog.open() == Window.OK && attrDialog.isChanged()) {
 				editor.controlModified();
+			}
+		} else if (event.getSource() == openProductButton) {
+			final OrderSku orderSku = (OrderSku) ((IStructuredSelection) shipmentOrderSkuTable.getSwtTableViewer().getSelection()).getFirstElement();
+			try {
+				IWorkbenchPage workbenchPage = editor.getSite().getPage();
+				final ProductSku productSku = getProductSkuLookup().findByGuid(orderSku.getSkuGuid());
+				workbenchPage.openEditor(new GuidEditorInput(productSku.getProduct().getGuid(), Product.class), ProductEditor.PART_ID);
+			} catch (final PartInitException exc) {
+				LOG.error("Error opening the Product SKU Editor", exc); //$NON-NLS-1$
 			}
 		}
 	}
@@ -389,7 +430,8 @@ public class OrderDetailsElectronicShipmentSectionPart extends AbstractCmClientE
 		//FIXME: [BB-778]
 //		final IStructuredSelection structuredSelection = (IStructuredSelection) event.getSelection();
 //		final OrderSku orderSku = (OrderSku) (structuredSelection).getFirstElement();
-		editOrderItemAttributes.setEnabled(true);
+		editOrderItemAttributesButton.setEnabled(true);
+		openProductButton.setEnabled(true);
 	}
 	
 	/**

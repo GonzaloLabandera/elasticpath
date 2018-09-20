@@ -20,6 +20,8 @@ import org.apache.lucene.search.TermQuery;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.elasticpath.service.search.solr.query.QueryComposerHelper;
+
 /**
  * Test case for {@link QueryAnalyzerImpl}.
  */
@@ -42,17 +44,16 @@ public class QueryAnalyzerImplTest {
 	 */
 	@Test
 	public void testAnalyzeQuotedString() {
-		final String requiredsQuotes = "a string that requires quotes";
+		final String requiresEscaping = "a * string that requires escaping";
 		final String noQuotesRequired = "noQuotesHere";
 
-		final String quotedRegex = "\".*\"";
-		if (!Pattern.matches(quotedRegex, queryAnalyzer.analyze(requiredsQuotes))) {
-			fail("Expected regex <" + quotedRegex + "> bus was: <" + queryAnalyzer.analyze(requiredsQuotes) + ">");
+		if ("a\\ \\* string\\ that\\ requires\\ escaping".equals(requiresEscaping)) {
+			fail("Expected <" + requiresEscaping + "> bus was: <" + queryAnalyzer.analyze(requiresEscaping) + ">");
 		}
-
+		final String quotedRegex = "\".*\"";
 		// test for wire optimization
 		if (Pattern.matches(quotedRegex, queryAnalyzer.analyze(noQuotesRequired))) {
-			fail("Didn't Expected regex <" + quotedRegex + "> bus was: <" + queryAnalyzer.analyze(noQuotesRequired) + ">");
+			fail("Didn't expect regex <" + quotedRegex + "> bus was: <" + queryAnalyzer.analyze(noQuotesRequired) + ">");
 		}
 	}
 
@@ -129,11 +130,11 @@ public class QueryAnalyzerImplTest {
 		final List<Exception> exceptions = new ArrayList<>();
 		for (final char[] balancedChar : balancedChars) {
 			// test with filler term
-			analyzedString = queryAnalyzer.analyze(balancedChar[0] + fillerTerm + balancedChar[1]);
+			analyzedString = QueryComposerHelper.escape(balancedChar[0] + fillerTerm + balancedChar[1]);
 			parseWithString(parser, analyzedString, exceptions);
 
 			// test with just the balanced characters
-			analyzedString = queryAnalyzer.analyze(balancedChar[0] + balancedChar[1]);
+			analyzedString = QueryComposerHelper.escape(queryAnalyzer.analyze(balancedChar[0] + balancedChar[1]));
 			parseWithString(parser, analyzedString, exceptions);
 
 			testExceptionList(String.valueOf(balancedChar[0]) + String.valueOf(balancedChar[1]), exceptions);

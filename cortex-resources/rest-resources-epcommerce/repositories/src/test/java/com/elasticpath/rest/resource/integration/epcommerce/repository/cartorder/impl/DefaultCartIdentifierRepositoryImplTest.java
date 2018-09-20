@@ -4,15 +4,17 @@
 
 package com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder.impl;
 
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import io.reactivex.Single;
+import org.apache.velocity.exception.ResourceNotFoundException;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.elasticpath.domain.shoppingcart.ShoppingCart;
 import com.elasticpath.rest.definition.carts.CartIdentifier;
@@ -32,21 +34,17 @@ public final class DefaultCartIdentifierRepositoryImplTest {
     @Mock
     private ShoppingCartRepositoryImpl shoppingCartRepository;
 
-    @Mock
-    private ShoppingCart shoppingCart;
-
     @InjectMocks
     private DefaultCartIdentifierRepositoryImpl<DefaultCartIdentifier, CartIdentifier> defaultCartRepository;
 
     @Before
     public void initialize() {
-        when(shoppingCart.getGuid()).thenReturn(GUID);
-        when(shoppingCartRepository.getDefaultShoppingCart()).thenReturn(Single.just(shoppingCart));
         defaultCartRepository.setShoppingCartRepository(shoppingCartRepository);
     }
 
     @Test
     public void resolveProducesCartIdentifier() {
+        when(shoppingCartRepository.getDefaultShoppingCartGuid()).thenReturn(Single.just(GUID));
 
         DefaultCartIdentifier defaultCartIdentifier = DefaultCartIdentifier.builder()
                 .withScope(StringIdentifier.of(SCOPE))
@@ -58,5 +56,26 @@ public final class DefaultCartIdentifierRepositoryImplTest {
                 .assertValue(cartIdentifier -> cartIdentifier.getCartId().getValue().equals(GUID))
                 .assertValue(cartIdentifier -> cartIdentifier.getScope().getValue().equals(SCOPE));
     }
+
+    @Test
+    public void resolveProducesCartIdentifierWhenCartGuidNotFound() {
+        when(shoppingCartRepository.getDefaultShoppingCartGuid()).thenReturn(Single.error(new ResourceNotFoundException("Cart not found")));
+
+        ShoppingCart mockCart = mock(ShoppingCart.class);
+
+        when(shoppingCartRepository.getDefaultShoppingCart()).thenReturn(Single.just(mockCart));
+        when(mockCart.getGuid()).thenReturn(GUID);
+
+        DefaultCartIdentifier defaultCartIdentifier = DefaultCartIdentifier.builder()
+                .withScope(StringIdentifier.of(SCOPE))
+                .build();
+
+        defaultCartRepository.resolve(defaultCartIdentifier)
+                .test()
+                .assertNoErrors()
+                .assertValue(cartIdentifier -> cartIdentifier.getCartId().getValue().equals(GUID))
+                .assertValue(cartIdentifier -> cartIdentifier.getScope().getValue().equals(SCOPE));
+    }
+
 
 }

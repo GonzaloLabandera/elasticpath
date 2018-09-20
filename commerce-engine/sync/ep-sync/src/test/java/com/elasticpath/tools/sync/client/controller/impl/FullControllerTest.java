@@ -9,6 +9,7 @@ import static org.junit.Assert.assertSame;
 import java.util.ArrayList;
 import java.util.List;
 
+import net.sf.ehcache.CacheManager;
 import org.jmock.Expectations;
 import org.jmock.integration.junit4.JUnitRuleMockery;
 import org.junit.Before;
@@ -60,6 +61,8 @@ public class FullControllerTest {
 
 	private final TransactionJobBuilder mockTransactionJobBuilder = context.mock(TransactionJobBuilder.class);
 
+	private  CacheManager cacheManager;
+
 	private FullController controller;
 
 	private SourceSyncRequestAdapter changeSetAdapter;
@@ -110,7 +113,7 @@ public class FullControllerTest {
 		changeSetAdapter = context.mock(SourceSyncRequestAdapter.class);
 
 		sourcePersistenceEngine = context.mock(PersistenceEngine.class);
-
+		cacheManager = CacheManager.newInstance();
 	}
 
 	/**
@@ -154,6 +157,8 @@ public class FullControllerTest {
 			oneOf(mockSyncBeanFactory).getSourceBean(TRANSACTION_JOB_BUILDER); will(returnValue(mockTransactionJobBuilder));
 			oneOf(mockSyncBeanFactory).getSourceBean(CHANGE_SET_ADAPTER); will(returnValue(changeSetAdapter));
 			oneOf(mockSyncBeanFactory).getSourceBean("sourceObjectCache"); will(returnValue(sourceObjectCache));
+			oneOf(mockSyncBeanFactory).getSourceBean("epEhcacheManager"); will(returnValue(cacheManager));
+
 			oneOf(sourceObjectCache).supportsPreloading(); will(returnValue(false));
 			oneOf(syncJobConfiguration).getAdapterParameter(); will(returnValue(ADAPTER_PARAM));
 			oneOf(changeSetAdapter).buildJobDescriptor(ADAPTER_PARAM); will(returnValue(mockJobDescriptor));
@@ -189,6 +194,7 @@ public class FullControllerTest {
 			oneOf(mockSyncBeanFactory).getSourceBean(CHANGE_SET_ADAPTER); will(returnValue(changeSetAdapter));
 			oneOf(mockSyncBeanFactory).getSourceBean(ContextIdNames.PERSISTENCE_ENGINE); will(returnValue(sourcePersistenceEngine));
 			oneOf(sourcePersistenceEngine).clearCache();
+			oneOf(mockSyncBeanFactory).getSourceBean("epEhcacheManager"); will(returnValue(cacheManager));
 
 			oneOf(mockSyncBeanFactory).getSourceBean("sourceObjectCache"); will(returnValue(sourceObjectCache));
 			oneOf(sourceObjectCache).supportsPreloading(); will(returnValue(false));

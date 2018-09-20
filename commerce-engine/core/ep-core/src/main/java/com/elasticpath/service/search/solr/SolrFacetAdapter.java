@@ -48,7 +48,7 @@ import com.elasticpath.service.search.StoreAwareSearchCriteria;
 import com.elasticpath.service.search.index.Analyzer;
 import com.elasticpath.service.search.query.SearchCriteria;
 import com.elasticpath.service.search.query.SearchHint;
-import com.elasticpath.settings.SettingsReader;
+import com.elasticpath.settings.provider.SettingValueProvider;
 
 /**
  * Converts between EP's filters and Solr's facets and back again.
@@ -67,7 +67,7 @@ public class SolrFacetAdapter {
 
 	private Analyzer analyzer;
 
-	private SettingsReader settingsReader;
+	private SettingValueProvider<Boolean> attributeFilterEnabledProvider;
 
 	private CategoryService categoryService;
 
@@ -129,7 +129,7 @@ public class SolrFacetAdapter {
 	 * @return true if attribute filtering is enabled in the given store, false if not.
 	 */
 	boolean isAttributeFilterEnabled(final String storeCode) {
-		return getSettingsReader().getSettingValue("COMMERCE/STORE/FILTEREDNAVIGATION/attributeFilterEnabled", storeCode).getBooleanValue();
+		return getAttributeFilterEnabledProvider().get(storeCode);
 	}
 
 	/**
@@ -537,15 +537,6 @@ public class SolrFacetAdapter {
 	}
 
 	/**
-	 * Sets the {@link SettingsReader} instance to use.
-	 *
-	 * @param settingsReader the {@link SettingsReader} instance to use
-	 */
-	public void setSettingsReader(final SettingsReader settingsReader) {
-		this.settingsReader = settingsReader;
-	}
-
-	/**
 	 * Sets the {@link CategoryService} instance to use.
 	 *
 	 * @param categoryService the {@link CategoryService} instance to use
@@ -609,10 +600,12 @@ public class SolrFacetAdapter {
 		return categoryService;
 	}
 
-	/**
-	 * @return the settings reader
-	 */
-	protected SettingsReader getSettingsReader() {
-		return settingsReader;
+	protected SettingValueProvider<Boolean> getAttributeFilterEnabledProvider() {
+		return attributeFilterEnabledProvider;
 	}
+
+	public void setAttributeFilterEnabledProvider(final SettingValueProvider<Boolean> attributeFilterEnabledProvider) {
+		this.attributeFilterEnabledProvider = attributeFilterEnabledProvider;
+	}
+
 }

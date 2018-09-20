@@ -13,6 +13,18 @@ public class Constants {
 	 */
 	public static final int SLEEP_HALFSECOND_IN_MILLIS = 500;
 	/**
+	 * Hundred milliseconds sleep timer.
+	 */
+	public static final int SLEEP_HUNDRED_MILLI_SECONDS = 100;
+	/**
+	 * One second sleep timer.
+	 */
+	public static final int SLEEP_ONE_SECOND_IN_MILLIS = 1000;
+	/**
+	 * Five second sleep timer.
+	 */
+	public static final int SLEEP_FIVE_SECONDS_IN_MILLIS = 5000;
+	/**
 	 * One hundred millisecond sleep timer.
 	 */
 	public static final int SLEEP_ONE_HUNDRED_MILLISECOND = 100;
@@ -23,11 +35,19 @@ public class Constants {
 	/**
 	 * Number of tries.
 	 */
-	public static final int RETRY_COUNTER = 3;
+	public static final int RETRY_COUNTER_3 = 3;
+	/**
+	 * Number of tries.
+	 */
+	public static final int RETRY_COUNTER_5 = 5;
 	/**
 	 * Wait interval(in sec).
 	 */
 	public static final int IMPLICIT_WAIT_FOR_ELEMENT_THREE_SECONDS = 3;
+	/**
+	 * Wait interval(in sec).
+	 */
+	public static final int IMPLICIT_WAIT_FOR_ELEMENT_FIVE_SECONDS = 5;
 
 
 	//---------------------------------------------------------------------------------------------------------
@@ -57,5 +77,10 @@ public class Constants {
 	 * Third clean up.
 	 */
 	public static final int CLEANUP_ORDER_THIRD = 9998;
+
+	/**
+	 * Fourth clean up.
+	 */
+	public static final int CLEANUP_ORDER_FOURTH = 9997;
 
 }

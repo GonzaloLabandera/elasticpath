@@ -1,6 +1,7 @@
 /**
  * Copyright (c) Elastic Path Software Inc., 2017
  */
+
 package com.elasticpath.cmclient.store.shipping.actions;
 
 import org.apache.log4j.Logger;
@@ -10,7 +11,7 @@ import org.eclipse.jface.resource.ImageDescriptor;
 import com.elasticpath.cmclient.core.ServiceLocator;
 import com.elasticpath.cmclient.store.shipping.dialogs.ShippingLevelDialog;
 import com.elasticpath.cmclient.store.shipping.views.ShippingLevelsSearchResultsView;
-import com.elasticpath.commons.constants.ContextIdNames;
+import com.elasticpath.commons.constants.EpShippingContextIdNames;
 import com.elasticpath.domain.shipping.ShippingServiceLevel;
 import com.elasticpath.service.shipping.ShippingServiceLevelService;
 
@@ -41,11 +42,11 @@ public class CreateShippingLevelAction extends Action {
 	public void run() {
 		LOG.debug("CreateShippingLevel Action called."); //$NON-NLS-1$
 
-		ShippingServiceLevel shippingLevel = ServiceLocator.getService(ContextIdNames.SHIPPING_SERVICE_LEVEL);
+		ShippingServiceLevel shippingLevel = ServiceLocator.getService(EpShippingContextIdNames.SHIPPING_SERVICE_LEVEL);
 
 		if (ShippingLevelDialog.openCreateDialog(listView.getSite().getShell(), shippingLevel)) {
 			ShippingServiceLevelService shippingService = ServiceLocator.getService(
-					ContextIdNames.SHIPPING_SERVICE_LEVEL_SERVICE);
+					EpShippingContextIdNames.SHIPPING_SERVICE_LEVEL_SERVICE);
 			shippingService.add(shippingLevel);
 			listView.refreshViewerInput();
 		}

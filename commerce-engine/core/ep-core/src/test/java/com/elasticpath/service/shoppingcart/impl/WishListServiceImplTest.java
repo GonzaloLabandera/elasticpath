@@ -4,7 +4,7 @@
 package com.elasticpath.service.shoppingcart.impl;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -19,7 +19,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.elasticpath.commons.beanframework.BeanFactory;
 import com.elasticpath.commons.constants.ContextIdNames;
@@ -173,7 +173,6 @@ public class WishListServiceImplTest {
 		shoppingItem.setGuid("one");
 
 		when(wishList.getAllItems()).thenReturn(Collections.singletonList(shoppingItem));
-		when(wishList.addItem(any())).thenReturn(shoppingItem);
 		when(cartDirector.itemsAreEqual(any(), any())).thenReturn(true);
 		AddToWishlistResult addToWishlistResult = wishListService.addItem(wishList, shoppingItem);
 

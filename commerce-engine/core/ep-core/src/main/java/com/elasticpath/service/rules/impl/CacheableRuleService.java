@@ -246,7 +246,7 @@ public interface CacheableRuleService extends RuleService {
 	}
 
 	@Override
-	default boolean isRuleValid(Rule rule, String storeCode) {
+	default RuleValidationResultEnum isRuleValid(Rule rule, String storeCode) {
 		return getDecorated().isRuleValid(rule, storeCode);
 	}
 

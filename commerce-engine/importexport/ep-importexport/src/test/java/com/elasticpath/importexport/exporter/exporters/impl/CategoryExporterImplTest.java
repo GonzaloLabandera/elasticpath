@@ -20,7 +20,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.elasticpath.domain.attribute.Attribute;
 import com.elasticpath.domain.attribute.AttributeValue;
@@ -99,9 +99,7 @@ public class CategoryExporterImplTest {
 
 		when(categoryLookup.findByUids(Collections.singletonList(CATEGORY_UID))).thenReturn(Collections.singletonList(category));
 		when(categoryLookup.findByGuid(CATEGORY_GUID)).thenReturn(category);
-		when(categoryService.findLinkedCategories(CATEGORY_UID)).thenReturn(new ArrayList<>());
 		when(categoryService.findAncestorCategoryUidsWithTreeOrder(Collections.singleton(category.getUidPk()))).thenReturn(new HashSet<>());
-		when(categoryService.findDescendantCategoryUids(category.getUidPk())).thenReturn(new ArrayList<>());
 		when(categoryAdapter.createDtoObject()).thenReturn(dto);
 
 

@@ -16,23 +16,17 @@
 	<description>Extension Cortex CE Web Application</description>
 
 	<properties>
-		<!--This can be removed once the parent parent hireachy is resolved to the current project as it is specified at the root-->
-		<tomcat.version>7.0.81</tomcat.version>
-		<dce.version>702.0.0-SNAPSHOT</dce.version>
-		<cortex.version>1.20.0.20180327150040-9738f</cortex.version>
-
 		<!-- logback -->
 		<ep.log.to.logback><![CDATA[<appender-ref ref="CONSOLE" /><appender-ref ref="FILE" />]]></ep.log.to.logback>
 		<ep.log.level>INFO</ep.log.level>
 		<ep.log.dir>target/logs</ep.log.dir>
 
-		<ep-commerce-engine-wrapper-group-id>com.elasticpath.extensions</ep-commerce-engine-wrapper-group-id>
-		<ep-commerce-engine-wrapper-artifact-id>ext-commerce-engine-wrapper</ep-commerce-engine-wrapper-artifact-id>
-		<ep-commerce-engine-wrapper-version>0.0.0-SNAPSHOT</ep-commerce-engine-wrapper-version>
-		<licensing.skip>true</licensing.skip>
-
 		<!-- Controls which resource runtime is activated -->
 		<resource-runtime>cortex</resource-runtime>
+
+		<!-- Override slf4j -->
+		<slf4j.version>1.7.25</slf4j.version>
+		<spring-security-oauth2.osgi.version>2.3.3.RELEASE</spring-security-oauth2.osgi.version>
 	</properties>
 
 	<dependencies>
@@ -130,6 +124,12 @@
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>log4j-over-slf4j</artifactId>
+			<version>${slf4j.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+			<version>${slf4j.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.osgi</groupId>
@@ -147,7 +147,6 @@
 			<artifactId>log4j</artifactId>
 			<scope>provided</scope>
 		</dependency>
-
 
 		<!-- Bundles. Everything below this comment should be marked as "provided" -->
 		<dependency>
@@ -228,6 +227,11 @@
 		<dependency>
 			<groupId>com.google.guava</groupId>
 			<artifactId>guava</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.fasterxml.uuid</groupId>
+			<artifactId>java-uuid-generator</artifactId>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
@@ -325,36 +329,31 @@
 
 		<!-- Spring Security -->
 		<dependency>
-			<groupId>org.springframework.security</groupId>
-			<artifactId>spring-security-core</artifactId>
+			<groupId>org.apache.servicemix.bundles</groupId>
+			<artifactId>org.apache.servicemix.bundles.spring-security-core</artifactId>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
-			<groupId>org.springframework.security</groupId>
-			<artifactId>spring-security-web</artifactId>
+			<groupId>org.apache.servicemix.bundles</groupId>
+			<artifactId>org.apache.servicemix.bundles.spring-security-web</artifactId>
+			<scope>provided</scope>
+			</dependency>
+		<dependency>
+			<groupId>org.apache.servicemix.bundles</groupId>
+			<artifactId>org.apache.servicemix.bundles.spring-security-config</artifactId>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
-			<groupId>org.springframework.security</groupId>
-			<artifactId>spring-security-config</artifactId>
+			<groupId>org.apache.servicemix.bundles</groupId>
+			<artifactId>org.apache.servicemix.bundles.spring-security-ldap</artifactId>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
-			<groupId>org.springframework.security</groupId>
-			<artifactId>spring-security-aspects</artifactId>
+			<groupId>com.elasticpath.bundles</groupId>
+			<artifactId>spring-security-oauth2-bundle</artifactId>
+			<version>${spring-security-oauth2.osgi.version}</version>
 			<scope>provided</scope>
 		</dependency>
-		<dependency>
-			<groupId>org.springframework.security</groupId>
-			<artifactId>spring-security-ldap</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.security.oauth</groupId>
-			<artifactId>spring-security-oauth2</artifactId>
-			<scope>provided</scope>
-		</dependency>
-
 		<dependency>
 			<groupId>com.elasticpath</groupId>
 			<artifactId>cxf-uritemplate-utils</artifactId>
@@ -414,18 +413,18 @@
 
 		<!-- Gemini blueprint -->
 		<dependency>
-			<groupId>org.eclipse.gemini</groupId>
-			<artifactId>org.eclipse.gemini.blueprint.core</artifactId>
+			<groupId>org.eclipse.gemini.blueprint</groupId>
+			<artifactId>gemini-blueprint-core</artifactId>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
-			<groupId>org.eclipse.gemini</groupId>
-			<artifactId>org.eclipse.gemini.blueprint.io</artifactId>
+			<groupId>org.eclipse.gemini.blueprint</groupId>
+			<artifactId>gemini-blueprint-io</artifactId>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
-			<groupId>org.eclipse.gemini</groupId>
-			<artifactId>org.eclipse.gemini.blueprint.extender</artifactId>
+			<groupId>org.eclipse.gemini.blueprint</groupId>
+			<artifactId>gemini-blueprint-extender</artifactId>
 			<scope>provided</scope>
 		</dependency>
 
@@ -475,8 +474,8 @@
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>${ep-commerce-engine-wrapper-group-id}</groupId>
-			<artifactId>${ep-commerce-engine-wrapper-artifact-id}</artifactId>
+			<groupId>com.elasticpath</groupId>
+			<artifactId>ep-converters</artifactId>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
@@ -525,6 +524,26 @@
 			<scope>provided</scope>
 		</dependency>
 
+		<dependency>
+			<groupId>com.elasticpath</groupId>
+			<artifactId>shipping-calculation-connectivity-api</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.elasticpath</groupId>
+			<artifactId>shipping-calculation-connectivity-caching</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.elasticpath</groupId>
+			<artifactId>shipping-calculation-plugin-epcommerce</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.elasticpath</groupId>
+			<artifactId>ep-bean-framework</artifactId>
+			<scope>provided</scope>
+		</dependency>
 		<!-- Subject -->
 		<dependency>
 			<groupId>com.elasticpath.rest.relos.rs.subject</groupId>
@@ -539,7 +558,6 @@
 		<dependency>
 			<groupId>com.elasticpath.rest.integration.epcommerce</groupId>
 			<artifactId>ep-rs-subject-lookup-epcommerce</artifactId>
-			<version>${cortex.ep.integration.version}</version>
 			<scope>provided</scope>
 		</dependency>
 
@@ -551,12 +569,7 @@
 		</dependency>
 		<dependency>
 			<groupId>com.elasticpath.rest.relos.rs.events</groupId>
-			<artifactId>ep-rs-events-client-local</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>com.elasticpath.rest.relos.rs.events</groupId>
-			<artifactId>ep-rs-events-resource</artifactId>
+			<artifactId>ep-rs-events-impl</artifactId>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
@@ -613,11 +626,6 @@
 		</dependency>
 		<dependency>
 			<groupId>com.elasticpath.rest</groupId>
-			<artifactId>ep-rest-identifiers-extender</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>com.elasticpath.rest</groupId>
 			<artifactId>ep-rest-commons</artifactId>
 			<scope>provided</scope>
 		</dependency>
@@ -629,6 +637,11 @@
 		<dependency>
 			<groupId>com.elasticpath.rest.relos.rs</groupId>
 			<artifactId>ep-rs-bridge-common</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.elasticpath.rest.relos.rs</groupId>
+			<artifactId>ep-rs-hal-support</artifactId>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
@@ -705,6 +718,11 @@
 			<artifactId>jersey-container-servlet</artifactId>
 			<scope>provided</scope>
 		</dependency>
+		<dependency>
+			<groupId>org.glassfish.jersey.inject</groupId>
+			<artifactId>jersey-hk2</artifactId>
+			<scope>provided</scope>
+		</dependency>
 
 		<dependency>
 			<groupId>org.apache.shiro</groupId>
@@ -764,175 +782,148 @@
 			<groupId>org.apache.camel</groupId>
 			<artifactId>camel-spring</artifactId>
 			<scope>provided</scope>
+
 		</dependency>
 
 		<!-- Resource Servers -->
 		<dependency>
 			<groupId>com.elasticpath.rest.resource.cortex</groupId>
 			<artifactId>ep-resource-availabilities</artifactId>
-			<version>${cortex.ep.integration.version}</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>com.elasticpath.rest.resource.cortex</groupId>
 			<artifactId>ep-resource-carts</artifactId>
-			<version>${cortex.ep.integration.version}</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>com.elasticpath.rest.resource.cortex</groupId>
 			<artifactId>ep-resource-wishlists</artifactId>
-			<version>${cortex.ep.integration.version}</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>com.elasticpath.rest.integration.epcommerce</groupId>
 			<artifactId>ep-resource-items-epcommerce</artifactId>
-			<version>${cortex.ep.integration.version}</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>com.elasticpath.rest.integration.epcommerce</groupId>
 			<artifactId>ep-resource-itemdefinitions-epcommerce</artifactId>
-			<version>${cortex.ep.integration.version}</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>com.elasticpath.rest.integration.epcommerce</groupId>
 			<artifactId>ep-resource-itemselections-epcommerce</artifactId>
-			<version>${cortex.ep.integration.version}</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>com.elasticpath.rest.resource.cortex</groupId>
 			<artifactId>ep-resource-orders</artifactId>
-			<version>${cortex.ep.integration.version}</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>com.elasticpath.rest.integration.epcommerce</groupId>
 			<artifactId>ep-resource-paymentmethods-epcommerce</artifactId>
-			<version>${cortex.ep.integration.version}</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>com.elasticpath.rest.resource.cortex</groupId>
 			<artifactId>ep-resource-prices</artifactId>
-			<version>${cortex.ep.integration.version}</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>com.elasticpath.rest.resource.cortex</groupId>
 			<artifactId>ep-resource-navigations</artifactId>
-			<version>${cortex.ep.integration.version}</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>com.elasticpath.rest.resource.cortex</groupId>
 			<artifactId>ep-resource-addresses</artifactId>
-			<version>${cortex.ep.integration.version}</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>com.elasticpath.rest.resource.cortex</groupId>
 			<artifactId>ep-resource-profiles</artifactId>
-			<version>${cortex.ep.integration.version}</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>com.elasticpath.rest.resource.cortex</groupId>
 			<artifactId>ep-resource-registrations</artifactId>
-			<version>${cortex.ep.integration.version}</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>com.elasticpath.rest.resource.cortex</groupId>
 			<artifactId>ep-resource-purchases</artifactId>
-			<version>${cortex.ep.integration.version}</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>com.elasticpath.rest.resource.cortex</groupId>
 			<artifactId>ep-resource-taxes</artifactId>
-			<version>${cortex.ep.integration.version}</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>com.elasticpath.rest.resource.cortex</groupId>
 			<artifactId>ep-resource-totals</artifactId>
-			<version>${cortex.ep.integration.version}</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>com.elasticpath.rest.resource.cortex</groupId>
 			<artifactId>ep-resource-coupons</artifactId>
-			<version>${cortex.ep.integration.version}</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>com.elasticpath.rest.resource.cortex</groupId>
 			<artifactId>ep-resource-promotions</artifactId>
-			<version>${cortex.ep.integration.version}</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>com.elasticpath.rest.resource.cortex</groupId>
 			<artifactId>ep-resource-searches</artifactId>
-			<version>${cortex.ep.integration.version}</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>com.elasticpath.rest.resource.cortex</groupId>
 			<artifactId>ep-resource-shipmentdetails</artifactId>
-			<version>${cortex.ep.integration.version}</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>com.elasticpath.rest.resource.cortex</groupId>
 			<artifactId>ep-resource-shipments</artifactId>
-			<version>${cortex.ep.integration.version}</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>com.elasticpath.rest.resource.cortex</groupId>
 			<artifactId>ep-resource-recommendations</artifactId>
-			<version>${cortex.ep.integration.version}</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>com.elasticpath.rest.integration.epcommerce</groupId>
 			<artifactId>ep-resource-payment-tokens-epcommerce</artifactId>
-			<version>${cortex.ep.integration.version}</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>com.elasticpath.rest.resource.cortex</groupId>
 			<artifactId>ep-resource-emails</artifactId>
-			<version>${cortex.ep.integration.version}</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>com.elasticpath.rest.resource.cortex</groupId>
 			<artifactId>ep-resource-geographies</artifactId>
-			<version>${cortex.ep.integration.version}</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>com.elasticpath.rest.resource.cortex</groupId>
 			<artifactId>ep-resource-discounts</artifactId>
-			<version>${cortex.ep.integration.version}</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>com.elasticpath.rest.resource.cortex</groupId>
 			<artifactId>ep-resource-data-policies</artifactId>
-			<version>${cortex.ep.integration.version}</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>com.elasticpath.rest.resource.cortex</groupId>
 			<artifactId>ep-resource-lookups</artifactId>
-			<version>${cortex.ep.integration.version}</version>
 			<scope>provided</scope>
 		</dependency>
 
@@ -1058,6 +1049,12 @@
 			<scope>provided</scope>
 		</dependency>
 
+		<dependency>
+			<groupId>org.codehaus.janino</groupId>
+			<artifactId>janino</artifactId>
+			<version>3.0.8</version>
+		</dependency>
+
 		<!-- Health monitoring dependency -->
 		<dependency>
 			<groupId>com.elasticpath.extensions</groupId>
@@ -1129,6 +1126,7 @@
 								javax.annotation,
 								javax.ws.rs,
 								com.fasterxml.jackson,
+								com.fasterxml.uuid,
 								io.reactivex.rxjava2,
 								org.reactivestreams
 							</includeGroupIds>
@@ -1153,7 +1151,9 @@
 							<includeScope>provided</includeScope>
 							<includeArtifactIds>
 								${ep-commerce-engine-wrapper-artifact-id},
+								ep-bean-framework,
 								ep-persistence-api,
+								ep-converters,
 								ep-messaging-api,
 								ep-messaging-camel,
 								ep-jms,
@@ -1173,6 +1173,28 @@
 							</includeArtifactIds>
 						</configuration>
 					</execution>
+
+					<!-- put OOTB or 3rd party plugin related bundles here -->
+					<execution>
+						<id>copy-plugin-OSGi-bundles</id>
+						<phase>prepare-package</phase>
+						<goals>
+							<goal>copy-dependencies</goal>
+						</goals>
+						<configuration>
+							<outputDirectory>${war-bundle-directory-level-2}</outputDirectory>
+							<includeScope>provided</includeScope>
+							<includeArtifactIds>
+								<!-- Shipping Calculation API -->
+								shipping-calculation-connectivity-api,
+								shipping-calculation-connectivity-caching,
+
+								<!-- Shipping Calculation SPI -->
+								shipping-calculation-plugin-epcommerce,
+							</includeArtifactIds>
+						</configuration>
+					</execution>
+
 					<execution>
 						<id>copy-dependant-OSGi-bundles</id>
 						<phase>prepare-package</phase>
@@ -1208,7 +1230,8 @@
 								<!-- dependant: ep-relos-kernel -->
 								shiro-core,
 								<!-- dependant: ep-rest-spi -->
-								msgpack-core
+								msgpack-core,
+								spring-security-oauth2-bundle
 							</includeArtifactIds>
 						</configuration>
 					</execution>
@@ -1393,7 +1416,7 @@
 						<webapp>
 							<groupId>com.elasticpath.rest.relos</groupId>
 							<artifactId>ep-rest-studio</artifactId>
-							<version>${cortex.version}</version>
+							<version>${api-platform.version}</version>
 							<type>war</type>
 							<contextPath>/studio</contextPath>
 							<asWebapp>true</asWebapp>
@@ -1750,7 +1773,7 @@
 						<plugin>
 							<groupId>org.eclipse.m2e</groupId>
 							<artifactId>lifecycle-mapping</artifactId>
-							<version>1.0.0</version>
+							<version>${lifecycle-mapping-plugin.version}</version>
 							<configuration>
 								<lifecycleMappingMetadata>
 									<pluginExecutions>

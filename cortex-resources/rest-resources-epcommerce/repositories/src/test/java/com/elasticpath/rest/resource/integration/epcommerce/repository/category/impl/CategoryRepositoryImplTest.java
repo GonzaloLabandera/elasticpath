@@ -4,7 +4,6 @@
 package com.elasticpath.rest.resource.integration.epcommerce.repository.category.impl;
 
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.stub;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
@@ -17,7 +16,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.elasticpath.commons.beanframework.BeanFactory;
 import com.elasticpath.commons.constants.ContextIdNames;
@@ -38,11 +37,11 @@ import com.elasticpath.service.catalog.CategoryService;
 @RunWith(MockitoJUnitRunner.class)
 public class CategoryRepositoryImplTest {
 
-	private static final long CATEGORY_UID = 0;
 	private static final String CATALOG_CODE = "CATALOG_CODE";
 	private static final String CATEGORY2_CODE = "CATEGORY2_CODE";
 	private static final String CATEGORY1_CODE = "CATEGORY1_CODE";
 	private static final String CATEGORY_CODE = "CATEGORY_CODE";
+	private static final String CATEGORY_GUID = "CATEGORY_GUID";
 	private static final String STORE_CODE = "STORE_CODE";
 	public static final String NOT_FOUND = "not found";
 
@@ -108,7 +107,20 @@ public class CategoryRepositoryImplTest {
 		Category category = createMockCategory();
 		when(categoryLookup.findByCategoryAndCatalogCode(CATEGORY_CODE, CATALOG_CODE)).thenReturn(category);
 
-		categoryRepository.findByGuid(STORE_CODE, CATEGORY_CODE)
+		categoryRepository.findByStoreAndCategoryCode(STORE_CODE, CATEGORY_CODE)
+				.test()
+				.assertValue(category);
+	}
+
+	@Test
+	public void testGetCategoryByGuidWhenFound() {
+		Catalog catalog = createMockCatalog(CATALOG_CODE);
+		Store store = createMockStore(catalog);
+		shouldFindStoreWithResult(store);
+		Category category = createMockCategory();
+		when(categoryLookup.findByGuid(CATEGORY_GUID)).thenReturn(category);
+
+		categoryRepository.findByGuid(CATEGORY_GUID)
 				.test()
 				.assertValue(category);
 	}
@@ -117,7 +129,7 @@ public class CategoryRepositoryImplTest {
 	public void testGetCategoryByIdWhenStoreNotFound() {
 		shouldNotFindTheStore();
 
-		categoryRepository.findByGuid(STORE_CODE, CATEGORY_CODE)
+		categoryRepository.findByStoreAndCategoryCode(STORE_CODE, CATEGORY_CODE)
 				.test()
 				.assertError(ResourceOperationFailure.notFound(NOT_FOUND));
 	}
@@ -130,7 +142,7 @@ public class CategoryRepositoryImplTest {
 		when(categoryLookup.findByCategoryAndCatalogCode(CATEGORY_CODE, CATALOG_CODE)).thenReturn(null);
 
 
-		categoryRepository.findByGuid(STORE_CODE, CATEGORY_CODE)
+		categoryRepository.findByStoreAndCategoryCode(STORE_CODE, CATEGORY_CODE)
 				.test()
 				.assertError(ResourceOperationFailure.notFound(CategoryRepositoryImpl.NAVIGATION_NODE_WAS_NOT_FOUND));
 	}
@@ -180,7 +192,6 @@ public class CategoryRepositoryImplTest {
 	}
 
 	private void shouldGetSubCategories(final Category category, final List<Category> categories) {
-		when(category.getUidPk()).thenReturn(CATEGORY_UID);
 		when(categoryLookup.findChildren(category)).thenReturn(categories);
 	}
 
@@ -190,14 +201,14 @@ public class CategoryRepositoryImplTest {
 
 	private Catalog createMockCatalog(final String catalogCode) {
 		Catalog catalog = mock(Catalog.class);
-		stub(catalog.getCode()).toReturn(catalogCode);
+		when(catalog.getCode()).thenReturn(catalogCode);
 
 		return catalog;
 	}
 
 	private Store createMockStore(final Catalog catalog) {
 		Store store = mock(Store.class);
-		stub(store.getCatalog()).toReturn(catalog);
+		when(store.getCatalog()).thenReturn(catalog);
 
 		return store;
 	}

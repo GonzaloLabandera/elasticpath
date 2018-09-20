@@ -11,8 +11,10 @@ import com.elasticpath.selenium.common.AbstractPageObject;
  * Catalog Promotion Details pane.
  */
 public class CatalogPromotionEditor extends AbstractPageObject {
-
-	private static final String ACTIVE_EDITOR_PARENT_CSS = "div[active-editor='true'][seeable='true'] ";
+	/**
+	 * Page Object Id CSS.
+	 */
+	public static final String ACTIVE_EDITOR_PARENT_CSS = "div[active-editor='true'][seeable='true'] ";
 	private static final String OVERVIEW_LABEL_CSS = ACTIVE_EDITOR_PARENT_CSS + "div[widget-id='Overview'][appearance-id='label-wrapper']";
 	private static final String EXPIRATION_PARENT_CSS = ACTIVE_EDITOR_PARENT_CSS + "div[widget-id='Expiration Date/Time'] ";
 	private static final String EXPIRATION_CALENDAR_ICON_CSS = EXPIRATION_PARENT_CSS + "div[style*='.png']";

@@ -23,7 +23,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import com.google.common.base.Function;
 import com.google.common.collect.Collections2;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
@@ -34,16 +33,16 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.transaction.support.TransactionCallback;
 
-import com.elasticpath.common.dto.StructuredErrorMessage;
+import com.elasticpath.base.GloballyIdentifiable;
+import com.elasticpath.base.common.dto.StructuredErrorMessage;
 import com.elasticpath.commons.beanframework.BeanFactory;
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.commons.constants.WebConstants;
-import com.elasticpath.commons.exception.EpValidationException;
+import com.elasticpath.base.exception.structured.EpValidationException;
 import com.elasticpath.commons.exception.UserIdExistException;
 import com.elasticpath.domain.builder.customer.CustomerGroupBuilder;
 import com.elasticpath.domain.customer.Customer;
 import com.elasticpath.domain.customer.CustomerAddress;
-import com.elasticpath.domain.customer.CustomerCreditCard;
 import com.elasticpath.domain.customer.CustomerGroup;
 import com.elasticpath.domain.customer.CustomerMessageIds;
 import com.elasticpath.domain.customer.CustomerPaymentMethods;
@@ -57,7 +56,6 @@ import com.elasticpath.service.customer.CustomerGroupService;
 import com.elasticpath.service.customer.CustomerService;
 import com.elasticpath.settings.SettingsService;
 import com.elasticpath.settings.domain.SettingDefinition;
-import com.elasticpath.test.builders.CustomerCreditCardBuilder;
 import com.elasticpath.test.persister.testscenarios.SimpleStoreScenario;
 import com.elasticpath.test.util.Utils;
 
@@ -71,10 +69,9 @@ public class CustomerServiceImplTest extends BasicSpringContextTest {
 	private static final String TEST_EMAIL_2 = "test2@elasticpath.com";
 
 	private static final String PASSWORD = "password";
-	public static final String TOKEN_DISPLAY_VALUE = "**** **** **** 1234";
-	public static final String TOKEN_GATEWAY_GUID = "abc";
+	private static final String TOKEN_DISPLAY_VALUE = "**** **** **** 1234";
+	private static final String TOKEN_GATEWAY_GUID = "abc";
 	private static final String TEST_TOKEN_VALUE = "testTokenValue";
-	private static final String TEST_CREDIT_CARD_NUMBER = "4111111111111111";
 
 	@Autowired
 	@Qualifier("customerService")
@@ -231,25 +228,20 @@ public class CustomerServiceImplTest extends BasicSpringContextTest {
 		final Customer customer1 = createCustomer();
 		final String customer1Guid = "guid_customer1";
 		customer1.setGuid(customer1Guid);
-		customer1.setCustomerGroups(new ArrayList<>(Arrays.asList(newCustomerGroup)));
+		customer1.setCustomerGroups(new ArrayList<>(Collections.singletonList(newCustomerGroup)));
 		service.add(customer1);
 
 		final Customer customer2 = createCustomer();
 		final String customer2Guid = "guid_customer2";
 		customer2.setGuid(customer2Guid);
-		customer2.setCustomerGroups(new ArrayList<>(Arrays.asList(newCustomerGroup)));
+		customer2.setCustomerGroups(new ArrayList<>(Collections.singletonList(newCustomerGroup)));
 		service.add(customer2);
 
 		final List<Customer> foundCustomers = service.findCustomersByCustomerGroup(newCustomerGroup.getName());
 
 		final Collection<String> expectedCustomerGuids = Arrays.asList(customer1Guid, customer2Guid);
 		final Collection<String> foundCustomerGuids =
-				Collections2.transform(foundCustomers, new Function<Customer, String>() {
-					@Override
-					public String apply(final Customer customer) {
-						return customer.getGuid();
-					}
-				});
+				Collections2.transform(foundCustomers, GloballyIdentifiable::getGuid);
 
 		assertTrue(
 				String.format("Expected customer guids [%s] but got [%s]",
@@ -340,7 +332,7 @@ public class CustomerServiceImplTest extends BasicSpringContextTest {
 		assertEquals("The updated address should have the updated first name", uniqueName, updatedAddress.getFirstName());
 
 		// Change a field to the same value and save again
-		String lastName = new String(updatedAddress.getLastName());
+		String lastName = updatedAddress.getLastName();
 		updatedAddress.setLastName(lastName);
 		assertEquals("Name should not have changed", lastName, updatedAddress.getLastName());
 		assertTrue("These objects should be equal", address.equals(updatedAddress));
@@ -362,8 +354,8 @@ public class CustomerServiceImplTest extends BasicSpringContextTest {
 	@DirtiesDatabase
 	@Test
 	public void testAddOrUpdateCustomerAddress() {
-		Customer customer = null;
-		CustomerAddress address = null;
+		Customer customer;
+		CustomerAddress address;
 
 		// Assert that we can create an address and not make it the default.
 		customer = service.add(createCustomer());
@@ -388,78 +380,7 @@ public class CustomerServiceImplTest extends BasicSpringContextTest {
 		assertEquals("The customer should have a preferred billing address.", address, customer.getPreferredBillingAddress());
 		assertNull("The customer should not have a preferred shipping address.", customer.getPreferredShippingAddress());
 		assertEquals("The persisted billing address should equal the in-memory billing address.", address, customer.getAddresses().get(0));
-	}
-
-	/**
-	 * Test adding a credit card to a customer.
-	 */
-	@DirtiesDatabase
-	@Test
-	public void testAddCustomerCreditCard() {
-		// Persist a customer
-		Customer customer = createCustomer();
-		service.add(customer);
-
-		// Add a credit card
-		final CustomerCreditCard creditCard = createCreditCard();
-		customer.addCreditCard(creditCard);
-		assertEquals("The customer should now have a credit card", customer.getCreditCards().size(), 1);
-		assertEquals("The customer card should match the one we created", customer.getCreditCards().get(0), creditCard);
-		assertNotNull("The card should have a guid", customer.getCreditCards().get(0).getGuid());
-
-		// Update the customer
-		Customer updatedCustomer = service.update(customer);
-		assertEquals("The returned object should have one credit card", updatedCustomer.getCreditCards().size(), 1);
-		CustomerCreditCard updatedCard = updatedCustomer.getCreditCards().get(0);
-		assertTrue("The customer's credit card should now be persistent", updatedCard.isPersisted());
-
-		// Load the credit card back from the customer object
-		CustomerCreditCard retrievedCard = updatedCustomer.getCreditCardByUid(updatedCard.getUidPk());
-		assertNotNull("The credit card should be found in the database", retrievedCard);
-		assertEquals("The GUID of the retrieved card should match that of the updated object", updatedCard.getGuid(), retrievedCard.getGuid());
-		assertEquals("The card we got back keyed by guid should match", updatedCard, retrievedCard);
-	}
-
-	/**
-	 * Test that editing a saved credit card and updating works correctly.
-	 */
-	@DirtiesDatabase
-	@Test
-	public void testEditCustomerCreditCard() {
-		// Persist a customer
-		Customer customer = createCustomer();
-		service.add(customer);
-
-		// Add a credit card to the customer and save to the DB
-		customer.addCreditCard(createCreditCard());
-		Customer updatedCustomer = service.update(customer);
-		assertTrue("The credit card should be persistent", updatedCustomer.getCreditCards().get(0).isPersisted());
-
-		// Make a change to the credit card and save to the DB
-		CustomerCreditCard creditCard = updatedCustomer.getCreditCards().get(0);
-		long cardUid = creditCard.getUidPk();
-		String uniqueName = Utils.uniqueCode("name");
-		creditCard.setCardHolderName(uniqueName);
-		Customer updatedTwiceCustomer = service.update(updatedCustomer);
-		CustomerCreditCard updatedCard = updatedTwiceCustomer.getCreditCardByUid(cardUid);
-		assertEquals("The updated credit card should have the same ID", cardUid, updatedCard.getUidPk());
-		assertEquals("The updated credit card should have the updated name", uniqueName, updatedCard.getCardHolderName());
-
-		// Change a field to the same value and save again
-		String expiryMonth = updatedCard.getExpiryMonth();
-		updatedCard.setExpiryMonth(expiryMonth);
-		assertEquals("Expiry month should not have changed", expiryMonth, updatedCard.getExpiryMonth());
-		assertTrue("These objects should be equal", expiryMonth.equals(updatedCard.getExpiryMonth()));
-		Customer updatedThriceCustomer = service.update(updatedTwiceCustomer);
-		CustomerCreditCard updatedTwiceCard = updatedThriceCustomer.getCreditCardByUid(cardUid);
-		assertEquals("The credit card of the updated customer should still have the same ID", cardUid, updatedTwiceCard.getUidPk());
-		assertEquals("The credit card of the updated customer should still have the updated expiry month", expiryMonth, updatedTwiceCard
-				.getExpiryMonth());
-
-		// Now reload customer and resave
-		Customer reloadedCustomer = service.get(customer.getUidPk());
-		Customer updatedReloadedCustomer = service.update(reloadedCustomer);
-		assertNotNull("We should have got the customer back", updatedReloadedCustomer);
+	
 	}
 
 	/**
@@ -538,7 +459,7 @@ public class CustomerServiceImplTest extends BasicSpringContextTest {
 				.withValue("third-token-value").build();
 
 		final Customer customer = createCustomer();
-		List<PaymentMethod> customerPaymentMethods = Arrays.<PaymentMethod>asList(firstToken, secondToken);
+		List<PaymentMethod> customerPaymentMethods = Arrays.asList(firstToken, secondToken);
 		customer.getPaymentMethods().addAll(customerPaymentMethods);
 		customer.getPaymentMethods().setDefault(thirdToken);
 		service.add(customer);
@@ -567,7 +488,7 @@ public class CustomerServiceImplTest extends BasicSpringContextTest {
 
 
 		final Customer customer = createCustomer();
-		List<PaymentMethod> customerPaymentMethods = Arrays.<PaymentMethod>asList(firstToken, secondToken);
+		List<PaymentMethod> customerPaymentMethods = Arrays.asList(firstToken, secondToken);
 		customer.getPaymentMethods().addAll(customerPaymentMethods);
 		customer.getPaymentMethods().setDefault(secondToken);
 		service.add(customer);
@@ -604,7 +525,7 @@ public class CustomerServiceImplTest extends BasicSpringContextTest {
 				.build();
 
 		Customer customer = createCustomer();
-		customer.getPaymentMethods().addAll(Arrays.<PaymentMethod>asList(tokenWithNoDisplayValue));
+		customer.getPaymentMethods().addAll(Collections.singletonList(tokenWithNoDisplayValue));
 
 		service.add(customer);
 	}
@@ -618,7 +539,7 @@ public class CustomerServiceImplTest extends BasicSpringContextTest {
 				.build();
 
 		Customer customer = createCustomer();
-		customer.getPaymentMethods().addAll(Arrays.<PaymentMethod>asList(tokenWithNoValue));
+		customer.getPaymentMethods().addAll(Collections.singletonList(tokenWithNoValue));
 
 		service.add(customer);
 	}
@@ -733,15 +654,6 @@ public class CustomerServiceImplTest extends BasicSpringContextTest {
 		customer.setEmail("test" + Math.round(Math.random() * 1000) + "@elasticpath.com");
 		customer.setStoreCode(scenario.getStore().getCode());
 		return customer;
-	}
-
-	private CustomerCreditCard createCreditCard() {
-		return new CustomerCreditCardBuilder(beanFactory)
-				.withCardNumber(TEST_CREDIT_CARD_NUMBER)
-				.withExpiryMonth("01")
-				.withExpiryYear("2008")
-				.withCardHolderName(Utils.uniqueCode("test user"))
-				.withCardType("VISA").build();
 	}
 
 	private void changeUserIdMode(final int userIdMode) {

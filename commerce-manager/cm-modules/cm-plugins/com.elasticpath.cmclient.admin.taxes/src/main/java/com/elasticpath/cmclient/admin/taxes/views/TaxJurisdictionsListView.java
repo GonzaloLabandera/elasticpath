@@ -4,7 +4,6 @@
 package com.elasticpath.cmclient.admin.taxes.views;
 
 import java.util.List;
-import java.util.Locale;
 
 import org.apache.log4j.Logger;
 import org.eclipse.jface.action.Action;
@@ -21,6 +20,7 @@ import com.elasticpath.cmclient.admin.taxes.TaxesPlugin;
 import com.elasticpath.cmclient.admin.taxes.actions.CreateTaxJurisdictionAction;
 import com.elasticpath.cmclient.admin.taxes.actions.DeleteTaxJurisdictionAction;
 import com.elasticpath.cmclient.admin.taxes.actions.EditTaxJurisdictionAction;
+import com.elasticpath.cmclient.core.CorePlugin;
 import com.elasticpath.cmclient.core.ServiceLocator;
 import com.elasticpath.cmclient.core.ui.framework.IEpTableViewer;
 import com.elasticpath.cmclient.core.views.AbstractListView;
@@ -157,7 +157,7 @@ public class TaxJurisdictionsListView extends AbstractListView {
 
 			switch (columnIndex) {
 			case TaxJurisdictionsListView.INDEX_JURISDICTION_COUNTRY:
-				return geography.getCountryDisplayName(taxJurisdiction.getRegionCode(), Locale.getDefault());
+				return geography.getCountryDisplayName(taxJurisdiction.getRegionCode(), CorePlugin.getDefault().getDefaultLocale());
 			case TaxJurisdictionsListView.INDEX_CALCULATION_METHOD:
 				String method;
 				if (taxJurisdiction.getPriceCalculationMethod().equals(TaxJurisdiction.PRICE_CALCULATION_EXCLUSIVE)) {

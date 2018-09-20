@@ -11,9 +11,9 @@ import cucumber.api.java.en.When;
 
 import com.elasticpath.selenium.editor.CartPromotionEditor;
 import com.elasticpath.selenium.editor.CatalogPromotionEditor;
-import com.elasticpath.selenium.framework.util.SeleniumDriverSetup;
 import com.elasticpath.selenium.navigations.PromotionsShipping;
 import com.elasticpath.selenium.resultspane.PromotionSearchResultPane;
+import com.elasticpath.selenium.setup.SetUp;
 import com.elasticpath.selenium.toolbars.PromotionsShippingActionToolbar;
 import com.elasticpath.selenium.util.Constants;
 import com.elasticpath.selenium.util.Utility;
@@ -45,8 +45,8 @@ public class PromotionsDefinition {
 	 * Constructor.
 	 */
 	public PromotionsDefinition() {
-		promotionsShipping = new PromotionsShipping(SeleniumDriverSetup.getDriver());
-		promotionsShippingActionToolbar = new PromotionsShippingActionToolbar(SeleniumDriverSetup.getDriver());
+		promotionsShipping = new PromotionsShipping(SetUp.getDriver());
+		promotionsShippingActionToolbar = new PromotionsShippingActionToolbar(SetUp.getDriver());
 	}
 
 	/**
@@ -97,7 +97,7 @@ public class PromotionsDefinition {
 	 */
 	@And("^newly created catalog promotion exists$")
 	public void verifyNewCatalogPromotion() {
-		isPromotionInList(catalogPromoName);
+		searchForPromotionByName(catalogPromoName);
 	}
 
 	/**
@@ -187,7 +187,7 @@ public class PromotionsDefinition {
 	 */
 	@And("^I verify newly created cart promotion exists$")
 	public void verifyNewCartPromotion() {
-		isPromotionInList(cartPromoName);
+		searchForPromotionByName(cartPromoName);
 	}
 
 	/**
@@ -216,7 +216,7 @@ public class PromotionsDefinition {
 	 *
 	 * @param promoName the promotion name.
 	 */
-	public void isPromotionInList(final String promoName) {
+	public void searchForPromotionByName(final String promoName) {
 		promotionsShipping.enterPromotionName(promoName);
 		promotionSearchResultPane = promotionsShipping.clickPromotionSearchButton();
 		boolean isPromotionInList = promotionSearchResultPane.isPromotionInList(promoName);

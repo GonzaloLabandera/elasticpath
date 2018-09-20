@@ -32,7 +32,6 @@ import com.elasticpath.domain.event.EventOriginator;
 import com.elasticpath.domain.event.EventOriginatorHelper;
 import com.elasticpath.domain.event.EventOriginatorType;
 import com.elasticpath.domain.event.OrderEventHelper;
-import com.elasticpath.domain.order.AdvancedOrderSearchCriteria;
 import com.elasticpath.domain.order.AllocationEventType;
 import com.elasticpath.domain.order.AllocationResult;
 import com.elasticpath.domain.order.Order;
@@ -52,6 +51,7 @@ import com.elasticpath.domain.order.impl.AbstractOrderShipmentImpl;
 import com.elasticpath.domain.order.impl.OrderSkuImpl;
 import com.elasticpath.domain.rules.Rule;
 import com.elasticpath.domain.shipping.ShipmentType;
+import com.elasticpath.domain.shoppingcart.ShoppingItem;
 import com.elasticpath.domain.store.Store;
 import com.elasticpath.domain.store.Warehouse;
 import com.elasticpath.messaging.EventMessage;
@@ -63,6 +63,7 @@ import com.elasticpath.persistence.api.LoadTuner;
 import com.elasticpath.persistence.support.FetchGroupConstants;
 import com.elasticpath.persistence.support.OrderCriterion;
 import com.elasticpath.persistence.support.OrderCriterion.ResultType;
+import com.elasticpath.persistence.support.impl.CriteriaQuery;
 import com.elasticpath.plugin.payment.exceptions.PaymentGatewayException;
 import com.elasticpath.service.impl.AbstractEpPersistenceServiceImpl;
 import com.elasticpath.service.misc.FetchMode;
@@ -126,7 +127,6 @@ public class OrderServiceImpl extends AbstractEpPersistenceServiceImpl implement
 	@Override
 	public Order add(final Order order) throws EpServiceException {
 		sanityCheck();
-		sanitizeOrderPayments(order);
 		order.setLastModifiedDate(timeService.getCurrentTime());
 		getPersistenceEngine().save(order);
 
@@ -144,7 +144,6 @@ public class OrderServiceImpl extends AbstractEpPersistenceServiceImpl implement
 	@SuppressWarnings("deprecation")
 	public Order update(final Order order) throws EpServiceException {
 		sanityCheck();
-		sanitizeOrderPayments(order);
 		order.setLastModifiedDate(timeService.getCurrentTime());
 
 		// Log payment captured event
@@ -179,20 +178,6 @@ public class OrderServiceImpl extends AbstractEpPersistenceServiceImpl implement
 		getTaxOperationService().updateTaxes(updatedOrder, taxDocumentModificationContext);
 
 		return updatedOrder;
-	}
-
-	/**
-	 * Removes security-sensitive data from Order Payments prior to persistence.
-	 * @param order the order whose payments need to be sanitized
-	 */
-	protected void sanitizeOrderPayments(final Order order) {
-		final Store store = getStore(order);
-		for (OrderPayment payment : order.getOrderPayments()) {
-			if (!store.isStoreFullCreditCardsEnabled()) {
-				payment.clearCreditCardData();
-			}
-			payment.setSanitized(true);
-		}
 	}
 
 	private void logOrderPaymentEvents(final Order order, final OrderPayment orderPayment) {
@@ -233,8 +218,8 @@ public class OrderServiceImpl extends AbstractEpPersistenceServiceImpl implement
 		prepareFetchPlan();
 
 		final OrderCriterion orderCriterion = getBean(ContextIdNames.ORDER_CRITERION);
-		List<Order> orders = getPersistenceEngine().retrieve(orderCriterion.getStatusCriteria(orderStatus, paymentStatus, shipmentStatus),
-				params.toArray());
+		final CriteriaQuery statusCriteria = orderCriterion.getStatusCriteria(orderStatus, paymentStatus, shipmentStatus);
+		List<Order> orders = getPersistenceEngine().retrieve(statusCriteria.getQuery(), statusCriteria.getParameters().toArray());
 		fetchPlanHelper.clearFetchPlan();
 
 		return populateRelationships(orders);
@@ -344,7 +329,7 @@ public class OrderServiceImpl extends AbstractEpPersistenceServiceImpl implement
 		prepareFetchPlan();
 		final OrderCriterion orderCriterion = getBean(ContextIdNames.ORDER_CRITERION);
 		final List<Order> orderList = getPersistenceEngine().retrieve(
-				orderCriterion.getOrderGiftCertificateCriteria("giftCertificateCode", giftCertificateCode, isExactMatch));
+				orderCriterion.getOrderGiftCertificateCriteria("giftCertificateCode", giftCertificateCode, isExactMatch).getQuery());
 		fetchPlanHelper.clearFetchPlan();
 		return populateRelationships(orderList);
 	}
@@ -361,38 +346,8 @@ public class OrderServiceImpl extends AbstractEpPersistenceServiceImpl implement
 		sanityCheck();
 		prepareFetchPlan();
 		final OrderCriterion orderCriterion = getBean(ContextIdNames.ORDER_CRITERION);
-		final List<Order> orderList = getPersistenceEngine().retrieve(
-				orderCriterion.getOrderCustomerProfileCriteria("CP_EMAIL", customerEmail, isExactMatch));
-		fetchPlanHelper.clearFetchPlan();
-		return populateRelationships(orderList);
-	}
-
-	/**
-	 * Advanced order search function based on the orderSearchCriteria and the max number of results to return.
-	 *
-	 * @param orderSearchCriteria the order search criteria.
-	 * @param maxResults the max results to be returned
-	 * @return the list of orders matching the given criteria.
-	 */
-	@Override
-	public List<Order> findOrderAdvanced(final AdvancedOrderSearchCriteria orderSearchCriteria, final int maxResults) {
-		sanityCheck();
-		final OrderCriterion orderCriterion = getBean(ContextIdNames.ORDER_CRITERION);
-		final List<Object> parameterList = new ArrayList<>();
-		if (orderSearchCriteria.getOrderFromDate() != null) {
-			parameterList.add(orderSearchCriteria.getOrderFromDate());
-		}
-		if (orderSearchCriteria.getOrderToDate() != null) {
-			parameterList.add(orderSearchCriteria.getOrderToDate());
-		}
-		List<Order> orderList = null;
-		prepareFetchPlan();
-		if (parameterList.isEmpty()) {
-			orderList = getPersistenceEngine().retrieve(orderCriterion.getAdvancedOrderCriteria(orderSearchCriteria), 0, maxResults);
-		} else {
-			orderList = getPersistenceEngine().retrieve(orderCriterion.getAdvancedOrderCriteria(orderSearchCriteria), parameterList.toArray(), 0,
-					maxResults);
-		}
+		final CriteriaQuery query = orderCriterion.getOrderCustomerProfileCriteria("CP_EMAIL", customerEmail, isExactMatch);
+		final List<Order> orderList = getPersistenceEngine().retrieve(query.getQuery(), query.getParameters().toArray());
 		fetchPlanHelper.clearFetchPlan();
 		return populateRelationships(orderList);
 	}
@@ -407,9 +362,8 @@ public class OrderServiceImpl extends AbstractEpPersistenceServiceImpl implement
 	public long getOrderCountBySearchCriteria(final OrderSearchCriteria orderSearchCriteria) {
 		sanityCheck();
 		final OrderCriterion orderCriterion = getBean(ContextIdNames.ORDER_CRITERION);
-		List<Object> parameters = new LinkedList<>();
 		Collection<String> storeCodes = new LinkedList<>();
-		String query = orderCriterion.getOrderSearchCriteria(orderSearchCriteria, parameters, storeCodes, ResultType.COUNT);
+		CriteriaQuery query = orderCriterion.getOrderSearchCriteria(orderSearchCriteria, storeCodes, ResultType.COUNT);
 		List<Long> orderCount = null;
 
 		FetchGroupLoadTuner loadTuner = getBean(ContextIdNames.FETCH_GROUP_LOAD_TUNER);
@@ -417,12 +371,13 @@ public class OrderServiceImpl extends AbstractEpPersistenceServiceImpl implement
 		fetchPlanHelper.configureFetchGroupLoadTuner(loadTuner);
 		fetchPlanHelper.setFetchMode(FetchMode.JOIN);
 
-		if (parameters.isEmpty() && storeCodes.isEmpty()) {
-			orderCount = getPersistenceEngine().retrieve(query);
+		if (query.getParameters().isEmpty() && storeCodes.isEmpty()) {
+			orderCount = getPersistenceEngine().retrieve(query.getQuery());
 		} else if (storeCodes.isEmpty()) {
-			orderCount = getPersistenceEngine().retrieve(query, parameters.toArray());
+			orderCount = getPersistenceEngine().retrieve(query.getQuery(), query.getParameters().toArray());
 		} else {
-			orderCount = getPersistenceEngine().retrieveWithList(query, "storeList", storeCodes, parameters.toArray(), 0, Integer.MAX_VALUE);
+			orderCount = getPersistenceEngine().retrieveWithList(query.getQuery(), "storeList", storeCodes,
+				query.getParameters().toArray(), 0, Integer.MAX_VALUE);
 		}
 
 		fetchPlanHelper.clearFetchPlan();
@@ -475,17 +430,17 @@ public class OrderServiceImpl extends AbstractEpPersistenceServiceImpl implement
 		}
 
 		final OrderCriterion orderCriterion = getBean(ContextIdNames.ORDER_CRITERION);
-		List<Object> parameters = new LinkedList<>();
 		Collection<String> storeCodes = new LinkedList<>();
-		String query = orderCriterion.getOrderSearchCriteria(orderSearchCriteria, parameters, storeCodes, ResultType.ENTITY);
+		CriteriaQuery query = orderCriterion.getOrderSearchCriteria(orderSearchCriteria, storeCodes, ResultType.ENTITY);
 
 		List<Order> orderList = null;
-		if (parameters.isEmpty() && storeCodes.isEmpty()) {
-			orderList = getPersistenceEngine().retrieve(query, start, maxResults);
+		if (query.getParameters().isEmpty() && storeCodes.isEmpty()) {
+			orderList = getPersistenceEngine().retrieve(query.getQuery(), start, maxResults);
 		} else if (storeCodes.isEmpty()) {
-			orderList = getPersistenceEngine().retrieve(query, parameters.toArray(), start, maxResults);
+			orderList = getPersistenceEngine().retrieve(query.getQuery(), query.getParameters().toArray(), start, maxResults);
 		} else {
-			orderList = getPersistenceEngine().retrieveWithList(query, "storeList", storeCodes, parameters.toArray(), start, maxResults);
+			orderList = getPersistenceEngine().retrieveWithList(query.getQuery(), "storeList", storeCodes,
+				query.getParameters().toArray(), start, maxResults);
 		}
 
 		if (loadTuner != null) {
@@ -507,17 +462,17 @@ public class OrderServiceImpl extends AbstractEpPersistenceServiceImpl implement
 	public List<String> findOrderNumbersBySearchCriteria(final OrderSearchCriteria orderSearchCriteria, final int start, final int maxResults) {
 
 		final OrderCriterion orderCriterion = getBean(ContextIdNames.ORDER_CRITERION);
-		List<Object> parameters = new LinkedList<>();
 		Collection<String> storeCodes = new LinkedList<>();
-		String query = orderCriterion.getOrderSearchCriteria(orderSearchCriteria, parameters, storeCodes, ResultType.ORDER_NUMBER);
+		CriteriaQuery query = orderCriterion.getOrderSearchCriteria(orderSearchCriteria, storeCodes, ResultType.ORDER_NUMBER);
 
 		List<String> orderList;
-		if (parameters.isEmpty() && storeCodes.isEmpty()) {
-			orderList = getPersistenceEngine().retrieve(query, start, maxResults);
+		if (query.getParameters().isEmpty() && storeCodes.isEmpty()) {
+			orderList = getPersistenceEngine().retrieve(query.getQuery(), start, maxResults);
 		} else if (storeCodes.isEmpty()) {
-			orderList = getPersistenceEngine().retrieve(query, parameters.toArray(), start, maxResults);
+			orderList = getPersistenceEngine().retrieve(query.getQuery(), query.getParameters().toArray(), start, maxResults);
 		} else {
-			orderList = getPersistenceEngine().retrieveWithList(query, "storeList", storeCodes, parameters.toArray(), start, maxResults);
+			orderList = getPersistenceEngine().retrieveWithList(query.getQuery(), "storeList", storeCodes,
+				query.getParameters().toArray(), start, maxResults);
 		}
 
 		return orderList;
@@ -629,7 +584,7 @@ public class OrderServiceImpl extends AbstractEpPersistenceServiceImpl implement
 	@Override
 	public Order get(final long orderUid) throws EpServiceException {
 		sanityCheck();
-		Order order = null;
+		Order order;
 		if (orderUid <= 0) {
 			order = getBean(ContextIdNames.ORDER);
 		} else {
@@ -652,7 +607,7 @@ public class OrderServiceImpl extends AbstractEpPersistenceServiceImpl implement
 	@Override
 	public Order get(final long orderUid, final FetchGroupLoadTuner loadTuner) throws EpServiceException {
 		sanityCheck();
-		Order order = null;
+		Order order;
 		if (orderUid <= 0) {
 			order = getBean(ContextIdNames.ORDER);
 		} else {
@@ -685,7 +640,7 @@ public class OrderServiceImpl extends AbstractEpPersistenceServiceImpl implement
 	@Override
 	public Order getOrderDetail(final long orderUid) throws EpServiceException {
 		sanityCheck();
-		Order order = null;
+		Order order;
 		if (orderUid <= 0) {
 			order = getBean(ContextIdNames.ORDER);
 		} else {
@@ -932,7 +887,7 @@ public class OrderServiceImpl extends AbstractEpPersistenceServiceImpl implement
 		// refund only when the refund amount <= available credit
 		if (refundAmount.compareTo(totalMinusCredit) <= 0) {
 			Order updatedOrder = order;
-			PaymentResult paymentResult = null;
+			PaymentResult paymentResult;
 
 			paymentResult = paymentService.refundShipmentPayment(orderShipmentToRefund, refundPayment, refundAmount);
 
@@ -1170,7 +1125,7 @@ public class OrderServiceImpl extends AbstractEpPersistenceServiceImpl implement
 	public List<PhysicalOrderShipment> getAwaitingShipments(final Warehouse warehouse) {
 		sanityCheck();
 		List<PhysicalOrderShipment> releasedShipments =
-			getPersistenceEngine().<PhysicalOrderShipment>retrieveByNamedQuery("PHYSICAL_SHIPMENTS_BY_STATUS_AND_WAREHOUSE",
+			getPersistenceEngine().retrieveByNamedQuery("PHYSICAL_SHIPMENTS_BY_STATUS_AND_WAREHOUSE",
 					OrderShipmentStatus.RELEASED, warehouse.getUidPk());
 		List<PhysicalOrderShipment> pickableShipments = new ArrayList<>();
 
@@ -1204,7 +1159,7 @@ public class OrderServiceImpl extends AbstractEpPersistenceServiceImpl implement
 		final OrderLockService orderLockService = getBean(ContextIdNames.ORDER_LOCK_SERVICE);
 		final OrderLock orderLock = orderLockService.getOrderLock(order);
 		if (orderLock != null) {
-			/** the order was locked, try to release it now. */
+			/* the order was locked, try to release it now. */
 			orderLockService.releaseOrderLock(orderLock, cmUser);
 		}
 		update(order);
@@ -1253,7 +1208,8 @@ public class OrderServiceImpl extends AbstractEpPersistenceServiceImpl implement
 		}
 		String eventOriginator = getEventOriginator(order);
 
-		for (final OrderSku orderSku : order.getOrderSkus()) {
+		for (final ShoppingItem shoppingItem : order.getRootShoppingItems()) {
+			OrderSku orderSku = (OrderSku) shoppingItem;
 			if (orderSku.getSkuGuid() != null) {
 				allocationService.processAllocationEvent(orderSku, AllocationEventType.ORDER_CANCELLATION, eventOriginator, orderSku
 						.getAllocatedQuantity(), null);
@@ -1337,6 +1293,15 @@ public class OrderServiceImpl extends AbstractEpPersistenceServiceImpl implement
 		sanityCheck();
 		prepareFetchPlan();
 		List<Order> results = getPersistenceEngine().retrieveByNamedQuery("ORDER_SELECT_BY_ORDERNUMBER", orderNumber);
+		if (fetchPlanHelper.doesPlanContainFetchGroup(FetchGroupConstants.ORDER_DEFAULT)) {
+			// Workaround to explicitly initialize "parent" field for all OrderSku entities.
+			results.stream()
+					.filter(order -> order != null && order.getAllShipments() != null)
+					.flatMap(order -> order.getAllShipments().stream())
+					.filter(shipment -> shipment != null && shipment.getShipmentOrderSkus() != null)
+					.flatMap(shipment -> shipment.getShipmentOrderSkus().stream())
+					.forEach(OrderSku::getParent);
+		}
 		fetchPlanHelper.clearFetchPlan();
 		Order order = null;
 		if (results.size() == 1) {
@@ -1540,7 +1505,7 @@ public class OrderServiceImpl extends AbstractEpPersistenceServiceImpl implement
 		if (!results.isEmpty()) {
 			count = (Long) results.get(0);
 		}
-		return count.longValue();
+		return count;
 	}
 
 	@Override
@@ -1638,8 +1603,7 @@ public class OrderServiceImpl extends AbstractEpPersistenceServiceImpl implement
 	 * @param order the order
 	 * @return the order shipment
 	 */
-	OrderShipment findRefundableShipment(final String shipmentNumber,
-			final Order order) {
+	private OrderShipment findRefundableShipment(final String shipmentNumber, final Order order) {
 		OrderShipment orderShipmentToRefund = null;
 		if (shipmentNumber != null) {
 			orderShipmentToRefund = order.getShipment(shipmentNumber);

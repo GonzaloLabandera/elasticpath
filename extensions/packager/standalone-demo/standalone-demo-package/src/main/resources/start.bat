@@ -45,7 +45,7 @@ set WEBAPPS_DIRECTORY=%CURRENT_DIRECTORY%webapps
 set TOMCAT_HOME=%WEBAPPS_DIRECTORY%\apache-tomcat
 set CATALINA_HOME=%TOMCAT_HOME%
 
-set CATALINA_OPTS=-Dh2.bindAddress=127.0.0.1 -Dcom.sun.management.jmxremote=true -Xmx1536m -XX:MaxPermSize=512m -Dsun.lang.ClassLoader.allowArraySyntax=true -XX:CompileCommand=exclude,org/apache/velocity/runtime/directive/Foreach,render -Dfile.encoding=UTF-8 -Dapple.awt.UIElement=true -Djava.awt.headless=true
+set CATALINA_OPTS=-Dh2.bindAddress=127.0.0.1 -Dcom.sun.management.jmxremote=true -Xmx1536m -Dsun.lang.ClassLoader.allowArraySyntax=true -XX:CompileCommand=exclude,org/apache/velocity/runtime/directive/Foreach,render -Dfile.encoding=UTF-8 -Dapple.awt.UIElement=true -Djava.awt.headless=true
 
 set CORTEX_STUDIO="http://localhost:9080/studio"
 set SEARCH_SERVER="http://localhost:38082/searchserver/product/select?q=*:*&wt=json"
@@ -61,32 +61,32 @@ for /d %%W in ("%WEBAPPS_DIRECTORY%\*-webapp-base") do (
     rmdir /s /q "%%W\work"
 	set CATALINA_BASE=%%W
 	ECHO.%%W| FIND /I "activemq">Nul && (
-		set CATALINA_OPTS=-Dh2.bindAddress=127.0.0.1 -Dcom.sun.management.jmxremote=true -Xmx512m -XX:MaxPermSize=512m -Dsun.lang.ClassLoader.allowArraySyntax=true -XX:CompileCommand=exclude,org/apache/velocity/runtime/directive/Foreach,render -Dfile.encoding=UTF-8 -Dapple.awt.UIElement=true -Djava.awt.headless=true
+		set CATALINA_OPTS=-Dh2.bindAddress=127.0.0.1 -Dcom.sun.management.jmxremote=true -Xmx512m -Dsun.lang.ClassLoader.allowArraySyntax=true -XX:CompileCommand=exclude,org/apache/velocity/runtime/directive/Foreach,render -Dfile.encoding=UTF-8 -Dapple.awt.UIElement=true -Djava.awt.headless=true
 		set TITLE=activemq
 		START CMD /C CALL "%CATALINA_HOME%\bin\catalina.bat" start
 		PING 1.1.1.1 -n 1 -w 10000 >NUL
 	)
 	ECHO.%%W| FIND /I "ep-cortex">Nul && (
-		set CATALINA_OPTS=-Dh2.bindAddress=127.0.0.1 -Dcom.sun.management.jmxremote=true -Xmx1024m -XX:MaxPermSize=512m -Dsun.lang.ClassLoader.allowArraySyntax=true -XX:CompileCommand=exclude,org/apache/velocity/runtime/directive/Foreach,render -Dfile.encoding=UTF-8 -Dapple.awt.UIElement=true -Djava.awt.headless=true
+		set CATALINA_OPTS=-Dh2.bindAddress=127.0.0.1 -Dcom.sun.management.jmxremote=true -Xmx1024m -Dsun.lang.ClassLoader.allowArraySyntax=true -XX:CompileCommand=exclude,org/apache/velocity/runtime/directive/Foreach,render -Dfile.encoding=UTF-8 -Dapple.awt.UIElement=true -Djava.awt.headless=true
 		set TITLE=ep-cortex
 		START CMD /C CALL "%CATALINA_HOME%\bin\catalina.bat" start
 		PING 1.1.1.1 -n 1 -w 45000 >NUL
 		start "" %CORTEX_STUDIO%
 	)
 	ECHO.%%W| FIND /I "ep-search">Nul && (
-		set CATALINA_OPTS=-Dh2.bindAddress=127.0.0.1 -Dcom.sun.management.jmxremote=true -Xmx1536m -XX:MaxPermSize=512m -Dsun.lang.ClassLoader.allowArraySyntax=true -XX:CompileCommand=exclude,org/apache/velocity/runtime/directive/Foreach,render -Dfile.encoding=UTF-8 -Dapple.awt.UIElement=true -Djava.awt.headless=true
+		set CATALINA_OPTS=-Dh2.bindAddress=127.0.0.1 -Dcom.sun.management.jmxremote=true -Xmx1536m -Dsun.lang.ClassLoader.allowArraySyntax=true -XX:CompileCommand=exclude,org/apache/velocity/runtime/directive/Foreach,render -Dfile.encoding=UTF-8 -Dapple.awt.UIElement=true -Djava.awt.headless=true
 		set TITLE=ep-search
 		START CMD /C CALL "%CATALINA_HOME%\bin\catalina.bat" start
 		PING 1.1.1.1 -n 1 -w 10000 >NUL
 	)
 	ECHO.%%W| FIND /I "ep-integration">Nul && (
-		set CATALINA_OPTS=-Dh2.bindAddress=127.0.0.1 -Dcom.sun.management.jmxremote=true -Xmx1280m -XX:MaxPermSize=512m -Dsun.lang.ClassLoader.allowArraySyntax=true -XX:CompileCommand=exclude,org/apache/velocity/runtime/directive/Foreach,render -Dfile.encoding=UTF-8 -Dapple.awt.UIElement=true -Djava.awt.headless=true
+		set CATALINA_OPTS=-Dh2.bindAddress=127.0.0.1 -Dcom.sun.management.jmxremote=true -Xmx1280m -Dsun.lang.ClassLoader.allowArraySyntax=true -XX:CompileCommand=exclude,org/apache/velocity/runtime/directive/Foreach,render -Dfile.encoding=UTF-8 -Dapple.awt.UIElement=true -Djava.awt.headless=true
 		set TITLE=ep-integration
 		START CMD /C CALL "%CATALINA_HOME%\bin\catalina.bat" start
 		PING 1.1.1.1 -n 1 -w 10000 >NUL
     )
     ECHO.%%W| FIND /I "ep-cm">Nul && (
-        set CATALINA_OPTS=-Dh2.bindAddress=127.0.0.1 -Dcom.sun.management.jmxremote=true -Xmx1280m -XX:MaxPermSize=512m -Dsun.lang.ClassLoader.allowArraySyntax=true -XX:CompileCommand=exclude,org/apache/velocity/runtime/directive/Foreach,render -Dfile.encoding=UTF-8 -Dapple.awt.UIElement=true -Djava.awt.headless=true
+        set CATALINA_OPTS=-Dh2.bindAddress=127.0.0.1 -Dcom.sun.management.jmxremote=true -Xmx1280m -Dsun.lang.ClassLoader.allowArraySyntax=true -XX:CompileCommand=exclude,org/apache/velocity/runtime/directive/Foreach,render -Dfile.encoding=UTF-8 -Dapple.awt.UIElement=true -Djava.awt.headless=true
         set TITLE=ep-cm
         START CMD /C CALL "%CATALINA_HOME%\bin\catalina.bat" start
         PING 1.1.1.1 -n 1 -w 10000 >NUL

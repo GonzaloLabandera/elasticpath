@@ -12,7 +12,8 @@ import com.elasticpath.domain.shoppingcart.WishList;
 import com.elasticpath.rest.advise.Message;
 import com.elasticpath.rest.definition.wishlists.WishlistIdentifier;
 import com.elasticpath.rest.definition.wishlists.WishlistLineItemIdentifier;
-import com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder.ShoppingItemValidationService;
+import com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder.AddToCartAdvisorService;
+import com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder.ShoppingCartRepository;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.wishlist.ItemValidationService;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.wishlist.WishlistRepository;
 
@@ -23,26 +24,32 @@ import com.elasticpath.rest.resource.integration.epcommerce.repository.wishlist.
 public class ItemValidationServiceImpl implements ItemValidationService {
 
 	private WishlistRepository wishlistRepository;
-	private ShoppingItemValidationService shoppingItemValidationService;
+	private AddToCartAdvisorService addToCartAdvisorService;
+	private ShoppingCartRepository shoppingCartRepository;
 
 	@Override
 	public Observable<Message> isItemPurchasable(final WishlistLineItemIdentifier wishlistLineItemIdentifier) {
 		WishlistIdentifier wishlistIdentifier = wishlistLineItemIdentifier.getWishlistLineItems().getWishlist();
 		String lineItemGuid = wishlistLineItemIdentifier.getLineItemId().getValue();
 		String wishlistId = wishlistIdentifier.getWishlistId().getValue();
-		
-		return wishlistRepository.getWishlist(wishlistId)
-				.flatMapObservable(toMessages(lineItemGuid));
+
+		return shoppingCartRepository.getDefaultShoppingCartGuid()
+				.flatMapObservable(cartGuid -> wishlistRepository.getWishlist(wishlistId)
+						.flatMapObservable(toMessages(cartGuid, lineItemGuid)));
+
+
 	}
 
 	/**
 	 * Get structured advise messages, if any.
-	 * @param lineItemGuid the line item guid
+	 *
+	 * @param  cartId the cart id.
+	 * @param lineItemGuid the line item guid.
 	 * @return the function
 	 */
-	protected Function<WishList, Observable<Message>> toMessages(final String lineItemGuid) {
+	protected Function<WishList, Observable<Message>> toMessages(final String cartId, final String lineItemGuid) {
 		return wishList -> wishlistRepository.getProductSku(wishList, lineItemGuid)
-				.flatMapObservable(productSku -> shoppingItemValidationService.validateItemPurchasable(wishList.getStoreCode(), productSku));
+				.flatMapObservable(productSku -> addToCartAdvisorService.validateItemPurchasable(wishList.getStoreCode(), cartId, productSku, null));
 	}
 
 	@Reference
@@ -51,7 +58,12 @@ public class ItemValidationServiceImpl implements ItemValidationService {
 	}
 
 	@Reference
-	public void setShoppingItemValidationService(final ShoppingItemValidationService shoppingItemValidationService) {
-		this.shoppingItemValidationService = shoppingItemValidationService;
+	public void setShoppingCartRepository(final ShoppingCartRepository shoppingCartRepository) {
+		this.shoppingCartRepository = shoppingCartRepository;
+	}
+
+	@Reference
+	public void setAddToCartAdvisorService(final AddToCartAdvisorService addToCartAdvisorService) {
+		this.addToCartAdvisorService = addToCartAdvisorService;
 	}
 }

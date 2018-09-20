@@ -3,22 +3,18 @@
  */
 package com.elasticpath.tags.service.impl;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.LinkedList;
-import java.util.Locale;
 import java.util.Set;
 
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang.StringUtils;
 
 import com.elasticpath.tags.domain.Condition;
 import com.elasticpath.tags.domain.LogicalOperator;
 import com.elasticpath.tags.domain.TagDefinition;
 import com.elasticpath.tags.service.ConditionValidationFacade;
 import com.elasticpath.validation.domain.ValidationConstraint;
-import com.elasticpath.validation.domain.ValidationError;
 import com.elasticpath.validation.domain.ValidationResult;
+import com.elasticpath.validation.domain.impl.CompoundValidationResult;
 import com.elasticpath.validation.service.ValidationService;
 
 /**
@@ -148,109 +144,6 @@ public class ConditionValidationFacadeImpl implements
 			}
 			
 		}
-	}
-	
-	/**
-	 * Provides implementation of the validation result interface that enables to 
-	 * create a compound result of the validation when a whole condition tree is
-	 * validated using {@link #ConditionValidationFacadeImpl()}.validate(LogicalOperator).
-	 */
-	private static class CompoundValidationResult implements ValidationResult {
-
-		private boolean validResult = true;
-		private final Collection<ValidationResult> results = new LinkedList<>();
-		private Collection<ValidationError> cachedErrors; 
-		
-		@Override
-		public ValidationError[] getErrors() {
-			if (cachedErrors == null) {
-				
-				cacheErrorsCollection();
-				
-			}
-			
-			return cachedErrors.toArray(new ValidationError[cachedErrors.size()]);
-		}
-		
-		private void cacheErrorsCollection() {
-			
-			cachedErrors = new ArrayList<>(results.size());
-			for (ValidationResult result : results) {
-				
-				if (!result.isValid()) {
-					
-					final ValidationResult invalidResult = result;
-					
-					cachedErrors.add(new ValidationError() {
-						
-						private ValidationResult validationResult = invalidResult;
-						
-						@Override
-						public String getMessage() {
-							return validationResult.getMessage();
-						}
-						@Override
-						public String getMessage(final Locale locale) {
-							return validationResult.getMessage(locale);
-						}
-						
-					});
-				}
-				
-			}
-		}
-
-		@Override
-		public String getMessage() {
-			return accumulateMessagesFromErrors(null);
-		}
-
-		@Override
-		public String getMessage(final Locale locale) {
-			return accumulateMessagesFromErrors(locale);
-		}
-		
-		/**
-		 * @return list of error messages from errors array separated by a new line character
-		 */
-		private String accumulateMessagesFromErrors(final Locale locale) {
-			if (this.getErrors().length > 0) {
-				
-				final char newLine = '\n';
-				final StringBuilder errorMessage = new StringBuilder();
-				
-				for (ValidationError error : this.getErrors()) {
-					if (locale == null) {
-						errorMessage.append(error.getMessage());
-					} else {
-						errorMessage.append(error.getMessage(locale));
-					}
-					errorMessage.append(newLine);
-				}
-				
-				return errorMessage.toString();
-			}
-			return StringUtils.EMPTY;
-		}
-
-		@Override
-		public boolean isValid() {
-			return validResult;
-		}
-		
-		/**
-		 * Appends the validation result to the collection of the validation results and 
-		 * updates the validResult property depending on the result being added. If any of the appended
-		 * results is invalid then the whole compound result is invalid also.
-		 * @param result the result of the validation of a single condition.
-		 */
-		private void addValidationResult(final ValidationResult result) {
-			results.add(result);
-			if (isValid()) {
-				this.validResult = result.isValid();
-			}
-		}
-		
 	}
 
 }

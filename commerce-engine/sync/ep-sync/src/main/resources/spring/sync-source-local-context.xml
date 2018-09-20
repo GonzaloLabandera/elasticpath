@@ -5,9 +5,9 @@
 		xmlns:util="http://www.springframework.org/schema/util"
 		xmlns:context="http://www.springframework.org/schema/context"
 		xsi:schemaLocation="
-			http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
-			http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-3.0.xsd
-			http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd
+			http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+			http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-4.0.xsd
+			http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.0.xsd
 		">
 
 	<!--
@@ -46,7 +46,7 @@
 	<bean id="eventMessageFactory" class="com.elasticpath.commons.beanframework.NoOpProxyFactoryBean">
 		<property name="serviceInterface" value="com.elasticpath.messaging.factory.EventMessageFactory"/>
 	</bean>
-	
+
 	<bean id="changeSetEventMessagePublisher" class="com.elasticpath.commons.beanframework.NoOpProxyFactoryBean">
 		<property name="serviceInterface" value="com.elasticpath.messaging.EventMessagePublisher"/>
 	</bean>
@@ -58,9 +58,9 @@
 	<bean id="orderEventMessagePublisher" class="com.elasticpath.commons.beanframework.NoOpProxyFactoryBean">
 		<property name="serviceInterface" value="com.elasticpath.messaging.EventMessagePublisher"/>
 	</bean>
-	
+
 	<import resource="classpath:spring/service/changeset-services.xml" />
-	
+
 	<!-- Suppress instantiating a caching bean for data sync by using an alias which forces use of the non-caching version -->
 	<alias name="nonCachingProductCharacteristicsService" alias="cachingProductCharacteristicsService" />
 
@@ -82,7 +82,6 @@
 	<import resource="classpath:spring/commons/validators.xml" />
 
 	<import resource="classpath:spring/dataaccess/openjpa/openjpa.xml" />
-	<import resource="classpath:spring/settings/ep-settings.xml" />
 
 	<util:map id="persistencePropertyOverrides" key-type="java.lang.String">
 		<!--
@@ -102,6 +101,7 @@
 
 	</util:map>
 
+	<alias name="basePersistenceUnitManager" alias="persistenceUnitManager"/>
 	<bean id="entityManagerFactory" parent="abstractEntityManagerFactory"/>
 
 	<import resource="classpath*:META-INF/elasticpath/conf/spring/plugin.xml"/>
@@ -120,13 +120,31 @@
 
 	<bean id="defaultCacheManager" class="org.springframework.cache.ehcache.EhCacheManagerFactoryBean"
 		  destroy-method="destroy">
-		<property name="cacheManagerName" value="#{applicationName}-CacheManager"/>
+		<property name="cacheManagerName" value="#{applicationName}--CacheManager"/>
 		<property name="shared" value="false"/>
 		<property name="configLocation" value="#{ehCacheConfigurationLoader.resource}"/>
 	</bean>
 
 	<bean id="ehCacheConfigurationLoader" class="com.elasticpath.commons.util.EhcacheConfigurationLoader">
 		<property name="pathname" value="${ep.external.datasync.source.ehcache.xml.path:null}"/>
+	</bean>
+
+
+	<!-- CACHING -->
+
+
+	<import resource="classpath:spring/core-caching/cache-rules.xml"/>
+	<import resource="classpath:spring/core-caching/cache-manager-non-osgi.xml"/>
+	<import resource="classpath:spring/core-caching/cache-factory.xml"/>
+	<import resource="classpath:spring/core-caching/cache-core.xml"/>
+	<import resource="classpath:spring/core-caching/cache-catalog.xml"/>
+
+	<bean factory-bean="productLookupProxy" factory-method="bindImplementation">
+		<constructor-arg ref="cachingProductLookup"/>
+	</bean>
+
+	<bean factory-bean="ProductSkuLookupProxy" factory-method="bindImplementation">
+		<constructor-arg ref="cachingProductSkuLookup"/>
 	</bean>
 
 </beans>

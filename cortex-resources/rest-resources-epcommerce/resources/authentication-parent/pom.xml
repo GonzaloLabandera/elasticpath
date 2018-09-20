@@ -20,41 +20,12 @@
 		<jacoco.complexity.covered-ratio>0.00</jacoco.complexity.covered-ratio>
 		<jacoco.method.covered-ratio>0.00</jacoco.method.covered-ratio>
 		<jacoco.class.covered-ratio>0.00</jacoco.class.covered-ratio>
-		<powermock.version>1.6.2</powermock.version>
 	</properties>
 
 	<dependencies>
 		<dependency>
 			<groupId>com.elasticpath.rest</groupId>
 			<artifactId>ep-rest-commons</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.powermock</groupId>
-			<artifactId>powermock-module-junit4</artifactId>
-			<version>${powermock.version}</version>
-			<scope>test</scope>
-			<exclusions>
-				<exclusion>
-					<groupId>junit</groupId>
-					<artifactId>junit</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-		<dependency>
-			<groupId>org.powermock</groupId>
-			<artifactId>powermock-api-mockito</artifactId>
-			<version>${powermock.version}</version>
-			<scope>test</scope>
-			<exclusions>
-				<exclusion>
-					<groupId>org.mockito</groupId>
-					<artifactId>mockito-all</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>junit</groupId>
-					<artifactId>junit</artifactId>
-				</exclusion>
-			</exclusions>
 		</dependency>
 	</dependencies>
 

@@ -3,15 +3,13 @@
  */
 package com.elasticpath.rest.resource.integration.epcommerce.repository.datapolicies.impl;
 
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import static com.elasticpath.rest.resource.integration.epcommerce.repository.ResourceTestConstants.USER_ID;
 import static com.elasticpath.rest.resource.integration.epcommerce.repository.datapolicies.impl.DataPolicyRepositoryTest.DATA_POLICY_NAME;
-import static com.elasticpath.rest.resource.integration.epcommerce.repository.datapolicies.impl.DataPolicyRepositoryTest.DATA_POLICY_SEGMENTS;
-import static com.elasticpath.rest.resource.integration.epcommerce.repository.datapolicies.impl.DataPolicyRepositoryTest.GLOBAL_DATA_POLICY_NAME;
 import static com.elasticpath.rest.resource.integration.epcommerce.repository.datapolicies.impl.DataPolicyRepositoryTest.KEY_1;
 import static com.elasticpath.rest.resource.integration.epcommerce.repository.datapolicies.impl.DataPolicyRepositoryTest.POLICY_GUID_1;
 import static com.elasticpath.rest.resource.integration.epcommerce.repository.datapolicies.impl.DataPolicyRepositoryTest.SCOPE;
@@ -23,10 +21,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-import java.util.Set;
 
 import com.google.common.collect.Sets;
-import io.reactivex.Maybe;
 import io.reactivex.Observable;
 import org.junit.Before;
 import org.junit.Test;
@@ -34,10 +30,8 @@ import org.junit.runner.RunWith;
 import org.mockito.Answers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
-import com.elasticpath.domain.datapolicy.ConsentAction;
-import com.elasticpath.domain.datapolicy.CustomerConsent;
 import com.elasticpath.domain.datapolicy.DataPoint;
 import com.elasticpath.domain.datapolicy.DataPolicy;
 import com.elasticpath.domain.datapolicy.DataPolicyState;
@@ -69,9 +63,6 @@ public class DataPolicyValidationServiceTest {
 	private DataPolicy dataPolicy2;
 
 	@Mock
-	private CustomerConsent customerConsent;
-
-	@Mock
 	private DataPolicyRepository dataPolicyRepository;
 
 	@Mock
@@ -88,13 +79,11 @@ public class DataPolicyValidationServiceTest {
 		DataPoint dataPoint1 = createMockDataPoint(CUSTOMER_BILLING_ADDRESS);
 		DataPoint dataPoint2 = createMockDataPoint(CUSTOMER_PROFILE);
 
-		dataPolicy1 = createMockDataPolicy(ADDRESS_DATA_POLICY, POLICY_GUID_1, KEY_1, Arrays.asList(dataPoint1, dataPoint2),
-				Sets.newHashSet(ADDRESS_DATA_POLICY, GLOBAL_DATA_POLICY_NAME));
-		dataPolicy2 = createMockDataPolicy(REGISTRATION_DATA_POLICY, POLICY_GUID_1, KEY_1, Collections.singletonList(dataPoint2),
-				Sets.newHashSet(ADDRESS_DATA_POLICY));
+		dataPolicy1 = createMockDataPolicy(ADDRESS_DATA_POLICY, POLICY_GUID_1, KEY_1, Arrays.asList(dataPoint1, dataPoint2)
+		);
+		dataPolicy2 = createMockDataPolicy(REGISTRATION_DATA_POLICY, POLICY_GUID_1, KEY_1, Collections.singletonList(dataPoint2)
+		);
 
-		when(subjectAttribute.getType()).thenReturn(DATA_POLICY_SEGMENTS);
-		when(subjectAttribute.getValue()).thenReturn(DATA_POLICY_NAME);
 		when(resourceOperationContext.getSubject().getAttributes()).thenReturn(Collections.singletonList(subjectAttribute));
 		when(resourceOperationContext.getUserIdentifier()).thenReturn(USER_ID);
 	}
@@ -105,7 +94,6 @@ public class DataPolicyValidationServiceTest {
 		when(dataPolicyRepository.getSegmentHeadersLowerCase(Collections.singletonList(subjectAttribute))).thenReturn(headers);
 		when(dataPolicyRepository.findActiveDataPoliciesForSegmentsAndStore(headers, SCOPE.getValue())).thenReturn(Observable.just(dataPolicy1));
 		when(dataPolicyRepository.customerHasGivenConsentForAtLeastOneDataPolicy(USER_ID, Sets.newHashSet(dataPolicy1))).thenReturn(true);
-		when(customerConsent.getAction()).thenReturn(ConsentAction.GRANTED);
 
 		validationService.validate(SCOPE, DATA_POINT_LOCATIONS)
 				.test()
@@ -130,7 +118,6 @@ public class DataPolicyValidationServiceTest {
 		List<String> headers = Collections.singletonList(DATA_POLICY_NAME);
 		when(dataPolicyRepository.getSegmentHeadersLowerCase(Collections.singletonList(subjectAttribute))).thenReturn(headers);
 		when(dataPolicyRepository.findActiveDataPoliciesForSegmentsAndStore(headers, SCOPE.getValue())).thenReturn(Observable.just(dataPolicy1));
-		when(customerConsent.getAction()).thenReturn(ConsentAction.REVOKED);
 
 		validationService.validate(SCOPE, DATA_POINT_LOCATIONS)
 				.test()
@@ -145,8 +132,6 @@ public class DataPolicyValidationServiceTest {
 		when(dataPolicyRepository.getSegmentHeadersLowerCase(Collections.singletonList(subjectAttribute))).thenReturn(headers);
 		when(dataPolicyRepository.findActiveDataPoliciesForSegmentsAndStore(headers, SCOPE.getValue()))
 				.thenReturn(Observable.just(dataPolicy1, dataPolicy2));
-		when(dataPolicyRepository.findCustomerConsentByDataPolicyGuidForCustomer(POLICY_GUID_1, USER_ID)).thenReturn(Maybe.just(customerConsent));
-		when(customerConsent.getAction()).thenReturn(ConsentAction.REVOKED);
 
 		validationService.validate(SCOPE, DATA_POINT_LOCATIONS)
 				.test()
@@ -202,7 +187,7 @@ public class DataPolicyValidationServiceTest {
 	}
 
 	private DataPolicy createMockDataPolicy(final String policyName, final String guid, final String referenceKey,
-											final List<DataPoint> dataPoints, final Set<String> segmentStrings) {
+											final List<DataPoint> dataPoints) {
 		DataPolicy dataPolicy = mock(DataPolicy.class, RETURNS_DEEP_STUBS);
 		when(dataPolicy.getState().getOrdinal()).thenReturn(DataPolicyState.ACTIVE_ORDINAL);
 		when(dataPolicy.getPolicyName()).thenReturn(policyName);
@@ -210,7 +195,6 @@ public class DataPolicyValidationServiceTest {
 		when(dataPolicy.getGuid()).thenReturn(guid);
 		when(dataPolicy.getReferenceKey()).thenReturn(referenceKey);
 		when(dataPolicy.getDataPoints()).thenReturn(dataPoints);
-		when(dataPolicy.getSegments()).thenReturn(segmentStrings);
 		return dataPolicy;
 	}
 }

@@ -10,6 +10,7 @@ import com.elasticpath.selenium.common.AbstractPageObject;
 import com.elasticpath.selenium.dialogs.ConfirmDialog;
 import com.elasticpath.selenium.dialogs.PriceEditorDialog;
 import com.elasticpath.selenium.editor.product.ProductEditor;
+import com.elasticpath.selenium.util.Constants;
 
 /**
  * Price List Details pane.
@@ -17,7 +18,10 @@ import com.elasticpath.selenium.editor.product.ProductEditor;
 @SuppressWarnings({"PMD.TooManyMethods", "PMD.GodClass"})
 public class PriceListEditor extends AbstractPageObject {
 
-	private static final String PRICE_LIST_EDITOR_PARENT_CSS = "div[pane-location='editor-pane'] div[active-editor='true'] ";
+	/**
+	 * Page Object Id.
+	 */
+	public static final String PRICE_LIST_EDITOR_PARENT_CSS = "div[pane-location='editor-pane'] div[active-editor='true'] ";
 	private static final String PRICE_LIST_NAME_INPUT_CSS = PRICE_LIST_EDITOR_PARENT_CSS + "div[widget-id='Price List'] > input";
 	private static final String PRICE_LIST_DESCRIPTION_INPUT_CSS = PRICE_LIST_EDITOR_PARENT_CSS + "div[widget-id='Description'] > input";
 	private static final String CURRENCY_CODE_INPUT_CSS = PRICE_LIST_EDITOR_PARENT_CSS + "div[widget-id='Currency'] > input";
@@ -39,6 +43,22 @@ public class PriceListEditor extends AbstractPageObject {
 	private static final String BASE_AMOUNT_EDITOR_PAGE_CSS = "div[automation-id='com.elasticpath.cmclient.pricelistmanager.editors"
 			+ ".BaseAmountEditorPage']";
 	private static final String PRICE_LIST_SUMMARY_EDITOR_CSS = "div[automation-id='PriceListDescriptorEditor']";
+	private static final String BASE_PRICE_LIST_SEARCH_INPUTS_XPATH = "//div[@automation-id='com.elasticpath.cmclient.pricelistmanager"
+			+ ".PriceListManagerMessages.PriceListBaseAmountSearch_Search']";
+	private static final String BASE_PRICE_LIST_FILTER_INPUTS_XPATH = "//div[@automation-id='com.elasticpath.cmclient.pricelistmanager"
+			+ ".PriceListManagerMessages.PriceListBaseAmountFilter_Search']";
+	private static final String PRICE_LIST_PRICE_FROM_INPUT_XPATH = "/..//div[@automation-id='com.elasticpath.cmclient.pricelistmanager"
+			+ ".PriceListManagerMessages.PriceListBaseAmountFilter_PriceFrom']/input";
+	private static final String PRICE_LIST_PRICE_TO_INPUT_XPATH = "/..//div[@automation-id='com.elasticpath.cmclient.pricelistmanager"
+			+ ".PriceListManagerMessages.PriceListBaseAmountFilter_PriceTo']/input";
+	private static final String PRICE_LIST_SEARCH_FROM_INPUT_XPATH = BASE_PRICE_LIST_SEARCH_INPUTS_XPATH + PRICE_LIST_PRICE_FROM_INPUT_XPATH;
+	private static final String PRICE_LIST_SEARCH_TO_INPUT_XPATH = BASE_PRICE_LIST_SEARCH_INPUTS_XPATH + PRICE_LIST_PRICE_TO_INPUT_XPATH;
+	private static final String PRICE_LIST_FILTER_FROM_INPUT_XPATH = BASE_PRICE_LIST_FILTER_INPUTS_XPATH + PRICE_LIST_PRICE_FROM_INPUT_XPATH;
+	private static final String PRICE_LIST_FILTER_TO_INPUT_XPATH = BASE_PRICE_LIST_FILTER_INPUTS_XPATH + PRICE_LIST_PRICE_TO_INPUT_XPATH;
+	private static final String PRICE_LIST_SEARCH_BUTTON_XPATH = BASE_PRICE_LIST_SEARCH_INPUTS_XPATH + "/..//div[@widget-id='Search']";
+	private static final String PRICE_LIST_FILTER_BUTTON_XPATH = BASE_PRICE_LIST_FILTER_INPUTS_XPATH + "/..//div[@widget-id='Filter']";
+	private static final String PRICES_TABLE_ROWS_XPATH = "//div[@widget-id='Base Amount'][@widget-type='Table']//div[@widget-type='table_row']";
+
 	/**
 	 * Column header 'Product Name'.
 	 */
@@ -145,6 +165,7 @@ public class PriceListEditor extends AbstractPageObject {
 	 * Selects Prices tab.
 	 */
 	public void selectPricesTab() {
+		resizeWindow(PRICES_TAB_CSS);
 		click(getDriver().findElement(By.cssSelector(PRICES_TAB_CSS)));
 	}
 
@@ -152,6 +173,7 @@ public class PriceListEditor extends AbstractPageObject {
 	 * Selects Price List Summary tab.
 	 */
 	public void selectPriceListSummaryTab() {
+		resizeWindow(PRICE_LIST_SUMMARY_TAB_CSS);
 		click(getDriver().findElement(By.cssSelector(PRICE_LIST_SUMMARY_TAB_CSS)));
 	}
 
@@ -170,7 +192,7 @@ public class PriceListEditor extends AbstractPageObject {
 	 * @return the product editor dialog.
 	 */
 	public PriceEditorDialog clickAddPriceButton() {
-		clickButton(ADD_PRICE_BUTTON_CSS, "Add Price");
+		clickButton(ADD_PRICE_BUTTON_CSS, "Add Price", PriceEditorDialog.PRICE_EDITOR_PARENT_CSS);
 		return new PriceEditorDialog(getDriver());
 	}
 
@@ -188,7 +210,7 @@ public class PriceListEditor extends AbstractPageObject {
 	 * @return the product editor dialog.
 	 */
 	public PriceEditorDialog clickEditPriceButton() {
-		clickButton(EDIT_PRICE_BUTTON_CSS, "Edit Price");
+		clickButton(EDIT_PRICE_BUTTON_CSS, "Edit Price", PriceEditorDialog.PRICE_EDITOR_PARENT_CSS);
 		return new PriceEditorDialog(getDriver());
 	}
 
@@ -198,7 +220,7 @@ public class PriceListEditor extends AbstractPageObject {
 	 * @return the product editor.
 	 */
 	public ProductEditor clickOpenItemButton() {
-		clickButton(OPEN_ITEM_BUTTON_CSS, "Open Item");
+		clickButton(OPEN_ITEM_BUTTON_CSS, "Open Item", ProductEditor.PRODUCT_EDITOR_PARENT_CSS);
 		return new ProductEditor(getDriver());
 	}
 
@@ -294,5 +316,44 @@ public class PriceListEditor extends AbstractPageObject {
 		assertThat(row.findElement(By.cssSelector(String.format(PRICE_LIST_COLUMN_CSS, price))).getText())
 				.as("Price validation failed")
 				.isEqualTo(price);
+	}
+
+	/**
+	 * Search a price list by price.
+	 *
+	 * @param searchFromPrice Search from price.
+	 * @param searchToPrice   Search to price.
+	 */
+	public void searchByPrice(final String searchFromPrice, final String searchToPrice) {
+		clearAndType(getDriver().findElement(By.xpath(PRICE_LIST_SEARCH_FROM_INPUT_XPATH)), searchFromPrice);
+		clearAndType(getDriver().findElement(By.xpath(PRICE_LIST_SEARCH_TO_INPUT_XPATH)), searchToPrice);
+		click(By.xpath(PRICE_LIST_SEARCH_BUTTON_XPATH));
+	}
+
+	/**
+	 * Filter a price list by price.
+	 *
+	 * @param filterFromPrice Filter from price.
+	 * @param filterToPrice   Filter to price.
+	 */
+	public void filterByPrice(final String filterFromPrice, final String filterToPrice) {
+		clearAndType(getDriver().findElement(By.xpath(PRICE_LIST_FILTER_FROM_INPUT_XPATH)), filterFromPrice);
+		clearAndType(getDriver().findElement(By.xpath(PRICE_LIST_FILTER_TO_INPUT_XPATH)), filterToPrice);
+		click(By.xpath(PRICE_LIST_FILTER_BUTTON_XPATH));
+	}
+
+	/**
+	 * Verify number of proces displayed in table.
+	 *
+	 * @param expResultsReturned number of results expected to be returned
+	 */
+	public void verifyResultsReturned(final int expResultsReturned) {
+		Integer pricesRowCount = getDriver().findElements(By.xpath(PRICES_TABLE_ROWS_XPATH)).size();
+		if (pricesRowCount != expResultsReturned) {
+			sleep(Constants.SLEEP_FIVE_SECONDS_IN_MILLIS);
+		}
+		assertThat(pricesRowCount)
+				.as("incorrect number of results returned")
+				.isEqualTo(expResultsReturned);
 	}
 }

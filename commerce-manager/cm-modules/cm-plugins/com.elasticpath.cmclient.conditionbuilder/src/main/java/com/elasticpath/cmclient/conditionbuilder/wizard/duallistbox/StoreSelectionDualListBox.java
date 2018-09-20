@@ -15,6 +15,7 @@ import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.swt.graphics.Image;
 
+import com.elasticpath.cmclient.core.LoginManager;
 import com.elasticpath.cmclient.core.ServiceLocator;
 import com.elasticpath.cmclient.core.comparator.StoreComparator;
 import com.elasticpath.cmclient.core.ui.framework.IEpLayoutData;
@@ -142,7 +143,7 @@ public class StoreSelectionDualListBox extends AbstractPolicyAwareDualListBox<Li
 		if (null == availableStores) {
 			availableStores = new ArrayList<>();
 			StoreService dynamicContentService = ServiceLocator.getService(ContextIdNames.STORE_SERVICE);
-			List<Store> allStores = dynamicContentService.findAllStores();
+			List<Store> allStores = dynamicContentService.findAllStores(LoginManager.getCmUser());
 			for (Store store : allStores) {
 				if (store.getStoreState().equals(StoreState.OPEN) || store.getStoreState().equals(StoreState.RESTRICTED)) {
 					availableStores.add(store);		

@@ -14,7 +14,7 @@ import org.apache.camel.test.junit4.CamelTestSupport;
 import org.assertj.core.api.Assertions;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 /**
  * Base unit test for Camel Route Builders.

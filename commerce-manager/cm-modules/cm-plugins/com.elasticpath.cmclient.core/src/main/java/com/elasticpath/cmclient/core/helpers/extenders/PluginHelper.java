@@ -19,6 +19,7 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.ui.forms.editor.FormPage;
 
 import com.elasticpath.cmclient.core.CorePlugin;
+import com.elasticpath.cmclient.core.EpUiException;
 import com.elasticpath.cmclient.core.editors.AbstractCmClientEditorPage;
 import com.elasticpath.cmclient.core.editors.AbstractCmClientFormEditor;
 import com.elasticpath.cmclient.core.helpers.TestIdUtil;
@@ -29,7 +30,9 @@ import com.elasticpath.commons.util.extenum.ExtensibleEnum;
  * Helper class for extending commerce manager.
  */
 public final class PluginHelper {
-    private static final Logger LOG = Logger.getLogger(PluginHelper.class);
+    private static final String CORE_PLUGIN_ID = "com.elasticpath.cmclient.core";
+
+	private static final Logger LOG = Logger.getLogger(PluginHelper.class);
 
     /**
      * Plugin Extension point ids (referenced in Plugin.xml).
@@ -38,6 +41,8 @@ public final class PluginHelper {
     private static final String STATE_POLICY_EXTENSION_ID = "StatePolicyExtender";
     private static final String PROMOTION_EXTENDER = "PromotionExtender";
     private static final String TEST_EXTENSION = "TestExtension";
+    private static final String MODEL_EXTENDER = "ModelExtender";
+    
     /**
      * Element names.
      */
@@ -49,6 +54,7 @@ public final class PluginHelper {
     private static final String DIALOG_ELEMENT_ID = "Dialog";
     private static final String TEST_ELEMENT_NAME = "EpWidgetUtil";
     private static final String SECTION_ELEMENT_ID = "Section";
+
     /**
      * Attribute ids.
      */
@@ -352,6 +358,49 @@ public final class PluginHelper {
         }
         return null;
     }
+    
+    /**
+     * Gets the EpModelCreator for any class, if any.  If there is more than one then the first one found is returned
+     * and an error is logged and an exception thrown.
+     *
+     * @param <T> the type of class for the model creator
+     * @param klass the class to get the creator for
+     * @return EpModelCreator for any class
+     */
+    public static <T> EpModelCreator<T> getModelCreator(final Class<T> klass) {
 
+        List<IConfigurationElement> allConfigElements = getConfigElements(CORE_PLUGIN_ID, MODEL_EXTENDER);
+
+        List<EpModelCreator<T>> baDtoCreators = new ArrayList<>();
+        String name = klass.getSimpleName();
+
+        allConfigElements.stream()
+                .filter(configurationElement -> name.equals(configurationElement.getName()))
+                .forEach(configElement -> baDtoCreators.add(instantiateEpModelCreator(configElement)));
+
+        if (baDtoCreators.size() > 1) {
+            StringBuilder errorText = new StringBuilder("There are more than one implementation of EpModelCreator<BaseAmountDTO>:\n");
+            baDtoCreators
+                .forEach(creator -> errorText.append(creator.getClass().getName()).append('\n'));
+            LOG.error(errorText);
+            throw new EpUiException(errorText.toString(), null);
+        }
+
+        return baDtoCreators.isEmpty() ? null : baDtoCreators.iterator().next();
+
+    }
+    
+    private static <T> EpModelCreator<T> instantiateEpModelCreator(final IConfigurationElement configElement) {
+        EpModelCreator<T> baDtoCreator;
+        try {
+            baDtoCreator = (EpModelCreator<T>) configElement.createExecutableExtension(CLASS_NAME_ATTRIBUTE);
+        } catch (Exception e) {
+            String errorText = "Error creating EpModelCreator extension.";
+            LOG.error(errorText, e);
+            throw new EpUiException(errorText, e);
+        }
+
+        return baDtoCreator;
+    }
 
 }

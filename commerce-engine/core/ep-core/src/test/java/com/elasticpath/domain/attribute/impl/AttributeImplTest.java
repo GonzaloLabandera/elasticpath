@@ -5,6 +5,7 @@ package com.elasticpath.domain.attribute.impl;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertNull;
@@ -250,7 +251,7 @@ public class AttributeImplTest extends AbstractEPTestCase {
 	@Test
 	public void testEquals() {
 		// New attributes are equal
-		assertEquals(true, attributeImpl1.equals(attributeImpl2));
+		assertEquals(attributeImpl1, attributeImpl2);
 
 		// compare the same one
 		attributeImpl1.setName(TEST_ATTRIBUTE_NAME);
@@ -259,7 +260,7 @@ public class AttributeImplTest extends AbstractEPTestCase {
 		attributeImpl2.setKey(TEST_ATTRIBUTE_KEY);
 		attributeImpl1.setUidPk(UID_PK_1);
 		attributeImpl2.setUidPk(UID_PK_1);
-		assertEquals(true, attributeImpl1.equals(attributeImpl2));
+		assertEquals(attributeImpl1, attributeImpl2);
 
 		// uidpk should be ignored
 		attributeImpl1.setLocaleDependant(true);
@@ -282,16 +283,16 @@ public class AttributeImplTest extends AbstractEPTestCase {
 		attributeImpl2.setKey(TEST_ATTRIBUTE_KEY);
 		attributeImpl1.setUidPk(UID_PK_1);
 		attributeImpl2.setUidPk(0);
-		assertEquals(true, attributeImpl1.equals(attributeImpl2));
+		assertEquals(attributeImpl1, attributeImpl2);
 
 		// symmetric
-		assertEquals(true, attributeImpl2.equals(attributeImpl1));
+		assertEquals(attributeImpl2, attributeImpl1);
 
 		// equals itself
-		assertEquals(true, attributeImpl1.equals(attributeImpl1));
+		assertEquals(attributeImpl1, attributeImpl1);
 
 		attributeImpl1.setKey(TEST_ATTRIBUTE_KEY1);
-		assertFalse(attributeImpl1.equals(attributeImpl2));
+		assertNotEquals(attributeImpl1, attributeImpl2);
 	}
 
 	/**

@@ -21,7 +21,7 @@ to coordinate with your marketers for how the navigation nodes should be used in
 				The node-id is a list of all ids denoting the path from the root node.
 				For the root node, the navigation id is a list containing one element.]]>
 			</description>
-			<path/>
+			<string/>
 		</uri-part>
 
 		<resource>

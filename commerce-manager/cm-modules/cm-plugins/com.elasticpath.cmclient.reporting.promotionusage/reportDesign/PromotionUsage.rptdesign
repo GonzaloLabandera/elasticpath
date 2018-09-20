@@ -29,23 +29,15 @@
             <text-property name="promptText">startDate</text-property>
             <property name="valueType">static</property>
             <property name="isRequired">false</property>
-            <property name="dataType">dateTime</property>
+            <property name="dataType">string</property>
             <property name="controlType">text-box</property>
-            <structure name="format">
-                <property name="category">Long Date</property>
-                <property name="pattern">Long Date</property>
-            </structure>
         </scalar-parameter>
         <scalar-parameter name="endDate" id="491">
             <text-property name="promptText">endDate</text-property>
             <property name="valueType">static</property>
             <property name="isRequired">true</property>
-            <property name="dataType">dateTime</property>
+            <property name="dataType">string</property>
             <property name="controlType">text-box</property>
-            <structure name="format">
-                <property name="category">Long Date</property>
-                <property name="pattern">Long Date</property>
-            </structure>
         </scalar-parameter>
     </parameters>
     <data-sources>
@@ -72,12 +64,12 @@
                 <structure>
                     <property name="position">4</property>
                     <property name="name">Start Date Time</property>
-                    <property name="dataType">date-time</property>
+                    <property name="dataType">string</property>
                 </structure>
                 <structure>
                     <property name="position">5</property>
                     <property name="name">End Date Time</property>
-                    <property name="dataType">date-time</property>
+                    <property name="dataType">string</property>
                 </structure>
                 <structure>
                     <property name="position">6</property>
@@ -158,12 +150,12 @@
                     <structure>
                         <property name="position">4</property>
                         <property name="name">Start Date Time</property>
-                        <property name="dataType">date-time</property>
+                        <property name="dataType">string</property>
                     </structure>
                     <structure>
                         <property name="position">5</property>
                         <property name="name">End Date Time</property>
-                        <property name="dataType">date-time</property>
+                        <property name="dataType">string</property>
                     </structure>
                     <structure>
                         <property name="position">6</property>
@@ -291,12 +283,12 @@ currentRow = null;]]></method>
                 <structure>
                     <property name="name">Start Date Time</property>
                     <expression name="expression">dataSetRow["Start Date Time"]</expression>
-                    <property name="dataType">date-time</property>
+                    <property name="dataType">string</property>
                 </structure>
                 <structure>
                     <property name="name">End Date Time</property>
                     <expression name="expression">dataSetRow["End Date Time"]</expression>
-                    <property name="dataType">date-time</property>
+                    <property name="dataType">string</property>
                 </structure>
                 <structure>
                     <property name="name">Subtotal: Total Revenue</property>

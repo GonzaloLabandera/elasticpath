@@ -31,7 +31,7 @@ import com.elasticpath.service.catalog.ProductService;
 import com.elasticpath.service.impl.AbstractEpPersistenceServiceImpl;
 import com.elasticpath.service.misc.TimeService;
 import com.elasticpath.service.store.StoreService;
-import com.elasticpath.settings.SettingsReader;
+import com.elasticpath.settings.provider.SettingValueProvider;
 
 /**
  * Create recommendation associations between the
@@ -77,10 +77,6 @@ public class ProductRecommendationServiceImpl extends AbstractEpPersistenceServi
 
 	private static final Logger LOG = Logger.getLogger(ProductRecommendationServiceImpl.class);
 
-	private static final String HISTORY_DAYS_PATH = "COMMERCE/STORE/PRODUCTRECOMMENDATIONS/numberOrderHistoryDays";
-
-	private static final String MAX_RECOMMENDATIONS_PATH = "COMMERCE/STORE/PRODUCTRECOMMENDATIONS/numberMaxRecommendations";
-
 	/** Setting this value as the history months or max recommendations disables the product recommendation feature. */
 	private static final int DISABLE_VALUE = -1;
 
@@ -88,33 +84,35 @@ public class ProductRecommendationServiceImpl extends AbstractEpPersistenceServi
 
 	private ProductAssociationService productAssociationService;
 
-	private SettingsReader settingsReader;
-
 	private StoreService storeService;
 
 	private TimeService timeService;
 
 	private FetchGroupLoadTuner fetchGroupLoadTuner;
 
+	private SettingValueProvider<Integer> maxHistoryDaysSettingProvider;
+
+	private SettingValueProvider<Integer> maxRecommendationsSettingProvider;
+
 	/**
 	 * Get the max number of days of order history to use in computing the recommendations for the store
 	 * represented by the given code.
-	 * Calls {@link #getSettingsReader()}.
+	 *
 	 * @param storeCode the store code
 	 * @return the max number of days of order history
 	 */
 	int getMaxOrderHistoryDays(final String storeCode) {
-		return Integer.parseInt(getSettingsReader().getSettingValue(HISTORY_DAYS_PATH, storeCode).getValue());
+		return getMaxHistoryDaysSettingProvider().get(storeCode);
 	}
 
 	/**
 	 * Get the max number of recommendations for the store represented by the given code.
-	 * Calls {@link #getSettingsReader()}.
+	 *
 	 * @param storeCode the store code
 	 * @return the max number of recommendations
 	 */
 	int getMaxRecommendations(final String storeCode) {
-		return Integer.parseInt(getSettingsReader().getSettingValue(MAX_RECOMMENDATIONS_PATH, storeCode).getValue());
+		return getMaxRecommendationsSettingProvider().get(storeCode);
 	}
 
 	/**
@@ -407,15 +405,6 @@ public class ProductRecommendationServiceImpl extends AbstractEpPersistenceServi
 		this.productAssociationService = productAssociationService;
 	}
 
-	/**
-	 * Set the SettingsReader.
-	 *
-	 * @param settingsReader the settings reader service
-	 */
-	public void setSettingsReader(final SettingsReader settingsReader) {
-		this.settingsReader = settingsReader;
-	}
-
 	/***
 	 * Set the StoreService.
 	 *
@@ -440,12 +429,20 @@ public class ProductRecommendationServiceImpl extends AbstractEpPersistenceServi
 		return this.productAssociationService;
 	}
 
-	/**
-	 * Get the SettingsReader.
-	 * @return the SettingsReader
-	 */
-	protected SettingsReader getSettingsReader() {
-		return this.settingsReader;
+	protected SettingValueProvider<Integer> getMaxHistoryDaysSettingProvider() {
+		return maxHistoryDaysSettingProvider;
+	}
+
+	public void setMaxHistoryDaysSettingProvider(final SettingValueProvider<Integer> maxHistoryDaysSettingProvider) {
+		this.maxHistoryDaysSettingProvider = maxHistoryDaysSettingProvider;
+	}
+
+	protected SettingValueProvider<Integer> getMaxRecommendationsSettingProvider() {
+		return maxRecommendationsSettingProvider;
+	}
+
+	public void setMaxRecommendationsSettingProvider(final SettingValueProvider<Integer> maxRecommendationsSettingProvider) {
+		this.maxRecommendationsSettingProvider = maxRecommendationsSettingProvider;
 	}
 
 	/**

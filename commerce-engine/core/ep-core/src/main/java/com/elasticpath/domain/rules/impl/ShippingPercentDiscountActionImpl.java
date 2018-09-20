@@ -32,7 +32,7 @@ public class ShippingPercentDiscountActionImpl extends AbstractRuleActionImpl {
 	
 	private static final RuleElementType RULE_ELEMENT_TYPE = RuleElementType.SHIPPING_PERCENT_DISCOUNT_ACTION;
 
-	private static final String[] PARAMETER_KEYS = new String[] { RuleParameter.DISCOUNT_PERCENT_KEY, RuleParameter.SHIPPING_SERVICE_LEVEL_CODE_KEY };
+	private static final String[] PARAMETER_KEYS = new String[] { RuleParameter.DISCOUNT_PERCENT_KEY, RuleParameter.SHIPPING_OPTION_CODE_KEY};
 
 	private static final int MAX_PERCENTAGE = 100;
 	
@@ -106,7 +106,7 @@ public class ShippingPercentDiscountActionImpl extends AbstractRuleActionImpl {
 		code.append(this.getUidPk()).append("L, \"");
 		code.append(this.getParamValue(RuleParameter.DISCOUNT_PERCENT_KEY));
 		code.append("\", \"");
-		code.append(this.getParamValue(RuleParameter.SHIPPING_SERVICE_LEVEL_CODE_KEY));
+		code.append(this.getParamValue(RuleParameter.SHIPPING_OPTION_CODE_KEY));
 		code.append("\", currency);\n");
 		return code.toString();
 	}

@@ -20,7 +20,7 @@ import com.elasticpath.persistence.openjpa.support.JpqlQueryBuilderWhereGroup.Co
 public class JpqlQueryBuilder {
 	private static final String CLOSE_BRACKET = ")";
 	private static final String OPEN_BRACKET = "(";
-	private static final String QUERY_COUNT = "QUERY_COUNT";
+	private static final String QUERY_COUNT = "COUNT";
 	private static final String QUERY_JOIN = " JOIN ";
 	private static final String QUERY_LEFT_JOIN = " LEFT JOIN ";
 	private static final String QUERY_AS = " AS ";

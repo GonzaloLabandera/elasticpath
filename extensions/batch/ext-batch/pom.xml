@@ -15,12 +15,10 @@
 		<dependency>
 			<groupId>com.elasticpath.extensions</groupId>
 			<artifactId>ext-core</artifactId>
-			<version>0.0.0-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>com.elasticpath</groupId>
 			<artifactId>ep-batch</artifactId>
-			<version>${platform.version}</version>
 		</dependency>
   </dependencies>
 	<build>

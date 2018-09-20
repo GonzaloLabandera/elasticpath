@@ -730,6 +730,7 @@ When setting the payment gateway, the path to the certificate should be relative
 ## Shipping Regions and Service Levels
 
 In Elastic Path Commerce, a shipping region is a geographical entity (for example, country, state, or province), while a shipping service level determines what shipping services are available to customers at each store.
+>Note: Elastic Path provides a default shipping calculation plug-in, which can be used to configure shipping regions and shipping service levels. However, if you want to use a custom shipping calculation plug-in, you must remove the default shipping calculation plug-in from Elastic Path Commerce Manager before you integrate the custom plug-in with the application. 
 
 ### Shipping Regions
 

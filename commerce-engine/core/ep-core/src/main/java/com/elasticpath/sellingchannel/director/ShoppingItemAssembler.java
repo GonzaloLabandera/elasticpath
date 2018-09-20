@@ -38,10 +38,4 @@ public interface ShoppingItemAssembler {
 	 * @return The ShoppingItemDto.
 	 */
 	ShoppingItemDto assembleShoppingItemDtoFrom(ShoppingItem shoppingItem, ProductSku shoppingItemSku);
-
-	/**
-	 *	Determines if the user selection are valid, using the product from the database.
-	 * @param shoppingItemDto - item received from the user
-	 */
-	void validateShoppingItemDto(ShoppingItemDto shoppingItemDto);
 }

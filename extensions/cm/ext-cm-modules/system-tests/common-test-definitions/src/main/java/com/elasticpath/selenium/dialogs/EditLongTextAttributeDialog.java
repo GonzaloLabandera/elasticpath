@@ -7,7 +7,10 @@ import org.openqa.selenium.WebDriver;
  */
 public class EditLongTextAttributeDialog extends AbstractDialog {
 
-	private static final String PARENT_EDIT_LONG_TEXT_CSS = "div[widget-id='Edit Long Text Value'][widget-type='Shell'] ";
+	/**
+	 * CSS selector used to identify the dialog.
+	 */
+	public static final String PARENT_EDIT_LONG_TEXT_CSS = "div[widget-id='Edit Long Text Value'][widget-type='Shell'] ";
 	private static final String TEXTAREA_CSS = PARENT_EDIT_LONG_TEXT_CSS + "textarea";
 	private static final String OK_BUTTON_CSS = PARENT_EDIT_LONG_TEXT_CSS + "div[widget-id='OK']";
 

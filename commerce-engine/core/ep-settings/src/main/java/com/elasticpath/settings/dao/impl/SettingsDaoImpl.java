@@ -174,6 +174,7 @@ public class SettingsDaoImpl implements SettingsDao {
 	 */
 	@Override
 	public void deleteSettingDefinition(final SettingDefinition settingDefinition) {
+		getPersistenceEngine().executeNamedQuery("DELETE_SETTINGVALUES_BY_DEFINITION_UID", settingDefinition.getUidPk());
 		getPersistenceEngine().delete(settingDefinition);
 	}
 

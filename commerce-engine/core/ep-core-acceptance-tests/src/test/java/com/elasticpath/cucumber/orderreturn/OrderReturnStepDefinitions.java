@@ -3,53 +3,54 @@
  */
 package com.elasticpath.cucumber.orderreturn;
 
-import java.util.List;
-
+import cucumber.api.DataTable;
 import cucumber.api.java.en.And;
 import cucumber.api.java.en.When;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.ContextConfiguration;
 
-import com.elasticpath.common.dto.ShoppingItemDto;
+import com.elasticpath.cucumber.shoppingcart.ShoppingCartStepDefinitionsHelper;
 
 /**
  * OrderReturn test scenario step definitions class.
  * 
  */
-@ContextConfiguration("/cucumber.xml")
 public class OrderReturnStepDefinitions {
 		
 	@Autowired
 	private OrderReturnStepDefinitionsHelper orderReturnStepDefinitionsHelper;
+
+	@Autowired
+	private ShoppingCartStepDefinitionsHelper shoppingCartStepDefinitionsHelper;
 	
 	/**
 	 * Creates an order return and save it to the current test context. 
 	 *
-	 * @param itemDtos return items
+	 * @param dataTable return items
 	 */
 	@When("^a return is created with following items$")
-	public void createReturn(final List<ShoppingItemDto> itemDtos) {
-		orderReturnStepDefinitionsHelper.createShipmentReturn(itemDtos);
+	public void createReturn(final DataTable dataTable) {
+		orderReturnStepDefinitionsHelper.createShipmentReturn(shoppingCartStepDefinitionsHelper.convertDataTableToShoppingItemDtos(dataTable));
 	}
 	
 	/**
 	 * Creates order return with a given collection of items.
 	 *
-	 * @param itemDtos item dtos
+	 * @param dataTable item dtos
 	 */
 	@When("^an exchange is created with returning following items$")
-	public void createExchangeReturning(final List<ShoppingItemDto> itemDtos) {
-		orderReturnStepDefinitionsHelper.createExchangeReturningItems(itemDtos);
+	public void createExchangeReturning(final DataTable dataTable) {
+		orderReturnStepDefinitionsHelper
+				.createExchangeReturningItems(shoppingCartStepDefinitionsHelper.convertDataTableToShoppingItemDtos(dataTable));
 	}
 	
 	/**
 	 * Creates order return with exchange order. 
 	 *
-	 * @param itemDtos item exchange items
+	 * @param dataTable item exchange items
 	 */
 	@When("^exchanging with following items$")
-	public void createExchange(final List<ShoppingItemDto> itemDtos) {
-		orderReturnStepDefinitionsHelper.createExchange(itemDtos);
+	public void createExchange(final DataTable dataTable) {
+		orderReturnStepDefinitionsHelper.createExchange(shoppingCartStepDefinitionsHelper.convertDataTableToShoppingItemDtos(dataTable));
 	}
 	
 	/**
@@ -64,10 +65,10 @@ public class OrderReturnStepDefinitions {
 	/**
 	 * Modifies order return items.
 	 * 
-	 * @param itemDtos order return items
+	 * @param dataTable order return items
 	 */
 	@And("^the return is modified with following items$")
-	public void editReturnItems(final List<ShoppingItemDto> itemDtos) {
-		orderReturnStepDefinitionsHelper.editReturnItems(itemDtos);
+	public void editReturnItems(final DataTable dataTable) {
+		orderReturnStepDefinitionsHelper.editReturnItems(shoppingCartStepDefinitionsHelper.convertDataTableToShoppingItemDtos(dataTable));
 	}
 }

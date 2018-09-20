@@ -17,9 +17,8 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.elasticpath.domain.builder.customer.NewInstanceCustomerCreditCardBuilder;
-import com.elasticpath.domain.customer.CustomerCreditCard;
 import com.elasticpath.domain.customer.CustomerPaymentMethods;
+import com.elasticpath.domain.customer.PaymentToken;
 import com.elasticpath.plugin.payment.dto.PaymentMethod;
 
 /**
@@ -28,23 +27,23 @@ import com.elasticpath.plugin.payment.dto.PaymentMethod;
 public class CustomerPaymentMethodsImplTest {
 	private static final Long TEST_UID_PK = 1L;
 	private CustomerPaymentMethods customerPaymentMethods;
-	private PaymentMethod testCustomerCreditCard;
-	private PaymentMethod testCustomerCreditCard2;
-	private PaymentMethod testCustomerCreditCard2Equal;
+	private PaymentMethod testCustomerPaymentMethod;
+	private PaymentMethod testCustomerPaymentMethod2;
+	private PaymentMethod testCustomerPaymentMethod2Equal;
 
 	/**
 	 * Setup common test components.
 	 */
 	@Before
 	public void setupTestComponents() {
-		testCustomerCreditCard = new NewInstanceCustomerCreditCardBuilder().withCardHolderName("testCardholderName")
-				.withGuid("testGuid")
+		testCustomerPaymentMethod = new PaymentTokenImpl.TokenBuilder().withValue("testCardholderName")
+				.withGatewayGuid("testGuid")
 				.build();
-		testCustomerCreditCard2 = new NewInstanceCustomerCreditCardBuilder().withCardHolderName("testCardHolderName2")
-				.withGuid("testGuid2")
+		testCustomerPaymentMethod2 = new PaymentTokenImpl.TokenBuilder().withValue("testCardHolderName2")
+				.withGatewayGuid("testGuid2")
 				.build();
-		testCustomerCreditCard2Equal = new NewInstanceCustomerCreditCardBuilder().withCardHolderName("testCardHolderName2")
-				.withGuid("testGuid2")
+		testCustomerPaymentMethod2Equal = new PaymentTokenImpl.TokenBuilder().withValue("testCardHolderName2")
+				.withGatewayGuid("testGuid2")
 				.build();
 		CustomerImpl customer = new CustomerImpl();
 		customerPaymentMethods = new CustomerPaymentMethodsImpl(customer);
@@ -55,10 +54,10 @@ public class CustomerPaymentMethodsImplTest {
 	 */
 	@Test
 	public void testAddAllEnsuresDefaultIsSet() {
-		customerPaymentMethods.addAll(Arrays.<PaymentMethod>asList(testCustomerCreditCard, testCustomerCreditCard2));
+		customerPaymentMethods.addAll(Arrays.<PaymentMethod>asList(testCustomerPaymentMethod, testCustomerPaymentMethod2));
 
 		assertEquals("The default payment method should be the first credit card in the list of credit cards added",
-				testCustomerCreditCard, customerPaymentMethods.getDefault());
+				testCustomerPaymentMethod, customerPaymentMethods.getDefault());
 	}
 
 	/**
@@ -66,9 +65,9 @@ public class CustomerPaymentMethodsImplTest {
 	 */
 	@Test
 	public void testAddEnsuresDefaultIsSet() {
-		customerPaymentMethods.add(testCustomerCreditCard);
+		customerPaymentMethods.add(testCustomerPaymentMethod);
 
-		assertEquals("The default payment method should be the first and only credit card added", testCustomerCreditCard,
+		assertEquals("The default payment method should be the first and only credit card added", testCustomerPaymentMethod,
 				customerPaymentMethods.getDefault());
 	}
 
@@ -77,12 +76,12 @@ public class CustomerPaymentMethodsImplTest {
 	 */
 	@Test
 	public void testRemoveEnsuresDefaultIsSet() {
-		customerPaymentMethods.addAll(Arrays.<PaymentMethod>asList(testCustomerCreditCard, testCustomerCreditCard2));
-		customerPaymentMethods.setDefault(testCustomerCreditCard);
-		customerPaymentMethods.remove(testCustomerCreditCard2);
+		customerPaymentMethods.addAll(Arrays.<PaymentMethod>asList(testCustomerPaymentMethod, testCustomerPaymentMethod2));
+		customerPaymentMethods.setDefault(testCustomerPaymentMethod);
+		customerPaymentMethods.remove(testCustomerPaymentMethod2);
 
 		assertEquals("The default payment method should be the second credit card in the list given the original default was removed",
-				testCustomerCreditCard, customerPaymentMethods.getDefault());
+				testCustomerPaymentMethod, customerPaymentMethods.getDefault());
 	}
 
 	/**
@@ -90,9 +89,9 @@ public class CustomerPaymentMethodsImplTest {
 	 */
 	@Test
 	public void testRemovingDefaultPaymentMethod() {
-		customerPaymentMethods.add(testCustomerCreditCard);
-		customerPaymentMethods.setDefault(testCustomerCreditCard);
-		customerPaymentMethods.remove(testCustomerCreditCard);
+		customerPaymentMethods.add(testCustomerPaymentMethod);
+		customerPaymentMethods.setDefault(testCustomerPaymentMethod);
+		customerPaymentMethods.remove(testCustomerPaymentMethod);
 
 		assertNull("There should be no default payment method set", customerPaymentMethods.getDefault());
 	}
@@ -102,12 +101,12 @@ public class CustomerPaymentMethodsImplTest {
 	 */
 	@Test
 	public void testAddingExistingDefaultPaymentMethodDoesNotDuplicatePaymentMethod() {
-		customerPaymentMethods.setDefault(testCustomerCreditCard);
-		customerPaymentMethods.add(testCustomerCreditCard);
+		customerPaymentMethods.setDefault(testCustomerPaymentMethod);
+		customerPaymentMethods.add(testCustomerPaymentMethod);
 
 		assertThat("The customer payment methods should only contain the test customer credit card",
-				customerPaymentMethods.all(), contains(testCustomerCreditCard));
-		assertEquals("The default customer payment method should be the test customer credit card", testCustomerCreditCard,
+				customerPaymentMethods.all(), contains(testCustomerPaymentMethod));
+		assertEquals("The default customer payment method should be the test customer credit card", testCustomerPaymentMethod,
 				customerPaymentMethods.getDefault());
 	}
 
@@ -116,12 +115,12 @@ public class CustomerPaymentMethodsImplTest {
 	 */
 	@Test
 	public void ensureAddAllDoesNotAddDuplicatePaymentMethods() {
-		List<PaymentMethod> paymentMethods = Arrays.asList(testCustomerCreditCard, testCustomerCreditCard2);
+		List<PaymentMethod> paymentMethods = Arrays.asList(testCustomerPaymentMethod, testCustomerPaymentMethod2);
 		customerPaymentMethods.addAll(paymentMethods);
-		customerPaymentMethods.add(testCustomerCreditCard);
+		customerPaymentMethods.add(testCustomerPaymentMethod);
 
 		assertThat("The customer payment methods should only contain the test customer credit card 1 and 2",
-				customerPaymentMethods.all(), contains(testCustomerCreditCard, testCustomerCreditCard2));
+				customerPaymentMethods.all(), contains(testCustomerPaymentMethod, testCustomerPaymentMethod2));
 	}
 
 	/**
@@ -138,13 +137,13 @@ public class CustomerPaymentMethodsImplTest {
 	 */
 	@Test
 	public void testRemoveAllWithDefaultRemovedResetsDefaultToFirstAvailableInList() {
-		customerPaymentMethods.addAll(Arrays.<PaymentMethod>asList(testCustomerCreditCard, testCustomerCreditCard2));
-		customerPaymentMethods.setDefault(testCustomerCreditCard);
-		customerPaymentMethods.removeAll(Arrays.<PaymentMethod>asList(testCustomerCreditCard));
+		customerPaymentMethods.addAll(Arrays.<PaymentMethod>asList(testCustomerPaymentMethod, testCustomerPaymentMethod2));
+		customerPaymentMethods.setDefault(testCustomerPaymentMethod);
+		customerPaymentMethods.removeAll(Arrays.<PaymentMethod>asList(testCustomerPaymentMethod));
 
 		assertThat("The customer payment methods should only contain the test customer credit card 2",
-				customerPaymentMethods.all(), contains(testCustomerCreditCard2));
-		assertEquals("The default customer payment method should be the test customer credit card 2", testCustomerCreditCard2,
+				customerPaymentMethods.all(), contains(testCustomerPaymentMethod2));
+		assertEquals("The default customer payment method should be the test customer credit card 2", testCustomerPaymentMethod2,
 				customerPaymentMethods.getDefault());
 	}
 
@@ -154,9 +153,9 @@ public class CustomerPaymentMethodsImplTest {
 	 */
 	@Test
 	public void ensureRemoveAllWithAllElementsRemovedAlsoRemovesDefaultPaymentMethod() {
-		List<PaymentMethod> paymentMethods = Arrays.asList(testCustomerCreditCard, testCustomerCreditCard2);
+		List<PaymentMethod> paymentMethods = Arrays.asList(testCustomerPaymentMethod, testCustomerPaymentMethod2);
 		customerPaymentMethods.addAll(paymentMethods);
-		customerPaymentMethods.setDefault(testCustomerCreditCard);
+		customerPaymentMethods.setDefault(testCustomerPaymentMethod);
 		customerPaymentMethods.removeAll(paymentMethods);
 
 		assertThat("The customer payment methods should be empty",
@@ -169,7 +168,7 @@ public class CustomerPaymentMethodsImplTest {
 	 */
 	@Test
 	public void ensureClearRemovesAllPaymentMethodsIncludingDefaultPaymentMethod() {
-		List<PaymentMethod> paymentMethods = Arrays.asList(testCustomerCreditCard, testCustomerCreditCard2);
+		List<PaymentMethod> paymentMethods = Arrays.asList(testCustomerPaymentMethod, testCustomerPaymentMethod2);
 		customerPaymentMethods.addAll(paymentMethods);
 		customerPaymentMethods.clear();
 
@@ -183,8 +182,8 @@ public class CustomerPaymentMethodsImplTest {
 	 */
 	@Test
 	public void ensureSetDefaultCoalescesReference() {
-		customerPaymentMethods.add(testCustomerCreditCard2);
-		customerPaymentMethods.setDefault(testCustomerCreditCard2Equal);
+		customerPaymentMethods.add(testCustomerPaymentMethod2);
+		customerPaymentMethods.setDefault(testCustomerPaymentMethod2Equal);
 		assertThat("Default references is same as the one in the collection", customerPaymentMethods.getDefault(),
 				sameInstance(customerPaymentMethods.all().iterator().next()));
 	}
@@ -213,7 +212,8 @@ public class CustomerPaymentMethodsImplTest {
 
 	@Test
 	public void ensureGetByUidPkForValidUidPkReturnsPaymentMethod() {
-		CustomerCreditCard paymentMethod = new CustomerCreditCardImpl();
+		PaymentTokenImpl.TokenBuilder tokenBuilder = new PaymentTokenImpl.TokenBuilder();
+		PaymentToken paymentMethod = tokenBuilder.build();
 		paymentMethod.setUidPk(TEST_UID_PK);
 
 		customerPaymentMethods.add(paymentMethod);

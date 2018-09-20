@@ -4,6 +4,8 @@
 
 package com.elasticpath.rest.resource.integration.epcommerce.repository.coupon.order;
 
+import static com.elasticpath.rest.resource.integration.epcommerce.repository.ResourceTestConstants.CART_GUID;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
 import static com.elasticpath.rest.resource.integration.epcommerce.repository.ResourceTestConstants.CART_ORDER_GUID;
@@ -17,6 +19,8 @@ import static com.elasticpath.rest.resource.integration.epcommerce.repository.co
 import java.util.Collections;
 import java.util.Set;
 
+import com.google.common.util.concurrent.Runnables;
+import io.reactivex.Completable;
 import io.reactivex.Single;
 import org.junit.Before;
 import org.junit.Test;
@@ -24,7 +28,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Answers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.elasticpath.domain.cartorder.CartOrder;
 import com.elasticpath.domain.rules.Coupon;
@@ -39,12 +43,13 @@ import com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder
 import com.elasticpath.rest.resource.integration.epcommerce.repository.coupon.CouponEntityBuilder;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.coupon.CouponRepository;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.coupon.CouponTestFactory;
+import com.elasticpath.service.rules.impl.CouponNotValidException;
 
 @RunWith(MockitoJUnitRunner.class)
 public class OrderCouponToCouponinfoRepositoryTest {
 
 	private static final String NOT_EXISTING_COUPON_ID = "random id";
-	private static final String COUPON_CODE_IS_NOT_VALID = "Coupon code is not valid";
+
 	private static final CouponEntity COUPON_ENTITY = CouponTestFactory.buildCouponEntity(
 			COUPON_CODE, CART_ORDER_GUID, "type");
 
@@ -75,11 +80,13 @@ public class OrderCouponToCouponinfoRepositoryTest {
 	@Before
 	public void setup() {
 		when(couponRepository.findByCouponCode(COUPON_CODE)).thenReturn(Single.just(coupon));
-		when(shoppingCartRepository.getDefaultShoppingCart()).thenReturn(Single.just(shoppingCart));
+		when(shoppingCartRepository.getShoppingCart(CART_GUID)).thenReturn(Single.just(shoppingCart));
 		when(shoppingCart.getShopper().getCustomer().getEmail()).thenReturn(EMAIL);
 		when(coupon.getCouponCode()).thenReturn(COUPON_CODE);
 		when(cartOrder.addCoupon(COUPON_CODE)).thenReturn(true);
+		when(cartOrder.getShoppingCartGuid()).thenReturn(CART_GUID);
 		when(cartOrderRepository.saveCartOrderAsSingle(cartOrder)).thenReturn(Single.just(cartOrder));
+		when(couponRepository.validateCoupon(anyString(), anyString(), anyString())).thenReturn(Completable.fromRunnable(Runnables.doNothing()));
 		when(builder.build(coupon, OrdersMediaTypes.ORDER.id(), CART_ORDER_GUID))
 				.thenReturn(Single.just(COUPON_ENTITY));
 	}
@@ -87,7 +94,7 @@ public class OrderCouponToCouponinfoRepositoryTest {
 	@Test
 	public void submitValidCouponEntityReturnsSubmitResultOfOrderCouponIdentifier() {
 		when(cartOrderRepository.findByGuidAsSingle(SCOPE, CART_ORDER_GUID)).thenReturn(Single.just(cartOrder));
-		when(couponRepository.isCouponValidInStore(COUPON_CODE, SCOPE, EMAIL)).thenReturn(Single.just(true));
+		couponRepository.validateCoupon(COUPON_CODE, SCOPE, EMAIL);
 
 		OrderCouponIdentifier orderCouponIdentifier = buildOrderCouponIdentifier(COUPON_CODE, CART_ORDER_GUID, SCOPE);
 
@@ -99,11 +106,13 @@ public class OrderCouponToCouponinfoRepositoryTest {
 	@Test
 	public void submitWithInvalidCouponReturnsStateFailureResourceOperationFailure() {
 		when(cartOrderRepository.findByGuidAsSingle(SCOPE, CART_ORDER_GUID)).thenReturn(Single.just(cartOrder));
-		when(couponRepository.isCouponValidInStore(COUPON_CODE, SCOPE, EMAIL)).thenReturn(Single.just(false));
-
+		when(couponRepository.validateCoupon(anyString(), anyString(), anyString())).thenReturn(Completable.fromRunnable(() -> {
+			throw new CouponNotValidException("coupon_code");
+		}));
 		repository.submit(COUPON_ENTITY, StringIdentifier.of(SCOPE))
 				.test()
-				.assertError(ResourceOperationFailure.stateFailure(COUPON_CODE_IS_NOT_VALID));
+				.assertError(CouponNotValidException.class)
+				.assertErrorMessage("Coupon 'coupon_code' is not valid");
 	}
 
 	@Test
@@ -119,7 +128,7 @@ public class OrderCouponToCouponinfoRepositoryTest {
 	@Test
 	public void submitValidExistingCouponEntityReturnsSubmitResultOfOrderCouponIdentifier() {
 		when(cartOrderRepository.findByGuidAsSingle(SCOPE, CART_ORDER_GUID)).thenReturn(Single.just(cartOrder));
-		when(couponRepository.isCouponValidInStore(COUPON_CODE, SCOPE, EMAIL)).thenReturn(Single.just(true));
+		couponRepository.validateCoupon(COUPON_CODE, SCOPE, EMAIL);
 		when(cartOrder.addCoupon(COUPON_CODE)).thenReturn(false);
 
 

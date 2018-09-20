@@ -26,7 +26,6 @@ import com.elasticpath.sellingchannel.presentation.OrderItemPresentationBean;
 public class OrderItemPresentationBeanImpl implements OrderItemPresentationBean {
 	private DigitalAsset digitalAsset;
 	private String displayName;
-	private String encryptedUidPk;
 	private String image;
 	private final List<OrderItemPresentationBean> children = new ArrayList<>();
 	private String displaySkuOptions;
@@ -85,11 +84,6 @@ public class OrderItemPresentationBeanImpl implements OrderItemPresentationBean 
 	@Override
 	public String getDisplayName() {
 		return displayName;
-	}
-
-	@Override
-	public String getEncryptedUidPk() {
-		return encryptedUidPk;
 	}
 
 	@Override
@@ -165,11 +159,6 @@ public class OrderItemPresentationBeanImpl implements OrderItemPresentationBean 
 	@Override
 	public void setDollarSavingsMoney(final Money dollarSavings) {
 		this.dollarSavings = dollarSavings;
-	}
-
-	@Override
-	public void setEncryptedUidPk(final String encryptedUidPk) {
-		this.encryptedUidPk = encryptedUidPk;
 	}
 
 	@Override

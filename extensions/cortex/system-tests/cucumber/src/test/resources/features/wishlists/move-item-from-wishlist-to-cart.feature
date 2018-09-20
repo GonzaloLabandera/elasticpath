@@ -24,8 +24,6 @@ Feature: Move item from wishlist to cart
       | bundleWithPhysicalAndDigitalComponents_sku |
       #   Digital item
       | alien_sku                                  |
-      #   Dynamic Bundle
-      | tb_dyn12345sku                             |
       # Back-Order item
       | tt0926084_sku                              |
       # Pre-Order item
@@ -184,9 +182,9 @@ Feature: Move item from wishlist to cart
     Given I add item with code <ITEMCODE> to my default wishlist
     When I navigate to the movetocartform for wishlist item with code <ITEMCODE>
     Then there are no movetocartaction links
-    And there is an advisor message with data field <dataField> and the following fields:
-      | messageType | messageId               | debugMessage                                     | dataField  | blocks           |
-      | error       | cart.item.not.available | Item '<ITEMCODE>' is not available for purchase. | <ITEMCODE> | movetocartaction |
+    And there is an advisor message with the following fields:
+      | messageType | messageId                   | debugMessage                                          | dataField  | blocks           |
+      | error       | item.insufficient.inventory | Item '<ITEMCODE>' does not have sufficient inventory. | <ITEMCODE> | movetocartaction |
 
     Examples:
       | ITEMCODE                         |

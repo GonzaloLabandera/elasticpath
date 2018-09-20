@@ -22,16 +22,6 @@
 
 	<name>Extension CM Repository</name>
 
-	<dependencyManagement>
-		<dependencies>
-			<dependency>
-				<groupId>com.elasticpath.cmclient</groupId>
-				<artifactId>cm-p2-repository</artifactId>
-				<version>${cmclient.platform.feature.version}</version>
-			</dependency>
-		</dependencies>
-	</dependencyManagement>
-
 	<build>
 		<plugins>
 			<plugin>

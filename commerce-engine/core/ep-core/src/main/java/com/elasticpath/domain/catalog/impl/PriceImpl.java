@@ -92,7 +92,7 @@ public class PriceImpl extends AbstractEpDomainImpl implements Price {
 	protected PriceTier initializePriceTier() {
 		PriceTier priceTier = new PriceTierImpl();
 		priceTier.initialize();
-		return new PriceTierImpl();
+		return priceTier;
 	}
 
 	@Override

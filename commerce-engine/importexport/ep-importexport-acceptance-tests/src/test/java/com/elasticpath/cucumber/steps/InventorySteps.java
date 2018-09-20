@@ -16,13 +16,8 @@ import cucumber.api.java.en.Given;
 import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.TestExecutionListeners;
-import org.springframework.test.context.support.DependencyInjectionTestExecutionListener;
 
 import com.elasticpath.commons.util.TestDomainMarshaller;
-import com.elasticpath.cucumber.testexecutionlisteners.CucumberDatabaseTestExecutionListener;
-import com.elasticpath.cucumber.testexecutionlisteners.CucumberJmsRegistrationTestExecutionListener;
 import com.elasticpath.domain.catalog.AvailabilityCriteria;
 import com.elasticpath.domain.store.Warehouse;
 import com.elasticpath.importexport.builder.ImportConfigurationBuilder;
@@ -45,12 +40,6 @@ import com.elasticpath.test.persister.testscenarios.SimpleStoreScenario;
 /**
  * Inventory Test Steps.
  */
-@ContextConfiguration("/integration-context-mocked-customer-service.xml")
-@TestExecutionListeners({
-		CucumberJmsRegistrationTestExecutionListener.class,
-		CucumberDatabaseTestExecutionListener.class,
-		DependencyInjectionTestExecutionListener.class
-})
 public class InventorySteps {
 
 	private static final String INVENTORY_IMPORT_FILE = "inventory.xml";

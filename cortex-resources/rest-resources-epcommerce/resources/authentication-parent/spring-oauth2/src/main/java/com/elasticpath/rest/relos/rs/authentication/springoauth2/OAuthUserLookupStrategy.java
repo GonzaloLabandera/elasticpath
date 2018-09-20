@@ -15,7 +15,7 @@ public interface OAuthUserLookupStrategy {
 	 * Load user by userId.
 	 *
 	 * @param scope the scope
-	 * @param userId the userID
+	 * @param userId the userId
 	 * @return the user details
 	 */
 	User loadUserByUserId(String scope, String userId);

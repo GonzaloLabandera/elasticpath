@@ -12,7 +12,7 @@ import com.elasticpath.commons.util.InvalidatableCache;
 import com.elasticpath.domain.contentspace.ContentWrapper;
 import com.elasticpath.domain.contentspace.ContentWrapperLoader;
 import com.elasticpath.domain.contentspace.ContentWrapperRepository;
-import com.elasticpath.settings.SettingsReader;
+import com.elasticpath.settings.provider.SettingValueProvider;
 
 /**
  * The implementation of the content wrapper repository.
@@ -27,14 +27,14 @@ public class ContentWrapperRepositoryImpl implements ContentWrapperRepository, I
 
 	private ContentWrapperLoader contentWrapperLoader;
 
-	private SettingsReader settingsReader;
-
 	private static final long MILLI = 1000L;
 
 	/**
 	 * The last time (in milliseconds) the content wrappers were loaded.
 	 */
 	private long lastLoadTime;
+
+	private SettingValueProvider<Integer> loadIntervalProvider;
 
 	/**
 	 * Loads content wrappers if cache is stale.
@@ -94,7 +94,7 @@ public class ContentWrapperRepositoryImpl implements ContentWrapperRepository, I
 	 * @return interval that must elapse before a reload in seconds
 	 */
 	protected int getLoadInterval() {
-		return Integer.parseInt(settingsReader.getSettingValue("COMMERCE/SYSTEM/CONTENTWRAPPERS/reloadInterval").getValue());
+		return getLoadIntervalProvider().get();
 	}
 
 	/**
@@ -195,15 +195,6 @@ public class ContentWrapperRepositoryImpl implements ContentWrapperRepository, I
 		this.contentWrapperLoader = contentWrapperLoader;
 	}
 
-
-	/**
-	 * The setter for the settings reader.
-	 * @param settingsReader the settings reader to be set
-	 */
-	public void setSettingsReader(final SettingsReader settingsReader) {
-		this.settingsReader = settingsReader;
-	}
-
 	/**
 	 * Invalidate the currently loaded content wrappers by setting the last load time to zero which
 	 * will initiate a reload.
@@ -212,6 +203,14 @@ public class ContentWrapperRepositoryImpl implements ContentWrapperRepository, I
 	public void invalidate() {
 		LOG.info("Content wrapper repository cache invalidated");
 		lastLoadTime = 0;
+	}
+
+	public void setLoadIntervalProvider(final SettingValueProvider<Integer> loadIntervalProvider) {
+		this.loadIntervalProvider = loadIntervalProvider;
+	}
+
+	protected SettingValueProvider<Integer> getLoadIntervalProvider() {
+		return loadIntervalProvider;
 	}
 
 }

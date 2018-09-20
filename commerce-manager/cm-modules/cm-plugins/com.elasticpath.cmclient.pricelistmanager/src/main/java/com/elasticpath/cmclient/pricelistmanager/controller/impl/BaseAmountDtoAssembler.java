@@ -7,6 +7,7 @@ import java.math.BigDecimal;
 import java.util.Locale;
 
 import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.helpers.BaseAmountDTOCreator;
 import com.elasticpath.cmclient.pricelistmanager.model.impl.BaseAmountType;
 import com.elasticpath.common.dto.pricing.BaseAmountDTO;
 import com.elasticpath.common.dto.pricing.PriceListDescriptorDTO;
@@ -35,7 +36,7 @@ public final class BaseAmountDtoAssembler {
 	 */
 	public static BaseAmountDTO assembleFromSku(final ProductSku source, final BigDecimal quantity, 
 				final PriceListDescriptorDTO priceListDescriptorDTO, final Locale locale) {
-		final BaseAmountDTO target = new BaseAmountDTO();
+		final BaseAmountDTO target = BaseAmountDTOCreator.createModel();
 		RandomGuid randomGuid = ServiceLocator.getService(ContextIdNames.RANDOM_GUID);
 		target.setGuid(randomGuid.toString());
 		target.setObjectGuid(source.getSkuCode());
@@ -61,7 +62,7 @@ public final class BaseAmountDtoAssembler {
 	 */	
 	public static BaseAmountDTO assembleFromProduct(final Product source, final BigDecimal quantity, 
 						final PriceListDescriptorDTO priceListDescriptorDTO) {
-		final BaseAmountDTO target = new BaseAmountDTO();
+		final BaseAmountDTO target = BaseAmountDTOCreator.createModel();
 		RandomGuid randomGuid = ServiceLocator.getService(ContextIdNames.RANDOM_GUID);
 		target.setGuid(randomGuid.toString());
 		target.setObjectGuid(source.getGuid());

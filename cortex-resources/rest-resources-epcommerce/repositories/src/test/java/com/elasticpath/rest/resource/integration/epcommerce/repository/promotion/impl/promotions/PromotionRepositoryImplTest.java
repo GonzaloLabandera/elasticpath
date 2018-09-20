@@ -3,60 +3,43 @@
  */
 package com.elasticpath.rest.resource.integration.epcommerce.repository.promotion.impl.promotions;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.eq;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Currency;
 import java.util.HashSet;
 import java.util.Set;
 
+import io.reactivex.Single;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
-import io.reactivex.Single;
-
-import org.apache.commons.collections.CollectionUtils;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.internal.util.collections.Sets;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.elasticpath.domain.order.Order;
 import com.elasticpath.domain.rules.AppliedRule;
 import com.elasticpath.domain.rules.Coupon;
 import com.elasticpath.domain.rules.Rule;
 import com.elasticpath.domain.rules.impl.AppliedRuleImpl;
-import com.elasticpath.domain.shipping.ShippingServiceLevel;
 import com.elasticpath.domain.shoppingcart.PromotionRecordContainer;
-import com.elasticpath.domain.shoppingcart.ShippingPricingSnapshot;
 import com.elasticpath.domain.shoppingcart.ShoppingCart;
 import com.elasticpath.domain.shoppingcart.ShoppingCartPricingSnapshot;
-import com.elasticpath.money.Money;
 import com.elasticpath.rest.ResourceOperationFailure;
 import com.elasticpath.rest.definition.promotions.PromotionEntity;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.order.OrderRepository;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.price.PriceRepository;
-import com.elasticpath.rest.resource.integration.epcommerce.repository.promotion.AppliedPromotionRuleAware;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.promotion.PromotionRuleMatcher;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.promotion.impl.promotions.applied.AppliedPromotionTransformer;
-import com.elasticpath.rest.resource.integration.epcommerce.repository.promotion.impl.rules.predicates.AppliedShippingRulePredicate;
-import com.elasticpath.rest.resource.integration.epcommerce.repository.promotion.impl.rules.predicates.CartRulePredicate;
-import com.elasticpath.rest.resource.integration.epcommerce.repository.promotion.impl.rules.predicates.CouponAppliedRulePredicate;
-import com.elasticpath.rest.resource.integration.epcommerce.repository.promotion.impl.rules.predicates.CouponRulePredicate;
-import com.elasticpath.rest.resource.integration.epcommerce.repository.promotion.impl.rules.predicates.PurchaseAppliedRulePredicate;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.transform.impl.ReactiveAdapterImpl;
 import com.elasticpath.service.rules.RuleService;
+import com.elasticpath.shipping.connectivity.dto.ShippingOption;
 
 /**
  * Unit Tests for {@link PromotionRepositoryImpl}.
@@ -111,14 +94,12 @@ public class PromotionRepositoryImplTest {
 	public void testGetAppliedPromotionsForCouponWithShoppingCart() {
 		Coupon mockCoupon = mock(Coupon.class);
 		Collection<String> expectedRules = new ArrayList<>();
-		when(cartPromotionRuleMatcher.findMatchingAppliedRules(
-				any(AppliedPromotionRuleAware.class), any(CouponRulePredicate.class)))
-				.thenReturn(expectedRules);
+		when(cartPromotionRuleMatcher.findMatchingAppliedRules(any(), any())).thenReturn(expectedRules);
 
 		Collection<String> appliedPromos
 				= promotionRepository.getAppliedPromotionsForCoupon(pricingSnapshot, mockCoupon);
 
-		assertEquals(expectedRules, appliedPromos);
+		assertThat(appliedPromos).isEqualTo(expectedRules);
 	}
 
 	@Test
@@ -126,13 +107,11 @@ public class PromotionRepositoryImplTest {
 		Order mockOrder = mock(Order.class);
 		Coupon mockCoupon = mock(Coupon.class);
 		Collection<String> expectedRules = new ArrayList<>();
-		when(orderPromotionRuleMatcher.findMatchingAppliedRules(
-				any(AppliedPromotionRuleAware.class), any(CouponAppliedRulePredicate.class)))
-				.thenReturn(expectedRules);
+		when(orderPromotionRuleMatcher.findMatchingAppliedRules(any(), any())).thenReturn(expectedRules);
 
 		Collection<String> appliedPromos = promotionRepository.getAppliedPromotionsForCoupon(mockOrder, mockCoupon);
 
-		assertEquals(expectedRules, appliedPromos);
+		assertThat(appliedPromos).isEqualTo(expectedRules);
 	}
 
 
@@ -140,87 +119,52 @@ public class PromotionRepositoryImplTest {
 	public void testGetAppliedPromotionsForPurchase() {
 		Order mockOrder = mock(Order.class);
 		Collection<String> expectedRules = new ArrayList<>();
-		when(orderPromotionRuleMatcher.findMatchingAppliedRules(
-				any(AppliedPromotionRuleAware.class), any(PurchaseAppliedRulePredicate.class)))
-				.thenReturn(expectedRules);
+		when(orderPromotionRuleMatcher.findMatchingAppliedRules(any(), any())).thenReturn(expectedRules);
 
 		Collection<String> appliedPromos = promotionRepository.getAppliedPromotionsForPurchase(mockOrder);
 
-		assertEquals(expectedRules, appliedPromos);
+		assertThat(appliedPromos).isEqualTo(expectedRules);
 	}
 
 	@Test
 	public void testGetAppliedCartLineitemPromotionsReturnsPromotionIds() {
 		String lineItemId = "testLineItemId";
-		when(cartPromotionRuleMatcher.findMatchingAppliedRules(any(AppliedPromotionRuleAware.class),
-				any(CartRulePredicate.class))).thenReturn(Collections.singletonList(EXPECTED_PROMOTION_ID));
+		when(cartPromotionRuleMatcher.findMatchingAppliedRules(any(), any())).thenReturn(Collections.singletonList(EXPECTED_PROMOTION_ID));
 		mockLineItemAppliedRules(lineItemId);
 
 		Collection<String> appliedCartPromotions =
 				promotionRepository.getAppliedCartLineitemPromotions(mockShoppingCart, pricingSnapshot, lineItemId);
 
-		assertTrue("Collection elements should be equal.", CollectionUtils.isEqualCollection(
-				Sets.newSet(EXPECTED_PROMOTION_ID), appliedCartPromotions));
+		assertThat(appliedCartPromotions).containsExactly(EXPECTED_PROMOTION_ID);
 	}
 
 	@Test
 	public void testGetAppliedCartPromotionsReturnsPromotionIds() {
-		when(cartPromotionRuleMatcher.findMatchingAppliedRules(any(AppliedPromotionRuleAware.class),
-				any(CartRulePredicate.class))).thenReturn(Collections.singletonList(EXPECTED_PROMOTION_ID));
+		when(cartPromotionRuleMatcher.findMatchingAppliedRules(any(), any())).thenReturn(Collections.singletonList(EXPECTED_PROMOTION_ID));
 
 		Collection<String> appliedCartPromotions = promotionRepository.getAppliedCartPromotions(pricingSnapshot);
 
-		assertTrue("Collection elements should be equal.", CollectionUtils.isEqualCollection(
-				Sets.newSet(EXPECTED_PROMOTION_ID), appliedCartPromotions));
+		assertThat(appliedCartPromotions).containsExactly(EXPECTED_PROMOTION_ID);
 	}
 
 	@Test
-	public void testSingleAppliedShippingPromotion() throws Exception {
+	public void testSingleAppliedShippingPromotion() {
 		ShoppingCartPricingSnapshot shoppingCartPricingSnapshot = mock(ShoppingCartPricingSnapshot.class);
-		ShippingServiceLevel shippingServiceLevel = givenShippingOptionWithDiscount();
-		when(cartPromotionRuleMatcher.findMatchingAppliedRules(
-				any(AppliedPromotionRuleAware.class), any(AppliedShippingRulePredicate.class)))
-				.thenReturn(Collections.singletonList(EXPECTED_RULE_CODE));
+		ShippingOption shippingOption = mock(ShippingOption.class);
+		when(cartPromotionRuleMatcher.findMatchingAppliedRules(any(), any())).thenReturn(Collections.singletonList(EXPECTED_RULE_CODE));
 		Collection<String> appliedShippingPromotions
-				= promotionRepository.getAppliedShippingPromotions(shoppingCartPricingSnapshot, shippingServiceLevel);
-		assertTrue(appliedShippingPromotions.contains(EXPECTED_RULE_CODE));
+				= promotionRepository.getAppliedShippingPromotions(shoppingCartPricingSnapshot, shippingOption);
+		assertThat(appliedShippingPromotions).contains(EXPECTED_RULE_CODE);
 	}
 
 	@Test
-	public void testNoAppliedShippingPromotions() throws Exception {
+	public void testNoAppliedShippingPromotions() {
 		ShoppingCartPricingSnapshot shoppingCartPricingSnapshot = mock(ShoppingCartPricingSnapshot.class);
-		ShippingServiceLevel shippingServiceLevel = givenShippingOptionWithoutDiscount();
-		when(cartPromotionRuleMatcher.findMatchingAppliedRules(
-				any(AppliedPromotionRuleAware.class), any(AppliedShippingRulePredicate.class)))
-				.thenReturn(Collections.<String>emptyList());
+		ShippingOption shippingOption = mock(ShippingOption.class);
+		when(cartPromotionRuleMatcher.findMatchingAppliedRules(any(), any())).thenReturn(Collections.emptyList());
 		Collection<String> appliedShippingPromotions
-				= promotionRepository.getAppliedShippingPromotions(shoppingCartPricingSnapshot, shippingServiceLevel);
-		assertFalse(appliedShippingPromotions.contains(EXPECTED_RULE_CODE));
-	}
-
-	private ShippingServiceLevel givenShippingOptionWithDiscount() {
-		return mockShippingServiceLevel(pricingSnapshot, BigDecimal.TEN, BigDecimal.ONE);
-	}
-
-	private ShippingServiceLevel givenShippingOptionWithoutDiscount() {
-		return mockShippingServiceLevel(pricingSnapshot, BigDecimal.TEN, BigDecimal.TEN);
-	}
-
-	private ShippingServiceLevel mockShippingServiceLevel(final ShoppingCartPricingSnapshot pricingSnapshot,
-														final BigDecimal regularShippingCostAmount,
-														final BigDecimal actualShippingCostAmount) {
-		ShippingServiceLevel shippingServiceLevel = mock(ShippingServiceLevel.class);
-		ShippingPricingSnapshot shippingPricingSnapshot = mock(ShippingPricingSnapshot.class);
-
-		when(pricingSnapshot.getShippingPricingSnapshot(shippingServiceLevel)).thenReturn(shippingPricingSnapshot);
-
-		Money regularPrice = Money.valueOf(regularShippingCostAmount, Currency.getInstance("CAD"));
-		Money discountedPrice = Money.valueOf(actualShippingCostAmount, Currency.getInstance("CAD"));
-
-		when(shippingPricingSnapshot.getShippingListPrice()).thenReturn(regularPrice);
-		when(shippingPricingSnapshot.getShippingPromotedPrice()).thenReturn(discountedPrice);
-
-		return shippingServiceLevel;
+				= promotionRepository.getAppliedShippingPromotions(shoppingCartPricingSnapshot, shippingOption);
+		assertThat(appliedShippingPromotions).doesNotContain(EXPECTED_RULE_CODE);
 	}
 
 	@Test
@@ -230,7 +174,7 @@ public class PromotionRepositoryImplTest {
 		HashSet<Long> rules = new HashSet<>();
 		rules.add(EXPECTED_RULE_ID);
 		when(priceRepository.getLowestPriceRules(eq(scope), eq(ITEM_ID))).thenReturn(Single.just(rules));
-		when(ruleService.findCodesByUids(rules)).thenReturn(Arrays.asList(EXPECTED_PROMOTION_ID));
+		when(ruleService.findCodesByUids(rules)).thenReturn(Collections.singletonList(EXPECTED_PROMOTION_ID));
 
 		promotionRepository.getAppliedPromotionsForItem(scope, ITEM_ID)
 				.test()

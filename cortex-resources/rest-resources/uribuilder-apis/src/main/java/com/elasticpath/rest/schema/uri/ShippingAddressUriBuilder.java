@@ -6,6 +6,7 @@ package com.elasticpath.rest.schema.uri;
 /**
  * Builds a URI for shipment shipping address.
  */
+@SuppressWarnings("rawtypes")
 public interface ShippingAddressUriBuilder extends ReadFromOtherUriBuilder<ReadFromOtherUriBuilder> {
 	
 }

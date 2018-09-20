@@ -11,6 +11,7 @@ import com.elasticpath.domain.rules.Rule;
 import com.elasticpath.domain.specifications.Specification;
 import com.elasticpath.service.rules.CouponUsageService;
 import com.elasticpath.service.rules.RuleService;
+import com.elasticpath.service.rules.impl.RuleValidationResultEnum;
 
 /**
  * Coupon validity in cart specification.
@@ -24,28 +25,28 @@ public class ValidCouponUseSpecification implements Specification<PotentialCoupo
 	private CouponUsageService couponUsageService;
 
 	@Override
-	public boolean isSatisfiedBy(final PotentialCouponUse potentialCouponUse) {
+	public RuleValidationResultEnum isSatisfiedBy(final PotentialCouponUse potentialCouponUse) {
 		Coupon coupon = potentialCouponUse.getCoupon();
 		if (coupon == null) {
-			return false;
+			return RuleValidationResultEnum.ERROR_UNSPECIFIED;
 		}
 		String code = coupon.getCouponCode();
 		if (StringUtils.isEmpty(code)) {
-			return false;
+			return RuleValidationResultEnum.ERROR_UNSPECIFIED;
 		}
 
 		Rule rule = ruleService.findByPromoCode(code);
-		if (!ruleService.isRuleValid(rule, potentialCouponUse.getStoreCode())) {
+		RuleValidationResultEnum ruleValidationResult = ruleService.isRuleValid(rule, potentialCouponUse.getStoreCode());
+		if (!ruleValidationResult.isSuccess()) {
 			LOG.debug(String.format("Promotion code '%s' is not valid", code));
-			return false;
+			return ruleValidationResult;
 		}
-
 		if (!isCouponUsageValidForRule(potentialCouponUse, rule.hasLimitedUseCondition())) {
 			LOG.debug(String.format("Promotion code '%s' usage is not valid", code));
-			return false;
+			return RuleValidationResultEnum.ERROR_UNSPECIFIED;
 		}
 
-		return true;
+		return RuleValidationResultEnum.SUCCESS;
 	}
 
 	private boolean isCouponUsageValidForRule(final PotentialCouponUse potentialCouponUse, final boolean hasLimitedUseCondition) {

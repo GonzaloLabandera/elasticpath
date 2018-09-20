@@ -12,8 +12,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 
-import org.apache.commons.lang.math.NumberUtils;
-
 import com.elasticpath.commons.beanframework.BeanFactory;
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.commons.exception.EpUnsupportedOperationException;
@@ -35,6 +33,7 @@ import com.elasticpath.service.catalogview.StoreProductService;
 import com.elasticpath.service.search.ProductCategorySearchCriteria;
 import com.elasticpath.service.search.index.IndexSearchResult;
 import com.elasticpath.service.search.query.ProductSearchCriteria;
+import com.elasticpath.settings.provider.SettingValueProvider;
 
 /**
  * Represents a default implementation of <code>SitemapService</code>.
@@ -48,6 +47,8 @@ public class SitemapServiceImpl extends AbstractCatalogViewServiceImpl implement
 	private StoreProductService storeProductService;
 
 	private BeanFactory beanFactory;
+
+	private SettingValueProvider<String> catalogSitemapPaginationProvider;
 
 	/**
 	 * A comparator implementation for sorting <code>Brand</code> objects based on their display names.
@@ -111,8 +112,7 @@ public class SitemapServiceImpl extends AbstractCatalogViewServiceImpl implement
 			result.setResultCount(searchResults.getNumFound());	//set the total to calculate pagination
 
 			// get the products for current page
-			final int sitemapPagination =
-				NumberUtils.toInt(getStoreConfig().getSetting("COMMERCE/STORE/CATALOG/catalogSitemapPagination").getValue());
+			final int sitemapPagination = getStoreConfig().getSettingValue(getFeaturedProductCountSettingValueProvider());
 			final List<Long> productUids = getPagedResults(searchResults, pageNumber, sitemapPagination);
 			final boolean loadProductAssociations = false;
 			final List<StoreProduct> products = storeProductService.getProductsForStore(
@@ -206,6 +206,14 @@ public class SitemapServiceImpl extends AbstractCatalogViewServiceImpl implement
 	@Override
 	public void setBeanFactory(final BeanFactory beanFactory) {
 		this.beanFactory = beanFactory;
+	}
+
+	protected SettingValueProvider<String> getCatalogSitemapPaginationProvider() {
+		return catalogSitemapPaginationProvider;
+	}
+
+	public void setCatalogSitemapPaginationProvider(final SettingValueProvider<String> catalogSitemapPaginationProvider) {
+		this.catalogSitemapPaginationProvider = catalogSitemapPaginationProvider;
 	}
 
 }

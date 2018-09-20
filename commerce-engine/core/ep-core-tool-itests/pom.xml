@@ -16,10 +16,6 @@
 	<name>Settings JUnit Integrations Tests</name>
 	<description>Settings JUnit Integrations Tests</description>
 
-	<properties>
-		<java.jvm.opts>-XX:MaxPermSize=128m -Xmx512m</java.jvm.opts>
-	</properties>
-
 	<dependencies>
 		<dependency>
 			<groupId>com.elasticpath</groupId>

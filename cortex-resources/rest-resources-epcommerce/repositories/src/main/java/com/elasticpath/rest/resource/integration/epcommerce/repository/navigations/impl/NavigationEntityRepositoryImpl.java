@@ -19,7 +19,6 @@ import com.elasticpath.repository.Repository;
 import com.elasticpath.rest.definition.base.DetailsEntity;
 import com.elasticpath.rest.definition.navigations.NavigationEntity;
 import com.elasticpath.rest.definition.navigations.NavigationIdentifier;
-import com.elasticpath.rest.id.type.PathIdentifier;
 import com.elasticpath.rest.identity.util.SubjectUtil;
 import com.elasticpath.rest.resource.ResourceOperationContext;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.category.CategoryRepository;
@@ -41,10 +40,10 @@ public class NavigationEntityRepositoryImpl<E extends NavigationEntity, I extend
 	@Override
 	public Single<NavigationEntity> findOne(final NavigationIdentifier identifier) {
 		String storeCode = identifier.getNavigations().getScope().getValue();
-		String categoryGuid = ((PathIdentifier) identifier.getNodeId()).extractLeafId();
+		String categoryGuid = identifier.getNodeId().getValue();
 		Locale locale = SubjectUtil.getLocale(resourceOperationContext.getSubject());
 
-		return categoryRepository.findByGuid(storeCode, categoryGuid)
+		return categoryRepository.findByStoreAndCategoryCode(storeCode, categoryGuid)
 				.flatMap(category -> getAttributeValues(category, locale)
 						.flatMap(attributeValue -> getDetailsEntity(attributeValue, locale))
 						.toList()

@@ -4,8 +4,8 @@
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 		xmlns:util="http://www.springframework.org/schema/util"
 		xsi:schemaLocation="
-				http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
-				http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-3.0.xsd
+				http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+				http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-4.0.xsd
 		">
 
 	<bean id="checkoutService" parent="txProxyTemplate">
@@ -17,7 +17,7 @@
 
 	<!-- !!!! DOCshippingServiceLevelService -->
 	<bean id="abstractCheckoutServiceDelegate" abstract="true" class="com.elasticpath.service.shoppingcart.impl.CheckoutServiceImpl">
-		<property name="shippingServiceLevelService" ref="shippingServiceLevelService"/>
+		<property name="shippingOptionService" ref="shippingOptionService"/>
 
 		<property name="setupActionList" ref="setupActions" />
 
@@ -26,13 +26,13 @@
 		<property name="finalizeActionList" ref="finalizeActions" />
 
 		<property name="beanFactory" ref="coreBeanFactory"/>
+
 	</bean>
 
 	<util:list id="setupActions" list-class="java.util.ArrayList">
 		<ref bean="preCheckoutCheckoutAction" />
-		<ref bean="shippingInformationCheckoutAction" />
-		<ref bean="giftCertificateBalanceCheckerCheckoutAction" />
-		<ref bean="stockCheckerCheckoutAction" />
+		<ref bean="removeEmptyGiftCardsCheckoutAction" />
+		<ref bean="validationCheckoutAction" />
 		<ref bean="updateCustomerCheckoutAction" />
 	</util:list>
 
@@ -90,7 +90,7 @@
 		<property name="orderService" ref="orderService"/>
 		<property name="checkoutService" ref="checkoutService"/>
 		<property name="paymentService" ref="paymentService"/>
-		<property name="shippingServiceLevelService" ref="shippingServiceLevelService"/>
+		<property name="shippingOptionService" ref="shippingOptionService"/>
 		<property name="productSkuLookup" ref="productSkuLookup"/>
 		<property name="customerSessionService" ref="customerSessionService"/>
 		<property name="shopperService" ref="shopperService"/>
@@ -189,23 +189,6 @@
 		<property name="eventMessagePublisher" ref="orderEventMessagePublisher" />
 	</bean>
 
-	<bean id="shippingInformationCheckoutAction" class="com.elasticpath.service.shoppingcart.actions.impl.ShippingInformationCheckoutAction">
-		<property name="shippingServiceLevelService" ref="shippingServiceLevelService" />
-	</bean>
-
-	<bean id="giftCertificateBalanceCheckerCheckoutAction"
-		  class="com.elasticpath.service.shoppingcart.actions.impl.GiftCertificateBalanceCheckerCheckoutAction">
-		<property name="giftCertificateService" ref="giftCertificateService" />
-	</bean>
-
-	<bean id="stockCheckerCheckoutAction"
-		  class="com.elasticpath.service.shoppingcart.actions.impl.StockCheckerCheckoutAction">
-		<property name="allocationService" ref="allocationService" />
-		<property name="productInventoryShoppingService" ref="productInventoryShoppingService" />
-		<property name="productSkuLookup" ref="productSkuLookup"/>
-		<property name="messageSource" ref="coreMessageSource"/>
-	</bean>
-
 	<bean id="preCheckoutCheckoutAction"
 		  class="com.elasticpath.service.shoppingcart.actions.impl.PreCheckoutCheckoutAction">
 		<property name="checkoutEventHandler" ref="checkoutEventHandler" />
@@ -274,5 +257,15 @@
         class="com.elasticpath.commons.handlers.order.impl.ElectronicOrderShipmentHandler">
 		<property name="productSkuLookup" ref="productSkuLookup"/>
     </bean>
+
+	<bean id="validationCheckoutAction"
+		  class="com.elasticpath.service.shoppingcart.actions.impl.ValidationCheckoutAction">
+		<property name="validationService" ref="purchaseCartValidationService"/>
+	</bean>
+
+	<bean id="removeEmptyGiftCardsCheckoutAction"
+		  class="com.elasticpath.service.shoppingcart.actions.impl.RemoveEmptyGiftCardsCheckoutAction">
+		<property name="giftCertificateService" ref="giftCertificateService"/>
+	</bean>
 
 </beans>

@@ -30,6 +30,7 @@ import com.elasticpath.service.rules.dao.CouponUsageDao;
 @SuppressWarnings({ "PMD.AvoidDuplicateLiterals", "PMD.GodClass" })
 public class CouponUsageDaoImpl extends AbstractDaoImpl implements CouponUsageDao {
 
+	public static final String CANNOT_RETRIEVE_NULL_COUPON_CODE = "Cannot retrieve null coupon code.";
 	private PersistenceEngine persistenceEngine;
 	private TimeService timeService;
 
@@ -102,7 +103,7 @@ public class CouponUsageDaoImpl extends AbstractDaoImpl implements CouponUsageDa
 	public List<CouponUsage> findByCode(final String couponCode) throws EpServiceException {
 		sanityCheck();
 		if (couponCode == null) {
-			throw new EpServiceException("Cannot retrieve null coupon code.");
+			throw new EpServiceException(CANNOT_RETRIEVE_NULL_COUPON_CODE);
 		}
 
 		return getPersistenceEngine().retrieveByNamedQuery("COUPON_USAGE_FIND_BY_COUPON_CODE", couponCode);
@@ -123,7 +124,7 @@ public class CouponUsageDaoImpl extends AbstractDaoImpl implements CouponUsageDa
 	public int getUseCountByCodeAndEmailAddress(final String couponCode, final String emailAddress) {
 		sanityCheck();
 		if (couponCode == null) {
-			throw new EpServiceException("Cannot retrieve null coupon code.");
+			throw new EpServiceException(CANNOT_RETRIEVE_NULL_COUPON_CODE);
 		}
 
 		String nonEmptyEmailAddress = emailAddress;
@@ -148,7 +149,7 @@ public class CouponUsageDaoImpl extends AbstractDaoImpl implements CouponUsageDa
 	@Override
 	public Collection<CouponUsage> findByRuleCode(final String ruleCode) {
 		if (ruleCode == null) {
-			throw new EpServiceException("Cannot retrieve null coupon code.");
+			throw new EpServiceException(CANNOT_RETRIEVE_NULL_COUPON_CODE);
 		}
 
 		List<CouponUsage> results = getPersistenceEngine().retrieveByNamedQuery("COUPON_USAGE_FIND_BY_RULE_CODE", ruleCode);
@@ -162,7 +163,7 @@ public class CouponUsageDaoImpl extends AbstractDaoImpl implements CouponUsageDa
 	public CouponUsage findByCouponCodeAndEmail(final String couponCode,
 			final String customerEmailAddress) {
 		if (couponCode == null) {
-			throw new EpServiceException("Cannot retrieve null coupon code.");
+			throw new EpServiceException(CANNOT_RETRIEVE_NULL_COUPON_CODE);
 		}
 
 		if (StringUtils.isEmpty(customerEmailAddress)) {

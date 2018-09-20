@@ -6,7 +6,6 @@ package com.elasticpath.cmclient.admin.stores.editors;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Locale;
 import java.util.Set;
 
 import org.apache.log4j.Logger;
@@ -28,6 +27,7 @@ import org.eclipse.ui.forms.widgets.Section;
 import org.eclipse.ui.forms.widgets.TableWrapData;
 
 import com.elasticpath.cmclient.admin.stores.AdminStoresMessages;
+import com.elasticpath.cmclient.core.CorePlugin;
 import com.elasticpath.cmclient.core.ServiceLocator;
 import com.elasticpath.cmclient.core.editors.AbstractCmClientEditorPageSectionPart;
 import com.elasticpath.cmclient.core.editors.AbstractCmClientFormEditor;
@@ -348,7 +348,7 @@ public class StoreTaxesSectionPart extends AbstractCmClientEditorPageSectionPart
 			@Override
 			public String getText(final Object element) {
 				final TaxJurisdiction tax = (TaxJurisdiction) element;
-				return geography.getCountryDisplayName(tax.getRegionCode(), Locale.getDefault());
+				return geography.getCountryDisplayName(tax.getRegionCode(), CorePlugin.getDefault().getDefaultLocale());
 			}
 		}
 

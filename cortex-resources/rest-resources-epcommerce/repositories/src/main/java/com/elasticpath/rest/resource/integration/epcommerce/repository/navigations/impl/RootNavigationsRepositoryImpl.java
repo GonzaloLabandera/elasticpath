@@ -4,8 +4,6 @@
 
 package com.elasticpath.rest.resource.integration.epcommerce.repository.navigations.impl;
 
-import java.util.List;
-
 import io.reactivex.Observable;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -15,7 +13,7 @@ import com.elasticpath.repository.LinksRepository;
 import com.elasticpath.rest.definition.navigations.NavigationIdentifier;
 import com.elasticpath.rest.definition.navigations.NavigationsIdentifier;
 import com.elasticpath.rest.id.IdentifierPart;
-import com.elasticpath.rest.id.type.PathIdentifier;
+import com.elasticpath.rest.id.type.StringIdentifier;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.category.CategoryRepository;
 
 /**
@@ -46,7 +44,7 @@ public class RootNavigationsRepositoryImpl<N extends NavigationsIdentifier, I ex
 	 * @return navigation identifier
 	 */
 	protected NavigationIdentifier buildNavigationIdentifier(final NavigationsIdentifier identifier, final String nodeId) {
-		IdentifierPart<List<String>> rootId = PathIdentifier.of(nodeId);
+		IdentifierPart<String> rootId = StringIdentifier.of(nodeId);
 
 		return NavigationIdentifier.builder()
 				.withNavigations(identifier)

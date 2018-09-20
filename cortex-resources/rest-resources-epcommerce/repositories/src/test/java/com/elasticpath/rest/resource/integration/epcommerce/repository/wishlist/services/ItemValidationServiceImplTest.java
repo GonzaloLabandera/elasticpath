@@ -3,6 +3,7 @@
  */
 package com.elasticpath.rest.resource.integration.epcommerce.repository.wishlist.services;
 
+import static com.elasticpath.rest.resource.integration.epcommerce.repository.ResourceTestConstants.CART_GUID;
 import static org.mockito.Mockito.when;
 
 import static com.elasticpath.rest.resource.integration.epcommerce.repository.ErrorCheckPredicate.createErrorCheckPredicate;
@@ -14,11 +15,12 @@ import static com.elasticpath.rest.resource.integration.epcommerce.repository.wi
 
 import io.reactivex.Observable;
 import io.reactivex.Single;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.elasticpath.domain.catalog.ProductSku;
 import com.elasticpath.domain.shoppingcart.WishList;
@@ -26,7 +28,8 @@ import com.elasticpath.rest.ResourceOperationFailure;
 import com.elasticpath.rest.ResourceStatus;
 import com.elasticpath.rest.advise.Message;
 import com.elasticpath.rest.definition.wishlists.WishlistLineItemIdentifier;
-import com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder.ShoppingItemValidationService;
+import com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder.AddToCartAdvisorService;
+import com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder.ShoppingCartRepository;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.wishlist.WishlistRepository;
 
 /**
@@ -53,12 +56,19 @@ public class ItemValidationServiceImplTest {
 	private WishlistRepository wishlistRepository;
 
 	@Mock
-	private ShoppingItemValidationService shoppingItemValidationService;
+	private AddToCartAdvisorService addToCartAdvisorService;
 
+	@Mock
+	private ShoppingCartRepository shoppingCartRepository;
+
+
+	@Before
+	public void setUp() {
+		when(shoppingCartRepository.getDefaultShoppingCartGuid()).thenReturn(Single.just(CART_GUID));
+	}
 	@Test
 	public void verifyIsItemPurchasableReturnNotFoundWhenWishlistNotFound() {
 		when(wishlistRepository.getWishlist(WISHLIST_ID)).thenReturn(Single.error(ResourceOperationFailure.notFound(NOT_FOUND)));
-
 		service.isItemPurchasable(wishlistLineItemIdentifier)
 				.test()
 				.assertError(createErrorCheckPredicate(NOT_FOUND, ResourceStatus.NOT_FOUND));
@@ -79,10 +89,12 @@ public class ItemValidationServiceImplTest {
 		when(wishlistRepository.getWishlist(WISHLIST_ID)).thenReturn(Single.just(wishList));
 		when(wishlistRepository.getProductSku(wishList, LINE_ITEM_ID)).thenReturn(Single.just(productSku));
 		when(wishList.getStoreCode()).thenReturn(SCOPE);
-		when(shoppingItemValidationService.validateItemPurchasable(SCOPE, productSku))
+		when(addToCartAdvisorService.validateItemPurchasable(SCOPE, CART_GUID, productSku, null))
 				.thenReturn(Observable.error(ResourceOperationFailure.notFound(NOT_FOUND)));
 
-		service.isItemPurchasable(wishlistLineItemIdentifier)
+
+		Observable<Message> itemPurchasable = service.isItemPurchasable(wishlistLineItemIdentifier);
+		itemPurchasable
 				.test()
 				.assertError(createErrorCheckPredicate(NOT_FOUND, ResourceStatus.NOT_FOUND));
 	}
@@ -92,7 +104,7 @@ public class ItemValidationServiceImplTest {
 		when(wishlistRepository.getWishlist(WISHLIST_ID)).thenReturn(Single.just(wishList));
 		when(wishlistRepository.getProductSku(wishList, LINE_ITEM_ID)).thenReturn(Single.just(productSku));
 		when(wishList.getStoreCode()).thenReturn(SCOPE);
-		when(shoppingItemValidationService.validateItemPurchasable(SCOPE, productSku))
+		when(addToCartAdvisorService.validateItemPurchasable(SCOPE, CART_GUID, productSku, null))
 				.thenReturn(Observable.just(message));
 
 		service.isItemPurchasable(wishlistLineItemIdentifier)

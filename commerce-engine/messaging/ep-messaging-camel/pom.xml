@@ -7,17 +7,13 @@
 	<parent>
 		<groupId>com.elasticpath</groupId>
 		<artifactId>messaging</artifactId>
-		<version>702.0.0-SNAPSHOT</version>
+		<version>703.0.0-SNAPSHOT</version>
 	</parent>
 
 	<artifactId>ep-messaging-camel</artifactId>
 	<packaging>bundle</packaging>
 	<name>Messaging Camel Implementation</name>
 	<description>Elastic Path Messaging Implementation</description>
-
-	<properties>
-		<dependency.directory>lib</dependency.directory>
-	</properties>
 
 	<dependencies>
 		<dependency>
@@ -103,7 +99,6 @@
 		<dependency>
 			<groupId>org.apache.camel</groupId>
 			<artifactId>camel-core-xml</artifactId>
-			<version>${org.apache.camel.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.reflections</groupId>

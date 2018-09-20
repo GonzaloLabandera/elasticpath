@@ -32,7 +32,9 @@ public class BrandsTab extends CatalogEditor {
 	 * @return AddEditBrandDialog
 	 */
 	public AddEditBrandDialog clickAddBrandButton() {
-		clickButton("Add");
+		final String buttonName = "Add";
+		clickButton(String.format(BUTTON_CSS, buttonName), buttonName, String.format(AddEditBrandDialog.ADD_EDIT_BRAND_DIALOGCSS_TEMPLATE,
+				buttonName));
 		return new AddEditBrandDialog(getDriver(), "Add");
 	}
 
@@ -42,7 +44,7 @@ public class BrandsTab extends CatalogEditor {
 	 * @param brandCode the brandCode.
 	 */
 	public void verifyAndSelectBrand(final String brandCode) {
-		assertThat(selectItemInEditorPaneWithScrollBar(BRANDS_TABLE_PARENT_CSS, BRAND_COLUMN_CSS, brandCode))
+		assertThat(selectItemInEditorPaneWithScrollBar(BRANDS_TABLE_PARENT_CSS, BRANDS_TABLE_PARENT_CSS + BRAND_COLUMN_CSS, brandCode))
 				.as("Unable to find brand code - " + brandCode)
 				.isTrue();
 	}
@@ -51,8 +53,10 @@ public class BrandsTab extends CatalogEditor {
 	 * Clicks remove brand button.
 	 */
 	public void clickRemoveBrandButton() {
-		clickButton("Remove");
-		new ConfirmDialog(getDriver()).clickOKButton("catalog.CatalogMessages.CatalogBrandsSection_RemoveDialog_title");
+		final String buttonName = "Remove";
+		final String dialogAutomationId = "catalog.CatalogMessages.CatalogBrandsSection_RemoveDialog_title";
+		clickButton(String.format(BUTTON_CSS, buttonName), buttonName, String.format(ConfirmDialog.CONFIRM_OK_BUTTON_CSS, dialogAutomationId));
+		new ConfirmDialog(getDriver()).clickOKButton(dialogAutomationId);
 	}
 
 	/**
@@ -74,7 +78,7 @@ public class BrandsTab extends CatalogEditor {
 	 * @param brandName the brandCode.
 	 */
 	public void verifyAndSelectBrandByName(final String brandName) {
-		assertThat(selectItemInEditorPaneWithScrollBar(BRANDS_TABLE_PARENT_CSS, BRAND_COLUMN_CSS, brandName))
+		assertThat(selectItemInEditorPaneWithScrollBar(BRANDS_TABLE_PARENT_CSS, BRANDS_TABLE_PARENT_CSS + BRAND_COLUMN_CSS, brandName))
 				.as("Unable to find brand name - " + brandName)
 				.isTrue();
 	}
@@ -85,8 +89,10 @@ public class BrandsTab extends CatalogEditor {
 	 * @return AddEditBrandDialog
 	 */
 	public AddEditBrandDialog clickEditBrandButton() {
-		clickButton("Edit");
-		return new AddEditBrandDialog(getDriver(), "Edit");
+		final String dialogName = "Edit";
+		clickButton(String.format(BUTTON_CSS, dialogName), dialogName, String.format(AddEditBrandDialog.ADD_EDIT_BRAND_DIALOGCSS_TEMPLATE,
+				dialogName));
+		return new AddEditBrandDialog(getDriver(), dialogName);
 	}
 
 	/**

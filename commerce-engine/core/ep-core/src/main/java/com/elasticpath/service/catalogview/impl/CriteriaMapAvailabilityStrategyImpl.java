@@ -18,7 +18,7 @@ public class CriteriaMapAvailabilityStrategyImpl implements AvailabilityStrategy
 	private Map<AvailabilityCriteria, Availability> criteriaMap;
 	
 	@Override
-	public Availability getAvailability(final Product product, final boolean isAvailable, final boolean isDisplayable, final boolean isPuchaseable) {
+	public Availability getAvailability(final Product product, final boolean isAvailable, final boolean isDisplayable) {
 		return getCriteriaMap().get(product.getAvailabilityCriteria());
 	}
 

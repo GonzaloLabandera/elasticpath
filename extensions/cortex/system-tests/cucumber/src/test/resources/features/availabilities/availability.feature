@@ -7,7 +7,7 @@ Feature: Item availability
   Background:
     Given I am logged in as a public shopper
 
-  Scenario Outline: An item availibility is based on stock
+  Scenario Outline: An item availability is based on stock
     When I look up an item with code <ITEM>
     And I view the item availability
     Then The availability should be <AVAILABILITY>
@@ -55,3 +55,24 @@ Feature: Item availability
     Examples:
       | AVAILABLE_ITEM                |
       | multiSkuProduct-available-sku |
+
+  Scenario Outline: User should not be able to add unavailable items to cart
+    Given I am logged into scope mobee as a public shopper
+    When Adding an item with item code <AVAILABLE_ITEM> and quantity 5000000 to the cart
+    Then the HTTP status is bad request
+    And Structured error message contains:
+      | Item '<AVAILABLE_ITEM>' only has 10 available but 5000000 were requested. |
+
+    Examples:
+      | AVAILABLE_ITEM |
+      | sony_bt_sku    |
+
+  Scenario Outline: Verifying an item availability after adding to cart
+    Given I am logged into scope mobee as a public shopper
+    When I add item with code <SKU_CODE> to my cart with quantity 1
+    And I view the item availability
+    Then The availability should be AVAILABLE
+
+    Examples:
+      | SKU_CODE    |
+      | sony_bt_sku |

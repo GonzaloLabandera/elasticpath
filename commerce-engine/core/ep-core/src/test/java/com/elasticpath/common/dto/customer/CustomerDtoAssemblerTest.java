@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) Elastic Path Software Inc., 2012
  */
 package com.elasticpath.common.dto.customer;
@@ -11,7 +11,6 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.unitils.reflectionassert.ReflectionAssert.assertReflectionEquals;
 
-import java.util.Arrays;
 import java.util.Currency;
 import java.util.Date;
 import java.util.HashSet;
@@ -29,11 +28,7 @@ import org.junit.Test;
 import org.unitils.reflectionassert.ReflectionComparatorMode;
 
 import com.elasticpath.common.dto.AddressDTO;
-import com.elasticpath.common.dto.assembler.customer.BuiltinFilters;
-import com.elasticpath.common.dto.customer.builder.CreditCardDTOBuilder;
 import com.elasticpath.common.dto.customer.builder.CustomerDTOBuilder;
-import com.elasticpath.common.dto.customer.builder.LegacyCreditCardDTOBuilder;
-import com.elasticpath.common.dto.customer.transformer.CreditCardDTOTransformer;
 import com.elasticpath.commons.beanframework.BeanFactory;
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.commons.util.Utility;
@@ -43,11 +38,9 @@ import com.elasticpath.domain.attribute.CustomerProfileValue;
 import com.elasticpath.domain.customer.Customer;
 import com.elasticpath.domain.customer.CustomerAddress;
 import com.elasticpath.domain.customer.CustomerAuthentication;
-import com.elasticpath.domain.customer.CustomerCreditCard;
 import com.elasticpath.domain.customer.CustomerGroup;
 import com.elasticpath.domain.customer.impl.CustomerAddressImpl;
 import com.elasticpath.domain.customer.impl.CustomerAuthenticationImpl;
-import com.elasticpath.domain.customer.impl.CustomerCreditCardImpl;
 import com.elasticpath.domain.customer.impl.CustomerGroupImpl;
 import com.elasticpath.domain.customer.impl.CustomerImpl;
 import com.elasticpath.domain.misc.impl.RandomGuidImpl;
@@ -55,7 +48,6 @@ import com.elasticpath.service.customer.CustomerGroupService;
 import com.elasticpath.test.BeanFactoryExpectationsFactory;
 import com.elasticpath.test.factory.CustomerAddressBuilder;
 import com.elasticpath.test.factory.CustomerBuilder;
-import com.elasticpath.test.factory.CustomerCreditCardBuilder;
 
 /**
  * Test {@link CustomerDtoAssembler} functionality.
@@ -67,10 +59,6 @@ public class CustomerDtoAssemblerTest {
 
 	private static final String EXPECTED_DOMAIN_OBJECT_SHOULD_EQUAL_ACTUAL =
 			"The assembled customer domain object should be equal to the expected customer domain object.";
-
-	private static final String CREDIT_CARD_TYPE_VISA = "VISA";
-
-	private static final String CREDIT_CARD_GUID = "CREDIT_CARD_GUID";
 
 	private static final String DEFAULT_CUSTOMER_GROUP_GUID = "DEFAULT_CUSTOMER_GROUP_GUID";
 
@@ -113,8 +101,6 @@ public class CustomerDtoAssemblerTest {
 		}
 	};
 
-	private BeanFactory beanFactory;
-
 	private BeanFactoryExpectationsFactory expectationsFactory;
 
 	private CustomerDtoAssembler customerDtoAssembler;
@@ -131,8 +117,6 @@ public class CustomerDtoAssemblerTest {
 
 	private CustomerGroup customerGroup;
 
-	private CreditCardDTOTransformer creditCardDTOTransformer;
-
 	private final Utility utility = new UtilityImpl() {
 		private static final long serialVersionUID = 1L;
 
@@ -147,32 +131,26 @@ public class CustomerDtoAssemblerTest {
 	 */
 	@Before
 	public void setUp() {
-		beanFactory = context.mock(BeanFactory.class);
+		BeanFactory beanFactory = context.mock(BeanFactory.class);
 		expectationsFactory = new BeanFactoryExpectationsFactory(context, beanFactory);
 
-		creditCardDTOTransformer = context.mock(CreditCardDTOTransformer.class);
-
-		expectationsFactory.allowingBeanFactoryGetBean(ContextIdNames.RANDOM_GUID, RandomGuidImpl.class);
-		expectationsFactory.allowingBeanFactoryGetBean(ContextIdNames.UTILITY, utility);
-
-		expectationsFactory.allowingBeanFactoryGetBean(ContextIdNames.CUSTOMER_ADDRESS, CustomerAddressImpl.class);
-		expectationsFactory.allowingBeanFactoryGetBean(ContextIdNames.CUSTOMER_CREDIT_CARD, CustomerCreditCardImpl.class);
-		expectationsFactory.allowingBeanFactoryGetBean(ContextIdNames.CUSTOMER_AUTHENTICATION, CustomerAuthenticationImpl.class);
-
-		customerDtoAssembler = new CustomerDtoAssembler();
-		customerDtoAssembler.setBeanFactory(beanFactory);
-		customerDtoAssembler.setCardFilter(BuiltinFilters.STATIC);
-
-		customerGroupService = context.mock(CustomerGroupService.class);
-		customerDtoAssembler.setCustomerGroupService(customerGroupService);
-
-		customerDtoAssembler.setCreditCardDTOTransformer(creditCardDTOTransformer);
 
 		creationDate = new Date();
 		lastEditDate = creationDate;
 		address = createAddress();
 		defaultCustomerGroup = createDefaultCustomerGroup();
 		customerGroup = createCustomerGroup();
+		expectationsFactory.allowingBeanFactoryGetBean(ContextIdNames.RANDOM_GUID, RandomGuidImpl.class);
+		expectationsFactory.allowingBeanFactoryGetBean(ContextIdNames.UTILITY, utility);
+
+		expectationsFactory.allowingBeanFactoryGetBean(ContextIdNames.CUSTOMER_ADDRESS, CustomerAddressImpl.class);
+		expectationsFactory.allowingBeanFactoryGetBean(ContextIdNames.CUSTOMER_AUTHENTICATION, CustomerAuthenticationImpl.class);
+
+		customerDtoAssembler = new CustomerDtoAssembler();
+		customerDtoAssembler.setBeanFactory(beanFactory);
+
+		customerGroupService = context.mock(CustomerGroupService.class);
+		customerDtoAssembler.setCustomerGroupService(customerGroupService);
 	}
 
 	/**
@@ -188,21 +166,13 @@ public class CustomerDtoAssemblerTest {
 	 */
 	@Test
 	public void testCustomerAssembleDtoFromDomainObject() {
-		CustomerCreditCard testCreditCard = createCreditCard(CREDIT_CARD_GUID, CREDIT_CARD_TYPE_VISA);
-
-		CreditCardDTO expectedCreditCardDto = createTestCreditCardDtoFromCreditCard(testCreditCard);
 		CustomerDTO expectedCustomerDTO = createTestCustomerDtoBuilder()
-				.withPaymentMethods(expectedCreditCardDto)
-				.withDefaultPaymentMethod(expectedCreditCardDto)
 				.build();
 
-		shouldTransformCreditCardToDto(testCreditCard, expectedCreditCardDto);
-
-		Customer customerWithCreditCards = createCustomerWithCreditCards(testCreditCard);
-		customerWithCreditCards.getPaymentMethods().setDefault(testCreditCard);
+		Customer customer = createCustomer();
 
 		CustomerDTO customerDTO = new CustomerDTO();
-		customerDtoAssembler.assembleDto(customerWithCreditCards, customerDTO);
+		customerDtoAssembler.assembleDto(customer, customerDTO);
 
 		assertReflectionEquals(EXPECTED_DTO_SHOULD_EQUAL_ACTUAL, expectedCustomerDTO, customerDTO, ReflectionComparatorMode.LENIENT_ORDER);
 	}
@@ -215,7 +185,7 @@ public class CustomerDtoAssemblerTest {
 		CustomerDTO expectedCustomerDto = createTestCustomerDtoBuilder().build();
 		expectedCustomerDto.setPreferredBillingAddressGuid(null);
 
-		Customer customer = createCustomerWithCreditCards();
+		Customer customer = createCustomer();
 		customer.setPreferredBillingAddress(null);
 
 		CustomerDTO customerDto = new CustomerDTO();
@@ -234,7 +204,7 @@ public class CustomerDtoAssemblerTest {
 		CustomerDTO expectedCustomerDto = createTestCustomerDtoBuilder().build();
 		expectedCustomerDto.setPreferredShippingAddressGuid(null);
 
-		Customer customer = createCustomerWithCreditCards();
+		Customer customer = createCustomer();
 		customer.setPreferredShippingAddress(null);
 
 		CustomerDTO customerDto = new CustomerDTO();
@@ -246,49 +216,18 @@ public class CustomerDtoAssemblerTest {
 	}
 
 	/**
-	 * Test customer DTO assembly does not use credit card when card type not populated with a recognized card type on the domain object being
-	 * translated.
-	 */
-	@Test
-	public void testCustomerAssembleDtoDoesNotUseCreditCardWhenCardTypeNotPopulatedWithRecognizedCardType() {
-		CustomerCreditCard creditCard = createCreditCard(CREDIT_CARD_GUID, CREDIT_CARD_TYPE_VISA);
-		CreditCardDTO expectedCreditCard = createTestCreditCardDtoFromCreditCard(creditCard);
-
-		CustomerDTO expectedCustomerDto = createTestCustomerDtoBuilder()
-				.withPaymentMethods(expectedCreditCard)
-				.withDefaultPaymentMethod(expectedCreditCard)
-				.build();
-
-		Customer customer = createCustomerWithCreditCards(creditCard);
-		customer.getCreditCards().get(0).setCardType("UNKNOWN_CARD_TYPE");
-
-		shouldTransformCreditCardToDto(creditCard, expectedCreditCard);
-		CustomerDTO customerDto = new CustomerDTO();
-
-		customerDtoAssembler.assembleDto(customer, customerDto);
-
-		assertReflectionEquals(EXPECTED_DTO_SHOULD_EQUAL_ACTUAL, expectedCustomerDto, customerDto, ReflectionComparatorMode.LENIENT_ORDER);
-	}
-
-	/**
 	 * Test customer domain assembly from DTO.
 	 */
 	@Test
 	public void testCustomerDomainAssemblyFromDto() {
 		shouldFindDefaultCustomerGroupByName();
 		shouldFindCustomerGroupsByGuid();
-		CustomerCreditCard expectedCreditCard = createCreditCard(CREDIT_CARD_GUID, CREDIT_CARD_TYPE_VISA);
-		Customer expectedCustomer = createCustomerWithCreditCards(expectedCreditCard);
+		Customer expectedCustomer = createCustomer();
 
-		CreditCardDTO creditCardDTO = createTestCreditCardDtoFromCreditCard(expectedCreditCard);
-
-		CustomerDTO customerDto = createTestCustomerDtoBuilder()
-				.withPaymentMethods(creditCardDTO)
-				.build();
+		CustomerDTO customerDto = createTestCustomerDtoBuilder().build();
 
 		Customer customer = CustomerBuilder.newCustomer().build();
 
-		shouldTransformCreditCardDtoToDomain(creditCardDTO, expectedCreditCard);
 		customerDtoAssembler.assembleDomain(customerDto, customer);
 
 		assertReflectionEquals(EXPECTED_DOMAIN_OBJECT_SHOULD_EQUAL_ACTUAL, expectedCustomer, customer, ReflectionComparatorMode.LENIENT_DATES);
@@ -303,7 +242,7 @@ public class CustomerDtoAssemblerTest {
 		shouldFindDefaultCustomerGroupByName();
 		shouldFindCustomerGroupsByGuid();
 
-		Customer expectedCustomer = createCustomerWithCreditCards();
+		Customer expectedCustomer = createCustomer();
 
 		CustomerDTO customerDto = createTestCustomerDtoBuilder()
 				.withAddresses(createAddressDto(address))
@@ -315,37 +254,6 @@ public class CustomerDtoAssemblerTest {
 
 		assertReflectionEquals(EXPECTED_DOMAIN_OBJECT_SHOULD_EQUAL_ACTUAL, expectedCustomer, customer, ReflectionComparatorMode.LENIENT_DATES);
 		assertEquals("The domain object should have no duplicate addresses", 1, customer.getAddresses().size());
-	}
-
-	/**
-	 * Test customer assemble domain creates multiple credit cards when assembling domain object.
-	 */
-	@Test
-	public void testCustomerAssembleDomainCreatesMultipleCreditCardsWhenAssemblingDomainObject() {
-		shouldFindDefaultCustomerGroupByName();
-		shouldFindCustomerGroupsByGuid();
-
-		CustomerCreditCard expectedCreditCard = createCreditCard(CREDIT_CARD_GUID, CREDIT_CARD_TYPE_VISA);
-		CustomerCreditCard expectedAlternateCreditCard = createCreditCard("ALTERNATE_CARD_GUID", "MASTERCARD");
-
-		Customer expectedCustomer = createCustomerWithCreditCards(expectedCreditCard, expectedAlternateCreditCard);
-		expectedCustomer.getPaymentMethods().setDefault(expectedCreditCard);
-
-		CreditCardDTO creditCardDto = createTestCreditCardDtoFromCreditCard(expectedCreditCard);
-		CreditCardDTO alternativeCreditCardDto = createTestCreditCardDtoFromCreditCard(expectedAlternateCreditCard);
-		CustomerDTO customerDto = createTestCustomerDtoBuilder()
-				.withPaymentMethods(creditCardDto, alternativeCreditCardDto)
-				.build();
-
-		Customer customer = CustomerBuilder.newCustomer().build();
-
-		shouldTransformCreditCardDtoToDomain(creditCardDto, expectedCreditCard);
-		shouldTransformCreditCardDtoToDomain(alternativeCreditCardDto, expectedAlternateCreditCard);
-
-		customerDtoAssembler.assembleDomain(customerDto, customer);
-
-		assertReflectionEquals(EXPECTED_DOMAIN_OBJECT_SHOULD_EQUAL_ACTUAL, expectedCustomer, customer, ReflectionComparatorMode.LENIENT_DATES);
-		assertEquals("The domain object should have two credit cards.", 2, customer.getCreditCards().size());
 	}
 
 	/**
@@ -398,7 +306,7 @@ public class CustomerDtoAssemblerTest {
 		shouldFindDefaultCustomerGroupByName();
 		shouldFindCustomerGroupsByGuid();
 
-		Customer expectedCustomer = createCustomerWithCreditCards();
+		Customer expectedCustomer = createCustomer();
 
 		CustomerDTO customerDto = createTestCustomerDtoBuilder()
 				.withGroups(CUSTOMER_GROUP_GUID, customerGroup.getGuid())
@@ -422,45 +330,12 @@ public class CustomerDtoAssemblerTest {
 		Customer customer = CustomerBuilder.newCustomer().build();
 		CustomerDTO customerDto = new CustomerDTO();
 
-		customerDtoAssembler.setCardFilter(null);
 		customerDtoAssembler.assembleDto(customer, customerDto);
-
-		assertEquals("The card filter should use the EMPTYING built in filter if none set.",
-				BuiltinFilters.EMPTYING,
-				customerDtoAssembler.getCardFilter());
-	}
-
-	/**
-	 * Test legacy credit cards are stil assembled correctly on a {@link CustomerDTO}.
-	 */
-	@Test
-	public void testCustomerDtoAssemblerAssemblesLegacyCreditCardDtos() {
-		shouldFindDefaultCustomerGroupByName();
-		shouldFindCustomerGroupsByGuid();
-
-		CustomerCreditCard expectedCreditCard = createCreditCard(CREDIT_CARD_GUID, CREDIT_CARD_TYPE_VISA);
-		Customer expectedCustomer = createCustomerWithCreditCards(expectedCreditCard);
-
-		LegacyCreditCardDTO legacyCreditCardDto = new LegacyCreditCardDTOBuilder()
-				.withGuid(CREDIT_CARD_GUID)
-				.withCardType(CREDIT_CARD_TYPE_VISA)
-				.build();
-
-		CustomerDTO customerDto = createTestCustomerDtoBuilder()
-				.withCreditCards(legacyCreditCardDto)
-				.build();
-
-		shouldTransformCreditCardDtoToDomain(legacyCreditCardDto, expectedCreditCard);
-
-		Customer customer = CustomerBuilder.newCustomer().build();
-		customerDtoAssembler.assembleDomain(customerDto, customer);
-
-		assertReflectionEquals(EXPECTED_DOMAIN_OBJECT_SHOULD_EQUAL_ACTUAL, expectedCustomer, customer, ReflectionComparatorMode.LENIENT_DATES);
 	}
 
 	@Test
 	public void testCustomerDtoAssemblerAssemblesCustomerProfileValuesWithCreationDate() {
-		Customer customer = createCustomerWithCreditCards();
+		Customer customer = CustomerBuilder.newCustomer().build();
 		customer.setPreferredShippingAddress(null);
 
 		Date creationDate = new Date();
@@ -533,25 +408,7 @@ public class CustomerDtoAssemblerTest {
 		});
 	}
 
-	private void shouldTransformCreditCardToDto(final CustomerCreditCard creditCard, final CreditCardDTO creditCardDTO) {
-		context.checking(new Expectations() {
-			{
-				allowing(creditCardDTOTransformer).transformToDto(creditCard);
-				will(returnValue(creditCardDTO));
-			}
-		});
-	}
-
-	private void shouldTransformCreditCardDtoToDomain(final CreditCardDTO creditCardDTO, final CustomerCreditCard creditCard) {
-		context.checking(new Expectations() {
-			{
-				allowing(creditCardDTOTransformer).transformToDomain(with(creditCardDTO));
-				will(returnValue(creditCard));
-			}
-		});
-	}
-
-	private Customer createCustomerWithCreditCards(final CustomerCreditCard... creditCards) {
+	private Customer createCustomer() {
 		return CustomerBuilder.newCustomer()
 			.withGuid(CUSTOMER_GUID)
 			.withCreationDate(creationDate)
@@ -579,7 +436,6 @@ public class CustomerDtoAssemblerTest {
 			.withToBeNotified(true)
 			.withHtmlEmailPreferred(true)
 			.withFaxNumber(FAX_NUMBER)
-			.withCreditCards(Arrays.asList(creditCards))
 			.withFirstTimeBuyer(false)
 			.build();
 	}
@@ -608,20 +464,6 @@ public class CustomerDtoAssemblerTest {
 		customerGroup.setName("CUSTOMER_GROUP_NAME");
 
 		return customerGroup;
-	}
-
-	private CustomerCreditCard createCreditCard(final String cardGuid, final String cardType) {
-		return CustomerCreditCardBuilder.newCustomerCreditCard()
-				.withGuid(cardGuid)
-				.withCardType(cardType)
-				.build();
-	}
-
-	private CreditCardDTO createTestCreditCardDtoFromCreditCard(final CustomerCreditCard creditCard) {
-		return new CreditCardDTOBuilder()
-				.withGuid(creditCard.getGuid())
-				.withCardType(creditCard.getCardType())
-				.build();
 	}
 
 	private CustomerAddress createAddress() {

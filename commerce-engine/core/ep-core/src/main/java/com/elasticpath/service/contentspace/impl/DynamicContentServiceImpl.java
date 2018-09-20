@@ -73,7 +73,7 @@ public class DynamicContentServiceImpl extends AbstractTargetedSellingServiceImp
 	@Override
 	public List<DynamicContent> findAll() throws EpServiceException {
 		sanityCheck();
-		return getPersistenceEngine().retrieveByNamedQuery("DYNAMIC_CONTENT_SELECT_ALL");
+		return getPersistenceEngine().retrieveByNamedQuery(QUERY_FIND_ALL);
 	}
 
 	@Override
@@ -101,7 +101,7 @@ public class DynamicContentServiceImpl extends AbstractTargetedSellingServiceImp
 			throw new EpServiceException("Cannot retrieve content with null name.");
 		}
 
-		final List<DynamicContent> results = getPersistenceEngine().retrieveByNamedQuery("DYNAMIC_CONTENT_FIND_BY_NAME",
+		final List<DynamicContent> results = getPersistenceEngine().retrieveByNamedQuery(QUERY_FIND_BY_NAME,
 				escapeSpecialCharacters(name));
 		DynamicContent dynamicContent = null;
 		if (results.size() == 1) {
@@ -115,7 +115,7 @@ public class DynamicContentServiceImpl extends AbstractTargetedSellingServiceImp
 	@Override
 	public List<DynamicContent> findByNameLike(final String string) throws EpServiceException {
 		sanityCheck();
-		return getPersistenceEngine().retrieveByNamedQuery("DYNAMIC_CONTENT_FIND_BY_NAME_LIKE",
+		return getPersistenceEngine().retrieveByNamedQuery(QUERY_FIND_BY_NAME_LIKE,
 				"%" + escapeSpecialCharacters(string) + "%");
 	}
 

@@ -16,8 +16,8 @@ public interface CustomerPersonalDataReportingService {
 	 * The method is called by CM's CustomerPersonalDataService service.
 	 *
 	 * @param storeCode the store code
-	 * @param customerUid the customer UidPk
+	 * @param userId the customer UidPk
 	 * @return the list of rows with all data points belonging to the specified customer.
 	 */
-	Collection<Object[]> getData(String storeCode, Long customerUid);
+	Collection<Object[]> getData(String storeCode, String userId);
 }

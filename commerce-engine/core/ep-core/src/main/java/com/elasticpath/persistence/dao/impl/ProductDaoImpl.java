@@ -49,9 +49,10 @@ public class ProductDaoImpl extends AbstractDaoImpl implements ProductDao {
 	protected static final String PRODUCT_UIDS_BY_SKU_UIDS_QUERY = "PRODUCT_UIDS_FOR_SKU_UIDS";
 	/** The named query that retrieves a product uid given the corresponding sku guid. */
 	protected static final String PRODUCT_UID_BY_SKU_GUID_QUERY = "PRODUCT_UID_BY_SKU_GUID";
+	/** The named query that retrieves a list of product uids given the corresponding sku guids. */
+	protected static final String PRODUCT_UIDS_BY_SKU_GUIDS_QUERY = "PRODUCT_UIDS_BY_SKU_GUIDS";
 	/** The named query that retrieves a list of product uids given the corresponding sku codes. */
 	protected static final String PRODUCT_UIDS_BY_SKU_CODES_QUERY = "PRODUCT_UIDS_BY_SKUCODES";
-
 
 	private static final String PLACEHOLDER_FOR_LIST = "list";
 
@@ -840,7 +841,7 @@ public class ProductDaoImpl extends AbstractDaoImpl implements ProductDao {
 	public List<Long> findUidsBySkuCodes(final Collection<String> skuCodes) {
 		return getPersistenceEngine().retrieveByNamedQueryWithList(
 				PRODUCT_UIDS_BY_SKU_CODES_QUERY,
-				"skuCodes", skuCodes);
+				PLACEHOLDER_FOR_LIST, skuCodes);
 	}
 
 	@Override
@@ -884,6 +885,13 @@ public class ProductDaoImpl extends AbstractDaoImpl implements ProductDao {
 		}
 
 		return productUids.get(0);
+	}
+
+	@Override
+	public List<Long> findUidsBySkuGuids(final Collection<String> skuGuids) {
+		return getPersistenceEngine().retrieveByNamedQueryWithList(
+				PRODUCT_UIDS_BY_SKU_GUIDS_QUERY,
+				PLACEHOLDER_FOR_LIST, skuGuids);
 	}
 
 	/**

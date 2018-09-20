@@ -11,13 +11,14 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
+import io.reactivex.Maybe;
 import io.reactivex.Single;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.elasticpath.domain.catalog.Product;
 import com.elasticpath.domain.catalog.impl.ProductImpl;
@@ -180,8 +181,8 @@ public class SearchRepositoryImplTest {
 
 	@Test
 	public void ensureGetDefaultPageSize() {
-		when(settingsRepository.getStringSettingValue(PAGINATION_SETTING, STORE_CODE))
-				.thenReturn(Single.just(String.valueOf(DEFAULT_PAGE_SIZE)));
+		when(settingsRepository.getSetting(PAGINATION_SETTING, STORE_CODE))
+				.thenReturn(Maybe.just(DEFAULT_PAGE_SIZE));
 
 		Single<Integer> result = repository.getDefaultPageSize(STORE_CODE);
 		result.test().assertComplete().assertNoErrors().assertValue(DEFAULT_PAGE_SIZE);
@@ -189,8 +190,8 @@ public class SearchRepositoryImplTest {
 
 	@Test
 	public void ensureGetDefaultPageSizeWithInvalidStoreCode() {
-		when(settingsRepository.getStringSettingValue(PAGINATION_SETTING, STORE_CODE))
-				.thenReturn(Single.error(ResourceOperationFailure.notFound()));
+		when(settingsRepository.getSetting(PAGINATION_SETTING, STORE_CODE))
+				.thenReturn(Maybe.empty());
 
 		Single<Integer> result = repository.getDefaultPageSize(STORE_CODE);
 		result.test()
@@ -203,8 +204,8 @@ public class SearchRepositoryImplTest {
 
 	@Test
 	public void ensureGetDefaultPageSizeWithMissingSetting() {
-		when(settingsRepository.getStringSettingValue(PAGINATION_SETTING, STORE_CODE))
-				.thenReturn(Single.error(ResourceOperationFailure.serverError("Error reading setting")));
+		when(settingsRepository.getSetting(PAGINATION_SETTING, STORE_CODE))
+				.thenReturn(Maybe.error(ResourceOperationFailure.serverError("Error reading setting")));
 
 		Single<Integer> result = repository.getDefaultPageSize(STORE_CODE);
 		result.test()
@@ -217,8 +218,8 @@ public class SearchRepositoryImplTest {
 
 	@Test
 	public void ensureGetDefaultPageSizeWithNegativePageSize() {
-		when(settingsRepository.getStringSettingValue(PAGINATION_SETTING, STORE_CODE))
-				.thenReturn(Single.just("-1"));
+		when(settingsRepository.getSetting(PAGINATION_SETTING, STORE_CODE))
+				.thenReturn(Maybe.just(-1));
 
 		Single<Integer> result = repository.getDefaultPageSize(STORE_CODE);
 		result.test()
@@ -229,17 +230,4 @@ public class SearchRepositoryImplTest {
 				);
 	}
 
-	@Test
-	public void ensureGetDefaultPageSizeWithNonNumericPageSize() {
-		when(settingsRepository.getStringSettingValue(PAGINATION_SETTING, STORE_CODE))
-				.thenReturn(Single.just("blarg"));
-
-		Single<Integer> result = repository.getDefaultPageSize(STORE_CODE);
-		result.test()
-				.assertFailure(ResourceOperationFailure.class)
-				.assertFailure(
-						throwable -> ResourceStatus.SERVER_ERROR
-								.equals(((ResourceOperationFailure) throwable).getResourceStatus())
-				);
-	}
 }

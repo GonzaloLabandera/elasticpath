@@ -15,7 +15,6 @@ import javax.mail.Message;
 import cucumber.api.java.en.Then;
 import org.apache.velocity.tools.generic.DateTool;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.ContextConfiguration;
 
 import com.elasticpath.domain.builder.customer.CustomerBuilder;
 import com.elasticpath.domain.customer.Customer;
@@ -24,7 +23,6 @@ import com.elasticpath.uat.ScenarioContextValueHolder;
 /**
  * Step Definitions for customer email functionality.
  */
-@ContextConfiguration("classpath:cucumber.xml")
 public class CustomerEmailStepDefinitions {
 
 	private static final String CREATION_DATE_FORMAT_STRING = "MMMM d, yyyy";

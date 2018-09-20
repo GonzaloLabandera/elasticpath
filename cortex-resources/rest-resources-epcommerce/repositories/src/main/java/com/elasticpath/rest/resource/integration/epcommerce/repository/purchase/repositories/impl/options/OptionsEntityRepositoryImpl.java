@@ -3,6 +3,8 @@
  */
 package com.elasticpath.rest.resource.integration.epcommerce.repository.purchase.repositories.impl.options;
 
+import java.util.List;
+
 import com.google.common.annotations.VisibleForTesting;
 import io.reactivex.Observable;
 import org.osgi.service.component.annotations.Component;
@@ -10,11 +12,12 @@ import org.osgi.service.component.annotations.Reference;
 
 import com.elasticpath.repository.LinksRepository;
 import com.elasticpath.rest.ResourceOperationFailure;
+import com.elasticpath.rest.definition.purchases.PurchaseIdentifier;
+import com.elasticpath.rest.definition.purchases.PurchaseLineItemIdentifier;
 import com.elasticpath.rest.definition.purchases.PurchaseLineItemOptionIdentifier;
 import com.elasticpath.rest.definition.purchases.PurchaseLineItemOptionsIdentifier;
-import com.elasticpath.rest.id.type.PathIdentifier;
 import com.elasticpath.rest.id.type.StringIdentifier;
-import com.elasticpath.rest.resource.integration.epcommerce.repository.sku.ProductSkuRepository;
+import com.elasticpath.rest.resource.integration.epcommerce.repository.order.OrderRepository;
 
 /**
  * This repository returns a lit of options given `options` identifier.
@@ -31,14 +34,16 @@ public class OptionsEntityRepositoryImpl<OSI extends PurchaseLineItemOptionsIden
 	 */
 	@VisibleForTesting
 	static final String OPTIONS_NOT_FOUND = "No options found for line item.";
-
-	private ProductSkuRepository productSkuRepository;
+	private OrderRepository orderRepository;
 
 	@Override
 	public Observable<PurchaseLineItemOptionIdentifier> getElements(final PurchaseLineItemOptionsIdentifier identifier) {
-		String lineItemId = ((PathIdentifier) identifier.getPurchaseLineItem().getLineItemId()).extractLeafId();
-
-		return productSkuRepository.getProductSkuWithAttributesByGuidAsSingle(lineItemId)
+		PurchaseLineItemIdentifier purchaseLineItemIdentifier = identifier.getPurchaseLineItem();
+		List<String> guidPathFromRootItem = purchaseLineItemIdentifier.getLineItemId().getValue();
+		PurchaseIdentifier purchaseIdentifier = purchaseLineItemIdentifier.getPurchaseLineItems().getPurchase();
+		String scope = purchaseIdentifier.getPurchases().getScope().getValue();
+		String purchaseId = purchaseIdentifier.getPurchaseId().getValue();
+		return orderRepository.findProductSku(scope, purchaseId, guidPathFromRootItem)
 				.flatMapObservable(productSku -> Observable.fromIterable(productSku.getOptionValueCodes()))
 				.map(optionId -> buildPurchaseLineItemOptionIdentifier(identifier, optionId))
 				.switchIfEmpty(Observable.error(ResourceOperationFailure.notFound(OPTIONS_NOT_FOUND)));
@@ -61,8 +66,7 @@ public class OptionsEntityRepositoryImpl<OSI extends PurchaseLineItemOptionsIden
 	}
 
 	@Reference
-	public void setProductSkuRepository(final ProductSkuRepository productSkuRepository) {
-		this.productSkuRepository = productSkuRepository;
+	public void setOrderRepository(final OrderRepository orderRepository) {
+		this.orderRepository = orderRepository;
 	}
-
 }

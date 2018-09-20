@@ -3,19 +3,21 @@
  */
 package com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder.repositories;
 
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.when;
-
 import static com.elasticpath.rest.resource.integration.epcommerce.repository.ResourceTestConstants.CART_GUID;
 import static com.elasticpath.rest.resource.integration.epcommerce.repository.ResourceTestConstants.SCOPE;
 import static com.elasticpath.rest.resource.integration.epcommerce.repository.ResourceTestConstants.SKU_CODE;
+import static org.mockito.Mockito.when;
 
+import java.util.Collections;
+import java.util.Map;
+
+import io.reactivex.Observable;
 import io.reactivex.Single;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.elasticpath.domain.catalog.ProductSku;
 import com.elasticpath.domain.shoppingcart.ShoppingCart;
@@ -23,6 +25,7 @@ import com.elasticpath.domain.shoppingcart.ShoppingItem;
 import com.elasticpath.domain.store.Store;
 import com.elasticpath.rest.definition.carts.CartIdentifier;
 import com.elasticpath.rest.definition.items.ItemIdentifier;
+import com.elasticpath.rest.id.IdentifierPart;
 import com.elasticpath.rest.id.transform.IdentifierTransformer;
 import com.elasticpath.rest.id.transform.IdentifierTransformerProvider;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.IdentifierTestFactory;
@@ -35,6 +38,7 @@ import com.elasticpath.rest.resource.integration.epcommerce.repository.item.Item
 @RunWith(MockitoJUnitRunner.class)
 public class CartsForItemRepositoryTest {
 
+	public static final String LINE_ITEM_SKU_CODE = "LINE_ITEM_SKU_CODE_1234";
 	@InjectMocks
 	private CartsForItemRepository<ItemIdentifier, CartIdentifier> repository;
 	@Mock
@@ -48,7 +52,7 @@ public class CartsForItemRepositoryTest {
 	@Mock
 	private IdentifierTransformerProvider identifierTransformerProvider;
 	@Mock
-	private IdentifierTransformer identifierTransformer;
+	private IdentifierTransformer<IdentifierPart<Map<String, String>>> identifierTransformer;
 	@Mock
 	private ShoppingCartRepository shoppingCartRepository;
 	@Mock
@@ -57,11 +61,15 @@ public class CartsForItemRepositoryTest {
 	@Test
 	public void getElementsWhenItemInCart() {
 		ItemIdentifier itemIdentifier = IdentifierTestFactory.buildItemIdentifier(SCOPE, SKU_CODE);
+
 		setupMocksForGetElements(itemIdentifier);
 
-		when(cart.getCartItem(anyString())).thenReturn(shoppingItem);
-		repository.getElements(itemIdentifier)
-				.test()
+		when(productSku.getSkuCode()).thenReturn(LINE_ITEM_SKU_CODE);
+		when(cart.getCartItems(LINE_ITEM_SKU_CODE)).thenReturn(Collections.singletonList(shoppingItem));
+
+		final Observable<CartIdentifier> elements = repository.getElements(itemIdentifier);
+
+		elements.test()
 				.assertNoErrors()
 				.assertValueCount(1);
 	}
@@ -71,7 +79,6 @@ public class CartsForItemRepositoryTest {
 		ItemIdentifier itemIdentifier = IdentifierTestFactory.buildItemIdentifier(SCOPE, SKU_CODE);
 		setupMocksForGetElements(itemIdentifier);
 
-		when(cart.getCartItem(anyString())).thenReturn(null);
 		repository.getElements(itemIdentifier)
 				.test()
 				.assertNoErrors()
@@ -80,7 +87,7 @@ public class CartsForItemRepositoryTest {
 
 	private void setupMocksForGetElements(final ItemIdentifier itemIdentifier) {
 		String encodedItemId = "encodedItemId";
-		when(identifierTransformerProvider.forUriPart(ItemIdentifier.ITEM_ID)).thenReturn(identifierTransformer);
+		when(identifierTransformerProvider.<IdentifierPart<Map<String, String>>>forUriPart(ItemIdentifier.ITEM_ID)).thenReturn(identifierTransformer);
 		when(identifierTransformer.identifierToUri(itemIdentifier.getItemId())).thenReturn(encodedItemId);
 		when(shoppingCartRepository.getDefaultShoppingCart()).thenReturn(Single.just(cart));
 		when(itemRepository.getSkuForItemIdAsSingle(encodedItemId)).thenReturn(Single.just(productSku));
@@ -92,7 +99,8 @@ public class CartsForItemRepositoryTest {
 
 	@Test
 	public void getCartContainingProductSkuWhenCartFound() {
-		when(cart.getCartItem(anyString())).thenReturn(shoppingItem);
+		when(productSku.getSkuCode()).thenReturn(LINE_ITEM_SKU_CODE);
+		when(cart.getCartItems(LINE_ITEM_SKU_CODE)).thenReturn(Collections.singletonList(shoppingItem));
 		when(cart.getStore()).thenReturn(store);
 		when(store.getCode()).thenReturn(SCOPE);
 		when(cart.getGuid()).thenReturn(CART_GUID);
@@ -121,8 +129,6 @@ public class CartsForItemRepositoryTest {
 
 	@Test
 	public void getCartContainingProductSkuWhenCartDoesNotContainProductSku() {
-		when(cart.getCartItem(anyString())).thenReturn(null);
-
 		repository.getCartContainingProductSku(cart, productSku)
 				.test()
 				.assertNoErrors()

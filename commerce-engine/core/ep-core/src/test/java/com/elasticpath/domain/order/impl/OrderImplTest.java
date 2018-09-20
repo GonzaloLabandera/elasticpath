@@ -87,7 +87,6 @@ public class OrderImplTest extends AbstractEPServiceTestCase {
 	private static final String BAR = "bar";
 
 	private StoreService storeService;
-	private TaxOperationServiceImpl taxOperationService;
 
 	private static final double ALLOWABLE_ERROR = 0.0000001;
 	/**
@@ -132,7 +131,7 @@ public class OrderImplTest extends AbstractEPServiceTestCase {
 				for (final Map.Entry<? extends ShoppingItem, ShoppingItemPricingSnapshot> entry : shoppingItemPricingSnapshotMap.entrySet()) {
 					final ShoppingItem shoppingItem = entry.getKey();
 					final ShoppingItemPricingSnapshot pricingSnapshot = entry.getValue();
-					final BigDecimal shoppingItemTotal = pricingSnapshot.getTotal().getAmount();
+					final BigDecimal shoppingItemTotal = pricingSnapshot.getPriceCalc().withCartDiscounts().getAmount();
 					final Money curTax = Money.valueOf(
 							shoppingItemTotal.multiply(taxValue).setScale(CALCULATION_FINAL_SCALE, BigDecimal.ROUND_HALF_UP),
 							defaultCurrency);
@@ -154,7 +153,7 @@ public class OrderImplTest extends AbstractEPServiceTestCase {
 			}
 		};
 
-		taxOperationService = new TaxOperationServiceImpl();
+		TaxOperationServiceImpl taxOperationService = new TaxOperationServiceImpl();
 		taxOperationService.setTaxCalculationService(taxCalculationService);
 		taxOperationService.setBeanFactory(getBeanFactory());
 		taxOperationService.setAddressAdapter(new TaxAddressAdapter());
@@ -375,7 +374,7 @@ public class OrderImplTest extends AbstractEPServiceTestCase {
 			}
 		};
 		assertEquals("Order beforeTaxSubtotal should be the sum of its shipment beforeTaxSubtotals, and the scale should be 2.",
-				new BigDecimal("20").setScale(2), order.getBeforeTaxSubtotalMoney().getAmountUnscaled());
+				new BigDecimal("20").setScale(2), order.getBeforeTaxSubtotalMoney().getRawAmount());
 		assertEquals(CURRENCY, order.getBeforeTaxSubtotalMoney().getCurrency());
 	}
 
@@ -420,7 +419,7 @@ public class OrderImplTest extends AbstractEPServiceTestCase {
 			}
 		};
 		assertEquals("Order subtotal discount should be the sum of its shipment subtotal discounts, and the scale should be 2.",
-				new BigDecimal("20").setScale(2), order.getSubtotalDiscountMoney().getAmountUnscaled());
+				new BigDecimal("20").setScale(2), order.getSubtotalDiscountMoney().getRawAmount());
 		assertEquals(CURRENCY, order.getSubtotalDiscountMoney().getCurrency());
 	}
 
@@ -429,7 +428,7 @@ public class OrderImplTest extends AbstractEPServiceTestCase {
 	public void testGetOrderShippingCostMoney() {
 		Order order = createTestOrder();
 		OrderPayment orderPayment = new OrderPaymentImpl();
-		orderPayment.setPaymentMethod(PaymentType.CREDITCARD);
+		orderPayment.setPaymentMethod(PaymentType.PAYMENT_TOKEN);
 		orderPayment.setCurrencyCode(CURRENCY.getCurrencyCode());
 		Set<OrderPayment> paymentSet = new HashSet<>();
 		paymentSet.add(orderPayment);
@@ -454,7 +453,7 @@ public class OrderImplTest extends AbstractEPServiceTestCase {
 	public void testGetBeforeTaxShippingCostMoney() {
 		Order order = createTestOrder();
 		OrderPayment orderPayment = new OrderPaymentImpl();
-		orderPayment.setPaymentMethod(PaymentType.CREDITCARD);
+		orderPayment.setPaymentMethod(PaymentType.PAYMENT_TOKEN);
 		orderPayment.setCurrencyCode(CURRENCY.getCurrencyCode());
 		Set<OrderPayment> paymentSet = new HashSet<>();
 		paymentSet.add(orderPayment);
@@ -1118,36 +1117,6 @@ public class OrderImplTest extends AbstractEPServiceTestCase {
 		 * Uses exclusive tax calculation mode.
 		 */
 		TestOrderImpl() {
-			super();
-			enableRecalculation();
-		}
-	}
-
-	/**
-	 * Implementation of PhysicalOrderShipment with auto-recalculation enabled by default for testing purposes.
-	 */
-	class TestPhysicalOrderShipmentImpl extends PhysicalOrderShipmentImpl {
-		private static final long serialVersionUID = -5938308330575188600L;
-
-		/**
-		 * Override default constructor to enable auto-recalculation.
-		 */
-		TestPhysicalOrderShipmentImpl() {
-			super();
-			enableRecalculation();
-		}
-	}
-
-	/**
-	 * Implementation of PhysicalOrderShipment with auto-recalculation enabled by default for testing purposes.
-	 */
-	class TestElectronicOrderShipmentImpl extends ElectronicOrderShipmentImpl {
-		private static final long serialVersionUID = -1540246999040879265L;
-
-		/**
-		 * Override default constructor to enable auto-recalculation.
-		 */
-		TestElectronicOrderShipmentImpl() {
 			super();
 			enableRecalculation();
 		}

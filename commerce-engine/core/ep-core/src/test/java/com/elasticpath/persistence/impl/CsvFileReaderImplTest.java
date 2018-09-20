@@ -5,18 +5,24 @@ package com.elasticpath.persistence.impl;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doAnswer;
 
 import java.io.IOException;
 import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Spy;
+import org.mockito.junit.MockitoJUnitRunner;
 
-import com.elasticpath.persistence.CsvFileReader;
+import com.elasticpath.settings.test.support.SimpleSettingValueProvider;
 
 /**
  * Test <code>CsvFileReader</code>.
  */
+@RunWith(MockitoJUnitRunner.class)
 public class CsvFileReaderImplTest {
 
 	private static final String COL = "col";
@@ -25,24 +31,18 @@ public class CsvFileReaderImplTest {
 
 	private static final String MAGIC_WORD = "_fran\u00e7ais_"; // \u00e7 is a special character.
 
-	private CsvFileReader csvFileReader;
+	@Spy
+	private CsvFileReaderImpl csvFileReader;
 
 	/**
 	 * Prepare for test.
 	 */
 	@Before
 	public void setUp() {
-		csvFileReader = new CsvFileReaderImpl() {
-			@Override
-			protected String getDatafileEncoding() {
-				return "UTF-8";
-			}
+		csvFileReader.setDatafileEncodingProvider(new SimpleSettingValueProvider<>("UTF-8"));
 
-			@Override
-			public String getRemoteCSVFileName(final String csvFileName) {
-				return csvFileName;
-			}
-		};
+		doAnswer(invocation -> invocation.getArguments()[0])
+				.when(csvFileReader).getRemoteCSVFileName(any(String.class));
 	}
 
 	/**
@@ -169,4 +169,5 @@ public class CsvFileReaderImplTest {
 		assertEquals(totalLinesInFile, previewData.size());
 		this.csvFileReader.close();
 	}
+
 }

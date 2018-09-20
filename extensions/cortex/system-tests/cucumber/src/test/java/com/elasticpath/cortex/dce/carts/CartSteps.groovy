@@ -127,7 +127,7 @@ When(~'^I attempt to add (.+) with invalid quantity (.+)$') { String displayName
 	client.addtocartform()
 			.stopIfFailure()
 
-	def actionLink = client.body.links[0].uri
+	def actionLink = client.body.links[0].href
 
 	client.POST(actionLink, [
 			quantity: InvalidQuantity
@@ -151,7 +151,7 @@ Then(~'the items in the cart are ordered as follows$') { DataTable cartItemsTabl
 	List elementLinks = new ArrayList();
 	client.body.links.findAll {
 		if (it.rel == "element") {
-			elementLinks.add(it.uri)
+			elementLinks.add(it.href)
 		}
 	}
 
@@ -210,7 +210,7 @@ Then(~'attempt to add to another shopper\'s cart$') { ->
 
 Then(~'I am not able to view the cart$') { ->
 	assertThat(client.response.status)
-			.as("HTTP response status is not as expected")
+			.as("Access to the specified resource is forbidden.")
 			.isEqualTo(403)
 	client.follow()
 }
@@ -323,7 +323,7 @@ Then(~'the number of cart lineitems is (.+)') { int numberOfLineitems ->
 	List lineItemElementList = new ArrayList();
 	client.body.links.findAll {
 		if (it.rel == "element") {
-			lineItemElementList.add(it.uri)
+			lineItemElementList.add(it.href)
 		}
 	}
 	assertThat(numberOfLineitems)
@@ -350,3 +350,5 @@ Then(~'new cart is created$') { ->
 			.as("New cart must be created after checkout")
 			.isNotEqualTo(CART_URI)
 }
+
+Then(~'that (?:.+) is the url of (?:.+)') { -> }

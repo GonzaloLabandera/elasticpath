@@ -14,8 +14,8 @@ import org.junit.runner.RunWith
 @CucumberOptions(
 		format = ["pretty", "html:target/cucumber-html-report", "json:target/cucumber.json", "junit:target/cucumber-junit.xml"],
 		features = ["src/test/resources/features"],
-		glue = ["classpath:com.elasticpath.cortex.dce"],
-		tags = ["~@bug", "~@notready", "~@jms-tests"],
+		glue = ["classpath:com.elasticpath.cortex.dce", "classpath:com.elasticpath.cucumber", "classpath:com.elasticpath.jms.cucumber"],
+		tags = ["~@bug", "~@notready"],
 		strict = true
 )
 class CucumberRunnerIT {}

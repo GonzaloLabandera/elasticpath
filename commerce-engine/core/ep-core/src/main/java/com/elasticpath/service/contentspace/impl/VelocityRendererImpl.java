@@ -13,16 +13,16 @@ import org.springframework.ui.velocity.VelocityEngineUtils;
 
 import com.elasticpath.service.contentspace.RenderContext;
 import com.elasticpath.service.contentspace.Renderer;
-import com.elasticpath.settings.SettingsReader;
+import com.elasticpath.settings.provider.SettingValueProvider;
 
 /**
- * Velocity implementation of {@link Render}.
+ * Velocity implementation of {@link Renderer}.
  */
 public class VelocityRendererImpl implements Renderer {
 
 	private Properties props = new Properties();
 	private VelocityEngine engine;
-	private SettingsReader settingsReader;
+	private SettingValueProvider<String> contentWrappersLocationProvider;
 
 	/**
 	 * Renders a velocity template for a specific content space using a rendering context.
@@ -60,7 +60,7 @@ public class VelocityRendererImpl implements Renderer {
 	 * @return the templates location relative to assets root folder
 	 */
 	protected String getTemplatesLocation() {
-		return withTrailingSlash(settingsReader.getSettingValue("COMMERCE/SYSTEM/ASSETS/contentWrappersLocation").getValue());
+		return withTrailingSlash(getContentWrappersLocationProvider().get());
 	}
 
 	/**
@@ -89,19 +89,19 @@ public class VelocityRendererImpl implements Renderer {
 		this.props = props;
 	}
 
-	/**
-	 * Set the settings reader.
-	 *
-	 * @param settingsReader the settings reader instance
-	 */
-	public void setSettingsReader(final SettingsReader settingsReader) {
-		this.settingsReader = settingsReader;
-	}
-
 	private String withTrailingSlash(final String input) {
 		if (StringUtils.isEmpty(input) || input.endsWith("/") || input.endsWith("\\")) {
 			return input;
 		}
 		return input + File.separator;
 	}
+
+	public void setContentWrappersLocationProvider(final SettingValueProvider<String> contentWrappersLocationProvider) {
+		this.contentWrappersLocationProvider = contentWrappersLocationProvider;
+	}
+
+	protected SettingValueProvider<String> getContentWrappersLocationProvider() {
+		return contentWrappersLocationProvider;
+	}
+
 }

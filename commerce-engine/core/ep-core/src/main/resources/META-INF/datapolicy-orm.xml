@@ -188,14 +188,14 @@
 		</query>
 	</named-query>
 
-	<named-query name="CUSTOMER_AND_DATA_POINT_BY_STORE_AND_CUSTOMER_UIDPK">
+	<named-query name="CUSTOMER_AND_DATA_POINT_BY_STORE_AND_USER_ID">
 		<query>
 			SELECT cust, dp
 			FROM  CustomerConsentImpl consent, CustomerImpl cust
 			JOIN consent.dataPolicy policy
 			JOIN policy.dataPoints dp
 			WHERE consent.customerGuid = cust.guid
-			AND cust.uidPk = ?1
+			AND cust.userId = ?1
 			AND cust.storeCode = ?2
 		</query>
 	</named-query>

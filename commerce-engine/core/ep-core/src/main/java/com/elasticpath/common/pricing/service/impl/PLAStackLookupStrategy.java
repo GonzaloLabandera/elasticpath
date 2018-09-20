@@ -74,7 +74,7 @@ public class PLAStackLookupStrategy implements PriceListStackLookupStrategy {
 			final SellingContext context = pla.getSellingContext();
 			
 			final boolean isApplicable = context == null 
-										|| context.isSatisfied(getConditionEvaluatorService(), tagSet);
+										|| context.isSatisfied(getConditionEvaluatorService(), tagSet).isSuccess();
 			if (isApplicable) {
 				availablePriceListAssignments.add(pla);
 			}

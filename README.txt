@@ -1,6 +1,6 @@
-Elastic Path Commerce 7.2.0 Distribution Package (build 7.2.0.20180327150040-95e14)
+Elastic Path Commerce 7.3.0 Distribution Package (build 7.3.0.20180720135358-d7837)
 ------------------------------------------------
-This package contains the following source code folders and resources for Elastic Path Commerce 702.0.0.20180327150040-5bd387.
+This package contains the following source code folders and resources for Elastic Path Commerce 703.0.0.20180720135358-373e9.
 
 Component name              Folder/file name
 --------------              ----------------
@@ -22,12 +22,6 @@ Related Elastic Path Projects
 -----------------------------
 The source distribution relies on additional Elastic Path projects that are available as binary dependencies. The related project versions are:
 
-Project name                Version
-------------                -------
-cortex                      1.20.0.20180327150040-9738f
-cortex-api                  1.20.0.20180327150040-7ec35
-data-population             2.0.10.20171228014437-3b658
-health-monitoring           1.1.2.20171228014437-844ef
-helix                       1.3.0.20180327150040-ad073
-helix-api                   1.3.0.20180327150040-38f81
-helix-validator             1.3.0.20180327150040-a62d3
+Project name        Version                            References
+------------        -------                            ----------
+Cortex/Helix        1.21.0.20180720135358-f9538f8        <api-platform.version> property in pom.xml and bill-of-materials/pom.xml

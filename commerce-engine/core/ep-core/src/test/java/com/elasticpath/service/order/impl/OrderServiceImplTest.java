@@ -5,21 +5,17 @@ package com.elasticpath.service.order.impl;
 
 import static java.lang.System.currentTimeMillis;
 import static java.util.Arrays.asList;
-import static java.util.Calendar.AUGUST;
-import static java.util.Calendar.DAY_OF_MONTH;
-import static java.util.Calendar.OCTOBER;
-import static java.util.Calendar.YEAR;
 import static java.util.Collections.singleton;
 import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.anyVararg;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.anyVararg;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -38,10 +34,8 @@ import static com.elasticpath.domain.order.OrderStatus.PARTIALLY_SHIPPED;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Currency;
 import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -55,12 +49,11 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.elasticpath.base.exception.EpServiceException;
 import com.elasticpath.commons.beanframework.BeanFactory;
 import com.elasticpath.commons.constants.ContextIdNames;
-import com.elasticpath.commons.util.security.CreditCardEncrypter;
 import com.elasticpath.core.messaging.order.OrderEventType;
 import com.elasticpath.domain.customer.Customer;
 import com.elasticpath.domain.customer.impl.CustomerImpl;
@@ -70,7 +63,6 @@ import com.elasticpath.domain.event.OrderEventHelper;
 import com.elasticpath.domain.event.impl.EventOriginatorHelperImpl;
 import com.elasticpath.domain.event.impl.EventOriginatorImpl;
 import com.elasticpath.domain.impl.ElasticPathImpl;
-import com.elasticpath.domain.order.AdvancedOrderSearchCriteria;
 import com.elasticpath.domain.order.Order;
 import com.elasticpath.domain.order.OrderPayment;
 import com.elasticpath.domain.order.OrderReturn;
@@ -78,7 +70,6 @@ import com.elasticpath.domain.order.OrderReturnSku;
 import com.elasticpath.domain.order.OrderShipment;
 import com.elasticpath.domain.order.OrderSku;
 import com.elasticpath.domain.order.impl.AbstractOrderShipmentImpl;
-import com.elasticpath.domain.order.impl.AdvancedOrderSearchCriteriaImpl;
 import com.elasticpath.domain.order.impl.ElectronicOrderShipmentImpl;
 import com.elasticpath.domain.order.impl.OrderImpl;
 import com.elasticpath.domain.order.impl.OrderPaymentImpl;
@@ -128,11 +119,8 @@ public class OrderServiceImplTest {
 
 	private static final String GUID_VALUE = "guidValue";
 
-	private static final int FIRST_RESULT = 0;
-
-	private static final int MAX_RESULTS = 100;
 	public static final Currency CAD = Currency.getInstance("CAD");
-	public static final String SHIPMENT_NUMBER = "1-1";
+	private static final String SHIPMENT_NUMBER = "1-1";
 
 	private OrderServiceImpl orderServiceImpl;
 
@@ -148,7 +136,6 @@ public class OrderServiceImplTest {
 	private Order order, order2;
 
 	@Mock private TimeService mockTimeService;
-	@Mock private CreditCardEncrypter creditCardEncrypter;
 	@Mock private PaymentService mockPaymentService;
 	@Mock private StoreService mockStoreService;
 	@Mock private EventMessageFactory eventMessageFactory;
@@ -158,7 +145,6 @@ public class OrderServiceImplTest {
 	@Mock private FetchPlanHelper fetchPlanHelper;
 	@Mock private BeanFactory beanFactory;
 
-	private Warehouse warehouse;
 	private EventOriginatorHelper eventOriginatorHelper;
 
 	@SuppressWarnings("PMD.DontUseElasticPathImplGetInstance")
@@ -182,7 +168,6 @@ public class OrderServiceImplTest {
 
 		orderCriterion = new OrderCriterionImpl();
 		when(beanFactory.getBean(ContextIdNames.ORDER_CRITERION)).thenReturn(orderCriterion);
-		when(beanFactory.getBean(ContextIdNames.CREDIT_CARD_ENCRYPTER)).thenReturn(creditCardEncrypter);
 
 		eventOriginatorHelper = new EventOriginatorHelperImpl();
 		when(beanFactory.getBean(ContextIdNames.EVENT_ORIGINATOR_HELPER)).thenReturn(eventOriginatorHelper);
@@ -197,7 +182,7 @@ public class OrderServiceImplTest {
 		orderServiceImpl.setStoreService(mockStoreService);
 		orderServiceImpl.setTimeService(mockTimeService);
 
-		warehouse = new WarehouseImpl();
+		Warehouse warehouse = new WarehouseImpl();
 
 		store = new StoreImpl();
 		store.setCode("store");
@@ -240,48 +225,6 @@ public class OrderServiceImplTest {
 		assertThat(added.getStore()).as("Store should have been set").isEqualTo(store);
 	}
 
-	@Test
-	public void testAddSanitizesOrderPayments() {
-		// Given
-		store.setStoreFullCreditCardsEnabled(false);
-		givenOrderHasACreditCardPayment();
-
-		// When
-		Order added = orderServiceImpl.add(order);
-
-		// Then
-		verify(persistenceEngine).save(order);
-		assertThat(added.getOrderPayment().getCardNumber()).as("Card number should have been cleared").isNull();
-	}
-
-	@Test
-	public void testUpdateSanitizesOrderPayments() {
-		// Given
-		store.setStoreFullCreditCardsEnabled(false);
-		givenOrderHasACreditCardPayment();
-
-		// When
-		when(persistenceEngine.merge(order)).thenReturn(order);
-		Order updated = orderServiceImpl.update(order);
-
-		// Then
-		verify(persistenceEngine).merge(order);
-		assertThat(updated.getOrderPayment().getCardNumber()).as("Card number should have been cleared").isNull();
-	}
-
-	private void givenOrderHasACreditCardPayment() {
-		final String cardNumber = "4111111111111111";
-		when(creditCardEncrypter.encrypt(cardNumber)).thenReturn("secret-card-number");
-		when(creditCardEncrypter.decrypt("secret-card-number")).thenReturn(cardNumber);
-		when(creditCardEncrypter.mask(cardNumber)).thenReturn("*** 1111");
-
-		OrderPayment payment = new OrderPaymentImpl();
-		payment.setUnencryptedCardNumber(cardNumber);
-		payment.setExpiryMonth("01");
-		payment.setExpiryYear("2099");
-		order.setOrderPayments(singleton(payment));
-	}
-
 	/**
 	 * Test findOrder with null inputs.
 	 */
@@ -311,15 +254,12 @@ public class OrderServiceImplTest {
 	 */
 	@Test
 	public void testFindOrderByCustomerEmail() {
-		boolean isExactMatch = true;
-
 		when(persistenceEngine.retrieve(anyString(), anyVararg())).thenReturn(singletonList(order));
-		assertThat(orderServiceImpl.findOrderByCustomerEmail(EMAIL_VALUE, isExactMatch)).isEqualTo(singletonList(order));
+		assertThat(orderServiceImpl.findOrderByCustomerEmail(EMAIL_VALUE, true)).isEqualTo(singletonList(order));
 		assertStoreIsPopulated(store, order);
 
-		isExactMatch = false;
 		when(persistenceEngine.retrieve(anyString(), anyVararg())).thenReturn(singletonList(order2));
-		assertThat(orderServiceImpl.findOrderByCustomerEmail(EMAIL_VALUE, isExactMatch)).isEqualTo(singletonList(order2));
+		assertThat(orderServiceImpl.findOrderByCustomerEmail(EMAIL_VALUE, false)).isEqualTo(singletonList(order2));
 		assertStoreIsPopulated(store, order2);
 	}
 
@@ -343,7 +283,7 @@ public class OrderServiceImplTest {
 	@Test
 	public void testAwaitingShipmentsCount() {
 		final List<Long> orders = new ArrayList<>();
-		orders.add(new Long(2));
+		orders.add(2L);
 
 		Warehouse warehouse = new WarehouseImpl();
 
@@ -357,8 +297,6 @@ public class OrderServiceImplTest {
 
 	@Test
 	public void testFindOrderByCustomerGuid() {
-		boolean isExactMatch = true;
-
 		// expectations
 		OrderSearchCriteria orderSearchCriteria = new OrderSearchCriteria();
 		when(beanFactory.getBean(ContextIdNames.ORDER_SEARCH_CRITERIA)).thenReturn(orderSearchCriteria);
@@ -366,7 +304,7 @@ public class OrderServiceImplTest {
 		when(beanFactory.getBean(ContextIdNames.CUSTOMER_SEARCH_CRITERIA)).thenReturn(customerSearchCriteria);
 		when(persistenceEngine.retrieve(anyString(), any(Object[].class), anyInt(), anyInt())).thenReturn(singletonList(order));
 
-		assertThat(orderServiceImpl.findOrderByCustomerGuid(GUID_VALUE, isExactMatch))
+		assertThat(orderServiceImpl.findOrderByCustomerGuid(GUID_VALUE, true))
 			.as("The orders should come from the retrieve call")
 			.isEqualTo(singletonList(order));
 		assertStoreIsPopulated(store, order);
@@ -383,11 +321,7 @@ public class OrderServiceImplTest {
 			.as("The customer search criteria should disable fuzzy match")
 			.isTrue();
 
-		// expectations
-		isExactMatch = false;
-		when(persistenceEngine.retrieve(anyString(), anyInt(), anyInt())).thenReturn(singletonList(order));
-
-		assertThat(orderServiceImpl.findOrderByCustomerGuid(GUID_VALUE, isExactMatch))
+		assertThat(orderServiceImpl.findOrderByCustomerGuid(GUID_VALUE, false))
 			.as("The orders should come from the retrieve call")
 			.isEqualTo(singletonList(order));
 		assertThat(customerSearchCriteria.isFuzzySearchDisabled())
@@ -406,39 +340,6 @@ public class OrderServiceImplTest {
 			.isEqualTo(singletonList(order));
 		assertStoreIsPopulated(store, order);
 		verify(persistenceEngine).retrieveByNamedQuery("ORDER_SELECT_BY_CUSTOMER_GUID_AND_STORECODE", GUID_VALUE, store.getCode());
-	}
-
-	/**
-	 * Test method for 'com.elasticpath.service.OrderServiceImpl.findOrderAdvanced'.
-	 */
-	@Test
-	public void testFindOrderAdvanced() {
-		final List<Order> orderList = singletonList(order);
-
-		final AdvancedOrderSearchCriteria orderSearchCriteria = new AdvancedOrderSearchCriteriaImpl();
-		when(persistenceEngine.retrieve(orderCriterion.getAdvancedOrderCriteria(orderSearchCriteria), FIRST_RESULT, MAX_RESULTS))
-			.thenAnswer(answer -> orderList);
-		assertThat(orderServiceImpl.findOrderAdvanced(orderSearchCriteria, MAX_RESULTS)).isEqualTo(orderList);
-		assertStoreIsPopulated(store, order);
-		verify(persistenceEngine).retrieve(orderCriterion.getAdvancedOrderCriteria(orderSearchCriteria), FIRST_RESULT, MAX_RESULTS);
-
-		Calendar fromDate = new GregorianCalendar(YEAR, AUGUST, DAY_OF_MONTH);
-		final Date orderFromDate = fromDate.getTime();
-		Calendar toDate = new GregorianCalendar(YEAR, OCTOBER, DAY_OF_MONTH);
-		final Date orderToDate = toDate.getTime();
-		orderSearchCriteria.setOrderFromDate(orderFromDate);
-		orderSearchCriteria.setOrderToDate(orderToDate);
-		when(persistenceEngine.retrieve(eq(orderCriterion.getAdvancedOrderCriteria(orderSearchCriteria)),
-			any(Object[].class),
-			eq(FIRST_RESULT),
-			eq(MAX_RESULTS))
-		).thenAnswer(answer -> orderList);
-
-		assertThat(orderServiceImpl.findOrderAdvanced(orderSearchCriteria, MAX_RESULTS)).isSameAs(orderList);
-		verify(persistenceEngine).retrieve(eq(orderCriterion.getAdvancedOrderCriteria(orderSearchCriteria)),
-			any(Object[].class),
-			eq(FIRST_RESULT),
-			eq(MAX_RESULTS));
 	}
 
 	/**
@@ -508,10 +409,8 @@ public class OrderServiceImplTest {
 	private OrderSku createOrderSku(final String guid, final long uid, final int qty) {
 		OrderSku orderSku = new OrderSkuImpl();
 		orderSku.setGuid(guid);
-		final long skuUid1 = uid;
-		orderSku.setUidPk(skuUid1);
-		final int skuQty1 = qty;
-		orderSku.setPrice(skuQty1, null);
+		orderSku.setUidPk(uid);
+		orderSku.setPrice(qty, null);
 		return orderSku;
 	}
 
@@ -564,18 +463,16 @@ public class OrderServiceImplTest {
 
 		final Order mockOrder = mock(Order.class);
 		final long uid = 1234L;
-		when(mockOrder.getUidPk()).thenReturn(uid);
 
 		final Set<OrderReturn> orderReturns = new HashSet<>();
 		orderReturns.add(orderReturn1);
 		orderReturns.add(orderReturn2);
 		when(mockOrder.getReturns()).thenReturn(orderReturns);
 
-		final Order order = mockOrder;
 		OrderServiceImpl service = new OrderServiceImpl() {
 			@Override
 			public Order get(final long orderUid) {
-				return order;
+				return mockOrder;
 			}
 
 		};
@@ -613,7 +510,7 @@ public class OrderServiceImplTest {
 
 		final TaxCalculationResult result = getTaxCalculationResult();
 
-		PhysicalOrderShipmentImpl physicalOrderShipmentImpl = new PhysicalOrderShipmentImpl() {
+		return new PhysicalOrderShipmentImpl() {
 			private static final long serialVersionUID = 7907342381488460247L;
 
 			@Override
@@ -631,8 +528,6 @@ public class OrderServiceImplTest {
 				return 2;
 			}
 		};
-
-		return physicalOrderShipmentImpl;
 
 	}
 
@@ -640,7 +535,7 @@ public class OrderServiceImplTest {
 
 		final TaxCalculationResult result = getTaxCalculationResult();
 
-		ServiceOrderShipmentImpl serviceOrderShipment = new ServiceOrderShipmentImpl() {
+		return new ServiceOrderShipmentImpl() {
 			private static final long serialVersionUID = 7907342381488460247L;
 
 			@Override
@@ -658,8 +553,6 @@ public class OrderServiceImplTest {
 				return 2;
 			}
 		};
-
-		return serviceOrderShipment;
 
 	}
 
@@ -668,7 +561,7 @@ public class OrderServiceImplTest {
 
 		final TaxCalculationResult result = getTaxCalculationResult();
 
-		ElectronicOrderShipmentImpl electronicOrderShipment = new ElectronicOrderShipmentImpl() {
+		return new ElectronicOrderShipmentImpl() {
 			private static final long serialVersionUID = 7907342381488460247L;
 
 			@Override
@@ -686,8 +579,6 @@ public class OrderServiceImplTest {
 				return 2;
 			}
 		};
-
-		return electronicOrderShipment;
 
 	}
 
@@ -725,7 +616,6 @@ public class OrderServiceImplTest {
 
 		shipmentList.add(physicalOrderShipmentImpl);
 
-		List<Order> orderList = new ArrayList<>();
 		Order order = new OrderImpl() {
 			private static final long serialVersionUID = -2159834083423268104L;
 
@@ -738,12 +628,11 @@ public class OrderServiceImplTest {
 		order.setCurrency(CAD);
 		order.setUidPk(1);
 		order.setStoreCode(store.getCode());
-		orderList.add(order);
 		order.addShipment(physicalOrderShipmentImpl);
 
 		when(beanFactory.getBean(ContextIdNames.ORDER_SERVICE)).thenReturn(orderServiceImpl);
 
-		when(persistenceEngine.retrieveByNamedQuery(eq("PHYSICAL_SHIPMENT_BY_SHIPMENT_NUMBER"), any(Object[].class)))
+		when(persistenceEngine.retrieveByNamedQuery(eq("PHYSICAL_SHIPMENT_BY_SHIPMENT_NUMBER"), anyString()))
 			.thenAnswer(answer -> shipmentList);
 
 		final PaymentResult paymentResult = new PaymentResultImpl();
@@ -755,10 +644,8 @@ public class OrderServiceImplTest {
 			.thenReturn(paymentResult)
 			.thenThrow(new PaymentServiceException("expected"));
 
-		Throwable thrown = catchThrowable(() -> {
-			orderServiceImpl.completeShipment(SHIPMENT_NUMBER, trackingCode, captureFund, null,
-				sendConfEmail, eventOriginatorHelper.getSystemOriginator());
-		});
+		Throwable thrown = catchThrowable(() -> orderServiceImpl.completeShipment(SHIPMENT_NUMBER, trackingCode, captureFund, null,
+			sendConfEmail, eventOriginatorHelper.getSystemOriginator()));
 
 		assertThat(thrown).isInstanceOf(CompleteShipmentFailedException.class);
 		assertThat(thrown).isNotNull();
@@ -780,7 +667,7 @@ public class OrderServiceImplTest {
 		order.setUidPk(1);
 		Warehouse warehouse1 = new WarehouseImpl();
 		warehouse1.setPickDelay(pickDelayOrder1);
-		store.setWarehouses(asList(warehouse1));
+		store.setWarehouses(singletonList(warehouse1));
 		order.setStoreCode(store.getCode());
 		order.setCurrency(CAD);
 
@@ -789,7 +676,7 @@ public class OrderServiceImplTest {
 		Warehouse warehouse2 = new WarehouseImpl();
 		warehouse2.setPickDelay(pickDelayOrder2);
 
-		store2.setWarehouses(asList(warehouse2));
+		store2.setWarehouses(singletonList(warehouse2));
 		secondOrder.setStoreCode(store2.getCode());
 		order.setCurrency(CAD);
 		secondOrder.setCurrency(CAD);
@@ -826,7 +713,6 @@ public class OrderServiceImplTest {
 		when(persistenceEngine.retrieveByNamedQuery("ORDERS_BY_ORDER_STATUS_AND_SHIPMENT_STATUS", parameters))
 			.thenAnswer(answer -> orderList);
 		when(persistenceEngine.get(OrderImpl.class, 1L)).thenAnswer(answer -> order);
-		when(persistenceEngine.get(OrderImpl.class, 2L)).thenAnswer(answer -> secondOrder);
 		when(persistenceEngine.merge(any(Persistable.class))).thenReturn(order);
 		when(mockPaymentService.adjustShipmentPayment(any(OrderShipment.class))).thenReturn(new PaymentResultImpl());
 
@@ -891,7 +777,7 @@ public class OrderServiceImplTest {
 	}
 
 	@Test
-	public void verifyOrderCancelSendsEventMessage() throws Exception {
+	public void verifyOrderCancelSendsEventMessage() {
 		// Given
 		OrderServiceImpl orderService = new OrderServiceImpl();
 		Order order = mock(Order.class);
@@ -920,7 +806,7 @@ public class OrderServiceImplTest {
 	}
 
 	@Test
-	public void verifyHoldOrderSendsEventMessage() throws Exception {
+	public void verifyHoldOrderSendsEventMessage() {
 		ignorePersistence();
 		EventMessage eventMessage = mock(EventMessage.class);
 		when(eventMessageFactory.createEventMessage(OrderEventType.ORDER_HELD, ORDER_NUMBER, null)).thenReturn(eventMessage);
@@ -960,7 +846,7 @@ public class OrderServiceImplTest {
 		order.releaseOrder();
 		order.addShipment(physicalOrderShipmentImpl);
 
-		when(persistenceEngine.retrieveByNamedQuery(eq("PHYSICAL_SHIPMENT_BY_SHIPMENT_NUMBER"), any(Object[].class)))
+		when(persistenceEngine.retrieveByNamedQuery(eq("PHYSICAL_SHIPMENT_BY_SHIPMENT_NUMBER"), anyString()))
 			.thenAnswer(answer -> shipmentList);
 		when(persistenceEngine.merge(any(Persistable.class))).thenReturn(order);
 		final Order result = orderServiceImpl.processOrderShipment(shipmentNumber, null, null, eventOriginatorHelper.getSystemOriginator());
@@ -1019,7 +905,7 @@ public class OrderServiceImplTest {
 
 		final OrderPayment payment = new OrderPaymentImpl();
 		payment.setTransactionType(OrderPayment.CAPTURE_TRANSACTION);
-		payment.setPaymentMethod(PaymentType.CREDITCARD);
+		payment.setPaymentMethod(PaymentType.PAYMENT_TOKEN);
 		payment.setAmount(new BigDecimal(amount));
 		payment.setCurrencyCode("CAD");
 		order.addOrderPayment(payment);
@@ -1027,7 +913,6 @@ public class OrderServiceImplTest {
 		final BigDecimal refundAmount = new BigDecimal(amount);
 		EventOriginator originator = new EventOriginatorImpl();
 
-		when(gateway.getPaymentGatewayType()).thenAnswer(answer -> PaymentType.CREDITCARD);
 		when(persistenceEngine.get(OrderImpl.class, order.getUidPk())).thenAnswer(answer -> order);
 		when(persistenceEngine.merge(order)).thenReturn(order);
 		when(mockPaymentService.refundShipmentPayment(any(OrderShipment.class), any(OrderPayment.class), any(BigDecimal.class)))
@@ -1037,7 +922,7 @@ public class OrderServiceImplTest {
 	}
 
 	@Test(expected = ReleaseShipmentFailedException.class)
-	public void verifyFailureToReleaseOrderShipmentSendsEventMessage() throws Exception {
+	public void verifyFailureToReleaseOrderShipmentSendsEventMessage() {
 		final String exceptionMessage = "Boom!";
 
 		final OrderServiceImpl releaseShipmentFailingOrderServiceImpl = new OrderServiceImpl() {
@@ -1069,7 +954,7 @@ public class OrderServiceImplTest {
 	}
 
 	@Test
-	public void verifyCompleteShipmentSendsEventMessage() throws Exception {
+	public void verifyCompleteShipmentSendsEventMessage() {
 		final OrderService mockOrderService = mock(OrderService.class);
 
 		when(beanFactory.getBean(ContextIdNames.ORDER_SERVICE)).thenReturn(mockOrderService);
@@ -1120,7 +1005,7 @@ public class OrderServiceImplTest {
 	}
 
 	@Test
-	public void verifyReleaseOrderReturnsPersistedOrder() throws Exception {
+	public void verifyReleaseOrderReturnsPersistedOrder() {
 		final Order persistedOrder = mock(Order.class);
 		when(persistenceEngine.merge(order)).thenReturn(persistedOrder);
 
@@ -1131,7 +1016,7 @@ public class OrderServiceImplTest {
 	}
 
 	@Test
-	public void verifyReleaseOrderSendsEventMessage() throws Exception {
+	public void verifyReleaseOrderSendsEventMessage() {
 		ignorePersistence();
 
 		EventMessage eventMessage = mock(EventMessage.class);
@@ -1142,7 +1027,7 @@ public class OrderServiceImplTest {
 	}
 
 	@Test
-	public void verifyReleaseOrderLogsOrderHoldReleasedEventWhenInHoldState() throws Exception {
+	public void verifyReleaseOrderLogsOrderHoldReleasedEventWhenInHoldState() {
 		ignorePersistence();
 
 		order.holdOrder();
@@ -1152,7 +1037,7 @@ public class OrderServiceImplTest {
 	}
 
 	@Test
-	public void verifyReleaseOrderLogsOrderReleasedEvent() throws Exception {
+	public void verifyReleaseOrderLogsOrderReleasedEvent() {
 		ignorePersistence();
 
 		orderServiceImpl.releaseOrder(order);
@@ -1160,17 +1045,14 @@ public class OrderServiceImplTest {
 	}
 
 	@Test
-	public void verifyReleaseOrderThrowsExceptionWhenOrderNotInReleasableState() throws Exception {
+	public void verifyReleaseOrderThrowsExceptionWhenOrderNotInReleasableState() {
 		order = createNonReleasableOrder();
-		assertThatExceptionOfType(EpServiceException.class).isThrownBy(() -> {
-
-			orderServiceImpl.releaseOrder(order);
-
-		}).withMessageStartingWith("Cannot release order with status ");
+		assertThatExceptionOfType(EpServiceException.class).isThrownBy(
+				() -> orderServiceImpl.releaseOrder(order)).withMessageStartingWith("Cannot release order with status ");
 	}
 
 	@Test
-	public void verifyShipmentsAreReleasedWhenOrderIsReleased() throws Exception {
+	public void verifyShipmentsAreReleasedWhenOrderIsReleased() {
 		final OrderService mockOrderService = mock(OrderService.class);
 		when(beanFactory.getBean(ContextIdNames.ORDER_SERVICE)).thenReturn(mockOrderService);
 
@@ -1187,7 +1069,7 @@ public class OrderServiceImplTest {
 	}
 
 	@Test
-	public void verifyReleaseOrderCapturesElectronicShipmentPayments() throws Exception {
+	public void verifyReleaseOrderCapturesElectronicShipmentPayments() {
 		ignorePersistence();
 
 		OrderShipment electronicShipment = getMockElectronicOrderShipment();
@@ -1205,7 +1087,7 @@ public class OrderServiceImplTest {
 	}
 
 	@Test
-	public void testCaptureNonPhysicalShipments() throws Exception {
+	public void testCaptureNonPhysicalShipments() {
 		ignorePersistence();
 
 		OrderShipment electronicShipment = getMockElectronicOrderShipment();
@@ -1235,7 +1117,7 @@ public class OrderServiceImplTest {
 
 
 	@Test
-	public void verifyReleaseDoesntCapturePaymentsForElectronicItemsWhenOrderIsNotOnHold() throws Exception {
+	public void verifyReleaseDoesntCapturePaymentsForElectronicItemsWhenOrderIsNotOnHold() {
 		ignorePersistence();
 
 		OrderShipment electronicShipment = getMockElectronicOrderShipment();

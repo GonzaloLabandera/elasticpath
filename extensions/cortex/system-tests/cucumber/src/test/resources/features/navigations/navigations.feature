@@ -3,93 +3,79 @@
 
 Feature: Retrieve Navigation nodes and child nodes
 
-  Scenario: Can retrieve navigation details
+  Background:
     Given I am logged in as a public shopper
-    When I follow the root navigations link
-    And open the element with field name of Games
+
+  Scenario: Can retrieve navigation details
+    When I open the navigation category Games
     Then the navigation node attributes contain
       | name             | display name         | display value                                                            |
-   #	  | catReleaseDate   | Release Date         | 2012                                                                     |
+      | catReleaseDate   | Release Date         | 2012                                                                     |
       | catDescription   | Category Description | This category contains listing of all Games titles                       |
       | catSubCategories | Subcategories        | Mobile Games, Video Games, 憤怒的小鳥, 怒っている鳥, नाराज पक्षियों, پرندگان عصبانی |
       | catReleased      | Released             | True                                                                     |
       | catRating        | Category Rating      | 8.25                                                                     |
       | catTotalItems    | Total items          | 5                                                                        |
-   #	  | catLastModified  | Last modified        | 2012                                                                     |
+      | catLastModified  | Last modified        | 2012                                                                     |
       | catName          | Name                 | All <b><i>Games</i></b>                                                  |
 
   Scenario: Media attributes and details with no value are not displayed
-    Given I am logged in as a public shopper
-    When I follow the root navigations link
-    And open the element with field name of Games
-    And open the child with field name of MobileGames
+    Given MobileGames is missing a value for catReleased
+    And MobileGames is missing a value for catLastModified
+    And MobileGames is missing a value for catImage
+    And MobileGames is missing a value for catTheme
+    When I open the navigation subcategory Games -> MobileGames
     Then the field details does not contain value catReleased
     And the field details does not contain value catLastModified
     And the field details does not contain value catImage
     And the field details does not contain value catTheme
 
-  Scenario Outline: Node displays detail values based on scope locale
-    Given I am logged into scope <ENGLISH_SCOPE> as a public shopper
-    And I follow the root navigations link
-    And open the element with field name of Movies
-    And the navigation node array field details contains
-      | name    | value  |
-      | catName | Movies |
-    When I am logged into scope <FRENCH_SCOPE> as a public shopper
-    And I follow the root navigations link
-    And open the element with field name of Movies
+  Scenario Outline: Node displays detail values based on requested language
+    Given category Movies has an attribute catName with value <CATEGORY_NAME> in language <LANGUAGE>
+    When I request the navigation definition of Movies in language <LANGUAGE>
     Then the navigation node array field details contains
-      | name    | value  |
-      | catName | Cinéma |
+      | name    | value           |
+      | catName | <CATEGORY_NAME> |
 
     Examples:
-      | ENGLISH_SCOPE | FRENCH_SCOPE |
-      | mobee         | toastie      |
+      | LANGUAGE | CATEGORY_NAME |
+      | EN       | Movies        |
+      | FR       | Cinéma        |
 
-
-  Scenario: Navigations node with no attributes associated with it will not display an attributes field
-    Given I am logged in as a public shopper
-    And I follow the root navigations link
-    When open the element with field name of Smartphones
+  Scenario: Navigations node with no attributes associated with it will not display an details field
+    Given category Smartphones has no attributes
+    When I open the navigation category Smartphones
     Then the field details does not exist
 
   Scenario: Verify links on node with child and no parent
-    Given I am logged in as a public shopper
-    And I follow the root navigations link
-    When open the element with field name of Games
+    Given category Games has a subcategory and no parent category
+    When I open the navigation category Games
     Then there are no parent links
     And there is a child link
     And there is a top link
 
   Scenario: Verify links on node with multiple children
-    Given I am logged in as a public shopper
-    And I follow the root navigations link
-    When open the element with field name of Games
+    Given the category Games has 2 subcategories
+    When I open the navigation category Games
     Then there are 2 links of rel child
 
   Scenario: Verify links on node with no parent and no child
-    Given I am logged in as a public shopper
-    And I follow the root navigations link
-    When open the element with field name of Smartphones
+    Given the category Smartphones is a top level category with no subcategories
+    When I open the navigation category Smartphones
     Then there are no parent links
     And there are no child links
     And there is a top link
 
   Scenario: Verify links on node with parent and child
-    Given I am logged in as a public shopper
-    And I follow the root navigations link
-    When open the element with field name of Games
-    And open the child with field name of MobileGames
+    Given the category Mobile games has a parent category and a subcategory
+    When I open the navigation subcategory Games -> MobileGames
     Then there is a parent link
     And there is a child link
     And there is a top link
 
   Scenario: Verify links on node with parent and no child
-    Given I am logged in as a public shopper
-    And I follow the root navigations link
-    When open the element with field name of Games
-    And open the child with field name of MobileGames
-    And open the child with field name of IPhoneGames
+    Given the category IPhoneGames has a parent category and no subcategories
+    When I open the navigation subcategory Games -> MobileGames -> IPhoneGames
     Then there is a parent link
     And there are no child links
     And there is a top link
@@ -97,50 +83,29 @@ Feature: Retrieve Navigation nodes and child nodes
     And the field name has value MobileGames
 
   Scenario Outline: Nodes have links to items
-    Given I am logged in as a public shopper
-    And I follow the root navigations link
-    When open the element with field name of <NODE_ITEMS>
-    Then there is a items link
-    And I follow links items
-    And there are 1 links of rel element
+    Given the category <CATEGORY> contains <NUMBER_OF_ITEMS> items
+    When I open the navigation category <CATEGORY>
+    Then there is an items link
+    And the items link contains <NUMBER_OF_ITEMS> elements
 
     Examples:
-      | NODE_ITEMS      |
-      | GiftCertificate |
+      | CATEGORY        | NUMBER_OF_ITEMS |
+      | GiftCertificate | 1               |
+      | Games           | 0               |
 
-  Scenario Outline: Items link always exists regardless if the node has items
-    Given I am logged in as a public shopper
-    And I follow the root navigations link
-    When open the element with field name of <NODE_WITHOUT_ITEMS>
-    Then there is a items link
+  Scenario Outline: Navigate to items in node
+    Given the category <CATEGORY> contains the item <ITEM>
+    When I open the navigation category <CATEGORY>
     And I follow links items
-    And there are 0 links of rel element
+    Then there is an item with display-name <ITEM>
 
     Examples:
-      | NODE_WITHOUT_ITEMS |
-      | Games              |
-
-  Scenario: Scope with no nodes has no navigation elements
-    Given I am logged into scope rockjam as a public shopper
-    When I follow the root navigations link
-    Then there are no element links
-
-  Scenario Outline: Configurable items in node
-    Given I am logged in as a public shopper
-    When I follow the root navigations link
-    When open the element with field name of Movies
-    And I follow links items
-    Then there is an item with display-name <CONFIGURABLE_ITEM>
-
-    Examples:
-      | CONFIGURABLE_ITEM |
-      | Avatar            |
+      | CATEGORY | ITEM   |
+      | Movies   | Avatar |
 
   Scenario Outline: Items in node do not include subnode items
-    Given I am logged in as a public shopper
-    When I follow the root navigations link
-    When open the element with field name of Games
-    And open the child with field name of MobileGames
+    Given the item <SUBNODE_ITEM> belongs to a subcategory of MobileGames
+    When I open the navigation subcategory Games -> MobileGames
     And I follow links items
     Then there is not an item with display-name <SUBNODE_ITEM>
 
@@ -149,11 +114,8 @@ Feature: Retrieve Navigation nodes and child nodes
       | Super Game Pack |
 
   Scenario Outline: Items in node do not include parent items
-    Given I am logged in as a public shopper
-    When I follow the root navigations link
-    And open the element with field name of Games
-    And open the child with field name of MobileGames
-    And open the child with field name of IPhoneGames
+    Given the item <SUBNODE_ITEM> belongs to a subcategory of MobileGames
+    When I open the navigation subcategory Games -> MobileGames -> IPhoneGames
     And I follow links items
     Then there is not an item with display-name <PARENT_ITEM>
 
@@ -162,9 +124,8 @@ Feature: Retrieve Navigation nodes and child nodes
       | Tetris Heaven |
 
   Scenario: Featured items are in the specified order
-    Given I am logged in as a public shopper
-    And I follow the root navigations link
-    When open the element with field name of Movies
+    Given featured items are configured for the category Movies
+    When I open the navigation category Movies
     And I follow links items
     Then the items are listed in the follow order
       | Die Hard      |
@@ -174,23 +135,17 @@ Feature: Retrieve Navigation nodes and child nodes
       | Sleepy Hallow |
 
   Scenario: Featured items show up first
-    Given I am logged in as a public shopper
-    And I follow the root navigations link
-    When open the element with field name of Games
-    And open the child with field name of MobileGames
-    And open the child with field name of IPhoneGames
+    Given featured items are configured for the category IPhoneGames
+    When I open the navigation subcategory Games -> MobileGames -> IPhoneGames
     And I follow links items
     Then the items are listed in the follow order
       | Super Game Pack  |
       | Wing Warrior     |
       | Little Adventure |
 
-  Scenario Outline: Does not display not scope visible products
-    Given I am logged into scope mobee as a public shopper
-    And I follow the root navigations link
-    When open the element with field name of Games
-    And open the child with field name of MobileGames
-    And open the child with field name of AndroidGames
+  Scenario Outline: Does not display items that are not scope visible
+    Given that <NOT_SCOPE_VISIBLE_PRODUCT> does not belong to the current scope
+    When I open the navigation subcategory Games -> MobileGames -> AndroidGames
     And I follow links items
     Then there is not an item with display-name <NOT_SCOPE_VISIBLE_PRODUCT>
 

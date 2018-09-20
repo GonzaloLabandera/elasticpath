@@ -7,20 +7,19 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
 
-import java.util.Collections;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.elasticpath.domain.customer.Customer;
-import com.elasticpath.domain.customer.CustomerCreditCard;
 import com.elasticpath.domain.customer.CustomerPaymentMethods;
-import com.elasticpath.domain.customer.impl.CustomerCreditCardImpl;
+import com.elasticpath.domain.customer.PaymentToken;
 import com.elasticpath.domain.customer.impl.CustomerImpl;
+import com.elasticpath.domain.customer.impl.PaymentTokenImpl;
 import com.elasticpath.plugin.payment.dto.PaymentMethod;
 import com.elasticpath.rest.ResourceStatus;
 import com.elasticpath.rest.command.ExecutionResult;
@@ -34,10 +33,11 @@ import com.elasticpath.rest.resource.integration.epcommerce.repository.customer.
 public class CustomerPaymentMethodsRepositoryImplTest {
 
 	private static final String CUSTOMER_GUID = "customer";
-	private static final String CREDIT_CARD_IDENTIFIER = "2000";
+	private static final String UID_IDENTIFIER = "2000";
 
 	private static final String RESULT_FAILURE_ASSERT_MESSAGE = "The operation should have failed";
 	private static final String RESULT_STATUS_NOT_FOUND_MESSAGE = "Result status should be NOT FOUND";
+	private static final String TOKEN_VALUE = "testTokenValue";
 
 	@Mock
 	private CustomerRepository mockCustomerRepository;
@@ -48,13 +48,12 @@ public class CustomerPaymentMethodsRepositoryImplTest {
 
 	@Test
 	public void ensurePaymentMethodFoundWhenPresent() {
-		customer.setCreditCards(Collections.singletonList(getTestCreditCard()));
-
+		customer.getPaymentMethods().add(getTestPaymentToken());
 		shouldFindCustomer();
-		ExecutionResult<PaymentMethod> result = repository.findPaymentMethodByCustomerGuidAndPaymentMethodId(CUSTOMER_GUID, CREDIT_CARD_IDENTIFIER);
+		ExecutionResult<PaymentMethod> result = repository.findPaymentMethodByCustomerGuidAndPaymentMethodId(CUSTOMER_GUID, UID_IDENTIFIER);
 
 		assertTrue("The operation should have been successful", result.isSuccessful());
-		assertEquals("The result should be the credit card belonging to the customer", getTestCreditCard(), result.getData());
+		assertEquals("The result should be the paymentMethod belonging to the customer", getTestPaymentToken(), result.getData());
 	}
 
 
@@ -62,14 +61,14 @@ public class CustomerPaymentMethodsRepositoryImplTest {
 	public void ensurePaymentMethodNotFoundWhenCustomerNotFound() {
 		shouldNotFindCustomer();
 
-		ExecutionResult<PaymentMethod> result = repository.findPaymentMethodByCustomerGuidAndPaymentMethodId(CUSTOMER_GUID, CREDIT_CARD_IDENTIFIER);
+		ExecutionResult<PaymentMethod> result = repository.findPaymentMethodByCustomerGuidAndPaymentMethodId(CUSTOMER_GUID, UID_IDENTIFIER);
 		assertTrue(RESULT_FAILURE_ASSERT_MESSAGE, result.isFailure());
 		assertEquals(RESULT_STATUS_NOT_FOUND_MESSAGE, ResourceStatus.NOT_FOUND, result.getResourceStatus());
 	}
 
 	@Test
 	public void ensurePaymentMethodNotFoundWhenPaymentMethodIdIsInvalid() {
-		customer.setCreditCards(Collections.singletonList(getTestCreditCard()));
+		customer.getPaymentMethods().add(getTestPaymentToken());
 		shouldFindCustomer();
 
 		ExecutionResult<PaymentMethod> result = repository.findPaymentMethodByCustomerGuidAndPaymentMethodId(CUSTOMER_GUID, String.valueOf(1L));
@@ -81,7 +80,7 @@ public class CustomerPaymentMethodsRepositoryImplTest {
 	public void ensurePaymentMethodNotFoundReturnedWhenNoCustomerPaymentMethods() {
 		shouldFindCustomer();
 
-		ExecutionResult<PaymentMethod> result = repository.findPaymentMethodByCustomerGuidAndPaymentMethodId(CUSTOMER_GUID, CREDIT_CARD_IDENTIFIER);
+		ExecutionResult<PaymentMethod> result = repository.findPaymentMethodByCustomerGuidAndPaymentMethodId(CUSTOMER_GUID, UID_IDENTIFIER);
 		assertTrue(RESULT_FAILURE_ASSERT_MESSAGE, result.isFailure());
 		assertEquals(RESULT_STATUS_NOT_FOUND_MESSAGE, ResourceStatus.NOT_FOUND, result.getResourceStatus());
 	}
@@ -126,10 +125,10 @@ public class CustomerPaymentMethodsRepositoryImplTest {
 		assertEquals(RESULT_STATUS_NOT_FOUND_MESSAGE, ResourceStatus.NOT_FOUND, result.getResourceStatus());
 	}
 
-	private CustomerCreditCard getTestCreditCard() {
-		CustomerCreditCard creditCard = new CustomerCreditCardImpl();
-		creditCard.setUidPk(Long.valueOf(CREDIT_CARD_IDENTIFIER));
-		return creditCard;
+	private PaymentMethod getTestPaymentToken() {
+		PaymentToken paymentToken = new PaymentTokenImpl.TokenBuilder().withValue(TOKEN_VALUE).build();
+		paymentToken.setUidPk(Long.valueOf(UID_IDENTIFIER));
+		return paymentToken;
 	}
 
 	private void shouldFindCustomer() {

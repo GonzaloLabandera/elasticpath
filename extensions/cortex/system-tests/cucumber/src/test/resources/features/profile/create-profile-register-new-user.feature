@@ -12,7 +12,7 @@ Feature: Create new shopper profile
       | testFamilyName | testGivenName | password |
 
   Scenario Outline: Create new profile with existing username
-    When I create a new shopper profile with family-name <FAMILY_NAME>, given-name <GIVEN_NAME>, password <PASSWORD>, and existing user name <USER_NAME>
+    When I create a new shopper profile with family-name <FAMILY_NAME>, given-name <GIVEN_NAME>, password <PASSWORD>, and user name <USER_NAME> in scope mobee
     Then the HTTP status is conflict
     And I should see validation error message with message type, message id, and debug message
       | messageType | messageId                     | debugMessage                                   |
@@ -22,8 +22,20 @@ Feature: Create new shopper profile
       | FAMILY_NAME    | GIVEN_NAME    | PASSWORD | USER_NAME                     |
       | testFamilyName | testGivenName | password | oliver.harris@elasticpath.com |
 
+ Scenario Outline: Create new profile with existing username in different scopes
+    When I create a new shopper profile with family-name <FAMILY_NAME>, given-name <GIVEN_NAME>, password <PASSWORD>, and user name <USER_NAME> in scope mobee
+    And I create a new shopper profile with family-name <FAMILY_NAME>, given-name <GIVEN_NAME>, password <PASSWORD>, and user name <USER_NAME> in scope kobee
+    Then the HTTP status is conflict
+    And I should see validation error message with message type, message id, and debug message
+      | messageType | messageId                     | debugMessage                                   |
+      | error       | profile.userid.already.exists | Customer with the given user Id already exists |
+
+   Examples:
+     | FAMILY_NAME          | GIVEN_NAME          | PASSWORD | USER_NAME     |
+     | testFamilyNameScopes | testGivenNameScopes | 11111111 | scopes@ep.com |
+
   Scenario Outline: Create new profile with invalid field values
-    When I create a new shopper profile with family-name <FAMILY_NAME>, given-name <GIVEN_NAME>, password <PASSWORD>, and existing user name <USER_NAME>
+    When I create a new shopper profile with family-name <FAMILY_NAME>, given-name <GIVEN_NAME>, password <PASSWORD>, and user name <USER_NAME> in scope mobee
     Then the HTTP status is bad request
     And I should see validation error message with message type, message id, and debug message
       | messageType | messageId  | debugMessage    |
@@ -57,3 +69,4 @@ Feature: Create new shopper profile
     Examples:
       | JSON                                                                                                        |
       | {"family-name":"kitty","given-name":"Hello","username":"Hello.Kitty@elasticpath.com","password":"password"} |
+

@@ -8,7 +8,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Locale;
 import java.util.Set;
 
 import org.apache.log4j.Logger;
@@ -35,8 +34,9 @@ import com.elasticpath.cmclient.admin.taxes.TaxesPlugin;
 import com.elasticpath.cmclient.admin.taxes.actions.CreateTaxValueAction;
 import com.elasticpath.cmclient.admin.taxes.actions.DeleteTaxValueAction;
 import com.elasticpath.cmclient.admin.taxes.actions.EditTaxValueAction;
-import com.elasticpath.cmclient.core.ServiceLocator;
 import com.elasticpath.cmclient.core.CoreMessages;
+import com.elasticpath.cmclient.core.CorePlugin;
+import com.elasticpath.cmclient.core.ServiceLocator;
 import com.elasticpath.cmclient.core.ui.dialog.AbstractEpDialog;
 import com.elasticpath.cmclient.core.ui.framework.EpControlFactory.EpState;
 import com.elasticpath.cmclient.core.ui.framework.IEpLayoutComposite;
@@ -259,7 +259,7 @@ public class ManageTaxValuesDialog extends AbstractEpDialog {
 		Geography geography = ServiceLocator.getService(ContextIdNames.GEOGRAPHY);
 		List<TaxJurisdiction> taxJurisdictionList = taxJurisdictionService.list();
 		for (TaxJurisdiction taxJurisdiction : taxJurisdictionList) {
-			String countryName = geography.getCountryDisplayName(taxJurisdiction.getRegionCode(), Locale.getDefault());
+			String countryName = geography.getCountryDisplayName(taxJurisdiction.getRegionCode(), CorePlugin.getDefault().getDefaultLocale());
 			if (countryName == null) {
 				countryName = taxJurisdiction.getRegionCode();
 			}

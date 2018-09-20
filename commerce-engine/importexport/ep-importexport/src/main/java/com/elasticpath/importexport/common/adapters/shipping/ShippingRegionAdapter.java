@@ -3,6 +3,8 @@
  */
 package com.elasticpath.importexport.common.adapters.shipping;
 
+import static com.elasticpath.commons.constants.EpShippingContextIdNames.SHIPPING_REGION;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -18,7 +20,7 @@ import com.elasticpath.importexport.common.dto.shipping.region.ShippingRegionDTO
 import com.elasticpath.importexport.common.dto.shipping.region.ShippingSubRegionsDTO;
 
 /**
- * Helper class for mediating data between ShippingRegion entitys and dtos. 
+ * Helper class for mediating data between ShippingRegion entitys and dtos.
  *
  */
 public class ShippingRegionAdapter extends AbstractDomainAdapterImpl<ShippingRegion, ShippingRegionDTO>  {
@@ -34,7 +36,7 @@ public class ShippingRegionAdapter extends AbstractDomainAdapterImpl<ShippingReg
 		target.setGuid(source.getGuid());
 		target.setName(source.getName());
 		List<ShippingSubRegionsDTO> subRegions = new ArrayList<>();
-		
+
 		Map<String, Region> regionMap = source.getRegionMap();
 		Set<String> keySet = regionMap.keySet();
 		Iterator<String> iter = keySet.iterator();
@@ -50,9 +52,9 @@ public class ShippingRegionAdapter extends AbstractDomainAdapterImpl<ShippingReg
 				}
 				subRegions.add(subRegionsDto);
 			}
-			
+
 		}
-		
+
 		target.setShippingSubRegions(subRegions);
 	}
 
@@ -65,9 +67,9 @@ public class ShippingRegionAdapter extends AbstractDomainAdapterImpl<ShippingReg
 	public void populateDomain(final ShippingRegionDTO source, final ShippingRegion target) {
 		target.setGuid(source.getGuid());
 		target.setName(source.getName());
-		
+
 		Map<String, Region> regionMap = new HashMap<>();
-		
+
 		List<ShippingSubRegionsDTO> subRegions = source.getShippingSubRegions();
 		for (ShippingSubRegionsDTO subRegionsDto : subRegions) {
 			Region region = getBeanFactory().getBean(ContextIdNames.REGION);
@@ -75,11 +77,11 @@ public class ShippingRegionAdapter extends AbstractDomainAdapterImpl<ShippingReg
 			region.setSubCountryCodeList(subRegionsDto.getRegionCodes());
 			regionMap.put(subRegionsDto.getCountryCode(), region);
 		}
-		
+
 		target.setRegionMap(regionMap);
-		
+
 	}
-	
+
 	@Override
 	public ShippingRegionDTO createDtoObject() {
 		return new ShippingRegionDTO();
@@ -87,6 +89,6 @@ public class ShippingRegionAdapter extends AbstractDomainAdapterImpl<ShippingReg
 
 	@Override
 	public ShippingRegion createDomainObject() {
-		return getBeanFactory().getBean(ContextIdNames.SHIPPING_REGION);
+		return getBeanFactory().getBean(SHIPPING_REGION);
 	}
 }

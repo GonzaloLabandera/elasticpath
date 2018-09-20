@@ -9,10 +9,9 @@ import static org.mockito.Mockito.mock;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.elasticpath.tools.sync.client.SyncJobConfiguration;
-import com.elasticpath.tools.sync.client.SyncToolControllerType;
 import com.elasticpath.tools.sync.client.SynchronizationTool;
 
 /**
@@ -72,7 +71,6 @@ public class CLISyncJobConfigurationTest {
 
 	private SynchronizationTool.CommandLineConfiguration givenSimpleCommandLineConfiguration(final boolean hasSubDir) {
 		SynchronizationTool.CommandLineConfiguration commandLineConfiguration = mock(SynchronizationTool.CommandLineConfiguration.class);
-		given(commandLineConfiguration.getControllerType()).willReturn(SyncToolControllerType.FULL_CONTROLLER);
 		given(commandLineConfiguration.getRootPath()).willReturn(ROOT_PATH);
 		if (hasSubDir) {
 			given(commandLineConfiguration.getSubDir()).willReturn(SUB_DIR);

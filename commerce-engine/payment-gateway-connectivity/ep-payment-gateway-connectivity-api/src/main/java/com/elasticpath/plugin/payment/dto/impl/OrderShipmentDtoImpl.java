@@ -22,7 +22,7 @@ public class OrderShipmentDtoImpl implements OrderShipmentDto {
 	
 	private String trackingCode;
 	
-	private String serviceLevel;
+	private String shippingOptionCode;
 	
 	private BigDecimal shippingTax;
 	
@@ -45,12 +45,12 @@ public class OrderShipmentDtoImpl implements OrderShipmentDto {
 	}
 
 	@Override
-	public String getCarrier() {
+	public String getCarrierCode() {
 		return carrier;
 	}
 
 	@Override
-	public void setCarrier(final String carrier) {
+	public void setCarrierCode(final String carrier) {
 		this.carrier = carrier;
 	}
 
@@ -65,13 +65,13 @@ public class OrderShipmentDtoImpl implements OrderShipmentDto {
 	}
 
 	@Override
-	public String getServiceLevel() {
-		return serviceLevel;
+	public String getShippingOptionCode() {
+		return shippingOptionCode;
 	}
 
 	@Override
-	public void setServiceLevel(final String serviceLevel) {
-		this.serviceLevel = serviceLevel;
+	public void setShippingOptionCode(final String shippingOptionCode) {
+		this.shippingOptionCode = shippingOptionCode;
 	}
 
 	@Override

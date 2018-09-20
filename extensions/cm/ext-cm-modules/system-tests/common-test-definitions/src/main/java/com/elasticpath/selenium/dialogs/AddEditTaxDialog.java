@@ -16,7 +16,10 @@ public class AddEditTaxDialog extends AbstractDialog {
 	private final String taxAddressFieldCSS;
 	private final String saveTaxButtonCSS;
 	private final String taxDisplayNameInputCSS;
-	private static final String TAX_PARENT_CSS_TEMPLATE =
+	/**
+	 * CSS selector used to identify the dialog.
+	 */
+	public static final String TAX_PARENT_CSS_TEMPLATE =
 			"div[automation-id*='com.elasticpath.cmclient.admin.taxes.TaxesMessages.%sTaxCategory'][widget-type='Shell'] ";
 	private static final String TAX_NAME_INPUT_CSS_TEMPLATE =
 			"div[automation-id='com.elasticpath.cmclient.admin.taxes.TaxesMessages.TaxCategory'][widget-type='Text'] input";

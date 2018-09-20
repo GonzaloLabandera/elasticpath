@@ -18,7 +18,6 @@ import cucumber.api.java.en.Then;
 import org.apache.commons.collections.CollectionUtils;
 import org.junit.Assert;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.ContextConfiguration;
 
 import com.elasticpath.domain.builder.customer.CustomerGroupBuilder;
 import com.elasticpath.domain.customer.CustomerGroup;
@@ -29,7 +28,6 @@ import com.elasticpath.service.customer.CustomerGroupService;
 /**
  * Customer group steps.
  */
-@ContextConfiguration("/integration-context-mocked-customer-service.xml")
 public class CustomerGroupSteps {
 
 	@Autowired

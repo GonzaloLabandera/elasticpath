@@ -3,6 +3,7 @@
  */
 package com.elasticpath.rest.resource.integration.epcommerce.repository.coupon;
 
+import io.reactivex.Completable;
 import io.reactivex.Observable;
 import io.reactivex.Single;
 
@@ -15,14 +16,14 @@ import com.elasticpath.domain.rules.Coupon;
 public interface CouponRepository {
 	
 	/**
-	 * True if coupon is valid for system.
+	 * Check if coupon is valid.
 	 * @param couponCode coupon code to verify.
 	 * @param storeCode  store code to verify coupon is valid within.
 	 * @param customerEmail email
 	 *
-	 * @return true if coupon is valid within store scope, false otherwise.
+	 * @return Completable object for compatibility reasons.
 	 */
-	Single<Boolean> isCouponValidInStore(String couponCode, String storeCode, String customerEmail);
+	Completable validateCoupon(String couponCode, String storeCode, String customerEmail);
 
 	/**
 	 * Find the Coupon using the coupon code.

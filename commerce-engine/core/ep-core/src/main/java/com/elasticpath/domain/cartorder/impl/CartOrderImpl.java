@@ -50,8 +50,8 @@ public class CartOrderImpl extends AbstractEntityImpl implements CartOrder {
 	private String shippingAddressGuid;
 	
 	private String shoppingCartGuid;
-		
-	private String shippingServiceLevelGuid;
+
+	private String shippingOptionCode;
 	
 	private long uidPk;
 
@@ -193,14 +193,14 @@ public class CartOrderImpl extends AbstractEntityImpl implements CartOrder {
 	
 	@Override
 	@Basic
-	@Column(name = "SHIPPING_SERVICE_LEVEL_GUID", nullable = true)
-	public String getShippingServiceLevelGuid() {
-		return shippingServiceLevelGuid;
+	@Column(name = "SHIPPING_OPTION_CODE", nullable = true)
+	public String getShippingOptionCode() {
+		return shippingOptionCode;
 	}
 	
 	@Override
-	public void setShippingServiceLevelGuid(final String shippingServiceLevelGuid) {
-		this.shippingServiceLevelGuid = shippingServiceLevelGuid;
+	public void setShippingOptionCode(final String shippingOptionCode) {
+		this.shippingOptionCode = shippingOptionCode;
 	}
 
 	@Override
@@ -244,7 +244,7 @@ public class CartOrderImpl extends AbstractEntityImpl implements CartOrder {
 
 	/**
 	 * Getter for coupon codes. Returns an unmodifiable Set.
-	 * 
+	 *
 	 * @return an unmodifiable list of coupon codes.
 	 */
 	@Transient
@@ -255,7 +255,7 @@ public class CartOrderImpl extends AbstractEntityImpl implements CartOrder {
 
 	/**
 	 * Internal getter for couponCodes.
-	 * 
+	 *
 	 * @return the coupon codes.
 	 */
 	@PersistentCollection(elementCascade = { CascadeType.ALL }, fetch = FetchType.EAGER)

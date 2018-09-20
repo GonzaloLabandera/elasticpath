@@ -101,6 +101,30 @@ public class CachingProductSkuLookupImpl implements ProductSkuLookup {
 		}
 	}
 
+	/**
+	 * Note that this is not especially efficient, and should be revisited if perf data suggests that
+	 * loading skus one at a time instead of all at once is causing real-world issues.
+	 *
+	 * @param guids the sku guids.
+	 * @param <P> the genericized ProductSku sub-class that this finder will return
+	 * @return the sku with the given guid, otherwise null
+	 * @throws EpServiceException - in case of any errors
+	 */
+	@Override
+	@SuppressWarnings("unchecked")
+	public <P extends ProductSku> List<P> findByGuids(final Collection<String> guids) throws EpServiceException {
+		ArrayList<P> productSkus = new ArrayList<>();
+		for (String guid : guids) {
+			ProductSku sku = findByGuid(guid);
+			if (sku == null) {
+				continue;
+			}
+			productSkus.add((P) sku);
+		}
+
+		return productSkus;
+	}
+
 	@Override
 	@SuppressWarnings("unchecked")
 	public <P extends ProductSku> P findBySkuCode(final String skuCode) throws EpServiceException {

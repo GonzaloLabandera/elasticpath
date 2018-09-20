@@ -4,8 +4,9 @@
 package com.elasticpath.settings.impl;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.same;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.same;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -23,8 +24,9 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
+import com.elasticpath.base.exception.EpServiceException;
 import com.elasticpath.settings.SettingsService;
 import com.elasticpath.settings.domain.SettingDefinition;
 import com.elasticpath.settings.domain.SettingMetadata;
@@ -75,7 +77,7 @@ public class CachedSettingsReaderImplTest {
 	}
 
 	/**
-	 * Test method for {@link com.elasticpath.settings.impl.CachedSettingsReaderImpl#getSettingValue(java.lang.String, java.lang.String)}.
+	 * Test method for {@link CachedSettingsReaderImpl#getSettingValue(String, String)}.
 	 * Tests that the setting definition is being checked and that the value is being retrieved from the refresh strategy.
 	 */
 	@Test
@@ -95,7 +97,7 @@ public class CachedSettingsReaderImplTest {
 	}
 
 	/**
-	 * Test method for {@link com.elasticpath.settings.impl.CachedSettingsReaderImpl#getSettingValue(java.lang.String)}.
+	 * Test method for {@link CachedSettingsReaderImpl#getSettingValue(String)}.
 	 * Tests that the setting definition is being checked and that the value is being retrieved from the refresh strategy.
 	 */
 	@Test
@@ -114,8 +116,25 @@ public class CachedSettingsReaderImplTest {
 		verify(refreshStrategy).retrieveSetting(any(String.class), any(String.class));
 	}
 
+	@Test
+	public void testThatGetSettingValueThrowsEpServiceExceptionWhenNoSuchSettingDefinition() {
+		when(reader.getSettingDefinition(SETTING_PATH)).thenReturn(null);
+
+		assertThatThrownBy(() -> cachedSettingsReader.getSettingValue(SETTING_PATH))
+				.isInstanceOf(EpServiceException.class);
+	}
+
+	@Test
+	public void testThatGetSettingValueWithContextThrowsEpServiceExceptionWhenNoSuchSettingDefinition() {
+		when(reader.getSettingDefinition(SETTING_PATH)).thenReturn(null);
+
+		assertThatThrownBy(() -> cachedSettingsReader.getSettingValue(SETTING_PATH, SETTING_CONTEXTS[0]))
+				.isInstanceOf(EpServiceException.class);
+
+	}
+
 	/**
-	 * Test method for {@link com.elasticpath.settings.impl.CachedSettingsReaderImpl#getSettingValues(java.lang.String, java.lang.String[])}.
+	 * Test method for {@link CachedSettingsReaderImpl#getSettingValues(String, String[])}.
 	 * Tests that the setting definition is being checked and that the values are being retrieved from the refresh strategy.
 	 */
 	@Test
@@ -171,4 +190,5 @@ public class CachedSettingsReaderImplTest {
 			.as("Setting data map should be cleared on destroy")
 			.isEmpty();
 	}
+
 }

@@ -20,7 +20,7 @@ import org.junit.runner.RunWith;
 import org.apache.commons.lang3.StringUtils;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.elasticpath.domain.catalog.Product;
 import com.elasticpath.domain.catalog.ProductSku;
@@ -69,7 +69,6 @@ public class ItemDefinitionLookupStrategyImplTest {
 	 */
 	@Before
 	public void setUp() {
-		when(mockItemRepository.getSkuCodeForItemId(ITEM_ID)).thenReturn(ExecutionResultFactory.createReadOK(SKU_CODE));
 		Subject subject = TestSubjectFactory.createWithScopeAndUserIdAndLocale(STORE_CODE, USERID, LOCALE);
 		when(mockResourceOperationContext.getSubject()).thenReturn(subject);
 	}

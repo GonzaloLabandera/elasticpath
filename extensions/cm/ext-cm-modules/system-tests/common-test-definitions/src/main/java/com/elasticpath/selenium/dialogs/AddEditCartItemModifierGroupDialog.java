@@ -14,7 +14,10 @@ import com.elasticpath.selenium.util.Constants;
  * Add Edit Cart Item Modifier Group Dialog.
  */
 public class AddEditCartItemModifierGroupDialog extends AbstractDialog {
-	private static final String ADD_CART_ITEM_MODIFIER_GROUP_PARENT_CSS
+	/**
+	 * CSS selector used to identify the dialog.
+	 */
+	public static final String ADD_CART_ITEM_MODIFIER_GROUP_PARENT_CSS
 			= "div[automation-id*='com.elasticpath.cmclient.catalog.CatalogMessages.GroupAddEditDialog'][widget-type='Shell'] ";
 	private static final String FIELD_TABLE_CSS = "div[widget-id='Cart Modifier Group'][widget-type='Table'][seeable='true'] ";
 	private static final String FIELD_COLUMN_CSS = FIELD_TABLE_CSS + "div[column-id='%s']";
@@ -83,7 +86,9 @@ public class AddEditCartItemModifierGroupDialog extends AbstractDialog {
 	 * @return AddEditCartItemModifierGroupFieldDialog
 	 */
 	public AddEditCartItemModifierGroupFieldDialog clickAddFieldButton() {
-		clickButton("Add Field");
+		final String buttonName = "Add Field";
+		clickButton(String.format(ADD_FIELD_BUTTON_CSS, buttonName), buttonName, AddEditCartItemModifierGroupFieldDialog
+				.ADD_CART_ITEM_MODIFIER_FIELD_PARENT_CSS);
 		return new AddEditCartItemModifierGroupFieldDialog(getDriver());
 	}
 
@@ -93,7 +98,9 @@ public class AddEditCartItemModifierGroupDialog extends AbstractDialog {
 	 * @return AddEditCartItemModifierGroupFieldDialog
 	 */
 	public AddEditCartItemModifierGroupFieldDialog clickEditFieldButton() {
-		clickButton("Edit Field");
+		final String buttonName = "Edit Field";
+		clickButton(String.format(EDIT_FIELD_BUTTON_CSS, buttonName), buttonName, AddEditCartItemModifierGroupFieldDialog
+				.ADD_CART_ITEM_MODIFIER_FIELD_PARENT_CSS);
 		return new AddEditCartItemModifierGroupFieldDialog(getDriver());
 	}
 

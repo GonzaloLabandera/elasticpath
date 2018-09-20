@@ -8,6 +8,7 @@ import java.util.Arrays;
 import org.osgi.service.component.annotations.Activate;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
+import org.springframework.context.MessageSource;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -30,6 +31,9 @@ public class EpAuthenticationManager implements AuthenticationManager {
 	@Reference
 	private UserDetailsService userDetailsService;
 
+	@Reference
+	private MessageSource globalMessageSource;
+
 	private AuthenticationManager authenticationManager;
 
 
@@ -45,11 +49,13 @@ public class EpAuthenticationManager implements AuthenticationManager {
 		daoAuthenticationProvider.setPasswordEncoder(sha256PasswordEncoder);
 		daoAuthenticationProvider.setUserDetailsService(userDetailsService);
 		daoAuthenticationProvider.setSaltSource(saltSource);
+		daoAuthenticationProvider.setMessageSource(globalMessageSource);
 
 		ShaPasswordEncoder sha1PasswordEncoder = new ShaPasswordEncoder();
 		DaoAuthenticationProvider fallbackDaoAuthenticationProvider = new DaoAuthenticationProvider();
 		fallbackDaoAuthenticationProvider.setPasswordEncoder(sha1PasswordEncoder);
 		fallbackDaoAuthenticationProvider.setUserDetailsService(userDetailsService);
+		fallbackDaoAuthenticationProvider.setMessageSource(globalMessageSource);
 
 		authenticationManager = new ProviderManager(Arrays.asList(daoAuthenticationProvider, fallbackDaoAuthenticationProvider));
 	}

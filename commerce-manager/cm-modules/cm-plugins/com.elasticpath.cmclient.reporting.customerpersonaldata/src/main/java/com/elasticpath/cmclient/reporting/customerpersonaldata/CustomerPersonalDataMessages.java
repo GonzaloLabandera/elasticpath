@@ -26,7 +26,7 @@ public final class CustomerPersonalDataMessages {
 	public String store;
 	public String fromDate;
 	public String toDate;
-	public String customerID;
+	public String userId;
 
 	/**
 	 * Gets the NLS localize message class.

@@ -97,7 +97,7 @@ public class CatalogPromotionSolrHook extends ProcessingHookAdapterImpl {
 			tagSet.addTag("SHOPPING_START_TIME", new Tag(currentTime.getTime()));
 			return rule.isEnabled() 
 				&& 
-				rule.getSellingContext().isSatisfied(conditionEvaluatorService, tagSet, TagDictionary.DICTIONARY_TIME_GUID);
+				rule.getSellingContext().isSatisfied(conditionEvaluatorService, tagSet, TagDictionary.DICTIONARY_TIME_GUID).isSuccess();
 			
 		}
 		return rule.isEnabled();

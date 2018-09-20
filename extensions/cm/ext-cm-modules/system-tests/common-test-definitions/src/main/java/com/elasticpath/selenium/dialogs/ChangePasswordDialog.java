@@ -8,7 +8,10 @@ import org.openqa.selenium.WebDriver;
  */
 public class ChangePasswordDialog extends AbstractDialog {
 
-	private static final String CHANGE_PASSWORD_PARENT_CSS = "div[widget-id='Change Password'][widget-type='Shell'] ";
+	/**
+	 * CSS selector used to identify the dialog.
+	 */
+	public static final String CHANGE_PASSWORD_PARENT_CSS = "div[widget-id='Change Password'][widget-type='Shell'] ";
 	private static final String OLD_PASSWORD_INPUT_CSS = CHANGE_PASSWORD_PARENT_CSS + "div[widget-id='Old Password'] input";
 	private static final String NEW_PASSWORD_INPUT_CSS = CHANGE_PASSWORD_PARENT_CSS + "div[widget-id='New Password'] input";
 	private static final String CONFIRM_NEW_PASSWORD_INPUT_CSS = CHANGE_PASSWORD_PARENT_CSS + "div[widget-id='Confirm New Password'] input";

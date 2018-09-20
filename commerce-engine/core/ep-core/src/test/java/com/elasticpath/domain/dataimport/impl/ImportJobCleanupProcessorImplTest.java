@@ -15,15 +15,14 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang.time.DateUtils;
 import org.jmock.Expectations;
 import org.jmock.integration.junit4.JUnitRuleMockery;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang.time.DateUtils;
 
 import com.elasticpath.base.exception.EpSystemException;
 import com.elasticpath.commons.util.AssetRepository;
@@ -38,9 +37,9 @@ import com.elasticpath.service.dataimport.dao.ImportJobStatusDao;
 import com.elasticpath.service.dataimport.dao.ImportNotificationDao;
 import com.elasticpath.service.dataimport.impl.ImportJobCleanupProcessorImpl;
 import com.elasticpath.service.misc.TimeService;
-import com.elasticpath.settings.SettingsReader;
-import com.elasticpath.settings.domain.SettingValue;
-import com.elasticpath.settings.domain.impl.SettingValueImpl;
+import com.elasticpath.settings.MalformedSettingValueException;
+import com.elasticpath.settings.provider.SettingValueProvider;
+import com.elasticpath.settings.test.support.SimpleSettingValueProvider;
 
 /**
  * ImportJobCleanupProcessorImpl unit test class.
@@ -58,7 +57,6 @@ public class ImportJobCleanupProcessorImplTest {
 
 	private final ImportNotificationDao importNotificationDao = mockery.mock(ImportNotificationDao.class);
 	private final ImportJobStatusDao importJobStatusDao = mockery.mock(ImportJobStatusDao.class);
-	private final SettingsReader settingsReader = mockery.mock(SettingsReader.class);
 	private final TimeService timeService = mockery.mock(TimeService.class);
 	private final AssetRepository assetRepository = mockery.mock(AssetRepository.class);
 
@@ -72,7 +70,6 @@ public class ImportJobCleanupProcessorImplTest {
 		importJobCleanupProcessor = new ImportJobCleanupProcessorImpl();
 		importJobCleanupProcessor.setImportJobStatusDao(importJobStatusDao);
 		importJobCleanupProcessor.setImportNotificationDao(importNotificationDao);
-		importJobCleanupProcessor.setSettingsReader(settingsReader);
 		importJobCleanupProcessor.setTimeService(timeService);
 		importJobCleanupProcessor.setAssetRepository(assetRepository);
 
@@ -95,12 +92,21 @@ public class ImportJobCleanupProcessorImplTest {
 		ImportNotification launchImportNotification = getLaunchImportNotification(new Date(), "1");
 		final List<ImportNotification> importNotifications = new ArrayList<>();
 		importNotifications.add(launchImportNotification);
-		
-		mockery.checking(new Expectations() { {
-			oneOf(settingsReader).getSettingValue(with(ImportJobCleanupProcessorImpl.SETTING_IMPORT_JOB_MAX_AGE));
-			will(returnValue(null));
-		} });
-		
+
+		final SettingValueProvider<Integer> exceptionThrowingProvider = new SettingValueProvider<Integer>() {
+			@Override
+			public Integer get() {
+				throw new MalformedSettingValueException("Null setting values can't be converted to integers");
+			}
+
+			@Override
+			public Integer get(final String context) {
+				throw new MalformedSettingValueException("Null setting values can't be converted to integers");
+			}
+		};
+
+		importJobCleanupProcessor.setMaximumImportJobAgeDaysProvider(exceptionThrowingProvider);
+
 		importJobCleanupProcessor.cleanupImportJobData();
 		fail("An EpSystemException must be thrown if no no max age setting is found.");
 	}
@@ -110,20 +116,18 @@ public class ImportJobCleanupProcessorImplTest {
 	 */
 	@Test
 	public void testCleanupImportJobWithNonExpiredNotification() {
-		final SettingValue importJobMaxAgeSettingValue = new SettingValueImpl();
-		importJobMaxAgeSettingValue.setValue("100000000");
-		
+		final int maximumImportJobAgeDaysProvider = 100000000;
+		importJobCleanupProcessor.setMaximumImportJobAgeDaysProvider(new SimpleSettingValueProvider<>(maximumImportJobAgeDaysProvider));
+
 		ImportNotification launchImportNotification = getLaunchImportNotification(new Date(), "processId-1");
 		final List<ImportNotification> importNotifications = new ArrayList<>();
 		importNotifications.add(launchImportNotification);
 		
 		final List<ImportJobState> importJobStates = new ArrayList<>();
-		
+
 		mockery.checking(new Expectations() { {
 			oneOf(importNotificationDao).findByActionAndState(with(ImportAction.LAUNCH_IMPORT), with(ImportNotificationState.PROCESSED));
 			will(returnValue(importNotifications));
-			oneOf(settingsReader).getSettingValue(with(ImportJobCleanupProcessorImpl.SETTING_IMPORT_JOB_MAX_AGE));
-			will(returnValue(importJobMaxAgeSettingValue));
 			oneOf(timeService).getCurrentTime();
 			will(returnValue(new Date()));
 			oneOf(importJobStatusDao).findByState(with(ImportJobState.QUEUED_FOR_VALIDATION));
@@ -133,14 +137,13 @@ public class ImportJobCleanupProcessorImplTest {
 		int importJobsAffected = importJobCleanupProcessor.cleanupImportJobData();
 		assertEquals("No import job should be affected with no notifications found.", 0, importJobsAffected);
 	}
-	
+
 	/**
 	 * Create a very old notification to force expiration, and thus a cleanup of it's data. 
 	 */
 	@Test
 	public void testCleanupImportJobWithExpiredNotification() {
-		final SettingValue importJobMaxAgeSettingValue = new SettingValueImpl();
-		importJobMaxAgeSettingValue.setValue("1");
+		importJobCleanupProcessor.setMaximumImportJobAgeDaysProvider(new SimpleSettingValueProvider<>(1));
 		
 		final String processId = "processId-" + System.currentTimeMillis();
 		
@@ -162,8 +165,6 @@ public class ImportJobCleanupProcessorImplTest {
 		mockery.checking(new Expectations() { {
 			oneOf(importNotificationDao).findByActionAndState(with(ImportAction.LAUNCH_IMPORT), with(ImportNotificationState.PROCESSED));
 			will(returnValue(importNotifications));
-			oneOf(settingsReader).getSettingValue(with(ImportJobCleanupProcessorImpl.SETTING_IMPORT_JOB_MAX_AGE));
-			will(returnValue(importJobMaxAgeSettingValue));
 			oneOf(timeService).getCurrentTime();
 			will(returnValue(new Date()));
 			oneOf(importJobStatusDao).findByProcessId(with(processId));
@@ -231,7 +232,7 @@ public class ImportJobCleanupProcessorImplTest {
 	 */
 	@Test
 	public void testProcessStaleImportJob() {
-		final SettingValue importJobStaleTimeoutValue = mockery.mock(SettingValue.class);
+		importJobCleanupProcessor.setStaleImportJobStatusThresholdMinsProvider(new SimpleSettingValueProvider<>(1));
 
 		final Date currentTime = new Date();
 		
@@ -245,8 +246,6 @@ public class ImportJobCleanupProcessorImplTest {
 			will(returnValue(Arrays.asList(launchImportNotification)));
 			oneOf(importJobStatusDao).findByProcessId(processId);
 			will(returnValue(importJobStatus));
-			oneOf(settingsReader).getSettingValue(with(ImportJobCleanupProcessorImpl.SETTING_IMPORT_JOB_STALE_TIMEOUT));
-			will(returnValue(importJobStaleTimeoutValue));
 			oneOf(timeService).getCurrentTime();
 			will(returnValue(currentTime));
 
@@ -254,14 +253,11 @@ public class ImportJobCleanupProcessorImplTest {
 			// the last modified date of a status is exactly the current time which is later
 			// than one minute in the past (defined by the setting).
 			will(returnValue(currentTime));
-
-			oneOf(importJobStaleTimeoutValue).getValue();
-			will(returnValue("1"));
 		} });
 
 		importJobCleanupProcessor.processStaleImportJobs();
 	}
-	
+
 	/**
 	 * Tests that having an import job status updated after the cut out time of 1 minute (defined by the setting)
 	 * does not trigger a job for clean up.
@@ -272,7 +268,7 @@ public class ImportJobCleanupProcessorImplTest {
 			mockery.mock(StaleImportNotificationProcessor.class);
 		
 		importJobCleanupProcessor.setStaleImportNotificationProcessor(staleImportNotificationProcessor);
-		final SettingValue importJobStaleTimeoutValue = mockery.mock(SettingValue.class);
+		importJobCleanupProcessor.setStaleImportJobStatusThresholdMinsProvider(new SimpleSettingValueProvider<>(1));
 
 		// set the current time one minute in the past
 		final Date currentTime = new Date();
@@ -285,8 +281,6 @@ public class ImportJobCleanupProcessorImplTest {
 			will(returnValue(Arrays.asList(launchImportNotification)));
 			oneOf(importJobStatusDao).findByProcessId("processId1");
 			will(returnValue(importJobStatus));
-			oneOf(settingsReader).getSettingValue(with(ImportJobCleanupProcessorImpl.SETTING_IMPORT_JOB_STALE_TIMEOUT));
-			will(returnValue(importJobStaleTimeoutValue));
 			oneOf(timeService).getCurrentTime();
 			will(returnValue(currentTime));
 
@@ -294,9 +288,6 @@ public class ImportJobCleanupProcessorImplTest {
 			// the last modified date of a status is 4 minutes before the calculated timeout (currentTime - 1)
 			final int fiveMinutesBeforeNow = -5;
 			will(returnValue(DateUtils.addMinutes(new Date(), fiveMinutesBeforeNow)));
-
-			oneOf(importJobStaleTimeoutValue).getValue();
-			will(returnValue("1"));
 
 			oneOf(staleImportNotificationProcessor).process(launchImportNotification);
 		} });

@@ -12,8 +12,8 @@ import static com.elasticpath.service.datapolicy.job.impl.DataPointTestUtil.buil
 import static com.elasticpath.service.datapolicy.job.impl.DataPointTestUtil.buildDataPointValue;
 import static com.elasticpath.service.datapolicy.job.impl.DataPointTestUtil.buildDataPolicy;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyMap;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
@@ -35,7 +35,7 @@ import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.internal.util.collections.Sets;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.elasticpath.domain.customer.Customer;
 import com.elasticpath.domain.datapolicy.ConsentAction;

@@ -13,13 +13,11 @@ import java.math.BigDecimal;
 import java.util.Date;
 
 import org.apache.commons.lang.StringUtils;
-import org.jmock.Expectations;
 import org.jmock.integration.junit4.JUnitRuleMockery;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 
-import com.elasticpath.domain.customer.PaymentToken;
 import com.elasticpath.domain.order.OrderPayment;
 import com.elasticpath.domain.order.OrderPaymentStatus;
 import com.elasticpath.domain.order.OrderShipment;
@@ -34,18 +32,7 @@ public class OrderPaymentImplTest {
 	public final JUnitRuleMockery context = new JUnitRuleMockery();
 
 	private static final String TEST_STRING = "testString";
-	private static final Date TEST_DATE = new Date();
-	
-	private static final String UNENCRYPTED_CARD_NUMBER = "4012888888881881";
 
-	private static final String CARD_HOLDER_NAME = "Elastic Path";
-	private static final String CARD_TYPE = "VISA";
-	private static final String EXPIRY_YEAR = "2019";
-	private static final String EXPIRY_MONTH = "01";
-	private static final String CARD_CVV2_CODE = "123";
-	private static final Date START_DATE = new Date();
-	private static final String ISSUE_NUMBER = "123";
-	
 	private static final String MONTH_JULY = "07";
 	private static final String YEAR_2008 = "2008";
 
@@ -72,69 +59,6 @@ public class OrderPaymentImplTest {
 	}
 
 	/**
-	 * Test method for 'com.elasticpath.domain.impl.OrderPaymentImpl.getCardVendor()'.
-	 */
-	@Test
-	public void testGetSetCardVendor() {
-		orderPaymentImpl.setCardType(TEST_STRING);
-		assertEquals(TEST_STRING, orderPaymentImpl.getCardType());
-	}
-
-	/**
-	 * Test method for 'com.elasticpath.domain.impl.OrderPaymentImpl.getCardHolderName()'.
-	 */
-	@Test
-	public void testGetSetCardHolderName() {
-		orderPaymentImpl.setCardHolderName(TEST_STRING);
-		assertEquals(TEST_STRING, orderPaymentImpl.getCardHolderName());
-	}
-
-	/**
-	 * Test method for 'com.elasticpath.domain.impl.OrderPaymentImpl.getExpiryDate()'.
-	 */
-	@Test
-	public void testGetSetExpiryYear() {
-		orderPaymentImpl.setExpiryYear(TEST_STRING);
-		assertEquals(TEST_STRING, orderPaymentImpl.getExpiryYear());
-	}
-
-	/**
-	 * Test method for 'com.elasticpath.domain.impl.OrderPaymentImpl.getExpiryDate()'.
-	 */
-	@Test
-	public void testGetSetExpiryMonth() {
-		orderPaymentImpl.setExpiryMonth(TEST_STRING);
-		assertEquals(TEST_STRING, orderPaymentImpl.getExpiryMonth());
-	}
-
-	/**
-	 * Test method for 'com.elasticpath.domain.impl.OrderPaymentImpl.getStartDate()'.
-	 */
-	@Test
-	public void testGetSetStartDate() {
-		orderPaymentImpl.setStartDate(TEST_DATE);
-		assertEquals(TEST_DATE, orderPaymentImpl.getStartDate());
-	}
-
-	/**
-	 * Test method for 'com.elasticpath.domain.impl.OrderPaymentImpl.getIssueNumber()'.
-	 */
-	@Test
-	public void testGetSetIssueNumber() {
-		orderPaymentImpl.setIssueNumber(TEST_STRING);
-		assertEquals(TEST_STRING, orderPaymentImpl.getIssueNumber());
-	}
-
-	/**
-	 * Test method for 'com.elasticpath.domain.impl.OrderPaymentImpl.getSecurityCode()'.
-	 */
-	@Test
-	public void testGetSetSecurityCode() {
-		orderPaymentImpl.setCvv2Code(TEST_STRING);
-		assertEquals(TEST_STRING, orderPaymentImpl.getCvv2Code());
-	}
-
-	/**
 	 * Test method for getting/setting the amount.
 	 */
 	@Test
@@ -149,11 +73,11 @@ public class OrderPaymentImplTest {
 	 */
 	@Test
 	public void testGetSetStrings() {
-		OrderPaymentImpl payment = null;
+		OrderPaymentImpl payment;
 
 		payment = new OrderPaymentImpl();
-		payment.setPaymentMethod(PaymentType.CREDITCARD);
-		assertEquals(PaymentType.CREDITCARD, payment.getPaymentMethod());
+		payment.setPaymentMethod(PaymentType.PAYMENT_TOKEN);
+		assertEquals(PaymentType.PAYMENT_TOKEN, payment.getPaymentMethod());
 
 		payment = new OrderPaymentImpl();
 		payment.setAuthorizationCode("authorizationCode");
@@ -203,100 +127,6 @@ public class OrderPaymentImplTest {
 		OrderShipment orderShipment = new PhysicalOrderShipmentImpl();
 		orderPaymentImpl.setOrderShipment(orderShipment);
 		assertSame(orderShipment, orderPaymentImpl.getOrderShipment());
-	}
-	
-	/**
-	 * Test method for 'com.elasticpath.domain.order.impl.OrderPaymentImpl.copyCreditCardInfo()'.
-	 */
-	@Test
-	public void testCopyCreditCardInfo() {
-		final OrderPayment mockOrderPayment = context.mock(OrderPayment.class);
-		final PaymentToken mockPaymentToken = context.mock(PaymentToken.class);
-
-		mockCreditCardData(mockOrderPayment, mockPaymentToken);
-
-		OrderPayment orderPaymentToCopy = mockOrderPayment;
-
-		OrderPayment newOrderPayment = createCreditCardOrderPayment();
-
-		newOrderPayment.copyCreditCardInfo(orderPaymentToCopy);
-
-		assertThatCreditCardDataMatches(newOrderPayment);
-	}
-
-	private void mockCreditCardData(final OrderPayment mockOrderPayment, final PaymentToken mockPaymentToken) {
-		context.checking(new Expectations() {
-			{
-				allowing(mockOrderPayment).getPaymentMethod();
-				will(returnValue(PaymentType.CREDITCARD));
-
-				allowing(mockOrderPayment).getCardHolderName();
-				will(returnValue(CARD_HOLDER_NAME));
-
-				allowing(mockOrderPayment).getCardType();
-				will(returnValue(CARD_TYPE));
-
-				allowing(mockOrderPayment).getExpiryMonth();
-				will(returnValue(EXPIRY_MONTH));
-
-				allowing(mockOrderPayment).getExpiryYear();
-				will(returnValue(EXPIRY_YEAR));
-
-				allowing(mockOrderPayment).getCvv2Code();
-				will(returnValue(CARD_CVV2_CODE));
-
-				allowing(mockOrderPayment).getUnencryptedCardNumber();
-				will(returnValue(UNENCRYPTED_CARD_NUMBER));
-
-				allowing(mockOrderPayment).getStartDate();
-				will(returnValue(START_DATE));
-
-				allowing(mockOrderPayment).getIssueNumber();
-				will(returnValue(ISSUE_NUMBER));
-
-				allowing(mockOrderPayment).extractPaymentToken();
-				will(returnValue(mockPaymentToken));
-
-				allowing(mockPaymentToken).getDisplayValue();
-				will(returnValue("Display Value"));
-
-				allowing(mockPaymentToken).getValue();
-				will(returnValue("Value"));
-			}
-		});
-	}
-
-	private OrderPayment createCreditCardOrderPayment() {
-		OrderPayment newOrderPayment = new OrderPaymentImpl() {
-			private static final long serialVersionUID = -4916048049208209766L;
-
-			private String creditCardNumber;
-
-			//Not testing this method, only that it's called
-			@Override
-			public void setUnencryptedCardNumber(final String number) {
-				this.creditCardNumber = number;
-			}
-
-			//Not testing this method, only that it's called
-			@Override
-			public String getUnencryptedCardNumber() {
-				return this.creditCardNumber;
-			}
-		};
-		newOrderPayment.setPaymentMethod(PaymentType.CREDITCARD);
-		return newOrderPayment;
-	}
-
-	private void assertThatCreditCardDataMatches(final OrderPayment newOrderPayment) {
-		assertEquals(CARD_HOLDER_NAME, newOrderPayment.getCardHolderName());
-		assertEquals(CARD_TYPE, newOrderPayment.getCardType());
-		assertEquals(EXPIRY_MONTH, newOrderPayment.getExpiryMonth());
-		assertEquals(EXPIRY_YEAR, newOrderPayment.getExpiryYear());
-		assertEquals(CARD_CVV2_CODE, newOrderPayment.getCvv2Code());
-		assertEquals(UNENCRYPTED_CARD_NUMBER, newOrderPayment.getUnencryptedCardNumber());
-		assertEquals(START_DATE, newOrderPayment.getStartDate());
-		assertEquals(ISSUE_NUMBER, newOrderPayment.getIssueNumber());
 	}
 
 	/**

@@ -16,9 +16,9 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
-import com.elasticpath.common.dto.StructuredErrorMessage;
+import com.elasticpath.base.common.dto.StructuredErrorMessage;
 import com.elasticpath.domain.cartmodifier.CartItemModifierField;
 import com.elasticpath.domain.cartmodifier.CartItemModifierType;
 import com.elasticpath.validation.impl.ConstraintViolationTransformerImpl;

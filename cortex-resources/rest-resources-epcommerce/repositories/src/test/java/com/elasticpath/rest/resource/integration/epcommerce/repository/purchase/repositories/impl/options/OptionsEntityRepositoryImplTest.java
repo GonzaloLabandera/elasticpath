@@ -3,10 +3,13 @@
  */
 package com.elasticpath.rest.resource.integration.epcommerce.repository.purchase.repositories.impl.options;
 
-import static org.mockito.Mockito.mock;
+import static com.elasticpath.rest.resource.integration.epcommerce.repository.ResourceTestConstants.PURCHASE_ID;
+import static com.elasticpath.rest.resource.integration.epcommerce.repository.ResourceTestConstants.SCOPE;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import com.google.common.collect.ImmutableList;
@@ -16,16 +19,15 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.elasticpath.domain.catalog.ProductSku;
 import com.elasticpath.rest.ResourceOperationFailure;
-import com.elasticpath.rest.definition.purchases.PurchaseLineItemIdentifier;
 import com.elasticpath.rest.definition.purchases.PurchaseLineItemOptionIdentifier;
 import com.elasticpath.rest.definition.purchases.PurchaseLineItemOptionsIdentifier;
-import com.elasticpath.rest.id.type.PathIdentifier;
 import com.elasticpath.rest.id.type.StringIdentifier;
-import com.elasticpath.rest.resource.integration.epcommerce.repository.sku.ProductSkuRepository;
+import com.elasticpath.rest.resource.integration.epcommerce.repository.IdentifierTestFactory;
+import com.elasticpath.rest.resource.integration.epcommerce.repository.order.OrderRepository;
 
 /**
  * Test for the  {@link OptionsEntityRepositoryImpl}.
@@ -36,23 +38,22 @@ public class OptionsEntityRepositoryImplTest {
 	private static final String LINE_ITEM_ID = "line item id";
 	private static final String CODE_1 = "code 1";
 	private static final String CODE_2 = "code 2";
+	private final List<String> guids = ImmutableList.of(LINE_ITEM_ID);
 
-	@Mock
-	private ProductSkuRepository productSkuRepository;
 	@InjectMocks
-	private OptionsEntityRepositoryImpl repository;
-
+	private OptionsEntityRepositoryImpl<PurchaseLineItemOptionsIdentifier, PurchaseLineItemOptionIdentifier> repository;
 	@Mock
-	private PurchaseLineItemOptionsIdentifier identifier;
+	private OrderRepository orderRepository;
+
+	private final PurchaseLineItemOptionsIdentifier identifier = PurchaseLineItemOptionsIdentifier.builder()
+			.withPurchaseLineItem(IdentifierTestFactory.buildPurchaseLineItemIdentifier(SCOPE, PURCHASE_ID, guids))
+			.build();
 	@Mock
 	private ProductSku productSku;
 
 	@Before
 	public void setUp() {
-		PurchaseLineItemIdentifier purchaseLineItem = mock(PurchaseLineItemIdentifier.class);
-		when(purchaseLineItem.getLineItemId()).thenReturn(PathIdentifier.of(LINE_ITEM_ID));
-		when(identifier.getPurchaseLineItem()).thenReturn(purchaseLineItem);
-		when(productSkuRepository.getProductSkuWithAttributesByGuidAsSingle(LINE_ITEM_ID)).thenReturn(Single.just(productSku));
+		when(orderRepository.findProductSku(any(), any(), any())).thenReturn(Single.just(productSku));
 	}
 
 	@Test

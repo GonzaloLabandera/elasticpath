@@ -150,6 +150,7 @@ public class ShoppingCartServiceImpl extends AbstractEpPersistenceServiceImpl im
 		}
 	}
 
+
 	@Override
 	public ShoppingCart saveIfNotPersisted(final ShoppingCart shoppingCart) throws EpServiceException {
 		verifyShoppingCartInterfaces(shoppingCart);
@@ -272,13 +273,33 @@ public class ShoppingCartServiceImpl extends AbstractEpPersistenceServiceImpl im
 		return shoppingCart;
 	}
 
+	@Override 
+	public String findDefaultShoppingCartGuidByShopper(final Shopper shopper) throws EpServiceException {
+		fetchPlanHelper.clearFetchPlan();
+
+		final List<String> carts = getPersistenceEngine().retrieveByNamedQuery("ACTIVE_SHOPPING_CARTGUID_FIND_BY_SHOPPER_UID",
+			new Object[]{shopper.getUidPk()}, 0, 1);
+		return Iterables.getFirst(carts, null);
+	}
+
+	@Override
+	public String findStoreCodeByCartGuid(final String cartGuid) {
+		fetchPlanHelper.clearFetchPlan();
+
+		final List<String> stores = getPersistenceEngine().retrieveByNamedQuery("STORE_BY_CARTGUID",
+				new Object[]{cartGuid}, 0, 1);
+		return Iterables.getFirst(stores, null);
+
+	}
+
+
 	@Deprecated
 	@Override
 	public ShoppingCart findOrCreateByShopper(final Shopper shopper) throws EpServiceException {
 		configureLoadTuners();
 
 		final List<ShoppingCartMemento> carts = getPersistenceEngine().retrieveByNamedQuery(ACTIVE_SHOPPING_CART_FIND_BY_SHOPPER_UID,
-			new Object[]{shopper.getUidPk()}, 0, 1);
+				new Object[]{shopper.getUidPk()}, 0, 1);
 
 		fetchPlanHelper.clearFetchPlan();
 

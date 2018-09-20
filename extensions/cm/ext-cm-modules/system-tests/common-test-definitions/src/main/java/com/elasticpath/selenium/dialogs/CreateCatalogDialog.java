@@ -10,7 +10,10 @@ import org.openqa.selenium.WebDriver;
  */
 public class CreateCatalogDialog extends AbstractDialog {
 
-	private static final String CREATE_CATALOG_PARENT_CSS = "div[widget-id='Create Catalog'][widget-type='Shell'] ";
+	/**
+	 * CSS selector used to identify the dialog.
+	 */
+	public static final String CREATE_CATALOG_PARENT_CSS = "div[widget-id='Create Catalog'][widget-type='Shell'] ";
 	private static final String CATALOG_CODE_INPUT_CSS = CREATE_CATALOG_PARENT_CSS + "div[widget-id='Catalog Code'] input";
 	private static final String CATALOG_NAME_INPUT_CSS = CREATE_CATALOG_PARENT_CSS + "div[widget-id='Catalog Name'] input";
 	private static final String MOVE_RIGHT_BUTTON_CSS = CREATE_CATALOG_PARENT_CSS + "div[widget-id='>']";

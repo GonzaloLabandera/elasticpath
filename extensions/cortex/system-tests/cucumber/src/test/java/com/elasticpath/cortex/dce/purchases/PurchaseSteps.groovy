@@ -1,17 +1,17 @@
 package com.elasticpath.cortex.dce.purchases
 
-import cucumber.api.DataTable
-import cucumber.api.groovy.EN
-import cucumber.api.groovy.Hooks
+import static com.elasticpath.cortex.dce.ClasspathFluentRelosClientFactory.client
+import static org.assertj.core.api.Assertions.assertThat
 
 import static com.elasticpath.cortex.dce.ClasspathFluentRelosClientFactory.client
-import static com.elasticpath.cortex.dce.CommonAssertion.assertCost
-import static com.elasticpath.cortex.dce.CommonAssertion.assertAddress
+import static com.elasticpath.cortex.dce.CommonAssertion.*
 import static com.elasticpath.cortex.dce.SharedConstants.*
-import static com.elasticpath.rest.ws.assertions.RelosAssert.assertLinkDoesNotExist
-import static com.elasticpath.rest.ws.assertions.RelosAssert.assertLinkExists
+import static com.elasticpath.rest.ws.assertions.RelosAssert.*
 
-import static org.assertj.core.api.Assertions.assertThat
+import cucumber.api.DataTable
+import cucumber.api.PendingException
+import cucumber.api.groovy.EN
+import cucumber.api.groovy.Hooks
 
 import com.elasticpath.cortex.dce.CommonMethods
 
@@ -26,12 +26,15 @@ def final CARRIER_FIELD = 'carrier'
 
 def purchaseUri
 
+def savedPurchaseNumber
+
 def createPurchaseWithFollow = { ->
 	CommonMethods.submitPurchase()
 	client.follow()
 			.stopIfFailure()
 
 	purchaseUri = client.save()
+	savedPurchaseNumber = client.body.'purchase-number'
 }
 
 When(~'^I (?:can make|make) a purchase$') { ->
@@ -46,13 +49,22 @@ When(~'^I create a purchase and view the purchase details$') { ->
 	createPurchaseWithFollow()
 }
 
-Given(~'^I have previously made a purchase with \"(\\d+?)\" (?:physical|digital|bundle) item \"([^\"]+)\"$') {
+Given(~'^I have previously made a purchase with \"(\\d+?)\" (?:physical item|digital item|bundle item|item) \"([^\"]+)\"$') {
 	int quantity, String productName ->
 
 		CommonMethods.searchAndOpenItemWithKeyword(productName)
 		client.addtocartform()
 				.addtodefaultcartaction(quantity: quantity)
 		CommonMethods.selectAnyShippingOption()
+		createPurchaseWithFollow()
+}
+
+Given(~'^I have previously made a purchase with item code (.+)$') {
+	def skuCode ->
+		CommonMethods.lookupAndAddToCart(skuCode, 1)
+		CommonMethods.addEmail()
+		CommonMethods.addTokenToOrder()
+		CommonMethods.addBillingAddress()
 		createPurchaseWithFollow()
 }
 
@@ -136,10 +148,22 @@ Then(~'^purchase item monetary total has fields amount: (.+), currency: (.+) and
 		assertCost(costElement, expectedAmount, expectedCurrency, expectedDisplayName)
 }
 
+And(~/^the purchase item monetary total has currency (.+) and display (.+)$/) { String expectedCurrency, String expectedDisplayName ->
+	def costElement = client.body.'monetary-total'
+	String costAmount = client.body.'monetary-total'[0].amount
+	assertCost(costElement, costAmount, expectedCurrency, expectedDisplayName)
+}
+
 Then(~'^purchase item tax total has fields amount: (.+), currency: (.+) and display: (.+)$') {
 	def expectedAmount, def expectedCurrency, def expectedDisplayName ->
 		def taxElement = client.body.'tax-total'
 		assertCost(taxElement, expectedAmount, expectedCurrency, expectedDisplayName)
+}
+
+And(~/^the purchase item tax total has currency (.+) and display (.+)$/) { def expectedCurrency, def expectedDisplayName ->
+	def taxElement = client.body.'tax-total'
+	String expectedAmount = client.body.'tax-total'.amount
+	assertCost(taxElement, expectedAmount, expectedCurrency, expectedDisplayName)
 }
 
 And(~'^I see the cost field has amount: (.+?), currency: (.+?) and display: (.+?)$') {
@@ -262,7 +286,7 @@ def isProductLinkExists(def prodName) {
 	def prodExists = false
 	client.body.links.findAll {
 		if (it.rel == "element") {
-			client.GET(it.uri)
+			client.GET(it.href)
 			if (client["name"] == prodName) {
 				prodExists = true
 			}
@@ -502,7 +526,7 @@ Then(~'there exists a purchase line item for item (.+) with configurable fields:
 			.lineitems()
 	client.body.links.find {
 		if (it.rel == "element") {
-			client.GET(it.uri)
+			client.GET(it.href)
 			actualMap = client.body.configuration
 			if (configurationFields == actualMap) {
 				return true
@@ -532,3 +556,50 @@ private void addNewUSAddressForZeroTaxState() {
 			"123 Main Street", "testFamilyName", "testGivenName")
 }
 
+When(~/^I lookup the newly purchased number$/) { ->
+	CommonMethods.purchaseNumberLookup(savedPurchaseNumber)
+}
+
+Then(~/^the purchase number matches my new purchase$/) { ->
+	assertThat(client.body.'purchase-number')
+			.as("The purchase number is not as expected")
+			.isEqualTo(savedPurchaseNumber)
+}
+When(~/^I look up an invalid purchase number (.+?)$/) { String purchaseNumber ->
+	purchaseLookupByInvalidNumber(purchaseNumber)
+}
+
+public static void purchaseLookupByInvalidNumber(final String purchaseNumber) {
+	client.GET("/")
+			.lookups().purchaselookupform()
+			.purchaselookupaction(["purchase-number": purchaseNumber])
+			.stopIfFailure()
+}
+
+And(~/^I lookup other user's purchase number$/) { ->
+	purchaseLookupByInvalidNumber(savedPurchaseNumber)
+}
+
+And(~/^I have an order for scope (.+) with following skus?/) { String scope, DataTable dataTable ->
+	client.authAsAPublicUser(scope)
+
+	String userName = UUID.randomUUID().toString() + "@elasticpath.com"
+	client.GET("registrations/$scope/newaccount/form")
+			.registeraction("family-name": FAMILY_NAME, "given-name": GIVEN_NAME, "password": PASSWORD, "username": userName)
+	client.authRegisteredUserByName(scope, userName)
+			.stopIfFailure()
+
+	Map<String, String> orderDetails = dataTable.asMap(String, String)
+	Iterator<Map.Entry<String, String>> it = orderDetails.entrySet().iterator()
+	it.next() // skip skuCode -> quantity Pair. cannot remove due to map conversion above returning UnmodifiableMap
+	while (it.hasNext()) {
+		Map.Entry<String, String> pair = it.next()
+		CommonMethods.lookupAndAddToCart(pair.getKey(), pair.getValue())
+	}
+
+	CommonMethods.addEmail()
+	CommonMethods.addTokenToOrder()
+	CommonMethods.addBillingAddress()
+	CommonMethods.submitPurchase()
+	client.stopIfFailure()
+}

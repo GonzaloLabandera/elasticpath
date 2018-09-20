@@ -50,10 +50,10 @@ public class CartOrderPopulationOnCustomerProfileStrategyImpl implements CartOrd
 
 		// set the default shipping address
 		CustomerAddress shippingAddress = customer.getPreferredShippingAddress();
-		String storeCode = shoppingCart.getShopper().getStoreCode();
+
 		if (null != shippingAddress) {
 			String shippingAddressGuid = shippingAddress.getGuid();
-			cartOrderShippingService.updateCartOrderShippingAddress(shippingAddressGuid, cartOrder, storeCode);
+			cartOrderShippingService.updateCartOrderShippingAddress(shippingAddressGuid, shoppingCart, cartOrder);
 		}
 
 		cartOrder = populateDefaultPaymentMethodOnCartOrder(cartOrder, customer);

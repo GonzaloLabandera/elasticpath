@@ -39,11 +39,13 @@ import com.elasticpath.cmclient.core.dto.catalog.PriceListEditorModel;
 import com.elasticpath.cmclient.core.editors.GuidEditorInput;
 import com.elasticpath.cmclient.core.event.ItemChangeEvent;
 import com.elasticpath.cmclient.core.event.SearchResultEvent;
+import com.elasticpath.cmclient.core.helpers.BaseAmountDTOCreator;
 import com.elasticpath.cmclient.core.helpers.ChangeEventListener;
 import com.elasticpath.cmclient.core.helpers.ChangeSetHelper;
 import com.elasticpath.cmclient.core.helpers.ProductListener;
 import com.elasticpath.cmclient.core.helpers.ProductSkuListener;
 import com.elasticpath.cmclient.core.helpers.extenders.EPTableColumnCreator;
+import com.elasticpath.cmclient.core.helpers.extenders.EPTableColumnNameCreator;
 import com.elasticpath.cmclient.core.helpers.extenders.PluginHelper;
 import com.elasticpath.cmclient.core.registry.ObjectRegistry;
 import com.elasticpath.cmclient.core.registry.ObjectRegistryListener;
@@ -78,6 +80,7 @@ import com.elasticpath.cmclient.pricelistmanager.validators.SalePriceValidator;
 import com.elasticpath.common.dto.pricing.BaseAmountDTO;
 import com.elasticpath.common.dto.pricing.PriceListDescriptorDTO;
 import com.elasticpath.commons.constants.ContextIdNames;
+import com.elasticpath.commons.util.Pair;
 import com.elasticpath.domain.catalog.Catalog;
 import com.elasticpath.domain.catalog.Product;
 import com.elasticpath.domain.catalog.ProductSku;
@@ -93,7 +96,6 @@ import com.elasticpath.service.catalog.ProductSkuLookup;
 @SuppressWarnings({ "PMD.TooManyMethods", "PMD.TooManyFields", "PMD.ExcessiveImports", "PMD.GodClass", "PMD.PrematureDeclaration" })
 public class BaseAmountSection extends AbstractStatePolicyTargetImpl  implements IEpViewPart, BaseAmountSearchEventListener,
 					ProductListener, ProductSkuListener {
-
 
 	private static final Logger LOG = Logger.getLogger(BaseAmountSection.class);
 
@@ -152,6 +154,11 @@ public class BaseAmountSection extends AbstractStatePolicyTargetImpl  implements
 	private final BaseAmountTableProperties tableProperties;
 
 	private final List<BaseAmountDTO> emptyObjects = new ArrayList<>();
+	
+	private int baseColumnCount;
+	
+	// Keeps the list of extension column names, if any, for later use.
+	private List<Pair> extensionColumnNames = new ArrayList<Pair>();
 
 	/**
 	 * Constructs the BaseAmount editing section.
@@ -202,6 +209,9 @@ public class BaseAmountSection extends AbstractStatePolicyTargetImpl  implements
 					baseAmountTableContentProvider.getQuantityComparator()
 				);
 		}
+		
+		// Initialize the count of base columns.
+		baseColumnCount = 0;
 	}
 
 	/**
@@ -326,12 +336,17 @@ public class BaseAmountSection extends AbstractStatePolicyTargetImpl  implements
 		fireStatePolicyTargetActivated();
 	}
 
-	private ITableLabelProvider getLabelProvider() {
+	/**
+	 * Allows extensions to include their own label providers.
+	 *
+	 * @return the label provider
+	 */
+	protected ITableLabelProvider getLabelProvider() {
 		if (showPricingOnly) {
-			return new SimpleBaseAmountTableLabelProvider(this, controller);
+			return new SimpleBaseAmountTableLabelProvider(this, controller, baseColumnCount);
 		}
 		return new BaseAmountTableLabelProvider(
-			this, controller
+			this, controller, baseColumnCount
 		);
 	}
 
@@ -536,9 +551,9 @@ public class BaseAmountSection extends AbstractStatePolicyTargetImpl  implements
 	}
 
 	/**
-	 * Creates the table columns.
+	 * Creates the standard BaseAmount table columns.
 	 */
-	protected void createTableColumns() {
+	protected void createStandardBaseAmountTableColumns() {
 		columnClickListener = new ColumnClickListener(
 				baseAmountTableViewer,
 				columnComparatorMap,
@@ -593,18 +608,38 @@ public class BaseAmountSection extends AbstractStatePolicyTargetImpl  implements
 				baseAmountTableViewer.addTableColumn(PriceListManagerMessages.get().BaseAmount_SalePrice,
 				getTableProperties().getSalePriceWidth()),
 				baseAmountTableContentProvider.getSaleValueComparator());
-
-
-		List<String> extensionColumnNames = getExtensionColumnNames();
-		for (String extensionColumnName : extensionColumnNames) {
-			registerSortableColumn(baseAmountTableViewer.addTableColumn(extensionColumnName, INITIAL_WIDTH_MED),
-					baseAmountTableContentProvider.getDefaultComparator());
-		}
 	}
-	private List<String> getExtensionColumnNames() {
-		List<String> columnNames = new ArrayList<>();
+	
+	/**
+	 * Creates the columns for extension plugins, if any.
+	 */
+	protected void createExtensionColumns() {
+		// Set the number of base columns.
+		this.baseColumnCount = baseAmountTableViewer.getColumnsCount();
+		
+		// Preserve the column names for later use.
+		extensionColumnNames = getExtensionColumnNames();
+		
+		for (Pair extensionColumnName : extensionColumnNames) {
+			// Create the column with the second part of the Pair, which should be the localized label.
+			registerSortableColumn(baseAmountTableViewer.addTableColumn(extensionColumnName.getSecond().toString(), INITIAL_WIDTH_MED),
+					baseAmountTableContentProvider.getDefaultComparator());
+		}		
+	}
+
+	/**
+	 * Creates the table columns.
+	 */
+	protected void createTableColumns() {
+		createStandardBaseAmountTableColumns();
+		createExtensionColumns();
+	}
+	
+	private List<Pair> getExtensionColumnNames() {
+		List<Pair> columnNames = new ArrayList<>();
 		PluginHelper.findTables(getClass().getSimpleName(), getPluginId())
-				.forEach(column -> columnNames.addAll(column.visitColumnNames()));
+				.forEach(column -> 
+					columnNames.addAll(((EPTableColumnNameCreator) column).visitColumnNameLabels()));
 		return columnNames;
 	}
 
@@ -715,7 +750,8 @@ public class BaseAmountSection extends AbstractStatePolicyTargetImpl  implements
 		boolean editMode = true;
 		BaseAmountDTO dto = baseAmountDto;
 		if (dto == null) {
-			dto = new BaseAmountDTO();
+			dto = BaseAmountDTOCreator.createModel();
+					
 			// set new DTO defaults
 			final RandomGuid randomGuid = ServiceLocator.getService(ContextIdNames.RANDOM_GUID);
 			dto.setGuid(randomGuid.toString());
@@ -724,7 +760,7 @@ public class BaseAmountSection extends AbstractStatePolicyTargetImpl  implements
 			dto.setObjectType(BaseAmountObjectType.PRODUCT.getName());
 			dto.setPriceListDescriptorGuid(getModel().getGuid());
 		} else {
-			dto = new BaseAmountDTO(baseAmountDto);
+			dto = BaseAmountDTOCreator.createModel(baseAmountDto);
 		}
 		final BaseAmountDialog dialog = createDialog(editMode, dto);
 		if (dialog.open() == Window.OK) {
@@ -979,15 +1015,36 @@ public class BaseAmountSection extends AbstractStatePolicyTargetImpl  implements
 	 * @return the cell text or empty string.
 	 */
 	public String getExtensionColumnText(final Object element, final int columnIndex) {
-			List<EPTableColumnCreator> tables = PluginHelper
-					.findTables(this.getClass().getSimpleName(), getPluginId());
-			String result = null;
-			for (EPTableColumnCreator table : tables) {
-				result = table.visitColumn(element, columnIndex);
-			}
-			if (result == null) {
-				result = StringUtils.EMPTY;
-			}
-			return result;
+		int extensionIndex = columnIndex - this.baseColumnCount;
+		
+		if (extensionIndex < 0) {
+			LOG.warn("Invalid columnIndex: " + columnIndex);
+			// This shouldn't happen, but just in case...
+			return ""; //$NON-NLS-1$
 		}
+		
+		List<EPTableColumnCreator> tables = PluginHelper
+				.findTables(this.getClass().getSimpleName(), getPluginId());
+		String result = StringUtils.EMPTY;
+		for (EPTableColumnCreator table : tables) {
+			result = ((EPTableColumnNameCreator) table).visitColumnText(
+					element, this.extensionColumnNames.get(extensionIndex).getFirst().toString());
+		}
+		return result;
+	}
+
+	/**
+	 * @return the showPricingOnly flag
+	 */
+	protected boolean isShowPricingOnly() {
+		return showPricingOnly;
+	}
+
+	/**
+	 * @return the baseColumnCount
+	 */
+	protected int getBaseColumnCount() {
+		return baseColumnCount;
+	}
+
 }

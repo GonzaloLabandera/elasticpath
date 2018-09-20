@@ -63,21 +63,21 @@ public class PhysicalOrderShipmentImplTest {
 	}
 
 	/**
-	 * Test method for 'com.elasticpath.domain.impl.PhysicalOrderShipmentImpl.getCarrier()'.
+	 * Test method for 'com.elasticpath.domain.impl.PhysicalOrderShipmentImpl.getCarrierCode()'.
 	 */
 	@Test
 	public void testGetSetCarrier() {
-		orderShipmentImpl.setCarrier(TEST_STRING);
-		assertEquals(TEST_STRING, orderShipmentImpl.getCarrier());
+		orderShipmentImpl.setCarrierCode(TEST_STRING);
+		assertEquals(TEST_STRING, orderShipmentImpl.getCarrierCode());
 	}
 
 	/**
-	 * Test method for 'com.elasticpath.domain.impl.PhysicalOrderShipmentImpl.getServiceLevel()'.
+	 * Test method for 'com.elasticpath.domain.impl.PhysicalOrderShipmentImpl.getShippingOptionCode()'.
 	 */
 	@Test
 	public void testGetSetServiceLevel() {
-		orderShipmentImpl.setServiceLevel(TEST_STRING);
-		assertEquals(TEST_STRING, orderShipmentImpl.getServiceLevel());
+		orderShipmentImpl.setShippingOptionCode(TEST_STRING);
+		assertEquals(TEST_STRING, orderShipmentImpl.getShippingOptionCode());
 	}
 
 	/**

@@ -20,7 +20,6 @@ import cucumber.api.java.en.Then;
 import org.apache.velocity.tools.generic.DateTool;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.test.context.ContextConfiguration;
 
 import com.elasticpath.domain.order.OrderReturn;
 import com.elasticpath.domain.order.OrderReturnSku;
@@ -31,7 +30,6 @@ import com.elasticpath.uat.ScenarioContextValueHolder;
 /**
  * Step Definitions for RMA email functionality.
  */
-@ContextConfiguration("classpath:cucumber.xml")
 public class RmaEmailStepDefinitions {
 
 	// This address is defined in the RMA.properties file, not in any domain class that can be accessed programmatically via the OrderReturn.

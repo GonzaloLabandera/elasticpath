@@ -3,14 +3,16 @@
  */
 package com.elasticpath.sellingchannel.impl;
 
+import static junit.framework.TestCase.assertFalse;
+import static junit.framework.TestCase.assertTrue;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
 import java.util.Currency;
 
-import org.jmock.integration.junit4.JUnitRuleMockery;
 import org.junit.Rule;
 import org.junit.Test;
+import org.jmock.integration.junit4.JUnitRuleMockery;
 
 import com.elasticpath.common.dto.OrderItemDto;
 import com.elasticpath.commons.tree.impl.TreeNodeMemento;
@@ -114,7 +116,6 @@ public class OrderItemPresentationBeanMapperImplTest {
 		dto.setProductSku(productSku);
 		DigitalAsset digitalAsset = context.mock(DigitalAsset.class);
 		dto.setDigitalAsset(digitalAsset);	
-		dto.setEncryptedUidPk("54321");
 		dto.setListPrice(Money.valueOf("12.34", Currency.getInstance("CAD")));
 		dto.setUnitPrice(Money.valueOf("23.45", Currency.getInstance("CAD")));
 		dto.setUnitLessThanList(false);
@@ -127,15 +128,14 @@ public class OrderItemPresentationBeanMapperImplTest {
 		
 		assertEquals("Output should match input", digitalAsset, presentationBean.getDigitalAsset());
 		assertEquals("Output should match input", "display", presentationBean.getDisplayName());
-		assertEquals("Output should match input", "54321", presentationBean.getEncryptedUidPk());
 		assertEquals("Output should match input", "image.jpg", presentationBean.getImage());
 		assertEquals("Output should match input", "skuoptions", presentationBean.getDisplaySkuOptions());
-		assertEquals("Output should match input", true, presentationBean.isAllocated());
+		assertTrue("Output should match input", presentationBean.isAllocated());
 		assertEquals("Output should match input", 
 				Money.valueOf("12.34", Currency.getInstance("CAD")), presentationBean.getListPriceMoney());
 		assertEquals("Output should match input", 
 				Money.valueOf("23.45", Currency.getInstance("CAD")), presentationBean.getUnitPriceMoney());
-		assertEquals("Output should match input", false, presentationBean.isUnitLessThanList());
+		assertFalse("Output should match input", presentationBean.isUnitLessThanList());
 		assertEquals("Output should match input", Money.valueOf("11.11", Currency.getInstance("CAD")), presentationBean
 				.getDollarSavingsMoney());
 		assertEquals("Output should match input", "sku-A", presentationBean.getSkuCode());

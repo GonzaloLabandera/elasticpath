@@ -3,7 +3,7 @@
  */
 package com.elasticpath.rest.resource.integration.epcommerce.repository.item.recommendations.impl;
 
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import java.util.Collections;
@@ -15,7 +15,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.elasticpath.base.exception.EpServiceException;
 import com.elasticpath.domain.catalog.Catalog;
@@ -66,10 +66,6 @@ public class ItemRecommendationsRepositoryImplTest {
 
 	@Test
 	public void testGettingRecommendedItemsWhenZeroReturned() {
-		List<ProductAssociation> expectedAssociations = Collections.emptyList();
-		when(productAssociationService.findByCriteria(any(ProductAssociationSearchCriteria.class),
-				any(Integer.class), any(Integer.class))).thenReturn(expectedAssociations);
-
 		repository.getRecommendedItemsFromGroup(store, product, GROUP, 1)
 				.test()
 				.assertNoErrors();

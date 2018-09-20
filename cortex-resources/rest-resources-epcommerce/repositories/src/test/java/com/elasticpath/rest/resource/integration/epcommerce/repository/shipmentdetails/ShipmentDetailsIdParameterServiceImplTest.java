@@ -16,7 +16,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.elasticpath.rest.ResourceOperationFailure;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder.CartOrderRepository;
@@ -47,7 +47,7 @@ public class ShipmentDetailsIdParameterServiceImplTest {
 		for (int i = 0; i < NUM_OF_IDS; i++) {
 			String cartId = String.valueOf(i);
 			cartIds.add(cartId);
-			when(shipmentDetailsService.getShipmentDetailsIdForOrder(cartId))
+			when(shipmentDetailsService.getShipmentDetailsIdForOrder(SCOPE, cartId))
 					.thenReturn(Single.just(createShipmentDetailsId(cartId, ShipmentDetailsConstants.SHIPMENT_TYPE)));
 		}
 
@@ -78,7 +78,7 @@ public class ShipmentDetailsIdParameterServiceImplTest {
 		for (int i = 0; i < NUM_OF_IDS; i++) {
 			String cartId = String.valueOf(i);
 			cartIds.add(cartId);
-			when(shipmentDetailsService.getShipmentDetailsIdForOrder(cartId))
+			when(shipmentDetailsService.getShipmentDetailsIdForOrder(SCOPE, cartId))
 					.thenReturn(Single.error(ResourceOperationFailure.notFound(ShipmentDetailsServiceImpl.COULD_NOT_FIND_SHIPMENT)));
 		}
 

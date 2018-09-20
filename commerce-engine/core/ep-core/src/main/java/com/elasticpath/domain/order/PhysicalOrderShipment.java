@@ -99,24 +99,44 @@ public interface PhysicalOrderShipment extends OrderShipment {
 	void setShipmentAddress(OrderAddress shipmentAddress);
 
 	/**
-	 * @return Returns the carrier.
+	 * @return Returns the carrier code.
 	 */
-	String getCarrier();
+	String getCarrierCode();
 
 	/**
-	 * @param carrier The carrier to set.
+	 * @param carrierCode The carrier code to set.
 	 */
-	void setCarrier(String carrier);
+	void setCarrierCode(String carrierCode);
 
 	/**
-	 * @return Returns the serviceLevel.
+	 * @return Returns the carrier name.
 	 */
-	String getServiceLevel();
+	String getCarrierName();
 
 	/**
-	 * @param serviceLevel The serviceLevel to set.
+	 * @param carrierName The carrier name to set.
 	 */
-	void setServiceLevel(String serviceLevel);
+	void setCarrierName(String carrierName);
+
+	/**
+	 * @return Returns the shipping option code.
+	 */
+	String getShippingOptionCode();
+
+	/**
+	 * @param shippingOptionCode The shipping option code to set.
+	 */
+	void setShippingOptionCode(String shippingOptionCode);
+
+	/**
+	 * @return Returns the name of the shipping option selected.
+	 */
+	String getShippingOptionName();
+
+	/**
+	 * @param shippingOptionName The shipping option name to set.
+	 */
+	void setShippingOptionName(String shippingOptionName);
 
 	/**
 	 * @return Returns the trackingCode.
@@ -129,24 +149,9 @@ public interface PhysicalOrderShipment extends OrderShipment {
 	void setTrackingCode(String trackingCode);
 
 	/**
-	 * Gets the shipping service level guid.
-	 *
-	 * @return the shipping service level's guid
-	 */
-	String getShippingServiceLevelGuid();
-
-	/**
-	 * Sets the shipping service level.
-	 *
-	 * @param shippingServiceLevelGuid the shipping service level's guid
-	 */
-	void setShippingServiceLevelGuid(String shippingServiceLevelGuid);
-
-	/**
 	 * Get shipmentRemovedOrderSku.
 	 *
 	 * @return <CODE>this</CODE> shipmentRemovedOrderSku
 	 */
 	Set<OrderSku> getShipmentRemovedOrderSku();
-	
 }

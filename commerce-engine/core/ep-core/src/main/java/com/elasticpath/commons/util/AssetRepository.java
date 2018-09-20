@@ -12,7 +12,9 @@ package com.elasticpath.commons.util;
 public interface AssetRepository {
 
 	/**
-	 * @return the file system path to catalog assets.
+	 * Gets the absolute path to the catalog assets folder on the file system.
+	 *
+	 * @return the file system path to catalog assets
 	 */
 	String getCatalogAssetPath();
 	

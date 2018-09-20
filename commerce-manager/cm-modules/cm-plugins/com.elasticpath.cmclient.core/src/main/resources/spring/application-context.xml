@@ -3,8 +3,8 @@
 	   xmlns="http://www.springframework.org/schema/beans"
 	   xmlns:context="http://www.springframework.org/schema/context"
 	   xsi:schemaLocation="
-        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
-        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd">
+        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.0.xsd">
 
 	<!-- Local Spring context files -->
 	<import resource="models/domainModelCM.xml" />
@@ -14,7 +14,6 @@
 	<import resource="util/utilCM.xml" />
 
 	<!-- Remote Spring context files - from ep-settings.jar and ep-core.jar -->
-	<import resource="classpath*:spring/settings/ep-settings.xml" />
 	<import resource="classpath:spring/dataaccess/openjpa/openjpa.xml" />
 
 	<!-- Spring context files from other JARs (e.g. ep-settings, etc) -->

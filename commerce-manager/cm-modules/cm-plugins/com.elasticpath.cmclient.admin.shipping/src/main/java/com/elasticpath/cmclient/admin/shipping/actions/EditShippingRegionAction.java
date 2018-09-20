@@ -12,7 +12,7 @@ import com.elasticpath.cmclient.admin.shipping.AdminShippingMessages;
 import com.elasticpath.cmclient.admin.shipping.dialogs.ShippingRegionDialog;
 import com.elasticpath.cmclient.admin.shipping.views.ShippingRegionListView;
 import com.elasticpath.cmclient.core.ServiceLocator;
-import com.elasticpath.commons.constants.ContextIdNames;
+import com.elasticpath.commons.constants.EpShippingContextIdNames;
 import com.elasticpath.domain.shipping.ShippingRegion;
 import com.elasticpath.service.shipping.ShippingRegionService;
 
@@ -40,7 +40,7 @@ public class EditShippingRegionAction extends Action {
 
 		ShippingRegion shippingRegion = listView.getSelectedShippingRegion();
 		ShippingRegionService shippingRegionService = ServiceLocator.getService(
-				ContextIdNames.SHIPPING_REGION_SERVICE);
+				EpShippingContextIdNames.SHIPPING_REGION_SERVICE);
 
 		/** Get the most recent version of the selected ShippingRegion. */
 		ShippingRegion shippingRegionToEdit = shippingRegionService.get(shippingRegion.getUidPk());

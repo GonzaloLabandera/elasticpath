@@ -210,8 +210,8 @@ public interface ChangeSetService {
 	boolean objectExists(String groupId, BusinessObjectDescriptor objectDescriptor);
 
 	/**
-	 * determine is change set enabled.
-	 *
+	 * Indicates whether or not Change Set functionality is enabled.
+	 * 
 	 * @return true if change set is enabled
 	 */
 	boolean isChangeSetEnabled();

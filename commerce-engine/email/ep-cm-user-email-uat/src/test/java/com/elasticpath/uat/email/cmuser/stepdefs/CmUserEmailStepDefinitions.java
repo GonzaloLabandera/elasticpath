@@ -17,7 +17,6 @@ import javax.mail.internet.InternetAddress;
 
 import cucumber.api.java.en.Then;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.ContextConfiguration;
 
 import com.elasticpath.domain.builder.CmUserBuilder;
 import com.elasticpath.domain.cmuser.CmUser;
@@ -27,7 +26,6 @@ import com.elasticpath.uat.ScenarioContextValueHolder;
 /**
  * Step Definitions for verifying CM User emails.
  */
-@ContextConfiguration("classpath:cucumber.xml")
 public class CmUserEmailStepDefinitions {
 
 	@Autowired

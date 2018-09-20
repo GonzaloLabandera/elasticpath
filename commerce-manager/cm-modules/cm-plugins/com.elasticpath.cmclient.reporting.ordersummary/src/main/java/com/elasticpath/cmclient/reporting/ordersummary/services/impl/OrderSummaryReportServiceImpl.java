@@ -5,7 +5,6 @@
 package com.elasticpath.cmclient.reporting.ordersummary.services.impl;
 
 import java.math.BigDecimal;
-import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -17,6 +16,8 @@ import java.util.Map;
 import org.apache.log4j.Logger;
 
 import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.formatting.TimeZoneInfo;
+import com.elasticpath.cmclient.core.util.DateTimeUtilFactory;
 import com.elasticpath.cmclient.reporting.ordersummary.OrderSummaryPreparedStatementBuilder;
 import com.elasticpath.cmclient.reporting.ordersummary.impl.OrderSummaryPreparedStatementBuilderImpl;
 import com.elasticpath.commons.constants.ContextIdNames;
@@ -24,7 +25,7 @@ import com.elasticpath.persistence.openjpa.support.JpqlQueryBuilder;
 import com.elasticpath.service.reporting.ReportService;
 
 /**
- * Local OrderSummaryReportService. This service is a wrapper for calling the ReportService, 
+ * Local OrderSummaryReportService. This service is a wrapper for calling the ReportService,
  * because BIRT's javascript engine does not handle Spring proxy beans well.
  *
  */
@@ -69,8 +70,8 @@ public class OrderSummaryReportServiceImpl {
 	private static final int REPORT_ROW_SIZE = 9;
 
 	/**
-	 * This method is called by BIRT Report and should return list of Object[]. 
-	 * 
+	 * This method is called by BIRT Report and should return list of Object[].
+	 *
 	 * Array of Objects should contain next values:
 	 * <ol>
 	 * <li>Order Date</li>
@@ -83,7 +84,7 @@ public class OrderSummaryReportServiceImpl {
 	 * <li>Order Taxes</li>
 	 * <li>Order Shipping</li>
 	 * </ol>
-	 * 
+	 *
 	 * @return a list of Object[] that contain summary info about orders by date.
 	 */
 	public List<Object[]> orderSummaryReport() {
@@ -112,6 +113,7 @@ public class OrderSummaryReportServiceImpl {
 			throw ex;
 		}
 	}
+
 
 	/**
 	 * Groups the order query results by day.
@@ -228,8 +230,11 @@ public class OrderSummaryReportServiceImpl {
 	 * @return Default Core Plugin Date String
 	 */
 	protected String formatReportDay(final Date date) {
-		DateFormat dateFormatter = DateFormat.getDateInstance(DateFormat.MEDIUM, Locale.ENGLISH);
-		return dateFormatter.format(date);
+		return DateTimeUtilFactory.getDateUtil().formatAsDate(date);
+	}
+
+	private TimeZoneInfo getTimeZoneInfo() {
+		return TimeZoneInfo.getInstance();
 	}
 
 	/**
@@ -240,6 +245,7 @@ public class OrderSummaryReportServiceImpl {
 	 */
 	protected String formatReportMonth(final Date date) {
 		final SimpleDateFormat formatter = new SimpleDateFormat("yyyy/MM", Locale.ENGLISH);	//$NON-NLS-1$
+		formatter.setTimeZone(getTimeZoneInfo().getTimezone());
 		return formatter.format(date);
 	}
 

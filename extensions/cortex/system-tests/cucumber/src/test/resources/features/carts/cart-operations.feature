@@ -106,3 +106,13 @@ Feature: Cart operations
       | 0.1              |
       | invalidFormat    |
       | 2147483648       |
+
+  Scenario Outline: Updating lineitem quantity gets correctly validated
+    Given I have item with code <ITEM_CODE> in my cart with quantity 10
+    And I cannot add to cart line item with code <ITEM_CODE> with quantity 1
+    When I change the lineitem quantity of item code <ITEM_CODE> to 8
+    Then the cart lineitem for item code <ITEM_CODE> has quantity of 8
+
+    Examples:
+      | ITEM_CODE    |
+      | sony_bt_sku  |

@@ -7,9 +7,9 @@ import java.util.Map;
 
 import org.apache.log4j.Logger;
 
-import com.elasticpath.commons.converter.ConversionMalformedValueException;
-import com.elasticpath.commons.converter.StringToTypeConverter;
-import com.elasticpath.commons.converter.impl.StringToStringConverter;
+import com.elasticpath.converter.ConversionMalformedValueException;
+import com.elasticpath.converter.StringToTypeConverter;
+import com.elasticpath.converter.impl.StringToStringConverter;
 import com.elasticpath.tags.domain.TagDefinition;
 import com.elasticpath.tags.domain.TagValueType;
 import com.elasticpath.tags.service.TagTypeValueConverter;

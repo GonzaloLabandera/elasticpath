@@ -26,6 +26,10 @@
 
 	<dependencies>
 		<dependency>
+			<groupId>com.elasticpath.rest.definitions</groupId>
+			<artifactId>ep-resource-lookups-api</artifactId>
+		</dependency>
+		<dependency>
 			<groupId>com.elasticpath.rest.resource.cortex</groupId>
 			<artifactId>ep-resource-uribuilder-apis</artifactId>
 		</dependency>

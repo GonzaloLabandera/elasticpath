@@ -13,7 +13,6 @@ import org.apache.camel.builder.NotifyBuilder;
 import org.jvnet.mock_javamail.Mailbox;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.test.context.ContextConfiguration;
 
 import com.elasticpath.domain.builder.OrderBuilder;
 import com.elasticpath.domain.builder.checkout.CheckoutTestCartBuilder;
@@ -36,7 +35,6 @@ import com.elasticpath.uat.ScenarioContextValueHolder;
 /**
  * Step Definitions for Order-based functionality.
  */
-@ContextConfiguration("classpath:cucumber.xml")
 public class OrderStepDefinitions {
 
 	private static final long MAX_SECONDS_TO_WAIT_FOR_EMAIL = 20;

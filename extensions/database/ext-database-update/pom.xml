@@ -204,8 +204,8 @@
                             <exclusions>
                                 <!-- Exclude gemini from the transitive libraries since it pulls in a conflicting spring version (3.0.5 instead of 3.1.x) and liquibase doesn't need it. -->
                                 <exclusion>
-                                    <groupId>org.eclipse.gemini</groupId>
-                                    <artifactId>org.eclipse.gemini.blueprint.core</artifactId>
+                                    <groupId>org.eclipse.gemini.blueprint</groupId>
+                                    <artifactId>gemini-blueprint-core</artifactId>
                                 </exclusion>
                                 <!-- Exclude spring-support since it was being pulled in via spring-modules-jakarta-commons (which seems to be required)
                                     leading to an old incompatible version of the MBeanExporter class being loaded instead of the one defined in spring-context. -->
@@ -229,7 +229,7 @@
                         <dependency>
                             <groupId>com.elasticpath.db</groupId>
                             <artifactId>core-schema</artifactId>
-                            <version>${platform.version}</version>
+                            <version>${dce.version}</version>
                         </dependency>
                         <dependency>
                             <groupId>com.elasticpath.extensions</groupId>

@@ -53,14 +53,6 @@ public interface DigitalAsset extends Persistable {
 	void setMaxDownloadTimes(int maxDownloadTimes);
 
 	/**
-	 * Get the encrypted uidPk string.
-	 *
-	 * @return the encrypted uidPk string
-	 */
-	String getEncryptedUidPk();
-
-
-	/**
 	 * Returns the file name without the path information.
 	 *
 	 * @return the file name

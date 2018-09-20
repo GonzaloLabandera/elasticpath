@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>com.elasticpath</groupId>
 		<artifactId>core</artifactId>
-		<version>702.0.0-SNAPSHOT</version>
+		<version>703.0.0-SNAPSHOT</version>
 	</parent>
 
 	<groupId>com.elasticpath.tools</groupId>
@@ -79,15 +79,11 @@
 		<dependency>
 			<groupId>com.elasticpath.tools</groupId>
 			<artifactId>ep-core-tool-logic</artifactId>
-			<version>702.0.0-SNAPSHOT</version>
+			<version>703.0.0-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>log4j</groupId>
 			<artifactId>log4j</artifactId>
 		</dependency>
 	</dependencies>
-	<properties>
-		<licensing.skip>true</licensing.skip>
-		<dependency.directory>lib</dependency.directory>
-	</properties>
 </project>

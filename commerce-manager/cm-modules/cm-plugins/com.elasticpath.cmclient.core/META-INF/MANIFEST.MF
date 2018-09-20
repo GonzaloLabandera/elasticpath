@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: %pluginName
 Bundle-SymbolicName: com.elasticpath.cmclient.core; singleton:=true
-Bundle-Version: 702.0.0.qualifier
+Bundle-Version: 703.0.0.qualifier
 Eclipse-RegisterBuddy: com.elasticpath.core
 Eclipse-BuddyPolicy: registered
 Bundle-Activator: com.elasticpath.cmclient.core.CorePlugin
@@ -15,6 +15,7 @@ Require-Bundle: org.eclipse.rap.ui,
  com.elasticpath.ep-cache,
  com.elasticpath.ep-persistence-api;visibility:=reexport,
  com.elasticpath.ep-persistence-openjpa;visibility:=reexport,
+ com.elasticpath.ep-converters,
  com.elasticpath.ep-settings,
  com.elasticpath.core;visibility:=reexport,
  org.eclipse.core.databinding,

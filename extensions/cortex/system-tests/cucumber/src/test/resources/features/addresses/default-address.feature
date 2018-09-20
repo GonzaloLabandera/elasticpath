@@ -30,3 +30,10 @@ Feature: No default addresses for public or newly registered shopper
     Given I authenticate as a registered shopper harry.potter@elasticpath.com with the default scope
     When I get the default shipping address
     Then the field address contains value 1234 Hogwarts Avenue
+
+  Scenario: Different default billing and shipping addresses
+    Given I authenticate as a registered shopper testuser.different.default.addresses@elasticpath.com with the default scope
+    When I get the default billing address
+    Then the field address contains value 61 Clair Street
+    When I get the default shipping address
+    Then the field address contains value 4246 Heavner Court

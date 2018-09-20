@@ -5,7 +5,6 @@ package com.elasticpath.domain.order.jobs;
 
 import com.elasticpath.service.misc.TimeService;
 import com.elasticpath.service.order.OrderLockService;
-import com.elasticpath.settings.SettingsService;
 
 /**
  * Job which will remove order locks that have expired past a defined amount of time, which
@@ -19,20 +18,6 @@ public interface OrderLockCleanupJob {
 	 * @return the number of order locks removed
 	 */
 	OrderLockCleanupResult cleanUpOrderLocks();
-
-	/**
-	 * Returns the settings service.
-	 *
-	 * @return the settings service
-	 */
-	SettingsService getSettingsService();
-
-	/**
-	 * Sets the settings service.
-	 *
-	 * @param settingsService - the settings service to set
-	 */
-	void setSettingsService(SettingsService settingsService);
 
 	/**
 	 * Returns the order lock service.

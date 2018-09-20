@@ -31,7 +31,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.elasticpath.domain.cartmodifier.CartItemModifierField;
 import com.elasticpath.domain.cartmodifier.CartItemModifierFieldOption;
@@ -85,6 +85,8 @@ public class CartItemModifiersRepositoryImplTest {
 	private static final String PURCHASE_GUID = "testPurchaseGuid";
 
 	private static final String PURCHASE_LINE_ITEM_GUID = "testPurchaseLineItemGuid";
+
+	private static final String CART_GUID = "testcartGUID";
 
 	private CartItemModifierGroup cartItemModifierGroup;
 
@@ -278,7 +280,7 @@ public class CartItemModifiersRepositoryImplTest {
 
 	@Test
 	public void testFindCartItemModifierValuesContainsOnlyValidModifiers() {
-		given(shoppingCartRepository.getDefaultShoppingCart())
+		given(shoppingCartRepository.getShoppingCart(CART_GUID))
 				.willReturn(Single.just(shoppingCart));
 		given(shoppingCart.getCartItemByGuid(SHOPPING_ITEM_GUID))
 				.willReturn(shoppingItem);
@@ -298,7 +300,7 @@ public class CartItemModifiersRepositoryImplTest {
 
 		shoppingItemData.put(FIELD_CODE1, FIELD_VALUE_1);
 
-		cartItemModifiersRepository.findCartItemModifierValues(SHOPPING_ITEM_GUID)
+		cartItemModifiersRepository.findCartItemModifierValues(CART_GUID, SHOPPING_ITEM_GUID)
 				.test()
 				.assertNoErrors()
 				.assertValue(shoppingData -> shoppingData.get(field1).equals(FIELD_VALUE_1) && shoppingData.get(field2).equals(StringUtils.EMPTY));
@@ -306,10 +308,10 @@ public class CartItemModifiersRepositoryImplTest {
 
 	@Test
 	public void testFindCartItemModifierValuesWithNoCartFoundFailure() {
-		given(shoppingCartRepository.getDefaultShoppingCart())
+		given(shoppingCartRepository.getShoppingCart(CART_GUID))
 				.willReturn(Single.error(ResourceOperationFailure.notFound(ShoppingCartRepositoryImpl.DEFAULT_CART_NOT_FOUND)));
 
-		cartItemModifiersRepository.findCartItemModifierValues(SHOPPING_ITEM_GUID)
+		cartItemModifiersRepository.findCartItemModifierValues(CART_GUID, SHOPPING_ITEM_GUID)
 				.test()
 				.assertError(createErrorCheckPredicate(ShoppingCartRepositoryImpl.DEFAULT_CART_NOT_FOUND, ResourceStatus.NOT_FOUND));
 	}

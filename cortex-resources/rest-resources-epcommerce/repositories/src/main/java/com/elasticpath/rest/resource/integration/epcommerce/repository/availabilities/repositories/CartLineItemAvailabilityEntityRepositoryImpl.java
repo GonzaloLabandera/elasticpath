@@ -36,7 +36,7 @@ public class CartLineItemAvailabilityEntityRepositoryImpl<E extends Availability
 		final String lineItemId = identifier.getLineItem().getLineItemId().getValue();
 		final String scope = identifier.getLineItem().getLineItems().getCart().getScope().getValue();
 
-		return shoppingCartRepository.getProductSku(lineItemId)
+		return shoppingCartRepository.getProductSku(identifier.getLineItem().getLineItems().getCart().getCartId().getValue(), lineItemId)
 				.flatMap(productSku -> getStoreProduct(scope, productSku)
 						.map(storeProduct -> convertStoreProductSkuToAvailabilityEntity(storeProduct, productSku)));
 	}

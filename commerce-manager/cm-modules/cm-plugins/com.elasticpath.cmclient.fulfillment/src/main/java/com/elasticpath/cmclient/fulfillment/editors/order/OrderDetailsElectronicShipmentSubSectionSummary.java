@@ -5,6 +5,7 @@ package com.elasticpath.cmclient.fulfillment.editors.order;
 
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IPropertyListener;
 import org.eclipse.ui.forms.widgets.ExpandableComposite;
@@ -12,6 +13,7 @@ import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.Section;
 import org.eclipse.ui.forms.widgets.TableWrapData;
 
+import com.elasticpath.cmclient.core.CmClientResources;
 import com.elasticpath.cmclient.core.binding.EpBindingConfiguration;
 import com.elasticpath.cmclient.core.binding.EpBindingConfiguration.UpdatePolicy;
 import com.elasticpath.cmclient.core.binding.EpControlBindingProvider;
@@ -35,6 +37,10 @@ public class OrderDetailsElectronicShipmentSubSectionSummary implements IPropert
 	private Text itemSubTotalCurrencyText;
 
 	private Text itemSubTotalText;
+
+	private Text shipmentDiscountCurrencyText;
+
+	private Text shipmentDiscountText;
 
 	private Text itemTaxCurrencyText;
 
@@ -84,7 +90,13 @@ public class OrderDetailsElectronicShipmentSubSectionSummary implements IPropert
 		shipmentSummaryInfoPane.addLabelBold(FulfillmentMessages.get().ShipmentSection_ShippingItemTotal, shipmentSummaryLabelData);
 		this.itemSubTotalCurrencyText = shipmentSummaryInfoPane.addTextField(EpState.READ_ONLY, shipmentSummaryCurrencyData);
 		this.itemSubTotalText = shipmentSummaryInfoPane.addTextField(EpState.READ_ONLY, shipmentSummaryData);
-		
+
+		Label shipmentDiscountLabel = shipmentSummaryInfoPane.addLabel(FulfillmentMessages.get().ShipmentSection_ShipmentDiscount,
+				shipmentSummaryLabelData);
+		shipmentDiscountLabel.setForeground(CmClientResources.getColor(CmClientResources.COLOR_RED));
+		this.shipmentDiscountCurrencyText = shipmentSummaryInfoPane.addTextField(EpState.READ_ONLY, shipmentSummaryCurrencyData);
+		this.shipmentDiscountText = shipmentSummaryInfoPane.addTextField(EpState.READ_ONLY, shipmentSummaryData);
+
 		//Different UI for inclusive or exclusive tax price to give the correct and clear information for CSR
 		if (shipment.isInclusiveTax()) {
 			final IEpLayoutData horizontalData2 = shippingSummaryPane.createLayoutData(IEpLayoutData.FILL, IEpLayoutData.CENTER, false, false, 3, 1);
@@ -126,6 +138,8 @@ public class OrderDetailsElectronicShipmentSubSectionSummary implements IPropert
 		itemSubTotalCurrencyText.setText(orderCurrency);
 		itemTaxCurrencyText.setText(orderCurrency);
 		shipmentTotalCurrencyText.setText(orderCurrency);
+		shipmentDiscountCurrencyText.setText(orderCurrency);
+		shipmentDiscountText.setText(shipment.getSubtotalDiscount().toString());
 	}
 
 	/**

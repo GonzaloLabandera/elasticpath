@@ -3,6 +3,7 @@
  */
 package com.elasticpath.rest.resource.integration.epcommerce.repository.purchase.repositories.impl.options;
 
+import java.util.List;
 import java.util.Locale;
 
 import com.google.common.annotations.VisibleForTesting;
@@ -15,13 +16,13 @@ import com.elasticpath.domain.skuconfiguration.SkuOption;
 import com.elasticpath.domain.skuconfiguration.SkuOptionValue;
 import com.elasticpath.repository.Repository;
 import com.elasticpath.rest.ResourceOperationFailure;
+import com.elasticpath.rest.definition.purchases.PurchaseIdentifier;
 import com.elasticpath.rest.definition.purchases.PurchaseLineItemIdentifier;
 import com.elasticpath.rest.definition.purchases.PurchaseLineItemOptionEntity;
 import com.elasticpath.rest.definition.purchases.PurchaseLineItemOptionIdentifier;
-import com.elasticpath.rest.id.type.PathIdentifier;
 import com.elasticpath.rest.identity.util.SubjectUtil;
 import com.elasticpath.rest.resource.ResourceOperationContext;
-import com.elasticpath.rest.resource.integration.epcommerce.repository.sku.ProductSkuRepository;
+import com.elasticpath.rest.resource.integration.epcommerce.repository.order.OrderRepository;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.transform.ReactiveAdapter;
 
 /**
@@ -40,18 +41,21 @@ public class OptionEntityRepositoryImpl<E extends PurchaseLineItemOptionEntity, 
 	@VisibleForTesting
 	static final String OPTION_NOT_FOUND_FOR_ITEM = "option not found for item";
 	private static final String KEY_NOT_FOUND = "Key not found";
+	private static final String PRODUCT_SKU_NOT_FOUND = "Product SKU not found";
 	private ResourceOperationContext resourceOperationContext;
-	private ProductSkuRepository productSkuRepository;
 	private ReactiveAdapter reactiveAdapter;
+	private OrderRepository orderRepository;
 
 	@Override
 	public Single<PurchaseLineItemOptionEntity> findOne(final PurchaseLineItemOptionIdentifier identifier) {
 		PurchaseLineItemIdentifier lineItemIdentifier = identifier.getPurchaseLineItemOptions().getPurchaseLineItem();
-
-		String lineItemId = ((PathIdentifier) lineItemIdentifier.getLineItemId()).extractLeafId();
+		List<String> guidPathFromRootItem = lineItemIdentifier.getLineItemId().getValue();
 		String optionId = identifier.getOptionId().getValue();
-
-		return productSkuRepository.getProductSkuWithAttributesByGuidAsSingle(lineItemId)
+		PurchaseIdentifier purchaseIdentifier = identifier.getPurchaseLineItemOptions().getPurchaseLineItem().getPurchaseLineItems().getPurchase();
+		String scope = purchaseIdentifier.getPurchases().getScope().getValue();
+		String purchaseId = purchaseIdentifier.getPurchaseId().getValue();
+		return orderRepository.findProductSku(scope, purchaseId, guidPathFromRootItem)
+				.onErrorResumeNext(Single.error(ResourceOperationFailure.notFound(PRODUCT_SKU_NOT_FOUND)))
 				.map(ProductSku::getOptionValueMap)
 				.flatMap(optionValueMap -> reactiveAdapter.fromNullableAsSingle(() -> optionValueMap.get(optionId), KEY_NOT_FOUND))
 				.onErrorResumeNext(Single.error(ResourceOperationFailure.notFound(OPTION_NOT_FOUND_FOR_ITEM)))
@@ -77,11 +81,6 @@ public class OptionEntityRepositoryImpl<E extends PurchaseLineItemOptionEntity, 
 	}
 
 	@Reference
-	public void setProductSkuRepository(final ProductSkuRepository productSkuRepository) {
-		this.productSkuRepository = productSkuRepository;
-	}
-
-	@Reference
 	public void setResourceOperationContext(final ResourceOperationContext resourceOperationContext) {
 		this.resourceOperationContext = resourceOperationContext;
 	}
@@ -89,5 +88,10 @@ public class OptionEntityRepositoryImpl<E extends PurchaseLineItemOptionEntity, 
 	@Reference
 	public void setReactiveAdapter(final ReactiveAdapter reactiveAdapter) {
 		this.reactiveAdapter = reactiveAdapter;
+	}
+
+	@Reference
+	public void setOrderRepository(final OrderRepository orderRepository) {
+		this.orderRepository = orderRepository;
 	}
 }

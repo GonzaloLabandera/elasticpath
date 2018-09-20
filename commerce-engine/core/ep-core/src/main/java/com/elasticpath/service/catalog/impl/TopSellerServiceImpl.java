@@ -17,7 +17,6 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Multiset;
 import com.google.common.collect.Multisets;
 import org.apache.commons.collections.map.ListOrderedMap;
-import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 
 import com.elasticpath.base.exception.EpServiceException;
@@ -35,7 +34,7 @@ import com.elasticpath.service.catalog.TopSellerService;
 import com.elasticpath.service.impl.AbstractEpPersistenceServiceImpl;
 import com.elasticpath.service.misc.TimeService;
 import com.elasticpath.service.order.OrderService;
-import com.elasticpath.settings.SettingsReader;
+import com.elasticpath.settings.provider.SettingValueProvider;
 
 /**
  * The default implementation of <code>TopSellerService</code>.
@@ -52,7 +51,7 @@ public class TopSellerServiceImpl extends AbstractEpPersistenceServiceImpl imple
 
 	private OrderService orderService;
 	
-	private SettingsReader settingsReader;
+	private SettingValueProvider<Integer> maxTopSellerCountProvider;
 
 	private Properties topSellerProperties;
 
@@ -144,7 +143,7 @@ public class TopSellerServiceImpl extends AbstractEpPersistenceServiceImpl imple
 	 * @return an integer value
 	 */
 	protected int getMaxTopSellerCount() {
-		return Integer.parseInt(getSettingsReader().getSettingValue("COMMERCE/SYSTEM/CATALOG/catalogTopSellerCount", StringUtils.EMPTY).getValue());
+		return getMaxTopSellerCountProvider().get();
 	}
 
 	/**
@@ -431,9 +430,6 @@ public class TopSellerServiceImpl extends AbstractEpPersistenceServiceImpl imple
 		if (orderService == null) {
 			throw new EpServiceException("The order service has not been set.");
 		}
-		if (getSettingsReader() == null) {
-			throw new EpServiceException("The settings reader has not been set.");
-		}
 	}
 
 	/**
@@ -521,18 +517,12 @@ public class TopSellerServiceImpl extends AbstractEpPersistenceServiceImpl imple
 		this.timeService = timeService;
 	}
 
-	/**
-	 * @return the settingsReader
-	 */
-	public SettingsReader getSettingsReader() {
-		return settingsReader;
+	protected SettingValueProvider<Integer> getMaxTopSellerCountProvider() {
+		return maxTopSellerCountProvider;
 	}
 
-	/**
-	 * @param settingsReader the settingsReader to set
-	 */
-	public void setSettingsReader(final SettingsReader settingsReader) {
-		this.settingsReader = settingsReader;
+	public void setMaxTopSellerCountProvider(final SettingValueProvider<Integer> maxTopSellerCountProvider) {
+		this.maxTopSellerCountProvider = maxTopSellerCountProvider;
 	}
 
 	public void setBeanFactory(final BeanFactory beanFactory) {

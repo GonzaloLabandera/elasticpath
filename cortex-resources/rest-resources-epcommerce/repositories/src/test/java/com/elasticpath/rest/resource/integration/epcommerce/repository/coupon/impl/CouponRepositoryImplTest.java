@@ -3,7 +3,10 @@
  */
 package com.elasticpath.rest.resource.integration.epcommerce.repository.coupon.impl;
 
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -13,24 +16,27 @@ import static com.elasticpath.rest.resource.integration.epcommerce.repository.Re
 
 import java.util.Collections;
 
+import io.reactivex.Completable;
 import io.reactivex.Single;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.elasticpath.domain.coupon.specifications.PotentialCouponUse;
 import com.elasticpath.domain.order.Order;
 import com.elasticpath.domain.rules.AppliedCoupon;
 import com.elasticpath.domain.rules.AppliedRule;
 import com.elasticpath.domain.rules.Coupon;
-import com.elasticpath.domain.specifications.Specification;
 import com.elasticpath.rest.ResourceOperationFailure;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.order.OrderRepository;
+import com.elasticpath.rest.resource.integration.epcommerce.repository.transform.ExceptionTransformer;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.transform.impl.ReactiveAdapterImpl;
 import com.elasticpath.service.rules.CouponService;
+import com.elasticpath.service.rules.impl.CouponNotValidException;
+import com.elasticpath.service.rules.impl.RuleValidationResultEnum;
 
 /**
  * The tests for {@link CouponRepositoryImpl}.
@@ -44,9 +50,6 @@ public class CouponRepositoryImplTest {
 	private CouponService couponService;
 
 	@Mock
-	private Specification<PotentialCouponUse> validCouponUseSpecification;
-
-	@Mock
 	private OrderRepository orderRepository;
 
 	@Mock
@@ -56,47 +59,46 @@ public class CouponRepositoryImplTest {
 	private AppliedRule appliedRule;
 
 	@InjectMocks
-	private ReactiveAdapterImpl reactiveAdapter;
+	private NoErrorHandlingReactiveAdapterImpl reactiveAdapter;
 
 	@InjectMocks
 	private CouponRepositoryImpl couponRepository;
 
 	@Before
 	public void setUp() {
-		couponRepository = new CouponRepositoryImpl(validCouponUseSpecification, couponService, orderRepository, reactiveAdapter);
+		couponRepository = new CouponRepositoryImpl(couponService, orderRepository, reactiveAdapter);
 		when(orderRepository.findByGuidAsSingle(SCOPE, PURCHASE_ID)).thenReturn(Single.just(order));
 	}
 
 	@Test
 	public void testCouponIsValidInStore() {
 		setUpCouponServiceToReturnCoupon();
-		setUpSpecificationToBeSatisfied(true);
-
-		couponRepository.isCouponValidInStore(COUPON_CODE, SCOPE, CUSTOMER_EMAIL)
-				.test()
-				.assertValue(true);
+		setUpSpecificationToBeSatisfied(RuleValidationResultEnum.SUCCESS);
+		couponRepository.validateCoupon(COUPON_CODE, SCOPE, CUSTOMER_EMAIL).test().assertNoErrors();
 	}
 
 	@Test
 	public void testCouponRuleIsInvalidInStore() {
 		setUpCouponServiceToReturnCoupon();
-		setUpSpecificationToBeSatisfied(false);
-
-		couponRepository.isCouponValidInStore(COUPON_CODE, SCOPE, CUSTOMER_EMAIL)
-				.test()
-				.assertValue(false);
+		setUpSpecificationToBeSatisfied(RuleValidationResultEnum.ERROR_UNSPECIFIED);
+		couponRepository.validateCoupon(COUPON_CODE, SCOPE, CUSTOMER_EMAIL).test()
+				.assertError(CouponNotValidException.class)
+				.assertErrorMessage("Coupon 'coupon_code' is not valid");
 	}
 
 	private Coupon setUpCouponServiceToReturnCoupon() {
 		Coupon coupon = mock(Coupon.class);
-		when(coupon.getCouponCode()).thenReturn(COUPON_CODE);
 		when(couponService.findByCouponCode(COUPON_CODE)).thenReturn(coupon);
 		return coupon;
 	}
 
 
-	private void setUpSpecificationToBeSatisfied(final boolean isSatisfied) {
-		when(validCouponUseSpecification.isSatisfiedBy(any(PotentialCouponUse.class))).thenReturn(isSatisfied);
+	private void setUpSpecificationToBeSatisfied(final RuleValidationResultEnum isSatisfied) {
+		if (isSatisfied.isSuccess()) {
+			doNothing().when(couponService).validateCoupon(any(PotentialCouponUse.class), anyString());
+		} else {
+			doThrow(new CouponNotValidException("coupon_code")).when(couponService).validateCoupon(any(PotentialCouponUse.class), anyString());
+		}
 	}
 
 	@Test
@@ -153,5 +155,31 @@ public class CouponRepositoryImplTest {
 				.assertNoErrors()
 				.assertValue(coupon -> coupon.getCouponCode().equals(appliedCoupon.getCouponCode()))
 				.assertValue(coupon -> coupon.getUsageCount() == appliedCoupon.getUsageCount());
+	}
+
+	private static final class NoErrorHandlingReactiveAdapterImpl extends ReactiveAdapterImpl {
+
+		/**
+		 * Constructor.
+		 *
+		 * @param exceptionTransformer the exception transformer
+		 */
+		private NoErrorHandlingReactiveAdapterImpl(final ExceptionTransformer exceptionTransformer) {
+			super(exceptionTransformer);
+		}
+
+		/**
+		 * Create a completable without error handling fixture (i.e. no calling .onErrorResumeNext as opposed to the parent).
+		 * Thus tests are able to easily assert for and analyze initial exceptions and not the Throwable objects that get
+		 * returned as a result of parent's .onErrorResumeNext(..) call.
+		 *
+		 * @param serviceCall serviceCall
+		 * @return completable
+		 */
+		@Override
+		public Completable fromServiceAsCompletable(final Runnable serviceCall) {
+			return Completable.fromRunnable(serviceCall);
+		}
+
 	}
 }

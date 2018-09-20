@@ -6,13 +6,11 @@ package com.elasticpath.cucumber.category;
 import cucumber.api.DataTable;
 import cucumber.api.java.en.And;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.ContextConfiguration;
 
 /**
  * Category test step definitions class.
  * 
  */
-@ContextConfiguration("/cucumber.xml")
 public class CategoryStepDefinitions {
 	
 	@Autowired

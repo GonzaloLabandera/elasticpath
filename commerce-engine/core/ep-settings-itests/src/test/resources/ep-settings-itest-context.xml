@@ -1,11 +1,15 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	   xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
+<beans
+	xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:settings="http://www.elasticpath.com/schema/settings"
+	xsi:schemaLocation="
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+		http://www.elasticpath.com/schema/settings http://www.elasticpath.com/schema/settings/settings.xsd
+	">
 
 	<import resource="classpath:integration-core-context.xml" />
 	<import resource="classpath:ep-test-application.xml" />
-
-	<import resource="classpath:spring/settings/ep-settings.xml" />
 
 	<bean id="schemaExtension" class="liquibase.integration.spring.SpringLiquibase" scope="prototype">
 		<property name="dataSource" ref="dataSource" />
@@ -13,29 +17,21 @@
 	</bean>
 
 	<bean id="settingFactoryBeanTestValue" parent="settingFactoryBean" depends-on="schemaExtension">
-		<property name="path" value="COMMERCE/ITEST/SETTINGS/sampleSetting" />
+		<property name="path" value="COMMERCE/ITEST/SETTINGS/sampleStringSetting"/>
 	</bean>
 
-	<!-- Opt out of messaging. -->
-	<bean id="eventMessageFactory" class="com.elasticpath.commons.beanframework.NoOpProxyFactoryBean">
-		<property name="serviceInterface" value="com.elasticpath.messaging.factory.EventMessageFactory"/>
-	</bean>
+	<settings:setting id="bigDecimalSetting" path="COMMERCE/ITEST/SETTINGS/sampleBigDecimalSetting"/>
+	<settings:setting id="booleanSetting" path="COMMERCE/ITEST/SETTINGS/sampleBooleanSetting"/>
+	<settings:setting id="collectionSetting" path="COMMERCE/ITEST/SETTINGS/sampleCollectionSetting"/>
+	<settings:setting id="integerSetting" path="COMMERCE/ITEST/SETTINGS/sampleIntegerSetting"/>
+	<settings:setting id="mapSetting" path="COMMERCE/ITEST/SETTINGS/sampleMapSetting"/>
+	<settings:setting id="stringSetting" path="COMMERCE/ITEST/SETTINGS/sampleStringSetting"/>
+	<settings:setting id="urlSetting" path="COMMERCE/ITEST/SETTINGS/sampleUrlSetting"/>
+	<settings:setting id="xmlSetting" path="COMMERCE/ITEST/SETTINGS/sampleXmlSetting"/>
 
-	<bean id="customerEventMessagePublisher" class="com.elasticpath.commons.beanframework.NoOpProxyFactoryBean">
-		<property name="serviceInterface" value="com.elasticpath.messaging.EventMessagePublisher" />
-	</bean>
-
-	<bean id="customerEventExternalEndpoint" class="org.apache.camel.spring.CamelEndpointFactoryBean">
-		<property name="uri" value="direct:/dev/null" />
-	</bean>
-
-	<bean id="orderEventMessagePublisher" class="com.elasticpath.commons.beanframework.NoOpProxyFactoryBean">
-		<property name="serviceInterface" value="com.elasticpath.messaging.EventMessagePublisher"/>
-	</bean>
-
-	<bean id="orderEventExternalEndpoint" class="org.apache.camel.spring.CamelEndpointFactoryBean">
-		<property name="uri" value="direct:/dev/null" />
-	</bean>
+	<settings:setting id="contextDefaultSetting" path="COMMERCE/ITEST/SETTINGS/sampleContextualSetting"/>
+	<settings:setting id="contextOneSetting" path="COMMERCE/ITEST/SETTINGS/sampleContextualSetting" context="CONTEXT1" />
+	<settings:setting id="contextTwoSetting" path="COMMERCE/ITEST/SETTINGS/sampleContextualSetting" context="CONTEXT2" />
 
 	<!-- Extension point for plugging in additional test components. -->
 	<!-- This must occur as the last import in the context to facilitate overriding existing beans. -->

@@ -40,6 +40,8 @@
 					<instructions>
 						<Import-Package>
 							org.springframework.context.annotation,
+							org.springframework.beans.factory.config,
+							com.elasticpath.commons.beanframework,
 							*
 						</Import-Package>
 					</instructions>

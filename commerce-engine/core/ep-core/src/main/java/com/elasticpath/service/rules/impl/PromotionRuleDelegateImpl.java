@@ -3,6 +3,9 @@
  */
 package com.elasticpath.service.rules.impl;
 
+import static java.lang.String.format;
+import static java.util.Collections.singletonList;
+
 import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.Currency;
@@ -10,8 +13,10 @@ import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
+import com.google.common.collect.ImmutableMap;
 import org.apache.log4j.Logger;
 
+import com.elasticpath.base.common.dto.StructuredErrorMessage;
 import com.elasticpath.commons.beanframework.BeanFactory;
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.catalog.Price;
@@ -26,7 +31,6 @@ import com.elasticpath.domain.rules.CouponConfig;
 import com.elasticpath.domain.rules.CouponUsage;
 import com.elasticpath.domain.rules.CouponUsageType;
 import com.elasticpath.domain.rules.RuleParameterNumItemsQuantifier;
-import com.elasticpath.domain.shipping.ShippingServiceLevel;
 import com.elasticpath.domain.shoppingcart.DiscountRecord;
 import com.elasticpath.domain.shoppingcart.ShoppingCart;
 import com.elasticpath.domain.shoppingcart.ShoppingItem;
@@ -39,6 +43,9 @@ import com.elasticpath.service.rules.CouponUsageService;
 import com.elasticpath.service.rules.PromotionRuleDelegate;
 import com.elasticpath.service.rules.PromotionRuleExceptions;
 import com.elasticpath.service.rules.RuleService;
+import com.elasticpath.service.shipping.ShippingOptionResult;
+import com.elasticpath.service.shipping.ShippingOptionService;
+import com.elasticpath.shipping.connectivity.dto.ShippingOption;
 
 /**
  * This interface provides helper methods that can be invoked from Drools code to make queries on the system. The intent of this
@@ -50,7 +57,7 @@ public class PromotionRuleDelegateImpl implements PromotionRuleDelegate {
 	private static final Logger LOG = Logger.getLogger(PromotionRuleDelegateImpl.class);
 
 	private static final String PERCENT_DIVISOR = "100";
-	
+
 	private static final int CALCULATION_SCALE = 2;
 
 	private static final String ANY_BRAND_CODE = "ANY";
@@ -60,6 +67,7 @@ public class PromotionRuleDelegateImpl implements PromotionRuleDelegate {
 	private CouponConfigService couponConfigService;
 	private ProductSkuLookup productSkuLookup;
 	private ProductService productService;
+	private ShippingOptionService shippingOptionService;
 
 	private BeanFactory beanFactory;
 
@@ -181,7 +189,8 @@ public class PromotionRuleDelegateImpl implements PromotionRuleDelegate {
 			return false;
 		}
 
-		final int qualifyingQuantity = shoppingCart.getCartItems().stream()
+		final int qualifyingQuantity = shoppingCart.getAllShoppingItems().stream()
+				.filter(shoppingItem -> !shoppingItem.isBundleConstituent())
 				.filter(shoppingItem -> shoppingItem.getSkuGuid().equals(targetSku.getGuid()))
 				.mapToInt(ShoppingItem::getQuantity)
 				.sum();
@@ -197,15 +206,14 @@ public class PromotionRuleDelegateImpl implements PromotionRuleDelegate {
 
 	@Override
 	public boolean cartContainsAnySku(final ShoppingCart shoppingCart, final DiscountItemContainer discountItemContainer,
-										final String numItemsQuantifier, final int quantity, final String exceptionStr) {
-		int qualifyingQuantity = 0;
-
-		for (ShoppingItem currCartItem : shoppingCart.getCartItems()) {
-			// The current item qualifies if the item does not fall under any of the rule's SKU exceptions
-			if (discountItemContainer.cartItemEligibleForPromotion(currCartItem, getPromotionRuleExceptions(exceptionStr))) {
-				qualifyingQuantity = currCartItem.getQuantity() + qualifyingQuantity;
-			}
-		}
+									  final String numItemsQuantifier, final int quantity, final String exceptionStr) {
+		final int qualifyingQuantity = shoppingCart.getAllShoppingItems().stream()
+				.filter(shoppingItem -> !shoppingItem.isBundleConstituent())
+				.filter(shoppingItem ->
+						// The current item qualifies if the item does not fall under any of the rule's SKU exceptions
+						discountItemContainer.cartItemEligibleForPromotion(shoppingItem, getPromotionRuleExceptions(exceptionStr)))
+				.mapToInt(ShoppingItem::getQuantity)
+				.sum();
 
 		if (numItemsQuantifier.equalsIgnoreCase(RuleParameterNumItemsQuantifier.AT_LEAST.toString()) && qualifyingQuantity >= quantity) {
 			return true;
@@ -232,17 +240,12 @@ public class PromotionRuleDelegateImpl implements PromotionRuleDelegate {
 	public boolean cartContainsProduct(final ShoppingCart shoppingCart, final String productCode, final String numItemsQuantifier, final int quantity,
 			final String exceptionStr) {
 		final PromotionRuleExceptions promotionRuleExceptions = getPromotionRuleExceptions(exceptionStr);
-		int qualifyingQuantity = 0;
 
-		for (ShoppingItem currItem : shoppingCart.getCartItems()) {
-			// The current item qualifies if the item matches the rule's product and if the item does not
-			// fall under any of the rule's SKU exceptions
-			final ProductSku currItemSku = getProductSkuLookup().findByGuid(currItem.getSkuGuid());
-			if (currItemSku.getProduct().getCode().equals(productCode)
-					&& !promotionRuleExceptions.isSkuExcluded(currItemSku)) {
-				qualifyingQuantity = currItem.getQuantity() + qualifyingQuantity;
-			}
-		}
+		final int qualifyingQuantity = shoppingCart.getAllShoppingItems().stream()
+				.filter(shoppingItem -> !shoppingItem.isBundleConstituent())
+				.filter(shoppingItem -> isShoppingItemQualifiedForQuantityMatch(productCode, promotionRuleExceptions, shoppingItem))
+				.mapToInt(ShoppingItem::getQuantity)
+				.sum();
 
 		if (numItemsQuantifier.equalsIgnoreCase(RuleParameterNumItemsQuantifier.AT_LEAST.toString()) && qualifyingQuantity >= quantity) {
 			return true;
@@ -253,25 +256,36 @@ public class PromotionRuleDelegateImpl implements PromotionRuleDelegate {
 		return false;
 	}
 
+	/**
+	 * The current item qualifies if the item matches the rule's product and if the item does not fall under any of the rule's SKU
+	 * exceptions.
+	 *
+	 * @param productCode             Product code to match the item against
+	 * @param promotionRuleExceptions exceptions to evaluate against
+	 * @param shoppingItem            the shopping item to verify for qualification
+	 * @return true if the ShoppingItem matches the product code and if the item does not fall under any of the rule's SKU
+	 * exceptions.
+	 */
+	protected boolean isShoppingItemQualifiedForQuantityMatch(final String productCode, final PromotionRuleExceptions promotionRuleExceptions,
+															  final ShoppingItem shoppingItem) {
+
+		final ProductSku currItemSku = getProductSkuLookup().findByGuid(shoppingItem.getSkuGuid());
+		return currItemSku.getProduct().getCode().equals(productCode)
+				&& !promotionRuleExceptions.isSkuExcluded(currItemSku);
+	}
+
 	@Override
-	@SuppressWarnings("PMD.CyclomaticComplexity")
 	public boolean cartContainsItemsOfCategory(final ShoppingCart shoppingCart,
 												final DiscountItemContainer discountItemContainer,
 												final String compoundCategoryGuid,
 												final String numItemsQuantifier,
 												final int numItems,
-												final String exceptionStr) {
-		int qualifyingQuantity = 0;
-
-		for (final ShoppingItem currCartItem : shoppingCart.getCartItems()) {
-			// The current item qualifies if the item's category matches the rule's category and if the item does not fall under any of the rule's
-			// exceptions
-			final ProductSku cartItemSku = getProductSkuLookup().findByGuid(currCartItem.getSkuGuid());
-			if (catalogProductInCategory(cartItemSku.getProduct(), true, compoundCategoryGuid, exceptionStr)
-					&& discountItemContainer.cartItemEligibleForPromotion(currCartItem, getPromotionRuleExceptions(exceptionStr))) {
-				qualifyingQuantity = currCartItem.getQuantity() + qualifyingQuantity;
-			}
-		}
+											   final String exceptionStr) {
+		final int qualifyingQuantity = shoppingCart.getAllShoppingItems().stream()
+				.filter(shoppingItem -> !shoppingItem.isBundleConstituent())
+				.filter(shoppingItem -> isShoppingItemQualifiedForCategoryMatch(discountItemContainer, compoundCategoryGuid, exceptionStr, shoppingItem))
+				.mapToInt(ShoppingItem::getQuantity)
+				.sum();
 
 		if (numItemsQuantifier.equalsIgnoreCase(RuleParameterNumItemsQuantifier.AT_LEAST.toString()) && qualifyingQuantity >= numItems) {
 			return true;
@@ -280,6 +294,27 @@ public class PromotionRuleDelegateImpl implements PromotionRuleDelegate {
 		}
 
 		return false;
+	}
+
+	/**
+	 * The current item qualifies if the item's category matches the rule's category and if the item does not fall under any of the
+	 * rule's exceptions.
+	 *
+	 * @param discountItemContainer a discount Item Container
+	 * @param compoundCategoryGuid  Compound category GUID
+	 * @param exceptionStr          Exception string
+	 * @param shoppingItem          Shopping item to be evaluated
+	 * @return true if the item's category matches the rule's category and if the item does not fall under any of the
+	 * rule's exceptions.
+	 */
+	protected boolean isShoppingItemQualifiedForCategoryMatch(final DiscountItemContainer discountItemContainer, final String compoundCategoryGuid,
+															  final String exceptionStr, final ShoppingItem shoppingItem) {
+
+		// The current item qualifies if the item's category matches the rule's category and if the item does not fall under any of the
+		// rule's exceptions
+		final ProductSku cartItemSku = getProductSkuLookup().findByGuid(shoppingItem.getSkuGuid());
+		return catalogProductInCategory(cartItemSku.getProduct(), true, compoundCategoryGuid, exceptionStr)
+				&& discountItemContainer.cartItemEligibleForPromotion(shoppingItem, getPromotionRuleExceptions(exceptionStr));
 	}
 
 	/**
@@ -418,22 +453,22 @@ public class PromotionRuleDelegateImpl implements PromotionRuleDelegate {
 
 	@Override
 	public void applyShippingDiscountPercent(final ShoppingCart shoppingCart, final DiscountItemContainer discountItemContainer, final long ruleId,
-											final long actionId, final String percent, final String shippingLevelCode, final Currency currency) {
+											 final long actionId, final String percent, final String shippingOptionCode, final Currency currency) {
 		if (LOG.isTraceEnabled()) {
-			LOG.trace("applyShippingDiscountPercent rule" + ruleId + " actionId: " + actionId + " shippingLevelCode: " + shippingLevelCode
+			LOG.trace("applyShippingDiscountPercent rule" + ruleId + " actionId: " + actionId + " shippingOptionCode: " + shippingOptionCode
 					+ " percent " + percent);
 		}
 
 		BigDecimal discountPercent = new BigDecimal(percent);
 		discountPercent = setDiscountPercentScale(discountPercent);
 		ShippingDiscountCalculator discountCalculator = new PercentBasedShippingDiscountCalculator(discountPercent, getProductSkuLookup());
-		applyShippingDiscount(shippingLevelCode, shoppingCart, discountItemContainer, ruleId, actionId, discountCalculator, currency);
+		applyShippingDiscount(shippingOptionCode, shoppingCart, discountItemContainer, ruleId, actionId, discountCalculator, currency);
 	}
 
 	/**
 	 * <p>
 	 * Applying a shipping discount involves setting the discount on the appropriate
-	 * shipping option (ShippingServiceLevel) and recording which rule was applied.
+	 * shipping option (ShippingOption) and recording which rule was applied.
 	 * </p>
 	 * <p>
 	 * Promotions that applied to shipping options are recorded in 2 places:
@@ -450,7 +485,7 @@ public class PromotionRuleDelegateImpl implements PromotionRuleDelegate {
 	 *     </li>
 	 * </ul>
 	 * </p>
-	 * @param shippingLevelCode The shipping option (ShippingServiceLevel) to apply the discount to.
+	 * @param shippingOptionCode The shipping option ({@link ShippingOption}) to apply the discount to.
 	 * @param shoppingCart The current shoppers shopping cart.
 	 * @param discountItemContainer the discount item container
 	 * @param ruleId The applied rule id.
@@ -458,19 +493,39 @@ public class PromotionRuleDelegateImpl implements PromotionRuleDelegate {
 	 * @param discountCalculator The discount calculator.
 	 * @param currency The discount's currency.
 	 */
-	private void applyShippingDiscount(final String shippingLevelCode,
-										final ShoppingCart shoppingCart,
-										final DiscountItemContainer discountItemContainer,
-										final long ruleId,
-										final long actionId,
-										final ShippingDiscountCalculator discountCalculator,
-										final Currency currency) {
-		for (ShippingServiceLevel shippingServiceLevel : shoppingCart.getShippingServiceLevelList()) {
-			if (shippingLevelCode.equals(shippingServiceLevel.getCode())) {
-				final Money discount = discountCalculator.calculateDiscount(shippingServiceLevel, shoppingCart, discountItemContainer, currency);
-				discountItemContainer.applyShippingOptionDiscount(shippingServiceLevel, ruleId, actionId, discount.getAmount());
-			}
-		}
+	private void applyShippingDiscount(final String shippingOptionCode,
+									   final ShoppingCart shoppingCart,
+									   final DiscountItemContainer discountItemContainer,
+									   final long ruleId,
+									   final long actionId,
+									   final ShippingDiscountCalculator discountCalculator,
+									   final Currency currency) {
+		final ShippingOptionResult shippingOptionResult = getShippingOptionService().getShippingOptions(shoppingCart);
+		final String errorMessage = format("Unable to get available shipping options for the given cart with guid '%s'. "
+						+ "Unable to attempt to apply shipping discount.",
+				shoppingCart.getGuid());
+		shippingOptionResult.throwExceptionIfUnsuccessful(
+				errorMessage,
+				singletonList(
+						new StructuredErrorMessage(
+								"shippingoptions.unavailable",
+								errorMessage,
+								ImmutableMap.of(
+										"cart-id", shoppingCart.getGuid(),
+										"rule-id", Long.toString(ruleId),
+										"action-id", Long.toString(actionId),
+										"shipping-option", shippingOptionCode,
+										"currency", currency.getCurrencyCode())
+						)
+				));
+
+		shippingOptionResult.getAvailableShippingOptions().stream()
+				.filter(shippingOption -> shippingOptionCode.equals(shippingOption.getCode()))
+				.findFirst()
+				.ifPresent(shippingOption -> {
+			final Money discount = discountCalculator.calculateDiscount(shippingOption, shoppingCart, discountItemContainer, currency);
+			discountItemContainer.applyShippingOptionDiscount(shippingOption, ruleId, actionId, discount.getAmount());
+		});
 	}
 
 	/**
@@ -479,14 +534,14 @@ public class PromotionRuleDelegateImpl implements PromotionRuleDelegate {
 	private interface ShippingDiscountCalculator {
 		/**
 		 * Calculates shipping discounts.
-		 * @param shippingServiceLevel The shipping option.
+		 * @param shippingOption The shipping option.
 		 * @param shoppingCart The shopping cart.
 		 * @param discountItemContainer the discount item container
 		 * @param currency The currency.
 		 * @return Money - The discount.  May be zero.
 		 */
-		Money calculateDiscount(
-				ShippingServiceLevel shippingServiceLevel, ShoppingCart shoppingCart, DiscountItemContainer discountItemContainer, Currency currency);
+		Money calculateDiscount(ShippingOption shippingOption, ShoppingCart shoppingCart, DiscountItemContainer discountItemContainer,
+								Currency currency);
 	}
 
 	/**
@@ -504,10 +559,10 @@ public class PromotionRuleDelegateImpl implements PromotionRuleDelegate {
 		}
 
 		@Override
-		public Money calculateDiscount(final ShippingServiceLevel shippingServiceLevel,
-										final ShoppingCart shoppingCart,
-										final DiscountItemContainer discountItemContainer,
-										final Currency currency) {
+		public Money calculateDiscount(final ShippingOption shippingOption,
+									   final ShoppingCart shoppingCart,
+									   final DiscountItemContainer discountItemContainer,
+									   final Currency currency) {
 			return Money.valueOf(discountAmount, currency);
 		}
 	}
@@ -530,11 +585,11 @@ public class PromotionRuleDelegateImpl implements PromotionRuleDelegate {
 		}
 
 		@Override
-		public Money calculateDiscount(final ShippingServiceLevel shippingServiceLevel,
-										final ShoppingCart shoppingCart,
-										final DiscountItemContainer discountItemContainer,
-										final Currency currency) {
-			BigDecimal originalShippingCost = discountItemContainer.getPrePromotionPriceAmount(shippingServiceLevel);
+		public Money calculateDiscount(final ShippingOption shippingOption,
+									   final ShoppingCart shoppingCart,
+									   final DiscountItemContainer discountItemContainer,
+									   final Currency currency) {
+			BigDecimal originalShippingCost = discountItemContainer.getPrePromotionPriceAmount(shippingOption);
 			BigDecimal discountAmount = originalShippingCost.multiply(discountPercent);
 			return Money.valueOf(discountAmount, currency);
 		}
@@ -747,4 +802,11 @@ public class PromotionRuleDelegateImpl implements PromotionRuleDelegate {
 		this.productService = productService;
 	}
 
+	protected ShippingOptionService getShippingOptionService() {
+		return this.shippingOptionService;
+	}
+
+	public void setShippingOptionService(final ShippingOptionService shippingOptionService) {
+		this.shippingOptionService = shippingOptionService;
+	}
 }

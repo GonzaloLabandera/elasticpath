@@ -3,6 +3,8 @@
  */
 package com.elasticpath.common.dto;
 
+import static junit.framework.TestCase.assertFalse;
+import static junit.framework.TestCase.assertTrue;
 import static org.junit.Assert.assertEquals;
 
 import java.util.ArrayList;
@@ -173,8 +175,8 @@ public class CouponUsageDtoMediatorImplTest {
 		Coupon coupon = couponService.getUpdatedCoupon();
 		CouponUsage couponUsage = couponUsageService.getUpdatedCouponUsage();
 		
-		assertEquals("CouponUsage should have Suspended = True.", true, couponUsage.isSuspended());
-		assertEquals("Coupon should have Suspended = False.", false, coupon.isSuspended());
+		assertTrue("CouponUsage should have Suspended = True.", couponUsage.isSuspended());
+		assertFalse("Coupon should have Suspended = False.", coupon.isSuspended());
 
 		assertEquals("CouponUsage should have CouponCode = CouponCode1.", COUPON_CODE1, couponUsage.getCoupon().getCouponCode());
 		assertEquals("CouponUsage should have email = " + EMAIL_ADDRESS1 + ".", EMAIL_ADDRESS1, couponUsage.getCustomerEmailAddress());

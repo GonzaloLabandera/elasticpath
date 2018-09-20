@@ -11,7 +11,10 @@ import org.openqa.selenium.WebDriver;
  */
 public class PriceEditorDialog extends AbstractDialog {
 
-	private static final String PRICE_EDITOR_PARENT_CSS = "div[widget-id='Price Editor'][widget-type='Shell'] ";
+	/**
+	 * CSS selector used to identify the dialog.
+	 */
+	public static final String PRICE_EDITOR_PARENT_CSS = "div[widget-id='Price Editor'][widget-type='Shell'] ";
 	private static final String LIST_PRICE_INPUT_CSS = PRICE_EDITOR_PARENT_CSS + "div[widget-id='List Price'] > input";
 	private static final String SALE_PRICE_INPUT_CSS = PRICE_EDITOR_PARENT_CSS + "div[widget-id='Sale Price'] > input";
 	private static final String SELECT_PRODUCT_IMAGE_LINK_CSS = PRICE_EDITOR_PARENT_CSS + "div[widget-type='ImageHyperlink'] > div[style*='.png']";

@@ -8,7 +8,10 @@ import org.openqa.selenium.WebDriver;
  */
 public class AddShortTextAttributeDialog extends AbstractDialog {
 
-	private static final String ADD_SHORT_TEXT_DIALOG_CSS = "div[automation-id='com.elasticpath.cmclient.catalog.CatalogMessages"
+	/**
+	 * CSS selector used to identify the dialog.
+	 */
+	public static final String ADD_SHORT_TEXT_DIALOG_CSS = "div[automation-id='com.elasticpath.cmclient.catalog.CatalogMessages"
 			+ ".ShortTextDialog_Add_Title'] ";
 	private static final String TEXTAREA_CSS = ADD_SHORT_TEXT_DIALOG_CSS + "textarea";
 	private static final String OK_BUTTON_CSS = "div[automation-id='com.elasticpath.cmclient.core.CoreMessages.AbstractEpDialog_ButtonOK']";

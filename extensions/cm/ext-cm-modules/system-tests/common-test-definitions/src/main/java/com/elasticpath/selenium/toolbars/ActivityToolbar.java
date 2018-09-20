@@ -40,9 +40,6 @@ public class ActivityToolbar extends AbstractToolbar {
 			= TOOLBAR_APPEARANCE_ID_CSS + "[widget-id*='Change Set']";
 	private static final String CHANGESET_TOOL_ITEM
 			= "div[widget-id*='Change Set'][widget-type='ToolItem']";
-	private static final String ADD_OBJ_TO_CHANGE_SET_BUTTON = "div[automation-id='com.elasticpath."
-			+ "cmclient.changeset.ChangeSetMessages.AddObjectToChangeset']";
-
 	private static final String USER_MENU_BUTTON_CSS = "div[widget-id='User Menu']";
 
 	/**
@@ -210,6 +207,15 @@ public class ActivityToolbar extends AbstractToolbar {
 	}
 
 	/**
+	 * Verifies Changeset button is not present.
+	 */
+	public void verifyChangesetButtonNotPresent() {
+		assertThat(isChangeSetEnabled())
+				.as("Changeset button is present when it should not be.")
+				.isFalse();
+	}
+
+	/**
 	 * Verifies if change set is enabled.
 	 *
 	 * @return boolean
@@ -227,7 +233,7 @@ public class ActivityToolbar extends AbstractToolbar {
 	 * @return UserMenuDialog
 	 */
 	public UserMenuDialog clickUserMenu() {
-		clickButton(USER_MENU_BUTTON_CSS, "User Menu");
+		clickButton(USER_MENU_BUTTON_CSS, "User Menu", UserMenuDialog.LOGOUT_CSS);
 		return new UserMenuDialog(getDriver());
 	}
 
@@ -242,13 +248,4 @@ public class ActivityToolbar extends AbstractToolbar {
 		//to escape tooltip
 		getDriver().findElement(By.cssSelector("body")).sendKeys(Keys.ESCAPE);
 	}
-
-
-	/**
-	 * Clicks add object to change set button in the activity toolbar.
-	 */
-	public void addSelectedObjectToChangeSet() {
-		clickButton(ADD_OBJ_TO_CHANGE_SET_BUTTON, "Add to change set");
-	}
-
 }

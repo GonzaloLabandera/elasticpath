@@ -7,13 +7,16 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import java.util.Locale;
+
 import org.jmock.integration.junit4.JUnitRuleMockery;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 
+import com.elasticpath.commons.beanframework.impl.ApplicationContextBackedBeanFactoryImpl;
 import com.elasticpath.commons.constants.GlobalConstants;
-import com.elasticpath.domain.impl.ApplicationContextBackedBeanFactoryImpl;
+import com.elasticpath.settings.test.support.SimpleSettingValueProvider;
 
 /**
  * Test <code>UtilityImpl</code>.
@@ -121,6 +124,18 @@ public class UtilityImplTest {
 		assertFalse(utility.isValidGuidStr(" aaaBBB112"));
 		assertFalse(utility.isValidGuidStr("aaaBBB112 "));
 		assertTrue(utility.isValidGuidStr("aaa-BBB112"));
+	}
+
+	@Test
+	public void verifyGetDefaultLocalizedDateFormatUsesDateFormatProvider() {
+		final String dateFormat = "EEE MMM dd HH:mm:ss yyyy";
+
+		utility.setDefaultDateFormatPatternProvider(new SimpleSettingValueProvider<>(dateFormat));
+
+		final LocalizedDateFormat expected = new LocalizedDateFormat(dateFormat, Locale.getDefault());
+		final LocalizedDateFormat actual = utility.getDefaultLocalizedDateFormat();
+
+		assertEquals("Unexpected LocalizedDateFormat instance constructed", expected, actual);
 	}
 
 }

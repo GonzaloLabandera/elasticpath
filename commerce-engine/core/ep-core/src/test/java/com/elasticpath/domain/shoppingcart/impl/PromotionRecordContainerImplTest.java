@@ -14,6 +14,7 @@ import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
@@ -29,10 +30,10 @@ import com.elasticpath.domain.rules.Rule;
 import com.elasticpath.domain.rules.RuleAction;
 import com.elasticpath.domain.rules.impl.CartAnySkuAmountDiscountActionImpl;
 import com.elasticpath.domain.rules.impl.PromotionRuleImpl;
-import com.elasticpath.domain.shipping.ShippingServiceLevel;
 import com.elasticpath.domain.shoppingcart.DiscountRecord;
 import com.elasticpath.domain.shoppingcart.ShoppingCart;
 import com.elasticpath.domain.shoppingcart.ShoppingItem;
+import com.elasticpath.shipping.connectivity.dto.ShippingOption;
 
 /**
  * Unit tests for {@link PromotionRecordContainerImpl}.
@@ -204,19 +205,19 @@ public class PromotionRecordContainerImplTest {
 	}
 
 	@Test
-	public void verifyGetAppliedRulesIgnoresRecordsNotApplicableToCurrentlySelectedShippingServiceLevel() throws Exception {
+	public void verifyGetAppliedRulesIgnoresRecordsNotApplicableToCurrentlySelectedShippingOption() throws Exception {
 		final long ruleId1 = 1L;
 		final long ruleId2 = 2L;
 		final long ruleId3 = 3L;
 
-		final String selectedShippingServiceLevelCode = UUID.randomUUID().toString();
-		final String unSelectedShippingServiceLevelCode = UUID.randomUUID().toString();
+		final String selectedShippingOptionCode = UUID.randomUUID().toString();
+		final String unSelectedShippingOptionCode = UUID.randomUUID().toString();
 
-		final ShippingServiceLevel shippingServiceLevelSelected = createShippingServiceLevel(selectedShippingServiceLevelCode);
+		final ShippingOption shippingOptionSelected = createShippingOption(selectedShippingOptionCode);
 
-		final DiscountRecord discountRecord1 = new ShippingDiscountRecordImpl(selectedShippingServiceLevelCode, ruleId1, ACTION_ID, BigDecimal.ONE);
-		final DiscountRecord discountRecord2 = new ShippingDiscountRecordImpl(selectedShippingServiceLevelCode, ruleId2, ACTION_ID, BigDecimal.ONE);
-		final DiscountRecord discountRecord3 = new ShippingDiscountRecordImpl(unSelectedShippingServiceLevelCode, ruleId3, ACTION_ID, BigDecimal.ONE);
+		final DiscountRecord discountRecord1 = new ShippingDiscountRecordImpl(selectedShippingOptionCode, ruleId1, ACTION_ID, BigDecimal.ONE);
+		final DiscountRecord discountRecord2 = new ShippingDiscountRecordImpl(selectedShippingOptionCode, ruleId2, ACTION_ID, BigDecimal.ONE);
+		final DiscountRecord discountRecord3 = new ShippingDiscountRecordImpl(unSelectedShippingOptionCode, ruleId3, ACTION_ID, BigDecimal.ONE);
 
 		promotionRecordContainer.addDiscountRecord(discountRecord1);
 		promotionRecordContainer.addDiscountRecord(discountRecord2);
@@ -224,8 +225,8 @@ public class PromotionRecordContainerImplTest {
 
 		context.checking(new Expectations() {
 			{
-				atLeast(1).of(shoppingCart).getSelectedShippingServiceLevel();
-				will(returnValue(shippingServiceLevelSelected));
+				atLeast(1).of(shoppingCart).getSelectedShippingOption();
+				will(returnValue(Optional.of(shippingOptionSelected)));
 			}
 		});
 
@@ -234,27 +235,27 @@ public class PromotionRecordContainerImplTest {
 	}
 
 	@Test
-	public void verifyGetAppliedRulesForShipmentFindsRecordsForGivenShippingServiceLevel() throws Exception {
+	public void verifyGetAppliedRulesForShipmentFindsRecordsForGivenShippingOption() throws Exception {
 		final long ruleId1 = 1L;
 		final long ruleId2 = 2L;
 		final long ruleId3 = 3L;
 
-		final String shippingServiceLevelCode1 = UUID.randomUUID().toString();
-		final String shippingServiceLevelCode2 = UUID.randomUUID().toString();
+		final String shippingOptionCode1 = UUID.randomUUID().toString();
+		final String shippingOptionCode2 = UUID.randomUUID().toString();
 
-		final ShippingServiceLevel shippingServiceLevel = createShippingServiceLevel(shippingServiceLevelCode2);
+		final ShippingOption shippingOption = createShippingOption(shippingOptionCode2);
 
-		final DiscountRecord discountRecord1 = new ShippingDiscountRecordImpl(shippingServiceLevelCode1, ruleId1, ACTION_ID, BigDecimal.ONE);
-		final DiscountRecord discountRecord2 = new ShippingDiscountRecordImpl(shippingServiceLevelCode1, ruleId2, ACTION_ID, BigDecimal.ONE);
-		final DiscountRecord discountRecord3 = new ShippingDiscountRecordImpl(shippingServiceLevelCode2, ruleId3, ACTION_ID, BigDecimal.ONE);
+		final DiscountRecord discountRecord1 = new ShippingDiscountRecordImpl(shippingOptionCode1, ruleId1, ACTION_ID, BigDecimal.ONE);
+		final DiscountRecord discountRecord2 = new ShippingDiscountRecordImpl(shippingOptionCode1, ruleId2, ACTION_ID, BigDecimal.ONE);
+		final DiscountRecord discountRecord3 = new ShippingDiscountRecordImpl(shippingOptionCode2, ruleId3, ACTION_ID, BigDecimal.ONE);
 
 		promotionRecordContainer.addDiscountRecord(discountRecord1);
 		promotionRecordContainer.addDiscountRecord(discountRecord2);
 		promotionRecordContainer.addDiscountRecord(discountRecord3);
 
-		ignoringSelectedShippingServiceLevelOnCart();
+		ignoringSelectedShippingOptionOnCart();
 
-		final Set<Long> appliedRules = promotionRecordContainer.getAppliedRulesByShippingServiceLevel(shippingServiceLevel);
+		final Set<Long> appliedRules = promotionRecordContainer.getAppliedRulesByShippingOption(shippingOption);
 		assertThat(appliedRules, containsInAnyOrder(ruleId3));
 	}
 
@@ -264,22 +265,22 @@ public class PromotionRecordContainerImplTest {
 		final long ruleId2 = 2L;
 		final long ruleId3 = 3L;
 
-		final String shippingServiceLevelCode = UUID.randomUUID().toString();
+		final String shippingOptionCode = UUID.randomUUID().toString();
 
-		final ShippingServiceLevel shippingServiceLevel = createShippingServiceLevel(shippingServiceLevelCode);
+		final ShippingOption shippingOption = createShippingOption(shippingOptionCode);
 
-		final DiscountRecord discountRecord1 = new ShippingDiscountRecordImpl(shippingServiceLevelCode, ruleId1, ACTION_ID, BigDecimal.ONE);
-		final DiscountRecord discountRecord2 = new ShippingDiscountRecordImpl(shippingServiceLevelCode, ruleId2, ACTION_ID, BigDecimal.ONE);
-		final DiscountRecord discountRecord3 = new ShippingDiscountRecordImpl(shippingServiceLevelCode, ruleId3, ACTION_ID, BigDecimal.ONE);
+		final DiscountRecord discountRecord1 = new ShippingDiscountRecordImpl(shippingOptionCode, ruleId1, ACTION_ID, BigDecimal.ONE);
+		final DiscountRecord discountRecord2 = new ShippingDiscountRecordImpl(shippingOptionCode, ruleId2, ACTION_ID, BigDecimal.ONE);
+		final DiscountRecord discountRecord3 = new ShippingDiscountRecordImpl(shippingOptionCode, ruleId3, ACTION_ID, BigDecimal.ONE);
 
 		((AbstractDiscountRecordImpl) discountRecord1).setSuperceded(true);
 
 		promotionRecordContainer.addDiscountRecord(discountRecord1);
 		promotionRecordContainer.addDiscountRecord(discountRecord2);
 		promotionRecordContainer.addDiscountRecord(discountRecord3);
-		ignoringSelectedShippingServiceLevelOnCart();
+		ignoringSelectedShippingOptionOnCart();
 
-		final Set<Long> appliedRules = promotionRecordContainer.getAppliedRulesByShippingServiceLevel(shippingServiceLevel);
+		final Set<Long> appliedRules = promotionRecordContainer.getAppliedRulesByShippingOption(shippingOption);
 		assertThat(appliedRules, containsInAnyOrder(ruleId2, ruleId3));
 	}
 
@@ -291,23 +292,23 @@ public class PromotionRecordContainerImplTest {
 		return new CatalogItemDiscountRecordImpl(ruleId, ACTION_ID, BigDecimal.ONE);
 	}
 
-	private ShippingServiceLevel createShippingServiceLevel(final String shippingServiceLevelCode) {
-		final ShippingServiceLevel shippingServiceLevel = context.mock(ShippingServiceLevel.class, "SSL " + shippingServiceLevelCode);
+	private ShippingOption createShippingOption(final String shippingOptionCode) {
+		final ShippingOption shippingOption = context.mock(ShippingOption.class, "SSL " + shippingOptionCode);
 
 		context.checking(new Expectations() {
 			{
-				allowing(shippingServiceLevel).getCode();
-				will(returnValue(shippingServiceLevelCode));
+				allowing(shippingOption).getCode();
+				will(returnValue(shippingOptionCode));
 			}
 		});
 
-		return shippingServiceLevel;
+		return shippingOption;
 	}
 
-	private void ignoringSelectedShippingServiceLevelOnCart() {
+	private void ignoringSelectedShippingOptionOnCart() {
 		context.checking(new Expectations() {
 			{
-				ignoring(shoppingCart).getSelectedShippingServiceLevel();
+				ignoring(shoppingCart).getSelectedShippingOption();
 			}
 		});
 	}

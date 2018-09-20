@@ -64,7 +64,7 @@ public class OrderPaymentMatcherFactory {
 	public static OrderPaymentMatcher createSuccessfulCreditCardAuthorization() {
 		return OrderPaymentMatcher.builder()
 				.withStatus(OrderPaymentStatus.APPROVED)
-				.withType(PaymentType.CREDITCARD)
+				.withType(PaymentType.CREDITCARD_DIRECT_POST)
 				.withTransaction(OrderPayment.AUTHORIZATION_TRANSACTION)
 				.build();
 	}
@@ -77,7 +77,7 @@ public class OrderPaymentMatcherFactory {
 	public static OrderPaymentMatcher createFailedCreditCardAuthorization() {
 		return OrderPaymentMatcher.builder()
 				.withStatus(OrderPaymentStatus.FAILED)
-				.withType(PaymentType.CREDITCARD)
+				.withType(PaymentType.CREDITCARD_DIRECT_POST)
 				.withTransaction(OrderPayment.AUTHORIZATION_TRANSACTION)
 				.build();
 	}
@@ -90,7 +90,7 @@ public class OrderPaymentMatcherFactory {
 	public static OrderPaymentMatcher createSuccessfulCreditCardCapture() {
 		return OrderPaymentMatcher.builder()
 				.withStatus(OrderPaymentStatus.APPROVED)
-				.withType(PaymentType.CREDITCARD)
+				.withType(PaymentType.CREDITCARD_DIRECT_POST)
 				.withTransaction(OrderPayment.CAPTURE_TRANSACTION)
 				.build();
 	}
@@ -117,6 +117,19 @@ public class OrderPaymentMatcherFactory {
 		return OrderPaymentMatcher.builder()
 				.withStatus(OrderPaymentStatus.APPROVED)
 				.withType(PaymentType.GIFT_CERTIFICATE)
+				.withTransaction(OrderPayment.AUTHORIZATION_TRANSACTION)
+				.build();
+	}
+
+	/**
+	 * Gets a failed token capture matcher.
+	 *
+	 * @return the failed token capture
+	 */
+	public static OrderPaymentMatcher createFailedTokenAuthorization() {
+		return OrderPaymentMatcher.builder()
+				.withStatus(OrderPaymentStatus.FAILED)
+				.withType(PaymentType.PAYMENT_TOKEN)
 				.withTransaction(OrderPayment.AUTHORIZATION_TRANSACTION)
 				.build();
 	}

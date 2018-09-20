@@ -33,7 +33,7 @@ set WEBAPPS_DIRECTORY=%CURRENT_DIRECTORY%webapps
 set TOMCAT_HOME=%WEBAPPS_DIRECTORY%\apache-tomcat
 set CATALINA_HOME=%TOMCAT_HOME%
 
-set CATALINA_OPTS=-Dcom.sun.management.jmxremote=true -Xmx1536m -XX:MaxPermSize=512m -Dsun.lang.ClassLoader.allowArraySyntax=true -XX:CompileCommand=exclude,org/apache/velocity/runtime/directive/Foreach,render -Dfile.encoding=UTF-8 -Dapple.awt.UIElement=true -Djava.awt.headless=true
+set CATALINA_OPTS=-Dcom.sun.management.jmxremote=true -Xmx1536m -Dsun.lang.ClassLoader.allowArraySyntax=true -XX:CompileCommand=exclude,org/apache/velocity/runtime/directive/Foreach,render -Dfile.encoding=UTF-8 -Dapple.awt.UIElement=true -Djava.awt.headless=true
 
 for /d %%W in ("%WEBAPPS_DIRECTORY%\*-webapp-base") do (
 	echo Stopping "%%W" ...

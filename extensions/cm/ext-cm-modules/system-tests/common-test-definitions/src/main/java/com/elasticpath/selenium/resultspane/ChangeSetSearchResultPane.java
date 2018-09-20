@@ -9,6 +9,7 @@ import com.elasticpath.selenium.common.AbstractPageObject;
 import com.elasticpath.selenium.dialogs.ConfirmDialog;
 import com.elasticpath.selenium.dialogs.CreateChangeSetDialog;
 import com.elasticpath.selenium.editor.ChangeSetEditor;
+import com.elasticpath.selenium.util.Constants;
 
 /**
  * Change Set Search Results Pane.
@@ -21,6 +22,8 @@ public class ChangeSetSearchResultPane extends AbstractPageObject {
 	private static final String CHANGE_SET_SEARCH_RESULT_COLUMN_CSS = CHANGE_SET_SEARCH_RESULT_PARENT + "div[column-id='%s']";
 	private static final String CHANGE_SET_SEARCH_RESULT_ROW_CSS = CHANGE_SET_SEARCH_RESULT_PARENT + "div[row-id='%s'] ";
 	private static final String LOCK_BUTTON_CSS = "div[widget-id='Lock']";
+	private static final String UNLOCK_BUTTON_CSS = "div[widget-id='Unlock']";
+	private static final String PUBLISH_BUTTON_CSS = "div[widget-id='Publish']";
 	private static final String FINALIZE_BUTTON_CSS = "div[widget-id='Finalize']";
 	private static final String NAME_COLUMN_NAME = "Name";
 	private static final int CREATE_CHANGESET_TOOLBAR_WAIT = 3;
@@ -47,7 +50,7 @@ public class ChangeSetSearchResultPane extends AbstractPageObject {
 		 * not clickable intermittently.
 		 */
 		getWaitDriver().waitFor(CREATE_CHANGESET_TOOLBAR_WAIT);
-		clickButton(CREATE_BUTTON_CSS, "Create");
+		clickButton(CREATE_BUTTON_CSS, "Create", CreateChangeSetDialog.CREATE_CHANGE_SET_PARENT_CSS);
 		return new CreateChangeSetDialog(getDriver());
 	}
 
@@ -55,15 +58,39 @@ public class ChangeSetSearchResultPane extends AbstractPageObject {
 	 * Clicks Lock button.
 	 */
 	public void clickLockButton() {
-		clickButton(LOCK_BUTTON_CSS, "Lock");
+		sleep(Constants.SLEEP_ONE_SECOND_IN_MILLIS);
+		if (isButtonEnabled(LOCK_BUTTON_CSS)) {
+			clickButton(LOCK_BUTTON_CSS, "Lock");
+		}
+	}
+
+	/**
+	 * Clicks Unlock button.
+	 */
+	public void clickUnlockButton() {
+		sleep(Constants.SLEEP_ONE_SECOND_IN_MILLIS);
+		if (isButtonEnabled(UNLOCK_BUTTON_CSS)) {
+			clickButton(UNLOCK_BUTTON_CSS, "Unlock");
+		}
+	}
+
+	/**
+	 * Clicks Publish button.
+	 */
+	public void clickPublishButton() {
+		clickButton(PUBLISH_BUTTON_CSS, "Publish");
+		new ConfirmDialog(getDriver()).clickOK();
+		waitTillElementDisappears(By.cssSelector("div[widget-id='OK'][seeable='true']"));
 	}
 
 	/**
 	 * Clicks Finalized button.
 	 */
 	public void clickFinalizedButton() {
+		getWaitDriver().waitForButtonToBeEnabled(FINALIZE_BUTTON_CSS);
 		clickButton(FINALIZE_BUTTON_CSS, "Finalize");
 		new ConfirmDialog(getDriver()).clickOK();
+		waitTillElementDisappears(By.cssSelector("div[widget-id='OK'][seeable='true']"));
 	}
 
 	/**
@@ -94,7 +121,7 @@ public class ChangeSetSearchResultPane extends AbstractPageObject {
 	 */
 	public ChangeSetEditor openChangeSetEditor(final String changeSetName) {
 		selectChangeSet(changeSetName);
-		doubleClick(getSelectedElement());
+		doubleClick(getSelectedElement(), ChangeSetEditor.getChangeSetTabId(changeSetName));
 		return new ChangeSetEditor(getDriver());
 	}
 

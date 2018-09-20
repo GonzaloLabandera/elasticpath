@@ -5,6 +5,7 @@ package com.elasticpath.cmclient.reporting.returnsandexchanges.service.impl;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -14,6 +15,7 @@ import java.util.Set;
 import org.apache.log4j.Logger;
 
 import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.util.DateTimeUtilFactory;
 import com.elasticpath.cmclient.reporting.returnsandexchanges.ReturnsAndExchangesPreparedStatementBuilder;
 import com.elasticpath.cmclient.reporting.returnsandexchanges.ReturnsAndExchangesReportMessages;
 import com.elasticpath.cmclient.reporting.returnsandexchanges.impl.ReturnsAndExchangesPreparedStatementBuilderImpl;
@@ -170,13 +172,13 @@ public class ReturnsAndExchangesReportServiceImpl {
 		reportRow[RETURN_STATUS_INDEX] = ReturnsAndExchangesReportMessages.get().getLocalizedName(orderReturn.getReturnStatus());
 		reportRow[RETURN_CODE_INDEX] = orderReturn.getRmaCode();
 		reportRow[ORDER_NUMBER_INDEX] = order.getOrderNumber();
-		reportRow[RETURN_DATE_INDEX] = orderReturn.getCreatedDate();
+		reportRow[RETURN_DATE_INDEX] = formatDateTime(orderReturn.getCreatedDate());
 		reportRow[RETURN_AMOUNT_INDEX] = BigDecimal.ZERO;
 		reportRow[RETURN_TAX_INDEX] = (taxRow == null ? BigDecimal.ZERO : taxRow[DB_TAX_AMOUNT_INDEX]);
 		reportRow[RETURN_SHIPPING_INDEX] = orderReturn.getShippingCost().negate();
 		reportRow[RETURN_REASON_INDEX] = "";
 		reportRow[CREATED_BY_INDEX] = (cmUser == null ? "" : (cmUser.getFirstName() + " " + cmUser.getLastName()));
-		reportRow[ORDER_CREATED_DATE_INDEX] = order.getCreatedDate();
+		reportRow[ORDER_CREATED_DATE_INDEX] = formatDateTime(order.getCreatedDate());
 		reportRow[ORDER_TOTAL_INDEX] = order.getTotal();
 		reportRow[ORDER_STATUS_INDEX] = order.getStatus();
 		reportRow[CUSTOMER_UID] = Long.toString(customer.getUidPk());
@@ -198,6 +200,10 @@ public class ReturnsAndExchangesReportServiceImpl {
 				break;
 		}
 		return reportRow;
+	}
+
+	private String formatDateTime(final Date createdDate) {
+		return DateTimeUtilFactory.getDateUtil().formatAsDateTime(createdDate);
 	}
 
 	private ReportService getReportService() {

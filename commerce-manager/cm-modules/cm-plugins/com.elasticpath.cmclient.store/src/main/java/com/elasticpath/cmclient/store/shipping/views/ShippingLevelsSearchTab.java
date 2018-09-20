@@ -14,20 +14,19 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.PartInitException;
 
 import com.elasticpath.cmclient.core.ServiceLocator;
-import com.elasticpath.cmclient.core.search.SafeSearchCodes;
-import com.elasticpath.cmclient.core.search.impl.SafeSearchCodesImpl;
 import com.elasticpath.cmclient.core.service.AuthorizationService;
 import com.elasticpath.cmclient.core.ui.framework.EpControlFactory.EpState;
 import com.elasticpath.cmclient.core.ui.framework.EpSortingCompositeControl;
 import com.elasticpath.cmclient.core.ui.framework.IEpLayoutComposite;
 import com.elasticpath.cmclient.core.ui.framework.IEpLayoutData;
 import com.elasticpath.cmclient.core.ui.framework.IEpTabFolder;
-import com.elasticpath.cmclient.store.views.IStoreMarketingInnerTab;
 import com.elasticpath.cmclient.store.shipping.ShippingImageRegistry;
 import com.elasticpath.cmclient.store.shipping.ShippingLevelsMessages;
 import com.elasticpath.cmclient.store.shipping.helpers.ShippingLevelSearchRequestJob;
+import com.elasticpath.cmclient.store.views.IStoreMarketingInnerTab;
 import com.elasticpath.cmclient.store.views.SearchView;
 import com.elasticpath.commons.constants.ContextIdNames;
+import com.elasticpath.commons.constants.EpShippingContextIdNames;
 import com.elasticpath.domain.shipping.ShippingRegion;
 import com.elasticpath.domain.store.Store;
 import com.elasticpath.service.search.query.ShippingServiceLevelSearchCriteria;
@@ -54,7 +53,7 @@ public class ShippingLevelsSearchTab implements SelectionListener, IStoreMarketi
 	private List<Store> stores;
 
 	private CCombo stateCombo;
-	
+
 	private ShippingServiceLevelSearchCriteria searchCriteria;
 
 	private final SearchView searchView;
@@ -127,7 +126,7 @@ public class ShippingLevelsSearchTab implements SelectionListener, IStoreMarketi
 	private void populateControls() {
 		shippingRegionCombo.add(ShippingLevelsMessages.get().ShippingLevelsAllShippingRegionsComboboxItem, INDEX_ALL);
 		ShippingRegionService shippingRegionService = ServiceLocator.getService(
-				ContextIdNames.SHIPPING_REGION_SERVICE);
+				EpShippingContextIdNames.SHIPPING_REGION_SERVICE);
 		shippingRegions = shippingRegionService.list();
 		for (ShippingRegion shippingRegion : shippingRegions) {
 			shippingRegionCombo.setData(shippingRegion.getName(), shippingRegion);
@@ -213,15 +212,10 @@ public class ShippingLevelsSearchTab implements SelectionListener, IStoreMarketi
 		// Set search criteria
 		searchCriteria.setActiveFlag((Boolean) stateCombo.getData(stateCombo.getText()));
 
-		SafeSearchCodes storeNames = new SafeSearchCodesImpl();
-		if (storeCombo.getSelectionIndex() == INDEX_ALL) {
-			storeNames.extractAndAdd(stores, "name");  //$NON-NLS-1$
-		} else {
-			Store selectedStore = (Store) storeCombo.getData(storeCombo.getText());
-			storeNames.extractAndAdd(selectedStore, "name");  //$NON-NLS-1$
+		if (storeCombo.getSelectionIndex() != INDEX_ALL) {
+			searchCriteria.setStoreExact(storeCombo.getText());
 		}
-		searchCriteria.setStoreExactNames(storeNames.asSet());
-		
+
 		if (shippingRegionCombo.getSelectionIndex() != INDEX_ALL) {
 			searchCriteria.setRegionExact(((ShippingRegion) shippingRegionCombo.getData(shippingRegionCombo.getText())).getName());
 		}

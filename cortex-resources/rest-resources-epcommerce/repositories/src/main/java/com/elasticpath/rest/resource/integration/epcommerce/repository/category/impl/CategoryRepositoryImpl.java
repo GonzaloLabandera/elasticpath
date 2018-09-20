@@ -85,7 +85,7 @@ public class CategoryRepositoryImpl implements CategoryRepository {
 	}
 
 	@Override
-	public Single<Category> findByGuid(final String storeCode, final String categoryCode) {
+	public Single<Category> findByStoreAndCategoryCode(final String storeCode, final String categoryCode) {
 		return storeRepository.findStoreAsSingle(storeCode)
 				.map(Store::getCatalog)
 				.flatMap(catalog -> getByCategoryAndCatalogCode(categoryCode, catalog));
@@ -102,14 +102,22 @@ public class CategoryRepositoryImpl implements CategoryRepository {
 	public Observable<Category> findChildren(final String storeCode, final String parentCategoryCode) {
 		Comparator<Category> comparator = coreBeanFactory.getBean(ContextIdNames.ORDERING_COMPARATOR);
 
-		return findByGuid(storeCode, parentCategoryCode)
+		return findByStoreAndCategoryCode(storeCode, parentCategoryCode)
 				.flatMap(this::getChildren)
 				.flatMapObservable(Observable::fromIterable)
 				.sorted(comparator);
+	}
+
+	@Override
+	@CacheResult
+	public Single<Category> findByGuid(final String categoryGuid) {
+		return reactiveAdapter.fromServiceAsSingle(() -> categoryLookup.findByGuid(categoryGuid), NAVIGATION_NODE_WAS_NOT_FOUND);
 	}
 
 	@CacheResult
 	private Single<List<Category>> getChildren(final Category parent) {
 		return reactiveAdapter.fromServiceAsSingle(() -> categoryLookup.findChildren(parent));
 	}
+
+
 }

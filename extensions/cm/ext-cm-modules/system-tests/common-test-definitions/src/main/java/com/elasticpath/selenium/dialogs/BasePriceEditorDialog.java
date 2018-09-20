@@ -8,7 +8,10 @@ import org.openqa.selenium.WebDriver;
  */
 public class BasePriceEditorDialog extends AbstractDialog {
 
-	private static final String PARENT_BASE_PRICE_EDITOR_CSS = "div[widget-id='Price Editor'][widget-type='Shell'] ";
+	/**
+	 * CSS selector used to identify the dialog.
+	 */
+	public static final String PARENT_BASE_PRICE_EDITOR_CSS = "div[widget-id='Price Editor'][widget-type='Shell'] ";
 	private static final String INPUT_CSS = PARENT_BASE_PRICE_EDITOR_CSS + "div[widget-id='List Price'] > input";
 	private static final String OK_BUTTON_CSS = PARENT_BASE_PRICE_EDITOR_CSS + "div[widget-id='OK']";
 

@@ -43,12 +43,12 @@ Feature: Tests order resource
     And I add item with code <SHIPPABLE_ITEM> to my cart
     When I retrieve the order
     Then there are advisor messages with the following fields:
-      | messageType | messageId             | debugMessage                                                             | linkedTo                             |
-      | needinfo    | need.billing.address  | A billing address must be provided before you can complete the purchase. | orders.billingaddress-info           |
-      | needinfo    | need.email            | An email address must be provided before you can complete the purchase.  | orders.email-info                    |
-      | needinfo    | need.payment.method   | A payment method must be provided before you can complete the purchase.  | paymentmethods.paymentmethod-info    |
-      | needinfo    | need.shipment.details | Shipment details must be provided before you can complete the purchase.  | shipmentdetails.destination-info     |
-      | needinfo    | need.shipment.details | Shipment details must be provided before you can complete the purchase.  | shipmentdetails.shipping-option-info |
+      | messageType | messageId             | debugMessage                              | linkedTo                             |
+      | needinfo    | need.billing.address  | Billing address must be specified.        | orders.billingaddress-info           |
+      | needinfo    | need.shipping.address | Shipping address must be specified.       | shipmentdetails.destination-info     |
+      | needinfo    | need.email            | Customer email address must be specified. | orders.email-info                    |
+      | needinfo    | need.payment.method   | Payment method must be specified.         | paymentmethods.paymentmethod-info    |
+      | needinfo    | need.shipping.option  | Shipping option must be specified.           | shipmentdetails.shipping-option-info |
   #fill in needinfo's and verify links are removed
     When I create a payment method for my order
     And I add an address with country CA and region BC
@@ -73,12 +73,12 @@ Feature: Tests order resource
     And I fill in payment methods needinfo
     When I retrieve the order
     Then there is an advisor message with the following fields:
-      | messageType | messageId             | debugMessage                                                            | linkedTo                             |
-      | needinfo    | need.shipment.details | Shipment details must be provided before you can complete the purchase. | shipmentdetails.shipping-option-info |
+      | messageType | messageId            | debugMessage                    | linkedTo                             |
+      | needinfo    | need.shipping.option | Shipping option must be specified. | shipmentdetails.shipping-option-info |
     And I retrieve the purchase form
     And there is an advisor message with the following fields:
-      | messageType | messageId             | debugMessage                                                            | linkedTo                             |
-      | needinfo    | need.shipment.details | Shipment details must be provided before you can complete the purchase. | shipmentdetails.shipping-option-info |
+      | messageType | messageId            | debugMessage                    | linkedTo                             |
+      | needinfo    | need.shipping.option | Shipping option must be specified. | shipmentdetails.shipping-option-info |
     And there are no submitorderaction links
 #fill in needinfo's and verify links are removed
     When I add an address with country CA and region BC

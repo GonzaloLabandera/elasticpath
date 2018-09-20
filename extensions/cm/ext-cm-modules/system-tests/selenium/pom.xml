@@ -6,9 +6,8 @@
 
 	<parent>
 		<groupId>com.elasticpath.extensions.cm</groupId>
-		<artifactId>ext-cm-modules</artifactId>
+		<artifactId>ep-cm-selenium-test-parent</artifactId>
 		<version>0.0.0-SNAPSHOT</version>
-		<relativePath>../../</relativePath>
 	</parent>
 
 	<artifactId>ep-cm-selenium-test</artifactId>
@@ -17,26 +16,39 @@
 	<name>Extension CM Selenium Cucumber Tests</name>
 
 	<properties>
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<!-- auth types: OAuth2 or headerAuth -->
 		<ep.rest.authtype>OAuth2</ep.rest.authtype>
 		<ep.cm.host>localhost</ep.cm.host>
+		<ep.publish.cm.host>localhost</ep.publish.cm.host>
 		<selenium.session.baseurl>http://${ep.cm.host}:${ep.cm.port.http}${ep.cm.context}</selenium.session.baseurl>
+		<selenium.session.publish.baseurl>http://${ep.publish.cm.host}:${ep.cm.port.http}${ep.cm.context}</selenium.session.publish.baseurl>
 		<selenium.take.screenshot>true</selenium.take.screenshot>
-		<change_set_enabled>true</change_set_enabled>
-		<change_set_name>smoketest</change_set_name>
-		<admin_id>admin</admin_id>
-		<cm_password>111111</cm_password>
-		<csr_id>csruser</csr_id>
-		<csr_password>111111</csr_password>
+		<admin.id>admin</admin.id>
+		<cm.password>111111</cm.password>
+		<csr.id>csruser</csr.id>
+		<csr.password>111111</csr.password>
 		<remote.web.driver.url>http://10.10.2.113:4444/wd/hub</remote.web.driver.url>
 		<failsafe.fork.count>1</failsafe.fork.count>
 		<selenium.waitdriver.timeout>30</selenium.waitdriver.timeout>
 		<cortex.server.host>localhost</cortex.server.host>
 		<ep.cortex.url>http://${cortex.server.host}:${ep.cortex.port.http}${ep.cortex.contextUrl}</ep.cortex.url>
+		<ep.dateTimeFormat>MMM d, yyyy h:mm a</ep.dateTimeFormat>
+		<ep.dateFormat>MMM d, yyyy</ep.dateFormat>
+
+		<!-- data sync tool properties -->
+		<db.driver>${epdb.jdbc.driver}</db.driver>
+		<ext.sync.cli>ext-sync-cli-</ext.sync.cli>
+		<cli.version>${project.version}</cli.version>
+		<source.url>${epdb.url}</source.url>
+		<source.login>${epdb.username}</source.login>
+		<source.pwd>${epdb.password}</source.pwd>
+		<source.driver>${db.driver}</source.driver>
+		<target.url>jdbc:mysql://localhost:3306/ElasticPathDB?characterEncoding=UTF-8</target.url>
+		<target.login>${epdb.username}</target.login>
+		<target.pwd>${epdb.password}</target.pwd>
+		<target.driver>${db.driver}</target.driver>
 
 		<!-- Dependency versions -->
-		<info.cukes.version>1.2.5</info.cukes.version>
 		<selenium.version>3.4.0</selenium.version>
 
 	</properties>
@@ -47,8 +59,13 @@
 			<groupId>com.elasticpath.extensions.cm</groupId>
 			<artifactId>ep-cm-common-test-definitions</artifactId>
 			<version>${project.version}</version>
+			<exclusions>
+				<exclusion>
+					<groupId>com.elasticpath.cmclient</groupId>
+					<artifactId>cm-p2-repository</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
-
 		<dependency>
 			<groupId>org.seleniumhq.selenium</groupId>
 			<artifactId>selenium-java</artifactId>
@@ -56,33 +73,30 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>info.cukes</groupId>
+			<groupId>io.cucumber</groupId>
 			<artifactId>cucumber-picocontainer</artifactId>
-			<version>${info.cukes.version}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>info.cukes</groupId>
+			<groupId>io.cucumber</groupId>
 			<artifactId>cucumber-junit</artifactId>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>info.cukes</groupId>
+			<groupId>io.cucumber</groupId>
 			<artifactId>cucumber-core</artifactId>
-			<version>${info.cukes.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>info.cukes</groupId>
+			<groupId>io.cucumber</groupId>
 			<artifactId>cucumber-java</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>io.cucumber</groupId>
+			<artifactId>gherkin</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>info.cukes</groupId>
-			<artifactId>gherkin</artifactId>
-			<version>2.12.2</version>
 		</dependency>
 		<dependency>
 			<groupId>com.google.guava</groupId>
@@ -92,7 +106,12 @@
 		<dependency>
 			<groupId>org.codehaus.groovy</groupId>
 			<artifactId>groovy-all</artifactId>
-			<version>2.4.5</version>
+			<version>2.4.15</version>
+		</dependency>
+		<dependency>
+			<groupId>mysql</groupId>
+			<artifactId>mysql-connector-java</artifactId>
+			<version>5.1.6</version>
 		</dependency>
 	</dependencies>
 
@@ -166,6 +185,34 @@
 					</execution>
 				</executions>
 			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-dependency-plugin</artifactId>
+				<version>3.0.1</version>
+				<executions>
+					<execution>
+						<id>unpack</id>
+						<phase>process-classes</phase>
+						<goals>
+							<goal>unpack</goal>
+						</goals>
+						<configuration>
+							<artifactItems>
+								<artifactItem>
+									<groupId>com.elasticpath.extensions</groupId>
+									<artifactId>ext-sync-cli</artifactId>
+									<version>${cli.version}</version>
+									<classifier>bin</classifier>
+									<type>zip</type>
+									<overWrite>true</overWrite>
+									<outputDirectory>${project.build.directory}/test-classes/</outputDirectory>
+								</artifactItem>
+							</artifactItems>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+
 		</plugins>
 	</build>
 

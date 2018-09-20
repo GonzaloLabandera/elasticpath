@@ -16,9 +16,7 @@ import org.junit.Test;
 
 import com.elasticpath.service.customer.AnonymousCustomerCleanupService;
 import com.elasticpath.service.misc.TimeService;
-import com.elasticpath.settings.SettingsReader;
-import com.elasticpath.settings.domain.SettingValue;
-import com.elasticpath.settings.domain.impl.SettingValueImpl;
+import com.elasticpath.settings.test.support.SimpleSettingValueProvider;
 
 
 /**
@@ -26,8 +24,6 @@ import com.elasticpath.settings.domain.impl.SettingValueImpl;
  */
 public class AnonymousCustomerCleanupJobTest {
 
-	private static final String ANONYMOUS_CUSTOMER_MAX_HISTORY = "COMMERCE/SYSTEM/ANONYMOUSCUSTOMERCLEANUP/maxHistory";
-	private static final String ANONYMOUS_CUSTOMER_BATCH_SIZE = "COMMERCE/SYSTEM/ANONYMOUSCUSTOMERCLEANUP/batchSize";
 	private static final int EXPIRY_DAYS = 5;
 	private static final int BATCH_SIZE = 10;
 	private static final int REMOVED_CUSTOMERS = BATCH_SIZE;
@@ -37,7 +33,6 @@ public class AnonymousCustomerCleanupJobTest {
 
 	private AnonymousCustomerCleanupJob anonymousCustomerCleanupJob;
 	private AnonymousCustomerCleanupService anonymousCustomerCleanupService;
-	private SettingsReader settingsReader;
 	private TimeService timeService;
 
 	/**
@@ -46,11 +41,9 @@ public class AnonymousCustomerCleanupJobTest {
 	@Before
 	public void initializeMocksAndObjectUnderTest() {
 		anonymousCustomerCleanupService = context.mock(AnonymousCustomerCleanupService.class);
-		settingsReader = context.mock(SettingsReader.class);
 		timeService = context.mock(TimeService.class);
 		anonymousCustomerCleanupJob = new AnonymousCustomerCleanupJob();
 		anonymousCustomerCleanupJob.setAnonymousCustomerCleanupService(anonymousCustomerCleanupService);
-		anonymousCustomerCleanupJob.setSettingsReader(settingsReader);
 		anonymousCustomerCleanupJob.setTimeService(timeService);
 	}
 
@@ -77,9 +70,8 @@ public class AnonymousCustomerCleanupJobTest {
 	public void verifyRemovalDateCalculation() {
 		Date now = new Date();
 		Date expiredDate = DateUtils.addDays(now, -EXPIRY_DAYS);
-		SettingValue expirySettingValue = createSettingValue(EXPIRY_DAYS);
 
-		shouldGetSettingValue(ANONYMOUS_CUSTOMER_MAX_HISTORY, expirySettingValue);
+		shouldGetMaxHistoryOf(EXPIRY_DAYS);
 		shouldGetCurrentTime(now);
 
 		Date result = anonymousCustomerCleanupJob.getCandidateRemovalDate();
@@ -91,22 +83,17 @@ public class AnonymousCustomerCleanupJobTest {
 	 */
 	@Test
 	public void verifyBatchSize() {
-		SettingValue batchSettingValue = createSettingValue(BATCH_SIZE);
-
-		shouldGetSettingValue(ANONYMOUS_CUSTOMER_BATCH_SIZE, batchSettingValue);
-
+		shouldGetBatchSizeOf(BATCH_SIZE);
 		int result = anonymousCustomerCleanupJob.getBatchSize();
 		assertEquals("The resulting value should be as expected.", BATCH_SIZE, result);
 	}
 
 	private void shouldGetBatchSizeOf(final int batchSize) {
-		SettingValue batchSettingValue = createSettingValue(batchSize);
-		shouldGetSettingValue(ANONYMOUS_CUSTOMER_BATCH_SIZE, batchSettingValue);
+		anonymousCustomerCleanupJob.setBatchSizeProvider(new SimpleSettingValueProvider<>(batchSize));
 	}
 
 	private void shouldGetMaxHistoryOf(final int expiryDays) {
-		SettingValue expirySettingValue = createSettingValue(expiryDays);
-		shouldGetSettingValue(ANONYMOUS_CUSTOMER_MAX_HISTORY, expirySettingValue);
+		anonymousCustomerCleanupJob.setMaxDaysHistoryProvider(new SimpleSettingValueProvider<>(expiryDays));
 	}
 
 	private void shouldDeleteAnonymousCustomers(final Date expiredDate, final int batchSize, final int result) {
@@ -127,18 +114,4 @@ public class AnonymousCustomerCleanupJobTest {
 		});
 	}
 
-	private void shouldGetSettingValue(final String path, final SettingValue settingValue) {
-		context.checking(new Expectations() {
-			{
-				oneOf(settingsReader).getSettingValue(path);
-				will(returnValue(settingValue));
-			}
-		});
-	}
-
-	private SettingValue createSettingValue(final int value) {
-		SettingValue result = new SettingValueImpl();
-		result.setIntegerValue(value);
-		return result;
-	}
 }

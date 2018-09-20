@@ -19,7 +19,6 @@ import cucumber.api.java.en.Then;
 import org.apache.velocity.tools.generic.DateTool;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.test.context.ContextConfiguration;
 
 import com.elasticpath.domain.catalog.ProductSku;
 import com.elasticpath.domain.customer.Address;
@@ -35,7 +34,6 @@ import com.elasticpath.uat.ScenarioContextValueHolder;
 /**
  * Step Definitions for order email functionality.
  */
-@ContextConfiguration("classpath:cucumber.xml")
 public class OrderEmailStepDefinitions {
 
 	@Autowired
@@ -135,10 +133,10 @@ public class OrderEmailStepDefinitions {
 
 			final PhysicalOrderShipment physicalOrderShipment = (PhysicalOrderShipment) orderShipment;
 
-			assertThat("The physical order shipment confirmation email contents should include the order shipment number",
-					   emailContents, containsString(physicalOrderShipment.getCarrier()));
-			assertThat("The physical order shipment confirmation email contents should include the order shipment number",
-					   emailContents, containsString(physicalOrderShipment.getServiceLevel()));
+			assertThat("The physical order shipment confirmation email contents should include the order shipment carier code",
+					   emailContents, containsString(physicalOrderShipment.getCarrierCode()));
+			assertThat("The physical order shipment confirmation email contents should include the order shipment option name",
+					   emailContents, containsString(physicalOrderShipment.getShippingOptionName()));
 		}
 	}
 

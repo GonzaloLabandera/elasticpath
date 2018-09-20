@@ -10,7 +10,7 @@
 	<changeSet id="ext-importexport-test-data${importexport.test-data.qualifier}" author="com.elasticpath.extensions" context="test-data">
 		<comment>Import of the test data</comment>
 
-		<customChange class="com.elasticpath.repo.datapopulation.importexport.ImportExportChange">
+		<customChange class="com.elasticpath.datapopulation.importexport.ImportExportChange">
 			<param name="dataSet" value="test-data" />
 		</customChange>
 	</changeSet>

@@ -17,6 +17,7 @@ import com.elasticpath.settings.dao.SettingsDao;
 import com.elasticpath.settings.domain.SettingDefinition;
 import com.elasticpath.settings.domain.SettingValue;
 import com.elasticpath.settings.domain.impl.SettingDefinitionImpl;
+import com.elasticpath.settings.domain.impl.SettingValueImpl;
 import com.elasticpath.settings.impl.SettingValueFactoryWithDefinitionImpl;
 
 /**
@@ -342,7 +343,19 @@ public class SettingsDaoImplTest extends BasicSpringContextTest {
 		def.setValueType(VALUETYPE);
 		def.setDefaultValue(DEFAULTVALUE);
 		settingsDao.updateSettingDefinition(def);
-		
+
+		final SettingValueImpl settingValue1 = new SettingValueImpl();
+		settingValue1.setSettingDefinition(def);
+		settingValue1.setContext(CONTEXT);
+		settingValue1.setValue("test");
+		settingsDao.updateSettingValue(settingValue1);
+
+		final SettingValueImpl settingValue2 = new SettingValueImpl();
+		settingValue2.setSettingDefinition(def);
+		settingValue2.setContext(CONTEXT2);
+		settingValue2.setValue("test");
+		settingsDao.updateSettingValue(settingValue2);
+
 		//Make sure that you can pull out the SettingDefinition from the database with
 		//the proper attributes, then delete the SettingDefinition and make sure you are
 		//no longer able to pull out the SettingDefinition from the database after that
@@ -351,7 +364,7 @@ public class SettingsDaoImplTest extends BasicSpringContextTest {
 		assertEquals(returnedDef.getPath(), PATH);
 		assertEquals(returnedDef.getDefaultValue(), DEFAULTVALUE);
 		assertEquals(returnedDef.getValueType(), VALUETYPE);
-		settingsDao.deleteSettingDefinition(def);
+		settingsDao.deleteSettingDefinition(returnedDef);
 		def = settingsDao.findSettingDefinition(PATH);
 		assertNull(def);
 	}

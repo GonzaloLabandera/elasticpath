@@ -8,7 +8,7 @@ import static java.util.Arrays.asList;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
@@ -27,9 +27,9 @@ import org.junit.runner.RunWith;
 import org.mockito.Answers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
-import com.elasticpath.common.dto.StructuredErrorMessage;
+import com.elasticpath.base.common.dto.StructuredErrorMessage;
 import com.elasticpath.commons.beanframework.BeanFactory;
 import com.elasticpath.commons.exception.UserIdExistException;
 import com.elasticpath.domain.customer.Customer;
@@ -251,7 +251,6 @@ public class CustomerRepositoryImplTest {
 	@Test
 	public void testAddUnauthenticatedUser() {
 		when(mockCustomerService.addByAuthenticate(mockCustomer, false)).thenReturn(mockCustomer);
-		when(mockCustomer.getGuid()).thenReturn(CUSTOMER_GUID);
 
 		customerRepository.addUnauthenticatedUser(mockCustomer);
 

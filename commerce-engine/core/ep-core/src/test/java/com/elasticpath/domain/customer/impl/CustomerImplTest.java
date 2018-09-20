@@ -32,10 +32,8 @@ import com.elasticpath.commons.beanframework.BeanFactory;
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.customer.Customer;
 import com.elasticpath.domain.customer.CustomerAddress;
-import com.elasticpath.domain.customer.CustomerCreditCard;
 import com.elasticpath.domain.customer.CustomerGroup;
 import com.elasticpath.domain.misc.impl.RandomGuidImpl;
-import com.elasticpath.plugin.payment.dto.PaymentMethod;
 import com.elasticpath.service.customer.CustomerService;
 import com.elasticpath.service.security.SaltFactory;
 import com.elasticpath.settings.impl.SettingsServiceImpl;
@@ -50,15 +48,11 @@ public class CustomerImplTest {
 	private static final int INVALID_STATUS = 5;
 	private static final String PUBLIC = "PUBLIC";
 	private static final String REGISTERED = "REGISTERED";
-	private static final String DEFAULT_PAYMENT_METHOD_INCORRECT =
-			"The default payment method should be the preferred credit card set";
 
 	private CustomerImpl customerImpl;
-	private CustomerGroupImpl customerGroupImpl;
 
 	@Rule
 	public final JUnitRuleMockery context = new JUnitRuleMockery();
-	private BeanFactory beanFactory;
 	private BeanFactoryExpectationsFactory beanExpectations;
 
 	private PasswordEncoder passwordEncoder;
@@ -68,7 +62,7 @@ public class CustomerImplTest {
 	 */
 	@Before
 	public void setUp()  {
-		beanFactory = context.mock(BeanFactory.class);
+		BeanFactory beanFactory = context.mock(BeanFactory.class);
 		beanExpectations = new BeanFactoryExpectationsFactory(context, beanFactory);
 		beanExpectations.allowingBeanFactoryGetBean(ContextIdNames.CUSTOMER_AUTHENTICATION, CustomerAuthenticationImpl.class);
 		beanExpectations.allowingBeanFactoryGetBean(ContextIdNames.RANDOM_GUID, RandomGuidImpl.class);
@@ -78,7 +72,7 @@ public class CustomerImplTest {
 
 		customerImpl = CustomerBuilder.newCustomer().build();
 
-		customerGroupImpl = new CustomerGroupImpl();
+		CustomerGroupImpl customerGroupImpl = new CustomerGroupImpl();
 		customerGroupImpl.initialize();
 		final long uidPk = 100000L;
 		customerGroupImpl.setUidPk(uidPk);
@@ -156,8 +150,7 @@ public class CustomerImplTest {
 		beanExpectations.allowingBeanFactoryGetBean("settingsService", SettingsServiceImpl.class);
 
 		final String[] testData = new String[] { "aaaa@aaa.aaa", "", null };
-		for (int i = 0; i < testData.length; i++) {
-			final String email = testData[i];
+		for (final String email : testData) {
 			customerImpl.setEmail(email);
 			assertSame("Check set email", email, customerImpl.getEmail());
 		}
@@ -236,8 +229,7 @@ public class CustomerImplTest {
 	@Test
 	public void testSetFirstName() {
 		final String[] testData = new String[] { "aaaaa", "", null };
-		for (int i = 0; i < testData.length; i++) {
-			final String firstName = testData[i];
+		for (final String firstName : testData) {
 			customerImpl.setFirstName(firstName);
 			assertSame(firstName, customerImpl.getFirstName());
 		}
@@ -257,8 +249,7 @@ public class CustomerImplTest {
 	@Test
 	public void testSetLastName() {
 		final String[] testData = new String[] { "aaaaaa", "", null };
-		for (int i = 0; i < testData.length; i++) {
-			final String lastName = testData[i];
+		for (final String lastName : testData) {
 			customerImpl.setLastName(lastName);
 			assertSame(lastName, customerImpl.getLastName());
 		}
@@ -524,144 +515,6 @@ public class CustomerImplTest {
 	}
 
 	/**
-	 * Test get credit card by GUID; happy path.
-	 */
-	@Test
-	public void testGetCreditCardByGuid() {
-		CustomerCreditCard visaCreditCard = createVisaCard();
-		CustomerCreditCard amexCreditCard = createAmexCard();
-
-		List<CustomerCreditCard> creditCards = new ArrayList<>(2);
-		creditCards.add(visaCreditCard);
-		creditCards.add(amexCreditCard);
-
-		customerImpl.setCreditCards(creditCards);
-
-		CustomerCreditCard retrievedCreditCard = customerImpl.getCreditCardByGuid(visaCreditCard.getGuid());
-
-		assertEquals(visaCreditCard, retrievedCreditCard);
-	}
-
-	@Test(expected = NullPointerException.class)
-	public void testSetCreditCardsWithNullThrowsException() {
-		customerImpl.setCreditCards(null);
-	}
-
-	/**
-	 * Test set credit cards with empty list removes all cards.
-	 */
-	@Test
-	public void testSetCreditCardsWithEmptyListRemovesAllCards() {
-		CustomerCreditCard visaCreditCard = createVisaCard();
-		CustomerCreditCard amexCreditCard = createAmexCard();
-
-		List<CustomerCreditCard> creditCards = new ArrayList<>(2);
-		creditCards.add(visaCreditCard);
-		creditCards.add(amexCreditCard);
-
-		customerImpl.setCreditCards(creditCards);
-		assertEquals(2, customerImpl.getCreditCards().size());
-		customerImpl.setCreditCards(new ArrayList<>());
-		assertEquals(0, customerImpl.getCreditCards().size());
-	}
-
-	/**
-	 * Test get credit card by GUID where the credit card with the given GUID does not exist.
-	 */
-	@Test
-	public void testGetCreditCardByInvalidGuid() {
-		CustomerCreditCard visaCreditCard = createVisaCard();
-		CustomerCreditCard amexCreditCard = createAmexCard();
-
-		List<CustomerCreditCard> creditCards = new ArrayList<>(2);
-		creditCards.add(visaCreditCard);
-		creditCards.add(amexCreditCard);
-
-		customerImpl.setCreditCards(creditCards);
-
-		CustomerCreditCard retrievedCreditCard = customerImpl.getCreditCardByGuid("non.existent.credit.card.guid");
-
-		assertNull("There should not be a card found with the given GUID", retrievedCreditCard);
-	}
-
-	/**
-	 * Ensure get default credit card returns correct card.
-	 */
-	@Test
-	public void ensureGetDefaultCreditCardReturnsCorrectCard() {
-		CustomerCreditCard defaultCreditCard = createVisaCard();
-		CustomerCreditCard nonDefaultCreditCard = createAmexCard();
-
-		customerImpl.addCreditCard(defaultCreditCard);
-		customerImpl.addCreditCard(nonDefaultCreditCard);
-		customerImpl.setPreferredCreditCard(defaultCreditCard);
-
-		assertEquals(DEFAULT_PAYMENT_METHOD_INCORRECT, defaultCreditCard, customerImpl.getPreferredCreditCard());
-	}
-	
-	
-	/**
-	 * Ensure get default credit card returns card with default set.
-	 */
-	@Test
-	public void ensureGetDefaultCreditCardReturnsCardWithDefaultSet() {
-		CustomerCreditCard nonDefaultCard = createVisaCard();
-		CustomerCreditCard defaultCard = createAmexCard();
-
-		customerImpl.addCreditCard(nonDefaultCard);
-		customerImpl.setPreferredCreditCard(defaultCard);
-
-		assertEquals(DEFAULT_PAYMENT_METHOD_INCORRECT, defaultCard, customerImpl.getPreferredCreditCard());
-	}
-	
-	/**
-	 * Ensure get default credit card returns first card in list when none are default.
-	 */
-	@Test
-	public void ensureGetDefaultCreditCardReturnsFirstCardInListWhenNoneAreDefault() {
-		CustomerCreditCard defaultCreditCard = createVisaCard();
-		CustomerCreditCard nonDefaultCreditCard = createAmexCard();
-
-		customerImpl.addCreditCard(defaultCreditCard);
-		customerImpl.addCreditCard(nonDefaultCreditCard);
-
-		assertEquals(DEFAULT_PAYMENT_METHOD_INCORRECT, defaultCreditCard, customerImpl.getPreferredCreditCard());
-	}
-
-	@Test
-	public void ensureGetPreferredCreditCardGetsDefaultCreditCardPaymentMethodSet() {
-		CustomerCreditCard defaultCreditCard = createVisaCard();
-		customerImpl.setDefaultPaymentMethod(defaultCreditCard);
-
-		assertEquals(DEFAULT_PAYMENT_METHOD_INCORRECT, defaultCreditCard, customerImpl.getPreferredCreditCard());
-	}
-
-	@Test
-	public void ensureGetPreferredCreditCardReturnsNullWhenDefaultCreditCardPaymentMethodNotSet() {
-		customerImpl.setDefaultPaymentMethod(new PaymentMethod() { });
-
-		assertNull("The preferred credit card should be null given a credit card was not set as the default payment method",
-				customerImpl.getPreferredCreditCard());
-	}
-
-	@Test
-	public void ensureSetPreferredCreditCardSetsCreditCardAsDefaultPaymentMethod() {
-		CustomerCreditCard defaultCreditCard = createVisaCard();
-		customerImpl.setPreferredCreditCard(defaultCreditCard);
-
-		assertEquals(DEFAULT_PAYMENT_METHOD_INCORRECT, defaultCreditCard, customerImpl.getDefaultPaymentMethod());
-	}
-
-	@Test
-	public void ensureGetPreferredCreditCardReturnsCreditCardMarkedAsDefaultSetOnCustomer() {
-		CustomerCreditCard defaultCreditCard = createVisaCard();
-
-		customerImpl.setPreferredCreditCard(defaultCreditCard);
-
-		assertEquals(DEFAULT_PAYMENT_METHOD_INCORRECT, defaultCreditCard, customerImpl.getDefaultPaymentMethod());
-	}
-	
-	/**
 	 * Verify role mapper returns correct roles on customer.
 	 */
 	@Test
@@ -673,27 +526,5 @@ public class CustomerImplTest {
 
 		customerImpl.setAnonymous(false);
 		assertTrue("Customer should have role " + REGISTERED, roleMapper.hasRole(REGISTERED));
-	}
-
-	private CustomerCreditCard createVisaCard() {
-		CustomerCreditCard card = new CustomerCreditCardImpl();
-		card.setCardType("VISA");
-		card.setCardHolderName("TEST CARD");
-		card.setCardNumber("4111111111111111");
-		card.setExpiryYear("2100");
-		card.setExpiryMonth("12");
-		card.setGuid("visa.credit.card.guid");
-		return card;
-	}
-	
-	private CustomerCreditCard createAmexCard() {
-		CustomerCreditCard card = new CustomerCreditCardImpl();
-		card.setCardType("AMEX");
-		card.setCardHolderName("TEST CARD");
-		card.setCardNumber("379667775757981");
-		card.setExpiryYear("2099");
-		card.setExpiryMonth("12");
-		card.setGuid("amex.credit.card.guid");
-		return card;
 	}
 }

@@ -129,23 +129,27 @@ public class PriceListAssignmentPersister {
 		PriceListAssignment priceListAssignment = buildPriceListAssignment(
 				catalogGuid, priceListDescriptorGuid, name, description,
 				priority, isHidden);
-		
-		ConditionalExpression time = beanFactory.getBean(ContextIdNames.TAG_CONDITION);
-		time.setConditionString(timeCondition);
-		time.setName(time.getGuid());
-		time.setDescription(time.getGuid());
-		//time = tagConditionService.saveOrUpdate(time);
-		
-		ConditionalExpression shopper = beanFactory.getBean(ContextIdNames.TAG_CONDITION);
-		shopper.setConditionString(shopperCondition);
-		shopper.setName(shopper.getGuid());
-		shopper.setDescription(shopper.getGuid());
-		//shopper = tagConditionService.saveOrUpdate(shopper);
-		
-		
+
 		SellingContext sellingContext = beanFactory.getBean(ContextIdNames.SELLING_CONTEXT);
-		sellingContext.setCondition(TagDictionary.DICTIONARY_PLA_SHOPPER_GUID, shopper);
-		sellingContext.setCondition(TagDictionary.DICTIONARY_TIME_GUID, time);
+
+		if (StringUtils.isNotEmpty(timeCondition)) {
+			ConditionalExpression time = beanFactory.getBean(ContextIdNames.TAG_CONDITION);
+			time.setConditionString(timeCondition);
+			time.setName(time.getGuid());
+			time.setDescription(time.getGuid());
+			//time = tagConditionService.saveOrUpdate(time);
+			sellingContext.setCondition(TagDictionary.DICTIONARY_TIME_GUID, time);
+		}
+
+		if (StringUtils.isNotEmpty(shopperCondition)) {
+			ConditionalExpression shopper = beanFactory.getBean(ContextIdNames.TAG_CONDITION);
+			shopper.setConditionString(shopperCondition);
+			shopper.setName(shopper.getGuid());
+			shopper.setDescription(shopper.getGuid());
+			//shopper = tagConditionService.saveOrUpdate(shopper);
+			sellingContext.setCondition(TagDictionary.DICTIONARY_PLA_SHOPPER_GUID, shopper);
+		}
+
 		sellingContext.setName(sellingContext.getGuid());
 		sellingContext.setDescription(sellingContext.getGuid());
 		

@@ -16,6 +16,29 @@ import com.elasticpath.cortex.dce.SharedConstants
 this.metaClass.mixin(Hooks)
 this.metaClass.mixin(EN)
 
+/**
+ * Retrieve list of data policies.
+ * @return list
+ */
+def retrieveDataPolicyList() {
+	def actualDataPolicyList = []
+	client.body.links.findAll {
+		if (it.rel == "element") {
+			client.GET(it.uri)
+			actualDataPolicyList.add(client.body.'policy-name')
+		}
+	}
+	return actualDataPolicyList
+}
+
+Given(~'^the following data policies are assigned to data policy segment (.+)$') { String value, DataTable dataPolicyListTable ->
+	//	Non implementation Given statement.
+}
+
+Given(~'the following data policies with segment (.+) are in (?:Disabled|Draft) state$') { String segment, DataTable dataPolicyListTable ->
+	//	Non implementation Given statement.
+}
+
 When(~'^I access the data policies resource from root') { ->
 	client.GET("/")
 			.'data-policies'()
@@ -32,27 +55,17 @@ Then(~'^I can follow a link to data policies') { ->
 			.stopIfFailure()
 }
 
-Then(~'I should see a list of data policies with( at least | )(.*) data (?:policies|policy)$') { String atLeast, int numberOfPolicies ->
-	def count = 0
+Then(~'the following expected data policies are visible in my profile') { DataTable dataPolicyListTable ->
+	def dataPolicyList = dataPolicyListTable.asList(String)
+	assertThat(retrieveDataPolicyList())
+			.containsExactlyElementsOf(dataPolicyList)
 
-	client.body.'links'.each { link ->
-		if (link.rel == "element") {
-			count++
-			assertThat(link.type)
-					.as("Data policy type is incorrect.")
-					.isEqualTo("datapolicies.data-policy")
-		}
-	}
+}
 
-	if (atLeast.length() > 1) {
-		assertThat(count >= numberOfPolicies)
-				.as("Number of data policies is not as expected.")
-				.isTrue()
-	} else {
-		assertThat(count)
-				.as("Number of data policies is not as expected.")
-				.isEqualTo(numberOfPolicies)
-	}
+Then(~'the following list of data policies are not visible') { DataTable dataPolicyListTable ->
+	def dataPolicyList = dataPolicyListTable.asList(String)
+	assertThat(retrieveDataPolicyList())
+			.doesNotContainAnyElementsOf(dataPolicyList)
 }
 
 Then(~'I should not see any data policies$') { ->
@@ -114,18 +127,20 @@ When(~/^I post the following fields to the data policy form:$/) { DataTable data
 			.stopIfFailure()
 }
 
-When(~/^I select the data policy named (.*)$/) { String policyName ->
-	def self = client.body.self.href
-	def target = ''
-	client.body.links.findAll { link ->
-		client.GET(link.href)
-				.stopIfFailure()
-		if (client.body.'policy-name' == policyName) {
-			target = link.href
+When(~/^I select the data policy (.*)$/) { String policyName ->
+	def policyExist = false
+
+	client.body.links.find {
+		if (it.rel == 'element') {
+			client.GET(it.href)
+					.stopIfFailure()
+			if (client.body.'policy-name' == policyName) {
+				policyExist = true
+			}
 		}
-		client.GET(self)
-				.stopIfFailure()
 	}
-	client.GET(target)
-			.stopIfFailure()
+
+	assertThat(policyExist)
+			.as("Unable to find the given data policy name - " + policyName)
+			.isTrue()
 }

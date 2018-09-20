@@ -15,7 +15,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
 import javax.persistence.Basic;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -48,7 +47,6 @@ import org.apache.openjpa.persistence.jdbc.ElementForeignKey;
 import org.apache.openjpa.persistence.jdbc.ElementJoinColumn;
 import org.apache.openjpa.persistence.jdbc.ForeignKey;
 
-import com.elasticpath.commons.util.security.StringEncrypter;
 import com.elasticpath.domain.RecalculableObject;
 import com.elasticpath.domain.catalog.DigitalAsset;
 import com.elasticpath.domain.catalog.impl.DigitalAssetImpl;
@@ -145,8 +143,6 @@ public class OrderSkuImpl extends AbstractShoppingItemImpl implements OrderSku, 
 	private String image;
 
 	private int weight;
-
-	private String encryptedUidPk;
 
 	private DigitalAsset digitalAsset;
 
@@ -570,7 +566,7 @@ public class OrderSkuImpl extends AbstractShoppingItemImpl implements OrderSku, 
 	public BigDecimal getSavings() {
 		BigDecimal savings = BigDecimal.ZERO;
 		if (getListUnitPrice() != null) {
-			final BigDecimal goodsItemTotal = getListUnitPrice().getAmountUnscaled().multiply(new BigDecimal(getQuantity()));
+			final BigDecimal goodsItemTotal = getListUnitPrice().getRawAmount().multiply(new BigDecimal(getQuantity()));
 			if (goodsItemTotal.compareTo(getInvoiceItemAmount()) > 0) {
 				savings = goodsItemTotal.subtract(getInvoiceItemAmount());
 			} else {
@@ -578,23 +574,6 @@ public class OrderSkuImpl extends AbstractShoppingItemImpl implements OrderSku, 
 			}
 		}
 		return savings;
-	}
-
-	/**
-	 * Get the encrypted uidPk string.
-	 *
-	 * @return the encrypted uidPk string
-	 */
-	@Override
-	@Transient
-	public String getEncryptedUidPk() {
-		if (encryptedUidPk == null || encryptedUidPk.length() == 0) {
-			StringEncrypter stringEncrypter = getBean("digitalAssetStringEncrypter");
-			encryptedUidPk = stringEncrypter.encrypt(String.valueOf(getUidPk()));
-
-		}
-		return encryptedUidPk;
-
 	}
 
 	/**
@@ -699,7 +678,7 @@ public class OrderSkuImpl extends AbstractShoppingItemImpl implements OrderSku, 
 		this.setImage(orderSku.getImage());
 		this.setLastModifiedBy(orderSku.getLastModifiedBy());
 		this.setLastModifiedDate(orderSku.getLastModifiedDate());
-		this.setDiscountBigDecimal(taxSnapshot.getPricingSnapshot().getDiscount().getAmountUnscaled());
+		this.setDiscountBigDecimal(taxSnapshot.getPricingSnapshot().getDiscount().getRawAmount());
 		this.setSkuGuid(orderSku.getSkuGuid());
 		this.setSkuCode(orderSku.getSkuCode());
 		// sets quantity, currency and prices

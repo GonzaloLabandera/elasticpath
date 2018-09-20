@@ -5,7 +5,7 @@ package com.elasticpath.rest.resource.integration.epcommerce.repository.cartorde
 
 import static org.mockito.Answers.RETURNS_DEEP_STUBS;
 import static org.mockito.Answers.RETURNS_SMART_NULLS;
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -17,7 +17,7 @@ import org.junit.runner.RunWith;
 
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.dao.DataIntegrityViolationException;
 
 import com.elasticpath.domain.customer.CustomerSession;
@@ -45,7 +45,7 @@ public class CartPostProcessorTest {
 	private ShoppingCartRefresher shoppingCartRefresher;
 
 	@InjectMocks
-	private CartPostProcessor cartPostProcessor;
+	private CartPostProcessorImpl cartPostProcessor;
 
 	@Test
 	public void testPostProcessCartWhenCartIsNull() {

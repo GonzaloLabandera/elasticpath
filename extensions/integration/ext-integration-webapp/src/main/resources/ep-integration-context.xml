@@ -10,7 +10,6 @@
 	<import resource="classpath:spring/dataaccess/dao.xml" />
 	<import resource="classpath:spring/service/service.xml" />
 	<import resource="classpath:spring/service/checkout.xml" />
-	<import resource="classpath:spring/settings/ep-settings.xml" />	
 	<import resource="classpath:spring/commons/util-config.xml" />
 	<import resource="classpath:spring/commons/validators.xml" />
 </beans>

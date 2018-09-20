@@ -5,8 +5,8 @@
 package com.elasticpath.service.datapolicy.impl;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -21,7 +21,7 @@ import org.junit.runner.RunWith;
 
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.elasticpath.domain.customer.Customer;
 import com.elasticpath.domain.datapolicy.DataPoint;
@@ -33,11 +33,11 @@ public class CustomerPersonalDataReportingServiceImplTest {
 
 	private static final long TEN_SECONDS =  10 * 1000;
 	private static final String STORE_CODE = "store code";
-	private static final Long CUSTOMER_UIDPK = 1L;
+	private static final String USER_ID = "harry.potter@elasticpath.com";
 	private static final String CUSTOMER_FULL_NAME = "Full Name";
 	private static final String CUSTOMER_GUID = "cust-guid";
 
-	private static final String QUERY = "CUSTOMER_AND_DATA_POINT_BY_STORE_AND_CUSTOMER_UIDPK";
+	private static final String QUERY = "CUSTOMER_AND_DATA_POINT_BY_STORE_AND_USER_ID";
 
 	@Mock
 	private DataPointValueService dataPointValueService;
@@ -60,17 +60,14 @@ public class CustomerPersonalDataReportingServiceImplTest {
 	@Test
 	public void shouldReturnEmptyListWhenCustomerConsentIsNotFound() {
 
-		when(customer.getFullName()).thenReturn(CUSTOMER_FULL_NAME);
-		when(customer.getGuid()).thenReturn(CUSTOMER_GUID);
+		when(persistenceEngine.retrieveByNamedQuery(QUERY, USER_ID, STORE_CODE)).thenReturn(Collections.emptyList());
 
-		when(persistenceEngine.retrieveByNamedQuery(QUERY, CUSTOMER_UIDPK, STORE_CODE)).thenReturn(Collections.emptyList());
-
-		Collection<Object[]> actualResult = service.getData(STORE_CODE, CUSTOMER_UIDPK);
+		Collection<Object[]> actualResult = service.getData(STORE_CODE, USER_ID);
 
 		assertThat(actualResult)
 			.isEmpty();
 
-		verify(persistenceEngine).retrieveByNamedQuery(QUERY, CUSTOMER_UIDPK, STORE_CODE);
+		verify(persistenceEngine).retrieveByNamedQuery(QUERY, USER_ID, STORE_CODE);
 	}
 
 	//The data points may live in many data policies but the report must show only unique ones.
@@ -96,13 +93,13 @@ public class CustomerPersonalDataReportingServiceImplTest {
 		when(dataPointValue.getCreatedDate()).thenReturn(createdDate);
 		when(dataPointValue.getLastModifiedDate()).thenReturn(lastModifiedDate);
 
-		when(persistenceEngine.retrieveByNamedQuery(QUERY, CUSTOMER_UIDPK, STORE_CODE)).thenReturn(Collections.singletonList(new Object[]{customer,
+		when(persistenceEngine.retrieveByNamedQuery(QUERY, USER_ID, STORE_CODE)).thenReturn(Collections.singletonList(new Object[]{customer,
 			dataPoint}
 		));
 
 		when(dataPointValueService.getValues(eq(customerGuidToDataPoints))).thenReturn(Collections.singletonList(dataPointValue));
 
-		Collection<Object[]> actualResult = service.getData(STORE_CODE, CUSTOMER_UIDPK);
+		Collection<Object[]> actualResult = service.getData(STORE_CODE, USER_ID);
 
 		Object[] expectedData = new Object[]{CUSTOMER_FULL_NAME, dpName, dPValue, createdDate, lastModifiedDate};
 
@@ -113,7 +110,7 @@ public class CustomerPersonalDataReportingServiceImplTest {
 
 		verify(dataPointValueService).getValues(any());
 
-		verify(persistenceEngine).retrieveByNamedQuery(QUERY, CUSTOMER_UIDPK, STORE_CODE);
+		verify(persistenceEngine).retrieveByNamedQuery(QUERY, USER_ID, STORE_CODE);
 
 	}
 }

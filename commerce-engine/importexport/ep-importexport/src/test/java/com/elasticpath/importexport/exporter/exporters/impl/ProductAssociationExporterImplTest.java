@@ -5,8 +5,7 @@ package com.elasticpath.importexport.exporter.exporters.impl;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
@@ -17,10 +16,9 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.elasticpath.domain.catalog.ProductAssociation;
-import com.elasticpath.domain.catalog.ProductAssociationLoadTuner;
 import com.elasticpath.domain.catalog.impl.CatalogImpl;
 import com.elasticpath.domain.catalog.impl.ProductAssociationImpl;
 import com.elasticpath.importexport.common.adapters.associations.ProductAssociationAdapter;
@@ -56,11 +54,10 @@ public class ProductAssociationExporterImplTest {
 	 */
 	@Before
 	public void setUp() throws Exception {
-
 		final ProductAssociation productAssociation = new ProductAssociationImpl();
 		productAssociation.setCatalog(new CatalogImpl());
 
-		when(mockProductAssociationService.findByGuid(anyString(), any(ProductAssociationLoadTuner.class))).thenReturn(productAssociation);
+		when(mockProductAssociationService.findByGuid(any(), any())).thenReturn(productAssociation);
 
 		productAssociationExporter = new ProductAssociationExporterImpl();
 		productAssociationExporter.setProductAssociationService(mockProductAssociationService);

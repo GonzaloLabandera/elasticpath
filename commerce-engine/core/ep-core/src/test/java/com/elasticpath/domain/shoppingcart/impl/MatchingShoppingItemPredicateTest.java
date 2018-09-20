@@ -38,7 +38,7 @@ public final class MatchingShoppingItemPredicateTest {
 		when(configurableItem1.isConfigurable(productSkuLookup)).thenReturn(true);
 		when(configurableItem1.isSameConfigurableItem(productSkuLookup, configurableItem1)).thenReturn(true);
 		when(configurableItem1.getSkuGuid()).thenReturn("SKU");
-		when(shoppingCart.getAllItems()).thenReturn(cartItems);
+		when(shoppingCart.getAllShoppingItems()).thenReturn(cartItems);
 
 		Predicate matchingShoppingItemPredicate =
 				ShoppingItemPredicateUtils.matchingShoppingItemPredicate(configurableItem1, productSkuLookup);
@@ -61,7 +61,7 @@ public final class MatchingShoppingItemPredicateTest {
 		when(configurableItem1.isConfigurable(productSkuLookup)).thenReturn(true);
 		when(configurableItem1.isSameConfigurableItem(productSkuLookup, configurableItem2)).thenReturn(false);
 		when(configurableItem1.getSkuGuid()).thenReturn("SKU");
-		when(shoppingCart.getAllItems()).thenReturn(cartItems);
+		when(shoppingCart.getAllShoppingItems()).thenReturn(cartItems);
 
 		Predicate matchingShoppingItemPredicate =
 				ShoppingItemPredicateUtils.matchingShoppingItemPredicate(configurableItem1, productSkuLookup);

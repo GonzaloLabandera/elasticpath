@@ -1,18 +1,21 @@
 /*
  * Copyright © 2017 Elastic Path Software Inc. All rights reserved.
  */
+
 package com.elasticpath.rest.resource.navigations.relationship;
 
-import java.util.List;
 import javax.inject.Inject;
 
 import io.reactivex.Observable;
+import org.apache.commons.lang.StringUtils;
 
+import com.elasticpath.domain.catalog.Category;
 import com.elasticpath.rest.definition.navigations.NavigationIdentifier;
 import com.elasticpath.rest.definition.navigations.ParentNodeToChildRelationship;
 import com.elasticpath.rest.helix.data.annotation.RequestIdentifier;
-import com.elasticpath.rest.id.IdentifierPart;
-import com.elasticpath.rest.id.type.PathIdentifier;
+import com.elasticpath.rest.helix.data.annotation.ResourceRepository;
+import com.elasticpath.rest.id.type.StringIdentifier;
+import com.elasticpath.rest.resource.integration.epcommerce.repository.category.CategoryRepository;
 
 /**
  * Reverse link from the child to the parent navigation.
@@ -21,27 +24,37 @@ public class ChildNodeToParentRelationshipImpl implements ParentNodeToChildRelat
 
 	private final NavigationIdentifier childIdentifier;
 
+	private final CategoryRepository categoryRepository;
+
 	/**
 	 * Constructor.
 	 *
-	 * @param childIdentifier child navigation identifier
+	 * @param childIdentifier    childIdentifier
+	 * @param categoryRepository categoryRepository
 	 */
 	@Inject
-	public ChildNodeToParentRelationshipImpl(@RequestIdentifier final NavigationIdentifier childIdentifier) {
+	public ChildNodeToParentRelationshipImpl(@RequestIdentifier final NavigationIdentifier childIdentifier,
+			@ResourceRepository final CategoryRepository categoryRepository) {
 		this.childIdentifier = childIdentifier;
+		this.categoryRepository = categoryRepository;
 	}
 
 	@Override
 	public Observable<NavigationIdentifier> onLinkFrom() {
-		IdentifierPart<List<String>> parentId = ((PathIdentifier) childIdentifier.getNodeId()).extractParentId();
 
-		if (parentId.getValue().isEmpty()) {
-			return Observable.empty();
-		}
+		 return categoryRepository.findByStoreAndCategoryCode(childIdentifier.getNavigations().getScope().getValue(), childIdentifier.getNodeId()
+				.getValue())
+				.flatMapObservable(category -> StringUtils.isNotEmpty(category.getParentGuid())
+						? Observable.just(category) : Observable.empty())
+				.flatMap(category -> categoryRepository.findByGuid(category.getParentGuid()).toObservable())
+		        .flatMap(this::buildNavigationIdentifier);
+	}
 
-		return Observable.just(NavigationIdentifier.builder()
+	private Observable<NavigationIdentifier> buildNavigationIdentifier(final Category parentCategory) {
+
+		return  Observable.just(NavigationIdentifier.builder()
 				.withNavigations(childIdentifier.getNavigations())
-				.withNodeId(parentId)
+				.withNodeId(StringIdentifier.of(parentCategory.getCode()))
 				.build());
 	}
 }

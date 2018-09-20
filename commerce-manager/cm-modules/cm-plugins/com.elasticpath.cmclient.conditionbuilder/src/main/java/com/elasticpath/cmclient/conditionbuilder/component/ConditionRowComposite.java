@@ -8,7 +8,6 @@ package com.elasticpath.cmclient.conditionbuilder.component;
 
 import java.beans.PropertyChangeListener;
 import java.util.List;
-import java.util.Locale;
 
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.jface.viewers.ComboViewer;
@@ -39,6 +38,7 @@ import com.elasticpath.cmclient.conditionbuilder.adapter.ConditionModelAdapter;
 import com.elasticpath.cmclient.conditionbuilder.adapter.LogicalOperatorModelAdapter;
 import com.elasticpath.cmclient.conditionbuilder.adapter.ResourceAdapter;
 import com.elasticpath.cmclient.conditionbuilder.valueeditor.ConditionRowValueFactory;
+import com.elasticpath.cmclient.core.CorePlugin;
 import com.elasticpath.cmclient.core.helpers.EPTestUtilFactory;
 import com.elasticpath.cmclient.core.ui.framework.EpControlFactory;
 
@@ -53,12 +53,17 @@ import com.elasticpath.cmclient.core.ui.framework.EpControlFactory;
 @SuppressWarnings("PMD.CyclomaticComplexity")
 public class ConditionRowComposite<M, OP, M2, O2> extends BaseComposite<ConditionModelAdapter<M, OP>, OP> {
 
-	private static final int VERTICAL_INDENT = 5;
-	private static final int HORIZONTAL_SPAN = 4;
-	private static final int HORIZONTAL_INDENT_IN_ROW = 5;
-	private static final int LAYOUT_COLUMNS = 4;
+	/** VERTICAL_INDENT. */
+	protected static final int VERTICAL_INDENT = 5;
+	/** HORIZONTAL_SPAN. */
+	protected static final int HORIZONTAL_SPAN = 4;
+	/** HORIZONTAL_INDENT_IN_ROW. */
+	protected static final int HORIZONTAL_INDENT_IN_ROW = 5;
+	/** LAYOUT_COLUMNS. */
+	protected static final int LAYOUT_COLUMNS = 4;
 
-	private static final int USER_VALUE_WIDTH = 200;
+	/** USER_VALUE_WIDTH. */
+	protected static final int USER_VALUE_WIDTH = 200;
 
 	private final ResourceAdapter<OP> resourceAdapterForOperator;
 
@@ -72,6 +77,28 @@ public class ConditionRowComposite<M, OP, M2, O2> extends BaseComposite<Conditio
 
 	private final LogicalOperatorModelAdapter<M2, O2> parentModelAdapter;
 	private final EpControlFactory controlFactory = EpControlFactory.getInstance();
+
+	/**
+	 * Used by extensions that will create their own controls.
+	 *
+	 * @param parent                   parent composite
+	 * @param swtStyle                 SWT style
+	 * @param modelAdapter             model adapter
+	 * @param parentModelAdapter       parent model adapter
+	 * @param layoutColumns the layout columns
+	 */
+	public ConditionRowComposite(
+			final Composite parent, 
+			final int swtStyle,
+			final ConditionModelAdapter<M, OP> modelAdapter, 
+			final LogicalOperatorModelAdapter<M2, O2> parentModelAdapter,
+			final int layoutColumns
+			) {
+		super(parent, swtStyle, modelAdapter, layoutColumns);
+
+		this.parentModelAdapter = parentModelAdapter;
+		this.resourceAdapterForOperator = modelAdapter.getResourceAdapterForOperator();
+	}
 
 	/**
 	 * Default constructor.
@@ -123,7 +150,15 @@ public class ConditionRowComposite<M, OP, M2, O2> extends BaseComposite<Conditio
 
 	} //END of constructor ---------
 
-	private void createRowSeparator(final Composite parent, final int swtStyle,
+	/**
+	 * Creates the row separator.
+	 *
+	 * @param parent the parent
+	 * @param swtStyle the style
+	 * @param parentModelAdapter the model adapter
+	 * @param layoutData the layout data
+	 */
+	protected void createRowSeparator(final Composite parent, final int swtStyle,
 		final LogicalOperatorModelAdapter<M2, O2> parentModelAdapter, final GridData layoutData) {
 		this.secondRowCanvas = new Canvas(this, swtStyle);
 		this.secondRowCanvas.setLayoutData(layoutData);
@@ -147,7 +182,13 @@ public class ConditionRowComposite<M, OP, M2, O2> extends BaseComposite<Conditio
 		parentModelAdapter.addPropertyChangeListener(this.parentPropertyChangeListener);
 	}
 
-	private void createDeleteRowButton(final int swtStyle, final GridData layoutData) {
+	/**
+	 * Creates the delete button for the row.
+	 *
+	 * @param swtStyle the style
+	 * @param layoutData the layout data
+	 */
+	protected void createDeleteRowButton(final int swtStyle, final GridData layoutData) {
 		ImageHyperlink deleteLink = this.createImageHyperlinkForDeleteRule(this, swtStyle,
 			new HyperlinkAdapter() {
 				@Override
@@ -158,7 +199,16 @@ public class ConditionRowComposite<M, OP, M2, O2> extends BaseComposite<Conditio
 		deleteLink.setLayoutData(layoutData);
 	}
 
-	private void createUserValueControl(final int swtStyle, final ConditionModelAdapter<M, OP> modelAdapter,
+	/**
+	 * Creates the value control.
+	 *
+	 * @param swtStyle the style
+	 * @param modelAdapter the model adapter
+	 * @param dataBindingContext the binding context
+	 * @param conditionRowValueFactory the row factory
+	 * @param layoutData the layout data
+	 */
+	protected void createUserValueControl(final int swtStyle, final ConditionModelAdapter<M, OP> modelAdapter,
 		final DataBindingContext dataBindingContext, final ConditionRowValueFactory conditionRowValueFactory, final GridData layoutData) {
 
 		final Control valueControl = conditionRowValueFactory.createControl(this, swtStyle | SWT.BORDER,
@@ -171,7 +221,14 @@ public class ConditionRowComposite<M, OP, M2, O2> extends BaseComposite<Conditio
 		);
 	}
 
-	private void createOperatorCombo(final int swtStyle, final ConditionModelAdapter<M, OP> modelAdapter, final GridData layoutData) {
+	/**
+	 * Creates the operator combo.
+	 *
+	 * @param swtStyle the style
+	 * @param modelAdapter the model adapter
+	 * @param layoutData the layout data
+	 */
+	protected void createOperatorCombo(final int swtStyle, final ConditionModelAdapter<M, OP> modelAdapter, final GridData layoutData) {
 		ComboViewer operatorCombo = new ComboViewer(new CCombo(this, swtStyle | SWT.READ_ONLY));
 		operatorCombo.setContentProvider(new IStructuredContentProvider() {
 			public void dispose() {
@@ -204,15 +261,39 @@ public class ConditionRowComposite<M, OP, M2, O2> extends BaseComposite<Conditio
 		EPTestUtilFactory.getInstance().getTestIdUtil().setUniqueId(operatorCombo.getCCombo());
 	}
 
-	private void createDescriptionLabel(final int swtStyle, final ConditionModelAdapter<M, OP> modelAdapter, final GridData layoutData) {
+	/**
+	 * Creates the description label.
+	 *
+	 * @param swtStyle the style
+	 * @param modelAdapter the model adapter
+	 * @param layoutData the layout data
+	 */
+	protected void createDescriptionLabel(final int swtStyle, final ConditionModelAdapter<M, OP> modelAdapter, final GridData layoutData) {
+		String labelText = modelAdapter.getTagDefinition().getLocalizedName(CorePlugin.getDefault().getDefaultLocale());
+		createDescriptionLabel(swtStyle, layoutData, labelText);
+	}
+
+	/**
+	 * Creates a description label for the text.
+	 *
+	 * @param swtStyle the style
+	 * @param layoutData the layout data
+	 * @param labelText the text for the label
+	 */
+	protected void createDescriptionLabel(final int swtStyle, final GridData layoutData, final String labelText) {
 		Label tagLabel = controlFactory.createLabel(
 			this,
-			modelAdapter.getTagDefinition().getLocalizedName(Locale.getDefault()),
+			labelText,
 			swtStyle, layoutData);
 		tagLabel.setBackground(this.getBackground());
 	}
 
-	private void drawLine(final GC graphicContext) {
+	/**
+	 * Draws a line.
+	 *
+	 * @param graphicContext the graphics context
+	 */
+	protected void drawLine(final GC graphicContext) {
 		if (this.controlForLogicalOperator == null || this.getColorGrey().isDisposed()) {
 			return;
 		}
@@ -243,7 +324,14 @@ public class ConditionRowComposite<M, OP, M2, O2> extends BaseComposite<Conditio
 		graphicContext.drawLine(pointX1, pointY, pointX2, pointY);
 	}
 
-	private void displayLogicalOperator(final Composite parent, final int swtStyle, final GridData layoutData) {
+	/**
+	 * Displays the operator.
+	 *
+	 * @param parent the parent
+	 * @param swtStyle the style
+	 * @param layoutData the layout data
+	 */
+	protected void displayLogicalOperator(final Composite parent, final int swtStyle, final GridData layoutData) {
 		boolean isFirstRow = this.equals(parent.getChildren()[0]);
 		boolean isLastRow = this.equals(parent.getChildren()[parent.getChildren().length - 1]);
 		if (this.controlForLogicalOperator != null) {
@@ -260,7 +348,14 @@ public class ConditionRowComposite<M, OP, M2, O2> extends BaseComposite<Conditio
 		}
 	}
 
-	private Control createLabelForLogicalOperator(final Composite parent, final int swtStyle) {
+	/**
+	 * Creates the label control for the logical operator.
+	 *
+	 * @param parent the parent
+	 * @param swtStyle the style
+	 * @return the new control
+	 */
+	protected Control createLabelForLogicalOperator(final Composite parent, final int swtStyle) {
 		return controlFactory.createLabel(parent,
 			this.parentModelAdapter.getResourceAdapterForOperator().getLocalizedResource(this.parentModelAdapter.getLogicalOperator()),
 			swtStyle, null);

@@ -362,7 +362,7 @@ Then(~'^item with code (.+) is in my cart with quantity (.+)$') { String itemCod
 			.isEqualTo(itemQuantity)
 }
 
-Then(~'^there is a (.+) link$') { String relValue ->
+Then(~'^there is (?:a|an) (.+) link$') { String relValue ->
 	assertLinkExists(client, relValue)
 }
 

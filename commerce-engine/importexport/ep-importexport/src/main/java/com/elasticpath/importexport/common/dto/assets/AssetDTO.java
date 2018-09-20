@@ -68,7 +68,7 @@ public class AssetDTO implements Dto {
 	@Override
 	public String toString() {
 		return new ToStringBuilder(this, ToStringStyle.DEFAULT_STYLE)
-			.append("asset", getAsset())
+			.append(ROOT_ELEMENT, getAsset())
 			.toString();
 	}
 }

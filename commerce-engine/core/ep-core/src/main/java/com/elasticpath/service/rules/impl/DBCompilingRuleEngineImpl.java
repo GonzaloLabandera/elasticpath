@@ -4,7 +4,6 @@
 package com.elasticpath.service.rules.impl;
 
 import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
 import java.text.DateFormat;
@@ -19,12 +18,14 @@ import java.util.TimeZone;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.log4j.Logger;
-import org.drools.RuleBase;
-import org.drools.compiler.DroolsError;
-import org.drools.compiler.DroolsParserException;
-import org.drools.compiler.PackageBuilder;
-import org.drools.compiler.PackageBuilderConfiguration;
-import org.drools.rule.Package;
+import org.drools.core.impl.InternalKnowledgeBase;
+import org.kie.api.KieBase;
+import org.kie.api.io.ResourceType;
+import org.kie.internal.builder.KnowledgeBuilder;
+import org.kie.internal.builder.KnowledgeBuilderConfiguration;
+import org.kie.internal.builder.KnowledgeBuilderError;
+import org.kie.internal.builder.KnowledgeBuilderFactory;
+import org.kie.internal.io.ResourceFactory;
 
 import com.elasticpath.base.exception.EpServiceException;
 import com.elasticpath.commons.beanframework.BeanFactory;
@@ -50,13 +51,13 @@ import com.elasticpath.service.store.StoreService;
 public class DBCompilingRuleEngineImpl extends AbstractRuleEngineImpl implements RecompilingRuleEngine {
 
 	private static final Logger LOG = Logger.getLogger(DBCompilingRuleEngineImpl.class);
-	
+
 	/** The property name for the last rule update/recompile date. */
 	private static final String LAST_COMPILATION_BEGIN_DATE_PROP = "LastSuccessfulCompilationBeginDate";
 
 	/** File name of the properties file where the last update date is stored. */
 	private static final String UPDATE_PROP_FILE = "ruleUpdate";
-	
+
 	/**
 	 * Required date format for SOLR dates. Store single instance rather than create a new one all
 	 * the time.
@@ -64,18 +65,18 @@ public class DBCompilingRuleEngineImpl extends AbstractRuleEngineImpl implements
 	private final DateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.US);
 
 	private RuleSetService ruleSetService;
-	
+
 	private PropertiesDao propertiesDao;
 
 	private Properties cacheUpdateProperties;
 
 	private TimeService timeService;
-	
+
 	private StoreService storeService;
 
-	private final Map<String, RuleBase> catalogRuleBaseMap = new ConcurrentHashMap<>();
+	private final Map<String, KieBase> catalogRuleBaseMap = new ConcurrentHashMap<>();
 
-	private final Map<String, RuleBase> cartRuleBaseMap = new ConcurrentHashMap<>();
+	private final Map<String, KieBase> cartRuleBaseMap = new ConcurrentHashMap<>();
 
 	private Properties configProps;
 
@@ -88,10 +89,10 @@ public class DBCompilingRuleEngineImpl extends AbstractRuleEngineImpl implements
 		// setup up required properties for the date formatter.
 		dateFormatter.setTimeZone(TimeZone.getTimeZone("UTC"));
 	}
-	
+
 	@Override
-	protected RuleBase getCartRuleBase(final Store store) {
-		final RuleBase ruleBase;
+	protected KieBase getCartRuleBase(final Store store) {
+		final KieBase ruleBase;
 		if (cartRuleBaseMap.containsKey(store.getCode())) {
 			ruleBase = cartRuleBaseMap.get(store.getCode());
 		} else {
@@ -102,8 +103,8 @@ public class DBCompilingRuleEngineImpl extends AbstractRuleEngineImpl implements
 	}
 
 	@Override
-	protected RuleBase getCatalogRuleBase(final Store store) {
-		final RuleBase ruleBase;
+	protected KieBase getCatalogRuleBase(final Store store) {
+		final KieBase ruleBase;
 		if (catalogRuleBaseMap.containsKey(store.getCode())) {
 			ruleBase = catalogRuleBaseMap.get(store.getCode());
 		} else {
@@ -116,11 +117,11 @@ public class DBCompilingRuleEngineImpl extends AbstractRuleEngineImpl implements
 	/**
 	 * Reads in a rule set from a file. This is a temporary method and will be replaced by a call
 	 * to service code that will get the rules from the DB.
-	 * 
+	 *
 	 * @param scenarioId the id of the scenario for which the rule set is to be retrieved
 	 * @return a RuleBase object corresponding to the rule set file.
 	 */
-	private RuleBase readRuleBase(final int scenarioId, final Store store) {
+	private KieBase readRuleBase(final int scenarioId, final Store store) {
 		EpRuleBase ruleBase = null;
 		switch (scenarioId) {
 		case RuleScenarios.CART_SCENARIO:
@@ -139,57 +140,50 @@ public class DBCompilingRuleEngineImpl extends AbstractRuleEngineImpl implements
 			RuleSet ruleSet = ruleSetService.findByScenarioId(scenarioId);
 			return recompileRuleBase(ruleSet, store);
 		}
-		
+
 		return ruleBase.getRuleBase();
 	}
 
 	/**
-	 * Synchronized so we only try to recompile the rule base once at a time.   This may be able to be 
+	 * Synchronized so we only try to recompile the rule base once at a time.   This may be able to be
 	 * pushed down to {@code #storeRuleBase(RuleBase, RuleSet, Store, Catalog)} if it becomes an issue.
-	 * 
+	 *
 	 * @param ruleSet rule set to compile
 	 * @param store store used to create rules
 	 * @return compiled ruleBase
 	 */
-	public synchronized RuleBase recompileRuleBase(final RuleSet ruleSet, final Store store) { //NOPMD
+	public synchronized KieBase recompileRuleBase(final RuleSet ruleSet, final Store store) { //NOPMD
 		final String ruleCode = ruleSet.getRuleCode(store);
 		LOG.debug(ruleCode);
-		Reader source = new StringReader(ruleCode);
+		final Reader source = new StringReader(ruleCode);
 
-		RuleBase ruleBase = null;
+		final InternalKnowledgeBase ruleBase;
 		try {
 			// Use package builder to build up a rule package.
 			// An alternative lower level class called "DrlParser" can also be used...
-			PackageBuilderConfiguration conf = new PackageBuilderConfiguration(getRuleEngineConfigProps());
-			PackageBuilder builder = new PackageBuilder(conf);
+			final KnowledgeBuilderConfiguration conf = KnowledgeBuilderFactory.newKnowledgeBuilderConfiguration(
+					getRuleEngineConfigProps(),
+					(ClassLoader[]) null);
+
+			final KnowledgeBuilder builder = KnowledgeBuilderFactory.newKnowledgeBuilder(conf);
 
 			// this will parse and compile in one step
 			// NOTE: There are 2 methods here, the one argument one is for normal DRL.
-			builder.addPackageFromDrl(source);
+			builder.add(ResourceFactory.newReaderResource(source), ResourceType.DRL);
 
-			// Use the following instead of above if you are using a DSL:
-			// builder.addPackageFromDrl( source, dsl );
-
-			// get the compiled package (which is serializable)
-			Package pkg = builder.getPackage();
-			
-			//ruleBase should not try to add a null package with errors
-			if (pkg == null &&  builder.getErrors() != null) {
-				String errormsg = "Drools code did not compile. Errors: ";
-				for (DroolsError error : builder.getErrors().getErrors()) {
-					errormsg = errormsg.concat(error.getMessage() + " ");
+			//ruleBase should not try to add a knowledge base with errors
+			if (!builder.getErrors().isEmpty()) {
+				String errorMsg = "Drools code did not compile. Errors: ";
+				for (KnowledgeBuilderError error : builder.getErrors()) {
+					errorMsg = errorMsg.concat(error.getMessage() + " ");
 				}
-				throw new RulesPackageCompilationException(errormsg);
+
+				throw new RulesPackageCompilationException(errorMsg);
 			}
 			
 			// add the package to a rulebase (deploy the rule package).
 			ruleBase = createRuleBase();
-			ruleBase.addPackage(pkg);
-
-		} catch (DroolsParserException dpe) {
-			throw new EpServiceException("Failed to readRuleBase.", dpe);
-		} catch (IOException ioe) {
-			throw new EpServiceException("Failed to readRuleBase.", ioe);
+			ruleBase.addPackages(builder.getKnowledgePackages());
 		} catch (RulesPackageCompilationException rpce) { //NOPMD necessary because of below catch for Exception
 			throw rpce;
 		} catch (Exception e) {
@@ -281,11 +275,11 @@ public class DBCompilingRuleEngineImpl extends AbstractRuleEngineImpl implements
 			for (RuleSet currRuleSet : ruleSets) {
 				if (currRuleSet.getScenario() == RuleScenarios.CART_SCENARIO) {
 					LOG.info("Re-compiling rule set for the shopping cart scenario");
-					RuleBase cartRuleBase = recompileRuleBase(currRuleSet, store);
+					KieBase cartRuleBase = recompileRuleBase(currRuleSet, store);
 					cartRuleBaseMap.put(store.getCode(), cartRuleBase);
 				} else {
 					LOG.info("Re-compiling rule set for the browse catalog scenario");
-					RuleBase catalogRuleBase = recompileRuleBase(currRuleSet, store);
+					KieBase catalogRuleBase = recompileRuleBase(currRuleSet, store);
 					catalogRuleBaseMap.put(store.getCode(), catalogRuleBase);
 				}
 			}
@@ -296,7 +290,7 @@ public class DBCompilingRuleEngineImpl extends AbstractRuleEngineImpl implements
 	}
 	
 	/**
-	 * Stores the given {@link RuleBase} for later retrieval. If a rule base already exists,
+	 * Stores the given {@link InternalKnowledgeBase} for later retrieval. If a rule base already exists,
 	 * updates the existing rule base. Generally either the {@code store} or {@code catalog}
 	 * should be {@code null}, but not both.
 	 * 
@@ -306,7 +300,7 @@ public class DBCompilingRuleEngineImpl extends AbstractRuleEngineImpl implements
 	 * @param catalog the catalog of the rule base
 	 * @return the stored rule base
 	 */
-	protected EpRuleBase storeRuleBase(final RuleBase ruleBase, final RuleSet ruleSet, final Store store, final Catalog catalog) {
+	protected EpRuleBase storeRuleBase(final KieBase ruleBase, final RuleSet ruleSet, final Store store, final Catalog catalog) {
 
 		// first try and find the existing rule base
 		EpRuleBase epRuleBase = getRuleService().findRuleBaseByScenario(store, catalog, ruleSet.getScenario());

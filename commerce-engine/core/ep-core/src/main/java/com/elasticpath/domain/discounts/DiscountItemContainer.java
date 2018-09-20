@@ -9,11 +9,12 @@ package com.elasticpath.domain.discounts;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import com.elasticpath.domain.catalog.Catalog;
-import com.elasticpath.domain.shipping.ShippingServiceLevel;
 import com.elasticpath.domain.shoppingcart.ShoppingItem;
 import com.elasticpath.service.rules.PromotionRuleExceptions;
+import com.elasticpath.shipping.connectivity.dto.ShippingOption;
 
 /**
  * A discount item container where the discounts can be applied to.
@@ -36,6 +37,14 @@ public interface DiscountItemContainer {
 	 * @return list of cart items.
 	 */
 	List<ShoppingItem> getItemsLowestToHighestPrice();
+
+	/**
+	 * Finds the lowest-priced shopping item for a given SKU code, if one exists.
+	 *
+	 * @param skuCode the code of a SKU that was discounted
+	 * @return a shopping item, if a matching exists
+	 */
+	Optional<ShoppingItem> getLowestPricedShoppingItemForSku(String skuCode);
 
 	/**
 	 * Get the discount item container's catalog.
@@ -70,12 +79,12 @@ public interface DiscountItemContainer {
 	ShoppingItem addCartItem(String skuCode, int numItems);
 
 	/**
-	 * Gets the per-unit, pre-cart promotion price for the {@link ShippingServiceLevel}.
+	 * Gets the per-unit, pre-cart promotion price for the {@link ShippingOption}.
 	 *
-	 * @param shippingServiceLevel the shipping service level to price
+	 * @param shippingOption the shipping option to price
 	 * @return the calculated price amount
 	 */
-	BigDecimal getPrePromotionPriceAmount(ShippingServiceLevel shippingServiceLevel);
+	BigDecimal getPrePromotionPriceAmount(ShippingOption shippingOption);
 
 	/**
 	 * Applies a discount to the shopping cart subtotal.
@@ -87,14 +96,14 @@ public interface DiscountItemContainer {
 	void applySubtotalDiscount(BigDecimal discountAmount, long ruleId, long actionId);
 
 	/**
-	 * Applies a discount to the shipping service level.
+	 * Applies a discount to the shipping option.
 	 *
-	 * @param shippingServiceLevel the shipping service level that qualifies for a discount
+	 * @param shippingOption the shipping option that qualifies for a discount
 	 * @param ruleId the ID of the rule that caused the discount
 	 * @param actionId the ID of the action that caused the discount
 	 * @param discountAmount the amount by which to discount the shipping cost
 	 */
-	void applyShippingOptionDiscount(ShippingServiceLevel shippingServiceLevel, long ruleId, long actionId, BigDecimal discountAmount);
+	void applyShippingOptionDiscount(ShippingOption shippingOption, long ruleId, long actionId, BigDecimal discountAmount);
 
 	/**
 	 * Calculates the subtotal of the cart minus the amount of all the items

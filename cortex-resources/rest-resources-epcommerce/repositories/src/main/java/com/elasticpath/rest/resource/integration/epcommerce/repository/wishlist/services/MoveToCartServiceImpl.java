@@ -9,6 +9,7 @@ import java.util.Optional;
 
 import io.reactivex.Completable;
 import io.reactivex.Single;
+
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
@@ -29,8 +30,8 @@ import com.elasticpath.rest.definition.wishlists.WishlistLineItemIdentifier;
 import com.elasticpath.rest.form.SubmitResult;
 import com.elasticpath.rest.form.SubmitStatus;
 import com.elasticpath.rest.id.type.StringIdentifier;
+import com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder.AddToCartAdvisorService;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder.ShoppingCartRepository;
-import com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder.ShoppingItemValidationService;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.wishlist.ItemValidationService;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.wishlist.MoveToCartService;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.wishlist.WishlistRepository;
@@ -44,7 +45,7 @@ public class MoveToCartServiceImpl implements MoveToCartService {
 	private WishlistRepository wishlistRepository;
 	private ShoppingCartRepository shoppingCartRepository;
 	private ItemValidationService itemValidationService;
-	private ShoppingItemValidationService shoppingItemValidationService;
+	private AddToCartAdvisorService addToCartAdvisorService;
 	private static final Logger LOG = LoggerFactory.getLogger(MoveToCartServiceImpl.class);
 
 
@@ -55,7 +56,7 @@ public class MoveToCartServiceImpl implements MoveToCartService {
 		WishlistIdentifier wishlistIdentifier = wishlistLineItemIdentifier.getWishlistLineItems().getWishlist();
 		LOG.trace("Moving item {} from wishlist {} to cart", lineItemEntity, wishlistIdentifier);
 
-		return shoppingItemValidationService.validateQuantity(lineItemEntity)
+		return addToCartAdvisorService.validateLineItemEntity(lineItemEntity)
 				.andThen(isItemPurchasable(wishlistLineItemIdentifier))
 				.andThen(moveItemToCart(wishlistLineItemIdentifier, lineItemEntity, wishlistIdentifier));
 	}
@@ -183,7 +184,7 @@ public class MoveToCartServiceImpl implements MoveToCartService {
 	}
 
 	@Reference
-	public void setShoppingItemValidationService(final ShoppingItemValidationService shoppingItemValidationService) {
-		this.shoppingItemValidationService = shoppingItemValidationService;
+	public void setAddToCartAdvisorService(final AddToCartAdvisorService addToCartAdvisorService) {
+		this.addToCartAdvisorService = addToCartAdvisorService;
 	}
 }

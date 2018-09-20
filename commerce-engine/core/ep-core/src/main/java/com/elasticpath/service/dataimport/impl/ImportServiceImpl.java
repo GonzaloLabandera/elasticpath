@@ -59,7 +59,7 @@ public class ImportServiceImpl extends AbstractEpPersistenceServiceImpl implemen
 	/**
 	 * The logger.
 	 */
-	protected static final Logger LOG = Logger.getLogger(ImportServiceImpl.class);
+	private static final Logger LOG = Logger.getLogger(ImportServiceImpl.class);
 
 	private CatalogService catalogService;
 

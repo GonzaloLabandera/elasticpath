@@ -456,4 +456,12 @@ public interface ProductDao {
 	 * @return the product uid, or null if the product does not exist
 	 */
 	Long findUidBySkuGuid(String skuGuid);
+
+	/**
+	 * Returns the uidPks of the products which are the parents of the skus with the given guids.
+	 *
+	 * @param skuGuids the SKU guids
+	 * @return the product UIDs, otherwise an empty list
+	 */
+	List<Long> findUidsBySkuGuids(Collection<String> skuGuids);
 }

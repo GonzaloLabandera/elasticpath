@@ -27,6 +27,7 @@ import com.elasticpath.service.catalog.ProductSkuLookup;
 /**
  * A builder for ShoppingCarts and its items.
  */
+@SuppressWarnings({"PMD.TooManyMethods"})
 public final class ShoppingCartStubBuilder {
 
 	private static final Currency CURRENCY_CAD = Currency.getInstance("CAD");
@@ -231,10 +232,10 @@ public final class ShoppingCartStubBuilder {
 		public ShoppingCart build() {
 
 			context.checking(new Expectations() { {
-				allowing(cart).getCartItems();
+				allowing(cart).getAllShoppingItems();
 				will(returnValue(items));
 
-				allowing(cart).getAllItems();
+				allowing(cart).getRootShoppingItems();
 				will(returnValue(items));
 
 				if (customerSession == null) {
@@ -384,7 +385,8 @@ public final class ShoppingCartStubBuilder {
 			} });
 			return this;
 		}
-		
+
+
 		/**
 		 * Makes the shopping item report that it is not discountable.
 		 * @return this shopping item builder.
@@ -393,6 +395,30 @@ public final class ShoppingCartStubBuilder {
 			getContext().checking(new Expectations() { {
 				allowing(item).isDiscountable(mockProductSkuLookup);
 				will(returnValue(true));
+			} });
+			return this;
+		}
+
+		/**
+		 * Makes the shopping item report that it is a bundle constituent.
+		 * @return this shopping item builder.
+		 */
+		public ShoppingItemBuilder thatsABundleConstituent() {
+			getContext().checking(new Expectations() { {
+				allowing(item).isBundleConstituent();
+				will(returnValue(true));
+			} });
+			return this;
+		}
+
+		/**
+		 * Makes the shopping item report that it is not a bundle constituent.
+		 * @return this shopping item builder.
+		 */
+		public ShoppingItemBuilder thatsNotABundleConstituent() {
+			getContext().checking(new Expectations() { {
+				allowing(item).isBundleConstituent();
+				will(returnValue(false));
 			} });
 			return this;
 		}

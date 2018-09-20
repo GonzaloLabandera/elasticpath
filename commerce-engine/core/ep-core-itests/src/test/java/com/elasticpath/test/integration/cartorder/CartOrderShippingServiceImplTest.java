@@ -4,12 +4,11 @@
 package com.elasticpath.test.integration.cartorder;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.util.Currency;
-import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -30,7 +29,6 @@ import com.elasticpath.domain.factory.TestCustomerSessionFactoryForTestApplicati
 import com.elasticpath.domain.factory.TestShopperFactoryForTestApplication;
 import com.elasticpath.domain.shipping.Region;
 import com.elasticpath.domain.shipping.ShippingRegion;
-import com.elasticpath.domain.shipping.ShippingServiceLevel;
 import com.elasticpath.domain.shopper.Shopper;
 import com.elasticpath.domain.shoppingcart.ShoppingCart;
 import com.elasticpath.domain.shoppingcart.impl.ShoppingCartImpl;
@@ -44,6 +42,7 @@ import com.elasticpath.service.customer.CustomerService;
 import com.elasticpath.service.customer.dao.CustomerAddressDao;
 import com.elasticpath.service.shopper.ShopperService;
 import com.elasticpath.service.shoppingcart.ShoppingCartService;
+import com.elasticpath.shipping.connectivity.dto.ShippingOption;
 import com.elasticpath.test.integration.BasicSpringContextTest;
 import com.elasticpath.test.persister.CatalogTestPersister;
 import com.elasticpath.test.persister.StoreTestPersister;
@@ -51,7 +50,6 @@ import com.elasticpath.test.persister.testscenarios.SimpleStoreScenario;
 import com.elasticpath.test.util.Utils;
 
 public class CartOrderShippingServiceImplTest  extends BasicSpringContextTest {
-	
 
 	private static String cartGuid;
 
@@ -65,10 +63,10 @@ public class CartOrderShippingServiceImplTest  extends BasicSpringContextTest {
 
 	private static String DEFAULT_SUBCOUNTRY_CODE;
 
-	private static String DEFAULT_SHIPPING_SERVICE_LEVEL_GUID;
+	private static String DEFAULT_SHIPPING_OPTION_CODE;
 
 	private SimpleStoreScenario scenario;
-	
+
 	private Customer customer;
 
 	@Autowired
@@ -79,7 +77,7 @@ public class CartOrderShippingServiceImplTest  extends BasicSpringContextTest {
 
 	@Autowired
 	private CartOrderService cartOrderService;
-	
+
 	@Autowired
 	private CartOrderShippingService cartOrderShippingService;
 
@@ -127,7 +125,7 @@ public class CartOrderShippingServiceImplTest  extends BasicSpringContextTest {
 		Region region = regionMap.values().iterator().next();
 		DEFAULT_COUNTRY_CODE = region.getCountryCode();
 		DEFAULT_SUBCOUNTRY_CODE = region.getSubCountryCodeList().get(0);
-		DEFAULT_SHIPPING_SERVICE_LEVEL_GUID = scenario.getShippingServiceLevel().getGuid();
+		DEFAULT_SHIPPING_OPTION_CODE = scenario.getShippingOption().getCode();
 
 		store = scenario.getStore();
 
@@ -135,7 +133,7 @@ public class CartOrderShippingServiceImplTest  extends BasicSpringContextTest {
 		createAndPersistAddressWithGuid(shippingAddressGuid);
 		cart = configureAndPersistCart();
 	}
-	
+
 	/**
 	 * Test populating transient fields on shopping cart.
 	 */
@@ -144,10 +142,10 @@ public class CartOrderShippingServiceImplTest  extends BasicSpringContextTest {
 		createAndSaveCartOrder();
 		CartOrder cartOrder = cartOrderService.findByStoreCodeAndGuid(store.getCode(), cartOrderGuid);
 		ShoppingCart populatedShoppingCart = cartOrderShippingService.populateAddressAndShippingFields(cart, cartOrder);
-		ShippingServiceLevel expectedShippingServiceLevel = scenario.getShippingServiceLevel();
-		assertEquals(expectedShippingServiceLevel, populatedShoppingCart.getSelectedShippingServiceLevel());
-		List<ShippingServiceLevel> populatedShippingServiceLevels = populatedShoppingCart.getShippingServiceLevelList();
-		assertTrue(populatedShippingServiceLevels.contains(expectedShippingServiceLevel));
+		ShippingOption shippingOption = scenario.getShippingOption(cart.getShopper().getLocale());
+		final Optional<ShippingOption> selectedShippingOption = populatedShoppingCart.getSelectedShippingOption();
+		assertTrue(selectedShippingOption.isPresent());
+		assertEquals(shippingOption, selectedShippingOption.get());
 		assertEquals(cartOrder.getBillingAddressGuid(), populatedShoppingCart.getBillingAddress().getGuid());
 	}
 
@@ -162,26 +160,21 @@ public class CartOrderShippingServiceImplTest  extends BasicSpringContextTest {
 		cartOrder = cartOrderService.saveOrUpdate(cartOrder);
 
 		ShoppingCart populatedShoppingCart = cartOrderShippingService.populateAddressAndShippingFields(cart, cartOrder);
-		assertNull("Shopping cart selected service level should be empty.", populatedShoppingCart.getSelectedShippingServiceLevel());
-		List<ShippingServiceLevel> populatedShippingServiceLevels = populatedShoppingCart.getShippingServiceLevelList();
-		assertTrue("Shopping cart service levels should be empty.", populatedShippingServiceLevels.isEmpty());
+		assertEquals("Shopping cart selected shipping option should be empty.", Optional.empty(), populatedShoppingCart.getSelectedShippingOption());
 		assertEquals(cartOrder.getBillingAddressGuid(), populatedShoppingCart.getBillingAddress().getGuid());
 	}
 
 	/**
-	 * Test populating transient fields on shopping cart with non-existent shipping service level.
+	 * Test populating transient fields on shopping cart with non-existent shipping option.
 	 */
 	@Test
-	public void testPopulatingTransientFieldsOnShoppingCartWithNonExistentShippingServiceLevel() {
+	public void testPopulatingTransientFieldsOnShoppingCartWithNonExistentShippingOption() {
 		createAndSaveCartOrder();
 		CartOrder cartOrder = cartOrderService.findByStoreCodeAndGuid(store.getCode(), cartOrderGuid);
-		cartOrder.setShippingServiceLevelGuid("non-existent");
+		cartOrder.setShippingOptionCode("non-existent");
 		cartOrder = cartOrderService.saveOrUpdate(cartOrder);
 
-		ShoppingCart populatedShoppingCart = cartOrderShippingService.populateAddressAndShippingFields(cart, cartOrder);
-		assertNull("Shopping cart selected service level should be empty.", populatedShoppingCart.getSelectedShippingServiceLevel());
-		List<ShippingServiceLevel> populatedShippingServiceLevels = populatedShoppingCart.getShippingServiceLevelList();
-		assertTrue("Shopping cart service levels should be empty.", populatedShippingServiceLevels.isEmpty());
+		ShoppingCart populatedShoppingCart = cartOrderShippingService.populateShoppingCartTransientFields(cart, cartOrder);
 		assertEquals(cartOrder.getBillingAddressGuid(), populatedShoppingCart.getBillingAddress().getGuid());
 	}
 
@@ -191,7 +184,7 @@ public class CartOrderShippingServiceImplTest  extends BasicSpringContextTest {
 		cartOrder.setGuid(cartOrderGuid);
 		cartOrder.setBillingAddressGuid(billingAddressGuid);
 		cartOrder.setShippingAddressGuid(shippingAddressGuid);
-		cartOrder.setShippingServiceLevelGuid(DEFAULT_SHIPPING_SERVICE_LEVEL_GUID);
+		cartOrder.setShippingOptionCode(DEFAULT_SHIPPING_OPTION_CODE);
 		cartOrder.setShoppingCartGuid(cartGuid);
 
 		cartOrder.usePaymentMethod(getPersistedToken());
@@ -221,7 +214,7 @@ public class CartOrderShippingServiceImplTest  extends BasicSpringContextTest {
 		address.setSubCountry(DEFAULT_SUBCOUNTRY_CODE);
 		return addressDao.saveOrUpdate(address);
 	}
-	
+
 	private ShoppingCart configureAndPersistCart() {
 		ShopperService shopperService = getBean(ContextIdNames.SHOPPER_SERVICE);
 		Shopper shopper = TestShopperFactoryForTestApplication.getInstance().createNewShopperWithMemento();
@@ -242,7 +235,7 @@ public class CartOrderShippingServiceImplTest  extends BasicSpringContextTest {
 		shopper.setCurrentShoppingCart(shoppingCart);
 		return shoppingCartService.saveOrUpdate(shoppingCart);
 	}
-	
+
 	private <T> T getBean(final String name) {
 		return getBeanFactory().getBean(name);
 	}

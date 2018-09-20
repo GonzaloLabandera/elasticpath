@@ -52,7 +52,8 @@ public class ShippingServiceLevelSearchResultPane extends AbstractPageObject {
 	 * @return the CreateShippingServiceLevelDialog.
 	 */
 	public EditShippingServiceLevelDialog clickOpenServiceLevelResultsTab() {
-		clickButton(OPEN_SHIPPING_SERVICE_LEVEL_BUTTON_CSS, "Open Service Level");
+		clickButton(OPEN_SHIPPING_SERVICE_LEVEL_BUTTON_CSS, "Open Service Level", EditShippingServiceLevelDialog
+				.EDIT_SHIPPING_SERVICE_LEVEL_PARENT_CSS);
 		return new EditShippingServiceLevelDialog(getDriver());
 	}
 
@@ -62,7 +63,8 @@ public class ShippingServiceLevelSearchResultPane extends AbstractPageObject {
 	 * @return the CreateShippingServiceLevelDialog.
 	 */
 	public CreateShippingServiceLevelDialog clickCreateServiceLevelButton() {
-		clickButton(CREATE_SHIPPING_SERVICE_LEVEL_BUTTON_CSS, "Create Service Level");
+		clickButton(CREATE_SHIPPING_SERVICE_LEVEL_BUTTON_CSS, "Create Service Level", CreateShippingServiceLevelDialog
+				.CREATE_SHIPPING_SERVICE_LEVEL_PARENT_CSS);
 		return new CreateShippingServiceLevelDialog(getDriver());
 	}
 

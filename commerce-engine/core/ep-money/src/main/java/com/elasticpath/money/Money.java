@@ -16,6 +16,13 @@ public final class Money implements Serializable, Comparable<Money> {
 
 	private static final long serialVersionUID = 0;
 
+	/**
+	 * Scale to be used by {@link Money#divide(int)} and {@link Money#divide(BigDecimal)}.
+	 *
+	 * It's a larger number than any {@link Currency#getDefaultFractionDigits()} to prevent rounding in those digits.
+	 * {@link #getAmount()} will scale the resultant value to the Currency's scale. */
+	private static final int DIVISION_SCALE = 10;
+
 	private final BigDecimal amount;
 	private final Currency currency;
 
@@ -77,6 +84,17 @@ public final class Money implements Serializable, Comparable<Money> {
 	}
 
 	/**
+	 * Create a money object in the currency given with a zero value.
+	 *
+	 * @param currency the currency
+	 *
+	 * @return the money.
+	 */
+	public static Money zero(final Currency currency) {
+		return valueOf(BigDecimal.ZERO, currency);
+	}
+
+	/**
 	 * Get the amount of money as a <code>BigDecimal</code>, in the scale
 	 * dictated by this object's Currency (if one has been set).
 	 *
@@ -87,10 +105,12 @@ public final class Money implements Serializable, Comparable<Money> {
 	}
 
 	/**
-	 * @return the amount of money as a <code>BigDecimal</code> in the scale it
-	 * currently has.
+	 * Returns the amount of money as a <code>BigDecimal</code>, without applying rounding. The value returned will be the same value used
+	 * originally to construct this Money instance.
+	 *
+	 * @return the amount of money as a <code>BigDecimal</code> without applying rounding.
 	 */
-	public BigDecimal getAmountUnscaled() {
+	public BigDecimal getRawAmount() {
 		return amount;
 	}
 
@@ -252,6 +272,28 @@ public final class Money implements Serializable, Comparable<Money> {
 	 */
 	public Money multiply(final int multiplier) {
 		return multiply(BigDecimal.valueOf(multiplier));
+	}
+
+	/**
+	 * Return a new Money object whose value is this money object's value divided by the specified divisor.
+	 * When rounding after dividing is required the number is rounded up if >= 0.5, otherwise it's rounded down.
+	 *
+	 * @param divisor the amount to divide by
+	 * @return a Money object representing the result
+	 */
+	public Money divide(final int divisor) {
+		return divide(BigDecimal.valueOf(divisor));
+	}
+
+	/**
+	 * Return a new Money object whose value is this money object's value divided by the specified divisor.
+	 * When rounding after dividing is required the number is rounded up if >= 0.5, otherwise it's rounded down.
+	 *
+	 * @param divisor the amount to divide by
+	 * @return a Money object representing the result
+	 */
+	public Money divide(final BigDecimal divisor) {
+		return valueOf(amount.divide(divisor, DIVISION_SCALE, BigDecimal.ROUND_HALF_UP), currency);
 	}
 
 	/**

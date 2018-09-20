@@ -8,7 +8,6 @@ import javax.inject.Named;
 
 import cucumber.api.java.Before;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.ContextConfiguration;
 
 import com.elasticpath.domain.store.Store;
 import com.elasticpath.test.persister.TestApplicationContext;
@@ -17,7 +16,6 @@ import com.elasticpath.test.persister.testscenarios.SimpleStoreScenario;
 /**
  *  Simple Store Scenario initialization.
  */
-@ContextConfiguration("/cucumber.xml")
 public class SimpleStoreScenarioInitializer {
 
 	@Inject

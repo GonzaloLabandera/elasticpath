@@ -241,7 +241,23 @@ public interface ShoppingItem extends Entity, TreeNode<ShoppingItem>, DatabaseLa
 	 * @param productSkuLookup a product sku lookup
 	 */
 	boolean isBundle(ProductSkuLookup productSkuLookup);
-	
+
+	/**
+	 * <p>Returns true if this item is a constituent of a bundle.</p>
+	 * <p>Note that this method will return {@code false} when this shopping item is a dependent item, even if the parent item is a bundle.</p>
+	 *
+	 * @return if this shopping item is a bundle constituent
+	 */
+	boolean isBundleConstituent();
+
+	/**
+	 * <p>Indicate whether or not this item is a constituent of a bundle.</p>
+	 * <p>Note that the parameter should be {@code false} when this shopping item is a dependent item, even if the parent item is a bundle.</p>
+	 *
+	 * @param isBundleConstituent indicates if this shopping item is a bundle constituent
+	 */
+	void setBundleConstituent(boolean isBundleConstituent);
+
 	/**
 	 * Accepts a ShoppingCartVisitor. If this item is a bundle then it is visited first and then each of its children accept the visitor.
 	 * 

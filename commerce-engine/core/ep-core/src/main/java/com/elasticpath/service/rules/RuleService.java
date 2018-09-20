@@ -22,6 +22,7 @@ import com.elasticpath.domain.rules.RuleException;
 import com.elasticpath.domain.store.Store;
 import com.elasticpath.persistence.api.FetchGroupLoadTuner;
 import com.elasticpath.service.EpPersistenceService;
+import com.elasticpath.service.rules.impl.RuleValidationResultEnum;
 
 /***
  * Provides rule engine-related services for each rule.
@@ -396,9 +397,9 @@ public interface RuleService extends EpPersistenceService  {
 	 *
 	 * @param rule rule to check
 	 * @param storeCode scope of rule
-	 * @return true if rule is valid for store, false otherwise.
+	 * @return SUCCESS if rule is valid for store, validation error type otherwise.
 	 */
-	boolean isRuleValid(Rule rule, String storeCode);
+	RuleValidationResultEnum isRuleValid(Rule rule, String storeCode);
 
 	/**
 	 * Return a list of rule codes for given list of IDs.

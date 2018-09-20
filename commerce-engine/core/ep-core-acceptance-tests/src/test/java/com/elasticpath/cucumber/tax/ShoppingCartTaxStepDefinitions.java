@@ -6,14 +6,12 @@ package com.elasticpath.cucumber.tax;
 import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.ContextConfiguration;
 
 /**
  * Step definitions class for operations related to tax calculations on shopping carts in flight.
  *
  * @see OrderTaxStepDefinitions for tax calculations on completed orders.
  */
-@ContextConfiguration("/cucumber.xml")
 public class ShoppingCartTaxStepDefinitions {
 
 	@Autowired

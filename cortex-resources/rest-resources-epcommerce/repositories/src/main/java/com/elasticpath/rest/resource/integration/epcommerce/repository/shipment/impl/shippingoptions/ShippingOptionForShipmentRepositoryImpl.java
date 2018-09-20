@@ -4,6 +4,7 @@
 package com.elasticpath.rest.resource.integration.epcommerce.repository.shipment.impl.shippingoptions;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Locale;
 
 import io.reactivex.Single;
@@ -11,7 +12,6 @@ import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
 import com.elasticpath.domain.order.PhysicalOrderShipment;
-import com.elasticpath.domain.shipping.ShippingServiceLevel;
 import com.elasticpath.repository.Repository;
 import com.elasticpath.rest.cache.CacheResult;
 import com.elasticpath.rest.definition.base.CostEntity;
@@ -22,7 +22,8 @@ import com.elasticpath.rest.resource.ResourceOperationContext;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.shipment.ShipmentRepository;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.transform.ReactiveAdapter;
 import com.elasticpath.rest.resource.integration.epcommerce.transform.MoneyTransformer;
-import com.elasticpath.service.shipping.ShippingServiceLevelService;
+import com.elasticpath.shipping.connectivity.dto.ShippingOption;
+import com.elasticpath.service.shipping.ShippingOptionService;
 
 /**
  * Repository for reading shipping option for shipment.
@@ -36,7 +37,7 @@ public class ShippingOptionForShipmentRepositoryImpl<E extends ShippingOptionEnt
 	private static final String SHIPPING_OPTION_NOT_FOUND = "Shipping option not found.";
 	private MoneyTransformer moneyTransformer;
 	private ShipmentRepository shipmentRepository;
-	private ShippingServiceLevelService shippingServiceLevelService;
+	private ShippingOptionService shippingOptionService;
 	private ReactiveAdapter reactiveAdapter;
 	private ResourceOperationContext resourceOperationContext;
 
@@ -55,23 +56,27 @@ public class ShippingOptionForShipmentRepositoryImpl<E extends ShippingOptionEnt
 
 	private Single<ShippingOptionEntity> buildShippingOptionEntityFromCostEntity(final PhysicalOrderShipment orderShipment,
 																				 final CostEntity costEntity) {
-		return getShippingServiceLevel(orderShipment)
-				.map(serviceLevel -> buildShippingOptionEntity(costEntity, serviceLevel));
+		return getShippingOption(orderShipment)
+				.map(shippingOption -> buildShippingOptionEntity(costEntity, shippingOption));
 	}
 
 	@CacheResult
-	private Single<ShippingServiceLevel> getShippingServiceLevel(final PhysicalOrderShipment orderShipment) {
-		return reactiveAdapter.fromServiceAsSingle(
-				() -> shippingServiceLevelService.findByGuid(orderShipment.getShippingServiceLevelGuid()), SHIPPING_OPTION_NOT_FOUND);
+	private Single<ShippingOption> getShippingOption(final PhysicalOrderShipment orderShipment) {
+		final Locale locale = SubjectUtil.getLocale(resourceOperationContext.getSubject());
+		final String storeCode = orderShipment.getOrder().getStoreCode();
+		final List<ShippingOption> shippingOptionList = shippingOptionService.getAllShippingOptions(storeCode, locale).getAvailableShippingOptions();
+		final ShippingOption foundShippingOption = shippingOptionList.stream()
+				.filter(shippingOption -> shippingOption.getCode().equals(orderShipment.getShippingOptionCode())).findFirst().orElse(null);
+		return reactiveAdapter.fromServiceAsSingle(() -> foundShippingOption, SHIPPING_OPTION_NOT_FOUND);
 	}
 
-	private ShippingOptionEntity buildShippingOptionEntity(final CostEntity costEntity, final ShippingServiceLevel serviceLevel) {
+	private ShippingOptionEntity buildShippingOptionEntity(final CostEntity costEntity, final ShippingOption shippingOption) {
 		Locale locale = SubjectUtil.getLocale(resourceOperationContext.getSubject());
 		return ShippingOptionEntity.builder()
 				.withCost(Collections.singleton(costEntity))
-				.withCarrier(serviceLevel.getCarrier())
-				.withName(serviceLevel.getCode())
-				.withDisplayName(serviceLevel.getDisplayName(locale, true))
+				.withCarrier(shippingOption.getCarrierCode().orElse(null))
+				.withName(shippingOption.getCode())
+				.withDisplayName(shippingOption.getDisplayName(locale).orElse(null))
 				.build();
 	}
 
@@ -86,13 +91,8 @@ public class ShippingOptionForShipmentRepositoryImpl<E extends ShippingOptionEnt
 	}
 
 	@Reference
-	public void setShippingServiceLevelRepository(final ShippingServiceLevelService shippingServiceLevelService) {
-		this.shippingServiceLevelService = shippingServiceLevelService;
-	}
-
-	@Reference
-	public void setShippingServiceLevelService(final ShippingServiceLevelService shippingServiceLevelService) {
-		this.shippingServiceLevelService = shippingServiceLevelService;
+	public void setShippingOptionService(final ShippingOptionService shippingOptionService) {
+		this.shippingOptionService = shippingOptionService;
 	}
 
 	@Reference

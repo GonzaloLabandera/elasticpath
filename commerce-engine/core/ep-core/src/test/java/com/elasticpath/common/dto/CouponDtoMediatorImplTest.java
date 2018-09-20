@@ -134,7 +134,7 @@ public class CouponDtoMediatorImplTest {
 
 		mediator.add(addedCoupon, ruleCode);
 		Coupon coupon = couponService.getUpdatedCoupon();
-		assertEquals("Should have Suspended = True.", true, coupon.isSuspended());
+		assertTrue("Should have Suspended = True.", coupon.isSuspended());
 		assertEquals("Should have CouponCode = CouponCode1.", COUPON_CODE1, coupon.getCouponCode());
 	}
 
@@ -166,7 +166,7 @@ public class CouponDtoMediatorImplTest {
 		Coupon coupon = couponService.getUpdatedCoupon();
 		assertTrue("uids being retrieved should match the set in the dto collection", 
 				CollectionUtils.isEqualCollection(couponService.getCouponUids(), expectedUids));
-		assertEquals("Should have Suspended = True.", true, coupon.isSuspended());
+		assertTrue("Should have Suspended = True.", coupon.isSuspended());
 		assertEquals("Should have CouponCode = CouponCode1.", COUPON_CODE1, coupon.getCouponCode());
 	}
 

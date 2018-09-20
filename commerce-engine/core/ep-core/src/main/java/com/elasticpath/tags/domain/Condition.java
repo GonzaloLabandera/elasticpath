@@ -23,6 +23,13 @@ public class Condition implements Serializable {
 	private LogicalOperator parent;
 	
 	/**
+	 * Empty constructor for simple instantiation.
+	 */
+	public Condition() {
+		// Empty constructor for simple instantiation.
+	}
+	
+	/**
 	 * Constructor.
 	 * @param tagDefinition the left operand of the expression which is tag definition
 	 * @param operator the operator

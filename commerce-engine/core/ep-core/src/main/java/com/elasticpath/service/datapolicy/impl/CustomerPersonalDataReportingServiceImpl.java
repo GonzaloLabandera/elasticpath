@@ -27,10 +27,10 @@ public class CustomerPersonalDataReportingServiceImpl extends AbstractEpPersiste
 	private DataPointValueService dataPointValueService;
 
 	@Override
-	public Collection<Object[]> getData(final String storeCode, final Long customerUidPk) {
+	public Collection<Object[]> getData(final String storeCode, final String userId) {
 
 		List<Object[]> customerWithDataPoints = getPersistenceEngine()
-			.retrieveByNamedQuery("CUSTOMER_AND_DATA_POINT_BY_STORE_AND_CUSTOMER_UIDPK", customerUidPk, storeCode);
+			.retrieveByNamedQuery("CUSTOMER_AND_DATA_POINT_BY_STORE_AND_USER_ID", userId, storeCode);
 
 		if (customerWithDataPoints.isEmpty()) {
 			return Collections.emptyList();

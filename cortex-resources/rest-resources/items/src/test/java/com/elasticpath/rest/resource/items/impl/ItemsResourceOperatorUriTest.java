@@ -11,8 +11,7 @@ import org.junit.runner.RunWith;
 
 import org.mockito.Mock;
 import org.mockito.Spy;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.elasticpath.rest.OperationResult;
 import com.elasticpath.rest.ResourceOperation;
@@ -23,8 +22,7 @@ import com.elasticpath.rest.uri.URIUtil;
 /**
  * Tests URI-related annotations on {@link ItemsResourceOperatorImpl}.
  */
-@RunWith(PowerMockRunner.class)
-@PrepareForTest({ ItemsResourceOperatorImpl.class })
+@RunWith(MockitoJUnitRunner.class)
 public final class ItemsResourceOperatorUriTest extends AbstractResourceOperatorUriTest {
 
 	private static final String ITEMS = "items";

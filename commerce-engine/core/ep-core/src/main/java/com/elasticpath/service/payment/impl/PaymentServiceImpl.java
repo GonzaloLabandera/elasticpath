@@ -597,7 +597,7 @@ public class PaymentServiceImpl implements PaymentService {
 			paymentGateway = getExchangePaymentGateway(store);
 		} else {
 			paymentGateway = store.getPaymentGatewayMap().get(paymentGatewayType);
-			if (paymentGateway != null && PaymentGatewayType.CREDITCARD.equals(paymentGateway.getPaymentGatewayType())) {
+			if (paymentGateway instanceof CreditCardPaymentGateway && PaymentGatewayType.CREDITCARD.equals(paymentGateway.getPaymentGatewayType())) {
 				((CreditCardPaymentGateway) paymentGateway).setValidateCvv2(store.isCreditCardCvv2Enabled());
 			}
 		}

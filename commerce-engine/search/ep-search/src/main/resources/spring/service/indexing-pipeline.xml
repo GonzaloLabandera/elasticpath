@@ -3,8 +3,8 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:task="http://www.springframework.org/schema/task"
 	xmlns:util="http://www.springframework.org/schema/util"
 	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
-		http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task-3.0.xsd
-		http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-3.0.xsd">
+		http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task-4.0.xsd
+		http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-4.0.xsd">
 
 	<!-- BEGIN: JMX Statistics for Pipeline Performance -->
 	<bean id="threadpoolMBeanExporter" class="org.springframework.jmx.export.MBeanExporter">
@@ -106,7 +106,7 @@
 	<bean id="indexGroupingTaskFactory"
 		class="org.springframework.beans.factory.config.ObjectFactoryCreatingFactoryBean">
 		<property name="targetBeanName">
-			<idref local="indexGroupingTask" />
+			<idref bean="indexGroupingTask" />
 		</property>
 	</bean>
 
@@ -137,8 +137,6 @@
 			fixed-delay="2500" />
 		<task:scheduled ref="ruleIndexingPipeline" method="periodicMonitor"
 			fixed-delay="2500" />
-		<task:scheduled ref="shippingServiceLevelIndexingPipeline"
-			method="periodicMonitor" fixed-delay="2500" />
 	</task:scheduled-tasks>
 
 	<!-- Product Indexing Pipeline -->
@@ -175,7 +173,7 @@
 	<bean id="productLoadingTaskFactory"
 		class="org.springframework.beans.factory.config.ObjectFactoryCreatingFactoryBean">
 		<property name="targetBeanName">
-			<idref local="batchProductLoader" />
+			<idref bean="batchProductLoader" />
 		</property>
 	</bean>
 
@@ -203,7 +201,7 @@
 	<bean id="productDocumentCreatorTaskFactory"
 		class="org.springframework.beans.factory.config.ObjectFactoryCreatingFactoryBean">
 		<property name="targetBeanName">
-			<idref local="productSolrInputDocumentCreator" />
+			<idref bean="productSolrInputDocumentCreator" />
 		</property>
 	</bean>
 
@@ -271,7 +269,7 @@
 	<bean id="cmUserLoadingTaskFactory"
 		class="org.springframework.beans.factory.config.ObjectFactoryCreatingFactoryBean">
 		<property name="targetBeanName">
-			<idref local="batchCmUserLoader" />
+			<idref bean="batchCmUserLoader" />
 		</property>
 	</bean>
 
@@ -297,7 +295,7 @@
 	<bean id="cmUserDocumentCreatorTaskFactory"
 		class="org.springframework.beans.factory.config.ObjectFactoryCreatingFactoryBean">
 		<property name="targetBeanName">
-			<idref local="cmUserSolrInputDocumentCreator" />
+			<idref bean="cmUserSolrInputDocumentCreator" />
 		</property>
 	</bean>
 
@@ -349,7 +347,7 @@
 	<bean id="skuLoadingTaskFactory"
 		class="org.springframework.beans.factory.config.ObjectFactoryCreatingFactoryBean">
 		<property name="targetBeanName">
-			<idref local="batchProductSkuLookup" />
+			<idref bean="batchProductSkuLookup" />
 		</property>
 	</bean>
 
@@ -375,7 +373,7 @@
 	<bean id="skuDocumentCreatorTaskFactory"
 		class="org.springframework.beans.factory.config.ObjectFactoryCreatingFactoryBean">
 		<property name="targetBeanName">
-			<idref local="skuSolrInputDocumentCreator" />
+			<idref bean="skuSolrInputDocumentCreator" />
 		</property>
 	</bean>
 
@@ -430,7 +428,7 @@
 	<bean id="categoryLoadingTaskFactory"
 		class="org.springframework.beans.factory.config.ObjectFactoryCreatingFactoryBean">
 		<property name="targetBeanName">
-			<idref local="batchCategoryLoader" />
+			<idref bean="batchCategoryLoader" />
 		</property>
 	</bean>
 
@@ -456,7 +454,7 @@
 	<bean id="categoryDocumentCreatorTaskFactory"
 		class="org.springframework.beans.factory.config.ObjectFactoryCreatingFactoryBean">
 		<property name="targetBeanName">
-			<idref local="categorySolrInputDocumentCreator" />
+			<idref bean="categorySolrInputDocumentCreator" />
 		</property>
 	</bean>
 
@@ -516,7 +514,7 @@
 	<bean id="customerFilterTaskFactory"
 		class="org.springframework.beans.factory.config.ObjectFactoryCreatingFactoryBean">
 		<property name="targetBeanName">
-			<idref local="customerFilter" />
+			<idref bean="customerFilter" />
 		</property>
 	</bean>
 
@@ -544,7 +542,7 @@
 	<bean id="customerLoadingTaskFactory"
 		class="org.springframework.beans.factory.config.ObjectFactoryCreatingFactoryBean">
 		<property name="targetBeanName">
-			<idref local="batchCustomerLoader" />
+			<idref bean="batchCustomerLoader" />
 		</property>
 	</bean>
 
@@ -570,7 +568,7 @@
 	<bean id="customerDocumentCreatorTaskFactory"
 		class="org.springframework.beans.factory.config.ObjectFactoryCreatingFactoryBean">
 		<property name="targetBeanName">
-			<idref local="customerSolrInputDocumentCreator" />
+			<idref bean="customerSolrInputDocumentCreator" />
 		</property>
 	</bean>
 
@@ -628,7 +626,7 @@
 	<bean id="ruleLoadingTaskFactory"
 		class="org.springframework.beans.factory.config.ObjectFactoryCreatingFactoryBean">
 		<property name="targetBeanName">
-			<idref local="batchRuleLoader" />
+			<idref bean="batchRuleLoader" />
 		</property>
 	</bean>
 
@@ -655,7 +653,7 @@
 	<bean id="ruleDocumentCreatorTaskFactory"
 		class="org.springframework.beans.factory.config.ObjectFactoryCreatingFactoryBean">
 		<property name="targetBeanName">
-			<idref local="ruleSolrInputDocumentCreator" />
+			<idref bean="ruleSolrInputDocumentCreator" />
 		</property>
 	</bean>
 
@@ -680,88 +678,10 @@
 
 	<!-- Document Publishing Related : Rule -->
 
-	<!-- ShippingServiceLevel Indexing Pipeline -->
-
-	<bean id="shippingServiceLevelIndexingPipeline" init-method="initialize"
-		destroy-method="destroy"
-		class="com.elasticpath.search.index.pipeline.impl.IndexingPipelineImpl">
-		<property name="indexType">
-			<value type="com.elasticpath.service.search.IndexType">SHIPPING_SERVICE_LEVEL</value>
-		</property>
-		<property name="stages">
-			<util:list>
-				<ref bean="batchingGroupingStage"/>
-				<ref bean="shippingServiceLevelLoadingStage"/>
-				<ref bean="shippingServiceLevelDocumentCreatorStage"/>
-				<ref bean="shippingServiceLevelDocumentPublishingStage"/>
-			</util:list>
-		</property>
-		<property name="indexingStatistics" ref="indexingStats" />
-		<property name="timeService" ref="timeService" />
-		<property name="indexBuildStatusUpdater" ref="indexBuildStatusUpdater" />
-	</bean>
 
 	<bean id="indexBuildStatusUpdater" init-method="initialize"
 		destroy-method="shutdown" class="com.elasticpath.search.index.pipeline.impl.IndexBuildStatusUpdater">
 		<property name="indexBuildStatusDao" ref="indexBuildStatusDao" />
-	</bean>
-
-	<bean id="shippingServiceLevelDocumentPublishingStage"
-		class="com.elasticpath.search.index.pipeline.impl.DocumentPublishingStage">
-		<property name="solrManager" ref="solrManager" />
-		<property name="indexType">
-			<value type="com.elasticpath.service.search.IndexType">SHIPPING_SERVICE_LEVEL</value>
-		</property>
-	</bean>
-
-	<!-- Loading Related : ShippingServiceLevel solrDocumentPublisher -->
-
-	<bean id="shippingServiceLevelLoadingTaskFactory"
-		class="org.springframework.beans.factory.config.ObjectFactoryCreatingFactoryBean">
-		<property name="targetBeanName">
-			<idref local="batchShippingServiceLevelLoader" />
-		</property>
-	</bean>
-
-	<bean id="shippingServiceLevelLoadingStage"
-		class="com.elasticpath.search.index.pipeline.impl.EntityLoadingStage">
-		<property name="loaderFactory" ref="shippingServiceLevelLoadingTaskFactory" />
-		<property name="taskExecutor" ref="entityLoaderTaskExecutor" />
-	</bean>
-
-	<bean id="batchShippingServiceLevelLoader"
-		class="com.elasticpath.search.index.loader.impl.ShippingServiceLevelLoader"
-		scope="prototype">
-		<property name="shippingServiceLevelService" ref="shippingServiceLevelService" />
-		<property name="pipelinePerformance">
-			<!-- pass in a black hole PipelinePerformance for integration tests.. -->
-			<bean
-				class="com.elasticpath.search.index.pipeline.stats.impl.PipelinePerformanceImpl" />
-		</property>
-	</bean>
-
-	<!-- Document Creation Related : ShippingServiceLevel -->
-
-	<bean id="shippingServiceLevelDocumentCreatorTaskFactory"
-		class="org.springframework.beans.factory.config.ObjectFactoryCreatingFactoryBean">
-		<property name="targetBeanName">
-			<idref local="shippingServiceLevelSolrInputDocumentCreator" />
-		</property>
-	</bean>
-
-	<bean id="shippingServiceLevelDocumentCreatorStage"
-		class="com.elasticpath.search.index.pipeline.impl.DocumentCreatingStage"
-		scope="prototype">
-		<property name="documentCreatorFactory"
-			ref="shippingServiceLevelDocumentCreatorTaskFactory" />
-		<property name="taskExecutor" ref="documentCreatorTaskExecutor" />
-	</bean>
-
-	<bean id="shippingServiceLevelSolrInputDocumentCreator"
-		class="com.elasticpath.search.index.solr.document.impl.ShippingServiceLevelSolrInputDocumentCreator"
-		scope="prototype">
-		<property name="indexUtility" ref="indexUtility" />
-		<property name="analyzer" ref="analyzer" />
 	</bean>
 
 </beans>

@@ -30,11 +30,11 @@
                 <property name="category">Unformatted</property>
             </structure>
         </scalar-parameter>
-        <scalar-parameter name="customerID" id="752">
-            <text-property name="promptText">customerID</text-property>
+        <scalar-parameter name="userId" id="752">
+            <text-property name="promptText">userId</text-property>
             <property name="valueType">static</property>
             <property name="isRequired">true</property>
-            <property name="dataType">integer</property>
+            <property name="dataType">string</property>
             <property name="distinct">true</property>
             <list-property name="selectionList"/>
             <property name="paramType">simple</property>
@@ -72,12 +72,12 @@
                 <structure>
                     <property name="position">4</property>
                     <property name="name">Created</property>
-                    <property name="dataType">date-time</property>
+                    <property name="dataType">string</property>
                 </structure>
                 <structure>
                     <property name="position">5</property>
                     <property name="name">Last Updated</property>
-                    <property name="dataType">date-time</property>
+                    <property name="dataType">string</property>
                 </structure>
             </list-property>
             <list-property name="columnHints">
@@ -122,12 +122,12 @@
                     <structure>
                         <property name="position">4</property>
                         <property name="name">Created</property>
-                        <property name="dataType">date-time</property>
+                        <property name="dataType">string</property>
                     </structure>
                     <structure>
                         <property name="position">5</property>
                         <property name="name">Last Updated</property>
-                        <property name="dataType">date-time</property>
+                        <property name="dataType">string</property>
                     </structure>
                 </list-property>
             </structure>
@@ -189,7 +189,7 @@ currentRow = null;]]></method>
                     <text id="745">
                         <property name="style">table-header-line-2-cell</property>
                         <property name="contentType">html</property>
-                        <text-property name="content"><![CDATA[<b>Customer ID:</b> <VALUE-OF>params["customerID"]</VALUE-OF>]]></text-property>
+                        <text-property name="content"><![CDATA[<b>User ID:</b> <VALUE-OF>params["userId"]</VALUE-OF>]]></text-property>
                     </text>
                 </cell>
             </row>

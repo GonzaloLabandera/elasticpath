@@ -3,7 +3,11 @@
  */
 package com.elasticpath.test.integration.junit;
 
+import java.sql.SQLException;
+
 import org.apache.commons.dbcp.BasicDataSource;
+import org.apache.log4j.Logger;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestContext;
 
 import com.elasticpath.test.persister.DatasourceInitializerFactory;
@@ -17,32 +21,45 @@ import com.elasticpath.test.support.jndi.JndiContextManager;
  */
 public class DatabaseTestExecutionListenerHelper {
 	private static final String JNDI_NAME = "java:comp/env/jdbc/epjndi";
+	private static final Logger LOG = Logger.getLogger(DatabaseTestExecutionListenerHelper.class);
+
+	private DatabaseTestExecutionListenerHelper() {
+		// prohibit instances of this class being created
+	}
+
+	/**
+	 * Re-initializes a new database for a TestContext.
+	 */
+	public static void initializeSnapshot() throws SQLException {
+		final TestConfig testConfig = new TestConfig(new TestConfigurationFactory.ClassPathResourceProvider());
+		final DataSourceInitializer initializer = new DatasourceInitializerFactory().getInstance(testConfig.getDatabaseProperties());
+		initializer.initializeSnapshot();
+	}
 
 
-    private DatabaseTestExecutionListenerHelper() {
-        // prohibit instances of this class being created
-    }
+	/**
+	 * Re-initializes a new database for a TestContext.
+	 *
+	 * @param testContext the test context to re-initiliaze the database for
+	 */
+	public static void resetDatabase(final TestContext testContext, final JndiContextManager jndiContextManager) throws SQLException {
+		LOG.debug("Reset database");
+		if (testContext != null) {
+			testContext.markApplicationContextDirty(DirtiesContext.HierarchyMode.EXHAUSTIVE);
+		}
 
-    /**
-     * Re-initializes a new database for a TestContext.
-     *
-     * @param testContext the test context to re-initiliaze the database for
-     */
-    public static void resetDatabase(final TestContext testContext, final JndiContextManager jndiContextManager) {
-        testContext.markApplicationContextDirty();
+		final TestConfig testConfig = new TestConfig(new TestConfigurationFactory.ClassPathResourceProvider());
+		final DataSourceInitializer initializer = new DatasourceInitializerFactory().getInstance(testConfig.getDatabaseProperties());
 
-        final TestConfig testConfig = new TestConfig(new TestConfigurationFactory.ClassPathResourceProvider());
+		String connectionURL = initializer.resetDatabase();
 
-        final DataSourceInitializer initializer = new DatasourceInitializerFactory().getInstance(testConfig.getDatabaseProperties());
-        initializer.dropAndCreateDatabase();
-
-        final BasicDataSource dataSource = new BasicDataSource();
-        dataSource.setDriverClassName(initializer.getDriverClass().getName());
-        dataSource.setUrl(initializer.getConnectionUrl());
-        dataSource.setUsername(initializer.getUsername());
-        dataSource.setPassword(initializer.getPassword());
-
+		final BasicDataSource dataSource = new BasicDataSource();
+		dataSource.setDriverClassName(initializer.getDriverClass().getName());
+		dataSource.setUsername(initializer.getUsername());
+		dataSource.setPassword(initializer.getPassword());
+		dataSource.setUrl(connectionURL);
 		jndiContextManager.unbind(JNDI_NAME);
 		jndiContextManager.bind(JNDI_NAME, dataSource);
-    }
+	}
+
 }

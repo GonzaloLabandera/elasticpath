@@ -8,6 +8,9 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.lang.reflect.Method;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -34,10 +37,15 @@ import com.elasticpath.test.integration.BasicSpringContextTest;
 /**
  * An abstract superclass for audit tests.
  */
+@SuppressWarnings("PMD.GodClass")
 @ContextConfiguration(locations = {"classpath:integration-audit-context.xml"}, inheritLocations = true)
 public abstract class AbstractAuditTestSupport extends BasicSpringContextTest {
 
 	private static final Logger LOG = Logger.getLogger(AbstractAuditTestSupport.class);
+
+	private static final long ONE_MINUTE = 60000;
+
+	private DateFormat dateFormat = new SimpleDateFormat("EEE MMM dd HH:mm:ss zzz yyyy");
 
 	@Autowired
 	private EntityManager entityManager;
@@ -54,13 +62,13 @@ public abstract class AbstractAuditTestSupport extends BasicSpringContextTest {
 	 * The JPQL to get the change operation records.
 	 */
 	protected static final String FIND_CHANGE_OPERATION_BY_GUID_AND_TYPE =
-		"SELECT o FROM SingleChangeOperationImpl o WHERE o.rootObjectGuid=?1 AND o.changeTypeName=?2";
+			"SELECT o FROM SingleChangeOperationImpl o WHERE o.rootObjectGuid=?1 AND o.changeTypeName=?2";
 
 	/**
 	 * The JPQL to get the data changed records.
 	 */
 	protected static final String FIND_DATA_CHANGED_BY_GUID_AND_TYPE =
-		"SELECT dc FROM DataChangedImpl dc WHERE dc.changeOperation.changeTypeName=?1";
+			"SELECT dc FROM DataChangedImpl dc WHERE dc.changeOperation.changeTypeName=?1";
 
 	/**
 	 * tearDown method for each test method.
@@ -84,7 +92,7 @@ public abstract class AbstractAuditTestSupport extends BasicSpringContextTest {
 	 * @param expectedChangeOperationNumber the expected change operation number
 	 */
 	protected void verifyAuditData(final Object objectBefore, final Object objectAfter,
-			final String targetObjectGuid, final ChangeType changeType, final int expectedChangeOperationNumber) {
+								   final String targetObjectGuid, final ChangeType changeType, final int expectedChangeOperationNumber) {
 		List<ChangeOperation> changeOperations = persistenceEngine.retrieveWithNewSession(FIND_CHANGE_OPERATION_BY_GUID_AND_TYPE, new Object[]{
 				targetObjectGuid, changeType.getName()});
 		assertNotNull(changeOperations);
@@ -93,6 +101,7 @@ public abstract class AbstractAuditTestSupport extends BasicSpringContextTest {
 
 		List<DataChanged> dataChanges = persistenceEngine.retrieveWithNewSession(FIND_DATA_CHANGED_BY_GUID_AND_TYPE,
 				new Object[]{changeType.getName()});
+
 		assertNotNull(dataChanges);
 
 		verifyDataChanged(objectBefore, objectAfter, dataChanges, changeType);
@@ -109,7 +118,7 @@ public abstract class AbstractAuditTestSupport extends BasicSpringContextTest {
 	 * @param changeType the change type
 	 */
 	protected void verifyDataChanged(final Object objectBefore, final Object objectAfter, final List<DataChanged> dataChanges,
-			final ChangeType changeType) {
+									 final ChangeType changeType) {
 		//EntityManager entityManager = getEntityManager();
 
 		Object object = null;
@@ -119,7 +128,6 @@ public abstract class AbstractAuditTestSupport extends BasicSpringContextTest {
 			object = objectBefore;
 		}
 		ClassMetaData metaData = JPAFacadeHelper.getMetaData(entityManager, object.getClass());
-
 		for (FieldMetaData fieldMetaData : metaData.getFields()) {
 			if (fieldMetaData.isPrimaryKey() || fieldMetaData.isVersion() || fieldMetaData.isTransient()) {
 				continue;
@@ -215,40 +223,57 @@ public abstract class AbstractAuditTestSupport extends BasicSpringContextTest {
 	 * @param dataChanges the list of data changed
 	 * @param changeType the change type
 	 */
-	protected void verifyUnEmbeddedChanges(final Object object, final String fieldName, final String fieldValueBefore, final String fieldValueAfter,
-			final List<DataChanged> dataChanges, final ChangeType changeType) {
+	protected void verifyUnEmbeddedChanges(final Object object, final String fieldName, String fieldValueBefore, final String fieldValueAfter,
+										   final List<DataChanged> dataChanges, final ChangeType changeType) {
 
 		dataChangedRecordCount++;
 
 		List<DataChanged> filteredDataChangedList = findDataChangedByChangeType(object, fieldName, dataChanges, changeType);
 		assertFalse(filteredDataChangedList.isEmpty());
 
+		StringBuilder debugInfo = new StringBuilder();
+		debugInfo.append("\nObject: \n");
+		debugInfo.append(object.getClass().getSimpleName());
+		debugInfo.append('.');
+		debugInfo.append(fieldName);
+		debugInfo.append(" changed from ");
+		debugInfo.append(fieldValueBefore);
+		debugInfo.append(" to ");
+		debugInfo.append(fieldValueAfter);
+
 		boolean verifyResult = false;
 		for (DataChanged dataChanged : filteredDataChangedList) {
-			LOG.info("");
-			LOG.info("object:" + object.getClass());
-			LOG.info("field: " + fieldName);
-			LOG.info("value before operation: " + dataChanged.getFieldOldValue());
-			LOG.info("value after operation:" + dataChanged.getFieldNewValue());
+			debugInfo.append("\nData Change record: ");
+			debugInfo.append(dataChanged.getFieldOldValue());
+			debugInfo.append(" changed to ");
+			debugInfo.append(dataChanged.getFieldNewValue());
 
-			if (Objects.equals(dataChanged.getFieldNewValue(), fieldValueAfter)
-					&& Objects.equals(dataChanged.getFieldOldValue(), fieldValueBefore)) {
-				LOG.info("was matched in data change");
+			if (auditEquals(dataChanged.getFieldOldValue(), fieldValueBefore)
+					&& auditEquals(dataChanged.getFieldNewValue(), fieldValueAfter)) {
 				verifyResult = true;
 				break;
-			} else {
-				LOG.info("was not matched in data change");
 			}
 		}
+
+		String debugMessage = debugInfo.toString();
+		LOG.debug(debugMessage);
 
 		if (!verifyResult) {
 			LOG.error("No audit records match.  Audit Records:");
 			LOG.error(filteredDataChangedList);
 		}
-		assertTrue("Object " + object.getClass() + " field " + fieldName
-				+ "before [" + fieldValueBefore + "] after [" + fieldValueAfter
-				+ "] should have been found in data change - # records = " + filteredDataChangedList.size(),
-				verifyResult);
+		assertTrue(debugMessage, verifyResult);
+	}
+
+	private boolean auditEquals(final String dataChangedValue, final String fieldValue) {
+		if (dataChangedValue != null && fieldValue != null) {
+			try {
+				return Math.abs(dateFormat.parse(fieldValue).getTime() - dateFormat.parse(dataChangedValue).getTime()) <= ONE_MINUTE;
+			} catch (ParseException e) {
+				// not a date so just use Objects.equals
+			}
+		}
+		return Objects.equals(dataChangedValue, fieldValue);
 	}
 
 	/**
@@ -305,7 +330,7 @@ public abstract class AbstractAuditTestSupport extends BasicSpringContextTest {
 	 * @return a list of data changed records
 	 */
 	protected List<DataChanged> findDataChangedByChangeType(final Object object, final String filedName, final List<DataChanged> dataChanges,
-			final ChangeType changeType) {
+															final ChangeType changeType) {
 		List<DataChanged> dataChangedList = new ArrayList<>();
 		for (DataChanged dataChanged : dataChanges) {
 			if (dataChanged.getFieldName().equals(filedName) && dataChanged.getObjectName().equals(object.getClass().getName())

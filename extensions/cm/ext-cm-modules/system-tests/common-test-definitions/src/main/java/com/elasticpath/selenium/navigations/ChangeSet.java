@@ -20,7 +20,7 @@ public class ChangeSet extends AbstractNavigation {
 			= LEFT_PANE_INNER_CSS + "div[automation-id='com.elasticpath.cmclient.changeset.ChangeSetMessages.ChangeSetSearchView_ClearButton']";
 	private static final String CHANGE_SET_NAME_INPUT_CSS =
 			LEFT_PANE_INNER_CSS + "div[automation-id='com.elasticpath.cmclient.changeset.ChangeSetMessages.ChangeSetEditor_ChangeSet_Name'] > input";
-	private static final String CHANGESET_STATE_DROPDOWN_CSS  = "div[automation-id='com.elasticpath.cmclient.changeset.ChangeSetMessages."
+	private static final String CHANGESET_STATE_DROPDOWN_CSS = "div[automation-id='com.elasticpath.cmclient.changeset.ChangeSetMessages."
 			+ "ChangeSetState_ComboLabel'][widget-type='CCombo']";
 	private static final int RETRY_COUNTER = 5;
 
@@ -58,6 +58,7 @@ public class ChangeSet extends AbstractNavigation {
 	 * @return ChangeSetSearchResultPane
 	 */
 	public ChangeSetSearchResultPane searchChangeSetByName(final String changeSetName) {
+		waitForElementToLoad(getDriver().findElement(By.cssSelector(CHANGE_SET_NAME_INPUT_CSS)));
 		clearAndType(CHANGE_SET_NAME_INPUT_CSS, changeSetName);
 		int counter = 0;
 		while (!getDriver().findElement(By.cssSelector(CHANGE_SET_NAME_INPUT_CSS)).getAttribute("value").contains(changeSetName)
@@ -78,6 +79,7 @@ public class ChangeSet extends AbstractNavigation {
 
 	/**
 	 * selects the change set state for search.
+	 *
 	 * @param state the state.
 	 */
 	public void selectChangeSetState(final String state) {

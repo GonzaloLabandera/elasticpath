@@ -35,7 +35,7 @@ public class OrderShipmentToDtoTest {
 	private static final String SHIPMENTNUMBER = "10000-1";
 	private static final String CARRIER = "FedEx";
 	private static final String TRACKINGCODE = "trackingCode";
-	private static final String SERVICELEVEL = "serviceLevel";
+	private static final String SHIPPING_OPTION_CODE = "shippingOptionCode";
 	private static final BigDecimal SHIPPINGCOST = new BigDecimal("10.00");
 
 	@Rule
@@ -69,9 +69,9 @@ public class OrderShipmentToDtoTest {
 		Order order = new OrderImpl();
 		order.setExternalOrderNumber(EXTERNALORDERNUMBER);
 		PhysicalOrderShipment source = new PhysicalOrderShipmentImpl();
-		source.setCarrier(CARRIER);
+		source.setCarrierCode(CARRIER);
 		source.setTrackingCode(TRACKINGCODE);
-		source.setServiceLevel(SERVICELEVEL);
+		source.setShippingOptionCode(SHIPPING_OPTION_CODE);
 		source.setShippingCost(SHIPPINGCOST);
 		source.setOrder(order);
 		source.setShipmentNumber(SHIPMENTNUMBER);
@@ -79,9 +79,9 @@ public class OrderShipmentToDtoTest {
 
 		OrderShipmentDto target = orderShipmentToDto.convert(source);
 		assertEquals(PHYSICAL, target.isPhysical());
-		assertEquals(CARRIER, target.getCarrier());
+		assertEquals(CARRIER, target.getCarrierCode());
 		assertEquals(TRACKINGCODE, target.getTrackingCode());
-		assertEquals(SERVICELEVEL, target.getServiceLevel());
+		assertEquals(SHIPPING_OPTION_CODE, target.getShippingOptionCode());
 		assertEquals(SHIPPINGCOST, target.getShippingCost());
 		assertEquals(EXTERNALORDERNUMBER, target.getExternalOrderNumber());
 		assertEquals(SHIPMENTNUMBER, target.getShipmentNumber());

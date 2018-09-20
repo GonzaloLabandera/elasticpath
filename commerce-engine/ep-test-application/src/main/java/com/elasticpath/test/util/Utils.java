@@ -16,8 +16,11 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
+import java.util.TimeZone;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.TransformerException;
@@ -25,6 +28,8 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
+import com.joestelmach.natty.DateGroup;
+import com.joestelmach.natty.Parser;
 import org.apache.commons.lang3.StringUtils;
 import org.w3c.dom.Document;
 
@@ -119,13 +124,19 @@ public class Utils {
 	 * @return date parsed from string.
 	 */
 	public static Date getDate(final String dateString) {
-		if ("null".equals(dateString) || StringUtils.isEmpty(dateString)) {
-			return new Date();
-		}
-		final DateTimeFormatter formatter = DateTimeFormatter.ISO_DATE_TIME;
-		LocalDateTime localDateTime = LocalDateTime.parse(dateString, formatter);
+		if (StringUtils.isNotEmpty(dateString) && !("null".equals(dateString))) {
 
-		return Date.from(localDateTime.atZone(ZoneOffset.UTC).toInstant());
+			Parser parser = new Parser(TimeZone.getTimeZone("UTC"));
+			List<DateGroup> dateGroups = parser.parse(dateString);
+
+			if (!dateGroups.isEmpty()) {
+				List<Date> dates = dateGroups.get(0).getDates();
+				if (!dates.isEmpty()) {
+					return dates.get(0);
+				}
+			}
+		}
+		return new Date();
 	}
 
 	/**

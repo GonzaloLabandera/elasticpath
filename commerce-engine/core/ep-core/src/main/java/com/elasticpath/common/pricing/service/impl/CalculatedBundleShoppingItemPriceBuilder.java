@@ -12,8 +12,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.google.common.collect.ImmutableMap;
+
+import com.elasticpath.base.common.dto.StructuredErrorMessage;
 import com.elasticpath.base.exception.EpSystemException;
-import com.elasticpath.common.dto.StructuredErrorMessage;
 import com.elasticpath.common.pricing.service.BundleShoppingItemPriceBuilder;
 import com.elasticpath.common.pricing.service.PriceLookupFacade;
 import com.elasticpath.commons.beanframework.BeanFactory;
@@ -34,7 +36,6 @@ import com.elasticpath.sellingchannel.ProductUnavailableException;
 import com.elasticpath.service.catalog.BundleIdentifier;
 import com.elasticpath.service.catalog.ProductSkuLookup;
 import com.elasticpath.service.pricing.PriceProvider;
-import com.google.common.collect.ImmutableMap;
 
 /**
  * Implementation of BundlePriceCalculator strategy.

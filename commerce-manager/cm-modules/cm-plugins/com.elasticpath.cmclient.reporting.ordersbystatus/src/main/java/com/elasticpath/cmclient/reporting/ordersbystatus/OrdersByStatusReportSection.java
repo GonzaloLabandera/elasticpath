@@ -46,6 +46,7 @@ import com.elasticpath.cmclient.core.ui.framework.EpControlFactory.EpState;
 import com.elasticpath.cmclient.core.ui.framework.IEpDateTimePicker;
 import com.elasticpath.cmclient.core.ui.framework.IEpLayoutComposite;
 import com.elasticpath.cmclient.core.ui.framework.IEpLayoutData;
+import com.elasticpath.cmclient.core.util.DateTimeUtilFactory;
 import com.elasticpath.cmclient.core.validation.CompoundValidator;
 import com.elasticpath.cmclient.core.validation.EpValidatorFactory;
 import com.elasticpath.cmclient.reporting.AbstractReportSection;
@@ -336,8 +337,8 @@ public class OrdersByStatusReportSection extends AbstractReportSection {
 
 		paramsMap.put("store", ordersByStatusParameters.getStore()); //$NON-NLS-1$
 		paramsMap.put("isShowExchangeOnly", ordersByStatusParameters.getExchangeString()); //$NON-NLS-1$
-		paramsMap.put("startDate", ordersByStatusParameters.getStartDate()); //$NON-NLS-1$
-		paramsMap.put("endDate", ordersByStatusParameters.getEndDate()); //$NON-NLS-1$
+		paramsMap.put("startDate", DateTimeUtilFactory.getDateUtil().formatAsDateTime(ordersByStatusParameters.getStartDate())); //$NON-NLS-1$
+		paramsMap.put("endDate", DateTimeUtilFactory.getDateUtil().formatAsDateTime(ordersByStatusParameters.getEndDate())); //$NON-NLS-1$
 		paramsMap.put("currency", ordersByStatusParameters.getCurrency().getCurrencyCode()); //$NON-NLS-1$
 		paramsMap.put("checkedStatuses", ordersByStatusParameters.getCheckedOrderStatuses()); //$NON-NLS-1$
 		paramsMap.put("internationalizedStatuses", ordersByStatusParameters.getTitle()); //$NON-NLS-1$

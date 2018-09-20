@@ -19,8 +19,7 @@ import org.junit.runner.RunWith;
 
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.mock.web.MockFilterChain;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
@@ -35,8 +34,7 @@ import com.elasticpath.rest.relos.rs.subject.SubjectHeaderConstants;
 /**
  * Test class for {@link OAuth2TokenAuthenticationFilter}.
  */
-@RunWith(PowerMockRunner.class)
-@PrepareForTest(TokenValidator.class)
+@RunWith(MockitoJUnitRunner.class)
 public final class OAuth2TokenAuthenticationFilterTest {
 
 	private static final int ONE_HOUR_MILLI_SECONDS = 3_600_000;

@@ -10,7 +10,10 @@ import org.openqa.selenium.WebDriver;
 public class CategoryFinderDialog extends AbstractDialog {
 
 
-	private static final String CATEGORY_FINDER_PARENT_CSS = "div[automation-id='com.elasticpath.cmclient.core."
+	/**
+	 * CSS selector used to identify the dialog.
+	 */
+	public static final String CATEGORY_FINDER_PARENT_CSS = "div[automation-id='com.elasticpath.cmclient.core."
 			+ "CoreMessages.CategoryFinderDialog_WindowTitle'] ";
 	private static final String CATALOG_COMBO_PARENT_CSS = "div[automation-id='com.elasticpath.cmclient.core.CoreMessages."
 			+ "CategoryFinderDialog_Catalog'][widget-type='CCombo'] ";

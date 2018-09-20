@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) Elastic Path Software Inc., 2007
  */
 package com.elasticpath.test.integration;
@@ -8,7 +8,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.Currency;
 import java.util.Date;
 import java.util.HashSet;
@@ -57,23 +57,33 @@ import com.elasticpath.test.util.Utils;
  */
 public class OrderFactoryImplTest extends DbTestCase {
 
-	@Autowired private CheckoutService checkoutService;
+	@Autowired
+	private CheckoutService checkoutService;
 
-	@Autowired private ShopperService shopperService;
+	@Autowired
+	private ShopperService shopperService;
 
-	@Autowired private CartDirector cartDirector;
+	@Autowired
+	private CartDirector cartDirector;
 
-	@Autowired private ShoppingItemDtoFactory shoppingItemDtoFactory;
+	@Autowired
+	private ShoppingItemDtoFactory shoppingItemDtoFactory;
 
-	@Autowired private ShoppingContextBuilder shoppingContextBuilder;
+	@Autowired
+	private ShoppingContextBuilder shoppingContextBuilder;
 
-	@Autowired private CartOrderService cartOrderService;
+	@Autowired
+	private CartOrderService cartOrderService;
 
-	@Autowired private PricingSnapshotService pricingSnapshotService;
+	@Autowired
+	private PricingSnapshotService pricingSnapshotService;
 
-	@Autowired private TaxSnapshotService taxSnapshotService;
+	@Autowired
+	private TaxSnapshotService taxSnapshotService;
 
-	/** An anonymous customer, you can use them to make orders. */
+	/**
+	 * An anonymous customer, you can use them to make orders.
+	 */
 	private Customer anonymousCustomer;
 
 	private ShoppingContext anonymousShoppingContext;
@@ -189,8 +199,7 @@ public class OrderFactoryImplTest extends DbTestCase {
 		shoppingCart.initialize();
 		shoppingCart.setBillingAddress(getBillingAddress());
 		shoppingCart.setShippingAddress(getBillingAddress());
-		shoppingCart.setShippingServiceLevelList(Arrays.asList(scenario.getShippingServiceLevel()));
-		shoppingCart.setSelectedShippingServiceLevelUid(scenario.getShippingServiceLevel().getUidPk());
+		shoppingCart.setSelectedShippingOption(scenario.getShippingOption());
 
 		final ShoppingCartService shoppingCartService = getBeanFactory().getBean(ContextIdNames.SHOPPING_CART_SERVICE);
 		shoppingCartService.saveOrUpdate(shoppingCart);
@@ -204,16 +213,10 @@ public class OrderFactoryImplTest extends DbTestCase {
 	 */
 	private OrderPayment getOrderPayment() {
 		final OrderPayment orderPayment = getBeanFactory().getBean(ContextIdNames.ORDER_PAYMENT);
-		orderPayment.setCardHolderName("test test");
-		orderPayment.setCardType("001");
 		orderPayment.setCreatedDate(new Date());
 		orderPayment.setCurrencyCode("USD");
 		orderPayment.setEmail(anonymousCustomer.getEmail());
-		orderPayment.setExpiryMonth("09");
-		orderPayment.setExpiryYear("10");
-		orderPayment.setPaymentMethod(PaymentType.CREDITCARD);
-		orderPayment.setCvv2Code("1111");
-		orderPayment.setUnencryptedCardNumber("4111111111111111");
+		orderPayment.setPaymentMethod(PaymentType.PAYMENT_TOKEN);
 		return orderPayment;
 	}
 
@@ -242,10 +245,9 @@ public class OrderFactoryImplTest extends DbTestCase {
 	}
 
 	private Product createPhysicalProduct() {
-		Product physicalProduct = persisterFactory.getCatalogTestPersister().createDefaultProductWithSkuAndInventory(scenario.getCatalog(),
+		return persisterFactory.getCatalogTestPersister().createDefaultProductWithSkuAndInventory(scenario.getCatalog(),
 				scenario.getCategory(),
 				scenario.getWarehouse());
-		return physicalProduct;
 	}
 
 	public EventOriginatorHelper getEventOriginatorHelper() {

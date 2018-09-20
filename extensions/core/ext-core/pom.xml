@@ -12,10 +12,6 @@
 	<packaging>bundle</packaging>
 	<name>Extension Core</name>
 
-	<properties>
-		<licensing.skip>true</licensing.skip>
-	</properties>
-
 	<build>
 		<plugins>
 			<plugin>
@@ -73,7 +69,7 @@
 					<dependency>
 						<groupId>com.elasticpath</groupId>
 						<artifactId>ep-core</artifactId>
-			<version>${platform.version}</version>
+						<version>${dce.version}</version>
 					</dependency>
 				</dependencies>
 			</plugin>
@@ -124,7 +120,6 @@
 		<dependency>
 			<groupId>com.elasticpath</groupId>
 			<artifactId>ep-core</artifactId>
-			<version>${platform.version}</version>
 			<scope>provided</scope>
 		</dependency>
 	</dependencies>

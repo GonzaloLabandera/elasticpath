@@ -65,10 +65,10 @@ Feature: Create & Edit Category
     When I change store visible to invisible
     Then the store visibility for the category is invisible
     When I select editor's Attributes tab
-    And I clear Category Rating attribute value
-    Then I should see the new attribute value N/A
-    When I edit Category Description to have a value of <newAttributeValue>
+    And I edit Category Description to have a value of <newAttributeValue>
     Then I should see the new attribute value <newAttributeValue>
+    When I clear Category Rating attribute value
+    Then I should see the new attribute value N/A
     When I select editor's Summary tab
     And I edit the category type to <newType>
     Then category type displays as <newType>

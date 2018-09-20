@@ -8,7 +8,10 @@ import org.openqa.selenium.WebDriver;
  */
 public class EditAttributeDialog extends AbstractDialog {
 
-	private static final String EDIT_ATTRUBUTE_PARENT_CSS
+	/**
+	 * CSS selector used to identify the dialog.
+	 */
+	public static final String EDIT_ATTRUBUTE_PARENT_CSS
 			= "div[automation-id='com.elasticpath.cmclient.catalog.CatalogMessages.AttributeAddDialog_WinTitle_Edit'] ";
 	private static final String ATTRUBUTE_NAME_INPUT_CSS = EDIT_ATTRUBUTE_PARENT_CSS
 			+ "div[automation-id='com.elasticpath.cmclient.catalog.CatalogMessages.AttributeAddDialog_AttributeName'] > input";

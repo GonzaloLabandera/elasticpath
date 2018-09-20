@@ -5,12 +5,12 @@ package com.elasticpath.cmclient.conditionbuilder.valueeditor;
 
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
 
 import com.elasticpath.cmclient.core.CmSingletonUtil;
+import com.elasticpath.cmclient.core.CorePlugin;
 import com.elasticpath.cmclient.core.ServiceLocator;
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.commons.constants.ValueTypeEnum;
@@ -123,8 +123,7 @@ public final class SelectableValuesProviderFactory {
 		} else {
 			// init new provider
 			final List<SelectableValue<Object>> list = selectableTagValuesFacade.getSelectableValues(tagDefinition.getValueType(),
-				Locale.getDefault(),
-				null);
+					CorePlugin.getDefault().getDefaultLocale(), null);
 			if (null == list) {
 				// no values provider for given tag definition
 				valuesProvider = new SelectableValuesProvider();

@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) Elastic Path Software Inc., 2016
  */
 package com.elasticpath.paymentgateways.cybersource;
@@ -51,15 +51,12 @@ import com.elasticpath.plugin.payment.capabilities.RefundCapability;
 import com.elasticpath.plugin.payment.capabilities.ReversePreAuthorizationCapability;
 import com.elasticpath.plugin.payment.capabilities.VoidCaptureCapability;
 import com.elasticpath.plugin.payment.dto.AddressDto;
-import com.elasticpath.plugin.payment.dto.CardDetailsPaymentMethod;
 import com.elasticpath.plugin.payment.dto.MoneyDto;
 import com.elasticpath.plugin.payment.dto.OrderPaymentDto;
-import com.elasticpath.plugin.payment.dto.PayerAuthValidationValueDto;
 import com.elasticpath.plugin.payment.dto.PayerAuthenticationEnrollmentResultDto;
 import com.elasticpath.plugin.payment.dto.PaymentMethod;
 import com.elasticpath.plugin.payment.dto.ShoppingCartDto;
 import com.elasticpath.plugin.payment.dto.impl.MoneyDtoImpl;
-import com.elasticpath.plugin.payment.dto.impl.PayerAuthValidationValueDtoImpl;
 import com.elasticpath.plugin.payment.dto.impl.PayerAuthenticationEnrollmentResultDtoImpl;
 import com.elasticpath.plugin.payment.exceptions.AuthorizedAmountExceededException;
 import com.elasticpath.plugin.payment.exceptions.CardDeclinedException;
@@ -77,14 +74,6 @@ import com.elasticpath.plugin.payment.transaction.CaptureTransactionResponse;
 @SuppressWarnings({"PMD.GodClass", "PMD.ExcessiveImports"})
 public abstract class AbstractFakeCybersourcePaymentGatewayPluginImpl extends AbstractCreditCardPaymentGatewayPluginSPI
 		implements CaptureCapability, RefundCapability, ReversePreAuthorizationCapability, VoidCaptureCapability {
-
-	private static final String CARD_EXPIRATION_YEAR = "card_expirationYear";
-
-	private static final String CARD_EXPIRATION_MONTH = "card_expirationMonth";
-
-	private static final String CARD_ACCOUNT_NUMBER = "card_accountNumber";
-
-	private static final String ITEM_PREFIX = "item_";
 
 	/** Determines the number of digits in the random portion of the reference code. */
 	private static final int RANDOM_NUMBER_MULTIPLIER = 1000;
@@ -106,55 +95,15 @@ public abstract class AbstractFakeCybersourcePaymentGatewayPluginImpl extends Ab
 
 	private static final String PAYER_AUTH_PAREQ = "payerAuthEnrollReply_paReq";
 
-	private static final String TYPE_OF_VISA = "001";
-
-	private static final String TYPE_OF_MASTERCARD = "002";
-
-	private static final String TYPE_OF_JCB = "007";
-
 	private Map<String, String> supportedCardTypes;
-
-	/**
-	 * Creates an item request map to be used in the Cybersource transaction from item information.
-	 *
-	 * @param number number of item.
-	 * @param productName the product name
-	 * @param productSku the product sku
-	 * @param quantity the quantity of the sku
-	 * @param taxAmount the tax amount
-	 * @param unitPrice the unit price
-	 * @return the request map representation of an item.
-	 */
-	protected Map<String, String> createItem(final int number, final String productName, final String productSku,
-			final int quantity, final BigDecimal taxAmount, final BigDecimal unitPrice) {
-		Map<String, String> itemMap = new HashMap<>();
-
-		itemMap.put(ITEM_PREFIX + number + "_productName", productName);
-		itemMap.put(ITEM_PREFIX + number + "_productSKU", productSku);
-		itemMap.put(ITEM_PREFIX + number + "_quantity", String.valueOf(quantity));
-
-		if (taxAmount != null) {
-			itemMap.put(ITEM_PREFIX + number + "_taxAmount", convertToString(taxAmount));
-		}
-		if (unitPrice != null) {
-			itemMap.put(ITEM_PREFIX + number + "_unitPrice", convertToString(unitPrice));
-		}
-
-		return itemMap;
-	}
 
 	/**
 	 * Sets the reference code for the given <code>OrderPayment</code>.
 	 *
-	 * @param payment the payment whose reference code is to be set
 	 * @param request the map specifying the parameters of the Cybersource request
 	 */
-	protected void setRequestReferenceCode(final CardDetailsPaymentMethod payment, final Map<String, String> request) {
-		if (payment.getReferenceId() == null || "".equals(payment.getReferenceId())) {
-			request.put(MERCHANT_REFERENCE_CODE, this.generateReferenceCode());
-		} else {
-			request.put(MERCHANT_REFERENCE_CODE, payment.getReferenceId());
-		}
+	protected void setRequestReferenceCode(final Map<String, String> request) {
+		request.put(MERCHANT_REFERENCE_CODE, this.generateReferenceCode());
 	}
 
 	/**
@@ -180,7 +129,7 @@ public abstract class AbstractFakeCybersourcePaymentGatewayPluginImpl extends Ab
 		request.put(REQUEST_ID, payment.getAuthorizationCode());
 		request.put(REQUEST_TOKEN, payment.getRequestToken());
 
-		setRequestReferenceCode(payment, request);
+		setRequestReferenceCode(request);
 
 		Map<String, String> transactionReply = runTransaction(payment, request);
 
@@ -201,7 +150,6 @@ public abstract class AbstractFakeCybersourcePaymentGatewayPluginImpl extends Ab
 			request.put("voidService_voidRequestToken", payment.getRequestToken());
 			request.put(MERCHANT_ID, getConfigurationValues().get(MERCHANT_ID));
 
-			setRequestReferenceCode(payment, request);
 			request.put(REQUEST_ID, payment.getAuthorizationCode());
 			request.put(REQUEST_TOKEN, payment.getRequestToken());
 
@@ -238,18 +186,6 @@ public abstract class AbstractFakeCybersourcePaymentGatewayPluginImpl extends Ab
 	}
 
 
-	private void addAttributeForPayerAuth(final CardDetailsPaymentMethod payment, final Map<String, String> request) {
-		final PayerAuthValidationValueDto payerAuthValidationValue = payment.getPayerAuthValidationValueDto();
-		if (payerAuthValidationValue != null && payerAuthValidationValue.isValidated()) {
-			request.put("ccAuthService_xid", payerAuthValidationValue.getXID());
-			request.put("ccAuthService_commerceIndicator", payerAuthValidationValue.getCommerceIndicator());
-			request.put("ccAuthService_eci", payerAuthValidationValue.getECI());
-			request.put("ccAuthService_cavv", payerAuthValidationValue.getCAVV());
-			request.put("ucaf_authenticationData", payerAuthValidationValue.getAAV());
-			request.put("ucaf_collectionIndicator", payerAuthValidationValue.getUcafCollectionIndicator());
-		}
-	}
-
 	private void updateOrderPaymentWithFollowOnRequestFields(final OrderPaymentDto payment, final Map<String, String> transactionReply) {
 		payment.setAuthorizationCode(transactionReply.get(REQUEST_ID));
 		payment.setRequestToken(transactionReply.get(REQUEST_TOKEN));
@@ -263,17 +199,10 @@ public abstract class AbstractFakeCybersourcePaymentGatewayPluginImpl extends Ab
 	 * @return PaymentTransactionResponse the response from the gateway
 	 */
 	protected Map<String, String> runTransaction(final PaymentMethod payment, final Map<String, String> request) {
-		Map<String, String> reply = null;
-
-		//Add name-pairs for Payer Authentication
-		if (payment instanceof CardDetailsPaymentMethod) {
-			addAttributeForPayerAuth((CardDetailsPaymentMethod) payment, request);
-		}
-
 		displayMap("PAYMENT GATEWAY REQUEST:", request);
 
 		// run transaction
-		reply = runTransaction(request);
+		Map<String, String> reply = runTransaction(request);
 
 		displayMap("PAYMENT GATEWAY REPLY:", reply);
 
@@ -394,7 +323,7 @@ public abstract class AbstractFakeCybersourcePaymentGatewayPluginImpl extends Ab
 	 * @return the unique reference code
 	 */
 	private String generateReferenceCode() {
-		return String.valueOf(Math.random() * RANDOM_NUMBER_MULTIPLIER + new Date().getTime());
+		return String.valueOf((Math.random() * RANDOM_NUMBER_MULTIPLIER) + (new Date()).getTime());
 	}
 
 	/**
@@ -418,9 +347,7 @@ public abstract class AbstractFakeCybersourcePaymentGatewayPluginImpl extends Ab
 	 */
 	private List<String> getDefaultSupportedCardTypesValues(final Map<String, String> supportedCardTypesMap) {
 		final List<String> supportedCardTypesList = new ArrayList<>();
-		for (final String cardType : supportedCardTypesMap.keySet()) {
-			supportedCardTypesList.add(cardType);
-		}
+		supportedCardTypesList.addAll(supportedCardTypesMap.keySet());
 		return supportedCardTypesList;
 	}
 
@@ -468,22 +395,6 @@ public abstract class AbstractFakeCybersourcePaymentGatewayPluginImpl extends Ab
 		request.put(PAYER_AUTH_ENROLL_SERVICE_RUN, TRUE);
 		request.put(MERCHANT_ID, getConfigurationValues().get(MERCHANT_ID));
 
-		setRequestReferenceCode(payment, request);
-
-		// Card Information
-		final String cardTypeCode = this.getDefaultSupportedCardTypes().get(payment.getCardType());
-		if (cardTypeCode != null) {
-			request.put("card_cardType", cardTypeCode);
-			if (cardTypeCode.equals(TYPE_OF_VISA) || cardTypeCode.equals(TYPE_OF_JCB)) {
-
-				request.put("item_0_unitPrice",
-						convertToString(shoppingCart.getTotalAmount()));
-			}
-		}
-
-		request.put(CARD_ACCOUNT_NUMBER, payment.getUnencryptedCardNumber());
-		request.put(CARD_EXPIRATION_MONTH, payment.getExpiryMonth());
-		request.put(CARD_EXPIRATION_YEAR, payment.getExpiryYear());
 		request.put(PURCHASE_TOTALS_CURRENCY, shoppingCart.getCurrencyCode());
 
 		displayMap("CREDIT CARD 3-D SECURE ENROLLMENT REQUEST:", request);
@@ -515,23 +426,11 @@ public abstract class AbstractFakeCybersourcePaymentGatewayPluginImpl extends Ab
 	@Override
 	public boolean validateAuthentication(final OrderPaymentDto payment, final String paRes) {
 
-		boolean returnValue = false;
-
 		final HashMap<String, String> request = new HashMap<>();
 		request.put(PAYER_AUTH_VALIDATE_SERVICE_RUN, TRUE);
 		request.put(MERCHANT_ID, getConfigurationValues().get(MERCHANT_ID));
 
-		setRequestReferenceCode(payment, request);
 
-		// Card Information
-		final String cardTypeCode = this.getDefaultSupportedCardTypes().get(payment.getCardType());
-		if (cardTypeCode != null) {
-			request.put("card_cardType", cardTypeCode);
-		}
-
-		request.put(CARD_ACCOUNT_NUMBER, payment.getUnencryptedCardNumber());
-		request.put(CARD_EXPIRATION_MONTH, payment.getExpiryMonth());
-		request.put(CARD_EXPIRATION_YEAR, payment.getExpiryYear());
 		request.put(PURCHASE_TOTALS_CURRENCY, payment.getCurrencyCode());
 
 		request.put("payerAuthValidateService_signedPARes", paRes);
@@ -545,40 +444,10 @@ public abstract class AbstractFakeCybersourcePaymentGatewayPluginImpl extends Ab
 
 		final String reason = reply.get(REASON_CODE);
 
-		if (reason.equals(SUCCESSFUL_RESPONSE_CODE)) {
-			final PayerAuthValidationValueDto payerAuthValidationValue = new PayerAuthValidationValueDtoImpl();
-
-			final String commerceIndicator = reply.get("payerAuthValidateReply_commerceIndicator");
-			payerAuthValidationValue.setCommerceIndicator(commerceIndicator);
-
-			final String eCI = reply.get("payerAuthValidateReply_eci");
-			payerAuthValidationValue.setECI(eCI);
-
-			final String xID = reply.get("payerAuthValidateReply_xid");
-			payerAuthValidationValue.setXID(xID);
-
-			if (cardTypeCode.equals(TYPE_OF_VISA) || cardTypeCode.equals(TYPE_OF_JCB)) {
-				final String cAVV = reply.get("payerAuthValidateReply_cavv");
-				payerAuthValidationValue.setCAVV(cAVV);
-			}
-
-			if (cardTypeCode.equals(TYPE_OF_MASTERCARD)) {
-				final String aAv = reply.get("payerAuthValidateReply_ucafAuthenticationData");
-				payerAuthValidationValue.setAAV(aAv);
-
-				final String ucafCollectionIndicator = reply.get("payerAuthValidateReply_ucafCollectionIndicator");
-				payerAuthValidationValue.setUcafCollectionIndicator(ucafCollectionIndicator);
-			}
-
-			payerAuthValidationValue.setValidated(true);
-			payment.setPayerAuthValidationValueDto(payerAuthValidationValue);
-			returnValue = true;
-
-		} else if (reason.equals(SYS_ERROR_RESPONSE_CODE)) {
+		if (!reason.equals(SUCCESSFUL_RESPONSE_CODE) && reason.equals(SYS_ERROR_RESPONSE_CODE)) {
 			throw new PaymentGatewayException("CyberSource Processor Error");
 		}
-
-		return returnValue;
+		return true;
 	}
 
 	/**
@@ -609,9 +478,6 @@ public abstract class AbstractFakeCybersourcePaymentGatewayPluginImpl extends Ab
 			request.put("billTo_country", billingAddress.getCountry());
 			request.put("billTo_email", payment.getEmail());
 
-			request.put(CARD_ACCOUNT_NUMBER, payment.getUnencryptedCardNumber());
-			request.put(CARD_EXPIRATION_MONTH, payment.getExpiryMonth());
-			request.put(CARD_EXPIRATION_YEAR, payment.getExpiryYear());
 		} else { // refund to an already existing capture payment (follow-up credit)
 			request.put(CC_CAPTURE_SERVICE_AUTH_REQUEST_ID, payment.getAuthorizationCode());
 			request.put(CC_CAPTURE_SERVICE_AUTH_REQUEST_TOKEN, payment.getRequestToken());
@@ -621,7 +487,6 @@ public abstract class AbstractFakeCybersourcePaymentGatewayPluginImpl extends Ab
 		request.put(PURCHASE_TOTALS_CURRENCY, payment.getCurrencyCode());
 		request.put(PURCHASE_TOTALS_GRAND_TOTAL_AMOUNT, convertToString(payment.getAmount()));
 		request.put(MERCHANT_ID, getConfigurationValues().get(MERCHANT_ID));
-		setRequestReferenceCode(payment, request);
 		request.put(REQUEST_ID, payment.getAuthorizationCode());
 		request.put(REQUEST_TOKEN, payment.getRequestToken());
 

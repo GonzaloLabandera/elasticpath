@@ -4,9 +4,12 @@
 
 package com.elasticpath.service.order.impl; // NOPMD All Imports required
 
+import static java.util.Collections.singletonList;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.math.BigDecimal;
@@ -20,7 +23,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Stream;
 
 import org.jmock.Expectations;
 import org.jmock.auto.Mock;
@@ -28,8 +33,6 @@ import org.junit.Test;
 
 import com.elasticpath.base.exception.EpServiceException;
 import com.elasticpath.commons.constants.ContextIdNames;
-import com.elasticpath.commons.util.security.CreditCardEncrypter;
-import com.elasticpath.commons.util.security.impl.CreditCardEncrypterImpl;
 import com.elasticpath.domain.catalog.LocaleDependantFields;
 import com.elasticpath.domain.catalog.Price;
 import com.elasticpath.domain.catalog.PriceTier;
@@ -80,15 +83,6 @@ import com.elasticpath.domain.payment.CreditCardPaymentGateway;
 import com.elasticpath.domain.payment.PaymentGateway;
 import com.elasticpath.domain.payment.PaymentHandlerFactory;
 import com.elasticpath.domain.payment.impl.PaymentHandlerFactoryImpl;
-import com.elasticpath.domain.shipping.ShippingCostCalculationMethod;
-import com.elasticpath.domain.shipping.ShippingCostCalculationParameter;
-import com.elasticpath.domain.shipping.ShippingCostCalculationParametersEnum;
-import com.elasticpath.domain.shipping.ShippingRegion;
-import com.elasticpath.domain.shipping.ShippingServiceLevel;
-import com.elasticpath.domain.shipping.impl.FixedBaseAndOrderTotalPercentageMethodImpl;
-import com.elasticpath.domain.shipping.impl.ShippingCostCalculationParameterImpl;
-import com.elasticpath.domain.shipping.impl.ShippingRegionImpl;
-import com.elasticpath.domain.shipping.impl.ShippingServiceLevelImpl;
 import com.elasticpath.domain.shopper.Shopper;
 import com.elasticpath.domain.shoppingcart.ShoppingCart;
 import com.elasticpath.domain.shoppingcart.ShoppingCartPricingSnapshot;
@@ -118,9 +112,7 @@ import com.elasticpath.persistence.support.impl.FetchGroupLoadTunerImpl;
 import com.elasticpath.persistence.support.impl.OrderCriterionImpl;
 import com.elasticpath.plugin.payment.PaymentType;
 import com.elasticpath.plugin.tax.domain.TaxAddress;
-import com.elasticpath.service.catalog.ProductInventoryManagementService;
 import com.elasticpath.service.catalog.ProductSkuLookup;
-import com.elasticpath.service.catalog.impl.ProductInventoryManagementServiceImpl;
 import com.elasticpath.service.customer.CustomerSessionService;
 import com.elasticpath.service.misc.TimeService;
 import com.elasticpath.service.misc.impl.DatabaseServerTimeServiceImpl;
@@ -132,11 +124,13 @@ import com.elasticpath.service.order.ReturnExchangeType;
 import com.elasticpath.service.payment.PaymentService;
 import com.elasticpath.service.payment.impl.PaymentResultImpl;
 import com.elasticpath.service.payment.impl.PaymentServiceImpl;
-import com.elasticpath.service.shipping.impl.ShippingServiceLevelServiceImpl;
+import com.elasticpath.service.shipping.ShippingOptionResult;
+import com.elasticpath.service.shipping.ShippingOptionService;
+import com.elasticpath.service.shipping.impl.ShippingOptionResultImpl;
 import com.elasticpath.service.shopper.ShopperService;
 import com.elasticpath.service.shoppingcart.CheckoutService;
 import com.elasticpath.service.shoppingcart.PricingSnapshotService;
-import com.elasticpath.service.shoppingcart.ShippableItemsSubtotalCalculator;
+import com.elasticpath.service.shoppingcart.ShoppingItemSubtotalCalculator;
 import com.elasticpath.service.shoppingcart.TaxSnapshotService;
 import com.elasticpath.service.shoppingcart.impl.BundleApportioningCalculatorImpl;
 import com.elasticpath.service.shoppingcart.impl.OrderSkuFactoryImpl;
@@ -150,6 +144,8 @@ import com.elasticpath.service.tax.impl.ReturnTaxOperationServiceImpl;
 import com.elasticpath.service.tax.impl.TaxCalculationResultImpl;
 import com.elasticpath.service.tax.impl.TaxCalculationServiceImpl;
 import com.elasticpath.service.tax.impl.TaxJurisdictionServiceImpl;
+import com.elasticpath.shipping.connectivity.dto.ShippingOption;
+import com.elasticpath.shipping.connectivity.dto.impl.ShippingOptionImpl;
 import com.elasticpath.test.factory.TestCustomerSessionFactory;
 import com.elasticpath.test.factory.TestShopperFactory;
 import com.elasticpath.test.factory.TestTaxCalculationServiceImpl;
@@ -199,17 +195,11 @@ public class ReturnAndExchangeServiceImplTest extends AbstractEPServiceTestCase 
 
 	private ShopperService mockShopperService;
 
-	private OrderCriterion orderCriterion;
-
 	private TimeService mockTimeService;
 
 	private ProductSkuLookup mockProductSkuLookup;
 
-	private ShippingServiceLevel shippingServiceLevel;
-
-	private ProductInventoryManagementServiceImpl productInventoryManagementService;
-
-	private AllocationServiceImpl allocationServiceImpl;
+	private ShippingOption shippingOption;
 
 	private ProductSku productSku;
 
@@ -227,7 +217,7 @@ public class ReturnAndExchangeServiceImplTest extends AbstractEPServiceTestCase 
 	private TaxSnapshotService taxSnapshotService;
 
 	@Mock
-	private ShippableItemsSubtotalCalculator shippableItemsSubtotalCalculator;
+	private ShoppingItemSubtotalCalculator shoppingItemSubtotalCalculator;
 
 	/**
 	 * Prepare for the tests.
@@ -242,22 +232,20 @@ public class ReturnAndExchangeServiceImplTest extends AbstractEPServiceTestCase 
 		stubGetBean(ContextIdNames.CUSTOMER_AUTHENTICATION, CustomerAuthenticationImpl.class);
 		stubGetBean(ContextIdNames.MONEY_FORMATTER, StandardMoneyFormatter.class);
 		stubGetBean(ContextIdNames.PRODUCT_SKU_LOOKUP, mockProductSkuLookup);
-		stubGetBean(ContextIdNames.SHIPPABLE_ITEMS_SUBTOTAL_CALCULATOR, shippableItemsSubtotalCalculator);
+		stubGetBean(ContextIdNames.SHOPPING_ITEM_SUBTOTAL_CALCULATOR, shoppingItemSubtotalCalculator);
 
-		/** setup order. */
+		/* setup order. */
 		setupOrder();
-		/** setup order service impl. */
+		/* setup order service impl. */
 		setupOrderService();
-		/** setup checkout service: */
+		/* setup checkout service: */
 		setupCheckoutService();
-		/** set up exchange service */
+		/* set up exchange service */
 		setupReturnService();
-		/** setup for order auditing */
+		/* setup for order auditing */
 		setUpForOrderAuditing();
 
-		setUpAllocationService(productInventoryManagementService);
-
-		/** setup return tax operation service. */
+		/* setup return tax operation service. */
 		setUpTaxCalculationService();
 
 		stubGetBean(ContextIdNames.ORDER_EVENT_HELPER, new OrderEventHelperImpl() {
@@ -292,21 +280,7 @@ public class ReturnAndExchangeServiceImplTest extends AbstractEPServiceTestCase 
 		stubGetBean(ContextIdNames.TAX_CALCULATION_SERVICE, taxCalculationService);
 	}
 
-	private void setUpAllocationService(final ProductInventoryManagementService productInventoryManagementService) {
-		allocationServiceImpl = new AllocationServiceImpl();
-
-		allocationServiceImpl.setPersistenceEngine(getPersistenceEngine());
-		allocationServiceImpl.setProductInventoryManagementService(productInventoryManagementService);
-
-		stubGetBean(ContextIdNames.ALLOCATION_SERVICE, allocationServiceImpl);
-
-		orderServiceImpl.setAllocationService(allocationServiceImpl);
-	}
-
-	/**
-	 *
-	 */
-	protected void setupOrder() {
+	private void setupOrder() {
 		orderImpl = new TestOrderImpl();
 		orderImpl.initialize();
 		final Store store = getMockedStore();
@@ -382,7 +356,7 @@ public class ReturnAndExchangeServiceImplTest extends AbstractEPServiceTestCase 
 		orderServiceImpl.setPersistenceEngine(getPersistenceEngine());
 		orderServiceImpl.setFetchPlanHelper(getFetchPlanHelper());
 
-		orderCriterion = new OrderCriterionImpl();
+		OrderCriterion orderCriterion = new OrderCriterionImpl();
 		stubGetBean(ContextIdNames.ORDER_CRITERION, orderCriterion);
 
 		mockTimeService = context.mock(TimeService.class);
@@ -433,22 +407,17 @@ public class ReturnAndExchangeServiceImplTest extends AbstractEPServiceTestCase 
 		exchangeService.setTimeService(mockTimeService);
 		exchangeService.setProductSkuLookup(mockProductSkuLookup);
 
-		final long uidPk = 1L;
-		shippingServiceLevel = getShippingServiceLevel(uidPk);
+		shippingOption = getShippingOption();
 
-		// final Stub[] stubs = new Stub[1];
-		final ShippingServiceLevelServiceImpl serviceLevelServiceImpl = new ShippingServiceLevelServiceImpl() {
-			@Override
-			public List<ShippingServiceLevel> retrieveShippingServiceLevel(final ShoppingCart shoppingCart) {
-				final List<ShippingServiceLevel> lst = new ArrayList<>();
-				lst.add(shippingServiceLevel);
-				return lst;
+		final ShippingOptionService shippingOptionService = context.mock(ShippingOptionService.class);
+		context.checking(new Expectations() {
+			{
+				allowing(shippingOptionService).getShippingOptions(with(any(ShoppingCart.class)));
+				will(returnValue(createShippingOptionResult(singletonList(shippingOption))));
 			}
-		};
+		});
 
-		serviceLevelServiceImpl.setPersistenceEngine(getPersistenceEngine());
-
-		exchangeService.setShippingServiceLevelService(serviceLevelServiceImpl);
+		exchangeService.setShippingOptionService(shippingOptionService);
 
 		stubGetBean(ContextIdNames.CUSTOMER_SESSION, new CustomerSessionImpl());
 
@@ -473,14 +442,15 @@ public class ReturnAndExchangeServiceImplTest extends AbstractEPServiceTestCase 
 
 		context.checking(new Expectations() {
 			{
-				allowing(shippableItemsSubtotalCalculator).calculateSubtotalOfShippableItems(
-						with(any(Collection.class)),
+				allowing(shoppingItemSubtotalCalculator).calculate(
+						with(any(Stream.class)),
 						with(any(ShoppingCartPricingSnapshot.class)),
 						with(any(Currency.class))
 				);
 				will(returnValue(Money.valueOf(BigDecimal.ZERO, CURRENCY)));
 			}
 		});
+
 	}
 
 	private void setUpOrderSkuFactory() {
@@ -715,6 +685,10 @@ public class ReturnAndExchangeServiceImplTest extends AbstractEPServiceTestCase 
 				allowing(mockCustomerSessionService).createWithShopper(with(any(Shopper.class)));
 				will(returnValue(customerSession));
 
+				allowing(mockCustomerSessionService)
+						.initializeCustomerSessionForPricing(with(equal(customerSession)), with(any(String.class)), with(any(Currency.class)));
+				will(returnValue(customerSession));
+
 				allowing(mockShopperService).findOrCreateShopper(with(any(Customer.class)), with(any(String.class)));
 				will(returnValue(shopper));
 
@@ -736,12 +710,13 @@ public class ReturnAndExchangeServiceImplTest extends AbstractEPServiceTestCase 
 		final List<ShoppingItem> cartItemList = mockCartItemList();
 
 		final Address shippingAddress = mockShippingAddress();
-		ShoppingCart shoppingCart = exchangeService.populateShoppingCart(exchangeOrder, cartItemList, shippingServiceLevel, shippingAddress);
+		final ShoppingCart shoppingCart = exchangeService.populateShoppingCart(exchangeOrder, cartItemList, shippingOption, shippingAddress);
+		final Optional<ShippingOption> selectedShippingOption = shoppingCart.getSelectedShippingOption();
 
 		assertEquals("Incorrect shipping address set on the exchange shopping cart", shippingAddress, shoppingCart.getShippingAddress());
-		assertEquals("Incorrect shipping service level set on the exchange shopping cart",
-				shippingServiceLevel, shoppingCart.getSelectedShippingServiceLevel());
-		assertEquals("Incorrect list of cart items set on the exchange shopping cart", cartItemList, shoppingCart.getAllItems());
+		assertTrue("No shipping option set on the exchange shopping cart", selectedShippingOption.isPresent());
+		assertEquals("Incorrect shipping option set on the exchange shopping cart", shippingOption, selectedShippingOption.get());
+		assertEquals("Incorrect list of cart items set on the exchange shopping cart", cartItemList, shoppingCart.getAllShoppingItems());
 	}
 
 	/**
@@ -776,7 +751,6 @@ public class ReturnAndExchangeServiceImplTest extends AbstractEPServiceTestCase 
 	@Test
 	public void testReceiveReturn() {
 		final OrderReturn mockOrderReturn = context.mock(OrderReturn.class);
-		final OrderReturn orderReturn = mockOrderReturn;
 		final OrderEventHelper mockOrderEventHelper = context.mock(OrderEventHelper.class);
 		final ReturnAndExchangeService mockReturnAndExchangeService = context.mock(ReturnAndExchangeService.class);
 		context.checking(new Expectations() {
@@ -785,7 +759,7 @@ public class ReturnAndExchangeServiceImplTest extends AbstractEPServiceTestCase 
 
 				oneOf(mockOrderEventHelper).logOrderReturnReceived(with(any(Order.class)), with(any(OrderReturn.class)));
 
-				oneOf(mockReturnAndExchangeService).update(with(same(orderReturn)));
+				oneOf(mockReturnAndExchangeService).update(with(same(mockOrderReturn)));
 			}
 		});
 
@@ -800,7 +774,7 @@ public class ReturnAndExchangeServiceImplTest extends AbstractEPServiceTestCase 
 			}
 
 		};
-		service.receiveReturn(orderReturn);
+		service.receiveReturn(mockOrderReturn);
 	}
 
 	/**
@@ -815,26 +789,12 @@ public class ReturnAndExchangeServiceImplTest extends AbstractEPServiceTestCase 
 		final PaymentServiceImpl paymentService = new PaymentServiceImpl();
 		paymentService.setPaymentHandlerFactory(paymentHandlerFactory);
 
-		final CreditCardEncrypter encrypter = context.mock(CreditCardEncrypter.class);
-		context.checking(new Expectations() {
-			{
-				allowing(encrypter).encrypt(with(any(String.class)));
-				will(returnValue("11111"));
-
-				allowing(encrypter).decrypt(with(any(String.class)));
-				will(returnValue("11111"));
-			}
-		});
-
-		stubGetBean(ContextIdNames.CREDIT_CARD_ENCRYPTER, CreditCardEncrypterImpl.class);
-		stubGetBean(ContextIdNames.CREDIT_CARD_ENCRYPTER, encrypter);
-
 		final CreditCardPaymentGateway creditCardPaymentGateway = context.mock(CreditCardPaymentGateway.class);
 		final PaymentGateway exchangePaymentGateway = context.mock(PaymentGateway.class);
 		context.checking(new Expectations() {
 			{
 				allowing(creditCardPaymentGateway).getPaymentGatewayType();
-				will(returnValue(PaymentType.CREDITCARD));
+				will(returnValue(PaymentType.CREDITCARD_DIRECT_POST));
 
 				allowing(creditCardPaymentGateway).preAuthorize(with(any(OrderPayment.class)), with(any(Address.class)));
 				allowing(creditCardPaymentGateway).reversePreAuthorization(with(any(OrderPayment.class)));
@@ -1031,8 +991,8 @@ public class ReturnAndExchangeServiceImplTest extends AbstractEPServiceTestCase 
 	private Set<OrderPayment> mockOrderPayments(final OrderShipment shipment) {
 		final OrderPayment orderPayment = new OrderPaymentImpl();
 		orderPayment.setTransactionType(OrderPayment.CAPTURE_TRANSACTION);
-		orderPayment.setCardHolderName(CARD_HOLDER_NAME);
-		orderPayment.setPaymentMethod(PaymentType.CREDITCARD);
+		orderPayment.setDisplayValue(CARD_HOLDER_NAME);
+		orderPayment.setPaymentMethod(PaymentType.CREDITCARD_DIRECT_POST);
 		orderPayment.setOrderShipment(shipment);
 		final Set<OrderPayment> paymentSet = new HashSet<>();
 		paymentSet.add(orderPayment);
@@ -1042,8 +1002,8 @@ public class ReturnAndExchangeServiceImplTest extends AbstractEPServiceTestCase 
 	private OrderShipment mockOrderShipment() {
 		final PhysicalOrderShipment orderShipment = getMockPhysicalOrderShipment();
 		orderShipment.setUidPk(BigDecimal.ONE.longValue());
-				
-		/* 
+
+		/*
 		* The status set to INVENTORY_ASSIGNED so that tax can be calculated and the transient variables can be
 		* initialized in orderShipment.Currently tax is not getting recalculated for PhysicalOrderShipment with
 		* status CANCELLED,SHIPPED or RELEASED.
@@ -1085,7 +1045,7 @@ public class ReturnAndExchangeServiceImplTest extends AbstractEPServiceTestCase 
 		};
 		result.setDefaultCurrency(Currency.getInstance(Locale.US));
 
-		final PhysicalOrderShipmentImpl physicalOrderShipmentImpl = new PhysicalOrderShipmentImpl() {
+		return new PhysicalOrderShipmentImpl() {
 			private static final long serialVersionUID = -8478099243134627014L;
 
 			@Override
@@ -1093,8 +1053,6 @@ public class ReturnAndExchangeServiceImplTest extends AbstractEPServiceTestCase 
 				return result;
 			}
 		};
-
-		return physicalOrderShipmentImpl;
 
 	}
 
@@ -1111,8 +1069,6 @@ public class ReturnAndExchangeServiceImplTest extends AbstractEPServiceTestCase 
 	 * Tax Region: VANCOUVER<br>
 	 * Tax Values: SHIPPING==7%, GOODS==7%<br>
 	 * The last category musn't be taken into account while calculating taxes. This category doesn't match the shipping address.
-	 *
-	 * @return
 	 */
 	private TaxJurisdiction getTaxJurisdiction() {
 		final TaxJurisdiction taxJurisdiction = new TaxJurisdictionImpl();
@@ -1258,49 +1214,11 @@ public class ReturnAndExchangeServiceImplTest extends AbstractEPServiceTestCase 
 		return customer;
 	}
 
-	/**
-	 * Returns a newly created shippingServiceLevel of type
-	 * fixedBaseAndOrderTotalPercentageMethod, with base value 5.0 and 10% of the order total and
-	 * supports shippingRegion CA(AB, BC) and US.
-	 *
-	 * @param uidPk - the uidPk for the newly created shippingServiceLevel.
-	 * @return a newly created shippingServiceLevel
-	 */
-	protected ShippingServiceLevel getShippingServiceLevel(final long uidPk) {
-		ShippingServiceLevel shippingServiceLevel = new ShippingServiceLevelImpl();
-		shippingServiceLevel.setUidPk(uidPk);
-		shippingServiceLevel.setCarrier("Fed Ex");
-
-		ShippingCostCalculationMethod fixedBaseOrderTotPertMeth = new FixedBaseAndOrderTotalPercentageMethodImpl();
-		ShippingCostCalculationParameter param1 = new ShippingCostCalculationParameterImpl();
-		Set<ShippingCostCalculationParameter> paramSet = new HashSet<>();
-		param1.setKey(ShippingCostCalculationParametersEnum.FIXED_BASE.getKey());
-		param1.setValue("5.0");
-		param1.setCurrency(Currency.getInstance(CART_CURRENCY));
-		paramSet.add(param1);
-		ShippingCostCalculationParameter param2 = new ShippingCostCalculationParameterImpl();
-		param2.setKey(ShippingCostCalculationParametersEnum.PERCENTAGE_OF_ORDER_TOTOAL.getKey());
-		param2.setValue("10");
-		param2.setCurrency(Currency.getInstance(CART_CURRENCY));
-		paramSet.add(param2);
-		fixedBaseOrderTotPertMeth.setParameters(paramSet);
-
-		shippingServiceLevel.setShippingCostCalculationMethod(fixedBaseOrderTotPertMeth);
-		shippingServiceLevel.setShippingRegion(getShippingRegion("[CA(AB,BC)][US()]"));
-
-		return shippingServiceLevel;
-	}
-
-	/**
-	 * Returns a newly created shippingRegion.
-	 *
-	 * @param regionStr - the region str, i.e. "[CA(AB,BC)][US()]".
-	 * @return a newly created shippingRegion
-	 */
-	private ShippingRegion getShippingRegion(final String regionStr) {
-		ShippingRegionImpl shippingRegionImpl = new ShippingRegionImpl();
-		shippingRegionImpl.setRegionStr(regionStr);
-		return shippingRegionImpl;
+	protected ShippingOption getShippingOption() {
+		final ShippingOptionImpl option = new ShippingOptionImpl();
+		option.setCode("fedex1");
+		option.setCarrierCode("Fed Ex");
+		return option;
 	}
 
 	/**
@@ -1343,5 +1261,11 @@ public class ReturnAndExchangeServiceImplTest extends AbstractEPServiceTestCase 
 		PriceTier priceTier = new PriceTierImpl();
 		priceTier.initialize();
 		return priceTier;
+	}
+
+	private ShippingOptionResult createShippingOptionResult(final List<ShippingOption> availableShippingOptions) {
+		final ShippingOptionResultImpl result = new ShippingOptionResultImpl();
+		result.setAvailableShippingOptions(availableShippingOptions);
+		return result;
 	}
 }

@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) Elastic Path Software Inc., 2007
  */
 package com.elasticpath.domain.payment.impl;
@@ -30,9 +30,6 @@ public class PaymentHandlerFactoryImpl extends AbstractEpDomainImpl implements P
 		}
 		PaymentHandler handler;
 		switch (paymentType.getOrdinal()) {
-			case PaymentType.CREDITCARD_ORDINAL :
-				handler = getBean(ContextIdNames.PAYMENT_HANDLER_CREDITCARD);
-				break;
 			case PaymentType.CREDITCARD_DIRECT_POST_ORDINAL :
 				handler = getBean(ContextIdNames.PAYMENT_HANDLER_CREDITCARD_DIRECT_POST);
 				break;

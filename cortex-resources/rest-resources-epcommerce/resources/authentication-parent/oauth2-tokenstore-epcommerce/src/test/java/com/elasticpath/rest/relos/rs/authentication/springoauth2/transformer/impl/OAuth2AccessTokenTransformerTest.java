@@ -16,7 +16,7 @@ import org.junit.runner.RunWith;
 import org.hamcrest.Matchers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.elasticpath.domain.auth.OAuth2AccessTokenMemento;
 import com.elasticpath.domain.auth.OAuth2AuthenticationMemento;

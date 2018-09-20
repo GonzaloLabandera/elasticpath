@@ -4,7 +4,7 @@
 package com.elasticpath.rest.resource.integration.epcommerce.repository.datapolicies.impl;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -25,7 +25,7 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.elasticpath.domain.datapolicy.ConsentAction;
 import com.elasticpath.domain.datapolicy.CustomerConsent;
@@ -89,8 +89,8 @@ public class DataPolicyRepositoryTest {
 		when(subjectAttribute.getType()).thenReturn(DATA_POLICY_SEGMENTS);
 		when(subjectAttribute.getValue()).thenReturn(DATA_POLICY_NAME);
 
-		dataPolicy1 = createMockDataPolicy(POLICY_GUID_1, KEY_1, DATA_POLICY_NAME, GLOBAL_DATA_POLICY_NAME);
-		dataPolicy2 = createMockDataPolicy(POLICY_GUID_2, KEY_2, DATA_POLICY_NAME);
+		dataPolicy1 = createMockDataPolicy(POLICY_GUID_1, DATA_POLICY_NAME, GLOBAL_DATA_POLICY_NAME);
+		dataPolicy2 = createMockDataPolicy(POLICY_GUID_2, DATA_POLICY_NAME);
 	}
 
 	@Test
@@ -213,7 +213,6 @@ public class DataPolicyRepositoryTest {
 
 		when(customerConsentService.findByDataPolicyGuidForCustomerLatest(POLICY_GUID_1, USER_ID)).thenReturn(customerConsent);
 		when(customerConsent.getAction()).thenReturn(ConsentAction.REVOKED);
-		when(customerConsent.getConsentDate()).thenReturn(NOW_DATE);
 		when(timeService.getCurrentTime()).thenReturn(NOW_DATE);
 		when(customerConsentService.save(any(CustomerConsent.class))).thenReturn(customerConsent);
 
@@ -256,13 +255,11 @@ public class DataPolicyRepositoryTest {
 	/**
 	 * Helper to create mock data policy objects.
 	 */
-	static DataPolicy createMockDataPolicy(final String guid, final String referenceKey, final String... segmentStrings) {
+	private static DataPolicy createMockDataPolicy(final String guid, final String... segmentStrings) {
 		DataPolicy dataPolicy = mock(DataPolicy.class, RETURNS_DEEP_STUBS);
 		when(dataPolicy.getState().getOrdinal()).thenReturn(DataPolicyState.ACTIVE_ORDINAL);
-		when(dataPolicy.getPolicyName()).thenReturn(POLICY_GUID_1);
 		when(dataPolicy.getStartDate().before(any(Date.class))).thenReturn(true);
 		when(dataPolicy.getGuid()).thenReturn(guid);
-		when(dataPolicy.getReferenceKey()).thenReturn(referenceKey);
 		when(dataPolicy.getSegments()).thenReturn(new HashSet<>(Arrays.asList(segmentStrings)));
 		return dataPolicy;
 	}

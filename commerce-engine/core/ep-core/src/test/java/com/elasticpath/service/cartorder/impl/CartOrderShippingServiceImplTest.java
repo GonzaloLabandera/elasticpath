@@ -3,75 +3,81 @@
  */
 package com.elasticpath.service.cartorder.impl;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static com.elasticpath.test.util.MatcherFactory.isSupplierOf;
+import static java.util.Collections.emptyList;
+import static java.util.Collections.singletonList;
 
-import java.util.Arrays;
-import java.util.Collections;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 import java.util.List;
+import java.util.Optional;
 
-import org.jmock.Expectations;
-import org.jmock.integration.junit4.JUnitRuleMockery;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.elasticpath.domain.cartorder.CartOrder;
 import com.elasticpath.domain.customer.Address;
-import com.elasticpath.domain.shipping.ShippingServiceLevel;
 import com.elasticpath.domain.shoppingcart.ShoppingCart;
-import com.elasticpath.domain.store.Store;
 import com.elasticpath.service.cartorder.CartOrderShippingInformationSanitizer;
 import com.elasticpath.service.customer.dao.CustomerAddressDao;
-import com.elasticpath.service.shipping.ShippingServiceLevelService;
+import com.elasticpath.service.shipping.ShippingOptionResult;
+import com.elasticpath.service.shipping.ShippingOptionService;
+import com.elasticpath.shipping.connectivity.dto.ShippingOption;
 
 /**
  * New JUnit4 tests for {@code CartOrderShippingServiceImpl}.
  */
+@SuppressWarnings({ "unchecked", "PMD.DontUseElasticPathImplGetInstance" })
+@RunWith(MockitoJUnitRunner.class)
 public class CartOrderShippingServiceImplTest {
 
 	private static final String CART_ORDER_SHOULD_BE_UPDATED = "Cart Order should be updated.";
-
-	private static final long SHIPPING_SERVICE_LEVEL_UID = Long.MIN_VALUE;
 
 	private static final String SHIPPING_ADDRESS_GUID = "shippingAddressGuid";
 
 	private static final String BILLING_ADDRESS_GUID = "billingAddressGuid";
 
-	@Rule
-	public final JUnitRuleMockery context = new JUnitRuleMockery();
-
-	private CartOrderShippingServiceImpl service;
-
-	private ShippingServiceLevelService shippingServiceLevelService;
-
-	private CartOrderShippingInformationSanitizer cartOrderShippingInformationSanitizer;
-
-	private CustomerAddressDao customerAddressDao;
-
-	private CartOrder cartOrder;
-
-	private Address shippingAddress;
-
-	private ShippingServiceLevel shippingServiceLevel;
-
-	private List<ShippingServiceLevel> shippingServiceLevels;
-
-	private ShoppingCart shoppingCart;
-
-	private Address billingAddress;
-
-	private Store store;
-
 	private static final String EXISTING_SHIPPING_ADDRESS_GUID = "EXISTING_SHIPPING_ADDRESS_GUID";
 
 	private static final String UPDATED_SHIPPING_ADDRESS_GUID = "UPDATED_SHIPPING_ADDRESS_GUID";
 
-	private static final String EXISTING_SHIPPING_SERVICE_LEVEL_GUID = "EXISTING_SHIPPING_SERVICE_LEVEL_GUID";
+	private static final String EXISTING_SHIPPING_OPTION_CODE = "EXISTING_SHIPPING_OPTION_CODE";
 
-	private static final String NEW_SHIPPING_SERVICE_LEVEL_GUID = "NEW_SHIPPING_SERVICE_LEVEL_GUID";
+	private static final String NEW_SHIPPING_OPTION_CODE = "NEW_SHIPPING_OPTION_CODE";
 
-	private static final String STORE_CODE = "STORE_CODE";
+	public static final String NONEXISTENT_GUID = "nonexistent-guid";
+
+	private CartOrderShippingServiceImpl service;
+
+	@Mock private ShippingOptionService shippingOptionService;
+
+	@Mock private ShippingOptionResult shippingOptionResult;
+
+	@Mock private CartOrderShippingInformationSanitizer cartOrderShippingInformationSanitizer;
+
+	@Mock private CustomerAddressDao customerAddressDao;
+
+	@Mock private CartOrder cartOrder;
+
+	@Mock private Address shippingAddress;
+
+	@Mock private ShippingOption shippingOption;
+
+	@Mock private ShoppingCart shoppingCart;
+
+	@Mock private Address billingAddress;
+
 
 	/**
 	 * Mock required services and objects.
@@ -79,173 +85,127 @@ public class CartOrderShippingServiceImplTest {
 	@Before
 	public void mockRequiredServicesAndObjects() {
 		service = new CartOrderShippingServiceImpl();
-		customerAddressDao = context.mock(CustomerAddressDao.class);
-		shippingServiceLevelService = context.mock(ShippingServiceLevelService.class);
-		cartOrderShippingInformationSanitizer = context.mock(CartOrderShippingInformationSanitizer.class);
-		shoppingCart = context.mock(ShoppingCart.class);
-		billingAddress = context.mock(Address.class, "billingAddress");
-		shippingAddress = context.mock(Address.class, "shippingAddress");
-		store = context.mock(Store.class);
+
 		service.setCustomerAddressDao(customerAddressDao);
-		service.setShippingServiceLevelService(shippingServiceLevelService);
+		service.setShippingOptionService(shippingOptionService);
 		service.setCartOrderShippingInformationSanitizer(cartOrderShippingInformationSanitizer);
 
-		cartOrder = context.mock(CartOrder.class);
-		shippingAddress = context.mock(Address.class);
-		shippingServiceLevel = context.mock(ShippingServiceLevel.class);
-		shippingServiceLevels = Arrays.asList(shippingServiceLevel);
+		shippingOption = mockShippingOption(EXISTING_SHIPPING_OPTION_CODE);
 
-		context.checking(new Expectations() {
-			{
-				allowing(customerAddressDao).findByGuid(UPDATED_SHIPPING_ADDRESS_GUID);
-				will(returnValue(shippingAddress));
+		when(customerAddressDao.findByGuid(UPDATED_SHIPPING_ADDRESS_GUID)).thenReturn(shippingAddress);
+		when(cartOrder.getBillingAddressGuid()).thenReturn(BILLING_ADDRESS_GUID);
+		when(customerAddressDao.findByGuid(BILLING_ADDRESS_GUID)).thenReturn(billingAddress);
 
-				allowing(cartOrder).getBillingAddressGuid();
-				will(returnValue(BILLING_ADDRESS_GUID));
+	}
 
-				allowing(customerAddressDao).findByGuid(BILLING_ADDRESS_GUID);
-				will(returnValue(billingAddress));
+	private ShippingOption mockShippingOption(final String code) {
+		return mockShippingOption(code, null);
+	}
 
-				allowing(shippingServiceLevel).getUidPk();
-				will(returnValue(SHIPPING_SERVICE_LEVEL_UID));
-			}
-		});
+	private ShippingOption mockShippingOption(final String code, final String name) {
+		ShippingOption shippingOption = mock(ShippingOption.class, name);
+		when(shippingOption.getCode()).thenReturn(code);
+		return shippingOption;
 	}
 
 	@Test
 	public void testCartOrderIsUpdatedWhenCartOrderShippingAddressIsNull() {
-		allowingUpdateOnCartOrderFromExistingShippingAddressGuid();
-		allowingShippingServiceLevelsForAddress(shippingServiceLevels);
-		allowingShippingServiceLevelGuidOnCartOrder();
-		context.checking(new Expectations() {
-			{
-				allowing(cartOrder).getShippingAddressGuid();
-				will(returnValue(null));
+		final List<ShippingOption> shippingOptions = singletonList(shippingOption);
 
-				allowing(cartOrderShippingInformationSanitizer).sanitize(STORE_CODE, cartOrder);
+		mockShippingOptionServiceToReturnUnpriced(shippingOptions);
+		allowingSanitizeWithGivenShippingOptionResult(shippingOptionResult);
+		allowingShippingOptionCodeOnCartOrder();
 
-				allowing(shippingServiceLevel).getGuid();
-				will(returnValue(EXISTING_SHIPPING_SERVICE_LEVEL_GUID));
+		when(cartOrder.getShippingAddressGuid()).thenReturn(null);
+		when(shippingOption.getCode()).thenReturn(EXISTING_SHIPPING_OPTION_CODE);
 
-				allowing(cartOrder).setShippingAddressGuid(with(any(String.class)));
-			}
-		});
+		boolean result = service.updateCartOrderShippingAddress(UPDATED_SHIPPING_ADDRESS_GUID, shoppingCart, cartOrder);
 
-		boolean result = service.updateCartOrderShippingAddress(UPDATED_SHIPPING_ADDRESS_GUID, cartOrder, STORE_CODE);
+		assertThat(result).as(CART_ORDER_SHOULD_BE_UPDATED).isTrue();
+		verify(shoppingCart).setShippingAddress(shippingAddress);
+		verify(cartOrderShippingInformationSanitizer).sanitize(eq(cartOrder), eq(shippingAddress), argThat(isSupplierOf(shippingOptionResult)));
 
-		assertTrue(CART_ORDER_SHOULD_BE_UPDATED, result);
 	}
 
 	@Test
 	public void testCartOrderIsNotUpdatedWhenUpdatingToSameShippingAddressGuid() {
-		allowingShippingServiceLevelGuidOnCartOrder();
+		allowingShippingOptionCodeOnCartOrder();
 
-		context.checking(new Expectations() {
-			{
-				allowing(cartOrder).getShippingAddressGuid();
-				will(returnValue(EXISTING_SHIPPING_ADDRESS_GUID));
-			}
-		});
+		when(cartOrder.getShippingAddressGuid()).thenReturn(EXISTING_SHIPPING_ADDRESS_GUID);
 
-		boolean result = service.updateCartOrderShippingAddress(EXISTING_SHIPPING_ADDRESS_GUID, cartOrder, STORE_CODE);
+		boolean result = service.updateCartOrderShippingAddress(EXISTING_SHIPPING_ADDRESS_GUID, shoppingCart, cartOrder);
 
-		assertFalse("Cart Order should not be updated.", result);
+		assertThat(result).as("Cart Order should not be updated.").isFalse();
 	}
 
 	@Test
 	public void testCartIsSanitizedWhenCartOrderShippingAddressGuidIsUpdated() {
-		allowingUpdateOnCartOrderFromExistingShippingAddressGuid();
-		allowingShippingServiceLevelsForAddress(Collections.<ShippingServiceLevel>emptyList());
-		allowingShippingServiceLevelGuidOnCartOrder();
+		mockShippingOptionServiceToReturnUnpriced(emptyList());
+		allowingSanitizeWithGivenShippingOptionResult(shippingOptionResult);
+		allowingShippingOptionCodeOnCartOrder();
 
-		boolean result = service.updateCartOrderShippingAddress(UPDATED_SHIPPING_ADDRESS_GUID, cartOrder, STORE_CODE);
+		boolean result = service.updateCartOrderShippingAddress(UPDATED_SHIPPING_ADDRESS_GUID, shoppingCart, cartOrder);
 
-		assertTrue(CART_ORDER_SHOULD_BE_UPDATED, result);
+		assertThat(result).as(CART_ORDER_SHOULD_BE_UPDATED).isTrue();
+
+		verify(shoppingCart).setShippingAddress(shippingAddress);
+		verify(cartOrderShippingInformationSanitizer).sanitize(eq(cartOrder), eq(shippingAddress), argThat(isSupplierOf(shippingOptionResult)));
+
 	}
 
 	@Test
-	public void testShippingServiceLevelIsNotSetIfNoneValidForAddress() {
-		allowingUpdateOnCartOrderFromExistingShippingAddressGuid();
-		allowingShippingServiceLevelsForAddress(Collections.<ShippingServiceLevel>emptyList());
-		allowingShippingServiceLevelGuidOnCartOrder();
+	public void testShippingOptionIsNotSetIfNoneValidForAddress() {
+		mockShippingOptionServiceToReturnUnpriced(emptyList());
+		allowingSanitizeWithGivenShippingOptionResult(shippingOptionResult);
+		allowingShippingOptionCodeOnCartOrder();
 
-		context.checking(new Expectations() {
-			{
-				never(cartOrder).setShippingAddressGuid(with(any(String.class)));
-			}
-		});
+		boolean result = service.updateCartOrderShippingAddress(UPDATED_SHIPPING_ADDRESS_GUID, shoppingCart, cartOrder);
 
-		boolean result = service.updateCartOrderShippingAddress(UPDATED_SHIPPING_ADDRESS_GUID, cartOrder, STORE_CODE);
+		assertThat(result).as(CART_ORDER_SHOULD_BE_UPDATED).isTrue();
 
-		assertTrue(CART_ORDER_SHOULD_BE_UPDATED, result);
+		verify(shoppingCart).setShippingAddress(shippingAddress);
+		verify(cartOrder).setShippingAddressGuid(anyString());
+		verify(cartOrderShippingInformationSanitizer).sanitize(eq(cartOrder), eq(shippingAddress), argThat(isSupplierOf(shippingOptionResult)));
+
 	}
 
 	@Test
-	public void testShippingServiceLevelDoesNotSwitchToDefaultIfStillValid() {
-		allowingUpdateOnCartOrderFromExistingShippingAddressGuid();
-		allowingShippingServiceLevelsForAddress(shippingServiceLevels);
-		allowingShippingServiceLevelGuidOnCartOrder();
+	public void testShippingOptionDoesNotSwitchToDefaultIfStillValid() {
+		final List<ShippingOption> shippingOptions = singletonList(shippingOption);
 
-		context.checking(new Expectations() {
-			{
-				allowing(shippingServiceLevel).getGuid();
-				will(returnValue(EXISTING_SHIPPING_SERVICE_LEVEL_GUID));
+		mockShippingOptionServiceToReturnUnpriced(shippingOptions);
+		allowingSanitizeWithGivenShippingOptionResult(shippingOptionResult);
+		allowingShippingOptionCodeOnCartOrder();
 
-				never(cartOrder).setShippingAddressGuid(with(any(String.class)));
-			}
-		});
+		when(shippingOption.getCode()).thenReturn(EXISTING_SHIPPING_OPTION_CODE);
 
-		boolean result = service.updateCartOrderShippingAddress(UPDATED_SHIPPING_ADDRESS_GUID, cartOrder, STORE_CODE);
+		boolean result = service.updateCartOrderShippingAddress(UPDATED_SHIPPING_ADDRESS_GUID, shoppingCart, cartOrder);
 
-		assertTrue(CART_ORDER_SHOULD_BE_UPDATED, result);
+		assertThat(result).as(CART_ORDER_SHOULD_BE_UPDATED).isTrue();
+		verify(shoppingCart).setShippingAddress(shippingAddress);
+		verify(cartOrder).setShippingAddressGuid(anyString());
+		verify(cartOrderShippingInformationSanitizer).sanitize(eq(cartOrder), eq(shippingAddress), argThat(isSupplierOf(shippingOptionResult)));
+
 	}
 
 	@Test
-	public void testShippingServiceLevelSwitchesToDefaultIfExistingSSLNotValid() {
-		allowingUpdateOnCartOrderFromExistingShippingAddressGuid();
-		allowingShippingServiceLevelsForAddress(shippingServiceLevels);
-		allowingShippingServiceLevelGuidOnCartOrder();
-		context.checking(new Expectations() {
-			{
-				allowing(shippingServiceLevel).getGuid();
-				will(returnValue(NEW_SHIPPING_SERVICE_LEVEL_GUID));
+	public void testShippingOptionSwitchesToDefaultIfExistingShippingOptionNotValid() {
+		ShippingOption newOption = mockShippingOption(NEW_SHIPPING_OPTION_CODE, "newOption");
+		final List<ShippingOption> shippingOptions = singletonList(newOption);
 
-				oneOf(cartOrder).setShippingServiceLevelGuid(NEW_SHIPPING_SERVICE_LEVEL_GUID);
-			}
-		});
+		mockShippingOptionServiceToReturnUnpriced(shippingOptions);
+		allowingSanitizeWithGivenShippingOptionResult(shippingOptionResult);
+		allowingShippingOptionCodeOnCartOrder();
 
-		boolean result = service.updateCartOrderShippingAddress(UPDATED_SHIPPING_ADDRESS_GUID, cartOrder, STORE_CODE);
+		when(shippingOptionService.getDefaultShippingOption(shippingOptions)).thenReturn(Optional.of(shippingOption));
 
-		assertTrue(CART_ORDER_SHOULD_BE_UPDATED, result);
-	}
+		boolean result = service.updateCartOrderShippingAddress(UPDATED_SHIPPING_ADDRESS_GUID, shoppingCart, cartOrder);
 
-	@Test
-	public void testCartOrderIsUpdatedWhenUpdatingToSameShippingAddressGuidWhenSelectedSSLIsNull() {
-		allowingUpdateOnCartOrderFromExistingShippingAddressGuid();
-		allowingShippingServiceLevelsForAddress(shippingServiceLevels);
-		context.checking(new Expectations() {
-			{
-				allowing(cartOrder).getShippingAddressGuid();
-				will(returnValue(EXISTING_SHIPPING_ADDRESS_GUID));
-
-				allowing(cartOrder).getShippingServiceLevelGuid();
-				will(returnValue(null));
-
-				allowing(cartOrderShippingInformationSanitizer).sanitize(STORE_CODE, cartOrder);
-
-				allowing(shippingServiceLevel).getGuid();
-				will(returnValue(EXISTING_SHIPPING_SERVICE_LEVEL_GUID));
-
-				allowing(cartOrder).setShippingAddressGuid(with(any(String.class)));
-
-				oneOf(cartOrder).setShippingServiceLevelGuid(EXISTING_SHIPPING_SERVICE_LEVEL_GUID);
-
-			}
-		});
-
-		boolean result = service.updateCartOrderShippingAddress(EXISTING_SHIPPING_ADDRESS_GUID, cartOrder, STORE_CODE);
-
-		assertTrue(CART_ORDER_SHOULD_BE_UPDATED, result);
+		assertThat(result).as(CART_ORDER_SHOULD_BE_UPDATED).isTrue();
+		verify(shoppingCart).setShippingAddress(shippingAddress);
+		verify(shippingOptionService).getDefaultShippingOption(shippingOptions);
+		verify(cartOrder).setShippingOptionCode(EXISTING_SHIPPING_OPTION_CODE);
+		verify(cartOrderShippingInformationSanitizer).sanitize(eq(cartOrder), eq(shippingAddress), argThat(isSupplierOf(shippingOptionResult)));
 	}
 
 	/**
@@ -253,30 +213,19 @@ public class CartOrderShippingServiceImplTest {
 	 */
 	@Test
 	public void testPopulateAddressAndShippingFields() {
-		allowingShippingServiceLevelGuidOnCartOrder();
+		final List<ShippingOption> shippingOptions = singletonList(shippingOption);
+		mockShippingOptionServiceToReturnUnpriced(shippingOptions);
+		allowingShippingOptionCodeOnCartOrder();
 
-		context.checking(new Expectations() {
-			{
-				oneOf(cartOrder).getShippingAddressGuid();
-				will(returnValue(SHIPPING_ADDRESS_GUID));
-				oneOf(customerAddressDao).findByGuid(SHIPPING_ADDRESS_GUID);
-				will(returnValue(shippingAddress));
-				oneOf(shoppingCart).getStore();
-				will(returnValue(store));
-				oneOf(store).getCode();
-				will(returnValue(STORE_CODE));
-				oneOf(shippingServiceLevelService).retrieveShippingServiceLevel(STORE_CODE, shippingAddress);
-				will(returnValue(shippingServiceLevels));
-				allowing(shippingServiceLevel).getGuid();
-				will(returnValue(EXISTING_SHIPPING_SERVICE_LEVEL_GUID));
+		when(cartOrder.getShippingAddressGuid()).thenReturn(SHIPPING_ADDRESS_GUID);
+		when(customerAddressDao.findByGuid(SHIPPING_ADDRESS_GUID)).thenReturn(shippingAddress);
+		when(shippingOption.getCode()).thenReturn(EXISTING_SHIPPING_OPTION_CODE);
 
-				oneOf(shoppingCart).setBillingAddress(billingAddress);
-				oneOf(shoppingCart).setShippingAddress(shippingAddress);
-				oneOf(shoppingCart).setSelectedShippingServiceLevelUid(SHIPPING_SERVICE_LEVEL_UID);
-				oneOf(shoppingCart).setShippingServiceLevelList(shippingServiceLevels);
-			}
-		});
 		service.populateAddressAndShippingFields(shoppingCart, cartOrder);
+
+		verify(shoppingCart).setBillingAddress(billingAddress);
+		verify(shoppingCart).setShippingAddress(shippingAddress);
+		verify(shoppingCart).setSelectedShippingOption(shippingOption);
 	}
 
 	/**
@@ -284,72 +233,46 @@ public class CartOrderShippingServiceImplTest {
 	 */
 	@Test
 	public void testPopulationOfShoppingCartWithNullShippingAddress() {
-		allowingShippingServiceLevelGuidOnCartOrder();
-		context.checking(new Expectations() {
-			{
-				allowing(shippingServiceLevel).getGuid();
-				will(returnValue(NEW_SHIPPING_SERVICE_LEVEL_GUID));
+		mockShippingOptionServiceToReturnUnpriced(emptyList());
+		allowingShippingOptionCodeOnCartOrder();
 
-				oneOf(shippingServiceLevelService).retrieveShippingServiceLevel(STORE_CODE, null);
-				will(returnValue(Collections.emptyList()));
-
-				oneOf(cartOrder).getShippingAddressGuid();
-				will(returnValue("nonexistent-guid"));
-
-				oneOf(customerAddressDao).findByGuid("nonexistent-guid");
-				will(returnValue(null));
-
-				oneOf(shoppingCart).setBillingAddress(billingAddress);
-				oneOf(shoppingCart).setShippingAddress(null);
-				never(shoppingCart).setSelectedShippingServiceLevelUid(with(any(Long.class)));
-				oneOf(shoppingCart).getStore();
-				will(returnValue(store));
-
-				oneOf(store).getCode();
-				will(returnValue(STORE_CODE));
-			}
-		});
+		when(cartOrder.getShippingAddressGuid()).thenReturn(NONEXISTENT_GUID);
+		when(customerAddressDao.findByGuid(NONEXISTENT_GUID)).thenReturn(null);
 
 		service.populateAddressAndShippingFields(shoppingCart, cartOrder);
 
+		verify(cartOrder).getShippingAddressGuid();
+		verify(customerAddressDao).findByGuid(NONEXISTENT_GUID);
+
+		verify(shoppingCart).setBillingAddress(billingAddress);
+		verify(shoppingCart).setShippingAddress(null);
+		verify(shoppingCart, never()).setSelectedShippingOption(any(ShippingOption.class));
+
 	}
 
-	private void allowingUpdateOnCartOrderFromExistingShippingAddressGuid() {
-		context.checking(new Expectations() {
-			{
-				allowing(cartOrder).getShippingAddressGuid();
-				will(returnValue(EXISTING_SHIPPING_ADDRESS_GUID));
-
-				allowing(customerAddressDao).findByGuid(EXISTING_SHIPPING_ADDRESS_GUID);
-				will(returnValue(shippingAddress));
-
-				allowing(cartOrder).setShippingAddressGuid(UPDATED_SHIPPING_ADDRESS_GUID);
-
-				oneOf(cartOrderShippingInformationSanitizer).sanitize(STORE_CODE, cartOrder);
-			}
-		});
+	private void allowingSanitizeWithGivenShippingOptionResult(final ShippingOptionResult shippingOptionResult) {
+		when(cartOrder.getShippingAddressGuid()).thenReturn(EXISTING_SHIPPING_ADDRESS_GUID);
+		when(cartOrderShippingInformationSanitizer.sanitize(eq(cartOrder), eq(shippingAddress), argThat(isSupplierOf(shippingOptionResult))))
+				.thenReturn(true);
 	}
 
-	private void allowingShippingServiceLevelsForAddress(final List<ShippingServiceLevel> shippingServiceLevels) {
-		context.checking(new Expectations() {
-			{
-				allowing(shippingServiceLevelService).retrieveShippingServiceLevel(STORE_CODE, shippingAddress);
-				will(returnValue(shippingServiceLevels));
-			}
-		});
+	private void allowingShippingOptionCodeOnCartOrder() {
+
+		when(cartOrder.getShippingOptionCode())
+				.thenReturn(
+						EXISTING_SHIPPING_OPTION_CODE,
+						EXISTING_SHIPPING_OPTION_CODE,
+						NEW_SHIPPING_OPTION_CODE);
+
 	}
 
-	private void allowingShippingServiceLevelGuidOnCartOrder() {
-		context.checking(new Expectations() {
-			{
-				allowing(cartOrder).getShippingServiceLevelGuid();
-				will(onConsecutiveCalls(
-					returnValue(EXISTING_SHIPPING_SERVICE_LEVEL_GUID),
-					returnValue(EXISTING_SHIPPING_SERVICE_LEVEL_GUID),
-					returnValue(NEW_SHIPPING_SERVICE_LEVEL_GUID)));
-
-			}
-		});
+	private void mockShippingOptionServiceToReturnUnpriced(final List<ShippingOption> shippingOptions) {
+		mockShippingOptionResultToReturn(shippingOptions);
+		when(shippingOptionService.getShippingOptions(shoppingCart)).thenReturn(shippingOptionResult);
 	}
 
+	private void mockShippingOptionResultToReturn(final List<ShippingOption> shippingOptions) {
+		when(shippingOptionResult.isSuccessful()).thenReturn(true);
+		when(shippingOptionResult.getAvailableShippingOptions()).thenReturn(shippingOptions);
+	}
 }

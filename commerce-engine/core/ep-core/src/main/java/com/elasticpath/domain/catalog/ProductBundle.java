@@ -103,4 +103,11 @@ public interface ProductBundle extends Product {
 	 */
 	void setCalculated(Boolean calculated);
 
+	/**
+	 * Determines if the passed bundle constituent should be automatically selected when the bundle is added to cart.
+	 *
+	 * @param bundleConstituent the bundle constituent to evaluate
+	 * @return true if the passed bundle constituent is auto-selectable.
+	 */
+	boolean isConstituentAutoSelectable(BundleConstituent bundleConstituent);
 }

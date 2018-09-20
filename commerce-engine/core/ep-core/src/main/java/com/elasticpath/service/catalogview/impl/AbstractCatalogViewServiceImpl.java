@@ -40,12 +40,14 @@ import com.elasticpath.service.search.query.SortOrder;
 import com.elasticpath.service.search.query.StandardSortBy;
 import com.elasticpath.service.search.solr.IndexUtility;
 import com.elasticpath.settings.SettingsReader;
+import com.elasticpath.settings.provider.SettingValueProvider;
 
 /**
  * Abstract service class from which catalog view services inherit.
  */
+@SuppressWarnings("PMD.GodClass")
 public abstract class AbstractCatalogViewServiceImpl {
-	
+
 	private CategoryLookup categoryLookup;
 
 	private TopSellerService topSellerService;
@@ -63,6 +65,10 @@ public abstract class AbstractCatalogViewServiceImpl {
 	private SettingsReader settingsReader;
 
 	private BeanFactory beanFactory;
+
+	private SettingValueProvider<Integer> featuredProductCountSettingValueProvider;
+
+	private SettingValueProvider<Boolean> attributeFilterEnabledSettingValueProvider;
 
 	/**
 	 * Searches for featured products with search criteria constructed from
@@ -239,15 +245,15 @@ public abstract class AbstractCatalogViewServiceImpl {
 	 * @return the number of catalog featured products to display
 	 */
 	int getCatalogFeaturedProductCount() {
-		return Integer.parseInt(this.getStoreConfig().getSetting("COMMERCE/STORE/CATALOG/featuredProductCountToDisplay").getValue());
+		return getStoreConfig().getSettingValue(getFeaturedProductCountSettingValueProvider());
 	}
-	
+
 	/**
 	 * @return true if attribute filtering is enabled for the store in this thread,
 	 * false if not.
 	 */
 	boolean isAttributeFilterEnabled() {
-		return this.getStoreConfig().getSetting("COMMERCE/STORE/FILTEREDNAVIGATION/attributeFilterEnabled").getBooleanValue();
+		return getStoreConfig().getSettingValue(getAttributeFilterEnabledSettingValueProvider());
 	}
 	
 	private <T extends Filter<T>> void prepareFilterOptions(final Collection<FilterOption<T>> filterOptions, final CatalogViewRequest request) {
@@ -488,4 +494,21 @@ public abstract class AbstractCatalogViewServiceImpl {
 	public void setBeanFactory(final BeanFactory beanFactory) {
 		this.beanFactory = beanFactory;
 	}
+
+	protected SettingValueProvider<Integer> getFeaturedProductCountSettingValueProvider() {
+		return featuredProductCountSettingValueProvider;
+	}
+
+	public void setFeaturedProductCountSettingValueProvider(final SettingValueProvider<Integer> featuredProductCountSettingValueProvider) {
+		this.featuredProductCountSettingValueProvider = featuredProductCountSettingValueProvider;
+	}
+
+	protected SettingValueProvider<Boolean> getAttributeFilterEnabledSettingValueProvider() {
+		return attributeFilterEnabledSettingValueProvider;
+	}
+
+	public void setAttributeFilterEnabledSettingValueProvider(final SettingValueProvider<Boolean> attributeFilterEnabledSettingValueProvider) {
+		this.attributeFilterEnabledSettingValueProvider = attributeFilterEnabledSettingValueProvider;
+	}
+
 }

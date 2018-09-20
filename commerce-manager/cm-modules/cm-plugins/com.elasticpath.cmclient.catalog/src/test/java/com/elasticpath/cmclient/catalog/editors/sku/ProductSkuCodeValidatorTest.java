@@ -4,8 +4,8 @@
 package com.elasticpath.cmclient.catalog.editors.sku;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Matchers.anyCollectionOf;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.anyCollection;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 import java.util.Collections;
@@ -69,7 +69,7 @@ public class ProductSkuCodeValidatorTest {
 	public void testSkuCodeExists() {
 		final List<String> skuCodes = Collections.singletonList(SKUCODE);
 
-		when(service.skuExists(anyCollectionOf(String.class), eq(1L))).thenReturn(skuCodes);
+		when(service.skuExists(anyCollection(), eq(1L))).thenReturn(skuCodes);
 
 		IStatus status = productSkuCodeValidator.validate(SKUCODE);
 		
@@ -83,7 +83,7 @@ public class ProductSkuCodeValidatorTest {
 	 */
 	@Test
 	public void testSkuCodeDoesntExist() {
-		when(service.skuExists(anyCollectionOf(String.class), eq(1L))).thenReturn(Collections.emptyList());
+		when(service.skuExists(anyCollection(), eq(1L))).thenReturn(Collections.emptyList());
 
 		IStatus status = productSkuCodeValidator.validate(SKUCODE);
 

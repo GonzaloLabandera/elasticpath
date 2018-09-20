@@ -299,7 +299,7 @@ public class CatalogTestPersister {
 		final PriceListAssignmentPersister plaPersister = new PriceListAssignmentPersister(beanFactory);
 		plaPersister.createPriceListAssignment(catalogSaved.getGuid(), priceListDescriptor.getGuid(),
 				catalogSaved.getGuid() + priceListDescriptor.getGuid() + priceListDescriptor.getCurrencyCode(),
-				"", 10);
+				"", 10, "{AND {SHOPPING_START_TIME.greaterThan (0L)} }", null);
 
 		return catalogSaved;
 	}
@@ -1155,13 +1155,6 @@ public class CatalogTestPersister {
 			final AvailabilityCriteria criteria, final int orderLimit, final String... skus) {
 		return createMultiSkuProduct(catalog, defaultCategory, brandCode, productCode, productTypeName, productName, taxCode, criteria,
 				orderLimit, skus, new String[] { Utils.uniqueCode("skuOptionKey1"), Utils.uniqueCode("skuOptionKey2") });
-	}
-
-	public Product createMultiSkuProduct(final Catalog catalog, final Category defaultCategory, final String brandCode,
-			final String productCode, final String productTypeName, final String productName, final String taxCode,
-			final AvailabilityCriteria criteria, final int orderLimit) {
-		return createMultiSkuProduct(catalog, defaultCategory, brandCode, productCode, productTypeName, productName, taxCode, criteria,
-				orderLimit, null, null);
 	}
 
 	/**

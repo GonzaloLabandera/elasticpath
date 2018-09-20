@@ -21,7 +21,7 @@ import com.elasticpath.service.catalogview.AvailabilityStrategy;
 public class WhenInStockAvailabilityStrategyImpl implements AvailabilityStrategy {
 
 	@Override
-	public Availability getAvailability(final Product product, final boolean isAvailable, final boolean isDisplayable, final boolean isPurchasable) {
+	public Availability getAvailability(final Product product, final boolean isAvailable, final boolean isDisplayable) {
 		Availability availability = null;
 		if (AvailabilityCriteria.AVAILABLE_WHEN_IN_STOCK.equals(product.getAvailabilityCriteria())) {
 			if (isAvailable) {

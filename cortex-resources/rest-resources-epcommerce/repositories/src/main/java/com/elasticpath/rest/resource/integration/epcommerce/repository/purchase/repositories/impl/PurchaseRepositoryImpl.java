@@ -72,7 +72,7 @@ public class PurchaseRepositoryImpl implements PurchaseRepository {
 	public Single<OrderPayment> createNewOrderPaymentEntity() {
 		return Single.just(coreBeanFactory.getBean(ContextIdNames.ORDER_PAYMENT));
 	}
-	
+
 	/**
 	 * Checkout handler.
 	 *
@@ -87,8 +87,7 @@ public class PurchaseRepositoryImpl implements PurchaseRepository {
 			} else if (throwable instanceof ResourceOperationFailure) {
 				return Single.error(throwable);
 			} else {
-				LOG.warn("Unexpected checkout error: {}", throwable.getMessage());
-				LOG.debug("Unexpected checkout error", throwable);
+				LOG.error("Unexpected checkout error", throwable);
 				return Single.error(ResourceOperationFailure.stateFailure("The purchase failed: " + throwable.getMessage()));
 			}
 		};
@@ -103,7 +102,7 @@ public class PurchaseRepositoryImpl implements PurchaseRepository {
 	public void setPaymentMethodTransformerFactory(final PaymentMethodTransformerFactory paymentMethodTransformerFactory) {
 		this.paymentMethodTransformerFactory = paymentMethodTransformerFactory;
 	}
-
+	
 	@Reference
 	public void setCheckoutService(final CheckoutService checkoutService) {
 		this.checkoutService = checkoutService;

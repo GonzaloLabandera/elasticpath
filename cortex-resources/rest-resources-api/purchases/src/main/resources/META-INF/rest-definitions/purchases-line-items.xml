@@ -63,10 +63,18 @@ track and t-shirt would be in separate line items.
 
 		<relationship>
 			<name>purchase-line-item-to-purchase</name>
-			<description><![CDATA[Link from line itme to the purchase.]]></description>
+			<description><![CDATA[Link from line item to the purchase.]]></description>
 			<rel>purchase</rel>
 			<from>purchase-line-item</from>
 			<to>purchase</to>
+		</relationship>
+
+		<relationship>
+			<name>purchase-line-item-to-item</name>
+			<description><![CDATA[Link from the purchase line item to the item.]]></description>
+			<rel>item</rel>
+			<from>purchase-line-item</from>
+			<to>items.item</to>
 		</relationship>
 
 		<!--COMPONENTS-->

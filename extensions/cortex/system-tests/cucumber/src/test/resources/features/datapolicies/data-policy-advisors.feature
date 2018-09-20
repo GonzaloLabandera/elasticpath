@@ -7,7 +7,7 @@ Feature: Data policy advisors on addresses
 
   Scenario: Data policy advisor on addresses when data policy not acknowledged
     Given I access the data policies resource from root
-    And I select the data policy named Saved Addresses
+    And I select the data policy Saved Addresses
     And I can access a data policy with the following field:
       | data-policy-consent  | false           |
       | policy-reference-key | DP12347         |
@@ -20,7 +20,7 @@ Feature: Data policy advisors on addresses
 
   Scenario: All data policy advisors with the same advising data points disappear when the user accepts one of the data policies
     Given I access the data policies resource from root
-    And I select the data policy named Saved Addresses
+    And I select the data policy Saved Addresses
     And I can access a data policy with the following field:
       | data-policy-consent  | false           |
       | policy-reference-key | DP12347         |
@@ -31,7 +31,7 @@ Feature: Data policy advisors on addresses
       | needinfo    | need.datapolicy.consent | Need user consent for data policy 'Marketing Contact Information' | datapolicies.data-policy-consent-form |
       | needinfo    | need.datapolicy.consent | Need user consent for data policy 'Saved Addresses'               | datapolicies.data-policy-consent-form |
     When I access the data policies resource from root
-    And I select the data policy named Saved Addresses
+    And I select the data policy Saved Addresses
     And I access the data policy form
     And I post the following fields to the data policy form:
       | data-policy-consent | true |

@@ -11,7 +11,10 @@ public class AddEditTaxRateDialog extends AbstractDialog {
 	private final String taxRateParentCSS;
 	private final String subCountryCSS;
 	private final String saveButtonCSS;
-	private static final String TAX_RATE_PARENT_CSS_TEMPLATE = "div[automation-id*='com.elasticpath.cmclient.admin.taxes.TaxesMessages"
+	/**
+	 * CSS selector used to identify the dialog.
+	 */
+	public static final String TAX_RATE_PARENT_CSS_TEMPLATE = "div[automation-id*='com.elasticpath.cmclient.admin.taxes.TaxesMessages"
 			+ ".TaxValue%sDialogTitle'][widget-type='Shell'] ";
 	private static final String TAX_RATE_VALUE_TABLE_CSS = "div[automation-id='com.elasticpath.cmclient.admin.taxes.TaxesMessages"
 			+ ".TaxValuesLabel'][widget-type='Group'] div[widget-id='Property Table']";

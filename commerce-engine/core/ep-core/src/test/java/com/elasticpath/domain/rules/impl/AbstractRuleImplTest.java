@@ -441,9 +441,9 @@ public class AbstractRuleImplTest {
 	 */
 	@Test
 	public void testIsEnabled() {
-		assertEquals(ruleImpl.isEnabled(), true);
+		assertTrue(ruleImpl.isEnabled());
 		ruleImpl.setEnabled(false);
-		assertEquals(false, ruleImpl.isEnabled());
+		assertFalse(ruleImpl.isEnabled());
 	}
 
 	/**

@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) Elastic Path Software Inc., 2013
  */
 package com.elasticpath.service.payment.gateway.impl;
@@ -15,13 +15,11 @@ import com.elasticpath.plugin.payment.capabilities.ReversePreAuthorizationCapabi
 import com.elasticpath.plugin.payment.capabilities.SaleCapability;
 import com.elasticpath.plugin.payment.capabilities.VoidCaptureCapability;
 import com.elasticpath.plugin.payment.dto.AddressDto;
-import com.elasticpath.plugin.payment.dto.CardDetailsPaymentMethod;
 import com.elasticpath.plugin.payment.dto.OrderPaymentDto;
 import com.elasticpath.plugin.payment.dto.OrderShipmentDto;
 import com.elasticpath.plugin.payment.dto.PayerAuthenticationEnrollmentResultDto;
 import com.elasticpath.plugin.payment.dto.ShoppingCartDto;
 import com.elasticpath.plugin.payment.dto.impl.PayerAuthenticationEnrollmentResultDtoImpl;
-import com.elasticpath.plugin.payment.exceptions.CardDeclinedException;
 import com.elasticpath.plugin.payment.exceptions.CardErrorException;
 import com.elasticpath.plugin.payment.exceptions.CardExpiredException;
 import com.elasticpath.plugin.payment.spi.AbstractCreditCardPaymentGatewayPluginSPI;
@@ -33,11 +31,12 @@ import com.elasticpath.plugin.payment.transaction.CaptureTransactionResponse;
 /**
  * Implementation of the "null" payment gateway which does not connect to any external service and is used mainly for testing.
  */
+// TODO: All credit card validations were removed on PB-2219. Is is important to discuss whether or not there should be any validations for this
+// Plugin and which ones.
 public class NullPaymentGatewayPluginImpl extends AbstractCreditCardPaymentGatewayPluginSPI
 		implements RefundCapability, VoidCaptureCapability, CaptureCapability,
 					ReversePreAuthorizationCapability, SaleCapability,
 					PreAuthorizeCapability {
-	private static final String TESTING_EXCEPTION_MESSAGE = "Testing exception";
 
 	/**
 	 * Serial version id.
@@ -77,17 +76,6 @@ public class NullPaymentGatewayPluginImpl extends AbstractCreditCardPaymentGatew
 			throw new CardExpiredException("credit card has expired");
 		}
 
-		CardDetailsPaymentMethod paymentMethod = (CardDetailsPaymentMethod) authorizationTransactionRequest.getPaymentMethod();
-		if ("EXP_AUTH".equals(paymentMethod.getCardHolderName())) {
-			throw new CardExpiredException(TESTING_EXCEPTION_MESSAGE);
-		}
-		if ("DEC_AUTH".equals(paymentMethod.getCardHolderName())) {
-			throw new CardDeclinedException(TESTING_EXCEPTION_MESSAGE);
-		}
-		if ("COM_AUTH".equals(paymentMethod.getCardHolderName())) {
-			throw new CardErrorException(TESTING_EXCEPTION_MESSAGE);
-		}
-
 		return createAuthorizationResponse(getMerchantReferenceId(), getAuthCode(), null, null, authorizationTransactionRequest.getMoney());
 	}
 
@@ -101,16 +89,6 @@ public class NullPaymentGatewayPluginImpl extends AbstractCreditCardPaymentGatew
 	public void reversePreAuthorization(final OrderPaymentDto payment) {
 		if (reversePreAuthorizeFailFlag) {
 			throw new CardExpiredException("Card has expired meanwhile");
-		}
-
-		if ("EXP_REV_AUTH".equals(payment.getCardHolderName())) {
-			throw new CardExpiredException(TESTING_EXCEPTION_MESSAGE);
-		}
-		if ("DEC_REV_AUTH".equals(payment.getCardHolderName())) {
-			throw new CardDeclinedException(TESTING_EXCEPTION_MESSAGE);
-		}
-		if ("COM_REV_AUTH".equals(payment.getCardHolderName())) {
-			throw new CardErrorException(TESTING_EXCEPTION_MESSAGE);
 		}
 
 		payment.setReferenceId(getMerchantReferenceId());
@@ -152,15 +130,6 @@ public class NullPaymentGatewayPluginImpl extends AbstractCreditCardPaymentGatew
 	 */
 	@Override
 	public void refund(final OrderPaymentDto payment, final AddressDto billingAddress) {
-		if ("EXP_REFUND".equals(payment.getCardHolderName())) {
-			throw new CardExpiredException(TESTING_EXCEPTION_MESSAGE);
-		}
-		if ("DEC_REFUND".equals(payment.getCardHolderName())) {
-			throw new CardDeclinedException(TESTING_EXCEPTION_MESSAGE);
-		}
-		if ("COM_REFUND".equals(payment.getCardHolderName())) {
-			throw new CardErrorException(TESTING_EXCEPTION_MESSAGE);
-		}
 		payment.setReferenceId(getMerchantReferenceId());
 		payment.setAuthorizationCode(NULL_REFUND_ID_PREFIX + randomGenerator.nextInt());
 	}

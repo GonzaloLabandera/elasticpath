@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>com.elasticpath</groupId>
 		<artifactId>core</artifactId>
-		<version>702.0.0-SNAPSHOT</version>
+		<version>703.0.0-SNAPSHOT</version>
 	</parent>
 
 	<artifactId>ep-core</artifactId>
@@ -47,7 +47,10 @@
 			<groupId>com.elasticpath</groupId>
 			<artifactId>ep-payment-gateway-connectivity-api</artifactId>
 		</dependency>
-
+		<dependency>
+			<groupId>com.elasticpath</groupId>
+			<artifactId>shipping-calculation-connectivity-api</artifactId>
+		</dependency>
 		<dependency>
 			<groupId>com.elasticpath</groupId>
 			<artifactId>ep-test-payment-gateway</artifactId>
@@ -60,9 +63,14 @@
 
 		<dependency>
 			<groupId>com.elasticpath</groupId>
+			<artifactId>ep-settings-test-support</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>com.elasticpath</groupId>
 			<artifactId>tax-calculation-connectivity-api</artifactId>
 		</dependency>
-	
+
 		<dependency>
 			<groupId>org.apache.xmlbeans</groupId>
 			<artifactId>xmlbeans</artifactId>
@@ -99,16 +107,6 @@
 		<dependency>
 			<groupId>aopalliance</groupId>
 			<artifactId>aopalliance</artifactId>
-		</dependency>
-
-		<dependency>
-			<groupId>org.drools</groupId>
-			<artifactId>drools-api</artifactId>
-		</dependency>
-
-		<dependency>
-			<groupId>org.drools</groupId>
-			<artifactId>drools-core</artifactId>
 		</dependency>
 
 		<dependency>
@@ -170,19 +168,8 @@
 			<artifactId>spring-web</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.springmodules</groupId>
-			<artifactId>spring-modules-jakarta-commons</artifactId>
-			<scope>runtime</scope>
-			<exclusions>
-				<exclusion>
-					<artifactId>commons-beanutils-core</artifactId>
-					<groupId>commons-beanutils</groupId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-		<dependency>
-			<groupId>org.springmodules</groupId>
-			<artifactId>spring-modules-validation</artifactId>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-expression</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.hibernate</groupId>
@@ -202,13 +189,20 @@
 			<artifactId>spring-webmvc</artifactId>
 			<scope>runtime</scope>
 		</dependency>
+
+		<dependency>
+			<groupId>org.drools</groupId>
+			<artifactId>drools-core</artifactId>
+		</dependency>
+
 		<dependency>
 			<groupId>org.drools</groupId>
 			<artifactId>drools-compiler</artifactId>
 		</dependency>
+
 		<dependency>
-			<groupId>org.eclipse.jdt.core.compiler</groupId>
-			<artifactId>ecj</artifactId>
+			<groupId>org.kie</groupId>
+			<artifactId>kie-api</artifactId>
 		</dependency>
 
 		<dependency>
@@ -234,6 +228,11 @@
 		<dependency>
 			<groupId>com.elasticpath</groupId>
 			<artifactId>ep-test-utils</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>com.elasticpath</groupId>
+			<artifactId>ep-bean-framework</artifactId>
 		</dependency>
 
 		<dependency>
@@ -304,10 +303,7 @@
 			<groupId>com.google.guava</groupId>
 			<artifactId>guava</artifactId>
 		</dependency>
-		<dependency>
-			<groupId>commons-vfs</groupId>
-			<artifactId>commons-vfs</artifactId>
-		</dependency>
+
 		<dependency>
 			<groupId>commons-validator</groupId>
 			<artifactId>commons-validator</artifactId>
@@ -369,11 +365,6 @@
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-email</artifactId>
 		</dependency>
-		<!-- quartz needs httpclient -->
-		<dependency>
-			<groupId>commons-httpclient</groupId>
-			<artifactId>commons-httpclient</artifactId>
-		</dependency>
 		<dependency>
 			<groupId>org.codehaus.groovy</groupId>
 			<artifactId>groovy-all</artifactId>
@@ -391,8 +382,8 @@
 		</dependency>
 
 		<dependency>
-			<groupId>org.eclipse.gemini</groupId>
-			<artifactId>org.eclipse.gemini.blueprint.core</artifactId>
+			<groupId>org.eclipse.gemini.blueprint</groupId>
+			<artifactId>gemini-blueprint-core</artifactId>
 			<exclusions>
 				<exclusion>
 					<groupId>org.aopalliance</groupId>
@@ -582,7 +573,6 @@
 				<artifactId>maven-surefire-plugin</artifactId>
 				<configuration>
 					<runOrder>alphabetical</runOrder>
-					<argLine>${java.jvm.opts}</argLine>
 				</configuration>
 			</plugin>
 
@@ -660,7 +650,12 @@
 						<_nodefaultversion>true</_nodefaultversion>
 						<Bundle-Localization>plugin</Bundle-Localization>
 						<Bundle-RequiredExecutionEnvironment>J2SE-1.5</Bundle-RequiredExecutionEnvironment>
-						<Import-Package>!*</Import-Package>
+						<Import-Package>
+							com.elasticpath.commons.beanframework,
+							com.elasticpath.commons.beanframework.impl,
+							com.elasticpath.commons.beanframework.spring,
+							!*
+						</Import-Package>
 						<Implementation-Build>${buildNumber}</Implementation-Build>
 						<Implementation-Version>${project.version} (r ${buildNumber} )</Implementation-Version>
 
@@ -671,7 +666,6 @@
 	</build>
 
 	<properties>
-		<java.jvm.opts>-XX:MaxPermSize=128m</java.jvm.opts>
 		<corbertura.instrument.excludes>com/elasticpath/commons/constants/*.class,
 			com/elasticpath/commons/util/impl/MailerImpl.class,
 			com/elasticpath/service/misc/Criteria.class</corbertura.instrument.excludes>
@@ -723,7 +717,7 @@
 						<plugin>
 							<groupId>org.eclipse.m2e</groupId>
 							<artifactId>lifecycle-mapping</artifactId>
-							<version>1.0.0</version>
+							<version>${lifecycle-mapping-plugin.version}</version>
 							<configuration>
 								<lifecycleMappingMetadata>
 									<pluginExecutions>

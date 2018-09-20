@@ -3,16 +3,13 @@
  */
 package com.elasticpath.rest.resource.integration.epcommerce.repository.navigations.impl;
 
-import java.util.List;
-
 import io.reactivex.Observable;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
 import com.elasticpath.repository.LinksRepository;
 import com.elasticpath.rest.definition.navigations.NavigationIdentifier;
-import com.elasticpath.rest.id.IdentifierPart;
-import com.elasticpath.rest.id.type.PathIdentifier;
+import com.elasticpath.rest.id.type.StringIdentifier;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.category.CategoryRepository;
 
 /**
@@ -29,7 +26,7 @@ public class NavigationToChildNavigationRepositoryImpl<IP extends NavigationIden
 	@Override
 	public Observable<NavigationIdentifier> getElements(final NavigationIdentifier identifier) {
 		String storeCode = identifier.getNavigations().getScope().getValue();
-		String nodeId = ((PathIdentifier) identifier.getNodeId()).extractLeafId();
+		String nodeId = identifier.getNodeId().getValue();
 
 		return categoryRepository.findChildren(storeCode, nodeId)
 				.map(category -> buildNavigationIdentifier(identifier, category.getCode()));
@@ -43,11 +40,10 @@ public class NavigationToChildNavigationRepositoryImpl<IP extends NavigationIden
 	 * @return navigation identifier
 	 */
 	protected NavigationIdentifier buildNavigationIdentifier(final NavigationIdentifier identifier, final String nodeId) {
-		IdentifierPart<List<String>> parentId = identifier.getNodeId();
 
 		return NavigationIdentifier.builder()
 				.withNavigations(identifier.getNavigations())
-				.withNodeId(PathIdentifier.of(parentId, nodeId))
+				.withNodeId(StringIdentifier.of(nodeId))
 				.build();
 	}
 

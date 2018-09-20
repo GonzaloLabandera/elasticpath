@@ -7,7 +7,7 @@
 	<parent>
 		<groupId>com.elasticpath</groupId>
 		<artifactId>email</artifactId>
-		<version>702.0.0-SNAPSHOT</version>
+		<version>703.0.0-SNAPSHOT</version>
 	</parent>
 
 	<artifactId>ep-email</artifactId>
@@ -18,6 +18,10 @@
 		<dependency>
 			<groupId>com.elasticpath</groupId>
 			<artifactId>ep-core</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.elasticpath</groupId>
+			<artifactId>ep-settings</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>com.elasticpath</groupId>
@@ -32,10 +36,6 @@
 			<groupId>com.elasticpath</groupId>
 			<artifactId>ep-messaging-camel</artifactId>
 			<scope>runtime</scope>
-		</dependency>
-		<dependency>
-			<groupId>com.elasticpath</groupId>
-			<artifactId>ep-settings</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.commons</groupId>
@@ -93,6 +93,10 @@
 		<dependency>
 			<groupId>org.apache.camel</groupId>
 			<artifactId>camel-test</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.elasticpath</groupId>
+			<artifactId>ep-settings-test-support</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>com.elasticpath</groupId>

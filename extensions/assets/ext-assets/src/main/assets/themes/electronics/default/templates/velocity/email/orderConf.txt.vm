@@ -61,7 +61,7 @@ $ctxCountries.getCountryDisplayName($!shippingAddres.country, ${order.locale})
 
 #emailMessage("email.orderConf.subtotal"): #displayPriceForLocale($shipment.getItemSubTotalMoney(), $order.locale)
 #emailMessage("email.orderConf.shipping"): #displayPriceForLocale($shipment.getShippingCostMoney(), $order.locale)
-#emailMessage("email.orderConf.shipping.method"): $shipment.serviceLevel
+#emailMessage("email.orderConf.shipping.method"): $shipment.shippingOptionName
 #if($shipment.hasSubtotalDiscount() && !$shipment.isInclusiveTax())
 #emailMessage("email.orderConf.orderdiscount"): #displayPriceForLocale($shipment.getSubtotalDiscountMoney(), $order.locale)
 #end

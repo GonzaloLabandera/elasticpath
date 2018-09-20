@@ -7,7 +7,7 @@
 	<changeSet id="standalone-demo-data${importexport.test-data.qualifier}" author="com.elasticpath.extensions" context="standalone-demo-data">
 		<comment>Import of the commerce demo data</comment>
 
-		<customChange class="com.elasticpath.repo.datapopulation.importexport.ImportExportChange">
+		<customChange class="com.elasticpath.datapopulation.importexport.ImportExportChange">
 			<param name="dataSet" value="standalone-demo-data" />
 		</customChange>
 	</changeSet>

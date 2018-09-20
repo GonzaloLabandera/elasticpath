@@ -140,11 +140,11 @@ public interface PromotionRuleDelegate {
 	 * @param ruleId the id of the rule executing this action
 	 * @param actionId the id of the action providing the discount
 	 * @param amount the amount by which to reduce the shipping cost
-	 * @param shippingLevelCode the code of shipping service level that this discount applies to
+	 * @param shippingOptionCode the code of shipping option that this discount applies to
 	 * @param currency the currency
 	 */
 	void applyShippingDiscountAmount(ShoppingCart shoppingCart, DiscountItemContainer discountItemContainer, long ruleId, long actionId,
-									String amount, String shippingLevelCode, Currency currency);
+									 String amount, String shippingOptionCode, Currency currency);
 
 	/**
 	 * Reduces the shipping cost of the shopping cart by the specified percent. (If the specified shipping method is in use)
@@ -154,11 +154,11 @@ public interface PromotionRuleDelegate {
 	 * @param ruleId the id of the rule executing this action
 	 * @param actionId the id of the action providing the discount
 	 * @param percent the percent by which to reduce the shipping cost (String value from 1 to 100)
-	 * @param shippingLevelCode the code of shipping service level that this discount applies to
+	 * @param shippingOptionCode the code of shipping option that this discount applies to
 	 * @param currency the currency
 	 */
 	void applyShippingDiscountPercent(ShoppingCart shoppingCart, DiscountItemContainer discountItemContainer, long ruleId, long actionId,
-									String percent, String shippingLevelCode, Currency currency);
+									  String percent, String shippingOptionCode, Currency currency);
 
 	/**
 	 * Checks that the current date is between the specified dates.

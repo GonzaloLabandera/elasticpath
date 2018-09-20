@@ -183,12 +183,14 @@ public class AbstractShoppingItemImplTest {
 		sku1.setSkuCode("skuA");
 		sku1.setGuid(sku1.getSkuCode());
 		child1.setSkuGuid(sku1.getGuid());
+		child1.setBundleConstituent(true);
 
 		ShoppingItemImpl child2 = new ShoppingItemImpl();
 		ProductSku sku2 = new ProductSkuImpl();
 		sku2.setSkuCode("skuA");
 		sku2.setGuid(sku2.getSkuCode());
 		child2.setSkuGuid(sku2.getGuid());
+		child2.setBundleConstituent(true);
 
 		item.addChildItem(child1);
 		item.addChildItem(child2);
@@ -211,9 +213,10 @@ public class AbstractShoppingItemImplTest {
 
 		CartItem cartItemImpl = new ShoppingItemImpl();
 		cartItemImpl.setSkuGuid(sku.getGuid());
-		CartItem dependentCartItem = new ShoppingItemImpl();
+		CartItem bundleConstituentCartItem = new ShoppingItemImpl();
+		bundleConstituentCartItem.setBundleConstituent(true);
 		assertFalse(cartItemImpl.hasBundleItems(productSkuLookup));
-		cartItemImpl.addChildItem(dependentCartItem);
+		cartItemImpl.addChildItem(bundleConstituentCartItem);
 		assertTrue(cartItemImpl.hasBundleItems(productSkuLookup));
 	}
 
@@ -223,11 +226,11 @@ public class AbstractShoppingItemImplTest {
 	@Test
 	public void testIsShippableFully() {
 		ShoppingItem cartItem = mockBundleCartItem(true, PRODUCT_SKU);
-		ShoppingItem dependentCartItem = mockCartItem(true, PRODUCT_SKU2);
+		ShoppingItem bundleConstituentItem = mockCartItem(true, PRODUCT_SKU2);
 
-		cartItem.addChildItem(dependentCartItem);
+		cartItem.addChildItem(bundleConstituentItem);
 
-		assertTrue("Bundle should be shippable if it's constituents all are.", cartItem.isShippable(productSkuLookup));
+		assertTrue("Bundle should be shippable if its constituents all are.", cartItem.isShippable(productSkuLookup));
 	}
 
 	/**

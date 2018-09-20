@@ -4,6 +4,7 @@
 package com.elasticpath.domain.discounts.impl;
 
 import java.math.BigDecimal;
+import java.util.Optional;
 
 import com.elasticpath.domain.discounts.DiscountItemContainer;
 import com.elasticpath.domain.discounts.TotallingApplier;
@@ -40,11 +41,18 @@ public class CartNFreeSkusDiscountImpl extends AbstractDiscountImpl {
 	@Override
 	public BigDecimal doApply(final boolean actuallyApply, final DiscountItemContainer discountItemContainer) {
 		final TotallingApplier applier = getTotallingApplier(actuallyApply, discountItemContainer, getRuleId());
-		final ShoppingItem cartItem = discountItemContainer.addCartItem(skuCode, getAvailableDiscountQuantity());
+
+		final Optional<ShoppingItem> lowestPricedShoppingItemForSku = discountItemContainer.getLowestPricedShoppingItemForSku(skuCode);
+
+		final ShoppingItem cartItem = lowestPricedShoppingItemForSku
+				.orElseGet(() -> discountItemContainer.addCartItem(skuCode, getAvailableDiscountQuantity()));
+
 		if (cartItem != null) {
 			final BigDecimal discount = getItemPrice(discountItemContainer, cartItem);
 			applier.apply(cartItem, discount);
 		}
+
 		return applier.getTotalDiscount();
 	}
+
 }

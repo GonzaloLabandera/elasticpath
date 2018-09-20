@@ -1,8 +1,9 @@
-/**
+/*
  * Copyright (c) Elastic Path Software Inc., 2007
  */
 package com.elasticpath.service.payment.impl;
 
+import static com.elasticpath.service.shoppingcart.impl.OrderSkuAsShoppingItemPricingSnapshotAction.returnTheSameOrderSkuAsPricingSnapshot;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
@@ -11,14 +12,10 @@ import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import static com.elasticpath.service.shoppingcart.impl.OrderSkuAsShoppingItemPricingSnapshotAction.returnTheSameOrderSkuAsPricingSnapshot;
-
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Currency;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
@@ -30,19 +27,15 @@ import org.junit.Test;
 import com.elasticpath.base.exception.EpServiceException;
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.commons.util.impl.UtilityImpl;
-import com.elasticpath.commons.util.security.CreditCardEncrypter;
-import com.elasticpath.commons.util.security.impl.CreditCardEncrypterImpl;
 import com.elasticpath.domain.catalog.GiftCertificate;
 import com.elasticpath.domain.catalog.Price;
 import com.elasticpath.domain.catalog.ProductSku;
-import com.elasticpath.domain.catalog.impl.CatalogLocaleImpl;
 import com.elasticpath.domain.catalog.impl.ProductSkuImpl;
 import com.elasticpath.domain.customer.Address;
 import com.elasticpath.domain.customer.Customer;
 import com.elasticpath.domain.customer.impl.CustomerAddressImpl;
 import com.elasticpath.domain.customer.impl.CustomerAuthenticationImpl;
 import com.elasticpath.domain.customer.impl.CustomerImpl;
-import com.elasticpath.domain.misc.impl.LocalizedPropertiesImpl;
 import com.elasticpath.domain.misc.impl.RandomGuidImpl;
 import com.elasticpath.domain.order.Order;
 import com.elasticpath.domain.order.OrderAddress;
@@ -58,14 +51,13 @@ import com.elasticpath.domain.order.impl.OrderPaymentImpl;
 import com.elasticpath.domain.order.impl.OrderSkuImpl;
 import com.elasticpath.domain.order.impl.OrderTaxValueImpl;
 import com.elasticpath.domain.order.impl.PhysicalOrderShipmentImpl;
-import com.elasticpath.domain.payment.CreditCardPaymentGateway;
 import com.elasticpath.domain.payment.PaymentGateway;
 import com.elasticpath.domain.payment.PaymentHandler;
 import com.elasticpath.domain.payment.PaymentHandlerFactory;
-import com.elasticpath.domain.payment.impl.CreditCardPaymentHandler;
 import com.elasticpath.domain.payment.impl.GiftCertificatePaymentHandler;
 import com.elasticpath.domain.payment.impl.PayPalExpressPaymentHandler;
 import com.elasticpath.domain.payment.impl.PaymentHandlerFactoryImpl;
+import com.elasticpath.domain.payment.impl.TokenPaymentHandler;
 import com.elasticpath.domain.shipping.ShipmentType;
 import com.elasticpath.domain.shoppingcart.ShoppingItemPricingSnapshot;
 import com.elasticpath.domain.tax.TaxJurisdiction;
@@ -74,10 +66,10 @@ import com.elasticpath.money.StandardMoneyFormatter;
 import com.elasticpath.plugin.payment.PaymentGatewayType;
 import com.elasticpath.plugin.payment.PaymentType;
 import com.elasticpath.plugin.tax.domain.TaxAddress;
-import com.elasticpath.service.misc.TimeService;
 import com.elasticpath.service.order.InvalidShipmentStateException;
 import com.elasticpath.service.payment.PaymentResult;
 import com.elasticpath.service.payment.PaymentServiceException;
+import com.elasticpath.service.shoppingcart.OrderSkuToPricingSnapshotFunction;
 import com.elasticpath.service.shoppingcart.PricingSnapshotService;
 import com.elasticpath.service.shoppingcart.TaxSnapshotService;
 import com.elasticpath.service.shoppingcart.impl.TaxSnapshotServiceImplTest;
@@ -106,10 +98,9 @@ public class PaymentServiceImplTest extends AbstractCatalogDataTestCase {
 	private static final Currency CURRENCY = Currency.getInstance("USD");
 	private PaymentServiceImpl paymentService;
 
-	@Mock
-	private CreditCardPaymentGateway creditCardPaymentGateway;
 	private PaymentGateway giftCertificatePaymentGateway;
 	private PaymentGateway paypalPaymentGateway;
+	private PaymentGateway tokenPaymentGateway;
 	private PaymentHandler mockPaymentHandler;
 	private PaymentHandlerFactory mockPaymentHandlerFactory;
 
@@ -130,34 +121,30 @@ public class PaymentServiceImplTest extends AbstractCatalogDataTestCase {
 	public void setUp() throws Exception {
 		super.setUp();
 
-		CreditCardPaymentHandler creditCardPaymentHandler = new CreditCardPaymentHandler();
-		creditCardPaymentHandler.setProductSkuLookup(getProductSkuLookup());
 		GiftCertificatePaymentHandler giftCertificatePaymentHandler = new GiftCertificatePaymentHandler();
 		giftCertificatePaymentHandler.setProductSkuLookup(getProductSkuLookup());
 		PayPalExpressPaymentHandler payPalExpressPaymentHandler = new PayPalExpressPaymentHandler();
 		payPalExpressPaymentHandler.setProductSkuLookup(getProductSkuLookup());
+		final TokenPaymentHandler tokenPaymentHandler = new TokenPaymentHandler();
+		tokenPaymentHandler.setProductSkuLookup(getProductSkuLookup());
 
-		stubGetBean(ContextIdNames.CATALOG_LOCALE, CatalogLocaleImpl.class);
 		stubGetBean(ContextIdNames.CUSTOMER_AUTHENTICATION, CustomerAuthenticationImpl.class);
 		stubGetBean(ContextIdNames.MONEY_FORMATTER, StandardMoneyFormatter.class);
 		stubGetBean(ContextIdNames.ORDER_ADDRESS, OrderAddressImpl.class);
 		stubGetBean(ContextIdNames.ORDER_PAYMENT, OrderPaymentImpl.class);
 		stubGetBean(ContextIdNames.ORDER_SKU, OrderSkuImpl.class);
-		stubGetBean(ContextIdNames.PAYMENT_HANDLER_CREDITCARD, creditCardPaymentHandler);
 		stubGetBean(ContextIdNames.PAYMENT_HANDLER_GIFTCERTIFICATE, giftCertificatePaymentHandler);
 		stubGetBean(ContextIdNames.PAYMENT_HANDLER_PAYPAL, payPalExpressPaymentHandler);
 		stubGetBean(ContextIdNames.PAYMENT_HANDLER_FACTORY, PaymentHandlerFactoryImpl.class);
 		stubGetBean(ContextIdNames.PAYMENT_RESULT, PaymentResultImpl.class);
 		stubGetBean(ContextIdNames.PRODUCT_SKU, ProductSkuImpl.class);
-		stubGetBean(ContextIdNames.PRODUCT_SKU_LOOKUP, getProductSkuLookup());
 		stubGetBean(ContextIdNames.TAX_CALCULATION_RESULT, TaxCalculationResultImpl.class);
 		stubGetBean(ContextIdNames.TAX_CALCULATION_SERVICE, getTaxCalculationService());
 		stubGetBean(ContextIdNames.UTILITY, UtilityImpl.class);
-		stubGetBean(ContextIdNames.LOCALIZED_PROPERTIES, LocalizedPropertiesImpl.class);
 		stubGetBean(ContextIdNames.TAX_OPERATION_SERVICE, getTaxOperationService());
 		stubGetBean(ContextIdNames.ORDER_TAX_VALUE, OrderTaxValueImpl.class);
 		stubGetBean(ContextIdNames.STORE_SERVICE, storeService);
-		stubGetBean(ContextIdNames.TIME_SERVICE, getMockTimeService());
+		stubGetBean(ContextIdNames.PAYMENT_HANDLER_TOKEN, tokenPaymentHandler);
 
 		context.checking(new Expectations() {
 			{
@@ -167,51 +154,42 @@ public class PaymentServiceImplTest extends AbstractCatalogDataTestCase {
 		});
 
 		//Not mocked for all tests
+		Set<PaymentGateway> paymentGateways = new HashSet<>();
+
+		tokenPaymentGateway = context.mock(PaymentGateway.class, "token payment gateway");
+
+		context.checking(new Expectations() {
+			{
+				allowing(tokenPaymentGateway).getPaymentGatewayType();
+				will(returnValue(PaymentGatewayType.CREDITCARD));
+
+				allowing(tokenPaymentGateway).preAuthorize(with(any(OrderPayment.class)), with(any(Address.class)));
+				allowing(tokenPaymentGateway).capture(with(any(OrderPayment.class)));
+				allowing(tokenPaymentGateway).sale(with(any(OrderPayment.class)), with(any(Address.class)));
+				allowing(tokenPaymentGateway).reversePreAuthorization(with(any(OrderPayment.class)));
+
+
+			}
+
+		});
+		paymentGateways.add(tokenPaymentGateway);
+
 		mockPaymentHandlerFactory = context.mock(PaymentHandlerFactory.class);
 		mockPaymentHandler = context.mock(PaymentHandler.class);
 		context.checking(new Expectations() {
 			{
+
 				allowing(mockPaymentHandlerFactory).getPaymentHandler(with(any(PaymentType.class)));
+				will(returnValue(mockPaymentHandler));
 				allowing(mockPaymentHandler).generateAuthorizeShipmentPayments(
-						with(any(OrderPayment.class)), with(any(OrderShipment.class)), with(Collections.<OrderPayment>emptyList()));
-				will(returnValue(Arrays.<OrderPayment>asList()));
+						with(any(OrderPayment.class)), with(any(OrderShipment.class)), with(Collections.emptyList()));
+				will(returnValue(Collections.<OrderPayment>emptyList()));
 
 				allowing(mockPaymentHandlerFactory).getPaymentHandler(with(any(PaymentType.class)));
 				will(returnValue(mockPaymentHandler));
 			}
 		});
 
-		final CreditCardEncrypter encrypter = context.mock(CreditCardEncrypter.class);
-		context.checking(new Expectations() {
-			{
-				allowing(encrypter).encrypt(with(any(String.class)));
-				will(returnValue("11111"));
-
-				allowing(encrypter).decrypt(with(any(String.class)));
-				will(returnValue("4111111111111111"));
-
-				allowing(encrypter).mask("4111111111111111");
-				will(returnValue("************1111"));
-			}
-		});
-		stubGetBean(ContextIdNames.CREDIT_CARD_ENCRYPTER, encrypter);
-
-
-		context.checking(new Expectations() {
-			{
-				allowing(creditCardPaymentGateway).getPaymentGatewayType();
-				will(returnValue(PaymentGatewayType.CREDITCARD));
-
-				allowing(creditCardPaymentGateway).preAuthorize(with(any(OrderPayment.class)), with(any(Address.class)));
-				allowing(creditCardPaymentGateway).reversePreAuthorization(with(any(OrderPayment.class)));
-				allowing(creditCardPaymentGateway).capture(with(any(OrderPayment.class)));
-				allowing(creditCardPaymentGateway).sale(with(any(OrderPayment.class)), with(any(Address.class)));
-				allowing(creditCardPaymentGateway).setValidateCvv2(with(any(boolean.class)));
-			}
-		});
-
-		Set<PaymentGateway> paymentGateways = new HashSet<>();
-		paymentGateways.add(creditCardPaymentGateway);
 
 		giftCertificatePaymentGateway = context.mock(PaymentGateway.class, "gift cert payment gateway");
 		context.checking(new Expectations() {
@@ -245,7 +223,6 @@ public class PaymentServiceImplTest extends AbstractCatalogDataTestCase {
 		stubGetBean(ContextIdNames.TAX_CALCULATION_SERVICE, getTaxCalculationService());
 		stubGetBean(ContextIdNames.PAYMENT_HANDLER_FACTORY, PaymentHandlerFactoryImpl.class);
 		stubGetBean(ContextIdNames.PAYMENT_RESULT, PaymentResultImpl.class);
-		stubGetBean(ContextIdNames.CREDIT_CARD_ENCRYPTER, CreditCardEncrypterImpl.class);
 		stubGetBean(ContextIdNames.PRICING_SNAPSHOT_SERVICE, pricingSnapshotService);
 
 		context.checking(new Expectations() {
@@ -265,6 +242,8 @@ public class PaymentServiceImplTest extends AbstractCatalogDataTestCase {
 		setupMockPrice();
 	}
 
+
+
 	/**
 	 * Tests a shipment which has a modified total amount that's been increased.
 	 */
@@ -275,7 +254,7 @@ public class PaymentServiceImplTest extends AbstractCatalogDataTestCase {
 
 		// 1. Initialises an order payment
 		// 2. Pre-auths:
-		OrderPayment templatePayment = getCreditCardTemplateOrderPayment();
+		OrderPayment templatePayment = getTemplateOrderPaymentForPaypal();
 		PaymentResult result = paymentService.initializePayments(order, templatePayment, null);
 		validateInitializePaymentsResult(order, templatePayment, result);
 
@@ -287,7 +266,7 @@ public class PaymentServiceImplTest extends AbstractCatalogDataTestCase {
 		// NOTE: otherwise we get faulty results when getting the last auth payment
 		try {
 			Thread.sleep(TIMEOUT);
-		} catch (InterruptedException e) {
+		} catch (InterruptedException ignored) {
 		}
 
 		result = paymentService.adjustShipmentPayment(orderShipment); // 2 new order payment should be created
@@ -297,7 +276,7 @@ public class PaymentServiceImplTest extends AbstractCatalogDataTestCase {
 		// NOTE: otherwise we get faulty results when getting the last auth payment
 		try {
 			Thread.sleep(TIMEOUT);
-		} catch (InterruptedException e) {
+		} catch (InterruptedException ignored) {
 		}
 
 		result = paymentService.processShipmentPayment(orderShipment);
@@ -321,14 +300,14 @@ public class PaymentServiceImplTest extends AbstractCatalogDataTestCase {
 				allowing(mockPaymentHandler).generateAuthorizeOrderPayments(with(any(OrderPayment.class)), with(any(Order.class)));
 
 				allowing(mockPaymentHandler).generateAuthorizeShipmentPayments(
-						with(any(OrderPayment.class)), with(any(OrderShipment.class)), with(Collections.<OrderPayment>emptyList()));
+						with(any(OrderPayment.class)), with(any(OrderShipment.class)), with(Collections.emptyList()));
 				will(returnValue(new PaymentResultImpl()));
 			}
 		});
 
 		// 1. Initializes an order payment
 		// 2. Pre-auths based on the single digital shipment.
-		OrderPayment templatePayment = getCreditCardTemplateOrderPayment();
+		OrderPayment templatePayment = getTemplateOrderPaymentForPaypal();
 		PaymentResult result = paymentService.initializePayments(order, templatePayment, null);
 		validateInitializePaymentsResult(order, templatePayment, result);
 
@@ -337,21 +316,6 @@ public class PaymentServiceImplTest extends AbstractCatalogDataTestCase {
 
 		validateOrder(order, templatePayment);
 
-	}
-
-	private OrderPayment getCreditCardTemplateOrderPayment() {
-		OrderPayment orderPayment = getBeanFactory().getBean(ContextIdNames.ORDER_PAYMENT);
-		orderPayment.setPaymentMethod(PaymentType.CREDITCARD);
-		orderPayment.setCardHolderName("john smith");
-		orderPayment.setUnencryptedCardNumber("4111111111111111");
-		orderPayment.setCardType("MasterCard");
-		orderPayment.setCreatedDate(new Date());
-		orderPayment.setCurrencyCode("CAD");
-		orderPayment.setCvv2Code("000");
-		orderPayment.setEmail("test@test.com");
-		orderPayment.setExpiryMonth("08");
-		orderPayment.setExpiryYear("2010");
-		return orderPayment;
 	}
 
 	/**
@@ -368,7 +332,7 @@ public class PaymentServiceImplTest extends AbstractCatalogDataTestCase {
 
 		// 1. Initializes an order payment
 		// 2. Pre-auths based on the single physical shipment.
-		OrderPayment templatePayment = getCreditCardTemplateOrderPayment();
+		OrderPayment templatePayment = getTemplateOrderPaymentForPaypal();
 		PaymentResult result = paymentService.initializePayments(order, templatePayment, null);
 		validateInitializePaymentsResult(order, templatePayment, result);
 
@@ -387,7 +351,7 @@ public class PaymentServiceImplTest extends AbstractCatalogDataTestCase {
 		Order order = getOrder();
 		OrderShipment digitalGoodOrderShipment = addElectronicOrderShipment(order);
 		OrderShipment physicalGoodOrderShipment = addPhysicalOrderShipment(order);
-		OrderPayment templateOrderPayment = getCreditCardTemplateOrderPayment();
+		OrderPayment templateOrderPayment = getTemplateOrderPaymentForPaypal();
 
 		// 1. Initialize an order payment
 		// 2. Pre-auths:
@@ -421,7 +385,7 @@ public class PaymentServiceImplTest extends AbstractCatalogDataTestCase {
 
 		// 1. Initialize an order payment
 		// 2. Pre-auths:
-		OrderPayment templatePayment = getCreditCardTemplateOrderPayment();
+		OrderPayment templatePayment = getTemplateOrderPaymentForPaypal();
 		PaymentResult result = paymentService.initializePayments(order, templatePayment, null);
 		validateInitializePaymentsResult(order, templatePayment, result);
 
@@ -455,7 +419,7 @@ public class PaymentServiceImplTest extends AbstractCatalogDataTestCase {
 
 		// 1. Initialises an order payment
 		// 2. Pre-auths:
-		OrderPayment templatePayment = getCreditCardTemplateOrderPayment();
+		OrderPayment templatePayment = getTemplateOrderPaymentForPaypal();
 		PaymentResult result = paymentService.initializePayments(order, templatePayment, null);
 		validateInitializePaymentsResult(order, templatePayment, result);
 
@@ -492,14 +456,14 @@ public class PaymentServiceImplTest extends AbstractCatalogDataTestCase {
 
 		// 1. Initialises an order payment
 		// 2. Pre-auths:
-		OrderPayment templatePayment = getCreditCardTemplateOrderPayment();
+		OrderPayment templatePayment = getTemplateOrderPaymentForPaypal();
 		PaymentResult result = paymentService.initializePayments(order, templatePayment, null);
 		validateInitializePaymentsResult(order, templatePayment, result);
 
 		// No shipment released
 		// Try cancel the order
 		try {
-			result = paymentService.cancelOrderPayments(order);
+			paymentService.cancelOrderPayments(order);
 			fail();
 		} catch (PaymentServiceException expected) {  //NOPMD
 			// Good, the order can't be canceled, since it has digital goods.
@@ -522,6 +486,8 @@ public class PaymentServiceImplTest extends AbstractCatalogDataTestCase {
 		}
 	}
 
+
+
 	/**
 	 * Tests shipment cancellation when shipment hasn't been released yet.
 	 */
@@ -533,7 +499,7 @@ public class PaymentServiceImplTest extends AbstractCatalogDataTestCase {
 
 		// 1. Initialises an order payment
 		// 2. Pre-auths:
-		OrderPayment templatePayment = getCreditCardTemplateOrderPayment();
+		OrderPayment templatePayment = getTemplateOrderPaymentForPaypal();
 		PaymentResult result = paymentService.initializePayments(order, templatePayment, null);
 		validateInitializePaymentsResult(order, templatePayment, result);
 
@@ -551,7 +517,7 @@ public class PaymentServiceImplTest extends AbstractCatalogDataTestCase {
 
 		// Release the physical shipment
 		try {
-			result = paymentService.processShipmentPayment(orderShipment);
+			paymentService.processShipmentPayment(orderShipment);
 			fail();
 		} catch (InvalidShipmentStateException expected) { //NOPMD
 			// Good, we can do nothing when shipment is cancelled.
@@ -569,7 +535,7 @@ public class PaymentServiceImplTest extends AbstractCatalogDataTestCase {
 
 		// 1. Initialises an order payment
 		// 2. Pre-auths:
-		OrderPayment templatePayment = getCreditCardTemplateOrderPayment();
+		OrderPayment templatePayment = getTemplateOrderPaymentForPaypal();
 		PaymentResult result = paymentService.initializePayments(order, templatePayment, null);
 		validateInitializePaymentsResult(order, templatePayment, result);
 
@@ -711,7 +677,7 @@ public class PaymentServiceImplTest extends AbstractCatalogDataTestCase {
 
 		// 1. Initialises an order payment
 		// 2. Pre-auths:
-		OrderPayment templatePayment = getCreditCardTemplateOrderPayment();
+		OrderPayment templatePayment = getPaymentTokenTemplateOrderPayment();
 		PaymentResult result = paymentService.initializePayments(order, templatePayment, null);
 		validateInitializePaymentsResult(order, templatePayment, result);
 
@@ -746,9 +712,7 @@ public class PaymentServiceImplTest extends AbstractCatalogDataTestCase {
 
 		orderSku.setSkuGuid(productSku.getGuid());
 
-		context.checking(new Expectations() { {
-			allowing(getProductSkuLookup()).findByGuid(productSku.getGuid()); will(returnValue(productSku));
-		} });
+		mockProductSkuLookupByGuid(productSku.getGuid(), productSku);
 		return orderSku;
 	}
 
@@ -763,7 +727,7 @@ public class PaymentServiceImplTest extends AbstractCatalogDataTestCase {
 
 		// 1. Initialises an order payment
 		// 2. Pre-auths:
-		OrderPayment templatePayment = getCreditCardTemplateOrderPayment();
+		OrderPayment templatePayment = getPaymentTokenTemplateOrderPayment();
 		PaymentResult result = paymentService.initializePayments(order, templatePayment, null);
 		validateInitializePaymentsResult(order, templatePayment, result);
 
@@ -807,7 +771,7 @@ public class PaymentServiceImplTest extends AbstractCatalogDataTestCase {
 		Order order = getOrder();
 		OrderShipment existingOrderShipment = addElectronicOrderShipment(order);
 
-		OrderPayment templatePayment = getCreditCardTemplateOrderPayment();
+		OrderPayment templatePayment = getPaymentTokenTemplateOrderPayment();
 		PaymentResult result = paymentService.initializePayments(order, templatePayment, null);
 		validateInitializePaymentsResult(order, templatePayment, result);
 
@@ -819,7 +783,8 @@ public class PaymentServiceImplTest extends AbstractCatalogDataTestCase {
 		result = paymentService.adjustShipmentPayment(existingOrderShipment);
 		validateAdjustShipmentPaymentResult(result, existingOrderShipment, oldShipmentTotal);
 
-		result = paymentService.initializeNewShipmentPayment(newOrderShipment, getCreditCardTemplateOrderPayment());
+
+		result = paymentService.initializeNewShipmentPayment(newOrderShipment, getPaymentTokenTemplateOrderPayment());
 		validateInitializeNewShipmentPaymentResult(result, newOrderShipment);
 
 		// ... time passes ...
@@ -983,7 +948,7 @@ public class PaymentServiceImplTest extends AbstractCatalogDataTestCase {
 	private void validateInitializePaymentsResult(final Order order, final OrderPayment templatePayment, final PaymentResult result) {
 		assertEquals(PaymentResult.CODE_OK, result.getResultCode());
 
-		if (templatePayment.getPaymentMethod() == PaymentType.CREDITCARD
+		if (templatePayment.getPaymentMethod() == PaymentType.PAYMENT_TOKEN
 			|| templatePayment.getPaymentMethod() == PaymentType.GIFT_CERTIFICATE) {
 			assertEquals(order.getAllShipments().size(), result.getProcessedPayments().size());
 			for (OrderPayment authPayment : result.getProcessedPayments()) {
@@ -1005,7 +970,7 @@ public class PaymentServiceImplTest extends AbstractCatalogDataTestCase {
 
 	private void validateOrder(final Order order, final OrderPayment templatePayment) {
 
-		if (templatePayment.getPaymentMethod() == PaymentType.CREDITCARD
+		if (templatePayment.getPaymentMethod() == PaymentType.PAYMENT_TOKEN
 				|| templatePayment.getPaymentMethod() == PaymentType.GIFT_CERTIFICATE) {
 			assertEquals(
 					"The order should have 2 payments per shipment when no gift certificate is present",
@@ -1067,7 +1032,7 @@ public class PaymentServiceImplTest extends AbstractCatalogDataTestCase {
 		TaxOperationServiceImpl taxOperationService = new TaxOperationServiceImpl();
 		taxOperationService.setTaxCalculationService(getTaxCalculationService());
 		taxOperationService.setBeanFactory(getBeanFactory());
-		taxOperationService.setPricingSnapshotService(pricingSnapshotService);
+		taxOperationService.setOrderSkuToPricingSnapshotFunction(new OrderSkuToPricingSnapshotFunction(pricingSnapshotService));
 
 		TaxAddressAdapter adapter = new TaxAddressAdapter();
 		WarehouseService mockWarehouseService = mock(WarehouseService.class);
@@ -1135,6 +1100,12 @@ public class PaymentServiceImplTest extends AbstractCatalogDataTestCase {
 		return orderPayment;
 	}
 
+	private OrderPayment getPaymentTokenTemplateOrderPayment() {
+		OrderPayment orderPayment = getBeanFactory().getBean(ContextIdNames.ORDER_PAYMENT);
+		orderPayment.setPaymentMethod(PaymentType.PAYMENT_TOKEN);
+		return orderPayment;
+	}
+
 	/**
 	 * Tests shipment cancellation when shipment hasn't been released yet.
 	 */
@@ -1164,7 +1135,7 @@ public class PaymentServiceImplTest extends AbstractCatalogDataTestCase {
 
 		// Release the physical shipment
 		try {
-			result = paymentService.processShipmentPayment(orderShipment);
+			paymentService.processShipmentPayment(orderShipment);
 			fail();
 		} catch (InvalidShipmentStateException expected) { //NOPMD
 			// Good, we can do nothing when shipment is cancelled.
@@ -1239,28 +1210,6 @@ public class PaymentServiceImplTest extends AbstractCatalogDataTestCase {
 	}
 
 	/**
-	 * Ensure {@link com.elasticpath.service.payment.PaymentService#isOrderPaymentRefundable(OrderPayment)}
-	 * returns true if card number is not persisted.
-	 */
-	@Test
-	public void ensureIsOrderPaymentRefundableReturnsTrueIfCardNumberIsNotPersisted() {
-		OrderPayment orderPayment = getCreditCardTemplateOrderPayment();
-		orderPayment.setTransactionType(OrderPayment.CAPTURE_TRANSACTION);
-		orderPayment.setUnencryptedCardNumber(null);
-		assertTrue("Credit Card Payment should be refundable without encrypted number.", paymentService.isOrderPaymentRefundable(orderPayment));
-	}
-
-	/**
-	 * Ensure {@link com.elasticpath.service.payment.PaymentService#isOrderPaymentRefundable(OrderPayment)} returns true if card number is persisted.
-	 */
-	@Test
-	public void ensureIsOrderPaymentRefundableReturnsTrueIfCardNumberIsPersisted() {
-		OrderPayment orderPayment = getCreditCardTemplateOrderPayment();
-		orderPayment.setTransactionType(OrderPayment.CAPTURE_TRANSACTION);
-		assertTrue("Credit Card Payment should be refundable with the encrypted card number.", paymentService.isOrderPaymentRefundable(orderPayment));
-	}
-
-	/**
 	 * Ensure {@link com.elasticpath.service.payment.PaymentService#isOrderPaymentRefundable(OrderPayment)}  returns true if
 	 * {@link PaymentType#PAYMENT_TOKEN} is persisted.
 	 */
@@ -1280,16 +1229,5 @@ public class PaymentServiceImplTest extends AbstractCatalogDataTestCase {
 		customer.setGuid(new RandomGuidImpl().toString());
 		customer.initialize();
 		return customer;
-	}
-	
-	private TimeService getMockTimeService() {
-		final TimeService mockTimeService = context.mock(TimeService.class);
-		context.checking(new Expectations() {
-			{
-				allowing(mockTimeService).getCurrentTime();
-				will(returnValue(new Date()));
-			}
-		});
-		return mockTimeService;
 	}
 }

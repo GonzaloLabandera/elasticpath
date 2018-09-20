@@ -7,7 +7,6 @@ package com.elasticpath.paymentgateways.cybersource;
 import java.util.Properties;
 
 import com.elasticpath.plugin.payment.dto.AddressDto;
-import com.elasticpath.plugin.payment.dto.CardDetailsPaymentMethod;
 
 /**
  * Creates different types of CyberSource subscribers for use in testing.
@@ -23,13 +22,11 @@ public interface CyberSourceTestSubscriberFactory {
 	 * Create a Cybersource subscriber.
 	 *
 	 * @param billingAddress the billing address
-	 * @param paymentMethod the payment method
 	 * @param currencyCode the currency code
 	 * @param cybersourceProperties the gateway properties
 	 * @return a subscriber id which represents a token that can be used to replace sensitive
 	 * data required for a transaction (i.e credit card information,billing address, etc).
 	 */
-	String createBillableSubscriber(AddressDto billingAddress, CardDetailsPaymentMethod paymentMethod,
-									String currencyCode, Properties cybersourceProperties);
+	String createBillableSubscriber(AddressDto billingAddress, String currencyCode, Properties cybersourceProperties);
 
 }

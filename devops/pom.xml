@@ -3,11 +3,12 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<parent>
-		<groupId>com.elasticpath.extensions</groupId>
-		<artifactId>ext-commerce-engine-parent</artifactId>
-		<version>0.0.0-SNAPSHOT</version>
+		<groupId>com.elasticpath</groupId>
+		<artifactId>commerce-parent</artifactId>
+		<version>703.0.0-SNAPSHOT</version>
 	</parent>
 
+	<groupId>com.elasticpath.extensions</groupId>
 	<artifactId>devops-parent</artifactId>
 	<version>0.0.0-SNAPSHOT</version>
 	<packaging>pom</packaging>

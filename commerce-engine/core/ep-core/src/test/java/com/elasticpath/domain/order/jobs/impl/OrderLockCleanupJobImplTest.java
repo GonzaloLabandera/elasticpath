@@ -3,13 +3,11 @@
  */
 package com.elasticpath.domain.order.jobs.impl;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import java.util.Date;
 
-import org.jmock.Expectations;
 import org.jmock.integration.junit4.JUnitRuleMockery;
 import org.junit.Before;
 import org.junit.Rule;
@@ -17,12 +15,10 @@ import org.junit.Test;
 
 import com.elasticpath.service.misc.TimeService;
 import com.elasticpath.service.misc.impl.DatabaseServerTimeServiceImpl;
-import com.elasticpath.settings.SettingsService;
-import com.elasticpath.settings.domain.SettingValue;
-import com.elasticpath.settings.domain.impl.SettingValueImpl;
+import com.elasticpath.settings.test.support.SimpleSettingValueProvider;
 
 /**
- * Unit tests for {@link OrderLockCleanupJob}.
+ * Unit tests for {@link OrderLockCleanupJobImpl}.
  */
 public class OrderLockCleanupJobImplTest  {
 
@@ -31,18 +27,8 @@ public class OrderLockCleanupJobImplTest  {
 	
 	private OrderLockCleanupJobImpl orderLockCleanupJob;
 	
-	private SettingsService settingsService;
-	
-	private static final int MINS_BEFORE_DEFAULT = 10;
-	
-	private static final int BATCH_SIZE_DEFAULT = 10;
-	
-	private static final String ORDERLOCK_BATCH_SETTING = "COMMERCE/SYSTEM/ORDERLOCK/batchSize";
-	
-	private static final String ORDERLOCK_CLEANUP_SETTING = "COMMERCE/SYSTEM/ORDERLOCK/minsBeforeCleanUp";
-	
 	private TimeService timeService;
-	
+
 	/**
 	 * Prepare for the testing of the order lock cleanup job.
 	 */
@@ -59,72 +45,31 @@ public class OrderLockCleanupJobImplTest  {
 			}
 			
 		};
-		orderLockCleanupJob = new OrderLockCleanupJobImpl();
-		settingsService = context.mock(SettingsService.class);
-		orderLockCleanupJob.setSettingsService(settingsService);
-		orderLockCleanupJob.setTimeService(timeService);
-		
-	}
-	
-	/**
-	 * Tests that a null pointer exception is thrown when the minutes until cleanup setting value that is returned by
-	 * the setting service contains no value.
-	 */
-	@Test
-	public void testGetOrderLockCleanupSettingNullException() {
-		
-		final SettingValue batchSetting = new SettingValueImpl();
-		batchSetting.setIntegerValue(BATCH_SIZE_DEFAULT);
-		
-		final SettingValue minBeforeSetting = new SettingValueImpl();
-		
-		context.checking(new Expectations() { {
-			oneOf(settingsService).getSettingValue(ORDERLOCK_CLEANUP_SETTING);
-			will(returnValue(minBeforeSetting));
-			oneOf(settingsService).getSettingValue(ORDERLOCK_BATCH_SETTING);
-			will(returnValue(batchSetting));
-			
-		} });
 
-		try {
-			orderLockCleanupJob.cleanUpOrderLocks();
-			fail();
-		} catch (Exception e) {
-			assertNotNull(e);
-			//This is expected, no value was set for the setting value and therefore a null pointer exception
-			//was expected to be thrown.
-		}
+		orderLockCleanupJob = new OrderLockCleanupJobImpl();
+		orderLockCleanupJob.setTimeService(timeService);
 	}
-	
+
 	/**
-	 * Tests that a null pointer exception is thrown when the batch setting value that is returned by
-	 * the setting service contains no value.
+	 * Tests that a null pointer exception is thrown when the minutes until cleanup setting value contains no value.
 	 */
-	@Test
-	public void testGetOrderLockBatchSizeSettingNullException() {
-		final SettingValue batchSetting = new SettingValueImpl();
-		
-		final SettingValue minBeforeSetting = new SettingValueImpl();
-		minBeforeSetting.setIntegerValue(MINS_BEFORE_DEFAULT);
-		
-		context.checking(new Expectations() { {
-			allowing(settingsService).getSettingValue(ORDERLOCK_CLEANUP_SETTING);
-			will(returnValue(minBeforeSetting));
-			
-			allowing(settingsService).getSettingValue(ORDERLOCK_BATCH_SETTING);
-			will(returnValue(batchSetting));
-		} });
-		
-		try {
-			orderLockCleanupJob.cleanUpOrderLocks();
-			fail();
-		} catch (Exception e) {
-			assertNotNull(e);
-			//This is expected, no value was set for the setting value and therefore a null pointer exception 
-			//was expected to be thrown.
-		}
+	@Test(expected = NullPointerException.class)
+	public void testGetOrderLockCleanupSettingNullException() {
+		orderLockCleanupJob.setBatchSizeProvider(new SimpleSettingValueProvider<>(1));
+		orderLockCleanupJob.setStaleLockThresholdMinsProvider(new SimpleSettingValueProvider<>((Integer) null));
+		orderLockCleanupJob.cleanUpOrderLocks();
 	}
-	
+
+	/**
+	 * Tests that a null pointer exception is thrown when the batch setting value contains no value.
+	 */
+	@Test(expected = NullPointerException.class)
+	public void testGetOrderLockBatchSizeSettingNullException() {
+		orderLockCleanupJob.setBatchSizeProvider(new SimpleSettingValueProvider<>((Integer) null));
+		orderLockCleanupJob.setStaleLockThresholdMinsProvider(new SimpleSettingValueProvider<>(1));
+		orderLockCleanupJob.cleanUpOrderLocks();
+	}
+
 	/**
 	 * Ensures that the isBatchSizeValid returns true if the value that is
 	 * provided is of a positive value.
@@ -132,9 +77,9 @@ public class OrderLockCleanupJobImplTest  {
 	@Test
 	public void testIsBatchSizeValid() {
 		final int batchSize = 5;
-		assertEquals(true, orderLockCleanupJob.isBatchSizeValid(batchSize));
+		assertTrue("Batch size should be valid for input " + batchSize, orderLockCleanupJob.isBatchSizeValid(batchSize));
 	}
-	
+
 	/**
 	 * Ensures that the isBatchSizeValid returns false if the value that is 
 	 * provided is of a negative value.
@@ -142,9 +87,9 @@ public class OrderLockCleanupJobImplTest  {
 	@Test
 	public void testIsBatchSizeValidNegative() {
 		final int batchSize = -10;
-		assertEquals(false, orderLockCleanupJob.isBatchSizeValid(batchSize));
+		assertFalse("Batch size should be invalid for input " + batchSize, orderLockCleanupJob.isBatchSizeValid(batchSize));
 	}
-	
+
 	/**
 	 * Ensures that the isMinsToExpireLocksValid return true if the value that is
 	 * provided is of a positive value.
@@ -152,9 +97,9 @@ public class OrderLockCleanupJobImplTest  {
 	@Test
 	public void testMinsToExpireLocksValid() {
 		final int minsToExpire = 5;
-		assertEquals(true, orderLockCleanupJob.isMinsToExpireLocksValid(minsToExpire));
+		assertTrue("Mins to expire should be valid for input " + minsToExpire, orderLockCleanupJob.isMinsToExpireLocksValid(minsToExpire));
 	}
-	
+
 	/**
 	 * Ensures that the isMinsToExpireLocksValid returns false if the value that is
 	 * provided is of a negative value.
@@ -162,7 +107,7 @@ public class OrderLockCleanupJobImplTest  {
 	@Test
 	public void testMinsToExpireLocksValidNegative() {
 		final int minsToExpire = -10;
-		assertEquals(false, orderLockCleanupJob.isMinsToExpireLocksValid(minsToExpire));
+		assertFalse("Mins to expire should be invalid for input " + minsToExpire, orderLockCleanupJob.isMinsToExpireLocksValid(minsToExpire));
 	}
-	
+
 }

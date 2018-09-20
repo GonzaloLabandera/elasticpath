@@ -12,7 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.annotation.DirtiesContext;
 
 import com.elasticpath.domain.customer.impl.AbstractPaymentMethodImpl;
-import com.elasticpath.domain.customer.impl.CustomerCreditCardImpl;
 import com.elasticpath.domain.customer.impl.PaymentTokenImpl;
 import com.elasticpath.plugin.payment.dto.PaymentMethod;
 import com.elasticpath.service.payment.gateway.PaymentMethodTransformer;
@@ -29,16 +28,6 @@ public class PaymentMethodTransformerFactoryTest extends BasicSpringContextTest 
 	
 	@Rule
 	public ExpectedException exception = ExpectedException.none();
-	
-	/**
-	 * Test factory for customer credit card.
-	 */
-	@Test
-	public void testFactoryForCustomerCreditCard() {
-		PaymentMethod paymentMethod = new CustomerCreditCardImpl();
-		PaymentMethodTransformer transformer = paymentMethodTransformerFactory.getTransformerInstance(paymentMethod);
-		assertNotNull(transformer);
-	}
 
 	/**
 	 * Test factory for payment token.

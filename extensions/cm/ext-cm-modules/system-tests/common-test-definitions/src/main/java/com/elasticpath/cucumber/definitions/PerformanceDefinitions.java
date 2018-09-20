@@ -7,11 +7,11 @@ import cucumber.api.java.en.Then;
 import org.apache.log4j.Logger;
 
 import com.elasticpath.selenium.framework.util.PropertyManager;
-import com.elasticpath.selenium.framework.util.SeleniumDriverSetup;
 import com.elasticpath.selenium.navigations.CatalogManagement;
 import com.elasticpath.selenium.navigations.CustomerService;
 import com.elasticpath.selenium.resultspane.CatalogProductListingPane;
 import com.elasticpath.selenium.resultspane.OrderSearchResultPane;
+import com.elasticpath.selenium.setup.SetUp;
 import com.elasticpath.selenium.toolbars.ActivityToolbar;
 
 /**
@@ -32,9 +32,9 @@ public class PerformanceDefinitions {
 	 * Constructor.
 	 */
 	public PerformanceDefinitions() {
-		activityToolbar = new ActivityToolbar(SeleniumDriverSetup.getDriver());
-		customerService = new CustomerService(SeleniumDriverSetup.getDriver());
-		catalogManagement = new CatalogManagement(SeleniumDriverSetup.getDriver());
+		activityToolbar = new ActivityToolbar(SetUp.getDriver());
+		customerService = new CustomerService(SetUp.getDriver());
+		catalogManagement = new CatalogManagement(SetUp.getDriver());
 	}
 
 	/**
@@ -78,7 +78,7 @@ public class PerformanceDefinitions {
 			activityToolbar.waitForPage();
 			orderSearchResultPane.verifyOrderColumnValueAndSelectRow(orderNumber, "Order #");
 			activityToolbar.waitForPage();
-			customerService.clearInputFields();
+			customerService.clearInputFieldsInOrdersTab();
 			activityToolbar.waitForPage();
 			orderSearchResultPane.close("Order Search Results");
 			activityToolbar.waitForPage();
@@ -86,7 +86,7 @@ public class PerformanceDefinitions {
 			activityToolbar.waitForPage();
 			orderSearchResultPane = customerService.clickOrderSearch();
 			activityToolbar.waitForPage();
-			customerService.clearInputFields();
+			customerService.clearInputFieldsInOrdersTab();
 			activityToolbar.waitForPage();
 			orderSearchResultPane.close("Order Search Results");
 			activityToolbar.waitForPage();

@@ -11,6 +11,7 @@ import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.graphics.Image;
 
 import com.elasticpath.cmclient.catalog.CatalogImageRegistry;
+import com.elasticpath.cmclient.core.CorePlugin;
 import com.elasticpath.domain.catalog.BundleConstituent;
 import com.elasticpath.domain.catalog.ConstituentItem;
 import com.elasticpath.domain.catalog.Product;
@@ -112,7 +113,7 @@ public class BundleConstituentTableLabelProvider extends LabelProvider implement
 			if (hasComma) {
 				builder.append(", "); //$NON-NLS-1$
 			}
-			builder.append(value.getDisplayName(Locale.getDefault(), true));
+			builder.append(value.getDisplayName(CorePlugin.getDefault().getDefaultLocale(), true));
 			hasComma = true;
 		}
 		return builder.toString();

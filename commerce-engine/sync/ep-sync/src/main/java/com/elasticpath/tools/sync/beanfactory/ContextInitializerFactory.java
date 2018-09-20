@@ -22,7 +22,7 @@ public class ContextInitializerFactory {
 	 * <p>
 	 * Note: This implementation relies on the fact that context initializers are created and set by the Spring framework.
 	 * 
-	 * @param connectionType the connection type (e.g. local, remote, ...)
+	 * @param connectionType the connection type (e.g. local ...)
 	 * @param destinationType the destination type (e.g. source, target, ...)
 	 * @return the context initializer instance
 	 */

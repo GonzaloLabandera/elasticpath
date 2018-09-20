@@ -13,6 +13,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.elasticpath.cmclient.core.util.DateTimeUtilFactory;
 import com.elasticpath.cmclient.reporting.common.SavedReportParameters;
 import com.elasticpath.cmclient.reporting.util.ReportAuthorizationUtility;
 import org.apache.commons.collections.CollectionUtils;
@@ -343,8 +344,8 @@ public class OrderSummaryReportSection extends AbstractReportSection {
 		
 		paramsMap.put("store", orderSummaryParameters.getStore()); //$NON-NLS-1$
 		paramsMap.put("isShowExchangeOnly", orderSummaryParameters.getExchangeString()); //$NON-NLS-1$
-		paramsMap.put("startDate", orderSummaryParameters.getStartDate()); //$NON-NLS-1$
-		paramsMap.put("endDate", orderSummaryParameters.getEndDate()); //$NON-NLS-1$
+		paramsMap.put("startDate", DateTimeUtilFactory.getDateUtil().formatAsDateTime(orderSummaryParameters.getStartDate())); //$NON-NLS-1$
+		paramsMap.put("endDate", DateTimeUtilFactory.getDateUtil().formatAsDateTime(orderSummaryParameters.getEndDate())); //$NON-NLS-1$
 		paramsMap.put("currency", orderSummaryParameters.getCurrency().getCurrencyCode()); //$NON-NLS-1$
 		paramsMap.put("checkedStatuses", orderSummaryParameters.getCheckedOrderStatuses()); //$NON-NLS-1$
 		paramsMap.put("internationalizedStatuses", orderSummaryParameters.getTitle()); //$NON-NLS-1$

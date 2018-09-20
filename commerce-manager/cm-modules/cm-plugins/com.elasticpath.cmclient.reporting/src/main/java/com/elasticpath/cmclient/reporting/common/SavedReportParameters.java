@@ -6,11 +6,12 @@ package com.elasticpath.cmclient.reporting.common;
 
 import com.elasticpath.cmclient.core.CmSingletonUtil;
 import com.elasticpath.cmclient.core.ui.framework.IEpDateTimePicker;
+import com.elasticpath.cmclient.core.util.DateTimeUtilFactory;
 import com.elasticpath.domain.store.Store;
 import org.eclipse.swt.custom.CCombo;
 
+import java.text.ParseException;
 import java.util.Currency;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -106,10 +107,10 @@ public class SavedReportParameters {
 	 * @param datePicker the date picker
 	 */
 	public void restoreStartDate(final IEpDateTimePicker datePicker) {
-		final Date startDate = (Date) parameters.get("startDate");
-		if (startDate != null) {
-			datePicker.setDate(startDate);
-		}
+
+		Object startDate = parameters.get("startDate");
+
+		restoreDate(datePicker, startDate);
 	}
 
 	/**
@@ -118,9 +119,17 @@ public class SavedReportParameters {
 	 * @param datePicker the date picker
 	 */
 	public void restoreEndDate(final IEpDateTimePicker datePicker) {
-		final Date endDate = (Date) parameters.get("endDate");
-		if (endDate != null) {
-			datePicker.setDate(endDate);
+		Object endDate = parameters.get("endDate");
+		restoreDate(datePicker, endDate);
+	}
+
+	private void restoreDate(final IEpDateTimePicker datePicker, final Object dateObject) {
+		if (dateObject instanceof String) {
+			try {
+				datePicker.setDate(DateTimeUtilFactory.getDateUtil().parseDateTime((String) dateObject));
+			} catch (ParseException exception) {
+
+			}
 		}
 	}
 

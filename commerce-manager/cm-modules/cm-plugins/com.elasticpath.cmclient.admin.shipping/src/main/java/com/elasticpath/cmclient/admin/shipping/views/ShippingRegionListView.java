@@ -1,6 +1,7 @@
 /**
  * Copyright (c) Elastic Path Software Inc., 2016
  */
+
 package com.elasticpath.cmclient.admin.shipping.views;
 
 import org.eclipse.jface.action.ActionContributionItem;
@@ -19,7 +20,7 @@ import com.elasticpath.cmclient.admin.shipping.actions.EditShippingRegionAction;
 import com.elasticpath.cmclient.core.ServiceLocator;
 import com.elasticpath.cmclient.core.ui.framework.IEpTableViewer;
 import com.elasticpath.cmclient.core.views.AbstractListView;
-import com.elasticpath.commons.constants.ContextIdNames;
+import com.elasticpath.commons.constants.EpShippingContextIdNames;
 import com.elasticpath.domain.shipping.ShippingRegion;
 import com.elasticpath.service.shipping.ShippingRegionService;
 
@@ -52,7 +53,7 @@ public class ShippingRegionListView extends AbstractListView {
 	public ShippingRegionListView() {
 		super(false, SHIPPING_REGION_TABLE);
 
-		shippingRegionService = ServiceLocator.getService(ContextIdNames.SHIPPING_REGION_SERVICE);
+		shippingRegionService = ServiceLocator.getService(EpShippingContextIdNames.SHIPPING_REGION_SERVICE);
 	}
 
 	@Override

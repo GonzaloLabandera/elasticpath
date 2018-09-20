@@ -12,10 +12,15 @@ import com.elasticpath.selenium.util.Constants;
  */
 public class EditGlobalAttributesDialog extends AbstractDialog {
 
-	private static final String EDIT_GLOBAL_ATTRIBUTES_PARENT_CSS
+	/**
+	 * CSS selector used to identify the dialog.
+	 */
+	public static final String EDIT_GLOBAL_ATTRIBUTES_PARENT_CSS
 			= "div[automation-id='com.elasticpath.cmclient.catalog.CatalogMessages.AddEditGlobalAttributesDialog_WindowTitle'] ";
 	private static final String ADD_ATTRIBUTE_BUTTON_CSS
 			= EDIT_GLOBAL_ATTRIBUTES_PARENT_CSS + "div[automation-id='com.elasticpath.cmclient.core.CoreMessages.Button_Add']";
+	private static final String EDIT_ATTRIBUTE_BUTTON_CSS
+			= EDIT_GLOBAL_ATTRIBUTES_PARENT_CSS + "div[automation-id='com.elasticpath.cmclient.core.CoreMessages.Button_Edit']";
 	private static final String REMOVE_ATTRIBUTE_BUTTON_CSS
 			= EDIT_GLOBAL_ATTRIBUTES_PARENT_CSS + "div[automation-id='com.elasticpath.cmclient.core.CoreMessages.Button_Remove']";
 	private static final String SAVE_BUTTON_CSS = EDIT_GLOBAL_ATTRIBUTES_PARENT_CSS + "div[widget-id='Save']";
@@ -35,13 +40,21 @@ public class EditGlobalAttributesDialog extends AbstractDialog {
 	/**
 	 * Click add attribute button.
 	 *
-	 * @return the Add attribute dialog.
+	 * @return the Add Edit attribute dialog.
 	 */
 	public AddAttributeDialog clickAddAttributeButton() {
-		clickButton(ADD_ATTRIBUTE_BUTTON_CSS, "Add Attribute");
+		clickButton(ADD_ATTRIBUTE_BUTTON_CSS, "Add Attribute", AddAttributeDialog.ADD_ATTRUBUTE_PARENT_CSS);
 		return new AddAttributeDialog(getDriver());
 	}
-
+	/**
+	 * Clicks edit attribute button.
+	 *
+	 * @return EditAttributeDialog
+	 */
+	public EditAttributeDialog clickEditAttributeButton() {
+		clickButton(EDIT_ATTRIBUTE_BUTTON_CSS, "Edit Attribute", EditAttributeDialog.EDIT_ATTRUBUTE_PARENT_CSS);
+		return new EditAttributeDialog(getDriver());
+	}
 	/**
 	 * Clicks Remove Attribute button.
 	 */

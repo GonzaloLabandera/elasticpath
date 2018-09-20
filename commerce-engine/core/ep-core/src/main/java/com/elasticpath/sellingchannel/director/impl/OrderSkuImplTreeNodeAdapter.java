@@ -78,7 +78,6 @@ class OrderSkuImplTreeNodeAdapter implements TreeNode<OrderSkuImplTreeNodeAdapte
 
 		destDto.setDigitalAsset(orderSku.getDigitalAsset());
 		destDto.setDisplayName(orderSku.getDisplayName());
-		destDto.setEncryptedUidPk(orderSku.getEncryptedUidPk());
 		destDto.setImage(orderSku.getImage());
 		destDto.setDisplaySkuOptions(orderSku.getDisplaySkuOptions());
 		destDto.setAllocated(orderSku.isAllocated());
@@ -125,17 +124,19 @@ class OrderSkuImplTreeNodeAdapter implements TreeNode<OrderSkuImplTreeNodeAdapte
 
 	@Override
 	public List<OrderSkuImplTreeNodeAdapter> getChildren() {
-		if (orderSku.isBundle(getProductSkuLookup())) {
-			List<OrderSkuImplTreeNodeAdapter> orderSkuList = new ArrayList<>(
-					orderSku.getBundleItems(getProductSkuLookup()).size());
-			for (ShoppingItem shoppingItem : orderSku.getBundleItems(getProductSkuLookup())) {
+		if (!orderSku.getChildren().isEmpty()) {
+			List<OrderSkuImplTreeNodeAdapter> orderSkuList = new ArrayList<>(orderSku.getChildren().size());
+
+			for (ShoppingItem shoppingItem : orderSku.getChildren()) {
 				OrderSku candidateSku = (OrderSku) shoppingItem;
+
 				if (hasChildrenInShipment(candidateSku, this.shipment)
 						|| isInShipment(candidateSku, this.shipment)) {
 					orderSkuList.add(new OrderSkuImplTreeNodeAdapter(candidateSku, shipment, store, bundleIdentifier,
 							productInventoryManagementService, productSkuLookup, pricingSnapshotService));
 				}
 			}
+
 			return orderSkuList;
 		}
 
@@ -144,19 +145,23 @@ class OrderSkuImplTreeNodeAdapter implements TreeNode<OrderSkuImplTreeNodeAdapte
 
 	private boolean hasChildrenInShipment(final ShoppingItem item, final OrderShipment shipment) {
 		boolean result = false;
-		if (item.isBundle(getProductSkuLookup())) {
-			for (ShoppingItem shoppingItem : item.getBundleItems(getProductSkuLookup())) {
+
+		if (!item.getChildren().isEmpty()) {
+			for (ShoppingItem shoppingItem : item.getChildren()) {
 				OrderSku candidateSku = (OrderSku) shoppingItem;
-				if (candidateSku.isBundle(getProductSkuLookup())) {
-					result = hasChildrenInShipment(candidateSku, shipment);
-				} else {
+
+				if (candidateSku.getChildren().isEmpty()) {
 					result = isInShipment(candidateSku, shipment);
+				} else {
+					result = hasChildrenInShipment(candidateSku, shipment);
 				}
+
 				if (result) {
 					break;
 				}
 			}
 		}
+
 		return result;
 	}
 

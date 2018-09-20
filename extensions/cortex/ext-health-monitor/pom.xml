@@ -18,17 +18,14 @@
 		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-lang3</artifactId>
-			<version>${commons.lang3.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>com.elasticpath.repo</groupId>
+			<groupId>com.elasticpath</groupId>
 			<artifactId>ep-health-monitoring</artifactId>
-			<version>${ep.health.monitoring.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>com.elasticpath.repo</groupId>
+			<groupId>com.elasticpath</groupId>
 			<artifactId>ep-health-monitoring-plugin-jms</artifactId>
-			<version>${ep.health.monitoring.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>javax.servlet</groupId>
@@ -64,7 +61,6 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-shade-plugin</artifactId>
-				<version>2.1</version>
 				<executions>
 					<execution>
 						<phase>package</phase>

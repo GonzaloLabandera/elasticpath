@@ -13,7 +13,7 @@ import com.elasticpath.rest.definition.carts.AddToCartFormAdvisor;
 import com.elasticpath.rest.definition.carts.AddToDefaultCartFormIdentifier;
 import com.elasticpath.rest.helix.data.annotation.RequestIdentifier;
 import com.elasticpath.rest.helix.data.annotation.ResourceService;
-import com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder.ShoppingItemValidationService;
+import com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder.AddToCartAdvisorService;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.item.ItemRepository;
 
 /**
@@ -23,25 +23,25 @@ public final class AddToCartFormAdvisorImpl implements AddToCartFormAdvisor.Form
 
 	private final String itemId;
 	private final String scope;
-	private final ShoppingItemValidationService shoppingItemValidationService;
+	private final AddToCartAdvisorService addToCartAdvisorService;
 
 	/**
 	 * Constructor.
 	 *
 	 * @param addToDefaultCartFormIdentifier addToDefaultCartFormIdentifier
-	 * @param shoppingItemValidationService          shoppingItemValidationService
+	 * @param addToCartAdvisorService        addToCartAdvisorService
 	 */
 	@Inject
 	public AddToCartFormAdvisorImpl(@RequestIdentifier final AddToDefaultCartFormIdentifier addToDefaultCartFormIdentifier,
-									@ResourceService final ShoppingItemValidationService shoppingItemValidationService) {
+									@ResourceService final AddToCartAdvisorService addToCartAdvisorService) {
 		Map<String, String> itemIdentifier = addToDefaultCartFormIdentifier.getItem().getItemId().getValue();
 		this.itemId = itemIdentifier.get(ItemRepository.SKU_CODE_KEY);
 		this.scope = addToDefaultCartFormIdentifier.getItem().getItems().getScope().getValue();
-		this.shoppingItemValidationService = shoppingItemValidationService;
+		this.addToCartAdvisorService = addToCartAdvisorService;
 	}
 
 	@Override
 	public Observable<Message> onAdvise() {
-		return shoppingItemValidationService.validateItemPurchasable(scope, itemId);
+		return addToCartAdvisorService.validateItemPurchasable(scope, itemId);
 	}
 }

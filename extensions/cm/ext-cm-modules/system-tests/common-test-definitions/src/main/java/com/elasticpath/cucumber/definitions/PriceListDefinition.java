@@ -16,14 +16,16 @@ import com.elasticpath.selenium.dialogs.ConfirmDialog;
 import com.elasticpath.selenium.dialogs.PriceEditorDialog;
 import com.elasticpath.selenium.dialogs.SelectAProductDialog;
 import com.elasticpath.selenium.dialogs.SelectASkuDialog;
+import com.elasticpath.selenium.domainobjects.DST;
 import com.elasticpath.selenium.editor.PriceListEditor;
 import com.elasticpath.selenium.editor.product.ProductEditor;
-import com.elasticpath.selenium.framework.util.SeleniumDriverSetup;
 import com.elasticpath.selenium.navigations.PriceListManagement;
 import com.elasticpath.selenium.resultspane.PriceListAssignmentsResultPane;
 import com.elasticpath.selenium.resultspane.PriceListsResultPane;
+import com.elasticpath.selenium.setup.SetUp;
 import com.elasticpath.selenium.toolbars.ActivityToolbar;
 import com.elasticpath.selenium.toolbars.PriceListActionToolbar;
+import com.elasticpath.selenium.util.Constants;
 import com.elasticpath.selenium.util.Utility;
 import com.elasticpath.selenium.wizards.CreatePriceListAssignmentWizard;
 
@@ -48,14 +50,19 @@ public class PriceListDefinition {
 	private static String uniquePriceListName = "";
 	private static final String PRICE_LIST_DESC = "test price list";
 	private static final String CURRENCY = "CAD";
+	private static final int SLEEP_TIME = 1000;
+	private final DST dst;
 
 	/**
 	 * Constructor.
+	 *
+	 * @param dst the DST class
 	 */
-	public PriceListDefinition() {
-		priceListActionToolbar = new PriceListActionToolbar(SeleniumDriverSetup.getDriver());
-		priceListManagement = new PriceListManagement(SeleniumDriverSetup.getDriver());
-		activityToolbar = new ActivityToolbar(SeleniumDriverSetup.getDriver());
+	public PriceListDefinition(final DST dst) {
+		priceListActionToolbar = new PriceListActionToolbar(SetUp.getDriver());
+		priceListManagement = new PriceListManagement(SetUp.getDriver());
+		activityToolbar = new ActivityToolbar(SetUp.getDriver());
+		this.dst = dst;
 	}
 
 	/**
@@ -121,9 +128,23 @@ public class PriceListDefinition {
 	 */
 	@When("^I search for Price List Name (.*)$")
 	public void searchCreatedPriceListAssignment(final String priceListName) {
+		searchForPriceListAssignmentByName(priceListName);
+	}
+
+	private void searchForPriceListAssignmentByName(final String priceListName) {
 		clickPriceListAssignmentsTab();
 		priceListManagement.enterPriceListName(priceListName);
 		priceListAssignmentsResultPane = priceListManagement.clickPriceListAssignmentSearch();
+
+		int index = 0;
+		while (!priceListAssignmentsResultPane.isPLAInList(priceListName) && index < Constants.UUID_END_INDEX) {
+			priceListAssignmentsResultPane.sleep(Constants.SLEEP_HALFSECOND_IN_MILLIS);
+			searchPriceListAssignment(priceListName);
+			index++;
+		}
+		priceListAssignmentsResultPane.setWebDriverImplicitWait(Constants.IMPLICIT_WAIT_FOR_ELEMENT_THREE_SECONDS);
+		priceListAssignmentsResultPane.verifyPriceListAssignmentExists(priceListName);
+		priceListAssignmentsResultPane.setWebDriverImplicitWaitToDefault();
 	}
 
 	/**
@@ -158,7 +179,7 @@ public class PriceListDefinition {
 	 */
 	@Then("^the deleted price list assignment no longer exists$")
 	public void verifyPriceListAssignmentDeleted() {
-		searchCreatedPriceListAssignment(uniquePriceListName);
+		searchPriceListAssignment(uniquePriceListName);
 		priceListAssignmentsResultPane.verifyPriceListAssignmentDeleted(uniquePriceListAssignmentName);
 	}
 
@@ -208,6 +229,9 @@ public class PriceListDefinition {
 	 */
 	public void createPriceList(final String description, final String currency) {
 		uniquePriceListName = "A" + Utility.getRandomUUID();
+		if (dst != null) {
+			dst.setPriceListName(uniquePriceListName);
+		}
 		priceListEditor = priceListActionToolbar.clickCreatePriceList();
 		priceListEditor.verifyPriceListSummaryEditorExists();
 		priceListEditor.enterPriceListName(uniquePriceListName);
@@ -241,11 +265,11 @@ public class PriceListDefinition {
 	/**
 	 * Delete new price list.
 	 */
-	@Then("^I delete the newly created price list")
+	@Then("^I delete the newly created price list$")
 	public void deleteNewPriceList() {
 		clickSearchForPriceLists();
 		priceListsResultPane.deletePriceList(uniquePriceListName);
-		new ConfirmDialog(SeleniumDriverSetup.getDriver()).clickOKButton("PriceListManagerMessages.ConfirmDeletePriceList");
+		new ConfirmDialog(SetUp.getDriver()).clickOKButton("PriceListManagerMessages.ConfirmDeletePriceList");
 	}
 
 	/**
@@ -655,6 +679,66 @@ public class PriceListDefinition {
 	}
 
 	/**
+	 * Search price list by price.
+	 *
+	 * @param searchFromPrice Search from price.
+	 * @param searchToPrice   Search to price.
+	 */
+	@When("^I search the price list with prices from (.+) and to (.+)$")
+	public void searchPriceListByPrice(final String searchFromPrice, final String searchToPrice) {
+		priceListEditor.searchByPrice(searchFromPrice, searchToPrice);
+		priceListEditor.sleep(SLEEP_TIME);
+	}
+
+	/**
+	 * Verify number of prices returned.
+	 *
+	 * @param expResultsReturned Expected number of results to be returned
+	 */
+	@Then("^I should see (.+) prices returned$")
+	public void verifyNumberOfPricesReturned(final int expResultsReturned) {
+		priceListEditor.verifyResultsReturned(expResultsReturned);
+	}
+
+	/**
+	 * Filter price list by price.
+	 *
+	 * @param filterFromPrice Filter from price.
+	 * @param filterToPrice   Filter to price.
+	 */
+	@When("^I filter the price list with prices from (.+) and to (.+)$")
+	public void filterPriceListByPrice(final String filterFromPrice, final String filterToPrice) {
+		priceListEditor.filterByPrice(filterFromPrice, filterToPrice);
+		priceListEditor.sleep(SLEEP_TIME);
+	}
+
+	/**
+	 * Edit price list  description and close price list editor pane.
+	 */
+	@Then("^I edit the price list description")
+	public void editPriceListDescription() {
+		//retrieve list
+		priceListEditor.selectPriceListSummaryTab();
+		priceListEditor.enterPriceListDescription("Edited description");
+		activityToolbar.saveAll();
+		priceListEditor.closePriceListEditor(uniquePriceListName);
+	}
+
+	/**
+	 * Edit pricelist assignment description.
+	 *
+	 * @param descriptionText the description text.
+	 * @param priceList       The price list.
+	 */
+	@When("^I edit the newly created price list assignment for price list (.+) description to \"(.+)\"")
+	public void editPriceListAssignmentDescriptionForPriceList(final String priceList, final String descriptionText) {
+		searchPriceListAssignment(priceList);
+		priceListAssignmentsResultPane.openPriceListAssignment(uniquePriceListAssignmentName);
+		createPriceListAssignmentWizard.enterPriceListAssignmentDescription(descriptionText);
+		createPriceListAssignmentWizard.clickFinish();
+	}
+
+	/**
 	 * Clean up price list assignment.
 	 */
 	@After("@cleanupPriceListAssignment")
@@ -826,7 +910,34 @@ public class PriceListDefinition {
 	public void deletePLA(final String priceList, final String priceListAssignment) {
 		searchPriceListAssignment(priceList);
 		priceListAssignmentsResultPane.deletePriceListAssignment(priceListAssignment);
-		new ConfirmDialog(SeleniumDriverSetup.getDriver()).clickOKButton("PriceListManagerMessages.ConfirmDeletePriceListAssignment");
+		new ConfirmDialog(SetUp.getDriver()).clickOKButton("PriceListManagerMessages.ConfirmDeletePriceListAssignment");
 	}
 
+	/**
+	 * Clicks next until a specific step of the Price List Assignment creation wizard is reached.
+	 *
+	 * @param step the step in the wizard to skip to ("Priority", "Price List", "Catalog", "Shoppers", "Time", "Stores")
+	 */
+	@And("^I skip to \"(.+)\" selection$")
+	public void skipToStep(final String step) {
+		createPriceListAssignmentWizard.skipToStep(step);
+	}
+
+	/**
+	 * Verifies that user only has access to a certain list of stores in the Price List Assignment Wizard.
+	 *
+	 * @param storeList the list of stores to verify
+	 */
+	@Then("^Available Stores should contain the following Stores?$")
+	public void verifyAvailableStores(final List<String> storeList) {
+		createPriceListAssignmentWizard.verifyAvailableStores(storeList);
+	}
+
+	/**
+	 * Verifies that user has access to all stores in the Price List Assignment by retrieving from DB.
+	 */
+	@Then("^Available Stores should contain all Stores?$")
+	public void verifyAllAvailableStores() {
+		createPriceListAssignmentWizard.verifyAllAvailableStores();
+	}
 }

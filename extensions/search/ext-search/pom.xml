@@ -20,7 +20,6 @@
 		<dependency>
 			<groupId>com.elasticpath</groupId>
 			<artifactId>ep-search</artifactId>
-			<version>${platform.version}</version>
 		</dependency>
   </dependencies>
 	<build>

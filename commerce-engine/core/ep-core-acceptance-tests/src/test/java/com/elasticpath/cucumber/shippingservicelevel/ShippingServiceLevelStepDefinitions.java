@@ -6,17 +6,15 @@ package com.elasticpath.cucumber.shippingservicelevel;
 import cucumber.api.DataTable;
 import cucumber.api.java.en.And;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.ContextConfiguration;
 
 /**
- * ShippingServiceLevel test step definitions class.
+ * {@link com.elasticpath.domain.shipping.ShippingServiceLevel} test step definitions class.
  * 
  */
-@ContextConfiguration("/cucumber.xml")
 public class ShippingServiceLevelStepDefinitions {
 	
 	@Autowired
-	private ShippingServiceLevelStepDefinitionsHelper shippingServiceLevelStepDefinitionsHelper;
+	private ShippingServiceLevelStepDefinitionsHelper helper;
 	
 	/**
 	 * Sets up shipping region for the current test environment.
@@ -26,7 +24,7 @@ public class ShippingServiceLevelStepDefinitions {
 	@And("with shipping regions of$")
 	public void setUpShippingRegions(final DataTable dataTable) {
 		
-		shippingServiceLevelStepDefinitionsHelper.setUpShippingRegions(dataTable.asMaps(String.class, String.class));
+		helper.setUpShippingRegions(dataTable.asMaps(String.class, String.class));
 	}
 	
 	/**
@@ -37,6 +35,6 @@ public class ShippingServiceLevelStepDefinitions {
 	@And("^with shipping service levels of$")
 	public void setUpShippingServiceLevels(final DataTable dataTable) {
 		
-		shippingServiceLevelStepDefinitionsHelper.setUpShippingServiceLevels(dataTable.asMaps(String.class, String.class));
+		helper.setUpShippingServiceLevels(dataTable.asMaps(String.class, String.class));
 	}
 }

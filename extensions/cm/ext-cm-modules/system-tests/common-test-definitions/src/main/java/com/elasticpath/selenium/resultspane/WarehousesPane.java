@@ -70,8 +70,11 @@ public class WarehousesPane extends AbstractPageObject {
 	 * @return WarehousePane
 	 */
 	public CreateEditWarehouseDialog clickCreateWarehouseButton() {
-		clickButton(CREATE_WAREHOUSE_BUTTON_CSS, "Create Warehouse");
-		return new CreateEditWarehouseDialog(getDriver());
+		final String dialogName = "Create";
+		clickButton(CREATE_WAREHOUSE_BUTTON_CSS, "Create Warehouse", String.format(CreateEditWarehouseDialog
+						.CREATE_EDIT_WAREHOUSE_DIALOG_CSS_TEMPLATE,
+				dialogName));
+		return new CreateEditWarehouseDialog(getDriver(), dialogName);
 	}
 
 	/**
@@ -88,9 +91,11 @@ public class WarehousesPane extends AbstractPageObject {
 	 * @return CreateEditWarehouseDialog
 	 */
 	public CreateEditWarehouseDialog clickEditWarehouseButton(final String warehouseName) {
+		final String dialogName = "Edit";
 		verifyWarehouseExists(warehouseName);
-		clickButton(EDIT_WAREHOUSE_BUTTON_CSS, "Edit Warehouse");
-		return new CreateEditWarehouseDialog(getDriver());
+		clickButton(EDIT_WAREHOUSE_BUTTON_CSS, "Edit Warehouse", String.format(CreateEditWarehouseDialog.CREATE_EDIT_WAREHOUSE_DIALOG_CSS_TEMPLATE,
+				dialogName));
+		return new CreateEditWarehouseDialog(getDriver(), dialogName);
 	}
 
 }

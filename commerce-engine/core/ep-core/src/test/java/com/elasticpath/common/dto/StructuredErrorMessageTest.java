@@ -9,8 +9,11 @@ import static org.junit.Assert.assertFalse;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.google.common.testing.EqualsTester;
 import org.junit.Test;
+
+import com.google.common.testing.EqualsTester;
+
+import com.elasticpath.base.common.dto.StructuredErrorMessage;
 
 /**
  * Tests for {@link StructuredErrorMessage}.
@@ -46,7 +49,7 @@ public class StructuredErrorMessageTest {
 	@Test
 	public void testToString() {
 		StructuredErrorMessage commerceMessageObject = createCommerceMessageObject(MESSAGE_ID, DEBUG_MESSAGE);
-		assertEquals(TYPE + "," + MESSAGE_ID + ",{key1=value1, key2=value2, key3=value3}", commerceMessageObject.toString());
+		assertEquals(TYPE + "," + MESSAGE_ID + "," + DEBUG_MESSAGE + ",{key1=value1, key2=value2, key3=value3}", commerceMessageObject.toString());
 	}
 
 	private StructuredErrorMessage createCommerceMessageObject(final String messageId, final String debugMessage) {

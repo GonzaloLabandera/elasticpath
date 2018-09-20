@@ -54,10 +54,12 @@ public interface CartItemModifiersRepository {
 	 * Find modifier values for a given cart line item.
 	 * The returned map will contain entries for all applicable modifier fields (including those with empty values).
 	 *
+	 *
+	 * @param cartId the shopping cart ID.
 	 * @param shoppingItemGuid the shopping cart line item GUID
 	 * @return map of fields to values
 	 */
-	Single<Map<CartItemModifierField, String>> findCartItemModifierValues(String shoppingItemGuid);
+	Single<Map<CartItemModifierField, String>> findCartItemModifierValues(String cartId, String shoppingItemGuid);
 
 	/**
 	 * Find modifier values for a given purchase line item.

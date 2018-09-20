@@ -3,15 +3,14 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<parent>
-		<groupId>com.elasticpath</groupId>
-		<artifactId>parent</artifactId>
-		<version>702.0.0-SNAPSHOT</version>
-		<relativePath></relativePath>
+		<groupId>com.elasticpath.cmclient</groupId>
+		<artifactId>cm-parent</artifactId>
+		<version>703.0.0-SNAPSHOT</version>
+		<relativePath>../pom.xml</relativePath>
 	</parent>
 
-	<groupId>com.elasticpath.cmclient</groupId>
 	<artifactId>cm-modules</artifactId>
-	<version>702.0.0-SNAPSHOT</version><!-- Version is required here for releasing tasks -->
+	<version>703.0.0-SNAPSHOT</version><!-- Version is required here for releasing tasks -->
 	<packaging>pom</packaging>
 	<name>CM Modules</name>
 	<description> Contains the MANIFEST-first tycho modules, separated from the pom-first modules.</description>
@@ -24,7 +23,6 @@
 		<checkstyle.ruleset>rulesets/checkstyle-elasticpath-rules.xml</checkstyle.ruleset>
 		<checkstyle.suppressions.location>cm-ruleset/checkstyle-cmclient-suppressions.xml</checkstyle.suppressions.location>
 		<solr.version>4.5.1</solr.version>
-		<licensing.skip>false</licensing.skip>
 		<sling-plugin.version>2.1.0</sling-plugin.version>
 		<org.apache.batic.version>1.6.0.v201011041432</org.apache.batic.version>
 		<org.eclipse.emf.version>2.12.0.v20160420-0247</org.eclipse.emf.version>
@@ -33,12 +31,7 @@
 	<repositories>
 		<repository>
 			<id>RAP</id>
-			<url>http://download.eclipse.org/rt/rap/3.2</url>
-			<layout>p2</layout>
-		</repository>
-		<repository>
-			<id>NeonRepository</id>
-			<url>http://download.eclipse.org/releases/neon</url>
+			<url>http://download.eclipse.org/rt/rap/3.4</url>
 			<layout>p2</layout>
 		</repository>
 		<repository>
@@ -51,10 +44,6 @@
 	<build>
 		<testOutputDirectory>${project.build.outputDirectory}</testOutputDirectory>
 		<plugins>
-			<plugin>
-				<groupId>org.linuxstuff.maven</groupId>
-				<artifactId>licensing-maven-plugin</artifactId>
-			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
@@ -160,255 +149,6 @@
 			</plugins>
 		</pluginManagement>
 	</build>
-
-	<dependencyManagement>
-		<dependencies>
-			<dependency>
-				<groupId>org.apache.solr</groupId>
-				<artifactId>solr-core</artifactId>
-				<version>${solr.version}</version>
-				<exclusions>
-					<exclusion>
-						<!--This artifact has no pom, so we exclude it and use org.codehaus.woodstox:wstx-asl instead. -->
-						<groupId>woodstox</groupId>
-						<artifactId>wstx-asl</artifactId>
-					</exclusion>
-					<exclusion>
-						<groupId>org.codehaus</groupId>
-						<artifactId>groovy-all</artifactId>
-					</exclusion>
-					<exclusion>
-						<!-- We already depend on commons-io-commons-io (1.3.2 is exactly the same as this) -->
-						<groupId>org.apache.commons</groupId>
-						<artifactId>commons-io</artifactId>
-					</exclusion>
-					<exclusion>
-						<groupId>org.apache.velocity</groupId>
-						<artifactId>velocity-tools</artifactId>
-					</exclusion>
-					<exclusion>
-						<groupId>org.slf4j</groupId>
-						<artifactId>slf4j-api</artifactId>
-					</exclusion>
-					<exclusion>
-						<groupId>org.slf4j</groupId>
-						<artifactId>slf4j-jdk14</artifactId>
-					</exclusion>
-				</exclusions>
-			</dependency>
-
-			<dependency>
-				<!-- org.apache.solr:solr-core depends on woodstox:wstx-asl which has no pom.xml, so we exclude it and depend on this instead -->
-				<groupId>org.codehaus.woodstox</groupId>
-				<artifactId>wstx-asl</artifactId>
-				<version>3.2.9</version>
-			</dependency>
-
-			<dependency>
-				<groupId>com.elasticpath</groupId>
-				<artifactId>ep-base</artifactId>
-				<version>702.0.0-SNAPSHOT</version>
-			</dependency>
-			<dependency>
-				<groupId>com.elasticpath</groupId>
-				<artifactId>ep-cache</artifactId>
-				<version>702.0.0-SNAPSHOT</version>
-			</dependency>
-			<dependency>
-				<groupId>com.elasticpath</groupId>
-				<artifactId>ep-persistence-api</artifactId>
-				<version>702.0.0-SNAPSHOT</version>
-			</dependency>
-			<dependency>
-				<groupId>com.elasticpath</groupId>
-				<artifactId>ep-persistence-openjpa</artifactId>
-				<version>702.0.0-SNAPSHOT</version>
-			</dependency>
-			<dependency>
-				<groupId>com.elasticpath</groupId>
-				<artifactId>ep-settings</artifactId>
-				<version>702.0.0-SNAPSHOT</version>
-			</dependency>
-			<dependency>
-				<groupId>com.elasticpath</groupId>
-				<artifactId>ep-core</artifactId>
-				<version>702.0.0-SNAPSHOT</version>
-			</dependency>
-			<dependency>
-				<groupId>com.elasticpath</groupId>
-				<artifactId>ep-geoip-demo</artifactId>
-				<version>702.0.0-SNAPSHOT</version>
-			</dependency>
-			<dependency>
-				<groupId>com.elasticpath.cmclient</groupId>
-				<artifactId>com.elasticpath.cmclient.libs</artifactId>
-				<version>702.0.0-SNAPSHOT</version>
-			</dependency>
-			<dependency>
-				<groupId>com.elasticpath.cmclient</groupId>
-				<artifactId>com.elasticpath.cmclient.testlibs</artifactId>
-				<version>702.0.0-SNAPSHOT</version>
-			</dependency>
-			<dependency>
-				<groupId>com.elasticpath.cmclient</groupId>
-				<artifactId>com.elasticpath.cmclient.core</artifactId>
-				<version>702.0.0-SNAPSHOT</version>
-			</dependency>
-			<dependency>
-				<groupId>com.elasticpath.cmclient</groupId>
-				<artifactId>com.elasticpath.cmclient.policy</artifactId>
-				<version>702.0.0-SNAPSHOT</version>
-			</dependency>
-			<dependency>
-				<groupId>com.elasticpath.cmclient</groupId>
-				<artifactId>com.elasticpath.cmclient.conditionbuilder</artifactId>
-				<version>702.0.0-SNAPSHOT</version>
-			</dependency>
-			<dependency>
-				<groupId>com.elasticpath.cmclient</groupId>
-				<artifactId>com.elasticpath.cmclient.pricelistmanager</artifactId>
-				<version>702.0.0-SNAPSHOT</version>
-			</dependency>
-			<dependency>
-				<groupId>com.elasticpath.cmclient</groupId>
-				<artifactId>com.elasticpath.cmclient.jobs</artifactId>
-				<version>702.0.0-SNAPSHOT</version>
-			</dependency>
-			<dependency>
-				<groupId>com.elasticpath.cmclient</groupId>
-				<artifactId>com.elasticpath.cmclient.catalog</artifactId>
-				<version>702.0.0-SNAPSHOT</version>
-			</dependency>
-			<dependency>
-				<groupId>com.elasticpath.cmclient</groupId>
-				<artifactId>com.elasticpath.cmclient.fulfillment</artifactId>
-				<version>702.0.0-SNAPSHOT</version>
-			</dependency>
-			<dependency>
-				<groupId>com.elasticpath.cmclient</groupId>
-				<artifactId>com.elasticpath.cmclient.admin</artifactId>
-				<version>702.0.0-SNAPSHOT</version>
-			</dependency>
-			<dependency>
-				<groupId>com.elasticpath.cmclient</groupId>
-				<artifactId>com.elasticpath.cmclient.admin.users</artifactId>
-				<version>702.0.0-SNAPSHOT</version>
-			</dependency>
-			<dependency>
-				<groupId>com.elasticpath.cmclient</groupId>
-				<artifactId>com.elasticpath.cmclient.admin.configuration</artifactId>
-				<version>702.0.0-SNAPSHOT</version>
-			</dependency>
-			<dependency>
-				<groupId>com.elasticpath.cmclient</groupId>
-				<artifactId>com.elasticpath.cmclient.store</artifactId>
-				<version>702.0.0-SNAPSHOT</version>
-			</dependency>
-			<dependency>
-				<groupId>com.elasticpath.cmclient</groupId>
-				<artifactId>com.elasticpath.cmclient.admin.stores</artifactId>
-				<version>702.0.0-SNAPSHOT</version>
-			</dependency>
-			<dependency>
-				<groupId>com.elasticpath.cmclient</groupId>
-				<artifactId>com.elasticpath.cmclient.admin.taxes</artifactId>
-				<version>702.0.0-SNAPSHOT</version>
-			</dependency>
-			<dependency>
-				<groupId>com.elasticpath.cmclient</groupId>
-				<artifactId>com.elasticpath.cmclient.admin.shipping</artifactId>
-				<version>702.0.0-SNAPSHOT</version>
-			</dependency>
-			<dependency>
-				<groupId>com.elasticpath.cmclient</groupId>
-				<artifactId>com.elasticpath.cmclient.admin.payment</artifactId>
-				<version>702.0.0-SNAPSHOT</version>
-			</dependency>
-			<dependency>
-				<groupId>com.elasticpath.cmclient</groupId>
-				<artifactId>com.elasticpath.cmclient.admin.warehouses</artifactId>
-				<version>702.0.0-SNAPSHOT</version>
-			</dependency>
-			<dependency>
-				<groupId>com.elasticpath.cmclient</groupId>
-				<artifactId>com.elasticpath.cmclient.warehouse</artifactId>
-				<version>702.0.0-SNAPSHOT</version>
-			</dependency>
-			<dependency>
-				<groupId>com.elasticpath.cmclient</groupId>
-				<artifactId>com.elasticpath.cmclient.advancedsearch</artifactId>
-				<version>702.0.0-SNAPSHOT</version>
-			</dependency>
-			<dependency>
-				<groupId>com.elasticpath.cmclient</groupId>
-				<artifactId>com.elasticpath.cmclient.platform.feature</artifactId>
-				<version>702.0.0-SNAPSHOT</version>
-			</dependency>
-			<dependency>
-				<groupId>com.elasticpath.cmclient</groupId>
-				<artifactId>com.elasticpath.cmclient.changeset</artifactId>
-				<version>702.0.0-SNAPSHOT</version>
-			</dependency>
-			<dependency>
-				<groupId>com.elasticpath.cmclient</groupId>
-				<artifactId>com.elasticpath.cmclient.admin.customers</artifactId>
-				<version>702.0.0-SNAPSHOT</version>
-			</dependency>
-			<dependency>
-				<groupId>com.elasticpath.cmclient</groupId>
-				<artifactId>com.elasticpath.cmclient.admin.datapolicies</artifactId>
-				<version>702.0.0-SNAPSHOT</version>
-			</dependency>
-
-			<dependency>
-				<groupId>org.eclipse.birt.runtime.3_7_1</groupId>
-				<artifactId>org.apache.batik.util.gui</artifactId>
-				<version>${org.apache.batic.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.eclipse.birt.runtime.3_7_1</groupId>
-				<artifactId>org.apache.batik.util</artifactId>
-				<version>${org.apache.batic.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.eclipse.birt.runtime.3_7_1</groupId>
-				<artifactId>org.apache.batik.css</artifactId>
-				<version>${org.apache.batic.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.eclipse.birt.runtime.3_7_1</groupId>
-				<artifactId>org.apache.batik.xml</artifactId>
-				<version>${org.apache.batic.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.eclipse.birt.runtime.3_7_1</groupId>
-				<artifactId>org.apache.batik.parser</artifactId>
-				<version>${org.apache.batic.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.eclipse.birt.runtime.3_7_1</groupId>
-				<artifactId>org.apache.batik.svggen</artifactId>
-				<version>${org.apache.batic.version}</version>
-			</dependency>
-
-			<dependency>
-				<groupId>org.eclipse.emf</groupId>
-				<artifactId>org.eclipse.emf.ecore</artifactId>
-				<version>${org.eclipse.emf.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.eclipse.emf</groupId>
-				<artifactId>org.eclipse.emf.common</artifactId>
-				<version>${org.eclipse.emf.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.eclipse.emf</groupId>
-				<artifactId>org.eclipse.emf.ecore.xmi</artifactId>
-				<version>${org.eclipse.emf.version}</version>
-			</dependency>
-
-		</dependencies>
-	</dependencyManagement>
 
 	<modules>
 		<module>target-platform</module>

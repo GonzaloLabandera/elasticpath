@@ -7,6 +7,7 @@ import org.openqa.selenium.WebDriver;
 import com.elasticpath.selenium.common.AbstractPageObject;
 import com.elasticpath.selenium.dialogs.ConfirmDialog;
 import com.elasticpath.selenium.dialogs.CreateEditTaxCodeDialog;
+import com.elasticpath.selenium.util.Constants;
 
 /**
  * Tax Codes Pane.
@@ -47,7 +48,7 @@ public class TaxCodesPane extends AbstractPageObject {
 	 * @param taxCodeName String
 	 */
 	public void verifyTaxCodeIsNotInList(final String taxCodeName) {
-		setWebDriverImplicitWait(1);
+		setWebDriverImplicitWait(Constants.IMPLICIT_WAIT_FOR_ELEMENT_NOT_EXISTS);
 		assertThat(verifyItemIsNotInCenterPaneWithoutPagination(TAXCODE_LIST_PARENT_CSS, TAXCODE_LIST_CSS, taxCodeName,
 				"Tax Code Name"))
 				.as("Delete failed, Tax Code is still in the list - " + taxCodeName)
@@ -61,8 +62,9 @@ public class TaxCodesPane extends AbstractPageObject {
 	 * @return CreateEditTaxCodeDialog
 	 */
 	public CreateEditTaxCodeDialog clickCreateTaxCodeButton() {
-		clickButton(CREATE_TAXCODE_BUTTON_CSS, "Create Tax Code");
-		return new CreateEditTaxCodeDialog(getDriver(), "Create");
+		final String dialogName = "Create";
+		clickButton(CREATE_TAXCODE_BUTTON_CSS, "Create Tax Code", String.format(CreateEditTaxCodeDialog.TAXCODE_PARENT_CSS_TEMPLATE, dialogName));
+		return new CreateEditTaxCodeDialog(getDriver(), dialogName);
 	}
 
 	/**
@@ -90,9 +92,10 @@ public class TaxCodesPane extends AbstractPageObject {
 	 * @return CreateEditTaxCodeDialog
 	 */
 	public CreateEditTaxCodeDialog clickEditTaxCodeButton(final String taxCodeName) {
+		final String dialogName = "Edit";
 		verifyTaxCodeIsInList(taxCodeName);
-		clickButton(EDIT_TAXCODE_BUTTON_CSS, "Edit Tax Code");
-		return new CreateEditTaxCodeDialog(getDriver(), "Edit");
+		clickButton(EDIT_TAXCODE_BUTTON_CSS, "Edit Tax Code", String.format(CreateEditTaxCodeDialog.TAXCODE_PARENT_CSS_TEMPLATE, dialogName));
+		return new CreateEditTaxCodeDialog(getDriver(), dialogName);
 	}
 
 }

@@ -18,14 +18,12 @@ import org.apache.camel.processor.RedeliveryPolicy;
 import org.jvnet.mock_javamail.Mailbox;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.test.context.ContextConfiguration;
 
 import com.elasticpath.uat.ScenarioContextValueHolder;
 
 /**
  * Steps for the reliable email delivery feature.
  */
-@ContextConfiguration("classpath:cucumber.xml")
 public class ReliableEmailDeliverySteps {
 
 	@Autowired

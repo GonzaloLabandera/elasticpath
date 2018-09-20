@@ -14,13 +14,7 @@
 		<dependency>
             <groupId>com.elasticpath.extensions</groupId>
             <artifactId>ext-search</artifactId>
-			<version>${project.version}</version>
         </dependency>
-		<dependency>
-			<groupId>javax.servlet</groupId>
-			<artifactId>javax.servlet-api</artifactId>
-			<scope>provided</scope>
-		</dependency>
 		<!--jaxb-impl is included due to jboss failing to load content wrappers RE-421-->
 		<dependency>
 			<groupId>com.sun.xml.bind</groupId>
@@ -31,29 +25,21 @@
 			<artifactId>ep-common-web</artifactId>
 		</dependency>
         <dependency>
-            <groupId>com.elasticpath.repo</groupId>
+            <groupId>com.elasticpath</groupId>
             <artifactId>ep-health-monitoring</artifactId>
-            <version>${ep.health.monitoring.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.elasticpath.repo</groupId>
+            <groupId>com.elasticpath</groupId>
             <artifactId>ep-health-monitoring-plugin-core</artifactId>
-            <version>${ep.health.monitoring.version}</version>
         </dependency>
 		<dependency>
 			<groupId>com.elasticpath.extensions</groupId>
 			<artifactId>ext-search-index-status</artifactId>
-			<version>0.0.0-SNAPSHOT</version>
 		</dependency>
 	</dependencies>
 
 	<properties>
 		<m2eclipse.wtp.contextRoot>${ep.search.contextUrl}</m2eclipse.wtp.contextRoot>
-	<!--
-				Disable checking that your dependencies all have license blocks and none of them are GPL or LGPL.
-				You likely don't want this without some configuration. See the code-checking-rules project for
-				how we use that internally in EP.
-			--><licensing.skip>true</licensing.skip>
     </properties>
 
 	<build>
@@ -110,7 +96,7 @@
 				<plugin>
 					<groupId>com.google.code.maven-replacer-plugin</groupId>
 					<artifactId>replacer</artifactId>
-					<version>1.5.2</version>
+					<version>${maven-replacer-plugin.version}</version>
 				</plugin>
 			</plugins>
 		</pluginManagement>

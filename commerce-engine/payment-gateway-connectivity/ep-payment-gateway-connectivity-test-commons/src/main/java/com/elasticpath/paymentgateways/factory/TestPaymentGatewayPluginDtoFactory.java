@@ -4,13 +4,10 @@
 package com.elasticpath.paymentgateways.factory;
 
 import java.math.BigDecimal;
-import java.util.Calendar;
 
 import com.elasticpath.plugin.payment.dto.AddressDto;
-import com.elasticpath.plugin.payment.dto.CardDetailsPaymentMethod;
 import com.elasticpath.plugin.payment.dto.OrderPaymentDto;
 import com.elasticpath.plugin.payment.dto.impl.AddressDtoImpl;
-import com.elasticpath.plugin.payment.dto.impl.CardDetailsPaymentMethodImpl;
 import com.elasticpath.plugin.payment.dto.impl.OrderPaymentDtoImpl;
 
 /**
@@ -20,23 +17,6 @@ public final class TestPaymentGatewayPluginDtoFactory {
 
 	private TestPaymentGatewayPluginDtoFactory() {
 		// Static class
-	}
-
-	/**
-	 * Creates a test {@link CardDetailsPaymentMethod} with test parameters.
-	 * 
-	 * @return created test {@link CardDetailsPaymentMethod}
-	 */
-	public static CardDetailsPaymentMethod createTestCardDetailsPaymentMethod() {
-		CardDetailsPaymentMethodImpl testCardDetails = new CardDetailsPaymentMethodImpl();
-		testCardDetails.setEmail("john.doe@elasticpath.com");
-		testCardDetails.setCardType("001");
-		testCardDetails.setUnencryptedCardNumber("4111111111111111");
-		testCardDetails.setExpiryMonth("01");
-		testCardDetails.setExpiryYear(String.valueOf(Calendar.getInstance().get(Calendar.YEAR) + 1));
-		testCardDetails.setCvv2Code("123");
-		testCardDetails.setReferenceId("12345");
-		return testCardDetails;
 	}
 
 	/**

@@ -3,15 +3,13 @@
  */
 package com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder.repositories;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
-import static com.elasticpath.rest.resource.integration.epcommerce.repository.ResourceTestConstants.CART_GUID;
 import static com.elasticpath.rest.resource.integration.epcommerce.repository.ResourceTestConstants.CART_ID;
 import static com.elasticpath.rest.resource.integration.epcommerce.repository.ResourceTestConstants.LINE_ITEM_ID;
 import static com.elasticpath.rest.resource.integration.epcommerce.repository.ResourceTestConstants.SCOPE;
 import static com.elasticpath.rest.resource.integration.epcommerce.repository.ResourceTestConstants.SKU_CODE;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.util.Collections;
 import java.util.Map;
@@ -22,13 +20,12 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.elasticpath.domain.cartmodifier.CartItemModifierField;
 import com.elasticpath.domain.catalog.ProductSku;
 import com.elasticpath.domain.shoppingcart.ShoppingCart;
 import com.elasticpath.domain.shoppingcart.ShoppingItem;
-import com.elasticpath.domain.store.Store;
 import com.elasticpath.rest.definition.carts.LineItemConfigurationEntity;
 import com.elasticpath.rest.definition.carts.LineItemEntity;
 import com.elasticpath.rest.definition.carts.LineItemIdentifier;
@@ -36,6 +33,7 @@ import com.elasticpath.rest.form.SubmitStatus;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.IdentifierTestFactory;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder.CartItemModifiersRepository;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder.ShoppingCartRepository;
+import com.elasticpath.rest.resource.integration.epcommerce.repository.carts.lineitems.LineItemIdentifierRepository;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.item.ItemRepository;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.sku.ProductSkuRepository;
 
@@ -56,8 +54,6 @@ public class LineItemEntityRepositoryTest {
 	@Mock
 	private ShoppingItem shoppingItem;
 	@Mock
-	private Store store;
-	@Mock
 	private ProductSku productSku;
 	@Mock
 	private ItemRepository itemRepository;
@@ -65,6 +61,8 @@ public class LineItemEntityRepositoryTest {
 	private ProductSkuRepository productSkuRepository;
 	@Mock
 	private CartItemModifiersRepository cartItemModifiersRepository;
+	@Mock
+	private LineItemIdentifierRepository lineItemIdentifierRepository;
 
 	private static final String SHOPPING_ITEM_SKU_GUID = "shoppingItemSkuGuid";
 	private static final String SHOPPING_ITEM_GUID = "shoppingItemGuid";
@@ -91,7 +89,7 @@ public class LineItemEntityRepositoryTest {
 		when(shoppingItem.getFields()).thenReturn(Collections.singletonMap("key", value));
 		CartItemModifierField cartItemModifierField = mock(CartItemModifierField.class);
 		when(cartItemModifierField.getCode()).thenReturn("code");
-		when(cartItemModifiersRepository.findCartItemModifierValues(LINE_ITEM_ID))
+		when(cartItemModifiersRepository.findCartItemModifierValues(CART_ID, LINE_ITEM_ID))
 				.thenReturn(Single.just(Collections.singletonMap(cartItemModifierField, value)));
 
 		LineItemIdentifier lineItemIdentifier = IdentifierTestFactory.buildLineItemIdentifier(SCOPE, CART_ID, LINE_ITEM_ID);
@@ -104,7 +102,7 @@ public class LineItemEntityRepositoryTest {
 	}
 
 	private void setupMocksForFindOne(final String lineItemId, final String encodedItemId) {
-		when(shoppingCartRepository.getDefaultShoppingCart()).thenReturn(Single.just(cart));
+		when(shoppingCartRepository.getShoppingCart(CART_ID)).thenReturn(Single.just(cart));
 		when(shoppingCartRepository.getShoppingItem(lineItemId, cart)).thenReturn(Single.just(shoppingItem));
 		when(shoppingItem.getSkuGuid()).thenReturn(SHOPPING_ITEM_SKU_GUID);
 		when(productSkuRepository.getProductSkuWithAttributesByGuidAsSingle(SHOPPING_ITEM_SKU_GUID)).thenReturn(Single.just(productSku));
@@ -115,13 +113,18 @@ public class LineItemEntityRepositoryTest {
 
 	@Test
 	public void successfullyAddNewItemToCart() {
+		final LineItemIdentifier expectedLineItemIdentifier = mock(LineItemIdentifier.class);
+
 		LineItemEntity lineItemEntity = setupMocksForAddToCart();
 		when(shoppingItem.getQuantity()).thenReturn(1);
+		when(lineItemIdentifierRepository.buildLineItemIdentifier(cart, shoppingItem))
+				.thenReturn(expectedLineItemIdentifier);
 
 		repository.addToCart(lineItemEntity)
 				.test()
 				.assertNoErrors()
-				.assertValue(submitResult -> submitResult.getStatus().equals(SubmitStatus.CREATED));
+				.assertValue(submitResult -> submitResult.getStatus().equals(SubmitStatus.CREATED))
+				.assertValue(submitResult -> submitResult.getIdentifier().equals(expectedLineItemIdentifier));
 	}
 
 	@Test
@@ -140,19 +143,16 @@ public class LineItemEntityRepositoryTest {
 		LineItemEntity lineItemEntity = mock(LineItemEntity.class);
 		when(lineItemEntity.getItemId()).thenReturn(ENCODED_ITEM_ID);
 		when(lineItemEntity.getQuantity()).thenReturn(quantity);
+		when(lineItemEntity.getCartId()).thenReturn(CART_ID);
 
 		LineItemConfigurationEntity lineItemConfigurationEntity = mock(LineItemConfigurationEntity.class);
 		when(lineItemEntity.getConfiguration()).thenReturn(lineItemConfigurationEntity);
 		Map<String, String> fields = Collections.emptyMap();
 		when(lineItemConfigurationEntity.getDynamicProperties()).thenReturn(fields);
 
-		when(shoppingCartRepository.getDefaultShoppingCart()).thenReturn(Single.just(cart));
+		when(shoppingCartRepository.getShoppingCart(CART_ID)).thenReturn(Single.just(cart));
 		when(shoppingCartRepository.addItemToCart(cart, ENCODED_ITEM_ID, quantity, fields)).thenReturn(Single.just(shoppingItem));
 		when(shoppingItem.getQuantity()).thenReturn(quantity);
-		when(cart.getStore()).thenReturn(store);
-		when(store.getCode()).thenReturn(SCOPE);
-		when(cart.getGuid()).thenReturn(CART_GUID);
-		when(shoppingItem.getGuid()).thenReturn(SHOPPING_ITEM_GUID);
 		return lineItemEntity;
 	}
 
@@ -179,4 +179,5 @@ public class LineItemEntityRepositoryTest {
 				.test()
 				.assertComplete();
 	}
+
 }
