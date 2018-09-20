@@ -29,7 +29,7 @@ import com.elasticpath.service.customer.CustomerGroupService;
 /**
  * Customer group steps.
  */
-@ContextConfiguration("/integration-context.xml")
+@ContextConfiguration("/integration-context-mocked-customer-service.xml")
 public class CustomerGroupSteps {
 
 	@Autowired

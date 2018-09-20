@@ -422,6 +422,16 @@
 		</property>
 	</bean>
 
+	<bean id="dataPolicyAdapter" class="com.elasticpath.importexport.common.adapters.datapolicy.DataPolicyAdapter"
+		  parent="abstractDomainAdapter">
+		<property name="dataPointService" ref="dataPointService" />
+	</bean>
+
+	<bean id="customerConsentAdapter" class="com.elasticpath.importexport.common.adapters.datapolicy.CustomerConsentAdapter"
+		  parent="abstractDomainAdapter">
+		<property name="assembler" ref="customerConsentAssembler" />
+	</bean>
+
 	<bean id="cartItemModifierFieldAdapter" class="com.elasticpath.importexport.common.adapters.cartmodifier.CartItemModifierFieldAdapter"
 		  parent="abstractDomainAdapter">
 		<property name="cartItemModifierFieldOptionAdapter">

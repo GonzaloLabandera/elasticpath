@@ -11,14 +11,14 @@ import org.apache.openjpa.enhance.PersistenceCapable;
 import org.apache.openjpa.event.LifecycleEvent;
 
 import com.elasticpath.domain.DatabaseLastModifiedDate;
-import com.elasticpath.persistence.impl.LastModifiedEntityListener;
+import com.elasticpath.persistence.impl.DatabaseTimestampsEntityListener;
 
 /**
  * A last modified entity listener that skips updating the last modified date of specified types when they are persisted.
- * This acts as a test double for the real LastModifiedEntityListener in cases where the last modified date of a type
+ * This acts as a test double for the real DatabaseTimestampsEntityListener in cases where the last modified date of a type
  * needs to be manually specified.
 */
-public class TypeFilteringLastModifiedEntityListenerDouble extends LastModifiedEntityListener {
+public class TypeFilteringLastModifiedEntityListenerDouble extends DatabaseTimestampsEntityListener {
 	private final Set<Class<?>> ignoredTypes = new HashSet<>();
 
 	public TypeFilteringLastModifiedEntityListenerDouble(final Class<?>... ignoredTypes) {

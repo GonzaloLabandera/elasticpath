@@ -13,7 +13,7 @@ import com.elasticpath.common.dto.customer.transformer.CreditCardDTOTransformer;
 import com.elasticpath.common.dto.customer.transformer.PaymentTokenDTOTransformer;
 import com.elasticpath.commons.beanframework.BeanFactory;
 import com.elasticpath.commons.constants.ContextIdNames;
-import com.elasticpath.domain.attribute.AttributeValue;
+import com.elasticpath.domain.attribute.CustomerProfileValue;
 import com.elasticpath.domain.customer.Customer;
 import com.elasticpath.domain.customer.CustomerAddress;
 import com.elasticpath.domain.customer.CustomerCreditCard;
@@ -76,21 +76,23 @@ public class CustomerDtoAssembler extends AbstractDtoAssembler<CustomerDTO, Cust
 		}
 
 		for (String key : source.getProfileValueMap().keySet()) {
-			AttributeValue value = source.getProfileValueMap().get(key);
+			CustomerProfileValue value = source.getProfileValueMap().get(key);
 
 			AttributeValueDTO avDto = getAttributeValueDto();
 			avDto.setKey(key);
 			avDto.setType(value.getAttributeType().toString());
+			avDto.setCreationDate(value.getCreationDate());
 			avDto.setValue(value.getStringValue());
 			target.getProfileValues().add(avDto);
 		}
-
 	}
 
 	private void populateDtoAddresses(final Customer source, final CustomerDTO target) {
 		for (CustomerAddress sourceAddress : source.getAddresses()) {
 			AddressDTO targetAddress = getAddressDto();
 
+			targetAddress.setCreationDate(sourceAddress.getCreationDate());
+			targetAddress.setLastModifiedDate(sourceAddress.getLastModifiedDate());
 			targetAddress.setCity(sourceAddress.getCity());
 			targetAddress.setCommercialAddress(sourceAddress.isCommercialAddress());
 			targetAddress.setCountry(sourceAddress.getCountry());
@@ -159,7 +161,7 @@ public class CustomerDtoAssembler extends AbstractDtoAssembler<CustomerDTO, Cust
 		populateDomainCustomerGroup(source, target);
 
 		for (AttributeValueDTO avDto : source.getProfileValues()) {
-			target.getCustomerProfile().setStringProfileValue(avDto.getKey(), avDto.getValue());
+			target.getCustomerProfile().setStringProfileValue(avDto.getKey(), avDto.getValue(), avDto.getCreationDate());
 		}
 
 	}
@@ -178,6 +180,8 @@ public class CustomerDtoAssembler extends AbstractDtoAssembler<CustomerDTO, Cust
 				target.getAddresses().add(targetAddress);
 			}
 
+			targetAddress.setCreationDate(sourceAddress.getCreationDate());
+			targetAddress.setLastModifiedDate(sourceAddress.getLastModifiedDate());
 			targetAddress.setCity(sourceAddress.getCity());
 			targetAddress.setCommercialAddress(sourceAddress.isCommercialAddress());
 			targetAddress.setCountry(sourceAddress.getCountry());

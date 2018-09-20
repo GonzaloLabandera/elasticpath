@@ -27,7 +27,7 @@ public final class CartOrderCouponsMergerForShopperUpdates implements CustomerSe
 	}
 
 	/**
-	 * Copies the Coupons from previous CartOrder to new CartOrder when shopper changes, iff the transition is from anonymous to registered.
+	 * Copies the Coupons from previous CartOrder to new CartOrder when shopper changes, if the transition is from anonymous to registered.
 	 *
 	 * {@inheritDoc}
 	 */

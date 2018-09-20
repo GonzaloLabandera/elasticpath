@@ -287,4 +287,32 @@
 		<property name="startDelay" value="${ep.cm.searchterms.aggregator.delay}" />
 		<property name="repeatInterval" value="${ep.cm.searchterms.aggregator.interval}" />
 	</bean>
+
+	<!--Data point value job triggers-->
+	<!--ExpiredDataPointValuesJobProcessor-->
+	<bean id="expiredDataPointValuesJobProcessorTrigger" class="org.springframework.scheduling.quartz.CronTriggerBean">
+		<property name="jobDetail" ref="expiredDataPointValuesJob"/>
+		<!-- run every day at 2 am -->
+		<property name="cronExpression" value="0 0 1 * * ?"/>
+	</bean>
+
+	<bean id="expiredDataPointValuesJob" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+		<property name="targetObject" ref="expiredDataPointValuesJobProcessor"/>
+		<property name="targetMethod" value="process"/>
+		<property name="concurrent" value="false"/>
+	</bean>
+
+	<!--DataPointRevokedConsentsJobProcessor-->
+	<bean id="dataPointRevokedConsentsJobProcessorTrigger" class="org.springframework.scheduling.quartz.CronTriggerBean">
+		<property name="jobDetail" ref="dataPointRevokedConsentsJob"/>
+		<!-- run every day at 1 am -->
+		<property name="cronExpression" value="0 0 2 * * ?"/>
+	</bean>
+
+	<bean id="dataPointRevokedConsentsJob" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+		<property name="targetObject" ref="dataPointRevokedConsentsJobProcessor"/>
+		<property name="targetMethod" value="process"/>
+		<property name="concurrent" value="false"/>
+	</bean>
+
 </beans>

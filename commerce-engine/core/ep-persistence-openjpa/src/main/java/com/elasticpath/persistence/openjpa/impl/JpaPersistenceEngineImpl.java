@@ -873,6 +873,61 @@ public class JpaPersistenceEngineImpl implements JpaPersistenceEngineInternal {
 
 	}
 
+	@Override
+	public int executeQuery(final String dynamicQuery, final Object... parameters) throws EpPersistenceException {
+		if (LOG.isDebugEnabled()) {
+			LOG.debug("Executing dynamic query: " + dynamicQuery);
+		}
+
+		OpenJPAQuery<?> query = OpenJPAPersistence.cast(getEntityManager().createQuery(dynamicQuery));
+		ChangeType changeType = getChangeTypeFor(query);
+		fireBeginBulkOperationEvent("Dynamic Query", query, parameters, changeType);
+
+		try {
+			setQueryParameters(query, parameters);
+			return query.executeUpdate();
+		} catch (final DataAccessException e) {
+			throw new EpPersistenceException(CAUGHT_AN_EXCEPTION, e);
+		} finally {
+			fireEndBulkOperationEvent(changeType);
+		}
+	}
+
+	/**
+	 * Execute dynamic update/delete query with list parameter and optional other parameters.
+	 *
+	 * @param dynamicQuery he query to be executed.
+	 * @param listParameterName the name of the parameter for the list values
+	 * @param values the collection of values
+	 * @param parameters the parameters to be used with the given query
+	 * @param <E> the type of values used in the query
+	 * @return the number of entities updated or deleted
+	 * @throws EpPersistenceException - in case of persistence errors
+	 */
+	public <E> int executeQueryWithList(final String dynamicQuery, final String listParameterName,
+		final Collection<E> values, final Object... parameters) throws EpPersistenceException {
+
+		if (LOG.isDebugEnabled()) {
+			LOG.debug("executing dynamic query with list: " + dynamicQuery + "==" + listParameterName);
+		}
+		List<String> listParameters = splitCollection(values, 0);
+		int result = 0;
+		for (String listParameter : listParameters) {
+			OpenJPAQuery<?> query = OpenJPAPersistence.cast(getEntityManager().createQuery(dynamicQuery));
+			Query newQuery = insertListIntoQuery(query, listParameterName, listParameter);
+			setQueryParameters(newQuery, parameters);
+
+			ChangeType changeType = getChangeTypeFor(query);
+			fireBeginBulkOperationEvent("Dynamic Query", query, parameters, changeType);
+			try {
+				result += newQuery.executeUpdate();
+			} finally {
+				fireEndBulkOperationEvent(changeType);
+			}
+		}
+		return result;
+	}
+
 	/**
 	 * Retrieve a list of persistent instances with the specified named query.
 	 *

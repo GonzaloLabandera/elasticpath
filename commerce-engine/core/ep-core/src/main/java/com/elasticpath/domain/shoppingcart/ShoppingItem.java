@@ -5,11 +5,11 @@ package com.elasticpath.domain.shoppingcart;
 
 import java.math.BigDecimal;
 import java.util.Currency;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
 import com.elasticpath.commons.tree.TreeNode;
+import com.elasticpath.domain.DatabaseLastModifiedDate;
 import com.elasticpath.domain.catalog.Price;
 import com.elasticpath.persistence.api.Entity;
 import com.elasticpath.service.catalog.ProductSkuLookup;
@@ -17,7 +17,7 @@ import com.elasticpath.service.catalog.ProductSkuLookup;
 /**
  * Represents a quantity of SKUs in a shopping cart, in progress cart, wish list, etc.
  */
-public interface ShoppingItem extends Entity, TreeNode<ShoppingItem> {
+public interface ShoppingItem extends Entity, TreeNode<ShoppingItem>, DatabaseLastModifiedDate {
 	/**
 	 * Returns the guid of the product sku being purchased by this item.
 	 * @return the guid of the product sku being purchased by this item.
@@ -138,13 +138,6 @@ public interface ShoppingItem extends Entity, TreeNode<ShoppingItem> {
 	 * @param message the error message
 	 */
 	void setErrorMessage(String message);
-	
-	/**
-	 * Get the date that this was last modified on.
-	 * 
-	 * @return the last modified date
-	 */
-	Date getLastModifiedDate();
 	
 	/**
 	 * Returns true if the Product this ShoppingItem represents is

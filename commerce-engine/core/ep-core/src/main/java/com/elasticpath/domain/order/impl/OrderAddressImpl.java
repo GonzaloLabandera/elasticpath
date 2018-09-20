@@ -43,6 +43,8 @@ public class OrderAddressImpl extends AbstractAddressImpl implements OrderAddres
 	 */
 	@Override
 	public void init(final Address customerAddress) {
+		this.setCreationDate(customerAddress.getCreationDate());
+		this.setLastModifiedDate(customerAddress.getLastModifiedDate());
 		this.setFirstName(customerAddress.getFirstName());
 		this.setLastName(customerAddress.getLastName());
 		this.setStreet1(customerAddress.getStreet1());

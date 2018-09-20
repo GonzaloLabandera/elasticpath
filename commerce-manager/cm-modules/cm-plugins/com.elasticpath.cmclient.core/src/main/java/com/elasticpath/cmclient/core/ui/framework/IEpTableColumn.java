@@ -60,6 +60,13 @@ public interface IEpTableColumn {
 	void setEditingSupport(EditingSupport editingSupport);
 
 	/**
+	 * Gets the editing support of this column.
+	 *
+	 * @return EditingSupport or null if not set
+	 */
+	EditingSupport getEditingSupport();
+
+	/**
 	 * Sets a column label provider.
 	 * 
 	 * @param labelProvider the label provider

@@ -28,8 +28,10 @@ import com.elasticpath.domain.customer.impl.CustomerSessionImpl;
 import com.elasticpath.domain.customer.impl.CustomerSessionMementoImpl;
 import com.elasticpath.persistence.api.PersistenceEngine;
 import com.elasticpath.service.customer.CustomerSessionShopperUpdateHandler;
+import com.elasticpath.service.datapolicy.impl.CustomerConsentServiceImpl;
 import com.elasticpath.service.misc.TimeService;
 import com.elasticpath.service.shopper.ShopperService;
+import com.elasticpath.service.shopper.impl.CustomerConsentMergerForShopperUpdates;
 import com.elasticpath.service.shopper.impl.ShoppingCartMergerForShopperUpdates;
 import com.elasticpath.service.shopper.impl.WishListMergerForShopperUpdates;
 import com.elasticpath.service.shoppingcart.ShoppingCartService;
@@ -91,9 +93,11 @@ public class CustomerSessionServiceImplTest {
 		CustomerSessionShopperUpdateHandler cartMerger =
 				new ShoppingCartMergerForShopperUpdates(shoppingCartService, new ShoppingCartMergerImpl());
 		CustomerSessionShopperUpdateHandler wishlistMerger = new WishListMergerForShopperUpdates(new WishListServiceImpl());
+		CustomerSessionShopperUpdateHandler customerConsentMerger = new CustomerConsentMergerForShopperUpdates(new CustomerConsentServiceImpl());
 
 		updateHandlers.add(cartMerger);
 		updateHandlers.add(wishlistMerger);
+		updateHandlers.add(customerConsentMerger);
 
 		customerSessionServiceImpl.setCustomerSessionUpdateHandlers(updateHandlers);
 	}

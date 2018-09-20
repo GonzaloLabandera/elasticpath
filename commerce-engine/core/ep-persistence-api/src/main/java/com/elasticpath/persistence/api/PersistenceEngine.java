@@ -426,6 +426,29 @@ public interface PersistenceEngine {
 			throws EpPersistenceException;
 
 	/**
+	 * Execute dynamic update/delete query.
+	 *
+	 * @param query the query to be executed.
+	 * @param parameters the query parameters.
+	 * @return the number of entities updated or deleted
+	 * @throws EpPersistenceException - in case of persistence errors
+	 */
+	int executeQuery(String query, Object... parameters) throws EpPersistenceException;
+
+	/**
+	 * Execute dynamic update/delete query with list parameter and optional other parameters.
+	 *
+	 * @param query he query to be executed.
+	 * @param listParameterName the name of the parameter for the list values
+	 * @param values the collection of values
+	 * @param parameters the parameters to be used with the given query
+	 * @param <E> the type of values used in the query
+	 * @return the number of entities updated or deleted
+	 * @throws EpPersistenceException - in case of persistence errors
+	 */
+	<E> int executeQueryWithList(String query, String listParameterName, Collection<E> values, Object... parameters) throws EpPersistenceException;
+
+	/**
 	 * Get the persistence session factory.
 	 * @return an instance of <code>PersistenceSessionFactory</code>
 	 */

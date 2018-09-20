@@ -74,4 +74,15 @@
         <value key="apiRefreshStrategy">application</value>
     </setting_metadata>
 </configuration_setting>
+
+<configuration_setting>
+	<name_space>COMMERCE/STORE/enableDataPolicies</name_space>
+	<description>Set to true if data policies are enabled for the store.</description>
+	<default_value type="Boolean">false</default_value>
+	<max_overrides>-1</max_overrides>
+	<defined_values>
+		<value context="MOBEE">true</value>
+	</defined_values>
+	<setting_metadata/>
+</configuration_setting>
 </system_configuration>

@@ -5,13 +5,13 @@
 	<parent>
 		<groupId>com.elasticpath</groupId>
 		<artifactId>parent</artifactId>
-		<version>701.0.0.20171228014437-be854</version>
+		<version>702.0.0-SNAPSHOT</version>
 		<relativePath></relativePath>
 	</parent>
 
 	<groupId>com.elasticpath.cmclient</groupId>
 	<artifactId>cm-modules</artifactId>
-	<version>701.0.0.20171228014437-c8fcb</version><!-- Version is required here for releasing tasks -->
+	<version>702.0.0-SNAPSHOT</version><!-- Version is required here for releasing tasks -->
 	<packaging>pom</packaging>
 	<name>CM Modules</name>
 	<description> Contains the MANIFEST-first tycho modules, separated from the pom-first modules.</description>
@@ -207,152 +207,157 @@
 			<dependency>
 				<groupId>com.elasticpath</groupId>
 				<artifactId>ep-base</artifactId>
-				<version>701.0.0.20171228014437-be854</version>
+				<version>702.0.0-SNAPSHOT</version>
 			</dependency>
 			<dependency>
 				<groupId>com.elasticpath</groupId>
 				<artifactId>ep-cache</artifactId>
-				<version>701.0.0.20171228014437-be854</version>
+				<version>702.0.0-SNAPSHOT</version>
 			</dependency>
 			<dependency>
 				<groupId>com.elasticpath</groupId>
 				<artifactId>ep-persistence-api</artifactId>
-				<version>701.0.0.20171228014437-be854</version>
+				<version>702.0.0-SNAPSHOT</version>
 			</dependency>
 			<dependency>
 				<groupId>com.elasticpath</groupId>
 				<artifactId>ep-persistence-openjpa</artifactId>
-				<version>701.0.0.20171228014437-be854</version>
+				<version>702.0.0-SNAPSHOT</version>
 			</dependency>
 			<dependency>
 				<groupId>com.elasticpath</groupId>
 				<artifactId>ep-settings</artifactId>
-				<version>701.0.0.20171228014437-be854</version>
+				<version>702.0.0-SNAPSHOT</version>
 			</dependency>
 			<dependency>
 				<groupId>com.elasticpath</groupId>
 				<artifactId>ep-core</artifactId>
-				<version>701.0.0.20171228014437-be854</version>
+				<version>702.0.0-SNAPSHOT</version>
 			</dependency>
 			<dependency>
 				<groupId>com.elasticpath</groupId>
 				<artifactId>ep-geoip-demo</artifactId>
-				<version>701.0.0.20171228014437-be854</version>
+				<version>702.0.0-SNAPSHOT</version>
 			</dependency>
 			<dependency>
 				<groupId>com.elasticpath.cmclient</groupId>
 				<artifactId>com.elasticpath.cmclient.libs</artifactId>
-				<version>701.0.0.20171228014437-c8fcb</version>
+				<version>702.0.0-SNAPSHOT</version>
 			</dependency>
 			<dependency>
 				<groupId>com.elasticpath.cmclient</groupId>
 				<artifactId>com.elasticpath.cmclient.testlibs</artifactId>
-				<version>701.0.0.20171228014437-c8fcb</version>
+				<version>702.0.0-SNAPSHOT</version>
 			</dependency>
 			<dependency>
 				<groupId>com.elasticpath.cmclient</groupId>
 				<artifactId>com.elasticpath.cmclient.core</artifactId>
-				<version>701.0.0.20171228014437-c8fcb</version>
+				<version>702.0.0-SNAPSHOT</version>
 			</dependency>
 			<dependency>
 				<groupId>com.elasticpath.cmclient</groupId>
 				<artifactId>com.elasticpath.cmclient.policy</artifactId>
-				<version>701.0.0.20171228014437-c8fcb</version>
+				<version>702.0.0-SNAPSHOT</version>
 			</dependency>
 			<dependency>
 				<groupId>com.elasticpath.cmclient</groupId>
 				<artifactId>com.elasticpath.cmclient.conditionbuilder</artifactId>
-				<version>701.0.0.20171228014437-c8fcb</version>
+				<version>702.0.0-SNAPSHOT</version>
 			</dependency>
 			<dependency>
 				<groupId>com.elasticpath.cmclient</groupId>
 				<artifactId>com.elasticpath.cmclient.pricelistmanager</artifactId>
-				<version>701.0.0.20171228014437-c8fcb</version>
+				<version>702.0.0-SNAPSHOT</version>
 			</dependency>
 			<dependency>
 				<groupId>com.elasticpath.cmclient</groupId>
 				<artifactId>com.elasticpath.cmclient.jobs</artifactId>
-				<version>701.0.0.20171228014437-c8fcb</version>
+				<version>702.0.0-SNAPSHOT</version>
 			</dependency>
 			<dependency>
 				<groupId>com.elasticpath.cmclient</groupId>
 				<artifactId>com.elasticpath.cmclient.catalog</artifactId>
-				<version>701.0.0.20171228014437-c8fcb</version>
+				<version>702.0.0-SNAPSHOT</version>
 			</dependency>
 			<dependency>
 				<groupId>com.elasticpath.cmclient</groupId>
 				<artifactId>com.elasticpath.cmclient.fulfillment</artifactId>
-				<version>701.0.0.20171228014437-c8fcb</version>
+				<version>702.0.0-SNAPSHOT</version>
 			</dependency>
 			<dependency>
 				<groupId>com.elasticpath.cmclient</groupId>
 				<artifactId>com.elasticpath.cmclient.admin</artifactId>
-				<version>701.0.0.20171228014437-c8fcb</version>
+				<version>702.0.0-SNAPSHOT</version>
 			</dependency>
 			<dependency>
 				<groupId>com.elasticpath.cmclient</groupId>
 				<artifactId>com.elasticpath.cmclient.admin.users</artifactId>
-				<version>701.0.0.20171228014437-c8fcb</version>
+				<version>702.0.0-SNAPSHOT</version>
 			</dependency>
 			<dependency>
 				<groupId>com.elasticpath.cmclient</groupId>
 				<artifactId>com.elasticpath.cmclient.admin.configuration</artifactId>
-				<version>701.0.0.20171228014437-c8fcb</version>
+				<version>702.0.0-SNAPSHOT</version>
 			</dependency>
 			<dependency>
 				<groupId>com.elasticpath.cmclient</groupId>
 				<artifactId>com.elasticpath.cmclient.store</artifactId>
-				<version>701.0.0.20171228014437-c8fcb</version>
+				<version>702.0.0-SNAPSHOT</version>
 			</dependency>
 			<dependency>
 				<groupId>com.elasticpath.cmclient</groupId>
 				<artifactId>com.elasticpath.cmclient.admin.stores</artifactId>
-				<version>701.0.0.20171228014437-c8fcb</version>
+				<version>702.0.0-SNAPSHOT</version>
 			</dependency>
 			<dependency>
 				<groupId>com.elasticpath.cmclient</groupId>
 				<artifactId>com.elasticpath.cmclient.admin.taxes</artifactId>
-				<version>701.0.0.20171228014437-c8fcb</version>
+				<version>702.0.0-SNAPSHOT</version>
 			</dependency>
 			<dependency>
 				<groupId>com.elasticpath.cmclient</groupId>
 				<artifactId>com.elasticpath.cmclient.admin.shipping</artifactId>
-				<version>701.0.0.20171228014437-c8fcb</version>
+				<version>702.0.0-SNAPSHOT</version>
 			</dependency>
 			<dependency>
 				<groupId>com.elasticpath.cmclient</groupId>
 				<artifactId>com.elasticpath.cmclient.admin.payment</artifactId>
-				<version>701.0.0.20171228014437-c8fcb</version>
+				<version>702.0.0-SNAPSHOT</version>
 			</dependency>
 			<dependency>
 				<groupId>com.elasticpath.cmclient</groupId>
 				<artifactId>com.elasticpath.cmclient.admin.warehouses</artifactId>
-				<version>701.0.0.20171228014437-c8fcb</version>
+				<version>702.0.0-SNAPSHOT</version>
 			</dependency>
 			<dependency>
 				<groupId>com.elasticpath.cmclient</groupId>
 				<artifactId>com.elasticpath.cmclient.warehouse</artifactId>
-				<version>701.0.0.20171228014437-c8fcb</version>
+				<version>702.0.0-SNAPSHOT</version>
 			</dependency>
 			<dependency>
 				<groupId>com.elasticpath.cmclient</groupId>
 				<artifactId>com.elasticpath.cmclient.advancedsearch</artifactId>
-				<version>701.0.0.20171228014437-c8fcb</version>
+				<version>702.0.0-SNAPSHOT</version>
 			</dependency>
 			<dependency>
 				<groupId>com.elasticpath.cmclient</groupId>
 				<artifactId>com.elasticpath.cmclient.platform.feature</artifactId>
-				<version>701.0.0.20171228014437-c8fcb</version>
+				<version>702.0.0-SNAPSHOT</version>
 			</dependency>
 			<dependency>
 				<groupId>com.elasticpath.cmclient</groupId>
 				<artifactId>com.elasticpath.cmclient.changeset</artifactId>
-				<version>701.0.0.20171228014437-c8fcb</version>
+				<version>702.0.0-SNAPSHOT</version>
 			</dependency>
 			<dependency>
 				<groupId>com.elasticpath.cmclient</groupId>
 				<artifactId>com.elasticpath.cmclient.admin.customers</artifactId>
-				<version>701.0.0.20171228014437-c8fcb</version>
+				<version>702.0.0-SNAPSHOT</version>
+			</dependency>
+			<dependency>
+				<groupId>com.elasticpath.cmclient</groupId>
+				<artifactId>com.elasticpath.cmclient.admin.datapolicies</artifactId>
+				<version>702.0.0-SNAPSHOT</version>
 			</dependency>
 
 			<dependency>

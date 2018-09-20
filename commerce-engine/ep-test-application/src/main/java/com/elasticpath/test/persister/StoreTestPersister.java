@@ -783,7 +783,17 @@ public class StoreTestPersister {
 	public Customer createDefaultCustomer(final Store store) {
 		final CustomerAddress address = createCustomerAddress(
 				"Bond", "James", "1234 Pine Street", "", "Vancouver", "CA", "BC", "V6JT2N", "891312345007");
-		final CustomerCreditCard creditCard = createCustomerCreditCard(address.getFirstName() + " " + address.getLastName(), "4111111111111111", "VISA", "11", "2020");
+		return createCustomerWithAddress(store, address);
+	}
+
+	/**
+	 * Create default persisted customer.
+	 *
+	 * @param store the store
+	 * @return a customer
+	 */
+	public Customer createCustomerWithAddress(final Store store, final CustomerAddress customerAddress) {
+		final CustomerCreditCard creditCard = createCustomerCreditCard(customerAddress.getFirstName() + " " + customerAddress.getLastName(), "4111111111111111", "VISA", "11", "2020");
 		Customer customer = null;
 		String randomEmail = null;
 		//if there is already a customer with the 'random' email the persistCustomer call will fail,
@@ -794,7 +804,11 @@ public class StoreTestPersister {
 		}
 		while (customer != null);
 
-		return persistCustomer(store, randomEmail, creditCard, address);
+		return persistCustomer(store, randomEmail, creditCard, customerAddress);
+	}
+
+	public Customer getCustomerByGuid(final String customerGuid) {
+		return customerService.findByGuid(customerGuid);
 	}
 
 	/**

@@ -232,6 +232,12 @@
 	<service ref="itemCharacteristicsService"
 			 interface="com.elasticpath.service.catalog.ItemCharacteristicsService" />
 
+	<service ref="dataPolicyService"
+			 interface="com.elasticpath.service.datapolicy.DataPolicyService" />
+
+	<service ref="customerConsentService"
+			 interface="com.elasticpath.service.datapolicy.CustomerConsentService" />
+
 	<service ref="timeService"
 			 interface="com.elasticpath.service.misc.TimeService"/>
 

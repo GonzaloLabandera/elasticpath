@@ -41,7 +41,7 @@ import com.elasticpath.service.customer.CustomerGroupService;
 /**
  * Import customer steps.
  */
-@ContextConfiguration("/integration-context.xml")
+@ContextConfiguration("/integration-context-mocked-customer-service.xml")
 public class ImportCustomerSteps {
 
 	private static final String CUSTOMERS_IMPORT_FILE = "customers.xml";

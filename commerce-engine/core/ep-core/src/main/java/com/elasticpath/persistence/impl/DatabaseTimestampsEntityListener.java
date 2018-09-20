@@ -9,13 +9,14 @@ import org.apache.openjpa.event.LifecycleEvent;
 
 import com.elasticpath.commons.beanframework.BeanFactory;
 import com.elasticpath.commons.constants.ContextIdNames;
+import com.elasticpath.domain.DatabaseCreationDate;
 import com.elasticpath.domain.DatabaseLastModifiedDate;
 import com.elasticpath.service.misc.TimeService;
 
 /**
- * EntityListener which sets the {@code lastModifiedDate} on entities.
+ * EntityListener which sets the {@code lastModifiedDate} and {@code creationDate} on entities.
  */
-public class LastModifiedEntityListener extends AbstractLifecycleListener {
+public class DatabaseTimestampsEntityListener extends AbstractLifecycleListener {
 	
 	private TimeService timeService;
 	private BeanFactory beanFactory;
@@ -27,7 +28,7 @@ public class LastModifiedEntityListener extends AbstractLifecycleListener {
 		case LifecycleEvent.BEFORE_STORE:
 			PersistenceCapable pcObject = (PersistenceCapable) event.getSource();
 			if (pcObject.pcIsDirty()) {
-				setLastModifiedDate(event);
+				setDatabaseTimestamps(event);
 			}
 			break;
 		case LifecycleEvent.BEFORE_PERSIST:
@@ -35,6 +36,21 @@ public class LastModifiedEntityListener extends AbstractLifecycleListener {
 			break;
 		default:
 			// No - op
+		}
+	}
+
+	private void setDatabaseTimestamps(final LifecycleEvent event) {
+		setCreationDate(event);
+		setLastModifiedDate(event);
+	}
+
+	private void setCreationDate(final LifecycleEvent event) {
+		Object source = event.getSource();
+		if (source instanceof DatabaseCreationDate) {
+			DatabaseCreationDate creationDateObject = (DatabaseCreationDate) source;
+			if (creationDateObject.getCreationDate() == null) {
+				creationDateObject.setCreationDate(getTimeService().getCurrentTime());
+			}
 		}
 	}
 

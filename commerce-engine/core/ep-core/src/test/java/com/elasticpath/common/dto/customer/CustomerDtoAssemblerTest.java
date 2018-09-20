@@ -3,6 +3,7 @@
  */
 package com.elasticpath.common.dto.customer;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
@@ -14,7 +15,9 @@ import java.util.Arrays;
 import java.util.Currency;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Locale;
+import java.util.stream.Collectors;
 
 import org.jmock.Expectations;
 import org.jmock.integration.junit4.JUnitRuleMockery;
@@ -36,6 +39,7 @@ import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.commons.util.Utility;
 import com.elasticpath.commons.util.impl.UtilityImpl;
 import com.elasticpath.domain.attribute.AttributeType;
+import com.elasticpath.domain.attribute.CustomerProfileValue;
 import com.elasticpath.domain.customer.Customer;
 import com.elasticpath.domain.customer.CustomerAddress;
 import com.elasticpath.domain.customer.CustomerAuthentication;
@@ -452,6 +456,53 @@ public class CustomerDtoAssemblerTest {
 		customerDtoAssembler.assembleDomain(customerDto, customer);
 
 		assertReflectionEquals(EXPECTED_DOMAIN_OBJECT_SHOULD_EQUAL_ACTUAL, expectedCustomer, customer, ReflectionComparatorMode.LENIENT_DATES);
+	}
+
+	@Test
+	public void testCustomerDtoAssemblerAssemblesCustomerProfileValuesWithCreationDate() {
+		Customer customer = createCustomerWithCreditCards();
+		customer.setPreferredShippingAddress(null);
+
+		Date creationDate = new Date();
+		customer.getProfileValueMap()
+				.values()
+				.forEach(value -> value.setCreationDate(creationDate));
+
+		CustomerDTO customerDto = new CustomerDTO();
+
+		customerDtoAssembler.assembleDto(customer, customerDto);
+
+		List<Date> dtoCreationDates = customerDto.getProfileValues().stream()
+				.map(AttributeValueDTO::getCreationDate)
+				.collect(Collectors.toList());
+
+		assertThat(dtoCreationDates)
+				.allMatch(date -> date.equals(creationDate));
+	}
+
+	@Test
+	public void testCustomerDtoAssemblerAssemblesCustomerProfileValuesDtoWithCreationDate() {
+		shouldFindDefaultCustomerGroupByName();
+		shouldFindDefaultCustomerGroupsByGuid();
+		shouldFindCustomerGroupsByGuid();
+
+		CustomerDTO customerDTO = createTestCustomerDtoBuilder().build();
+
+		Date creationDate = new Date();
+		customerDTO.getProfileValues()
+				.forEach(value -> value.setCreationDate(creationDate));
+
+		Customer customer = CustomerBuilder.newCustomer().build();
+
+		customerDtoAssembler.assembleDomain(customerDTO, customer);
+
+		List<Date> domainCreationDates = customer.getProfileValueMap().values()
+				.stream()
+				.map(CustomerProfileValue::getCreationDate)
+				.collect(Collectors.toList());
+
+		assertThat(domainCreationDates)
+				.allMatch(date -> date.equals(creationDate));
 	}
 
 	private void shouldFindDefaultCustomerGroupByName() {

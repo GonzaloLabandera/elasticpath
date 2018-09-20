@@ -14,7 +14,7 @@ import com.elasticpath.cmclient.core.AbstractImageRegistry;
  */
 public final class AdminConfigurationImageRegistry extends AbstractImageRegistry {
 
-	// HashMap for storing the imagesS
+	// HashMap for storing the images
 	private static final String PLUGIN_ID = AdminConfigurationPlugin.PLUGIN_ID;
 
 	/**

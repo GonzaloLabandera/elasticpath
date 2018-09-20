@@ -4,12 +4,13 @@
 package com.elasticpath.domain.customer;
 
 import java.util.Collection;
+import java.util.Date;
 import java.util.Map;
 import javax.validation.Valid;
 
 import com.elasticpath.commons.exception.EpBindException;
 import com.elasticpath.domain.attribute.Attribute;
-import com.elasticpath.domain.attribute.AttributeValue;
+import com.elasticpath.domain.attribute.CustomerProfileValue;
 import com.elasticpath.validation.constraints.AttributeRequired;
 
 /**
@@ -26,6 +27,17 @@ public interface CustomerProfile {
 	 * @return the <code>String</code> value of the attribute
 	 */
 	String getStringProfileValue(String attributeKey);
+
+	/**
+	 * Set the customer profile value based on the given string value and given creation date.
+	 * Method is important for import functionality.
+	 *
+	 * @param attributeKey the attribute Key to set the value
+	 * @param stringValue the string value
+	 * @param creationDate the date attribute value has been created
+	 * @throws EpBindException in case the given string value is invalid
+	 */
+	void setStringProfileValue(String attributeKey, String stringValue, Date creationDate) throws EpBindException;
 
 	/**
 	 * Set the customer profile value based on the given string value.
@@ -58,7 +70,7 @@ public interface CustomerProfile {
 	 *
 	 * @param attributeValueMap the attribute value map
 	 */
-	void setProfileValueMap(Map<String, AttributeValue> attributeValueMap);
+	void setProfileValueMap(Map<String, CustomerProfileValue> attributeValueMap);
 
 	/**
 	 * Returns the attribute value map.
@@ -66,7 +78,7 @@ public interface CustomerProfile {
 	 * @return the attribute value map
 	 */
 	@Valid
-	Map<String, AttributeValue> getProfileValueMap();
+	Map<String, CustomerProfileValue> getProfileValueMap();
 
 	/**
 	 * Determines if profile value with the specified key is required or not.

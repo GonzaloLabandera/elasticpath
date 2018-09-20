@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: %pluginName
 Bundle-SymbolicName: com.elasticpath.cmclient.core; singleton:=true
-Bundle-Version: 701.0.0.20171228014437-c8fcb
+Bundle-Version: 702.0.0.qualifier
 Eclipse-RegisterBuddy: com.elasticpath.core
 Eclipse-BuddyPolicy: registered
 Bundle-Activator: com.elasticpath.cmclient.core.CorePlugin

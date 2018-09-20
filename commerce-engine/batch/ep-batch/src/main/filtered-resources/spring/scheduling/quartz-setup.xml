@@ -34,6 +34,8 @@
 		<ref bean="cleanupInactiveCartsTrigger"/>
 		<ref bean="cleanupFailedOrdersTrigger"/>
 		<ref bean="cleanupAnonymousCustomersTrigger"/>
+		<ref bean="expiredDataPointValuesJobProcessorTrigger"/>
+		<ref bean="dataPointRevokedConsentsJobProcessorTrigger"/>
 	</util:list>
 
 	<util:list id="topSellerSchedulingTriggers">

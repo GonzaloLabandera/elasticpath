@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>com.elasticpath.rest.integration</groupId>
 		<artifactId>cortex-ep-integration-parent</artifactId>
-		<version>701.0.0.20171228014437-2e075</version>
+		<version>0.0.0-SNAPSHOT</version>
 		<relativePath/>
 	</parent>
 
@@ -48,7 +48,7 @@
 		<antrun-plugin.version>1.7</antrun-plugin.version>
 		<lifecycle-mapping-plugin.version>1.0.0</lifecycle-mapping-plugin.version>
 		<licensing.skip>true</licensing.skip>
-		<dce.version>701.0.0.20171228014437-be854</dce.version>
+		<dce.version>702.0.0-SNAPSHOT</dce.version>
 	</properties>
 
 	<build>

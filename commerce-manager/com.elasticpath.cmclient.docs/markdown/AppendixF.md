@@ -33,6 +33,7 @@ The following table describes the permissions that can be assigned to user soles
 | Permission Name | Description |
 | --- | --- |
 | Manage Customer Profiles | Grants permission to create, edit, and delete customer profile attributes. |
+| Manage Data Policies | Grants permission to create, edit, and delete data policies. |
 | Manage Gift Certificate Themes | Grants permission to create, edit, and delete gift certificate themes. |
 | Manage Payment Gateways | Grants permission to create, edit, and delete payment gateways. |
 | Manage Shipping Regions | Grants permission to create, edit, and delete shipping regions. |
@@ -73,23 +74,6 @@ The following table describes the permissions that can be assigned to user soles
 | --- | --- |
 | Create Queries | Grants permission to create, edit, and delete Advanced Search queries in catalogs assigned to the user. After a query is created, it can be accessed from the _Saved Queries_ tab. This does not grant permission to delete queries created by other users. |
 | Manage Queries | Grants permission to create Advanced Search queries and to edit and delete Advanced Search queries created by the user or by others in all catalogs assigned to the user. |
-
-<!--
-## Reporting
-
-| Permission Name | Description |
-| --- | --- |
-| Run Customer Registration Report | Grants permission to run the Customer Registration report for stores assigned to the user. |
-| Run Gift Certificate Details Report | Grants permission to run the Gift Certificate Details report for stores assigned to the user. |
-| Run Gift Certificate Summary Report | Grants permission to run the Gift Certificate Summary report for stores assigned to the user. |
-| Run Low Stock Report | Grants permission to run the Low Stock report for warehouses assigned to the user. |
-| Run Order Summary Report | Grants permission to run the Order Summary report for stores assigned to the user. |
-| Run Orders Awaiting Stock Allocation Report | Grants permission to run the Orders Awaiting Stock Allocation report for stores assigned to the user. |
-| Run Order by Status Report | Grants permission to run the Order by Status report for stores assigned to the user. |
-| Run Returns and Exchanges Report | Grants permission to run the Returns and Exchanges report for warehouses assigned to the user. |
-| Run Shopping Cart Promotion Details Report | Grants permission to run the Shopping Cart Promotion Details report for stores assigned to the user. |
-| Run Shopping Cart Promotion Usage Report | Grants permission to run the Shopping Cart Promotion Usage report for stores assigned to the user. |
--->
 
 ## Shipping/Receiving
 

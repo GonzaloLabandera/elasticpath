@@ -3,12 +3,15 @@
  */
 package com.elasticpath.domain.customer.impl;
 
+import java.util.Date;
 import java.util.Objects;
 import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.Inheritance;
 import javax.persistence.InheritanceType;
 import javax.persistence.MappedSuperclass;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 import javax.persistence.Transient;
 
 import org.apache.commons.lang.StringUtils;
@@ -56,6 +59,10 @@ public abstract class AbstractAddressImpl extends AbstractEntityImpl implements 
 
 	private static final String COMMA_SPACE = ", ";
 
+	private Date lastModifiedDate;
+
+	private Date creationDate;
+
 	private String firstName;
 
 	private String lastName;
@@ -89,6 +96,8 @@ public abstract class AbstractAddressImpl extends AbstractEntityImpl implements 
 	 */
 	@Override
 	public void copyFrom(final Address address) {
+		this.setCreationDate(address.getCreationDate());
+		this.setLastModifiedDate(address.getLastModifiedDate());
 		this.setFirstName(address.getFirstName());
 		this.setLastName(address.getLastName());
 		this.setCity(address.getCity());
@@ -101,6 +110,31 @@ public abstract class AbstractAddressImpl extends AbstractEntityImpl implements 
 		this.setZipOrPostalCode(address.getZipOrPostalCode());
 		this.setCommercialAddress(address.isCommercialAddress());
 		this.setOrganization(address.getOrganization());
+	}
+
+	@Override
+	@Basic
+	@Temporal(TemporalType.TIMESTAMP)
+	@Column(name = "LAST_MODIFIED_DATE", nullable = false)
+	public Date getLastModifiedDate() {
+		return lastModifiedDate;
+	}
+
+	@Override
+	public void setLastModifiedDate(final Date lastModifiedDate) {
+		this.lastModifiedDate = lastModifiedDate;
+	}
+
+	@Override
+	@Basic
+	@Temporal(TemporalType.TIMESTAMP)
+	@Column(name = "CREATION_DATE", nullable = false)
+	public Date getCreationDate() {
+		return creationDate;
+	}
+
+	public void setCreationDate(final Date creationDate) {
+		this.creationDate = creationDate;
 	}
 
 	/**

@@ -60,6 +60,7 @@
         <permission>ADMIN_CUSTOMER_PROFILES_MANAGE</permission>
         <permission>ADMIN_SHIPPING_MANAGE</permission>
         <permission>ADMIN_TARGETED_SELLING_MANAGE</permission>
+        <permission>ADMIN_DATA_POLICIES_MANAGE</permission>
     </permissions>
 </user_role>
 

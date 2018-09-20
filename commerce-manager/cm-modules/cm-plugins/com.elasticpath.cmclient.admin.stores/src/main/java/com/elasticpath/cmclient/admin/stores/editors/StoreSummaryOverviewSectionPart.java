@@ -13,6 +13,7 @@ import org.eclipse.core.databinding.validation.IValidator;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.swt.custom.CCombo;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.forms.editor.FormPage;
@@ -61,6 +62,8 @@ public class StoreSummaryOverviewSectionPart extends AbstractCmClientEditorPageS
 	private Text storeStateText;
 
 	private CCombo timeZoneCombo;
+
+	private Button enableDataPoliciesCheckbox;
 
 	private IEpLayoutComposite controlPane;
 
@@ -134,6 +137,8 @@ public class StoreSummaryOverviewSectionPart extends AbstractCmClientEditorPageS
 		};
 
 		binder.bind(bindingContext, stateCountryManager.getStateCombo(), null, null, subCountryUpdateStrategy, hideFirstValidationErrors);
+
+		binder.bind(bindingContext, enableDataPoliciesCheckbox, getStoreEditorModel(), "storeEnableDataPoliciesSettingEnabled"); //$NON-NLS-1$
 	}
 
 	@Override
@@ -173,6 +178,10 @@ public class StoreSummaryOverviewSectionPart extends AbstractCmClientEditorPageS
 
 		controlPane.addLabelBoldRequired(AdminStoresMessages.get().StoreSubCountry, EpState.EDITABLE, labelData);
 		stateCountryManager.setStateCombo(controlPane.addComboBox(getEditableState(), fieldData));
+
+		controlPane.addLabelBold(AdminStoresMessages.get().EnableDataPolicies,
+				controlPane.createLayoutData(IEpLayoutData.END, IEpLayoutData.BEGINNING));
+		enableDataPoliciesCheckbox = controlPane.addCheckBoxButton(AdminStoresMessages.EMPTY_STRING, EpState.EDITABLE, null);
 
 		stateCountryManager.initStateCountryCombo(getEditableState());
 	}
@@ -225,6 +234,8 @@ public class StoreSummaryOverviewSectionPart extends AbstractCmClientEditorPageS
 		}
 
 		storeStateText.setText(AdminStoresMessages.get().getMessage(getStoreEditorModel().getStoreState().getNameMessageKey()));
+
+		enableDataPoliciesCheckbox.setSelection(getStoreEditorModel().isStoreEnableDataPoliciesSettingEnabled());
 
 		controlPane.setControlModificationListener(getEditor());
 	}

@@ -13,6 +13,9 @@ import java.io.OutputStream;
 import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.Locale;
 import javax.xml.transform.Transformer;
@@ -22,6 +25,7 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
+import org.apache.commons.lang3.StringUtils;
 import org.w3c.dom.Document;
 
 /**
@@ -107,7 +111,23 @@ public class Utils {
 	public static String uniqueEmailAddress(final String prefix) {
 		return uniqueCode(prefix) + EMAIL_DOMAIN;
 	}
-	
+
+	/**
+	 * Get date from a passed string.
+	 *
+	 * @param dateString date string.
+	 * @return date parsed from string.
+	 */
+	public static Date getDate(final String dateString) {
+		if ("null".equals(dateString) || StringUtils.isEmpty(dateString)) {
+			return new Date();
+		}
+		final DateTimeFormatter formatter = DateTimeFormatter.ISO_DATE_TIME;
+		LocalDateTime localDateTime = LocalDateTime.parse(dateString, formatter);
+
+		return Date.from(localDateTime.atZone(ZoneOffset.UTC).toInstant());
+	}
+
 	/**
 	 * Converts <code>String</code> to <code>Date</code>.
 	 * 

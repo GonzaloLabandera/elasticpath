@@ -45,7 +45,7 @@ import com.elasticpath.test.persister.testscenarios.SimpleStoreScenario;
 /**
  * Inventory Test Steps.
  */
-@ContextConfiguration("/integration-context.xml")
+@ContextConfiguration("/integration-context-mocked-customer-service.xml")
 @TestExecutionListeners({
 		CucumberJmsRegistrationTestExecutionListener.class,
 		CucumberDatabaseTestExecutionListener.class,

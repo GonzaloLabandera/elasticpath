@@ -1437,6 +1437,32 @@ public final class FulfillmentMessages {
 
 	public String ShipmentSection_SubSectionStatus;
 
+	//Data Policy
+
+	public String Delete_Label;
+	public String DeletePolicyData_Confirm;
+	public String DeleteCustomerData_Question;
+	public String IncludeDataPointsWithGrantedConsent_Label;
+	public String DeletePolicyData_Title;
+	public String NoRemovableDataPointValues_Message;
+	public String Error_Title;
+	public String DataPointValueRemovalError_Message;
+	public String DataPointValueSuccessfulDeletion_Message;
+	public String CustomerDataPolicies_Title;
+	public String ShowDisabledPolicies_Label;
+	public String DataPolicyName_Label;
+	public String DataPolicyState_Label;
+	public String DataPolicyConsentGiven_Label;
+	public String DataPolicyConsentUpdated_Label;
+	public String ViewDataPoints_Label;
+	public String Yes_Text;
+	public String No_Text;
+	public String DataPointName_Label;
+	public String DataPointRemovable_Label;
+	public String DataPointValue_Label;
+	public String DataPointValueCreated_Label;
+	public String DataPointValueLastUpdated_Label;
+
 	// Define the map of enum constants to localized names
 	private final Map<Enum<?>, String> localizedEnums = new HashMap<>();
 
@@ -1502,9 +1528,9 @@ public final class FulfillmentMessages {
 	public String getCreditCardErrorMessage(final PaymentProcessingException error) {
 		if (error instanceof InsufficientFundException) {
 			return InsufficientFundError;
-		} else {
-			return PaymentProcessingCommonError;
 		}
+
+			return PaymentProcessingCommonError;
 	}
 
 	private FulfillmentMessages() {

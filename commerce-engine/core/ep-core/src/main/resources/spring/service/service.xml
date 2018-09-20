@@ -11,6 +11,7 @@
 	<import resource="classpath:tax-calculation-connectivity-api.xml"/>
 	<import resource="classpath:spring/models/domainSpecifications.xml"/>
 	<import resource="classpath:spring/commons/structuredErrorMessage.xml"/>
+	<import resource="datapolicy.xml" />
 
 	<bean id="applicationName" class="java.lang.String">
 		<constructor-arg value="CoreOSGiBundle"/>
@@ -2163,6 +2164,10 @@
 		<constructor-arg ref="cartOrderService" />
 	</bean>
 
+	<bean id="customerConsentMergerForShopperUpdates" class="com.elasticpath.service.shopper.impl.CustomerConsentMergerForShopperUpdates">
+		<constructor-arg ref="customerConsentService" />
+	</bean>
+
     <bean id="promotionCodeInvalidatorForShopperUpdates"
         class="com.elasticpath.service.shopper.impl.PromotionCodeInvalidatorForShopperUpdates" lazy-init="false">
         <constructor-arg ref="couponService" />
@@ -2176,6 +2181,7 @@
 		<ref bean="shoppingCartCustomerSessionUpdater"/>
 		<ref bean="promotionCodeInvalidatorForShopperUpdates"/>
 		<ref bean="cartOrderCouponsMergerForShopperUpdates"/>
+		<ref bean="customerConsentMergerForShopperUpdates"/>
 	</util:list>
 
 	<alias name="coreShopperUpdateHandlers" alias="shopperUpdateHandlers" />

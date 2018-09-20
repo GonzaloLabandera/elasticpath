@@ -15,8 +15,9 @@ import javax.validation.constraints.Size;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import com.elasticpath.commons.constants.GlobalConstants;
+import com.elasticpath.domain.DatabaseCreationDate;
 import com.elasticpath.domain.DatabaseLastModifiedDate;
-import com.elasticpath.domain.attribute.AttributeValue;
+import com.elasticpath.domain.attribute.CustomerProfileValue;
 import com.elasticpath.domain.customer.impl.CustomerRoleMapper;
 import com.elasticpath.persistence.api.Entity;
 import com.elasticpath.validation.constraints.CustomerUsernameUserIdModeEmail;
@@ -31,7 +32,7 @@ import com.elasticpath.validation.groups.PasswordChange;
 @RegisteredCustomerPasswordNotBlankWithSize(
 		min = Customer.MINIMUM_PASSWORD_LENGTH, max = GlobalConstants.SHORT_TEXT_MAX_LENGTH, groups = PasswordChange.class)
 @CustomerUsernameUserIdModeEmail
-public interface Customer extends Entity, UserDetails, DatabaseLastModifiedDate {
+public interface Customer extends Entity, UserDetails, DatabaseLastModifiedDate, DatabaseCreationDate {
 
 	/** The minimum length of a password. */
 	int MINIMUM_PASSWORD_LENGTH = 8;
@@ -280,20 +281,6 @@ public interface Customer extends Entity, UserDetails, DatabaseLastModifiedDate 
 	 * @param anonymous - true if the customer is anonymous; otherwise false.
 	 */
 	void setAnonymous(boolean anonymous);
-
-	/**
-	 * Gets the customer creation date.
-	 *
-	 * @return customer creation date.
-	 */
-	Date getCreationDate();
-
-	/**
-	 * Sets the customer creation date.
-	 *
-	 * @param creationDate customer creation date.
-	 */
-	void setCreationDate(Date creationDate);
 
 	/**
 	 * Gets the customer last edit date.
@@ -565,14 +552,14 @@ public interface Customer extends Entity, UserDetails, DatabaseLastModifiedDate 
 	 *
 	 * @return the map
 	 */
-	Map<String, AttributeValue> getProfileValueMap();
+	Map<String, CustomerProfileValue> getProfileValueMap();
 
 	/**
 	 * Set the profile value map.
 	 *
 	 * @param profileValueMap the map
 	 */
-	void setProfileValueMap(Map<String, AttributeValue> profileValueMap);
+	void setProfileValueMap(Map<String, CustomerProfileValue> profileValueMap);
 
 	/**
 	 * @return store code for which the customer is associated

@@ -3,6 +3,7 @@
  */
 package com.elasticpath.common.dto.customer;
 
+import java.util.Date;
 import java.util.Objects;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -32,6 +33,9 @@ public class AttributeValueDTO implements Dto {
 	@XmlAttribute(required = true)
 	private String type;
 
+	@XmlAttribute(name = "creation_date")
+	private Date creationDate;
+
 	@XmlValue
 	private String value;
 
@@ -51,6 +55,14 @@ public class AttributeValueDTO implements Dto {
 		this.type = type;
 	}
 
+	public Date getCreationDate() {
+		return creationDate;
+	}
+
+	public void setCreationDate(final Date creationDate) {
+		this.creationDate = creationDate;
+	}
+
 	public String getValue() {
 		return value;
 	}
@@ -61,7 +73,7 @@ public class AttributeValueDTO implements Dto {
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(key, type, value);
+		return Objects.hash(key, type, creationDate, value);
 	}
 
 	@Override
@@ -80,6 +92,7 @@ public class AttributeValueDTO implements Dto {
 		
 		return Objects.equals(key, other.key)
 			&& Objects.equals(type, other.type)
+			&& Objects.equals(creationDate, other.creationDate)
 			&& Objects.equals(value, other.value);
 	}
 

@@ -55,6 +55,11 @@ public class FulfillmentPermissions {
 	
 	/**
 	 * Permission to manage customer segment associations.
-	 */
+		*/
 	public static final String ASSIGN_CUSTOMER_SEGMENTS = "ASSIGN_CUSTOMER_SEGMENTS";  //$NON-NLS-1$
+
+	/**
+	 * Permission to manage customer personal details.
+	 */
+	public static final String DATA_POLICIES_MANAGE = "ADMIN_DATA_POLICIES_MANAGE";  //$NON-NLS-1$
 }

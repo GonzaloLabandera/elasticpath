@@ -6,13 +6,13 @@
 	<parent>
 		<groupId>com.elasticpath.rest.resource</groupId>
 		<artifactId>cortex-resource-parent</artifactId>
-		<version>701.0.0.20171228014437-2e075</version>
+		<version>0.0.0-SNAPSHOT</version>
 	</parent>
 
 	<groupId>com.elasticpath.rest.integration</groupId>
 	<artifactId>cortex-ep-integration-parent</artifactId>
 	<packaging>pom</packaging>
-	<version>701.0.0.20171228014437-2e075</version>
+	<version>0.0.0-SNAPSHOT</version>
 	<name>EP ∷ Cortex Integration</name>
 
 	<description>Elastic Path REST - Resources Commerce Engine Integrations</description>
@@ -182,7 +182,7 @@
 			<dependency>
 				<groupId>com.elasticpath.rest.definitions</groupId>
 				<artifactId>ep-resource-items-api</artifactId>
-				<version>701.0.0.20171228014437-2e075</version>
+				<version>0.0.0-SNAPSHOT</version>
 			</dependency>
 			<!-- block xerces from getting into our classpath -->
 			<dependency>

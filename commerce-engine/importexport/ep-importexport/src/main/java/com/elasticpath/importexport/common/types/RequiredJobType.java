@@ -85,7 +85,13 @@ public enum RequiredJobType {
 	SAVED_CONDITION(JobType.SAVED_CONDITION),
 
 	/** ImportJob. */
-	CM_IMPORT_JOB(JobType.CM_IMPORT_JOB);
+	CM_IMPORT_JOB(JobType.CM_IMPORT_JOB),
+
+	/** Data Policy. */
+	DATA_POLICY(JobType.DATA_POLICY),
+
+	/** Customer Consents. */
+	CUSTOMER_CONSENT(JobType.CUSTOMER_CONSENT);
 
 	private JobType jobType;
 

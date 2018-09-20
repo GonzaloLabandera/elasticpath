@@ -3,6 +3,7 @@
  */
 package com.elasticpath.domain.order.impl;
 
+import java.util.Date;
 import java.util.Objects;
 import javax.persistence.Basic;
 import javax.persistence.Column;
@@ -12,6 +13,8 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.persistence.TableGenerator;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.openjpa.persistence.DataCache;
@@ -34,6 +37,8 @@ public class OrderDataImpl extends AbstractPersistableImpl implements OrderData 
 	private String key;
 	private String value;
 	private long uidPk;
+	private Date lastModifiedDate;
+	private Date creationDate;
 
 	/**
 	 * Default Constructor.
@@ -100,6 +105,31 @@ public class OrderDataImpl extends AbstractPersistableImpl implements OrderData 
 	}
 
 	@Override
+	@Basic
+	@Temporal(TemporalType.TIMESTAMP)
+	@Column(name = "LAST_MODIFIED_DATE", nullable = false)
+	public Date getLastModifiedDate() {
+		return lastModifiedDate;
+	}
+
+	@Override
+	public void setLastModifiedDate(final Date lastModifiedDate) {
+		this.lastModifiedDate = lastModifiedDate;
+	}
+
+	@Override
+	@Basic
+	@Temporal(TemporalType.TIMESTAMP)
+	@Column(name = "CREATION_DATE", nullable = false)
+	public Date getCreationDate() {
+		return creationDate;
+	}
+
+	public void setCreationDate(final Date creationDate) {
+		this.creationDate = creationDate;
+	}
+
+	@Override
 	public String toString() {
 		return new ToStringBuilder(this)
 				.append("key", key)
@@ -125,5 +155,4 @@ public class OrderDataImpl extends AbstractPersistableImpl implements OrderData 
 	public int hashCode() {
 		return Objects.hash(this.key);
 	}
-
 }

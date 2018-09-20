@@ -46,7 +46,7 @@ import com.elasticpath.service.customer.CustomerService;
 /**
  * Export customer steps.
  */
-@ContextConfiguration("/integration-context.xml")
+@ContextConfiguration("/integration-context-mocked-customer-service.xml")
 public class ExportCustomerSteps {
 
 	private static final String CUSTOMERS_EXPORT_FILE = "customers.xml";

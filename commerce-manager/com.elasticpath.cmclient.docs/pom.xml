@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>com.elasticpath</groupId>
 		<artifactId>parent</artifactId>
-		<version>701.0.0.20171228014437-be854</version>
+		<version>702.0.0-SNAPSHOT</version>
 		<relativePath></relativePath>
 	</parent>
 
@@ -13,7 +13,7 @@
 	<artifactId>com.elasticpath.cmclient.docs</artifactId>
 	<packaging>jar</packaging>
 	<name>CM Docs Project</name>
-	<version>701.0.0.20171228014437-c8fcb</version>
+	<version>702.0.0-SNAPSHOT</version>
 	<dependencies>
 		<dependency>
 			<groupId>com.ruleoftech</groupId>

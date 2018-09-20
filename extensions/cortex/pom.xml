@@ -33,13 +33,13 @@
 	</modules>
 
 	<properties>
-		<cortex-api.version>1.19.0.20171228014437-a84d7</cortex-api.version>
-		<cortex.version>1.19.0.20171228014437-ed0c30</cortex.version>
-		<helix-api.version>1.2.0.20171228014437-73ec6</helix-api.version>
-		<helix-validator.version>1.2.0.20171228014437-66f3a</helix-validator.version>
-		<dce.version>701.0.0.20171228014437-be854</dce.version>
-		<helix.version>1.2.0.20171228014437-754ee</helix.version>
-		<cortex.ep.integration.version>701.0.0.20171228014437-2e075</cortex.ep.integration.version>
+		<cortex-api.version>1.20.0.20180327150040-7ec35</cortex-api.version>
+		<cortex.version>1.20.0.20180327150040-9738f</cortex.version>
+		<helix-api.version>1.3.0.20180327150040-38f81</helix-api.version>
+		<helix-validator.version>1.3.0.20180327150040-a62d3</helix-validator.version>
+		<dce.version>702.0.0-SNAPSHOT</dce.version>
+		<helix.version>1.3.0.20180327150040-ad073</helix.version>
+		<cortex.ep.integration.version>0.0.0-SNAPSHOT</cortex.ep.integration.version>
 		<ep.health.monitoring.version>1.1.2.20171228014437-844ef</ep.health.monitoring.version>
 		<esapi.version>2.1.0.1</esapi.version>
 		<licensing.skip>true</licensing.skip>
@@ -715,6 +715,10 @@
 					</exclusion>
 					<exclusion>
 						<groupId>org.springframework</groupId>
+						<artifactId>org.springframework.context.support</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>org.springframework</groupId>
 						<artifactId>org.springframework.core</artifactId>
 					</exclusion>
 				</exclusions>
@@ -723,11 +727,31 @@
 				<groupId>org.eclipse.gemini</groupId>
 				<artifactId>org.eclipse.gemini.blueprint.io</artifactId>
 				<version>${gemini.blueprint.version}</version>
+				<exclusions>
+					<exclusion>
+						<groupId>org.springframework</groupId>
+						<artifactId>org.springframework.core</artifactId>
+					</exclusion>
+				</exclusions>
 			</dependency>
 			<dependency>
 				<groupId>org.eclipse.gemini</groupId>
 				<artifactId>org.eclipse.gemini.blueprint.extender</artifactId>
 				<version>${gemini.blueprint.version}</version>
+				<exclusions>
+					<exclusion>
+						<groupId>org.springframework</groupId>
+						<artifactId>org.springframework.beans</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>org.springframework</groupId>
+						<artifactId>org.springframework.context</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>org.springframework</groupId>
+						<artifactId>org.springframework.core</artifactId>
+					</exclusion>
+				</exclusions>
 			</dependency>
 
 			<!--Helix-->

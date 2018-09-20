@@ -10,4 +10,5 @@
 	<resource>user_roles.xml</resource>
 	<resource>cmusers.xml</resource>
 	<resource>shipping_regions.xml</resource>
+	<resource>data_policies.xml</resource>
 </manifest>

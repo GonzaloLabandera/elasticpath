@@ -9,12 +9,13 @@ import java.util.Date;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import com.elasticpath.commons.security.PasswordHolder;
+import com.elasticpath.domain.DatabaseCreationDate;
 import com.elasticpath.persistence.api.Entity;
 
 /**
  * <code>CmUser</code> represents a person with an account in the system for accessing the Commerce Manager or web services.
  */
-public interface CmUser extends Entity, UserDetails, PasswordHolder, GrantableObjects {
+public interface CmUser extends Entity, UserDetails, PasswordHolder, GrantableObjects, DatabaseCreationDate {
 
 	/**
 	 * Gets the user name for this <code>CmUser</code>.
@@ -252,20 +253,6 @@ public interface CmUser extends Entity, UserDetails, PasswordHolder, GrantableOb
 	 * @return true if cmUser has the permission with the given authority value; otherwise, false.
 	 */
 	boolean hasPermission(String authority);
-
-	/**
-	 * Gets this <code>cmUser</code>'s creationDate.
-	 *
-	 * @return cmUser's creation date.
-	 */
-	Date getCreationDate();
-
-	/**
-	 * Sets this <code>cmUser</code>'s creationDate.
-	 *
-	 * @param creationDate cmUser's creationDate.
-	 */
-	void setCreationDate(Date creationDate);
 
 	/**
 	 * Gets this <code>cmUser</code>'s last login date.

@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>com.elasticpath.rest.resource</groupId>
 		<artifactId>cortex-resource-parent</artifactId>
-		<version>701.0.0.20171228014437-2e075</version>
+		<version>0.0.0-SNAPSHOT</version>
 	</parent>
 
 	<groupId>com.elasticpath.rest.resource.cortex</groupId>
@@ -52,6 +52,7 @@
 		<module>carts</module>
 		<module>commons</module>
 		<module>coupons</module>
+		<module>datapolicies</module>
 		<module>discounts</module>
 		<module>emails</module>
 		<module>geographies</module>
@@ -97,22 +98,22 @@
 			<dependency>
 				<groupId>com.elasticpath.rest.resource.cortex</groupId>
 				<artifactId>ep-resource-uribuilder-apis</artifactId>
-				<version>701.0.0.20171228014437-2e075</version>
+				<version>0.0.0-SNAPSHOT</version>
 			</dependency>
 			<dependency>
 				<groupId>com.elasticpath.rest.integration.epcommerce</groupId>
 				<artifactId>ep-rest-repositories-epcommerce</artifactId>
-				<version>701.0.0.20171228014437-2e075</version>
+				<version>0.0.0-SNAPSHOT</version>
 			</dependency>
 			<dependency>
 				<groupId>com.elasticpath.rest.resource.cortex</groupId>
 				<artifactId>ep-resource-pagination-commons</artifactId>
-				<version>701.0.0.20171228014437-2e075</version>
+				<version>0.0.0-SNAPSHOT</version>
 			</dependency>
 			<dependency>
 				<groupId>com.elasticpath.rest.resource.cortex</groupId>
 				<artifactId>ep-resource-test-utils</artifactId>
-				<version>701.0.0.20171228014437-2e075</version>
+				<version>0.0.0-SNAPSHOT</version>
 				<scope>test</scope>
 			</dependency>
 			<dependency>
@@ -129,12 +130,12 @@
 			<dependency>
 				<groupId>com.elasticpath.rest.resource.cortex</groupId>
 				<artifactId>ep-resource-commons</artifactId>
-				<version>701.0.0.20171228014437-2e075</version>
+				<version>0.0.0-SNAPSHOT</version>
 			</dependency>
 			<dependency>
 				<groupId>com.elasticpath.rest.resource.cortex</groupId>
 				<artifactId>ep-resource-payment-method-commons</artifactId>
-				<version>701.0.0.20171228014437-2e075</version>
+				<version>0.0.0-SNAPSHOT</version>
 			</dependency>
 
 			<!-- Generated Resource APIs -->
@@ -151,132 +152,137 @@
 			<dependency>
 				<groupId>com.elasticpath.rest.definitions</groupId>
 				<artifactId>ep-resource-addresses-api</artifactId>
-				<version>701.0.0.20171228014437-2e075</version>
+				<version>0.0.0-SNAPSHOT</version>
 			</dependency>
 			<dependency>
 				<groupId>com.elasticpath.rest.definitions</groupId>
 				<artifactId>ep-resource-availabilities-api</artifactId>
-				<version>701.0.0.20171228014437-2e075</version>
+				<version>0.0.0-SNAPSHOT</version>
 			</dependency>
 			<dependency>
 				<groupId>com.elasticpath.rest.definitions</groupId>
 				<artifactId>ep-resource-carts-api</artifactId>
-				<version>701.0.0.20171228014437-2e075</version>
+				<version>0.0.0-SNAPSHOT</version>
 			</dependency>
 			<dependency>
 				<groupId>com.elasticpath.rest.definitions</groupId>
 				<artifactId>ep-resource-wishlists-api</artifactId>
-				<version>701.0.0.20171228014437-2e075</version>
+				<version>0.0.0-SNAPSHOT</version>
 			</dependency>
 			<dependency>
 				<groupId>com.elasticpath.rest.definitions</groupId>
 				<artifactId>ep-resource-totals-api</artifactId>
-				<version>701.0.0.20171228014437-2e075</version>
+				<version>0.0.0-SNAPSHOT</version>
+			</dependency>
+			<dependency>
+				<groupId>com.elasticpath.rest.definitions</groupId>
+				<artifactId>ep-resource-data-policies-api</artifactId>
+				<version>0.0.0-SNAPSHOT</version>
 			</dependency>
 			<dependency>
 				<groupId>com.elasticpath.rest.definitions</groupId>
 				<artifactId>ep-resource-discounts-api</artifactId>
-				<version>701.0.0.20171228014437-2e075</version>
+				<version>0.0.0-SNAPSHOT</version>
 			</dependency>
 			<dependency>
 				<groupId>com.elasticpath.rest.definitions</groupId>
 				<artifactId>ep-resource-geographies-api</artifactId>
-				<version>701.0.0.20171228014437-2e075</version>
+				<version>0.0.0-SNAPSHOT</version>
 			</dependency>
 			<dependency>
 				<groupId>com.elasticpath.rest.definitions</groupId>
 				<artifactId>ep-resource-coupons-api</artifactId>
-				<version>701.0.0.20171228014437-2e075</version>
+				<version>0.0.0-SNAPSHOT</version>
 			</dependency>
 			<dependency>
 				<groupId>com.elasticpath.rest.definitions</groupId>
 				<artifactId>ep-resource-emails-api</artifactId>
-				<version>701.0.0.20171228014437-2e075</version>
+				<version>0.0.0-SNAPSHOT</version>
 			</dependency>
 			<dependency>
 				<groupId>com.elasticpath.rest.definitions</groupId>
 				<artifactId>ep-resource-items-api</artifactId>
-				<version>701.0.0.20171228014437-2e075</version>
+				<version>0.0.0-SNAPSHOT</version>
 			</dependency>
 			<dependency>
 				<groupId>com.elasticpath.rest.definitions</groupId>
 				<artifactId>ep-resource-itemdefinitions-api</artifactId>
-				<version>701.0.0.20171228014437-2e075</version>
+				<version>0.0.0-SNAPSHOT</version>
 			</dependency>
 			<dependency>
 				<groupId>com.elasticpath.rest.definitions</groupId>
 				<artifactId>ep-resource-itemselections-api</artifactId>
-				<version>701.0.0.20171228014437-2e075</version>
+				<version>0.0.0-SNAPSHOT</version>
 			</dependency>
 			<dependency>
 				<groupId>com.elasticpath.rest.definitions</groupId>
 				<artifactId>ep-resource-navigations-api</artifactId>
-				<version>701.0.0.20171228014437-2e075</version>
+				<version>0.0.0-SNAPSHOT</version>
 			</dependency>
 			<dependency>
 				<groupId>com.elasticpath.rest.definitions</groupId>
 				<artifactId>ep-resource-searches-api</artifactId>
-				<version>701.0.0.20171228014437-2e075</version>
+				<version>0.0.0-SNAPSHOT</version>
 			</dependency>
 			<dependency>
 				<groupId>com.elasticpath.rest.definitions</groupId>
 				<artifactId>ep-resource-orders-api</artifactId>
-				<version>701.0.0.20171228014437-2e075</version>
+				<version>0.0.0-SNAPSHOT</version>
 			</dependency>
 			<dependency>
 				<groupId>com.elasticpath.rest.definitions</groupId>
 				<artifactId>ep-resource-payment-tokens-api</artifactId>
-				<version>701.0.0.20171228014437-2e075</version>
+				<version>0.0.0-SNAPSHOT</version>
 			</dependency>
 			<dependency>
 				<groupId>com.elasticpath.rest.definitions</groupId>
 				<artifactId>ep-resource-prices-api</artifactId>
-				<version>701.0.0.20171228014437-2e075</version>
+				<version>0.0.0-SNAPSHOT</version>
 			</dependency>
 			<dependency>
 				<groupId>com.elasticpath.rest.definitions</groupId>
 				<artifactId>ep-resource-profiles-api</artifactId>
-				<version>701.0.0.20171228014437-2e075</version>
+				<version>0.0.0-SNAPSHOT</version>
 			</dependency>
 			<dependency>
 				<groupId>com.elasticpath.rest.definitions</groupId>
 				<artifactId>ep-resource-registrations-api</artifactId>
-				<version>701.0.0.20171228014437-2e075</version>
+				<version>0.0.0-SNAPSHOT</version>
 			</dependency>
 			<dependency>
 				<groupId>com.elasticpath.rest.definitions</groupId>
 				<artifactId>ep-resource-shipment-details-api</artifactId>
-				<version>701.0.0.20171228014437-2e075</version>
+				<version>0.0.0-SNAPSHOT</version>
 			</dependency>
 			<dependency>
 				<groupId>com.elasticpath.rest.definitions</groupId>
 				<artifactId>ep-resource-promotions-api</artifactId>
-				<version>701.0.0.20171228014437-2e075</version>
+				<version>0.0.0-SNAPSHOT</version>
 			</dependency>
 			<dependency>
 				<groupId>com.elasticpath.rest.definitions</groupId>
 				<artifactId>ep-resource-purchases-api</artifactId>
-				<version>701.0.0.20171228014437-2e075</version>
+				<version>0.0.0-SNAPSHOT</version>
 			</dependency>
 			<dependency>
 				<groupId>com.elasticpath.rest.definitions</groupId>
 				<artifactId>ep-resource-recommendations-api</artifactId>
-				<version>701.0.0.20171228014437-2e075</version>
+				<version>0.0.0-SNAPSHOT</version>
 			</dependency>
 			<dependency>
 				<groupId>com.elasticpath.rest.definitions</groupId>
 				<artifactId>ep-resource-shipments-api</artifactId>
-				<version>701.0.0.20171228014437-2e075</version>
+				<version>0.0.0-SNAPSHOT</version>
 			</dependency>
 			<dependency>
 				<groupId>com.elasticpath.rest.definitions</groupId>
 				<artifactId>ep-resource-taxes-api</artifactId>
-				<version>701.0.0.20171228014437-2e075</version>
+				<version>0.0.0-SNAPSHOT</version>
 			</dependency>
 			<dependency>
 				<groupId>com.elasticpath.rest.definitions</groupId>
 				<artifactId>ep-resource-lookups-api</artifactId>
-				<version>701.0.0.20171228014437-2e075</version>
+				<version>0.0.0-SNAPSHOT</version>
 			</dependency>
 			<dependency>
 				<groupId>com.elasticpath.rest.helix</groupId>

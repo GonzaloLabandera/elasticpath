@@ -55,7 +55,7 @@ import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.commons.constants.WebConstants;
 import com.elasticpath.commons.util.PasswordGenerator;
 import com.elasticpath.domain.attribute.Attribute;
-import com.elasticpath.domain.attribute.AttributeValue;
+import com.elasticpath.domain.attribute.CustomerProfileValue;
 import com.elasticpath.domain.attribute.impl.CustomerProfileValueImpl;
 import com.elasticpath.domain.customer.Customer;
 import com.elasticpath.domain.customer.CustomerAddress;
@@ -957,12 +957,12 @@ public class CustomerImpl extends AbstractLegacyEntityImpl implements Customer {
 	@ElementDependent
 	@ElementJoinColumn(name = CUSTOMER_UID)
 	@ElementForeignKey(name = "tcustomerprofilevalue_ibfk_2")
-	public Map<String, AttributeValue> getProfileValueMap() {
+	public Map<String, CustomerProfileValue> getProfileValueMap() {
 		return getCustomerProfile().getProfileValueMap();
 	}
 
 	@Override
-	public void setProfileValueMap(final Map<String, AttributeValue> profileValueMap) {
+	public void setProfileValueMap(final Map<String, CustomerProfileValue> profileValueMap) {
 		getCustomerProfile().setProfileValueMap(profileValueMap);
 	}
 

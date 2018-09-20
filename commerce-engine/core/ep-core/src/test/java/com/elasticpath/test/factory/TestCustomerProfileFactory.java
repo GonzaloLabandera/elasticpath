@@ -27,21 +27,21 @@ public class TestCustomerProfileFactory {
 	public Map<String, Attribute> getProfile() {
 		HashMap<String, Attribute> customerProfileMap = new HashMap<>();
 
-		addAttribute(customerProfileMap, "CP_FIRST_NAME", REQUIRED, AttributeType.SHORT_TEXT);
-		addAttribute(customerProfileMap, "CP_LAST_NAME", REQUIRED, AttributeType.SHORT_TEXT);
-		addAttribute(customerProfileMap, "CP_EMAIL", REQUIRED, AttributeType.SHORT_TEXT);
-		addAttribute(customerProfileMap, "CP_PREF_LOCALE", NOT_REQUIRED, AttributeType.SHORT_TEXT);
-		addAttribute(customerProfileMap, "CP_PREF_CURR", NOT_REQUIRED, AttributeType.SHORT_TEXT);
-		addAttribute(customerProfileMap, "CP_ANONYMOUS_CUST", REQUIRED, AttributeType.BOOLEAN);
-		addAttribute(customerProfileMap, "CP_PHONE", NOT_REQUIRED, AttributeType.SHORT_TEXT);
-		addAttribute(customerProfileMap, "CP_FAX", NOT_REQUIRED, AttributeType.SHORT_TEXT);
-		addAttribute(customerProfileMap, "CP_GENDER", NOT_REQUIRED, AttributeType.SHORT_TEXT);
-		addAttribute(customerProfileMap, "CP_COMPANY", NOT_REQUIRED, AttributeType.SHORT_TEXT);
-		addAttribute(customerProfileMap, "CP_HTML_EMAIL", REQUIRED, AttributeType.BOOLEAN);
-		addAttribute(customerProfileMap, "CP_DOB", NOT_REQUIRED, AttributeType.DATE);
+		addAttribute(customerProfileMap, CustomerImpl.ATT_KEY_CP_FIRST_NAME, REQUIRED, AttributeType.SHORT_TEXT);
+		addAttribute(customerProfileMap, CustomerImpl.ATT_KEY_CP_LAST_NAME, REQUIRED, AttributeType.SHORT_TEXT);
+		addAttribute(customerProfileMap, CustomerImpl.ATT_KEY_CP_EMAIL, REQUIRED, AttributeType.SHORT_TEXT);
+		addAttribute(customerProfileMap, CustomerImpl.ATT_KEY_CP_PREF_LOCALE, NOT_REQUIRED, AttributeType.SHORT_TEXT);
+		addAttribute(customerProfileMap, CustomerImpl.ATT_KEY_CP_PREF_CURR, NOT_REQUIRED, AttributeType.SHORT_TEXT);
+		addAttribute(customerProfileMap, CustomerImpl.ATT_KEY_CP_ANONYMOUS_CUST, REQUIRED, AttributeType.BOOLEAN);
+		addAttribute(customerProfileMap, CustomerImpl.ATT_KEY_CP_PHONE, NOT_REQUIRED, AttributeType.SHORT_TEXT);
+		addAttribute(customerProfileMap, CustomerImpl.ATT_KEY_CP_FAX, NOT_REQUIRED, AttributeType.SHORT_TEXT);
+		addAttribute(customerProfileMap, CustomerImpl.ATT_KEY_CP_GENDER, NOT_REQUIRED, AttributeType.SHORT_TEXT);
+		addAttribute(customerProfileMap, CustomerImpl.ATT_KEY_CP_COMPANY, NOT_REQUIRED, AttributeType.SHORT_TEXT);
+		addAttribute(customerProfileMap, CustomerImpl.ATT_KEY_CP_HTML_EMAIL, REQUIRED, AttributeType.BOOLEAN);
+		addAttribute(customerProfileMap, CustomerImpl.ATT_KEY_CP_DOB, NOT_REQUIRED, AttributeType.DATE);
 		addAttribute(customerProfileMap, CustomerImpl.ATT_KEY_CP_BE_NOTIFIED, NOT_REQUIRED, AttributeType.BOOLEAN);
-		addAttribute(customerProfileMap, "CP_BUSINESS_NUMBER", NOT_REQUIRED, AttributeType.SHORT_TEXT);
-		addAttribute(customerProfileMap, "CP_TAX_EXEMPTION_ID", NOT_REQUIRED, AttributeType.SHORT_TEXT);
+		addAttribute(customerProfileMap, CustomerImpl.ATT_KEY_CP_BUSINESS_NUMBER, NOT_REQUIRED, AttributeType.SHORT_TEXT);
+		addAttribute(customerProfileMap, CustomerImpl.ATT_KEY_CP_TAX_EXEMPTION_ID, NOT_REQUIRED, AttributeType.SHORT_TEXT);
 
 		return customerProfileMap;
 	}

@@ -4,9 +4,9 @@
 	<jmxConfigurator/>
 
 	<insertFromJNDI env-entry-name="java:comp/env/appName" as="appName"/>
-	<define name="appName" class="com.elasticpath.rest.relos.logback.NonOverridingProperty" propertyName="appName" propertyValue="RELOS">
+	<define name="appName" class="com.elasticpath.rest.relos.logback.NonOverridingProperty" propertyName="appName" propertyValue="EP-Cortex">
 		<name>appName</name>
-		<value>RELOS</value>
+		<value>[EP-Cortex]</value>
 	</define>
 	<contextName>${appName}</contextName>
 

@@ -6,6 +6,7 @@ package com.elasticpath.rest.resource.integration.epcommerce.repository.customer
 import javax.inject.Named;
 import javax.inject.Singleton;
 
+import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.core.convert.converter.Converter;
 
 import com.elasticpath.domain.customer.Customer;
@@ -22,8 +23,8 @@ public class ProfileEntityConverter implements Converter<Customer, ProfileEntity
 	public ProfileEntity convert(final Customer customer) {
 		return ProfileEntity.builder()
 				.withProfileId(customer.getGuid())
-				.withGivenName(customer.getFirstName())
-				.withFamilyName(customer.getLastName())
+				.withGivenName(ObjectUtils.defaultIfNull(customer.getFirstName(), ""))
+				.withFamilyName(ObjectUtils.defaultIfNull(customer.getLastName(), ""))
 				.build();
 	}
 

@@ -17,7 +17,6 @@ import javax.persistence.TemporalType;
 
 import org.apache.openjpa.persistence.DataCache;
 
-import com.elasticpath.domain.DatabaseLastModifiedDate;
 import com.elasticpath.domain.attribute.CustomerProfileValue;
 
 /**
@@ -26,7 +25,7 @@ import com.elasticpath.domain.attribute.CustomerProfileValue;
 @Entity
 @Table(name = CustomerProfileValueImpl.TABLE_NAME)
 @DataCache(enabled = false)
-public class CustomerProfileValueImpl extends AbstractAttributeValueImpl implements CustomerProfileValue, DatabaseLastModifiedDate {
+public class CustomerProfileValueImpl extends AbstractAttributeValueImpl implements CustomerProfileValue {
 
 	/** The name of the table & generator to use for persistence. */
 	public static final String TABLE_NAME = "TCUSTOMERPROFILEVALUE";
@@ -36,6 +35,8 @@ public class CustomerProfileValueImpl extends AbstractAttributeValueImpl impleme
 	private long uidPk;
 
 	private Date lastModifiedDate;
+
+	private Date creationDate;
 
 	@Override
 	@Basic
@@ -48,6 +49,18 @@ public class CustomerProfileValueImpl extends AbstractAttributeValueImpl impleme
 	@Override
 	public void setLastModifiedDate(final Date lastModifiedDate) {
 		this.lastModifiedDate = lastModifiedDate;
+	}
+
+	@Override
+	@Basic
+	@Temporal(TemporalType.TIMESTAMP)
+	@Column(name = "CREATION_DATE", nullable = false)
+	public Date getCreationDate() {
+		return creationDate;
+	}
+
+	public void setCreationDate(final Date creationDate) {
+		this.creationDate = creationDate;
 	}
 
 	@Override

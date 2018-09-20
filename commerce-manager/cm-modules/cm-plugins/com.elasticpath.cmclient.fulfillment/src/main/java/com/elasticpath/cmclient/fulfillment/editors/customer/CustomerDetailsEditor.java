@@ -71,6 +71,11 @@ public class CustomerDetailsEditor extends AbstractCmClientFormEditor {
 			if (AuthorizationService.getInstance().isAuthorizedWithPermission(FulfillmentPermissions.ASSIGN_CUSTOMER_SEGMENTS)) {
 				this.addPage(new CustomerDetailsCustomerSegmentsPage(this));
 			}
+
+			if (AuthorizationService.getInstance().isAuthorizedWithPermission(FulfillmentPermissions.DATA_POLICIES_MANAGE)) {
+				this.addPage(new CustomerDetailsDataPoliciesPage(this));
+			}
+
 			addExtensionPages(getClass().getSimpleName(), FulfillmentPlugin.PLUGIN_ID);
 		} catch (final PartInitException e) {
 			LOG.error("Can not create pages for the Customer editor", e); //$NON-NLS-1$

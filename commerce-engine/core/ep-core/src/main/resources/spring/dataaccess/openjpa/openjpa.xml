@@ -42,7 +42,7 @@
 		  PersistenceEngineOperationListeners are associated directly with the EP PersistenceEngine, not the OpenJPA EntityManager,
 		  so any listeners which do double duty listening to both interfaces must be registered in both locations. -->
 	<util:list id="entityManagerLifecycleListeners">
-		<ref bean="lastModifiedEntityListener"/>
+		<ref bean="databaseTimestampsEntityListener"/>
 		<ref bean="objectDeletedEntityListener"/>
 		<ref bean="changeSetPersistenceListener"/>
 		<ref bean="persistablePostLoadListener"/>
@@ -72,7 +72,7 @@
 		<property name="transactionManager" ref="transactionManager"/>
 	</bean>
 
-	<bean id="lastModifiedEntityListener" class="com.elasticpath.persistence.impl.LastModifiedEntityListener">
+	<bean id="databaseTimestampsEntityListener" class="com.elasticpath.persistence.impl.DatabaseTimestampsEntityListener">
 		<property name="beanFactory" ref="coreBeanFactory"/>
 	</bean>
 

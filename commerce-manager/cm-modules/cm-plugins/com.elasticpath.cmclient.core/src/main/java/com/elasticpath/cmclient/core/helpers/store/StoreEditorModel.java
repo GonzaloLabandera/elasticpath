@@ -50,6 +50,8 @@ public class StoreEditorModel {
 
 	private String storeAdvancedSearchSetting;
 
+	private Boolean storeEnableDataPoliciesSetting;
+
 	private StoreEditorModelHelper editorModelHelper;
 
 	/**
@@ -237,6 +239,25 @@ public class StoreEditorModel {
 	public String getStoreAdvancedSearchSetting() {
 		return storeAdvancedSearchSetting;
 	}
+
+	/**
+	 * Sets the value for the store enable data policies setting.
+	 *
+	 * @param storeEnableDataPoliciesSetting value to set
+	 */
+	public void setStoreEnableDataPoliciesSettingEnabled(final Boolean storeEnableDataPoliciesSetting) {
+		this.storeEnableDataPoliciesSetting = storeEnableDataPoliciesSetting;
+	}
+
+	/**
+	 * Gets the setting value for store enable data policies.
+	 *
+	 * @return setting value for store enable data policies.
+	 */
+	public Boolean isStoreEnableDataPoliciesSettingEnabled() {
+		return storeEnableDataPoliciesSetting;
+	}
+
 
 	/**
 	 * Sets default locale.

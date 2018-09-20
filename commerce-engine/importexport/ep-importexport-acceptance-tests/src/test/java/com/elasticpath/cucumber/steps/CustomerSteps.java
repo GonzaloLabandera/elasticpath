@@ -31,7 +31,7 @@ import com.elasticpath.service.customer.CustomerService;
 /**
  * Customer steps.
  */
-@ContextConfiguration("/integration-context.xml")
+@ContextConfiguration("/integration-context-mocked-customer-service.xml")
 public class CustomerSteps {
 
 	@Autowired

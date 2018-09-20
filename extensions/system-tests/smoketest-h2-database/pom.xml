@@ -59,7 +59,21 @@
 									<goal>unpack-dependencies</goal>
 								</goals>
 								<configuration>
-									<includeArtifactIds>smoketest-data, ext-data</includeArtifactIds>
+									<includeArtifactIds>ext-data</includeArtifactIds>
+									<type>jar</type>
+									<outputDirectory>${project.build.outputDirectory}</outputDirectory>
+									<overWriteSnapshots>true</overWriteSnapshots>
+									<includes>**/**</includes>
+								</configuration>
+							</execution>
+							<execution>
+								<id>unpack-smoketest-data</id>
+								<phase>generate-sources</phase>
+								<goals>
+									<goal>unpack-dependencies</goal>
+								</goals>
+								<configuration>
+									<includeArtifactIds>smoketest-data</includeArtifactIds>
 									<type>jar</type>
 									<outputDirectory>${project.build.outputDirectory}</outputDirectory>
 									<overWriteSnapshots>true</overWriteSnapshots>

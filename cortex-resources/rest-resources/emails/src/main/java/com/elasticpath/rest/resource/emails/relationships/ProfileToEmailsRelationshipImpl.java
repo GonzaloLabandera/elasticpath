@@ -13,7 +13,7 @@ import com.elasticpath.rest.definition.profiles.ProfileIdentifier;
 import com.elasticpath.rest.helix.data.annotation.RequestIdentifier;
 
 /**
- * Item to email memberships link.
+ * Profile to email memberships link.
  */
 public class ProfileToEmailsRelationshipImpl implements ProfileToEmailsRelationship.LinkTo {
 

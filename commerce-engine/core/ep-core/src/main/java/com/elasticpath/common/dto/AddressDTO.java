@@ -3,6 +3,7 @@
  */
 package com.elasticpath.common.dto;
 
+import java.util.Date;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
@@ -27,6 +28,12 @@ public class AddressDTO implements Dto {
 
 	@XmlAttribute(required = true)
 	private String guid;
+
+	@XmlElement(name = "creation_date")
+	private Date creationDate;
+
+	@XmlElement(name = "last_modified_date")
+	private Date lastModifiedDate;
 
 	@XmlElement(name = "last_name")
 	private String lastName;
@@ -70,6 +77,22 @@ public class AddressDTO implements Dto {
 
 	public void setGuid(final String guid) {
 		this.guid = guid;
+	}
+
+	public Date getCreationDate() {
+		return creationDate;
+	}
+
+	public void setCreationDate(final Date creationDate) {
+		this.creationDate = creationDate;
+	}
+
+	public Date getLastModifiedDate() {
+		return lastModifiedDate;
+	}
+
+	public void setLastModifiedDate(final Date lastModifiedDate) {
+		this.lastModifiedDate = lastModifiedDate;
 	}
 
 	public String getLastName() {

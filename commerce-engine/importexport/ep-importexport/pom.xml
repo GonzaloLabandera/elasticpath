@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>com.elasticpath</groupId>
 		<artifactId>importexport</artifactId>
-		<version>701.0.0.20171228014437-be854</version>
+		<version>702.0.0-SNAPSHOT</version>
 	</parent>
 
 	<artifactId>ep-importexport</artifactId>
@@ -519,6 +519,24 @@
 									<src>
 										<pathelement location="src/main/java/com/elasticpath/importexport/common/dto/general" />
 										<pathelement location="src/main/java/com/elasticpath/importexport/common/dto/cmimportjob" />
+									</src>
+									<classpath refid="maven.compile.classpath" />
+								</schemagen>
+
+								<schemagen destdir="target/classes/schema">
+									<schema namespace="" file="schemaDataPolicy.xsd" />
+									<src>
+										<pathelement location="src/main/java/com/elasticpath/importexport/common/dto/general" />
+										<pathelement location="src/main/java/com/elasticpath/importexport/common/dto/datapolicy" />
+									</src>
+									<classpath refid="maven.compile.classpath" />
+								</schemagen>
+
+								<schemagen destdir="target/classes/schema">
+									<schema namespace="" file="schemaCustomerConsent.xsd" />
+									<src>
+										<pathelement location="src/main/java/com/elasticpath/importexport/common/dto/general" />
+										<pathelement location="src/main/java/com/elasticpath/importexport/common/dto/datapolicy" />
 									</src>
 									<classpath refid="maven.compile.classpath" />
 								</schemagen>

@@ -45,6 +45,9 @@
    <exporter type="SHIPPING_SERVICE_LEVEL"/>
    <exporter type="SAVED_CONDITION"/>
    <exporter type="CM_IMPORT_JOB"/>
+
+   <exporter type="DATA_POLICY"/>
+   <exporter type="CUSTOMER_CONSENT"/>
  
   </exporters>
   <packager type="NONE"/>

@@ -131,6 +131,7 @@ function set_commerce_engine_version() {
   set_parent_version "${platform_version}" "${project_dir}/extensions/pom.xml"
 
   set_property_version "platform.version" "${platform_version}" "${project_dir}/extensions/pom.xml"
+  set_property_version "dce.version"      "${platform_version}" "${project_dir}/extensions/cortex/pom.xml"
   set_property_version "dce.version"      "${platform_version}" "${project_dir}/extensions/cortex/ext-commerce-engine-wrapper/pom.xml"
   set_property_version "dce.version"      "${platform_version}" "${project_dir}/extensions/cortex/ext-cortex-webapp/pom.xml"
   set_property_version "dce.version"      "${platform_version}" "${project_dir}/extensions/cortex/system-tests/cucumber/pom.xml"

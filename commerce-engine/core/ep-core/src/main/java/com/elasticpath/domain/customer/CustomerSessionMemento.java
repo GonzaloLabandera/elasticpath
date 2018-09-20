@@ -7,27 +7,14 @@ import java.util.Currency;
 import java.util.Date;
 
 import com.elasticpath.base.GloballyIdentifiable;
+import com.elasticpath.domain.DatabaseCreationDate;
 import com.elasticpath.domain.shopper.ShopperKey;
 import com.elasticpath.persistence.api.Persistable;
 
 /**
  * Persistent data for the CustomerSession.
  */
-public interface CustomerSessionMemento extends GloballyIdentifiable, ShopperKey, Persistable {
-
-	/**
-	 * Get the date the session was created.
-	 *
-	 * @return the date
-	 */
-	Date getCreationDate();
-
-	/**
-	 * Set the date the session was created.
-	 *
-	 * @param creationDate the date
-	 */
-	void setCreationDate(Date creationDate);
+public interface CustomerSessionMemento extends GloballyIdentifiable, ShopperKey, Persistable, DatabaseCreationDate {
 
 	/**
 	 * Get the date the session was last accessed.

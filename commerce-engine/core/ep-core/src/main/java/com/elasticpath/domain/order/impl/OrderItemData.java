@@ -3,6 +3,9 @@
  */
 package com.elasticpath.domain.order.impl;
 
+import java.util.Date;
+
+import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -10,7 +13,11 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.persistence.TableGenerator;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 
+import com.elasticpath.domain.DatabaseCreationDate;
+import com.elasticpath.domain.DatabaseLastModifiedDate;
 import com.elasticpath.domain.impl.AbstractItemData;
 
 /**
@@ -18,7 +25,7 @@ import com.elasticpath.domain.impl.AbstractItemData;
  */
 @Entity
 @Table(name = OrderItemData.TABLE_NAME)
-public class OrderItemData extends AbstractItemData {
+public class OrderItemData extends AbstractItemData implements DatabaseCreationDate, DatabaseLastModifiedDate {
 
 	private static final long serialVersionUID = 2264404135360493998L;
 
@@ -26,6 +33,10 @@ public class OrderItemData extends AbstractItemData {
 	public static final String TABLE_NAME = "TORDERITEMDATA";
 
 	private long uidPk;
+
+	private Date lastModifiedDate;
+
+	private Date creationDate;
 
 	/**
 	 * Constructor for JPA.
@@ -66,6 +77,31 @@ public class OrderItemData extends AbstractItemData {
 	@Override
 	public void setUidPk(final long uidPk) {
 		this.uidPk = uidPk;
+	}
+
+	@Override
+	@Basic
+	@Temporal(TemporalType.TIMESTAMP)
+	@Column(name = "LAST_MODIFIED_DATE", nullable = false)
+	public Date getLastModifiedDate() {
+		return lastModifiedDate;
+	}
+
+	@Override
+	public void setLastModifiedDate(final Date lastModifiedDate) {
+		this.lastModifiedDate = lastModifiedDate;
+	}
+
+	@Override
+	@Basic
+	@Temporal(TemporalType.TIMESTAMP)
+	@Column(name = "CREATION_DATE", nullable = false)
+	public Date getCreationDate() {
+		return creationDate;
+	}
+
+	public void setCreationDate(final Date creationDate) {
+		this.creationDate = creationDate;
 	}
 
 	@Override

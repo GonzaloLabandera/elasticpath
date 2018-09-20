@@ -25,7 +25,7 @@ public abstract class AbstractSearchRequestJob<T extends Persistable> implements
 	/**
 	 * Default constructor.
 	 * 
-	 * @throws com.elasticpath.cmclient.core.EpUiException if pageSize < 1
+	 * @throws EpUiException if pageSize < 1
 	 */
 	public AbstractSearchRequestJob() throws EpUiException {
 		super();

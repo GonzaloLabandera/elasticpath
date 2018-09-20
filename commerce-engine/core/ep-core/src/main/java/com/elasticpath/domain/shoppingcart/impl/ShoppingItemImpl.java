@@ -5,11 +5,13 @@ package com.elasticpath.domain.shoppingcart.impl;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import javax.persistence.Basic;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -22,6 +24,8 @@ import javax.persistence.OneToMany;
 import javax.persistence.OrderBy;
 import javax.persistence.Table;
 import javax.persistence.TableGenerator;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 import javax.persistence.Transient;
 
 import org.apache.openjpa.persistence.DataCache;
@@ -32,6 +36,7 @@ import org.apache.openjpa.persistence.FetchGroups;
 import org.apache.openjpa.persistence.jdbc.ElementForeignKey;
 import org.apache.openjpa.persistence.jdbc.ElementJoinColumn;
 
+import com.elasticpath.domain.DatabaseCreationDate;
 import com.elasticpath.domain.impl.AbstractItemData;
 import com.elasticpath.domain.impl.AbstractShoppingItemImpl;
 import com.elasticpath.domain.shoppingcart.ExchangeItem;
@@ -68,7 +73,7 @@ import com.elasticpath.service.shoppingcart.impl.TaxHandlingEnum;
 	)
 })
 @SuppressWarnings("PMD.GodClass")
-public class ShoppingItemImpl extends AbstractShoppingItemImpl implements CartItem, ExchangeItem {
+public class ShoppingItemImpl extends AbstractShoppingItemImpl implements CartItem, ExchangeItem, DatabaseCreationDate {
 	/**
 	 * Serial version id.
 	 */
@@ -94,6 +99,8 @@ public class ShoppingItemImpl extends AbstractShoppingItemImpl implements CartIt
 	private Set<ShoppingItemRecurringPrice> recurringPrices = new HashSet<>();
 	
 	private boolean taxInclusive;
+
+	private Date creationDate;
 
 	/**
 	 * Internal JPA method to get Item Data.
@@ -386,6 +393,18 @@ public class ShoppingItemImpl extends AbstractShoppingItemImpl implements CartIt
 	@Transient
 	public TaxPriceCalculator getTaxPriceCalculator() {
 		return new PriceCalculatorImpl(true);
+	}
+
+	@Override
+	@Basic
+	@Temporal(TemporalType.TIMESTAMP)
+	@Column(name = "CREATION_DATE", nullable = false)
+	public Date getCreationDate() {
+		return creationDate;
+	}
+
+	public void setCreationDate(final Date creationDate) {
+		this.creationDate = creationDate;
 	}
 
 	/**

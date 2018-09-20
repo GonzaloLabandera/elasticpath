@@ -5,11 +5,11 @@
 	<parent>
 		<groupId>com.elasticpath.cmclient</groupId>
 		<artifactId>cm-modules</artifactId>
-		<version>701.0.0.20171228014437-c8fcb</version>
+		<version>702.0.0-SNAPSHOT</version>
 	</parent>
 
 	<artifactId>cm-plugins</artifactId>
-	<version>701.0.0.20171228014437-c8fcb</version><!-- Version is required here for releasing tasks -->
+	<version>702.0.0-SNAPSHOT</version><!-- Version is required here for releasing tasks -->
 	<packaging>pom</packaging>
 	<name>CM Plugins Parent</name>
 
@@ -34,6 +34,7 @@
 		<module>com.elasticpath.cmclient.warehouse</module>
 		<module>com.elasticpath.cmclient.advancedsearch</module>
 		<module>com.elasticpath.cmclient.admin.customers</module>
+		<module>com.elasticpath.cmclient.admin.datapolicies</module>
 		<module>com.elasticpath.cmclient.ep-local-auth</module>
 		<module>test-util</module>
 
@@ -42,6 +43,7 @@
 		<module>com.elasticpath.cmclient.reporting.ordersbystatus</module>
 		<module>com.elasticpath.cmclient.reporting.ordersummary</module>
 		<module>com.elasticpath.cmclient.reporting.returnsandexchanges</module>
+		<module>com.elasticpath.cmclient.reporting.customerpersonaldata</module>
 	</modules>
 
 </project>

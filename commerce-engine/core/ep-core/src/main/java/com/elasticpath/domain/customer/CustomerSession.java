@@ -7,6 +7,7 @@ import java.util.Currency;
 import java.util.Date;
 
 import com.elasticpath.base.GloballyIdentifiable;
+import com.elasticpath.domain.DatabaseCreationDate;
 import com.elasticpath.domain.shopper.ShopperReference;
 import com.elasticpath.domain.shoppingcart.ShoppingCart;
 
@@ -16,21 +17,7 @@ import com.elasticpath.domain.shoppingcart.ShoppingCart;
  * who may not be logged in (using cookies).
  *
  */
-public interface CustomerSession extends GloballyIdentifiable, CustomerSessionTransientData, ShopperReference {
-
-	/**
-	 * Get the date when the customer session was created.
-	 *
-	 * @return the creation date
-	 */
-	Date getCreationDate();
-
-	/**
-	 * Set the creation date.
-	 *
-	 * @param creationDate the creation date.
-	 */
-	void setCreationDate(Date creationDate);
+public interface CustomerSession extends GloballyIdentifiable, CustomerSessionTransientData, ShopperReference, DatabaseCreationDate {
 
 	/**
 	 * Get the date when the customer session was last accessed.

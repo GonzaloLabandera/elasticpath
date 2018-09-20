@@ -22,6 +22,7 @@ import com.elasticpath.commons.util.impl.ConverterUtils;
 import com.elasticpath.domain.EpDomainException;
 import com.elasticpath.domain.attribute.Attribute;
 import com.elasticpath.domain.attribute.AttributeValue;
+import com.elasticpath.domain.attribute.CustomerProfileValue;
 import com.elasticpath.domain.customer.Customer;
 import com.elasticpath.domain.customer.CustomerProfile;
 import com.elasticpath.persistence.api.Entity;
@@ -136,7 +137,7 @@ public class ImportDataTypeCustomerImpl extends AbstractImportDataTypeImpl {
 				final CustomerProfile customerProfile = ((Customer) customer).getCustomerProfile();
 				customerProfile.setStringProfileValue(attributeKey, value);
 
-				Map<String, AttributeValue> profileValueMap = customerProfile.getProfileValueMap();
+				Map<String, CustomerProfileValue> profileValueMap = customerProfile.getProfileValueMap();
 				((Customer) customer).setProfileValueMap(profileValueMap);
 				AttributeValue attributeValue = profileValueMap.get(attributeKey);
 

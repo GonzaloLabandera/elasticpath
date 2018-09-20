@@ -89,8 +89,24 @@ public class CheckoutTestCartBuilder {
 		return this;
 	}
 
+	/**
+	 * Set the customer session.
+	 * @param customerSession the session.
+	 * @return the checkout test cart builder
+	 */
 	public CheckoutTestCartBuilder withCustomerSession(final CustomerSession customerSession) {
 		this.customerSession = customerSession;
+		return this;
+	}
+
+	/**
+	 * Set customer.
+	 *
+	 * @param customer the customer.
+	 * @return the checkout test cart builder
+	 */
+	public CheckoutTestCartBuilder withCustomer(final Customer customer) {
+		this.customer = customer;
 		return this;
 	}
 

@@ -3,12 +3,14 @@
  */
 package com.elasticpath.domain.order;
 
+import com.elasticpath.domain.DatabaseCreationDate;
+import com.elasticpath.domain.DatabaseLastModifiedDate;
 import com.elasticpath.persistence.api.Persistable;
 
 /**
  * Holds generic key/value information associated with an {@link Order}.
  */
-public interface OrderData extends Persistable {
+public interface OrderData extends DatabaseCreationDate, DatabaseLastModifiedDate, Persistable {
 	/**
 	 * @return the key
 	 */

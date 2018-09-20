@@ -48,4 +48,9 @@ public final class StructuredErrorMessageIdConstants {
 	 * Structured error message ID indicating the cart is not purchasable.
 	 */
 	public static final String CART_NOT_PURCHASABLE = "purchase.cart.not.purchasable";
+
+	/**
+	 * Structured error message ID indicating the addresses data policy is not accepted.
+	 */
+	public static final String NEED_DATA_POLICY_CONSENT = "need.datapolicy.consent";
 }

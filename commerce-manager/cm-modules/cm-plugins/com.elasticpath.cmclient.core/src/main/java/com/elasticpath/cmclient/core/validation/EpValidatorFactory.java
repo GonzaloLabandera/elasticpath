@@ -932,8 +932,22 @@ public class EpValidatorFactory {
 	 * @return validator instance
 	 */
 	public static IValidator createDisableDateValidator(final IEpDateTimePicker enableDatePicker, final IEpDateTimePicker disableDatePicker) {
-		return createToAfterFromDateValidator(enableDatePicker, disableDatePicker,
+		return createDisableDateValidator(enableDatePicker, disableDatePicker,
 				CoreMessages.get().EpValidatorFactory_DisableDateBeforeStartDate);
+	}
+
+	/**
+	 * Creates a validator that verifies if a start date is after the end date (rounded to the nearest minute).
+	 *
+	 * @param enableDatePicker the enable date picker
+	 * @param disableDatePicker the disable date picker
+	 * @param validationMessage validation message to show
+	 * @return validator instance
+	 */
+	public static IValidator createDisableDateValidator(final IEpDateTimePicker enableDatePicker,
+														final IEpDateTimePicker disableDatePicker,
+														final String validationMessage) {
+		return createToAfterFromDateValidator(enableDatePicker, disableDatePicker, validationMessage);
 	}
 
 	private static IValidator createToAfterFromDateValidator(final IEpDateTimePicker fromDatePicker,

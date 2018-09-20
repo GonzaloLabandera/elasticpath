@@ -28,7 +28,6 @@ import java.util.Set;
 import org.eclipse.rap.rwt.testfixture.TestContext;
 import org.junit.Rule;
 import org.junit.Test;
-
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
@@ -44,6 +43,7 @@ import com.elasticpath.plugin.payment.PaymentGatewayType;
 import com.elasticpath.service.command.CommandService;
 import com.elasticpath.service.command.UpdateStoreCommand;
 import com.elasticpath.service.command.UpdateStoreCommandResult;
+import com.elasticpath.service.datapolicy.DataPolicyService;
 import com.elasticpath.service.store.StoreService;
 import com.elasticpath.settings.SettingsService;
 import com.elasticpath.settings.domain.SettingValue;
@@ -151,18 +151,23 @@ public class StoreEditorModelHelperTest {
 		final SettingValue mockThemeValue = mock(SettingValue.class, "theme setting");
 		final SettingValue mockBrowsingValue = mock(SettingValue.class, "browsing setting");
 		final SettingValue mockAsValue = mock(SettingValue.class, "adv search setting");
+		final SettingValue mockDataPolicyValue = mock(SettingValue.class, "data policy setting");
 		final Store mockStore = mock(Store.class);
 		final String themeValue = "themeValue"; //$NON-NLS-1$
 		final String browsingValue = "browsingValue"; //$NON-NLS-1$
 		final String asValue = "asValue"; //$NON-NLS-1$
+		final Boolean dataPolicyValue = false; //$NON-NLS-1$
 
 		when(mockThemeValue.getValue()).thenReturn(themeValue);
 		when(mockBrowsingValue.getValue()).thenReturn(browsingValue);
 		when(mockAsValue.getValue()).thenReturn(asValue);
+		when(mockDataPolicyValue.getBooleanValue()).thenReturn(dataPolicyValue);
 		when(mockSettingsService.getSettingValue("COMMERCE/STORE/theme", STORE_CODE)).thenReturn(mockThemeValue);
 		when(mockSettingsService.getSettingValue("COMMERCE/STORE/FILTEREDNAVIGATION/filteredNavigationConfiguration", STORE_CODE))
 				.thenReturn(mockBrowsingValue);
 		when(mockSettingsService.getSettingValue("COMMERCE/STORE/ADVANCEDSEARCH/advancedSearchConfiguration", STORE_CODE)).thenReturn(mockAsValue);
+		when(mockSettingsService.getSettingValue(DataPolicyService.COMMERCE_STORE_ENABLE_DATA_POLICIES, STORE_CODE)).thenReturn(mockDataPolicyValue);
+
 		when(mockStore.getCode()).thenReturn(STORE_CODE);
 
 		StoreEditorModel editorModel = new StoreEditorModel(mockStore);
@@ -173,14 +178,16 @@ public class StoreEditorModelHelperTest {
 		assertEquals(themeValue, editorModel.getStoreThemeSetting());
 		assertEquals(browsingValue, editorModel.getStoreBrowsingSetting());
 		assertEquals(asValue, editorModel.getStoreAdvancedSearchSetting());
+		assertEquals(dataPolicyValue, editorModel.isStoreEnableDataPoliciesSettingEnabled());
 
 		verify(mockThemeValue).getValue();
 		verify(mockBrowsingValue).getValue();
 		verify(mockAsValue).getValue();
+		verify(mockDataPolicyValue).getBooleanValue();
 		verify(mockSettingsService).getSettingValue("COMMERCE/STORE/theme", STORE_CODE);
 		verify(mockSettingsService).getSettingValue("COMMERCE/STORE/FILTEREDNAVIGATION/filteredNavigationConfiguration", STORE_CODE);
 		verify(mockSettingsService).getSettingValue("COMMERCE/STORE/ADVANCEDSEARCH/advancedSearchConfiguration", STORE_CODE);
-
+		verify(mockSettingsService).getSettingValue(DataPolicyService.COMMERCE_STORE_ENABLE_DATA_POLICIES, STORE_CODE);
 	}
 
 	/**

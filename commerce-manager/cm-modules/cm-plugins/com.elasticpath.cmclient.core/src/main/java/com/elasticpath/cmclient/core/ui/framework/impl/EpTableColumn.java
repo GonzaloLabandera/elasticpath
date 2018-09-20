@@ -79,12 +79,8 @@ public class EpTableColumn implements IEpTableColumn {
 		}
 	}
 
-	/**
-	 * Gets the editing support of this column.
-	 * 
-	 * @return EditingSupport or null if not set
-	 */
-	protected EditingSupport getEditingSupport() {
+	@Override
+	public EditingSupport getEditingSupport() {
 		return this.editingSupport;
 	}
 

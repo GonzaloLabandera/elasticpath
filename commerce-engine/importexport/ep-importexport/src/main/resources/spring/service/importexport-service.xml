@@ -473,6 +473,20 @@
 		<property name="schemaPath" value="schema/schemaGiftCertificate.xsd" />
 	</bean>
 
+	<bean id="dataPolicyImporter" class="com.elasticpath.importexport.importer.importers.impl.DataPolicyImporterImpl" parent="abstractImporter">
+		<property name="dataPolicyService" ref="dataPolicyService" />
+		<property name="dataPolicyAdapter" ref="dataPolicyAdapter"/>
+		<property name="schemaPath" value="schema/schemaDataPolicy.xsd" />
+	</bean>
+
+	<bean id="customerConsentImporter" class="com.elasticpath.importexport.importer.importers.impl.CustomerConsentImporterImpl" parent="abstractImporter">
+		<property name="customerConsentService" ref="customerConsentService" />
+		<property name="customerConsentAdapter" ref="customerConsentAdapter"/>
+		<property name="customerService" ref="customerService"/>
+		<property name="dataPolicyService" ref="dataPolicyService" />
+		<property name="schemaPath" value="schema/schemaCustomerConsent.xsd" />
+	</bean>
+
 	<bean id="cachingService" class="com.elasticpath.importexport.common.caching.impl.CachingServiceImpl">
 		<property name="catalogService">
 			<ref bean="catalogService" />
@@ -614,6 +628,12 @@
                 <entry key="CM_IMPORT_JOB">
                     <ref bean="cmImportJobImporter" />
                 </entry>
+				<entry key="DATA_POLICY">
+					<ref bean="dataPolicyImporter" />
+				</entry>
+				<entry key="CUSTOMER_CONSENT">
+					<ref bean="customerConsentImporter" />
+				</entry>
 			</map>
 		</property>
 	</bean>
@@ -813,6 +833,17 @@
 				<entry key="CM_IMPORT_JOB">
 					<list>
 						<ref bean="cmImportJobExporter" />
+					</list>
+				</entry>
+
+				<entry key="DATA_POLICY">
+					<list>
+						<ref bean="dataPolicyExporter" />
+					</list>
+				</entry>
+				<entry key="CUSTOMER_CONSENT">
+					<list>
+						<ref bean="customerConsentExporter" />
 					</list>
 				</entry>
 			</map>
@@ -1061,6 +1092,18 @@
 	<bean id="catalogCartItemModifierExporter" class="com.elasticpath.importexport.exporter.exporters.impl.CartItemModifierExporterImpl">
 		<property name="domainAdapter" ref="cartItemModifierGroupAdapter" />
 		<property name="cartItemModifierService" ref="cartItemModifierService" />
+	</bean>
+
+	<bean id="dataPolicyExporter" class="com.elasticpath.importexport.exporter.exporters.impl.DataPolicyExporterImpl">
+		<property name="importExportSearcher" ref="importExportSearcher" />
+		<property name="dataPolicyAdapter" ref="dataPolicyAdapter" />
+		<property name="dataPolicyService" ref="dataPolicyService" />
+	</bean>
+
+	<bean id="customerConsentExporter" class="com.elasticpath.importexport.exporter.exporters.impl.CustomerConsentExporterImpl">
+		<property name="importExportSearcher" ref="importExportSearcher" />
+		<property name="customerConsentAdapter" ref="customerConsentAdapter" />
+		<property name="customerConsentService" ref="customerConsentService" />
 	</bean>
 
 	<bean id="settingDefinitionExporter" class="com.elasticpath.importexport.exporter.exporters.impl.SettingDefinitionExporter"
@@ -1431,6 +1474,8 @@
 				<value>SHIPPING_REGION</value>
 				<value>SHIPPING_SERVICE_LEVEL</value>
 				<value>CM_IMPORT_JOB</value>
+				<value>DATA_POLICY</value>
+				<value>CUSTOMER_CONSENT</value>
 			</list>
 		</property>
 	</bean>

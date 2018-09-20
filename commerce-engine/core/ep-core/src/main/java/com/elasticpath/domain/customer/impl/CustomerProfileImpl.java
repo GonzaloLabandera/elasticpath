@@ -5,6 +5,7 @@ package com.elasticpath.domain.customer.impl;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
@@ -18,6 +19,7 @@ import com.elasticpath.commons.exception.EpBindException;
 import com.elasticpath.commons.util.impl.LocaleUtils;
 import com.elasticpath.domain.attribute.Attribute;
 import com.elasticpath.domain.attribute.AttributeValue;
+import com.elasticpath.domain.attribute.CustomerProfileValue;
 import com.elasticpath.domain.attribute.impl.CustomerProfileValueImpl;
 import com.elasticpath.domain.customer.CustomerProfile;
 import com.elasticpath.domain.impl.AbstractLegacyPersistenceImpl;
@@ -31,7 +33,7 @@ public class CustomerProfileImpl extends AbstractLegacyPersistenceImpl implement
 
 	private static final char SEPARATOR = '_';
 
-	private Map<String, AttributeValue> profileValueMap = new HashMap<>();
+	private Map<String, CustomerProfileValue> profileValueMap = new HashMap<>();
 	private Map<String, Attribute> customerProfileAttributes;
 
 	private long uidPk;
@@ -88,12 +90,18 @@ public class CustomerProfileImpl extends AbstractLegacyPersistenceImpl implement
 	}
 
 	@Override
-	public void setStringProfileValue(final String attributeKey, final String stringValue) throws EpBindException {
-		setStringAttributeValue(getCustomerProfileAttributeMap().get(attributeKey), null, stringValue);
+	public void setStringProfileValue(final String attributeKey, final String stringValue, final Date creationDate) throws EpBindException {
+		setStringAttributeValue(getCustomerProfileAttributeMap().get(attributeKey), null, stringValue, creationDate);
 	}
 
-	private void setStringAttributeValue(final Attribute attribute, final Locale locale, final String stringValue) throws EpBindException {
-		AttributeValue attributeValue = getAttributeValueWithoutFallBack(attribute.getKey(), locale);
+	@Override
+	public void setStringProfileValue(final String attributeKey, final String stringValue) {
+		setStringProfileValue(attributeKey, stringValue, null);
+	}
+
+	private void setStringAttributeValue(final Attribute attribute, final Locale locale,
+										 final String stringValue, final Date creationDate) throws EpBindException {
+		CustomerProfileValue attributeValue = getAttributeValueWithoutFallBack(attribute.getKey(), locale);
 		if (attributeValue != null) {
 			String attributeStringValue = attributeValue.getStringValue();
 			if (!Objects.equals(stringValue, attributeStringValue)) {
@@ -104,6 +112,7 @@ public class CustomerProfileImpl extends AbstractLegacyPersistenceImpl implement
 
 		attributeValue = createAttributeValue(attribute);
 		attributeValue.setStringValue(stringValue);
+		attributeValue.setCreationDate(creationDate);
 		final String localizedAttributeKey = getLocalizedAttributeKey(attribute.getKey(), locale);
 		attributeValue.setLocalizedAttributeKey(localizedAttributeKey);
 		getProfileValueMap().put(localizedAttributeKey, attributeValue);
@@ -150,7 +159,7 @@ public class CustomerProfileImpl extends AbstractLegacyPersistenceImpl implement
 	}
 
 	private void setAttributeValue(final Attribute attribute, final Locale locale, final Object value) {
-		AttributeValue attributeValue = getAttributeValueWithoutFallBack(attribute.getKey(), locale);
+		CustomerProfileValue attributeValue = getAttributeValueWithoutFallBack(attribute.getKey(), locale);
 		if (attributeValue != null) {
 			attributeValue.setValue(value);
 			return;
@@ -163,13 +172,13 @@ public class CustomerProfileImpl extends AbstractLegacyPersistenceImpl implement
 		getProfileValueMap().put(localizedAttributeKey, attributeValue);
 	}
 
-	private AttributeValue getAttributeValueWithoutFallBack(final String attributeKey, final Locale locale) {
+	private CustomerProfileValue getAttributeValueWithoutFallBack(final String attributeKey, final Locale locale) {
 		if (locale == null) {
 			return getProfileValueMap().get(getLocalizedAttributeKey(attributeKey, null));
 		}
 		Locale broadenedLocale = locale;
 
-		AttributeValue attributeValue = getProfileValueMap().get(getLocalizedAttributeKey(attributeKey, broadenedLocale));
+		CustomerProfileValue attributeValue = getProfileValueMap().get(getLocalizedAttributeKey(attributeKey, broadenedLocale));
 		if (attributeValue == null) { // Remove the variant, if present
 			broadenedLocale = LocaleUtils.broadenLocale(broadenedLocale);
 			attributeValue = getProfileValueMap().get(getLocalizedAttributeKey(attributeKey, broadenedLocale));
@@ -188,8 +197,8 @@ public class CustomerProfileImpl extends AbstractLegacyPersistenceImpl implement
 	 * @param attribute the attribute
 	 * @return the attribute value
 	 */
-	protected AttributeValue createAttributeValue(final Attribute attribute) {
-		AttributeValue attributeValue = new CustomerProfileValueImpl();
+	protected CustomerProfileValue createAttributeValue(final Attribute attribute) {
+		CustomerProfileValue attributeValue = new CustomerProfileValueImpl();
 		attributeValue.setAttribute(attribute);
 		attributeValue.setAttributeType(attribute.getAttributeType());
 
@@ -197,12 +206,12 @@ public class CustomerProfileImpl extends AbstractLegacyPersistenceImpl implement
 	}
 
 	@Override
-	public void setProfileValueMap(final Map<String, AttributeValue> profileValueMap) {
+	public void setProfileValueMap(final Map<String, CustomerProfileValue> profileValueMap) {
 		this.profileValueMap = profileValueMap;
 	}
 
 	@Override
-	public Map<String, AttributeValue> getProfileValueMap() {
+	public Map<String, CustomerProfileValue> getProfileValueMap() {
 		return profileValueMap;
 	}
 

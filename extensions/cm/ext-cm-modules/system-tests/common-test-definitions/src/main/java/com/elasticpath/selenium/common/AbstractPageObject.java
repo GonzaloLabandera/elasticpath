@@ -44,6 +44,7 @@ public abstract class AbstractPageObject extends AbstractPage {
 	 * The Tab CSS.
 	 */
 	protected static final String TAB_CSS = "div[widget-id='%s'][widget-type='CTabItem']";
+	private String lastSearchedElementInCenterPane;
 
 	/**
 	 * constructor.
@@ -237,14 +238,18 @@ public abstract class AbstractPageObject extends AbstractPage {
 	public boolean selectItemInCenterPane(final String tableParentCss, final String tableColumnCss, final String value, final String columnName) {
 		boolean valueExists = false;
 		boolean isNextButtonEnabled = true;
-		getWaitDriver().waitForElementToBeInteractable(tableParentCss);
+		assertThat(getWaitDriver().waitForElementToBeInteractable(tableParentCss))
+				.as("Center pane is not interactable")
+				.isTrue();
 
 		getWaitDriver().waitForElementToBeInteractable(CENTER_PANE_FIRST_BUTTON_CSS);
 
 		if (isButtonEnabled(CENTER_PANE_FIRST_BUTTON_CSS)) {
 			clickButton(CENTER_PANE_FIRST_BUTTON_CSS, "First Page");
+			waitTillElementDisappears(By.cssSelector(String.format(tableColumnCss, lastSearchedElementInCenterPane)));
 			getWaitDriver().waitForElementToBeInteractable(tableParentCss);
 		}
+		lastSearchedElementInCenterPane = value;
 
 		while (isNextButtonEnabled) {
 			getWaitDriver().waitForElementToBeInteractable(tableParentCss);

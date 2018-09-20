@@ -17,6 +17,9 @@ public final class AdminStoresMessages {
 	/** Property file binding. */
 	private static final String BUNDLE_NAME = "com.elasticpath.cmclient.admin.stores.AdminStoresPluginResources"; //$NON-NLS-1$
 
+	/** Empty string. */
+	public static final String EMPTY_STRING = ""; //$NON-NLS-1$
+
 	/**
 	 * Empty constructor.
 	 */
@@ -46,6 +49,8 @@ public final class AdminStoresMessages {
 	public String StoreCountry;
 
 	public String StoreSubCountry;
+
+	public String EnableDataPolicies;
 
 	public String DefaultLanguage;
 

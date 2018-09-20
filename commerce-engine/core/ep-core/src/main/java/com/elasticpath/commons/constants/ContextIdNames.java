@@ -633,6 +633,11 @@ public final class ContextIdNames {
 	/** bean id for implemenation of com.elasticpath.service.shoppingcart.CheckoutService. */
 	public static final String CHECKOUT_SERVICE = "checkoutService";
 
+	/** bean id for implemenation of com.elasticpath.service.shoppingcart.CheckoutService. */
+	public static final String CUSTOMER_PERSONAL_DATA_REPORTING_SERVICE = "customerPersonalDataReportingService";
+
+
+
 	// +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ //
 	// Content Wrapper Repository
 
@@ -1691,6 +1696,29 @@ public final class ContextIdNames {
 
 	/** Bean id for PersistenceMetadataMap. */
 	public static final String PERSISTENCELISTENER_METADATA_MAP = "persistenceListenerMetadataMap";
+
+	/** bean id for implementation of com.elasticpath.domain.datapolicy.impl.DataPointImpl. */
+	public static final String DATA_POINT = "dataPoint";
+
+	/** bean id for implementation of com.elasticpath.domain.datapolicy.impl.DataPolicyImpl. */
+	public static final String DATA_POLICY = "dataPolicy";
+
+	/** bean id for implementation of com.elasticpath.domain.datapolicy.impl.CustomerConsentImpl. */
+	public static final String CUSTOMER_CONSENT = "customerConsent";
+
+	/** bean id for implementation of com.elasticpath.service.datapolicy.impl.DataPolicyServiceImpl. */
+	public static final String DATA_POLICY_SERVICE = "dataPolicyService";
+
+	/** bean id for implementation of com.elasticpath.service.datapolicy.impl.DataPointServiceImpl. */
+	public static final String DATA_POINT_SERVICE = "dataPointService";
+
+	/** bean id for implementation of com.elasticpath.service.datapolicy.impl.DataPointValueServiceImpl. */
+	public static final String DATA_POINT_VALUE_SERVICE = "dataPointValueService";
+
+	/** bean id for implementation of com.elasticpath.domain.datapolicy.impl.CustomerConsentServiceImpl. */
+	public static final String CUSTOMER_CONSENT_SERVICE = "customerConsentService";
+
+
 
 	private ContextIdNames() {
 		// Do not instantiate this class

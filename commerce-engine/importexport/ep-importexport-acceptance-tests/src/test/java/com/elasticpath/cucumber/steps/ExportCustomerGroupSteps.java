@@ -36,7 +36,7 @@ import com.elasticpath.importexport.exporter.controller.ExportController;
 /**
  * Export customer group steps.
  */
-@ContextConfiguration("/integration-context.xml")
+@ContextConfiguration("/integration-context-mocked-customer-service.xml")
 public class ExportCustomerGroupSteps {
 
 	private static final String CUSTOMER_GROUPS_EXPORT_FILE = "customer_groups.xml";

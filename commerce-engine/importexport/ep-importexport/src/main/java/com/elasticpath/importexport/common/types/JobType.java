@@ -115,7 +115,13 @@ public enum JobType {
 	SAVED_CONDITION("saved_conditions"),
 	
 	/** Job Type for ImportJob. */
-	CM_IMPORT_JOB("cmimportjobs");
+	CM_IMPORT_JOB("cmimportjobs"),
+
+	/** Data Policies. */
+	DATA_POLICY("data_policies"),
+
+	/** Customer Consents. */
+	CUSTOMER_CONSENT("customer_consents");
 	
 	/*
 	 * The map of Job Types available in the system. XML tag name is the key and JobType is the value.

@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>com.elasticpath</groupId>
 		<artifactId>parent</artifactId>
-		<version>701.0.0.20171228014437-be854</version>
+		<version>702.0.0-SNAPSHOT</version>
 		<relativePath/>
 	</parent>
 
@@ -34,10 +34,10 @@
 
 	<properties>
 		<tomcat.version>7.0.81</tomcat.version>
-		<platform.version>701.0.0.20171228014437-be854</platform.version>
-		<cmclient.platform.feature.version>701.0.0.20171228014437-c8fcb</cmclient.platform.feature.version>
-		<cortex.version>1.19.0.20171228014437-ed0c30</cortex.version>
-		<ep.commerce.data.version>701.0.0.20171228014437-e904e</ep.commerce.data.version>
+		<platform.version>702.0.0-SNAPSHOT</platform.version>
+		<cmclient.platform.feature.version>702.0.0-SNAPSHOT</cmclient.platform.feature.version>
+		<cortex.version>1.20.0.20180327150040-9738f</cortex.version>
+		<ep.commerce.data.version>702.0.0-SNAPSHOT</ep.commerce.data.version>
 		<ep.data.population.version>2.0.10.20171228014437-3b658</ep.data.population.version>
 		<ep.health.monitoring.version>1.1.2.20171228014437-844ef</ep.health.monitoring.version>
 		<licensing.skip>true</licensing.skip>

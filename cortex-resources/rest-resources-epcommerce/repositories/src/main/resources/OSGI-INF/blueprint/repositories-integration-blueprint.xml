@@ -61,6 +61,12 @@
 	<reference id="itemCharacteristicsService"
 			interface="com.elasticpath.service.catalog.ItemCharacteristicsService"/>
 
+	<reference id="dataPolicyService"
+			   interface="com.elasticpath.service.datapolicy.DataPolicyService"/>
+
+	<reference id="customerConsentService"
+			   interface="com.elasticpath.service.datapolicy.CustomerConsentService"/>
+
 	<reference id="orderService"
 			interface="com.elasticpath.service.order.OrderService"/>
 
@@ -98,6 +104,9 @@
 
 	<reference id="taxSnapshotService"
 			   interface="com.elasticpath.service.shoppingcart.TaxSnapshotService"/>
+
+	<reference id="timeService"
+			   interface="com.elasticpath.service.misc.TimeService"/>
 
 	<reference id="shoppingItemAssembler"
 			interface="com.elasticpath.sellingchannel.director.ShoppingItemAssembler"/>
@@ -225,6 +234,9 @@
 
 	<service ref="customerSessionRepository"
 			interface="com.elasticpath.rest.resource.integration.epcommerce.repository.customer.CustomerSessionRepository"/>
+
+	<service ref="dataPolicyRepository"
+			 interface="com.elasticpath.rest.resource.integration.epcommerce.repository.datapolicies.DataPolicyRepository"/>
 
 	<service ref="itemRepository"
 			interface="com.elasticpath.rest.resource.integration.epcommerce.repository.item.ItemRepository"/>

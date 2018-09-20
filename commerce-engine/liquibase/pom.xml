@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>com.elasticpath</groupId>
 		<artifactId>parent</artifactId>
-		<version>701.0.0.20171228014437-be854</version>
+		<version>702.0.0-SNAPSHOT</version>
 	</parent>
 
 	<groupId>com.elasticpath.db</groupId>
@@ -18,17 +18,17 @@
 			<dependency>
 				<groupId>com.elasticpath.db</groupId>
 				<artifactId>core-schema</artifactId>
-				<version>701.0.0.20171228014437-be854</version>
+				<version>702.0.0-SNAPSHOT</version>
 			</dependency>
 			<dependency>
 				<groupId>com.elasticpath.db</groupId>
 				<artifactId>liquibase-extensions</artifactId>
-				<version>701.0.0.20171228014437-be854</version>
+				<version>702.0.0-SNAPSHOT</version>
 			</dependency>
 			<dependency>
 				<groupId>com.elasticpath.db</groupId>
 				<artifactId>schema-documentation</artifactId>
-				<version>701.0.0.20171228014437-be854</version>
+				<version>702.0.0-SNAPSHOT</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>

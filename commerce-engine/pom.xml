@@ -12,7 +12,7 @@
 	<packaging>pom</packaging>
 
 	<name>Elastic Path Parent</name>
-	<version>701.0.0.20171228014437-be854</version>
+	<version>702.0.0-SNAPSHOT</version>
 
 	<inceptionYear>2000</inceptionYear>
 	<url>http://www.elasticpath.com</url>
@@ -971,252 +971,252 @@
 			<dependency>
 				<groupId>com.elasticpath</groupId>
 				<artifactId>ep-base</artifactId>
-				<version>701.0.0.20171228014437-be854</version>
+				<version>702.0.0-SNAPSHOT</version>
 			</dependency>
 
 			<dependency>
 				<groupId>com.elasticpath</groupId>
 				<artifactId>ep-cache</artifactId>
-				<version>701.0.0.20171228014437-be854</version>
+				<version>702.0.0-SNAPSHOT</version>
 			</dependency>
 
 			<dependency>
 				<groupId>com.elasticpath</groupId>
 				<artifactId>ep-money</artifactId>
-				<version>701.0.0.20171228014437-be854</version>
+				<version>702.0.0-SNAPSHOT</version>
 			</dependency>
 
 			<dependency>
 				<groupId>com.elasticpath</groupId>
 				<artifactId>ep-persistence-api</artifactId>
-				<version>701.0.0.20171228014437-be854</version>
+				<version>702.0.0-SNAPSHOT</version>
 			</dependency>
 
 			<dependency>
 				<groupId>com.elasticpath</groupId>
 				<artifactId>ep-persistence-openjpa</artifactId>
-				<version>701.0.0.20171228014437-be854</version>
+				<version>702.0.0-SNAPSHOT</version>
 			</dependency>
 
 			<dependency>
 				<groupId>com.elasticpath</groupId>
 				<artifactId>ep-settings</artifactId>
-				<version>701.0.0.20171228014437-be854</version>
+				<version>702.0.0-SNAPSHOT</version>
 			</dependency>
 
 			<dependency>
 				<groupId>com.elasticpath</groupId>
 				<artifactId>ep-core</artifactId>
-				<version>701.0.0.20171228014437-be854</version>
+				<version>702.0.0-SNAPSHOT</version>
 			</dependency>
 
 			<dependency>
 				<groupId>com.elasticpath</groupId>
 				<artifactId>ep-core-caching</artifactId>
-				<version>701.0.0.20171228014437-be854</version>
+				<version>702.0.0-SNAPSHOT</version>
 			</dependency>
 
 			<dependency>
 				<groupId>com.elasticpath</groupId>
 				<artifactId>ep-geoip-demo</artifactId>
-				<version>701.0.0.20171228014437-be854</version>
+				<version>702.0.0-SNAPSHOT</version>
 			</dependency>
 
 			<dependency>
 				<groupId>com.elasticpath</groupId>
 				<artifactId>ep-geoip-providers</artifactId>
-				<version>701.0.0.20171228014437-be854</version>
+				<version>702.0.0-SNAPSHOT</version>
 			</dependency>
 
 			<dependency>
 				<groupId>com.elasticpath</groupId>
 				<artifactId>ep-core-itests</artifactId>
-				<version>701.0.0.20171228014437-be854</version>
+				<version>702.0.0-SNAPSHOT</version>
 			</dependency>
 
 			<dependency>
 				<groupId>com.elasticpath</groupId>
 				<artifactId>ep-core-test-utils</artifactId>
-				<version>701.0.0.20171228014437-be854</version>
+				<version>702.0.0-SNAPSHOT</version>
 			</dependency>
 
 			<dependency>
 				<groupId>com.elasticpath</groupId>
 				<artifactId>ep-test-utils</artifactId>
-				<version>701.0.0.20171228014437-be854</version>
+				<version>702.0.0-SNAPSHOT</version>
 				<scope>test</scope>
 			</dependency>
 			<dependency>
 				<groupId>com.elasticpath</groupId>
 				<artifactId>ep-test-support</artifactId>
-				<version>701.0.0.20171228014437-be854</version>
+				<version>702.0.0-SNAPSHOT</version>
 				<scope>test</scope>
 			</dependency>
 			<dependency>
 				<groupId>com.elasticpath</groupId>
 				<artifactId>ep-querylanguage</artifactId>
-				<version>701.0.0.20171228014437-be854</version>
+				<version>702.0.0-SNAPSHOT</version>
 			</dependency>
 			<dependency>
 				<groupId>com.elasticpath</groupId>
 				<artifactId>ep-common-web</artifactId>
-				<version>701.0.0.20171228014437-be854</version>
+				<version>702.0.0-SNAPSHOT</version>
 			</dependency>
 			<dependency>
 				<groupId>com.elasticpath</groupId>
 				<artifactId>ep-test-application</artifactId>
-				<version>701.0.0.20171228014437-be854</version>
+				<version>702.0.0-SNAPSHOT</version>
 			</dependency>
 
 			<dependency>
 				<groupId>com.elasticpath</groupId>
 				<artifactId>ep-search</artifactId>
-				<version>701.0.0.20171228014437-be854</version>
+				<version>702.0.0-SNAPSHOT</version>
 			</dependency>
 
 			<dependency>
 				<groupId>com.elasticpath</groupId>
 				<artifactId>ep-batch</artifactId>
-				<version>701.0.0.20171228014437-be854</version>
+				<version>702.0.0-SNAPSHOT</version>
 			</dependency>
 
 			<dependency>
 				<groupId>com.elasticpath</groupId>
 				<artifactId>ep-importexport</artifactId>
-				<version>701.0.0.20171228014437-be854</version>
+				<version>702.0.0-SNAPSHOT</version>
 			</dependency>
 
 			<dependency>
 				<groupId>com.elasticpath</groupId>
 				<artifactId>ep-importexport-cli</artifactId>
-				<version>701.0.0.20171228014437-be854</version>
+				<version>702.0.0-SNAPSHOT</version>
 			</dependency>
 
 			<dependency>
 				<groupId>com.elasticpath</groupId>
 				<artifactId>ep-importexport</artifactId>
-				<version>701.0.0.20171228014437-be854</version>
+				<version>702.0.0-SNAPSHOT</version>
 				<classifier>tests</classifier>
 			</dependency>
 
 			<dependency>
 				<groupId>com.elasticpath</groupId>
 				<artifactId>ep-sync</artifactId>
-				<version>701.0.0.20171228014437-be854</version>
+				<version>702.0.0-SNAPSHOT</version>
 			</dependency>
 
 			<dependency>
 				<groupId>com.elasticpath</groupId>
 				<artifactId>ep-messaging-api</artifactId>
-				<version>701.0.0.20171228014437-be854</version>
+				<version>702.0.0-SNAPSHOT</version>
 			</dependency>
 
 			<dependency>
 				<groupId>com.elasticpath</groupId>
 				<artifactId>ep-messaging-camel</artifactId>
-				<version>701.0.0.20171228014437-be854</version>
+				<version>702.0.0-SNAPSHOT</version>
 			</dependency>
 
 			<dependency>
 				<groupId>com.elasticpath</groupId>
 				<artifactId>ep-core-uat-step-definitions</artifactId>
-				<version>701.0.0.20171228014437-be854</version>
+				<version>702.0.0-SNAPSHOT</version>
 				<scope>test</scope>
 			</dependency>
 
 			<dependency>
 				<groupId>com.elasticpath</groupId>
 				<artifactId>ep-email-uat-step-definitions</artifactId>
-				<version>701.0.0.20171228014437-be854</version>
+				<version>702.0.0-SNAPSHOT</version>
 				<scope>test</scope>
 			</dependency>
 
 			<dependency>
 				<groupId>com.elasticpath</groupId>
 				<artifactId>ep-customer-email-uat-step-definitions</artifactId>
-				<version>701.0.0.20171228014437-be854</version>
+				<version>702.0.0-SNAPSHOT</version>
 				<scope>test</scope>
 			</dependency>
 
 			<dependency>
 				<groupId>com.elasticpath</groupId>
 				<artifactId>ep-core-customer-messaging</artifactId>
-				<version>701.0.0.20171228014437-be854</version>
+				<version>702.0.0-SNAPSHOT</version>
 			</dependency>
 
 			<dependency>
 				<groupId>com.elasticpath</groupId>
 				<artifactId>ep-core-order-messaging</artifactId>
-				<version>701.0.0.20171228014437-be854</version>
+				<version>702.0.0-SNAPSHOT</version>
 			</dependency>
 
 			<dependency>
 				<groupId>com.elasticpath</groupId>
 				<artifactId>openjpa-osgi-wrapper</artifactId>
-				<version>701.0.0.20171228014437-be854</version>
+				<version>702.0.0-SNAPSHOT</version>
 			</dependency>
 
 			<dependency>
 				<groupId>com.elasticpath</groupId>
 				<artifactId>ep-core-changeset-messaging</artifactId>
-				<version>701.0.0.20171228014437-be854</version>
+				<version>702.0.0-SNAPSHOT</version>
 			</dependency>
 
 			<dependency>
 				<groupId>com.elasticpath</groupId>
 				<artifactId>ep-core-gift-certificate-messaging</artifactId>
-				<version>701.0.0.20171228014437-be854</version>
+				<version>702.0.0-SNAPSHOT</version>
 			</dependency>
 
 			<dependency>
 				<groupId>com.elasticpath</groupId>
 				<artifactId>ep-core-cm-user-messaging</artifactId>
-				<version>701.0.0.20171228014437-be854</version>
+				<version>702.0.0-SNAPSHOT</version>
 			</dependency>
 
 			<dependency>
 				<groupId>com.elasticpath</groupId>
 				<artifactId>ep-core-dataimport-messaging</artifactId>
-				<version>701.0.0.20171228014437-be854</version>
+				<version>702.0.0-SNAPSHOT</version>
 			</dependency>
 
 			<dependency>
 				<groupId>com.elasticpath</groupId>
 				<artifactId>ep-messaging-camel-test-support</artifactId>
-				<version>701.0.0.20171228014437-be854</version>
+				<version>702.0.0-SNAPSHOT</version>
 				<scope>test</scope>
 			</dependency>
 
 			<dependency>
 				<groupId>com.elasticpath</groupId>
 				<artifactId>ep-search-test-support</artifactId>
-				<version>701.0.0.20171228014437-be854</version>
+				<version>702.0.0-SNAPSHOT</version>
 				<scope>test</scope>
 			</dependency>
 
 			<dependency>
 				<groupId>com.elasticpath</groupId>
 				<artifactId>ep-jms</artifactId>
-				<version>701.0.0.20171228014437-be854</version>
+				<version>702.0.0-SNAPSHOT</version>
 				<scope>runtime</scope>
 			</dependency>
 
 			<dependency>
 				<groupId>com.elasticpath</groupId>
 				<artifactId>ep-email-test-support</artifactId>
-				<version>701.0.0.20171228014437-be854</version>
+				<version>702.0.0-SNAPSHOT</version>
 				<scope>test</scope>
 			</dependency>
 
 			<dependency>
 				<groupId>com.elasticpath</groupId>
 				<artifactId>ep-email</artifactId>
-				<version>701.0.0.20171228014437-be854</version>
+				<version>702.0.0-SNAPSHOT</version>
 			</dependency>
 			<dependency>
 				<groupId>com.elasticpath</groupId>
 				<artifactId>ep-email-sender</artifactId>
-				<version>701.0.0.20171228014437-be854</version>
+				<version>702.0.0-SNAPSHOT</version>
 			</dependency>
 			<dependency>
 				<groupId>org.jvnet.mock-javamail</groupId>
@@ -1228,44 +1228,44 @@
 			<dependency>
 				<groupId>com.elasticpath</groupId>
 				<artifactId>ep-order-email-handler</artifactId>
-				<version>701.0.0.20171228014437-be854</version>
+				<version>702.0.0-SNAPSHOT</version>
 			</dependency>
 			<dependency>
 				<groupId>com.elasticpath</groupId>
 				<artifactId>ep-order-shipment-creation-message-producer</artifactId>
-				<version>701.0.0.20171228014437-be854</version>
+				<version>702.0.0-SNAPSHOT</version>
 			</dependency>
 			<dependency>
 				<groupId>com.elasticpath</groupId>
 				<artifactId>ep-gift-certificate-creation-message-producer</artifactId>
-				<version>701.0.0.20171228014437-be854</version>
+				<version>702.0.0-SNAPSHOT</version>
 			</dependency>
 			<dependency>
 				<groupId>com.elasticpath</groupId>
 				<artifactId>ep-gift-certificate-email-handler</artifactId>
-				<version>701.0.0.20171228014437-be854</version>
+				<version>702.0.0-SNAPSHOT</version>
 			</dependency>
 			<dependency>
 				<groupId>com.elasticpath</groupId>
 				<artifactId>ep-customer-email-handler</artifactId>
-				<version>701.0.0.20171228014437-be854</version>
+				<version>702.0.0-SNAPSHOT</version>
 			</dependency>
 
 			<dependency>
 				<groupId>com.elasticpath</groupId>
 				<artifactId>ep-cm-user-email-handler</artifactId>
-				<version>701.0.0.20171228014437-be854</version>
+				<version>702.0.0-SNAPSHOT</version>
 			</dependency>
 			<dependency>
 				<groupId>com.elasticpath</groupId>
 				<artifactId>ep-dataimport-email-handler</artifactId>
-				<version>701.0.0.20171228014437-be854</version>
+				<version>702.0.0-SNAPSHOT</version>
 			</dependency>
 
 			 <dependency>
  				<groupId>com.elasticpath</groupId>
  				<artifactId>tax-calculation-connectivity-api</artifactId>
- 				<version>701.0.0.20171228014437-be854</version>
+ 				<version>702.0.0-SNAPSHOT</version>
  			</dependency>
 
 
@@ -1273,22 +1273,22 @@
 			<dependency>
 				<groupId>com.elasticpath</groupId>
 				<artifactId>ep-payment-gateway-connectivity-api</artifactId>
-				<version>701.0.0.20171228014437-be854</version>
+				<version>702.0.0-SNAPSHOT</version>
 			</dependency>
 			<dependency>
 				<groupId>com.elasticpath</groupId>
 				<artifactId>ep-test-payment-gateway</artifactId>
-				<version>701.0.0.20171228014437-be854</version>
+				<version>702.0.0-SNAPSHOT</version>
 			</dependency>
 			<dependency>
 				<groupId>com.elasticpath</groupId>
 				<artifactId>ep-test-cybersource-gateway</artifactId>
-				<version>701.0.0.20171228014437-be854</version>
+				<version>702.0.0-SNAPSHOT</version>
 			</dependency>
 			<dependency>
 				<groupId>com.elasticpath</groupId>
 				<artifactId>ep-payment-gateway-connectivity-test-commons</artifactId>
-				<version>701.0.0.20171228014437-be854</version>
+				<version>702.0.0-SNAPSHOT</version>
 			</dependency>
 			<dependency>
 				<groupId>org.jmock</groupId>
@@ -1710,7 +1710,7 @@
 				<plugin>
 					<groupId>com.elasticpath.tools</groupId>
 					<artifactId>ep-core-tool</artifactId>
-					<version>701.0.0.20171228014437-be854</version>
+					<version>702.0.0-SNAPSHOT</version>
 					<dependencies>
 						<dependency>
 							<groupId>${epdb.maven.groupId}</groupId>

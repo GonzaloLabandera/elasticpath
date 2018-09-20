@@ -68,7 +68,7 @@ import com.elasticpath.service.customer.CustomerService;
 /**
  * Steps for the import customer with payment methods feature.
  */
-@ContextConfiguration("/integration-context.xml")
+@ContextConfiguration("/integration-context-mocked-customer-service.xml")
 @TestExecutionListeners({
 		DependencyInjectionTestExecutionListener.class
 })

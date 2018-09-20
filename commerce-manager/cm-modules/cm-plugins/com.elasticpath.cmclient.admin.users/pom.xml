@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>com.elasticpath.cmclient</groupId>
 		<artifactId>cm-plugins</artifactId>
-		<version>701.0.0.20171228014437-c8fcb</version>
+		<version>702.0.0-SNAPSHOT</version>
 	</parent>
 
 	<artifactId>com.elasticpath.cmclient.admin.users</artifactId>

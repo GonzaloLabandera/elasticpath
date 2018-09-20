@@ -11,7 +11,7 @@
 		">
 
 	<util:list id="entityManagerLifecycleListeners">
-		<ref bean="lastModifiedEntityListener"/>
+		<ref bean="databaseTimestampsEntityListener"/>
 		<ref bean="objectDeletedEntityListener"/>
 		<ref bean="changeSetPersistenceListener"/>
 		<ref bean="persistablePostLoadListener"/>

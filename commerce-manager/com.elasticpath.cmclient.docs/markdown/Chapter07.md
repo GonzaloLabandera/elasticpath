@@ -69,28 +69,6 @@ Events are recorded regardless of who initiated the action or how it occurred. E
 
 Any user with the appropriate authorization may view the entire audit history of an order. The system provides a reverse chronological display of events, detailing the date-time, event creator, and event action. This allows CSRs to quickly scan the entire history of an order.
 
-<!--
-## Call Center Functionality
-
-An authorized CSR may create orders for both new and existing customers. This functionality may be accessed in both the &quot;View existing customers&quot; and &quot;View existing order&quot; windows. If the order is for a new customer, the CSR must first create a customer account before the order is placed.
-
-Depending on the CSR&#39;s permissions, they may modify the item prices in the order. The shipping costs and the total price are also determined and specified by the CSR. The system records the CSR&#39;s name and attaches it to the order.
-
-Only CSRs with the proper role may create orders on behalf of customers. The privilege to create orders comes in two variants:
-
-- Basic (the CSR may create an order, but cannot override the prices)
-- Manager (the CSR can create orders and override the prices)
--->
-<!---
-### Creating an Order
-
-1.  On the toolbar, click the **Customer Service** button.
-
-2. In the **Customer Service Search** tab on the left pane, click **Create Order**.
-
-2. Select the store where you want to create the order in and click **OK**.
--->
-
 ## Order Locking
 
 The idea behind &quot;locking&quot; orders is to prevent multiple CSRs from modifying the same data simultaneously. This can cause unexpected behavior and result in corrupted data. When a CSR opts to edit an order, it is automatically locked. Until the order is unlocked, no one else is allowed to edit it.
@@ -321,6 +299,8 @@ You can sort customer search results using the following column headers:
     | **Addresses** | Manage a customer&#39;s address(es), and sets the customer&#39;s default billing and shipping addresses. |
     | **Credit Cards** | Manage a customer&#39;s credit cards and sets their default credit card. |
     | **Orders** | View the details of a customer&#39;s order(s) and creates an order for the customer. |
+    | **Customer Segments** | View the customer segments a customer belongs to and add new customer segments. |
+    | **Customer Data Policies** | View data policies that apply to a customer, data points collected for a data policy, and remove a customer's data. |
 
 8. On the toolbar, click **Save**.
 
@@ -344,7 +324,7 @@ You can sort customer search results using the following column headers:
 
       > **Note**: An e-mail containing a new, system-generated password is automatically sent to the customer.
 
-### Managing a Customer&#39;s Segment Group
+### Customer Segments
 
 By default, all customers are assigned the PUBLIC customer segment.  You can add and remove new customer segments to a customer, but you cannot remove the PUBLIC customer segment.
 
@@ -391,3 +371,60 @@ By default, all customers are assigned the PUBLIC customer segment.  You can add
 9. In the _Remove Customer Segment Membership - Confirm_ dialog box, click **OK**.
 
 10. On the toolbar, click **Save**.
+
+### Customer Data Policies
+
+You can use the **Customer Data Policies** tab to manage the data policies that apply to a customer, as well as the data associated with those data policies.
+
+The **Customer Data Policies** tab shows:
+
+* Data policies that apply to a customer.
+* Whether a customer has given consent to a data policy.
+* When their consent was last updated.
+* The status of the data policy.
+
+#### Viewing a Data Policy's Data Points
+
+1. On the toolbar, click the **Customer Service** button.
+
+2. In the **Customer Service Search** pane, click the **Customers** tab.
+
+3. In the **Search Terms** section, enter the search terms in the fields to narrow your search.
+
+4. In the **Sorting** section, select a sort order by heading from the **Sort By Column** list and set a **Sort Order**.
+
+5. Click **Search**. The search results are listed in the **Customer Search Results** tab on the top right pane.
+
+6. Select a customer account. In the bottom pane, the **Customer** tab appears.
+
+7. In the bottom pane, click the **Data Policies** tab.
+
+8. Select the data policy you want to view data points for.
+
+9. Optionally, to view data points for a disabled data policy, select the **Show disabled data policies** checkbox.
+
+10. Click **View Data Points**.
+
+#### Removing Customer Data
+
+1. On the toolbar, click the **Customer Service** button.
+
+2. In the **Customer Service Search** pane, click the **Customers** tab.
+
+3. In the **Search Terms** section, enter the search terms in the fields to narrow your search.
+
+4. In the **Sorting** section, select a sort order by heading from the **Sort By Column** list and set a **Sort Order**.
+
+5. Click **Search**. The search results are listed in the **Customer Search Results** tab on the top right pane.
+
+6. Select a customer account. In the bottom pane, the **Customer** tab appears.
+
+7. In the bottom pane, click the **Data Policies** tab.
+
+8. Select the data policy to remove data points for.
+
+9. Optionally, to view data points for a disabled data policy, select the **Show disabled data policies** checkbox.
+
+10. Click **Delete Policy Data**.
+
+A data point value is only removed if it is indicated as removable by the data policy, and a customer does not have active consent for the same data point recorded in another data policy.

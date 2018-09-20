@@ -390,4 +390,8 @@
 	<bean id="cartItemModifierGroup" scope="prototype" class="com.elasticpath.domain.cartmodifier.impl.CartItemModifierGroupImpl"/>
 	<bean id="cartItemModifierGroupLdf" scope="prototype" class="com.elasticpath.domain.cartmodifier.impl.CartItemModifierGroupLdfImpl"/>
 
+	<!-- Data Policy -->
+	<bean id="dataPoint" scope="prototype" class="com.elasticpath.domain.datapolicy.impl.DataPointImpl"/>
+	<bean id="dataPolicy" scope="prototype" class="com.elasticpath.domain.datapolicy.impl.DataPolicyImpl"/>
+	<bean id="customerConsent" scope="prototype" class="com.elasticpath.domain.datapolicy.impl.CustomerConsentImpl"/>
 </beans>

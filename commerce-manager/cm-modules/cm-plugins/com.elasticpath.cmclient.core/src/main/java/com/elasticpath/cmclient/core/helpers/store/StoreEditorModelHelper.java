@@ -15,10 +15,10 @@ import java.util.Set;
 import org.apache.commons.lang.StringUtils;
 
 import com.elasticpath.base.exception.EpServiceException;
-import com.elasticpath.cmclient.core.ServiceLocator;
 import com.elasticpath.cmclient.core.CoreMessages;
 import com.elasticpath.cmclient.core.CorePlugin;
 import com.elasticpath.cmclient.core.LoginManager;
+import com.elasticpath.cmclient.core.ServiceLocator;
 import com.elasticpath.cmclient.core.service.AuthorizationService;
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.cmuser.CmUser;
@@ -31,9 +31,11 @@ import com.elasticpath.service.cmuser.CmUserService;
 import com.elasticpath.service.command.CommandService;
 import com.elasticpath.service.command.UpdateStoreCommand;
 import com.elasticpath.service.command.UpdateStoreCommandResult;
+import com.elasticpath.service.datapolicy.DataPolicyService;
 import com.elasticpath.service.store.StoreService;
 import com.elasticpath.settings.SettingsService;
 import com.elasticpath.settings.domain.SettingDefinition;
+import com.elasticpath.settings.domain.SettingValue;
 
 /**
  * This class is responsible for store editor model creation, reloading and removing.
@@ -192,6 +194,9 @@ public class StoreEditorModelHelper {
 		model.setStoreThemeSetting(getSettingValue(COMMERCE_STORE_THEME, model));
 		model.setStoreBrowsingSetting(getSettingValue(COMMERCE_STORE_BROWSING, model));
 		model.setStoreAdvancedSearchSetting(getSettingValue(COMMERCE_STORE_ADVANCED_SEARCH, model));
+
+		SettingValue settingValue = settingsService.getSettingValue(DataPolicyService.COMMERCE_STORE_ENABLE_DATA_POLICIES, model.getCode());
+		model.setStoreEnableDataPoliciesSettingEnabled(settingValue != null && settingValue.getBooleanValue());
 	}
 
 	/**
@@ -364,7 +369,7 @@ public class StoreEditorModelHelper {
 	 * @return true if we are changing an open store and other open store has the same url
 	 */
 	boolean isUrlNotUniqueForOpenStore(final StoreEditorModel model) {
-		return StringUtils.isNotEmpty(model.getUrl()) && model.getStoreState().equals(StoreState.OPEN) 
+		return StringUtils.isNotEmpty(model.getUrl()) && model.getStoreState().equals(StoreState.OPEN)
 				&& !storeService.isStoreUrlUniqueForState(model.getStore(), StoreState.OPEN);
 	}
 
@@ -445,6 +450,7 @@ public class StoreEditorModelHelper {
 		settingsValueMap.put(COMMERCE_STORE_THEME, model.getStoreThemeSetting());
 		settingsValueMap.put(COMMERCE_STORE_BROWSING, model.getStoreBrowsingSetting());
 		settingsValueMap.put(COMMERCE_STORE_ADVANCED_SEARCH, model.getStoreAdvancedSearchSetting());
+		settingsValueMap.put(DataPolicyService.COMMERCE_STORE_ENABLE_DATA_POLICIES, model.isStoreEnableDataPoliciesSettingEnabled().toString());
 		processSettingModels(settingsValueMap, model.getMarketingSettings());
 		processSettingModels(settingsValueMap, model.getSystemSettings());
 		return settingsValueMap;

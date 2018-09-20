@@ -32,6 +32,8 @@
 		<mapping-file>META-INF/oauthtoken-orm.xml</mapping-file>
 		<mapping-file>META-INF/paymenttoken-orm.xml</mapping-file>
 		<mapping-file>META-INF/cartitemmodifier-orm.xml</mapping-file>
+		<mapping-file>META-INF/datapolicy-orm.xml</mapping-file>
+		<mapping-file>META-INF/datapoint-value-orm.xml</mapping-file>
 
 		<class>com.elasticpath.domain.attribute.impl.AbstractAttributeValueImpl</class>
 		<class>com.elasticpath.domain.attribute.impl.AttributeGroupAttributeImpl</class>
@@ -279,6 +281,10 @@
 		<class>com.elasticpath.domain.cartmodifier.impl.CartItemModifierGroupImpl</class>
 		<class>com.elasticpath.domain.cartmodifier.impl.CartItemModifierGroupLdfImpl</class>
 
+		<!-- Data Policy -->
+		<class>com.elasticpath.domain.datapolicy.impl.DataPointImpl</class>
+		<class>com.elasticpath.domain.datapolicy.impl.DataPolicyImpl</class>
+		<class>com.elasticpath.domain.datapolicy.impl.CustomerConsentImpl</class>
 
 		<exclude-unlisted-classes>true</exclude-unlisted-classes>
 		

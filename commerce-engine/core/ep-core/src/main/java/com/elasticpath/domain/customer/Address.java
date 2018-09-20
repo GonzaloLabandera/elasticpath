@@ -6,6 +6,8 @@ package com.elasticpath.domain.customer;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
+import com.elasticpath.domain.DatabaseCreationDate;
+import com.elasticpath.domain.DatabaseLastModifiedDate;
 import com.elasticpath.persistence.api.Persistable;
 import com.elasticpath.validation.constraints.NotBlank;
 import com.elasticpath.validation.constraints.ValidCountry;
@@ -14,7 +16,7 @@ import com.elasticpath.validation.constraints.ValidCountry;
  * <code>Address</code> represents a North American address.
  */
 @ValidCountry
-public interface Address extends Persistable {
+public interface Address extends Persistable, DatabaseLastModifiedDate, DatabaseCreationDate {
 
 	/** Maximum length for a short sized field. */
 	int SHORT_MAXLENGTH = 50;

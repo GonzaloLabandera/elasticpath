@@ -17,6 +17,10 @@
 
 	<bean id="cmUserBuilder" class="com.elasticpath.domain.builder.CmUserBuilder" scope="prototype"/>
 
+	<bean id="dataPolicyBuilder" class="com.elasticpath.domain.builder.datapolicy.DataPolicyBuilder" scope="prototype"/>
+
+	<bean id="customerConsentBuilder" class="com.elasticpath.domain.builder.datapolicy.CustomerConsentBuilder" scope="prototype"/>
+
 	<bean id="shoppingContextBuilder" class="com.elasticpath.domain.builder.shopper.ShoppingContextBuilder" scope="prototype">
 		<constructor-arg ref="coreBeanFactory"/>
 	</bean>

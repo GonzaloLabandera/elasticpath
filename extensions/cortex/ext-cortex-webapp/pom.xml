@@ -18,8 +18,8 @@
 	<properties>
 		<!--This can be removed once the parent parent hireachy is resolved to the current project as it is specified at the root-->
 		<tomcat.version>7.0.81</tomcat.version>
-		<dce.version>701.0.0.20171228014437-be854</dce.version>
-		<cortex.version>1.19.0.20171228014437-ed0c30</cortex.version>
+		<dce.version>702.0.0-SNAPSHOT</dce.version>
+		<cortex.version>1.20.0.20180327150040-9738f</cortex.version>
 
 		<!-- logback -->
 		<ep.log.to.logback><![CDATA[<appender-ref ref="CONSOLE" /><appender-ref ref="FILE" />]]></ep.log.to.logback>
@@ -920,6 +920,12 @@
 		<dependency>
 			<groupId>com.elasticpath.rest.resource.cortex</groupId>
 			<artifactId>ep-resource-discounts</artifactId>
+			<version>${cortex.ep.integration.version}</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.elasticpath.rest.resource.cortex</groupId>
+			<artifactId>ep-resource-data-policies</artifactId>
 			<version>${cortex.ep.integration.version}</version>
 			<scope>provided</scope>
 		</dependency>
