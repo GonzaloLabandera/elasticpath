@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans
+		xmlns="http://www.springframework.org/schema/beans"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xsi:schemaLocation="
+			http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		">
+
+	<import resource="../../spring/dataaccess/openjpa/openjpa.xml" />
+
+	<import resource="../../spring/prototypes/prototypes.xml"/>
+	
+	<import resource="../../spring/models/domainSpecifications.xml" />
+
+    <import resource="../../spring/models/domainModel.xml" />
+
+    <import resource="../../spring/dataaccess/dao.xml" />
+
+    <import resource="../../spring/service/service.xml" />
+
+    <import resource="../../spring/service/checkout.xml" />
+
+	<import resource="classpath:spring/settings/ep-settings.xml" />
+
+    <import resource="../../spring/commons/util-config.xml" />
+
+	<import resource="../../spring/commons/validators.xml" />
+
+	<import resource="classpath*:/META-INF/elasticpath/conf/spring/plugin.xml"/>
+
+    <bean id="servicePreInterceptors" class="java.util.ArrayList" />
+
+    <bean id="searchHostLocator" class="com.elasticpath.service.search.impl.SettingsSearchHostLocatorImpl">
+        <property name="settingsReader" ref="settingsReader" />
+    </bean>
+
+    <bean id="searchConfigFactory" class="com.elasticpath.service.search.impl.DefaultSearchConfigFactoryImpl">
+        <property name="beanFactory" ref="coreBeanFactory" />
+        <property name="searchHostLocator" ref="searchHostLocator" />
+    </bean>
+
+	<bean id="intervalRefreshStrategy" class="com.elasticpath.settings.refreshstrategy.impl.IntervalRefreshStrategyImpl">
+		<property name="settingsReader" ref="settingsService"/>
+		<property name="timeoutParamKey" value="timeout"/>
+	</bean>
+
+	<bean id="immediateRefreshStrategy" class="com.elasticpath.settings.refreshstrategy.impl.ImmediateRefreshStrategyImpl">
+		<property name="settingsReader" ref="settingsService" />
+	</bean>
+
+	<bean id="applicationLifetimeRefreshStrategy" class="com.elasticpath.settings.refreshstrategy.impl.ApplicationLifetimeRefreshStrategyImpl">
+		<property name="settingsReader" ref="settingsService" />
+	</bean>
+	
+	<bean id="cachedSettingsReader" class="com.elasticpath.settings.impl.CachedSettingsReaderImpl" >
+		<property name="settingsService" ref="settingsService" />
+		<property name="refreshStrategies">
+			<map>
+				<entry key="interval" value-ref="intervalRefreshStrategy"/>
+				<entry key="immediate" value-ref="immediateRefreshStrategy"/>
+				<entry key="application" value-ref="applicationLifetimeRefreshStrategy"/>
+			</map>
+		</property>
+		<property name="refreshStrategyKey" value="apiRefreshStrategy"/>
+		<property name="defaultRefreshStrategy" ref="immediateRefreshStrategy"/>
+	</bean>
+	
+	<alias name="cachedSettingsReader" alias="settingsReader" />
+
+	<bean id="messageSourceCache" class="com.elasticpath.commons.util.impl.MessageSourceCacheImpl" init-method="init">
+	    <property name="assetRepository" ref="assetRepository"/>
+	    <property name="defaultLanguage" value="en"/>
+	</bean>
+	
+	<bean id="globalMessageSource" class="org.springframework.context.support.ReloadableResourceBundleMessageSource">
+	    <property name="basenames">
+	        <list>
+	            <value>org.springframework.security/messages</value>
+	        </list>
+	    </property>
+	    <property name="defaultEncoding" value="UTF-8"/>
+	</bean>
+
+	<bean id="storeMessageSource" class="com.elasticpath.commons.util.impl.StoreMessageSourceImpl">
+	    <property name="messageSourceCache" ref="messageSourceCache"/>
+	    <property name="globalMessageSource" ref="globalMessageSource"/>
+	    <property name="assetRepository" ref="assetRepository"/>
+	    <property name="settingsReader" ref="settingsReader"/>
+	</bean>
+
+	<!-- Remember: <alias name="FromBean" alias="ToBean"/> -->
+	<alias name="cachedTagDefinitionReader" alias="tagDefinitionReader"/>
+
+</beans>

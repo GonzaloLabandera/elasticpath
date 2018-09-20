@@ -1,0 +1,43 @@
+# Common rules for all environments
+# ---------------------------------
+
+# Ignored files #
+*.class
+*.orig
+*.~
+*.bak
+*.iml
+.classpath
+.project
+.springBeans
+.checkstyle
+.metadata
+.pmd
+.pmdruleset
+.ruleset
+rebel.xml
+pom.xml.versionsBackup
+
+# Ignored directories #
+.idea/
+.settings/
+target/
+
+# Commerce Engine & Extensions
+# ----------------------------
+
+# Ignored files #
+.openjpaenhancer
+ImportExport-*.log
+velocity.log
+MANIFEST.MF
+ep-sample-data/src/main/resources/sample-data/importexport/summary.log
+
+# Ignored directories #
+osgi-wrappers/com.elasticpath.cmclient.*libs/lib/
+*/*/ep-dcapi-core-wrapper-epcommerce/lib/
+jms/activemq-broker/overlays/
+
+# Exceptions #
+!**/src/*/java/com/elasticpath/tools/sync/target/
+

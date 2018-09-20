@@ -1,0 +1,8 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: %fragmentName
+Bundle-SymbolicName: com.elasticpath.cmclient.admin.shipping.nl1
+Bundle-Version: 701.0.0.20171228014437-c8fcb
+Bundle-Vendor: %fragmentProvider
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Fragment-Host: com.elasticpath.cmclient.admin.shipping

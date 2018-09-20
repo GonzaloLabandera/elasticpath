@@ -1,0 +1,50 @@
+# Common rules for all environments
+# ---------------------------------
+
+# Ignored files #
+*.class
+*.orig
+*.~
+*.bak
+*.iml
+.classpath
+.project
+.springBeans
+.checkstyle
+.metadata
+.pmd
+.pmdruleset
+.ruleset
+rebel.xml
+pom.xml.versionsBackup
+pom.xmle
+settings.xmle
+dependency-reduced-pom.xml
+
+# Ignored directories #
+.idea/
+.settings/
+target/
+
+# Commerce Engine & Extensions
+# ----------------------------
+
+# Ignored files #
+.openjpaenhancer
+ImportExport-*.log
+velocity.log
+
+# Ignore Manifest file, except for those in cm, because they are necessary for cm plugins and tycho
+**/MANIFEST.MF
+!cm/**/MANIFEST.MF
+
+# Ignored directories #
+*/*/ep-dcapi-core-wrapper-epcommerce/lib/
+jms/activemq-broker/overlays/
+
+# Generated CM default CSS
+cm/ext-plugins/branding/themes/default.css*
+
+# Exceptions #
+!**/src/*/java/com/elasticpath/tools/sync/target/
+

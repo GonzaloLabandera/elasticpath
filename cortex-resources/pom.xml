@@ -1,0 +1,292 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>com.elasticpath</groupId>
+		<artifactId>grandparent</artifactId>
+		<version>101</version>
+	</parent>
+
+	<groupId>com.elasticpath.rest.resource</groupId>
+	<artifactId>cortex-resource-parent</artifactId>
+	<packaging>pom</packaging>
+	<version>701.0.0.20171228014437-2e075</version>
+	<name>EP ∷ Cortex Integration</name>
+
+	<description>Elastic Path REST - Rest Resources parent</description>
+
+	<modules>
+		<module>rest-resources-api</module>
+		<module>rest-resources</module>
+		<module>rest-resources-epcommerce</module>
+	</modules>
+
+	<organization>
+		<name>Elastic Path Software, Inc</name>
+		<url>http://www.elasticpath.com</url>
+	</organization>
+
+	<issueManagement>
+		<system>JIRA</system>
+		<url>http://jira.elasticpath.com</url>
+	</issueManagement>
+
+	<properties>
+		<!--EP versions-->
+		<cortex-api.version>1.19.0.20171228014437-a84d7</cortex-api.version>
+		<cortex.version>1.19.0.20171228014437-ed0c30</cortex.version>
+		<dce.version>701.0.0.20171228014437-be854</dce.version>
+		<helix-api.version>1.2.0.20171228014437-73ec6</helix-api.version>
+		<helix-validator.version>1.2.0.20171228014437-66f3a</helix-validator.version>
+
+		<!--Groovy-->
+		<groovy-all.version>2.4.5</groovy-all.version>
+		<groovy-eclipse-batch.version>2.4.3-01</groovy-eclipse-batch.version>
+		<groovy-eclipse-compiler.version>2.9.2-01</groovy-eclipse-compiler.version>
+
+		<!--3rd party versions-->
+		<javassist.version>3.20.0-GA</javassist.version>
+		<junit.version>4.12</junit.version>
+		<mockito.version>1.10.19</mockito.version>
+		<osgi.core.version>6.0.0</osgi.core.version>
+
+		<!-- maven plugins -->
+		<sling-plugin.version>2.1.0</sling-plugin.version>
+		<jacoco-plugin.version>0.7.5.201505241946</jacoco-plugin.version>
+
+		<!--Jacoco-->
+		<jacoco.instruction.covered-ratio>0.90</jacoco.instruction.covered-ratio>
+		<jacoco.branch.covered-ratio>0.90</jacoco.branch.covered-ratio>
+		<jacoco.line.covered-ratio>0.90</jacoco.line.covered-ratio>
+		<jacoco.complexity.covered-ratio>0.90</jacoco.complexity.covered-ratio>
+		<jacoco.method.covered-ratio>0.90</jacoco.method.covered-ratio>
+		<jacoco.class.covered-ratio>0.90</jacoco.class.covered-ratio>
+	</properties>
+
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>org.osgi</groupId>
+				<artifactId>osgi.core</artifactId>
+				<version>${osgi.core.version}</version>
+				<scope>provided</scope>
+			</dependency>
+			<dependency>
+				<groupId>com.elasticpath.rest.definitions</groupId>
+				<artifactId>ep-resource-base-api</artifactId>
+				<version>${cortex.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.elasticpath.rest</groupId>
+				<artifactId>ep-rest-api</artifactId>
+				<version>${cortex-api.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.elasticpath.rest</groupId>
+				<artifactId>ep-relos-legacy</artifactId>
+				<version>${cortex.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.elasticpath.rest.helix</groupId>
+				<artifactId>repository-api</artifactId>
+				<version>${helix-api.version}</version>
+			</dependency>
+			<!-- Test -->
+			<dependency>
+				<groupId>junit</groupId>
+				<artifactId>junit</artifactId>
+				<version>${junit.version}</version>
+				<scope>test</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.mockito</groupId>
+				<artifactId>mockito-core</artifactId>
+				<version>${mockito.version}</version>
+				<scope>test</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.hamcrest</groupId>
+				<artifactId>hamcrest-library</artifactId>
+				<version>${hamcrest.version}</version>
+				<scope>test</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.hamcrest</groupId>
+				<artifactId>hamcrest-core</artifactId>
+				<version>${hamcrest.version}</version>
+				<scope>test</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.codehaus.groovy</groupId>
+				<artifactId>groovy-all</artifactId>
+				<version>${groovy-all.version}</version>
+				<scope>test</scope>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
+	<build>
+		<pluginManagement>
+			<plugins>
+				<plugin>
+					<groupId>org.jacoco</groupId>
+					<artifactId>jacoco-maven-plugin</artifactId>
+					<version>${jacoco-plugin.version}</version>
+					<executions>
+						<execution>
+							<id>default-prepare-agent</id>
+							<goals>
+								<goal>prepare-agent</goal>
+							</goals>
+						</execution>
+						<execution>
+							<id>default-check</id>
+							<goals>
+								<goal>check</goal>
+							</goals>
+							<configuration>
+								<rules>
+									<rule>
+										<element>BUNDLE</element>
+										<limits>
+											<limit>
+												<counter>INSTRUCTION</counter>
+												<value>COVEREDRATIO</value>
+												<minimum>${jacoco.instruction.covered-ratio}</minimum>
+											</limit>
+											<limit>
+												<counter>BRANCH</counter>
+												<value>COVEREDRATIO</value>
+												<minimum>${jacoco.branch.covered-ratio}</minimum>
+											</limit>
+											<limit>
+												<counter>LINE</counter>
+												<value>COVEREDRATIO</value>
+												<minimum>${jacoco.line.covered-ratio}</minimum>
+											</limit>
+											<limit>
+												<counter>COMPLEXITY</counter>
+												<value>COVEREDRATIO</value>
+												<minimum>${jacoco.complexity.covered-ratio}</minimum>
+											</limit>
+											<limit>
+												<counter>METHOD</counter>
+												<value>COVEREDRATIO</value>
+												<minimum>${jacoco.method.covered-ratio}</minimum>
+											</limit>
+											<limit>
+												<counter>CLASS</counter>
+												<value>COVEREDRATIO</value>
+												<minimum>${jacoco.class.covered-ratio}</minimum>
+											</limit>
+										</limits>
+									</rule>
+								</rules>
+							</configuration>
+						</execution>
+						<execution>
+							<id>default-report</id>
+							<phase>prepare-package</phase>
+							<goals>
+								<goal>report</goal>
+							</goals>
+						</execution>
+					</executions>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-compiler-plugin</artifactId>
+					<version>${maven.compiler.plugin.version}</version>
+					<configuration>
+						<source>1.8</source>
+						<target>1.8</target>
+						<compilerArgs>
+							<arg>-Xlint:all</arg>
+						</compilerArgs>
+					</configuration>
+				</plugin>
+				<plugin>
+					<artifactId>maven-compiler-plugin</artifactId>
+					<executions>
+						<execution>
+							<!-- Override only the testCompile execution, as javac is still the desired compiler for production code -->
+							<id>default-testCompile</id>
+							<configuration>
+								<!-- Groovy compilation doesn't seem to be compatible with -Werror and -Xlint:all -->
+								<compilerArgs combine.self="override"/>
+								<compilerId>groovy-eclipse-compiler</compilerId>
+							</configuration>
+						</execution>
+					</executions>
+					<dependencies>
+						<dependency>
+							<groupId>org.codehaus.groovy</groupId>
+							<artifactId>groovy-eclipse-compiler</artifactId>
+							<version>${groovy-eclipse-compiler.version}</version>
+						</dependency>
+						<dependency>
+							<groupId>org.codehaus.groovy</groupId>
+							<artifactId>groovy-eclipse-batch</artifactId>
+							<version>${groovy-eclipse-batch.version}</version>
+						</dependency>
+					</dependencies>
+				</plugin>
+			</plugins>
+		</pluginManagement>
+	</build>
+
+	<profiles>
+		<profile>
+			<id>osgi-deploy</id>
+			<!-- This profile must enabled with ep-developer profile so that the felix console bundles are installed. -->
+			<properties>
+				<cortex.deploy.url>http://localhost:8080/cortex/system/console/install</cortex.deploy.url>
+				<felix.admin.user>admin</felix.admin.user>
+				<felix.admin.password>admin</felix.admin.password>
+			</properties>
+			<build>
+				<pluginManagement>
+					<plugins>
+						<plugin>
+							<groupId>org.apache.sling</groupId>
+							<artifactId>maven-sling-plugin</artifactId>
+							<version>${sling-plugin.version}</version>
+						</plugin>
+					</plugins>
+				</pluginManagement>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.sling</groupId>
+						<artifactId>maven-sling-plugin</artifactId>
+						<executions>
+							<execution>
+								<id>install-to-felix</id>
+								<phase>install</phase>
+								<goals>
+									<goal>install</goal>
+								</goals>
+								<configuration>
+									<slingUrl>${cortex.deploy.url}</slingUrl>
+									<user>${felix.admin.user}</user>
+									<password>${felix.admin.password}</password>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
+
+	<distributionManagement>
+		<repository>
+			<id>ep-releases</id>
+			<url>${ep.releases.repository.url}</url>
+		</repository>
+		<snapshotRepository>
+			<id>ep-snapshots</id>
+			<url>${ep.snapshots.repository.url}</url>
+		</snapshotRepository>
+	</distributionManagement>
+</project>

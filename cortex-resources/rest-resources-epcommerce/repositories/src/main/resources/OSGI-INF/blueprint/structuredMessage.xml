@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	   xmlns:util="http://www.springframework.org/schema/util"
+	   xsi:schemaLocation="
+				http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+				http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-3.0.xsd
+		">
+
+	<bean id="structuredErrorMessageTransformerTemplate"
+		  class="com.elasticpath.rest.resource.integration.epcommerce.repository.transform.impl.StructuredErrorMessageTransformerImpl"
+		  abstract="true">
+		<property name="fieldMap">
+			<map>
+				<entry key="customerProfile.profileValueMap[CP_FIRST_NAME]" value="given-name"/>
+				<entry key="customerProfile.profileValueMap[CP_LAST_NAME]" value="family-name"/>
+				<entry key="customerProfile.profileValueMap[CP_EMAIL]" value="email"/>
+				<entry key="firstName" value="given-name"/>
+				<entry key="lastName" value="family-name"/>
+				<entry key="country" value="country-name"/>
+				<entry key="city" value="locality"/>
+				<entry key="zipOrPostalCode" value="postal-code"/>
+				<entry key="subCountry" value="region"/>
+				<entry key="street1" value="street-address"/>
+			</map>
+		</property>
+	</bean>
+
+	<bean id="structuredErrorMessageTransformer" parent="structuredErrorMessageTransformerTemplate"/>
+
+</beans>

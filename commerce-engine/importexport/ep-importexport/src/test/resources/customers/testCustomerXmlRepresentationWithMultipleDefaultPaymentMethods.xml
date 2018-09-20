@@ -1,0 +1,32 @@
+<customer guid="testGuid">
+	<status>0</status>
+	<addresses/>
+	<payment_methods>
+		<credit_card type="testCardType" expiry_year="testExpiryYear" expiry_month="testExpiryMonth" guid="testIdentity">
+			<holder_name>testCardHolderName</holder_name>
+			<card_number>testIdentity</card_number>
+			<start_year>testStartYear</start_year>
+			<start_month>testStartMonth</start_month>
+			<issue_number>1</issue_number>
+		</credit_card>
+		<payment_token>
+			<payment_token_display_value>testPaymentTokenDisplayValue</payment_token_display_value>
+			<payment_token_value>testPaymentTokenValue</payment_token_value>
+		</payment_token>
+	</payment_methods>
+	<default_payment_method>
+		<credit_card type="testCardType" expiry_year="testExpiryYear" expiry_month="testExpiryMonth" guid="testIdentity">
+			<holder_name>testCardHolderName</holder_name>
+			<card_number>testIdentity</card_number>
+			<start_year>testStartYear</start_year>
+			<start_month>testStartMonth</start_month>
+			<issue_number>1</issue_number>
+		</credit_card>
+		<payment_token>
+			<payment_token_display_value>testPaymentTokenDisplayValue</payment_token_display_value>
+			<payment_token_value>testPaymentTokenValue</payment_token_value>
+		</payment_token>
+	</default_payment_method>
+	<groups/>
+	<customer_profile/>
+</customer>

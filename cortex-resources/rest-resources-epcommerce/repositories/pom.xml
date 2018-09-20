@@ -1,0 +1,254 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>com.elasticpath.rest.integration</groupId>
+		<artifactId>cortex-ep-integration-parent</artifactId>
+		<version>701.0.0.20171228014437-2e075</version>
+	</parent>
+
+	<groupId>com.elasticpath.rest.integration.epcommerce</groupId>
+	<artifactId>ep-rest-repositories-epcommerce</artifactId>
+	<packaging>bundle</packaging>
+	<name>EP ∷ Resources ʃ Commerce Engine Repositories</name>
+	<description>Elastic Path REST - Resources Integration Commerce Engine Repositories</description>
+
+	<properties>
+		<aspectj.rt.version>1.8.9</aspectj.rt.version>
+		<aspectj.maven.plugin.version>1.8</aspectj.maven.plugin.version>
+		<aspectj.compiliance.level>1.8</aspectj.compiliance.level>
+
+		<jacoco.instruction.covered-ratio>0.81</jacoco.instruction.covered-ratio>
+		<jacoco.branch.covered-ratio>0.74</jacoco.branch.covered-ratio>
+		<jacoco.line.covered-ratio>0.82</jacoco.line.covered-ratio>
+		<jacoco.complexity.covered-ratio>0.78</jacoco.complexity.covered-ratio>
+		<jacoco.method.covered-ratio>0.80</jacoco.method.covered-ratio>
+	</properties>
+
+	<dependencies>
+		<dependency>
+			<groupId>org.osgi</groupId>
+			<artifactId>osgi.core</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>com.elasticpath.rest.helix</groupId>
+			<artifactId>repository-api</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>com.elasticpath.rest.integration.epcommerce</groupId>
+			<artifactId>ep-rest-commons-epcommerce</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>com.elasticpath.rest.definitions</groupId>
+			<artifactId>ep-resource-coupons-api</artifactId>
+			<version>701.0.0.20171228014437-2e075</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.elasticpath.rest.definitions</groupId>
+			<artifactId>ep-resource-orders-api</artifactId>
+			<version>701.0.0.20171228014437-2e075</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.elasticpath.rest.definitions</groupId>
+			<artifactId>ep-resource-wishlists-api</artifactId>
+			<version>701.0.0.20171228014437-2e075</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.elasticpath.rest.definitions</groupId>
+			<artifactId>ep-resource-registrations-api</artifactId>
+			<version>701.0.0.20171228014437-2e075</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.elasticpath.rest.definitions</groupId>
+			<artifactId>ep-resource-prices-api</artifactId>
+			<version>701.0.0.20171228014437-2e075</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.elasticpath.rest.definitions</groupId>
+			<artifactId>ep-resource-geographies-api</artifactId>
+			<version>701.0.0.20171228014437-2e075</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.elasticpath.rest.definitions</groupId>
+			<artifactId>ep-resource-taxes-api</artifactId>
+			<version>701.0.0.20171228014437-2e075</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.elasticpath.rest.definitions</groupId>
+			<artifactId>ep-resource-totals-api</artifactId>
+			<version>701.0.0.20171228014437-2e075</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.elasticpath.rest.definitions</groupId>
+			<artifactId>ep-resource-emails-api</artifactId>
+			<version>701.0.0.20171228014437-2e075</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.elasticpath.rest.definitions</groupId>
+			<artifactId>ep-resource-availabilities-api</artifactId>
+			<version>701.0.0.20171228014437-2e075</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.elasticpath.rest.definitions</groupId>
+			<artifactId>ep-resource-discounts-api</artifactId>
+			<version>701.0.0.20171228014437-2e075</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.elasticpath.rest.definitions</groupId>
+			<artifactId>ep-resource-searches-api</artifactId>
+			<version>701.0.0.20171228014437-2e075</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.elasticpath.rest.definitions</groupId>
+			<artifactId>ep-resource-lookups-api</artifactId>
+			<version>701.0.0.20171228014437-2e075</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.elasticpath.rest.definitions</groupId>
+			<artifactId>ep-resource-promotions-api</artifactId>
+			<version>701.0.0.20171228014437-2e075</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.elasticpath.rest.definitions</groupId>
+			<artifactId>ep-resource-recommendations-api</artifactId>
+			<version>701.0.0.20171228014437-2e075</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.elasticpath.rest</groupId>
+			<artifactId>ep-rest-spi</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>com.elasticpath</groupId>
+			<artifactId>ep-core</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.servicemix.bundles</groupId>
+			<artifactId>org.apache.servicemix.bundles.aspectj</artifactId>
+		</dependency>
+
+		<!-- Test -->
+		<dependency>
+			<groupId>com.elasticpath.rest</groupId>
+			<artifactId>ep-rest-spi-impl</artifactId>
+			<version>${cortex.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.elasticpath.rest.tests</groupId>
+			<artifactId>ep-rest-test-utils</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.mockito</groupId>
+			<artifactId>mockito-core</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.hamcrest</groupId>
+			<artifactId>hamcrest-library</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.aspectj</groupId>
+			<artifactId>aspectjrt</artifactId>
+			<version>${aspectj.rt.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.codehaus.groovy</groupId>
+			<artifactId>groovy-all</artifactId>
+		</dependency>
+	</dependencies>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>aspectj-maven-plugin</artifactId>
+				<version>${aspectj.maven.plugin.version}</version>
+				<configuration>
+					<showWeaveInfo>true</showWeaveInfo>
+					<complianceLevel>${aspectj.compiliance.level}</complianceLevel>
+					<verbose>true</verbose>
+					<sources>
+						<source>
+							<basedir>${project.basedir}/src/main/java</basedir>
+							<includes>
+								<include>**/CacheRemoveAspect.java</include>
+								<include>**/CacheResultAspect.java</include>
+							</includes>
+						</source>
+					</sources>
+				</configuration>
+				<executions>
+					<execution>
+						<goals>
+							<goal>compile</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.felix</groupId>
+				<artifactId>maven-bundle-plugin</artifactId>
+				<configuration>
+					<instructions>
+						<Bundle-Activator>
+							com.elasticpath.rest.resource.integration.epcommerce.repository.weaving.Activator
+						</Bundle-Activator>
+						<Import-Package>
+							org.aopalliance.aop,
+							org.springframework.aop,
+							org.springframework.aop.framework,
+							org.springframework.context.annotation,
+							org.springframework.context.weaving,
+							com.elasticpath.rest.id.transform.type,
+							org.aspectj.runtime.internal,
+							com.google.common.annotations,
+							org.aspectj.runtime.reflect,
+							com.sun.el,
+							*
+						</Import-Package>
+					</instructions>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-checkstyle-plugin</artifactId>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-pmd-plugin</artifactId>
+			</plugin>
+			<plugin>
+				<groupId>org.jacoco</groupId>
+				<artifactId>jacoco-maven-plugin</artifactId>
+			</plugin>
+		</plugins>
+	</build>
+</project>

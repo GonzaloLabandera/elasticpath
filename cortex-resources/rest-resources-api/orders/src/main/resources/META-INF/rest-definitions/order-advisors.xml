@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<definitions xmlns="http://www.elasticpath.com/schema/rest/0.5">
+
+	<family>
+		<name>orders</name>
+		<description><![CDATA[ Advisors for the order]]></description>
+
+		<advisor>
+			<name>order-email-info</name>
+			<description>Advisor for the email</description>
+			<linked-to>email-info</linked-to>
+			<advises>order</advises>
+		</advisor>
+
+		<advisor>
+			<name>order-billing-info</name>
+			<description>Advisor for the billing address</description>
+			<linked-to>billingaddress-info</linked-to>
+			<advises>order</advises>
+		</advisor>
+
+	</family>
+</definitions>

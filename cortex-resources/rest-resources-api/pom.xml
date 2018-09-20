@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>com.elasticpath.rest.resource</groupId>
+		<artifactId>cortex-resource-parent</artifactId>
+		<version>701.0.0.20171228014437-2e075</version>
+	</parent>
+
+	<groupId>com.elasticpath.rest.definitions</groupId>
+	<artifactId>rest-resources-api</artifactId>
+	<packaging>pom</packaging>
+
+	<name>EP ∷ Resources API Parent</name>
+	<description>Elastic Path REST - Resources API</description>
+
+	<modules>
+		<module>addresses</module>
+		<module>availabilities</module>
+		<module>carts</module>
+		<module>coupons</module>
+		<module>discounts</module>
+		<module>emails</module>
+		<module>geographies</module>
+		<module>itemdefinitions</module>
+		<module>itemselections</module>
+		<module>items</module>
+		<module>lookups</module>
+		<module>navigations</module>
+		<module>orders</module>
+		<module>payment-methods</module>
+		<module>payment-tokens</module>
+		<module>prices</module>
+		<module>profiles</module>
+		<module>promotions</module>
+		<module>purchases</module>
+		<module>recommendations</module>
+		<module>registrations</module>
+		<module>schema-reference-doc</module>
+		<module>searches</module>
+		<module>shipment-details</module>
+		<module>shipments</module>
+		<module>taxes</module>
+		<module>totals</module>
+		<module>unreleased-plans</module>
+		<module>wishlists</module>
+	</modules>
+
+	<dependencies>
+		<dependency>
+			<groupId>org.osgi</groupId>
+			<artifactId>osgi.core</artifactId>
+			<version>${osgi.core.version}</version>
+			<scope>provided</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>com.elasticpath.rest</groupId>
+			<artifactId>ep-rest-api</artifactId>
+			<version>${cortex-api.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.elasticpath.rest</groupId>
+			<artifactId>ep-rest-spi</artifactId>
+			<version>${cortex.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>com.elasticpath.rest.definitions</groupId>
+			<artifactId>ep-rest-definitions-schema</artifactId>
+			<version>${cortex.version}</version>
+			<!-- contains the XSD -->
+		</dependency>
+
+	</dependencies>
+
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>com.elasticpath.rest.definitions</groupId>
+				<artifactId>ep-resource-base-api</artifactId>
+				<version>${cortex.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.elasticpath.rest.definitions</groupId>
+				<artifactId>ep-resource-collections-api</artifactId>
+				<version>${cortex.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.elasticpath.rest.definitions</groupId>
+				<artifactId>ep-resource-controls-api</artifactId>
+				<version>${cortex.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.elasticpath.rest</groupId>
+				<artifactId>ep-relos-legacy</artifactId>
+				<version>${cortex.version}</version>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
+
+	<build>
+		<resources>
+			<resource>
+				<directory>${basedir}/src/main/resources</directory>
+			</resource>
+		</resources>
+
+		<pluginManagement>
+			<plugins>
+				<plugin>
+					<groupId>com.elasticpath.rest.definitions</groupId>
+					<artifactId>api-generator-maven-plugin</artifactId>
+					<version>${cortex.version}</version>
+					<executions>
+						<execution>
+							<phase>process-resources</phase>
+							<goals>
+								<goal>generate-sources</goal>
+							</goals>
+						</execution>
+					</executions>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-javadoc-plugin</artifactId>
+					<configuration>
+						<additionalparam>-Xdoclint:none</additionalparam>
+					</configuration>
+				</plugin>
+			</plugins>
+		</pluginManagement>
+	</build>
+</project>

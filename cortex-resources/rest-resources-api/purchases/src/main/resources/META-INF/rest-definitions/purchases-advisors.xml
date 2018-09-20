@@ -1,0 +1,52 @@
+<?xml version="1.0"?>
+<definitions xmlns="http://www.elasticpath.com/schema/rest/0.5">
+
+	<family>
+		<name>purchases</name>
+		<description><![CDATA[Advisors on the purchase form]]></description>
+
+		<advisor>
+			<name>purchase-form-email-info</name>
+			<description>Advisor on the purchase form for missing email on the order</description>
+			<linked-to>email-info</linked-to>
+			<blocks>create-purchase-form</blocks>
+		</advisor>
+
+		<advisor>
+			<name>purchase-form-billing-info</name>
+			<description>Advisor on the purchase form for missing billing address on the order</description>
+			<linked-to>billingaddress-info</linked-to>
+			<blocks>create-purchase-form</blocks>
+		</advisor>
+
+		<advisor>
+			<name>purchase-form-availability</name>
+			<description>Order check that items are available</description>
+			<linked-to>availabilities.availability-for-cart-line-item</linked-to>
+			<blocks>create-purchase-form</blocks>
+		</advisor>
+
+		<advisor>
+			<name>purchase-form-is-cart-empty</name>
+			<description>Order check that cart is not empty.</description>
+			<blocks>create-purchase-form</blocks>
+		</advisor>
+
+		<!--FIXME This advisor must move to the Payment Method resource once it is converted-->
+		<advisor>
+			<name>purchase-form-payment-method-info</name>
+			<description>Advisor on the purchase form for missing payment method information</description>
+			<linked-to>paymentmethod-info</linked-to>
+			<blocks>create-purchase-form</blocks>
+		</advisor>
+
+		<!--Advise on order-->
+		<advisor>
+			<name>order-payment-method-info</name>
+			<description>Advisor for the payment mehtod</description>
+			<linked-to>paymentmethod-info</linked-to>
+			<advises>orders.order</advises>
+		</advisor>
+
+	</family>
+</definitions>

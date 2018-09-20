@@ -1,0 +1,11 @@
+velocity.log*
+workspace
+target/
+.project
+.settings
+.pmdruleset.xml
+*.iml
+.idea
+*.orig
+cm-libs/com.elasticpath.cmclient.*libs/lib/
+
