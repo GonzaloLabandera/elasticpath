@@ -3,10 +3,7 @@
  */
 package com.elasticpath.domain.catalog.impl;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.Locale;
 
@@ -104,12 +101,14 @@ public class BrandImplTest {
 		BrandImpl brand = createBrandImplWithDisplayNameInDefaultLocale();
 		
 		//fallback explicitly requested
-		assertEquals("Should fall back if directed to do so", 
-				DISPLAYNAME_DEFAULT_LOCALE, brand.getDisplayName(NON_DEFAULT_LOCALE, true));
+		assertThat(brand.getDisplayName(NON_DEFAULT_LOCALE, true))
+			.as("Should fall back if directed to do so")
+			.isEqualTo(DISPLAYNAME_DEFAULT_LOCALE);
 		
 		//fallback implicitly requested
-		assertEquals("Should fall back to Catalog's default locale if display name is not available in given locale",
-				DISPLAYNAME_DEFAULT_LOCALE, brand.getDisplayName(NON_DEFAULT_LOCALE));		
+		assertThat(brand.getDisplayName(NON_DEFAULT_LOCALE))
+			.as("Should fall back to Catalog's default locale if display name is not available in given locale")
+			.isEqualTo(DISPLAYNAME_DEFAULT_LOCALE);
 	}
 	
 	/**
@@ -122,11 +121,12 @@ public class BrandImplTest {
 		BrandImpl brand = createBrandImplWithDisplayNameInDefaultAndOtherLocale();
 		
 		//Base case
-		assertEquals(DISPLAYNAME_DEFAULT_LOCALE, brand.getDisplayName(CATALOG_DEFAULT_LOCALE, false));
+		assertThat(brand.getDisplayName(CATALOG_DEFAULT_LOCALE, false)).isEqualTo(DISPLAYNAME_DEFAULT_LOCALE);
 		
 		//Doesn't fall back if not necessary
-		assertEquals("Should not fall back if not necessary", 
-				DISPLAYNAME_OTHER_LOCALE, brand.getDisplayName(NON_DEFAULT_LOCALE, true));
+		assertThat(brand.getDisplayName(NON_DEFAULT_LOCALE, true))
+			.as("Should not fall back if not necessary")
+			.isEqualTo(DISPLAYNAME_OTHER_LOCALE);
 	}
 	
 	/**
@@ -135,8 +135,10 @@ public class BrandImplTest {
 	@Test
 	public void testGetDisplayNameDoesNotFallBackIfForbidden() {
 		BrandImpl brand = createBrandImplWithDisplayNameInDefaultLocale();
-		
-		assertEquals("Should not fall back if forbidden", null, brand.getDisplayName(NON_DEFAULT_LOCALE, false));
+
+		assertThat(brand.getDisplayName(NON_DEFAULT_LOCALE, false))
+			.as("Should not fall back if forbidden")
+			.isNull();
 	}
 	
 	/**
@@ -144,9 +146,9 @@ public class BrandImplTest {
 	 */
 	@Test
 	public void testGetSetImageUrl() {
-		assertNull(brand.getImageUrl());
+		assertThat(brand.getImageUrl()).isNull();
 		brand.setImageUrl("images/logo.jpg");
-		assertEquals("images/logo.jpg", brand.getImageUrl());
+		assertThat(brand.getImageUrl()).isEqualTo("images/logo.jpg");
 	}
 
 	/**
@@ -158,11 +160,11 @@ public class BrandImplTest {
 		this.brand.setGuid(gUid);
 		Brand brandToCompare = new BrandImpl();
 		brandToCompare.setGuid(gUid);
-		assertEquals(brand, brandToCompare);
+		assertThat(brandToCompare).isEqualTo(brand);
 
 		String anotherGuid = "Another_GUID";
 		brandToCompare.setGuid(anotherGuid);
-		assertFalse(brand.equals(brandToCompare));
+		assertThat(brand).isNotEqualTo(brandToCompare);
 	}
 	
 	/**
@@ -170,15 +172,15 @@ public class BrandImplTest {
 	 */
 	@Test
 	public void testGetSetCode() {
-		assertNull(brand.getCode());
+		assertThat(brand.getCode()).isNull();
 		final String code1 = "testBrand1";
 		brand.setCode(code1);
-		assertSame(code1, brand.getCode());
-		assertSame(code1, brand.getGuid());
+		assertThat(brand.getCode()).isEqualTo(code1);
+		assertThat(brand.getGuid()).isEqualTo(code1);
 		
 		final String code2 = "testBrand2";
 		brand.setGuid(code2);
-		assertSame(code2, brand.getCode());
-		assertSame(code2, brand.getGuid());
+		assertThat(brand.getCode()).isEqualTo(code2);
+		assertThat(brand.getGuid()).isEqualTo(code2);
 	}	
 }

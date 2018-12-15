@@ -3,23 +3,24 @@
  */
 package com.elasticpath.importexport.common.adapters.products.data;
 
-import static junit.framework.TestCase.assertTrue;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertSame;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.entry;
+import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.jmock.Expectations;
-import org.jmock.integration.junit4.JUnitRuleMockery;
+import com.google.common.collect.ImmutableList;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.elasticpath.commons.beanframework.BeanFactory;
 import com.elasticpath.commons.constants.ContextIdNames;
@@ -43,13 +44,14 @@ import com.elasticpath.importexport.common.exception.runtime.PopulationRuntimeEx
  * Verify that ProductSkuAdapter populates category domain object from DTO properly and vice versa.
  * <br>Nested adapters should be tested separately.
  */
+@RunWith(MockitoJUnitRunner.class)
 public class ProductSkuAdapterTest {
 
 	private static final String ATTRIBUTE_KEY = "attributeKey";
 
 	private static final String PRODUCT_SKU_CODE = "productSkuCode";
 
-	private static final Integer MAX_DOWNLOAD_TIME = Integer.valueOf(5);
+	private static final Integer MAX_DOWNLOAD_TIME = 5;
 
 	private static final String PRODUCT_SKU_IMAGE = "skuOptionImage";
 
@@ -65,33 +67,29 @@ public class ProductSkuAdapterTest {
 
 	private ProductSkuAdapter productSkuAdapter;
 
-	@Rule
-	public final JUnitRuleMockery context = new JUnitRuleMockery();
-
+	@Mock
 	private ProductSku mockProductSku;
 
+	@Mock
 	private BeanFactory mockBeanFactory;
 
+	@Mock
 	private SkuOption mockSkuOption;
 
+	@Mock
 	private SkuOptionValue mockSkuOptionValue;
 
+	@Mock
 	private Product mockProduct;
 
+	@Mock
 	private AttributeValueGroup mockAttributeValueGroup;
 
+	@Mock
 	private TaxCode mockSkuTaxCode;
 
 	@Before
 	public void setUp() throws Exception {
-		mockProductSku = context.mock(ProductSku.class);
-		mockSkuOption = context.mock(SkuOption.class);
-		mockSkuOptionValue = context.mock(SkuOptionValue.class);
-		mockBeanFactory = context.mock(BeanFactory.class);
-		mockProduct = context.mock(Product.class);
-		mockAttributeValueGroup = context.mock(AttributeValueGroup.class);
-		mockSkuTaxCode = context.mock(TaxCode.class);
-
 		productSkuAdapter = new ProductSkuAdapter();
 		productSkuAdapter.setBeanFactory(mockBeanFactory);
 	}
@@ -106,29 +104,22 @@ public class ProductSkuAdapterTest {
 	/**
 	 * Tests PopulateDomain.
 	 *
-	 * TODO: This Test can be improved if it necessary.
 	 */
 	@Test
 	public void testPopulateDomain() {
-		context.checking(new Expectations() {
-			{
-				oneOf(mockProductSku).setSkuCode(SKU_OPTION_CODE);
-				oneOf(mockProductSku).setGuid(SKU_OPTION_CODE);
-				oneOf(mockProductSku).setImage(PRODUCT_SKU_IMAGE);
-				oneOf(mockProductSku).getAttributeValueGroup();
-				will(returnValue(mockAttributeValueGroup));
-			}
-		});
+		when(mockProductSku.getAttributeValueGroup()).thenReturn(mockAttributeValueGroup);
 
 		ProductSkuAdapter adapter = new ProductSkuAdapter() {
 			@Override
 			void populateDomainSkuOptions(final ProductSku productSku, final List<SkuOptionDTO> skuOptionDtoList) {
 				// empty
 			}
+
 			@Override
 			void populateProductSkuAvailability(final ProductSku productSku, final ProductSkuAvailabilityDTO productSkuAvailabilityDTO) {
 				// empty
 			}
+
 			@Override
 			void checkDigitalShippable(final ShippableItemDTO shippableItem, final DigitalAssetItemDTO digitalAssetItem) {
 				// empty
@@ -163,6 +154,11 @@ public class ProductSkuAdapterTest {
 		productSkuDTO.setImage(PRODUCT_SKU_IMAGE);
 
 		adapter.populateDomain(productSkuDTO, mockProductSku);
+
+		verify(mockProductSku).setSkuCode(SKU_OPTION_CODE);
+		verify(mockProductSku).setGuid(SKU_OPTION_CODE);
+		verify(mockProductSku).setImage(PRODUCT_SKU_IMAGE);
+		verify(mockProductSku).getAttributeValueGroup();
 	}
 
 	/**
@@ -175,14 +171,10 @@ public class ProductSkuAdapterTest {
 		productSkuAvailabilityDTO.setStartDate(START_DATE);
 		productSkuAvailabilityDTO.setEndDate(END_DATE);
 
-		context.checking(new Expectations() {
-			{
-				oneOf(mockProductSku).setStartDate(START_DATE);
-				oneOf(mockProductSku).setEndDate(END_DATE);
-			}
-		});
-
 		productSkuAdapter.populateProductSkuAvailability(mockProductSku, productSkuAvailabilityDTO);
+
+		verify(mockProductSku).setStartDate(START_DATE);
+		verify(mockProductSku).setEndDate(END_DATE);
 	}
 
 	/**
@@ -190,11 +182,6 @@ public class ProductSkuAdapterTest {
 	 */
 	@Test
 	public void testPopulateDomainSkuOptions() {
-		context.checking(new Expectations() {
-			{
-				oneOf(mockSkuOptionValue).setSkuOption(mockSkuOption);
-			}
-		});
 		final JpaAdaptorOfSkuOptionValueImpl expectedSkuOptionValue = new JpaAdaptorOfSkuOptionValueImpl();
 		expectedSkuOptionValue.setSkuOptionValue(mockSkuOptionValue);
 
@@ -210,13 +197,14 @@ public class ProductSkuAdapterTest {
 		adapter.setProductSkuOptionAdapter(new ProductSkuOptionAdapter() {
 			@Override
 			public void populateDomain(final SkuOptionDTO source, final JpaAdaptorOfSkuOptionValueImpl target) {
-				assertEquals(SKU_OPTION_CODE, source.getCode());
-				assertEquals(expectedSkuOptionValue, target);
+				assertThat(source.getCode()).isEqualTo(SKU_OPTION_CODE);
+				assertThat(target).isEqualTo(expectedSkuOptionValue);
 				target.setSkuOption(mockSkuOption);
 			}
 		});
 
 		adapter.populateDomainSkuOptions(mockProductSku, skuOptionDtoList);
+		verify(mockSkuOptionValue).setSkuOption(mockSkuOption);
 	}
 
 	/**
@@ -227,18 +215,14 @@ public class ProductSkuAdapterTest {
 		final JpaAdaptorOfSkuOptionValueImpl expectedSkuOptionValue = new JpaAdaptorOfSkuOptionValueImpl();
 		final Map<String, SkuOptionValue> optionValueMap = new HashMap<>();
 
-		context.checking(new Expectations() {
-			{
-				atLeast(1).of(mockProductSku).getOptionValueMap();
-				will(returnValue(optionValueMap));
-				oneOf(mockBeanFactory).getBean(ContextIdNames.SKU_OPTION_VALUE_JPA_ADAPTOR);
-				will(returnValue(expectedSkuOptionValue));
-			}
-		});
+		when(mockProductSku.getOptionValueMap()).thenReturn(optionValueMap);
+		when(mockBeanFactory.getBean(ContextIdNames.SKU_OPTION_VALUE_JPA_ADAPTOR)).thenReturn(expectedSkuOptionValue);
 
-		assertEquals(expectedSkuOptionValue, productSkuAdapter.createSkuOptionValue(mockProductSku, SKU_OPTION_CODE));
-		assertEquals(1, optionValueMap.size());
-		assertEquals(expectedSkuOptionValue, optionValueMap.get(SKU_OPTION_CODE));
+		assertThat(productSkuAdapter.createSkuOptionValue(mockProductSku, SKU_OPTION_CODE)).isEqualTo(expectedSkuOptionValue);
+		assertThat(optionValueMap).containsOnly(entry(SKU_OPTION_CODE, expectedSkuOptionValue));
+
+		verify(mockProductSku, atLeastOnce()).getOptionValueMap();
+		verify(mockBeanFactory).getBean(ContextIdNames.SKU_OPTION_VALUE_JPA_ADAPTOR);
 	}
 
 	/**
@@ -246,42 +230,27 @@ public class ProductSkuAdapterTest {
 	 */
 	@Test
 	public void testPopulateDTO() {
-		context.checking(new Expectations() {
-			{
-				oneOf(mockProduct).hasMultipleSkus();
-				will(returnValue(Boolean.TRUE));
+		when(mockProduct.hasMultipleSkus()).thenReturn(Boolean.TRUE);
 
-				oneOf(mockProductSku).getSkuCode();
-				will(returnValue(PRODUCT_SKU_CODE));
-				oneOf(mockProductSku).getGuid();
-				will(returnValue(PRODUCT_SKU_CODE));
-				oneOf(mockProductSku).getProduct();
-				will(returnValue(mockProduct));
+		when(mockProductSku.getSkuCode()).thenReturn(PRODUCT_SKU_CODE);
+		when(mockProductSku.getGuid()).thenReturn(PRODUCT_SKU_CODE);
+		when(mockProductSku.getProduct()).thenReturn(mockProduct);
 
-				oneOf(mockProductSku).getImage();
-				will(returnValue(PRODUCT_SKU_IMAGE));
-				oneOf(mockProductSku).getAttributeValueGroup();
-				will(returnValue(mockAttributeValueGroup));
+		when(mockProductSku.getImage()).thenReturn(PRODUCT_SKU_IMAGE);
+		when(mockProductSku.getAttributeValueGroup()).thenReturn(mockAttributeValueGroup);
 
-				oneOf(mockProductSku).getStartDate();
-				will(returnValue(START_DATE));
-				oneOf(mockProductSku).getEndDate();
-				will(returnValue(END_DATE));
+		when(mockProductSku.getStartDate()).thenReturn(START_DATE);
+		when(mockProductSku.getEndDate()).thenReturn(END_DATE);
 
-				oneOf(mockProductSku).getTaxCodeOverride();
-				will(returnValue(mockSkuTaxCode));
-				oneOf(mockSkuTaxCode).getCode();
-				will(returnValue(PRODUCT_SKU_TAX_CODE_VALUE));
-			}
-		});
-
+		when(mockProductSku.getTaxCodeOverride()).thenReturn(mockSkuTaxCode);
+		when(mockSkuTaxCode.getCode()).thenReturn(PRODUCT_SKU_TAX_CODE_VALUE);
 		ProductSkuAdapter adapter = new ProductSkuAdapter() {
 			@Override
 			void populateDTOSkuOptions(final ProductSku productSku, final ProductSkuDTO productSkuDTO) {
-				assertNotNull(productSku);
+				assertThat(productSku).isNotNull();
 				SkuOptionDTO skuOptionDTO = new SkuOptionDTO();
 				skuOptionDTO.setCode(SKU_OPTION_CODE);
-				productSkuDTO.setSkuOptionList(Arrays.asList(skuOptionDTO));
+				productSkuDTO.setSkuOptionList(ImmutableList.of(skuOptionDTO));
 			}
 		};
 
@@ -290,14 +259,14 @@ public class ProductSkuAdapterTest {
 		adapter.setShippableItemAdapter(new ShippableItemAdapter() {
 			@Override
 			public void populateDTO(final ProductSku source, final ShippableItemDTO target) {
-				assertNotNull(source);
+				assertThat(source).isNotNull();
 				target.setEnabled(true);
 			}
 		});
 		adapter.setDigitalAssetItemAdapter(new DigitalAssetItemAdapter() {
 			@Override
 			public void populateDTO(final ProductSku source, final DigitalAssetItemDTO target) {
-				assertNotNull(source);
+				assertThat(source).isNotNull();
 				target.setEnabled(true);
 				target.setMaxDownloadTimes(MAX_DOWNLOAD_TIME);
 			}
@@ -305,26 +274,37 @@ public class ProductSkuAdapterTest {
 		adapter.setAttributeGroupAdapter(new AttributeGroupAdapter() {
 			@Override
 			public void populateDTO(final AttributeValueGroup attributeValueGroup, final AttributeGroupDTO attributeGroupDto) {
-				assertNotNull(attributeValueGroup);
+				assertThat(attributeValueGroup).isNotNull();
 				AttributeValuesDTO attributeValuesDTO = new AttributeValuesDTO();
 				attributeValuesDTO.setKey(ATTRIBUTE_KEY);
-				attributeGroupDto.setAttributeValues(Arrays.asList(attributeValuesDTO));
+				attributeGroupDto.setAttributeValues(ImmutableList.of(attributeValuesDTO));
 			}
 		});
 		adapter.populateDTO(mockProductSku, productSkuDTO);
 
-		assertEquals(PRODUCT_SKU_CODE, productSkuDTO.getSkuCode());
-		assertEquals(PRODUCT_SKU_IMAGE, productSkuDTO.getImage());
-		assertEquals(END_DATE, productSkuDTO.getProductSkuAvailabilityDTO().getEndDate());
-		assertEquals(START_DATE, productSkuDTO.getProductSkuAvailabilityDTO().getStartDate());
-		assertEquals(END_DATE, productSkuDTO.getProductSkuAvailabilityDTO().getEndDate());
-		assertEquals(MAX_DOWNLOAD_TIME, productSkuDTO.getDigitalAssetItem().getMaxDownloadTimes());
-		assertTrue(productSkuDTO.getDigitalAssetItem().isEnabled());
-		assertTrue(productSkuDTO.getShippableItem().isEnabled());
-		assertEquals(SKU_OPTION_CODE, productSkuDTO.getSkuOptionList().get(0).getCode());
-		assertEquals(1, productSkuDTO.getSkuOptionList().size());
-		assertEquals(1, productSkuDTO.getAttributeGroupDTO().getAttributeValues().size());
-		assertEquals(ATTRIBUTE_KEY, productSkuDTO.getAttributeGroupDTO().getAttributeValues().get(0).getKey());
+		verify(mockProduct).hasMultipleSkus();
+		verify(mockProductSku).getSkuCode();
+		verify(mockProductSku).getGuid();
+		verify(mockProductSku).getProduct();
+		verify(mockProductSku).getImage();
+		verify(mockProductSku).getAttributeValueGroup();
+		verify(mockProductSku).getStartDate();
+		verify(mockProductSku).getEndDate();
+		verify(mockProductSku).getTaxCodeOverride();
+		verify(mockSkuTaxCode).getCode();
+
+		assertThat(productSkuDTO.getSkuCode()).isEqualTo(PRODUCT_SKU_CODE);
+		assertThat(productSkuDTO.getImage()).isEqualTo(PRODUCT_SKU_IMAGE);
+		assertThat(productSkuDTO.getProductSkuAvailabilityDTO().getEndDate()).isEqualTo(END_DATE);
+		assertThat(productSkuDTO.getProductSkuAvailabilityDTO().getStartDate()).isEqualTo(START_DATE);
+		assertThat(productSkuDTO.getProductSkuAvailabilityDTO().getEndDate()).isEqualTo(END_DATE);
+		assertThat(productSkuDTO.getDigitalAssetItem().getMaxDownloadTimes()).isEqualTo(MAX_DOWNLOAD_TIME);
+		assertThat(productSkuDTO.getDigitalAssetItem().isEnabled()).isTrue();
+		assertThat(productSkuDTO.getShippableItem().isEnabled()).isTrue();
+		assertThat(productSkuDTO.getSkuOptionList().get(0).getCode()).isEqualTo(SKU_OPTION_CODE);
+		assertThat(productSkuDTO.getSkuOptionList()).hasSize(1);
+		assertThat(productSkuDTO.getAttributeGroupDTO().getAttributeValues()).hasSize(1);
+		assertThat(productSkuDTO.getAttributeGroupDTO().getAttributeValues().get(0).getKey()).isEqualTo(ATTRIBUTE_KEY);
 	}
 
 	/**
@@ -335,25 +315,21 @@ public class ProductSkuAdapterTest {
 		final JpaAdaptorOfSkuOptionValueImpl expectedJpaAdaptorOfSkuOptionValue = new JpaAdaptorOfSkuOptionValueImpl();
 		final Map<String, SkuOptionValue> optionValueMap = new HashMap<>();
 		optionValueMap.put(SKU_OPTION_CODE, expectedJpaAdaptorOfSkuOptionValue);
-		context.checking(new Expectations() {
-			{
-				oneOf(mockProductSku).getOptionValueMap();
-				will(returnValue(optionValueMap));
-			}
-		});
+		when(mockProductSku.getOptionValueMap()).thenReturn(optionValueMap);
 
 		ProductSkuDTO productSkuDTO = new ProductSkuDTO();
 		productSkuAdapter.setProductSkuOptionAdapter(new ProductSkuOptionAdapter() {
 			@Override
 			public void populateDTO(final JpaAdaptorOfSkuOptionValueImpl source, final SkuOptionDTO target) {
-				assertSame(expectedJpaAdaptorOfSkuOptionValue, source);
+				assertThat(source).isEqualTo(expectedJpaAdaptorOfSkuOptionValue);
 				target.setCode(SKU_OPTION_CODE);
 			}
 		});
 		productSkuAdapter.populateDTOSkuOptions(mockProductSku, productSkuDTO);
 
-		assertEquals(1, productSkuDTO.getSkuOptionList().size());
-		assertEquals(SKU_OPTION_CODE, productSkuDTO.getSkuOptionList().get(0).getCode());
+		assertThat(productSkuDTO.getSkuOptionList()).hasSize(1);
+		assertThat(productSkuDTO.getSkuOptionList().get(0).getCode()).isEqualTo(SKU_OPTION_CODE);
+		verify(mockProductSku).getOptionValueMap();
 	}
 
 	/**

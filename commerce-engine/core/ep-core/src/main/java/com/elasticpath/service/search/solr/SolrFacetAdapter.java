@@ -1,31 +1,37 @@
-/**
- * Copyright (c) Elastic Path Software Inc., 2008
+/*
+ * Copyright (c) Elastic Path Software Inc., 2018
  */
 package com.elasticpath.service.search.solr;
+
+import static com.elasticpath.service.search.solr.FacetConstants.BRAND;
+import static com.elasticpath.service.search.solr.FacetConstants.CATEGORY;
+import static com.elasticpath.service.search.solr.FacetConstants.PRICE;
 
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Currency;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.apache.lucene.index.Term;
-import org.apache.lucene.search.BooleanClause;
 import org.apache.lucene.search.BooleanClause.Occur;
 import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.TermQuery;
 import org.apache.lucene.search.TermRangeQuery;
 import org.apache.solr.client.solrj.SolrQuery;
-import org.springframework.util.CollectionUtils;
 
 import com.elasticpath.base.exception.EpServiceException;
 import com.elasticpath.base.exception.EpSystemException;
+import com.elasticpath.commons.beanframework.BeanFactory;
+import com.elasticpath.commons.constants.ContextIdNames;
+import com.elasticpath.domain.attribute.Attribute;
 import com.elasticpath.domain.catalog.Brand;
 import com.elasticpath.domain.catalogview.AdvancedSearchFilteredNavSeparatorFilter;
 import com.elasticpath.domain.catalogview.AttributeKeywordFilter;
@@ -39,11 +45,17 @@ import com.elasticpath.domain.catalogview.Filter;
 import com.elasticpath.domain.catalogview.PriceFilter;
 import com.elasticpath.domain.catalogview.RangeFilter;
 import com.elasticpath.domain.catalogview.RangeFilterType;
+import com.elasticpath.domain.catalogview.SizeRangeFilter;
+import com.elasticpath.domain.catalogview.SkuOptionValueFilter;
 import com.elasticpath.domain.pricing.PriceListStack;
+import com.elasticpath.domain.skuconfiguration.SkuOption;
+import com.elasticpath.domain.skuconfiguration.SkuOptionValue;
 import com.elasticpath.service.catalog.CategoryService;
 import com.elasticpath.service.catalogview.filterednavigation.FilteredNavigationConfiguration;
 import com.elasticpath.service.catalogview.filterednavigation.FilteredNavigationConfigurationLoader;
+import com.elasticpath.service.pricing.PriceListAssignmentService;
 import com.elasticpath.service.search.CatalogAwareSearchCriteria;
+import com.elasticpath.service.search.FacetService;
 import com.elasticpath.service.search.StoreAwareSearchCriteria;
 import com.elasticpath.service.search.index.Analyzer;
 import com.elasticpath.service.search.query.SearchCriteria;
@@ -58,8 +70,9 @@ public class SolrFacetAdapter {
 	private static final Logger LOG = Logger.getLogger(SolrFacetAdapter.class);
 
 	private static final String DEFAULT_RANGE_QUERY = null;
+	private static final String EXCLUDE_TAG = "{!ex=%s}%s";
 
-	private final Map<String, Filter<?>> filterLookup = new HashMap<>();
+	private FilteredNavigationConfiguration config;
 
 	private FilteredNavigationConfigurationLoader fncLoader;
 
@@ -70,6 +83,10 @@ public class SolrFacetAdapter {
 	private SettingValueProvider<Boolean> attributeFilterEnabledProvider;
 
 	private CategoryService categoryService;
+
+	private FacetService facetService;
+
+	private BeanFactory beanFactory;
 
 	/**
 	 * Gets the <code>FilteredNavigationConfiguration</code> for the <code>Store</code>
@@ -86,35 +103,45 @@ public class SolrFacetAdapter {
 	 *
 	 * @param query the query to add the faceting information to.
 	 * @param searchCriteria the Locale, Currency, and StoreCode are retrieved from here.
+	 * @param queryLookup a map keyed on filter id and a value containing the solr query filter.
+	 * @param filterLookup a map keyed on solr query with a value containing the filter.
 	 */
-	public void addFacets(final SolrQuery query, final SearchCriteria searchCriteria) {
+	public void addFacets(final SolrQuery query, final SearchCriteria searchCriteria, final Map<String, String> queryLookup,
+						  final Map<String, Filter<?>> filterLookup) {
 		LOG.debug("Adding facets to SOLR query.");
 		if (searchCriteria instanceof StoreAwareSearchCriteria) {
-			StoreAwareSearchCriteria criteria = (StoreAwareSearchCriteria) searchCriteria;
-			String storeCode = criteria.getStoreCode();
+			final Locale locale = searchCriteria.getLocale();
+			final String storeCode = ((StoreAwareSearchCriteria) searchCriteria).getStoreCode();
+			String catalogCode = null;
 
-			if (isAttributeFilterEnabled(storeCode)) {
-				addAttributeRangeFacets(query, criteria.getLocale(), storeCode);
-				addAttributeFacets(query, criteria.getLocale(), storeCode);
+			if (searchCriteria instanceof CatalogAwareSearchCriteria) {
+				catalogCode = ((CatalogAwareSearchCriteria) searchCriteria).getCatalogCode();
 			}
-		}
-		if (searchCriteria instanceof CatalogAwareSearchCriteria) {
-			CatalogAwareSearchCriteria criteria = (CatalogAwareSearchCriteria) searchCriteria;
-			String catalogCode = criteria.getCatalogCode();
-			addCategoryFacets(query, catalogCode);
-		}
 
-		addPriceFacets(query, searchCriteria.getCurrency(),
-				getStoreCodeFromSearchCriteria(searchCriteria),
-				getCatalogCodeFromSearchCriteria(searchCriteria),
-				getPriceListStackFromSearchCriteria(searchCriteria));
-		addBrandFacets(query);
+			config = this.getFilteredNavigationConfiguration(storeCode);
+
+			addBrandFacets(query, queryLookup, filterLookup);
+
+			if (catalogCode != null) {
+				addCategoryFacets(query, catalogCode, queryLookup, filterLookup);
+			}
+
+			addFacetValues(query, locale, queryLookup, filterLookup);
+
+			addPriceFacets(query, catalogCode, searchCriteria.getCurrency(), queryLookup, filterLookup);
+
+			addRangeFacets(query, locale, queryLookup, filterLookup);
+
+			addSkuOptionFacets(query, locale, queryLookup, filterLookup);
+
+			addSizeFacets(query, queryLookup, filterLookup);
+		}
 	}
 
 	/**
 	 *
-	 * @param searchCriteria
-	 * @return
+	 * @param searchCriteria the search criteria.
+	 * @return THe list of price list stacks.
 	 */
 	private List<String> getPriceListStackFromSearchCriteria(final SearchCriteria searchCriteria) {
 		SearchHint<PriceListStack> priceListStackHint = searchCriteria.getSearchHint("priceListStack");
@@ -122,14 +149,6 @@ public class SolrFacetAdapter {
 			return priceListStackHint.getValue().getPriceListStack();
 		}
 		return Collections.emptyList();
-	}
-
-	/**
-	 * @param storeCode the code for the store in which to check whether attribute filters are enabled.
-	 * @return true if attribute filtering is enabled in the given store, false if not.
-	 */
-	boolean isAttributeFilterEnabled(final String storeCode) {
-		return getAttributeFilterEnabledProvider().get(storeCode);
 	}
 
 	/**
@@ -154,11 +173,11 @@ public class SolrFacetAdapter {
 			queries = constructBrandFilterQuery((BrandFilter) filter).toString();
 
 		} else if (filter instanceof AttributeValueFilter) {
-			queries = constructAttributeValueFilterQuery((AttributeValueFilter) filter, true).toString();
+			queries = constructAttributeValueFilterQuery((AttributeValueFilter) filter, true);
 
 		} else if (filter instanceof AttributeKeywordFilter) {
 			queries = constructAttributeKeywordFilterQuery((AttributeKeywordFilter) filter, searchCriteria.getLocale(), true).toString();
-			
+
 		} else if (filter instanceof CategoryFilter) {
 			final String catalogCode = getCatalogCodeFromSearchCriteria(searchCriteria);
 			queries = constructCategoryFilterQuery((CategoryFilter) filter, catalogCode).toString();
@@ -172,6 +191,8 @@ public class SolrFacetAdapter {
 
 		} else if (filter instanceof AdvancedSearchFilteredNavSeparatorFilter) {
 			queries = "";
+		} else if (filter instanceof SkuOptionValueFilter) {
+			queries = constructSkuOptionValueFilterQuery((SkuOptionValueFilter) filter, searchCriteria.getLocale());
 		}
 
 		if (queries == null) {
@@ -196,61 +217,6 @@ public class SolrFacetAdapter {
 	}
 
 	/**
-	 * Get the store code from the given search criteria, if it's a type
-	 * of SearchCriteria which has a store code.
-	 *
-	 * @param searchCriteria the criteria
-	 * @return the store code if available, else null
-	 */
-	String getStoreCodeFromSearchCriteria(final SearchCriteria searchCriteria) {
-		if (searchCriteria instanceof StoreAwareSearchCriteria) {
-			return ((StoreAwareSearchCriteria) searchCriteria).getStoreCode();
-		}
-		return null;
-	}
-
-	/**
-	 * Gets the map of query filters. This is a map of Solr queries to filters.
-	 *
-	 * @return the map of query to filters
-	 */
-	public Map<String, Filter<?>> getFilterLookupMap() {
-		return filterLookup;
-	}
-
-	/**
-	 * Adds Price facets to the given query.
-	 * @param query the query
-	 * @param currency the currency of the prices
-	 * @param storeCode the code for the store in which the price facets are valid
-	 * @param catalogCode the code for the catalog in which the price facets are valid
-	 * @param priceListGuids the price list guids ordered by priority
-	 */
-	void addPriceFacets(final SolrQuery query, final Currency currency, final String storeCode,
-			final String catalogCode, final List<String> priceListGuids) {
-		LOG.debug("Adding Price Facets to query.");
-		if (CollectionUtils.isEmpty(priceListGuids)) {
-			LOG.debug("No price list stack is defined.");
-			return;
-		}
-		Collection<PriceFilter> priceFilters =
-			getFilteredNavigationConfiguration(storeCode).getAllPriceRanges().values();
-		for (PriceFilter priceFilter : priceFilters) {
-			// don't want filters for currencies we aren't searching for
-			if (!priceFilter.getCurrency().equals(currency)) {
-				continue;
-			}
-			// remove filters that do nothing (filter then filters nothing)
-			if (priceFilter.getRangeType() == RangeFilterType.ALL) {
-				continue;
-			}
-			String luceneQuery = getPriceQueryForStack(priceFilter, catalogCode, priceListGuids).toString();
-			filterLookup.put(luceneQuery, priceFilter);
-			query.addFacetQuery(luceneQuery);
-		}
-	}
-
-	/**
 	 * Gets a price query for the given price list stack.
 	 * @param priceFilter the filter to use
 	 * @param catalogCode the catalog code
@@ -259,97 +225,138 @@ public class SolrFacetAdapter {
 	 */
 	protected Query getPriceQueryForStack(final PriceFilter priceFilter, final String catalogCode, final List<String> stackGuids) {
 		if (stackGuids == null || stackGuids.isEmpty()) {
-			return new BooleanQuery();
+			return new BooleanQuery.Builder().build();
 		}
 		String priceListGuid = stackGuids.get(0);
 		Query facetForPriceList = constructPriceFilterQuery(priceFilter, catalogCode, priceListGuid);
 		if (stackGuids.size() == 1) {
 			return facetForPriceList;
 		}
-		BooleanQuery facetQuery = new BooleanQuery();
-		facetQuery.add(facetForPriceList, BooleanClause.Occur.SHOULD);
+		BooleanQuery.Builder facetQueryBuilder = new BooleanQuery.Builder();
+		facetQueryBuilder.add(facetForPriceList, Occur.SHOULD);
 
-		BooleanQuery subQuery = new BooleanQuery();
+		BooleanQuery.Builder subQueryBuilder = new BooleanQuery.Builder();
 		String fieldName = getIndexUtility().createPriceFieldName(SolrIndexConstants.PRICE, catalogCode, priceListGuid);
 		final Query excludeQuery = TermRangeQuery.newStringRange(fieldName, DEFAULT_RANGE_QUERY, DEFAULT_RANGE_QUERY, true, true);
-		subQuery.add(excludeQuery, BooleanClause.Occur.MUST_NOT);
-		subQuery.add(getPriceQueryForStack(priceFilter, catalogCode, stackGuids.subList(1, stackGuids.size())), BooleanClause.Occur.MUST);
-		facetQuery.add(subQuery, BooleanClause.Occur.SHOULD);
-		return facetQuery;
+		subQueryBuilder.add(excludeQuery, Occur.MUST_NOT);
+		subQueryBuilder.add(getPriceQueryForStack(priceFilter, catalogCode, stackGuids.subList(1, stackGuids.size())), Occur.MUST);
+		facetQueryBuilder.add(subQueryBuilder.build(), Occur.SHOULD);
+		return facetQueryBuilder.build();
 	}
 
-	/**
-	 * Adds attribute range facets.
-	 * @param query solr query
-	 * @param locale locale
-	 * @param storeCode store code
-	 */
-	void addAttributeRangeFacets(final SolrQuery query, final Locale locale, final String storeCode) {
-		LOG.debug("Adding AttributeRange Facets to query.");
-		Collection<AttributeRangeFilter> attrRangeFilters =
-			this.getFilteredNavigationConfiguration(storeCode).getAllAttributeRanges().values();
-		for (AttributeRangeFilter attrRangeFilter : attrRangeFilters) {
-			// don't want filters for locales we aren't searching for
-			if (attrRangeFilter.getAttribute().isLocaleDependant() && !attrRangeFilter.getLocale().equals(locale)) {
-				continue;
-			}
-			// remove filters that do nothing (filter then filters nothing)
-			if (attrRangeFilter.getRangeType() == RangeFilterType.ALL) {
-				continue;
-			}
-			final String luceneQuery = constructAttributeRangeFilterQuery(attrRangeFilter);
-			filterLookup.put(luceneQuery, attrRangeFilter);
-			query.addFacetQuery(luceneQuery);
+	private void addLuceneQuery(final SolrQuery query, final Filter<?> filter, final String luceneQuery, final String guid,
+								final Map<String, String> queryLookup, final Map<String, Filter<?>> filterLookup) {
+		String tagQuery = String.format(EXCLUDE_TAG, guid, luceneQuery);
+		filterLookup.put(tagQuery, filter);
+		queryLookup.put(filter.getId(), luceneQuery);
+		query.addFacetQuery(tagQuery);
+	}
+
+	private void addSizeFacets(final SolrQuery query, final Map<String, String> queryLookup, final Map<String, Filter<?>> filterLookup) {
+		Collection<SizeRangeFilter> sizeRangeFilters = config.getAllSizeRangeFilters().values();
+
+		sizeRangeFilters.forEach(sizeRangeFilter -> {
+			String guid = config.getOthersGuidMap().get(sizeRangeFilter.getSizeType().getLabel());
+			addLuceneQuery(query, sizeRangeFilter, constructSizeFilterQuery(sizeRangeFilter), guid, queryLookup, filterLookup);
+		});
+	}
+
+	private void addSkuOptionFacets(final SolrQuery query, final Locale locale, final Map<String, String> queryLookup,
+									final Map<String, Filter<?>> filterLookup) {
+		Collection<SkuOptionValueFilter> skuOptionValueFilters = config.getAllSkuOptionValueFilters().values();
+		skuOptionValueFilters.forEach(skuOptionValueFilter -> {
+			String guid = config.getSkuOptionGuidMap().get(skuOptionValueFilter.getSkuOptionValue().getSkuOption().getOptionKey());
+			addLuceneQuery(query, skuOptionValueFilter, constructSkuOptionValueFilterQuery(skuOptionValueFilter, locale), guid,
+					queryLookup, filterLookup);
+		});
+	}
+
+	private void addRangeFacets(final SolrQuery query, final Locale locale, final Map<String, String> queryLookup,
+								final Map<String, Filter<?>> filterLookup) {
+		Collection<AttributeRangeFilter> attrRangeFilters = config.getAllAttributeRanges().values();
+		// don't want filters for locales we aren't searching for
+		// remove filters that do nothing (filter then filters nothing)
+		attrRangeFilters.stream()
+				.filter(attrRangeFilter -> !attrRangeFilter.getAttribute().isLocaleDependant() || Objects.equals(attrRangeFilter.getLocale(),
+						locale))
+				.filter(attrRangeFilter -> attrRangeFilter.getRangeType() != RangeFilterType.ALL)
+				.forEach(attrRangeFilter -> {
+					String guid = config.getAttributeGuidMap().get(attrRangeFilter.getAttributeKey());
+					addLuceneQuery(query, attrRangeFilter, constructAttributeRangeFilterQuery(attrRangeFilter), guid, queryLookup, filterLookup);
+				});
+	}
+
+	private void addPriceFacets(final SolrQuery query, final String catalogCode,
+								final Currency currency, final Map<String, String> queryLookup, final Map<String, Filter<?>> filterLookup) {
+		if (catalogCode == null || currency == null) {
+			return;
 		}
+
+		PriceListAssignmentService priceListAssignmentService = beanFactory.getBean(ContextIdNames.PRICE_LIST_ASSIGNMENT_SERVICE);
+
+
+		List<String> priceListGuids = priceListAssignmentService.listByCatalogAndCurrencyCode(catalogCode, currency.getCurrencyCode())
+				.stream().map(priceListAssignment -> priceListAssignment.getPriceListDescriptor().getGuid())
+				.collect(Collectors.toList());
+
+		Collection<PriceFilter> priceFilters = config.getAllPriceRanges().values();
+		// don't want filters for currencies we aren't searching for
+		// remove filters that do nothing (filter then filters nothing)
+		priceFilters.stream()
+				.filter(priceFilter -> priceFilter.getCurrency().equals(currency))
+				.filter(priceFilter -> priceFilter.getRangeType() != RangeFilterType.ALL)
+				.forEach(priceFilter -> {
+					String guid = config.getOthersGuidMap().get(PRICE);
+					addLuceneQuery(query, priceFilter, getPriceQueryForStack(priceFilter, catalogCode, priceListGuids).toString(), guid,
+							queryLookup, filterLookup);
+				});
 	}
 
-	private void addAttributeFacets(final SolrQuery query, final Locale locale, final String storeCode) {
-		LOG.debug("Adding AttributeValue Facets to query.");
-		Collection<AttributeValueFilter> attrValueFilters = retrieveAttributeValueFilters(storeCode);
-		for (AttributeValueFilter attrValueFilter : attrValueFilters) {
-			// remove the filters used as unique keys - they don't have attribute values
-			if (attrValueFilter.getAttributeValue() == null) {
-				continue;
-			}
-			// don't want to filter for locales we aren't searching for
-			if (attrValueFilter.isLocalized()
-					&& !attrValueFilter.getLocale().equals(locale)) {
-				continue;
-			}
-
-			final Query luceneQuery = constructAttributeValueFilterQuery(attrValueFilter, true);
-			filterLookup.put(luceneQuery.toString(), attrValueFilter);
-			query.addFacetQuery(luceneQuery.toString());
-		}
+	private void addFacetValues(final SolrQuery query, final Locale locale, final Map<String, String> queryLookup,
+								final Map<String, Filter<?>> filterLookup) {
+		Collection<AttributeValueFilter> attrValueFilters = config.getAllAttributeSimpleValues().values();
+		// remove the filters used as unique keys - they don't have attribute values
+		// don't want to filter for locales we aren't searching for
+		attrValueFilters.stream()
+				.filter(attrValueFilter -> attrValueFilter.getAttributeValue() != null)
+				.filter(attrValueFilter -> !attrValueFilter.isLocalized()
+				|| attrValueFilter.getLocale().equals(locale))
+				.forEach(attrValueFilter -> {
+					String guid = config.getAttributeGuidMap().get(attrValueFilter.getAttributeKey());
+					addLuceneQuery(query, attrValueFilter, constructAttributeValueFilterQuery(attrValueFilter, true), guid,
+							queryLookup, filterLookup);
+				});
 	}
 
-	/**
-	 * Retrieves a collection of {@link AttributeValueFilter}s consisting of all simple values defined in
-	 * the {@link FilteredNavigationConfiguration} for a given store.
-	 * @param storeCode the store
-	 * @return the collection of {@link AttributeValueFilter}s
-	 */
-	Collection<AttributeValueFilter> retrieveAttributeValueFilters(
-			final String storeCode) {
-		return this.getFilteredNavigationConfiguration(storeCode).getAllAttributeSimpleValues().values();
+	private String constructSizeFilterQuery(final SizeRangeFilter sizeRangeFilter) {
+		return constructRangeFilterQuery(sizeRangeFilter, sizeRangeFilter.getSizeType().getLabel().toLowerCase()).toString();
 	}
 
 	/**
 	 * Adds the Brand facets to the given query.
+	 *
 	 * @param query the query
 	 */
-	void addBrandFacets(final SolrQuery query) {
-		query.addFacetField(SolrIndexConstants.BRAND_CODE_NON_LC);
+	void addBrandFacets(final SolrQuery query, final Map<String, String> queryLookup, final Map<String, Filter<?>> filterLookup) {
+		String guid = config.getOthersGuidMap().get(BRAND);
+		config.getBrandFilters().forEach(brandFilter ->
+				addLuceneQuery(query, brandFilter, constructBrandFilterQuery(brandFilter).toString(), guid, queryLookup, filterLookup));
 	}
 
 	/**
 	 * Adds the Category facets to the given query.
-	 * @param query the query
-	 * @param catalogCode the catalog code
+	 *
+	 * @param query         the query
+	 * @param catalogCode   the catalog code
+	 * @param queryLookup   map keyed on filter id with a value containing the solr query filter
+	 * @param filterLookup  map keyed on solr query filter with a value containing the filter
 	 */
-	void addCategoryFacets(final SolrQuery query, final String catalogCode) {
-		// we don't want facets here for the parent category UIDs
-		query.addFacetField(getIndexUtility().createProductCategoryFieldName(SolrIndexConstants.PRODUCT_CATEGORY_NON_LC, catalogCode));
+	void addCategoryFacets(final SolrQuery query, final String catalogCode, final Map<String, String> queryLookup,
+						   final Map<String, Filter<?>> filterLookup) {
+		String guid = config.getOthersGuidMap().get(CATEGORY);
+		config.getCategoryFilters().forEach(categoryFilter ->
+						addLuceneQuery(query, categoryFilter,
+								constructCategoryFilterQuery(categoryFilter, catalogCode).toString(), guid, queryLookup, filterLookup));
 	}
 
 	private Query constructPriceFilterQuery(final PriceFilter filter, final String catalogCode, final String priceListGuid) {
@@ -365,8 +372,17 @@ public class SolrFacetAdapter {
 	}
 
 	private String constructAttributeRangeFilterQuery(final AttributeRangeFilter filter) {
-		final String fieldName = getIndexUtility().createAttributeFieldName(filter.getAttribute(), filter.getLocale(), false, true);
+		Attribute attribute = filter.getAttribute();
+		String fieldName = getIndexUtility().createAttributeFieldName(attribute, filter.getLocale(), false, true);
 		return constructRangeFilterQuery(filter, fieldName).toString();
+	}
+
+	private String constructSkuOptionValueFilterQuery(final SkuOptionValueFilter filter, final Locale locale) {
+		SkuOptionValue skuOptionValue = filter.getSkuOptionValue();
+		SkuOption skuOption = skuOptionValue.getSkuOption();
+		String optionKey = skuOption.getOptionKey();
+		String fieldName = indexUtility.createSkuOptionFieldName(locale, optionKey);
+		return new TermQuery(new Term(fieldName, analyzer.analyze(skuOptionValue.getDisplayName(locale, true), true))).toString();
 	}
 
 	/**
@@ -379,22 +395,22 @@ public class SolrFacetAdapter {
 	Query constructRangeFilterQuery(final RangeFilter<?, ?> filter, final String fieldName) {
 
 		switch (filter.getRangeType()) {
-		case BETWEEN:
-			String lowerValue = filter.getLowerValue().toString();
-			String upperValue = filter.getUpperValue().toString();
+			case BETWEEN:
+				String lowerValue = filter.getLowerValue().toString();
+				String upperValue = filter.getUpperValue().toString();
 
-			BooleanQuery outerQuery = new BooleanQuery();
-			outerQuery.add(new TermQuery(new Term(fieldName, lowerValue)), Occur.SHOULD);
-			outerQuery.add(TermRangeQuery.newStringRange(fieldName, lowerValue, upperValue, false, false), Occur.SHOULD);
-			return outerQuery;
-		case LESS_THAN:
-			upperValue = filter.getUpperValue().toString();
-			return TermRangeQuery.newStringRange(fieldName, DEFAULT_RANGE_QUERY, upperValue, false, false);
-		case MORE_THAN:
-			lowerValue = filter.getLowerValue().toString();
-			return TermRangeQuery.newStringRange(fieldName, lowerValue, DEFAULT_RANGE_QUERY, true, true);
-		default:
-			break;
+				BooleanQuery.Builder outerQueryBuilder = new BooleanQuery.Builder();
+				outerQueryBuilder.add(new TermQuery(new Term(fieldName, lowerValue)), Occur.SHOULD);
+				outerQueryBuilder.add(TermRangeQuery.newStringRange(fieldName, lowerValue, upperValue, false, false), Occur.SHOULD);
+				return outerQueryBuilder.build();
+			case LESS_THAN:
+				upperValue = filter.getUpperValue().toString();
+				return TermRangeQuery.newStringRange(fieldName, DEFAULT_RANGE_QUERY, upperValue, false, false);
+			case MORE_THAN:
+				lowerValue = filter.getLowerValue().toString();
+				return TermRangeQuery.newStringRange(fieldName, lowerValue, DEFAULT_RANGE_QUERY, true, true);
+			default:
+				break;
 		}
 
 		return null;
@@ -409,14 +425,14 @@ public class SolrFacetAdapter {
 	protected Query constructBrandFilterQuery(final BrandFilter filter) {
 		if (filter != null && filter.getBrands() != null && !filter.getBrands().isEmpty()) {
 			Iterator<Brand> iterator = filter.getBrands().iterator();
-			final BooleanQuery query = new BooleanQuery();
+			final BooleanQuery.Builder queryBuilder = new BooleanQuery.Builder();
 			while (iterator.hasNext()) {
 				Brand brand = iterator.next();
 				TermQuery term =
-					new TermQuery(new Term(SolrIndexConstants.BRAND_CODE, getAnalyzer().analyze(brand.getCode())));
-				query.add(term, Occur.SHOULD);
+						new TermQuery(new Term(SolrIndexConstants.BRAND_CODE, getAnalyzer().analyze(brand.getCode())));
+				queryBuilder.add(term, Occur.SHOULD);
 			}
-			return query;
+			return queryBuilder.build();
 		}
 		return null;
 	}
@@ -428,36 +444,37 @@ public class SolrFacetAdapter {
 	 * @param faceting true if faceting is used
 	 * @return constructed query
 	 */
-	Query constructAttributeValueFilterQuery(final AttributeValueFilter filter, final boolean faceting) {
-		return new TermQuery(new Term(indexUtility.createAttributeFieldName(filter.getAttribute(), filter.getLocale(), faceting,
-				faceting), analyzer.analyze(filter.getAttributeValue().getStringValue(), true)));
+	String constructAttributeValueFilterQuery(final AttributeValueFilter filter, final boolean faceting) {
+		final Attribute attribute = filter.getAttribute();
+		return new TermQuery(new Term(indexUtility.createAttributeFieldName(attribute, filter.getLocale(), faceting,
+				faceting), analyzer.analyze(filter.getAttributeValue().getStringValue(), true))).toString();
 	}
 
 	/**
 	 * Constructs attribute keyword query.
-	 * 
+	 *
 	 * @param filter filter
 	 * @param locale locale
 	 * @param faceting true if faceting is used
 	 * @return constructed query
 	 */
 	Query constructAttributeKeywordFilterQuery(final AttributeKeywordFilter filter, final Locale locale, final boolean faceting) {
-		
-		final BooleanQuery query = new BooleanQuery();
-		String fieldName = getIndexUtility().createAttributeFieldName(filter.getAttribute(), locale, faceting, false);	
-		
+
+		final BooleanQuery.Builder queryBuilder = new BooleanQuery.Builder();
+		String fieldName = getIndexUtility().createAttributeFieldName(filter.getAttribute(), locale, faceting, false);
+
 		String keywords = filter.getAttributeValue().getStringValue();
 		if (StringUtils.isNotEmpty(keywords)) {
 			for (String keyword : StringUtils.split(keywords)) {
 				Query keywordQuery = new TermQuery(new Term(fieldName, analyzer.analyze(keyword, true)));
-				
-				query.add(keywordQuery, Occur.MUST);
-			} 
+
+				queryBuilder.add(keywordQuery, Occur.MUST);
+			}
 		}
-		
-		return query;
+
+		return queryBuilder.build();
 	}
-	
+
 	private Query constructCategoryFilterQuery(final CategoryFilter filter, final String catalogCode) {
 		if (catalogCode == null) {
 			throw new EpServiceException("The catalog code cannot be null to filter on Category");
@@ -465,17 +482,17 @@ public class SolrFacetAdapter {
 
 		final String categoryCode = this.getCategoryCodeFromCategoryUid(filter.getCategory().getUidPk());
 
-		final BooleanQuery query = new BooleanQuery();
+		final BooleanQuery.Builder queryBuilder = new BooleanQuery.Builder();
 		final Query currentCategoryQuery = new TermQuery(
 				new Term(getIndexUtility().createProductCategoryFieldName(SolrIndexConstants.PRODUCT_CATEGORY, catalogCode),
-				getAnalyzer().analyze(categoryCode)));
+						getAnalyzer().analyze(categoryCode)));
 		final Query parentCategoryQuery = new TermQuery(new Term(SolrIndexConstants.PARENT_CATEGORY_CODES,
 				getAnalyzer().analyze(categoryCode)));
 
-		query.add(currentCategoryQuery, Occur.SHOULD);
-		query.add(parentCategoryQuery, Occur.SHOULD);
+		queryBuilder.add(currentCategoryQuery, Occur.SHOULD);
+		queryBuilder.add(parentCategoryQuery, Occur.SHOULD);
 
-		return query;
+		return queryBuilder.build();
 	}
 
 	private Query constructFeaturedProductFilterQuery(final FeaturedProductFilter filter, final String catalogCode) {
@@ -483,37 +500,38 @@ public class SolrFacetAdapter {
 			throw new EpServiceException("The store code cannot be null to filter on featured product");
 		}
 
-		final BooleanQuery query = new BooleanQuery();
-		query.add(new TermQuery(new Term(SolrIndexConstants.FEATURED, String.valueOf(true))), Occur.MUST);
+		final BooleanQuery.Builder queryBuilder = new BooleanQuery.Builder();
+		queryBuilder.add(new TermQuery(new Term(SolrIndexConstants.FEATURED, String.valueOf(true))), Occur.MUST);
 
 		if (filter.getCategoryUid() != null && filter.getCategoryUid() > 0) {
-			final BooleanQuery innerQuery = new BooleanQuery();
+			final BooleanQuery.Builder innerQueryBuilder = new BooleanQuery.Builder();
 
 			// case 1 - not featured in this category, but it's featured in a sub-category
-			final BooleanQuery innerSubQuery = new BooleanQuery();
-			innerSubQuery.add(new TermQuery(
+			final BooleanQuery.Builder innerSubQueryBuilder = new BooleanQuery.Builder();
+			innerSubQueryBuilder.add(new TermQuery(
 					new Term(getIndexUtility().createFeaturedField(filter.getCategoryUid()), String.valueOf(0))), Occur.MUST);
 			final String categoryCode = getCategoryCodeFromCategoryUid(filter.getCategoryUid());
 
-			innerSubQuery.add(new TermQuery(new Term(SolrIndexConstants.PARENT_CATEGORY_CODES, categoryCode)), Occur.MUST);
+			innerSubQueryBuilder.add(new TermQuery(new Term(SolrIndexConstants.PARENT_CATEGORY_CODES, categoryCode)), Occur.MUST);
 
 			// case 2 - it is featured in this category and apart of this category
-			final BooleanQuery innerSubQuery2 = new BooleanQuery();
-			innerSubQuery2.add(new TermQuery(new Term(getIndexUtility().createFeaturedField(filter.getCategoryUid()), String
-					.valueOf(0))), Occur.MUST_NOT);
+			final BooleanQuery.Builder innerSubQuery2Builder = new BooleanQuery.Builder();
+			innerSubQuery2Builder.add(
+					new TermQuery(
+							new Term(getIndexUtility().createFeaturedField(filter.getCategoryUid()), String.valueOf(0))), Occur.MUST_NOT);
 			// have to explicitly say it's in this category or in combination with the other inner
 			// query will give invalid results
-			innerSubQuery2.add(new TermQuery(
-					new Term(getIndexUtility().createProductCategoryFieldName(SolrIndexConstants.PRODUCT_CATEGORY, catalogCode),
-					categoryCode)),
+			innerSubQuery2Builder.add(new TermQuery(
+							new Term(getIndexUtility().createProductCategoryFieldName(SolrIndexConstants.PRODUCT_CATEGORY, catalogCode),
+									categoryCode)),
 					Occur.MUST);
 
-			innerQuery.add(innerSubQuery, Occur.SHOULD);
-			innerQuery.add(innerSubQuery2, Occur.SHOULD);
-			query.add(innerQuery, Occur.MUST);
+			innerQueryBuilder.add(innerSubQueryBuilder.build(), Occur.SHOULD);
+			innerQueryBuilder.add(innerSubQuery2Builder.build(), Occur.SHOULD);
+			queryBuilder.add(innerQueryBuilder.build(), Occur.MUST);
 		}
 
-		return query;
+		return queryBuilder.build();
 	}
 
 	/**
@@ -526,14 +544,14 @@ public class SolrFacetAdapter {
 	}
 
 	private Query constructDisplayableOnlyFilterQuery(final DisplayableFilter filter) {
-		BooleanQuery booleanQuery = new BooleanQuery();
+		BooleanQuery.Builder booleanQueryBuilder = new BooleanQuery.Builder();
 
 		Query termQuery = new TermQuery(
 				new Term(getIndexUtility().createDisplayableFieldName(SolrIndexConstants.DISPLAYABLE, filter.getStoreCode()), String.valueOf(true)));
 
-		booleanQuery.add(termQuery, Occur.MUST);
+		booleanQueryBuilder.add(termQuery, Occur.MUST);
 
-		return booleanQuery;
+		return booleanQueryBuilder.build();
 	}
 
 	/**
@@ -608,4 +626,27 @@ public class SolrFacetAdapter {
 		this.attributeFilterEnabledProvider = attributeFilterEnabledProvider;
 	}
 
+	public FacetService getFacetService() {
+		return facetService;
+	}
+
+	public void setFacetService(final FacetService facetService) {
+		this.facetService = facetService;
+	}
+
+	public BeanFactory getBeanFactory() {
+		return beanFactory;
+	}
+
+	public void setBeanFactory(final BeanFactory beanFactory) {
+		this.beanFactory = beanFactory;
+	}
+
+	public FilteredNavigationConfiguration getConfig() {
+		return config;
+	}
+
+	public void setConfig(final FilteredNavigationConfiguration config) {
+		this.config = config;
+	}
 }

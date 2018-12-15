@@ -3,7 +3,7 @@
  */
 package com.elasticpath.service.search.solr;
 
-import org.apache.solr.client.solrj.SolrServer;
+import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.common.SolrInputDocument;
 
 import com.elasticpath.service.search.IndexType;
@@ -66,13 +66,13 @@ public class ReadOnlySolrDocumentPublisher implements SolrDocumentPublisher {
 	}
 
 	/**
-	 * Sets the {@link SolrServer}.
+	 * Sets the {@link SolrClient}.
 	 * 
-	 * @param solrServer the {@link SolrServer}.
+	 * @param solrServer the {@link SolrClient}.
 	 */
 	@Override
-	public void setSolrServer(final SolrServer solrServer) {
-		// do not need the SolrServer for this.
+	public void setSolrServer(final SolrClient solrServer) {
+		// do not need the SolrClient for this.
 	}
 
 	@Override

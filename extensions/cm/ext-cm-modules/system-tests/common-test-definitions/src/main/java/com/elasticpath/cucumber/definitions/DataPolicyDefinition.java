@@ -4,11 +4,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import cucumber.api.java.en.And;
 import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
 
-
-import com.elasticpath.cucumber.macros.DataPolicyMacro;
+import com.elasticpath.cortex.dce.datapolicies.DataPolicySteps;
+import com.elasticpath.cortexTestObjects.Profile;
 import com.elasticpath.selenium.dialogs.AddViewDataPointDialog;
 import com.elasticpath.selenium.dialogs.ConfirmDialog;
 import com.elasticpath.selenium.editor.DataPolicyEditor;
@@ -186,6 +187,14 @@ public class DataPolicyDefinition {
 	}
 
 	/**
+	 * Selects newly created data policy.
+	 */
+	@And("^I select newly created data policy$")
+	public void selectNewlyCreatedDataPolicy() {
+		Profile.selectDataPolicy(this.dataPolicyName);
+	}
+
+	/**
 	 * click On Edit Data Policy Button.
 	 */
 	@When("^I edit newly created Data Policy$")
@@ -345,10 +354,8 @@ public class DataPolicyDefinition {
 	@Then("^I can see the newly created data policy in my profile with following details$")
 	public void verifyDataPolicyDetails(final Map<String, String> dataPolicyDetailMap) {
 		HashMap<String, String> dataPolicyHashMap = new HashMap<>(dataPolicyDetailMap);
-		DataPolicyMacro dataPolicyMacro = new DataPolicyMacro();
-		dataPolicyMacro.selectDataPolicy(this.dataPolicyName);
 		dataPolicyHashMap.put("policy-name", this.dataPolicyName);
-		dataPolicyMacro.verifyPolicyDetail(this.dataPolicyName, dataPolicyHashMap);
+		DataPolicySteps.verifyDataPolicies(dataPolicyHashMap);
 	}
 
 	/**

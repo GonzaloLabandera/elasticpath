@@ -527,7 +527,6 @@ public class StoreServiceImpl extends AbstractEpPersistenceServiceImpl implement
 
 	@Override
 	public String findValidStoreCode(final String storeCode) {
-
 		final List<String> result = getPersistenceEngine().retrieveByNamedQuery("FIND_VALID_STORE_CODE", storeCode);
 		if (result.isEmpty()) {
 			throw new EpServiceException("Non-existing store code: " + storeCode);

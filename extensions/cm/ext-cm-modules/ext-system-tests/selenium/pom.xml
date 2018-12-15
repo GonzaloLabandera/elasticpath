@@ -30,10 +30,7 @@
 		<failsafe.fork.count>1</failsafe.fork.count>
 		<selenium.waitdriver.timeout>30</selenium.waitdriver.timeout>
 		<cortex.server.host>localhost</cortex.server.host>
-		<ep.cortex.url>http://${cortex.server.host}:${ep.cortex.port.http}${ep.cortex.contextUrl}</ep.cortex.url>
-
-		<!-- Dependency versions -->
-		<selenium.version>3.4.0</selenium.version>
+		<ep.rest.baseurl>http://${cortex.server.host}:${ep.cortex.port.http}${ep.cortex.contextUrl}</ep.rest.baseurl>
 
 	</properties>
 
@@ -44,11 +41,9 @@
 			<artifactId>ep-cm-common-test-definitions</artifactId>
 			<version>${project.version}</version>
 		</dependency>
-
 		<dependency>
 			<groupId>org.seleniumhq.selenium</groupId>
 			<artifactId>selenium-java</artifactId>
-			<version>${selenium.version}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
@@ -87,7 +82,6 @@
 		<dependency>
 			<groupId>com.google.guava</groupId>
 			<artifactId>guava</artifactId>
-			<version>21.0</version>
 		</dependency>
 		<dependency>
 			<groupId>org.codehaus.groovy</groupId>
@@ -95,9 +89,8 @@
 			<version>2.4.15</version>
 		</dependency>
 		<dependency>
-			<groupId>com.elasticpath.repo</groupId>
-			<artifactId>ep-cortex-macros</artifactId>
-			<scope>compile</scope>
+			<groupId>com.elasticpath.extensions</groupId>
+			<artifactId>ep-cortex-common-test-definitions</artifactId>
 		</dependency>
 	</dependencies>
 

@@ -51,15 +51,13 @@ import com.elasticpath.domain.shoppingcart.ShoppingItemPricingSnapshot;
 import com.elasticpath.domain.shoppingcart.ShoppingItemTaxSnapshot;
 import com.elasticpath.service.catalog.ProductSkuLookup;
 import com.elasticpath.service.misc.TimeService;
-import com.elasticpath.service.shipping.transformers.PricedShippableItemContainerFromOrderShipmentTransformer;
+import com.elasticpath.service.shipping.PhysicalOrderShipmentShippingCostRefresher;
 import com.elasticpath.service.shipping.ShippingOptionService;
 import com.elasticpath.service.shoppingcart.OrderSkuSubtotalCalculator;
 import com.elasticpath.service.shoppingcart.PricingSnapshotService;
 import com.elasticpath.service.shoppingcart.TaxSnapshotService;
 import com.elasticpath.shipping.connectivity.commons.constants.ShippingContextIdNames;
 import com.elasticpath.shipping.connectivity.dto.ShippingOption;
-import com.elasticpath.shipping.connectivity.dto.PricedShippableItem;
-import com.elasticpath.shipping.connectivity.dto.PricedShippableItemContainer;
 import com.elasticpath.shipping.connectivity.service.ShippingCalculationService;
 
 /**
@@ -113,6 +111,7 @@ public class MoveItemDialog extends AbstractEpDialog {
 	private TaxSnapshotService taxSnapshotService;
 
 	private OrderSkuSubtotalCalculator orderSkuSubtotalCalculator;
+	private PhysicalOrderShipmentShippingCostRefresher physicalOrderShipmentShippingCostRefresher;
 
 	private static final String BLANK = " "; //$NON-NLS-1$
 
@@ -468,6 +467,8 @@ public class MoveItemDialog extends AbstractEpDialog {
 
 			((OrderEditor) editor).addOrderShipmentToUpdate(existingShipment);
 
+			getPhysicalOrderShipmentShippingCostRefresher().refresh(existingShipment);
+
 			((OrderEditor) editor).fireRefreshChanges();
 			editor.controlModified();
 			destinationShipment = existingShipment;
@@ -493,11 +494,13 @@ public class MoveItemDialog extends AbstractEpDialog {
 
 			newShipment.setSubtotalDiscount(discountToMove);
 
+			getPhysicalOrderShipmentShippingCostRefresher().refresh(newShipment);
+
 			((OrderEditor) editor).fireRefreshChanges();
 			editor.controlModified();
 			destinationShipment = newShipment;
 		}
-		updatePhysicalOrderShipment(physicalOrderShipment);
+		getPhysicalOrderShipmentShippingCostRefresher().refresh(physicalOrderShipment);
 		// Log the orderSku move event.
 		OrderEventCmHelper.getOrderEventHelper().logOrderSkuMoved(destinationShipment, newOrderSku);
 		((OrderEditor) editor).fireAddNoteChanges();
@@ -522,20 +525,6 @@ public class MoveItemDialog extends AbstractEpDialog {
 
 	private void updatePhysicalOrderShipment(final PhysicalOrderShipment shipment) {
 		shipment.setCreatedDate(getTimeService().getCurrentTime());
-
-		final PricedShippableItemContainerFromOrderShipmentTransformer<PricedShippableItem> shippableItemContainerTransformer = ServiceLocator
-				.getService(ContextIdNames.PRICED_SHIPPABLE_CONTAINER_FROM_SHIPMENT_TRANSFORMER);
-
-		final PricedShippableItemContainer<PricedShippableItem> pricedShippableItemContainer = shippableItemContainerTransformer.apply(shipment);
-
-		final List<ShippingOption> shippingOptions = getShippingCalculationService()
-				.getPricedShippingOptions(pricedShippableItemContainer).getAvailableShippingOptions();
-
-		final ShippingOption foundShippingOption = shippingOptions.stream()
-				.filter(shippingOption -> shippingOption.getCode().equals(shipment.getShippingOptionCode()))
-				.findFirst().get();
-
-		shipment.setShippingCost(foundShippingOption.getShippingCost().get().getAmount());
 		shipment.setBeforeTaxShippingCost(BigDecimal.ZERO);
 		shipment.setSubtotalDiscount(BigDecimal.ZERO);
 		shipment.setStatus(physicalOrderShipment.getShipmentStatus());
@@ -637,6 +626,17 @@ public class MoveItemDialog extends AbstractEpDialog {
 			orderSkuSubtotalCalculator = ServiceLocator.getService(ContextIdNames.ORDER_SKU_SUBTOTAL_CALCULATOR);
 		}
 		return orderSkuSubtotalCalculator;
+	}
+
+	/**
+	 * Get the physical order shipment shipping cost refresher.
+	 * @return the physical order shipment shipping cost refresher.
+	 */
+	private PhysicalOrderShipmentShippingCostRefresher getPhysicalOrderShipmentShippingCostRefresher() {
+		if (physicalOrderShipmentShippingCostRefresher == null) {
+			physicalOrderShipmentShippingCostRefresher = ServiceLocator.getService(ContextIdNames.PHYSICAL_ORDER_SHIPMENT_SHIPPING_COST_REFRESHER);
+		}
+		return physicalOrderShipmentShippingCostRefresher;
 	}
 }
 

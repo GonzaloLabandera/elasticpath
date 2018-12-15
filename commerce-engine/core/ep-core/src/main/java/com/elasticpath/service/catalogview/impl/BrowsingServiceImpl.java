@@ -152,7 +152,7 @@ public class BrowsingServiceImpl extends AbstractCatalogViewServiceImpl implemen
 	 * @return
 	 */
 	private boolean productsExist(final BrowsingResult result) {
-		return result.getProducts() != null && result.getProducts().size() == 0;
+		return result.getProducts() != null && result.getProducts().isEmpty();
 	}
 
 	private IndexSearchResult retrieveProducts(final BrowsingRequest browsingRequest, final Category category, final PriceListStack priceListStack) {

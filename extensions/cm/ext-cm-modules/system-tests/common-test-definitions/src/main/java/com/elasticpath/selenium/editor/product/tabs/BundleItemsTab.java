@@ -66,7 +66,7 @@ public class BundleItemsTab extends AbstractPageObject {
 	 * @param bundleItemCode the bundle Item code
 	 */
 	public void verifyBundleItemExists(final String bundleItemCode) {
-		assertThat(selectItemInEditorPane(BUNDLE_ITEM_PARENT_CSS, BUNDLE_ITEM_COLUMN_CSS, bundleItemCode, "Product Code"))
+		assertThat(selectItemInEditorPaneNonJSCheck(BUNDLE_ITEM_PARENT_CSS, BUNDLE_ITEM_COLUMN_CSS, bundleItemCode, "Product Code"))
 				.as("Unable to find bundle Item - " + bundleItemCode)
 				.isTrue();
 	}

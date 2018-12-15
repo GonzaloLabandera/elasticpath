@@ -15,6 +15,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.search.BooleanClause.Occur;
 import org.apache.lucene.search.BooleanQuery;
+import org.apache.lucene.search.BoostQuery;
 import org.apache.lucene.search.FuzzyQuery;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.TermQuery;
@@ -109,20 +110,20 @@ public abstract class AbstractQueryComposerImpl implements QueryComposer {
 	 * @param text the actual text to search for
 	 * @param locale the locale to add the fuzzy query for
 	 * @param searchConfig the search configuration to use
-	 * @param booleanQuery the query to add a term query to
+	 * @param booleanQueryBuilder the query to add a term query to
 	 * @param occur the occurrence value of the added query
 	 * @param applyBoost whether to apply the boost to the query
 	 * @return whether the addition was successful or a non-fatal error occurred
 	 */
 	protected boolean addSplitFieldToQuery(final String field, final String text, final Locale locale,
-			final SearchConfig searchConfig, final BooleanQuery booleanQuery, final Occur occur, final boolean applyBoost) {
+			final SearchConfig searchConfig, final BooleanQuery.Builder booleanQueryBuilder, final Occur occur, final boolean applyBoost) {
 		if (!isValidText(text)) {
 			return false;
 		}
 
 		// split should always produce valid text
 		for (String str : text.split(S_SYMBOL)) {
-			addWholeFieldToQuery(field, str, locale, searchConfig, booleanQuery, occur, applyBoost);
+			addWholeFieldToQuery(field, str, locale, searchConfig, booleanQueryBuilder, occur, applyBoost);
 		}
 		return true;
 	}
@@ -139,20 +140,20 @@ public abstract class AbstractQueryComposerImpl implements QueryComposer {
 	 * @param text the actual text to search for
 	 * @param locales the locales to add to the fuzzy query
 	 * @param searchConfig the search configuration to use
-	 * @param booleanQuery the query to add a term query to
+	 * @param booleanQueryBuilder the query to add a term query to
 	 * @param occur the occurrence value of the added query
 	 * @param applyBoost whether to apply the boost to the query
 	 * @return whether the addition was successful or a non-fatal error occurred
 	 */
 	protected boolean addSplitFieldToQueryWithMultipleLocales(final String field, final String text, final Set<Locale> locales,
-			final SearchConfig searchConfig, final BooleanQuery booleanQuery, final Occur occur, final boolean applyBoost) {
+			final SearchConfig searchConfig, final BooleanQuery.Builder booleanQueryBuilder, final Occur occur, final boolean applyBoost) {
 		if (!isValidText(text)) {
 			return false;
 		}
 
 		// split should always produce valid text
 		for (String str : text.split(S_SYMBOL)) {
-			addWholeFieldToQueryWithMultipleLocales(field, str, locales, searchConfig, booleanQuery, occur, applyBoost);
+			addWholeFieldToQueryWithMultipleLocales(field, str, locales, searchConfig, booleanQueryBuilder, occur, applyBoost);
 		}
 		return true;
 	}
@@ -169,20 +170,20 @@ public abstract class AbstractQueryComposerImpl implements QueryComposer {
 	 * @param text the actual text to search for
 	 * @param locale the locale to add the fuzzy query for
 	 * @param searchConfig the search configuration to use
-	 * @param booleanQuery the query to add the constructed query to
+	 * @param booleanQueryBuilder the query to add the constructed query to
 	 * @param occur the occurrence value of the added query
 	 * @param applyBoost whether to apply the boost to the query
 	 * @return whether the addition was successful or a non-fatal error occurred
 	 */
 	protected boolean addSplitFuzzyFieldToQuery(final String field, final String text, final Locale locale,
-			final SearchConfig searchConfig, final BooleanQuery booleanQuery, final Occur occur, final boolean applyBoost) {
+			final SearchConfig searchConfig, final BooleanQuery.Builder booleanQueryBuilder, final Occur occur, final boolean applyBoost) {
 		if (!isValidText(text)) {
 			return false;
 		}
 
 		// split should always produce valid text
 		for (String str : text.split(S_SYMBOL)) {
-			addWholeFuzzyFieldToQuery(field, str, locale, searchConfig, booleanQuery, occur, applyBoost);
+			addWholeFuzzyFieldToQuery(field, str, locale, searchConfig, booleanQueryBuilder, occur, applyBoost);
 		}
 		return true;
 	}
@@ -199,20 +200,20 @@ public abstract class AbstractQueryComposerImpl implements QueryComposer {
 	 * @param text the actual text to search for
 	 * @param locales the locales to add to the fuzzy query
 	 * @param searchConfig the search configuration to use
-	 * @param booleanQuery the query to add the constructed query to
+	 * @param booleanQueryBuilder the query to add the constructed query to
 	 * @param occur the occurrence value of the added query
 	 * @param applyBoost whether to apply the boost to the query
 	 * @return whether the addition was successful or a non-fatal error occurred
 	 */
 	protected boolean addSplitFuzzyFieldToQueryWithMultipleLocales(final String field, final String text, final Set<Locale> locales,
-			final SearchConfig searchConfig, final BooleanQuery booleanQuery, final Occur occur, final boolean applyBoost) {
+			final SearchConfig searchConfig, final BooleanQuery.Builder booleanQueryBuilder, final Occur occur, final boolean applyBoost) {
 		if (!isValidText(text)) {
 			return false;
 		}
 
 		// split should always produce valid text
 		for (String str : text.split(S_SYMBOL)) {
-			addWholeFuzzyFieldToQueryWithMultipleLocales(field, str, locales, searchConfig, booleanQuery, occur, applyBoost);
+			addWholeFuzzyFieldToQueryWithMultipleLocales(field, str, locales, searchConfig, booleanQueryBuilder, occur, applyBoost);
 		}
 		return true;
 	}
@@ -227,24 +228,24 @@ public abstract class AbstractQueryComposerImpl implements QueryComposer {
 	 * @param text the actual text to search for
 	 * @param locale the locale to add the fuzzy query for
 	 * @param searchConfig the search configuration to use
-	 * @param booleanQuery the query to add a term query to
+	 * @param booleanQueryBuilder the query to add a term query to
 	 * @param occur the occurrence value of the added query
 	 * @param applyBoost whether to apply the boost to the query
 	 * @return whether the addition was successful or a non-fatal error occurred
 	 */
 	protected boolean addWholeFieldToQuery(final String field, final String text, final Locale locale,
-			final SearchConfig searchConfig, final BooleanQuery booleanQuery, final Occur occur, final boolean applyBoost) {
+			final SearchConfig searchConfig, final BooleanQuery.Builder booleanQueryBuilder, final Occur occur, final boolean applyBoost) {
 		if (!isValidText(text)) {
 			return false;
 		}
 
-		final BooleanQuery innerQuery = new BooleanQuery();
+		final BooleanQuery.Builder innerQueryBuilder = new BooleanQuery.Builder();
 		Locale fieldLocale = locale;
 
 		// we could potentially have a locale fall back 3 times
 		for (int i = 0; i < POSSIBLE_LOCALE_FALLBACK; ++i) {
 			addFieldLocalePart(field, text, searchConfig, applyBoost,
-					innerQuery, fieldLocale);
+					innerQueryBuilder, fieldLocale);
 
 			// it's possible that we didn't pass in a locale
 			if (fieldLocale == null) {
@@ -258,7 +259,7 @@ public abstract class AbstractQueryComposerImpl implements QueryComposer {
 			}
 			fieldLocale = newLocale;
 		}
-		booleanQuery.add(innerQuery, occur);
+		booleanQueryBuilder.add(innerQueryBuilder.build(), occur);
 		return true;
 	}
 
@@ -274,58 +275,58 @@ public abstract class AbstractQueryComposerImpl implements QueryComposer {
 	 * @param text the actual text to search for
 	 * @param locales the locales to add into the query
 	 * @param searchConfig the search configuration to use
-	 * @param booleanQuery the query to add a term query to
+	 * @param booleanQueryBuilder the query to add a term query to
 	 * @param occur the occurrence value of the added query
 	 * @param applyBoost whether to apply the boost to the query
 	 * @return whether the addition was successful or a non-fatal error occurred
 	 */
 	protected boolean addWholeFieldToQueryWithMultipleLocales(final String field, final String text, final Set<Locale> locales,
-			final SearchConfig searchConfig, final BooleanQuery booleanQuery, final Occur occur, final boolean applyBoost) {
+			final SearchConfig searchConfig, final BooleanQuery.Builder booleanQueryBuilder, final Occur occur, final boolean applyBoost) {
 		if (!isValidText(text)) {
 			return false;
 		}
-		final BooleanQuery innerQuery = new BooleanQuery();
+		final BooleanQuery.Builder innerQueryBuilder = new BooleanQuery.Builder();
 
 		final Set<Locale> broadenedLocales = new HashSet<>();
 
 		for (Locale locale : locales) {
 			addFieldLocalePart(field, text, searchConfig, applyBoost,
-					innerQuery, locale);
+					innerQueryBuilder, locale);
 			Locale broadenedLocale = LocaleUtils.broadenLocale(locale);
 			if (broadenedLocale != null && !broadenedLocales.contains(broadenedLocale) && !locales.contains(broadenedLocale)) {
 				broadenedLocales.add(broadenedLocale);
-				addFieldLocalePart(field, text, searchConfig, applyBoost, innerQuery, broadenedLocale);
+				addFieldLocalePart(field, text, searchConfig, applyBoost, innerQueryBuilder, broadenedLocale);
 			}
 		}
 
-		booleanQuery.add(innerQuery, occur);
+		booleanQueryBuilder.add(innerQueryBuilder.build(), occur);
 		return true;
 	}
 
 	private void addFieldLocalePart(final String field, final String text,
 			final SearchConfig searchConfig, final boolean applyBoost,
-			final BooleanQuery innerQuery, final Locale locale) {
+			final BooleanQuery.Builder innerQueryBuilder, final Locale locale) {
 		final String fieldName = constructFieldName(field, locale);
-		final Query query = createQuery(text, fieldName);
+		 Query query = createQuery(text, fieldName);
 		if (applyBoost) {
-			query.setBoost(getBoostValue(fieldName, locale, searchConfig));
+			query = new BoostQuery(query, getBoostValue(fieldName, locale, searchConfig));
 		}
-		innerQuery.add(query, Occur.SHOULD);
+		innerQueryBuilder.add(query, Occur.SHOULD);
 	}
 
 	private void addFuzzyFieldLocalePart(final String field, final String text,
 			final SearchConfig searchConfig, final boolean applyBoost,
-			final BooleanQuery innerQuery, final Locale locale) {
+			final BooleanQuery.Builder innerQueryBuilder, final Locale locale) {
 		final String fieldName = constructFieldName(field, locale);
-		final Query query = newFuzzyQuery(new Term(fieldName, getAnalyzer().analyze(text)), searchConfig);
+		Query query = newFuzzyQuery(new Term(fieldName, getAnalyzer().analyze(text)), searchConfig);
 		if (applyBoost) {
 			if (locale == null) {
-				query.setBoost(searchConfig.getBoostValue(fieldName));
+				query = new BoostQuery(query, searchConfig.getBoostValue(fieldName));
 			} else {
-				query.setBoost(getIndexUtility().getLocaleBoostWithFallback(searchConfig, fieldName, locale));
+				query = new BoostQuery(query, getIndexUtility().getLocaleBoostWithFallback(searchConfig, fieldName, locale));
 			}
 		}
-		innerQuery.add(query, Occur.SHOULD);
+		innerQueryBuilder.add(query, Occur.SHOULD);
 	}
 	
 	private Query newFuzzyQuery(final Term term, final SearchConfig searchConfig) {
@@ -354,23 +355,23 @@ public abstract class AbstractQueryComposerImpl implements QueryComposer {
 	 * @param text the actual text to search for
 	 * @param locale the locale to add the fuzzy query for
 	 * @param searchConfig the search configuration to use
-	 * @param booleanQuery the query to add the constructed query to
+	 * @param booleanQueryBuilder the query to add the constructed query to
 	 * @param occur the occurrence value of the added query
 	 * @param applyBoost whether to apply the boost to the query
 	 * @return whether the addition was successful or a non-fatal error occurred
 	 */
 	protected boolean addWholeFuzzyFieldToQuery(final String field, final String text, final Locale locale,
-			final SearchConfig searchConfig, final BooleanQuery booleanQuery, final Occur occur, final boolean applyBoost) {
+			final SearchConfig searchConfig, final BooleanQuery.Builder booleanQueryBuilder, final Occur occur, final boolean applyBoost) {
 		if (!isValidText(text)) {
 			return false;
 		}
 
-		final BooleanQuery innerQuery = new BooleanQuery();
+		final BooleanQuery.Builder innerQueryBuilder = new BooleanQuery.Builder();
 		Locale fieldLocale = locale;
 
 		// we could potentially have a locale fall back 3 times
 		for (int i = 0; i < POSSIBLE_LOCALE_FALLBACK; ++i) {
-			addFuzzyFieldLocalePart(field, text, searchConfig, applyBoost, innerQuery, fieldLocale);
+			addFuzzyFieldLocalePart(field, text, searchConfig, applyBoost, innerQueryBuilder, fieldLocale);
 
 			// it's possible that we didn't pass in a locale
 			if (fieldLocale == null) {
@@ -384,7 +385,7 @@ public abstract class AbstractQueryComposerImpl implements QueryComposer {
 			}
 			fieldLocale = newLocale;
 		}
-		booleanQuery.add(innerQuery, occur);
+		booleanQueryBuilder.add(innerQueryBuilder.build(), occur);
 		return true;
 	}
 
@@ -400,31 +401,31 @@ public abstract class AbstractQueryComposerImpl implements QueryComposer {
 	 * @param text the actual text to search for
 	 * @param locales the locales to add to the fuzzy query
 	 * @param searchConfig the search configuration to use
-	 * @param booleanQuery the query to add the constructed query to
+	 * @param booleanQueryBuilder the query to add the constructed query to
 	 * @param occur the occurrence value of the added query
 	 * @param applyBoost whether to apply the boost to the query
 	 * @return whether the addition was successful or a non-fatal error occurred
 	 */
 	protected boolean addWholeFuzzyFieldToQueryWithMultipleLocales(final String field, final String text, final Set<Locale> locales,
-			final SearchConfig searchConfig, final BooleanQuery booleanQuery, final Occur occur, final boolean applyBoost) {
+			final SearchConfig searchConfig, final BooleanQuery.Builder booleanQueryBuilder, final Occur occur, final boolean applyBoost) {
 		if (!isValidText(text)) {
 			return false;
 		}
-		final BooleanQuery innerQuery = new BooleanQuery();
+		final BooleanQuery.Builder innerQueryBuilder = new BooleanQuery.Builder();
 		final Set<Locale> broadenedLocales = new HashSet<>();
 
 		for (Locale locale : locales) {
 
 			addFuzzyFieldLocalePart(field, text, searchConfig, applyBoost,
-					innerQuery, locale);
+					innerQueryBuilder, locale);
 			Locale broadenedLocale = LocaleUtils.broadenLocale(locale);
 			if (broadenedLocale != null && !broadenedLocales.contains(broadenedLocale) && !locales.contains(broadenedLocale)) {
 				broadenedLocales.add(broadenedLocale);
-				addFuzzyFieldLocalePart(field, text, searchConfig, applyBoost, innerQuery, broadenedLocale);
+				addFuzzyFieldLocalePart(field, text, searchConfig, applyBoost, innerQueryBuilder, broadenedLocale);
 			}
 		}
 
-		booleanQuery.add(innerQuery, occur);
+		booleanQueryBuilder.add(innerQueryBuilder.build(), occur);
 		return true;
 	}
 
@@ -441,26 +442,27 @@ public abstract class AbstractQueryComposerImpl implements QueryComposer {
 	 * @param collection the collection of text to search for
 	 * @param locale the locale to add the fuzzy query for
 	 * @param searchConfig the search configuration to use
-	 * @param booleanQuery the query to add a term query to
+	 * @param booleanQueryBuilder the query to add a term query to
 	 * @param occur the occurrence value of the added query
 	 * @param applyBoost whether to apply the boost to the query
 	 * @return whether the addition was successful or a non-fatal error occurred
 	 */
 	protected boolean addWholeFieldToQuery(final String field, final Collection<?> collection, final Locale locale,
-			final SearchConfig searchConfig, final BooleanQuery booleanQuery, final Occur occur, final boolean applyBoost) {
+			final SearchConfig searchConfig, final BooleanQuery.Builder booleanQueryBuilder, final Occur occur, final boolean applyBoost) {
 		if (collection == null || collection.isEmpty()) {
 			return false;
 		}
-		final BooleanQuery innerQuery = new BooleanQuery();
+		final BooleanQuery.Builder innerQueryBuilder = new BooleanQuery.Builder();
 		for (Object obj : collection) {
-			if (!addWholeFieldToQuery(field, obj.toString(), locale, searchConfig, innerQuery, Occur.SHOULD, false)) {
+			if (!addWholeFieldToQuery(field, obj.toString(), locale, searchConfig, innerQueryBuilder, Occur.SHOULD, false)) {
 				return false;
 			}
 		}
+		Query innerQuery = innerQueryBuilder.build();
 		if (applyBoost) {
-			innerQuery.setBoost(getBoostValue(constructFieldName(field, locale), locale, searchConfig));
+			innerQuery = new BoostQuery(innerQuery, getBoostValue(constructFieldName(field, locale), locale, searchConfig));
 		}
-		booleanQuery.add(innerQuery, occur);
+		booleanQueryBuilder.add(innerQuery, occur);
 		return true;
 	}
 

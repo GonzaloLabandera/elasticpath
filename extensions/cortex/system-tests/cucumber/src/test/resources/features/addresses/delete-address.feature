@@ -1,4 +1,4 @@
-@Addresses
+@addresses
 Feature: DELETE address
 
   Background:
@@ -8,7 +8,7 @@ Feature: DELETE address
     Given I am logged in as a public shopper
     And I get address form
     And I create address with Country <COUNTRY>, Extended-Address <EXTENDED_ADDRESS>, Locality <LOCALITY>, Organization <ORGANIZATION>, Phone-Number <PHONE_NUMBER>, Postal-Code <POSTAL_CODE>, Region <REGION>, Street-Address <STREET_ADDRESS>, Family-Name <FAMILY_NAME> and Given-Name <GIVEN_NAME>
-    And I should see address matches the following
+    And the address with postal code <POSTAL_CODE> should match the following address values
       | country-name     | <COUNTRY>          |
       | extended-address | <EXTENDED_ADDRESS> |
       | locality         | <LOCALITY>         |

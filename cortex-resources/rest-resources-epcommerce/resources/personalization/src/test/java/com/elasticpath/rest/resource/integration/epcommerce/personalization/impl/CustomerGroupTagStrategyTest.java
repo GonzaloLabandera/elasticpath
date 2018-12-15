@@ -16,12 +16,10 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
-
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
-
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
@@ -53,7 +51,7 @@ public class CustomerGroupTagStrategyTest {
 	public void testTagName() {
 		String tagName = classUnderTest.tagName();
 
-		assertEquals(tagName, CUSTOMER_GROUP);
+		assertEquals(CUSTOMER_GROUP, tagName);
 	}
 
 	@Test

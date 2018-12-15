@@ -18,6 +18,7 @@ import static org.mockito.Mockito.when;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 
 import org.junit.Before;
@@ -29,16 +30,25 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import com.elasticpath.cache.Cache;
+import com.elasticpath.caching.core.CodeUidDateCacheKey;
+import com.elasticpath.domain.catalog.Catalog;
+import com.elasticpath.domain.catalog.impl.CatalogImpl;
+import com.elasticpath.domain.rules.EpRuleBase;
 import com.elasticpath.domain.rules.Rule;
+import com.elasticpath.domain.rules.impl.EpRuleBaseImpl;
 import com.elasticpath.domain.rules.impl.PromotionRuleImpl;
+import com.elasticpath.domain.store.Store;
+import com.elasticpath.domain.store.impl.StoreImpl;
 import com.elasticpath.service.rules.RuleService;
 
+@SuppressWarnings("PMD.TooManyMethods")
 @RunWith(MockitoJUnitRunner.class)
 public class CachingRuleServiceImplTest {
 
 	private static final Long RULE_UIDPK = 1L;
 	private static final String RULE_NAME = "ruleName";
 	private static final String RULE_CODE = "ruleCode";
+	private static final String STORE_CODE = "storeCode";
 
 	@Mock
 	private Cache<String, Rule> ruleByRuleCodeCache;
@@ -48,6 +58,12 @@ public class CachingRuleServiceImplTest {
 	private Cache<Long, String> ruleCodeByRuleUidCache;
 	@Mock
 	private Cache<Collection<Long>, Collection<String>> ruleCodesByRuleUidsCache;
+	@Mock
+	private Cache<Collection<Long>, EpRuleBase> ruleBaseByScenarioCache;
+	@Mock
+	private Cache<CodeUidDateCacheKey, EpRuleBase> changedStoreRuleBaseCache;
+	@Mock
+	private Cache<CodeUidDateCacheKey, EpRuleBase> changedCatalogRuleBaseCache;
 	@Mock
 	private RuleService decoratedFallbackService;
 	@Mock
@@ -432,5 +448,202 @@ public class CachingRuleServiceImplTest {
 		verify(ruleCodeByRuleUidCache).remove(RULE_UIDPK);
 		verifyZeroInteractions(ruleByRuleCodeCache);
 		verifyZeroInteractions(ruleCodeByRuleNameCache);
+	}
+
+	@Test
+	public void shouldFindRuleBaseByScenarioInDbOnCacheMiss() {
+		final int scenarioId = 1;
+		final EpRuleBase expectedRuleBase = mock(EpRuleBaseImpl.class);
+
+		final Store store = new StoreImpl();
+		store.setUidPk(1L);
+
+		final Catalog catalog = new CatalogImpl();
+		catalog.setUidPk(2L);
+
+		Collection<Long> cacheKey = Arrays.asList(store.getUidPk(), catalog.getUidPk(), (long) scenarioId);
+
+		when(ruleBaseByScenarioCache.containsKey(cacheKey)).thenReturn(false);
+		when(decoratedFallbackService.findRuleBaseByScenario(store, catalog, scenarioId)).thenReturn(expectedRuleBase);
+
+		EpRuleBase actualRuleBase = fixture.findRuleBaseByScenario(store, catalog, scenarioId);
+
+		assertThat(actualRuleBase).isEqualTo(expectedRuleBase);
+
+		verify(ruleBaseByScenarioCache).containsKey(cacheKey);
+		verify(decoratedFallbackService).findRuleBaseByScenario(store, catalog, scenarioId);
+		verify(ruleBaseByScenarioCache).put(cacheKey, actualRuleBase);
+	}
+
+	@Test
+	public void shouldReturnNullRuleBaseInCache() {
+		final int scenarioId = 1;
+		final Store store = new StoreImpl();
+		store.setUidPk(1L);
+
+		final Catalog catalog = new CatalogImpl();
+		catalog.setUidPk(2L);
+
+		Collection<Long> cacheKey = Arrays.asList(store.getUidPk(), catalog.getUidPk(), (long) scenarioId);
+
+		when(ruleBaseByScenarioCache.get(cacheKey)).thenReturn(null);
+		when(ruleBaseByScenarioCache.containsKey(cacheKey)).thenReturn(true);
+
+		EpRuleBase actualRuleBase = fixture.findRuleBaseByScenario(store, catalog, scenarioId);
+
+		assertThat(actualRuleBase).isNull();
+
+		verify(ruleBaseByScenarioCache).get(cacheKey);
+		verify(decoratedFallbackService, never()).findRuleBaseByScenario(store, catalog, scenarioId);
+		verify(ruleBaseByScenarioCache, never()).put(cacheKey, actualRuleBase);
+	}
+
+	@Test
+	public void shouldFindRuleBaseByScenarioInCacheOnCacheHit() {
+		final int scenarioId = 1;
+		final EpRuleBase expectedRuleBase = mock(EpRuleBaseImpl.class);
+
+		final Store store = new StoreImpl();
+		store.setUidPk(1L);
+
+		final Catalog catalog = new CatalogImpl();
+		catalog.setUidPk(2L);
+
+		Collection<Long> cacheKey = Arrays.asList(store.getUidPk(), catalog.getUidPk(), Long.valueOf(scenarioId));
+
+		when(ruleBaseByScenarioCache.containsKey(cacheKey)).thenReturn(true);
+		when(ruleBaseByScenarioCache.get(cacheKey)).thenReturn(expectedRuleBase);
+
+		EpRuleBase actualRuleBase = fixture.findRuleBaseByScenario(store, catalog, scenarioId);
+
+		assertThat(actualRuleBase).isEqualTo(expectedRuleBase);
+
+		verify(ruleBaseByScenarioCache).get(cacheKey);
+		verify(decoratedFallbackService, never()).findRuleBaseByScenario(store, catalog, scenarioId);
+		verify(ruleBaseByScenarioCache, never()).put(cacheKey, actualRuleBase);
+	}
+
+	@Test
+	public void shouldFindChangedStoreRuleBaseInDbOnCacheMiss() {
+		final int scenarioId = 1;
+		final Date date = new Date();
+
+		final EpRuleBase expectedRuleBase = mock(EpRuleBaseImpl.class);
+
+		CodeUidDateCacheKey cacheKey = new CodeUidDateCacheKey(STORE_CODE, scenarioId, date);
+
+		when(changedStoreRuleBaseCache.containsKey(cacheKey)).thenReturn(false);
+		when(decoratedFallbackService.findChangedStoreRuleBases(STORE_CODE, scenarioId, date)).thenReturn(expectedRuleBase);
+
+		EpRuleBase actualRuleBase = fixture.findChangedStoreRuleBases(STORE_CODE, scenarioId, date);
+
+		assertThat(actualRuleBase).isEqualTo(expectedRuleBase);
+
+		verify(changedStoreRuleBaseCache).containsKey(cacheKey);
+		verify(decoratedFallbackService).findChangedStoreRuleBases(STORE_CODE, scenarioId, date);
+		verify(changedStoreRuleBaseCache).put(cacheKey, actualRuleBase);
+	}
+
+	@Test
+	public void shouldReturnNullChangedStoreRuleBaseInCache() {
+		final int scenarioId = 1;
+		final Date date = new Date();
+
+		CodeUidDateCacheKey cacheKey = new CodeUidDateCacheKey(STORE_CODE, scenarioId, date);
+
+		when(changedStoreRuleBaseCache.get(cacheKey)).thenReturn(null);
+		when(changedStoreRuleBaseCache.containsKey(cacheKey)).thenReturn(true);
+
+		EpRuleBase actualRuleBase = fixture.findChangedStoreRuleBases(STORE_CODE, scenarioId, date);
+
+		assertThat(actualRuleBase).isNull();
+
+		verify(changedStoreRuleBaseCache).get(cacheKey);
+		verify(decoratedFallbackService, never()).findChangedStoreRuleBases(STORE_CODE, scenarioId, date);
+		verify(changedStoreRuleBaseCache, never()).put(cacheKey, actualRuleBase);
+	}
+
+	@Test
+	public void shouldFindChangedStoreRuleBaseInCacheOnCacheHit() {
+		final int scenarioId = 1;
+		final Date date = new Date();
+
+		final EpRuleBase expectedRuleBase = mock(EpRuleBaseImpl.class);
+
+		CodeUidDateCacheKey cacheKey = new CodeUidDateCacheKey(STORE_CODE, scenarioId, date);
+
+		when(changedStoreRuleBaseCache.containsKey(cacheKey)).thenReturn(true);
+		when(changedStoreRuleBaseCache.get(cacheKey)).thenReturn(expectedRuleBase);
+
+		EpRuleBase actualRuleBase = fixture.findChangedStoreRuleBases(STORE_CODE, scenarioId, date);
+
+		assertThat(actualRuleBase).isEqualTo(expectedRuleBase);
+
+		verify(changedStoreRuleBaseCache).containsKey(cacheKey);
+		verify(changedStoreRuleBaseCache).get(cacheKey);
+		verify(decoratedFallbackService, never()).findChangedStoreRuleBases(STORE_CODE, scenarioId, date);
+		verify(changedStoreRuleBaseCache, never()).put(cacheKey, actualRuleBase);
+	}
+
+	@Test
+	public void shouldFindChangedCatalogRuleBaseInDbOnCacheMiss() {
+		final int scenarioId = 1;
+		final Date date = new Date();
+
+		final EpRuleBase expectedRuleBase = mock(EpRuleBaseImpl.class);
+
+		CodeUidDateCacheKey cacheKey = new CodeUidDateCacheKey(STORE_CODE, scenarioId, date);
+
+		when(changedCatalogRuleBaseCache.containsKey(cacheKey)).thenReturn(false);
+		when(decoratedFallbackService.findChangedCatalogRuleBases(STORE_CODE, scenarioId, date)).thenReturn(expectedRuleBase);
+
+		EpRuleBase actualRuleBase = fixture.findChangedCatalogRuleBases(STORE_CODE, scenarioId, date);
+
+		assertThat(actualRuleBase).isEqualTo(expectedRuleBase);
+
+		verify(changedCatalogRuleBaseCache).containsKey(cacheKey);
+		verify(decoratedFallbackService).findChangedCatalogRuleBases(STORE_CODE, scenarioId, date);
+		verify(changedCatalogRuleBaseCache).put(cacheKey, actualRuleBase);
+	}
+
+	@Test
+	public void shouldReturnNullChangedCatalogRuleBaseInCache() {
+		final int scenarioId = 1;
+		final Date date = new Date();
+
+		CodeUidDateCacheKey cacheKey = new CodeUidDateCacheKey(STORE_CODE, scenarioId, date);
+
+		when(changedCatalogRuleBaseCache.get(cacheKey)).thenReturn(null);
+		when(changedCatalogRuleBaseCache.containsKey(cacheKey)).thenReturn(true);
+
+		EpRuleBase actualRuleBase = fixture.findChangedCatalogRuleBases(STORE_CODE, scenarioId, date);
+
+		assertThat(actualRuleBase).isNull();
+
+		verify(changedCatalogRuleBaseCache).get(cacheKey);
+		verify(decoratedFallbackService, never()).findChangedCatalogRuleBases(STORE_CODE, scenarioId, date);
+		verify(changedCatalogRuleBaseCache, never()).put(cacheKey, actualRuleBase);
+	}
+
+	@Test
+	public void shouldFindChangedCatalogRuleBaseInCacheOnCacheHit() {
+		final int scenarioId = 1;
+		final Date date = new Date();
+
+		final EpRuleBase expectedRuleBase = mock(EpRuleBaseImpl.class);
+
+		CodeUidDateCacheKey cacheKey = new CodeUidDateCacheKey(STORE_CODE, scenarioId, date);
+
+		when(changedCatalogRuleBaseCache.get(cacheKey)).thenReturn(expectedRuleBase);
+		when(changedCatalogRuleBaseCache.containsKey(cacheKey)).thenReturn(true);
+
+		EpRuleBase actualRuleBase = fixture.findChangedCatalogRuleBases(STORE_CODE, scenarioId, date);
+
+		assertThat(actualRuleBase).isEqualTo(expectedRuleBase);
+
+		verify(changedCatalogRuleBaseCache).containsKey(cacheKey);
+		verify(changedCatalogRuleBaseCache).get(cacheKey);
+		verify(decoratedFallbackService, never()).findChangedCatalogRuleBases(STORE_CODE, scenarioId, date);
+		verify(changedCatalogRuleBaseCache, never()).put(cacheKey, actualRuleBase);
 	}
 }

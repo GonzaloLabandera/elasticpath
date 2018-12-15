@@ -8,14 +8,11 @@ import static org.mockito.Mockito.when;
 import java.util.List;
 import java.util.Map;
 
+import com.google.common.collect.ImmutableList;
+import io.reactivex.Single;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
-import io.reactivex.Single;
-
-import com.google.common.collect.ImmutableList;
-
 import org.mockito.Answers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -87,7 +84,7 @@ public class PurchaseLineItemToItemLinksRepositoryImplTest {
 				.assertNoErrors()
 				.assertValueCount(1)
 				.assertValue(submitResult -> submitResult.getItemId().equals(itemId))
-				.assertValue(submitResult -> submitResult.getItems().getScope().getValue().equals(SCOPE));
+				.assertValue(submitResult -> submitResult.getScope().getValue().equals(SCOPE));
 
 	}
 

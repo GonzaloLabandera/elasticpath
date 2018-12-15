@@ -43,10 +43,7 @@ public class AdvancedSearchFilteredNavSeparatorFilterImpl
 	 */
 	@Override
 	public boolean equals(final Object object) {
-		if (object instanceof AdvancedSearchFilteredNavSeparatorFilter) {
-			return true;
-		}
-		return false;
+		return object instanceof AdvancedSearchFilteredNavSeparatorFilter;
 	}
 
 	/**

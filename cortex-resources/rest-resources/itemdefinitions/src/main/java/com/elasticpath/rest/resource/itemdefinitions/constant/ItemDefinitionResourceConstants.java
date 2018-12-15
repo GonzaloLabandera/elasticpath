@@ -9,8 +9,10 @@ package com.elasticpath.rest.resource.itemdefinitions.constant;
 public final class ItemDefinitionResourceConstants {
 
 	/**
-	 * Max age.
+	 * Cache-Control max age.
 	 */
 	public static final int MAX_AGE = 600;
 
+	private ItemDefinitionResourceConstants() {
+	}
 }

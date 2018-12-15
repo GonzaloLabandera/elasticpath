@@ -1,4 +1,4 @@
-@Wishlists
+@wishlists
 Feature: Move item from wishlist to cart
   As a shopper
   I want to move items from my wishlist to cart
@@ -76,7 +76,6 @@ Feature: Move item from wishlist to cart
     Then the HTTP status is OK
     Then item with name digitalProduct is in my cart with quantity 3
     And item with name digitalProduct is not found in my default wishlist
-
 
   Scenario Outline: Moving configurable item from wishlist to cart should be possible
     Given I add item with code <ITEMCODE> to my default wishlist

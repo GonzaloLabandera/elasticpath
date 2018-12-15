@@ -3,18 +3,14 @@
  */
 package com.elasticpath.commons.util;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-
 import java.util.Locale;
 
+import com.google.common.testing.EqualsTester;
 import org.junit.Test;
 
 /**
  * Test that the {@link PairInsensitiveString} class works as expected.
  */
-@SuppressWarnings("PMD.UseAssertEqualsInsteadOfAssertTrue")
 public class PairInsensitiveStringTest {
 	
 	/**
@@ -28,15 +24,11 @@ public class PairInsensitiveStringTest {
 		final PairInsensitiveString firstPair = new PairInsensitiveString("elastic", "path", locale);
 		final PairInsensitiveString secondPair = new PairInsensitiveString("Elastic", "Path", locale);
 		final PairInsensitiveString thrirdPair = new PairInsensitiveString("Flexible", "Path", locale);
-		
-		assertTrue(firstPair.equals(secondPair));
-		assertTrue(secondPair.equals(firstPair));
-		
-		assertEquals(firstPair.hashCode(), secondPair.hashCode());
-		
-		assertFalse(firstPair.equals(thrirdPair));
-		assertFalse(thrirdPair.equals(secondPair));
-		
+
+		new EqualsTester()
+			.addEqualityGroup(firstPair, secondPair)
+			.addEqualityGroup(thrirdPair)
+			.testEquals();
 	}
 	
 	/**
@@ -50,26 +42,18 @@ public class PairInsensitiveStringTest {
 		
 		PairInsensitiveString firstPair = new PairInsensitiveString("elastic", null, locale);
 		PairInsensitiveString secondPair = new PairInsensitiveString("Elastic", null, locale);
-		
-		
-		assertTrue(firstPair.equals(secondPair));
-		assertTrue(secondPair.equals(firstPair));
-		
-		assertEquals(firstPair.hashCode(), secondPair.hashCode());
 
-		
-		assertFalse(firstPair.equals(thrirdPair));
-		assertFalse(thrirdPair.equals(secondPair));
-		
+		new EqualsTester()
+			.addEqualityGroup(firstPair, secondPair)
+			.addEqualityGroup(thrirdPair)
+			.testEquals();
+
 		firstPair = new PairInsensitiveString(null, "path", locale);
 		secondPair = new PairInsensitiveString(null, "PatH", locale);
 
-		assertTrue(firstPair.equals(secondPair));
-		assertTrue(secondPair.equals(firstPair));
-		
-		assertEquals(firstPair.hashCode(), secondPair.hashCode());
-		
-		
+		new EqualsTester()
+			.addEqualityGroup(firstPair, secondPair)
+			.testEquals();
 	}
 	
 

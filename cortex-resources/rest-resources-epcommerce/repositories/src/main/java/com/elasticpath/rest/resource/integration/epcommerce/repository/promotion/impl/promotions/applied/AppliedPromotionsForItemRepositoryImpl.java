@@ -3,8 +3,7 @@
  */
 package com.elasticpath.rest.resource.integration.epcommerce.repository.promotion.impl.promotions.applied;
 
-import static com.elasticpath.rest.resource.integration.epcommerce.repository.promotion.impl.promotions.PromotionIdentifierUtil
-		.buildPromotionIdentifier;
+import static com.elasticpath.rest.resource.integration.epcommerce.repository.promotion.impl.promotions.PromotionIdentifierUtil.buildPromotionIdentifier;
 
 import io.reactivex.Observable;
 import org.osgi.service.component.annotations.Component;
@@ -31,7 +30,7 @@ public class AppliedPromotionsForItemRepositoryImpl<I extends AppliedPromotionsF
 	@Override
 	public Observable<PromotionIdentifier> getElements(final AppliedPromotionsForItemIdentifier identifier) {
 		String itemId = identifier.getItem().getItemId().getValue().get(ItemRepository.SKU_CODE_KEY);
-		String scope = identifier.getItem().getItems().getScope().getValue();
+		String scope = identifier.getItem().getScope().getValue();
 		return promotionRepository.getAppliedPromotionsForItem(scope, itemId)
 						.map(appliedPromotion -> buildPromotionIdentifier(scope, appliedPromotion));
 	}

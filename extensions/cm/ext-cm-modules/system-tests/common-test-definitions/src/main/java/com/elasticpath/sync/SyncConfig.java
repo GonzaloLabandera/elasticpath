@@ -25,6 +25,7 @@ public class SyncConfig {
 	private PrintWriter printWriter;
 	private final String syncCliPath;
 	private static final String SYNC_FILE_NAME = "sync.sh";
+	private static final String SYNC_FILE_NAME_WIN = "sync.bat";
 	private URL loc;
 	private static final Logger LOGGER = Logger.getLogger(SyncConfig.class);
 
@@ -55,12 +56,14 @@ public class SyncConfig {
 
 	public int runDataSync(final String changeSetGuid) {
 		try {
-
-			loc = getClass().getClassLoader().getResource("sync.sh");
-
-			Runtime.getRuntime().exec("chmod 777 " + loc.getPath());
-
-			Runtime.getRuntime().exec("chmod 777 " + syncCliPath + "/synctool.sh");
+			String operatingSystem = System.getProperty("os.name");
+			if (operatingSystem.contains("Windows")) {
+				loc = getClass().getClassLoader().getResource(SYNC_FILE_NAME_WIN);
+			} else{
+				loc = getClass().getClassLoader().getResource("sync.sh");
+				Runtime.getRuntime().exec("chmod 777 " + loc.getPath());
+				Runtime.getRuntime().exec("chmod 777 " + syncCliPath + "/synctool.sh");
+			}
 			String[] cmd = {loc.getPath(), resourseFolderPath + "/" + propertyManager.getProperty("sync.cli"), changeSetGuid};
 			LOGGER.info("cmd ...... : " + resourseFolderPath + "/" + propertyManager.getProperty("sync.cli") + " changeSetGuid: " + changeSetGuid);
 			Process process = Runtime.getRuntime().exec(cmd);

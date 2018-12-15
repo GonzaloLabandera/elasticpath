@@ -126,19 +126,7 @@ public class OrderLockServiceImpl extends AbstractEpPersistenceServiceImpl imple
 
 		CmUser lockerUser = orderLock.getCmUser();
 
-		if (unlockerUser != null && lockerUser != null && unlockerUser.getUidPk() == lockerUser.getUidPk()) {
-			/** order is locked as expected AND BY CORRECT USER!!! */
-			return true;
-		}
-
-		/**
-		 * order is locked but user is incorrect. To test this: lock the order by user1 (by editing order), then crash application (this will leave
-		 * order locked in DB) then modify order by user2 (actually this can�t be done since order is already locked, but force this to test) then
-		 * call this method to test the last condition Also we can use multiple RCP applications!
-		 */
-
-		return false;
-
+		return unlockerUser != null && lockerUser != null && unlockerUser.getUidPk() == lockerUser.getUidPk();
 	}
 
 	@Override

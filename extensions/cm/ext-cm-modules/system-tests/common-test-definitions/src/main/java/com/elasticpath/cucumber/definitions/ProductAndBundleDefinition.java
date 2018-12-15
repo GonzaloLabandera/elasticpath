@@ -3,8 +3,13 @@ package com.elasticpath.cucumber.definitions;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.List;
+import java.util.Locale;
 
+import cucumber.api.java.After;
 import cucumber.api.java.en.And;
 import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
@@ -35,11 +40,13 @@ import com.elasticpath.selenium.editor.product.tabs.PricingTab;
 import com.elasticpath.selenium.navigations.CatalogManagement;
 import com.elasticpath.selenium.resultspane.CatalogProductListingPane;
 import com.elasticpath.selenium.resultspane.CatalogSearchResultPane;
+import com.elasticpath.selenium.resultspane.CatalogSkuSearchResultPane;
 import com.elasticpath.selenium.setup.SetUp;
 import com.elasticpath.selenium.toolbars.ActivityToolbar;
 import com.elasticpath.selenium.toolbars.CatalogManagementActionToolbar;
 import com.elasticpath.selenium.toolbars.ChangeSetActionToolbar;
 import com.elasticpath.selenium.util.Constants;
+import com.elasticpath.selenium.util.DBConnector;
 import com.elasticpath.selenium.util.Utility;
 import com.elasticpath.selenium.wizards.AddSkuWizard;
 import com.elasticpath.selenium.wizards.CreateBundleWizard;
@@ -48,7 +55,7 @@ import com.elasticpath.selenium.wizards.CreateProductWizard;
 /**
  * Product Definition.
  */
-@SuppressWarnings({"PMD.GodClass", "PMD.TooManyMethods", "PMD.TooManyFields"})
+@SuppressWarnings({"PMD.GodClass", "PMD.TooManyMethods", "PMD.TooManyFields", "PMD.ExcessiveClassLength"})
 public class ProductAndBundleDefinition {
 	private final CatalogManagement catalogManagement;
 	private CreateBundleWizard createBundleWizard;
@@ -79,6 +86,7 @@ public class ProductAndBundleDefinition {
 	private CatalogProductListingPane catalogProductListingPane;
 	private ProductEditor productEditor;
 	private final ChangeSetActionToolbar changeSetActionToolbar;
+	private CatalogSkuSearchResultPane catalogSkuSearchResultPane;
 
 	/**
 	 * Constructor.
@@ -102,10 +110,12 @@ public class ProductAndBundleDefinition {
 		activityToolbar = new ActivityToolbar(driver);
 		editDecimalValueAttributeDialog = new EditDecimalValueAttributeDialog(driver);
 		changeSetActionToolbar = new ChangeSetActionToolbar(driver);
+		productEditor = new ProductEditor(driver);
 		this.catalog = catalog;
 		this.category = category;
 		this.productType = productType;
 		this.product = product;
+		this.product.setProductName("");
 		this.catalogManagementActionToolbar = new CatalogManagementActionToolbar(driver);
 		this.dst = dst;
 	}
@@ -125,41 +135,22 @@ public class ProductAndBundleDefinition {
 			catalogManagement.expandCatalogAndVerifyCategory(product.getCatalog(), product.getCategory());
 			catalogManagement.doubleClickCategory(product.getCategory());
 		}
-		createProductWizard = catalogManagement.clickCreateProductButton();
-		String prodCode = Utility.getRandomUUID();
-		this.product.setProductCode(prodCode);
-		String prodName = product.getProductName() + "-" + prodCode;
-		this.product.setProductName(prodName);
-		if (dst != null) {
-			dst.setProductCode(prodCode);
-			dst.setProductName(prodName);
-		}
-		createProductWizard.enterProductCode(prodCode);
-		createProductWizard.enterProductName(this.product.getProductName());
+		createProduct(product);
+	}
 
-		selectProductType(product);
-
-		createProductWizard.selectTaxCode(product.getTaxCode());
-
-		selectStoreVisiblity(product);
-
-		createProductWizard.selectAvailabilityRule(product.getAvailability());
-		createProductWizard.clickNextInDialog();
-
-		enterProductAttribute(product);
-
-		createProductWizard.clickNextInDialog();
-
-		if (createProductWizard.isAddSKUButtonPresent()) {
-			addMultiSkuValues(product);
-
-		} else {
-			createProductWizard.enterSkuCode(getUniqueSkuCode());
-			createProductWizard.selectShippableType(product.getShippableType());
-		}
-
-		addPrice(product);
-		createProductWizard.clickFinish();
+	/**
+	 * Create new product for existing subcategory.
+	 *
+	 * @param parentCategory  a parent category for subcategory
+	 * @param productInfoList a product info list.
+	 */
+	@When("^(?:I create|a) new product for a newly created subcategory where parent category is (.+) with following attributes$")
+	public void createNewProductForSubcategory(final String parentCategory, final List<Product> productInfoList) {
+		Product product = productInfoList.get(0);
+		product.setCategory(this.category.getCategoryName());
+		this.product.setCategory(this.category.getCategoryName());
+		navigateToSubcategoryAndOpenProductList(product.getCatalog(), parentCategory, product.getCategory());
+		createProduct(product);
 	}
 
 	/**
@@ -167,7 +158,7 @@ public class ProductAndBundleDefinition {
 	 */
 	@Then("^the newly created product is in the list$")
 	public void verifyNewlyCreatedProductExists() {
-		searchForProductByName(this.product.getProductName());
+		verifyProductByName(this.product.getProductName());
 	}
 
 	/**
@@ -175,22 +166,32 @@ public class ProductAndBundleDefinition {
 	 */
 	@When("^I delete the newly created (?:product|bundle)$")
 	public void deleteNewlyCreatedProduct() {
+		assertThat(this.product.getProductName())
+				.as("It's not possible to delete a Product. The product name was not assigned")
+				.isNotBlank();
 		verifyProductByName(this.product.getProductName());
 		if (activityToolbar.isChangeSetEnabled()) {
 			changeSetActionToolbar.clickAddItemToChangeSet();
-			catalogSearchResultPane.isProductInList(this.product.getProductName());
+			catalogSearchResultPane.isProductNameInList(this.product.getProductName());
 		}
 		catalogSearchResultPane.clickDeleteProductButton();
 		new ConfirmDialog(SetUp.getDriver()).clickOKButton("CatalogMessages.DeleteProduct");
 	}
 
 	/**
-	 * Verifies product exists with the name productName.
+	 * Searches for product and verifies it is displayed in a result list.
 	 *
 	 * @param productName product name.
 	 */
 	public void verifyProductByName(final String productName) {
 		searchForProductByName(productName);
+		int index = 0;
+		while (!catalogSearchResultPane.isProductNameInList(productName) && index < Constants.UUID_END_INDEX) {
+			catalogSearchResultPane.sleep(Constants.SLEEP_HALFSECOND_IN_MILLIS);
+			searchForProductByName(productName);
+			index++;
+		}
+		catalogSearchResultPane.verifyProductNameExists(productName);
 	}
 
 
@@ -199,7 +200,7 @@ public class ProductAndBundleDefinition {
 	 */
 	@Then("^the (?:product|bundle) is deleted$")
 	public void verifyProductIsDeleted() {
-		searchNewlyCreatedProductByName(this.product.getProductName());
+		searchForProductByName(this.product.getProductName());
 		catalogSearchResultPane.verifyProductIsDeleted(this.product.getProductName());
 	}
 
@@ -241,7 +242,7 @@ public class ProductAndBundleDefinition {
 	}
 
 	/**
-	 * Delete Newly Created product.
+	 * Update quantity of a bundle product.
 	 *
 	 * @param productCode product code
 	 * @param quantity    quantity
@@ -435,60 +436,17 @@ public class ProductAndBundleDefinition {
 	 * @param productName product name.
 	 */
 	public void searchForProductByName(final String productName) {
-		catalogManagement.clickCatalogSearchTab();
-		catalogManagement.enterProductName(productName);
-		catalogSearchResultPane = catalogManagement.clickCatalogSearch();
-
-		int index = 0;
-		while (!catalogSearchResultPane.isProductInList(productName) && index < Constants.UUID_END_INDEX) {
-			catalogSearchResultPane.sleep(Constants.SLEEP_HALFSECOND_IN_MILLIS);
-			searchNewlyCreatedProductByName(productName);
-			index++;
-		}
-		catalogSearchResultPane.setWebDriverImplicitWait(Constants.IMPLICIT_WAIT_FOR_ELEMENT_THREE_SECONDS);
-		catalogSearchResultPane.verifyProductNameExists(productName);
-		catalogSearchResultPane.setWebDriverImplicitWaitToDefault();
+		searchForActiveProduct(() -> catalogManagement.enterProductName(productName));
 	}
+
 
 	/**
 	 * Searches for a product by code.
 	 *
 	 * @param productCode product code.
 	 */
-	private void searchForProductByCode(final String productCode) {
-		catalogManagement.clickCatalogSearchTab();
-		catalogManagement.enterProductCode(productCode);
-		catalogSearchResultPane = catalogManagement.clickCatalogSearch();
-
-		int index = 0;
-		while (!catalogSearchResultPane.isProductCodeInList(productCode) && index < Constants.UUID_END_INDEX) {
-			catalogSearchResultPane.sleep(Constants.SLEEP_HALFSECOND_IN_MILLIS);
-			searchNewlyCreatedProductByCode(productCode);
-			index++;
-		}
-		catalogSearchResultPane.setWebDriverImplicitWait(Constants.IMPLICIT_WAIT_FOR_ELEMENT_THREE_SECONDS);
-		catalogSearchResultPane.verifyProductCodeExists(productCode);
-		catalogSearchResultPane.setWebDriverImplicitWaitToDefault();
-	}
-
-	/**
-	 * Searches for a newly created product by name.
-	 *
-	 * @param productName product name.
-	 */
-	private void searchNewlyCreatedProductByName(final String productName) {
-		catalogManagement.enterProductName(productName);
-		catalogSearchResultPane = catalogManagement.clickCatalogSearch();
-	}
-
-	/**
-	 * Searches for a newly created product by code.
-	 *
-	 * @param productCode product code.
-	 */
-	private void searchNewlyCreatedProductByCode(final String productCode) {
-		catalogManagement.enterProductCode(productCode);
-		catalogSearchResultPane = catalogManagement.clickCatalogSearch();
+	public void searchForProductByCode(final String productCode) {
+		searchForActiveProduct(() -> catalogManagement.enterProductCode(productCode));
 	}
 
 	private String getUniqueSkuCode() {
@@ -581,7 +539,7 @@ public class ProductAndBundleDefinition {
 	 */
 	@When("^I edit newly created product name to (.+)$")
 	public void editProductName(final String productName) {
-		productEditor = catalogSearchResultPane.openProductEditor(this.product.getProductName());
+		productEditor = catalogSearchResultPane.openProductEditorWithProductName(this.product.getProductName());
 		this.product.setProductName(productName);
 		productEditor.enterProductName(this.product.getProductName());
 		catalogManagementActionToolbar.saveAll();
@@ -631,15 +589,24 @@ public class ProductAndBundleDefinition {
 	}
 
 	/**
+	 * Search for product by name.
+	 *
+	 * @param productName product name.
+	 */
+	@When("^I search for product by name (.*) and verify it appears in a result list$")
+	public void searchForProductName(final String productName) {
+		verifyProductByName(productName);
+	}
+
+	/**
 	 * Search and open an existing Product.
 	 *
 	 * @param existingProductName the product name
 	 */
 	@When("^I search and open an existing product with name (.+)$")
 	public void searchOpenProductEditor(final String existingProductName) {
-		searchForProductByName(existingProductName);
-		catalogSearchResultPane.verifyProductNameExists(existingProductName);
-		productEditor = catalogSearchResultPane.openProductEditor(existingProductName);
+		verifyProductByName(existingProductName);
+		productEditor = catalogSearchResultPane.openProductEditorWithProductName(existingProductName);
 	}
 
 	/**
@@ -648,10 +615,191 @@ public class ProductAndBundleDefinition {
 	 * @param existingProductcode the product code
 	 * @param tabName             for product
 	 */
-	@When("^I am viewing the (.+) tab of an existing product with product code (.+)$")
+	@When("^I (?:am viewing|can see) the (.+) tab of an existing product with product code (.+)$")
 	public void searchOpenProductEditorTabWithCode(final String tabName, final String existingProductcode) {
 		searchOpenProductWithCode(existingProductcode);
 		productEditor.selectTab(tabName);
+	}
+
+	/**
+	 * Search for product by code.
+	 *
+	 * @param productCode product code.
+	 */
+	@When("^I search for (?:product|bundle) by code (.*)$")
+	public void searchForProductCode(final String productCode) {
+		searchForProductByCode(productCode);
+		this.product.setProductCode(productCode);
+	}
+
+	/**
+	 * Search for product by sku.
+	 *
+	 * @param productSku product sku.
+	 */
+	@When("^I search for product by sku (.*)$")
+	public void searchForProductSku(final String productSku) {
+		searchForActiveProduct(() -> catalogManagement.enterProductSku(productSku));
+	}
+
+	/**
+	 * Search for sku by sku code.
+	 *
+	 * @param skuCode sku code as a search key.
+	 */
+	@When("^I search for sku by sku code (.*)$")
+	public void searchForSkuBySkuCode(final String skuCode) {
+		searchForSku(() -> catalogManagement.enterProductSkuSkuSearch(skuCode));
+		this.product.setSkuCode(skuCode);
+	}
+
+	/**
+	 * Search for sku by product name.
+	 *
+	 * @param productName product name as a search key.
+	 */
+	@When("^I search for sku by product name (.*)$")
+	public void searchForSkuByProductName(final String productName) {
+		searchForSku(() -> catalogManagement.enterProductNameSkuSearch(productName));
+	}
+
+	/**
+	 * Search for sku by product code.
+	 *
+	 * @param productCode product code as a search key.
+	 */
+	@When("^I search for sku by product code (.*)$")
+	public void searchForSkuByProductCode(final String productCode) {
+		searchForSku(() -> catalogManagement.enterProductCode(productCode));
+	}
+
+	/**
+	 * Search for sku by selecting Sku Options filter values.
+	 *
+	 * @param skuOption      sku Option which should be selected in a filter.
+	 * @param skuOptionValue sku Option Value which should be selected in a filter.
+	 */
+	@When("^I search for sku by Sku Option (.+) and Sku Option value (.+)$")
+	public void searchForSkuBySkuOptionsFilter(final String skuOption, final String skuOptionValue) {
+		searchForSku(() -> {
+			catalogManagement.selectSkuOption(skuOption);
+			catalogManagement.selectSkuOptionValue(skuOptionValue);
+		});
+	}
+
+	/**
+	 * Verifies that product code appears in a search result table.
+	 *
+	 * @param expectedProductCode expected product code.
+	 */
+	@Then("^(?:Product|Bundle) code (.*) should appear in result$")
+	public void verifyProductSearchResultCode(final String expectedProductCode) {
+		int index = 0;
+		while (!catalogSearchResultPane.isProductCodeInList(expectedProductCode) && index < Constants.UUID_END_INDEX) {
+			catalogSearchResultPane.sleep(Constants.SLEEP_HALFSECOND_IN_MILLIS);
+			searchForProductCode(expectedProductCode);
+			index++;
+		}
+		catalogSearchResultPane.verifyProductCodeExists(expectedProductCode);
+	}
+
+	/**
+	 * Verifies that product with specified sku appears in a search result table.
+	 *
+	 * @param expectedSku expected product sku.
+	 */
+	@Then("^Product with sku (.*) should appear in result$")
+	public void verifyProductSearchResultSku(final String expectedSku) {
+		int index = 0;
+		while (catalogSearchResultPane.isSearchResultTableEmpty() && index < Constants.UUID_END_INDEX) {
+			catalogSearchResultPane.sleep(Constants.SLEEP_HALFSECOND_IN_MILLIS);
+			searchForProductSku(expectedSku);
+			index++;
+		}
+		productEditor = catalogSearchResultPane.openProductEditorForFirstSearchResultEntry();
+		productEditor.selectTab(ProductEditor.SKU_DETAILS_TAB_ID);
+		assertThat(productEditor.getSkuCode())
+				.as("Unexpected sku code in the search results")
+				.isEqualTo(expectedSku);
+	}
+
+	/**
+	 * Verifies that entity (single sku product, sku associated with multi sku product or bundle)
+	 * with specified sku code appears in a search result table.
+	 *
+	 * @param expectedSku expected sku code.
+	 */
+	@Then("^Entity with sku code (.*) should appear in result$")
+	public void isEntityInResultTableSkuProduct(final String expectedSku) {
+		int index = 0;
+		while (!catalogSkuSearchResultPane.isSkuCodeInList(expectedSku) && index < Constants.UUID_END_INDEX) {
+			catalogSkuSearchResultPane.sleep(Constants.SLEEP_HALFSECOND_IN_MILLIS);
+			searchForSkuBySkuCode(expectedSku);
+			index++;
+		}
+		assertThat(catalogSkuSearchResultPane.isSkuCodeInList(expectedSku))
+				.as("Expected single sku product is not found")
+				.isTrue();
+	}
+
+	/**
+	 * Checks if all entries of sku search results table contain provided product name.
+	 *
+	 * @param productName expected product name for verification
+	 */
+	@Then("^All entries in result list have product name (.+)$")
+	public void areAllEntriesInListHaveProductName(final String productName) {
+		catalogSkuSearchResultPane.isValueInAllListEntries(productName, CatalogSkuSearchResultPane.PRODUCT_NAME_COLUMN_INDEX);
+	}
+
+	/**
+	 * Opens Product Editor for the first entry in a sku search result table, checks that the editor is opened for a found product and
+	 * verifies that Open Parent Product button is not rendered.
+	 */
+	@Then("^I should not see Open Parent Product button in Sku Details tab for found entity$")
+	public void openParentProductNotPresent() {
+		verifySkuCodeInProductEditor(this.product.getSkuCode());
+		productEditor.selectTab(ProductEditor.SKU_DETAILS_TAB_ID);
+		assertThat(productEditor.isOpenParentProductPresent())
+				.as("Open Parent Product button is rendered, but expected to be absent for opened entity.")
+				.isFalse();
+	}
+
+	/**
+	 * Opens Product Editor for the first entry in a sku search result table, checks that the editor is opened for a found sku and
+	 * verifies that Open Parent Product button is rendered.
+	 */
+	@Then("^I should see Open Parent Product button in Sku Details tab for found sku$")
+	public void openParentProductIsPresent() {
+		verifySkuCodeInProductEditor(this.product.getSkuCode());
+		productEditor.selectTab(ProductEditor.SKU_DETAILS_TAB_ID);
+		assertThat(productEditor.isOpenParentProductPresent())
+				.as("Open Parent Product button is not rendered, but expected to be present for sku associated with multi sku product.")
+				.isTrue();
+	}
+
+	/**
+	 * Verifies that specified tab is not rendered in a currently opened Product Editor.
+	 *
+	 * @param tabName tab name which supposed to be absent in a currently opened Product Editor
+	 */
+	@Then("^I should not see (.+) tab in a currently opened Product Editor$")
+	public void editorTabNotPresent(final String tabName) {
+		assertThat(productEditor.isTabPresent(tabName))
+				.as(tabName + " tab is rendered, but expected to be absent.")
+				.isFalse();
+	}
+
+	/**
+	 * Verifies that specified tab is rendered in a currently opened Product Editor.
+	 *
+	 * @param tabName tab name which supposed to be in a currently opened Product Editor
+	 */
+	@Then("^I should see (.+) tab in a currently opened Product Editor$")
+	public void editorTabIsPresent(final String tabName) {
+		assertThat(productEditor.isTabPresent(tabName))
+				.as(tabName + " tab is not rendered, but expected to be present.")
+				.isTrue();
 	}
 
 	/**
@@ -661,10 +809,19 @@ public class ProductAndBundleDefinition {
 	 */
 	@When("^I search and open an existing product with product code (.+)$")
 	public void searchOpenProductWithCode(final String existingProductcode) {
-		this.product.setProductCode(existingProductcode);
-		searchForProductByCode(existingProductcode);
-		catalogSearchResultPane.verifyProductCodeExists(existingProductcode);
-		productEditor = catalogSearchResultPane.openProductEditorWithCode(existingProductcode);
+		searchForProductCode(existingProductcode);
+		verifyProductSearchResultCode(existingProductcode);
+		productEditor = catalogSearchResultPane.openProductEditorWithProductCode(existingProductcode);
+	}
+
+	/**
+	 * Saves new future date in Enable Date/Time field
+	 */
+	@When("^I enter future date in Enable Date / Time field and save changes$")
+	public void changeEnableDate() throws ParseException {
+		this.product.setEnableDateTime(productEditor.getDateTimeFromEpFormattedString(productEditor.getEnableDate()));
+		productEditor.setEnableDate(productEditor.getFormattedDateTime(2));
+		clickSaveAllIcon();
 	}
 
 	/**
@@ -763,8 +920,8 @@ public class ProductAndBundleDefinition {
 	 */
 	@When("^I add SKU (.+) with (.+) shippable type$")
 	public void addSkuToProduct(final String productSkuCode, final String skuShippableType) {
-		productEditor = catalogSearchResultPane.openProductEditor(this.product.getProductName());
-		productEditor.selectTab("SingleSku");
+		productEditor = catalogSearchResultPane.openProductEditorWithProductName(this.product.getProductName());
+		productEditor.selectTab(ProductEditor.SKU_DETAILS_TAB_ID);
 		addSkuWizard = productEditor.clickAddSkuButton();
 		addSkuWizard.enterSkuCode(getUniqueSkuCode());
 		addSkuWizard.selectSkuOptions("GC_Denominations", productSkuCode);
@@ -846,6 +1003,34 @@ public class ProductAndBundleDefinition {
 	}
 
 	/**
+	 * Exclude a category from category assignment list for a particular catalog.
+	 *
+	 * @param categoryName category name.
+	 * @param catalogName  catalog name.
+	 */
+	@When("^I exclude category (.+) in the (.+) catalog from category assignment list$")
+	public void excludeCategoryAssignmentOfCatalog(final String categoryName, final String catalogName) {
+		productEditor.selectVirtualCatalogAssignment(catalogName);
+
+		if ("newly created".equalsIgnoreCase(categoryName)) {
+			excludeCategoryAssignment(this.category.getCategoryName());
+		} else {
+			excludeCategoryAssignment(categoryName);
+		}
+
+	}
+
+	private void excludeCategoryAssignment(final String categoryName) {
+		productEditor.selectCategoryDetails(categoryName);
+		productEditor.clickExcludeCategoryButton();
+		new ConfirmDialog(SetUp.getDriver()).clickOKButton("CatalogMessages.CategoryAssignmentPage_RemoveConfirmTitle");
+		catalogManagementActionToolbar.saveAll();
+		catalogManagementActionToolbar.clickReloadActiveEditor();
+		productEditor.closeProductEditor(this.product.getProductCode());
+	}
+
+
+	/**
 	 * Verify product under assigned category for a catalog.
 	 *
 	 * @param productName  Product Name.
@@ -858,14 +1043,21 @@ public class ProductAndBundleDefinition {
 		catalogManagement.expandCatalogAndVerifyCategory(catalogName, categoryName);
 		catalogProductListingPane = catalogManagement.doubleClickCategory(categoryName);
 
-		int index = 0;
-		while (!catalogProductListingPane.isProductNameInList(productName) && index < Constants.UUID_END_INDEX) {
-			catalogProductListingPane.sleep(Constants.SLEEP_HALFSECOND_IN_MILLIS);
-			catalogManagement.doubleClickCategory(categoryName);
-			index++;
-		}
+		verifyProductIsInList(productName, categoryName);
+	}
 
-		catalogProductListingPane.verifyProductNameExists(productName);
+	/**
+	 * Verify product under assigned subcategory for a catalog.
+	 *
+	 * @param categoryName Category Name.
+	 * @param catalogName  Catalog Name.
+	 */
+	@When("^newly created product is present in newly created subcategory under category (.+) for (.+)$")
+	public void verifyProductLinkedWithSubcategory(final String categoryName, final String catalogName) {
+		catalogManagement.clickCatalogBrowseTab();
+		navigateToSubcategoryAndOpenProductList(catalogName, categoryName, this.product.getCategory());
+
+		verifyProductIsInList(this.product.getProductName(), this.product.getCategory());
 	}
 
 	/**
@@ -960,6 +1152,29 @@ public class ProductAndBundleDefinition {
 		catalogManagementActionToolbar.clickReloadActiveEditor();
 	}
 
+	/**
+	 * Checks if search result table is empty.
+	 */
+	@Then("^I should see empty result list$")
+	public void verifyResultListIsEmpty() {
+		int index = 0;
+		while (!catalogSearchResultPane.isSearchResultTableEmpty() && index < Constants.UUID_END_INDEX) {
+			catalogSearchResultPane.sleep(Constants.SLEEP_HALFSECOND_IN_MILLIS);
+			searchForProductCode(this.product.getProductCode());
+			index++;
+		}
+		assertThat(catalogSearchResultPane.isSearchResultTableEmpty())
+				.as("Search result table should be empty, but contains at least one row")
+				.isTrue();
+	}
+
+	/**
+	 * Closes product search results tab.
+	 */
+	@Then("^I close product search results tab$")
+	public void closeSearchResultsTab() {
+		catalogSearchResultPane.closeProductSearchResultsPane();
+	}
 
 	/**
 	 * Adds bundle product price.
@@ -976,4 +1191,141 @@ public class ProductAndBundleDefinition {
 		}
 	}
 
+	/**
+	 * creates a new product with preselected category
+	 *
+	 * @param product a product instance
+	 */
+	private void createProduct(final Product product) {
+		createProductWizard = catalogManagement.clickCreateProductButton();
+		String prodCode = Utility.getRandomUUID();
+		this.product.setProductCode(prodCode);
+		String prodName = product.getProductName() + "-" + prodCode;
+		this.product.setProductName(prodName);
+		if (dst != null) {
+			dst.setProductCode(prodCode);
+			dst.setProductName(prodName);
+		}
+		createProductWizard.enterProductCode(prodCode);
+		createProductWizard.enterProductName(this.product.getProductName());
+
+		selectProductType(product);
+
+		createProductWizard.selectTaxCode(product.getTaxCode());
+
+		selectStoreVisiblity(product);
+
+		createProductWizard.selectAvailabilityRule(product.getAvailability());
+		createProductWizard.clickNextInDialog();
+
+		enterProductAttribute(product);
+
+		createProductWizard.clickNextInDialog();
+
+		if (createProductWizard.isAddSKUButtonPresent()) {
+			addMultiSkuValues(product);
+
+		} else {
+			createProductWizard.enterSkuCode(getUniqueSkuCode());
+			createProductWizard.selectShippableType(product.getShippableType());
+		}
+
+		addPrice(product);
+		createProductWizard.clickFinish();
+	}
+
+	/**
+	 * navigates to a subcategory and opens a products list
+	 *
+	 * @param catalogName     a name of a Catalog for navigation
+	 * @param categoryName    a name of a Category for navigation
+	 * @param subcategoryName a name of a Subcategory for navigation
+	 */
+	private void navigateToSubcategoryAndOpenProductList(final String catalogName, final String categoryName, final String subcategoryName) {
+		catalogManagement.expandCategoryAndVerifySubcategory(catalogName, categoryName, subcategoryName);
+		catalogProductListingPane = catalogManagement.doubleClickSubcategory(catalogName, categoryName, subcategoryName);
+	}
+
+	/**
+	 * verifies that a Product is present in an opened products list for a given category
+	 *
+	 * @param productName     a name of a Product
+	 * @param productCategory a name of Product's Category
+	 */
+	private void verifyProductIsInList(final String productName, final String productCategory) {
+		int index = 0;
+		while (!catalogProductListingPane.isProductNameInList(productName) && index < Constants.UUID_END_INDEX) {
+			catalogProductListingPane.sleep(Constants.SLEEP_HALFSECOND_IN_MILLIS);
+			catalogManagement.doubleClickCategory(productCategory);
+			index++;
+		}
+
+		catalogProductListingPane.verifyProductNameExists(productName);
+	}
+
+	/**
+	 * Searches for product and verifies that result table appears.
+	 *
+	 * @param runnable function to enter search key in appropriate field.
+	 */
+	private void searchForActiveProduct(final Runnable runnable) {
+		catalogManagement.clickCatalogSearchTab();
+		catalogManagement.clearInputFieldsInCatalogSearchTab();
+		runnable.run();
+		catalogManagement.selectActiveProductsFilter();
+		catalogSearchResultPane = catalogManagement.clickCatalogSearch();
+		catalogSearchResultPane.waitForSearchResultTableIsRendered();
+	}
+
+	/**
+	 * Searches for sku and verifies that result table appears.
+	 *
+	 * @param runnable function to enter search key in appropriate field
+	 */
+	private void searchForSku(final Runnable runnable) {
+		catalogManagement.clickCatalogSearchTab();
+		catalogManagement.clickSkuSearchTab();
+		catalogManagement.clearInputFieldsInCatalogSearchTab();
+		runnable.run();
+		catalogManagement.selectActiveSkusFilter();
+		catalogSkuSearchResultPane = catalogManagement.clickCatalogSkuSearch();
+		catalogSkuSearchResultPane.waitForSearchResultTableIsRendered();
+	}
+
+	/**
+	 * Opens product editor for the first entry in a sku search result table and verifies that opened entity has provided sku code
+	 *
+	 * @param expectedSku expected sku code for verification
+	 */
+	private void verifySkuCodeInProductEditor(final String expectedSku) {
+		productEditor = catalogSkuSearchResultPane.openProductEditorForFirstSearchResultEntry();
+		productEditor.selectTab(ProductEditor.SKU_DETAILS_TAB_ID);
+		assertThat(productEditor.getSkuCode())
+				.as("Unexpected sku code in the search results")
+				.isEqualTo(expectedSku);
+	}
+
+	/**
+	 * deletes new product using DB
+	 */
+	@After(value = "@cleanUpProductDB", order = Constants.CLEANUP_ORDER_FIRST)
+	public void deleteNewlyCreatedProductUsingDb() {
+		DBConnector dbc = new DBConnector();
+		dbc.deleteProduct(this.product.getProductName());
+	}
+
+	/**
+	 * reverts changed Enable date for a product using DB
+	 */
+	@After(value = "@cleanUpProductEnableDateDB", order = Constants.CLEANUP_ORDER_FIRST)
+	public void saveCurrentProductEnableDatePropertyUsingDb() {
+		DBConnector dbc = new DBConnector();
+		SimpleDateFormat dbDateFormat = new SimpleDateFormat("YYYY-M-d HH:mm:ss", Locale.ENGLISH);
+		Calendar calendar = Calendar.getInstance();
+		/*we add 1 day to "last_modified_date" value to resolve potential issue
+		of having different time zones on jenkins server and app under test server*/
+		calendar.add(Calendar.DAY_OF_MONTH, 1);
+		dbc.updateProductEnableDate(
+				this.product.getProductCode(), dbDateFormat.format(this.product.getEnableDateTime()), dbDateFormat.format(calendar.getTime()));
+	}
 }

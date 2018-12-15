@@ -21,9 +21,13 @@ public class Constants {
 	 */
 	public static final int SLEEP_ONE_SECOND_IN_MILLIS = 1000;
 	/**
-	 * Five second sleep timer.
+	 * Five seconds sleep timer.
 	 */
 	public static final int SLEEP_FIVE_SECONDS_IN_MILLIS = 5000;
+	/**
+	 * Three seconds sleep timer.
+	 */
+	public static final int SLEEP_THREE_SECONDS_IN_MILLIS = 3000;
 	/**
 	 * One hundred millisecond sleep timer.
 	 */

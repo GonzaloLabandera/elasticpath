@@ -58,17 +58,14 @@ public class IndexBuildStatusUpdater {
 	 * internal <code>Queue</code> and passes it to the internal <code>IndexBuildStatusDao</code>.
 	 */
 	public void initialize() {
-		executorService.scheduleWithFixedDelay(new Runnable() {
-			@Override
-			public void run() {
-				if (!waitingQueue.isEmpty()) {
-					LinkedList<IndexBuildStatus> processingQueue = new LinkedList<>();
-					waitingQueue.drainTo(processingQueue);
-					if (LOG.isDebugEnabled()) {
-						LOG.debug(String.format("Processing: %s. Waiting: %s", processingQueue.size(), waitingQueue.size()));
-					}
-					saveOrUpdateMostRecentStatusUpdatesPerType(processingQueue);
+		executorService.scheduleWithFixedDelay(() -> {
+			if (!waitingQueue.isEmpty()) {
+				LinkedList<IndexBuildStatus> processingQueue = new LinkedList<>();
+				waitingQueue.drainTo(processingQueue);
+				if (LOG.isDebugEnabled()) {
+					LOG.debug(String.format("Processing: %s. Waiting: %s", processingQueue.size(), waitingQueue.size()));
 				}
+				saveOrUpdateMostRecentStatusUpdatesPerType(processingQueue);
 			}
 		}, 0, POLLING_INTERVAL_IN_MILLISECONDS, TimeUnit.MILLISECONDS);
 	}

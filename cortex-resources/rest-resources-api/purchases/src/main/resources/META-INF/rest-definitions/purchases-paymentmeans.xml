@@ -107,48 +107,5 @@ The Paymentmeans resource is responsible for recording a purchase's billing deta
 				</string>
 			</property>
 		</entity>
-
-		<entity>
-			<name>payment-means-credit-card</name>
-			<description><![CDATA[The credit card payment means for the purchase]]></description>
-			<is-a>payment-means</is-a>
-			<property>
-				<name>card-type</name>
-				<description><![CDATA[The card type used for the purchase.]]></description>
-				<string/>
-			</property>
-			<property>
-				<name>telephone-type</name>
-				<description><![CDATA[The type of telephone number.]]></description>
-				<string/>
-			</property>
-			<property>
-				<name>telephone-number</name>
-				<description><![CDATA[The telephone number.]]></description>
-				<string/>
-			</property>
-			<property>
-				<name>primary-account-number-id</name>
-				<description><![CDATA[The primary account number identifier.]]></description>
-				<string/>
-			</property>
-			<property>
-				<name>holder-name</name>
-				<description><![CDATA[The card holder name used for the purchase.]]></description>
-				<string/>
-			</property>
-			<property>
-				<name>expiry-date</name>
-				<description><![CDATA[The expiry date of card used for the purchase.]]></description>
-				<is-a>expiration-date</is-a>
-			</property>
-			<property>
-				<name>billing-address</name>
-				<description><![CDATA[The billing address used for the purchase.]]></description>
-				<is-a>addresses.address</is-a>
-			</property>
-			<entity-type>purchases.purchase.paymentmeans</entity-type>
-		</entity>
-
 	</family>
 </definitions>

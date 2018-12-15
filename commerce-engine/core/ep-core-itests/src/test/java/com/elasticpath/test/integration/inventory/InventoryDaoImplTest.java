@@ -3,8 +3,7 @@
  */
 package com.elasticpath.test.integration.inventory;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.Calendar;
 import java.util.Date;
@@ -13,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.google.common.collect.ImmutableSet;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -65,7 +65,7 @@ public class InventoryDaoImplTest extends DbTestCase {
 	@Test
 	public void testFindLowStockInventories() {
 		List<InventoryDto> lowStockInventories = findLowStockInventories(WAREHOUSE_10, SKU_CODE1, SKU_CODE2);
-		assertEquals(1, lowStockInventories.size());
+		assertThat(lowStockInventories).hasSize(1);
 		InventoryDto dto = lowStockInventories.get(0);
 		int expectedQuantityOnHand = 14;
 		int expectedAllocatedQuantity = 5;
@@ -79,7 +79,7 @@ public class InventoryDaoImplTest extends DbTestCase {
 	@Test
 	public void testFindLowStockInventoriesWithEmptySkuCodeList() {
 		List<InventoryDto> lowStockInventories = findLowStockInventories(WAREHOUSE_10);
-		assertEquals(1, lowStockInventories.size());
+		assertThat(lowStockInventories).hasSize(1);
 		InventoryDto dto = lowStockInventories.get(0);
 		int expectedQuantityOnHand = 14;
 		int expectedAllocatedQuantity = 5;
@@ -94,12 +94,16 @@ public class InventoryDaoImplTest extends DbTestCase {
 	public void testRemove() {
 		Inventory inventoryToDelete = inventoryDao.getInventory(SKU_CODE1, WAREHOUSE_10);
 		inventoryDao.remove(inventoryToDelete);
-		
+
 		Inventory deletedInventory = inventoryDao.getInventory(SKU_CODE1, WAREHOUSE_10);
-		assertTrue("This Inventory should be deleted.", deletedInventory == null);
-		
+		assertThat(deletedInventory)
+			.as("This Inventory should be deleted.")
+			.isNull();
+
 		Inventory remainingInventory = inventoryDao.getInventory(SKU_CODE2, WAREHOUSE_10);
-		assertTrue("This Inventory should not be deleted.", remainingInventory != null);
+		assertThat(remainingInventory)
+			.as("This Inventory should not be deleted.")
+			.isNotNull();
 	}
 
 	/**
@@ -110,13 +114,15 @@ public class InventoryDaoImplTest extends DbTestCase {
 	public void testGetInventoriesForSku() {
 		Map<Long, Inventory> inventoryMap = inventoryDao.getInventoriesForSku(SKU_CODE3);
 		int expectedInventoryCount = 2;
-		assertEquals("Map should contain "+ expectedInventoryCount +" entries", inventoryMap.size(), expectedInventoryCount);
-		
+		assertThat(inventoryMap)
+			.as("Map should contain " + expectedInventoryCount + " entries")
+			.hasSize(expectedInventoryCount);
+
 		Inventory inventory = inventoryMap.get(WAREHOUSE_100);
-		assertEquals(inventory.getSkuCode(), SKU_CODE3);
+		assertThat(inventory.getSkuCode()).isEqualTo(SKU_CODE3);
 
 		inventory = inventoryMap.get(WAREHOUSE_1000);
-		assertEquals(inventory.getSkuCode(), SKU_CODE3);
+		assertThat(inventory.getSkuCode()).isEqualTo(SKU_CODE3);
 	}
 	
 	/**
@@ -128,20 +134,28 @@ public class InventoryDaoImplTest extends DbTestCase {
 		Set<String> skuCodeSet = new HashSet<>();
 		skuCodeSet.add(SKU_CODE1);
 		skuCodeSet.add(SKU_CODE2);
-		
+
 		Map<String, Inventory> inventoryMap = inventoryDao.getInventoryMap(skuCodeSet, WAREHOUSE_10);
-		assertEquals("Inventory map size is incorrect", inventoryMap.size(), 2);
-		
+		assertThat(inventoryMap).hasSize(2);
+
 		Inventory inventory = inventoryMap.get(SKU_CODE1);
-		assertEquals("Inventory for " + SKU_CODE1 + "does not match the one from the map.", inventory, inventoryDao.getInventory(SKU_CODE1, WAREHOUSE_10));
+		assertThat(inventoryDao.getInventory(SKU_CODE1, WAREHOUSE_10))
+			.as("Inventory for " + SKU_CODE1 + "does not match the one from the map.")
+			.isEqualTo(inventory);
 
 		inventory = inventoryMap.get(SKU_CODE2);
-		assertEquals("Inventory for " + SKU_CODE2 + "does not match the one from the map.", inventory, inventoryDao.getInventory(SKU_CODE2, WAREHOUSE_10));
+		assertThat(inventoryDao.getInventory(SKU_CODE2, WAREHOUSE_10))
+			.as("Inventory for " + SKU_CODE2 + "does not match the one from the map.")
+			.isEqualTo(inventory);
 	}
 	
 	private void verifyQuantitiesForInventory(InventoryDto dto, int quantityOnHand, int allocatedQuantity) {
-		assertEquals("On hand quantity doesn't match calculated value", 14, dto.getQuantityOnHand());
-		assertEquals("Allocated quantity doesn't match calculated value", 5, dto.getAllocatedQuantity());
+		assertThat(dto.getQuantityOnHand())
+			.as("On hand quantity doesn't match calculated value")
+			.isEqualTo(14);
+		assertThat(dto.getAllocatedQuantity())
+			.as("Allocated quantity doesn't match calculated value")
+			.isEqualTo(5);
 	}
 
 	private void addInventory(final String skuCode, final long warehouseUid, final int quantityOnHand,
@@ -180,11 +194,8 @@ public class InventoryDaoImplTest extends DbTestCase {
 	}
 	
 	private List<InventoryDto> findLowStockInventories(long warehouseUid, String ... skuCodes) {
-		Set<String> skuCodeSet = new HashSet<>();
-		for (String skuCode : skuCodes) {
-			skuCodeSet.add(skuCode);
-		}
-		List<InventoryDto> inventories = inventoryDao.findLowStockInventories(skuCodeSet, WAREHOUSE_10);
+		Set<String> skuCodeSet = ImmutableSet.copyOf(skuCodes);
+		List<InventoryDto> inventories = inventoryDao.findLowStockInventories(skuCodeSet, warehouseUid);
 		return inventories;
 	}
 	

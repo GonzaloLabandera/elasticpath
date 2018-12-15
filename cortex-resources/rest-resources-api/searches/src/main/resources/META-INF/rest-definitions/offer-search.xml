@@ -1,0 +1,179 @@
+<?xml version="1.0"?>
+<definitions xmlns="http://www.elasticpath.com/schema/rest/0.5">
+
+	<family>
+		<name>searches</name>
+
+		<uri-part>
+			<name>facet-id</name>
+			<description><![CDATA[Contains the facet identifier (guid)]]></description>
+			<string/>
+		</uri-part>
+
+		<uri-part>
+			<name>facet-value-id</name>
+			<description><![CDATA[Contains the filter name, display name, count, and tag of the facet value]]></description>
+			<composite/>
+		</uri-part>
+
+		<uri-part>
+			<name>applied-facets</name>
+			<description><![CDATA[Applied facets with a key on facet field name and '\0' separated filter names]]></description>
+			<composite/>
+		</uri-part>
+
+		<resource>
+			<name>offer-search-form</name>
+			<description>
+				<![CDATA[
+Search form to fill searching information. Unlike keyword-search-form, it allows to search for offers (products) and provides a different API.
+
+~! # Offer Keyword Size Limit #
+Offer keywords can be up to 500 characters long. Any longer and Cortex API returns status 400 and a error message.
+!~
+				]]>
+			</description>
+			<uri>{searches}/offers/form</uri>
+			<form>
+				<entity>search-offer</entity>
+				<action-rel>offersearchaction</action-rel>
+				<result>offer-search-result</result>
+			</form>
+		</resource>
+
+		<resource>
+			<name>offer-search-result</name>
+			<description><![CDATA[The paged result of offer search query.]]></description>
+			<uri>{searches}/offers/{search-id}/filters/{applied-facets}/{page-id}</uri>
+			<paginates>offers.offer</paginates>
+		</resource>
+
+		<entity>
+			<name>search-offer</name>
+			<description><![CDATA[Search offer.]]></description>
+			<is-a>search-keywords</is-a>
+			<entity-type>searches.offer-search</entity-type>
+		</entity>
+
+		<resource>
+			<name>facets</name>
+			<description><![CDATA[List of facets fields.]]></description>
+			<uri>{searches}/offers/{search-id}/filters/{applied-facets}/facets</uri>
+			<list-of>facet</list-of>
+		</resource>
+
+		<resource>
+			<name>facet</name>
+			<description><![CDATA[Facet.]]></description>
+			<uri>{facets}/{facet-id}</uri>
+			<entity>facet</entity>
+		</resource>
+
+		<resource>
+			<name>facet-value</name>
+			<description><![CDATA[Facet value that contains the name and the number of hits.]]></description>
+			<uri>{facet}/value/{facet-value-id}</uri>
+			<entity>facet-value</entity>
+		</resource>
+
+		<resource>
+			<name>facet-selector</name>
+			<description><![CDATA[Selects the facet to be used for filtering the search result.]]></description>
+			<uri>{facet}/selector</uri>
+			<selector-for>facet</selector-for>
+		</resource>
+
+		<resource>
+			<name>facet-selector-choice</name>
+			<description><![CDATA[Choice for a facet selector.]]></description>
+			<uri>{facet-value}/choice</uri>
+			<choices-for>facet-selector</choices-for>
+		</resource>
+
+		<relationship>
+			<name>facet-selector-to-offer-search-result</name>
+			<description><![CDATA[Link from facet selector to offer search result.]]></description>
+			<rel>offersearchresult</rel>
+			<from>facet-selector</from>
+			<to>offer-search-result</to>
+		</relationship>
+
+		<relationship>
+			<name>facet-to-selector</name>
+			<description><![CDATA[Link from facet to selector.]]></description>
+			<rel>facetselector</rel>
+			<rev>facet</rev>
+			<from>facet</from>
+			<to>facet-selector</to>
+		</relationship>
+
+		<relationship>
+			<name>searches-to-offer-search-form</name>
+			<description><![CDATA[Link from searched to offer-search-form.]]></description>
+			<rel>offersearchform</rel>
+			<from>searches</from>
+			<to>offer-search-form</to>
+		</relationship>
+
+		<relationship>
+			<name>facet-to-facets</name>
+			<description><![CDATA[Link from facet to facets.]]></description>
+			<rel>facets</rel>
+			<from>facet</from>
+			<to>facets</to>
+		</relationship>
+
+		<relationship>
+			<name>offer-search-result-to-facets</name>
+			<description><![CDATA[Link from offer search result to facets.]]></description>
+			<rel>facets</rel>
+			<rev>offersearchresult</rev>
+			<from>offer-search-result</from>
+			<to>facets</to>
+		</relationship>
+
+		<relationship>
+			<name>facet-value-to-offer-search-result</name>
+			<description><![CDATA[Filter the search result by the facet selected.]]></description>
+			<rel>apply</rel>
+			<from>facet-value</from>
+			<to>offer-search-result</to>
+		</relationship>
+
+		<relationship>
+			<name>facet-value-to-facet-selector-choice</name>
+			<description><![CDATA[Link from facet value to facet selector choice.]]></description>
+			<rel>facetselectorchoice</rel>
+			<from>facet-value</from>
+			<to>facet-selector-choice</to>
+		</relationship>
+
+		<entity>
+			<name>facet-value</name>
+			<description><![CDATA[The facet value of the selected facet option.]]></description>
+			<property>
+				<name>value</name>
+				<description><![CDATA[The facet value.]]></description>
+				<string/>
+			</property>
+			<property>
+				<name>count</name>
+				<description><![CDATA[The count of items corresponding to the selected facet value.]]></description>
+				<string/>
+			</property>
+			<entity-type>searches.facet-value</entity-type>
+		</entity>
+
+		<entity>
+			<name>facet</name>
+			<description><![CDATA[Facet field.]]></description>
+			<property>
+				<name>display-name</name>
+				<description><![CDATA[The display name of the selected facet in the API.]]></description>
+				<string/>
+			</property>
+			<entity-type>searches.facet</entity-type>
+		</entity>
+
+	</family>
+</definitions>

@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) Elastic Path Software Inc., 2013
  */
 
@@ -140,7 +140,7 @@ public class ShippingServiceLevelTestPersister {
 		shippingServiceLevel.setStore(findStore);
 
 		shippingServiceLevel.setCarrier(carrier);
-		shippingServiceLevel.setEnabled(Boolean.valueOf(active).booleanValue());
+		shippingServiceLevel.setEnabled(Boolean.parseBoolean(active));
 		shippingServiceLevel.setCode(levelCode);
 		//	look: a service call here...
 		shippingServiceLevel.setShippingRegion(shippingRegionService.findByName(shippingRegionName));

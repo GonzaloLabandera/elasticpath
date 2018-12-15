@@ -1107,15 +1107,13 @@ public class ImportDataTypeProductImpl extends AbstractImportDataTypeImpl {
 
 			@Override
 			public void setStringValue(final Object entity, final String value, final ImportGuidHelper service) {
-				if (checkNullValue(value)) {
-					return;
+				if (!checkNullValue(value)) {
+					final Product product = (Product) entity;
+					final ProductSku sku = getProductSku(product);
+					boolean shippable = ConverterUtils.string2Boolean(value);
+					sku.setShippable(shippable);
+					sku.setDigital(!shippable);
 				}
-
-				final Product product = (Product) entity;
-				final ProductSku sku = getProductSku(product);
-				boolean shippable = ConverterUtils.string2Boolean(value);
-				sku.setShippable(shippable);
-				sku.setDigital(!shippable);
 			}
 		});
 	}

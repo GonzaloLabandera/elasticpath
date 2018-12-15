@@ -3,7 +3,7 @@
  */
 package com.elasticpath.search.index.solr.builders.impl;
 
-import org.apache.solr.client.solrj.SolrServer;
+import org.apache.solr.client.solrj.SolrClient;
 
 import com.elasticpath.search.IndexNotificationProcessor;
 import com.elasticpath.search.index.solr.IndexBuildEventListener;
@@ -23,7 +23,7 @@ public abstract class AbstractIndexBuilder implements IndexBuilder {
 	 * @param server the server that was used to update the index
 	 */
 	@Override
-	public void onIndexUpdated(final SolrServer server) {
+	public void onIndexUpdated(final SolrClient client) {
 		// subclass to perform actions
 	}
 
@@ -33,7 +33,7 @@ public abstract class AbstractIndexBuilder implements IndexBuilder {
 	 * @param server the server that is going to be used to update the index
 	 */
 	@Override
-	public void onIndexUpdating(final SolrServer server) {
+	public void onIndexUpdating(final SolrClient client) {
 		// subclass to perform actions
 	}
 

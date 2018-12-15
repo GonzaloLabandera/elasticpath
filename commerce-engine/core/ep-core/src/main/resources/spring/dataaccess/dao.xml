@@ -7,6 +7,7 @@
 				http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
 				http://www.elasticpath.com/schema/settings http://www.elasticpath.com/schema/settings/settings.xsd
 		">
+	<import resource="../caching/cache-manager.xml" />
 
 	<bean id="productTypeDao" class="com.elasticpath.persistence.dao.impl.ProductTypeDaoImpl">
 		<property name="persistenceEngine" ref="persistenceEngine"/>
@@ -107,9 +108,8 @@
 	<bean id="solrIndexSearcher" class="com.elasticpath.service.search.solr.SolrIndexSearcherImpl">
 		<property name="solrProvider" ref="solrManager"/>
 		<property name="queryComposerFactory" ref="queryComposerFactory"/>
-		<property name="solrQueryFactory" ref="solrQueryFactory"/>
+		<property name="solrQueryFactory" ref="cachedSolrQueryFactory"/>
 		<property name="elasticPath" ref="elasticPath"/>
-		<property name="filterFactory" ref="filterFactory"/>
 		<property name="solrFacetAdapter" ref="solrFacetAdapter"/>
 		<property name="indexUtility" ref="indexUtility"/>
 		<property name="retrieveCatalogFromCache" value="true"/>
@@ -117,17 +117,14 @@
 
 	<bean id="luceneRawQueryComposer" class="com.elasticpath.service.search.solr.query.LuceneRawQueryComposerImpl" parent="abstractQueryComposer">
 		<property name="luceneAnalyzer">
-			<bean id="synonymAnalyzer" class="org.apache.lucene.analysis.snowball.SnowballAnalyzer">
-				<constructor-arg value="LUCENE_45"/>
-				<constructor-arg value="English"/>
-			</bean>
+			<bean id="synonymAnalyzer" class="org.apache.lucene.analysis.en.EnglishAnalyzer" />
 		</property>
 	</bean>
 	<bean id="productQueryComposer" class="com.elasticpath.service.search.solr.query.ProductQueryComposerImpl" parent="abstractQueryComposer">
 		<property name="categoryLookup" ref="categoryLookup"/>
 		<property name="categoryService" ref="categoryService"/>
 		<property name="catalogService" ref="catalogService"/>
-		<property name="solrQueryFactory" ref="solrQueryFactory"/>
+		<property name="solrQueryFactory" ref="cachedSolrQueryFactory"/>
 		<property name="analyzer" ref="queryAnalyzer"/>
 	</bean>
 
@@ -143,20 +140,25 @@
 		<property name="queryComposerFactory" ref="queryComposerFactory"/>
 	</bean>
 	<bean id="skuQueryComposer" class="com.elasticpath.service.search.solr.query.SkuQueryComposerImpl" parent="abstractQueryComposer">
-		<property name="solrQueryFactory" ref="solrQueryFactory"/>
+		<property name="solrQueryFactory" ref="cachedSolrQueryFactory"/>
 	</bean>
 
 	<bean id="spellIndexSearcher" class="com.elasticpath.service.search.solr.SolrSpellIndexSearcherImpl">
 		<property name="solrProvider" ref="solrManager"/>
-		<property name="solrQueryFactory" ref="solrQueryFactory"/>
+		<property name="solrQueryFactory" ref="cachedSolrQueryFactory"/>
 	</bean>
 
-	<bean id="queryAnalyzer" class="com.elasticpath.service.search.solr.QueryAnalyzerImpl"/>
+
+	<bean id="queryAnalyzer" class="com.elasticpath.service.search.solr.QueryAnalyzerImpl">
+	</bean>
 
 	<bean id="solrQueryFactory" class="com.elasticpath.service.search.solr.SolrQueryFactoryImpl">
 		<property name="indexUtility" ref="indexUtility"/>
 		<property name="solrFacetAdapter" ref="solrFacetAdapter"/>
 		<property name="beanFactory" ref="coreBeanFactory"/>
+		<property name="facetService" ref="cachedFacetService"/>
+
+		<property name="attributeService" ref="cachedAttributeService" />
 		<property name="searchConfigFactory" ref="searchConfigFactory"/>
 		<property name="analyzer" ref="queryAnalyzer"/>
 		<property name="showBundlesFirstProvider">
@@ -165,10 +167,12 @@
 	</bean>
 
 	<bean id="solrFacetAdapter" class="com.elasticpath.service.search.solr.SolrFacetAdapter">
-		<property name="categoryService" ref="categoryService"/>
+		<property name="categoryService" ref="cachedCategoryService"/>
+		<property name="beanFactory" ref="coreBeanFactory"/>
+		<property name="facetService" ref="cachedFacetService"/>
 		<property name="analyzer" ref="queryAnalyzer"/>
 		<property name="indexUtility" ref="indexUtility"/>
-		<property name="fncLoader" ref="filteredNavigationConfigurationLoader"/>
+		<property name="fncLoader" ref="cachedFacetConfigurationLoader"/>
 		<property name="attributeFilterEnabledProvider">
 			<settings:setting path="COMMERCE/STORE/FILTEREDNAVIGATION/attributeFilterEnabled"/>
 		</property>

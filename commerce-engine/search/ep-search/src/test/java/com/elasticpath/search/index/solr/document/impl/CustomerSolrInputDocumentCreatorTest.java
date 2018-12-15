@@ -3,24 +3,25 @@
  */
 package com.elasticpath.search.index.solr.document.impl;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.Date;
 
 import org.apache.solr.common.SolrInputDocument;
-import org.jmock.Expectations;
-import org.jmock.api.Invocation;
-import org.jmock.integration.junit4.JUnitRuleMockery;
-import org.jmock.lib.action.CustomAction;
+import org.assertj.core.api.SoftAssertions;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.elasticpath.domain.customer.Customer;
-import com.elasticpath.domain.customer.CustomerAddress;
 import com.elasticpath.domain.customer.impl.CustomerImpl;
 import com.elasticpath.search.index.pipeline.IndexingStage;
 import com.elasticpath.search.index.pipeline.stats.impl.PipelinePerformanceImpl;
@@ -31,13 +32,14 @@ import com.elasticpath.service.search.solr.SolrIndexConstants;
 /**
  * Test construction of {@link SolrInputDocument}s from {@link Customer}s using {@link CustomerSolrInputDocumentCreator}.
  */
+@RunWith(MockitoJUnitRunner.class)
 public class CustomerSolrInputDocumentCreatorTest {
 	private Analyzer analyzer;
 
 	private CustomerSolrInputDocumentCreator customerSolrInputDocumentCreator;
 
-	@Rule
-	public final JUnitRuleMockery context = new JUnitRuleMockery();
+	@Captor
+	private ArgumentCaptor<SolrInputDocument> documentCaptor;
 
 	/**
 	 * Set up {@link CustomerSolrInputDocumentCreator}.
@@ -57,7 +59,7 @@ public class CustomerSolrInputDocumentCreatorTest {
 	public void testCreateDocumentWhenCustomerHasNoUserIdReturnsNull() {
 		final Customer customer = new CustomerImpl();
 		customerSolrInputDocumentCreator.setEntity(customer);
-		assertNull(customerSolrInputDocumentCreator.createDocument());
+		assertThat((Object) customerSolrInputDocumentCreator.createDocument()).isNull();
 	}
 
 	/**
@@ -66,7 +68,7 @@ public class CustomerSolrInputDocumentCreatorTest {
 	@Test
 	public void testNullYieldsNull() {
 		customerSolrInputDocumentCreator.setEntity(null);
-		assertNull(customerSolrInputDocumentCreator.createDocument());
+		assertThat((Object) customerSolrInputDocumentCreator.createDocument()).isNull();
 	}
 
 	/**
@@ -80,60 +82,49 @@ public class CustomerSolrInputDocumentCreatorTest {
 		final Date date = new Date();
 		final String userId = "some id";
 
-		final Customer customer = context.mock(Customer.class);
+		final Customer customer = mock(Customer.class);
 
 		final int expectedCallsToGetUserId = 3;
 
-		@SuppressWarnings("unchecked")
-		final IndexingStage<SolrInputDocument, Long> nextStage = context.mock(IndexingStage.class);
+		@SuppressWarnings("unchecked") final IndexingStage<SolrInputDocument, Long> nextStage = mock(IndexingStage.class);
 
 		customerSolrInputDocumentCreator.setNextStage(nextStage);
 
-		context.checking(new Expectations() {
-			{
-
-				oneOf(nextStage).send(with(any(SolrInputDocument.class)));
-				will(new CustomAction("capture SolrInputDocument") {
-
-					@Override
-					public Object invoke(final Invocation invocation) throws Throwable {
-						final SolrInputDocument document = (SolrInputDocument) invocation.getParameter(0);
-						assertNotNull(document);
-						assertNotNull(document);
-
-						assertEquals(Long.toString(customer.getUidPk()), document.getFieldValue(SolrIndexConstants.OBJECT_UID));
-						assertEquals(userId, document.getFieldValue(SolrIndexConstants.USER_ID));
-						assertEquals(null, document.getFieldValue(SolrIndexConstants.FIRST_NAME));
-						assertEquals(null, document.getFieldValue(SolrIndexConstants.LAST_NAME));
-						assertEquals(null, document.getFieldValue(SolrIndexConstants.EMAIL));
-						assertEquals(null, document.getFieldValue(SolrIndexConstants.PHONE_NUMBER));
-						assertEquals(analyzer.analyze(date), document.getFieldValue(SolrIndexConstants.CREATE_TIME));
-						assertEquals(analyzer.analyze(storeCode), document.getFieldValue(SolrIndexConstants.STORE_CODE));
-						assertNull(document.getFieldValue(SolrIndexConstants.ZIP_POSTAL_CODE));
-						return null;
-					}
-				});
-
-				allowing(customer).getStoreCode();
-				will(returnValue(storeCode));
-				exactly(2).of(customer).getUidPk();
-				will(returnValue(uidPk));
-				oneOf(customer).getAddresses();
-				will(returnValue(new ArrayList<CustomerAddress>()));
-				oneOf(customer).getCreationDate();
-				will(returnValue(date));
-				exactly(expectedCallsToGetUserId).of(customer).getUserId();
-				will(returnValue(userId));
-				oneOf(customer).getFirstName();
-				oneOf(customer).getLastName();
-				oneOf(customer).getEmail();
-				oneOf(customer).getPhoneNumber();
-				oneOf(customer).getPreferredBillingAddress();
-			}
-		});
-
+		when(customer.getStoreCode()).thenReturn(storeCode);
+		when(customer.getUidPk()).thenReturn(uidPk);
+		when(customer.getAddresses()).thenReturn(new ArrayList<>());
+		when(customer.getCreationDate()).thenReturn(date);
+		when(customer.getUserId()).thenReturn(userId);
 		customerSolrInputDocumentCreator.setEntity(customer);
 		customerSolrInputDocumentCreator.run();
+
+		verify(nextStage).send(documentCaptor.capture());
+		final SolrInputDocument document = documentCaptor.getValue();
+
+		SoftAssertions softly = new SoftAssertions();
+
+		softly.assertThat((Object) document).isNotNull();
+		softly.assertThat(document.getFieldValue(SolrIndexConstants.OBJECT_UID)).isEqualTo(String.valueOf(customer.getUidPk()));
+		softly.assertThat(document.getFieldValue(SolrIndexConstants.USER_ID)).isEqualTo(userId);
+		softly.assertThat(document.getFieldValue(SolrIndexConstants.FIRST_NAME)).isNull();
+		softly.assertThat(document.getFieldValue(SolrIndexConstants.LAST_NAME)).isNull();
+		softly.assertThat(document.getFieldValue(SolrIndexConstants.EMAIL)).isNull();
+		softly.assertThat(document.getFieldValue(SolrIndexConstants.PHONE_NUMBER)).isNull();
+		softly.assertThat(document.getFieldValue(SolrIndexConstants.CREATE_TIME)).isEqualTo(analyzer.analyze(date));
+		softly.assertThat(document.getFieldValue(SolrIndexConstants.STORE_CODE)).isEqualTo(analyzer.analyze(storeCode));
+		softly.assertThat(document.getFieldValue(SolrIndexConstants.ZIP_POSTAL_CODE)).isNull();
+
+		softly.assertAll();
+
+		verify(customer, times(2)).getUidPk();
+		verify(customer).getAddresses();
+		verify(customer).getCreationDate();
+		verify(customer, times(expectedCallsToGetUserId)).getUserId();
+		verify(customer).getFirstName();
+		verify(customer).getLastName();
+		verify(customer).getEmail();
+		verify(customer).getPhoneNumber();
+		verify(customer).getPreferredBillingAddress();
 
 	}
 
@@ -151,59 +142,52 @@ public class CustomerSolrInputDocumentCreatorTest {
 		final Date createDate = new Date();
 		final String storeCode = "sdfsdf";
 
-		final Customer customer = context.mock(Customer.class);
+		final Customer customer = mock(Customer.class);
 
 		final int expectedCallsToGetUserId = 3;
 
-		@SuppressWarnings("unchecked")
-		final IndexingStage<SolrInputDocument, Long> nextStage = context.mock(IndexingStage.class);
+		@SuppressWarnings("unchecked") final IndexingStage<SolrInputDocument, Long> nextStage = mock(IndexingStage.class);
 
 		customerSolrInputDocumentCreator.setNextStage(nextStage);
 
-		context.checking(new Expectations() {
-			{
-				oneOf(nextStage).send(with(any(SolrInputDocument.class)));
-				will(new CustomAction("capture SolrInputDocument") {
-
-					@Override
-					public Object invoke(final Invocation invocation) throws Throwable {
-						final SolrInputDocument document = (SolrInputDocument) invocation.getParameter(0);
-						assertNotNull(document);
-						assertEquals(Long.toString(uidPk), document.getFieldValue(SolrIndexConstants.OBJECT_UID));
-						assertEquals(analyzer.analyze(userId), document.getFieldValue(SolrIndexConstants.USER_ID));
-						assertEquals(analyzer.analyze(firstName), document.getFieldValue(SolrIndexConstants.FIRST_NAME));
-						assertEquals(analyzer.analyze(lastName), document.getFieldValue(SolrIndexConstants.LAST_NAME));
-						assertEquals(analyzer.analyze(email), document.getFieldValue(SolrIndexConstants.EMAIL));
-						assertEquals(analyzer.analyze(phoneNumber), document.getFieldValue(SolrIndexConstants.PHONE_NUMBER));
-						assertEquals(analyzer.analyze(createDate), document.getFieldValue(SolrIndexConstants.CREATE_TIME));
-						return null;
-					}
-				});
-
-				allowing(customer).getStoreCode();
-				will(returnValue(storeCode));
-				oneOf(customer).getUidPk();
-				will(returnValue(uidPk));
-				oneOf(customer).getAddresses();
-				will(returnValue(new ArrayList<CustomerAddress>()));
-				oneOf(customer).getCreationDate();
-				will(returnValue(createDate));
-				exactly(expectedCallsToGetUserId).of(customer).getUserId();
-				will(returnValue(userId));
-				oneOf(customer).getFirstName();
-				will(returnValue(firstName));
-				oneOf(customer).getLastName();
-				will(returnValue(lastName));
-				oneOf(customer).getEmail();
-				will(returnValue(email));
-				oneOf(customer).getPhoneNumber();
-				will(returnValue(phoneNumber));
-				oneOf(customer).getPreferredBillingAddress();
-			}
-		});
+		when(customer.getStoreCode()).thenReturn(storeCode);
+		when(customer.getUidPk()).thenReturn(uidPk);
+		when(customer.getAddresses()).thenReturn(new ArrayList<>());
+		when(customer.getCreationDate()).thenReturn(createDate);
+		when(customer.getUserId()).thenReturn(userId);
+		when(customer.getFirstName()).thenReturn(firstName);
+		when(customer.getLastName()).thenReturn(lastName);
+		when(customer.getEmail()).thenReturn(email);
+		when(customer.getPhoneNumber()).thenReturn(phoneNumber);
 
 		customerSolrInputDocumentCreator.setEntity(customer);
 		customerSolrInputDocumentCreator.run();
+
+		verify(nextStage).send(documentCaptor.capture());
+		final SolrInputDocument document = documentCaptor.getValue();
+
+		SoftAssertions softly = new SoftAssertions();
+
+		softly.assertThat((Object) document).isNotNull();
+		softly.assertThat(document.getFieldValue(SolrIndexConstants.OBJECT_UID)).isEqualTo(String.valueOf(uidPk));
+		softly.assertThat(document.getFieldValue(SolrIndexConstants.USER_ID)).isEqualTo(analyzer.analyze(userId));
+		softly.assertThat(document.getFieldValue(SolrIndexConstants.FIRST_NAME)).isEqualTo(analyzer.analyze(firstName));
+		softly.assertThat(document.getFieldValue(SolrIndexConstants.LAST_NAME)).isEqualTo(analyzer.analyze(lastName));
+		softly.assertThat(document.getFieldValue(SolrIndexConstants.EMAIL)).isEqualTo(analyzer.analyze(email));
+		softly.assertThat(document.getFieldValue(SolrIndexConstants.PHONE_NUMBER)).isEqualTo(analyzer.analyze(phoneNumber));
+		softly.assertThat(document.getFieldValue(SolrIndexConstants.CREATE_TIME)).isEqualTo(analyzer.analyze(createDate));
+
+		softly.assertAll();
+
+		verify(customer).getUidPk();
+		verify(customer).getAddresses();
+		verify(customer).getCreationDate();
+		verify(customer, times(expectedCallsToGetUserId)).getUserId();
+		verify(customer).getFirstName();
+		verify(customer).getLastName();
+		verify(customer).getEmail();
+		verify(customer).getPhoneNumber();
+		verify(customer).getPreferredBillingAddress();
 
 	}
 

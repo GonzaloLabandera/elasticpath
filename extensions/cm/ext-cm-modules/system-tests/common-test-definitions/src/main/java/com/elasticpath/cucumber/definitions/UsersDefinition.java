@@ -12,6 +12,7 @@ import cucumber.api.java.en.When;
 import org.apache.commons.codec.digest.DigestUtils;
 
 import com.elasticpath.selenium.dialogs.ChangePasswordDialog;
+import com.elasticpath.selenium.dialogs.ChangeTimezoneDialog;
 import com.elasticpath.selenium.dialogs.ConfirmDialog;
 import com.elasticpath.selenium.dialogs.CreateUserDialog;
 import com.elasticpath.selenium.dialogs.ExpiredPasswordDialog;
@@ -26,6 +27,7 @@ import com.elasticpath.selenium.util.Constants;
 import com.elasticpath.selenium.util.DBConnector;
 import com.elasticpath.selenium.util.Utility;
 import com.elasticpath.selenium.wizards.EditUser;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * User Roles step definitions.
@@ -43,6 +45,7 @@ public class UsersDefinition {
 	private String firstNameChanged;
 
 	private UserMenuDialog userMenuDialog;
+	private ChangeTimezoneDialog changeTimezoneDialog;
 	private static final String PASSWORD = "Password";
 	private static final org.apache.log4j.Logger LOGGER = org.apache.log4j.Logger.getLogger(UsersDefinition.class);
 
@@ -211,8 +214,7 @@ public class UsersDefinition {
 	 */
 	@And("^I sign out")
 	public void signOut() {
-		new ActivityToolbar(SetUp.getDriver()).clickUserMenu();
-		userMenuDialog = new UserMenuDialog(SetUp.getDriver());
+		openCmUserMenu();
 		userMenuDialog.clickLogout();
 	}
 
@@ -353,8 +355,7 @@ public class UsersDefinition {
 	 * @param newPassword the new password
 	 */
 	public void enterNewPassword(final String oldPassword, final String newPassword) {
-		new ActivityToolbar(SetUp.getDriver()).clickUserMenu();
-		userMenuDialog = new UserMenuDialog(SetUp.getDriver());
+		openCmUserMenu();
 		ChangePasswordDialog changePasswordDialog = userMenuDialog.clickChangePassword();
 		changePasswordDialog.enterOldPassword(oldPassword);
 		changePasswordDialog.enterNewPassword(newPassword);
@@ -388,5 +389,80 @@ public class UsersDefinition {
 
 		dbConnector.executeUpdateQuery("INSERT INTO TCMUSERROLEX (CM_USER_UID, USER_ROLE_UID) VALUES (" + uidpk + ", '201');");
 		dbConnector.closeAll();
+	}
+
+	/**
+	 * Opens Change Time Zone dialog in CM users menu.
+	 */
+	@And("^I open Change Time Zone dialog")
+	public void openTimeZoneDialog() {
+		openCmUserMenu();
+		changeTimezoneDialog = userMenuDialog.clickChangeTimezone();
+	}
+
+	/**
+	 * Checks that browser time zone is selected in Change Time Zone dialog in CM users menu.
+	 */
+	@And("^I see that browser time zone is selected")
+	public void verifyBrowserTimeZoneSelected() {
+		assertThat(changeTimezoneDialog.isBrowserTimeZoneSelected())
+				.as("Browser time zone is not selected")
+				.isTrue();
+		assertThat(changeTimezoneDialog.isCustomTimeZoneSelected())
+				.as("Custom time zone is selected")
+				.isFalse();
+	}
+
+	/**
+	 * Checks that custom time zone is selected in Change Time Zone dialog in CM users menu.
+	 *
+	 * @param timeZone for custom time zone verification
+	 */
+	@And("^I see that custom time zone (.+) is selected")
+	public void verifyBrowserTimeZoneSelected(final String timeZone) {
+		assertThat(changeTimezoneDialog.isBrowserTimeZoneSelected())
+				.as("Browser time zone is selected")
+				.isFalse();
+		assertThat(changeTimezoneDialog.isCustomTimeZoneSelected())
+				.as("Custom time zone is not selected")
+				.isTrue();
+		assertThat(changeTimezoneDialog.getCustomTimeZone())
+				.as("Custom time zone value is unexpected")
+				.isEqualTo(timeZone);
+	}
+
+	/**
+	 * Chooses custom timezone in Change Time Zone dialog.
+	 *
+	 * @param timezone which should be selected from a dropdown
+	 */
+	@And("^I set (.+) time zone")
+	public void chooseCustomTimeZone(final String timezone) {
+		changeTimezoneDialog.selectTimezone(timezone);
+	}
+
+	/**
+	 * Chooses browser timezone in Change Time Zone dialog.
+	 *
+	 */
+	@And("^I choose browser time zone")
+	public void chooseBrowserTimeZone() {
+		changeTimezoneDialog.selectBrowserTimezone();
+	}
+
+	/**
+	 * Saves changes in Change Time Zone dialog in CM users menu.
+	 */
+	@And("^I save changes in Change Time Zone dialog")
+	public void saveTimeZoneDialogChanges() {
+		changeTimezoneDialog.clickSaveButton();
+	}
+
+	/**
+	 * Opens Cm user menu.
+	 */
+	private void openCmUserMenu(){
+		new ActivityToolbar(SetUp.getDriver()).clickUserMenu();
+		userMenuDialog = new UserMenuDialog(SetUp.getDriver());
 	}
 }

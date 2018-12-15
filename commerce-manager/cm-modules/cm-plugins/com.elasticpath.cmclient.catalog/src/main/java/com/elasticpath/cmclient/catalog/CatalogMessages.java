@@ -1187,6 +1187,7 @@ public final class CatalogMessages {
 	public String ProductMerchandisingAssociationSection_Warranty;
 	public String ProductMerchandisingAssociationSection_Accessory;
 	public String ProductMerchandisingAssociationSection_Replacement;
+	public String ProductMerchandisingAssociationSection_Dependent_Item;
 	public String ProductMerchandisingAssociationSection_Product_Code;
 	public String ProductMerchandisingAssociationSection_Proudct_Name;
 	public String ProductMerchandisingAssociationSection_Enable_Date;
@@ -1203,13 +1204,14 @@ public final class CatalogMessages {
 	public String ProductMerchandisingAssociationDialog_Add_Warranty;
 	public String ProductMerchandisingAssociationDialog_Add_Accessory;
 	public String ProductMerchandisingAssociationDialog_Add_Replacement;
-
+	public String ProductMerchandisingAssociationDialog_Add_Dependent_Item;
 
 	public String ProductMerchandisingAssociationDialog_Edit_Cross_Sell;
 	public String ProductMerchandisingAssociationDialog_Edit_Up_Sell;
 	public String ProductMerchandisingAssociationDialog_Edit_Warranty;
 	public String ProductMerchandisingAssociationDialog_Edit_Accessory;
 	public String ProductMerchandisingAssociationDialog_Edit_Replacement;
+	public String ProductMerchandisingAssociationDialog_Edit_Dependent_Item;
 
 	public String ProductMerchandisingAssociationDialog_Add;
 	public String ProductMerchandisingAssociationDialog_Set;

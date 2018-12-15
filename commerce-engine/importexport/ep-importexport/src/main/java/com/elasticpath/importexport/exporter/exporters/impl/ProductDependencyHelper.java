@@ -1,8 +1,9 @@
-/**
+/*
  * Copyright (c) Elastic Path Software Inc., 2013
  */
 package com.elasticpath.importexport.exporter.exporters.impl;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.NavigableSet;
@@ -36,7 +37,7 @@ class ProductDependencyHelper {
 
 	private final ProductAssociationService productAssociationService;
 
-	private final List<Long> futureNonDependant;
+	private final Collection<Long> futureNonDependant;
 
 	/**
 	 * Constructs ProductDependencyHelper and sets the data it depends on.
@@ -48,7 +49,7 @@ class ProductDependencyHelper {
 	 */
 	ProductDependencyHelper(final DependencyRegistry dependencyRegistry,
 			final List<Long> productUidPkList,
-			final List<Long> futureNonDependant,
+			final Collection<Long> futureNonDependant,
 			final ProductAssociationService productAssociationService) {
 		this.dependencyRegistry = dependencyRegistry;
 		this.productUidPkList = productUidPkList;

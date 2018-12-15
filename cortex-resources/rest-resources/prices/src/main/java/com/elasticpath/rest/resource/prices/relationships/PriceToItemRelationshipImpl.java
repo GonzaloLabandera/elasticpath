@@ -31,10 +31,6 @@ public class PriceToItemRelationshipImpl implements PriceForItemRelationship.Lin
 
 	@Override
 	public Observable<ItemIdentifier> onLinkFrom() {
-		ItemIdentifier itemIdentifier = priceForItemIdentifier.getItem();
-		return Observable.just(ItemIdentifier.builder()
-				.withItemId(itemIdentifier.getItemId())
-				.withItems(itemIdentifier.getItems())
-				.build());
+		return Observable.just(priceForItemIdentifier.getItem());
 	}
 }

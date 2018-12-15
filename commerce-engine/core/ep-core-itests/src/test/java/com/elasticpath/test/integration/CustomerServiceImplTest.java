@@ -4,41 +4,33 @@
 package com.elasticpath.test.integration;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThatCode;
+import static org.assertj.core.api.Assertions.catchThrowableOfType;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import com.google.common.base.Joiner;
 import com.google.common.collect.Collections2;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Lists;
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang.StringUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
-import org.springframework.transaction.support.TransactionCallback;
 
 import com.elasticpath.base.GloballyIdentifiable;
 import com.elasticpath.base.common.dto.StructuredErrorMessage;
+import com.elasticpath.base.exception.structured.EpValidationException;
 import com.elasticpath.commons.beanframework.BeanFactory;
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.commons.constants.WebConstants;
-import com.elasticpath.base.exception.structured.EpValidationException;
 import com.elasticpath.commons.exception.UserIdExistException;
 import com.elasticpath.domain.builder.customer.CustomerGroupBuilder;
 import com.elasticpath.domain.customer.Customer;
@@ -108,11 +100,10 @@ public class CustomerServiceImplTest extends BasicSpringContextTest {
 	public void testCreateCustomerWithSameUserIdAsAnonymousCustomer() {
 		createPersistedAnonymousCustomer(TEST_EMAIL_1, scenario.getStore());
 
-		try {
-			createPersistedCustomer(TEST_EMAIL_1, scenario.getStore());
-		} catch (UserIdExistException uidee) {
-			fail("Should be able to add a new customer with the same userId as an existing anonymous customer.");
-		}
+		assertThatCode(() -> createPersistedCustomer(TEST_EMAIL_1, scenario.getStore()))
+			.as("Should be able to add a new customer with the same userId as an existing anonymous customer.")
+			.doesNotThrowAnyException();
+
 	}
 
 	/**
@@ -124,13 +115,13 @@ public class CustomerServiceImplTest extends BasicSpringContextTest {
 	public void testUpdateCustomerWithSameUserIdAsAnonymousCustomer() {
 		createPersistedAnonymousCustomer(TEST_EMAIL_1, scenario.getStore());
 
-		try {
+		assertThatCode(() -> {
 			Customer customer = createPersistedCustomer(TEST_EMAIL_2, scenario.getStore());
 			customer.setEmail(TEST_EMAIL_1);
 			service.update(customer);
-		} catch (UserIdExistException uidee) {
-			fail("Should be able to add a new customer with the same userId as an existing anonymous customer.");
-		}
+		})
+			.as("Should be able to add a new customer with the same userId as an existing anonymous customer.")
+			.doesNotThrowAnyException();
 	}
 
 	/**
@@ -143,12 +134,12 @@ public class CustomerServiceImplTest extends BasicSpringContextTest {
 
 		Customer customer = createPersistedCustomer(TEST_EMAIL_2, scenario.getStore());
 		//Assert the correct customer has been created.
-		assertEquals(TEST_EMAIL_2, customer.getEmail());
+		assertThat(customer.getEmail()).isEqualTo(TEST_EMAIL_2);
 
 		customer.setEmail(TEST_EMAIL_1);
 		service.update(customer);
 
-		assertEquals(TEST_EMAIL_1, customer.getEmail());
+		assertThat(customer.getEmail()).isEqualTo(TEST_EMAIL_1);
 	}
 
 	/**
@@ -160,18 +151,15 @@ public class CustomerServiceImplTest extends BasicSpringContextTest {
 	public void testAttemptCreateCustomerWithSameUserIdAsExistingCustomer() {
 		createPersistedCustomer(TEST_EMAIL_1, scenario.getStore());
 
-		try {
-			createPersistedCustomer(TEST_EMAIL_1, scenario.getStore());
-		} catch (UserIdExistException uidee) {
-			assertThat(uidee.getStructuredErrorMessages())
-					.extracting(StructuredErrorMessage::getMessageId)
-					.containsOnly(CustomerMessageIds.EMAIL_ALREADY_EXISTS);
-			assertThat(uidee.getStructuredErrorMessages())
-					.extracting(structuredErrorMessage -> structuredErrorMessage.getData().get("email"))
-					.containsOnly(TEST_EMAIL_1);
-			return;
-		}
-		fail("Should not be able to add a new customer with the same userId as an existing customer.");
+		UserIdExistException uidee = catchThrowableOfType(() -> createPersistedCustomer(TEST_EMAIL_1, scenario.getStore()),
+			UserIdExistException.class);
+
+		assertThat(uidee.getStructuredErrorMessages())
+				.extracting(StructuredErrorMessage::getMessageId)
+				.containsOnly(CustomerMessageIds.EMAIL_ALREADY_EXISTS);
+		assertThat(uidee.getStructuredErrorMessages())
+				.extracting(structuredErrorMessage -> structuredErrorMessage.getData().get("email"))
+				.containsOnly(TEST_EMAIL_1);
 	}
 
 	/**
@@ -183,20 +171,18 @@ public class CustomerServiceImplTest extends BasicSpringContextTest {
 	public void testAttemptUpdateCustomerWithSameUserIdAsExistingCustomer() {
 		createPersistedCustomer(TEST_EMAIL_1, scenario.getStore());
 
-		try {
+		UserIdExistException uidee = catchThrowableOfType(() -> {
 			Customer customerB = createPersistedCustomer(TEST_EMAIL_2, scenario.getStore());
 			customerB.setEmail(TEST_EMAIL_1);
 			service.update(customerB);
-		} catch (UserIdExistException uidee) {
-			assertThat(uidee.getStructuredErrorMessages())
-					.extracting(StructuredErrorMessage::getMessageId)
-					.containsOnly(CustomerMessageIds.USERID_ALREADY_EXISTS);
-			assertThat(uidee.getStructuredErrorMessages())
-					.extracting(structuredErrorMessage -> structuredErrorMessage.getData().get("user-id"))
-					.containsOnly(TEST_EMAIL_1);
-			return;
-		}
-		fail("Should not be able to add a new customer with the same userId as an existing customer.");
+		}, UserIdExistException.class);
+
+		assertThat(uidee.getStructuredErrorMessages())
+				.extracting(StructuredErrorMessage::getMessageId)
+				.containsOnly(CustomerMessageIds.USERID_ALREADY_EXISTS);
+		assertThat(uidee.getStructuredErrorMessages())
+				.extracting(structuredErrorMessage -> structuredErrorMessage.getData().get("user-id"))
+				.containsOnly(TEST_EMAIL_1);
 	}
 
 	/**
@@ -207,10 +193,10 @@ public class CustomerServiceImplTest extends BasicSpringContextTest {
 	public void testAddAndGetCustomer() {
 		Customer customer = createCustomer();
 		service.add(customer);
-		assertFalse("UidPk should not be zero", customer.getUidPk() == 0);
-		assertTrue("Customer should be persistent", customer.isPersisted());
+		assertThat(customer.getUidPk()).isNotEqualTo(0);
+		assertThat(customer.isPersisted()).isTrue();
 		Customer retrievedCustomer = service.get(customer.getUidPk());
-		assertEquals("Loaded customer should have correct UidPk", customer.getUidPk(), retrievedCustomer.getUidPk());
+		assertThat(retrievedCustomer.getUidPk()).isEqualTo(customer.getUidPk());
 	}
 
 	/**
@@ -220,33 +206,34 @@ public class CustomerServiceImplTest extends BasicSpringContextTest {
 	@Test
 	public void testFindCustomerByGroup() {
 		CustomerGroup newCustomerGroup = customerGroupBuilder.newInstance()
-				.withGuid("guid_newCustomerGroup")
-				.withName("newCustomerGroup")
-				.build();
+			.withGuid("guid_newCustomerGroup")
+			.withName("newCustomerGroup")
+			.build();
 		newCustomerGroup = customerGroupService.add(newCustomerGroup);
 
 		final Customer customer1 = createCustomer();
 		final String customer1Guid = "guid_customer1";
 		customer1.setGuid(customer1Guid);
-		customer1.setCustomerGroups(new ArrayList<>(Collections.singletonList(newCustomerGroup)));
+		customer1.setCustomerGroups(Lists.newArrayList(newCustomerGroup));
 		service.add(customer1);
 
 		final Customer customer2 = createCustomer();
 		final String customer2Guid = "guid_customer2";
 		customer2.setGuid(customer2Guid);
-		customer2.setCustomerGroups(new ArrayList<>(Collections.singletonList(newCustomerGroup)));
+		customer2.setCustomerGroups(Lists.newArrayList(newCustomerGroup));
 		service.add(customer2);
 
 		final List<Customer> foundCustomers = service.findCustomersByCustomerGroup(newCustomerGroup.getName());
 
-		final Collection<String> expectedCustomerGuids = Arrays.asList(customer1Guid, customer2Guid);
+		final Collection<String> expectedCustomerGuids = ImmutableList.of(customer1Guid, customer2Guid);
 		final Collection<String> foundCustomerGuids =
-				Collections2.transform(foundCustomers, GloballyIdentifiable::getGuid);
+			Collections2.transform(foundCustomers, GloballyIdentifiable::getGuid);
 
-		assertTrue(
-				String.format("Expected customer guids [%s] but got [%s]",
-						StringUtils.join(expectedCustomerGuids, ", "), StringUtils.join(foundCustomerGuids, ", ")),
-				CollectionUtils.isEqualCollection(expectedCustomerGuids, foundCustomerGuids));
+		Joiner joiner = Joiner.on(", ");
+		assertThat(CollectionUtils.isEqualCollection(expectedCustomerGuids, foundCustomerGuids))
+			.as("Expected customer guids [%s] but got [%s]",
+				joiner.join(expectedCustomerGuids), joiner.join(foundCustomerGuids))
+			.isTrue();
 	}
 
 	/**
@@ -259,15 +246,15 @@ public class CustomerServiceImplTest extends BasicSpringContextTest {
 
 		Customer customer = createCustomer();
 		service.add(customer);
-		assertFalse("UidPk should not be zero", customer.getUidPk() == 0);
-		assertTrue("Customer should be persistent", customer.isPersisted());
+		assertThat(customer.getUidPk()).isNotEqualTo(0);
+		assertThat(customer.isPersisted()).isTrue();
 
 		customer.setFirstName(firstName);
 		service.update(customer);
 
 		Customer retrievedCustomer = service.get(customer.getUidPk());
-		assertEquals("Loaded customer should have correct UidPk", customer.getUidPk(), retrievedCustomer.getUidPk());
-		assertEquals("Loaded customer should have saved Firstname", firstName, retrievedCustomer.getFirstName());
+		assertThat(retrievedCustomer.getUidPk()).isEqualTo(customer.getUidPk());
+		assertThat(retrievedCustomer.getFirstName()).isEqualTo(firstName);
 	}
 
 	/**
@@ -283,26 +270,30 @@ public class CustomerServiceImplTest extends BasicSpringContextTest {
 		// Add an address to the customer
 		final CustomerAddress customerAddress = createAddress();
 		customer.addAddress(customerAddress);
-		assertEquals("The customer should now have an address", customer.getAddresses().size(), 1);
-		assertEquals("The customer address should match the one we created", customer.getAddresses().get(0), customerAddress);
+		assertThat(customer.getAddresses()).containsOnly(customerAddress);
+
 		String guid = customer.getAddresses().get(0).getGuid();
-		assertNotNull("The address should have a guid", guid);
+		assertThat(guid).isNotNull();
 
 		// Update the customer
 		Customer updatedCustomer = service.update(customer);
-		assertEquals("The returned object should have one address", updatedCustomer.getAddresses().size(), 1);
+		assertThat(updatedCustomer.getAddresses()).hasSize(1);
 		CustomerAddress updatedAddress = updatedCustomer.getAddresses().get(0);
-		assertTrue("The customer's address should now be persistent", updatedAddress.isPersisted());
+		assertThat(updatedAddress.isPersisted())
+			.as("The customer's address should now be persistent")
+			.isTrue();
 
 		// Load the address back from the customer object
 		CustomerAddress retrievedAddress = updatedCustomer.getAddressByUid(updatedAddress.getUidPk());
-		assertNotNull("The address should be found in the database", retrievedAddress);
-		assertEquals("The GUID of the retrieved address should match that of the updated object", updatedAddress.getGuid(), retrievedAddress
-				.getGuid());
-		assertEquals("The address we got back keyed by guid should match", updatedAddress, retrievedAddress);
+		assertThat(retrievedAddress)
+			.as("The address should be found in the database and match the updated address")
+			.isEqualTo(updatedAddress);
+		assertThat(retrievedAddress.getGuid())
+			.as("The GUID of the retrieved address should match that of the updated object")
+			.isEqualTo(updatedAddress.getGuid());
 
 		// Also try using the service to get the updated customer address.
-		assertNotNull(service.getCustomerAddress(updatedAddress.getUidPk()));
+		assertThat(service.getCustomerAddress(updatedAddress.getUidPk())).isNotNull();
 	}
 
 	/**
@@ -314,12 +305,16 @@ public class CustomerServiceImplTest extends BasicSpringContextTest {
 		// Persist a customer
 		Customer customer = createCustomer();
 		service.add(customer);
-		assertEquals("The customer should have a group", customer.getCustomerGroups().size(), 1);
+		assertThat(customer.getCustomerGroups())
+			.as("The customer should have a group")
+			.hasSize(1);
 
 		// Add an address to the customer and save to the DB
 		customer.addAddress(createAddress());
 		Customer updatedCustomer = service.update(customer);
-		assertEquals("The customer should still have a group", updatedCustomer.getCustomerGroups().size(), 1);
+		assertThat(updatedCustomer.getCustomerGroups())
+			.as("The customer should still have a group")
+			.hasSize(1);
 
 		// Make a change to the address and save to the DB
 		CustomerAddress address = updatedCustomer.getAddresses().get(0);
@@ -328,23 +323,33 @@ public class CustomerServiceImplTest extends BasicSpringContextTest {
 		address.setFirstName(uniqueName);
 		Customer updatedTwiceCustomer = service.update(updatedCustomer);
 		CustomerAddress updatedAddress = updatedTwiceCustomer.getAddressByUid(addressUid);
-		assertEquals("The updated address should have the same ID", addressUid, updatedAddress.getUidPk());
-		assertEquals("The updated address should have the updated first name", uniqueName, updatedAddress.getFirstName());
+		assertThat(updatedAddress.getUidPk())
+			.as("The updated address should have the same ID")
+			.isEqualTo(addressUid);
+		assertThat(updatedAddress.getFirstName())
+			.as("The updated address should have the updated first name")
+			.isEqualTo(uniqueName);
 
 		// Change a field to the same value and save again
 		String lastName = updatedAddress.getLastName();
 		updatedAddress.setLastName(lastName);
-		assertEquals("Name should not have changed", lastName, updatedAddress.getLastName());
-		assertTrue("These objects should be equal", address.equals(updatedAddress));
+		assertThat(updatedAddress.getLastName())
+			.as("Name should not have changed")
+			.isEqualTo(lastName);
+		assertThat(updatedAddress).isEqualTo(address);
 		Customer updatedThriceCustomer = service.update(updatedTwiceCustomer);
 		CustomerAddress updatedTwiceAddress = updatedThriceCustomer.getAddressByUid(addressUid);
-		assertEquals("The address of the updated customer should still have the same ID", addressUid, updatedTwiceAddress.getUidPk());
-		assertEquals("The address of the updated customer should still have the updated first name", uniqueName, updatedTwiceAddress.getFirstName());
+		assertThat(updatedTwiceAddress.getUidPk())
+			.as("The address of the updated customer should still have the same ID")
+			.isEqualTo(addressUid);
+		assertThat(updatedTwiceAddress.getFirstName())
+			.as("The address of the updated customer should still have the updated first name")
+			.isEqualTo(uniqueName);
 
 		// Now reload customer and resave
 		Customer reloadedCustomer = service.get(customer.getUidPk());
 		Customer updatedReloadedCustomer = service.update(reloadedCustomer);
-		assertNotNull("We should have got the customer back", updatedReloadedCustomer);
+		assertThat(updatedReloadedCustomer).isNotNull();
 	}
 
 	/**
@@ -360,27 +365,43 @@ public class CustomerServiceImplTest extends BasicSpringContextTest {
 		// Assert that we can create an address and not make it the default.
 		customer = service.add(createCustomer());
 		customer = service.addOrUpdateAddress(customer, createAddress());
-		assertEquals("The customer should only have 1 address.", 1, customer.getAddresses().size());
-		assertNull("The customer should not have a preferred billing address.", customer.getPreferredBillingAddress());
-		assertNull("The customer should not have a preferred shipping address.", customer.getPreferredShippingAddress());
+		assertThat(customer.getAddresses()).hasSize(1);
+		assertThat(customer.getPreferredBillingAddress())
+			.as("The customer should not have a preferred billing address.")
+			.isNull();
+		assertThat(customer.getPreferredShippingAddress())
+			.as("The customer should not have a preferred shipping address.")
+			.isNull();
 
 		// Assert that we can update an address and not make it the default.
 		address = customer.getAddresses().get(0);
 		address.setFirstName("a");
 		customer = service.addOrUpdateAddress(customer, address);
-		assertEquals("The customer should only have 1 address.", 1, customer.getAddresses().size());
-		assertNull("The customer should not have a preferred billing address.",  customer.getPreferredBillingAddress());
-		assertNull("The customer should not have a preferred shipping address.", customer.getPreferredShippingAddress());
-		assertEquals("The persisted billing address should equal the in-memory billing address.", address, customer.getAddresses().get(0));
+		assertThat(customer.getAddresses()).hasSize(1);
+		assertThat(customer.getPreferredBillingAddress())
+			.as("The customer should not have a preferred billing address.")
+			.isNull();
+		assertThat(customer.getPreferredShippingAddress())
+			.as("The customer should not have a preferred shipping address.")
+			.isNull();
+		assertThat(customer.getAddresses().get(0))
+			.as("The persisted billing address should equal the in-memory billing address.")
+			.isEqualTo(address);
 
 		// Assert that we can make an existing address the default billing address.
 		address = customer.getAddresses().get(0);
 		customer = service.addOrUpdateCustomerBillingAddress(customer, address);
-		assertEquals("The customer should only have 1 address.", 1, customer.getAddresses().size());
-		assertEquals("The customer should have a preferred billing address.", address, customer.getPreferredBillingAddress());
-		assertNull("The customer should not have a preferred shipping address.", customer.getPreferredShippingAddress());
-		assertEquals("The persisted billing address should equal the in-memory billing address.", address, customer.getAddresses().get(0));
-	
+		assertThat(customer.getAddresses().size()).isEqualTo(1);
+		assertThat(customer.getPreferredBillingAddress())
+			.as("The customer should have a preferred billing address.")
+			.isEqualTo(address);
+		assertThat(customer.getPreferredShippingAddress())
+			.as("The customer should not have a preferred shipping address.")
+			.isNull();
+		assertThat(customer.getAddresses().get(0))
+			.as("The persisted billing address should equal the in-memory billing address.")
+			.isEqualTo(address);
+
 	}
 
 	/**
@@ -390,7 +411,9 @@ public class CustomerServiceImplTest extends BasicSpringContextTest {
 	@Test
 	public void testGetLastModifiedDateInvalidGuid() {
 		Date dateFromService = service.getCustomerLastModifiedDate("INVALID_GUID");
-		assertNull("The method should return null when the GUID is invalid.", dateFromService);
+		assertThat(dateFromService)
+			.as("The method should return null when the GUID is invalid.")
+			.isNull();
 	}
 
 
@@ -405,7 +428,9 @@ public class CustomerServiceImplTest extends BasicSpringContextTest {
 		Customer customer = createPersistedAnonymousCustomer(TEST_EMAIL_1, scenario.getStore());
 		Date dateFromCustomer = customer.getLastModifiedDate();
 		Date dateFromService = service.getCustomerLastModifiedDate(customer.getGuid());
-		assertEquals("The date loaded from the object should be equal to the date retrieved by the service.", dateFromCustomer, dateFromService);
+		assertThat(dateFromService)
+			.as("The date loaded from the object should be equal to the date retrieved by the service.")
+			.isEqualTo(dateFromCustomer);
 	}
 
 	/**
@@ -420,8 +445,7 @@ public class CustomerServiceImplTest extends BasicSpringContextTest {
 
 		Customer loadedCustomer = service.load(customer.getUidPk());
 
-		assertNotNull("There should be a salt value", loadedCustomer.getCustomerAuthentication().getSalt());
-		assertFalse("The salt should not be empty", loadedCustomer.getCustomerAuthentication().getSalt().isEmpty());
+		assertThat(loadedCustomer.getCustomerAuthentication().getSalt()).isNotEmpty();
 	}
 
 	/**
@@ -435,31 +459,32 @@ public class CustomerServiceImplTest extends BasicSpringContextTest {
 		customer = service.update(customer);
 
 		String password = customer.getPassword();
-		assertNotNull("The customer should have a password set", password);
-		assertFalse("The password should not be empty", password.isEmpty());
+		assertThat(password).isNotEmpty();
 
 		customer.setClearTextPassword(PASSWORD);
 		customer = service.update(customer);
 
-		assertFalse("The encoded password should be different", password.equals(customer.getPassword()));
+		assertThat(customer.getPassword())
+			.as("The encoded password should be different")
+			.isNotEqualTo(password);
 	}
 
 	@Test
 	@DirtiesDatabase
 	public void ensureCascadeDeletionOfTokensOnCustomerDelete() {
 		PaymentTokenImpl.TokenBuilder tokenBuilder = new PaymentTokenImpl.TokenBuilder()
-				.withDisplayValue(TOKEN_DISPLAY_VALUE)
-				.withGatewayGuid(TOKEN_GATEWAY_GUID);
+			.withDisplayValue(TOKEN_DISPLAY_VALUE)
+			.withGatewayGuid(TOKEN_GATEWAY_GUID);
 
 		PaymentToken firstToken = tokenBuilder
-				.withValue("first-token-value").build();
+			.withValue("first-token-value").build();
 		PaymentToken secondToken = tokenBuilder
-				.withValue("second-token-value").build();
+			.withValue("second-token-value").build();
 		PaymentToken thirdToken = tokenBuilder
-				.withValue("third-token-value").build();
+			.withValue("third-token-value").build();
 
 		final Customer customer = createCustomer();
-		List<PaymentMethod> customerPaymentMethods = Arrays.asList(firstToken, secondToken);
+		List<PaymentMethod> customerPaymentMethods = ImmutableList.of(firstToken, secondToken);
 		customer.getPaymentMethods().addAll(customerPaymentMethods);
 		customer.getPaymentMethods().setDefault(thirdToken);
 		service.add(customer);
@@ -467,28 +492,30 @@ public class CustomerServiceImplTest extends BasicSpringContextTest {
 		service.remove(customer);
 		for (PaymentMethod token : customer.getPaymentMethods().all()) {
 			long uidPk = ((PaymentToken) token).getUidPk();
-			assertNull(String.format("Token with uidpk {%s} should have been cascade deleted", uidPk),
-					persistenceEngine.get(PaymentTokenImpl.class, uidPk));
+			assertThat(persistenceEngine.get(PaymentTokenImpl.class, uidPk))
+				.as("Token with uidpk {%s} should have been cascade deleted", uidPk)
+				.isNull();
 		}
-		assertNull(String.format("Token with uidpk {%s} should have been cascade deleted", thirdToken.getUidPk()),
-				persistenceEngine.get(PaymentTokenImpl.class, thirdToken.getUidPk()));
+		assertThat(persistenceEngine.get(PaymentTokenImpl.class, thirdToken.getUidPk()))
+			.as("Token with uidpk {%s} should have been cascade deleted", thirdToken.getUidPk())
+			.isNull();
 	}
 
 	@Test
 	@DirtiesDatabase
 	public void ensureCustomerSavesWithPopulatedTokenFields() {
 		PaymentTokenImpl.TokenBuilder tokenBuilder = new PaymentTokenImpl.TokenBuilder()
-				.withDisplayValue(TOKEN_DISPLAY_VALUE)
-				.withGatewayGuid(TOKEN_GATEWAY_GUID);
+			.withDisplayValue(TOKEN_DISPLAY_VALUE)
+			.withGatewayGuid(TOKEN_GATEWAY_GUID);
 
 		PaymentToken firstToken = tokenBuilder
-				.withValue("first-token-value").build();
+			.withValue("first-token-value").build();
 		PaymentToken secondToken = tokenBuilder
-				.withValue("second-token-value").build();
+			.withValue("second-token-value").build();
 
 
 		final Customer customer = createCustomer();
-		List<PaymentMethod> customerPaymentMethods = Arrays.asList(firstToken, secondToken);
+		List<PaymentMethod> customerPaymentMethods = ImmutableList.of(firstToken, secondToken);
 		customer.getPaymentMethods().addAll(customerPaymentMethods);
 		customer.getPaymentMethods().setDefault(secondToken);
 		service.add(customer);
@@ -496,12 +523,13 @@ public class CustomerServiceImplTest extends BasicSpringContextTest {
 		Customer retrievedCustomer = service.get(customer.getUidPk());
 		CustomerPaymentMethods retrievedPaymentTokens = retrievedCustomer.getPaymentMethods();
 
-		assertEquals("Two payment tokens should have been saved on the customer", 2, retrievedPaymentTokens.all().size());
+		assertThat(retrievedPaymentTokens.all().size()).isEqualTo(2);
 		for (PaymentMethod token : retrievedPaymentTokens.all()) {
-			assertNotNull("Tokens referenced by the customer should exist in the database",
-					persistenceEngine.get(PaymentTokenImpl.class, ((PaymentToken) token).getUidPk()));
+			assertThat(persistenceEngine.get(PaymentTokenImpl.class, ((PaymentToken) token).getUidPk()))
+				.as("Tokens referenced by the customer should exist in the database")
+				.isNotNull();
 		}
-		assertNotNull("Default payment token should be persisted", customer.getPaymentMethods().getDefault());
+		assertThat(customer.getPaymentMethods().getDefault()).isNotNull();
 	}
 
 	@Test
@@ -512,11 +540,13 @@ public class CustomerServiceImplTest extends BasicSpringContextTest {
 
 		Customer retrievedCustomer = service.get(customer.getUidPk());
 		CustomerPaymentMethods retrievedCustomerCustomerPaymentMethods = retrievedCustomer.getPaymentMethods();
-		assertEquals("No payment tokens should have been saved on the customer", 0, retrievedCustomerCustomerPaymentMethods.all().size());
-		assertNull("No default payment token should have been saved on the customer", customer.getPaymentMethods().getDefault());
+		assertThat(retrievedCustomerCustomerPaymentMethods.all()).isEmpty();
+		assertThat(customer.getPaymentMethods().getDefault())
+			.as("No default payment token should have been saved on the customer")
+			.isNull();
 	}
 
-	@Test(expected= InvalidDataAccessApiUsageException.class)
+	@Test(expected = InvalidDataAccessApiUsageException.class)
 	@DirtiesDatabase
 	public void ensureCustomerSavedWithTokenWithNullDisplayValueThrowsAnException() {
 		PaymentToken tokenWithNoDisplayValue = new PaymentTokenImpl.TokenBuilder()
@@ -530,7 +560,7 @@ public class CustomerServiceImplTest extends BasicSpringContextTest {
 		service.add(customer);
 	}
 
-	@Test(expected= InvalidDataAccessApiUsageException.class)
+	@Test(expected = InvalidDataAccessApiUsageException.class)
 	@DirtiesDatabase
 	public void ensureCustomerSavedWithTokenWithNullTokenValueThrowsAnException() {
 		PaymentToken tokenWithNoValue = new PaymentTokenImpl.TokenBuilder()
@@ -550,11 +580,12 @@ public class CustomerServiceImplTest extends BasicSpringContextTest {
 		Customer signedInCustomer = createPersistedCustomer("foo@foo.com", scenario.getStore());
 		Customer anonymousCustomer = createPersistedAnonymousCustomer("anon@foo.com", scenario.getStore());
 
-		Collection<Long> filteredUids = service.filterSearchable(Arrays.asList(signedInCustomer.getUidPk(), anonymousCustomer.getUidPk()));
+		Collection<Long> filteredUids = service.filterSearchable(ImmutableList.of(signedInCustomer.getUidPk(), anonymousCustomer.getUidPk()));
 		Set<Long> filteredUidSet = new HashSet<>(filteredUids);
 
-		assertEquals("The filtered set should not include the anonymous customer uid",
-				Collections.singleton(signedInCustomer.getUidPk()), filteredUidSet);
+		assertThat(filteredUidSet)
+			.as("The filtered set should not include the anonymous customer uid")
+			.containsOnly(signedInCustomer.getUidPk());
 	}
 
 	@Test
@@ -563,17 +594,17 @@ public class CustomerServiceImplTest extends BasicSpringContextTest {
 		Customer customer = createCustomer();
 
 		PaymentMethod tokenWithValue = new PaymentTokenImpl.TokenBuilder()
-				.withGatewayGuid(TOKEN_GATEWAY_GUID)
-				.withDisplayValue(TOKEN_DISPLAY_VALUE)
-				.withValue(TEST_TOKEN_VALUE + "1")
-				.build();
+			.withGatewayGuid(TOKEN_GATEWAY_GUID)
+			.withDisplayValue(TOKEN_DISPLAY_VALUE)
+			.withValue(TEST_TOKEN_VALUE + "1")
+			.build();
 		customer.getPaymentMethods().add(tokenWithValue);
 
 		PaymentMethod tokenWithValue2 = new PaymentTokenImpl.TokenBuilder()
-				.withGatewayGuid(TOKEN_GATEWAY_GUID)
-				.withDisplayValue(TOKEN_DISPLAY_VALUE)
-				.withValue(TEST_TOKEN_VALUE + "2")
-				.build();
+			.withGatewayGuid(TOKEN_GATEWAY_GUID)
+			.withDisplayValue(TOKEN_DISPLAY_VALUE)
+			.withValue(TEST_TOKEN_VALUE + "2")
+			.build();
 		customer.getPaymentMethods().setDefault(tokenWithValue2);
 		Customer updatedCustomer = service.update(customer);
 
@@ -581,12 +612,13 @@ public class CustomerServiceImplTest extends BasicSpringContextTest {
 		updatedCustomer.getPaymentMethods().setDefault(tokenWithValue);
 		updatedCustomer = service.update(updatedCustomer);
 
-		assertThat("token values after second update", updatedCustomer.getPaymentMethods().all(),
-				containsInAnyOrder(tokenWithValue, tokenWithValue2));
+		assertThat(updatedCustomer.getPaymentMethods().all())
+			.containsExactlyInAnyOrder(tokenWithValue, tokenWithValue2)
+			.allSatisfy(paymentMethod -> assertThat(retrieveToken(paymentMethod)).isNotNull());
+	}
 
-		Iterator<PaymentMethod> iterator = updatedCustomer.getPaymentMethods().all().iterator();
-		assertNotNull(persistenceEngine.get(PaymentTokenImpl.class, ((PaymentTokenImpl) iterator.next()).getUidPk()));
-		assertNotNull(persistenceEngine.get(PaymentTokenImpl.class, ((PaymentTokenImpl) iterator.next()).getUidPk()));
+	private PaymentTokenImpl retrieveToken(final PaymentMethod paymentMethod) {
+		return persistenceEngine.get(PaymentTokenImpl.class, ((PaymentTokenImpl) paymentMethod).getUidPk());
 	}
 
 	@Test(expected= EpValidationException.class)
@@ -661,9 +693,5 @@ public class CustomerServiceImplTest extends BasicSpringContextTest {
 		SettingDefinition userIdSetting = settingsService.getSettingDefinition("COMMERCE/SYSTEM/userIdMode");
 		userIdSetting.setDefaultValue(String.valueOf(userIdMode));
 		settingsService.updateSettingDefinition(userIdSetting);
-	}
-
-	protected <T> T doInTransaction(final TransactionCallback<T> callBack) {
-		return getTac().getTxTemplate().execute(callBack);
 	}
 }

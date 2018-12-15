@@ -14,7 +14,6 @@ import com.elasticpath.service.search.IndexType;
 import com.elasticpath.service.search.index.QueryComposer;
 import com.elasticpath.service.search.query.LuceneRawSearchCriteria;
 import com.elasticpath.service.search.query.SearchCriteria;
-import com.elasticpath.service.search.solr.SolrIndexConstants;
 
 /**
  * Test case for {@link LuceneRawQueryComposerImpl}.
@@ -35,7 +34,7 @@ public class LuceneRawQueryComposerImplTest extends QueryComposerTestCase {
 	public void setUp() throws Exception {
 		super.setUp();
 		luceneRawQueryComposerImpl = new LuceneRawQueryComposerImpl();
-		luceneRawQueryComposerImpl.setLuceneAnalyzer(new SimpleAnalyzer(SolrIndexConstants.LUCENE_MATCH_VERSION));
+		luceneRawQueryComposerImpl.setLuceneAnalyzer(new SimpleAnalyzer());
 		
 		searchCriteria = new LuceneRawSearchCriteria();
 		searchCriteria.setIndexType(IndexType.PRODUCT);

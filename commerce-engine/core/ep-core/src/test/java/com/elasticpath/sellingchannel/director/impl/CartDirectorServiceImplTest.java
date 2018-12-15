@@ -4,13 +4,19 @@
 package com.elasticpath.sellingchannel.director.impl;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
@@ -22,6 +28,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import com.elasticpath.base.common.dto.StructuredErrorMessage;
 import com.elasticpath.common.dto.ShoppingItemDto;
 import com.elasticpath.domain.shopper.Shopper;
 import com.elasticpath.domain.shoppingcart.ShoppingCart;
@@ -31,10 +38,13 @@ import com.elasticpath.domain.shoppingcart.impl.CartItem;
 import com.elasticpath.domain.shoppingcart.impl.ShoppingItemImpl;
 import com.elasticpath.domain.store.Store;
 import com.elasticpath.sellingchannel.director.CartDirector;
+import com.elasticpath.service.shoppingcart.CantDeleteAutoselectableBundleItemsException;
 import com.elasticpath.service.shoppingcart.PricingSnapshotService;
 import com.elasticpath.service.shoppingcart.ShoppingCartService;
 import com.elasticpath.service.shoppingcart.WishListService;
 import com.elasticpath.service.shoppingcart.impl.AddToWishlistResult;
+import com.elasticpath.service.shoppingcart.validation.RemoveShoppingItemFromCartValidationService;
+import com.elasticpath.service.shoppingcart.validation.ShoppingItemValidationContext;
 
 @RunWith(MockitoJUnitRunner.class)
 public class CartDirectorServiceImplTest {
@@ -51,6 +61,7 @@ public class CartDirectorServiceImplTest {
 	@Mock private Store store;
 	@Mock private WishList wishList;
 	@Mock private PricingSnapshotService pricingSnapshotService;
+	@Mock private RemoveShoppingItemFromCartValidationService removeShoppingItemFromCartValidationService;
 
 	@InjectMocks
 	private CartDirectorServiceImpl service;
@@ -152,13 +163,29 @@ public class CartDirectorServiceImplTest {
 		final String itemId1 = "12345";
 		final String itemId2 = "54321";
 
+		when(removeShoppingItemFromCartValidationService.buildContext(any(), any())).thenReturn(mock(ShoppingItemValidationContext.class));
+
 		// When
 		service.removeItemsFromCart(shoppingCart, itemId1, itemId2);
 
 		verify(shoppingCart).removeCartItem(itemId1);
 		verify(shoppingCart).removeCartItem(itemId2);
+		verify(removeShoppingItemFromCartValidationService, times(2)).buildContext(eq(shoppingCart), any());
+		verify(removeShoppingItemFromCartValidationService, times(2)).validate(isA(ShoppingItemValidationContext.class));
 
 		expectThatShoppingCartWillBePersisted();
+	}
+
+	@Test
+	public void testRemoveItemFromCartValidationFails() {
+		Collection<StructuredErrorMessage> validationMessages = new ArrayList<>();
+		validationMessages.add(new StructuredErrorMessage("messageId", "debug message", null));
+
+		when(removeShoppingItemFromCartValidationService.validate(any())).thenReturn(validationMessages);
+
+		assertThatThrownBy(()->service.removeItemsFromCart(shoppingCart, ""))
+				.isInstanceOf(CantDeleteAutoselectableBundleItemsException.class)
+				.hasMessage("Remove item from cart validation failure.");
 	}
 
 	@Test

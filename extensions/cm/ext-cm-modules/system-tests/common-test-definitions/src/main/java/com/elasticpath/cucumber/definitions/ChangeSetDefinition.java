@@ -7,6 +7,7 @@ import cucumber.api.java.en.And;
 import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
 
+import com.elasticpath.cucumber.definitions.dst.DSTDefinition;
 import com.elasticpath.selenium.dialogs.AddEditBrandDialog;
 import com.elasticpath.selenium.dialogs.CreateChangeSetDialog;
 import com.elasticpath.selenium.dialogs.MoveSelectedObjectsDialog;
@@ -82,6 +83,8 @@ public class ChangeSetDefinition {
 		this.product = product;
 		this.productAndBundleDefinition = productAndBundleDefinition;
 		this.dst = dst;
+		this.changeSetName = "";
+		this.secondChangeSetName = "";
 	}
 
 	/**
@@ -116,13 +119,22 @@ public class ChangeSetDefinition {
 	 * @param changeSetName the change set name
 	 **/
 	@And("^I create a new change set (.+)$")
-	public void createChangeSetAndOpenEditor(final String changeSetName) {
-		createChangeSet(changeSetName);
-		searchChangeSetByName(this.changeSetName);
-		changeSetEditor = changeSetSearchResultPane.openChangeSetEditor(this.changeSetName);
-		changeSetEditor.selectObjectsTab();
+	public void createFirstChangeSetAndOpenEditor(final String changeSetName) {
+		this.changeSetName = changeSetName + "_" + Utility.getRandomUUID();
+		createChangeSetAndOpenEditor(this.changeSetName);
 	}
 
+	/**
+	 * Creates a new change set in staging environment.
+	 *
+	 * @param changeSetName the change set name
+	 **/
+	@And("^in staging environment I create and select a new change set (.+)$")
+	public void createNewChangeSet(final String changeSetName) {
+		this.changeSetName = changeSetName + "_" + Utility.getRandomUUID();
+		createChangeSet(this.changeSetName);
+		selectChangeSet(this.changeSetName);
+	}
 
 	/**
 	 * Creates a second change set.
@@ -131,9 +143,33 @@ public class ChangeSetDefinition {
 	 **/
 	@And("^I create a second change set (.+)$")
 	public void createSecondChangeSetAndOpenEditor(final String changeSetName) {
-		createSecondChangeSet(changeSetName);
-		searchChangeSetByName(this.secondChangeSetName);
-		changeSetEditor = changeSetSearchResultPane.openChangeSetEditor(this.secondChangeSetName);
+		this.secondChangeSetName = changeSetName + "_" + Utility.getRandomUUID();
+		createChangeSetAndOpenEditor(this.secondChangeSetName);
+	}
+
+	/**
+	 * Creates a new change set.
+	 *
+	 * @param changeSetName the change set name
+	 **/
+	private void createChangeSet(final String changeSetName) {
+		activityToolbar.clickChangeSetButton();
+		clickSearchButton();
+		clickCreateButton();
+		createChangeSetDialog.enterChangeSetName(changeSetName);
+		createChangeSetDialog.clickFinishButton();
+	}
+
+
+	/**
+	 * Creates a new change set and opens changeset editor.
+	 *
+	 * @param changeSetName the change set name
+	 **/
+	private void createChangeSetAndOpenEditor(final String changeSetName) {
+		createChangeSet(changeSetName);
+		searchChangeSetByName(changeSetName);
+		changeSetEditor = changeSetSearchResultPane.openChangeSetEditor(changeSetName);
 		changeSetEditor.selectObjectsTab();
 	}
 
@@ -168,7 +204,7 @@ public class ChangeSetDefinition {
 	 **/
 	@And("^I create and select the newly created change set (.+)$")
 	public void createAndSelectChangeSet(final String changeSetName) {
-		createChangeSetAndOpenEditor(changeSetName);
+		createFirstChangeSetAndOpenEditor(changeSetName);
 		if (dst != null) {
 			changeSetEditor.setChangeSetGuid(dst);
 			changeSetEditor.selectObjectsTab();
@@ -395,20 +431,16 @@ public class ChangeSetDefinition {
 	 **/
 	@When("^I add product (.+) to the change set$")
 	public void addProductToChangeset(final String productName) {
-		productAndBundleDefinition.searchForProductByName(productName);
+		productAndBundleDefinition.verifyProductByName(productName);
 		clickAddItemToChangeSetButton();
 	}
-
 
 	/**
 	 * Locks and Finalizes change set.
 	 */
 	@After(value = "@lockAndFinalize", order = Constants.CLEANUP_ORDER_FOURTH)
 	public void lockAndFinalizeNewChangeSet() {
-		searchAndLockNewChangeSet();
-		searchChangeSetByName(this.changeSetName);
-		changeSetSearchResultPane.clickFinalizedButton();
-		verifyChangeSetStatus("Finalized");
+		lockAndFinalizeNewChangeSet(this.changeSetName);
 	}
 
 	/**
@@ -416,36 +448,49 @@ public class ChangeSetDefinition {
 	 */
 	@After(value = "@lockAndFinalizeSecond", order = Constants.CLEANUP_ORDER_FOURTH)
 	public void lockAndFinalizeSecondChangeSet() {
-		searchAndLockSecondChangeSet();
-		searchChangeSetByName(this.secondChangeSetName);
+		lockAndFinalizeNewChangeSet(this.secondChangeSetName);
+	}
+
+	/**
+	 * Locks and Finalizes change set
+	 */
+	public void lockAndFinalizeNewChangeSet(final String changeSetName) {
+		assertThat(changeSetName)
+				.as("It's not possible to finalize a changeset " + changeSetName + ". A changeset name was not generated")
+				.isNotBlank();
+		//any dialog which inherits Abstract dialog can be used here
+		createChangeSetDialog = new CreateChangeSetDialog(SetUp.getDriver());
+		createChangeSetDialog.closeDialogIfOpened();
+		searchAndLockNewChangeSet(changeSetName);
 		changeSetSearchResultPane.clickFinalizedButton();
-		verifyChangeSetStatusSecond("Finalized");
+		changeSetSearchResultPane.verifyChangeSetStatus(changeSetName, "Finalized");
+	}
+
+	/**
+	 * Locks and Finalizes change set.
+	 */
+	@After(value = "@lockAndFinalizeStaging", order = Constants.CLEANUP_ORDER_FOURTH)
+	public void lockAndFinalizeStagingChangeSet() {
+		DSTDefinition.switchToAuthorWindow();
+		lockAndFinalizeNewChangeSet();
 	}
 
 	/**
 	 * Locks and Publishes change set.
 	 */
 	public void lockAndPublishNewChangeSet() {
-		searchAndLockNewChangeSet();
-		searchChangeSetByName(this.changeSetName);
+		searchAndLockNewChangeSet(this.changeSetName);
 		changeSetSearchResultPane.clickPublishButton();
 	}
 
 	/**
 	 * Locks change set.
+	 *
+	 * @param changeSetName name of a changeset which should be locked
 	 */
-	public void searchAndLockNewChangeSet() {
+	private void searchAndLockNewChangeSet(final String changeSetName) {
 		activityToolbar.clickChangeSetButton();
-		searchChangeSetByName(this.changeSetName);
-		changeSetSearchResultPane.clickLockButton();
-	}
-
-	/**
-	 * Locks change set.
-	 */
-	public void searchAndLockSecondChangeSet() {
-		activityToolbar.clickChangeSetButton();
-		searchChangeSetByName(this.secondChangeSetName);
+		searchChangeSetByName(changeSetName);
 		changeSetSearchResultPane.clickLockButton();
 	}
 
@@ -628,32 +673,6 @@ public class ChangeSetDefinition {
 	@Then("^total number of change set objects should match the number of category items added to the change set$")
 	public void verifyNumberOfCategoryItems() {
 		changeSetEditor.verifyNumberOfChangeSetObjects(CatalogProductListingPane.getNumberOfCategoryItems());
-	}
-
-	/**
-	 * Create change set.
-	 *
-	 * @param changeSetName change set name
-	 */
-	private void createChangeSet(final String changeSetName) {
-		activityToolbar.clickChangeSetButton();
-		clickSearchButton();
-		clickCreateButton();
-		this.changeSetName = changeSetName + "_" + Utility.getRandomUUID();
-		createChangeSetDialog.enterChangeSetName(this.changeSetName);
-		createChangeSetDialog.clickFinishButton();
-	}
-
-	/**
-	 * Create change set.
-	 *
-	 * @param changeSetName change set name
-	 */
-	private void createSecondChangeSet(final String changeSetName) {
-		clickCreateButton();
-		this.secondChangeSetName = changeSetName + "_" + Utility.getRandomUUID();
-		createChangeSetDialog.enterChangeSetName(this.secondChangeSetName);
-		createChangeSetDialog.clickFinishButton();
 	}
 
 	/**

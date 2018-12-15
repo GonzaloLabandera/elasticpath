@@ -3,10 +3,8 @@
  */
 package com.elasticpath.domain.cmuser.impl;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -38,24 +36,12 @@ public class UserPermissionImplTest {
 	 */
 	@Test
 	public void testInit() {
-		try {
-			userPermissionImpl.init();
-			fail(EP_DOMAIN_EXCEPTION_EXPECTED);
-		} catch (final EpDomainException e) {
-			assertNotNull(e);
-			// Success!
-		}
-		
-		try {
-			userPermissionImpl.init();
-			fail(EP_DOMAIN_EXCEPTION_EXPECTED);
-		} catch (final EpDomainException e) {
-			assertNotNull(e);
-			// Success!
-		}
-		
+		assertThatThrownBy(() -> userPermissionImpl.init())
+			.as(EP_DOMAIN_EXCEPTION_EXPECTED)
+			.isInstanceOf(EpDomainException.class);
+
 		userPermissionImpl.setAuthority(AUTHORITY);
-		assertSame(AUTHORITY, userPermissionImpl.getAuthority());
+		assertThat(userPermissionImpl.getAuthority()).isEqualTo(AUTHORITY);
 	}
 	
 	/**
@@ -63,7 +49,7 @@ public class UserPermissionImplTest {
 	 */
 	@Test
 	public void testGetAuthority() {
-		assertEquals(userPermissionImpl.getAuthority(), null);
+		assertThat(userPermissionImpl.getAuthority()).isNull();
 	}
 
 	/**
@@ -72,7 +58,7 @@ public class UserPermissionImplTest {
 	@Test
 	public void testSetAuthority() {
 		userPermissionImpl.setAuthority(AUTHORITY);
-		assertSame(userPermissionImpl.getAuthority(), AUTHORITY);
+		assertThat(userPermissionImpl.getAuthority()).isEqualTo(AUTHORITY);
 	}
 }
 

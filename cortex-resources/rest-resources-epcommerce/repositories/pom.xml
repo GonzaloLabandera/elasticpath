@@ -48,6 +48,11 @@
 
 		<dependency>
 			<groupId>com.elasticpath.rest.definitions</groupId>
+			<artifactId>ep-resource-itemselections-api</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>com.elasticpath.rest.definitions</groupId>
 			<artifactId>ep-resource-coupons-api</artifactId>
 		</dependency>
 
@@ -124,6 +129,16 @@
 		<dependency>
 			<groupId>com.elasticpath.rest.definitions</groupId>
 			<artifactId>ep-resource-recommendations-api</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>com.elasticpath.rest.definitions</groupId>
+			<artifactId>ep-resource-offers-api</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>com.elasticpath.rest.definitions</groupId>
+			<artifactId>ep-resource-offerdefinitions-api</artifactId>
 		</dependency>
 
 		<dependency>

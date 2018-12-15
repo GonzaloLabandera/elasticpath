@@ -14,7 +14,6 @@ import java.util.Optional;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
@@ -45,7 +44,7 @@ public class CustomerAgeTagStrategyTest {
 	public void testTagName() {
 		String traitName = classUnderTest.tagName();
 
-		assertEquals(traitName, CustomerAgeTagStrategy.CUSTOMER_AGE_YEARS);
+		assertEquals(CustomerAgeTagStrategy.CUSTOMER_AGE_YEARS, traitName);
 	}
 
 	@Test

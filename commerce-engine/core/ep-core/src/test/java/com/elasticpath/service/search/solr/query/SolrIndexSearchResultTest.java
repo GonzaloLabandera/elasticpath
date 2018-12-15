@@ -14,6 +14,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.drools.core.util.StringUtils;
 import org.jmock.Expectations;
 import org.jmock.auto.Mock;
 import org.jmock.integration.junit4.JUnitRuleMockery;
@@ -23,8 +24,6 @@ import org.junit.Test;
 
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.ElasticPath;
-import com.elasticpath.domain.attribute.Attribute;
-import com.elasticpath.domain.attribute.impl.AttributeImpl;
 import com.elasticpath.domain.catalog.Catalog;
 import com.elasticpath.domain.catalog.impl.CatalogImpl;
 import com.elasticpath.domain.catalogview.AttributeRangeFilter;
@@ -249,7 +248,7 @@ public class SolrIndexSearchResultTest {
 	}
 
 	/**
-	 * Test the {@link SolrIndexSearchResult#getStoreCatalog()} and  cache store to catalog cache.
+	 * Test the {@link StoreService#getCatalogCodeForStore(String)} and  cache store to catalog cache.
 	 */
 	@Test
 	public void testGetStoreCatalog() {
@@ -336,19 +335,19 @@ public class SolrIndexSearchResultTest {
 
 	private void populateSearchResult() {
 		final List<Long> results = new ArrayList<>();
-		results.add(new Long(1L));
-		final Map<Attribute, List<FilterOption<AttributeRangeFilter>>> attributeRangeFilterOptions =
+		results.add(1L);
+		final Map<String, List<FilterOption<AttributeRangeFilter>>> attributeRangeFilterOptions =
 			new HashMap<>();
-		attributeRangeFilterOptions.put(new AttributeImpl(), null);
+		attributeRangeFilterOptions.put(StringUtils.EMPTY, null);
 		final List<FilterOption<CategoryFilter>> categoryFilterOptions = new ArrayList<>();
 		categoryFilterOptions.add(new FilterOptionImpl<>());
 		final List<FilterOption<BrandFilter>> brandFilterOptions = new ArrayList<>();
 		brandFilterOptions.add(new FilterOptionImpl<>());
 		final List<FilterOption<PriceFilter>> priceFilterOptions = new ArrayList<>();
 		priceFilterOptions.add(new FilterOptionImpl<>());
-		final Map<Attribute, List<FilterOption<AttributeValueFilter>>> attributeFilterOptions =
+		final Map<String, List<FilterOption<AttributeValueFilter>>> attributeFilterOptions =
 			new HashMap<>();
-		attributeFilterOptions.put(new AttributeImpl(), null);
+		attributeFilterOptions.put(StringUtils.EMPTY, null);
 
 		solrIndexSearchResult.setResultUids(results);
 		solrIndexSearchResult.setCategoryFilterOptions(categoryFilterOptions);

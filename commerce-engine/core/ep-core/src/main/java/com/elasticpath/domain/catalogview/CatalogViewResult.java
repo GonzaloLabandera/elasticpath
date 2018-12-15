@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Map;
 
 import com.elasticpath.domain.EpDomain;
-import com.elasticpath.domain.attribute.Attribute;
 import com.elasticpath.domain.catalog.Category;
 import com.elasticpath.service.catalog.CategoryLookup;
 
@@ -186,28 +185,28 @@ public interface CatalogViewResult extends EpDomain {
 	 *
 	 * @return a map of filter value options
 	 */
-	Map<Attribute, List<FilterOption<AttributeValueFilter>>> getAttributeValueFilterOptions();
+	Map<String, List<FilterOption<AttributeValueFilter>>> getAttributeValueFilterOptions();
 
 	/**
 	 * Sets the map of attribute value filter options.
 	 *
 	 * @param attributeValueFilterOptions map of attribute value filter options
 	 */
-	void setAttributeValueFilterOptions(Map<Attribute, List<FilterOption<AttributeValueFilter>>> attributeValueFilterOptions);
+	void setAttributeValueFilterOptions(Map<String, List<FilterOption<AttributeValueFilter>>> attributeValueFilterOptions);
 
 	/**
 	 * Gets the map of attribute range filter options.
 	 *
 	 * @return the map of attribute range filter options
 	 */
-	Map<Attribute, List<FilterOption<AttributeRangeFilter>>> getAttributeRangeFilterOptions();
+	Map<String, List<FilterOption<AttributeRangeFilter>>> getAttributeRangeFilterOptions();
 
 	/**
 	 * Sets the map of attribute value filter options.
 	 *
 	 * @param attributeRangeFilterOptions map of attribute value filter options
 	 */
-	void setAttributeRangeFilterOptions(Map<Attribute, List<FilterOption<AttributeRangeFilter>>> attributeRangeFilterOptions);
+	void setAttributeRangeFilterOptions(Map<String, List<FilterOption<AttributeRangeFilter>>> attributeRangeFilterOptions);
 
 	/**
 	 * Collapses the list of attribute range filter options. This is only value for attribute

@@ -113,4 +113,12 @@ public interface Cache<K, V> {
 	 *                                  due to the current security settings
 	 */
 	<T> T unwrap(java.lang.Class<T> clazz);
+
+	/**
+	 * Checks if the cache contains given key.
+	 *
+	 * @param key the key
+	 * @return true if cache contains provided key
+	 */
+	boolean containsKey(K key);
 }

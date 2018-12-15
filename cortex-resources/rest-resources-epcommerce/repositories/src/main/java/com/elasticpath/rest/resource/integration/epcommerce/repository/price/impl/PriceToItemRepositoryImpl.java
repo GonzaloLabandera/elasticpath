@@ -29,7 +29,7 @@ public class PriceToItemRepositoryImpl<I extends ItemIdentifier, LI extends Pric
 	@Override
 	public Observable<PriceForItemIdentifier> getElements(final ItemIdentifier identifier) {
 		String skuCode = identifier.getItemId().getValue().get(ItemRepository.SKU_CODE_KEY);
-		String scope = identifier.getItems().getScope().getValue();
+		String scope = identifier.getScope().getValue();
 		return priceRepository.priceExists(scope, skuCode)
 				.flatMapObservable(exists ->
 						exists ? Observable.just(PriceForItemIdentifier.builder().withItem(identifier).build()) : Observable.empty());

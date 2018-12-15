@@ -36,7 +36,7 @@ public final class AddToCartFormAdvisorImpl implements AddToCartFormAdvisor.Form
 									@ResourceService final AddToCartAdvisorService addToCartAdvisorService) {
 		Map<String, String> itemIdentifier = addToDefaultCartFormIdentifier.getItem().getItemId().getValue();
 		this.itemId = itemIdentifier.get(ItemRepository.SKU_CODE_KEY);
-		this.scope = addToDefaultCartFormIdentifier.getItem().getItems().getScope().getValue();
+		this.scope = addToDefaultCartFormIdentifier.getItem().getScope().getValue();
 		this.addToCartAdvisorService = addToCartAdvisorService;
 	}
 

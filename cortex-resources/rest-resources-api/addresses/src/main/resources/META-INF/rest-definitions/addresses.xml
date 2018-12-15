@@ -8,7 +8,7 @@
 ### addresses
 </a>
 
-The Addresses resource is responsible for the customer's shipping and billing address. This resource allows you to
+The Addresses resource family is responsible for the customer's shipping and billing address. This resource allows you to
 retrieve a logged in customer's addresses, edit existing addresses, and create new addresses.
 
 #### Shipping Address vs. Billing Addresses

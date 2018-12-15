@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.Set;
 
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.collections.Predicate;
 import org.apache.log4j.Logger;
 
 import com.elasticpath.base.exception.EpServiceException;
@@ -57,13 +56,8 @@ public class AuthorizePaymentsCheckoutAction implements ReversibleCheckoutAction
 
 			Set<OrderPayment> orderPayments = new HashSet<>(context.getOrder().getOrderPayments());
 			
-			CollectionUtils.filter(orderPayments, new Predicate() {
-
-				@Override
-				public boolean evaluate(final Object object) {
-					return ((OrderPayment) object).getTransactionType().equals(OrderPayment.AUTHORIZATION_TRANSACTION);
-				}
-			});
+			CollectionUtils.filter(orderPayments, object -> ((OrderPayment) object)
+					.getTransactionType().equals(OrderPayment.AUTHORIZATION_TRANSACTION));
 			
 			paymentService.rollBackPayments(orderPayments);
 		}

@@ -49,7 +49,7 @@ public class CartLineItemAvailabilityEntityRepositoryImpl<E extends Availability
 	 * @return the store product
 	 */
 	protected Single<StoreProduct> getStoreProduct(final String scope, final ProductSku productSku) {
-		return storeProductRepository.findDisplayableStoreProductWithAttributesByProductGuidAsSingle(scope, productSku.getProduct().getGuid());
+		return storeProductRepository.findDisplayableStoreProductWithAttributesByProductGuid(scope, productSku.getProduct().getGuid());
 	}
 
 	/**

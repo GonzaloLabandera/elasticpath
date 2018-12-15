@@ -10,6 +10,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import com.elasticpath.base.exception.EpServiceException;
 import com.elasticpath.commons.constants.ContextIdNames;
@@ -31,7 +32,6 @@ public class AttributeServiceImpl extends AbstractEpPersistenceServiceImpl imple
 
 	private static final String ATTRIBUTE_FIND_BY_USAGE = "ATTRIBUTE_FIND_BY_USAGE";
 	private static final String ATTRIBUTE_FIND_BY_USAGE_IDS = "ATTRIBUTE_FIND_BY_USAGE_IDS";
-
 	private DistinctAttributeValueCriterion distinctAttributeValueCriterion;
 
 	/**
@@ -533,8 +533,10 @@ public class AttributeServiceImpl extends AbstractEpPersistenceServiceImpl imple
 		return getAttributes(usage.getValue());
 	}
 
-	private List<Attribute> getAttributes(final int usageId) {
-		return getPersistenceEngine().retrieveByNamedQuery(ATTRIBUTE_FIND_BY_USAGE, Integer.valueOf(usageId));
+	@Override
+	public List<Attribute> getAttributes(final int usageId) {
+
+		return getPersistenceEngine().retrieveByNamedQuery(ATTRIBUTE_FIND_BY_USAGE, usageId);
 	}
 
 	/**
@@ -568,5 +570,48 @@ public class AttributeServiceImpl extends AbstractEpPersistenceServiceImpl imple
 		sanityCheck();
 
 		return getPersistenceEngine().retrieveByNamedQuery("ATTRIBUTE_FIND_BY_CATALOG_USAGE", catalogUid, attributeUsageId);
+	}
+
+
+	@Override
+	public List<AttributeValueInfo> findProductAttributeValueByAttributeUid(final Attribute attribute) {
+		sanityCheck();
+
+		String queryType = "PRODUCT_ATTRIBUTE_VALUE_BY_ATTRIBUTE_" + getAttributeTypeQuery(attribute);
+
+		return getPersistenceEngine().<Object[]>retrieveByNamedQuery(queryType, attribute.getUidPk()).stream()
+				.map(element -> new AttributeValueInfo(element[1].toString(), element[0].toString()))
+				.collect(Collectors.toList());
+	}
+
+	@Override
+	public List<Attribute> getProductAttributes(final List<String> attributeKeys) {
+		sanityCheck();
+
+		return getPersistenceEngine().retrieveByNamedQueryWithList("FIND_UNEXCLUDED_ATTRIBUTES_BY_USAGE", "keys", attributeKeys, AttributeUsage.PRODUCT);
+	}
+
+	@Override
+	public List<AttributeValueInfo> findProductSkuValueAttributeByAttributeUid(final Attribute attribute) {
+		sanityCheck();
+
+		String queryType = "PRODUCT_SKU_ATTRIBUTE_VALUE_BY_ATTRIBUTE_" + getAttributeTypeQuery(attribute);
+
+		return getPersistenceEngine().<Object[]>retrieveByNamedQuery(queryType, attribute.getUidPk()).stream()
+				.map(element -> new AttributeValueInfo(element[1].toString(), element[0].toString()))
+				.collect(Collectors.toList());
+	}
+
+	private String getAttributeTypeQuery(final Attribute attribute) {
+		AttributeType attributeType = attribute.getAttributeType();
+
+		// when an attribute is multi valued, the value is stored in long text
+		if (attribute.isMultiValueEnabled()) {
+			return "LONG_TEXT";
+		} else if (attributeType == AttributeType.FILE || attributeType == AttributeType.IMAGE) {
+			return "SHORT_TEXT";
+		} else {
+			return attributeType.getName();
+		}
 	}
 }

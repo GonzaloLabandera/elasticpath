@@ -15,6 +15,11 @@ public class PromotionsShipping extends AbstractNavigation {
 	private static final String PROMOTION_NAME_INPUT_CSS = LEFT_PANE_INNER_PARENT_CSS + "div[widget-id='Promotion Name'] > input";
 	private static final String SEARCH_BUTTON_CSS = LEFT_PANE_INNER_PARENT_CSS + "div[widget-id='Search'][seeable='true']";
 	private static final String SHIPPING_SERVICE_LEVEL_TAB_CSS = "div[widget-id*='Sh'][appearance-id='ctab-item'][seeable='true']";
+	private final static String COMBO_BOX_APPEARANCE_ID = "div[appearance-id='ccombo']";
+	private static final String SEARCH_FILTER_SHIPPING_REGION_CSS = COMBO_BOX_APPEARANCE_ID
+			+ "[automation-id='com.elasticpath.cmclient.store.shipping.ShippingLevelsMessages.ShippingLevelsShippingRegionLabel']";
+	private static final String SEARCH_FILTER_STORE_CSS = COMBO_BOX_APPEARANCE_ID
+			+ "[automation-id='com.elasticpath.cmclient.store.shipping.ShippingLevelsMessages.ShippingLevelsStoreLabel']";
 
 	/**
 	 * Constructor.
@@ -61,5 +66,23 @@ public class PromotionsShipping extends AbstractNavigation {
 	 */
 	public void clickShippingServiceLevelTab() {
 		click(getWaitDriver().waitForElementToBeClickable(By.cssSelector(SHIPPING_SERVICE_LEVEL_TAB_CSS)));
+	}
+
+	/**
+	 * Chooses a value in Shipping Region filter from a drop down element in Shipping tab.
+	 *
+	 * @param region which should be chosen in a filter
+	 */
+	public void setShippingRegionFilter(final String region) {
+		selectComboBoxItem(SEARCH_FILTER_SHIPPING_REGION_CSS, region);
+	}
+
+	/**
+	 * Chooses a value in Store filter from a drop down element in Shipping tab.
+	 *
+	 * @param store which should be chosen in a filter
+	 */
+	public void setStoreFilter(final String store) {
+		selectComboBoxItem(SEARCH_FILTER_STORE_CSS, store);
 	}
 }

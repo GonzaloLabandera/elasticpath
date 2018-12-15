@@ -3,9 +3,7 @@
  */
 package com.elasticpath.test.integration.audit;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.lang.reflect.Method;
 import java.text.DateFormat;
@@ -94,19 +92,17 @@ public abstract class AbstractAuditTestSupport extends BasicSpringContextTest {
 	protected void verifyAuditData(final Object objectBefore, final Object objectAfter,
 								   final String targetObjectGuid, final ChangeType changeType, final int expectedChangeOperationNumber) {
 		List<ChangeOperation> changeOperations = persistenceEngine.retrieveWithNewSession(FIND_CHANGE_OPERATION_BY_GUID_AND_TYPE, new Object[]{
-				targetObjectGuid, changeType.getName()});
-		assertNotNull(changeOperations);
-		assertTrue(changeOperations.size() == expectedChangeOperationNumber);
-		assertNotNull("", changeOperations.get(0).getChangeTransaction());
+			targetObjectGuid, changeType.getName()});
+		assertThat(changeOperations).hasSize(expectedChangeOperationNumber);
+		assertThat(changeOperations.get(0).getChangeTransaction()).isNotNull();
 
 		List<DataChanged> dataChanges = persistenceEngine.retrieveWithNewSession(FIND_DATA_CHANGED_BY_GUID_AND_TYPE,
-				new Object[]{changeType.getName()});
+			new Object[]{changeType.getName()});
 
-		assertNotNull(dataChanges);
+		assertThat(dataChanges).isNotNull();
 
 		verifyDataChanged(objectBefore, objectAfter, dataChanges, changeType);
 
-		//assertEquals("all data changed in database are verified...", dataChanges.size(), dataChangedRecordCount);
 	}
 
 	/**
@@ -119,9 +115,7 @@ public abstract class AbstractAuditTestSupport extends BasicSpringContextTest {
 	 */
 	protected void verifyDataChanged(final Object objectBefore, final Object objectAfter, final List<DataChanged> dataChanges,
 									 final ChangeType changeType) {
-		//EntityManager entityManager = getEntityManager();
-
-		Object object = null;
+		Object object;
 		if (objectBefore == null) {
 			object = objectAfter;
 		} else {
@@ -134,7 +128,6 @@ public abstract class AbstractAuditTestSupport extends BasicSpringContextTest {
 			}
 
 			String fieldName = fieldMetaData.getName();
-			//getLog().info("verifying:"+object.getClass().getName()+"."+fieldName);
 			Method method = getMethod(object, fieldName);
 
 			Object fieldBefore = getField(objectBefore, method);
@@ -160,10 +153,6 @@ public abstract class AbstractAuditTestSupport extends BasicSpringContextTest {
 						if (foundObject == null) {
 							verifyDataChanged(member, null, dataChanges, ChangeType.DELETE);
 						}
-						/*This flow equlas the flow above "UPDATE" flow.
-						 * else {
-							verifyDataChanged(member, foundObject, dataChanges, ChangeType.UPDATE);
-						}*/
 					}
 				}
 				continue;
@@ -229,7 +218,7 @@ public abstract class AbstractAuditTestSupport extends BasicSpringContextTest {
 		dataChangedRecordCount++;
 
 		List<DataChanged> filteredDataChangedList = findDataChangedByChangeType(object, fieldName, dataChanges, changeType);
-		assertFalse(filteredDataChangedList.isEmpty());
+		assertThat(filteredDataChangedList).isNotEmpty();
 
 		StringBuilder debugInfo = new StringBuilder();
 		debugInfo.append("\nObject: \n");
@@ -249,7 +238,7 @@ public abstract class AbstractAuditTestSupport extends BasicSpringContextTest {
 			debugInfo.append(dataChanged.getFieldNewValue());
 
 			if (auditEquals(dataChanged.getFieldOldValue(), fieldValueBefore)
-					&& auditEquals(dataChanged.getFieldNewValue(), fieldValueAfter)) {
+				&& auditEquals(dataChanged.getFieldNewValue(), fieldValueAfter)) {
 				verifyResult = true;
 				break;
 			}
@@ -262,7 +251,9 @@ public abstract class AbstractAuditTestSupport extends BasicSpringContextTest {
 			LOG.error("No audit records match.  Audit Records:");
 			LOG.error(filteredDataChangedList);
 		}
-		assertTrue(debugMessage, verifyResult);
+		assertThat(verifyResult)
+			.as(debugMessage)
+			.isTrue();
 	}
 
 	private boolean auditEquals(final String dataChangedValue, final String fieldValue) {

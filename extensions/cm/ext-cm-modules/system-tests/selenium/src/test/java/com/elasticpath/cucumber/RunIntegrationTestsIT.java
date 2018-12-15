@@ -9,7 +9,8 @@ import org.junit.runner.RunWith;
  */
 @RunWith(Cucumber.class)
 @CucumberOptions(format = {"pretty", "html:target/cucumber-html-reports/integrationTest", "json:target/integrationTest.json"},
-		tags = {"@smoketest", "@integration"},
+		glue = {"classpath:com.elasticpath.cucumber", "classpath:com.elasticpath.cortex"},
+		tags = {"@regressionTest", "@integration"},
 		features = "src/test/resources/com.elasticpath.cucumber/integrationTest")
 public class RunIntegrationTestsIT {
 }

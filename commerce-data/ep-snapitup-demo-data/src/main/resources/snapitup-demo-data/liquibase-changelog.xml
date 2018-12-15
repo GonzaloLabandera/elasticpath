@@ -13,4 +13,1254 @@
 			<param name="dataSet" value="snapitup-demo-data" />
 		</customChange>
 	</changeSet>
+
+	<changeSet id="add-default-snapitup-facets" author="elasticpath" context="snapitup-data">
+		<comment>Configure Default Facets</comment>
+		<insert tableName="TFACET">
+			<column name="UIDPK" valueNumeric='11650'/>
+			<column name="FACET_GUID" value='595b6e58-de18-428b-910b-887cb0e04756'/>
+			<column name="BUSINESS_OBJECT_ID" value='A01010'/>
+			<column name="FACET_NAME" value='Optical System / Prism System'/>
+			<column name="FIELD_KEY_TYPE" valueNumeric='0'/>
+			<column name="STORECODE" value='SNAPITUP'/>
+			<column name="DISPLAY_NAME" value='{"en":"Optical System / Prism System","fr":""}'/>
+			<column name="FACET_TYPE" valueNumeric='2'/>
+			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="RANGE_FACET_VALUES" value='[]'/>
+			<column name="FACET_GROUP" valueNumeric='0'/>
+		</insert>
+
+		<insert tableName="TFACET">
+			<column name="UIDPK" valueNumeric='11651'/>
+			<column name="FACET_GUID" value='d30d5ef6-f558-463c-a8cd-4dde71ea8524'/>
+			<column name="BUSINESS_OBJECT_ID" value='A01283'/>
+			<column name="FACET_NAME" value='Camera / Film Speed Range'/>
+			<column name="FIELD_KEY_TYPE" valueNumeric='0'/>
+			<column name="STORECODE" value='SNAPITUP'/>
+			<column name="DISPLAY_NAME" value='{"en":"Camera / Film Speed Range","fr":""}'/>
+			<column name="FACET_TYPE" valueNumeric='2'/>
+			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="RANGE_FACET_VALUES" value='[]'/>
+			<column name="FACET_GROUP" valueNumeric='0'/>
+		</insert>
+
+		<insert tableName="TFACET">
+			<column name="UIDPK" valueNumeric='11652'/>
+			<column name="FACET_GUID" value='854ae33c-878f-4a22-851a-771d520aa145'/>
+			<column name="BUSINESS_OBJECT_ID" value='A00556'/>
+			<column name="FACET_NAME" value='Viewfinder / Viewfinder Type'/>
+			<column name="FIELD_KEY_TYPE" valueNumeric='0'/>
+			<column name="STORECODE" value='SNAPITUP'/>
+			<column name="DISPLAY_NAME" value='{"en":"Viewfinder / Viewfinder Type","fr":""}'/>
+			<column name="FACET_TYPE" valueNumeric='2'/>
+			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="RANGE_FACET_VALUES" value='[]'/>
+			<column name="FACET_GROUP" valueNumeric='0'/>
+		</insert>
+
+		<insert tableName="TFACET">
+			<column name="UIDPK" valueNumeric='11653'/>
+			<column name="FACET_GUID" value='43cdce84-b578-4097-bc8a-4b36f48bd214'/>
+			<column name="BUSINESS_OBJECT_ID" value='A00373'/>
+			<column name="FACET_NAME" value='Miscellaneous / Color'/>
+			<column name="FIELD_KEY_TYPE" valueNumeric='0'/>
+			<column name="STORECODE" value='SNAPITUP'/>
+			<column name="DISPLAY_NAME" value='{"en":"Miscellaneous / Color","fr":""}'/>
+			<column name="FACET_TYPE" valueNumeric='2'/>
+			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="RANGE_FACET_VALUES" value='[]'/>
+			<column name="FACET_GROUP" valueNumeric='0'/>
+		</insert>
+
+		<insert tableName="TFACET">
+			<column name="UIDPK" valueNumeric='11654'/>
+			<column name="FACET_GUID" value='fe95ce06-b86f-4239-825b-10b2eaea404f'/>
+			<column name="BUSINESS_OBJECT_ID" value='A00140'/>
+			<column name="FACET_NAME" value='Display (Projector) / Diagonal Size'/>
+			<column name="FIELD_KEY_TYPE" valueNumeric='3'/>
+			<column name="STORECODE" value='SNAPITUP'/>
+			<column name="DISPLAY_NAME" value='{"en":"Display (Projector) / Diagonal Size","fr":""}'/>
+			<column name="FACET_TYPE" valueNumeric='2'/>
+			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="RANGE_FACET_VALUES" value='[{"start":0,"end":100,"displayNameMap":{"en":"","fr":""}},{"start":100,"end":200,"displayNameMap":{"en":"","fr":""}},{"start":200,"end":300,"displayNameMap":{"en":"","fr":""}},{"start":300,"end":null,"displayNameMap":{"en":"","fr":""}}]'/>
+			<column name="FACET_GROUP" valueNumeric='0'/>
+		</insert>
+
+		<insert tableName="TFACET">
+			<column name="UIDPK" valueNumeric='11655'/>
+			<column name="FACET_GUID" value='655409ca-860e-4c8d-94fe-bba459a9ee48'/>
+			<column name="BUSINESS_OBJECT_ID" value='A01280'/>
+			<column name="FACET_NAME" value='Camera / Shooting Modes'/>
+			<column name="FIELD_KEY_TYPE" valueNumeric='0'/>
+			<column name="STORECODE" value='SNAPITUP'/>
+			<column name="DISPLAY_NAME" value='{"en":"Camera / Shooting Modes","fr":""}'/>
+			<column name="FACET_TYPE" valueNumeric='2'/>
+			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="RANGE_FACET_VALUES" value='[]'/>
+			<column name="FACET_GROUP" valueNumeric='0'/>
+		</insert>
+
+		<insert tableName="TFACET">
+			<column name="UIDPK" valueNumeric='11656'/>
+			<column name="FACET_GUID" value='cff0f686-f03b-43da-930e-6e4a3f3a15f2'/>
+			<column name="BUSINESS_OBJECT_ID" value='A01448'/>
+			<column name="FACET_NAME" value='Optical Viewfinder / Magnification'/>
+			<column name="FIELD_KEY_TYPE" valueNumeric='0'/>
+			<column name="STORECODE" value='SNAPITUP'/>
+			<column name="DISPLAY_NAME" value='{"en":"Optical Viewfinder / Magnification","fr":""}'/>
+			<column name="FACET_TYPE" valueNumeric='2'/>
+			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="RANGE_FACET_VALUES" value='[]'/>
+			<column name="FACET_GROUP" valueNumeric='0'/>
+		</insert>
+
+		<insert tableName="TFACET">
+			<column name="UIDPK" valueNumeric='11657'/>
+			<column name="FACET_GUID" value='bdaffb19-8f40-42bb-9ba6-b3e92579b730'/>
+			<column name="BUSINESS_OBJECT_ID" value='A00409'/>
+			<column name="FACET_NAME" value='Flash Memory / Form Factor'/>
+			<column name="FIELD_KEY_TYPE" valueNumeric='0'/>
+			<column name="STORECODE" value='SNAPITUP'/>
+			<column name="DISPLAY_NAME" value='{"en":"Flash Memory / Form Factor","fr":""}'/>
+			<column name="FACET_TYPE" valueNumeric='2'/>
+			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="RANGE_FACET_VALUES" value='[]'/>
+			<column name="FACET_GROUP" valueNumeric='0'/>
+		</insert>
+
+		<insert tableName="TFACET">
+			<column name="UIDPK" valueNumeric='11658'/>
+			<column name="FACET_GUID" value='6425a69f-291f-426e-852f-0309f9dcc6fe'/>
+			<column name="BUSINESS_OBJECT_ID" value='A00429'/>
+			<column name="FACET_NAME" value='System Requirements / OS Required'/>
+			<column name="FIELD_KEY_TYPE" valueNumeric='0'/>
+			<column name="STORECODE" value='SNAPITUP'/>
+			<column name="DISPLAY_NAME" value='{"en":"System Requirements / OS Required","fr":""}'/>
+			<column name="FACET_TYPE" valueNumeric='2'/>
+			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="RANGE_FACET_VALUES" value='[]'/>
+			<column name="FACET_GROUP" valueNumeric='0'/>
+		</insert>
+
+		<insert tableName="TFACET">
+			<column name="UIDPK" valueNumeric='11659'/>
+			<column name="FACET_GUID" value='ad5b55e6-232f-45cf-8709-914a53525c9f'/>
+			<column name="BUSINESS_OBJECT_ID" value='A01244'/>
+			<column name="FACET_NAME" value='Optical System / Image Stabilizer'/>
+			<column name="FIELD_KEY_TYPE" valueNumeric='0'/>
+			<column name="STORECODE" value='SNAPITUP'/>
+			<column name="DISPLAY_NAME" value='{"en":"Optical System / Image Stabilizer","fr":""}'/>
+			<column name="FACET_TYPE" valueNumeric='2'/>
+			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="RANGE_FACET_VALUES" value='[]'/>
+			<column name="FACET_GROUP" valueNumeric='0'/>
+		</insert>
+
+		<insert tableName="TFACET">
+			<column name="UIDPK" valueNumeric='11660'/>
+			<column name="FACET_GUID" value='1fa2bded-b333-4894-8d9d-7c6908a146a8'/>
+			<column name="BUSINESS_OBJECT_ID" value='A01287'/>
+			<column name="FACET_NAME" value='Optical Viewfinder / Type'/>
+			<column name="FIELD_KEY_TYPE" valueNumeric='0'/>
+			<column name="STORECODE" value='SNAPITUP'/>
+			<column name="DISPLAY_NAME" value='{"en":"Optical Viewfinder / Type","fr":""}'/>
+			<column name="FACET_TYPE" valueNumeric='2'/>
+			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="RANGE_FACET_VALUES" value='[]'/>
+			<column name="FACET_GROUP" valueNumeric='0'/>
+		</insert>
+
+		<insert tableName="TFACET">
+			<column name="UIDPK" valueNumeric='11661'/>
+			<column name="FACET_GUID" value='036fad54-8270-4f9c-91e5-ed268ef9d104'/>
+			<column name="BUSINESS_OBJECT_ID" value='A00871'/>
+			<column name="FACET_NAME" value='Audio Input / Microphone Operation Mode'/>
+			<column name="FIELD_KEY_TYPE" valueNumeric='0'/>
+			<column name="STORECODE" value='SNAPITUP'/>
+			<column name="DISPLAY_NAME" value='{"fr":"Audio Input FR","en":"Audio Input / Microphone Operation Mode"}'/>
+			<column name="FACET_TYPE" valueNumeric='0'/>
+			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="RANGE_FACET_VALUES" value='[]'/>
+			<column name="FACET_GROUP" valueNumeric='0'/>
+		</insert>
+
+		<insert tableName="TFACET">
+			<column name="UIDPK" valueNumeric='11662'/>
+			<column name="FACET_GUID" value='2adc490f-a605-468e-9786-c767b05eef67'/>
+			<column name="BUSINESS_OBJECT_ID" value='A00919'/>
+			<column name="FACET_NAME" value='Video Input / Media Type'/>
+			<column name="FIELD_KEY_TYPE" valueNumeric='0'/>
+			<column name="STORECODE" value='SNAPITUP'/>
+			<column name="DISPLAY_NAME" value='{"en":"Video Input / Media Type","fr":""}'/>
+			<column name="FACET_TYPE" valueNumeric='2'/>
+			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="RANGE_FACET_VALUES" value='[]'/>
+			<column name="FACET_GROUP" valueNumeric='0'/>
+		</insert>
+
+		<insert tableName="TFACET">
+			<column name="UIDPK" valueNumeric='11663'/>
+			<column name="FACET_GUID" value='8f720088-6da7-487b-a10b-5d60a5030f56'/>
+			<column name="BUSINESS_OBJECT_ID" value='A02805'/>
+			<column name="FACET_NAME" value='Digital Camera / Digital Camera Type'/>
+			<column name="FIELD_KEY_TYPE" valueNumeric='0'/>
+			<column name="STORECODE" value='SNAPITUP'/>
+			<column name="DISPLAY_NAME" value='{"en":"Digital Camera / Digital Camera Type","fr":""}'/>
+			<column name="FACET_TYPE" valueNumeric='2'/>
+			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="RANGE_FACET_VALUES" value='[]'/>
+			<column name="FACET_GROUP" valueNumeric='0'/>
+		</insert>
+
+		<insert tableName="TFACET">
+			<column name="UIDPK" valueNumeric='11664'/>
+			<column name="FACET_GUID" value='23e4b314-9264-4533-891d-bdc7f7ce7685'/>
+			<column name="BUSINESS_OBJECT_ID" value='A00260'/>
+			<column name="FACET_NAME" value='Video Input / Digital Video Format'/>
+			<column name="FIELD_KEY_TYPE" valueNumeric='0'/>
+			<column name="STORECODE" value='SNAPITUP'/>
+			<column name="DISPLAY_NAME" value='{"en":"Video Input / Digital Video Format","fr":""}'/>
+			<column name="FACET_TYPE" valueNumeric='2'/>
+			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="RANGE_FACET_VALUES" value='[]'/>
+			<column name="FACET_GROUP" valueNumeric='0'/>
+		</insert>
+
+		<insert tableName="TFACET">
+			<column name="UIDPK" valueNumeric='11665'/>
+			<column name="FACET_GUID" value='5d4aba95-e061-42ac-9005-54b6c12ef559'/>
+			<column name="BUSINESS_OBJECT_ID" value='A01072'/>
+			<column name="FACET_NAME" value='Optical System / Magnification'/>
+			<column name="FIELD_KEY_TYPE" valueNumeric='0'/>
+			<column name="STORECODE" value='SNAPITUP'/>
+			<column name="DISPLAY_NAME" value='{"en":"Optical System / Magnification","fr":""}'/>
+			<column name="FACET_TYPE" valueNumeric='2'/>
+			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="RANGE_FACET_VALUES" value='[]'/>
+			<column name="FACET_GROUP" valueNumeric='0'/>
+		</insert>
+
+		<insert tableName="TFACET">
+			<column name="UIDPK" valueNumeric='11666'/>
+			<column name="FACET_GUID" value='e43e0fcf-f870-4633-a7e8-72aae49beacc'/>
+			<column name="BUSINESS_OBJECT_ID" value='A01006'/>
+			<column name="FACET_NAME" value='Optical System / Objective Lens Diameter'/>
+			<column name="FIELD_KEY_TYPE" valueNumeric='1'/>
+			<column name="STORECODE" value='SNAPITUP'/>
+			<column name="DISPLAY_NAME" value='{"en":"Optical System / Objective Lens Diameter","fr":""}'/>
+			<column name="FACET_TYPE" valueNumeric='2'/>
+			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="RANGE_FACET_VALUES" value='[{"start":0,"end":100,"displayNameMap":{"en":"","fr":""}},{"start":100,"end":200,"displayNameMap":{"en":"","fr":""}},{"start":200,"end":300,"displayNameMap":{"en":"","fr":""}},{"start":300,"end":null,"displayNameMap":{"en":"","fr":""}}]'/>
+			<column name="FACET_GROUP" valueNumeric='0'/>
+		</insert>
+
+		<insert tableName="TFACET">
+			<column name="UIDPK" valueNumeric='11667'/>
+			<column name="FACET_GUID" value='176afde8-0a7d-4faa-8106-0616f19d7bd2'/>
+			<column name="BUSINESS_OBJECT_ID" value='A00981'/>
+			<column name="FACET_NAME" value='Lens System / Type'/>
+			<column name="FIELD_KEY_TYPE" valueNumeric='0'/>
+			<column name="STORECODE" value='SNAPITUP'/>
+			<column name="DISPLAY_NAME" value='{"en":"Lens System / Type","fr":""}'/>
+			<column name="FACET_TYPE" valueNumeric='2'/>
+			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="RANGE_FACET_VALUES" value='[]'/>
+			<column name="FACET_GROUP" valueNumeric='0'/>
+		</insert>
+
+		<insert tableName="TFACET">
+			<column name="UIDPK" valueNumeric='11668'/>
+			<column name="FACET_GUID" value='9c530442-84e0-4fb0-956d-4d3c2b09ba29'/>
+			<column name="BUSINESS_OBJECT_ID" value='A01281'/>
+			<column name="FACET_NAME" value='Camera / Exposure Metering'/>
+			<column name="FIELD_KEY_TYPE" valueNumeric='0'/>
+			<column name="STORECODE" value='SNAPITUP'/>
+			<column name="DISPLAY_NAME" value='{"en":"Camera / Exposure Metering","fr":""}'/>
+			<column name="FACET_TYPE" valueNumeric='2'/>
+			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="RANGE_FACET_VALUES" value='[]'/>
+			<column name="FACET_GROUP" valueNumeric='0'/>
+		</insert>
+
+		<insert tableName="TFACET">
+			<column name="UIDPK" valueNumeric='11669'/>
+			<column name="FACET_GUID" value='69298fb5-ff64-403f-9e59-9535160119f5'/>
+			<column name="BUSINESS_OBJECT_ID" value='A00258'/>
+			<column name="FACET_NAME" value='Video Input / Analog Video Format'/>
+			<column name="FIELD_KEY_TYPE" valueNumeric='0'/>
+			<column name="STORECODE" value='SNAPITUP'/>
+			<column name="DISPLAY_NAME" value='{"en":"Video Input / Analog Video Format","fr":""}'/>
+			<column name="FACET_TYPE" valueNumeric='2'/>
+			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="RANGE_FACET_VALUES" value='[]'/>
+			<column name="FACET_GROUP" valueNumeric='0'/>
+		</insert>
+
+		<insert tableName="TFACET">
+			<column name="UIDPK" valueNumeric='11670'/>
+			<column name="FACET_GUID" value='b7a15b0a-0c43-49c9-a995-74ab90706f99'/>
+			<column name="BUSINESS_OBJECT_ID" value='A01206'/>
+			<column name="FACET_NAME" value='Exposure Parameters / Shooting Programs'/>
+			<column name="FIELD_KEY_TYPE" valueNumeric='0'/>
+			<column name="STORECODE" value='SNAPITUP'/>
+			<column name="DISPLAY_NAME" value='{"en":"Exposure Parameters / Shooting Programs","fr":""}'/>
+			<column name="FACET_TYPE" valueNumeric='2'/>
+			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="RANGE_FACET_VALUES" value='[]'/>
+			<column name="FACET_GROUP" valueNumeric='0'/>
+		</insert>
+
+		<insert tableName="TFACET">
+			<column name="UIDPK" valueNumeric='11671'/>
+			<column name="FACET_GUID" value='52f5e324-e7b0-4a02-84f7-f82cb9881c8d'/>
+			<column name="BUSINESS_OBJECT_ID" value='A01007'/>
+			<column name="FACET_NAME" value='Optical System / Eye Relief'/>
+			<column name="FIELD_KEY_TYPE" valueNumeric='3'/>
+			<column name="STORECODE" value='SNAPITUP'/>
+			<column name="DISPLAY_NAME" value='{"en":"Optical System / Eye Relief","fr":""}'/>
+			<column name="FACET_TYPE" valueNumeric='2'/>
+			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="RANGE_FACET_VALUES" value='[{"start":0,"end":100,"displayNameMap":{"en":"","fr":""}},{"start":100,"end":200,"displayNameMap":{"en":"","fr":""}},{"start":200,"end":300,"displayNameMap":{"en":"","fr":""}},{"start":300,"end":null,"displayNameMap":{"en":"","fr":""}}]'/>
+			<column name="FACET_GROUP" valueNumeric='0'/>
+		</insert>
+
+		<insert tableName="TFACET">
+			<column name="UIDPK" valueNumeric='11672'/>
+			<column name="FACET_GUID" value='a0bfcb5a-9753-4bad-b47b-75c247c0db3d'/>
+			<column name="BUSINESS_OBJECT_ID" value='A01207'/>
+			<column name="FACET_NAME" value='Video Input / Special Effects'/>
+			<column name="FIELD_KEY_TYPE" valueNumeric='0'/>
+			<column name="STORECODE" value='SNAPITUP'/>
+			<column name="DISPLAY_NAME" value='{"en":"Video Input / Special Effects","fr":""}'/>
+			<column name="FACET_TYPE" valueNumeric='2'/>
+			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="RANGE_FACET_VALUES" value='[]'/>
+			<column name="FACET_GROUP" valueNumeric='0'/>
+		</insert>
+
+		<insert tableName="TFACET">
+			<column name="UIDPK" valueNumeric='11673'/>
+			<column name="FACET_GUID" value='c3216a8a-ddad-47b1-b143-1ed6047ab3b0'/>
+			<column name="BUSINESS_OBJECT_ID" value='A00973'/>
+			<column name="FACET_NAME" value='Camera / Type'/>
+			<column name="FIELD_KEY_TYPE" valueNumeric='0'/>
+			<column name="STORECODE" value='SNAPITUP'/>
+			<column name="DISPLAY_NAME" value='{"en":"Camera / Type","fr":""}'/>
+			<column name="FACET_TYPE" valueNumeric='2'/>
+			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="RANGE_FACET_VALUES" value='[]'/>
+			<column name="FACET_GROUP" valueNumeric='0'/>
+		</insert>
+
+		<insert tableName="TFACET">
+			<column name="UIDPK" valueNumeric='11674'/>
+			<column name="FACET_GUID" value='6f38eff5-98e4-485d-a480-ef0ef3ed92ee'/>
+			<column name="BUSINESS_OBJECT_ID" value='A04393'/>
+			<column name="FACET_NAME" value='Optical System / Product Type'/>
+			<column name="FIELD_KEY_TYPE" valueNumeric='0'/>
+			<column name="STORECODE" value='SNAPITUP'/>
+			<column name="DISPLAY_NAME" value='{"en":"Optical System / Product Type","fr":""}'/>
+			<column name="FACET_TYPE" valueNumeric='2'/>
+			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="RANGE_FACET_VALUES" value='[]'/>
+			<column name="FACET_GROUP" valueNumeric='0'/>
+		</insert>
+
+		<insert tableName="TFACET">
+			<column name="UIDPK" valueNumeric='11675'/>
+			<column name="FACET_GUID" value='8ed1843d-5a6c-49ef-ab2a-fefa6200de63'/>
+			<column name="BUSINESS_OBJECT_ID" value='A01003'/>
+			<column name="FACET_NAME" value='Optical System / Telescope Class'/>
+			<column name="FIELD_KEY_TYPE" valueNumeric='0'/>
+			<column name="STORECODE" value='SNAPITUP'/>
+			<column name="DISPLAY_NAME" value='{"en":"Optical System / Telescope Class","fr":""}'/>
+			<column name="FACET_TYPE" valueNumeric='2'/>
+			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="RANGE_FACET_VALUES" value='[]'/>
+			<column name="FACET_GROUP" valueNumeric='0'/>
+		</insert>
+
+		<insert tableName="TFACET">
+			<column name="UIDPK" valueNumeric='11676'/>
+			<column name="FACET_GUID" value='8ebcee96-8c34-46b8-accb-6042e91fc388'/>
+			<column name="BUSINESS_OBJECT_ID" value='A02299'/>
+			<column name="FACET_NAME" value='System Requirements / Platform'/>
+			<column name="FIELD_KEY_TYPE" valueNumeric='0'/>
+			<column name="STORECODE" value='SNAPITUP'/>
+			<column name="DISPLAY_NAME" value='{"en":"System Requirements / Platform","fr":""}'/>
+			<column name="FACET_TYPE" valueNumeric='2'/>
+			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="RANGE_FACET_VALUES" value='[]'/>
+			<column name="FACET_GROUP" valueNumeric='0'/>
+		</insert>
+
+		<insert tableName="TFACET">
+			<column name="UIDPK" valueNumeric='11677'/>
+			<column name="FACET_GUID" value='7742a417-4ef8-4471-b385-728dc50655b9'/>
+			<column name="BUSINESS_OBJECT_ID" value='A00974'/>
+			<column name="FACET_NAME" value='Camera / Camera Format'/>
+			<column name="FIELD_KEY_TYPE" valueNumeric='0'/>
+			<column name="STORECODE" value='SNAPITUP'/>
+			<column name="DISPLAY_NAME" value='{"en":"Camera / Camera Format","fr":""}'/>
+			<column name="FACET_TYPE" valueNumeric='2'/>
+			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="RANGE_FACET_VALUES" value='[]'/>
+			<column name="FACET_GROUP" valueNumeric='0'/>
+		</insert>
+
+		<insert tableName="TFACET">
+			<column name="UIDPK" valueNumeric='11678'/>
+			<column name="FACET_GUID" value='259a1d76-f2f0-47e1-b68f-b2f04d64b6db'/>
+			<column name="BUSINESS_OBJECT_ID" value='A00986'/>
+			<column name="FACET_NAME" value='Lens System / Min Focus Range'/>
+			<column name="FIELD_KEY_TYPE" valueNumeric='3'/>
+			<column name="STORECODE" value='SNAPITUP'/>
+			<column name="DISPLAY_NAME" value='{"en":"Lens System / Min Focus Range","fr":""}'/>
+			<column name="FACET_TYPE" valueNumeric='2'/>
+			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="RANGE_FACET_VALUES" value='[{"start":0,"end":100,"displayNameMap":{"en":"","fr":""}},{"start":100,"end":200,"displayNameMap":{"en":"","fr":""}},{"start":200,"end":300,"displayNameMap":{"en":"","fr":""}},{"start":300,"end":null,"displayNameMap":{"en":"","fr":""}}]'/>
+			<column name="FACET_GROUP" valueNumeric='0'/>
+		</insert>
+
+		<insert tableName="TFACET">
+			<column name="UIDPK" valueNumeric='11679'/>
+			<column name="FACET_GUID" value='a04700b1-836a-4dad-ac00-6f83c0e96527'/>
+			<column name="BUSINESS_OBJECT_ID" value='A01584'/>
+			<column name="FACET_NAME" value='Display (Projector) / Display Form Factor'/>
+			<column name="FIELD_KEY_TYPE" valueNumeric='0'/>
+			<column name="STORECODE" value='SNAPITUP'/>
+			<column name="DISPLAY_NAME" value='{"en":"Display (Projector) / Display Form Factor","fr":""}'/>
+			<column name="FACET_TYPE" valueNumeric='2'/>
+			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="RANGE_FACET_VALUES" value='[]'/>
+			<column name="FACET_GROUP" valueNumeric='0'/>
+		</insert>
+
+		<insert tableName="TFACET">
+			<column name="UIDPK" valueNumeric='11680'/>
+			<column name="FACET_GUID" value='e923a382-e227-42bd-bc77-e3cd090bc139'/>
+			<column name="BUSINESS_OBJECT_ID" value='A01013'/>
+			<column name="FACET_NAME" value='Optical System / Special Functions'/>
+			<column name="FIELD_KEY_TYPE" valueNumeric='0'/>
+			<column name="STORECODE" value='SNAPITUP'/>
+			<column name="DISPLAY_NAME" value='{"en":"Optical System / Special Functions","fr":""}'/>
+			<column name="FACET_TYPE" valueNumeric='2'/>
+			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="RANGE_FACET_VALUES" value='[]'/>
+			<column name="FACET_GROUP" valueNumeric='0'/>
+		</insert>
+
+		<insert tableName="TFACET">
+			<column name="UIDPK" valueNumeric='11681'/>
+			<column name="FACET_GUID" value='e17c9a0e-4816-4111-afa1-79d1831cdcdf'/>
+			<column name="BUSINESS_OBJECT_ID" value='A00978'/>
+			<column name="FACET_NAME" value='Camera / Timer Functions'/>
+			<column name="FIELD_KEY_TYPE" valueNumeric='0'/>
+			<column name="STORECODE" value='SNAPITUP'/>
+			<column name="DISPLAY_NAME" value='{"en":"Camera / Timer Functions","fr":""}'/>
+			<column name="FACET_TYPE" valueNumeric='2'/>
+			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="RANGE_FACET_VALUES" value='[]'/>
+			<column name="FACET_GROUP" valueNumeric='0'/>
+		</insert>
+
+		<insert tableName="TFACET">
+			<column name="UIDPK" valueNumeric='11682'/>
+			<column name="FACET_GUID" value='78de9f50-ecc7-4910-b7b7-31b36c9e9321'/>
+			<column name="BUSINESS_OBJECT_ID" value='A01454'/>
+			<column name="FACET_NAME" value='Camera / Date Imprint Selections'/>
+			<column name="FIELD_KEY_TYPE" valueNumeric='0'/>
+			<column name="STORECODE" value='SNAPITUP'/>
+			<column name="DISPLAY_NAME" value='{"en":"Camera / Date Imprint Selections","fr":""}'/>
+			<column name="FACET_TYPE" valueNumeric='2'/>
+			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="RANGE_FACET_VALUES" value='[]'/>
+			<column name="FACET_GROUP" valueNumeric='0'/>
+		</insert>
+
+		<insert tableName="TFACET">
+			<column name="UIDPK" valueNumeric='11683'/>
+			<column name="FACET_GUID" value='16c453d0-6cbe-49c4-8d55-3c0f7ab95b0c'/>
+			<column name="BUSINESS_OBJECT_ID" value='A00256'/>
+			<column name="FACET_NAME" value='Video Input / Type'/>
+			<column name="FIELD_KEY_TYPE" valueNumeric='0'/>
+			<column name="STORECODE" value='SNAPITUP'/>
+			<column name="DISPLAY_NAME" value='{"en":"Video Input / Type","fr":""}'/>
+			<column name="FACET_TYPE" valueNumeric='2'/>
+			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="RANGE_FACET_VALUES" value='[]'/>
+			<column name="FACET_GROUP" valueNumeric='0'/>
+		</insert>
+
+		<insert tableName="TFACET">
+			<column name="UIDPK" valueNumeric='11684'/>
+			<column name="FACET_GUID" value='a5cf48ea-4f66-4290-858c-e9630a7e971e'/>
+			<column name="BUSINESS_OBJECT_ID" value='A03379'/>
+			<column name="FACET_NAME" value='Battery / Manufacturer Battery Name'/>
+			<column name="FIELD_KEY_TYPE" valueNumeric='0'/>
+			<column name="STORECODE" value='SNAPITUP'/>
+			<column name="DISPLAY_NAME" value='{"en":"Battery / Manufacturer Battery Name","fr":""}'/>
+			<column name="FACET_TYPE" valueNumeric='2'/>
+			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="RANGE_FACET_VALUES" value='[]'/>
+			<column name="FACET_GROUP" valueNumeric='0'/>
+		</insert>
+
+		<insert tableName="TFACET">
+			<column name="UIDPK" valueNumeric='11685'/>
+			<column name="FACET_GUID" value='a4ecb3f8-7f8f-4fd3-a955-b1cf0d7cad7c'/>
+			<column name="BUSINESS_OBJECT_ID" value='A01071'/>
+			<column name="FACET_NAME" value='Lens System / Optical Zoom'/>
+			<column name="FIELD_KEY_TYPE" valueNumeric='3'/>
+			<column name="STORECODE" value='SNAPITUP'/>
+			<column name="DISPLAY_NAME" value='{"en":"Lens System / Optical Zoom","fr":""}'/>
+			<column name="FACET_TYPE" valueNumeric='2'/>
+			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="RANGE_FACET_VALUES" value='[{"start":0,"end":100,"displayNameMap":{"en":"","fr":""}},{"start":100,"end":200,"displayNameMap":{"en":"","fr":""}},{"start":200,"end":300,"displayNameMap":{"en":"","fr":""}},{"start":300,"end":null,"displayNameMap":{"en":"","fr":""}}]'/>
+			<column name="FACET_GROUP" valueNumeric='0'/>
+		</insert>
+
+		<insert tableName="TFACET">
+			<column name="UIDPK" valueNumeric='11686'/>
+			<column name="FACET_GUID" value='dd9b8d01-a0b7-4384-9bcd-49ffbf4b8a00'/>
+			<column name="BUSINESS_OBJECT_ID" value='A02638'/>
+			<column name="FACET_NAME" value='Optical Sensor / Sensor Resolution'/>
+			<column name="FIELD_KEY_TYPE" valueNumeric='3'/>
+			<column name="STORECODE" value='SNAPITUP'/>
+			<column name="DISPLAY_NAME" value='{"en":"Optical Sensor / Sensor Resolution","fr":""}'/>
+			<column name="FACET_TYPE" valueNumeric='2'/>
+			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="RANGE_FACET_VALUES" value='[{"start":0,"end":100,"displayNameMap":{"en":"","fr":""}},{"start":100,"end":200,"displayNameMap":{"en":"","fr":""}},{"start":200,"end":300,"displayNameMap":{"en":"","fr":""}},{"start":300,"end":null,"displayNameMap":{"en":"","fr":""}}]'/>
+			<column name="FACET_GROUP" valueNumeric='0'/>
+		</insert>
+
+		<insert tableName="TFACET">
+			<column name="UIDPK" valueNumeric='11687'/>
+			<column name="FACET_GUID" value='b156c0bd-fc36-4f1f-a366-b4d3a51bddca'/>
+			<column name="BUSINESS_OBJECT_ID" value='A03378'/>
+			<column name="FACET_NAME" value='Battery / Battery Form Factor'/>
+			<column name="FIELD_KEY_TYPE" valueNumeric='0'/>
+			<column name="STORECODE" value='SNAPITUP'/>
+			<column name="DISPLAY_NAME" value='{"en":"Battery / Battery Form Factor","fr":""}'/>
+			<column name="FACET_TYPE" valueNumeric='2'/>
+			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="RANGE_FACET_VALUES" value='[]'/>
+			<column name="FACET_GROUP" valueNumeric='0'/>
+		</insert>
+
+		<insert tableName="TFACET">
+			<column name="UIDPK" valueNumeric='11688'/>
+			<column name="FACET_GUID" value='8eadc18c-1359-4182-9bb1-aff8eecf4293'/>
+			<column name="BUSINESS_OBJECT_ID" value='A00995'/>
+			<column name="FACET_NAME" value='Finderscope / Type'/>
+			<column name="FIELD_KEY_TYPE" valueNumeric='0'/>
+			<column name="STORECODE" value='SNAPITUP'/>
+			<column name="DISPLAY_NAME" value='{"en":"Finderscope / Type","fr":""}'/>
+			<column name="FACET_TYPE" valueNumeric='2'/>
+			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="RANGE_FACET_VALUES" value='[]'/>
+			<column name="FACET_GROUP" valueNumeric='0'/>
+		</insert>
+
+		<insert tableName="TFACET">
+			<column name="UIDPK" valueNumeric='11689'/>
+			<column name="FACET_GUID" value='e9aa6cd5-e40b-41da-b07d-da91deaf6724'/>
+			<column name="BUSINESS_OBJECT_ID" value='A00600'/>
+			<column name="FACET_NAME" value='Header / Product Line'/>
+			<column name="FIELD_KEY_TYPE" valueNumeric='0'/>
+			<column name="STORECODE" value='SNAPITUP'/>
+			<column name="DISPLAY_NAME" value='{"en":"Header / Product Line","fr":""}'/>
+			<column name="FACET_TYPE" valueNumeric='2'/>
+			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="RANGE_FACET_VALUES" value='[]'/>
+			<column name="FACET_GROUP" valueNumeric='0'/>
+		</insert>
+
+		<insert tableName="TFACET">
+			<column name="UIDPK" valueNumeric='11690'/>
+			<column name="FACET_GUID" value='2a35b9e3-798d-44ed-8c75-a04c783325ce'/>
+			<column name="BUSINESS_OBJECT_ID" value='A03380'/>
+			<column name="FACET_NAME" value='Battery / Supported Battery Form Factor'/>
+			<column name="FIELD_KEY_TYPE" valueNumeric='0'/>
+			<column name="STORECODE" value='SNAPITUP'/>
+			<column name="DISPLAY_NAME" value='{"en":"Battery / Supported Battery Form Factor","fr":""}'/>
+			<column name="FACET_TYPE" valueNumeric='2'/>
+			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="RANGE_FACET_VALUES" value='[]'/>
+			<column name="FACET_GROUP" valueNumeric='0'/>
+		</insert>
+
+		<insert tableName="TFACET">
+			<column name="UIDPK" valueNumeric='11691'/>
+			<column name="FACET_GUID" value='d6692d4e-5f0c-4ae7-adae-1ce87ed9c839'/>
+			<column name="BUSINESS_OBJECT_ID" value='A00548'/>
+			<column name="FACET_NAME" value='Video Input / Light Sensitivity'/>
+			<column name="FIELD_KEY_TYPE" valueNumeric='0'/>
+			<column name="STORECODE" value='SNAPITUP'/>
+			<column name="DISPLAY_NAME" value='{"en":"Video Input / Light Sensitivity","fr":""}'/>
+			<column name="FACET_TYPE" valueNumeric='2'/>
+			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="RANGE_FACET_VALUES" value='[]'/>
+			<column name="FACET_GROUP" valueNumeric='0'/>
+		</insert>
+
+		<insert tableName="TFACET">
+			<column name="UIDPK" valueNumeric='11692'/>
+			<column name="FACET_GUID" value='a75122b1-5d28-4d11-b5b6-d676cfd31f13'/>
+			<column name="BUSINESS_OBJECT_ID" value='A00870'/>
+			<column name="FACET_NAME" value='Audio Input / Microphone Technology'/>
+			<column name="FIELD_KEY_TYPE" valueNumeric='0'/>
+			<column name="STORECODE" value='SNAPITUP'/>
+			<column name="DISPLAY_NAME" value='{"en":"Audio Input / Microphone Technology","fr":""}'/>
+			<column name="FACET_TYPE" valueNumeric='2'/>
+			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="RANGE_FACET_VALUES" value='[]'/>
+			<column name="FACET_GROUP" valueNumeric='0'/>
+		</insert>
+
+		<insert tableName="TFACET">
+			<column name="UIDPK" valueNumeric='11693'/>
+			<column name="FACET_GUID" value='15dc5860-d2c4-436a-86cc-ba0217a7946f'/>
+			<column name="BUSINESS_OBJECT_ID" value='A01376'/>
+			<column name="FACET_NAME" value='Optical Sensor / Optical Sensor Size'/>
+			<column name="FIELD_KEY_TYPE" valueNumeric='0'/>
+			<column name="STORECODE" value='SNAPITUP'/>
+			<column name="DISPLAY_NAME" value='{"en":"Optical Sensor / Optical Sensor Size","fr":""}'/>
+			<column name="FACET_TYPE" valueNumeric='2'/>
+			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="RANGE_FACET_VALUES" value='[]'/>
+			<column name="FACET_GROUP" valueNumeric='0'/>
+		</insert>
+
+		<insert tableName="TFACET">
+			<column name="UIDPK" valueNumeric='11694'/>
+			<column name="FACET_GUID" value='1a755c04-966e-41ca-ac5a-0e4e08da4292'/>
+			<column name="BUSINESS_OBJECT_ID" value='A00652'/>
+			<column name="FACET_NAME" value='Video Input / Digital Zoom'/>
+			<column name="FIELD_KEY_TYPE" valueNumeric='3'/>
+			<column name="STORECODE" value='SNAPITUP'/>
+			<column name="DISPLAY_NAME" value='{"en":"Video Input / Digital Zoom","fr":""}'/>
+			<column name="FACET_TYPE" valueNumeric='2'/>
+			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="RANGE_FACET_VALUES" value='[{"start":0,"end":100,"displayNameMap":{"en":"","fr":""}},{"start":100,"end":200,"displayNameMap":{"en":"","fr":""}},{"start":200,"end":300,"displayNameMap":{"en":"","fr":""}},{"start":300,"end":null,"displayNameMap":{"en":"","fr":""}}]'/>
+			<column name="FACET_GROUP" valueNumeric='0'/>
+		</insert>
+
+		<insert tableName="TFACET">
+			<column name="UIDPK" valueNumeric='11695'/>
+			<column name="FACET_GUID" value='d46759fc-2e9b-4a83-9fcb-fb63636611ef'/>
+			<column name="BUSINESS_OBJECT_ID" value='A00413'/>
+			<column name="FACET_NAME" value='Flash Memory / Storage Capacity'/>
+			<column name="FIELD_KEY_TYPE" valueNumeric='1'/>
+			<column name="STORECODE" value='SNAPITUP'/>
+			<column name="DISPLAY_NAME" value='{"en":"Flash Memory / Storage Capacity","fr":""}'/>
+			<column name="FACET_TYPE" valueNumeric='2'/>
+			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="RANGE_FACET_VALUES" value='[{"start":0,"end":100,"displayNameMap":{"en":"","fr":""}},{"start":100,"end":200,"displayNameMap":{"en":"","fr":""}},{"start":200,"end":300,"displayNameMap":{"en":"","fr":""}},{"start":300,"end":null,"displayNameMap":{"en":"","fr":""}}]'/>
+			<column name="FACET_GROUP" valueNumeric='0'/>
+		</insert>
+
+		<insert tableName="TFACET">
+			<column name="UIDPK" valueNumeric='11696'/>
+			<column name="FACET_GUID" value='052a7845-2bbd-4bea-bb0d-9ca2a9e570f1'/>
+			<column name="BUSINESS_OBJECT_ID" value='A00601'/>
+			<column name="FACET_NAME" value='Header / Model'/>
+			<column name="FIELD_KEY_TYPE" valueNumeric='0'/>
+			<column name="STORECODE" value='SNAPITUP'/>
+			<column name="DISPLAY_NAME" value='{"en":"Header / Model","fr":""}'/>
+			<column name="FACET_TYPE" valueNumeric='2'/>
+			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="RANGE_FACET_VALUES" value='[]'/>
+			<column name="FACET_GROUP" valueNumeric='0'/>
+		</insert>
+
+		<insert tableName="TFACET">
+			<column name="UIDPK" valueNumeric='11697'/>
+			<column name="FACET_GUID" value='48c8013c-6abc-4a63-ae09-bc0951725e8e'/>
+			<column name="BUSINESS_OBJECT_ID" value='A03517'/>
+			<column name="FACET_NAME" value='Optical Sensor / Camcorder Sensor Resolution'/>
+			<column name="FIELD_KEY_TYPE" valueNumeric='3'/>
+			<column name="STORECODE" value='SNAPITUP'/>
+			<column name="DISPLAY_NAME" value='{"en":"Optical Sensor / Camcorder Sensor Resolution","fr":""}'/>
+			<column name="FACET_TYPE" valueNumeric='2'/>
+			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="RANGE_FACET_VALUES" value='[{"start":0,"end":100,"displayNameMap":{"en":"","fr":""}},{"start":100,"end":200,"displayNameMap":{"en":"","fr":""}},{"start":200,"end":300,"displayNameMap":{"en":"","fr":""}},{"start":300,"end":null,"displayNameMap":{"en":"","fr":""}}]'/>
+			<column name="FACET_GROUP" valueNumeric='0'/>
+		</insert>
+
+		<insert tableName="TFACET">
+			<column name="UIDPK" valueNumeric='11698'/>
+			<column name="FACET_GUID" value='472e94a9-32fc-4339-aae6-99eeb980efa6'/>
+			<column name="BUSINESS_OBJECT_ID" value='A01278'/>
+			<column name="FACET_NAME" value='Optical System / Telescope Aperture'/>
+			<column name="FIELD_KEY_TYPE" valueNumeric='1'/>
+			<column name="STORECODE" value='SNAPITUP'/>
+			<column name="DISPLAY_NAME" value='{"en":"Optical System / Telescope Aperture","fr":""}'/>
+			<column name="FACET_TYPE" valueNumeric='2'/>
+			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="RANGE_FACET_VALUES" value='[{"start":0,"end":100,"displayNameMap":{"en":"","fr":""}},{"start":100,"end":200,"displayNameMap":{"en":"","fr":""}},{"start":200,"end":300,"displayNameMap":{"en":"","fr":""}},{"start":300,"end":null,"displayNameMap":{"en":"","fr":""}}]'/>
+			<column name="FACET_GROUP" valueNumeric='0'/>
+		</insert>
+
+		<insert tableName="TFACET">
+			<column name="UIDPK" valueNumeric='11699'/>
+			<column name="FACET_GUID" value='dfd8090e-7a8a-4869-b149-0c31aa3ed270'/>
+			<column name="BUSINESS_OBJECT_ID" value='A00430'/>
+			<column name="FACET_NAME" value='Service &amp; Support / Type'/>
+			<column name="FIELD_KEY_TYPE" valueNumeric='0'/>
+			<column name="STORECODE" value='SNAPITUP'/>
+			<column name="DISPLAY_NAME" value='{"en":"Service &amp; Support / Type","fr":""}'/>
+			<column name="FACET_TYPE" valueNumeric='2'/>
+			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="RANGE_FACET_VALUES" value='[]'/>
+			<column name="FACET_GROUP" valueNumeric='0'/>
+		</insert>
+
+		<insert tableName="TFACET">
+			<column name="UIDPK" valueNumeric='11700'/>
+			<column name="FACET_GUID" value='8f7f5169-bcf9-4a83-adae-ee2ffdaff3cc'/>
+			<column name="BUSINESS_OBJECT_ID" value='A01015'/>
+			<column name="FACET_NAME" value='Camera Flash / Type'/>
+			<column name="FIELD_KEY_TYPE" valueNumeric='0'/>
+			<column name="STORECODE" value='SNAPITUP'/>
+			<column name="DISPLAY_NAME" value='{"en":"Camera Flash / Type","fr":""}'/>
+			<column name="FACET_TYPE" valueNumeric='2'/>
+			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="RANGE_FACET_VALUES" value='[]'/>
+			<column name="FACET_GROUP" valueNumeric='0'/>
+		</insert>
+
+		<insert tableName="TFACET">
+			<column name="UIDPK" valueNumeric='11701'/>
+			<column name="FACET_GUID" value='79032b2d-5ad7-440a-965b-c71e28c00b83'/>
+			<column name="BUSINESS_OBJECT_ID" value='A00920'/>
+			<column name="FACET_NAME" value='Viewfinder / Viewfinder Color Support'/>
+			<column name="FIELD_KEY_TYPE" valueNumeric='0'/>
+			<column name="STORECODE" value='SNAPITUP'/>
+			<column name="DISPLAY_NAME" value='{"en":"Viewfinder / Viewfinder Color Support","fr":""}'/>
+			<column name="FACET_TYPE" valueNumeric='2'/>
+			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="RANGE_FACET_VALUES" value='[]'/>
+			<column name="FACET_GROUP" valueNumeric='0'/>
+		</insert>
+
+		<insert tableName="TFACET">
+			<column name="UIDPK" valueNumeric='11702'/>
+			<column name="FACET_GUID" value='f9e30b44-dd03-4fd4-b595-3b008d768b9f'/>
+			<column name="BUSINESS_OBJECT_ID" value='A03519'/>
+			<column name="FACET_NAME" value='Optical Sensor / Camcorder Effective Video Resolution'/>
+			<column name="FIELD_KEY_TYPE" valueNumeric='3'/>
+			<column name="STORECODE" value='SNAPITUP'/>
+			<column name="DISPLAY_NAME" value='{"en":"Optical Sensor / Camcorder Effective Video Resolution","fr":""}'/>
+			<column name="FACET_TYPE" valueNumeric='2'/>
+			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="RANGE_FACET_VALUES" value='[{"start":0,"end":100,"displayNameMap":{"en":"","fr":""}},{"start":100,"end":200,"displayNameMap":{"en":"","fr":""}},{"start":200,"end":300,"displayNameMap":{"en":"","fr":""}},{"start":300,"end":null,"displayNameMap":{"en":"","fr":""}}]'/>
+			<column name="FACET_GROUP" valueNumeric='0'/>
+		</insert>
+
+		<insert tableName="TFACET">
+			<column name="UIDPK" valueNumeric='11703'/>
+			<column name="FACET_GUID" value='5054c34b-91a4-4b6c-873c-827571d96fd2'/>
+			<column name="BUSINESS_OBJECT_ID" value='A03190'/>
+			<column name="FACET_NAME" value='Digital Camera / Supported Flash Memory'/>
+			<column name="FIELD_KEY_TYPE" valueNumeric='0'/>
+			<column name="STORECODE" value='SNAPITUP'/>
+			<column name="DISPLAY_NAME" value='{"en":"Digital Camera / Supported Flash Memory","fr":""}'/>
+			<column name="FACET_TYPE" valueNumeric='2'/>
+			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="RANGE_FACET_VALUES" value='[]'/>
+			<column name="FACET_GROUP" valueNumeric='0'/>
+		</insert>
+
+		<insert tableName="TFACET">
+			<column name="UIDPK" valueNumeric='11704'/>
+			<column name="FACET_GUID" value='228ed084-d432-4369-a64d-d0cdf520a593'/>
+			<column name="BUSINESS_OBJECT_ID" value='A00983'/>
+			<column name="FACET_NAME" value='Lens System / Lens Aperture'/>
+			<column name="FIELD_KEY_TYPE" valueNumeric='0'/>
+			<column name="STORECODE" value='SNAPITUP'/>
+			<column name="DISPLAY_NAME" value='{"en":"Lens System / Lens Aperture","fr":""}'/>
+			<column name="FACET_TYPE" valueNumeric='2'/>
+			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="RANGE_FACET_VALUES" value='[]'/>
+			<column name="FACET_GROUP" valueNumeric='0'/>
+		</insert>
+
+		<insert tableName="TFACET">
+			<column name="UIDPK" valueNumeric='11705'/>
+			<column name="FACET_GUID" value='8b254baf-fd84-42a6-959a-c23354001aad'/>
+			<column name="BUSINESS_OBJECT_ID" value='A01250'/>
+			<column name="FACET_NAME" value='Camera Flash / Flash Modes'/>
+			<column name="FIELD_KEY_TYPE" valueNumeric='0'/>
+			<column name="STORECODE" value='SNAPITUP'/>
+			<column name="DISPLAY_NAME" value='{"en":"Camera Flash / Flash Modes","fr":""}'/>
+			<column name="FACET_TYPE" valueNumeric='2'/>
+			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="RANGE_FACET_VALUES" value='[]'/>
+			<column name="FACET_GROUP" valueNumeric='0'/>
+		</insert>
+
+		<insert tableName="TFACET">
+			<column name="UIDPK" valueNumeric='11706'/>
+			<column name="FACET_GUID" value='8360a130-2d8c-4e67-804d-b48201cf6c96'/>
+			<column name="BUSINESS_OBJECT_ID" value='A00276'/>
+			<column name="FACET_NAME" value='Audio Input / Type'/>
+			<column name="FIELD_KEY_TYPE" valueNumeric='0'/>
+			<column name="STORECODE" value='SNAPITUP'/>
+			<column name="DISPLAY_NAME" value='{"en":"Audio Input / Type","fr":""}'/>
+			<column name="FACET_TYPE" valueNumeric='2'/>
+			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="RANGE_FACET_VALUES" value='[]'/>
+			<column name="FACET_GROUP" valueNumeric='0'/>
+		</insert>
+
+		<insert tableName="TFACET">
+			<column name="UIDPK" valueNumeric='11707'/>
+			<column name="FACET_GUID" value='4a018cb9-f34f-4d7a-b070-008179cc5e58'/>
+			<column name="BUSINESS_OBJECT_ID" value='A00551'/>
+			<column name="FACET_NAME" value='Optical Sensor / Optical Sensor Type'/>
+			<column name="FIELD_KEY_TYPE" valueNumeric='0'/>
+			<column name="STORECODE" value='SNAPITUP'/>
+			<column name="DISPLAY_NAME" value='{"en":"Optical Sensor / Optical Sensor Type","fr":""}'/>
+			<column name="FACET_TYPE" valueNumeric='2'/>
+			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="RANGE_FACET_VALUES" value='[]'/>
+			<column name="FACET_GROUP" valueNumeric='0'/>
+		</insert>
+
+		<insert tableName="TFACET">
+			<column name="UIDPK" valueNumeric='11708'/>
+			<column name="FACET_GUID" value='93818ec4-926c-4ded-8426-7536e1d4b9d0'/>
+			<column name="BUSINESS_OBJECT_ID" value='A00984'/>
+			<column name="FACET_NAME" value='Lens System / Min Focal Length'/>
+			<column name="FIELD_KEY_TYPE" valueNumeric='3'/>
+			<column name="STORECODE" value='SNAPITUP'/>
+			<column name="DISPLAY_NAME" value='{"en":"Lens System / Min Focal Length","fr":""}'/>
+			<column name="FACET_TYPE" valueNumeric='2'/>
+			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="RANGE_FACET_VALUES" value='[{"start":0,"end":100,"displayNameMap":{"en":"","fr":""}},{"start":100,"end":200,"displayNameMap":{"en":"","fr":""}},{"start":200,"end":300,"displayNameMap":{"en":"","fr":""}},{"start":300,"end":null,"displayNameMap":{"en":"","fr":""}}]'/>
+			<column name="FACET_GROUP" valueNumeric='0'/>
+		</insert>
+
+		<insert tableName="TFACET">
+			<column name="UIDPK" valueNumeric='11709'/>
+			<column name="FACET_GUID" value='86db7d3c-1eec-48ac-856d-b02ae3dfccd3'/>
+			<column name="BUSINESS_OBJECT_ID" value='A01282'/>
+			<column name="FACET_NAME" value='Camera / Auto Focus'/>
+			<column name="FIELD_KEY_TYPE" valueNumeric='0'/>
+			<column name="STORECODE" value='SNAPITUP'/>
+			<column name="DISPLAY_NAME" value='{"en":"Camera / Auto Focus","fr":""}'/>
+			<column name="FACET_TYPE" valueNumeric='2'/>
+			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="RANGE_FACET_VALUES" value='[]'/>
+			<column name="FACET_GROUP" valueNumeric='0'/>
+		</insert>
+
+		<insert tableName="TFACET">
+			<column name="UIDPK" valueNumeric='11710'/>
+			<column name="FACET_GUID" value='f55693bc-7128-47c5-9511-61cfbdec3a02'/>
+			<column name="BUSINESS_OBJECT_ID" value='A01002'/>
+			<column name="FACET_NAME" value='Optical System / Type'/>
+			<column name="FIELD_KEY_TYPE" valueNumeric='0'/>
+			<column name="STORECODE" value='SNAPITUP'/>
+			<column name="DISPLAY_NAME" value='{"en":"Optical System / Type","fr":""}'/>
+			<column name="FACET_TYPE" valueNumeric='2'/>
+			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="RANGE_FACET_VALUES" value='[]'/>
+			<column name="FACET_GROUP" valueNumeric='0'/>
+		</insert>
+
+		<insert tableName="TFACET">
+			<column name="UIDPK" valueNumeric='11711'/>
+			<column name="FACET_GUID" value='368c34ac-ace4-48b1-be9e-c1a16afaee5c'/>
+			<column name="BUSINESS_OBJECT_ID" value='A00996'/>
+			<column name="FACET_NAME" value='Finderscope / Magnification'/>
+			<column name="FIELD_KEY_TYPE" valueNumeric='1'/>
+			<column name="STORECODE" value='SNAPITUP'/>
+			<column name="DISPLAY_NAME" value='{"en":"Finderscope / Magnification","fr":""}'/>
+			<column name="FACET_TYPE" valueNumeric='2'/>
+			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="RANGE_FACET_VALUES" value='[{"start":0,"end":100,"displayNameMap":{"en":"","fr":""}},{"start":100,"end":200,"displayNameMap":{"en":"","fr":""}},{"start":200,"end":300,"displayNameMap":{"en":"","fr":""}},{"start":300,"end":null,"displayNameMap":{"en":"","fr":""}}]'/>
+			<column name="FACET_GROUP" valueNumeric='0'/>
+		</insert>
+
+		<insert tableName="TFACET">
+			<column name="UIDPK" valueNumeric='11712'/>
+			<column name="FACET_GUID" value='929445d2-8c8d-4cf0-b572-2923e5aa0c10'/>
+			<column name="BUSINESS_OBJECT_ID" value='A00537'/>
+			<column name="FACET_NAME" value='Video Input / Still Image Format'/>
+			<column name="FIELD_KEY_TYPE" valueNumeric='0'/>
+			<column name="STORECODE" value='SNAPITUP'/>
+			<column name="DISPLAY_NAME" value='{"en":"Video Input / Still Image Format","fr":""}'/>
+			<column name="FACET_TYPE" valueNumeric='2'/>
+			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="RANGE_FACET_VALUES" value='[]'/>
+			<column name="FACET_GROUP" valueNumeric='0'/>
+		</insert>
+
+		<insert tableName="TFACET">
+			<column name="UIDPK" valueNumeric='11713'/>
+			<column name="FACET_GUID" value='e5f45f2d-30bd-463c-9282-611625bd44f1'/>
+			<column name="BUSINESS_OBJECT_ID" value='A00341'/>
+			<column name="FACET_NAME" value='Battery / Run Time (Up To)'/>
+			<column name="FIELD_KEY_TYPE" valueNumeric='3'/>
+			<column name="STORECODE" value='SNAPITUP'/>
+			<column name="DISPLAY_NAME" value='{"en":"Battery / Run Time (Up To)","fr":""}'/>
+			<column name="FACET_TYPE" valueNumeric='2'/>
+			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="RANGE_FACET_VALUES" value='[{"start":0,"end":100,"displayNameMap":{"en":"","fr":""}},{"start":100,"end":200,"displayNameMap":{"en":"","fr":""}},{"start":200,"end":300,"displayNameMap":{"en":"","fr":""}},{"start":300,"end":null,"displayNameMap":{"en":"","fr":""}}]'/>
+			<column name="FACET_GROUP" valueNumeric='0'/>
+		</insert>
+
+		<insert tableName="TFACET">
+			<column name="UIDPK" valueNumeric='11714'/>
+			<column name="FACET_GUID" value='e00e15aa-4b40-4f26-a30c-3e62a3276e14'/>
+			<column name="BUSINESS_OBJECT_ID" value='A00152'/>
+			<column name="FACET_NAME" value='Display (Projector) / Technology'/>
+			<column name="FIELD_KEY_TYPE" valueNumeric='0'/>
+			<column name="STORECODE" value='SNAPITUP'/>
+			<column name="DISPLAY_NAME" value='{"en":"Display (Projector) / Technology","fr":""}'/>
+			<column name="FACET_TYPE" valueNumeric='2'/>
+			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="RANGE_FACET_VALUES" value='[]'/>
+			<column name="FACET_GROUP" valueNumeric='0'/>
+		</insert>
+
+		<insert tableName="TFACET">
+			<column name="UIDPK" valueNumeric='11715'/>
+			<column name="FACET_GUID" value='7fdf510b-aedb-4281-8083-75f5d3d3214c'/>
+			<column name="BUSINESS_OBJECT_ID" value='A01570'/>
+			<column name="FACET_NAME" value='Video Input / Shooting Modes'/>
+			<column name="FIELD_KEY_TYPE" valueNumeric='0'/>
+			<column name="STORECODE" value='SNAPITUP'/>
+			<column name="DISPLAY_NAME" value='{"en":"Video Input / Shooting Modes","fr":""}'/>
+			<column name="FACET_TYPE" valueNumeric='2'/>
+			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="RANGE_FACET_VALUES" value='[]'/>
+			<column name="FACET_GROUP" valueNumeric='0'/>
+		</insert>
+
+		<insert tableName="TFACET">
+			<column name="UIDPK" valueNumeric='11716'/>
+			<column name="FACET_GUID" value='e1c7b8ae-8ba5-49f3-ae16-51922554ad37'/>
+			<column name="BUSINESS_OBJECT_ID" value='A02028'/>
+			<column name="FACET_NAME" value='Camera Flash / Red Eye Reduction'/>
+			<column name="FIELD_KEY_TYPE" valueNumeric='2'/>
+			<column name="STORECODE" value='SNAPITUP'/>
+			<column name="DISPLAY_NAME" value='{"en":"Camera Flash / Red Eye Reduction","fr":""}'/>
+			<column name="FACET_TYPE" valueNumeric='2'/>
+			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="RANGE_FACET_VALUES" value='[]'/>
+			<column name="FACET_GROUP" valueNumeric='0'/>
+		</insert>
+
+		<insert tableName="TFACET">
+			<column name="UIDPK" valueNumeric='11717'/>
+			<column name="FACET_GUID" value='5e4f1c74-7f99-4fe0-9d3f-5fb39550fab5'/>
+			<column name="BUSINESS_OBJECT_ID" value='A00138'/>
+			<column name="FACET_NAME" value='Display (Projector) / Type'/>
+			<column name="FIELD_KEY_TYPE" valueNumeric='0'/>
+			<column name="STORECODE" value='SNAPITUP'/>
+			<column name="DISPLAY_NAME" value='{"en":"Display (Projector) / Type","fr":""}'/>
+			<column name="FACET_TYPE" valueNumeric='2'/>
+			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="RANGE_FACET_VALUES" value='[]'/>
+			<column name="FACET_GROUP" valueNumeric='0'/>
+		</insert>
+
+		<insert tableName="TFACET">
+			<column name="UIDPK" valueNumeric='11718'/>
+			<column name="FACET_GUID" value='5528b7dc-f72c-4c18-9c19-ab1f29b4bcee'/>
+			<column name="BUSINESS_OBJECT_ID" value='A00985'/>
+			<column name="FACET_NAME" value='Lens System / Max Focal Length'/>
+			<column name="FIELD_KEY_TYPE" valueNumeric='3'/>
+			<column name="STORECODE" value='SNAPITUP'/>
+			<column name="DISPLAY_NAME" value='{"en":"Lens System / Max Focal Length","fr":""}'/>
+			<column name="FACET_TYPE" valueNumeric='2'/>
+			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="RANGE_FACET_VALUES" value='[{"start":0,"end":100,"displayNameMap":{"en":"","fr":""}},{"start":100,"end":200,"displayNameMap":{"en":"","fr":""}},{"start":200,"end":300,"displayNameMap":{"en":"","fr":""}},{"start":300,"end":null,"displayNameMap":{"en":"","fr":""}}]'/>
+			<column name="FACET_GROUP" valueNumeric='0'/>
+		</insert>
+
+		<insert tableName="TFACET">
+			<column name="UIDPK" valueNumeric='11719'/>
+			<column name="FACET_GUID" value='1e1a68ac-755c-4a86-bb6b-90c5c7157c7e'/>
+			<column name="BUSINESS_OBJECT_ID" value='A03497'/>
+			<column name="FACET_NAME" value='Optical Sensor / Sensor Qty'/>
+			<column name="FIELD_KEY_TYPE" valueNumeric='1'/>
+			<column name="STORECODE" value='SNAPITUP'/>
+			<column name="DISPLAY_NAME" value='{"en":"Optical Sensor / Sensor Qty","fr":""}'/>
+			<column name="FACET_TYPE" valueNumeric='2'/>
+			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="RANGE_FACET_VALUES" value='[{"start":0,"end":100,"displayNameMap":{"en":"","fr":""}},{"start":100,"end":200,"displayNameMap":{"en":"","fr":""}},{"start":200,"end":300,"displayNameMap":{"en":"","fr":""}},{"start":300,"end":null,"displayNameMap":{"en":"","fr":""}}]'/>
+			<column name="FACET_GROUP" valueNumeric='0'/>
+		</insert>
+
+		<insert tableName="TFACET">
+			<column name="UIDPK" valueNumeric='11720'/>
+			<column name="FACET_GUID" value='37537a44-caa5-42a2-af7e-826ea765438b'/>
+			<column name="BUSINESS_OBJECT_ID" value='A01381'/>
+			<column name="FACET_NAME" value='Video Input / Digital Scene Transition'/>
+			<column name="FIELD_KEY_TYPE" valueNumeric='0'/>
+			<column name="STORECODE" value='SNAPITUP'/>
+			<column name="DISPLAY_NAME" value='{"en":"Video Input / Digital Scene Transition","fr":""}'/>
+			<column name="FACET_TYPE" valueNumeric='2'/>
+			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="RANGE_FACET_VALUES" value='[]'/>
+			<column name="FACET_GROUP" valueNumeric='0'/>
+		</insert>
+
+		<insert tableName="TFACET">
+			<column name="UIDPK" valueNumeric='11721'/>
+			<column name="FACET_GUID" value='72e115cf-d40e-480f-800b-ebd23a4cdc83'/>
+			<column name="BUSINESS_OBJECT_ID" value='features'/>
+			<column name="FACET_NAME" value='Features'/>
+			<column name="FIELD_KEY_TYPE" valueNumeric='0'/>
+			<column name="STORECODE" value='SNAPITUP'/>
+			<column name="DISPLAY_NAME" value='{"en":"Features","fr":""}'/>
+			<column name="FACET_TYPE" valueNumeric='2'/>
+			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="RANGE_FACET_VALUES" value='[]'/>
+			<column name="FACET_GROUP" valueNumeric='0'/>
+		</insert>
+
+		<insert tableName="TFACET">
+			<column name="UIDPK" valueNumeric='11722'/>
+			<column name="FACET_GUID" value='a09f45dc-3ea8-451f-b100-598d5bbf6cf4'/>
+			<column name="BUSINESS_OBJECT_ID" value='GC_Theme'/>
+			<column name="FACET_NAME" value='Design'/>
+			<column name="FIELD_KEY_TYPE" valueNumeric='0'/>
+			<column name="STORECODE" value='SNAPITUP'/>
+			<column name="DISPLAY_NAME" value='{"en":"Design","fr":""}'/>
+			<column name="FACET_TYPE" valueNumeric='2'/>
+			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="RANGE_FACET_VALUES" value='[]'/>
+			<column name="FACET_GROUP" valueNumeric='2'/>
+		</insert>
+
+		<insert tableName="TFACET">
+			<column name="UIDPK" valueNumeric='11723'/>
+			<column name="FACET_GUID" value='c06a0016-1c69-4745-88f3-6e2ba79f2638'/>
+			<column name="BUSINESS_OBJECT_ID" value='GC_Denomination'/>
+			<column name="FACET_NAME" value='Amount'/>
+			<column name="FIELD_KEY_TYPE" valueNumeric='0'/>
+			<column name="STORECODE" value='SNAPITUP'/>
+			<column name="DISPLAY_NAME" value='{"en":"Amount","fr":""}'/>
+			<column name="FACET_TYPE" valueNumeric='2'/>
+			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="RANGE_FACET_VALUES" value='[]'/>
+			<column name="FACET_GROUP" valueNumeric='2'/>
+		</insert>
+
+		<insert tableName="TFACET">
+			<column name="UIDPK" valueNumeric='11724'/>
+			<column name="FACET_GUID" value='23f79749-251a-4dad-93ce-31cf74bd6d08'/>
+			<column name="BUSINESS_OBJECT_ID" value='Color'/>
+			<column name="FACET_NAME" value='Color'/>
+			<column name="FIELD_KEY_TYPE" valueNumeric='0'/>
+			<column name="STORECODE" value='SNAPITUP'/>
+			<column name="DISPLAY_NAME" value='{"en":"Color","fr":""}'/>
+			<column name="FACET_TYPE" valueNumeric='2'/>
+			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="RANGE_FACET_VALUES" value='[]'/>
+			<column name="FACET_GROUP" valueNumeric='2'/>
+		</insert>
+
+		<insert tableName="TFACET">
+			<column name="UIDPK" valueNumeric='11725'/>
+			<column name="FACET_GUID" value='0981dceb-a41b-43cb-a9a0-77e384ada46b'/>
+			<column name="BUSINESS_OBJECT_ID" value='LeatherCaseColor'/>
+			<column name="FACET_NAME" value='Color'/>
+			<column name="FIELD_KEY_TYPE" valueNumeric='0'/>
+			<column name="STORECODE" value='SNAPITUP'/>
+			<column name="DISPLAY_NAME" value='{"en":"Color","fr":""}'/>
+			<column name="FACET_TYPE" valueNumeric='2'/>
+			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="RANGE_FACET_VALUES" value='[]'/>
+			<column name="FACET_GROUP" valueNumeric='2'/>
+		</insert>
+
+		<insert tableName="TFACET">
+			<column name="UIDPK" valueNumeric='11726'/>
+			<column name="FACET_GUID" value='80e9253f-e305-4de7-81be-69e1fa0ce96a'/>
+			<column name="BUSINESS_OBJECT_ID" value='BagSize'/>
+			<column name="FACET_NAME" value='Size'/>
+			<column name="FIELD_KEY_TYPE" valueNumeric='0'/>
+			<column name="STORECODE" value='SNAPITUP'/>
+			<column name="DISPLAY_NAME" value='{"en":"Size","fr":""}'/>
+			<column name="FACET_TYPE" valueNumeric='2'/>
+			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="RANGE_FACET_VALUES" value='[]'/>
+			<column name="FACET_GROUP" valueNumeric='2'/>
+		</insert>
+
+		<insert tableName="TFACET">
+			<column name="UIDPK" valueNumeric='11727'/>
+			<column name="FACET_GUID" value='31b9dceb-0d7b-4d0b-ba5c-9c6b3cd4a9c9'/>
+			<column name="BUSINESS_OBJECT_ID" value='PodPouchColor'/>
+			<column name="FACET_NAME" value='Color'/>
+			<column name="FIELD_KEY_TYPE" valueNumeric='0'/>
+			<column name="STORECODE" value='SNAPITUP'/>
+			<column name="DISPLAY_NAME" value='{"fr":"ColorFR","en":"Color"}'/>
+			<column name="FACET_TYPE" valueNumeric='0'/>
+			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="RANGE_FACET_VALUES" value='[]'/>
+			<column name="FACET_GROUP" valueNumeric='2'/>
+		</insert>
+
+		<insert tableName="TFACET">
+			<column name="UIDPK" valueNumeric='11728'/>
+			<column name="FACET_GUID" value='4984c767-79b0-4a63-8fbf-cf008b6eba3e'/>
+			<column name="BUSINESS_OBJECT_ID" value='Frequency_DISABLED'/>
+			<column name="FACET_NAME" value='Billed'/>
+			<column name="FIELD_KEY_TYPE" valueNumeric='0'/>
+			<column name="STORECODE" value='SNAPITUP'/>
+			<column name="DISPLAY_NAME" value='{"en":"Billed","fr":""}'/>
+			<column name="FACET_TYPE" valueNumeric='2'/>
+			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="RANGE_FACET_VALUES" value='[]'/>
+			<column name="FACET_GROUP" valueNumeric='2'/>
+		</insert>
+
+		<insert tableName="TFACET">
+			<column name="UIDPK" valueNumeric='11729'/>
+			<column name="FACET_GUID" value='7c48a65e-561a-4429-8bad-8003573ec1e6'/>
+			<column name="BUSINESS_OBJECT_ID" value='PSize'/>
+			<column name="FACET_NAME" value='Plan Size'/>
+			<column name="FIELD_KEY_TYPE" valueNumeric='0'/>
+			<column name="STORECODE" value='SNAPITUP'/>
+			<column name="DISPLAY_NAME" value='{"en":"Plan Size","fr":""}'/>
+			<column name="FACET_TYPE" valueNumeric='2'/>
+			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="RANGE_FACET_VALUES" value='[]'/>
+			<column name="FACET_GROUP" valueNumeric='2'/>
+		</insert>
+
+		<insert tableName="TFACET">
+			<column name="UIDPK" valueNumeric='11730'/>
+			<column name="FACET_GUID" value='5682c8e8-6463-4bde-ac42-fd6b1e8a1e5c'/>
+			<column name="BUSINESS_OBJECT_ID" value='Brand'/>
+			<column name="FACET_NAME" value='Brand'/>
+			<column name="FIELD_KEY_TYPE" valueNumeric='0'/>
+			<column name="STORECODE" value='SNAPITUP'/>
+			<column name="DISPLAY_NAME" value='{"fr":"BrandFR","en":"Brand"}'/>
+			<column name="FACET_TYPE" valueNumeric='0'/>
+			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="RANGE_FACET_VALUES" value='[]'/>
+			<column name="FACET_GROUP" valueNumeric='3'/>
+		</insert>
+
+		<insert tableName="TFACET">
+			<column name="UIDPK" valueNumeric='11731'/>
+			<column name="FACET_GUID" value='8aa7ad56-e780-4d82-b50a-7f104fdd08d7'/>
+			<column name="BUSINESS_OBJECT_ID" value='Product Sku Code'/>
+			<column name="FACET_NAME" value='Product Sku Code'/>
+			<column name="FIELD_KEY_TYPE" valueNumeric='0'/>
+			<column name="STORECODE" value='SNAPITUP'/>
+			<column name="DISPLAY_NAME" value='{"en":"Product Sku Code","fr":""}'/>
+			<column name="FACET_TYPE" valueNumeric='2'/>
+			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="RANGE_FACET_VALUES" value='[]'/>
+			<column name="FACET_GROUP" valueNumeric='3'/>
+		</insert>
+
+		<insert tableName="TFACET">
+			<column name="UIDPK" valueNumeric='11732'/>
+			<column name="FACET_GUID" value='0b358582-a1bd-4204-b9bd-1740b87d4eba'/>
+			<column name="BUSINESS_OBJECT_ID" value='Category'/>
+			<column name="FACET_NAME" value='Category'/>
+			<column name="FIELD_KEY_TYPE" valueNumeric='0'/>
+			<column name="STORECODE" value='SNAPITUP'/>
+			<column name="DISPLAY_NAME" value='{"fr":"CategoryFR","en":"Category"}'/>
+			<column name="FACET_TYPE" valueNumeric='0'/>
+			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="RANGE_FACET_VALUES" value='[]'/>
+			<column name="FACET_GROUP" valueNumeric='3'/>
+		</insert>
+
+		<insert tableName="TFACET">
+			<column name="UIDPK" valueNumeric='11733'/>
+			<column name="FACET_GUID" value='eb52dd3e-cdf8-4d4c-b9c0-9a9da04af5b5'/>
+			<column name="BUSINESS_OBJECT_ID" value='Price'/>
+			<column name="FACET_NAME" value='Price'/>
+			<column name="FIELD_KEY_TYPE" valueNumeric='3'/>
+			<column name="STORECODE" value='SNAPITUP'/>
+			<column name="DISPLAY_NAME" value='{"fr":"PriceFr","en":"Price"}'/>
+			<column name="FACET_TYPE" valueNumeric='1'/>
+			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="RANGE_FACET_VALUES" value='[{"start":0,"end":100,"displayNameMap":{"fr":"&lt; 100","en":"&lt; 100"}},{"start":100,"end":200,"displayNameMap":{"fr":"100 - 200","en":"100 - 200"}},{"start":200,"end":300,"displayNameMap":{"fr":"200 - 300","en":"200 - 300"}},{"start":300,"end":null,"displayNameMap":{"fr":"> 300","en":"> 300"}}]'/>
+			<column name="FACET_GROUP" valueNumeric='3'/>
+		</insert>
+
+		<insert tableName="TFACET">
+			<column name="UIDPK" valueNumeric='11734'/>
+			<column name="FACET_GUID" value='ae37232f-f617-4d25-84ea-66e2ac2b0e41'/>
+			<column name="BUSINESS_OBJECT_ID" value='Length'/>
+			<column name="FACET_NAME" value='Length'/>
+			<column name="FIELD_KEY_TYPE" valueNumeric='3'/>
+			<column name="STORECODE" value='SNAPITUP'/>
+			<column name="DISPLAY_NAME" value='{"en":"Length","fr":""}'/>
+			<column name="FACET_TYPE" valueNumeric='2'/>
+			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="RANGE_FACET_VALUES" value='[{"start":0,"end":100,"displayNameMap":{"en":"","fr":""}},{"start":100,"end":200,"displayNameMap":{"en":"","fr":""}},{"start":200,"end":300,"displayNameMap":{"en":"","fr":""}},{"start":300,"end":null,"displayNameMap":{"en":"","fr":""}}]'/>
+			<column name="FACET_GROUP" valueNumeric='3'/>
+		</insert>
+
+		<insert tableName="TFACET">
+			<column name="UIDPK" valueNumeric='11735'/>
+			<column name="FACET_GUID" value='7703276f-a2c8-4397-8a41-802060fc0efd'/>
+			<column name="BUSINESS_OBJECT_ID" value='Product Name'/>
+			<column name="FACET_NAME" value='Product Name'/>
+			<column name="FIELD_KEY_TYPE" valueNumeric='0'/>
+			<column name="STORECODE" value='SNAPITUP'/>
+			<column name="DISPLAY_NAME" value='{"en":"Product Name","fr":""}'/>
+			<column name="FACET_TYPE" valueNumeric='2'/>
+			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="RANGE_FACET_VALUES" value='[]'/>
+			<column name="FACET_GROUP" valueNumeric='3'/>
+		</insert>
+
+		<insert tableName="TFACET">
+			<column name="UIDPK" valueNumeric='11736'/>
+			<column name="FACET_GUID" value='60e7da07-b2f9-46ea-ad93-6ccaa86c2cea'/>
+			<column name="BUSINESS_OBJECT_ID" value='Height'/>
+			<column name="FACET_NAME" value='Height'/>
+			<column name="FIELD_KEY_TYPE" valueNumeric='3'/>
+			<column name="STORECODE" value='SNAPITUP'/>
+			<column name="DISPLAY_NAME" value='{"fr":"HeightFR","en":"Height"}'/>
+			<column name="FACET_TYPE" valueNumeric='1'/>
+			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="RANGE_FACET_VALUES" value='[{"start":0,"end":100,"displayNameMap":{"fr":"&lt; 100","en":"&lt; 100"}},{"start":100,"end":200,"displayNameMap":{"fr":"100 - 200","en":"1000- 20 "}},{"start":200,"end":300,"displayNameMap":{"fr":"200 - 300","en":"200 - 300"}},{"start":300,"end":null,"displayNameMap":{"fr":"> 300","en":"> 300"}}]'/>
+			<column name="FACET_GROUP" valueNumeric='3'/>
+		</insert>
+
+		<insert tableName="TFACET">
+			<column name="UIDPK" valueNumeric='11737'/>
+			<column name="FACET_GUID" value='f700ec47-fd11-446b-b911-99cffb398a60'/>
+			<column name="BUSINESS_OBJECT_ID" value='Width'/>
+			<column name="FACET_NAME" value='Width'/>
+			<column name="FIELD_KEY_TYPE" valueNumeric='3'/>
+			<column name="STORECODE" value='SNAPITUP'/>
+			<column name="DISPLAY_NAME" value='{"en":"Width","fr":""}'/>
+			<column name="FACET_TYPE" valueNumeric='2'/>
+			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="RANGE_FACET_VALUES" value='[{"start":0,"end":100,"displayNameMap":{"en":"","fr":""}},{"start":100,"end":200,"displayNameMap":{"en":"","fr":""}},{"start":200,"end":300,"displayNameMap":{"en":"","fr":""}},{"start":300,"end":null,"displayNameMap":{"en":"","fr":""}}]'/>
+			<column name="FACET_GROUP" valueNumeric='3'/>
+		</insert>
+
+		<insert tableName="TFACET">
+			<column name="UIDPK" valueNumeric='11738'/>
+			<column name="FACET_GUID" value='9121db52-9dce-4843-88ce-21f168b54da0'/>
+			<column name="BUSINESS_OBJECT_ID" value='Weight'/>
+			<column name="FACET_NAME" value='Weight'/>
+			<column name="FIELD_KEY_TYPE" valueNumeric='3'/>
+			<column name="STORECODE" value='SNAPITUP'/>
+			<column name="DISPLAY_NAME" value='{"en":"Weight","fr":""}'/>
+			<column name="FACET_TYPE" valueNumeric='2'/>
+			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="RANGE_FACET_VALUES" value='[{"start":0,"end":100,"displayNameMap":{"en":"","fr":""}},{"start":100,"end":200,"displayNameMap":{"en":"","fr":""}},{"start":200,"end":300,"displayNameMap":{"en":"","fr":""}},{"start":300,"end":null,"displayNameMap":{"en":"","fr":""}}]'/>
+			<column name="FACET_GROUP" valueNumeric='3'/>
+		</insert>
+	</changeSet>
+
 </databaseChangeLog>

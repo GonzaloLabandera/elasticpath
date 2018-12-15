@@ -13,7 +13,6 @@ import org.osgi.service.component.annotations.Reference;
 import com.elasticpath.repository.LinksRepository;
 import com.elasticpath.rest.definition.carts.LineItemIdentifier;
 import com.elasticpath.rest.definition.items.ItemIdentifier;
-import com.elasticpath.rest.definition.items.ItemsIdentifier;
 import com.elasticpath.rest.id.IdentifierPart;
 import com.elasticpath.rest.id.type.StringIdentifier;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder.ShoppingCartRepository;
@@ -53,9 +52,7 @@ public class ItemIdentifierRepositoryImpl<I extends LineItemIdentifier, LI exten
 	protected Single<ItemIdentifier> buildItemIdentifier(final String scope, final IdentifierPart<Map<String, String>> itemId) {
 		return Single.just(ItemIdentifier.builder()
 				.withItemId(itemId)
-				.withItems(ItemsIdentifier.builder()
-						.withScope(StringIdentifier.of(scope))
-						.build())
+				.withScope(StringIdentifier.of(scope))
 				.build());
 	}
 

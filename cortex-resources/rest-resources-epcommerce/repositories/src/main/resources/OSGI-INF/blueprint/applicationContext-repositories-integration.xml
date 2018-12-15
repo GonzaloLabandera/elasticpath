@@ -79,6 +79,11 @@
 				<ref bean="addressEntityConverter"/>
 				<ref bean="purchaseEntityConverter"/>
 				<ref bean="paymentMeansEntityConverter"/>
+				<ref bean="productSkuToItemDefinitionEntityConverter"/>
+				<ref bean="productToOfferDefinitionEntityConverter"/>
+				<ref bean="skuOptionValueToItemDefinitionOptionEntityConverter"/>
+				<ref bean="bundleConstituentToItemDefinitionComponentEntityConverter"/>
+				<ref bean="skuOptionValueToItemDefinitionOptionValueEntityConverter"/>
 			</set>
 		</property>
 	</bean>

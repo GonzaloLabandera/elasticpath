@@ -424,4 +424,11 @@ public interface CategoryService {
 	 * @param category the category whose path should be returned.
 	 */
 	List<Category> getPath(Category category);
+
+	/**
+	 * Returns all categories by catalog uid.
+	 * @param catalogUid catalog uid
+	 * @return categories
+	 */
+	List<Category> findCategoriesByCatalogUid(long catalogUid);
 }

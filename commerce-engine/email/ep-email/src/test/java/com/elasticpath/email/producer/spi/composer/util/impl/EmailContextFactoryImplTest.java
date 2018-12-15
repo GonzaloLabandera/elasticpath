@@ -3,18 +3,17 @@
  */
 package com.elasticpath.email.producer.spi.composer.util.impl;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertSame;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.when;
 
 import java.util.Map;
 
-import org.jmock.Expectations;
-import org.jmock.integration.junit4.JUnitRuleMockery;
-import org.jmock.lib.legacy.ClassImposteriser;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.elasticpath.commons.beanframework.BeanFactory;
 import com.elasticpath.commons.constants.ContextIdNames;
@@ -29,33 +28,29 @@ import com.elasticpath.money.MoneyFormatter;
 /**
  * Unit test for {@link EmailContextFactoryImpl}.
  */
+@RunWith(MockitoJUnitRunner.class)
 public class EmailContextFactoryImplTest {
-	@Rule
-	public JUnitRuleMockery context = new JUnitRuleMockery();
 
 	private EmailContextFactoryImpl contextFactory;
 	private StoreImpl store;
 	private EmailPropertiesImpl emailProperties;
+
+	@Mock
 	private StoreThemeMessageSource storeThemeMessageSource;
+
+	@Mock
 	private BeanFactory beanFactory;
+
+	@Mock
 	private MoneyFormatter moneyFormatter;
+
+	@Mock
 	private Geography geography;
 
 	@Before
-	public void setUp() throws Exception {
-		context.setImposteriser(ClassImposteriser.INSTANCE);
+	public void setUp() {
 
-		beanFactory = context.mock(BeanFactory.class);
-		context.checking(new Expectations() {
-			{
-				allowing(beanFactory).getBean(ContextIdNames.SEO_URL_BUILDER);
-				will(returnValue(new SeoUrlBuilderImpl()));
-			}
-		});
-
-		geography = context.mock(Geography.class);
-		moneyFormatter = context.mock(MoneyFormatter.class);
-		storeThemeMessageSource = context.mock(StoreThemeMessageSource.class);
+		when(beanFactory.getBean(ContextIdNames.SEO_URL_BUILDER)).thenReturn(new SeoUrlBuilderImpl());
 
 		contextFactory = new EmailContextFactoryImpl();
 		contextFactory.setBeanFactory(beanFactory);
@@ -76,8 +71,12 @@ public class EmailContextFactoryImplTest {
 	public void testCreateVelocityContextInjectsServices() {
 		Map<String, Object> context = contextFactory.createVelocityContext(store, emailProperties);
 
-		assertSame("Context should be created with spring-injected services", moneyFormatter, context.get(WebConstants.MONEY_FORMATTER));
-		assertNotNull("Geography should be on the map", context.get(WebConstants.GEOGRAPHY_HELPER));
+		assertThat(context.get(WebConstants.MONEY_FORMATTER))
+			.as("Context should be created with spring-injected services")
+			.isSameAs(moneyFormatter);
+		assertThat(context.get(WebConstants.GEOGRAPHY_HELPER))
+			.as("Geography should be on the map")
+			.isNotNull();
 	}
 
 	/**
@@ -93,8 +92,14 @@ public class EmailContextFactoryImplTest {
 		Map<String, Object> context = contextFactory.createVelocityContext(store, emailProperties);
 
 		//  Then
-		assertSame("Context should include store", store, context.get("store"));
-		assertEquals("Context should include store url", store.getUrl(), context.get("baseImgUrl"));
-		assertEquals("Context should include trimmed store url", "/snap-it-up", context.get("storeUrl"));
+		assertThat(context.get("store"))
+			.as("Context should include store")
+			.isSameAs(store);
+		assertThat(context.get("baseImgUrl"))
+			.as("Context should include store url")
+			.isEqualTo(store.getUrl());
+		assertThat(context.get("storeUrl"))
+			.as("Context should include trimmed store url")
+			.isEqualTo("/snap-it-up");
 	}
 }

@@ -12,17 +12,14 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Currency;
 import java.util.Map;
-
 import javax.servlet.http.HttpServletRequest;
-
-import org.junit.Test;
-import org.junit.runner.RunWith;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Iterators;
-
 import org.hamcrest.Matchers;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
@@ -71,7 +68,7 @@ public class CurrencySubjectAttributeLookupStrategyTest {
 
 		assertThat(actualAttributes, Matchers.iterableWithSize(1));
 		CurrencySubjectAttribute subjectAttribute = (CurrencySubjectAttribute) Iterables.getFirst(actualAttributes, null);
-		assertEquals(EXPECTED_CURRENCY_DOES_NOT_MATCH_RESULT, subjectAttribute.getCurrency(), CAD_CURRENCY);
+		assertEquals(EXPECTED_CURRENCY_DOES_NOT_MATCH_RESULT, CAD_CURRENCY, subjectAttribute.getCurrency());
 	}
 
 	@Test

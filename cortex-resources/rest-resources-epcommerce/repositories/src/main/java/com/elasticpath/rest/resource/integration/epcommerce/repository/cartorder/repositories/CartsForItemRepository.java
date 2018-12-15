@@ -12,9 +12,6 @@ import com.elasticpath.domain.shoppingcart.ShoppingCart;
 import com.elasticpath.repository.LinksRepository;
 import com.elasticpath.rest.definition.carts.CartIdentifier;
 import com.elasticpath.rest.definition.items.ItemIdentifier;
-import com.elasticpath.rest.id.Identifier;
-import com.elasticpath.rest.id.transform.IdentifierTransformer;
-import com.elasticpath.rest.id.transform.IdentifierTransformerProvider;
 import com.elasticpath.rest.id.type.StringIdentifier;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder.ShoppingCartRepository;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.item.ItemRepository;
@@ -33,15 +30,10 @@ public class CartsForItemRepository<I extends ItemIdentifier, LI extends CartIde
 
 	private ItemRepository itemRepository;
 
-	private IdentifierTransformerProvider identifierTransformerProvider;
-
 	@Override
 	public Observable<CartIdentifier> getElements(final ItemIdentifier itemIdentifier) {
-		//Deep down item repository expects an encoded id
-		final IdentifierTransformer<Identifier> identifierIdentifierTransformer = identifierTransformerProvider.forUriPart(ItemIdentifier.ITEM_ID);
-		String encodedItemId = identifierIdentifierTransformer.identifierToUri(itemIdentifier.getItemId());
 		return shoppingCartRepository.getDefaultShoppingCart()
-				.flatMapObservable(cart -> itemRepository.getSkuForItemIdAsSingle(encodedItemId)
+				.flatMapObservable(cart -> itemRepository.getSkuForItemId(itemIdentifier.getItemId().getValue())
 						.flatMapObservable(productSku -> getCartContainingProductSku(cart, productSku)));
 	}
 
@@ -72,10 +64,4 @@ public class CartsForItemRepository<I extends ItemIdentifier, LI extends CartIde
 	public void setItemRepository(final ItemRepository itemRepository) {
 		this.itemRepository = itemRepository;
 	}
-
-	@Reference
-	public void setIdentifierTransformerProvider(final IdentifierTransformerProvider identifierTransformerProvider) {
-		this.identifierTransformerProvider = identifierTransformerProvider;
-	}
-
 }

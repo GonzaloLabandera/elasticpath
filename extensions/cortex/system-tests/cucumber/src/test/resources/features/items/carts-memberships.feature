@@ -1,10 +1,10 @@
-@Items @Carts
+@items @carts
 Feature: Carts memberships
 
   Background:
     Given I have authenticated as a newly registered shopper
 
-  Scenario: An item always has a link to cartmemberships, even if the item is not in my default cart
+  Scenario: An item always has a link to cart memberships, even if the item is not in my default cart
     When item digitalProduct is not in any of my carts
     Then digitalProduct's cart membership does not contain the default cart
 

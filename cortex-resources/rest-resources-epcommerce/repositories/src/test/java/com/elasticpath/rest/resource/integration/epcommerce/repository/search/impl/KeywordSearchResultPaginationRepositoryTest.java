@@ -25,9 +25,12 @@ import com.elasticpath.domain.catalog.Catalog;
 import com.elasticpath.domain.store.Store;
 import com.elasticpath.rest.ResourceOperationFailure;
 import com.elasticpath.rest.ResourceStatus;
+import com.elasticpath.rest.definition.base.ScopeIdentifierPart;
 import com.elasticpath.rest.definition.collections.PaginationEntity;
 import com.elasticpath.rest.definition.items.ItemIdentifier;
 import com.elasticpath.rest.definition.searches.KeywordSearchResultIdentifier;
+import com.elasticpath.rest.definition.searches.PageIdIdentifierPart;
+import com.elasticpath.rest.definition.searches.SearchIdIdentifierPart;
 import com.elasticpath.rest.definition.searches.SearchKeywordsEntity;
 import com.elasticpath.rest.definition.searches.SearchesIdentifier;
 import com.elasticpath.rest.id.IdentifierPart;
@@ -296,6 +299,27 @@ public class KeywordSearchResultPaginationRepositoryTest {
 								.equals(((ResourceOperationFailure) throwable).getResourceStatus())
 				);
 	}
+
+	/**
+	 * Test keyword search when page setting is invalid.
+	 */
+	@Test
+	public void testOfferSearchWithPageSettingOfZero() {
+		Catalog catalog = createMockCatalog();
+		Store store = createMockStore(catalog);
+
+		shouldFindSubject();
+		shouldFindStoreWithResult(Single.just(store));
+		shouldGetDefaultPageSizeWithResult(Single.error(ResourceOperationFailure.serverError("Zero size pagination setting")));
+		paginationRepository.validateSearchData(KeywordSearchResultIdentifier.builder()
+				.withSearchId(SearchIdIdentifierPart.of("-", "-"))
+				.withSearches(SearchesIdentifier.builder().withScope(ScopeIdentifierPart.of("-")).build())
+				.withPageId(PageIdIdentifierPart.of(0)).build())
+				.test()
+				.assertFailure(ResourceOperationFailure.class)
+				.assertErrorMessage("Page id 0 can't be smaller than 1");
+	}
+
 
 	/**
 	 * Test the behaviour of keyword search with search result failure.

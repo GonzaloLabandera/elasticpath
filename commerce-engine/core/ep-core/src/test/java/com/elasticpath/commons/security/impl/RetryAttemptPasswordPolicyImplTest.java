@@ -3,12 +3,10 @@
  */
 package com.elasticpath.commons.security.impl;
 
-import static junit.framework.TestCase.assertFalse;
-import static junit.framework.TestCase.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
-import org.jmock.Expectations;
-import org.jmock.integration.junit4.JUnitRuleMockery;
-import org.junit.Rule;
 import org.junit.Test;
 
 import com.elasticpath.commons.security.PasswordHolder;
@@ -21,9 +19,6 @@ import com.elasticpath.settings.test.support.SimpleSettingValueProvider;
  */
 public class RetryAttemptPasswordPolicyImplTest {
 
-	@Rule
-	public final JUnitRuleMockery context = new JUnitRuleMockery();
-
 	private static final int DEFAULT_ACCOUNT_LOCKOUT_THRESHOLD = 4;
 
 	/**
@@ -35,8 +30,8 @@ public class RetryAttemptPasswordPolicyImplTest {
 		PasswordHolder passwordHolder = createMockPasswordHolder(DEFAULT_ACCOUNT_LOCKOUT_THRESHOLD - 1);
 
 		ValidationResult result = passwordPolicy.validate(passwordHolder);
-		assertFalse(result.containsError(RetryAttemptPasswordPolicyImpl.PASSWORD_VALIDATION_ERROR_MAXIMUM_RETRY_ATTEMPTS));
-		assertTrue(result.isValid());
+		assertThat(result.containsError(RetryAttemptPasswordPolicyImpl.PASSWORD_VALIDATION_ERROR_MAXIMUM_RETRY_ATTEMPTS)).isFalse();
+		assertThat(result.isValid()).isTrue();
 	}
 
 	/**
@@ -48,8 +43,8 @@ public class RetryAttemptPasswordPolicyImplTest {
 		PasswordHolder passwordHolder = createMockPasswordHolder(DEFAULT_ACCOUNT_LOCKOUT_THRESHOLD);
 
 		ValidationResult result = passwordPolicy.validate(passwordHolder);
-		assertTrue(result.containsError(RetryAttemptPasswordPolicyImpl.PASSWORD_VALIDATION_ERROR_MAXIMUM_RETRY_ATTEMPTS));
-		assertFalse(result.isValid());
+		assertThat(result.containsError(RetryAttemptPasswordPolicyImpl.PASSWORD_VALIDATION_ERROR_MAXIMUM_RETRY_ATTEMPTS)).isTrue();
+		assertThat(result.isValid()).isFalse();
 	}
 
 	private RetryAttemptPasswordPolicyImpl createRetryAttemptPasswordPolicy(final int accountLockoutThreshold) {
@@ -59,13 +54,8 @@ public class RetryAttemptPasswordPolicyImplTest {
 	}
 
 	private PasswordHolder createMockPasswordHolder(final int failedLoginAttempts) {
-		final PasswordHolder mockPasswordHolder = context.mock(PasswordHolder.class);
-		context.checking(new Expectations() {
-			{
-				allowing(mockPasswordHolder).getFailedLoginAttempts();
-				will(returnValue(failedLoginAttempts));
-			}
-		});
+		final PasswordHolder mockPasswordHolder = mock(PasswordHolder.class);
+		when(mockPasswordHolder.getFailedLoginAttempts()).thenReturn(failedLoginAttempts);
 		return mockPasswordHolder;
 	}
 

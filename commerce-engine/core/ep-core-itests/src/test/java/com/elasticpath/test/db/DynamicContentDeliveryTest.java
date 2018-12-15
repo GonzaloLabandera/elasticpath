@@ -1,21 +1,14 @@
-/**
+/*
  * Copyright (c) Elastic Path Software Inc., 2013
  */
 package com.elasticpath.test.db;
-/**
- * Copyright (c) Elastic Path Software Inc., 2009
- */
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.List;
 
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.transaction.TransactionStatus;
-import org.springframework.transaction.support.TransactionCallback;
 
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.contentspace.ContentSpace;
@@ -119,18 +112,13 @@ public class DynamicContentDeliveryTest extends DbTestCase {
 	@DirtiesDatabase
 	@Test
 	public void testAddDynamicContentDelivery() throws InvalidConditionTreeException {
-		final DynamicContentDelivery dynamicContentDelivery  = createDynamicContentDelivery();
+		final DynamicContentDelivery dynamicContentDelivery = createDynamicContentDelivery();
 
 		DynamicContentDelivery dynamicContentDeliveryPersisted
-			= getTxTemplate().execute(new TransactionCallback<DynamicContentDelivery>() {
-			@Override
-			public DynamicContentDelivery doInTransaction(final TransactionStatus arg0) {
-				return dynamicContentDeliveryService.add(dynamicContentDelivery);
-			}
-		});
+			= getTxTemplate().execute(txStatus -> dynamicContentDeliveryService.add(dynamicContentDelivery));
 
-		assertNotNull(dynamicContentDeliveryPersisted);
-		assertTrue(dynamicContentDeliveryPersisted.isPersisted());
+		assertThat(dynamicContentDeliveryPersisted).isNotNull();
+		assertThat(dynamicContentDeliveryPersisted.isPersisted()).isTrue();
 	}
 
 	/**
@@ -142,19 +130,15 @@ public class DynamicContentDeliveryTest extends DbTestCase {
 	public void testFindByName() throws InvalidConditionTreeException {
 		final DynamicContentDelivery dynamicContentDelivery  = createDynamicContentDelivery();
 		dynamicContentDelivery.setName("findMe");
-		getTxTemplate().execute(new TransactionCallback<DynamicContentDelivery>() {
-			@Override
-			public DynamicContentDelivery doInTransaction(final TransactionStatus arg0) {
-				dynamicContentDeliveryService.add(dynamicContentDelivery);
-				List<DynamicContentDelivery> allDynamicContent = getPersistenceEngine().retrieveByNamedQuery(
-						"DYNAMIC_CONTENT_DELIVERY_FIND_BY_NAME", "findMe");
-				assertNotNull(allDynamicContent);
-				assertFalse(allDynamicContent.isEmpty());
-				allDynamicContent = getPersistenceEngine().retrieveByNamedQuery("DYNAMIC_CONTENT_DELIVERY_FIND_BY_NAME", "canNotFound");
-				assertNotNull(allDynamicContent);
-				assertTrue(allDynamicContent.isEmpty());
-				return null;
-			}
+		getTxTemplate().execute(txStatus -> {
+			dynamicContentDeliveryService.add(dynamicContentDelivery);
+			List<DynamicContentDelivery> allDynamicContent = getPersistenceEngine().retrieveByNamedQuery(
+				"DYNAMIC_CONTENT_DELIVERY_FIND_BY_NAME", "findMe");
+			assertThat(allDynamicContent).isNotEmpty();
+			allDynamicContent = getPersistenceEngine().retrieveByNamedQuery("DYNAMIC_CONTENT_DELIVERY_FIND_BY_NAME", "canNotFound");
+			assertThat(allDynamicContent).isEmpty();
+
+			return null;
 		});
 	}
 
@@ -168,22 +152,17 @@ public class DynamicContentDeliveryTest extends DbTestCase {
 		final DynamicContentDelivery dynamicContentDelivery  = createDynamicContentDelivery();
 		dynamicContentDelivery.setName("findMe");
 
-		getTxTemplate().execute(new TransactionCallback<DynamicContentDelivery>() {
-			@Override
-			public DynamicContentDelivery doInTransaction(final TransactionStatus arg0) {
-				dynamicContentDeliveryService.add(dynamicContentDelivery);
+		getTxTemplate().execute(txStatus -> {
+			dynamicContentDeliveryService.add(dynamicContentDelivery);
 
-				List<DynamicContentDelivery> allDynamicContent = getPersistenceEngine().retrieveByNamedQuery(
-						"DYNAMIC_CONTENT_DELIVERY_FIND_BY_NAME_LIKE", "%indM%");
-				assertNotNull(allDynamicContent);
-				assertFalse(allDynamicContent.isEmpty());
+			List<DynamicContentDelivery> allDynamicContent = getPersistenceEngine().retrieveByNamedQuery(
+				"DYNAMIC_CONTENT_DELIVERY_FIND_BY_NAME_LIKE", "%indM%");
+			assertThat(allDynamicContent).isNotEmpty();
 
-				allDynamicContent = getPersistenceEngine().retrieveByNamedQuery("DYNAMIC_CONTENT_DELIVERY_FIND_BY_NAME_LIKE", "%canNotFound%");
-				assertNotNull(allDynamicContent);
-				assertTrue(allDynamicContent.isEmpty());
+			allDynamicContent = getPersistenceEngine().retrieveByNamedQuery("DYNAMIC_CONTENT_DELIVERY_FIND_BY_NAME_LIKE", "%canNotFound%");
+			assertThat(allDynamicContent).isEmpty();
 
-				return null;
-			}
+			return null;
 		});
 	}
 
@@ -195,17 +174,13 @@ public class DynamicContentDeliveryTest extends DbTestCase {
 	@Test
 	public void testFindAll() throws InvalidConditionTreeException {
 		final DynamicContentDelivery dynamicContentDelivery  = createDynamicContentDelivery();
-		getTxTemplate().execute(new TransactionCallback<DynamicContentDelivery>() {
-			@Override
-			public DynamicContentDelivery doInTransaction(final TransactionStatus arg0) {
-				dynamicContentDeliveryService.add(dynamicContentDelivery);
-				List<DynamicContentDelivery> allDynamicContent = getPersistenceEngine().retrieveByNamedQuery(
-						"DYNAMIC_CONTENT_DELIVERY_FIND_ALL");
-				assertNotNull(allDynamicContent);
-				assertFalse(allDynamicContent.isEmpty());
-				assertTrue(allDynamicContent.size() == 1);
-				return null;
-			}
+		getTxTemplate().execute(txStatus -> {
+			dynamicContentDeliveryService.add(dynamicContentDelivery);
+			List<DynamicContentDelivery> allDynamicContent = getPersistenceEngine().retrieveByNamedQuery(
+				"DYNAMIC_CONTENT_DELIVERY_FIND_ALL");
+			assertThat(allDynamicContent).hasSize(1);
+
+			return null;
 		});
 	}
 
@@ -224,19 +199,15 @@ public class DynamicContentDeliveryTest extends DbTestCase {
 	@Test
 	public void testFindDcaByContentSpace() throws InvalidConditionTreeException {
 		final DynamicContentDelivery dynamicContentDelivery  = createDynamicContentDelivery();
-		getTxTemplate().execute(new TransactionCallback<DynamicContentDelivery>() {
-			@Override
-			public DynamicContentDelivery doInTransaction(final TransactionStatus arg0) {
-				final ContentSpace contentSpace = contentSpaceService.saveOrUpdate(createContentSpace("findMeByCS"));
-				dynamicContentDelivery.getContentspaces().add(contentSpace);
-				dynamicContentDeliveryService.add(dynamicContentDelivery);
-				List<DynamicContentDelivery> allDynamicContent = getPersistenceEngine().retrieveByNamedQuery(
-						"DYNAMIC_CONTENT_DELIVERY_FIND_BY_CONTENT_SPACE", "findMeByCS");
-				assertNotNull(allDynamicContent);
-				assertFalse(allDynamicContent.isEmpty());
-				assertTrue(allDynamicContent.size() == 1);
-				return null;
-			}
+		getTxTemplate().execute(txStatus -> {
+			final ContentSpace contentSpace = contentSpaceService.saveOrUpdate(createContentSpace("findMeByCS"));
+			dynamicContentDelivery.getContentspaces().add(contentSpace);
+			dynamicContentDeliveryService.add(dynamicContentDelivery);
+			List<DynamicContentDelivery> allDynamicContent = getPersistenceEngine().retrieveByNamedQuery(
+				"DYNAMIC_CONTENT_DELIVERY_FIND_BY_CONTENT_SPACE", "findMeByCS");
+			assertThat(allDynamicContent).hasSize(1);
+
+			return null;
 		});
 	}
 
@@ -249,19 +220,15 @@ public class DynamicContentDeliveryTest extends DbTestCase {
 	public void testFindDcaBySellingContextGuid() throws InvalidConditionTreeException {
 		final DynamicContentDelivery dynamicContentDelivery  = createDynamicContentDelivery();
 		final String sellingContextGuid = dynamicContentDelivery.getSellingContextGuid();
-		getTxTemplate().execute(new TransactionCallback<DynamicContentDelivery>() {
-			@Override
-			public DynamicContentDelivery doInTransaction(final TransactionStatus arg0) {
-				final ContentSpace contentSpace = contentSpaceService.saveOrUpdate(createContentSpace("notImportant"));
-				dynamicContentDelivery.getContentspaces().add(contentSpace);
-				dynamicContentDeliveryService.add(dynamicContentDelivery);
-				List<DynamicContentDelivery> allDynamicContent = getPersistenceEngine().retrieveByNamedQuery(
-						"DYNAMIC_CONTENT_DELIVERY_FIND_BY_SELLING_CONTEXT_GUID", sellingContextGuid);
-				assertNotNull(allDynamicContent);
-				assertFalse(allDynamicContent.isEmpty());
-				assertTrue(allDynamicContent.size() == 1);
-				return null;
-			}
+		getTxTemplate().execute(txStatus -> {
+			final ContentSpace contentSpace = contentSpaceService.saveOrUpdate(createContentSpace("notImportant"));
+			dynamicContentDelivery.getContentspaces().add(contentSpace);
+			dynamicContentDeliveryService.add(dynamicContentDelivery);
+			List<DynamicContentDelivery> allDynamicContent = getPersistenceEngine().retrieveByNamedQuery(
+				"DYNAMIC_CONTENT_DELIVERY_FIND_BY_SELLING_CONTEXT_GUID", sellingContextGuid);
+			assertThat(allDynamicContent).hasSize(1);
+
+			return null;
 		});
 	}
 }

@@ -2,9 +2,7 @@
 <exportconfiguration>
 
   <exporters>
-   <exporter type="CUSTOMER">
-     <option key="CARD_NUMBER_FILTER" value="EMPTY"/>
-   </exporter>
+   <exporter type="CUSTOMER"/>
    <exporter type="CUSTOMERPROFILE_ATTRIBUTE"/>
 
   </exporters>

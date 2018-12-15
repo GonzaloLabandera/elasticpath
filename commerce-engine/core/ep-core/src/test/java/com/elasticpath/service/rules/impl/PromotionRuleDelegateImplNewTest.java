@@ -4,16 +4,21 @@
 package com.elasticpath.service.rules.impl;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.jmock.Expectations;
-import org.jmock.integration.junit4.JUnitRuleMockery;
-import org.junit.Rule;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.elasticpath.domain.customer.Customer;
 import com.elasticpath.domain.customer.CustomerSession;
@@ -35,7 +40,7 @@ import com.elasticpath.test.factory.TestCustomerSessionFactory;
 /**
  * Tests {@code PromotionRuleDelegateImpl} without extending elastic path test case.
  */
-@SuppressWarnings({"PMD.AvoidDuplicateLiterals" })
+@RunWith(MockitoJUnitRunner.class)
 public class PromotionRuleDelegateImplNewTest {
 
 	private static final int THREE = 3;
@@ -43,8 +48,21 @@ public class PromotionRuleDelegateImplNewTest {
 	private static final String RULE_CODE = "promo5";
 	private static final int DISCOUNT_QUANTITY_PER_COUPON = 7;
 	private static final int RULE_ID = FIVE;
-	@Rule
-	public final JUnitRuleMockery context = new JUnitRuleMockery();
+
+	@Mock
+	private RuleService ruleService;
+	@Mock
+	private CouponConfigService couponConfigService;
+	@Mock
+	private CouponUsageService couponUsageService;
+	@Mock
+	private ShoppingCart shoppingCart;
+	@Mock
+	private Customer customer;
+
+	@InjectMocks
+	private PromotionRuleDelegateImpl delegate;
+
 
 	/**
 	 * Tests that when calculateAvailableDiscountQuantity is called but there
@@ -52,24 +70,16 @@ public class PromotionRuleDelegateImplNewTest {
 	 */
 	@Test
 	public void testCalculateAvailableDiscountQuantityNoCouponConfig() {
-		final PromotionRuleDelegateImpl delegate = new PromotionRuleDelegateImpl();
-
-		final RuleService ruleService = context.mock(RuleService.class);
-		delegate.setRuleService(ruleService);
-
-		final CouponConfigService couponConfigService = context.mock(CouponConfigService.class);
-		delegate.setCouponConfigService(couponConfigService);
-
-		final ShoppingCart shoppingCart = context.mock(ShoppingCart.class);
-
-		context.checking(new Expectations() { {
-			oneOf(ruleService).findRuleCodeById(RULE_ID); will(returnValue(RULE_CODE));
-			oneOf(couponConfigService).findByRuleCode(RULE_CODE); will(returnValue(null));
-			allowing(shoppingCart).getShopper(); will(returnValue(createShopper()));
-		} });
+		when(ruleService.findRuleCodeById(RULE_ID)).thenReturn(RULE_CODE);
+		when(shoppingCart.getShopper()).thenReturn(createShopper());
 
 		final int actualResult = delegate.calculateAvailableDiscountQuantity(shoppingCart, RULE_ID, DISCOUNT_QUANTITY_PER_COUPON);
+
 		assertEquals("The discountQuantityPerCoupon should be returned", DISCOUNT_QUANTITY_PER_COUPON, actualResult);
+
+		verify(ruleService).findRuleCodeById(RULE_ID);
+		verify(shoppingCart, times(2)).getShopper();
+
 	}
 
 	private Shopper createShopper() {
@@ -84,30 +94,18 @@ public class PromotionRuleDelegateImplNewTest {
 	 */
 	@Test
 	public void testCalculateAvailableDiscountQuantityNoCouponUsage() {
-		final PromotionRuleDelegateImpl delegate = new PromotionRuleDelegateImpl();
-
-		final RuleService ruleService = context.mock(RuleService.class);
-		delegate.setRuleService(ruleService);
-
-		final CouponConfigService couponConfigService = context.mock(CouponConfigService.class);
-		delegate.setCouponConfigService(couponConfigService);
-
-		final ShoppingCart shoppingCart = context.mock(ShoppingCart.class);
-		final Shopper shopper = createShopper();
 		final CouponConfig couponConfig = new CouponConfigImpl();
 		couponConfig.setUsageType(CouponUsageType.LIMIT_PER_ANY_USER);
 
-		final CouponUsageService couponUsageService = context.mock(CouponUsageService.class);
-		delegate.setCouponUsageService(couponUsageService);
-
-		context.checking(new Expectations() { {
-			oneOf(ruleService).findRuleCodeById(RULE_ID); will(returnValue(RULE_CODE));
-			oneOf(couponConfigService).findByRuleCode(RULE_CODE); will(returnValue(couponConfig));
-			allowing(shoppingCart).getShopper(); will(returnValue(shopper));
-		} });
+		when(ruleService.findRuleCodeById(RULE_ID)).thenReturn(RULE_CODE);
+		when(shoppingCart.getShopper()).thenReturn(createShopper());
 
 		final int actualResult = delegate.calculateAvailableDiscountQuantity(shoppingCart, RULE_ID, DISCOUNT_QUANTITY_PER_COUPON);
+
 		assertEquals("The discountQuantityPerCoupon should be returned", DISCOUNT_QUANTITY_PER_COUPON, actualResult);
+
+		verify(ruleService).findRuleCodeById(RULE_ID);
+		verify(shoppingCart, times(2)).getShopper();
 	}
 
 	/**
@@ -116,32 +114,17 @@ public class PromotionRuleDelegateImplNewTest {
 	 */
 	@Test
 	public void testCalculateAvailableDiscountQuantityLimitPerCoupon() {
-		final PromotionRuleDelegateImpl delegate = new PromotionRuleDelegateImpl();
-
-		final RuleService ruleService = context.mock(RuleService.class);
-		delegate.setRuleService(ruleService);
-
-		final CouponConfigService couponConfigService = context.mock(CouponConfigService.class);
-		delegate.setCouponConfigService(couponConfigService);
-
-		final ShoppingCart shoppingCart = context.mock(ShoppingCart.class);
-		final Shopper shopper = createShopper();
-
 		final CouponConfig couponConfig = new CouponConfigImpl();
 		couponConfig.setUsageType(CouponUsageType.LIMIT_PER_COUPON);
 
-		final CouponUsageService couponUsageService = context.mock(CouponUsageService.class);
-		delegate.setCouponUsageService(couponUsageService);
-
-
-		context.checking(new Expectations() { {
-			oneOf(ruleService).findRuleCodeById(RULE_ID); will(returnValue(RULE_CODE));
-			oneOf(couponConfigService).findByRuleCode(RULE_CODE); will(returnValue(couponConfig));
-			allowing(shoppingCart).getShopper(); will(returnValue(shopper));
-		} });
+		when(ruleService.findRuleCodeById(RULE_ID)).thenReturn(RULE_CODE);
+		when(shoppingCart.getShopper()).thenReturn(createShopper());
 
 		final int actualResult = delegate.calculateAvailableDiscountQuantity(shoppingCart, RULE_ID, DISCOUNT_QUANTITY_PER_COUPON);
 		assertEquals("The discountQuantityPerCoupon should be returned", DISCOUNT_QUANTITY_PER_COUPON, actualResult);
+
+		verify(ruleService).findRuleCodeById(RULE_ID);
+		verify(shoppingCart, times(2)).getShopper();
 	}
 
 	/**
@@ -151,15 +134,6 @@ public class PromotionRuleDelegateImplNewTest {
 	 */
 	@Test
 	public void testCalculateAvailableDiscountQuantityMultiUsePerOrder() {
-		final PromotionRuleDelegateImpl delegate = new PromotionRuleDelegateImpl();
-
-		final RuleService ruleService = context.mock(RuleService.class);
-		delegate.setRuleService(ruleService);
-
-		final CouponConfigService couponConfigService = context.mock(CouponConfigService.class);
-		delegate.setCouponConfigService(couponConfigService);
-
-		final ShoppingCart shoppingCart = context.mock(ShoppingCart.class);
 		final Shopper shopper = createShopper();
 
 		final CouponConfig couponConfig = new CouponConfigImpl();
@@ -167,34 +141,39 @@ public class PromotionRuleDelegateImplNewTest {
 		couponConfig.setUsageLimit(FIVE);
 		couponConfig.setMultiUsePerOrder(true);
 
-		final CouponUsageService couponUsageService = context.mock(CouponUsageService.class);
-		delegate.setCouponUsageService(couponUsageService);
-
 		final Set<String> promotionCodes = new HashSet<>();
 		promotionCodes.add("ABC");
 
 		final List<CouponUsage> couponUsageList = new ArrayList<>();
+
 		final Coupon coupon = new CouponImpl();
 		coupon.setCouponCode("ABC");
 		coupon.setCouponConfig(couponConfig);
+
 		final CouponUsage couponUsage = new CouponUsageImpl();
 		couponUsage.setCoupon(coupon);
 		couponUsage.setUseCount(2);
 		couponUsageList.add(couponUsage);
-		final Customer customer = context.mock(Customer.class);
+
 		shopper.setCustomer(customer);
 
-		context.checking(new Expectations() { {
-			oneOf(ruleService).findRuleCodeById(RULE_ID); will(returnValue(RULE_CODE));
-			oneOf(couponConfigService).findByRuleCode(RULE_CODE); will(returnValue(couponConfig));
-			allowing(shoppingCart).getShopper(); will(returnValue(shopper));
-			allowing(shoppingCart).getPromotionCodes(); will(returnValue(promotionCodes));
-			oneOf(couponUsageService).findByRuleCodeAndEmail(RULE_CODE, ""); will(returnValue(couponUsageList));
-			allowing(customer).getEmail(); will(returnValue(""));
-		} });
+		when(ruleService.findRuleCodeById(RULE_ID)).thenReturn(RULE_CODE);
+		when(couponConfigService.findByRuleCode(RULE_CODE)).thenReturn(couponConfig);
+		when(shoppingCart.getShopper()).thenReturn(shopper);
+		when(shoppingCart.getPromotionCodes()).thenReturn(promotionCodes);
+		when(couponUsageService.findByRuleCodeAndEmail(RULE_CODE, "")).thenReturn(couponUsageList);
+		when(customer.getEmail()).thenReturn("");
 
 		final int actualResult = delegate.calculateAvailableDiscountQuantity(shoppingCart, RULE_ID, 2);
+
 		assertEquals("2 * (Coupon Config max - Coupon usage)", 2 * THREE, actualResult);
+
+		verify(ruleService).findRuleCodeById(RULE_ID);
+		verify(couponConfigService).findByRuleCode(RULE_CODE);
+		verify(shoppingCart, times(2)).getShopper();
+		verify(shoppingCart).getPromotionCodes();
+		verify(couponUsageService).findByRuleCodeAndEmail(RULE_CODE, "");
+		verify(customer).getEmail();
 	}
 
 	/**
@@ -204,44 +183,35 @@ public class PromotionRuleDelegateImplNewTest {
 	 */
 	@Test
 	public void testCalculateAvailableDiscountQuantitySingleUsePerOrder() {
-		final PromotionRuleDelegateImpl delegate = new PromotionRuleDelegateImpl();
-
-		final RuleService ruleService = context.mock(RuleService.class);
-		delegate.setRuleService(ruleService);
-
-		final CouponConfigService couponConfigService = context.mock(CouponConfigService.class);
-		delegate.setCouponConfigService(couponConfigService);
-
-		final ShoppingCart shoppingCart = context.mock(ShoppingCart.class);
-		final Shopper shopper = createShopper();
 
 		final CouponConfig couponConfig = new CouponConfigImpl();
 		couponConfig.setUsageType(CouponUsageType.LIMIT_PER_ANY_USER);
 		couponConfig.setUsageLimit(FIVE);
 		couponConfig.setMultiUsePerOrder(false);
 
-		final CouponUsageService couponUsageService = context.mock(CouponUsageService.class);
-		delegate.setCouponUsageService(couponUsageService);
-
+		final String promotionCode = "ABC";
 		final Set<String> promotionCodes = new HashSet<>();
-		promotionCodes.add("ABC");
+		promotionCodes.add(promotionCode);
 
 		final List<CouponUsage> couponUsageList = new ArrayList<>();
+
 		final Coupon coupon = new CouponImpl();
-		coupon.setCouponCode("ABC");
+		coupon.setCouponCode(promotionCode);
 		coupon.setCouponConfig(couponConfig);
+
 		final CouponUsage couponUsage = new CouponUsageImpl();
 		couponUsage.setCoupon(coupon);
 		couponUsage.setUseCount(2);
 		couponUsageList.add(couponUsage);
 
-		context.checking(new Expectations() { {
-			oneOf(ruleService).findRuleCodeById(RULE_ID); will(returnValue(RULE_CODE));
-			oneOf(couponConfigService).findByRuleCode(RULE_CODE); will(returnValue(couponConfig));
-			allowing(shoppingCart).getShopper(); will(returnValue(shopper));
-		} });
+		when(ruleService.findRuleCodeById(RULE_ID)).thenReturn(RULE_CODE);
+		when(shoppingCart.getShopper()).thenReturn(createShopper());
 
 		final int actualResult = delegate.calculateAvailableDiscountQuantity(shoppingCart, RULE_ID, 2);
+
 		assertEquals("1 Coupon usage * parameter", 2, actualResult);
+
+		verify(ruleService).findRuleCodeById(RULE_ID);
+		verify(shoppingCart, times(2)).getShopper();
 	}
 }

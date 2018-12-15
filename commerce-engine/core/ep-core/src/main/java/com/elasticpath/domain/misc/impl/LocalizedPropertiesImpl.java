@@ -15,6 +15,7 @@ import org.apache.commons.lang.builder.ToStringStyle;
 import com.elasticpath.commons.util.impl.LocaleUtils;
 import com.elasticpath.domain.EpDomainException;
 import com.elasticpath.domain.impl.AbstractEpDomainImpl;
+import com.elasticpath.domain.misc.LocalizedAttributeKeyUtils;
 import com.elasticpath.domain.misc.LocalizedProperties;
 import com.elasticpath.domain.misc.LocalizedPropertyValue;
 
@@ -88,20 +89,18 @@ public class LocalizedPropertiesImpl extends AbstractEpDomainImpl implements Loc
 
 	@Override
 	public Locale getLocaleFromKey(final String keyInMap) {
-		String[] keys = StringUtils.split(keyInMap, SEPARATOR);
-		return org.apache.commons.lang.LocaleUtils.toLocale(keys[1]);
+		return LocalizedAttributeKeyUtils.getLocaleFromLocalizedKeyName(keyInMap);
 	}
 
 	@Override
 	public String getPropertyNameFromKey(final String keyInMap) {
-		String[] keys = StringUtils.split(keyInMap, SEPARATOR);
-		return keys[0];
+		return LocalizedAttributeKeyUtils.getAttributePropertyFromLocalizedKeyName(keyInMap);
 	}
 
 	/**
 	 * Creates a new instance of {@link LocalizedPropertyValue}.
 	 *
-	 * @return an instance of the bean specified by {@link #setLocalizedPropertyValueBeanId(String)}
+	 * @return an instance of the bean specified by {@link #setLocalizedPropertiesMap(Map, String)}
 	 */
 	protected LocalizedPropertyValue getNewLocalizedPropertyValue() {
 		return getBean(localizedPropertyValueBean);

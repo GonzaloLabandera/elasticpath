@@ -40,17 +40,17 @@ public class LuceneQueryBuilder implements CompleteQueryBuilder {
 		if (clauses.isEmpty()) {
 			return null; // all clause words were filtered away by the analyzer.
 		}
-		BooleanQuery query = new BooleanQuery(false);
+		BooleanQuery.Builder queryBuilder = new BooleanQuery.Builder();
 		boolean once = true;
 		for (int i = 0; i < clauses.size(); i++) {
 			final LuceneBooleanClause clause = (LuceneBooleanClause) clauses.get(i);
-			if (once && clause.getOccur() == Occur.MUST_NOT) {
-				query.add(new TermQuery(new Term("*", "*")), Occur.SHOULD);
+			if (once && clause.getBooleanClause().getOccur() == Occur.MUST_NOT) {
+				queryBuilder.add(new TermQuery(new Term("*", "*")), Occur.SHOULD);
 				once = false;
 			}
-			query.add(clause);
+			queryBuilder.add(clause.getBooleanClause());
 		}
-		return new LuceneQuery(query);
+		return new LuceneQuery(queryBuilder.build());
 	}
 
 	@Override
@@ -91,7 +91,7 @@ public class LuceneQueryBuilder implements CompleteQueryBuilder {
 		// unless it's already prohibited
 		if (!clauses.isEmpty() && conj == EpQueryParser.CONJ_AND) {
 			LuceneBooleanClause clause = (LuceneBooleanClause) clauses.get(clauses.size() - 1);
-			if (!clause.isProhibited()) {
+			if (!clause.getBooleanClause().isProhibited()) {
 				clause.setOccur(BooleanClause.Occur.MUST);
 			}
 		}
@@ -102,7 +102,8 @@ public class LuceneQueryBuilder implements CompleteQueryBuilder {
 			// notice if the input is a OR b, first term is parsed as required; without
 			// this modification a OR b would parsed as +a OR b
 			LuceneBooleanClause clause = (LuceneBooleanClause) clauses.get(clauses.size() - 1);
-			if (!clause.isProhibited()) {
+			if (!clause.getBooleanClause().isProhibited()) {
+				clause.setOccur(BooleanClause.Occur.SHOULD);
 				clause.setOccur(BooleanClause.Occur.SHOULD);
 			}
 		}

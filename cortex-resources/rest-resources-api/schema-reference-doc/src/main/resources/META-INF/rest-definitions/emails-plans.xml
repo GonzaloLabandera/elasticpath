@@ -4,31 +4,25 @@
 	<family>
 		<name>emails</name>
 		<plan>
+			<name>read-emails</name>
+			<description><![CDATA[Read the customer's list of emails.]]></description>
+			<step>
+				<description><![CDATA[Customers profile to the customer's list of emails..]]></description>
+				<start>profiles.profile</start>
+				<follow-link>emails</follow-link>
+				<result>emails</result>
+			</step>
+		</plan>
+
+		<plan>
 			<name>read-email</name>
 			<description><![CDATA[Read an email from a list of the customer's emails.]]></description>
-			<template>
-				<name>collections.list-element-template</name>
-				<replace>
-					<key>start-resource</key>
-					<value>profiles.profile</value>
-				</replace>
-				<replace>
-					<key>start-name</key>
-					<value>profile</value>
-				</replace>
-				<replace>
-					<key>list-resource</key>
-					<value>emails</value>
-				</replace>
-				<replace>
-					<key>list-name</key>
-					<value>emails</value>
-				</replace>
-				<replace>
-					<key>element-resource</key>
-					<value>email</value>
-				</replace>
-			</template>
+			<step>
+				<description><![CDATA[The customer's list of emails to an email.]]></description>
+				<start>emails</start>
+				<follow-link>element</follow-link>
+				<result>email</result>
+			</step>
 		</plan>
 
 		<plan>
@@ -38,33 +32,20 @@ Add an email to a logged in customer. Out of the box, customers can have only on
 which is their user name. If you create a new email for a registered customer, this changes the customer's user name.
 				]]>
 			</description>
-			<template>
-				<name>controls.form-control-template</name>
-				<replace>
-					<key>start-resource</key>
-					<value>emails</value>
-				</replace>
-				<replace>
-					<key>read-form-link</key>
-					<value>emailform</value>
-				</replace>
-				<replace>
-					<key>form-resource</key>
-					<value>add-email-form</value>
-				</replace>
-				<replace>
-					<key>submit-action-link</key>
-					<value>createemailaction</value>
-				</replace>
-				<replace>
-					<key>submit-resource</key>
-					<value>add-email-action</value>
-				</replace>
-				<replace>
-					<key>submit-result</key>
-					<value>email</value>
-				</replace>
-			</template>
+			<step>
+				<description><![CDATA[The customer's list of emails to the add email form.]]></description>
+				<start>emails</start>
+				<follow-link>emailform</follow-link>
+				<result>add-email-form</result>
+			</step>
+			<step>
+				<description><![CDATA[Submit the add email form.]]></description>
+				<start>add-email-form</start>
+				<submit></submit>
+				<to>add-email-form</to>
+				<via-link>createemailaction</via-link>
+				<result>email</result>
+			</step>
 		</plan>
 	</family>
 </definitions>

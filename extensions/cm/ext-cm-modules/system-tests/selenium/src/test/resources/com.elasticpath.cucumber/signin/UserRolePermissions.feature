@@ -1,4 +1,4 @@
-@smoketest @signin @permission
+@regressionTest @signIn @permission
 Feature: User Role Permissions
 
   Scenario: admin should have access to activities

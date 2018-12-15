@@ -1,12 +1,10 @@
-/**
+/*
  * Copyright (c) Elastic Path Software Inc., 2013
  */
 package com.elasticpath.importexport.common.transformers.impl;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -64,26 +62,19 @@ public class TransformersChainFactoryImplTest {
 
 	/**
 	 * Verify that transformers chain factory creates the chain of transformers properly.
-	 * 
-	 * @throws ConfigurationException
 	 */
 	@Test
-	public void testCreateTransformersChain() {
+	public void testCreateTransformersChain() throws ConfigurationException {
 		TransformersChainFactory transformersChainFactory = new TransformersChainFactoryImpl();
 
-		List<Transformer> transformerList = null;
-		try {
-			transformerList = transformersChainFactory.createTransformersChain(
-					createTransformerConfigurationList(DummyTransformer.class.getName()));
-			
-		} catch (ConfigurationException e) {
-			fail("ConfigurationException must not be thrown");
-		}
+		List<Transformer> transformerList = transformersChainFactory.createTransformersChain(
+			createTransformerConfigurationList(DummyTransformer.class.getName()));
 
-		assertEquals(1, transformerList.size());
+
+		assertThat(transformerList).hasSize(1);
 
 		Transformer transformer = transformerList.get(0);
-		assertTrue(transformer instanceof DummyTransformer);
+		assertThat(transformer).isInstanceOf(DummyTransformer.class);
 
 		transformer.transform(null); // Dummy Transformer can do nothing with nothing.
 	}
@@ -95,15 +86,11 @@ public class TransformersChainFactoryImplTest {
 	public void testCreateTransformersChainThrowsConfigurationExceptionCauseClassNotFoundException() {
 		TransformersChainFactory transformersChainFactory = new TransformersChainFactoryImpl();
 		
-		try {
-			transformersChainFactory.createTransformersChain(
-					createTransformerConfigurationList("MyDummyUnknownClass"));
-			
-			fail("ConfigurationException must be thrown cause ClassNotFoundException");
-		} catch (ConfigurationException e) {
-			assertNotNull(e);
-			assertTrue(e.getCause() instanceof ClassNotFoundException);
-		}
+		assertThatThrownBy(() -> transformersChainFactory.createTransformersChain(
+					createTransformerConfigurationList("MyDummyUnknownClass")))
+			.as("ConfigurationException must be thrown cause ClassNotFoundException")
+			.isInstanceOf(ConfigurationException.class)
+			.hasCauseInstanceOf(ClassNotFoundException.class);
 	}
 
 	/**
@@ -113,15 +100,11 @@ public class TransformersChainFactoryImplTest {
 	public void testCreateTransformersChainThrowsExceptionsCauseIllegalAccessException() {
 		TransformersChainFactory transformersChainFactory = new TransformersChainFactoryImpl();
 
-		try {
-			transformersChainFactory.createTransformersChain(
-					createTransformerConfigurationList(IllegalAccessExceptionTransformer.class.getName()));
-			
-			fail("ConfigurationException must be thrown cause of IllegalAccessException");
-		} catch (ConfigurationException e) {
-			assertNotNull(e);
-			assertTrue(e.getCause() instanceof IllegalAccessException);
-		}
+		assertThatThrownBy(() -> transformersChainFactory.createTransformersChain(
+					createTransformerConfigurationList(IllegalAccessExceptionTransformer.class.getName())))
+			.as("ConfigurationException must be thrown cause of IllegalAccessException")
+			.isInstanceOf(ConfigurationException.class)
+			.hasCauseInstanceOf(IllegalAccessException.class);
 	}
 	
 	/**
@@ -130,15 +113,11 @@ public class TransformersChainFactoryImplTest {
 	@Test
 	public void testCreateTransformersChainThrowsExceptionsCauseInstantiationException() {
 		TransformersChainFactory transformersChainFactory = new TransformersChainFactoryImpl();
-		
-		try {
-			transformersChainFactory.createTransformersChain(
-					createTransformerConfigurationList(AbstractInstantiationExceptionTransformer.class.getName()));
-			
-			fail("ConfigurationException must be thrown cause of InstantiationException");
-		} catch (ConfigurationException e) {
-			assertNotNull(e);
-			assertTrue(e.getCause() instanceof InstantiationException);
-		}
+
+		assertThatThrownBy(() -> transformersChainFactory.createTransformersChain(
+					createTransformerConfigurationList(AbstractInstantiationExceptionTransformer.class.getName())))
+			.as("ConfigurationException must be thrown cause of InstantiationException")
+			.isInstanceOf(ConfigurationException.class)
+			.hasCauseInstanceOf(InstantiationException.class);
 	}
 }

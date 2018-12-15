@@ -5,7 +5,7 @@ package com.elasticpath.search.index.solr.queueingpublisher.impl;
 
 import java.io.IOException;
 
-import org.apache.solr.client.solrj.SolrServer;
+import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.common.SolrInputDocument;
 
@@ -26,14 +26,14 @@ public class UpdateCommand implements SolrPublishCommand {
 	}
 
 	/**
-	 * Applies the update to the specified SolrServer server.
+	 * Applies the update to the specified SolrClient client.
 	 * 
-	 * @param server the specified {@link SolrServer}.
+	 * @param client the specified {@link SolrClient}.
 	 * @throws SolrServerException on failure.
 	 * @throws IOException on failure.
 	 */
 	@Override
-	public void apply(final SolrServer server) throws SolrServerException, IOException {
-		server.add(document);
+	public void apply(final SolrClient client) throws SolrServerException, IOException {
+		client.add(document);
 	}
 }

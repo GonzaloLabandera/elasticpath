@@ -38,5 +38,5 @@ public abstract class AbstractCustomerTagStrategy implements CustomerTagStrategy
 	 * @param customer the customer to create a tag from
 	 * @return Optional Tag. If no data available to create a tag with, then return empty.
 	 */
-	protected abstract Optional<Tag> createTag(final Customer customer);
+	protected abstract Optional<Tag> createTag(Customer customer);
 }

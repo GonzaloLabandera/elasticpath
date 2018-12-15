@@ -1,8 +1,9 @@
-/**
- * Copyright (c) Elastic Path Software Inc., 2013
+/*
+ * Copyright (c) Elastic Path Software Inc., 2018
  */
 package com.elasticpath.service.search;
 
+import java.util.Map;
 
 /**
  * Represents a search criteria that has objects that are within a category.
@@ -71,4 +72,16 @@ public interface ProductCategorySearchCriteria extends CatalogAwareSearchCriteri
 	 * @param activeOnlyFlag the active-only flag
 	 */
 	void setActiveOnly(boolean activeOnlyFlag);
+
+	/**
+	 * Get the applied facets in search criteria.
+	 * @return applied facets
+	 */
+	Map<String, String> getAppliedFacets();
+
+	/**
+	 * Sets the applied facets.
+	 * @param appliedFacets applied facets
+	 */
+	void setAppliedFacets(Map<String, String> appliedFacets);
 }

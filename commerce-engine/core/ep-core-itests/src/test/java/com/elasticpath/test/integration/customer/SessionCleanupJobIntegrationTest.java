@@ -3,7 +3,7 @@
  */
 package com.elasticpath.test.integration.customer;
 
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -43,7 +43,7 @@ import com.elasticpath.test.integration.cart.AbstractCartIntegrationTestParent;
 import com.elasticpath.test.persister.testscenarios.SimpleStoreScenario;
 
 /**
- * TODO.
+ * Test that the session cleanup job cleans up as expected.
  */
 @SuppressWarnings("PMD.GodClass")
 public class SessionCleanupJobIntegrationTest extends AbstractCartIntegrationTestParent {
@@ -311,16 +311,18 @@ public class SessionCleanupJobIntegrationTest extends AbstractCartIntegrationTes
 		int checkDeleteSize = cleanupBatchSize;
 		int loopCount = 0;
 		while (leftOverSessions > 0) {
-			assertTrue(String.format("The delete size (%d) did not match the batch size (%d) on loop %d.",
-					checkDeleteSize, cleanupBatchSize, loopCount), checkDeleteSize == cleanupBatchSize);
+			assertThat(cleanupBatchSize)
+				.as("The delete size (%d) did not match the batch size (%d) on loop %d.", checkDeleteSize, cleanupBatchSize, loopCount)
+				.isEqualTo(checkDeleteSize);
 			checkDeleteSize = sessionCleanupJob.purgeSessionHistory();
 			leftOverSessions -= checkDeleteSize;
 			loopCount++;
 		}
 
 		// Verify
-		assertTrue(String.format("The delete size (%d) does not match expected size (%d) on last pass.",
-				checkDeleteSize, expectedLastPassSize), checkDeleteSize == expectedLastPassSize);
+		assertThat(expectedLastPassSize)
+			.as("The delete size (%d) does not match expected size (%d) on last pass.", checkDeleteSize, expectedLastPassSize)
+			.isEqualTo(checkDeleteSize);
 		verifyDeletions(track, 1);
 	}
 
@@ -362,18 +364,19 @@ public class SessionCleanupJobIntegrationTest extends AbstractCartIntegrationTes
 	private void verifyCustomerSessionsPersistedState(final Verifier<CustomerSession> customerSessionVerifier,
 			final Set<CustomerSession> sessionSet, final String message, final int passNumber) {
 		for (CustomerSession checkSession : sessionSet) {
-			assertTrue(String.format("CustomerSession (guid:%s) (email:%s) %s - Pass %d",
-					checkSession.getGuid(), checkSession.getShopper().getCustomer().getEmail(), message, passNumber),
-					customerSessionVerifier.verify(checkSession));
+			assertThat(customerSessionVerifier.verify(checkSession))
+				.as("CustomerSession (guid:%s) (email:%s) %s - Pass %d",
+					checkSession.getGuid(), checkSession.getShopper().getCustomer().getEmail(), message, passNumber)
+				.isTrue();
 		}
 	}
 
 	private void verifyShoppersPersistedState(final Verifier<Shopper> shopperVerifier, final Set<Shopper> shopperSet,
 			final String message, final int passNumber) {
 		for (Shopper shopper : shopperSet) {
-			assertTrue(String.format("Shopper (uid:%d) (guid:%s) %s - Pass %d",
-					shopper.getUidPk(), shopper.getGuid(), message, passNumber),
-					shopperVerifier.verify(shopper));
+			assertThat(shopperVerifier.verify(shopper))
+				.as("Shopper (uid:%d) (guid:%s) %s - Pass %d", shopper.getUidPk(), shopper.getGuid(), message, passNumber)
+				.isTrue();
 		}
 	}
 
@@ -523,54 +526,24 @@ public class SessionCleanupJobIntegrationTest extends AbstractCartIntegrationTes
     }
 
     private boolean verifyShopperExists(final Shopper shopper) {
-    	if (!shopper.isPersisted()) {
-    		return false;
-    	}
-    	if (shopperService.get(shopper.getUidPk()) == null) {
-    		return false;
-    	}
-		return true;
-    }
+		return shopper.isPersisted() && shopperService.get(shopper.getUidPk()) != null;
+	}
 
     // I wish Java had delegates. =(
     private Verifier<CustomerSession> getCustomerSessionExistsVerifier() {
-    	final Verifier<CustomerSession> verifier = new Verifier<CustomerSession>() {
-			@Override
-			public boolean verify(final CustomerSession customerSession) {
-				return verifyCustomerSessionExists(customerSession);
-			}
-		};
-		return verifier;
+		return this::verifyCustomerSessionExists;
     }
 
     private Verifier<CustomerSession> getCustomerSessionNotExistsVerifier() {
-    	final Verifier<CustomerSession> verifier = new Verifier<CustomerSession>() {
-			@Override
-			public boolean verify(final CustomerSession customerSession) {
-				return !verifyCustomerSessionExists(customerSession);
-			}
-		};
-		return verifier;
+		return customerSession -> !verifyCustomerSessionExists(customerSession);
     }
 
     private Verifier<Shopper> getShopperExistsVerifier() {
-    	final Verifier<Shopper> verifier = new Verifier<Shopper>() {
-			@Override
-			public boolean verify(final Shopper shopper) {
-				return verifyShopperExists(shopper);
-			}
-		};
-		return verifier;
+		return shopper -> verifyShopperExists(shopper);
     }
 
     private Verifier<Shopper> getShopperNotExistsVerifier() {
-    	final Verifier<Shopper> verifier = new Verifier<Shopper>() {
-			@Override
-			public boolean verify(final Shopper shopper) {
-				return !verifyShopperExists(shopper);
-			}
-		};
-		return verifier;
+		return shopper -> !verifyShopperExists(shopper);
     }
 
     private int getAccessAgeInDays(final AccessAge age) {

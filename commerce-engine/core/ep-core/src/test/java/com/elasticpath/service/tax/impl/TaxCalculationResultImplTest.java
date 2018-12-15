@@ -3,11 +3,10 @@
  */
 package com.elasticpath.service.tax.impl;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -17,9 +16,14 @@ import java.util.HashSet;
 import java.util.Locale;
 import java.util.Set;
 
-import org.jmock.Expectations;
+import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
 
+import com.elasticpath.base.exception.EpServiceException;
+import com.elasticpath.commons.beanframework.BeanFactory;
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.catalog.Price;
 import com.elasticpath.domain.catalog.ProductSku;
@@ -31,19 +35,22 @@ import com.elasticpath.domain.shoppingcart.ShoppingItem;
 import com.elasticpath.domain.tax.TaxCategory;
 import com.elasticpath.domain.tax.impl.TaxCategoryImpl;
 import com.elasticpath.money.Money;
-import com.elasticpath.money.StandardMoneyFormatter;
 import com.elasticpath.service.tax.TaxCalculationResult;
-import com.elasticpath.test.jmock.AbstractEPTestCase;
 
 /**
  * Tests that the TaxCalculationResultImpl methods work as expected.
  */
-public class TaxCalculationResultImplTest extends AbstractEPTestCase {
+@RunWith(MockitoJUnitRunner.class)
+public class TaxCalculationResultImplTest {
 
 	private static final String OTHERSKU = "othersku";
 	private static final String MYSKU = "mysku";
 
 	private static final Currency CAD = Currency.getInstance(Locale.CANADA);
+
+	@Mock
+	private BeanFactory beanFactory;
+
 	private TaxCalculationResultImpl taxCalculationResult;
 
 	/**
@@ -51,13 +58,18 @@ public class TaxCalculationResultImplTest extends AbstractEPTestCase {
 	 * 
 	 * @throws java.lang.Exception if error occurs
 	 */
-	@Override
+	@Before
 	public void setUp() throws Exception {
-		super.setUp();
-		
-		stubGetBean(ContextIdNames.MONEY_FORMATTER, StandardMoneyFormatter.class);
-		stubGetBean(ContextIdNames.LOCALIZED_PROPERTIES, LocalizedPropertiesImpl.class);
-		taxCalculationResult = new TaxCalculationResultImpl();
+		when(beanFactory.getBean(ContextIdNames.LOCALIZED_PROPERTIES)).thenAnswer(invocation -> new LocalizedPropertiesImpl());
+
+		taxCalculationResult = new TaxCalculationResultImpl() {
+			private static final long serialVersionUID = 740L;
+
+			@Override
+			protected <T> T getBean(final String beanName) {
+				return beanFactory.getBean(beanName);
+			}
+		};
 		taxCalculationResult.setDefaultCurrency(CAD);
 	}
 
@@ -66,22 +78,24 @@ public class TaxCalculationResultImplTest extends AbstractEPTestCase {
 	 */
 	@Test
 	public void testAddTaxValue() {
-		TaxCategory taxCategory = new TaxCategoryImpl();
+		TaxCategory taxCategory = new TaxCategoryImpl() {
+			private static final long serialVersionUID = 740L;
+
+			@Override
+			protected <T> T getBean(final String beanName) {
+				return beanFactory.getBean(beanName);
+			}
+		};
 		Money amount = newMoney("10");
 		
 		taxCalculationResult.addTaxValue(taxCategory, amount);
 		
-		assertTrue(taxCalculationResult.getTaxCategoriesIterator().hasNext());
-		
-		assertEquals(taxCategory, taxCalculationResult.getTaxCategoriesIterator().next());
-		
-		assertEquals(amount.getAmount(), taxCalculationResult.getTaxValue(taxCategory).getAmount());
-		assertEquals(amount.getAmount(), taxCalculationResult.getTotalTaxes().getAmount());
+		assertThat(taxCalculationResult.getTaxCategoriesIterator()).containsOnly(taxCategory);
+
+		assertThat(taxCalculationResult.getTaxValue(taxCategory).getAmount()).isEqualTo(amount.getAmount());
+		assertThat(taxCalculationResult.getTotalTaxes().getAmount()).isEqualTo(amount.getAmount());
 	}
 
-	/**
-	 *
-	 */
 	private Money newMoney(final String value) {
 		return Money.valueOf(new BigDecimal(value).setScale(2), CAD);
 	}
@@ -94,12 +108,12 @@ public class TaxCalculationResultImplTest extends AbstractEPTestCase {
 		Money shippingTax = newMoney("3");
 		taxCalculationResult.addShippingTax(shippingTax);
 		
-		assertEquals(shippingTax.getAmount(), taxCalculationResult.getShippingTax().getAmount());
+		assertThat(taxCalculationResult.getShippingTax().getAmount()).isEqualTo(shippingTax.getAmount());
 
 		// add a little bit more
 		taxCalculationResult.addShippingTax(shippingTax);
 		
-		assertEquals(shippingTax.getAmount().multiply(new BigDecimal("2")), taxCalculationResult.getShippingTax().getAmount());
+		assertThat(taxCalculationResult.getShippingTax().getAmount()).isEqualTo(shippingTax.getAmount().multiply(new BigDecimal("2")));
 		
 	}
 
@@ -108,7 +122,7 @@ public class TaxCalculationResultImplTest extends AbstractEPTestCase {
 	 */
 	@Test
 	public void testGetTaxValue() {
-		assertNotNull(taxCalculationResult.getTaxValue(null));
+		assertThat(taxCalculationResult.getTaxValue(null)).isNotNull();
 	}
 
 	/**
@@ -119,7 +133,7 @@ public class TaxCalculationResultImplTest extends AbstractEPTestCase {
 		taxCalculationResult.addToTaxInItemPrice(newMoney("6"));
 		taxCalculationResult.addToTaxInItemPrice(newMoney("3"));
 		
-		assertEquals(newMoney("9"), taxCalculationResult.getTaxInItemPrice());
+		assertThat(taxCalculationResult.getTaxInItemPrice()).isEqualTo(newMoney("9"));
 	}
 
 	/**
@@ -128,13 +142,10 @@ public class TaxCalculationResultImplTest extends AbstractEPTestCase {
 	@Test
 	public void testSetDefaultCurrency() {
 		taxCalculationResult = new TaxCalculationResultImpl();
-		
-		try {
-			taxCalculationResult.getTotalTaxes();
-			fail("If no default currency has been set then no calculations should be possible.");
-		} catch (Exception exc) {
-			assertNotNull(exc);
-		}
+
+		assertThatThrownBy(() -> taxCalculationResult.getTotalTaxes())
+			.as("If no default currency has been set then no calculations should be possible.")
+			.isInstanceOf(EpServiceException.class);
 	}
 
 	/**
@@ -145,7 +156,7 @@ public class TaxCalculationResultImplTest extends AbstractEPTestCase {
 		taxCalculationResult.addItemTax(MYSKU, newMoney("3"));
 		taxCalculationResult.addItemTax(OTHERSKU, newMoney("5"));
 		
-		assertEquals(new BigDecimal("8").setScale(2), taxCalculationResult.getTotalItemTax().getAmount());
+		assertThat(taxCalculationResult.getTotalItemTax().getAmount()).isEqualTo("8.00");
 	}
 	
 	/**
@@ -157,10 +168,15 @@ public class TaxCalculationResultImplTest extends AbstractEPTestCase {
 		taxCalculationResult.addItemTax(MYSKU, newMoney("5"));
 		taxCalculationResult.addItemTax(OTHERSKU, newMoney("5"));
 		
-		assertEquals("expected getTotalItemTax to be the sum of the latest calls to addItemTax for each sku.", 
-				BigDecimal.TEN.setScale(2), taxCalculationResult.getTotalItemTax().getAmount());
-		assertEquals("expected getLineItemTax to return last value set for sku.", newMoney("5"), taxCalculationResult.getLineItemTax(MYSKU));
-		assertEquals("getLineItemTax should return value set by addItemTax", newMoney("5"), taxCalculationResult.getLineItemTax(OTHERSKU));
+		assertThat(taxCalculationResult.getTotalItemTax().getAmount())
+			.as("expected getTotalItemTax to be the sum of the latest calls to addItemTax for each sku.")
+			.isEqualTo("10.00");
+		assertThat(taxCalculationResult.getLineItemTax(MYSKU))
+			.as("expected getLineItemTax to return last value set for sku.")
+			.isEqualTo(newMoney("5"));
+		assertThat(taxCalculationResult.getLineItemTax(OTHERSKU))
+			.as("getLineItemTax should return value set by addItemTax")
+			.isEqualTo(newMoney("5"));
 	}
 
 	/**
@@ -172,8 +188,12 @@ public class TaxCalculationResultImplTest extends AbstractEPTestCase {
 		taxCalculationResult.addItemTax(MYSKU, newMoney("3"));
 		taxCalculationResult.addItemTax(OTHERSKU, newMoney("5"));
 		
-		assertEquals("getLineItemTax should return value set by addItemTax", newMoney("3"), taxCalculationResult.getLineItemTax(MYSKU));
-		assertEquals("getLineItemTax should return value set by addItemTax", newMoney("5"), taxCalculationResult.getLineItemTax(OTHERSKU));
+		assertThat(taxCalculationResult.getLineItemTax(MYSKU))
+			.as("getLineItemTax should return value set by addItemTax")
+			.isEqualTo(newMoney("3"));
+		assertThat(taxCalculationResult.getLineItemTax(OTHERSKU))
+			.as("getLineItemTax should return value set by addItemTax")
+			.isEqualTo(newMoney("5"));
 	}
 	
 	/**
@@ -184,8 +204,10 @@ public class TaxCalculationResultImplTest extends AbstractEPTestCase {
 	public void testGetLineItemTaxNoSku() {
 		taxCalculationResult.addItemTax(MYSKU, newMoney("3"));
 		taxCalculationResult.addItemTax(OTHERSKU, newMoney("5"));
-		
-		assertEquals("expected requesting tax for unknown sku to return null", null, taxCalculationResult.getLineItemTax("someothersku"));
+
+		assertThat(taxCalculationResult.getLineItemTax("someothersku"))
+			.as("expected requesting tax for unknown sku to return null")
+			.isNull();
 	}
 
 	/**
@@ -220,10 +242,14 @@ public class TaxCalculationResultImplTest extends AbstractEPTestCase {
 		taxCalculationResult.applyTaxes(lineItems);
 
 		final BigDecimal myTaxAmount = myOrderSku.getTaxAmount();
-		assertEquals("expected tax for ordersku to be set to value given to addItemTax", new BigDecimal("3.00"), myTaxAmount);
+		assertThat(myTaxAmount)
+			.as("expected tax for ordersku to be set to value given to addItemTax")
+			.isEqualTo("3.00");
 
 		final BigDecimal otherTaxAmount = otherOrderSku.getTaxAmount();
-		assertEquals("expected tax for ordersku to be set to value given to addItemTax", new BigDecimal("5.00"), otherTaxAmount);
+		assertThat(otherTaxAmount)
+			.as("expected tax for ordersku to be set to value given to addItemTax")
+			.isEqualTo("5.00");
 	}
 
 	/**
@@ -233,26 +259,20 @@ public class TaxCalculationResultImplTest extends AbstractEPTestCase {
 	public void testApplyTaxesSkuNoPriceCodeSuccess() {
 		taxCalculationResult.addItemTax(MYSKU, newMoney("3"));
 		Collection<ShoppingItem> lineItems = new ArrayList<>(2);
-		
+
 		ProductSku myProductSku = new ProductSkuImpl();
 		myProductSku.setSkuCode(MYSKU);
 		myProductSku.setGuid(MYSKU);
-		
+
 		ProductSku otherProductSku = new ProductSkuImpl();
 		otherProductSku.setSkuCode(OTHERSKU);
 		otherProductSku.setGuid(OTHERSKU);
 
-		final ShoppingItem myOrderSku = context.mock(ShoppingItem.class, "My Order SKU");
-		final ShoppingItem otherOrderSku = context.mock(ShoppingItem.class, "Other Order SKU");
+		final ShoppingItem myOrderSku = mock(ShoppingItem.class, "My Order SKU");
+		final ShoppingItem otherOrderSku = mock(ShoppingItem.class, "Other Order SKU");
 
-		context.checking(new Expectations() {
-			{
-				allowing(myOrderSku).hasPrice();
-				will(returnValue(false));
-				allowing(otherOrderSku).hasPrice();
-				will(returnValue(false));
-			}
-		});
+		when(myOrderSku.hasPrice()).thenReturn(false);
+		when(otherOrderSku.hasPrice()).thenReturn(false);
 
 		lineItems.add(myOrderSku);
 		lineItems.add(otherOrderSku);
@@ -268,7 +288,7 @@ public class TaxCalculationResultImplTest extends AbstractEPTestCase {
 	public void testAddBeforeTaxItemPrice() {
 		taxCalculationResult.addBeforeTaxItemPrice(newMoney("5"));
 		
-		assertEquals(new BigDecimal("5").setScale(2), taxCalculationResult.getBeforeTaxSubTotal().getAmount());
+		assertThat(taxCalculationResult.getBeforeTaxSubTotal().getAmount()).isEqualTo("5.00");
 	}
 
 	/**
@@ -278,7 +298,7 @@ public class TaxCalculationResultImplTest extends AbstractEPTestCase {
 	public void testAddBeforeTaxShippingCost() {
 		taxCalculationResult.addBeforeTaxShippingCost(newMoney("5"));
 		
-		assertEquals(new BigDecimal("5").setScale(2), taxCalculationResult.getBeforeTaxShippingCost().getAmount());
+		assertThat(taxCalculationResult.getBeforeTaxShippingCost().getAmount()).isEqualTo("5.00");
 	}
 
 	/**
@@ -292,16 +312,17 @@ public class TaxCalculationResultImplTest extends AbstractEPTestCase {
 		
 		TaxCalculationResultImpl obj2 = newTaxCalculationResult(cAD);
 		
-		assertEquals(obj1, obj2);
-		assertEquals(obj2, obj1);
-		assertFalse(obj1.equals(null)); //NOPMD
-		
-		assertEquals(obj1, obj1);
+		assertThat(obj2).isEqualTo(obj1);
+
+		assertThat(obj1)
+			.isNotNull()
+			.isEqualTo(obj2)
+			.isEqualTo(obj1);
 		
 		// make objects not equal
 		obj1.setBeforeTaxShippingCost(newMoney("34"));
 		
-		assertFalse(obj1.equals(obj2));
+		assertThat(obj1).isNotEqualTo(obj2);
 	}
 
 	/**
@@ -330,14 +351,16 @@ public class TaxCalculationResultImplTest extends AbstractEPTestCase {
 		testSet.add(result1);
 		testSet.add(result2);
 		
-		assertEquals("Only one of the objects should be in the Set", 1, testSet.size());
+		assertThat(testSet)
+			.as("Only one of the objects should be in the Set")
+			.hasSize(1);
 		
 		TaxCalculationResult taxCalcResult = result1;
 		
 		taxCalcResult.setDefaultCurrency(CAD);
 		testSet.add(taxCalcResult);
 		
-		assertEquals(2, testSet.size());
+		assertThat(testSet).hasSize(2);
 	}
 	
 	/**
@@ -345,9 +368,16 @@ public class TaxCalculationResultImplTest extends AbstractEPTestCase {
 	 */
 	@Test
 	public void testSetTaxValue() {
-		TaxCategory taxCategory = new TaxCategoryImpl();
+		TaxCategory taxCategory = new TaxCategoryImpl() {
+			private static final long serialVersionUID = 740L;
+
+			@Override
+			protected <T> T getBean(final String beanName) {
+				return beanFactory.getBean(beanName);
+			}
+		};
 		taxCalculationResult.addTaxValue(taxCategory, newMoney("3"));
-		assertEquals(newMoney("3"), taxCalculationResult.getTaxValue(taxCategory));
+		assertThat(taxCalculationResult.getTaxValue(taxCategory)).isEqualTo(newMoney("3"));
 	}
 
 	/**
@@ -365,11 +395,11 @@ public class TaxCalculationResultImplTest extends AbstractEPTestCase {
 		
 		taxCalculationResult.addTaxValue(anotherTaxCategory, newMoney("15"));
 		taxCalculationResult.addTaxValue(taxCategory, newMoney("5"));
-		assertEquals(newMoney("20"), taxCalculationResult.getTotalTaxes());
+		assertThat(taxCalculationResult.getTotalTaxes()).isEqualTo(newMoney("20"));
 
 		taxCalculationResult.addTaxValue(anotherTaxCategory, newMoney("5"));
 		taxCalculationResult.addTaxValue(taxCategory, newMoney("5"));
-		assertEquals(newMoney("30"), taxCalculationResult.getTotalTaxes());
+		assertThat(taxCalculationResult.getTotalTaxes()).isEqualTo(newMoney("30"));
 	}
 	
 	/**
@@ -377,7 +407,7 @@ public class TaxCalculationResultImplTest extends AbstractEPTestCase {
 	 */
 	@Test
 	public void testToString() {
-		assertNotNull(taxCalculationResult.toString());
+		assertThat(taxCalculationResult.toString()).isNotNull();
 		
 	}
 }

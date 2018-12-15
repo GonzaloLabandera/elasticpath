@@ -39,7 +39,7 @@ public class StoreEditor extends AbstractPageObject {
 	private static final String SELECTED_LANGUAGES_COLUMN_CSS = SELECTED_LANGUAGES_PARENT_CSS + "div[column-id='%s']";
 	private static final String WAREHOUSE_NAME_BUTTON_CSS = "div[widget-id='%s'][widget-type='Button'][seeable='true']";
 	private static final String STORE_MARKETING_PARENT_CSS = "div[automation-id='com.elasticpath.cmclient.core.CoreMessages";
-	private static final String STORE_MARKETING_EDIT_VALUE_BUTTON_CSS = STORE_MARKETING_PARENT_CSS + ".Store_Marketing_EditValue']";
+	private static final String STORE_MARKETING_EDIT_VALUE_BUTTON_CSS = STORE_MARKETING_PARENT_CSS + ".Store_Marketing_EditValue'][seeable='true']";
 	private static final String STORE_MARKETING_SETTINGS_PARENT_CSS = "div[widget-type='Table'][widget-id='Store Marketing Table']";
 	private static final String STORE_MARKETING_SETTINGS_COLUMN_CSS = STORE_MARKETING_SETTINGS_PARENT_CSS + " div[column-id='%s']";
 	private static final String STORE_MARKETING_SETTINGS_EDIT_VALUE_INPUT_CSS = "div[widget-id='Edit Setting'] div[widget-id='Value'] textarea";
@@ -271,9 +271,8 @@ public class StoreEditor extends AbstractPageObject {
 	 *
 	 * @param newStoreState String
 	 */
-	public void changeStoreState(final String newStoreState) {
-		clickButton(STORE_CHANGE_STATE_BUTTON_CSS, "Store Change State Button");
-		clickButton(String.format(STORE_STATE_OPTION_CSS, newStoreState), newStoreState + " Button");
+	public void changeStoreStateAndConfirm(final String newStoreState) {
+		changeStoreState(newStoreState);
 		clickButton(STORE_STATE_CHANGE_CONFIRMATION_BUTTON_CSS, "Store State Change OK Button");
 	}
 
@@ -295,5 +294,10 @@ public class StoreEditor extends AbstractPageObject {
 		assertThat(isSelected(STORE_ENABLED_DATA_POLICY_CSS))
 				.as("Data Policies is not enabled.")
 				.isTrue();
+	}
+
+	public void changeStoreState(final String newStoreState){
+		clickButton(STORE_CHANGE_STATE_BUTTON_CSS, "Store Change State Button");
+		clickButton(String.format(STORE_STATE_OPTION_CSS, newStoreState), newStoreState + " Button");
 	}
 }

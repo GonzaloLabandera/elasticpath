@@ -49,12 +49,7 @@ public class ProductBundleAdapter extends AbstractDomainAdapterImpl<ProductBundl
 
 	private Map<String, String> bundleConstituentCodeTypeResolver = new HashMap<>();
 
-	private static final Comparator<ProductBundleConstituentDTO> COMPARATOR = new Comparator<ProductBundleConstituentDTO>() {
-		@Override
-		public int compare(final ProductBundleConstituentDTO constituent1, final ProductBundleConstituentDTO constituent2) {
-			return constituent1.getOrdering().compareTo(constituent2.getOrdering());
-		}
-	};
+	private static final Comparator<ProductBundleConstituentDTO> COMPARATOR = Comparator.comparing(ProductBundleConstituentDTO::getOrdering);
 
 	@Override
 	public void populateDTO(final ProductBundle source, final ProductBundleDTO target) {

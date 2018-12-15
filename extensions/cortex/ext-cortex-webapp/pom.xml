@@ -47,17 +47,8 @@
 			<artifactId>ep-relos-webapp-housing</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>javax.inject</groupId>
-			<artifactId>javax.inject</artifactId>
-		</dependency>
-		<dependency>
 			<groupId>javax.validation</groupId>
 			<artifactId>validation-api</artifactId>
-		</dependency>
-		<!-- JAXB is included explicitly in WEB-INF/lib to support jboss (RE-421) and weblogic (COR-2665). -->
-		<dependency>
-			<groupId>com.sun.xml.bind</groupId>
-			<artifactId>jaxb-impl</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>com.sun.xml.bind</groupId>
@@ -79,6 +70,11 @@
 		<dependency>
 			<groupId>org.apache.geronimo.specs</groupId>
 			<artifactId>geronimo-j2ee-management_1.1_spec</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.google.protobuf</groupId>
+			<artifactId>protobuf-java</artifactId>
 			<scope>provided</scope>
 		</dependency>
 
@@ -147,6 +143,11 @@
 			<artifactId>log4j</artifactId>
 			<scope>provided</scope>
 		</dependency>
+		<!-- Non-OSGi Drools dependencies -->
+		<dependency>
+			<groupId>org.mvel</groupId>
+			<artifactId>mvel2</artifactId>
+		</dependency>
 
 		<!-- Bundles. Everything below this comment should be marked as "provided" -->
 		<dependency>
@@ -155,8 +156,28 @@
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
+			<groupId>org.apache.servicemix.bundles</groupId>
+			<artifactId>org.apache.servicemix.bundles.quartz</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.thoughtworks.xstream</groupId>
+			<artifactId>xstream</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
 			<groupId>javax.cache</groupId>
 			<artifactId>cache-api</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>javax.security.jacc</groupId>
+			<artifactId>javax.security.jacc-api</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.sun.mail</groupId>
+			<artifactId>javax.mail</artifactId>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
@@ -191,17 +212,12 @@
 		</dependency>
 		<dependency>
 			<groupId>org.apache.felix</groupId>
-			<artifactId>org.apache.felix.http.base</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.felix</groupId>
 			<artifactId>org.apache.felix.http.bridge</artifactId>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.felix</groupId>
-			<artifactId>org.apache.felix.http.whiteboard</artifactId>
+			<artifactId>org.apache.felix.http.servlet-api</artifactId>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
@@ -316,6 +332,12 @@
 			<artifactId>spring-batch-infrastructure</artifactId>
 			<scope>provided</scope>
 		</dependency>
+
+		<dependency>
+			<groupId>commons-codec</groupId>
+			<artifactId>commons-codec</artifactId>
+			<scope>provided</scope>
+		</dependency>
 		<dependency>
 			<groupId>commons-pool</groupId>
 			<artifactId>commons-pool</artifactId>
@@ -354,6 +376,99 @@
 			<version>${spring-security-oauth2.osgi.version}</version>
 			<scope>provided</scope>
 		</dependency>
+
+		<!-- Drools & KIE -->
+		<dependency>
+			<groupId>org.drools</groupId>
+			<artifactId>drools-core</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.drools</groupId>
+			<artifactId>drools-persistence-api</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.drools</groupId>
+			<artifactId>drools-persistence-jpa</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.drools</groupId>
+			<artifactId>drools-compiler</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.kie</groupId>
+			<artifactId>kie-api</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.kie</groupId>
+			<artifactId>kie-internal</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.kie.soup</groupId>
+			<artifactId>kie-soup-project-datamodel-api</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.kie.soup</groupId>
+			<artifactId>kie-soup-commons</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.kie.soup</groupId>
+			<artifactId>kie-soup-project-datamodel-commons</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.kie.soup</groupId>
+			<artifactId>kie-soup-maven-support</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.jbpm</groupId>
+			<artifactId>jbpm-runtime-manager</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.jbpm</groupId>
+			<artifactId>jbpm-audit</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.jbpm</groupId>
+			<artifactId>jbpm-flow</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.jbpm</groupId>
+			<artifactId>jbpm-human-task-core</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.jbpm</groupId>
+			<artifactId>jbpm-human-task-workitems</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.jbpm</groupId>
+			<artifactId>jbpm-query-jpa</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.jbpm</groupId>
+			<artifactId>jbpm-persistence-api</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.jbpm</groupId>
+			<artifactId>jbpm-persistence-jpa</artifactId>
+			<scope>provided</scope>
+		</dependency>
+
 		<dependency>
 			<groupId>com.elasticpath</groupId>
 			<artifactId>cxf-uritemplate-utils</artifactId>
@@ -802,18 +917,28 @@
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
-			<groupId>com.elasticpath.rest.integration.epcommerce</groupId>
-			<artifactId>ep-resource-items-epcommerce</artifactId>
+			<groupId>com.elasticpath.rest.resource.cortex</groupId>
+			<artifactId>ep-resource-items</artifactId>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
-			<groupId>com.elasticpath.rest.integration.epcommerce</groupId>
-			<artifactId>ep-resource-itemdefinitions-epcommerce</artifactId>
+			<groupId>com.elasticpath.rest.resource.cortex</groupId>
+			<artifactId>ep-resource-offers</artifactId>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
-			<groupId>com.elasticpath.rest.integration.epcommerce</groupId>
-			<artifactId>ep-resource-itemselections-epcommerce</artifactId>
+			<groupId>com.elasticpath.rest.resource.cortex</groupId>
+			<artifactId>ep-resource-itemdefinitions</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.elasticpath.rest.resource.cortex</groupId>
+			<artifactId>ep-resource-offerdefinitions</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.elasticpath.rest.resource.cortex</groupId>
+			<artifactId>ep-resource-itemselections</artifactId>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
@@ -1039,13 +1164,13 @@
 		<dependency>
 			<groupId>org.apache.tomcat.embed</groupId>
 			<artifactId>tomcat-embed-logging-juli</artifactId>
-			<version>${tomcat.version}</version>
+			<version>${tomcatLogging.version}</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.tomcat.embed</groupId>
 			<artifactId>tomcat-embed-logging-log4j</artifactId>
-			<version>${tomcat.version}</version>
+			<version>${tomcatLogging.version}</version>
 			<scope>provided</scope>
 		</dependency>
 
@@ -1134,7 +1259,8 @@
 								com.elasticpath.rest.definitions,
 								com.elasticpath.rest.resource.cortex,
 								com.elasticpath.rest.integration.epcommerce,
-								org.glassfish.web
+								org.glassfish.web,
+								com.fasterxml.jackson.dataformat
 							</excludeGroupIds>
 						</configuration>
 					</execution>
@@ -1267,7 +1393,15 @@
 							<includeGroupIds>
 								org.apache.servicemix.bundles,
 								org.springframework.security,
+								org.drools,
 								org.springframework.batch,
+								org.kie,
+								org.kie.soup,
+								org.jbpm,
+								com.thoughtworks.xstream,
+								com.google.protobuf,
+								com.sun.mail,
+								commons-codec,
 								commons-lang,
 								commons-pool,
 								com.sun.xml.bind,
@@ -1400,8 +1534,8 @@
 			<!-- Include Cortex studio -->
 			<plugin>
 				<groupId>org.apache.tomcat.maven</groupId>
-				<artifactId>tomcat7-maven-plugin</artifactId>
-				<version>${tomcat7.plugin.version}</version>
+				<artifactId>tomcat8-maven-plugin</artifactId>
+				<version>${tomcat.maven.plugin.version}</version>
 				<configuration>
 					<warSourceDirectory>${project.build.directory}/${project.artifactId}-${project.version}</warSourceDirectory>
 					<path>${ep.cortex.contextUrl}</path>
@@ -1411,6 +1545,8 @@
 						<felix.fileinstall.dir>
 							${user.home}/ep/conf/cortex/permissions,${user.home}/ep/conf/cortex,/ep/conf/cortex/permissions,/ep/conf/cortex,/etc/ep/cortex/resources/config/permissions,/etc/ep/cortex/system/config
 						</felix.fileinstall.dir>
+						<org.aspectj.tracing.messages>true</org.aspectj.tracing.messages>
+						<org.aspectj.tracing.factory>org.aspectj.weaver.tools.CommonsTraceFactory</org.aspectj.tracing.factory>
 					</systemProperties>
 					<webapps>
 						<webapp>
@@ -1523,12 +1659,12 @@
 					<dependency>
 						<groupId>org.apache.tomcat.embed</groupId>
 						<artifactId>tomcat-embed-logging-juli</artifactId>
-						<version>${tomcat.version}</version>
+						<version>${tomcatLogging.version}</version>
 					</dependency>
 					<dependency>
 						<groupId>org.apache.tomcat.embed</groupId>
 						<artifactId>tomcat-embed-logging-log4j</artifactId>
-						<version>${tomcat.version}</version>
+						<version>${tomcatLogging.version}</version>
 					</dependency>
 					<dependency>
 						<groupId>${epdb.maven.groupId}</groupId>
@@ -1554,16 +1690,6 @@
 						<groupId>commons-pool</groupId>
 						<artifactId>commons-pool</artifactId>
 						<version>${commons.pool.version}</version>
-					</dependency>
-					<dependency>
-						<groupId>org.apache.geronimo.specs</groupId>
-						<artifactId>geronimo-jms_1.1_spec</artifactId>
-						<version>${org.apache.geronimo.specs.version}</version>
-					</dependency>
-					<dependency>
-						<groupId>org.apache.geronimo.specs</groupId>
-						<artifactId>geronimo-j2ee-management_1.1_spec</artifactId>
-						<version>${org.apache.geronimo.management.spec.version}</version>
 					</dependency>
 					<dependency>
 						<groupId>org.fusesource.hawtbuf</groupId>

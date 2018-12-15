@@ -18,9 +18,11 @@ import com.elasticpath.domain.rules.CouponUsage;
 public class CouponUsageModelDtoAssembler {
 	
 	private final BeanFactory beanFactory;
-	
-	/** 
-	 * @param beanFactory the bean factory used to create coupons 
+
+	/**
+	 * Constructor for the {@link CouponUsageModelDtoAssembler}.
+	 * @param beanFactory the bean factory used to create coupons
+	 *
 	 */
 	public CouponUsageModelDtoAssembler(final BeanFactory beanFactory) {
 		this.beanFactory = beanFactory;

@@ -6,7 +6,6 @@ package com.elasticpath.service.catalog.impl;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -219,14 +218,11 @@ public class TopSellerServiceImpl extends AbstractEpPersistenceServiceImpl imple
 		List<Object[]> sortedResults = new ArrayList<>(counts);
 
 		// Sort the list according to count value
-		Collections.sort(sortedResults, new Comparator<Object[]>() {
-			@Override
-			public int compare(final Object[] entry1, final Object[] entry2) {
-				int count1 = Integer.parseInt(entry1[0].toString());
-				int count2 = Integer.parseInt(entry2[0].toString());
+		Collections.sort(sortedResults, (entry1, entry2) -> {
+			int count1 = Integer.parseInt(entry1[0].toString());
+			int count2 = Integer.parseInt(entry2[0].toString());
 
-				return count2 - count1;
-			}
+			return count2 - count1;
 		});
 
 		// Build the sorted map of product uid -> sales count

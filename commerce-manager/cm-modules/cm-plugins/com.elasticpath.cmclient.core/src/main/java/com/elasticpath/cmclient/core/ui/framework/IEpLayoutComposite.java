@@ -99,8 +99,8 @@ public interface IEpLayoutComposite {
 	/**
 	 * Adds new scrolled composite with a <code>GridLayout</code> layout to the current composite.
 	 *
-	 * @param numColumns          number of columns to be created in the grid
-	 * @param equalWidthColumns   specifies whether the columns are with equal width
+	 * @param numColumns number of columns to be created in the grid
+	 * @param equalWidthColumns specifies whether the columns are with equal width
 	 * @param grabHorizontalSpace specifies if scrolled composite will grab horizontal space
 	 * @return instance of <code>IEpLayoutComposite</code>
 	 */
@@ -109,8 +109,19 @@ public interface IEpLayoutComposite {
 	/**
 	 * Adds new scrolled composite with a <code>GridLayout</code> layout to the current composite.
 	 *
-	 * @param numColumns          number of columns to be created in the grid
-	 * @param equalWidthColumns   specifies whether the columns are with equal width
+	 * @param numColumns number of columns to be created in the grid
+	 * @param equalWidthColumns specifies whether the columns are with equal width
+	 * @param grabHorizontalSpace specifies if scrolled composite will grab horizontal space
+	 * @param style the style of the composite
+	 * @return instance of <code>IEpLayoutComposite</code>
+	 */
+	IEpLayoutComposite addScrolledGridLayoutComposite(int numColumns, boolean equalWidthColumns, boolean grabHorizontalSpace, int style);
+
+	/**
+	 * Adds new scrolled composite with a <code>GridLayout</code> layout to the current composite.
+	 *
+	 * @param numColumns number of columns to be created in the grid
+	 * @param equalWidthColumns specifies whether the columns are with equal width
 	 * @param grabHorizontalSpace specifies if scrolled composite will grab horizontal space
 	 * @param data the layout data specifying the way the new composite will be placed in the current composite. If data is <code>null</code> the
 	 *            default layout data for filling the cell will be used
@@ -168,6 +179,16 @@ public interface IEpLayoutComposite {
 	 * @return <code>Text</code> UI control
 	 */
 	Text addTextField(EpState epState, IEpLayoutData data);
+
+	/**
+	 * Adds new text field to the composite.
+	 *
+	 * @param epState the EP UI state flag (can be EDITABLE, READ_ONLY, DISABLED)
+	 * @param data the layout data. If data is <code>null</code> the default layout data for filling the cell will be used
+	 * @param style style
+	 * @return <code>Text</code> UI control
+	 */
+	Text addTextField(EpState epState, IEpLayoutData data, int style);
 
 	/**
 	 * Adds a password field that echos an obscured character.
@@ -334,6 +355,27 @@ public interface IEpLayoutComposite {
 	 * @return instance of <code>IEpLayoutComposite</code>
 	 */
 	IEpLayoutComposite addGroup(String groupLabel, int numColumns, boolean equalWidthColumns, IEpLayoutData data);
+
+	/**
+	 * Adds new UI group to the composite with no label and border.
+	 *
+	 * @param numColumns the number of columns
+	 * @param equalWidthColumns sets whether the columns should be the same width
+	 * @param data the layout data. If data is <code>null</code> the default layout data for filling the cell will be used
+	 * @return instance of <code>IEpLayoutComposite</code>
+	 */
+	IEpLayoutComposite addGroup(int numColumns, boolean equalWidthColumns, IEpLayoutData data);
+
+	/**
+	 * Adds new UI group to the composite with style.
+	 *
+	 * @param numColumns the number of columns
+	 * @param equalWidthColumns sets whether the columns should be the same width
+	 * @param data the layout data. If data is <code>null</code> the default layout data for filling the cell will be used
+	 * @param style the style
+	 * @return instance of <code>IEpLayoutComposite</code>
+	 */
+	IEpLayoutComposite addGroup(int numColumns, boolean equalWidthColumns, IEpLayoutData data, int style);
 
 	/**
 	 * Adds a horizontal separator to the composite.

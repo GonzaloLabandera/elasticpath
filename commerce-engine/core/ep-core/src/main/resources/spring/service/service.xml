@@ -133,6 +133,8 @@
 		<property name="preInterceptors" ref="servicePreInterceptors"/>
 	</bean>
 
+
+
 	<bean id="customerService" parent="txProxyTemplate">
 		<property name="target">
 			<bean parent="customerServiceTarget"/>
@@ -642,6 +644,13 @@
 
 	<bean id="orderLockServiceTarget" parent="orderLockServiceTargetTemplate"/>
 
+	<bean id="findByCodeCache"
+		  class="com.elasticpath.commons.beanframework.EhCacheDefaultConfigurationFactoryBean">
+		<property name="name" value="findByCodeCache"/>
+		<property name="cacheManager" ref="epCoreEhcacheManager"/>
+		<property name="timeToLive" value="600" />
+		<property name="timeToIdle" value="600" />
+	</bean>
 
 	<bean id="brandService" parent="txProxyTemplate">
 		<property name="target">
@@ -720,14 +729,22 @@
 	</bean>
 
 	<bean id="productAssociationService" parent="txProxyTemplate">
-		<property name="target">
-			<bean class="com.elasticpath.service.catalog.impl.ProductAssociationServiceImpl">
-				<property name="persistenceEngine" ref="persistenceEngine"/>
-				<property name="elasticPath" ref="elasticPath"/>
-				<property name="fetchPlanHelper" ref="fetchPlanHelper"/>
-				<property name="productAssociationLoadTuner" ref="productAssociationLoadTuner"/>
-			</bean>
-		</property>
+		<property name="target" ref="productAssociationServiceTarget"/>
+	</bean>
+
+	<bean id="productAssociationServiceTarget" parent="productAssociationServiceTargetTemplate"/>
+
+	<bean id="productAssociationServiceTargetTemplate" class="com.elasticpath.service.catalog.impl.ProductAssociationServiceImpl">
+		<property name="persistenceEngine" ref="persistenceEngine"/>
+		<property name="elasticPath" ref="elasticPath"/>
+		<property name="fetchPlanHelper" ref="fetchPlanHelper"/>
+		<property name="productAssociationLoadTuner" ref="productAssociationLoadTuner"/>
+	</bean>
+
+	<bean id="dependentItemLookup" parent="dependentItemLookupTemplate"/>
+
+	<bean id="dependentItemLookupTemplate" abstract="true" class="com.elasticpath.service.catalog.impl.DependentItemLookupImpl">
+		<property name="persistenceEngine" ref="persistenceEngine"/>
 	</bean>
 
 	<bean id="topSellerService" parent="txProxyTemplate">
@@ -755,7 +772,10 @@
 	<!--  Lucene Index related services -->
 	<bean id="analyzer" class="com.elasticpath.service.search.solr.AnalyzerImpl"/>
 
-	<bean id="queryAnalyzer" class="com.elasticpath.service.search.solr.QueryAnalyzerImpl"/>
+
+	<bean id="queryAnalyzer" class="com.elasticpath.service.search.solr.QueryAnalyzerImpl">
+
+	</bean>
 
 	<bean id="solrIndexSearchResult" class="com.elasticpath.service.search.solr.query.SolrIndexSearchResult" scope="prototype">
 		<property name="indexSearcher" ref="solrIndexSearcher"/>
@@ -902,6 +922,14 @@
 				<property name="persistenceEngine" ref="persistenceEngine"/>
 			</bean>
 		</property>
+	</bean>
+
+	<bean id="findValidStoreCodeCache"
+		  class="com.elasticpath.commons.beanframework.EhCacheDefaultConfigurationFactoryBean">
+		<property name="name" value="findValidStoreCodeCache"/>
+		<property name="cacheManager" ref="epCoreEhcacheManager"/>
+		<property name="timeToLive" value="600" />
+		<property name="timeToIdle" value="600" />
 	</bean>
 
 	<bean id="nonCachingStoreServiceTarget" class="com.elasticpath.service.store.impl.StoreServiceImpl">
@@ -1296,11 +1324,38 @@
 		<property name="filteredNavigationConfigurationXmlElementParserFactory" ref="filteredNavigationConfigurationXmlElementParserFactory"/>
 	</bean>
 
+	<bean id="skuOptionFacetConfigurationStrategy"
+			class="com.elasticpath.service.catalogview.filterednavigation.facetconfigurationstrategies.impl.SkuOptionFacetConfigurationStrategy">
+		<property name="beanFactory" ref="coreBeanFactory"/>
+		<property name="skuOptionService" ref="cachedSkuOptionService"/>
+	</bean>
+
+
+	<bean id="attributeFacetConfigurationStrategy"
+		  class="com.elasticpath.service.catalogview.filterednavigation.facetconfigurationstrategies.impl.AttributeFacetConfigurationStrategy">
+		<property name="beanFactory" ref="coreBeanFactory"/>
+		<property name="attributeService" ref="attributeService"/>
+	</bean>
+
+
+	<bean id="productFacetConfigurationStrategy"
+		  class="com.elasticpath.service.catalogview.filterednavigation.facetconfigurationstrategies.impl.ProductFacetConfigurationStrategy">
+		<property name="beanFactory" ref="coreBeanFactory"/>
+	</bean>
+
+
 	<bean id="abstractFilteredNavigationConfigurationLoader"
-		  class="com.elasticpath.service.catalogview.filterednavigation.impl.FilteredNavigationConfigurationLoaderImpl"
+		  class="com.elasticpath.service.catalogview.filterednavigation.impl.FacetConfigurationLoaderImpl"
 		  abstract="true">
 		<property name="beanFactory" ref="coreBeanFactory"/>
-		<property name="parser" ref="filteredNavigationConfigurationParser"/>
+		<property name="facetService" ref="cachedFacetService"/>
+		<property name="facetConfigurationStrategies">
+				<list>
+					<ref bean="skuOptionFacetConfigurationStrategy"/>
+					<ref bean="productFacetConfigurationStrategy" />
+					<ref bean="attributeFacetConfigurationStrategy" />
+				</list>
+		</property>
 		<property name="separatorInTokenProvider">
 			<settings:setting path="COMMERCE/SYSTEM/FILTEREDNAVIGATION/separatorInToken"/>
 		</property>
@@ -1308,18 +1363,13 @@
 
 	<bean id="filteredNavigationConfigurationLoaderTemplate" parent="abstractFilteredNavigationConfigurationLoader"
 		  abstract="true">
-		<property name="configurationProvider">
-			<settings:setting path="COMMERCE/STORE/FILTEREDNAVIGATION/filteredNavigationConfiguration"/>
-		</property>
 	</bean>
 
 	<bean id="filteredNavigationConfigurationLoader" parent="filteredNavigationConfigurationLoaderTemplate"/>
 
 	<bean id="advancedSearchConfigurationLoaderTemplate" parent="abstractFilteredNavigationConfigurationLoader"
 		  abstract="true">
-		<property name="configurationProvider">
-			<settings:setting path="COMMERCE/STORE/ADVANCEDSEARCH/advancedSearchConfiguration"/>
-		</property>
+
 	</bean>
 
 	<bean id="advancedSearchConfigurationLoader" parent="advancedSearchConfigurationLoaderTemplate"/>
@@ -1874,6 +1924,8 @@
 		<property name="proxy" ref="priceListAssignmentServiceProxy"/>
 	</bean>
 
+
+
 	<!-- bundling end -->
 
 	<bean id="epRuleEngine" class="com.elasticpath.service.rules.impl.DBReadingRuleEngineImpl">
@@ -2121,6 +2173,59 @@
 		<property name="proxy" ref="categoryLookupProxy"/>
 	</bean>
 
+	<bean id="cachingSolrQueryFactoryProxy" class="com.elasticpath.commons.beanframework.SwitchableProxyBinder">
+		<property name="fallbackImplementation" ref="solrQueryFactory"/>
+	</bean>
+	<bean id="cachedSolrQueryFactory" class="com.elasticpath.commons.beanframework.SwitchableProxyFactoryBean">
+		<property name="proxyInterface" value="com.elasticpath.service.search.solr.SolrQueryFactory"/>
+		<property name="proxy" ref="cachingSolrQueryFactoryProxy"/>
+	</bean>
+
+	<bean id="categoryServiceProxy" class="com.elasticpath.commons.beanframework.SwitchableProxyBinder">
+		<property name="fallbackImplementation" ref="categoryService"/>
+	</bean>
+
+	<bean id="cachedCategoryService" class="com.elasticpath.commons.beanframework.SwitchableProxyFactoryBean">
+		<property name="proxyInterface" value="com.elasticpath.service.catalog.CategoryService"/>
+		<property name="proxy" ref="categoryServiceProxy"/>
+	</bean>
+
+	<bean id="facetServiceProxy" class="com.elasticpath.commons.beanframework.SwitchableProxyBinder">
+		<property name="fallbackImplementation" ref="facetService"/>
+	</bean>
+
+	<bean id="cachedFacetService" class="com.elasticpath.commons.beanframework.SwitchableProxyFactoryBean">
+		<property name="proxyInterface" value="com.elasticpath.service.search.FacetService" />
+		<property name="proxy" ref="facetServiceProxy"/>
+	</bean>
+
+	<bean id="cachingSkuOptionServiceProxy" class="com.elasticpath.commons.beanframework.SwitchableProxyBinder">
+		<property name="fallbackImplementation" ref="skuOptionService"/>
+	</bean>
+
+	<bean id="cachedSkuOptionService" class="com.elasticpath.commons.beanframework.SwitchableProxyFactoryBean">
+		<property name="proxyInterface" value="com.elasticpath.service.catalog.SkuOptionService" />
+		<property name="proxy" ref="cachingSkuOptionServiceProxy"/>
+	</bean>
+
+	<bean id="attributeServiceProxy" class="com.elasticpath.commons.beanframework.SwitchableProxyBinder">
+		<property name="fallbackImplementation" ref="attributeService"/>
+	</bean>
+
+	<bean id="cachedAttributeService" class="com.elasticpath.commons.beanframework.SwitchableProxyFactoryBean">
+		<property name="proxyInterface" value="com.elasticpath.service.attribute.AttributeService"/>
+		<property name="proxy" ref="attributeServiceProxy"/>
+	</bean>
+
+	<bean id="cachingFilteredNavigationConfigurationLoaderProxy" class="com.elasticpath.commons.beanframework.SwitchableProxyBinder">
+		<property name="fallbackImplementation" ref="advancedSearchConfigurationLoader"/>
+	</bean>
+
+	<bean id="cachedFacetConfigurationLoader" class="com.elasticpath.commons.beanframework.SwitchableProxyFactoryBean">
+		<property name="proxyInterface" value="com.elasticpath.service.catalogview.filterednavigation.FilteredNavigationConfigurationLoader" />
+		<property name="proxy" ref="cachingFilteredNavigationConfigurationLoaderProxy"/>
+	</bean>
+
 	<bean id="assetRepositoryTemplate" class="com.elasticpath.commons.util.impl.AssetRepositoryImpl"
 		  abstract="true">
 		<property name="environmentInfoService" ref="environmentInfoService"/>
@@ -2239,8 +2344,8 @@
 		<property name="shoppingItemDtoFactory" ref="shoppingItemDtoFactory" />
 		<property name="productSkuLookup" ref="productSkuLookup"/>
 		<property name="timeService" ref="timeService" />
-		<property name="productAssociationService" ref="productAssociationService" />
 		<property name="validationService" ref="addOrUpdateShoppingItemDtoToCartValidationService"/>
+		<property name="dependentItemLookup" ref="dependentItemLookup" />
 	</bean>
 
 	<bean id="cartDirector" parent="cartDirectorTemplate"/>
@@ -2251,6 +2356,7 @@
 		<property name="shoppingCartService" ref="shoppingCartService"/>
 		<property name="wishListService" ref="wishListService"/>
 		<property name="pricingSnapshotService" ref="pricingSnapshotService"/>
+		<property name="removeShoppingItemFromCartValidationService" ref="removeShoppingItemFromCartValidationService"/>
 	</bean>
 
 	<bean id="cartDirectorService" parent="txRequiredProxyTemplate">  <!-- All methods are TRANSACTION_REQUIRED -->
@@ -2765,6 +2871,26 @@
 		<property name="assetRepository" ref="assetRepository"/>
 		<property name="storeThemeCodeProvider">
 			<settings:setting path="COMMERCE/STORE/theme"/>
+		</property>
+	</bean>
+
+	<bean id="physicalOrderShipmentShippingCostCalculationService"
+		  class="com.elasticpath.service.shipping.impl.PhysicalOrderShipmentShippingCostCalculationServiceImpl">
+		<property name="pricedShippableItemContainerTransformer" ref="pricedShippableItemContainerFromOrderShipmentTransformer"/>
+		<property name="shippingCalculationService" ref="shippingCalculationService"/>
+	</bean>
+
+	<bean id="physicalOrderShipmentShippingCostRefresher" class="com.elasticpath.service.shipping.impl.PhysicalOrderShipmentShippingCostRefresherImpl">
+		<property name="physicalOrderShipmentShippingCostCalculationService" ref="physicalOrderShipmentShippingCostCalculationService"/>
+	</bean>
+
+
+	<bean id="facetService" parent="txProxyTemplate">
+		<property name="target">
+			<bean class="com.elasticpath.service.search.impl.FacetServiceImpl">
+				<property name="persistenceEngine" ref="persistenceEngine"/>
+				<property name="elasticPath" ref="elasticPath"/>
+			</bean>
 		</property>
 	</bean>
 

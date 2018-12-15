@@ -1473,16 +1473,16 @@ public class CatalogTestPersister {
 	private void addOrUpdateProductBaseAmounts(final Catalog catalog, final Product product, final String currencyCode, final String[] minQty,
 			final String[] prices, final String[] salePrices) {
 		for (int i = 0; i < minQty.length; i++) {
-			addOrUpdateProductBaseAmount(catalog, product, BigDecimal.valueOf(Double.valueOf(minQty[i])),
-					BigDecimal.valueOf(Double.valueOf(prices[i])), BigDecimal.valueOf(Double.valueOf(salePrices[i])), currencyCode);
+			addOrUpdateProductBaseAmount(catalog, product, BigDecimal.valueOf(Double.parseDouble(minQty[i])),
+					BigDecimal.valueOf(Double.parseDouble(prices[i])), BigDecimal.valueOf(Double.parseDouble(salePrices[i])), currencyCode);
 		}
 	}
 
 	private void addOrUpdateProductSkuBaseAmounts(final Catalog catalog, final ProductSku productSku, final String currencyCode, final String[] minQty,
 			final String[] prices, final String[] salePrices) {
 		for (int i = 0; i < minQty.length; i++) {
-			addOrUpdateProductSkuBaseAmount(catalog, productSku, BigDecimal.valueOf(Double.valueOf(minQty[i])),
-					BigDecimal.valueOf(Double.valueOf(prices[i])), BigDecimal.valueOf(Double.valueOf(salePrices[i])), currencyCode);
+			addOrUpdateProductSkuBaseAmount(catalog, productSku, BigDecimal.valueOf(Double.parseDouble(minQty[i])),
+					BigDecimal.valueOf(Double.parseDouble(prices[i])), BigDecimal.valueOf(Double.parseDouble(salePrices[i])), currencyCode);
 		}
 	}
 

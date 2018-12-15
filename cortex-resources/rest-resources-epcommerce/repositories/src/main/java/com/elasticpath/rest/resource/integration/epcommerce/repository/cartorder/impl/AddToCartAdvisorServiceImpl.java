@@ -64,7 +64,7 @@ public class AddToCartAdvisorServiceImpl implements AddToCartAdvisorService {
 	public Observable<Message> validateItemPurchasable(final String scope, final String itemId) {
 
 		return shoppingCartRepository.getDefaultShoppingCartGuid()
-				.flatMapObservable(defaultShoppingCartGuid -> productSkuRepository.getProductSkuWithAttributesByCodeAsSingle(itemId)
+				.flatMapObservable(defaultShoppingCartGuid -> productSkuRepository.getProductSkuWithAttributesByCode(itemId)
 						.flatMapObservable(prodSku -> validateItemPurchasable(scope, defaultShoppingCartGuid, prodSku, null)));
 
 	}
@@ -72,7 +72,7 @@ public class AddToCartAdvisorServiceImpl implements AddToCartAdvisorService {
 
 	@Override
 	public Observable<Message> validateItemPurchasable(final String scope, final String cartId, final String itemId) {
-		return productSkuRepository.getProductSkuWithAttributesByCodeAsSingle(itemId)
+		return productSkuRepository.getProductSkuWithAttributesByCode(itemId)
 				.flatMapObservable(productSku -> validateItemPurchasable(scope, cartId, productSku, null));
 	}
 	@Override

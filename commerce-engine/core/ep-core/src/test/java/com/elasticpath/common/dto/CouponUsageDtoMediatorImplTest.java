@@ -3,22 +3,20 @@
  */
 package com.elasticpath.common.dto;
 
-import static junit.framework.TestCase.assertFalse;
-import static junit.framework.TestCase.assertTrue;
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 
-import org.jmock.Expectations;
-import org.jmock.integration.junit4.JUnitRuleMockery;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.elasticpath.base.exception.EpServiceException;
 import com.elasticpath.commons.beanframework.BeanFactory;
@@ -38,26 +36,27 @@ import com.elasticpath.service.rules.impl.CouponUsageServiceImpl;
 /**
  * Test that the coupon usage dto mediator behaves as expected.
  */
-
+@RunWith(MockitoJUnitRunner.class)
 public class CouponUsageDtoMediatorImplTest {
 	private static final String COUPON_CODE1 = "CouponCode1";
 	private static final String EMAIL_ADDRESS1 = "email.address@blog.com";
 
-	@Rule
-	public final JUnitRuleMockery context = new JUnitRuleMockery();
-
 	private CouponServiceImplDouble couponService;
 	
 	private CouponUsageServiceImplDouble couponUsageService;
-	
+
+	@Mock
 	private CouponConfigService couponConfigService;
 	
 	private CouponUsageDtoMediatorImpl mediator;
-	
+
+	@Mock
 	private BeanFactory beanFactory;
-	
+
+	@Mock
 	private CouponDao couponDao;
-	
+
+	@Mock
 	private CouponUsageDao couponUsageDao;
 
 
@@ -114,9 +113,9 @@ public class CouponUsageDtoMediatorImplTest {
 		public boolean doesCouponCodeOnlyExistForThisRuleCode(final String couponCode, final String ruleCode) {
 			return true;
 		}
-	};
+	}
 
-	
+
 	/**
 	 * Set up required for each test.
 	 * 
@@ -124,14 +123,10 @@ public class CouponUsageDtoMediatorImplTest {
 	 */
 	@Before
 	public void setUp() throws Exception {
-		couponDao = context.mock(CouponDao.class);
 		couponService = new CouponServiceImplDouble();
 		couponService.setCouponDao(couponDao);
-		couponUsageDao = context.mock(CouponUsageDao.class);
 		couponUsageService = new CouponUsageServiceImplDouble();
 		couponUsageService.setCouponUsageDao(couponUsageDao);
-		couponConfigService = context.mock(CouponConfigService.class);
-		beanFactory = context.mock(BeanFactory.class);
 		mediator = new CouponUsageDtoMediatorImpl();
 		mediator.setCouponConfigService(couponConfigService);
 		mediator.setCouponService(couponService);
@@ -149,36 +144,35 @@ public class CouponUsageDtoMediatorImplTest {
 		persistentCouponConfig.setRuleCode(ruleCode);
 
 		final CouponUsage persistentCouponUsage = new CouponUsageImpl();
-		
+
 		final Coupon persistentCoupon = new CouponImpl();
 		persistentCoupon.setCouponCode(COUPON_CODE1);
 		persistentCoupon.setSuspended(false);
 		persistentCoupon.setCouponConfig(persistentCouponConfig);
 
-		final Set<String> codes = new HashSet<>();
-		codes.add(COUPON_CODE1);
-		
 		Collection<CouponUsageModelDto> addedCouponUsages = new ArrayList<>();
 		CouponUsageModelDto dto1 = new CouponUsageModelDto();
 		dto1.setCouponCode(COUPON_CODE1);
 		dto1.setSuspended(true);
 		dto1.setEmailAddress(EMAIL_ADDRESS1);
 		addedCouponUsages.add(dto1);
-				
-		context.checking(new Expectations() { {
-			oneOf(couponConfigService).findByRuleCode(ruleCode); will(returnValue(persistentCouponConfig));
-			oneOf(beanFactory).getBean(ContextIdNames.COUPON); will(returnValue(persistentCoupon));
-			oneOf(beanFactory).getBean(ContextIdNames.COUPON_USAGE); will(returnValue(persistentCouponUsage));
-		} });
-		
+
+		when(couponConfigService.findByRuleCode(ruleCode)).thenReturn(persistentCouponConfig);
+		when(beanFactory.getBean(ContextIdNames.COUPON)).thenReturn(persistentCoupon);
+		when(beanFactory.getBean(ContextIdNames.COUPON_USAGE)).thenReturn(persistentCouponUsage);
+
 		mediator.add(addedCouponUsages, ruleCode);
 		Coupon coupon = couponService.getUpdatedCoupon();
 		CouponUsage couponUsage = couponUsageService.getUpdatedCouponUsage();
-		
-		assertTrue("CouponUsage should have Suspended = True.", couponUsage.isSuspended());
-		assertFalse("Coupon should have Suspended = False.", coupon.isSuspended());
 
-		assertEquals("CouponUsage should have CouponCode = CouponCode1.", COUPON_CODE1, couponUsage.getCoupon().getCouponCode());
-		assertEquals("CouponUsage should have email = " + EMAIL_ADDRESS1 + ".", EMAIL_ADDRESS1, couponUsage.getCustomerEmailAddress());
+		verify(couponConfigService).findByRuleCode(ruleCode);
+		verify(beanFactory).getBean(ContextIdNames.COUPON);
+		verify(beanFactory).getBean(ContextIdNames.COUPON_USAGE);
+
+		assertThat(couponUsage.isSuspended()).isTrue();
+		assertThat(coupon.isSuspended()).isFalse();
+
+		assertThat(couponUsage.getCoupon().getCouponCode()).isEqualTo(COUPON_CODE1);
+		assertThat(couponUsage.getCustomerEmailAddress()).isEqualTo(EMAIL_ADDRESS1);
 	}
 }

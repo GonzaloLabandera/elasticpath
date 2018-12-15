@@ -77,6 +77,9 @@
 		<property name="productInventoryManagementService" ref="productInventoryManagementService"/>
 	</bean>
 
+	<bean id="shoppingItemNotAutoSelectedValidator" class="com.elasticpath.service.shoppingcart.validation.impl.ShoppingItemNotAutoSelectedValidatorImpl">
+	</bean>
+
 	<!-- ShoppingCart Validators -->
 
 	<bean id="shoppingItemDelegateFromShoppingCartValidator" class="com.elasticpath.service.shoppingcart.validation.impl.ShoppingItemDelegateFromShoppingCartValidatorImpl">
@@ -134,6 +137,12 @@
 	<bean id="purchaseCartValidationService" class="com.elasticpath.service.shoppingcart.validation.impl.PurchaseCartValidationServiceImpl">
 		<property name="beanFactory" ref="coreBeanFactory"/>
 		<property name="validators" ref="purchaseCartValidatorList"/>
+	</bean>
+
+	<bean id="removeShoppingItemFromCartValidationService" class="com.elasticpath.service.shoppingcart.validation.impl.RemoveShoppingItemFromCartValidationServiceImpl">
+		<property name="beanFactory" ref="coreBeanFactory"/>
+		<property name="productSkuLookup" ref="productSkuLookup"/>
+		<property name="validators" ref="removeCartItemsValidatorList"/>
 	</bean>
 
 	<!-- Validation Strategy Lists-->
@@ -205,6 +214,17 @@
 		</property>
 	</bean>
 	<bean id="shoppingItemValidatorList" parent="shoppingItemValidatorListParent"/>
+
+	<!-- These validators are executed on when removing shopping cart item. -->
+	<bean id="removeCartItemsValidatorListParent" class="com.elasticpath.commons.beanframework.config.ExtensibleListFactoryBean" abstract="true">
+		<property name="targetListClass" value="java.util.ArrayList"/>
+		<property name="sourceList">
+			<list merge="true">
+				<ref bean="shoppingItemNotAutoSelectedValidator"/>
+			</list>
+		</property>
+	</bean>
+	<bean id="removeCartItemsValidatorList" parent="removeCartItemsValidatorListParent"/>
 
 	<!-- These validators are executed on the shopping cart, when determining if the cart is purchasable. -->
 	<bean id="purchaseCartValidatorListParent" class="com.elasticpath.commons.beanframework.config.ExtensibleListFactoryBean" abstract="true">

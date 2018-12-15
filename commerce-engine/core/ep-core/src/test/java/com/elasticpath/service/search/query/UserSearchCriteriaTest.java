@@ -3,10 +3,7 @@
  */
 package com.elasticpath.service.search.query;
 
-import static junit.framework.TestCase.assertFalse;
-import static junit.framework.TestCase.assertTrue;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -31,7 +28,7 @@ public class UserSearchCriteriaTest {
 	 */
 	@Test
 	public void testGetUserRole() {
-		assertNull(this.userSearchCriteria.getUserRoleName());
+		assertThat(this.userSearchCriteria.getUserRoleName()).isNull();
 	}
 	
 	/**
@@ -39,7 +36,7 @@ public class UserSearchCriteriaTest {
 	 */
 	@Test
 	public void testGetUserState() {
-		assertNull(this.userSearchCriteria.getUserStatus());
+		assertThat(this.userSearchCriteria.getUserStatus()).isNull();
 	}
 
 	/**
@@ -49,7 +46,7 @@ public class UserSearchCriteriaTest {
 	public void testSetUserStatus() {
 		final UserStatus userStatus = UserStatus.ENABLED;
 		this.userSearchCriteria.setUserStatus(userStatus);
-		assertSame(userStatus, this.userSearchCriteria.getUserStatus());
+		assertThat(this.userSearchCriteria.getUserStatus()).isEqualTo(userStatus);
 	}
 
 	/**
@@ -57,7 +54,7 @@ public class UserSearchCriteriaTest {
 	 */
 	@Test
 	public void testClear() {
-		assertTrue(this.userSearchCriteria.isEmpty());
+		assertThat(this.userSearchCriteria.isEmpty()).isTrue();
 		userSearchCriteria.setUserStatus(UserStatus.ENABLED);
 		userSearchCriteria.setCatalogCode("Cat01");
 		userSearchCriteria.setStoreCode("Store01");
@@ -65,9 +62,9 @@ public class UserSearchCriteriaTest {
 		userSearchCriteria.setFirstName("Peter");
 		userSearchCriteria.setLastName("Jensen");
 		userSearchCriteria.setUserName("Peter Jensen");
-		assertFalse(this.userSearchCriteria.isEmpty());
+		assertThat(this.userSearchCriteria.isEmpty()).isFalse();
 
 		this.userSearchCriteria.clear();
-		assertTrue(this.userSearchCriteria.isEmpty());
+		assertThat(this.userSearchCriteria.isEmpty()).isTrue();
 	}
 }

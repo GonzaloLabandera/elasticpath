@@ -1209,7 +1209,8 @@ public final class PromotionRulesWidgetUtil {
 
 				List<PromotionWidgetCreator> promotionWidgetCreators = PluginHelper.findPromotionWidgetCreators(StorePlugin.PLUGIN_ID, paramKey);
 				for (PromotionWidgetCreator promotionWidgetCreator : promotionWidgetCreators) {
-					promotionWidgetCreator.execute(this, ruleParameter, parentComposite, bindingContext, policyActionContainer);
+					promotionWidgetCreator.execute(this, parentWidget, ruleParameter, parentComposite, bindingContext, policyActionContainer,
+							this.rule, this.scenario, this.store, this.catalog);
 				}
 				break;
 		}

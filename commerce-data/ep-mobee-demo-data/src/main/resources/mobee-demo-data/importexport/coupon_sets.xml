@@ -1,19 +1,19 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <coupon_sets>
 	<coupon_set>
-	    <coupon_config>
-	        <rule_code>2b5c9998-721a-4d5f-a2cc-71571b8659e0</rule_code>
-	        <coupon_config_code>57957dd2-843c-4c0e-b9f5-6cdfb2b35ae0</coupon_config_code>
-	        <coupon_usage_type>limitPerCoupon</coupon_usage_type>
-	        <usage_limit>2147483647</usage_limit>
-	        <duration_days>60</duration_days>
-	        <limited_duration>false</limited_duration>
-	        <multi_use_per_order>false</multi_use_per_order>
-	    </coupon_config>
-	    <coupons>
-	        <coupon_code>CouponWillApply10PercentOffTheProductWith10PercentCoupon</coupon_code>
-	    </coupons>
-	    <coupon_usages/>
+		<coupon_config>
+			<rule_code>2b5c9998-721a-4d5f-a2cc-71571b8659e0</rule_code>
+			<coupon_config_code>57957dd2-843c-4c0e-b9f5-6cdfb2b35ae0</coupon_config_code>
+			<coupon_usage_type>limitPerCoupon</coupon_usage_type>
+			<usage_limit>2147483647</usage_limit>
+			<duration_days>60</duration_days>
+			<limited_duration>false</limited_duration>
+			<multi_use_per_order>false</multi_use_per_order>
+		</coupon_config>
+		<coupons>
+			<coupon_code>CouponWillApply10PercentOffTheProductWith10PercentCoupon</coupon_code>
+		</coupons>
+		<coupon_usages/>
 	</coupon_set>
 
 	<coupon_set>
@@ -67,7 +67,7 @@
 			<coupon_code>blackfriday</coupon_code>
 		</coupons>
 		<coupon_usages/>
-	</coupon_set>	
+	</coupon_set>
 	<coupon_set>
 		<coupon_config>
 			<rule_code>71d00c2d-b0c7-4b7c-9415-3d295097fb01</rule_code>
@@ -88,7 +88,7 @@
 				<email>frequent.shopper@elasticpath.com</email>
 			</coupon_usage>
 		</coupon_usages>
-	</coupon_set>	
+	</coupon_set>
 	<coupon_set>
 		<coupon_config>
 			<rule_code>c8d6e77d-4a00-4bf0-8a59-dd4ce3f4c55a</rule_code>
@@ -135,5 +135,19 @@
 		</coupons>
 		<coupon_usages/>
 	</coupon_set>
-
+	<coupon_set>
+		<coupon_config>
+			<rule_code>c8565b32-0f43-4832-b8be-d5d1da456bac</rule_code>
+			<coupon_config_code>37dfe348-4170-446a-8bd0-4a1a73989f66</coupon_config_code>
+			<coupon_usage_type>limitPerAnyUser</coupon_usage_type>
+			<usage_limit>1</usage_limit>
+			<duration_days>60</duration_days>
+			<limited_duration>false</limited_duration>
+			<multi_use_per_order>false</multi_use_per_order>
+		</coupon_config>
+		<coupons>
+			<coupon_code>55PercentOff4PhysicalSku</coupon_code>
+		</coupons>
+		<coupon_usages/>
+	</coupon_set>
 </coupon_sets>

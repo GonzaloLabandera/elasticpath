@@ -1610,8 +1610,12 @@
 			</query>
 		</named-query>
 
-
-
+		<named-query name="FIND_CATEGORIES_BY_CATALOG_UID">
+			<query>
+				SELECT ac
+				FROM AbstractCategoryImpl ac
+				WHERE ac.catalog.uidPk = ?1
+			</query>
+		</named-query>
 
 </entity-mappings>
-

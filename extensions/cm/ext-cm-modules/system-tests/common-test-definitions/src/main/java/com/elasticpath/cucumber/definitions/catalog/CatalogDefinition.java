@@ -1,11 +1,14 @@
 package com.elasticpath.cucumber.definitions.catalog;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import java.util.List;
 
 import cucumber.api.java.After;
 import cucumber.api.java.en.And;
 import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
+
 import org.openqa.selenium.WebDriver;
 
 import com.elasticpath.cucumber.definitions.NavigationDefinition;
@@ -21,6 +24,7 @@ import com.elasticpath.selenium.dialogs.CreateCatalogDialog;
 import com.elasticpath.selenium.dialogs.CreateEditVirtualCatalogDialog;
 import com.elasticpath.selenium.dialogs.EditAttributeDialog;
 import com.elasticpath.selenium.dialogs.EditGlobalAttributesDialog;
+import com.elasticpath.selenium.dialogs.SelectAProductDialog;
 import com.elasticpath.selenium.domainobjects.CartItemModifierGroup;
 import com.elasticpath.selenium.domainobjects.Catalog;
 import com.elasticpath.selenium.domainobjects.Category;
@@ -37,18 +41,19 @@ import com.elasticpath.selenium.toolbars.ActivityToolbar;
 import com.elasticpath.selenium.toolbars.CatalogManagementActionToolbar;
 import com.elasticpath.selenium.toolbars.ChangeSetActionToolbar;
 import com.elasticpath.selenium.util.Constants;
+import com.elasticpath.selenium.util.DBConnector;
 import com.elasticpath.selenium.util.Utility;
 import com.elasticpath.selenium.wizards.CreateCategoryWizard;
 
 /**
  * Catalog Search step definitions.
  */
-@SuppressWarnings({"PMD.GodClass", "PMD.TooManyMethods", "PMD.TooManyFields"})
+@SuppressWarnings({"PMD.GodClass", "PMD.TooManyMethods", "PMD.TooManyFields", "PMD.ExcessiveClassLength"})
 public class CatalogDefinition {
 	private final CatalogManagement catalogManagement;
 	private final ActivityToolbar activityToolbar;
 	private final ChangeSetActionToolbar changeSetActionToolbar;
-	private CatalogSearchResultPane catalogSearchResultPane;
+	private final CatalogSearchResultPane catalogSearchResultPane;
 	private CatalogProductListingPane catalogProductListingPane;
 	private final CatalogManagementActionToolbar catalogManagementActionToolbar;
 	private CreateCatalogDialog createCatalogDialog;
@@ -76,6 +81,8 @@ public class CatalogDefinition {
 	private final CartItemModifierGroupTabDefinition cartItemModifierGroupTabDefinition;
 	private final CategoryTypesTabDefinition categoryTypesTabDefinition;
 	private final ProductAndBundleDefinition productAndBundleDefinition;
+	private final static String CATEGORY_ASSIGNMENT = "Category Assignment";
+	private final static String MERCHANDISING_ASSIGNMENT = "Merchandising Associations";
 
 	/**
 	 * Constructor.
@@ -102,6 +109,7 @@ public class CatalogDefinition {
 		activityToolbar = new ActivityToolbar(driver);
 		brandsTab = new BrandsTab(driver);
 		changeSetActionToolbar = new ChangeSetActionToolbar(driver);
+		catalogSearchResultPane = new CatalogSearchResultPane(driver);
 		this.catalog = catalog;
 		this.category = category;
 		this.linkedCategory = linkedCategory;
@@ -114,26 +122,6 @@ public class CatalogDefinition {
 	}
 
 	/**
-	 * Search for product name.
-	 *
-	 * @param productName product name.
-	 */
-	@When("^I search for product name (.*)$")
-	public void searchForProductName(final String productName) {
-		searchForProductByName(productName);
-	}
-
-	/**
-	 * Verify Product name.
-	 *
-	 * @param expectedProductName expected product name.
-	 */
-	@Then("^Product name (.*) should appear in result$")
-	public void verifyProductSearchResult(final String expectedProductName) {
-		catalogSearchResultPane.verifyProductNameExists(expectedProductName);
-	}
-
-	/**
 	 * Expand Catalog.
 	 *
 	 * @param catalogName the catalog Name.
@@ -141,6 +129,7 @@ public class CatalogDefinition {
 	@When("^I expand (.+) catalog$")
 	public void expandCatalog(final String catalogName) {
 		catalogManagement.expandCatalog(catalogName);
+		catalogManagement.clickCatalogBrowseTab();
 	}
 
 	/**
@@ -375,8 +364,6 @@ public class CatalogDefinition {
 	public void verifyLinkedCategoryExists(final String linkedCategory, final String catalog) {
 		catalogManagement.expandCatalogAndVerifyCategory(catalog, linkedCategory);
 		catalogManagement.verifyCategoryExists(linkedCategory);
-		//cleanup category so the test can pass the next time we run it
-		deleteLinkedCategory();
 	}
 
 	/**
@@ -398,9 +385,10 @@ public class CatalogDefinition {
 	/**
 	 * Delete new category.
 	 */
-	@And("^I delete newly created category")
+	@And("^I delete newly created (?:category|subcategory)")
 	public void deleteNewCategory() {
-//		Need to select category again before right click delete.
+		catalogManagement.clickCatalogBrowseTab();
+		catalogManagement.clickCatalogRefreshButton();
 		selectNewCategory();
 		catalogManagement.clickDeleteCategoryIcon();
 		new ConfirmDialog(SetUp.getDriver()).clickOKButton("CatalogMessages.CatalogBrowseView_Action_DeleteCategoryDialog");
@@ -416,6 +404,20 @@ public class CatalogDefinition {
 	}
 
 	/**
+	 * Remove linked category from Virtual Catalog.
+	 *
+	 * @param linkedCategoryName name of linked category to be deleted.
+	 * @param virtualCatalog     name of Virtual Catalog in which linked category will be deleted.
+	 */
+	@And("^I remove linked category (.+) from virtual catalog (.+)")
+	public void deleteLinkedCategoryFromVirtualCatalog(final String linkedCategoryName, final String virtualCatalog) {
+		catalogManagement.clickCatalogBrowseTab();
+		catalogManagement.clickCatalogRefreshButton();
+		catalogManagement.selectCategoryInCatalog(virtualCatalog, linkedCategoryName);
+		deleteLinkedCategory();
+	}
+
+	/**
 	 * Helper method for deleting already selected linked category.
 	 */
 	public void deleteLinkedCategory() {
@@ -426,20 +428,24 @@ public class CatalogDefinition {
 	/**
 	 * Verify newly created category is deleted.
 	 */
-	@And("^newly created category is deleted$")
-	public void verifyNewlyCreatedCategoryIsDeleted() {
-		catalogManagement.verifyCategoryIsNotInList(this.category.getCategoryName());
+	@And("^(.+) (?:category|subcategory) is deleted$")
+	public void verifyNewlyCreatedCategoryIsDeleted(final String categoryName) {
+		if ("newly created".equalsIgnoreCase(categoryName)) {
+			catalogManagement.verifyCategoryIsNotInList(this.category.getCategoryName());
+		} else {
+			catalogManagement.verifyCategoryIsNotInList(categoryName);
+		}
 	}
 
 
 	/**
-	 * Create new category for existing catelog.
+	 * Create new category for existing catalog.
 	 *
-	 * @param catalog          the catelog.
+	 * @param catalog          the catalog.
 	 * @param categoryInfoList the category info list.
 	 */
 	@When("^I create new category for (.+) with following data")
-	public void createNewCategoryforExistingCatalog(final String catalog, final List<Category> categoryInfoList) {
+	public void createNewCategoryForExistingCatalog(final String catalog, final List<Category> categoryInfoList) {
 		for (Category category : categoryInfoList) {
 			selectExistingCatalog(catalog);
 			createCategoryWizard = catalogManagement.clickCreateCategoryIcon();
@@ -462,14 +468,81 @@ public class CatalogDefinition {
 	}
 
 	/**
-	 * Create new linked category for existing catelog.
+	 * Create new subcategory for an existing category in an existing catalog.
 	 *
-	 * @param catalog                the catelog.
+	 * @param category         a parent category for a new subcategory
+	 * @param catalog          a catalog for a new subcategory.
+	 * @param categoryInfoList a subcategory info list.
+	 */
+	@When("^I create new subcategory for category (.+) in catalog (.+) with following data")
+	public void createNewSubcategoryForExistingCatalog(final String category, final String catalog, final List<Category> categoryInfoList) {
+		for (Category subcategory : categoryInfoList) {
+			catalogManagement.expandCatalog(catalog);
+			catalogManagement.verifyCategoryExists(category);
+			createCategoryWizard = catalogManagement.clickCreateSubcategoryIcon();
+			this.category.setCategoryCode(Utility.getRandomUUID());
+			createCategoryWizard.enterCategoryCode(this.category.getCategoryCode());
+			this.category.setCategoryName(subcategory.getCategoryName() + " - " + this.category.getCategoryCode());
+			createCategoryWizard.enterCategoryName(this.category.getCategoryName());
+			this.category.setCategoryType(subcategory.getCategoryType());
+			createCategoryWizard.selectCategoryType(this.category.getCategoryType());
+			createCategoryWizard.enterCurrentEnableDateTime();
+			if (subcategory.getStoreVisible().equalsIgnoreCase("true")) {
+				createCategoryWizard.checkStoreVisibleBox();
+			}
+			clickNextButtonCreateCategory();
+			createCategoryWizard.enterAttributeLongText(subcategory.getAttrLongTextValue(), subcategory.getAttrLongTextName());
+			createCategoryWizard.enterAttributeDecimalValue(subcategory.getAttrDecimalValue(), subcategory.getAttrDecimalName());
+			createCategoryWizard.enterAttributeShortText(subcategory.getAttrShortTextValue(), subcategory.getAttrShortTextName());
+			createCategoryWizard.clickFinish();
+		}
+	}
+
+	/**
+	 * verifies that newly created subcategory is present in a Catalog under Category
+	 */
+	@When("^newly created subcategory is present in catalog (.+) under category (.+)")
+	public void createNewSubcategoryForExistingCatalog(final String catalogName, final String parentCategoryName) {
+		catalogManagement.expandCategoryAndVerifySubcategory(catalogName, parentCategoryName, this.category.getCategoryName());
+	}
+
+	/**
+	 * Create new category for newly created catalog.
+	 *
+	 * @param categoryInfoList the category info list.
+	 */
+	@When("^I create new category for newly created catalog with the following data")
+	public void createNewCategoryForNewlyCreatedCatalog(final List<Category> categoryInfoList) {
+		for (Category category : categoryInfoList) {
+			selectNewCatalog();
+			createCategoryWizard = catalogManagement.clickCreateCategoryIcon();
+			this.category.setCategoryCode(Utility.getRandomUUID());
+			createCategoryWizard.enterCategoryCode(this.category.getCategoryCode());
+			this.category.setCategoryName(category.getCategoryName() + " - " + this.category.getCategoryCode());
+			createCategoryWizard.enterCategoryName(this.category.getCategoryName());
+			this.category.setCategoryType(category.getCategoryType());
+			createCategoryWizard.selectCategoryType(this.category.getCategoryType());
+			createCategoryWizard.enterCurrentEnableDateTime();
+			if (category.getStoreVisible().equalsIgnoreCase("true")) {
+				createCategoryWizard.checkStoreVisibleBox();
+			}
+			clickNextButtonCreateCategory();
+			createCategoryWizard.enterAttributeLongText(category.getAttrLongTextValue(), category.getAttrLongTextName());
+			createCategoryWizard.enterAttributeDecimalValue(category.getAttrDecimalValue(), category.getAttrDecimalName());
+			createCategoryWizard.enterAttributeShortText(category.getAttrShortTextValue(), category.getAttrShortTextName());
+			createCategoryWizard.clickFinish();
+		}
+	}
+
+	/**
+	 * Add new linked category to existing virtual catalog.
+	 *
+	 * @param virtualCatalog         the virtual catalog.
 	 * @param linkedCategoryInfoList the linked category info list.
 	 */
-	@When("^I add new linked category to (.+) with following data")
-	public void createNewLinkedCategoryforExistingCatalog(final String catalog, final List<String> linkedCategoryInfoList) {
-		selectExistingCatalog(catalog);
+	@When("^I add new linked category to virtual catalog (.+) with following data")
+	public void addLinkedCategoryToVirtualCatalog(final String virtualCatalog, final List<String> linkedCategoryInfoList) {
+		selectExistingCatalog(virtualCatalog);
 		categoryFinderDialog = catalogManagement.clickAddLinkedCategoryIcon();
 		categoryFinderDialog.selectCatalog(linkedCategoryInfoList.get(0));
 		categoryFinderDialog.enterCategoryName(linkedCategoryInfoList.get(1));
@@ -574,17 +647,6 @@ public class CatalogDefinition {
 	public void verifyNewlyCreatedGlobalAttributeIsDeleted() {
 		editGlobalAttributesDialog = catalogManagementActionToolbar.clickEditGlobalAttributesButton();
 		editGlobalAttributesDialog.verifyGlobalAttributeValueIsNotInList(this.globalAttributeName);
-	}
-
-	/**
-	 * Searches for a product by name.
-	 *
-	 * @param productName product name.
-	 */
-	private void searchForProductByName(final String productName) {
-		catalogManagement.clickCatalogSearchTab();
-		catalogManagement.enterProductName(productName);
-		catalogSearchResultPane = catalogManagement.clickCatalogSearch();
 	}
 
 	/**
@@ -770,23 +832,45 @@ public class CatalogDefinition {
 	}
 
 	/**
+	 * Verify that Product (productCode) does not have Category Assignment.
+	 *
+	 * @param productCode the Product code.
+	 * @param catalogName the catalog name.
+	 */
+	@Then("^the product with code (.+) does not have (.+) in category assignment and merchandising associations$")
+	public void verifyVirtualCatalogNotInProductTabs(final String productCode, final String catalogName) {
+		productAndBundleDefinition.searchForProductByCode(productCode);
+		productAndBundleDefinition.verifyProductSearchResultCode(productCode);
+		productEditor = catalogSearchResultPane.openProductEditorWithProductCode(productCode);
+		verifyCategoryMerchandisingAssignments(catalogName, false);
+	}
+
+	/**
 	 * @param catalogName the catalog name.
 	 */
 	@Then("^the product does not have (.+) in category assignment and merchandising associations$")
 	public void verifyVirtualCatalogNotInProductTabs(final String catalogName) {
 		productEditor = catalogProductListingPane.selectProductAndOpenProductEditor();
-		productEditor.selectTab("CategoryAssignment");
-		productEditor.verifyCatalogTabIsNotPresent(catalogName);
-		productEditor.selectTab("MerchandisingAssociation");
-		productEditor.verifyCatalogTabIsNotPresent(catalogName);
+		verifyCategoryMerchandisingAssignments(catalogName, false);
 	}
 
 	/**
-	 * Clicks Include Product button.
+	 * Verify virtual catalog tab is not present in product tabs
+	 *
+	 * @param productCode the Product code.
+	 * @param catalogName the catalog name.
 	 */
-	@When("^I include the product in the virtual catalog$")
-	public void clickProductState() {
-		catalogProductListingPane.clickIncludeProductButton();
+	@Then("^the product with code (.+) has (.+) in category assignment and merchandising associations$")
+	public void verifyVirtualCatalogInProductTabs(final String productCode, final String catalogName) {
+		productAndBundleDefinition.searchForProductByCode(productCode);
+		productAndBundleDefinition.verifyProductSearchResultCode(productCode);
+		productEditor = catalogSearchResultPane.openProductEditorWithProductCode(productCode);
+		if ("newly created".equalsIgnoreCase(catalogName)) {
+			verifyCategoryMerchandisingAssignments(this.catalog.getCatalogName(), true);
+		} else {
+			verifyCategoryMerchandisingAssignments(catalogName, true);
+		}
+		productEditor.closeProductEditor(productCode);
 	}
 
 	/**
@@ -796,11 +880,36 @@ public class CatalogDefinition {
 	 */
 	@Then("^the product has (.+) in category assignment and merchandising associations$")
 	public void verifyVirtualCatalogInProductTabs(final String catalogName) {
-		productEditor.selectTab("CategoryAssignment");
-		catalogManagementActionToolbar.clickReloadActiveEditor();
-		productEditor.verifyCatalogTabIsPresent(catalogName);
-		productEditor.selectTab("MerchandisingAssociation");
-		productEditor.verifyCatalogTabIsPresent(catalogName);
+		productEditor = catalogProductListingPane.selectProductAndOpenProductEditor();
+		verifyCategoryMerchandisingAssignments(catalogName, true);
+	}
+
+	/**
+	 * @param catalogName  the catalog name.
+	 * @param isTabPresent switch to verify the tab is present or not.
+	 */
+	private void verifyCategoryMerchandisingAssignments(final String catalogName, final Boolean isTabPresent) {
+		productEditor.selectTab(CATEGORY_ASSIGNMENT);
+		if (isTabPresent) {
+			catalogManagementActionToolbar.clickReloadActiveEditor();
+			productEditor.verifyCatalogTabIsPresent(catalogName);
+		} else {
+			productEditor.verifyCatalogTabIsNotPresent(catalogName);
+		}
+		productEditor.selectTab(MERCHANDISING_ASSIGNMENT);
+		if (isTabPresent) {
+			productEditor.verifyCatalogTabIsPresent(catalogName);
+		} else {
+			productEditor.verifyCatalogTabIsNotPresent(catalogName);
+		}
+	}
+
+	/**
+	 * Clicks Include Product button.
+	 */
+	@When("^I include the product in the virtual catalog$")
+	public void clickProductState() {
+		catalogProductListingPane.clickIncludeProductButton();
 	}
 
 	/**
@@ -835,6 +944,9 @@ public class CatalogDefinition {
 	 */
 	@After(value = "@cleanupProduct", order = Constants.CLEANUP_ORDER_FIRST)
 	public void cleanupProduct() {
+		createCatalogDialog = new CreateCatalogDialog(driver);
+		createCatalogDialog.closeDialogIfOpened();
+		activityToolbar.clickCatalogManagementButton();
 		this.productAndBundleDefinition.deleteNewlyCreatedProduct();
 		this.productAndBundleDefinition.verifyProductIsDeleted();
 		catalogManagement.clickCatalogBrowseTab();
@@ -869,12 +981,27 @@ public class CatalogDefinition {
 	}
 
 	/**
+	 * Delete new category or subcategory using Db query.
+	 */
+	@After(value = "@cleanUpCategoryDB", order = Constants.CLEANUP_ORDER_SECOND)
+	public void deleteNewlyCreatedCategoryUsingDb() {
+		DBConnector dbc = new DBConnector();
+		dbc.deleteCategory(this.category.getCategoryName());
+	}
+
+	/**
 	 * Resets the virtual catalog product to its default state.
 	 */
 	@After(value = "@resetVirtualCatalogProduct", order = Constants.CLEANUP_ORDER_FIRST)
 	public void resetVirtualCatalogProduct() {
+		assertThat(this.virtualProductName)
+				.as("It's not possible to reset a virtual product. A virtual product name was not assigned")
+				.isNotBlank();
+		//any dialog which inherits Abstract dialog can be used here
+		addEditBrandDialog = new AddEditBrandDialog(driver, "Edit");
+		addEditBrandDialog.closeDialogIfOpened();
 		catalogProductListingPane.verifyProductNameExists(this.virtualProductName);
-		catalogProductListingPane.clickIncludeProductButton();
+		catalogProductListingPane.clickIncludeProductButtonIfEnabled();
 	}
 
 	@After(value = "@cleanupVirtualCatalog", order = Constants.CLEANUP_ORDER_FIRST)
@@ -1015,6 +1142,28 @@ public class CatalogDefinition {
 			catalogProductListingPane = catalogManagement.doubleClickCategory(category);
 			catalogProductListingPane.addAllCategoryItemsToAChangeSet();
 		}
+	}
+
+	/**
+	 * Opens catalog management tab
+	 */
+	@And("^I open catalog management tab$")
+	public void clickCatalogManagementTab() {
+		catalogManagement.clickCatalogBrowseTab();
+	}
+
+	/**
+	 * Right-clicks newly created category and adds an existing product to it.
+	 */
+	@And("^I add existing product (.+) to newly created category$")
+	public void rightClickToAddExistingProductToNewCategory(final String productCode) {
+		selectNewCategory();
+		SelectAProductDialog dialog = catalogManagement.rightClickAddExistingProduct();
+
+		dialog.enterProductCode(productCode);
+		dialog.clickSearchButton();
+		dialog.selectProductByCode(productCode);
+		dialog.clickOKButton();
 	}
 
 	/**

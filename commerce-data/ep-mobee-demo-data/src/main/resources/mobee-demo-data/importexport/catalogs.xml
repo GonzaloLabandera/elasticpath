@@ -771,6 +771,13 @@
     </categorytypes>
     <producttypes>
         <producttype>
+            <guid>a738a6F2-0aC6-B99f-ab6f-afe483e570f8</guid>
+            <name>Fee</name>
+            <assignedattributes/>
+            <defaulttaxcode>NONE</defaulttaxcode>
+            <nodiscount>true</nodiscount>
+        </producttype>
+        <producttype>
             <guid>a738a602-0a06-492f-ab6f-9fe483e570f8</guid>
             <name>Headset</name>
             <assignedattributes/>
@@ -1306,6 +1313,13 @@
             <name>
                 <value language="fr_CA"/>
                 <value language="en">Sony Ericsson</value>
+            </name>
+        </brand>
+        <brand>
+            <code>Hama</code>
+            <name>
+                <value language="fr_CA">Hama</value>
+                <value language="en">Hama</value>
             </name>
         </brand>
         <brand>

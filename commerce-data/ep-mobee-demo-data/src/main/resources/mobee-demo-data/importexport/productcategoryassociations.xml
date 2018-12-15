@@ -213,6 +213,37 @@
     </catalog>
 </product>
 
+
+    <product code="handsfree_no_hama">
+        <catalog code="Mobile">
+            <category code="Accessories">
+                <default>true</default>
+                <featuredorder>0</featuredorder>
+            </category>
+        </catalog>
+        <catalog code="MobileCatalog">
+            <category code="Accessories">
+                <default>true</default>
+                <featuredorder>0</featuredorder>
+            </category>
+        </catalog>
+    </product>
+
+    <product code="eco_fee_headphones">
+        <catalog code="Mobile">
+            <category code="Accessories">
+                <default>true</default>
+                <featuredorder>0</featuredorder>
+            </category>
+        </catalog>
+        <catalog code="MobileCatalog">
+            <category code="Accessories">
+                <default>true</default>
+                <featuredorder>0</featuredorder>
+            </category>
+        </catalog>
+    </product>
+
 <product code="tt0984938">
     <catalog code="Mobile">
         <category code="Movies">
@@ -2535,6 +2566,96 @@
     </catalog>
     <catalog code="MobileCatalog">
         <category code="AcceptanceTestItems">
+            <default>true</default>
+            <featuredorder>0</featuredorder>
+        </category>
+    </catalog>
+</product>
+<product code="bundleDependentLineItemsScheme1AssignedPrice">
+    <catalog code="Mobile">
+        <category code="phone_plan">
+            <default>true</default>
+            <featuredorder>0</featuredorder>
+        </category>
+    </catalog>
+    <catalog code="MobileCatalog">
+        <category code="phone_plan">
+            <default>true</default>
+            <featuredorder>0</featuredorder>
+        </category>
+    </catalog>
+</product>
+<product code="bundlePhysicalDigitalItemsAssignedPrice">
+    <catalog code="Mobile">
+        <category code="phone_plan">
+            <default>true</default>
+            <featuredorder>0</featuredorder>
+        </category>
+    </catalog>
+    <catalog code="MobileCatalog">
+        <category code="phone_plan">
+            <default>true</default>
+            <featuredorder>0</featuredorder>
+        </category>
+    </catalog>
+</product>
+<product code="bundleDependentLineItemsScheme1CalculatedPrice">
+    <catalog code="Mobile">
+        <category code="phone_plan">
+            <default>true</default>
+            <featuredorder>0</featuredorder>
+        </category>
+    </catalog>
+    <catalog code="MobileCatalog">
+        <category code="phone_plan">
+            <default>true</default>
+            <featuredorder>0</featuredorder>
+        </category>
+    </catalog>
+</product>
+<product code="bundlePhysicalDigitalItemsCalculatedPrice">
+    <catalog code="Mobile">
+        <category code="phone_plan">
+            <default>true</default>
+            <featuredorder>0</featuredorder>
+        </category>
+    </catalog>
+    <catalog code="MobileCatalog">
+        <category code="phone_plan">
+            <default>true</default>
+            <featuredorder>0</featuredorder>
+        </category>
+    </catalog>
+</product>
+<product code="bundleDependentLineItemsScheme2AssignedPrice">
+    <catalog code="Toastie">
+        <category code="AcceptanceTestItems">
+            <default>true</default>
+            <featuredorder>0</featuredorder>
+        </category>
+    </catalog>
+    <catalog code="Mobile">
+        <category code="AcceptanceTestItems">
+            <default>true</default>
+            <featuredorder>0</featuredorder>
+        </category>
+    </catalog>
+    <catalog code="MobileCatalog">
+        <category code="AcceptanceTestItems">
+            <default>true</default>
+            <featuredorder>0</featuredorder>
+        </category>
+    </catalog>
+</product>
+<product code="bundleDependentLineItemsScheme2CalculatedPrice">
+    <catalog code="Mobile">
+        <category code="phone_plan">
+            <default>true</default>
+            <featuredorder>0</featuredorder>
+        </category>
+    </catalog>
+    <catalog code="MobileCatalog">
+        <category code="phone_plan">
             <default>true</default>
             <featuredorder>0</featuredorder>
         </category>

@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) Elastic Path Software Inc., 2008
  */
 package com.elasticpath.service.misc.impl;
@@ -202,7 +202,7 @@ public class OpenJpaFetchPlanHelperImplTest {
 		@Override
 		@SuppressWarnings({"unchecked", "PMD.AvoidThrowingRawExceptionTypes", "rawtypes"})
 		public FetchPlan addField(final Class cls, final String field) {
-			Class<? extends Annotation> transientAnnotation = null;
+			Class<? extends Annotation> transientAnnotation;
 			try {
 				transientAnnotation = (Class<? extends Annotation>) Class.forName("javax.persistence.Transient");
 			} catch (ClassNotFoundException e) {
@@ -214,8 +214,9 @@ public class OpenJpaFetchPlanHelperImplTest {
 				if (method.getAnnotation(transientAnnotation) != null) {
 					fail("Persistence field " + field + " in class " + cls.getName() + " is declared Transient!");
 				}
-			} catch (NoSuchMethodException snme) {
-				fail("Persistence field " + field + " not defined for class " + cls.getName());
+			} catch (NoSuchMethodException exception) {
+				throw new AssertionError("Persistence field " + field + " not defined for class " + cls.getName()
+						+ " with the exception: \n" + exception);
 			}
 			return this;
 		}

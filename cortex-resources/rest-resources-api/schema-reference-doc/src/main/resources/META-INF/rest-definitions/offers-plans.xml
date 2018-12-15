@@ -1,0 +1,78 @@
+<?xml version="1.0"?>
+<definitions xmlns="http://www.elasticpath.com/schema/rest/0.5">
+
+	<family>
+		<name>offers</name>
+		<plan>
+			<name>read-offer-availability</name>
+			<description><![CDATA[Retrieve the availability status of the offer.]]></description>
+			<step>
+				<description><![CDATA[Read a navigation node.]]></description>
+				<start>offer</start>
+				<follow-link>availability</follow-link>
+				<link-back>element</link-back>
+				<result>availabilities.availability-for-offer</result>
+			</step>
+		</plan>
+
+		<plan>
+			<name>read-offer-definition</name>
+			<description><![CDATA[Provide the offer attributes.]]></description>
+			<step>
+				<description><![CDATA[The offer definition.]]></description>
+				<start>offer</start>
+				<follow-link>definition</follow-link>
+				<link-back>offer</link-back>
+				<result>offerdefinitions.offer-definition</result>
+			</step>
+		</plan>
+
+		<plan>
+			<name>read-offer-code</name>
+			<description><![CDATA[Retrieve the unique code associated with the offer.]]></description>
+			<step>
+				<description><![CDATA[The offer code.]]></description>
+				<start>offer</start>
+				<follow-link>code</follow-link>
+				<link-back>offer</link-back>
+				<result>code-for-offer</result>
+			</step>
+		</plan>
+
+		<plan>
+			<name>read-offer-items</name>
+			<description><![CDATA[Retrieve all items in an offer.]]></description>
+			<step>
+				<description><![CDATA[Read a navigation node.]]></description>
+				<start>offer</start>
+				<follow-link>items</follow-link>
+				<link-back>element</link-back>
+				<result>offer-items</result>
+			</step>
+		</plan>
+
+		<plan>
+			<name>read-offer-price-range</name>
+			<description><![CDATA[Retrieve the list price range and the purchase price range defined for the offer.]]></description>
+			<step>
+				<description><![CDATA[Read a navigation node.]]></description>
+				<start>offer</start>
+				<follow-link>pricerange</follow-link>
+				<result>prices.offer-price-range</result>
+			</step>
+		</plan>
+
+		<plan>
+			<name>read-offer-components</name>
+			<description><![CDATA[Retrieve all constituents in the offer if the offer is a bundle.]]></description>
+			<step>
+				<description><![CDATA[Read a navigation node.]]></description>
+				<start>offer</start>
+				<follow-link>components</follow-link>
+				<link-back>element</link-back>
+				<result>offer-components</result>
+			</step>
+		</plan>
+
+	</family>
+</definitions>

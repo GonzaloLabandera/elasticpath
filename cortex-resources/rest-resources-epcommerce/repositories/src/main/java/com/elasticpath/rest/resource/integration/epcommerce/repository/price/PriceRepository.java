@@ -8,6 +8,7 @@ import java.util.Set;
 import io.reactivex.Single;
 
 import com.elasticpath.domain.catalog.Price;
+import com.elasticpath.rest.definition.prices.OfferPriceRangeEntity;
 
 /**
  * Repository for working with the Price domain.
@@ -22,6 +23,15 @@ public interface PriceRepository {
 	 * @return the price
 	 */
 	Single<Price> getPrice(String storeCode, String skuCode);
+
+	/**
+	 * Returns the price range for the product guid in the given store.
+	 *
+	 * @param storeCode the store code
+	 * @param guid   the product guid code
+	 * @return the price
+	 */
+	Single<OfferPriceRangeEntity> getPriceRange(String storeCode, String guid);
 
 	/**
 	 * Returns the lowest price of all skus of the given product in the given store.
@@ -49,4 +59,13 @@ public interface PriceRepository {
 	 * @return true if a price exists for the sku in the store, false otherwise
 	 */
 	Single<Boolean> priceExists(String storeCode, String skuCode);
+
+	/**
+	 * Checks if a price exists for the product in the given store.
+	 *
+	 * @param storeCode the store code
+	 * @param productGuid   the product guid
+	 * @return true if a price exists for the product in the store, false otherwise
+	 */
+	Single<Boolean> priceExistsForProduct(String storeCode, String productGuid);
 }

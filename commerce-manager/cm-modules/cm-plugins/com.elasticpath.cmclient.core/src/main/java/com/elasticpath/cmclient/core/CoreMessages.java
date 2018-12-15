@@ -171,6 +171,8 @@ public final class CoreMessages {
 
 	public String EpValidatorFactory_NoSpace;
 
+	public String EpValidatorFactory_LocaleDisplayNamesRequired;
+
 	public String EpValidatorFactory_ValueRequired;
 	
 	public String EpValidatorFactory_ComboValueRequired;
@@ -194,6 +196,8 @@ public final class CoreMessages {
 	public String EpValidatorFactory_Long;
 	
 	public String EpValidatorFactory_BigDecimal;
+
+	public String EpValidatorFactory_BigDecimal_Asterisk;
 	
 	public String EpValidatorFactory_NonNegativeNonZeroBigDecimal;
 	

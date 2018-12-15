@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) Elastic Path Software Inc., 2014
  */
 package com.elasticpath.importexport.exporter.exporters.impl;

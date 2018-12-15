@@ -4,17 +4,15 @@
 package com.elasticpath.domain.order.impl;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.entry;
+import static org.assertj.core.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.within;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Currency;
 import java.util.Date;
 import java.util.HashMap;
@@ -24,15 +22,19 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
-import org.jmock.Expectations;
+import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
 
+import com.elasticpath.commons.beanframework.BeanFactory;
 import com.elasticpath.commons.constants.ContextIdNames;
+import com.elasticpath.commons.exception.IllegalOperationException;
 import com.elasticpath.domain.customer.Customer;
 import com.elasticpath.domain.customer.impl.CustomerImpl;
 import com.elasticpath.domain.event.EventOriginator;
 import com.elasticpath.domain.event.impl.EventOriginatorImpl;
-import com.elasticpath.domain.misc.impl.LocalizedPropertiesImpl;
 import com.elasticpath.domain.order.ElectronicOrderShipment;
 import com.elasticpath.domain.order.Order;
 import com.elasticpath.domain.order.OrderAddress;
@@ -48,10 +50,10 @@ import com.elasticpath.domain.order.PhysicalOrderShipment;
 import com.elasticpath.domain.shoppingcart.ShoppingItem;
 import com.elasticpath.domain.shoppingcart.ShoppingItemPricingSnapshot;
 import com.elasticpath.domain.store.Store;
+import com.elasticpath.domain.store.impl.StoreImpl;
 import com.elasticpath.domain.tax.TaxCode;
 import com.elasticpath.domain.tax.impl.TaxCodeImpl;
 import com.elasticpath.money.Money;
-import com.elasticpath.money.StandardMoneyFormatter;
 import com.elasticpath.plugin.payment.PaymentType;
 import com.elasticpath.plugin.tax.domain.TaxAddress;
 import com.elasticpath.plugin.tax.domain.TaxOperationContext;
@@ -62,13 +64,13 @@ import com.elasticpath.service.tax.adapter.TaxAddressAdapter;
 import com.elasticpath.service.tax.impl.TaxCalculationResultImpl;
 import com.elasticpath.service.tax.impl.TaxCalculationServiceImpl;
 import com.elasticpath.service.tax.impl.TaxOperationServiceImpl;
-import com.elasticpath.test.jmock.AbstractEPServiceTestCase;
 
 /**
  * Test cases for <code>OrderImpl</code>.
  */
+@RunWith(MockitoJUnitRunner.class)
 @SuppressWarnings({ "PMD.TooManyMethods", "PMD.GodClass", "PMD.ExcessiveClassLength", "PMD.ExcessiveImports" })
-public class OrderImplTest extends AbstractEPServiceTestCase {
+public class OrderImplTest {
 
 	private static final String HST = "HST";
 
@@ -86,7 +88,11 @@ public class OrderImplTest extends AbstractEPServiceTestCase {
 	private static final String FOO = "foo";
 	private static final String BAR = "bar";
 
+	@Mock
 	private StoreService storeService;
+
+	@Mock
+	private BeanFactory beanFactory;
 
 	private static final double ALLOWABLE_ERROR = 0.0000001;
 	/**
@@ -94,20 +100,12 @@ public class OrderImplTest extends AbstractEPServiceTestCase {
 	 *
 	 * @throws Exception on error
 	 */
-	@Override
+	@Before
 	public void setUp() throws Exception {
-		super.setUp();
 
-		stubGetBean(ContextIdNames.MONEY_FORMATTER, StandardMoneyFormatter.class);
-		stubGetBean(ContextIdNames.TAX_CALCULATION_RESULT, TaxCalculationResultImpl.class);
-		stubGetBean(ContextIdNames.LOCALIZED_PROPERTIES, LocalizedPropertiesImpl.class);
+		when(beanFactory.getBean(ContextIdNames.STORE_SERVICE)).thenReturn(storeService);
 
-		storeService = context.mock(StoreService.class);
-		stubGetBean(ContextIdNames.STORE_SERVICE, storeService);
-
-		context.checking(new Expectations() { {
-			allowing(storeService).findStoreWithCode(getMockedStore().getCode()); will(returnValue(getMockedStore()));
-		} });
+		when(storeService.findStoreWithCode(getMockedStore().getCode())).thenReturn(getMockedStore());
 
 		setUpTaxCalculationService();
 	}
@@ -155,10 +153,10 @@ public class OrderImplTest extends AbstractEPServiceTestCase {
 
 		TaxOperationServiceImpl taxOperationService = new TaxOperationServiceImpl();
 		taxOperationService.setTaxCalculationService(taxCalculationService);
-		taxOperationService.setBeanFactory(getBeanFactory());
+		taxOperationService.setBeanFactory(beanFactory);
 		taxOperationService.setAddressAdapter(new TaxAddressAdapter());
 
-		stubGetBean(ContextIdNames.TAX_OPERATION_SERVICE, taxOperationService);
+		when(beanFactory.getBean(ContextIdNames.TAX_OPERATION_SERVICE)).thenReturn(taxOperationService);
 	}
 
 	/**
@@ -167,23 +165,15 @@ public class OrderImplTest extends AbstractEPServiceTestCase {
 	@Test
 	public void testSubtotalSum() {
 		final BigDecimal shipmentSubtotal = BigDecimal.TEN;
-		final OrderShipment mockOrderShipment = context.mock(OrderShipment.class);
-		final OrderShipment mockOrderShipment2 = context.mock(OrderShipment.class, "second order shipment");
-		context.checking(new Expectations() {
-			{
-				allowing(mockOrderShipment).getSubtotal();
-				will(returnValue(shipmentSubtotal));
+		final OrderShipment mockOrderShipment = mock(OrderShipment.class);
+		final OrderShipment mockOrderShipment2 = mock(OrderShipment.class, "second order shipment");
+		when(mockOrderShipment.getSubtotal()).thenReturn(shipmentSubtotal);
 
-				allowing(mockOrderShipment).getCreatedDate();
-				will(returnValue(new Date()));
+		when(mockOrderShipment.getCreatedDate()).thenReturn(new Date());
 
-				allowing(mockOrderShipment2).getSubtotal();
-				will(returnValue(shipmentSubtotal));
+		when(mockOrderShipment2.getSubtotal()).thenReturn(shipmentSubtotal);
 
-				allowing(mockOrderShipment2).getCreatedDate();
-				will(returnValue(new Date()));
-			}
-		});
+		when(mockOrderShipment2.getCreatedDate()).thenReturn(new Date());
 		final List<OrderShipment> shipments = new ArrayList<>();
 		shipments.add(mockOrderShipment);
 		shipments.add(mockOrderShipment2);
@@ -195,8 +185,9 @@ public class OrderImplTest extends AbstractEPServiceTestCase {
 				return shipments;
 			}
 		};
-		assertEquals("Order subtotal should be the sum of its shipment subtotals, and the scale should be 2.",
-				new BigDecimal("20").setScale(2), order.getSubtotal());
+		assertThat(order.getSubtotal())
+			.as("Order subtotal should be the sum of its shipment subtotals, and the scale should be 2.")
+			.isEqualTo("20.00");
 	}
 
 	/**
@@ -207,7 +198,7 @@ public class OrderImplTest extends AbstractEPServiceTestCase {
 		Order order = createTestOrder();
 		Date testDate = new Date();
 		order.setCreatedDate(testDate);
-		assertEquals(testDate, order.getCreatedDate());
+		assertThat(order.getCreatedDate()).isEqualTo(testDate);
 	}
 
 	/**
@@ -218,7 +209,7 @@ public class OrderImplTest extends AbstractEPServiceTestCase {
 		Order order = createTestOrder();
 		Date testDate = new Date();
 		order.setLastModifiedDate(testDate);
-		assertEquals(testDate, order.getLastModifiedDate());
+		assertThat(order.getLastModifiedDate()).isEqualTo(testDate);
 
 	}
 
@@ -230,7 +221,7 @@ public class OrderImplTest extends AbstractEPServiceTestCase {
 		Order order = createTestOrder();
 		EventOriginator originator = new EventOriginatorImpl();
 		order.setModifiedBy(originator);
-		assertEquals(originator, order.getModifiedBy());
+		assertThat(order.getModifiedBy()).isEqualTo(originator);
 	}
 
 	/**
@@ -241,7 +232,7 @@ public class OrderImplTest extends AbstractEPServiceTestCase {
 		Order order = createTestOrder();
 		String testString = "TestString";
 		order.setIpAddress(testString);
-		assertEquals(testString, order.getIpAddress());
+		assertThat(order.getIpAddress()).isEqualTo(testString);
 	}
 
 	/**
@@ -252,7 +243,7 @@ public class OrderImplTest extends AbstractEPServiceTestCase {
 		Order order = createTestOrder();
 		Customer customer = new CustomerImpl();
 		order.setCustomer(customer);
-		assertEquals(customer, order.getCustomer());
+		assertThat(order.getCustomer()).isEqualTo(customer);
 	}
 
 	/**
@@ -263,7 +254,7 @@ public class OrderImplTest extends AbstractEPServiceTestCase {
 		Order order = createTestOrder();
 		OrderAddress orderAddress = new OrderAddressImpl();
 		order.setBillingAddress(orderAddress);
-		assertEquals(orderAddress, order.getBillingAddress());
+		assertThat(order.getBillingAddress()).isEqualTo(orderAddress);
 	}
 
 	/**
@@ -276,11 +267,11 @@ public class OrderImplTest extends AbstractEPServiceTestCase {
 		List<OrderShipment> shipmentSet = new ArrayList<>();
 		shipmentSet.add(orderShipment);
 		order.setShipments(shipmentSet);
-		assertEquals(shipmentSet, order.getAllShipments());
+		assertThat(order.getAllShipments()).isEqualTo(shipmentSet);
 
 		int numShipments = order.getAllShipments().size();
 		createPhysicalOrderShipmentForOrder(order);
-		assertEquals(numShipments + 1, order.getAllShipments().size());
+		assertThat(order.getAllShipments()).hasSize(numShipments + 1);
 	}
 
 	/**
@@ -293,12 +284,12 @@ public class OrderImplTest extends AbstractEPServiceTestCase {
 		Set<OrderPayment> paymentSet = new HashSet<>();
 		paymentSet.add(orderPayment);
 		order.setOrderPayments(paymentSet);
-		assertEquals(paymentSet, order.getOrderPayments());
+		assertThat(order.getOrderPayments()).isEqualTo(paymentSet);
 
 		int numPayments = order.getOrderPayments().size();
 		OrderPayment anotherOrderPayment = new OrderPaymentImpl();
 		order.addOrderPayment(anotherOrderPayment);
-		assertEquals(numPayments + 1, order.getOrderPayments().size());
+		assertThat(order.getOrderPayments()).hasSize(numPayments + 1);
 	}
 
 	/**
@@ -309,7 +300,7 @@ public class OrderImplTest extends AbstractEPServiceTestCase {
 		OrderImpl order = createTestOrder();
 		Set<OrderEvent> orderNotesSet = new HashSet<>();
 		order.setOrderEvents(orderNotesSet);
-		assertEquals(orderNotesSet, order.getOrderEvents());
+		assertThat(order.getOrderEvents()).isEqualTo(orderNotesSet);
 	}
 
 	/**
@@ -320,7 +311,7 @@ public class OrderImplTest extends AbstractEPServiceTestCase {
 		Order order = createTestOrder();
 		Locale testLocale = Locale.CANADA;
 		order.setLocale(testLocale);
-		assertEquals(testLocale, order.getLocale());
+		assertThat(order.getLocale()).isEqualTo(testLocale);
 	}
 
 	/**
@@ -330,7 +321,7 @@ public class OrderImplTest extends AbstractEPServiceTestCase {
 	public void testGetSetCurrency() {
 		Order order = createTestOrder();
 		order.setCurrency(CURRENCY);
-		assertEquals(CURRENCY, order.getCurrency());
+		assertThat(order.getCurrency()).isEqualTo(CURRENCY);
 	}
 
 	/**
@@ -341,23 +332,15 @@ public class OrderImplTest extends AbstractEPServiceTestCase {
 	@Test
 	public void testBeforeTaxSubtotalSum() {
 		final BigDecimal beforeTaxSubtotal = BigDecimal.TEN;
-		final OrderShipment mockOrderShipment = context.mock(OrderShipment.class);
-		final OrderShipment mockOrderShipment2 = context.mock(OrderShipment.class, "second order shipment");
-		context.checking(new Expectations() {
-			{
-				allowing(mockOrderShipment).getSubtotalBeforeTax();
-				will(returnValue(beforeTaxSubtotal));
+		final OrderShipment mockOrderShipment = mock(OrderShipment.class);
+		final OrderShipment mockOrderShipment2 = mock(OrderShipment.class, "second order shipment");
+		when(mockOrderShipment.getSubtotalBeforeTax()).thenReturn(beforeTaxSubtotal);
 
-				allowing(mockOrderShipment).getCreatedDate();
-				will(returnValue(new Date()));
+		when(mockOrderShipment.getCreatedDate()).thenReturn(new Date());
 
-				allowing(mockOrderShipment2).getSubtotalBeforeTax();
-				will(returnValue(beforeTaxSubtotal));
+		when(mockOrderShipment2.getSubtotalBeforeTax()).thenReturn(beforeTaxSubtotal);
 
-				allowing(mockOrderShipment2).getCreatedDate();
-				will(returnValue(new Date()));
-			}
-		});
+		when(mockOrderShipment2.getCreatedDate()).thenReturn(new Date());
 		final List<OrderShipment> shipments = new ArrayList<>();
 		shipments.add(mockOrderShipment);
 		shipments.add(mockOrderShipment2);
@@ -368,14 +351,16 @@ public class OrderImplTest extends AbstractEPServiceTestCase {
 			public List<OrderShipment> getShipments() {
 				return shipments;
 			}
+
 			@Override
 			public Currency getCurrency() {
 				return CURRENCY;
 			}
 		};
-		assertEquals("Order beforeTaxSubtotal should be the sum of its shipment beforeTaxSubtotals, and the scale should be 2.",
-				new BigDecimal("20").setScale(2), order.getBeforeTaxSubtotalMoney().getRawAmount());
-		assertEquals(CURRENCY, order.getBeforeTaxSubtotalMoney().getCurrency());
+		assertThat(order.getBeforeTaxSubtotalMoney().getRawAmount())
+			.as("Order beforeTaxSubtotal should be the sum of its shipment beforeTaxSubtotals, and the scale should be 2.")
+			.isEqualTo("20.00");
+		assertThat(order.getBeforeTaxSubtotalMoney().getCurrency()).isEqualTo(CURRENCY);
 	}
 
 	/**
@@ -386,23 +371,15 @@ public class OrderImplTest extends AbstractEPServiceTestCase {
 	@Test
 	public void testSubtotalDiscountSum() {
 		final BigDecimal subtotalDiscount = BigDecimal.TEN;
-		final OrderShipment mockOrderShipment = context.mock(OrderShipment.class);
-		final OrderShipment mockOrderShipment2 = context.mock(OrderShipment.class, "second order shipment");
-		context.checking(new Expectations() {
-			{
-				allowing(mockOrderShipment).getSubtotalDiscount();
-				will(returnValue(subtotalDiscount));
+		final OrderShipment mockOrderShipment = mock(OrderShipment.class);
+		final OrderShipment mockOrderShipment2 = mock(OrderShipment.class, "second order shipment");
+		when(mockOrderShipment.getSubtotalDiscount()).thenReturn(subtotalDiscount);
 
-				allowing(mockOrderShipment).getCreatedDate();
-				will(returnValue(new Date()));
+		when(mockOrderShipment.getCreatedDate()).thenReturn(new Date());
 
-				allowing(mockOrderShipment2).getSubtotalDiscount();
-				will(returnValue(subtotalDiscount));
+		when(mockOrderShipment2.getSubtotalDiscount()).thenReturn(subtotalDiscount);
 
-				allowing(mockOrderShipment2).getCreatedDate();
-				will(returnValue(new Date()));
-			}
-		});
+		when(mockOrderShipment2.getCreatedDate()).thenReturn(new Date());
 		final List<OrderShipment> shipments = new ArrayList<>();
 		shipments.add(mockOrderShipment);
 		shipments.add(mockOrderShipment2);
@@ -413,14 +390,16 @@ public class OrderImplTest extends AbstractEPServiceTestCase {
 			public List<OrderShipment> getShipments() {
 				return shipments;
 			}
+
 			@Override
 			public Currency getCurrency() {
 				return CURRENCY;
 			}
 		};
-		assertEquals("Order subtotal discount should be the sum of its shipment subtotal discounts, and the scale should be 2.",
-				new BigDecimal("20").setScale(2), order.getSubtotalDiscountMoney().getRawAmount());
-		assertEquals(CURRENCY, order.getSubtotalDiscountMoney().getCurrency());
+		assertThat(order.getSubtotalDiscountMoney().getRawAmount())
+			.as("Order subtotal discount should be the sum of its shipment subtotal discounts, and the scale should be 2.")
+			.isEqualTo("20.00");
+		assertThat(order.getSubtotalDiscountMoney().getCurrency()).isEqualTo(CURRENCY);
 	}
 
 	/** Test for getOrderShippingCostMoney(). */
@@ -436,7 +415,7 @@ public class OrderImplTest extends AbstractEPServiceTestCase {
 		order.setUidPk(TEST_UIDPK);
 		order.setOrderNumber(TEST_ORDER_NUMBER1);
 
-		assertEquals(BigDecimal.ZERO.setScale(2), order.getTotalShippingCostMoney().getAmount());
+		assertThat(order.getTotalShippingCostMoney().getAmount()).isEqualTo(BigDecimal.ZERO.setScale(2));
 
 		PhysicalOrderShipment orderShipment1 = createPhysicalOrderShipmentForOrder(order);
 		orderShipment1.setShippingCost(new BigDecimal("50.00"));
@@ -444,7 +423,7 @@ public class OrderImplTest extends AbstractEPServiceTestCase {
 		PhysicalOrderShipment orderShipment2 = createPhysicalOrderShipmentForOrder(order);
 		orderShipment2.setShippingCost(new BigDecimal("25.50"));
 
-		assertEquals(new BigDecimal("75.50"), order.getTotalShippingCostMoney().getAmount());
+		assertThat(order.getTotalShippingCostMoney().getAmount()).isEqualTo("75.50");
 
 	}
 
@@ -461,16 +440,16 @@ public class OrderImplTest extends AbstractEPServiceTestCase {
 		order.setUidPk(TEST_UIDPK);
 		order.setOrderNumber(TEST_ORDER_NUMBER1);
 
-		assertEquals(BigDecimal.ZERO.setScale(2), order.getTotalShippingCostMoney().getAmount());
+		assertThat(order.getTotalShippingCostMoney().getAmount()).isEqualTo(BigDecimal.ZERO.setScale(2));
 
-		PhysicalOrderShipment orderShipment1 =  createPhysicalOrderShipmentForOrder(order);
+		PhysicalOrderShipment orderShipment1 = createPhysicalOrderShipmentForOrder(order);
 		orderShipment1.setShippingCost(new BigDecimal("45.00"));
 
 
 		PhysicalOrderShipment orderShipment2 = createPhysicalOrderShipmentForOrder(order);
 		orderShipment2.setShippingCost(new BigDecimal("22.50"));
 
-		assertEquals(new BigDecimal("67.50"), order.getBeforeTaxTotalShippingCostMoney().getAmount());
+		assertThat(order.getBeforeTaxTotalShippingCostMoney().getAmount()).isEqualTo("67.50");
 
 	}
 
@@ -478,16 +457,15 @@ public class OrderImplTest extends AbstractEPServiceTestCase {
 	@Test
 	public void testGetShippingAddress() {
 		Order order = createTestOrder();
-		assertNull(order.getShippingAddress());
+		assertThat(order.getShippingAddress()).isNull();
 
 		OrderAddress testAddress = new OrderAddressImpl();
-		PhysicalOrderShipment orderShipment = new PhysicalOrderShipmentImpl();
-		orderShipment.setShipmentAddress(testAddress);
 		order.setUidPk(TEST_UIDPK);
 		order.setOrderNumber(TEST_ORDER_NUMBER1);
-		order.addShipment(orderShipment);
+		PhysicalOrderShipment orderShipment = createPhysicalOrderShipmentForOrder(order);
+		orderShipment.setShipmentAddress(testAddress);
 
-		assertSame(testAddress, order.getShippingAddress());
+		assertThat(order.getShippingAddress()).isSameAs(testAddress);
 	}
 
 	/**
@@ -498,7 +476,7 @@ public class OrderImplTest extends AbstractEPServiceTestCase {
 		OrderImpl order = createTestOrder();
 		Set<OrderReturn> returns = new HashSet<>();
 		order.setReturns(returns);
-		assertEquals(returns, order.getReturns());
+		assertThat(order.getReturns()).isEqualTo(returns);
 	}
 
 	/**
@@ -509,7 +487,7 @@ public class OrderImplTest extends AbstractEPServiceTestCase {
 		Order order = createTestOrder();
 		OrderReturn orderReturn = new OrderReturnImpl();
 		order.addReturn(orderReturn);
-		assertEquals(1, order.getReturns().size());
+		assertThat(order.getReturns()).hasSize(1);
 	}
 
 	/**
@@ -520,7 +498,7 @@ public class OrderImplTest extends AbstractEPServiceTestCase {
 		Order order = createTestOrder();
 		OrderEvent orderEvent = new OrderEventImpl();
 		order.addOrderEvent(orderEvent);
-		assertEquals(1, order.getOrderEvents().size());
+		assertThat(order.getOrderEvents()).hasSize(1);
 	}
 
 	/**
@@ -530,23 +508,17 @@ public class OrderImplTest extends AbstractEPServiceTestCase {
 	public void testGetSetOrderNumber() {
 		Order order = createTestOrder();
 		order.setOrderNumber(TEST_ORDER_NUMBER1);
-		assertEquals(TEST_ORDER_NUMBER1, order.getOrderNumber());
-		assertEquals(TEST_ORDER_NUMBER1, order.getGuid());
+		assertThat(order.getOrderNumber()).isEqualTo(TEST_ORDER_NUMBER1);
+		assertThat(order.getGuid()).isEqualTo(TEST_ORDER_NUMBER1);
 	}
 
 	/**
 	 * Test method for 'com.elasticpath.domain.order.impl.OrderImpl.setGuid'.
 	 */
-	@SuppressWarnings({ "PMD.EmptyCatchBlock" })
 	@Test
 	public void testSetGuidShouldThrowException() {
 		Order order = createTestOrder();
-		try {
-			order.setGuid(TEST_ORDER_NUMBER1);
-			fail();
-		} catch (Exception e) {
-			// exception was expected
-		}
+		assertThatThrownBy(() -> order.setGuid(TEST_ORDER_NUMBER1)).isInstanceOf(IllegalOperationException.class);
 	}
 
 	/**
@@ -555,7 +527,7 @@ public class OrderImplTest extends AbstractEPServiceTestCase {
 	@Test
 	public void testOrderStartsWithStatusOfCreated() {
 		Order order = createTestOrder();
-		assertEquals(OrderStatus.CREATED, order.getStatus());
+		assertThat(order.getStatus()).isEqualTo(OrderStatus.CREATED);
 	}
 
 	/**
@@ -574,10 +546,10 @@ public class OrderImplTest extends AbstractEPServiceTestCase {
 		order.setStatus(OrderStatus.IN_PROGRESS);
 
 		shipment.setStatus(OrderShipmentStatus.SHIPPED);
-		assertEquals(OrderStatus.PARTIALLY_SHIPPED, order.getStatus());
+		assertThat(order.getStatus()).isEqualTo(OrderStatus.PARTIALLY_SHIPPED);
 
 		shipment2.setStatus(OrderShipmentStatus.SHIPPED);
-		assertEquals(OrderStatus.COMPLETED, order.getStatus());
+		assertThat(order.getStatus()).isEqualTo(OrderStatus.COMPLETED);
 	}
 
 	/**
@@ -586,13 +558,11 @@ public class OrderImplTest extends AbstractEPServiceTestCase {
 	@Test
 	public void testOrderNotCancellableWithDigitalGoods() {
 		Order order = createTestOrder();
-		final OrderShipment shipment = new ElectronicOrderShipmentImpl();
-		shipment.setStatus(OrderShipmentStatus.RELEASED);
 		order.setUidPk(TEST_UIDPK);
 		order.setOrderNumber(TEST_ORDER_NUMBER1);
-		order.addShipment(shipment);
+		final OrderShipment shipment = createElectronicOrderShipmentForOrder(order);
 		shipment.setStatus(OrderShipmentStatus.SHIPPED);
-		assertFalse(order.isCancellable());
+		assertThat(order.isCancellable()).isFalse();
 	}
 
 	/**
@@ -602,7 +572,7 @@ public class OrderImplTest extends AbstractEPServiceTestCase {
 	public void testOrderNotCancellableWhenComplete() {
 		OrderImpl order = createTestOrder();
 		order.setStatus(OrderStatus.COMPLETED);
-		assertFalse(order.isCancellable());
+		assertThat(order.isCancellable()).isFalse();
 	}
 
 	/**
@@ -612,7 +582,7 @@ public class OrderImplTest extends AbstractEPServiceTestCase {
 	public void testOrderNotCancellableWhenPartiallyShipped() {
 		OrderImpl order = createTestOrder();
 		order.setStatus(OrderStatus.PARTIALLY_SHIPPED);
-		assertFalse(order.isCancellable());
+		assertThat(order.isCancellable()).isFalse();
 	}
 
 	/**
@@ -632,7 +602,7 @@ public class OrderImplTest extends AbstractEPServiceTestCase {
 	public void testOrderNotCancellableWhenCancelled() {
 		OrderImpl order = createTestOrder();
 		order.setStatus(OrderStatus.CANCELLED);
-		assertFalse(order.isCancellable());
+		assertThat(order.isCancellable()).isFalse();
 	}
 
 	/**
@@ -641,7 +611,7 @@ public class OrderImplTest extends AbstractEPServiceTestCase {
 	@Test
 	public void testOrderCancellableWhenInProgress() {
 		OrderImpl order = createOrderInProgress();
-		assertTrue(order.isCancellable());
+		assertThat(order.isCancellable()).isTrue();
 	}
 
 	/**
@@ -651,7 +621,7 @@ public class OrderImplTest extends AbstractEPServiceTestCase {
 	public void testOrderCancellableWhenCreated() {
 		OrderImpl order = createTestOrder();
 		order.setStatus(OrderStatus.CREATED);
-		assertTrue(order.isCancellable());
+		assertThat(order.isCancellable()).isTrue();
 	}
 
 	/**
@@ -661,7 +631,7 @@ public class OrderImplTest extends AbstractEPServiceTestCase {
 	public void testOrderHoldableWhenCreated() {
 		OrderImpl order = createTestOrder();
 		order.setStatus(OrderStatus.CREATED);
-		assertTrue(order.isHoldable());
+		assertThat(order.isHoldable()).isTrue();
 	}
 
 	/**
@@ -671,7 +641,7 @@ public class OrderImplTest extends AbstractEPServiceTestCase {
 	public void testOrderNotHoldableWhenComplete() {
 		OrderImpl order = createTestOrder();
 		order.setStatus(OrderStatus.COMPLETED);
-		assertFalse(order.isHoldable());
+		assertThat(order.isHoldable()).isFalse();
 	}
 
 	/**
@@ -681,7 +651,7 @@ public class OrderImplTest extends AbstractEPServiceTestCase {
 	public void testOrderNotHoldableWhenPartiallyShipped() {
 		OrderImpl order = createTestOrder();
 		order.setStatus(OrderStatus.PARTIALLY_SHIPPED);
-		assertFalse(order.isHoldable());
+		assertThat(order.isHoldable()).isFalse();
 	}
 
 	/**
@@ -691,7 +661,7 @@ public class OrderImplTest extends AbstractEPServiceTestCase {
 	public void testOrderHoldableWhenAwaitingExchange() {
 		OrderImpl order = createTestOrder();
 		order.setStatus(OrderStatus.AWAITING_EXCHANGE);
-		assertFalse(order.isHoldable());
+		assertThat(order.isHoldable()).isFalse();
 	}
 
 	/**
@@ -701,7 +671,7 @@ public class OrderImplTest extends AbstractEPServiceTestCase {
 	public void testOrderNotHoldableWhenCancelled() {
 		OrderImpl order = createTestOrder();
 		order.setStatus(OrderStatus.CANCELLED);
-		assertFalse(order.isHoldable());
+		assertThat(order.isHoldable()).isFalse();
 	}
 
 	/**
@@ -710,7 +680,7 @@ public class OrderImplTest extends AbstractEPServiceTestCase {
 	@Test
 	public void testOrderNotHoldableWhenInProgress() {
 		OrderImpl order = createOrderInProgress();
-		assertFalse(order.isHoldable());
+		assertThat(order.isHoldable()).isFalse();
 	}
 
 	private OrderImpl createOrderInProgress() {
@@ -729,7 +699,7 @@ public class OrderImplTest extends AbstractEPServiceTestCase {
 
 		order.releaseOrder();
 
-		assertEquals(OrderStatus.IN_PROGRESS, order.getStatus());
+		assertThat(order.getStatus()).isEqualTo(OrderStatus.IN_PROGRESS);
 	}
 
 	/**
@@ -739,18 +709,14 @@ public class OrderImplTest extends AbstractEPServiceTestCase {
 	@Test
 	public void testPersistedOrderAddPhysicalShipment() {
 		Order order = createTestOrder();
-		assertTrue("Order should be persistent", order.isPersisted());
+		assertThat(order.isPersisted())
+			.as("Order should be persistent")
+			.isTrue();
 		OrderShipment orderShipment = createPhysicalOrderShipmentForOrder(order);
 		orderShipment.setStatus(OrderShipmentStatus.INVENTORY_ASSIGNED);
-		try {
-			order.addShipment(orderShipment);
-		} catch (OrderNotPersistedException ex) {
-			fail("Persisted order should not have a problem adding a shipment");
-		}
-		assertNotNull("Shipment number should not be null", orderShipment.getShipmentNumber());
-		assertTrue("Shipment number should not be empty", orderShipment.getShipmentNumber().length() > 0);
-		assertTrue("Shipment number should contain order number", orderShipment.getShipmentNumber().contains(order.getOrderNumber()));
-		assertEquals("Order status should be CREATED", OrderStatus.CREATED, order.getStatus());
+		order.addShipment(orderShipment);
+		assertThat(orderShipment.getShipmentNumber()).contains(order.getOrderNumber());
+		assertThat(order.getStatus()).isEqualTo(OrderStatus.CREATED);
 	}
 
 	/**
@@ -760,18 +726,11 @@ public class OrderImplTest extends AbstractEPServiceTestCase {
 	@Test
 	public void testPersistedOrderAddElectronicShipment() {
 		OrderImpl order = createOrderInProgress();
-		assertTrue("Order should be persistent", order.isPersisted());
-		OrderShipment orderShipment = new ElectronicOrderShipmentImpl();
+		assertThat(order.isPersisted()).isTrue();
+		OrderShipment orderShipment = createElectronicOrderShipmentForOrder(order);
 		orderShipment.setStatus(OrderShipmentStatus.RELEASED);
-		try {
-			order.addShipment(orderShipment);
-		} catch (OrderNotPersistedException ex) {
-			fail("Persisted order should not have a problem adding a shipment");
-		}
-		assertNotNull("Shipment number should not be null", orderShipment.getShipmentNumber());
-		assertTrue("Shipment number should not be empty", orderShipment.getShipmentNumber().length() > 0);
-		assertTrue("Shipment number should contain order number", orderShipment.getShipmentNumber().contains(order.getOrderNumber()));
-		assertEquals("Order status should be IN_PROGRESS", OrderStatus.IN_PROGRESS, order.getStatus());
+		assertThat(orderShipment.getShipmentNumber()).contains(order.getOrderNumber());
+		assertThat(order.getStatus()).isEqualTo(OrderStatus.IN_PROGRESS);
 	}
 
 	/**
@@ -781,18 +740,12 @@ public class OrderImplTest extends AbstractEPServiceTestCase {
 	@Test
 	public void testPersistedOrderAddServiceShipment() {
 		OrderImpl order = createOrderInProgress();
-		assertTrue("Order should be persistent", order.isPersisted());
+		assertThat(order.isPersisted()).isTrue();
 		OrderShipment orderShipment = new ServiceOrderShipmentImpl();
 		orderShipment.setStatus(OrderShipmentStatus.SHIPPED);
-		try {
-			order.addShipment(orderShipment);
-		} catch (OrderNotPersistedException ex) {
-			fail("Persisted order should not have a problem adding a shipment");
-		}
-		assertNotNull("Shipment number should not be null", orderShipment.getShipmentNumber());
-		assertTrue("Shipment number should not be empty", orderShipment.getShipmentNumber().length() > 0);
-		assertTrue("Shipment number should contain order number", orderShipment.getShipmentNumber().contains(order.getOrderNumber()));
-		assertEquals("Order status should be COMPLETED", OrderStatus.COMPLETED, order.getStatus());
+		order.addShipment(orderShipment);
+		assertThat(orderShipment.getShipmentNumber()).contains(order.getOrderNumber());
+		assertThat(order.getStatus()).isEqualTo(OrderStatus.COMPLETED);
 	}
 
 	/**
@@ -802,22 +755,20 @@ public class OrderImplTest extends AbstractEPServiceTestCase {
 	public void testTransientOrderAddShipment() {
 		Order order = createTestOrder();
 		order.setUidPk(0);
-		assertFalse("Order should not be persistent", order.isPersisted());
+		assertThat(order.isPersisted()).isFalse();
 		OrderShipment orderShipment = new PhysicalOrderShipmentImpl();
-		try {
-			order.addShipment(orderShipment);
-			fail("Attempting to add a shipment to a transient order should result in an exception");
-		} catch (OrderNotPersistedException expected) {
-			assertNotNull("Exception was expected", expected);
-		}
+		assertThatThrownBy(() -> order.addShipment(orderShipment))
+			.isInstanceOf(OrderNotPersistedException.class);
 	}
 
 	@Test
 	public void testOrderDataLazyInstantiation() {
 		Order order = createTestOrder();
 
-		assertNull("Getter of non-existent order data key should return null", order.getFieldValue(FOO));
-		assertEquals("Map getter should return empty map", Collections.emptyMap(), order.getFieldValues());
+		assertThat(order.getFieldValue(FOO))
+			.as("Getter of non-existent order data key should return null")
+			.isNull();
+		assertThat(order.getFieldValues()).isEmpty();
 	}
 
 	@Test
@@ -825,8 +776,12 @@ public class OrderImplTest extends AbstractEPServiceTestCase {
 		Order order = createTestOrder();
 		order.setFieldValue(FOO, BAR);
 
-		assertEquals("Getter/Setters should work as expected", BAR, order.getFieldValue(FOO));
-		assertEquals("Map getter should also work", Collections.singletonMap(FOO, BAR), order.getFieldValues());
+		assertThat(order.getFieldValue(FOO))
+			.as("Getter/Setters should work as expected")
+			.isEqualTo(BAR);
+		assertThat(order.getFieldValues())
+			.as("Map getter should also work")
+			.containsOnly(entry(FOO, BAR));
 	}
 
 	/**
@@ -850,10 +805,10 @@ public class OrderImplTest extends AbstractEPServiceTestCase {
 		List<OrderShipment> shipmentSet = new ArrayList<>();
 		shipmentSet.add(orderShipment);
 		order.setShipments(shipmentSet);
-		assertEquals(shipmentSet, order.getAllShipments());
+		assertThat(order.getAllShipments()).isEqualTo(shipmentSet);
 
 		int numShipments = order.getAllShipments().size();
-		assertEquals(numShipments, order.getAllShipments().size());
+		assertThat(order.getAllShipments()).hasSize(numShipments);
 
 		Map<String, Money> eachTaxMap = order.getEachItemTaxTotalsMoney();
 		for (final Map.Entry<String, Money> taxEntry : eachTaxMap.entrySet()) {
@@ -868,9 +823,8 @@ public class OrderImplTest extends AbstractEPServiceTestCase {
 				fail("Unrecognized tax is given.");
 			}
 
-			assertEquals(actualValue.doubleValue(),
-				taxEntry.getValue().getAmount().doubleValue(),
-					ALLOWABLE_ERROR);
+			assertThat(taxEntry.getValue().getAmount().doubleValue())
+				.isCloseTo(actualValue.doubleValue(), within(ALLOWABLE_ERROR));
 		}
 	}
 
@@ -918,10 +872,10 @@ public class OrderImplTest extends AbstractEPServiceTestCase {
 
 
 		order.setShipments(shipmentSet);
-		assertEquals(shipmentSet, order.getAllShipments());
+		assertThat(order.getAllShipments()).isEqualTo(shipmentSet);
 
 		int numShipments = order.getAllShipments().size();
-		assertEquals(numShipments, order.getAllShipments().size());
+		assertThat(order.getAllShipments()).hasSize(numShipments);
 
 		Map<String, Money> eachTaxMap = order.getEachItemTaxTotalsMoney();
 		for (final Map.Entry<String, Money> taxEntry : eachTaxMap.entrySet()) {
@@ -936,9 +890,9 @@ public class OrderImplTest extends AbstractEPServiceTestCase {
 				fail("Unrecognized tax is given.");
 			}
 
-			assertEquals("For " + taxEntry.getKey(), actualValue.doubleValue(),
-				taxEntry.getValue().getAmount().doubleValue(),
-					ALLOWABLE_ERROR);
+			assertThat(taxEntry.getValue().getAmount().doubleValue())
+				.as("For %s", taxEntry.getKey())
+				.isCloseTo(actualValue.doubleValue(), within(ALLOWABLE_ERROR));
 		}
 	}
 
@@ -950,7 +904,7 @@ public class OrderImplTest extends AbstractEPServiceTestCase {
 	public void testGetEachItemTaxTotalsMoneyNoShipment() {
 		OrderImpl order = createTestOrder();
 		Map<String, Money> eachTaxMap = order.getEachItemTaxTotalsMoney();
-		assertEquals(0, eachTaxMap.size());
+		assertThat(eachTaxMap).isEmpty();
 	}
 
 	private OrderSku createOrderSku(final String guid) {
@@ -967,6 +921,11 @@ public class OrderImplTest extends AbstractEPServiceTestCase {
 			protected void addSkuListeners(final OrderSku orderSku) {
 				// do nothing; this short-circuits activities we don't care about, for example tax calculation
 			}
+
+			@Override
+			protected <T> T getBean(final String beanName) {
+				return beanFactory.getBean(beanName);
+			}
 		};
 		order.addShipment(orderShipment);
 		return orderShipment;
@@ -979,6 +938,11 @@ public class OrderImplTest extends AbstractEPServiceTestCase {
 			@Override
 			protected void addSkuListeners(final OrderSku orderSku) {
 				// do nothing; this short-circuits activities we don't care about, for example tax calculation
+			}
+
+			@Override
+			protected <T> T getBean(final String beanName) {
+				return beanFactory.getBean(beanName);
 			}
 		};
 		order.addShipment(orderShipment);
@@ -996,8 +960,9 @@ public class OrderImplTest extends AbstractEPServiceTestCase {
 		orderShipment.addShipmentOrderSku(orderSku1);
 		orderShipment.addShipmentOrderSku(orderSku2);
 
-		assertNull("Expected null when attempting to retrieve an OrderSku not contained within the order",
-				order.getOrderSkuByGuid("NO-SUCH-GUID"));
+		assertThat(order.getOrderSkuByGuid("NO-SUCH-GUID"))
+			.as("Expected null when attempting to retrieve an OrderSku not contained within the order")
+			.isNull();
 	}
 
 	@Test
@@ -1013,7 +978,7 @@ public class OrderImplTest extends AbstractEPServiceTestCase {
 		orderShipment.addShipmentOrderSku(orderSku1);
 		orderShipment.addShipmentOrderSku(orderSku2);
 
-		assertEquals("Unexpected OrderSku", orderSku2, order.getOrderSkuByGuid(matchingOrderSkuGuid));
+		assertThat(order.getOrderSkuByGuid(matchingOrderSkuGuid)).isEqualTo(orderSku2);
 	}
 
 	@Test
@@ -1038,63 +1003,77 @@ public class OrderImplTest extends AbstractEPServiceTestCase {
 		orderShipment2.addShipmentOrderSku(orderSku3);
 		orderShipment2.addShipmentOrderSku(orderSku4);
 
-		assertEquals("Unexpected OrderSku", orderSku4, order.getOrderSkuByGuid(matchingOrderSkuGuid));
+		assertThat(order.getOrderSkuByGuid(matchingOrderSkuGuid)).isEqualTo(orderSku4);
 	}
 
 	@Test
-	public void verifyOrderNotReleasableWhenFulfilmentAlreadyInProgress() throws Exception {
+	public void verifyOrderNotReleasableWhenFulfilmentAlreadyInProgress() {
 		final OrderImpl order = createTestOrder();
 		order.setStatus(OrderStatus.IN_PROGRESS);
 
-		assertFalse("Expected order not to be releasable with a status of IN_PROGRESS", order.isReleasable());
+		assertThat(order.isReleasable())
+			.as("Expected order not to be releasable with a status of IN_PROGRESS")
+			.isFalse();
 	}
 
 	@Test
-	public void verifyOrderNotReleasableWhenAlreadyCompleted() throws Exception {
+	public void verifyOrderNotReleasableWhenAlreadyCompleted() {
 		final OrderImpl order = createTestOrder();
 		order.setStatus(OrderStatus.COMPLETED);
 
-		assertFalse("Expected order not to be releasable with a status of COMPLETED", order.isReleasable());
+		assertThat(order.isReleasable())
+			.as("Expected order not to be releasable with a status of COMPLETED")
+			.isFalse();
 	}
 
 	@Test
-	public void verifyOrderNotReleasableWhenAlreadyCancelled() throws Exception {
+	public void verifyOrderNotReleasableWhenAlreadyCancelled() {
 		final OrderImpl order = createTestOrder();
 		order.setStatus(OrderStatus.CANCELLED);
 
-		assertFalse("Expected order not to be releasable with a status of CANCELLED", order.isReleasable());
+		assertThat(order.isReleasable())
+			.as("Expected order not to be releasable with a status of CANCELLED")
+			.isFalse();
 	}
 
 	@Test
-	public void verifyOrderNotReleasableWhenAlreadyPartiallyShipped() throws Exception {
+	public void verifyOrderNotReleasableWhenAlreadyPartiallyShipped() {
 		final OrderImpl order = createTestOrder();
 		order.setStatus(OrderStatus.PARTIALLY_SHIPPED);
 
-		assertFalse("Expected order not to be releasable with a status of PARTIALLY_SHIPPED", order.isReleasable());
+		assertThat(order.isReleasable())
+			.as("Expected order not to be releasable with a status of PARTIALLY_SHIPPED")
+			.isFalse();
 	}
 
 	@Test
-	public void verifyOrderNotReleasableWhenAlreadyFailed() throws Exception {
+	public void verifyOrderNotReleasableWhenAlreadyFailed() {
 		final OrderImpl order = createTestOrder();
 		order.setStatus(OrderStatus.FAILED);
 
-		assertFalse("Expected order not to be releasable with a status of FAILED", order.isReleasable());
+		assertThat(order.isReleasable())
+			.as("Expected order not to be releasable with a status of FAILED")
+			.isFalse();
 	}
 
 	@Test
-	public void verifyOrderReleasableWhenCreated() throws Exception {
+	public void verifyOrderReleasableWhenCreated() {
 		final OrderImpl order = createTestOrder();
 		order.setStatus(OrderStatus.CREATED);
 
-		assertTrue("Expected order to be releasable with a status of CREATED", order.isReleasable());
+		assertThat(order.isReleasable())
+			.as("Expected order to be releasable with a status of CREATED")
+			.isTrue();
 	}
 
 	@Test
-	public void verifyOrderReleasableWhenOnHold() throws Exception {
+	public void verifyOrderReleasableWhenOnHold() {
 		final OrderImpl order = createTestOrder();
 		order.setStatus(OrderStatus.ONHOLD);
 
-		assertTrue("Expected order to be releasable with a status of ONHOLD", order.isReleasable());
+		assertThat(order.isReleasable())
+			.as("Expected order to be releasable with a status of ONHOLD")
+			.isTrue();
 	}
 
 	@Test
@@ -1102,7 +1081,9 @@ public class OrderImplTest extends AbstractEPServiceTestCase {
 		final OrderImpl order = createTestOrder();
 		order.setStatus(OrderStatus.AWAITING_EXCHANGE);
 
-		assertTrue("Expected order to be releasable with a status of AWAITING_EXCHANGE", order.isReleasable());
+		assertThat(order.isReleasable())
+			.as("Expected order to be releasable with a status of AWAITING_EXCHANGE")
+			.isTrue();
 	}
 
 	/**
@@ -1165,13 +1146,13 @@ public class OrderImplTest extends AbstractEPServiceTestCase {
 	 *
 	 * @return the default mocked store.
 	 */
-	@Override
 	protected Store getMockedStore() {
 		Set <TaxCode> taxCodes = new HashSet<>();
 		taxCodes.add(createTaxCode(TaxCode.TAX_CODE_SHIPPING));
 		taxCodes.add(createTaxCode(TAX_CODE));
 
-		Store store = super.getMockedStore();
+		StoreImpl store = new StoreImpl();
+		store.initialize();
 		store.setTaxCodes(taxCodes);
 		return store;
 	}

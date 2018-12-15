@@ -115,6 +115,7 @@ public class CustomerRepositoryImpl implements CustomerRepository {
 				CustomerSession customerSessionResult = Assign.ifSuccessful(findCustomerSessionByUserIdWithoutException(storeCode, userId));
 				Customer customer = customerSessionResult.getShopper().getCustomer();
 				Ensure.notNull(customer, OnFailure.returnNotFound(CUSTOMER_WAS_NOT_FOUND));
+				customer.setStoreCode(storeCode);
 
 				return ExecutionResultFactory.createReadOK(customer);
 			}
@@ -169,9 +170,9 @@ public class CustomerRepositoryImpl implements CustomerRepository {
 			customerSessionRepository.invalidateCustomerSessionByGuid(customer.getGuid());
 			result = ExecutionResultFactory.createUpdateOK();
 		} catch (UserIdExistException error) {
-			result = exceptionTransformer.getExecutionResult(error);
+			result = exceptionTransformer.getExecutionResult(error);  // uses getExecutionResult(InvalidBusinessStateException)
 		} catch (EpValidationException error) {
-			result = exceptionTransformer.getExecutionResult(error);
+			result = exceptionTransformer.getExecutionResult(error);  // uses getExecutionResult(EpValidationException)
 		} catch (EpSystemException error) {
 			result = ExecutionResultFactory.createServerError(error.getMessage());
 		}

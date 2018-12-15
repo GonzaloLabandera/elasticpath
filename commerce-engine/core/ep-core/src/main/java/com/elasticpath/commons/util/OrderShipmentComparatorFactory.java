@@ -21,15 +21,7 @@ public final class OrderShipmentComparatorFactory {
 	 * @return comparator
 	 */
 	public static Comparator<OrderShipment> getOrderShipmentNumberComparator() {
-		return new Comparator<OrderShipment>() {
-			/**
-			 * Compare by shipment number in ascending order.
-			 */
-			@Override
-			public int compare(final OrderShipment arg0, final OrderShipment arg1) {
-				return arg0.getShipmentNumber().compareTo(arg1.getShipmentNumber());
-			}
-		};
+		return Comparator.comparing(OrderShipment::getShipmentNumber);
 	}
 }
 

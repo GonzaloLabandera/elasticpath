@@ -3,15 +3,14 @@
  */
 package com.elasticpath.importexport.common.adapters.promotion;
 
-import static org.hamcrest.Matchers.hasSize;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.text.ParseException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -19,11 +18,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.google.common.collect.ImmutableList;
 import org.apache.commons.lang.LocaleUtils;
-import org.jmock.Expectations;
-import org.jmock.integration.junit4.JUnitRuleMockery;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.elasticpath.common.dto.DisplayValue;
 import com.elasticpath.commons.beanframework.BeanFactory;
@@ -57,6 +58,7 @@ import com.elasticpath.service.rules.RuleSetService;
  * Tests for PromotionAdapter.
  */
 @SuppressWarnings({ "PMD.TooManyMethods" })
+@RunWith(MockitoJUnitRunner.class)
 public class PromotionAdapterTest {
 
 	private static final Date START_DATE = new Date();
@@ -67,29 +69,36 @@ public class PromotionAdapterTest {
 
 	private static final String CATALOG_CODE = "CatalogCode";
 
-	@org.junit.Rule
-	public final JUnitRuleMockery context = new JUnitRuleMockery();
-	
-	private final Rule rule = context.mock(Rule.class);
+	private static final String PROMOTION_DISPLAY_NAME_EN = "promotionDisplayName_en";
+
+	private static final String PROMOTION_DISPLAY_NAME_FR = "promotionDisplayName_fr";
+
+	@Mock
+	private Rule rule;
 
 	private final PromotionAdapter promotionAdapter = new PromotionAdapter();
 
-	private final BeanFactory mockBeanFactory = context.mock(BeanFactory.class);
+	@Mock
+	private BeanFactory mockBeanFactory;
 
-	private final CachingService cachingService = context.mock(CachingService.class);
+	@Mock
+	private CachingService cachingService;
 
-	@SuppressWarnings("unchecked")
-	private final DomainAdapter<RuleElement, ActionDTO> actionAdapter = context.mock(DomainAdapter.class);
+	@Mock
+	private DomainAdapter<RuleElement, ActionDTO> actionAdapter;
 
 	private int numberOfCalls;
 
-	private final LocalizedProperties localizedProperties = context.mock(LocalizedProperties.class);;
+	@Mock
+	private LocalizedProperties localizedProperties;
 
 	private final Map<String, LocalizedPropertyValue> localizedPropertiesMap = new HashMap<>();
 
-	private final LocalizedPropertyValue value1 = context.mock(LocalizedPropertyValue.class, "value1");
+	@Mock
+	private LocalizedPropertyValue value1;
 
-	private final LocalizedPropertyValue value2 = context.mock(LocalizedPropertyValue.class, "value2");
+	@Mock
+	private LocalizedPropertyValue value2;
 
 	private final DisplayValue displayValue1 = new DisplayValue("fr", "frValue");
 
@@ -117,11 +126,13 @@ public class PromotionAdapterTest {
 			void populatePromotionDTOType(final PromotionDTO promotionDTO, final Catalog catalog, final Store store) {
 				++numberOfCalls;
 			}
+
 			@Override
 			AvailabilityDTO createAvailabilityDTO(final Rule rule) {
 				++numberOfCalls;
 				return null;
 			}
+
 			@Override
 			List<ActionDTO> createElementDTOList(final Rule source) {
 				++numberOfCalls;
@@ -133,59 +144,60 @@ public class PromotionAdapterTest {
 		final String ruleCode = "PROMOTION_CODE";
 		final String ruleDescription = "Great discount";
 
-		context.checking(new Expectations() { {
-			oneOf(rule).getCatalog(); will(returnValue(null));
-			oneOf(rule).getStore(); will(returnValue(null));
-			oneOf(rule).getName(); will(returnValue(ruleName));
-			oneOf(rule).getCode(); will(returnValue(ruleCode));
-			oneOf(rule).getDescription(); will(returnValue(ruleDescription));
-			allowing(rule).getLocalizedProperties(); will(returnValue(localizedProperties));
-
-			oneOf(localizedProperties).getLocalizedPropertiesMap();
-			will(returnValue(localizedPropertiesMap));
-
-			oneOf(localizedProperties).getPropertyNameFromKey("promotionDisplayName_en");
-			will(returnValue("promotionDisplayName"));
-
-			oneOf(localizedProperties).getPropertyNameFromKey("promotionDisplayName_fr");
-			will(returnValue("promotionDisplayName"));
-
-			oneOf(localizedProperties).getLocaleFromKey("promotionDisplayName_en");
-			will(returnValue(LocaleUtils.toLocale("en")));
-
-			oneOf(localizedProperties).getLocaleFromKey("promotionDisplayName_fr");
-			will(returnValue(LocaleUtils.toLocale("fr")));
-
-			oneOf(value1).getValue(); will(returnValue(displayValue1.getValue()));
-			oneOf(value2).getValue(); will(returnValue(displayValue2.getValue()));
-		} });
+		when(rule.getCatalog()).thenReturn(null);
+		when(rule.getStore()).thenReturn(null);
+		when(rule.getName()).thenReturn(ruleName);
+		when(rule.getCode()).thenReturn(ruleCode);
+		when(rule.getDescription()).thenReturn(ruleDescription);
+		when(rule.getLocalizedProperties()).thenReturn(localizedProperties);
+		when(localizedProperties.getLocalizedPropertiesMap()).thenReturn(localizedPropertiesMap);
+		when(localizedProperties.getPropertyNameFromKey(PROMOTION_DISPLAY_NAME_EN)).thenReturn("promotionDisplayName");
+		when(localizedProperties.getPropertyNameFromKey(PROMOTION_DISPLAY_NAME_FR)).thenReturn("promotionDisplayName");
+		when(localizedProperties.getLocaleFromKey(PROMOTION_DISPLAY_NAME_EN)).thenReturn(LocaleUtils.toLocale("en"));
+		when(localizedProperties.getLocaleFromKey(PROMOTION_DISPLAY_NAME_FR)).thenReturn(LocaleUtils.toLocale("fr"));
+		when(value1.getValue()).thenReturn(displayValue1.getValue());
+		when(value2.getValue()).thenReturn(displayValue2.getValue());
 
 		numberOfCalls = 0;
 		final int expectedNumberOfCalls = 3;
 		promotionAdapter.populateDTO(rule, target);
 
-		assertEquals(ruleName, target.getName());
-		assertEquals(ruleCode, target.getCode());
-		assertEquals(ruleDescription, target.getDescription());
-		assertEquals(expectedNumberOfCalls, numberOfCalls);
+		assertThat(target.getName()).isEqualTo(ruleName);
+		assertThat(target.getCode()).isEqualTo(ruleCode);
+		assertThat(target.getDescription()).isEqualTo(ruleDescription);
+		assertThat(numberOfCalls).isEqualTo(expectedNumberOfCalls);
 
 		List<DisplayValue> displayNames = target.getDisplayNames();
-		assertEquals("target should have two display names", 2, displayNames.size());
+		assertThat(displayNames.size()).as("target should have two display names").isEqualTo(2);
 
 		boolean value1Found = false;
 		boolean value2Found = false;
-		for (int i = 0; i < displayNames.size(); i++) {
-			DisplayValue value = displayNames.get(i);
+		for (DisplayValue value : displayNames) {
 			if ("fr".equals(value.getLanguage())
-					&& value.getValue().equals(displayValue1.getValue())) {
+				&& value.getValue().equals(displayValue1.getValue())) {
 				value1Found = true;
 			} else if ("en".equals(value.getLanguage())
-					&& value.getValue().equals(displayValue2.getValue())) {
+					   && value.getValue().equals(displayValue2.getValue())) {
 				value2Found = true;
 			}
 		}
 
-		assertTrue("both display name should be found", value1Found && value2Found);
+		assertThat(value1Found && value2Found)
+			.as("both display name should be found")
+			.isTrue();
+
+		verify(rule).getCatalog();
+		verify(rule).getStore();
+		verify(rule).getName();
+		verify(rule).getCode();
+		verify(rule).getDescription();
+		verify(localizedProperties).getLocalizedPropertiesMap();
+		verify(localizedProperties).getPropertyNameFromKey(PROMOTION_DISPLAY_NAME_EN);
+		verify(localizedProperties).getPropertyNameFromKey(PROMOTION_DISPLAY_NAME_FR);
+		verify(localizedProperties).getLocaleFromKey(PROMOTION_DISPLAY_NAME_EN);
+		verify(localizedProperties).getLocaleFromKey(PROMOTION_DISPLAY_NAME_FR);
+		verify(value1).getValue();
+		verify(value2).getValue();
 	}
 
 	/**
@@ -203,17 +215,16 @@ public class PromotionAdapterTest {
 	@Test
 	public void testPopulatePromotionDTOType02() {
 		final PromotionDTO promotionDto = new PromotionDTO();
-		final Store store = context.mock(Store.class);
+		final Store store = mock(Store.class);
 
-		context.checking(new Expectations() { {
-			oneOf(store).getCode(); will(returnValue(STORE_CODE));
-		} });
+		when(store.getCode()).thenReturn(STORE_CODE);
 
 		promotionAdapter.populatePromotionDTOType(promotionDto, null, store);
 
-		assertEquals(STORE_CODE, promotionDto.getStoreCode());
-		assertEquals(null, promotionDto.getCatalogCode());
-		assertEquals(PromotionAdapter.SHOPPING_CART_TYPE, promotionDto.getType());
+		assertThat(promotionDto.getStoreCode()).isEqualTo(STORE_CODE);
+		assertThat(promotionDto.getCatalogCode()).isNull();
+		assertThat(promotionDto.getType()).isEqualTo(PromotionAdapter.SHOPPING_CART_TYPE);
+		verify(store).getCode();
 	}
 
 	/**
@@ -222,17 +233,16 @@ public class PromotionAdapterTest {
 	@Test
 	public void testPopulatePromotionDTOType03() {
 		final PromotionDTO promotionDto = new PromotionDTO();
-		final Catalog catalog = context.mock(Catalog.class);
+		final Catalog catalog = mock(Catalog.class);
 
-		context.checking(new Expectations() { {
-			oneOf(catalog).getCode(); will(returnValue(CATALOG_CODE));
-		} });
+		when(catalog.getCode()).thenReturn(CATALOG_CODE);
 
 		promotionAdapter.populatePromotionDTOType(promotionDto, catalog, null);
 
-		assertEquals(CATALOG_CODE, promotionDto.getCatalogCode());
-		assertEquals(null, promotionDto.getStoreCode());
-		assertEquals(PromotionAdapter.CATALOG_TYPE, promotionDto.getType());
+		assertThat(promotionDto.getCatalogCode()).isEqualTo(CATALOG_CODE);
+		assertThat(promotionDto.getStoreCode()).isNull();
+		assertThat(promotionDto.getType()).isEqualTo(PromotionAdapter.CATALOG_TYPE);
+		verify(catalog).getCode();
 	}
 
 	/**
@@ -241,19 +251,19 @@ public class PromotionAdapterTest {
 	@Test
 	public void testPopulatePromotionDTOType04() {
 		final PromotionDTO promotionDto = new PromotionDTO();
-		final Catalog catalog = context.mock(Catalog.class);
-		final Store store = context.mock(Store.class);
+		final Catalog catalog = mock(Catalog.class);
+		final Store store = mock(Store.class);
 
-		context.checking(new Expectations() { {
-			oneOf(catalog).getCode(); will(returnValue(CATALOG_CODE));
-			oneOf(store).getCode(); will(returnValue(STORE_CODE));
-		} });
+		when(catalog.getCode()).thenReturn(CATALOG_CODE);
+		when(store.getCode()).thenReturn(STORE_CODE);
 
 		promotionAdapter.populatePromotionDTOType(promotionDto, catalog, store);
 
-		assertEquals(CATALOG_CODE, promotionDto.getCatalogCode());
-		assertEquals(STORE_CODE, promotionDto.getStoreCode());
-		assertEquals(PromotionAdapter.SHOPPING_CART_TYPE, promotionDto.getType());
+		assertThat(promotionDto.getCatalogCode()).isEqualTo(CATALOG_CODE);
+		assertThat(promotionDto.getStoreCode()).isEqualTo(STORE_CODE);
+		assertThat(promotionDto.getType()).isEqualTo(PromotionAdapter.SHOPPING_CART_TYPE);
+		verify(catalog).getCode();
+		verify(store).getCode();
 	}
 
 	/**
@@ -261,17 +271,18 @@ public class PromotionAdapterTest {
 	 */
 	@Test
 	public void testCreateAvailabilityDTO() {
-		context.checking(new Expectations() { {
-			oneOf(rule).isEnabled();    will(returnValue(true));
-			oneOf(rule).getStartDate(); will(returnValue(START_DATE));
-			oneOf(rule).getEndDate();   will(returnValue(END_DATE));
-		} });
+		when(rule.isEnabled()).thenReturn(true);
+		when(rule.getStartDate()).thenReturn(START_DATE);
+		when(rule.getEndDate()).thenReturn(END_DATE);
 
 		AvailabilityDTO availabilityDTO = promotionAdapter.createAvailabilityDTO(rule);
 
-		assertTrue(availabilityDTO.getEnabled());
-		assertEquals(START_DATE, availabilityDTO.getEnableDate());
-		assertEquals(END_DATE, availabilityDTO.getDisableDate());
+		assertThat(availabilityDTO.getEnabled()).isTrue();
+		assertThat(availabilityDTO.getEnableDate()).isEqualTo(START_DATE);
+		assertThat(availabilityDTO.getDisableDate()).isEqualTo(END_DATE);
+		verify(rule).isEnabled();
+		verify(rule).getStartDate();
+		verify(rule).getEndDate();
 	}
 
 	/**
@@ -287,13 +298,11 @@ public class PromotionAdapterTest {
 			}
 		};
 
-		context.checking(new Expectations() { {
-			oneOf(rule).getActions();
-		} });
 
 		numberOfCalls = 0;
 		promotionAdapter.createElementDTOList(rule);
-		assertEquals(1, numberOfCalls);
+		assertThat(numberOfCalls).isEqualTo(1);
+		verify(rule).getActions();
 	}
 
 	/**
@@ -301,20 +310,20 @@ public class PromotionAdapterTest {
 	 */
 	@Test
 	public void testPopulateDTOAction() {
-		final RuleAction firstRuleAction = context.mock(RuleAction.class);
+		final RuleAction firstRuleAction = mock(RuleAction.class);
 		final ActionDTO firstActionDto = new ActionDTO();
 		final Set<RuleAction> ruleActions = new HashSet<>();
 		ruleActions.add(firstRuleAction);
 		final List<ActionDTO> actions = new ArrayList<>();
 
-		context.checking(new Expectations() { {
-			oneOf(actionAdapter).createDtoObject(); will(returnValue(firstActionDto));
-			oneOf(actionAdapter).populateDTO(with(same(firstRuleAction)), with(same(firstActionDto)));
-		} });
+		when(actionAdapter.createDtoObject()).thenReturn(firstActionDto);
 
 		promotionAdapter.populateDTOAction(actions, ruleActions);
-		assertThat("Actions list should contain exactly one action", actions, hasSize(1));
-		assertEquals("Actions list should contain the firstActionDto", firstActionDto, actions.get(0));
+		assertThat(actions)
+			.as("Actions list should contain the firstActionDto")
+			.containsOnly(firstActionDto);
+		verify(actionAdapter).createDtoObject();
+		verify(actionAdapter).populateDTO(firstRuleAction, firstActionDto);
 	}
 
 	/**
@@ -322,7 +331,7 @@ public class PromotionAdapterTest {
 	 */
 	@Test
 	public void testCreateDtoObject() {
-		assertEquals(PromotionDTO.class, promotionAdapter.createDtoObject().getClass());
+		assertThat(promotionAdapter.createDtoObject().getClass()).isEqualTo(PromotionDTO.class);
 	}
 
 	/**
@@ -330,11 +339,10 @@ public class PromotionAdapterTest {
 	 */
 	@Test
 	public void testCreateDomainObject() {
-		context.checking(new Expectations() { {
-			oneOf(mockBeanFactory).getBean(ContextIdNames.PROMOTION_RULE); will(returnValue(new PromotionRuleImpl()));
-		} });
+		when(mockBeanFactory.getBean(ContextIdNames.PROMOTION_RULE)).thenReturn(new PromotionRuleImpl());
 
-		assertNotNull(promotionAdapter.createDomainObject());
+		assertThat(promotionAdapter.createDomainObject()).isNotNull();
+		verify(mockBeanFactory).getBean(ContextIdNames.PROMOTION_RULE);
 	}
 
 	/**
@@ -353,11 +361,10 @@ public class PromotionAdapterTest {
 		final String storeCode = "SNAPITUP";
 		final Store store = new StoreImpl();
 
-		context.checking(new Expectations() { {
-			oneOf(cachingService).findStoreByCode(storeCode); will(returnValue(store));
-		} });
+		when(cachingService.findStoreByCode(storeCode)).thenReturn(store);
 
-		assertEquals(store, promotionAdapter.findStoreByCode(storeCode));
+		assertThat(promotionAdapter.findStoreByCode(storeCode)).isEqualTo(store);
+		verify(cachingService).findStoreByCode(storeCode);
 	}
 
 	/**
@@ -376,11 +383,10 @@ public class PromotionAdapterTest {
 		final String catalogCode = "CopperwoodAndCo";
 		final Catalog catalog = new CatalogImpl();
 
-		context.checking(new Expectations() { {
-			oneOf(cachingService).findCatalogByCode(catalogCode); will(returnValue(catalog));
-		} });
+		when(cachingService.findCatalogByCode(catalogCode)).thenReturn(catalog);
 
-		assertEquals(catalog, promotionAdapter.findCatalogByCode(catalogCode));
+		assertThat(promotionAdapter.findCatalogByCode(catalogCode)).isEqualTo(catalog);
+		verify(cachingService).findCatalogByCode(catalogCode);
 	}
 
 	/**
@@ -390,11 +396,10 @@ public class PromotionAdapterTest {
 	public void testCreateRuleActionException() {
 		final String actionType = RuleElementType.CART_ANY_SKU_AMOUNT_DISCOUNT_ACTION.getPropertyKey();
 
-		context.checking(new Expectations() { {
-			oneOf(mockBeanFactory).getBean(actionType); will(returnValue(null));
-		} });
+		when(mockBeanFactory.getBean(actionType)).thenReturn(null);
 
 		promotionAdapter.createRuleAction(actionType);
+		verify(mockBeanFactory).getBean(actionType);
 	}
 
 	/**
@@ -405,11 +410,10 @@ public class PromotionAdapterTest {
 		final String actionType = RuleElementType.CART_ANY_SKU_AMOUNT_DISCOUNT_ACTION.getPropertyKey();
 		final RuleAction ruleAction = new CartAnySkuAmountDiscountActionImpl();
 
-		context.checking(new Expectations() { {
-			oneOf(mockBeanFactory).getBean(actionType); will(returnValue(ruleAction));
-		} });
+		when(mockBeanFactory.getBean(actionType)).thenReturn(ruleAction);
 
-		assertEquals(ruleAction, promotionAdapter.createRuleAction(actionType));
+		assertThat(promotionAdapter.createRuleAction(actionType)).isEqualTo(ruleAction);
+		verify(mockBeanFactory).getBean(actionType);
 	}
 
 	/**
@@ -429,13 +433,11 @@ public class PromotionAdapterTest {
 		PromotionDTO promotionDto = new PromotionDTO();
 		promotionDto.setAvailability(availabilityDto);
 
-		context.checking(new Expectations() { {
-			oneOf(rule).setEnabled(true);
-			oneOf(rule).setStartDate(with(same(enableDate)));
-			oneOf(rule).setEndDate(with(same(disableDate)));
-		} });
-
 		promotionAdapter.populateDomainAvailability(promotionDto, rule);
+
+		verify(rule).setEnabled(true);
+		verify(rule).setStartDate(enableDate);
+		verify(rule).setEndDate(disableDate);
 	}
 
 	/**
@@ -451,21 +453,19 @@ public class PromotionAdapterTest {
 		final ActionDTO actionDto2 = new ActionDTO();
 		actionDto2.setType(RuleElementType.CART_ANY_SKU_PERCENT_DISCOUNT_ACTION.getPropertyKey());
 
-		final List<ActionDTO> actionDtoList = Arrays.asList(actionDto1, actionDto2);
+		final List<ActionDTO> actionDtoList = ImmutableList.of(actionDto1, actionDto2);
 
-		context.checking(new Expectations() { {
-			oneOf(mockBeanFactory).getBean(RuleElementType.CART_ANY_SKU_AMOUNT_DISCOUNT_ACTION.getPropertyKey());
-			will(returnValue(ruleAction1));
-			oneOf(actionAdapter).populateDomain(with(same(actionDto1)), with(same(ruleAction1)));
-			oneOf(rule).addRuleElement(ruleAction1);
-
-			oneOf(mockBeanFactory).getBean(RuleElementType.CART_ANY_SKU_PERCENT_DISCOUNT_ACTION.getPropertyKey());
-			will(returnValue(ruleAction2));
-			oneOf(actionAdapter).populateDomain(with(same(actionDto2)), with(same(ruleAction2)));
-			oneOf(rule).addRuleElement(ruleAction2);
-		} });
+		when(mockBeanFactory.getBean(RuleElementType.CART_ANY_SKU_AMOUNT_DISCOUNT_ACTION.getPropertyKey())).thenReturn(ruleAction1);
+		when(mockBeanFactory.getBean(RuleElementType.CART_ANY_SKU_PERCENT_DISCOUNT_ACTION.getPropertyKey())).thenReturn(ruleAction2);
 
 		promotionAdapter.populatedDomainActions(rule, actionDtoList);
+
+		verify(mockBeanFactory).getBean(RuleElementType.CART_ANY_SKU_AMOUNT_DISCOUNT_ACTION.getPropertyKey());
+		verify(actionAdapter).populateDomain(actionDto1, ruleAction1);
+		verify(rule).addRuleElement(ruleAction1);
+		verify(mockBeanFactory).getBean(RuleElementType.CART_ANY_SKU_PERCENT_DISCOUNT_ACTION.getPropertyKey());
+		verify(actionAdapter).populateDomain(actionDto2, ruleAction2);
+		verify(rule).addRuleElement(ruleAction2);
 	}
 
 	/**
@@ -479,12 +479,12 @@ public class PromotionAdapterTest {
 		promotionDto.setCatalogCode(catalogCode);
 		promotionDto.setType(PromotionAdapter.CATALOG_TYPE);
 
-		context.checking(new Expectations() { {
-			oneOf(cachingService).findCatalogByCode(catalogCode); will(returnValue(catalog));
-			oneOf(rule).setCatalog(with(same(catalog)));
-		} });
+		when(cachingService.findCatalogByCode(catalogCode)).thenReturn(catalog);
 
 		promotionAdapter.populatePromotionDomainType(promotionDto, rule);
+
+		verify(cachingService).findCatalogByCode(catalogCode);
+		verify(rule).setCatalog(catalog);
 	}
 
 	/**
@@ -498,12 +498,11 @@ public class PromotionAdapterTest {
 		promotionDto.setStoreCode(storeCode);
 		promotionDto.setType(PromotionAdapter.SHOPPING_CART_TYPE);
 
-		context.checking(new Expectations() { {
-			oneOf(cachingService).findStoreByCode(storeCode); will(returnValue(store));
-			oneOf(rule).setStore(with(same(store)));
-		} });
+		when(cachingService.findStoreByCode(storeCode)).thenReturn(store);
 
 		promotionAdapter.populatePromotionDomainType(promotionDto, rule);
+		verify(cachingService).findStoreByCode(storeCode);
+		verify(rule).setStore(store);
 	}
 
 	/**
@@ -525,27 +524,23 @@ public class PromotionAdapterTest {
 		final PromotionDTO promotionDTO = new PromotionDTO();
 		promotionDTO.setType(PromotionAdapter.SHOPPING_CART_TYPE);
 
-		final RuleSetService ruleSetService = context.mock(RuleSetService.class);
+		final RuleSetService ruleSetService = mock(RuleSetService.class);
 		promotionAdapter.setRuleSetService(ruleSetService);
 		final RuleSet ruleSet = new RuleSetImpl();
 
-		context.checking(new Expectations() { {
-			oneOf(ruleSetService).findByScenarioId(RuleScenarios.CART_SCENARIO);
-			will(returnValue(ruleSet));
-			oneOf(rule).setRuleSet(with(same(ruleSet)));
-		} });
+		when(ruleSetService.findByScenarioId(RuleScenarios.CART_SCENARIO)).thenReturn(ruleSet);
 
 		promotionAdapter.populateRuleSet(promotionDTO, rule);
 
 		promotionDTO.setType(PromotionAdapter.CATALOG_TYPE);
 
-		context.checking(new Expectations() { {
-			oneOf(ruleSetService).findByScenarioId(RuleScenarios.CATALOG_BROWSE_SCENARIO);
-			will(returnValue(ruleSet));
-			oneOf(rule).setRuleSet(with(same(ruleSet)));
-		} });
+		when(ruleSetService.findByScenarioId(RuleScenarios.CATALOG_BROWSE_SCENARIO)).thenReturn(ruleSet);
 
 		promotionAdapter.populateRuleSet(promotionDTO, rule);
+
+		verify(ruleSetService).findByScenarioId(RuleScenarios.CART_SCENARIO);
+		verify(ruleSetService).findByScenarioId(RuleScenarios.CATALOG_BROWSE_SCENARIO);
+		verify(rule, times(2)).setRuleSet(ruleSet);
 	}
 
 	/**
@@ -600,17 +595,15 @@ public class PromotionAdapterTest {
 		displayNames.add(displayValue2);
 		promotionDto.setDisplayNames(displayNames);
 
-		context.checking(new Expectations() { {
-			oneOf(rule).setName(promotionName);
-			oneOf(rule).setCode(promotionCode);
-			oneOf(rule).setDescription(description);
-			oneOf(rule).getLocalizedProperties(); will(returnValue(localizedProperties));
-			oneOf(localizedProperties).setValue(Rule.LOCALIZED_PROPERTY_DISPLAY_NAME,
-					LocaleUtils.toLocale("fr"), displayValue1.getValue());
-			oneOf(localizedProperties).setValue(Rule.LOCALIZED_PROPERTY_DISPLAY_NAME,
-					LocaleUtils.toLocale("en"), displayValue2.getValue());
-		} });
+		when(rule.getLocalizedProperties()).thenReturn(localizedProperties);
 
 		promotionAdapter.populateDomain(promotionDto, rule);
+
+		verify(rule).setName(promotionName);
+		verify(rule).setCode(promotionCode);
+		verify(rule).setDescription(description);
+		verify(rule).getLocalizedProperties();
+		verify(localizedProperties).setValue(Rule.LOCALIZED_PROPERTY_DISPLAY_NAME, LocaleUtils.toLocale("fr"), displayValue1.getValue());
+		verify(localizedProperties).setValue(Rule.LOCALIZED_PROPERTY_DISPLAY_NAME, LocaleUtils.toLocale("en"), displayValue2.getValue());
 	}
 }

@@ -3,47 +3,33 @@
  */
 package com.elasticpath.domain.misc.impl;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
-import org.jmock.integration.junit4.JUnitRuleMockery;
-import org.junit.After;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.junit.MockitoJUnitRunner;
 
-import com.elasticpath.commons.beanframework.BeanFactory;
 import com.elasticpath.commons.constants.ContextIdNames;
-import com.elasticpath.commons.util.impl.UtilityImpl;
 import com.elasticpath.domain.EpDomainException;
 import com.elasticpath.domain.misc.LocalizedProperties;
 import com.elasticpath.domain.misc.LocalizedPropertyValue;
-import com.elasticpath.test.BeanFactoryExpectationsFactory;
 
 /**
  * Test <code>LocalizedPropertiesImpl</code>.
  */
 @SuppressWarnings({ "PMD.TooManyStaticImports" })
+@RunWith(MockitoJUnitRunner.class)
 public class LocalizedPropertiesImplTest {
 
 	private static final String NULL_VALUES_PROHIBITED_MSG = "Null values are prohibited";
-	private static final String EPDOMAIN_EXCEPTION_EXPECTED_MSG = "EpDomainException expected";
 
 	private LocalizedPropertiesImpl localizedPropertiesImpl;
-
-	@Rule
-	public final JUnitRuleMockery context = new JUnitRuleMockery();
-	private BeanFactory beanFactory;
-	private BeanFactoryExpectationsFactory expectationsFactory;
 
 	/**
 	 * Prepare for tests.
@@ -52,9 +38,6 @@ public class LocalizedPropertiesImplTest {
 	 */
 	@Before
 	public void setUp() throws Exception {
-		beanFactory = context.mock(BeanFactory.class);
-		expectationsFactory = new BeanFactoryExpectationsFactory(context, beanFactory);
-		expectationsFactory.allowingBeanFactoryGetBean("utility", UtilityImpl.class);
 
 		this.localizedPropertiesImpl = new LocalizedPropertiesImpl() {
 			private static final long serialVersionUID = -7100252602367051323L;
@@ -66,44 +49,29 @@ public class LocalizedPropertiesImplTest {
 		};
 	}
 
-	@After
-	public void tearDown() {
-		expectationsFactory.close();
-	}
-
 	/**
 	 * Test that getValue() and SetValue() methods cannot be called with null parameters;
 	 * EpDomainException will be thrown.
 	 */
 	@Test
 	public void testGetValueWithNullsForbidden() {
-		try {
-			localizedPropertiesImpl.getValue(null, Locale.US);
-			fail(NULL_VALUES_PROHIBITED_MSG);
-		} catch (EpDomainException ex) {
-			assertNotNull(EPDOMAIN_EXCEPTION_EXPECTED_MSG, ex);
-		}
 
-		try {
-			localizedPropertiesImpl.getValue("", null);
-			fail(NULL_VALUES_PROHIBITED_MSG);
-		} catch (EpDomainException ex) {
-			assertNotNull(EPDOMAIN_EXCEPTION_EXPECTED_MSG, ex);
-		}
+		assertThatThrownBy(() -> localizedPropertiesImpl.getValue(null, Locale.US))
+			.as(NULL_VALUES_PROHIBITED_MSG)
+			.isInstanceOf(EpDomainException.class);
 
-		try {
-			localizedPropertiesImpl.setValue(null, Locale.US, "");
-			fail(NULL_VALUES_PROHIBITED_MSG);
-		} catch (EpDomainException ex) {
-			assertNotNull(EPDOMAIN_EXCEPTION_EXPECTED_MSG, ex);
-		}
 
-		try {
-			localizedPropertiesImpl.setValue("", null, "");
-			fail(NULL_VALUES_PROHIBITED_MSG);
-		} catch (EpDomainException ex) {
-			assertNotNull(EPDOMAIN_EXCEPTION_EXPECTED_MSG, ex);
-		}
+		assertThatThrownBy(() -> localizedPropertiesImpl.getValue("", null))
+			.as(NULL_VALUES_PROHIBITED_MSG)
+			.isInstanceOf(EpDomainException.class);
+
+		assertThatThrownBy(() -> localizedPropertiesImpl.setValue(null, Locale.US, ""))
+			.as(NULL_VALUES_PROHIBITED_MSG)
+			.isInstanceOf(EpDomainException.class);
+
+		assertThatThrownBy(() -> localizedPropertiesImpl.setValue("", null, ""))
+			.as(NULL_VALUES_PROHIBITED_MSG)
+			.isInstanceOf(EpDomainException.class);
 	}
 
 	/**
@@ -114,10 +82,10 @@ public class LocalizedPropertiesImplTest {
 		String propertyName = "myprop1";
 		String value = "test1";
 		localizedPropertiesImpl.setValue(propertyName, Locale.CANADA, value);
-		assertEquals(value, localizedPropertiesImpl.getValue(propertyName, Locale.CANADA));
+		assertThat(localizedPropertiesImpl.getValue(propertyName, Locale.CANADA)).isEqualTo(value);
 
 		localizedPropertiesImpl.setValue(propertyName, Locale.CANADA, null);
-		assertNull(localizedPropertiesImpl.getValue(propertyName, Locale.CANADA));
+		assertThat(localizedPropertiesImpl.getValue(propertyName, Locale.CANADA)).isNull();
 	}
 
 	/**
@@ -128,10 +96,10 @@ public class LocalizedPropertiesImplTest {
 		String propertyName = "myprop2";
 		String value = "test2";
 		localizedPropertiesImpl.setValue(propertyName, Locale.CANADA, value);
-		assertEquals(value, localizedPropertiesImpl.getValue(propertyName, Locale.CANADA));
+		assertThat(localizedPropertiesImpl.getValue(propertyName, Locale.CANADA)).isEqualTo(value);
 
 		localizedPropertiesImpl.setValue(propertyName, Locale.CANADA, "");
-		assertNull(localizedPropertiesImpl.getValue(propertyName, Locale.CANADA));
+		assertThat(localizedPropertiesImpl.getValue(propertyName, Locale.CANADA)).isNull();
 	}
 
 	/**
@@ -142,28 +110,51 @@ public class LocalizedPropertiesImplTest {
 		final String propertyName1 = "testProperty";
 		final Locale locale1 = Locale.US;
 		final Locale locale2 = Locale.CANADA;
-		assertNull(this.localizedPropertiesImpl.getValue(propertyName1, locale1));
+		assertThat(this.localizedPropertiesImpl.getValue(propertyName1, locale1)).isNull();
 
 		// Set the value to a property name
 		String value1 = "testValue";
 		this.localizedPropertiesImpl.setValue(propertyName1, locale1, value1);
-		assertEquals(value1, this.localizedPropertiesImpl.getValue(propertyName1, locale1));
-		assertNull(this.localizedPropertiesImpl.getValueWithoutFallBack(propertyName1, locale2));
+		assertThat(this.localizedPropertiesImpl.getValue(propertyName1, locale1)).isEqualTo(value1);
+		assertThat(this.localizedPropertiesImpl.getValueWithoutFallBack(propertyName1, locale2)).isNull();
 		// When the value of the given locale doesn't exist, should not fallback to the value of the default locale
-		assertEquals(null, this.localizedPropertiesImpl.getValue(propertyName1, locale2));
+		assertThat(this.localizedPropertiesImpl.getValue(propertyName1, locale2)).isNull();
 
 		// Set the value to the same property name with another locale
 		String value2 = "testValue2";
 		this.localizedPropertiesImpl.setValue(propertyName1, locale2, value2);
-		assertEquals(value1, this.localizedPropertiesImpl.getValue(propertyName1, locale1));
-		assertEquals(value2, this.localizedPropertiesImpl.getValue(propertyName1, locale2));
+		assertThat(this.localizedPropertiesImpl.getValue(propertyName1, locale1)).isEqualTo(value1);
+		assertThat(this.localizedPropertiesImpl.getValue(propertyName1, locale2)).isEqualTo(value2);
 
 		// Set the value to the another property name
 		final String propertyName2 = "testProperty2";
 		this.localizedPropertiesImpl.setValue(propertyName2, locale2, value2);
-		assertEquals(value1, this.localizedPropertiesImpl.getValue(propertyName1, locale1));
-		assertEquals(value2, this.localizedPropertiesImpl.getValue(propertyName1, locale2));
-		assertEquals(value2, this.localizedPropertiesImpl.getValue(propertyName2, locale2));
+		assertThat(this.localizedPropertiesImpl.getValue(propertyName1, locale1)).isEqualTo(value1);
+		assertThat(this.localizedPropertiesImpl.getValue(propertyName1, locale2)).isEqualTo(value2);
+		assertThat(this.localizedPropertiesImpl.getValue(propertyName2, locale2)).isEqualTo(value2);
+	}
+
+	@Test
+	public void verifyAttributeNamesMayHaveUnderscores() {
+		final String attributeName = "my_attribute_name";
+		final Locale locale = Locale.CANADA;
+
+		final String localisedAttributeKey = attributeName + "_" + locale;
+
+		assertThat(localizedPropertiesImpl.getPropertyNameFromKey(localisedAttributeKey))
+				.isEqualTo(attributeName);
+	}
+
+	@Test
+	public void verifyLocalesCanHaveCountryAndLanguage() {
+		// in other words, locale strings can have an underscore in them
+		final String attributeName = "attributename";
+		final Locale locale = Locale.CANADA; // i.e. en_CA
+
+		final String localisedAttributeKey = attributeName + "_" + locale;
+
+		assertThat(localizedPropertiesImpl.getLocaleFromKey(localisedAttributeKey))
+				.isEqualTo(locale);
 	}
 
 	/**
@@ -171,7 +162,7 @@ public class LocalizedPropertiesImplTest {
 	 */
 	@Test
 	public void testGetLocalizedPropertiesMap() {
-		assertNotNull(this.localizedPropertiesImpl.getLocalizedPropertiesMap());
+		assertThat(this.localizedPropertiesImpl.getLocalizedPropertiesMap()).isNotNull();
 	}
 
 	/**
@@ -182,8 +173,8 @@ public class LocalizedPropertiesImplTest {
 		final Map<String, LocalizedPropertyValue> map = new HashMap<>();
 		final String beanId = ContextIdNames.TAX_CATEGORY_LOCALIZED_PROPERTY_VALUE;
 		this.localizedPropertiesImpl.setLocalizedPropertiesMap(map, beanId);
-		assertSame(map, this.localizedPropertiesImpl.getLocalizedPropertiesMap());
-		assertEquals(beanId, this.localizedPropertiesImpl.getLocalizedPropertyValueBean());
+		assertThat(this.localizedPropertiesImpl.getLocalizedPropertiesMap()).isEqualTo(map);
+		assertThat(this.localizedPropertiesImpl.getLocalizedPropertyValueBean()).isEqualTo(beanId);
 	}
 
 	/**
@@ -192,7 +183,10 @@ public class LocalizedPropertiesImplTest {
 	@Test
 	public void testEquals() {
 
-		assertTrue("Every object should be equal to itself", localizedPropertiesImpl.equals(localizedPropertiesImpl)); // NOPMD
+		assertThat(localizedPropertiesImpl)
+			.as("Every object should be equal to itself")
+			.isEqualTo(localizedPropertiesImpl);
+
 		LocalizedProperties otherLocalizedPropertiesImpl = new LocalizedPropertiesImpl() {
 			private static final long serialVersionUID = 7825564499802504460L;
 
@@ -201,12 +195,12 @@ public class LocalizedPropertiesImplTest {
 				return new BrandLocalizedPropertyValueImpl(); // arbitrary implementation
 			}
 		};
-		assertFalse(localizedPropertiesImpl.equals(null)); // NOPMD
-		assertEquals(localizedPropertiesImpl, otherLocalizedPropertiesImpl);
+		assertThat(localizedPropertiesImpl).isNotEqualTo(null);
+		assertThat(otherLocalizedPropertiesImpl).isEqualTo(localizedPropertiesImpl);
 
 		otherLocalizedPropertiesImpl.setValue("test", Locale.CANADA, "testValue");
 
-		assertFalse(localizedPropertiesImpl.equals(otherLocalizedPropertiesImpl));
+		assertThat(localizedPropertiesImpl).isNotEqualTo(otherLocalizedPropertiesImpl);
 	}
 
 	/**
@@ -223,11 +217,11 @@ public class LocalizedPropertiesImplTest {
 			}
 		};
 
-		assertEquals(localizedPropertiesImpl.hashCode(), otherLocalizedPropertiesImpl.hashCode());
+		assertThat(otherLocalizedPropertiesImpl).hasSameHashCodeAs(localizedPropertiesImpl);
 
 		otherLocalizedPropertiesImpl.setValue("test", Locale.CANADA, "testValue");
 
-		assertFalse(localizedPropertiesImpl.hashCode() == otherLocalizedPropertiesImpl.hashCode());
+		assertThat(localizedPropertiesImpl.hashCode()).isNotEqualTo(otherLocalizedPropertiesImpl.hashCode());
 	}
 
 	/**
@@ -235,7 +229,7 @@ public class LocalizedPropertiesImplTest {
 	 */
 	@Test
 	public void testToString() {
-		assertNotNull(localizedPropertiesImpl.toString());
+		assertThat(localizedPropertiesImpl.toString()).isNotNull();
 	}
 
 }

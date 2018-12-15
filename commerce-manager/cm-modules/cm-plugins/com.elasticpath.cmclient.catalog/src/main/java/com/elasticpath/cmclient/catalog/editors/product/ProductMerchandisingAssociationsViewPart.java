@@ -71,6 +71,8 @@ public class ProductMerchandisingAssociationsViewPart extends DefaultStatePolicy
 
 	private final Map<Integer, TableViewer> tableViewers;
 
+	private static final int TAB_DEPENDENTITEM = 5;
+
 	private static final int TAB_REPLACEMENT = 4;
 
 	private static final int TAB_ACCESSORY = 3;
@@ -105,6 +107,7 @@ public class ProductMerchandisingAssociationsViewPart extends DefaultStatePolicy
 		TAB_ASSOCIATIONTYPE_MAP.put(TAB_WARRANTY, ProductAssociationType.WARRANTY);
 		TAB_ASSOCIATIONTYPE_MAP.put(TAB_ACCESSORY, ProductAssociationType.ACCESSORY);
 		TAB_ASSOCIATIONTYPE_MAP.put(TAB_REPLACEMENT, ProductAssociationType.REPLACEMENT);
+		TAB_ASSOCIATIONTYPE_MAP.put(TAB_DEPENDENTITEM, ProductAssociationType.DEPENDENT_ITEM);
 	}
 
 	private static final int PRODUCT_CODE_WIDTH = 150;
@@ -195,6 +198,9 @@ public class ProductMerchandisingAssociationsViewPart extends DefaultStatePolicy
 						null, TAB_REPLACEMENT, 1, false);
 		this.createTable(replacementTabItem, TAB_REPLACEMENT, merchContainer);
 
+		final IEpLayoutComposite dependentItemTabItem = this.tabFolder.addTabItem(CatalogMessages.get()
+						.ProductMerchandisingAssociationSection_Dependent_Item, null, TAB_DEPENDENTITEM, 1, false);
+		this.createTable(dependentItemTabItem, TAB_DEPENDENTITEM, merchContainer);
 
 		final IEpLayoutData buttonCompositeData = mainComposite.createLayoutData(IEpLayoutData.FILL, IEpLayoutData.FILL, true, false);
 		final IPolicyTargetLayoutComposite buttonComposite = mainComposite.addTableWrapLayoutComposite(1, false, buttonCompositeData, merchContainer);

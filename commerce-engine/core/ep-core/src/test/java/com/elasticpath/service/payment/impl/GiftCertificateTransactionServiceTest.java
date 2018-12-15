@@ -1,10 +1,9 @@
-/**
+/*
  * Copyright (c) Elastic Path Software Inc., 2007
  */
 package com.elasticpath.service.payment.impl;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -179,12 +178,8 @@ public class GiftCertificateTransactionServiceTest {
 		captureMoney.setCurrencyCode(TEST_CURRENCY);
 		captureRequest.setMoney(captureMoney);
 		captureRequest.setAuthorizationCode(AUTH_CODE1);
-		
-		try {
-			transactionService.capture(captureRequest);
-		} catch (GiftCertificateException e) {
-			fail("The first transaction should succeed.");
-		}
+
+		transactionService.capture(captureRequest);
 		
 		transactionService.capture(captureRequest);
 	}

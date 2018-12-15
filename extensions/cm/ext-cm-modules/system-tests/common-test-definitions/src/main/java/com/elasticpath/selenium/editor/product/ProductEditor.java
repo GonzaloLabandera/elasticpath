@@ -23,8 +23,8 @@ public class ProductEditor extends AbstractPageObject {
 	public static final String PRODUCT_EDITOR_PARENT_CSS = "div[pane-location='editor-pane'] div[active-editor='true'] ";
 	private static final String PRODUCT_NAME_INPUT_CSS = PRODUCT_EDITOR_PARENT_CSS + "div[automation-id='com.elasticpath.cmclient.catalog"
 			+ ".CatalogMessages.ProductEditorSummaySection_ProductName'][widget-type='Text'] > input";
-	private static final String TAB_CSS = "div[automation-id='com.elasticpath.cmclient.catalog.CatalogMessages"
-			+ ".Product%sPage_Title'][seeable='true']";
+	private static final String TAB_CSS = "div[widget-id='%s'][appearance-id='ctab-item'][seeable='true']";
+	private static final String CATALOG_ASSIGNMENT_TAB_CSS = "div[widget-id='%s'][seeable='true']";
 	private static final String CATEGORY_ASSIGNMENT_MERCHANDISING_CATALOG_TAB_CSS = PRODUCT_EDITOR_PARENT_CSS
 			+ "div[widget-id='%s'][seeable='true']";
 	private static final String PRODUCT_EDITOR_WITH_PRODUCT_CODE_CLOSE_ICON_CSS = "div[pane-location='editor-pane'] "
@@ -36,9 +36,19 @@ public class ProductEditor extends AbstractPageObject {
 	private static final String SKU_DETAILS_ITEM_COLUMN_CSS = SKU_DETAILS_ITEM_PARENT_CSS + "div[column-id='%s']";
 	private static final String ADD_CATEGORY_BUTTON_CSS = PRODUCT_EDITOR_PARENT_CSS + "div[widget-id='Add Category...'][seeable='true']";
 	private static final String REMOVE_CATEGORY_BUTTON_CSS = PRODUCT_EDITOR_PARENT_CSS + "div[widget-id='Remove Category...'][seeable='true']";
+	private static final String INCLUDE_CATEGORY_BUTTON_CSS = PRODUCT_EDITOR_PARENT_CSS + "div[widget-id='Add/Include "
+			+ "Category...'][seeable='true']";
+	private static final String EXCLUDE_CATEGORY_BUTTON_CSS = PRODUCT_EDITOR_PARENT_CSS + "div[widget-id='Exclude Category...'][seeable='true']";
 	private static final String CATEGORY_DETAILS_ITEM_PARENT_CSS = "div[widget-id='Product Category'][widget-type='Table'] ";
 	private static final String CATEGORY_DETAILS_ITEM_COLUMN_CSS = CATEGORY_DETAILS_ITEM_PARENT_CSS + "div[column-id='%s']";
 	private static final String PRODUCT_EDITOR = "div[widget-id='%s'][appearance-id='ctab-item']";
+	private static final String SKU_CODE_FIELD_CSS = PRODUCT_EDITOR_PARENT_CSS + "div[widget-id='%s'][widget-type='Text']>input";
+	private static final String OPEN_PARENT_PRODUCT_CSS = PRODUCT_EDITOR_PARENT_CSS
+			+ "div[automation-id='com.elasticpath.cmclient.catalog.CatalogMessages.MultipleSku_OpenParentProduct'][seeable='true']";
+	private static final String ENABLE_DATE_FIELD_CSS = PRODUCT_EDITOR_PARENT_CSS
+			+ "div[widget-id='Enable Date/Time']>div[widget-type='Text']>input";
+	public static final String SKU_DETAILS_TAB_ID = "SKU Details";
+	public static final String SKU_CODE_FIELD_ID = "SKU Code";
 
 	/**
 	 * Constructor.
@@ -72,6 +82,10 @@ public class ProductEditor extends AbstractPageObject {
 		click(getWaitDriver().waitForElementToBeClickable(By.cssSelector(cssSelector)));
 	}
 
+	public void selectVirtualCatalogAssignment(final String catalogName) {
+		click(getWaitDriver().waitForElementToBeClickable(By.cssSelector(String.format(CATALOG_ASSIGNMENT_TAB_CSS, catalogName))));
+	}
+
 	/**
 	 * Verifies Catalog Tab is not present.
 	 *
@@ -86,7 +100,7 @@ public class ProductEditor extends AbstractPageObject {
 	}
 
 	/**
-	 * Verifies Catalog Tab is not present.
+	 * Verifies Catalog Tab is present.
 	 *
 	 * @param catalogName the catalog name.
 	 */
@@ -235,6 +249,19 @@ public class ProductEditor extends AbstractPageObject {
 		clickButton(REMOVE_CATEGORY_BUTTON_CSS, "Remove Category");
 	}
 
+	/**
+	 * Clicks exclude category button.
+	 */
+	public void clickExcludeCategoryButton() {
+		clickButton(EXCLUDE_CATEGORY_BUTTON_CSS, "Exclude Category");
+	}
+
+	/**
+	 * Clicks include category button.
+	 */
+	public void clickIncludeCategoryButton() {
+		clickButton(INCLUDE_CATEGORY_BUTTON_CSS, "Include Category");
+	}
 
 	/**
 	 * Selects product's editor.
@@ -245,4 +272,70 @@ public class ProductEditor extends AbstractPageObject {
 		click(getWaitDriver().waitForElementToBeClickable(By.cssSelector(String.format(PRODUCT_EDITOR, productName))));
 	}
 
+	/**
+	 * Returns text from SKU Code field of SKU Details tab
+	 *
+	 * @return text from SKU Code field of a SKU Details tab
+	 */
+	public String getSkuCode() {
+		getWaitDriver().waitForElementToBeInteractable(String.format(SKU_CODE_FIELD_CSS, SKU_CODE_FIELD_ID));
+		return getDriver().findElement(By.cssSelector(String.format(SKU_CODE_FIELD_CSS, SKU_CODE_FIELD_ID))).getAttribute("value");
+	}
+
+	/**
+	 * Returns text from Enable Date/Time field of Summary tab
+	 *
+	 * @return text from Enable Date/Time field of Summary tab
+	 */
+	public String getEnableDate() {
+		scrollWidgetIntoView(By.cssSelector(ENABLE_DATE_FIELD_CSS), 5);
+		getWaitDriver().waitForElementToBeInteractable(ENABLE_DATE_FIELD_CSS);
+		return getDriver().findElement(By.cssSelector(ENABLE_DATE_FIELD_CSS)).getAttribute("value");
+	}
+
+	/**
+	 * Types new value in Date/Time field of Summary tab
+	 *
+	 * @param formattedDateTime formatted value for Date/Time field of Summary tab
+	 */
+	public void setEnableDate(final String formattedDateTime) {
+		scrollWidgetIntoView(By.cssSelector(ENABLE_DATE_FIELD_CSS), 5);
+		getWaitDriver().waitForElementToBeInteractable(ENABLE_DATE_FIELD_CSS);
+		clearAndType(ENABLE_DATE_FIELD_CSS, formattedDateTime);
+	}
+
+	/**
+	 * Returns true if Open Parent Product is present on a page, else returns false
+	 *
+	 * @return true if Open Parent Product is present on a page, else returns false
+	 */
+	public boolean isOpenParentProductPresent() {
+		//we assume that if Sku Code field is rendered we can check if Open Parent Product button is rendered
+		return isElementPresentInCurrentEditor(String.format(SKU_CODE_FIELD_CSS, SKU_CODE_FIELD_ID), OPEN_PARENT_PRODUCT_CSS);
+	}
+
+	/**
+	 * Returns true if Product Editor tab is present on a page, else returns false
+	 *
+	 * @return true if Product Editor tab is present on a page, else returns false
+	 */
+	public boolean isTabPresent(final String tabName) {
+		//we assume that if Product editor parent element is rendered we can check if tab is rendered
+		return isElementPresentInCurrentEditor(PRODUCT_EDITOR_PARENT_CSS, String.format(TAB_CSS, tabName));
+	}
+
+	/**
+	 * Returns true if element is present on a page, else returns false
+	 *
+	 * @param isPresentElement css selector of an element which should be rendered before check
+	 * @param waitForElement css selector of an element for which a check is performed
+	 * @return true if element is present on a page, else returns false
+	 */
+	private boolean isElementPresentInCurrentEditor(final String waitForElement, final String isPresentElement) {
+		getWaitDriver().waitForElementToBeInteractable(waitForElement);
+		setWebDriverImplicitWait(1);
+		boolean isPresent = isElementPresent(By.cssSelector(isPresentElement));
+		setWebDriverImplicitWaitToDefault();
+		return isPresent;
+	}
 }

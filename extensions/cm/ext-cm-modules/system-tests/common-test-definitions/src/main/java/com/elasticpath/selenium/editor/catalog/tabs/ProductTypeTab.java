@@ -6,6 +6,7 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 
 import com.elasticpath.selenium.common.AbstractPageObject;
+import com.elasticpath.selenium.util.Constants;
 import com.elasticpath.selenium.wizards.AddEditProductTypeWizard;
 
 /**
@@ -34,6 +35,11 @@ public class ProductTypeTab extends AbstractPageObject {
 	 * @return AddProductTypeDialog
 	 */
 	public AddEditProductTypeWizard clickAddProductTypeButton() {
+		setWebDriverImplicitWait(Constants.IMPLICIT_WAIT_FOR_ELEMENT_THREE_SECONDS);
+		assertThat(isElementPresent(By.cssSelector(PRODUCT_TYPE_PARENT_CSS.trim())))
+				.as("Product Type tab is not the active tab")
+				.isTrue();
+		setWebDriverImplicitWaitToDefault();
 		clickButton("Add");
 		return new AddEditProductTypeWizard(getDriver());
 	}

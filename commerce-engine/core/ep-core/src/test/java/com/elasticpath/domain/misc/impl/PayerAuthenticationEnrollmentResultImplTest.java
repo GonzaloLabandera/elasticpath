@@ -3,10 +3,7 @@
  */
 package com.elasticpath.domain.misc.impl;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -28,7 +25,7 @@ public class PayerAuthenticationEnrollmentResultImplTest {
 	 */
 	@Test
 	public void testGetPaREQ() {
-		assertEquals("Check get PaREQ", payerAuthenticationEnrollmentResultImpl.getPaREQ(), null);
+		assertThat(payerAuthenticationEnrollmentResultImpl.getPaREQ()).isNull();
 	}
 	
 	/**
@@ -38,7 +35,7 @@ public class PayerAuthenticationEnrollmentResultImplTest {
 	public void testSetPaREQ() {
 		final String pareq = "test";
 		payerAuthenticationEnrollmentResultImpl.setPaREQ(pareq);
-		assertEquals("Check set PaEQ", payerAuthenticationEnrollmentResultImpl.getPaREQ(), pareq);
+		assertThat(payerAuthenticationEnrollmentResultImpl.getPaREQ()).isEqualTo(pareq);
 	}
 	
 	/**
@@ -46,7 +43,7 @@ public class PayerAuthenticationEnrollmentResultImplTest {
 	 */
 	@Test
 	public void testGetAcsURL() {
-		assertEquals("Check get AcsURL", payerAuthenticationEnrollmentResultImpl.getAcsURL(), null);
+		assertThat(payerAuthenticationEnrollmentResultImpl.getAcsURL()).isNull();
 	}
 	
 	/**
@@ -56,7 +53,7 @@ public class PayerAuthenticationEnrollmentResultImplTest {
 	public void testSetAcsURL() {
 		final String acsURL = "www.citibank.com";
 		payerAuthenticationEnrollmentResultImpl.setAcsURL(acsURL);
-		assertEquals("Check set AcsURL", payerAuthenticationEnrollmentResultImpl.getAcsURL(), acsURL);
+		assertThat(payerAuthenticationEnrollmentResultImpl.getAcsURL()).isEqualTo(acsURL);
 	}
 	
 	/**
@@ -64,7 +61,7 @@ public class PayerAuthenticationEnrollmentResultImplTest {
 	 */
 	@Test
 	public void testIs3DSecureEnrolled() {
-		assertFalse("Check is 3D enrolled?", payerAuthenticationEnrollmentResultImpl.is3DSecureEnrolled());
+		assertThat(payerAuthenticationEnrollmentResultImpl.is3DSecureEnrolled()).isFalse();
 	}
 	
 	/**
@@ -73,7 +70,7 @@ public class PayerAuthenticationEnrollmentResultImplTest {
 	@Test
 	public void testSetEnrolled() {
 		payerAuthenticationEnrollmentResultImpl.setEnrolled(true);
-		assertTrue("Check set enrolled", payerAuthenticationEnrollmentResultImpl.is3DSecureEnrolled());
+		assertThat(payerAuthenticationEnrollmentResultImpl.is3DSecureEnrolled()).isTrue();
 	}
 		
 	/**
@@ -81,7 +78,7 @@ public class PayerAuthenticationEnrollmentResultImplTest {
 	 */
 	@Test
 	public void testGetMerchantData() {
-		assertEquals("Check get merchantData", payerAuthenticationEnrollmentResultImpl.getMerchantData(), null);
+		assertThat(payerAuthenticationEnrollmentResultImpl.getMerchantData()).isNull();
 	}
 	
 	/**
@@ -91,7 +88,7 @@ public class PayerAuthenticationEnrollmentResultImplTest {
 	public void testSetMerchantData() {
 		final String merchantData = "123456789";
 		payerAuthenticationEnrollmentResultImpl.setMerchantData(merchantData);
-		assertSame("Check set merchantData", payerAuthenticationEnrollmentResultImpl.getMerchantData(), merchantData);
+		assertThat(payerAuthenticationEnrollmentResultImpl.getMerchantData()).isEqualTo(merchantData);
 	}
 	
 	/**
@@ -99,7 +96,7 @@ public class PayerAuthenticationEnrollmentResultImplTest {
 	 */
 	@Test
 	public void testGetTermURL() {
-		assertEquals("Check get termURL", payerAuthenticationEnrollmentResultImpl.getTermURL(), null);
+		assertThat(payerAuthenticationEnrollmentResultImpl.getTermURL()).isNull();
 	}
 	
 	/**
@@ -109,6 +106,6 @@ public class PayerAuthenticationEnrollmentResultImplTest {
 	public void testSetTermURL() {
 		final String termURL = "www.elasticapth.com";
 		payerAuthenticationEnrollmentResultImpl.setTermURL(termURL);
-		assertEquals("Check set termURL", payerAuthenticationEnrollmentResultImpl.getTermURL(), termURL);
+		assertThat(payerAuthenticationEnrollmentResultImpl.getTermURL()).isEqualTo(termURL);
 	}
 }

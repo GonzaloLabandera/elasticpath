@@ -3,8 +3,7 @@
  */
 package com.elasticpath.domain.order.impl;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.Date;
 import java.util.HashMap;
@@ -36,32 +35,32 @@ public class OrderSearchCriteriaImplTest {
 	 */
 	@Test
 	public void testGetSet() {
-		assertEquals(null, orderSearchCriteriaImpl.getCustomerCriteria());
+		assertThat(orderSearchCriteriaImpl.getCustomerCriteria()).isNull();
 		final Map<String, String> customerCriteria = new HashMap<>();
 		orderSearchCriteriaImpl.setCustomerCriteria(customerCriteria);
-		assertEquals(customerCriteria, orderSearchCriteriaImpl.getCustomerCriteria());
+		assertThat(orderSearchCriteriaImpl.getCustomerCriteria()).isEqualTo(customerCriteria);
 
-		assertNull(orderSearchCriteriaImpl.getOrderFromDate());
+		assertThat(orderSearchCriteriaImpl.getOrderFromDate()).isNull();
 		final Date testDate = new Date();
 		orderSearchCriteriaImpl.setOrderFromDate(testDate);
-		assertEquals(testDate, orderSearchCriteriaImpl.getOrderFromDate());
+		assertThat(orderSearchCriteriaImpl.getOrderFromDate()).isEqualTo(testDate);
 
-		assertNull(orderSearchCriteriaImpl.getOrderToDate());
+		assertThat(orderSearchCriteriaImpl.getOrderToDate()).isNull();
 		orderSearchCriteriaImpl.setOrderToDate(testDate);
-		assertEquals(testDate, orderSearchCriteriaImpl.getOrderToDate());
+		assertThat(orderSearchCriteriaImpl.getOrderToDate()).isEqualTo(testDate);
 
-		assertNull(orderSearchCriteriaImpl.getOrderStatus());
+		assertThat(orderSearchCriteriaImpl.getOrderStatus()).isNull();
 		orderSearchCriteriaImpl.setOrderStatus(ORDER_STATUS);
-		assertEquals(ORDER_STATUS, orderSearchCriteriaImpl.getOrderStatus());
+		assertThat(orderSearchCriteriaImpl.getOrderStatus()).isEqualTo(ORDER_STATUS);
 
-		assertNull(orderSearchCriteriaImpl.getShipmentAddressCriteria());
+		assertThat(orderSearchCriteriaImpl.getShipmentAddressCriteria()).isNull();
 		final Map<String, String> shipmentAddressCriteria = new HashMap<>();
 		orderSearchCriteriaImpl.setShipmentAddressCriteria(shipmentAddressCriteria);
-		assertEquals(shipmentAddressCriteria, orderSearchCriteriaImpl.getShipmentAddressCriteria());
+		assertThat(orderSearchCriteriaImpl.getShipmentAddressCriteria()).isEqualTo(shipmentAddressCriteria);
 
-		assertNull(orderSearchCriteriaImpl.getShipmentStatus());
+		assertThat(orderSearchCriteriaImpl.getShipmentStatus()).isNull();
 		orderSearchCriteriaImpl.setShipmentStatus(SHIPMENT_STATUS);
-		assertEquals(SHIPMENT_STATUS, orderSearchCriteriaImpl.getShipmentStatus());
+		assertThat(orderSearchCriteriaImpl.getShipmentStatus()).isEqualTo(SHIPMENT_STATUS);
 
 
 

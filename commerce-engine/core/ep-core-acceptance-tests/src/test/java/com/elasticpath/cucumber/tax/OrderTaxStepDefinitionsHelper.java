@@ -1,11 +1,11 @@
-/**
+/*
  * Copyright (c) Elastic Path Software Inc., 2014
  */
 package com.elasticpath.cucumber.tax;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -46,7 +46,8 @@ public class OrderTaxStepDefinitionsHelper {
 	 *
 	 * @param taxJournalData the expected tax journals for verifying
 	 */
-	public void verifyTaxJournalEntriesForOrder(final List<Map<String, String>> taxJournalData) {
+	public void verifyTaxJournalEntriesForOrder(final List<Map<String, String>> taxJournalData)
+			throws IllegalAccessException, NoSuchMethodException, InvocationTargetException {
 
 		verifyTaxJournalEntriesWithExpectedRecords(orderHolder.get(), taxJournalData);
 	}
@@ -56,12 +57,14 @@ public class OrderTaxStepDefinitionsHelper {
 	 *
 	 * @param taxJournalData the expected tax journals for verifying
 	 */
-	public void verifyTaxJournalEntriesForExchange(final List<Map<String, String>> taxJournalData) {
+	public void verifyTaxJournalEntriesForExchange(final List<Map<String, String>> taxJournalData)
+			throws IllegalAccessException, NoSuchMethodException, InvocationTargetException {
 
 		verifyTaxJournalEntriesWithExpectedRecords(orderReturnHolder.get().getExchangeOrder(), taxJournalData);
 	}
 
-	private void verifyTaxJournalEntriesWithExpectedRecords(final Order order, final List<Map<String, String>> taxJournalData) {
+	private void verifyTaxJournalEntriesWithExpectedRecords(final Order order, final List<Map<String, String>> taxJournalData)
+			throws InvocationTargetException, IllegalAccessException, NoSuchMethodException {
 
 		orderTaxTestVerifier.verifyOrderTaxDocumentWithExpectedRecords(
 				order.getOrderNumber(),
@@ -74,7 +77,8 @@ public class OrderTaxStepDefinitionsHelper {
 	 *
 	 * @param orderEntriesMapList the expected order fields
 	 */
-	public void verifyOrderEntries(final List<Map<String, String>> orderEntriesMapList) {
+	public void verifyOrderEntries(final List<Map<String, String>> orderEntriesMapList)
+			throws IllegalAccessException, NoSuchMethodException, InvocationTargetException {
 		verifyTaxJournalEntriesForOrder(orderEntriesMapList);
 
 		Order order = orderHolder.get();
@@ -84,34 +88,27 @@ public class OrderTaxStepDefinitionsHelper {
 		}
 	}
 
-	private List<TaxJournalRecord> populateTaxJournals(final List<Map<String, String>> taxJournalData) {
+	private List<TaxJournalRecord> populateTaxJournals(final List<Map<String, String>> taxJournalData)
+			throws InvocationTargetException, IllegalAccessException {
 
 		List<TaxJournalRecord> taxJournals = new ArrayList<>();
 
-		try {
-			for (Map<String, String> properties : taxJournalData) {
+		for (Map<String, String> properties : taxJournalData) {
 
-				TaxJournalRecord taxJournal = new TaxJournalRecordImpl();
-				BeanUtils.populate(taxJournal, properties);
-				taxJournals.add(taxJournal);
-			}
-		} catch (Exception exc) {
-			fail(exc.getMessage());
+			TaxJournalRecord taxJournal = new TaxJournalRecordImpl();
+			BeanUtils.populate(taxJournal, properties);
+			taxJournals.add(taxJournal);
 		}
-
 		return taxJournals;
 	}
 
 	@SuppressWarnings("unchecked")
-	private Set<String> getExcludeFieldNames(final List<Map<String, String>> taxJournalData) {
+	private Set<String> getExcludeFieldNames(final List<Map<String, String>> taxJournalData)
+			throws IllegalAccessException, NoSuchMethodException, InvocationTargetException {
 
-		Set<String> taxJournalRecordFieldNames = new HashSet<>();
+		Set<String> taxJournalRecordFieldNames;
 
-		try {
-			taxJournalRecordFieldNames = BeanUtils.describe(new TaxJournalRecordImpl()).keySet();
-		} catch (Exception exc) {
-			fail(exc.getMessage());
-		}
+		taxJournalRecordFieldNames = BeanUtils.describe(new TaxJournalRecordImpl()).keySet();
 
 		Set<String> includeFieldNames = new HashSet<>(taxJournalData.get(0).keySet());
 

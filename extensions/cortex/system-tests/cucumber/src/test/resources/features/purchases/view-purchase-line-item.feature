@@ -1,11 +1,10 @@
-@Purchases
+@purchases
 Feature: View purchase line item
   As a shopper, I want to see the configurable items details in my purchase, so that I know what I have configured.
 
   Scenario Outline: View configurable item details in purchase line item as registered shopper
     Given I login as a registered shopper
-    When I look up an item with code <ITEMCODE>
-    Then I go to add to cart form
+    And I look up an item with code <ITEMCODE>
     And I add the item to the cart with quantity <QTY> and configurable fields:
       | allFieldTypes.boolean           | <BOOLEAN>       |
       | allFieldTypes.date              | <DATE>          |
@@ -16,8 +15,8 @@ Feature: View purchase line item
       | allFieldTypes.multiSelectOption | <MULTI_OPTION>  |
       | allFieldTypes.shortText         | <SHORT_TEXT>    |
       | allFieldTypes.singleOption      | <SINGLE_OPTION> |
-    And I select shipping option Canada Post Express
-    And I make a purchase
+    And I select shipping option CanadaPostExpress
+    When I complete the purchase for the order
     Then the purchase line item configurable fields for item <ITEM_NAME> are:
       | allFieldTypes.boolean           | <BOOLEAN>       |
       | allFieldTypes.date              | <DATE>          |
@@ -35,8 +34,7 @@ Feature: View purchase line item
 
   Scenario Outline: View configurable item details in purchase line item as public shopper
     Given I login as a public shopper
-    When I look up an item with code <ITEMCODE>
-    Then I go to add to cart form
+    And I look up an item with code <ITEMCODE>
     And I add the item to the cart with quantity <QTY> and configurable fields:
       | allFieldTypes.boolean           | <BOOLEAN>       |
       | allFieldTypes.date              | <DATE>          |
@@ -47,10 +45,10 @@ Feature: View purchase line item
       | allFieldTypes.multiSelectOption | <MULTI_OPTION>  |
       | allFieldTypes.shortText         | <SHORT_TEXT>    |
       | allFieldTypes.singleOption      | <SINGLE_OPTION> |
-    When I fill in email needinfo
+    And I fill in email needinfo
     And I fill in payment methods needinfo
     And I fill in billing address needinfo
-    And I make a purchase
+    When I complete the purchase for the order
     Then the purchase line item configurable fields for item <ITEM_NAME> are:
       | allFieldTypes.boolean           | <BOOLEAN>       |
       | allFieldTypes.date              | <DATE>          |
@@ -68,21 +66,19 @@ Feature: View purchase line item
 
   Scenario Outline: Two identical items with different configuration are shown in purchase line items
     Given I have authenticated as a newly registered shopper
-    When I look up an item with code <ITEMCODE>
-    And I go to add to cart form
+    And I look up an item with code <ITEMCODE>
     And I successfully add the item to the cart with quantity 1 and configurable fields:
       | giftCertificate.message        | <MESSAGE>         |
       | giftCertificate.recipientEmail | <RECIPIENT_EMAIL> |
       | giftCertificate.recipientName  | <RECIPIENT_NAME>  |
       | giftCertificate.senderName     | <SENDER_NAME>     |
-    When I look up an item with code <ITEMCODE>
-    And I go to add to cart form
+    And I look up an item with code <ITEMCODE>
     And I successfully add the item to the cart with quantity 1 and configurable fields:
       | giftCertificate.message        | <MESSAGE_2>         |
       | giftCertificate.recipientEmail | <RECIPIENT_EMAIL_2> |
       | giftCertificate.recipientName  | <RECIPIENT_NAME>    |
       | giftCertificate.senderName     | <SENDER_NAME>       |
-    And I create a purchase and view the purchase details
+    When I create a purchase and view the purchase details
     Then the number of purchase lineitems is 2
     And there exists a purchase line item for item <ITEMCODE> with configurable fields:
       | giftCertificate.message        | <MESSAGE>         |

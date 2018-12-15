@@ -72,7 +72,11 @@ public final class SeoConstants {
 	 */
 	public static final String PAGE_NUMBER_PREFIX = "p";
 
-	
+	/**
+	 * Define the SEO(Search Engine Optimization) ID prefix for size filters.
+	 */
+	public static final String SIZE_RANGE_FILTER_PREFIX = "sr";
+
 	/**
 	 * Define the SEO(Search Engine Optimization) ID prefix for sitemap.
 	 */

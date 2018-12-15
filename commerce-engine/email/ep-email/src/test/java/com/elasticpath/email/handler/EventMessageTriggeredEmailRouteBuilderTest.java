@@ -4,6 +4,7 @@
 package com.elasticpath.email.handler;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.io.InputStream;
@@ -15,6 +16,7 @@ import java.util.concurrent.TimeUnit;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.collect.Lists;
+import com.google.common.util.concurrent.Uninterruptibles;
 import org.apache.camel.Endpoint;
 import org.apache.camel.Exchange;
 import org.apache.camel.Predicate;
@@ -105,6 +107,7 @@ public class EventMessageTriggeredEmailRouteBuilderTest extends CamelTestSupport
 
 		template().sendBody(incomingEndpoint, getJson(eventMessage));
 
+		verify(emailEnabledPredicate).matches(any(Exchange.class));
 		verifyNoInteractionsOnOutgoingEndpoint();
 	}
 
@@ -119,6 +122,7 @@ public class EventMessageTriggeredEmailRouteBuilderTest extends CamelTestSupport
 
 		template().sendBody(incomingEndpoint, getJson(eventMessage));
 
+		verify(eventMessagePredicate).apply(eventMessage);
 		verifyNoInteractionsOnOutgoingEndpoint();
 	}
 
@@ -137,11 +141,7 @@ public class EventMessageTriggeredEmailRouteBuilderTest extends CamelTestSupport
 	private void verifyNoInteractionsOnOutgoingEndpoint() throws InterruptedException {
 		// Make sure everything's done processing so we don't get false positives
 		// (since we're testing for a _lack_ of activity)
-		try {
-			Thread.sleep(SECONDS_TO_WAIT);
-		} catch (InterruptedException e) {
-			// do nothing
-		}
+		Uninterruptibles.sleepUninterruptibly(SECONDS_TO_WAIT, TimeUnit.SECONDS);
 
 		outgoingEndpoint.expectedMessageCount(0);
 		outgoingEndpoint.assertIsSatisfied();

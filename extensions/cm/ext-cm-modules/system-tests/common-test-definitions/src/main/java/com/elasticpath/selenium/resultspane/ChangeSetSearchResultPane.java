@@ -87,10 +87,17 @@ public class ChangeSetSearchResultPane extends AbstractPageObject {
 	 * Clicks Finalized button.
 	 */
 	public void clickFinalizedButton() {
-		getWaitDriver().waitForButtonToBeEnabled(FINALIZE_BUTTON_CSS);
-		clickButton(FINALIZE_BUTTON_CSS, "Finalize");
-		new ConfirmDialog(getDriver()).clickOK();
-		waitTillElementDisappears(By.cssSelector("div[widget-id='OK'][seeable='true']"));
+		setWebDriverImplicitWait(Constants.IMPLICIT_WAIT_FOR_ELEMENT_THREE_SECONDS);
+		try {
+			getWaitDriver().waitForButtonToBeEnabled(FINALIZE_BUTTON_CSS);
+			if(isButtonEnabled(FINALIZE_BUTTON_CSS)) {
+				clickButton(FINALIZE_BUTTON_CSS, "Finalize");
+				new ConfirmDialog(getDriver()).clickOK();
+				waitTillElementDisappears(By.cssSelector("div[widget-id='OK'][seeable='true']"));
+			}
+		}finally {
+			setWebDriverImplicitWaitToDefault();
+		}
 	}
 
 	/**

@@ -444,5 +444,4 @@ public class SkuOptionServiceImpl extends AbstractEpPersistenceServiceImpl imple
 	public void remove(final SkuOptionValue skuOptionValue) throws EpServiceException {
 		getPersistenceEngine().delete(skuOptionValue);
 	}
-
 }

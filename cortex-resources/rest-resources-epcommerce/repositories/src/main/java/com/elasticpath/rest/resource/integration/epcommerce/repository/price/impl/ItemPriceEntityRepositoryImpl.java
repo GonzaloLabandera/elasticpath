@@ -33,7 +33,7 @@ public class ItemPriceEntityRepositoryImpl<E extends ItemPriceEntity, I extends 
 	public Single<ItemPriceEntity> findOne(final PriceForItemIdentifier priceForItemIdentifier) {
 		ItemIdentifier itemIdentifier = priceForItemIdentifier.getItem();
 		String skuCode = itemIdentifier.getItemId().getValue().get(ItemRepository.SKU_CODE_KEY);
-		String scope = itemIdentifier.getItems().getScope().getValue();
+		String scope = itemIdentifier.getScope().getValue();
 		return priceRepository.getPrice(scope, skuCode)
 				.map(this::getItemPriceEntity);
 	}

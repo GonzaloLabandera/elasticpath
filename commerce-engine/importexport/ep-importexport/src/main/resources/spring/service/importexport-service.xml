@@ -1335,24 +1335,15 @@
 						<property name="categoryGuidUtil" ref="categoryGuidUtil" />
 					</bean>
 				</entry>
-				<entry key="com.elasticpath.importexport.common.dto.products.ProductDTO">
-					<bean class="com.elasticpath.importexport.importer.changesetsupport.impl.MethodObjectDescriptorPopulator">
-						<property name="objectIdGetter" value="getCode" />
-						<property name="objectType" value="Product" />
-					</bean>
-				</entry>
+				<entry key="com.elasticpath.importexport.common.dto.products.ProductDTO" value-ref="productObjectDescriptorPopulator"/>
 				<entry key="com.elasticpath.importexport.common.dto.products.ProductSkuDTO">
 					<bean class="com.elasticpath.importexport.importer.changesetsupport.impl.MethodObjectDescriptorPopulator">
 						<property name="objectIdGetter" value="getGuid" />
 						<property name="objectType" value="Product SKU" />
 					</bean>
 				</entry>
-				<entry key="com.elasticpath.importexport.common.dto.products.bundles.ProductBundleDTO">
-					<bean class="com.elasticpath.importexport.importer.changesetsupport.impl.MethodObjectDescriptorPopulator">
-						<property name="objectIdGetter" value="getCode" />
-						<property name="objectType" value="Product Bundle" />
-					</bean>
-				</entry>
+				<entry key="com.elasticpath.importexport.common.dto.products.bundles.ProductBundleDTO"
+					   value-ref="productBundleObjectDescriptorPopulator"/>
 				<entry key="com.elasticpath.importexport.common.dto.promotion.cart.PromotionDTO">
 					<bean class="com.elasticpath.importexport.importer.changesetsupport.impl.MethodObjectDescriptorPopulator">
 						<property name="objectIdGetter" value="getCode" />
@@ -1385,6 +1376,21 @@
 				</entry>
 			</map>
 		</property>
+	</bean>
+
+	<bean id="productObjectDescriptorPopulator" class="com.elasticpath.importexport.importer.changesetsupport.impl.ProductObjectDescriptorPopulator">
+		<property name="productDelegate">
+			<bean class="com.elasticpath.importexport.importer.changesetsupport.impl.MethodObjectDescriptorPopulator">
+				<property name="objectIdGetter" value="getCode"/>
+				<property name="objectType" value="Product"/>
+			</bean>
+		</property>
+		<property name="bundleDelegate" ref="productBundleObjectDescriptorPopulator"/>
+	</bean>
+
+	<bean id="productBundleObjectDescriptorPopulator" class="com.elasticpath.importexport.importer.changesetsupport.impl.MethodObjectDescriptorPopulator">
+		<property name="objectIdGetter" value="getCode" />
+		<property name="objectType" value="Product Bundle" />
 	</bean>
 
 	<bean id="businessObjectDescriptorLocator" parent="abstractBusinessObjectDescriptorLocator"/>

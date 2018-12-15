@@ -18,9 +18,6 @@
 	<modules>
 		<module>authentication-parent</module>
 		<module>event-handlers</module>
-		<module>itemdefinitions</module>
-		<module>items</module>
-		<module>itemselections</module>
 		<module>paymentmethods</module>
 		<module>paymenttokens</module>
 		<module>personalization</module>

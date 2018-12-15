@@ -1,0 +1,39 @@
+<?xml version="1.0"?>
+<definitions xmlns="http://www.elasticpath.com/schema/rest/0.5">
+
+	<family>
+		<name>prices</name>
+
+		<resource>
+			<name>offer-price-range</name>
+			<description><![CDATA[The offer's price range.]]></description>
+			<uri>{base.family}/{offers.offer}</uri>
+			<entity>offer-price-range</entity>
+		</resource>
+
+		<relationship>
+			<name>price-range-for-offer</name>
+			<description><![CDATA[Price range for an offer.]]></description>
+			<rel>pricerange</rel>
+			<rev>offer</rev>
+			<from>offers.offer</from>
+			<to>offer-price-range</to>
+		</relationship>
+
+		<entity>
+			<name>offer-price-range</name>
+			<description>
+				<![CDATA[The price range of an offer. An offer can have multiple skus, the price-range depicts the minimum and maximum prices among those skus.]]></description>
+			<property>
+				<name>list-price-range</name>
+				<description><![CDATA[The range of unit prices for the offer before applying discounts.]]></description>
+				<is-a>price-range</is-a>
+			</property>
+			<property>
+				<name>purchase-price-range</name>
+				<description><![CDATA[The range of sale prices for the offer. ]]></description>
+				<is-a>price-range</is-a>
+			</property>
+		</entity>
+	</family>
+</definitions>

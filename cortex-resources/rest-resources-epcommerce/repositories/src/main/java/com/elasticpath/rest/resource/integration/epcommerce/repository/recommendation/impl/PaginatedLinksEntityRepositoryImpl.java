@@ -14,11 +14,9 @@ import org.osgi.service.component.annotations.Reference;
 import com.elasticpath.domain.catalog.ProductSku;
 import com.elasticpath.repository.PaginationRepository;
 import com.elasticpath.rest.definition.items.ItemIdentifier;
-import com.elasticpath.rest.definition.items.ItemsIdentifier;
 import com.elasticpath.rest.definition.recommendations.ItemRecommendationGroupIdentifier;
 import com.elasticpath.rest.definition.recommendations.PaginatedRecommendationsIdentifier;
 import com.elasticpath.rest.id.IdentifierPart;
-import com.elasticpath.rest.id.transform.IdentifierTransformerProvider;
 import com.elasticpath.rest.id.type.CompositeIdentifier;
 import com.elasticpath.rest.id.util.CompositeIdUtil;
 import com.elasticpath.rest.pagination.PaginationEntity;
@@ -41,7 +39,6 @@ public class PaginatedLinksEntityRepositoryImpl<R extends PaginatedRecommendatio
 	private ItemRepository itemRepository;
 	private StoreRepository storeRepository;
 	private ItemRecommendationsRepository itemRecommendationsRepository;
-	private IdentifierTransformerProvider identifierTransformerProvider;
 
 	@Override
 	public Single<PaginationEntity> getPaginationInfo(final PaginatedRecommendationsIdentifier identifier) {
@@ -51,13 +48,13 @@ public class PaginatedLinksEntityRepositoryImpl<R extends PaginatedRecommendatio
 
 	@Override
 	public Observable<ItemIdentifier> getElements(final PaginatedRecommendationsIdentifier identifier) {
-		ItemsIdentifier items = identifier.getItemRecommendationGroup().getItemRecommendationGroups().getItem().getItems();
+		IdentifierPart<String> scope = identifier.getItemRecommendationGroup().getItemRecommendationGroups().getItem().getScope();
 
 		return getRecommendedItemsFromGroup(identifier)
 				.flatMapObservable(paginatedResult -> Observable.fromIterable(paginatedResult.getResultIds()))
 				.map(itemId -> ItemIdentifier.builder()
 						.withItemId(CompositeIdentifier.of(CompositeIdUtil.decodeCompositeId(itemId)))
-						.withItems(items)
+						.withScope(scope)
 						.build());
 	}
 
@@ -92,7 +89,7 @@ public class PaginatedLinksEntityRepositoryImpl<R extends PaginatedRecommendatio
 		String groupId = identifier.getGroupId().getValue();
 		ItemIdentifier itemIdentifier = identifier.getItemRecommendationGroups().getItem();
 		IdentifierPart<Map<String, String>> itemId = itemIdentifier.getItemId();
-		String scope = itemIdentifier.getItems().getScope().getValue();
+		String scope = itemIdentifier.getScope().getValue();
 
 		return getPaginatedResult(scope, groupId, pageId, itemId);
 	}
@@ -108,11 +105,7 @@ public class PaginatedLinksEntityRepositoryImpl<R extends PaginatedRecommendatio
 	 */
 	protected Single<PaginatedResult> getPaginatedResult(final String scope, final String recommendationGroup,
 													   final int pageNumber, final IdentifierPart<Map<String, String>> itemId) {
-
-		//Deep down item repository expects an encoded id
-		String encodedItemId = identifierTransformerProvider.forUriPart(ItemIdentifier.ITEM_ID).identifierToUri(itemId);
-
-		return itemRepository.getSkuForItemIdAsSingle(encodedItemId)
+		return itemRepository.getSkuForItemId(itemId.getValue())
 				.map(ProductSku::getProduct)
 				.flatMap(product -> storeRepository.findStoreAsSingle(scope)
 						.flatMap(store -> itemRecommendationsRepository
@@ -148,10 +141,5 @@ public class PaginatedLinksEntityRepositoryImpl<R extends PaginatedRecommendatio
 	@Reference
 	public void setItemRecommendationsRepository(final ItemRecommendationsRepository itemRecommendationsRepository) {
 		this.itemRecommendationsRepository = itemRecommendationsRepository;
-	}
-
-	@Reference
-	public void setIdentifierTransformerProvider(final IdentifierTransformerProvider identifierTransformerProvider) {
-		this.identifierTransformerProvider = identifierTransformerProvider;
 	}
 }

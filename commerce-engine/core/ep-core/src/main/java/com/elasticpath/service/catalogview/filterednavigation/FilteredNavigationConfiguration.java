@@ -4,6 +4,7 @@
 package com.elasticpath.service.catalogview.filterednavigation;
 
 import java.util.Currency;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.SortedMap;
@@ -12,7 +13,12 @@ import com.elasticpath.domain.attribute.Attribute;
 import com.elasticpath.domain.catalogview.AttributeKeywordFilter;
 import com.elasticpath.domain.catalogview.AttributeRangeFilter;
 import com.elasticpath.domain.catalogview.AttributeValueFilter;
+import com.elasticpath.domain.catalogview.BrandFilter;
+import com.elasticpath.domain.catalogview.CategoryFilter;
 import com.elasticpath.domain.catalogview.PriceFilter;
+import com.elasticpath.domain.catalogview.SizeRangeFilter;
+import com.elasticpath.domain.catalogview.SkuOptionValueFilter;
+import com.elasticpath.domain.search.Facet;
 
 /**
  * Defines the methods relevant to filtered navigation.
@@ -122,14 +128,14 @@ public interface FilteredNavigationConfiguration {
 	 * Clears all the brand codes defined previously.
 	 */
 	void clearAllBrandCodes();
-	
+
 	/**
 	 * Returns all defined attribute keywords as a <code>Map</code>.
 	 * <p>
 	 * The attribute code will be used as the map key .
 	 * <p>
 	 * And the value will be a <code>AttributeKeywordFilter</code>.
-	 * 
+	 *
 	 * @return all defined attribute keyword as a <code>Map</code>.
 	 */
 	Map<String, AttributeKeywordFilter> getAllAttributeKeywords();
@@ -139,4 +145,67 @@ public interface FilteredNavigationConfiguration {
 	 */
 	void clearAllAttributeKeywords();
 
+	/**
+	 * A map of all facets with a key on facet guid.
+	 *
+	 * @return facet map
+	 */
+	Map<String, Facet> getFacetMap();
+
+	/**
+	 * Returns all sku option filters.
+	 * @return map of sku option filters
+	 */
+	Map<String, SkuOptionValueFilter> getAllSkuOptionValueFilters();
+
+	/**
+	 * Clears all sku option filters.
+	 */
+	void clearAllSkuOptionValueFilters();
+
+	/**
+	 * Return all size filters.
+	 * @return map of size filters.
+	 */
+	Map<String, SizeRangeFilter> getAllSizeRangeFilters();
+
+	/**
+	 * Clears all size filters.
+	 */
+	void clearAllSizeRangeFilters();
+
+	/**
+	 * Return a map of facet name and guid for default facets.
+	 *
+	 * @return map of facet name and guid for default facets.
+	 */
+	Map<String, String> getOthersGuidMap();
+
+	/**
+	 * Return a map of facet name and guid for attribute facets.
+	 *
+	 * @return map of facet name and guid for attribute facets.
+	 */
+	Map<String, String> getAttributeGuidMap();
+
+	/**
+	 * Return a map of facet name and guid for sku option facets.
+	 *
+	 * @return map of facet name and guid for sku option facets.
+	 */
+	Map<String, String> getSkuOptionGuidMap();
+
+	/**
+	 * Return all brand filters.
+	 *
+	 * @return brand filters
+	 */
+	List<BrandFilter> getBrandFilters();
+
+	/**
+	 * Return all category filters.
+	 *
+	 * @return category filters
+	 */
+	List<CategoryFilter> getCategoryFilters();
 }

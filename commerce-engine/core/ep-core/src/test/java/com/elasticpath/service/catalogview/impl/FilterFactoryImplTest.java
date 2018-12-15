@@ -260,7 +260,7 @@ public class FilterFactoryImplTest {
 			final FilteredNavigationConfigurationLoader mockFncLoader = context.mock(FilteredNavigationConfigurationLoader.class);
 
 			final String filterBeanName = "testFilter";
-			final String separatorInToken = "%%%";
+			final String separatorInToken = "_";
 
 			filterFactory.setFncLoader(mockFncLoader);
 			filterFactory.setBeanFactory(beanFactory);
@@ -275,7 +275,7 @@ public class FilterFactoryImplTest {
 			Filter<?> filterBean = filterFactory.getFilterBean(filterBeanName);
 
 			assertNotNull(filterBean);
-			assertEquals(separatorInToken, filterBean.getSeparatorInToken());
+			assertEquals(FilterFactoryImpl.UNDERSCORE, filterBean.getSeparatorInToken());
 		} finally {
 			expectationsFactory.close();
 		}

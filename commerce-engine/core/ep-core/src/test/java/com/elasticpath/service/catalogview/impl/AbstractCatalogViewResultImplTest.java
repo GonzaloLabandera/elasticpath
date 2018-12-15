@@ -14,7 +14,6 @@ import java.util.Map;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.elasticpath.domain.attribute.Attribute;
 import com.elasticpath.domain.catalogview.AttributeRangeFilter;
 import com.elasticpath.domain.catalogview.AttributeValueFilter;
 import com.elasticpath.domain.catalogview.BrandFilter;
@@ -85,7 +84,7 @@ public class AbstractCatalogViewResultImplTest {
 	@Test
 	public void testAttributeValueFilterOptions() {
 		assertNotNull(catalogViewResult.getAttributeValueFilterOptions());
-		final Map<Attribute, List<FilterOption<AttributeValueFilter>>> attributeFilterOptions =
+		final Map<String, List<FilterOption<AttributeValueFilter>>> attributeFilterOptions =
 			new HashMap<>();
 		catalogViewResult.setAttributeValueFilterOptions(attributeFilterOptions);
 		assertEquals(attributeFilterOptions, catalogViewResult.getAttributeValueFilterOptions());
@@ -98,7 +97,7 @@ public class AbstractCatalogViewResultImplTest {
 	@Test
 	public void testAttributeRangeFilterOptions() {
 		assertNotNull(catalogViewResult.getAttributeRangeFilterOptions());
-		final Map<Attribute, List<FilterOption<AttributeRangeFilter>>> attributeFilterOptions =
+		final Map<String, List<FilterOption<AttributeRangeFilter>>> attributeFilterOptions =
 			new HashMap<>();
 		catalogViewResult.setAttributeRangeFilterOptions(attributeFilterOptions);
 		assertEquals(attributeFilterOptions, catalogViewResult.getAttributeRangeFilterOptions());

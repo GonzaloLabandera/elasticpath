@@ -1,5 +1,4 @@
-@Orders
-
+@orders
 Feature: Tests order resource
 
   Scenario: Order access restricted to owner
@@ -28,11 +27,11 @@ Feature: Tests order resource
     Then there is no needinfo link to payment-method-info
     And I follow links tax
     And the tax total on the order is $0.00
-    And I retrieve the order
+    When I retrieve the order
     And I follow links total
-    And I see the cost field has amount: 0, currency: CAD and display: $0.00
-    And I make a purchase
-    And the HTTP status is OK, created
+    And I see the cost field has amount: 0.00, currency: CAD and display: $0.00
+    When I submit the order and retrieve the HTTP status
+    Then the HTTP status is OK, created
 
     Examples:
       | FREE_ITEM     |
@@ -48,7 +47,7 @@ Feature: Tests order resource
       | needinfo    | need.shipping.address | Shipping address must be specified.       | shipmentdetails.destination-info     |
       | needinfo    | need.email            | Customer email address must be specified. | orders.email-info                    |
       | needinfo    | need.payment.method   | Payment method must be specified.         | paymentmethods.paymentmethod-info    |
-      | needinfo    | need.shipping.option  | Shipping option must be specified.           | shipmentdetails.shipping-option-info |
+      | needinfo    | need.shipping.option  | Shipping option must be specified.        | shipmentdetails.shipping-option-info |
   #fill in needinfo's and verify links are removed
     When I create a payment method for my order
     And I add an address with country CA and region BC
@@ -73,11 +72,11 @@ Feature: Tests order resource
     And I fill in payment methods needinfo
     When I retrieve the order
     Then there is an advisor message with the following fields:
-      | messageType | messageId            | debugMessage                    | linkedTo                             |
+      | messageType | messageId            | debugMessage                       | linkedTo                             |
       | needinfo    | need.shipping.option | Shipping option must be specified. | shipmentdetails.shipping-option-info |
     And I retrieve the purchase form
     And there is an advisor message with the following fields:
-      | messageType | messageId            | debugMessage                    | linkedTo                             |
+      | messageType | messageId            | debugMessage                       | linkedTo                             |
       | needinfo    | need.shipping.option | Shipping option must be specified. | shipmentdetails.shipping-option-info |
     And there are no submitorderaction links
 #fill in needinfo's and verify links are removed

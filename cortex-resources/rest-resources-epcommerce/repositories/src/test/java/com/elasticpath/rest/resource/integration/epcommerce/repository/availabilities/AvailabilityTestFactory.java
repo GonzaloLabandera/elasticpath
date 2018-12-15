@@ -6,6 +6,7 @@ package com.elasticpath.rest.resource.integration.epcommerce.repository.availabi
 import com.elasticpath.rest.definition.availabilities.AvailabilityEntity;
 import com.elasticpath.rest.definition.availabilities.AvailabilityForCartLineItemIdentifier;
 import com.elasticpath.rest.definition.availabilities.AvailabilityForItemIdentifier;
+import com.elasticpath.rest.definition.availabilities.AvailabilityForOfferIdentifier;
 import com.elasticpath.rest.definition.base.DateEntity;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.IdentifierTestFactory;
 
@@ -71,6 +72,18 @@ public final class AvailabilityTestFactory {
 	public static AvailabilityForItemIdentifier createAvailabilityForItemIdentifier(final String itemId, final String scope) {
 		return AvailabilityForItemIdentifier.builder()
 				.withItem(IdentifierTestFactory.buildItemIdentifier(scope, itemId))
+				.build();
+	}
+/**
+	 * Creates an availability for offer identifier, delegating to create and link an offer identifier with the given values.
+	 *
+	 * @param offerId the item id
+	 * @param scope  the scope
+	 * @return the availability for item identifier.
+	 */
+	public static AvailabilityForOfferIdentifier createAvailabilityForOfferIdentifier(final String offerId, final String scope) {
+		return AvailabilityForOfferIdentifier.builder()
+				.withOffer(IdentifierTestFactory.buildOfferIdentifier(scope, offerId))
 				.build();
 	}
 }

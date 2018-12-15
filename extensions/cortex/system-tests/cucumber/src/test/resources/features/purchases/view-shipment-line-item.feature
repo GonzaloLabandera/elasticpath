@@ -1,4 +1,4 @@
-@Shipments @Purchases @HeaderAuth
+@shipments @purchases @headerAuth
 Feature: View purchase shipment lineitems
   As an Customer
   I want to see a list of the line items in each shipment
@@ -10,7 +10,7 @@ Feature: View purchase shipment lineitems
   Scenario: Shipment line items list contains single line item
     When I have previously made a purchase with "1" physical item "Sony Ericsson Xperia Pro"
     And I view the shipment line items
-    Then I see "1" shipment line items
+    Then I see shipment line items: 1
     And I see a back link to the shipment
 
   Scenario: Shipment line item representation has expected fields
@@ -23,7 +23,7 @@ Feature: View purchase shipment lineitems
   Scenario: Shipment contains multiple physical line items and not digital line items
     When I have purchased physical and digital items: "Finding Nemo" "Sony Ericsson Xperia Pro" "Portable TV"
     And I view the shipment line items
-    Then I see "2" shipment line items
+    Then I see shipment line items: 2
     And I can follow the line item link for product "Sony Ericsson Xperia Pro" and back to the list
     And I can follow the line item link for product "Portable TV" and back to the list
     And I do not see a link to line item "Finding Nemo"
@@ -39,7 +39,7 @@ Feature: View purchase shipment lineitems
   Scenario: Shipment line item contains bundle items
     When I have previously made a purchase with "1" physical item "bundle with physical and multisku items"
     And I view the shipment line items
-    Then I see "3" shipment line items
+    Then I see shipment line items: 3
     And I can follow the line item link for product "Portable TV" and back to the list
     And I can follow the line item link for product "Samsung Galaxy Q" and back to the list
     And I can follow the line item link for product "Samsung Headset" and back to the list
@@ -47,6 +47,6 @@ Feature: View purchase shipment lineitems
   Scenario: Shipment only has line items for physical part of bundle containing digital and physical components
     When I have previously made a purchase with "1" bundle item "Bundle with Physical and Digital Components"
     And I view the shipment line items
-    Then I see "1" shipment line items
+    Then I see shipment line items: 1
     And I can follow the line item link for product "Physical Item From Bundle With Physical and Digital Components" and back to the list
 

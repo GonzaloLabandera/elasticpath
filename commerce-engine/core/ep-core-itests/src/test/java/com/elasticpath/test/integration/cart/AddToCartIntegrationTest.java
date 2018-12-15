@@ -1,13 +1,9 @@
-/**
+/*
  * Copyright (c) Elastic Path Software Inc., 2015
- */
-/**
- * 
  */
 package com.elasticpath.test.integration.cart;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,7 +45,7 @@ public class AddToCartIntegrationTest extends AbstractCartIntegrationTestParent 
 		ShoppingItemDto dto = new ShoppingItemDto(skuCode, 1);
 		cartDirectorService.addItemToCart(shoppingCart, dto);
 		ShoppingItem item = cartDirectorService.addItemToCart(shoppingCart, dto);
-		assertEquals(2, item.getQuantity());		
+		assertThat(item.getQuantity()).isEqualTo(2);
 	}
 	
 	/**
@@ -69,11 +65,11 @@ public class AddToCartIntegrationTest extends AbstractCartIntegrationTestParent 
 
 		final ShoppingItem addedCartItem = cartDirectorService.addItemToCart(shoppingCart, dto);
 		addedCartItem.setFieldValue(key, value);
-		assertEquals(value, shoppingCart.getRootShoppingItems().iterator().next().getFieldValue(key));
+		assertThat(shoppingCart.getRootShoppingItems().iterator().next().getFieldValue(key)).isEqualTo(value);
 		shoppingCartService.saveOrUpdate(shoppingCart);
 
 		ShoppingCart retrievedShoppingCart = shoppingCartService.findOrCreateByShopper(customerSession.getShopper());
-		assertTrue(retrievedShoppingCart.getRootShoppingItems().size() == 1);
-		assertEquals(value, retrievedShoppingCart.getRootShoppingItems().iterator().next().getFieldValue(key));
+		assertThat(retrievedShoppingCart.getRootShoppingItems()).hasSize(1);
+		assertThat(retrievedShoppingCart.getRootShoppingItems().iterator().next().getFieldValue(key)).isEqualTo(value);
 	}
 }

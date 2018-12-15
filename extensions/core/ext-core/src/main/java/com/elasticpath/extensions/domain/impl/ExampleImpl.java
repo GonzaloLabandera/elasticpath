@@ -1,3 +1,7 @@
+/**
+ * Copyright (c) Elastic Path Software Inc., 2018
+ */
+
 package com.elasticpath.extensions.domain.impl;
 
 import javax.persistence.Basic;

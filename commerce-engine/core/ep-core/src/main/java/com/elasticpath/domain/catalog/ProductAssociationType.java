@@ -37,6 +37,10 @@ public class ProductAssociationType extends AbstractExtensibleEnum<ProductAssoci
 
 	private static final String RECOMMENDATION_NAME = "recommendation";
 
+	private static final int DEPENDENT_ITEM_ORDINAL = 7;
+
+	private static final String DEPENDENT_ITEM_NAME = "dependentItem";
+
 	/**
 	 * Cross Sell Product Association Type.
 	 */
@@ -66,6 +70,11 @@ public class ProductAssociationType extends AbstractExtensibleEnum<ProductAssoci
 	 * Recommendation Product Association Type.
 	 */
 	public static final ProductAssociationType RECOMMENDATION = new ProductAssociationType(RECOMMENDATION_ORDINAL, RECOMMENDATION_NAME);
+
+	/**
+	 * Dependent Item Product Association Type.
+	 */
+	public static final ProductAssociationType DEPENDENT_ITEM = new ProductAssociationType(DEPENDENT_ITEM_ORDINAL, DEPENDENT_ITEM_NAME);
 
 	/**
 	 * Constructor.

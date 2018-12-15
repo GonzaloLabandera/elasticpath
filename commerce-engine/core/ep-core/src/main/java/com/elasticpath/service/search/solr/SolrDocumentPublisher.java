@@ -3,7 +3,7 @@
  */
 package com.elasticpath.service.search.solr;
 
-import org.apache.solr.client.solrj.SolrServer;
+import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.common.SolrInputDocument;
 
 import com.elasticpath.service.search.IndexType;
@@ -15,7 +15,7 @@ import com.elasticpath.service.search.IndexType;
 public interface SolrDocumentPublisher {
 
 	/**
-	 * In production code, you must call this method after {@code #setSolrServer(SolrServer)} to let the SolrDocumentPublisher know it can setup any
+	 * In production code, you must call this method after {@code #setSolrServer(SolrClient)} to let the SolrDocumentPublisher know it can setup any
 	 * internal state it needs. Calling it multiple times is undefined.
 	 */
 	void start();
@@ -58,11 +58,11 @@ public interface SolrDocumentPublisher {
 	void commit();
 
 	/**
-	 * The SolrServer that this SolrDocumentPublisher is working for. Each SolrDocumentPublisher works for exactly one SolrServer.
+	 * The SolrClient that this SolrDocumentPublisher is working for. Each SolrDocumentPublisher works for exactly one SolrClient.
 	 *
 	 * @param solrServer the Solr server
 	 */
-	void setSolrServer(SolrServer solrServer);
+	void setSolrServer(SolrClient solrServer);
 
 	/**
 	 * Returns true if this SolrDocumentPublisher is currently busy publishing documents.

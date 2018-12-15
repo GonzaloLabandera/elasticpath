@@ -3,13 +3,10 @@
  */
 package com.elasticpath.domain.impl;
 
-import static org.hamcrest.collection.IsEmptyCollection.empty;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertNotSame;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.entry;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
 import java.util.Currency;
@@ -20,13 +17,12 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
-import org.jmock.Expectations;
-import org.jmock.auto.Mock;
-import org.jmock.integration.junit4.JUnitRuleMockery;
-import org.junit.After;
+import com.google.common.testing.EqualsTester;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.elasticpath.commons.beanframework.BeanFactory;
 import com.elasticpath.commons.constants.ContextIdNames;
@@ -56,18 +52,17 @@ import com.elasticpath.domain.shoppingcart.impl.ShoppingItemSimplePrice;
 import com.elasticpath.domain.subscriptions.PaymentSchedule;
 import com.elasticpath.domain.subscriptions.impl.PaymentScheduleImpl;
 import com.elasticpath.money.Money;
-import com.elasticpath.money.StandardMoneyFormatter;
 import com.elasticpath.sellingchannel.ShoppingItemRecurringPriceAssembler;
 import com.elasticpath.sellingchannel.impl.ShoppingItemRecurringPriceAssemblerImpl;
 import com.elasticpath.service.catalog.ProductSkuLookup;
 import com.elasticpath.service.catalog.SkuOptionService;
 import com.elasticpath.service.pricing.impl.PaymentScheduleHelperImpl;
-import com.elasticpath.test.BeanFactoryExpectationsFactory;
 
 /**
  * Tests the {@code AbstractShoppingItemImpl} class.
  */
 @SuppressWarnings({"PMD.TooManyMethods", "PMD.GodClass" })
+@RunWith(MockitoJUnitRunner.class)
 public class AbstractShoppingItemImplTest {
 
 	private static final String PRODUCT_SKU3 = "productSku3";
@@ -81,11 +76,12 @@ public class AbstractShoppingItemImplTest {
 
 	private static final Currency CURRENCY_CAD = Currency.getInstance(Locale.CANADA);
 
-	@Rule
-	public final JUnitRuleMockery context = new JUnitRuleMockery();
+	@Mock
 	private BeanFactory beanFactory;
-	private BeanFactoryExpectationsFactory expectationsFactory;
-	@Mock private ProductSkuLookup productSkuLookup;
+
+	@Mock
+	private ProductSkuLookup productSkuLookup;
+
 	private ShoppingItemRecurringPriceAssemblerImpl recurringPriceAssembler;
 
 	/**
@@ -93,32 +89,20 @@ public class AbstractShoppingItemImplTest {
 	 */
 	@Before
 	public void setUp() {
-		beanFactory = context.mock(BeanFactory.class);
 		recurringPriceAssembler = new ShoppingItemRecurringPriceAssemblerImpl();
 		recurringPriceAssembler.setBeanFactory(beanFactory);
-		expectationsFactory = new BeanFactoryExpectationsFactory(context, beanFactory);
-		expectationsFactory.allowingBeanFactoryGetBean(ContextIdNames.SHOPPING_ITEM_RECURRING_PRICE_ASSEMBLER, recurringPriceAssembler);
-		expectationsFactory.allowingBeanFactoryGetBean(ContextIdNames.SHOPPING_ITEM_RECURRING_PRICE, ShoppingItemRecurringPriceImpl.class);
-		expectationsFactory.allowingBeanFactoryGetBean(ContextIdNames.MONEY_FORMATTER, StandardMoneyFormatter.class);
+
+		when(beanFactory.getBean(ContextIdNames.SHOPPING_ITEM_RECURRING_PRICE_ASSEMBLER)).thenReturn(recurringPriceAssembler);
+		when(beanFactory.getBean(ContextIdNames.SHOPPING_ITEM_RECURRING_PRICE)).thenAnswer(invocation -> new ShoppingItemRecurringPriceImpl());
 
 		final PaymentScheduleHelperImpl paymentScheduleHelper = getPaymentScheduleHelper();
 
-		final SkuOptionService skuOptionService = context.mock(SkuOptionService.class);
-		context.checking(new Expectations() {
-			{
-				allowing(skuOptionService).findOptionValueByKey("shoppingItemRecurringPrice 1"); will(returnValue(null));
-				allowing(skuOptionService).findOptionValueByKey("shoppingItemRecurringPrice 2"); will(returnValue(null));
-			}
-		});
+		final SkuOptionService skuOptionService = mock(SkuOptionService.class);
+		when(skuOptionService.findOptionValueByKey("shoppingItemRecurringPrice 2")).thenReturn(null);
 		paymentScheduleHelper.setSkuOptionService(skuOptionService);
 
 		recurringPriceAssembler.setPaymentScheduleHelper(paymentScheduleHelper);
 
-	}
-
-	@After
-	public void tearDown() {
-		expectationsFactory.close();
 	}
 
 	/**
@@ -134,9 +118,8 @@ public class AbstractShoppingItemImplTest {
 		ShoppingItem cartItemImpl2 = new ShoppingItemImpl();
 		cartItemImpl2.setGuid(guid2);
 
-		assertEquals(cartItemImpl.hashCode(), cartItemImpl.hashCode());
-
-		assertNotSame(cartItemImpl.hashCode(), cartItemImpl2.hashCode());
+		assertThat(cartItemImpl).hasSameHashCodeAs(cartItemImpl);
+		assertThat(cartItemImpl2.hashCode()).isNotEqualTo(cartItemImpl.hashCode());
 
 		Map<ShoppingItem, String> testMap = new HashMap<>();
 
@@ -144,15 +127,12 @@ public class AbstractShoppingItemImplTest {
 		testMap.put(cartItemImpl2, "2");
 		testMap.put(cartItemImpl, "4");
 
-		assertEquals(Integer.parseInt("2"), testMap.size());
-		assertEquals("4", testMap.get(cartItemImpl));
-		assertEquals("2", testMap.get(cartItemImpl2));
+		assertThat(testMap).containsExactly(entry(cartItemImpl, "4"), entry(cartItemImpl2, "2"));
 	}
 
 	/**
 	 * Test for ShoppingCartItemImpl.equals().
 	 */
-	@SuppressWarnings("PMD.UseAssertEqualsInsteadOfAssertTrue")
 	@Test
 	public void testEquals() {
 		final String guid1 = "guid1";
@@ -163,9 +143,11 @@ public class AbstractShoppingItemImplTest {
 		ShoppingItem cartItemImpl2 = new ShoppingItemImpl();
 		cartItemImpl2.setGuid(guid2);
 
-		assertTrue(cartItemImpl.equals(cartItemImpl));
-		assertTrue(cartItemImpl2.equals(cartItemImpl2));
-		assertFalse(cartItemImpl.equals(cartItemImpl2));
+		new EqualsTester()
+			.addEqualityGroup(cartItemImpl)
+			.addEqualityGroup(cartItemImpl2)
+			.testEquals();
+
 	}
 
 	/**
@@ -199,8 +181,9 @@ public class AbstractShoppingItemImplTest {
 		givenProductSkuLookupWillFindSku(sku1);
 		givenProductSkuLookupWillFindSku(sku2);
 
-		assertEquals("Should be two separate items", 2, item
-				.getBundleItems(productSkuLookup).size());
+		assertThat(item.getBundleItems(productSkuLookup))
+			.as("Should be two separate items")
+			.hasSize(2);
 	}
 
 	/** Test for testHasDependentCartItems(). */
@@ -215,9 +198,9 @@ public class AbstractShoppingItemImplTest {
 		cartItemImpl.setSkuGuid(sku.getGuid());
 		CartItem bundleConstituentCartItem = new ShoppingItemImpl();
 		bundleConstituentCartItem.setBundleConstituent(true);
-		assertFalse(cartItemImpl.hasBundleItems(productSkuLookup));
+		assertThat(cartItemImpl.hasBundleItems(productSkuLookup)).isFalse();
 		cartItemImpl.addChildItem(bundleConstituentCartItem);
-		assertTrue(cartItemImpl.hasBundleItems(productSkuLookup));
+		assertThat(cartItemImpl.hasBundleItems(productSkuLookup)).isTrue();
 	}
 
 	/**
@@ -225,12 +208,14 @@ public class AbstractShoppingItemImplTest {
 	 */
 	@Test
 	public void testIsShippableFully() {
-		ShoppingItem cartItem = mockBundleCartItem(true, PRODUCT_SKU);
+		ShoppingItem cartItem = mockBundleCartItem(PRODUCT_SKU);
 		ShoppingItem bundleConstituentItem = mockCartItem(true, PRODUCT_SKU2);
 
 		cartItem.addChildItem(bundleConstituentItem);
 
-		assertTrue("Bundle should be shippable if its constituents all are.", cartItem.isShippable(productSkuLookup));
+		assertThat(cartItem.isShippable(productSkuLookup))
+			.as("Bundle should be shippable if its constituents all are.")
+			.isTrue();
 	}
 
 	/**
@@ -238,14 +223,16 @@ public class AbstractShoppingItemImplTest {
 	 */
 	@Test
 	public void testIsShippablePartial() {
-		ShoppingItem cartItem = mockBundleCartItem(false, PRODUCT_SKU);
+		ShoppingItem cartItem = mockBundleCartItem(PRODUCT_SKU);
 		ShoppingItem dependentCartItem = mockCartItem(true, PRODUCT_SKU2);
 		ShoppingItem dependentItem2 = mockCartItem(false, PRODUCT_SKU3);
 
 		cartItem.addChildItem(dependentCartItem);
 		cartItem.addChildItem(dependentItem2);
 
-		assertTrue("Bundle should be considered shippable if one constituent shippable, one not", cartItem.isShippable(productSkuLookup));
+		assertThat(cartItem.isShippable(productSkuLookup))
+			.as("Bundle should be considered shippable if one constituent shippable, one not")
+			.isTrue();
 	}
 
 	/**
@@ -253,13 +240,14 @@ public class AbstractShoppingItemImplTest {
 	 */
 	@Test
 	public void testIsShippableBundleButNotConstituents() {
-		ShoppingItem cartItem = mockBundleCartItem(true, PRODUCT_SKU);
+		ShoppingItem cartItem = mockBundleCartItem(PRODUCT_SKU);
 		ShoppingItem dependentCartItem = mockCartItem(false, PRODUCT_SKU2);
 
 		cartItem.addChildItem(dependentCartItem);
 
-		assertFalse("bundle marked as shippable but constituents marked as unshippable should be unshippable.",
-				cartItem.isShippable(productSkuLookup));
+		assertThat(cartItem.isShippable(productSkuLookup))
+			.as("bundle marked as shippable but constituents marked as unshippable should be unshippable.")
+			.isFalse();
 	}
 
 	/**
@@ -267,29 +255,26 @@ public class AbstractShoppingItemImplTest {
 	 */
 	@Test
 	public void testNoPartShippable() {
-		ShoppingItem cartItem = mockBundleCartItem(false, PRODUCT_SKU);
+		ShoppingItem cartItem = mockBundleCartItem(PRODUCT_SKU);
 		ShoppingItem dependentCartItem = mockCartItem(false, PRODUCT_SKU2);
 
 		cartItem.addChildItem(dependentCartItem);
 
-		assertFalse("Bundle cart item with self and constituents not shippable should not be shippable.",
-				cartItem.isShippable(productSkuLookup));
+		assertThat(cartItem.isShippable(productSkuLookup))
+			.as("Bundle cart item with self and constituents not shippable should not be shippable.")
+			.isFalse();
 	}
 
 
-	private ShoppingItem mockBundleCartItem(final boolean shippable, final String name) {
-		final ProductBundle bundle = context.mock(ProductBundle.class, name + "_bundle");
-		final ProductSku productSku = context.mock(ProductSku.class, name);
+	private ShoppingItem mockBundleCartItem(final String name) {
+		final ProductBundle bundle = mock(ProductBundle.class, name + "_bundle");
+		final ProductSku productSku = mock(ProductSku.class, name);
 
-		context.checking(new Expectations() { {
-			String skuGuid = new RandomGuidImpl().toString();
-			allowing(productSku).isShippable(); will(returnValue(shippable));
-			allowing(productSku).setProduct(bundle);
-			allowing(productSku).getProduct(); will(returnValue(bundle));
-			allowing(productSku).getGuid(); will(returnValue(skuGuid));
+		String skuGuid = new RandomGuidImpl().toString();
+		when(productSku.getProduct()).thenReturn(bundle);
+		when(productSku.getGuid()).thenReturn(skuGuid);
 
-			allowing(productSkuLookup).findByGuid(skuGuid); will(returnValue(productSku));
-		} });
+		when(productSkuLookup.findByGuid(skuGuid)).thenReturn(productSku);
 
 		ShoppingItem cartItem = new ShoppingItemImpl();
 		productSku.setProduct(bundle);
@@ -298,19 +283,15 @@ public class AbstractShoppingItemImplTest {
 	}
 
 	private ShoppingItem mockCartItem(final boolean shippable, final String name) {
-		final Product product = context.mock(Product.class, name + "_product");
-		final ProductSku productSku = context.mock(ProductSku.class, name);
+		final Product product = mock(Product.class, name + "_product");
+		final ProductSku productSku = mock(ProductSku.class, name);
 
-		context.checking(new Expectations() { {
-			String skuGuid = new RandomGuidImpl().toString();
-			allowing(productSku).isShippable(); will(returnValue(shippable));
-			allowing(productSku).setProduct(product);
-			allowing(productSku).getProduct(); will(returnValue(product));
-			allowing(productSku).getGuid(); will(returnValue(skuGuid));
+		String skuGuid = new RandomGuidImpl().toString();
+		when(productSku.isShippable()).thenReturn(shippable);
+		when(productSku.getProduct()).thenReturn(product);
+		when(productSku.getGuid()).thenReturn(skuGuid);
 
-			allowing(productSkuLookup).findByGuid(skuGuid);
-			will(returnValue(productSku));
-		} });
+		when(productSkuLookup.findByGuid(skuGuid)).thenReturn(productSku);
 
 		ShoppingItem cartItem = new ShoppingItemImpl();
 		productSku.setProduct(product);
@@ -329,8 +310,9 @@ public class AbstractShoppingItemImplTest {
 		Currency currency = Currency.getInstance("CAD");
 		AbstractShoppingItemImpl item = prepareShoppingItem(lowestPrice, currency, false);
 		item.applyDiscount(discount, productSkuLookup);
-		assertEquals("The cartItem amount should never be less than zero regardless of the discount amount",
-				item.calculateItemTotal().compareTo(BigDecimal.ZERO), 0);
+		assertThat(item.calculateItemTotal())
+			.as("The cartItem amount should never be less than zero regardless of the discount amount")
+			.isEqualByComparingTo(BigDecimal.ZERO);
 	}
 
 
@@ -362,15 +344,15 @@ public class AbstractShoppingItemImplTest {
 
 		AbstractShoppingItemImpl item = prepareShoppingItemWithRecurringPrice(recurringPrices, CURRENCY_CAD);
 
-		assertEquals("0.00", item.getLowestUnitPrice().getAmount().toString());  //unit price SHOULD return 0.00 for recurring priced items
-		assertEquals("0.00", item.calculateItemTotal().toString());  //unit price SHOULD return 0.00 for calculating the item total too
+		assertThat(item.getLowestUnitPrice().getAmount()).isEqualTo("0.00");  //unit price SHOULD return 0.00 for recurring priced items
+		assertThat(item.calculateItemTotal()).isEqualTo("0.00");  //unit price SHOULD return 0.00 for calculating the item total too
 	}
 
 	private AbstractShoppingItemImpl prepareShoppingItemWithRecurringPrice(final Set<ShoppingItemRecurringPrice> recurringPrices,
 			final Currency currency) {
-		expectationsFactory.allowingBeanFactoryGetBean(ContextIdNames.PRICE, PriceImpl.class);
-		expectationsFactory.allowingBeanFactoryGetBean(ContextIdNames.PRICING_SCHEME, PricingSchemeImpl.class);
-		expectationsFactory.allowingBeanFactoryGetBean(ContextIdNames.PRICE_SCHEDULE, PriceScheduleImpl.class);
+		when(beanFactory.getBean(ContextIdNames.PRICE)).thenAnswer(invocation -> new PriceImpl());
+		when(beanFactory.getBean(ContextIdNames.PRICING_SCHEME)).thenAnswer(invocation -> new PricingSchemeImpl());
+		when(beanFactory.getBean(ContextIdNames.PRICE_SCHEDULE)).thenAnswer(invocation -> new PriceScheduleImpl());
 
 		AbstractShoppingItemImpl item = new ShoppingItemImpl() {  //no overriding of get prices
 			private static final long serialVersionUID = -2100849016179282868L;
@@ -383,6 +365,11 @@ public class AbstractShoppingItemImplTest {
 			@Override
 			protected ShoppingItemRecurringPriceAssembler getShoppingItemRecurringPriceAssembler() {
 				return recurringPriceAssembler;
+			}
+
+			@Override
+			protected <T> T getBean(final String beanName) {
+				return beanFactory.getBean(beanName);
 			}
 		};
 		item.setRecurringPrices(recurringPrices);
@@ -405,7 +392,7 @@ public class AbstractShoppingItemImplTest {
 		AbstractShoppingItemImpl item = prepareShoppingItem(lowestPrice, currency, false);
 		item.applyDiscount(new BigDecimal(discount), productSkuLookup);
 		item.setQuantity(quantity);
-		assertEquals(shoppingItemPrice * quantity - discount, item.calculateItemTotal().intValue());
+		assertThat(item.calculateItemTotal().intValue()).isEqualTo(shoppingItemPrice * quantity - discount);
 	}
 
 	/**
@@ -423,7 +410,7 @@ public class AbstractShoppingItemImplTest {
 		item.applyDiscount(new BigDecimal(discount), productSkuLookup);
 		item.setQuantity(quantity);
 
-		assertEquals(shoppingItemPrice * quantity, item.calculateItemTotal().intValue());
+		assertThat(item.calculateItemTotal().intValue()).isEqualTo(shoppingItemPrice * quantity);
 	}
 
 
@@ -432,7 +419,7 @@ public class AbstractShoppingItemImplTest {
 	public void testSetNullFieldValues() {
 		AbstractShoppingItemImpl item = new ShoppingItemImpl();
 		item.mergeFieldValues(null);
-		assertEquals(0, item.getItemData().size());
+		assertThat(item.getItemData()).isEmpty();
 	}
 
 	/**.*/
@@ -443,17 +430,17 @@ public class AbstractShoppingItemImplTest {
 		values.put("key1", "value1");
 		values.put("key2", "value2");
 		item.mergeFieldValues(values);
-		assertEquals(2, item.getItemData().size());
-		assertEquals("value1", item.getFieldValue("key1"));
-		assertEquals("value2", item.getFieldValue("key2"));
+		assertThat(item.getItemData()).hasSize(2);
+		assertThat(item.getFieldValue("key1")).isEqualTo("value1");
+		assertThat(item.getFieldValue("key2")).isEqualTo("value2");
 	}
 
 	private AbstractShoppingItemImpl prepareShoppingItem(final BigDecimal lowestUnitPrice,
 			final Currency currency, final boolean excludedFromDiscount) {
 		final String skuGuid = "sku-guid";
-		final ProductType productType = context.mock(ProductType.class);
-		final Product product = context.mock(Product.class);
-		final ProductSku productSku = context.mock(ProductSku.class);
+		final ProductType productType = mock(ProductType.class);
+		final Product product = mock(Product.class);
+		final ProductSku productSku = mock(ProductSku.class);
 		AbstractShoppingItemImpl item = new ShoppingItemImpl() {
 			private static final long serialVersionUID = -4910510721160996614L;
 
@@ -465,14 +452,10 @@ public class AbstractShoppingItemImplTest {
 		item.setSkuGuid(skuGuid);
 		item.setCurrency(currency);
 
-		context.checking(new Expectations() { {
-							allowing(productType).isExcludedFromDiscount(); will(returnValue(excludedFromDiscount));
-							allowing(product).getProductType(); will(returnValue(productType));
-							allowing(productSku).getProduct(); will(returnValue(product));
-							allowing(productSku).getGuid(); will(returnValue(skuGuid));
-							allowing(productSkuLookup).findByGuid(skuGuid); will(returnValue(productSku));
-						} }
-		);
+		when(productType.isExcludedFromDiscount()).thenReturn(excludedFromDiscount);
+		when(product.getProductType()).thenReturn(productType);
+		when(productSku.getProduct()).thenReturn(product);
+		when(productSkuLookup.findByGuid(skuGuid)).thenReturn(productSku);
 		return item;
 	}
 
@@ -480,11 +463,7 @@ public class AbstractShoppingItemImplTest {
 		final PaymentScheduleHelperImpl paymentScheduleHelper = new PaymentScheduleHelperImpl();
 		paymentScheduleHelper.setBeanFactory(beanFactory);
 
-		context.checking(new Expectations() {
-			{
-				allowing(beanFactory).getBean(ContextIdNames.PAYMENT_SCHEDULE); will(returnValue(new PaymentScheduleImpl()));
-			}
-		});
+		when(beanFactory.getBean(ContextIdNames.PAYMENT_SCHEDULE)).thenReturn(new PaymentScheduleImpl());
 
 		return paymentScheduleHelper;
 	}
@@ -496,7 +475,7 @@ public class AbstractShoppingItemImplTest {
 	public void testCanReceiveCartPromotionNonDiscountable() {
 		AbstractShoppingItemImpl shoppingItem = createShoppingItem(false);
 
-		assertFalse(shoppingItem.canReceiveCartPromotion(productSkuLookup));
+		assertThat(shoppingItem.canReceiveCartPromotion(productSkuLookup)).isFalse();
 	}
 
 	/**
@@ -508,7 +487,7 @@ public class AbstractShoppingItemImplTest {
 
 		PriceImpl price = createSimplePrice(BigDecimal.TEN);
 		shoppingItem.setPrice(1, price);
-		assertFalse(shoppingItem.canReceiveCartPromotion(productSkuLookup));
+		assertThat(shoppingItem.canReceiveCartPromotion(productSkuLookup)).isFalse();
 	}
 
 	/**
@@ -521,7 +500,7 @@ public class AbstractShoppingItemImplTest {
 		PriceImpl price = createSimplePrice(BigDecimal.ZERO);
 		price.setPricingScheme(getRecurringScheme());
 		shoppingItem.setPrice(1, price);
-		assertFalse(shoppingItem.canReceiveCartPromotion(productSkuLookup));
+		assertThat(shoppingItem.canReceiveCartPromotion(productSkuLookup)).isFalse();
 	}
 
 	/**
@@ -535,7 +514,7 @@ public class AbstractShoppingItemImplTest {
 		PriceImpl price = createSimplePrice(BigDecimal.TEN);
 		price.setPricingScheme(getRecurringScheme());
 		shoppingItem.setPrice(1, price);
-		assertFalse(shoppingItem.canReceiveCartPromotion(productSkuLookup));
+		assertThat(shoppingItem.canReceiveCartPromotion(productSkuLookup)).isFalse();
 	}
 
 	/**
@@ -545,7 +524,7 @@ public class AbstractShoppingItemImplTest {
 	public void testCanReceiveCartPromotionDiscountable() {
 		AbstractShoppingItemImpl shoppingItem = createShoppingItem(true);
 
-		assertTrue(shoppingItem.canReceiveCartPromotion(productSkuLookup));
+		assertThat(shoppingItem.canReceiveCartPromotion(productSkuLookup)).isTrue();
 	}
 
 	/**
@@ -557,7 +536,7 @@ public class AbstractShoppingItemImplTest {
 
 		PriceImpl price = createSimplePrice(BigDecimal.TEN);
 		shoppingItem.setPrice(1, price);
-		assertTrue(shoppingItem.canReceiveCartPromotion(productSkuLookup));
+		assertThat(shoppingItem.canReceiveCartPromotion(productSkuLookup)).isTrue();
 	}
 
 	/**
@@ -570,7 +549,7 @@ public class AbstractShoppingItemImplTest {
 		PriceImpl price = createSimplePrice(BigDecimal.ZERO);
 		price.setPricingScheme(getRecurringScheme());
 		shoppingItem.setPrice(1, price);
-		assertFalse(shoppingItem.canReceiveCartPromotion(productSkuLookup));
+		assertThat(shoppingItem.canReceiveCartPromotion(productSkuLookup)).isFalse();
 	}
 
 	/**
@@ -584,7 +563,7 @@ public class AbstractShoppingItemImplTest {
 		PriceImpl price = createSimplePrice(BigDecimal.TEN);
 		price.setPricingScheme(getRecurringScheme());
 		shoppingItem.setPrice(1, price);
-		assertTrue(shoppingItem.canReceiveCartPromotion(productSkuLookup));
+		assertThat(shoppingItem.canReceiveCartPromotion(productSkuLookup)).isTrue();
 	}
 
 	/**
@@ -598,9 +577,9 @@ public class AbstractShoppingItemImplTest {
 		final AbstractShoppingItemImpl shoppingItem = new ShoppingItemImpl();
 		shoppingItem.setFieldValue(key, value);
 
-		assertTrue("Expected shopping item to contain item data", shoppingItem.getItemData().containsKey(key));
-		assertEquals(key, shoppingItem.getItemData().get(key).getKey());
-		assertEquals(value, shoppingItem.getItemData().get(key).getValue());
+		assertThat(shoppingItem.getItemData()).containsKey(key);
+		assertThat(shoppingItem.getItemData().get(key).getKey()).isEqualTo(key);
+		assertThat(shoppingItem.getItemData().get(key).getValue()).isEqualTo(value);
 	}
 
 	/**
@@ -614,11 +593,11 @@ public class AbstractShoppingItemImplTest {
 		final AbstractShoppingItemImpl shoppingItem = new ShoppingItemImpl();
 		shoppingItem.setFieldValue(key, oldValue);
 
-		assertEquals(oldValue, shoppingItem.getItemData().get(key).getValue());
+		assertThat(shoppingItem.getItemData().get(key).getValue()).isEqualTo(oldValue);
 
 		shoppingItem.setFieldValue(key, newValue);
 
-		assertEquals(newValue, shoppingItem.getItemData().get(key).getValue());
+		assertThat(shoppingItem.getItemData().get(key).getValue()).isEqualTo(newValue);
 	}
 
 	/**
@@ -636,15 +615,17 @@ public class AbstractShoppingItemImplTest {
 		AbstractItemData itemData = shoppingItem.getItemData().get(key);
 		shoppingItem.setFieldValue(key, newValue);
 
-		assertEquals(newValue, shoppingItem.getItemData().get(key).getValue());
-		assertTrue("Expected setFieldValue to modify existing item data object", itemData == shoppingItem.getItemData().get(key));
+		assertThat(shoppingItem.getItemData().get(key).getValue()).isEqualTo(newValue);
+		assertThat(shoppingItem.getItemData().get(key))
+			.as("Expected setFieldValue to modify existing item data object")
+			.isEqualTo(itemData);
 	}
 
 	@Test
-	public void verifyClearDiscountRemovesAllDiscountRecords() throws Exception {
+	public void verifyClearDiscountRemovesAllDiscountRecords() {
 		// Given a Shopping Item whose price contains a discount record
 		final PriceImpl price = createSimplePrice(BigDecimal.TEN);
-		price.addDiscountRecord(context.mock(DiscountRecord.class));
+		price.addDiscountRecord(mock(DiscountRecord.class));
 
 		final AbstractShoppingItemImpl shoppingItem = createShoppingItem(true);
 		shoppingItem.setPrice(1, price);
@@ -653,31 +634,37 @@ public class AbstractShoppingItemImplTest {
 		shoppingItem.clearDiscount();
 
 		// Then the price does not contain any discount records
-		assertThat(price.getDiscountRecords(), empty());
+		assertThat(price.getDiscountRecords()).isEmpty();
 	}
 
 	@Test
-	public void verifyHasPriceTrueWhenHasLowestUnitPrice() throws Exception {
+	public void verifyHasPriceTrueWhenHasLowestUnitPrice() {
 		final AbstractShoppingItemImpl shoppingItem = createShoppingItem(true);
 		shoppingItem.setListUnitPriceInternal(BigDecimal.TEN);
 
-		assertTrue("Expected hasPrice to return true when an internal unit price is set", shoppingItem.hasPrice());
+		assertThat(shoppingItem.hasPrice())
+			.as("Expected hasPrice to return true when an internal unit price is set")
+			.isTrue();
 	}
 
 	@Test
-	public void verifyHasPriceTrueWhenPriceExists() throws Exception {
+	public void verifyHasPriceTrueWhenPriceExists() {
 		final AbstractShoppingItemImpl shoppingItem = createShoppingItem(true);
 		shoppingItem.setPrice(1, createSimplePrice(BigDecimal.TEN));
 
-		assertTrue("Expected hasPrice to return true when a Price is set", shoppingItem.hasPrice());
+		assertThat(shoppingItem.hasPrice())
+			.as("Expected hasPrice to return true when a Price is set")
+			.isTrue();
 	}
 
 	@Test
-	public void verifyHasPriceTrueWhenPriceZeroDollars() throws Exception {
+	public void verifyHasPriceTrueWhenPriceZeroDollars() {
 		final AbstractShoppingItemImpl shoppingItem = createShoppingItem(true);
 		shoppingItem.setPrice(1, createSimplePrice(BigDecimal.ZERO));
 
-		assertTrue("Expected hasPrice to return true when a Price is $0", shoppingItem.hasPrice());
+		assertThat(shoppingItem.hasPrice())
+			.as("Expected hasPrice to return true when a Price is $0")
+			.isTrue();
 	}
 
 	@Test
@@ -692,11 +679,11 @@ public class AbstractShoppingItemImplTest {
 
 		givenProductSkuLookupWillFindSku(itemSku);
 
-		assertFalse(shoppingItem.isMultiSku(productSkuLookup));
-		assertEquals(shoppingItem.getSkuGuid(), comparisonItem.getSkuGuid());
-		assertEquals(shoppingItem.getFields(), comparisonItem.getFields());
+		assertThat(shoppingItem.isMultiSku(productSkuLookup)).isFalse();
+		assertThat(comparisonItem.getSkuGuid()).isEqualTo(shoppingItem.getSkuGuid());
+		assertThat(comparisonItem.getFields()).isEqualTo(shoppingItem.getFields());
 
-		assertFalse(shoppingItem.isSameMultiSkuItem(productSkuLookup, comparisonItem));
+		assertThat(shoppingItem.isSameMultiSkuItem(productSkuLookup, comparisonItem)).isFalse();
 	}
 
 	@Test
@@ -711,11 +698,11 @@ public class AbstractShoppingItemImplTest {
 
 		givenProductSkuLookupWillFindSku(itemSku);
 
-		assertTrue(shoppingItem.isMultiSku(productSkuLookup));
-		assertNotEquals(shoppingItem.getSkuGuid(), comparisonItem.getSkuGuid());
-		assertEquals(shoppingItem.getFields(), comparisonItem.getFields());
+		assertThat(shoppingItem.isMultiSku(productSkuLookup)).isTrue();
+		assertThat(comparisonItem.getSkuGuid()).isNotEqualTo(shoppingItem.getSkuGuid());
+		assertThat(comparisonItem.getFields()).isEqualTo(shoppingItem.getFields());
 
-		assertFalse(shoppingItem.isSameMultiSkuItem(productSkuLookup, comparisonItem));
+		assertThat(shoppingItem.isSameMultiSkuItem(productSkuLookup, comparisonItem)).isFalse();
 	}
 
 	@Test
@@ -730,11 +717,11 @@ public class AbstractShoppingItemImplTest {
 
 		givenProductSkuLookupWillFindSku(itemSku);
 
-		assertTrue(shoppingItem.isMultiSku(productSkuLookup));
-		assertEquals(shoppingItem.getSkuGuid(), comparisonItem.getSkuGuid());
-		assertNotEquals(shoppingItem.getFields(), comparisonItem.getFields());
+		assertThat(shoppingItem.isMultiSku(productSkuLookup)).isTrue();
+		assertThat(comparisonItem.getSkuGuid()).isEqualTo(shoppingItem.getSkuGuid());
+		assertThat(comparisonItem.getFields()).isNotEqualTo(shoppingItem.getFields());
 
-		assertFalse(shoppingItem.isSameMultiSkuItem(productSkuLookup, comparisonItem));
+		assertThat(shoppingItem.isSameMultiSkuItem(productSkuLookup, comparisonItem)).isFalse();
 	}
 
 	@Test
@@ -749,11 +736,11 @@ public class AbstractShoppingItemImplTest {
 
 		givenProductSkuLookupWillFindSku(itemSku);
 
-		assertTrue(shoppingItem.isMultiSku(productSkuLookup));
-		assertEquals(shoppingItem.getSkuGuid(), comparisonItem.getSkuGuid());
-		assertEquals(shoppingItem.getFields(), comparisonItem.getFields());
+		assertThat(shoppingItem.isMultiSku(productSkuLookup)).isTrue();
+		assertThat(comparisonItem.getSkuGuid()).isEqualTo(shoppingItem.getSkuGuid());
+		assertThat(comparisonItem.getFields()).isEqualTo(shoppingItem.getFields());
 
-		assertTrue(shoppingItem.isSameMultiSkuItem(productSkuLookup, comparisonItem));
+		assertThat(shoppingItem.isSameMultiSkuItem(productSkuLookup, comparisonItem)).isTrue();
 	}
 
 	private PriceImpl createSimplePrice(final BigDecimal amount) {
@@ -780,7 +767,12 @@ public class AbstractShoppingItemImplTest {
 			@Override
 			public boolean isDiscountable(final ProductSkuLookup productSkuLookup) {
 				return discountable;
-			};
+			}
+
+			@Override
+			protected <T> T getBean(final String beanName) {
+				return beanFactory.getBean(beanName);
+			}
 		};
 		return shoppingItem;
 	}
@@ -805,12 +797,7 @@ public class AbstractShoppingItemImplTest {
 	}
 
 	private void givenProductSkuLookupWillFindSku(final ProductSku sku) {
-		context.checking(new Expectations() {
-			{
-				allowing(productSkuLookup).findByGuid(sku.getGuid());
-				will(returnValue(sku));
-			}
-		});
+		when(productSkuLookup.findByGuid(sku.getGuid())).thenReturn(sku);
 	}
 
 	private ShoppingItem createShoppingItemWithSkuAndOptionalNameFieldValues(final String sku, final String nameFieldValue) {

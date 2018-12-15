@@ -107,7 +107,7 @@ public class ItemRecommendationsRepositoryImpl implements ItemRecommendationsRep
 
 		return Observable.fromIterable(productAssociationService.findByCriteria(criteria, startIndex, pageSize))
 				.map(ProductAssociation::getTargetProduct)
-				.flatMapSingle(itemRepository::getDefaultItemIdForProductSingle)
+				.map(itemRepository::getDefaultItemIdForProduct)
 				.toList();
 	}
 }

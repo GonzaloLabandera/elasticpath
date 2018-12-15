@@ -207,4 +207,168 @@
 		<property name="fallbackProductSkuLookup" ref="semiCachingProductSkuLookup"/>
 		<property name="productLookup" ref="cachingProductLookup"/>
 	</bean>
+
+
+
+
+	<bean id="cachingAttributeServiceAttributesEhCache"
+		  class="com.elasticpath.commons.beanframework.EhCacheDefaultConfigurationFactoryBean">
+		<property name="name" value="cachingAttributeServiceAttributesCache"/>
+		<property name="cacheManager" ref="epEhcacheManager"/>
+		<property name="timeToLive" value="600"/>
+		<property name="timeToIdle" value="600"/>
+	</bean>
+
+	<bean id="cachingAttributeServiceAttributesCache"
+		  factory-bean="localCacheFactory" factory-method="createCache"
+		  depends-on="cachingAttributeServiceAttributesEhCache">
+		<constructor-arg value="cachingAttributeServiceAttributesCache"/>
+	</bean>
+
+	<bean id="findProductAttributeValueByAttributeUidEhCache"
+		  class="com.elasticpath.commons.beanframework.EhCacheDefaultConfigurationFactoryBean">
+		<property name="name" value="findProductAttributeValueByAttributeUidCache"/>
+		<property name="cacheManager" ref="epEhcacheManager"/>
+		<property name="timeToLive" value="600"/>
+		<property name="timeToIdle" value="600"/>
+	</bean>
+
+	<bean id="findProductAttributeValueByAttributeUidCache"
+		  factory-bean="localCacheFactory" factory-method="createCache"
+		  depends-on="findProductAttributeValueByAttributeUidEhCache">
+		<constructor-arg value="findProductAttributeValueByAttributeUidCache"/>
+	</bean>
+
+	<bean id="cachingAttributeServicefindByKeyEhCache"
+		  class="com.elasticpath.commons.beanframework.EhCacheDefaultConfigurationFactoryBean">
+		<property name="name" value="cachingAttributeServicefindByKeyCache"/>
+		<property name="cacheManager" ref="epEhcacheManager"/>
+		<property name="timeToLive" value="600"/>
+		<property name="timeToIdle" value="600"/>
+	</bean>
+
+	<bean id="cachingAttributeServicefindByKeyCache"
+		  factory-bean="localCacheFactory" factory-method="createCache"
+		  depends-on="cachingAttributeServicefindByKeyEhCache">
+		<constructor-arg value="cachingAttributeServicefindByKeyCache"/>
+	</bean>
+
+	<bean id="cachingAttributeService" class="com.elasticpath.caching.core.catalog.CachingAttributeServiceImpl">
+				<property name="fallbackAttributeService" ref="attributeService" />
+				<property name="attributesCache" ref="cachingAttributeServiceAttributesCache"/>
+				<property name="findProductAttributeValueByAttributeUidCache" ref="findProductAttributeValueByAttributeUidCache"/>
+				<property name="findByKeyCache" ref="cachingAttributeServicefindByKeyCache"/>
+	</bean>
+
+	<bean id="cachingCategoryServiceFindCodeByUidEhCache"
+		  class="com.elasticpath.commons.beanframework.EhCacheDefaultConfigurationFactoryBean">
+		<property name="name" value="cachingCategoryServiceFindCodeByUidCache"/>
+		<property name="cacheManager" ref="epEhcacheManager"/>
+		<property name="timeToLive" value="600"/>
+		<property name="timeToIdle" value="600"/>
+	</bean>
+
+	<bean id="cachingCategoryServiceFindCodeByUidCache"
+		  factory-bean="localCacheFactory" factory-method="createCache"
+		  depends-on="cachingCategoryServiceFindCodeByUidEhCache">
+		<constructor-arg value="cachingCategoryServiceFindCodeByUidCache"/>
+	</bean>
+
+	<bean id="cachingCategoryService" class="com.elasticpath.caching.core.catalog.CachingCategoryServiceImpl">
+		<property name="fallbackCategoryService" ref="categoryService" />
+		<property name="findCodeByUidCache" ref="cachingCategoryServiceFindCodeByUidCache" />
+	</bean>
+
+	<bean id="cachingSkuOptionServiceFindByKeyEhCache"
+		  class="com.elasticpath.commons.beanframework.EhCacheDefaultConfigurationFactoryBean">
+		<property name="name" value="cachingSkuOptionServiceFindByKeyCache"/>
+		<property name="cacheManager" ref="epEhcacheManager"/>
+		<property name="timeToLive" value="600"/>
+		<property name="timeToIdle" value="600"/>
+	</bean>
+
+	<bean id="cachingSkuOptionServiceFindByKeyCache"
+		  factory-bean="localCacheFactory" factory-method="createCache"
+		  depends-on="cachingSkuOptionServiceFindByKeyEhCache">
+		<constructor-arg value="cachingSkuOptionServiceFindByKeyCache"/>
+	</bean>
+
+	<bean id="cachingSkuOptionService" class="com.elasticpath.caching.core.catalog.CachingSkuOptionServiceImpl">
+		<property name="fallbackSkuOptionService" ref="skuOptionService" />
+		<property name="findByKeyCache" ref="cachingSkuOptionServiceFindByKeyCache" />
+
+	</bean>
+
+	<bean id="cachingSolrQueryFactorySearchableAttributeEhCache"
+		  class="com.elasticpath.commons.beanframework.EhCacheDefaultConfigurationFactoryBean">
+		<property name="name" value="cachingSolrQueryFactorySearchableAttributeCache"/>
+		<property name="cacheManager" ref="epEhcacheManager"/>
+		<property name="timeToLive" value="600"/>
+		<property name="timeToIdle" value="600"/>
+	</bean>
+
+	<bean id="cachingSolrQueryFactorySearchableAttributeCache"
+		  factory-bean="localCacheFactory" factory-method="createCache"
+		  depends-on="cachingSolrQueryFactorySearchableAttributeEhCache">
+		<constructor-arg value="cachingSolrQueryFactorySearchableAttributeCache"/>
+	</bean>
+
+	<bean id="cachingSolrQueryFactory" class="com.elasticpath.caching.core.faceting.CachingSolrQueryFactoryImpl">
+		<property name="fallbackQueryFactory" ref="solrQueryFactory" />
+		<property name="searchableAttributeCache" ref="cachingSolrQueryFactorySearchableAttributeCache" />
+	</bean>
+
+	<bean id="loadFilteredNavigationConfigurationEhCache"
+		  class="com.elasticpath.commons.beanframework.EhCacheDefaultConfigurationFactoryBean">
+		<property name="name" value="loadFilteredNavigationConfigurationCache"/>
+		<property name="cacheManager" ref="epEhcacheManager"/>
+		<property name="timeToLive" value="600"/>
+		<property name="timeToIdle" value="600"/>
+	</bean>
+
+	<bean id="loadFilteredNavigationConfigurationCache"
+		  factory-bean="localCacheFactory" factory-method="createCache"
+		  depends-on="loadFilteredNavigationConfigurationEhCache">
+		<constructor-arg value="loadFilteredNavigationConfigurationCache"/>
+	</bean>
+
+	<bean id="cachingFacetConfigurationLoader" class="com.elasticpath.caching.core.faceting.CachingFacetConfigurationLoaderImpl">
+		<property name="fallback" ref="filteredNavigationConfigurationLoader" />
+		<property name="loadFilteredNavigationConfigurationCache" ref="loadFilteredNavigationConfigurationCache" />
+
+	</bean>
+	<bean id="facetServiceFindByGuidEhCache"
+		  class="com.elasticpath.commons.beanframework.EhCacheDefaultConfigurationFactoryBean">
+		<property name="name" value="facetServiceFindByGuidCache"/>
+		<property name="cacheManager" ref="epEhcacheManager"/>
+		<property name="timeToLive" value="600"/>
+		<property name="timeToIdle" value="600"/>
+	</bean>
+
+	<bean id="facetServiceFindByGuidCache"
+		  factory-bean="localCacheFactory" factory-method="createCache"
+		  depends-on="facetServiceFindByGuidEhCache">
+		<constructor-arg value="facetServiceFindByGuidCache"/>
+	</bean>
+	<bean id="facetServiceSearchableFacetsEhCache"
+		  class="com.elasticpath.commons.beanframework.EhCacheDefaultConfigurationFactoryBean">
+		<property name="name" value="facetServiceSearchableFacetsCache"/>
+		<property name="cacheManager" ref="epEhcacheManager"/>
+		<property name="timeToLive" value="600"/>
+		<property name="timeToIdle" value="600"/>
+	</bean>
+
+	<bean id="facetServiceSearchableFacetsCache"
+		  factory-bean="localCacheFactory" factory-method="createCache"
+		  depends-on="facetServiceSearchableFacetsEhCache">
+		<constructor-arg value="facetServiceSearchableFacetsCache"/>
+	</bean>
+
+	<bean id="cachingFacetService" class="com.elasticpath.caching.core.faceting.CachingFacetServiceImpl">
+		<property name="fallbackFacetService" ref="facetService" />
+		<property name="findByGuidCache" ref="facetServiceFindByGuidCache" />
+		<property name="searchableFacetsCache" ref="facetServiceSearchableFacetsCache" />
+	</bean>
+
+
 </beans>

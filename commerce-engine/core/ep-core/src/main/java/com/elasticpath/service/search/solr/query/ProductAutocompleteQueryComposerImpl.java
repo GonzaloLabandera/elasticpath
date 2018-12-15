@@ -48,14 +48,14 @@ public class ProductAutocompleteQueryComposerImpl extends ProductQueryComposerIm
 		}
 
 		boolean hasSomeCriteria = false;
-		final BooleanQuery booleanQuery = new BooleanQuery();
+		final BooleanQuery.Builder booleanQueryBuilder = new BooleanQuery.Builder();
 		// split should always produce valid text
 		for (String str : searchText.trim().toLowerCase().split("\\\\\\s")) {
 			if (str.length() == 0) {
 				continue;
 			}
 
-			hasSomeCriteria |= addSearchCriteriaForTerm(str, booleanQuery, searchCriteria, searchConfig);
+			hasSomeCriteria |= addSearchCriteriaForTerm(str, booleanQueryBuilder, searchCriteria, searchConfig);
 		}
 
 		if (!hasSomeCriteria) {
@@ -64,44 +64,44 @@ public class ProductAutocompleteQueryComposerImpl extends ProductQueryComposerIm
 		// check in category and subcategories
 		Query categoryQuery = checkForCategory(productSearchCriteria);
 		if (categoryQuery != null) {
-			booleanQuery.add(categoryQuery, Occur.MUST);
+			booleanQueryBuilder.add(categoryQuery, Occur.MUST);
 		}
 		// query for enabled products only
-		this.addTermForEnabledProducts(productSearchCriteria, booleanQuery, searchConfig);
+		this.addTermForEnabledProducts(productSearchCriteria, booleanQueryBuilder, searchConfig);
 		// query for active products only
-		this.addTermForActiveOnly(productSearchCriteria, booleanQuery);
+		this.addTermForActiveOnly(productSearchCriteria, booleanQueryBuilder);
 
-		return booleanQuery;
+		return booleanQueryBuilder.build();
 	}
 
-	private boolean addSearchCriteriaForTerm(final String word, final BooleanQuery booleanQuery,
+	private boolean addSearchCriteriaForTerm(final String word, final BooleanQuery.Builder booleanQueryBuilder,
 			final SearchCriteria searchCriteria, final SearchConfig searchConfig) {
 
-		BooleanQuery booleanSubQuery = new BooleanQuery();
+		BooleanQuery.Builder booleanSubQueryBuilder = new BooleanQuery.Builder();
 
 		boolean hasSomeCriteria = false;
 
 		hasSomeCriteria |= addWholeFieldToQuery(SolrIndexConstants.PRODUCT_NAME,
-				word, searchCriteria.getLocale(), searchConfig, booleanSubQuery, Occur.SHOULD, false);
+				word, searchCriteria.getLocale(), searchConfig, booleanSubQueryBuilder, Occur.SHOULD, false);
 
 		hasSomeCriteria |= addWholeFieldToQuery(SolrIndexConstants.BRAND_NAME,
-				word, searchCriteria.getLocale(), searchConfig, booleanSubQuery, Occur.SHOULD, false);
+				word, searchCriteria.getLocale(), searchConfig, booleanSubQueryBuilder, Occur.SHOULD, false);
 
-		booleanQuery.add(booleanSubQuery, Occur.MUST);
+		booleanQueryBuilder.add(booleanSubQueryBuilder.build(), Occur.MUST);
 
 		return hasSomeCriteria;
 
 	}
 
 	private boolean addTermForEnabledProducts(final ProductSearchCriteria productSearchCriteria,
-			final BooleanQuery booleanQuery, final SearchConfig searchConfig) {
+			final BooleanQuery.Builder booleanQueryBuilder, final SearchConfig searchConfig) {
 
 		if (productSearchCriteria.isDisplayableOnly()) {
 			if (StringUtils.isBlank(productSearchCriteria.getStoreCode())) {
 				throw new EpUnsupportedOperationException("StoreCode must be defined to include displayable products");
 			}
 			return addWholeFieldToQuery(getIndexUtility().createDisplayableFieldName(SolrIndexConstants.DISPLAYABLE,
-					productSearchCriteria.getStoreCode()), String.valueOf(true), null, searchConfig, booleanQuery, Occur.MUST,
+					productSearchCriteria.getStoreCode()), String.valueOf(true), null, searchConfig, booleanQueryBuilder, Occur.MUST,
 					false);
 		}
 		return false;
@@ -112,7 +112,7 @@ public class ProductAutocompleteQueryComposerImpl extends ProductQueryComposerIm
 	 */
 	private Query checkForCategory(final ProductAutocompleteSearchCriteria productSearchCriteria) {
 
-		BooleanQuery booleanQuery = null;
+		BooleanQuery query = null;
 
 		if (productSearchCriteria.getCategoryUid() != null) {
 
@@ -126,31 +126,33 @@ public class ProductAutocompleteQueryComposerImpl extends ProductQueryComposerIm
 				} else {
 					catalogCode = productSearchCriteria.getCatalogCode();
 				}
-				// prepare boolean query
-				booleanQuery = new BooleanQuery();
+				BooleanQuery.Builder booleanQueryBuilder = new BooleanQuery.Builder();
 				// add parent category
-				createQueryForCategoryAndSubCategories(booleanQuery, category, catalogCode);
+				createQueryForCategoryAndSubCategories(booleanQueryBuilder, category, catalogCode);
+				query = booleanQueryBuilder.build();
 			}
 		}
-		return booleanQuery;
+
+		return query;
 	}
 
 	/**
-	 * @param booleanQuery boolean query
+	 * @param booleanQueryBuilder boolean query
 	 * @param category category object
 	 * @param catalogCode catalog code
 	 */
-	private void createQueryForCategoryAndSubCategories(final BooleanQuery booleanQuery, final Category category, final String catalogCode) {
+	private void createQueryForCategoryAndSubCategories(final BooleanQuery.Builder booleanQueryBuilder,
+														final Category category, final String catalogCode) {
 		// get category, just not lost a children categories
 		Category testCategory = getCategoryLookup().findByUid(category.getUidPk());
 
 		// create query
 		Query categoryQuery = createQueryForCategory(testCategory, catalogCode);
-		booleanQuery.add(categoryQuery, Occur.SHOULD);
+		booleanQueryBuilder.add(categoryQuery, Occur.SHOULD);
 
 		// add subcategories
 		for (Category subCategory : getCategoryLookup().findChildren(testCategory)) {
-			createQueryForCategoryAndSubCategories(booleanQuery, subCategory, catalogCode);
+			createQueryForCategoryAndSubCategories(booleanQueryBuilder, subCategory, catalogCode);
 		}
 	}
 
@@ -168,10 +170,10 @@ public class ProductAutocompleteQueryComposerImpl extends ProductQueryComposerIm
 	@Override
 	protected Query createQuery(final String text, final String fieldName) {
 		String fixedText = getAnalyzer().analyze(text);
-		BooleanQuery resultQuery = new BooleanQuery();
-		resultQuery.add(new PrefixQuery(new Term(fieldName, fixedText)), Occur.SHOULD);
-		resultQuery.add(new TermQuery(new Term(fieldName, fixedText)), Occur.SHOULD);
-		return resultQuery;
+		BooleanQuery.Builder resultQueryBuilder = new BooleanQuery.Builder();
+		resultQueryBuilder.add(new PrefixQuery(new Term(fieldName, fixedText)), Occur.SHOULD);
+		resultQueryBuilder.add(new TermQuery(new Term(fieldName, fixedText)), Occur.SHOULD);
+		return resultQueryBuilder.build();
 	}
 
 }

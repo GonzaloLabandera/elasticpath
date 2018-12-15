@@ -28,7 +28,7 @@ public class PossiblePromotionsForItemIdentifierRepositoryImpl<I extends ItemIde
 
 	@Override
 	public Observable<PossiblePromotionsForItemIdentifier> getElements(final ItemIdentifier identifier) {
-		String scope = identifier.getItems().getScope().getValue();
+		String scope = identifier.getScope().getValue();
 		String skuCode = identifier.getItemId().getValue().get(ItemRepository.SKU_CODE_KEY);
 		return promotionRepository.itemHasPossiblePromotions(scope, skuCode)
 				.flatMapObservable(exists ->

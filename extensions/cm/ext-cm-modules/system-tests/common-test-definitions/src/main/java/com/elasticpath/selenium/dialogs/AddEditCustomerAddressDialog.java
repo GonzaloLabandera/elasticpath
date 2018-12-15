@@ -25,6 +25,9 @@ public class AddEditCustomerAddressDialog extends AbstractDialog {
 	private static final String CUSTOMER_ADDRESS_PHONE_CSS = CUSTOMER_ADDRESS_PARENT_CSS + "div[widget-id='Phone Number'] input";
 	private static final String SAVE_BUTTON_CSS = CUSTOMER_ADDRESS_PARENT_CSS
 			+ "div[automation-id='com.elasticpath.cmclient.core.CoreMessages.AbstractEpDialog_ButtonSave']";
+	private static final String CANCEL_BUTTON_CSS = CUSTOMER_ADDRESS_PARENT_CSS
+			+ "div[automation-id='com.elasticpath.cmclient.core.CoreMessages.AbstractEpDialog_ButtonCancel']";
+	private static final String ATTRIBUTE_VALUE = "value";
 
 
 	/**
@@ -118,5 +121,25 @@ public class AddEditCustomerAddressDialog extends AbstractDialog {
 		assertThat(selectComboBoxItem(CUSTOMER_ADDRESS_COUNTRY_COMBO_CSS, country))
 				.as("Unable to find country - " + country)
 				.isTrue();
+	}
+
+	/**
+	 * Verifies Postal Code Details.
+	 *
+	 * @param expectedPostalCode the Postal Code.
+	 */
+	public void verifyPostalCode(final String expectedPostalCode) {
+		getWaitDriver().waitForTextInInput(By.cssSelector(CUSTOMER_ADDRESS_ZIP_CSS), expectedPostalCode);
+		assertThat(getDriver().findElement(By.cssSelector(CUSTOMER_ADDRESS_ZIP_CSS)).getAttribute(ATTRIBUTE_VALUE))
+				.as("Postal Code does not match the order search result.")
+				.isEqualTo(expectedPostalCode);
+	}
+
+	/**
+	 * Clicks cancel.
+	 */
+	public void clickCancel() {
+		clickButton(CANCEL_BUTTON_CSS, "Cancel");
+		waitTillElementDisappears(By.cssSelector(CUSTOMER_ADDRESS_PARENT_CSS));
 	}
 }

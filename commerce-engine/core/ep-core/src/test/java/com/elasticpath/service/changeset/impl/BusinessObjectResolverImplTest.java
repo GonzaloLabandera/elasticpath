@@ -3,12 +3,12 @@
  */
 package com.elasticpath.service.changeset.impl;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
@@ -16,11 +16,11 @@ import java.util.Set;
 import java.util.SortedSet;
 
 import org.apache.commons.collections.CollectionUtils;
-import org.jmock.Expectations;
-import org.jmock.integration.junit4.JUnitRuleMockery;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.elasticpath.common.dto.pricing.BaseAmountDTO;
 import com.elasticpath.commons.beanframework.BeanFactory;
@@ -40,28 +40,32 @@ import com.elasticpath.service.changeset.ObjectGuidResolver;
 /**
  * Tests for {@link com.elasticpath.service.changeset.impl.BusinessObjectResolverImpl}.
  */
+@RunWith(MockitoJUnitRunner.class)
 public class BusinessObjectResolverImplTest {
-	/**
-	 *
-	 */
+
 	private static final String OBJECT_TYPE_CATEGORY = "Category";
 	private static final String OBJECT_TYPE_PRODUCT = "Product";
 	private static final String OBJECT_TYPE_CATALOG = "Catalog";
 	private static final String OBJECT_TYPE_BASE_AMOUNT = "Base Amount";
 	private static final String OBJECT_TYPE_PRODUCT_BUNDLE = "Product Bundle";
 
-	@Rule
-	public final JUnitRuleMockery context = new JUnitRuleMockery();
-
+	@Mock
 	private BeanFactory beanFactory;
 
 	/**
 	 * A map of interface to object type mappings.
 	 */
 	private Map<Class <?>, String> objectTypes;
+
+	@Mock
 	private ObjectGuidResolver defaultObjectGuidResolver;
+
+	@Mock
 	private Map<String, ObjectGuidResolver> objectGuidResolvers;
+
+	@Mock
 	private ObjectGuidResolver categoryGuidResolver;
+
 	private BusinessObjectResolverImpl businessObjectResolver;
 
 	/**
@@ -70,9 +74,6 @@ public class BusinessObjectResolverImplTest {
 	 */
 	@Before
 	public void setUp() throws Exception {
-
-		beanFactory = context.mock(BeanFactory.class);
-		defaultObjectGuidResolver = context.mock(ObjectGuidResolver.class, "default object guid resolver");
 
 		objectTypes = new LinkedHashMap<>();
 		objectTypes.put(Product.class, OBJECT_TYPE_PRODUCT);
@@ -84,7 +85,6 @@ public class BusinessObjectResolverImplTest {
 		secondaryObjectTypes.put(BaseAmountDTO.class, OBJECT_TYPE_BASE_AMOUNT);
 
 		objectGuidResolvers = new HashMap<>();
-		categoryGuidResolver = context.mock(ObjectGuidResolver.class, "category guid resolver");
 		objectGuidResolvers.put(Category.class.getName(), categoryGuidResolver);
 		objectGuidResolvers.put(BaseAmountDTO.class.getName(), new BaseAmountDTOGuidResolver());
 
@@ -116,45 +116,52 @@ public class BusinessObjectResolverImplTest {
 		final ProductBundle productBundle1 = new ProductBundleImpl();
 		productBundle1.setGuid("789");
 
-		context.checking(new Expectations() { {
-
-			final int expectTime = 3;
-			exactly(expectTime).of(beanFactory).getBean(ContextIdNames.BUSINESS_OBJECT_DESCRIPTOR);
-			will(returnValue(objectDescriptor));
-
-			oneOf(defaultObjectGuidResolver).resolveGuid(product1);
-			will(returnValue(product1.getGuid()));
-
-			oneOf(defaultObjectGuidResolver).resolveGuid(catalog1);
-			will(returnValue(catalog1.getGuid()));
-
-			oneOf(defaultObjectGuidResolver).resolveGuid(productBundle1);
-			will(returnValue(productBundle1.getGuid()));
-		} });
+		final int expectTime = 3;
+		when(beanFactory.getBean(ContextIdNames.BUSINESS_OBJECT_DESCRIPTOR)).thenReturn(objectDescriptor);
+		when(defaultObjectGuidResolver.resolveGuid(product1)).thenReturn(product1.getGuid());
+		when(defaultObjectGuidResolver.resolveGuid(catalog1)).thenReturn(catalog1.getGuid());
+		when(defaultObjectGuidResolver.resolveGuid(productBundle1)).thenReturn(productBundle1.getGuid());
 
 		// test product resolution
 		BusinessObjectDescriptor result = businessObjectResolver.resolveObjectDescriptor(product1);
 		String objectType = result.getObjectType();
 		String objectId = result.getObjectIdentifier();
 
-		assertEquals("Incorrect object type resolved.", OBJECT_TYPE_PRODUCT, objectType);
-		assertEquals("Incorrect object ID resolved.", product1.getGuid(), objectId);
+		assertThat(objectType)
+			.as("Incorrect object type resolved.")
+			.isEqualTo(OBJECT_TYPE_PRODUCT);
+		assertThat(objectId)
+			.as("Incorrect object ID resolved.")
+			.isEqualTo(product1.getGuid());
 
 		// test catalog resolution
 		result = businessObjectResolver.resolveObjectDescriptor(catalog1);
 		objectType = result.getObjectType();
 		objectId = result.getObjectIdentifier();
 
-		assertEquals("Incorrect object type resolved.", OBJECT_TYPE_CATALOG, objectType);
-		assertEquals("Incorrect object ID resolved.", catalog1.getGuid(), objectId);
+		assertThat(objectType)
+			.as("Incorrect object type resolved.")
+			.isEqualTo(OBJECT_TYPE_CATALOG);
+		assertThat(objectId)
+			.as("Incorrect object ID resolved.")
+			.isEqualTo(catalog1.getGuid());
 
 		// test product bundle resolution
 		result = businessObjectResolver.resolveObjectDescriptor(productBundle1);
 		objectType = result.getObjectType();
 		objectId = result.getObjectIdentifier();
 
-		assertEquals("Incorrect object type resolved.", OBJECT_TYPE_PRODUCT_BUNDLE, objectType);
-		assertEquals("Incorrect object ID resolved.", productBundle1.getGuid(), objectId);
+		assertThat(objectType)
+			.as("Incorrect object type resolved.")
+			.isEqualTo(OBJECT_TYPE_PRODUCT_BUNDLE);
+		assertThat(objectId)
+			.as("Incorrect object ID resolved.")
+			.isEqualTo(productBundle1.getGuid());
+
+		verify(beanFactory, times(expectTime)).getBean(ContextIdNames.BUSINESS_OBJECT_DESCRIPTOR);
+		verify(defaultObjectGuidResolver).resolveGuid(product1);
+		verify(defaultObjectGuidResolver).resolveGuid(catalog1);
+		verify(defaultObjectGuidResolver).resolveGuid(productBundle1);
 	}
 
 	/**
@@ -167,11 +174,11 @@ public class BusinessObjectResolverImplTest {
 		subClassLastSet.add(Product.class);
 		subClassLastSet.add(ProductBundle.class);
 
-		SortedSet<?> subClassFirstSet = businessObjectResolver.getSubClassFirstSet(subClassLastSet);
+		SortedSet<Class<?>> subClassFirstSet = businessObjectResolver.getSubClassFirstSet(subClassLastSet);
 
-		Iterator<?> iterator = subClassFirstSet.iterator();
-
-		assertEquals("sub class should appear first", ProductBundle.class, iterator.next());
+		assertThat(subClassFirstSet)
+			.as("sub class should appear first")
+			.startsWith(ProductBundle.class);
 	}
 
 	/**
@@ -183,14 +190,18 @@ public class BusinessObjectResolverImplTest {
 		final BaseAmountDTO baDTO = new BaseAmountDTO();
 		baDTO.setGuid(guid);
 		final BusinessObjectDescriptor objectDescriptor = new BusinessObjectDescriptorImpl();
-		context.checking(new Expectations() { {
 
-			exactly(1).of(beanFactory).getBean(ContextIdNames.BUSINESS_OBJECT_DESCRIPTOR);
-			will(returnValue(objectDescriptor));
-		} });
+		when(beanFactory.getBean(ContextIdNames.BUSINESS_OBJECT_DESCRIPTOR)).thenReturn(objectDescriptor);
+
 		BusinessObjectDescriptor bod = businessObjectResolver.resolveObjectDescriptor(baDTO);
-		assertEquals("Expected guid to be same", guid, bod.getObjectIdentifier());
-		assertEquals("Expected type for Base Amount", OBJECT_TYPE_BASE_AMOUNT, bod.getObjectType());
+
+		verify(beanFactory).getBean(ContextIdNames.BUSINESS_OBJECT_DESCRIPTOR);
+		assertThat(bod.getObjectIdentifier())
+			.as("Expected guid to be same")
+			.isEqualTo(guid);
+		assertThat(bod.getObjectType())
+			.as("Expected type for Base Amount")
+			.isEqualTo(OBJECT_TYPE_BASE_AMOUNT);
 	}
 
 	/**
@@ -208,7 +219,9 @@ public class BusinessObjectResolverImplTest {
 
 		// test product resolution
 		BusinessObjectDescriptor result = businessObjectResolver.resolveObjectDescriptor(product1);
-		assertNull("The resolved BusinessObjectDescriptor should be null.", result);
+		assertThat(result)
+			.as("The resolved BusinessObjectDescriptor should be null.")
+			.isNull();
 	}
 
 	/**
@@ -219,7 +232,9 @@ public class BusinessObjectResolverImplTest {
 
 		// try to resolve an object that is not of type Entity and expect a null
 		BusinessObjectDescriptor result = businessObjectResolver.resolveObjectDescriptor(Integer.valueOf(1));
-		assertEquals("Business object must be of type com.elasticpath.domain.Entity and should not be resolveable. ", null, result);
+		assertThat(result)
+			.as("Business object must be of type com.elasticpath.domain.Entity and should not be resolvable.")
+			.isNull();
 	}
 	/**
 	 * Tests to resolve object guid. 
@@ -229,17 +244,12 @@ public class BusinessObjectResolverImplTest {
 		final CategoryImpl category = new CategoryImpl();
 		category.setGuid("category1");
 
-		context.checking(new Expectations() { {
+		when(categoryGuidResolver.isSupportedObject(category)).thenReturn(true);
+		when(categoryGuidResolver.resolveGuid(category)).thenReturn("categoryGuid|catalogGuid");
 
-			oneOf(categoryGuidResolver).isSupportedObject(category);
-			will(returnValue(true));
-
-			oneOf(categoryGuidResolver).resolveGuid(category);
-			will(returnValue("categoryGuid|catalogGuid"));
-
-		} });
-
-		assertNotNull(businessObjectResolver.resolveObjectGuid(category));
+		assertThat(businessObjectResolver.resolveObjectGuid(category)).isNotNull();
+		verify(categoryGuidResolver).isSupportedObject(category);
+		verify(categoryGuidResolver).resolveGuid(category);
 	}
 
 	/**
@@ -252,7 +262,7 @@ public class BusinessObjectResolverImplTest {
 		baDTO.setGuid(guid);
 
 		String resolvedGuid = businessObjectResolver.resolveObjectGuid(baDTO);
-		assertEquals("Expected guid to be same", guid, resolvedGuid);
+		assertThat(resolvedGuid).isEqualTo(guid);
 	}
 
 	/**
@@ -264,13 +274,10 @@ public class BusinessObjectResolverImplTest {
 		final String productGuid = "product1";
 		product.setGuid(productGuid);
 
-		context.checking(new Expectations() { {
+		when(defaultObjectGuidResolver.resolveGuid(product)).thenReturn(productGuid);
 
-			oneOf(defaultObjectGuidResolver).resolveGuid(product);
-			will(returnValue(productGuid));
-		} });
-
-		assertNotNull(businessObjectResolver.resolveObjectGuid(product));
+		assertThat(businessObjectResolver.resolveObjectGuid(product)).isNotNull();
+		verify(defaultObjectGuidResolver).resolveGuid(product);
 	}
 
 	/**
@@ -283,13 +290,10 @@ public class BusinessObjectResolverImplTest {
 		final String productGuid = "product1";
 		product.setGuid(productGuid);
 
-		context.checking(new Expectations() { {
+		when(defaultObjectGuidResolver.resolveGuid(product)).thenReturn(productGuid);
 
-			oneOf(defaultObjectGuidResolver).resolveGuid(product);
-			will(returnValue(productGuid));
-		} });
-
-		assertNotNull(businessObjectResolver.resolveObjectGuid(product));
+		assertThat(businessObjectResolver.resolveObjectGuid(product)).isNotNull();
+		verify(defaultObjectGuidResolver).resolveGuid(product);
 	}
 
 	/**
@@ -297,7 +301,9 @@ public class BusinessObjectResolverImplTest {
 	 */
 	@Test
 	public void testGetClassForObjectWithNullArgument() {
-		assertNull("Expected result for a null parameter value is null",  businessObjectResolver.getObjectClass(null));
+		assertThat(businessObjectResolver.getObjectClass(null))
+			.as("Expected result for a null parameter value is null")
+			.isNull();
 	}
 
 	/**
@@ -306,17 +312,21 @@ public class BusinessObjectResolverImplTest {
 	@Test
 	public void testGetClassForNullType() {
 		BusinessObjectDescriptor objectDescriptor = new BusinessObjectDescriptorImpl();
-		assertNull("expected result is null class", businessObjectResolver.getObjectClass(objectDescriptor));
+		assertThat(businessObjectResolver.getObjectClass(objectDescriptor))
+			.as("expected result is null class")
+			.isNull();
 	}
 
 	/**
-	 * Expecting that asking for an unkown type returns null value.
+	 * Expecting that asking for an unknown type returns null value.
 	 */
 	@Test
-	public void testGetClassForUnkownType() {
+	public void testGetClassForUnknownType() {
 		BusinessObjectDescriptor objectDescriptor = new BusinessObjectDescriptorImpl();
-		objectDescriptor.setObjectType("unkownType");
-		assertNull("expected result is null class", businessObjectResolver.getObjectClass(objectDescriptor));
+		objectDescriptor.setObjectType("unknownType");
+		assertThat(businessObjectResolver.getObjectClass(objectDescriptor))
+			.as("expected result is null class")
+			.isNull();
 	}
 
 	/**
@@ -327,8 +337,8 @@ public class BusinessObjectResolverImplTest {
 		BusinessObjectDescriptor objectDescriptor = new BusinessObjectDescriptorImpl();
 		objectDescriptor.setObjectType(OBJECT_TYPE_PRODUCT);
 		Class<?> clazz = businessObjectResolver.getObjectClass(objectDescriptor);
-		assertNotNull("class should not be null", clazz);
-		assertEquals("Product class should have been instantiated", Product.class, clazz);
+		assertThat(clazz).as("class should not be null").isNotNull();
+		assertThat(clazz).as("Product class should have been instantiated").isEqualTo(Product.class);
 	}
 
 	/**
@@ -350,47 +360,36 @@ public class BusinessObjectResolverImplTest {
 		objects.add(catalog1);
 		objects.add(productBundle1);
 
-		context.checking(new Expectations() { {
-			oneOf(beanFactory).getBean(ContextIdNames.BUSINESS_OBJECT_DESCRIPTOR);
-			will(returnValue(new BusinessObjectDescriptorImpl()));
-
-			oneOf(beanFactory).getBean(ContextIdNames.BUSINESS_OBJECT_DESCRIPTOR);
-			will(returnValue(new BusinessObjectDescriptorImpl()));
-
-			oneOf(beanFactory).getBean(ContextIdNames.BUSINESS_OBJECT_DESCRIPTOR);
-			will(returnValue(new BusinessObjectDescriptorImpl()));
-
-			oneOf(defaultObjectGuidResolver).resolveGuid(product1);
-			will(returnValue(product1.getGuid()));
-
-			oneOf(defaultObjectGuidResolver).resolveGuid(catalog1);
-			will(returnValue(catalog1.getGuid()));
-
-			oneOf(defaultObjectGuidResolver).resolveGuid(productBundle1);
-			will(returnValue(productBundle1.getGuid()));
-		} });
+		when(beanFactory.getBean(ContextIdNames.BUSINESS_OBJECT_DESCRIPTOR)).thenAnswer(invocation -> new BusinessObjectDescriptorImpl());
+		when(defaultObjectGuidResolver.resolveGuid(product1)).thenReturn(product1.getGuid());
+		when(defaultObjectGuidResolver.resolveGuid(catalog1)).thenReturn(catalog1.getGuid());
+		when(defaultObjectGuidResolver.resolveGuid(productBundle1)).thenReturn(productBundle1.getGuid());
 
 		// test product resolution
 		Set<BusinessObjectDescriptor> results = businessObjectResolver.resolveObjectDescriptor(objects);
 		BusinessObjectDescriptor result = (BusinessObjectDescriptor) CollectionUtils.get(results, 0);
 		String objectType = result.getObjectType();
 		String objectId = result.getObjectIdentifier();
-		assertEquals("Incorrect object type resolved", OBJECT_TYPE_PRODUCT, objectType);
-		assertEquals("Incorrect object ID resolved", product1.getGuid(), objectId);
+		assertThat(objectType).isEqualTo(OBJECT_TYPE_PRODUCT);
+		assertThat(objectId).isEqualTo(product1.getGuid());
 
 		// test catalog resolution
 		result = (BusinessObjectDescriptor) CollectionUtils.get(results, 1);
 		objectType = result.getObjectType();
 		objectId = result.getObjectIdentifier();
-		assertEquals("Incorrect object type resolved", OBJECT_TYPE_CATALOG, objectType);
-		assertEquals("Incorrect object ID resolved", catalog1.getGuid(), objectId);
+		assertThat(objectType).isEqualTo(OBJECT_TYPE_CATALOG);
+		assertThat(objectId).isEqualTo(catalog1.getGuid());
 
 		// test product bundle resolution
 		result = (BusinessObjectDescriptor) CollectionUtils.get(results, 2);
 		objectType = result.getObjectType();
 		objectId = result.getObjectIdentifier();
-		assertEquals("Incorrect object type resolved", OBJECT_TYPE_PRODUCT_BUNDLE, objectType);
-		assertEquals("Incorrect object ID resolved", productBundle1.getGuid(), objectId);
+		assertThat(objectType).isEqualTo(OBJECT_TYPE_PRODUCT_BUNDLE);
+		assertThat(objectId).isEqualTo(productBundle1.getGuid());
+
+		verify(defaultObjectGuidResolver).resolveGuid(product1);
+		verify(defaultObjectGuidResolver).resolveGuid(catalog1);
+		verify(defaultObjectGuidResolver).resolveGuid(productBundle1);
 	}
 
 	/**
@@ -401,6 +400,6 @@ public class BusinessObjectResolverImplTest {
 	public void testResolveObjectWithNull() {
 		Object nullObject = null;
 		BusinessObjectDescriptor result = businessObjectResolver.resolveObjectDescriptor(nullObject);
-		assertNull("A null object should be resolved to null", result);
+		assertThat(result).as("A null object should be resolved to null").isNull();
 	}
 }

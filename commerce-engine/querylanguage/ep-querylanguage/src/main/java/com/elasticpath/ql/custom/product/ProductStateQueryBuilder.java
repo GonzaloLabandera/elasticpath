@@ -56,21 +56,21 @@ public class ProductStateQueryBuilder extends LuceneSubQueryBuilder {
 		// get NOW as a SOLR date string
 		final String now = getDate(new Date());
 		
-		final BooleanQuery booleanQuery = new BooleanQuery();
+		final BooleanQuery.Builder booleanQueryBuilder = new BooleanQuery.Builder();
 		if (conditionActive) {
 			// build the SOLR query for active products
 			// start date is in the past
-			booleanQuery.add(TermRangeQuery.newStringRange(SolrIndexConstants.START_DATE, null, now, true, true), Occur.MUST);
+			booleanQueryBuilder.add(TermRangeQuery.newStringRange(SolrIndexConstants.START_DATE, null, now, true, true), Occur.MUST);
 			// AND end date is NOT in the past - the NOT correctly handled possible null end dates
-			booleanQuery.add(TermRangeQuery.newStringRange(SolrIndexConstants.END_DATE, null, now, true, true), Occur.MUST_NOT);
+			booleanQueryBuilder.add(TermRangeQuery.newStringRange(SolrIndexConstants.END_DATE, null, now, true, true), Occur.MUST_NOT);
 		} else {
 			// start date is in the future, which means end date is also in the future
-			booleanQuery.add(TermRangeQuery.newStringRange(SolrIndexConstants.START_DATE, now, null, true, true), Occur.SHOULD);
+			booleanQueryBuilder.add(TermRangeQuery.newStringRange(SolrIndexConstants.START_DATE, now, null, true, true), Occur.SHOULD);
 			// OR end date in the past, which means start date is also in the past
-			booleanQuery.add(TermRangeQuery.newStringRange(SolrIndexConstants.END_DATE, null, now, true, true), Occur.SHOULD);
+			booleanQueryBuilder.add(TermRangeQuery.newStringRange(SolrIndexConstants.END_DATE, null, now, true, true), Occur.SHOULD);
 		}
 		
-		return booleanQuery;
+		return booleanQueryBuilder.build();
 	}
 	
 	/**

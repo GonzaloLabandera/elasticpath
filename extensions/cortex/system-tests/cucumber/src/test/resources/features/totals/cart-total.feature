@@ -1,4 +1,4 @@
-@totals @HeaderAuth
+@totals @headerAuth
 
 Feature: Retrieve Total Of Cart
   As a client developer
@@ -51,7 +51,7 @@ Feature: Retrieve Total Of Cart
 
     Examples:
       | ITEM_NAME                                      | AMOUNT | CURRENCY | DISPLAY_AMOUNT |
-      | Product With 50 Percent Off Cart Item Discount | 5.0    | CAD      | $5.00          |
+      | Product With 50 Percent Off Cart Item Discount | 5.00   | CAD      | $5.00          |
 
 
   Scenario Outline: Verify cart total with multiple line items that have cart item discount
@@ -63,7 +63,7 @@ Feature: Retrieve Total Of Cart
 
     Examples:
       | ITEM_NAME_1                                    | ITEM_NAME_2                                    | AMOUNT | CURRENCY | DISPLAY_AMOUNT |
-      | Product With 20 Percent Off Cart Item Discount | Product With 50 Percent Off Cart Item Discount | 13.0   | CAD      | $13.00         |
+      | Product With 20 Percent Off Cart Item Discount | Product With 50 Percent Off Cart Item Discount | 13.00  | CAD      | $13.00         |
 
 
   Scenario Outline: Can retrieve total of cart with no lineitems
@@ -73,4 +73,4 @@ Feature: Retrieve Total Of Cart
 
     Examples:
       | AMOUNT | CURRENCY | DISPLAY_AMOUNT |
-      | 0.0    | CAD      | $0.00          |
+      | 0.00   | CAD      | $0.00          |

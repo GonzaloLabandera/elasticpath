@@ -23,9 +23,11 @@ public class OrderEmailPropertyHelperImpl implements OrderEmailPropertyHelper {
 
 	private static final String LOCALE_KEY_FOR_VM_TEMPLATE = "locale";
 	private static final String SHIPMENT_RELEASE_FAILURE_TEMPLATE_TXT = "shipmentReleaseFailure.txt";
+	private static final String SHIPMENT_RELEASE_FAILURE_TEMPLATE_HTML = "shipmentReleaseFailure.html";
 	private static final String ORDER_CONF_EMAIL_HTML_TEMPLATE = "orderConf.html";
 	private static final String ORDER_CONF_EMAIL_TXT_TEMPLATE = "orderConf.txt";
 	private static final String SHIPMENT_CONF_EMAIL_TXT_TEMPLATE = "shipmentConf.txt";
+	private static final String SHIPMENT_CONF_EMAIL_HTML_TEMPLATE = "shipmentConf.html";
 
 	private BeanFactory beanFactory;
 
@@ -54,6 +56,7 @@ public class OrderEmailPropertyHelperImpl implements OrderEmailPropertyHelper {
 		emailProperties.setDefaultSubject("Shipment Confirmation");
 		emailProperties.setLocaleDependentSubjectKey("shipment.confirmation.emailSubject");
 		emailProperties.setEmailLocale(order.getLocale());
+		emailProperties.setHtmlTemplate(SHIPMENT_CONF_EMAIL_HTML_TEMPLATE);
 		emailProperties.setTextTemplate(SHIPMENT_CONF_EMAIL_TXT_TEMPLATE);
 		emailProperties.setRecipientAddress(order.getCustomer().getEmail());
 		emailProperties.setStoreCode(order.getStoreCode());
@@ -78,6 +81,7 @@ public class OrderEmailPropertyHelperImpl implements OrderEmailPropertyHelper {
 		emailProperties.setDefaultSubject("Payment Confirmation");
 		emailProperties.setLocaleDependentSubjectKey("shipment.release.failed.emailSubject");
 		emailProperties.setEmailLocale(shipment.getOrder().getLocale());
+		emailProperties.setHtmlTemplate(SHIPMENT_RELEASE_FAILURE_TEMPLATE_HTML);
 		emailProperties.setTextTemplate(SHIPMENT_RELEASE_FAILURE_TEMPLATE_TXT);
 		Store store = getStoreService().findStoreWithCode(shipment.getOrder().getStoreCode());
 		emailProperties.setRecipientAddress(store.getStoreAdminEmailAddress());

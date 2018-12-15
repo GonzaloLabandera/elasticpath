@@ -23,12 +23,9 @@
 		class="com.elasticpath.importexport.common.adapters.products.data.ProductAvailabilityAdapter"
 		parent="abstractDomainAdapter"/>
 
-	<bean id="localizedAttributeKeyLocaleTranslator" class="com.elasticpath.importexport.common.util.LocalizedAttributeKeyLocaleTranslatorImpl"/>
-
 	<bean id="attributeValuesAdapter"
 			   class="com.elasticpath.importexport.common.adapters.products.data.AttributeValuesAdapter"
 			   parent="abstractDomainAdapter">
-			<property name="localizedAttributeKeyLocaleTranslator" ref="localizedAttributeKeyLocaleTranslator"/>
 		<property name="validatorUtils" ref="validatorUtils"/>
 	</bean>
 

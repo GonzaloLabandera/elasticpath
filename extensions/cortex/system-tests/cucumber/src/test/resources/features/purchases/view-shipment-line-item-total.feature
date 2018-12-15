@@ -1,4 +1,4 @@
-@Shipments @Purchases @HeaderAuth
+@shipments @purchases @headerAuth
 Feature: View purchase shipment lineitems
   As an Customer
   I want to see a total cost of each shipment line item in my shipment
@@ -42,4 +42,4 @@ Feature: View purchase shipment lineitems
     And I can follow line item back links all the way to the purchase
     And I view the shipment line item for item "Samsung Headset"
     And I can follow the total link
-    And I see the cost field has amount: 112.0, currency: CAD and display: $112.00
+    And I see the cost field has amount: 112.00, currency: CAD and display: $112.00

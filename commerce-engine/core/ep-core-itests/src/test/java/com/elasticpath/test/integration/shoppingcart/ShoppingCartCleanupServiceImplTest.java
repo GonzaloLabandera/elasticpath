@@ -3,11 +3,7 @@
  */
 package com.elasticpath.test.integration.shoppingcart;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.Arrays;
 import java.util.Calendar;
@@ -121,19 +117,24 @@ public class ShoppingCartCleanupServiceImplTest extends BasicSpringContextTest {
 		Shopper shopperBeforeRemovalDate = addShoppingCart(beforeRemovalDate);
 
 		int removed = shoppingCartCleanupService.deleteAbandonedShoppingCarts(equalsBoundaryDate, EXPECTED_MAX_RESULTS);
-		assertEquals("There should have been two shopping carts removed.", EXPECTED_TWO_CARTS_REMOVED, removed);
+		assertThat(removed)
+			.as("There should have been two shopping carts removed.")
+			.isEqualTo(EXPECTED_TWO_CARTS_REMOVED);
 
 		ShoppingCart updatedCartAfterRemovalDate = shoppingCartService.findOrCreateByShopper(shopperAfterRemovalDate);
-		assertEquals("The non-candidate shopping cart should still exist in database.", updatedCartAfterRemovalDate.getGuid(),
-				shopperAfterRemovalDate.getCurrentShoppingCart().getGuid());
+		assertThat(shopperAfterRemovalDate.getCurrentShoppingCart().getGuid())
+			.as("The non-candidate shopping cart should still exist in database.")
+			.isEqualTo(updatedCartAfterRemovalDate.getGuid());
 
 		ShoppingCart updatedCartEqualsRemovalDate = shoppingCartService.findOrCreateByShopper(shopperEqualsRemovalDate);
-		assertFalse("The candidate shopping cart which is equals to the removal date should not exist in database. A new cart was created.",
-				updatedCartEqualsRemovalDate.getGuid().equals(shopperEqualsRemovalDate.getCurrentShoppingCart().getGuid()));
+		assertThat(updatedCartEqualsRemovalDate.getGuid())
+			.as("The candidate shopping cart which is equals to the removal date should not exist in database. A new cart was created.")
+			.isNotEqualTo(shopperEqualsRemovalDate.getCurrentShoppingCart().getGuid());
 
 		ShoppingCart updatedCartBeforeRemovalDate = shoppingCartService.findOrCreateByShopper(shopperBeforeRemovalDate);
-		assertFalse("The candidate shopping cart which is before the removal date should not exist in database. A new cart was created.",
-				updatedCartBeforeRemovalDate.getGuid().equals(shopperBeforeRemovalDate.getCurrentShoppingCart().getGuid()));
+		assertThat(updatedCartBeforeRemovalDate.getGuid())
+			.as("The candidate shopping cart which is before the removal date should not exist in database. A new cart was created.")
+			.isNotEqualTo(shopperBeforeRemovalDate.getCurrentShoppingCart().getGuid());
 	}
 
 	/**
@@ -152,19 +153,24 @@ public class ShoppingCartCleanupServiceImplTest extends BasicSpringContextTest {
 		Shopper shopperBeforeRemovalDate = addShoppingCart(beforeRemovalDate);
 
 		int removed = shoppingCartCleanupService.deleteAbandonedShoppingCarts(equalsBoundaryDate, 1);
-		assertEquals("There should have been one shopping cart removed.", 1, removed);
+		assertThat(removed)
+			.as("There should have been one shopping cart removed.")
+			.isEqualTo(1);
 
 		ShoppingCart updatedCartAfterRemovalDate = shoppingCartService.findOrCreateByShopper(shopperAfterRemovalDate);
-		assertEquals("The non-candidate shopping cart should still exist in database.", updatedCartAfterRemovalDate.getGuid(),
-				shopperAfterRemovalDate.getCurrentShoppingCart().getGuid());
+		assertThat(shopperAfterRemovalDate.getCurrentShoppingCart().getGuid())
+			.as("The non-candidate shopping cart should still exist in database.")
+			.isEqualTo(updatedCartAfterRemovalDate.getGuid());
 
 		ShoppingCart updatedCartEqualsRemovalDate = shoppingCartService.findOrCreateByShopper(shopperEqualsRemovalDate);
-		assertEquals("The candidate shopping cart which is equals to the removal date should still exist in database.",
-				updatedCartEqualsRemovalDate.getGuid(), shopperEqualsRemovalDate.getCurrentShoppingCart().getGuid());
+		assertThat(shopperEqualsRemovalDate.getCurrentShoppingCart().getGuid())
+			.as("The candidate shopping cart which is equals to the removal date should still exist in database.")
+			.isEqualTo(updatedCartEqualsRemovalDate.getGuid());
 
 		ShoppingCart updatedCartBeforeRemovalDate = shoppingCartService.findOrCreateByShopper(shopperBeforeRemovalDate);
-		assertFalse("The candidate shopping cart which is before the removal date should not exist in database. A new cart was created.",
-				updatedCartBeforeRemovalDate.getGuid().equals(shopperBeforeRemovalDate.getCurrentShoppingCart().getGuid()));
+		assertThat(updatedCartBeforeRemovalDate.getGuid())
+			.as("The candidate shopping cart which is before the removal date should not exist in database. A new cart was created.")
+			.isNotEqualTo(shopperBeforeRemovalDate.getCurrentShoppingCart().getGuid());
 	}
 
 	/**
@@ -183,10 +189,14 @@ public class ShoppingCartCleanupServiceImplTest extends BasicSpringContextTest {
 
 		mockTimeService.setCurrentTime(new Date());  // Just for clarity here
 		int removed = shoppingCartCleanupService.deleteAbandonedShoppingCarts(new Date(cartCreationTime.getTime() + 1000), 100);
-		assertEquals("There should have been one shopping cart removed.", 1, removed);
+		assertThat(removed)
+			.as("There should have been one shopping cart removed.")
+			.isEqualTo(1);
 
 		ShoppingItem actualShoppingItem = shoppingItemService.findByGuid(shoppingItem.getGuid(), null);
-		assertNull("This shopping item should have been cascade deleted when the shopping cart was removed.", actualShoppingItem);
+		assertThat(actualShoppingItem)
+			.as("This shopping item should have been cascade deleted when the shopping cart was removed.")
+			.isNull();
 	}
 
 	/**
@@ -203,16 +213,22 @@ public class ShoppingCartCleanupServiceImplTest extends BasicSpringContextTest {
 		ShoppingItem shoppingItem = cartDirectorService.addSkuToWishList(SKU_CODE, shopperEqualsRemovalDate, store);
 
 		int removed = shoppingCartCleanupService.deleteAbandonedShoppingCarts(equalsBoundaryDate, 1);
-		assertEquals("There should have been one shopping cart removed.", 1, removed);
+		assertThat(removed)
+			.as("There should have been one shopping cart removed.")
+			.isEqualTo(1);
 
 		WishList actualWishList = wishListService.findOrCreateWishListByShopper(shopperEqualsRemovalDate);
-		assertFalse("This wishlist should not be null.", actualWishList == null);
+		assertThat(actualWishList)
+			.as("This wishlist should not be null.")
+			.isNotNull();
 
-		assertEquals("This wishlist should have the same amount of items as previously held.", actualWishList.getAllItems().size(), 1);
+		assertThat(actualWishList.getAllItems())
+			.as("This wishlist should have the same amount of items as previously held.")
+			.hasSize(1);
 
-		assertEquals("This wishlist should contain the same product sku.",
-				actualWishList.getAllItems().get(0).getSkuGuid(),
-				shoppingItem.getSkuGuid());
+		assertThat(actualWishList.getAllItems().get(0).getSkuGuid())
+			.as("This wishlist should contain the same product sku.")
+			.isEqualTo(shoppingItem.getSkuGuid());
 	}
 
 	/**
@@ -225,13 +241,19 @@ public class ShoppingCartCleanupServiceImplTest extends BasicSpringContextTest {
 		Shopper shopperWithInactiveCart = createShoppingCartWithStatus(ShoppingCartStatus.INACTIVE);
 
 		int removed = shoppingCartCleanupService.deleteInactiveShoppingCarts(1);
-		assertEquals("There should have been one shopping cart removed.", 1, removed);
+		assertThat(removed)
+			.as("There should have been one shopping cart removed.")
+			.isEqualTo(1);
 
 		boolean inactiveCartExists = shoppingCartService.shoppingCartExists(shopperWithInactiveCart.getCurrentShoppingCart().getGuid());
-		assertFalse("Inactive cart must not exist.", inactiveCartExists);
+		assertThat(inactiveCartExists)
+			.as("Inactive cart must not exist.")
+			.isFalse();
 
 		boolean activeCartExists = shoppingCartService.shoppingCartExists(shopperWithActiveCart.getCurrentShoppingCart().getGuid());
-		assertTrue("Active cart must exist.", activeCartExists);
+		assertThat(activeCartExists)
+			.as("Active cart must exist.")
+			.isTrue();
 	}
 
 	/**
@@ -246,13 +268,19 @@ public class ShoppingCartCleanupServiceImplTest extends BasicSpringContextTest {
 		ShoppingItem shoppingItem = cartDirectorService.addItemToCart(shopperWithInactiveCart.getCurrentShoppingCart(), dto);
 
 		int removed = shoppingCartCleanupService.deleteInactiveShoppingCarts(1);
-		assertEquals("There should have been one shopping cart removed.", 1, removed);
+		assertThat(removed)
+			.as("There should have been one shopping cart removed.")
+			.isEqualTo(1);
 
 		boolean inactiveCartExists = shoppingCartService.shoppingCartExists(shopperWithInactiveCart.getCurrentShoppingCart().getGuid());
-		assertFalse("Inactive cart must not exist.", inactiveCartExists);
+		assertThat(inactiveCartExists)
+			.as("Inactive cart must not exist.")
+			.isFalse();
 
 		ShoppingItem actualShoppingItem = shoppingItemService.findByGuid(shoppingItem.getGuid(), null);
-		assertNull("This shopping item should have been cascade deleted when the shopping cart was removed.", actualShoppingItem);
+		assertThat(actualShoppingItem)
+			.as("This shopping item should have been cascade deleted when the shopping cart was removed.")
+			.isNull();
 	}
 
 	/**
@@ -268,16 +296,22 @@ public class ShoppingCartCleanupServiceImplTest extends BasicSpringContextTest {
 		ShoppingItem shoppingItem = cartDirectorService.addSkuToWishList(SKU_CODE, shopperWithInactiveCart, store);
 
 		int removed = shoppingCartCleanupService.deleteInactiveShoppingCarts(1);
-		assertEquals("There should have been one shopping cart removed.", 1, removed);
+		assertThat(removed)
+			.as("There should have been one shopping cart removed.")
+			.isEqualTo(1);
 
 		WishList actualWishList = wishListService.findOrCreateWishListByShopper(shopperWithInactiveCart);
-		assertNotNull("This wishlist should not be null.", actualWishList);
+		assertThat(actualWishList)
+			.as("This wishlist should not be null.")
+			.isNotNull();
 
-		assertEquals("This wishlist should have the same amount of items as previously held.", actualWishList.getAllItems().size(), 1);
+		assertThat(actualWishList.getAllItems())
+			.as("This wishlist should have the same amount of items as previously held.")
+			.hasSize(1);
 
-		assertEquals("This wishlist should contain the same product sku.",
-			actualWishList.getAllItems().get(0).getSkuGuid(),
-			shoppingItem.getSkuGuid());
+		assertThat(actualWishList.getAllItems().get(0).getSkuGuid())
+			.as("This wishlist should contain the same product sku.")
+			.isEqualTo(shoppingItem.getSkuGuid());
 	}
 
 	private Date getAdjustedDate(final Date now, final int adjustment) {

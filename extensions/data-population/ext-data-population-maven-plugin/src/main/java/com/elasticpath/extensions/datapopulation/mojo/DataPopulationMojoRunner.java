@@ -1,3 +1,6 @@
+/**
+ * Copyright (c) Elastic Path Software Inc., 2018
+ */
 package com.elasticpath.extensions.datapopulation.mojo;
 
 import java.io.File;

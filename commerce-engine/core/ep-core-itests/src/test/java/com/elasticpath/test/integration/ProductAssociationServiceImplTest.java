@@ -3,16 +3,14 @@
  */
 package com.elasticpath.test.integration;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.Set;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 
 import com.elasticpath.domain.catalog.Catalog;
 import com.elasticpath.domain.catalog.Category;
@@ -31,6 +29,7 @@ public class ProductAssociationServiceImplTest extends BasicSpringContextTest {
 
 	/** The main object under test. */
 	@Autowired
+	@Qualifier(value = "productAssociationService")
 	private ProductAssociationService service;
 
 	private Store store;
@@ -89,14 +88,14 @@ public class ProductAssociationServiceImplTest extends BasicSpringContextTest {
 	public void testLoadPopulatesTargetProductDefaultSku() {
 		ProductAssociationType associationType = ProductAssociationType.ACCESSORY;
 		ProductAssociation pa = catalogTestPersister.persistProductAssociation(sourceProduct.getMasterCatalog(), sourceProduct, targetProduct,
-				associationType);
-		Set<ProductAssociation> returnedAssociations = service.getAssociationsByType(sourceProduct.getCode(), associationType, sourceProduct
-				.getMasterCatalog().getCode(), false);
-		assertNotNull("Returned associations should not be null", returnedAssociations);
-		assertEquals("One product association should be returned", 1, returnedAssociations.size());
+			associationType);
+		Set<ProductAssociation> returnedAssociations = service.getAssociationsByType(sourceProduct.getCode(), associationType,
+				sourceProduct.getMasterCatalog().getCode(), false);
+		assertThat(returnedAssociations).hasSize(1);
+
 		ProductAssociation savedAssociation = returnedAssociations.iterator().next();
-		assertTrue("The TargetProduct's default sku should not be null", savedAssociation.getTargetProduct().getDefaultSku() != null);
-		assertEquals("The returned association should have the same UidPk as the one we saved", pa.getUidPk(), savedAssociation.getUidPk());
+		assertThat(savedAssociation.getTargetProduct().getDefaultSku()).isNotNull();
+		assertThat(savedAssociation.getUidPk()).isEqualTo(pa.getUidPk());
 	}
 
 	/**
@@ -107,25 +106,30 @@ public class ProductAssociationServiceImplTest extends BasicSpringContextTest {
 	public void testVirtualCatalogAssociation() {
 
 		ProductAssociation associationWithinCatalog = catalogTestPersister.persistProductAssociation(virtualCatalog, productInFirstCategory,
-				productInSecondCategory, ProductAssociationType.ACCESSORY);
-		assertTrue("Association in catalog should be recognized as such", service.isAssociationInCatalog(associationWithinCatalog));
+			productInSecondCategory, ProductAssociationType.ACCESSORY);
+		assertThat(service.isAssociationInCatalog(associationWithinCatalog))
+			.as("Association in catalog should be recognized as such")
+			.isTrue();
 
 		ProductAssociation associationOutsideOfCatalog = catalogTestPersister.persistProductAssociation(virtualCatalog, productInFirstCategory,
-				productInNoLinkCategory, ProductAssociationType.ACCESSORY);
-		assertFalse("Association out of catalog should be recognized as such", service.isAssociationInCatalog(associationOutsideOfCatalog));
+			productInNoLinkCategory, ProductAssociationType.ACCESSORY);
+		assertThat(service.isAssociationInCatalog(associationOutsideOfCatalog))
+			.as("Association out of catalog should be recognized as such")
+			.isFalse();
 
 		Set<ProductAssociation> allAssociations = service.getAssociations(productInFirstCategory.getCode(), virtualCatalog.getCode(), false);
-		assertEquals("There should be a total of 2 associations", 2, allAssociations.size());
+		assertThat(allAssociations).hasSize(2);
 
 		Set<ProductAssociation> associationsWithinCatalog = service
-				.getAssociations(productInFirstCategory.getCode(), virtualCatalog.getCode(), true);
-		assertEquals("There should only be 1 association within the virtual catalog", 1, associationsWithinCatalog.size());
+			.getAssociations(productInFirstCategory.getCode(), virtualCatalog.getCode(), true);
+		assertThat(associationsWithinCatalog)
+			.as("There should only be 1 association within the virtual catalog")
+			.hasSize(1);
 
 		ProductAssociation retrievedAssociation = associationsWithinCatalog.iterator().next();
-		assertEquals("The virtual catalog's association should be the one that we expected", associationWithinCatalog.getUidPk(),
-				retrievedAssociation.getUidPk());
+		assertThat(retrievedAssociation.getUidPk()).isEqualTo(associationWithinCatalog.getUidPk());
 
 		Set<ProductAssociation> filteredAssociations = service.limitAssociationsToCatalog(allAssociations);
-		assertEquals("There should only be 1 association within the filtered list", 1, filteredAssociations.size());
+		assertThat(filteredAssociations).hasSize(1);
 	}
 }

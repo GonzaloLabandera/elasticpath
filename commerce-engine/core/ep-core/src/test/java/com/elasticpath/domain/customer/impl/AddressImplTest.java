@@ -3,33 +3,23 @@
  */
 package com.elasticpath.domain.customer.impl;
 
-import static junit.framework.TestCase.assertFalse;
-import static junit.framework.TestCase.assertTrue;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertSame;
+import static org.assertj.core.api.Assertions.assertThat;
 
-import java.util.Locale;
-
-import org.junit.Before;
 import org.junit.Test;
 
 /**
  * Test of the public API of <code>CustomerAddressImpl</code>.
  */
 public class AddressImplTest {
-	private CustomerAddressImpl addressImpl;
 
-	@Before
-	public void setUp() throws Exception {
-		addressImpl = new CustomerAddressImpl();
-	}
+	private final CustomerAddressImpl addressImpl = new CustomerAddressImpl();
 
 	/**
 	 * Test method for 'com.elasticpath.domain.impl.CustomerAddressImpl.getCountry()'.
 	 */
 	@Test
 	public void testGetFirstName() {
-		assertEquals("Check get name", addressImpl.getFirstName(), null);
+		assertThat(addressImpl.getFirstName()).isNull();
 	}
 
 	/**
@@ -39,7 +29,7 @@ public class AddressImplTest {
 	public void testSetFirstName() {
 		final String name = "test name";
 		addressImpl.setFirstName(name);
-		assertSame("Check set name", addressImpl.getFirstName(), name);
+		assertThat(addressImpl.getFirstName()).isEqualTo(name);
 	}
 
 	/**
@@ -47,7 +37,7 @@ public class AddressImplTest {
 	 */
 	@Test
 	public void testGetLastName() {
-		assertEquals("Check get name", addressImpl.getLastName(), null);
+		assertThat(addressImpl.getLastName()).isNull();
 	}
 
 	/**
@@ -57,7 +47,7 @@ public class AddressImplTest {
 	public void testSetLastName() {
 		final String name = "test name";
 		addressImpl.setLastName(name);
-		assertSame("Check set name", addressImpl.getLastName(), name);
+		assertThat(addressImpl.getLastName()).isEqualTo(name);
 	}
 	
 	/**
@@ -65,7 +55,7 @@ public class AddressImplTest {
 	 */
 	@Test
 	public void testGetStreet1() {
-		assertEquals("Check get street", addressImpl.getStreet1(), null);
+		assertThat(addressImpl.getStreet1()).isNull();
 	}
 
 	/**
@@ -75,7 +65,7 @@ public class AddressImplTest {
 	public void testSetStreet1() {
 		final String street = "test street";
 		addressImpl.setStreet1(street);
-		assertSame("Check set street", addressImpl.getStreet1(), street);
+		assertThat(addressImpl.getStreet1()).isEqualTo(street);
 	}
 	
 	/**
@@ -83,7 +73,7 @@ public class AddressImplTest {
 	 */
 	@Test
 	public void testGetStreet2() {
-		assertEquals("Check get street", addressImpl.getStreet2(), null);
+		assertThat(addressImpl.getStreet2()).isNull();
 	}
 
 	/**
@@ -93,7 +83,7 @@ public class AddressImplTest {
 	public void testSetStreet2() {
 		final String street = "test street";
 		addressImpl.setStreet2(street);
-		assertSame("Check set street", addressImpl.getStreet2(), street);
+		assertThat(addressImpl.getStreet2()).isEqualTo(street);
 	}
 	
 	/**
@@ -101,7 +91,7 @@ public class AddressImplTest {
 	 */
 	@Test
 	public void testGetCountry() {
-		assertEquals("Check get country", addressImpl.getCountry(), null);
+		assertThat(addressImpl.getCountry()).isNull();
 	}
 
 	/**
@@ -111,7 +101,7 @@ public class AddressImplTest {
 	public void testSetCountry() {
 		final String country = "test country";
 		addressImpl.setCountry(country);
-		assertEquals("Check set country", addressImpl.getCountry(), country.toUpperCase(Locale.US));
+		assertThat(addressImpl.getCountry()).isEqualToIgnoringCase(country);
 	}
 
 	/**
@@ -119,7 +109,7 @@ public class AddressImplTest {
 	 */
 	@Test
 	public void testGetPhoneNumber() {
-		assertEquals("Check get phone number", addressImpl.getPhoneNumber(), null);
+		assertThat(addressImpl.getPhoneNumber()).isNull();
 	}
 
 	/**
@@ -129,7 +119,7 @@ public class AddressImplTest {
 	public void testSetPhoneNumber() {
 		final String phoneNumber = "888-8888-888";
 		addressImpl.setPhoneNumber(phoneNumber);
-		assertSame("Check set phone number", addressImpl.getPhoneNumber(), phoneNumber);
+		assertThat(addressImpl.getPhoneNumber()).isEqualTo(phoneNumber);
 	}
 
 	/**
@@ -137,7 +127,7 @@ public class AddressImplTest {
 	 */
 	@Test
 	public void testGetFaxNumber() {
-		assertEquals("Check get fax number", addressImpl.getFaxNumber(), null);
+		assertThat(addressImpl.getFaxNumber()).isNull();
 	}
 
 	/**
@@ -147,7 +137,7 @@ public class AddressImplTest {
 	public void testSetFaxNumber() {
 		final String faxNumber = "999-9999-999";
 		addressImpl.setFaxNumber(faxNumber);
-		assertSame("Check set fax number", addressImpl.getFaxNumber(), faxNumber);
+		assertThat(addressImpl.getFaxNumber()).as("Check set fax number").isEqualTo(faxNumber);
 	}
 
 	/**
@@ -155,7 +145,7 @@ public class AddressImplTest {
 	 */
 	@Test
 	public void testGetCity() {
-		assertEquals("Check get city", addressImpl.getCity(), null);
+		assertThat(addressImpl.getCity()).isNull();
 	}
 
 	/**
@@ -165,7 +155,7 @@ public class AddressImplTest {
 	public void testSetCity() {
 		final String city = "test city";
 		addressImpl.setCity(city);
-		assertSame("Check set city", addressImpl.getCity(), city);
+		assertThat(addressImpl.getCity()).isEqualTo(city);
 	}
 
 	/**
@@ -173,7 +163,7 @@ public class AddressImplTest {
 	 */
 	@Test
 	public void testGetSubCountry() {
-		assertEquals("Check get state/province", addressImpl.getSubCountry(), null);
+		assertThat(addressImpl.getSubCountry()).isNull();
 	}
 
 	/**
@@ -183,7 +173,7 @@ public class AddressImplTest {
 	public void testSetSubCountry() {
 		final String stateOrProvince = "test state or province";
 		addressImpl.setSubCountry(stateOrProvince);
-		assertEquals("Check set state/province", addressImpl.getSubCountry(), stateOrProvince.toUpperCase(Locale.US));
+		assertThat(addressImpl.getSubCountry()).isEqualToIgnoringCase(stateOrProvince);
 	}
 
 	/**
@@ -191,7 +181,7 @@ public class AddressImplTest {
 	 */
 	@Test
 	public void testGetZipOrPostalCode() {
-		assertEquals("Check get zip/postal code", addressImpl.getZipOrPostalCode(), null);
+		assertThat(addressImpl.getZipOrPostalCode()).isNull();
 	}
 
 	/**
@@ -201,7 +191,7 @@ public class AddressImplTest {
 	public void testSetZipOrPostalCode() {
 		final String zipOrPostalCode = "test zip or postal code";
 		addressImpl.setZipOrPostalCode(zipOrPostalCode);
-		assertSame("Check set zip/postal code", addressImpl.getZipOrPostalCode(), zipOrPostalCode);
+		assertThat(addressImpl.getZipOrPostalCode()).isEqualTo(zipOrPostalCode);
 	}
 	
 	/**
@@ -210,24 +200,26 @@ public class AddressImplTest {
 	 */
 	@Test
 	public void testGetCommercialAddress() {
-		assertFalse("Check if commercial address", addressImpl.isCommercialAddress());
+		assertThat(addressImpl.isCommercialAddress()).isFalse();
 		addressImpl.setCommercialAddress(true);
-		assertTrue("Check if commercial address", addressImpl.isCommercialAddress());
+		assertThat(addressImpl.isCommercialAddress()).isTrue();
 	}
 
 	/**
 	 * Test method for 'com.elasticpath.domain.impl.CustomerAddressImpl.getOrganization()'.
 	 */
+	@Test
 	public void testGetOrganization() {
-		assertEquals("Check get organization", addressImpl.getOrganization(), null);
+		assertThat(addressImpl.getOrganization()).isNull();
 	}
 
 	/**
 	 * Test method for 'com.elasticpath.domain.impl.CustomerAddressImpl.setOrganization(String)'.
 	 */
+	@Test
 	public void testSetOrganization() {
 		final String organization = "test organization";
 		addressImpl.setOrganization(organization);
-		assertSame("Check set organization", addressImpl.getOrganization(), organization);
+		assertThat(addressImpl.getOrganization()).isEqualTo(organization);
 	}
 }

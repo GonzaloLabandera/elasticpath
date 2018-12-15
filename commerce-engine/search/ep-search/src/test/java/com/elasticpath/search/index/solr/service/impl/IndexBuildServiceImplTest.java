@@ -15,7 +15,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.solr.client.solrj.SolrServer;
+import org.apache.solr.client.solrj.SolrClient;
 import org.jmock.Expectations;
 import org.jmock.Sequence;
 import org.jmock.api.Invocation;
@@ -75,7 +75,7 @@ public class IndexBuildServiceImplTest {
 
 	private SolrManager mockSolrManager;
 
-	private SolrServer mockSolrServer;
+	private SolrClient mockSolrServer;
 
 	private IndexNotificationProcessor mockIndexNotificationProcessor;
 
@@ -111,7 +111,7 @@ public class IndexBuildServiceImplTest {
 		mockSolrManager = context.mock(SolrManager.class);
 		indexBuildService.setSolrManager(mockSolrManager);
 
-		mockSolrServer = context.mock(SolrServer.class);
+		mockSolrServer = context.mock(SolrClient.class);
 
 		mockTimeService = context.mock(TimeService.class);
 		context.checking(new Expectations() {

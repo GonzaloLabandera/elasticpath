@@ -3,16 +3,12 @@
  */
 package com.elasticpath.domain.cmuser.impl;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
 
 import java.util.Set;
 
-import org.jmock.integration.junit4.JUnitRuleMockery;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
 
 import com.elasticpath.domain.cmuser.UserPermission;
@@ -24,9 +20,7 @@ import com.elasticpath.domain.cmuser.UserRole;
 public class UserRoleImplTest {
 
 	private UserRoleImpl userRoleImpl;
-	@Rule
-	public final JUnitRuleMockery context = new JUnitRuleMockery();
-	
+
 	/**
 	 * Prepares for the next test.
 	 *
@@ -42,7 +36,7 @@ public class UserRoleImplTest {
 	 */
 	@Test
 	public void testGetName() {
-		assertEquals(userRoleImpl.getName(), null);
+		assertThat(userRoleImpl.getName()).isNull();
 	}
 
 	/**
@@ -52,7 +46,7 @@ public class UserRoleImplTest {
 	public void testSetName() {
 		final String roleName = "CSR";
 		userRoleImpl.setName(roleName);
-		assertSame(userRoleImpl.getName(), roleName);
+		assertThat(userRoleImpl.getName()).isEqualTo(roleName);
 	}
 
 	/**
@@ -61,7 +55,7 @@ public class UserRoleImplTest {
 	@Test
 	public void testGetUserPermissionMap() {
 		final Set<UserPermission> userPermissions = userRoleImpl.getUserPermissions();
-		assertTrue("Check getUserPermissions", userPermissions.isEmpty());
+		assertThat(userPermissions).as("Check getUserPermissions").isEmpty();
 	}
 
 	/**
@@ -69,10 +63,10 @@ public class UserRoleImplTest {
 	 */
 	@Test
 	public void testIsSuperUserRole() {
-		assertFalse(userRoleImpl.isSuperUserRole());
+		assertThat(userRoleImpl.isSuperUserRole()).isFalse();
 
 		userRoleImpl.setName(UserRole.SUPERUSER);
-		assertTrue(userRoleImpl.isSuperUserRole());
+		assertThat(userRoleImpl.isSuperUserRole()).isTrue();
 	}
 	
 	/**
@@ -81,7 +75,7 @@ public class UserRoleImplTest {
 	@Test
 	public void testIsPermanentRoleWsUser() {
 		userRoleImpl.setName(UserRole.WSUSER);
-		assertTrue(userRoleImpl.isUnmodifiableRole());		
+		assertThat(userRoleImpl.isUnmodifiableRole()).isTrue();
 	}
 	
 	/**
@@ -90,7 +84,7 @@ public class UserRoleImplTest {
 	@Test
 	public void testIsPermanentRoleCmUser() {
 		userRoleImpl.setName(UserRole.CMUSER);
-		assertTrue(userRoleImpl.isUnmodifiableRole());
+		assertThat(userRoleImpl.isUnmodifiableRole()).isTrue();
 	}
 
 	/**
@@ -98,11 +92,11 @@ public class UserRoleImplTest {
 	 */
 	@Test
 	public void testAddUserPermission() {
-		UserPermission userPermission = context.mock(UserPermission.class);
+		UserPermission userPermission = mock(UserPermission.class);
 		
 		userRoleImpl.addUserPermission(userPermission);
 
-		assertTrue(userRoleImpl.getUserPermissions().contains(userPermission));
+		assertThat(userRoleImpl.getUserPermissions()).contains(userPermission);
 	}
 
 	/**
@@ -110,10 +104,10 @@ public class UserRoleImplTest {
 	 */
 	@Test
 	public void testRemoveUserPermission() {
-		UserPermission userPermission = context.mock(UserPermission.class);
+		UserPermission userPermission = mock(UserPermission.class);
 		
 		userRoleImpl.addUserPermission(userPermission);
 		userRoleImpl.removeUserPermission(userPermission);
-		assertFalse(userRoleImpl.getUserPermissions().contains(userPermission));
+		assertThat(userRoleImpl.getUserPermissions()).doesNotContain(userPermission);
 	}
 }

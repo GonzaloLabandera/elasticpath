@@ -3,21 +3,22 @@
  */
 package com.elasticpath.search.searchengine;
 
+import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
 import org.apache.log4j.Logger;
+import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrRequest.METHOD;
-import org.apache.solr.client.solrj.SolrServer;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.request.QueryRequest;
 import org.apache.solr.client.solrj.response.QueryResponse;
-import org.apache.solr.common.SolrDocument;
+import
+		org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.params.SolrParams;
 
 import com.elasticpath.persistence.api.EpPersistenceException;
@@ -74,7 +75,7 @@ public class SolrIndexSearcherImpl implements IndexSearcher {
 		LuceneQuery luceneQuery = (LuceneQuery) epQuery.getNativeQuery();
 
 		SolrQuery solrQuery = new SolrQuery();
-		solrQuery.setQueryType(STANDARD_REQUEST_HANDLER);
+		solrQuery.setRequestHandler(STANDARD_REQUEST_HANDLER);
 
 		solrQuery.setQuery(luceneQuery.getNativeQuery());
 
@@ -107,16 +108,16 @@ public class SolrIndexSearcherImpl implements IndexSearcher {
 	/**
 	 * Searches the given SOLR server with the given query.
 	 *
-	 * @param server the SOLR server to search
+	 * @param client the SOLR server to search
 	 * @param query the query to search with
 	 * @return list of UIDs representing matches of the given query
 	 */
-	QueryResponse performSearch(final SolrServer server, final SolrParams query) {
+	QueryResponse performSearch(final SolrClient client, final SolrParams query) {
 		try {
 			QueryRequest queryRequest = new QueryRequest(query);
 			queryRequest.setMethod(METHOD.POST);
-			return queryRequest.process(server);
-		} catch (SolrServerException e) {
+			return queryRequest.process(client);
+		} catch (SolrServerException | IOException e) {
 			throw new EpPersistenceException("Solr exception executing search", e);
 		}
 	}
@@ -129,13 +130,15 @@ public class SolrIndexSearcherImpl implements IndexSearcher {
 	 * @param epQuery epQuery
 	 */
 	void parseResponseDocument(final QueryResponse response, final SolrIndexSearchResult<Long> searchResult, final EpQuery epQuery) {
-		List<Long> objectUidList = Collections.emptyList();
+		List<Long> objectUidList;
+
 
 		searchResult.setNumFound(Math.min(epQuery.getLimit(), (int) response.getResults().getNumFound() - epQuery.getStartIndex()));
 
 		objectUidList = new ArrayList<>(response.getResults().size());
 		for (SolrDocument document : response.getResults()) {
-			objectUidList.add((Long) document.getFieldValue(SolrIndexConstants.OBJECT_UID));
+			String fieldValue = (String) document.getFieldValue(SolrIndexConstants.OBJECT_UID);
+			objectUidList.add(Long.valueOf(fieldValue));
 		}
 		searchResult.setResultUids(objectUidList);
 	}

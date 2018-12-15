@@ -15,8 +15,8 @@ import com.elasticpath.commons.pagination.SearchCriterion;
 import com.elasticpath.commons.pagination.SearchablePaginatorLocator;
 
 /**
- *
- * @param <T>
+ * Database memory merge Searchable pagination locator.
+ * @param <T> the database paginator locator..
  */
 public class DatabaseMemoryMergeSearchablePaginatorLocator<T extends UniquelyIdentifiable> implements SearchablePaginatorLocator<T> {
 	private static final long serialVersionUID = 109947822347395051L;

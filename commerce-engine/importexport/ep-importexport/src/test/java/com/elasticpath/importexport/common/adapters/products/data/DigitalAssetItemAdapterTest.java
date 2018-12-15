@@ -1,20 +1,18 @@
 /**
  * Copyright (c) Elastic Path Software Inc., 2014
  */
-/**
- * 
- */
+
 package com.elasticpath.importexport.common.adapters.products.data;
 
-import static junit.framework.TestCase.assertTrue;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
-import org.jmock.Expectations;
-import org.jmock.integration.junit4.JUnitRuleMockery;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.elasticpath.commons.beanframework.BeanFactory;
 import com.elasticpath.commons.constants.ContextIdNames;
@@ -26,6 +24,7 @@ import com.elasticpath.importexport.common.dto.products.DigitalAssetItemDTO;
  * Verify that DigitalAssetItemAdapter populates category domain object from DTO properly and vice versa. 
  * <br>Nested adapters should be tested separately.
  */
+@RunWith(MockitoJUnitRunner.class)
 public class DigitalAssetItemAdapterTest {
 	
 	private static final Integer EXPIRY_DAYS = 10;
@@ -34,13 +33,13 @@ public class DigitalAssetItemAdapterTest {
 
 	private static final String FILE_NAME = "fileName";
 
-	@Rule
-	public final JUnitRuleMockery context = new JUnitRuleMockery();
-
+	@Mock
 	private ProductSku mockProductSku;
 
+	@Mock
 	private DigitalAsset mockDigitalAsset;
 
+	@Mock
 	private BeanFactory mockBeanFactory;
 
 	private DigitalAssetItemAdapter digitalAssetItemAdapter;
@@ -50,11 +49,6 @@ public class DigitalAssetItemAdapterTest {
 	 */
 	@Before
 	public void setUp() throws Exception {
-
-		mockProductSku = context.mock(ProductSku.class);
-		mockBeanFactory = context.mock(BeanFactory.class);
-		mockDigitalAsset = context.mock(DigitalAsset.class);
-		
 		digitalAssetItemAdapter = new DigitalAssetItemAdapter();
 		digitalAssetItemAdapter.setBeanFactory(mockBeanFactory);
 	}
@@ -69,35 +63,33 @@ public class DigitalAssetItemAdapterTest {
 			void checkDownloadExpiry(final Integer expiryDays) {
 				// empty, not necessary
 			}
+
 			@Override
 			void checkDownloadLimit(final Integer maxDownloadTimes) {
 				// empty, not necessary
 			}
+
 			@Override
 			DigitalAsset createDigitalAsset(final ProductSku productSku) {
-				assertNotNull(productSku);
+				assertThat(productSku).isNotNull();
 				return mockDigitalAsset;
 			}
 		};
 
-		context.checking(new Expectations() {
-			{
-				oneOf(mockProductSku).setDigital(true);
-				oneOf(mockProductSku).setDigitalAsset(mockDigitalAsset);
-
-				oneOf(mockDigitalAsset).setFileName(FILE_NAME);
-				oneOf(mockDigitalAsset).setExpiryDays(EXPIRY_DAYS);
-				oneOf(mockDigitalAsset).setMaxDownloadTimes(MAX_DOWNLOAD_TIMES);
-			}
-		});
-		
 		DigitalAssetItemDTO digitalAssetItemDTO = new DigitalAssetItemDTO();
 		digitalAssetItemDTO.setEnabled(true);
 		digitalAssetItemDTO.setExpiryDays(EXPIRY_DAYS);
 		digitalAssetItemDTO.setMaxDownloadTimes(MAX_DOWNLOAD_TIMES);
 		digitalAssetItemDTO.setFileName(FILE_NAME);
-		
+
 		adapter.populateDomain(digitalAssetItemDTO, mockProductSku);
+
+		verify(mockProductSku).setDigital(true);
+		verify(mockProductSku).setDigitalAsset(mockDigitalAsset);
+		verify(mockDigitalAsset).setFileName(FILE_NAME);
+		verify(mockDigitalAsset).setExpiryDays(EXPIRY_DAYS);
+		verify(mockDigitalAsset).setMaxDownloadTimes(MAX_DOWNLOAD_TIMES);
+
 	}
 
 	/**
@@ -105,18 +97,14 @@ public class DigitalAssetItemAdapterTest {
 	 */
 	@Test
 	public void testCreateDigitalAsset() {
-		context.checking(new Expectations() {
-			{
-				oneOf(mockProductSku).getDigitalAsset();
-				will(returnValue(null));
-				oneOf(mockBeanFactory).getBean(ContextIdNames.DIGITAL_ASSET);
-				will(returnValue(mockDigitalAsset));
-			}
-		});
-		
+		when(mockProductSku.getDigitalAsset()).thenReturn(null);
+		when(mockBeanFactory.getBean(ContextIdNames.DIGITAL_ASSET)).thenReturn(mockDigitalAsset);
+
 		DigitalAsset result = digitalAssetItemAdapter.createDigitalAsset(mockProductSku);
-		
-		assertEquals(mockDigitalAsset, result);
+
+		assertThat(result).isEqualTo(mockDigitalAsset);
+		verify(mockProductSku).getDigitalAsset();
+		verify(mockBeanFactory).getBean(ContextIdNames.DIGITAL_ASSET);
 	}
 
 	/**
@@ -124,29 +112,25 @@ public class DigitalAssetItemAdapterTest {
 	 */
 	@Test
 	public void testPopulateDTO() {
-		context.checking(new Expectations() {
-			{
-				oneOf(mockProductSku).isDigital();
-				will(returnValue(true));
-				oneOf(mockProductSku).getDigitalAsset();
-				will(returnValue(mockDigitalAsset));
+		when(mockProductSku.isDigital()).thenReturn(true);
+		when(mockProductSku.getDigitalAsset()).thenReturn(mockDigitalAsset);
 
-				oneOf(mockDigitalAsset).getFileName();
-				will(returnValue(FILE_NAME));
-				oneOf(mockDigitalAsset).getExpiryDays();
-				will(returnValue(EXPIRY_DAYS));
-				oneOf(mockDigitalAsset).getMaxDownloadTimes();
-				will(returnValue(MAX_DOWNLOAD_TIMES));
-			}
-		});
-		
+		when(mockDigitalAsset.getFileName()).thenReturn(FILE_NAME);
+		when(mockDigitalAsset.getExpiryDays()).thenReturn(EXPIRY_DAYS);
+		when(mockDigitalAsset.getMaxDownloadTimes()).thenReturn(MAX_DOWNLOAD_TIMES);
+
 		DigitalAssetItemDTO digitalAssetItemDTO = new DigitalAssetItemDTO();
 		digitalAssetItemAdapter.populateDTO(mockProductSku, digitalAssetItemDTO);
-		
-		assertTrue(digitalAssetItemDTO.isEnabled());
-		assertEquals(FILE_NAME, digitalAssetItemDTO.getFileName());
-		assertEquals(EXPIRY_DAYS, digitalAssetItemDTO.getExpiryDays());
-		assertEquals(MAX_DOWNLOAD_TIMES, digitalAssetItemDTO.getMaxDownloadTimes());
+
+		verify(mockProductSku).isDigital();
+		verify(mockProductSku).getDigitalAsset();
+		verify(mockDigitalAsset).getFileName();
+		verify(mockDigitalAsset).getExpiryDays();
+		verify(mockDigitalAsset).getMaxDownloadTimes();
+		assertThat(digitalAssetItemDTO.isEnabled()).isTrue();
+		assertThat(digitalAssetItemDTO.getFileName()).isEqualTo(FILE_NAME);
+		assertThat(digitalAssetItemDTO.getExpiryDays()).isEqualTo(EXPIRY_DAYS);
+		assertThat(digitalAssetItemDTO.getMaxDownloadTimes()).isEqualTo(MAX_DOWNLOAD_TIMES);
 	}
 
 }

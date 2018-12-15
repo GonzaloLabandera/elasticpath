@@ -3,23 +3,24 @@
  */
 package com.elasticpath.search.index.solr.builders.impl;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.Date;
 
 import org.apache.solr.common.SolrInputDocument;
-import org.jmock.Expectations;
-import org.jmock.integration.junit4.JUnitRuleMockery;
+import org.assertj.core.api.SoftAssertions;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.elasticpath.domain.customer.Customer;
-import com.elasticpath.domain.customer.CustomerAddress;
 import com.elasticpath.domain.customer.impl.CustomerAddressImpl;
 import com.elasticpath.search.index.pipeline.stats.impl.PipelinePerformanceImpl;
 import com.elasticpath.search.index.solr.document.impl.CustomerSolrInputDocumentCreator;
@@ -30,15 +31,14 @@ import com.elasticpath.service.search.solr.SolrIndexConstants;
 /**
  * Test <code>CustomerIndexBuilder</code>.
  */
+@RunWith(MockitoJUnitRunner.class)
 public class CustomerIndexBuilderTest {
 
 	private CustomerSolrInputDocumentCreator customerDocumentBuilder;
 
 	private CustomerIndexBuilder customerIndexBuilder;
 
-	@Rule
-	public final JUnitRuleMockery context = new JUnitRuleMockery();
-
+	@Mock
 	private CustomerService mockCustomerService;
 
 	private AnalyzerImpl analyzer;
@@ -49,12 +49,11 @@ public class CustomerIndexBuilderTest {
 	 * @throws Exception on error
 	 */
 	@Before
-	public void setUp() throws Exception {
+	public void setUp() {
 
 		this.customerIndexBuilder = new CustomerIndexBuilder();
 		this.analyzer = new AnalyzerImpl();
 
-		this.mockCustomerService = context.mock(CustomerService.class);
 		this.customerIndexBuilder.setCustomerService(mockCustomerService);
 
 		customerDocumentBuilder = new CustomerSolrInputDocumentCreator();
@@ -67,7 +66,7 @@ public class CustomerIndexBuilderTest {
 	 */
 	@Test
 	public void testGetName() {
-		assertNotNull(this.customerIndexBuilder.getName());
+		assertThat(this.customerIndexBuilder.getName()).isNotNull();
 	}
 
 	/**
@@ -76,13 +75,9 @@ public class CustomerIndexBuilderTest {
 	@Test
 	public void testFindDeletedUids() {
 		final ArrayList<Long> uidList = new ArrayList<>();
-		context.checking(new Expectations() {
-			{
-				oneOf(mockCustomerService).findUidsByDeletedDate(with(any(Date.class)));
-				will(returnValue(uidList));
-			}
-		});
-		assertSame(uidList, this.customerIndexBuilder.findDeletedUids(new Date()));
+		when(mockCustomerService.findUidsByDeletedDate(any(Date.class))).thenReturn(uidList);
+		assertThat(this.customerIndexBuilder.findDeletedUids(new Date())).isEqualTo(uidList);
+		verify(mockCustomerService).findUidsByDeletedDate(any(Date.class));
 	}
 
 	/**
@@ -91,13 +86,9 @@ public class CustomerIndexBuilderTest {
 	@Test
 	public void testFindAddedOrModifiedUids() {
 		final ArrayList<Long> uidList = new ArrayList<>();
-		context.checking(new Expectations() {
-			{
-				oneOf(mockCustomerService).findUidsByModifiedDate(with(any(Date.class)));
-				will(returnValue(uidList));
-			}
-		});
-		assertSame(uidList, this.customerIndexBuilder.findAddedOrModifiedUids(new Date()));
+		when(mockCustomerService.findUidsByModifiedDate(any(Date.class))).thenReturn(uidList);
+		assertThat(this.customerIndexBuilder.findAddedOrModifiedUids(new Date())).isEqualTo(uidList);
+		verify(mockCustomerService).findUidsByModifiedDate(any(Date.class));
 	}
 
 	/**
@@ -106,13 +97,9 @@ public class CustomerIndexBuilderTest {
 	@Test
 	public void testFindAllUids() {
 		final ArrayList<Long> uidList = new ArrayList<>();
-		context.checking(new Expectations() {
-			{
-				oneOf(mockCustomerService).findUidsByModifiedDate(with(any(Date.class)));
-				will(returnValue(uidList));
-			}
-		});
-		assertSame(uidList, this.customerIndexBuilder.findAddedOrModifiedUids(new Date()));
+		when(mockCustomerService.findUidsByModifiedDate(any(Date.class))).thenReturn(uidList);
+		assertThat(this.customerIndexBuilder.findAddedOrModifiedUids(new Date())).isEqualTo(uidList);
+		verify(mockCustomerService).findUidsByModifiedDate(any(Date.class));
 	}
 
 	/**
@@ -120,15 +107,10 @@ public class CustomerIndexBuilderTest {
 	 */
 	@Test
 	public void testCreateDocumentWhenCustomerHasNoUserIdReturnsNull() {
-		final Customer mockCustomer = context.mock(Customer.class);
-		context.checking(new Expectations() {
-			{
-				allowing(mockCustomer).getUserId();
-				will(returnValue(null));
-			}
-		});
+		final Customer mockCustomer = mock(Customer.class);
+		when(mockCustomer.getUserId()).thenReturn(null);
 		customerDocumentBuilder.setEntity(mockCustomer);
-		assertNull(customerDocumentBuilder.createDocument());
+		assertThat((Object) customerDocumentBuilder.createDocument()).isNull();
 	}
 
 	/**
@@ -142,48 +124,38 @@ public class CustomerIndexBuilderTest {
 		final Date date = new Date();
 		final String userId = "some id";
 
-		final Customer mockCustomer = context.mock(Customer.class);
-		context.checking(new Expectations() {
-			{
-				allowing(mockCustomer).getUidPk();
-				will(returnValue(uidPk));
+		final Customer mockCustomer = mock(Customer.class);
+		when(mockCustomer.getUidPk()).thenReturn(uidPk);
 
-				allowing(mockCustomer).getStoreCode();
-				will(returnValue(storeCode));
-				allowing(mockCustomer).getAddresses();
-				will(returnValue(new ArrayList<CustomerAddress>()));
-				allowing(mockCustomer).getCreationDate();
-				will(returnValue(date));
-				allowing(mockCustomer).getUserId();
-				will(returnValue(userId));
+		when(mockCustomer.getStoreCode()).thenReturn(storeCode);
+		when(mockCustomer.getAddresses()).thenReturn(new ArrayList<>());
+		when(mockCustomer.getCreationDate()).thenReturn(date);
+		when(mockCustomer.getUserId()).thenReturn(userId);
 
-				allowing(mockCustomer).getFirstName();
-				will(returnValue(null));
-				allowing(mockCustomer).getLastName();
-				will(returnValue(null));
-				allowing(mockCustomer).getEmail();
-				will(returnValue(null));
-				allowing(mockCustomer).getPhoneNumber();
-				will(returnValue(null));
-				allowing(mockCustomer).getPreferredBillingAddress();
-				will(returnValue(null));
-			}
-		});
+		when(mockCustomer.getFirstName()).thenReturn(null);
+		when(mockCustomer.getLastName()).thenReturn(null);
+		when(mockCustomer.getEmail()).thenReturn(null);
+		when(mockCustomer.getPhoneNumber()).thenReturn(null);
+		when(mockCustomer.getPreferredBillingAddress()).thenReturn(null);
 
 		customerDocumentBuilder.setEntity(mockCustomer);
 
 		final SolrInputDocument document = customerDocumentBuilder.createDocument();
-		assertNotNull(document);
+		assertThat((Object) document).isNotNull();
 
-		assertEquals(Long.toString(mockCustomer.getUidPk()), document.getFieldValue(SolrIndexConstants.OBJECT_UID));
-		assertEquals(userId, document.getFieldValue(SolrIndexConstants.USER_ID));
-		assertEquals(null, document.getFieldValue(SolrIndexConstants.FIRST_NAME));
-		assertEquals(null, document.getFieldValue(SolrIndexConstants.LAST_NAME));
-		assertEquals(null, document.getFieldValue(SolrIndexConstants.EMAIL));
-		assertEquals(null, document.getFieldValue(SolrIndexConstants.PHONE_NUMBER));
-		assertEquals(analyzer.analyze(date), document.getFieldValue(SolrIndexConstants.CREATE_TIME));
-		assertEquals(analyzer.analyze(storeCode), document.getFieldValue(SolrIndexConstants.STORE_CODE));
-		assertNull(document.getFieldValue(SolrIndexConstants.ZIP_POSTAL_CODE));
+		SoftAssertions softly = new SoftAssertions();
+
+		softly.assertThat(document.getFieldValue(SolrIndexConstants.OBJECT_UID)).isEqualTo(Long.toString(mockCustomer.getUidPk()));
+		softly.assertThat(document.getFieldValue(SolrIndexConstants.USER_ID)).isEqualTo(userId);
+		softly.assertThat(document.getFieldValue(SolrIndexConstants.FIRST_NAME)).isNull();
+		softly.assertThat(document.getFieldValue(SolrIndexConstants.LAST_NAME)).isNull();
+		softly.assertThat(document.getFieldValue(SolrIndexConstants.EMAIL)).isNull();
+		softly.assertThat(document.getFieldValue(SolrIndexConstants.PHONE_NUMBER)).isNull();
+		softly.assertThat(document.getFieldValue(SolrIndexConstants.CREATE_TIME)).isEqualTo(analyzer.analyze(date));
+		softly.assertThat(document.getFieldValue(SolrIndexConstants.STORE_CODE)).isEqualTo(analyzer.analyze(storeCode));
+		softly.assertThat(document.getFieldValue(SolrIndexConstants.ZIP_POSTAL_CODE)).isNull();
+
+		softly.assertAll();
 	}
 
 	/**
@@ -200,44 +172,34 @@ public class CustomerIndexBuilderTest {
 		final Date createDate = new Date();
 		final String storeCode = "sdfsdf";
 
-		final Customer mockCustomer = context.mock(Customer.class);
-		context.checking(new Expectations() {
-			{
-				allowing(mockCustomer).getUidPk();
-				will(returnValue(uidPk));
-				allowing(mockCustomer).getFirstName();
-				will(returnValue(firstName));
-				allowing(mockCustomer).getLastName();
-				will(returnValue(lastName));
-				allowing(mockCustomer).getEmail();
-				will(returnValue(email));
-				allowing(mockCustomer).getUserId();
-				will(returnValue(userId));
-				allowing(mockCustomer).getPhoneNumber();
-				will(returnValue(phoneNumber));
-				allowing(mockCustomer).getCreationDate();
-				will(returnValue(createDate));
-				allowing(mockCustomer).getAddresses();
-				will(returnValue(new ArrayList<CustomerAddress>()));
-				allowing(mockCustomer).getPreferredBillingAddress();
-				will(returnValue(new CustomerAddressImpl()));
+		final Customer mockCustomer = mock(Customer.class);
+		when(mockCustomer.getUidPk()).thenReturn(uidPk);
+		when(mockCustomer.getFirstName()).thenReturn(firstName);
+		when(mockCustomer.getLastName()).thenReturn(lastName);
+		when(mockCustomer.getEmail()).thenReturn(email);
+		when(mockCustomer.getUserId()).thenReturn(userId);
+		when(mockCustomer.getPhoneNumber()).thenReturn(phoneNumber);
+		when(mockCustomer.getCreationDate()).thenReturn(createDate);
+		when(mockCustomer.getAddresses()).thenReturn(new ArrayList<>());
+		when(mockCustomer.getPreferredBillingAddress()).thenReturn(new CustomerAddressImpl());
 
-				allowing(mockCustomer).getStoreCode();
-				will(returnValue(storeCode));
-			}
-		});
+		when(mockCustomer.getStoreCode()).thenReturn(storeCode);
 
 		customerDocumentBuilder.setEntity(mockCustomer);
 
 		final SolrInputDocument document = customerDocumentBuilder.createDocument();
-		assertNotNull(document);
+		assertThat((Object) document).isNotNull();
 
-		assertEquals(Long.toString(uidPk), document.getFieldValue(SolrIndexConstants.OBJECT_UID));
-		assertEquals(analyzer.analyze(userId), document.getFieldValue(SolrIndexConstants.USER_ID));
-		assertEquals(analyzer.analyze(firstName), document.getFieldValue(SolrIndexConstants.FIRST_NAME));
-		assertEquals(analyzer.analyze(lastName), document.getFieldValue(SolrIndexConstants.LAST_NAME));
-		assertEquals(analyzer.analyze(email), document.getFieldValue(SolrIndexConstants.EMAIL));
-		assertEquals(analyzer.analyze(phoneNumber), document.getFieldValue(SolrIndexConstants.PHONE_NUMBER));
-		assertEquals(analyzer.analyze(createDate), document.getFieldValue(SolrIndexConstants.CREATE_TIME));
+		SoftAssertions softly = new SoftAssertions();
+
+		softly.assertThat(document.getFieldValue(SolrIndexConstants.OBJECT_UID)).isEqualTo(Long.toString(uidPk));
+		softly.assertThat(document.getFieldValue(SolrIndexConstants.USER_ID)).isEqualTo(analyzer.analyze(userId));
+		softly.assertThat(document.getFieldValue(SolrIndexConstants.FIRST_NAME)).isEqualTo(analyzer.analyze(firstName));
+		softly.assertThat(document.getFieldValue(SolrIndexConstants.LAST_NAME)).isEqualTo(analyzer.analyze(lastName));
+		softly.assertThat(document.getFieldValue(SolrIndexConstants.EMAIL)).isEqualTo(analyzer.analyze(email));
+		softly.assertThat(document.getFieldValue(SolrIndexConstants.PHONE_NUMBER)).isEqualTo(analyzer.analyze(phoneNumber));
+		softly.assertThat(document.getFieldValue(SolrIndexConstants.CREATE_TIME)).isEqualTo(analyzer.analyze(createDate));
+
+		softly.assertAll();
 	}
 }

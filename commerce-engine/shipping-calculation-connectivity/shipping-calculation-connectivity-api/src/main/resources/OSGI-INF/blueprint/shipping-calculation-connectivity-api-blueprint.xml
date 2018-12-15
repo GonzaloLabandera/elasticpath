@@ -59,7 +59,11 @@
 							unbind-method="unbindImplementation"/>
 	</reference>
 
-	<reference id="transactionManager" interface="org.springframework.transaction.PlatformTransactionManager"/>
+	<reference id="transactionManager"
+			   availability="optional"
+			   interface="org.springframework.transaction.PlatformTransactionManager"
+			   filter="(type=JpaTransactionManager)"
+			   timeout="1"/>
 
 	<service ref="shippingCalculationResultBuilderSupplier"
 			 interface="java.util.function.Supplier">

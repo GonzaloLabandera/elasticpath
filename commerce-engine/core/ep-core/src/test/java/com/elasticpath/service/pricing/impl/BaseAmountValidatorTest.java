@@ -1,14 +1,9 @@
-/**
+/*
  * Copyright (c) Elastic Path Software Inc., 2013
- */
-/**
- * 
  */
 package com.elasticpath.service.pricing.impl;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.math.BigDecimal;
 
@@ -65,12 +60,12 @@ public class BaseAmountValidatorTest {
 	/** */
 	@Test
 	public void testSupports() {
-		assertTrue(validator.supports(BaseAmount.class));
+		assertThat(validator.supports(BaseAmount.class)).isTrue();
 	}
 	/** */
 	@Test
 	public void testDoesNotSupport() {
-		assertFalse(validator.supports(BaseAmountDTO.class));
+		assertThat(validator.supports(BaseAmountDTO.class)).isFalse();
 	}
 	/** */
 	@Test
@@ -79,7 +74,7 @@ public class BaseAmountValidatorTest {
 		Errors errors = new BeanPropertyBindingResult(amount, BASE_AMOUNT); 
 		
 		validator.validate(amount, errors);
-		assertFalse(errors.hasErrors());
+		assertThat(errors.hasErrors()).isFalse();
 	}
 	/** */
 	@Test
@@ -88,10 +83,10 @@ public class BaseAmountValidatorTest {
 		Errors errors = new BeanPropertyBindingResult(amount, BASE_AMOUNT); 
 		
 		validator.validate(amount, errors);
-		assertTrue(errors.hasErrors());
-		assertEquals(1, errors.getErrorCount());
-		assertEquals("validator.baseAmount.invalidQuantity", errors.getFieldError(QUANTITY).getCode());
-		assertEquals(BigDecimal.ZERO, errors.getFieldError(QUANTITY).getRejectedValue());
+		assertThat(errors.hasErrors()).isTrue();
+		assertThat(errors.getErrorCount()).isEqualTo(1);
+		assertThat(errors.getFieldError(QUANTITY).getCode()).isEqualTo("validator.baseAmount.invalidQuantity");
+		assertThat(errors.getFieldError(QUANTITY).getRejectedValue()).isEqualTo(BigDecimal.ZERO);
 	}
 	
 	/** */
@@ -101,9 +96,9 @@ public class BaseAmountValidatorTest {
 		Errors errors = new BeanPropertyBindingResult(amount, BASE_AMOUNT); 
 		
 		validator.validate(amount, errors);
-		assertEquals(1, errors.getErrorCount());
-		assertEquals("validator.baseAmount.invalidQuantity", errors.getFieldError(QUANTITY).getCode());
-		assertEquals(null, errors.getFieldError(QUANTITY).getRejectedValue());
+		assertThat(errors.getErrorCount()).isEqualTo(1);
+		assertThat(errors.getFieldError(QUANTITY).getCode()).isEqualTo("validator.baseAmount.invalidQuantity");
+		assertThat(errors.getFieldError(QUANTITY).getRejectedValue()).isNull();
 	}
 
 	/** */
@@ -113,10 +108,10 @@ public class BaseAmountValidatorTest {
 		Errors errors = new BeanPropertyBindingResult(amount, BASE_AMOUNT); 
 		
 		validator.validate(amount, errors);
-		assertTrue(errors.hasErrors());
-		assertEquals(1, errors.getErrorCount());
-		assertEquals("validator.baseAmount.invalidListPrice", errors.getFieldError(LIST_VALUE).getCode());
-		assertEquals(new BigDecimal(-1), errors.getFieldError(LIST_VALUE).getRejectedValue());
+		assertThat(errors.hasErrors()).isTrue();
+		assertThat(errors.getErrorCount()).isEqualTo(1);
+		assertThat(errors.getFieldError(LIST_VALUE).getCode()).isEqualTo("validator.baseAmount.invalidListPrice");
+		assertThat(errors.getFieldError(LIST_VALUE).getRejectedValue()).isEqualTo(new BigDecimal(-1));
 	}
 
 	/** */
@@ -126,10 +121,10 @@ public class BaseAmountValidatorTest {
 		Errors errors = new BeanPropertyBindingResult(amount, BASE_AMOUNT); 
 		
 		validator.validate(amount, errors);
-		assertTrue(errors.hasErrors());
-		assertEquals(1, errors.getErrorCount());
-		assertEquals("validator.baseAmount.invalidObjectGuid", errors.getFieldError("objectGuid").getCode());
-		assertEquals(null, errors.getFieldError("objectGuid").getRejectedValue());
+		assertThat(errors.hasErrors()).isTrue();
+		assertThat(errors.getErrorCount()).isEqualTo(1);
+		assertThat(errors.getFieldError("objectGuid").getCode()).isEqualTo("validator.baseAmount.invalidObjectGuid");
+		assertThat(errors.getFieldError("objectGuid").getRejectedValue()).isNull();
 	}
 	
 	/** */
@@ -139,10 +134,10 @@ public class BaseAmountValidatorTest {
 		Errors errors = new BeanPropertyBindingResult(amount, BASE_AMOUNT); 
 		
 		validator.validate(amount, errors);
-		assertTrue(errors.hasErrors());
-		assertEquals(1, errors.getErrorCount());
-		assertEquals("validator.baseAmount.invalidObjectType", errors.getFieldError(OBJECT_TYPE).getCode());
-		assertEquals(null, errors.getFieldError(OBJECT_TYPE).getRejectedValue());
+		assertThat(errors.hasErrors()).isTrue();
+		assertThat(errors.getErrorCount()).isEqualTo(1);
+		assertThat(errors.getFieldError(OBJECT_TYPE).getCode()).isEqualTo("validator.baseAmount.invalidObjectType");
+		assertThat(errors.getFieldError(OBJECT_TYPE).getRejectedValue()).isNull();
 	}
 	
 	/** */
@@ -152,10 +147,10 @@ public class BaseAmountValidatorTest {
 		Errors errors = new BeanPropertyBindingResult(amount, BASE_AMOUNT); 
 		
 		validator.validate(amount, errors);
-		assertTrue(errors.hasErrors());
-		assertEquals(1, errors.getErrorCount());
-		assertEquals("validator.baseAmount.invalidObjectType", errors.getFieldError(OBJECT_TYPE).getCode());
-		assertEquals("NOT_PRODUCT_OR_SKU", errors.getFieldError(OBJECT_TYPE).getRejectedValue());
+		assertThat(errors.hasErrors()).isTrue();
+		assertThat(errors.getErrorCount()).isEqualTo(1);
+		assertThat(errors.getFieldError(OBJECT_TYPE).getCode()).isEqualTo("validator.baseAmount.invalidObjectType");
+		assertThat(errors.getFieldError(OBJECT_TYPE).getRejectedValue()).isEqualTo("NOT_PRODUCT_OR_SKU");
 	}
 
 	/** */
@@ -165,10 +160,10 @@ public class BaseAmountValidatorTest {
 		Errors errors = new BeanPropertyBindingResult(amount, BASE_AMOUNT); 
 		
 		validator.validate(amount, errors);
-		assertTrue(errors.hasErrors());
-		assertEquals(1, errors.getErrorCount());
-		assertEquals("validator.baseAmount.invalidListPrice", errors.getFieldError(LIST_VALUE).getCode());
-		assertEquals(null, errors.getFieldError(LIST_VALUE).getRejectedValue());
+		assertThat(errors.hasErrors()).isTrue();
+		assertThat(errors.getErrorCount()).isEqualTo(1);
+		assertThat(errors.getFieldError(LIST_VALUE).getCode()).isEqualTo("validator.baseAmount.invalidListPrice");
+		assertThat(errors.getFieldError(LIST_VALUE).getRejectedValue()).isNull();
 	}
 	/** */
 	@Test
@@ -177,10 +172,10 @@ public class BaseAmountValidatorTest {
 		Errors errors = new BeanPropertyBindingResult(amount, BASE_AMOUNT); 
 		
 		validator.validate(amount, errors);
-		assertTrue(errors.hasErrors());
-		assertEquals(1, errors.getErrorCount());
-		assertEquals("validator.baseAmount.invalidSalePrice", errors.getFieldError(SALE_VALUE).getCode());
-		assertEquals(new BigDecimal(-1), errors.getFieldError(SALE_VALUE).getRejectedValue());
+		assertThat(errors.hasErrors()).isTrue();
+		assertThat(errors.getErrorCount()).isEqualTo(1);
+		assertThat(errors.getFieldError(SALE_VALUE).getCode()).isEqualTo("validator.baseAmount.invalidSalePrice");
+		assertThat(errors.getFieldError(SALE_VALUE).getRejectedValue()).isEqualTo(new BigDecimal(-1));
 	}
 	/** */
 	@Test
@@ -189,7 +184,7 @@ public class BaseAmountValidatorTest {
 		Errors errors = new BeanPropertyBindingResult(amount, BASE_AMOUNT); 
 		
 		validator.validate(amount, errors);
-		assertFalse(errors.hasErrors());
+		assertThat(errors.hasErrors()).isFalse();
 	}
 	/** */
 	@Test
@@ -198,10 +193,10 @@ public class BaseAmountValidatorTest {
 		Errors errors = new BeanPropertyBindingResult(amount, BASE_AMOUNT); 
 		
 		validator.validate(amount, errors);
-		assertTrue(errors.hasErrors());
-		assertEquals(1, errors.getErrorCount());
-		assertEquals("validator.baseAmount.salePriceIsMoreThenListPrice", errors.getFieldError(SALE_VALUE).getCode());
-		assertEquals(new BigDecimal(DIGIT_6), errors.getFieldError(SALE_VALUE).getRejectedValue());
+		assertThat(errors.hasErrors()).isTrue();
+		assertThat(errors.getErrorCount()).isEqualTo(1);
+		assertThat(errors.getFieldError(SALE_VALUE).getCode()).isEqualTo("validator.baseAmount.salePriceIsMoreThenListPrice");
+		assertThat(errors.getFieldError(SALE_VALUE).getRejectedValue()).isEqualTo(new BigDecimal(DIGIT_6));
 	}
 
 	private BaseAmount createBaseAmountWithObjectType(final String objectType) {

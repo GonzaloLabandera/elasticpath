@@ -129,14 +129,15 @@ public class CatalogProductListingPane extends AbstractPageObject {
 	 * Clicks Include Product.
 	 */
 	public void clickIncludeProductButton() {
-		int retry = 0;
-		while (isButtonEnabled(INCLUDE_PRODUCT_BUTTON_CSS) && retry < Constants.RETRY_COUNTER_3) {
-			getDriver().findElement(By.cssSelector(INCLUDE_PRODUCT_BUTTON_CSS)).click();
+		clickButton(INCLUDE_PRODUCT_BUTTON_CSS, "Include Product");
+	}
 
-			if (!isButtonEnabled(INCLUDE_PRODUCT_BUTTON_CSS)) {
-				sleep(Constants.SLEEP_HALFSECOND_IN_MILLIS);
-				retry++;
-			}
+	/**
+	 * Clicks Include Product button if it is enabled.
+	 */
+	public void clickIncludeProductButtonIfEnabled() {
+		if (isButtonEnabled(INCLUDE_PRODUCT_BUTTON_CSS)) {
+			clickButton(INCLUDE_PRODUCT_BUTTON_CSS, "Include Product");
 		}
 	}
 

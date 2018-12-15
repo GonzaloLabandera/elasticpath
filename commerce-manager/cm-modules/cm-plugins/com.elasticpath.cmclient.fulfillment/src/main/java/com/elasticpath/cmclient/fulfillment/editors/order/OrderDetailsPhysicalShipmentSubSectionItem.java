@@ -40,9 +40,9 @@ import org.eclipse.ui.forms.widgets.Section;
 import org.eclipse.ui.forms.widgets.TableWrapData;
 
 import com.elasticpath.cmclient.catalog.editors.product.ProductEditor;
+import com.elasticpath.cmclient.core.CoreImageRegistry;
 import com.elasticpath.cmclient.core.LoginManager;
 import com.elasticpath.cmclient.core.ServiceLocator;
-import com.elasticpath.cmclient.core.CoreImageRegistry;
 import com.elasticpath.cmclient.core.binding.EpBindingConfiguration;
 import com.elasticpath.cmclient.core.binding.EpBindingConfiguration.ValidationErrorLocation;
 import com.elasticpath.cmclient.core.binding.EpControlBindingProvider;
@@ -92,6 +92,7 @@ import com.elasticpath.service.catalog.ProductInventoryManagementService;
 import com.elasticpath.service.catalog.ProductSkuLookup;
 import com.elasticpath.service.misc.TimeService;
 import com.elasticpath.service.order.AllocationService;
+import com.elasticpath.service.shipping.PhysicalOrderShipmentShippingCostRefresher;
 import com.elasticpath.service.shoppingcart.PricingSnapshotService;
 import com.elasticpath.service.tax.TaxCodeRetriever;
 
@@ -163,6 +164,8 @@ public class OrderDetailsPhysicalShipmentSubSectionItem implements IPropertyList
 	private TimeService timeService;
 
 	private PricingSnapshotService pricingSnapshotService;
+
+	private PhysicalOrderShipmentShippingCostRefresher physicalOrderShipmentShippingCostRefresher;
 
 	/**
 	 * Constructor.
@@ -587,6 +590,7 @@ public class OrderDetailsPhysicalShipmentSubSectionItem implements IPropertyList
 					OrderEventCmHelper.getOrderEventHelper().logOrderSkuQuantityChanged(orderSku.getShipment(), orderSku, qtyChanged);
 					((OrderEditor) editor).addOrderShipmentToUpdate(shipment);
 					((OrderEditor) editor).fireAddNoteChanges();
+					getPhysicalOrderShipmentShippingCostRefresher().refresh(shipment);
 				}
 				
 				super.afterEditorDeactivated(event);
@@ -669,6 +673,7 @@ public class OrderDetailsPhysicalShipmentSubSectionItem implements IPropertyList
 
 				if (orderSku.getDiscountBigDecimal().setScale(2).compareTo(oldOrderSku.getDiscountBigDecimal().setScale(2)) != 0) {
 					((OrderEditor) editor).addOrderShipmentToUpdate(shipment);
+					getPhysicalOrderShipmentShippingCostRefresher().refresh(shipment);
 				}
 				
 				super.afterEditorDeactivated(event);
@@ -739,6 +744,7 @@ public class OrderDetailsPhysicalShipmentSubSectionItem implements IPropertyList
 			
 			if (newInvoicePrice != null && oldInvoicePrice.compareTo(newInvoicePrice) != 0) {
 				((OrderEditor) editor).addOrderShipmentToUpdate(shipment);
+				getPhysicalOrderShipmentShippingCostRefresher().refresh(shipment);
 			}
 		}
 	}
@@ -877,7 +883,9 @@ public class OrderDetailsPhysicalShipmentSubSectionItem implements IPropertyList
 		if (confirmOrderSkuRemoval(orderSku)) {
 			orderShipment.removeShipmentOrderSku(orderSku, getProductSkuLookup());
 			orderShipment.getOrder().setModifiedBy(getEventOriginator());
-			
+
+			getPhysicalOrderShipmentShippingCostRefresher().refresh(shipment);
+
 			// Log the sku removed event.
 			OrderEventCmHelper.getOrderEventHelper().logOrderSkuRemoved(orderShipment, orderSku);
 			((OrderEditor) editor).fireAddNoteChanges();
@@ -936,7 +944,7 @@ public class OrderDetailsPhysicalShipmentSubSectionItem implements IPropertyList
 	 * @param orderShipment the shipment to which the sku should be added
 	 * @param selectedPrice the price to set into the added item
 	 */
-	void addToShipment(final ProductSku sku, final OrderShipment orderShipment, final BaseAmountDTO selectedPrice) {
+	void addToShipment(final ProductSku sku, final PhysicalOrderShipment orderShipment, final BaseAmountDTO selectedPrice) {
 		// check if the product is digital and if yes show error message and cancel the addition to order shipment
 		if (!validRequest(sku, orderShipment.getShipmentOrderSkus())) {
 			return;
@@ -949,7 +957,9 @@ public class OrderDetailsPhysicalShipmentSubSectionItem implements IPropertyList
 		orderShipment.getOrder().setModifiedBy(getEventOriginator());
 		handleQuantityAllocationWhenAddItem(orderSku);
 		((OrderEditor) editor).addOrderShipmentToUpdate(orderShipment);
-		
+
+		getPhysicalOrderShipmentShippingCostRefresher().refresh(orderShipment);
+
 		OrderEventCmHelper.getOrderEventHelper().logOrderSkuAdded(orderShipment, orderSku);
 		
 		((OrderEditor) editor).fireAddNoteChanges();
@@ -1196,6 +1206,18 @@ public class OrderDetailsPhysicalShipmentSubSectionItem implements IPropertyList
 			pricingSnapshotService = ServiceLocator.getService(ContextIdNames.PRICING_SNAPSHOT_SERVICE);
 		}
 		return pricingSnapshotService;
+	}
+
+	/**
+	 * Get the physical order shipment cost refresher.
+	 *
+	 * @return the physical order shipment refresher.
+	 */
+	private PhysicalOrderShipmentShippingCostRefresher getPhysicalOrderShipmentShippingCostRefresher() {
+		if (physicalOrderShipmentShippingCostRefresher == null) {
+			physicalOrderShipmentShippingCostRefresher = ServiceLocator.getService(ContextIdNames.PHYSICAL_ORDER_SHIPMENT_SHIPPING_COST_REFRESHER);
+		}
+		return physicalOrderShipmentShippingCostRefresher;
 	}
 
 }

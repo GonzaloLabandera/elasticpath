@@ -17,6 +17,7 @@ import org.eclipse.ui.PartInitException;
 import com.elasticpath.base.exception.EpServiceException;
 import com.elasticpath.cmclient.admin.stores.AdminStoresMessages;
 import com.elasticpath.cmclient.admin.stores.AdminStoresPlugin;
+import com.elasticpath.cmclient.admin.stores.editors.facets.StoreFacetsPage;
 import com.elasticpath.cmclient.admin.stores.event.AdminStoresEventService;
 import com.elasticpath.cmclient.core.editors.AbstractCmClientFormEditor;
 import com.elasticpath.cmclient.core.event.ItemChangeEvent;
@@ -91,6 +92,9 @@ public class StoreEditor extends AbstractCmClientFormEditor {
 			addPage(new SharedCustomerAccountsPage(this, authorized));
 			addPage(new StoreMarketingPage(this, authorized));
 			addPage(new StoreSystemPage(this, authorized));
+			if (getModel() != null) {
+				addPage(new StoreFacetsPage(this, authorized, getModel()));
+			}
 
 			getCustomData().put("authorized", authorized);
 			addExtensionPages(getClass().getSimpleName(), AdminStoresPlugin.PLUGIN_ID);

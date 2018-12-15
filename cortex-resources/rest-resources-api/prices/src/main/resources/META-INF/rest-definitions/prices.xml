@@ -105,10 +105,10 @@ Prices describe the amount of money required to purchase an item or items. The p
 
 		<entity>
 			<name>cart-line-item-price</name>
-			<description><![CDATA[The unit price of an item in the shopper’s cart.]]></description>
+			<description><![CDATA[The unit price of an item in the shopper's cart.]]></description>
 			<property>
 				<name>list-price</name>
-				<description><![CDATA[The unit price of an item in the shopper’s cart before shopping cart discounts are applied.]]></description>
+				<description><![CDATA[The unit price of an item in the shopper's cart before shopping cart discounts are applied.]]></description>
 				<array>
 					<is-a>base.cost</is-a>
 				</array>
@@ -117,7 +117,7 @@ Prices describe the amount of money required to purchase an item or items. The p
 				<name>purchase-price</name>
 				<description>
 					<![CDATA[
-The unit price of an item in the shopper’s cart after shopping cart discounts are applied. This represents the price the shopper will
+The unit price of an item in the shopper's cart after shopping cart discounts are applied. This represents the price the shopper will
 actually pay for each unit. If no discounts have been applied, the list and purchase price will be the same.
 					]]>
 				</description>
@@ -141,10 +141,17 @@ actually pay for each unit. If no discounts have been applied, the list and purc
 
 		<entity>
 			<name>price-range</name>
-			<description><![CDATA[The price range describes a price for an item or cart line item.]]></description>
+			<description><![CDATA[The price range entity.]]></description>
 			<property>
 				<name>from-price</name>
-				<description><![CDATA[The price of the item's least expensive option.]]></description>
+				<description><![CDATA[The starting or the minimum price.]]></description>
+				<array>
+					<is-a>base.cost</is-a>
+				</array>
+			</property>
+			<property>
+				<name>to-price</name>
+				<description><![CDATA[The maximum price.]]></description>
 				<array>
 					<is-a>base.cost</is-a>
 				</array>

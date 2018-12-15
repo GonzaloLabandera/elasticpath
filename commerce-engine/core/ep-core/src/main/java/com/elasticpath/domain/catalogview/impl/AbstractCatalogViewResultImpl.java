@@ -8,8 +8,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.ObjectUtils;
+
 import com.elasticpath.domain.EpDomainException;
-import com.elasticpath.domain.attribute.Attribute;
 import com.elasticpath.domain.catalog.Category;
 import com.elasticpath.domain.catalogview.AttributeRangeFilter;
 import com.elasticpath.domain.catalogview.AttributeValueFilter;
@@ -47,9 +48,9 @@ public abstract class AbstractCatalogViewResultImpl extends AbstractEpDomainImpl
 
 	private List<FilterOption<CategoryFilter>> categoryFilterOptions;
 
-	private Map<Attribute, List<FilterOption<AttributeValueFilter>>> attributeValueFilterOptions;
+	private Map<String, List<FilterOption<AttributeValueFilter>>> attributeValueFilterOptions;
 
-	private Map<Attribute, List<FilterOption<AttributeRangeFilter>>> attributeRangeFilterOptions;
+	private Map<String, List<FilterOption<AttributeRangeFilter>>> attributeRangeFilterOptions;
 
 	private Category category;
 	private List<Category> availableChildCategories;
@@ -121,11 +122,8 @@ public abstract class AbstractCatalogViewResultImpl extends AbstractEpDomainImpl
 	 * @return a map of filter value options
 	 */
 	@Override
-	public Map<Attribute, List<FilterOption<AttributeValueFilter>>> getAttributeValueFilterOptions() {
-		if (attributeValueFilterOptions == null) {
-			return Collections.emptyMap();
-		}
-		return attributeValueFilterOptions;
+	public Map<String, List<FilterOption<AttributeValueFilter>>> getAttributeValueFilterOptions() {
+		return ObjectUtils.defaultIfNull(attributeValueFilterOptions, Collections.emptyMap());
 	}
 
 	/**
@@ -135,7 +133,7 @@ public abstract class AbstractCatalogViewResultImpl extends AbstractEpDomainImpl
 	 */
 	@Override
 	public void setAttributeValueFilterOptions(
-			final Map<Attribute, List<FilterOption<AttributeValueFilter>>> attributeValueFilterOptions) {
+			final Map<String, List<FilterOption<AttributeValueFilter>>> attributeValueFilterOptions) {
 		this.attributeValueFilterOptions = attributeValueFilterOptions;
 	}
 
@@ -145,11 +143,8 @@ public abstract class AbstractCatalogViewResultImpl extends AbstractEpDomainImpl
 	 * @return the map of attribute range filter options
 	 */
 	@Override
-	public Map<Attribute, List<FilterOption<AttributeRangeFilter>>> getAttributeRangeFilterOptions() {
-		if (attributeRangeFilterOptions == null) {
-			return Collections.emptyMap();
-		}
-		return attributeRangeFilterOptions;
+	public Map<String, List<FilterOption<AttributeRangeFilter>>> getAttributeRangeFilterOptions() {
+		return ObjectUtils.defaultIfNull(attributeRangeFilterOptions, Collections.emptyMap());
 	}
 
 	/**
@@ -158,7 +153,7 @@ public abstract class AbstractCatalogViewResultImpl extends AbstractEpDomainImpl
 	 * @param attributeRangeFilterOptions map of attribute value filter options
 	 */
 	@Override
-	public void setAttributeRangeFilterOptions(final Map<Attribute, List<FilterOption<AttributeRangeFilter>>> attributeRangeFilterOptions) {
+	public void setAttributeRangeFilterOptions(final Map<String, List<FilterOption<AttributeRangeFilter>>> attributeRangeFilterOptions) {
 		this.attributeRangeFilterOptions = attributeRangeFilterOptions;
 	}
 
@@ -182,10 +177,7 @@ public abstract class AbstractCatalogViewResultImpl extends AbstractEpDomainImpl
 	 */
 	@Override
 	public List<FilterOption<BrandFilter>> getBrandFilterOptions() {
-		if (brandFilterOptions == null) {
-			return Collections.emptyList();
-		}
-		return brandFilterOptions;
+		return ObjectUtils.defaultIfNull(brandFilterOptions, Collections.emptyList());
 	}
 
 	/**
@@ -272,6 +264,11 @@ public abstract class AbstractCatalogViewResultImpl extends AbstractEpDomainImpl
 		return category;
 	}
 
+	/**
+	 * Sets the category.
+	 *
+	 * @param category the category to set
+	 */
 	@Override
 	public void setAvailableChildCategories(final List<Category> categories) {
 		this.availableChildCategories = categories;

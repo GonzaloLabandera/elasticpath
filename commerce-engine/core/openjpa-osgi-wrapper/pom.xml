@@ -7,7 +7,7 @@
 	<parent>
 		<artifactId>core</artifactId>
 		<groupId>com.elasticpath</groupId>
-		<version>703.0.0-SNAPSHOT</version>
+		<version>704.0.0-SNAPSHOT</version>
 	</parent>
 
 	<artifactId>openjpa-osgi-wrapper</artifactId>
@@ -133,6 +133,7 @@
 							javax.persistence,
 							javax.persistence.criteria,
 							javax.persistence.spi,
+							javax.persistence.metamodel
 						</_exportcontents>
 					</instructions>
 				</configuration>

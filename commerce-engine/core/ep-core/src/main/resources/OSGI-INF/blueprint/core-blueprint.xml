@@ -127,6 +127,58 @@
 		<reference-listener ref="baseAmountFinderProxy" bind-method="bindImplementation" unbind-method="unbindImplementation"/>
 	</reference>
 
+
+	<reference id="cachingCategoryService"
+			   availability="optional"
+			   interface="com.elasticpath.service.catalog.CategoryService"
+			   filter="(caching=true)"
+			   timeout="1">
+		<reference-listener ref="categoryServiceProxy" bind-method="bindImplementation" unbind-method="unbindImplementation"/>
+	</reference>
+
+
+	<reference id="cachingSolrQueryFactory"
+			   availability="optional"
+			   interface="com.elasticpath.service.search.solr.SolrQueryFactory"
+			   filter="(caching=true)"
+			   timeout="1">
+		<reference-listener ref="cachingSolrQueryFactoryProxy" bind-method="bindImplementation" unbind-method="unbindImplementation"/>
+	</reference>
+	<reference id="cachingFacetConfigurationLoader"
+			   availability="optional"
+			   interface="com.elasticpath.service.catalogview.filterednavigation.FilteredNavigationConfigurationLoader"
+			   filter="(caching=true)"
+			   timeout="1">
+		<reference-listener ref="cachingFilteredNavigationConfigurationLoaderProxy" bind-method="bindImplementation" unbind-method="unbindImplementation"/>
+	</reference>
+
+
+	<reference id="cachingFacetService"
+			   availability="optional"
+			   interface="com.elasticpath.service.search.FacetService"
+			   filter="(caching=true)"
+			   timeout="1">
+		<reference-listener ref="facetServiceProxy" bind-method="bindImplementation" unbind-method="unbindImplementation"/>
+	</reference>
+
+	<reference id="cachingSkuOptionService"
+			   availability="optional"
+			   interface="com.elasticpath.service.catalog.SkuOptionService"
+			   filter="(caching=true)"
+			   timeout="1">
+		<reference-listener ref="cachingSkuOptionServiceProxy" bind-method="bindImplementation" unbind-method="unbindImplementation"/>
+	</reference>
+
+
+
+	<reference id="cachingAttributeService"
+			   availability="optional"
+			   interface="com.elasticpath.service.attribute.AttributeService"
+			   filter="(caching=true)"
+			   timeout="1">
+		<reference-listener ref="attributeServiceProxy" bind-method="bindImplementation" unbind-method="unbindImplementation"/>
+	</reference>
+
 	<!-- export services -->
 	<service ref="nonCachingStoreService"
 			 interface="com.elasticpath.service.store.StoreService" ranking="100">
@@ -176,7 +228,13 @@
 			 interface="com.elasticpath.service.catalog.MultiSkuProductConfigurationService"/>
 
 	<service ref="skuOptionService"
-			 interface="com.elasticpath.service.catalog.SkuOptionService" />
+			 interface="com.elasticpath.service.catalog.SkuOptionService" >
+		<service-properties>
+			<entry key="caching">
+				<value type="java.lang.Boolean">false</value>
+			</entry>
+		</service-properties>
+	</service>
 
 	<service ref="customerService"
 			 interface="com.elasticpath.service.customer.CustomerService" />
@@ -284,8 +342,14 @@
 		</service-properties>
 	</service>
 
-	<service ref="categoryService"
-			 interface="com.elasticpath.service.catalog.CategoryService" />
+	<service ref="categoryService" ranking="100"
+			 interface="com.elasticpath.service.catalog.CategoryService" >
+		<service-properties>
+			<entry key="caching">
+				<value type="java.lang.Boolean">false</value>
+			</entry>
+		</service-properties>
+	</service>
 
 	<service ref="searchTermsService"
 			 interface="com.elasticpath.service.search.query.SearchTermsService" />
@@ -391,7 +455,11 @@
 		</service-properties>
 	</service>
 
-	<service ref="transactionManager" interface="org.springframework.transaction.PlatformTransactionManager"/>
+	<service ref="transactionManager" interface="org.springframework.transaction.PlatformTransactionManager">
+		<service-properties>
+			<entry key="type" value="JpaTransactionManager"/>
+		</service-properties>
+	</service>
 
 	<service ref="shippingOptionTransformer"
 			 interface="com.elasticpath.service.shipping.ShippingOptionTransformer"/>
@@ -416,5 +484,43 @@
 
 	<service ref="purchaseCartValidationService"
 		  interface="com.elasticpath.service.shoppingcart.validation.PurchaseCartValidationService"/>
+
+	<service ref="facetService"
+		  interface="com.elasticpath.service.search.FacetService">
+		<service-properties>
+			<entry key="caching">
+				<value type="java.lang.Boolean">false</value>
+			</entry>
+		</service-properties>
+	</service>
+
+	<service ref="attributeService"
+			 interface="com.elasticpath.service.attribute.AttributeService" >
+		<service-properties>
+			<entry key="caching">
+				<value type="java.lang.Boolean">false</value>
+			</entry>
+		</service-properties>
+	</service>
+
+	<service ref="solrQueryFactory" ranking="100"
+			 interface="com.elasticpath.service.search.solr.SolrQueryFactory" >
+		<service-properties>
+			<entry key="caching">
+				<value type="java.lang.Boolean">false</value>
+			</entry>
+		</service-properties>
+	</service>
+
+
+	<service ref="filteredNavigationConfigurationLoader" ranking="100"
+			 interface="com.elasticpath.service.catalogview.filterednavigation.FilteredNavigationConfigurationLoader"  >
+		<service-properties>
+			<entry key="caching">
+				<value type="java.lang.Boolean">false</value>
+			</entry>
+		</service-properties>
+	</service>
+
 
 </blueprint>

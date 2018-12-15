@@ -10,9 +10,18 @@ import com.google.common.collect.ImmutableMap;
 import com.elasticpath.rest.definition.carts.CartIdentifier;
 import com.elasticpath.rest.definition.carts.LineItemIdentifier;
 import com.elasticpath.rest.definition.carts.LineItemsIdentifier;
+import com.elasticpath.rest.definition.itemdefinitions.ItemDefinitionComponentIdentifier;
+import com.elasticpath.rest.definition.itemdefinitions.ItemDefinitionComponentOptionIdentifier;
+import com.elasticpath.rest.definition.itemdefinitions.ItemDefinitionComponentOptionValueIdentifier;
+import com.elasticpath.rest.definition.itemdefinitions.ItemDefinitionComponentOptionsIdentifier;
+import com.elasticpath.rest.definition.itemdefinitions.ItemDefinitionComponentsIdentifier;
 import com.elasticpath.rest.definition.itemdefinitions.ItemDefinitionIdentifier;
+import com.elasticpath.rest.definition.itemdefinitions.ItemDefinitionNestedComponentsIdentifier;
+import com.elasticpath.rest.definition.itemdefinitions.ItemDefinitionOptionIdentifier;
+import com.elasticpath.rest.definition.itemdefinitions.ItemDefinitionOptionValueIdentifier;
+import com.elasticpath.rest.definition.itemdefinitions.ItemDefinitionOptionsIdentifier;
 import com.elasticpath.rest.definition.items.ItemIdentifier;
-import com.elasticpath.rest.definition.items.ItemsIdentifier;
+import com.elasticpath.rest.definition.offers.OfferIdentifier;
 import com.elasticpath.rest.definition.orders.OrderIdentifier;
 import com.elasticpath.rest.definition.prices.PriceForCartLineItemIdentifier;
 import com.elasticpath.rest.definition.prices.PriceForItemIdentifier;
@@ -32,10 +41,12 @@ import com.elasticpath.rest.id.type.CompositeIdentifier;
 import com.elasticpath.rest.id.type.PathIdentifier;
 import com.elasticpath.rest.id.type.StringIdentifier;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.item.ItemRepository;
+import com.elasticpath.rest.resource.integration.epcommerce.repository.search.impl.SearchRepositoryImpl;
 
 /**
  * Factory methods for building identifiers.
  */
+@SuppressWarnings({"PMD.TooManyMethods", "PMD.CouplingBetweenObjects"})
 public final class IdentifierTestFactory {
 
 	private IdentifierTestFactory() {
@@ -159,35 +170,37 @@ public final class IdentifierTestFactory {
 	}
 
 	/**
-	 * Builds an ItemsIdentifier with test data.
-	 *
-	 * @param scope the scope
-	 * @return ItemsIdentifier
-	 */
-	public static ItemsIdentifier buildItemsIdentifier(final String scope) {
-		return ItemsIdentifier.builder()
-				.withScope(StringIdentifier.of(scope))
-				.build();
-	}
-
-	/**
 	 * Builds an ItemIdentifier with test data.
 	 *
-	 * @param scope  the scope
+	 * @param scope   the scope
 	 * @param skuCode the item sku code
 	 * @return ItemIdentifier
 	 */
 	public static ItemIdentifier buildItemIdentifier(final String scope, final String skuCode) {
 		return ItemIdentifier.builder()
 				.withItemId(CompositeIdentifier.of(ImmutableMap.of(ItemRepository.SKU_CODE_KEY, skuCode)))
-				.withItems(buildItemsIdentifier(scope))
+				.withScope(StringIdentifier.of(scope))
+				.build();
+	}
+
+	/**
+	 * Builds an OfferIdentifier with test data.
+	 *
+	 * @param scope   the scope
+	 * @param guid the item sku code
+	 * @return ItemIdentifier
+	 */
+	public static OfferIdentifier buildOfferIdentifier(final String scope, final String guid) {
+		return OfferIdentifier.builder()
+				.withOfferId(CompositeIdentifier.of(ImmutableMap.of(SearchRepositoryImpl.PRODUCT_GUID_KEY, guid)))
+				.withScope(StringIdentifier.of(scope))
 				.build();
 	}
 
 	/**
 	 * Builds a PriceForItemIdentifier with test data.
 	 *
-	 * @param scope  the scope
+	 * @param scope   the scope
 	 * @param skuCode the item sku code
 	 * @return PriceForItemIdentifier
 	 */
@@ -257,7 +270,7 @@ public final class IdentifierTestFactory {
 	/**
 	 * Builds an ItemDefinitionIdentifier with test data.
 	 *
-	 * @param scope  the scope
+	 * @param scope   the scope
 	 * @param skuCode the item sku code
 	 * @return ItemDefinitionIdentifier
 	 */
@@ -269,9 +282,151 @@ public final class IdentifierTestFactory {
 	}
 
 	/**
+	 * Builds an ItemDefinitionOptionValueIdentifier with test data.
+	 *
+	 * @param scope         the scope
+	 * @param skuCode       the item sku code
+	 * @param optionId      the option id
+	 * @param optionValueId the option value id
+	 * @return ItemDefinitionOptionValueIdentifier
+	 */
+	public static ItemDefinitionOptionValueIdentifier buildItemDefinitionOptionValueIdentifier(
+			final String scope, final String skuCode, final String optionId, final String optionValueId) {
+		return ItemDefinitionOptionValueIdentifier.builder()
+				.withItemDefinitionOption(buildItemDefinitionOptionIdentifier(scope, skuCode, optionId))
+				.withOptionValueId(StringIdentifier.of(optionValueId))
+				.build();
+	}
+
+	/**
+	 * Builds an ItemDefinitionOptionIdentifier with test data.
+	 *
+	 * @param scope    the scope
+	 * @param skuCode  the item sku code
+	 * @param optionId the option id
+	 * @return ItemDefinitionOptionIdentifier
+	 */
+	public static ItemDefinitionOptionIdentifier buildItemDefinitionOptionIdentifier(
+			final String scope, final String skuCode, final String optionId) {
+		return ItemDefinitionOptionIdentifier.builder()
+				.withItemDefinitionOptions(buildItemDefinitionOptionsIdentifier(scope, skuCode))
+				.withOptionId(StringIdentifier.of(optionId))
+				.build();
+	}
+
+	/**
+	 * Builds an ItemDefinitionNestedComponentsIdentifier with test data.
+	 *
+	 * @param scope       the scope
+	 * @param skuCode     the item sku code
+	 * @param componentId the component id
+	 * @return ItemDefinitionNestedComponentsIdentifier
+	 */
+	public static ItemDefinitionNestedComponentsIdentifier buildItemDefinitionNestedComponentsIdentifier(
+			final String scope, final String skuCode, final String componentId) {
+		return ItemDefinitionNestedComponentsIdentifier.builder()
+				.withItemDefinitionComponent(buildItemDefinitionComponentIdentifier(scope, skuCode, componentId))
+				.build();
+	}
+
+
+	/**
+	 * Builds an ItemDefinitionOptionsIdentifier with test data.
+	 *
+	 * @param scope   the scope
+	 * @param skuCode the item sku code
+	 * @return ItemDefinitionOptionsIdentifier
+	 */
+	public static ItemDefinitionOptionsIdentifier buildItemDefinitionOptionsIdentifier(final String scope, final String skuCode) {
+		return ItemDefinitionOptionsIdentifier.builder()
+				.withItemDefinition(buildItemDefinitionIdentifier(scope, skuCode))
+				.build();
+	}
+
+	/**
+	 * Builds an ItemDefinitionComponentOptionValueIdentifier with test data.
+	 *
+	 * @param scope         the scope
+	 * @param skuCode       the item sku code
+	 * @param componentId   the component id
+	 * @param optionId      the option id
+	 * @param optionValueId the option value id
+	 * @return ItemDefinitionComponentOptionValueIdentifier
+	 */
+	public static ItemDefinitionComponentOptionValueIdentifier buildItemDefinitionComponentOptionValueIdentifier(
+			final String scope, final String skuCode, final String componentId, final String optionId, final String optionValueId) {
+		return ItemDefinitionComponentOptionValueIdentifier.builder()
+				.withItemDefinitionComponentOption(buildItemDefinitionComponentOptionIdentifier(scope, skuCode, componentId, optionId))
+				.withOptionValueId(StringIdentifier.of(optionValueId))
+				.build();
+	}
+
+	/**
+	 * Builds an ItemDefinitionComponentOptionIdentifier with test data.
+	 *
+	 * @param scope       the scope
+	 * @param skuCode     the item sku code
+	 * @param componentId the component id
+	 * @param optionId    the option id
+	 * @return ItemDefinitionComponentOptionIdentifier
+	 */
+	public static ItemDefinitionComponentOptionIdentifier buildItemDefinitionComponentOptionIdentifier(
+			final String scope, final String skuCode, final String componentId, final String optionId) {
+		return ItemDefinitionComponentOptionIdentifier.builder()
+				.withItemDefinitionComponentOptions(buildItemDefinitionComponentOptionsIdentifier(scope, skuCode, componentId))
+				.withOptionId(StringIdentifier.of(optionId))
+				.build();
+	}
+
+	/**
+	 * Builds an ItemDefinitionComponentOptionsIdentifier with test data.
+	 *
+	 * @param scope       the scope
+	 * @param skuCode     the item sku code
+	 * @param componentId the component id
+	 * @return ItemDefinitionComponentOptionsIdentifier
+	 */
+	public static ItemDefinitionComponentOptionsIdentifier buildItemDefinitionComponentOptionsIdentifier(
+			final String scope, final String skuCode, final String componentId) {
+		return ItemDefinitionComponentOptionsIdentifier.builder()
+				.withItemDefinitionComponent(buildItemDefinitionComponentIdentifier(scope, skuCode, componentId))
+				.build();
+	}
+
+	/**
+	 * Builds an ItemDefinitionComponentIdentifier with test data.
+	 *
+	 * @param scope       the scope
+	 * @param skuCode     the item sku code
+	 * @param componentId the component id
+	 * @return ItemDefinitionComponentIdentifier
+	 */
+	public static ItemDefinitionComponentIdentifier buildItemDefinitionComponentIdentifier(
+			final String scope, final String skuCode, final String componentId) {
+		return ItemDefinitionComponentIdentifier.builder()
+				.withItemDefinitionComponents(buildItemDefinitionComponentsIdentifier(scope, skuCode))
+				.withComponentId(PathIdentifier.of(componentId))
+				.build();
+	}
+
+	/**
+	 * Builds an ItemDefinitionComponentsIdentifier with test data.
+	 *
+	 * @param scope   the scope
+	 * @param skuCode the item sku code
+	 * @return ItemDefinitionComponentsIdentifier
+	 */
+	public static ItemDefinitionComponentsIdentifier buildItemDefinitionComponentsIdentifier(final String scope, final String skuCode) {
+		return ItemDefinitionComponentsIdentifier.builder()
+				.withItemDefinition(buildItemDefinitionIdentifier(scope, skuCode))
+				.build();
+	}
+
+
+	/**
 	 * Builds a PriceForItemdefinitionIdentifier with test data.
 	 *
-	 * @param scope  the scope
+	 * @param scope   the scope
 	 * @param skuCode the item sku code
 	 * @return PriceForItemdefinitionIdentifier
 	 */
@@ -314,7 +469,8 @@ public final class IdentifierTestFactory {
 
 	/**
 	 * Builds a PurchaseLineItemsIdentifier.
-	 * @param scope scope
+	 *
+	 * @param scope      scope
 	 * @param purchaseId purchase id
 	 * @return PurchaseLineItemsIdentifier
 	 */
@@ -326,8 +482,9 @@ public final class IdentifierTestFactory {
 
 	/**
 	 * Builds a PurchaseLineItemIdentifier.
-	 * @param scope scope
-	 * @param purchaseId purchase id
+	 *
+	 * @param scope       scope
+	 * @param purchaseId  purchase id
 	 * @param lineItemIds line item ids
 	 * @return PurchaseLineItemIdentifier
 	 */

@@ -1,14 +1,13 @@
 package com.elasticpath.cortex.dce
 
-import cucumber.api.groovy.EN
-import cucumber.api.groovy.Hooks
+import cucumber.api.java.en.When
+
+class ExampleSteps {
 
 
-this.metaClass.mixin(Hooks)
-this.metaClass.mixin(EN)
+	@When("^I search for an item name (.+)\$")
+	void searchItemByName(String itemName) {
+		CommonMethods.searchAndOpenItemWithKeyword(itemName)
+	}
 
-
-When(~'^I search for an item name (.+)$') { itemName ->
-	CommonMethods.searchAndOpenItemWithKeyword(itemName)
 }
-

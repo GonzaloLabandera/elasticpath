@@ -3,8 +3,6 @@
  */
 package com.elasticpath.importexport.importer.importers.impl;
 
-import java.util.List;
-
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.SetMultimap;
 import org.apache.commons.lang3.StringUtils;
@@ -34,7 +32,7 @@ import com.elasticpath.service.catalog.CategoryService;
 /**
  * Category importer implementation.
  */
-public class CategoryImporterImpl extends AbstractImporterImpl<Category, CategoryDTO> { // NOPMD
+public class CategoryImporterImpl extends AbstractImporterImpl<Category, CategoryDTO> {
 	
 	private static final Logger LOG = Logger.getLogger(CategoryImporterImpl.class);
 
@@ -75,8 +73,9 @@ public class CategoryImporterImpl extends AbstractImporterImpl<Category, Categor
 		linkedCategorySavingStrategy.setDomainAdapter(linkedCategoryAdapter);
 	}
 
+	@SuppressWarnings("PMD.AvoidDeeplyNestedIfStmts") // To use nested if stmt in setParentCategory method
 	@Override
-	public boolean executeImport(final CategoryDTO object) { // NOPMD
+	public boolean executeImport(final CategoryDTO object) {
 		sanityCheck();
 		orderingCheck(object);
 
@@ -87,6 +86,7 @@ public class CategoryImporterImpl extends AbstractImporterImpl<Category, Categor
 		
 		final Category category = getSavingStrategy().populateAndSaveObject(obtainedCategory, object);
 
+		boolean executeImport = false;
 		if (category != null) {
 			linkedCategorySavingStrategy.setLifecycleListener(new DefaultLifecycleListener() {
 				@Override
@@ -101,26 +101,22 @@ public class CategoryImporterImpl extends AbstractImporterImpl<Category, Categor
 				}
 
 				protected void setParentCategory(final Category linkedCategory) {
-					if (StringUtils.isEmpty(object.getParentCategoryCode())) {
-						return;
-					}
-
-					final Category linkedParent = getCachingService().findCategoryByCode(
-							object.getParentCategoryCode(), linkedCategory.getCatalog().getCode());
-					if (linkedParent != null) {
-						linkedCategory.setParent(linkedParent);
+					if (!StringUtils.isEmpty(object.getParentCategoryCode())) {
+						final Category linkedParent = getCachingService().findCategoryByCode(
+								object.getParentCategoryCode(), linkedCategory.getCatalog().getCode());
+						if (linkedParent != null) {
+							linkedCategory.setParent(linkedParent);
+						}
 					}
 				}
 			});
 
-			List<LinkedCategoryDTO> linkedCategoryDTOList = object.getLinkedCategoryDTOList();
-
-			for (LinkedCategoryDTO linkedCategoryDTO : linkedCategoryDTOList) {
+			for (LinkedCategoryDTO linkedCategoryDTO : object.getLinkedCategoryDTOList()) {
 				importLinkedCategory(object, linkedCategoryDTO);
 			}
-			return true;
+			executeImport = true;
 		}
-		return false;
+		return executeImport;
 	}
 
 	/**

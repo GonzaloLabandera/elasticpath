@@ -1,6 +1,5 @@
 #TODO: investigate way to test time fields
-@Items
-
+@items
 Feature: Items with components
 
   Background:
@@ -49,7 +48,7 @@ Feature: Items with components
     Given a bundle with a selection rule of Select All
     When lookup the bundle by <PURCHASABLE_BUNDLE> and add the <PURCHASABLE_BUNDLE> to cart
     And the <PURCHASABLE_BUNDLE> will be added to cart as a root LineItem
-    Then all of the <PURCHASABLE_BUNDLE> constituents will be added to cart as DependentLineItems
+    Then all 3 constituents of the <PURCHASABLE_BUNDLE> will be added to cart as DependentLineItems
 
     Examples:
       | PURCHASABLE_BUNDLE |
@@ -71,8 +70,9 @@ Feature: Items with components
     Examples:
       | SKU_CODE  |
       | tt0373883 |
+
   Scenario Outline: Bundle in the Cart with Dependent Line Items that are NOT Bundles themselves, each of their DependentLineItems are empty
-    Given a <PURCHASABLE_BUNDLE> in the Cart with Dependent Line Items that are NOT Bundles themselves (leaf items)
+    Given I add <PURCHASABLE_BUNDLE> in the Cart with Dependent Line Items
     When navigate to each of their DependentLineItems link
     Then the DependentLineItems link will be present, but will be empty on all leaf items
 
@@ -80,12 +80,14 @@ Feature: Items with components
   | PURCHASABLE_BUNDLE                         |
   | bundleWithPhysicalAndDigitalComponents_sku |
 
-  Scenario Outline: Bundle in the Cart with Dependent Line Items, all Order need infos solved and purchase complete
-    Given a <PURCHASABLE_BUNDLE> in the Cart with Dependent Line Items
-    When all Order need infos solved
-    And complete the purchase with the <PURCHASABLE_BUNDLE> in the Cart
-    Then purchase is completed successfully
-    And  the LineItems structure in under the created Purchase is equivalent to the one in the Cart
+  # TODO in automation story PB-4286
+#  Scenario Outline: Bundle in the Cart with Dependent Line Items, all Order need infos solved and purchase complete
+#    Given I add <PURCHASABLE_BUNDLE> in the Cart with Dependent Line Items
+#    And I retrieve the order
+#    And I follow links total
+#    Then I see the cost field has amount: 40, currency: CAD and display: $40.00
+#    When I complete the purchase after providing all required order info
+#    Then the LineItems structure under the created Purchase
 
     Examples:
       | PURCHASABLE_BUNDLE                         |

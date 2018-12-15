@@ -3,8 +3,6 @@
  */
 package com.elasticpath.rest.resource.integration.epcommerce.repository.wishlist.repositories;
 
-import static org.mockito.Mockito.when;
-
 import static com.elasticpath.rest.resource.integration.epcommerce.repository.ErrorCheckPredicate.createErrorCheckPredicate;
 import static com.elasticpath.rest.resource.integration.epcommerce.repository.ResourceTestConstants.ITEM_ID_MAP;
 import static com.elasticpath.rest.resource.integration.epcommerce.repository.ResourceTestConstants.LINE_ITEM_ID;
@@ -14,6 +12,7 @@ import static com.elasticpath.rest.resource.integration.epcommerce.repository.Re
 import static com.elasticpath.rest.resource.integration.epcommerce.repository.ResourceTestConstants.SKU_CODE;
 import static com.elasticpath.rest.resource.integration.epcommerce.repository.ResourceTestConstants.WISHLIST_ID;
 import static com.elasticpath.rest.resource.integration.epcommerce.repository.wishlist.WishlistTestFactory.buildWishlistLineItemIdentifier;
+import static org.mockito.Mockito.when;
 
 import com.google.common.collect.ImmutableList;
 import io.reactivex.Completable;
@@ -164,23 +163,11 @@ public class WishlistLineItemEntityRepositoryImplTest {
 	}
 
 	@Test
-	public void verifyFindOneReturnsNotFoundWhenItemIdNotFound() {
-		when(wishlistRepository.getWishlist(WISHLIST_ID)).thenReturn(Single.just(wishList));
-		when(wishlistRepository.getShoppingItem(wishList, LINE_ITEM_ID)).thenReturn(Single.just(shoppingItem));
-		when(wishlistRepository.getProductSku(wishList, LINE_ITEM_ID)).thenReturn(Single.just(productSku));
-		when(itemRepository.getItemIdForSkuAsSingle(productSku)).thenReturn(Single.error(ResourceOperationFailure.notFound(NOT_FOUND)));
-
-		repository.findOne(wishlistLineItemIdentifier)
-				.test()
-				.assertError(createErrorCheckPredicate(NOT_FOUND, ResourceStatus.NOT_FOUND));
-	}
-
-	@Test
 	public void verifyFindOneReturnsWishlistLineItemEntityWithNoConfigurationsWhenShoppingItemFieldsAreNull() {
 		when(wishlistRepository.getWishlist(WISHLIST_ID)).thenReturn(Single.just(wishList));
 		when(wishlistRepository.getShoppingItem(wishList, LINE_ITEM_ID)).thenReturn(Single.just(shoppingItem));
 		when(wishlistRepository.getProductSku(wishList, LINE_ITEM_ID)).thenReturn(Single.just(productSku));
-		when(itemRepository.getItemIdForSkuAsSingle(productSku)).thenReturn(Single.just(SKU_CODE));
+		when(itemRepository.getItemIdForSku(productSku)).thenReturn(SKU_CODE);
 		when(shoppingItem.getFields()).thenReturn(null);
 		when(wishList.getGuid()).thenReturn(WISHLIST_ID);
 
@@ -197,7 +184,7 @@ public class WishlistLineItemEntityRepositoryImplTest {
 		when(wishlistRepository.getWishlist(WISHLIST_ID)).thenReturn(Single.just(wishList));
 		when(wishlistRepository.getShoppingItem(wishList, LINE_ITEM_ID)).thenReturn(Single.just(shoppingItem));
 		when(wishlistRepository.getProductSku(wishList, LINE_ITEM_ID)).thenReturn(Single.just(productSku));
-		when(itemRepository.getItemIdForSkuAsSingle(productSku)).thenReturn(Single.just(SKU_CODE));
+		when(itemRepository.getItemIdForSku(productSku)).thenReturn(SKU_CODE);
 		when(shoppingItem.getFields()).thenReturn(ITEM_ID_MAP);
 		when(cartItemModifiersRepository.findCartItemModifiersByProduct(product)).thenReturn(ImmutableList.of(cartItemModifierField));
 		when(cartItemModifierField.getCode()).thenReturn(ItemRepository.SKU_CODE_KEY);

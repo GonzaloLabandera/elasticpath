@@ -6,7 +6,7 @@ package com.elasticpath.search.index.solr.service.impl;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.apache.solr.client.solrj.SolrServer;
+import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.common.SolrInputDocument;
 
 import com.elasticpath.service.search.IndexType;
@@ -44,7 +44,7 @@ public class TestSolrDocumentPublisher implements SolrDocumentPublisher {
 	}
 
 	@Override
-	public void setSolrServer(final SolrServer solrServer) {
+	public void setSolrServer(final SolrClient solrServer) {
 		// does nothing.
 	}
 

@@ -38,14 +38,9 @@ public class JpaCacheTest extends BasicSpringContextTest {
 	@Autowired
 	private JpaSessionFactoryImpl  sessionFactory;
 
-	@Autowired
-	private DataSource dataSource;
-
 	private JpaPersistenceEngineImpl persistenceEngine;
 
 	private Map<String, String> jpaPropertyOverrides;
-
-	private DataSourceJndiBinderImpl datasourceJndiBinder;
 
 	/**
 	 * Set up objects required by all tests.
@@ -62,13 +57,6 @@ public class JpaCacheTest extends BasicSpringContextTest {
 		persistenceEngine.setSessionFactory(sessionFactory);
 		
 		jpaPropertyOverrides = new HashMap<>();
-		datasourceJndiBinder = new DataSourceJndiBinderImpl();
-		datasourceJndiBinder.bindEpDatasourceInJndi(dataSource);
-	}
-
-	@After
-	public void tearDown() throws Exception {
-		datasourceJndiBinder.unbindEpDatasourceInJndi();
 	}
 
 	/**

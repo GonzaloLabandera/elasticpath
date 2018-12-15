@@ -6,7 +6,7 @@ package com.elasticpath.search.index.solr.service.impl;
 import java.util.Collection;
 import java.util.LinkedList;
 
-import org.apache.solr.client.solrj.SolrServer;
+import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.common.SolrInputDocument;
 
 import com.elasticpath.persistence.api.PersistenceEngine;
@@ -22,7 +22,7 @@ import com.elasticpath.service.search.solr.SolrManager;
  */
 public class SimpleSolrDocumentPublisher implements SolrDocumentPublisher {
 
-	private SolrServer solrServer;
+	private SolrClient solrServer;
 
 	private IndexBuildPolicy indexBuildPolicy;
 
@@ -114,7 +114,7 @@ public class SimpleSolrDocumentPublisher implements SolrDocumentPublisher {
 	 *
 	 * @param solrServer the SOLR server
 	 */
-	protected void commitChanges(final SolrServer solrServer) {
+	protected void commitChanges(final SolrClient solrServer) {
 		// never do optimisation on commit. A separate Quartz job does that on a
 		// timely basis.
 		solrManager.flushChanges(solrServer, false);
@@ -137,12 +137,12 @@ public class SimpleSolrDocumentPublisher implements SolrDocumentPublisher {
 		this.persistenceEngine = persistenceEngine;
 	}
 
-	public SolrServer getSolrServer() {
+	public SolrClient getSolrServer() {
 		return solrServer;
 	}
 
 	@Override
-	public void setSolrServer(final SolrServer solrServer) {
+	public void setSolrServer(final SolrClient solrServer) {
 		this.solrServer = solrServer;
 	}
 

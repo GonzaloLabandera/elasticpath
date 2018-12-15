@@ -240,7 +240,7 @@ public class CustomerEditor extends AbstractPageObject {
 	 * @param dataPointValue String
 	 */
 	public void selectDataPoint(final String dataPointValue) {
-		assertThat(selectItemInEditorPaneWithScrollBar(DATA_POINT_PARENT_CSS, DATA_POINT_COLUMN_CSS, dataPointValue))
+		assertThat(selectItemInEditorPaneWithScrollBarNonJSCheck(DATA_POINT_PARENT_CSS, DATA_POINT_COLUMN_CSS, dataPointValue))
 				.as("Unable to find Data Point Value - " + dataPointValue)
 				.isTrue();
 	}

@@ -7,14 +7,12 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
 
+import io.reactivex.Single;
+
 import com.elasticpath.domain.skuconfiguration.SkuOptionValue;
-import com.elasticpath.rest.chain.Assign;
-import com.elasticpath.rest.chain.Ensure;
-import com.elasticpath.rest.chain.ExecutionResultChain;
-import com.elasticpath.rest.chain.OnFailure;
-import com.elasticpath.rest.command.ExecutionResult;
-import com.elasticpath.rest.command.ExecutionResultFactory;
+import com.elasticpath.rest.ResourceOperationFailure;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.product.option.SkuOptionRepository;
+import com.elasticpath.rest.resource.integration.epcommerce.repository.transform.ReactiveAdapter;
 import com.elasticpath.service.catalog.SkuOptionService;
 
 /**
@@ -27,34 +25,28 @@ public class SkuOptionRepositoryImpl implements SkuOptionRepository {
 	private static final String CANNOT_FIND_OPTION_VALUE_MESSAGE = "Cannot find option value.";
 
 	private final SkuOptionService skuOptionService;
+	private final ReactiveAdapter reactiveAdapter;
 
 	/**
 	 * Default constructor.
 	 *
 	 * @param skuOptionService the sku option service
+	 * @param reactiveAdapter  reactiveAdapter
 	 */
 	@Inject
 	public SkuOptionRepositoryImpl(
-			@Named("skuOptionService")
-			final SkuOptionService skuOptionService) {
+			@Named("skuOptionService") final SkuOptionService skuOptionService,
+			@Named("reactiveAdapter") final ReactiveAdapter reactiveAdapter) {
 
 		this.skuOptionService = skuOptionService;
+		this.reactiveAdapter = reactiveAdapter;
 	}
 
 	@Override
-	public ExecutionResult<SkuOptionValue> findSkuOptionValueByKey(final String skuOptionNameKey, final String skuOptionValueKey) {
-		return new ExecutionResultChain() {
-			public ExecutionResult<?> build() {
-				// The SKU Option name key is not needed for sku option value.
-				// However, we may need this when core changes lookup logic.
-
-				SkuOptionValue skuOptionValue = Assign.ifNotNull(skuOptionService.findOptionValueByKey(skuOptionValueKey),
-						OnFailure.returnNotFound(CANNOT_FIND_OPTION_VALUE_MESSAGE));
-				Ensure.isTrue(skuOptionValue.getSkuOption().getOptionKey().equals(skuOptionNameKey),
-						OnFailure.returnNotFound(CANNOT_FIND_OPTION_VALUE_MESSAGE));
-
-				return ExecutionResultFactory.createReadOK(skuOptionValue);
-			}
-		}.execute();
+	public Single<SkuOptionValue> findSkuOptionValueByKey(final String skuOptionNameKey, final String skuOptionValueKey) {
+		return reactiveAdapter.fromServiceAsSingle(() -> skuOptionService.findOptionValueByKey(skuOptionValueKey), CANNOT_FIND_OPTION_VALUE_MESSAGE)
+				.filter(skuOptionValue -> skuOptionValue.getSkuOption().getOptionKey().equals(skuOptionNameKey))
+				.toSingle()
+				.onErrorResumeNext(Single.error(ResourceOperationFailure.notFound(CANNOT_FIND_OPTION_VALUE_MESSAGE)));
 	}
 }

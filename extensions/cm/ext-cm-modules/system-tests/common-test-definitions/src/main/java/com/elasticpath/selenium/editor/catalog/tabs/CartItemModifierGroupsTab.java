@@ -7,6 +7,7 @@ import org.openqa.selenium.WebDriver;
 
 import com.elasticpath.selenium.common.AbstractPageObject;
 import com.elasticpath.selenium.dialogs.AddEditCartItemModifierGroupDialog;
+import com.elasticpath.selenium.util.Constants;
 
 /**
  * Cart Item Modifier Groups Tab.
@@ -38,6 +39,13 @@ public class CartItemModifierGroupsTab extends AbstractPageObject {
 	 */
 	public AddEditCartItemModifierGroupDialog clickAddGroupButton() {
 		final String buttonName = "Add";
+
+		setWebDriverImplicitWait(Constants.IMPLICIT_WAIT_FOR_ELEMENT_THREE_SECONDS);
+		assertThat(isElementPresent(By.cssSelector(GROUP_TABLE_CSS.trim())))
+				.as("Cart Item Modifier Groups is not the active tab")
+				.isTrue();
+		setWebDriverImplicitWaitToDefault();
+
 		clickButton(String.format(BUTTON_CSS, buttonName), buttonName, AddEditCartItemModifierGroupDialog.ADD_CART_ITEM_MODIFIER_GROUP_PARENT_CSS);
 		return new AddEditCartItemModifierGroupDialog(getDriver());
 	}

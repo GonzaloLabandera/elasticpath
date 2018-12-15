@@ -3,9 +3,10 @@
  */
 package com.elasticpath.commons.util;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.awaitility.Awaitility.await;
 
+import org.awaitility.Duration;
 import org.junit.Test;
 
 /**
@@ -14,8 +15,7 @@ import org.junit.Test;
 public class IntervalTimerTest {
 	
 	private static final int ONE_SECOND_AS_MS = 1000;
-	private static final int TWO_SECONDS_AS_MS = 2000;
-	
+
 	/**
 	 * Tests that an immediate call to hasIntervalPassed to a timer with a 1 second interval returns false.
 	 */
@@ -23,7 +23,7 @@ public class IntervalTimerTest {
 	public void testImmediateCallHasIntervalPassedReturnsFalse() {
 		IntervalTimer intervalTimer = new IntervalTimer(ONE_SECOND_AS_MS);
 		intervalTimer.setStartPointToNow();
-		assertFalse("interval should not have elapsed.", intervalTimer.hasIntervalPassed());
+		assertThat(intervalTimer.hasIntervalPassed()).as("interval should not have elapsed.").isFalse();
 	}
 
 	/**
@@ -34,13 +34,12 @@ public class IntervalTimerTest {
 	@Test
 	public void testCallHasIntervalPassedReturnsTrueAfterWaitingLongerThanInterval() 
 		throws InterruptedException {
-		
+
 		IntervalTimer intervalTimer = new IntervalTimer(ONE_SECOND_AS_MS);
 		intervalTimer.setStartPointToNow();
-		
-		Thread.sleep(TWO_SECONDS_AS_MS); //give it a chance to elapse
 
-		assertTrue("interval should have elapsed.", intervalTimer.hasIntervalPassed());
+		await().atLeast(Duration.ONE_SECOND).until(() ->
+			assertThat(intervalTimer.hasIntervalPassed()).as("interval should have elapsed.").isTrue());
 	}
 	
 	/**
@@ -52,17 +51,16 @@ public class IntervalTimerTest {
 	@Test
 	public void testImmediateCallHasIntervalPassedReturnsFalseOnPreviouslyElapsedTimer() 
 		throws InterruptedException {
-	
+
 		IntervalTimer intervalTimer = new IntervalTimer(ONE_SECOND_AS_MS);
 		intervalTimer.setStartPointToNow();
-		
-		Thread.sleep(TWO_SECONDS_AS_MS); //give it a chance to elapse
-		
-		assertTrue("interval should have elapsed.", intervalTimer.hasIntervalPassed());
-		
+
+		await().atLeast(Duration.ONE_SECOND).until(() ->
+			assertThat(intervalTimer.hasIntervalPassed()).as("interval should have elapsed.").isTrue());
+
 		intervalTimer.setStartPointToNow(); //restart the interval clock
 
-		assertFalse("interval should not have elapsed.", intervalTimer.hasIntervalPassed());
+		assertThat(intervalTimer.hasIntervalPassed()).as("interval should not have elapsed.").isFalse();
 	}
 
 }

@@ -3,17 +3,13 @@
  */
 package com.elasticpath.service.catalog.impl;
 
-import static org.hamcrest.collection.IsEmptyCollection.empty;
-import static org.hamcrest.core.IsCollectionContaining.hasItems;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
 
 import java.math.BigDecimal;
 import java.util.Collection;
 
-import org.jmock.integration.junit4.JUnitRuleMockery;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
 
 import com.elasticpath.domain.catalog.PriceTier;
@@ -26,9 +22,6 @@ public class PriceTierImplTest {
 	private static final String FIFTY = "50";
 	private static final String ONE_HUNDRED = "100";
 	private PriceTier priceTier;
-
-	@Rule
-	public final JUnitRuleMockery context = new JUnitRuleMockery();
 
 	/**
 	 * Prepare for the tests.
@@ -50,7 +43,7 @@ public class PriceTierImplTest {
 		priceTier.setComputedPriceIfLower(highPrice);
 		priceTier.setComputedPriceIfLower(lowPrice);
 
-		assertEquals(lowPrice, priceTier.getComputedPrice());
+		assertThat(priceTier.getComputedPrice()).isEqualTo(lowPrice);
 	}
 
 	/**
@@ -64,7 +57,7 @@ public class PriceTierImplTest {
 		priceTier.setComputedPriceIfLower(lowPrice);
 		priceTier.setComputedPriceIfLower(highPrice);
 
-		assertEquals(lowPrice, priceTier.getComputedPrice());
+		assertThat(priceTier.getComputedPrice()).isEqualTo(lowPrice);
 	}
 
 	/**
@@ -79,7 +72,7 @@ public class PriceTierImplTest {
 		priceTier.clearComputedPrice();
 		priceTier.setComputedPriceIfLower(highPrice);
 
-		assertEquals(highPrice, priceTier.getComputedPrice());
+		assertThat(priceTier.getComputedPrice()).isEqualTo(highPrice);
 	}
 
 	/**
@@ -93,7 +86,7 @@ public class PriceTierImplTest {
 		priceTier.setListPrice(listPrice);
 		priceTier.setSalePrice(salePrice);
 
-		assertEquals(salePrice, priceTier.getLowestPrice());
+		assertThat(priceTier.getLowestPrice()).isEqualTo(salePrice);
 	}
 
 	/**
@@ -107,7 +100,7 @@ public class PriceTierImplTest {
 		priceTier.setListPrice(listPrice);
 		priceTier.setSalePrice(salePrice);
 
-		assertEquals(listPrice, priceTier.getLowestPrice());
+		assertThat(priceTier.getLowestPrice()).isEqualTo(listPrice);
 	}
 
 	/**
@@ -121,7 +114,7 @@ public class PriceTierImplTest {
 		priceTier.setListPrice(listPrice);
 		priceTier.setSalePrice(salePrice);
 
-		assertEquals(salePrice, priceTier.getLowestPrice());
+		assertThat(priceTier.getLowestPrice()).isEqualTo(salePrice);
 	}
 
 	/**
@@ -135,7 +128,7 @@ public class PriceTierImplTest {
 		priceTier.setListPrice(listPrice);
 		priceTier.setSalePrice(salePrice);
 
-		assertEquals(listPrice, priceTier.getLowestPrice());
+		assertThat(priceTier.getLowestPrice()).isEqualTo(listPrice);
 	}
 
 	/**
@@ -149,7 +142,7 @@ public class PriceTierImplTest {
 		priceTier.setListPrice(listPrice);
 		priceTier.setSalePrice(salePrice);
 
-		assertEquals(null, priceTier.getLowestPrice());
+		assertThat(priceTier.getLowestPrice()).isNull();
 	}
 
 	/**
@@ -159,7 +152,7 @@ public class PriceTierImplTest {
 	public void testSetComputedPriceNegative() {
 		BigDecimal negativePrice = new BigDecimal("-100");
 		priceTier.setComputedPriceIfLower(negativePrice);
-		assertEquals(0, BigDecimal.ZERO.compareTo(priceTier.getComputedPrice()));
+		assertThat(priceTier.getComputedPrice()).isEqualByComparingTo(BigDecimal.ZERO);
 	}
 
 	/**
@@ -169,7 +162,7 @@ public class PriceTierImplTest {
 	public void testSetSalePriceNegative() {
 		BigDecimal negativePrice = new BigDecimal("-100");
 		priceTier.setSalePrice(negativePrice);
-		assertEquals(0, BigDecimal.ZERO.compareTo(priceTier.getSalePrice()));
+		assertThat(priceTier.getSalePrice()).isEqualByComparingTo(BigDecimal.ZERO);
 	}
 
 	/**
@@ -179,7 +172,7 @@ public class PriceTierImplTest {
 	public void testSetListPriceNegative() {
 		BigDecimal negativePrice = new BigDecimal("-100");
 		priceTier.setListPrice(negativePrice);
-		assertEquals(0, BigDecimal.ZERO.compareTo(priceTier.getListPrice()));
+		assertThat(priceTier.getListPrice()).isEqualByComparingTo(BigDecimal.ZERO);
 	}
 
 	/**
@@ -192,7 +185,7 @@ public class PriceTierImplTest {
 		PriceTier priceTier2 = new PriceTierImpl();
 		priceTier2.setListPrice(new BigDecimal(ONE_HUNDRED));
 
-		assertEquals(0, priceTier.compareTo(priceTier2));
+		assertThat(priceTier).isEqualByComparingTo(priceTier2);
 	}
 
 	/**
@@ -205,7 +198,7 @@ public class PriceTierImplTest {
 		PriceTier priceTier2 = new PriceTierImpl();
 		priceTier2.setListPrice(new BigDecimal(ONE_HUNDRED));
 
-		assertEquals(-1, priceTier.compareTo(priceTier2));
+		assertThat(priceTier).isLessThan(priceTier2);
 	}
 
 	/**
@@ -218,7 +211,7 @@ public class PriceTierImplTest {
 		PriceTier priceTier2 = new PriceTierImpl();
 		priceTier2.setListPrice(new BigDecimal(FIFTY));
 
-		assertEquals(1, priceTier.compareTo(priceTier2));
+		assertThat(priceTier).isGreaterThan(priceTier2);
 	}
 
 	/**
@@ -229,7 +222,7 @@ public class PriceTierImplTest {
 		PriceTier priceTier2 = new PriceTierImpl();
 		priceTier2.setListPrice(new BigDecimal(ONE_HUNDRED));
 
-		assertEquals(-1, priceTier.compareTo(priceTier2));
+		assertThat(priceTier).isLessThan(priceTier2);
 	}
 
 	/**
@@ -241,7 +234,7 @@ public class PriceTierImplTest {
 
 		PriceTier priceTier2 = new PriceTierImpl();
 
-		assertEquals(1, priceTier.compareTo(priceTier2));
+		assertThat(priceTier).isGreaterThan(priceTier2);
 	}
 
 	/**
@@ -251,24 +244,24 @@ public class PriceTierImplTest {
 	public void testCompare6() {
 		PriceTier priceTier2 = new PriceTierImpl();
 
-		assertEquals(0, priceTier.compareTo(priceTier2));
+		assertThat(priceTier).isEqualByComparingTo(priceTier2);
 	}
 
 	@Test
-	public void verifyDiscountRecordCollectionIsInitiallyEmpty() throws Exception {
+	public void verifyDiscountRecordCollectionIsInitiallyEmpty() {
 		// Given a price with no discount records
 		// When I retrieve the set of discount records
 		final Collection<DiscountRecord> discountRecords = priceTier.getDiscountRecords();
 
 		// Then no discount records exist
-		assertThat(discountRecords, empty());
+		assertThat(discountRecords).isEmpty();
 	}
 
 	@Test(expected = UnsupportedOperationException.class)
-	public void verifyGetDiscountRecordsSetIsImmutable() throws Exception {
+	public void verifyGetDiscountRecordsSetIsImmutable() {
 		// Given a price with discount records
-		priceTier.addDiscountRecord(context.mock(DiscountRecord.class, "DiscountRecord 1"));
-		priceTier.addDiscountRecord(context.mock(DiscountRecord.class, "DiscountRecord 2"));
+		priceTier.addDiscountRecord(mock(DiscountRecord.class, "DiscountRecord 1"));
+		priceTier.addDiscountRecord(mock(DiscountRecord.class, "DiscountRecord 2"));
 
 		// When I retrieve the set of discount records
 		final Collection<DiscountRecord> discountRecords = priceTier.getDiscountRecords();
@@ -278,29 +271,29 @@ public class PriceTierImplTest {
 	}
 
 	@Test
-	public void verifyManyDiscountRecordsCanBeAdded() throws Exception {
+	public void verifyManyDiscountRecordsCanBeAdded() {
 		// Given a price with no discount record
 		// When I add discount records
-		final DiscountRecord discountRecord1 = context.mock(DiscountRecord.class, "DiscountRecord 1");
-		final DiscountRecord discountRecord2 = context.mock(DiscountRecord.class, "DiscountRecord 2");
+		final DiscountRecord discountRecord1 = mock(DiscountRecord.class, "DiscountRecord 1");
+		final DiscountRecord discountRecord2 = mock(DiscountRecord.class, "DiscountRecord 2");
 		priceTier.addDiscountRecord(discountRecord1);
 		priceTier.addDiscountRecord(discountRecord2);
 
 		// Then the price contains the discount records
-		assertThat(priceTier.getDiscountRecords(), hasItems(discountRecord1, discountRecord2));
+		assertThat(priceTier.getDiscountRecords()).contains(discountRecord1, discountRecord2);
 	}
 
 	@Test
-	public void verifyClearDiscountRecordsClearsDiscountRecords() throws Exception {
+	public void verifyClearDiscountRecordsClearsDiscountRecords() {
 		// Given a price with discount records
-		priceTier.addDiscountRecord(context.mock(DiscountRecord.class, "DiscountRecord 1"));
-		priceTier.addDiscountRecord(context.mock(DiscountRecord.class, "DiscountRecord 2"));
+		priceTier.addDiscountRecord(mock(DiscountRecord.class, "DiscountRecord 1"));
+		priceTier.addDiscountRecord(mock(DiscountRecord.class, "DiscountRecord 2"));
 
 		// When I clear the discount records
 		priceTier.clearDiscountRecords();
 
 		// Then no discount records exist
-		assertThat(priceTier.getDiscountRecords(), empty());
+		assertThat(priceTier.getDiscountRecords()).isEmpty();
 	}
 
 }

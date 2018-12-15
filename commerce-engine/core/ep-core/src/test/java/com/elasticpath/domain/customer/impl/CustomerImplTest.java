@@ -3,13 +3,9 @@
  */
 package com.elasticpath.domain.customer.impl;
 
-import static org.hamcrest.Matchers.hasItem;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.Currency;
@@ -18,32 +14,27 @@ import java.util.List;
 import java.util.Locale;
 
 import org.apache.commons.lang.StringUtils;
-import org.hamcrest.Matchers;
-import org.jmock.Expectations;
-import org.jmock.integration.junit4.JUnitRuleMockery;
-import org.junit.After;
-import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.security.authentication.encoding.PasswordEncoder;
 
 import com.elasticpath.commons.beanframework.BeanFactory;
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.customer.Customer;
 import com.elasticpath.domain.customer.CustomerAddress;
+import com.elasticpath.domain.customer.CustomerAuthentication;
 import com.elasticpath.domain.customer.CustomerGroup;
-import com.elasticpath.domain.misc.impl.RandomGuidImpl;
-import com.elasticpath.service.customer.CustomerService;
 import com.elasticpath.service.security.SaltFactory;
-import com.elasticpath.settings.impl.SettingsServiceImpl;
-import com.elasticpath.test.BeanFactoryExpectationsFactory;
 import com.elasticpath.test.factory.CustomerBuilder;
 
 /**
  * Test of the public API of <code>CustomerImpl</code>.
  */
 @SuppressWarnings({ "PMD.TooManyMethods", "PMD.TooManyStaticImports", "PMD.GodClass" })
+@RunWith(MockitoJUnitRunner.class)
 public class CustomerImplTest {
 	private static final int INVALID_STATUS = 5;
 	private static final String PUBLIC = "PUBLIC";
@@ -51,10 +42,10 @@ public class CustomerImplTest {
 
 	private CustomerImpl customerImpl;
 
-	@Rule
-	public final JUnitRuleMockery context = new JUnitRuleMockery();
-	private BeanFactoryExpectationsFactory beanExpectations;
+	@Mock
+	private BeanFactory beanFactory;
 
+	@Mock
 	private PasswordEncoder passwordEncoder;
 
 	/**
@@ -62,15 +53,20 @@ public class CustomerImplTest {
 	 */
 	@Before
 	public void setUp()  {
-		BeanFactory beanFactory = context.mock(BeanFactory.class);
-		beanExpectations = new BeanFactoryExpectationsFactory(context, beanFactory);
-		beanExpectations.allowingBeanFactoryGetBean(ContextIdNames.CUSTOMER_AUTHENTICATION, CustomerAuthenticationImpl.class);
-		beanExpectations.allowingBeanFactoryGetBean(ContextIdNames.RANDOM_GUID, RandomGuidImpl.class);
 
-		passwordEncoder = context.mock(PasswordEncoder.class);
-		beanExpectations.allowingBeanFactoryGetBean(ContextIdNames.PASSWORDENCODER, passwordEncoder);
+		final CustomerAuthentication customerAuthentication = new CustomerAuthenticationImpl() {
+			private static final long serialVersionUID = 740L;
 
-		customerImpl = CustomerBuilder.newCustomer().build();
+			@Override
+			protected <T> T getBean(final String beanName) {
+				return beanFactory.getBean(beanName);
+			}
+		};
+
+		when(beanFactory.getBean(ContextIdNames.CUSTOMER_AUTHENTICATION)).thenReturn(customerAuthentication);
+		when(beanFactory.getBean(ContextIdNames.PASSWORDENCODER)).thenReturn(passwordEncoder);
+
+		customerImpl = CustomerBuilder.newCustomer(beanFactory).build();
 
 		CustomerGroupImpl customerGroupImpl = new CustomerGroupImpl();
 		customerGroupImpl.initialize();
@@ -82,18 +78,12 @@ public class CustomerImplTest {
 		customerImpl.setCustomerGroups(customerGroupList);
 	}
 
-
-	@After
-	public void tearDown() {
-		beanExpectations.close();
-	}
-
 	/**
 	 * Test method for 'com.elasticpath.domain.impl.CustomerImpl.getUserId()'.
 	 */
 	@Test
 	public void testGetUserId() {
-		assertEquals(customerImpl.getUserId(), null);
+		assertThat(customerImpl.getUserId()).isNull();
 	}
 
 	/**
@@ -103,7 +93,7 @@ public class CustomerImplTest {
 	public void testSetUserId() {
 		final String userId = "aaaa";
 		customerImpl.setUserId(userId);
-		assertSame(customerImpl.getUserId(), userId);
+		assertThat(customerImpl.getUserId()).isEqualTo(userId);
 	}
 
 
@@ -114,7 +104,7 @@ public class CustomerImplTest {
 	public void testSetGetPreferrredLocale() {
 		final Locale locale = Locale.US;
 		customerImpl.setPreferredLocale(locale);
-		assertEquals(locale, customerImpl.getPreferredLocale());
+		assertThat(customerImpl.getPreferredLocale()).isEqualTo(locale);
 	}
 
 	/**
@@ -124,7 +114,7 @@ public class CustomerImplTest {
 	public void testSetGetPreferredCurrency() {
 		final Currency currency = Currency.getInstance(Locale.US);
 		customerImpl.setPreferredCurrency(currency);
-		assertEquals(currency, customerImpl.getPreferredCurrency());
+		assertThat(customerImpl.getPreferredCurrency()).isEqualTo(currency);
 	}
 
 	/**
@@ -132,7 +122,7 @@ public class CustomerImplTest {
 	 */
 	@Test
 	public void testGetEmail() {
-		assertEquals("Check get email", null, customerImpl.getEmail());
+		assertThat(customerImpl.getEmail()).as("Check get email").isNull();
 	}
 
 	/**
@@ -140,19 +130,10 @@ public class CustomerImplTest {
 	 */
 	@Test
 	public void testSetEmail() {
-		final CustomerService customerService = context.mock(CustomerService.class);
-		context.checking(new Expectations() {
-			{
-				allowing(customerService).getUserIdMode(); will(returnValue(1));
-			}
-		});
-		beanExpectations.allowingBeanFactoryGetBean(ContextIdNames.CUSTOMER_SERVICE, customerService);
-		beanExpectations.allowingBeanFactoryGetBean("settingsService", SettingsServiceImpl.class);
-
-		final String[] testData = new String[] { "aaaa@aaa.aaa", "", null };
+		final String[] testData = new String[]{"aaaa@aaa.aaa", "", null};
 		for (final String email : testData) {
 			customerImpl.setEmail(email);
-			assertSame("Check set email", email, customerImpl.getEmail());
+			assertThat(customerImpl.getEmail()).isEqualTo(email);
 		}
 	}
 
@@ -162,7 +143,7 @@ public class CustomerImplTest {
 	@Test
 	public void testGetAddresses() {
 		final List<CustomerAddress> addresses = customerImpl.getAddresses();
-		assertTrue("Check get addresses", addresses.isEmpty());
+		assertThat(addresses).isEmpty();
 	}
 
 	/**
@@ -173,7 +154,7 @@ public class CustomerImplTest {
 		final List<CustomerAddress> addressList = new ArrayList<>();
 		customerImpl.setAddresses(addressList);
 		final List<CustomerAddress> savedAddresses = customerImpl.getAddresses();
-		assertEquals(addressList, savedAddresses);
+		assertThat(savedAddresses).isEqualTo(addressList);
 	}
 
 	/**
@@ -184,7 +165,7 @@ public class CustomerImplTest {
 		final CustomerAddress address = new CustomerAddressImpl();
 		customerImpl.addAddress(address);
 		final List<CustomerAddress> savedAddresses = customerImpl.getAddresses();
-		assertTrue(savedAddresses.contains(address));
+		assertThat(savedAddresses).contains(address);
 	}
 
 	/**
@@ -204,7 +185,7 @@ public class CustomerImplTest {
 		customerImpl.addAddress(address);
 		customerImpl.removeAddress(address);
 		final List<CustomerAddress> savedAddresses = customerImpl.getAddresses();
-		assertFalse(savedAddresses.contains(address));
+		assertThat(savedAddresses).doesNotContain(address);
 	}
 
 	/**
@@ -220,7 +201,7 @@ public class CustomerImplTest {
 	 */
 	@Test
 	public void testGetFirstName() {
-		assertEquals(null, customerImpl.getFirstName());
+		assertThat(customerImpl.getFirstName()).isNull();
 	}
 
 	/**
@@ -231,7 +212,7 @@ public class CustomerImplTest {
 		final String[] testData = new String[] { "aaaaa", "", null };
 		for (final String firstName : testData) {
 			customerImpl.setFirstName(firstName);
-			assertSame(firstName, customerImpl.getFirstName());
+			assertThat(customerImpl.getFirstName()).isEqualTo(firstName);
 		}
 	}
 
@@ -240,7 +221,7 @@ public class CustomerImplTest {
 	 */
 	@Test
 	public void testGetLastName() {
-		assertEquals(null, customerImpl.getLastName());
+		assertThat(customerImpl.getLastName()).isNull();
 	}
 
 	/**
@@ -251,7 +232,7 @@ public class CustomerImplTest {
 		final String[] testData = new String[] { "aaaaaa", "", null };
 		for (final String lastName : testData) {
 			customerImpl.setLastName(lastName);
-			assertSame(lastName, customerImpl.getLastName());
+			assertThat(customerImpl.getLastName()).isEqualTo(lastName);
 		}
 	}
 
@@ -260,7 +241,7 @@ public class CustomerImplTest {
 	 */
 	@Test
 	public void testGetPassword() {
-		assertEquals(null, customerImpl.getPassword());
+		assertThat(customerImpl.getPassword()).isNull();
 	}
 
 	/**
@@ -268,7 +249,7 @@ public class CustomerImplTest {
 	 */
 	@Test
 	public void testGetEncryptedPassword() {
-		assertEquals(customerImpl.getPassword(), null);
+		assertThat(customerImpl.getPassword()).isNull();
 	}
 
 	/**
@@ -276,9 +257,8 @@ public class CustomerImplTest {
 	 */
 	@Test
 	public void testSetClearTextPassword() {
-		@SuppressWarnings("unchecked")
-		final SaltFactory<String> saltFactory = context.mock(SaltFactory.class);
-		beanExpectations.allowingBeanFactoryGetBean(ContextIdNames.SALT_FACTORY, saltFactory);
+		@SuppressWarnings("unchecked") final SaltFactory<String> saltFactory = mock(SaltFactory.class);
+		when(beanFactory.getBean(ContextIdNames.SALT_FACTORY)).thenReturn(saltFactory);
 
 		final String[] passwords = new String[] { "AbCdEfGhI", "AbCdEfGhIjKlMnOpQrS", "aA123_$@#^&", "", null };
 		final String[] hashedPasswords = new String[] { "d60c7aaba158d8270ec509390438152ca931ec6a", "32a6ea3419c4d9653cf51c6500f3accef2012ab0",
@@ -289,18 +269,13 @@ public class CustomerImplTest {
 			final String password = passwords[i];
 			final String hashedPassword = hashedPasswords[i];
 
-			context.checking(new Expectations() {
-				{
-					if (!StringUtils.isBlank(password)) {
-						oneOf(saltFactory).createSalt(); will(returnValue(salt));
-						oneOf(passwordEncoder).encodePassword(password, salt);
-						will(returnValue(hashedPassword));
-					}
-				}
-			});
+			if (!StringUtils.isBlank(password)) {
+				when(saltFactory.createSalt()).thenReturn(salt);
+				when(passwordEncoder.encodePassword(password, salt)).thenReturn(hashedPassword);
+			}
 
 			customerImpl.setClearTextPassword(password);
-			assertEquals(hashedPassword, customerImpl.getPassword());
+			assertThat(customerImpl.getPassword()).isEqualTo(hashedPassword);
 		}
 	}
 
@@ -310,7 +285,7 @@ public class CustomerImplTest {
 	 */
 	@Test
 	public void testIsAnonymous() {
-		assertFalse(customerImpl.isAnonymous());
+		assertThat(customerImpl.isAnonymous()).isFalse();
 	}
 
 	/**
@@ -319,7 +294,7 @@ public class CustomerImplTest {
 	@Test
 	public void testSetAnonymous() {
 		customerImpl.setAnonymous(true);
-		assertTrue(customerImpl.isAnonymous());
+		assertThat(customerImpl.isAnonymous()).isTrue();
 	}
 
 	/**
@@ -328,7 +303,7 @@ public class CustomerImplTest {
 	@Test
 	public void testGetCreationDate() {
 		final Date creationDate = customerImpl.getCreationDate();
-		assertNotNull("Check getCreationDate", creationDate);
+		assertThat(creationDate).isNotNull();
 	}
 
 	/**
@@ -338,7 +313,7 @@ public class CustomerImplTest {
 	public void testSetCreationDate() {
 		final Date creationDate = new Date();
 		this.customerImpl.setCreationDate(creationDate);
-		assertEquals(creationDate, this.customerImpl.getCreationDate());
+		assertThat(this.customerImpl.getCreationDate()).isEqualTo(creationDate);
 	}
 
 	/**
@@ -347,7 +322,7 @@ public class CustomerImplTest {
 	@Test
 	public void testGetLastEditDate() {
 		final Date lastEditDate = customerImpl.getLastEditDate();
-		assertNotNull("Check getCreationDate", lastEditDate);
+		assertThat(lastEditDate).isNotNull();
 	}
 
 	/**
@@ -357,7 +332,7 @@ public class CustomerImplTest {
 	public void testSetLastEditDate() {
 		final Date lastEditDate = new Date();
 		this.customerImpl.setLastEditDate(lastEditDate);
-		assertEquals(lastEditDate, this.customerImpl.getLastEditDate());
+		assertThat(this.customerImpl.getLastEditDate()).isEqualTo(lastEditDate);
 	}
 
 	/**
@@ -365,20 +340,19 @@ public class CustomerImplTest {
 	 */
 	@Test
 	public void testGetSetAddresses() {
-		assertNull(customerImpl.getPreferredBillingAddress());
-		assertNull(customerImpl.getPreferredShippingAddress());
+		assertThat(customerImpl.getPreferredBillingAddress()).isNull();
+		assertThat(customerImpl.getPreferredShippingAddress()).isNull();
 
 		CustomerAddress address = new CustomerAddressImpl();
 		address.setFirstName("Test");
 
 		customerImpl.setPreferredBillingAddress(address);
-		assertSame(address, customerImpl.getPreferredBillingAddress());
+		assertThat(customerImpl.getPreferredBillingAddress()).isEqualTo(address);
+		assertThat(customerImpl.getPreferredShippingAddress()).isNull();
 
-		assertNull(customerImpl.getPreferredShippingAddress());
 		customerImpl.setPreferredBillingAddress(null);
-
 		customerImpl.setPreferredShippingAddress(address);
-		assertSame(address, customerImpl.getPreferredShippingAddress());
+		assertThat(customerImpl.getPreferredShippingAddress()).isEqualTo(address);
 	}
 
 	/**
@@ -387,7 +361,7 @@ public class CustomerImplTest {
 	@Test
 	public void testSetStatus() {
 		this.customerImpl.setStatus(Customer.STATUS_ACTIVE);
-		assertEquals(Customer.STATUS_ACTIVE, this.customerImpl.getStatus());
+		assertThat(this.customerImpl.getStatus()).isEqualTo(Customer.STATUS_ACTIVE);
 	}
 
 	/**
@@ -404,7 +378,7 @@ public class CustomerImplTest {
 	@Test
 	public void testSetGender() {
 		this.customerImpl.setGender(Customer.GENDER_FEMALE);
-		assertEquals(Customer.GENDER_FEMALE, this.customerImpl.getGender());
+		assertThat(this.customerImpl.getGender()).isEqualTo(Customer.GENDER_FEMALE);
 	}
 
 	/**
@@ -413,31 +387,31 @@ public class CustomerImplTest {
 	@Test
 	public void testSetCompany() {
 		this.customerImpl.setCompany(null);
-		assertEquals(null, this.customerImpl.getCompany());
+		assertThat(this.customerImpl.getCompany()).isNull();
 	}
 
 	/** When setting the preferred billing address, it should be in the list of addresses. */
 	@Test
 	public void testSetPreferredBillingIsInAddresses() {
 		CustomerAddress address = new CustomerAddressImpl();
-		Assert.assertThat("Customer already has the address?", customerImpl.getAddresses(),
-				Matchers.not(hasItem(address)));
+		assertThat(customerImpl.getAddresses()).doesNotContain(address);
 
 		customerImpl.setPreferredBillingAddress(address);
-		Assert.assertThat("Preferred address should a part of customer addresses", customerImpl.getAddresses(),
-				hasItem(address));
+		assertThat(customerImpl.getAddresses())
+			.as("Preferred address should a part of customer addresses")
+			.contains(address);
 	}
 
 	/** When setting the preferred shipping address, it should be in the list of addresses. */
 	@Test
 	public void testSetPreferredShippingIsInAddresses() {
 		CustomerAddress address = new CustomerAddressImpl();
-		Assert.assertThat("Customer already has the address?", customerImpl.getAddresses(),
-				Matchers.not(hasItem(address)));
+		assertThat(customerImpl.getAddresses()).doesNotContain(address);
 
 		customerImpl.setPreferredShippingAddress(address);
-		Assert.assertThat("Preferred address should a part of customer addresses", customerImpl.getAddresses(),
-				hasItem(address));
+		assertThat(customerImpl.getAddresses())
+			.as("Preferred address should a part of customer addresses")
+			.contains(address);
 	}
 
 	/** Test get address by Id method. */
@@ -451,8 +425,8 @@ public class CustomerImplTest {
 		address2.setCity("Vancouver");
 		customerImpl.addAddress(address1);
 		customerImpl.addAddress(address2);
-		assertEquals(address1, customerImpl.getAddressByUid(1));
-		assertEquals(address2, customerImpl.getAddressByUid(2));
+		assertThat(customerImpl.getAddressByUid(1)).isEqualTo(address1);
+		assertThat(customerImpl.getAddressByUid(2)).isEqualTo(address2);
 	}
 
 	/**
@@ -460,12 +434,12 @@ public class CustomerImplTest {
 	 */
 	@Test
 	public void testSetHtmlEmailPreferred() {
-		assertFalse(customerImpl.isHtmlEmailPreferred());
+		assertThat(customerImpl.isHtmlEmailPreferred()).isFalse();
 		customerImpl.setHtmlEmailPreferred(true);
-		assertTrue(customerImpl.isHtmlEmailPreferred());
+		assertThat(customerImpl.isHtmlEmailPreferred()).isTrue();
 
 		customerImpl.setHtmlEmailPreferred(false);
-		assertFalse(customerImpl.isHtmlEmailPreferred());
+		assertThat(customerImpl.isHtmlEmailPreferred()).isFalse();
 
 	}
 
@@ -474,12 +448,12 @@ public class CustomerImplTest {
 	 */
 	@Test
 	public void testSetToBeNotified() {
-		assertFalse(customerImpl.isToBeNotified());
+		assertThat(customerImpl.isToBeNotified()).isFalse();
 		customerImpl.setToBeNotified(true);
-		assertTrue(customerImpl.isToBeNotified());
+		assertThat(customerImpl.isToBeNotified()).isTrue();
 
 		customerImpl.setToBeNotified(false);
-		assertFalse(customerImpl.isToBeNotified());
+		assertThat(customerImpl.isToBeNotified()).isFalse();
 	}
 
 	/**
@@ -488,9 +462,9 @@ public class CustomerImplTest {
 	@Test
 	public void testSetFaxNumber() {
 		String faxNumber = "+1 111 111 888";
-		assertNull(customerImpl.getFaxNumber());
+		assertThat(customerImpl.getFaxNumber()).isNull();
 		customerImpl.setFaxNumber(faxNumber);
-		assertEquals(faxNumber, customerImpl.getFaxNumber());
+		assertThat(customerImpl.getFaxNumber()).isEqualTo(faxNumber);
 
 	}
 
@@ -500,9 +474,9 @@ public class CustomerImplTest {
 	@Test
 	public void testSetPhoneNumber() {
 		String phoneNumber = "+1 111 111 888";
-		assertNull(customerImpl.getPhoneNumber());
+		assertThat(customerImpl.getPhoneNumber()).isNull();
 		customerImpl.setPhoneNumber(phoneNumber);
-		assertEquals(phoneNumber, customerImpl.getPhoneNumber());
+		assertThat(customerImpl.getPhoneNumber()).isEqualTo(phoneNumber);
 
 	}
 
@@ -511,7 +485,7 @@ public class CustomerImplTest {
 	 */
 	@Test
 	public void testBelongsToCustomerGroup() {
-		assertTrue(customerImpl.belongsToCustomerGroup(customerImpl.getCustomerGroups().get(0).getUidPk()));
+		assertThat(customerImpl.belongsToCustomerGroup(customerImpl.getCustomerGroups().get(0).getUidPk())).isTrue();
 	}
 
 	/**
@@ -521,10 +495,14 @@ public class CustomerImplTest {
 	public void verifyRoleMapperReturnsCorrectRolesOnCustomer() {
 		customerImpl.setAnonymous(true);
 		CustomerRoleMapper roleMapper = customerImpl.getCustomerRoleMapper();
-		assertNotNull(roleMapper);
-		assertTrue("Customer should have role " + PUBLIC, roleMapper.hasRole(PUBLIC));
+		assertThat(roleMapper).isNotNull();
+		assertThat(roleMapper.hasRole(PUBLIC))
+			.as("Customer should have role %s", PUBLIC)
+			.isTrue();
 
 		customerImpl.setAnonymous(false);
-		assertTrue("Customer should have role " + REGISTERED, roleMapper.hasRole(REGISTERED));
+		assertThat(roleMapper.hasRole(REGISTERED))
+			.as("Customer should have role %s", REGISTERED)
+			.isTrue();
 	}
 }

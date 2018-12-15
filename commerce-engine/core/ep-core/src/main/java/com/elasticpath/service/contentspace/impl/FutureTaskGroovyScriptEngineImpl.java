@@ -3,7 +3,6 @@
  */
 package com.elasticpath.service.contentspace.impl;
 
-import java.util.concurrent.Callable;
 import java.util.concurrent.FutureTask;
 
 import groovy.lang.Binding;
@@ -41,12 +40,7 @@ public class FutureTaskGroovyScriptEngineImpl extends AbstractGroovyScriptEngine
 			compiler = groovyScriptTimeoutCache.get(textScript);
 			if (compiler == null) {
 				newlyCreated = true;
-				compiler = new FutureTask<>(new Callable<Script>() {
-					@Override
-					public Script call() {
-						return groovyShell.parse(textScript);
-					}
-				});
+				compiler = new FutureTask<>(() -> groovyShell.parse(textScript));
 				groovyScriptTimeoutCache.put(textScript, compiler);
 			}
 		}

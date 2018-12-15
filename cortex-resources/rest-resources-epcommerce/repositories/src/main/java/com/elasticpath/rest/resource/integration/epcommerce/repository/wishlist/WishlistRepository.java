@@ -3,6 +3,8 @@
  */
 package com.elasticpath.rest.resource.integration.epcommerce.repository.wishlist;
 
+import java.util.Map;
+
 import io.reactivex.Completable;
 import io.reactivex.Maybe;
 import io.reactivex.Observable;
@@ -66,10 +68,10 @@ public interface WishlistRepository {
 	/**
 	 * Gets the list of wishlist guids for the customer that contain the given item.
 	 *
-	 * @param itemId the item id
+	 * @param itemIdMap the item id map
 	 * @return a list of wishlists for the customer that contain the item
 	 */
-	Maybe<WishList> findWishlistsContainingItem(String itemId);
+	Maybe<WishList> findWishlistsContainingItem(Map<String, String> itemIdMap);
 
 	/**
 	 * Get the default wishlist id.

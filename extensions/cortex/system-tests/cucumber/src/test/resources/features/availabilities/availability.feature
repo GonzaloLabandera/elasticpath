@@ -1,4 +1,4 @@
-@Items @Availability
+@items @availability
 Feature: Item availability
   As a client developer,
   I can retrieve the availability of an item
@@ -70,7 +70,7 @@ Feature: Item availability
   Scenario Outline: Verifying an item availability after adding to cart
     Given I am logged into scope mobee as a public shopper
     When I add item with code <SKU_CODE> to my cart with quantity 1
-    And I view the item availability
+    And I view the cart line item availability
     Then The availability should be AVAILABLE
 
     Examples:

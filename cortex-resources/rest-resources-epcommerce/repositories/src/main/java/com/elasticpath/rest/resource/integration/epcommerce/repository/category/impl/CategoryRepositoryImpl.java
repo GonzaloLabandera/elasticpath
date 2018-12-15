@@ -93,9 +93,8 @@ public class CategoryRepositoryImpl implements CategoryRepository {
 
 	@CacheResult
 	private Single<Category> getByCategoryAndCatalogCode(final String categoryCode, final Catalog catalog) {
-		return reactiveAdapter.fromServiceAsSingle(() ->
-				categoryLookup.findByCategoryAndCatalogCode(categoryCode, catalog.getCode()),
-				NAVIGATION_NODE_WAS_NOT_FOUND);
+		return reactiveAdapter.fromServiceAsSingle(
+				() -> categoryLookup.findByCategoryAndCatalogCode(categoryCode, catalog.getCode()), NAVIGATION_NODE_WAS_NOT_FOUND);
 	}
 
 	@Override

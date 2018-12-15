@@ -31,9 +31,10 @@
 		<failsafe.fork.count>1</failsafe.fork.count>
 		<selenium.waitdriver.timeout>30</selenium.waitdriver.timeout>
 		<cortex.server.host>localhost</cortex.server.host>
-		<ep.cortex.url>http://${cortex.server.host}:${ep.cortex.port.http}${ep.cortex.contextUrl}</ep.cortex.url>
+		<ep.rest.baseurl>http://${cortex.server.host}:${ep.cortex.port.http}${ep.cortex.contextUrl}</ep.rest.baseurl>
 		<ep.dateTimeFormat>MMM d, yyyy h:mm a</ep.dateTimeFormat>
 		<ep.dateFormat>MMM d, yyyy</ep.dateFormat>
+		<ep.locale>en-US</ep.locale>
 
 		<!-- data sync tool properties -->
 		<db.driver>${epdb.jdbc.driver}</db.driver>
@@ -48,8 +49,10 @@
 		<target.pwd>${epdb.password}</target.pwd>
 		<target.driver>${db.driver}</target.driver>
 
-		<!-- Dependency versions -->
-		<selenium.version>3.4.0</selenium.version>
+		<!-- JMS properties -->
+		<ep.jms.host>localhost</ep.jms.host>
+		<ep.jms.port.tcp>61616</ep.jms.port.tcp>
+		<ep.jms.url>tcp://${ep.jms.host}:${ep.jms.port.tcp}</ep.jms.url>
 
 	</properties>
 
@@ -69,7 +72,6 @@
 		<dependency>
 			<groupId>org.seleniumhq.selenium</groupId>
 			<artifactId>selenium-java</artifactId>
-			<version>${selenium.version}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
@@ -101,7 +103,6 @@
 		<dependency>
 			<groupId>com.google.guava</groupId>
 			<artifactId>guava</artifactId>
-			<version>21.0</version>
 		</dependency>
 		<dependency>
 			<groupId>org.codehaus.groovy</groupId>
@@ -111,7 +112,6 @@
 		<dependency>
 			<groupId>mysql</groupId>
 			<artifactId>mysql-connector-java</artifactId>
-			<version>5.1.6</version>
 		</dependency>
 	</dependencies>
 

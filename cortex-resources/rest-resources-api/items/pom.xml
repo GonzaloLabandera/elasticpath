@@ -18,6 +18,11 @@
 			<groupId>com.elasticpath.rest.definitions</groupId>
 			<artifactId>ep-resource-base-api</artifactId>
 		</dependency>
+
+		<dependency>
+			<groupId>com.elasticpath.rest.definitions</groupId>
+			<artifactId>ep-resource-lookups-api</artifactId>
+		</dependency>
 	</dependencies>
 
 	<build>

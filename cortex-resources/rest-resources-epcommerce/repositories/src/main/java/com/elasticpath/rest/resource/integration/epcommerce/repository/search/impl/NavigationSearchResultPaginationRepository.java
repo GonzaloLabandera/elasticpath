@@ -17,7 +17,6 @@ import com.elasticpath.domain.store.Store;
 import com.elasticpath.repository.PaginationRepository;
 import com.elasticpath.rest.ResourceOperationFailure;
 import com.elasticpath.rest.definition.items.ItemIdentifier;
-import com.elasticpath.rest.definition.items.ItemsIdentifier;
 import com.elasticpath.rest.definition.searches.NavigationSearchResultIdentifier;
 import com.elasticpath.rest.id.IdentifierPart;
 import com.elasticpath.rest.id.type.CompositeIdentifier;
@@ -108,7 +107,7 @@ public class NavigationSearchResultPaginationRepository<I extends NavigationSear
 	protected Single<NavigationSearchData> validateSearchData(final NavigationSearchResultIdentifier navigationSearchResultIdentifier) {
 		int pageId = navigationSearchResultIdentifier.getPageId().getValue();
 		if (pageId < FIRST_PAGE_ID) {
-			String unknownPageIdErrorMsg = "Page id " + pageId + "can't be smaller than" + FIRST_PAGE_ID;
+			String unknownPageIdErrorMsg = "Page id " + pageId + " can't be smaller than " + FIRST_PAGE_ID;
 			LOG.error(unknownPageIdErrorMsg);
 			return Single.error(ResourceOperationFailure.badRequestBody(unknownPageIdErrorMsg));
 		}
@@ -185,9 +184,7 @@ public class NavigationSearchResultPaginationRepository<I extends NavigationSear
 				map(itemId ->
 						ItemIdentifier.builder()
 								.withItemId(CompositeIdentifier.of(CompositeIdUtil.decodeCompositeId(itemId)))
-								.withItems(ItemsIdentifier.builder()
-										.withScope(StringIdentifier.of(navigationSearchData.getScope()))
-										.build())
+								.withScope(StringIdentifier.of(navigationSearchData.getScope()))
 								.build()
 				);
 	}

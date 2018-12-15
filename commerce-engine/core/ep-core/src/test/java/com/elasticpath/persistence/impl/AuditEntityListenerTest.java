@@ -1,11 +1,13 @@
-/**
+/*
  * Copyright (c) Elastic Path Software Inc., 2014
  */
 package com.elasticpath.persistence.impl;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -22,13 +24,11 @@ import org.apache.openjpa.kernel.Broker;
 import org.apache.openjpa.meta.FieldMetaData;
 import org.apache.openjpa.meta.ValueMetaData;
 import org.apache.openjpa.persistence.OpenJPAEntityManager;
-import org.jmock.Expectations;
-import org.jmock.integration.junit4.JUnitRuleMockery;
-import org.jmock.lib.concurrent.Synchroniser;
-import org.jmock.lib.legacy.ClassImposteriser;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.elasticpath.commons.ThreadLocalMap;
 import com.elasticpath.commons.beanframework.BeanFactory;
@@ -44,33 +44,33 @@ import com.elasticpath.persistence.api.Transaction;
 import com.elasticpath.persistence.openjpa.JpaPersistenceEngine;
 import com.elasticpath.persistence.openjpa.impl.JpaPersistenceEngineImpl;
 import com.elasticpath.service.audit.AuditDao;
-import com.elasticpath.test.BeanFactoryExpectationsFactory;
 
 /**
  * Unit test for the {@code AuditEntityListener} class.
  */
+@RunWith(MockitoJUnitRunner.class)
 public class AuditEntityListenerTest {
 
 	private static final long UIDPK = 1000L;
 
-	@Rule
-	public final JUnitRuleMockery context = new JUnitRuleMockery() {
-		{
-			setImposteriser(ClassImposteriser.INSTANCE);
-			setThreadingPolicy(new Synchroniser());
-		}
-	};
-
 	private AuditEntityListener auditEntityListener;
-	private final AuditDao auditDao = context.mock(AuditDao.class);
-	private final BeanFactory beanFactory = context.mock(BeanFactory.class);
-	private final JpaPersistenceEngineImpl realJpaPersistenceEngine = new JpaPersistenceEngineImpl();
-	private final JpaPersistenceEngine mockJpaPersistenceEngine = context.mock(JpaPersistenceEngine.class);
-	private final OpenJPAEntityManager openJPAEntityManager = context.mock(OpenJPAEntityManager.class);
 
-	@SuppressWarnings("unchecked")
-	private final ThreadLocalMap<String, Object> metadataMap = context.mock(ThreadLocalMap.class);
-	private final BeanFactoryExpectationsFactory bfef = new BeanFactoryExpectationsFactory(context, beanFactory);
+	@Mock
+	private AuditDao auditDao;
+
+	@Mock
+	private BeanFactory beanFactory;
+
+	private final JpaPersistenceEngineImpl realJpaPersistenceEngine = new JpaPersistenceEngineImpl();
+
+	@Mock
+	private JpaPersistenceEngine mockJpaPersistenceEngine;
+
+	@Mock
+	private OpenJPAEntityManager openJPAEntityManager;
+
+	@Mock
+	private ThreadLocalMap<String, Object> metadataMap;
 
 	/**
 	 * Interface for mocking an Entity with a method that provides a way to get a mocked field
@@ -109,15 +109,15 @@ public class AuditEntityListenerTest {
 		auditEntityListener.setBeanFactory(beanFactory);
 		auditEntityListener.setMetadataMap(metadataMap);
 
-		bfef.allowingBeanFactoryGetBean(ContextIdNames.AUDIT_DAO, auditDao);
+		when(beanFactory.getBean(ContextIdNames.AUDIT_DAO)).thenReturn(auditDao);
 	}
 
 	private void givenRealJpaPersistenceEngine() {
-		bfef.allowingBeanFactoryGetBean(ContextIdNames.PERSISTENCE_ENGINE, realJpaPersistenceEngine);
+		when(beanFactory.getBean(ContextIdNames.PERSISTENCE_ENGINE)).thenReturn(realJpaPersistenceEngine);
 	}
 
 	private void givenMockJpaPersistenceEngine() {
-		bfef.allowingBeanFactoryGetBean(ContextIdNames.PERSISTENCE_ENGINE, mockJpaPersistenceEngine);
+		when(beanFactory.getBean(ContextIdNames.PERSISTENCE_ENGINE)).thenReturn(mockJpaPersistenceEngine);
 	}
 
 	/**
@@ -125,20 +125,12 @@ public class AuditEntityListenerTest {
 	 */
 	@Test
 	public void testIsPrimaryKeyFieldAuditable() {
-		final FieldMetaData fieldMetaData = context.mock(FieldMetaData.class);
-		context.checking(new Expectations() {
-			{
-				allowing(fieldMetaData).getName();
-					will(returnValue("fieldName"));
-				allowing(fieldMetaData).isTransient();
-					will(returnValue(false));
-				allowing(fieldMetaData).isVersion();
-					will(returnValue(false));
-				oneOf(fieldMetaData).isPrimaryKey();
-					will(returnValue(true));
-			}
-		});
-		assertFalse("Primary key fields should not be auditable", auditEntityListener.isFieldAuditable(fieldMetaData, null));
+		final FieldMetaData fieldMetaData = mock(FieldMetaData.class);
+		when(fieldMetaData.isPrimaryKey()).thenReturn(true);
+		assertThat(auditEntityListener.isFieldAuditable(fieldMetaData, null))
+			.as("Primary key fields should not be auditable")
+			.isFalse();
+		verify(fieldMetaData).isPrimaryKey();
 	}
 	
 	/**
@@ -146,20 +138,13 @@ public class AuditEntityListenerTest {
 	 */
 	@Test
 	public void testIsVersionFieldAuditable() {
-		final FieldMetaData fieldMetaData = context.mock(FieldMetaData.class);
-		context.checking(new Expectations() {
-			{
-				allowing(fieldMetaData).getName();
-					will(returnValue("fieldName"));
-				allowing(fieldMetaData).isPrimaryKey();
-					will(returnValue(false));
-				allowing(fieldMetaData).isTransient();
-					will(returnValue(false));
-				oneOf(fieldMetaData).isVersion();
-					will(returnValue(true));
-			}
-		});
-		assertFalse("Version fields should not be auditable", auditEntityListener.isFieldAuditable(fieldMetaData, null));
+		final FieldMetaData fieldMetaData = mock(FieldMetaData.class);
+		when(fieldMetaData.isPrimaryKey()).thenReturn(false);
+		when(fieldMetaData.isVersion()).thenReturn(true);
+		assertThat(auditEntityListener.isFieldAuditable(fieldMetaData, null))
+			.as("Version fields should not be auditable")
+			.isFalse();
+		verify(fieldMetaData).isVersion();
 	}
 
 	/**
@@ -167,20 +152,14 @@ public class AuditEntityListenerTest {
 	 */
 	@Test
 	public void testIsTransientFieldAuditable() {
-		final FieldMetaData fieldMetaData = context.mock(FieldMetaData.class);
-		context.checking(new Expectations() {
-			{
-				allowing(fieldMetaData).getName();
-					will(returnValue("fieldName"));
-				allowing(fieldMetaData).isPrimaryKey();
-					will(returnValue(false));
-				allowing(fieldMetaData).isVersion();
-					will(returnValue(false));
-				oneOf(fieldMetaData).isTransient();
-					will(returnValue(true));
-			}
-		});
-		assertFalse("Transient fields should not be auditable", auditEntityListener.isFieldAuditable(fieldMetaData, null));
+		final FieldMetaData fieldMetaData = mock(FieldMetaData.class);
+		when(fieldMetaData.isPrimaryKey()).thenReturn(false);
+		when(fieldMetaData.isVersion()).thenReturn(false);
+		when(fieldMetaData.isTransient()).thenReturn(true);
+		assertThat(auditEntityListener.isFieldAuditable(fieldMetaData, null))
+			.as("Transient fields should not be auditable")
+			.isFalse();
+		verify(fieldMetaData).isTransient();
 	}
 	
 	/**
@@ -188,10 +167,11 @@ public class AuditEntityListenerTest {
 	 */
 	@Test
 	public void testIsNonAuditableCollectionOrMapForNormalField() {
-		final FieldMetaData fieldMetaData = context.mock(FieldMetaData.class);
+		final FieldMetaData fieldMetaData = mock(FieldMetaData.class);
 		final Object nonCollectionField = new Object();
-		assertFalse("Non-collections should be auditable", 
-				auditEntityListener.isNonAuditableCollectionOrMap(fieldMetaData, nonCollectionField));
+		assertThat(auditEntityListener.isNonAuditableCollectionOrMap(fieldMetaData, nonCollectionField))
+			.as("Non-collections should be auditable")
+			.isFalse();
 	}
 	
 	/**
@@ -199,23 +179,20 @@ public class AuditEntityListenerTest {
 	 */
 	@Test
 	public void testIsNonAuditableCollectionOrMapForBasicCollection() {
-		final FieldMetaData fieldMetaData = context.mock(FieldMetaData.class);
-		final ValueMetaData valueMetaData = context.mock(ValueMetaData.class);
-		final Object collectionField = context.mock(Collection.class);
-		context.checking(new Expectations() {
-			{
-				oneOf(fieldMetaData).getElement();
-					will(returnValue(valueMetaData));
-					
-				oneOf(fieldMetaData).isEmbedded();
-					will(returnValue(false));
-					
-				oneOf(valueMetaData).isDeclaredTypePC();
-					will(returnValue(false));
-			}
-		});
-		assertTrue("Collections of non-PC objects should not be auditable", 
-				auditEntityListener.isNonAuditableCollectionOrMap(fieldMetaData, collectionField));
+		final FieldMetaData fieldMetaData = mock(FieldMetaData.class);
+		final ValueMetaData valueMetaData = mock(ValueMetaData.class);
+		final Object collectionField = mock(Collection.class);
+		when(fieldMetaData.getElement()).thenReturn(valueMetaData);
+
+		when(fieldMetaData.isEmbedded()).thenReturn(false);
+
+		when(valueMetaData.isDeclaredTypePC()).thenReturn(false);
+		assertThat(auditEntityListener.isNonAuditableCollectionOrMap(fieldMetaData, collectionField))
+			.as("Collections of non-PC objects should not be auditable")
+			.isTrue();
+		verify(fieldMetaData).getElement();
+		verify(fieldMetaData).isEmbedded();
+		verify(valueMetaData).isDeclaredTypePC();
 	}
 
 	/**
@@ -223,23 +200,19 @@ public class AuditEntityListenerTest {
 	 */
 	@Test
 	public void testIsNonAuditableCollectionOrMapForEmbeddedCollection() {
-		final FieldMetaData fieldMetaData = context.mock(FieldMetaData.class);
-		final ValueMetaData valueMetaData = context.mock(ValueMetaData.class);
-		final Object collectionField = context.mock(Collection.class);
-		context.checking(new Expectations() {
-			{
-				oneOf(fieldMetaData).getElement();
-					will(returnValue(valueMetaData));
-					
-				oneOf(fieldMetaData).isEmbedded();
-					will(returnValue(true));
-					
-				allowing(valueMetaData).isDeclaredTypePC();
-					will(returnValue(false));
-			}
-		});
-		assertFalse("Collections of embedded objects should be auditable", 
-				auditEntityListener.isNonAuditableCollectionOrMap(fieldMetaData, collectionField));
+		final FieldMetaData fieldMetaData = mock(FieldMetaData.class);
+		final ValueMetaData valueMetaData = mock(ValueMetaData.class);
+		final Object collectionField = mock(Collection.class);
+		when(fieldMetaData.getElement()).thenReturn(valueMetaData);
+
+		when(fieldMetaData.isEmbedded()).thenReturn(true);
+
+		when(valueMetaData.isDeclaredTypePC()).thenReturn(false);
+		assertThat(auditEntityListener.isNonAuditableCollectionOrMap(fieldMetaData, collectionField))
+			.as("Collections of embedded objects should be auditable")
+			.isFalse();
+		verify(fieldMetaData).getElement();
+		verify(fieldMetaData).isEmbedded();
 	}
 
 	/**
@@ -247,23 +220,17 @@ public class AuditEntityListenerTest {
 	 */
 	@Test
 	public void testIsNonAuditableCollectionOrMapForPCCollection() {
-		final FieldMetaData fieldMetaData = context.mock(FieldMetaData.class);
-		final ValueMetaData valueMetaData = context.mock(ValueMetaData.class);
-		final Object collectionField = context.mock(Collection.class);
-		context.checking(new Expectations() {
-			{
-				oneOf(fieldMetaData).getElement();
-					will(returnValue(valueMetaData));
-					
-				allowing(fieldMetaData).isEmbedded();
-					will(returnValue(false));
-					
-				oneOf(valueMetaData).isDeclaredTypePC();
-					will(returnValue(true));
-			}
-		});
-		assertFalse("Collections of Persistence objects should be auditable", 
-				auditEntityListener.isNonAuditableCollectionOrMap(fieldMetaData, collectionField));
+		final FieldMetaData fieldMetaData = mock(FieldMetaData.class);
+		final ValueMetaData valueMetaData = mock(ValueMetaData.class);
+		final Object collectionField = mock(Collection.class);
+		when(fieldMetaData.getElement()).thenReturn(valueMetaData);
+
+		when(valueMetaData.isDeclaredTypePC()).thenReturn(true);
+		assertThat(auditEntityListener.isNonAuditableCollectionOrMap(fieldMetaData, collectionField))
+			.as("Collections of Persistence objects should be auditable")
+			.isFalse();
+		verify(fieldMetaData).getElement();
+		verify(valueMetaData).isDeclaredTypePC();
 	}
 
 	/**
@@ -271,23 +238,17 @@ public class AuditEntityListenerTest {
 	 */
 	@Test
 	public void testIsNonAuditableCollectionOrMapForPCMap() {
-		final FieldMetaData fieldMetaData = context.mock(FieldMetaData.class);
-		final ValueMetaData valueMetaData = context.mock(ValueMetaData.class);
-		final Object mapField = context.mock(Map.class);
-		context.checking(new Expectations() {
-			{
-				oneOf(fieldMetaData).getElement();
-					will(returnValue(valueMetaData));
-					
-				allowing(fieldMetaData).isEmbedded();
-					will(returnValue(false));
-					
-				oneOf(valueMetaData).isDeclaredTypePC();
-					will(returnValue(true));
-			}
-		});
-		assertFalse("Maps of Persistence objects should be auditable", 
-				auditEntityListener.isNonAuditableCollectionOrMap(fieldMetaData, mapField));
+		final FieldMetaData fieldMetaData = mock(FieldMetaData.class);
+		final ValueMetaData valueMetaData = mock(ValueMetaData.class);
+		final Object mapField = mock(Map.class);
+		when(fieldMetaData.getElement()).thenReturn(valueMetaData);
+
+		when(valueMetaData.isDeclaredTypePC()).thenReturn(true);
+		assertThat(auditEntityListener.isNonAuditableCollectionOrMap(fieldMetaData, mapField))
+			.as("Maps of Persistence objects should be auditable")
+			.isFalse();
+		verify(fieldMetaData).getElement();
+		verify(valueMetaData).isDeclaredTypePC();
 	}
 	
 	/**
@@ -295,18 +256,14 @@ public class AuditEntityListenerTest {
 	 */
 	@Test
 	public void testRecordFieldChangedCreate() {
-		final Entity entity = context.mock(Entity.class);
+		final Entity entity = mock(Entity.class);
 		final String field = "Create Field";
-		final ChangeOperation operation = context.mock(ChangeOperation.class);
+		final ChangeOperation operation = mock(ChangeOperation.class);
 		
 		auditEntityListener.setCurrentOperation(operation);
 		
-		context.checking(new Expectations() {
-			{
-				oneOf(auditDao).persistDataChanged(entity, "createField", ChangeType.CREATE, null, field, operation);
-			}
-		});
 		auditEntityListener.recordFieldChanged(entity, "createField", field, ChangeType.CREATE);
+		verify(auditDao).persistDataChanged(entity, "createField", ChangeType.CREATE, null, field, operation);
 	}
 	
 	/**
@@ -314,18 +271,14 @@ public class AuditEntityListenerTest {
 	 */
 	@Test
 	public void testRecordFieldChangedDelete() {
-		final Entity entity = context.mock(Entity.class);
+		final Entity entity = mock(Entity.class);
 		final String field = "Delete Field";
-		final ChangeOperation operation = context.mock(ChangeOperation.class);
+		final ChangeOperation operation = mock(ChangeOperation.class);
 		
 		auditEntityListener.setCurrentOperation(operation);
 		
-		context.checking(new Expectations() {
-			{
-				oneOf(auditDao).persistDataChanged(entity, "deleteField", ChangeType.DELETE, field, null, operation);
-			}
-		});
 		auditEntityListener.recordFieldChanged(entity, "deleteField", field, ChangeType.DELETE);
+		verify(auditDao).persistDataChanged(entity, "deleteField", ChangeType.DELETE, field, null, operation);
 	}
 
 	/**
@@ -335,42 +288,42 @@ public class AuditEntityListenerTest {
 	public void testRecordCollectionChangedUpdate() {
 		givenRealJpaPersistenceEngine();
 
-		final Entity entity = context.mock(Entity.class, "new");
-		final EntityWithField oldEntity = context.mock(EntityWithField.class, "old");
+		final Entity entity = mock(Entity.class, "new");
+		final EntityWithField oldEntity = mock(EntityWithField.class, "old");
 
 		final Set<Persistable> newCollection = new HashSet<>();
 		final Set<Persistable> oldCollection = new HashSet<>();
-		final Entity unchangedMember = context.mock(Entity.class, "unchangedMember");
-		final Entity newMember = context.mock(Entity.class, "newMember");
-		final Entity removedMember = context.mock(Entity.class, "removedMember");
+		final Entity unchangedMember = mock(Entity.class, "unchangedMember");
+		final Entity newMember = mock(Entity.class, "newMember");
+		final Entity removedMember = mock(Entity.class, "removedMember");
 		oldCollection.add(unchangedMember);
 		oldCollection.add(removedMember);
 		newCollection.add(unchangedMember);
 		newCollection.add(newMember);
-		
+
 		final String fieldName = "changedCollection";
 
-		final ChangeOperation operation = context.mock(ChangeOperation.class);
+		final ChangeOperation operation = mock(ChangeOperation.class);
 		auditEntityListener.setCurrentOperation(operation);
 
-		final EntityManager entityManager = context.mock(EntityManager.class);
+		final EntityManager entityManager = mock(EntityManager.class);
 		realJpaPersistenceEngine.setEntityManager(entityManager);
-		
-		context.checking(new Expectations() {
-			{
-				oneOf(entity).getUidPk(); will(returnValue(UIDPK));
 
-				oneOf(entityManager).find(entity.getClass(), UIDPK); will(returnValue(oldEntity));
-				oneOf(oldEntity).getField(); will(returnValue(oldCollection));
-					
-				oneOf(removedMember).getGuid(); will(returnValue("OLDGUID"));
-				oneOf(newMember).getGuid(); will(returnValue("NEWGUID"));
-				
-				oneOf(auditDao).persistDataChanged(entity, fieldName, ChangeType.DELETE, "OLDGUID", null, operation);
-				oneOf(auditDao).persistDataChanged(entity, fieldName, ChangeType.CREATE, null, "NEWGUID", operation);
-			}
-		});
+		when(entity.getUidPk()).thenReturn(UIDPK);
+		doReturn(oldEntity).when(entityManager).find(entity.getClass(), UIDPK);
+		when(oldEntity.getField()).thenReturn(oldCollection);
+		when(removedMember.getGuid()).thenReturn("OLDGUID");
+		when(newMember.getGuid()).thenReturn("NEWGUID");
+
 		auditEntityListener.recordCollectionChanged(entity, fieldName, newCollection, ChangeType.UPDATE);
+
+		verify(entity).getUidPk();
+		verify(entityManager).find(entity.getClass(), UIDPK);
+		verify(oldEntity).getField();
+		verify(removedMember).getGuid();
+		verify(newMember).getGuid();
+		verify(auditDao).persistDataChanged(entity, fieldName, ChangeType.DELETE, "OLDGUID", null, operation);
+		verify(auditDao).persistDataChanged(entity, fieldName, ChangeType.CREATE, null, "NEWGUID", operation);
 	}
 	
 	/**
@@ -380,31 +333,30 @@ public class AuditEntityListenerTest {
 	public void testRecordFieldChangedUpdate() {
 		givenRealJpaPersistenceEngine();
 
-		final Entity entity = context.mock(Entity.class, "new");
-		final EntityWithField oldEntity = context.mock(EntityWithField.class, "old");
+		final Entity entity = mock(Entity.class, "new");
+		final EntityWithField oldEntity = mock(EntityWithField.class, "old");
 		final String field = "Update Field";
 		final String oldField = "Old Field";
-		
-		final ChangeOperation operation = context.mock(ChangeOperation.class);
-		
+
+		final ChangeOperation operation = mock(ChangeOperation.class);
+
 		auditEntityListener.setCurrentOperation(operation);
 
-		final EntityManager entityManager = context.mock(EntityManager.class);
+		final EntityManager entityManager = mock(EntityManager.class);
 		realJpaPersistenceEngine.setEntityManager(entityManager);
-		
-		context.checking(new Expectations() {
-			{
-				oneOf(entity).getUidPk(); will(returnValue(UIDPK));
-					
-				oneOf(entityManager).find(entity.getClass(), UIDPK); will(returnValue(oldEntity));
-				
-				oneOf(oldEntity).getField(); will(returnValue(oldField));
-				
-				oneOf(auditDao).persistDataChanged(entity, "updateField", ChangeType.UPDATE, oldField, field, operation);
-			}
-		});
-		
+
+		when(entity.getUidPk()).thenReturn(UIDPK);
+
+		doReturn(oldEntity).when(entityManager).find(entity.getClass(), UIDPK);
+
+		when(oldEntity.getField()).thenReturn(oldField);
+
 		auditEntityListener.recordFieldChanged(entity, "updateField", field, ChangeType.UPDATE);
+
+		verify(entity).getUidPk();
+		verify(entityManager).find(entity.getClass(), UIDPK);
+		verify(oldEntity).getField();
+		verify(auditDao).persistDataChanged(entity, "updateField", ChangeType.UPDATE, oldField, field, operation);
 	}
 	
 	/**
@@ -414,24 +366,21 @@ public class AuditEntityListenerTest {
 	public void testRecordCollectionChangedCreate() {
 		givenRealJpaPersistenceEngine();
 
-		final Entity entity = context.mock(Entity.class);
-		final Persistable member = context.mock(Persistable.class);
+		final Entity entity = mock(Entity.class);
+		final Persistable member = mock(Persistable.class);
 		final Set<Persistable> collection = new HashSet<>();
 		collection.add(member);
 		final long memberUid = 12345L;
 
-		final ChangeOperation operation = context.mock(ChangeOperation.class);
-		
+		final ChangeOperation operation = mock(ChangeOperation.class);
+
 		auditEntityListener.setCurrentOperation(operation);
-		
-		context.checking(new Expectations() {
-			{
-				oneOf(member).getUidPk(); will(returnValue(memberUid));
-				
-				oneOf(auditDao).persistDataChanged(entity, "newCollection", ChangeType.CREATE, null, String.valueOf(memberUid), operation);
-			}
-		});
+
+		when(member.getUidPk()).thenReturn(memberUid);
 		auditEntityListener.recordCollectionChanged(entity, "newCollection", collection, ChangeType.CREATE);
+
+		verify(member).getUidPk();
+		verify(auditDao).persistDataChanged(entity, "newCollection", ChangeType.CREATE, null, String.valueOf(memberUid), operation);
 	}
 
 	/**
@@ -439,24 +388,21 @@ public class AuditEntityListenerTest {
 	 */
 	@Test
 	public void testRecordCollectionChangedDelete() {
-		final Entity entity = context.mock(Entity.class);
+		final Entity entity = mock(Entity.class);
 		final Set<Persistable> collection = new HashSet<>();
-		final Persistable member = context.mock(Persistable.class);
+		final Persistable member = mock(Persistable.class);
 		collection.add(member);
 		final long memberUid = 12345L;
-		
-		final ChangeOperation operation = context.mock(ChangeOperation.class);
+
+		final ChangeOperation operation = mock(ChangeOperation.class);
 
 		auditEntityListener.setCurrentOperation(operation);
-		
-		context.checking(new Expectations() {
-			{
-				oneOf(member).getUidPk(); will(returnValue(memberUid));
-				
-				oneOf(auditDao).persistDataChanged(entity, "deletedCollection", ChangeType.DELETE, String.valueOf(memberUid), null, operation);
-			}
-		});
+
+		when(member.getUidPk()).thenReturn(memberUid);
 		auditEntityListener.recordCollectionChanged(entity, "deletedCollection", collection, ChangeType.DELETE);
+
+		verify(member).getUidPk();
+		verify(auditDao).persistDataChanged(entity, "deletedCollection", ChangeType.DELETE, String.valueOf(memberUid), null, operation);
 	}
 	
 	/**
@@ -464,24 +410,21 @@ public class AuditEntityListenerTest {
 	 */
 	@Test
 	public void testRecordMapChangedCreate() {
-		final Entity entity = context.mock(Entity.class);
-		final Persistable member = context.mock(Persistable.class);
+		final Entity entity = mock(Entity.class);
+		final Persistable member = mock(Persistable.class);
 		final Map<Object, Persistable> map = new HashMap<>();
 		map.put("key", member);
 		final long memberUid = 12345L;
 
-		final ChangeOperation operation = context.mock(ChangeOperation.class);
+		final ChangeOperation operation = mock(ChangeOperation.class);
 
 		auditEntityListener.setCurrentOperation(operation);
-		
-		context.checking(new Expectations() {
-			{
-				oneOf(member).getUidPk(); will(returnValue(memberUid));
-				
-				oneOf(auditDao).persistDataChanged(entity, "newMap", ChangeType.CREATE, null, "key=" + memberUid, operation);
-			}
-		});
+
+		when(member.getUidPk()).thenReturn(memberUid);
 		auditEntityListener.recordMapChanged(entity, "newMap", map, ChangeType.CREATE);
+
+		verify(member).getUidPk();
+		verify(auditDao).persistDataChanged(entity, "newMap", ChangeType.CREATE, null, "key=" + memberUid, operation);
 	}
 
 	/**
@@ -489,24 +432,21 @@ public class AuditEntityListenerTest {
 	 */
 	@Test
 	public void testRecordMapChangedDelete() {
-		final Entity entity = context.mock(Entity.class);
-		final Persistable member = context.mock(Persistable.class);
+		final Entity entity = mock(Entity.class);
+		final Persistable member = mock(Persistable.class);
 		final Map<Object, Persistable> map = new HashMap<>();
 		map.put("key", member);
 		final long memberUid = 12345L;
 
-		final ChangeOperation operation = context.mock(ChangeOperation.class);
+		final ChangeOperation operation = mock(ChangeOperation.class);
 
 		auditEntityListener.setCurrentOperation(operation);
 
-		context.checking(new Expectations() {
-			{
-				oneOf(member).getUidPk(); will(returnValue(memberUid));
-				
-				oneOf(auditDao).persistDataChanged(entity, "deletedMap", ChangeType.DELETE, "key=" + memberUid, null, operation);
-			}
-		});
+		when(member.getUidPk()).thenReturn(memberUid);
 		auditEntityListener.recordMapChanged(entity, "deletedMap", map, ChangeType.DELETE);
+
+		verify(member).getUidPk();
+		verify(auditDao).persistDataChanged(entity, "deletedMap", ChangeType.DELETE, "key=" + memberUid, null, operation);
 	}
 	
 	/**
@@ -516,96 +456,94 @@ public class AuditEntityListenerTest {
 	public void testRecordMapChangedUpdate() {
 		givenRealJpaPersistenceEngine();
 
-		final Entity entity = context.mock(Entity.class, "new");
-		final EntityWithField oldEntity = context.mock(EntityWithField.class, "old");
+		final Entity entity = mock(Entity.class, "new");
+		final EntityWithField oldEntity = mock(EntityWithField.class, "old");
 		final String fieldName = "updatedMap";
-		
-		final Entity oldMember = context.mock(Entity.class, "oldMember");
-		final Entity orphanMember = context.mock(Entity.class, "orphanMember");
-		final Entity newMember = context.mock(Entity.class, "newMember");
-		final Entity unchangedMember = context.mock(Entity.class, "unchangedMember");
-		final Entity adoptedMember = context.mock(Entity.class, "adoptedMember");
-		
+
+		final Entity oldMember = mock(Entity.class, "oldMember");
+		final Entity orphanMember = mock(Entity.class, "orphanMember");
+		final Entity newMember = mock(Entity.class, "newMember");
+		final Entity unchangedMember = mock(Entity.class, "unchangedMember");
+		final Entity adoptedMember = mock(Entity.class, "adoptedMember");
+
 		final Map<Object, Persistable> oldMap = new HashMap<>();
 		oldMap.put("oldKey", oldMember);
 		oldMap.put("unchangedKey", unchangedMember);
 		oldMap.put("changedKey", orphanMember);
-		
+
 		final Map<Object, Persistable> newMap = new HashMap<>();
 		newMap.put("unchangedKey", unchangedMember);
 		newMap.put("changedKey", adoptedMember);
 		newMap.put("newKey", newMember);
-		
-		final ChangeOperation operation = context.mock(ChangeOperation.class);
+
+		final ChangeOperation operation = mock(ChangeOperation.class);
 		auditEntityListener.setCurrentOperation(operation);
 
-		final EntityManager entityManager = context.mock(EntityManager.class);
+		final EntityManager entityManager = mock(EntityManager.class);
 		realJpaPersistenceEngine.setEntityManager(entityManager);
-		
-		context.checking(new Expectations() {
-			{
-				oneOf(entity).getUidPk(); will(returnValue(UIDPK));
-				oneOf(entityManager).find(entity.getClass(), UIDPK); will(returnValue(oldEntity));
-				oneOf(oldEntity).getField(); will(returnValue(oldMap));
-				
-				oneOf(oldMember).getGuid(); will(returnValue("OLDGUID"));
-				oneOf(orphanMember).getGuid(); will(returnValue("ORPHAN"));
-				oneOf(newMember).getGuid(); will(returnValue("NEWGUID"));
-				oneOf(adoptedMember).getGuid(); will(returnValue("ADOPTEE"));
-				
-				oneOf(auditDao).persistDataChanged(entity, fieldName, ChangeType.CREATE, null, "newKey=NEWGUID", operation);
-				oneOf(auditDao).persistDataChanged(entity, fieldName, ChangeType.DELETE, "oldKey=OLDGUID", null, operation);
-				oneOf(auditDao).persistDataChanged(entity, fieldName, ChangeType.UPDATE, "changedKey=ORPHAN", "changedKey=ADOPTEE", operation);
-			}
-		});
+
+		when(entity.getUidPk()).thenReturn(UIDPK);
+		doReturn(oldEntity).when(entityManager).find(entity.getClass(), UIDPK);
+		when(oldEntity.getField()).thenReturn(oldMap);
+
+		when(oldMember.getGuid()).thenReturn("OLDGUID");
+		when(orphanMember.getGuid()).thenReturn("ORPHAN");
+		when(newMember.getGuid()).thenReturn("NEWGUID");
+		when(adoptedMember.getGuid()).thenReturn("ADOPTEE");
+
 		auditEntityListener.recordMapChanged(entity, fieldName, newMap, ChangeType.UPDATE);
+
+		verify(entity).getUidPk();
+		verify(entityManager).find(entity.getClass(), UIDPK);
+		verify(oldEntity).getField();
+		verify(oldMember).getGuid();
+		verify(orphanMember).getGuid();
+		verify(newMember).getGuid();
+		verify(adoptedMember).getGuid();
+		verify(auditDao).persistDataChanged(entity, fieldName, ChangeType.CREATE, null, "newKey=NEWGUID", operation);
+		verify(auditDao).persistDataChanged(entity, fieldName, ChangeType.DELETE, "oldKey=OLDGUID", null, operation);
+		verify(auditDao).persistDataChanged(entity, fieldName, ChangeType.UPDATE, "changedKey=ORPHAN", "changedKey=ADOPTEE", operation);
 	}
 	
 	/**
 	 * Test that beginning a change operation stores the operation details.
 	 */
 	@Test
-	public void testBeginOperation() {
+	public void testBeginOperation() throws Exception {
 		givenMockJpaPersistenceEngine();
 
 		final Entity entity = new ProductSkuImpl();  //Any entity object
 		final Object transactionKey = new Object();
-		final Transaction transaction = context.mock(Transaction.class);
-		final ChangeTransaction changeTransaction = context.mock(ChangeTransaction.class);
-		final PersistenceSession persistenceSession = context.mock(PersistenceSession.class);
+		final Transaction transaction = mock(Transaction.class);
+		final ChangeTransaction changeTransaction = mock(ChangeTransaction.class);
+		final PersistenceSession persistenceSession = mock(PersistenceSession.class);
 
 
 		List<String> auditableClasses = new ArrayList<>();
 		auditableClasses.add("com.elasticpath.domain.catalog.impl.ProductSkuImpl");
 		auditEntityListener.setAuditableClasses(auditableClasses);
-		
-		final Broker broker = context.mock(Broker.class);
-		final ManagedRuntime managedRuntime = context.mock(ManagedRuntime.class);
-		
-		try {
-			context.checking(new Expectations() {
-				{	
-					oneOf(mockJpaPersistenceEngine).getPersistenceSession(); will(returnValue(persistenceSession));
-					oneOf(persistenceSession).beginTransaction(); will(returnValue(transaction));
-					oneOf(openJPAEntityManager).getFlushMode(); will(returnValue(FlushModeType.AUTO));
-					oneOf(openJPAEntityManager).setFlushMode(FlushModeType.COMMIT);
-					
-					oneOf(auditDao).persistChangeSetTransaction(String.valueOf(transactionKey.hashCode()), entity, metadataMap); 
-						will(returnValue(changeTransaction));
-					oneOf(auditDao).persistSingleChangeOperation(entity, ChangeType.CREATE, changeTransaction, 1);
-					
-					oneOf(transaction).commit();
-					
-					allowing(mockJpaPersistenceEngine).getBroker(); will(returnValue(broker));
-					allowing(broker).getManagedRuntime(); will(returnValue(managedRuntime));
-					allowing(managedRuntime).getTransactionKey(); will(returnValue(transactionKey));
-					oneOf(openJPAEntityManager).setFlushMode(FlushModeType.AUTO);
-				}
-			});
-		} catch (Exception e) {
-			fail("Mock method should not have thrown an exception: " + e);
-		}
-		auditEntityListener.beginSingleOperation(entity,
-				ChangeType.CREATE);
+
+		final Broker broker = mock(Broker.class);
+		final ManagedRuntime managedRuntime = mock(ManagedRuntime.class);
+
+		when(mockJpaPersistenceEngine.getPersistenceSession()).thenReturn(persistenceSession);
+		when(persistenceSession.beginTransaction()).thenReturn(transaction);
+		when(openJPAEntityManager.getFlushMode()).thenReturn(FlushModeType.AUTO);
+
+		when(auditDao.persistChangeSetTransaction(String.valueOf(transactionKey.hashCode()), entity, metadataMap)).thenReturn(changeTransaction);
+
+		when(mockJpaPersistenceEngine.getBroker()).thenReturn(broker);
+		when(broker.getManagedRuntime()).thenReturn(managedRuntime);
+		when(managedRuntime.getTransactionKey()).thenReturn(transactionKey);
+		auditEntityListener.beginSingleOperation(entity, ChangeType.CREATE);
+
+		verify(mockJpaPersistenceEngine).getPersistenceSession();
+		verify(persistenceSession).beginTransaction();
+		verify(openJPAEntityManager).getFlushMode();
+		verify(openJPAEntityManager).setFlushMode(FlushModeType.COMMIT);
+		verify(auditDao).persistChangeSetTransaction(String.valueOf(transactionKey.hashCode()), entity, metadataMap);
+		verify(auditDao).persistSingleChangeOperation(entity, ChangeType.CREATE, changeTransaction, 1);
+		verify(transaction).commit();
+		verify(openJPAEntityManager).setFlushMode(FlushModeType.AUTO);
 	}
 }

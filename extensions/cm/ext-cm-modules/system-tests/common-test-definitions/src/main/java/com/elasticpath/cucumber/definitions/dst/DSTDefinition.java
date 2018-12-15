@@ -8,6 +8,8 @@ import cucumber.api.java.en.When;
 import org.openqa.selenium.WebDriver;
 
 import com.elasticpath.selenium.domainobjects.DST;
+import com.elasticpath.selenium.editor.product.ProductEditor;
+import com.elasticpath.selenium.editor.product.tabs.MerchandisingTab;
 import com.elasticpath.selenium.navigations.CatalogManagement;
 import com.elasticpath.selenium.navigations.PriceListManagement;
 import com.elasticpath.selenium.resultspane.CatalogSearchResultPane;
@@ -15,6 +17,7 @@ import com.elasticpath.selenium.resultspane.PriceListsResultPane;
 import com.elasticpath.selenium.setup.PublishEnvSetUp;
 import com.elasticpath.selenium.setup.SetUp;
 import com.elasticpath.selenium.toolbars.ActivityToolbar;
+import com.elasticpath.selenium.toolbars.CustomerServiceActionToolbar;
 import com.elasticpath.selenium.util.Constants;
 import com.elasticpath.sync.SyncConfig;
 
@@ -28,6 +31,9 @@ public class DSTDefinition {
 	private static WebDriver driver;
 	private CatalogManagement catalogManagement;
 	private CatalogSearchResultPane catalogSearchResultPane;
+	private ProductEditor productEditor;
+	private MerchandisingTab merchandisingTab;
+	private CustomerServiceActionToolbar customerServiceActionToolbar;
 
 	/**
 	 * Constructor.
@@ -98,7 +104,7 @@ public class DSTDefinition {
 		catalogSearchResultPane = new CatalogSearchResultPane(getDriver());
 
 		int index = 0;
-		while (!catalogSearchResultPane.isProductInList(productName) && index < Constants.UUID_END_INDEX) {
+		while (!catalogSearchResultPane.isProductNameInList(productName) && index < Constants.UUID_END_INDEX) {
 			catalogSearchResultPane.sleep(Constants.SLEEP_HALFSECOND_IN_MILLIS);
 			searchProductByName(productName);
 			index++;
@@ -137,6 +143,46 @@ public class DSTDefinition {
 	@And("^I switch to publish environment$")
 	public static void switchToPublishWindow() {
 		getDriver().switchTo().window(getDriver().getWindowHandle());
+	}
+
+	/**
+	 * Search and open an existing Product to go specific Tab.
+	 *
+	 * @param productCode the product code
+	 * @param tabName     for product
+	 */
+	@And("^in publish environment I am viewing the (.+) tab of product with code (.+)$")
+	public void searchOpenProductEditorTabWithCode(final String tabName, final String productCode) {
+		catalogManagement = new CatalogManagement(getDriver());
+		catalogManagement.clickCatalogSearchTab();
+		catalogManagement.enterProductCode(productCode);
+		catalogManagement.clickCatalogSearch();
+		catalogSearchResultPane = new CatalogSearchResultPane(getDriver());
+		productEditor = catalogSearchResultPane.openProductEditorWithProductCode(productCode);
+		productEditor.selectTab(tabName);
+	}
+
+	/**
+	 * Verify Added Merchandising Associations product in publish environment.
+	 *
+	 * @param productCode Product Code.
+	 */
+	@When("^the product code (.+) exists under merchandising association$")
+	public void verifyProductFromMerchandisingTab(final String productCode) {
+		merchandisingTab = new MerchandisingTab(getDriver());
+		merchandisingTab.verifySelectProductCode(productCode);
+	}
+
+	/**
+	 * Verify Merchandising Associations product is deleted in publish environment.
+	 *
+	 * @param productCode Product Code.
+	 */
+	@When("^the product code (.+) is no longer under merchandising association$")
+	public void verifyProductIsDeletedFromMerchandisingTab(final String productCode) {
+		customerServiceActionToolbar = new CustomerServiceActionToolbar(getDriver());
+		customerServiceActionToolbar.clickReloadActiveEditor();
+		merchandisingTab.verifyProductCodeIsDeleted(productCode);
 	}
 
 	private static WebDriver getDriver() {

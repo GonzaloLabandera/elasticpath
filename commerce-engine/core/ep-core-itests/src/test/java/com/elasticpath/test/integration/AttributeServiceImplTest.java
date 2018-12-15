@@ -12,6 +12,7 @@ import java.util.Locale;
 
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.attribute.Attribute;
@@ -38,6 +39,7 @@ public class AttributeServiceImplTest extends DbTestCase {
 	private static final String ATTR_KEY2 = "attr_key2";
 
 	@Autowired
+	@Qualifier("attributeService")
 	private AttributeService service;
 
 	/**

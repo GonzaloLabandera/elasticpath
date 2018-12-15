@@ -36,8 +36,15 @@ public class EmailsLinkRepositoryImpl<I extends EmailInfoIdentifier, LI extends 
 	@Override
 	public Observable<EmailIdentifier> getElements(final EmailInfoIdentifier identifier) {
 		return customerRepository.getCustomer(resourceOperationContext.getUserIdentifier())
-				.map(Customer::getEmail)
-				.flatMapObservable(customerEmail -> getEmailIdentifier(identifier.getOrder().getScope(), customerEmail));
+				.flatMapObservable(this::getCustomerEmail)
+				.flatMap(customerEmail -> getEmailIdentifier(identifier.getOrder().getScope(), customerEmail));
+	}
+
+	private Observable<String> getCustomerEmail(final Customer customer) {
+		String email = customer.getEmail();
+		return email == null
+				? Observable.empty()
+				: Observable.just(email);
 	}
 
 	/**

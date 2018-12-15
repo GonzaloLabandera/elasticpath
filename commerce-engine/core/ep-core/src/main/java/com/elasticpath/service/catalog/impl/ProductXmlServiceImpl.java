@@ -5,6 +5,8 @@ package com.elasticpath.service.catalog.impl;
 
 import java.util.Locale;
 
+import org.apache.commons.lang.StringUtils;
+
 import com.elasticpath.base.exception.EpServiceException;
 import com.elasticpath.commons.beanframework.BeanFactory;
 import com.elasticpath.commons.constants.ContextIdNames;
@@ -59,13 +61,13 @@ public class ProductXmlServiceImpl implements ProductXmlService {
 		}
 		
 		// Generate the product xml if the product exists, otherwise generate error xml
-		String productXml = "";
+		String productXml;
 		if (productUidValid) {
 			productXml = generateMinimalXml(baseUrl, product, isSeoEnabled);
 		} else {
-			productXml = getInvalidProductXml();
+			// Currently PowerReviews does not require any special message, so return empty string
+			productXml = StringUtils.EMPTY;
 		}
-			
 		return productXml;
 	}
 	
@@ -82,7 +84,6 @@ public class ProductXmlServiceImpl implements ProductXmlService {
 	 */
 	String generateMinimalXml(final String baseUrl, final Product product, final boolean isSeoEnabled) {
 
-		String productXml = "";		
 		Locale defaultLocale = product.getMasterCatalog().getDefaultLocale();
 		Category parentCategory = product.getDefaultCategory(product.getMasterCatalog());
 		
@@ -124,7 +125,7 @@ public class ProductXmlServiceImpl implements ProductXmlService {
 		String categoryHierarchy = "";
 		categoryHierarchy = "<category name=\"" + categoryNameXml
 			+ "\" code=\"" + parentCategory.getUidPk() + "\">";
-		
+
 		// Build the rest of the category hierarchy xml string
 		Category currentCategory = getCategoryLookup().findParent(parentCategory);
 		int categoryCount = 1;
@@ -142,26 +143,14 @@ public class ProductXmlServiceImpl implements ProductXmlService {
 		for (int i = 0; i < categoryCount; i++) {
 			categoryHierarchy = categoryHierarchy + " </category>";
 		}
-		
+
 		categoryHierarchy = " <categoryHierarchy> " + categoryHierarchy + " </categoryHierarchy>";
-		
+
 		String xmlHeader = "<?xml version=\"1.0\" encoding=\"utf-8\"?>";
-		productXml = xmlHeader + productTag + categoryHierarchy + productEndTag;
-		
-		return productXml;
+		return xmlHeader + productTag + categoryHierarchy + productEndTag;
 	}
-	
-	/**
-	 * Generates the xml string to use in response to a productUid that is invalid.
-	 *
-	 * @return An xml string indicating that the productUid is invalid.
-	 */
-	private String getInvalidProductXml() {
-		// Currently PowerReviews does not require any special message, so return empty string
-		return "";
-	}
-	
-	
+
+
 	/**
 	 * Escapes any xml special characters in the string.
 	 *
@@ -187,13 +176,12 @@ public class ProductXmlServiceImpl implements ProductXmlService {
 	 * @return A two-dimensional array with all xml special characters and their escapes.
 	 */
 	private String[][] getCharacterXmlEscapes() {
-		String[][] xmlCharactersToEscape1 = {{"&", "&amp;"},
+
+		return new String[][]{{"&", "&amp;"},
 											{"<", "&lt;"},
 											{">", "&gt;"},
 											{"\"", "&quot;"},
 											{"\'", "&apos;"} };
-		
-		return xmlCharactersToEscape1;
 	}
 
 	protected ProductLookup getProductLookup() {
@@ -208,7 +196,6 @@ public class ProductXmlServiceImpl implements ProductXmlService {
 		return categoryLookup;
 	}
 
-	
 	public void setBeanFactory(final BeanFactory beanFactory) {
 		this.beanFactory = beanFactory;
 	}

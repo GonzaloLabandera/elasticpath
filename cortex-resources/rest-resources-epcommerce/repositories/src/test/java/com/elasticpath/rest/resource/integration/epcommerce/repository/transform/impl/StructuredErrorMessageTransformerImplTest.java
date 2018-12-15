@@ -30,7 +30,6 @@ import com.elasticpath.domain.catalog.ProductSku;
 import com.elasticpath.rest.advise.LinkedMessage;
 import com.elasticpath.rest.advise.Message;
 import com.elasticpath.rest.definition.items.ItemIdentifier;
-import com.elasticpath.rest.definition.items.ItemsIdentifier;
 import com.elasticpath.rest.id.type.CompositeIdentifier;
 import com.elasticpath.rest.id.type.StringIdentifier;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.transform.StructuredErrorResolutionStrategy;
@@ -122,8 +121,7 @@ public class StructuredErrorMessageTransformerImplTest {
 
 		ItemIdentifier identifier = ItemIdentifier.builder()
 				.withItemId(CompositeIdentifier.of("a", "b"))
-				.withItems(ItemsIdentifier.builder()
-						.withScope(StringIdentifier.of("SCOPE")).build())
+				.withScope(StringIdentifier.of("SCOPE"))
 				.build();
 		given(resolutionStrategy.getResourceIdentifier(structuredErrorMessage, OBJECT_ID))
 				.willReturn(Maybe.just(identifier));

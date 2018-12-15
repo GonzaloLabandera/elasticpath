@@ -1,6 +1,5 @@
 #TODO: investigate way to test time fields
-@Navigations
-
+@navigations
 Feature: Retrieve Navigation nodes and child nodes
 
   Background:
@@ -94,7 +93,7 @@ Feature: Retrieve Navigation nodes and child nodes
       | Games           | 0               |
 
   Scenario Outline: Navigate to items in node
-    Given the category <CATEGORY> contains the item <ITEM>
+    Given the category <CATEGORY> contains item <ITEM>
     When I open the navigation category <CATEGORY>
     And I follow links items
     Then there is an item with display-name <ITEM>

@@ -3,32 +3,36 @@
  */
 package com.elasticpath.domain.contentspace.impl;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
-import org.jmock.Expectations;
-import org.jmock.integration.junit4.JUnitRuleMockery;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
 
+import com.elasticpath.commons.beanframework.BeanFactory;
 import com.elasticpath.commons.constants.ContextIdNames;
-import com.elasticpath.domain.ElasticPath;
 import com.elasticpath.domain.contentspace.Parameter;
 import com.elasticpath.domain.contentspace.ParameterLocaleDependantValue;
 
 /**
  * A test case for {@link ParameterValueImpl}.
  */
+@RunWith(MockitoJUnitRunner.class)
 public class ParameterValueImplTest {
 	
-	@Rule
-	public final JUnitRuleMockery context = new JUnitRuleMockery();
-
 	private static final String TEST_VALUE = "test2";
 	private ParameterValueImpl parameterValue;
-	private ElasticPath elasticPath;
+
+	@Mock
 	private Parameter userInputParameter;
+
+	@Mock
+	private BeanFactory beanFactory;
 
 	/**
 	 * Sets up the test case.
@@ -37,22 +41,20 @@ public class ParameterValueImplTest {
 	 */
 	@Before
 	public void setUp() throws Exception {
-		
-		elasticPath = context.mock(ElasticPath.class);
-		
-		userInputParameter = context.mock(Parameter.class, "userInputParameter");
+
+		userInputParameter = mock(Parameter.class, "userInputParameter");
 		
 		parameterValue = new ParameterValueImpl() {
 			private static final long serialVersionUID = 8108527056961199725L;
 
 			@Override
-			public ElasticPath getElasticPath() {
-				return elasticPath;
-			}
-			
-			@Override
 			protected ParameterLocaleDependantValue getNewParameterLocaleDependantValue() {
 				return new ParameterLocaleDependantValueImpl();
+			}
+
+			@Override
+			protected <T> T getBean(final String beanName) {
+				return beanFactory.getBean(beanName);
 			}
 		};
 	}
@@ -63,18 +65,16 @@ public class ParameterValueImplTest {
 	 */
 	@Test
 	public void testSetParameterValueNoParameter() {
-		
-		context.checking(new Expectations() { {
-			oneOf(elasticPath).getBean(ContextIdNames.DYNAMIC_CONTENT_WRAPPER_USER_INPUT_PARAMETER);
-			will(returnValue(userInputParameter));
-			oneOf(userInputParameter).setParameterId(null);
-			oneOf(userInputParameter).setDescription(null);
-			oneOf(userInputParameter).setLocalizable(false);
-			allowing(userInputParameter).isLocalizable(); will(returnValue(false));
-		} });
-		
+
+		when(beanFactory.getBean(ContextIdNames.DYNAMIC_CONTENT_WRAPPER_USER_INPUT_PARAMETER)).thenReturn(userInputParameter);
+		when(userInputParameter.isLocalizable()).thenReturn(false);
+
 		parameterValue.setValue("test123", "en");
-		assertEquals("test123", parameterValue.getValue("en"));
+		assertThat(parameterValue.getValue("en")).isEqualTo("test123");
+		verify(beanFactory).getBean(ContextIdNames.DYNAMIC_CONTENT_WRAPPER_USER_INPUT_PARAMETER);
+		verify(userInputParameter).setParameterId(null);
+		verify(userInputParameter).setDescription(null);
+		verify(userInputParameter).setLocalizable(false);
 	}
 	
 	/**
@@ -83,17 +83,15 @@ public class ParameterValueImplTest {
 	 */
 	@Test
 	public void testGetSetValueWithSpecifiedLanguage() {
-		context.checking(new Expectations() { {
-			allowing(userInputParameter).isLocalizable(); will(returnValue(true));
-		} });
-		
+		when(userInputParameter.isLocalizable()).thenReturn(true);
+
 		parameterValue.setParameter(userInputParameter);
 
 		String locale = "en";
 		String value = "testvalue";
 		parameterValue.setValue(value, locale);
-		
-		assertEquals(value, parameterValue.getValue(locale));
+
+		assertThat(parameterValue.getValue(locale)).isEqualTo(value);
 	}
 
 	/**
@@ -102,17 +100,15 @@ public class ParameterValueImplTest {
 	 */
 	@Test
 	public void testGetSetValueNullLanguage() {
-		context.checking(new Expectations() { {
-			allowing(userInputParameter).isLocalizable(); will(returnValue(true));
-		} });
-		
+		when(userInputParameter.isLocalizable()).thenReturn(true);
+
 		parameterValue.setParameter(userInputParameter);
-		
+
 		String locale = null;
 		String value = "testvalue";
 		parameterValue.setValue(value, locale);
-		
-		assertEquals(value, parameterValue.getValue(locale));
+
+		assertThat(parameterValue.getValue(locale)).isEqualTo(value);
 	}
 
 
@@ -122,17 +118,15 @@ public class ParameterValueImplTest {
 	 */
 	@Test
 	public void testGetSetValueNullLanguageNonLocalizedParameter() {
-		context.checking(new Expectations() { {
-			allowing(userInputParameter).isLocalizable(); will(returnValue(false));
-		} });
-		
+		when(userInputParameter.isLocalizable()).thenReturn(false);
+
 		parameterValue.setParameter(userInputParameter);
 		
 		String locale = null;
 		String value = "test";
 		parameterValue.setValue(value, locale);
 		
-		assertEquals(value, parameterValue.getValue(locale));
+		assertThat(parameterValue.getValue(locale)).isEqualTo(value);
 	}
 
 	/**
@@ -141,14 +135,12 @@ public class ParameterValueImplTest {
 	 */
 	@Test
 	public void testGetEmptyValueFromNonRequeredNonLocalizableParameter() {
-		context.checking(new Expectations() { {
-			allowing(userInputParameter).isLocalizable(); will(returnValue(false));
-			allowing(userInputParameter).isRequired(); will(returnValue(false));
-		} });
-		
+		when(userInputParameter.isLocalizable()).thenReturn(false);
+		when(userInputParameter.isRequired()).thenReturn(false);
+
 		parameterValue.setParameter(userInputParameter);
 		
-		assertEquals("", parameterValue.getValue(null));
+		assertThat(parameterValue.getValue(null)).isBlank();
 		
 	}
 	
@@ -159,13 +151,11 @@ public class ParameterValueImplTest {
 	@Test
 	public void testGetNullFromNonRequeredNonLocalizableParameter() {
 		
-		context.checking(new Expectations() { {
-			allowing(userInputParameter).isLocalizable(); will(returnValue(false));
-			allowing(userInputParameter).isRequired(); will(returnValue(true));
-		} });
-		
+		when(userInputParameter.isLocalizable()).thenReturn(false);
+		when(userInputParameter.isRequired()).thenReturn(true);
+
 		parameterValue.setParameter(userInputParameter);
-		assertEquals(null, parameterValue.getValue(null));
+		assertThat(parameterValue.getValue(null)).isNull();
 		
 	}
 	
@@ -177,14 +167,11 @@ public class ParameterValueImplTest {
 	@Test
 	public void testGetEmptyValueFromNonRequeredLocalizableParameter() {
 		
-		context.checking(new Expectations() { {
-			allowing(userInputParameter).isLocalizable(); will(returnValue(true));
-			allowing(userInputParameter).isRequired(); will(returnValue(false));
-		} });
-		
+		when(userInputParameter.isLocalizable()).thenReturn(true);
+		when(userInputParameter.isRequired()).thenReturn(false);
 		parameterValue.setParameter(userInputParameter);
 		
-		assertEquals("", parameterValue.getValue(null));
+		assertThat(parameterValue.getValue(null)).isEmpty();
 		
 	}
 	
@@ -196,15 +183,12 @@ public class ParameterValueImplTest {
 	@Test
 	public void testGetValueFromNonRequeredNonLocalizableParameter() {
 		
-		context.checking(new Expectations() { {
-			allowing(userInputParameter).isLocalizable(); will(returnValue(false));
-			allowing(userInputParameter).isRequired(); will(returnValue(false));
-		} });
-		
+		when(userInputParameter.isLocalizable()).thenReturn(false);
+
 		parameterValue.setParameter(userInputParameter);
 		
 		parameterValue.setValue("value", null);
-		assertEquals("value", parameterValue.getValue(null));
+		assertThat(parameterValue.getValue(null)).isEqualTo("value");
 	}
 	
 	/**
@@ -214,17 +198,14 @@ public class ParameterValueImplTest {
 	@Test
 	public void testGetValueFromNonRequeredLocalizableParameter() {
 		
-		context.checking(new Expectations() { {
-			allowing(userInputParameter).isLocalizable(); will(returnValue(true));
-			allowing(userInputParameter).isRequired(); will(returnValue(false));
-		} });
-		
+		when(userInputParameter.isLocalizable()).thenReturn(true);
+
 		parameterValue.setParameter(userInputParameter);
 		
 		parameterValue.setValue("value_en", "en");
 		parameterValue.setValue("value_de", "de");
-		assertEquals("value_en", parameterValue.getValue("en"));
-		assertEquals("value_de", parameterValue.getValue("de"));
+		assertThat(parameterValue.getValue("en")).isEqualTo("value_en");
+		assertThat(parameterValue.getValue("de")).isEqualTo("value_de");
 		
 	}
 	
@@ -240,24 +221,21 @@ public class ParameterValueImplTest {
 	@Test
 	public void testGetSetValueNonLocalizedParameter() {
 		
-		context.checking(new Expectations() { {
-			allowing(userInputParameter).isLocalizable(); will(returnValue(false));
-			allowing(userInputParameter).isRequired(); will(returnValue(false));
-		} });
-		
+		when(userInputParameter.isLocalizable()).thenReturn(false);
+
 		parameterValue.setParameter(userInputParameter);
 		
 		String locale = "de";
 		String value = "test";
 		parameterValue.setValue(value, locale);
 		
-		assertEquals(value, parameterValue.getValue(locale));
+		assertThat(parameterValue.getValue(locale)).isEqualTo(value);
 		
 		parameterValue.setValue(TEST_VALUE, "en");
 		
-		assertEquals(TEST_VALUE, parameterValue.getValue(null));
-		assertEquals(TEST_VALUE, parameterValue.getValue("en"));
-		assertEquals(TEST_VALUE, parameterValue.getValue("de"));
+		assertThat(parameterValue.getValue(null)).isEqualTo(TEST_VALUE);
+		assertThat(parameterValue.getValue("en")).isEqualTo(TEST_VALUE);
+		assertThat(parameterValue.getValue("de")).isEqualTo(TEST_VALUE);
 	}
 
 	/**
@@ -266,23 +244,21 @@ public class ParameterValueImplTest {
 	 */
 	@Test
 	public void testToString() {
-		
-		context.checking(new Expectations() { {
-			oneOf(elasticPath).getBean(ContextIdNames.DYNAMIC_CONTENT_WRAPPER_USER_INPUT_PARAMETER);
-			will(returnValue(userInputParameter));
-			oneOf(userInputParameter).setParameterId(null);
-			oneOf(userInputParameter).setDescription(null);
-			oneOf(userInputParameter).setLocalizable(false);
-			allowing(userInputParameter).isLocalizable(); will(returnValue(false));
-		} });
-		
+
+		when(beanFactory.getBean(ContextIdNames.DYNAMIC_CONTENT_WRAPPER_USER_INPUT_PARAMETER)).thenReturn(userInputParameter);
+
 		parameterValue.setParameter(null);
-		
-		assertNotNull("toString() must return result which is not null", parameterValue.toString());
-		
+
+		assertThat(parameterValue.toString()).isNotNull();
+
 		parameterValue.setParameter(new TemplateParameterImpl());
 
-		assertNotNull(parameterValue.toString());
+		assertThat(parameterValue.toString()).isNotNull();
+
+		verify(beanFactory).getBean(ContextIdNames.DYNAMIC_CONTENT_WRAPPER_USER_INPUT_PARAMETER);
+		verify(userInputParameter).setParameterId(null);
+		verify(userInputParameter).setDescription(null);
+		verify(userInputParameter).setLocalizable(false);
 
 	}
 }

@@ -23,9 +23,7 @@
         <exporter type="TAXJURISDICTION"/>
         <exporter type="PAYMENTGATEWAY"/>
         <exporter type="WAREHOUSE"/>
-        <exporter type="CUSTOMER">
-            <option key="CARD_NUMBER_FILTER" value="EMPTY"/>
-        </exporter>
+        <exporter type="CUSTOMER"/>
         <exporter type="CUSTOMERPROFILE_ATTRIBUTE"/>
         <exporter type="CUSTOMER_GROUP"/>
         <exporter type="STORE"/>

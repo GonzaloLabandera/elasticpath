@@ -11,7 +11,6 @@ import org.osgi.service.component.annotations.Reference;
 
 import com.elasticpath.repository.LinksRepository;
 import com.elasticpath.rest.definition.items.ItemIdentifier;
-import com.elasticpath.rest.definition.items.ItemsIdentifier;
 import com.elasticpath.rest.definition.wishlists.WishlistIdentifier;
 import com.elasticpath.rest.definition.wishlists.WishlistLineItemIdentifier;
 import com.elasticpath.rest.id.IdentifierPart;
@@ -56,7 +55,7 @@ public class ItemIdentifierRepositoryImpl<I extends WishlistLineItemIdentifier, 
 	 */
 	protected ItemIdentifier buildItemIdentifier(final String scope, final IdentifierPart<Map<String, String>> itemId) {
 		return ItemIdentifier.builder()
-				.withItems(ItemsIdentifier.builder().withScope(StringIdentifier.of(scope)).build())
+				.withScope(StringIdentifier.of(scope))
 				.withItemId(itemId)
 				.build();
 	}

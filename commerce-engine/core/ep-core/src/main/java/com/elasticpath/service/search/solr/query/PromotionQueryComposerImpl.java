@@ -3,7 +3,7 @@
  */
 package com.elasticpath.service.search.solr.query;
 
-import java.util.Date;
+import java.time.Instant;
 import java.util.Map;
 import java.util.Set;
 
@@ -12,7 +12,6 @@ import org.apache.lucene.search.BooleanClause.Occur;
 import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.TermRangeQuery;
-import org.apache.solr.common.util.DateUtil;
 
 import com.elasticpath.domain.misc.SearchConfig;
 import com.elasticpath.service.search.query.EpEmptySearchCriteriaException;
@@ -35,51 +34,51 @@ public class PromotionQueryComposerImpl extends AbstractQueryComposerImpl {
 	@Override
 	public Query composeQueryInternal(final SearchCriteria searchCriteria, final SearchConfig searchConfig) {
 		final PromotionSearchCriteria promotionSearchCriteria = (PromotionSearchCriteria) searchCriteria;
-		final BooleanQuery booleanQuery = new BooleanQuery();
+		final BooleanQuery.Builder booleanQueryBuilder = new BooleanQuery.Builder();
 		boolean hasSomeCriteria = false;
 		
 		hasSomeCriteria |= addSplitFieldToQuery(SolrIndexConstants.PROMOTION_NAME, promotionSearchCriteria.getPromotionName(), null,
-				searchConfig, booleanQuery, Occur.MUST, true);
+				searchConfig, booleanQueryBuilder, Occur.MUST, true);
 		
-		hasSomeCriteria |= addFuzzyInvariableTerms(promotionSearchCriteria, booleanQuery, searchConfig);
+		hasSomeCriteria |= addFuzzyInvariableTerms(promotionSearchCriteria, booleanQueryBuilder, searchConfig);
 
 		if (!hasSomeCriteria) {
 			throw new EpEmptySearchCriteriaException("Empty search criteria.");
 		}
 
-		return booleanQuery;
+		return booleanQueryBuilder.build();
 	}
 
 	@Override
 	public Query composeFuzzyQueryInternal(final SearchCriteria searchCriteria, final SearchConfig searchConfig) {
 		final PromotionSearchCriteria promotionSearchCriteria = (PromotionSearchCriteria) searchCriteria;
-		final BooleanQuery booleanQuery = new BooleanQuery();
+		final BooleanQuery.Builder booleanQueryBuilder = new BooleanQuery.Builder();
 		boolean hasSomeCriteria = false;
 		
 		hasSomeCriteria |= addSplitFuzzyFieldToQuery(SolrIndexConstants.PROMOTION_NAME, promotionSearchCriteria.getPromotionName(),
-				null, searchConfig, booleanQuery, Occur.MUST, true);
+				null, searchConfig, booleanQueryBuilder, Occur.MUST, true);
 		
-		hasSomeCriteria |= addFuzzyInvariableTerms(promotionSearchCriteria, booleanQuery, searchConfig);
+		hasSomeCriteria |= addFuzzyInvariableTerms(promotionSearchCriteria, booleanQueryBuilder, searchConfig);
 
 		if (!hasSomeCriteria) {
 			throw new EpEmptySearchCriteriaException("Empty search criteria is not allowed!");
 		}
 
-		return booleanQuery;
+		return booleanQueryBuilder.build();
 	}
 	
-	private boolean addFuzzyInvariableTerms(final PromotionSearchCriteria promotionSearchCriteria, final BooleanQuery booleanQuery,
+	private boolean addFuzzyInvariableTerms(final PromotionSearchCriteria promotionSearchCriteria, final BooleanQuery.Builder booleanQueryBuilder,
 			final SearchConfig searchConfig) {
 		boolean hasSomeCriteria = false;
 		
 		hasSomeCriteria |= addWholeFieldToQuery(SolrIndexConstants.PROMOTION_RULESET_NAME, promotionSearchCriteria.getRuleSetName(),
-				null, searchConfig, booleanQuery, Occur.MUST, true);
+				null, searchConfig, booleanQueryBuilder, Occur.MUST, true);
 		hasSomeCriteria |= addWholeFieldToQuery(SolrIndexConstants.OBJECT_UID, promotionSearchCriteria.getFilteredUids(), null,
-				searchConfig, booleanQuery, Occur.MUST_NOT, false);
+				searchConfig, booleanQueryBuilder, Occur.MUST_NOT, false);
 		
 		if (promotionSearchCriteria.getCatalogUid() != null && promotionSearchCriteria.getCatalogUid() > 0) {
 			hasSomeCriteria |= addWholeFieldToQuery(SolrIndexConstants.CATALOG_UID, 
-					String.valueOf(promotionSearchCriteria.getCatalogUid()), null, searchConfig, booleanQuery, Occur.MUST, true);
+					String.valueOf(promotionSearchCriteria.getCatalogUid()), null, searchConfig, booleanQueryBuilder, Occur.MUST, true);
 		}
 		
 		Set<String> catalogCodes = promotionSearchCriteria.getCatalogCodes();
@@ -88,28 +87,28 @@ public class PromotionQueryComposerImpl extends AbstractQueryComposerImpl {
 			//both catalog codes and store codes are not empty
 			//means search catalog promotions in catalog codes 
 			//or search shopping cart promotions in store codes
-			BooleanQuery tempBooleanQuery = new BooleanQuery();
+			BooleanQuery.Builder tempBooleanQueryBuilder = new BooleanQuery.Builder();
 			hasSomeCriteria |= addWholeFieldToQuery(SolrIndexConstants.CATALOG_CODE, 
-					catalogCodes, null, searchConfig, tempBooleanQuery, Occur.SHOULD, true);
+					catalogCodes, null, searchConfig, tempBooleanQueryBuilder, Occur.SHOULD, true);
 			hasSomeCriteria |= addWholeFieldToQuery(SolrIndexConstants.STORE_CODE, storeCodes, null,
-					searchConfig, tempBooleanQuery, Occur.SHOULD, true);
-			booleanQuery.add(tempBooleanQuery, Occur.MUST);
+					searchConfig, tempBooleanQueryBuilder, Occur.SHOULD, true);
+			booleanQueryBuilder.add(tempBooleanQueryBuilder.build(), Occur.MUST);
 		} else {		
 			hasSomeCriteria |= addWholeFieldToQuery(SolrIndexConstants.PROMOTION_RULESET_UID, promotionSearchCriteria.getRuleSetUid(),
-					null, searchConfig, booleanQuery, Occur.MUST, true);
+					null, searchConfig, booleanQueryBuilder, Occur.MUST, true);
 			if (CollectionUtils.isNotEmpty(catalogCodes)) {
 				hasSomeCriteria |= addWholeFieldToQuery(SolrIndexConstants.CATALOG_CODE, 
-						catalogCodes, null, searchConfig, booleanQuery, Occur.MUST, true);
+						catalogCodes, null, searchConfig, booleanQueryBuilder, Occur.MUST, true);
 			}
 			if (CollectionUtils.isNotEmpty(storeCodes)) {
 				hasSomeCriteria |= addWholeFieldToQuery(SolrIndexConstants.STORE_CODE, storeCodes, null,
-						searchConfig, booleanQuery, Occur.MUST, true);
+						searchConfig, booleanQueryBuilder, Occur.MUST, true);
 			}
 		}
 		
 		if (promotionSearchCriteria.getEnabled() != null) {
 			hasSomeCriteria |= addWholeFieldToQuery(SolrIndexConstants.PROMOTION_STATE,
-					String.valueOf(promotionSearchCriteria.getEnabled()), null, searchConfig, booleanQuery, Occur.MUST, true);
+					String.valueOf(promotionSearchCriteria.getEnabled()), null, searchConfig, booleanQueryBuilder, Occur.MUST, true);
 		}
 
 		if (promotionSearchCriteria.isActive() != null) {
@@ -122,7 +121,7 @@ public class PromotionQueryComposerImpl extends AbstractQueryComposerImpl {
 				occur = Occur.MUST;
 			}
 			// end date must not be in the past (this handles missing end dates)
-			booleanQuery.add(TermRangeQuery.newStringRange(SolrIndexConstants.END_DATE, null, DateUtil.getThreadLocalDateFormat().format(new Date()),
+			booleanQueryBuilder.add(TermRangeQuery.newStringRange(SolrIndexConstants.END_DATE, null, Instant.now().toString(),
 					true, true), occur);
 		}
 

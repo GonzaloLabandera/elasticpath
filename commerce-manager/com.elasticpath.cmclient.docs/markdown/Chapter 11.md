@@ -1,3 +1,5 @@
+<!-- note: keep for archives/when we eventually convert all reports. -->
+
 # Chapter 11: Reporting
 
 You can generate various reports using Elastic Path Commerce. Reports can help to improve the decisions taken by management and front-line personnel in an organization. You can access reports from the main toolbar.

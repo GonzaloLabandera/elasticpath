@@ -26,6 +26,26 @@
 	<reference id="nonCachingRuleService" interface="com.elasticpath.service.rules.RuleService"/>
 	<reference id="nonCachingPriceListAssignmentService" interface="com.elasticpath.service.pricing.PriceListAssignmentService"/>
 	<reference id="nonCachingBaseAmountFinder" interface="com.elasticpath.service.pricing.BaseAmountFinder"/>
+	<reference id="categoryService" interface="com.elasticpath.service.catalog.CategoryService"
+			   filter="(caching=false)"/>
+	<reference id="solrQueryFactory" interface="com.elasticpath.service.search.solr.SolrQueryFactory"
+			   filter="(caching=false)"/>
+	<reference id="filteredNavigationConfigurationLoader"
+			   interface="com.elasticpath.service.catalogview.filterednavigation.FilteredNavigationConfigurationLoader"
+			   filter="(caching=false)"/>
+
+	<reference id="facetService"
+			   interface="com.elasticpath.service.search.FacetService"
+			   filter="(caching=false)"/>
+
+	<reference id="skuOptionService"
+			   interface="com.elasticpath.service.catalog.SkuOptionService"
+			   filter="(caching=false)"/>
+
+
+	<reference id="attributeService" interface="com.elasticpath.service.attribute.AttributeService"
+			   filter="(caching=false)"/>
+
 
 	<!-- Exported Services  -->
 	<service ref="cachingStoreService"
@@ -102,4 +122,58 @@
 			</entry>
 		</service-properties>
 	</service>
+
+	<service ref="cachingCategoryService" interface="com.elasticpath.service.catalog.CategoryService" ranking="200">
+		<service-properties>
+			<entry key="caching">
+				<value type="java.lang.Boolean">true</value>
+			</entry>
+		</service-properties>
+	</service>
+
+	<service ref="cachingAttributeService" interface="com.elasticpath.service.attribute.AttributeService" ranking="200">
+		<service-properties>
+			<entry key="caching">
+				<value type="java.lang.Boolean">true</value>
+			</entry>
+		</service-properties>
+	</service>
+
+
+	<service ref="cachingSkuOptionService" interface="com.elasticpath.service.catalog.SkuOptionService" ranking="200">
+		<service-properties>
+			<entry key="caching">
+				<value type="java.lang.Boolean">true</value>
+			</entry>
+		</service-properties>
+	</service>
+
+
+	<service ref="cachingSolrQueryFactory" interface="com.elasticpath.service.search.solr.SolrQueryFactory" ranking="200">
+		<service-properties>
+			<entry key="caching">
+				<value type="java.lang.Boolean">true</value>
+			</entry>
+		</service-properties>
+	</service>
+
+
+	<service ref="cachingFacetConfigurationLoader"
+			 interface="com.elasticpath.service.catalogview.filterednavigation.FilteredNavigationConfigurationLoader" ranking="200">
+		<service-properties>
+			<entry key="caching">
+				<value type="java.lang.Boolean">true</value>
+			</entry>
+		</service-properties>
+	</service>
+
+
+	<service ref="cachingFacetService" interface="com.elasticpath.service.search.FacetService" ranking="200">
+		<service-properties>
+			<entry key="caching">
+				<value type="java.lang.Boolean">true</value>
+			</entry>
+		</service-properties>
+	</service>
+
 </blueprint>

@@ -15,7 +15,9 @@
 			interface="javax.jms.ConnectionFactory"
 			filter="(jndiName=jms/JMSConnectionFactory)"/>
 	<reference id="jms" interface="org.apache.camel.Component"/>
-	<reference id="jmsTransactionManager" interface="org.springframework.transaction.PlatformTransactionManager"/>
+	<reference id="jmsTransactionManager"
+			   interface="org.springframework.transaction.PlatformTransactionManager"
+			   filter="(type=JmsTransactionManager)"/>
 	<reference id="eventMessageDataFormat" interface="org.apache.camel.spi.DataFormat"/>
 	<reference id="camelAnnotatedClassList" interface="java.util.Set"/>
 

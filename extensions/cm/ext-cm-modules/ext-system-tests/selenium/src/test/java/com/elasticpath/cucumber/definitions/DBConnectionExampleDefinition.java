@@ -5,7 +5,7 @@ import static org.junit.Assert.fail;
 
 import java.sql.SQLException;
 
-import com.elaticpath.selenium.util.ExtDBConnector;
+import com.elasticpath.selenium.util.ExtDBConnector;
 import cucumber.api.java.en.Then;
 
 /**

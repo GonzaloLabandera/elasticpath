@@ -23,6 +23,12 @@
 		<dependency>
 			<groupId>com.elasticpath</groupId>
 			<artifactId>ep-common-web</artifactId>
+			<exclusions>
+				<exclusion>
+					<groupId>javax.servlet</groupId>
+					<artifactId>javax.servlet-api</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
         <dependency>
             <groupId>com.elasticpath</groupId>
@@ -40,14 +46,16 @@
 
 	<properties>
 		<m2eclipse.wtp.contextRoot>${ep.search.contextUrl}</m2eclipse.wtp.contextRoot>
-    </properties>
+		<javax.servlet.version>3.1.0</javax.servlet.version>
+
+	</properties>
 
 	<build>
 		<pluginManagement>
 			<plugins>
 				<plugin>
 					<groupId>org.apache.tomcat.maven</groupId>
-					<artifactId>tomcat7-maven-plugin</artifactId>
+					<artifactId>tomcat8-maven-plugin</artifactId>
 					<configuration>
 						<path>${ep.search.contextUrl}</path>
 						<port>${ep.search.tomcat.port.http}</port>

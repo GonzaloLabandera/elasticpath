@@ -291,6 +291,35 @@ public abstract class AbstractEpLayoutComposite implements IEpLayoutComposite {
 	}
 
 	/**
+	 * Adds a group.
+	 *
+	 * @param numColumns        columns count
+	 * @param equalWidthColumns set equal width columns
+	 * @param data              EP layout data
+	 * @return EP layout composite
+	 */
+	public IEpLayoutComposite addGroup(final int numColumns, final boolean equalWidthColumns, final IEpLayoutData data) {
+		final Composite group = new Composite(this.getSwtComposite(), SWT.NONE);
+
+		return this.newWrapperCompositeInstance(group, numColumns, equalWidthColumns, data);
+	}
+
+	/**
+	 * Adds a group.
+	 *
+	 * @param numColumns        columns count
+	 * @param equalWidthColumns set equal width columns
+	 * @param data              EP layout data
+	 * @param style             style
+	 * @return EP layout composite
+	 */
+	public IEpLayoutComposite addGroup(final int numColumns, final boolean equalWidthColumns, final IEpLayoutData data, final int style) {
+		final Composite group = new Composite(this.getSwtComposite(), style);
+
+		return this.newWrapperCompositeInstance(group, numColumns, equalWidthColumns, data);
+	}
+
+	/**
 	 * Creates new EP composite instance.
 	 *
 	 * @param parentComposite   Eclipse parent composite for the new EP composite
@@ -337,6 +366,21 @@ public abstract class AbstractEpLayoutComposite implements IEpLayoutComposite {
 	 */
 	public Text addTextField(final EpState epState, final IEpLayoutData data) {
 		final Text text = this.getEpControlFactory().createTextField(this.getSwtComposite(), SWT.NONE, epState);
+		text.setLayoutData(this.adaptEpLayoutData(data));
+
+		return text;
+	}
+
+	/**
+	 * Adds a text field.
+	 *
+	 * @param epState the EP UI state flag (can be EDITABLE, READ_ONLY, DISABLED)
+	 * @param data    EP layout data
+	 * @param style   style
+	 * @return Text
+	 */
+	public Text addTextField(final EpState epState, final IEpLayoutData data, final int style) {
+		final Text text = this.getEpControlFactory().createTextField(this.getSwtComposite(), style, epState);
 		text.setLayoutData(this.adaptEpLayoutData(data));
 
 		return text;
@@ -655,8 +699,13 @@ public abstract class AbstractEpLayoutComposite implements IEpLayoutComposite {
 	@Override
 	public IEpLayoutComposite addScrolledGridLayoutComposite(final int numColumns, final boolean equalWidthColumns,
 		final boolean grabHorizontalSpace) {
+		return addScrolledGridLayoutComposite(numColumns, equalWidthColumns, grabHorizontalSpace, SWT.V_SCROLL | SWT.H_SCROLL);
+	}
 
-		final ScrolledComposite scrolledComposite = new ScrolledComposite(this.getSwtComposite(), SWT.V_SCROLL | SWT.H_SCROLL);
+	@Override
+	public IEpLayoutComposite addScrolledGridLayoutComposite(final int numColumns, final boolean equalWidthColumns,
+															 final boolean grabHorizontalSpace, final int style) {
+		final ScrolledComposite scrolledComposite = new ScrolledComposite(this.getSwtComposite(), style);
 		scrolledComposite.setLayoutData(new GridData(GridData.FILL, GridData.FILL, grabHorizontalSpace, true));
 		scrolledComposite.setLayout(new GridLayout());
 

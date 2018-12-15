@@ -3,18 +3,15 @@
  */
 package com.elasticpath.test.integration;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.math.BigDecimal;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
+import com.google.common.collect.ImmutableList;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -43,8 +40,6 @@ public class ProductDaoImplTest extends DbTestCase {
 
 	private static final String NEW_SKU = "newSku";
 
-	private static final int I_3 = 3;
-
 	@Autowired
 	private ProductDao productDao;
 
@@ -53,39 +48,9 @@ public class ProductDaoImplTest extends DbTestCase {
 
 	private static final double PRODUCT_PRICE = 269.00;
 
-// FIXME: Broken test
-//	/**
-//	 * Tests returning the uids of products associated with a given product sku option.
-//	 */
-//	public void testFindUidsBySkuOption() {
-//
-//		// Persist a test multi-sku product
-//		String skuCode1 = Utils.uniqueCode("sku");
-//		String skuCode2 = Utils.uniqueCode("sku");
-//		Product product = this.persisterFactory.getCatalogTestPersister().persistMultiSkuProduct(scenario.getCatalog(),
-//				scenario.getCategory(), scenario.getWarehouse(), BigDecimal.valueOf(PRODUCT_PRICE), TestDataPersisterFactory.DEFAULT_CURRENCY,
-//				Utils.uniqueCode("product"), "Multi-Sku Product", "GOODS", null, 0, skuCode1, skuCode2);
-//
-//		// Get and validate the first sku option associated with the product type
-//		ProductType productType = product.getProductType();
-//		assertNotNull(productType);
-//		Set<SkuOption> skuOptions = productType.getSkuOptions();
-//		assertNotNull(skuOptions);
-//		assertFalse(skuOptions.isEmpty());
-//		SkuOption option = skuOptions.iterator().next();
-//		assertNotNull(option);
-//
-//		// Validate the findUidsBySkuOption() method passing in the sku option
-//		List<Long> foundUids = productDao.findUidsBySkuOption(option);
-//		assertNotNull("The list of product uids found should not be null.", foundUids);
-//		assertFalse("The list of product uids found should not be empty.", foundUids.isEmpty());
-//	}
-
-
 	/**
 	 * Test multi sku products can have new skus added and correctly persisted without exception,
 	 * and that non-zero uidPk's are assigned.
-	 * TODO: this test seems to fail only half the time
 	 */
 	@DirtiesDatabase
 	@Test
@@ -94,14 +59,13 @@ public class ProductDaoImplTest extends DbTestCase {
 		final String skuCode1 = Utils.uniqueCode(NEW_SKU);
 		final String skuCode2 = Utils.uniqueCode(NEW_SKU);
 		final Product product = persisterFactory.getCatalogTestPersister().persistMultiSkuProduct(scenario.getCatalog(),
-				scenario.getCategory(), scenario.getWarehouse(), BigDecimal.valueOf(PRODUCT_PRICE), TestDataPersisterFactory.DEFAULT_CURRENCY,
-				null, Utils.uniqueCode(PRODUCT), MULTI_SKU_PRODUCT, GOODS, null, 0, skuCode1, skuCode2);
+			scenario.getCategory(), scenario.getWarehouse(), BigDecimal.valueOf(PRODUCT_PRICE), TestDataPersisterFactory.DEFAULT_CURRENCY,
+			null, Utils.uniqueCode(PRODUCT), MULTI_SKU_PRODUCT, GOODS, null, 0, skuCode1, skuCode2);
 
 		final ProductLoadTuner productLoadTuner = getBeanFactory().getBean(ContextIdNames.PRODUCT_LOAD_TUNER);
-        productLoadTuner.setLoadingSkus(true);
+		productLoadTuner.setLoadingSkus(true);
 		final Product retrievedProduct = productDao.getTuned(product.getUidPk(), productLoadTuner);
-		assertNotNull("Retrieved product should not have an empty list of skus", retrievedProduct.getProductSkus());
-		assertEquals("Retrieved product should have 2 skus", 2, retrievedProduct.getProductSkus().size());
+		assertThat(retrievedProduct.getProductSkus()).hasSize(2);
 
 		// Add a new SKU
 		final ProductSku productSku = getBeanFactory().getBean(ContextIdNames.PRODUCT_SKU);
@@ -113,7 +77,7 @@ public class ProductDaoImplTest extends DbTestCase {
 		final Product loadedProduct = productDao.saveOrUpdate(retrievedProduct);
 
 		for (final ProductSku sku : loadedProduct.getProductSkus().values()) {
-			assertFalse("ProductSku " + sku.getSkuCode() + " was persisted with UIDPK=0", sku.getUidPk() == 0);
+			assertThat(sku.getUidPk()).isNotEqualTo(0);
 		}
 	}
 
@@ -130,27 +94,27 @@ public class ProductDaoImplTest extends DbTestCase {
 		final CatalogTestPersister catalogTestPersister = persisterFactory.getCatalogTestPersister();
 
 		catalogTestPersister.persistSimpleProduct(
-				code,
-				productType,
-				scenario.getCatalog(),
-				scenario.getCategory(),
-				catalogTestPersister.getPersistedTaxCode(GOODS)
+			code,
+			productType,
+			scenario.getCatalog(),
+			scenario.getCategory(),
+			catalogTestPersister.getPersistedTaxCode(GOODS)
 		);
 
 		final ProductBundle bundle = catalogTestPersister.createSimpleProductBundle(
-										productType,
-										bundleSkuCode,
-										scenario.getCatalog(),
-										scenario.getCategory(),
-										catalogTestPersister.getPersistedTaxCode(GOODS)
+			productType,
+			bundleSkuCode,
+			scenario.getCatalog(),
+			scenario.getCategory(),
+			catalogTestPersister.getPersistedTaxCode(GOODS)
 		);
 		productDao.saveOrUpdate(bundle);
 
 		final List<Long> uids = productDao.findAllUids();
 
 		final int expectedNumberOfProducts = 2;
-		assertTrue("Should have " + expectedNumberOfProducts + " products!", expectedNumberOfProducts == uids.size());
-		assertTrue("Last product should be an instance of ProductBundleImpl", productLookup.findByUid(uids.get(1)) instanceof ProductBundle);
+		assertThat(uids).hasSize(expectedNumberOfProducts);
+		assertThat(productLookup.<Product>findByUid(uids.get(1))).isInstanceOf(ProductBundle.class);
 	}
 
 	/**
@@ -184,32 +148,26 @@ public class ProductDaoImplTest extends DbTestCase {
 		final String skuCode2 = Utils.uniqueCode(NEW_SKU);
 		final String productMultiSKUCode = Utils.uniqueCode(PRODUCT);
 		persisterFactory.getCatalogTestPersister().persistMultiSkuProduct(scenario.getCatalog(),
-				scenario.getCategory(), scenario.getWarehouse(), BigDecimal.valueOf(PRODUCT_PRICE), TestDataPersisterFactory.DEFAULT_CURRENCY,
-				null, productMultiSKUCode, MULTI_SKU_PRODUCT, GOODS, null, 0, skuCode1, skuCode2);
+			scenario.getCategory(), scenario.getWarehouse(), BigDecimal.valueOf(PRODUCT_PRICE), TestDataPersisterFactory.DEFAULT_CURRENCY,
+			null, productMultiSKUCode, MULTI_SKU_PRODUCT, GOODS, null, 0, skuCode1, skuCode2);
 
-		final Collection<String> collMS = Arrays.asList(productMultiSKUCode);
+		final Collection<String> collMS = ImmutableList.of(productMultiSKUCode);
 		final List<Object[]> resultMS = productDao.findEnrichingData("PRODUCT_ENRICH_DTO_BY_GUIDS", collMS, Locale.ENGLISH);
-		assertNotNull(resultMS);
-		assertEquals(1, resultMS.size());
-		assertEquals(productMultiSKUCode, resultMS.get(0)[0]);
-		assertEquals(MULTI_SKU_PRODUCT, resultMS.get(0)[1]);
-		assertTrue((Boolean) resultMS.get(0)[2]);
-		assertEquals(skuCode1, resultMS.get(0)[I_3]);
+		assertThat(resultMS).hasSize(1);
+		assertThat(resultMS.get(0))
+			.containsExactly(productMultiSKUCode, MULTI_SKU_PRODUCT, true, skuCode1);
 
 		final String productSingleSKUCode = Utils.uniqueCode(PRODUCT);
 		final String productSingleSKUskuCode = productSingleSKUCode + "SKU";
 		persisterFactory.getCatalogTestPersister().persistProductWithSku(scenario.getCatalog(),
-				scenario.getCategory(), scenario.getWarehouse(), BigDecimal.valueOf(PRODUCT_PRICE), TestDataPersisterFactory.DEFAULT_CURRENCY,
-				"brandCode", productSingleSKUCode, "Single-Sku Product", productSingleSKUskuCode, GOODS, null, 0);
+			scenario.getCategory(), scenario.getWarehouse(), BigDecimal.valueOf(PRODUCT_PRICE), TestDataPersisterFactory.DEFAULT_CURRENCY,
+			"brandCode", productSingleSKUCode, "Single-Sku Product", productSingleSKUskuCode, GOODS, null, 0);
 
-		final Collection<String> collSS = Arrays.asList(productSingleSKUCode);
+		final Collection<String> collSS = ImmutableList.of(productSingleSKUCode);
 		final List<Object[]> resultSS = productDao.findEnrichingData("PRODUCT_ENRICH_DTO_BY_GUIDS", collSS, Locale.ENGLISH);
-		assertNotNull(resultSS);
-		assertEquals(1, resultSS.size());
-		assertEquals(productSingleSKUCode, resultSS.get(0)[0]);
-		assertEquals("Single-Sku Product", resultSS.get(0)[1]);
-		assertFalse((Boolean) resultSS.get(0)[2]);
-		assertEquals(productSingleSKUskuCode, resultSS.get(0)[I_3]);
+		assertThat(resultSS).hasSize(1);
+		assertThat(resultSS.get(0))
+			.containsExactly(productSingleSKUCode, "Single-Sku Product", false, productSingleSKUskuCode);
 
 	}
 
@@ -220,17 +178,17 @@ public class ProductDaoImplTest extends DbTestCase {
 	@Test
 	public void testFindUidBySkuCode() {
 
-	    final CatalogTestPersister catalogTestPersister = persisterFactory.getCatalogTestPersister();
+		final CatalogTestPersister catalogTestPersister = persisterFactory.getCatalogTestPersister();
 
-	    final String productSingleSKUCode = Utils.uniqueCode(PRODUCT);
-	    final String productSingleSKUskuCode = productSingleSKUCode + "SKU";
+		final String productSingleSKUCode = Utils.uniqueCode(PRODUCT);
+		final String productSingleSKUskuCode = productSingleSKUCode + "SKU";
 
-	    final Product product =  catalogTestPersister.persistProductWithSku(scenario.getCatalog(),
-	            scenario.getCategory(), scenario.getWarehouse(), BigDecimal.valueOf(PRODUCT_PRICE), TestDataPersisterFactory.DEFAULT_CURRENCY,
-	            "brandCode", productSingleSKUCode, "Single-Sku Product", productSingleSKUskuCode, GOODS, null, 0);
+		final Product product = catalogTestPersister.persistProductWithSku(scenario.getCatalog(),
+			scenario.getCategory(), scenario.getWarehouse(), BigDecimal.valueOf(PRODUCT_PRICE), TestDataPersisterFactory.DEFAULT_CURRENCY,
+			"brandCode", productSingleSKUCode, "Single-Sku Product", productSingleSKUskuCode, GOODS, null, 0);
 
-	    final Long resultUid = productDao.findUidBySkuCode(productSingleSKUskuCode);
+		final Long resultUid = productDao.findUidBySkuCode(productSingleSKUskuCode);
 
-	    assertEquals("wrong uid returned", (Long) product.getUidPk(), resultUid);
+		assertThat(resultUid).isEqualTo(product.getUidPk());
 	}
 }

@@ -14,20 +14,12 @@ See the main Cortex documentation for more information on *default*.
 			</description>
 			<step>
 				<description><![CDATA[Retrieve the cart with cart-id default.]]></description>
-				<start>default-cart</start>
-				<read-self/>
+				<start>base.root</start>
+				<follow-link>defaultcart</follow-link>
+				<result>cart</result>
 			</step>
 		</plan>
 
-		<plan>
-			<name>read-cart</name>
-			<description><![CDATA[Retrieve a cart with a specific cart identifier.]]></description>
-			<step>
-				<description><![CDATA[Retrieve a cart.]]></description>
-				<start>cart</start>
-				<read-self/>
-			</step>
-		</plan>
 		<plan>
 			<name>read-cart-memberships</name>
 			<description><![CDATA[

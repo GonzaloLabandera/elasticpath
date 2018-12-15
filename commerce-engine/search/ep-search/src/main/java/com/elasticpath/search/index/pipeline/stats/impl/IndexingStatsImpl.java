@@ -11,7 +11,6 @@ import org.apache.commons.math.stat.descriptive.DescriptiveStatistics;
 import org.springframework.jmx.export.annotation.ManagedAttribute;
 import org.springframework.jmx.export.annotation.ManagedOperation;
 import org.springframework.jmx.export.annotation.ManagedOperationParameter;
-import org.springframework.jmx.export.annotation.ManagedOperationParameters;
 import org.springframework.jmx.export.annotation.ManagedResource;
 
 import com.elasticpath.base.exception.EpServiceException;
@@ -114,7 +113,7 @@ public class IndexingStatsImpl implements IndexingStatistics {
 	 * @return string value of {@code IndexStatus}.
 	 */
 	@ManagedOperation(description = "Return the index status for the specified IndexType", currencyTimeLimit = 1)
-	@ManagedOperationParameters({ @ManagedOperationParameter(name = "indexTypeName", description = "The string value of the IndexType.") })
+	@ManagedOperationParameter(name = "indexTypeName", description = "The string value of the IndexType.")
 	public String getIndexStatus(final String indexTypeName) {
 		final IndexBuildStatus buildStatus = indexBuildStatuses.get(IndexType.findFromName(indexTypeName));
 

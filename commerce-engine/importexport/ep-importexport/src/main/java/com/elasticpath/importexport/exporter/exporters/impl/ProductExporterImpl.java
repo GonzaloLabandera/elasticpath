@@ -1,9 +1,10 @@
-/**
+/*
  * Copyright (c) Elastic Path Software Inc., 2013
  */
 package com.elasticpath.importexport.exporter.exporters.impl;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -38,7 +39,7 @@ public class ProductExporterImpl extends AbstractExporterImpl<Product, ProductDT
 
 	private List<Long> productUidPkList = Collections.emptyList();
 
-	private List<Long> futureNonDependant;
+	private Collection<Long> futureNonDependant;
 
 	private ProductAssociationService productAssociationService;
 

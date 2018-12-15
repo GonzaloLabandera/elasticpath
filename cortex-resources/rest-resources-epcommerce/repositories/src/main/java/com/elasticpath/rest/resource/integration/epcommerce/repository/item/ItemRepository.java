@@ -3,16 +3,18 @@
  */
 package com.elasticpath.rest.resource.integration.epcommerce.repository.item;
 
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
+import io.reactivex.Observable;
 import io.reactivex.Single;
 
+import com.elasticpath.domain.catalog.BundleConstituent;
 import com.elasticpath.domain.catalog.Product;
 import com.elasticpath.domain.catalog.ProductBundle;
 import com.elasticpath.domain.catalog.ProductSku;
 import com.elasticpath.domain.skuconfiguration.SkuOption;
-import com.elasticpath.rest.command.ExecutionResult;
 import com.elasticpath.rest.id.IdentifierPart;
 
 /**
@@ -28,22 +30,11 @@ public interface ItemRepository {
 	/**
 	 * Returns the id for an item based on the product's default sku.
 	 * The product must have a default sku.
-	 * @deprecated use this method instead: {@link #getDefaultItemIdForProductSingle(Product)}
-	 * 
-	 * @param product the product with the sku to build an item id from
-	 * @return the item id for the product's default sku
-	 */
-	@Deprecated
-	ExecutionResult<String> getDefaultItemIdForProduct(Product product);
-
-	/**
-	 * Returns the id for an item based on the product's default sku.
-	 * The product must have a default sku.
 	 *
 	 * @param product the product with the sku to build an item id from
 	 * @return the item id for the product's default sku
 	 */
-	Single<String> getDefaultItemIdForProductSingle(Product product);
+	String getDefaultItemIdForProduct(Product product);
 
 	/**
 	 * Returns the id for an item based on the sku.
@@ -51,17 +42,7 @@ public interface ItemRepository {
 	 * @param productSku product sku to encode the id from
 	 * @return an id that uniquely identifies the purchasable item
 	 */
-	Single<String> getItemIdForSkuAsSingle(ProductSku productSku);
-
-	/**
-	 * Returns the id for an item based on the sku.
-	 *
-	 * @param productSku product sku to encode the id from
-	 * @return an id that uniquely identifies the purchasable item
-	 * @deprecated use {@link ItemRepository#getItemIdForSkuAsSingle} when possible
-	 */
-	@Deprecated
-	ExecutionResult<String> getItemIdForSku(ProductSku productSku);
+	String getItemIdForSku(ProductSku productSku);
 
 	/**
 	 * Returns the identifier for an item based on the sku.
@@ -80,58 +61,77 @@ public interface ItemRepository {
 	IdentifierPart<Map<String, String>> getItemIdMap(String skuCode);
 
 	/**
-	 * Returns the product sku identified by the given itemId.
+	 * Returns the product sku identified by the given itemIdMap.
 	 *
-	 * @param itemId the id to search with
+	 * @param itemIdMap the item id map to search with
 	 * @return the product sku identified by the itemId
 	 */
-	Single<ProductSku> getSkuForItemIdAsSingle(String itemId);
-
-	/**
-	 * Returns the product sku identified by the given itemId.
-	 *
-	 * @param itemId the id to search with
-	 * @return the product sku identified by the itemId
-	 * @deprecated use (@link ItemRepository#getSkuForItemIdAsSingle} when possible
-	 */
-	@Deprecated
-	ExecutionResult<ProductSku> getSkuForItemId(String itemId);
-
-	/**
-	 * Returns the product sku code identified by the given itemId.
-	 *
-	 * @param itemId the id to search with
-	 * @return the product sku code identified by the itemId
-	 */
-	ExecutionResult<String> getSkuCodeForItemId(String itemId);
+	Single<ProductSku> getSkuForItemId(Map<String, String> itemIdMap);
 
 	/**
 	 * Checks if item is bundle.
 	 *
-	 * @param itemId the item id
+	 * @param itemIdMap the item id map
 	 * @return true if the item is a bundle, false otherwise
 	 */
-	ExecutionResult<Boolean> isItemBundle(String itemId);
+	Single<Boolean> isItemBundle(Map<String, String> itemIdMap);
 
 	/**
-	 * Returns the product sku identified by the given sku guid.
+	 * Returns a Single of ProductBundle based on the product.
 	 *
-	 * @param skuGuid the sku guid
-	 * @return the product sku identified by the guid
-	 */
-	ExecutionResult<ProductSku> getSkuForSkuGuid(String skuGuid);
-
-	/**
-	 * Returns a ProductBundle based on the product.
 	 * @param product a product
 	 * @return a product bundle
 	 */
-	ProductBundle asProductBundle(Product product);
+	Single<ProductBundle> asProductBundle(Product product);
 
 	/**
-	 * Returns the Set of SkuOptions for the given itemId.
-	 * @param itemId the item id.
-	 * @return Set of Sku Options
+	 * Verifies whether SKU exists for given sku code.
+	 *
+	 * @param itemIdMap the item id map
+	 * @return true if product sku exists
 	 */
-	ExecutionResult<Set<SkuOption>> getSkuOptionsForItemId(String itemId);
+	Single<Boolean> isProductSkuExistForItemId(Map<String, String> itemIdMap);
+
+	/**
+	 * Returns the set of SkuOptions for the given itemIdMap.
+	 *
+	 * @param itemIdMap the item id map.
+	 * @return Observable of Sku Options
+	 */
+	Observable<SkuOption> getSkuOptionsForItemId(Map<String, String> itemIdMap);
+
+	/**
+	 * Get the BundleConstituent at the end of guid path from root item.
+	 *
+	 * @param rootItemIdMap        rootItemIdMap
+	 * @param guidPathFromRootItem a list of all guids from the root item to the component item
+	 * @return the component
+	 */
+	Single<BundleConstituent> findBundleConstituentAtPathEnd(Map<String, String> rootItemIdMap, Iterator<String> guidPathFromRootItem);
+
+	/**
+	 * Get the next nested BundleConstituent if there is one.
+	 *
+	 * @param currBundleConstituent currBundleConstituent
+	 * @param guidPathFromRootItem  guidPathFromRootItem
+	 * @return nested BundleConstituent
+	 */
+	Single<BundleConstituent> getNestedBundleConstituent(BundleConstituent currBundleConstituent, Iterator<String> guidPathFromRootItem);
+
+	/**
+	 * Get the product bundle for a bundle constituent.
+	 *
+	 * @param bundleConstituent bundleConstituent
+	 * @return the product bundle
+	 */
+	Single<ProductBundle> getProductBundleFromConstituent(BundleConstituent bundleConstituent);
+
+	/**
+	 * Get the bundle constituent with the given guid.
+	 *
+	 * @param bundleConstituents bundleConstituents
+	 * @param guid               guid
+	 * @return bundle constituent with the given guid
+	 */
+	Single<BundleConstituent> findBundleConstituentWithGuid(List<BundleConstituent> bundleConstituents, String guid);
 }

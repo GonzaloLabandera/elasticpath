@@ -1,10 +1,15 @@
+# Prerequisite
+  * build project /ep-commerce/extensions/cortex/system-tests to install required dependency with following command:
+  ```java
+  mvn clean install -DskipAllTests
+  ```
 # cm-selenium-test
 **Before Running the Tests**
 
 Ensure the CM you are testing against has the Test ID mode turned on.
 In ext-cm-webapp-runner, run the following:
 ```
-mvn clean tomcat7:run-war -Dorg.eclipse.rap.rwt.enableUITests=true
+mvn clean tomcat8:run-war -Dorg.eclipse.rap.rwt.enableUITests=true
 ```
 
 **Setting up commerce/ep-commerce/extensions/cm/ext-cm-modules/system-tests Project in IntelliJ**
@@ -27,12 +32,16 @@ Build the following projects using this command: mvn clean install -DskipAllTest
 
 **Running Tests:**
 
-mvn clean install -Dcucumber.options="--tags @smoketest"
+mvn clean install -Dcucumber.options="--tags @regressionTest"
 
-Sanity Tests: @sanity
+*Test Suites*
+
+* Sanity Tests: @sanityTest
+* Smoke Tests: @smokeTest
+* Regression Tests: @regressionTest
 
 *Maven Options:*
-* -Dcucumber.options="--tags @smoketest" - You can replace the tag to your own tag. 
+* -Dcucumber.options="--tags @regressionTest" - You can replace the tag to your own tag.
 * -Dfailsafe.fork.count="1" - This is the number of parallel tests at the same time. Default is 1 and can be changed to other values depending on number of TestsIT classes.
 * -Premote -Dremote.web.driver.url="<REMOTE DRIVER IP>" - The "remote" triggers tests to be executed using remote VM. The "remote.web.driver.url" specifies the URL of the remote VM. e.g. "http://10.10.2.113:4444/wd/hub"
     * Note: You have to have selenium grid setup in order to use this feature. Please refer to official documentation on Selenium Grid.  

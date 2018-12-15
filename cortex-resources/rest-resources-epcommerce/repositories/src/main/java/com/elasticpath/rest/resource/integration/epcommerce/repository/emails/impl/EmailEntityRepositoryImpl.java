@@ -60,14 +60,31 @@ public class EmailEntityRepositoryImpl<E extends EmailEntity, I extends EmailIde
 	@Override
 	public Observable<EmailIdentifier> findAll(final IdentifierPart<String> scope) {
 
-		EmailsIdentifier emailsIdentifier = EmailsIdentifier.builder().withScope(scope).build();
-
 		return customerRepository.getCustomer(resourceOperationContext.getUserIdentifier())
-				.map(customer -> EmailIdentifier.builder()
-						.withEmails(emailsIdentifier)
-						.withEmailId(StringIdentifier.of(customer.getEmail()))
-						.build())
-				.toObservable();
+				.flatMapObservable(customer -> getEmailIdentifier(scope, customer.getEmail()));
+	}
+
+	/**
+	 * Get email identifier if customer email is not empty.
+	 *
+	 * @param scope         the scope
+	 * @param customerEmail the customer email
+	 * @return email identifier (if any)
+	 */
+	protected Observable<EmailIdentifier> getEmailIdentifier(final IdentifierPart<String> scope, final String customerEmail) {
+
+		if (StringUtils.isNotEmpty(customerEmail)) {
+			final EmailsIdentifier emails = EmailsIdentifier.builder()
+					.withScope(scope)
+					.build();
+
+			return Observable.just(EmailIdentifier.builder()
+					.withEmails(emails)
+					.withEmailId(StringIdentifier.of(customerEmail))
+					.build());
+		}
+
+		return Observable.empty();
 	}
 
 	@Reference

@@ -3,9 +3,7 @@
  */
 package com.elasticpath.test.integration.importjobs;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.List;
 import java.util.Locale;
@@ -29,45 +27,40 @@ public class ImportMultiskuProductTest extends ImportJobTestCase {
 	private void assertProductOne() {
 		ProductLookup productLookup = getBeanFactory().getBean(ContextIdNames.PRODUCT_LOOKUP);
 		Product product = productLookup.findByGuid("101");
-		assertNotNull("Product should have been found", product);
+		assertThat(product).isNotNull();
 		final AttributeValueGroup attributes = product.getAttributeValueGroup();
 
-		assertEquals("Desc en 1", attributes.getAttributeValue("description", Locale.ENGLISH).getValue());
-		assertEquals("Desc fr 1", attributes.getAttributeValue("description", Locale.FRENCH).getValue());
+		assertThat(attributes.getAttributeValue("description", Locale.ENGLISH).getValue()).isEqualTo("Desc en 1");
+		assertThat(attributes.getAttributeValue("description", Locale.FRENCH).getValue()).isEqualTo("Desc fr 1");
 
-		assertEquals("101", product.getCode());
-		assertEquals(AvailabilityCriteria.AVAILABLE_WHEN_IN_STOCK, product.getAvailabilityCriteria());
-		assertEquals("F00004", product.getBrand().getCode());
-		assertEquals("Displ Name en 1", product.getDisplayName(Locale.ENGLISH));
-		assertEquals("Displ Name fr 1", product.getDisplayName(Locale.FRENCH));
-		assertEquals(null, product.getEndDate());
-		assertEquals(null, product.getExpectedReleaseDate());
-		assertEquals("Image 1.jpg", product.getImage());
-		assertEquals(1, product.getMinOrderQty());
-		assertEquals(0, product.getPreOrBackOrderLimit());
+		assertThat(product.getCode()).isEqualTo("101");
+		assertThat(product.getAvailabilityCriteria()).isEqualTo(AvailabilityCriteria.AVAILABLE_WHEN_IN_STOCK);
+		assertThat(product.getBrand().getCode()).isEqualTo("F00004");
+		assertThat(product.getDisplayName(Locale.ENGLISH)).isEqualTo("Displ Name en 1");
+		assertThat(product.getDisplayName(Locale.FRENCH)).isEqualTo("Displ Name fr 1");
+		assertThat(product.getEndDate()).isNull();
+		assertThat(product.getExpectedReleaseDate()).isNull();
+		assertThat(product.getImage()).isEqualTo("Image 1.jpg");
+		assertThat(product.getMinOrderQty()).isEqualTo(1);
+		assertThat(product.getPreOrBackOrderLimit()).isEqualTo(0);
 
 		{ // assert locale dependent fields: For English
 			LocaleDependantFields localeDependantFields = product.getLocaleDependantFields(Locale.ENGLISH);
-			assertEquals("SEO desc en 1", localeDependantFields.getDescription());
-			assertEquals("Displ Name en 1", localeDependantFields.getDisplayName());
-			assertEquals("SEO title en 1", localeDependantFields.getTitle());
-			assertEquals("SEO keywords en 1", localeDependantFields.getKeyWords());
-			assertEquals(null, localeDependantFields.getUrl());
+			assertThat(localeDependantFields.getDescription()).isEqualTo("SEO desc en 1");
+			assertThat(localeDependantFields.getDisplayName()).isEqualTo("Displ Name en 1");
+			assertThat(localeDependantFields.getTitle()).isEqualTo("SEO title en 1");
+			assertThat(localeDependantFields.getKeyWords()).isEqualTo("SEO keywords en 1");
+			assertThat(localeDependantFields.getUrl()).isNull();
 		}
 
 		{ // assert locale dependent fields: For French
 			LocaleDependantFields localeDependantFields = product.getLocaleDependantFields(Locale.FRENCH);
-			assertEquals("SEO desc fr 1", localeDependantFields.getDescription());
-			assertEquals("Displ Name fr 1", localeDependantFields.getDisplayName());
-			assertEquals("SEO title fr 1", localeDependantFields.getTitle());
-			assertEquals("SEO keywords fr 1", localeDependantFields.getKeyWords());
-			assertEquals(null, localeDependantFields.getUrl());
+			assertThat(localeDependantFields.getDescription()).isEqualTo("SEO desc fr 1");
+			assertThat(localeDependantFields.getDisplayName()).isEqualTo("Displ Name fr 1");
+			assertThat(localeDependantFields.getTitle()).isEqualTo("SEO title fr 1");
+			assertThat(localeDependantFields.getKeyWords()).isEqualTo("SEO keywords fr 1");
+			assertThat(localeDependantFields.getUrl()).isNull();
 		}
-	}
-
-	private void assertProductOneAbsent() {
-		ProductLookup productLookup = getBeanFactory().getBean(ContextIdNames.PRODUCT_LOOKUP);
-		assertNull(productLookup.findByGuid("101"));
 	}
 
 	private void assertProductTwo() {
@@ -75,36 +68,36 @@ public class ImportMultiskuProductTest extends ImportJobTestCase {
 		Product product = productLookup.findByGuid("102");
 		final AttributeValueGroup attributes = product.getAttributeValueGroup();
 
-		assertEquals("Desc en 2", attributes.getAttributeValue("description", Locale.ENGLISH).getValue());
-		assertEquals("Desc fr 2", attributes.getAttributeValue("description", Locale.FRENCH).getValue());
+		assertThat(attributes.getAttributeValue("description", Locale.ENGLISH).getValue()).isEqualTo("Desc en 2");
+		assertThat(attributes.getAttributeValue("description", Locale.FRENCH).getValue()).isEqualTo("Desc fr 2");
 
-		assertEquals("102", product.getCode());
-		assertEquals(AvailabilityCriteria.AVAILABLE_WHEN_IN_STOCK, product.getAvailabilityCriteria());
-		assertEquals("F00004", product.getBrand().getCode());
-		assertEquals("Displ Name en 2", product.getDisplayName(Locale.ENGLISH));
-		assertEquals("Displ Name fr 2", product.getDisplayName(Locale.FRENCH));
-		assertEquals(null, product.getEndDate());
-		assertEquals(null, product.getExpectedReleaseDate());
-		assertEquals("Image 2.jpg", product.getImage());
-		assertEquals(1, product.getMinOrderQty());
-		assertEquals(0, product.getPreOrBackOrderLimit());
+		assertThat(product.getCode()).isEqualTo("102");
+		assertThat(product.getAvailabilityCriteria()).isEqualTo(AvailabilityCriteria.AVAILABLE_WHEN_IN_STOCK);
+		assertThat(product.getBrand().getCode()).isEqualTo("F00004");
+		assertThat(product.getDisplayName(Locale.ENGLISH)).isEqualTo("Displ Name en 2");
+		assertThat(product.getDisplayName(Locale.FRENCH)).isEqualTo("Displ Name fr 2");
+		assertThat(product.getEndDate()).isNull();
+		assertThat(product.getExpectedReleaseDate()).isNull();
+		assertThat(product.getImage()).isEqualTo("Image 2.jpg");
+		assertThat(product.getMinOrderQty()).isEqualTo(1);
+		assertThat(product.getPreOrBackOrderLimit()).isEqualTo(0);
 
 		{ // assert locale dependent fields: For English
 			LocaleDependantFields localeDependantFields = product.getLocaleDependantFields(Locale.ENGLISH);
-			assertEquals("SEO desc en 2", localeDependantFields.getDescription());
-			assertEquals("Displ Name en 2", localeDependantFields.getDisplayName());
-			assertEquals("SEO title en 2", localeDependantFields.getTitle());
-			assertEquals("SEO keywords en 2", localeDependantFields.getKeyWords());
-			assertEquals(null, localeDependantFields.getUrl());
+			assertThat(localeDependantFields.getDescription()).isEqualTo("SEO desc en 2");
+			assertThat(localeDependantFields.getDisplayName()).isEqualTo("Displ Name en 2");
+			assertThat(localeDependantFields.getTitle()).isEqualTo("SEO title en 2");
+			assertThat(localeDependantFields.getKeyWords()).isEqualTo("SEO keywords en 2");
+			assertThat(localeDependantFields.getUrl()).isNull();
 		}
 
 		{ // assert locale dependent fields: For French
 			LocaleDependantFields localeDependantFields = product.getLocaleDependantFields(Locale.FRENCH);
-			assertEquals("SEO desc fr 2", localeDependantFields.getDescription());
-			assertEquals("Displ Name fr 2", localeDependantFields.getDisplayName());
-			assertEquals("SEO title fr 2", localeDependantFields.getTitle());
-			assertEquals("SEO keywords fr 2", localeDependantFields.getKeyWords());
-			assertEquals(null, localeDependantFields.getUrl());
+			assertThat(localeDependantFields.getDescription()).isEqualTo("SEO desc fr 2");
+			assertThat(localeDependantFields.getDisplayName()).isEqualTo("Displ Name fr 2");
+			assertThat(localeDependantFields.getTitle()).isEqualTo("SEO title fr 2");
+			assertThat(localeDependantFields.getKeyWords()).isEqualTo("SEO keywords fr 2");
+			assertThat(localeDependantFields.getUrl()).isNull();
 		}
 	}
 
@@ -113,76 +106,38 @@ public class ImportMultiskuProductTest extends ImportJobTestCase {
 		Product product = productLookup.findByGuid("102");
 		final AttributeValueGroup attributes = product.getAttributeValueGroup();
 
-		assertEquals("Desc en 2 upd", attributes.getAttributeValue("description", Locale.ENGLISH).getValue());
-		assertEquals("Desc fr 2 upd", attributes.getAttributeValue("description", Locale.FRENCH).getValue());
+		assertThat(attributes.getAttributeValue("description", Locale.ENGLISH).getValue()).isEqualTo("Desc en 2 upd");
+		assertThat(attributes.getAttributeValue("description", Locale.FRENCH).getValue()).isEqualTo("Desc fr 2 upd");
 
-		assertEquals("102", product.getCode());
-		assertEquals(AvailabilityCriteria.AVAILABLE_WHEN_IN_STOCK, product.getAvailabilityCriteria());
-		assertEquals("F00004", product.getBrand().getCode());
-		assertEquals("Displ Name en 2 upd", product.getDisplayName(Locale.ENGLISH));
-		assertEquals("Displ Name fr 2 upd", product.getDisplayName(Locale.FRENCH));
-		assertEquals(null, product.getEndDate());
-		assertEquals(null, product.getExpectedReleaseDate());
-		assertEquals("Image 2.jpg", product.getImage());
-		assertEquals(1, product.getMinOrderQty());
-		assertEquals(0, product.getPreOrBackOrderLimit());
+		assertThat(product.getCode()).isEqualTo("102");
+		assertThat(product.getAvailabilityCriteria()).isEqualTo(AvailabilityCriteria.AVAILABLE_WHEN_IN_STOCK);
+		assertThat(product.getBrand().getCode()).isEqualTo("F00004");
+		assertThat(product.getDisplayName(Locale.ENGLISH)).isEqualTo("Displ Name en 2 upd");
+		assertThat(product.getDisplayName(Locale.FRENCH)).isEqualTo("Displ Name fr 2 upd");
+		assertThat(product.getEndDate()).isNull();
+		assertThat(product.getExpectedReleaseDate()).isNull();
+		assertThat(product.getImage()).isEqualTo("Image 2.jpg");
+		assertThat(product.getMinOrderQty()).isEqualTo(1);
+		assertThat(product.getPreOrBackOrderLimit()).isEqualTo(0);
 
 		{ // assert locale dependent fields: For English
 			LocaleDependantFields localeDependantFields = product.getLocaleDependantFields(Locale.ENGLISH);
-			assertEquals("SEO desc en 2 upd", localeDependantFields.getDescription());
-			assertEquals("Displ Name en 2 upd", localeDependantFields.getDisplayName());
-			assertEquals("SEO title en 2", localeDependantFields.getTitle());
-			assertEquals("SEO keywords en 2", localeDependantFields.getKeyWords());
-			assertEquals(null, localeDependantFields.getUrl());
+			assertThat(localeDependantFields.getDescription()).isEqualTo("SEO desc en 2 upd");
+			assertThat(localeDependantFields.getDisplayName()).isEqualTo("Displ Name en 2 upd");
+			assertThat(localeDependantFields.getTitle()).isEqualTo("SEO title en 2");
+			assertThat(localeDependantFields.getKeyWords()).isEqualTo("SEO keywords en 2");
+			assertThat(localeDependantFields.getUrl()).isNull();
 		}
 
 		{ // assert locale dependent fields: For French
 			LocaleDependantFields localeDependantFields = product.getLocaleDependantFields(Locale.FRENCH);
-			assertEquals("SEO desc fr 2 upd", localeDependantFields.getDescription());
-			assertEquals("Displ Name fr 2 upd", localeDependantFields.getDisplayName());
-			assertEquals("SEO title fr 2", localeDependantFields.getTitle());
-			assertEquals("SEO keywords fr 2", localeDependantFields.getKeyWords());
-			assertEquals(null, localeDependantFields.getUrl());
+			assertThat(localeDependantFields.getDescription()).isEqualTo("SEO desc fr 2 upd");
+			assertThat(localeDependantFields.getDisplayName()).isEqualTo("Displ Name fr 2 upd");
+			assertThat(localeDependantFields.getTitle()).isEqualTo("SEO title fr 2");
+			assertThat(localeDependantFields.getKeyWords()).isEqualTo("SEO keywords fr 2");
+			assertThat(localeDependantFields.getUrl()).isNull();
 		}
 
-	}
-
-	private void assertProductThree() {
-		ProductLookup productLookup = getBeanFactory().getBean(ContextIdNames.PRODUCT_LOOKUP);
-		Product product = productLookup.findByGuid("103");
-		final AttributeValueGroup attributes = product.getAttributeValueGroup();
-
-		assertEquals("Desc en 3", attributes.getAttributeValue("description", Locale.ENGLISH).getValue());
-		assertEquals("Desc fr 3", attributes.getAttributeValue("description", Locale.FRENCH).getValue());
-
-		assertEquals("103", product.getCode());
-		assertEquals(AvailabilityCriteria.AVAILABLE_WHEN_IN_STOCK, product.getAvailabilityCriteria());
-		assertEquals("F00004", product.getBrand().getCode());
-		assertEquals("Displ Name en 3", product.getDisplayName(Locale.ENGLISH));
-		assertEquals("Displ Name fr 3", product.getDisplayName(Locale.FRENCH));
-		assertEquals(null, product.getEndDate());
-		assertEquals(null, product.getExpectedReleaseDate());
-		assertEquals("Image 3.jpg", product.getImage());
-		assertEquals(1, product.getMinOrderQty());
-		assertEquals(0, product.getPreOrBackOrderLimit());
-
-		{ // assert locale dependent fields: For English
-			LocaleDependantFields localeDependantFields = product.getLocaleDependantFields(Locale.ENGLISH);
-			assertEquals("SEO desc en 3", localeDependantFields.getDescription());
-			assertEquals("Displ Name en 3", localeDependantFields.getDisplayName());
-			assertEquals("SEO title en 3", localeDependantFields.getTitle());
-			assertEquals("SEO keywords en 3", localeDependantFields.getKeyWords());
-			assertEquals(null, localeDependantFields.getUrl());
-		}
-
-		{ // assert locale dependent fields: For French
-			LocaleDependantFields localeDependantFields = product.getLocaleDependantFields(Locale.FRENCH);
-			assertEquals("SEO desc fr 3", localeDependantFields.getDescription());
-			assertEquals("Displ Name fr 3", localeDependantFields.getDisplayName());
-			assertEquals("SEO title fr 3", localeDependantFields.getTitle());
-			assertEquals("SEO keywords fr 3", localeDependantFields.getKeyWords());
-			assertEquals(null, localeDependantFields.getUrl());
-		}
 	}
 
 	/**
@@ -194,27 +149,11 @@ public class ImportMultiskuProductTest extends ImportJobTestCase {
 		executeImportJob(createInsertCategoriesImportJob());
 
 		List<ImportBadRow> badRows = executeImportJob(createInsertMultiskuProductImportJob());
-		assertEquals(0, badRows.size());
+		assertThat(badRows).isEmpty();
 
 		assertProductOne();
 		assertProductTwo();
 	}
-//
-//	/**
-//	 * Test import Product insert/update.
-//	 */
-//	@DirtiesDatabase
-//	@Test
-//	public void testImportProductInsertUpdate() throws Exception {
-//		executeImportJob(createInsertCategoriesImportJob());
-//		executeImportJob(createInsertMultiskuProductImportJob());
-//		List<ImportBadRow> badRows = executeImportJob(createInsertUpdateMultiskuProductImportJob());
-//		assertEquals(0, badRows.size());
-//
-//		assertProductOne();
-//		assertProductTwoUpdated();
-//		assertProductThree();
-//	}
 
 	/**
 	 * Test import Product update.
@@ -225,25 +164,11 @@ public class ImportMultiskuProductTest extends ImportJobTestCase {
 		executeImportJob(createInsertCategoriesImportJob());
 		executeImportJob(createInsertMultiskuProductImportJob());
 		List<ImportBadRow> badRows = executeImportJob(createUpdateMultiskuProductImportJob());
-		assertEquals(0, badRows.size());
+		assertThat(badRows).isEmpty();
 
 		assertProductOne();
 		assertProductTwoUpdated();
 
 	}
 
-//	/**
-//	 * Test input Product delete.
-//	 */
-//	@DirtiesDatabase
-//	@Test
-//	public void testImportProductDelete() throws Exception {
-//		executeImportJob(createInsertCategoriesImportJob());
-//		executeImportJob(createInsertMultiskuProductImportJob());
-//		List<ImportBadRow> badRows = executeImportJob(createDeleteMultiskuProductImportJob());
-//		assertEquals(0, badRows.size());
-//
-//		assertProductOneAbsent();
-//		assertProductTwo();
-//	}
 }

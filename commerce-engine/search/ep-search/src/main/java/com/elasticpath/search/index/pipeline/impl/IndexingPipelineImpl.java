@@ -29,7 +29,7 @@ import com.elasticpath.service.search.IndexType;
  * of uids. These lists are small enough to make fetches for all of them at once.
  * <p>
  * <b>Stage Two: Loading.</b>The small batches of uids are handed to a loading task. This loading task <b>is {@code IndexType} and therefore
- * {@code SolrServer} specific</b>. How the loader fetches these objects is left to to itself, either multiple round trips, sneaky SQL or named
+ * {@code SolrClient} specific</b>. How the loader fetches these objects is left to to itself, either multiple round trips, sneaky SQL or named
  * query.
  * <p>
  * <b>Stage Three: Document Creation.</b> With the entity loaded, it is sent to the Solr document creation process which is effectively

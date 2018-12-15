@@ -86,6 +86,5 @@
 				WHERE sov.skuOptionValue.uidPk = ?1
 			</query>
 		</named-query>
-
 </entity-mappings>
 

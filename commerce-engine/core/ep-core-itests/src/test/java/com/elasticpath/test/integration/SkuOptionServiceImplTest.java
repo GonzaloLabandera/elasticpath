@@ -68,6 +68,7 @@ public class SkuOptionServiceImplTest extends DbTestCase {
 	private static final String SKU_OPTION_VALUE_KEY4 = "key4";
 
 	@Autowired
+	@Qualifier("skuOptionService")
 	private SkuOptionService optionService;
 
 	@Autowired
@@ -90,6 +91,7 @@ public class SkuOptionServiceImplTest extends DbTestCase {
 	private ProductSkuLookup skuLookup;
 
 	@Autowired
+	@Qualifier("catalogService")
 	private CatalogService catalogService;
 
 	@Autowired

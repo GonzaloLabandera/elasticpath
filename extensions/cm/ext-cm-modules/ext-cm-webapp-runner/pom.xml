@@ -58,7 +58,7 @@
 			</plugin>
 			<plugin>
 				<groupId>org.apache.tomcat.maven</groupId>
-				<artifactId>tomcat7-maven-plugin</artifactId>
+				<artifactId>tomcat8-maven-plugin</artifactId>
 				<configuration>
 					<path>${ep.cm.context}</path>
 					<port>${ep.cm.tomcat.port.http}</port>

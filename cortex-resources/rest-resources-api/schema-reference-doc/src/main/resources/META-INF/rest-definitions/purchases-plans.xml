@@ -4,13 +4,12 @@
 	<family>
 		<name>purchases</name>
 		<plan>
-			<name>purchases-list</name>
+			<name>read-purchase</name>
 			<description><![CDATA[Retrieve a customer's purchase.]]></description>
 			<step>
-				<description><![CDATA[Read list of purchases.]]></description>
+				<description><![CDATA[Read a customer's purchase.]]></description>
 				<start>purchases</start>
 				<follow-link>element</follow-link>
-				<link-back>list</link-back>
 				<result>purchase</result>
 			</step>
 		</plan>
@@ -18,13 +17,6 @@
 		<plan>
 			<name>read-purchase-billing-address</name>
 			<description><![CDATA[Read the billing address for the purchase.]]></description>
-			<step>
-				<description><![CDATA[Read the purchase.]]></description>
-				<start>purchases</start>
-				<follow-link>element</follow-link>
-				<link-back>list</link-back>
-				<result>purchase</result>
-			</step>
 			<step>
 				<description><![CDATA[Read the billing address.]]></description>
 				<start>purchase</start>
@@ -35,8 +27,8 @@
 		</plan>
 
 		<plan>
-			<name>create-purchase</name>
-			<description><![CDATA[Submit the purchase form to complete the purchase.]]></description>
+			<name>read-purchase-form</name>
+			<description><![CDATA[Read the purchase form to complete the purchase.]]></description>
 			<!-- Not using the form template here since purchase field does not have any fields.-->
 			<step>
 				<description><![CDATA[Retrieve the form.]]></description>
@@ -44,6 +36,11 @@
 				<follow-link>purchaseform</follow-link>
 				<result>create-purchase-form</result>
 			</step>
+		</plan>
+
+		<plan>
+			<name>create-purchase</name>
+			<description><![CDATA[Submit the purchase form to complete the purchase.]]></description>
 			<step>
 				<description><![CDATA[Submit the form]]></description>
 				<start>create-purchase-form</start>

@@ -16,7 +16,7 @@
   <query for="TaxCode">FIND TaxCode</query>
   <query for="PaymentGateway">FIND PaymentGateway</query>
   <query for="Warehouse">FIND Warehouse</query>
-  <query for="Store">FIND Store WHERE StoreCode='SNAPITUP'</query>
+  <query for="Store">FIND Store</query>
   <query for="Customer">FIND Customer</query>
   <query for="CustomerProfileAttribute">FIND CustomerProfileAttribute</query>
   <query for='CmUser'>FIND CmUser</query>

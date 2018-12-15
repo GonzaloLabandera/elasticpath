@@ -19,33 +19,20 @@ The Items selections resource provides [Selectors][selectors] to allow customers
 				<start>itemdefinitions.item-definition-option</start>
 				<follow-link>selector</follow-link>
 				<link-back>option</link-back>
-				<result>itemselections-option-selector</result>
+				<result>item-option-selector</result>
 			</step>
 			<step>
 				<description><![CDATA[Retrieve a choice.]]></description>
-				<start>itemselections-option-selector</start>
+				<start>item-option-selector</start>
 				<follow-link>choice</follow-link>
 				<link-back>selector</link-back>
-				<result>itemselections-option-value-selector</result>
-			</step>
-			<step>
-				<description><![CDATA[Retrieve a selected choice, if any.]]></description>
-				<start>itemselections-option-selector</start>
-				<follow-link>chosen</follow-link>
-				<link-back>selector</link-back>
-				<result>itemselections-option-value-selector</result>
-			</step>
-			<step>
-				<description><![CDATA[Retrieve the description of an option value choice.]]></description>
-				<start>itemselections-option-value-selector</start>
-				<follow-link>description</follow-link>
-				<result>itemdefinitions.item-definition-option-value</result>
+				<result>item-option-selector-choice</result>
 			</step>
 			<step>
 				<description><![CDATA[Select a choice.]]></description>
-				<start>itemselections-option-value-selector</start>
+				<start>item-option-selector-choice</start>
 				<submit/>
-				<to>itemselections-option-value-selector</to>
+				<to>item-option-selector-choice</to>
 				<via-link>selectaction</via-link>
 				<result>items.item</result>
 			</step>

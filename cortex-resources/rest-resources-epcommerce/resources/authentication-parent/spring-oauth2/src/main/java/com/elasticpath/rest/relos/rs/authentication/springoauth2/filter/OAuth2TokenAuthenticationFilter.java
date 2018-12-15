@@ -5,7 +5,6 @@ package com.elasticpath.rest.relos.rs.authentication.springoauth2.filter;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
@@ -17,11 +16,11 @@ import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.core.MediaType;
 
 import com.google.common.collect.Multimap;
-
 import org.apache.commons.lang3.StringUtils;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
+import org.osgi.service.http.whiteboard.HttpWhiteboardConstants;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 import com.elasticpath.rest.ResourceStatus;
@@ -38,7 +37,7 @@ import com.elasticpath.rest.relos.rs.subject.SubjectHeaderConstants;
  */
 @Component(property = {
 		Constants.SERVICE_RANKING + ":Integer=10",
-		"pattern=.*" }
+		HttpWhiteboardConstants.HTTP_WHITEBOARD_FILTER_PATTERN + "=/*" }
 )
 public class OAuth2TokenAuthenticationFilter implements Filter {
 

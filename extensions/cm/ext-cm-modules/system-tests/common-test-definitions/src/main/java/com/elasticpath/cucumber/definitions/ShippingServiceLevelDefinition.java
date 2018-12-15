@@ -158,28 +158,34 @@ public class ShippingServiceLevelDefinition {
 
 	/**
 	 * Verify new shipping service level.
+	 *
+	 * @param searchFilters a list of search filters parameters
 	 */
 	@And("^I verify newly created shipping service level exists$")
-	public void verifyNewShippingServiceLevel() {
-		isShippingServiceLevelInList(shippingServiceLevel.getShippingServiceLevelCode());
+	public void verifyNewShippingServiceLevel(final List<String> searchFilters) {
+		isShippingServiceLevelInList(shippingServiceLevel.getShippingServiceLevelCode(), searchFilters.get(1), searchFilters.get(0));
 	}
 
 	/**
 	 * Delete new shipping service level.
+	 *
+	 * @param searchFilters a list of search filters parameters
 	 */
 	@When("^I delete the newly created shipping service level$")
-	public void deleteNewShippingServiceLevel() {
-		isShippingServiceLevelInList(shippingServiceLevel.getShippingServiceLevelCode());
+	public void deleteNewShippingServiceLevel(final List<String> searchFilters) {
+		isShippingServiceLevelInList(shippingServiceLevel.getShippingServiceLevelCode(), searchFilters.get(1), searchFilters.get(0));
 		shippingServiceLevelSearchResultPane.clickDeleteServiceLevelButton();
 		new ConfirmDialog(SetUp.getDriver()).clickOKButton("ShippingLevelsMessages.ConfirmDeleteShippingLevel");
 	}
 
 	/**
 	 * Verify shipping service level is deleted.
+	 *
+	 * @param searchFilters a list of search filters parameters
 	 */
 	@And("^I verify shipping service level is deleted$")
-	public void verifyShippingServiceLevelIsDeleted() {
-		shippingServiceLevelSearchResultPane = promotionsShipping.clickShippingServiceSearchButton();
+	public void verifyShippingServiceLevelIsDeleted(final List<String> searchFilters) {
+		searchShippingServiceLevel(searchFilters.get(1), searchFilters.get(0));
 		shippingServiceLevelSearchResultPane.verifyShippingServiceLevelIsDeleted(shippingServiceLevel.getShippingServiceLevelCode());
 	}
 
@@ -207,15 +213,17 @@ public class ShippingServiceLevelDefinition {
 	 * Is shipping service level in list.
 	 *
 	 * @param shippingServiceLevelCode the shipping service level code.
+	 * @param region which should be set in Shipping Region filter
+	 * @param store  which should be set in Store filter
 	 */
-	public void isShippingServiceLevelInList(final String shippingServiceLevelCode) {
-		shippingServiceLevelSearchResultPane = promotionsShipping.clickShippingServiceSearchButton();
+	private void isShippingServiceLevelInList(final String shippingServiceLevelCode, final String region, final String store) {
+		searchShippingServiceLevel(region, store);
 		boolean isServiceLevelInList = shippingServiceLevelSearchResultPane.isShippingServiceLevelInList(shippingServiceLevelCode);
 
 		int index = 0;
 		while (!isServiceLevelInList && index < Constants.UUID_END_INDEX) {
 			shippingServiceLevelSearchResultPane.sleep(SLEEP_TIME);
-			promotionsShipping.clickShippingServiceSearchButton();
+			searchShippingServiceLevel(region, store);
 			isServiceLevelInList = shippingServiceLevelSearchResultPane.isShippingServiceLevelInList(shippingServiceLevelCode);
 			index++;
 		}
@@ -223,5 +231,17 @@ public class ShippingServiceLevelDefinition {
 		assertThat(isServiceLevelInList)
 				.as("Shipping Service Level does not exist in search result - " + shippingServiceLevelCode)
 				.isTrue();
+	}
+
+	/**
+	 * Fills Shipping Service Levels search filters and performs search
+	 *
+	 * @param region which should be selected in Shipping Region filter
+	 * @param store which should be selected in Store filter
+	 */
+	private void searchShippingServiceLevel(final String region, final String store){
+		promotionsShipping.setShippingRegionFilter(region);
+		promotionsShipping.setStoreFilter(store);
+		shippingServiceLevelSearchResultPane = promotionsShipping.clickShippingServiceSearchButton();
 	}
 }

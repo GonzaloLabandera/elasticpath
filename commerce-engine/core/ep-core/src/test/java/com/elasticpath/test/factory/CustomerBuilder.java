@@ -16,6 +16,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
+import com.elasticpath.commons.beanframework.BeanFactory;
 import com.elasticpath.commons.constants.WebConstants;
 import com.elasticpath.domain.EpDomainException;
 import com.elasticpath.domain.customer.CustomerAddress;
@@ -26,15 +27,31 @@ import com.elasticpath.domain.customer.impl.CustomerImpl;
 
 public class CustomerBuilder extends CustomerImplBuilderBase<CustomerBuilder> {
 	public static CustomerBuilder newCustomer() {
-		return new CustomerBuilder();
+		return new CustomerBuilder(null);
 	}
 
-	public CustomerBuilder() {
-		super(createCustomer());
+	public static CustomerBuilder newCustomer(final BeanFactory beanFactory) {
+		return new CustomerBuilder(beanFactory);
 	}
 
-	protected static CustomerImpl createCustomer() {
-		CustomerImpl customer = new CustomerImpl();
+	public CustomerBuilder(final BeanFactory beanFactory) {
+		super(createCustomer(beanFactory));
+	}
+
+	protected static CustomerImpl createCustomer(final BeanFactory beanFactory) {
+		CustomerImpl customer;
+		if (beanFactory == null) {
+			customer = new CustomerImpl();
+		} else {
+			customer = new CustomerImpl() {
+				private static final long serialVersionUID = 740L;
+
+				@Override
+				protected <T> T getBean(final String beanName) {
+					return beanFactory.getBean(beanName);
+				}
+			};
+		}
 		customer.initialize();
 		customer.setCustomerProfileAttributes(new TestCustomerProfileFactory().getProfile());
 		customer.setUserIdMode(WebConstants.USE_EMAIL_AS_USER_ID_MODE);

@@ -177,7 +177,7 @@ public class DataPolicyRepositoryImpl implements DataPolicyRepository {
 	}
 
 	private boolean isSubmittingRepeatConsentAction(final CustomerConsent consent, final String dataPolicyConsent) {
-		ConsentAction consentAction = ConsentAction.valueOf(Boolean.valueOf(dataPolicyConsent));
+		ConsentAction consentAction = ConsentAction.valueOf(Boolean.parseBoolean(dataPolicyConsent));
 		return consentAction.equals(consent.getAction())
 				&& Math.abs(Duration.between(timeService.getCurrentTime().toInstant(),
 				consent.getConsentDate().toInstant()).getSeconds()) <= SECONDS_ALLOWED;

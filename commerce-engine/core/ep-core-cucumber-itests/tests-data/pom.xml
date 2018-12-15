@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>com.elasticpath</groupId>
 		<artifactId>ep-core-cucumber-itests</artifactId>
-		<version>703.0.0-SNAPSHOT</version>
+		<version>704.0.0-SNAPSHOT</version>
 	</parent>
 
 	<artifactId>ep-core-itests-h2-database</artifactId>
@@ -39,17 +39,17 @@
 		<dependency>
 			<groupId>com.elasticpath.db</groupId>
 			<artifactId>core-schema</artifactId>
-			<version>703.0.0-SNAPSHOT</version>
+			<version>704.0.0-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>com.elasticpath</groupId>
 			<artifactId>ep-importexport</artifactId>
-			<version>703.0.0-SNAPSHOT</version>
+			<version>704.0.0-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>com.elasticpath</groupId>
 			<artifactId>ep-core</artifactId>
-			<version>703.0.0-SNAPSHOT</version>
+			<version>704.0.0-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework</groupId>

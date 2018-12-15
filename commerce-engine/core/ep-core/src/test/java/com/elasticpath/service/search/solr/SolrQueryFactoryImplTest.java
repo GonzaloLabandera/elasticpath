@@ -12,6 +12,7 @@ import static org.junit.Assert.assertTrue;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Currency;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
@@ -22,6 +23,8 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.google.common.collect.ImmutableMap;
+import org.apache.commons.lang.reflect.FieldUtils;
 import org.apache.lucene.analysis.core.SimpleAnalyzer;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.queryparser.classic.ParseException;
@@ -37,6 +40,7 @@ import org.jmock.integration.junit4.JUnitRuleMockery;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+import org.mockito.Mockito;
 
 import com.elasticpath.commons.beanframework.BeanFactory;
 import com.elasticpath.commons.constants.ContextIdNames;
@@ -61,7 +65,9 @@ import com.elasticpath.domain.misc.SearchConfig;
 import com.elasticpath.service.attribute.AttributeService;
 import com.elasticpath.service.catalog.BrandService;
 import com.elasticpath.service.catalog.CategoryService;
+import com.elasticpath.service.catalogview.filterednavigation.FilteredNavigationConfiguration;
 import com.elasticpath.service.search.CatalogAwareSearchCriteria;
+import com.elasticpath.service.search.FacetService;
 import com.elasticpath.service.search.IndexType;
 import com.elasticpath.service.search.SearchConfigFactory;
 import com.elasticpath.service.search.SpellSuggestionSearchCriteria;
@@ -123,6 +129,7 @@ public class SolrQueryFactoryImplTest {
 
 	private Catalog catalog;
 
+	private FacetService facetService;
 	/**
 	 * Prepare for test.
 	 * 
@@ -152,10 +159,13 @@ public class SolrQueryFactoryImplTest {
 		
 		beanFactory = context.mock(BeanFactory.class);
 		searchConfigFactory = context.mock(SearchConfigFactory.class);
-		
+		facetService = context.mock(FacetService.class);
+
 		solrQueryFactoryImpl = new SolrQueryFactoryImpl();
 		solrQueryFactoryImpl.setBeanFactory(beanFactory); 
 		solrQueryFactoryImpl.setSearchConfigFactory(searchConfigFactory);
+		solrQueryFactoryImpl.setAttributeService(attributeService);
+		solrQueryFactoryImpl.setFacetService(facetService);
 		
 		attributeService = context.mock(AttributeService.class);
 		
@@ -179,12 +189,12 @@ public class SolrQueryFactoryImplTest {
 				
 				allowing(spellSuggestionSearchCriteria).getLocale(); will(returnValue(Locale.US));
 				
-				allowing(beanFactory).getBean(ContextIdNames.ATTRIBUTE_SERVICE); will(returnValue(attributeService));
 				allowing(beanFactory).getBean(ContextIdNames.CATEGORY); will(returnValue(category));
 				
 				allowing(category).getCode(); will(returnValue("myCategoryCode"));
 
 				allowing(catalog).getCode(); will(returnValue("myCatalogCode"));
+				allowing(facetService).findAllSearchableFacets("storeCode"); will(returnValue(Collections.emptyList()));
 				
 				ignoring(analyzer);
 			}
@@ -203,8 +213,9 @@ public class SolrQueryFactoryImplTest {
 		};
 		indexUtilityImpl.setSolrAttributeTypeExt(new HashMap<>());
 		solrQueryFactoryImpl.setIndexUtility(indexUtilityImpl);
-		
+
 		SolrFacetAdapter facetAdapter = new SolrFacetAdapter();
+		FieldUtils.writeDeclaredField(facetAdapter, "config", Mockito.mock(FilteredNavigationConfiguration.class), true);
 		facetAdapter.setAnalyzer(analyzer);
 		facetAdapter.setCategoryService(categoryService);
 		facetAdapter.setIndexUtility(indexUtilityImpl);
@@ -294,7 +305,7 @@ public class SolrQueryFactoryImplTest {
 	public void testCreateSolrQuery() {
 		SolrQueryFactoryImpl factory = new SolrQueryFactoryImpl();
 		SolrQuery query = factory.createSolrQueryFromLuceneQuery(new MatchAllDocsQuery());
-		assertEquals("standard", query.getQueryType());
+		assertEquals("standard", query.getRequestHandler());
 	}
 
 	/**
@@ -414,7 +425,7 @@ public class SolrQueryFactoryImplTest {
 		
 		this.solrQueryFactoryImpl.addFiltersToQuery(query, searchCriteria);
 
-		assertNotNull(query.getFilterQueries());		
+		assertNotNull(query.getFilterQueries());
 	}		
 	
 	/**
@@ -436,7 +447,8 @@ public class SolrQueryFactoryImplTest {
 		});
 		keywordSearchCriteria.setCatalogCode("catalogCode1");
 		solrQueryFactoryImpl.setShowBundlesFirstProvider(new SimpleSettingValueProvider<>(false));
-		SolrQuery query = solrQueryFactoryImpl.composeKeywordQuery(keywordSearchCriteria, START_INDEX, MAX_ROWS, searchConfig, false);
+		solrQueryFactoryImpl.setAttributeService(attributeService);
+		SolrQuery query = solrQueryFactoryImpl.composeKeywordQuery(keywordSearchCriteria, START_INDEX, MAX_ROWS, searchConfig, false, ImmutableMap.of());
 
 		SolrQuery startIndexQuery = new SolrQuery();
 		startIndexQuery.setStart(START_INDEX);
@@ -541,10 +553,10 @@ public class SolrQueryFactoryImplTest {
 		});
 
 		SolrQuery query = solrQueryFactoryImpl.composeSpecificQuery(queryComposer, searchCriteria, START_INDEX, MAX_ROWS,
-				searchConfig, false);
+				searchConfig, false, ImmutableMap.of());
 		
-		final QueryParser queryParser = new QueryParser(SolrIndexConstants.LUCENE_MATCH_VERSION, "",
-				new SimpleAnalyzer(SolrIndexConstants.LUCENE_MATCH_VERSION));
+		final QueryParser queryParser = new QueryParser("",
+				new SimpleAnalyzer());
 		assertNotNull(query.get(CommonParams.QT));
 		queryParser.parse(query.get(CommonParams.QT));
 	}

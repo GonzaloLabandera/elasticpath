@@ -1,30 +1,31 @@
-/**
+/*
  * Copyright (c) Elastic Path Software Inc., 2015
  */
 package com.elasticpath.service.contentspace.impl;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.entry;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.FutureTask;
 
+import com.google.common.collect.ImmutableList;
 import groovy.lang.Binding;
 import groovy.lang.GroovyShell;
 import groovy.lang.Script;
-import org.jmock.Expectations;
-import org.jmock.integration.junit4.JUnitRuleMockery;
-import org.jmock.lib.legacy.ClassImposteriser;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.elasticpath.cache.SimpleTimeoutCache;
 import com.elasticpath.commons.constants.ContextIdNames;
@@ -36,12 +37,13 @@ import com.elasticpath.domain.contentspace.ParameterValue;
 import com.elasticpath.service.contentspace.ParameterResolvingException;
 import com.elasticpath.service.contentspace.ScriptEngine;
 import com.elasticpath.service.contentspace.ScriptEngineFactory;
+
 /**
  * Test for ParameterValueResolverImpl.
  */
-@SuppressWarnings({ "PMD.TooManyStaticImports" })
+@RunWith(MockitoJUnitRunner.class)
 public class ParameterValueResolverImplTest  {
-	
+
 	private static final String DOUBLE_VAR2 = "doubleVar2";
 	private static final String DOUBLE_VAR1 = "doubleVar1";
 	private static final String CODE = "code";
@@ -50,31 +52,24 @@ public class ParameterValueResolverImplTest  {
 	private static final String GROOVY = "groovy";
 	private static final String PARAM1 = "param1";
 	private static final String VALUE1 = "value1";
-	private ParameterValueResolverImpl resolver;
-	private ScriptEngineFactory scriptEngineFactory;
-	
+
+	private static final String PRODUCT_CODE = "123456789";
+	private static final int INT_NUMBER_20 = 20;
+	private static final int INT_NUMBER_123 = 123;
+
+	private static final List<Parameter> NULL_PARAMETERS = null;
+
 	private List<ParameterValue> parameterValues;
 	private List<Parameter> userParameters;
 	private List<Parameter> tempParameters;
-	private static final List<Parameter> NULL_PARAMETERS = null;
+
 	private ContentWrapper contentWrapper;
-	
-	private static final String PRODUCT_CODE = "123456789";
-	private static final int N_20 = 20;
-	private static final int N_123 = 123;
-	private static final int N_1 = 1;
-	private static final int N_3 = 3;
-	private static final int N_5 = 5;
+	private ScriptEngineFactory scriptEngineFactory;
+	private ParameterValueResolverImpl resolver;
 
-	@Rule
-	public final JUnitRuleMockery context = new JUnitRuleMockery() {
-		{
-			setImposteriser(ClassImposteriser.INSTANCE);
-		}
-	};
+	@Mock
+	private SimpleTimeoutCache<String, FutureTask<Script>> mockSimpleTimeoutCache;
 
-	@SuppressWarnings("unchecked")
-	private final SimpleTimeoutCache<String, FutureTask<Script>> mockSimpleTimeoutCache = context.mock(SimpleTimeoutCache.class);
 	/**
 	 * Set up the test case.
 	 */
@@ -90,7 +85,6 @@ public class ParameterValueResolverImplTest  {
 		Map<String, ScriptEngine> engines = new HashMap<>();
 		engines.put(GROOVY, futureTaskGroovyScriptEngineImp);
 		scriptEngineFactory.setValues(engines);
-
 	}
 	
 	/**
@@ -100,18 +94,14 @@ public class ParameterValueResolverImplTest  {
 	 */
 	@Test
 	public void testGetAllContentWrapperParametersAllNull() {
-		
-		final ContentWrapper contentWrapperNoParams = context.mock(ContentWrapper.class, "contentWrapperNoParams");
-		context.checking(new Expectations() { {
-			allowing(contentWrapperNoParams).getTemplateParameters(); will(returnValue(NULL_PARAMETERS));
-			allowing(contentWrapperNoParams).getUserInputSettings(); will(returnValue(NULL_PARAMETERS));
-		} });
+
+		final ContentWrapper contentWrapperNoParams = mock(ContentWrapper.class, "contentWrapperNoParams");
+		when(contentWrapperNoParams.getTemplateParameters()).thenReturn(NULL_PARAMETERS);
+		when(contentWrapperNoParams.getUserInputSettings()).thenReturn(NULL_PARAMETERS);
 		List<Parameter> resultNullNull;
 
 		resultNullNull = resolver.getAllContentWrapperParameters(contentWrapperNoParams);
-		assertNotNull(resultNullNull);
-		assertEquals(0, resultNullNull.size());
-		
+		assertThat(resultNullNull).isEmpty();
 	}
 	
 	/**
@@ -121,22 +111,17 @@ public class ParameterValueResolverImplTest  {
 	 */
 	@Test
 	public void testGetAllContentWrapperParametersTemplateOnly() {
-
 		final List<Parameter> withParameters = new ArrayList<>();
-		final Parameter parameter = context.mock(Parameter.class);
+		final Parameter parameter = mock(Parameter.class);
 		withParameters.add(parameter);
-		
-		final ContentWrapper contentWrapperTemplateOnlyParams = context.mock(ContentWrapper.class, "contentWrapperTemplateOnlyParams");
-		context.checking(new Expectations() { {
-			allowing(contentWrapperTemplateOnlyParams).getTemplateParameters(); will(returnValue(withParameters));
-			allowing(contentWrapperTemplateOnlyParams).getUserInputSettings(); will(returnValue(NULL_PARAMETERS));
-		} });
+
+		final ContentWrapper contentWrapperTemplateOnlyParams = mock(ContentWrapper.class, "contentWrapperTemplateOnlyParams");
+		when(contentWrapperTemplateOnlyParams.getTemplateParameters()).thenReturn(withParameters);
+		when(contentWrapperTemplateOnlyParams.getUserInputSettings()).thenReturn(NULL_PARAMETERS);
 		List<Parameter> resultTemplateOnly;
 
 		resultTemplateOnly = resolver.getAllContentWrapperParameters(contentWrapperTemplateOnlyParams);
-		assertNotNull(resultTemplateOnly);
-		assertEquals(1, resultTemplateOnly.size());		
-		
+		assertThat(resultTemplateOnly).hasSize(1);
 	}
 	
 	/**
@@ -146,22 +131,17 @@ public class ParameterValueResolverImplTest  {
 	 */
 	@Test
 	public void testGetAllContentWrapperParametersUserInputOnly() {
-
 		final List<Parameter> withParameters = new ArrayList<>();
-		final Parameter parameter = context.mock(Parameter.class);
+		final Parameter parameter = mock(Parameter.class);
 		withParameters.add(parameter);
-		
-		final ContentWrapper contentWrapperUserInputOnlyParams = context.mock(ContentWrapper.class, "contentWrapperUserInputOnlyParams");
-		context.checking(new Expectations() { {
-			allowing(contentWrapperUserInputOnlyParams).getTemplateParameters(); will(returnValue(NULL_PARAMETERS));
-			allowing(contentWrapperUserInputOnlyParams).getUserInputSettings(); will(returnValue(withParameters));
-		} });
+
+		final ContentWrapper contentWrapperUserInputOnlyParams = mock(ContentWrapper.class, "contentWrapperUserInputOnlyParams");
+		when(contentWrapperUserInputOnlyParams.getTemplateParameters()).thenReturn(NULL_PARAMETERS);
+		when(contentWrapperUserInputOnlyParams.getUserInputSettings()).thenReturn(withParameters);
 		List<Parameter> resultUserInputOnly;
 
 		resultUserInputOnly = resolver.getAllContentWrapperParameters(contentWrapperUserInputOnlyParams);
-		assertNotNull(resultUserInputOnly);
-		assertEquals(1, resultUserInputOnly.size());		
-		
+		assertThat(resultUserInputOnly).hasSize(1);
 	}
 	
 	/**
@@ -171,22 +151,17 @@ public class ParameterValueResolverImplTest  {
 	 */
 	@Test
 	public void testGetAllContentWrapperParametersBothOnly() {
-
 		final List<Parameter> withParameters = new ArrayList<>();
-		final Parameter parameter = context.mock(Parameter.class);
+		final Parameter parameter = mock(Parameter.class);
 		withParameters.add(parameter);
-		
-		final ContentWrapper contentWrapperUserInputOnlyParams = context.mock(ContentWrapper.class, "contentWrapperUserInputOnlyParams");
-		context.checking(new Expectations() { {
-			allowing(contentWrapperUserInputOnlyParams).getTemplateParameters(); will(returnValue(withParameters));
-			allowing(contentWrapperUserInputOnlyParams).getUserInputSettings(); will(returnValue(withParameters));
-		} });
+
+		final ContentWrapper contentWrapperUserInputOnlyParams = mock(ContentWrapper.class, "contentWrapperUserInputOnlyParams");
+		when(contentWrapperUserInputOnlyParams.getTemplateParameters()).thenReturn(withParameters);
+		when(contentWrapperUserInputOnlyParams.getUserInputSettings()).thenReturn(withParameters);
 		List<Parameter> resultUserInputOnly;
 
 		resultUserInputOnly = resolver.getAllContentWrapperParameters(contentWrapperUserInputOnlyParams);
-		assertNotNull(resultUserInputOnly);
-		assertEquals(2, resultUserInputOnly.size());		
-		
+		assertThat(resultUserInputOnly).hasSize(2);
 	}
 	
 	/**
@@ -197,19 +172,14 @@ public class ParameterValueResolverImplTest  {
 	 */
 	@Test
 	public void testResolveValuesNullArguments() throws ParameterResolvingException {
-		String lang = null;
-		final List<ParameterValue> parameterValues = null;
 		final List<Parameter> parameters = null;
-		final ContentWrapper contentWrapper = context.mock(ContentWrapper.class);
-		context.checking(new Expectations() { {
-			allowing(contentWrapper).getTemplateParameters(); will(returnValue(parameters));
-			allowing(contentWrapper).getUserInputSettings(); will(returnValue(parameters));
-		} });
+		final ContentWrapper contentWrapper = mock(ContentWrapper.class);
+		when(contentWrapper.getTemplateParameters()).thenReturn(parameters);
+		when(contentWrapper.getUserInputSettings()).thenReturn(parameters);
 		Map<String, Object> result;
 
-		result = resolver.resolveValues(contentWrapper, parameterValues, new HashMap<>(), lang);
-		assertNotNull(result);
-		assertTrue(result.isEmpty());			
+		result = resolver.resolveValues(contentWrapper, parameterValues, new HashMap<>(), null);
+		assertThat(result).isEmpty();
 	}
 
 	/**
@@ -221,23 +191,21 @@ public class ParameterValueResolverImplTest  {
 	@Test(expected = ParameterResolvingException.class)
 	public void testResolveValuesNoLocaleNoParameterValues() throws ParameterResolvingException {
 		String lang = null;
-		
+
 		final List<Parameter> withParameters = new ArrayList<>();
-		final Parameter parameter = context.mock(Parameter.class);
+		final Parameter parameter = mock(Parameter.class);
 		withParameters.add(parameter);
-		
-		final ContentWrapper contentWrapper = context.mock(ContentWrapper.class);
-		context.checking(new Expectations() { {
-			allowing(parameter).getParameterId(); will(returnValue(PARAM1));
-			allowing(parameter).getScriptExpression(); will(returnValue(null));
-			allowing(parameter).isRequired(); will(returnValue(true));
-			
-			allowing(contentWrapper).getTemplateParameters(); will(returnValue(NULL_PARAMETERS));
-			allowing(contentWrapper).getUserInputSettings(); will(returnValue(withParameters));
-		} });
-		
+
+		final ContentWrapper contentWrapper = mock(ContentWrapper.class);
+		when(parameter.getParameterId()).thenReturn(PARAM1);
+		when(parameter.getScriptExpression()).thenReturn(null);
+		when(parameter.isRequired()).thenReturn(true);
+
+		when(contentWrapper.getTemplateParameters()).thenReturn(NULL_PARAMETERS);
+		when(contentWrapper.getUserInputSettings()).thenReturn(withParameters);
+
 		resolver.resolveValues(contentWrapper, parameterValues, new HashMap<>(), lang);
-		
+
 	}
 
 	/**
@@ -249,24 +217,19 @@ public class ParameterValueResolverImplTest  {
 	public void testResolveValuesNoParameterDefinition() throws ParameterResolvingException {
 
 		final String lang = "en";
-		final ParameterValue parameterValue = context.mock(ParameterValue.class);
-		
-		final ContentWrapper contentWrapper = context.mock(ContentWrapper.class);
-		context.checking(new Expectations() { {
-			allowing(parameterValue).getValue(lang); will(returnValue(VALUE1));
-			
-			allowing(contentWrapper).getTemplateParameters(); will(returnValue(NULL_PARAMETERS));
-			allowing(contentWrapper).getUserInputSettings(); will(returnValue(NULL_PARAMETERS));
-		} });
-		
-		Map<String, Object> result;
-		
-		List<ParameterValue> parameterValues = Arrays.asList(parameterValue);
-		
-		result = resolver.resolveValues(contentWrapper, parameterValues, new HashMap<>(), lang);
-		assertNotNull(result);
-		assertTrue(result.isEmpty());
+		final ParameterValue parameterValue = mock(ParameterValue.class);
 
+		final ContentWrapper contentWrapper = mock(ContentWrapper.class);
+
+		when(contentWrapper.getTemplateParameters()).thenReturn(NULL_PARAMETERS);
+		when(contentWrapper.getUserInputSettings()).thenReturn(NULL_PARAMETERS);
+
+		Map<String, Object> result;
+
+		List<ParameterValue> parameterValues = ImmutableList.of(parameterValue);
+
+		result = resolver.resolveValues(contentWrapper, parameterValues, new HashMap<>(), lang);
+		assertThat(result).isEmpty();
 	}
 	
 	/**
@@ -276,37 +239,28 @@ public class ParameterValueResolverImplTest  {
 	 */
 	@Test
 	public void testResolveValuesNoLocale() throws ParameterResolvingException {
-		
+
 		final String lang = null;
-		final ParameterValue parameterValue = context.mock(ParameterValue.class);
-		
-		final Parameter parameter = context.mock(Parameter.class);
-		List<ParameterValue> parameterValues = Arrays.asList(
-				parameterValue
-				);
-		final List<Parameter> parameters = Arrays.asList(parameter);
-		
-		final ContentWrapper contentWrapper = context.mock(ContentWrapper.class);
-		context.checking(new Expectations() { {
-			allowing(parameterValue).getValue(lang); will(returnValue(VALUE1));
-			allowing(parameterValue).getParameter(); will(returnValue(parameter));
-			allowing(parameterValue).getParameterName(); will(returnValue(PARAM1));
-			allowing(parameter).getParameterId(); will(returnValue(PARAM1));
-			allowing(parameter).getScriptExpression(); will(returnValue(null));
-			allowing(parameter).isRequired(); will(returnValue(true));
-			allowing(parameter).isPassToTemplate(); will(returnValue(true));
-			
-			allowing(contentWrapper).getTemplateParameters(); will(returnValue(NULL_PARAMETERS));
-			allowing(contentWrapper).getUserInputSettings(); will(returnValue(parameters));
-		} });
+		final ParameterValue parameterValue = mock(ParameterValue.class);
+
+		final Parameter parameter = mock(Parameter.class);
+		List<ParameterValue> parameterValues = ImmutableList.of(parameterValue);
+		final List<Parameter> parameters = ImmutableList.of(parameter);
+
+		final ContentWrapper contentWrapper = mock(ContentWrapper.class);
+		when(parameterValue.getValue(lang)).thenReturn(VALUE1);
+		when(parameterValue.getParameterName()).thenReturn(PARAM1);
+		when(parameter.getParameterId()).thenReturn(PARAM1);
+		when(parameter.getScriptExpression()).thenReturn(null);
+		when(parameter.isPassToTemplate()).thenReturn(true);
+
+		when(contentWrapper.getTemplateParameters()).thenReturn(NULL_PARAMETERS);
+		when(contentWrapper.getUserInputSettings()).thenReturn(parameters);
 		Map<String, Object> result;
 
 		result = resolver.resolveValues(contentWrapper, parameterValues, new HashMap<>(), lang);
-		assertNotNull(result);
-		assertEquals(1, result.size());
-		assertEquals(PARAM1, result.keySet().iterator().next());
-		assertEquals(VALUE1, result.values().iterator().next());			
-		
+		assertThat(result).containsOnly(entry(PARAM1, VALUE1));
+
 	}
 	
 	/**
@@ -316,37 +270,27 @@ public class ParameterValueResolverImplTest  {
 	 */
 	@Test
 	public void testResolveValuesWithLocale() throws ParameterResolvingException {
-		
-		final String lang = "en";
-		final ParameterValue parameterValue = context.mock(ParameterValue.class);
 
-		final Parameter parameter = context.mock(Parameter.class);
-		final List<ParameterValue> parameterValues = Arrays.asList(
-				parameterValue
-				);
-		final List<Parameter> parameters = Arrays.asList(parameter);
-		
-		final ContentWrapper contentWrapper = context.mock(ContentWrapper.class);
-		context.checking(new Expectations() { {
-			allowing(parameterValue).getValue(lang); will(returnValue(VALUE1));
-			allowing(parameterValue).getParameter(); will(returnValue(parameter));
-			allowing(parameterValue).getParameterName(); will(returnValue(PARAM1));
-			allowing(parameter).getParameterId(); will(returnValue(PARAM1));
-			allowing(parameter).getScriptExpression(); will(returnValue(null));
-			allowing(parameter).isRequired(); will(returnValue(true));
-			allowing(parameter).isPassToTemplate(); will(returnValue(true));
-			
-			allowing(contentWrapper).getTemplateParameters(); will(returnValue(NULL_PARAMETERS));
-			allowing(contentWrapper).getUserInputSettings(); will(returnValue(parameters));
-		} });
+		final String lang = "en";
+		final ParameterValue parameterValue = mock(ParameterValue.class);
+
+		final Parameter parameter = mock(Parameter.class);
+		final List<ParameterValue> parameterValues = ImmutableList.of(parameterValue);
+		final List<Parameter> parameters = ImmutableList.of(parameter);
+
+		final ContentWrapper contentWrapper = mock(ContentWrapper.class);
+		when(parameterValue.getValue(lang)).thenReturn(VALUE1);
+		when(parameterValue.getParameterName()).thenReturn(PARAM1);
+		when(parameter.getParameterId()).thenReturn(PARAM1);
+		when(parameter.getScriptExpression()).thenReturn(null);
+		when(parameter.isPassToTemplate()).thenReturn(true);
+
+		when(contentWrapper.getTemplateParameters()).thenReturn(NULL_PARAMETERS);
+		when(contentWrapper.getUserInputSettings()).thenReturn(parameters);
 		Map<String, Object> result;
 
 		result = resolver.resolveValues(contentWrapper, parameterValues, new HashMap<>(), lang);
-		assertNotNull(result);
-		assertEquals(1, result.size());
-		assertEquals(PARAM1, result.keySet().iterator().next());
-		assertEquals(VALUE1, result.values().iterator().next());			
-		
+		assertThat(result).containsOnly(entry(PARAM1, VALUE1));
 	}
 	
 	/**
@@ -357,36 +301,27 @@ public class ParameterValueResolverImplTest  {
 	 */
 	@Test(expected = ParameterResolvingException.class)
 	public void testResolveValuesWithWrongLocale() throws ParameterResolvingException {
-		
-		final String lang = "en";
-		final String wrongLang = "pl";
-		final ParameterValue parameterValue = context.mock(ParameterValue.class);
 
-		final Parameter parameter = context.mock(Parameter.class);
-		final List<ParameterValue> parameterValues = Arrays.asList(
-				parameterValue
-				);
-		final List<Parameter> parameters = Arrays.asList(parameter);
-		
-		final ContentWrapper contentWrapper = context.mock(ContentWrapper.class);
-		context.checking(new Expectations() { {
-			allowing(parameterValue).getValue(lang); will(returnValue(VALUE1));
-			allowing(parameterValue).getValue(wrongLang); will(returnValue(null));
-			allowing(parameterValue).getParameter(); will(returnValue(parameter));
-			allowing(parameterValue).getParameterName(); will(returnValue(PARAM1));
-			allowing(parameter).getParameterId(); will(returnValue(PARAM1));
-			allowing(parameter).getScriptExpression(); will(returnValue(null));
-			allowing(parameter).isRequired(); will(returnValue(true));
-			allowing(parameter).isPassToTemplate(); will(returnValue(true));
-			
-			allowing(contentWrapper).getTemplateParameters(); will(returnValue(NULL_PARAMETERS));
-			allowing(contentWrapper).getUserInputSettings(); will(returnValue(parameters));
-		} });
-		
+		final String wrongLang = "pl";
+		final ParameterValue parameterValue = mock(ParameterValue.class);
+
+		final Parameter parameter = mock(Parameter.class);
+		final List<ParameterValue> parameterValues = ImmutableList.of(parameterValue);
+		final List<Parameter> parameters = ImmutableList.of(parameter);
+
+		final ContentWrapper contentWrapper = mock(ContentWrapper.class);
+		when(parameterValue.getValue(wrongLang)).thenReturn(null);
+		when(parameterValue.getParameterName()).thenReturn(PARAM1);
+		when(parameter.getParameterId()).thenReturn(PARAM1);
+		when(parameter.getScriptExpression()).thenReturn(null);
+		when(parameter.isRequired()).thenReturn(true);
+
+		when(contentWrapper.getTemplateParameters()).thenReturn(NULL_PARAMETERS);
+		when(contentWrapper.getUserInputSettings()).thenReturn(parameters);
+
 		resolver.resolveValues(contentWrapper, parameterValues, new HashMap<>(), wrongLang);
-		
+
 	}
-	
 
 	/**
 	 * Tests that the result empty map of resolved parameters if the arguments are null.
@@ -394,15 +329,13 @@ public class ParameterValueResolverImplTest  {
 	 */
 	@Test
 	public void testIsParametersResolvedWithEitherArgumentNull() throws ParameterResolvingException {
-		final ContentWrapper contentWrapper = context.mock(ContentWrapper.class);
-		context.checking(new Expectations() { {
-			allowing(contentWrapper).getTemplateParameters(); will(returnValue(NULL_PARAMETERS));
-			allowing(contentWrapper).getUserInputSettings(); will(returnValue(NULL_PARAMETERS));
-		} });
-		
-		assertNotNull(resolver.resolveValues(contentWrapper, new ArrayList<>(), new HashMap<>(), "pl"));
-		assertNotNull(resolver.resolveValues(contentWrapper, null, new HashMap<>(), "pl"));
-					
+		final ContentWrapper contentWrapper = mock(ContentWrapper.class);
+		when(contentWrapper.getTemplateParameters()).thenReturn(NULL_PARAMETERS);
+		when(contentWrapper.getUserInputSettings()).thenReturn(NULL_PARAMETERS);
+
+		assertThat(resolver.resolveValues(contentWrapper, new ArrayList<>(), new HashMap<>(), "pl")).isNotNull();
+		assertThat(resolver.resolveValues(contentWrapper, null, new HashMap<>(), "pl")).isNotNull();
+
 	}
 
 	/**
@@ -412,13 +345,11 @@ public class ParameterValueResolverImplTest  {
 	 */
 	@Test
 	public void testParametersResolvedEmptyDefinitionsAndValues() throws ParameterResolvingException {
-		final ContentWrapper contentWrapper = context.mock(ContentWrapper.class);
-		context.checking(new Expectations() { {
-			allowing(contentWrapper).getTemplateParameters(); will(returnValue(new ArrayList<Parameter>()));
-			allowing(contentWrapper).getUserInputSettings(); will(returnValue(NULL_PARAMETERS));
-		} });
-		
-		assertNotNull(resolver.resolveValues(contentWrapper, new ArrayList<>(), new HashMap<>(), "pl"));
+		final ContentWrapper contentWrapper = mock(ContentWrapper.class);
+		when(contentWrapper.getTemplateParameters()).thenReturn(new ArrayList<>());
+		when(contentWrapper.getUserInputSettings()).thenReturn(NULL_PARAMETERS);
+
+		assertThat(resolver.resolveValues(contentWrapper, new ArrayList<>(), new HashMap<>(), "pl")).isNotNull();
 
 	}
 	
@@ -430,52 +361,41 @@ public class ParameterValueResolverImplTest  {
 	 */
 	@Test(expected = ParameterResolvingException.class)
 	public void testParametersResolvedWithNullParameterValue() throws ParameterResolvingException {
-		
+
 		final String lang = "pl";
-		
+
 		// create CW with two required parameters
-		final Parameter param3 = context.mock(Parameter.class, PARAM3);
-		final Parameter param4 = context.mock(Parameter.class, PARAM4);
-		
+		final Parameter param3 = mock(Parameter.class, PARAM3);
+		final Parameter param4 = mock(Parameter.class, PARAM4);
+
 		final List<Parameter> paramDefs = new ArrayList<>();
 		paramDefs.add(param3);
 		paramDefs.add(param4);
-		
 
-		
+
 		// set one's value to null
-		final ParameterValue paramValue3 = context.mock(ParameterValue.class, "paramValue3");
+		final ParameterValue paramValue3 = mock(ParameterValue.class, "paramValue3");
 		// set one's value to a value		
-		final ParameterValue paramValue4 = context.mock(ParameterValue.class, "paramValue4");
-		
-		List<ParameterValue> resolvedParameters = Arrays.asList(
-				paramValue3,
-				paramValue4);
-		
-		final ContentWrapper contentWrapper = context.mock(ContentWrapper.class);
-		context.checking(new Expectations() { {
-			allowing(contentWrapper).getTemplateParameters(); will(returnValue(paramDefs));
-			allowing(contentWrapper).getUserInputSettings(); will(returnValue(NULL_PARAMETERS));
-			
-			allowing(paramValue3).getParameter(); will(returnValue(param3));
-			allowing(paramValue3).getValue(lang); will(returnValue(null));
-			allowing(paramValue3).getParameterName(); will(returnValue(PARAM3));
-			allowing(param3).getParameterId(); will(returnValue(PARAM3));
-			allowing(param3).getScriptExpression(); will(returnValue(null));
-			allowing(param3).isRequired(); will(returnValue(true));
-			allowing(param3).isPassToTemplate(); will(returnValue(true));
-			
-			allowing(paramValue4).getParameter(); will(returnValue(param4));
-			allowing(paramValue4).getValue(lang); will(returnValue("value4"));
-			allowing(paramValue4).getParameterName(); will(returnValue(PARAM4));
-			allowing(param4).getParameterId(); will(returnValue(PARAM4));
-			allowing(param4).getScriptExpression(); will(returnValue(null));
-			allowing(param4).isRequired(); will(returnValue(true));
-			allowing(param4).isPassToTemplate(); will(returnValue(true));
-		} });
-		
+		final ParameterValue paramValue4 = mock(ParameterValue.class, "paramValue4");
+
+		List<ParameterValue> resolvedParameters = ImmutableList.of(paramValue3, paramValue4);
+		final ContentWrapper contentWrapper = mock(ContentWrapper.class);
+		when(contentWrapper.getTemplateParameters()).thenReturn(paramDefs);
+		when(contentWrapper.getUserInputSettings()).thenReturn(NULL_PARAMETERS);
+
+		when(paramValue3.getValue(lang)).thenReturn(null);
+		when(paramValue3.getParameterName()).thenReturn(PARAM3);
+		when(param3.getParameterId()).thenReturn(PARAM3);
+		when(param3.getScriptExpression()).thenReturn(null);
+		when(param3.isRequired()).thenReturn(true);
+
+		when(paramValue4.getValue(lang)).thenReturn("value4");
+		when(paramValue4.getParameterName()).thenReturn(PARAM4);
+		when(param4.getParameterId()).thenReturn(PARAM4);
+		when(param4.getScriptExpression()).thenReturn(null);
+
 		resolver.resolveValues(contentWrapper, resolvedParameters, new HashMap<>(), lang);
-		
+
 	}
 	
 	/**
@@ -486,64 +406,44 @@ public class ParameterValueResolverImplTest  {
 	 */
 	@Test
 	public void testIsParameterResolvedWithExcessParameterValues() throws ParameterResolvingException {
-		
+
 		final String lang = "pl";
-		
+
 		// create CW with two required parameters
-		final Parameter param3 = context.mock(Parameter.class, PARAM3);
-		final Parameter param4 = context.mock(Parameter.class, PARAM4);
-		final Parameter param5 = context.mock(Parameter.class, "param5");
-		
+		final Parameter param3 = mock(Parameter.class, PARAM3);
+		final Parameter param4 = mock(Parameter.class, PARAM4);
+
 		// set one's value to null
-		final ParameterValue paramValue3 = context.mock(ParameterValue.class, "paramValue3");
+		final ParameterValue paramValue3 = mock(ParameterValue.class, "paramValue3");
 		// set one's value to a value		
-		final ParameterValue paramValue4 = context.mock(ParameterValue.class, "paramValue4");
-		final ParameterValue paramValue5 = context.mock(ParameterValue.class, "paramValue5");
-		
+		final ParameterValue paramValue4 = mock(ParameterValue.class, "paramValue4");
+		final ParameterValue paramValue5 = mock(ParameterValue.class, "paramValue5");
+
 		final List<Parameter> paramDefs = new ArrayList<>();
 		paramDefs.add(param3);
 		paramDefs.add(param4);
-		
-		final List<ParameterValue> resolvedParameters = Arrays.asList(
-				paramValue3,
-				paramValue4,
-				paramValue5);
-		
-		final ContentWrapper contentWrapper = context.mock(ContentWrapper.class);
-		context.checking(new Expectations() { {
-			allowing(contentWrapper).getTemplateParameters(); will(returnValue(paramDefs));
-			allowing(contentWrapper).getUserInputSettings(); will(returnValue(NULL_PARAMETERS));
-			
-			allowing(paramValue3).getParameter(); will(returnValue(param3));
-			allowing(paramValue3).getValue(lang); will(returnValue("value3"));
-			allowing(paramValue3).getParameterName(); will(returnValue(PARAM3));
-			allowing(param3).getParameterId(); will(returnValue(PARAM3));
-			allowing(param3).getScriptExpression(); will(returnValue(null));
-			allowing(param3).isRequired(); will(returnValue(true));
-			allowing(param3).isPassToTemplate(); will(returnValue(true));
-			
-			allowing(paramValue4).getParameter(); will(returnValue(param4));
-			allowing(paramValue4).getValue(lang); will(returnValue("value4"));
-			allowing(paramValue4).getParameterName(); will(returnValue(PARAM4));
-			allowing(param4).getParameterId(); will(returnValue(PARAM4));
-			allowing(param4).getScriptExpression(); will(returnValue(null));
-			allowing(param4).isRequired(); will(returnValue(true));
-			allowing(param4).isPassToTemplate(); will(returnValue(true));
-			
-			allowing(paramValue5).getParameter(); will(returnValue(param5));
-			allowing(paramValue5).getValue(lang); will(returnValue("value5"));
-			allowing(paramValue5).getParameterName(); will(returnValue("param5"));
-			allowing(param5).getParameterId(); will(returnValue("param5"));
-			allowing(param5).getScriptExpression(); will(returnValue(null));
-			allowing(param5).isRequired(); will(returnValue(true));
-			allowing(param5).isPassToTemplate(); will(returnValue(true));
-		} });
-		
-		Map<String, Object> resolved = resolver.resolveValues(contentWrapper, resolvedParameters, new HashMap<>(), lang);
-		
-		assertNotNull(resolved);
-		assertEquals(2, resolved.size());
 
+		final List<ParameterValue> resolvedParameters = ImmutableList.of(paramValue3, paramValue4, paramValue5);
+
+		final ContentWrapper contentWrapper = mock(ContentWrapper.class);
+		when(contentWrapper.getTemplateParameters()).thenReturn(paramDefs);
+		when(contentWrapper.getUserInputSettings()).thenReturn(NULL_PARAMETERS);
+
+		when(paramValue3.getValue(lang)).thenReturn("value3");
+		when(paramValue3.getParameterName()).thenReturn(PARAM3);
+		when(param3.getParameterId()).thenReturn(PARAM3);
+		when(param3.getScriptExpression()).thenReturn(null);
+		when(param3.isPassToTemplate()).thenReturn(true);
+
+		when(paramValue4.getValue(lang)).thenReturn("value4");
+		when(paramValue4.getParameterName()).thenReturn(PARAM4);
+		when(param4.getParameterId()).thenReturn(PARAM4);
+		when(param4.getScriptExpression()).thenReturn(null);
+		when(param4.isPassToTemplate()).thenReturn(true);
+
+		Map<String, Object> resolved = resolver.resolveValues(contentWrapper, resolvedParameters, new HashMap<>(), lang);
+
+		assertThat(resolved).hasSize(2);
 	}
 	
 
@@ -551,62 +451,25 @@ public class ParameterValueResolverImplTest  {
 	 * Fill parameter - value list.
 	 */
 	private void fillParameterValues(final String lang) {
-		
-		final Parameter parameterName = context.mock(Parameter.class, "name");
-		final Parameter parameterImage = context.mock(Parameter.class, "image");
-		final Parameter parameterPrice = context.mock(Parameter.class, "price");
-		
-		final ParameterValue parameterValueCode = context.mock(ParameterValue.class, "codeVal");
-		final Parameter parameterCode = context.mock(Parameter.class, CODE);		
-		
-		parameterValues = Arrays.asList(
-				parameterValueCode
-		);
-		
-		userParameters = Arrays.asList(
-				parameterCode				
-				);
-		
-		tempParameters = Arrays.asList(
-				parameterName,
-				parameterImage,
-				parameterPrice
-				);
-		
-		contentWrapper = context.mock(ContentWrapper.class);
-		
-		context.checking(new Expectations() { {
-			allowing(contentWrapper).getTemplateParameters(); will(returnValue(tempParameters));
-			allowing(contentWrapper).getUserInputSettings(); will(returnValue(userParameters));
-			
-			allowing(parameterName).getParameterId(); will(returnValue("name"));
-			allowing(parameterName).getScriptExpression(); will(returnValue("product.getDisplayName(locale)"));
-			allowing(parameterName).isRequired(); will(returnValue(true));
-			allowing(parameterName).isPassToTemplate(); will(returnValue(true));
-			
-			allowing(parameterImage).getParameterId(); will(returnValue("image"));
-			allowing(parameterImage).getScriptExpression(); will(returnValue("product.getImage()"));
-			allowing(parameterImage).isRequired(); will(returnValue(true));
-			allowing(parameterImage).isPassToTemplate(); will(returnValue(true));
-			
-			allowing(parameterPrice).getParameterId(); will(returnValue("price"));
-			allowing(parameterPrice).getScriptExpression(); will(returnValue(
-					"price = priceLookupService.getProductPrice(product, store.getCatalog(), store.getDefaultCurrency()).getLowestPrice(1);\n"
-					+ "return moneyFormatter.formatCurrency(price, locale);"));
-			allowing(parameterPrice).isRequired(); will(returnValue(true));
-			allowing(parameterPrice).isPassToTemplate(); will(returnValue(true));
-			
-			allowing(parameterValueCode).getParameter(); will(returnValue(parameterCode));
-			allowing(parameterValueCode).getValue(lang); will(returnValue(PRODUCT_CODE));
-			allowing(parameterValueCode).getParameterName(); will(returnValue(CODE));
-			allowing(parameterCode).getParameterId(); will(returnValue(CODE));
-			allowing(parameterCode).getScriptExpression(); will(returnValue(null));
-			allowing(parameterCode).isRequired(); will(returnValue(true));
-			allowing(parameterCode).isPassToTemplate(); will(returnValue(true));
-			
-			
-		} });
-		
+
+		final Parameter parameterName = mock(Parameter.class, "name");
+		final Parameter parameterImage = mock(Parameter.class, "image");
+		final Parameter parameterPrice = mock(Parameter.class, "price");
+
+		final ParameterValue parameterValueCode = mock(ParameterValue.class, "codeVal");
+		final Parameter parameterCode = mock(Parameter.class, CODE);
+
+		parameterValues = ImmutableList.of(parameterValueCode);
+		userParameters = ImmutableList.of(parameterCode);
+		tempParameters = ImmutableList.of(parameterName, parameterImage, parameterPrice);
+
+		contentWrapper = mock(ContentWrapper.class);
+
+		when(parameterName.getScriptExpression()).thenReturn("product.getDisplayName(locale)");
+
+		when(parameterValueCode.getValue(lang)).thenReturn(PRODUCT_CODE);
+		when(parameterValueCode.getParameterName()).thenReturn(CODE);
+		when(parameterCode.getScriptExpression()).thenReturn(null);
 
 	}
 	
@@ -616,21 +479,19 @@ public class ParameterValueResolverImplTest  {
 	@Test
 	public void testGroovy() {
 		Binding binding = new Binding();
-		binding.setVariable("foo", Integer.valueOf(2));
+		binding.setVariable("foo", 2);
 		GroovyShell shell = new GroovyShell(binding);
 
 		Object value = shell.evaluate("x = 123; return foo * 10");
-		assertEquals(Integer.valueOf(N_20), value);
-		assertEquals(binding.getVariable("x"), Integer.valueOf(N_123));
+		assertThat(value).isEqualTo(INT_NUMBER_20);
+		assertThat(binding.getVariable("x")).isEqualTo(INT_NUMBER_123);
 	}
-	
 
 	/**
 	 * Test for detect dynamic parameter values in list.
 	 */
 	@Test
 	public void testIsDynamicParameterValuesPresent() {
-		
 		fillParameterValues("en");
 		
 		ParameterValueResolverImpl parameterValueResolverImpl = new ParameterValueResolverImpl();
@@ -639,13 +500,9 @@ public class ParameterValueResolverImplTest  {
 		all.addAll(tempParameters);
 		all.addAll(userParameters);
 		
-		assertTrue(parameterValueResolverImpl.isDynamicParameterPresent(all));
-		
-		assertTrue(parameterValueResolverImpl.isDynamicParameterPresent(
-				tempParameters));
-
-		assertFalse(parameterValueResolverImpl.isDynamicParameterPresent(
-				userParameters));
+		assertThat(parameterValueResolverImpl.isDynamicParameterPresent(all)).isTrue();
+		assertThat(parameterValueResolverImpl.isDynamicParameterPresent(tempParameters)).isTrue();
+		assertThat(parameterValueResolverImpl.isDynamicParameterPresent(userParameters)).isFalse();
 		
 	}
 	
@@ -654,7 +511,6 @@ public class ParameterValueResolverImplTest  {
 	 */
 	@Test
 	public void testLoadStaticParameterValues() {
-		
 		fillParameterValues(null);
 		
 		ParameterValueResolverImpl parameterValueResolverImpl = new ParameterValueResolverImpl();
@@ -663,7 +519,7 @@ public class ParameterValueResolverImplTest  {
 		
 		parameterValueResolverImpl.loadStaticParameterValues(parameterValues, null, binding);
 		
-		assertNotNull(binding.get(CODE));
+		assertThat(binding.get(CODE)).isNotNull();
 
 		
 	}
@@ -673,34 +529,29 @@ public class ParameterValueResolverImplTest  {
 	 */
 	@Test
 	public void testLoadSpringBeansIntoGroovyBinding() {
-		
+
 		Map<String, Object> binding = new HashMap<>();
-		
-		final ContentWrapperService service1 = context.mock(ContentWrapperService.class, "service1");
-		
-		final ContentWrapper contentWrapper = context.mock(ContentWrapper.class);
-		
-		context.checking(new Expectations() { {
-			allowing(contentWrapper).getTemplateParameters(); will(returnValue(NULL_PARAMETERS));
-			allowing(contentWrapper).getUserInputSettings(); will(returnValue(NULL_PARAMETERS));
-			allowing(contentWrapper).getServiceDefinitions(); will(returnValue(Arrays.asList(service1)));
-			allowing(service1).getName(); will(returnValue("sName"));
-			allowing(service1).getValue(); will(returnValue(ContextIdNames.PRICE_TIER));
-		} });
-		
+
+		final ContentWrapperService service1 = mock(ContentWrapperService.class, "service1");
+
+		final ContentWrapper contentWrapper = mock(ContentWrapper.class);
+
+		when(contentWrapper.getServiceDefinitions()).thenReturn(ImmutableList.of(service1));
+		when(service1.getName()).thenReturn("sName");
+		when(service1.getValue()).thenReturn(ContextIdNames.PRICE_TIER);
+
 		ParameterValueResolverImpl parameterValueResolverImpl = new ParameterValueResolverImpl() {
 			@Override
 			protected Object getServiceDefinitionBean(final String serviceBeanName) {
 				return new PriceTierImpl();
 			}
 		};
-		
+
 		parameterValueResolverImpl.loadServiceDefinitions(contentWrapper, binding);
-		
-		assertNotNull(binding.get(service1.getName()));
-		
-		
-		
+
+		assertThat(binding.get(service1.getName())).isNotNull();
+
+
 	}
 	
 	/**
@@ -743,76 +594,66 @@ public class ParameterValueResolverImplTest  {
 	@SuppressWarnings("unchecked")
 	@Test
 	public void testInitSectionAndDynamicValues() throws ParameterResolvingException {
-		
-		
-		final Parameter parameterVar1 = context.mock(Parameter.class, DOUBLE_VAR1);
-		final Parameter parameterVar2 = context.mock(Parameter.class, DOUBLE_VAR2);
-		final Parameter parameterVar3 = context.mock(Parameter.class, "rez");
-		
-		final List<Parameter> parameters = Arrays.asList(
-				parameterVar1,
-				parameterVar2,
-				parameterVar3
-				);
-		
-		final ContentWrapper contentWrapper = context.mock(ContentWrapper.class);
+
+
+		final Parameter parameterVar1 = mock(Parameter.class, DOUBLE_VAR1);
+		final Parameter parameterVar2 = mock(Parameter.class, DOUBLE_VAR2);
+		final Parameter parameterVar3 = mock(Parameter.class, "rez");
+
+		final List<Parameter> parameters = ImmutableList.of(parameterVar1, parameterVar2, parameterVar3);
+
+		final ContentWrapper contentWrapper = mock(ContentWrapper.class);
 		final String script = "doubleVar1 = 1+1+1;\ndoubleVar2 = Math.sqrt(4);";
 		final String script2 = "doubleVar1 + doubleVar2";
 
-		context.checking(new Expectations() { {
-			allowing(contentWrapper).getTemplateParameters(); will(returnValue(parameters));
-			allowing(contentWrapper).getUserInputSettings(); will(returnValue(NULL_PARAMETERS));
-			allowing(contentWrapper).getInitSection(); will(returnValue(script));
-			allowing(contentWrapper).getScriptLanguage(); will(returnValue(GROOVY));
-			allowing(contentWrapper).getServiceDefinitions(); will(returnValue(null));
-			
-			allowing(parameterVar1).getParameterId(); will(returnValue(DOUBLE_VAR1));
-			allowing(parameterVar1).getScriptExpression(); will(returnValue(DOUBLE_VAR1));
-			allowing(parameterVar1).isRequired(); will(returnValue(true));
-			allowing(parameterVar1).isPassToTemplate(); will(returnValue(true));
-			
-			allowing(parameterVar2).getParameterId(); will(returnValue(DOUBLE_VAR2));
-			allowing(parameterVar2).getScriptExpression(); will(returnValue(DOUBLE_VAR2));
-			allowing(parameterVar2).isRequired(); will(returnValue(true));
-			allowing(parameterVar2).isPassToTemplate(); will(returnValue(true));
-			
-			allowing(parameterVar3).getParameterId(); will(returnValue("rez"));
-			allowing(parameterVar3).getScriptExpression(); will(returnValue(script2));
-			allowing(parameterVar3).isRequired(); will(returnValue(true));
-			allowing(parameterVar3).isPassToTemplate(); will(returnValue(true));
+		when(contentWrapper.getTemplateParameters()).thenReturn(parameters);
+		when(contentWrapper.getUserInputSettings()).thenReturn(NULL_PARAMETERS);
+		when(contentWrapper.getInitSection()).thenReturn(script);
+		when(contentWrapper.getScriptLanguage()).thenReturn(GROOVY);
+		when(contentWrapper.getServiceDefinitions()).thenReturn(null);
 
-			oneOf(mockSimpleTimeoutCache).get(script);	will(returnValue(null));
-			oneOf(mockSimpleTimeoutCache).put(with(script), with(any(FutureTask.class)));
+		when(parameterVar1.getParameterId()).thenReturn(DOUBLE_VAR1);
+		when(parameterVar1.getScriptExpression()).thenReturn(DOUBLE_VAR1);
+		when(parameterVar1.isPassToTemplate()).thenReturn(true);
 
-			oneOf(mockSimpleTimeoutCache).get(DOUBLE_VAR1);	will(returnValue(null));
-			oneOf(mockSimpleTimeoutCache).put(with(DOUBLE_VAR1), with(any(FutureTask.class)));
+		when(parameterVar2.getParameterId()).thenReturn(DOUBLE_VAR2);
+		when(parameterVar2.getScriptExpression()).thenReturn(DOUBLE_VAR2);
+		when(parameterVar2.isPassToTemplate()).thenReturn(true);
 
-			oneOf(mockSimpleTimeoutCache).get(DOUBLE_VAR2);	will(returnValue(null));
-			oneOf(mockSimpleTimeoutCache).put(with(DOUBLE_VAR2), with(any(FutureTask.class)));
+		when(parameterVar3.getParameterId()).thenReturn("rez");
+		when(parameterVar3.getScriptExpression()).thenReturn(script2);
+		when(parameterVar3.isPassToTemplate()).thenReturn(true);
 
-			oneOf(mockSimpleTimeoutCache).get(script2);	will(returnValue(null));
-			oneOf(mockSimpleTimeoutCache).put(with(script2), with(any(FutureTask.class)));
-		} });
+		when(mockSimpleTimeoutCache.get(script)).thenReturn(null);
+		when(mockSimpleTimeoutCache.get(DOUBLE_VAR1)).thenReturn(null);
+		when(mockSimpleTimeoutCache.get(DOUBLE_VAR2)).thenReturn(null);
+		when(mockSimpleTimeoutCache.get(script2)).thenReturn(null);
 
 		ParameterValueResolverImpl parameterValueResolverImpl = new ParameterValueResolverImpl();
-		
+
 		parameterValueResolverImpl.setScriptEngineFactory(scriptEngineFactory);
-		
+
 		Map<String, Object> resolvedValues;
-		
+
 		resolvedValues = parameterValueResolverImpl.resolveValues(
-				contentWrapper,
+			contentWrapper,
 			new ArrayList<>(),
 			new HashMap<>(), null);
-		assertEquals(N_3, resolvedValues.size());
-		
-		assertEquals(Integer.valueOf(N_3), Integer.valueOf((String) resolvedValues.get(DOUBLE_VAR1)));
-		
-		assertEquals(Float.valueOf(2), Float.valueOf((String) resolvedValues.get(DOUBLE_VAR2)));
-		
-		assertEquals(Float.valueOf(N_5), Float.valueOf((String) resolvedValues.get("rez")));
-		
-		
+
+		assertThat(resolvedValues).containsOnly(
+			entry(DOUBLE_VAR1, String.valueOf(3)),
+			entry(DOUBLE_VAR2, String.valueOf(2f)),
+			entry("rez", String.valueOf(5f)));
+
+		verify(mockSimpleTimeoutCache).get(script);
+		verify(mockSimpleTimeoutCache).put(eq(script), any(FutureTask.class));
+		verify(mockSimpleTimeoutCache).get(DOUBLE_VAR1);
+		verify(mockSimpleTimeoutCache).put(eq(DOUBLE_VAR1), any(FutureTask.class));
+		verify(mockSimpleTimeoutCache).get(DOUBLE_VAR2);
+		verify(mockSimpleTimeoutCache).put(eq(DOUBLE_VAR2), any(FutureTask.class));
+		verify(mockSimpleTimeoutCache).get(script2);
+		verify(mockSimpleTimeoutCache).put(eq(script2), any(FutureTask.class));
+
 	}
 	
 	/**
@@ -824,85 +665,59 @@ public class ParameterValueResolverImplTest  {
 	 */
 	@SuppressWarnings("unchecked")
 	@Test
-	public void testDynamicValues() {
-		
-		final String lang = "en";
-		
-		ParameterValueResolverImpl parameterValueResolverImpl = new ParameterValueResolverImpl();	
-		parameterValueResolverImpl.setScriptEngineFactory(scriptEngineFactory);
-		
-		final Parameter paramX = context.mock(Parameter.class, "paramX");
-		final Parameter paramY = context.mock(Parameter.class, "paramY");
-		final Parameter paramZ = context.mock(Parameter.class, "paramZ");
-		
-		userParameters = Arrays.asList(
-				paramX,
-				paramY
-		);
-		
-		tempParameters = Arrays.asList(
-				paramZ
-		);
-		
-		final ParameterValue parameterValueX = context.mock(ParameterValue.class, "x");
-		final ParameterValue parameterValueY = context.mock(ParameterValue.class, "y");
+	public void testDynamicValues() throws ParameterResolvingException {
 
-		parameterValues = Arrays.asList(
-				parameterValueX,
-				parameterValueY
-		);
-	
-		contentWrapper = context.mock(ContentWrapper.class);
+		final String lang = "en";
+
+		ParameterValueResolverImpl parameterValueResolverImpl = new ParameterValueResolverImpl();
+		parameterValueResolverImpl.setScriptEngineFactory(scriptEngineFactory);
+
+		final Parameter paramX = mock(Parameter.class, "paramX");
+		final Parameter paramY = mock(Parameter.class, "paramY");
+		final Parameter paramZ = mock(Parameter.class, "paramZ");
+
+		userParameters = ImmutableList.of(paramX, paramY);
+		tempParameters = ImmutableList.of(paramZ);
+
+		final ParameterValue parameterValueX = mock(ParameterValue.class, "x");
+		final ParameterValue parameterValueY = mock(ParameterValue.class, "y");
+
+		parameterValues = ImmutableList.of(parameterValueX, parameterValueY);
+
+		contentWrapper = mock(ContentWrapper.class);
 
 		final String script = "x+y";
 
-		context.checking(new Expectations() { {
-			allowing(contentWrapper).getTemplateParameters(); will(returnValue(tempParameters));
-			allowing(contentWrapper).getUserInputSettings(); will(returnValue(userParameters));
-			allowing(contentWrapper).getInitSection(); will(returnValue(null));
-			allowing(contentWrapper).getScriptLanguage(); will(returnValue(GROOVY));
-			allowing(contentWrapper).getServiceDefinitions(); will(returnValue(null));
-			
-			allowing(parameterValueX).getParameter(); will(returnValue(paramX));
-			allowing(parameterValueX).getValue(lang); will(returnValue("hi"));
-			allowing(parameterValueX).getParameterName(); will(returnValue("x"));
-			allowing(paramX).getParameterId(); will(returnValue("x"));
-			allowing(paramX).getScriptExpression(); will(returnValue(null));
-			allowing(paramX).isRequired(); will(returnValue(true));
-			allowing(paramX).isPassToTemplate(); will(returnValue(false));
-			
-			allowing(parameterValueY).getParameter(); will(returnValue(paramY));
-			allowing(parameterValueY).getValue(lang); will(returnValue(GROOVY));
-			allowing(parameterValueY).getParameterName(); will(returnValue("y"));
-			allowing(paramY).getParameterId(); will(returnValue("y"));
-			allowing(paramY).getScriptExpression(); will(returnValue(null));
-			allowing(paramY).isRequired(); will(returnValue(true));
-			allowing(paramY).isPassToTemplate(); will(returnValue(false));
-			
-			allowing(paramZ).getParameterId(); will(returnValue("z"));
-			allowing(paramZ).getScriptExpression(); will(returnValue(script));
-			allowing(paramZ).isRequired(); will(returnValue(true));
-			allowing(paramZ).isPassToTemplate(); will(returnValue(true));
+		when(contentWrapper.getTemplateParameters()).thenReturn(tempParameters);
+		when(contentWrapper.getUserInputSettings()).thenReturn(userParameters);
+		when(contentWrapper.getInitSection()).thenReturn(null);
+		when(contentWrapper.getScriptLanguage()).thenReturn(GROOVY);
+		when(contentWrapper.getServiceDefinitions()).thenReturn(null);
 
-			oneOf(mockSimpleTimeoutCache).get(script);	will(returnValue(null));
-			oneOf(mockSimpleTimeoutCache).put(with(script), with(any(FutureTask.class)));
+		when(parameterValueX.getValue(lang)).thenReturn("hi");
+		when(parameterValueX.getParameterName()).thenReturn("x");
+		when(paramX.getParameterId()).thenReturn("x");
+		when(paramX.isPassToTemplate()).thenReturn(false);
 
-		} });
-		
-		try {
-			
+		when(parameterValueY.getValue(lang)).thenReturn(GROOVY);
+		when(parameterValueY.getParameterName()).thenReturn("y");
+		when(paramY.getParameterId()).thenReturn("y");
+		when(paramY.isPassToTemplate()).thenReturn(false);
 
-			Map<String, Object> resolvedValues = parameterValueResolverImpl.resolveValues(
-					contentWrapper, 
-					parameterValues,
-				new HashMap<>(), lang);
-			assertEquals(N_1, resolvedValues.size());
-			assertEquals("higroovy", resolvedValues.get("z"));
-		} catch (ParameterResolvingException e) {
-			fail(e.getMessage());
-		}
+		when(paramZ.getParameterId()).thenReturn("z");
+		when(paramZ.getScriptExpression()).thenReturn(script);
+		when(paramZ.isPassToTemplate()).thenReturn(true);
 
-		
+		when(mockSimpleTimeoutCache.get(script)).thenReturn(null);
+
+		Map<String, Object> resolvedValues = parameterValueResolverImpl.resolveValues(
+			contentWrapper,
+			parameterValues,
+			new HashMap<>(), lang);
+		assertThat(resolvedValues).containsOnly(entry("z", "higroovy"));
+
+		verify(mockSimpleTimeoutCache).get(script);
+		verify(mockSimpleTimeoutCache).put(eq(script), any(FutureTask.class));
 	}
 
 }

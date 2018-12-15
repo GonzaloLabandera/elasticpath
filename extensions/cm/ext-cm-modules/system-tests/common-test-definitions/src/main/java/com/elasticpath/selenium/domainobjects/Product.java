@@ -1,6 +1,7 @@
 package com.elasticpath.selenium.domainobjects;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -33,6 +34,15 @@ public class Product {
 	private String bundleProductSKUList;
 	private String bundleSelectionRule;
 	private String bundleSelectionRuleValue;
+	private Date enableDateTime;
+
+	public Date getEnableDateTime() {
+		return this.enableDateTime;
+	}
+
+	public void setEnableDateTime(final Date enableDateTime) {
+		this.enableDateTime = enableDateTime;
+	}
 
 	public String getBundleSelectionRule() {
 		return bundleSelectionRule;

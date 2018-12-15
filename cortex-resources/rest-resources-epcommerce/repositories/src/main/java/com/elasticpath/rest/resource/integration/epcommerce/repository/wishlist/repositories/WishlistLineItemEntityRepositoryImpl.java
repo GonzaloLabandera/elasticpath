@@ -79,8 +79,9 @@ public class WishlistLineItemEntityRepositoryImpl<E extends WishlistLineItemEnti
 	protected Function<WishList, Single<WishlistLineItemEntity>> toWishlistLineItemEntity(final String lineItemGuid) {
 		return wishList -> wishlistRepository.getShoppingItem(wishList, lineItemGuid)
 				.flatMap(shoppingItem -> wishlistRepository.getProductSku(wishList, lineItemGuid)
-						.flatMap(productSku -> itemRepository.getItemIdForSkuAsSingle(productSku)
-								.flatMap(itemId -> buildWishlistLineItemEntity(shoppingItem, productSku, itemId, lineItemGuid, wishList))));
+						.flatMap(productSku ->
+								buildWishlistLineItemEntity(shoppingItem, productSku, itemRepository.getItemIdForSku(productSku),
+										lineItemGuid, wishList)));
 	}
 
 	/**

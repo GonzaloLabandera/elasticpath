@@ -3,21 +3,18 @@
  */
 package com.elasticpath.service.catalogview.impl;
 
-import static junit.framework.TestCase.assertFalse;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.util.Currency;
 import java.util.Locale;
 
-import org.jmock.Expectations;
-import org.jmock.integration.junit4.JUnitRuleMockery;
-import org.junit.After;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.elasticpath.commons.beanframework.BeanFactory;
 import com.elasticpath.commons.constants.ContextIdNames;
@@ -34,11 +31,11 @@ import com.elasticpath.service.catalogview.StoreConfig;
 import com.elasticpath.service.search.query.CategorySearchCriteria;
 import com.elasticpath.service.search.query.KeywordSearchCriteria;
 import com.elasticpath.service.search.query.ProductSearchCriteria;
-import com.elasticpath.test.BeanFactoryExpectationsFactory;
 
 /**
  * Test cases for {@link SearchCriteriaFactoryImpl}.
  */
+@RunWith(MockitoJUnitRunner.class)
 public class SearchCriteriaFactoryImplTest {
 
 	private static final String STORE_CODE = "store_code";
@@ -51,17 +48,17 @@ public class SearchCriteriaFactoryImplTest {
 
 	private SearchCriteriaFactoryImpl searchCriteriaFactory;
 
+	@Mock
 	private CategoryService mockCategoryService;
 
+	@Mock
 	private StoreConfig mockStoreConfig;
 
+	@Mock
 	private CatalogService mockCatalogService;
 
+	@Mock
 	private BeanFactory beanFactory;
-	private BeanFactoryExpectationsFactory expectationsFactory;
-
-	@Rule
-	public final JUnitRuleMockery context = new JUnitRuleMockery();
 
 	private static final Locale LOCALE = Locale.CANADA;
 
@@ -75,10 +72,6 @@ public class SearchCriteriaFactoryImplTest {
 	@Before
 	public void setUp() {
 		searchCriteriaFactory = new SearchCriteriaFactoryImpl();
-		mockStoreConfig = context.mock(StoreConfig.class);
-		mockCategoryService = context.mock(CategoryService.class);
-		beanFactory = context.mock(BeanFactory.class);
-		expectationsFactory = new BeanFactoryExpectationsFactory(context, beanFactory);
 
 		searchCriteriaFactory.setCatalogService(mockCatalogService);
 		searchCriteriaFactory.setCategoryService(mockCategoryService);
@@ -88,21 +81,10 @@ public class SearchCriteriaFactoryImplTest {
 		Catalog catalog = new CatalogImpl();
 		catalog.setCode(CATALOG_CODE);
 		store.setCatalog(catalog);
-		context.checking(new Expectations() {
-			{
-				allowing(mockStoreConfig).getStore();
-				will(returnValue(store));
-				
-				allowing(mockStoreConfig).getStoreCode();
-				will(returnValue(STORE_CODE));
-			}
-		});
+		when(mockStoreConfig.getStore()).thenReturn(store);
 
-	}
+		when(mockStoreConfig.getStoreCode()).thenReturn(STORE_CODE);
 
-	@After
-	public void tearDown() {
-		expectationsFactory.close();
 	}
 
 	/**
@@ -113,18 +95,15 @@ public class SearchCriteriaFactoryImplTest {
 
 		SearchRequest searchRequest = setUpSearchRequest();
 
-		context.checking(new Expectations() {
-			{
-				oneOf(beanFactory).getBean(ContextIdNames.CATEGORY_SEARCH_CRITERIA);
-				will(returnValue(new CategorySearchCriteria()));
-			}
-		});
+		when(beanFactory.getBean(ContextIdNames.CATEGORY_SEARCH_CRITERIA)).thenReturn(new CategorySearchCriteria());
 
 		CategorySearchCriteria categorySearchCriteria = searchCriteriaFactory.createCategorySearchCriteria(searchRequest);
 
 		examineSearchCriteria(categorySearchCriteria);
 
-		assertNull("The ancestor category code in the search criteria should be null", categorySearchCriteria.getAncestorCode());
+		assertThat(categorySearchCriteria.getAncestorCode())
+			.as("The ancestor category code in the search criteria should be null")
+			.isNull();
 	}
 
 	/**
@@ -136,22 +115,17 @@ public class SearchCriteriaFactoryImplTest {
 		SearchRequest searchRequest = setUpSearchRequest();
 		searchRequest.setCategoryUid(CATEGORY_UID);
 
-		context.checking(new Expectations() {
-			{
-				oneOf(mockCategoryService).findCodeByUid(CATEGORY_UID);
-				will(returnValue(ANCESTOR_CATEGORY_CODE));
-
-				oneOf(beanFactory).getBean(ContextIdNames.CATEGORY_SEARCH_CRITERIA);
-				will(returnValue(new CategorySearchCriteria()));
-
-			}
-		});
+		when(mockCategoryService.findCodeByUid(CATEGORY_UID)).thenReturn(ANCESTOR_CATEGORY_CODE);
+		when(beanFactory.getBean(ContextIdNames.CATEGORY_SEARCH_CRITERIA)).thenReturn(new CategorySearchCriteria());
 
 		CategorySearchCriteria categorySearchCriteria = searchCriteriaFactory.createCategorySearchCriteria(searchRequest);
 
 		examineSearchCriteria(categorySearchCriteria);
-		assertEquals("The ancestor category code in the search criteria should be equal to the category code ", ANCESTOR_CATEGORY_CODE,
-				categorySearchCriteria.getAncestorCode());
+		verify(mockCategoryService).findCodeByUid(CATEGORY_UID);
+		verify(beanFactory).getBean(ContextIdNames.CATEGORY_SEARCH_CRITERIA);
+		assertThat(categorySearchCriteria.getAncestorCode())
+			.as("The ancestor category code in the search criteria should be equal to the category code ")
+			.isEqualTo(ANCESTOR_CATEGORY_CODE);
 	}
 
 	/**
@@ -161,17 +135,13 @@ public class SearchCriteriaFactoryImplTest {
 	public void testCreateProductSearchCriteria() {
 
 		SearchRequest searchRequest = setUpSearchRequest();
-		context.checking(new Expectations() {
-			{
 
-				oneOf(beanFactory).getBean(ContextIdNames.PRODUCT_SEARCH_CRITERIA);
-				will(returnValue(new ProductSearchCriteria()));
+		when(beanFactory.getBean(ContextIdNames.PRODUCT_SEARCH_CRITERIA)).thenReturn(new ProductSearchCriteria());
 
-			}
-		});
-		
-		
-		assertNotNull("The product search criteria object should not be null", searchCriteriaFactory.createProductSearchCriteria(searchRequest));
+		assertThat(searchCriteriaFactory.createProductSearchCriteria(searchRequest))
+			.as("The product search criteria object should not be null")
+			.isNotNull();
+		verify(beanFactory).getBean(ContextIdNames.PRODUCT_SEARCH_CRITERIA);
 	}
 	
 	/**
@@ -180,34 +150,46 @@ public class SearchCriteriaFactoryImplTest {
 	@Test
 	public void testCreateKeywordProductCategorySearchCriteria() {
 		SearchRequest searchRequest = setUpSearchRequest();
-		
-		context.checking(new Expectations() {
-			{
 
-				oneOf(beanFactory).getBean(ContextIdNames.KEYWORD_SEARCH_CRITERIA);
-				will(returnValue(new KeywordSearchCriteria()));
+		when(beanFactory.getBean(ContextIdNames.KEYWORD_SEARCH_CRITERIA)).thenReturn(new KeywordSearchCriteria());
 
-			}
-		});
-		
+
 		KeywordSearchCriteria keywordSearchCriteria = searchCriteriaFactory.createKeywordProductCategorySearchCriteria(searchRequest);
-		assertEquals("The catalog code for search criteria should be the same as the store catalog code.", CATALOG_CODE, keywordSearchCriteria
-				.getCatalogCode());
-		assertEquals("The search criteria should contain the store code from the search request.", STORE_CODE, keywordSearchCriteria.getStoreCode());
-		assertEquals("The search criteria should have the same keywords as the search request.", KEYWORDS, keywordSearchCriteria.getKeyword());
-		assertFalse("The search criteria should have isFuzzySearchEnabled set to false.", keywordSearchCriteria.isFuzzySearchDisabled());
-		
+		assertThat(keywordSearchCriteria.getCatalogCode())
+			.as("The catalog code for search criteria should be the same as the store catalog code.")
+			.isEqualTo(CATALOG_CODE);
+		assertThat(keywordSearchCriteria.getStoreCode())
+			.as("The search criteria should contain the store code from the search request.")
+			.isEqualTo(STORE_CODE);
+		assertThat(keywordSearchCriteria.getKeyword())
+			.as("The search criteria should have the same keywords as the search request.")
+			.isEqualTo(KEYWORDS);
+		assertThat(keywordSearchCriteria.isFuzzySearchDisabled())
+			.as("The search criteria should have isFuzzySearchEnabled set to false.")
+			.isFalse();
+		verify(beanFactory).getBean(ContextIdNames.KEYWORD_SEARCH_CRITERIA);
+
 	}
 
 	private void examineSearchCriteria(final CategorySearchCriteria categorySearchCriteria) {
-		assertEquals("The category name in the search criteria should contain the key words from the search request.", KEYWORDS,
-				categorySearchCriteria.getCategoryName());
-		assertEquals("The search criteria should contain the locale from the search request.", LOCALE, categorySearchCriteria.getLocale());
-		assertTrue("The search criteria should have categoryNameExact set to true.", categorySearchCriteria.isCategoryNameExact());
-		assertTrue("The search criteria should have displayableOnly set to true.", categorySearchCriteria.isDisplayableOnly());
-		assertNotNull("The collection of catalog codes in the search criteria should not be null.", categorySearchCriteria.getCatalogCodes());
-		assertTrue("The collection of catalog codes in the search criteria should contain the catalogCode.", categorySearchCriteria
-				.getCatalogCodes().contains(CATALOG_CODE));
+		assertThat(categorySearchCriteria.getCategoryName())
+			.as("The category name in the search criteria should contain the key words from the search request.")
+			.isEqualTo(KEYWORDS);
+		assertThat(categorySearchCriteria.getLocale())
+			.as("The search criteria should contain the locale from the search request.")
+			.isEqualTo(LOCALE);
+		assertThat(categorySearchCriteria.isCategoryNameExact())
+			.as("The search criteria should have categoryNameExact set to true.")
+			.isTrue();
+		assertThat(categorySearchCriteria.isDisplayableOnly())
+			.as("The search criteria should have displayableOnly set to true.")
+			.isTrue();
+		assertThat(categorySearchCriteria.getCatalogCodes())
+			.as("The collection of catalog codes in the search criteria should not be null.")
+			.isNotNull();
+		assertThat(categorySearchCriteria.getCatalogCodes().contains(CATALOG_CODE))
+			.as("The collection of catalog codes in the search criteria should contain the catalogCode.")
+			.isTrue();
 	}
 
 	private SearchRequest setUpSearchRequest() {
@@ -224,7 +206,7 @@ public class SearchCriteriaFactoryImplTest {
 			@Override
 			public void setFiltersIdStr(final String filtersIdStr, final Store store) throws EpCatalogViewRequestBindException {
 				// does nothing
-			};
+			}
 		};
 		searchRequest.setCurrency(CURRENCY);
 		searchRequest.setFiltersIdStr("filter", null);

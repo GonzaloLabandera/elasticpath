@@ -4,6 +4,7 @@
 package com.elasticpath.service.search.query;
 
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import com.elasticpath.service.search.AbstractSearchCriteriaImpl;
@@ -30,6 +31,8 @@ public abstract class AbstractProductCategorySearchCriteria extends AbstractSear
 	private String storeCode;
 	
 	private Set<String> catalogCodes;
+
+	private Map<String, String> appliedFacets;
 
 	private static final String PERMISSION_ENFORCER = "PermissionEnforcer";
 	
@@ -170,8 +173,17 @@ public abstract class AbstractProductCategorySearchCriteria extends AbstractSear
 		catalogCodes = new HashSet<>();
 		catalogCodes.add(catalogCode);
 	}
-	
-	
+
+	@Override
+	public Map<String, String> getAppliedFacets() {
+		return appliedFacets;
+	}
+
+	@Override
+	public void setAppliedFacets(final Map<String, String> appliedFacets) {
+		this.appliedFacets = appliedFacets;
+	}
+
 	/**
 	 * Optimizes the search criteria.
 	 * 

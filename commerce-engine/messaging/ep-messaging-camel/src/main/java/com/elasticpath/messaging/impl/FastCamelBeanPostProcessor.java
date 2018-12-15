@@ -33,6 +33,7 @@ import org.springframework.context.ApplicationContextAware;
  */
 @XmlRootElement(name = "beanPostProcessor")
 @XmlAccessorType(XmlAccessType.FIELD)
+@SuppressWarnings("PMD.AvoidRethrowingException")
 public class FastCamelBeanPostProcessor implements BeanPostProcessor, ApplicationContextAware {
 	private static final transient Logger LOG = LoggerFactory.getLogger(FastCamelBeanPostProcessor.class);
 	@XmlTransient
@@ -151,11 +152,9 @@ public class FastCamelBeanPostProcessor implements BeanPostProcessor, Applicatio
 	public Object postProcessBeforeInitialization(final Object bean, final String beanName) throws BeansException {
 		try {
 			return delegate.postProcessBeforeInitialization(bean, beanName);
+		} catch (final BeansException beanException) {
+			throw beanException;
 		} catch (final Exception e) {
-			// do not wrap already beans exceptions
-			if (e instanceof BeansException) { // NOPMD - to maintain Spring source compatibility
-				throw (BeansException) e;
-			}
 			throw new GenericBeansException("Error post processing bean: " + beanName, e);
 		}
 	}
@@ -176,11 +175,9 @@ public class FastCamelBeanPostProcessor implements BeanPostProcessor, Applicatio
 	public Object postProcessAfterInitialization(final Object bean, final String beanName) throws BeansException {
 		try {
 			return delegate.postProcessAfterInitialization(bean, beanName);
+		} catch (final BeansException beansException) {
+			throw beansException;
 		} catch (final Exception e) {
-			// do not wrap already beans exceptions
-			if (e instanceof BeansException) { // NOPMD - to maintain Spring source compatibility
-				throw (BeansException) e;
-			}
 			throw new GenericBeansException("Error post processing bean: " + beanName, e);
 		}
 	}

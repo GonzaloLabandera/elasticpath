@@ -7,8 +7,9 @@ import cucumber.api.java.en.Given;
 import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
 
-import com.elasticpath.cucumber.macros.AuthenticationMacro;
-import com.elasticpath.cucumber.macros.ItemMacro;
+import com.elasticpath.cortex.dce.LoginSteps;
+import com.elasticpath.cortexTestObjects.FindItemBy;
+import com.elasticpath.cortexTestObjects.Item;
 import com.elasticpath.selenium.dialogs.AddCustomerSegmentMembershipDialog;
 import com.elasticpath.selenium.dialogs.ConfirmDialog;
 import com.elasticpath.selenium.editor.CustomerEditor;
@@ -162,10 +163,10 @@ public class CustomerSegmentDefinition {
 
 	private void verifyItemPriceFromCortex(final String customerID, final String price, final String sku,
 										   final String store) {
-		ItemMacro itemMacro = new ItemMacro();
-		AuthenticationMacro authenticationMacro = new AuthenticationMacro();
-		authenticationMacro.authenticateRegisteredUser(store, customerID);
-		assertThat(itemMacro.retrieveItemPurchasePrice(sku))
+		LoginSteps.loginAsRegisteredShopperOnScope(customerID, store);
+		FindItemBy.skuCode(sku);
+		Item.price();
+		assertThat(Item.getPurchasePrice("display"))
 				.as("Expected item price not match.")
 				.isEqualTo(price);
 	}

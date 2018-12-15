@@ -3,10 +3,7 @@
  */
 package com.elasticpath.domain.skuconfiguration.impl;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.HashSet;
 import java.util.Locale;
@@ -55,7 +52,7 @@ public class SkuOptionValueImplTest {
 	@Test
 	public void testGetSetOptionCode() {
 		skuOptionValue.setOptionValueKey(TEST_STRING);
-		assertEquals(TEST_STRING, skuOptionValue.getOptionValueKey());
+		assertThat(skuOptionValue.getOptionValueKey()).isEqualTo(TEST_STRING);
 	}
 
 	/**
@@ -64,7 +61,7 @@ public class SkuOptionValueImplTest {
 	@Test
 	public void testGetSetImage() {
 		skuOptionValue.setImage("TEST_STRING");
-		assertEquals("TEST_STRING", skuOptionValue.getImage());
+		assertThat(skuOptionValue.getImage()).isEqualTo("TEST_STRING");
 	}
 
 
@@ -74,7 +71,7 @@ public class SkuOptionValueImplTest {
 	@Test
 	public void testGetSetOrder() {
 		skuOptionValue.setOrdering(TEST_INT);
-		assertEquals(TEST_INT, skuOptionValue.getOrdering());
+		assertThat(skuOptionValue.getOrdering()).isEqualTo(TEST_INT);
 	}
 
 	/**
@@ -84,8 +81,9 @@ public class SkuOptionValueImplTest {
 	public void testGetDisplayNameFallsBackIfNecessary() {
 		final SkuOptionValueImpl skuOptionValue = createSkuOptionValueWithOnlyDefaultLocaleDisplayName();
 		skuOptionValue.setDisplayName(CATALOG_DEFAULT_LOCALE, DISPLAYNAME_DEFAULT_LOCALE);
-		assertEquals("Should fall back to default locale's display name since display name for other locale non-existent",
-				DISPLAYNAME_DEFAULT_LOCALE, skuOptionValue.getDisplayName(OTHER_LOCALE, true));
+		assertThat(skuOptionValue.getDisplayName(OTHER_LOCALE, true))
+			.as("Should fall back to default locale's display name since display name for other locale non-existent")
+			.isEqualTo(DISPLAYNAME_DEFAULT_LOCALE);
 	}
 
 	/**
@@ -97,8 +95,9 @@ public class SkuOptionValueImplTest {
 		final SkuOptionValueImpl skuOptionValue = createSkuOptionValueWithDisplayNameInDefaultAndOtherLocale();
 		skuOptionValue.setDisplayName(CATALOG_DEFAULT_LOCALE, DISPLAYNAME_DEFAULT_LOCALE);
 		skuOptionValue.setDisplayName(OTHER_LOCALE, DISPLAYNAME_OTHER_LOCALE);
-		assertEquals("Should not fall back since it doesn't have to",
-				DISPLAYNAME_OTHER_LOCALE, skuOptionValue.getDisplayName(OTHER_LOCALE, true));
+		assertThat(skuOptionValue.getDisplayName(OTHER_LOCALE, true))
+			.as("Should not fall back since it doesn't have to")
+			.isEqualTo(DISPLAYNAME_OTHER_LOCALE);
 	}
 
 	/**
@@ -107,7 +106,9 @@ public class SkuOptionValueImplTest {
 	@Test
 	public void testGetDisplayNameDoesNotFallBackIfForbidden() {
 		final SkuOptionValueImpl skuOptionValue = createSkuOptionValueWithOnlyDefaultLocaleDisplayName();
-		assertEquals("Should not fall back if forbidden", null, skuOptionValue.getDisplayName(OTHER_LOCALE, false));
+		assertThat(skuOptionValue.getDisplayName(OTHER_LOCALE, false))
+			.as("Should not fall back if forbidden")
+			.isNull();
 	}
 
 	private SkuOptionValueImpl createSkuOptionValueWithDisplayNameInDefaultAndOtherLocale() {
@@ -186,7 +187,7 @@ public class SkuOptionValueImplTest {
 		set.add(skuOption2);
 
 		// the sku options are identical as they do not have anything set yet
-		assertEquals(1, set.size());
+		assertThat(set).hasSize(1);
 
 		// checks if one of the objects have different value for one of the attributes
 		skuOption1.setOptionValueKey("key1");
@@ -196,9 +197,7 @@ public class SkuOptionValueImplTest {
 		set.add(skuOption1);
 		set.add(skuOption2);
 
-		assertTrue(set.contains(skuOption1));
-		assertTrue(set.contains(skuOption2));
-		assertEquals(2, set.size());
+		assertThat(set).containsExactlyInAnyOrder(skuOption1, skuOption2);
 
 		// make the two objects equal
 		skuOption2.setOptionValueKey("key1");
@@ -207,9 +206,10 @@ public class SkuOptionValueImplTest {
 		set.add(skuOption1);
 		set.add(skuOption2);
 
-		assertTrue(set.contains(skuOption1));
-		assertTrue(set.contains(skuOption2));
-		assertEquals(1, set.size());
+		assertThat(set)
+			.contains(skuOption1)
+			.contains(skuOption2)
+			.hasSize(1);
 
 	}
 
@@ -222,16 +222,12 @@ public class SkuOptionValueImplTest {
 		// test two objects with no data defined for them
 		final SkuOptionValue skuOption2 = new SkuOptionValueImpl();
 
-		boolean equals = skuOption1.equals(skuOption2);
-		assertTrue(equals);
+		assertThat(skuOption1).isEqualTo(skuOption2);
 
 		skuOption2.setOptionValueKey("key1");
 
-		equals = skuOption1.equals(skuOption2);
-		assertFalse(equals);
-
-		equals = skuOption2.equals(skuOption1);
-		assertFalse(equals);
+		assertThat(skuOption1).isNotEqualTo(skuOption2);
+		assertThat(skuOption2).isNotEqualTo(skuOption1);
 	}
 
 	/**
@@ -246,15 +242,15 @@ public class SkuOptionValueImplTest {
 		final SkuOptionValueImpl skuOptionValue2 = new SkuOptionValueImpl();
 		skuOptionValue2.setGuid(COMMON_GUID);
 
-		assertEquals(skuOptionValue1, skuOptionValue2);
-		assertEquals(skuOptionValue2, skuOptionValue1);
+		assertThat(skuOptionValue2).isEqualTo(skuOptionValue1);
+		assertThat(skuOptionValue1).isEqualTo(skuOptionValue2);
 
 		// create an instance that shares the same parent entity equals method
 		final Attribute attribute = new AttributeImpl();
 		attribute.setGuid(COMMON_GUID);
 
-		assertNotEquals(skuOptionValue1, attribute);
-		assertNotEquals(attribute, skuOptionValue1);
+		assertThat(attribute).isNotEqualTo(skuOptionValue1);
+		assertThat(skuOptionValue1).isNotEqualTo(attribute);
 	}
 
 	/**
@@ -267,7 +263,7 @@ public class SkuOptionValueImplTest {
 
 		final SkuOptionValueImpl skuOptionValue2 = null;
 
-		assertNotEquals(skuOptionValue1, skuOptionValue2);
+		assertThat(skuOptionValue2).isNotEqualTo(skuOptionValue1);
 	}
 
 

@@ -3,7 +3,6 @@
  */
 package com.elasticpath.tools.sync.job.transaction.impl;
 
-import java.util.Iterator;
 import java.util.List;
 
 import org.apache.log4j.Logger;
@@ -40,14 +39,7 @@ public class TransactionDemarcationProviderImpl implements TransactionDemarcatio
 	 */	
 	@Override
 	public Iterable<List<TransactionJobDescriptorEntry>> getTransactionEntries() {
-		return new Iterable<List<TransactionJobDescriptorEntry>>() {
-
-			@Override
-			public Iterator<List<TransactionJobDescriptorEntry>> iterator() {
-				return transactionIteratorFactory.createIterator(transactionSettings, descriptorList);
-			}
-			
-		};
+		return () -> transactionIteratorFactory.createIterator(transactionSettings, descriptorList);
 	}
 
 	/**

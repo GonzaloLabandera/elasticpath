@@ -21,41 +21,24 @@
 		<groovy.http-builder>0.7.1</groovy.http-builder>
 		<fluent.relos.client.version>1.10.44</fluent.relos.client.version>
 		<ep.rest.authtype>OAuth2</ep.rest.authtype>
-		<ep.rest.baseurl>${ep.cortex.url}</ep.rest.baseurl>
-		<ep.search.server.url>${ep.search.url}</ep.search.server.url>
-		<ep.activemq.url>${ep.jms.url}</ep.activemq.url>
+
+		<!-- Cortex properties -->
+		<ep.cortex.host>localhost</ep.cortex.host>
+		<ep.cortex.port.http>9080</ep.cortex.port.http>
+		<ep.rest.baseurl>http://${ep.cortex.host}:${ep.cortex.port.http}${ep.cortex.contextUrl}</ep.rest.baseurl>
+
+		<!-- JMS properties -->
+		<ep.jms.host>localhost</ep.jms.host>
+		<ep.jms.port.tcp>61616</ep.jms.port.tcp>
+		<ep.jms.url>tcp://${ep.jms.host}:${ep.jms.port.tcp}</ep.jms.url>
 
 		<charset.encoding>UTF-8</charset.encoding>
 	</properties>
 
-
-	<profiles>
-		<profile>
-			<id>local</id>
-			<activation>
-				<activeByDefault>true</activeByDefault>
-			</activation>
-			<properties>
-				<ep.cortex.host>localhost</ep.cortex.host>
-				<ep.cortex.port.http>9080</ep.cortex.port.http>
-				<ep.cortex.url>http://${ep.cortex.host}:${ep.cortex.port.http}${ep.cortex.contextUrl}</ep.cortex.url>
-				<ep.jms.port.tcp>61616</ep.jms.port.tcp>
-			</properties>
-		</profile>
-	</profiles>
-
 	<dependencies>
 		<dependency>
 			<groupId>com.elasticpath.extensions</groupId>
-			<artifactId>cortex-cucumber-tests</artifactId>
-			<type>test-jar</type>
-			<version>${project.version}</version>
-			<exclusions>
-				<exclusion>
-					<groupId>com.elasticpath.rest</groupId>
-					<artifactId>ep-rs-annotated-dispatch</artifactId>
-				</exclusion>
-			</exclusions>
+			<artifactId>ep-cortex-common-test-definitions</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>commons-validator</groupId>
@@ -76,7 +59,6 @@
 		<dependency>
 			<groupId>org.assertj</groupId>
 			<artifactId>assertj-core</artifactId>
-			<version>3.5.2</version>
 			<scope>compile</scope>
 		</dependency>
 		<dependency>
@@ -145,6 +127,12 @@
 			<artifactId>ep-query-analyzer</artifactId>
 			<scope>compile</scope>
 		</dependency>
+		<dependency>
+			<groupId>io.cucumber</groupId>
+			<artifactId>gherkin</artifactId>
+			<version>5.1.0</version>
+			<scope>compile</scope>
+		</dependency>
 	</dependencies>
 
 	<build>
@@ -197,33 +185,6 @@
 							<systemPropertyVariables>
 								<cucumber.options>${cucumber.options}</cucumber.options>
 							</systemPropertyVariables>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-dependency-plugin</artifactId>
-				<version>3.1.0</version>
-				<executions>
-					<execution>
-						<id>unpack</id>
-						<phase>package</phase>
-						<goals>
-							<goal>unpack</goal>
-						</goals>
-						<configuration>
-							<artifactItems>
-								<artifactItem>
-									<groupId>com.elasticpath.extensions</groupId>
-									<artifactId>cortex-cucumber-tests</artifactId>
-									<version>${project.version}</version>
-									<classifier>test-sources</classifier>
-								</artifactItem>
-							</artifactItems>
-							<outputDirectory>target</outputDirectory>
-							<overWriteReleases>false</overWriteReleases>
-							<overWriteSnapshots>true</overWriteSnapshots>
 						</configuration>
 					</execution>
 				</executions>

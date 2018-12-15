@@ -2,9 +2,12 @@ package com.elasticpath.selenium.common;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
@@ -130,7 +133,28 @@ public abstract class AbstractPageObject extends AbstractPage {
 	public void clearAndType(final String cssString, final String text) {
 		getWaitDriver().waitForElementToBeNotStale(cssString);
 		getWaitDriver().waitForElementToBeInteractable(cssString);
+		clearAndTypeText(cssString, text);
+	}
 
+	/**
+	 * Clears given field and types in new text. This function doesn't use Javascript checks
+	 *
+	 * @param cssString the css of a field
+	 * @param text      the text which should be entered
+	 */
+	public void clearAndTypeNonJSCheck(final String cssString, final String text) {
+		getWaitDriver().waitForElementToBeNotStale(cssString);
+		getWaitDriver().waitForElementToBeVisible(By.cssSelector(cssString));
+		clearAndTypeText(cssString, text);
+	}
+
+	/**
+	 * Clears given field and types in new text.
+	 *
+	 * @param cssString the css of a field
+	 * @param text      the text which should be entered
+	 */
+	private void clearAndTypeText(final String cssString, final String text) {
 		if (text != null && !text.isEmpty()) {
 			WebElement element = getDriver().findElement(By.cssSelector(cssString));
 			waitForElementToLoad(element);
@@ -319,26 +343,18 @@ public abstract class AbstractPageObject extends AbstractPage {
 		assertThat(getWaitDriver().waitForElementToBeInteractable(tableParentCss))
 				.as("Center pane is not interactable")
 				.isTrue();
-
 		getWaitDriver().waitForElementToBeInteractable(CENTER_PANE_FIRST_BUTTON_CSS);
-
 		if (isButtonEnabled(CENTER_PANE_FIRST_BUTTON_CSS)) {
 			clickButton(CENTER_PANE_FIRST_BUTTON_CSS, "First Page");
 			waitTillElementDisappears(By.cssSelector(String.format(tableColumnCss, lastSearchedElementInCenterPane)));
 			getWaitDriver().waitForElementToBeInteractable(tableParentCss);
 		}
 		lastSearchedElementInCenterPane = value;
-
 		while (isNextButtonEnabled) {
 			getWaitDriver().waitForElementToBeInteractable(tableParentCss);
-
 			setWebDriverImplicitWait(Constants.IMPLICIT_WAIT_FOR_ELEMENT_THREE_SECONDS);
-			if (!isElementPresent(By.cssSelector(String.format(tableColumnCss, value)))) {
-				sleep(Constants.SLEEP_FIVE_SECONDS_IN_MILLIS);
-			}
-			setWebDriverImplicitWaitToDefault();
-
-			if (scrollToTableListItem(tableParentCss, value, columnName)) {
+			if (isElementPresent(By.cssSelector(String.format(tableColumnCss, value)))) {
+				scrollToTableListItem(tableParentCss, value, columnName);
 				setWebDriverImplicitWait(1);
 				if (isElementPresent(By.cssSelector(String.format(tableColumnCss, value)))) {
 					WebElement element = getDriver().findElement(By.cssSelector(String.format(tableColumnCss, value)));
@@ -352,7 +368,6 @@ public abstract class AbstractPageObject extends AbstractPage {
 					}
 				}
 				setWebDriverImplicitWaitToDefault();
-
 			} else {
 				isNextButtonEnabled = isButtonEnabled(CENTER_PANE_NEXT_BUTTON_CSS);
 				if (isNextButtonEnabled) {
@@ -362,8 +377,29 @@ public abstract class AbstractPageObject extends AbstractPage {
 			}
 			setWebDriverImplicitWaitToDefault();
 		}
-
 		return valueExists;
+	}
+
+	/**
+	 * Selects item in center pane by cell css in a pane without pagination.
+	 *
+	 * @param tableParentCss parent table css to wait until the table is rendered
+	 * @param cellCss        cell css to be selected
+	 * @return true if an element was selected, else returns false
+	 */
+	public boolean selectItemInCenterPaneFirstPageByCell(final String tableParentCss, final String cellCss) {
+		getWaitDriver().waitForElementToBeInteractable(tableParentCss);
+		setWebDriverImplicitWait(1);
+		if (isElementPresent(By.cssSelector(cellCss))) {
+			assertThat(getWaitDriver().waitForElementToBeNotStale(cellCss))
+					.as("Failed to select cell - " + cellCss)
+					.isTrue();
+			this.selectedElement = click(By.cssSelector(cellCss));
+			setWebDriverImplicitWaitToDefault();
+			return true;
+		}
+		setWebDriverImplicitWaitToDefault();
+		return false;
 	}
 
 	/**
@@ -377,7 +413,7 @@ public abstract class AbstractPageObject extends AbstractPage {
 	 */
 	public boolean selectItemInCenterPaneWithoutPagination(final String tableParentCss, final String tableColumnCss, final String value,
 														   final String columnName) {
-		return selectItem(tableParentCss, tableColumnCss, value, columnName, true, true);
+		return selectItem(tableParentCss, tableColumnCss, value, columnName, true, true, true);
 	}
 
 	/**
@@ -391,7 +427,7 @@ public abstract class AbstractPageObject extends AbstractPage {
 	 */
 	public boolean verifyItemIsNotInCenterPaneWithoutPagination(final String tableParentCss, final String tableColumnCss, final String value,
 																final String columnName) {
-		return selectItem(tableParentCss, tableColumnCss, value, columnName, true, false);
+		return selectItem(tableParentCss, tableColumnCss, value, columnName, true, false, true);
 	}
 
 	/**
@@ -404,7 +440,21 @@ public abstract class AbstractPageObject extends AbstractPage {
 	 * @return true if selected item.
 	 */
 	public boolean selectItemInEditorPane(final String tableParentCss, final String tableColumnCss, final String value, final String columnName) {
-		return selectItem(tableParentCss, tableColumnCss, value, columnName, false, true);
+		return selectItem(tableParentCss, tableColumnCss, value, columnName, false, true, true);
+	}
+
+	/**
+	 * Selects item in editor pane without scrollbar, without Javascript check if element is interactable.
+	 *
+	 * @param tableParentCss the table parent css.
+	 * @param tableColumnCss the table column css.
+	 * @param value          the value.
+	 * @param columnName     the column name.
+	 * @return true if selected item.
+	 */
+	public boolean selectItemInEditorPaneNonJSCheck(
+			final String tableParentCss, final String tableColumnCss, final String value, final String columnName) {
+		return selectItem(tableParentCss, tableColumnCss, value, columnName, false, true, false);
 	}
 
 	/**
@@ -418,7 +468,7 @@ public abstract class AbstractPageObject extends AbstractPage {
 	 */
 	public boolean verifyItemIsNotInEditorPane(final String tableParentCss, final String tableColumnCss, final String value, final String
 			columnName) {
-		return selectItem(tableParentCss, tableColumnCss, value, columnName, false, false);
+		return selectItem(tableParentCss, tableColumnCss, value, columnName, false, false, true);
 	}
 
 	/**
@@ -430,7 +480,19 @@ public abstract class AbstractPageObject extends AbstractPage {
 	 * @return true if selected item.
 	 */
 	public boolean selectItemInEditorPaneWithScrollBar(final String tableParentCss, final String tableColumnCss, final String value) {
-		return selectItem(tableParentCss, tableColumnCss, value, "Name", true, true);
+		return selectItem(tableParentCss, tableColumnCss, value, "Name", true, true, true);
+	}
+
+	/**
+	 * Selects item in editor pane with scrollbar for a specific column without Javascript check for element.
+	 *
+	 * @param tableParentCss the table parent css.
+	 * @param tableColumnCss the table column css.
+	 * @param value          the value.
+	 * @return true if selected item.
+	 */
+	public boolean selectItemInEditorPaneWithScrollBarNonJSCheck(final String tableParentCss, final String tableColumnCss, final String value) {
+		return selectItem(tableParentCss, tableColumnCss, value, "Name", true, true, false);
 	}
 
 	/**
@@ -444,7 +506,7 @@ public abstract class AbstractPageObject extends AbstractPage {
 	 */
 	public boolean selectItemInEditorPaneWithScrollBar(final String tableParentCss, final String tableColumnCss, final String value, final String
 			columnName) {
-		return selectItem(tableParentCss, tableColumnCss, value, columnName, true, true);
+		return selectItem(tableParentCss, tableColumnCss, value, columnName, true, true, true);
 	}
 
 	/**
@@ -456,7 +518,7 @@ public abstract class AbstractPageObject extends AbstractPage {
 	 * @return false if item is not present.
 	 */
 	public boolean verifyItemIsNotInEditorPaneWithScrollBar(final String tableParentCss, final String tableColumnCss, final String value) {
-		return selectItem(tableParentCss, tableColumnCss, value, "Name", true, false);
+		return selectItem(tableParentCss, tableColumnCss, value, "Name", true, false, true);
 	}
 
 	/**
@@ -469,7 +531,7 @@ public abstract class AbstractPageObject extends AbstractPage {
 	 * @return true if selected item.
 	 */
 	public boolean selectItemInDialog(final String tableParentCss, final String tableColumnCss, final String value, final String columnName) {
-		return selectItem(tableParentCss, tableColumnCss, value, columnName, true, true);
+		return selectItem(tableParentCss, tableColumnCss, value, columnName, true, true, true);
 	}
 
 	/**
@@ -482,22 +544,23 @@ public abstract class AbstractPageObject extends AbstractPage {
 	 * @return false if item is not present.
 	 */
 	public boolean verifyItemIsNotInDialog(final String tableParentCss, final String tableColumnCss, final String value, final String columnName) {
-		return selectItem(tableParentCss, tableColumnCss, value, columnName, true, false);
+		return selectItem(tableParentCss, tableColumnCss, value, columnName, true, false, true);
 	}
 
 	/**
 	 * Selects item in dialog and pane.
 	 *
-	 * @param tableParentCss      the table parent css.
-	 * @param tableColumnCss      the table column css.
-	 * @param value               the value.
-	 * @param columnName          the column name.
-	 * @param isScrollBarPresent  is scrollbar present.
-	 * @param expectedReturnValue the expected return value, true if the item is expected in the list, false if it is not.
+	 * @param tableParentCss          the table parent css.
+	 * @param tableColumnCss          the table column css.
+	 * @param value                   the value.
+	 * @param columnName              the column name.
+	 * @param isScrollBarPresent      is scrollbar present.
+	 * @param expectedReturnValue     the expected return value, true if the item is expected in the list, false if it is not.
+	 * @param interactableCheckNeeded indicates if Javascript check of the element availability is needed
 	 * @return true if selected item.
 	 */
-	private boolean selectItem(final String tableParentCss, final String tableColumnCss, final String value,
-							   final String columnName, final boolean isScrollBarPresent, final boolean expectedReturnValue) {
+	private boolean selectItem(final String tableParentCss, final String tableColumnCss, final String value, final String columnName,
+							   final boolean isScrollBarPresent, final boolean expectedReturnValue, final boolean interactableCheckNeeded) {
 		String cleanedValue = value.replace("'", "\\'");
 		boolean valueExists = false;
 		if (isScrollBarPresent) {
@@ -505,7 +568,11 @@ public abstract class AbstractPageObject extends AbstractPage {
 		}
 
 		if (expectedReturnValue) {
+			if (interactableCheckNeeded) {
 			getWaitDriver().waitForElementToBeInteractable(String.format(tableColumnCss, cleanedValue));
+			} else {
+				getWaitDriver().waitForElementToBeVisible(By.cssSelector(String.format(tableColumnCss, cleanedValue)));
+			}
 		}
 
 		if (isElementPresent(By.cssSelector(String.format(tableColumnCss, cleanedValue)))) {
@@ -634,7 +701,7 @@ public abstract class AbstractPageObject extends AbstractPage {
 	private void retryFunction(final Function<WebDriver, Object> func, final int pollingInterval, final long timeout) {
 		setWebDriverImplicitWait(1);
 		new WebDriverWait(getDriver(), timeout)
-				.pollingEvery(pollingInterval, TimeUnit.MILLISECONDS)
+				.pollingEvery(Duration.ofMillis(pollingInterval))
 				.ignoring(StaleElementReferenceException.class, WebDriverException.class)
 				.until(func);
 		setWebDriverImplicitWaitToDefault();
@@ -1021,6 +1088,30 @@ public abstract class AbstractPageObject extends AbstractPage {
 		SimpleDateFormat simpleDateFormat = new SimpleDateFormat(dateFormat, Locale.ENGLISH);
 
 		return simpleDateFormat.format(calendar.getTime());
+	}
+
+	/**
+	 * Parses formatted with EP date format date string value and converts it to Date object
+	 *
+	 * @param dateString formatted with EP date format date string value
+	 * @return converted date object
+	 */
+	public Date getDateTimeFromEpFormattedString(final String dateString) throws ParseException {
+		SimpleDateFormat epDateFormat = new SimpleDateFormat(PropertyManager.getInstance().getProperty("ep.dateTimeFormat"), Locale.ENGLISH);
+		return epDateFormat.parse(dateString);
+	}
+
+	/**
+	 * Gets the formatted time in YYYY-MM-dd with plus or minus number of days.
+	 *
+	 * @param numberOfDays number of days to plus or minus to current date.
+	 * @return String
+	 */
+	public String getDateWithoutTime(final int numberOfDays) {
+		Calendar calendar = Calendar.getInstance();
+		calendar.add(Calendar.DAY_OF_MONTH, numberOfDays);
+		SimpleDateFormat formattedDate = new SimpleDateFormat("YYYY-MM-dd", Locale.ENGLISH);
+		return formattedDate.format(calendar.getTime());
 	}
 
 	/**

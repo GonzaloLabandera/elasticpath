@@ -3,22 +3,25 @@
  */
 package com.elasticpath.domain.cmuser.impl;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.jmock.Expectations;
-import org.junit.Rule;
+import org.junit.Before;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.security.authentication.encoding.PasswordEncoder;
 
+import com.elasticpath.commons.beanframework.BeanFactory;
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.commons.exception.EpPasswordValidationException;
 import com.elasticpath.commons.security.CmPasswordPolicy;
@@ -29,39 +32,40 @@ import com.elasticpath.domain.cmuser.UserPasswordHistoryItem;
 import com.elasticpath.domain.cmuser.UserPermission;
 import com.elasticpath.domain.cmuser.UserRole;
 import com.elasticpath.service.misc.TimeService;
-import com.elasticpath.test.jmock.AbstractEPTestCase;
 
 /**
  * Test of the public API of <code>CmUserImpl</code>.
  */
-
-public class CmUserImplTest extends AbstractEPTestCase {
+@RunWith(MockitoJUnitRunner.class)
+public class CmUserImplTest {
 
 	private CmUserImpl cmUserImpl;
 
+	@Mock
 	private PasswordEncoder mockPasswordEncoder;
 
-	@Rule
-	public ExpectedException thrown = ExpectedException.none();
+	@Mock
+	private BeanFactory beanFactory;
 
 	/**
 	 * Prepares for the next test.
 	 *
 	 * @throws Exception if something goes wrong.
 	 */
-	@Override
-	@SuppressWarnings("PMD.DontUseElasticPathImplGetInstance")
+	@Before
 	public void setUp() throws Exception {
-		super.setUp();
-		this.cmUserImpl = new CmUserImpl();
-		this.cmUserImpl.setUserRoles(new HashSet<>());
-		
-		stubGetBean("CSR", UserPermissionImpl.class);
-		
-		this.mockPasswordEncoder = context.mock(PasswordEncoder.class);
-		stubGetBean(ContextIdNames.CM_PASSWORDENCODER, mockPasswordEncoder);
+		this.cmUserImpl = new CmUserImpl() {
+			private static final long serialVersionUID = 740L;
 
-		stubGetBean("userPasswordHistoryItem", UserPasswordHistoryItemImpl.class);
+			@Override
+			protected <T> T getBean(final String beanName) {
+				return beanFactory.getBean(beanName);
+			}
+		};
+		this.cmUserImpl.setUserRoles(new HashSet<>());
+
+		when(beanFactory.getBean(ContextIdNames.CM_PASSWORDENCODER)).thenReturn(mockPasswordEncoder);
+		when(beanFactory.getBean("userPasswordHistoryItem")).thenAnswer(invocation -> new UserPasswordHistoryItemImpl());
 	}
 
 	/**
@@ -69,11 +73,11 @@ public class CmUserImplTest extends AbstractEPTestCase {
 	 */
 	@Test
 	public void testGetSetUserName() {
-		assertEquals(cmUserImpl.getUsername(), null);
+		assertThat(cmUserImpl.getUsername()).isNull();
 
 		final String userName = "userName";
 		cmUserImpl.setUserName(userName);
-		assertSame(userName, cmUserImpl.getUsername());
+		assertThat(cmUserImpl.getUsername()).isEqualTo(userName);
 	}
 
 	/**
@@ -84,7 +88,7 @@ public class CmUserImplTest extends AbstractEPTestCase {
 		final String[] testData = new String[] { "aaaa@aaa.aaa", "", null };
 		for (final String email : testData) {
 			cmUserImpl.setEmail(email);
-			assertSame("Check set email", email, cmUserImpl.getEmail());
+			assertThat(cmUserImpl.getEmail()).isEqualTo(email);
 		}
 	}
 
@@ -93,11 +97,11 @@ public class CmUserImplTest extends AbstractEPTestCase {
 	 */
 	@Test
 	public void testGetSetFirstName() {
-		assertEquals(cmUserImpl.getFirstName(), null);
+		assertThat(cmUserImpl.getFirstName()).isNull();
 
 		final String firstName = "first";
 		cmUserImpl.setFirstName(firstName);
-		assertSame(firstName, cmUserImpl.getFirstName());
+		assertThat(cmUserImpl.getFirstName()).isEqualTo(firstName);
 	}
 
 	/**
@@ -105,11 +109,11 @@ public class CmUserImplTest extends AbstractEPTestCase {
 	 */
 	@Test
 	public void testGetSetLastName() {
-		assertEquals(cmUserImpl.getLastName(), null);
+		assertThat(cmUserImpl.getLastName()).isNull();
 
 		final String firstName = "first";
 		cmUserImpl.setLastName(firstName);
-		assertSame(firstName, cmUserImpl.getLastName());
+		assertThat(cmUserImpl.getLastName()).isEqualTo(firstName);
 	}
 
 	/**
@@ -127,11 +131,11 @@ public class CmUserImplTest extends AbstractEPTestCase {
 		userRole.setName(testRoleName);
 
 		cmUserImpl.addUserRole(userRole);
-		assertTrue(cmUserImpl.hasUserRole(userRoleId));
-		assertTrue(cmUserImpl.hasUserRole(testRoleName));
+		assertThat(cmUserImpl.hasUserRole(userRoleId)).isTrue();
+		assertThat(cmUserImpl.hasUserRole(testRoleName)).isTrue();
 
-		assertFalse(cmUserImpl.hasUserRole(invalidTestRoleName));
-		assertFalse(cmUserImpl.hasUserRole(invalidUserRoleId));
+		assertThat(cmUserImpl.hasUserRole(invalidTestRoleName)).isFalse();
+		assertThat(cmUserImpl.hasUserRole(invalidUserRoleId)).isFalse();
 	}
 
 	/**
@@ -155,8 +159,8 @@ public class CmUserImplTest extends AbstractEPTestCase {
 		userRole.setUserPermissions(userPermissions);
 		cmUserImpl.addUserRole(userRole);
 
-		assertTrue(cmUserImpl.hasPermission(authority));
-		assertFalse(cmUserImpl.hasPermission(invalidAuthority));
+		assertThat(cmUserImpl.hasPermission(authority)).isTrue();
+		assertThat(cmUserImpl.hasPermission(invalidAuthority)).isFalse();
 	}
 
 	/**
@@ -164,7 +168,7 @@ public class CmUserImplTest extends AbstractEPTestCase {
 	 */
 	@Test
 	public void testGetPassword() {
-		assertEquals(null, cmUserImpl.getPassword());
+		assertThat(cmUserImpl.getPassword()).isNull();
 	}
 
 	/**
@@ -172,7 +176,7 @@ public class CmUserImplTest extends AbstractEPTestCase {
 	 */
 	@Test
 	public void testGetEncryptedPassword() {
-		assertEquals(cmUserImpl.getPassword(), null);
+		assertThat(cmUserImpl.getPassword()).isNull();
 	}
 
 	/**
@@ -187,15 +191,10 @@ public class CmUserImplTest extends AbstractEPTestCase {
 		for (int i = 0; i < passwords.length; i++) {
 			final String password = passwords[i];
 			final String hashedPassword = hashedPasswords[i];
-		context.checking(new Expectations() {
-			{
-			allowing(mockPasswordEncoder).encodePassword(password, null);
-			will(returnValue(hashedPassword));
-			}
-		});
+			when(mockPasswordEncoder.encodePassword(password, null)).thenReturn(hashedPassword);
 			cmUserImpl.setClearTextPassword(password);
 			cmUserImpl.setPasswordUsingPasswordEncoder(password);
-			assertEquals(hashedPassword, cmUserImpl.getPassword());
+			assertThat(cmUserImpl.getPassword()).isEqualTo(hashedPassword);
 		}
 	}
 
@@ -204,7 +203,7 @@ public class CmUserImplTest extends AbstractEPTestCase {
 	 */
 	@Test
 	public void testGetConfirmClearTextPassword() {
-		assertEquals(null, cmUserImpl.getConfirmClearTextPassword());
+		assertThat(cmUserImpl.getConfirmClearTextPassword()).isNull();
 	}
 
 	/**
@@ -215,7 +214,7 @@ public class CmUserImplTest extends AbstractEPTestCase {
 		final String[] passwords = new String[] { "AbCdEfGhI", "AbCdEfGhIjKlMnOpQrS", "aA123_$@#^&", "", null };
 		for (final String password : passwords) {
 			cmUserImpl.setConfirmClearTextPassword(password);
-			assertSame(password, cmUserImpl.getConfirmClearTextPassword());
+			assertThat(cmUserImpl.getConfirmClearTextPassword()).isEqualTo(password);
 		}
 	}
 
@@ -224,12 +223,12 @@ public class CmUserImplTest extends AbstractEPTestCase {
 	 * @throws Exception on error.
 	 */
 	@Test
-	public void testIsCmAccessTrue() throws Exception {
+	public void testIsCmAccessTrue() {
 		UserRole cmUserRole = new UserRoleImpl();
 		cmUserRole.setUserPermissions(new HashSet<>());
 		cmUserRole.setName(UserRole.CMUSER);
 		cmUserImpl.addUserRole(cmUserRole);
-		assertTrue(cmUserImpl.isCmAccess());
+		assertThat(cmUserImpl.isCmAccess()).isTrue();
 	}
 	
 	/** 
@@ -237,12 +236,12 @@ public class CmUserImplTest extends AbstractEPTestCase {
 	 * @throws Exception on error.
 	 */
 	@Test
-	public void testIsCmAccessFalse() throws Exception {
+	public void testIsCmAccessFalse() {
 		UserRole wsUserRole = new UserRoleImpl();
 		wsUserRole.setUserPermissions(new HashSet<>());
 		wsUserRole.setName(UserRole.WSUSER);
 		cmUserImpl.addUserRole(wsUserRole);
-		assertFalse(cmUserImpl.isCmAccess());
+		assertThat(cmUserImpl.isCmAccess()).isFalse();
 	}
 	
 	/** 
@@ -250,12 +249,12 @@ public class CmUserImplTest extends AbstractEPTestCase {
 	 * @throws Exception on error.
 	 */
 	@Test
-	public void testIsWsAccessTrue() throws Exception {
+	public void testIsWsAccessTrue() {
 		UserRole wsUserRole = new UserRoleImpl();
 		wsUserRole.setUserPermissions(new HashSet<>());
 		wsUserRole.setName(UserRole.WSUSER);
 		cmUserImpl.addUserRole(wsUserRole);
-		assertTrue(cmUserImpl.isWsAccess());
+		assertThat(cmUserImpl.isWsAccess()).isTrue();
 	}
 	
 	/** 
@@ -263,73 +262,62 @@ public class CmUserImplTest extends AbstractEPTestCase {
 	 * @throws Exception on error.
 	 */
 	@Test
-	public void testIsWsAccessFalse() throws Exception {
+	public void testIsWsAccessFalse() {
 		UserRole cmUserRole = new UserRoleImpl();
 		cmUserRole.setUserPermissions(new HashSet<>());
 		cmUserRole.setName(UserRole.CMUSER);
 		cmUserImpl.addUserRole(cmUserRole);
-		assertFalse(cmUserImpl.isWsAccess());
+		assertThat(cmUserImpl.isWsAccess()).isFalse();
 	}
 
 	@Test
 	public void testIsPasswordExpiredTrueWhenMaxAgePasswordPolicyInvalid() {
-		final PasswordPolicy maximumAgePasswordPolicy = context.mock(PasswordPolicy.class, "maxAgePasswordPolicy");
+		final PasswordPolicy maximumAgePasswordPolicy = mock(PasswordPolicy.class, "maxAgePasswordPolicy");
 
-		stubGetBean("maximumAgePasswordPolicy", maximumAgePasswordPolicy);
+		when(beanFactory.getBean("maximumAgePasswordPolicy")).thenReturn(maximumAgePasswordPolicy);
 
-		context.checking(new Expectations() {
-			{
-				final ValidationResult validationResult = new ValidationResult();
-				validationResult.addError(new ValidationError("foo"));
+		final ValidationResult validationResult = new ValidationResult();
+		validationResult.addError(new ValidationError("foo"));
 
-				oneOf(maximumAgePasswordPolicy).validate(cmUserImpl);
-				will(returnValue(validationResult));
-			}
-		});
+		when(maximumAgePasswordPolicy.validate(cmUserImpl)).thenReturn(validationResult);
 
-		assertTrue("Expected password to be expired when the max age password policy is invalid",
-				   cmUserImpl.isPasswordExpired());
+		assertThat(cmUserImpl.isPasswordExpired())
+			.as("Expected password to be expired when the max age password policy is invalid")
+			.isTrue();
+		verify(maximumAgePasswordPolicy).validate(cmUserImpl);
 	}
 
 	@Test
 	public void testIsPasswordExpiredFalseWhenMaxAgePasswordPolicyValid() {
-		final PasswordPolicy maximumAgePasswordPolicy = context.mock(PasswordPolicy.class, "maxAgePasswordPolicy");
+		final PasswordPolicy maximumAgePasswordPolicy = mock(PasswordPolicy.class, "maxAgePasswordPolicy");
 
-		stubGetBean("maximumAgePasswordPolicy", maximumAgePasswordPolicy);
+		when(beanFactory.getBean("maximumAgePasswordPolicy")).thenReturn(maximumAgePasswordPolicy);
 
-		context.checking(new Expectations() {
-			{
-				oneOf(maximumAgePasswordPolicy).validate(cmUserImpl);
-				will(returnValue(new ValidationResult()));
-			}
-		});
+		when(maximumAgePasswordPolicy.validate(cmUserImpl)).thenReturn(new ValidationResult());
 
-		assertFalse("Expected password not to be expired when the max age password policy is valid",
-					cmUserImpl.isPasswordExpired());
+		assertThat(cmUserImpl.isPasswordExpired())
+			.as("Expected password not to be expired when the max age password policy is valid")
+			.isFalse();
+		verify(maximumAgePasswordPolicy).validate(cmUserImpl);
 	}
 
 	@Test
 	public void verifySetCheckedClearTextPasswordFailsWhenValidatorRejects() throws Exception {
 		cmUserImpl.setPasswordHistoryItems(Collections.<UserPasswordHistoryItem>emptyList());
 
-		final CmPasswordPolicy cmPasswordPolicy = context.mock(CmPasswordPolicy.class);
+		final CmPasswordPolicy cmPasswordPolicy = mock(CmPasswordPolicy.class);
 
-		stubGetBean("cmPasswordPolicy", cmPasswordPolicy);
+		when(beanFactory.getBean("cmPasswordPolicy")).thenReturn(cmPasswordPolicy);
 
-		context.checking(new Expectations() {
-			{
-				final ValidationResult validationResult = new ValidationResult();
-				validationResult.addError(new ValidationError("Invalid"));
+		final ValidationResult validationResult = new ValidationResult();
+		validationResult.addError(new ValidationError("Invalid"));
 
-				oneOf(cmPasswordPolicy).validate(cmUserImpl);
-				will(returnValue(validationResult));
-			}
-		});
+		when(cmPasswordPolicy.validate(cmUserImpl)).thenReturn(validationResult);
 
-		thrown.expect(EpPasswordValidationException.class);
-		thrown.expectMessage("Password didn't pass validation");
-
-		cmUserImpl.setCheckedClearTextPassword("foo");
+		assertThatThrownBy(() -> cmUserImpl.setCheckedClearTextPassword("foo"))
+			.isInstanceOf(EpPasswordValidationException.class)
+			.hasMessage("Password didn't pass validation");
+		verify(cmPasswordPolicy).validate(cmUserImpl);
 	}
 
 	@Test
@@ -339,24 +327,21 @@ public class CmUserImplTest extends AbstractEPTestCase {
 
 		cmUserImpl.setPasswordHistoryItems(Collections.<UserPasswordHistoryItem>emptyList());
 
-		final CmPasswordPolicy cmPasswordPolicy = context.mock(CmPasswordPolicy.class);
+		final CmPasswordPolicy cmPasswordPolicy = mock(CmPasswordPolicy.class);
 
 		givenTimeServiceReturnsCurrentTime();
-		stubGetBean("cmPasswordPolicy", cmPasswordPolicy);
+		when(beanFactory.getBean("cmPasswordPolicy")).thenReturn(cmPasswordPolicy);
 
-		context.checking(new Expectations() {
-			{
-				allowing(mockPasswordEncoder).encodePassword(newPassword, null);
-				will(returnValue(newPasswordEncoded));
+		when(mockPasswordEncoder.encodePassword(newPassword, null)).thenReturn(newPasswordEncoded);
 
-				oneOf(cmPasswordPolicy).validate(cmUserImpl);
-				will(returnValue(new ValidationResult()));
-			}
-		});
+		when(cmPasswordPolicy.validate(cmUserImpl)).thenReturn(new ValidationResult());
 
 		cmUserImpl.setCheckedClearTextPassword(newPassword);
 
-		assertEquals("New password should be set successfully", newPasswordEncoded, cmUserImpl.getPassword());
+		assertThat(cmUserImpl.getPassword())
+			.as("New password should be set successfully")
+			.isEqualTo(newPasswordEncoded);
+		verify(cmPasswordPolicy).validate(cmUserImpl);
 	}
 
 	/**
@@ -366,57 +351,43 @@ public class CmUserImplTest extends AbstractEPTestCase {
 	public void testSetCheckedClearTextPassword3() {
 		final String initialPassword = "initialPassword";
 
-		final CmPasswordPolicy cmPasswordPolicy = context.mock(CmPasswordPolicy.class);
+		final CmPasswordPolicy cmPasswordPolicy = mock(CmPasswordPolicy.class);
 
 		givenTimeServiceReturnsCurrentTime();
-		stubGetBean("cmPasswordPolicy", cmPasswordPolicy);
+		when(beanFactory.getBean("cmPasswordPolicy")).thenReturn(cmPasswordPolicy);
 
-		context.checking(new Expectations() {
-			{
-				allowing(mockPasswordEncoder).encodePassword(initialPassword, null);
-				will(returnValue("encodedInitialPassword"));
-			}
-		});
+		when(mockPasswordEncoder.encodePassword(initialPassword, null)).thenReturn("encodedInitialPassword");
 		cmUserImpl.setClearTextPassword(initialPassword);
 		cmUserImpl.setPasswordUsingPasswordEncoder(initialPassword);
 
-		assertEquals("There should be 0 passwords in history after first login.",
-				0, cmUserImpl.getPasswordHistoryItems().size());
+		assertThat(cmUserImpl.getPasswordHistoryItems())
+			.as("There should be no passwords in history after first login.")
+			.isEmpty();
 
 		final String oldPassword = cmUserImpl.getPassword();
 		final String newPassword = "newPassword1";
 		final String encodedNewPassword = "encodedNewPassword1";
-		context.checking(new Expectations() {
-			{
-				allowing(mockPasswordEncoder).encodePassword(newPassword, null);
-				will(returnValue(encodedNewPassword));
+		when(mockPasswordEncoder.encodePassword(newPassword, null)).thenReturn(encodedNewPassword);
 
-				allowing(cmPasswordPolicy).validate(cmUserImpl);
-				will(returnValue(new ValidationResult()));
+		when(cmPasswordPolicy.validate(cmUserImpl)).thenReturn(new ValidationResult());
 
-				final int passwordHistoryMinimumLength = 3;
-				allowing(cmPasswordPolicy).getPasswordHistoryLength();
-				will(returnValue(passwordHistoryMinimumLength));
-			}
-		});
+		final int passwordHistoryMinimumLength = 3;
+		when(cmPasswordPolicy.getPasswordHistoryLength()).thenReturn(passwordHistoryMinimumLength);
 		cmUserImpl.setCheckedClearTextPassword(newPassword);
-		assertEquals("After changing password old should be moved to history",
-				1, cmUserImpl.getPasswordHistoryItems().size());
-		assertEquals("Password in history should be equal to changed password",
-					 oldPassword, cmUserImpl.getPasswordHistoryItems().get(0).getOldPassword());
+		assertThat(cmUserImpl.getPasswordHistoryItems())
+			.as("After changing password old should be moved to history")
+			.hasSize(1);
+		assertThat(cmUserImpl.getPasswordHistoryItems().get(0).getOldPassword())
+			.as("Password in history should be equal to changed password")
+			.isEqualTo(oldPassword);
 	}
 
 	private void givenTimeServiceReturnsCurrentTime() {
-		final TimeService timeService = context.mock(TimeService.class);
+		final TimeService timeService = mock(TimeService.class);
 
-		context.checking(new Expectations() {
-			{
-				allowing(timeService).getCurrentTime();
-				will(returnValue(new Date()));
-			}
-		});
+		when(timeService.getCurrentTime()).thenReturn(new Date());
 
-		stubGetBean("timeService", timeService);
+		when(beanFactory.getBean("timeService")).thenReturn(timeService);
 	}
 
 }

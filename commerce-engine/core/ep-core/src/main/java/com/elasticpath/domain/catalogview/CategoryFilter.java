@@ -10,6 +10,7 @@ import com.elasticpath.domain.catalog.Category;
  * Represents a filter on product category.
  */
 public interface CategoryFilter extends Filter<CategoryFilter> {
+
 	/**
 	 * Get the category.
 	 *

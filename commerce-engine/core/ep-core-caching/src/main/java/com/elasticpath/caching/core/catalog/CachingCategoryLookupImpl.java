@@ -9,7 +9,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.google.common.base.Function;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 
@@ -19,6 +18,7 @@ import com.elasticpath.cache.MultiKeyCache;
 import com.elasticpath.commons.util.CategoryGuidUtil;
 import com.elasticpath.domain.catalog.Catalog;
 import com.elasticpath.domain.catalog.Category;
+import com.elasticpath.persistence.api.Persistable;
 import com.elasticpath.service.catalog.CategoryLookup;
 
 /**
@@ -88,13 +88,9 @@ public class CachingCategoryLookupImpl implements CategoryLookup {
 		List<Long> childIds = getChildCategoryCache().get(parent.getUidPk());
 		if (childIds == null) {
 			List<C> children = getFallbackReader().findChildren(parent);
-			List<Long> resultIds = ImmutableList.copyOf(
-				Lists.transform(children, new Function<C, Long>() {
-				@Override
-				public Long apply(final C category) {
-					return category.getUidPk();
-				}
-			}));
+			List<Long> resultIds = children.stream()
+					.map(Persistable::getUidPk)
+					.collect(ImmutableList.toImmutableList());
 			getChildCategoryCache().put(parent.getUidPk(), resultIds);
 
 			return children;

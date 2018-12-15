@@ -3,10 +3,7 @@
  */
 package com.elasticpath.domain.misc.impl;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -28,7 +25,7 @@ public class PayerAuthValidationValueImplTest {
 	 */
 	@Test
 	public void testGetAAV() {
-		assertEquals("Check get AAV", payerAuthValidationValueImpl.getAAV(), null);
+		assertThat(payerAuthValidationValueImpl.getAAV()).isNull();
 	}
 	
 	/**
@@ -38,7 +35,7 @@ public class PayerAuthValidationValueImplTest {
 	public void testSetAAV() {
 		final String aav = "test";
 		payerAuthValidationValueImpl.setAAV(aav);
-		assertEquals("Check set AAV", payerAuthValidationValueImpl.getAAV(), aav);
+		assertThat(payerAuthValidationValueImpl.getAAV()).isEqualTo(aav);
 	}
 	
 	/**
@@ -46,7 +43,7 @@ public class PayerAuthValidationValueImplTest {
 	 */
 	@Test
 	public void testGetCAVV() {
-		assertEquals("Check get CAVV", payerAuthValidationValueImpl.getCAVV(), null);
+		assertThat(payerAuthValidationValueImpl.getCAVV()).isNull();
 	}
 	
 	/**
@@ -56,7 +53,7 @@ public class PayerAuthValidationValueImplTest {
 	public void testSetCAVV() {
 		final String cavv = "test cavv";
 		payerAuthValidationValueImpl.setCAVV(cavv);
-		assertEquals("Check set CAVV", payerAuthValidationValueImpl.getCAVV(), cavv);
+		assertThat(payerAuthValidationValueImpl.getCAVV()).isEqualTo(cavv);
 	}
 	
 	/**
@@ -64,7 +61,7 @@ public class PayerAuthValidationValueImplTest {
 	 */
 	@Test
 	public void testGetCommerceIndicator() {
-		assertEquals("Check get CommerceIndicator", payerAuthValidationValueImpl.getCommerceIndicator(), null);
+		assertThat(payerAuthValidationValueImpl.getCommerceIndicator()).isNull();
 	}
 	
 	/**
@@ -74,7 +71,7 @@ public class PayerAuthValidationValueImplTest {
 	public void testSetCommerceIndicator() {
 		final String commerceIndicator = "test CommerceIndicator";
 		payerAuthValidationValueImpl.setCommerceIndicator(commerceIndicator);
-		assertEquals("Check set commerceIndicator", payerAuthValidationValueImpl.getCommerceIndicator(), commerceIndicator);
+		assertThat(payerAuthValidationValueImpl.getCommerceIndicator()).isEqualTo(commerceIndicator);
 	}
 	
 	/**
@@ -82,7 +79,7 @@ public class PayerAuthValidationValueImplTest {
 	 */
 	@Test
 	public void testGetECI() {
-		assertEquals("Check get ECI", payerAuthValidationValueImpl.getECI(), null);
+		assertThat(payerAuthValidationValueImpl.getECI()).isNull();
 	}
 	
 	/**
@@ -92,7 +89,7 @@ public class PayerAuthValidationValueImplTest {
 	public void testSetECI() {
 		final String eci = "test ECI";
 		payerAuthValidationValueImpl.setECI(eci);
-		assertEquals("Check set ECI", payerAuthValidationValueImpl.getECI(), eci);
+		assertThat(payerAuthValidationValueImpl.getECI()).isEqualTo(eci);
 	}
 	
 	/**
@@ -100,7 +97,7 @@ public class PayerAuthValidationValueImplTest {
 	 */
 	@Test
 	public void testGetXID() {
-		assertEquals("Check get XID", payerAuthValidationValueImpl.getXID(), null);
+		assertThat(payerAuthValidationValueImpl.getXID()).isNull();
 	}
 	
 	/**
@@ -110,7 +107,7 @@ public class PayerAuthValidationValueImplTest {
 	public void testSetXID() {
 		final String xid = "test XID";
 		payerAuthValidationValueImpl.setXID(xid);
-		assertEquals("Check set XID", payerAuthValidationValueImpl.getXID(), xid);
+		assertThat(payerAuthValidationValueImpl.getXID()).isEqualTo(xid);
 	}
 	
 	/**
@@ -118,7 +115,7 @@ public class PayerAuthValidationValueImplTest {
 	 */
 	@Test
 	public void testIsValidated() {
-		assertFalse("Check is 3D validated?", payerAuthValidationValueImpl.isValidated());
+		assertThat(payerAuthValidationValueImpl.isValidated()).isFalse();
 	}
 	
 	/**
@@ -127,7 +124,7 @@ public class PayerAuthValidationValueImplTest {
 	@Test
 	public void testSetValidated() {
 		payerAuthValidationValueImpl.setValidated(true);
-		assertTrue("Check set validated", payerAuthValidationValueImpl.isValidated());
+		assertThat(payerAuthValidationValueImpl.isValidated()).isTrue();
 	}
 		
 	/**
@@ -135,7 +132,7 @@ public class PayerAuthValidationValueImplTest {
 	 */
 	@Test
 	public void testGetPaRES() {
-		assertEquals("Check get PaRES", payerAuthValidationValueImpl.getPaRES(), null);
+		assertThat(payerAuthValidationValueImpl.getPaRES()).isNull();
 	}
 	
 	/**
@@ -145,7 +142,7 @@ public class PayerAuthValidationValueImplTest {
 	public void testSetMerchantData() {
 		final String paRES = "pares test";
 		payerAuthValidationValueImpl.setPaRES(paRES);
-		assertSame("Check set PaRES", payerAuthValidationValueImpl.getPaRES(), paRES);
+		assertThat(payerAuthValidationValueImpl.getPaRES()).isEqualTo(paRES);
 	}
 	
 	/**
@@ -153,7 +150,7 @@ public class PayerAuthValidationValueImplTest {
 	 */
 	@Test
 	public void testGetUcafCollectionIndicator() {
-		assertEquals("Check get UcafCollectionIndicator", payerAuthValidationValueImpl.getUcafCollectionIndicator(), null);
+		assertThat(payerAuthValidationValueImpl.getUcafCollectionIndicator()).isNull();
 	}
 	
 	/**
@@ -163,6 +160,6 @@ public class PayerAuthValidationValueImplTest {
 	public void testSetTermURL() {
 		final String ucafCollectionIndicator = "UcafCollectionIndicator test";
 		payerAuthValidationValueImpl.setUcafCollectionIndicator(ucafCollectionIndicator);
-		assertEquals("Check set UcafCollectionIndicator", payerAuthValidationValueImpl.getUcafCollectionIndicator(), ucafCollectionIndicator);
+		assertThat(payerAuthValidationValueImpl.getUcafCollectionIndicator()).isEqualTo(ucafCollectionIndicator);
 	}
 }

@@ -39,7 +39,7 @@ public class SkuQueryComposerImpl extends AbstractQueryComposerImpl {
 		}
 
 		final SkuSearchCriteria skuSearchCriteria = (SkuSearchCriteria) searchCriteria;
-		final BooleanQuery booleanQuery = new BooleanQuery();
+		final BooleanQuery.Builder booleanQueryBuilder = new BooleanQuery.Builder();
 		boolean hasSomeCriteria = false;
 
 		Set<Locale> locales = skuSearchCriteria.getCatalogSearchableLocales();
@@ -49,22 +49,22 @@ public class SkuQueryComposerImpl extends AbstractQueryComposerImpl {
 
 		hasSomeCriteria |= addSplitFuzzyFieldToQueryWithMultipleLocales(SolrIndexConstants.PRODUCT_NAME,
 					skuSearchCriteria.getProductName(), locales,
-					searchConfig, booleanQuery, Occur.MUST, true);
+					searchConfig, booleanQueryBuilder, Occur.MUST, true);
 
 		hasSomeCriteria |= addWholeFuzzyFieldToQuery(SolrIndexConstants.PRODUCT_SKU_CODE, skuSearchCriteria.getSkuCode(), null,
-				searchConfig, booleanQuery, Occur.MUST, true);
+				searchConfig, booleanQueryBuilder, Occur.MUST, true);
 
 		//SKU option does not support fuzzy search
-		hasSomeCriteria |= addSkuOptionAndValuesToQuery(searchConfig, skuSearchCriteria, locales, booleanQuery);
+		hasSomeCriteria |= addSkuOptionAndValuesToQuery(searchConfig, skuSearchCriteria, locales, booleanQueryBuilder);
 
-		hasSomeCriteria |= addFuzzyInvariableTerms(skuSearchCriteria, booleanQuery, searchConfig);
-		hasSomeCriteria |= addTermForActiveOnly(skuSearchCriteria, booleanQuery);
+		hasSomeCriteria |= addFuzzyInvariableTerms(skuSearchCriteria, booleanQueryBuilder, searchConfig);
+		hasSomeCriteria |= addTermForActiveOnly(skuSearchCriteria, booleanQueryBuilder);
 
 		if (!hasSomeCriteria) {
 			throw new EpEmptySearchCriteriaException("Empty search criteria is not allowed!");
 		}
 
-		return booleanQuery;
+		return booleanQueryBuilder.build();
 	}
 
 	@Override
@@ -74,7 +74,7 @@ public class SkuQueryComposerImpl extends AbstractQueryComposerImpl {
 		}
 
 		final SkuSearchCriteria skuSearchCriteria = (SkuSearchCriteria) searchCriteria;
-		final BooleanQuery booleanQuery = new BooleanQuery();
+		final BooleanQuery.Builder booleanQueryBuilder = new BooleanQuery.Builder();
 		boolean hasSomeCriteria = false;
 
 		Set<Locale> locales = skuSearchCriteria.getCatalogSearchableLocales();
@@ -84,21 +84,21 @@ public class SkuQueryComposerImpl extends AbstractQueryComposerImpl {
 
 		hasSomeCriteria |= addSplitFieldToQueryWithMultipleLocales(SolrIndexConstants.PRODUCT_NAME,
 					skuSearchCriteria.getProductName(), locales,
-					searchConfig, booleanQuery, Occur.MUST, true);
+					searchConfig, booleanQueryBuilder, Occur.MUST, true);
 
 		hasSomeCriteria |= addWholeFieldToQuery(SolrIndexConstants.PRODUCT_SKU_CODE, skuSearchCriteria.getSkuCode(), null,
-				searchConfig, booleanQuery, Occur.MUST, true);
+				searchConfig, booleanQueryBuilder, Occur.MUST, true);
 
-		hasSomeCriteria |= addSkuOptionAndValuesToQuery(searchConfig, skuSearchCriteria, locales, booleanQuery);
+		hasSomeCriteria |= addSkuOptionAndValuesToQuery(searchConfig, skuSearchCriteria, locales, booleanQueryBuilder);
 
-		hasSomeCriteria |= addFuzzyInvariableTerms(skuSearchCriteria, booleanQuery, searchConfig);
-		hasSomeCriteria |= addTermForActiveOnly(skuSearchCriteria, booleanQuery);
+		hasSomeCriteria |= addFuzzyInvariableTerms(skuSearchCriteria, booleanQueryBuilder, searchConfig);
+		hasSomeCriteria |= addTermForActiveOnly(skuSearchCriteria, booleanQueryBuilder);
 
 		if (!hasSomeCriteria) {
 			throw new EpEmptySearchCriteriaException("Empty search criteria is not allowed!");
 		}
 
-		return booleanQuery;
+		return booleanQueryBuilder.build();
 
 	}
 
@@ -106,7 +106,7 @@ public class SkuQueryComposerImpl extends AbstractQueryComposerImpl {
 			final SearchConfig searchConfig,
 			final SkuSearchCriteria skuSearchCriteria,
 			final Set<Locale> locales,
-			final BooleanQuery booleanQuery) {
+			final BooleanQuery.Builder booleanQueryBuilder) {
 
 		if (CollectionUtils.isEmpty(skuSearchCriteria.getSkuOptionAndValuesSet())) {
 			return false;
@@ -114,14 +114,14 @@ public class SkuQueryComposerImpl extends AbstractQueryComposerImpl {
 
 		boolean innerQueryHasSomeCriteria = false;
 		for (SkuOptionAndValues skuOptionAndValues : skuSearchCriteria.getSkuOptionAndValuesSet()) {
-			final BooleanQuery queryForDifferentSkuOptions = new BooleanQuery();
+			final BooleanQuery.Builder queryForDifferentSkuOptionsBuilder = new BooleanQuery.Builder();
 			for (Locale locale : locales) {
 				String fieldName = getIndexUtility().createSkuOptionFieldName(locale, skuOptionAndValues.getSkuOptionKey());
 				innerQueryHasSomeCriteria |= addWholeFieldToQuery(fieldName, skuOptionAndValues.getSkuOptionValues(), null,
-						searchConfig, queryForDifferentSkuOptions, Occur.SHOULD, true);
+						searchConfig, queryForDifferentSkuOptionsBuilder, Occur.SHOULD, true);
 			}
 
-			booleanQuery.add(queryForDifferentSkuOptions, Occur.MUST);
+			booleanQueryBuilder.add(queryForDifferentSkuOptionsBuilder.build(), Occur.MUST);
 		}
 
 		return innerQueryHasSomeCriteria;
@@ -130,24 +130,24 @@ public class SkuQueryComposerImpl extends AbstractQueryComposerImpl {
 	/**
 	 * Add the invariable search terms to the product index query.
 	 * @param skuSearchCriteria the product search criteria
-	 * @param booleanQuery the query being composed
+	 * @param booleanQueryBuilder the query being composed
 	 * @param searchConfig the search configuration
 	 * @return true if any fields were added to the query, false if not
 	 */
-	protected boolean addFuzzyInvariableTerms(final SkuSearchCriteria skuSearchCriteria, final BooleanQuery booleanQuery,
+	protected boolean addFuzzyInvariableTerms(final SkuSearchCriteria skuSearchCriteria, final BooleanQuery.Builder booleanQueryBuilder,
 			final SearchConfig searchConfig) {
 		boolean hasSomeCriteria = false;
 
 		hasSomeCriteria |= addWholeFieldToQuery(SolrIndexConstants.PRODUCT_CODE, skuSearchCriteria.getProductCode(), null,
-				searchConfig, booleanQuery, Occur.MUST, true);
+				searchConfig, booleanQueryBuilder, Occur.MUST, true);
 		hasSomeCriteria |= addWholeFieldToQuery(SolrIndexConstants.BRAND_CODE, skuSearchCriteria.getBrandCode(), null,
-				searchConfig, booleanQuery, Occur.MUST, true);
+				searchConfig, booleanQueryBuilder, Occur.MUST, true);
 
 		hasSomeCriteria |= addWholeFieldToQuery(SolrIndexConstants.CATALOG_CODE, skuSearchCriteria.getCatalogCodes(),
-				null, searchConfig, booleanQuery, Occur.MUST, true);
+				null, searchConfig, booleanQueryBuilder, Occur.MUST, true);
 
 		hasSomeCriteria |= addWholeFieldToQuery(SolrIndexConstants.OBJECT_UID, skuSearchCriteria.getFilteredUids(), null,
-				searchConfig, booleanQuery, Occur.MUST_NOT, false);
+				searchConfig, booleanQueryBuilder, Occur.MUST_NOT, false);
 
 		return hasSomeCriteria;
 	}
@@ -188,10 +188,10 @@ public class SkuQueryComposerImpl extends AbstractQueryComposerImpl {
 	/**
 	 * Add query for active products.
 	 * @param skuSearchCriteria search criteria
-	 * @param booleanQuery boolean query
+	 * @param booleanQueryBuilder boolean query
 	 * @return return true if flag isActive activated
 	 */
-	protected boolean addTermForActiveOnly(final SkuSearchCriteria skuSearchCriteria, final BooleanQuery booleanQuery) {
+	protected boolean addTermForActiveOnly(final SkuSearchCriteria skuSearchCriteria, final BooleanQuery.Builder booleanQueryBuilder) {
 		boolean hasSomeCriteria = false;
 
 		if (skuSearchCriteria.isActiveOnly()) {
@@ -199,7 +199,7 @@ public class SkuQueryComposerImpl extends AbstractQueryComposerImpl {
 			// only query for products currently active
 			Date now = new Date();
 			BooleanQuery dateRangeQuery = getSolrQueryFactory().createTermsForStartEndDateRange(now);
-			booleanQuery.add(dateRangeQuery, Occur.MUST);
+			booleanQueryBuilder.add(dateRangeQuery, Occur.MUST);
 		}
 		return hasSomeCriteria;
 

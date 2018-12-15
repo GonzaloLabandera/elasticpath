@@ -715,7 +715,6 @@
 		<property name="queryComposerFactory" ref="queryComposerFactory" />
 		<property name="solrQueryFactory" ref="solrQueryFactory" />
 		<property name="elasticPath" ref="elasticPath" />
-		<property name="filterFactory" ref="filterFactory" />
 		<property name="solrFacetAdapter" ref="solrFacetAdapter" />
 		<property name="indexUtility" ref="indexUtility" />
 		<property name="retrieveCatalogFromCache" value="false" />

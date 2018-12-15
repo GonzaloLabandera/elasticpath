@@ -340,18 +340,13 @@ public class ApportioningCalculatorImpl implements ApportioningCalculator {
 		}
 
 		private Comparator<DiscountableItem> createComparator() {
-			return new Comparator<DiscountableItem>() {
-				@Override
-				public int compare(final DiscountableItem item1,
-								   final DiscountableItem item2) {
-					int result = item1.getAmount().compareTo(item2.getAmount());
-					if (result == 0) {
-						result = item1.getSkuCode().compareTo(item2.getSkuCode());
-					}
-
-					return -result;
+			return (item1, item2) -> {
+				int result = item1.getAmount().compareTo(item2.getAmount());
+				if (result == 0) {
+					result = item1.getSkuCode().compareTo(item2.getSkuCode());
 				}
 
+				return -result;
 			};
 		}
 	}	

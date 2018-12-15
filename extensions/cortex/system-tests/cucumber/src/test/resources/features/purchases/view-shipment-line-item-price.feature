@@ -1,4 +1,4 @@
-@Shipments @Purchases @HeaderAuth
+@shipments @purchases @headerAuth
 Feature: View purchase shipment line item prices
   As a Customer
   I want to see the price of a line item in a shipment
@@ -18,7 +18,7 @@ Feature: View purchase shipment line item prices
     When I have previously made a purchase with "1" physical item "physical product with lineitem promotion"
     And I view the shipment line item for item "physical product with lineitem promotion"
     Then I can follow the shipment line item price link
-    And the purchase-price has fields amount: 5.0, currency: CAD and display: $5.00
+    And the purchase-price has fields amount: 5.00, currency: CAD and display: $5.00
 
   Scenario: Quantity does not effect shipment line item price
     When I have previously made a purchase with "2" physical item "Sony Ericsson Xperia Pro"
@@ -38,5 +38,5 @@ Feature: View purchase shipment line item prices
     And I can follow line item back links all the way to the purchase
     And I view the shipment line item for item "Samsung Headset"
     And I can follow the shipment line item price link
-    And the purchase-price has fields amount: 100.0, currency: CAD and display: $100.00
+    And the purchase-price has fields amount: 100.00, currency: CAD and display: $100.00
     And I can follow line item back links all the way to the purchase

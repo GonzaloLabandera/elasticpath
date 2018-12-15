@@ -17,7 +17,6 @@ import com.elasticpath.domain.store.Store;
 import com.elasticpath.repository.PaginationRepository;
 import com.elasticpath.rest.ResourceOperationFailure;
 import com.elasticpath.rest.definition.items.ItemIdentifier;
-import com.elasticpath.rest.definition.items.ItemsIdentifier;
 import com.elasticpath.rest.definition.searches.KeywordSearchResultIdentifier;
 import com.elasticpath.rest.definition.searches.SearchKeywordsEntity;
 import com.elasticpath.rest.id.IdentifierPart;
@@ -103,7 +102,7 @@ public class KeywordSearchResultPaginationRepository<I extends KeywordSearchResu
 		int pageId = keywordSearchResultIdentifier.getPageId().getValue();
 
 		if (pageId < FIRST_PAGE_ID) {
-			String unknownPageIdErrorMsg = "Page id " + pageId + "can't be smaller than" + FIRST_PAGE_ID;
+			String unknownPageIdErrorMsg = "Page id " + pageId + " can't be smaller than " + FIRST_PAGE_ID;
 			LOG.error(unknownPageIdErrorMsg);
 			return Single.error(ResourceOperationFailure.badRequestBody(unknownPageIdErrorMsg));
 		}
@@ -155,9 +154,7 @@ public class KeywordSearchResultPaginationRepository<I extends KeywordSearchResu
 				.map(itemId ->
 						ItemIdentifier.builder()
 								.withItemId(CompositeIdentifier.of(CompositeIdUtil.decodeCompositeId(itemId)))
-								.withItems(ItemsIdentifier.builder()
-										.withScope(StringIdentifier.of(keywordSearchData.getScope()))
-										.build())
+								.withScope(StringIdentifier.of(keywordSearchData.getScope()))
 								.build()
 				);
 	}

@@ -142,5 +142,111 @@
 			</query>
 		</named-query>
 
+		<named-query name="PRODUCT_ATTRIBUTE_VALUE_BY_ATTRIBUTE_SHORT_TEXT">
+			<query>
+				SELECT DISTINCT pav.shortTextValue, pav.localizedAttributeKey
+				FROM ProductAttributeValueImpl pav
+				WHERE pav.attribute.uidPk = ?1
+			</query>
+		</named-query>
+
+
+		<named-query name="PRODUCT_ATTRIBUTE_VALUE_BY_ATTRIBUTE_LONG_TEXT">
+			<query>
+				SELECT pav.longTextValue, pav.localizedAttributeKey
+				FROM ProductAttributeValueImpl pav
+				WHERE pav.attribute.uidPk = ?1
+			</query>
+		</named-query>
+
+
+		<named-query name="PRODUCT_ATTRIBUTE_VALUE_BY_ATTRIBUTE_INTEGER">
+			<query>
+				SELECT DISTINCT pav.integerValue, pav.localizedAttributeKey
+				FROM ProductAttributeValueImpl pav
+				WHERE pav.attribute.uidPk = ?1
+			</query>
+		</named-query>
+
+		<named-query name="PRODUCT_ATTRIBUTE_VALUE_BY_ATTRIBUTE_DECIMAL">
+			<query>
+				SELECT DISTINCT pav.decimalValue, pav.localizedAttributeKey
+				FROM ProductAttributeValueImpl pav
+				WHERE pav.attribute.uidPk = ?1
+			</query>
+		</named-query>
+
+		<named-query name="PRODUCT_ATTRIBUTE_VALUE_BY_ATTRIBUTE_BOOLEAN">
+			<query>
+				SELECT DISTINCT pav.booleanValue, pav.localizedAttributeKey
+				FROM ProductAttributeValueImpl pav
+				WHERE pav.attribute.uidPk = ?1
+			</query>
+		</named-query>
+
+		<named-query name="PRODUCT_ATTRIBUTE_VALUE_BY_ATTRIBUTE_DATE">
+			<query>
+				SELECT DISTINCT pav.dateValue, pav.localizedAttributeKey
+				FROM ProductAttributeValueImpl pav
+				WHERE pav.attribute.uidPk = ?1
+			</query>
+		</named-query>
+
+		<named-query name="PRODUCT_SKU_ATTRIBUTE_VALUE_BY_ATTRIBUTE_SHORT_TEXT">
+			<query>
+				SELECT DISTINCT psav.shortTextValue, psav.localizedAttributeKey
+				FROM SkuAttributeValueImpl psav
+				WHERE psav.attribute.uidPk = ?1
+			</query>
+		</named-query>
+
+		<named-query name="PRODUCT_SKU_ATTRIBUTE_VALUE_BY_ATTRIBUTE_LONG_TEXT">
+			<query>
+				SELECT psav.longTextValue, psav.localizedAttributeKey
+				FROM SkuAttributeValueImpl psav
+				WHERE psav.attribute.uidPk = ?1
+			</query>
+		</named-query>
+
+		<named-query name="PRODUCT_SKU_ATTRIBUTE_VALUE_BY_ATTRIBUTE_INTEGER">
+			<query>
+				SELECT DISTINCT psav.integerValue, psav.localizedAttributeKey
+				FROM SkuAttributeValueImpl psav
+				WHERE psav.attribute.uidPk = ?1
+			</query>
+		</named-query>
+
+		<named-query name="PRODUCT_SKU_ATTRIBUTE_VALUE_BY_ATTRIBUTE_DECIMAL">
+			<query>
+				SELECT DISTINCT psav.decimalValue, psav.localizedAttributeKey
+				FROM SkuAttributeValueImpl psav
+				WHERE psav.attribute.uidPk = ?1
+			</query>
+		</named-query>
+
+		<named-query name="PRODUCT_SKU_ATTRIBUTE_VALUE_BY_ATTRIBUTE_BOOLEAN">
+			<query>
+				SELECT DISTINCT psav.booleanValue, psav.localizedAttributeKey
+				FROM SkuAttributeValueImpl psav
+				WHERE psav.attribute.uidPk = ?1
+			</query>
+		</named-query>
+
+		<named-query name="PRODUCT_SKU_ATTRIBUTE_VALUE_BY_ATTRIBUTE_DATE">
+			<query>
+				SELECT DISTINCT psav.dateValue, psav.localizedAttributeKey
+				FROM SkuAttributeValueImpl psav
+				WHERE psav.attribute.uidPk = ?1
+			</query>
+		</named-query>
+
+	<named-query name="FIND_UNEXCLUDED_ATTRIBUTES_BY_USAGE">
+		<query>
+			SELECT a
+			FROM AttributeImpl a
+			WHERE a.attributeUsageIdInternal = ?1
+			AND a.key not in (:keys)
+		</query>
+	</named-query>
 </entity-mappings>
 

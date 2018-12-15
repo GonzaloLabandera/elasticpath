@@ -4,6 +4,7 @@
 package com.elasticpath.shipping.connectivity.service.cache.impl;
 
 import static java.util.Collections.singletonList;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 

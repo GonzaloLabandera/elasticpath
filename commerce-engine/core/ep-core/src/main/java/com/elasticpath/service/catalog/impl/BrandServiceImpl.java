@@ -360,5 +360,4 @@ public class BrandServiceImpl extends AbstractEpPersistenceServiceImpl implement
 	public void setCatalogService(final CatalogService catalogService) {
 		this.catalogService = catalogService;
 	}
-	
 }

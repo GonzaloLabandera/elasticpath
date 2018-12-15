@@ -5,47 +5,52 @@
 		<name>wishlists</name>
 
 		<plan>
-			<name>wishlists</name>
-			<description><![CDATA[Returns a list of links to the shopper’s wishlists. Only the default wishlist is currently supported, so responses will contain only one link..]]></description>
+			<name>read-wishlists</name>
+			<description><![CDATA[Returns a list of links to the shopper's wishlists. Only the default wishlist is currently supported, so responses will contain only one link..]]></description>
 			<step>
-				<description>Read wishlists</description>
-				<start>wishlists</start>
-				<read-self/>
+				<description><![CDATA[Read the shopper's wishlists.]]></description>
+				<start>profiles.profile</start>
+				<follow-link>wishlists</follow-link>
+				<result>wishlists</result>
 			</step>
 		</plan>
+
 		<plan>
-			<name>wishlist</name>
+			<name>read-wishlist</name>
 			<description><![CDATA[Retrieves a collection of links to wishlist lineitems.]]></description>
 			<step>
-				<description>Read a wishlist</description>
-				<start>wishlist</start>
-				<read-self/>
+				<description>><![CDATA[Read a wishlist.]]></description>
+				<start>wishlists</start>
+				<follow-link>element</follow-link>
+				<result>wishlist</result>
 			</step>
 		</plan>
 
 		<plan>
-			<name>default-wishlist</name>
-			<description><![CDATA[Retrieves the shopper’s default wishlist.]]></description>
+			<name>read-default-wishlist</name>
+			<description><![CDATA[Retrieves the shopper's default wishlist.]]></description>
 			<step>
-				<description>Read the default wishlist</description>
-				<start>default-wishlist</start>
-				<read-self/>
+				<description>><![CDATA[Read the default wishlist.]]></description>
+				<start>base.root</start>
+				<follow-link>defaultwishlist</follow-link>
+				<result>wishlist</result>
 			</step>
 		</plan>
 
 		<plan>
-			<name>wishlist-line-items</name>
+			<name>read-wishlist-line-items</name>
 			<description><![CDATA[Retrieves a collection of links to wishlist items and a link to the wishlist.]]></description>
 			<step>
-				<description>Read wishlist items</description>
-				<start>wishlist-line-items</start>
-				<read-self/>
+				<description>><![CDATA[Read wishlist items.]]></description>
+				<start>wishlist</start>
+				<follow-link>lineitems</follow-link>
+				<result>wishlist-line-items</result>
 			</step>
 		</plan>
 
 
 		<plan>
-			<name>wishlist-line-item</name>
+			<name>read-wishlist-line-item</name>
 			<description><![CDATA[
 			Retrieves wishlist item details, which include:
 			 - A link to the list of wishlist items
@@ -53,34 +58,17 @@
 			 - A link to the item in the items resource
 			 - A link to the movetocart form
 			]]></description>
-			<template>
-				<name>collections.list-element-template</name>
-				<replace>
-					<key>start-resource</key>
-					<value>wishlist</value>
-				</replace>
-				<replace>
-					<key>start-name</key>
-					<value>wishlist</value>
-				</replace>
-				<replace>
-					<key>list-resource</key>
-					<value>wishlist-line-items</value>
-				</replace>
-				<replace>
-					<key>list-name</key>
-					<value>lineitems</value>
-				</replace>
-				<replace>
-					<key>element-resource</key>
-					<value>wishlist-line-item</value>
-				</replace>
-			</template>
+			<step>
+				<description>><![CDATA[Read wishlist line item.]]></description>
+				<start>wishlist-line-items</start>
+				<follow-link>element</follow-link>
+				<result>wishlist-line-item</result>
+			</step>
 		</plan>
 
 		<plan>
 			<name>delete-wishlist-items</name>
-			<description><![CDATA[Deletes the items from a shopper’s wishlist.
+			<description><![CDATA[Deletes the items from a shopper's wishlist.
 ]]></description>
 			<step>
 				<description><![CDATA[Start at the wishlist line items]]></description>

@@ -5,7 +5,6 @@ package com.elasticpath.domain.rules.impl;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -750,18 +749,13 @@ public abstract class AbstractRuleImpl extends AbstractLegacyEntityImpl implemen
 	protected List<RuleAction> getActionsBySalience() {
 		List<RuleAction> actionList = new ArrayList<>();
 		actionList.addAll(this.getActions());
-		Collections.sort(actionList, new Comparator<RuleAction>() {
-
-			@Override
-			public int compare(final RuleAction action1, final RuleAction action2) {
-				if (action1.getSalience() > action2.getSalience()) {
-					return -1;
-				} else if (action1.getSalience() < action2.getSalience()) {
-					return 1;
-				}
-				return 0;
+		Collections.sort(actionList, (action1, action2) -> {
+			if (action1.getSalience() > action2.getSalience()) {
+				return -1;
+			} else if (action1.getSalience() < action2.getSalience()) {
+				return 1;
 			}
-
+			return 0;
 		});
 		return actionList;
 	}

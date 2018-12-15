@@ -52,6 +52,7 @@ the item and how your storefront has implemented Cortex API. Some resources may 
 			<name>options-for-item-definition</name>
 			<description><![CDATA[Read the options for an item definition.]]></description>
 			<rel>options</rel>
+			<rev>definition</rev>
 			<from>item-definition</from>
 			<to>item-definition-options</to>
 		</relationship>
@@ -62,6 +63,14 @@ the item and how your storefront has implemented Cortex API. Some resources may 
 			<uri>{item-definition-options}/{option-id}</uri>
 			<entity>item-definition-option</entity>
 		</resource>
+
+		<relationship>
+			<name>item-definition-options-for-item-definition-option</name>
+			<description><![CDATA[Read the item definition option value.]]></description>
+			<rel>list</rel>
+			<from>item-definition-option</from>
+			<to>item-definition-options</to>
+		</relationship>
 
 		<relationship>
 			<name>value-for-item-definition-option</name>
@@ -100,7 +109,7 @@ the item and how your storefront has implemented Cortex API. Some resources may 
 					<is-a>base.details</is-a>
 				</array>
 			</property>
-			<entity-type>elasticpath.itemdefinitions.item-definition</entity-type>
+			<entity-type>itemdefinitions.item-definition</entity-type>
 		</entity>
 
 		<entity>
@@ -140,7 +149,7 @@ the item and how your storefront has implemented Cortex API. Some resources may 
 				<internal/>
 				<string/>
 			</property>
-			<entity-type>elasticpath.itemdefinitions.option</entity-type>
+			<entity-type>itemdefinitions.item-definition-option</entity-type>
 		</entity>
 
 		<entity>
@@ -156,7 +165,7 @@ the item and how your storefront has implemented Cortex API. Some resources may 
 				<description><![CDATA[The name of the item definition option value.]]></description>
 				<string/>
 			</property>
-			<entity-type>elasticpath.itemdefinitions.value</entity-type>
+			<entity-type>itemdefinitions.item-definition-option-value</entity-type>
 		</entity>
 
 	</family>

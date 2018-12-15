@@ -4,7 +4,6 @@
 package com.elasticpath.importexport.exporter.exporters.impl;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
@@ -68,7 +67,7 @@ public class ProductAssociationExporterImplTest {
 	 * Check that during initialization exporter prepares the list of UidPk for product associations to be exported.
 	 */
 	@Test
-	public void testExporterInitialization() {
+	public void testExporterInitialization() throws ConfigurationException {
 		final List<String> associationGuidList = new ArrayList<>();
 		associationGuidList.add(ASSOCIATION_GUID);
 
@@ -85,31 +84,20 @@ public class ProductAssociationExporterImplTest {
 		dependencyRegistry.addGuidDependencies(ProductAssociation.class, new TreeSet<>(associationGuidList));
 		exportContext.setDependencyRegistry(dependencyRegistry);
 
-		try {
-			productAssociationExporter.initialize(exportContext);
-		} catch (ConfigurationException e) {
-			fail(e.getMessage());
-		}
+		productAssociationExporter.initialize(exportContext);
 	}
 
 	/**
 	 * Check an export of product associations.
 	 */
 	@Test
-	public void testProcessExport() {
+	public void testProcessExport() throws ConfigurationException {
 		testExporterInitialization();
 		productAssociationExporter.processExport(System.out);
 		Summary summary = productAssociationExporter.getContext().getSummary();
-		assertThat(summary.getCounters())
-				.size()
-				.isEqualTo(1);
-		assertThat(summary.getCounters())
-				.containsKey(JobType.PRODUCTASSOCIATION);
-		assertThat(summary.getCounters().get(JobType.PRODUCTASSOCIATION))
-				.isEqualTo(1);
-		assertThat(summary.getFailures())
-				.size()
-				.isEqualTo(0);
+		assertThat(summary.getCounters()).containsOnlyKeys(JobType.PRODUCTASSOCIATION);
+		assertThat(summary.getCounters().get(JobType.PRODUCTASSOCIATION)).isEqualTo(1);
+		assertThat(summary.getFailures()).isEmpty();
 		assertThat(summary.getStartDate()).isNotNull();
 		assertThat(summary.getElapsedTime()).isNotNull();
 		assertThat(summary.getElapsedTime().toString()).isNotNull();

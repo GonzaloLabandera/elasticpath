@@ -137,6 +137,7 @@
 						<value>com.elasticpath.domain.catalog.impl.ProductImpl</value>
 						<value>com.elasticpath.domain.catalog.impl.ProductBundleImpl</value>
 						<value>com.elasticpath.domain.catalog.impl.CategoryImpl</value>
+						<value>com.elasticpath.domain.catalog.impl.LinkedCategoryImpl</value>
 					</set>
 				</entry>
 				<entry key="com.elasticpath.domain.catalog.impl.CategoryTypeImpl">

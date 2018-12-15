@@ -9,7 +9,8 @@ import org.junit.runner.RunWith;
  */
 @RunWith(Cucumber.class)
 @CucumberOptions(format = {"pretty", "html:target/cucumber-html-reports/sanity", "json:target/sanitytest.json"},
-		tags = {"@sanity"},
+		glue = {"classpath:com.elasticpath.cucumber", "classpath:com.elasticpath.cortex"},
+		tags = {"@sanityTest"},
 		features = "src/test/resources/com.elasticpath.cucumber/sanity")
 public class RunSanityTestsIT {
 }

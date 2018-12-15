@@ -3,34 +3,31 @@
  */
 package com.elasticpath.search.solr;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.collections.CollectionUtils;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.core.SimpleAnalyzer;
 import org.apache.lucene.analysis.miscellaneous.LimitTokenCountAnalyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
-import org.apache.lucene.index.AtomicReader;
+import org.apache.lucene.document.FieldType;
+import org.apache.lucene.document.TextField;
 import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
 import org.apache.lucene.index.IndexWriterConfig.OpenMode;
-import org.apache.lucene.index.SlowCompositeReaderWrapper;
+import org.apache.lucene.index.LeafReader;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.RAMDirectory;
+import org.apache.solr.index.SlowCompositeReaderWrapper;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-
-import com.elasticpath.service.search.solr.SolrIndexConstants;
 
 /**
  * Test cases for {@link PriceListPriceScoreDocComparator}.
@@ -54,12 +51,9 @@ public class PriceListPriceScoreDocComparatorTest {
 		String fieldname = "pricesort-catalog1#PL1#PL2#PL3";
 		List<String> result = new PriceListPriceScoreDocComparator(fieldname, 0).generatePriorityOrderedPriceListFieldNames(fieldname);
 
-		assertEquals("price_catalog1_PL1", result.get(0));
-		assertEquals("price_catalog1_PL2", result.get(1));
-		assertEquals("price_catalog1_PL3", result.get(2));
-		
-		assertTrue("Totally 3 price fields are expected to be generated. Actual result: " + result, 
-				CollectionUtils.isEqualCollection(Arrays.asList("price_catalog1_PL1", "price_catalog1_PL2", "price_catalog1_PL3"), result));
+		assertThat(result)
+			.as("Totally 3 price fields are expected to be generated. Actual result: %s", result)
+			.containsExactly("price_catalog1_PL1", "price_catalog1_PL2", "price_catalog1_PL3");
 	}
 	
 	/**
@@ -90,15 +84,19 @@ public class PriceListPriceScoreDocComparatorTest {
 		
 		// Most of this code is "borrowed" from Lucene's test code in 2.9.4 (/src/test/org/apache/lucene/search/TestSort.java).
 		final RAMDirectory directory = new RAMDirectory();
-		Analyzer writerAnalyzer = new LimitTokenCountAnalyzer(new SimpleAnalyzer(SolrIndexConstants.LUCENE_MATCH_VERSION), maxTokenCountPerField);
-		IndexWriterConfig writerConfig = new IndexWriterConfig(SolrIndexConstants.LUCENE_MATCH_VERSION,
-				writerAnalyzer).setOpenMode(OpenMode.CREATE).setMaxBufferedDocs(2);
+		Analyzer writerAnalyzer = new LimitTokenCountAnalyzer(new SimpleAnalyzer(), maxTokenCountPerField);
+		IndexWriterConfig writerConfig = new IndexWriterConfig(writerAnalyzer).setOpenMode(OpenMode.CREATE).setMaxBufferedDocs(2);
 		final IndexWriter writer = new IndexWriter(directory, writerConfig);
-		for (int i = 0; i < data.length; ++i) {
+
+		FieldType fieldType = new FieldType();
+		fieldType.setStored(true);
+
+		for (String[] dataRow : data) {
 			final Document doc = new Document();
-			doc.add(new Field("tracer", data[i][0], Field.Store.YES, Field.Index.NO));
-			doc.add(new Field("contents", data[i][1], Field.Store.NO, Field.Index.ANALYZED));
-			doc.add(new Field("price_product_parse", data[i][2], Field.Store.NO, Field.Index.ANALYZED));
+
+			doc.add(new Field("tracer", dataRow[0], fieldType));
+			doc.add(new TextField("contents", dataRow[1], Field.Store.NO));
+			doc.add(new TextField("price_product_parse", dataRow[2], Field.Store.NO));
 			//doc.setBoost(2);
 			writer.addDocument(doc);
 		}
@@ -109,12 +107,12 @@ public class PriceListPriceScoreDocComparatorTest {
 	
 	private PriceListPriceScoreDocComparator createNewBasicSortComparator(final Directory directory) throws IOException {
 		final String fieldname = "pricesort-product#parse";
-		final AtomicReader reader = SlowCompositeReaderWrapper.wrap(DirectoryReader.open(directory));
+		final LeafReader reader = SlowCompositeReaderWrapper.wrap(DirectoryReader.open(directory));
 
 		final int directorySize = reader.maxDoc();
 		final PriceListPriceScoreDocComparator comparator = new PriceListPriceScoreDocComparator(fieldname, directorySize);
 		
-		comparator.setNextReader(reader.getContext());
+		comparator.doSetNextReader(reader.getContext());
 		
 		for (int i = 0; i < directorySize; i++) {
 			comparator.copy(i, i);
@@ -143,7 +141,7 @@ public class PriceListPriceScoreDocComparatorTest {
 		final PriceListPriceScoreDocComparator comparator = getBasicSortComparator(directory);
 		
 		final int result = comparator.compare(1, 3);
-		assertTrue(result < 0);
+		assertThat(result).isNegative();
 	}
 	
 	/**
@@ -157,7 +155,7 @@ public class PriceListPriceScoreDocComparatorTest {
 		final PriceListPriceScoreDocComparator comparator = getBasicSortComparator(directory);
 		
 		final int result = comparator.compare(3, 2);
-		assertTrue(result > 0);
+		assertThat(result).isPositive();
 	}
 	
 	/**
@@ -171,7 +169,7 @@ public class PriceListPriceScoreDocComparatorTest {
 		final PriceListPriceScoreDocComparator comparator = getBasicSortComparator(directory);
 		
 		final int result = comparator.compare(2, 2);
-		assertTrue(result == 0);
+		assertThat(result).isZero();
 	}
 	
 	/**
@@ -186,7 +184,7 @@ public class PriceListPriceScoreDocComparatorTest {
 		
 		comparator.setBottom(1);
 		final int result = comparator.compareBottom(2);
-		assertTrue(result < 0);
+		assertThat(result).isNegative();
 	}
 	
 	/**
@@ -203,7 +201,7 @@ public class PriceListPriceScoreDocComparatorTest {
 		
 		comparator.setBottom(magicNumber);
 		final int result = comparator.compareBottom(2);
-		assertTrue(result > 0);
+		assertThat(result).isPositive();
 	}
 	
 	/**
@@ -218,7 +216,7 @@ public class PriceListPriceScoreDocComparatorTest {
 		
 		comparator.setBottom(2);
 		final int result = comparator.compareBottom(2);
-		assertTrue(result == 0);
+		assertThat(result).isZero();
 	}
 	
 	/**

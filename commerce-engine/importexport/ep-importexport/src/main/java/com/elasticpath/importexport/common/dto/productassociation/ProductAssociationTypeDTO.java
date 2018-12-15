@@ -52,6 +52,12 @@ public class ProductAssociationTypeDTO extends AbstractExtensibleEnum<ProductAss
 
 	private static final ProductAssociationType RECOMMENDATION_TYPE = ProductAssociationType.RECOMMENDATION;
 
+	private static final int DEPENDENT_ITEM_ORDINAL = 7;
+
+	private static final String DEPENDENT_ITEM_NAME = "DependentItem";
+
+	private static final ProductAssociationType DEPENDENT_ITEM_TYPE = ProductAssociationType.DEPENDENT_ITEM;
+
 	/**
 	 * Cross Sell Product Association Type DTO.
 	 */
@@ -93,6 +99,13 @@ public class ProductAssociationTypeDTO extends AbstractExtensibleEnum<ProductAss
 	public static final ProductAssociationTypeDTO RECOMMENDATION = new ProductAssociationTypeDTO(RECOMMENDATION_ORDINAL,
 		RECOMMENDATION_NAME,
 		RECOMMENDATION_TYPE);
+
+	/**
+	 * Cross Dependent Item Product Association Type DTO.
+	 */
+	public static final ProductAssociationTypeDTO DEPENDENT_ITEM = new ProductAssociationTypeDTO(DEPENDENT_ITEM_ORDINAL,
+			DEPENDENT_ITEM_NAME,
+			DEPENDENT_ITEM_TYPE);
 
 	private final ProductAssociationType productAssociationType;
 	/**

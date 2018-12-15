@@ -17,19 +17,13 @@
 
 	<properties>
 		<!-- Dependency versions -->
-		<selenium.version>3.4.0</selenium.version>
-		<ep.selenium.framework.version>1.5.2</ep.selenium.framework.version>
-		<!-- JMS properties -->
-		<ep.jms.host>localhost</ep.jms.host>
-		<ep.jms.port.tcp>61616</ep.jms.port.tcp>
-		<ep.jms.url>tcp://${ep.jms.host}:${ep.jms.port.tcp}</ep.jms.url>
+		<ep.selenium.framework.version>1.5.3</ep.selenium.framework.version>
 	</properties>
 
 	<dependencies>
 		<dependency>
 			<groupId>org.seleniumhq.selenium</groupId>
 			<artifactId>selenium-java</artifactId>
-			<version>${selenium.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>com.elasticpath.repo</groupId>
@@ -71,15 +65,6 @@
 			<artifactId>slf4j-api</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>jul-to-slf4j</artifactId>
-			<version>${slf4j.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-log4j12</artifactId>
-		</dependency>
-		<dependency>
 			<groupId>io.cucumber</groupId>
 			<artifactId>gherkin</artifactId>
 		</dependency>
@@ -91,16 +76,19 @@
 		<dependency>
 			<groupId>com.google.guava</groupId>
 			<artifactId>guava</artifactId>
-			<version>21.0</version>
 		</dependency>
 		<dependency>
-			<groupId>com.elasticpath.repo</groupId>
-			<artifactId>ep-cortex-macros</artifactId>
+			<groupId>com.elasticpath.extensions</groupId>
+			<artifactId>ep-cortex-common-test-definitions</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.elasticpath</groupId>
+			<artifactId>ep-query-analyzer</artifactId>
+			<scope>compile</scope>
 		</dependency>
 		<dependency>
 			<groupId>mysql</groupId>
 			<artifactId>mysql-connector-java</artifactId>
-			<version>5.1.44</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.commons</groupId>

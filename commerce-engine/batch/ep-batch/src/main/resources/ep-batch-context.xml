@@ -13,6 +13,7 @@
 	<!-- required by productQueryComposer in spring/dataaccess/dao.xml -->
 	<import resource="classpath:spring/commons/util-config.xml" />
 	<import resource="classpath:spring/commons/validators.xml" />
+	<import resource="classpath:spring/service/service.xml" />
 
 	<!-- Local Spring files -->
 	<import resource="spring/models/domainModelBatch.xml" />

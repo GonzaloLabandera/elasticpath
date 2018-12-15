@@ -455,6 +455,11 @@ public class CachingShippingCalculationServiceImplTest {
 			return null;
 		}
 
+		@Override
+		public boolean containsKey(final ShippingCalculationResultCacheKey key) {
+			return cacheMap.containsKey(key);
+		}
+
 		public Map<ShippingCalculationResultCacheKey, ShippingCalculationResult> getCacheMap() {
 			return cacheMap;
 		}

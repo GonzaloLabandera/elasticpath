@@ -35,12 +35,37 @@
 		</dependency>
 		<dependency>
 			<groupId>com.elasticpath.rest.definitions</groupId>
+			<artifactId>ep-resource-offerdefinitions-api</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.elasticpath.rest.definitions</groupId>
 			<artifactId>ep-resource-collections-api</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.elasticpath.rest.integration.epcommerce</groupId>
+			<artifactId>ep-rest-repositories-epcommerce</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>com.elasticpath.rest</groupId>
 			<artifactId>ep-rs-annotated-dispatch</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>com.elasticpath.rest.helix</groupId>
+			<artifactId>helix-data-injectors</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.elasticpath.rest.helix</groupId>
+			<artifactId>helix-api</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.google.inject</groupId>
+			<artifactId>guice</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.ops4j</groupId>
+			<artifactId>peaberry</artifactId>
+		</dependency>
+
 	</dependencies>
 
 	<build>
@@ -48,6 +73,17 @@
 			<plugin>
 				<groupId>org.apache.felix</groupId>
 				<artifactId>maven-bundle-plugin</artifactId>
+				<configuration>
+					<instructions>
+						<Require-Capability>osgi.service; filter:="(objectClass=com.elasticpath.rest.helix.client.extender.BootstrapExtender)";
+							effective:=active,
+						</Require-Capability>
+					</instructions>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>com.elasticpath.rest.helix</groupId>
+				<artifactId>helix-maven-plugin</artifactId>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -57,7 +93,6 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-pmd-plugin</artifactId>
 			</plugin>
-
 		</plugins>
 	</build>
 </project>

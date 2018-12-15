@@ -3,15 +3,15 @@
  */
 package com.elasticpath.service.store.impl;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -19,14 +19,12 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 
-import org.hamcrest.collection.IsArray;
-import org.jmock.Expectations;
-import org.jmock.integration.junit4.JUnitRuleMockery;
-import org.junit.After;
+import com.google.common.collect.ImmutableList;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.elasticpath.base.exception.EpServiceException;
 import com.elasticpath.commons.beanframework.BeanFactory;
@@ -41,18 +39,17 @@ import com.elasticpath.domain.store.impl.StoreImpl;
 import com.elasticpath.persistence.api.FetchGroupLoadTuner;
 import com.elasticpath.persistence.api.FlushMode;
 import com.elasticpath.persistence.api.PersistenceEngine;
-import com.elasticpath.persistence.api.PersistenceSession;
 import com.elasticpath.service.misc.FetchPlanHelper;
 import com.elasticpath.service.search.IndexNotificationService;
 import com.elasticpath.service.search.query.ProductSearchCriteria;
 import com.elasticpath.service.search.query.SearchCriteria;
 import com.elasticpath.service.store.StoreService;
-import com.elasticpath.test.BeanFactoryExpectationsFactory;
 
 /**
  * Test case for <code>StoreServiceImpl</code>.
  */
-@SuppressWarnings({ "PMD.TooManyStaticImports", "PMD.TooManyMethods", "PMD.GodClass" })
+@SuppressWarnings({ "PMD.TooManyMethods", "PMD.GodClass" })
+@RunWith(MockitoJUnitRunner.class)
 public class StoreServiceImplTest {
 
 	private static final String STORE_DISPLAYABLE = "STORE_DISPLAYABLE_FLAG";
@@ -63,22 +60,29 @@ public class StoreServiceImplTest {
 
 	private static final String FIND_ALL_COMPLETE_STORES = "FIND_ALL_COMPLETE_STORES";
 
+	private static final String FIND_STORE_WITH_CODE = "FIND_STORE_WITH_CODE";
+
+	private static final String FIND_ALL_STORE_UIDS = "FIND_ALL_STORE_UIDS";
+
+	private static final String STORE_WITH_ORDER_IN_USE = "STORE_WITH_ORDER_IN_USE";
+
+	private static final String STORE_WITH_USER_IN_USE = "STORE_WITH_USER_IN_USE";
+
 	private StoreServiceImpl storeServiceImpl;
 
 	private static final String PLACEHOLDER_FOR_LIST = "list";
 
-	@Rule
-	public final JUnitRuleMockery context = new JUnitRuleMockery();
+	@Mock
+	private PersistenceEngine persistenceEngine;
 
-	@Rule
-	public ExpectedException exception = ExpectedException.none();
+	@Mock
+	private FetchPlanHelper fetchPlanHelper;
 
-	private final PersistenceEngine persistenceEngine = context.mock(PersistenceEngine.class);
-	private final PersistenceSession persistenceSession = context.mock(PersistenceSession.class);
-	private final FetchPlanHelper fetchPlanHelper = context.mock(FetchPlanHelper.class);
-	private final IndexNotificationService indexNotificationService = context.mock(IndexNotificationService.class);
-	private final BeanFactory beanFactory = context.mock(BeanFactory.class);
-	private BeanFactoryExpectationsFactory expectationsFactory;
+	@Mock
+	private IndexNotificationService indexNotificationService;
+
+	@Mock
+	private BeanFactory beanFactory;
 
 	/**
 	 * Prepares for tests.
@@ -87,7 +91,6 @@ public class StoreServiceImplTest {
 	 */
 	@Before
 	public void setUp() throws Exception {
-		setupPersistenceEngine();
 		setupElasticPath();
 
 		storeServiceImpl = new StoreServiceImpl();
@@ -96,23 +99,8 @@ public class StoreServiceImplTest {
 		storeServiceImpl.setIndexNotificationService(indexNotificationService);
 	}
 
-	@After
-	public void tearDown() {
-		expectationsFactory.close();
-	}
-
 	private void setupElasticPath() {
-		expectationsFactory = new BeanFactoryExpectationsFactory(context, beanFactory);
-		context.checking(new Expectations() { {
-			allowing(beanFactory).getBean(ContextIdNames.PRODUCT_SEARCH_CRITERIA); will(returnValue(new ProductSearchCriteria()));
-		} });
-	}
-
-	private void setupPersistenceEngine() {
-		context.checking(new Expectations() { {
-			allowing(persistenceEngine).initialize(with(any(Object.class)));
-			allowing(persistenceEngine).getSharedPersistenceSession(); will(returnValue(persistenceSession));
-		} });
+		when(beanFactory.getBean(ContextIdNames.PRODUCT_SEARCH_CRITERIA)).thenReturn(new ProductSearchCriteria());
 	}
 
 	/**
@@ -123,12 +111,9 @@ public class StoreServiceImplTest {
 		final Store store = new StoreImpl();
 		final List<SearchCriteria> result = new ArrayList<>();
 		result.add(new ProductSearchCriteria());
-		final MockUpdateNotification mockUpdateNotification = context.mock(MockUpdateNotification.class);
+		final MockUpdateNotification mockUpdateNotification = mock(MockUpdateNotification.class);
 
-		context.checking(new Expectations() { {
-			oneOf(persistenceEngine).saveOrUpdate(with(store)); will(returnValue(store));
-			oneOf(mockUpdateNotification).mockMethod(with(same(result)));
-		} });
+		when(persistenceEngine.saveOrUpdate(store)).thenReturn(store);
 
 		storeServiceImpl = new StoreServiceImpl() {
 			@Override
@@ -144,6 +129,9 @@ public class StoreServiceImplTest {
 
 		storeServiceImpl.setPersistenceEngine(persistenceEngine);
 		storeServiceImpl.saveOrUpdate(store);
+
+		verify(persistenceEngine).saveOrUpdate(store);
+		verify(mockUpdateNotification).mockMethod(result);
 	}
 
 	/**
@@ -155,14 +143,8 @@ public class StoreServiceImplTest {
 		final ProductSearchCriteria productSearchCriteria = new ProductSearchCriteria();
 		result.add(productSearchCriteria);
 
-		context.checking(new Expectations() {
-			{
-				oneOf(indexNotificationService).addViaQuery(with(same(UpdateType.UPDATE)), with(same(productSearchCriteria)), with(false));
-			}
-		});
-
-
 		storeServiceImpl.notifyObjectsByUpdateCriteria(result);
+		verify(indexNotificationService).addViaQuery(UpdateType.UPDATE, productSearchCriteria, false);
 	}
 
 	/**
@@ -175,14 +157,24 @@ public class StoreServiceImplTest {
 			protected boolean updateProductsNotificationRequired(final Store storeBeforePersistence) {
 				return false;
 			}
+
+			@Override
+			protected <T> T getBean(final String beanName) {
+				return beanFactory.getBean(beanName);
+			}
 		};
 
-		assertNull(storeServiceImpl.buildProductUpdateCriteria(null));
+		assertThat(storeServiceImpl.buildProductUpdateCriteria(null)).isNull();
 
 		storeServiceImpl = new StoreServiceImpl() {
 			@Override
 			protected boolean updateProductsNotificationRequired(final Store storeBeforePersistence) {
 				return true;
+			}
+
+			@Override
+			protected <T> T getBean(final String beanName) {
+				return beanFactory.getBean(beanName);
 			}
 		};
 
@@ -192,12 +184,11 @@ public class StoreServiceImplTest {
 		store.setCatalog(catalog);
 
 		SearchCriteria productUpdateCriteria = storeServiceImpl.buildProductUpdateCriteria(store);
-		assertNotNull(productUpdateCriteria);
-		assertTrue(productUpdateCriteria instanceof ProductSearchCriteria);
+		assertThat(productUpdateCriteria).isInstanceOf(ProductSearchCriteria.class);
 
 		ProductSearchCriteria productSearchCriteria = (ProductSearchCriteria) productUpdateCriteria;
-		assertEquals(Locale.US, productSearchCriteria.getLocale());
-		assertEquals(catalog.getCode(), productSearchCriteria.getCatalogCode());
+		assertThat(productSearchCriteria.getLocale()).isEqualTo(Locale.US);
+		assertThat(productSearchCriteria.getCatalogCode()).isEqualTo(catalog.getCode());
 	}
 
 	/**
@@ -208,10 +199,10 @@ public class StoreServiceImplTest {
 		Store store = new StoreImpl();
 		store.setStoreState(StoreState.UNDER_CONSTRUCTION);
 
-		assertFalse(storeServiceImpl.updateProductsNotificationRequired(store));
+		assertThat(storeServiceImpl.updateProductsNotificationRequired(store)).isFalse();
 
 		store.setUidPk(1L);
-		assertFalse(storeServiceImpl.updateProductsNotificationRequired(store));
+		assertThat(storeServiceImpl.updateProductsNotificationRequired(store)).isFalse();
 	}
 
 	/**
@@ -221,7 +212,7 @@ public class StoreServiceImplTest {
 	public void testUpdateProductsNotificationRequiredCompleteNotPersistedStore() {
 		Store store = new StoreImpl();
 		store.setStoreState(StoreState.OPEN);
-		assertTrue(storeServiceImpl.updateProductsNotificationRequired(store));
+		assertThat(storeServiceImpl.updateProductsNotificationRequired(store)).isTrue();
 	}
 
 	/**
@@ -243,14 +234,10 @@ public class StoreServiceImplTest {
 		};
 		storeServiceImpl.setPersistenceEngine(persistenceEngine);
 
-		context.checking(new Expectations() {
-			{
-				oneOf(persistenceEngine).retrieveByNamedQuery(STORE_DISPLAYABLE, store.getUidPk());
-				will(returnValue(Arrays.asList(store.isDisplayOutOfStock())));
-			}
-		});
+		when(persistenceEngine.retrieveByNamedQuery(STORE_DISPLAYABLE, store.getUidPk())).thenReturn(ImmutableList.of(store.isDisplayOutOfStock()));
 
-		assertFalse(storeServiceImpl.updateProductsNotificationRequired(store));
+		assertThat(storeServiceImpl.updateProductsNotificationRequired(store)).isFalse();
+		verify(persistenceEngine).retrieveByNamedQuery(STORE_DISPLAYABLE, store.getUidPk());
 	}
 
 	/**
@@ -271,14 +258,10 @@ public class StoreServiceImplTest {
 		};
 		storeServiceImpl.setPersistenceEngine(persistenceEngine);
 
-		context.checking(new Expectations() {
-			{
-				oneOf(persistenceEngine).retrieveByNamedQuery(STORE_DISPLAYABLE, store.getUidPk());
-				will(returnValue(Arrays.asList(!store.isDisplayOutOfStock())));
-			}
-		});
+		when(persistenceEngine.retrieveByNamedQuery(STORE_DISPLAYABLE, store.getUidPk())).thenReturn(ImmutableList.of(!store.isDisplayOutOfStock()));
 
-		assertTrue(storeServiceImpl.updateProductsNotificationRequired(store));
+		assertThat(storeServiceImpl.updateProductsNotificationRequired(store)).isTrue();
+		verify(persistenceEngine).retrieveByNamedQuery(STORE_DISPLAYABLE, store.getUidPk());
 	}
 
 	/**
@@ -305,7 +288,7 @@ public class StoreServiceImplTest {
 		};
 		storeServiceImpl.setPersistenceEngine(persistenceEngine);
 
-		assertTrue(storeServiceImpl.updateProductsNotificationRequired(store));
+		assertThat(storeServiceImpl.updateProductsNotificationRequired(store)).isTrue();
 	}
 
 	/**
@@ -332,7 +315,7 @@ public class StoreServiceImplTest {
 		};
 		storeServiceImpl.setPersistenceEngine(persistenceEngine);
 
-		assertFalse(storeServiceImpl.updateProductsNotificationRequired(store));
+		assertThat(storeServiceImpl.updateProductsNotificationRequired(store)).isFalse();
 	}
 
 	/**
@@ -342,14 +325,10 @@ public class StoreServiceImplTest {
 	public void testGetPersistedStoreName() {
 		final String persistedStoreName = "persistedStoreName";
 
-		context.checking(new Expectations() {
-			{
-				oneOf(persistenceEngine).retrieveByNamedQuery(STORE_NAME, 1L);
-				will(returnValue(Arrays.asList(persistedStoreName)));
-			}
-		});
+		when(persistenceEngine.retrieveByNamedQuery(STORE_NAME, 1L)).thenReturn(ImmutableList.of(persistedStoreName));
 
-		assertEquals(persistedStoreName, storeServiceImpl.getPersistedStoreName(1L));
+		assertThat(storeServiceImpl.getPersistedStoreName(1L)).isEqualTo(persistedStoreName);
+		verify(persistenceEngine).retrieveByNamedQuery(STORE_NAME, 1L);
 	}
 
 	/**
@@ -357,11 +336,9 @@ public class StoreServiceImplTest {
 	 */
 	@Test
 	public void testRemove() {
-		final Store store = context.mock(Store.class);
-		context.checking(new Expectations() { {
-			oneOf(persistenceEngine).delete(with(store));
-		} });
+		final Store store = mock(Store.class);
 		storeServiceImpl.remove(store);
+		verify(persistenceEngine).delete(store);
 	}
 
 	/**
@@ -369,13 +346,8 @@ public class StoreServiceImplTest {
 	 */
 	@Test
 	public void testGetStore() {
-		final Store store = context.mock(Store.class);
+		final StoreImpl store = mock(StoreImpl.class);
 		final long uidpk = 1234L;
-		context.checking(new Expectations() { {
-			allowing(store).getUidPk(); will(returnValue(uidpk));
-			allowing(persistenceEngine).get(with(StoreImpl.class), with(uidpk)); will(returnValue(store));
-			allowing(store).getAssociatedStoreUids();
-		} });
 
 		storeServiceImpl = new StoreServiceImpl() {
 			@Override
@@ -387,8 +359,8 @@ public class StoreServiceImplTest {
 		storeServiceImpl.setFetchPlanHelper(fetchPlanHelper);
 		storeServiceImpl.setIndexNotificationService(indexNotificationService);
 
-		assertSame(store, storeServiceImpl.getStore(uidpk));
-		assertSame(store, storeServiceImpl.getObject(uidpk));
+		assertThat(storeServiceImpl.getStore(uidpk)).isEqualTo(store);
+		assertThat(storeServiceImpl.getObject(uidpk)).isEqualTo(store);
 	}
 
 	/**
@@ -396,12 +368,7 @@ public class StoreServiceImplTest {
 	 */
 	@Test
 	public void testGetStoreNonExisting() {
-		final Store store = context.mock(Store.class);
 		final long nonExistUid = 3456L;
-		context.checking(new Expectations() { {
-			allowing(store).getUidPk(); will(returnValue(nonExistUid));
-			allowing(persistenceEngine).get(with(StoreImpl.class), with(nonExistUid)); will(returnValue(null));
-		} });
 
 		storeServiceImpl = new StoreServiceImpl() {
 			@Override
@@ -413,7 +380,7 @@ public class StoreServiceImplTest {
 		storeServiceImpl.setFetchPlanHelper(fetchPlanHelper);
 		storeServiceImpl.setIndexNotificationService(indexNotificationService);
 
-		assertNull(storeServiceImpl.getStore(nonExistUid));
+		assertThat(storeServiceImpl.getStore(nonExistUid)).isNull();
 	}
 
 	/**
@@ -421,10 +388,8 @@ public class StoreServiceImplTest {
 	 */
 	@Test
 	public void testGetStoreNew() {
-		final Store store = context.mock(Store.class);
-		context.checking(new Expectations() { {
-			allowing(store).getUidPk(); will(returnValue(0L));
-		} });
+		final Store store = mock(Store.class);
+		when(store.getUidPk()).thenReturn(0L);
 
 		storeServiceImpl = new StoreServiceImpl() {
 			@SuppressWarnings("unchecked")
@@ -434,7 +399,7 @@ public class StoreServiceImplTest {
 			}
 		};
 		storeServiceImpl.setPersistenceEngine(persistenceEngine);
-		assertEquals(0, storeServiceImpl.getStore(0).getUidPk());
+		assertThat(storeServiceImpl.getStore(0).getUidPk()).isEqualTo(0);
 	}
 
 
@@ -445,16 +410,12 @@ public class StoreServiceImplTest {
 	public void testFindStoreWithCodeExisting() {
 		final List<Store> storeList = new ArrayList<>();
 		final String existingCode = "test code";
-		final Store store = context.mock(Store.class);
+		final Store store = mock(Store.class);
 		storeList.add(store);
-		context.checking(new Expectations() { {
-			allowing(store).getUidPk(); will(returnValue(1));
-			allowing(store).getCode(); will(returnValue(existingCode));
-			oneOf(persistenceEngine).retrieveByNamedQuery("FIND_STORE_WITH_CODE", FlushMode.COMMIT, existingCode);
-			will(returnValue(storeList));
-		} });
+		doReturn(storeList).when(persistenceEngine).retrieveByNamedQuery(FIND_STORE_WITH_CODE, FlushMode.COMMIT, existingCode);
 
-		assertSame(storeList.get(0), storeServiceImpl.findStoreWithCode(existingCode));
+		assertThat(storeServiceImpl.findStoreWithCode(existingCode)).isEqualTo(storeList.get(0));
+		verify(persistenceEngine).retrieveByNamedQuery(FIND_STORE_WITH_CODE, FlushMode.COMMIT, existingCode);
 	}
 
 	/**
@@ -464,14 +425,9 @@ public class StoreServiceImplTest {
 	public void testFindStoreWithCodeNonExisting() {
 		final List<Store> storeList = new ArrayList<>();
 		final String nonExistingCode = "non existing code";
-		final Store store = context.mock(Store.class);
-		context.checking(new Expectations() { {
-			allowing(store).getUidPk(); will(returnValue(1));
-			allowing(store).getCode(); will(returnValue(nonExistingCode));
-			oneOf(persistenceEngine).retrieveByNamedQuery("FIND_STORE_WITH_CODE", FlushMode.COMMIT, nonExistingCode);
-			will(returnValue(storeList));
-		} });
-		assertNull(storeServiceImpl.findStoreWithCode(nonExistingCode));
+		doReturn(storeList).when(persistenceEngine).retrieveByNamedQuery(FIND_STORE_WITH_CODE, FlushMode.COMMIT, nonExistingCode);
+		assertThat(storeServiceImpl.findStoreWithCode(nonExistingCode)).isNull();
+		verify(persistenceEngine).retrieveByNamedQuery(FIND_STORE_WITH_CODE, FlushMode.COMMIT, nonExistingCode);
 	}
 
 	/**
@@ -479,14 +435,17 @@ public class StoreServiceImplTest {
 	 */
 	@Test
 	public void testIsStoreUniqueForStateNull() {
-		final Store store = context.mock(Store.class);
+		final Store store = mock(Store.class);
 
-		context.checking(new Expectations() { {
-			oneOf(store).getUrl(); will(returnValue(null));
-		} });
+		when(store.getUrl()).thenReturn(null);
 
-		assertTrue("null store should just return true", storeServiceImpl.isStoreUrlUniqueForState(null, StoreState.OPEN));
-		assertTrue("null url should return true", storeServiceImpl.isStoreUrlUniqueForState(store, StoreState.OPEN));
+		assertThat(storeServiceImpl.isStoreUrlUniqueForState(null, StoreState.OPEN))
+			.as("null store should just return true")
+			.isTrue();
+		assertThat(storeServiceImpl.isStoreUrlUniqueForState(store, StoreState.OPEN))
+			.as("null url should return true")
+			.isTrue();
+		verify(store).getUrl();
 	}
 
 	/**
@@ -496,27 +455,28 @@ public class StoreServiceImplTest {
 	@Test
 	public void testIsStoreUniqueForStateWithUrlInUse() {
 
-		final Store persistentStore = context.mock(Store.class, "persistentStore");
+		final Store persistentStore = mock(Store.class, "persistentStore");
 		final String persistentStoreUrl = "http://my.store.url";
 
-		final Store newStore = context.mock(Store.class, "newStore");
+		final Store newStore = mock(Store.class, "newStore");
 		final String newStoreUrl = "http://my.store.url/";
 
-		context.checking(new Expectations() { {
-			allowing(persistentStore).getUrl(); will(returnValue(persistentStoreUrl));
-			allowing(newStore).getUrl(); will(returnValue(newStoreUrl));
-		} });
+		when(persistentStore.getUrl()).thenReturn(persistentStoreUrl);
+		when(newStore.getUrl()).thenReturn(newStoreUrl);
 
 
 		StoreServiceImpl service = new StoreServiceImpl() {
 			@Override
 			List<Store> findStoresWithState(final StoreState state) {
-				return Arrays.asList(persistentStore);
-			};
+				return ImmutableList.of(persistentStore);
+			}
+
+			;
 		};
 
-		assertFalse("The new store's URL already exists for another open store (without the given slash), so should be regarded as non-unique",
-				service.isStoreUrlUniqueForState(newStore, StoreState.OPEN));
+		assertThat(service.isStoreUrlUniqueForState(newStore, StoreState.OPEN))
+			.as("The new store's URL already exists for another open store (without the given slash), so should be regarded as non-unique")
+			.isFalse();
 	}
 
 	/**
@@ -524,26 +484,27 @@ public class StoreServiceImplTest {
 	 */
 	@Test
 	public void testIsStoreUniqueForStateWithUrlNotUsed() {
-		final Store persistentStore = context.mock(Store.class, "persistentStore");
+		final Store persistentStore = mock(Store.class, "persistentStore");
 		final String persistentStoreUrl = "http://my.store.url";
 
-		final Store newStore = context.mock(Store.class, "newStore");
+		final Store newStore = mock(Store.class, "newStore");
 		final String newStoreUrl = "http://my.newstore.url/";
 
-		context.checking(new Expectations() { {
-			allowing(persistentStore).getUrl(); will(returnValue(persistentStoreUrl));
-			allowing(newStore).getUrl(); will(returnValue(newStoreUrl));
-		} });
+		when(persistentStore.getUrl()).thenReturn(persistentStoreUrl);
+		when(newStore.getUrl()).thenReturn(newStoreUrl);
 
 		StoreServiceImpl service = new StoreServiceImpl() {
 			@Override
 			List<Store> findStoresWithState(final StoreState state) {
-				return Arrays.asList(persistentStore);
-			};
+				return ImmutableList.of(persistentStore);
+			}
+
+			;
 		};
 
-		assertTrue("The new store's URL doesn't already exist, so should be regarded as unique",
-				service.isStoreUrlUniqueForState(newStore, StoreState.OPEN));
+		assertThat(service.isStoreUrlUniqueForState(newStore, StoreState.OPEN))
+			.as("The new store's URL doesn't already exist, so should be regarded as unique")
+			.isTrue();
 	}
 
 	/**
@@ -552,20 +513,18 @@ public class StoreServiceImplTest {
 	@Test
 	public void testFindAllStoreUids() {
 		final List<Long> uidList = new ArrayList<>();
-		context.checking(new Expectations() { {
-			oneOf(persistenceEngine).retrieveByNamedQuery("FIND_ALL_STORE_UIDS");
-			will(returnValue(uidList));
-		} });
-		assertSame(uidList, storeServiceImpl.findAllStoreUids());
+		doReturn(uidList).when(persistenceEngine).retrieveByNamedQuery(FIND_ALL_STORE_UIDS);
+		assertThat(storeServiceImpl.findAllStoreUids()).isEqualTo(uidList);
+		verify(persistenceEngine).retrieveByNamedQuery(FIND_ALL_STORE_UIDS);
+
+		reset(persistenceEngine);
 
 		// make sure the query returns something seemingly valid
 		final long storeUid = 1234L;
 		uidList.add(storeUid);
-		context.checking(new Expectations() { {
-			oneOf(persistenceEngine).retrieveByNamedQuery("FIND_ALL_STORE_UIDS");
-			will(returnValue(uidList));
-		} });
-		assertSame(uidList, storeServiceImpl.findAllStoreUids());
+		doReturn(uidList).when(persistenceEngine).retrieveByNamedQuery(FIND_ALL_STORE_UIDS);
+		assertThat(storeServiceImpl.findAllStoreUids()).isEqualTo(uidList);
+		verify(persistenceEngine).retrieveByNamedQuery(FIND_ALL_STORE_UIDS);
 	}
 
 	/**
@@ -574,24 +533,22 @@ public class StoreServiceImplTest {
 	@Test
 	public void testFindAllStores() {
 		final List<Store> storeList = new ArrayList<>();
-		context.checking(new Expectations() { {
-			oneOf(persistenceEngine).retrieveByNamedQuery(FIND_ALL_STORES); will(returnValue(storeList));
-			oneOf(fetchPlanHelper).configureFetchGroupLoadTuner(null);
-			oneOf(fetchPlanHelper).clearFetchPlan();
-		} });
-		assertSame(storeList, storeServiceImpl.findAllStores());
+		doReturn(storeList).when(persistenceEngine).retrieveByNamedQuery(FIND_ALL_STORES);
+		assertThat(storeServiceImpl.findAllStores()).isEqualTo(storeList);
+		verify(persistenceEngine).retrieveByNamedQuery(FIND_ALL_STORES);
+		verify(fetchPlanHelper).configureFetchGroupLoadTuner(null);
+		verify(fetchPlanHelper).clearFetchPlan();
+
+		reset(persistenceEngine, fetchPlanHelper);
 
 		// make sure the query returns something seemingly valid
-		final Store store = context.mock(Store.class);
-		final long storeUid = 1234L;
-		context.checking(new Expectations() { {
-			allowing(store).getUidPk(); will(returnValue(storeUid));
-			oneOf(persistenceEngine).retrieveByNamedQuery(FIND_ALL_STORES); will(returnValue(storeList));
-			oneOf(fetchPlanHelper).configureFetchGroupLoadTuner(null);
-			oneOf(fetchPlanHelper).clearFetchPlan();
-		} });
+		final Store store = mock(Store.class);
+		doReturn(storeList).when(persistenceEngine).retrieveByNamedQuery(FIND_ALL_STORES);
 		storeList.add(store);
-		assertSame(storeList, storeServiceImpl.findAllStores());
+		assertThat(storeServiceImpl.findAllStores()).isEqualTo(storeList);
+		verify(persistenceEngine).retrieveByNamedQuery(FIND_ALL_STORES);
+		verify(fetchPlanHelper).configureFetchGroupLoadTuner(null);
+		verify(fetchPlanHelper).clearFetchPlan();
 	}
 
 	/**
@@ -600,42 +557,35 @@ public class StoreServiceImplTest {
 	@SuppressWarnings("unchecked")
 	@Test
 	public void testStoreInUse() {
-		final Store store = context.mock(Store.class);
 		final long storeUid = 1L;
-		context.checking(new Expectations() { {
-			allowing(store).getUidPk(); will(returnValue(storeUid));
-			oneOf(persistenceEngine).retrieveByNamedQuery(
-					with(equal("STORE_WITH_ORDER_IN_USE")), with(IsArray.<Object>array(anything())));
-			will(returnValue(new ArrayList<Long>()));
-			oneOf(persistenceEngine).retrieveByNamedQuery(
-					with(equal("STORE_WITH_USER_IN_USE")), with(IsArray.<Object>array(anything())));
-			will(returnValue(new ArrayList<Long>()));
-			oneOf(persistenceEngine).retrieveByNamedQuery(
-					with(equal("STORE_WITH_IMPORTJOB_IN_USE")), with(IsArray.<Object>array(anything())));
-			will(returnValue(new ArrayList<Long>()));
-			oneOf(persistenceEngine).retrieveByNamedQuery(
-					with(equal("STORE_WITH_SHIPPING_SERVICE_LEVEL_IN_USE")), with(IsArray.<Object>array(anything())));
-			will(returnValue(new ArrayList<Long>()));
-			oneOf(persistenceEngine).retrieveByNamedQuery(
-					with(equal("STORE_WITH_STORE_ASSOCIATION_IN_USE")), with(IsArray.<Object>array(anything())));
-			will(returnValue(new ArrayList<Long>()));
-			oneOf(persistenceEngine).retrieveByNamedQuery(
-					with(equal("STORE_WITH_PROMOTION_IN_USE")), with(IsArray.<Object>array(anything())));
-			will(returnValue(new ArrayList<Long>()));
-		} });
-		assertFalse(storeServiceImpl.storeInUse(storeUid));
+		when(persistenceEngine.retrieveByNamedQuery(STORE_WITH_ORDER_IN_USE, storeUid)).thenReturn(new ArrayList<>());
+		when(persistenceEngine.retrieveByNamedQuery(STORE_WITH_USER_IN_USE, storeUid)).thenReturn(new ArrayList<>());
+		when(persistenceEngine.retrieveByNamedQuery("STORE_WITH_IMPORTJOB_IN_USE", storeUid)).thenReturn(new ArrayList<>());
+		when(persistenceEngine.retrieveByNamedQuery("STORE_WITH_SHIPPING_SERVICE_LEVEL_IN_USE", storeUid)).thenReturn(new ArrayList<>());
+		when(persistenceEngine.retrieveByNamedQuery("STORE_WITH_STORE_ASSOCIATION_IN_USE", storeUid)).thenReturn(new ArrayList<>());
+		when(persistenceEngine.retrieveByNamedQuery("STORE_WITH_PROMOTION_IN_USE", storeUid)).thenReturn(new ArrayList<>());
+
+		assertThat(storeServiceImpl.storeInUse(storeUid)).isFalse();
+
+		verify(persistenceEngine).retrieveByNamedQuery(STORE_WITH_ORDER_IN_USE, storeUid);
+		verify(persistenceEngine).retrieveByNamedQuery(STORE_WITH_USER_IN_USE, storeUid);
+		verify(persistenceEngine).retrieveByNamedQuery("STORE_WITH_IMPORTJOB_IN_USE", storeUid);
+		verify(persistenceEngine).retrieveByNamedQuery("STORE_WITH_SHIPPING_SERVICE_LEVEL_IN_USE", storeUid);
+		verify(persistenceEngine).retrieveByNamedQuery("STORE_WITH_STORE_ASSOCIATION_IN_USE", storeUid);
+		verify(persistenceEngine).retrieveByNamedQuery("STORE_WITH_PROMOTION_IN_USE", storeUid);
+
+		reset(persistenceEngine);
 
 		final List<Long> storeList = new ArrayList<>();
 		storeList.add(storeUid);
 
-		context.checking(new Expectations() { {
-			allowing(store).getUidPk(); will(returnValue(storeUid));
-			oneOf(persistenceEngine).retrieveByNamedQuery(with(equal("STORE_WITH_ORDER_IN_USE")), with(IsArray.<Object>array(anything())));
-			will(returnValue(new ArrayList<Long>()));
-			oneOf(persistenceEngine).retrieveByNamedQuery(with(equal("STORE_WITH_USER_IN_USE")), with(IsArray.<Object>array(anything())));
-			will(returnValue(storeList));
-		} });
-		assertTrue(storeServiceImpl.storeInUse(1L));
+		when(persistenceEngine.retrieveByNamedQuery(STORE_WITH_ORDER_IN_USE, storeUid)).thenReturn(new ArrayList<>());
+		doReturn(storeList).when(persistenceEngine).retrieveByNamedQuery(STORE_WITH_USER_IN_USE, storeUid);
+
+		assertThat(storeServiceImpl.storeInUse(storeUid)).isTrue();
+
+		verify(persistenceEngine).retrieveByNamedQuery(STORE_WITH_ORDER_IN_USE, storeUid);
+		verify(persistenceEngine).retrieveByNamedQuery(STORE_WITH_USER_IN_USE, storeUid);
 	}
 
 	/**
@@ -648,11 +598,9 @@ public class StoreServiceImplTest {
 		uids.add(2L);
 
 		final Collection<Store> result = new ArrayList<>();
-		context.checking(new Expectations() { {
-			oneOf(persistenceEngine).retrieveByNamedQueryWithList("STORE_WITH_CATALOG_UID", PLACEHOLDER_FOR_LIST, uids);
-			will(returnValue(result));
-		} });
-		assertEquals(result, storeServiceImpl.findStoresWithCatalogUids(uids));
+		doReturn(result).when(persistenceEngine).retrieveByNamedQueryWithList("STORE_WITH_CATALOG_UID", PLACEHOLDER_FOR_LIST, uids);
+		assertThat(storeServiceImpl.findStoresWithCatalogUids(uids)).isEqualTo(result);
+		verify(persistenceEngine).retrieveByNamedQueryWithList("STORE_WITH_CATALOG_UID", PLACEHOLDER_FOR_LIST, uids);
 	}
 
 	/**
@@ -660,25 +608,20 @@ public class StoreServiceImplTest {
 	 */
 	@Test
 	public void testFindAllStoresFGLoadTuner() {
-		final long uid = 1234L;
-		final Store store = context.mock(Store.class);
-		final FetchGroupLoadTuner loadTuner = context.mock(FetchGroupLoadTuner.class);
-		final List<Store> stores = Arrays.asList(store);
-		context.checking(new Expectations() { {
-			allowing(store).getUidPk(); will(returnValue(uid));
-			oneOf(persistenceEngine).retrieveByNamedQuery(FIND_ALL_STORES); will(returnValue(stores));
-			oneOf(fetchPlanHelper).configureFetchGroupLoadTuner(loadTuner);
-			oneOf(fetchPlanHelper).clearFetchPlan();
-		} });
-		assertSame(stores, storeServiceImpl.findAllStores(loadTuner));
+		final Store store = mock(Store.class);
+		final FetchGroupLoadTuner loadTuner = mock(FetchGroupLoadTuner.class);
+		final List<Store> stores = ImmutableList.of(store);
+		doReturn(stores).when(persistenceEngine).retrieveByNamedQuery(FIND_ALL_STORES);
 
-		context.checking(new Expectations() { {
-			allowing(store).getUidPk(); will(returnValue(uid));
-			oneOf(persistenceEngine).retrieveByNamedQuery(FIND_ALL_STORES); will(returnValue(new ArrayList<Store>()));
-			oneOf(fetchPlanHelper).configureFetchGroupLoadTuner(loadTuner);
-			oneOf(fetchPlanHelper).clearFetchPlan();
-		} });
-		assertTrue(storeServiceImpl.findAllStores(loadTuner).isEmpty());
+		assertThat(storeServiceImpl.findAllStores(loadTuner)).isEqualTo(stores);
+
+		when(persistenceEngine.retrieveByNamedQuery(FIND_ALL_STORES)).thenReturn(new ArrayList<>());
+
+		assertThat(storeServiceImpl.findAllStores(loadTuner)).isEmpty();
+
+		verify(persistenceEngine, times(2)).retrieveByNamedQuery(FIND_ALL_STORES);
+		verify(fetchPlanHelper, times(2)).configureFetchGroupLoadTuner(loadTuner);
+		verify(fetchPlanHelper, times(2)).clearFetchPlan();
 	}
 
 	/**
@@ -688,15 +631,12 @@ public class StoreServiceImplTest {
 	@Test
 	public void testFindAllCompleteStores() {
 		final List<Store> completeStores = Collections.emptyList();
-		context.checking(new Expectations() { {
-			oneOf(persistenceEngine).retrieveByNamedQuery(
-					FIND_ALL_COMPLETE_STORES, StoreState.UNDER_CONSTRUCTION, StoreState.RESTRICTED);
-			will(returnValue(completeStores));
-			oneOf(fetchPlanHelper).configureFetchGroupLoadTuner(null);
-			oneOf(fetchPlanHelper).clearFetchPlan();
-		} });
+		doReturn(completeStores).when(persistenceEngine).retrieveByNamedQuery(FIND_ALL_COMPLETE_STORES, StoreState.UNDER_CONSTRUCTION, StoreState.RESTRICTED);
 
-		assertSame(completeStores, storeServiceImpl.findAllCompleteStores());
+		assertThat(storeServiceImpl.findAllCompleteStores()).isEqualTo(completeStores);
+		verify(persistenceEngine).retrieveByNamedQuery(FIND_ALL_COMPLETE_STORES, StoreState.UNDER_CONSTRUCTION, StoreState.RESTRICTED);
+		verify(fetchPlanHelper).configureFetchGroupLoadTuner(null);
+		verify(fetchPlanHelper).clearFetchPlan();
 	}
 
 	/**
@@ -706,15 +646,14 @@ public class StoreServiceImplTest {
 	@Test
 	public void testFindAllCompleteStoresWithLoadTuner() {
 		final List<Store> completeStores = Collections.emptyList();
-		final FetchGroupLoadTuner loadTuner = context.mock(FetchGroupLoadTuner.class);
-		context.checking(new Expectations() { {
-			oneOf(persistenceEngine).retrieveByNamedQuery(
-					FIND_ALL_COMPLETE_STORES, StoreState.UNDER_CONSTRUCTION, StoreState.RESTRICTED);
-			will(returnValue(completeStores));
-			oneOf(fetchPlanHelper).configureFetchGroupLoadTuner(loadTuner);
-			oneOf(fetchPlanHelper).clearFetchPlan();
-		} });
-		assertSame(completeStores, storeServiceImpl.findAllCompleteStores(loadTuner));
+		final FetchGroupLoadTuner loadTuner = mock(FetchGroupLoadTuner.class);
+		doReturn(completeStores).when(persistenceEngine).retrieveByNamedQuery(FIND_ALL_COMPLETE_STORES, StoreState.UNDER_CONSTRUCTION, StoreState.RESTRICTED);
+
+		assertThat(storeServiceImpl.findAllCompleteStores(loadTuner)).isEqualTo(completeStores);
+
+		verify(persistenceEngine).retrieveByNamedQuery(FIND_ALL_COMPLETE_STORES, StoreState.UNDER_CONSTRUCTION, StoreState.RESTRICTED);
+		verify(fetchPlanHelper).configureFetchGroupLoadTuner(loadTuner);
+		verify(fetchPlanHelper).clearFetchPlan();
 	}
 
 	/**
@@ -723,12 +662,11 @@ public class StoreServiceImplTest {
 	@Test
 	public void testFindAllCompleteStoreUids() {
 		final List<Long> stores = Collections.emptyList();
-		context.checking(new Expectations() { {
-			oneOf(persistenceEngine).retrieveByNamedQuery(
-					"FIND_ALL_COMPLETE_STORE_UIDS", StoreState.UNDER_CONSTRUCTION, StoreState.RESTRICTED);
-			will(returnValue(stores));
-		} });
-		assertSame(stores, storeServiceImpl.findAllCompleteStoreUids());
+		doReturn(stores).when(persistenceEngine).retrieveByNamedQuery("FIND_ALL_COMPLETE_STORE_UIDS", StoreState.UNDER_CONSTRUCTION, StoreState.RESTRICTED);
+
+		assertThat(storeServiceImpl.findAllCompleteStoreUids()).isEqualTo(stores);
+
+		verify(persistenceEngine).retrieveByNamedQuery("FIND_ALL_COMPLETE_STORE_UIDS", StoreState.UNDER_CONSTRUCTION, StoreState.RESTRICTED);
 	}
 
 	/**
@@ -739,38 +677,31 @@ public class StoreServiceImplTest {
 
 		final Set<CreditCardType> types = new HashSet<>();
 
-		final Store store = context.mock(Store.class);
-		final CreditCardType visa = context.mock(CreditCardType.class, "visa");
-		final CreditCardType masterCard = context.mock(CreditCardType.class, "masterCard");
+		final Store store = mock(Store.class);
+		final CreditCardType visa = mock(CreditCardType.class, "visa");
+		final CreditCardType masterCard = mock(CreditCardType.class, "masterCard");
 		types.add(visa);
 		types.add(masterCard);
 
 		final List<Store> stores = new ArrayList<>();
 		stores.add(store);
 
-		context.checking(new Expectations() { {
 
-			oneOf(visa).getCreditCardType();
-			will(returnValue("Visa"));
-
-			oneOf(masterCard).getCreditCardType();
-			will(returnValue("MasterCard"));
-
-			oneOf(store).getCreditCardTypes();
-			will(returnValue(types));
-		} });
-
-
-
+		when(visa.getCreditCardType()).thenReturn("Visa");
+		when(masterCard.getCreditCardType()).thenReturn("MasterCard");
+		when(store.getCreditCardTypes()).thenReturn(types);
 
 		StoreService storeService = new StoreServiceImpl() {
 			@Override
-			public List <Store> findAllCompleteStores() {
+			public List<Store> findAllCompleteStores() {
 				return stores;
 			}
 		};
 
-		assertTrue(storeService.findAllSupportedCreditCardTypes().size() == 2);
+		assertThat(storeService.findAllSupportedCreditCardTypes()).hasSize(2);
+		verify(visa).getCreditCardType();
+		verify(masterCard).getCreditCardType();
+		verify(store).getCreditCardTypes();
 
 	}
 

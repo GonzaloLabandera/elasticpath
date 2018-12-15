@@ -5,7 +5,6 @@ package com.elasticpath.rest.resource.integration.epcommerce.repository.purchase
 
 import java.util.List;
 
-import com.google.common.collect.ImmutableSortedMap;
 import io.reactivex.Observable;
 import io.reactivex.Single;
 import org.osgi.service.component.annotations.Component;
@@ -16,10 +15,8 @@ import com.elasticpath.repository.LinksRepository;
 import com.elasticpath.rest.definition.purchases.PurchaseIdentifier;
 import com.elasticpath.rest.definition.purchases.PurchaseLineItemIdentifier;
 import com.elasticpath.rest.definition.purchases.PurchaseLineItemOptionsIdentifier;
-import com.elasticpath.rest.id.util.CompositeIdUtil;
-import com.elasticpath.rest.resource.integration.epcommerce.repository.item.ItemRepository;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.order.OrderRepository;
-import com.elasticpath.rest.resource.integration.epcommerce.repository.transform.ReactiveAdapter;
+import com.elasticpath.rest.resource.integration.epcommerce.repository.sku.ProductSkuRepository;
 
 /**
  * Repository that returns options for the given line item.
@@ -31,8 +28,7 @@ import com.elasticpath.rest.resource.integration.epcommerce.repository.transform
 public class LineItemToOptionsRepositoryImpl<I extends PurchaseLineItemIdentifier, O extends PurchaseLineItemOptionsIdentifier>
 		implements LinksRepository<PurchaseLineItemIdentifier, PurchaseLineItemOptionsIdentifier> {
 
-	private ItemRepository itemRepository;
-	private ReactiveAdapter reactiveAdapter;
+	private ProductSkuRepository productSkuRepository;
 	private OrderRepository orderRepository;
 
 	@Override
@@ -43,7 +39,6 @@ public class LineItemToOptionsRepositoryImpl<I extends PurchaseLineItemIdentifie
 		String purchaseId = purchaseIdentifier.getPurchaseId().getValue();
 		return orderRepository.findProductSku(scope, purchaseId, guidPathFromRootItem)
 				.map(ProductSku::getSkuCode)
-				.map(this::encodeItemId)
 				.flatMap(this::doesSkuContainOptions)
 				.flatMapObservable(containsOptions -> containsOptions ? buildPurchaseLineItemOptionsIdentifier(identifier) : Observable.empty())
 				.onErrorResumeNext(Observable.empty());
@@ -55,12 +50,6 @@ public class LineItemToOptionsRepositoryImpl<I extends PurchaseLineItemIdentifie
 				.build());
 	}
 
-	private String encodeItemId(final String skuCode) {
-		return CompositeIdUtil.encodeCompositeId(
-				ImmutableSortedMap.of(ItemRepository.SKU_CODE_KEY, skuCode)
-		);
-	}
-
 	/**
 	 * Checks if item has options.
 	 *
@@ -68,19 +57,14 @@ public class LineItemToOptionsRepositoryImpl<I extends PurchaseLineItemIdentifie
 	 * @return true any options are present for this item
 	 */
 	protected Single<Boolean> doesSkuContainOptions(final String skuCode) {
-		return reactiveAdapter.fromRepository(() -> itemRepository.getSkuOptionsForItemId(skuCode))
+		return productSkuRepository.getProductSkuOptionsByCode(skuCode)
 				.isEmpty()
 				.map(empty -> !empty);
 	}
 
 	@Reference
-	public void setItemRepository(final ItemRepository itemRepository) {
-		this.itemRepository = itemRepository;
-	}
-
-	@Reference
-	public void setReactiveAdapter(final ReactiveAdapter reactiveAdapter) {
-		this.reactiveAdapter = reactiveAdapter;
+	public void setProductSkuRepository(final ProductSkuRepository productSkuRepository) {
+		this.productSkuRepository = productSkuRepository;
 	}
 
 	@Reference

@@ -13,7 +13,6 @@ import com.elasticpath.persistence.api.Persistable;
 import com.elasticpath.tools.sync.exception.SyncToolConfigurationException;
 import com.elasticpath.tools.sync.job.Command;
 import com.elasticpath.tools.sync.job.JobEntry;
-import com.elasticpath.tools.sync.job.JobEntryCreator;
 import com.elasticpath.tools.sync.job.TransactionJob;
 import com.elasticpath.tools.sync.job.TransactionJobBuilder;
 import com.elasticpath.tools.sync.job.TransactionJobUnit;
@@ -62,15 +61,11 @@ public class TransactionJobBuilderImpl implements TransactionJobBuilder {
 	TransactionJobUnit createTransactionJobUnit(final TransactionJobDescriptor transactionJobDescriptor, final boolean populate)
 			throws SyncToolConfigurationException {
 
-		final TransactionJobUnit transactionJobUnit = new TransactionJobUnitImpl(new JobEntryCreator() {
-
-			@Override
-			public JobEntry createJobEntry(final TransactionJobUnit transactionJobUnit, final TransactionJobDescriptorEntry descriptorEntry) {
-				if (descriptorEntry instanceof JobEntry) {
-					return (JobEntry) descriptorEntry;
-				}
-				return TransactionJobBuilderImpl.this.createJobEntry(transactionJobUnit, descriptorEntry);
+		final TransactionJobUnit transactionJobUnit = new TransactionJobUnitImpl((transactionJobUnit1, descriptorEntry) -> {
+			if (descriptorEntry instanceof JobEntry) {
+				return (JobEntry) descriptorEntry;
 			}
+			return TransactionJobBuilderImpl.this.createJobEntry(transactionJobUnit1, descriptorEntry);
 		});
 
 		transactionJobUnit.setName(transactionJobDescriptor.getName());

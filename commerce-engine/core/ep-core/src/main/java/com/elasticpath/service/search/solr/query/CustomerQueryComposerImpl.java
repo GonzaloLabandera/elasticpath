@@ -19,9 +19,9 @@ import java.util.Collection;
 import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.lucene.search.BooleanClause;
 import org.apache.lucene.search.BooleanClause.Occur;
 import org.apache.lucene.search.BooleanQuery;
+import org.apache.lucene.search.BoostQuery;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.TermRangeQuery;
 import org.springframework.util.CollectionUtils;
@@ -47,58 +47,59 @@ public class CustomerQueryComposerImpl extends AbstractQueryComposerImpl {
 	public Query composeQueryInternal(final SearchCriteria searchCriteria, final SearchConfig searchConfig) {
 		setAnalyzer(new CustomerQueryAnalyzerImpl());
 		final CustomerSearchCriteria criteria = (CustomerSearchCriteria) searchCriteria;
-		final BooleanQuery booleanQuery = new BooleanQuery();
-		final BooleanQuery emailQuery = new BooleanQuery();
-		final BooleanQuery userIdQuery = new BooleanQuery();
-		boolean hasUserIdCriteria = addToQuery(searchConfig, userIdQuery, USER_ID_EXACT, criteria.getUserId(), Occur.SHOULD, true);
-		boolean hasEmailCriteria = addToQuery(searchConfig, emailQuery, EMAIL_EXACT, criteria.getEmail(), Occur.SHOULD, true);
+		final BooleanQuery.Builder booleanQueryBuilder = new BooleanQuery.Builder();
+		final BooleanQuery.Builder emailQueryBuilder = new BooleanQuery.Builder();
+		final BooleanQuery.Builder userIdQueryBuilder = new BooleanQuery.Builder();
+		boolean hasUserIdCriteria = addToQuery(searchConfig, userIdQueryBuilder, USER_ID_EXACT, criteria.getUserId(), Occur.SHOULD, true);
+		boolean hasEmailCriteria = addToQuery(searchConfig, emailQueryBuilder, EMAIL_EXACT, criteria.getEmail(), Occur.SHOULD, true);
 		boolean hasSomeCriteria = hasUserIdCriteria || hasEmailCriteria;
 		if (hasSomeCriteria) {
 			if (criteria.isUserIdAndEmailMutualSearch()) {
-				BooleanQuery innerQuery = new BooleanQuery();
+				BooleanQuery.Builder innerQueryBuilder = new BooleanQuery.Builder();
 				if (hasEmailCriteria) {
-					innerQuery.add(emailQuery, Occur.SHOULD);
+					innerQueryBuilder.add(emailQueryBuilder.build(), Occur.SHOULD);
 				}
 				if (hasUserIdCriteria) {
-					innerQuery.add(userIdQuery, Occur.SHOULD);
+					innerQueryBuilder.add(userIdQueryBuilder.build(), Occur.SHOULD);
 				}
-				booleanQuery.add(innerQuery, Occur.MUST);
+				booleanQueryBuilder.add(innerQueryBuilder.build(), Occur.MUST);
 			} else {
 				if (hasEmailCriteria) {
-					booleanQuery.add(emailQuery, Occur.MUST);
+					booleanQueryBuilder.add(emailQueryBuilder.build(), Occur.MUST);
 				}
 				if (hasUserIdCriteria) {
-					booleanQuery.add(userIdQuery, Occur.MUST);
+					booleanQueryBuilder.add(userIdQueryBuilder.build(), Occur.MUST);
 				}
 			}
 		}
-		hasSomeCriteria |= addToQuery(searchConfig, booleanQuery, FIRST_NAME_EXACT, criteria.getFirstName(), Occur.MUST, true);
-		hasSomeCriteria |= addToQuery(searchConfig, booleanQuery, LAST_NAME_EXACT, criteria.getLastName(), Occur.MUST, true);
-		hasSomeCriteria |= addToQuery(searchConfig, booleanQuery, ZIP_POSTAL_CODE_EXACT, criteria.getZipOrPostalCode(), Occur.MUST, true);
-		hasSomeCriteria |= addToQuery(searchConfig, booleanQuery, CUSTOMER_NUMBER, criteria.getCustomerNumber(), Occur.MUST, false);
-		hasSomeCriteria |= addToQuery(searchConfig, booleanQuery, PHONE_NUMBER_EXACT, criteria.getPhoneNumber(), Occur.MUST, true);
-		hasSomeCriteria |= addToQuery(searchConfig, booleanQuery, STORE_CODE, criteria.getStoreCodes(), Occur.MUST);
-		hasSomeCriteria |= addToQuery(searchConfig, booleanQuery, OBJECT_UID, criteria.getFilteredUids(), Occur.MUST_NOT);
-		hasSomeCriteria |= addTermForCreateDate(criteria, booleanQuery, searchConfig);
+		hasSomeCriteria |= addToQuery(searchConfig, booleanQueryBuilder, FIRST_NAME_EXACT, criteria.getFirstName(), Occur.MUST, true);
+		hasSomeCriteria |= addToQuery(searchConfig, booleanQueryBuilder, LAST_NAME_EXACT, criteria.getLastName(), Occur.MUST, true);
+		hasSomeCriteria |= addToQuery(searchConfig, booleanQueryBuilder, ZIP_POSTAL_CODE_EXACT, criteria.getZipOrPostalCode(), Occur.MUST, true);
+		hasSomeCriteria |= addToQuery(searchConfig, booleanQueryBuilder, CUSTOMER_NUMBER, criteria.getCustomerNumber(), Occur.MUST, false);
+		hasSomeCriteria |= addToQuery(searchConfig, booleanQueryBuilder, PHONE_NUMBER_EXACT, criteria.getPhoneNumber(), Occur.MUST, true);
+		hasSomeCriteria |= addToQuery(searchConfig, booleanQueryBuilder, STORE_CODE, criteria.getStoreCodes(), Occur.MUST);
+		hasSomeCriteria |= addToQuery(searchConfig, booleanQueryBuilder, OBJECT_UID, criteria.getFilteredUids(), Occur.MUST_NOT);
+		hasSomeCriteria |= addTermForCreateDate(criteria, booleanQueryBuilder, searchConfig);
 		if (!hasSomeCriteria) {
 			throw new EpEmptySearchCriteriaException("Empty search criteria is not allowed!");
 		}
-		return booleanQuery;
+		return booleanQueryBuilder.build();
 	}
 
-	private boolean addToQuery(final SearchConfig conf, final BooleanQuery query, final String field,
+	private boolean addToQuery(final SearchConfig conf, final BooleanQuery.Builder queryBuilder, final String field,
 							   final String value, final Occur occur, final boolean wildcards) {
-		if (StringUtils.isBlank(field) || StringUtils.isBlank(value) || query == null || conf == null) {
+		if (StringUtils.isBlank(field) || StringUtils.isBlank(value) || queryBuilder == null || conf == null) {
 			return false;
 		}
-		return addWholeFieldToQuery(field, wildcards ? QueryComposerHelper.addWildcards(value) : value, null, conf, query, occur, false);
+		return addWholeFieldToQuery(field, wildcards ? QueryComposerHelper.addWildcards(value) : value, null, conf, queryBuilder, occur, false);
 	}
 
-	private boolean addToQuery(final SearchConfig conf, final BooleanQuery query, final String field, final Collection<?> value, final Occur occur) {
-		if (StringUtils.isBlank(field) || CollectionUtils.isEmpty(value) || query == null || conf == null) {
+	private boolean addToQuery(final SearchConfig conf, final BooleanQuery.Builder queryBuilder, final String field,
+							   final Collection<?> value, final Occur occur) {
+		if (StringUtils.isBlank(field) || CollectionUtils.isEmpty(value) || queryBuilder == null || conf == null) {
 			return false;
 		}
-		return addWholeFieldToQuery(field, value, null, conf, query, occur, false);
+		return addWholeFieldToQuery(field, value, null, conf, queryBuilder, occur, false);
 	}
 
 	@Override
@@ -106,19 +107,18 @@ public class CustomerQueryComposerImpl extends AbstractQueryComposerImpl {
 		return composeQueryInternal(searchCriteria, searchConfig);
 	}
 
-	private boolean addTermForCreateDate(final CustomerSearchCriteria criteria, final BooleanQuery query,
+	private boolean addTermForCreateDate(final CustomerSearchCriteria criteria, final BooleanQuery.Builder queryBuilder,
 										 final SearchConfig config) {
-		if (criteria == null || query == null || config == null) {
+		if (criteria == null || queryBuilder == null || config == null) {
 			return false;
 		}
 		boolean hasCriteria = false;
 		if (criteria.getFromDate() != null) {
 			hasCriteria = true;
 			final String fromDateAnalyzed = getAnalyzer().analyze(criteria.getFromDate());
-			final Query fromDateRangeQuery = TermRangeQuery.newStringRange(CREATE_TIME,
-					fromDateAnalyzed, null, true, true);
-			fromDateRangeQuery.setBoost(config.getBoostValue(CREATE_TIME));
-			query.add(fromDateRangeQuery, BooleanClause.Occur.MUST);
+			final Query fromDateRangeQuery = new BoostQuery(TermRangeQuery.newStringRange(CREATE_TIME,
+					fromDateAnalyzed, null, true, true), config.getBoostValue(CREATE_TIME));
+			queryBuilder.add(fromDateRangeQuery, Occur.MUST);
 		}
 		return hasCriteria;
 	}

@@ -150,6 +150,7 @@
 	<bean id="attributeKeywordFilter" scope="prototype" class="com.elasticpath.domain.catalogview.impl.AttributeKeywordFilterImpl"/>
 	<bean id="priceFilter" scope="prototype" class="com.elasticpath.domain.catalogview.impl.PriceFilterImpl"/>
 	<bean id="brandFilter" scope="prototype" class="com.elasticpath.domain.catalogview.impl.BrandFilterImpl"/>
+	<bean id="sizeFilter" scope="prototype" class="com.elasticpath.domain.catalogview.impl.SizeRangeFilterImpl"/>
 	<bean id="featuredProductFilter" scope="prototype" class="com.elasticpath.domain.catalogview.impl.FeaturedProductFilterImpl"/>
 	<bean id="displayableFilter" scope="prototype" class="com.elasticpath.domain.catalogview.impl.DisplayableFilterImpl"/>
 	<bean id="advancedSearchFilteredNavSeparatorFilter"
@@ -382,4 +383,7 @@
 	<bean id="shoppingItemDtoValidationContext" scope="prototype" class="com.elasticpath.service.shoppingcart.validation.impl.ShoppingItemDtoValidationContextImpl"/>
 	<bean id="shoppingItemValidationContext" scope="prototype" class="com.elasticpath.service.shoppingcart.validation.impl.ShoppingItemValidationContextImpl"/>
 	<bean id="shoppingCartValidationContext" scope="prototype" class="com.elasticpath.service.shoppingcart.validation.impl.ShoppingCartValidationContextImpl"/>
+
+	<!-- Facets -->
+	<bean id="facet" scope="prototype" class="com.elasticpath.domain.search.impl.FacetImpl"/>
 </beans>

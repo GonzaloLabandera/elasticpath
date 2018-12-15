@@ -5,12 +5,12 @@
 	<parent>
 		<groupId>com.elasticpath.cmclient</groupId>
 		<artifactId>cm-parent</artifactId>
-		<version>703.0.0-SNAPSHOT</version>
+		<version>704.0.0-SNAPSHOT</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 
 	<artifactId>cm-modules</artifactId>
-	<version>703.0.0-SNAPSHOT</version><!-- Version is required here for releasing tasks -->
+	<version>704.0.0-SNAPSHOT</version><!-- Version is required here for releasing tasks -->
 	<packaging>pom</packaging>
 	<name>CM Modules</name>
 	<description> Contains the MANIFEST-first tycho modules, separated from the pom-first modules.</description>
@@ -31,12 +31,12 @@
 	<repositories>
 		<repository>
 			<id>RAP</id>
-			<url>http://download.eclipse.org/rt/rap/3.4</url>
+			<url>http://download.eclipse.org/rt/rap/3.5</url>
 			<layout>p2</layout>
 		</repository>
 		<repository>
 			<id>OxygenRepository</id>
-			<url>http://download.eclipse.org/releases/oxygen</url>
+			<url>http://download.eclipse.org/releases/photon</url>
 			<layout>p2</layout>
 		</repository>
 	</repositories>

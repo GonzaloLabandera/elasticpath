@@ -70,7 +70,7 @@ public class EpRuleBaseImplTest {
 		InternalKnowledgeBase reteooRuleBase = KnowledgeBaseFactory.newKnowledgeBase(KnowledgeBaseFactory.newKnowledgeBaseConfiguration());
 		Externalizable reteooExternalRuleBase = (Externalizable) reteooRuleBase;
 		reteooExternalRuleBase.readExternal(new DroolsObjectInputStream(
-				new ByteArrayInputStream(output.toByteArray()), EpRuleBaseImpl.class.getClassLoader()));
+				new ByteArrayInputStream(output.toByteArray())));
 
 		testDefaultRule(reteooRuleBase);
 	}

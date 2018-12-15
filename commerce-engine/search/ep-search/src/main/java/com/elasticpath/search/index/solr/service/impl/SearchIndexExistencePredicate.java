@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
+import org.apache.log4j.Logger;
 import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.store.FSDirectory;
 
@@ -21,8 +22,12 @@ import com.elasticpath.service.search.IndexType;
  */
 public class SearchIndexExistencePredicate implements Predicate<IndexType> {
 
+	private static final Logger LOG = Logger.getLogger(SearchIndexExistencePredicate.class);
+
 	private static final String SOLR_INDEX_SUBDIRECTORY = "index";
-	private static final long SOLR_INDEX_INITIAL_VERSION = 1L;
+	// This is set to 2 because Solr increments this twice before the index is ready to be used.
+	// This may change in future versions of Solr.
+	private static final long SOLR_INDEX_INITIAL_VERSION = 2L;
 
 	private SearchIndexLocator searchIndexLocator;
 
@@ -32,6 +37,10 @@ public class SearchIndexExistencePredicate implements Predicate<IndexType> {
 		final File actualIndexDirectory = getActualIndexDirectory(searchIndexParentDirectory);
 
 		try (final IndexVersionNumberSupplier indexVersionNumberSupplier = createIndexVersionNumberSupplier(actualIndexDirectory)) {
+			if (indexVersionNumberSupplier.get() <= SOLR_INDEX_INITIAL_VERSION) {
+				LOG.warn("IndexVersionNumberSupplier is " + indexVersionNumberSupplier.get() + ".  The expected threshold for indexing is "
+						+ SOLR_INDEX_INITIAL_VERSION + ".");
+			}
 			return indexVersionNumberSupplier.get() > SOLR_INDEX_INITIAL_VERSION;
 		} catch (final IOException ioe) {
 			throw new EpServiceException("Unable to determine the existence of search index for type [" + indexType + "]", ioe);
@@ -81,7 +90,7 @@ public class SearchIndexExistencePredicate implements Predicate<IndexType> {
 		 * @throws IOException if the file cannot be read or other unexpected low-level I/O issue occurs
 		 */
 		protected IndexVersionNumberSupplier(final File solrIndexDirectory) throws IOException {
-			final FSDirectory directory = FSDirectory.open(solrIndexDirectory);
+			final FSDirectory directory = FSDirectory.open(solrIndexDirectory.toPath());
 
 			this.directoryReader = DirectoryReader.open(directory);
 		}

@@ -3,7 +3,7 @@
  */
 package com.elasticpath.search.index.solr.queueingpublisher.impl;
 
-import org.apache.solr.client.solrj.SolrServer;
+import org.apache.solr.client.solrj.SolrClient;
 
 /**
  * Shut down command for the {@code QueueingSolrDocumentPublisher}.
@@ -11,14 +11,14 @@ import org.apache.solr.client.solrj.SolrServer;
 public class ShutdownCommand implements SolrPublishCommand {
 
 	/**
-	 * Applies the command to the specified {@link SolrServer}.
+	 * Applies the command to the specified {@link SolrClient}.
 	 * 
-	 * @param server the specified {@link SolrServer}.
+	 * @param server the specified {@link SolrClient}.
 	 * @throws InterruptedException which the will shutdown the thread.
 	 * @see QueueingSolrDocumentPublisher
 	 */
 	@Override
-	public void apply(final SolrServer server) throws InterruptedException {
+	public void apply(final SolrClient client) throws InterruptedException {
 		throw new InterruptedException();
 	}
 

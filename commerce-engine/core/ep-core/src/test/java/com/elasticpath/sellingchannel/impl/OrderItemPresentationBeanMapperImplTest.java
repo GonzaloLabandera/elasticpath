@@ -3,16 +3,12 @@
  */
 package com.elasticpath.sellingchannel.impl;
 
-import static junit.framework.TestCase.assertFalse;
-import static junit.framework.TestCase.assertTrue;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
 
 import java.util.Currency;
 
-import org.junit.Rule;
 import org.junit.Test;
-import org.jmock.integration.junit4.JUnitRuleMockery;
 
 import com.elasticpath.common.dto.OrderItemDto;
 import com.elasticpath.commons.tree.impl.TreeNodeMemento;
@@ -36,8 +32,6 @@ public class OrderItemPresentationBeanMapperImplTest {
 
 	private static final int FIVE = 5;
 	private static final int THREE = 3;
-	@Rule
-	public final JUnitRuleMockery context = new JUnitRuleMockery();
 
 
 	/** Required for testing. */
@@ -67,7 +61,7 @@ public class OrderItemPresentationBeanMapperImplTest {
 		
 		TreeNodeMemento<OrderItemPresentationBean> formBean = functor.processNode(orderItemDto, null, null, 0);
 		
-		assertNotNull("A formBean should be returned", formBean);
+		assertThat(formBean).isNotNull();
 	}
 	
 	/**
@@ -88,13 +82,15 @@ public class OrderItemPresentationBeanMapperImplTest {
 		
 		OrderItemPresentationBean presentationBean = mapper.mapFrom(orderItemDto);
 		
-		assertNotNull("A formBean should be returned", presentationBean);
-		assertEquals("Should have 2 children", 2, presentationBean.getChildren().size());
-		assertEquals("Parent is at level 0", 0, presentationBean.getLevel());
+		assertThat(presentationBean).isNotNull();
+		assertThat(presentationBean.getChildren()).hasSize(2);
+		assertThat(presentationBean.getLevel()).isEqualTo(0);
+
 		OrderItemPresentationBean childFormBean = presentationBean.getChildren().get(0);
-		assertEquals("Child is at level 1", 1, childFormBean.getLevel());
+		assertThat(childFormBean.getLevel()).isEqualTo(1);
+
 		OrderItemPresentationBean grandchildFormBean = presentationBean.getChildren().get(1);
-		assertEquals("Grandchild is at level 2", 2, grandchildFormBean.getLevel());
+		assertThat(grandchildFormBean.getLevel()).isEqualTo(2);
 	}
 	
 	/**
@@ -114,7 +110,7 @@ public class OrderItemPresentationBeanMapperImplTest {
 		dto.setAllocated(true);
 		ProductSku productSku = new ProductSkuImpl();
 		dto.setProductSku(productSku);
-		DigitalAsset digitalAsset = context.mock(DigitalAsset.class);
+		DigitalAsset digitalAsset = mock(DigitalAsset.class);
 		dto.setDigitalAsset(digitalAsset);	
 		dto.setListPrice(Money.valueOf("12.34", Currency.getInstance("CAD")));
 		dto.setUnitPrice(Money.valueOf("23.45", Currency.getInstance("CAD")));
@@ -126,21 +122,18 @@ public class OrderItemPresentationBeanMapperImplTest {
 		TreeNodeMemento<OrderItemPresentationBean> presentationBeanMemento = functor.processNode(dto, null, null, 0);
 		OrderItemPresentationBean presentationBean = presentationBeanMemento.getTreeNode();
 		
-		assertEquals("Output should match input", digitalAsset, presentationBean.getDigitalAsset());
-		assertEquals("Output should match input", "display", presentationBean.getDisplayName());
-		assertEquals("Output should match input", "image.jpg", presentationBean.getImage());
-		assertEquals("Output should match input", "skuoptions", presentationBean.getDisplaySkuOptions());
-		assertTrue("Output should match input", presentationBean.isAllocated());
-		assertEquals("Output should match input", 
-				Money.valueOf("12.34", Currency.getInstance("CAD")), presentationBean.getListPriceMoney());
-		assertEquals("Output should match input", 
-				Money.valueOf("23.45", Currency.getInstance("CAD")), presentationBean.getUnitPriceMoney());
-		assertFalse("Output should match input", presentationBean.isUnitLessThanList());
-		assertEquals("Output should match input", Money.valueOf("11.11", Currency.getInstance("CAD")), presentationBean
-				.getDollarSavingsMoney());
-		assertEquals("Output should match input", "sku-A", presentationBean.getSkuCode());
-		assertEquals("Output should match input", THREE, presentationBean.getQuantity());
-		assertEquals("Output should match input", "37.02 CAD", presentationBean.getTotalMoney().toString());
+		assertThat(presentationBean.getDigitalAsset()).isEqualTo(digitalAsset);
+		assertThat(presentationBean.getDisplayName()).isEqualTo("display");
+		assertThat(presentationBean.getImage()).isEqualTo("image.jpg");
+		assertThat(presentationBean.getDisplaySkuOptions()).isEqualTo("skuoptions");
+		assertThat(presentationBean.isAllocated()).isTrue();
+		assertThat(presentationBean.getListPriceMoney()).isEqualTo(Money.valueOf("12.34", Currency.getInstance("CAD")));
+		assertThat(presentationBean.getUnitPriceMoney()).isEqualTo(Money.valueOf("23.45", Currency.getInstance("CAD")));
+		assertThat(presentationBean.isUnitLessThanList()).isFalse();
+		assertThat(presentationBean.getDollarSavingsMoney()).isEqualTo(Money.valueOf("11.11", Currency.getInstance("CAD")));
+		assertThat(presentationBean.getSkuCode()).isEqualTo("sku-A");
+		assertThat(presentationBean.getQuantity()).isEqualTo(THREE);
+		assertThat(presentationBean.getTotalMoney().toString()).isEqualTo("37.02 CAD");
 	}
 	
 	/** Tests that the quantity on the formBeans is the per bundle quantity instead of the shippable quantity. */
@@ -150,16 +143,18 @@ public class OrderItemPresentationBeanMapperImplTest {
 		OrderItemDto root = createFakeOrderItemDto();
 
 		OrderItemPresentationBean actualPresentationBeanRoot = mapper.mapFrom(root);
-		assertEquals(FIVE, actualPresentationBeanRoot.getQuantity());
-		assertEquals("Both descendants should be direct children of the root", 2, actualPresentationBeanRoot.getChildren().size());
+		assertThat(actualPresentationBeanRoot.getQuantity()).isEqualTo(FIVE);
+		assertThat(actualPresentationBeanRoot.getChildren())
+			.as("Both descendants should be direct children of the root")
+			.hasSize(2);
 
 		OrderItemPresentationBean actualFormBeanChild1 = actualPresentationBeanRoot.getChildren().get(0);
-		assertEquals(2, actualFormBeanChild1.getQuantity());
-		assertEquals(0, actualFormBeanChild1.getChildren().size());
+		assertThat(actualFormBeanChild1.getQuantity()).isEqualTo(2);
+		assertThat(actualFormBeanChild1.getChildren()).isEmpty();
 
 		OrderItemPresentationBean actualFormBeanChild2 = actualPresentationBeanRoot.getChildren().get(1);
-		assertEquals(THREE, actualFormBeanChild2.getQuantity());
-		assertEquals(0, actualFormBeanChild2.getChildren().size());
+		assertThat(actualFormBeanChild2.getQuantity()).isEqualTo(THREE);
+		assertThat(actualFormBeanChild2.getChildren()).isEmpty();
 	}
 
 	/**

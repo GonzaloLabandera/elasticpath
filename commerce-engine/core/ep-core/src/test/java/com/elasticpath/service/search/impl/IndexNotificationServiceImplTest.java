@@ -157,7 +157,7 @@ public class IndexNotificationServiceImplTest {
 				will(returnValue(queryComposer));
 
 				oneOf(queryComposer).composeQuery(with(searchCriteria), with(any(SearchConfig.class)));
-				will(returnValue(new BooleanQuery()));
+				will(returnValue(new BooleanQuery.Builder().build()));
 
 				oneOf(mockPersistenceEngine).saveOrUpdate(with(any(Persistable.class)));
 				will(returnValue(null));
@@ -193,7 +193,7 @@ public class IndexNotificationServiceImplTest {
 				will(returnValue(queryComposer));
 
 				oneOf(queryComposer).composeFuzzyQuery(with(searchCriteria), with(any(SearchConfig.class)));
-				will(returnValue(new BooleanQuery()));
+				will(returnValue(new BooleanQuery.Builder().build()));
 
 				oneOf(mockPersistenceEngine).saveOrUpdate(with(any(Persistable.class)));
 				will(returnValue(null));

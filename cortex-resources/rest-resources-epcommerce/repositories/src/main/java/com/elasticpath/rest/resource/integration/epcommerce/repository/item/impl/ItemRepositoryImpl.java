@@ -3,28 +3,24 @@
  */
 package com.elasticpath.rest.resource.integration.epcommerce.repository.item.impl;
 
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
 
 import com.google.common.collect.ImmutableSortedMap;
+import io.reactivex.Observable;
 import io.reactivex.Single;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import com.elasticpath.base.exception.EpSystemException;
+import com.elasticpath.domain.catalog.BundleConstituent;
 import com.elasticpath.domain.catalog.Product;
 import com.elasticpath.domain.catalog.ProductBundle;
 import com.elasticpath.domain.catalog.ProductSku;
 import com.elasticpath.domain.skuconfiguration.SkuOption;
+import com.elasticpath.rest.ResourceOperationFailure;
 import com.elasticpath.rest.cache.CacheResult;
-import com.elasticpath.rest.chain.Assign;
-import com.elasticpath.rest.chain.ExecutionResultChain;
-import com.elasticpath.rest.chain.OnFailure;
-import com.elasticpath.rest.command.ExecutionResult;
-import com.elasticpath.rest.command.ExecutionResultFactory;
 import com.elasticpath.rest.id.IdentifierPart;
 import com.elasticpath.rest.id.type.CompositeIdentifier;
 import com.elasticpath.rest.id.util.CompositeIdUtil;
@@ -32,7 +28,6 @@ import com.elasticpath.rest.resource.integration.epcommerce.repository.item.Item
 import com.elasticpath.rest.resource.integration.epcommerce.repository.sku.ProductSkuRepository;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.transform.ReactiveAdapter;
 import com.elasticpath.service.catalog.BundleIdentifier;
-import com.elasticpath.service.catalog.ProductSkuLookup;
 
 /**
  * Repository that consolidates access to item domain related concepts such as product, sku, and item configuration.
@@ -40,13 +35,14 @@ import com.elasticpath.service.catalog.ProductSkuLookup;
 @Singleton
 @Named("itemRepository")
 public class ItemRepositoryImpl implements ItemRepository {
-	private static final Logger LOG = LoggerFactory.getLogger(ItemRepositoryImpl.class);
 	private static final String ITEM_NOT_FOUND_MESSAGE = "Item not found.";
 	private static final String PRODUCT_NOT_FOUND = "Product cannot be null.";
 	private static final String DEFAULT_SKU_NOT_FOUND = "Product must have a default sku.";
+	private static final String BUNDLE_CONS_NOT_FOUND = "Bundle constituent not found.";
+	private static final String CONSTITUENT_NOT_BUNDLE = "Constituent is not a bundle.";
+	private static final String COMPONENT_NOT_FOUND = "Component not found.";
 
 	private final ProductSkuRepository productSkuRepository;
-	private final ProductSkuLookup productSkuLookup;
 	private final BundleIdentifier bundleIdentifier;
 	private final ReactiveAdapter reactiveAdapter;
 
@@ -55,29 +51,18 @@ public class ItemRepositoryImpl implements ItemRepository {
 	 * Creates instance with needed services wired in.
 	 *
 	 * @param productSkuRepository product sku repository
-	 * @param productSkuLookup     product sku lookup
 	 * @param bundleIdentifier     class for evaluating bundle information about a product
 	 * @param reactiveAdapter      the reactive adapter
 	 */
 	@Inject
 	public ItemRepositoryImpl(
 			@Named("productSkuRepository")  final ProductSkuRepository productSkuRepository,
-			@Named("productSkuLookup")      final ProductSkuLookup productSkuLookup,
 			@Named("bundleIdentifier")      final BundleIdentifier bundleIdentifier,
 			@Named("reactiveAdapter") 		final ReactiveAdapter reactiveAdapter) {
 
 		this.productSkuRepository = productSkuRepository;
-		this.productSkuLookup = productSkuLookup;
 		this.bundleIdentifier = bundleIdentifier;
 		this.reactiveAdapter = reactiveAdapter;
-	}
-
-
-	@Override
-	public ExecutionResult<String> getDefaultItemIdForProduct(final Product product) {
-		ProductSku defaultSku = getVerifiedDefaultSku(product);
-
-		return getItemIdForSku(defaultSku);
 	}
 
 	private ProductSku getVerifiedDefaultSku(final Product product) {
@@ -89,26 +74,16 @@ public class ItemRepositoryImpl implements ItemRepository {
 	}
 
 	@Override
-	public Single<String> getDefaultItemIdForProductSingle(final Product product) {
+	public String getDefaultItemIdForProduct(final Product product) {
 		ProductSku defaultSku = getVerifiedDefaultSku(product);
 
-		return getItemIdForSkuAsSingle(defaultSku);
+		return getItemIdForSku(defaultSku);
 	}
 
 	@Override
-	public Single<String> getItemIdForSkuAsSingle(final ProductSku productSku) {
-		assert productSku != null : "Product sku cannot be null.";
+	public String getItemIdForSku(final ProductSku productSku) {
 		String skuCode = productSku.getSkuCode();
-		String itemId = CompositeIdUtil.encodeCompositeId(createItemIdMap(skuCode));
-		return Single.just(itemId);
-	}
-	
-	@Override
-	public ExecutionResult<String> getItemIdForSku(final ProductSku productSku) {
-		assert productSku != null : "Product sku cannot be null.";
-		String skuCode = productSku.getSkuCode();
-		String itemId = CompositeIdUtil.encodeCompositeId(createItemIdMap(skuCode));
-		return ExecutionResultFactory.createReadOK(itemId);
+		return CompositeIdUtil.encodeCompositeId(createItemIdMap(skuCode));
 	}
 
 	@Override
@@ -124,10 +99,10 @@ public class ItemRepositoryImpl implements ItemRepository {
 	}
 
 	@Override
-	@CacheResult
-	public ProductBundle asProductBundle(final Product product) {
-		assert product != null : "product should not be null.";
-		return bundleIdentifier.asProductBundle(product);
+	@CacheResult(uniqueIdentifier = "asProductBundle")
+	public Single<ProductBundle> asProductBundle(final Product product) {
+		return reactiveAdapter.fromNullableAsSingle(() -> product, "product should not be null.")
+				.flatMap(prod -> reactiveAdapter.fromServiceAsSingle(() -> bundleIdentifier.asProductBundle(prod)));
 	}
 
 	private Map<String, String> createItemIdMap(final String skuCode) {
@@ -135,96 +110,80 @@ public class ItemRepositoryImpl implements ItemRepository {
 	}
 
 	@Override
-	@CacheResult(uniqueIdentifier = "getSkuForItemIdAsSingle")
-	public Single<ProductSku> getSkuForItemIdAsSingle(final String itemId) {
-		assert itemId != null : "itemId should never be null.";
-		return reactiveAdapter.fromRepositoryAsSingle(() -> getSkuCodeForItemId(itemId))
-				.flatMap(productSkuRepository::getProductSkuWithAttributesByCodeAsSingle);
-	}
-	
-	@Override
 	@CacheResult(uniqueIdentifier = "getSkuForItemId")
-	public ExecutionResult<ProductSku> getSkuForItemId(final String itemId) {
-		assert itemId != null : "itemId should never be null.";
-		return new ExecutionResultChain() {
-			public ExecutionResult<?> build() {
-				String skuCode = Assign.ifSuccessful(getSkuCodeForItemId(itemId));
-				ProductSku productSku = Assign.ifSuccessful(productSkuRepository.getProductSkuWithAttributesByCode(skuCode),
-						OnFailure.returnNotFound(ITEM_NOT_FOUND_MESSAGE));
+	public Single<ProductSku> getSkuForItemId(final Map<String, String> itemIdMap) {
+		return getSkuCodeForItemIdMap(itemIdMap)
+				.flatMap(productSkuRepository::getProductSkuWithAttributesByCode);
+	}
 
-				return ExecutionResultFactory.createReadOK(productSku);
-			}
-
-		}.execute();
+	private Single<String> getSkuCodeForItemIdMap(final Map<String, String> itemIdMap) {
+		assert itemIdMap != null : "itemId should never be null.";
+		return reactiveAdapter.fromNullableAsSingle(() -> itemIdMap.get(SKU_CODE_KEY), ITEM_NOT_FOUND_MESSAGE);
 	}
 
 	@Override
-	public ExecutionResult<String> getSkuCodeForItemId(final String itemId) {
-		return getField(itemId, SKU_CODE_KEY);
-	}
-
-	private static ExecutionResult<String> getField(final String itemId, final String skuCodeFieldName) {
-		return new ExecutionResultChain() {
-			public ExecutionResult<?> build() {
-				Map<String, String> compositeItemIdFields = Assign.ifNotNull(CompositeIdUtil.decodeCompositeId(itemId),
-						OnFailure.returnNotFound(ITEM_NOT_FOUND_MESSAGE));
-
-				return ExecutionResultFactory.createReadOK(compositeItemIdFields.get(skuCodeFieldName));
-			}
-		}.execute();
+	@CacheResult(uniqueIdentifier = "isItemBundle")
+	public Single<Boolean> isItemBundle(final Map<String, String> itemIdMap) {
+		return getSkuCodeForItemIdMap(itemIdMap)
+				.flatMap(productSkuRepository::isProductBundleByCode);
 	}
 
 	@Override
-	@CacheResult
-	public ExecutionResult<Boolean> isItemBundle(final String itemId) {
-		return new ExecutionResultChain() {
-			public ExecutionResult<?> build() {
-				ProductSku productSku = Assign.ifSuccessful(getSkuForItemId(itemId));
-				Product product = productSku.getProduct();
-				assert product != null : "Product should not be null";
-
-				return ExecutionResultFactory.createReadOK(bundleIdentifier.isBundle(product));
-			}
-		}.execute();
+	@CacheResult(uniqueIdentifier = "isProductSkuExistForItemId")
+	public Single<Boolean> isProductSkuExistForItemId(final Map<String, String> itemIdMap) {
+		return getSkuCodeForItemIdMap(itemIdMap)
+				.flatMap(productSkuRepository::isProductSkuExistByCode);
 	}
 
 	@Override
-	@CacheResult(uniqueIdentifier = "getSkuForSkuGuid")
-	public ExecutionResult<ProductSku> getSkuForSkuGuid(final String skuGuid) {
-		assert skuGuid != null : "skuGuid should never be null.";
-		return new ExecutionResultChain() {
-			public ExecutionResult<?> build() {
-				ProductSku productSku = Assign.ifSuccessful(productSkuRepository.getProductSkuWithAttributesByGuid(skuGuid),
-						OnFailure.returnNotFound("Sku not found"));
-
-				return ExecutionResultFactory.createReadOK(productSku);
-			}
-
-		}.execute();
+	@CacheResult(uniqueIdentifier = "getSkuOptionsForItemId")
+	public Observable<SkuOption> getSkuOptionsForItemId(final Map<String, String> itemIdMap) {
+		return getSkuCodeForItemIdMap(itemIdMap)
+				.flatMapObservable(productSkuRepository::getProductSkuOptionsByCode);
 	}
 
 	@Override
-	@CacheResult
-	public ExecutionResult<Set<SkuOption>> getSkuOptionsForItemId(final String itemId) {
-		ExecutionResult<String> skuCodeResult = getSkuCodeForItemId(itemId);
-		if (skuCodeResult.isFailure()) {
-			return ExecutionResultFactory.createNotFound(skuCodeResult.getErrorMessage());
+	public Single<BundleConstituent> findBundleConstituentAtPathEnd(final Map<String, String> rootItemIdMap,
+																	final Iterator<String> guidPathFromRootItem) {
+		return getSkuForItemId(rootItemIdMap)
+				.map(ProductSku::getProduct)
+				.flatMap(this::asProductBundle)
+				.map(ProductBundle::getConstituents)
+				.flatMap(bundleConstituents -> findBundleConstituentWithGuid(bundleConstituents, guidPathFromRootItem.next()))
+				.flatMap(bundleConstituent -> getNestedBundleConstituent(bundleConstituent, guidPathFromRootItem))
+				.onErrorResumeNext(Single.error(ResourceOperationFailure.notFound(COMPONENT_NOT_FOUND)));
+	}
+
+	@Override
+	public Single<BundleConstituent> getNestedBundleConstituent(final BundleConstituent currBundleConstituent,
+																final Iterator<String> guidPathFromRootItem) {
+		if (!guidPathFromRootItem.hasNext()) {
+			return Single.just(currBundleConstituent);
 		}
 
-		ExecutionResult<Set<SkuOption>> result;
-		final String skuCode = skuCodeResult.getData();
-		try {
-			ProductSku productSku = productSkuLookup.findBySkuCode(skuCode);
-			if (productSku == null) {
-				return ExecutionResultFactory.createNotFound("Sku could not be found for code " + skuCode);
-			}
+		return getProductBundleFromConstituent(currBundleConstituent)
+				.map(ProductBundle::getConstituents)
+				.flatMap(bundleConstituents -> findBundleConstituentWithGuid(bundleConstituents, guidPathFromRootItem.next()))
+				.flatMap(bundleConstituent -> getNestedBundleConstituent(bundleConstituent, guidPathFromRootItem));
+	}
 
-			result = ExecutionResultFactory.createReadOK(productSku.getProduct().getProductType().getSkuOptions());
-		} catch (EpSystemException exception) {
-			LOG.debug("Exception from productSkuLookup({})", skuCode, exception);
-			result = ExecutionResultFactory.createServerError("Error while loading sku options");
+	@Override
+	public Single<ProductBundle> getProductBundleFromConstituent(final BundleConstituent bundleConstituent) {
+		if (bundleConstituent.getConstituent().isBundle()) {
+			Product product = bundleConstituent.getConstituent().getProduct();
+			return asProductBundle(product);
 		}
 
-		return result;
+		return Single.error(ResourceOperationFailure.notFound(CONSTITUENT_NOT_BUNDLE));
+	}
+
+	@Override
+	public Single<BundleConstituent> findBundleConstituentWithGuid(final List<BundleConstituent> bundleConstituents, final String guid) {
+		for (BundleConstituent bundleConstituent : bundleConstituents) {
+			if (bundleConstituent.getGuid().equals(guid)) {
+				return Single.just(bundleConstituent);
+			}
+		}
+		return Single.error(ResourceOperationFailure.notFound(BUNDLE_CONS_NOT_FOUND));
 	}
 }

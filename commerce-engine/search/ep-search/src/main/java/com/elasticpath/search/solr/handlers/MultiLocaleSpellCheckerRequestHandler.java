@@ -5,6 +5,7 @@ package com.elasticpath.search.solr.handlers;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
@@ -18,8 +19,8 @@ import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
-import org.apache.lucene.index.AtomicReader;
 import org.apache.lucene.index.FieldInfo;
+import org.apache.lucene.index.IndexOptions;
 import org.apache.lucene.index.IndexWriterConfig;
 import org.apache.lucene.search.spell.Dictionary;
 import org.apache.lucene.search.spell.LuceneDictionary;
@@ -202,7 +203,7 @@ public class MultiLocaleSpellCheckerRequestHandler extends RequestHandlerBase im
 				spellDirectory = new RAMDirectory();
 			} else {
 				try {
-					spellDirectory = FSDirectory.open(new File(directory, locale.toString()));
+					spellDirectory = FSDirectory.open(Paths.get(getFile(directory, locale.toString()).toURI()));
 				} catch (IOException e) {
 					throw new SolrException(ErrorCode.SERVER_ERROR, "Unable to open index directory", e);
 				}
@@ -210,6 +211,10 @@ public class MultiLocaleSpellCheckerRequestHandler extends RequestHandlerBase im
 			spellCheckerIndexDir.put(locale, spellDirectory);
 		}
 		return spellDirectory;
+	}
+
+	private File getFile(final File directory, final String locale) {
+		return new File(directory, locale);
 	}
 
 	private void reopen(final Locale locale) throws IOException {
@@ -249,9 +254,8 @@ public class MultiLocaleSpellCheckerRequestHandler extends RequestHandlerBase im
 
 	private Set<String> getIndexedFieldNames(final SolrIndexSearcher searcher) {
 		Set<String> fieldNames = new HashSet<>();
-		AtomicReader reader = searcher.getAtomicReader();
-		for (FieldInfo fieldInfo : reader.getFieldInfos()) {
-			if (fieldInfo.isIndexed()) {
+		for (FieldInfo fieldInfo : searcher.getFieldInfos()) {
+			if (!fieldInfo.getIndexOptions().equals(IndexOptions.NONE)) {
 				fieldNames.add(fieldInfo.name);
 			}
 		}
@@ -271,7 +275,7 @@ public class MultiLocaleSpellCheckerRequestHandler extends RequestHandlerBase im
 			spellChecker.clearIndex();
 			localeHasBeenCleared.put(fieldLocale, true);
 		}
-		spellChecker.indexDictionary(dictionary, new IndexWriterConfig(req.getCore().getSolrConfig().luceneMatchVersion, null), false);
+		spellChecker.indexDictionary(dictionary, new IndexWriterConfig(null), false);
 	}
 
 	private String[] suggest(final String word, final SpellChecker spellChecker, final int numSuggestions) throws IOException {
@@ -294,16 +298,6 @@ public class MultiLocaleSpellCheckerRequestHandler extends RequestHandlerBase im
 	}
 
 	/**
-	 * Returns the version as a string.
-	 *
-	 * @return the version
-	 */
-	@Override
-	public String getVersion() {
-		return "$Revision: 1 $";
-	}
-
-	/**
 	 * Returns the description of the handler.
 	 *
 	 * @return the description
@@ -318,7 +312,6 @@ public class MultiLocaleSpellCheckerRequestHandler extends RequestHandlerBase im
 	 *
 	 * @return the source of the request handler
 	 */
-	@Override
 	public String getSource() {
 		return null;
 	}

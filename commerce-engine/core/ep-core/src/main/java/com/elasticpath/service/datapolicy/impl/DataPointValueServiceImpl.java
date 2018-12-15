@@ -113,7 +113,7 @@ public class DataPointValueServiceImpl extends AbstractEpPersistenceServiceImpl 
 		Collection<DataPointValue> dataPointValues = new ArrayList<>();
 
 		custGuidToDpLocationsMap.forEach((customerGuid, dpLocationToPoints) ->
-			dpLocationToPoints.keySet().forEach((dpLocation) -> {
+			dpLocationToPoints.keySet().forEach(dpLocation -> {
 				DataPointValueReader reader = findDataPointReader(dpLocation);
 				dataPointValues.addAll(reader.readValues(customerGuid, dpLocationToPoints.get(dpLocation)));
 			})

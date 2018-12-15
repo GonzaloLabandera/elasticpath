@@ -11,7 +11,7 @@ import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
 import org.apache.log4j.Logger;
 
-import com.elasticpath.cucumber.util.CortexMacrosTestBase;
+import com.elasticpath.cortexTestObjects.Purchase;
 import com.elasticpath.selenium.dialogs.AddEditCustomerAddressDialog;
 import com.elasticpath.selenium.dialogs.CompleteShipmentDialog;
 import com.elasticpath.selenium.dialogs.ConfirmDialog;
@@ -19,6 +19,8 @@ import com.elasticpath.selenium.dialogs.EditItemDetailsDialog;
 import com.elasticpath.selenium.dialogs.MoveItemDialog;
 import com.elasticpath.selenium.dialogs.SelectASkuDialog;
 import com.elasticpath.selenium.domainobjects.Product;
+import com.elasticpath.selenium.domainobjects.Shipment;
+import com.elasticpath.selenium.domainobjects.ShipmentTableRecord;
 import com.elasticpath.selenium.editor.CustomerEditor;
 import com.elasticpath.selenium.editor.OrderEditor;
 import com.elasticpath.selenium.editor.RmaEditor;
@@ -28,6 +30,7 @@ import com.elasticpath.selenium.resultspane.OrderSearchResultPane;
 import com.elasticpath.selenium.resultspane.RmaSearchResultPane;
 import com.elasticpath.selenium.setup.SetUp;
 import com.elasticpath.selenium.toolbars.ActivityToolbar;
+import com.elasticpath.selenium.toolbars.CatalogManagementActionToolbar;
 import com.elasticpath.selenium.toolbars.CustomerServiceActionToolbar;
 import com.elasticpath.selenium.toolbars.ShippingReceivingActionToolbar;
 import com.elasticpath.selenium.util.Constants;
@@ -37,20 +40,24 @@ import com.elasticpath.selenium.wizards.CreateRefundWizard;
 import com.elasticpath.selenium.wizards.CreateReturnWizard;
 import com.elasticpath.selenium.wizards.PaymentAuthorizationWizard;
 
+
 /**
  * Order step definitions.
  */
-@SuppressWarnings({"PMD.GodClass", "PMD.TooManyMethods", "PMD.TooManyFields"})
+@SuppressWarnings({"PMD.GodClass", "PMD.TooManyMethods", "PMD.TooManyFields", "PMD.ExcessiveClassLength"})
 public class OrderDefinition {
 
 	private static final String ORDER_DETAILS_TAB = "Details";
 	private static final String CUSTOMERNAME_COLUUMNNAME = "Customer Name";
 	private static final String ORDER_NUMBER_COLUMNNAME = "Order #";
+	private static final String ORDER_STORE_COLUUMNNAME = "Store";
+	private static final String ORDER_PHONE_FIELD = "phone";
 	private static final Logger LOGGER = Logger.getLogger(OrderDefinition.class);
 	private final CustomerService customerService;
 	private final ActivityToolbar activityToolbar;
 	private final ShippingReceivingActionToolbar shippingReceivingActionToolbar;
 	private final CustomerServiceActionToolbar customerServiceActionToolbar;
+	private final CatalogManagementActionToolbar catalogManagementActionToolbar;
 	private final Product product;
 	private ShippingReceiving shippingReceiving;
 	private OrderSearchResultPane orderSearchResultPane;
@@ -72,6 +79,7 @@ public class OrderDefinition {
 	private String exchangeOrderNumber;
 	private String addressNameToCheck;
 	private String addressPhoneToCheck;
+	private static final String PAYMENT_SOURCE = "Payment Source";
 
 	/**
 	 * Constructor.
@@ -83,6 +91,7 @@ public class OrderDefinition {
 		shippingReceivingActionToolbar = new ShippingReceivingActionToolbar(SetUp.getDriver());
 		customerService = new CustomerService(SetUp.getDriver());
 		customerServiceActionToolbar = new CustomerServiceActionToolbar(SetUp.getDriver());
+		catalogManagementActionToolbar = new CatalogManagementActionToolbar(SetUp.getDriver());
 		this.product = product;
 	}
 
@@ -143,7 +152,7 @@ public class OrderDefinition {
 	 */
 	@Then("^I should see the latest order in results pane$")
 	public void verifyLatestOrderInResultsPane() {
-		orderSearchResultPane.verifyOrderColumnValueAndSelectRow(CortexMacrosTestBase.PURCHASE_NUMBER, ORDER_NUMBER_COLUMNNAME);
+		orderSearchResultPane.verifyOrderColumnValueAndSelectRow(Purchase.getPurchaseNumber(), ORDER_NUMBER_COLUMNNAME);
 	}
 
 	/**
@@ -210,7 +219,7 @@ public class OrderDefinition {
 		orderEditor.clickReleaseShipmentButton();
 		activityToolbar.clickShippingReceivingButton();
 		completeShipmentDialog = shippingReceivingActionToolbar.clickCompleteShipmentButton();
-		completeShipmentDialog.completeShipment(CortexMacrosTestBase.PURCHASE_NUMBER + "-1");
+		completeShipmentDialog.completeShipment(Purchase.getPurchaseNumber() + "-1");
 		customerServiceActionToolbar.clickReloadActiveEditor();
 	}
 
@@ -285,13 +294,9 @@ public class OrderDefinition {
 	 */
 	@When("^I (?:search|can search) and open order editor for the latest order$")
 	public void searchAndOpenLatestOrderEditor() {
-		String orderNumber = CortexMacrosTestBase.PURCHASE_NUMBER;
-		LOGGER.info("ordernumber.... " + orderNumber);
-		assertThat(null == orderNumber || orderNumber.isEmpty()).as("OrderNumber is null or empty because order was not created successfully")
-				.isFalse();
-		customerService.enterOrderNumber(orderNumber);
+		customerService.enterOrderNumber(getLatestOrderNumber());
 		orderSearchResultPane = customerService.clickOrderSearch();
-		orderEditor = orderSearchResultPane.selectOrderAndOpenOrderEditor(orderNumber, ORDER_NUMBER_COLUMNNAME);
+		orderEditor = orderSearchResultPane.selectOrderAndOpenOrderEditor(getLatestOrderNumber(), ORDER_NUMBER_COLUMNNAME);
 	}
 
 	/**
@@ -299,10 +304,8 @@ public class OrderDefinition {
 	 */
 	@When("^I search the latest order by number$")
 	public void searchOrderByNumber() {
-		String orderNumber = CortexMacrosTestBase.PURCHASE_NUMBER;
-		LOGGER.info("searching for ordernumber.... " + orderNumber);
-
-		searchOrderByNumber(orderNumber);
+		LOGGER.info("searching for ordernumber.... " + getLatestOrderNumber());
+		searchOrderByNumber(getLatestOrderNumber());
 	}
 
 	/**
@@ -312,9 +315,9 @@ public class OrderDefinition {
 	 */
 	@When("^I create a refund with following values$")
 	public void createRefund(final Map<String, String> refundMap) {
-		orderEditor.closePane("#" + CortexMacrosTestBase.PURCHASE_NUMBER);
+		orderEditor.closePane("#" + Purchase.getPurchaseNumber());
 		activityToolbar.clickCustomerServiceButton();
-		orderEditor = orderSearchResultPane.selectOrderAndOpenOrderEditor(CortexMacrosTestBase.PURCHASE_NUMBER, ORDER_NUMBER_COLUMNNAME);
+		orderEditor = orderSearchResultPane.selectOrderAndOpenOrderEditor(Purchase.getPurchaseNumber(), ORDER_NUMBER_COLUMNNAME);
 		createRefundWizard = orderEditor.clickCreateRefundButton();
 		createRefundWizard.createRefund(refundMap);
 	}
@@ -364,7 +367,7 @@ public class OrderDefinition {
 	 */
 	@When("^I should see the original order\\# as External Order\\# and exchange order\\# as Order\\#$")
 	public void verifyOrderNumbers() {
-		orderEditor.verifyOriginalAndExchangeOrderNumbers(CortexMacrosTestBase.PURCHASE_NUMBER, exchangeOrderNumber);
+		orderEditor.verifyOriginalAndExchangeOrderNumbers(Purchase.getPurchaseNumber(), exchangeOrderNumber);
 	}
 
 	/**
@@ -414,7 +417,7 @@ public class OrderDefinition {
 		moveItemDialog = orderEditor.clickMoveItemButton();
 		moveItemDialog.moveItem(newShipmentInfoMap.get("Address"), newShipmentInfoMap.get("Shipment Method"));
 		paymentAuthorizationWizard = customerServiceActionToolbar.clickSaveAllButton();
-		paymentAuthorizationWizard.completePaymentAuthorization(newShipmentInfoMap.get("Payment Source"));
+		paymentAuthorizationWizard.completePaymentAuthorization(newShipmentInfoMap.get(PAYMENT_SOURCE));
 	}
 
 	/**
@@ -428,10 +431,9 @@ public class OrderDefinition {
 		selectASkuDialog = orderEditor.clickAddItemButton();
 		selectASkuDialog.selectSkuAndPriceList(skuCode, addItemInfoMap.get("Price List Name"));
 		paymentAuthorizationWizard = customerServiceActionToolbar.clickSaveAllButton();
-		paymentAuthorizationWizard.completePaymentAuthorization(addItemInfoMap.get("Payment Source"));
+		paymentAuthorizationWizard.completePaymentAuthorization(addItemInfoMap.get(PAYMENT_SOURCE));
 		customerServiceActionToolbar.clickReloadActiveEditor();
 	}
-
 
 	/**
 	 * Removes an item from shipment.
@@ -454,7 +456,7 @@ public class OrderDefinition {
 	@And("^I should see (\\d+) shipments?$")
 	public void verifyNumberOfShipments(final int numberOfShipments) {
 		for (int i = 0; i < numberOfShipments; i++) {
-			String shipmentNumber = CortexMacrosTestBase.PURCHASE_NUMBER + "-" + (i + 1);
+			String shipmentNumber = Purchase.getPurchaseNumber() + "-" + (i + 1);
 			LOGGER.info("verifying shipment #: " + shipmentNumber);
 			orderEditor.verifyShipmentNumber(shipmentNumber);
 		}
@@ -513,7 +515,7 @@ public class OrderDefinition {
 	 */
 	@When("^I should see the latest order details$")
 	public void verifyCustomerProfileOrderId() {
-		customerEditor.verifyCustomerOrderIdColumnValue(CortexMacrosTestBase.PURCHASE_NUMBER, "Order ID");
+		customerEditor.verifyCustomerOrderIdColumnValue(Purchase.getPurchaseNumber(), "Order ID");
 	}
 
 	/**
@@ -557,7 +559,7 @@ public class OrderDefinition {
 	@When("^I add new address with the following values$")
 	public void fillInCustomerAddressDialog(final Map<String, String> addressMap) {
 		this.addressNameToCheck = addressMap.get("first name") + " " + addressMap.get("last name");
-		this.addressPhoneToCheck = addressMap.get("phone");
+		this.addressPhoneToCheck = addressMap.get(ORDER_PHONE_FIELD);
 		addEditCustomerAddressDialog.enterFirstName(addressMap.get("first name"));
 		addEditCustomerAddressDialog.enterLastName(addressMap.get("last name"));
 		addEditCustomerAddressDialog.enterAddressLine1(addressMap.get("address line 1"));
@@ -565,7 +567,7 @@ public class OrderDefinition {
 		addEditCustomerAddressDialog.selectState(addressMap.get("state"));
 		addEditCustomerAddressDialog.enterZip(addressMap.get("zip"));
 		addEditCustomerAddressDialog.selectCountry(addressMap.get("country"));
-		addEditCustomerAddressDialog.enterPhone(addressMap.get("phone"));
+		addEditCustomerAddressDialog.enterPhone(addressMap.get(ORDER_PHONE_FIELD));
 		addEditCustomerAddressDialog.clickSave();
 		customerServiceActionToolbar.clickSaveButton();
 	}
@@ -612,7 +614,7 @@ public class OrderDefinition {
 	public void receiveReturnForSku(final String receivedQuantity, final String receivedSku) {
 		shippingReceiving = activityToolbar.clickShippingReceivingButton();
 		shippingReceiving.clickReturnsTab();
-		String orderNumber = CortexMacrosTestBase.PURCHASE_NUMBER;
+		String orderNumber = Purchase.getPurchaseNumber();
 		shippingReceiving.enterOrderNumber(orderNumber);
 		rmaSearchResultPane = shippingReceiving.clickReturnsSearch();
 		rmaEditor = rmaSearchResultPane.selectOrderAndOpenRmaEditor(orderNumber, ORDER_NUMBER_COLUMNNAME);
@@ -653,8 +655,30 @@ public class OrderDefinition {
 		selectOrderEditorTab(ORDER_DETAILS_TAB);
 		addEditCustomerAddressDialog = orderEditor.clickEditAddressButton();
 		addEditCustomerAddressDialog.enterAddressLine1(addressMap.get("address line 1"));
-		addEditCustomerAddressDialog.enterPhone(addressMap.get("phone"));
+		addEditCustomerAddressDialog.enterPhone(addressMap.get(ORDER_PHONE_FIELD));
 		addEditCustomerAddressDialog.clickSave();
+		customerServiceActionToolbar.clickSaveButton();
+		customerServiceActionToolbar.clickReloadActiveEditor();
+	}
+
+	/**
+	 * Update Shipping Address and Shipping Method for the Order.
+	 *
+	 * @param addressMap the address map
+	 * @param shippingMethod the new shipping method
+	 */
+	@When("^I update the shipping address and set \"(.+)\" shipping method for the order$")
+	public void updateOrderShippingAddressAndMethod(final String shippingMethod, final Map<String, String> addressMap) {
+		selectOrderEditorTab(ORDER_DETAILS_TAB);
+		addEditCustomerAddressDialog = orderEditor.clickEditAddressButton();
+		addEditCustomerAddressDialog.selectCountry(addressMap.get("Country"));
+		addEditCustomerAddressDialog.selectState(addressMap.get("State/Province"));
+		addEditCustomerAddressDialog.enterCity(addressMap.get("City"));
+		addEditCustomerAddressDialog.enterZip(addressMap.get("Zip/Postal Code"));
+		addEditCustomerAddressDialog.enterAddressLine1(addressMap.get("Address Line 1"));
+		addEditCustomerAddressDialog.enterPhone(addressMap.get("Phone"));
+		addEditCustomerAddressDialog.clickSave();
+		orderEditor.selectShippingMethod(shippingMethod);
 		customerServiceActionToolbar.clickSaveButton();
 		customerServiceActionToolbar.clickReloadActiveEditor();
 	}
@@ -667,13 +691,375 @@ public class OrderDefinition {
 		orderEditor.verifyUnlockOrderIsNotEnabled();
 	}
 
+	@Then("^I should see the following Shipment Summary$")
+	public void verifyShipmentSummary(final List<Map<String, String>> shipments) {
+		List<Shipment> shipmentObjects = orderEditor.populateShipments(shipments);
+
+		for (Shipment shipment : shipmentObjects) {
+			orderEditor.verifyShipmentSubtotal(shipment.getShipmentNumber(), shipment.getItemSubTotal());
+			orderEditor.verifyShipmentDiscount(shipment.getShipmentNumber(), shipment.getLessShipmentDiscount());
+			orderEditor.verifyShipmentItemTaxes(shipment.getShipmentNumber(), shipment.getItemTaxes());
+			orderEditor.verifyShipmentTotal(shipment.getShipmentNumber(), shipment.getShipmentTotal());
+
+			if (!shipment.getShipmentNumber().equals("E-shipment")) {
+				orderEditor.verifyShipmentShippingCost(shipment.getShipmentNumber(), shipment.getShippingCost());
+				orderEditor.verifyShipmentTotalBeforeTax(shipment.getShipmentNumber(), shipment.getTotalBeforeTax());
+				orderEditor.verifyShipmentShippingTaxes(shipment.getShipmentNumber(), shipment.getShippingTaxes());
+			}
+		}
+	}
+
 	/**
-	 * Verify Shipment Discount Value.
+	 * Verify Shipping cost with Promotion Applied in order details.
 	 *
-	 * @param shipmentDiscount String
+	 * @param promotionName promotion name
 	 */
-	@Then("^Shipment Discount of (.+) is present in the order details$")
-	public void verifyShipmentDiscountValue(final String shipmentDiscount) {
-		orderEditor.verifyShipmentDiscountValue(shipmentDiscount);
+	@Then("^I should see the applied promotion of (.+) in the order details$")
+	public void verifyPromotionTable(final String promotionName) {
+		orderEditor.verifyPromotionColumnValue(promotionName, "Promotion Name");
+	}
+
+	/**
+	 * Search order by First Name.
+	 *
+	 * @param firstName the First Name.
+	 */
+	@When("^I search for orders by First Name (.+)$")
+	public void searchOrderByFirstName(final String firstName) {
+		customerService.clearInputFieldsInOrdersTab();
+		customerService.enterFirstName(firstName);
+		orderSearchResultPane = customerService.clickOrderSearch();
+	}
+
+	/**
+	 * Search order by Last Name.
+	 *
+	 * @param lastName the Last Name.
+	 */
+	@When("^I search for orders by Last Name (.+)$")
+	public void searchOrderByLastName(final String lastName) {
+		customerService.clearInputFieldsInOrdersTab();
+		customerService.enterLastName(lastName);
+		orderSearchResultPane = customerService.clickOrderSearch();
+	}
+
+	/**
+	 * Search order by Postal Code/ZIP.
+	 *
+	 * @param postalCode the Postal Code.
+	 */
+	@When("^I search for latest orders by Postal Code (.+)$")
+	public void searchOrderByPostalCode(final String postalCode) {
+		customerService.clearInputFieldsInOrdersTab();
+		customerService.enterOrderNumber(getLatestOrderNumber());
+		customerService.enterPostalCode(postalCode);
+		orderSearchResultPane = customerService.clickOrderSearch();
+	}
+
+	/**
+	 * Search order by Phone Number.
+	 *
+	 * @param phoneNumber the Phone Number.
+	 */
+	@When("^I search for orders by Phone Number (.+)$")
+	public void searchOrderByPhoneNumber(final String phoneNumber) {
+		customerService.clearInputFieldsInOrdersTab();
+		customerService.enterPhoneNumber(phoneNumber);
+		orderSearchResultPane = customerService.clickOrderSearch();
+	}
+
+	/**
+	 * Search order by store.
+	 *
+	 * @param storeName the Store.
+	 */
+	@When("^I search for latest order by Store (.+)$")
+	public void searchOrderByStore(final String storeName) {
+		customerService.clearInputFieldsInOrdersTab();
+		customerService.enterOrderNumber(getLatestOrderNumber());
+		customerService.selectStore(storeName);
+		orderSearchResultPane = customerService.clickOrderSearch();
+	}
+
+	/**
+	 * Search order by Order Status.
+	 *
+	 * @param orderStatus the Order status.
+	 */
+	@When("^I search for latest order by Order Status (.+)$")
+	public void searchLatestOrderByStatus(final String orderStatus) {
+		customerService.clearInputFieldsInOrdersTab();
+
+		customerService.enterOrderNumber(getLatestOrderNumber());
+
+		customerService.selectStatus(orderStatus);
+		orderSearchResultPane = customerService.clickOrderSearch();
+	}
+
+	/**
+	 * Verify Order Store Column in search results pane.
+	 *
+	 * @param orderStore the Order Store Column.
+	 */
+	@Then("^I should see Order with Store (.+) in search results pane$")
+	public void verifyOrderStoreNameInSearchResultsPane(final String orderStore) {
+		orderSearchResultPane.verifyOrderColumnValueAndSelectRow(orderStore, ORDER_STORE_COLUUMNNAME);
+	}
+
+
+	/**
+	 * Verify Order Status Column in search results pane.
+	 *
+	 * @param orderStatus the Order Status Column.
+	 */
+	@Then("^I should see Order with Order Status - (.+) in search results pane$")
+	public void verifyOrderStatusNameInSearchResultsPane(final String orderStatus) {
+		orderSearchResultPane.verifyOrderStatusExistInResult(orderStatus);
+	}
+
+	/**
+	 * Update Billing Address for the Order.
+	 *
+	 * @param addressMap the address map
+	 */
+	@When("^I update and save the following billing address for the order$")
+	public void updateOrderBillingAddress(final Map<String, String> addressMap) {
+		addEditCustomerAddressDialog = orderEditor.clickEditBillingAddressButton();
+		addEditCustomerAddressDialog.enterPhone(addressMap.get(ORDER_PHONE_FIELD));
+		addEditCustomerAddressDialog.clickSave();
+		customerServiceActionToolbar.clickSaveButton();
+		customerServiceActionToolbar.clickReloadActiveEditor();
+	}
+
+	/**
+	 * Gets the latest order number.
+	 *
+	 * @return orderNumber.
+	 */
+	private String getLatestOrderNumber() {
+		String orderNumber = Purchase.getPurchaseNumber();
+		LOGGER.info("ordernumber.... " + orderNumber);
+		assertThat(null == orderNumber || orderNumber.isEmpty())
+				.as("OrderNumber is null or empty because order was not created successfully")
+				.isFalse();
+		return orderNumber;
+	}
+
+	/**
+	 * Search order by Order Shipment Status.
+	 *
+	 * @param orderShipmentStatus the Order Shipment status.
+	 */
+	@When("^I search for latest order by Order Shipment Status (.+)$")
+	public void searchOrderByShipmentStatus(final String orderShipmentStatus) {
+		customerService.clearInputFieldsInOrdersTab();
+		customerService.enterOrderNumber(getLatestOrderNumber());
+		customerService.selectShipmentStatus(orderShipmentStatus);
+		orderSearchResultPane = customerService.clickOrderSearch();
+	}
+
+	/**
+	 * Search order by SKU Code.
+	 *
+	 * @param skuCode the SKU Code .
+	 */
+	@When("^I search for latest order by SKU Code (.+)$")
+	public void searchOrderBySkuCode(final String skuCode) {
+		customerService.clearInputFieldsInOrdersTab();
+		customerService.enterOrderNumber(getLatestOrderNumber());
+		customerService.enterSkuCode(skuCode);
+		orderSearchResultPane = customerService.clickOrderSearch();
+	}
+
+	/**
+	 * Search order by Dates.
+	 */
+	@When("^I search for order by Dates between current date and next date$")
+	public void searchOrderByDateRange() {
+		customerService.clearInputFieldsInOrdersTab();
+		customerService.enterOrderNumber(getLatestOrderNumber());
+		customerService.enterFromDate();
+		customerService.enterToDate();
+		orderSearchResultPane = customerService.clickOrderSearch();
+	}
+
+	/**
+	 * Verify Order Date Range
+	 */
+	@Then("^I should see Orders search results are within Date Range$")
+	public void verifyOrderSearchResultDateRange() {
+		orderEditor = orderSearchResultPane.selectOrderAndOpenOrderEditor(Purchase.getPurchaseNumber(), ORDER_NUMBER_COLUMNNAME);
+		orderEditor.verifyOrderSearchResultDateRange();
+	}
+
+	/**
+	 * Verify Order Postal Code.
+	 *
+	 * @param postalCode the Postal Code.
+	 */
+	@Then("^I should see Order with Postal Code (.+) in search results pane$")
+	public void verifySearchResultOrderPostalCode(final String postalCode) {
+		orderEditor = orderSearchResultPane.selectOrderAndOpenOrderEditor(Purchase.getPurchaseNumber(), ORDER_NUMBER_COLUMNNAME);
+		addEditCustomerAddressDialog = orderEditor.clickEditBillingAddressButton();
+		addEditCustomerAddressDialog.verifyPostalCode(postalCode);
+		addEditCustomerAddressDialog.clickCancel();
+	}
+
+	/**
+	 * Verify Order Phone Number.
+	 *
+	 * @param phoneNumber the Phone Number.
+	 */
+	@Then("^I should see Order with Phone Number (.+) in search results pane$")
+	public void verifySearchResultOrderPhoneNumber(final String phoneNumber) {
+		orderEditor = orderSearchResultPane.selectOrderAndOpenOrderEditor(Purchase.getPurchaseNumber(), ORDER_NUMBER_COLUMNNAME);
+		orderEditor.verifyPhoneNumber(phoneNumber);
+	}
+
+	/**
+	 * Verify Order shipment status.
+	 *
+	 * @param orderShipmentStatus the Order status.
+	 */
+	@Then("^I should see Order with Shipment Status (.+) in search results pane$")
+	public void verifySearchResultOrderShipmentStatus(final String orderShipmentStatus) {
+		orderEditor = orderSearchResultPane.selectOrderAndOpenOrderEditor(Purchase.getPurchaseNumber(), ORDER_NUMBER_COLUMNNAME);
+		orderEditor.clickTab(ORDER_DETAILS_TAB);
+		orderEditor.verifyShipmentStatus(orderShipmentStatus);
+	}
+
+	/**
+	 * Verify Order Sku Code.
+	 *
+	 * @param orderSkuCode the Order sku code.
+	 */
+	@Then("^I should see Order with SKU Code (.+) in search results pane$")
+	public void verifySearchResultOrderSkuDetails(final String orderSkuCode) {
+		orderEditor = orderSearchResultPane.selectOrderAndOpenOrderEditor(Purchase.getPurchaseNumber(), ORDER_NUMBER_COLUMNNAME);
+		orderEditor.clickTab(ORDER_DETAILS_TAB);
+		orderEditor.verifyAndSelectOrderSkuCode(orderSkuCode);
+	}
+
+	/**
+	 * Update Shipping Method.
+	 *
+	 * @param newShipmentInfoMap new shipment values
+	 */
+	@When("^I change the Shipping Method to the following$")
+	public void updateShippingMethod(final Map<String, String> newShipmentInfoMap) {
+		orderEditor.selectShippingMethod(newShipmentInfoMap.get("Shipping Method"));
+		paymentAuthorizationWizard = customerServiceActionToolbar.clickSaveAllButton();
+		paymentAuthorizationWizard.completePaymentAuthorization(newShipmentInfoMap.get(PAYMENT_SOURCE));
+	}
+
+	/**
+	 * Verify Shipping Method.
+	 *
+	 * @param shippingMethod the shipping method.
+	 */
+	@And("^the Shipping Method should be (.+)$")
+	public void verifyShippingMethod(final String shippingMethod) {
+		orderEditor.verifyShippingMethod(shippingMethod);
+	}
+
+	/**
+	 * Update Shipping Address.
+	 *
+	 * @param newShipmentInfoMap new shipment values.
+	 */
+	@When("^I change the Shipping Information to the following$")
+	public void updateShippingInformation(final Map<String, String> newShipmentInfoMap) {
+		orderEditor.selectShippingAddress(newShipmentInfoMap.get("Address"));
+		orderEditor.selectShippingMethod(newShipmentInfoMap.get("Shipping Method"));
+		paymentAuthorizationWizard = customerServiceActionToolbar.clickSaveAllButton();
+		paymentAuthorizationWizard.completePaymentAuthorization(newShipmentInfoMap.get(PAYMENT_SOURCE));
+	}
+
+	/**
+	 * Verify values in Items table for a Shipment in Order Details.
+	 *
+	 * @param shipmentItems expected values for a row in the Items table.
+	 */
+	@Then("I should see the following line items in the Shipment table$")
+	public void verifyShimpentLineItem(final List<Map<String, String>> shipmentItems) {
+		for (Map<String, String> item : shipmentItems) {
+			orderEditor.verifyShipmentLineItemSkuCode(item.get("sku-code"));
+			orderEditor.verifyShipmentLineItemSalePrice(item.get("sale-price"));
+			orderEditor.verifyShipmentLineItemQuantity(item.get("quantity"));
+			orderEditor.verifyShipmentLineItemDiscount(item.get("discount"));
+			orderEditor.verifyShipmentLineItemTotalPrice(item.get("total-price"));
+		}
+	}
+
+	/**
+	 * Verifies values in Shipment Details table for all shipment types
+	 * like physical, digital, recurring and bundle
+	 *
+	 * @param shipmentItems List of ShipmentTableRecord objects that represent row in the table
+	 */
+	@Then("^I should see the following shipment with lineitem details$")
+	public void verifyLineItemByShipment(final List<ShipmentTableRecord> shipmentItems) {
+		for (ShipmentTableRecord record : shipmentItems) {
+			orderEditor.verifyOrderItemsTableValues(record);
+		}
+	}
+
+	/**
+	 * Modify shipment line item quantity
+	 *
+	 * @param quantity new quantity value
+	 */
+	@When("^I modify order shipment line item quantity to (.+)$")
+	public void setShipmentLineItemQuantity(final String quantity) {
+		orderEditor.setShipmentLineItemQuantity(quantity);
+	}
+
+	/**
+	 *  Modify shipment line item discount
+	 *
+	 * @param discount item discount value to be set
+	 */
+	@When("^I modify order shipment line item discount to (.+)$")
+	public void setShipmentLineItemDiscount(final String discount) {
+		orderEditor.setShipmentLineItemDiscount(discount);
+		saveAllChangesAndReload();
+	}
+
+	/**
+	 * Enters payment source and complete Payment Authorization
+	 *
+	 * @param paymentMethod payment source name
+	 */
+	@And("^I complete Payment Authorization with (.+) payment source$")
+	public void completePaymentAuthorization(final String paymentMethod) {
+		paymentAuthorizationWizard = customerServiceActionToolbar.clickSaveAllButton();
+		paymentAuthorizationWizard.completePaymentAuthorization(paymentMethod);
+	}
+
+	/**
+	 *  Enters shipment discount value for the order
+	 *
+	 * @param discount discount amount to be set
+	 */
+	@When("^I set order shipment discount to (.+)$")
+	public void setOrderShipmentDiscountValue(final String discount) {
+		orderEditor.setLessShipmentDiscountValue(discount);
+		saveAllChangesAndReload();
+	}
+
+	/**
+	 *  Enters new shipping cost for the order
+	 *
+	 * @param cost new value to be set
+	 */
+	@When("^I set order Shipping Cost value to (.+)$")
+	public void setOrderShippingCost(final String cost) {
+		orderEditor.setShippingCostValue(cost);
+		saveAllChangesAndReload();
+	}
+
+	private void saveAllChangesAndReload() {
+		catalogManagementActionToolbar.saveAll();
+		catalogManagementActionToolbar.clickReloadActiveEditor();
 	}
 }

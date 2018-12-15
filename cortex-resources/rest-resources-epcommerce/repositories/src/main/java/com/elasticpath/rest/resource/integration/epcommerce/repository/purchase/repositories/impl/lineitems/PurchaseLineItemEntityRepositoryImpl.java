@@ -34,7 +34,6 @@ import com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder
 import com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder.PricingSnapshotRepository;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.order.OrderRepository;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.sku.ProductSkuRepository;
-import com.elasticpath.rest.resource.integration.epcommerce.repository.transform.ReactiveAdapter;
 import com.elasticpath.rest.resource.integration.epcommerce.transform.MoneyTransformer;
 
 /**
@@ -53,7 +52,6 @@ public class PurchaseLineItemEntityRepositoryImpl<E extends PurchaseLineItemEnti
 	private ProductSkuRepository productSkuRepository;
 	private PricingSnapshotRepository pricingSnapshotRepository;
 	private CartItemModifiersRepository cartItemModifiersRepository;
-	private ReactiveAdapter reactiveAdapter;
 
 	@Override
 	public Single<PurchaseLineItemEntity> findOne(final PurchaseLineItemIdentifier identifier) {
@@ -178,7 +176,7 @@ public class PurchaseLineItemEntityRepositoryImpl<E extends PurchaseLineItemEnti
 	 * @return the calculated tax.
 	 */
 	protected Single<Money> getTax(final OrderSku item, final Currency rootCurrency) {
-		return reactiveAdapter.fromRepositoryAsSingle(() -> productSkuRepository.isProductBundle(item.getSkuGuid()))
+		return productSkuRepository.isProductBundleByGuid(item.getSkuGuid())
 				.flatMap(isProductBundle -> {
 					Single<Money> tax = pricingSnapshotRepository.getTaxSnapshotForOrderSku(item)
 							.map(taxSnapshot -> Money.valueOf(taxSnapshot.getTaxAmount(), rootCurrency));
@@ -221,11 +219,6 @@ public class PurchaseLineItemEntityRepositoryImpl<E extends PurchaseLineItemEnti
 	@Reference
 	public void setOrderRepository(final OrderRepository orderRepository) {
 		this.orderRepository = orderRepository;
-	}
-
-	@Reference
-	public void setReactiveAdapter(final ReactiveAdapter reactiveAdapter) {
-		this.reactiveAdapter = reactiveAdapter;
 	}
 
 	@Reference

@@ -4,11 +4,8 @@
 package com.elasticpath.service.payment.impl;
 
 import static com.elasticpath.service.shoppingcart.impl.OrderSkuAsShoppingItemPricingSnapshotAction.returnTheSameOrderSkuAsPricingSnapshot;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -19,7 +16,9 @@ import java.util.Currency;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
+import com.google.common.util.concurrent.Uninterruptibles;
 import org.jmock.Expectations;
 import org.jmock.auto.Mock;
 import org.junit.Test;
@@ -264,26 +263,18 @@ public class PaymentServiceImplTest extends AbstractCatalogDataTestCase {
 
 		// usually some time should pass before adjust is called
 		// NOTE: otherwise we get faulty results when getting the last auth payment
-		try {
-			Thread.sleep(TIMEOUT);
-		} catch (InterruptedException ignored) {
-		}
+		Uninterruptibles.sleepUninterruptibly(TIMEOUT, TimeUnit.MILLISECONDS);
 
 		result = paymentService.adjustShipmentPayment(orderShipment); // 2 new order payment should be created
 		validateAdjustShipmentPaymentResult(result, orderShipment, oldShipmentTotal);
 
 		// usually some time should pass before shipment is processed
 		// NOTE: otherwise we get faulty results when getting the last auth payment
-		try {
-			Thread.sleep(TIMEOUT);
-		} catch (InterruptedException ignored) {
-		}
+		Uninterruptibles.sleepUninterruptibly(TIMEOUT, TimeUnit.MILLISECONDS);
 
 		result = paymentService.processShipmentPayment(orderShipment);
 		validateProcessShipmentPaymentResult(result, orderShipment);
 	}
-
-
 
 	/**
 	 * Test that an order with a single shipment of a digital good
@@ -394,12 +385,9 @@ public class PaymentServiceImplTest extends AbstractCatalogDataTestCase {
 		validateProcessShipmentPaymentResult(result, digitalGoodOrderShipment);
 
 		// Try cancel the order.
-		try {
-			paymentService.cancelOrderPayments(order);
-			fail();
-		} catch (PaymentServiceException expected) { //NOPMD
-			// good, we shouldn't be able to cancel a partially shipped order.
-		}
+		assertThatThrownBy(() -> paymentService.cancelOrderPayments(order))
+			.isInstanceOf(PaymentServiceException.class)
+			.as("we shouldn't be able to cancel a partially shipped order");
 
 		// ... time passes ...
 
@@ -425,24 +413,17 @@ public class PaymentServiceImplTest extends AbstractCatalogDataTestCase {
 
 		// No shipment released
 		// Try to cancel the order
-		try {
-			result = paymentService.cancelOrderPayments(order);
-			validateCancelOrderPaymentsResult(order, result);
-			// Good, we should let the order been cancelled.
-			order.cancelOrder();
-		} catch (PaymentServiceException exception) {
-			fail(exception.getMessage());
-		}
+		result = paymentService.cancelOrderPayments(order);
+		validateCancelOrderPaymentsResult(order, result);
+		// Good, we should let the order been cancelled.
+		order.cancelOrder();
 
 		// ... time passes ...
 
 		// Release the physical shipment
-		try {
-			paymentService.processShipmentPayment(physicalGoodOrderShipment);
-			fail();
-		} catch (InvalidShipmentStateException expected) { //NOPMD
-			// Good, we can do nothing when order is cancelled.
-		}
+		assertThatThrownBy(() -> paymentService.processShipmentPayment(physicalGoodOrderShipment))
+			.isInstanceOf(InvalidShipmentStateException.class)
+			.as("we can do nothing when order is cancelled");
 	}
 
 	/**
@@ -462,28 +443,17 @@ public class PaymentServiceImplTest extends AbstractCatalogDataTestCase {
 
 		// No shipment released
 		// Try cancel the order
-		try {
-			paymentService.cancelOrderPayments(order);
-			fail();
-		} catch (PaymentServiceException expected) {  //NOPMD
-			// Good, the order can't be canceled, since it has digital goods.
-		}
+		assertThatThrownBy(() -> paymentService.cancelOrderPayments(order))
+			.isInstanceOf(PaymentServiceException.class)
+			.as("the order can't be canceled, since it has digital goods");
 
 		// ... time passes ...
 
 		// Release the physical shipment
-		try {
-			paymentService.processShipmentPayment(physicalGoodOrderShipment);
-		} catch (PaymentServiceException expected) {
-			fail();
-		}
+		paymentService.processShipmentPayment(physicalGoodOrderShipment);
 
 		// Release the electronic shipment
-		try {
-			paymentService.processShipmentPayment(digitalGoodOrderShipment);
-		} catch (PaymentServiceException expected) {
-			fail();
-		}
+		paymentService.processShipmentPayment(digitalGoodOrderShipment);
 	}
 
 
@@ -504,24 +474,17 @@ public class PaymentServiceImplTest extends AbstractCatalogDataTestCase {
 		validateInitializePaymentsResult(order, templatePayment, result);
 
 		// No shipment released
-		try {
-			result = paymentService.cancelShipmentPayment(orderShipment);
-			validateCancelShipmentPaymentsResult(result);
-			// Good, we should be able to cancel a shipment before it is released.
-			orderShipment.setStatus(OrderShipmentStatus.CANCELLED);
-		} catch (PaymentServiceException expected) {
-			fail();
-		}
+		result = paymentService.cancelShipmentPayment(orderShipment);
+		validateCancelShipmentPaymentsResult(result);
+		// Good, we should be able to cancel a shipment before it is released.
+		orderShipment.setStatus(OrderShipmentStatus.CANCELLED);
 
 		// ... time passes ...
 
 		// Release the physical shipment
-		try {
-			paymentService.processShipmentPayment(orderShipment);
-			fail();
-		} catch (InvalidShipmentStateException expected) { //NOPMD
-			// Good, we can do nothing when shipment is cancelled.
-		}
+		assertThatThrownBy(() -> paymentService.processShipmentPayment(orderShipment))
+			.isInstanceOf(InvalidShipmentStateException.class)
+			.as("we can do nothing when shipment is cancelled");
 
 	}
 
@@ -542,21 +505,14 @@ public class PaymentServiceImplTest extends AbstractCatalogDataTestCase {
 		// ... time passes ...
 
 		// Release the physical shipment
-		try {
-			result = paymentService.processShipmentPayment(orderShipment);
-			validateProcessShipmentPaymentResult(result, orderShipment);
-			orderShipment.setStatus(OrderShipmentStatus.CANCELLED);
-			// Good, we should be able to release a shipment.
-		} catch (PaymentServiceException expected) {
-			fail();
-		}
+		result = paymentService.processShipmentPayment(orderShipment);
+		validateProcessShipmentPaymentResult(result, orderShipment);
+		orderShipment.setStatus(OrderShipmentStatus.CANCELLED);
+		// Good, we should be able to release a shipment.
 
-		try {
-			paymentService.cancelShipmentPayment(orderShipment);
-			fail();
-		} catch (PaymentServiceException expected) { //NOPMD
-			// good, we shouldn't be able to cancel a shipped order.
-		}
+		assertThatThrownBy(() -> paymentService.cancelShipmentPayment(orderShipment))
+			.isInstanceOf(PaymentServiceException.class)
+			.as("we shouldn't be able to cancel a shipped order");
 	}
 
 	/**
@@ -567,11 +523,7 @@ public class PaymentServiceImplTest extends AbstractCatalogDataTestCase {
 	public void testProcessOrderShipmentSucceedsWithOnlyGiftCertificates() {
 		//Make a shipment that has only GCs as payment methods, and they should be already authorized.
 		OrderShipment shipment = createOrderShipmentReadyForCaptureFundsPaidByGiftCertificates();
-		try {
-			paymentService.processShipmentPayment(shipment);
-		} catch (Exception e) {
-			fail("Should be able to process a shipment paid for entirely with gift certificates");
-		}
+		paymentService.processShipmentPayment(shipment);
 	}
 
 	private OrderShipment createOrderShipmentReadyForCaptureFundsPaidByGiftCertificates() {
@@ -746,23 +698,6 @@ public class PaymentServiceImplTest extends AbstractCatalogDataTestCase {
 	}
 
 	/**
-	 * Tests pre and back order authorizations and payments.
-	 */
-	@Test
-	public void testPreOrBackOrderPayment() {
-		// TODO waiting for additional specs
-	}
-
-
-	/**
-	 * Tests refund functionality.
-	 */
-	@Test
-	public void testRefund() {
-		// TODO
-	}
-
-	/**
 	 * Test new shipment created on existing order.
 	 */
 	@Test
@@ -905,8 +840,8 @@ public class PaymentServiceImplTest extends AbstractCatalogDataTestCase {
 
 
 	private void validateCancelShipmentPaymentsResult(final PaymentResult result) {
-		assertEquals(PaymentResult.CODE_OK, result.getResultCode());
-		assertEquals(1, result.getProcessedPayments().size());
+		assertThat(result.getResultCode()).isEqualTo(PaymentResult.CODE_OK);
+		assertThat(result.getProcessedPayments().size()).isEqualTo(1);
 		for (OrderPayment orderPayment : result.getProcessedPayments()) {
 			// Validate the reverse payment is approved.
 			validateReversePaymentApproved(orderPayment);
@@ -914,8 +849,8 @@ public class PaymentServiceImplTest extends AbstractCatalogDataTestCase {
 	}
 
 	private void validateCancelOrderPaymentsResult(final Order order, final PaymentResult result) {
-		assertEquals(PaymentResult.CODE_OK, result.getResultCode());
-		assertEquals(order.getAllShipments().size(), result.getProcessedPayments().size());
+		assertThat(result.getResultCode()).isEqualTo(PaymentResult.CODE_OK);
+		assertThat(result.getProcessedPayments().size()).isEqualTo(order.getAllShipments().size());
 		for (OrderPayment orderPayment : result.getProcessedPayments()) {
 			// Validate the reverse payment is approved.
 			validateReversePaymentApproved(orderPayment);
@@ -923,48 +858,48 @@ public class PaymentServiceImplTest extends AbstractCatalogDataTestCase {
 	}
 
 	private void validateReversePaymentApproved(final OrderPayment orderPayment) {
-		assertEquals(OrderPayment.REVERSE_AUTHORIZATION, orderPayment.getTransactionType());
-		assertEquals(OrderPaymentStatus.APPROVED, orderPayment.getStatus());
+		assertThat(orderPayment.getTransactionType()).isEqualTo(OrderPayment.REVERSE_AUTHORIZATION);
+		assertThat(orderPayment.getStatus()).isEqualTo(OrderPaymentStatus.APPROVED);
 	}
 
 	private void validateCapturePaymentApproved(final OrderPayment capturePayment, final OrderShipment orderShipment) {
-		assertEquals(orderShipment.getTotal(), capturePayment.getAmount());
-		assertEquals(OrderPayment.CAPTURE_TRANSACTION, capturePayment.getTransactionType());
-		assertEquals(OrderPaymentStatus.APPROVED, capturePayment.getStatus());
+		assertThat(capturePayment.getAmount()).isEqualTo(orderShipment.getTotal());
+		assertThat(capturePayment.getTransactionType()).isEqualTo(OrderPayment.CAPTURE_TRANSACTION);
+		assertThat(capturePayment.getStatus()).isEqualTo(OrderPaymentStatus.APPROVED);
 	}
 
 	private void validateAuthPaymentApproved(final OrderPayment authPayment, final OrderShipment orderShipment) {
-		assertEquals(orderShipment.getTotal(), authPayment.getAmount());
-		assertEquals(OrderPayment.AUTHORIZATION_TRANSACTION, authPayment.getTransactionType());
-		assertEquals(OrderPaymentStatus.APPROVED, authPayment.getStatus());
+		assertThat(authPayment.getAmount()).isEqualTo(orderShipment.getTotal());
+		assertThat(authPayment.getTransactionType()).isEqualTo(OrderPayment.AUTHORIZATION_TRANSACTION);
+		assertThat(authPayment.getStatus()).isEqualTo(OrderPaymentStatus.APPROVED);
 	}
 
 	private void validateProcessShipmentPaymentResult(final PaymentResult result, final OrderShipment orderShipment) {
-		assertEquals(PaymentResult.CODE_OK, result.getResultCode());
-		assertEquals(1, result.getProcessedPayments().size());
+		assertThat(result.getResultCode()).isEqualTo(PaymentResult.CODE_OK);
+		assertThat(result.getProcessedPayments().size()).isEqualTo(1);
 		validateCapturePaymentApproved(result.getProcessedPayments().iterator().next(), orderShipment);
 	}
 
 	private void validateInitializePaymentsResult(final Order order, final OrderPayment templatePayment, final PaymentResult result) {
-		assertEquals(PaymentResult.CODE_OK, result.getResultCode());
+		assertThat(result.getResultCode()).isEqualTo(PaymentResult.CODE_OK);
 
 		if (templatePayment.getPaymentMethod() == PaymentType.PAYMENT_TOKEN
 			|| templatePayment.getPaymentMethod() == PaymentType.GIFT_CERTIFICATE) {
-			assertEquals(order.getAllShipments().size(), result.getProcessedPayments().size());
+			assertThat(result.getProcessedPayments().size()).isEqualTo(order.getAllShipments().size());
 			for (OrderPayment authPayment : result.getProcessedPayments()) {
 				validateAuthPaymentApproved(authPayment, authPayment.getOrderShipment());
 			}
 		} else if (templatePayment.getPaymentMethod() == PaymentType.PAYPAL_EXPRESS) {
 			// For paypal there is one order, and one auth.
-			assertEquals(2, result.getProcessedPayments().size());
+			assertThat(result.getProcessedPayments().size()).isEqualTo(2);
 			Iterator<OrderPayment> iterator = result.getProcessedPayments().iterator();
 			OrderPayment orderPayment = iterator.next();
-			assertEquals(order.getTotal(), orderPayment.getAmount());
-			assertEquals(OrderPayment.ORDER_TRANSACTION, orderPayment.getTransactionType());
-			assertEquals(OrderPaymentStatus.APPROVED, orderPayment.getStatus());
+			assertThat(orderPayment.getAmount()).isEqualTo(order.getTotal());
+			assertThat(orderPayment.getTransactionType()).isEqualTo(OrderPayment.ORDER_TRANSACTION);
+			assertThat(orderPayment.getStatus()).isEqualTo(OrderPaymentStatus.APPROVED);
 			OrderPayment authPayment = iterator.next();
-			assertEquals(OrderPayment.AUTHORIZATION_TRANSACTION, authPayment.getTransactionType());
-			assertEquals(OrderPaymentStatus.APPROVED, authPayment.getStatus());
+			assertThat(authPayment.getTransactionType()).isEqualTo(OrderPayment.AUTHORIZATION_TRANSACTION);
+			assertThat(authPayment.getStatus()).isEqualTo(OrderPaymentStatus.APPROVED);
 		}
 	}
 
@@ -972,23 +907,21 @@ public class PaymentServiceImplTest extends AbstractCatalogDataTestCase {
 
 		if (templatePayment.getPaymentMethod() == PaymentType.PAYMENT_TOKEN
 				|| templatePayment.getPaymentMethod() == PaymentType.GIFT_CERTIFICATE) {
-			assertEquals(
-					"The order should have 2 payments per shipment when no gift certificate is present",
-					order.getAllShipments().size() * 2,
-					order.getOrderPayments().size());
+			assertThat(order.getOrderPayments().size())
+				.as("The order should have 2 payments per shipment when no gift certificate is present")
+				.isEqualTo(order.getAllShipments().size() * 2);
 		} else if (templatePayment.getPaymentMethod() == PaymentType.PAYPAL_EXPRESS) {
-			assertEquals(
-					"The order should have 1 order payment for whole order, and 1 auth payment for whole order, "
-					+ "and 1 capture payment per shipment when no gift certificate is present",
-					order.getAllShipments().size() + 2,
-					order.getOrderPayments().size());
+			assertThat(order.getOrderPayments().size())
+					.as("The order should have 1 order payment for whole order, and 1 auth payment for whole order, "
+					+ "and 1 capture payment per shipment when no gift certificate is present")
+					.isEqualTo(order.getAllShipments().size() + 2);
 		}
 	}
 
 	private void validateInitializeNewShipmentPaymentResult(final PaymentResult result,
 			final OrderShipment orderShipment) {
-		assertEquals(PaymentResult.CODE_OK, result.getResultCode());
-		assertEquals(1, result.getProcessedPayments().size());
+		assertThat(result.getResultCode()).isEqualTo(PaymentResult.CODE_OK);
+		assertThat(result.getProcessedPayments().size()).isEqualTo(1);
 		for (OrderPayment authPayment : result.getProcessedPayments()) {
 			validateAuthPaymentApproved(authPayment, orderShipment);
 		}
@@ -996,18 +929,17 @@ public class PaymentServiceImplTest extends AbstractCatalogDataTestCase {
 
 	private void validateAdjustShipmentPaymentResult(final PaymentResult paymentResult,
 			final OrderShipment orderShipment, final BigDecimal oldShipmentTotal) {
-		assertEquals(PaymentResult.CODE_OK, paymentResult.getResultCode());
+		assertThat(paymentResult.getResultCode()).isEqualTo(PaymentResult.CODE_OK);
 
 		BigDecimal newShipmentTotal = orderShipment.getTotal();
 		int result = newShipmentTotal.compareTo(oldShipmentTotal);
 		if (result <= 0) { //Amount decreased or stay the same.
 			// No payment been processed.
-			assertEquals(0, paymentResult.getProcessedPayments().size());
+			assertThat(paymentResult.getProcessedPayments().size()).isEqualTo(0);
 		} else {
 			// 1. reverse preauth
 			// 2. new preauth requested.
-			assertEquals(2, paymentResult.getProcessedPayments().size());
-			// TODO validate the payments, one is reverse and one is preauth.
+			assertThat(paymentResult.getProcessedPayments().size()).isEqualTo(2);
 		}
 	}
 
@@ -1122,24 +1054,17 @@ public class PaymentServiceImplTest extends AbstractCatalogDataTestCase {
 		validateInitializePaymentsResult(order, templatePayment, result);
 
 		// No shipment released
-		try {
-			result = paymentService.cancelShipmentPayment(orderShipment);
-			validateCancelShipmentPaymentsResult(result);
-			// Good, we should be able to cancel a shipment before it is released.
-			orderShipment.setStatus(OrderShipmentStatus.CANCELLED);
-		} catch (PaymentServiceException expected) {
-			fail();
-		}
+		result = paymentService.cancelShipmentPayment(orderShipment);
+		validateCancelShipmentPaymentsResult(result);
+		// Good, we should be able to cancel a shipment before it is released.
+		orderShipment.setStatus(OrderShipmentStatus.CANCELLED);
 
 		// ... time passes ...
 
 		// Release the physical shipment
-		try {
-			paymentService.processShipmentPayment(orderShipment);
-			fail();
-		} catch (InvalidShipmentStateException expected) { //NOPMD
-			// Good, we can do nothing when shipment is cancelled.
-		}
+		assertThatThrownBy(() -> paymentService.processShipmentPayment(orderShipment))
+			.isInstanceOf(InvalidShipmentStateException.class)
+			.as("we can do nothing when shipment is cancelled");
 
 	}
 
@@ -1160,21 +1085,14 @@ public class PaymentServiceImplTest extends AbstractCatalogDataTestCase {
 		// ... time passes ...
 
 		// Release the physical shipment
-		try {
-			result = paymentService.processShipmentPayment(orderShipment);
-			validateProcessShipmentPaymentResult(result, orderShipment);
-			orderShipment.setStatus(OrderShipmentStatus.CANCELLED);
-			// Good, we should be able to release a shipment.
-		} catch (PaymentServiceException expected) {
-			fail();
-		}
+		result = paymentService.processShipmentPayment(orderShipment);
+		validateProcessShipmentPaymentResult(result, orderShipment);
+		orderShipment.setStatus(OrderShipmentStatus.CANCELLED);
+		// Good, we should be able to release a shipment.
 
-		try {
-			paymentService.cancelShipmentPayment(orderShipment);
-			fail();
-		} catch (PaymentServiceException expected) { //NOPMD
-			// good, we shouldn't be able to cancel a shipped order.
-		}
+		assertThatThrownBy(() -> paymentService.cancelShipmentPayment(orderShipment))
+			.isInstanceOf(PaymentServiceException.class)
+			.as("we shouldn't be able to cancel a shipped order");
 	}
 
 
@@ -1185,9 +1103,9 @@ public class PaymentServiceImplTest extends AbstractCatalogDataTestCase {
 	public void testAdjustShipmentPayment() {
 		PhysicalOrderShipmentImpl orderShipment = new PhysicalOrderShipmentImpl();
 
-		assertNull(orderShipment.getTotal());
+		assertThat(orderShipment.getTotal()).isNull();
 
-		assertNull(paymentService.adjustShipmentPayment(orderShipment));
+		assertThat(paymentService.adjustShipmentPayment(orderShipment)).isNull();
 	}
 
 
@@ -1198,7 +1116,7 @@ public class PaymentServiceImplTest extends AbstractCatalogDataTestCase {
 	public void ensureIsOrderPaymentRefundableReturnsFalseOnNonCapture() {
 		OrderPayment orderPayment = new OrderPaymentImpl();
 		orderPayment.setTransactionType(OrderPayment.AUTHORIZATION_TRANSACTION);
-		assertFalse("Non capture payment should not be refundable.", paymentService.isOrderPaymentRefundable(orderPayment));
+		assertThat(paymentService.isOrderPaymentRefundable(orderPayment)).as("Non capture payment should not be refundable.").isFalse();
 	}
 
 	/**
@@ -1206,7 +1124,7 @@ public class PaymentServiceImplTest extends AbstractCatalogDataTestCase {
 	 */
 	@Test
 	public void ensureIsOrderPaymentRefundableReturnsFalseOnNull() {
-		assertFalse("Null payment should not be refundable.", paymentService.isOrderPaymentRefundable(null));
+		assertThat(paymentService.isOrderPaymentRefundable(null)).as("Null payment should not be refundable.").isFalse();
 	}
 
 	/**
@@ -1218,7 +1136,7 @@ public class PaymentServiceImplTest extends AbstractCatalogDataTestCase {
 		OrderPayment orderPayment = new OrderPaymentImpl();
 		orderPayment.setTransactionType(OrderPayment.CAPTURE_TRANSACTION);
 		orderPayment.setPaymentMethod(PaymentType.PAYMENT_TOKEN);
-		assertTrue("Captured Payment Token should be refundable.", paymentService.isOrderPaymentRefundable(orderPayment));
+		assertThat(paymentService.isOrderPaymentRefundable(orderPayment)).as("Captured Payment Token should be refundable.").isTrue();
 	}
 
 	/**

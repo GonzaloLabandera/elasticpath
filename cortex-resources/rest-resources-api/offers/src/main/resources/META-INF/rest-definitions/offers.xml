@@ -1,0 +1,66 @@
+<?xml version="1.0"?>
+<definitions xmlns="http://www.elasticpath.com/schema/rest/0.5">
+
+	<family>
+		<name>offers</name>
+		<description>
+			<![CDATA[
+			Offer is any tangible or non-tangible collection of items for sale in a store. An offer represents a product
+			or product bundle and is a collection of items.  The offer resource returns all associated items, offer codes,
+			availabilities, price ranges, and lists of constituents in the offer.]]>
+		</description>
+		<uri-part>
+			<name>offer-id</name>
+			<description><![CDATA[The offer identifier. This ID is a unique value across the scope.]]></description>
+			<composite/>
+		</uri-part>
+
+		<uri-part>
+			<name>offer-component-id</name>
+			<description><![CDATA[The offer component id.]]></description>
+			<composite/>
+		</uri-part>
+
+		<resource>
+			<name>offer</name>
+			<description><![CDATA[An offer resource.]]></description>
+			<uri>/{base.family}/{base.scope}/{offer-id}</uri>
+		</resource>
+
+		<resource>
+			<name>offer-components</name>
+			<description><![CDATA[The offer components resource.]]></description>
+			<uri>{offer}/components</uri>
+			<mixed-list-of>
+				<element>offer</element>
+				<element>items.item</element>
+			</mixed-list-of>
+		</resource>
+
+		<relationship>
+			<name>offer-components-for-offer</name>
+			<description><![CDATA[Offer components for offer relationship.]]></description>
+			<rel>components</rel>
+			<rev>offer</rev>
+			<from>offer</from>
+			<to>offer-components</to>
+		</relationship>
+
+		<resource>
+			<name>offer-items</name>
+			<description><![CDATA[The offer items resource.]]></description>
+			<uri>{offer}/items</uri>
+			<list-of>items.item</list-of>
+		</resource>
+
+		<relationship>
+			<name>offer-items-for-offer</name>
+			<description><![CDATA[Offer items for offer relationship.]]></description>
+			<rel>items</rel>
+			<rev>offer</rev>
+			<from>offer</from>
+			<to>offer-items</to>
+		</relationship>
+
+	</family>
+</definitions>

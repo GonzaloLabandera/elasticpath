@@ -1,7 +1,8 @@
-/**
+/*
  * Copyright (c) Elastic Path Software Inc., 2013
  */
 package com.elasticpath.ql.asserts;
+
 import org.junit.Assert;
 
 import com.elasticpath.ql.parser.EpQLParseException;
@@ -26,8 +27,7 @@ public final class ParseAssert {
 		try {
 			return parser.parse(query);
 		} catch (EpQLParseException e) {
-			Assert.fail(e.getMessage());
-			return null;
+			throw new AssertionError(e);
 		}
 	}
 	

@@ -15,11 +15,6 @@ import com.elasticpath.domain.catalog.Product;
 import com.elasticpath.domain.catalogview.StoreProduct;
 import com.elasticpath.domain.store.Store;
 import com.elasticpath.rest.cache.CacheResult;
-import com.elasticpath.rest.chain.Assign;
-import com.elasticpath.rest.chain.ExecutionResultChain;
-import com.elasticpath.rest.chain.OnFailure;
-import com.elasticpath.rest.command.ExecutionResult;
-import com.elasticpath.rest.command.ExecutionResultFactory;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.product.StoreProductRepository;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.sku.ProductSkuRepository;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.store.StoreRepository;
@@ -64,45 +59,20 @@ public class StoreProductRepositoryImpl implements StoreProductRepository {
 	}
 
 	@Override
-	public ExecutionResult<StoreProduct> findDisplayableStoreProductWithAttributesByProductGuid(final String storeCode, final String productGuid) {
-		return new ExecutionResultChain() {
-			public ExecutionResult<?> build() {
-				Product product = Assign.ifNotNull(findByGuid(productGuid), OnFailure.returnNotFound("Product not found"));
-				StoreProduct storeProduct = Assign.ifSuccessful(findDisplayableStoreProductWithAttributesForProduct(storeCode, product));
-
-				return ExecutionResultFactory.createReadOK(storeProduct);
-			}
-		}.execute();
-	}
-
-	@Override
-	public Single<StoreProduct> findDisplayableStoreProductWithAttributesByProductGuidAsSingle(final String storeCode, final String productGuid) {
-		return reactiveAdapter.fromServiceAsSingle(() -> findByGuid(productGuid), "Product not found")
-				.flatMap(product -> findDisplayableStoreProductWithAttributesForProductAsSingle(storeCode, product));
+	public Single<StoreProduct> findDisplayableStoreProductWithAttributesByProductGuid(final String storeCode, final String productGuid) {
+		return findByGuid(productGuid).flatMap(product -> findDisplayableStoreProductWithAttributesForProduct(storeCode, product));
 	}
 
 	@Override
 	public Single<StoreProduct> findDisplayableStoreProductWithAttributesBySkuGuid(final String storeCode, final String skuGuid) {
 		return productSkuRepository.getProductSkuWithAttributesByGuidAsSingle(skuGuid)
-				.flatMap(productSku -> findDisplayableStoreProductWithAttributesForProductAsSingle(storeCode, productSku.getProduct()));
-	}
-
-	@CacheResult
-	private ExecutionResult<StoreProduct> findDisplayableStoreProductWithAttributesForProduct(final String storeCode, final Product product) {
-		return new ExecutionResultChain() {
-			public ExecutionResult<?> build() {
-				Store store = Assign.ifSuccessful(storeRepository.findStore(storeCode));
-				StoreProduct storeProduct = Assign.ifNotNull(coreStoreProductService.getProductForStore(product, store),
-						OnFailure.returnNotFound("Store product not found"));
-				return ExecutionResultFactory.createReadOK(storeProduct);
-			}
-		}.execute();
+				.flatMap(productSku -> findDisplayableStoreProductWithAttributesForProduct(storeCode, productSku.getProduct()));
 	}
 
 	@Override
 	@CacheResult
-	public Product findByGuid(final String productGuid) {
-		return coreProductLookup.findByGuid(productGuid);
+	public Single<Product> findByGuid(final String productGuid) {
+		return reactiveAdapter.fromServiceAsSingle(() -> coreProductLookup.findByGuid(productGuid), "Product not found");
 	}
 
 	@Override
@@ -117,7 +87,7 @@ public class StoreProductRepositoryImpl implements StoreProductRepository {
 		return productsToReturn;
 	}
 
-	private Single<StoreProduct> findDisplayableStoreProductWithAttributesForProductAsSingle(final String storeCode, final Product product) {
+	private Single<StoreProduct> findDisplayableStoreProductWithAttributesForProduct(final String storeCode, final Product product) {
 		return storeRepository.findStoreAsSingle(storeCode)
 				.flatMap(store -> reactiveAdapter
 						.fromServiceAsSingle(() -> getProductForStore(product, store), "Store product not found"));

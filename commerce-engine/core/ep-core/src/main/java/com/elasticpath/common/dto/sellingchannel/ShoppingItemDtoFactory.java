@@ -13,6 +13,7 @@ import com.elasticpath.domain.catalog.Product;
  */
 public interface ShoppingItemDtoFactory {
 	/**
+	 * Creates a {@link ShoppingItemDto} for a given skucode.
 	 * @param skuCode sku code
 	 * @param qty quantity
 	 * @return new shopping item dto

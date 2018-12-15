@@ -29,7 +29,7 @@
 					<Eclipse-BuddyPolicy>registered</Eclipse-BuddyPolicy>
 					<Bundle-Name>Extension CM Libs</Bundle-Name>
 					<Bundle-Vendor>Elastic Path Software</Bundle-Vendor>
-					<Embed-Dependency>ext-core</Embed-Dependency>
+					<Embed-Dependency>*;scope=compile|runtime;artifactId=!ep-core</Embed-Dependency>
 					<Embed-Transitive>true</Embed-Transitive>
 					<_nouses>true</_nouses>
 					<_exportcontents>

@@ -3,15 +3,14 @@
  */
 package com.elasticpath.rest.resource.integration.epcommerce.repository.search.impl;
 
+import static com.elasticpath.rest.resource.integration.epcommerce.repository.search.impl.SearchRepositoryImpl.FIRST_PAGE;
+
 import com.google.common.collect.ImmutableMap;
-import io.reactivex.Completable;
 import io.reactivex.Single;
-import org.apache.commons.lang3.Range;
-import org.apache.commons.lang3.StringUtils;
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
 
 import com.elasticpath.repository.Repository;
-import com.elasticpath.rest.ResourceOperationFailure;
 import com.elasticpath.rest.definition.searches.KeywordSearchResultIdentifier;
 import com.elasticpath.rest.definition.searches.SearchKeywordsEntity;
 import com.elasticpath.rest.definition.searches.SearchesIdentifier;
@@ -20,6 +19,7 @@ import com.elasticpath.rest.form.SubmitStatus;
 import com.elasticpath.rest.id.IdentifierPart;
 import com.elasticpath.rest.id.type.CompositeIdentifier;
 import com.elasticpath.rest.id.type.IntegerIdentifier;
+import com.elasticpath.rest.resource.integration.epcommerce.repository.search.SearchRepository;
 
 /**
  * Repository for search keywords entity.
@@ -31,41 +31,12 @@ import com.elasticpath.rest.id.type.IntegerIdentifier;
 public class SearchKeywordsEntitySearchResultRepositoryImpl<E extends SearchKeywordsEntity, I extends KeywordSearchResultIdentifier>
 		implements Repository<SearchKeywordsEntity, KeywordSearchResultIdentifier> {
 
-	private static final int KEYWORDS_MAX_LENGTH = 500;
-	private static final Range<Integer> RANGE = Range.between(1, Integer.MAX_VALUE);
-	private static final int FIRST_PAGE = 1;
-
-	/**
-	 * validate search kewords entity.
-	 *
-	 * @param searchKeywordsEntity SearchKeywordsEntity
-	 * @return validation result
-	 */
-	protected Completable validate(final SearchKeywordsEntity searchKeywordsEntity) {
-		String keywords = searchKeywordsEntity.getKeywords();
-		if (StringUtils.isEmpty(keywords)) {
-			return Completable.error(ResourceOperationFailure
-					.badRequestBody("Keywords field is missing a value."));
-		}
-		if (StringUtils.length(keywords) > KEYWORDS_MAX_LENGTH) {
-			return Completable.error(ResourceOperationFailure
-					.badRequestBody(String.format("Keywords field is too long, the maximum length is %s.",
-							KEYWORDS_MAX_LENGTH)));
-		}
-
-		Integer pageSize = searchKeywordsEntity.getPageSize();
-		if (pageSize != null && !RANGE.contains(pageSize)) {
-			return Completable.error(ResourceOperationFailure
-					.badRequestBody(String.format("Page Size is outside this range: %s", RANGE)));
-		}
-
-		return Completable.complete();
-	}
+	private SearchRepository searchRepository;
 
 	@Override
 	public Single<SubmitResult<KeywordSearchResultIdentifier>> submit(final SearchKeywordsEntity searchKeywordsEntity,
 																	  final IdentifierPart<String> scope) {
-		return validate(searchKeywordsEntity)
+		return searchRepository.validate(searchKeywordsEntity)
 				.andThen(Single.just(SubmitResult.<KeywordSearchResultIdentifier>builder()
 						.withIdentifier(buildKeywordSearchResultIdentifier(searchKeywordsEntity, scope))
 						.withStatus(SubmitStatus.CREATED)
@@ -84,4 +55,8 @@ public class SearchKeywordsEntitySearchResultRepositoryImpl<E extends SearchKeyw
 				.build();
 	}
 
+	@Reference
+	public void setSearchRepository(final SearchRepository searchRepository) {
+		this.searchRepository = searchRepository;
+	}
 }

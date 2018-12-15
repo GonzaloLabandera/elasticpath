@@ -1,33 +1,62 @@
+#*
+* Copyright (c) Elastic Path Software Inc., 2018
+*#
+## orderConf.html.vm
 #emailInit()
-<html>
-  <head>
+<?xml-stylesheet href="http://www.w3.org/StyleSheets/TR/W3C-REC.css" type="text/css"?>
+<?xml-stylesheet href="#internalStyle" type="text/css"?>
+<!DOCTYPE html
+        PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-  </head>
-  <body>
+    <style type="text/css" id="internalStyle">
+
+        .body { width:600px; margin-left:auto; margin-right:auto;
+            background:#fff; color:#333; font-size:11pt; line-height:150%; padding-bottom:20px; border:0;
+            font-family:arial,helvetica,sans-serif;border:2px solid #ccc; }
+
+        .indent {
+            margin-left:30px;
+        }
+
+    </style>
+</head>
+<body class="body indent">
 	#set ($order = $shipment.getOrder())
 
+<p>
 	#emailMessage("email.failedRelease.message")
+    <br />#emailMessage("email.failedRelease.message2")
+</p>
 
-	#emailMessage("email.failedRelease.message2"):
-
+<p class="indent">
 	#emailMessage("email.failedRelease.store"): $order.getStore().getName()
-	#emailMessage("email.failedRelease.orderNumber"): $!order.getOrderNumber()
-	#emailMessage("email.failedRelease.shipmentNumber"): $!shipment.getShipmentNumber()
-	#emailMessage("email.failedRelease.createdDate"): $!shipment.createdDate
+    <br />#emailMessage("email.failedRelease.orderNumber"): $!order.getOrderNumber()
+    <br />#emailMessage("email.failedRelease.shipmentNumber"): $!shipment.getShipmentNumber()
+    <br />#emailMessage("email.failedRelease.createdDate"): $!shipment.createdDate
+</p>
 
+<p>
 	#emailMessage("email.failedRelease.reason"):
 	$errorMessage
+</p>
 
+<p>
 	#emailMessage("email.failedRelease.failedPayments")
+</p>
 
 	#foreach($orderPayment in $order.getOrderPayments())
-	#if ($orderPayment.getOrderShipment() && ($shipment.getUidPk() == $orderPayment.getOrderShipment().getUidPk()))
-	#emailMessage("email.failedRelease.paymentDate"): $!orderPayment.getCreatedDate()
-	#emailMessage("email.failedRelease.paymentMethod"): $!orderPayment.getPaymentMethod()
-	#emailMessage("email.failedRelease.paymentAmount"): ($!orderPayment.getCurrencyCode() $!orderPayment.getAmount())
-	#emailMessage("email.failedRelease.paymentStatus"): $!orderPayment.getStatus()
+    <p class="indent">
+		#if ($orderPayment.getOrderShipment() && ($shipment.getUidPk() == $orderPayment.getOrderShipment().getUidPk()))
+			#emailMessage("email.failedRelease.paymentDate"): $!orderPayment.getCreatedDate()
+            <br />#emailMessage("email.failedRelease.paymentMethod"): $!orderPayment.getPaymentMethod()
+            <br />#emailMessage("email.failedRelease.paymentAmount"): ($!orderPayment.getCurrencyCode() $!orderPayment.getAmount())
+            <br />#emailMessage("email.failedRelease.paymentStatus"): $!orderPayment.getStatus()
+        </p>
 
-	#end#end
+		#end#end
 
-  </body>
+</body>
 </html>

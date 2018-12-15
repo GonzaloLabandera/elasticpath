@@ -4,13 +4,8 @@
 
 package com.elasticpath.test.integration.cartorder;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Currency;
 import java.util.Date;
 import java.util.List;
@@ -163,8 +158,8 @@ public class CartOrderServiceImplTest extends BasicSpringContextTest {
 
 		CartOrder sanitizedCartOrder = cartOrderService.findByStoreCodeAndGuid(store.getCode(), cartOrder.getGuid());
 
-		assertEquals("Address guid is incorrect.", shippingAddressGuid, sanitizedCartOrder.getShippingAddressGuid());
-		assertEquals("Shipping option code is incorrect.", DEFAULT_SHIPPING_OPTION_CODE, sanitizedCartOrder.getShippingOptionCode());
+		assertThat(sanitizedCartOrder.getShippingAddressGuid()).isEqualTo(shippingAddressGuid);
+		assertThat(sanitizedCartOrder.getShippingOptionCode()).isEqualTo(DEFAULT_SHIPPING_OPTION_CODE);
 	}
 
 	/**
@@ -177,8 +172,8 @@ public class CartOrderServiceImplTest extends BasicSpringContextTest {
 
 		CartOrder sanitizedCartOrder = cartOrderService.findByStoreCodeAndGuid(store.getCode(), cartOrder.getGuid());
 
-		assertEquals("Address guid should be null.", null, sanitizedCartOrder.getShippingAddressGuid());
-		assertEquals("Shipping option code should be null.", null, sanitizedCartOrder.getShippingOptionCode());
+		assertThat(sanitizedCartOrder.getShippingAddressGuid()).isNull();
+		assertThat(sanitizedCartOrder.getShippingOptionCode()).isNull();
 	}
 
 	/**
@@ -191,8 +186,8 @@ public class CartOrderServiceImplTest extends BasicSpringContextTest {
 
 		CartOrder sanitizedCartOrder = cartOrderService.findByStoreCodeAndGuid(store.getCode(), cartOrder.getGuid());
 
-		assertEquals("Address guid should be null.", null, sanitizedCartOrder.getShippingAddressGuid());
-		assertEquals("Shipping option code should be null.", null, sanitizedCartOrder.getShippingOptionCode());
+		assertThat(sanitizedCartOrder.getShippingAddressGuid()).isNull();
+		assertThat(sanitizedCartOrder.getShippingOptionCode()).isNull();
 	}
 
 	/**
@@ -205,8 +200,8 @@ public class CartOrderServiceImplTest extends BasicSpringContextTest {
 
 		CartOrder sanitizedCartOrder = cartOrderService.findByStoreCodeAndGuid(store.getCode(), cartOrder.getGuid());
 
-		assertEquals("Address guid should be null.", null, sanitizedCartOrder.getShippingAddressGuid());
-		assertEquals("shipping option code guid should be null.", null, sanitizedCartOrder.getShippingOptionCode());
+		assertThat(sanitizedCartOrder.getShippingAddressGuid()).isNull();
+		assertThat(sanitizedCartOrder.getShippingOptionCode()).isNull();
 	}
 
 	/**
@@ -219,8 +214,8 @@ public class CartOrderServiceImplTest extends BasicSpringContextTest {
 
 		CartOrder sanitizedCartOrder = cartOrderService.findByStoreCodeAndGuid(store.getCode(), cartOrder.getGuid());
 
-		assertEquals("Address guid is incorrect.", shippingAddressGuid, sanitizedCartOrder.getShippingAddressGuid());
-		assertEquals("Shipping option code should be null.", null, sanitizedCartOrder.getShippingOptionCode());
+		assertThat(sanitizedCartOrder.getShippingAddressGuid()).isEqualTo(shippingAddressGuid);
+		assertThat(sanitizedCartOrder.getShippingOptionCode()).isNull();
 	}
 
 	/**
@@ -241,15 +236,29 @@ public class CartOrderServiceImplTest extends BasicSpringContextTest {
 
 		CartOrder retrievedCartOrder = cartOrderService.findByStoreCodeAndGuid(store.getCode(), cartOrder.getGuid());
 
-		assertEquals("Customer billing address guid was not persisted", billingAddressGuid, retrievedCartOrder.getBillingAddressGuid());
-		assertEquals("Customer shipping address guid was not persisted", shippingAddressGuid, retrievedCartOrder.getShippingAddressGuid());
-		assertEquals("Shipping shipping option code was not persisted", DEFAULT_SHIPPING_OPTION_CODE, retrievedCartOrder.getShippingOptionCode());
-		assertEquals("Shopping cart guid was not persisted", cartGuid, retrievedCartOrder.getShoppingCartGuid());
+		assertThat(retrievedCartOrder.getBillingAddressGuid())
+			.as("Customer billing address guid was not persisted")
+			.isEqualTo(billingAddressGuid);
+		assertThat(retrievedCartOrder.getShippingAddressGuid())
+			.as("Customer shipping address guid was not persisted")
+			.isEqualTo(shippingAddressGuid);
+		assertThat(retrievedCartOrder.getShippingOptionCode())
+			.as("Shipping shipping option code was not persisted")
+			.isEqualTo(DEFAULT_SHIPPING_OPTION_CODE);
+		assertThat(retrievedCartOrder.getShoppingCartGuid())
+			.as("Shopping cart guid was not persisted")
+			.isEqualTo(cartGuid);
 		PaymentToken persistedPaymentToken = (PaymentToken) retrievedCartOrder.getPaymentMethod();
-		assertEquals("Payment method value was not persisted", token.getValue(), persistedPaymentToken.getValue());
-		assertEquals("Payment method display value was not persisted", token.getDisplayValue(), persistedPaymentToken.getDisplayValue());
+		assertThat(persistedPaymentToken.getValue())
+			.as("Payment method value was not persisted")
+			.isEqualTo(token.getValue());
+		assertThat(persistedPaymentToken.getDisplayValue())
+			.as("Payment method display value was not persisted")
+			.isEqualTo(token.getDisplayValue());
 
-		assertEquals("The persisted cart order was not identical to expected cart order", cartOrder, retrievedCartOrder);
+		assertThat(retrievedCartOrder)
+			.as("The persisted cart order was not identical to expected cart order")
+			.isEqualTo(cartOrder);
 	}
 
 	/**
@@ -266,8 +275,12 @@ public class CartOrderServiceImplTest extends BasicSpringContextTest {
 
 		CartOrder retrievedCartOrder = cartOrderService.findByStoreCodeAndGuid(store.getCode(), cartOrder.getGuid());
 		PaymentToken persistedPaymentToken = (PaymentToken) retrievedCartOrder.getPaymentMethod();
-		assertEquals("Payment method value was not persisted", token.getValue(), persistedPaymentToken.getValue());
-		assertEquals("Payment method display value was not persisted", token.getDisplayValue(), persistedPaymentToken.getDisplayValue());
+		assertThat(persistedPaymentToken.getValue())
+			.as("Payment method value was not persisted")
+			.isEqualTo(token.getValue());
+		assertThat(persistedPaymentToken.getDisplayValue())
+			.as("Payment method display value was not persisted")
+			.isEqualTo(token.getDisplayValue());
 	}
 
 	/**
@@ -287,8 +300,8 @@ public class CartOrderServiceImplTest extends BasicSpringContextTest {
 
 		CartOrder updatedCartOrder = cartOrderService.findByStoreCodeAndGuid(store.getCode(), cartOrder.getGuid());
 		PaymentToken retrievedPaymentToken = (PaymentToken) updatedCartOrder.getPaymentMethod();
-		assertEquals("Retrieved payment token display value does not match", token.getDisplayValue(), retrievedPaymentToken.getDisplayValue());
-		assertEquals("Retrieved payment token value does not match", token.getValue(), retrievedPaymentToken.getValue());
+		assertThat(retrievedPaymentToken.getDisplayValue()).isEqualTo(token.getDisplayValue());
+		assertThat(retrievedPaymentToken.getValue()).isEqualTo(token.getValue());
 	}
 
 	/**
@@ -310,8 +323,9 @@ public class CartOrderServiceImplTest extends BasicSpringContextTest {
 
 		cartOrderService.remove(cartOrder);
 		Customer updatedCustomer = customerService.findByGuid(customer.getGuid());
-		assertEquals("Payment method was not retained on Customer after CartOrder deletion.", persistedPaymentMethod,
-				updatedCustomer.getPaymentMethods().getDefault());
+		assertThat(updatedCustomer.getPaymentMethods().getDefault())
+			.as("Payment method was not retained on Customer after CartOrder deletion.")
+			.isEqualTo(persistedPaymentMethod);
 	}
 
 	@Test
@@ -327,23 +341,25 @@ public class CartOrderServiceImplTest extends BasicSpringContextTest {
 		cartOrder.clearPaymentMethod();
 		cartOrderService.saveOrUpdate(cartOrder);
 		PaymentToken retrievedPaymentMethod = paymentTokenDao.get(persistedPaymentMethod.getUidPk());
-		assertNull("Orphaned payment token should be deleted", retrievedPaymentMethod);
+		assertThat(retrievedPaymentMethod)
+			.as("Orphaned payment token should be deleted")
+			.isNull();
 	}
 
 	@Test
 	public void testRetrieveBillingAddress() {
 		CartOrder cartOrder = createAndSaveCartOrder();
 		Address retrievedBillingAddress = cartOrderService.getBillingAddress(cartOrder);
-		assertNotNull(retrievedBillingAddress);
-		assertEquals(billingAddressGuid, retrievedBillingAddress.getGuid());
+		assertThat(retrievedBillingAddress).isNotNull();
+		assertThat(retrievedBillingAddress.getGuid()).isEqualTo(billingAddressGuid);
 	}
 
 	@Test
 	public void testRetrieveShippingAddress() {
 		CartOrder cartOrder = createAndSaveCartOrder();
 		Address retrievedShippingAddress = cartOrderService.getShippingAddress(cartOrder);
-		assertNotNull(retrievedShippingAddress);
-		assertEquals(shippingAddressGuid, retrievedShippingAddress.getGuid());
+		assertThat(retrievedShippingAddress).isNotNull();
+		assertThat(retrievedShippingAddress.getGuid()).isEqualTo(shippingAddressGuid);
 	}
 
 	/**
@@ -361,7 +377,7 @@ public class CartOrderServiceImplTest extends BasicSpringContextTest {
 
 		cart = loadShoppingCart();
 		Date updatedDate = cart.getLastModifiedDate();
-		assertTrue(initialDate.before(updatedDate));
+		assertThat(initialDate).isBefore(updatedDate);
 	}
 
 	/**
@@ -374,13 +390,19 @@ public class CartOrderServiceImplTest extends BasicSpringContextTest {
 		CartOrder retrievedCartOrder = cartOrderService.findByStoreCodeAndGuid(store.getCode(), cartOrder.getGuid());
 
 		cartOrderService.remove(retrievedCartOrder);
-		assertNull(cartOrderService.findByStoreCodeAndGuid(store.getCode(), cartOrderGuid));
+		assertThat(cartOrderService.findByStoreCodeAndGuid(store.getCode(), cartOrderGuid)).isNull();
 
-		assertNotNull(loadShoppingCart());
+		assertThat(loadShoppingCart()).isNotNull();
 		PaymentTokenImpl paymentMethod = (PaymentTokenImpl) cartOrder.getPaymentMethod();
-		assertNull("Payment method should have been cascade deleted", persistenceEngine.get(PaymentTokenImpl.class, paymentMethod.getUidPk()));
-		assertNotNull("Billing address should not have been deleted", addressDao.findByGuid(billingAddressGuid));
-		assertNotNull("Shipping address should not have been deleted", addressDao.findByGuid(shippingAddressGuid));
+		assertThat(persistenceEngine.get(PaymentTokenImpl.class, paymentMethod.getUidPk()))
+			.as("Payment method should have been cascade deleted")
+			.isNull();
+		assertThat(addressDao.findByGuid(billingAddressGuid))
+			.as("Billing address should not have been deleted")
+			.isNotNull();
+		assertThat(addressDao.findByGuid(shippingAddressGuid))
+			.as("Shipping address should not have been deleted")
+			.isNotNull();
 	}
 
 	/**
@@ -390,11 +412,11 @@ public class CartOrderServiceImplTest extends BasicSpringContextTest {
 	public void testRemoveAddress() {
 		createAndSaveCartOrder();
 		addressDao.remove(addressDao.findByGuid(billingAddressGuid));
-		assertNull(addressDao.findByGuid(billingAddressGuid));
+		assertThat(addressDao.findByGuid(billingAddressGuid)).isNull();
 		CartOrder cartOrder = cartOrderService.findByStoreCodeAndGuid(store.getCode(), cartOrderGuid);
-		assertNotNull(cartOrder);
-		assertNotNull(cartOrder.getShoppingCartGuid());
-		assertNull(cartOrderService.getBillingAddress(cartOrder));
+		assertThat(cartOrder).isNotNull();
+		assertThat(cartOrder.getShoppingCartGuid()).isNotNull();
+		assertThat(cartOrderService.getBillingAddress(cartOrder)).isNull();
 	}
 
 	/**
@@ -408,9 +430,9 @@ public class CartOrderServiceImplTest extends BasicSpringContextTest {
 		cartOrderService.saveOrUpdate(cartOrder);
 
 		cartOrder = cartOrderService.findByStoreCodeAndGuid(store.getCode(), cartOrderGuid);
-		assertNotNull(cartOrder);
-		assertNull(cartOrder.getBillingAddressGuid());
-		assertNotNull(addressDao.findByGuid(billingAddressGuid));
+		assertThat(cartOrder).isNotNull();
+		assertThat(cartOrder.getBillingAddressGuid()).isNull();
+		assertThat(addressDao.findByGuid(billingAddressGuid)).isNotNull();
 	}
 
 	/**
@@ -430,10 +452,10 @@ public class CartOrderServiceImplTest extends BasicSpringContextTest {
 	public void testRemoveCartOrderByShoppingCartGuid() {
 		createAndSaveCartOrder();
 		ShoppingCart shoppingCart = loadShoppingCart();
-		assertNotNull(shoppingCart);
+		assertThat(shoppingCart).isNotNull();
 		cartOrderService.removeIfExistsByShoppingCart(shoppingCart);
 		CartOrder cartOrder = cartOrderService.findByShoppingCartGuid(cartGuid);
-		assertNull(cartOrder);
+		assertThat(cartOrder).isNull();
 	}
 
 	/**
@@ -442,7 +464,7 @@ public class CartOrderServiceImplTest extends BasicSpringContextTest {
 	@Test
 	public void testRemoveNonExistingCartOrderByShoppingCartGuid() {
 		CartOrder cartOrder = cartOrderService.findByShoppingCartGuid(cartGuid);
-		assertNull(cartOrder);
+		assertThat(cartOrder).isNull();
 		cartOrderService.removeIfExistsByShoppingCart(cart);
 	}
 
@@ -456,9 +478,10 @@ public class CartOrderServiceImplTest extends BasicSpringContextTest {
 		cartOrderService.createOrderIfPossible(cart);
 		CartOrder cartOrder = cartOrderService.findByShoppingCartGuid(cartGuid);
 
-		assertEquals("Customer preferred billing address guid and cart order billing address guid should be equal.",
-				customer.getPreferredBillingAddress().getGuid(), cartOrder.getBillingAddressGuid());
-		assertNull("cart order payment method should be null.", cartOrder.getPaymentMethod());
+		assertThat(cartOrder.getBillingAddressGuid())
+			.as("Customer preferred billing address guid and cart order billing address guid should be equal.")
+			.isEqualTo(customer.getPreferredBillingAddress().getGuid());
+		assertThat(cartOrder.getPaymentMethod()).isNull();
 	}
 
 	/**
@@ -474,8 +497,8 @@ public class CartOrderServiceImplTest extends BasicSpringContextTest {
 		cartOrderService.createOrderIfPossible(cart);
 		CartOrder cartOrder = cartOrderService.findByShoppingCartGuid(cartGuid);
 
-		assertNull("Cart order billing address guid should be null.", cartOrder.getBillingAddressGuid());
-		assertNull("Cart order payment method should be null.", cartOrder.getPaymentMethod());
+		assertThat(cartOrder.getBillingAddressGuid()).isNull();
+		assertThat(cartOrder.getPaymentMethod()).isNull();
 	}
 
 	/**
@@ -484,14 +507,17 @@ public class CartOrderServiceImplTest extends BasicSpringContextTest {
 	@Test
 	public void testFindGuidsByCustomerGuid() {
 		List<String> guidsBefore = cartOrderService.findCartOrderGuidsByCustomerGuid(store.getCode(), customer.getGuid());
-		assertTrue("No cart order GUID should be found, as there are no cart orders yet.", guidsBefore.isEmpty());
+		assertThat(guidsBefore.isEmpty())
+			.as("No cart order GUID should be found, as there are no cart orders yet.")
+			.isTrue();
 
 		cartOrderService.createOrderIfPossible(cart);
 		CartOrder cartOrder = cartOrderService.findByShoppingCartGuid(cartGuid);
 
 		List<String> guids = cartOrderService.findCartOrderGuidsByCustomerGuid(store.getCode(), customer.getGuid());
-		assertEquals("Only one cart order should be found.", 1, guids.size());
-		assertTrue("The cart order GUID should match that of the newly created cart order.", guids.contains(cartOrder.getGuid()));
+		assertThat(guids)
+			.as("The cart order GUID should match that of the newly created cart order.")
+			.containsOnly(cartOrder.getGuid());
 	}
 
 	/**
@@ -502,7 +528,9 @@ public class CartOrderServiceImplTest extends BasicSpringContextTest {
 		cartOrderService.createOrderIfPossible(cart);
 
 		List<String> guids = cartOrderService.findCartOrderGuidsByCustomerGuid(store.getCode(), "INVALID_GUID");
-		assertTrue("No cart order guids should be found, as the customer GUID does not match.", guids.isEmpty());
+		assertThat(guids)
+			.as("No cart order guids should be found, as the customer GUID does not match.")
+			.isEmpty();
 	}
 
 	/**
@@ -513,7 +541,9 @@ public class CartOrderServiceImplTest extends BasicSpringContextTest {
 		cartOrderService.createOrderIfPossible(cart);
 
 		List<String> guids = cartOrderService.findCartOrderGuidsByCustomerGuid("BAD STORE CODE", customer.getGuid());
-		assertTrue("No cart order guids should be found, as the store code is invalid.", guids.isEmpty());
+		assertThat(guids)
+			.as("No cart order guids should be found, as the store code is invalid.")
+			.isEmpty();
 	}
 
 	/**
@@ -526,9 +556,9 @@ public class CartOrderServiceImplTest extends BasicSpringContextTest {
 		Date lastModifiedDateFromDB = shoppingCart.getLastModifiedDate();
 
 		Date cartOrderLastModifiedDate = cartOrderService.getCartOrderLastModifiedDate(cartOrderGuid);
-		assertEquals("Last modified date of the CartOrder should be equal to the one in the database.",
-				lastModifiedDateFromDB,
-				cartOrderLastModifiedDate);
+		assertThat(cartOrderLastModifiedDate)
+			.as("Last modified date of the CartOrder should be equal to the one in the database.")
+			.isEqualTo(lastModifiedDateFromDB);
 	}
 
 	/**
@@ -537,7 +567,9 @@ public class CartOrderServiceImplTest extends BasicSpringContextTest {
 	@Test
 	public void testLastModifiedDateInvalidGuid() {
 		Date cartOrderLastModifiedDate = cartOrderService.getCartOrderLastModifiedDate(INVALID_CARTORDER_GUID);
-		assertNull("The last modified date should be null, iff the cart order is not found.", cartOrderLastModifiedDate);
+		assertThat(cartOrderLastModifiedDate)
+			.as("The last modified date should be null, iff the cart order is not found.")
+			.isNull();
 	}
 
 	private ShoppingCart configureAndPersistCart() {
@@ -575,7 +607,7 @@ public class CartOrderServiceImplTest extends BasicSpringContextTest {
 
 		cartOrder = cartOrderService.saveOrUpdate(cartOrder);
 
-		assertTrue(cartOrder.isPersisted());
+		assertThat(cartOrder.isPersisted()).isTrue();
 		return cartOrder;
 	}
 

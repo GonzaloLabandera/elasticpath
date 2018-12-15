@@ -80,6 +80,9 @@
 			   interface="com.elasticpath.service.catalog.ProductLookup"
 			   filter="(caching=true)"/>
 
+	<reference id="facetService"
+			   interface="com.elasticpath.service.search.FacetService"/>
+
 	<reference id="productService"
 			interface="com.elasticpath.service.catalog.ProductService"/>
 
@@ -148,8 +151,13 @@
 	<reference id="categoryLookup"
 			   interface="com.elasticpath.service.catalog.CategoryLookup" filter="(caching=true)"/>
 
+	<reference id="attributeService"
+			   interface="com.elasticpath.service.attribute.AttributeService"
+			   filter="(caching=true)"/>
+
 	<reference id="categoryService"
-			   interface="com.elasticpath.service.catalog.CategoryService"/>
+			   interface="com.elasticpath.service.catalog.CategoryService"
+			   filter="(caching=true)"/>
 
 	<reference id="productTypeService"
 			   interface="com.elasticpath.service.catalog.ProductTypeService"/>
@@ -199,6 +207,9 @@
 
 	<reference id="addressTransformer"
 			   interface="com.elasticpath.rest.resource.integration.commons.addresses.transform.AddressTransformer"/>
+
+	<reference id="attributeValueTransformer"
+			   interface="com.elasticpath.rest.resource.integration.epcommerce.transform.AttributeValueTransformer"/>
 
 	<reference id="addProductSkuToCartValidationService"
 			 interface="com.elasticpath.service.shoppingcart.validation.AddProductSkuToCartValidationService"/>

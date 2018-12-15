@@ -3,21 +3,19 @@
  */
 package com.elasticpath.test.integration.inventory;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import javax.persistence.TableGenerator;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import org.junit.Before;
 import org.junit.Test;
@@ -124,11 +122,11 @@ public class InventoryJournalDaoImplTest extends DbTestCase {
 		InventoryKey key = new InventoryKey(SKU_CODE1, WAREHOUSE_10);
 
 		List<Long> uidsByKey = inventoryJournalDao.getUidsByKey(key);
-		assertFalse(uidsByKey.isEmpty()); //assert that journal row exists
+		assertThat(uidsByKey).isNotEmpty(); //assert that journal row exists
 		
 		inventoryJournalDao.removeByKey(key); //remove it
 		uidsByKey = inventoryJournalDao.getUidsByKey(key);
-		assertTrue(uidsByKey.isEmpty()); //and assert that it's gone now
+		assertThat(uidsByKey).isEmpty(); //and assert that it's gone now
 	}
 	
 	/**
@@ -247,7 +245,9 @@ public class InventoryJournalDaoImplTest extends DbTestCase {
 	@Test
 	public void testGetAllInventoryKeys() {
 		List<InventoryKey> inventoryKeys = inventoryJournalDao.getAllInventoryKeys(0);
-		assertEquals("Inventory Key count is incorrect.", 7, inventoryKeys.size());
+		assertThat(inventoryKeys)
+			.as("Inventory Key count is incorrect.")
+			.hasSize(7);
 		verifyKeyInListWithSkuCodeAndWarehouseUid(inventoryKeys, SKU_CODE1, WAREHOUSE_10);
 		verifyKeyInListWithSkuCodeAndWarehouseUid(inventoryKeys, SKU_CODE1, WAREHOUSE_100);
 		verifyKeyInListWithSkuCodeAndWarehouseUid(inventoryKeys, SKU_CODE2, WAREHOUSE_10);
@@ -265,7 +265,9 @@ public class InventoryJournalDaoImplTest extends DbTestCase {
 	public void testGetRollupByUids() {
 		InventoryKey inventoryKey = new InventoryKey(SKU_CODE1, WAREHOUSE_10);
 		List<Long> journalUids = inventoryJournalDao.getUidsByKey(inventoryKey);
-		assertEquals("Journal uid list size incorrect.", journalUids.size(), 2);
+		assertThat(journalUids)
+			.as("Journal uid list size incorrect.")
+			.hasSize(2);
 		InventoryJournalRollup inventoryJournalRollup = inventoryJournalDao.getRollupByUids(journalUids);
 		verifyQuantitiesOnInventoryJournalRollup(inventoryJournalRollup, -21, -26);
 	}
@@ -278,7 +280,7 @@ public class InventoryJournalDaoImplTest extends DbTestCase {
 	public void testGetRollupByUidsWithNonExistentUid() {
 		InventoryKey inventoryKey = new InventoryKey(SKU_CODE2, WAREHOUSE_100);
 		List<Long> journalUids = inventoryJournalDao.getUidsByKey(inventoryKey);
-		assertEquals("Journal uid list size incorrect.", journalUids.size(), 0);
+		assertThat(journalUids).isEmpty();
 	}
 
 	/**
@@ -292,7 +294,9 @@ public class InventoryJournalDaoImplTest extends DbTestCase {
 
 		Map<String, InventoryJournalRollup> rollups = inventoryJournalDao.getInventoryRollupsForSkusInWarehouse(skuCodes, WAREHOUSE_10);
 
-		assertEquals("There should be " + skuCodesSize + " rollups", rollups.size(), 2);
+		assertThat(rollups)
+			.as("There should be %s rollups", skuCodesSize)
+			.hasSize(skuCodesSize);
 
 		verifyQuantitiesOnInventoryJournalRollup(rollups.get(SKU_CODE1), -21, -26);
 		verifyQuantitiesOnInventoryJournalRollup(rollups.get(SKU_CODE2), 31, 37);
@@ -305,13 +309,15 @@ public class InventoryJournalDaoImplTest extends DbTestCase {
 	@Test
 	public void testRemoveAll() {
 		List<Long> journalUids = getJournalIdsForSkuCodeAndWarehouseUid(SKU_CODE1, WAREHOUSE_10);
-		assertEquals("Journal uid list size incorrect.", journalUids.size(), 2);
+		assertThat(journalUids).hasSize(2);
 		inventoryJournalDao.removeAll(journalUids);
 		InventoryJournalRollup inventoryJournalRollup = inventoryJournalDao.getRollupByUids(journalUids);
-		assertTrue("No rollup result should be returned for this key.", inventoryJournalRollup == null);
+		assertThat(inventoryJournalRollup)
+			.as("No rollup result should be returned for this key.")
+			.isNull();
 		
 		journalUids = getJournalIdsForSkuCodeAndWarehouseUid(SKU_CODE1, WAREHOUSE_100);
-		assertEquals("Journal uid list size incorrect.", journalUids.size(), 1);
+		assertThat(journalUids).hasSize(1);
 		inventoryJournalRollup = inventoryJournalDao.getRollupByUids(journalUids);
 		verifyQuantitiesOnInventoryJournalRollup(inventoryJournalRollup, 101, 103);
 	}
@@ -326,22 +332,18 @@ public class InventoryJournalDaoImplTest extends DbTestCase {
 		final int allocationSize = getAllocationSizeFromAnnotatedMethod("getUidPk");
 
 		//ensure that allocationSize attribute has desired value
-		assertEquals(10000, allocationSize);
+		assertThat(allocationSize).isEqualTo(10000);
 
 		final int upperLoopBoundary = lowerLoopBoundary + allocationSize;
 
-		Connection conn = null;
-		PreparedStatement stmt = null;
-
-		try{
-			conn = getPersistenceEngine().getConnection();
-			stmt = conn.prepareStatement(jpaGeneratedKeysNativeQuery);
+		try (Connection conn = getPersistenceEngine().getConnection();
+			 PreparedStatement stmt = conn.prepareStatement(jpaGeneratedKeysNativeQuery)) {
 
 			//get the latest state from jpa_generated_keys table for TINVENTORYJOURNAL table
 			int lastGeneratedKey = getLastGeneratedKey(stmt);
 
 			//insert *allocationSize* records into TINVENTORYJOURNAL table
-			for (int i=lowerLoopBoundary;i<upperLoopBoundary;i++) {
+			for (int i = lowerLoopBoundary; i < upperLoopBoundary; i++) {
 				addInventoryJournalEntry(SKU_CODE1, WAREHOUSE_10, i, 3000);
 			}
 
@@ -349,11 +351,8 @@ public class InventoryJournalDaoImplTest extends DbTestCase {
 			int newGeneratedKey = getLastGeneratedKey(stmt);
 
 			//new generated key must be exactly *allocationSize* far from the last one
-			assertEquals(lastGeneratedKey + allocationSize, newGeneratedKey);
+			assertThat(newGeneratedKey).isEqualTo(lastGeneratedKey + allocationSize);
 
-		}finally {
-			stmt.close();
-			conn.close();
 		}
 	}
 
@@ -363,47 +362,55 @@ public class InventoryJournalDaoImplTest extends DbTestCase {
 	}
 
 	private int getLastGeneratedKey(final PreparedStatement stmt) throws Exception {
-		ResultSet rs = null;
 
-		try {
-			rs = stmt.executeQuery();
+		try (ResultSet rs = stmt.executeQuery()) {
 
-			if (rs.next()){
+			if (rs.next()) {
 				return rs.getInt("last_value");
 			}
 
 			return 0;
-		} finally {
-			rs.close();
 		}
 	}
 	
 	private List<Long> getJournalIdsForSkuCodeAndWarehouseUid(String skuCode, long warehouseUid) {
 		InventoryKey inventoryKey = new InventoryKey(skuCode, warehouseUid);
-		List<Long> journalUids = inventoryJournalDao.getUidsByKey(inventoryKey);
-		return journalUids;
+		return inventoryJournalDao.getUidsByKey(inventoryKey);
 	}
 	
 	private void verifyKeyInListWithSkuCodeAndWarehouseUid(List<InventoryKey> inventoryKeys, String skuCode, long warehouseUid) {
 		InventoryKey inventoryKey = getKeyFromListBySkuCodeAndWarehouseUid(inventoryKeys, skuCode, warehouseUid);
-		assertTrue ("Unable to find key with sku code " + skuCode + " and warehouse uid " + Long.toString(warehouseUid), inventoryKey != null);
+		assertThat(inventoryKey)
+			.as("Unable to find key with sku code %s and warehouse uid %d", skuCode, warehouseUid)
+			.isNotNull();
 	}
 	
 	private void verifyQuantitiesOnInventoryDto(InventoryDto dto, int onHandQuantity, int allocatedQuantity) {
-		assertEquals("Inventory on hand quantity doesn't match calculated value", onHandQuantity, dto.getQuantityOnHand());
-		assertEquals("Inventory allocated quantity doesn't match calculated value", allocatedQuantity, dto.getAllocatedQuantity());
+		assertThat(dto.getQuantityOnHand())
+			.as("Inventory on hand quantity doesn't match calculated value")
+			.isEqualTo(onHandQuantity);
+		assertThat(dto.getAllocatedQuantity())
+			.as("Inventory allocated quantity doesn't match calculated value")
+			.isEqualTo(allocatedQuantity);
 	}
 	
 	private void verifyInventoryDtoResultCount(List<InventoryDto> inventoryResults, int resultCount) {
-		String expectedMessage = "Expected " + Integer.toString(resultCount) + " result(s). ";
-		assertEquals(expectedMessage, resultCount, inventoryResults.size());
+		assertThat(inventoryResults)
+			.as("Expected %d result(s).", resultCount)
+			.hasSize(resultCount);
 	}
 
 	private void verifyQuantitiesOnInventoryJournalRollup(
 			InventoryJournalRollup inventoryJournalRollup, int allocatedQuantityDelta, int quantityOnHandDelta) {
-		assertTrue("InventoryJournalRollup is null", inventoryJournalRollup != null);
-		assertEquals("Allocated quantity does not match.", allocatedQuantityDelta, inventoryJournalRollup.getAllocatedQuantityDelta());
-		assertEquals("Quantity on hand does not match.", quantityOnHandDelta, inventoryJournalRollup.getQuantityOnHandDelta());
+		assertThat(inventoryJournalRollup)
+			.as("InventoryJournalRollup is null")
+			.isNotNull();
+		assertThat(inventoryJournalRollup.getAllocatedQuantityDelta())
+			.as("Allocated quantity does not match.")
+			.isEqualTo(allocatedQuantityDelta);
+		assertThat(inventoryJournalRollup.getQuantityOnHandDelta())
+			.as("Quantity on hand does not match.")
+			.isEqualTo(quantityOnHandDelta);
 	}
 
 	private InventoryJournal createInventoryJournal(final String skuCode, final long warehouseUid,
@@ -453,27 +460,22 @@ public class InventoryJournalDaoImplTest extends DbTestCase {
 	}
 
 	private List<InventoryDto> getLowStockInventoryResults(final long warehouseUid, final String... skuCodes) {
-		Set<String> skuCodeSet = new HashSet<>();
-		
-		if (skuCodes != null) {
-			for (String skuCode : skuCodes) {
-				skuCodeSet.add(skuCode);
-			}
-		}
-
-		return inventoryJournalDao.findLowStockInventories(skuCodeSet, warehouseUid); 
+		Set<String> skuCodeSet = ImmutableSet.copyOf(skuCodes);
+		return inventoryJournalDao.findLowStockInventories(skuCodeSet, warehouseUid);
 	}
 	
 	private void verifySkuCodesInResults(final List<InventoryDto> inventoryResults, final long warehouseUid, final String... skuCodes) {
 		for (String skuCode : skuCodes) {
 			InventoryDto inventoryDto = getDtoFromListBySkuCodeAndWarehouseUid(inventoryResults, skuCode, warehouseUid);
-			assertFalse("Results with " + skuCode + " should be included.", inventoryDto == null);
+			assertThat(inventoryDto)
+				.as("Results with " + skuCode + " should be included.")
+				.isNotNull();
 		}
 	}
 	
 	private InventoryDto getDtoFromListBySkuCodeAndWarehouseUid(List<InventoryDto> inventoryDtos, String skuCode, long warehouseUid) {
 		for (InventoryDto inventoryDto : inventoryDtos) {
-			if (inventoryDto.getSkuCode() == skuCode && inventoryDto.getWarehouseUid() == warehouseUid) {
+			if (inventoryDto.getSkuCode().equals(skuCode) && inventoryDto.getWarehouseUid() == warehouseUid) {
 				return inventoryDto;
 			}
 		}
@@ -482,7 +484,7 @@ public class InventoryJournalDaoImplTest extends DbTestCase {
 
 	private InventoryKey getKeyFromListBySkuCodeAndWarehouseUid(List<InventoryKey> inventoryKeys, String skuCode, long warehouseUid) {
 		for (InventoryKey inventoryKey : inventoryKeys) {
-			if (inventoryKey.getSkuCode() == skuCode && inventoryKey.getWarehouseUid() == warehouseUid) {
+			if (inventoryKey.getSkuCode().equals(skuCode) && inventoryKey.getWarehouseUid() == warehouseUid) {
 				return inventoryKey;
 			}
 		}

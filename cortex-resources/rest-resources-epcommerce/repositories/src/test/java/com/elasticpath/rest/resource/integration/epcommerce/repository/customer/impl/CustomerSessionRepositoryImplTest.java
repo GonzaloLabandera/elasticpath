@@ -4,9 +4,10 @@
 package com.elasticpath.rest.resource.integration.epcommerce.repository.customer.impl;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.util.AssertionErrors.assertTrue;
 
 import java.util.Currency;
 import java.util.Locale;
@@ -48,6 +49,7 @@ public class CustomerSessionRepositoryImplTest {
 	private static final String TAG_KEY = "tag";
 	private static final Locale LOCALE = Locale.CANADA;
 	private static final Currency CURRENCY = Currency.getInstance(LOCALE);
+	private static final String RESULT_SHOULD_BE_NOT_FOUND_MESSAGE = "Result should be not found message";
 
 	private TagSet sessionTagSet;
 
@@ -76,6 +78,7 @@ public class CustomerSessionRepositoryImplTest {
 
 	@InjectMocks
 	private CustomerSessionRepositoryImpl customerSessionRepository;
+	public static final String ASSERT_DESCRIPTION = "Expected tag not found in customer session tag set.";
 
 	/**
 	 * Setting up tests.
@@ -96,17 +99,15 @@ public class CustomerSessionRepositoryImplTest {
 		when(resourceOperationContext.getUserIdentifier()).thenReturn(USER_GUID);
 		when(shopperService.findByCustomerGuidAndStoreCode(USER_GUID, STORE_CODE)).thenReturn(mockShopper);
 		when(storeRepository.findStore(STORE_CODE)).thenReturn(ExecutionResultFactory.createReadOK(mockStore));
-		when(mockShopper.getCustomer()).thenReturn(mockCustomer);
 		when(mockStore.getCode()).thenReturn(STORE_CODE);
 		when(mockStore.getDefaultLocale()).thenReturn(LOCALE);
 		when(mockStore.getDefaultCurrency()).thenReturn(CURRENCY);
 		when(customerSessionService.initializeCustomerSessionForPricing(mockCustomerSession, STORE_CODE, CURRENCY))
 				.thenReturn(mockCustomerSession);
-		when(tagSetFactory.createTagSet(mockCustomer)).thenReturn(tagSet);
-
+		when(tagSetFactory.createTagSet(any())).thenReturn(tagSet);
 		ExecutionResult<CustomerSession> result = customerSessionRepository.findOrCreateCustomerSession();
 		assertEquals("The customer session returned should be same as expected", mockCustomerSession, result.getData());
-		assertEquals("Expected tag not found in customer session tag set.", tag, sessionTagSet.getTagValue(TAG_KEY));
+		assertEquals(ASSERT_DESCRIPTION, tag, sessionTagSet.getTagValue(TAG_KEY));
 		verify(sessionPriceListLifecycle).refreshPriceListStack(mockCustomerSession, mockStore);
 	}
 
@@ -132,7 +133,7 @@ public class CustomerSessionRepositoryImplTest {
 
 		ExecutionResult<CustomerSession> result = customerSessionRepository.findOrCreateCustomerSession();
 		assertEquals("The customer session returned should be same as expected", mockCustomerSession, result.getData());
-		assertEquals("Expected tag not found in customer session tag set.", tag, sessionTagSet.getTagValue(TAG_KEY));
+		assertEquals(ASSERT_DESCRIPTION, tag, sessionTagSet.getTagValue(TAG_KEY));
 		verify(sessionPriceListLifecycle).refreshPriceListStack(mockCustomerSession, mockStore);
 	}
 
@@ -146,7 +147,7 @@ public class CustomerSessionRepositoryImplTest {
 		ExecutionResult<CustomerSession> result = customerSessionRepository.findOrCreateCustomerSession();
 
 		assertTrue(RESULT_SHOULD_BE_A_FAILURE, result.isFailure());
-		assertEquals("Result should be not found message", ResourceStatus.NOT_FOUND, result.getResourceStatus());
+		assertEquals(RESULT_SHOULD_BE_NOT_FOUND_MESSAGE, ResourceStatus.NOT_FOUND, result.getResourceStatus());
 	}
 
 	@Test
@@ -159,7 +160,7 @@ public class CustomerSessionRepositoryImplTest {
 		ExecutionResult<CustomerSession> result = customerSessionRepository.findOrCreateCustomerSession();
 
 		assertTrue(RESULT_SHOULD_BE_A_FAILURE, result.isFailure());
-		assertEquals("Result should be not found message", ResourceStatus.SERVER_ERROR, result.getResourceStatus());
+		assertEquals(RESULT_SHOULD_BE_NOT_FOUND_MESSAGE, ResourceStatus.SERVER_ERROR, result.getResourceStatus());
 	}
 
 	@Test
@@ -171,7 +172,7 @@ public class CustomerSessionRepositoryImplTest {
 		ExecutionResult<CustomerSession> result = customerSessionRepository.findCustomerSessionByGuid(mockCustomer.getGuid());
 
 		assertTrue(RESULT_SHOULD_BE_A_FAILURE, result.isFailure());
-		assertEquals("Result should be not found message", ResourceStatus.NOT_FOUND, result.getResourceStatus());
+		assertEquals(RESULT_SHOULD_BE_NOT_FOUND_MESSAGE, ResourceStatus.NOT_FOUND, result.getResourceStatus());
 	}
 
 	@Test

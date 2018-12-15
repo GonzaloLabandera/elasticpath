@@ -9,7 +9,8 @@ import org.junit.runner.RunWith;
  */
 @RunWith(Cucumber.class)
 @CucumberOptions(format = {"pretty", "html:target/cucumber-html-reports/shippingReceiving", "json:target/shippingReceiving.json"},
-		tags = {"@smoketest", "@shippingReceiving"},
+		glue = {"classpath:com.elasticpath.cucumber", "classpath:com.elasticpath.cortex"},
+		tags = {"@regressionTest", "@shippingReceiving"},
 		features = "src/test/resources/com.elasticpath.cucumber/shippingReceiving")
 public class RunShippingReceivingTestsIT {
 }

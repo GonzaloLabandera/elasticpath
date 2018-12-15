@@ -1,15 +1,13 @@
-/**
+/*
  * Copyright (c) Elastic Path Software Inc., 2015
  */
 package com.elasticpath.uat.email.dataimport.stepdefs;
 
+import static com.elasticpath.uat.email.stepdefs.EmailStepDefinitions.getContents;
+import static com.elasticpath.uat.email.stepdefs.EmailStepDefinitions.getEmailMessageBySubject;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-
-import static com.elasticpath.uat.email.stepdefs.EmailStepDefinitions.getContents;
-import static com.elasticpath.uat.email.stepdefs.EmailStepDefinitions.getEmailMessageBySubject;
 
 import java.io.File;
 import java.io.IOException;
@@ -114,7 +112,7 @@ public class DataImportStepDefinitions {
 			try {
 				executeImportJob(importJob);
 			} catch (InterruptedException e) {
-				fail("Import job failed: " + e.getMessage());
+				throw new AssertionError("Import job failed: " + e.getMessage());
 			}
 		});
 	}

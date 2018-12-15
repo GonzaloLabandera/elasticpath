@@ -54,7 +54,7 @@ public final class CoreImageRegistry extends AbstractImageRegistry {
 
 	/** Product SKU image. */
 	public static final ImageDescriptor IMAGE_PRODUCT_SKU = getImageDescriptor(PLUGIN_ID, "sku_default_22.png"); //$NON-NLS-1$
-	
+
 	/** user image. */
 	public static final ImageDescriptor IMAGE_USER = getImageDescriptor(PLUGIN_ID, "user_default_22.png"); //$NON-NLS-1$
 
@@ -231,6 +231,30 @@ public final class CoreImageRegistry extends AbstractImageRegistry {
 	 * Perspective selection image.
 	 */
 	public static final ImageDescriptor PERSPECTIVE_SELECTED = getImageDescriptor(PLUGIN_ID, "toolbar-overlay_selected_34.png"); //$NON-NLS-1$
+
+	/**
+	 * Checkbox checked image.
+	 */
+	public static final ImageDescriptor CHECKBOX_CHECKED = getImageDescriptor(PLUGIN_ID, "checkbox-checked.png"); //$NON-NLS-1$
+
+	/**
+	 * Checkbox unchecked image.
+	 */
+	public static final ImageDescriptor CHECKBOX_UNCHECKED = getImageDescriptor(PLUGIN_ID, "checkbox-unchecked.png"); //$NON-NLS-1$
+	/**
+	 * Radio button checked image.
+	 */
+	public static final ImageDescriptor RADIO_BUTTON_CHECKED = getImageDescriptor(PLUGIN_ID, "radio-button-checked.png"); //$NON-NLS-1$
+
+	/**
+	 * Radio button unchecked image.
+	 */
+	public static final ImageDescriptor RADIO_BUTTON_UNCHECKED = getImageDescriptor(PLUGIN_ID, "radio-button-unchecked.png"); //$NON-NLS-1$
+
+	/**
+	 * Configuration image.
+	 */
+	public static final ImageDescriptor CONFIGURATION_ICON = getImageDescriptor(PLUGIN_ID, "configuration_default.png"); //$NON-NLS-1$
 
 
 	/**

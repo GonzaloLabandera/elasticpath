@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+<definitions xmlns="http://www.elasticpath.com/schema/rest/0.5">
+
+	<family>
+		<name>items</name>
+
+		<resource>
+			<name>code-for-item</name>
+			<description><![CDATA[The item code resource.]]></description>
+			<uri>{base.family}/code/{item}</uri>
+			<entity>code</entity>
+		</resource>
+
+		<relationship>
+			<name>code-for-item</name>
+			<description><![CDATA[Read the code of an [item][items].]]></description>
+			<rel>code</rel>
+			<rev>item</rev>
+			<from>item</from>
+			<to>code-for-item</to>
+		</relationship>
+
+		<entity>
+			<name>code</name>
+			<description><![CDATA[The item SKU code.]]></description>
+			<property>
+				<name>code</name>
+				<description><![CDATA[The sku code.]]></description>
+				<string/>
+			</property>
+		</entity>
+	</family>
+</definitions>

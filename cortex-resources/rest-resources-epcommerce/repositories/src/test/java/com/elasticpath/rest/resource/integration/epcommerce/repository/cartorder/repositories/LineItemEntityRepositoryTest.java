@@ -106,7 +106,7 @@ public class LineItemEntityRepositoryTest {
 		when(shoppingCartRepository.getShoppingItem(lineItemId, cart)).thenReturn(Single.just(shoppingItem));
 		when(shoppingItem.getSkuGuid()).thenReturn(SHOPPING_ITEM_SKU_GUID);
 		when(productSkuRepository.getProductSkuWithAttributesByGuidAsSingle(SHOPPING_ITEM_SKU_GUID)).thenReturn(Single.just(productSku));
-		when(itemRepository.getItemIdForSkuAsSingle(productSku)).thenReturn(Single.just(encodedItemId));
+		when(itemRepository.getItemIdForSku(productSku)).thenReturn(encodedItemId);
 		when(shoppingItem.getGuid()).thenReturn(SHOPPING_ITEM_GUID);
 		when(shoppingItem.getQuantity()).thenReturn(1);
 	}

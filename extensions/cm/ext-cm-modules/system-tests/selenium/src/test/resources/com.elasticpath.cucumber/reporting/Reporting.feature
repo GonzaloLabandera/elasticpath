@@ -1,8 +1,8 @@
-@smoketest @reporting
+@regressionTest @reporting
 Feature: Reporting
 
   Scenario Outline: <report-type> report
-    Given I create an order for scope <scope> with following sku
+    Given I have an order for scope <scope> with following sku
       | skuCode    | quantity   |
       | <sku-code> | <quantity> |
     And I sign in to CM as admin user
@@ -22,7 +22,7 @@ Feature: Reporting
       | Shopping Cart Promotion Usage | Mobee | 50_percent_off_physical_line_item_promo | mobee | physical_product_with_lineitem_promotion_sku | 1        |
 
   Scenario Outline: <report-type> report
-    When I create an order for scope mobee with following sku
+    Given I have an order for scope <scope> with following sku
       | skuCode                                      | quantity |
       | physical_product_with_lineitem_promotion_sku | 1        |
     And I sign in to CM as admin user
@@ -42,7 +42,7 @@ Feature: Reporting
       | Order Summary | Mobee | CAD      | In Progress, Created | mobee | physical_product_with_lineitem_promotion_sku | 1        |
 
   Scenario Outline: <report-type> report
-    Given I have an order for scope <scope> with following skus
+    Given I have an order for scope <scope> with following sku
       | skuCode    | quantity   |
       | <sku-code> | <quantity> |
     And I sign in to CM as admin user
@@ -60,7 +60,7 @@ Feature: Reporting
       | Returns And Exchanges | Mobee | CAD      | mobee | physical_sku | 1        |
 
   Scenario Outline: <report-type> report
-    Given I have an order for scope <scope> with following skus
+    Given I have an order for scope <scope> with following sku
       | skuCode    | quantity   |
       | <sku-code> | <quantity> |
     And I sign in to CM as admin user

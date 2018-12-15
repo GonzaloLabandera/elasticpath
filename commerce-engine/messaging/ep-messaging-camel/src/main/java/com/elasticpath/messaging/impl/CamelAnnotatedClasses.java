@@ -37,7 +37,8 @@ public class CamelAnnotatedClasses implements FactoryBean<Set<Class<?>>> {
 				.setScanners(new SubTypesScanner(),
 						new TypeAnnotationsScanner(),
 						new MethodAnnotationsScanner(),
-						new FieldAnnotationsScanner());
+						new FieldAnnotationsScanner())
+				.setExpandSuperTypes(false);
 		Reflections reflections = new Reflections(configurationBuilder);
 
 		Set<Class<?>> classes = new HashSet<>();

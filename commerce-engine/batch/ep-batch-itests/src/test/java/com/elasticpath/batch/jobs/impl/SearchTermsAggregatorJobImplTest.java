@@ -1,16 +1,14 @@
-/**
+/*
  * Copyright (c) Elastic Path Software Inc., 2013
  */
-
 package com.elasticpath.batch.jobs.impl;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
+import com.google.common.util.concurrent.Uninterruptibles;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,8 +17,6 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.junit4.AbstractJUnit4SpringContextTests;
 import org.springframework.test.context.support.DirtiesContextTestExecutionListener;
-import org.springframework.transaction.TransactionStatus;
-import org.springframework.transaction.support.TransactionCallback;
 
 import com.elasticpath.commons.beanframework.BeanFactory;
 import com.elasticpath.commons.constants.ContextIdNames;
@@ -60,7 +56,7 @@ public class SearchTermsAggregatorJobImplTest extends AbstractJUnit4SpringContex
 	private SearchTermsAggregatorJobImpl searchTermsAggregatorJob;
 
 	@Before
-	public void setUp() throws Exception {
+	public void setUp() {
 		TimeService timeService = beanFactory.getBean("timeService");
 
 		searchTermsAggregatorJob = new SearchTermsAggregatorJobImpl();
@@ -69,21 +65,14 @@ public class SearchTermsAggregatorJobImplTest extends AbstractJUnit4SpringContex
 	}
 
 	private void updateSearchTermsActivity() {
-		try {
-			Thread.sleep(2000L);
-		} catch (InterruptedException e) {
-			fail(e.getMessage());
-		}
+		Uninterruptibles.sleepUninterruptibly(2000L, TimeUnit.MILLISECONDS);
 		/*
 		 * Since we instantiate searchTermsAggregatorJob (instead of having spring do it), it won't be wrapped in a
 		 * transaction proxy --- help it out.
 		 */
-		tac.getTxTemplate().execute(new TransactionCallback<Object>() {
-			@Override
-			public Object doInTransaction(final TransactionStatus arg0) {
-				searchTermsAggregatorJob.updateSearchTermsActivity();
-				return null;
-			}
+		tac.getTxTemplate().execute(txStatus -> {
+			searchTermsAggregatorJob.updateSearchTermsActivity();
+			return null;
 		});
 	}
 
@@ -97,14 +86,22 @@ public class SearchTermsAggregatorJobImplTest extends AbstractJUnit4SpringContex
 		SearchTermsId identifier = searchTermsService.saveIfNotExists(searchTerms);
 
 		List<SearchTermsActivity> searchTermsActivity = getSearchTermsActivity(identifier);
-		assertEquals("Single search log expected", 1, searchTermsActivity.size());
+		assertThat(searchTermsActivity)
+			.as("Single search log expected")
+			.hasSize(1);
 
 		updateSearchTermsActivity();
 
 		SearchTermsActivitySummary summary = getSearchTermsActivitySummary(identifier);
-		assertNotNull("Summary not updated!", summary);
-		assertEquals("Count didn't update", 1, summary.getSearchCount());
-		assertEquals("Dates don't match!", searchTermsActivity.get(0).getLastAccessDate(), summary.getLastAccessDate());
+		assertThat(summary)
+			.as("Summary not updated!")
+			.isNotNull();
+		assertThat(summary.getSearchCount())
+			.as("Count didn't update")
+			.isEqualTo(1);
+		assertThat(summary.getLastAccessDate())
+			.as("Dates don't match!")
+			.isEqualTo(searchTermsActivity.get(0).getLastAccessDate());
 	}
 
 	/**
@@ -118,14 +115,22 @@ public class SearchTermsAggregatorJobImplTest extends AbstractJUnit4SpringContex
 		searchTermsService.load(identifier);
 
 		List<SearchTermsActivity> searchTermsActivity = getSearchTermsActivity(identifier);
-		assertEquals("2 search logs expected", 2, searchTermsActivity.size());
+		assertThat(searchTermsActivity)
+			.as("2 search logs expected")
+			.hasSize(2);
 
 		updateSearchTermsActivity();
 
 		SearchTermsActivitySummary summary = getSearchTermsActivitySummary(identifier);
-		assertNotNull("Summary not updated!", summary);
-		assertEquals("Count didn't update after save then load", 2, summary.getSearchCount());
-		assertEquals("Incorrect date updated", searchTermsActivity.get(1).getLastAccessDate(), summary.getLastAccessDate());
+		assertThat(summary)
+			.as("Summary not updated!")
+			.isNotNull();
+		assertThat(summary.getSearchCount())
+			.as("Count didn't update after save then load")
+			.isEqualTo(2);
+		assertThat(summary.getLastAccessDate())
+			.as("Incorrect date updated")
+			.isEqualTo(searchTermsActivity.get(1).getLastAccessDate());
 	}
 
 	/**
@@ -141,14 +146,22 @@ public class SearchTermsAggregatorJobImplTest extends AbstractJUnit4SpringContex
 		searchTermsService.load(identifier);
 
 		List<SearchTermsActivity> searchTermsActivity = getSearchTermsActivity(identifier);
-		assertEquals("2 search logs expected", 2, searchTermsActivity.size());
+		assertThat(searchTermsActivity)
+			.as("2 search logs expected")
+			.hasSize(2);
 
 		updateSearchTermsActivity();
 
 		SearchTermsActivitySummary summary = getSearchTermsActivitySummary(identifier);
-		assertNotNull("Summary not updated!", summary);
-		assertEquals("Count didn't update after save then load", 2, summary.getSearchCount());
-		assertEquals("Incorrect date updated", searchTermsActivity.get(1).getLastAccessDate(), summary.getLastAccessDate());
+		assertThat(summary)
+			.as("Summary not updated!")
+			.isNotNull();
+		assertThat(summary.getSearchCount())
+			.as("Count didn't update after save then load")
+			.isEqualTo(2);
+		assertThat(summary.getLastAccessDate())
+			.as("Incorrect date updated")
+			.isEqualTo(searchTermsActivity.get(1).getLastAccessDate());
 	}
 
 	/**
@@ -161,20 +174,30 @@ public class SearchTermsAggregatorJobImplTest extends AbstractJUnit4SpringContex
 		SearchTermsId identifier = searchTermsService.saveIfNotExists(searchTerms);
 
 		List<SearchTermsActivity> searchTermsActivity = getSearchTermsActivity(identifier);
-		assertEquals("Single search log expected", 1, searchTermsActivity.size());
+		assertThat(searchTermsActivity)
+			.as("Single search log expected")
+			.hasSize(1);
 
 		updateSearchTermsActivity();
 
 		searchTermsService.load(identifier);
 		searchTermsActivity = getSearchTermsActivity(identifier);
-		assertEquals("One saerch log expected", 1, searchTermsActivity.size());
+		assertThat(searchTermsActivity)
+			.as("One search log expected")
+			.hasSize(1);
 
 		updateSearchTermsActivity();
 
 		SearchTermsActivitySummary summary = getSearchTermsActivitySummary(identifier);
-		assertNotNull("Summary not updated!", summary);
-		assertEquals("Count didn't update after save then load", 2, summary.getSearchCount());
-		assertEquals("Incorrect date updated", searchTermsActivity.get(0).getLastAccessDate(), summary.getLastAccessDate());
+		assertThat(summary)
+			.as("Summary not updated!")
+			.isNotNull();
+		assertThat(summary.getSearchCount())
+			.as("Count didn't update after save then load")
+			.isEqualTo(2);
+		assertThat(summary.getLastAccessDate())
+			.as("Incorrect date updated")
+			.isEqualTo(searchTermsActivity.get(0).getLastAccessDate());
 	}
 
 	/**
@@ -191,26 +214,42 @@ public class SearchTermsAggregatorJobImplTest extends AbstractJUnit4SpringContex
 
 		List<SearchTermsActivity> searchTermsActivity1 = getSearchTermsActivity(identifier);
 		List<SearchTermsActivity> searchTermsActivity2 = getSearchTermsActivity(identifier2);
-		
-		assertEquals("Single search log expected", 1, searchTermsActivity1.size());
+
+		assertThat(searchTermsActivity1)
+			.as("Single search log expected")
+			.hasSize(1);
 
 		updateSearchTermsActivity();
 
 		searchTermsService.load(identifier);
 		searchTermsActivity1 = getSearchTermsActivity(identifier);
-		assertEquals("One search log expected", 1, searchTermsActivity1.size());
+		assertThat(searchTermsActivity1)
+			.as("One search log expected")
+			.hasSize(1);
 
 		updateSearchTermsActivity();
 
 		SearchTermsActivitySummary summary = getSearchTermsActivitySummary(identifier);
-		assertNotNull("Summary not updated!", summary);
-		assertEquals("Count didn't update after save then load", 2, summary.getSearchCount());
-		assertEquals("Incorrect date updated", searchTermsActivity1.get(0).getLastAccessDate(), summary.getLastAccessDate());
+		assertThat(summary)
+			.as("Summary not updated!")
+			.isNotNull();
+		assertThat(summary.getSearchCount())
+			.as("Count didn't update after save then load")
+			.isEqualTo(2);
+		assertThat(summary.getLastAccessDate())
+			.as("Incorrect date updated")
+			.isEqualTo(searchTermsActivity1.get(0).getLastAccessDate());
 
 		SearchTermsActivitySummary summary2 = getSearchTermsActivitySummary(identifier2);
-		assertNotNull("Summary not updated!", summary2);
-		assertEquals("Count wasn't accurate", 1, summary2.getSearchCount());
-		assertEquals("Incorrect date updated", searchTermsActivity2.get(0).getLastAccessDate(), summary2.getLastAccessDate());
+		assertThat(summary2)
+			.as("Summary not updated!")
+			.isNotNull();
+		assertThat(summary2.getSearchCount())
+			.as("Count wasn't accurate")
+			.isEqualTo(1);
+		assertThat(summary2.getLastAccessDate())
+			.as("Incorrect date updated")
+			.isEqualTo(searchTermsActivity2.get(0).getLastAccessDate());
 	}
 
 	@DirtiesDatabase
@@ -222,37 +261,33 @@ public class SearchTermsAggregatorJobImplTest extends AbstractJUnit4SpringContex
 			searchTermsService.load(identifier);
 		}
 
-		assertTrue("There should be a bunch of activities.", getSearchTermsActivity(identifier).size() > 10);
+		assertThat(getSearchTermsActivity(identifier).size())
+			.as("There should be a bunch of activities.")
+			.isGreaterThan(10);
 		updateSearchTermsActivity();
-		assertEquals("Old activity should be cleaned up.", 0, getSearchTermsActivity(identifier).size());
+		assertThat(getSearchTermsActivity(identifier))
+			.as("Old activity should be cleaned up.")
+			.isEmpty();
 	}
 
 	private SearchTermsActivitySummary getSearchTermsActivitySummary(final SearchTermsId identifier) {
 		// Need to wrap the call in a transaction as the workaround for TSR-372 to avoid a ClassCastException in the persitence engine evict call
 		return tac.getTxTemplate().execute(
-				new TransactionCallback<SearchTermsActivitySummary>() {
-					@Override
-					public SearchTermsActivitySummary doInTransaction(final TransactionStatus arg0) {
-				List<SearchTermsActivitySummary> result = persistenceEngine.retrieve(
-						"SELECT s FROM SearchTermsActivitySummaryImpl s WHERE s.searchTermsInternal.guid = ?1", identifier.getValue());
-						if (result == null || result.isEmpty()) {
-							return null;
-						}
-						return result.get(0);
+				txStatus -> {
+					List<SearchTermsActivitySummary> result = persistenceEngine.retrieve(
+							"SELECT s FROM SearchTermsActivitySummaryImpl s WHERE s.searchTermsInternal.guid = ?1", identifier.getValue());
+					if (result == null || result.isEmpty()) {
+						return null;
 					}
+					return result.get(0);
 				});
 	}
 
 	private List<SearchTermsActivity> getSearchTermsActivity(final SearchTermsId identifier) {
-		// Need to wrap the call in a transaction as the workaround for TSR-372 to avoid a ClassCastException in the persitence engine evict call
+		// Need to wrap the call in a transaction as the workaround for TSR-372 to avoid a ClassCastException in the persistence engine evict call
 		return tac.getTxTemplate().execute(
-				new TransactionCallback<List<SearchTermsActivity>>() {
-					@Override
-					public List<SearchTermsActivity> doInTransaction(final TransactionStatus arg0) {
-				return persistenceEngine.retrieve("SELECT s FROM SearchTermsActivityImpl s WHERE s.searchTerms.guid = ?1 ORDER BY s.lastAccessDate",
-						identifier.getValue());
-					}
-				});
+				txStatus -> persistenceEngine.retrieve(
+						"SELECT s FROM SearchTermsActivityImpl s WHERE s.searchTerms.guid = ?1 ORDER BY s.lastAccessDate", identifier.getValue()));
 	}
 
 	private SearchTerms createSearchTerms(final String keywords) {
@@ -260,5 +295,4 @@ public class SearchTermsAggregatorJobImplTest extends AbstractJUnit4SpringContex
 		searchTerms.setKeywords(keywords);
 		return searchTerms;
 	}
-	
 }

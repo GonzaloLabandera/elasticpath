@@ -3,8 +3,7 @@
  */
 package com.elasticpath.common.dto.pricing;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.math.BigDecimal;
 
@@ -13,7 +12,6 @@ import org.junit.Test;
 /**
  *	Tests BaseAmountDTO methods. 
  */
-@SuppressWarnings("PMD.UseAssertEqualsInsteadOfAssertTrue")
 public class BaseAmountDTOTest {
 
 	private static final String TYPE = "type";
@@ -25,7 +23,7 @@ public class BaseAmountDTOTest {
 	@Test
 	public void testEqualsSameObject() {
 		BaseAmountDTO baseAmount1 = new BaseAmountDTO();
-		assertTrue(baseAmount1.equals(baseAmount1));
+		assertThat(baseAmount1).isEqualTo(baseAmount1);
 	}
 
 	/**
@@ -34,7 +32,7 @@ public class BaseAmountDTOTest {
 	@Test
 	public void testEqualsDifferentObjectType() {
 		BaseAmountDTO baseAmount1 = new BaseAmountDTO();
-		assertFalse(baseAmount1.equals(new Object()));
+		assertThat(baseAmount1).isNotEqualTo(new Object());
 	}
 
 	/**
@@ -44,7 +42,7 @@ public class BaseAmountDTOTest {
 	public void testEqualsNull() {
 		BaseAmountDTO baseAmount1 = new BaseAmountDTO();
 		final Object nullObj = null;
-		assertFalse(baseAmount1.equals(nullObj));
+		assertThat(baseAmount1).isNotEqualTo(nullObj);
 	}
 
 	/**
@@ -60,7 +58,7 @@ public class BaseAmountDTOTest {
 		baseAmount1.setGuid(GUID);
 		baseAmount1.setObjectType(TYPE);
 		baseAmount1.setQuantity(BigDecimal.ONE);
-		assertTrue(baseAmount1.equals(baseAmount2));
+		assertThat(baseAmount2).isEqualTo(baseAmount1);
 	}
 
 	/**
@@ -78,7 +76,7 @@ public class BaseAmountDTOTest {
 		baseAmount1.setObjectType(TYPE);
 		baseAmount1.setQuantity(BigDecimal.ONE);
 		baseAmount1.setListValue(BigDecimal.TEN);
-		assertTrue(baseAmount1.equals(baseAmount2));
+		assertThat(baseAmount2).isEqualTo(baseAmount1);
 	}
 
 	/**
@@ -97,7 +95,7 @@ public class BaseAmountDTOTest {
 		baseAmount1.setObjectType(TYPE);
 		baseAmount1.setQuantity(BigDecimal.ONE);
 		baseAmount1.setListValue(BigDecimal.TEN);
-		assertFalse(baseAmount1.equals(baseAmount2));
+		assertThat(baseAmount1).isNotEqualTo(baseAmount2);
 	}
 
 	/**
@@ -119,7 +117,7 @@ public class BaseAmountDTOTest {
 		baseAmount1.setQuantity(BigDecimal.ONE);
 		baseAmount1.setListValue(BigDecimal.TEN);
 		baseAmount1.setSaleValue(BigDecimal.TEN);
-		assertFalse(baseAmount1.equals(baseAmount2));
+		assertThat(baseAmount1).isNotEqualTo(baseAmount2);
 	}
 
 	/**
@@ -141,7 +139,7 @@ public class BaseAmountDTOTest {
 		baseAmount1.setQuantity(BigDecimal.ONE);
 		baseAmount1.setListValue(BigDecimal.TEN);
 		baseAmount1.setSaleValue(BigDecimal.TEN);
-		assertTrue(baseAmount1.equals(baseAmount2));
+		assertThat(baseAmount2).isEqualTo(baseAmount1);
 	}
 
 	

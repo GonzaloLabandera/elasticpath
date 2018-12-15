@@ -13,4 +13,455 @@
 			<param name="dataSet" value="mobee-demo-data" />
 		</customChange>
 	</changeSet>
+
+	<changeSet id="add-default-mobee-facets" author="elasticpath" context="mobee-data">
+		<comment>Configure Default Facets</comment>
+		<insert tableName="TFACET">
+			<column name="UIDPK" valueNumeric='1'/>
+			<column name="FACET_GUID" value='d9a1d8bd-d00d-4d8c-a83a-c398bf542597'/>
+			<column name="BUSINESS_OBJECT_ID" value='A00001'/>
+			<column name="FACET_NAME" value='Plot Keyword'/>
+			<column name="FIELD_KEY_TYPE" valueNumeric='0'/>
+			<column name="STORECODE" value='MOBEE'/>
+			<column name="DISPLAY_NAME" value='{"fr_CA":"","en":"Plot Keyword","fr":""}'/>
+			<column name="FACET_TYPE" valueNumeric='2'/>
+			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="RANGE_FACET_VALUES" value='[]'/>
+			<column name="FACET_GROUP" valueNumeric='0'/>
+		</insert>
+
+		<insert tableName="TFACET">
+			<column name="UIDPK" valueNumeric='2'/>
+			<column name="FACET_GUID" value='e2facf5e-6270-48d4-8e65-c4866f4af608'/>
+			<column name="BUSINESS_OBJECT_ID" value='A00004'/>
+			<column name="FACET_NAME" value='Languages'/>
+			<column name="FIELD_KEY_TYPE" valueNumeric='0'/>
+			<column name="STORECODE" value='MOBEE'/>
+			<column name="DISPLAY_NAME" value='{"fr_CA":"","en":"Languages","fr":""}'/>
+			<column name="FACET_TYPE" valueNumeric='0'/>
+			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="RANGE_FACET_VALUES" value='[]'/>
+			<column name="FACET_GROUP" valueNumeric='0'/>
+		</insert>
+
+		<insert tableName="TFACET">
+			<column name="UIDPK" valueNumeric='3'/>
+			<column name="FACET_GUID" value='ff73b4cd-9e64-4969-810c-c9eaa839aa0c'/>
+			<column name="BUSINESS_OBJECT_ID" value='A00003'/>
+			<column name="FACET_NAME" value='Storyline'/>
+			<column name="FIELD_KEY_TYPE" valueNumeric='0'/>
+			<column name="STORECODE" value='MOBEE'/>
+			<column name="DISPLAY_NAME" value='{"fr_CA":"","en":"Storyline","fr":""}'/>
+			<column name="FACET_TYPE" valueNumeric='2'/>
+			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="RANGE_FACET_VALUES" value='[]'/>
+			<column name="FACET_GROUP" valueNumeric='0'/>
+		</insert>
+
+		<insert tableName="TFACET">
+			<column name="UIDPK" valueNumeric='4'/>
+			<column name="FACET_GUID" value='50bce0f8-8fc5-45ab-876f-e605366cc9a0'/>
+			<column name="BUSINESS_OBJECT_ID" value='A00006'/>
+			<column name="FACET_NAME" value='Color'/>
+			<column name="FIELD_KEY_TYPE" valueNumeric='2'/>
+			<column name="STORECODE" value='MOBEE'/>
+			<column name="DISPLAY_NAME" value='{"fr_CA":"","en":"Color","fr":""}'/>
+			<column name="FACET_TYPE" valueNumeric='2'/>
+			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="RANGE_FACET_VALUES" value='[]'/>
+			<column name="FACET_GROUP" valueNumeric='0'/>
+		</insert>
+
+		<insert tableName="TFACET">
+			<column name="UIDPK" valueNumeric='5'/>
+			<column name="FACET_GUID" value='d5a370d2-e535-4229-bc13-784a5ec02245'/>
+			<column name="BUSINESS_OBJECT_ID" value='A00007'/>
+			<column name="FACET_NAME" value='Runtime'/>
+			<column name="FIELD_KEY_TYPE" valueNumeric='1'/>
+			<column name="STORECODE" value='MOBEE'/>
+			<column name="DISPLAY_NAME" value='{"en":"Runtime","fr_CA":"","fr":"Runtime_fr"}'/>
+			<column name="FACET_TYPE" valueNumeric='1'/>
+			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="RANGE_FACET_VALUES" value='[{"start":0,"end":100,"displayNameMap":{"en":"0 - 100","fr_CA":"0 - 100","fr":"0 to 100 fr"}},{"start":100,"end":200,"displayNameMap":{"en":"100 - 200","fr_CA":"100 - 200","fr":"100 to 200 fr"}},{"start":200,"end":300,"displayNameMap":{"en":"200 - 300","fr_CA":"200 - 300","fr":"200 to 300 fr"}},{"start":300,"end":null,"displayNameMap":{"en":"300 +","fr_CA":"300 +","fr":"300 + fr"}}]'/>
+			<column name="FACET_GROUP" valueNumeric='0'/>
+		</insert>
+
+		<insert tableName="TFACET">
+			<column name="UIDPK" valueNumeric='6'/>
+			<column name="FACET_GUID" value='36059ebd-7569-4704-a81e-de7ee141eb10'/>
+			<column name="BUSINESS_OBJECT_ID" value='A00009'/>
+			<column name="FACET_NAME" value='Viewer&apos;s Rating'/>
+			<column name="FIELD_KEY_TYPE" valueNumeric='3'/>
+			<column name="STORECODE" value='MOBEE'/>
+			<column name="DISPLAY_NAME" value='{"fr_CA":"","en":"Viewer&apos;s Rating","fr":""}'/>
+			<column name="FACET_TYPE" valueNumeric='2'/>
+			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="RANGE_FACET_VALUES" value='[{"start":0,"end":100,"displayNameMap":{"fr_CA":"0 - 100","en":"0 - 100","fr":"0 - 100"}},{"start":100,"end":200,"displayNameMap":{"fr_CA":"100 - 200","en":"100 - 200","fr":"100 - 200"}},{"start":200,"end":300,"displayNameMap":{"fr_CA":"200 - 300","en":"200 - 300","fr":"200 - 300"}},{"start":300,"end":null,"displayNameMap":{"fr_CA":"300 +","en":"300 +","fr":"300 +"}}]'/>
+			<column name="FACET_GROUP" valueNumeric='0'/>
+		</insert>
+
+		<insert tableName="TFACET">
+			<column name="UIDPK" valueNumeric='7'/>
+			<column name="FACET_GUID" value='b4096c65-d00f-4dc6-9946-eb74c486652c'/>
+			<column name="BUSINESS_OBJECT_ID" value='A00011'/>
+			<column name="FACET_NAME" value='Tagline'/>
+			<column name="FIELD_KEY_TYPE" valueNumeric='0'/>
+			<column name="STORECODE" value='MOBEE'/>
+			<column name="DISPLAY_NAME" value='{"fr_CA":"","en":"Tagline","fr":""}'/>
+			<column name="FACET_TYPE" valueNumeric='2'/>
+			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="RANGE_FACET_VALUES" value='[]'/>
+			<column name="FACET_GROUP" valueNumeric='0'/>
+		</insert>
+
+		<insert tableName="TFACET">
+			<column name="UIDPK" valueNumeric='8'/>
+			<column name="FACET_GUID" value='8b6cf74e-c6eb-476d-978f-6e0390975dba'/>
+			<column name="BUSINESS_OBJECT_ID" value='A00012'/>
+			<column name="FACET_NAME" value='Rental Days'/>
+			<column name="FIELD_KEY_TYPE" valueNumeric='1'/>
+			<column name="STORECODE" value='MOBEE'/>
+			<column name="DISPLAY_NAME" value='{"fr_CA":"","en":"Rental Days","fr":""}'/>
+			<column name="FACET_TYPE" valueNumeric='1'/>
+			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="RANGE_FACET_VALUES" value='[{"start":0,"end":100,"displayNameMap":{"fr_CA":"0 - 100","en":"0 - 100","fr":"0 - 100"}},{"start":100,"end":200,"displayNameMap":{"fr_CA":"100 - 200","en":"100 - 200","fr":"100 - 200"}},{"start":200,"end":300,"displayNameMap":{"fr_CA":"200 - 300","en":"200 - 300","fr":"200 - 300"}},{"start":300,"end":null,"displayNameMap":{"fr_CA":"300 +","en":"300 +","fr":"300 +"}}]'/>
+			<column name="FACET_GROUP" valueNumeric='1'/>
+		</insert>
+
+		<insert tableName="TFACET">
+			<column name="UIDPK" valueNumeric='9'/>
+			<column name="FACET_GUID" value='086dc7e4-66de-449c-8df0-0e20b2b3e8d0'/>
+			<column name="BUSINESS_OBJECT_ID" value='A00013'/>
+			<column name="FACET_NAME" value='Format'/>
+			<column name="FIELD_KEY_TYPE" valueNumeric='0'/>
+			<column name="STORECODE" value='MOBEE'/>
+			<column name="DISPLAY_NAME" value='{"fr_CA":"","en":"Format","fr":""}'/>
+			<column name="FACET_TYPE" valueNumeric='2'/>
+			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="RANGE_FACET_VALUES" value='[]'/>
+			<column name="FACET_GROUP" valueNumeric='0'/>
+		</insert>
+
+		<insert tableName="TFACET">
+			<column name="UIDPK" valueNumeric='10'/>
+			<column name="FACET_GUID" value='2ac964dc-5684-4426-ad66-83d0d98b1a5d'/>
+			<column name="BUSINESS_OBJECT_ID" value='A00014'/>
+			<column name="FACET_NAME" value='Specific Resolution'/>
+			<column name="FIELD_KEY_TYPE" valueNumeric='0'/>
+			<column name="STORECODE" value='MOBEE'/>
+			<column name="DISPLAY_NAME" value='{"fr_CA":"","en":"Specific Resolution","fr":""}'/>
+			<column name="FACET_TYPE" valueNumeric='2'/>
+			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="RANGE_FACET_VALUES" value='[]'/>
+			<column name="FACET_GROUP" valueNumeric='1'/>
+		</insert>
+
+		<insert tableName="TFACET">
+			<column name="UIDPK" valueNumeric='11'/>
+			<column name="FACET_GUID" value='97a83240-ffa8-41a9-8505-f19934045772'/>
+			<column name="BUSINESS_OBJECT_ID" value='A00015'/>
+			<column name="FACET_NAME" value='Screen Format'/>
+			<column name="FIELD_KEY_TYPE" valueNumeric='0'/>
+			<column name="STORECODE" value='MOBEE'/>
+			<column name="DISPLAY_NAME" value='{"fr_CA":"","en":"Screen Format","fr":""}'/>
+			<column name="FACET_TYPE" valueNumeric='0'/>
+			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="RANGE_FACET_VALUES" value='[]'/>
+			<column name="FACET_GROUP" valueNumeric='1'/>
+		</insert>
+
+		<insert tableName="TFACET">
+			<column name="UIDPK" valueNumeric='12'/>
+			<column name="FACET_GUID" value='48e911ee-00e7-4ed5-8ce1-84b0831b7aad'/>
+			<column name="BUSINESS_OBJECT_ID" value='A00018'/>
+			<column name="FACET_NAME" value='Color'/>
+			<column name="FIELD_KEY_TYPE" valueNumeric='2'/>
+			<column name="STORECODE" value='MOBEE'/>
+			<column name="DISPLAY_NAME" value='{"fr_CA":"","en":"Color","fr":""}'/>
+			<column name="FACET_TYPE" valueNumeric='2'/>
+			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="RANGE_FACET_VALUES" value='[]'/>
+			<column name="FACET_GROUP" valueNumeric='1'/>
+		</insert>
+
+		<insert tableName="TFACET">
+			<column name="UIDPK" valueNumeric='13'/>
+			<column name="FACET_GUID" value='ff7b153b-479b-402c-9295-ac5c500f4e56'/>
+			<column name="BUSINESS_OBJECT_ID" value='M0002'/>
+			<column name="FACET_NAME" value='Product Color'/>
+			<column name="FIELD_KEY_TYPE" valueNumeric='0'/>
+			<column name="STORECODE" value='MOBEE'/>
+			<column name="DISPLAY_NAME" value='{"fr_CA":"","en":"Product Color","fr":""}'/>
+			<column name="FACET_TYPE" valueNumeric='2'/>
+			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="RANGE_FACET_VALUES" value='[]'/>
+			<column name="FACET_GROUP" valueNumeric='0'/>
+		</insert>
+
+		<insert tableName="TFACET">
+			<column name="UIDPK" valueNumeric='14'/>
+			<column name="FACET_GUID" value='1bbbaafe-827b-48e7-9234-5e843f923015'/>
+			<column name="BUSINESS_OBJECT_ID" value='description'/>
+			<column name="FACET_NAME" value='Product Description'/>
+			<column name="FIELD_KEY_TYPE" valueNumeric='0'/>
+			<column name="STORECODE" value='MOBEE'/>
+			<column name="DISPLAY_NAME" value='{"fr_CA":"","en":"Product Description","fr":""}'/>
+			<column name="FACET_TYPE" valueNumeric='2'/>
+			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="RANGE_FACET_VALUES" value='[]'/>
+			<column name="FACET_GROUP" valueNumeric='0'/>
+		</insert>
+
+		<insert tableName="TFACET">
+			<column name="UIDPK" valueNumeric='16'/>
+			<column name="FACET_GUID" value='9e5fbf22-8ee6-4e02-9d8e-d3291e481435'/>
+			<column name="BUSINESS_OBJECT_ID" value='VideoQuality'/>
+			<column name="FACET_NAME" value='Video Quality'/>
+			<column name="FIELD_KEY_TYPE" valueNumeric='0'/>
+			<column name="STORECODE" value='MOBEE'/>
+			<column name="DISPLAY_NAME" value='{"fr_CA":"","en":"Video Quality","fr":""}'/>
+			<column name="FACET_TYPE" valueNumeric='2'/>
+			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="RANGE_FACET_VALUES" value='[]'/>
+			<column name="FACET_GROUP" valueNumeric='2'/>
+		</insert>
+
+		<insert tableName="TFACET">
+			<column name="UIDPK" valueNumeric='17'/>
+			<column name="FACET_GUID" value='35ba6f8d-c408-49b7-9b20-31a2674c28ca'/>
+			<column name="BUSINESS_OBJECT_ID" value='PurchaseType'/>
+			<column name="FACET_NAME" value='Purchase Type'/>
+			<column name="FIELD_KEY_TYPE" valueNumeric='0'/>
+			<column name="STORECODE" value='MOBEE'/>
+			<column name="DISPLAY_NAME" value='{"fr_CA":"","en":"Purchase Type","fr":""}'/>
+			<column name="FACET_TYPE" valueNumeric='2'/>
+			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="RANGE_FACET_VALUES" value='[]'/>
+			<column name="FACET_GROUP" valueNumeric='2'/>
+		</insert>
+
+		<insert tableName="TFACET">
+			<column name="UIDPK" valueNumeric='18'/>
+			<column name="FACET_GUID" value='6db48b21-c374-4530-aaea-69c1fdd95f50'/>
+			<column name="BUSINESS_OBJECT_ID" value='résolution'/>
+			<column name="FACET_NAME" value='Resolution'/>
+			<column name="FIELD_KEY_TYPE" valueNumeric='0'/>
+			<column name="STORECODE" value='MOBEE'/>
+			<column name="DISPLAY_NAME" value='{"fr_CA":"","en":"Resolution","fr":""}'/>
+			<column name="FACET_TYPE" valueNumeric='0'/>
+			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="RANGE_FACET_VALUES" value='[]'/>
+			<column name="FACET_GROUP" valueNumeric='2'/>
+		</insert>
+
+		<insert tableName="TFACET">
+			<column name="UIDPK" valueNumeric='19'/>
+			<column name="FACET_GUID" value='369b07f1-232a-4d24-adc0-19ce0167cf6c'/>
+			<column name="BUSINESS_OBJECT_ID" value='main'/>
+			<column name="FACET_NAME" value='main'/>
+			<column name="FIELD_KEY_TYPE" valueNumeric='0'/>
+			<column name="STORECODE" value='MOBEE'/>
+			<column name="DISPLAY_NAME" value='{"fr_CA":"","en":"main","fr":""}'/>
+			<column name="FACET_TYPE" valueNumeric='2'/>
+			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="RANGE_FACET_VALUES" value='[]'/>
+			<column name="FACET_GROUP" valueNumeric='2'/>
+		</insert>
+
+		<insert tableName="TFACET">
+			<column name="UIDPK" valueNumeric='20'/>
+			<column name="FACET_GUID" value='8b40571b-3c19-4c1d-8214-4b2f65d60381'/>
+			<column name="BUSINESS_OBJECT_ID" value='side'/>
+			<column name="FACET_NAME" value='side'/>
+			<column name="FIELD_KEY_TYPE" valueNumeric='0'/>
+			<column name="STORECODE" value='MOBEE'/>
+			<column name="DISPLAY_NAME" value='{"fr_CA":"","en":"side","fr":""}'/>
+			<column name="FACET_TYPE" valueNumeric='2'/>
+			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="RANGE_FACET_VALUES" value='[]'/>
+			<column name="FACET_GROUP" valueNumeric='2'/>
+		</insert>
+
+		<insert tableName="TFACET">
+			<column name="UIDPK" valueNumeric='21'/>
+			<column name="FACET_GUID" value='961833ce-a624-407f-a3c9-57e1a5552d4b'/>
+			<column name="BUSINESS_OBJECT_ID" value='GC_Themes'/>
+			<column name="FACET_NAME" value='Design'/>
+			<column name="FIELD_KEY_TYPE" valueNumeric='0'/>
+			<column name="STORECODE" value='MOBEE'/>
+			<column name="DISPLAY_NAME" value='{"fr_CA":"","en":"Design","fr":""}'/>
+			<column name="FACET_TYPE" valueNumeric='2'/>
+			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="RANGE_FACET_VALUES" value='[]'/>
+			<column name="FACET_GROUP" valueNumeric='2'/>
+		</insert>
+
+		<insert tableName="TFACET">
+			<column name="UIDPK" valueNumeric='22'/>
+			<column name="FACET_GUID" value='c84e871b-924d-4d36-82d3-609c37cfe487'/>
+			<column name="BUSINESS_OBJECT_ID" value='GC_Denominations'/>
+			<column name="FACET_NAME" value='Amount'/>
+			<column name="FIELD_KEY_TYPE" valueNumeric='0'/>
+			<column name="STORECODE" value='MOBEE'/>
+			<column name="DISPLAY_NAME" value='{"fr_CA":"","en":"Amount","fr":""}'/>
+			<column name="FACET_TYPE" valueNumeric='2'/>
+			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="RANGE_FACET_VALUES" value='[]'/>
+			<column name="FACET_GROUP" valueNumeric='2'/>
+		</insert>
+
+		<insert tableName="TFACET">
+			<column name="UIDPK" valueNumeric='23'/>
+			<column name="FACET_GUID" value='86e1b248-c5ee-40ee-9cda-7b6a982471fb'/>
+			<column name="BUSINESS_OBJECT_ID" value='CLR'/>
+			<column name="FACET_NAME" value='Color'/>
+			<column name="FIELD_KEY_TYPE" valueNumeric='0'/>
+			<column name="STORECODE" value='MOBEE'/>
+			<column name="DISPLAY_NAME" value='{"fr_CA":"","en":"Color","fr":""}'/>
+			<column name="FACET_TYPE" valueNumeric='2'/>
+			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="RANGE_FACET_VALUES" value='[]'/>
+			<column name="FACET_GROUP" valueNumeric='2'/>
+		</insert>
+
+		<insert tableName="TFACET">
+			<column name="UIDPK" valueNumeric='24'/>
+			<column name="FACET_GUID" value='92e88795-c602-45c2-99fa-7f062a806226'/>
+			<column name="BUSINESS_OBJECT_ID" value='Frequency'/>
+			<column name="FACET_NAME" value='Billed'/>
+			<column name="FIELD_KEY_TYPE" valueNumeric='0'/>
+			<column name="STORECODE" value='MOBEE'/>
+			<column name="DISPLAY_NAME" value='{"fr_CA":"","en":"Billed","fr":""}'/>
+			<column name="FACET_TYPE" valueNumeric='0'/>
+			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="RANGE_FACET_VALUES" value='[]'/>
+			<column name="FACET_GROUP" valueNumeric='2'/>
+		</insert>
+
+		<insert tableName="TFACET">
+			<column name="UIDPK" valueNumeric='25'/>
+			<column name="FACET_GUID" value='efd74d50-11cd-4073-bc12-24e4dbb61f3e'/>
+			<column name="BUSINESS_OBJECT_ID" value='Brand'/>
+			<column name="FACET_NAME" value='Brand'/>
+			<column name="FIELD_KEY_TYPE" valueNumeric='0'/>
+			<column name="STORECODE" value='MOBEE'/>
+			<column name="DISPLAY_NAME" value='{"fr_CA":"","en":"Brand","fr":""}'/>
+			<column name="FACET_TYPE" valueNumeric='0'/>
+			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="RANGE_FACET_VALUES" value='[]'/>
+			<column name="FACET_GROUP" valueNumeric='3'/>
+		</insert>
+
+		<insert tableName="TFACET">
+			<column name="UIDPK" valueNumeric='26'/>
+			<column name="FACET_GUID" value='2e81af9d-6571-4412-985a-af851547b7d7'/>
+			<column name="BUSINESS_OBJECT_ID" value='Product Sku Code'/>
+			<column name="FACET_NAME" value='Product Sku Code'/>
+			<column name="FIELD_KEY_TYPE" valueNumeric='0'/>
+			<column name="STORECODE" value='MOBEE'/>
+			<column name="DISPLAY_NAME" value='{"fr_CA":"","en":"Product Sku Code","fr":""}'/>
+			<column name="FACET_TYPE" valueNumeric='2'/>
+			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="RANGE_FACET_VALUES" value='[]'/>
+			<column name="FACET_GROUP" valueNumeric='3'/>
+		</insert>
+
+		<insert tableName="TFACET">
+			<column name="UIDPK" valueNumeric='27'/>
+			<column name="FACET_GUID" value='956735c3-a763-4d99-8a15-d1829f886afd'/>
+			<column name="BUSINESS_OBJECT_ID" value='Category'/>
+			<column name="FACET_NAME" value='Category'/>
+			<column name="FIELD_KEY_TYPE" valueNumeric='0'/>
+			<column name="STORECODE" value='MOBEE'/>
+			<column name="DISPLAY_NAME" value='{"fr_CA":"","en":"Category","fr":""}'/>
+			<column name="FACET_TYPE" valueNumeric='0'/>
+			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="RANGE_FACET_VALUES" value='[]'/>
+			<column name="FACET_GROUP" valueNumeric='3'/>
+		</insert>
+
+		<insert tableName="TFACET">
+			<column name="UIDPK" valueNumeric='28'/>
+			<column name="FACET_GUID" value='562f447c-7e6d-460f-9044-e540cf303dc8'/>
+			<column name="BUSINESS_OBJECT_ID" value='Price'/>
+			<column name="FACET_NAME" value='Price'/>
+			<column name="FIELD_KEY_TYPE" valueNumeric='3'/>
+			<column name="STORECODE" value='MOBEE'/>
+			<column name="DISPLAY_NAME" value='{"en":"Price","fr_CA":"","fr":""}'/>
+			<column name="FACET_TYPE" valueNumeric='1'/>
+			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="RANGE_FACET_VALUES" value='[{"start":0,"end":5,"displayNameMap":{"en":"Below $5","fr_CA":"0 - 100","fr":"0 - 100"}},{"start":5,"end":20,"displayNameMap":{"en":"$5 to $20","fr_CA":"100 - 200","fr":"100 - 200"}},{"start":20,"end":50,"displayNameMap":{"en":"$20 to $50","fr_CA":"200 - 300","fr":"200 - 300"}},{"start":50,"end":200,"displayNameMap":{"en":"$50 to $200","fr_CA":"300 +","fr":"300 +"}},{"start":200,"end":null,"displayNameMap":{"en":"$200 and Above","fr_CA":"","fr":""}}]'/>
+			<column name="FACET_GROUP" valueNumeric='3'/>
+		</insert>
+
+		<insert tableName="TFACET">
+			<column name="UIDPK" valueNumeric='29'/>
+			<column name="FACET_GUID" value='029f339b-e42f-44a6-9c7f-c67b822baeef'/>
+			<column name="BUSINESS_OBJECT_ID" value='Length'/>
+			<column name="FACET_NAME" value='Length'/>
+			<column name="FIELD_KEY_TYPE" valueNumeric='3'/>
+			<column name="STORECODE" value='MOBEE'/>
+			<column name="DISPLAY_NAME" value='{"fr_CA":"","en":"Length","fr":""}'/>
+			<column name="FACET_TYPE" valueNumeric='2'/>
+			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="RANGE_FACET_VALUES" value='[{"start":0,"end":100,"displayNameMap":{"fr_CA":"0 - 100","en":"0 - 100","fr":"0 - 100"}},{"start":100,"end":200,"displayNameMap":{"fr_CA":"100 - 200","en":"100 - 200","fr":"100 - 200"}},{"start":200,"end":300,"displayNameMap":{"fr_CA":"200 - 300","en":"200 - 300","fr":"200 - 300"}},{"start":300,"end":null,"displayNameMap":{"fr_CA":"300 +","en":"300 +","fr":"300 +"}}]'/>
+			<column name="FACET_GROUP" valueNumeric='3'/>
+		</insert>
+
+		<insert tableName="TFACET">
+			<column name="UIDPK" valueNumeric='30'/>
+			<column name="FACET_GUID" value='c64a90aa-5e9a-47a0-b73b-c61d7784108a'/>
+			<column name="BUSINESS_OBJECT_ID" value='Product Name'/>
+			<column name="FACET_NAME" value='Product Name'/>
+			<column name="FIELD_KEY_TYPE" valueNumeric='0'/>
+			<column name="STORECODE" value='MOBEE'/>
+			<column name="DISPLAY_NAME" value='{"fr_CA":"","en":"Product Name","fr":""}'/>
+			<column name="FACET_TYPE" valueNumeric='2'/>
+			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="RANGE_FACET_VALUES" value='[]'/>
+			<column name="FACET_GROUP" valueNumeric='3'/>
+		</insert>
+
+		<insert tableName="TFACET">
+			<column name="UIDPK" valueNumeric='31'/>
+			<column name="FACET_GUID" value='7b25de47-e6c4-46f7-96b3-e767a0538fd7'/>
+			<column name="BUSINESS_OBJECT_ID" value='Height'/>
+			<column name="FACET_NAME" value='Height'/>
+			<column name="FIELD_KEY_TYPE" valueNumeric='3'/>
+			<column name="STORECODE" value='MOBEE'/>
+			<column name="DISPLAY_NAME" value='{"fr_CA":"","en":"Height","fr":""}'/>
+			<column name="FACET_TYPE" valueNumeric='2'/>
+			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="RANGE_FACET_VALUES" value='[{"start":0,"end":100,"displayNameMap":{"fr_CA":"0 - 100","en":"0 - 100","fr":"0 - 100"}},{"start":100,"end":200,"displayNameMap":{"fr_CA":"100 - 200","en":"100 - 200","fr":"100 - 200"}},{"start":200,"end":300,"displayNameMap":{"fr_CA":"200 - 300","en":"200 - 300","fr":"200 - 300"}},{"start":300,"end":null,"displayNameMap":{"fr_CA":"300 +","en":"300 +","fr":"300 +"}}]'/>
+			<column name="FACET_GROUP" valueNumeric='3'/>
+		</insert>
+
+		<insert tableName="TFACET">
+			<column name="UIDPK" valueNumeric='32'/>
+			<column name="FACET_GUID" value='56c4001c-7494-4853-918f-535f1573d563'/>
+			<column name="BUSINESS_OBJECT_ID" value='Width'/>
+			<column name="FACET_NAME" value='Width'/>
+			<column name="FIELD_KEY_TYPE" valueNumeric='3'/>
+			<column name="STORECODE" value='MOBEE'/>
+			<column name="DISPLAY_NAME" value='{"fr_CA":"","en":"Width","fr":""}'/>
+			<column name="FACET_TYPE" valueNumeric='2'/>
+			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="RANGE_FACET_VALUES" value='[{"start":0,"end":100,"displayNameMap":{"fr_CA":"0 - 100","en":"0 - 100","fr":"0 - 100"}},{"start":100,"end":200,"displayNameMap":{"fr_CA":"100 - 200","en":"100 - 200","fr":"100 - 200"}},{"start":200,"end":300,"displayNameMap":{"fr_CA":"200 - 300","en":"200 - 300","fr":"200 - 300"}},{"start":300,"end":null,"displayNameMap":{"fr_CA":"300 +","en":"300 +","fr":"300 +"}}]'/>
+			<column name="FACET_GROUP" valueNumeric='3'/>
+		</insert>
+
+		<insert tableName="TFACET">
+			<column name="UIDPK" valueNumeric='33'/>
+			<column name="FACET_GUID" value='5462caef-3b73-47b0-84a5-61c3def95fa3'/>
+			<column name="BUSINESS_OBJECT_ID" value='Weight'/>
+			<column name="FACET_NAME" value='Weight'/>
+			<column name="FIELD_KEY_TYPE" valueNumeric='3'/>
+			<column name="STORECODE" value='MOBEE'/>
+			<column name="DISPLAY_NAME" value='{"fr_CA":"","en":"Weight","fr":""}'/>
+			<column name="FACET_TYPE" valueNumeric='2'/>
+			<column name="SEARCHABLE_OPTION" valueNumeric='1'/>
+			<column name="RANGE_FACET_VALUES" value='[{"start":0,"end":100,"displayNameMap":{"fr_CA":"0 - 100","en":"0 - 100","fr":"0 - 100"}},{"start":100,"end":200,"displayNameMap":{"fr_CA":"100 - 200","en":"100 - 200","fr":"100 - 200"}},{"start":200,"end":300,"displayNameMap":{"fr_CA":"200 - 300","en":"200 - 300","fr":"200 - 300"}},{"start":300,"end":null,"displayNameMap":{"fr_CA":"300 +","en":"300 +","fr":"300 +"}}]'/>
+			<column name="FACET_GROUP" valueNumeric='3'/>
+		</insert>
+	</changeSet>
 </databaseChangeLog>

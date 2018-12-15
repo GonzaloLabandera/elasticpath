@@ -4,6 +4,7 @@ package com.elasticpath.selenium.util;
  * Extended WaitDriver class to use FluentWait.
  */
 
+import java.time.Duration;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -48,8 +49,8 @@ public class FluentWaitDriver extends WaitDriver {
 		super(driver);
 		webDriver = driver;
 		wait = new FluentWait<WebDriver>(driver)
-				.withTimeout(WEBDRIVER_DEFAULT_TIMEOUT, TimeUnit.SECONDS)
-				.pollingEvery(POLLING_INTERVAL, TimeUnit.MILLISECONDS)
+				.withTimeout(Duration.ofSeconds(WEBDRIVER_DEFAULT_TIMEOUT))
+				.pollingEvery(Duration.ofMillis(POLLING_INTERVAL))
 				.ignoring(NoSuchElementException.class, StaleElementReferenceException.class);
 
 		//set up the js driver.
@@ -74,14 +75,14 @@ public class FluentWaitDriver extends WaitDriver {
 	 * @param timeOutInSeconds the duration
 	 */
 	public void setFluentWaitTimer(final long timeOutInSeconds) {
-		wait.withTimeout(timeOutInSeconds, TimeUnit.SECONDS);
+		wait.withTimeout(Duration.ofSeconds(timeOutInSeconds));
 	}
 
 	/**
 	 * Sets the wait duration of FluentWait back to default.
 	 */
 	public void setFluentWaitTimerBackToDefault() {
-		wait.withTimeout(WEBDRIVER_DEFAULT_TIMEOUT, TimeUnit.SECONDS);
+		wait.withTimeout(Duration.ofSeconds(WEBDRIVER_DEFAULT_TIMEOUT));
 	}
 
 	/**
@@ -116,6 +117,22 @@ public class FluentWaitDriver extends WaitDriver {
 			String[] selectorStringArray = findBy.toString().split(":", 2);
 			String selectorString = selectorStringArray[1].trim();
 			waitForElementToBeInteractable(selectorString);
+		}
+		return wait.until(ExpectedConditions.elementToBeClickable(findBy));
+	}
+
+	/**
+	 * Waits until an element is clickable without Javascript element check.
+	 *
+	 * @param findBy the FindBy condition
+	 * @return the webelement which was checked
+	 */
+	public WebElement waitForElementToBeClickableNonJSCheck(final By findBy) {
+		webDriver.findElement(findBy);
+		if (!findBy.toString().contains("xpath")) {
+			String[] selectorStringArray = findBy.toString().split(":", 2);
+			String selectorString = selectorStringArray[1].trim();
+			waitForElementToBeVisible(By.cssSelector(selectorString));
 		}
 		return wait.until(ExpectedConditions.elementToBeClickable(findBy));
 	}
@@ -179,6 +196,10 @@ public class FluentWaitDriver extends WaitDriver {
 		waitForElementToBePresent(By.cssSelector(elementSelector));
 		waitForElementToBeVisible(By.cssSelector(elementSelector));
 		try {
+			if (elementSelector.contains("\\'")) {
+				final String selector = elementSelector.replace("'", "\"").replace("\\\"", "\\'");
+				return wait.until(driver -> (Boolean) jsDriver.executeScript(" return EPTest.isElementInteractable('" + selector + "');"));
+			}
 			return wait.until(driver -> (Boolean) jsDriver.executeScript(" return EPTest.isElementInteractable(\"" + elementSelector + "\");"));
 		} catch (Exception e) {
 			LOGGER.debug(elementSelector + " - " + e.getMessage());

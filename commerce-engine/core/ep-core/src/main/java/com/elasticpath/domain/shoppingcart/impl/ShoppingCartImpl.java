@@ -1907,6 +1907,22 @@ public class ShoppingCartImpl extends AbstractEpDomainImpl implements ShoppingCa
 		return this.shippableItemPredicate;
 	}
 
+
+	/**
+	 * Returns parent product sku for a shopping item.
+	 *
+	 * @param shoppingItem shopping item
+	 * @return parent product sku or null if there is no parent
+	 */
+	@Override
+	public ProductSku getParentProductSku(final ShoppingItem shoppingItem) {
+		return getShoppingItemProductSkuMap().entrySet().stream()
+				.filter(entry -> entry.getKey().getChildren().contains(shoppingItem))
+				.findFirst()
+				.map(Map.Entry::getValue)
+				.orElse(null);
+	}
+
 	/**
 	 * Represents the pricing for a particular shipping option.
 	 */
@@ -1964,7 +1980,7 @@ public class ShoppingCartImpl extends AbstractEpDomainImpl implements ShoppingCa
 		 * Constructor.
 		 *
 		 * @param shippingPricing the shipping pricing details
-		 * @param currency the currency
+		 * @param currency        the currency
 		 */
 		public ImmutableShippingPricingSnapshot(final ShippingPricing shippingPricing, final Currency currency) {
 			shippingListPrice = shippingPricing.getListPrice();

@@ -3,12 +3,16 @@
  */
 package com.elasticpath.persistence.openjpa.impl;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertSame;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -17,18 +21,19 @@ import javax.persistence.EntityManager;
 import javax.persistence.FlushModeType;
 import javax.persistence.Query;
 
-import org.apache.commons.lang3.ArrayUtils;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import org.apache.openjpa.kernel.Broker;
+import org.apache.openjpa.persistence.OpenJPAEntityManager;
 import org.apache.openjpa.persistence.OpenJPAEntityManagerSPI;
 import org.apache.openjpa.persistence.OpenJPAQuery;
 import org.apache.openjpa.persistence.QueryOperationType;
-import org.jmock.Expectations;
-import org.jmock.integration.junit4.JUnitRuleMockery;
-import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Rule;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.transaction.PlatformTransactionManager;
 
 import com.elasticpath.persistence.api.ChangeType;
@@ -37,12 +42,14 @@ import com.elasticpath.persistence.api.FlushMode;
 import com.elasticpath.persistence.api.Persistable;
 import com.elasticpath.persistence.api.PersistenceEngineOperationListener;
 import com.elasticpath.persistence.api.PersistenceSessionFactory;
+import com.elasticpath.persistence.openjpa.JpaPersistenceSession;
 import com.elasticpath.persistence.openjpa.PersistenceInterceptor;
 
 /**
  * Test that the methods of the JPA Persistence Engine behave as expected.
  */
-@SuppressWarnings({ "unchecked", "PMD.TooManyMethods", "PMD.TooManyStaticImports", "PMD.UselessOverridingMethod", "PMD.GodClass" })
+@SuppressWarnings({"unchecked", "PMD.TooManyMethods", "PMD.ExcessiveClassLength", "PMD.UselessOverridingMethod", "PMD.GodClass"})
+@RunWith(MockitoJUnitRunner.class)
 public class JpaPersistenceEngineImplTest {
 
 	private static final String MERGED_OBJECT = "mergedObject";
@@ -55,20 +62,29 @@ public class JpaPersistenceEngineImplTest {
 
 	private static final String NAMED_QUERY = "NAMED_QUERY";
 
-	@Rule
-	public final JUnitRuleMockery context = new JUnitRuleMockery();
+	private static final String NAMED_QUERY_WITH_LIST = "SELECT FROM SOMETHING s WHERE s.uidPk IN (:list)";
+
+	private static final String NAMED_QUERY_WITH_LIST_INSERTED = "SELECT FROM SOMETHING s WHERE s.uidPk IN (1000,1001)";
 
 	private JpaPersistenceEngineImpl persistenceEngine;
 
 	private JpaPersistenceEngineImpl listeningPersistenceEngine;
 
+	@Mock
 	private EntityManager entityManager;
 
+	@Mock
+	private OpenJPAEntityManager openJPAEntityManager;
+
+	@Mock
 	private PersistenceSessionFactory sessionFactory;
 
+	@Mock
 	private Broker broker;
 
 	private static final long UIDPK = 1000L;
+
+	private static final long UIDPK2 = 1001L;
 
 	/**
 	 * Set up mocks etc required by all tests.
@@ -77,10 +93,6 @@ public class JpaPersistenceEngineImplTest {
 	 */
 	@Before
 	public void setUp() throws Exception {
-		// Mock objects that get injected
-		entityManager = context.mock(EntityManager.class);
-		sessionFactory = context.mock(PersistenceSessionFactory.class);
-		broker = context.mock(Broker.class);
 
 		// Set up the persistence engine to be tested, stub out OpenJPA internals (e.g. broker).
 		persistenceEngine = new JpaPersistenceEngineImpl() {
@@ -107,43 +119,8 @@ public class JpaPersistenceEngineImplTest {
 		};
 		listeningPersistenceEngine.setEntityManager(entityManager);
 		listeningPersistenceEngine.setSessionFactory(sessionFactory);
-	}
 
-	/**
-	 * Test that bulk update creates a query and executes update on that query.
-	 */
-	@Test
-	public final void testBulkUpdate() {
-		final String queryString = "UPDATE SomeObjectImpl so SET so.one = 1";
-		final OpenJPAQuery<?> query = context.mock(OpenJPAQuery.class);
-		context.checking(new Expectations() {
-			{
-				oneOf(entityManager).createQuery(queryString); will(Expectations.returnValue(query));
-				oneOf(query).getOperation(); will(Expectations.returnValue(QueryOperationType.UPDATE));
-				oneOf(query).executeUpdate();
-			}
-		});
-		persistenceEngine.bulkUpdate(queryString);
-	}
-
-	/**
-	 * Test that bulk update with a parameter creates a query, sets the parameter and executes
-	 * update on that query.
-	 */
-	@Test
-	public final void testBulkUpdateWithParameter() {
-		final String queryString = "UPDATE SomeObjectImpl so SET so.one = 1 WHERE so.something = ?1";
-		final OpenJPAQuery<?> query = context.mock(OpenJPAQuery.class);
-		final Object[] parameters = new Object[] { SOME_PARAMETER };
-		context.checking(new Expectations() {
-			{
-				oneOf(entityManager).createQuery(queryString); will(Expectations.returnValue(query));
-				oneOf(query).getOperation(); will(Expectations.returnValue(QueryOperationType.UPDATE));
-				oneOf(query).setParameter(1, SOME_PARAMETER);
-				oneOf(query).executeUpdate();
-			}
-		});
-		persistenceEngine.bulkUpdate(queryString, parameters);
+		when(entityManager.getDelegate()).thenReturn(openJPAEntityManager);
 	}
 
 	/**
@@ -151,12 +128,8 @@ public class JpaPersistenceEngineImplTest {
 	 */
 	@Test
 	public final void testClear() {
-		context.checking(new Expectations() {
-			{
-				oneOf(entityManager).clear();
-			}
-		});
 		persistenceEngine.clear();
+		verify(entityManager).clear();
 	}
 
 	/**
@@ -165,15 +138,12 @@ public class JpaPersistenceEngineImplTest {
 	 */
 	@Test
 	public final void testDelete() {
-		final Persistable object = context.mock(Persistable.class);
-		context.checking(new Expectations() {
-			{
-				oneOf(object).getUidPk(); will(Expectations.returnValue(UIDPK));
-				oneOf(entityManager).getReference(object.getClass(), UIDPK); will(Expectations.returnValue(object));
-				oneOf(entityManager).remove(object);
-			}
-		});
+		final Persistable object = mock(Persistable.class);
+		when(object.getUidPk()).thenReturn(UIDPK);
+		when(entityManager.getReference(object.getClass(), UIDPK)).thenAnswer(answer -> object);
 		persistenceEngine.delete(object);
+		verify(object).getUidPk();
+		verify(entityManager).remove(object);
 	}
 
 	/**
@@ -182,15 +152,12 @@ public class JpaPersistenceEngineImplTest {
 	@Test
 	public final void testExecuteSessionUpdate() {
 		final String sql = "UPDATE SomeObjectImpl so SET so.one = 1";
-		final OpenJPAQuery<?> query = context.mock(OpenJPAQuery.class);
-		context.checking(new Expectations() {
-			{
-				oneOf(entityManager).createQuery(sql); will(Expectations.returnValue(query));
-				oneOf(query).getOperation(); will(Expectations.returnValue(QueryOperationType.UPDATE));
-				oneOf(query).executeUpdate();
-			}
-		});
+		final OpenJPAQuery<?> query = mock(OpenJPAQuery.class);
+		when(entityManager.createQuery(sql)).thenReturn(query);
+		when(query.getOperation()).thenReturn(QueryOperationType.UPDATE);
+
 		persistenceEngine.executeSessionUpdate(sql);
+		verify(query).executeUpdate();
 	}
 
 	/**
@@ -198,12 +165,8 @@ public class JpaPersistenceEngineImplTest {
 	 */
 	@Test
 	public final void testFlush() {
-		context.checking(new Expectations() {
-			{
-				oneOf(entityManager).flush();
-			}
-		});
 		persistenceEngine.flush();
+		verify(entityManager).flush();
 	}
 
 	/**
@@ -212,15 +175,14 @@ public class JpaPersistenceEngineImplTest {
 	@Test
 	public final void testGet() {
 		final Class<Persistable> persistenceClass = Persistable.class;
-		final Persistable object = context.mock(Persistable.class);
-		context.checking(new Expectations() {
-			{
-				oneOf(entityManager).find(persistenceClass, UIDPK);
-				will(Expectations.returnValue(object));
-			}
-		});
+		final Persistable object = mock(Persistable.class);
+		when(entityManager.find(persistenceClass, UIDPK)).thenReturn(object);
+
 		Persistable result = persistenceEngine.get(persistenceClass, UIDPK);
-		assertEquals("Returned object should be the result of the entity manager call", object, result);
+		verify(entityManager).find(persistenceClass, UIDPK);
+		assertThat(result)
+			.as("Returned object should be the result of the entity manager call")
+			.isEqualTo(object);
 	}
 
 	/**
@@ -228,13 +190,9 @@ public class JpaPersistenceEngineImplTest {
 	 */
 	@Test
 	public final void testInitialize() {
-		final Persistable object = context.mock(Persistable.class);
-		context.checking(new Expectations() {
-			{
-				oneOf(entityManager).refresh(object);
-			}
-		});
+		final Persistable object = mock(Persistable.class);
 		persistenceEngine.initialize(object);
+		verify(entityManager).refresh(object);
 	}
 
 	/**
@@ -243,15 +201,14 @@ public class JpaPersistenceEngineImplTest {
 	@Test
 	public final void testLoad() {
 		final Class<Persistable> persistenceClass = Persistable.class;
-		final Persistable object = context.mock(Persistable.class);
-		context.checking(new Expectations() {
-			{
-				oneOf(entityManager).find(persistenceClass, UIDPK);
-				will(Expectations.returnValue(object));
-			}
-		});
+		final Persistable object = mock(Persistable.class);
+		when(entityManager.find(persistenceClass, UIDPK)).thenReturn(object);
+
 		Persistable result = persistenceEngine.load(persistenceClass, UIDPK);
-		assertEquals("Returned object should be the result of the entity manager call", object, result);
+		verify(entityManager).find(persistenceClass, UIDPK);
+		assertThat(result)
+			.as("Returned object should be the result of the entity manager call")
+			.isEqualTo(object);
 	}
 
 	/**
@@ -261,9 +218,9 @@ public class JpaPersistenceEngineImplTest {
 	@Test
 	public final void testLoadWithNewSession() {
 		final Class<Persistable> persistenceClass = Persistable.class;
-		final Persistable object = context.mock(Persistable.class);
-		final EntityManager newEntityManager = context.mock(EntityManager.class, "newEntityManager");
-		final PlatformTransactionManager txManager = context.mock(PlatformTransactionManager.class);
+		final Persistable object = mock(Persistable.class);
+		final EntityManager newEntityManager = mock(EntityManager.class, "newEntityManager");
+		final PlatformTransactionManager txManager = mock(PlatformTransactionManager.class);
 		final JpaSessionImpl session = new JpaSessionImpl(entityManager, txManager, false) {
 
 			@Override
@@ -272,15 +229,52 @@ public class JpaPersistenceEngineImplTest {
 			}
 
 		};
-		context.checking(new Expectations() {
-			{
-				oneOf(sessionFactory).createPersistenceSession(); will(Expectations.returnValue(session));
-				oneOf(newEntityManager).find(persistenceClass, UIDPK); will(Expectations.returnValue(object));
-				oneOf(newEntityManager).close();
-			}
-		});
+		when(sessionFactory.createPersistenceSession()).thenReturn(session);
+		when(newEntityManager.find(persistenceClass, UIDPK)).thenReturn(object);
+
 		Persistable result = persistenceEngine.loadWithNewSession(persistenceClass, UIDPK);
-		assertEquals("Returned object should be the result of the entity manager call", object, result);
+		verify(newEntityManager).close();
+		assertThat(result)
+			.as("Returned object should be the result of the entity manager call")
+			.isEqualTo(object);
+	}
+
+
+	/**
+	 * Test that bulk update creates a query and executes update on that query.
+	 */
+	@Test
+	public final void testBulkUpdate() {
+		final String queryString = "UPDATE SomeObjectImpl so SET so.one = 1";
+		final OpenJPAQuery<?> query = mock(OpenJPAQuery.class);
+
+		when(entityManager.createQuery(queryString)).thenReturn(query);
+		when(query.getOperation()).thenReturn(QueryOperationType.UPDATE);
+
+		persistenceEngine.bulkUpdate(queryString);
+		verify(entityManager).createQuery(queryString);
+		verify(query).getOperation();
+		verify(query).executeUpdate();
+	}
+
+	/**
+	 * Test that bulk update with a parameter creates a query, sets the parameter and executes
+	 * update on that query.
+	 */
+	@Test
+	public final void testBulkUpdateWithParameter() {
+		final String queryString = "UPDATE SomeObjectImpl so SET so.one = 1 WHERE so.something = ?1";
+		final OpenJPAQuery<?> query = mock(OpenJPAQuery.class);
+		final Object[] parameters = new Object[] { SOME_PARAMETER };
+
+		when(entityManager.createQuery(queryString)).thenReturn(query);
+		when(query.getOperation()).thenReturn(QueryOperationType.UPDATE);
+
+		persistenceEngine.bulkUpdate(queryString, parameters);
+		verify(entityManager).createQuery(queryString);
+		verify(query).getOperation();
+		verify(query).executeUpdate();
+		verify(query).setParameter(1, SOME_PARAMETER);
 	}
 
 	/**
@@ -289,16 +283,17 @@ public class JpaPersistenceEngineImplTest {
 	 */
 	@Test
 	public final void testMerge() {
-		final FakePersistablePersistenceInterceptor object = context.mock(FakePersistablePersistenceInterceptor.class);
-		final FakePersistablePersistenceInterceptor mergedObject = context.mock(FakePersistablePersistenceInterceptor.class, MERGED_OBJECT);
-		context.checking(new Expectations() {
-			{
-				oneOf(object).executeBeforePersistAction();
-				oneOf(entityManager).merge(object); will(Expectations.returnValue(mergedObject));
-			}
-		});
+		final FakePersistablePersistenceInterceptor object = mock(FakePersistablePersistenceInterceptor.class);
+		final FakePersistablePersistenceInterceptor mergedObject = mock(FakePersistablePersistenceInterceptor.class, MERGED_OBJECT);
+
+		when(entityManager.merge(object)).thenReturn(mergedObject);
+
 		Persistable result = persistenceEngine.merge(object);
-		Assert.assertNotSame("Returned object should be different to the one given", object, result);
+		verify(object).executeBeforePersistAction();
+		verify(entityManager).merge(object);
+		assertThat(result)
+			.as("Returned object should be different to the one given")
+			.isNotSameAs(object);
 	}
 
 	/**
@@ -315,27 +310,23 @@ public class JpaPersistenceEngineImplTest {
 		queries.add(query2);
 
 		// Mock the Query objects and Query results
-		final Query query1Query = context.mock(Query.class, "query1");
-		final Query query2Query = context.mock(Query.class, "query2");
+		final Query query1Query = mock(Query.class, "query1");
+		final Query query2Query = mock(Query.class, "query2");
 		final List<Persistable> results1 = new ArrayList<>();
 		final List<Persistable> results2 = new ArrayList<>();
-		final Persistable obj1 = context.mock(Persistable.class, "result1");
-		final Persistable obj2 = context.mock(Persistable.class, "result2");
+		final Persistable obj1 = mock(Persistable.class, "result1");
+		final Persistable obj2 = mock(Persistable.class, "result2");
 		results1.add(obj1);
 		results2.add(obj2);
 
 		// Set expectations
-		context.checking(new Expectations() {
-			{
-				oneOf(entityManager).createQuery(query1); will(Expectations.returnValue(query1Query));
-				oneOf(entityManager).createQuery(query2); will(Expectations.returnValue(query2Query));
-				oneOf(query1Query).getResultList(); will(Expectations.returnValue(results1));
-				oneOf(query2Query).getResultList(); will(Expectations.returnValue(results2));
-			}
-		});
+		when(entityManager.createQuery(query1)).thenReturn(query1Query);
+		when(entityManager.createQuery(query2)).thenReturn(query2Query);
+		when(query1Query.getResultList()).thenReturn(results1);
+		when(query2Query.getResultList()).thenReturn(results2);
+
 		List<Persistable> results = persistenceEngine.retrieve(queries);
-		Assert.assertTrue("The first query's result should be present", results.contains(obj1));
-		Assert.assertTrue("The second query's result should be present", results.contains(obj2));
+		assertThat(results).containsExactlyInAnyOrder(obj1, obj2);
 	}
 
 	/**
@@ -352,31 +343,26 @@ public class JpaPersistenceEngineImplTest {
 		queries.add(query2);
 
 		// Mock the Query objects and Query results
-		final Query query1Query = context.mock(Query.class, "query1");
-		final Query query2Query = context.mock(Query.class, "query2");
+		final Query query1Query = mock(Query.class, "query1");
+		final Query query2Query = mock(Query.class, "query2");
 		final List<Persistable> results1 = new ArrayList<>();
 		final List<Persistable> results2 = new ArrayList<>();
-		final Persistable obj1 = context.mock(Persistable.class, "result1");
-		final Persistable obj2 = context.mock(Persistable.class, "result2");
+		final Persistable obj1 = mock(Persistable.class, "result1");
+		final Persistable obj2 = mock(Persistable.class, "result2");
 		results1.add(obj1);
 		results2.add(obj2);
 
-		// Set expectations
-		context.checking(new Expectations() {
-			{
-				oneOf(entityManager).createQuery(query1); will(Expectations.returnValue(query1Query));
-				oneOf(entityManager).createQuery(query2); will(Expectations.returnValue(query2Query));
-				oneOf(query1Query).setParameter(1, SOME_PARAMETER);
-				oneOf(query2Query).setParameter(1, SOME_PARAMETER);
-				oneOf(query1Query).getResultList(); will(Expectations.returnValue(results1));
-				oneOf(query2Query).getResultList(); will(Expectations.returnValue(results2));
-			}
-		});
+		when(entityManager.createQuery(query1)).thenReturn(query1Query);
+		when(entityManager.createQuery(query2)).thenReturn(query2Query);
+		when(query1Query.getResultList()).thenReturn(results1);
+		when(query2Query.getResultList()).thenReturn(results2);
 
-		final Object[] parameters = new Object[] { SOME_PARAMETER };
+		final Object[] parameters = new Object[]{SOME_PARAMETER};
 		List<Persistable> results = persistenceEngine.retrieve(queries, parameters);
-		Assert.assertTrue("The first query's result should be present", results.contains(obj1));
-		Assert.assertTrue("The second query's result should be present", results.contains(obj2));
+		assertThat(results).containsExactlyInAnyOrder(obj1, obj2);
+
+		verify(query1Query).setParameter(1, SOME_PARAMETER);
+		verify(query2Query).setParameter(1, SOME_PARAMETER);
 	}
 
 	/**
@@ -385,14 +371,11 @@ public class JpaPersistenceEngineImplTest {
 	 */
 	@Test
 	public final void testSave() {
-		final FakePersistablePersistenceInterceptor object = context.mock(FakePersistablePersistenceInterceptor.class);
-		context.checking(new Expectations() {
-			{
-				oneOf(object).executeBeforePersistAction();
-				oneOf(entityManager).persist(object);
-			}
-		});
+		final FakePersistablePersistenceInterceptor object = mock(FakePersistablePersistenceInterceptor.class);
+
 		persistenceEngine.save(object);
+		verify(object).executeBeforePersistAction();
+		verify(entityManager).persist(object);
 	}
 
 	/**
@@ -401,16 +384,16 @@ public class JpaPersistenceEngineImplTest {
 	 */
 	@Test
 	public final void testSaveOrMergeWithNewObject() {
-		final FakePersistablePersistenceInterceptor object = context.mock(FakePersistablePersistenceInterceptor.class);
-		context.checking(new Expectations() {
-			{
-				oneOf(object).isPersisted(); will(Expectations.returnValue(false));
-				oneOf(object).executeBeforePersistAction();
-				oneOf(entityManager).persist(object);
-			}
-		});
+		final FakePersistablePersistenceInterceptor object = mock(FakePersistablePersistenceInterceptor.class);
+		when(object.isPersisted()).thenReturn(false);
+
 		Persistable result = persistenceEngine.saveOrMerge(object);
-		assertSame("Returned object should be the same as the one passed in", result, object);
+		verify(object).isPersisted();
+		verify(object).executeBeforePersistAction();
+		verify(entityManager).persist(object);
+		assertThat(result)
+			.as("Returned object should be the same as the one passed in")
+			.isSameAs(object);
 	}
 
 	/**
@@ -419,17 +402,19 @@ public class JpaPersistenceEngineImplTest {
 	 */
 	@Test
 	public final void testSaveOrMergeWithExistingObject() {
-		final FakePersistablePersistenceInterceptor object = context.mock(FakePersistablePersistenceInterceptor.class);
-		final FakePersistablePersistenceInterceptor mergedObject = context.mock(FakePersistablePersistenceInterceptor.class, MERGED_OBJECT);
-		context.checking(new Expectations() {
-			{
-				oneOf(object).isPersisted(); will(Expectations.returnValue(true));
-				oneOf(object).executeBeforePersistAction();
-				oneOf(entityManager).merge(object); will(Expectations.returnValue(mergedObject));
-			}
-		});
+		final FakePersistablePersistenceInterceptor object = mock(FakePersistablePersistenceInterceptor.class);
+		final FakePersistablePersistenceInterceptor mergedObject = mock(FakePersistablePersistenceInterceptor.class, MERGED_OBJECT);
+
+		when(object.isPersisted()).thenReturn(true);
+		when(entityManager.merge(object)).thenReturn(mergedObject);
+
 		Persistable result = persistenceEngine.saveOrMerge(object);
-		Assert.assertNotSame("Returned object should be different to the one passed in", result, object);
+		verify(object).isPersisted();
+		verify(object).executeBeforePersistAction();
+		verify(entityManager).merge(object);
+		assertThat(result)
+			.as("Returned object should be different to the one passed in")
+			.isNotSameAs(object);
 	}
 
 	/**
@@ -438,16 +423,17 @@ public class JpaPersistenceEngineImplTest {
 	 */
 	@Test
 	public final void testUpdate() {
-		final FakePersistablePersistenceInterceptor object = context.mock(FakePersistablePersistenceInterceptor.class);
-		final FakePersistablePersistenceInterceptor mergedObject = context.mock(FakePersistablePersistenceInterceptor.class, MERGED_OBJECT);
-		context.checking(new Expectations() {
-			{
-				oneOf(object).executeBeforePersistAction();
-				oneOf(entityManager).merge(object); will(Expectations.returnValue(mergedObject));
-			}
-		});
+		final FakePersistablePersistenceInterceptor object = mock(FakePersistablePersistenceInterceptor.class);
+		final FakePersistablePersistenceInterceptor mergedObject = mock(FakePersistablePersistenceInterceptor.class, MERGED_OBJECT);
+
+		when(entityManager.merge(object)).thenReturn(mergedObject);
+
 		Persistable result = persistenceEngine.update(object);
-		Assert.assertNotSame("Returned object should be different to the one passed in", result, object);
+		verify(object).executeBeforePersistAction();
+		verify(entityManager).merge(object);
+		assertThat(result)
+			.as("Returned object should be different to the one passed in")
+			.isNotSameAs(object);
 	}
 
 	/**
@@ -455,20 +441,17 @@ public class JpaPersistenceEngineImplTest {
 	 */
 	@Test
 	public final void testSetQueryParameters() {
-		final Query query = context.mock(Query.class);
+		final Query query = mock(Query.class);
 		final String param1 = "parameter1";
 		final Long param2 = 10L;
 		final Boolean param3 = false;
 		final int three = 3;
 		final Object[] parameters = new Object[] { param1, param2, param3 };
-		context.checking(new Expectations() {
-			{
-				oneOf(query).setParameter(1, param1);
-				oneOf(query).setParameter(2, param2);
-				oneOf(query).setParameter(three, param3);
-			}
-		});
+
 		persistenceEngine.setQueryParameters(query, parameters);
+		verify(query).setParameter(1, param1);
+		verify(query).setParameter(2, param2);
+		verify(query).setParameter(three, param3);
 	}
 
 	/**
@@ -476,17 +459,20 @@ public class JpaPersistenceEngineImplTest {
 	 */
 	@Test
 	public final void testExecuteNamedQuery() {
-		final OpenJPAQuery<Integer> query = context.mock(OpenJPAQuery.class);
+		final OpenJPAQuery<Integer> query = mock(OpenJPAQuery.class);
 		final int rowsUpdated = 103;
-		context.checking(new Expectations() {
-			{
-				oneOf(entityManager).createNamedQuery(NAMED_QUERY); will(Expectations.returnValue(query));
-				oneOf(query).getOperation(); will(Expectations.returnValue(QueryOperationType.UPDATE));
-				oneOf(query).executeUpdate(); will(Expectations.returnValue(rowsUpdated));
-			}
-		});
+
+		when(entityManager.createNamedQuery(NAMED_QUERY)).thenReturn(query);
+		when(query.getOperation()).thenReturn(QueryOperationType.UPDATE);
+		when(query.executeUpdate()).thenReturn(rowsUpdated);
+
 		int result = persistenceEngine.executeNamedQuery(NAMED_QUERY);
-		assertEquals("The return value should be the row count returned by executeUpdate", rowsUpdated, result);
+		verify(entityManager).createNamedQuery(NAMED_QUERY);
+		verify(query).getOperation();
+		verify(query).executeUpdate();
+		assertThat(result)
+			.as("The return value should be the row count returned by executeUpdate")
+			.isEqualTo(rowsUpdated);
 	}
 
 	/**
@@ -495,16 +481,15 @@ public class JpaPersistenceEngineImplTest {
 	 */
 	@Test
 	public final void testInsertListIntoQuery() {
-		final String queryString = "SELECT so FROM SomeObjectImpl so WHERE so.uidPk in (:list) AND so.field = ?1";
+		final String queryString = "SELECT so FROM SomeObjectImpl so WHERE so.uidPk in (:list) AND so.field = :field";
 		final String parameters = "1001, 1002, 1003";
-		final OpenJPAQuery<?> query = context.mock(OpenJPAQuery.class);
-		context.checking(new Expectations() {
-			{
-				oneOf(query).getQueryString(); will(Expectations.returnValue(queryString));
-				oneOf(entityManager).createQuery("SELECT so FROM SomeObjectImpl so WHERE so.uidPk in (1001, 1002, 1003) AND so.field = ?1");
-			}
-		});
+		final OpenJPAQuery<?> query = mock(OpenJPAQuery.class);
+
+		when(query.getQueryString()).thenReturn(queryString);
+
 		persistenceEngine.insertListIntoQuery(query, LIST_PARAMETER_NAME, parameters);
+		verify(query).getQueryString();
+		verify(entityManager).createQuery("SELECT so FROM SomeObjectImpl so WHERE so.uidPk in (1001, 1002, 1003) AND so.field = :field");
 	}
 
 
@@ -520,7 +505,9 @@ public class JpaPersistenceEngineImplTest {
 			values.add(l);
 		}
 		List<String> result = persistenceEngine.splitCollection(values, parameterCount);
-		assertEquals("The method should have split the collection into 2 strings", 2, result.size());
+		assertThat(result)
+			.as("The method should have split the collection into 2 strings")
+			.hasSize(2);
 	}
 
 	/**
@@ -535,8 +522,7 @@ public class JpaPersistenceEngineImplTest {
 			values.add(l);
 		}
 		List<String> result = persistenceEngine.splitCollection(values, parameterCount);
-		assertEquals("There should only be a single result string", 1, result.size());
-		assertEquals("The results string should be the collection passed in", "1,2,3", result.get(0));
+		assertThat(result).containsOnly("1,2,3");
 	}
 
 	/**
@@ -551,8 +537,7 @@ public class JpaPersistenceEngineImplTest {
 		values.add("SNAP IT UP UK");
 		values.add("SLR' WORLD");
 		List<String> result = persistenceEngine.splitCollection(values, parameterCount);
-		assertEquals("There should only be a single result string", 1, result.size());
-		assertEquals("The results string should be the collection passed in", "'SNAP'' IT UP','SNAP IT UP UK','SLR'' WORLD'", result.get(0));
+		assertThat(result).containsOnly("'SNAP'' IT UP','SNAP IT UP UK','SLR'' WORLD'");
 	}
 
 	/**
@@ -563,9 +548,13 @@ public class JpaPersistenceEngineImplTest {
 		final String noSingleQuotes = "some text";
 		final String hasSingleQuotes = "some' text'";
 		String result = persistenceEngine.escapeParameter(noSingleQuotes);
-		assertEquals("The string should be the same as before", noSingleQuotes, result);
+		assertThat(result)
+			.as("The string should be the same as before")
+			.isEqualTo(noSingleQuotes);
 		result = persistenceEngine.escapeParameter(hasSingleQuotes);
-		assertEquals("Single quotes should be escaped", "some'' text''", result);
+		assertThat(result)
+			.as("Single quotes should be escaped")
+			.isEqualTo("some'' text''");
 	}
 
 	/**
@@ -575,7 +564,7 @@ public class JpaPersistenceEngineImplTest {
 	public final void testEscapeParameterWithNonStrings() {
 		Integer one = 1;
 		Integer result = persistenceEngine.escapeParameter(one);
-		assertSame("Same object should be returned", one, result);
+		assertThat(result).isSameAs(one);
 	}
 
 	/**
@@ -583,22 +572,16 @@ public class JpaPersistenceEngineImplTest {
 	 */
 	@Test
 	public void testBeginEndSingleOperationEventsAreFiredOnSave() {
-		final FakePersistablePersistenceInterceptor persistableObject = context.mock(FakePersistablePersistenceInterceptor.class);
-		final PersistenceEngineOperationListener listener = context.mock(PersistenceEngineOperationListener.class);
-
-		@SuppressWarnings("rawtypes")
-		final Class<?>[] emptyArray = new Class[1]; // Used to get the correct class type for JMock.
+		final FakePersistablePersistenceInterceptor persistableObject = mock(FakePersistablePersistenceInterceptor.class);
+		final PersistenceEngineOperationListener listener = mock(PersistenceEngineOperationListener.class);
 
 		listeningPersistenceEngine.addPersistenceEngineOperationListener(listener);
 
-		context.checking(new Expectations() { {
-			oneOf(listener).beginSingleOperation(persistableObject, ChangeType.CREATE);
-			oneOf(persistableObject).executeBeforePersistAction();
-			oneOf(entityManager).persist(persistableObject);
-			oneOf(listener).endSingleOperation(persistableObject, ChangeType.CREATE);
-		} });
-
 		listeningPersistenceEngine.save(persistableObject);
+		verify(listener).beginSingleOperation(persistableObject, ChangeType.CREATE);
+		verify(persistableObject).executeBeforePersistAction();
+		verify(entityManager).persist(persistableObject);
+		verify(listener).endSingleOperation(persistableObject, ChangeType.CREATE);
 	}
 
 	/**
@@ -606,20 +589,19 @@ public class JpaPersistenceEngineImplTest {
 	 */
 	@Test
 	public void testBeginEndSingleOperationEventsAreFiredOnMerge() {
-		final FakePersistablePersistenceInterceptor persistableObject = context.mock(FakePersistablePersistenceInterceptor.class);
-		final Persistable mergedObject = context.mock(Persistable.class, MERGED_OBJECT);
-		final PersistenceEngineOperationListener listener = context.mock(PersistenceEngineOperationListener.class);
+		final FakePersistablePersistenceInterceptor persistableObject = mock(FakePersistablePersistenceInterceptor.class);
+		final Persistable mergedObject = mock(Persistable.class, MERGED_OBJECT);
+		final PersistenceEngineOperationListener listener = mock(PersistenceEngineOperationListener.class);
 
 		listeningPersistenceEngine.addPersistenceEngineOperationListener(listener);
 
-		context.checking(new Expectations() { {
-			oneOf(listener).beginSingleOperation(persistableObject, ChangeType.UPDATE);
-			oneOf(persistableObject).executeBeforePersistAction();
-			oneOf(entityManager).merge(persistableObject); will(Expectations.returnValue(mergedObject));
-			oneOf(listener).endSingleOperation(persistableObject, ChangeType.UPDATE);
-		} });
+		when(entityManager.merge(persistableObject)).thenAnswer(answer -> mergedObject);
 
 		listeningPersistenceEngine.merge(persistableObject);
+		verify(listener).beginSingleOperation(persistableObject, ChangeType.UPDATE);
+		verify(persistableObject).executeBeforePersistAction();
+		verify(entityManager).merge(persistableObject);
+		verify(listener).endSingleOperation(persistableObject, ChangeType.UPDATE);
 
 	}
 
@@ -628,21 +610,21 @@ public class JpaPersistenceEngineImplTest {
 	 */
 	@Test
 	public void testBeginEndSingleOperationEventsAreFiredOnDelete() {
-		final Entity entity = context.mock(Entity.class);
-		final PersistenceEngineOperationListener listener = context.mock(PersistenceEngineOperationListener.class);
+		final Entity entity = mock(Entity.class);
+		final PersistenceEngineOperationListener listener = mock(PersistenceEngineOperationListener.class);
 
 		listeningPersistenceEngine.addPersistenceEngineOperationListener(listener);
 
-		context.checking(new Expectations() { {
-			oneOf(listener).beginSingleOperation(entity, ChangeType.DELETE);
-			oneOf(entity).getUidPk(); will(Expectations.returnValue(UIDPK));
-			oneOf(entityManager).getReference(entity.getClass(), UIDPK); will(Expectations.returnValue(entity));
-			oneOf(entityManager).remove(entity);
-			oneOf(listener).endSingleOperation(entity, ChangeType.DELETE);
-		} });
+		when(entity.getUidPk()).thenReturn(UIDPK);
+		when(entityManager.getReference(entity.getClass(), UIDPK)).thenAnswer(answer -> entity);
 
 		listeningPersistenceEngine.delete(entity);
 
+		verify(listener).beginSingleOperation(entity, ChangeType.DELETE);
+		verify(entity).getUidPk();
+		verify(entityManager).getReference(entity.getClass(), UIDPK);
+		verify(entityManager).remove(entity);
+		verify(listener).endSingleOperation(entity, ChangeType.DELETE);
 	}
 
 	/**
@@ -650,20 +632,18 @@ public class JpaPersistenceEngineImplTest {
 	 */
 	@Test
 	public final void testConsecutiveChanges() {
-		final FakePersistablePersistenceInterceptor persistableObject = context.mock(FakePersistablePersistenceInterceptor.class);
-		final PersistenceEngineOperationListener listener = context.mock(PersistenceEngineOperationListener.class);
+		final FakePersistablePersistenceInterceptor persistableObject = mock(FakePersistablePersistenceInterceptor.class);
+		final PersistenceEngineOperationListener listener = mock(PersistenceEngineOperationListener.class);
 
 		listeningPersistenceEngine.addPersistenceEngineOperationListener(listener);
 
-		context.checking(new Expectations() { {
-			exactly(2).of(listener).beginSingleOperation(persistableObject, ChangeType.CREATE);
-			exactly(2).of(persistableObject).executeBeforePersistAction();
-			exactly(2).of(entityManager).persist(persistableObject);
-			exactly(2).of(listener).endSingleOperation(persistableObject, ChangeType.CREATE);
-		} });
+		listeningPersistenceEngine.save(persistableObject);
+		listeningPersistenceEngine.save(persistableObject);
 
-		listeningPersistenceEngine.save(persistableObject);
-		listeningPersistenceEngine.save(persistableObject);
+		verify(listener, times(2)).beginSingleOperation(persistableObject, ChangeType.CREATE);
+		verify(persistableObject, times(2)).executeBeforePersistAction();
+		verify(entityManager, times(2)).persist(persistableObject);
+		verify(listener, times(2)).endSingleOperation(persistableObject, ChangeType.CREATE);
 	}
 
 	/**
@@ -671,19 +651,21 @@ public class JpaPersistenceEngineImplTest {
 	 */
 	@Test
 	public final void testRetrieveByNamedQueryStringFlushModeObjectArray() {
-		final Query query = context.mock(Query.class);
+		final Query query = mock(Query.class);
 
-		context.checking(new Expectations() { {
-			oneOf(entityManager).createNamedQuery(NAMED_QUERY); will(returnValue(query));
-			oneOf(query).setParameter(1, SOME_PARAMETER);
-			oneOf(query).setParameter(2, SOME_OTHER_PARAMETER);
-			oneOf(query).setFlushMode(FlushModeType.COMMIT);
-			oneOf(query).getResultList(); will(returnValue(Collections.singletonList("result")));
-		} });
+		when(entityManager.createNamedQuery(NAMED_QUERY)).thenReturn(query);
+		when(query.getResultList()).thenReturn(ImmutableList.of("result"));
 
 		final Object[] parameters = new Object[] { SOME_PARAMETER, SOME_OTHER_PARAMETER };
 		List<Object> result = persistenceEngine.retrieveByNamedQuery(NAMED_QUERY, FlushMode.COMMIT, parameters);
-		assertEquals("Retrieve gives back results from OpenJPA", Collections.singletonList("result"), result);
+		verify(entityManager).createNamedQuery(NAMED_QUERY);
+		verify(query).setParameter(1, SOME_PARAMETER);
+		verify(query).setParameter(2, SOME_OTHER_PARAMETER);
+		verify(query).setFlushMode(FlushModeType.COMMIT);
+		verify(query).getResultList();
+		assertThat(result)
+			.as("Retrieve gives back results from OpenJPA")
+			.containsOnly("result");
 	}
 
 	@Test
@@ -692,25 +674,25 @@ public class JpaPersistenceEngineImplTest {
 		// Given
 		final String adhocQueryString = "SELECT Entity e WHERE e.foo = :foo AND e.bar = :bar";
 		final List<String> entities = Collections.singletonList("entity1");
+		final Query adhocQuery = mock(Query.class);
 
-		context.checking(new Expectations() { {
-			final Query adhocQuery = context.mock(Query.class);
-
-			oneOf(entityManager).createQuery(adhocQueryString);
-			will(returnValue(adhocQuery));
-
-			oneOf(adhocQuery).setParameter("foo", "fooParam"); will(returnValue(adhocQuery));
-			oneOf(adhocQuery).setParameter("bar", "barParam"); will(returnValue(adhocQuery));
-			oneOf(adhocQuery).getResultList(); will(returnValue(entities));
-		} });
+		when(entityManager.createQuery(adhocQueryString)).thenReturn(adhocQuery);
+		when(adhocQuery.setParameter("foo", "fooParam")).thenReturn(adhocQuery);
+		when(adhocQuery.setParameter("bar", "barParam")).thenReturn(adhocQuery);
+		when(adhocQuery.getResultList()).thenReturn(entities);
 
 		// When
-		Map parameters = ArrayUtils.toMap(new Object[][] { {"foo", "fooParam"}, {"bar", "barParam"} });
-		List<String> results = persistenceEngine.retrieveWithNamedParameters(
-				adhocQueryString, parameters);
+		Map<String, String> parameters = ImmutableMap.of("foo", "fooParam", "bar", "barParam");
+		List<String> results = persistenceEngine.retrieveWithNamedParameters(adhocQueryString, parameters);
 
 		// Then
-		assertEquals("Query should have been evaluated with the proper params", entities, results);
+		verify(entityManager).createQuery(adhocQueryString);
+		verify(adhocQuery).setParameter("foo", "fooParam");
+		verify(adhocQuery).setParameter("bar", "barParam");
+		verify(adhocQuery).getResultList();
+		assertThat(results)
+			.as("Query should have been evaluated with the proper params")
+			.isEqualTo(entities);
 	}
 
 	@Test
@@ -718,268 +700,347 @@ public class JpaPersistenceEngineImplTest {
 		// Given
 		final List<String> entities = Collections.singletonList("entity1");
 		final String adhocQueryString = "SELECT Entity e WHERE e.code = 'hardcodedValue'";
-		context.checking(new Expectations() { {
-			final Query adhocQuery = context.mock(Query.class);
+		final Query adhocQuery = mock(Query.class);
 
-			oneOf(entityManager).createQuery(adhocQueryString);
-			will(returnValue(adhocQuery));
-
-			oneOf(adhocQuery).getResultList(); will(returnValue(entities));
-		} });
+		when(entityManager.createQuery(adhocQueryString)).thenReturn(adhocQuery);
+		when(adhocQuery.getResultList()).thenReturn(entities);
 
 		// When
-		List<String> results = persistenceEngine.retrieveWithNamedParameters(adhocQueryString, Collections.<String, Object>emptyMap());
+		List<String> results = persistenceEngine.retrieve(adhocQueryString, Collections.emptyMap());
 
 		// Then
-		assertEquals("Query should have been evaluated with the proper params", entities, results);
+		verify(entityManager).createQuery(adhocQueryString);
+		verify(adhocQuery).getResultList();
+		assertThat(results)
+			.as("Query should have been evaluated with the proper params")
+			.isEqualTo(entities);
 	}
 
 	@Test
 	public void testDetachWithAttachedObject() {
 		// Given
-		final OpenJPAEntityManagerSPI openJPAEntityManager = context.mock(OpenJPAEntityManagerSPI.class);
+		final OpenJPAEntityManagerSPI openJPAEntityManager = mock(OpenJPAEntityManagerSPI.class);
 		persistenceEngine.setEntityManager(openJPAEntityManager);
 
 		final Object entity = new Object();
-		context.checking(new Expectations() {
-			{
-				oneOf(openJPAEntityManager).isDetached(entity);
-				will(returnValue(false));
-
-				oneOf(openJPAEntityManager).detachCopy(entity);
-				will(returnValue("detached"));
-			}
-		});
+		when(openJPAEntityManager.isDetached(entity)).thenReturn(false);
+		when(openJPAEntityManager.detachCopy(entity)).thenReturn("detached");
 
 		// When
 		Object detached = persistenceEngine.detach(entity);
 
 		// Then
-		assertEquals("Object should have been detached", "detached", detached);
+		verify(openJPAEntityManager).isDetached(entity);
+		verify(openJPAEntityManager).detachCopy(entity);
+		assertThat(detached)
+			.as("Object should have been detached")
+			.isEqualTo("detached");
 	}
 
 	@Test
 	public void testDetachWithPreviouslyDetachedObjectDoesNothing() {
 		// Given
-		final OpenJPAEntityManagerSPI openJPAEntityManager = context.mock(OpenJPAEntityManagerSPI.class);
+		final OpenJPAEntityManagerSPI openJPAEntityManager = mock(OpenJPAEntityManagerSPI.class);
 		persistenceEngine.setEntityManager(openJPAEntityManager);
 
 		final Object entity = new Object();
-		context.checking(new Expectations() {
-			{
-				oneOf(openJPAEntityManager).isDetached(entity);
-				will(returnValue(true));
-
-				never(openJPAEntityManager).detachCopy(with(any(Object.class)));
-			}
-		});
+		when(openJPAEntityManager.isDetached(entity)).thenReturn(true);
 
 		// When
 		Object detached = persistenceEngine.detach(entity);
 
 		// Then
-		assertSame("Object is already detached so detach() should do nothing", entity, detached);
-	}
-
-	// TODO - finish implementing the tests below
-
-	/**
-	 * Test method for {@link JpaPersistenceEngineImpl#retrieve(java.lang.String)}.
-	 */
-	@Ignore
-	public final void testRetrieveString() {
-		final String query = "SELECT so FROM SomeObjectImpl so";
-		persistenceEngine.retrieve(query);
+		verify(openJPAEntityManager).isDetached(entity);
+		verify(openJPAEntityManager, never()).detachCopy(any());
+		assertThat(detached)
+			.as("Object is already detached so detach() should do nothing")
+			.isSameAs(entity);
 	}
 
 	/**
 	 * Test method for {@link JpaPersistenceEngineImpl#retrieve(java.lang.String, int, int)}.
 	 */
-	@Ignore
+	@Test
 	public final void testRetrieveStringIntInt() {
 		final String queryStr = "SELECT slo FROM SomeLargeObjectImpl slo";
 		final int firstResult = 10;
 		final int maxResults = 100;
+		final Query query = mock(Query.class);
+		when(entityManager.createQuery(queryStr)).thenReturn(query);
+
 		persistenceEngine.retrieve(queryStr, firstResult, maxResults);
+		verify(query).setFirstResult(firstResult);
+		verify(query).setMaxResults(maxResults);
+		verify(query).getResultList();
 	}
 
 	/**
-	 * Test method for {@link JpaPersistenceEngineImpl#retrieve(java.lang.String, java.lang.Object[])}.
+	 * Test method for retrieve with named parameters.
 	 */
-	@Ignore
-	public final void testRetrieveStringObjectArray() {
+	@Test
+	public final void testRetrieveStringNamedParameter() {
 		final String query = "SELECT so FROM SomeObjectImpl so WHERE so.field = ?1";
 		final Object[] parameters = new Object[] { SOME_PARAMETER };
+		final Query jpaQuery = mock(Query.class);
+		when(entityManager.createQuery(query)).thenReturn(jpaQuery);
 		persistenceEngine.retrieve(query, parameters);
+		verify(jpaQuery).setParameter(1, SOME_PARAMETER);
+		verify(jpaQuery).getResultList();
 	}
 
 	/**
-	 * Test method for {@link JpaPersistenceEngineImpl#retrieveWithNewSession(java.lang.String, java.lang.Object[])}.
+	 * Test method for {@link JpaPersistenceEngineImpl#retrieveWithNewSession(String, Object...)}.
 	 */
-	@Ignore
-	public final void testRetrieveWithNewSessionStringObjectArray() {
+	@Test
+	public final void testRetrieveWithNewSessionWithNamedParameters() {
 		final String query = "SELECT so FROM SomeObjectImpl so WHERE so.field = ?1";
 		final Object[] parameters = new Object[] { SOME_PARAMETER };
+		final JpaPersistenceSession session = mock(JpaPersistenceSession.class);
+		final Query jpaQuery = mock(Query.class);
+
+		when(sessionFactory.createPersistenceSession()).thenReturn(session);
+		when(session.getEntityManager()).thenReturn(entityManager);
+		when(entityManager.createQuery(query)).thenReturn(jpaQuery);
+
 		persistenceEngine.retrieveWithNewSession(query, parameters);
+		verify(sessionFactory).createPersistenceSession();
+		verify(session).getEntityManager();
+		verify(entityManager).createQuery(query);
+		verify(jpaQuery).setParameter(1, SOME_PARAMETER);
+		verify(jpaQuery).getResultList();
 	}
 
 	/**
 	 * Test method for {@link com.elasticpath.persistence.openjpa.impl.JpaPersistenceEngineImpl
 	 * #retrieveWithListWithNewSession(java.lang.String, java.lang.String, java.util.Collection, java.lang.Object[])}.
 	 */
-	@Ignore
+	@Test
 	public final void testRetrieveWithListWithNewSession() {
-		final String query = "SELECT so FROM SomeObjectImpl so WHERE so.uidPk in (:list) AND so.field = ?1";
-		final Object[] parameters = new Object[] { SOME_PARAMETER };
-		final Set<Long> values = new HashSet<>();
-		final Long uidPk2 = 1001L;
-		values.add(UIDPK);
-		values.add(uidPk2);
+		final String query = "SELECT so FROM SomeObjectImpl so WHERE so.uidPk in (:list) AND so.field = :someField";
+		final String expected = "SELECT so FROM SomeObjectImpl so WHERE so.uidPk in (1000,1001) AND so.field = :someField";
+		final Map<String, Object> parameters = ImmutableMap.of("somefield", SOME_PARAMETER);
+		final Set<Long> values = ImmutableSet.of(UIDPK, UIDPK2);
+		final Query jpaQuery = mock(Query.class);
+		final OpenJPAQuery<Entity> newQuery = mock(OpenJPAQuery.class);
+		final JpaPersistenceSession session = mock(JpaPersistenceSession.class);
+
+		when(sessionFactory.createPersistenceSession()).thenReturn(session);
+		when(session.getEntityManager()).thenReturn(entityManager);
+		when(entityManager.createQuery(query)).thenReturn(newQuery);
+		when(newQuery.getQueryString()).thenReturn(query);
+		when(entityManager.createQuery(expected)).thenReturn(jpaQuery);
+
 		persistenceEngine.retrieveWithListWithNewSession(query, LIST_PARAMETER_NAME, values, parameters);
+		verify(entityManager).createQuery(expected);
+		verify(jpaQuery).getResultList();
 	}
 
 	/**
-	 * Test method for {@link JpaPersistenceEngineImpl#retrieveWithNewSession(java.lang.String)}.
+	 * Test method for retrieveWithNewSession.
 	 */
-	@Ignore
+	@Test
 	public final void testRetrieveWithNewSessionString() {
 		final String query = "SELECT so FROM SomeObjectImpl so";
-		persistenceEngine.retrieveWithNewSession(query);
+		final JpaPersistenceSession session = mock(JpaPersistenceSession.class);
+		final Query jpaQuery = mock(Query.class);
+
+		when(sessionFactory.createPersistenceSession()).thenReturn(session);
+		when(session.getEntityManager()).thenReturn(entityManager);
+		when(entityManager.createQuery(query)).thenReturn(jpaQuery);
+
+		persistenceEngine.retrieveWithNewSession(query, Collections.emptyMap());
+		verify(sessionFactory).createPersistenceSession();
+		verify(session).getEntityManager();
+		verify(entityManager).createQuery(query);
+		verify(jpaQuery).getResultList();
 	}
 
 	/**
-	 * Test method for {@link JpaPersistenceEngineImpl#retrieve(java.lang.String, java.lang.Object[], boolean)}.
+	 * Test method for retrieveByNamedQuery.
 	 */
-	@Ignore
-	public final void testRetrieveStringObjectArrayBoolean() {
-		final String query = "SELECT so FROM SomeObjectImpl so WHERE so.field = ?1";
-		final Object[] parameters = new Object[] { SOME_PARAMETER };
-		boolean cacheQuery = false;
-		persistenceEngine.retrieve(query, parameters, cacheQuery);
-	}
-
-	/**
-	 * Test method for {@link JpaPersistenceEngineImpl#retrieve(java.lang.String, java.lang.Object[], int, int)}.
-	 */
-	@Ignore
-	public final void testRetrieveStringObjectArrayIntInt() {
-		final String queryStr = "SELECT slo FROM SomeLargeObjectImpl slo WHERE slo.field = ?1";
-		final Object[] parameters = new Object[] { SOME_PARAMETER };
-		final int firstResult = 1;
-		final int maxResults = 10;
-		persistenceEngine.retrieve(queryStr, parameters, firstResult, maxResults);
-	}
-
-	/**
-	 * Test method for {@link JpaPersistenceEngineImpl#retrieveByNamedQuery(java.lang.String)}.
-	 */
-	@Ignore
+	@Test
 	public final void testRetrieveByNamedQueryString() {
+		final Query query = mock(Query.class);
+
+		when(entityManager.createNamedQuery(NAMED_QUERY)).thenReturn(query);
+
 		persistenceEngine.retrieveByNamedQuery(NAMED_QUERY);
+		verify(entityManager).createNamedQuery(NAMED_QUERY);
+		verify(query).getResultList();
 	}
 
 	/**
 	 * Test method for {@link JpaPersistenceEngineImpl#retrieveByNamedQuery(java.lang.String, java.lang.Object[])}.
 	 */
-	@Ignore
+	@Test
 	public final void testRetrieveByNamedQueryStringObjectArray() {
 		final Object[] parameters = new Object[] { SOME_PARAMETER };
+		final Query query = mock(Query.class);
+
+		when(entityManager.createNamedQuery(NAMED_QUERY)).thenReturn(query);
+
 		persistenceEngine.retrieveByNamedQuery(NAMED_QUERY, parameters);
+		verify(entityManager).createNamedQuery(NAMED_QUERY);
+		verify(query).setParameter(1, SOME_PARAMETER);
+		verify(query).getResultList();
 	}
 
 	/**
 	 * Test method for {@link JpaPersistenceEngineImpl#retrieveByNamedQuery(java.lang.String, java.util.Map)}.
 	 */
-	@Ignore
+	@Test
 	public final void testRetrieveByNamedQueryStringMapOfStringObject() {
-		Map<String, Object> parameters = new HashMap<>();
-		parameters.put("parameter", SOME_PARAMETER);
+		Map<String, Object> parameters = ImmutableMap.of("parameter", SOME_PARAMETER);
+		final Query query = mock(Query.class);
+
+		when(entityManager.createNamedQuery(NAMED_QUERY)).thenReturn(query);
+
 		persistenceEngine.retrieveByNamedQuery(NAMED_QUERY, parameters);
+		verify(entityManager).createNamedQuery(NAMED_QUERY);
+		verify(query).setParameter("parameter", SOME_PARAMETER);
+		verify(query).getResultList();
 	}
 
 	/**
 	 * Test method for {@link JpaPersistenceEngineImpl#retrieveByNamedQuery(java.lang.String, int, int)}.
 	 */
-	@Ignore
+	@Test
 	public final void testRetrieveByNamedQueryStringIntInt() {
 		final int firstResult = 1;
 		final int maxResults = 10;
+		final Query query = mock(Query.class);
+
+		when(entityManager.createNamedQuery(NAMED_QUERY)).thenReturn(query);
+
 		persistenceEngine.retrieveByNamedQuery(NAMED_QUERY, firstResult, maxResults);
+		verify(entityManager).createNamedQuery(NAMED_QUERY);
+		verify(query).setFirstResult(firstResult);
+		verify(query).setMaxResults(maxResults);
+		verify(query).getResultList();
 	}
 
 	/**
 	 * Test method for {@link com.elasticpath.persistence.openjpa.impl.JpaPersistenceEngineImpl
 	 * #retrieveByNamedQuery(java.lang.String, java.lang.Object[], int, int)}.
 	 */
-	@Ignore
+	@Test
 	public final void testRetrieveByNamedQueryStringObjectArrayIntInt() {
 		final Object[] parameters = new Object[] { SOME_PARAMETER };
 		final int firstResult = 1;
 		final int maxResults = 10;
+		final Query query = mock(Query.class);
+
+		when(entityManager.createNamedQuery(NAMED_QUERY)).thenReturn(query);
+
 		persistenceEngine.retrieveByNamedQuery(NAMED_QUERY, parameters, firstResult, maxResults);
+		verify(entityManager).createNamedQuery(NAMED_QUERY);
+		verify(query).setParameter(1, SOME_PARAMETER);
+		verify(query).setFirstResult(firstResult);
+		verify(query).setMaxResults(maxResults);
+		verify(query).getResultList();
 	}
 
 	/**
 	 * Test method for {@link com.elasticpath.persistence.openjpa.impl.JpaPersistenceEngineImpl
 	 * #retrieveByNamedQueryWithList(java.lang.String, java.lang.String, java.util.Collection)}.
 	 */
-	@Ignore
+	@Test
 	public final void testRetrieveByNamedQueryWithListStringStringCollectionOfE() {
-		final Set<Long> values = new HashSet<>();
-		final Long uidPk2 = 1001L;
-		values.add(UIDPK);
-		values.add(uidPk2);
-		persistenceEngine.retrieveByNamedQueryWithList(NAMED_QUERY, LIST_PARAMETER_NAME, values);
+		final Set<Long> values = ImmutableSet.of(UIDPK, UIDPK2);
+		final OpenJPAQuery<Entity> query = mock(OpenJPAQuery.class);
+		final Query newQuery = mock(Query.class);
+
+		when(openJPAEntityManager.createNamedQuery(NAMED_QUERY_WITH_LIST)).thenReturn(query);
+		when(query.getQueryString()).thenReturn(NAMED_QUERY_WITH_LIST);
+		when(entityManager.createQuery(NAMED_QUERY_WITH_LIST_INSERTED)).thenReturn(newQuery);
+
+		persistenceEngine.retrieveByNamedQueryWithList(NAMED_QUERY_WITH_LIST, LIST_PARAMETER_NAME, values);
+		verify(openJPAEntityManager).createNamedQuery(NAMED_QUERY_WITH_LIST);
+		verify(entityManager).createQuery(NAMED_QUERY_WITH_LIST_INSERTED);
+		verify(newQuery).getResultList();
 	}
 
 	/**
 	 * Test method for {@link com.elasticpath.persistence.openjpa.impl.JpaPersistenceEngineImpl
 	 * #retrieveByNamedQueryWithList(java.lang.String, java.lang.String, java.util.Collection, java.lang.Object[])}.
 	 */
-	@Ignore
+	@Test
 	public final void testRetrieveByNamedQueryWithListStringStringCollectionOfEObjectArray() {
 		final Object[] parameters = new Object[] { SOME_PARAMETER };
-		final Set<Long> values = new HashSet<>();
-		final Long uidPk2 = 1001L;
-		values.add(UIDPK);
-		values.add(uidPk2);
-		persistenceEngine.retrieveByNamedQueryWithList(NAMED_QUERY, LIST_PARAMETER_NAME, values, parameters);
+		final Set<Long> values = ImmutableSet.of(UIDPK, UIDPK2);
+		final OpenJPAQuery<Entity> query = mock(OpenJPAQuery.class);
+		final Query newQuery = mock(Query.class);
+
+		when(openJPAEntityManager.createNamedQuery(NAMED_QUERY_WITH_LIST)).thenReturn(query);
+		when(entityManager.createQuery(NAMED_QUERY_WITH_LIST_INSERTED)).thenReturn(newQuery);
+		when(query.getQueryString()).thenReturn(NAMED_QUERY_WITH_LIST);
+
+		persistenceEngine.retrieveByNamedQueryWithList(NAMED_QUERY_WITH_LIST, LIST_PARAMETER_NAME, values, parameters);
+		verify(openJPAEntityManager).createNamedQuery(NAMED_QUERY_WITH_LIST);
+		verify(entityManager).createQuery(NAMED_QUERY_WITH_LIST_INSERTED);
+		verify(newQuery).setParameter(1, SOME_PARAMETER);
+		verify(newQuery).getResultList();
 	}
 
 	/**
 	 * Test method for {@link JpaPersistenceEngineImpl#executeNamedQuery(java.lang.String, java.lang.Object[])}.
 	 */
-	@Ignore
+	@Test
 	public final void testExecuteNamedQueryStringObjectArray() {
 		final Object[] parameters = new Object[] { SOME_PARAMETER };
+
+		final OpenJPAQuery<Entity> query = mock(OpenJPAQuery.class);
+
+		when(entityManager.createNamedQuery(NAMED_QUERY)).thenReturn(query);
+		when(query.getOperation()).thenReturn(QueryOperationType.SELECT);
+
 		persistenceEngine.executeNamedQuery(NAMED_QUERY, parameters);
+		verify(entityManager).createNamedQuery(NAMED_QUERY);
+		verify(query).setParameter(1, SOME_PARAMETER);
+		verify(query).executeUpdate();
 	}
 
 	/**
 	 * Test method for {@link com.elasticpath.persistence.openjpa.impl.JpaPersistenceEngineImpl
 	 * #executeNamedQueryWithList(java.lang.String, java.lang.String, java.util.Collection)}.
 	 */
-	@Ignore
+	@Test
 	public final void testExecuteNamedQueryWithListStringStringCollectionOfE() {
-		final Set<Long> values = new HashSet<>();
-		final Long uidPk2 = 1001L;
-		values.add(UIDPK);
-		values.add(uidPk2);
-		persistenceEngine.executeNamedQueryWithList(NAMED_QUERY, LIST_PARAMETER_NAME, values);
+		final Set<Long> values = ImmutableSet.of(UIDPK, UIDPK2);
+		final OpenJPAQuery<Entity> query = mock(OpenJPAQuery.class);
+		final Query newQuery = mock(Query.class);
+
+		when(openJPAEntityManager.createNamedQuery(NAMED_QUERY_WITH_LIST)).thenReturn(query);
+		when(query.getQueryString()).thenReturn(NAMED_QUERY_WITH_LIST);
+		when(entityManager.createQuery(NAMED_QUERY_WITH_LIST_INSERTED)).thenReturn(newQuery);
+		when(query.getOperation()).thenReturn(QueryOperationType.SELECT);
+
+		persistenceEngine.executeNamedQueryWithList(NAMED_QUERY_WITH_LIST, LIST_PARAMETER_NAME, values);
+		verify(entityManager).createQuery(NAMED_QUERY_WITH_LIST_INSERTED);
+		verify(newQuery).executeUpdate();
 	}
 
 	/**
 	 * Test method for {@link com.elasticpath.persistence.openjpa.impl.JpaPersistenceEngineImpl
 	 * #executeNamedQueryWithList(java.lang.String, java.lang.String, java.util.Collection, java.lang.Object[])}.
 	 */
-	@Ignore
+	@Test
 	public final void testExecuteNamedQueryWithListStringStringCollectionOfEObjectArray() {
 		final Object[] parameters = new Object[] { SOME_PARAMETER };
-		final Set<Long> values = new HashSet<>();
-		final Long uidPk2 = 1001L;
-		values.add(UIDPK);
-		values.add(uidPk2);
-		persistenceEngine.executeNamedQueryWithList(NAMED_QUERY, LIST_PARAMETER_NAME, values, parameters);
+		final Set<Long> values = ImmutableSet.of(UIDPK, UIDPK2);
+		final OpenJPAQuery<Entity> query = mock(OpenJPAQuery.class);
+		final Query newQuery = mock(Query.class);
+
+		when(openJPAEntityManager.createNamedQuery(NAMED_QUERY_WITH_LIST)).thenReturn(query);
+		when(query.getQueryString()).thenReturn(NAMED_QUERY_WITH_LIST);
+		when(entityManager.createQuery(NAMED_QUERY_WITH_LIST_INSERTED)).thenReturn(newQuery);
+		when(query.getOperation()).thenReturn(QueryOperationType.SELECT);
+
+		persistenceEngine.executeNamedQueryWithList(NAMED_QUERY_WITH_LIST, LIST_PARAMETER_NAME, values, parameters);
+		verify(openJPAEntityManager).createNamedQuery(NAMED_QUERY_WITH_LIST);
+		verify(entityManager).createQuery(NAMED_QUERY_WITH_LIST_INSERTED);
+		verify(newQuery).setParameter(1, SOME_PARAMETER);
+		verify(newQuery).executeUpdate();
 	}
 
 	/**

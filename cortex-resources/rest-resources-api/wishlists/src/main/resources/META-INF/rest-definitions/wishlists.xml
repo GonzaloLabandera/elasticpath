@@ -6,7 +6,7 @@
 		<description><![CDATA[
 ####Entry Point: /wishlists/{scope}/default
 
-A wishlist is list that customers build up containing items that they are interested in, or desire to purchase.
+A wishlist is a list that customers build up containing items that they are interested in, or desire to purchase.
 This applies even to items which are out of stock, which allows a customer to track the item and to be notified when the item
 becomes available.
 A wishlist is similar to a cart in that items can be added or removed.

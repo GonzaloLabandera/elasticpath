@@ -1,31 +1,31 @@
-/**
+/*
  * Copyright (c) Elastic Path Software Inc., 2016
  */
 package com.elasticpath.tools.sync.job.impl;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
-import org.jmock.Expectations;
-import org.jmock.integration.junit4.JUnitRuleMockery;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.elasticpath.domain.catalog.Product;
 import com.elasticpath.domain.rules.Coupon;
 import com.elasticpath.domain.rules.CouponConfig;
 import com.elasticpath.domain.rules.Rule;
 import com.elasticpath.persistence.api.Persistable;
-import com.elasticpath.tools.sync.exception.SyncToolConfigurationException;
 import com.elasticpath.tools.sync.job.Command;
 import com.elasticpath.tools.sync.job.JobEntry;
 import com.elasticpath.tools.sync.job.TransactionJobUnit;
@@ -40,11 +40,13 @@ import com.elasticpath.tools.sync.target.DaoAdapterFactory;
 /**
  * Tests that the TransactionJobBuilderImpl class behaves as expected.
  */
+@RunWith(MockitoJUnitRunner.class)
 public class TransactionJobBuilderImplTest {
 
-	@org.junit.Rule
-	public final JUnitRuleMockery context = new JUnitRuleMockery();
+	private static final String COUPON_1 = "coupon1";
+	private static final String COUPON_2 = "coupon2";
 
+	@Mock
 	private EntityLocator entityLocator;
 
 	private TransactionJobBuilderImpl transactionJobBuilderImpl;
@@ -56,7 +58,6 @@ public class TransactionJobBuilderImplTest {
 	 */
 	@Before
 	public void setUp() {
-		entityLocator = context.mock(EntityLocator.class);
 		daoAdapterFactory = new DaoAdapterFactory();
 		transactionJobBuilderImpl = new TransactionJobBuilderImpl();
 		transactionJobBuilderImpl.setEntityLocator(entityLocator);
@@ -71,24 +72,14 @@ public class TransactionJobBuilderImplTest {
 
 		final TransactionJobDescriptorEntry descriptorEntry = transactionJobBuilderImpl.createJobDescriptorEntry(Product.class, "dd", Command.REMOVE);
 
-		final Product product = context.mock(Product.class);
-		context.checking(new Expectations() {
-			{
-				try {
-					oneOf(entityLocator).locatePersistence(descriptorEntry.getGuid(), descriptorEntry.getType());
-					will(returnValue(product));
-				} catch (Exception e) {
-					fail("Exception should not be thrown: " + e.getMessage());
-				}
-			}
-		});
+		final Product product = mock(Product.class);
+		when(entityLocator.locatePersistence(descriptorEntry.getGuid(), descriptorEntry.getType())).thenReturn(product);
 
-		try {
-			Persistable result = transactionJobBuilderImpl.getObject(descriptorEntry);
-			assertSame("The job builder object should be the expected product", product, result);
-		} catch (SyncToolConfigurationException e) {
-			fail("Exception should not be thrown: " + e.getMessage());
-		}
+		Persistable result = transactionJobBuilderImpl.getObject(descriptorEntry);
+		verify(entityLocator).locatePersistence(descriptorEntry.getGuid(), descriptorEntry.getType());
+		assertThat(result)
+			.as("The job builder object should be the expected product")
+			.isEqualTo(product);
 	}
 
 	/**
@@ -96,16 +87,13 @@ public class TransactionJobBuilderImplTest {
 	 */
 	@Test
 	public void testAssociatedJobEntries() {
-		@SuppressWarnings("unchecked")
-		final DaoAdapter<? super Persistable> ruleAdaptor = context.mock(DaoAdapter.class, "ruleAdaptor");
+		@SuppressWarnings("unchecked") final DaoAdapter<? super Persistable> ruleAdaptor = mock(DaoAdapter.class, "ruleAdaptor");
 
-		@SuppressWarnings("unchecked")
-		final AssociatedDaoAdapter<? super Persistable> couponConfigAdapter = context.mock(AssociatedDaoAdapter.class, "couponConfigAdaptor");
+		@SuppressWarnings("unchecked") final AssociatedDaoAdapter<? super Persistable> couponConfigAdapter = mock(AssociatedDaoAdapter.class, "couponConfigAdaptor");
 
-		@SuppressWarnings("unchecked")
-		final AssociatedDaoAdapter<? super Persistable> couponAdapter = context.mock(AssociatedDaoAdapter.class, "couponAdaptor");
+		@SuppressWarnings("unchecked") final AssociatedDaoAdapter<? super Persistable> couponAdapter = mock(AssociatedDaoAdapter.class, "couponAdaptor");
 
-		final Map<Class<?>, DaoAdapter< ? super Persistable>> syncAdapters = new HashMap<>();
+		final Map<Class<?>, DaoAdapter<? super Persistable>> syncAdapters = new HashMap<>();
 		syncAdapters.put(Rule.class, ruleAdaptor);
 		syncAdapters.put(CouponConfig.class, couponConfigAdapter);
 		syncAdapters.put(Coupon.class, couponAdapter);
@@ -123,56 +111,58 @@ public class TransactionJobBuilderImplTest {
 		assocaitedTypes.add(CouponConfig.class);
 		assocaitedTypes.add(Coupon.class);
 
-		final CouponConfig couponConfig = context.mock(CouponConfig.class);
+		final CouponConfig couponConfig = mock(CouponConfig.class);
 		final List<String> couponConfigGuids = new ArrayList<>();
 		couponConfigGuids.add("CONFIG1");
 
-		final Coupon coupon1 = context.mock(Coupon.class, "coupon1");
-		final Coupon coupon2 = context.mock(Coupon.class, "coupon2");
+		final Coupon coupon1 = mock(Coupon.class, COUPON_1);
+		final Coupon coupon2 = mock(Coupon.class, COUPON_2);
 		final List<String> couponCodes = new ArrayList<>();
-		couponCodes.add("coupon1");
-		couponCodes.add("coupon2");
+		couponCodes.add(COUPON_1);
+		couponCodes.add(COUPON_2);
 
-		final Rule rule = context.mock(Rule.class);
-		context.checking(new Expectations() {
-			{
-				oneOf(entityLocator).locatePersistence(entry.getGuid(), entry.getType()); will(returnValue(rule));
-				oneOf(entityLocator).locatePersistence("CONFIG1", CouponConfig.class); will(returnValue(couponConfig));
-				oneOf(entityLocator).locatePersistence("coupon1", Coupon.class); will(returnValue(coupon1));
-				oneOf(entityLocator).locatePersistence("coupon2", Coupon.class); will(returnValue(coupon2));
+		final Rule rule = mock(Rule.class);
+		when(entityLocator.locatePersistence(entry.getGuid(), entry.getType())).thenReturn(rule);
+		when(entityLocator.locatePersistence("CONFIG1", CouponConfig.class)).thenReturn(couponConfig);
+		when(entityLocator.locatePersistence(COUPON_1, Coupon.class)).thenReturn(coupon1);
+		when(entityLocator.locatePersistence(COUPON_2, Coupon.class)).thenReturn(coupon2);
 
-				oneOf(ruleAdaptor).getAssociatedTypes(); will(returnValue(assocaitedTypes));
+		doReturn(assocaitedTypes).when(ruleAdaptor).getAssociatedTypes();
 
-				oneOf(couponConfigAdapter).getAssociatedGuids(entry.getType(), entry.getGuid()); will(returnValue(couponConfigGuids));
-				oneOf(couponConfigAdapter).getType(); will(returnValue(CouponConfig.class));
+		when(couponConfigAdapter.getAssociatedGuids(entry.getType(), entry.getGuid())).thenReturn(couponConfigGuids);
+		doReturn(CouponConfig.class).when(couponConfigAdapter).getType();
 
-				oneOf(couponAdapter).getAssociatedGuids(entry.getType(), entry.getGuid()); will(returnValue(couponCodes));
-				allowing(couponAdapter).getType(); will(returnValue(Coupon.class));
-			}
-		});
+		when(couponAdapter.getAssociatedGuids(entry.getType(), entry.getGuid())).thenReturn(couponCodes);
+		doReturn(Coupon.class).when(couponAdapter).getType();
 		TransactionJobUnit jobUnit = transactionJobBuilderImpl.createTransactionJobUnit(transactionJobDescriptor, true);
 
 		final Collection<JobEntry> entries = new ArrayList<>(jobUnit.createJobEntries());
 
 		final int expectedEntryCount = 4;
 
-		assertFalse("There should be job entries", entries.isEmpty());
-		assertEquals("There should be a total of 4 entries - rule + couponConfig + 2 Coupons", expectedEntryCount, entries.size());
+		assertThat(entries)
+			.as("There should be a total of 4 entries - rule + couponConfig + 2 Coupons")
+			.hasSize(expectedEntryCount);
 
 		// unordered at this point
 		assertEntriesHasExactly(entries, Rule.class, 1);
 		assertEntriesHasExactly(entries, Coupon.class, 2);
 		assertEntriesHasExactly(entries, CouponConfig.class, 1);
+
+		verify(entityLocator).locatePersistence(entry.getGuid(), entry.getType());
+		verify(entityLocator).locatePersistence("CONFIG1", CouponConfig.class);
+		verify(entityLocator).locatePersistence(COUPON_1, Coupon.class);
+		verify(entityLocator).locatePersistence(COUPON_2, Coupon.class);
+		verify(ruleAdaptor).getAssociatedTypes();
+		verify(couponConfigAdapter).getAssociatedGuids(entry.getType(), entry.getGuid());
+		verify(couponConfigAdapter).getType();
+		verify(couponAdapter).getAssociatedGuids(entry.getType(), entry.getGuid());
 	}
 
 	private static <T extends JobEntry> void assertEntriesHasExactly(final Collection<T> actual, final Class<?> clazz, final int number) {
-		int matches = 0;
-		for (JobEntry entry : actual) {
-			if (Objects.equals(clazz, entry.getType())) {
-				matches += 1;
-			}
-		}
-
-		assertSame("Expected <" + number + "> JobEntry with <" + clazz + ">, got: " + actual, number, matches);
+		assertThat(actual)
+			.as("Expected <" + number + "> JobEntry with <" + clazz + ">, got: " + actual)
+			.filteredOn(jobEntry -> jobEntry.getType().equals(clazz))
+			.hasSize(number);
 	}
 }

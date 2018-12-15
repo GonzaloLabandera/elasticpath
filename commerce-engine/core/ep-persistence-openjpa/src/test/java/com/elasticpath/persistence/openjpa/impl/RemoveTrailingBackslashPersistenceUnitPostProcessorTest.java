@@ -1,12 +1,10 @@
-/**
+/*
  * Copyright (c) Elastic Path Software Inc., 2008
  */
 package com.elasticpath.persistence.openjpa.impl;
 
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -35,35 +33,27 @@ public class RemoveTrailingBackslashPersistenceUnitPostProcessorTest {
 	 * Test that a trailing slash gets removed.
 	 */
 	@Test
-	public void testSlashGetsRemoved() {
+	public void testSlashGetsRemoved() throws MalformedURLException {
 		MutablePersistenceUnitInfo pui = new MutablePersistenceUnitInfo();
-		URL url = null;
-		try {
-			url = new URL("file:/root/somefile.jar/");
-		} catch (MalformedURLException e) {
-			fail("unexpected exception: " + e.getMessage());
-		}
+		URL url = new URL("file:/root/somefile.jar/");
 		pui.setPersistenceUnitRootUrl(url);
 		processor.postProcessPersistenceUnitInfo(pui);
-		assertEquals("The url should have the slash removed", "file:/root/somefile.jar", pui.getPersistenceUnitRootUrl().toString());
+		assertThat(pui.getPersistenceUnitRootUrl().toString())
+			.as("The url should have the slash removed")
+			.isEqualTo("file:/root/somefile.jar");
 	}
 
 	/**
 	 * Test that if there is no trailing slash nothing gets changed.
 	 */
 	@Test
-	public void testNothingHappensWithNoSlash() {
+	public void testNothingHappensWithNoSlash() throws MalformedURLException {
 		MutablePersistenceUnitInfo pui = new MutablePersistenceUnitInfo();
-		URL url = null;
-		try {
-			url = new URL("file:/root/somefile.jar");
-		} catch (MalformedURLException e) {
-			fail("unexpected exception: " + e.getMessage());
-		}
+		URL url = new URL("file:/root/somefile.jar");
 		pui.setPersistenceUnitRootUrl(url);
 		processor.postProcessPersistenceUnitInfo(pui);
-		assertSame("The url not have changed if there was no slash", url, pui.getPersistenceUnitRootUrl());
+		assertThat(pui.getPersistenceUnitRootUrl())
+			.as("The url not have changed if there was no slash")
+			.isEqualTo(url);
 	}
-
-
 }

@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 
+import com.elasticpath.selenium.util.Constants;
 import com.elasticpath.selenium.wizards.PaymentAuthorizationWizard;
 
 /**
@@ -12,9 +13,9 @@ import com.elasticpath.selenium.wizards.PaymentAuthorizationWizard;
  */
 public class CustomerServiceActionToolbar extends AbstractToolbar {
 
-	private static final int SLEEP_TIME = 1000;
 	private static final String VIEW_CUSTOMER_IMPORT_JOBS_BUTTON_CSS =
 			"div[widget-id='View Customer Import Jobs']";
+	private static final String SAVE_ALL = "Save All";
 
 	/**
 	 * Constructor.
@@ -31,8 +32,8 @@ public class CustomerServiceActionToolbar extends AbstractToolbar {
 	 * @return PaymentAuthorizationWizard
 	 */
 	public PaymentAuthorizationWizard clickSaveAllButton() {
-		sleep(SLEEP_TIME);
-		click(getWaitDriver().waitForElementToBeClickable(By.cssSelector(SAVE_ALL_BUTTON_CSS)));
+		sleep(Constants.SLEEP_ONE_SECOND_IN_MILLIS);
+		clickButton(SAVE_ALL_BUTTON_CSS, SAVE_ALL);
 		return new PaymentAuthorizationWizard(getDriver());
 	}
 

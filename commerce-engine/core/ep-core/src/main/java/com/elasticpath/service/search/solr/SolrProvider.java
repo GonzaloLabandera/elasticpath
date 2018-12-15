@@ -3,7 +3,7 @@
  */
 package com.elasticpath.service.search.solr;
 
-import org.apache.solr.client.solrj.SolrServer;
+import org.apache.solr.client.solrj.SolrClient;
 
 import com.elasticpath.domain.misc.SearchConfig;
 import com.elasticpath.persistence.api.EpPersistenceException;
@@ -21,7 +21,7 @@ public interface SolrProvider {
 	 * @return a SOLR server
 	 * @throws EpPersistenceException in case of any errors
 	 */
-	SolrServer getServer(IndexType indexType) throws EpPersistenceException;
+	SolrClient getServer(IndexType indexType) throws EpPersistenceException;
 
 	/**
 	 * Gets the configuration for the specified <code>IndexType</code>.

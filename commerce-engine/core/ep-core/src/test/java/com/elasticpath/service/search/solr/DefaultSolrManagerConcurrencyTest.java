@@ -9,7 +9,7 @@ import java.util.List;
 
 import com.google.code.tempusfugit.concurrency.RepeatingRule;
 import com.google.code.tempusfugit.concurrency.annotations.Repeating;
-import org.apache.solr.client.solrj.SolrServer;
+import org.apache.solr.client.solrj.SolrClient;
 import org.jmock.Expectations;
 import org.jmock.integration.junit4.JUnitRuleMockery;
 import org.jmock.lib.concurrent.Synchroniser;
@@ -64,7 +64,7 @@ public class DefaultSolrManagerConcurrencyTest {
 		});
 	}
 
-	/** Tests getting a server. */
+	/** Tests getting a client. */
 	@Test
 	@Repeating(repetition = NUM_TEST_REPEATS)
 	public void getServer() {
@@ -76,16 +76,16 @@ public class DefaultSolrManagerConcurrencyTest {
 			}
 		});
 
-		SolrServer firstServer = runnables.get(0).server;
+		SolrClient firstServer = runnables.get(0).client;
 		for (int i = 0; i < runnables.size(); ++i) {
-			assertEquals(String.format("Test server[0] against server[%d] failed (all should be the same)", i), firstServer,
-					runnables.get(i).server);
+			assertEquals(String.format("Test client[0] against client[%d] failed (all should be the same)", i), firstServer,
+					runnables.get(i).client);
 		}
 	}
 
 	/** {@link Runnable} for {@link DefaultSolrManagerConcurrencyTest#getServer()}. */
 	private static class GetServerTestRunnable implements Runnable {
-		private SolrServer server;
+		private SolrClient client;
 		private final SolrProvider provider;
 
 		GetServerTestRunnable(final SolrProvider provider) {
@@ -94,7 +94,7 @@ public class DefaultSolrManagerConcurrencyTest {
 
 		@Override
 		public void run() {
-			server = provider.getServer(IndexType.PRODUCT);
+			client = provider.getServer(IndexType.PRODUCT);
 		}
 	}
 

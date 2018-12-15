@@ -7,7 +7,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
-import org.apache.solr.client.solrj.SolrServer;
+import org.apache.solr.client.solrj.SolrClient;
 
 import com.elasticpath.domain.search.IndexNotification;
 import com.elasticpath.search.IndexNotificationProcessor;
@@ -68,17 +68,17 @@ public interface IndexBuilder {
 	 * Action that is performed after the index has been updated. This only occurs when there are
 	 * items to process. Override in subclass to perform actions.
 	 * 
-	 * @param server the server that was used to update the index
+	 * @param client the client that was used to update the index
 	 */
-	void onIndexUpdated(SolrServer server);
+	void onIndexUpdated(SolrClient client);
 
 	/**
 	 * Action that is performed before updating the index. This only occurs when there are items
 	 * to process. Override in subclass to perform actions.
 	 * 
-	 * @param server the server that is going to be used to update the index
+	 * @param client the client that is going to be used to update the index
 	 */
-	void onIndexUpdating(SolrServer server);
+	void onIndexUpdating(SolrClient client);
 	
 	/**
 	 * Gets the index builder event listener.

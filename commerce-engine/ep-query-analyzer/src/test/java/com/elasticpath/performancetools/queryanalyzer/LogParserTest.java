@@ -26,6 +26,7 @@ import com.elasticpath.performancetools.queryanalyzer.utils.SystemProperties;
 @RunWith(MockitoJUnitRunner.class)
 public class LogParserTest {
 
+
 	@After
 	public void clean() {
 		System.getProperties().remove(SystemProperties.OUTPUT_JSON_FILE_PATH_SYSTEM_PROPERTY);
@@ -36,7 +37,13 @@ public class LogParserTest {
 		final File testCortexLog = new File(getResourcePathFromClassLoader("TestCortex.log"));
 		final QueryStatistics expectedStatistics = restoreQueryStatisticsFromFile("partial_statistics.ser");
 
+
 		final QueryStatistics actualStatistics = LogParser.INSTANCE.parse(testCortexLog);
+
+		// Remove timestamps, as they are irrelevant.
+		actualStatistics.getOperations().stream()
+				.flatMap(operation -> operation.getJpaQueries().stream())
+				.forEach(jpaQuery -> jpaQuery.setStartedAt(null));
 		/*
 			If any of objects, constituents of QueryStatistics, is changed then partial_statistics.ser must be recreated with
 			The generated file will be saved under this project base folder.
@@ -44,7 +51,6 @@ public class LogParserTest {
 			ObjectOutputStream os = new ObjectOutputStream(new FileOutputStream("partial_statistics.ser"));
 			os.writeObject(actualStatistics);
 		 */
-
 		//after parsing, QueryStatistics contains only operations
 		assertThat(actualStatistics.getOperations())
 				.as("Expected and actual operations must be the same")

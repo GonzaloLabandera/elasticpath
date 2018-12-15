@@ -1,4 +1,4 @@
-@smoketest @signin @invalidSignin
+@regressionTest @signIn @invalidSignIn
 Feature: Invalid signin
 
   Scenario Outline: Invalid sign in to CM

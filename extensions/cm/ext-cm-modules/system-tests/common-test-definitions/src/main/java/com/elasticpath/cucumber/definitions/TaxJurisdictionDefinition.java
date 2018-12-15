@@ -1,5 +1,7 @@
 package com.elasticpath.cucumber.definitions;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import java.util.Map;
 
 import cucumber.api.java.After;
@@ -137,6 +139,12 @@ public class TaxJurisdictionDefinition {
 	 */
 	@After("@cleanupTaxJurisdiction")
 	public void cleanupTaxJurisdiction() {
+		assertThat(this.taxJurisdictionCountry)
+				.as("It's not possible to delete a Tax jurisdiction. A tax jurisdiction country was not assigned")
+				.isNotBlank();
+		//any dialog which inherits Abstract dialog can be used here
+		createEditTaxJurisdictionDialog = new CreateEditTaxJurisdictionDialog(SetUp.getDriver(), "Create");
+		createEditTaxJurisdictionDialog.closeDialogIfOpened();
 		configurationActionToolbar.clickTaxJurisdiction();
 		deleteTaxJurisdictionCountry(this.taxJurisdictionCountry);
 		verifyTaxJurisdictionIsDeleted(this.taxJurisdictionCountry);

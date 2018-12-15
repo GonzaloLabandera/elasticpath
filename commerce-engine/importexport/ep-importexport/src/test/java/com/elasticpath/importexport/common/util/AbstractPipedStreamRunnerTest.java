@@ -1,11 +1,9 @@
-/**
+/*
  * Copyright (c) Elastic Path Software Inc., 2013
  */
 package com.elasticpath.importexport.common.util;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -35,18 +33,18 @@ public class AbstractPipedStreamRunnerTest {
 		final InputStream stream = new AbstractPipedStreamRunner() {
 			@Override
 			protected void runInternal(final OutputStream outputStream) {
-				try {
-					outputStream.write(content.getBytes());
-				} catch (IOException e) {
-					fail("Exception must not be thrown");
-				}
-				
+			try {
+				outputStream.write(content.getBytes());
+			} catch (IOException e) {
+				// Something went wrong
+				throw new AssertionError("Writing to output stream failed.\n" + e);
+			}
 			}
 		} .createResultStream();
 		
 		final BufferedReader lineStream = new BufferedReader(new InputStreamReader(stream));
-		assertEquals(content, lineStream.readLine());
-		assertSame(lineStream.read(), -1);
+		assertThat(lineStream.readLine()).isEqualTo(content);
+		assertThat(lineStream.read()).isEqualTo(-1);
 		lineStream.close();
 	}
 	
@@ -64,6 +62,6 @@ public class AbstractPipedStreamRunnerTest {
 			}
 		} .createResultStream();
 		
-		assertEquals(-1, stream.read());
+		assertThat(stream.read()).isEqualTo(-1);
 	}
 }

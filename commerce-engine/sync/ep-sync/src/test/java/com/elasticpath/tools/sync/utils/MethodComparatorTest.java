@@ -1,10 +1,9 @@
-/**
+/*
  * Copyright (c) Elastic Path Software Inc., 2013
  */
 package com.elasticpath.tools.sync.utils;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.lang.reflect.Method;
 
@@ -14,6 +13,8 @@ import org.junit.Test;
  * Test for MethodComparator.
  */
 public class MethodComparatorTest {
+
+	private static final String TEST_METHOD_1 = "testMethod1";
 
 	/**
 	 * Test Data Interface for getting Methods form it.
@@ -31,26 +32,21 @@ public class MethodComparatorTest {
 		void testMethod3(String arg1);
 	}
 	
-	private Method getMethodByName(final String name, final Class<?>...params) {
-		try {
-			return TestInterface.class.getMethod(name, params);
-		} catch (Exception e) {
-			fail(e.getMessage());
-		}
-		return null;
+	private Method getMethodByName(final String name, final Class<?>...params) throws NoSuchMethodException {
+		return TestInterface.class.getMethod(name, params);
 	}
-	
+
 	/**
 	 * Tests compare of the MethodComparator.
 	 */
 	@Test
-	public void testCompare() {
+	public void testCompare() throws NoSuchMethodException {
 		final MethodComparator methodComparator = new MethodComparator();
 		
-		assertEquals(0,  methodComparator.compare(getMethodByName("testMethod1"), getMethodByName("testMethod1"))); // NOPMD
-		assertEquals(-1, methodComparator.compare(getMethodByName("testMethod1"), getMethodByName("testMethod2")));
-		assertEquals(-1, methodComparator.compare(getMethodByName("testMethod1"), getMethodByName("testMethod1", String.class)));
-		assertEquals(-1, methodComparator.compare(getMethodByName("testMethod2"), getMethodByName("testMethod2", String.class)));
-		assertEquals(-1, methodComparator.compare(getMethodByName("testMethod3", int.class), getMethodByName("testMethod3", String.class)));
+		assertThat(methodComparator.compare(getMethodByName(TEST_METHOD_1), getMethodByName(TEST_METHOD_1))).isZero();
+		assertThat(methodComparator.compare(getMethodByName(TEST_METHOD_1), getMethodByName("testMethod2"))).isNegative();
+		assertThat(methodComparator.compare(getMethodByName(TEST_METHOD_1), getMethodByName(TEST_METHOD_1, String.class))).isNegative();
+		assertThat(methodComparator.compare(getMethodByName("testMethod2"), getMethodByName("testMethod2", String.class))).isNegative();
+		assertThat(methodComparator.compare(getMethodByName("testMethod3", int.class), getMethodByName("testMethod3", String.class))).isNegative();
 	}
 }

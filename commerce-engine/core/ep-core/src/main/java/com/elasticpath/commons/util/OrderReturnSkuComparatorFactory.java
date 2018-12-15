@@ -21,14 +21,6 @@ public final class OrderReturnSkuComparatorFactory {
 	 * @return comparator
 	 */
 	public static Comparator<OrderReturnSku> getOrderReturnSkuComparator() {
-		return new Comparator<OrderReturnSku>() {
-			/**
-			 * Compare by return sku code in ascending order.
-			 */
-			@Override
-			public int compare(final OrderReturnSku arg0, final OrderReturnSku arg1) {
-				return arg0.getOrderSku().getSkuCode().compareTo(arg1.getOrderSku().getSkuCode());
-			}
-		};
+		return Comparator.comparing(arg0 -> arg0.getOrderSku().getSkuCode());
 	}
 }

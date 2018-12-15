@@ -8,7 +8,6 @@ import java.util.Map;
 
 import io.reactivex.Observable;
 import io.reactivex.Single;
-
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
@@ -17,7 +16,6 @@ import com.elasticpath.domain.order.OrderSku;
 import com.elasticpath.repository.LinksRepository;
 import com.elasticpath.rest.definition.base.ScopeIdentifierPart;
 import com.elasticpath.rest.definition.items.ItemIdentifier;
-import com.elasticpath.rest.definition.items.ItemsIdentifier;
 import com.elasticpath.rest.definition.purchases.PurchaseIdentifier;
 import com.elasticpath.rest.definition.purchases.PurchaseLineItemIdentifier;
 import com.elasticpath.rest.id.IdentifierPart;
@@ -53,9 +51,7 @@ public class PurchaseLineItemToItemLinksRepositoryImpl<E extends PurchaseLineIte
 	private Observable<ItemIdentifier> buildItemIdentifier(final IdentifierPart<Map<String, String>> itemId, final String scope) {
 		return Observable.just(ItemIdentifier.builder()
 				.withItemId(itemId)
-				.withItems(ItemsIdentifier.builder()
-						.withScope(ScopeIdentifierPart.of(scope))
-						.build())
+				.withScope(ScopeIdentifierPart.of(scope))
 				.build());
 	}
 

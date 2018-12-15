@@ -321,11 +321,7 @@
 		 scope="prototype">
 	 </bean>
 
-	<bean id="synonymAnalyzer" class="org.apache.lucene.analysis.snowball.SnowballAnalyzer">
-		<constructor-arg value="LUCENE_45"/>
-		<constructor-arg value="English"/>
-	</bean>
-
+	<bean id="synonymAnalyzer" class="org.apache.lucene.analysis.en.EnglishAnalyzer" />
 
 	<bean id="categoryGuidUtil" class="com.elasticpath.commons.util.CategoryGuidUtil"/>
 

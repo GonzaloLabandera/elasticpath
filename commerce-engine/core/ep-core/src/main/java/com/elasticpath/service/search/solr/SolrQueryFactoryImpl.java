@@ -1,5 +1,5 @@
-/**
- * Copyright (c) Elastic Path Software Inc., 2008
+/*
+ * Copyright (c) Elastic Path Software Inc., 2018
  */
 package com.elasticpath.service.search.solr;
 
@@ -9,9 +9,11 @@ import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -41,8 +43,11 @@ import com.elasticpath.domain.catalogview.DisplayableFilter;
 import com.elasticpath.domain.catalogview.Filter;
 import com.elasticpath.domain.misc.SearchConfig;
 import com.elasticpath.domain.pricing.PriceListStack;
+import com.elasticpath.domain.search.Facet;
+import com.elasticpath.domain.search.FacetGroup;
 import com.elasticpath.service.attribute.AttributeService;
 import com.elasticpath.service.catalog.CatalogService;
+import com.elasticpath.service.search.FacetService;
 import com.elasticpath.service.search.IndexType;
 import com.elasticpath.service.search.ProductCategorySearchCriteria;
 import com.elasticpath.service.search.SearchConfigFactory;
@@ -62,7 +67,7 @@ import com.elasticpath.settings.provider.SettingValueProvider;
 /**
  * Factory class to create SOLR queries.
  */
-@SuppressWarnings({ "PMD.CyclomaticComplexity", "PMD.GodClass" })
+@SuppressWarnings({ "PMD.CyclomaticComplexity", "PMD.GodClass", "PMD.TooManyMethods", "PMD.ExcessiveImports" })
 public class SolrQueryFactoryImpl implements SolrQueryFactory {
 
 	private static final String STANDARD_REQUEST_HANDLER = "standard";
@@ -81,6 +86,8 @@ public class SolrQueryFactoryImpl implements SolrQueryFactory {
 
 	private static final int BOOST_SCALE = 4;
 
+	private static final String SOLR_QF_PARAMETER = "qf";
+
 	private IndexUtility indexUtility;
 
 	private SolrFacetAdapter solrFacetAdapter;
@@ -92,6 +99,10 @@ public class SolrQueryFactoryImpl implements SolrQueryFactory {
 	private SettingValueProvider<Boolean> showBundlesFirstProvider;
 
 	private Analyzer analyzer;
+
+	private AttributeService attributeService;
+
+	private FacetService facetService;
 
 	/**
 	 * <p>Constructs a SOLR query object of <b>type=STANDARD</b> (to be handled by SOLR's <code>StandardRequestHandler</code>),
@@ -109,17 +120,19 @@ public class SolrQueryFactoryImpl implements SolrQueryFactory {
 	 * specified in the given SearchConfig then this parameter will be ignored
 	 * @param searchConfig the search configuration to use
 	 * @param fuzzyQuery whether the composed query should be fuzzy
+	 * @param filterLookup a map keyed on solr query with a value containing the filter
 	 * @return a {@link SolrQuery} specific query
 	 */
 	@Override
 	public SolrQuery composeSpecificQuery(final QueryComposer luceneQueryComposer, final SearchCriteria searchCriteria,
-			final int startIndex, final int maxResults, final SearchConfig searchConfig, final boolean fuzzyQuery) {
+										  final int startIndex, final int maxResults, final SearchConfig searchConfig,
+										  final boolean fuzzyQuery, final Map<String, Filter<?>> filterLookup) {
 
 		SolrQuery solrQuery = createSolrQueryFromLuceneQuery(createLuceneQuery(luceneQueryComposer, searchCriteria, searchConfig, fuzzyQuery));
 
 		addFiltersToQuery(solrQuery, searchCriteria); //Explicitly define the restricted set of returned values by adding restriction filters
 
-		addFacetsToQuery(solrQuery, searchCriteria); //Group stuff into buckets
+		addFacetsToQuery(solrQuery, searchCriteria, filterLookup); //Group stuff into buckets
 
 		addSorting(solrQuery, searchCriteria, luceneQueryComposer, searchConfig);
 		addInvariantTerms(solrQuery, startIndex, maxResults, searchConfig);
@@ -135,12 +148,14 @@ public class SolrQueryFactoryImpl implements SolrQueryFactory {
 	 *
 	 * @param query the query to which facets should be added
 	 * @param searchCriteria the search criteria containing the facets and the store to which the facets apply
+	 * @param filterLookup a map keyed on solr query with a value containing the filter
 	 */
-	void addFacetsToQuery(final SolrQuery query, final SearchCriteria searchCriteria) {
+	void addFacetsToQuery(final SolrQuery query, final SearchCriteria searchCriteria, final Map<String, Filter<?>> filterLookup) {
 		if (searchCriteria instanceof ProductCategorySearchCriteria
 				&& ((ProductCategorySearchCriteria) searchCriteria).isFacetingEnabled()
 				&& IndexType.PRODUCT.equals(searchCriteria.getIndexType())) {
-			solrFacetAdapter.addFacets(query, searchCriteria);
+			Map<String, String> queryLookup = new HashMap<>();
+			solrFacetAdapter.addFacets(query, searchCriteria, queryLookup, filterLookup);
 		}
 	}
 
@@ -179,6 +194,10 @@ public class SolrQueryFactoryImpl implements SolrQueryFactory {
 		}
 	}
 
+	public String constructSolrQuery(final Filter<?> filter, final SearchCriteria searchCriteria) {
+		return escapeMatchAllQuery(solrFacetAdapter.constructFilterQuery(filter, searchCriteria));
+	}
+
 	/**
 	 * Creates a new non-fuzzy query with the given inputs using the given query composer.
 	 *
@@ -189,7 +208,7 @@ public class SolrQueryFactoryImpl implements SolrQueryFactory {
 	 * @return a non-fuzzy query based on the given criteria and configuration
 	 */
 	Query createLuceneQuery(final QueryComposer luceneQueryComposer,
-			final SearchCriteria searchCriteria, final SearchConfig searchConfig, final boolean fuzzyQuery) {
+							final SearchCriteria searchCriteria, final SearchConfig searchConfig, final boolean fuzzyQuery) {
 		if (fuzzyQuery) {
 			return luceneQueryComposer.composeFuzzyQuery(searchCriteria, searchConfig);
 		}
@@ -203,7 +222,7 @@ public class SolrQueryFactoryImpl implements SolrQueryFactory {
 	 */
 	SolrQuery createSolrQueryFromLuceneQuery(final Query luceneQuery) {
 		final SolrQuery query = new SolrQuery();
-		query.setQueryType(STANDARD_REQUEST_HANDLER);
+		query.setRequestHandler(STANDARD_REQUEST_HANDLER);
 		query.setQuery(escapeMatchAllQuery(luceneQuery.toString()));
 		return query;
 	}
@@ -237,16 +256,26 @@ public class SolrQueryFactoryImpl implements SolrQueryFactory {
 	 */
 	@Override
 	public SolrQuery composeKeywordQuery(final KeywordSearchCriteria searchCriteria, final int startIndex,
-			final int maxResults, final SearchConfig searchConfig, final boolean fuzzyQuery) {
+										 final int maxResults, final SearchConfig searchConfig, final boolean fuzzyQuery,
+										 final Map<String, Filter<?>> filterLookup) {
 		final SolrQuery query = new SolrQuery();
 
-		query.setQueryType(DISMAX_REQUEST_HANDLER);
-		String keyword =	StringEscapeUtils.unescapeJava(searchCriteria.getKeyword());
+		query.setRequestHandler(DISMAX_REQUEST_HANDLER);
+		String keyword = StringEscapeUtils.unescapeJava(searchCriteria.getKeyword());
 		query.setQuery(keyword);
 		addQueryOptions(query, searchCriteria);
 
-		ProductFields fields = new ProductFields(searchCriteria, searchConfig);
-		query.set("qf", fields.getFieldString());
+		if (searchCriteria.isOfferSearch()) {
+			String searchableAttributes = getSearchableAttributes(searchConfig, searchCriteria);
+			if (StringUtils.isEmpty(searchableAttributes)) {
+				searchableAttributes = getSearchableAttributesFromFilterAttributes(searchCriteria, searchConfig);
+
+
+			}
+			query.set(SOLR_QF_PARAMETER, searchableAttributes);
+		} else {
+			query.set(SOLR_QF_PARAMETER, this.filterAttributes(searchCriteria, searchConfig));
+		}
 
 		query.set(DisMaxConstants.FUZZY, String.valueOf(fuzzyQuery));
 		if (fuzzyQuery) {
@@ -266,14 +295,113 @@ public class SolrQueryFactoryImpl implements SolrQueryFactory {
 		addDisplayableOnlyFilter(query, filterQueries, searchCriteria);
 
 		addFiltersToQuery(query, filterQueries, searchCriteria);
-		if (searchCriteria.isFacetingEnabled()) {
-			solrFacetAdapter.addFacets(query, searchCriteria);
+
+		if (searchCriteria.getStoreCode() != null && searchCriteria.isFacetingEnabled()) {
+			// only returns facet values relevant to the search result
+			query.add("facet.mincount", "1");
+			Map<String, String> queryLookup = new HashMap<>();
+			solrFacetAdapter.addFacets(query, searchCriteria, queryLookup, filterLookup);
+			Map<String, String> appliedFacets = searchCriteria.getAppliedFacets();
+			if (appliedFacets != null && !appliedFacets.isEmpty()) {
+				addAppliedFacetFilters(query, appliedFacets, queryLookup);
+			}
 		}
 
 		addDefaultSorting(query, searchCriteria);
 		addInvariantTerms(query, startIndex, maxResults, getSearchConfigFactory().getSearchConfig(IndexType.PRODUCT.getIndexName()));
 
 		return query;
+	}
+
+	@Override
+	public String getSearchableAttributesFromFilterAttributes(final KeywordSearchCriteria searchCriteria, final SearchConfig searchConfig) {
+		return this.filterAttributes(searchCriteria, searchConfig);
+	}
+
+	private void addAppliedFacetFilters(final SolrQuery query, final Map<String, String> appliedFacets, final Map<String, String> filterMap) {
+		for (Entry<String, String> entry : appliedFacets.entrySet()) {
+			String guid = entry.getKey();
+			if (!guid.isEmpty() && !entry.getValue().isEmpty()) {
+				StringBuilder filterQueryString = new StringBuilder();
+				filterQueryString.append("{!tag=").append(guid).append('}');
+				for (String facetValue : appliedFacets.get(guid).split(FacetConstants.APPLIED_FACETS_SEPARATOR)) {
+					filterQueryString.append(' ').append(filterMap.get(facetValue));
+				}
+				query.addFilterQuery(filterQueryString.toString());
+			}
+		}
+	}
+
+	@Override
+	public String getSearchableAttributes(final SearchConfig searchConfig, final KeywordSearchCriteria searchCriteria) {
+
+		Map<String, Float> searchKeys = new HashMap<>();
+		Locale locale = searchCriteria.getLocale();
+		for (Facet facet : facetService.findAllSearchableFacets(searchCriteria.getStoreCode())) {
+			int facetGroup = facet.getFacetGroup();
+			if (facetGroup == FacetGroup.OTHERS.getOrdinal()) {
+				addFieldAttributes(searchConfig, searchKeys, locale, facet);
+			} else if (facetGroup == FacetGroup.SKU_OPTION.getOrdinal()) {
+				addSkuOptions(searchConfig, searchKeys, locale, facet);
+			} else {
+				addSkuAndProductAttributes(searchConfig, searchKeys, locale, facet);
+			}
+		}
+
+		return buildQfParameter(searchKeys);
+	}
+
+	private String buildQfParameter(final Map<String, Float> searchKeys) {
+		StringBuilder stringBuilder = new StringBuilder();
+		for (Entry<String, Float> entry : searchKeys.entrySet()) {
+			String key = entry.getKey();
+			stringBuilder.append(key);
+			final BigDecimal boostValue = BigDecimal.valueOf(entry.getValue()).setScale(BOOST_SCALE, BigDecimal.ROUND_DOWN);
+			if (boostValue.compareTo(BigDecimal.ONE) != 0) {
+				stringBuilder.append('^').append(boostValue);
+			}
+			stringBuilder.append(' ');
+		}
+		stringBuilder.setLength(Math.max(stringBuilder.length() - 1, 0));
+		return stringBuilder.toString();
+	}
+
+	private void addSkuAndProductAttributes(final SearchConfig searchConfig,
+											final Map<String, Float> searchKeys, final Locale locale, final Facet facet) {
+		String attributeKey = facet.getBusinessObjectId();
+		Attribute attribute = getAttributeService().findByKey(attributeKey);
+		String fieldName = indexUtility.createAttributeFieldName(attribute, locale, true, false);
+		float boost;
+		if (attribute.isLocaleDependant()) {
+			boost = indexUtility.getAttributeBoostWithFallback(searchConfig, attribute, locale);
+		} else {
+			boost = indexUtility.getAttributeBoost(searchConfig, attribute);
+		}
+		searchKeys.put(fieldName, boost);
+	}
+
+	private void addSkuOptions(final SearchConfig searchConfig, final Map<String, Float> searchKeys, final Locale locale, final Facet facet) {
+		String optionKey = facet.getBusinessObjectId();
+		String fieldName = indexUtility.createSkuOptionFieldName(locale, facet.getBusinessObjectId());
+		searchKeys.put(fieldName, indexUtility.getLocaleBoostWithFallback(searchConfig, optionKey, locale));
+	}
+
+	private void addFieldAttributes(final SearchConfig searchConfig, final Map<String, Float> searchKeys, final Locale locale, final Facet facet) {
+		String fieldKey = facet.getFacetName();
+		if (fieldKey.equals(FacetConstants.PRODUCT_NAME)) {
+			searchKeys.put(indexUtility.createLocaleFieldName(SolrIndexConstants.PRODUCT_NAME, locale),
+					indexUtility.getLocaleBoostWithFallback(searchConfig, SolrIndexConstants.PRODUCT_NAME, locale));
+		} else if (fieldKey.equals(FacetConstants.PRODUCT_SKU_CODE)) {
+			searchKeys.put(SolrIndexConstants.PRODUCT_SKU_CODE, searchConfig.getBoostValue(SolrIndexConstants.PRODUCT_SKU_CODE));
+		} else if (fieldKey.equals(FacetConstants.BRAND)) {
+			searchKeys.put(SolrIndexConstants.BRAND_NAME, searchConfig.getBoostValue(SolrIndexConstants.BRAND_NAME));
+		} else if (FacetConstants.SIZE_ATTRIBUTES.contains(fieldKey)) {
+			String solrAttribute = fieldKey.toLowerCase(Locale.ENGLISH);
+			searchKeys.put(solrAttribute, searchConfig.getBoostValue(solrAttribute));
+		} else if (FacetConstants.CATEGORY.equals(fieldKey)) {
+			searchKeys.put(indexUtility.createLocaleFieldName(SolrIndexConstants.CATEGORY_NAME, locale),
+					indexUtility.getLocaleBoostWithFallback(searchConfig, SolrIndexConstants.CATEGORY_NAME, locale));
+		}
 	}
 
 	/**
@@ -318,7 +446,7 @@ public class SolrQueryFactoryImpl implements SolrQueryFactory {
 	 * @param searchCriteria the search criteria containing the displayable boolean
 	 */
 	protected void addDisplayableOnlyFilter(final SolrQuery query, final List<Filter<?>> filterQueries,
-			final KeywordSearchCriteria searchCriteria) {
+											final KeywordSearchCriteria searchCriteria) {
 		if (searchCriteria.isDisplayableOnly()) {
 			DisplayableFilter displayableFilter = getBeanFactory().getBean(ContextIdNames.DISPLAYABLE_FILTER);
 			displayableFilter.setStoreCode(searchCriteria.getStoreCode());
@@ -354,7 +482,7 @@ public class SolrQueryFactoryImpl implements SolrQueryFactory {
 			query.add(SpellingParams.QUERY, keyword);
 		}
 
-		query.setQueryType(SPELLING_REQUEST_HANDLER);
+		query.setRequestHandler(SPELLING_REQUEST_HANDLER);
 		query.set(SpellingParams.ACCURACY, String.valueOf(config.getAccuracy()));
 		query.set(SpellingParams.NUM_SUGGESTIONS, String.valueOf(config.getMaximumSuggestionsPerWord()));
 		query.set(SpellingParams.LOCALE, searchCriteria.getLocale().toString());
@@ -370,7 +498,7 @@ public class SolrQueryFactoryImpl implements SolrQueryFactory {
 	 * @param searchConfig the search configuration
 	 */
 	void addInvariantTerms(final SolrQuery query, final int startIndex, final int maxResults,
-			final SearchConfig searchConfig) {
+						   final SearchConfig searchConfig) {
 		query.setStart(startIndex);
 
 		int maxReturnNum = maxResults;
@@ -387,7 +515,7 @@ public class SolrQueryFactoryImpl implements SolrQueryFactory {
 	}
 
 	private void addSorting(final SolrQuery query, final SearchCriteria searchCriteria,
-			final QueryComposer luceneQueryComposer, final SearchConfig searchConfig) {
+							final QueryComposer luceneQueryComposer, final SearchConfig searchConfig) {
 		if (sortingRedundant(searchCriteria)) {
 			return;
 		}
@@ -397,7 +525,9 @@ public class SolrQueryFactoryImpl implements SolrQueryFactory {
 		Map<String, SortOrder> sortFields = null;
 
 		if (legacySortField == null) {
-			if (luceneQueryComposer != null) {
+			if (luceneQueryComposer == null) {
+				sortFields = new LinkedHashMap<>();
+			} else {
 				sortFields = luceneQueryComposer.resolveSortField(searchCriteria, searchConfig);
 			}
 		} else {
@@ -410,7 +540,7 @@ public class SolrQueryFactoryImpl implements SolrQueryFactory {
 		}
 
 		for (Entry<String, SortOrder> sortField : sortFields.entrySet()) {
-			query.addSortField(sortField.getKey(), resolveSortingOrder(sortField.getValue()));
+			query.addSort(sortField.getKey(), resolveSortingOrder(sortField.getValue()));
 		}
 
 		handleFeaturedCategorySpecialCase(query, searchCriteria);
@@ -431,7 +561,7 @@ public class SolrQueryFactoryImpl implements SolrQueryFactory {
 			SortBy tmpType = searchCriteria.getSortingType();
 
 			searchCriteria.setSortingType(StandardSortBy.FEATURED_ANYWHERE);
-			query.addSortField(getSortTypeField(searchCriteria), sortOrder);
+			query.addSort(getSortTypeField(searchCriteria), sortOrder);
 
 			searchCriteria.setSortingType(tmpType);
 		}
@@ -454,39 +584,39 @@ public class SolrQueryFactoryImpl implements SolrQueryFactory {
 	 */
 	private String getSortTypeField(final SearchCriteria searchCriteria) {
 		switch (searchCriteria.getSortingType().getOrdinal()) {
-		case StandardSortBy.PRICE_ORDINAL:
-			if (!(searchCriteria instanceof ProductCategorySearchCriteria)) {
-				throw new EpServiceException("sorting on price is only defined for search criteria's of type "
-						+ ProductCategorySearchCriteria.class);
-			}
-			final StoreAwareSearchCriteria storeAwareSearchCriteria = (StoreAwareSearchCriteria) searchCriteria;
-			if (storeAwareSearchCriteria.getStoreCode() == null) {
-				throw new EpServiceException("Sorting on price requires a store UID");
-			}
-			ProductCategorySearchCriteria  productCategorySearchCriteria = (ProductCategorySearchCriteria) searchCriteria;
-			String catalogCode = productCategorySearchCriteria.getCatalogCode();
-			List<String> priceListStack = getPriceListStackFromSearchCriteria(searchCriteria);
-			return indexUtility.createPriceSortFieldName(SolrIndexConstants.PRICE_SORT, catalogCode, priceListStack);
-		case StandardSortBy.PRODUCT_NAME_ORDINAL:
-			// need exact name here, otherwise we sort on the lowest or highest value of the
-			// tokens
-			return indexUtility.createLocaleFieldName(SolrIndexConstants.SORT_PRODUCT_NAME_EXACT, searchCriteria.getLocale());
-		case StandardSortBy.RELEVANCE_ORDINAL:
-			return SolrIndexConstants.SCORE;
-		case StandardSortBy.TOP_SELLER_ORDINAL:
-			return SolrIndexConstants.SALES_COUNT;
-		case StandardSortBy.FEATURED_ANYWHERE_ORDINAL:
-			return SolrIndexConstants.FEATURED;
-		case StandardSortBy.FEATURED_CATEGORY_ORDINAL:
-			// this sorting ordering should only happen for instances of ProductCategorySearchCriteria
-			ProductCategorySearchCriteria prodCatSearchCriteria = (ProductCategorySearchCriteria) searchCriteria;
-			if (prodCatSearchCriteria.getCategoryUid() == null || prodCatSearchCriteria.getCategoryUid() <= 0) {
-				// assume that if we aren't in a category, we want them all
+			case StandardSortBy.PRICE_ORDINAL:
+				if (!(searchCriteria instanceof ProductCategorySearchCriteria)) {
+					throw new EpServiceException("sorting on price is only defined for search criteria's of type "
+							+ ProductCategorySearchCriteria.class);
+				}
+				final StoreAwareSearchCriteria storeAwareSearchCriteria = (StoreAwareSearchCriteria) searchCriteria;
+				if (storeAwareSearchCriteria.getStoreCode() == null) {
+					throw new EpServiceException("Sorting on price requires a store UID");
+				}
+				ProductCategorySearchCriteria productCategorySearchCriteria = (ProductCategorySearchCriteria) searchCriteria;
+				String catalogCode = productCategorySearchCriteria.getCatalogCode();
+				List<String> priceListStack = getPriceListStackFromSearchCriteria(searchCriteria);
+				return indexUtility.createPriceSortFieldName(SolrIndexConstants.PRICE_SORT, catalogCode, priceListStack);
+			case StandardSortBy.PRODUCT_NAME_ORDINAL:
+				// need exact name here, otherwise we sort on the lowest or highest value of the
+				// tokens
+				return indexUtility.createLocaleFieldName(SolrIndexConstants.SORT_PRODUCT_NAME_EXACT, searchCriteria.getLocale());
+			case StandardSortBy.RELEVANCE_ORDINAL:
+				return SolrIndexConstants.SCORE;
+			case StandardSortBy.TOP_SELLER_ORDINAL:
+				return SolrIndexConstants.SALES_COUNT;
+			case StandardSortBy.FEATURED_ANYWHERE_ORDINAL:
 				return SolrIndexConstants.FEATURED;
-			}
-			return indexUtility.createFeaturedField(prodCatSearchCriteria.getCategoryUid());
-		default:
-			return null;
+			case StandardSortBy.FEATURED_CATEGORY_ORDINAL:
+				// this sorting ordering should only happen for instances of ProductCategorySearchCriteria
+				ProductCategorySearchCriteria prodCatSearchCriteria = (ProductCategorySearchCriteria) searchCriteria;
+				if (prodCatSearchCriteria.getCategoryUid() == null || prodCatSearchCriteria.getCategoryUid() <= 0) {
+					// assume that if we aren't in a category, we want them all
+					return SolrIndexConstants.FEATURED;
+				}
+				return indexUtility.createFeaturedField(prodCatSearchCriteria.getCategoryUid());
+			default:
+				return null;
 		}
 	}
 
@@ -514,7 +644,7 @@ public class SolrQueryFactoryImpl implements SolrQueryFactory {
 	 */
 	@Override
 	public BooleanQuery createTermsForStartEndDateRange(final Date date) {
-		final BooleanQuery booleanQuery = new BooleanQuery();
+		final BooleanQuery.Builder booleanQueryBuilder = new BooleanQuery.Builder();
 
 		// round to the nearest minute to improve query caching
 		// to the second granularity is an overkill
@@ -522,11 +652,11 @@ public class SolrQueryFactoryImpl implements SolrQueryFactory {
 		final String now = getAnalyzer().analyze(roundedDate);
 
 		// start date is in the past
-		booleanQuery.add(TermRangeQuery.newStringRange(SolrIndexConstants.START_DATE, null, now, true, true), Occur.MUST);
+		booleanQueryBuilder.add(TermRangeQuery.newStringRange(SolrIndexConstants.START_DATE, null, now, true, true), Occur.MUST);
 		// AND end date is NOT in the past - correctly evaluates possible null end dates
-		booleanQuery.add(TermRangeQuery.newStringRange(SolrIndexConstants.END_DATE, null, now, true, true), Occur.MUST_NOT);
+		booleanQueryBuilder.add(TermRangeQuery.newStringRange(SolrIndexConstants.END_DATE, null, now, true, true), Occur.MUST_NOT);
 
-		return booleanQuery;
+		return booleanQueryBuilder.build();
 	}
 
 	/**
@@ -571,73 +701,6 @@ public class SolrQueryFactoryImpl implements SolrQueryFactory {
 	}
 
 	/**
-	 * Creates the fields specific to a product search in the SF.
-	 */
-	private class ProductFields {
-
-		private String cachedList;
-
-		private final AttributeService attributeService;
-
-		ProductFields(final KeywordSearchCriteria searchCriteria, final SearchConfig searchConfig) {
-			attributeService = getBeanFactory().getBean(ContextIdNames.ATTRIBUTE_SERVICE);
-			filterAttributes(searchCriteria, searchConfig);
-		}
-
-		private void filterAttributes(final KeywordSearchCriteria searchCriteria, final SearchConfig searchConfig) {
-			final List<Attribute> attributeList = attributeService.getProductAttributes();
-			final List<String> searchKeys = new ArrayList<>(attributeList.size() + 2 + 1);
-			final Set<String> excludedItems = searchConfig.getExclusiveAttributes();
-			final List<Float> boostValues = new ArrayList<>(attributeList.size() + 2 + 1);
-
-			for (Attribute attribute : attributeList) {
-				if (excludedItems.contains(attribute.getKey())) {
-					continue;
-				}
-
-				final String fieldName = indexUtility
-						.createAttributeFieldName(attribute, searchCriteria.getLocale(), true, false);
-				searchKeys.add(fieldName);
-				if (attribute.isLocaleDependant()) {
-					boostValues.add(indexUtility.getAttributeBoostWithFallback(searchConfig, attribute, searchCriteria.getLocale()));
-				} else {
-					boostValues.add(indexUtility.getAttributeBoost(searchConfig, attribute));
-				}
-			}
-
-			searchKeys.add(indexUtility.createLocaleFieldName(SolrIndexConstants.PRODUCT_NAME, searchCriteria.getLocale()));
-			boostValues.add(indexUtility.getLocaleBoostWithFallback(searchConfig, SolrIndexConstants.PRODUCT_NAME, searchCriteria
-					.getLocale()));
-			searchKeys.add(SolrIndexConstants.PRODUCT_SKU_CODE);
-			boostValues.add(searchConfig.getBoostValue(SolrIndexConstants.PRODUCT_SKU_CODE));
-			searchKeys.add(SolrIndexConstants.BRAND_CODE_FOR_DISMAX);
-			boostValues.add(searchConfig.getBoostValue(SolrIndexConstants.BRAND_CODE_FOR_DISMAX));
-			searchKeys.add(SolrIndexConstants.BRAND_NAME);
-			boostValues.add(searchConfig.getBoostValue(SolrIndexConstants.BRAND_NAME));
-
-			final StringBuilder builder = new StringBuilder();
-			Iterator<String> fieldIter = searchKeys.iterator();
-			Iterator<Float> boostIter = boostValues.iterator();
-
-			while (fieldIter.hasNext()) {
-				builder.append(fieldIter.next());
-				final BigDecimal boostValue = BigDecimal.valueOf(boostIter.next()).setScale(BOOST_SCALE, BigDecimal.ROUND_DOWN);
-				if (boostValue.compareTo(BigDecimal.ONE) != 0) {
-					builder.append('^').append(boostValue);
-				}
-				builder.append(' ');
-			}
-			builder.deleteCharAt(builder.length() - 1);
-
-			cachedList = builder.toString();
-		}
-
-		public String getFieldString() {
-			return cachedList;
-		}
-	}
-
-	/**
 	 * Get the search config factory used to get a search configuration.
 	 *
 	 * @return the <code>SearchConfigFactory</code>
@@ -664,6 +727,7 @@ public class SolrQueryFactoryImpl implements SolrQueryFactory {
 		return beanFactory;
 	}
 
+
 	/**
 	 * Set the bean factory.
 	 *
@@ -674,16 +738,77 @@ public class SolrQueryFactoryImpl implements SolrQueryFactory {
 	}
 
 	/**
+	 * @return the analyzer
+	 */
+	public Analyzer getAnalyzer() {
+		return analyzer;
+	}
+
+	/**
 	 * @param analyzer the analyzer to set
 	 */
 	public void setAnalyzer(final Analyzer analyzer) {
 		this.analyzer = analyzer;
 	}
 
-	/**
-	 * @return the analyzer
-	 */
-	public Analyzer getAnalyzer() {
-		return analyzer;
+
+	private String filterAttributes(final KeywordSearchCriteria searchCriteria, final SearchConfig searchConfig) {
+		final List<Attribute> attributeList = getAttributeService().getProductAttributes();
+		final List<String> searchKeys = new ArrayList<>(attributeList.size());
+		final Set<String> excludedItems = searchConfig.getExclusiveAttributes();
+		final List<Float> boostValues = new ArrayList<>(attributeList.size());
+
+		for (Attribute attribute : attributeList) {
+			if (excludedItems.contains(attribute.getKey())) {
+				continue;
+			}
+
+			final String fieldName = indexUtility
+					.createAttributeFieldName(attribute, searchCriteria.getLocale(), true, false);
+			searchKeys.add(fieldName);
+			if (attribute.isLocaleDependant()) {
+				boostValues.add(indexUtility.getAttributeBoostWithFallback(searchConfig, attribute, searchCriteria.getLocale()));
+			} else {
+				boostValues.add(indexUtility.getAttributeBoost(searchConfig, attribute));
+			}
+		}
+
+		searchKeys.add(indexUtility.createLocaleFieldName(SolrIndexConstants.PRODUCT_NAME, searchCriteria.getLocale()));
+		boostValues.add(indexUtility.getLocaleBoostWithFallback(searchConfig, SolrIndexConstants.PRODUCT_NAME, searchCriteria
+				.getLocale()));
+		searchKeys.add(SolrIndexConstants.PRODUCT_SKU_CODE);
+		boostValues.add(searchConfig.getBoostValue(SolrIndexConstants.PRODUCT_SKU_CODE));
+		searchKeys.add(SolrIndexConstants.BRAND_CODE_FOR_DISMAX);
+		boostValues.add(searchConfig.getBoostValue(SolrIndexConstants.BRAND_CODE_FOR_DISMAX));
+		searchKeys.add(SolrIndexConstants.BRAND_NAME);
+		boostValues.add(searchConfig.getBoostValue(SolrIndexConstants.BRAND_NAME));
+
+		final StringBuilder builder = new StringBuilder();
+		Iterator<String> fieldIter = searchKeys.iterator();
+		Iterator<Float> boostIter = boostValues.iterator();
+
+		while (fieldIter.hasNext()) {
+			builder.append(fieldIter.next());
+			final BigDecimal boostValue = BigDecimal.valueOf(boostIter.next()).setScale(BOOST_SCALE, BigDecimal.ROUND_DOWN);
+			if (boostValue.compareTo(BigDecimal.ONE) != 0) {
+				builder.append('^').append(boostValue);
+			}
+			builder.append(' ');
+		}
+		builder.deleteCharAt(builder.length() - 1);
+
+		return builder.toString();
+	}
+
+	private AttributeService getAttributeService() {
+		return this.attributeService;
+	}
+
+	public void setAttributeService(final AttributeService attributeService) {
+		this.attributeService = attributeService;
+	}
+
+	public void setFacetService(final FacetService facetService) {
+		this.facetService = facetService;
 	}
 }

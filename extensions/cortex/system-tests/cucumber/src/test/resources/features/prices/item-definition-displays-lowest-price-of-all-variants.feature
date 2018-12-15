@@ -1,5 +1,4 @@
-@Prices
-
+@prices
 Feature: Prices - Retrieve from-price For Items with Variants
   As a client developer,
   I want to retrieve the lowest price out of all variants that a shopper pays for an item,
@@ -20,23 +19,23 @@ Feature: Prices - Retrieve from-price For Items with Variants
 
   Scenario: The lowest price is the sku level list-price which is over-riding the product price
   # Pricing data for the item used in this test:
-  # | Item		| List-Price	| Sale-Price	|
+  # | Item		    | List-Price	| Sale-Price	|
   # | Sancturary 	| $17.99		| -				|
   # | 400Pixels  	| $11.00		| -    			|
   # | 700Pixels  	| -		 		| -				|
     Given an item Sanctuary exists in my catalog
     When I follow the fromprice link on the item definition
-    Then the from-price has fields amount: 11.0, currency: CAD and display: $11.00
+    Then the from-price has fields amount: 11.00, currency: CAD and display: $11.00
 
   Scenario: The lowest price is the product list-price since there is no sale-price, nor any sku price over-rides
   # Pricing data for the item used in this test:
   # | Item					| List-Price	| Sale-Price	|
   # | Finding Santa Clause	| $22.00		| -				|
-  # | 400Pixels  				| -				| -				|
+  # | 400Pixels  			| -				| -				|
   # | 720Pixels				| -		 		| -   			|
     Given an item Finding Santa Clause exists in my catalog
     When I follow the fromprice link on the item definition
-    Then the from-price has fields amount: 22.0, currency: CAD and display: $22.00
+    Then the from-price has fields amount: 22.00, currency: CAD and display: $22.00
 
   Scenario: The lowest price is the product sale-price since there are no sku price over-rides
   # Pricing data for the item used in this test:

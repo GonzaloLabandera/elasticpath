@@ -1,0 +1,28 @@
+<?xml version="1.0"?>
+<definitions xmlns="http://www.elasticpath.com/schema/rest/0.5">
+
+	<family>
+		<name>searches</name>
+		<plan>
+			<name>offer-search</name>
+			<description>
+				<![CDATA[Retrieve offers with facets for the keywords in the search query, submitted using the form.]]>
+			</description>
+			<step>
+				<description><![CDATA[The offer search form.]]></description>
+				<start>searches</start>
+				<follow-link>offersearchform</follow-link>
+				<result>offer-search-form</result>
+			</step>
+			<step>
+				<description><![CDATA[The offer search form.]]></description>
+				<start>offer-search-form</start>
+				<submit/>
+				<to>offer-search-form</to>
+				<via-link>offersearchaction</via-link>
+				<result>offer-search-result</result>
+			</step>
+		</plan>
+
+	</family>
+</definitions>

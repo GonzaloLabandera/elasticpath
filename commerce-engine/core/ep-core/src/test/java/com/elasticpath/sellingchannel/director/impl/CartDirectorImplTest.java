@@ -4,12 +4,13 @@
 package com.elasticpath.sellingchannel.director.impl;
 
 import static java.util.Collections.emptyList;
-import static java.util.Collections.singletonList;
+import static java.util.Collections.emptyMap;
+
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.BDDMockito.given;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doNothing;
@@ -26,6 +27,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.google.common.collect.ImmutableMap;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -52,7 +54,7 @@ import com.elasticpath.domain.shoppingcart.impl.ShoppingItemImpl;
 import com.elasticpath.domain.store.Store;
 import com.elasticpath.money.Money;
 import com.elasticpath.sellingchannel.director.ShoppingItemAssembler;
-import com.elasticpath.service.catalog.ProductAssociationService;
+import com.elasticpath.service.catalog.DependentItemLookup;
 import com.elasticpath.service.catalog.ProductSkuLookup;
 import com.elasticpath.service.shoppingcart.validation.AddOrUpdateShoppingItemDtoToCartValidationService;
 
@@ -74,6 +76,8 @@ public class CartDirectorImplTest {
 	private static final int SHOPPING_ITEM_ORDERING = 5;
 	private static final int QUANTITY = 3;
 	private static final String DEPENDENT_SKU_CODE = "testADependentSkuCode";
+	private static final int DEPENDENT_ITEM_QUANTITY = 5;
+	private static final int PARENT_ITEM_QUANTITY = 1;
 
 	@Mock
 	private ProductSkuLookup productSkuLookup;
@@ -98,7 +102,7 @@ public class CartDirectorImplTest {
 	@Mock
 	private PriceLookupFacade priceLookupFacade;
 	@Mock
-	private ProductAssociationService productAssociationService;
+	private DependentItemLookup dependentItemLookup;
 	@Mock
 	private ShoppingItemDtoFactory shoppingItemDtoFactory;
 	@SuppressWarnings("PMD.UnusedPrivateField")
@@ -112,7 +116,7 @@ public class CartDirectorImplTest {
 		cartDirector.setProductSkuLookup(productSkuLookup);
 		cartDirector.setShoppingItemAssembler(shoppingItemAssembler);
 		cartDirector.setPriceLookupFacade(priceLookupFacade);
-		cartDirector.setProductAssociationService(productAssociationService);
+		cartDirector.setDependentItemLookup(dependentItemLookup);
 		cartDirector.setShoppingItemDtoFactory(shoppingItemDtoFactory);
 		cartDirector.setValidationService(validationService);
 
@@ -131,7 +135,7 @@ public class CartDirectorImplTest {
 		given(shoppingCart.getStore()).willReturn(store);
 
 		given(shoppingItemAlreadyInCart.getQuantity()).willReturn(1);
-		given(addedShoppingItem.getQuantity()).willReturn(1);
+		given(addedShoppingItem.getQuantity()).willReturn(PARENT_ITEM_QUANTITY);
 
 		given(shoppingItemAlreadyInCart.getSkuGuid()).willReturn(SKU_GUID);
 		given(addedShoppingItem.getSkuGuid()).willReturn(SKU_GUID);
@@ -142,7 +146,7 @@ public class CartDirectorImplTest {
 		given(shoppingItemAlreadyInCart.getChildren()).willReturn(emptyList());
 
 		given(shoppingCart.addShoppingCartItem(any(ShoppingItem.class))).willAnswer(new ReturnsArgumentAt(0));
-		given(productAssociationService.findDependentItemsForSku(eq(store), any(ProductSku.class))).willReturn(emptyList());
+		given(dependentItemLookup.findDependentItemsForSku(eq(store), any(ProductSku.class))).willReturn(emptyMap());
 	}
 
 	/**
@@ -205,10 +209,9 @@ public class CartDirectorImplTest {
 		given(addedShoppingItem.getSkuGuid()).willReturn(SKU_GUID);
 		given(productSkuLookup.findByGuid(SKU_GUID)).willReturn(parentProductSkuAdded);
 		given(parentProductSkuAdded.getProduct().isNotSoldSeparately()).willReturn(false);
-		given(productAssociationService.findDependentItemsForSku(store, parentProductSkuAdded)).willReturn(singletonList(dependentProductSkuToAdd));
-		given(dependentProductSkuToAdd.getSkuCode()).willReturn(DEPENDENT_SKU_CODE);
+ 		given(dependentItemLookup.findDependentItemsForSku(store, parentProductSkuAdded)).willReturn(ImmutableMap.of(DEPENDENT_SKU_CODE, DEPENDENT_ITEM_QUANTITY));
 		given(dependentProductSkuToAdd.getProduct().getMinOrderQty()).willReturn(1);
-		given(shoppingItemDtoFactory.createDto(DEPENDENT_SKU_CODE, 1)).willReturn(dependentShoppingItemDto);
+		given(shoppingItemDtoFactory.createDto(DEPENDENT_SKU_CODE, PARENT_ITEM_QUANTITY)).willReturn(dependentShoppingItemDto);
 		given(shoppingItemAssembler.createShoppingItem(dependentShoppingItemDto)).willReturn(dependentShoppingItem);
 
 		cartDirector.addDependentItemsForParentItem(shoppingCart, addedShoppingItem);

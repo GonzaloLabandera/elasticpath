@@ -4,12 +4,12 @@
 
 package com.elasticpath.rest.resource.integration.epcommerce.repository.recommendation.impl;
 
+import static com.elasticpath.rest.resource.integration.epcommerce.repository.ResourceTestConstants.SKU_CODE;
+import static com.elasticpath.rest.resource.integration.epcommerce.repository.item.ItemRepository.SKU_CODE_KEY;
 import static org.mockito.Mockito.when;
 
-import static com.elasticpath.rest.resource.integration.epcommerce.repository.ResourceTestConstants.ITEM_IDENTIFIER_PART;
-import static com.elasticpath.rest.resource.integration.epcommerce.repository.ResourceTestConstants.SKU_CODE;
-
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import com.google.common.collect.ImmutableList;
@@ -25,13 +25,9 @@ import com.elasticpath.domain.catalog.Product;
 import com.elasticpath.domain.catalog.ProductSku;
 import com.elasticpath.domain.store.Store;
 import com.elasticpath.rest.definition.items.ItemIdentifier;
-import com.elasticpath.rest.definition.items.ItemsIdentifier;
 import com.elasticpath.rest.definition.recommendations.ItemRecommendationGroupIdentifier;
 import com.elasticpath.rest.definition.recommendations.ItemRecommendationGroupsIdentifier;
 import com.elasticpath.rest.definition.recommendations.PaginatedRecommendationsIdentifier;
-import com.elasticpath.rest.id.Identifier;
-import com.elasticpath.rest.id.transform.IdentifierTransformer;
-import com.elasticpath.rest.id.transform.IdentifierTransformerProvider;
 import com.elasticpath.rest.id.type.CompositeIdentifier;
 import com.elasticpath.rest.id.type.IntegerIdentifier;
 import com.elasticpath.rest.id.type.StringIdentifier;
@@ -53,9 +49,6 @@ public class PaginatedLinksEntityRepositoryImplTest {
 	private static final String GROUP_ID = "upsell";
 	private static final ImmutableList<String> RESULT_IDS = ImmutableList.of(encodeItemId("ID_1"), encodeItemId("ID_2"));
 
-	private ItemsIdentifier items;
-	@Mock
-	private IdentifierTransformerProvider identifierTransformerProvider;
 	@Mock
 	private ItemRepository itemRepository;
 	@Mock
@@ -66,8 +59,6 @@ public class PaginatedLinksEntityRepositoryImplTest {
 	@InjectMocks
 	private PaginatedLinksEntityRepositoryImpl repository;
 	@Mock
-	private IdentifierTransformer<Identifier> transformer;
-	@Mock
 	private ProductSku productSku;
 	@Mock
 	private Product product;
@@ -77,7 +68,7 @@ public class PaginatedLinksEntityRepositoryImplTest {
 	private PaginatedResult paginatedResult;
 
 	private static String encodeItemId(final String skuCode) {
-		return CompositeIdUtil.encodeCompositeId(ImmutableSortedMap.of(ItemRepository.SKU_CODE_KEY, skuCode));
+		return CompositeIdUtil.encodeCompositeId(ImmutableSortedMap.of(SKU_CODE_KEY, skuCode));
 	}
 
 	@Test
@@ -135,7 +126,7 @@ public class PaginatedLinksEntityRepositoryImplTest {
 		List<ItemIdentifier> expectedResult = RESULT_IDS.stream()
 				.map(resultId -> ItemIdentifier.builder()
 						.withItemId(CompositeIdentifier.of(CompositeIdUtil.decodeCompositeId(resultId)))
-						.withItems(items)
+						.withScope(StringIdentifier.of(ResourceTestConstants.SCOPE))
 						.build())
 				.collect(Collectors.toList());
 
@@ -173,9 +164,8 @@ public class PaginatedLinksEntityRepositoryImplTest {
 	}
 
 	private void setUpRecommendationRepository(final int pageNumber) {
-		when(identifierTransformerProvider.forUriPart(ItemIdentifier.ITEM_ID)).thenReturn(transformer);
-		when(transformer.identifierToUri(ITEM_IDENTIFIER_PART)).thenReturn(SKU_CODE);
-		when(itemRepository.getSkuForItemIdAsSingle(SKU_CODE)).thenReturn(Single.just(productSku));
+		final Map<String, String> itemIdMap = ImmutableSortedMap.of(SKU_CODE_KEY, SKU_CODE);
+		when(itemRepository.getSkuForItemId(itemIdMap)).thenReturn(Single.just(productSku));
 		when(productSku.getProduct()).thenReturn(product);
 		when(storeRepository.findStoreAsSingle(ResourceTestConstants.SCOPE)).thenReturn(Single.just(store));
 		when(itemRecommendationsRepository.getRecommendedItemsFromGroup(store, product, GROUP_ID, pageNumber))
@@ -186,7 +176,6 @@ public class PaginatedLinksEntityRepositoryImplTest {
 			final int pageNumber) {
 
 		ItemIdentifier itemIdentifier = IdentifierTestFactory.buildItemIdentifier(ResourceTestConstants.SCOPE, SKU_CODE);
-		items = itemIdentifier.getItems();
 
 		ItemRecommendationGroupsIdentifier recommendationGroups = ItemRecommendationGroupsIdentifier.builder()
 				.withItem(itemIdentifier)

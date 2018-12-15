@@ -7,7 +7,10 @@ import javax.inject.Provider;
 
 /**
  * Factory for {@link ItemDefinitionsOptionValueUriBuilder}.
+ *
+ * @deprecated remove once dependent resources are converted to Helix.
  */
+@Deprecated
 public interface ItemDefinitionsOptionValueUriBuilderFactory extends Provider<ItemDefinitionsOptionValueUriBuilder> {
 
 }

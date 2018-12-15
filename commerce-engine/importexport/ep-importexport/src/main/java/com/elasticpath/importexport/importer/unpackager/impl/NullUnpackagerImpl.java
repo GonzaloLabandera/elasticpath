@@ -6,7 +6,6 @@ package com.elasticpath.importexport.importer.unpackager.impl;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.LinkedList;
@@ -72,12 +71,7 @@ public class NullUnpackagerImpl implements Unpackager {
 			throw new ImportRuntimeException("IE-30200", this.getClass().getName());
 		}
 		final File[] manifestDescriptor = importDirectory.listFiles(
-				new FilenameFilter() {
-					@Override
-					public boolean accept(final File dir, final String name) {
-						return name.equals(Manifest.MANIFEST_XML);
-					}
-				});
+				(dir, name) -> name.equals(Manifest.MANIFEST_XML));
 		if (manifestDescriptor == null || manifestDescriptor.length != 1) {
 			throw new ImportRuntimeException("IE-30201");
 		}

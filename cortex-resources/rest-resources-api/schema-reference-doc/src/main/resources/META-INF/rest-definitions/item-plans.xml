@@ -4,14 +4,53 @@
 		<name>items</name>
 
 		<plan>
-			<name>read-item</name>
-			<description><![CDATA[Retrieve an item with a specific item ID.]]></description>
+			<name>lookup-item-by-code</name>
+			<description><![CDATA[Lookup for an item by item code.]]></description>
 			<step>
-				<description><![CDATA[Retrieve an item.]]></description>
-				<start>item</start>
-				<read-self/>
+				<description><![CDATA[Lookups to item lookup form.]]></description>
+				<start>lookups.lookups</start>
+				<follow-link>itemlookupform</follow-link>
+				<result>lookup-item-form</result>
+			</step>
+			<step>
+				<description><![CDATA[Submit a lookup for an item.]]></description>
+				<start>lookup-item-form</start>
+				<submit></submit>
+				<to>lookup-item-form</to>
+				<via-link>itemlookupaction</via-link>
+				<result>item</result>
 			</step>
 		</plan>
 
+		<plan>
+			<name>lookup-batch-items</name>
+			<description><![CDATA[Look up a batch of items with a list of codes.]]></description>
+			<step>
+				<description><![CDATA[Lookups to batch items lookup form.]]></description>
+				<start>lookups.lookups</start>
+				<follow-link>batchitemslookupform</follow-link>
+				<result>batch-items-form</result>
+			</step>
+			<step>
+				<description><![CDATA[Submit a batch lookup for items.]]></description>
+				<start>batch-items-form</start>
+				<submit></submit>
+				<to>batch-items-form</to>
+				<via-link>batchlookupaction</via-link>
+				<result>batch-items</result>
+			</step>
+		</plan>
+
+		<plan>
+			<name>read-code-for-item</name>
+			<description><![CDATA[Read the code of an [item][items].]]></description>
+			<step>
+				<description><![CDATA[Follow a link from item to code.]]></description>
+				<start>item</start>
+				<follow-link>code</follow-link>
+				<link-back>item</link-back>
+				<result>code-for-item</result>
+			</step>
+		</plan>
 	</family>
 </definitions>

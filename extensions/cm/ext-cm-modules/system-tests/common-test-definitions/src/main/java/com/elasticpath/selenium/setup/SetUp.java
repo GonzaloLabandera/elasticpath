@@ -28,6 +28,7 @@ public final class SetUp {
 
 	private static final Object LOCKOBJ = new Object();
 	private static final PropertyManager PROPERTY_MANAGER = PropertyManager.getInstance();
+	private static boolean hasOptionSet;
 
 	/**
 	 * Private constructor.
@@ -61,7 +62,8 @@ public final class SetUp {
 		LoggingPreferences logPrefs = new LoggingPreferences();
 		logPrefs.enable(LogType.DRIVER, Level.INFO);
 		capabilities.setCapability(CapabilityType.LOGGING_PREFS, logPrefs);
-		
+		setNewChromeCapabilties();
+
 		/*The following line of code will not accept the unexpected alert by accepting it which is the default selenium behaviour. 
 		Instead, an UnhandledAlertException will be thrown and user will have to explicitly handle the exception and deal with the
 		unexpected alert.*/
@@ -76,13 +78,18 @@ public final class SetUp {
 		ChromeWebDriverFactory.setEnableDefaultCapabilities(false);
 
 		ChromeOptions options = ChromeWebDriverFactory.getOptions();
-		options.addArguments("disable-infobars");
-		options.addArguments("--start-fullscreen");
+		if (!hasOptionSet) {
+			options.addArguments("disable-infobars");
+			options.addArguments("--start-fullscreen");
+			hasOptionSet = true;
+		}
+
 		System.setProperty("webdriver.chrome.driver", PROPERTY_MANAGER.getProperty("selenium.chrome.driver.path"));
 
 		Map<String, Object> prefs = new HashMap<String, Object>();
 		prefs.put("credentials_enable_service", false);
 		prefs.put("profile.password_manager_enabled", false);
+		prefs.put("intl.accept_languages", PROPERTY_MANAGER.getProperty("ep.locale"));
 
 		options.setExperimentalOption("prefs", prefs);
 

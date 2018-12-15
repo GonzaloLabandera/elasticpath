@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+<definitions xmlns="http://www.elasticpath.com/schema/rest/0.5">
+
+<family>
+	<name>items</name>
+
+	<resource>
+		<name>lookup-item-form</name>
+		<description><![CDATA[Provides the form with which to search for items by code.]]></description>
+		<uri>{base.family}/{base.scope}/lookups/form</uri>
+		<form>
+			<entity>code</entity>
+			<action-rel>itemlookupaction</action-rel>
+			<result>item</result>
+		</form>
+	</resource>
+
+	<relationship>
+		<name>lookup-item-form-from-lookups</name>
+		<description>A link from the lookups resource to this form.</description>
+		<rel>itemlookupform</rel>
+		<from>lookups.lookups</from>
+		<to>lookup-item-form</to>
+	</relationship>
+
+</family>
+</definitions>

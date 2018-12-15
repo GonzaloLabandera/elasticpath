@@ -1,5 +1,9 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <Context>
+	<Resources
+			cachingAllowed="true"
+			cacheMaxSize="${ep.tomcat.maxcachesize}"
+	/>
 	<Resource auth="Container" name="mail/Session" type="javax.mail.Session"/>
 	<Resource name="jdbc/epjndi"
 		auth="Container"
@@ -12,6 +16,7 @@
 		username="${epdb.username}"
 		password="${epdb.password}"
 		driverClassName="${epdb.jdbc.driver}"
+		factory="org.apache.tomcat.jdbc.pool.DataSourceFactory"
 		url="${epdb.url}"
 		/>
 

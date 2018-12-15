@@ -1,4 +1,4 @@
-@Promotions
+@promotions
 Feature: Shipping promotions
 
   Background:
@@ -14,8 +14,8 @@ Feature: Shipping promotions
     And the list of applied promotions contains promotion <PROMOTION>
 
     Examples:
-      | ITEM_NAME                       | SHIPPING_OPTION    | PROMOTION    |
-      | triggerprodforfreeshippingpromo | Canada Post 2 days | freeshipping |
+      | ITEM_NAME                       | SHIPPING_OPTION   | PROMOTION    |
+      | triggerprodforfreeshippingpromo | CanadaPostTwoDays | freeshipping |
 
   Scenario Outline: Retrieve promotion applied to an unselected shipping option
     Given a shipping promotion <PROMOTION> for the shipping option <SHIPPING_OPTION>
@@ -27,8 +27,8 @@ Feature: Shipping promotions
     And the list of applied promotions contains promotion <PROMOTION>
 
     Examples:
-      | ITEM_NAME                       | SHIPPING_OPTION    | SHIPPING_OPTION_WITH_PROMOTION                 | PROMOTION                                                       |
-      | triggerprodforfreeshippingpromo | Canada Post 2 days | FixedPriceWith100PercentOffPromoShippingOption | Free shipping on FixedPriceWith100PercentOffPromoShippingOption |
+      | ITEM_NAME                       | SHIPPING_OPTION   | SHIPPING_OPTION_WITH_PROMOTION                 | PROMOTION                                                       |
+      | triggerprodforfreeshippingpromo | CanadaPostTwoDays | FixedPriceWith100PercentOffPromoShippingOption | Free shipping on FixedPriceWith100PercentOffPromoShippingOption |
 
   Scenario Outline: Retrieve shipping option with no promotions
     Given I fill in address for Canadian Shipping
@@ -39,8 +39,8 @@ Feature: Shipping promotions
     And the list of applied promotions is empty
 
     Examples:
-      | ITEM_NAME                       | SHIPPING_OPTION    | SHIPPING_WITHOUT_PROMOTION |
-      | triggerprodforfreeshippingpromo | Canada Post 2 days | CanadaPostExpress          |
+      | ITEM_NAME                       | SHIPPING_OPTION   | SHIPPING_WITHOUT_PROMOTION |
+      | triggerprodforfreeshippingpromo | CanadaPostTwoDays | CanadaPostExpress          |
 
   Scenario Outline: Retrieve promotion applied to a shipping option with personalization parameters
     Given I fill in address for Canadian Shipping

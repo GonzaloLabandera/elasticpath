@@ -1,4 +1,4 @@
-@Shipments @Purchases @HeaderAuth
+@shipments @purchases @headerAuth
 Feature: View purchase shipment
   As a Shopper, I want to view my purchase and shipment status, so that I can track my order.
 
@@ -8,9 +8,8 @@ Feature: View purchase shipment
 
   Scenario Outline: View purchase and shipment status - shippable item
     When I add item <ITEM_NAME> to the cart with quantity 1
-    And I select shipping option Canada Post Express
-    And I make a purchase
-    When I go to the purchases
+    And I select shipping option CanadaPostExpress
+    When I create a purchase and view the purchase details
     Then the purchase status is <PURCHASE_STATUS>
     And I navigate to shipment
     Then I can see the shipment status <SHIPMENT_STATUS>
@@ -26,8 +25,7 @@ Feature: View purchase shipment
   Scenario Outline: View purchase status only - non shippable item
   No shipment status available for non shippable item
     When I add item <ITEM_NAME> to the cart with quantity 1
-    And I make a purchase
-    When I go to the purchases
+    And I create a purchase and view the purchase details
     Then the purchase status is <PURCHASE_STATUS>
 
     # Digital Item and Recurring Item
@@ -39,9 +37,8 @@ Feature: View purchase shipment
   Scenario Outline: View purchase and shipment status - multiple items
     When I add item <ITEM_1> to the cart with quantity 1
     And I add item <ITEM_2> to the cart with quantity 1
-    And I select shipping option Canada Post Express
-    And I make a purchase
-    When I go to the purchases
+    And I select shipping option CanadaPostExpress
+    When I make a purchase
     Then the purchase status is <PURCHASE_STATUS>
     And I navigate to shipment
     Then I can see the shipment status <SHIPMENT_STATUS>

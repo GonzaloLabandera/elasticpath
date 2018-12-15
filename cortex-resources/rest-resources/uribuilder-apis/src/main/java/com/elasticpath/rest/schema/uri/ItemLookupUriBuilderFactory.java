@@ -7,7 +7,10 @@ import javax.inject.Provider;
 
 /**
  * A factory for creating ItemLookupUriBuilder objects.
+ *
+ * @deprecated remove once dependent resources are converted to Helix.
  */
+@Deprecated
 public interface ItemLookupUriBuilderFactory extends Provider<ItemLookupUriBuilder> {
 
 }

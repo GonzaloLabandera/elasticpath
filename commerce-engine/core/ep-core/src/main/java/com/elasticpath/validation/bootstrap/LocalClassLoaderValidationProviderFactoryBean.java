@@ -89,13 +89,10 @@ public class LocalClassLoaderValidationProviderFactoryBean extends AbstractFacto
 	 * @return the new ValidationProviderResolver
 	 */
 	ValidationProviderResolver createValidationProviderResolver(final ValidationProvider<?> provider) {
-		return new ValidationProviderResolver() {
-			@Override
-			public List<ValidationProvider<?>> getValidationProviders() {
-				List<ValidationProvider<?>> validationProviders = new ArrayList<>(1);
-				validationProviders.add(provider);
-				return validationProviders;
-			}
+		return () -> {
+			List<ValidationProvider<?>> validationProviders = new ArrayList<>(1);
+			validationProviders.add(provider);
+			return validationProviders;
 		};
 	}
 }

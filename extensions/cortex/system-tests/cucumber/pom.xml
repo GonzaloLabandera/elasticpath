@@ -58,6 +58,7 @@
 				<epdb.maven.groupId>com.h2database</epdb.maven.groupId>
 				<epdb.maven.artifactId>h2</epdb.maven.artifactId>
 				<epdb.maven.version>${h2database.version}</epdb.maven.version>
+				<epdb.jdbc.driver>org.h2.Driver</epdb.jdbc.driver>
 			</properties>
 			<dependencies>
 				<dependency>
@@ -277,7 +278,7 @@
 								</goals>
 								<configuration>
 									<configuration>
-										<home>${project.build.directory}/tomcat7x/container</home>
+										<home>${project.build.directory}/tomcat9x/container</home>
 										<properties>
 											<cargo.jvmargs>${cargo.jvmargs.cortex} ${cargo.jvmargs.cortex.jmx} ${cargo.jvmargs.cortex.logback.threshold} ${cargo.jvmargs.ep.external.ehcache.xml.path}</cargo.jvmargs>
 											<cargo.servlet.port>${ep.cortex.itest.port.http}</cargo.servlet.port>
@@ -306,7 +307,7 @@
 								</goals>
 								<configuration>
 									<configuration>
-										<home>${project.build.directory}/tomcat7x/container</home>
+										<home>${project.build.directory}/tomcat9x/container</home>
 										<properties>
 											<cargo.jvmargs>${cargo.jvmargs.cortex}</cargo.jvmargs>
 											<cargo.servlet.port>${ep.cortex.itest.port.http}</cargo.servlet.port>
@@ -325,7 +326,7 @@
 								</goals>
 								<configuration>
 									<configuration>
-										<home>${project.build.directory}/tomcat7x/search-container</home>
+										<home>${project.build.directory}/tomcat9x/search-container</home>
 										<properties>
 											<cargo.jvmargs>${cargo.jvmargs.search}</cargo.jvmargs>
 											<cargo.servlet.port>${ep.search.itest.port.http}</cargo.servlet.port>
@@ -353,7 +354,7 @@
 							<!-- This project is not designed to run cargo standalone, use tomcat:run-war in the war project you want. -->
 							<wait>false</wait>
 							<container>
-								<containerId>tomcat7x</containerId>
+								<containerId>tomcat9x</containerId>
 								<artifactInstaller>
 									<groupId>org.apache.tomcat</groupId>
 									<artifactId>tomcat</artifactId>
@@ -445,7 +446,7 @@
 									cargo.datasource.driver=org.h2.Driver|
 									cargo.datasource.username=sa|
 									cargo.datasource.password=sa|
-									cargo.datasource.properties=scope=Shareable;maxActive=250;maxIdle=30;maxWait=10000;removeAbandoned=true;testWhileIdle=true;validationQuery=${epdb.validation.query};removeAbandoned=true;logAbandoned=true|
+									cargo.datasource.properties=scope=Shareable;factory=${ep.jndi.factory};maxActive=250;maxIdle=30;maxWait=10000;removeAbandoned=true;testWhileIdle=true;validationQuery=${epdb.validation.query};removeAbandoned=true;logAbandoned=true|
 									cargo.datasource.jndi=jdbc/epjndi]]>
 									</cargo.datasource.datasource>
 									<cargo.resource.resource>
@@ -454,9 +455,10 @@
 										cargo.resource.parameters=factory=${ep.jms.factory};brokerURL=${ep.activemq.url};maxConnections=100;maximumActiveSessionPerConnection=50;idleTimeout=10000
 									</cargo.resource.resource>
 								</properties>
+
 								<files>
 									<copy>
-										<file>${project.basedir}/src/test/resources/tomcat7x/server.xml</file>
+										<file>${project.basedir}/src/test/resources/tomcat9x/server.xml</file>
 										<tofile>conf/server.xml</tofile>
 										<configfile>true</configfile>
 										<overwrite>true</overwrite>
@@ -564,6 +566,11 @@
 
 	<dependencies>
 		<dependency>
+			<groupId>com.elasticpath.extensions</groupId>
+			<artifactId>ep-cortex-common-test-definitions</artifactId>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
 			<groupId>commons-validator</groupId>
 			<artifactId>commons-validator</artifactId>
 			<version>1.4.0</version>
@@ -582,7 +589,6 @@
 		<dependency>
 			<groupId>org.assertj</groupId>
 			<artifactId>assertj-core</artifactId>
-			<version>3.5.2</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.activemq</groupId>
@@ -651,47 +657,15 @@
 			<artifactId>ep-query-analyzer</artifactId>
 			<scope>test</scope>
 		</dependency>
+		<dependency>
+			<groupId>${epdb.maven.groupId}</groupId>
+			<artifactId>${epdb.maven.artifactId}</artifactId>
+			<version>${epdb.maven.version}</version>
+		</dependency>
 	</dependencies>
 
 	<build>
 		<plugins>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-jar-plugin</artifactId>
-				<version>3.0.2</version>
-				<configuration>
-					<includes>
-						<include>**/com/elasticpath/**</include>
-					</includes>
-				</configuration>
-				<executions>
-					<execution>
-						<goals>
-							<goal>test-jar</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-source-plugin</artifactId>
-				<configuration>
-					<includes>
-					<include>**/com/elasticpath/**</include>
-					</includes>
-				</configuration>
-				<executions>
-					<execution>
-						<goals>
-							<goal>test-jar</goal>
-						</goals>
-					</execution>
-					<execution>
-						<id>attach-sources</id>
-						<phase>package</phase>
-					</execution>
-				</executions>
-			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>

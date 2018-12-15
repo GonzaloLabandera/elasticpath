@@ -546,8 +546,14 @@ public final class ContextIdNames {
 	/** bean id for implementation of com.elasticpath.service.CategoryService. */
 	public static final String CATEGORY_SERVICE = "categoryService";
 
+	/** bean id for cachingimplementation of com.elasticpath.service.CategoryService. */
+	public static final String CACHING_CATEGORY_SERVICE = "cachingCategoryService";
+
 	/** bean id for implementation of com.elasticpath.service.AttributeService. */
 	public static final String ATTRIBUTE_SERVICE = "attributeService";
+
+	/** bean id for caching implementation of com.elasticpath.service.AttributeService. */
+	public static final String CACHING_ATTRIBUTE_SERVICE = "cachingAttributeService";
 
 	/** bean id for implementation of com.elasticpath.service.CategoryTypeService. */
 	public static final String CATEGORY_TYPE_SERVICE = "categoryTypeService";
@@ -738,6 +744,9 @@ public final class ContextIdNames {
 
 	/** bean id for implementation of com.elasticpath.domain.catalogview.impl.BrandFilterImpl. */
 	public static final String BRAND_FILTER = "brandFilter";
+
+	/** bean id for implementation of com.elasticpath.domain.catalogview.impl.SizeFilterImpl. */
+	public static final String SIZE_FILTER = "sizeFilter";
 
 	/** bean id for implementation of com.elasticpath.domain.catalogview.AttributeKeywordFilter. */
 	public static final String ATTRIBUTE_KEYWORD_FILTER_PARSER = "attributeKeywordFilterParser";
@@ -1690,6 +1699,13 @@ public final class ContextIdNames {
 
 	/** Bean id for implementation of {@link com.elasticpath.service.shipping.ShippingOptionService}. */
 	public static final String SHIPPING_OPTION_SERVICE = "shippingOptionService";
+
+	/** Bean id for implementation of {@link com.elasticpath.service.shipping.PhysicalOrderShipmentShippingCostRefresher}. */
+	public static final String PHYSICAL_ORDER_SHIPMENT_SHIPPING_COST_REFRESHER = "physicalOrderShipmentShippingCostRefresher";
+
+	/** bean id for implementation of com.elasticpath.service.search.FacetService. */
+	public static final String FACET_SERVICE = "facetService";
+
 
 	private ContextIdNames() {
 		// Do not instantiate this class

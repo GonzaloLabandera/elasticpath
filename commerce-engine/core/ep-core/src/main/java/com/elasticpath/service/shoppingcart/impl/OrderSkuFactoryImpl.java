@@ -11,7 +11,6 @@ import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -150,12 +149,7 @@ public class OrderSkuFactoryImpl implements OrderSkuFactory {
 		for (Entry<String, BigDecimal> entry : allSplitPricing.entrySet()) {
 			sortedPairs.add(entry);
 		}
-		Collections.sort(sortedPairs, new Comparator<Entry<String, BigDecimal>>() {
-			@Override
-			public int compare(final Entry<String, BigDecimal> entry1, final Entry<String, BigDecimal> entry2) {
-				return entry2.getValue().compareTo(entry1.getValue());
-			}
-		});
+		Collections.sort(sortedPairs, (entry1, entry2) -> entry2.getValue().compareTo(entry1.getValue()));
 
 		Map<String, BigDecimal> sortedMap = new LinkedHashMap<>();
 		for (Entry<String, BigDecimal> entry : sortedPairs) {
@@ -372,22 +366,19 @@ public class OrderSkuFactoryImpl implements OrderSkuFactory {
 		if (root.isBundle(getProductSkuLookup())) {
 			populateConstituents(sortedItems, root.getBundleItems(getProductSkuLookup()));
 		}
-		Collections.sort(sortedItems, new Comparator<ShoppingItem>() {
-			@Override
-			public int compare(final ShoppingItem item1, final ShoppingItem item2) {
-				final ShoppingItemTaxSnapshot itemTaxSnapshot1 = cartTaxSnapshot.getShoppingItemTaxSnapshot(item1);
-				final ShoppingItemTaxSnapshot itemTaxSnapshot2 = cartTaxSnapshot.getShoppingItemTaxSnapshot(item2);
+		sortedItems.sort((item1, item2) -> {
+			final ShoppingItemTaxSnapshot itemTaxSnapshot1 = cartTaxSnapshot.getShoppingItemTaxSnapshot(item1);
+			final ShoppingItemTaxSnapshot itemTaxSnapshot2 = cartTaxSnapshot.getShoppingItemTaxSnapshot(item2);
 
-				final BigDecimal item1Price = itemTaxSnapshot1.getPricingSnapshot().getLinePricing().getPrice();
-				final BigDecimal item2Price = itemTaxSnapshot2.getPricingSnapshot().getLinePricing().getPrice();
+			final BigDecimal item1Price = itemTaxSnapshot1.getPricingSnapshot().getLinePricing().getPrice();
+			final BigDecimal item2Price = itemTaxSnapshot2.getPricingSnapshot().getLinePricing().getPrice();
 
-				int result = item1Price.compareTo(item2Price);
-				if (result == 0) {
-					result = item1.getSkuGuid().compareTo(item2.getSkuGuid());
-				}
-
-				return -result;
+			int result = item1Price.compareTo(item2Price);
+			if (result == 0) {
+				result = item1.getSkuGuid().compareTo(item2.getSkuGuid());
 			}
+
+			return -result;
 		});
 		return sortedItems;
 	}

@@ -5,6 +5,7 @@ package com.elasticpath.service.rules.impl;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.awaitility.Awaitility.await;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -24,6 +25,7 @@ import java.util.Set;
 
 import com.google.common.collect.ImmutableList;
 import org.apache.commons.lang.StringUtils;
+import org.awaitility.Duration;
 import org.jmock.Expectations;
 import org.jmock.Sequence;
 import org.junit.Test;
@@ -529,12 +531,7 @@ Tested by FIT?
 		final Date date = new Date();
 
 		// give time so that current date is definitely after our date
-		try {
-			final int ten = 10;
-			Thread.sleep(ten);
-		} catch (InterruptedException e) {
-			// do nothing
-		}
+		await().atMost(Duration.ONE_SECOND).until(() -> new Date().after(date));
 
 		final List<Long> engineResult = new ArrayList<>();
 		context.checking(new Expectations() {

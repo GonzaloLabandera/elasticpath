@@ -13,7 +13,6 @@ import com.elasticpath.domain.misc.SearchConfig;
 import com.elasticpath.service.search.query.EpEmptySearchCriteriaException;
 import com.elasticpath.service.search.query.LuceneRawSearchCriteria;
 import com.elasticpath.service.search.query.SearchCriteria;
-import com.elasticpath.service.search.solr.SolrIndexConstants;
 
 /**
  * A query composer for {@link LuceneRawSearchCriteria}.
@@ -58,7 +57,7 @@ public class LuceneRawQueryComposerImpl extends AbstractQueryComposerImpl {
 	private QueryParser getParser() {
 		QueryParser parser = queryParsers.get();
 		if (parser == null) {
-			parser = new QueryParser(SolrIndexConstants.LUCENE_MATCH_VERSION, "", analyzer);
+			parser = new QueryParser("", analyzer);
 			queryParsers.set(parser);
 		}
 		return parser;

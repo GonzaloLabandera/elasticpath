@@ -7,7 +7,7 @@
 		<name_space>COMMERCE/SYSTEM/SEARCH/searchHost</name_space>
 		<description>The search server's URL. If this is not set correctly, searching and browsing in the storefront and in Commerce Manager will not work. For a search server cluster, this setting must contain two values. The default value must be set to the load balancer URL. A defined value with the context set to 'master' must be set to the master search server URL.</description>
 		<default_value type="url">${ep.search.url}</default_value>
-		<max_overrides>1</max_overrides>
+		<max_overrides>-1</max_overrides>
 		<setting_metadata>
 			<value key="environmentSpecific">true</value>
 			<value key="apiRefreshStrategy">interval:timeout=COMMERCE/Cache/Cache_1</value>

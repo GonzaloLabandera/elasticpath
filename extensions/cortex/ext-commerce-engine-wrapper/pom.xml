@@ -83,7 +83,9 @@
 						<Bundle-RequiredExecutionEnvironment>JavaSE-1.7</Bundle-RequiredExecutionEnvironment>
 						<Embed-Directory>${dependency.directory}</Embed-Directory>
 						<Embed-Dependency>
-							ep-core;scope=compile|runtime;inline=true,ext-core;scope=compile|runtime,!(ep-core|openjpa-osgi-wrapper|ep-persistence-api|org.apache.servicemix.bundles.ehcache|org.apache.bval.bundle|commons-beanutils|org.apache.servicemix.bundles.commons-collections|guava);scope=compile|runtime
+							ep-core;scope=compile|runtime;inline=true,
+							ext-core;scope=compile|runtime,
+							!(ep-core|ep-cache|openjpa-osgi-wrapper|ep-persistence-api|org.apache.servicemix.bundles.ehcache|org.apache.bval.bundle|commons-beanutils|org.apache.servicemix.bundles.commons-collections|guava|drools-core|drools-compiler|drools-persistence-api|drools-persistence-jpa|kie-api|kie-soup-maven-support|kie-internal|kie-soup-project-datamodel-commons|kie-soup-project-datamodel-api|kie-soup-commons|protobuf-java|mvel2|quartz|javax.mail|commons-codec|xstream);scope=compile|runtime
 						</Embed-Dependency>
 						<Embed-Transitive>true</Embed-Transitive>
 						<Import-Package>
@@ -98,6 +100,7 @@
 							javax.validation.metadata,
 							javax.validation.groups,
 							javax.xml.*;resolution:=optional,
+							com.elasticpath.cache,
 							com.elasticpath.core.messaging.*;resolution:=optional,
 							com.elasticpath.messaging,
 							com.elasticpath.messaging.factory,
@@ -122,9 +125,37 @@
 							org.apache.bval.constraints,
 							org.apache.bval.jsr303,
 							org.apache.bval.jsr303.resolver,
+							org.apache.commons.codec.binary,
 							org.apache.commons.beanutils,
+							org.apache.commons.codec,
+							org.apache.commons.codec.digest,
 							org.apache.commons.io,
 							org.apache.commons.logging,
+							org.drools.core,
+							org.drools.core.base,
+							org.drools.core.common,
+							org.drools.core.conflict,
+							org.drools.core.factmodel,
+							org.drools.core.factmodel.traits,
+							org.drools.core.impl,
+							org.drools.core.reteoo,
+							org.drools.core.reteoo.builder,
+							org.drools.core.rule,
+							org.drools.core.util,
+							org.kie.api,
+							org.kie.api.conf,
+							org.kie.api.io,
+							org.kie.api.internal.assembler,
+							org.kie.api.internal.runtime,
+							org.kie.api.internal.runtime.beliefs,
+							org.kie.api.internal.utils,
+							org.kie.api.internal.weaver,
+							org.kie.api.runtime,
+							org.kie.api.runtime.rule,
+							org.kie.internal.builder,
+							org.kie.internal.builder.conf,
+							org.kie.internal.conf,
+							org.kie.internal.utils,
 							org.osgi.service.blueprint.container,
 							org.springframework.aop,
 							org.springframework.aop.framework,
@@ -142,6 +173,7 @@
 							org.apache.openjpa.persistence.validation,
 							org.apache.openjpa.kernel.exps,
 							org.apache.openjpa.*,
+							org.apache.zookeeper.*,
 							javax.persistence,
 							javax.persistence.criteria,
 							javax.persistence.spi,
@@ -201,6 +233,8 @@
 							com.elasticpath.settings.refreshstrategy.impl;x-internal:=true,
 							com.elasticpath.settings.domain.impl;x-internal:=true,
 							com.sun.el.*,
+							org.apache.solr.client.solrj,
+							org.apache.lucene.search,
 							!com.elasticpath.persistence.api.*,
 							!*.impl
 						</_exportcontents>
@@ -311,10 +345,6 @@
 					<artifactId>wstx-asl</artifactId>
 				</exclusion>
 				<exclusion>
-					<groupId>javax.servlet</groupId>
-					<artifactId>servlet-api</artifactId>
-				</exclusion>
-				<exclusion>
 					<groupId>org.apache.geronimo.specs</groupId>
 					<artifactId>geronimo-jms_1.1_spec</artifactId>
 				</exclusion>
@@ -380,6 +410,10 @@
 				</exclusion>
 				<exclusion>
 					<artifactId>spring-security-core</artifactId>
+					<groupId>org.springframework.security</groupId>
+				</exclusion>
+				<exclusion>
+					<artifactId>spring-security-remoting</artifactId>
 					<groupId>org.springframework.security</groupId>
 				</exclusion>
 				<exclusion>
@@ -482,6 +516,14 @@
 					<groupId>org.apache.xmlbeans</groupId>
 					<artifactId>xmlbeans</artifactId>
 				</exclusion>
+				<exclusion>
+					<groupId>org.eclipse.jetty</groupId>
+					<artifactId>*</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>javax.servlet</groupId>
+					<artifactId>javax.servlet-api</artifactId>
+				</exclusion>
 			</exclusions>
 		</dependency>
 		<dependency>
@@ -541,6 +583,10 @@
 					<groupId>log4j</groupId>
 					<artifactId>log4j</artifactId>
 				</exclusion>
+				<exclusion>
+					<groupId>javax.servlet</groupId>
+					<artifactId>javax.servlet-api</artifactId>
+				</exclusion>
 			</exclusions>
 		</dependency>
 		<dependency>
@@ -572,6 +618,10 @@
 			<artifactId>wstx-asl</artifactId>
 			<version>${wstx-asl.version}</version>
 			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.zookeeper</groupId>
+			<artifactId>zookeeper</artifactId>
 		</dependency>
 		<!-- CyberSource WS -->
 		<dependency>

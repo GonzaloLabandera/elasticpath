@@ -9,7 +9,6 @@ import static org.mockito.Mockito.when;
 import java.util.Collections;
 import java.util.List;
 
-import io.reactivex.Single;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -61,7 +60,7 @@ public class ItemRecommendationsRepositoryImplTest {
 		when(catalog.getCode()).thenReturn(SCOPE);
 		when(paginationResolver.getPageSize()).thenReturn(PAGE_SIZE);
 		when(productAssociation.getTargetProduct()).thenReturn(product);
-		when(itemRepository.getDefaultItemIdForProductSingle(any(Product.class))).thenReturn(Single.just(ITEM_ID));
+		when(itemRepository.getDefaultItemIdForProduct(any(Product.class))).thenReturn(ITEM_ID);
 	}
 
 	@Test

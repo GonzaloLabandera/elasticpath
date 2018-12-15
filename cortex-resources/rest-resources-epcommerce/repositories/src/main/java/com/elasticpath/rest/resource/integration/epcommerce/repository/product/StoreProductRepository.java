@@ -9,7 +9,6 @@ import io.reactivex.Single;
 
 import com.elasticpath.domain.catalog.Product;
 import com.elasticpath.domain.catalogview.StoreProduct;
-import com.elasticpath.rest.command.ExecutionResult;
 
 
 /**
@@ -20,20 +19,11 @@ public interface StoreProductRepository {
 	/**
 	 * Find store product with attributes.
 	 *
-	 * @param storeCode the store code
-	 * @param productGuid the product guid
-	 * @return the store product
-	 */
-	ExecutionResult<StoreProduct> findDisplayableStoreProductWithAttributesByProductGuid(String storeCode, String productGuid);
-
-	/**
-	 * Find store product with attributes.
-	 *
 	 * @param storeCode   the store code
 	 * @param productGuid the product guid
 	 * @return the store product
 	 */
-	Single<StoreProduct> findDisplayableStoreProductWithAttributesByProductGuidAsSingle(String storeCode, String productGuid);
+	Single<StoreProduct> findDisplayableStoreProductWithAttributesByProductGuid(String storeCode, String productGuid);
 	
 	/**
 	 * Find store product with attributes for given sku guid.
@@ -49,7 +39,7 @@ public interface StoreProductRepository {
 	 * @param productGuid a product guid
 	 * @return a product
 	 */
-	Product findByGuid(String productGuid);
+	Single<Product> findByGuid(String productGuid);
 
 	/**
 	 * Find a list of products by their uids.
@@ -57,4 +47,5 @@ public interface StoreProductRepository {
 	 * @return a list of products
 	 */
 	List<Product> findByUids(List<Long> productUids);
+
 }

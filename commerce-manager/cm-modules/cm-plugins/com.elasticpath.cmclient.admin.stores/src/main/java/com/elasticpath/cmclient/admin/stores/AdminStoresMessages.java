@@ -175,6 +175,12 @@ public final class AdminStoresMessages {
 
 	public String NewStoreCode;
 
+	public String StoreFacetConfiguration;
+
+	public String StoreFacetErrorDialogHeader;
+
+	public String StoreFacetErrorDialogMessage;
+
 	/** Payment page. */
 	public String Payments;
 
@@ -208,6 +214,27 @@ public final class AdminStoresMessages {
 	public String NotDefinedValue;
 
 	public String EditSetting;
+
+	/** Facet Configuration Page. */
+	public String FacetName;
+
+	public String Searchable;
+
+	public String Facetable;
+
+	public String DisplayName;
+
+	public String FieldType;
+
+	public String FacetGroup;
+
+	public String TextField_To_Edit;
+
+	public String ConfigureRangeFacet;
+
+	public String Values;
+
+	public String ConfigureFacet;
 
 	/** Localization tab. */
 	public String CannotRemoveLocale_Title;

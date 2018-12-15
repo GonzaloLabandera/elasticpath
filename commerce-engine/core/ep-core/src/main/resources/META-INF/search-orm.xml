@@ -74,5 +74,53 @@
 			</query>
 		</named-query>
 
+		<!-- Named queries for FacetServiceImpl -->
+		<named-query name="FIND_FACETABLE_FACETS_BY_STORE_CODE">
+			<query>
+				SELECT facet
+				FROM FacetImpl facet
+				WHERE facet.storeCode = ?1
+				AND facet.facetType &lt; 2
+			</query>
+		</named-query>
+		<named-query name="FIND_ALL_FACETS_BY_STORE_CODE">
+			<query>
+				SELECT facet
+				FROM FacetImpl facet
+				WHERE facet.storeCode = ?1
+			</query>
+		</named-query>
+		<named-query name="FIND_ALL_SEARCHABLE_FACETS_BY_STORE_CODE">
+			<query>
+				SELECT facet
+				FROM FacetImpl facet
+				WHERE facet.storeCode = ?1
+				AND facet.searchableOption = true
+			</query>
+		</named-query>
+		<named-query name="ATTRIBUTE_FIND_BY_CATALOG_USAGE_NOT_FACETABLE">
+			<query>
+				SELECT a
+				FROM AttributeImpl a
+				WHERE (a.catalog.uidPk IN (:catalogIds) OR a.global = TRUE)
+				AND (a.attributeUsageIdInternal = ?1 OR a.attributeUsageIdInternal = ?2)
+				AND NOT EXISTS (SELECT f FROM FacetImpl f WHERE f.facetGroup &lt; 2 AND f.businessObjectId = a.key AND f.storeCode = ?3)
+			</query>
+		</named-query>
+		<named-query name="SKU_OPTION_SELECT_CATALOG_NOT_FACETABLE">
+			<query>
+				SELECT s
+				FROM SkuOptionImpl s
+				WHERE s.catalog.uidPk IN (:catalogIds)
+				AND NOT EXISTS (SELECT f FROM FacetImpl f WHERE f.facetGroup = 2 AND f.businessObjectId = s.optionKey AND f.storeCode = ?1)
+			</query>
+		</named-query>
+		<named-query name="FACET_FIND_BY_GUID">
+			<query>
+				SELECT facet
+				FROM FacetImpl facet
+				WHERE facet.facetGuid = ?1
+			</query>
+		</named-query>
 </entity-mappings>
 

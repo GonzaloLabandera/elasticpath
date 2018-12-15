@@ -1,5 +1,4 @@
-@Prices
-
+@prices @bug
 Feature: Prices - Retrieve Item Price for Calculated Bundles
   As a client developer,
   I want to retrieve the price of calculated bundles,
@@ -11,8 +10,8 @@ Feature: Prices - Retrieve Item Price for Calculated Bundles
   Scenario: Get price information for bundle product
     Given an item Movie Classics Bundle exists in my catalog
     When I view the item price
-    Then the list-price has fields amount: 34.0, currency: CAD and display: $34.00
-    And the purchase-price has fields amount: 29.0, currency: CAD and display: $29.00
+    Then the list-price has fields amount: 34.00, currency: CAD and display: $34.00
+    And the purchase-price has fields amount: 29.00, currency: CAD and display: $29.00
 
   Scenario: Price link should not exist for calculated bundles if any of its components do not have a price
     When an item SmartPhones Bundle exists in my catalog

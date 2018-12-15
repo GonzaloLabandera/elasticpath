@@ -22,24 +22,17 @@ import org.junit.Rule;
 import org.junit.Test;
 
 import com.elasticpath.commons.beanframework.BeanFactory;
-import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.attribute.Attribute;
 import com.elasticpath.domain.attribute.AttributeType;
-import com.elasticpath.domain.attribute.AttributeValue;
 import com.elasticpath.domain.attribute.AttributeValueWithType;
-import com.elasticpath.domain.attribute.impl.ProductAttributeValueImpl;
 import com.elasticpath.domain.catalog.Brand;
 import com.elasticpath.domain.catalog.impl.BrandImpl;
 import com.elasticpath.domain.catalogview.AttributeKeywordFilter;
 import com.elasticpath.domain.catalogview.BrandFilter;
-import com.elasticpath.domain.catalogview.FilterOption;
 import com.elasticpath.domain.catalogview.PriceFilter;
 import com.elasticpath.domain.catalogview.RangeFilterType;
-import com.elasticpath.domain.catalogview.impl.AttributeKeywordFilterImpl;
 import com.elasticpath.domain.catalogview.impl.BrandFilterImpl;
-import com.elasticpath.domain.catalogview.impl.FilterOptionImpl;
 import com.elasticpath.domain.catalogview.impl.PriceFilterImpl;
-import com.elasticpath.service.attribute.AttributeService;
 import com.elasticpath.test.BeanFactoryExpectationsFactory;
 import com.elasticpath.test.util.mock.PropertyEnabledExpectations;
 
@@ -64,10 +57,12 @@ public class SolrFacetAdapterTest {
 	 * @throws Exception in case of setup errors
 	 */
 	@Before
+	@SuppressWarnings("unchecked")
 	public void setUp() throws Exception {
 		solrFacetAdapter = new SolrFacetAdapter();
 		solrFacetAdapter.setIndexUtility(new IndexUtilityImpl());
-		solrFacetAdapter.setAnalyzer(new QueryAnalyzerImpl());
+		final QueryAnalyzerImpl analyzer = new QueryAnalyzerImpl();
+		solrFacetAdapter.setAnalyzer(analyzer);
 		
 		beanFactory = context.mock(BeanFactory.class);
 		expectationsFactory = new BeanFactoryExpectationsFactory(context, beanFactory);
@@ -231,57 +226,6 @@ public class SolrFacetAdapterTest {
 		
 		assertEquals("brandCode:" + code1 + " brandCode:" + code2, 
 				solrFacetAdapter.constructBrandFilterQuery(filter).toString());
-	}	
-	
-	/**
-	 * Tests the facet queries with attribute keyword filter are parsed correctly.
-	 */
-	@Test
-	public void testParseFacetQueriesWithAttributeKeywordFilter() {
-		
-		final Attribute attribute = context.mock(Attribute.class, "attr");
-		final AttributeService attributeService = context.mock(AttributeService.class, "attrService");
-		final AttributeValue attributeValue = context.mock(AttributeValueWithType.class, "attrValue");
-
-		final String attributeKey = "A00373";
-		final String attributeValueText = "Red blur";
-		final FilterOption<AttributeKeywordFilter> filterOption = new FilterOptionImpl<>();
-		final AttributeType attributeType = AttributeType.valueOf(1);
-		
-		context.checking(new PropertyEnabledExpectations() {
-			{
-				allowing(attribute).getKey(); will(returnValue(attributeKey));
-				allowing(attribute).isLocaleDependant(); will(returnValue(false));
-				allowing(attribute).getAttributeType(); will(returnValue(attributeType));
-				
-				allowing(attributeValue).getStringValue(); will(returnValue(attributeValueText));
-				
-				allowing(attributeService).findByKey(with(any(String.class))); will(returnValue(attribute));
-
-				allowing(beanFactory).getBean(ContextIdNames.ATTRIBUTE_SERVICE); will(returnValue(attributeService));
-				allowing(beanFactory).getBean(ContextIdNames.ATTRIBUTE_KEYWORD_FILTER); will(returnValue(filterOption));
-				
-			}
-		});
-		
-		final AttributeKeywordFilter attributeKeywordFilter = new AttributeKeywordFilterImpl();
-		
-		solrFacetAdapter.getFilterLookupMap().put(attributeKey, attributeKeywordFilter);	
-
-		attributeKeywordFilter.setAttributeKey(attributeKey);
-		attributeKeywordFilter.setId(attributeKey);
-		AttributeValueWithType value = new ProductAttributeValueImpl();
-		value.setAttributeType(AttributeType.valueOf(2));
-		value.setStringValue(attributeValueText);
-		attributeKeywordFilter.setAttributeValue(value);
-		
-		
-		((IndexUtilityImpl) solrFacetAdapter.getIndexUtility()).setSolrAttributeTypeExt(new HashMap<>());
-		Query query = solrFacetAdapter.constructAttributeKeywordFilterQuery(attributeKeywordFilter, Locale.ENGLISH, false);
-		
-		assertEquals("+attribute." + attributeKey + "_st:Red "
-				+ "+attribute." + attributeKey + "_st:blur", query.toString());
-			
 	}
 	
 	/**
@@ -321,8 +265,8 @@ public class SolrFacetAdapterTest {
 		((IndexUtilityImpl) solrFacetAdapter.getIndexUtility()).setSolrAttributeTypeExt(new HashMap<>());
 		BooleanQuery query = (BooleanQuery) solrFacetAdapter.constructAttributeKeywordFilterQuery(filter, Locale.US, true);
 		
-		assertEquals(1, query.getClauses().length);
-		assertEquals("attribute.testKey|en_US|_st:biology", query.getClauses()[0].getQuery().toString());
+		assertEquals(1, query.clauses().size());
+		assertEquals("attribute.testKey|en_US|_st:biology", query.clauses().get(0).getQuery().toString());
 	}
 
 }

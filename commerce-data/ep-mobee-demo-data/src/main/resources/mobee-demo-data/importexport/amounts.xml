@@ -793,6 +793,24 @@
     <price_list_guid>1A971BA1-D81F-A164-0FF0-53817D83B107</price_list_guid>
 </base_amount>
 
+    <base_amount>
+        <guid>B250CF48-B871-DCB4-0134-AF5393C49A63</guid>
+        <object_guid>handsfree_no_hama</object_guid>
+        <object_type>PRODUCT</object_type>
+        <quantity>1.00</quantity>
+        <list_price>55.50</list_price>
+        <price_list_guid>1A971BA1-D81F-A164-0FF0-53817D83B107</price_list_guid>
+    </base_amount>
+
+    <base_amount>
+        <guid>B250CF48-B871-DCB4-0134-AF5393C49A62</guid>
+        <object_guid>eco_fee_headphones</object_guid>
+        <object_type>PRODUCT</object_type>
+        <quantity>1.00</quantity>
+        <list_price>20.50</list_price>
+        <price_list_guid>1A971BA1-D81F-A164-0FF0-53817D83B107</price_list_guid>
+    </base_amount>
+
 <base_amount>
     <guid>0C5C4816-742C-A94A-E51E-22958BE6C0D5</guid>
     <object_guid>mb_1234567</object_guid>
@@ -1571,6 +1589,30 @@
     <object_type>PRODUCT</object_type>
     <quantity>1.00</quantity>
     <list_price>99.00</list_price>
+    <price_list_guid>1A971BA1-D81F-A164-0FF0-53817D83B107</price_list_guid>
+</base_amount>
+<base_amount>
+    <guid>07CF2C44-ED03-75DF-D279-A5969541A29A</guid>
+    <object_guid>bundleDependentLineItemsScheme1AssignedPrice</object_guid>
+    <object_type>PRODUCT</object_type>
+    <quantity>1.00</quantity>
+    <list_price>150.00</list_price>
+    <price_list_guid>1A971BA1-D81F-A164-0FF0-53817D83B107</price_list_guid>
+</base_amount>
+<base_amount>
+    <guid>932CEEFD-31FD-0B3F-CE34-6A79CB8EC751</guid>
+    <object_guid>bundlePhysicalDigitalItemsAssignedPrice</object_guid>
+    <object_type>PRODUCT</object_type>
+    <quantity>1.00</quantity>
+    <list_price>100.00</list_price>
+    <price_list_guid>1A971BA1-D81F-A164-0FF0-53817D83B107</price_list_guid>
+</base_amount>
+<base_amount>
+    <guid>CC8D532A-015B-AF45-8B3A-FEF1165DE3D9</guid>
+    <object_guid>bundleDependentLineItemsScheme2AssignedPrice</object_guid>
+    <object_type>PRODUCT</object_type>
+    <quantity>1.00</quantity>
+    <list_price>200.00</list_price>
     <price_list_guid>1A971BA1-D81F-A164-0FF0-53817D83B107</price_list_guid>
 </base_amount>
 </amounts>

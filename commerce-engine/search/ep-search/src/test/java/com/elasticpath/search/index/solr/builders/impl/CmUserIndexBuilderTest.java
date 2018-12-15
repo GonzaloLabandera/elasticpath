@@ -3,23 +3,22 @@
  */
 package com.elasticpath.search.index.solr.builders.impl;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
-import org.apache.commons.collections.CollectionUtils;
 import org.apache.solr.common.SolrInputDocument;
-import org.jmock.Expectations;
-import org.jmock.integration.junit4.JUnitRuleMockery;
+import org.assertj.core.api.SoftAssertions;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.elasticpath.domain.catalog.Catalog;
 import com.elasticpath.domain.catalog.impl.CatalogImpl;
@@ -42,28 +41,21 @@ import com.elasticpath.service.search.solr.SolrIndexConstants;
 /**
  * Tests for CmUserIndexBuilder class.
  */
+@RunWith(MockitoJUnitRunner.class)
 public class CmUserIndexBuilderTest {
 
 	private CmUserIndexBuilder cmUserIndexBuilder;
 	
 	private CmUserSolrInputDocumentCreator cmUserDocumentCreator;
 
-	private AnalyzerImpl analyzer;
-
-	@Rule
-	public final JUnitRuleMockery context = new JUnitRuleMockery();
-
+	@Mock
 	private CmUserService cmUserServiceMock;
 
-	private IndexUtility indexUtility;
-
 	@Before
-	public void setUp() throws Exception {
+	public void setUp() {
 		cmUserIndexBuilder = new CmUserIndexBuilder();
-		indexUtility = new IndexUtilityImpl();
-		analyzer = new AnalyzerImpl();
-
-		cmUserServiceMock = context.mock(CmUserService.class);
+		IndexUtility indexUtility = new IndexUtilityImpl();
+		AnalyzerImpl analyzer = new AnalyzerImpl();
 
 		cmUserIndexBuilder.setCmUserService(cmUserServiceMock);
 
@@ -79,7 +71,7 @@ public class CmUserIndexBuilderTest {
 	 */
 	@Test
 	public void testGetName() {
-		assertEquals(SolrIndexConstants.CMUSER_SOLR_CORE, cmUserIndexBuilder.getName());
+		assertThat(cmUserIndexBuilder.getName()).isEqualTo(SolrIndexConstants.CMUSER_SOLR_CORE);
 	}
 
 	/**
@@ -87,7 +79,7 @@ public class CmUserIndexBuilderTest {
 	 */
 	@Test
 	public void testGetIndexType() {
-		assertEquals(IndexType.CMUSER, cmUserIndexBuilder.getIndexType());
+		assertThat(cmUserIndexBuilder.getIndexType()).isEqualTo(IndexType.CMUSER);
 	}
 
 	/**
@@ -103,7 +95,7 @@ public class CmUserIndexBuilderTest {
 	 */
 	@Test
 	public void testFindDeletedUids() {
-		assertSame(Collections.emptyList(), cmUserIndexBuilder.findDeletedUids(null));
+		assertThat(cmUserIndexBuilder.findDeletedUids(null)).isEqualTo(Collections.emptyList());
 	}
 
 	/**
@@ -112,13 +104,9 @@ public class CmUserIndexBuilderTest {
 	@Test
 	public void testFindAllUids() {
 		final List<Long> result = new ArrayList<>();
-		context.checking(new Expectations() {
-			{
-				oneOf(cmUserServiceMock).findAllUids();
-				will(returnValue(result));
-			}
-		});
-		assertSame(result, cmUserIndexBuilder.findAllUids());
+		when(cmUserServiceMock.findAllUids()).thenReturn(result);
+		assertThat(cmUserIndexBuilder.findAllUids()).isEqualTo(result);
+		verify(cmUserServiceMock).findAllUids();
 	}
 
 	/**
@@ -128,13 +116,9 @@ public class CmUserIndexBuilderTest {
 	public void testFindAddedOrModifiedUids() {
 		final Date date = new Date();
 		final List<Long> result = new ArrayList<>();
-		context.checking(new Expectations() {
-			{
-				oneOf(cmUserServiceMock).findUidsByModifiedDate(date);
-				will(returnValue(result));
-			}
-		});
-		assertSame(result, cmUserIndexBuilder.findAddedOrModifiedUids(date));
+		when(cmUserServiceMock.findUidsByModifiedDate(date)).thenReturn(result);
+		assertThat(cmUserIndexBuilder.findAddedOrModifiedUids(date)).isEqualTo(result);
+		verify(cmUserServiceMock).findUidsByModifiedDate(date);
 	}
 
 	/**
@@ -147,23 +131,22 @@ public class CmUserIndexBuilderTest {
 		cmUserDocumentCreator.setEntity(cmUser);
 		final SolrInputDocument createDocument = cmUserDocumentCreator.createDocument();
 
-		assertEquals(String.valueOf(cmUser.getUidPk()), createDocument.getFieldValue(SolrIndexConstants.OBJECT_UID));
-		assertEquals(cmUser.getUserName(), createDocument.getFieldValue(SolrIndexConstants.USER_NAME));
-		assertEquals(cmUser.getLastName(), createDocument.getFieldValue(SolrIndexConstants.LAST_NAME));
-		assertEquals(cmUser.getFirstName(), createDocument.getFieldValue(SolrIndexConstants.FIRST_NAME));
-		assertEquals(cmUser.getEmail(), createDocument.getFieldValue(SolrIndexConstants.EMAIL));
-		assertEquals(UserStatus.ENABLED.getPropertyKey(), createDocument.getFieldValue(SolrIndexConstants.STATUS));
-		assertEquals(String.valueOf(cmUser.isAllCatalogsAccess()), createDocument.getFieldValue(SolrIndexConstants.ALL_CATALOGS_ACCESS));
-		assertEquals(String.valueOf(cmUser.isAllStoresAccess()), createDocument.getFieldValue(SolrIndexConstants.ALL_STORES_ACCESS));
-		
-		assertTrue(CollectionUtils.subtract(Arrays.asList("role1", "role2"), 
-				createDocument.getFieldValues(SolrIndexConstants.USER_ROLE)).size() == 0);
-		
-		assertTrue(CollectionUtils.subtract(Arrays.asList("catalog1", "catalog2"), 
-				createDocument.getFieldValues(SolrIndexConstants.CATALOG_CODE)).size() == 0);
-		
-		assertTrue(CollectionUtils.subtract(Arrays.asList("store1", "store2"), 
-				createDocument.getFieldValues(SolrIndexConstants.STORE_CODE)).size() == 0);
+		SoftAssertions softly = new SoftAssertions();
+
+		softly.assertThat(createDocument.getFieldValue(SolrIndexConstants.OBJECT_UID)).isEqualTo(String.valueOf(cmUser.getUidPk()));
+		softly.assertThat(createDocument.getFieldValue(SolrIndexConstants.USER_NAME)).isEqualTo(cmUser.getUserName());
+		softly.assertThat(createDocument.getFieldValue(SolrIndexConstants.LAST_NAME)).isEqualTo(cmUser.getLastName());
+		softly.assertThat(createDocument.getFieldValue(SolrIndexConstants.FIRST_NAME)).isEqualTo(cmUser.getFirstName());
+		softly.assertThat(createDocument.getFieldValue(SolrIndexConstants.EMAIL)).isEqualTo(cmUser.getEmail());
+		softly.assertThat(createDocument.getFieldValue(SolrIndexConstants.STATUS)).isEqualTo(UserStatus.ENABLED.getPropertyKey());
+		softly.assertThat(createDocument.getFieldValue(SolrIndexConstants.ALL_CATALOGS_ACCESS)).isEqualTo(String.valueOf(cmUser.isAllCatalogsAccess()));
+		softly.assertThat(createDocument.getFieldValue(SolrIndexConstants.ALL_STORES_ACCESS)).isEqualTo(String.valueOf(cmUser.isAllStoresAccess()));
+
+		softly.assertThat(createDocument.getFieldValues(SolrIndexConstants.USER_ROLE)).containsExactlyInAnyOrder("role1", "role2");
+		softly.assertThat(createDocument.getFieldValues(SolrIndexConstants.CATALOG_CODE)).containsExactlyInAnyOrder("catalog1", "catalog2");
+		softly.assertThat(createDocument.getFieldValues(SolrIndexConstants.STORE_CODE)).containsExactlyInAnyOrder("store1", "store2");
+
+		softly.assertAll();
 	}
 
 	private CmUser createCmUser() {

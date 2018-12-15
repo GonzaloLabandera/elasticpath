@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) Elastic Path Software Inc., 2013
  */
 package com.elasticpath.tools.sync.utils.impl;
@@ -91,9 +91,8 @@ public class SyncUtilsImplTest {
 		try {
 			return TestData.class.getMethod(methodName, params);
 		} catch (Exception e) {
-			fail("Could not get method " + methodName + ", " + e);
+			throw new AssertionError("Could not get method " + methodName + ", " + e);
 		}
-		return null;
 	}
 
 	/**
@@ -202,5 +201,4 @@ public class SyncUtilsImplTest {
 		assertEquals("setEnabled", syncUtils.createSetterName("isEnabled"));
 		assertEquals("badGetter", syncUtils.createSetterName("badGetter"));
 	}
-
 }

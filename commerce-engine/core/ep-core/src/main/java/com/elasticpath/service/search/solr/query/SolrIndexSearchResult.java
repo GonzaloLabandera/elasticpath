@@ -3,25 +3,46 @@
  */
 package com.elasticpath.service.search.solr.query;
 
+import static com.elasticpath.service.search.solr.FacetConstants.ATTRIBUTE;
+import static com.elasticpath.service.search.solr.FacetConstants.BRAND;
+import static com.elasticpath.service.search.solr.FacetConstants.CATEGORY;
+import static com.elasticpath.service.search.solr.FacetConstants.PRICE;
+import static com.elasticpath.service.search.solr.FacetConstants.RANGED_ATTRIBUTE;
+import static com.elasticpath.service.search.solr.FacetConstants.SIZE;
+import static com.elasticpath.service.search.solr.FacetConstants.SKU_OPTION;
+
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Stream;
 
-import com.elasticpath.domain.attribute.Attribute;
+import com.google.common.collect.Sets;
+import org.apache.commons.lang3.ObjectUtils;
+
 import com.elasticpath.domain.catalogview.AttributeRangeFilter;
 import com.elasticpath.domain.catalogview.AttributeValueFilter;
 import com.elasticpath.domain.catalogview.BrandFilter;
 import com.elasticpath.domain.catalogview.CategoryFilter;
 import com.elasticpath.domain.catalogview.FilterOption;
 import com.elasticpath.domain.catalogview.PriceFilter;
+import com.elasticpath.domain.catalogview.SizeRangeFilter;
+import com.elasticpath.domain.catalogview.SkuOptionValueFilter;
+import com.elasticpath.domain.search.Facet;
+import com.elasticpath.domain.search.FacetGroup;
 import com.elasticpath.service.search.index.IndexSearchResult;
 import com.elasticpath.service.search.query.SearchCriteria;
+import com.elasticpath.service.search.solr.FacetConstants;
+import com.elasticpath.service.search.solr.FacetValue;
 import com.elasticpath.service.search.solr.SolrIndexSearcherImpl;
 
 /**
  * A SOLR implementation of <code>IndexSearchResult</code>.
  */
+@SuppressWarnings("PMD.GodClass")
 public class SolrIndexSearchResult implements IndexSearchResult, Serializable {
 
 	/** Serial version id. */
@@ -33,6 +54,8 @@ public class SolrIndexSearchResult implements IndexSearchResult, Serializable {
 	 * prior to your search).
 	 */
 	private static final boolean PREFER_NON_EMPTY_PAGE = true;
+
+	private static final Set<Integer> RANGE_ATTRIBUTE_FIELD_KEY_TYPES = Sets.newHashSet(1, 3);
 
 	private SearchCriteria searchCriteria;
 
@@ -52,11 +75,21 @@ public class SolrIndexSearchResult implements IndexSearchResult, Serializable {
 
 	private List<FilterOption<PriceFilter>> priceFilterOptions;
 
-	private Map<Attribute, List<FilterOption<AttributeValueFilter>>> attributeValueFilterOptions;
+	private Map<String, List<FilterOption<SkuOptionValueFilter>>> skuOptionValueFilterOptions;
 
-	private Map<Attribute, List<FilterOption<AttributeRangeFilter>>> attributeRangeFilterOptions;
+	private Map<String, List<FilterOption<AttributeValueFilter>>> attributeValueFilterOptions;
+
+	private Map<String, List<FilterOption<AttributeRangeFilter>>> attributeRangeFilterOptions;
 
 	private boolean rememberOptions;
+
+	private Map<String, List<FilterOption<SizeRangeFilter>>> sizeRangeFilterOptions;
+
+	private Map<String, Facet> facetMap;
+
+	private static FacetValue buildFacetValue(final Locale locale, final FilterOption<?> filter) {
+		return new FacetValue(filter.getDisplayName(locale), filter.getFilter().getId(), String.valueOf(filter.getHitsNumber()));
+	}
 
 	/**
 	 * Gets the list of results with an initial index to search from. Attempts to always return a
@@ -211,17 +244,14 @@ public class SolrIndexSearchResult implements IndexSearchResult, Serializable {
 	 */
 	@Override
 	public List<FilterOption<CategoryFilter>> getCategoryFilterOptions() {
-		if (categoryFilterOptions == null) {
-			return Collections.emptyList();
-		}
-		return categoryFilterOptions;
+		return ObjectUtils.defaultIfNull(categoryFilterOptions, Collections.emptyList());
 	}
 
 	/**
 	 * Sets the list of category {@link FilterOption}s for the previous search. This is only
 	 * valid if faceting is enabled for the search.
 	 *
-	 * @param categoryFilterOptions the list of category {@link FilterOptions}s for the previous
+	 * @param categoryFilterOptions the list of category {@link FilterOption}s for the previous
 	 *            search
 	 */
 	public void setCategoryFilterOptions(final List<FilterOption<CategoryFilter>> categoryFilterOptions) {
@@ -236,10 +266,7 @@ public class SolrIndexSearchResult implements IndexSearchResult, Serializable {
 	 */
 	@Override
 	public List<FilterOption<BrandFilter>> getBrandFilterOptions() {
-		if (brandFilterOptions == null) {
-			return Collections.emptyList();
-		}
-		return brandFilterOptions;
+		return ObjectUtils.defaultIfNull(brandFilterOptions, Collections.emptyList());
 	}
 
 	/**
@@ -256,14 +283,11 @@ public class SolrIndexSearchResult implements IndexSearchResult, Serializable {
 	 * Gets the list of price {@link FilterOption}s for the previous search. This is only valid
 	 * if faceting is enabled for the search.
 	 *
-	 * @return the list of price {@link FilterOptions}s for the previous search
+	 * @return the list of price {@link FilterOption}s for the previous search
 	 */
 	@Override
 	public List<FilterOption<PriceFilter>> getPriceFilterOptions() {
-		if (priceFilterOptions == null) {
-			return Collections.emptyList();
-		}
-		return priceFilterOptions;
+		return ObjectUtils.defaultIfNull(priceFilterOptions, Collections.emptyList());
 	}
 
 	/**
@@ -280,24 +304,21 @@ public class SolrIndexSearchResult implements IndexSearchResult, Serializable {
 	 * Gets the list of attribute value {@link FilterOption}s for the previous search. This is
 	 * only valid if faceting is enabled for the search.
 	 *
-	 * @return the list of attribute value {@link FilterOptions}s for the previous search
+	 * @return the list of attribute value {@link FilterOption}s for the previous search
 	 */
 	@Override
-	public Map<Attribute, List<FilterOption<AttributeValueFilter>>> getAttributeValueFilterOptions() {
-		if (attributeValueFilterOptions == null) {
-			return Collections.emptyMap();
-		}
-		return attributeValueFilterOptions;
+	public Map<String, List<FilterOption<AttributeValueFilter>>> getAttributeValueFilterOptions() {
+		return ObjectUtils.defaultIfNull(attributeValueFilterOptions, Collections.emptyMap());
 	}
 
 	/**
 	 * Sets the list of attribute value {@link FilterOption}s for the previous search. This is
 	 * only valid if faceting is enabled for the search.
 	 *
-	 * @param attributeFilterOptions the list of attribute value {@link FilterOptions}s for the
+	 * @param attributeFilterOptions the list of attribute value {@link FilterOption}s for the
 	 *            previous search
 	 */
-	public void setAttributeValueFilterOptions(final Map<Attribute, List<FilterOption<AttributeValueFilter>>> attributeFilterOptions) {
+	public void setAttributeValueFilterOptions(final Map<String, List<FilterOption<AttributeValueFilter>>> attributeFilterOptions) {
 		this.attributeValueFilterOptions = attributeFilterOptions;
 	}
 
@@ -305,26 +326,100 @@ public class SolrIndexSearchResult implements IndexSearchResult, Serializable {
 	 * Gets the list of attribute range {@link FilterOption}s for the previous search. This is
 	 * only valid if faceting is enabled for the search.
 	 *
-	 * @return the list of attribute range {@link FilterOptions}s for the previous search
+	 * @return the list of attribute range {@link FilterOption}s for the previous search
 	 */
 	@Override
-	public Map<Attribute, List<FilterOption<AttributeRangeFilter>>> getAttributeRangeFilterOptions() {
-		if (attributeRangeFilterOptions == null) {
-			return Collections.emptyMap();
-		}
-		return attributeRangeFilterOptions;
+	public Map<String, List<FilterOption<AttributeRangeFilter>>> getAttributeRangeFilterOptions() {
+		return ObjectUtils.defaultIfNull(attributeRangeFilterOptions, Collections.emptyMap());
 	}
 
 	/**
 	 * Sets the list of attribute range {@link FilterOption}s for the previous search. This is
 	 * only valid if faceting is enabled for the search.
 	 *
-	 * @param attributeRangeFilterOptions the list of attribute range {@link FilterOptions}s for
-	 *            the previous search
+	 * @param attributeRangeFilterOptions the list of attribute range {@link FilterOption}s for
+	 *                                    the previous search
 	 */
 	public void setAttributeRangeFilterOptions(
-			final Map<Attribute, List<FilterOption<AttributeRangeFilter>>> attributeRangeFilterOptions) {
+			final Map<String, List<FilterOption<AttributeRangeFilter>>> attributeRangeFilterOptions) {
 		this.attributeRangeFilterOptions = attributeRangeFilterOptions;
+	}
+
+	@Override
+	public List<String> getFacetFields(final int maxResults) {
+		getResults(0, maxResults);
+		List<String> facetInfos = addDefaultFacets();
+		facetInfos.addAll(getSizeRangeFilterOptions().keySet());
+		facetInfos.addAll(getAttributeRangeFilterOptions().keySet());
+		facetInfos.addAll(getAttributeValueFilterOptions().keySet());
+		facetInfos.addAll(getSkuOptionValueFilterOptions().keySet());
+		return facetInfos;
+	}
+
+	private List<String> addDefaultFacets() {
+		final List<String> facetInfos = new ArrayList<>();
+		if (!getBrandFilterOptions().isEmpty()) {
+			facetInfos.add(getFacetInfo(BRAND));
+		}
+		if (!getPriceFilterOptions().isEmpty()) {
+			facetInfos.add(getFacetInfo(PRICE));
+		}
+		if (!getCategoryFilterOptions().isEmpty()) {
+			facetInfos.add(getFacetInfo(CATEGORY));
+		}
+		return facetInfos;
+	}
+
+	private String getFacetInfo(final String facetType) {
+		return getFacetMap().values().stream()
+				.filter(facet -> facet.getFacetGroup() == FacetGroup.OTHERS.getOrdinal() && facetType.equals(facet.getFacetName()))
+				.map(Facet::getFacetGuid).findFirst().orElse(facetType);
+	}
+
+	@Override
+	public List<FacetValue> getFacetValues(final String facetGuid, final int maxResults) {
+		getResults(0, maxResults);
+		Locale locale = searchCriteria.getLocale();
+		final Facet facet = getFacetMap().get(facetGuid);
+		final Integer facetGroup = facet.getFacetGroup();
+		final String type;
+		if (facetGroup == FacetGroup.OTHERS.getOrdinal()) {
+			String name = facet.getFacetName();
+			type = FacetConstants.SIZE_ATTRIBUTES.contains(name) ? SIZE : name;
+		} else if (Stream.of(FacetGroup.PRODUCT_ATTRIBUTE, FacetGroup.SKU_ATTRIBUTE).map(FacetGroup::getOrdinal).anyMatch(facetGroup::equals)) {
+			type = RANGE_ATTRIBUTE_FIELD_KEY_TYPES.contains(facet.getFieldKeyType()) ? RANGED_ATTRIBUTE : ATTRIBUTE;
+		} else {
+			type = SKU_OPTION;
+		}
+		List<FacetValue> facetValues = new ArrayList<>();
+		switch (type) {
+			case BRAND:
+				getBrandFilterOptions().forEach(brandFilter -> facetValues.add(buildFacetValue(locale, brandFilter)));
+				break;
+			case CATEGORY:
+				getCategoryFilterOptions().forEach(catFilter -> facetValues.add(buildFacetValue(locale, catFilter)));
+				break;
+			case PRICE:
+				getPriceFilterOptions().forEach(priceFilter -> facetValues.add(buildFacetValue(locale, priceFilter)));
+				break;
+			case RANGED_ATTRIBUTE:
+				getAttributeRangeFilterOptions().get(facetGuid)
+						.forEach(filter -> facetValues.add(buildFacetValue(locale, filter)));
+				break;
+			case SKU_OPTION:
+				getSkuOptionValueFilterOptions().get(facetGuid)
+						.forEach(filter -> facetValues.add(buildFacetValue(locale, filter)));
+				break;
+			case SIZE:
+				getSizeRangeFilterOptions().get(facetGuid)
+						.forEach(filter -> facetValues.add(buildFacetValue(locale, filter)));
+				break;
+			default:
+				getAttributeValueFilterOptions().get(facetGuid)
+						.forEach(filter -> facetValues.add(buildFacetValue(locale, filter)));
+				break;
+		}
+		return facetValues;
 	}
 
 	/**
@@ -393,5 +488,33 @@ public class SolrIndexSearchResult implements IndexSearchResult, Serializable {
 	@Override
 	public boolean isEmpty() {
 		return results.isEmpty();
+	}
+
+	public Map<String, Facet> getFacetMap() {
+		return facetMap;
+	}
+
+	public void setFacetMap(final Map<String, Facet> facetMap) {
+		this.facetMap = facetMap;
+	}
+
+	@Override
+	public Map<String, List<FilterOption<SkuOptionValueFilter>>> getSkuOptionValueFilterOptions() {
+		return ObjectUtils.defaultIfNull(skuOptionValueFilterOptions, Collections.emptyMap());
+	}
+
+	@Override
+	public void setSkuOptionValueFilterOptions(final Map<String, List<FilterOption<SkuOptionValueFilter>>> skuOptionValueFilterOptions) {
+		this.skuOptionValueFilterOptions = skuOptionValueFilterOptions;
+	}
+
+	@Override
+	public Map<String, List<FilterOption<SizeRangeFilter>>> getSizeRangeFilterOptions() {
+		return ObjectUtils.defaultIfNull(sizeRangeFilterOptions, Collections.emptyMap());
+	}
+
+	@Override
+	public void setSizeRangeFilterOptions(final Map<String, List<FilterOption<SizeRangeFilter>>> sizeRangeFilterOptions) {
+		this.sizeRangeFilterOptions = sizeRangeFilterOptions;
 	}
 }

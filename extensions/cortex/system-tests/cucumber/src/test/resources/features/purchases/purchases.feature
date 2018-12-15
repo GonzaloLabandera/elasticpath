@@ -1,5 +1,4 @@
-@Purchases
-
+@purchases
 Feature: purchase resource tests
 
   Scenario: Unable to view another shoppers purchases
@@ -33,24 +32,6 @@ Feature: purchase resource tests
     And I view my profile
     And I follow links purchases
     Then there are no element links
-
-  Scenario: Can retrieve all successful purchases
-    Given I login as a newly registered shopper
-    And Adding an item with item code plantsVsZombies and quantity 1 to the cart
-    And I fill in email needinfo
-    And I fill in payment methods needinfo
-    And I fill in billing address needinfo
-    And the order is submitted
-    And the HTTP status is OK
-    And Adding an item with item code plantsVsZombies and quantity 1 to the cart
-    And I fill in email needinfo
-    And I fill in payment methods needinfo
-    And I fill in billing address needinfo
-    And the order is submitted
-    And the HTTP status is OK
-    When I view my profile
-    And I follow links purchases
-    Then there are 2 links of rel element
 
   Scenario: Purchase has purchase number and same total as the order
     Given I login as a newly registered shopper

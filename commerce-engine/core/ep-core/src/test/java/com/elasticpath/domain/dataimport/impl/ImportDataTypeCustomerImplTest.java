@@ -3,22 +3,21 @@
  */
 package com.elasticpath.domain.dataimport.impl;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
-import org.jmock.Expectations;
-import org.jmock.integration.junit4.JUnitRuleMockery;
-import org.junit.After;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.elasticpath.commons.beanframework.BeanFactory;
 import com.elasticpath.commons.constants.ContextIdNames;
@@ -31,14 +30,12 @@ import com.elasticpath.commons.util.Utility;
 import com.elasticpath.commons.util.impl.ConverterUtils;
 import com.elasticpath.commons.util.impl.UtilityImpl;
 import com.elasticpath.domain.EpDomainException;
-import com.elasticpath.domain.attribute.AttributeValue;
 import com.elasticpath.domain.customer.Customer;
 import com.elasticpath.domain.customer.CustomerAuthentication;
 import com.elasticpath.domain.customer.impl.CustomerImpl;
 import com.elasticpath.domain.dataimport.ImportField;
 import com.elasticpath.service.attribute.AttributeService;
 import com.elasticpath.service.dataimport.ImportGuidHelper;
-import com.elasticpath.test.BeanFactoryExpectationsFactory;
 import com.elasticpath.test.factory.CustomerBuilder;
 import com.elasticpath.test.factory.TestCustomerProfileFactory;
 import com.elasticpath.validation.service.ValidatorUtils;
@@ -47,6 +44,7 @@ import com.elasticpath.validation.service.ValidatorUtils;
  * Test <code>ImportDataTypeCustomerImpl</code>.
  */
 @SuppressWarnings({ "PMD.TooManyMethods" })
+@RunWith(MockitoJUnitRunner.class)
 public class ImportDataTypeCustomerImplTest {
 	private static final String TEST_GUID = "aaa";
 
@@ -79,6 +77,7 @@ public class ImportDataTypeCustomerImplTest {
 
 	private Customer customer;
 
+	@Mock
 	private ImportGuidHelper importGuidHelper;
 
 	private String validDateString;
@@ -92,44 +91,37 @@ public class ImportDataTypeCustomerImplTest {
 		}
 	};
 
-	@Rule
-	public final JUnitRuleMockery context = new JUnitRuleMockery();
-
+	@Mock
 	private BeanFactory beanFactory;
 
+	@Mock
 	private AttributeService attributeService;
 
+	@Mock
 	private ValidatorUtils validatorUtils;
 
+	@Mock
 	private CustomerAuthentication customerAuthentication;
-
-	private BeanFactoryExpectationsFactory expectationsFactory;
 
 	/** Test initialization. */
 	@Before
 	public void setUp() {
-		beanFactory = context.mock(BeanFactory.class);
 
-		attributeService = context.mock(AttributeService.class);
-		validatorUtils = context.mock(ValidatorUtils.class);
-		customerAuthentication = context.mock(CustomerAuthentication.class);
+		when(beanFactory.getBean(ContextIdNames.ATTRIBUTE_SERVICE)).thenReturn(attributeService);
+		when(beanFactory.getBean(ContextIdNames.VALIDATOR_UTILS)).thenReturn(validatorUtils);
+		when(beanFactory.getBean(ContextIdNames.UTILITY)).thenReturn(utility);
+		when(beanFactory.getBean(ContextIdNames.CUSTOMER_AUTHENTICATION)).thenReturn(customerAuthentication);
 
-		expectationsFactory = new BeanFactoryExpectationsFactory(context, beanFactory);
-		expectationsFactory.allowingBeanFactoryGetBean(ContextIdNames.ATTRIBUTE_SERVICE, attributeService);
-		expectationsFactory.allowingBeanFactoryGetBean(ContextIdNames.VALIDATOR_UTILS, validatorUtils);
-		expectationsFactory.allowingBeanFactoryGetBean(ContextIdNames.UTILITY, utility);
-		expectationsFactory.allowingBeanFactoryGetBean(ContextIdNames.CUSTOMER_AUTHENTICATION, customerAuthentication);
+		when(attributeService.getCustomerProfileAttributesMap()).thenReturn(new TestCustomerProfileFactory().getProfile());
 
-		context.checking(new Expectations() {
-			{
-				allowing(attributeService).getCustomerProfileAttributesMap();
-				will(returnValue(new TestCustomerProfileFactory().getProfile()));
+		customerImportType = new ImportDataTypeCustomerImpl() {
+			private static final long serialVersionUID = 740L;
+
+			@Override
+			protected <T> T getBean(final String beanName) {
+				return beanFactory.getBean(beanName);
 			}
-		});
-
-		customerImportType = new ImportDataTypeCustomerImpl();
-
-		importGuidHelper = context.mock(ImportGuidHelper.class);
+		};
 
 		customerImportType.init(null);
 
@@ -138,13 +130,8 @@ public class ImportDataTypeCustomerImplTest {
 		validDateString = ConverterUtils.date2String(new Date(), DATE_FORMAT, Locale.getDefault());
 	}
 
-	@After
-	public void tearDown() {
-		expectationsFactory.close();
-	}
-
 	/**
-	 * Assert that {@link ImportDataTypeCustomerImpl#init(Object) will be successful if given a null argument.
+	 * Assert that {@link ImportDataTypeCustomerImpl#init(Object)} will be successful if given a null argument.
 	 */
 	@Test
 	public void testSuccessfulInit() {
@@ -166,11 +153,11 @@ public class ImportDataTypeCustomerImplTest {
 	public void testGetRequiredImportFields() {
 		List<String> requiredFields = Arrays.asList(REQUIRED_FIELDS);
 		List<ImportField> retrievedRequiredImportFields = customerImportType.getRequiredImportFields();
-		assertEquals(REQUIRED_FIELDS.length, retrievedRequiredImportFields.size());
+		assertThat(retrievedRequiredImportFields).hasSize(REQUIRED_FIELDS.length);
 
 		for (ImportField importField : retrievedRequiredImportFields) {
-			assertTrue(importField.isRequired());
-			assertTrue(requiredFields.contains(importField.getName()));
+			assertThat(importField.isRequired()).isTrue();
+			assertThat(requiredFields).contains(importField.getName());
 		}
 	}
 
@@ -181,11 +168,13 @@ public class ImportDataTypeCustomerImplTest {
 	public void testGetOptionalImportFields() {
 		List<String> optionalFields = Arrays.asList(OPTIONAL_FIELDS);
 		List<ImportField> retrievedOptionalImportFields = customerImportType.getOptionalImportFields();
-		assertEquals(OPTIONAL_FIELDS.length, retrievedOptionalImportFields.size());
+		assertThat(retrievedOptionalImportFields).hasSize(OPTIONAL_FIELDS.length);
 
 		for (ImportField importField : retrievedOptionalImportFields) {
-			assertFalse(importField.isRequired());
-			assertTrue(importField.getName() + " should not be an optional field", optionalFields.contains(importField.getName()));
+			assertThat(importField.isRequired()).isFalse();
+			assertThat(optionalFields)
+				.as("%s should not be an optional field", importField.getName())
+				.contains(importField.getName());
 		}
 	}
 
@@ -200,18 +189,12 @@ public class ImportDataTypeCustomerImplTest {
 
 		ImportField importField = customerImportType.getImportField(ImportDataTypeProductImpl.PREFIX_OF_FIELD_NAME
 				+ CustomerImpl.ATT_KEY_CP_FIRST_NAME);
-		assertEquals(firstName, importField.getStringValue(customer));
+		assertThat(importField.getStringValue(customer)).isEqualTo(firstName);
 
 		final String newFirstName = "firstname2";
 
-		context.checking(new Expectations() {
-			{
-				allowing(validatorUtils).validateAttributeValue(with(any(AttributeValue.class)));
-			}
-		});
-
 		importField.setStringValue(customer, newFirstName, importGuidHelper);
-		assertEquals(newFirstName, customer.getCustomerProfile().getStringProfileValue(CustomerImpl.ATT_KEY_CP_FIRST_NAME));
+		assertThat(customer.getCustomerProfile().getStringProfileValue(CustomerImpl.ATT_KEY_CP_FIRST_NAME)).isEqualTo(newFirstName);
 	}
 
 	/**
@@ -220,10 +203,10 @@ public class ImportDataTypeCustomerImplTest {
 	@Test
 	public void testGetImportFieldOfCustomerGuid() {
 		ImportField importField = customerImportType.getImportField(ImportDataTypeCustomerImpl.PREFIX_OF_FIELD_NAME + IMPORT_FIELD_GUID);
-		assertNotNull(importField.getStringValue(customer));
+		assertThat(importField.getStringValue(customer)).isNotNull();
 
 		importField.setStringValue(customer, TEST_GUID, importGuidHelper);
-		assertEquals(TEST_GUID, customer.getGuid());
+		assertThat(customer.getGuid()).isEqualTo(TEST_GUID);
 	}
 
 	/**
@@ -241,10 +224,10 @@ public class ImportDataTypeCustomerImplTest {
 	@Test
 	public void testGetImportFieldOfUserId() {
 		ImportField importField = customerImportType.getImportField(ImportDataTypeCustomerImpl.PREFIX_OF_FIELD_NAME + IMPORT_FIELD_USERID);
-		assertEquals(null, importField.getStringValue(customer));
+		assertThat(importField.getStringValue(customer)).isNull();
 
 		importField.setStringValue(customer, TEST_GUID, importGuidHelper);
-		assertEquals(TEST_GUID, importField.getStringValue(customer));
+		assertThat(importField.getStringValue(customer)).isEqualTo(TEST_GUID);
 	}
 
 	/**
@@ -263,22 +246,21 @@ public class ImportDataTypeCustomerImplTest {
 	public void testGetImportFieldOfPasswordNonNull() {
 		final String password = "eightcha";
 
-		context.checking(new Expectations() {
-			{
-				oneOf(customerAuthentication).getClearTextPassword();
-				will(returnValue(null));
-				oneOf(customerAuthentication).getClearTextPassword();
-				will(returnValue(password));
-
-				oneOf(customerAuthentication).setClearTextPassword(password);
-			}
-		});
+		when(customerAuthentication.getClearTextPassword()).thenReturn(null);
 
 		ImportField importField = customerImportType.getImportField(ImportDataTypeCustomerImpl.PREFIX_OF_FIELD_NAME + IMPORT_FIELD_PASSWORD);
-		assertEquals(GlobalConstants.NULL_VALUE, importField.getStringValue(customer));
+		assertThat(importField.getStringValue(customer)).isEqualTo(GlobalConstants.NULL_VALUE);
+		verify(customerAuthentication).getClearTextPassword();
+
+		reset(customerAuthentication);
+		when(customerAuthentication.getClearTextPassword()).thenReturn(password);
 
 		importField.setStringValue(customer, password, importGuidHelper);
-		assertEquals(IMPORT_FIELD_PASSWORD + " was not set or retrieved properly.", password, importField.getStringValue(customer));
+		assertThat(importField.getStringValue(customer))
+			.as("%s was not set or retrieved properly.", IMPORT_FIELD_PASSWORD)
+			.isEqualTo(password);
+		verify(customerAuthentication).getClearTextPassword();
+		verify(customerAuthentication).setClearTextPassword(password);
 	}
 
 	/**
@@ -286,20 +268,15 @@ public class ImportDataTypeCustomerImplTest {
 	 */
 	@Test
 	public void testGetImportFieldOfPasswordNull() {
-		context.checking(new Expectations() {
-			{
-				allowing(customerAuthentication).getClearTextPassword();
-				will(returnValue(null));
-			}
-		});
+		when(customerAuthentication.getClearTextPassword()).thenReturn(null);
 
 		ImportField importField = customerImportType.getImportField(ImportDataTypeCustomerImpl.PREFIX_OF_FIELD_NAME + IMPORT_FIELD_PASSWORD);
-		assertEquals(GlobalConstants.NULL_VALUE, importField.getStringValue(customer));
+		assertThat(importField.getStringValue(customer)).isEqualTo(GlobalConstants.NULL_VALUE);
 
 		importField.setStringValue(customer, null, importGuidHelper);
-		assertEquals(IMPORT_FIELD_PASSWORD + " was set to null but is not returning null.",
-				GlobalConstants.NULL_VALUE,
-				importField.getStringValue(customer));
+		assertThat(importField.getStringValue(customer))
+			.as("%s was set to null but is not returning null.", IMPORT_FIELD_PASSWORD)
+			.isEqualTo(GlobalConstants.NULL_VALUE);
 	}
 
 	/**
@@ -317,9 +294,11 @@ public class ImportDataTypeCustomerImplTest {
 	@Test
 	public void testGetImportFieldOfStatusEnabled() {
 		ImportField importField = customerImportType.getImportField(ImportDataTypeCustomerImpl.PREFIX_OF_FIELD_NAME + IMPORT_FIELD_STATUS);
-		assertEquals(String.valueOf(Customer.STATUS_ACTIVE), importField.getStringValue(customer));
+		assertThat(importField.getStringValue(customer)).isEqualTo(String.valueOf(Customer.STATUS_ACTIVE));
 		importField.setStringValue(customer, "1", importGuidHelper);
-		assertEquals(IMPORT_FIELD_STATUS, String.valueOf(Customer.STATUS_ACTIVE), importField.getStringValue(customer));
+		assertThat(importField.getStringValue(customer))
+			.as(IMPORT_FIELD_STATUS)
+			.isEqualTo(String.valueOf(Customer.STATUS_ACTIVE));
 	}
 
 	/**
@@ -328,9 +307,11 @@ public class ImportDataTypeCustomerImplTest {
 	@Test
 	public void testGetImportFieldOfStatusDisabled() {
 		ImportField importField = customerImportType.getImportField(ImportDataTypeCustomerImpl.PREFIX_OF_FIELD_NAME + IMPORT_FIELD_STATUS);
-		assertEquals(String.valueOf(Customer.STATUS_ACTIVE), importField.getStringValue(customer));
+		assertThat(importField.getStringValue(customer)).isEqualTo(String.valueOf(Customer.STATUS_ACTIVE));
 		importField.setStringValue(customer, "2", importGuidHelper);
-		assertEquals(IMPORT_FIELD_STATUS, String.valueOf(Customer.STATUS_DISABLED), importField.getStringValue(customer));
+		assertThat(importField.getStringValue(customer))
+			.as(IMPORT_FIELD_STATUS)
+			.isEqualTo(String.valueOf(Customer.STATUS_DISABLED));
 	}
 
 	/**
@@ -339,9 +320,11 @@ public class ImportDataTypeCustomerImplTest {
 	@Test
 	public void testGetImportFieldOfStatusPending() {
 		ImportField importField = customerImportType.getImportField(ImportDataTypeCustomerImpl.PREFIX_OF_FIELD_NAME + IMPORT_FIELD_STATUS);
-		assertEquals(String.valueOf(Customer.STATUS_ACTIVE), importField.getStringValue(customer));
+		assertThat(importField.getStringValue(customer)).isEqualTo(String.valueOf(Customer.STATUS_ACTIVE));
 		importField.setStringValue(customer, "3", importGuidHelper);
-		assertEquals(IMPORT_FIELD_STATUS, String.valueOf(Customer.STATUS_PENDING_APPROVAL), importField.getStringValue(customer));
+		assertThat(importField.getStringValue(customer))
+			.as(IMPORT_FIELD_STATUS)
+			.isEqualTo(String.valueOf(Customer.STATUS_PENDING_APPROVAL));
 	}
 
 	/**
@@ -350,7 +333,7 @@ public class ImportDataTypeCustomerImplTest {
 	@Test(expected = EpInvalidValueBindException.class)
 	public void testGetImportFieldOfStatusInvalid() {
 		ImportField importField = customerImportType.getImportField(ImportDataTypeCustomerImpl.PREFIX_OF_FIELD_NAME + IMPORT_FIELD_STATUS);
-		assertEquals(String.valueOf(Customer.STATUS_ACTIVE), importField.getStringValue(customer));
+		assertThat(importField.getStringValue(customer)).isEqualTo(String.valueOf(Customer.STATUS_ACTIVE));
 		importField.setStringValue(customer, "0", importGuidHelper);
 	}
 
@@ -360,8 +343,10 @@ public class ImportDataTypeCustomerImplTest {
 	@Test
 	public void testGetImportFieldOfStatusNull() {
 		ImportField importField = customerImportType.getImportField(ImportDataTypeCustomerImpl.PREFIX_OF_FIELD_NAME + IMPORT_FIELD_STATUS);
-		assertEquals(String.valueOf(Customer.STATUS_ACTIVE), importField.getStringValue(customer));
-		assertEquals(IMPORT_FIELD_STATUS, String.valueOf(Customer.STATUS_ACTIVE), importField.getStringValue(customer));
+		assertThat(importField.getStringValue(customer)).isEqualTo(String.valueOf(Customer.STATUS_ACTIVE));
+		assertThat(importField.getStringValue(customer))
+			.as(IMPORT_FIELD_STATUS)
+			.isEqualTo(String.valueOf(Customer.STATUS_ACTIVE));
 	}
 
 	/**
@@ -382,11 +367,12 @@ public class ImportDataTypeCustomerImplTest {
 
 		// Check that the importField initially returns a value of today's date
 		final Date creationDate = customer.getCreationDate();
-		assertEquals(creationDate.toString(),
-				ConverterUtils.string2Date(importField.getStringValue(customer), DATE_FORMAT, Locale.getDefault()).toString());
+		assertThat(ConverterUtils.string2Date(importField.getStringValue(customer), DATE_FORMAT, Locale.getDefault()).toString()).isEqualTo(creationDate.toString());
 
 		importField.setStringValue(customer, validDateString, importGuidHelper);
-		assertEquals(IMPORT_FIELD_CREATIONDATE + " was not set or retrieved properly.", validDateString, importField.getStringValue(customer));
+		assertThat(importField.getStringValue(customer))
+			.as(IMPORT_FIELD_CREATIONDATE + " was not set or retrieved properly.")
+			.isEqualTo(validDateString);
 	}
 
 	/**
@@ -399,8 +385,8 @@ public class ImportDataTypeCustomerImplTest {
 
 		// Should be automatically assigned to creation date, but we don't have that to the millisecond
 		final Date creationDate = customer.getCreationDate();
-		assertEquals(creationDate.toString(),
-				ConverterUtils.string2Date(importField.getStringValue(customer), DATE_FORMAT, Locale.getDefault()).toString());
+		assertThat(ConverterUtils.string2Date(importField.getStringValue(customer), DATE_FORMAT, Locale.getDefault()).toString())
+			.isEqualTo(creationDate.toString());
 	}
 
 	/**
@@ -417,8 +403,8 @@ public class ImportDataTypeCustomerImplTest {
 	 */
 	@Test
 	public void testIsEntityImport() {
-		assertTrue(customerImportType.isEntityImport());
-		assertFalse(customerImportType.isValueObjectImport());
+		assertThat(customerImportType.isEntityImport()).isTrue();
+		assertThat(customerImportType.isValueObjectImport()).isFalse();
 	}
 
 	/**
@@ -434,10 +420,10 @@ public class ImportDataTypeCustomerImplTest {
 	 */
 	@Test
 	public void testGetImportJobRunnerBeanName() {
-		assertEquals("importJobRunnerCustomer", customerImportType.getImportJobRunnerBeanName());
+		assertThat(customerImportType.getImportJobRunnerBeanName()).isEqualTo("importJobRunnerCustomer");
 	}
 
 	private Customer createCustomer() {
-		return CustomerBuilder.newCustomer().build();
+		return CustomerBuilder.newCustomer(beanFactory).build();
 	}
 }

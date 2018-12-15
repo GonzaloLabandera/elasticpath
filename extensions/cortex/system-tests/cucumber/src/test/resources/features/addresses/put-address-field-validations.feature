@@ -1,13 +1,12 @@
-@Addresses
+@addresses
 Feature: PUT address field validations
 
   Background:
     Given I have authenticated as a newly registered shopper
-    When I create a default billing address on the profile
+    And I create a default billing address on the profile
 
   Scenario Outline: PUT address with valid field values
-    When I go to registered shopper profile addresses
-    And I update address via put with country <COUNTRY>, locality <LOCALITY>, postal code <POSTAL_CODE>, region <REGION>, street address <STREET_ADDRESS>, family name <FAMILY_NAME>, given name <GIVEN_NAME>
+    When I modify existing address with postal code V7V7V7 with Country <COUNTRY>, Extended-Address , Locality <LOCALITY>, Organization , Phone-Number , Postal-Code <POSTAL_CODE>, Region <REGION>, Street-Address <STREET_ADDRESS>, Family-Name <FAMILY_NAME> and Given-Name <GIVEN_NAME>
     Then the HTTP status is no content
 
     Examples:
@@ -15,8 +14,7 @@ Feature: PUT address field validations
       | CA      | Calgary  | v1v1v1      | AB     | 123 street     | testFName   | testLName  |
 
   Scenario Outline: PUT address with empty fields
-    When I go to registered shopper profile addresses
-    And I update address via put with country <COUNTRY>, locality <LOCALITY>, postal code <POSTAL_CODE>, region <REGION>, street address <STREET_ADDRESS>, family name <FAMILY_NAME>, given name <GIVEN_NAME>
+    When I modify existing address with postal code V7V7V7 with Country <COUNTRY>, Extended-Address , Locality <LOCALITY>, Organization , Phone-Number , Postal-Code <POSTAL_CODE>, Region <REGION>, Street-Address <STREET_ADDRESS>, Family-Name <FAMILY_NAME> and Given-Name <GIVEN_NAME>
     Then the HTTP status is bad request
     And Structured error message contains:
       | locality may not be null       |
@@ -31,8 +29,7 @@ Feature: PUT address field validations
       |         |          |             |        |                |             |            |
 
   Scenario Outline: PUT address with invalid country values
-    When I go to registered shopper profile addresses
-    And I update address via put with country <COUNTRY>, locality <LOCALITY>, postal code <POSTAL_CODE>, region <REGION>, street address <STREET_ADDRESS>, family name <FAMILY_NAME>, given name <GIVEN_NAME>
+    When I modify existing address with postal code V7V7V7 with Country <COUNTRY>, Extended-Address , Locality <LOCALITY>, Organization , Phone-Number , Postal-Code <POSTAL_CODE>, Region <REGION>, Street-Address <STREET_ADDRESS>, Family-Name <FAMILY_NAME> and Given-Name <GIVEN_NAME>
     Then the HTTP status is bad request
     And I should see validation error message with message type, message id, and debug message
       | messageType | messageId                    | debugMessage                                           |
@@ -44,8 +41,7 @@ Feature: PUT address field validations
       | Canada  | Calgary  | v1v1v1      | AB     | 123 street     | testFName   | testLName  |
 
   Scenario Outline: PUT address with invalid region values
-    When I go to registered shopper profile addresses
-    And I update address via put with country <COUNTRY>, locality <LOCALITY>, postal code <POSTAL_CODE>, region <REGION>, street address <STREET_ADDRESS>, family name <FAMILY_NAME>, given name <GIVEN_NAME>
+    When I modify existing address with postal code V7V7V7 with Country <COUNTRY>, Extended-Address , Locality <LOCALITY>, Organization , Phone-Number , Postal-Code <POSTAL_CODE>, Region <REGION>, Street-Address <STREET_ADDRESS>, Family-Name <FAMILY_NAME> and Given-Name <GIVEN_NAME>
     Then the HTTP status is bad request
     And I should see validation error message with message type, message id, and debug message
       | messageType | messageId  | debugMessage    |
@@ -60,19 +56,19 @@ Feature: PUT address field validations
     Given I am logged in as a public shopper
     And I get address form
     And I create address with Country CA, Extended-Address 1234, Locality Vancouver, Organization Company Inc, Phone-Number 555-555-5555, Postal-Code V5C1N2, Region BC, Street-Address 123 Broadway, Family-Name Customer and Given-Name Public Tester
-    And I should see address matches the following
+    And the address with postal code V5C1N2 should match the following address values
       | country-name     | CA           |
       | extended-address | 1234         |
       | locality         | Vancouver    |
       | postal-code      | V5C1N2       |
       | region           | BC           |
       | street-address   | 123 Broadway |
-    And I modify the address with Country US, Extended-Address , Locality Vancouver, Organization , Phone-Number , Postal-Code 90210, Region WA, Street-Address 123 Broadway, Family-Name Customer and Given-Name Public Tester
+    And I modify existing address with postal code V5C1N2 with Country US, Extended-Address , Locality Vancouver, Organization , Phone-Number , Postal-Code 90210, Region WA, Street-Address 123 Broadway, Family-Name Customer and Given-Name Public Tester
     Then the HTTP status is no content
     And I view my profile
     And I follow links addresses
     And there are 1 links of rel element
-    And I should see address matches the following
+    And the address with postal code 90210 should match the following address values
       | country-name   | US           |
       | locality       | Vancouver    |
       | postal-code    | 90210        |

@@ -71,8 +71,8 @@ public class LuceneSubQueryBuilder implements SubQueryBuilder {
 	 * @return term query 
 	 */
 	private Query getFieldQuery(final String field, final String queryText) {
-		final PhraseQuery fieldQuery = new PhraseQuery();
+		final PhraseQuery.Builder fieldQuery = new PhraseQuery.Builder();
 		fieldQuery.add(new Term(field, queryText));
-		return fieldQuery;
+		return fieldQuery.build();
 	}
 }

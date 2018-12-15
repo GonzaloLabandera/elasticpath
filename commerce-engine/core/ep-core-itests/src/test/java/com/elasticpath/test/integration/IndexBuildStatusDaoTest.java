@@ -3,14 +3,11 @@
  */
 package com.elasticpath.test.integration;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
-import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
-import org.apache.commons.lang.time.DateUtils;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -37,10 +34,10 @@ public class IndexBuildStatusDaoTest extends BasicSpringContextTest {
 	@Test
 	public void testGet() {
 		IndexBuildStatus indexBuildStatus = indexBuildStatusDao.get(IndexType.CATEGORY);
-		
-		assertEquals(IndexType.CATEGORY, indexBuildStatus.getIndexType());
-		assertEquals(null, indexBuildStatus.getLastBuildDate());
-		assertEquals(IndexStatus.MISSING, indexBuildStatus.getIndexStatus());
+
+		assertThat(indexBuildStatus.getIndexType()).isEqualTo(IndexType.CATEGORY);
+		assertThat(indexBuildStatus.getLastBuildDate()).isNull();
+		assertThat(indexBuildStatus.getIndexStatus()).isEqualTo(IndexStatus.MISSING);
 	}
 
 	/**
@@ -50,14 +47,14 @@ public class IndexBuildStatusDaoTest extends BasicSpringContextTest {
 	@Test
 	public void testList() {
 		List<IndexBuildStatus> indexBuildStatusList = indexBuildStatusDao.list();
-		assertEquals(NUM_OF_DEFAULT_INDEX_TYPES, indexBuildStatusList.size());
+		assertThat(indexBuildStatusList).hasSize(NUM_OF_DEFAULT_INDEX_TYPES);
 
-		assertTrue(findIndexType(indexBuildStatusList, IndexType.CATEGORY));
-		assertTrue(findIndexType(indexBuildStatusList, IndexType.CUSTOMER));	
-		assertTrue(findIndexType(indexBuildStatusList, IndexType.PRODUCT));
-		assertTrue(findIndexType(indexBuildStatusList, IndexType.PROMOTION));
-		assertTrue(findIndexType(indexBuildStatusList, IndexType.CMUSER));
-		assertTrue(findIndexType(indexBuildStatusList, IndexType.SKU));
+		assertThat(findIndexType(indexBuildStatusList, IndexType.CATEGORY)).isTrue();
+		assertThat(findIndexType(indexBuildStatusList, IndexType.CUSTOMER)).isTrue();
+		assertThat(findIndexType(indexBuildStatusList, IndexType.PRODUCT)).isTrue();
+		assertThat(findIndexType(indexBuildStatusList, IndexType.PROMOTION)).isTrue();
+		assertThat(findIndexType(indexBuildStatusList, IndexType.CMUSER)).isTrue();
+		assertThat(findIndexType(indexBuildStatusList, IndexType.SKU)).isTrue();
 	}
 	
 	/**
@@ -71,27 +68,23 @@ public class IndexBuildStatusDaoTest extends BasicSpringContextTest {
 		// save
 		final IndexBuildStatus indexBuildStatusBeforeSave = indexBuildStatusDao.get(IndexType.PRODUCT);
 		indexBuildStatusBeforeSave.setLastBuildDate(buildDate);
-		indexBuildStatusBeforeSave.setIndexStatus(IndexStatus.COMPLETE);		
+		indexBuildStatusBeforeSave.setIndexStatus(IndexStatus.COMPLETE);
 		indexBuildStatusDao.saveOrUpdate(indexBuildStatusBeforeSave);
 
 		// check
 		final IndexBuildStatus indexBuildStatusAfterSave = indexBuildStatusDao.get(IndexType.PRODUCT);
-		assertEquals(IndexType.PRODUCT, indexBuildStatusAfterSave.getIndexType());
-		assertEquals(DateUtils.truncate(buildDate, Calendar.SECOND), 
-				DateUtils.truncate(indexBuildStatusAfterSave.getLastBuildDate(), Calendar.SECOND));
-		assertEquals(IndexStatus.COMPLETE, indexBuildStatusAfterSave.getIndexStatus());
+		assertThat(indexBuildStatusAfterSave.getIndexType()).isEqualTo(IndexType.PRODUCT);
+
+		assertThat(indexBuildStatusAfterSave.getLastBuildDate()).isInSameSecondAs(buildDate);
+		assertThat(indexBuildStatusAfterSave.getIndexStatus()).isEqualTo(IndexStatus.COMPLETE);
 	}
 	
 	/*
 	 * Utility: tests if list contains IndexBuildStatus with type.  
 	 */
 	private static boolean findIndexType(final List<IndexBuildStatus> list, final IndexType type) {
-		for (IndexBuildStatus indexBuildStatus : list) {
-			if (indexBuildStatus.getIndexType().equals(type)) {
-				return true;
-			}
-		}
-		return false;
+		return list.stream()
+			.anyMatch(indexBuildStatus -> indexBuildStatus.getIndexType().equals(type));
 	}
 
 }

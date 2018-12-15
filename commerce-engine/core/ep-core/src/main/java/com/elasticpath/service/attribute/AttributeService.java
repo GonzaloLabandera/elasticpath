@@ -13,6 +13,7 @@ import com.elasticpath.domain.attribute.Attribute;
 import com.elasticpath.domain.attribute.AttributeUsage;
 import com.elasticpath.persistence.support.DistinctAttributeValueCriterion;
 import com.elasticpath.service.EpPersistenceService;
+import com.elasticpath.service.attribute.impl.AttributeValueInfo;
 
 /**
  * Provide attribute related business service.
@@ -188,6 +189,13 @@ public interface AttributeService extends EpPersistenceService {
 	List<Attribute> getAttributes(AttributeUsage usage);
 
 	/**
+	 * Gets the attibutes by usage Id.
+	 * @param usageId the usage Id.
+	 * @return the List of attributes.
+	 */
+	List<Attribute> getAttributes(int usageId);
+
+	/**
 	 * For a given attribute, the set of distinct values currently
 	 * existing for that attribute is returned.
 	 * @param attribute the attribute for which the distinct attribute values are to be returned
@@ -277,5 +285,26 @@ public interface AttributeService extends EpPersistenceService {
 	 * @return List of attributes by the given catalog and attribute usage id
 	 */
 	List<Attribute> findByCatalogAndUsage(long catalogUid, int attributeUsageId);
+
+	/**
+	 * Find unique product attribute values given the attribute id.
+	 * @param attribute attribute
+	 * @return product attribute values
+	 */
+	List<AttributeValueInfo> findProductAttributeValueByAttributeUid(Attribute attribute);
+
+	/**
+	 * Get product attributes.
+	 * @param attributeKeys the attribute keys.
+	 * @return the list of attributes.
+	 */
+	List<Attribute> getProductAttributes(List<String> attributeKeys);
+
+	/**
+	 * Find unique product sku attribute values given the attribute id.
+	 * @param attribute attribute
+	 * @return product sku attribute values
+	 */
+	List<AttributeValueInfo> findProductSkuValueAttributeByAttributeUid(Attribute attribute);
 
 }

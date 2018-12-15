@@ -12,6 +12,7 @@ import com.elasticpath.selenium.common.AbstractPageObject;
 public abstract class AbstractWizard extends AbstractPageObject {
 
 	private static final String NEXT_BUTTON = "div[widget-id='Next >']";
+	private static final String BACK_BUTTON = "div[widget-id='< Back']";
 	private static final String CANCEL_BUTTON = "div[widget-id='Cancel']";
 	private static final String FINISH_BUTTON = "div[widget-id='Finish']";
 	private static String wizardType;
@@ -47,6 +48,13 @@ public abstract class AbstractWizard extends AbstractPageObject {
 	 */
 	public void clickNextInDialog() {
 		clickButton(NEXT_BUTTON, "Next");
+	}
+
+	/**
+	 * Clicks Back.
+	 */
+	public void clickBackInDialog() {
+		clickButton(BACK_BUTTON, "Back");
 	}
 
 	/**

@@ -7,6 +7,7 @@ import static com.elasticpath.rest.resource.integration.epcommerce.repository.wi
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Map;
 import java.util.Objects;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -36,6 +37,7 @@ import com.elasticpath.rest.form.SubmitStatus;
 import com.elasticpath.rest.resource.ResourceOperationContext;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.customer.CustomerSessionRepository;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.item.ItemRepository;
+import com.elasticpath.rest.resource.integration.epcommerce.repository.sku.ProductSkuRepository;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.store.StoreRepository;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.transform.ReactiveAdapter;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.wishlist.WishlistRepository;
@@ -55,6 +57,7 @@ public class WishlistRepositoryImpl implements WishlistRepository {
 	private final WishListService wishListService;
 	private final CustomerSessionRepository customerSessionRepository;
 	private final ItemRepository itemRepository;
+	private final ProductSkuRepository productSkuRepository;
 	private final StoreRepository storeRepository;
 	private final ResourceOperationContext resourceOperationContext;
 	private final ReactiveAdapter reactiveAdapter;
@@ -65,6 +68,7 @@ public class WishlistRepositoryImpl implements WishlistRepository {
 	 * @param wishListService           the wishlistService
 	 * @param customerSessionRepository the customer session repo
 	 * @param itemRepository            the item repo
+	 * @param productSkuRepository      the product sku repo
 	 * @param storeRepository           the store repo
 	 * @param resourceOperationContext  the resource operation context
 	 * @param reactiveAdapter           the reactive adapter
@@ -74,6 +78,7 @@ public class WishlistRepositoryImpl implements WishlistRepository {
 			@Named("wishListService") final WishListService wishListService,
 			@Named("customerSessionRepository") final CustomerSessionRepository customerSessionRepository,
 			@Named("itemRepository") final ItemRepository itemRepository,
+			@Named("productSkuRepository") final ProductSkuRepository productSkuRepository,
 			@Named("storeRepository") final StoreRepository storeRepository,
 			@Named("resourceOperationContext") final ResourceOperationContext resourceOperationContext,
 			@Named("reactiveAdapter") final ReactiveAdapter reactiveAdapter) {
@@ -84,6 +89,7 @@ public class WishlistRepositoryImpl implements WishlistRepository {
 		this.storeRepository = storeRepository;
 		this.resourceOperationContext = resourceOperationContext;
 		this.reactiveAdapter = reactiveAdapter;
+		this.productSkuRepository = productSkuRepository;
 	}
 
 	@Override
@@ -166,21 +172,21 @@ public class WishlistRepositoryImpl implements WishlistRepository {
 
 	@Override
 	@CacheResult
-	public Maybe<WishList> findWishlistsContainingItem(final String itemId) {
+	public Maybe<WishList> findWishlistsContainingItem(final Map<String, String> itemIdMap) {
 		return customerSessionRepository.findOrCreateCustomerSessionAsSingle()
 				.flatMap(customerSession -> getWishlistInternal(customerSession.getShopper()))
-				.flatMapMaybe(filterWishlist(itemId))
+				.flatMapMaybe(filterWishlist(itemIdMap))
 				.filter(Objects::nonNull);
 	}
 
 	/**
 	 * Filter Wishlist containing given item.
 	 *
-	 * @param itemId the itemId
+	 * @param itemIdMap the itemIdMap
 	 * @return function to perform the operation
 	 */
-	protected Function<WishList, Maybe<? extends WishList>> filterWishlist(final String itemId) {
-		return wishList -> itemRepository.getSkuForItemIdAsSingle(itemId)
+	protected Function<WishList, Maybe<WishList>> filterWishlist(final Map<String, String> itemIdMap) {
+		return wishList -> itemRepository.getSkuForItemId(itemIdMap)
 				.flatMapMaybe(productSku -> getWishListContainingItem(wishList, productSku.getGuid()));
 	}
 
@@ -203,11 +209,10 @@ public class WishlistRepositoryImpl implements WishlistRepository {
 	@CacheResult(uniqueIdentifier = "cachingGetProductSku")
 	public Single<ProductSku> getProductSku(final WishList wishlist, final String lineItemGuid) {
 		return getShoppingItem(wishlist, lineItemGuid)
-				.flatMap(shoppingItem -> reactiveAdapter.fromRepositoryAsSingle(() -> itemRepository.getSkuForSkuGuid(shoppingItem.getSkuGuid())))
-				.toObservable()
+				.flatMap(shoppingItem -> productSkuRepository.getProductSkuWithAttributesByGuidAsSingle(shoppingItem.getSkuGuid()))
 				.filter(WishlistRepositoryImpl::isProductDiscoverable)
-				.switchIfEmpty(Observable.error(ResourceOperationFailure.notFound(ITEM_NOT_FOUND)))
-				.singleElement().toSingle();
+				.toSingle()
+				.onErrorResumeNext(Single.error(ResourceOperationFailure.notFound(ITEM_NOT_FOUND)));
 	}
 
 	@Override

@@ -79,6 +79,21 @@ public class PriceListAssignmentsResultPane extends AbstractPageObject {
 	}
 
 	/**
+	 * Deletes given price list assignment and returns true, returns false if there was not specified assignment.
+	 *
+	 * @param priceListAssignment the price list assignment.
+	 * @return true if the assignment was deleted, returns false if there was not specified assignment
+	 */
+	public boolean deletePriceListAssignmentIfPresent(final String priceListAssignment) {
+		if(selectItemInCenterPane(PRICE_LIST_ASSIGNMENT_TABLE_CSS, PRICE_LIST_ASSIGNMENT_COLUMN_CSS, priceListAssignment,
+				PRICE_LIST_ASSIGNMENT_COLUMN_NAME)){
+			clickButton(DELETE_PRICE_LIST_ASSIGNMENT_CSS, "Delete Price List Assignment");
+			return true;
+		}
+		return false;
+	}
+
+	/**
 	 * Verifies Price List Assignments result.
 	 *
 	 * @param priceListAssignment the price list assignment.

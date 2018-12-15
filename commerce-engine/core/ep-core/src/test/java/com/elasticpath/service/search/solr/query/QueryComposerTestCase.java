@@ -3,8 +3,8 @@
  */
 package com.elasticpath.service.search.solr.query;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.fail;
 
 import java.util.Collection;
 import java.util.Date;
@@ -37,7 +37,7 @@ import com.elasticpath.service.search.solr.SolrQueryFactoryImpl;
 /**
  * This is an abstract Test case. It contains some simple checks for <code>QueryComposer</code>s.
  */
-@SuppressWarnings("PMD.AbstractNaming")
+@SuppressWarnings({"PMD.AbstractNaming", "PMD.GodClass", "unchecked"})
 public abstract class QueryComposerTestCase {
 
 	private static final char FUZZY_CHAR = '~';
@@ -53,7 +53,7 @@ public abstract class QueryComposerTestCase {
 	private static final String NOT_EXPECTED_WITHIN = "Did not expected <%1$s> within <%2$s>.";
 	
 	private SearchConfig searchConfig;
-	
+
 	static {
 		//For test purposes we'll override the methods in IndexUtility that would normally make service calls,
 		//and simply return a sensible string.
@@ -68,16 +68,16 @@ public abstract class QueryComposerTestCase {
 				return name + storeCode;
 			}
 		};
-		
+
 		analyzer = new AnalyzerImpl();
-		
+
 		solrQueryFactory = new SolrQueryFactoryImpl();
 		solrQueryFactory.setAnalyzer(analyzer);
 	}
-	
+
 	/**
 	 * Prepares for tests.
-	 * 
+	 *
 	 * @throws Exception in case of any errors
 	 */
 	@Before
@@ -110,8 +110,8 @@ public abstract class QueryComposerTestCase {
 		}
 		for (String value : values) {
 			final TermQuery testQuery = new TermQuery(new Term(key, value));
-			if (query.toString().indexOf(testQuery.toString()) >= 0) {
-				fail(String.format(NOT_EXPECTED_WITHIN, testQuery.toString(), query.toString()));
+			if (query.toString().contains(testQuery.toString())) {
+				fail(NOT_EXPECTED_WITHIN, testQuery.toString(), query.toString());
 			}
 		}
 	}
@@ -141,9 +141,9 @@ public abstract class QueryComposerTestCase {
 		}
 		for (String value : values) {
 			final TermQuery testQuery = new TermQuery(new Term(key, value));
-			final boolean assertion = query.toString().indexOf(testQuery.toString()) >= 0;
+			final boolean assertion = query.toString().contains(testQuery.toString());
 			if (!assertion) {
-				fail(String.format(EXPECTED_WITHIN, testQuery.toString(), query.toString()));
+				fail(EXPECTED_WITHIN, testQuery.toString(), query.toString());
 			}
 		}
 	}
@@ -192,9 +192,9 @@ public abstract class QueryComposerTestCase {
 		}
 		for (String value : values) {
 			TermQuery testQuery = new TermQuery(new Term(indexUtility.createLocaleFieldName(key, locale), value));
-			boolean assertion = query.toString().indexOf(testQuery.toString()) >= 0;
+			boolean assertion = query.toString().contains(testQuery.toString());
 			if (!assertion) {
-				fail(String.format(EXPECTED_WITHIN, testQuery.toString(), query.toString()));
+				fail(EXPECTED_WITHIN, testQuery.toString(), query.toString());
 			}
 		}
 	}
@@ -228,10 +228,10 @@ public abstract class QueryComposerTestCase {
 			TermQuery testQuery = new TermQuery(new Term(key, value));
 			int index = query.toString().indexOf(testQuery.toString());
 			if (index < 0) {
-				fail(String.format(EXPECTED_WITHIN, testQuery.toString(), query.toString()));
+				fail(EXPECTED_WITHIN, testQuery.toString(), query.toString());
 			}
 			if (testNextChar(query.toString(), index + testQuery.toString().length(), FUZZY_CHAR)) {
-				fail(String.format("Expected non-fuzzy search for <%1$s> within <%2$s>.", testQuery.toString(), query.toString()));
+				fail("Expected non-fuzzy search for <%1$s> within <%2$s>.", testQuery.toString(), query.toString());
 			}
 		}
 	}
@@ -269,10 +269,10 @@ public abstract class QueryComposerTestCase {
 			TermQuery testQuery = new TermQuery(new Term(indexUtility.createLocaleFieldName(key, locale), value));
 			int index = query.toString().indexOf(testQuery.toString());
 			if (index < 0) {
-				fail(String.format(EXPECTED_WITHIN, testQuery.toString(), query.toString()));
+				fail(EXPECTED_WITHIN, testQuery.toString(), query.toString());
 			}
 			if (testNextChar(query.toString(), index + testQuery.toString().length(), FUZZY_CHAR)) {
-				fail(String.format("Expected non-fuzzy search for <%1$s> within <%2$s>.", testQuery.toString(), query.toString()));
+				fail("Expected non-fuzzy search for <%1$s> within <%2$s>.", testQuery.toString(), query.toString());
 			}
 		}
 	}
@@ -307,8 +307,8 @@ public abstract class QueryComposerTestCase {
 
 			// remove actual fuzziness just so that we aren't dependent on that
 			String fuzzyQuery = testQuery.toString().substring(0, testQuery.toString().indexOf(FUZZY_CHAR) + 1);
-			if (query.toString().indexOf(fuzzyQuery) < 0) {
-				fail(String.format("Expected fuzzy search for <%1$s> within <%2$s>.", fuzzyQuery, query.toString()));
+			if (!query.toString().contains(fuzzyQuery)) {
+				fail("Expected fuzzy search for <%1$s> within <%2$s>.", fuzzyQuery, query.toString());
 			}
 		}
 
@@ -347,8 +347,8 @@ public abstract class QueryComposerTestCase {
 
 			// remove actual fuzziness just so that we aren't dependent on that
 			String fuzzyQuery = testQuery.toString().substring(0, testQuery.toString().indexOf(FUZZY_CHAR) + 1);
-			if (query.toString().indexOf(fuzzyQuery) < 0) {
-				fail(String.format("Expected fuzzy search for <%1$s> within <%2$s>.", fuzzyQuery, query.toString()));
+			if (!query.toString().contains(fuzzyQuery)) {
+				fail("Expected fuzzy search for <%1$s> within <%2$s>.", fuzzyQuery, query.toString());
 			}
 		}
 	}
@@ -398,8 +398,7 @@ public abstract class QueryComposerTestCase {
 		}
 
 		if (!assertion) {
-			fail(String.format("Expected <%1$s> %2$s many times within <%3$s>", testQuery.toString(), collection.size(), query
-					.toString()));
+			fail("Expected <%1$s> %2$s many times within <%3$s>", testQuery.toString(), collection.size(), query.toString());
 		}
 	}
 
@@ -428,7 +427,7 @@ public abstract class QueryComposerTestCase {
 				endInclusive);
 		int index = query.toString().indexOf(testQuery.toString());
 		if (index < 0) {
-			fail(String.format(EXPECTED_WITHIN, testQuery.toString(), query.toString()));
+			fail(EXPECTED_WITHIN, testQuery.toString(), query.toString());
 		}
 	}
 	
@@ -443,7 +442,7 @@ public abstract class QueryComposerTestCase {
 		TermQuery testQuery = new TermQuery(new Term(key, ""));
 		Pattern dateRangePattern = Pattern.compile(testQuery + "[\\[\\{]\\S+? TO \\S+?[\\}\\]]");
 		if (!dateRangePattern.matcher(query.toString()).find()) {
-			fail(String.format("Expected date range search <%1$s> within <%2$s>", dateRangePattern.pattern(), query.toString()));
+			fail("Expected date range search <%1$s> within <%2$s>", dateRangePattern.pattern(), query.toString());
 		}
 	}
 
@@ -538,19 +537,13 @@ public abstract class QueryComposerTestCase {
 		
 		SearchConfig searchConfig = new SearchConfigImpl();
 
-		try {
-			getComposerUnderTest().composeQuery(wrongSearchCriteria, searchConfig);
-			fail("EpServiceException expected for wrong search criteria.");
-		} catch (EpServiceException e) {
-			assertNotNull(e);
-		}
+		assertThatThrownBy(() -> getComposerUnderTest().composeQuery(wrongSearchCriteria, searchConfig))
+			.as("EpServiceException expected for wrong search criteria.")
+			.isInstanceOf(EpServiceException.class);
 
-		try {
-			getComposerUnderTest().composeFuzzyQuery(wrongSearchCriteria, searchConfig);
-			fail("EpServiceException expected for wrong search criteria.");
-		} catch (EpServiceException e) {
-			assertNotNull(e);
-		}
+		assertThatThrownBy(() -> getComposerUnderTest().composeFuzzyQuery(wrongSearchCriteria, searchConfig))
+			.as("EpServiceException expected for wrong search criteria.")
+			.isInstanceOf(EpServiceException.class);
 	}
 	
 	/**
@@ -559,18 +552,13 @@ public abstract class QueryComposerTestCase {
 	@Test
 	public void testEmptyCriteria() {
 		SearchConfig searchConfig = new SearchConfigImpl();
-		try {
-			getComposerUnderTest().composeQuery(getCriteriaUnderTest(), searchConfig);
-			fail("EpServiceException expected for no parameters in search criteria.");
-		} catch (EpServiceException e) {
-			assertNotNull(e);
-		}
 
-		try {
-			getComposerUnderTest().composeFuzzyQuery(getCriteriaUnderTest(), searchConfig);
-			fail("EpServiceException expected for no parameters in search criteria.");
-		} catch (EpServiceException e) {
-			assertNotNull(e);
-		}
+		assertThatThrownBy(() -> getComposerUnderTest().composeQuery(getCriteriaUnderTest(), searchConfig))
+			.as("EpServiceException expected for no parameters in search criteria.")
+			.isInstanceOf(EpServiceException.class);
+
+		assertThatThrownBy(() -> getComposerUnderTest().composeFuzzyQuery(getCriteriaUnderTest(), searchConfig))
+			.as("EpServiceException expected for no parameters in search criteria.")
+			.isInstanceOf(EpServiceException.class);
 	}
 }

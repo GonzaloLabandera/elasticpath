@@ -6,9 +6,9 @@ package com.elasticpath.service.search.solr;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.core.SimpleAnalyzer;
-import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.queryparser.classic.QueryParser;
 
 import com.elasticpath.commons.util.impl.StringEscapeUtilityImpl;
@@ -19,19 +19,31 @@ import com.elasticpath.commons.util.impl.StringEscapeUtilityImpl;
  * "productName:canon &lt;defaultField&gt;:camera".
  */
 public class QueryAnalyzerImpl extends AnalyzerImpl {
-
 	/**
 	 * Quote char.
 	 */
 	protected static final char QUOTE_CHAR = '"';
 
 	private static final Pattern WHITESPACE_PATTERN = Pattern.compile("\\s", Pattern.MULTILINE);
-
 	private static final Pattern UNESCAPED_QUOTE_PATTERN = Pattern.compile("(^\")|([^\\\\][\"])", Pattern.MULTILINE);
-
 	private static final char[] ILLEGAL_END_CHARS = new char[] { '\\', ';' };
 
-	private static final Analyzer ANALYZER = new SimpleAnalyzer(SolrIndexConstants.LUCENE_MATCH_VERSION);
+	private static final String[] ILLEGAL_CHARACTERS = new String[] {
+			";",
+			"-",
+			"(",
+			")",
+			"[",
+			"]",
+			"{",
+			"}",
+			"^",
+			"\"",
+			"~",
+			":"
+
+	};
+	private static final Analyzer ANALYZER = new SimpleAnalyzer();
 
 	private static final ThreadLocal<QueryParser> QUERY_PARSER = new ThreadLocal<>();
 
@@ -46,7 +58,7 @@ public class QueryAnalyzerImpl extends AnalyzerImpl {
 		if ("".equals(result)) {
 			return result;
 		}
-		return parseResult(result, isEscapeAllQuotes);
+		return parseResult(result);
 	}
 
 	/**
@@ -54,10 +66,9 @@ public class QueryAnalyzerImpl extends AnalyzerImpl {
 	 * the empty string.  Also escapes all quotes in the string.
 	 *
 	 * @param string the string value to analyze
-	 * @param isEscapeAllQuotes flag to force all quotes, matched and unmatched, to be escaped
 	 * @return the analyzed parsed text
 	 */
-	private String parseResult(final String string, final boolean isEscapeAllQuotes) {
+	private String parseResult(final String string) {
 		String workingString = string;
 		for (int i = 0; i < ILLEGAL_END_CHARS.length; ++i) {
 			while (workingString.endsWith(String.valueOf(ILLEGAL_END_CHARS[i]))) {
@@ -69,19 +80,12 @@ public class QueryAnalyzerImpl extends AnalyzerImpl {
 			}
 		}
 
-		if (workingString.trim().length() == 0) {
+		if (StringUtils.isBlank(workingString)) {
 			// hack to not fail searching when all illegal chars have been removed
-			return new StringBuffer().append(QUOTE_CHAR).append(' ').append(QUOTE_CHAR).toString();
+			return String.valueOf(QUOTE_CHAR) + ' ' + QUOTE_CHAR;
 		}
 
-		boolean parseFailed = false;
-		try {
-			// only test that we don't throw an exception so that we don't need to worry about
-			// parsing out special characters
-			getParser().parse("pattern:" + workingString);
-		} catch (ParseException e) {
-			parseFailed = true;
-		}
+		boolean hasEscapedcharacters = checkForEscapeCharacters(workingString);
 
 		// special case for unbalanced unescaped quotes since we quote the string
 		final Matcher matcher = UNESCAPED_QUOTE_PATTERN.matcher(workingString);
@@ -90,19 +94,34 @@ public class QueryAnalyzerImpl extends AnalyzerImpl {
 			++count;
 		}
 
-		if (count % 2 != 0 || isEscapeAllQuotes) {
+		if (count % 2 != 0) {
 			workingString = StringEscapeUtilityImpl.escapeUnescapedQuotes(workingString);
 		}
 
 		// wire optimization to not use quotes if we don't need to,
 		// only need quotes if we have whitespace
-		if (!parseFailed && !WHITESPACE_PATTERN.matcher(workingString).find()) {
+		if (!hasEscapedcharacters && !WHITESPACE_PATTERN.matcher(workingString).find()) {
 			return workingString;
 		}
 
-		final StringBuilder builder = new StringBuilder();
-		builder.append(QUOTE_CHAR).append(workingString).append(QUOTE_CHAR);
-		return builder.toString();
+		return QUOTE_CHAR + workingString + QUOTE_CHAR;
+
+	}
+
+	private boolean checkForEscapeCharacters(final String workingString) {
+		for (String illegalCharacter: ILLEGAL_CHARACTERS) {
+			if (workingString.contains(illegalCharacter)) {
+				int indexOfIllegalCharacter = workingString.indexOf(illegalCharacter);
+				if (indexOfIllegalCharacter == 0) {
+					return true;
+				}
+				if (workingString.charAt(indexOfIllegalCharacter - 1) != '\\') {
+					return true;
+				}
+			}
+
+		}
+		return false;
 	}
 
 	/**
@@ -111,7 +130,7 @@ public class QueryAnalyzerImpl extends AnalyzerImpl {
 	 */
 	protected QueryParser getParser() {
 		if (QUERY_PARSER.get() == null) {
-			QUERY_PARSER.set(new QueryParser(SolrIndexConstants.LUCENE_MATCH_VERSION, "text", ANALYZER));
+			QUERY_PARSER.set(new QueryParser("text", ANALYZER));
 		}
 		return QUERY_PARSER.get();
 	}

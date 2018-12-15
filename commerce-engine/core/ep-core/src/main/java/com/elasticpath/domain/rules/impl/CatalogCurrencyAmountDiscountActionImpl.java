@@ -91,17 +91,17 @@ public class CatalogCurrencyAmountDiscountActionImpl extends AbstractRuleActionI
 	 */
 	@Override
 	@Transient
-	public String getRuleCode() throws EpDomainException {
+	public String getRuleCode() {
 		validate();
-		StringBuilder sbf = new StringBuilder();
-		sbf.append("\t\tdelegate.applyCatalogCurrencyDiscountAmount(");
-		sbf.append(this.getRuleId()).append("L, "); //NOPMD
-		sbf.append(this.getUidPk()).append("L, "); //NOPMD
-		sbf.append("prices.get(product.getCode()), ");
-		sbf.append("currency.getCurrencyCode(), \"" + this.getParamValue(RuleParameter.CURRENCY_KEY) + "\", \"");
-		sbf.append(this.getParamValue(RuleParameter.DISCOUNT_AMOUNT_KEY));
-		sbf.append("\");\n");
-		return sbf.toString();
+		return "\t\tdelegate.applyCatalogCurrencyDiscountAmount("
+				+ this.getRuleId() + "L, "
+				+ this.getUidPk() + "L, "
+				+ "prices.get(product.getCode()), "
+				+ "currency.getCurrencyCode(), \""
+				+ this.getParamValue(RuleParameter.CURRENCY_KEY)
+				+ "\", \""
+				+ this.getParamValue(RuleParameter.DISCOUNT_AMOUNT_KEY)
+				+ "\");\n";
 	}
 
 	/**

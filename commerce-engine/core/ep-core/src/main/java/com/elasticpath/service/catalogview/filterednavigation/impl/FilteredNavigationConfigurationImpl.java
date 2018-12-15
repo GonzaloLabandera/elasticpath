@@ -3,9 +3,11 @@
  */
 package com.elasticpath.service.catalogview.filterednavigation.impl;
 
+import java.util.ArrayList;
 import java.util.Currency;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.SortedMap;
@@ -15,7 +17,12 @@ import com.elasticpath.domain.attribute.Attribute;
 import com.elasticpath.domain.catalogview.AttributeKeywordFilter;
 import com.elasticpath.domain.catalogview.AttributeRangeFilter;
 import com.elasticpath.domain.catalogview.AttributeValueFilter;
+import com.elasticpath.domain.catalogview.BrandFilter;
+import com.elasticpath.domain.catalogview.CategoryFilter;
 import com.elasticpath.domain.catalogview.PriceFilter;
+import com.elasticpath.domain.catalogview.SizeRangeFilter;
+import com.elasticpath.domain.catalogview.SkuOptionValueFilter;
+import com.elasticpath.domain.search.Facet;
 import com.elasticpath.service.catalogview.filterednavigation.FilteredNavigationConfiguration;
 
 /**
@@ -25,39 +32,52 @@ public class FilteredNavigationConfigurationImpl implements FilteredNavigationCo
 
 	private final Map<String, PriceFilter> allPriceRanges = new HashMap<>();
 
-	private final Map<Currency, SortedMap<PriceFilter, PriceFilter>> bottomLevelPriceRangesMap =
-		new HashMap<>();
+	private final Map<Currency, SortedMap<PriceFilter, PriceFilter>> bottomLevelPriceRangesMap = new HashMap<>();
 
 	private final Map<String, AttributeRangeFilter> allAttributeRanges = new HashMap<>();
 
-	private final Map<String, SortedMap<AttributeRangeFilter, AttributeRangeFilter>> bottomLevelAttributeRangesMap =
-		new HashMap<>();
+	private final Map<String, SortedMap<AttributeRangeFilter, AttributeRangeFilter>> bottomLevelAttributeRangesMap = new HashMap<>();
 
 	private final Map<String, AttributeValueFilter> allAttributeSimpleValues = new HashMap<>();
 
 	private final Map<String, AttributeKeywordFilter> allAttributeKeywords = new HashMap<>();
-	
-	private final Map<String, SortedMap<String, AttributeValueFilter>> attributeSimpleValuesMap =
-		new HashMap<>();
+
+	private final Map<String, SortedMap<String, AttributeValueFilter>> attributeSimpleValuesMap = new HashMap<>();
 
 	private final Map<String, Attribute> allAttributesMap = new HashMap<>();
 
 	private final Set<String> allBrandCodes = new HashSet<>();
-	
+
+	private final Map<String, Facet> facetMap = new HashMap<>();
+
+	private final Map<String, SkuOptionValueFilter> allSkuOptionValueFilters = new HashMap<>();
+
+	private final Map<String, SizeRangeFilter> allSizeRangeFilters = new HashMap<>();
+
+	private final Map<String, String> othersGuidMap = new HashMap<>();
+
+	private final Map<String, String> attributeGuidMap = new HashMap<>();
+
+	private final Map<String, String> skuOptionGuidMap = new HashMap<>();
+
+	private final List<BrandFilter> brandFilters = new ArrayList<>();
+
+	private final List<CategoryFilter> categoryFilters = new ArrayList<>();
+
 	/**
 	 * Returns all defined price ranges as a <code>Map</code>.
 	 * <p>
 	 * The key will be like : "price-between-USD-90-and-100".
 	 * <p>
 	 * And the value will be a <code>PriceFilter</code>.
-	 * 
+	 *
 	 * @return all defined price ranges as a <code>Map</code>.
 	 */
 	@Override
 	public Map<String, PriceFilter> getAllPriceRanges() {
 		return this.allPriceRanges;
 	}
-	
+
 	/**
 	 * Clears all price range information, including bottom level price ranges.
 	 */
@@ -73,7 +93,7 @@ public class FilteredNavigationConfigurationImpl implements FilteredNavigationCo
 	 * range it should belongs to.
 	 * <p>
 	 * The key and the value will be the same <code>PriceFilter</code>.
-	 * 
+	 *
 	 * @param currency the currency
 	 * @return price ranges of the given currency, which are defined at bottom level
 	 */
@@ -95,7 +115,7 @@ public class FilteredNavigationConfigurationImpl implements FilteredNavigationCo
 	 * The attribute code will be used as the map key .
 	 * <p>
 	 * And the value will be a <code>AttributeRangeFilter</code>.
-	 * 
+	 *
 	 * @return all defined attribute ranges as a <code>Map</code>.
 	 */
 	@Override
@@ -117,7 +137,7 @@ public class FilteredNavigationConfigurationImpl implements FilteredNavigationCo
 	 * <code>Product</code> to decide which attribute range it should belongs to.
 	 * <p>
 	 * The key and the value will be the same <code>AttributeRangeFilter</code>.
-	 * 
+	 *
 	 * @param attributeCode the attributeCode
 	 * @return attribute ranges of the given attribute code, which are defined at bottom level
 	 */
@@ -138,7 +158,7 @@ public class FilteredNavigationConfigurationImpl implements FilteredNavigationCo
 	 * The filter id will be used as the map key .
 	 * <p>
 	 * And the value will be a <code>AttributeFilter</code>.
-	 * 
+	 *
 	 * @return all defined attribute filters as a <code>Map</code>.
 	 */
 	@Override
@@ -157,7 +177,7 @@ public class FilteredNavigationConfigurationImpl implements FilteredNavigationCo
 	/**
 	 * Returns attribute values of the given attributeCode, which are defined at the attribute section. The key will be the attribute value and the
 	 * value will be the <code>AttributeValueFilter</code>.
-	 * 
+	 *
 	 * @param attributeCode the attributeCode
 	 * @return attribute ranges of the given attribute code, which are defined at bottom level
 	 */
@@ -176,28 +196,28 @@ public class FilteredNavigationConfigurationImpl implements FilteredNavigationCo
 	public Map<String, AttributeKeywordFilter> getAllAttributeKeywords() {
 		return allAttributeKeywords;
 	}
-	
+
 	@Override
 	public void clearAllAttributeKeywords() {
 		this.allAttributeKeywords.clear();
 	}
-	
+
 	/**
 	 * This map contains all the attributes defined in the filtered navigation configuration.
 	 * The key will be the attribute code, and the value will be the <code>Attribute</code>.
-	 * 
+	 *
 	 * @return All the attributes.
 	 */
 	@Override
 	public Map<String, Attribute> getAllAttributesMap() {
 		return this.allAttributesMap;
 	}
-	
+
 	@Override
 	public Set<String> getAllSimpleAttributeKeys() {
 		return attributeSimpleValuesMap.keySet();
 	}
-	
+
 	@Override
 	public Set<String> getAllBrandCodes() {
 		return this.allBrandCodes;
@@ -206,5 +226,54 @@ public class FilteredNavigationConfigurationImpl implements FilteredNavigationCo
 	@Override
 	public void clearAllBrandCodes() {
 		this.allBrandCodes.clear();
+	}
+
+	@Override
+	public Map<String, Facet> getFacetMap() {
+		return facetMap;
+	}
+
+	@Override
+	public Map<String, SkuOptionValueFilter> getAllSkuOptionValueFilters() {
+		return allSkuOptionValueFilters;
+	}
+
+	@Override
+	public void clearAllSkuOptionValueFilters() {
+		allSkuOptionValueFilters.clear();
+	}
+
+	public Map<String, SizeRangeFilter> getAllSizeRangeFilters() {
+		return allSizeRangeFilters;
+	}
+
+	@Override
+	public void clearAllSizeRangeFilters() {
+		allSizeRangeFilters.clear();
+	}
+
+	@Override
+	public Map<String, String> getOthersGuidMap() {
+		return othersGuidMap;
+	}
+
+	@Override
+	public Map<String, String> getAttributeGuidMap() {
+		return attributeGuidMap;
+	}
+
+	@Override
+	public Map<String, String> getSkuOptionGuidMap() {
+		return skuOptionGuidMap;
+	}
+
+	@Override
+	public List<BrandFilter> getBrandFilters() {
+		return brandFilters;
+	}
+
+	@Override
+	public List<CategoryFilter> getCategoryFilters() {
+		return categoryFilters;
 	}
 }

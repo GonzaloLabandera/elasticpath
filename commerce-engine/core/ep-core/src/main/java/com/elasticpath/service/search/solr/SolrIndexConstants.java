@@ -15,7 +15,7 @@ public final class SolrIndexConstants {
 	/**
 	 * Use by certain classes to match version compatibility across releases of Lucene.
 	 */
-	public static final Version LUCENE_MATCH_VERSION = Version.LUCENE_45;
+	public static final Version LUCENE_MATCH_VERSION = Version.LUCENE_7_2_1;
 
 	/**
 	 * The Solr home system property name.
@@ -378,6 +378,18 @@ public final class SolrIndexConstants {
 
 	/** The SKU index location system property name. */
 	public static final String SKU_INDEX_DIR_PROPERTY = SOLR_INDEX_PROPERTY_BASE + SKU_SOLR_CORE;
+
+	/** Weight of a product sku. */
+	public static final String WEIGHT = "weight";
+
+	/** Length of a product sku. */
+	public static final String LENGTH = "length";
+
+	/** Height of a product sku. */
+	public static final String HEIGHT = "height";
+
+	/** Width of a product sku. */
+	public static final String WIDTH = "width";
 
 	private SolrIndexConstants() {
 		// Do not instantiate this class

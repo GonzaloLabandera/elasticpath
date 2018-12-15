@@ -6,13 +6,16 @@ package com.elasticpath.service.search.index;
 import java.util.List;
 import java.util.Map;
 
-import com.elasticpath.domain.attribute.Attribute;
 import com.elasticpath.domain.catalogview.AttributeRangeFilter;
 import com.elasticpath.domain.catalogview.AttributeValueFilter;
 import com.elasticpath.domain.catalogview.BrandFilter;
 import com.elasticpath.domain.catalogview.CategoryFilter;
 import com.elasticpath.domain.catalogview.FilterOption;
 import com.elasticpath.domain.catalogview.PriceFilter;
+import com.elasticpath.domain.catalogview.SizeRangeFilter;
+import com.elasticpath.domain.catalogview.SkuOptionValueFilter;
+import com.elasticpath.domain.search.Facet;
+import com.elasticpath.service.search.solr.FacetValue;
 
 /**
  * Represents a object that holds search information including the results (for a particular
@@ -103,7 +106,7 @@ public interface IndexSearchResult {
 	 *
 	 * @return the list of attribute {@link FilterOption}s for the previous search
 	 */
-	Map<Attribute, List<FilterOption<AttributeValueFilter>>> getAttributeValueFilterOptions();
+	Map<String, List<FilterOption<AttributeValueFilter>>> getAttributeValueFilterOptions();
 
 	/**
 	 * Gets the list of attribute range {@link FilterOption}s for the previous search. This is
@@ -111,7 +114,7 @@ public interface IndexSearchResult {
 	 *
 	 * @return the list of attribute value {@link FilterOption}s for the previous search
 	 */
-	Map<Attribute, List<FilterOption<AttributeRangeFilter>>> getAttributeRangeFilterOptions();
+	Map<String, List<FilterOption<AttributeRangeFilter>>> getAttributeRangeFilterOptions();
 
 	/**
 	 * filter uids by startIndex and pageSize.
@@ -141,4 +144,55 @@ public interface IndexSearchResult {
 	 * @return true if the search result is empty, false otherwise
 	 */
 	boolean isEmpty();
+
+	/**
+	 * Retrieves a map a key on facet guid and a value of a facet.
+	 * @return facet map
+	 */
+	Map<String, Facet> getFacetMap();
+
+	/**
+	 * Sets the facet map.
+	 * @param facetMap the facet map
+	 */
+	void setFacetMap(Map<String, Facet> facetMap);
+
+	/**
+	 * Returns a map with a key on Sku Option containing the list of sku option value filters.
+	 * @return map of sku option value filters
+	 */
+	Map<String, List<FilterOption<SkuOptionValueFilter>>> getSkuOptionValueFilterOptions();
+
+	/**
+	 * Sets the sku option value filters.
+	 * @param skuOptionValueFilterOptions sku option value filters options
+	 */
+	void setSkuOptionValueFilterOptions(Map<String, List<FilterOption<SkuOptionValueFilter>>> skuOptionValueFilterOptions);
+
+	/**
+	 * Returns a map of size range filter options with a key on the size type
+	 * @return map of size range filters.
+	 */
+	Map<String, List<FilterOption<SizeRangeFilter>>> getSizeRangeFilterOptions();
+
+	/**
+	 * Sets the size range filters.
+	 * @param sizeRangeFilterOptions size range filters
+	 */
+	void setSizeRangeFilterOptions(Map<String, List<FilterOption<SizeRangeFilter>>> sizeRangeFilterOptions);
+
+	/**
+	 * Get facet infos from the search result containing the localized field name and type.
+	 * @param maxResults maxResults to use for the query
+	 * @return facet infos
+	 */
+	List<String> getFacetFields(int maxResults);
+
+	/**
+	 * Get facet values given a facet info.
+	 * @param facetGuid the facet guid
+	 * @param maxResults the max results.
+	 * @return facet values
+	 */
+	List<FacetValue> getFacetValues(String facetGuid, int maxResults);
 }

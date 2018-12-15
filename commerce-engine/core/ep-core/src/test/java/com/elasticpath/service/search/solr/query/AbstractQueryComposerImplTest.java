@@ -1,11 +1,9 @@
-/**
+/*
  * Copyright (c) Elastic Path Software Inc., 2014
  */
 package com.elasticpath.service.search.solr.query;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import org.apache.lucene.analysis.core.SimpleAnalyzer;
 import org.apache.lucene.queryparser.classic.ParseException;
@@ -18,25 +16,23 @@ import org.junit.Test;
 import com.elasticpath.domain.misc.SearchConfig;
 import com.elasticpath.service.search.index.QueryComposer;
 import com.elasticpath.service.search.query.SearchCriteria;
-import com.elasticpath.service.search.solr.SolrIndexConstants;
 
 /**
  * Test case for {@link AbstractQueryComposerImpl}.
  */
 public class AbstractQueryComposerImplTest extends QueryComposerTestCase {
-	
+
 	private AbstractQueryComposerImpl queryComposer;
-	
-	
+
 	/**
 	 * Prepare for tests.
-	 * 
+	 *
 	 * @throws Exception in case of any errors.
 	 */
 	@Override
 	public void setUp() throws Exception {
 		super.setUp();
-		
+
 		queryComposer = getQueryComposer();
 	}
 
@@ -45,12 +41,12 @@ public class AbstractQueryComposerImplTest extends QueryComposerTestCase {
 
 			@Override
 			protected Query composeFuzzyQueryInternal(final SearchCriteria searchCriteria, final SearchConfig searchConfig) {
-				return new BooleanQuery();
+				return new BooleanQuery.Builder().build();
 			}
 
 			@Override
 			protected Query composeQueryInternal(final SearchCriteria searchCriteria, final SearchConfig searchConfig) {
-				return new BooleanQuery();
+				return new BooleanQuery.Builder().build();
 			}
 
 			@Override
@@ -59,32 +55,26 @@ public class AbstractQueryComposerImplTest extends QueryComposerTestCase {
 			}
 		};
 	}
-	
+
 	/**
 	 * Test method for {@link AbstractQueryComposerImpl#getMatchAllQuery()}.
 	 */
 	@Test
-	public void testMatchAllQuery() {
+	public void testMatchAllQuery() throws ParseException {
 		// our query _has_ to go through the lucene query parser
-		QueryParser parser = new QueryParser(SolrIndexConstants.LUCENE_MATCH_VERSION, "text",
-				new SimpleAnalyzer(SolrIndexConstants.LUCENE_MATCH_VERSION));
-		Query query = null;
-		
-		try {
-			query = parser.parse(queryComposer.getMatchAllQuery().toString());
-		} catch (ParseException e) {
-			fail("Should not throw an exception.");
-		}
-		
-		assertNotNull(query);
-		assertEquals(query, new MatchAllDocsQuery());
+		QueryParser parser = new QueryParser("text",
+				new SimpleAnalyzer());
+
+		Query query = parser.parse(queryComposer.getMatchAllQuery().toString());
+
+		assertThat(query).isEqualTo(new MatchAllDocsQuery());
 	}
-	
+
 	@Override
 	public void testWrongSearchCriteria() {
 		// not valid for the abstract class
 	}
-	
+
 	@Override
 	public void testEmptyCriteria() {
 		// not valid for the abstract class

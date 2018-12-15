@@ -1,22 +1,21 @@
 /**
  * Copyright (c) Elastic Path Software Inc., 2016
  */
-/**
- * 
- */
+
 package com.elasticpath.service.catalog.impl;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.jmock.Expectations;
-import org.jmock.integration.junit4.JUnitRuleMockery;
-import org.junit.Ignore;
-import org.junit.Rule;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.elasticpath.commons.exception.EpProductInUseException;
 import com.elasticpath.domain.catalog.Product;
@@ -29,14 +28,18 @@ import com.elasticpath.service.search.IndexType;
 /**
  * Tests for the ProductServiceImpl class.
  */
+@RunWith(MockitoJUnitRunner.class)
 public class ProductServiceImplTest {
 
-	@Rule
-	public final JUnitRuleMockery context = new JUnitRuleMockery();
-	private final ProductDao productDao = context.mock(ProductDao.class);
-	private final ProductLookup productLookup = context.mock(ProductLookup.class);
-	private final IndexNotificationService indexNotificationService = context.mock(IndexNotificationService.class);
-	
+	@Mock
+	private ProductDao productDao;
+
+	@Mock
+	private ProductLookup productLookup;
+
+	@Mock
+	private IndexNotificationService indexNotificationService;
+
 	/**
 	 * Tests if #removeProductTree throws exception when product is in a bundle.
 	 */
@@ -56,11 +59,8 @@ public class ProductServiceImplTest {
 		};
 		
 		service.setProductLookup(productLookup);
-		
-		context.checking(new Expectations() { {
-			oneOf(productLookup).findByUid(aProductUid); will(returnValue(product));
-		} });
-		
+		when(productLookup.findByUid(aProductUid)).thenReturn(product);
+
 		service.removeProductTree(aProductUid);
 	}
 
@@ -73,32 +73,32 @@ public class ProductServiceImplTest {
 		ProductServiceImpl service = new ProductServiceImpl();
 		service.setProductDao(productDao);
 
-		context.checking(new Expectations() { {
-			oneOf(productDao).findUidsByCategoryUids(categoryUids); will(returnValue(expectedProductUids));
-		} });
+		when(productDao.findUidsByCategoryUids(categoryUids)).thenReturn(expectedProductUids);
 
 		final List<Long> actualProductUids = service.findUidsByCategoryUids(categoryUids);
 
-		assertEquals(actualProductUids, expectedProductUids);
+		assertThat(actualProductUids).isEqualTo(expectedProductUids);
 	}
 	
 	/**
 	 * Tests that index notification update is posted when a product is added or updated.
 	 */
-	@Ignore("test does not work")
 	@Test
 	public void testAddOrUpdateProductAddsIndexNotification() {
 		final Product product = new ProductImpl();
-		final ProductServiceImpl productService = new ProductServiceImpl();
-		productService.setIndexNotificationService(indexNotificationService);
-		context.checking(new Expectations() {
-			{
-				oneOf(productDao).saveOrUpdate(product); will(returnValue(product));
-				oneOf(indexNotificationService).addNotificationForEntityIndexUpdate(IndexType.PRODUCT, product.getUidPk());
+		final ProductServiceImpl productService = new ProductServiceImpl() {
+			@Override
+			protected void validate(final Product product) {
+				// Skip validation
 			}
-		});
-		
+		};
+		productService.setProductDao(productDao);
+		productService.setIndexNotificationService(indexNotificationService);
+
+		when(productDao.saveOrUpdate(product)).thenReturn(product);
+
 		productService.saveOrUpdate(product);
+		verify(indexNotificationService).addNotificationForEntityIndexUpdate(IndexType.PRODUCT, product.getUidPk());
 	}
 	
 }

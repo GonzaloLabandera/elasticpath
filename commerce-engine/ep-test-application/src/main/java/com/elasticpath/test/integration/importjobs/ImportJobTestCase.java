@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) Elastic Path Software Inc., 2015
  */
 package com.elasticpath.test.integration.importjobs;
@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import com.google.common.collect.ImmutableMap;
 import org.junit.Before;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -141,7 +142,7 @@ public abstract class ImportJobTestCase extends BasicSpringContextTest {
 		return importJob;
 	}
 
-	public List<ImportBadRow> executeImportJob(final ImportJob importJob) throws InterruptedException {
+	public List<ImportBadRow> executeImportJob(final ImportJob importJob) {
 		CmUser initiator = scenario.getCmUser();
 
 		ImportJobRequest importJobProcessRequest = new ImportJobRequestImpl();
@@ -178,140 +179,144 @@ public abstract class ImportJobTestCase extends BasicSpringContextTest {
 	protected ImportJob createInsertCustomerImportJob(final String csvFileName) {
 		List<ImportDataType> importDataTypes = importService.getCustomerImportDataTypes();
 		String importDataTypeName = findByType(importDataTypes, ImportDataTypeCustomerImpl.class).getName();
-		Map<String, Integer> mappings = new HashMap<>();
 
-		mappings.put("guid", 1);
-		mappings.put("userId", 2);
-		mappings.put("CP_FIRST_NAME", 3);
-		mappings.put("CP_LAST_NAME", 4);
-		mappings.put("CP_EMAIL", 5);
-		mappings.put("CP_ANONYMOUS_CUST", 6);
-		mappings.put("CP_HTML_EMAIL", 7);
-		mappings.put("status", 8);
-		mappings.put("creationDate", 9);
-		mappings.put("CP_PHONE", 10);
+		ImmutableMap<String, Integer> map = new ImmutableMap.Builder<String, Integer>()
+				.put("guid", 1)
+				.put("userId", 2)
+				.put("CP_FIRST_NAME", 3)
+				.put("CP_LAST_NAME", 4)
+				.put("CP_EMAIL", 5)
+				.put("CP_ANONYMOUS_CUST", 6)
+				.put("CP_HTML_EMAIL", 7)
+				.put("status", 8)
+				.put("creationDate", 9)
+				.put("CP_PHONE", 10)
+				.build();
 
-		ImportJob importJob = createSimpleImportJob(scenario.getStore(), Utils.uniqueCode("Insert Customers"),
-				csvFileName, AbstractImportTypeImpl.INSERT_TYPE, importDataTypeName, mappings);
-		return importJob;
+		return createSimpleImportJob(scenario.getStore(), Utils.uniqueCode("Insert Customers"),
+				csvFileName, AbstractImportTypeImpl.INSERT_TYPE, importDataTypeName, map);
 	}
 
 	protected ImportJob createInsertUpdateCustomerImportJob() {
 		List<ImportDataType> importDataTypes = importService.getCustomerImportDataTypes();
 		String importDataTypeName = findByType(importDataTypes, ImportDataTypeCustomerImpl.class).getName();
-		Map<String, Integer> mappings = new HashMap<>();
 
-		mappings.put("guid", 1);
-		mappings.put("userId", 2);
-		mappings.put("CP_FIRST_NAME", 3);
-		mappings.put("CP_LAST_NAME", 4);
-		mappings.put("CP_EMAIL", 5);
-		mappings.put("CP_ANONYMOUS_CUST", 6);
-		mappings.put("CP_HTML_EMAIL", 7);
-		mappings.put("status", 8);
-		mappings.put("creationDate", 9);
-		mappings.put("CP_PHONE", 10);
+		ImmutableMap<String, Integer> map = new ImmutableMap.Builder<String, Integer>()
+				.put("guid", 1)
+				.put("userId", 2)
+				.put("CP_FIRST_NAME", 3)
+				.put("CP_LAST_NAME", 4)
+				.put("CP_EMAIL", 5)
+				.put("CP_ANONYMOUS_CUST", 6)
+				.put("CP_HTML_EMAIL", 7)
+				.put("status", 8)
+				.put("creationDate", 9)
+				.put("CP_PHONE", 10)
+				.build();
 
-		ImportJob importJob = createSimpleImportJob(scenario.getStore(), Utils.uniqueCode("Insert and Update Customers"),
-				"customer_insert_update.csv", AbstractImportTypeImpl.INSERT_UPDATE_TYPE, importDataTypeName, mappings);
-		return importJob;
+		return createSimpleImportJob(scenario.getStore(), Utils.uniqueCode("Insert and Update Customers"),
+				"customer_insert_update.csv", AbstractImportTypeImpl.INSERT_UPDATE_TYPE, importDataTypeName, map);
 	}
 
 	protected ImportJob createUpdateCustomerImportJob() {
 		List<ImportDataType> importDataTypes = importService.getCustomerImportDataTypes();
 		String importDataTypeName = findByType(importDataTypes, ImportDataTypeCustomerImpl.class).getName();
-		Map<String, Integer> mappings = new HashMap<>();
 
-		mappings.put("guid", 1);
-		mappings.put("CP_EMAIL", 2);
-		mappings.put("CP_PHONE", 3);
+		ImmutableMap<String, Integer> map = new ImmutableMap.Builder<String, Integer>()
+				.put("guid", 1)
+				.put("CP_EMAIL", 2)
+				.put("CP_PHONE", 3)
+				.build();
 
-		ImportJob importJob = createSimpleImportJob(scenario.getStore(), Utils.uniqueCode("Update Customers"),
-				"customer_update.csv", AbstractImportTypeImpl.UPDATE_TYPE, importDataTypeName, mappings);
-		return importJob;
+		return createSimpleImportJob(scenario.getStore(), Utils.uniqueCode("Update Customers"),
+				"customer_update.csv", AbstractImportTypeImpl.UPDATE_TYPE, importDataTypeName, map);
 	}
 
 	protected ImportJob createDeleteCustomerImportJob() {
 		List<ImportDataType> importDataTypes = importService.getCustomerImportDataTypes();
 		String importDataTypeName = findByType(importDataTypes, ImportDataTypeCustomerImpl.class).getName();
-		Map<String, Integer> mappings = new HashMap<>();
 
-		mappings.put("guid", 1);
+		ImmutableMap<String, Integer> map = new ImmutableMap.Builder<String, Integer>()
+				.put("guid", 1)
+				.build();
 
-		ImportJob importJob = createSimpleImportJob(scenario.getStore(), Utils.uniqueCode("Delete Customers"),
-				"customer_delete.csv", AbstractImportTypeImpl.DELETE_TYPE, importDataTypeName, mappings);
-		return importJob;
+		return createSimpleImportJob(scenario.getStore(), Utils.uniqueCode("Delete Customers"),
+				"customer_delete.csv", AbstractImportTypeImpl.DELETE_TYPE, importDataTypeName, map);
 	}
 
 	protected ImportJob createInsertCategoriesImportJob() {
 
 		List<ImportDataType> importDataTypes = importService.getCatalogImportDataTypes(scenario.getCatalog().getUidPk());
 		String importDataTypeName = findByType(importDataTypes, ImportDataTypeCategoryImpl.class).getName();
-		Map<String, Integer> mappings = new HashMap<>();
-		mappings.put("categoryCode", 1);
-		mappings.put("parentCategoryCode", 2);
-		mappings.put("displayName(en)", 3);
-		mappings.put("enableDate", 4);
-		mappings.put("disableDate", 5);
-		mappings.put("storeVisible", 6);
-		mappings.put("ordering", 7);
-		mappings.put("seoUrl(en)", 8);
-		mappings.put("seoTitle(en)", 9);
-		mappings.put("seoKeyWords(en)", 10);
-		mappings.put("seoDescription(en)", 11);
-		mappings.put("catImage", 12);
-		mappings.put("catDescription(en)", 13);
 
-		ImportJob importJob = createSimpleImportJob(scenario.getCatalog(), Utils.uniqueCode("Insert Categories"),
-				"categories_insert.csv", AbstractImportTypeImpl.INSERT_TYPE, importDataTypeName, mappings);
-		return importJob;
+		ImmutableMap<String, Integer> map = new ImmutableMap.Builder<String, Integer>()
+				.put("categoryCode", 1)
+				.put("parentCategoryCode", 2)
+				.put("displayName(en)", 3)
+				.put("enableDate", 4)
+				.put("disableDate", 5)
+				.put("storeVisible", 6)
+				.put("ordering", 7)
+				.put("seoUrl(en)", 8)
+				.put("seoTitle(en)", 9)
+				.put("seoKeyWords(en)", 10)
+				.put("seoDescription(en)", 11)
+				.put("catImage", 12)
+				.put("catDescription(en)", 13)
+				.build();
+
+		return createSimpleImportJob(scenario.getCatalog(), Utils.uniqueCode("Insert Categories"),
+				"categories_insert.csv", AbstractImportTypeImpl.INSERT_TYPE, importDataTypeName, map);
 	}
 
 	protected ImportJob createInsertUpdateCategoriesImportJob() {
 		List<ImportDataType> importDataTypes = importService.getCatalogImportDataTypes(scenario.getCatalog().getUidPk());
 		String importDataTypeName = importDataTypes.get(0).getName();
-		Map<String, Integer> mappings = new HashMap<>();
-		mappings.put("categoryCode", 1);
-		mappings.put("parentCategoryCode", 2);
-		mappings.put("displayName(en)", 3);
-		mappings.put("enableDate", 4);
-		mappings.put("disableDate", 5);
-		mappings.put("storeVisible", 6);
-		mappings.put("ordering", 7);
-		mappings.put("seoUrl(en)", 8);
-		mappings.put("seoTitle(en)", 9);
-		mappings.put("seoKeyWords(en)", 10);
-		mappings.put("seoDescription(en)", 11);
-		mappings.put("catImage", 12);
-		mappings.put("catDescription(en)", 13);
 
-		ImportJob importJob = createSimpleImportJob(scenario.getCatalog(), Utils.uniqueCode("Insert and Update Categories"),
-				"categories_insert_update.csv", AbstractImportTypeImpl.INSERT_UPDATE_TYPE, importDataTypeName, mappings);
-		return importJob;
+		ImmutableMap<String, Integer> map = new ImmutableMap.Builder<String, Integer>()
+				.put("categoryCode", 1)
+				.put("parentCategoryCode", 2)
+				.put("displayName(en)", 3)
+				.put("enableDate", 4)
+				.put("disableDate", 5)
+				.put("storeVisible", 6)
+				.put("ordering", 7)
+				.put("seoUrl(en)", 8)
+				.put("seoTitle(en)", 9)
+				.put("seoKeyWords(en)", 10)
+				.put("seoDescription(en)", 11)
+				.put("catImage", 12)
+				.put("catDescription(en)", 13)
+				.build();
+
+		return createSimpleImportJob(scenario.getCatalog(), Utils.uniqueCode("Insert and Update Categories"),
+				"categories_insert_update.csv", AbstractImportTypeImpl.INSERT_UPDATE_TYPE, importDataTypeName, map);
 	}
 
 	protected ImportJob createUpdateCategoriesImportJob() {
 		List<ImportDataType> importDataTypes = importService.getCatalogImportDataTypes(scenario.getCatalog().getUidPk());
 		String importDataTypeName = importDataTypes.get(0).getName();
-		Map<String, Integer> mappings = new HashMap<>();
-		mappings.put("categoryCode", 1);
-		mappings.put("displayName(en)", 2);
-		mappings.put("catDescription(en)", 3);
 
-		ImportJob importJob = createSimpleImportJob(scenario.getCatalog(), Utils.uniqueCode("Update Categories"),
-				"categories_update.csv", AbstractImportTypeImpl.UPDATE_TYPE, importDataTypeName, mappings);
-		return importJob;
+		ImmutableMap<String, Integer> map = new ImmutableMap.Builder<String, Integer>()
+				.put("categoryCode", 1)
+				.put("displayName(en)", 2)
+				.put("catDescription(en)", 3)
+				.build();
+
+		return createSimpleImportJob(scenario.getCatalog(), Utils.uniqueCode("Update Categories"),
+				"categories_update.csv", AbstractImportTypeImpl.UPDATE_TYPE, importDataTypeName, map);
 	}
 
 	protected ImportJob createDeleteCategoriesImportJob() {
 		List<ImportDataType> importDataTypes = importService.getCatalogImportDataTypes(scenario.getCatalog().getUidPk());
 		String importDataTypeName = importDataTypes.get(0).getName();
-		Map<String, Integer> mappings = new HashMap<>();
-		mappings.put("categoryCode", 1);
 
-		ImportJob importJob = createSimpleImportJob(scenario.getCatalog(), Utils.uniqueCode("Delete Categories"),
-				"categories_delete.csv", AbstractImportTypeImpl.DELETE_TYPE, importDataTypeName, mappings);
-		return importJob;
+		ImmutableMap<String, Integer> map = new ImmutableMap.Builder<String, Integer>()
+				.put("categoryCode", 1)
+				.build();
+
+		return createSimpleImportJob(scenario.getCatalog(), Utils.uniqueCode("Delete Categories"),
+				"categories_delete.csv", AbstractImportTypeImpl.DELETE_TYPE, importDataTypeName, map);
 	}
 
 	/**
@@ -323,731 +328,708 @@ public abstract class ImportJobTestCase extends BasicSpringContextTest {
 	protected ImportJob createInsertCategoriesImportJobManyRows() {
 		List<ImportDataType> importDataTypes = importService.getCatalogImportDataTypes(scenario.getCatalog().getUidPk());
 		String importDataTypeName = importDataTypes.get(0).getName();
-		Map<String, Integer> mappings = new HashMap<>();
-		mappings.put("categoryCode", 1);
-		mappings.put("displayName(en)", 2);
-		mappings.put("parentCategoryCode", 3);
 
-		ImportJob importJob = createSimpleImportJob(scenario.getCatalog(), Utils.uniqueCode("Concurrent Import Categories"),
-				"categories_insert_concurrent.csv", AbstractImportTypeImpl.INSERT_TYPE, importDataTypeName, mappings);
-		return importJob;
+		ImmutableMap<String, Integer> map = new ImmutableMap.Builder<String, Integer>()
+				.put("categoryCode", 1)
+				.put("displayName(en)", 2)
+				.put("parentCategoryCode", 3)
+				.build();
+
+		return createSimpleImportJob(scenario.getCatalog(), Utils.uniqueCode("Concurrent Import Categories"),
+				"categories_insert_concurrent.csv", AbstractImportTypeImpl.INSERT_TYPE, importDataTypeName, map);
 	}
 
 	protected ImportJob createInsertCategoryAssociationImportJob() {
 		List<ImportDataType> importDataTypes = importService.getCatalogImportDataTypes(scenario.getCatalog().getUidPk());
 		String importDataTypeName = findByType(importDataTypes, ImportDataTypeProductCategoryAssociationImpl.class).getName();
-		Map<String, Integer> mappings = new HashMap<>();
 
-		mappings.put("productCode", 1);
-		mappings.put("categoryCode", 2);
-		mappings.put("featuredProductOrder", 3);
+		ImmutableMap<String, Integer> map = new ImmutableMap.Builder<String, Integer>()
+				.put("productCode", 1)
+				.put("categoryCode", 2)
+				.put("featuredProductOrder", 3)
+				.build();
 
-		ImportJob importJob = createSimpleImportJob(scenario.getCatalog(), Utils.uniqueCode("Insert Categories"),
-				"categoryassociation_insert.csv", AbstractImportTypeImpl.INSERT_TYPE, importDataTypeName, mappings);
-		return importJob;
+		return createSimpleImportJob(scenario.getCatalog(), Utils.uniqueCode("Insert Categories"),
+				"categoryassociation_insert.csv", AbstractImportTypeImpl.INSERT_TYPE, importDataTypeName, map);
 	}
 
 	protected ImportJob createInsertUpdateCategoryAssociationImportJob() {
 		List<ImportDataType> importDataTypes = importService.getCatalogImportDataTypes(scenario.getCatalog().getUidPk());
 		String importDataTypeName = findByType(importDataTypes, ImportDataTypeProductCategoryAssociationImpl.class).getName();
-		Map<String, Integer> mappings = new HashMap<>();
 
-		mappings.put("productCode", 1);
-		mappings.put("categoryCode", 2);
-		mappings.put("featuredProductOrder", 3);
+		ImmutableMap<String, Integer> map = new ImmutableMap.Builder<String, Integer>()
+				.put("productCode", 1)
+				.put("categoryCode", 2)
+				.put("featuredProductOrder", 3)
+				.build();
 
-		ImportJob importJob = createSimpleImportJob(scenario.getCatalog(), Utils.uniqueCode("Insert and Update Categories"),
-				"categoryassociation_insert_update.csv", AbstractImportTypeImpl.INSERT_UPDATE_TYPE, importDataTypeName,
-				mappings);
-		return importJob;
+		return createSimpleImportJob(scenario.getCatalog(), Utils.uniqueCode("Insert and Update Categories"),
+				"categoryassociation_insert_update.csv", AbstractImportTypeImpl.INSERT_UPDATE_TYPE, importDataTypeName, map);
 	}
 
 	protected ImportJob createUpdateCategoryAssociationImportJob() {
 		List<ImportDataType> importDataTypes = importService.getCatalogImportDataTypes(scenario.getCatalog().getUidPk());
 		String importDataTypeName = findByType(importDataTypes, ImportDataTypeProductCategoryAssociationImpl.class).getName();
-		Map<String, Integer> mappings = new HashMap<>();
 
-		mappings.put("productCode", 1);
-		mappings.put("featuredProductOrder", 2);
+		ImmutableMap<String, Integer> map = new ImmutableMap.Builder<String, Integer>()
+				.put("productCode", 1)
+				.put("featuredProductOrder", 2)
+				.build();
 
-		ImportJob importJob = createSimpleImportJob(scenario.getCatalog(), Utils.uniqueCode("Update Categories"),
-				"categoryassociation_update.csv", AbstractImportTypeImpl.UPDATE_TYPE, importDataTypeName, mappings);
-		return importJob;
+		return createSimpleImportJob(scenario.getCatalog(), Utils.uniqueCode("Update Categories"),
+				"categoryassociation_update.csv", AbstractImportTypeImpl.UPDATE_TYPE, importDataTypeName, map);
 	}
 
 	protected ImportJob createDeleteCategoryAssociationImportJob() {
 		List<ImportDataType> importDataTypes = importService.getCatalogImportDataTypes(scenario.getCatalog().getUidPk());
 		String importDataTypeName = findByType(importDataTypes, ImportDataTypeProductCategoryAssociationImpl.class).getName();
-		Map<String, Integer> mappings = new HashMap<>();
 
-		mappings.put("productCode", 1);
+		ImmutableMap<String, Integer> map = new ImmutableMap.Builder<String, Integer>()
+				.put("productCode", 1)
+				.build();
 
-		ImportJob importJob = createSimpleImportJob(scenario.getCatalog(), Utils.uniqueCode("Delete Categories"),
-				"categoryassociation_delete.csv", AbstractImportTypeImpl.DELETE_TYPE, importDataTypeName, mappings);
-		return importJob;
+		return createSimpleImportJob(scenario.getCatalog(), Utils.uniqueCode("Delete Categories"),
+				"categoryassociation_delete.csv", AbstractImportTypeImpl.DELETE_TYPE, importDataTypeName, map);
 	}
 
 	protected ImportJob createUpdateCustomerAddressImportJob() {
 		List<ImportDataType> importDataTypes = importService.getCustomerImportDataTypes();
 		String importDataTypeName = findByType(importDataTypes, ImportDataTypeCustomerAddressImpl.class).getName();
-		Map<String, Integer> mappings = new HashMap<>();
 
-		mappings.put("guid", 1);
-		mappings.put("customerGuid", 2);
-		mappings.put("firstName", 3);
-		mappings.put("lastName", 4);
-		mappings.put("phoneNumber", 5);
-		mappings.put("street1", 6);
-		mappings.put("street2", 7);
-		mappings.put("city", 8);
-		mappings.put("subCountry", 9);
-		mappings.put("country", 10);
-		mappings.put("zipOrPostalCode", 11);
+		ImmutableMap<String, Integer> map = new ImmutableMap.Builder<String, Integer>()
+				.put("guid", 1)
+				.put("customerGuid", 2)
+				.put("firstName", 3)
+				.put("lastName", 4)
+				.put("phoneNumber", 5)
+				.put("street1", 6)
+				.put("street2", 7)
+				.put("city", 8)
+				.put("subCountry", 9)
+				.put("country", 10)
+				.put("zipOrPostalCode", 11)
+				.build();
 
-		ImportJob importJob = createSimpleImportJob(scenario.getStore(), Utils.uniqueCode("Update Customer Addresses"),
-				"customeraddress_update.csv", AbstractImportTypeImpl.UPDATE_TYPE, importDataTypeName, mappings);
-		return importJob;
+		return createSimpleImportJob(scenario.getStore(), Utils.uniqueCode("Update Customer Addresses"),
+				"customeraddress_update.csv", AbstractImportTypeImpl.UPDATE_TYPE, importDataTypeName, map);
 	}
 
 	protected ImportJob createInsertInventoryImportJob() {
 		List<ImportDataType> importDataTypes = importService.getWarehouseImportDataTypes();
 		String importDataTypeName = findByType(importDataTypes, ImportDataTypeInventoryImpl.class).getName();
-		Map<String, Integer> mappings = new HashMap<>();
 
-		mappings.put("productSku", 1);
-		mappings.put("quantityOnHand", 2);
-		mappings.put("reservedQuantity", 3);
-		mappings.put("reorderMinimum", 4);
-		mappings.put("reorderQuantity", 5);
-		mappings.put("restockDate", 6);
+		ImmutableMap<String, Integer> map = new ImmutableMap.Builder<String, Integer>()
+				.put("productSku", 1)
+				.put("quantityOnHand", 2)
+				.put("reservedQuantity", 3)
+				.put("reorderMinimum", 4)
+				.put("reorderQuantity", 5)
+				.put("restockDate", 6)
+				.build();
 
-		ImportJob importJob = createSimpleImportJob(scenario.getWarehouse(), Utils.uniqueCode("Insert Inventories"),
-				"inventory_insert.csv", AbstractImportTypeImpl.INSERT_TYPE, importDataTypeName, mappings);
-		return importJob;
+		return createSimpleImportJob(scenario.getWarehouse(), Utils.uniqueCode("Insert Inventories"),
+				"inventory_insert.csv", AbstractImportTypeImpl.INSERT_TYPE, importDataTypeName, map);
 	}
 
 	protected ImportJob createInsertUpdateInventoryImportJob() {
 		List<ImportDataType> importDataTypes = importService.getWarehouseImportDataTypes();
 		String importDataTypeName = findByType(importDataTypes, ImportDataTypeInventoryImpl.class).getName();
-		Map<String, Integer> mappings = new HashMap<>();
 
-		mappings.put("productSku", 1);
-		mappings.put("quantityOnHand", 2);
-		mappings.put("reservedQuantity", 3);
-		mappings.put("reorderMinimum", 4);
-		mappings.put("reorderQuantity", 5);
-		mappings.put("restockDate", 6);
+		ImmutableMap<String, Integer> map = new ImmutableMap.Builder<String, Integer>()
+				.put("productSku", 1)
+				.put("quantityOnHand", 2)
+				.put("reservedQuantity", 3)
+				.put("reorderMinimum", 4)
+				.put("reorderQuantity", 5)
+				.put("restockDate", 6)
+				.build();
 
-		ImportJob importJob = createSimpleImportJob(scenario.getWarehouse(), Utils.uniqueCode("Insert and Update Categories"),
-				"inventory_insert_update.csv", AbstractImportTypeImpl.INSERT_UPDATE_TYPE, importDataTypeName, mappings);
-		return importJob;
+		return createSimpleImportJob(scenario.getWarehouse(), Utils.uniqueCode("Insert and Update Categories"),
+				"inventory_insert_update.csv", AbstractImportTypeImpl.INSERT_UPDATE_TYPE, importDataTypeName, map);
 	}
 
 	protected ImportJob createUpdateInventoryImportJob() {
 		List<ImportDataType> importDataTypes = importService.getWarehouseImportDataTypes();
 		String importDataTypeName = findByType(importDataTypes, ImportDataTypeInventoryImpl.class).getName();
-		Map<String, Integer> mappings = new HashMap<>();
 
-		mappings.put("productSku", 1);
-		mappings.put("quantityOnHand", 2);
-		mappings.put("reservedQuantity", 3);
-		mappings.put("reorderMinimum", 4);
-		mappings.put("reorderQuantity", 5);
-		mappings.put("restockDate", 6);
+		ImmutableMap<String, Integer> map = new ImmutableMap.Builder<String, Integer>()
+				.put("productSku", 1)
+				.put("quantityOnHand", 2)
+				.put("reservedQuantity", 3)
+				.put("reorderMinimum", 4)
+				.put("reorderQuantity", 5)
+				.put("restockDate", 6)
+				.build();
 
-		ImportJob importJob = createSimpleImportJob(scenario.getWarehouse(), Utils.uniqueCode("Update Categories"),
-				"inventory_update.csv", AbstractImportTypeImpl.UPDATE_TYPE, importDataTypeName, mappings);
-		return importJob;
+		return createSimpleImportJob(scenario.getWarehouse(), Utils.uniqueCode("Update Categories"),
+				"inventory_update.csv", AbstractImportTypeImpl.UPDATE_TYPE, importDataTypeName, map);
 	}
 
 	protected ImportJob createDeleteInventoryImportJob() {
 		List<ImportDataType> importDataTypes = importService.getWarehouseImportDataTypes();
 		String importDataTypeName = findByType(importDataTypes, ImportDataTypeInventoryImpl.class).getName();
-		Map<String, Integer> mappings = new HashMap<>();
 
-		mappings.put("productSku", 1);
+		ImmutableMap<String, Integer> map = new ImmutableMap.Builder<String, Integer>()
+				.put("productSku", 1)
+				.build();
 
-		ImportJob importJob = createSimpleImportJob(scenario.getWarehouse(), Utils.uniqueCode("Delete Categories"),
-				"inventory_delete.csv", AbstractImportTypeImpl.DELETE_TYPE, importDataTypeName, mappings);
-		return importJob;
+		return createSimpleImportJob(scenario.getWarehouse(), Utils.uniqueCode("Delete Categories"),
+				"inventory_delete.csv", AbstractImportTypeImpl.DELETE_TYPE, importDataTypeName, map);
 	}
 
 	protected ImportJob createInsertProductAssociationImportJob() {
 		List<ImportDataType> importDataTypes = importService.getCatalogImportDataTypes(scenario.getCatalog().getUidPk());
 		String importDataTypeName = findByType(importDataTypes, ImportDataTypeProductAssociationImpl.class).getName();
-		Map<String, Integer> mappings = new HashMap<>();
 
-		mappings.put("sourceProductCode", 1);
-		mappings.put("targetProductCode", 2);
-		mappings.put("associationType", 3);
-		mappings.put("sourceProductDependant", 4);
-		mappings.put("defaultQuantity", 5);
-		mappings.put("ordering", 6);
+		ImmutableMap<String, Integer> map = new ImmutableMap.Builder<String, Integer>()
+				.put("sourceProductCode", 1)
+				.put("targetProductCode", 2)
+				.put("associationType", 3)
+				.put("sourceProductDependant", 4)
+				.put("defaultQuantity", 5)
+				.put("ordering", 6)
+				.build();
 
-        ImportJob importJob = createSimpleImportJob(scenario.getCatalog(), Utils.uniqueCode("Insert Product Association"),
-				"productassociation_insert.csv", AbstractImportTypeImpl.INSERT_TYPE, importDataTypeName, mappings);
-		return importJob;
+		return createSimpleImportJob(scenario.getCatalog(), Utils.uniqueCode("Insert Product Association"),
+				"productassociation_insert.csv", AbstractImportTypeImpl.INSERT_TYPE, importDataTypeName, map);
 	}
 
 	protected ImportJob createInsertUpdateProductAssociationImportJob() {
 		List<ImportDataType> importDataTypes = importService.getCatalogImportDataTypes(scenario.getCatalog().getUidPk());
 		String importDataTypeName = findByType(importDataTypes, ImportDataTypeProductAssociationImpl.class).getName();
-		Map<String, Integer> mappings = new HashMap<>();
 
-		mappings.put("sourceProductCode", 1);
-		mappings.put("targetProductCode", 2);
-		mappings.put("associationType", 3);
-		mappings.put("sourceProductDependant", 4);
-		mappings.put("defaultQuantity", 5);
-		mappings.put("ordering", 6);
+		ImmutableMap<String, Integer> map = new ImmutableMap.Builder<String, Integer>()
+				.put("sourceProductCode", 1)
+				.put("targetProductCode", 2)
+				.put("associationType", 3)
+				.put("sourceProductDependant", 4)
+				.put("defaultQuantity", 5)
+				.put("ordering", 6)
+				.build();
 
-        ImportJob importJob = createSimpleImportJob(scenario.getCatalog(), Utils.uniqueCode("Insert and Update Product Associations"),
-				"productassociation_insert_update.csv", AbstractImportTypeImpl.INSERT_UPDATE_TYPE, importDataTypeName,
-				mappings);
-		return importJob;
+		return createSimpleImportJob(scenario.getCatalog(), Utils.uniqueCode("Insert and Update Product Associations"),
+				"productassociation_insert_update.csv", AbstractImportTypeImpl.INSERT_UPDATE_TYPE, importDataTypeName, map);
 	}
 
-    protected ImportJob createClearThenInsertProductAssociationImportJob() {
-        List<ImportDataType> importDataTypes = importService.getCatalogImportDataTypes(scenario.getCatalog().getUidPk());
-        String importDataTypeName = findByType(importDataTypes, ImportDataTypeProductAssociationImpl.class).getName();
-        Map<String, Integer> mappings = new HashMap<>();
-
-        mappings.put("sourceProductCode", 1);
-        mappings.put("targetProductCode", 2);
-        mappings.put("associationType", 3);
-        mappings.put("sourceProductDependant", 4);
-        mappings.put("defaultQuantity", 5);
-        mappings.put("ordering", 6);
-
-        ImportJob importJob = createSimpleImportJob(scenario.getCatalog(), Utils.uniqueCode("Clear then Insert Product Associations"),
-                "productassociation_clear_then_insert.csv", AbstractImportTypeImpl.CLEAR_INSERT_TYPE, importDataTypeName,
-                mappings);
-        return importJob;
-    }
-
-    protected ImportJob createUpdateProductAssociationImportJob() {
+	protected ImportJob createClearThenInsertProductAssociationImportJob() {
 		List<ImportDataType> importDataTypes = importService.getCatalogImportDataTypes(scenario.getCatalog().getUidPk());
 		String importDataTypeName = findByType(importDataTypes, ImportDataTypeProductAssociationImpl.class).getName();
-		Map<String, Integer> mappings = new HashMap<>();
 
-		mappings.put("sourceProductCode", 1);
-		mappings.put("defaultQuantity", 2);
+		ImmutableMap<String, Integer> map = new ImmutableMap.Builder<String, Integer>()
+				.put("sourceProductCode", 1)
+				.put("targetProductCode", 2)
+				.put("associationType", 3)
+				.put("sourceProductDependant", 4)
+				.put("defaultQuantity", 5)
+				.put("ordering", 6)
+				.build();
 
-        ImportJob importJob = createSimpleImportJob(scenario.getCatalog(), Utils.uniqueCode("Update Product Associations"),
-				"productassociation_update.csv", AbstractImportTypeImpl.UPDATE_TYPE, importDataTypeName, mappings);
-		return importJob;
+		return createSimpleImportJob(scenario.getCatalog(), Utils.uniqueCode("Clear then Insert Product Associations"),
+				"productassociation_clear_then_insert.csv", AbstractImportTypeImpl.CLEAR_INSERT_TYPE, importDataTypeName, map);
+	}
+
+	protected ImportJob createUpdateProductAssociationImportJob() {
+		List<ImportDataType> importDataTypes = importService.getCatalogImportDataTypes(scenario.getCatalog().getUidPk());
+		String importDataTypeName = findByType(importDataTypes, ImportDataTypeProductAssociationImpl.class).getName();
+
+		ImmutableMap<String, Integer> map = new ImmutableMap.Builder<String, Integer>()
+				.put("sourceProductCode", 1)
+				.put("defaultQuantity", 2)
+				.build();
+
+		return createSimpleImportJob(scenario.getCatalog(), Utils.uniqueCode("Update Product Associations"),
+				"productassociation_update.csv", AbstractImportTypeImpl.UPDATE_TYPE, importDataTypeName, map);
 	}
 
 	protected ImportJob createDeleteProductAssociationImportJob() {
 		List<ImportDataType> importDataTypes = importService.getCatalogImportDataTypes(scenario.getCatalog().getUidPk());
 		String importDataTypeName = findByType(importDataTypes, ImportDataTypeProductAssociationImpl.class).getName();
-		Map<String, Integer> mappings = new HashMap<>();
 
-		mappings.put("sourceProductCode", 1);
+		ImmutableMap<String, Integer> map = new ImmutableMap.Builder<String, Integer>()
+				.put("sourceProductCode", 1)
+				.build();
 
-        ImportJob importJob = createSimpleImportJob(scenario.getCatalog(), Utils.uniqueCode("Delete Product Associations"),
-				"productassociation_delete.csv", AbstractImportTypeImpl.DELETE_TYPE, importDataTypeName, mappings);
-		return importJob;
+		return createSimpleImportJob(scenario.getCatalog(), Utils.uniqueCode("Delete Product Associations"),
+				"productassociation_delete.csv", AbstractImportTypeImpl.DELETE_TYPE, importDataTypeName, map);
 	}
 
 	protected ImportJob createInsertProductSkuImportJob() {
-		Map<String, Integer> mappings = new HashMap<>();
+		ImmutableMap<String, Integer> map = new ImmutableMap.Builder<String, Integer>()
+				.put("skuCode", 1)
+				.put("image", 3)
+				.put("productCode", 4)
+				.put("Color", 5)
+				.put("listPrice(USD)", 6)
+				.put("salePrice(USD)", 7)
+				.put("width", 8)
+				.put("length", 9)
+				.put("height", 10)
+				.put("weight", 11)
+				.build();
 
-		// Digital cameras SKUs
-		mappings.put("skuCode", 1);
-		mappings.put("image", 3);
-		mappings.put("productCode", 4);
-		mappings.put("Color", 5);
-		mappings.put("listPrice(USD)", 6);
-		mappings.put("salePrice(USD)", 7);
-		mappings.put("width", 8);
-		mappings.put("length", 9);
-		mappings.put("height", 10);
-		mappings.put("weight", 11);
-
-		ImportJob importJob = createSimpleImportJob(scenario.getCatalog(), Utils.uniqueCode("Insert ProductSku"),
+		return createSimpleImportJob(scenario.getCatalog(), Utils.uniqueCode("Insert ProductSku"),
 				"productsku_insert.csv", AbstractImportTypeImpl.INSERT_TYPE, PRODUCT_SKU_PREFIX
-						+ ImportJobScenario.MULTI_SKU_PRODUCT_TYPE, mappings);
-		return importJob;
+						+ ImportJobScenario.MULTI_SKU_PRODUCT_TYPE, map);
 	}
 
 	protected ImportJob createInsertUpdateProductSkuImportJob() {
-		Map<String, Integer> mappings = new HashMap<>();
+		ImmutableMap<String, Integer> map = new ImmutableMap.Builder<String, Integer>()
+				.put("skuCode", 1)
+				.put("productCode", 2)
+				.put("image", 3)
+				.put("productGuid", 4)
+				.put("color", 5)
+				.put("listPrice_USD", 6)
+				.put("salePrice_USD", 7)
+				.put("width", 8)
+				.put("length", 9)
+				.put("height", 10)
+				.put("weight", 11)
+				.build();
 
-		mappings.put("skuCode", 1);
-		mappings.put("productCode", 2);
-		mappings.put("image", 3);
-		mappings.put("productGuid", 4);
-		mappings.put("color", 5);
-		mappings.put("listPrice_USD", 6);
-		mappings.put("salePrice_USD", 7);
-		mappings.put("width", 8);
-		mappings.put("length", 9);
-		mappings.put("height", 10);
-		mappings.put("weight", 11);
-
-		ImportJob importJob = createSimpleImportJob(scenario.getCatalog(), Utils.uniqueCode("Insert and Update ProductSku"),
+		return createSimpleImportJob(scenario.getCatalog(), Utils.uniqueCode("Insert and Update ProductSku"),
 				"productsku_insert_update.csv", AbstractImportTypeImpl.INSERT_UPDATE_TYPE, PRODUCT_SKU_PREFIX
-						+ ImportJobScenario.MULTI_SKU_PRODUCT_TYPE, mappings);
-		return importJob;
+						+ ImportJobScenario.MULTI_SKU_PRODUCT_TYPE, map);
 	}
 
 	protected ImportJob createUpdateProductSkuImportJob() {
-		Map<String, Integer> mappings = new HashMap<>();
+		ImmutableMap<String, Integer> map = new ImmutableMap.Builder<String, Integer>()
+				.put("skuCode", 1)
+				.put("productCode", 2)
+				.put("image", 3)
+				.put("productGuid", 4)
+				.put("color", 5)
+				.put("listPrice_USD", 6)
+				.put("salePrice_USD", 7)
+				.put("width", 8)
+				.put("length", 9)
+				.put("height", 10)
+				.put("weight", 11)
+				.build();
 
-		mappings.put("skuCode", 1);
-		mappings.put("productCode", 2);
-		mappings.put("image", 3);
-		mappings.put("productGuid", 4);
-		mappings.put("color", 5);
-		mappings.put("listPrice_USD", 6);
-		mappings.put("salePrice_USD", 7);
-		mappings.put("width", 8);
-		mappings.put("length", 9);
-		mappings.put("height", 10);
-		mappings.put("weight", 11);
-
-		ImportJob importJob = createSimpleImportJob(scenario.getCatalog(), Utils.uniqueCode("Update Categories"),
+		return createSimpleImportJob(scenario.getCatalog(), Utils.uniqueCode("Update Categories"),
 				"productsku_update.csv", AbstractImportTypeImpl.UPDATE_TYPE, PRODUCT_SKU_PREFIX
-						+ ImportJobScenario.MULTI_SKU_PRODUCT_TYPE, mappings);
-		return importJob;
+						+ ImportJobScenario.MULTI_SKU_PRODUCT_TYPE, map);
 	}
 
 	protected ImportJob createInsertProductImportJob() {
-		Map<String, Integer> mappings = new HashMap<>();
+		ImmutableMap<String, Integer> map = new ImmutableMap.Builder<String, Integer>()
+				.put("skuCode", 1)
+				.put("productCode", 2)
+				.put("description(en)", 3)
+				.put("description(fr)", 4)
+				.put("displayName(en)", 5)
+				.put("displayName(fr)", 6)
+				.put("image", 7)
+				.put("defaultCategoryCode", 8)
+				.put("brandCode", 9)
+				.put("listPrice(USD)", 10)
+				.put("salePrice(USD)", 11)
+				.put("seoTitle(en)", 12)
+				.put("seoTitle(fr)", 13)
+				.put("seoKeyWords(en)", 14)
+				.put("seoKeyWords(fr)", 15)
+				.put("seoDescription(en)", 16)
+				.put("seoDescription(fr)", 17)
+				.put("width", 18)
+				.put("length", 19)
+				.put("height", 20)
+				.put("weight", 21)
+				.put("A00996", 22)
+				.put("A00995(en)", 23)
+				.put("A00995(fr)", 24)
+				.put("A00601", 25)
+				.put("A00600", 26)
+				.put("A01006", 27)
+				.put("A04393(en)", 28)
+				.put("A04393(fr)", 29)
+				.put("A01278", 30)
+				.put("A01003(en)", 31)
+				.put("A01003(fr)", 32)
+				.put("A00430(en)", 33)
+				.put("A00430(fr)", 34)
+				.put("availabilityCriteria", 38)
+				.put("preBackOrderLimit", 39)
+				.build();
 
-		// Telescopes
-		mappings.put("skuCode", 1);
-		mappings.put("productCode", 2);
-		mappings.put("description(en)", 3);
-		mappings.put("description(fr)", 4);
-		mappings.put("displayName(en)", 5);
-		mappings.put("displayName(fr)", 6);
-		mappings.put("image", 7);
-		mappings.put("defaultCategoryCode", 8);
-		mappings.put("brandCode", 9);
-		mappings.put("listPrice(USD)", 10);
-		mappings.put("salePrice(USD)", 11);
-		mappings.put("seoTitle(en)", 12);
-		mappings.put("seoTitle(fr)", 13);
-		mappings.put("seoKeyWords(en)", 14);
-		mappings.put("seoKeyWords(fr)", 15);
-		mappings.put("seoDescription(en)", 16);
-		mappings.put("seoDescription(fr)", 17);
-		mappings.put("width", 18);
-		mappings.put("length", 19);
-		mappings.put("height", 20);
-		mappings.put("weight", 21);
-		mappings.put("A00996", 22);
-		mappings.put("A00995(en)", 23);
-		mappings.put("A00995(fr)", 24);
-		mappings.put("A00601", 25);
-		mappings.put("A00600", 26);
-		mappings.put("A01006", 27);
-		mappings.put("A04393(en)", 28);
-		mappings.put("A04393(fr)", 29);
-		mappings.put("A01278", 30);
-		mappings.put("A01003(en)", 31);
-		mappings.put("A01003(fr)", 32);
-		mappings.put("A00430(en)", 33);
-		mappings.put("A00430(fr)", 34);
-		mappings.put("availabilityCriteria", 38);
-		mappings.put("preBackOrderLimit", 39);
 
-		ImportJob importJob = createSimpleImportJob(scenario.getCatalog(), Utils.uniqueCode("Insert Products"),
+		return createSimpleImportJob(scenario.getCatalog(), Utils.uniqueCode("Insert Products"),
 				"product_insert.csv", AbstractImportTypeImpl.INSERT_TYPE, PRODUCT_PREFIX
-						+ ImportJobScenario.SINGLE_SKU_PRODUCT_TYPE, mappings);
-		return importJob;
+						+ ImportJobScenario.SINGLE_SKU_PRODUCT_TYPE, map);
 	}
 
 	protected ImportJob createInsertUpdateProductImportJob() {
-		Map<String, Integer> mappings = new HashMap<>();
+		ImmutableMap<String, Integer> map = new ImmutableMap.Builder<String, Integer>()
+				.put("skuCode", 1)
+				.put("productCode", 2)
+				.put("description(en)", 3)
+				.put("description(fr)", 4)
+				.put("displayName(en)", 5)
+				.put("displayName(fr)", 6)
+				.put("image", 7)
+				.put("defaultCategoryCode", 8)
+				.put("brandCode", 9)
+				.put("listPrice(USD)", 10)
+				.put("salePrice(USD)", 11)
+				.put("seoTitle(en)", 12)
+				.put("seoTitle(fr)", 13)
+				.put("seoKeyWords(en)", 14)
+				.put("seoKeyWords(fr)", 15)
+				.put("seoDescription(en)", 16)
+				.put("seoDescription(fr)", 17)
+				.put("width", 18)
+				.put("length", 19)
+				.put("height", 20)
+				.put("weight", 21)
+				.put("A00996", 22)
+				.put("A00995(en)", 23)
+				.put("A00995(fr)", 24)
+				.put("A00601", 25)
+				.put("A00600", 26)
+				.put("A01006", 27)
+				.put("A04393(en)", 28)
+				.put("A04393(fr)", 29)
+				.put("A01278", 30)
+				.put("A01003(en)", 31)
+				.put("A01003(fr)", 32)
+				.put("A00430(en)", 33)
+				.put("A00430(fr)", 34)
+				.put("availabilityCriteria", 38)
+				.put("preBackOrderLimit", 39)
+				.build();
 
-		// Telescopes
-		mappings.put("skuCode", 1);
-		mappings.put("productCode", 2);
-		mappings.put("description(en)", 3);
-		mappings.put("description(fr)", 4);
-		mappings.put("displayName(en)", 5);
-		mappings.put("displayName(fr)", 6);
-		mappings.put("image", 7);
-		mappings.put("defaultCategoryCode", 8);
-		mappings.put("brandCode", 9);
-		mappings.put("listPrice(USD)", 10);
-		mappings.put("salePrice(USD)", 11);
-		mappings.put("seoTitle(en)", 12);
-		mappings.put("seoTitle(fr)", 13);
-		mappings.put("seoKeyWords(en)", 14);
-		mappings.put("seoKeyWords(fr)", 15);
-		mappings.put("seoDescription(en)", 16);
-		mappings.put("seoDescription(fr)", 17);
-		mappings.put("width", 18);
-		mappings.put("length", 19);
-		mappings.put("height", 20);
-		mappings.put("weight", 21);
-		mappings.put("A00996", 22);
-		mappings.put("A00995(en)", 23);
-		mappings.put("A00995(fr)", 24);
-		mappings.put("A00601", 25);
-		mappings.put("A00600", 26);
-		mappings.put("A01006", 27);
-		mappings.put("A04393(en)", 28);
-		mappings.put("A04393(fr)", 29);
-		mappings.put("A01278", 30);
-		mappings.put("A01003(en)", 31);
-		mappings.put("A01003(fr)", 32);
-		mappings.put("A00430(en)", 33);
-		mappings.put("A00430(fr)", 34);
-		mappings.put("availabilityCriteria", 38);
-		mappings.put("preBackOrderLimit", 39);
-
-		ImportJob importJob = createSimpleImportJob(scenario.getCatalog(), Utils.uniqueCode("Insert and Update Product"),
+		return createSimpleImportJob(scenario.getCatalog(), Utils.uniqueCode("Insert and Update Product"),
 				"product_insert_update.csv", AbstractImportTypeImpl.INSERT_UPDATE_TYPE, PRODUCT_PREFIX
-						+ ImportJobScenario.SINGLE_SKU_PRODUCT_TYPE, mappings);
-		return importJob;
+						+ ImportJobScenario.SINGLE_SKU_PRODUCT_TYPE, map);
 	}
 
 	protected ImportJob createUpdateProductImportJob() {
-		Map<String, Integer> mappings = new HashMap<>();
+		ImmutableMap<String, Integer> map = new ImmutableMap.Builder<String, Integer>()
+				.put("productCode", 2)
+				.put("description(en)", 3)
+				.put("description(fr)", 4)
+				.put("displayName(en)", 5)
+				.put("displayName(fr)", 6)
+				.put("seoDescription(en)", 16)
+				.put("seoDescription(fr)", 17)
+				.build();
 
-		// Telescopes
-		mappings.put("productCode", 2);
-		mappings.put("description(en)", 3);
-		mappings.put("description(fr)", 4);
-		mappings.put("displayName(en)", 5);
-		mappings.put("displayName(fr)", 6);
-		mappings.put("seoDescription(en)", 16);
-		mappings.put("seoDescription(fr)", 17);
-
-		ImportJob importJob = createSimpleImportJob(scenario.getCatalog(), Utils.uniqueCode("Update Product"),
+		return createSimpleImportJob(scenario.getCatalog(), Utils.uniqueCode("Update Product"),
 				"product_update.csv", AbstractImportTypeImpl.UPDATE_TYPE, PRODUCT_PREFIX
-						+ ImportJobScenario.SINGLE_SKU_PRODUCT_TYPE, mappings);
-		return importJob;
+						+ ImportJobScenario.SINGLE_SKU_PRODUCT_TYPE, map);
 	}
 
 	protected ImportJob createDeleteProductImportJob() {
-		Map<String, Integer> mappings = new HashMap<>();
+		ImmutableMap<String, Integer> map = new ImmutableMap.Builder<String, Integer>()
+				.put("productCode", 1)
+				.build();
 
-		mappings.put("productCode", 1);
-
-		ImportJob importJob = createSimpleImportJob(scenario.getCatalog(), Utils.uniqueCode("Delete Product"),
+		return createSimpleImportJob(scenario.getCatalog(), Utils.uniqueCode("Delete Product"),
 				"product_delete.csv", AbstractImportTypeImpl.DELETE_TYPE, PRODUCT_PREFIX
-						+ ImportJobScenario.SINGLE_SKU_PRODUCT_TYPE, mappings);
-		return importJob;
+						+ ImportJobScenario.SINGLE_SKU_PRODUCT_TYPE, map);
 	}
 
 	protected ImportJob createInsertProductMultiCatalogImportJob(final Catalog catalog) {
-		Map<String, Integer> mappings = new HashMap<>();
+		ImmutableMap<String, Integer> map = new ImmutableMap.Builder<String, Integer>()
+				.put("skuCode", 1)
+				.put("productCode", 2)
+				.put("description(en)", 3)
+				.put("description(fr)", 4)
+				.put("displayName(en)", 5)
+				.put("displayName(fr)", 6)
+				.put("image", 7)
+				.put("defaultCategoryCode", 8)
+				.put("brandCode", 9)
+				.put("listPrice(USD)", 10)
+				.put("salePrice(USD)", 11)
+				.put("seoTitle(en)", 12)
+				.put("seoTitle(fr)", 13)
+				.put("seoKeyWords(en)", 14)
+				.put("seoKeyWords(fr)", 15)
+				.put("seoDescription(en)", 16)
+				.put("seoDescription(fr)", 17)
+				.put("width", 18)
+				.put("length", 19)
+				.put("height", 20)
+				.put("weight", 21)
+				.put("A00996", 22)
+				.put("A00995(en)", 23)
+				.put("A00995(fr)", 24)
+				.put("A00601", 25)
+				.put("A00600", 26)
+				.put("A01006", 27)
+				.put("A04393(en)", 28)
+				.put("A04393(fr)", 29)
+				.put("A01278", 30)
+				.put("A01003(en)", 31)
+				.put("A01003(fr)", 32)
+				.put("A00430(en)", 33)
+				.put("A00430(fr)", 34)
+				.put("availabilityCriteria", 38)
+				.put("preBackOrderLimit", 39)
+				.build();
 
-		// Telescopes
-		mappings.put("skuCode", 1);
-		mappings.put("productCode", 2);
-		mappings.put("description(en)", 3);
-		mappings.put("description(fr)", 4);
-		mappings.put("displayName(en)", 5);
-		mappings.put("displayName(fr)", 6);
-		mappings.put("image", 7);
-		mappings.put("defaultCategoryCode", 8);
-		mappings.put("brandCode", 9);
-		mappings.put("listPrice(USD)", 10);
-		mappings.put("salePrice(USD)", 11);
-		mappings.put("seoTitle(en)", 12);
-		mappings.put("seoTitle(fr)", 13);
-		mappings.put("seoKeyWords(en)", 14);
-		mappings.put("seoKeyWords(fr)", 15);
-		mappings.put("seoDescription(en)", 16);
-		mappings.put("seoDescription(fr)", 17);
-		mappings.put("width", 18);
-		mappings.put("length", 19);
-		mappings.put("height", 20);
-		mappings.put("weight", 21);
-		mappings.put("A00996", 22);
-		mappings.put("A00995(en)", 23);
-		mappings.put("A00995(fr)", 24);
-		mappings.put("A00601", 25);
-		mappings.put("A00600", 26);
-		mappings.put("A01006", 27);
-		mappings.put("A04393(en)", 28);
-		mappings.put("A04393(fr)", 29);
-		mappings.put("A01278", 30);
-		mappings.put("A01003(en)", 31);
-		mappings.put("A01003(fr)", 32);
-		mappings.put("A00430(en)", 33);
-		mappings.put("A00430(fr)", 34);
-		mappings.put("availabilityCriteria", 38);
-		mappings.put("preBackOrderLimit", 39);
-
-		ImportJob importJob = createSimpleImportJob(catalog, Utils.uniqueCode("Insert Products"),
+		return createSimpleImportJob(catalog, Utils.uniqueCode("Insert Products"),
 				"product_multi_catalog_insert.csv", AbstractImportTypeImpl.INSERT_TYPE, PRODUCT_PREFIX
-						+ ImportJobScenario.SINGLE_SKU_PRODUCT_TYPE, mappings);
-		return importJob;
+						+ ImportJobScenario.SINGLE_SKU_PRODUCT_TYPE, map);
 	}
 
 	protected ImportJob createInsertUpdateProductMultiCatalogImportJob(final Catalog catalog) {
-		Map<String, Integer> mappings = new HashMap<>();
+		ImmutableMap<String, Integer> map = new ImmutableMap.Builder<String, Integer>()
+				.put("skuCode", 1)
+				.put("productCode", 2)
+				.put("description(en)", 3)
+				.put("description(fr)", 4)
+				.put("displayName(en)", 5)
+				.put("displayName(fr)", 6)
+				.put("image", 7)
+				.put("defaultCategoryCode", 8)
+				.put("brandCode", 9)
+				.put("listPrice(USD)", 10)
+				.put("salePrice(USD)", 11)
+				.put("seoTitle(en)", 12)
+				.put("seoTitle(fr)", 13)
+				.put("seoKeyWords(en)", 14)
+				.put("seoKeyWords(fr)", 15)
+				.put("seoDescription(en)", 16)
+				.put("seoDescription(fr)", 17)
+				.put("width", 18)
+				.put("length", 19)
+				.put("height", 20)
+				.put("weight", 21)
+				.put("A00996", 22)
+				.put("A00995(en)", 23)
+				.put("A00995(fr)", 24)
+				.put("A00601", 25)
+				.put("A00600", 26)
+				.put("A01006", 27)
+				.put("A04393(en)", 28)
+				.put("A04393(fr)", 29)
+				.put("A01278", 30)
+				.put("A01003(en)", 31)
+				.put("A01003(fr)", 32)
+				.put("A00430(en)", 33)
+				.put("A00430(fr)", 34)
+				.put("availabilityCriteria", 38)
+				.put("preBackOrderLimit", 39)
+				.build();
 
-		// Telescopes
-		mappings.put("skuCode", 1);
-		mappings.put("productCode", 2);
-		mappings.put("description(en)", 3);
-		mappings.put("description(fr)", 4);
-		mappings.put("displayName(en)", 5);
-		mappings.put("displayName(fr)", 6);
-		mappings.put("image", 7);
-		mappings.put("defaultCategoryCode", 8);
-		mappings.put("brandCode", 9);
-		mappings.put("listPrice(USD)", 10);
-		mappings.put("salePrice(USD)", 11);
-		mappings.put("seoTitle(en)", 12);
-		mappings.put("seoTitle(fr)", 13);
-		mappings.put("seoKeyWords(en)", 14);
-		mappings.put("seoKeyWords(fr)", 15);
-		mappings.put("seoDescription(en)", 16);
-		mappings.put("seoDescription(fr)", 17);
-		mappings.put("width", 18);
-		mappings.put("length", 19);
-		mappings.put("height", 20);
-		mappings.put("weight", 21);
-		mappings.put("A00996", 22);
-		mappings.put("A00995(en)", 23);
-		mappings.put("A00995(fr)", 24);
-		mappings.put("A00601", 25);
-		mappings.put("A00600", 26);
-		mappings.put("A01006", 27);
-		mappings.put("A04393(en)", 28);
-		mappings.put("A04393(fr)", 29);
-		mappings.put("A01278", 30);
-		mappings.put("A01003(en)", 31);
-		mappings.put("A01003(fr)", 32);
-		mappings.put("A00430(en)", 33);
-		mappings.put("A00430(fr)", 34);
-		mappings.put("availabilityCriteria", 38);
-		mappings.put("preBackOrderLimit", 39);
-
-		ImportJob importJob = createSimpleImportJob(catalog, Utils.uniqueCode("Insert and Update Product"),
+		return createSimpleImportJob(catalog, Utils.uniqueCode("Insert and Update Product"),
 				"product_multi_catalog_insert_update.csv", AbstractImportTypeImpl.INSERT_UPDATE_TYPE, PRODUCT_PREFIX
-						+ ImportJobScenario.SINGLE_SKU_PRODUCT_TYPE, mappings);
-		return importJob;
+						+ ImportJobScenario.SINGLE_SKU_PRODUCT_TYPE, map);
 	}
 
 	protected ImportJob createUpdateProductMultiCatalogImportJob(final Catalog catalog) {
-		Map<String, Integer> mappings = new HashMap<>();
+		ImmutableMap<String, Integer> map = new ImmutableMap.Builder<String, Integer>()
+				.put("productCode", 2)
+				.put("description(en)", 3)
+				.put("description(fr)", 4)
+				.put("displayName(en)", 5)
+				.put("displayName(fr)", 6)
+				.put("defaultCategoryCode", 8)
+				.put("seoDescription(en)", 16)
+				.put("seoDescription(fr)", 17)
+				.build();
 
-		// Telescopes
-		mappings.put("productCode", 2);
-		mappings.put("description(en)", 3);
-		mappings.put("description(fr)", 4);
-		mappings.put("displayName(en)", 5);
-		mappings.put("displayName(fr)", 6);
-		mappings.put("defaultCategoryCode", 8);
-		mappings.put("seoDescription(en)", 16);
-		mappings.put("seoDescription(fr)", 17);
-
-		ImportJob importJob = createSimpleImportJob(catalog, Utils.uniqueCode("Update Product"),
+		return createSimpleImportJob(catalog, Utils.uniqueCode("Update Product"),
 				"product_multi_catalog_update.csv", AbstractImportTypeImpl.UPDATE_TYPE, PRODUCT_PREFIX
-						+ ImportJobScenario.SINGLE_SKU_PRODUCT_TYPE, mappings);
-		return importJob;
+						+ ImportJobScenario.SINGLE_SKU_PRODUCT_TYPE, map);
 	}
 
 	protected ImportJob createDeleteProductMultiCatalogImportJob(final Catalog catalog) {
-		Map<String, Integer> mappings = new HashMap<>();
+		ImmutableMap<String, Integer> map = new ImmutableMap.Builder<String, Integer>()
+				.put("productCode", 1)
+				.build();
 
-		mappings.put("productCode", 1);
-
-		ImportJob importJob = createSimpleImportJob(catalog, Utils.uniqueCode("Delete Product"),
+		return createSimpleImportJob(catalog, Utils.uniqueCode("Delete Product"),
 				"product_multi_catalog_delete.csv", AbstractImportTypeImpl.DELETE_TYPE, PRODUCT_PREFIX
-						+ ImportJobScenario.SINGLE_SKU_PRODUCT_TYPE, mappings);
-		return importJob;
+						+ ImportJobScenario.SINGLE_SKU_PRODUCT_TYPE, map);
 	}
 
 	protected ImportJob createInsertMultiskuProductImportJob() {
-		Map<String, Integer> mappings = new HashMap<>();
+		ImmutableMap<String, Integer> map = new ImmutableMap.Builder<String, Integer>()
+				.put("productCode", 1)
+				.put("description(en)", 2)
+				.put("description(fr)", 3)
+				.put("displayName(en)", 4)
+				.put("displayName(fr)", 5)
+				.put("image", 6)
+				.put("defaultCategoryCode", 7)
+				.put("brandCode", 8)
+				.put("listPrice(USD)", 9)
+				.put("salePrice(USD)", 10)
+				.put("seoTitle(en)", 11)
+				.put("seoTitle(fr)", 12)
+				.put("seoKeyWords(en)", 13)
+				.put("seoKeyWords(fr)", 14)
+				.put("seoDescription(en)", 15)
+				.put("seoDescription(fr)", 16)
+				.put("A00871(en)", 17)
+				.put("A00871(fr)", 18)
+				.put("A00870(en)", 19)
+				.put("A00870(fr)", 20)
+				.put("A00276(en)", 21)
+				.put("A00276(fr)", 22)
+				.put("A03378(en)", 23)
+				.put("A03378(fr)", 24)
+				.put("A03379", 25)
+				.put("A00341", 26)
+				.put("A03380", 27)
+				.put("A02028", 28)
+				.put("A01015(en)", 29)
+				.put("A01015(fr)", 30)
+				.put("A02805", 31)
+				.put("A03190", 32)
+				.put("A00140", 33)
+				.put("A01584(en)", 34)
+				.put("A01584(fr)", 35)
+				.put("A00152(en)", 36)
+				.put("A00152(fr)", 37)
+				.put("A00138(en)", 38)
+				.put("A00138(fr)", 39)
+				.put("A01206(en)", 40)
+				.put("A01206(fr)", 41)
+				.put("A00409(en)", 42)
+				.put("A00409(fr)", 43)
+				.put("A00413", 44)
+				.put("A00601", 45)
+				.put("A00600", 46)
+				.put("A00983", 47)
+				.put("A00985", 48)
+				.put("A00984", 49)
+				.put("A01071", 50)
+				.put("A00981(en)", 51)
+				.put("A00981(fr)", 52)
+				.put("A00373(en)", 53)
+				.put("A00373(fr)", 54)
+				.put("A03519", 55)
+				.put("A03517", 56)
+				.put("A01376", 57)
+				.put("A00551", 58)
+				.put("A03497", 59)
+				.put("A02638", 60)
+				.put("A01244(en)", 61)
+				.put("A01244(fr)", 62)
+				.put("A00430(en)", 63)
+				.put("A00430(fr)", 64)
+				.put("A00258", 65)
+				.put("A01381(en)", 66)
+				.put("A01381(fr)", 67)
+				.put("A00260", 68)
+				.put("A00652", 69)
+				.put("A00548", 70)
+				.put("A00919", 71)
+				.put("A01570(en)", 72)
+				.put("A01570(fr)", 73)
+				.put("A01207(en)", 74)
+				.put("A01207(fr)", 75)
+				.put("A00537", 76)
+				.put("A00256(en)", 77)
+				.put("A00256(fr)", 78)
+				.put("A00920(en)", 79)
+				.put("A00920(fr)", 80)
+				.put("A00556(en)", 81)
+				.put("A00556(fr)", 82)
+				.put("availabilityCriteria", 86)
+				.put("preBackOrderLimit", 87)
+				.build();
 
-		// Digital cameras (Multi-SKU)
-		mappings.put("productCode", 1);
-		mappings.put("description(en)", 2);
-		mappings.put("description(fr)", 3);
-		mappings.put("displayName(en)", 4);
-		mappings.put("displayName(fr)", 5);
-		mappings.put("image", 6);
-		mappings.put("defaultCategoryCode", 7);
-		mappings.put("brandCode", 8);
-		mappings.put("listPrice(USD)", 9);
-		mappings.put("salePrice(USD)", 10);
-		mappings.put("seoTitle(en)", 11);
-		mappings.put("seoTitle(fr)", 12);
-		mappings.put("seoKeyWords(en)", 13);
-		mappings.put("seoKeyWords(fr)", 14);
-		mappings.put("seoDescription(en)", 15);
-		mappings.put("seoDescription(fr)", 16);
-		mappings.put("A00871(en)", 17);
-		mappings.put("A00871(fr)", 18);
-		mappings.put("A00870(en)", 19);
-		mappings.put("A00870(fr)", 20);
-		mappings.put("A00276(en)", 21);
-		mappings.put("A00276(fr)", 22);
-		mappings.put("A03378(en)", 23);
-		mappings.put("A03378(fr)", 24);
-		mappings.put("A03379", 25);
-		mappings.put("A00341", 26);
-		mappings.put("A03380", 27);
-		mappings.put("A02028", 28);
-		mappings.put("A01015(en)", 29);
-		mappings.put("A01015(fr)", 30);
-		mappings.put("A02805", 31);
-		mappings.put("A03190", 32);
-		mappings.put("A00140", 33);
-		mappings.put("A01584(en)", 34);
-		mappings.put("A01584(fr)", 35);
-		mappings.put("A00152(en)", 36);
-		mappings.put("A00152(fr)", 37);
-		mappings.put("A00138(en)", 38);
-		mappings.put("A00138(fr)", 39);
-		mappings.put("A01206(en)", 40);
-		mappings.put("A01206(fr)", 41);
-		mappings.put("A00409(en)", 42);
-		mappings.put("A00409(fr)", 43);
-		mappings.put("A00413", 44);
-		mappings.put("A00601", 45);
-		mappings.put("A00600", 46);
-		mappings.put("A00983", 47);
-		mappings.put("A00985", 48);
-		mappings.put("A00984", 49);
-		mappings.put("A01071", 50);
-		mappings.put("A00981(en)", 51);
-		mappings.put("A00981(fr)", 52);
-		mappings.put("A00373(en)", 53);
-		mappings.put("A00373(fr)", 54);
-		mappings.put("A03519", 55);
-		mappings.put("A03517", 56);
-		mappings.put("A01376", 57);
-		mappings.put("A00551", 58);
-		mappings.put("A03497", 59);
-		mappings.put("A02638", 60);
-		mappings.put("A01244(en)", 61);
-		mappings.put("A01244(fr)", 62);
-		mappings.put("A00430(en)", 63);
-		mappings.put("A00430(fr)", 64);
-		mappings.put("A00258", 65);
-		mappings.put("A01381(en)", 66);
-		mappings.put("A01381(fr)", 67);
-		mappings.put("A00260", 68);
-		mappings.put("A00652", 69);
-		mappings.put("A00548", 70);
-		mappings.put("A00919", 71);
-		mappings.put("A01570(en)", 72);
-		mappings.put("A01570(fr)", 73);
-		mappings.put("A01207(en)", 74);
-		mappings.put("A01207(fr)", 75);
-		mappings.put("A00537", 76);
-		mappings.put("A00256(en)", 77);
-		mappings.put("A00256(fr)", 78);
-		mappings.put("A00920(en)", 79);
-		mappings.put("A00920(fr)", 80);
-		mappings.put("A00556(en)", 81);
-		mappings.put("A00556(fr)", 82);
-		mappings.put("availabilityCriteria", 86);
-		mappings.put("preBackOrderLimit", 87);
-
-		ImportJob importJob = createSimpleImportJob(scenario.getCatalog(), Utils.uniqueCode("Insert MultiskuProduct"),
+		return createSimpleImportJob(scenario.getCatalog(), Utils.uniqueCode("Insert MultiskuProduct"),
 				"productmultisku_insert.csv", AbstractImportTypeImpl.INSERT_TYPE, PRODUCT_PREFIX
-						+ ImportJobScenario.MULTI_SKU_PRODUCT_TYPE, mappings);
-		return importJob;
+						+ ImportJobScenario.MULTI_SKU_PRODUCT_TYPE, map);
 	}
 
 	protected ImportJob createInsertUpdateMultiskuProductImportJob() {
-		Map<String, Integer> mappings = new HashMap<>();
+		ImmutableMap<String, Integer> map = new ImmutableMap.Builder<String, Integer>()
+				.put("productCode", 1)
+				.put("description(en)", 2)
+				.put("description(fr)", 3)
+				.put("displayName(en)", 4)
+				.put("displayName(fr)", 5)
+				.put("image", 6)
+				.put("defaultCategoryCode", 7)
+				.put("brandCode", 8)
+				.put("listPrice(USD)", 9)
+				.put("salePrice(USD)", 10)
+				.put("seoTitle(en)", 11)
+				.put("seoTitle(fr)", 12)
+				.put("seoKeyWords(en)", 13)
+				.put("seoKeyWords(fr)", 14)
+				.put("seoDescription(en)", 15)
+				.put("seoDescription(fr)", 16)
+				.put("A00871(en)", 17)
+				.put("A00871(fr)", 18)
+				.put("A00870(en)", 19)
+				.put("A00870(fr)", 20)
+				.put("A00276(en)", 21)
+				.put("A00276(fr)", 22)
+				.put("A03378(en)", 23)
+				.put("A03378(fr)", 24)
+				.put("A03379", 25)
+				.put("A00341", 26)
+				.put("A03380", 27)
+				.put("A02028", 28)
+				.put("A01015(en)", 29)
+				.put("A01015(fr)", 30)
+				.put("A02805", 31)
+				.put("A03190", 32)
+				.put("A00140", 33)
+				.put("A01584(en)", 34)
+				.put("A01584(fr)", 35)
+				.put("A00152(en)", 36)
+				.put("A00152(fr)", 37)
+				.put("A00138(en)", 38)
+				.put("A00138(fr)", 39)
+				.put("A01206(en)", 40)
+				.put("A01206(fr)", 41)
+				.put("A00409(en)", 42)
+				.put("A00409(fr)", 43)
+				.put("A00413", 44)
+				.put("A00601", 45)
+				.put("A00600", 46)
+				.put("A00983", 47)
+				.put("A00985", 48)
+				.put("A00984", 49)
+				.put("A01071", 50)
+				.put("A00981(en)", 51)
+				.put("A00981(fr)", 52)
+				.put("A00373(en)", 53)
+				.put("A00373(fr)", 54)
+				.put("A03519", 55)
+				.put("A03517", 56)
+				.put("A01376", 57)
+				.put("A00551", 58)
+				.put("A03497", 59)
+				.put("A02638", 60)
+				.put("A01244(en)", 61)
+				.put("A01244(fr)", 62)
+				.put("A00430(en)", 63)
+				.put("A00430(fr)", 64)
+				.put("A00258", 65)
+				.put("A01381(en)", 66)
+				.put("A01381(fr)", 67)
+				.put("A00260", 68)
+				.put("A00652", 69)
+				.put("A00548", 70)
+				.put("A00919", 71)
+				.put("A01570(en)", 72)
+				.put("A01570(fr)", 73)
+				.put("A01207(en)", 74)
+				.put("A01207(fr)", 75)
+				.put("A00537", 76)
+				.put("A00256(en)", 77)
+				.put("A00256(fr)", 78)
+				.put("A00920(en)", 79)
+				.put("A00920(fr)", 80)
+				.put("A00556(en)", 81)
+				.put("A00556(fr)", 82)
+				.put("availabilityCriteria", 86)
+				.put("preBackOrderLimit", 87)
+				.build();
 
-		// Digital cameras (Multi-SKU)
-		mappings.put("productCode", 1);
-		mappings.put("description(en)", 2);
-		mappings.put("description(fr)", 3);
-		mappings.put("displayName(en)", 4);
-		mappings.put("displayName(fr)", 5);
-		mappings.put("image", 6);
-		mappings.put("defaultCategoryCode", 7);
-		mappings.put("brandCode", 8);
-		mappings.put("listPrice(USD)", 9);
-		mappings.put("salePrice(USD)", 10);
-		mappings.put("seoTitle(en)", 11);
-		mappings.put("seoTitle(fr)", 12);
-		mappings.put("seoKeyWords(en)", 13);
-		mappings.put("seoKeyWords(fr)", 14);
-		mappings.put("seoDescription(en)", 15);
-		mappings.put("seoDescription(fr)", 16);
-		mappings.put("A00871(en)", 17);
-		mappings.put("A00871(fr)", 18);
-		mappings.put("A00870(en)", 19);
-		mappings.put("A00870(fr)", 20);
-		mappings.put("A00276(en)", 21);
-		mappings.put("A00276(fr)", 22);
-		mappings.put("A03378(en)", 23);
-		mappings.put("A03378(fr)", 24);
-		mappings.put("A03379", 25);
-		mappings.put("A00341", 26);
-		mappings.put("A03380", 27);
-		mappings.put("A02028", 28);
-		mappings.put("A01015(en)", 29);
-		mappings.put("A01015(fr)", 30);
-		mappings.put("A02805", 31);
-		mappings.put("A03190", 32);
-		mappings.put("A00140", 33);
-		mappings.put("A01584(en)", 34);
-		mappings.put("A01584(fr)", 35);
-		mappings.put("A00152(en)", 36);
-		mappings.put("A00152(fr)", 37);
-		mappings.put("A00138(en)", 38);
-		mappings.put("A00138(fr)", 39);
-		mappings.put("A01206(en)", 40);
-		mappings.put("A01206(fr)", 41);
-		mappings.put("A00409(en)", 42);
-		mappings.put("A00409(fr)", 43);
-		mappings.put("A00413", 44);
-		mappings.put("A00601", 45);
-		mappings.put("A00600", 46);
-		mappings.put("A00983", 47);
-		mappings.put("A00985", 48);
-		mappings.put("A00984", 49);
-		mappings.put("A01071", 50);
-		mappings.put("A00981(en)", 51);
-		mappings.put("A00981(fr)", 52);
-		mappings.put("A00373(en)", 53);
-		mappings.put("A00373(fr)", 54);
-		mappings.put("A03519", 55);
-		mappings.put("A03517", 56);
-		mappings.put("A01376", 57);
-		mappings.put("A00551", 58);
-		mappings.put("A03497", 59);
-		mappings.put("A02638", 60);
-		mappings.put("A01244(en)", 61);
-		mappings.put("A01244(fr)", 62);
-		mappings.put("A00430(en)", 63);
-		mappings.put("A00430(fr)", 64);
-		mappings.put("A00258", 65);
-		mappings.put("A01381(en)", 66);
-		mappings.put("A01381(fr)", 67);
-		mappings.put("A00260", 68);
-		mappings.put("A00652", 69);
-		mappings.put("A00548", 70);
-		mappings.put("A00919", 71);
-		mappings.put("A01570(en)", 72);
-		mappings.put("A01570(fr)", 73);
-		mappings.put("A01207(en)", 74);
-		mappings.put("A01207(fr)", 75);
-		mappings.put("A00537", 76);
-		mappings.put("A00256(en)", 77);
-		mappings.put("A00256(fr)", 78);
-		mappings.put("A00920(en)", 79);
-		mappings.put("A00920(fr)", 80);
-		mappings.put("A00556(en)", 81);
-		mappings.put("A00556(fr)", 82);
-		mappings.put("availabilityCriteria", 86);
-		mappings.put("preBackOrderLimit", 87);
-
-		ImportJob importJob = createSimpleImportJob(scenario.getCatalog(), Utils.uniqueCode("Insert and Update MultiskuProduct"),
+		return createSimpleImportJob(scenario.getCatalog(), Utils.uniqueCode("Insert and Update MultiskuProduct"),
 				"productmultisku_insert_update.csv", AbstractImportTypeImpl.INSERT_UPDATE_TYPE, PRODUCT_PREFIX
-						+ ImportJobScenario.MULTI_SKU_PRODUCT_TYPE, mappings);
-		return importJob;
+						+ ImportJobScenario.MULTI_SKU_PRODUCT_TYPE, map);
 	}
 
 	/**
@@ -1055,20 +1037,19 @@ public abstract class ImportJobTestCase extends BasicSpringContextTest {
 	 * @return ImportJob instance
 	 */
 	protected ImportJob createUpdateMultiskuProductImportJob() {
-		Map<String, Integer> mappings = new HashMap<>();
+		ImmutableMap<String, Integer> map = new ImmutableMap.Builder<String, Integer>()
+				.put("productCode", 1)
+				.put("description(en)", 2)
+				.put("description(fr)", 3)
+				.put("displayName(en)", 4)
+				.put("displayName(fr)", 5)
+				.put("seoDescription(en)", 15)
+				.put("seoDescription(fr)", 16)
+				.build();
 
-		mappings.put("productCode", 1);
-		mappings.put("description(en)", 2);
-		mappings.put("description(fr)", 3);
-		mappings.put("displayName(en)", 4);
-		mappings.put("displayName(fr)", 5);
-		mappings.put("seoDescription(en)", 15);
-		mappings.put("seoDescription(fr)", 16);
-
-		ImportJob importJob = createSimpleImportJob(scenario.getCatalog(), Utils.uniqueCode("Update MultiskuProduct"),
+		return createSimpleImportJob(scenario.getCatalog(), Utils.uniqueCode("Update MultiskuProduct"),
 				"productmultisku_update.csv", AbstractImportTypeImpl.UPDATE_TYPE, PRODUCT_PREFIX
-						+ ImportJobScenario.MULTI_SKU_PRODUCT_TYPE, mappings);
-		return importJob;
+						+ ImportJobScenario.MULTI_SKU_PRODUCT_TYPE, map);
 	}
 
 	protected Date string2Date(final String dateString, final Locale locale) throws ParseException {

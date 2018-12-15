@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: %pluginName
 Bundle-SymbolicName: com.elasticpath.cmclient.store;singleton:=true
-Bundle-Version: 703.0.0.qualifier
+Bundle-Version: 704.0.0.qualifier
 Bundle-Activator: com.elasticpath.cmclient.store.StorePlugin
 Bundle-Vendor: %providerName
 Bundle-Localization: plugin
@@ -25,4 +25,6 @@ Require-Bundle: org.eclipse.core.runtime,
  org.eclipse.rap.jface.databinding;resolution:=optional,
  org.eclipse.rap.rwt.testfixture;resolution:=optional
 Bundle-ActivationPolicy: lazy
-Export-Package: com.elasticpath.cmclient.store.promotions
+Export-Package: com.elasticpath.cmclient.store.promotions,
+ com.elasticpath.cmclient.store.promotions.wizard,
+ com.elasticpath.cmclient.store.promotions.editors

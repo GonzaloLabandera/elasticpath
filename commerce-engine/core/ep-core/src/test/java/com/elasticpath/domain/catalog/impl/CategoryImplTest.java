@@ -3,25 +3,23 @@
  */
 package com.elasticpath.domain.catalog.impl;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
-import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-import org.jmock.integration.junit4.JUnitRuleMockery;
-import org.junit.After;
+import com.google.common.collect.ImmutableList;
+import com.google.common.testing.EqualsTester;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.elasticpath.commons.beanframework.BeanFactory;
 import com.elasticpath.commons.constants.ContextIdNames;
@@ -44,12 +42,12 @@ import com.elasticpath.domain.catalog.CategoryType;
 import com.elasticpath.domain.catalog.LocaleDependantFields;
 import com.elasticpath.domain.localization.LocaleFallbackPolicy;
 import com.elasticpath.domain.misc.impl.RandomGuidImpl;
-import com.elasticpath.test.BeanFactoryExpectationsFactory;
 
 /**
  * Test <code>CategoryImpl</code>.
  */
-@SuppressWarnings({ "PMD.TooManyMethods", "PMD.TooManyStaticImports", "PMD.GodClass" })
+@SuppressWarnings({ "PMD.TooManyMethods", "PMD.GodClass" })
+@RunWith(MockitoJUnitRunner.class)
 public class CategoryImplTest  {
 
 	private static final int ORDERING_NUMBER_2 = 4;
@@ -75,26 +73,16 @@ public class CategoryImplTest  {
 
 	private Catalog masterCatalog;
 
-	@Rule
-	public final JUnitRuleMockery context = new JUnitRuleMockery();
+	@Mock
 	private BeanFactory beanFactory;
-	private BeanFactoryExpectationsFactory expectationsFactory;
 
 	/**
 	 * Prepare for tests.
 	 */
 	@Before
 	public void setUp() {
-		beanFactory = context.mock(BeanFactory.class);
-		expectationsFactory = new BeanFactoryExpectationsFactory(context, beanFactory);
-
-		expectationsFactory.allowingBeanFactoryGetBean(ContextIdNames.RANDOM_GUID, RandomGuidImpl.class);
-		expectationsFactory.allowingBeanFactoryGetBean(ContextIdNames.CATALOG_LOCALE, CatalogLocaleImpl.class);
-
 		setupCategoryType();
-
 		setupCategory();
-
 		setupChildCategory();
 	}
 
@@ -109,7 +97,7 @@ public class CategoryImplTest  {
 		}
 		@Override
 		public List<Locale> getLocales() {
-			return Arrays.asList(new Locale("en"), new Locale("fr"));
+			return ImmutableList.of(new Locale("en"), new Locale("fr"));
 		}
 
 		@Override
@@ -120,11 +108,6 @@ public class CategoryImplTest  {
 		public void setPreferredLocales(final Locale... locales) {
 			//not needed
 		}
-	}
-
-	@After
-	public void tearDown() {
-		expectationsFactory.close();
 	}
 
 	private void setupChildCategory() {
@@ -157,7 +140,7 @@ public class CategoryImplTest  {
 	 */
 	@Test
 	public void testGetStartDate() {
-		assertNotNull(categoryImpl.getStartDate());
+		assertThat(categoryImpl.getStartDate()).isNotNull();
 	}
 
 	/**
@@ -167,7 +150,7 @@ public class CategoryImplTest  {
 	public void testSetStartDate() {
 		final Date date = new Date();
 		categoryImpl.setStartDate(date);
-		assertSame(date, categoryImpl.getStartDate());
+		assertThat(categoryImpl.getStartDate()).isEqualTo(date);
 	}
 
 	/**
@@ -175,7 +158,7 @@ public class CategoryImplTest  {
 	 */
 	@Test
 	public void testGetEndDate() {
-		assertNull(categoryImpl.getEndDate());
+		assertThat(categoryImpl.getEndDate()).isNull();
 	}
 
 	/**
@@ -185,7 +168,7 @@ public class CategoryImplTest  {
 	public void testSetEndDate() {
 		final Date date = new Date();
 		categoryImpl.setEndDate(date);
-		assertSame(date, categoryImpl.getEndDate());
+		assertThat(categoryImpl.getEndDate()).isEqualTo(date);
 	}
 
 	/**
@@ -193,7 +176,7 @@ public class CategoryImplTest  {
 	 */
 	@Test
 	public void testGetOrdering() {
-		assertEquals(0, categoryImpl.getOrdering());
+		assertThat(categoryImpl.getOrdering()).isEqualTo(0);
 	}
 
 	/**
@@ -203,7 +186,7 @@ public class CategoryImplTest  {
 	public void testSetOrdering() {
 		final int ordering = 999;
 		categoryImpl.setOrdering(ordering);
-		assertEquals(ordering, categoryImpl.getOrdering());
+		assertThat(categoryImpl.getOrdering()).isEqualTo(ordering);
 	}
 
 	/**
@@ -211,35 +194,42 @@ public class CategoryImplTest  {
 	 */
 	@Test
 	public void testCompareToAndEquals() {
+
 		// New categories are different
-		assertTrue(0 != categoryImpl.compareTo(childImpl)); // NOPMD
-		assertFalse(categoryImpl.equals(childImpl));
-		assertFalse(categoryImpl.hashCode() == childImpl.hashCode()); // NOPMD
+		new EqualsTester()
+			.addEqualityGroup(categoryImpl)
+			.addEqualityGroup(childImpl)
+			.testEquals();
+
 
 		// compare by ordering number
 		categoryImpl.setOrdering(ORDERING_NUMBER_1);
 		childImpl.setOrdering(ORDERING_NUMBER_2);
-		assertTrue(categoryImpl.compareTo(childImpl) < 0);
-		assertFalse(categoryImpl.equals(childImpl));
-		assertFalse(categoryImpl.hashCode() == childImpl.hashCode()); // NOPMD
+		assertThat(categoryImpl).isLessThan(childImpl);
+		new EqualsTester()
+			.addEqualityGroup(categoryImpl)
+			.addEqualityGroup(childImpl)
+			.testEquals();
 
 		// compare by guid
 		categoryImpl.setOrdering(ORDERING_NUMBER_1);
 		childImpl.setOrdering(ORDERING_NUMBER_1);
 		categoryImpl.setGuid(TEST_CATEGORY_GUID_1);
 		childImpl.setGuid(TEST_CATEGORY_GUID_2);
-		assertTrue(categoryImpl.compareTo(childImpl) < 0);
-		assertFalse(categoryImpl.equals(childImpl));
-		assertFalse(categoryImpl.hashCode() == childImpl.hashCode()); // NOPMD
+		assertThat(categoryImpl).isLessThan(childImpl);
+		new EqualsTester()
+			.addEqualityGroup(categoryImpl)
+			.addEqualityGroup(childImpl)
+			.testEquals();
 
 		// compare the same one
 		categoryImpl.setOrdering(ORDERING_NUMBER_1);
 		childImpl.setOrdering(ORDERING_NUMBER_1);
 		categoryImpl.setGuid(TEST_CATEGORY_GUID);
 		childImpl.setGuid(TEST_CATEGORY_GUID);
-		assertEquals(0, categoryImpl.compareTo(childImpl));
-		assertTrue(categoryImpl.equals(childImpl)); // NOPMD
-		assertTrue(categoryImpl.hashCode() == childImpl.hashCode()); // NOPMD
+		new EqualsTester()
+			.addEqualityGroup(categoryImpl, childImpl)
+			.testEquals();
 	}
 
 	/**
@@ -258,18 +248,18 @@ public class CategoryImplTest  {
 		afterNow.setTime(afterNow.getTime() + timeUnit);
 
 		categoryImpl.setStartDate(beforeNow);
-		assertTrue(categoryImpl.isAvailable());
+		assertThat(categoryImpl.isAvailable()).isTrue();
 
 		categoryImpl.setStartDate(afterNow);
-		assertFalse(categoryImpl.isAvailable());
+		assertThat(categoryImpl.isAvailable()).isFalse();
 
 		categoryImpl.setStartDate(beforeNow);
 		categoryImpl.setEndDate(afterNow);
-		assertTrue(categoryImpl.isAvailable());
+		assertThat(categoryImpl.isAvailable()).isTrue();
 
 		categoryImpl.setStartDate(muchBeforeNow);
 		categoryImpl.setEndDate(beforeNow);
-		assertFalse(categoryImpl.isAvailable());
+		assertThat(categoryImpl.isAvailable()).isFalse();
 	}
 
 	/**
@@ -283,8 +273,8 @@ public class CategoryImplTest  {
 
 		// set default values again, no value should be changed.
 		categoryImpl.initialize();
-		assertSame(oldGuid, categoryImpl.getGuid());
-		assertSame(oldDate, categoryImpl.getStartDate());
+		assertThat(categoryImpl.getGuid()).isEqualTo(oldGuid);
+		assertThat(categoryImpl.getStartDate()).isEqualTo(oldDate);
 	}
 
 	/**
@@ -293,7 +283,7 @@ public class CategoryImplTest  {
 	@Test
 	public void testGetFullAttributeValues() {
 		this.categoryImpl.setCategoryType(this.categoryType);
-		assertSame(this.categoryType, this.categoryImpl.getCategoryType());
+		assertThat(this.categoryImpl.getCategoryType()).isEqualTo(this.categoryType);
 	}
 
 	/**
@@ -307,8 +297,9 @@ public class CategoryImplTest  {
 		LocaleDependantFields result;
 
 		result = categoryImpl.getLocaleDependantFields(policy);
-		assertEquals("If no LDF has been set, should get an empty LDF in the primary locale",
-				new Locale("en"), result.getLocale());
+		assertThat(result.getLocale())
+			.as("If no LDF has been set, should get an empty LDF in the primary locale")
+			.isEqualTo(new Locale("en"));
 	}
 
 	/**
@@ -320,20 +311,24 @@ public class CategoryImplTest  {
 		final Map<Locale, LocaleDependantFields> ldfMap = new HashMap<>();
 
 		categoryImpl.setLocaleDependantFieldsMap(ldfMap);
-		LocaleDependantFields frLdf = context.mock(LocaleDependantFields.class, "fr");
-		LocaleDependantFields enLdf = context.mock(LocaleDependantFields.class, "en");
+		LocaleDependantFields frLdf = mock(LocaleDependantFields.class, "fr");
+		LocaleDependantFields enLdf = mock(LocaleDependantFields.class, "en");
 
 		//put only the secondary ldf into the map
 		ldfMap.put(new Locale("fr"), frLdf);
 
 		LocaleDependantFields result = categoryImpl.getLocaleDependantFields(policy);
-		assertSame("LDF should match second locale in policy", frLdf, result);
+		assertThat(result)
+			.as("LDF should match second locale in policy")
+			.isEqualTo(frLdf);
 
 		//put the primary ldf into the map
 		ldfMap.put(new Locale("en"), enLdf);
 
 		result = categoryImpl.getLocaleDependantFields(policy);
-		assertSame("LDF should match first locale in policy", enLdf, result);
+		assertThat(result)
+			.as("LDF should match first locale in policy")
+			.isEqualTo(enLdf);
 
 	}
 
@@ -342,7 +337,7 @@ public class CategoryImplTest  {
 	 */
 	@Test
 	public void testGetLastModifiedDate() {
-		assertNull(categoryImpl.getLastModifiedDate());
+		assertThat(categoryImpl.getLastModifiedDate()).isNull();
 	}
 
 	/**
@@ -354,46 +349,20 @@ public class CategoryImplTest  {
 		final CategoryImpl second = new CategoryImpl();
 		final CategoryImpl third = new CategoryImpl();
 		final String guid = "some code";
-
-		assertEquals("Should reflexive", first, first);
-		assertEquals("New objects should be equal", first, second);
-		assertEquals("Should be symmetric", second, first);
+		new EqualsTester()
+			.addEqualityGroup(first, second)
+			.testEquals();
 
 		first.setGuid(guid);
 		second.setGuid(guid);
-		assertEquals("Equal codes should be equal", first, second);
-		assertEquals("Equal codes should be symmetric", second, first);
+		new EqualsTester()
+			.addEqualityGroup(first, second)
+			.testEquals();
 
 		third.setGuid(guid);
-		assertEquals("Equal codes should be equal", second, third);
-		assertEquals("Should be transitive", first, third);
-	}
-
-	/**
-	 * Test method for {@link CategoryImpl#hashCode()}.
-	 */
-	@Test
-	public void testHashCode() {
-		final CategoryImpl first = new CategoryImpl();
-		final CategoryImpl second = new CategoryImpl();
-		final String guid = "some code";
-
-		assertEquals("hash code should be same on different calls", first.hashCode(), first.hashCode());
-
-		first.setGuid(guid);
-		second.setGuid(guid);
-		assertEquals("Same code should hash to same value", first.hashCode(), second.hashCode());
-
-		first.setUidPk(1L);
-		second.setUidPk(1L);
-
-		if (first.equals(second)) {
-			assertEquals("Equal objects should have same hash code", first.hashCode(), second.hashCode());
-		}
-
-		first.setGuid(null);
-		second.setGuid(null);
-		assertEquals("No codes with same UIDs should be the same", first.hashCode(), second.hashCode());
+		new EqualsTester()
+			.addEqualityGroup(first, second, third)
+			.testEquals();
 	}
 
 	/**
@@ -409,11 +378,12 @@ public class CategoryImplTest  {
 		ExtCategoryImpl category = new ExtCategoryImpl();
 		category.getAttributeValueGroup().setStringAttributeValue(attribute, null, "beanie-weenie");
 
-		assertEquals("AttributeValueGroup implementation class should have been overridden",
-				ExtAttributeValueGroupTestImpl.class, category.getAttributeValueGroup().getClass());
-		assertEquals("AttributeValueImpl implementation class should have been overridden",
-				ExtAttributeValueTestImpl.class,
-				category.getAttributeValueGroup().getAttributeValue("name", null).getClass());
+		assertThat(category.getAttributeValueGroup())
+			.as("AttributeValueGroup implementation class should have been overridden")
+			.isInstanceOf(ExtAttributeValueGroupTestImpl.class);
+		assertThat(category.getAttributeValueGroup().getAttributeValue("name", null))
+			.as("AttributeValueImpl implementation class should have been overridden")
+			.isInstanceOf(ExtAttributeValueTestImpl.class);
 	}
 
 	/**
@@ -422,18 +392,20 @@ public class CategoryImplTest  {
 	@Test
 	public void testExtensionClassesCanOverrideLocaleDependantFieldsFactory() {
 		final CatalogLocaleFallbackPolicyFactory factory = new CatalogLocaleFallbackPolicyFactory();
-		expectationsFactory.allowingBeanFactoryGetBean(ContextIdNames.LOCALE_FALLBACK_POLICY_FACTORY, factory);
+
+		when(beanFactory.getBean(ContextIdNames.LOCALE_FALLBACK_POLICY_FACTORY)).thenReturn(factory);
 		ExtCategoryImpl category = new ExtCategoryImpl();
 		LocaleDependantFields ldf = category.getLocaleDependantFieldsWithoutFallBack(Locale.ENGLISH);
 
-		assertTrue("Extension classes should be able to override LocaleDependantFields impl",
-				ldf instanceof ExtCategoryLocaleDependantFieldsImpl);
+		assertThat(ldf)
+			.as("Extension classes should be able to override LocaleDependantFields impl")
+			.isInstanceOf(ExtCategoryLocaleDependantFieldsImpl.class);
 	}
 
 	/**
 	 * Faux category domain extension class.
 	 */
-	private static class ExtCategoryImpl extends CategoryImpl {
+	private class ExtCategoryImpl extends CategoryImpl {
 		private static final long serialVersionUID = 4347049078506080278L;
 
 		/**
@@ -463,6 +435,11 @@ public class CategoryImplTest  {
 		@Override
 		public Utility getUtility() {
 			return new UtilityImpl();
+		}
+
+		@Override
+		protected <T> T getBean(final String beanName) {
+			return beanFactory.getBean(beanName);
 		}
 	}
 

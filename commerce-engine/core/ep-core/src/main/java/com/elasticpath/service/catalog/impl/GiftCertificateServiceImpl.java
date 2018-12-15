@@ -6,7 +6,6 @@ package com.elasticpath.service.catalog.impl;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.Currency;
 import java.util.Date;
@@ -421,15 +420,8 @@ public class GiftCertificateServiceImpl extends AbstractEpPersistenceServiceImpl
 							totalPurchased.subtract(totalSpend)
 					});
 		}
-		Collections.sort(result, new Comparator<Object[]>() {
-					@Override
-					public int compare(final Object[] dataRow1, final Object[] dataRow2) {
-						int result = ((String) dataRow1[0]).compareTo((String) dataRow2[0]); //store name
-						if (result == 0) {
-							result = ((String) dataRow1[1]).compareTo((String) dataRow2[1]); //currency
-						}
-						return result;
-					} });
+		result.sort(Comparator.comparing((Object[] dataRow) -> (String) dataRow[0])
+				.thenComparing(dataRow -> (String) dataRow[1]));
 		return result;
 	}
 
@@ -522,12 +514,7 @@ public class GiftCertificateServiceImpl extends AbstractEpPersistenceServiceImpl
 	public Map<Order, Money> retrieveOrdersBalances(final long uidPk) {
 		sanityCheck();
 
-		final Map<Order, Money> ordersBalance = new TreeMap<>(new Comparator<Order>() {
-			@Override
-			public int compare(final Order order1, final Order order2) {
-				return order1.getCreatedDate().compareTo(order2.getCreatedDate());
-			}
-		});
+		final Map<Order, Money> ordersBalance = new TreeMap<>(Comparator.comparing(Order::getCreatedDate));
 
 		List<Order> orders = getPersistenceEngine().retrieveByNamedQuery("ORDERS_BY_GIFT_CERTIFICATE", uidPk);
 		for (Order order : orders) {

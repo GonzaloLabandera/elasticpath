@@ -14,13 +14,11 @@ import java.util.Set;
 
 import com.elasticpath.base.exception.EpServiceException;
 import com.elasticpath.commons.exception.DuplicateNameException;
-import com.elasticpath.domain.catalog.Catalog;
 import com.elasticpath.domain.rules.EpRuleBase;
 import com.elasticpath.domain.rules.Rule;
 import com.elasticpath.domain.rules.RuleAction;
 import com.elasticpath.domain.rules.RuleCondition;
 import com.elasticpath.domain.rules.RuleException;
-import com.elasticpath.domain.store.Store;
 import com.elasticpath.persistence.api.FetchGroupLoadTuner;
 import com.elasticpath.persistence.api.PersistenceEngine;
 import com.elasticpath.service.rules.DuplicatePromoCodeException;
@@ -192,21 +190,6 @@ public interface CacheableRuleService extends RuleService {
 	@Override
 	default Collection<Long> findChangedPromoUids(Date excludeFrom, int ruleScenario) throws EpServiceException {
 		return getDecorated().findChangedPromoUids(excludeFrom, ruleScenario);
-	}
-
-	@Override
-	default EpRuleBase findRuleBaseByScenario(Store store, Catalog catalog, int scenarioId) {
-		return getDecorated().findRuleBaseByScenario(store, catalog, scenarioId);
-	}
-
-	@Override
-	default EpRuleBase findChangedStoreRuleBases(String storeCode, int scenarioId, Date date) {
-		return getDecorated().findChangedStoreRuleBases(storeCode, scenarioId, date);
-	}
-
-	@Override
-	default EpRuleBase findChangedCatalogRuleBases(String catalogCode, int scenarioId, Date date) {
-		return getDecorated().findChangedCatalogRuleBases(catalogCode, scenarioId, date);
 	}
 
 	@Override

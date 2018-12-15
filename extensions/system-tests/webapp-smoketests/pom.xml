@@ -25,6 +25,8 @@
 		<ep.activemq.context>/jms</ep.activemq.context>
 		<cargo.timeout>300000</cargo.timeout>
 		<ping.timeout>600000</ping.timeout>
+		<cargo.plugin.version>1.6.8</cargo.plugin.version>
+
 	</properties>
 
 	<profiles>
@@ -127,8 +129,7 @@
 								<goals>
 									<goal>java</goal>
 								</goals>
-								<configuration>
-									<mainClass>org.h2.tools.Server</mainClass>
+								<configuration><mainClass>org.h2.tools.Server</mainClass>
 									<arguments>
 										<argument>-tcpDaemon</argument>
 										<argument>-tcp</argument>
@@ -468,12 +469,11 @@
 				<plugin>
 					<groupId>org.codehaus.cargo</groupId>
 					<artifactId>cargo-maven2-plugin</artifactId>
-					<version>1.1.4</version>
 					<configuration>
 						<!-- This project is not designed to run cargo standalone, use tomcat:run-war in the war project you want. -->
 						<wait>${cargo.wait}</wait>
 						<container>
-							<containerId>tomcat7x</containerId>
+							<containerId>tomcat9x</containerId>
 							<artifactInstaller>
 								<groupId>org.apache.tomcat</groupId>
 								<artifactId>tomcat</artifactId>
@@ -570,18 +570,20 @@
 						</container>
 
 						<configuration>
-							<home>${project.build.directory}/tomcat7x/container</home>
+							<home>${project.build.directory}/tomcat9x/container</home>
 							<properties>
 								<cargo.logging>medium</cargo.logging>
 								<cargo.servlet.port>${cargo.port.http}</cargo.servlet.port>
 								<cargo.tomcat.ajp.port>${cargo.tomcat.ajp.port}</cargo.tomcat.ajp.port>
 								<cargo.rmi.port>${cargo.rmi.port}</cargo.rmi.port>
 								<cargo.tomcat.shutdown.port>${cargo.tomcat.shutdown.port}</cargo.tomcat.shutdown.port>
-								<cargo.datasource.datasource><![CDATA[cargo.datasource.url=jdbc:h2:tcp://localhost:${h2.port}/SMOKETESTDB|
-							cargo.datasource.driver=org.h2.Driver|
-							cargo.datasource.username=sa|
-							cargo.datasource.password=sa|
-							cargo.datasource.jndi=jdbc/epjndi]]>
+								<cargo.datasource.datasource>
+									<![CDATA[cargo.datasource.url=jdbc:h2:tcp://localhost:${h2.port}/SMOKETESTDB;DB_CLOSE_DELAY=-1|
+									cargo.datasource.driver=org.h2.Driver|
+									cargo.datasource.username=sa|
+									cargo.datasource.password=sa|
+									cargo.datasource.properties=scope=Shareable;factory=${ep.jndi.factory};maxActive=250;maxIdle=30;maxWait=10000;removeAbandoned=true;testWhileIdle=true;validationQuery=${epdb.validation.query};removeAbandoned=true;logAbandoned=true|
+									cargo.datasource.jndi=jdbc/epjndi]]>
 								</cargo.datasource.datasource>
 								<cargo.resource.resource>
 										cargo.resource.name=jms/JMSConnectionFactory|
@@ -589,62 +591,6 @@
 										cargo.resource.parameters=factory=${ep.jms.factory};brokerURL=${ep.jms.url}
 								</cargo.resource.resource>
 							</properties>
-							<deployables>
-								<deployable>
-									<groupId>com.elasticpath.extensions</groupId>
-									<artifactId>ext-search-webapp</artifactId>
-									<type>war</type>
-									<pingTimeout>${ping.timeout}</pingTimeout>
-									<properties>
-										<context>${ep.search.contextUrl}</context>
-									</properties>
-								</deployable>
-								<deployable>
-									<groupId>com.elasticpath.extensions</groupId>
-									<artifactId>ext-batch-webapp</artifactId>
-									<type>war</type>
-									<pingTimeout>${ping.timeout}</pingTimeout>
-									<properties>
-										<context>${ep.batch.context}</context>
-									</properties>
-								</deployable>
-								<deployable>
-									<groupId>com.elasticpath.extensions</groupId>
-									<artifactId>ext-integration-webapp</artifactId>
-									<type>war</type>
-									<pingTimeout>${ping.timeout}</pingTimeout>
-									<properties>
-										<context>${ep.integration.context}</context>
-									</properties>
-								</deployable>
-								<deployable>
-									<groupId>org.apache.activemq</groupId>
-									<artifactId>activemq-web-console</artifactId>
-									<type>war</type>
-									<pingTimeout>${ping.timeout}</pingTimeout>
-									<properties>
-										<context>${ep.activemq.context}</context>
-									</properties>
-								</deployable>
-								<deployable>
-									<groupId>com.elasticpath.extensions.cm</groupId>
-									<artifactId>ext-cm-webapp</artifactId>
-									<type>war</type>
-									<pingTimeout>${ping.timeout}</pingTimeout>
-									<properties>
-										<context>${ep.cm.context}</context>
-									</properties>
-								</deployable>
-								<deployable>
-									<groupId>com.elasticpath.extensions</groupId>
-									<artifactId>ext-cortex-webapp</artifactId>
-									<type>war</type>
-									<pingTimeout>${ping.timeout}</pingTimeout>
-									<properties>
-										<context>${ep.cortex.contextUrl}</context>
-									</properties>
-								</deployable>
-							</deployables>
 						</configuration>
 					</configuration>
 					<executions>
@@ -660,6 +606,64 @@
 										<cargo.jvmargs>${cargo.jvmargs} -Dcom.sun.management.jmxremote.port=${start.remote.jmx.port}</cargo.jvmargs>
 									</properties>
 								</configuration>
+								<deployables>
+									<deployable>
+										<groupId>com.elasticpath.extensions</groupId>
+										<artifactId>ext-search-webapp</artifactId>
+										<type>war</type>
+										<pingTimeout>${ping.timeout}</pingTimeout>
+										<properties>
+											<context>${ep.search.contextUrl}</context>
+										</properties>
+									</deployable>
+									<deployable>
+										<groupId>com.elasticpath.extensions</groupId>
+										<artifactId>ext-batch-webapp</artifactId>
+										<type>war</type>
+										<pingTimeout>${ping.timeout}</pingTimeout>
+										<properties>
+											<context>${ep.batch.context}</context>
+										</properties>
+									</deployable>
+									<deployable>
+										<groupId>com.elasticpath.extensions</groupId>
+										<artifactId>ext-integration-webapp</artifactId>
+										<type>war</type>
+										<pingTimeout>${ping.timeout}</pingTimeout>
+										<properties>
+											<context>${ep.integration.context}</context>
+										</properties>
+									</deployable>
+									<deployable>
+										<groupId>org.apache.activemq</groupId>
+										<artifactId>activemq-web-console</artifactId>
+										<type>war</type>
+										<pingTimeout>${ping.timeout}</pingTimeout>
+										<properties>
+											<context>${ep.activemq.context}</context>
+										</properties>
+									</deployable>
+									<deployable>
+										<groupId>com.elasticpath.extensions.cm</groupId>
+										<artifactId>ext-cm-webapp</artifactId>
+										<type>war</type>
+										<pingTimeout>${ping.timeout}</pingTimeout>
+										<properties>
+											<context>${ep.cm.context}</context>
+										</properties>
+									</deployable>
+									<deployable>
+										<groupId>com.elasticpath.extensions</groupId>
+										<artifactId>ext-cortex-webapp</artifactId>
+										<type>war</type>
+										<pingTimeout>${ping.timeout}</pingTimeout>
+										<properties>
+											<context>${ep.cortex.contextUrl}</context>
+										</properties>
+									</deployable>
+
+								</deployables>
+
 							</configuration>
 						</execution>
 						<execution>

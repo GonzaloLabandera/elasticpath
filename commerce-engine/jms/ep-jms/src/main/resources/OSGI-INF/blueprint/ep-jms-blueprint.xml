@@ -11,7 +11,11 @@
 			filter="(jndiName=jms/JMSConnectionFactory)"/>
 
 	<service ref="jms" interface="org.apache.camel.Component"/>
-	<service ref="jmsTransactionManager" interface="org.springframework.transaction.PlatformTransactionManager"/>
+	<service ref="jmsTransactionManager" interface="org.springframework.transaction.PlatformTransactionManager">
+		<service-properties>
+			<entry key="type" value="JmsTransactionManager"/>
+		</service-properties>
+	</service>
 	<service ref="JMS_PROPAGATION_REQUIRED" interface="org.apache.camel.spi.TransactedPolicy"/>
 
 </blueprint>

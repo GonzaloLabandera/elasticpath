@@ -3,8 +3,8 @@ package com.elasticpath.cucumber.definitions;
 
 import java.util.List;
 
-import com.elaticpath.selenium.example.ExampleCatalogManagement;
-import com.elaticpath.selenium.example.ExampleProductListingPane;
+import com.elasticpath.selenium.example.ExampleCatalogManagement;
+import com.elasticpath.selenium.example.ExampleProductListingPane;
 import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
 

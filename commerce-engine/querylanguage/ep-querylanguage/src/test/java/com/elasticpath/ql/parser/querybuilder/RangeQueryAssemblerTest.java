@@ -1,15 +1,10 @@
-/**
+/*
  * Copyright (c) Elastic Path Software Inc., 2013
- */
-/**
- * 
  */
 package com.elasticpath.ql.parser.querybuilder;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import org.apache.lucene.search.Query;
 import org.junit.Before;
@@ -39,35 +34,38 @@ public class RangeQueryAssemblerTest {
 	}
 
 	/**
-	 * Test method for
-	 * {@link com.elasticpath.ql.parser.RangeQueryAssemblerImpl#getRangeQuery(com.elasticpath.ql.parser.EpQLFieldDescriptor, 
-	 * java.lang.String, java.lang.String, java.lang.String)}.
+	 * Test the range query happy path.
+	 * @throws ParseException in case of error
 	 */
 	@Test
-	public void testGetRangeQuery() {
-		try {
-			EpQLTerm epQLTerm = new EpQLTerm(EpQLField.PRODUCT_CODE.getFieldName(), null, null, "=", null);
-			assertNull(queryAssembler.getRangeQuery(null, epQLTerm, null));
-		} catch (ParseException e) {
-			fail();
-		}
-		try {
-			EpQLTerm epQLTerm = new EpQLTerm(EpQLField.PRODUCT_CODE.getFieldName(), null, null, "&", null);
-			assertNull(queryAssembler.getRangeQuery(null, epQLTerm, null));
-			fail();
-		} catch (ParseException expected) {
-			assertNotNull(expected);
-		}
+	public void testGetRangeQueryHappyPath() throws ParseException {
+		EpQLTerm epQLTerm = new EpQLTerm(EpQLField.PRODUCT_CODE.getFieldName(), null, null, "=", null);
+		assertThat(queryAssembler.getRangeQuery(null, epQLTerm, null)).isNull();
+	}
 
-		try {
-			NativeResolvedTerm solrAssembler = new NativeResolvedTerm(new EpQLFieldDescriptor());
-			// String type - wrong
-			EpQLTerm epQLTerm = new EpQLTerm(EpQLField.PRODUCT_CODE.getFieldName(), null, null, ">", null);
-			assertNull(queryAssembler.getRangeQuery(solrAssembler, epQLTerm, null));
-			fail();
-		} catch (ParseException expected) {
-			assertNotNull(expected);
-		}
+	/**
+	 * Test that range query throws a parse exception when an invalid operator is used.
+	 * @throws ParseException in case of error
+	 */
+	@Test
+	public void testGetRangeQueryInvalidOperator() throws ParseException {
+		final EpQLTerm epQLTerm = new EpQLTerm(EpQLField.PRODUCT_CODE.getFieldName(), null, null, "&", null);
+		assertThatThrownBy(() -> queryAssembler.getRangeQuery(null, epQLTerm, null))
+			.isInstanceOf(ParseException.class)
+			.hasMessageStartingWith("Invalid operator");
+	}
+
+	/**
+	 * Test that range query throws a parse exception when an invalid type is used.
+	 * @throws ParseException in case of error
+	 */
+	@Test
+	public void testGetRangeQueryBadType() throws ParseException {
+		NativeResolvedTerm solrAssembler = new NativeResolvedTerm(new EpQLFieldDescriptor());
+		final EpQLTerm epQLTerm = new EpQLTerm(EpQLField.PRODUCT_CODE.getFieldName(), null, null, ">", null);
+		assertThatThrownBy(() -> queryAssembler.getRangeQuery(solrAssembler, epQLTerm, null))
+			.isInstanceOf(ParseException.class)
+			.hasMessage("Range query is not supported for this field: ProductCode of type: STRING");
 	}
 
 	/**
@@ -76,46 +74,31 @@ public class RangeQueryAssemblerTest {
 	 * java.lang.String, java.lang.String)}.
 	 */
 	@Test
-	public void testGetDateRangeQuery() {
+	public void testGetDateRangeQuery() throws ParseException {
 		NativeResolvedTerm solrAssembler = new NativeResolvedTerm(new EpQLFieldDescriptor());
 		solrAssembler.getFieldDescriptor().setType(EpQLFieldType.DATE);
 		solrAssembler.setResolvedField("startDate");
 		String date = "2008-07-31T23:59:59.999Z";
 
-		try {
-			EpQLTerm epQLTerm = new EpQLTerm(EpQLField.PRODUCT_START_DATE.getFieldName(), null, null, ">", null);
-			Query rangeQuery = queryAssembler.getRangeQuery(solrAssembler, epQLTerm, date);
-			assertNotNull(rangeQuery);
-			assertEquals("startDate:{2008-07-31T23:59:59.999Z TO *}", rangeQuery.toString());
-		} catch (ParseException e) {
-			fail();
-		}
+		EpQLTerm epQLTerm = new EpQLTerm(EpQLField.PRODUCT_START_DATE.getFieldName(), null, null, ">", null);
+		Query rangeQuery = queryAssembler.getRangeQuery(solrAssembler, epQLTerm, date);
+		assertThat(rangeQuery).isNotNull();
+		assertThat(rangeQuery.toString()).isEqualTo("startDate:{2008-07-31T23:59:59.999Z TO *}");
 
-		try {
-			EpQLTerm epQLTerm = new EpQLTerm(EpQLField.PRODUCT_START_DATE.getFieldName(), null, null, ">=", null);
-			Query rangeQuery = queryAssembler.getRangeQuery(solrAssembler, epQLTerm, date);
-			assertNotNull(rangeQuery);
-			assertEquals("startDate:[2008-07-31T23:59:59.999Z TO *]", rangeQuery.toString());
-		} catch (ParseException e) {
-			fail();
-		}
-		
-		try {
-			EpQLTerm epQLTerm = new EpQLTerm(EpQLField.PRODUCT_START_DATE.getFieldName(), null, null, "<", null);
-			Query rangeQuery = queryAssembler.getRangeQuery(solrAssembler, epQLTerm, date);
-			assertNotNull(rangeQuery);
-			assertEquals("startDate:{* TO 2008-07-31T23:59:59.999Z}", rangeQuery.toString());
-		} catch (ParseException e) {
-			fail();
-		}
-		try {
-			EpQLTerm epQLTerm = new EpQLTerm(EpQLField.PRODUCT_START_DATE.getFieldName(), null, null, "<=", null);
-			Query rangeQuery = queryAssembler.getRangeQuery(solrAssembler, epQLTerm, date);
-			assertNotNull(rangeQuery);
-			assertEquals("startDate:[* TO 2008-07-31T23:59:59.999Z]", rangeQuery.toString());
-		} catch (ParseException e) {
-			fail();
-		}
+		epQLTerm = new EpQLTerm(EpQLField.PRODUCT_START_DATE.getFieldName(), null, null, ">=", null);
+		rangeQuery = queryAssembler.getRangeQuery(solrAssembler, epQLTerm, date);
+		assertThat(rangeQuery).isNotNull();
+		assertThat(rangeQuery.toString()).isEqualTo("startDate:[2008-07-31T23:59:59.999Z TO *]");
+
+		epQLTerm = new EpQLTerm(EpQLField.PRODUCT_START_DATE.getFieldName(), null, null, "<", null);
+		rangeQuery = queryAssembler.getRangeQuery(solrAssembler, epQLTerm, date);
+		assertThat(rangeQuery).isNotNull();
+		assertThat(rangeQuery.toString()).isEqualTo("startDate:{* TO 2008-07-31T23:59:59.999Z}");
+
+		epQLTerm = new EpQLTerm(EpQLField.PRODUCT_START_DATE.getFieldName(), null, null, "<=", null);
+		rangeQuery = queryAssembler.getRangeQuery(solrAssembler, epQLTerm, date);
+		assertThat(rangeQuery).isNotNull();
+		assertThat(rangeQuery.toString()).isEqualTo("startDate:[* TO 2008-07-31T23:59:59.999Z]");
 	}
 
 	/**
@@ -124,19 +107,15 @@ public class RangeQueryAssemblerTest {
 	 * java.lang.String, java.lang.String)}.
 	 */
 	@Test
-	public void testGetFloatRangeQuery() {
+	public void testGetFloatRangeQuery() throws ParseException {
 		NativeResolvedTerm solrAssembler = new NativeResolvedTerm(new EpQLFieldDescriptor());
 		solrAssembler.getFieldDescriptor().setType(EpQLFieldType.FLOAT);
 		solrAssembler.setResolvedField("price");
 		String floatString = "65.21";
 
-		try {
-			EpQLTerm epQLTerm = new EpQLTerm(EpQLField.PRODUCT_PRICE.getFieldName(), null, null, ">", null);
-			Query rangeQuery = queryAssembler.getRangeQuery(solrAssembler, epQLTerm, floatString);
-			assertNotNull(rangeQuery);
-			assertEquals("price:{65.21 TO *}", rangeQuery.toString());
-		} catch (ParseException e) {
-			fail();
-		}
+		EpQLTerm epQLTerm = new EpQLTerm(EpQLField.PRODUCT_PRICE.getFieldName(), null, null, ">", null);
+		Query rangeQuery = queryAssembler.getRangeQuery(solrAssembler, epQLTerm, floatString);
+		assertThat(rangeQuery).isNotNull();
+		assertThat(rangeQuery.toString()).isEqualTo("price:{65.21 TO *}");
 	}
 }

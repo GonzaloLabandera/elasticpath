@@ -25,6 +25,12 @@
 			<version>${org.apache.activemq.version}</version>
 			<type>war</type>
 		</dependency>
+		<dependency>
+			<groupId>javax.servlet</groupId>
+			<artifactId>jstl</artifactId>
+			<version>1.2</version>
+		</dependency>
+
 	</dependencies>
 	<build>
 		<plugins>
@@ -49,7 +55,7 @@
 			</plugin>
 			<plugin>
 				<groupId>org.apache.tomcat.maven</groupId>
-				<artifactId>tomcat7-maven-plugin</artifactId>
+				<artifactId>tomcat8-maven-plugin</artifactId>
 				<configuration>
 					<path>${activemq.contextUrl}</path>
 					<port>${activemq.tomcat.port.http}</port>

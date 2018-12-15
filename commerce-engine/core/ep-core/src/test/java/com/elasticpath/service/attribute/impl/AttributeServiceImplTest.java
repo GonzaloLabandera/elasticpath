@@ -126,12 +126,12 @@ public class AttributeServiceImplTest extends AbstractEPServiceTestCase {
 			attribute.setKey(key);
 			final List<Attribute> attributeList = new ArrayList<>();
 			attributeList.add(attribute);
-		context.checking(new Expectations() {
-			{
-				allowing(mockPersistenceEngine).retrieveByNamedQuery(ATTRIBUTE_FIND_BY_KEY, key);
-				will(returnValue(attributeList));
-			}
-		});
+			context.checking(new Expectations() {
+				{
+					allowing(mockPersistenceEngine).retrieveByNamedQuery(ATTRIBUTE_FIND_BY_KEY, key);
+					will(returnValue(attributeList));
+				}
+			});
 			attributeService.add(attribute);
 			fail(SERVICE_EXCEPTION_EXPECTED);
 		} catch (final DuplicateKeyException e) {
@@ -442,7 +442,7 @@ public class AttributeServiceImplTest extends AbstractEPServiceTestCase {
 		});
 		attributeService.getDistinctAttributeValueList(attribute, "");
 	}
-	
+
 	/**
 	 * Test method for 'com.elasticpath.service.AttributeServiceImpl.getDistinctAttributeValueList()' <br>
 	 * for a multi-valued enabled attribute.
@@ -453,13 +453,13 @@ public class AttributeServiceImplTest extends AbstractEPServiceTestCase {
 		attribute.setAttributeType(AttributeType.INTEGER);
 		attribute.setUidPk(ATTRIBUTE_UID);
 		attribute.setMultiValueType(AttributeMultiValueType.LEGACY);
-		
+
 		AttributeUsage attributeUsage = new AttributeUsageImpl();
 		attributeUsage.setValue(AttributeUsage.PRODUCT);
 		attribute.setAttributeUsage(attributeUsage);
 
 		final CsvStringEncoder mockEncoder = context.mock(CsvStringEncoder.class);
-		
+
 		attributeService.setDistinctAttributeValueCriterion(new DistinctAttributeValueCriterionImpl());
 		context.checking(new Expectations() {
 			{

@@ -1,4 +1,4 @@
-@datapolicies
+@dataPolicies
 Feature: Access Data Policies
 
   Background:
@@ -10,7 +10,7 @@ Feature: Access Data Policies
       | Marketing Contact Information |
       | Saved Addresses               |
       | Order Information             |
-    When I access the data policies resource from root
+    When I access the data policies
     Then the following expected data policies are visible in my profile
       | Marketing Contact Information |
       | Saved Addresses               |
@@ -18,7 +18,7 @@ Feature: Access Data Policies
 
   Scenario: No data policies provided without segment header
     Given I remove the X-EP-Data-Policy-Segments header
-    When I access the data policies resource from root
+    When I access the data policies
     Then I should not see any data policies
 
   Scenario: No data policies provided when scope has not enabled data policies
@@ -39,7 +39,7 @@ Feature: Access Data Policies
       | Order Information             |
 
   Scenario: Access individual data policy information from the data policies endpoint
-    When I access the data policies resource from root
+    When I access the data policies
     And I select the data policy Marketing Contact Information
     Then I can see a data policy with the following field:
       | data-policy-consent  | false                         |
@@ -47,7 +47,7 @@ Feature: Access Data Policies
       | policy-name          | Marketing Contact Information |
 
   Scenario: Accessing the data point endpoint without segments header returns not found
-    Given I access the data policies resource from root
+    Given I access the data policies
     And I select the data policy Marketing Contact Information
     And I can access a data policy with the following field:
       | data-policy-consent  | false                         |
@@ -59,7 +59,7 @@ Feature: Access Data Policies
   Scenario Outline: Data Policy not visible when in Draft state
     Given the following data policies with segment EU_Data_Policy are in Draft state
       | <POLICY> |
-    When I access the data policies resource from root
+    When I access the data policies
     Then the following list of data policies are not visible
       | <POLICY> |
     Examples:
@@ -71,7 +71,7 @@ Feature: Access Data Policies
       | <POLICY> |
     And I set X-EP-Data-Policy-Segments header disable_policy
     And I login as a new public shopper
-    When I access the data policies resource from root
+    When I access the data policies
     Then the following list of data policies are not visible
       | <POLICY> |
     Examples:

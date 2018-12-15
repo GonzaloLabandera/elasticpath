@@ -659,4 +659,131 @@
     </constituents>
 </bundle>
 
+<bundle code="bundleDependentLineItemsScheme1AssignedPrice">
+	<constituents>
+		<constituent>
+			<guid>243cf7e5-bbbc-4d2f-a4d8-9f66a9a33489</guid>
+			<code type="product">bundlePhysicalDigitalItemsAssignedPrice</code>
+			<quantity>1</quantity>
+			<ordering>0</ordering>
+			<price_adjustments/>
+		</constituent>
+		<constituent>
+			<guid>494fbe3e-c042-48b2-933d-c284f4abea36</guid>
+			<code type="product">physicalItemFromBundleWithPhysicalAndDigitalComponents</code>
+			<quantity>1</quantity>
+			<ordering>1</ordering>
+			<price_adjustments/>
+		</constituent>
+	</constituents>
+</bundle>
+
+<bundle code="bundlePhysicalDigitalItemsAssignedPrice">
+	<constituents>
+		<constituent>
+			<guid>75b171b6-15c1-4210-9459-95c655370b39</guid>
+			<code type="product">physicalItemFromBundleWithPhysicalAndDigitalComponents</code>
+			<quantity>1</quantity>
+			<ordering>0</ordering>
+			<price_adjustments/>
+		</constituent>
+		<constituent>
+			<guid>0cae871d-7b4f-4794-a541-68ffb6b99a1f</guid>
+			<code type="product">digitalItemFromBundleWithPhysicalAndDigitalComponents</code>
+			<quantity>1</quantity>
+			<ordering>1</ordering>
+			<price_adjustments/>
+		</constituent>
+	</constituents>
+</bundle>
+
+<bundle code="bundleDependentLineItemsScheme1CalculatedPrice">
+    <constituents>
+        <constituent>
+            <guid>9eb1fa05-703b-4d54-be0e-f25181f12aa8</guid>
+            <code type="product">bundlePhysicalDigitalItemsCalculatedPrice</code>
+            <quantity>1</quantity>
+            <ordering>0</ordering>
+            <price_adjustments/>
+        </constituent>
+        <constituent>
+            <guid>8678b6ea-99b2-4b1a-9684-61b41bbeb4e9</guid>
+            <code type="product">physicalItemFromBundleWithPhysicalAndDigitalComponents</code>
+            <quantity>1</quantity>
+            <ordering>1</ordering>
+            <price_adjustments/>
+        </constituent>
+    </constituents>
+</bundle>
+
+<bundle code="bundlePhysicalDigitalItemsCalculatedPrice">
+    <constituents>
+        <constituent>
+            <guid>158336e9-44f0-42c6-8d0a-c3dd0b22948d</guid>
+            <code type="product">physicalItemFromBundleWithPhysicalAndDigitalComponents</code>
+            <quantity>1</quantity>
+            <ordering>0</ordering>
+            <price_adjustments/>
+        </constituent>
+        <constituent>
+            <guid>9dfee15f-385a-4e1a-b4e3-53e1eca309d2</guid>
+            <code type="product">digitalItemFromBundleWithPhysicalAndDigitalComponents</code>
+            <quantity>1</quantity>
+            <ordering>1</ordering>
+            <price_adjustments/>
+        </constituent>
+    </constituents>
+</bundle>
+
+<bundle code="bundleDependentLineItemsScheme2AssignedPrice">
+	<constituents>
+		<constituent>
+			<guid>c1a0fb27-b57e-4d73-a953-9f248082f74f</guid>
+			<code type="product">bundlePhysicalDigitalItemsAssignedPrice</code>
+			<quantity>1</quantity>
+			<ordering>0</ordering>
+			<price_adjustments/>
+		</constituent>
+		<constituent>
+			<guid>288e8798-bbb9-43dc-b1e3-fd9047183e38</guid>
+			<code type="product">digitalItemFromBundleWithPhysicalAndDigitalComponents</code>
+			<quantity>1</quantity>
+			<ordering>1</ordering>
+			<price_adjustments/>
+		</constituent>
+		<constituent>
+			<guid>58dabbdb-be62-42d8-b466-3507c8c8fb89</guid>
+			<code type="product">digitalProduct</code>
+			<quantity>1</quantity>
+			<ordering>2</ordering>
+			<price_adjustments/>
+		</constituent>
+	</constituents>
+</bundle>
+
+<bundle code="bundleDependentLineItemsScheme2CalculatedPrice">
+	<constituents>
+		<constituent>
+			<guid>3b003070-68bb-41b6-8662-3adb45160801</guid>
+			<code type="product">bundlePhysicalDigitalItemsCalculatedPrice</code>
+			<quantity>1</quantity>
+			<ordering>0</ordering>
+			<price_adjustments/>
+		</constituent>
+		<constituent>
+			<guid>c665e37d-dadd-470b-b79b-68ceeedffb9c</guid>
+			<code type="product">digitalItemFromBundleWithPhysicalAndDigitalComponents</code>
+			<quantity>1</quantity>
+			<ordering>1</ordering>
+			<price_adjustments/>
+		</constituent>
+		<constituent>
+			<guid>1d7f2dc7-7dde-4e9e-bac4-5cf6a86bcc8a</guid>
+			<code type="product">digitalProduct</code>
+			<quantity>1</quantity>
+			<ordering>2</ordering>
+			<price_adjustments/>
+		</constituent>
+	</constituents>
+</bundle>
 </bundles>

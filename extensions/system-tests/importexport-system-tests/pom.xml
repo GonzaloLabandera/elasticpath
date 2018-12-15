@@ -13,7 +13,7 @@
 	<description>Import/Export Tool System Tests</description>
 
 	<properties>
-		<cargo.plugin.version>1.2.4</cargo.plugin.version>
+		<cargo.plugin.version>1.6.8</cargo.plugin.version>
 		<h2database.version>1.3.172</h2database.version>
 		<ep.cortex.itest.port.http>8080</ep.cortex.itest.port.http>
 		<epdb.maven.groupId>com.h2database</epdb.maven.groupId>
@@ -91,7 +91,7 @@
 							<configuration>
 								<wait>false</wait>
 								<container>
-									<containerId>tomcat7x</containerId>
+									<containerId>tomcat9x</containerId>
 									<artifactInstaller>
 										<groupId>org.apache.tomcat</groupId>
 										<artifactId>tomcat</artifactId>
@@ -107,7 +107,7 @@
 									</dependencies>
 								</container>
 								<configuration>
-									<home>${project.build.directory}/tomcat7x/container</home>
+									<home>${project.build.directory}/tomcat9x/container</home>
 									<properties>
 										<cargo.logging>medium</cargo.logging>
 										<cargo.servlet.port>${ep.importexport.systemtests.search.port.http}</cargo.servlet.port>
@@ -119,6 +119,7 @@
 										cargo.datasource.driver=${ep.importexport.systemtestsdb.driver}|
 										cargo.datasource.username=${ep.importexport.systemtestsdb.username}|
 										cargo.datasource.password=${ep.importexport.systemtestsdb.password}|
+										cargo.datasource.properties=factory=${ep.jndi.factory}
 										cargo.datasource.jndi=jdbc/epjndi]]>
 										</cargo.datasource.datasource>
 									</properties>

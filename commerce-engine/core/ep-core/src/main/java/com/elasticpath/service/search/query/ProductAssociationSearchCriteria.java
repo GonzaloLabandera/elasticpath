@@ -240,6 +240,7 @@ public class ProductAssociationSearchCriteria extends AbstractSearchCriteriaImpl
 		return notSoldSeparately;
 	}
 
+
 	/**
 	 * Sets not sold separately flag.
 	 * @param notSoldSeparately new not sold separately flag.

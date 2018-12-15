@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>com.elasticpath</groupId>
 		<artifactId>commerce-parent</artifactId>
-		<version>703.0.0-SNAPSHOT</version>
+		<version>704.0.0-SNAPSHOT</version>
 	</parent>
 
 	<name>Extension Commerce Engine Parent</name>
@@ -32,9 +32,9 @@
 	</modules>
 
 	<properties>
-		<cmclient.platform.feature.version>703.0.0-SNAPSHOT</cmclient.platform.feature.version>
+		<cmclient.platform.feature.version>704.0.0-SNAPSHOT</cmclient.platform.feature.version>
 
-		<dce.version>703.0.0-SNAPSHOT</dce.version>
+		<dce.version>704.0.0-SNAPSHOT</dce.version>
 
 		<!-- log4j -->
 		<ep.log.to>CONSOLE, FILE</ep.log.to>
@@ -46,121 +46,24 @@
 		<org.apache.commons.pool2.version>2.4.2</org.apache.commons.pool2.version>
 		<org.apache.geronimo.specs.version>1.1.1</org.apache.geronimo.specs.version>
 		<org.apache.geronimo.management.spec.version>1.0.1</org.apache.geronimo.management.spec.version>
-
+		<ep.jndi.factory>org.apache.tomcat.jdbc.pool.DataSourceFactory</ep.jndi.factory>
+		<ep.tomcat.maxcachesize>100000</ep.tomcat.maxcachesize>
 		<peaberry.version>1.3</peaberry.version>
 
-		<tomcat.version>7.0.81</tomcat.version>
-	</properties>
+		<!-- need to set tomcat8Version for maven-plugin, should be same as tomcat.version-->
+		<tomcat8Version>9.0.10</tomcat8Version>
+		<tomcat.version>${tomcat8Version}</tomcat.version>
 
-	<dependencies>
-		<dependency>
-			<groupId>org.apache.tomcat.embed</groupId>
-			<artifactId>tomcat-embed-core</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.tomcat</groupId>
-			<artifactId>tomcat-util</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.tomcat</groupId>
-			<artifactId>tomcat-coyote</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.tomcat</groupId>
-			<artifactId>tomcat-api</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.tomcat</groupId>
-			<artifactId>tomcat-jdbc</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.tomcat</groupId>
-			<artifactId>tomcat-dbcp</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.tomcat</groupId>
-			<artifactId>tomcat-servlet-api</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.tomcat</groupId>
-			<artifactId>tomcat-jsp-api</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.tomcat</groupId>
-			<artifactId>tomcat-jasper</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.tomcat</groupId>
-			<artifactId>tomcat-jasper-el</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.tomcat</groupId>
-			<artifactId>tomcat-el-api</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.tomcat</groupId>
-			<artifactId>tomcat-catalina</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.tomcat</groupId>
-			<artifactId>tomcat-catalina-ha</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.tomcat</groupId>
-			<artifactId>tomcat-annotations-api</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.tomcat</groupId>
-			<artifactId>tomcat-i18n-es</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.tomcat</groupId>
-			<artifactId>tomcat-i18n-fr</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.tomcat</groupId>
-			<artifactId>tomcat-i18n-ja</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.tomcat</groupId>
-			<artifactId>tomcat-juli</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.tomcat.embed</groupId>
-			<artifactId>tomcat-embed-logging-juli</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.tomcat.embed</groupId>
-			<artifactId>tomcat-embed-logging-log4j</artifactId>
-			<scope>provided</scope>
-		</dependency>
-	</dependencies>
+		<!--  embedded tomcat logging doesn't have a 9.x version, use 8.5.2 for now-->
+		<tomcatLogging.version>8.5.2</tomcatLogging.version>
+	</properties>
 
 	<build>
 		<pluginManagement>
 			<plugins>
 				<plugin>
 					<groupId>org.apache.tomcat.maven</groupId>
-					<artifactId>tomcat7-maven-plugin</artifactId>
+					<artifactId>tomcat8-maven-plugin</artifactId>
 					<version>${tomcat.maven.plugin.version}</version>
 					<configuration>
 						<uriEncoding>UTF-8</uriEncoding>
@@ -265,12 +168,12 @@
 						<dependency>
 							<groupId>org.apache.tomcat.embed</groupId>
 							<artifactId>tomcat-embed-logging-juli</artifactId>
-							<version>${tomcat.version}</version>
+							<version>${tomcatLogging.version}</version>
 						</dependency>
 						<dependency>
 							<groupId>org.apache.tomcat.embed</groupId>
 							<artifactId>tomcat-embed-logging-log4j</artifactId>
-							<version>${tomcat.version}</version>
+							<version>${tomcatLogging.version}</version>
 						</dependency>
 					</dependencies>
 				</plugin>

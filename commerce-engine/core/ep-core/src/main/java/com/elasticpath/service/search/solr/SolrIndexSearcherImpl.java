@@ -1,35 +1,40 @@
 /*
- * Copyright (c) Elastic Path Software Inc., 2006
+ * Copyright (c) Elastic Path Software Inc., 2018
  */
 package com.elasticpath.service.search.solr;
 
+import static com.elasticpath.service.search.solr.SolrIndexConstants.BRAND_CODE;
+import static com.elasticpath.service.search.solr.SolrIndexConstants.PRODUCT_CATEGORY;
+
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.google.common.collect.ImmutableSet;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
+import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrRequest.METHOD;
-import org.apache.solr.client.solrj.SolrServer;
 import org.apache.solr.client.solrj.SolrServerException;
-import org.apache.solr.client.solrj.impl.HttpSolrServer;
+import org.apache.solr.client.solrj.impl.HttpSolrClient;
 import org.apache.solr.client.solrj.request.QueryRequest;
-import org.apache.solr.client.solrj.response.FacetField;
-import org.apache.solr.client.solrj.response.FacetField.Count;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.params.SolrParams;
 
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.ElasticPath;
-import com.elasticpath.domain.attribute.Attribute;
 import com.elasticpath.domain.catalog.Catalog;
 import com.elasticpath.domain.catalogview.AttributeFilter;
 import com.elasticpath.domain.catalogview.AttributeRangeFilter;
@@ -39,11 +44,11 @@ import com.elasticpath.domain.catalogview.CategoryFilter;
 import com.elasticpath.domain.catalogview.Filter;
 import com.elasticpath.domain.catalogview.FilterOption;
 import com.elasticpath.domain.catalogview.PriceFilter;
+import com.elasticpath.domain.catalogview.SizeRangeFilter;
+import com.elasticpath.domain.catalogview.SkuOptionValueFilter;
 import com.elasticpath.domain.misc.SearchConfig;
 import com.elasticpath.persistence.api.EpPersistenceException;
 import com.elasticpath.service.catalog.CatalogService;
-import com.elasticpath.service.catalogview.FilterFactory;
-import com.elasticpath.service.search.StoreAwareSearchCriteria;
 import com.elasticpath.service.search.index.QueryComposer;
 import com.elasticpath.service.search.index.QueryComposerFactory;
 import com.elasticpath.service.search.query.KeywordSearchCriteria;
@@ -59,25 +64,18 @@ public class SolrIndexSearcherImpl {
 
 	private static final Logger LOG = Logger.getLogger(SolrIndexSearcherImpl.class);
 
+	private static final Set<String> SIZES = ImmutableSet.of(SolrIndexConstants.WEIGHT, SolrIndexConstants.HEIGHT, SolrIndexConstants.LENGTH,
+			SolrIndexConstants.WIDTH);
+
 	private static final Pattern RANGE_REGEX_PATTERN = Pattern
 			.compile("[\\[\\{](?:\\w+|\\d+\\.\\d+|\\*)\\s+TO\\s+(?:\\w+|\\d+\\.\\d+|\\*)[\\]\\}]");
-
-	private SolrProvider solrProvider;
-
-	private SolrQueryFactory solrQueryFactory;
-
-	private ElasticPath elasticPath;
-
-	private FilterFactory filterFactory;
-
-	private SolrFacetAdapter solrFacetAdapter;
-
-	private QueryComposerFactory queryComposerFactory;
-
-	private IndexUtility indexUtility;
-
 	private final Map<String, Catalog> storeCodeToCatalogCodeMap = new ConcurrentHashMap<>();
-
+	private SolrProvider solrProvider;
+	private SolrQueryFactory solrQueryFactory;
+	private ElasticPath elasticPath;
+	private SolrFacetAdapter solrFacetAdapter;
+	private QueryComposerFactory queryComposerFactory;
+	private IndexUtility indexUtility;
 	private boolean retrieveCatalogFromCache = true;
 
 	/**
@@ -106,40 +104,41 @@ public class SolrIndexSearcherImpl {
 	 * @param searchResult the search result object to populate.
 	 */
 	public void search(final SearchCriteria searchCriteria, final int startIndex, final int maxResults,
-			final SolrIndexSearchResult searchResult) {
+					   final SolrIndexSearchResult searchResult) {
 		final SearchConfig searchConfig = solrProvider.getSearchConfig(searchCriteria.getIndexType());
 
 		SolrQuery solrQuery;
+		Map<String, Filter<?>> filterLookup = new HashMap<>();
 		if (searchCriteria instanceof KeywordSearchCriteria) {
 			solrQuery = solrQueryFactory.composeKeywordQuery((KeywordSearchCriteria) searchCriteria, startIndex, maxResults,
-					searchConfig, false);
+					searchConfig, false, filterLookup);
 		} else {
 			final QueryComposer queryComposer = queryComposerFactory.getComposerForCriteria(searchCriteria);
 			solrQuery = solrQueryFactory.composeSpecificQuery(queryComposer, searchCriteria, startIndex, maxResults,
-					searchConfig, false);
+					searchConfig, false, filterLookup);
 		}
 		if (LOG.isDebugEnabled()) {
 			LOG.debug("Generated query: " + solrQuery);
 		}
 
 		// get the SOLR server and do the search
-		final SolrServer server = solrProvider.getServer(searchCriteria.getIndexType());
-		doUidSearch(server, solrQuery, searchResult, searchCriteria);
+		final SolrClient client = solrProvider.getServer(searchCriteria.getIndexType());
+		doUidSearch(client, solrQuery, searchResult, filterLookup);
 
 		// If we don't have any results try again with a 'fuzzy search'
 		if (searchResult.getLastNumFound() == 0 && !searchCriteria.isFuzzySearchDisabled()) {
 			if (searchCriteria instanceof KeywordSearchCriteria) {
 				solrQuery = solrQueryFactory.composeKeywordQuery((KeywordSearchCriteria) searchCriteria, startIndex, maxResults,
-						searchConfig, true);
+						searchConfig, true, filterLookup);
 			} else {
 				final QueryComposer queryComposer = queryComposerFactory.getComposerForCriteria(searchCriteria);
 				solrQuery = solrQueryFactory.composeSpecificQuery(queryComposer, searchCriteria, startIndex, maxResults,
-						searchConfig, true);
+						searchConfig, true, filterLookup);
 			}
 			if (LOG.isDebugEnabled()) {
 				LOG.debug("Generated fuzzy query: " + solrQuery);
 			}
-			doUidSearch(server, solrQuery, searchResult, searchCriteria);
+			doUidSearch(client, solrQuery, searchResult, filterLookup);
 		}
 
 		// make sure the results numFound doesn't exceed the max return number
@@ -155,29 +154,27 @@ public class SolrIndexSearcherImpl {
 	 * document may have a store-specific facet to parse, otherwise any store-specific facets will be assumed not
 	 * to exist and will not be parsed.
 	 *
-	 * @param server the SOLR server to search
+	 * @param client the SOLR server to search
 	 * @param query the query to search with
 	 * @param searchResult the search result to modify
-	 * @param storeAwareSearchCriteria the store-aware search criteria initiating the search. Can be null if the
-	 * initiating search critiera is not store-aware
+	 * @param filterLookup map keyed on solr query filter with a value containing the filter
 	 */
-	private void doUidSearch(final SolrServer server, final SolrParams query, final SolrIndexSearchResult searchResult,
-			final SearchCriteria storeAwareSearchCriteria) {
+	private void doUidSearch(final SolrClient client, final SolrParams query, final SolrIndexSearchResult searchResult,
+							 final Map<String, Filter<?>> filterLookup) {
 		try {
 			final QueryRequest queryRequest = new QueryRequest(query);
 			queryRequest.setMethod(METHOD.POST);
-			final QueryResponse response = queryRequest.process(server);
-			parseResponseDocument(response, searchResult, storeAwareSearchCriteria);
-		} catch (final SolrServerException e) {
-			if (server instanceof HttpSolrServer) {
-				LOG.error("Error executing search. Solr Manager url : " + ((HttpSolrServer) server).getBaseURL(), e);
+			parseResponseDocument(queryRequest.process(client), searchResult, filterLookup);
+		} catch (final SolrServerException | IOException e) {
+			if (client instanceof HttpSolrClient) {
+				LOG.error("Error executing search. Solr Manager url : " + ((HttpSolrClient) client).getBaseURL(), e);
 			}
 			throw new EpPersistenceException("Solr exception executing search", e);
 		}
 	}
 
 	private void parseResponseDocument(final QueryResponse response, final SolrIndexSearchResult searchResult,
-			final SearchCriteria storeAwareSearchCriteria) {
+									   final Map<String, Filter<?>> filterLookup) {
 		List<Long> objectUidList = Collections.emptyList();
 		if (response.getResults() == null) {
 			searchResult.setNumFound(0);
@@ -187,26 +184,21 @@ public class SolrIndexSearcherImpl {
 		searchResult.setNumFound((int) response.getResults().getNumFound());
 		objectUidList = new ArrayList<>(response.getResults().size());
 		for (final SolrDocument document : response.getResults()) {
-			objectUidList.add((Long) document.getFieldValue(SolrIndexConstants.OBJECT_UID));
+			String fieldValue = (String) document.getFieldValue(SolrIndexConstants.OBJECT_UID);
+			objectUidList.add(Long.valueOf(fieldValue));
 		}
 		searchResult.setResultUids(objectUidList);
 
 		if (!searchResult.isRememberOptions()) {
-			parseFacetInformation(response, searchResult, storeAwareSearchCriteria);
+			parseFacetInformation(response, searchResult, filterLookup);
 		}
 	}
 
 	private void parseFacetInformation(final QueryResponse response, final SolrIndexSearchResult searchResult,
-			final SearchCriteria storeAwareSearchCriteria) {
-		if (storeAwareSearchCriteria instanceof StoreAwareSearchCriteria) {
-			parseCategoryFacets(response, searchResult, ((StoreAwareSearchCriteria) storeAwareSearchCriteria).getStoreCode());
-		}
-		parseBrandFacets(response, searchResult);
-
-		// other facets
+									   final Map<String, Filter<?>> filterLookup) {
 		final Map<String, Integer> facetQueries = response.getFacetQuery();
 		if (facetQueries != null) {
-			parseFacetQueries(searchResult, facetQueries);
+			parseFacetQueries(searchResult, facetQueries, filterLookup);
 		}
 	}
 
@@ -215,31 +207,152 @@ public class SolrIndexSearcherImpl {
 	 * @param searchResult search result
 	 * @param facetQueries facet queries
 	 */
-	void parseFacetQueries(final SolrIndexSearchResult searchResult,
-			final Map<String, Integer> facetQueries) {
+	void parseFacetQueries(final SolrIndexSearchResult searchResult, final Map<String, Integer> facetQueries,
+						   final Map<String, Filter<?>> filterLookup) {
 		final List<FilterOption<PriceFilter>> priceFilterOptions = new ArrayList<>(facetQueries.size());
-		final List<FilterOption<AttributeValueFilter>> attributeValueFilterOptions = new ArrayList<>(
-			facetQueries.size());
+		final List<FilterOption<AttributeValueFilter>> attributeValueFilterOptions = new ArrayList<>(facetQueries.size());
 		final List<FilterOption<AttributeRangeFilter>> attributeRangeFilterOptions = new ArrayList<>();
+		final List<FilterOption<SkuOptionValueFilter>> skuOptionValueFilterOptions = new ArrayList<>();
+		final List<FilterOption<SizeRangeFilter>> sizeFilterOptions = new ArrayList<>();
+		final List<FilterOption<BrandFilter>> brandFilters = new ArrayList<>();
+		final List<FilterOption<CategoryFilter>> categoryFilters = new ArrayList<>();
+
 		for (final Entry<String, Integer> entry : facetQueries.entrySet()) {
 			// don't care about entries with a zero count
 			if (entry.getValue() == 0) {
 				continue;
 			}
-			if (isPriceKey(entry.getKey())) {
-				final PriceFilter priceFilter = (PriceFilter) solrFacetAdapter.getFilterLookupMap().get(entry.getKey());
-				priceFilterOptions.add(constructFilterOption(entry.getValue(), priceFilter));
-			} else if (isAttributeRangeKey(entry.getKey())) {
-				final AttributeRangeFilter rangeFilter = (AttributeRangeFilter) solrFacetAdapter.getFilterLookupMap().get(entry.getKey());
-				attributeRangeFilterOptions.add(constructFilterOption(entry.getValue(), rangeFilter));
-			} else if (isAttributeKey(entry.getKey())) {
-				final AttributeValueFilter valueFilter = (AttributeValueFilter) solrFacetAdapter.getFilterLookupMap().get(entry.getKey());
-				attributeValueFilterOptions.add(constructFilterOption(entry.getValue(), valueFilter));
+			String query = entry.getKey();
+			String queryString = query.replaceFirst("(\\{[\\w-!= ]+})", "");
+			final String filterTag = Optional.ofNullable(StringUtils.substringBetween(query, "{", "}"))
+					.map(string -> string.replace("!ex=", "")).orElse(null);
+			if (isPriceKey(queryString)) {
+				addPriceFilter(filterLookup, priceFilterOptions, entry, query, queryString, filterTag);
+			} else if (isAttributeRangeKey(queryString)) {
+				addAttributeRangeFilter(filterLookup, attributeRangeFilterOptions, entry, query, queryString, filterTag);
+			} else if (isAttributeKey(queryString)) {
+				addAttributeValueFilter(filterLookup, attributeValueFilterOptions, entry, query, queryString, filterTag);
+			} else if (isSkuOptionKey(queryString)) {
+				addSkuOptionValueFilter(filterLookup, skuOptionValueFilterOptions, entry, query, queryString, filterTag);
+			} else if (isSizeFilter(queryString)) {
+				addSizeRangeFilter(filterLookup, sizeFilterOptions, entry, query, queryString, filterTag);
+			} else if (isBrandFilter(queryString)) {
+				addBrandFilter(filterLookup, brandFilters, entry, query, queryString, filterTag);
+			} else if (isCategoryFilter(queryString)) {
+				addCategoryFilter(filterLookup, categoryFilters, entry, query, queryString, filterTag);
 			}
 		}
 		searchResult.setPriceFilterOptions(priceFilterOptions);
+		searchResult.setSizeRangeFilterOptions(createSizeRangeFilterMap(sizeFilterOptions));
+		searchResult.setSkuOptionValueFilterOptions(createSkuOptionValueFilterMap(skuOptionValueFilterOptions));
 		searchResult.setAttributeValueFilterOptions(createAttributeFilterMap(attributeValueFilterOptions));
 		searchResult.setAttributeRangeFilterOptions(createAttributeFilterMap(attributeRangeFilterOptions));
+		searchResult.setCategoryFilterOptions(categoryFilters);
+		searchResult.setBrandFilterOptions(brandFilters);
+		if (solrFacetAdapter != null) {
+			searchResult.setFacetMap(solrFacetAdapter.getConfig().getFacetMap());
+		}
+	}
+
+	private void addCategoryFilter(final Map<String, Filter<?>> filterLookup, final List<FilterOption<CategoryFilter>> categoryFilters,
+								   final Entry<String, Integer> entry, final String query, final String queryString, final String filterTag) {
+		final CategoryFilter categoryFilter = (CategoryFilter) filterLookup.get(query);
+		final FilterOption<CategoryFilter> filterOption = constructFilterOption(entry.getValue(), categoryFilter);
+		enrichFilterOption(queryString, filterTag, filterOption);
+		categoryFilters.add(filterOption);
+	}
+
+	private void addBrandFilter(final Map<String, Filter<?>> filterLookup, final List<FilterOption<BrandFilter>> brandFilters,
+								final Entry<String, Integer> entry, final String query, final String queryString, final String filterTag) {
+		final BrandFilter brandFilter = (BrandFilter) filterLookup.get(query);
+		final FilterOption<BrandFilter> filterOption = constructFilterOption(entry.getValue(), brandFilter);
+		enrichFilterOption(queryString, filterTag, filterOption);
+		brandFilters.add(filterOption);
+	}
+
+	private void addSizeRangeFilter(final Map<String, Filter<?>> filterLookup, final List<FilterOption<SizeRangeFilter>> sizeFilterOptions,
+									final Entry<String, Integer> entry, final String query, final String queryString, final String filterTag) {
+		final SizeRangeFilter sizeRangeFilter = (SizeRangeFilter) filterLookup.get(query);
+		final FilterOption<SizeRangeFilter> filterOption = constructFilterOption(entry.getValue(), sizeRangeFilter);
+		enrichFilterOption(queryString, filterTag, filterOption);
+		sizeFilterOptions.add(filterOption);
+	}
+
+	private void addSkuOptionValueFilter(final Map<String, Filter<?>> filterLookup,
+										 final List<FilterOption<SkuOptionValueFilter>> skuOptionValueFilterOptions,
+										 final Entry<String, Integer> entry, final String query, final String queryString, final String filterTag) {
+		final SkuOptionValueFilter skuOptionValueFilter = (SkuOptionValueFilter) filterLookup.get(query);
+		final FilterOption<SkuOptionValueFilter> filterOption = constructFilterOption(entry.getValue(), skuOptionValueFilter);
+		enrichFilterOption(queryString, filterTag, filterOption);
+		skuOptionValueFilterOptions.add(filterOption);
+	}
+
+	private void addAttributeValueFilter(final Map<String, Filter<?>> filterLookup,
+										 final List<FilterOption<AttributeValueFilter>> attributeValueFilterOptions,
+										 final Entry<String, Integer> entry, final String query, final String queryString, final String filterTag) {
+		final AttributeValueFilter valueFilter = (AttributeValueFilter) filterLookup.get(query);
+		final FilterOption<AttributeValueFilter> filterOption = constructFilterOption(entry.getValue(), valueFilter);
+		enrichFilterOption(queryString, filterTag, filterOption);
+		attributeValueFilterOptions.add(filterOption);
+	}
+
+	private void addAttributeRangeFilter(final Map<String, Filter<?>> filterLookup,
+										 final List<FilterOption<AttributeRangeFilter>> attributeRangeFilterOptions,
+										 final Entry<String, Integer> entry, final String query, final String queryString, final String filterTag) {
+		final AttributeRangeFilter rangeFilter = (AttributeRangeFilter) filterLookup.get(query);
+		final FilterOption<AttributeRangeFilter> filterOption = constructFilterOption(entry.getValue(), rangeFilter);
+		enrichFilterOption(queryString, filterTag, filterOption);
+		attributeRangeFilterOptions.add(filterOption);
+	}
+
+	private void addPriceFilter(final Map<String, Filter<?>> filterLookup, final List<FilterOption<PriceFilter>> priceFilterOptions,
+								final Entry<String, Integer> entry, final String query, final String queryString, final String filterTag) {
+		final PriceFilter priceFilter = (PriceFilter) filterLookup.get(query);
+		final FilterOption<PriceFilter> filterOption = constructFilterOption(entry.getValue(), priceFilter);
+		enrichFilterOption(queryString, filterTag, filterOption);
+		priceFilterOptions.add(filterOption);
+	}
+
+	private void enrichFilterOption(final String queryString, final String filterTag, final FilterOption<?> filterOption) {
+		filterOption.setQueryString(queryString);
+		filterOption.setFilterTag(filterTag);
+	}
+
+	private boolean isBrandFilter(final String queryString) {
+		return queryString.startsWith(BRAND_CODE);
+	}
+
+	private boolean isCategoryFilter(final String queryString) {
+		return queryString.startsWith(PRODUCT_CATEGORY);
+	}
+
+	private Map<String, List<FilterOption<SizeRangeFilter>>> createSizeRangeFilterMap(final List<FilterOption<SizeRangeFilter>> filterOptions) {
+		Map<String, List<FilterOption<SizeRangeFilter>>> sizeRangeFilters = new HashMap<>();
+		for (FilterOption<SizeRangeFilter> filterOption : filterOptions) {
+			String key = filterOption.getFilterTag();
+			if (!sizeRangeFilters.containsKey(key)) {
+				sizeRangeFilters.put(key, new ArrayList<>());
+			}
+			sizeRangeFilters.get(key).add(filterOption);
+		}
+		return sizeRangeFilters;
+	}
+
+	private boolean isSizeFilter(final String key) {
+		return SIZES.contains(key.split(":")[0]);
+	}
+
+	private Map<String, List<FilterOption<SkuOptionValueFilter>>> createSkuOptionValueFilterMap(
+			final List<FilterOption<SkuOptionValueFilter>> filterOptions) {
+		Map<String, List<FilterOption<SkuOptionValueFilter>>> skuOptionValueFilters = new HashMap<>();
+		for (FilterOption<SkuOptionValueFilter> filterOption : filterOptions) {
+			String key = filterOption.getFilterTag();
+			if (!skuOptionValueFilters.containsKey(key)) {
+				skuOptionValueFilters.put(key, new ArrayList<>());
+			}
+			skuOptionValueFilters.get(key).add(filterOption);
+		}
+		return skuOptionValueFilters;
 	}
 
 	private boolean isPriceKey(final String key) {
@@ -248,6 +361,10 @@ public class SolrIndexSearcherImpl {
 
 	private boolean isAttributeKey(final String attributeKey) {
 		return attributeKey.startsWith(SolrIndexConstants.ATTRIBUTE_PREFIX);
+	}
+
+	private boolean isSkuOptionKey(final String key) {
+		return key.startsWith(SolrIndexConstants.SKU_OPTION_PREFIX);
 	}
 
 	private boolean isAttributeRangeKey(final String attributeKey) {
@@ -266,56 +383,6 @@ public class SolrIndexSearcherImpl {
 	boolean queryStartsWith(final String queryString, final String fieldPrefix) {
 		final String queryToCheck = StringUtils.remove(queryString, "(");
 		return queryToCheck.startsWith(fieldPrefix);
-	}
-
-	private void parseBrandFacets(final QueryResponse response, final SolrIndexSearchResult searchResult) {
-		FacetField field;
-		field = response.getFacetField(SolrIndexConstants.BRAND_CODE_NON_LC);
-		if (field != null && field.getValueCount() > 0) {
-			final List<FilterOption<BrandFilter>> filterOptions = new ArrayList<>(field.getValueCount());
-			for (final Count count : field.getValues()) {
-				if (count.getCount() > 0L) {
-					filterOptions.add(constructFilterOption((int) count.getCount(), filterFactory.createBrandFilter(count.getName())));
-				}
-			}
-			searchResult.setBrandFilterOptions(filterOptions);
-		}
-	}
-
-	/**
-	 * Parses the given QueryResponse for a CategoryCode facet field (e.g. Digital Cameras), and if one is found, creates
-	 * FilterOption objects (e.g. "SLR Cameras", "Point and Shoot Cameras") and populates the SearchResult with them.
-	 * Since category filters need to know in which Catalog they're valid, and any search with Category facets is a search
-	 * on a particular Store, then the store code is required so the category filter can be created on the Store's category.
-	 *
-	 * @param response the solr query response
-	 * @param searchResult the search result to populate with the search details
-	 * @param storeCode the code representing the store on which the query must have taken place for there to be a CategoreCode facet. This
-	 * code is used to create the CategoryFilter.
-	 */
-	void parseCategoryFacets(final QueryResponse response, final SolrIndexSearchResult searchResult, final String storeCode) {
-		if (storeCode == null) {
-			LOG.warn("Cannot parse category facets without store code.");
-			return;
-		}
-		final Catalog storeCatalog = getStoreCatalog(storeCode);
-
-		final String productCategoryFieldName = indexUtility.createProductCategoryFieldName(
-				SolrIndexConstants.PRODUCT_CATEGORY_NON_LC, storeCatalog.getCode());
-		final FacetField field = response.getFacetField(productCategoryFieldName);
-
-		if (field != null && field.getValueCount() > 0) {
-			// if CategoryCode facet field exists, load the catalog associated with the store
-
-			final List<FilterOption<CategoryFilter>> filterOptions = new ArrayList<>(field.getValueCount());
-			for (final Count count : field.getValues()) {
-				if (count.getCount() > 0L) {
-					filterOptions.add(constructFilterOption((int) count.getCount(),
-					filterFactory.createCategoryFilter(count.getName(), storeCatalog)));
-				}
-			}
-			searchResult.setCategoryFilterOptions(filterOptions);
-		}
 	}
 
 	/**
@@ -367,6 +434,7 @@ public class SolrIndexSearcherImpl {
 	protected StoreService getStoreService() {
 		return elasticPath.getBean(ContextIdNames.STORE_SERVICE);
 	}
+
 	/**
 	 * @return Catalog service
 	 */
@@ -375,16 +443,14 @@ public class SolrIndexSearcherImpl {
 	}
 
 
-	private <T extends AttributeFilter<T>> Map<Attribute, List<FilterOption<T>>> createAttributeFilterMap(
+	private <T extends AttributeFilter<T>> Map<String, List<FilterOption<T>>> createAttributeFilterMap(
 			final List<FilterOption<T>> attributeFilterOptions) {
-		final Map<Attribute, List<FilterOption<T>>> resultMap = new LinkedHashMap<>(
-			attributeFilterOptions.size());
+		final Map<String, List<FilterOption<T>>> resultMap = new LinkedHashMap<>(
+				attributeFilterOptions.size());
 		for (final FilterOption<T> option : attributeFilterOptions) {
-			final Attribute attribute = option.getFilter().getAttribute();
-			if (resultMap.get(attribute) == null) {
-				resultMap.put(attribute, new ArrayList<>());
-			}
-			resultMap.get(attribute).add(option);
+			final String guid = option.getFilterTag();
+			resultMap.computeIfAbsent(guid, key -> new ArrayList<>());
+			resultMap.get(guid).add(option);
 		}
 		return resultMap;
 	}
@@ -415,15 +481,6 @@ public class SolrIndexSearcherImpl {
 	}
 
 	/**
-	 * Sets the {@link FilterFactory} instance to use.
-	 *
-	 * @param filterFactory the {@link FilterFactory} instance to use
-	 */
-	public void setFilterFactory(final FilterFactory filterFactory) {
-		this.filterFactory = filterFactory;
-	}
-
-	/**
 	 * Sets the {@link ElasticPath} instance to use.
 	 *
 	 * @param elasticPath the {@link ElasticPath} instance to use
@@ -451,20 +508,20 @@ public class SolrIndexSearcherImpl {
 	}
 
 	/**
-	 * Sets the index utility instance.
-	 *
-	 * @param indexUtility the index utility instance
-	 */
-	public void setIndexUtility(final IndexUtility indexUtility) {
-		this.indexUtility = indexUtility;
-	}
-
-	/**
 	 * Gets the {@link IndexUtility} instance.
 	 *
 	 * @return the {@link IndexUtility} instance
 	 */
 	protected IndexUtility getIndexUtility() {
 		return indexUtility;
+	}
+
+	/**
+	 * Sets the index utility instance.
+	 *
+	 * @param indexUtility the index utility instance
+	 */
+	public void setIndexUtility(final IndexUtility indexUtility) {
+		this.indexUtility = indexUtility;
 	}
 }

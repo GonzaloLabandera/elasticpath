@@ -10,66 +10,67 @@ import java.util.List;
 import java.util.Set;
 
 import org.apache.log4j.Logger;
-import org.apache.lucene.index.AtomicReader;
-import org.apache.lucene.index.AtomicReaderContext;
-import org.apache.lucene.index.DocsEnum;
+
+import org.apache.lucene.index.LeafReader;
+import org.apache.lucene.index.LeafReaderContext;
+import org.apache.lucene.index.PostingsEnum;
 import org.apache.lucene.index.Terms;
 import org.apache.lucene.index.TermsEnum;
-import org.apache.lucene.search.FieldComparator;
+import org.apache.lucene.search.SimpleFieldComparator;
 
 import com.elasticpath.service.search.solr.SolrIndexConstants;
 
 /**
- * This class needs a little bit of an explanation. 
- * 
+ * This class needs a little bit of an explanation.
+ *
  * First the facts:
- * 
+ *
  * We index on Solr several prices, one for each price list that exist in the system. If you open the product
- * index with Luke, you will see fields such as: price_SNAPITUS_SNAPITUP_USD, price_SNAPITUS_Seion_PL, 
+ * index with Luke, you will see fields such as: price_SNAPITUS_SNAPITUP_USD, price_SNAPITUS_Seion_PL,
  * price_SNAPITUK_SNAPITUP_GBP, etc.
- * 
+ *
  * That means that a set of products returned by any search should be shown to the user with prices coming
  * from different price lists. This fact make it impossible for Solr to sort a search result set by prices
- * because the price of a specific product is determined at runtime based on the store and the price lists 
+ * because the price of a specific product is determined at runtime based on the store and the price lists
  * the web user is entitled to use. So, how we can sort by price?
- * 
+ *
  * The solution:
- * 
+ *
  * We created a dynamic field in product.schema.xml called 'sortprice*'. You should note that:
- * 
+ *
  * 	1) this field is never populated on the ProductIndexBuilder.
  * 	2) this field is used in such a way that it has its own sorting class (this class: PriceListPriceScoreDocComparator)
  *
  * When StoreFront issues a search request to Solr and ask it to sort by price, the request looks like this:
- * 
+ *
  * http://demo.elasticpath.com:8080/searchserver/product/select?qt=dismax&q=canon&......
  * ...&sort=sortprice_SNAPITUPUS_SNAPITUP_USD%23price_SNAPITUS_Senior_PL+asc&start=40&rows=20&fl=objectUid
- * 
+ *
  * Note that the sorting is requested by the parameter "sort=sortprice_SNAPITUPUS_SNAPITUP_USD%23price_SNAPITUS_Senior_PL"
- * 
+ *
  * Solr identifies that the field starts with 'pricesort*' and then it uses this class to delegate the sort algorithm.
- * 
+ *
  * This class first parses the field name using the method generatePriorityOrderedPriceListFieldNames(....). The parsing breaks down the field name
  * into existing populated fields such as price_SNAPITUPUS_SNAPITUP_USD and price_SNAPITUS_Senior_PL.
- * 
+ *
  * When it comes to the method setNextReader(...), we calculate the price based on the different price lists and sort it accordingly with
  * the prices the user that issued this request is entitled to.
- * 
+ *
  * The final sort behaves like it is really sorting by a price field. (yeee!)
- * 
- * Ok, I know it sounds a little bit complicate and obscure. The first time I came across this thing, I wanted to change it to be simpler but soon 
+ *
+ * Ok, I know it sounds a little bit complicate and obscure. The first time I came across this thing, I wanted to change it to be simpler but soon
  * I realized that is indeed a good "price sorting solution". If you think it can be smarter and simplified just bring it up in the next opportunity.
- * 
+ *
  */
-class PriceListPriceScoreDocComparator extends FieldComparator<String> {
-	
+class PriceListPriceScoreDocComparator extends SimpleFieldComparator<String>  {
+
 	/**
 	 * This constant must be the same as the one used in {@code IndexUtility#createPriceSortFieldName(String, String, List)} implementation.
 	 */
 	private static final String PRICE_LIST_SEPARATOR = "#";
 
 	private static final Logger LOG = Logger.getLogger(PriceListPriceScoreDocComparator.class);
-	
+
 	private static final String MARKER_PREFIX = SolrIndexConstants.PRICE_SORT;
 
 	private static final int MINIMUM_FIELD_LENGTH = 2;
@@ -80,7 +81,8 @@ class PriceListPriceScoreDocComparator extends FieldComparator<String> {
 	private final String[] values;
 	private String[] currentReaderValues;
 	private String bottom;
-	
+	private String top;
+
 	/**
 	 * Constructor for class.
 	 *
@@ -92,11 +94,11 @@ class PriceListPriceScoreDocComparator extends FieldComparator<String> {
 			fields = generatePriorityOrderedPriceListFieldNames(field);
 			values = new String[numhits];
 	}
-	
+
 	/**
 	 * Generates a list of product price fields out of the given field name which follows the format.
 	 * <p>pricesort_catalogGuid_priceListGuid1_priceListGuid2_..._priceListGuidN
-	 *  
+	 *
 	 * @param fieldName the field name
 	 * @return a list of price list fields in the following format:
 	 * <li>price_catalogGuid_priceListGuid1
@@ -113,7 +115,7 @@ class PriceListPriceScoreDocComparator extends FieldComparator<String> {
 		Set<String> priorityOrderedPriceListFieldNames = new LinkedHashSet<>();
 		String[] fieldNameComponents = semanticPart.split(PRICE_LIST_SEPARATOR);
 		String catalogName = fieldNameComponents[0];
-		
+
 		for (int i = 1; i < fieldNameComponents.length; i++) {
 			String singlePriceListFieldName = SolrIndexConstants.PRICE + "_" + catalogName + "_" + fieldNameComponents[i];
 			priorityOrderedPriceListFieldNames.add(singlePriceListFieldName);
@@ -135,18 +137,28 @@ class PriceListPriceScoreDocComparator extends FieldComparator<String> {
 		return values[slot];
 	}
 
+	/**
+	 * Sets the top value.
+	 * @param value the value.
+	 */
+	@Override
+	public void setTopValue(final String value) {
+		this.top = value;
+	}
+
+	@Override
+	public int compareTop(final int doc) throws IOException {
+
+		return checkEmpty(currentReaderValues, doc).compareTo(top);
+	}
+
 	@Override
 	public int compareBottom(final int doc) throws IOException {
 		return bottom.compareTo(checkEmpty(currentReaderValues, doc));
 	}
-	
-	@Override
-	public int compareDocToValue(final int doc, final String value) throws IOException {
-		return checkEmpty(currentReaderValues, doc).compareTo(value);
-	}
 
 	@Override
-	public void copy(final int slot, final int doc) throws IOException {
+	public void copy(final int slot, final int doc) {
 		values[slot] = checkEmpty(currentReaderValues, doc);
 	}
 
@@ -157,38 +169,41 @@ class PriceListPriceScoreDocComparator extends FieldComparator<String> {
 
 	// Updates prices with the given AtomicReaderContext.
 	@Override
-	public FieldComparator<String> setNextReader(final AtomicReaderContext context) throws IOException {
-		AtomicReader reader = context.reader();
+	public void doSetNextReader(final LeafReaderContext context) throws IOException {
+		LeafReader reader = context.reader();
 		currentReaderValues = new String[reader.maxDoc()];
+
 		for (String priceField : fields) {
 			Terms terms = reader.terms(priceField);
 			if (terms == null) {
 				LOG.error(String.format("Field %s does not exist", priceField));
 				continue;
 			}
-			TermsEnum termsEnum = terms.iterator(null);
+			TermsEnum termsEnum = terms.iterator();
 			if (termsEnum.next() == null) {
 				LOG.error("No terms in field: " + priceField);
 				continue;
 			}
 			do {
-				DocsEnum docsEnum = termsEnum.docs(reader.getLiveDocs(), null);
-				for (int docId = docsEnum.nextDoc(); docId != DocsEnum.NO_MORE_DOCS; docId = docsEnum.nextDoc()) {
+
+				PostingsEnum postings = termsEnum.postings(null);
+				for (int docId = postings.nextDoc(); docId != PostingsEnum.NO_MORE_DOCS; docId = postings.nextDoc()) {
 					// if value already assigned, price with higher priority already assigned
 					if (currentReaderValues[docId] == null) {
 						currentReaderValues[docId] = termsEnum.term().utf8ToString();
 					}
 				}
+
 			} while (termsEnum.next() != null); // For each term (price list field, price)
+
 		}
-		return this;
 	}
-	
+
 	private String checkEmpty(final String[] arr, final int index) {
 		if (arr[index] == null) {
 			return DEFAULT_PRICE_VALUE;
 		}
 		return arr[index];
 	}
-	
+
 }

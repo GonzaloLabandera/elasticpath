@@ -40,6 +40,8 @@ import com.elasticpath.domain.catalog.ProductSku;
 import com.elasticpath.domain.pricing.PriceListAssignment;
 import com.elasticpath.domain.pricing.PriceListDescriptor;
 import com.elasticpath.domain.pricing.PriceListStack;
+import com.elasticpath.domain.skuconfiguration.SkuOption;
+import com.elasticpath.domain.skuconfiguration.SkuOptionValue;
 import com.elasticpath.domain.store.Store;
 import com.elasticpath.money.Money;
 import com.elasticpath.persistence.api.FetchGroupLoadTuner;
@@ -110,6 +112,7 @@ public class ProductSolrInputDocumentCreator extends AbstractDocumentCreatingTas
 		addLocaleSpecificFieldsToDocument(solrInputDocument, getEntity());
 		addDefaultLocalizedFieldsToDocument(solrInputDocument, getEntity(), getProductBrand(getEntity()));
 		addSortedFieldsToDocument(solrInputDocument, getEntity());
+		addSizesAndWeightsToDocument(solrInputDocument, getEntity());
 
 		if (getEntity().getWrappedProduct() instanceof ProductBundle) {
 			final ArrayList<ConstituentItem> count = new ArrayList<>();
@@ -118,6 +121,15 @@ public class ProductSolrInputDocumentCreator extends AbstractDocumentCreatingTas
 		}
 
 		return solrInputDocument;
+	}
+
+	private void addSizesAndWeightsToDocument(final SolrInputDocument solrInputDocument, final Product product) {
+		for (ProductSku productSku : product.getProductSkus().values()) {
+			addFieldToDocument(solrInputDocument, SolrIndexConstants.WEIGHT, getAnalyzer().analyze(productSku.getWeight()));
+			addFieldToDocument(solrInputDocument, SolrIndexConstants.LENGTH, getAnalyzer().analyze(productSku.getLength()));
+			addFieldToDocument(solrInputDocument, SolrIndexConstants.HEIGHT, getAnalyzer().analyze(productSku.getHeight()));
+			addFieldToDocument(solrInputDocument, SolrIndexConstants.WIDTH, getAnalyzer().analyze(productSku.getWidth()));
+		}
 	}
 
 	private void addSortedFieldsToDocument(final SolrInputDocument solrInputDocument, final Product product) {
@@ -436,6 +448,9 @@ public class ProductSolrInputDocumentCreator extends AbstractDocumentCreatingTas
 					for (final AttributeValue attributeValue : productSku.getAttributeValueMap().values()) {
 						addAttributeToDocument(solrInputDocument, attributeValue, locale);
 					}
+					for (final SkuOptionValue skuOptionValue : productSku.getOptionValues()) {
+						addSkuOptionValueToDocument(solrInputDocument, skuOptionValue, locale);
+					}
 				}
 			}
 
@@ -471,6 +486,19 @@ public class ProductSolrInputDocumentCreator extends AbstractDocumentCreatingTas
 			addDefaultLocalizedMultiValueFieldsToDocument(document, product, getProductBrand(product));
 			addLocaleSpecificFieldsToDocument(document, product);
 		}
+	}
+
+	/**
+	 * Adds a sku option value to the the SOLR document.
+	 *
+	 * @param document the document to use
+	 * @param skuOptionValue the sku option valuye to add
+	 * @param locale the locale
+	 */
+	protected void addSkuOptionValueToDocument(final SolrInputDocument document, final SkuOptionValue skuOptionValue, final Locale locale) {
+		final SkuOption skuOption = skuOptionValue.getSkuOption();
+		final String fieldName = getIndexUtility().createSkuOptionFieldName(locale, skuOption.getOptionKey());
+		addFieldToDocument(document, fieldName, getAnalyzer().analyze(skuOptionValue.getDisplayName(locale, false)));
 	}
 
 	/**

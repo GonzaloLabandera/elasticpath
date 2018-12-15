@@ -1,15 +1,7 @@
-/**
+/*
  * Copyright (c) Elastic Path Software Inc., 2015
  */
 package com.elasticpath.persistence.openjpa.impl;
-
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.hasEntry;
-import static org.hamcrest.Matchers.not;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 import static com.elasticpath.persistence.openjpa.impl.PostProcessorTestHelper.PERSISTENCE_UNIT_NAME;
 import static com.elasticpath.persistence.openjpa.impl.PostProcessorTestHelper.givenAPersistenceUnit;
@@ -17,6 +9,8 @@ import static com.elasticpath.persistence.openjpa.impl.PostProcessorTestHelper.g
 import static com.elasticpath.persistence.openjpa.impl.PostProcessorTestHelper.givenAPersistenceUnitWithManagedClassNames;
 import static com.elasticpath.persistence.openjpa.impl.PostProcessorTestHelper.givenAPersistenceUnitWithMappingFiles;
 import static com.elasticpath.persistence.openjpa.impl.PostProcessorTestHelper.whenTheProcessorIsCalled;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.entry;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -26,21 +20,18 @@ import java.util.Properties;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
-import org.jmock.integration.junit4.JUnitRuleMockery;
-import org.junit.Rule;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.orm.jpa.persistenceunit.MutablePersistenceUnitInfo;
 
 /**
  * OverridingPersistenceUnitPostProcessorTest.
  */
+@RunWith(MockitoJUnitRunner.class)
 public class OverridingPersistenceUnitPostProcessorTest {
 
-	@Rule
-	public final JUnitRuleMockery context = new JUnitRuleMockery();
-
 	@Test
-	@SuppressWarnings("PMD.AvoidCatchingNPE")
 	public void testProcessorHandlesNullCollections() {
 		OverridingPersistenceUnitPostProcessor processor = givenAnOverridingProcessor();
 		processor.setExcludedMappingFiles(null);
@@ -49,11 +40,7 @@ public class OverridingPersistenceUnitPostProcessorTest {
 
 		MutablePersistenceUnitInfo persistenceUnitInfo = givenAPersistenceUnit();
 
-		try {
-			whenTheProcessorIsCalled(processor, persistenceUnitInfo);
-		} catch (NullPointerException e) {
-			fail("The processor should be able to handle null collections");
-		}
+		whenTheProcessorIsCalled(processor, persistenceUnitInfo);
 	}
 
 	/**
@@ -66,8 +53,9 @@ public class OverridingPersistenceUnitPostProcessorTest {
 
 		MutablePersistenceUnitInfo persistenceUnitInfo = givenAPersistenceUnitWithMappingFiles("file1.orm", "file2.orm", "file3.orm");
 		whenTheProcessorIsCalled(processor, persistenceUnitInfo);
-		assertThat(persistenceUnitInfo.getMappingFileNames(), contains("file1.orm", "file3.orm"));
-		assertThat(persistenceUnitInfo.getMappingFileNames(), not(contains("file2.orm")));
+		assertThat(persistenceUnitInfo.getMappingFileNames())
+			.contains("file1.orm", "file3.orm")
+			.doesNotContain("file2.orm");
 	}
 
 	/**
@@ -80,8 +68,9 @@ public class OverridingPersistenceUnitPostProcessorTest {
 
 		MutablePersistenceUnitInfo persistenceUnitInfo = givenAPersistenceUnitWithManagedClassNames("SomeBaseClassImpl", "AnotherClassImpl");
 		whenTheProcessorIsCalled(processor, persistenceUnitInfo);
-		assertThat(persistenceUnitInfo.getManagedClassNames(), contains("AnotherClassImpl"));
-		assertThat(persistenceUnitInfo.getManagedClassNames(), not(contains("SomeBaseClassImpl")));
+		assertThat(persistenceUnitInfo.getManagedClassNames())
+			.contains("AnotherClassImpl")
+			.doesNotContain("SomeBaseClassImpl");
 	}
 
 	/**
@@ -99,8 +88,9 @@ public class OverridingPersistenceUnitPostProcessorTest {
 
 		MutablePersistenceUnitInfo persistenceUnitInfo = givenAPersistenceUnitWithJarFileUrls(jarFile1, jarFile2);
 		whenTheProcessorIsCalled(processor, persistenceUnitInfo);
-		assertThat(persistenceUnitInfo.getJarFileUrls(), contains(jarFile1));
-		assertThat(persistenceUnitInfo.getJarFileUrls(), not(contains(jarFile2)));
+		assertThat(persistenceUnitInfo.getJarFileUrls())
+			.contains(jarFile1)
+			.doesNotContain(jarFile2);
 	}
 
 	/**
@@ -115,8 +105,7 @@ public class OverridingPersistenceUnitPostProcessorTest {
 
 		whenTheProcessorIsCalled(processor, persistenceUnitInfo);
 		ImmutableMap<String, String> finalProperties = Maps.fromProperties(persistenceUnitInfo.getProperties());
-		assertThat(finalProperties, hasEntry("openjpa.Log", "log4j"));
-		assertThat(finalProperties, hasEntry("openjpa.DataCacheTimeout", "7000"));
+		assertThat(finalProperties).contains(entry("openjpa.Log", "log4j"), entry("openjpa.DataCacheTimeout", "7000"));
 	}
 
 	/**
@@ -130,7 +119,9 @@ public class OverridingPersistenceUnitPostProcessorTest {
 		processor.setExcludeUnlistedClasses(true);
 
 		whenTheProcessorIsCalled(processor, persistenceUnitInfo);
-		assertTrue("Exclude unlisted classes should be true", persistenceUnitInfo.excludeUnlistedClasses());
+		assertThat(persistenceUnitInfo.excludeUnlistedClasses())
+			.as("Exclude unlisted classes should be true")
+			.isTrue();
 	}
 
 	/**
@@ -144,7 +135,9 @@ public class OverridingPersistenceUnitPostProcessorTest {
 		processor.setExcludeUnlistedClasses(false);
 
 		whenTheProcessorIsCalled(processor, persistenceUnitInfo);
-		assertFalse("Exclude unlisted classes should be false", persistenceUnitInfo.excludeUnlistedClasses());
+		assertThat(persistenceUnitInfo.excludeUnlistedClasses())
+			.as("Exclude unlisted classes should be false")
+			.isFalse();
 	}
 
 	/**
@@ -158,7 +151,9 @@ public class OverridingPersistenceUnitPostProcessorTest {
 		processor.setExcludeUnlistedClasses(null);
 
 		whenTheProcessorIsCalled(processor, persistenceUnitInfo);
-		assertFalse("The default value of exclude unlisted classes should be false", persistenceUnitInfo.excludeUnlistedClasses());
+		assertThat(persistenceUnitInfo.excludeUnlistedClasses())
+			.as("The default value of exclude unlisted classes should be false")
+			.isFalse();
 	}
 
 	// Methods to set up expectations

@@ -13,7 +13,6 @@ import java.util.List;
 import java.util.Map;
 
 import com.google.common.collect.ImmutableMap;
-
 import org.apache.commons.lang.ObjectUtils;
 import org.apache.commons.lang.StringUtils;
 
@@ -46,6 +45,8 @@ import com.elasticpath.test.persister.TestApplicationContext;
  * A helper to with all util methods for checkout.
  */
 public class CheckoutHelper {
+
+	private static final int FIRST_INDEX = 0;
 
 	private final CheckoutService checkoutService;
 
@@ -175,7 +176,7 @@ public class CheckoutHelper {
 	}
 
 	private ShippingOption getDefaultShippingOptionFromCart(final ShoppingCart storeShoppingCart) {
-		return getShippingOptionsFromCart(storeShoppingCart).iterator().next();
+		return getShippingOptionsFromCart(storeShoppingCart).get(FIRST_INDEX);
 	}
 
 	private CustomerAddress defaultCustomerAddress() {

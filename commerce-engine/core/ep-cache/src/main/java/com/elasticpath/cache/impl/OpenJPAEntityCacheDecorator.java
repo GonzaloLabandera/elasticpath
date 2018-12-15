@@ -69,6 +69,11 @@ public class OpenJPAEntityCacheDecorator<K, V extends Persistable> implements Ca
 		return decoratedCache.unwrap(clazz);
 	}
 
+	@Override
+	public boolean containsKey(final K key) {
+		return decoratedCache.containsKey(key);
+	}
+
 	protected PersistenceEngine getPersistenceEngine() {
 		return persistenceEngine;
 	}

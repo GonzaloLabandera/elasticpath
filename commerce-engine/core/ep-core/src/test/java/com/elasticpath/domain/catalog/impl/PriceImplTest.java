@@ -3,29 +3,19 @@
  */
 package com.elasticpath.domain.catalog.impl;
 
-import static org.hamcrest.collection.IsEmptyCollection.empty;
-import static org.hamcrest.collection.IsIterableContainingInOrder.contains;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
 
 import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.Currency;
 import java.util.Locale;
 
-import org.jmock.integration.junit4.JUnitRuleMockery;
-import org.junit.After;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.junit.MockitoJUnitRunner;
 
-import com.elasticpath.commons.beanframework.BeanFactory;
-import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.catalog.Price;
 import com.elasticpath.domain.catalog.PriceSchedule;
 import com.elasticpath.domain.catalog.PriceScheduleType;
@@ -36,13 +26,11 @@ import com.elasticpath.domain.shoppingcart.DiscountRecord;
 import com.elasticpath.domain.subscriptions.PaymentSchedule;
 import com.elasticpath.domain.subscriptions.impl.PaymentScheduleImpl;
 import com.elasticpath.money.Money;
-import com.elasticpath.money.StandardMoneyFormatter;
-import com.elasticpath.test.BeanFactoryExpectationsFactory;
 
 /**
  * Test <code>PriceImpl</code>.
  */
-@SuppressWarnings({ "PMD.TooManyStaticImports" })
+@RunWith(MockitoJUnitRunner.class)
 public class PriceImplTest {
 
 	private PriceImpl priceImpl;
@@ -67,20 +55,11 @@ public class PriceImplTest {
 
 	private PricingScheme pricingScheme;
 
-	@Rule
-	public final JUnitRuleMockery context = new JUnitRuleMockery();
-	private BeanFactory beanFactory;
-	private BeanFactoryExpectationsFactory expectationsFactory;
-
 	/**
 	 * Prepares for the next test.
 	 */
 	@Before
 	public void setUp() {
-
-		beanFactory = context.mock(BeanFactory.class);
-		expectationsFactory = new BeanFactoryExpectationsFactory(context, beanFactory);
-		expectationsFactory.allowingBeanFactoryGetBean(ContextIdNames.MONEY_FORMATTER, StandardMoneyFormatter.class);
 
 		priceImpl = new PriceImpl();
 
@@ -117,17 +96,12 @@ public class PriceImplTest {
 
 	}
 
-	@After
-	public void tearDown() {
-		expectationsFactory.close();
-	}
-
 	/**
 	 * Test method for 'com.elasticpath.domain.impl.AbstractPriceImpl.getCurrency()'.
 	 */
 	@Test
 	public void testGetCurrency() {
-		assertEquals("Check get currency", priceImpl.getCurrency(), null);
+		assertThat(priceImpl.getCurrency()).as("Check get currency").isNull();
 	}
 
 	/**
@@ -136,7 +110,9 @@ public class PriceImplTest {
 	@Test
 	public void testSetCurrency() {
 		priceImpl.setCurrency(CURRENCY_CAD);
-		assertSame("Check set currency", priceImpl.getCurrency(), CURRENCY_CAD);
+		assertThat(priceImpl.getCurrency())
+			.as("Check set currency")
+			.isEqualTo(CURRENCY_CAD);
 	}
 
 	/**
@@ -145,12 +121,12 @@ public class PriceImplTest {
 	@Test
 	public void testGetCurrencyFromPriceScheme() {
 		final Price priceImpl = new PriceImpl(); //use an empty PriceImpl object
-		assertNull(priceImpl.getCurrency());  //make sure currency at the priceImpl level is null
-		assertNull(priceImpl.getPriceTiers());
+		assertThat(priceImpl.getCurrency()).isNull();  //make sure currency at the priceImpl level is null
+		assertThat(priceImpl.getPriceTiers()).isNull();
 
 		priceImpl.setPricingScheme(pricingScheme); //add the scheme to the price
 
-		assertEquals(CURRENCY_CAD, priceImpl.getCurrency());
+		assertThat(priceImpl.getCurrency()).isEqualTo(CURRENCY_CAD);
 	}
 
 	/**
@@ -158,7 +134,7 @@ public class PriceImplTest {
 	 */
 	@Test
 	public void testGetListPrice() {
-		assertEquals("Check get list price", priceImpl.getListPrice(), null);
+		assertThat(priceImpl.getListPrice()).isNull();
 	}
 
 	/**
@@ -171,19 +147,19 @@ public class PriceImplTest {
 		final Money cadMoney = Money.valueOf("18.88", CURRENCY_CAD);
 		priceImpl.setListPrice(cadMoney);
 		Money cadListPrice = priceImpl.getListPrice();
-		assertEquals(cadListPrice.getCurrency(), CURRENCY_CAD);
-		assertEquals(cadMoney.getAmount(), cadListPrice.getAmount());
+		assertThat(cadListPrice.getCurrency()).isEqualTo(CURRENCY_CAD);
+		assertThat(cadListPrice.getAmount()).isEqualTo(cadMoney.getAmount());
 
 		priceImpl.setListPrice(cadMoney, SECOND_TIER_MTY);
 		cadListPrice = priceImpl.getListPrice(QTY_6);
-		assertEquals(cadListPrice.getCurrency(), CURRENCY_CAD);
-		assertEquals(cadMoney.getAmount(), cadListPrice.getAmount());
+		assertThat(cadListPrice.getCurrency()).isEqualTo(CURRENCY_CAD);
+		assertThat(cadListPrice.getAmount()).isEqualTo(cadMoney.getAmount());
 
 		final Money cadMoney2 = Money.valueOf("8.88", CURRENCY_CAD);
 		priceImpl.setListPrice(cadMoney2, NON_EXIST_TIER_MTY);
 		cadListPrice = priceImpl.getListPrice(QTY_100);
-		assertEquals(cadListPrice.getCurrency(), CURRENCY_CAD);
-		assertEquals(cadMoney2.getAmount(), cadListPrice.getAmount());
+		assertThat(cadListPrice.getCurrency()).isEqualTo(CURRENCY_CAD);
+		assertThat(cadListPrice.getAmount()).isEqualTo(cadMoney2.getAmount());
 
 	}
 
@@ -192,7 +168,7 @@ public class PriceImplTest {
 	 */
 	@Test
 	public void testGetSalePrice() {
-		assertEquals("Check get sale price", priceImpl.getSalePrice(), null);
+		assertThat(priceImpl.getSalePrice()).isNull();
 	}
 
 	/**
@@ -206,13 +182,13 @@ public class PriceImplTest {
 		final Money cadMoney = Money.valueOf("18.88", currencyOfCAD);
 		priceImpl.setSalePrice(cadMoney);
 		Money cadSalePrice = priceImpl.getSalePrice();
-		assertEquals(cadSalePrice.getCurrency(), currencyOfCAD);
-		assertEquals(cadMoney.getAmount(), cadSalePrice.getAmount());
+		assertThat(cadSalePrice.getCurrency()).isEqualTo(currencyOfCAD);
+		assertThat(cadSalePrice.getAmount()).isEqualTo(cadMoney.getAmount());
 
 		priceImpl.setSalePrice(cadMoney, SECOND_TIER_MTY);
 		cadSalePrice = priceImpl.getSalePrice(QTY_6);
-		assertEquals(cadSalePrice.getCurrency(), currencyOfCAD);
-		assertEquals(cadMoney.getAmount(), cadSalePrice.getAmount());
+		assertThat(cadSalePrice.getCurrency()).isEqualTo(currencyOfCAD);
+		assertThat(cadSalePrice.getAmount()).isEqualTo(cadMoney.getAmount());
 	}
 
 	/**
@@ -220,7 +196,7 @@ public class PriceImplTest {
 	 */
 	@Test
 	public void testGetComputedPrice() {
-		assertEquals("Check get computed price", priceImpl.getComputedPrice(), null);
+		assertThat(priceImpl.getComputedPrice()).isNull();
 	}
 
 	/**
@@ -234,13 +210,13 @@ public class PriceImplTest {
 		final Money cadMoney = Money.valueOf("18.88", currencyOfCAD);
 		priceImpl.setComputedPriceIfLower(cadMoney);
 		Money cadComputedPrice = priceImpl.getComputedPrice();
-		assertEquals(cadComputedPrice.getCurrency(), currencyOfCAD);
-		assertEquals(cadMoney.getAmount(), cadComputedPrice.getAmount());
+		assertThat(cadComputedPrice.getCurrency()).isEqualTo(currencyOfCAD);
+		assertThat(cadComputedPrice.getAmount()).isEqualTo(cadMoney.getAmount());
 
 		priceImpl.setComputedPriceIfLower(cadMoney, SECOND_TIER_MTY);
 		cadComputedPrice = priceImpl.getComputedPrice(QTY_6);
-		assertEquals(cadComputedPrice.getCurrency(), currencyOfCAD);
-		assertEquals(cadMoney.getAmount(), cadComputedPrice.getAmount());
+		assertThat(cadComputedPrice.getCurrency()).isEqualTo(currencyOfCAD);
+		assertThat(cadComputedPrice.getAmount()).isEqualTo(cadMoney.getAmount());
 	}
 
 	/**
@@ -254,8 +230,8 @@ public class PriceImplTest {
 		final Money cadMoney = Money.valueOf("-18.88", currencyOfCAD);
 		priceImpl.setComputedPriceIfLower(cadMoney);
 		Money returnedCadComputedPrice = priceImpl.getComputedPrice();
-		assertEquals(returnedCadComputedPrice.getCurrency(), currencyOfCAD);
-		assertEquals(0, BigDecimal.ZERO.compareTo(returnedCadComputedPrice.getAmount()));
+		assertThat(returnedCadComputedPrice.getCurrency()).isEqualTo(currencyOfCAD);
+		assertThat(returnedCadComputedPrice.getAmount()).isEqualByComparingTo(BigDecimal.ZERO);
 	}
 
 	/**
@@ -265,13 +241,13 @@ public class PriceImplTest {
 	public void testGetMatchPriceTier() {
 
 		PriceTier priceTier = priceImpl.getPriceTierByExactMinQty(1);
-		assertEquals(1, priceTier.getMinQty());
+		assertThat(priceTier.getMinQty()).isEqualTo(1);
 
 		priceTier = priceImpl.getPriceTierByExactMinQty(SECOND_TIER_MTY);
-		assertEquals(QTY_5, priceTier.getMinQty());
+		assertThat(priceTier.getMinQty()).isEqualTo(QTY_5);
 
 		priceTier = priceImpl.getPriceTierByExactMinQty(QTY_6);
-		assertEquals(priceTier, null);
+		assertThat(priceTier).isNull();
 	}
 
 	/**
@@ -279,7 +255,7 @@ public class PriceImplTest {
 	 */
 	@Test
 	public void testGetFirstPriceTierMinQty() {
-		assertEquals(1, priceImpl.getFirstPriceTierMinQty());
+		assertThat(priceImpl.getFirstPriceTierMinQty()).isEqualTo(1);
 	}
 
 	/**
@@ -287,12 +263,12 @@ public class PriceImplTest {
 	 */
 	@Test
 	public void testhasPriceTiers() {
-		assertTrue(priceImpl.hasPriceTiers());
+		assertThat(priceImpl.hasPriceTiers()).isTrue();
 
 		priceImpl.setPersistentPriceTiers(null);
 		PriceTier priceTier1 = new PriceTierImpl();
 		priceTier1.setMinQty(SECOND_TIER_MTY);
-		assertFalse(priceImpl.hasPriceTiers());
+		assertThat(priceImpl.hasPriceTiers()).isFalse();
 	}
 
 	/**
@@ -301,20 +277,19 @@ public class PriceImplTest {
 	@Test
 	public void testInitialize() {
 		final Price priceImpl = new PriceImpl();
-		assertNull(priceImpl.getCurrency());
-		assertNull(priceImpl.getPriceTiers());
+		assertThat(priceImpl.getCurrency()).isNull();
+		assertThat(priceImpl.getPriceTiers()).isNull();
 
 		priceImpl.initialize();
 		// After set default values, the following field should get populated.
-		assertNotNull(priceImpl.getPriceTiers());
-		assertEquals(0, priceImpl.getPriceTiers().size());
+		assertThat(priceImpl.getPriceTiers()).isEmpty();
 	}
 
 	@Test
-	public void verifyGetDiscountRecordsWithQuantityFindsDiscountRecordsOfCorrespondingPriceTier() throws Exception {
+	public void verifyGetDiscountRecordsWithQuantityFindsDiscountRecordsOfCorrespondingPriceTier() {
 		final Price price = new PriceImpl();
-		final DiscountRecord discountRecord1 = context.mock(DiscountRecord.class, "Discount Record 1");
-		final DiscountRecord discountRecord2 = context.mock(DiscountRecord.class, "Discount Record 2");
+		final DiscountRecord discountRecord1 = mock(DiscountRecord.class, "Discount Record 1");
+		final DiscountRecord discountRecord2 = mock(DiscountRecord.class, "Discount Record 2");
 
 		// Given price has a price tier for qty 1 with discount record 1
 		final PriceTierImpl priceTier1 = new PriceTierImpl();
@@ -332,14 +307,14 @@ public class PriceImplTest {
 		final Collection<DiscountRecord> discountRecords = price.getDiscountRecords(SECOND_TIER_MTY);
 
 		// Then I get discount record 2
-		assertThat(discountRecords, contains(discountRecord2));
+		assertThat(discountRecords).containsExactly(discountRecord2);
 	}
 
 	@Test
-	public void verifyGetDiscountRecordsFindsFromFirstPriceTier() throws Exception {
+	public void verifyGetDiscountRecordsFindsFromFirstPriceTier() {
 		final Price price = new PriceImpl();
-		final DiscountRecord discountRecord1 = context.mock(DiscountRecord.class, "Discount Record 1");
-		final DiscountRecord discountRecord2 = context.mock(DiscountRecord.class, "Discount Record 2");
+		final DiscountRecord discountRecord1 = mock(DiscountRecord.class, "Discount Record 1");
+		final DiscountRecord discountRecord2 = mock(DiscountRecord.class, "Discount Record 2");
 
 		// Given price has a price tier for qty 1 with discount record 1
 		final PriceTierImpl priceTier1 = new PriceTierImpl();
@@ -357,11 +332,11 @@ public class PriceImplTest {
 		final Collection<DiscountRecord> discountRecords = price.getDiscountRecords();
 
 		// Then I get the first discount record, discount record 1
-		assertThat(discountRecords, contains(discountRecord1));
+		assertThat(discountRecords).containsExactly(discountRecord1);
 	}
 
 	@Test
-	public void verifyGetDiscountsRecordsEmptyWhenNoPriceTiers() throws Exception {
+	public void verifyGetDiscountsRecordsEmptyWhenNoPriceTiers() {
 		// Given price with no price tiers
 		final Price price = new PriceImpl();
 
@@ -369,13 +344,13 @@ public class PriceImplTest {
 		final Collection<DiscountRecord> discountRecords = price.getDiscountRecords();
 
 		// Then no Discount Record is returned
-		assertThat(discountRecords, empty());
+		assertThat(discountRecords).isEmpty();
 	}
 
 	@Test
-	public void verifyGetDiscountRecordsEmptyWhenNoMatchingPriceTier() throws Exception {
+	public void verifyGetDiscountRecordsEmptyWhenNoMatchingPriceTier() {
 		final Price price = new PriceImpl();
-		final DiscountRecord discountRecord = context.mock(DiscountRecord.class);
+		final DiscountRecord discountRecord = mock(DiscountRecord.class);
 
 		// Given price has a price tier for qty 5 with discount record 1
 		final PriceTier priceTier1 = new PriceTierImpl();
@@ -387,13 +362,13 @@ public class PriceImplTest {
 		final Collection<DiscountRecord> discountRecords = price.getDiscountRecords(FIRST_TIER_MTY);
 
 		// Then no Discount Record is returned
-		assertThat(discountRecords, empty());
+		assertThat(discountRecords).isEmpty();
 	}
 
 	@Test
-	public void verifyAddDiscountRecordWithoutQtySetsOnFirstPriceTier() throws Exception {
+	public void verifyAddDiscountRecordWithoutQtySetsOnFirstPriceTier() {
 		final Price price = new PriceImpl();
-		final DiscountRecord discountRecord = context.mock(DiscountRecord.class);
+		final DiscountRecord discountRecord = mock(DiscountRecord.class);
 
 		// Given price has a price tier for qty 1
 		final PriceTierImpl priceTier1 = new PriceTierImpl();
@@ -409,13 +384,13 @@ public class PriceImplTest {
 		price.addDiscountRecord(discountRecord);
 
 		// Then the discount record is set on the first price tier
-		assertThat(priceTier1.getDiscountRecords(), contains(discountRecord));
+		assertThat(priceTier1.getDiscountRecords()).containsExactly(discountRecord);
 	}
 
 	@Test
-	public void verifyAddDiscountRecordWithQtySetsOnCorrespondingPriceTier() throws Exception {
+	public void verifyAddDiscountRecordWithQtySetsOnCorrespondingPriceTier() {
 		final Price price = new PriceImpl();
-		final DiscountRecord discountRecord = context.mock(DiscountRecord.class);
+		final DiscountRecord discountRecord = mock(DiscountRecord.class);
 
 		// Given price has a price tier for qty 1
 		final PriceTierImpl priceTier1 = new PriceTierImpl();
@@ -431,14 +406,14 @@ public class PriceImplTest {
 		price.addDiscountRecord(discountRecord, SECOND_TIER_MTY);
 
 		// Then the discount record is set on the second price tier
-		assertThat(priceTier2.getDiscountRecords(), contains(discountRecord));
+		assertThat(priceTier2.getDiscountRecords()).containsExactly(discountRecord);
 	}
 
 	@Test
-	public void verifyClearDiscountRecordsClearsFromAllPriceTiers() throws Exception {
+	public void verifyClearDiscountRecordsClearsFromAllPriceTiers() {
 		final Price price = new PriceImpl();
-		final DiscountRecord discountRecord1 = context.mock(DiscountRecord.class, "Discount Record 1");
-		final DiscountRecord discountRecord2 = context.mock(DiscountRecord.class, "Discount Record 2");
+		final DiscountRecord discountRecord1 = mock(DiscountRecord.class, "Discount Record 1");
+		final DiscountRecord discountRecord2 = mock(DiscountRecord.class, "Discount Record 2");
 
 		// Given price has a price tier for qty 1 with discount record 1
 		final PriceTierImpl priceTier1 = new PriceTierImpl();
@@ -456,10 +431,10 @@ public class PriceImplTest {
 		price.clearDiscountRecords();
 
 		// Then the first price tier has no discount record
-		assertThat(priceTier1.getDiscountRecords(), empty());
+		assertThat(priceTier1.getDiscountRecords()).isEmpty();
 
 		// And second price tier has no discount record
-		assertThat(priceTier2.getDiscountRecords(), empty());
+		assertThat(priceTier2.getDiscountRecords()).isEmpty();
 	}
 
 }

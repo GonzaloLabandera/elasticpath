@@ -3,22 +3,17 @@
  */
 package com.elasticpath.domain.catalog.impl;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertSame;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.Locale;
 
+import org.junit.Before;
 import org.junit.Test;
-
-import com.elasticpath.commons.constants.ContextIdNames;
-import com.elasticpath.commons.util.impl.UtilityImpl;
-import com.elasticpath.test.jmock.AbstractEPTestCase;
 
 /**
  * Test <code>AbstractLocaleDependantFieldsImpl</code>.
  */
-public class AbstractLocaleDependantFieldsImplTest extends AbstractEPTestCase {
-
+public class AbstractLocaleDependantFieldsImplTest {
 
 	private AbstractLocaleDependantFieldsImpl localeDependantFields;
 
@@ -27,12 +22,8 @@ public class AbstractLocaleDependantFieldsImplTest extends AbstractEPTestCase {
 	 * 
 	 * @throws Exception in case of error happens
 	 */
-	@Override
+	@Before
 	public void setUp() throws Exception {
-		super.setUp();
-		
-		stubGetBean(ContextIdNames.UTILITY, new UtilityImpl());
-		
 		this.localeDependantFields = new AbstractLocaleDependantFieldsImpl() {
 			private static final long serialVersionUID = 8573857602031136445L;
 
@@ -46,6 +37,7 @@ public class AbstractLocaleDependantFieldsImplTest extends AbstractEPTestCase {
 			public void setUidPk(final long uidPk) {
 				// Not Testing
 			}
+
 		};
 	}
 
@@ -75,7 +67,7 @@ public class AbstractLocaleDependantFieldsImplTest extends AbstractEPTestCase {
 		};
 		final String url = "TestUrl";
 		aldf.setUrl(url);
-		assertEquals(url.toLowerCase(Locale.CANADA), aldf.getUrl());
+		assertThat(aldf.getUrl()).isEqualTo(url.toLowerCase(Locale.CANADA));
 	}
 	
 	/**
@@ -103,7 +95,7 @@ public class AbstractLocaleDependantFieldsImplTest extends AbstractEPTestCase {
 			}
 		};
 		aldf.setUrl(null);
-		assertEquals(null, aldf.getUrl());
+		assertThat(aldf.getUrl()).isNull();
 	}
 
 	/**
@@ -114,8 +106,9 @@ public class AbstractLocaleDependantFieldsImplTest extends AbstractEPTestCase {
 		final Locale locale = Locale.CANADA;
 		localeDependantFields.setLocale(locale);
 		
-		assertEquals(locale, localeDependantFields.getLocale());
-		assertSame(locale, localeDependantFields.getLocale());
+		assertThat(localeDependantFields.getLocale())
+			.isEqualTo(locale)
+			.isSameAs(locale);
 	}
 
 	/**
@@ -125,7 +118,7 @@ public class AbstractLocaleDependantFieldsImplTest extends AbstractEPTestCase {
 	public void testSetKeyWords() {
 		final String keyWords = "test key words";
 		localeDependantFields.setKeyWords(keyWords);
-		assertSame(keyWords, localeDependantFields.getKeyWords());
+		assertThat(localeDependantFields.getKeyWords()).isEqualTo(keyWords);
 	}
 
 	/**
@@ -135,7 +128,7 @@ public class AbstractLocaleDependantFieldsImplTest extends AbstractEPTestCase {
 	public void testSetDescription() {
 		final String desc = "test desc";
 		localeDependantFields.setDescription(desc);
-		assertSame(desc, localeDependantFields.getDescription());
+		assertThat(localeDependantFields.getDescription()).isEqualTo(desc);
 	}
 
 	/**
@@ -145,7 +138,7 @@ public class AbstractLocaleDependantFieldsImplTest extends AbstractEPTestCase {
 	public void testSetTitle() {
 		final String title = "test title";
 		localeDependantFields.setTitle(title);
-		assertSame(title, localeDependantFields.getTitle());
+		assertThat(localeDependantFields.getTitle()).isEqualTo(title);
 	}
 
 	/**
@@ -155,6 +148,6 @@ public class AbstractLocaleDependantFieldsImplTest extends AbstractEPTestCase {
 	public void testSetDisplayName() {
 		final String displayName = "test title";
 		localeDependantFields.setDisplayName(displayName);
-		assertSame(displayName, localeDependantFields.getDisplayName());
+		assertThat(localeDependantFields.getDisplayName()).isEqualTo(displayName);
 	}
 }

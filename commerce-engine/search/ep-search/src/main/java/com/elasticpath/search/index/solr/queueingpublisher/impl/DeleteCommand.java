@@ -3,7 +3,7 @@
  */
 package com.elasticpath.search.index.solr.queueingpublisher.impl;
 
-import org.apache.solr.client.solrj.SolrServer;
+import org.apache.solr.client.solrj.SolrClient;
 
 /**
  * Delete command for a Solr server.
@@ -22,14 +22,14 @@ public class DeleteCommand implements SolrPublishCommand {
 	}
 
 	/**
-	 * Applies the deletion to the specified SolrServer server.
+	 * Applies the deletion to the specified SolrClient client.
 	 * 
-	 * @param server the specified {@link SolrServer}.
+	 * @param client the specified {@link SolrClient}.
 	 * @throws Exception on failure.
 	 */
 	@Override
-	public void apply(final SolrServer server) throws Exception {
-		server.deleteById(uid);
+	public void apply(final SolrClient client) throws Exception {
+		client.deleteById(uid);
 	}
 
 }

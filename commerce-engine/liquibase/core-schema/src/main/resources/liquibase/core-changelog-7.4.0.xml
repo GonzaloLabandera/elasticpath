@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright (c) Elastic Path Software Inc., 2018
+  -->
+<databaseChangeLog xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+				   xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+				   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd"
+				   logicalFilePath="com/elasticpath/core/db/core-changelog-7.4.0.xml">
+
+	<changeSet id="7.4.0-create-new-tfacets-table" author="elasticpath" context="pre-app-upgrade">
+		<comment>Create the TFACET table for storing and retrieving facets</comment>
+
+		<createTable tableName="TFACET">
+			<column name="UIDPK" type="BIGINT">
+				<constraints primaryKey="true"/>
+			</column>
+			<column name="FACET_GUID" type="VARCHAR(64)">
+				<constraints nullable="false"/>
+			</column>
+			<column name="BUSINESS_OBJECT_ID" type="VARCHAR(64)">
+				<constraints nullable="false"/>
+			</column>
+			<column name="FACET_NAME" type="VARCHAR(255)">
+				<constraints nullable="false"/>
+			</column>
+			<column name="FIELD_KEY_TYPE" type="SMALLINT" defaultValue="0">
+				<constraints nullable="false"/>
+			</column>
+			<column name="STORECODE" type="VARCHAR(64)">
+				<constraints nullable="false"/>
+			</column>
+			<column name="DISPLAY_NAME" type="VARCHAR(512)">
+				<constraints nullable="false" unique="false"/>
+			</column>
+			<column name="FACET_TYPE" type="SMALLINT" defaultValue="0">
+				<constraints nullable="false"/>
+			</column>
+			<column name="SEARCHABLE_OPTION" type="BOOLEAN" defaultValue="FALSE">
+				<constraints nullable="false"/>
+			</column>
+			<column name="RANGE_FACET_VALUES" type="VARCHAR(1024)">
+				<constraints nullable="true" unique="false"/>
+			</column>
+			<column name="FACET_GROUP" type="SMALLINT" defaultValue="0">
+				<constraints nullable="false"/>
+			</column>
+		</createTable>
+
+		<insert tableName="JPA_GENERATED_KEYS">
+			<column name="ID" value="TFACET" />
+			<column name="LAST_VALUE" valueNumeric="200000" />
+		</insert>
+	</changeSet>
+
+</databaseChangeLog>

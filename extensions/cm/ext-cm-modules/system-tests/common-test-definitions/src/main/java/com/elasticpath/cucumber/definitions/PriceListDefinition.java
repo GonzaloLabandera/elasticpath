@@ -11,7 +11,9 @@ import cucumber.api.java.en.And;
 import cucumber.api.java.en.Given;
 import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
+import org.apache.log4j.Logger;
 
+import com.elasticpath.selenium.common.AbstractPageObject;
 import com.elasticpath.selenium.dialogs.ConfirmDialog;
 import com.elasticpath.selenium.dialogs.PriceEditorDialog;
 import com.elasticpath.selenium.dialogs.SelectAProductDialog;
@@ -35,6 +37,7 @@ import com.elasticpath.selenium.wizards.CreatePriceListAssignmentWizard;
  */
 @SuppressWarnings({"PMD.TooManyMethods", "PMD.GodClass"})
 public class PriceListDefinition {
+	private static final Logger LOGGER = Logger.getLogger(AbstractPageObject.class);
 	private final PriceListManagement priceListManagement;
 	private final PriceListActionToolbar priceListActionToolbar;
 	private final ActivityToolbar activityToolbar;
@@ -108,6 +111,11 @@ public class PriceListDefinition {
 	@When("^I create Price List Assignment with newly created price list for catalog (.+)$")
 	public void createPriceListAssignmentForNewPriceList(final String catalog) {
 		createPLA(uniquePriceListName, catalog);
+	}
+
+	@When("^I create Price List Assignment with newly created price list using the following values$")
+	public void createPriceListAssignmentForNewPriceList(final Map<String, String> plaProperties) {
+		createPLA(uniquePriceListName, plaProperties.get("catalog"), plaProperties.get("priority"));
 	}
 
 	/**
@@ -741,21 +749,32 @@ public class PriceListDefinition {
 	/**
 	 * Clean up price list assignment.
 	 */
-	@After("@cleanupPriceListAssignment")
+	@After(value = "@cleanupPriceListAssignment", order = Constants.CLEANUP_ORDER_FIRST)
 	public void cleanUpPriceListAssignment() {
-		deleteNewCreatedPriceListAssignment();
+		assertThat(uniquePriceListAssignmentName)
+				.as("It's not possible to delete a Price list assignment. A price list assignment name was not generated")
+				.isNotBlank();
+		priceEditorDialog = new PriceEditorDialog(SetUp.getDriver());
+		priceEditorDialog.closeDialogIfOpened();
+		deletePLAIfPresent(uniquePriceListName, uniquePriceListAssignmentName);
 		verifyPriceListAssignmentDeleted();
-		cleanUpPriceList();
 	}
 
 	/**
 	 * Clean up price list.
 	 */
-	@After("@cleanupPriceList")
+	@After(value = "@cleanupPriceList", order = Constants.CLEANUP_ORDER_SECOND)
 	public void cleanUpPriceList() {
+		assertThat(uniquePriceListName)
+				.as("It's not possible to delete a Price list assignment. A price list name was not generated")
+				.isNotBlank();
+		//any dialog which inherits Abstract dialog can be used here
+		priceEditorDialog = new PriceEditorDialog(SetUp.getDriver());
+		priceEditorDialog.closeDialogIfOpened();
 		clickPriceListTab();
 		deleteNewPriceList();
 		verifyPriceListDeleted();
+		uniquePriceListName = null;
 	}
 
 	private void searchPriceListAssignment(final String priceList) {
@@ -773,17 +792,18 @@ public class PriceListDefinition {
 		createPriceListAssignmentWizard.enterPriceListAssignmentName(uniquePriceListAssignmentName);
 	}
 
+	private void selectPriority(final String priority) {
+		createPriceListAssignmentWizard.selectPriceListAssignmentPriority(priority);
+	}
+
 	private void clickNextButton() {
 		createPriceListAssignmentWizard.clickNextInDialog();
 	}
 
-	private void clickFinishButton() {
-		createPriceListAssignmentWizard.clickFinish();
-	}
+	@Then("^I click create price list assignment wizard save button$")
+	public void clickFinishButton() { createPriceListAssignmentWizard.clickFinish(); }
 
-	private void selectPriceListName(final String priceListName) {
-		createPriceListAssignmentWizard.selectPriceList(priceListName);
-	}
+	private void selectPriceListName(final String priceListName) { createPriceListAssignmentWizard.selectPriceList(priceListName); }
 
 	private void selectCatalogNameForPriceListAssignment(final String catalogName) {
 		createPriceListAssignmentWizard.selectCatalogName(catalogName);
@@ -892,13 +912,54 @@ public class PriceListDefinition {
 	 * @param catalog   the catalog to assign it to
 	 */
 	public void createPLA(final String priceList, final String catalog) {
+		createPLA(priceList, catalog, null);
+	}
+
+	/**
+	 * Create Price List Assignment
+	 *
+	 * @param priceList the price list
+	 * @param catalog the catalog to assign it to
+	 * @param priority price list assignment priority
+	 */
+	public void createPLA(final String priceList, final String catalog, final String priority) {
+		mandatoryPLASteps(priceList, catalog, priority);
+		clickFinishButton();
+	}
+
+	/**
+	 * Create price list assignment with Customer condition
+	 *
+	 * @param plaValues all values to create this PLA
+	 */
+	@When("^I create Price List Assignment with Customer conditions that has the following values$")
+	public void createPLAWithCustomerCondition(final Map<String, String> plaValues) {
+		mandatoryPLASteps(plaValues.get("price list"), plaValues.get("catalog"), plaValues.get("priority"));
+		clickNextButton();
+		createPriceListAssignmentWizard.selectRadioButton("Only Shoppers who match the following conditions");
+		createPriceListAssignmentWizard.createNewStatementBlock();
+		createPriceListAssignmentWizard.addNewStatement();
+		String[] conditions = plaValues.get("shopper condition").split(" -> ");
+		createPriceListAssignmentWizard.selectStatementConditions(conditions[0], conditions[1], conditions[2], conditions[3]);
+	}
+
+	/**
+	 * Common steps to create price list assignment
+	 *
+	 * @param priceList the price list
+	 * @param catalog the catalog to assign it to
+	 * @param priority price list assignment priority
+	 */
+	private void mandatoryPLASteps(final String priceList, final String catalog, final String priority) {
 		clickCreatePriceListAssignment();
 		enterPriceListAssignmentName();
+		if (priority != null) {
+			selectPriority(priority);
+		}
 		clickNextButton();
 		selectPriceListName(priceList);
 		clickNextButton();
 		selectCatalogNameForPriceListAssignment(catalog);
-		clickFinishButton();
 	}
 
 	/**
@@ -907,10 +968,26 @@ public class PriceListDefinition {
 	 * @param priceList           the price list
 	 * @param priceListAssignment the price list assignment
 	 */
-	public void deletePLA(final String priceList, final String priceListAssignment) {
+	private void deletePLA(final String priceList, final String priceListAssignment) {
 		searchPriceListAssignment(priceList);
 		priceListAssignmentsResultPane.deletePriceListAssignment(priceListAssignment);
 		new ConfirmDialog(SetUp.getDriver()).clickOKButton("PriceListManagerMessages.ConfirmDeletePriceListAssignment");
+	}
+
+	/**
+	 * Delete Price list assignment if present.
+	 *
+	 * @param priceList           the price list
+	 * @param priceListAssignment the price list assignment
+	 */
+	private void deletePLAIfPresent(final String priceList, final String priceListAssignment) {
+		searchPriceListAssignment(priceList);
+		if(priceListAssignmentsResultPane.deletePriceListAssignmentIfPresent(priceListAssignment)){
+			new ConfirmDialog(SetUp.getDriver()).clickOKButton("PriceListManagerMessages.ConfirmDeletePriceListAssignment");
+			LOGGER.debug("Price list assignment was deleted.");
+			return;
+		}
+		LOGGER.debug("Price list assignment was not found. Deleting steps are skipped.");
 	}
 
 	/**
@@ -939,5 +1016,11 @@ public class PriceListDefinition {
 	@Then("^Available Stores should contain all Stores?$")
 	public void verifyAllAvailableStores() {
 		createPriceListAssignmentWizard.verifyAllAvailableStores();
+	}
+
+	@And("^I assign the price list assignment to the following stores$")
+	public void assignPLAToStores(final List<String> allStores) {
+		createPriceListAssignmentWizard.selectRadioButton("Assign Specific Stores");
+		createPriceListAssignmentWizard.assignPLAToStores(allStores);
 	}
 }

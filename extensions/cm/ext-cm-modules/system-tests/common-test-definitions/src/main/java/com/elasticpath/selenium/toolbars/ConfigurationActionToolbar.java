@@ -9,6 +9,7 @@ import com.elasticpath.selenium.dialogs.ManageTaxValueDialog;
 import com.elasticpath.selenium.navigations.UserSearch;
 import com.elasticpath.selenium.resultspane.CustomerSegmentResultPane;
 import com.elasticpath.selenium.resultspane.ProfileAttributePane;
+import com.elasticpath.selenium.resultspane.SearchIndexesResultPane;
 import com.elasticpath.selenium.resultspane.ShippingRegionsPane;
 import com.elasticpath.selenium.resultspane.StoresResultPane;
 import com.elasticpath.selenium.resultspane.SystemConfigurationResultPane;
@@ -25,6 +26,8 @@ public class ConfigurationActionToolbar extends AbstractToolbar {
 
 	private static final String SYSTEM_CONFIGURATION = "div[automation-id='com.elasticpath.cmclient.admin.configuration.AdminConfigurationMessages"
 			+ ".ConfigurationAdminSection_SystemConfiguration']";
+	private static final String SEARCH_INDEXES = "div[automation-id='com.elasticpath.cmclient.admin.configuration.AdminConfigurationMessages"
+			+ ".ConfigurationAdminSection_SearchIndexes']";
 	private static final String USER_ROLES_LINK_CSS = "div[automation-id='com.elasticpath.cmclient.admin.users"
 			+ ".AdminUsersMessages.UserAdminSection_RoleAdmin']";
 	private static final String WAREHOUSE_LINK_CSS = "div[automation-id='com.elasticpath.cmclient.admin.warehouses.AdminWarehousesMessages"
@@ -65,6 +68,15 @@ public class ConfigurationActionToolbar extends AbstractToolbar {
 	public SystemConfigurationResultPane clickSystemConfiguration() {
 		click(getWaitDriver().waitForElementToBeClickable(By.cssSelector(SYSTEM_CONFIGURATION)));
 		return new SystemConfigurationResultPane(getDriver());
+	}
+
+	/**
+	 * Clicks Search Indexes
+	 * @return SearchIndexesResultPane
+	 */
+	public SearchIndexesResultPane clickSearchIndexes() {
+		click(getWaitDriver().waitForElementToBeClickable(By.cssSelector(SEARCH_INDEXES)));
+		return new SearchIndexesResultPane(getDriver());
 	}
 
 	/**

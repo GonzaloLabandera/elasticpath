@@ -6,7 +6,7 @@ package com.elasticpath.search.index.solr.builders.impl;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-import org.apache.solr.client.solrj.SolrServer;
+import org.apache.solr.client.solrj.SolrClient;
 import org.junit.Test;
 
 /**
@@ -143,7 +143,7 @@ public class SpellingUpdaterTest {
 			 * @return a TestSpellingUpdaterRunnable
 			 */
 			@Override
-			protected Runnable createSpellingUpdaterRunnable(final SolrServer server) {
+			protected Runnable createSpellingUpdaterRunnable(final SolrClient client) {
 				return new TestSpellingUpdaterRunnable();
 			}
 			

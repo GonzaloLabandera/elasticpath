@@ -4,7 +4,6 @@
 package com.elasticpath.commons.util.impl;
 
 import java.io.File;
-import java.io.FileFilter;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -104,12 +103,7 @@ public class MessageSourceCacheImpl implements MessageSourceCache, Invalidatable
 			throw new EpSystemException("Theme asset directory not found: " + themeAssetsDir.getAbsolutePath());
 		}
 
-		File[] themeDirs = themeAssetsDir.listFiles(new FileFilter() {
-			@Override
-			public boolean accept(final File pathname) {
-				return pathname.isDirectory() && !pathname.getName().startsWith(".");
-			}
-		});
+		File[] themeDirs = themeAssetsDir.listFiles(pathname -> pathname.isDirectory() && !pathname.getName().startsWith("."));
 
 		if (themeDirs == null || themeDirs.length == 0) {
 			throw new EpSystemException("No themes found in theme assets directory: " + themeAssetsDir.getAbsolutePath());
@@ -133,12 +127,7 @@ public class MessageSourceCacheImpl implements MessageSourceCache, Invalidatable
 
 
 	private void loadStorePropertiesForTheme(final File themeDir) {
-		File[] storeDirs = themeDir.listFiles(new FileFilter() {
-			@Override
-			public boolean accept(final File pathname) {
-				return pathname.isDirectory() && !pathname.getName().startsWith(".");
-			}
-		});
+		File[] storeDirs = themeDir.listFiles(pathname -> pathname.isDirectory() && !pathname.getName().startsWith("."));
 
 		if (storeDirs == null || storeDirs.length == 0) {
 			return;

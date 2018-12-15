@@ -1,4 +1,4 @@
-@Shipping
+@shipping
 
 Feature: Shipping Options
 
@@ -39,7 +39,7 @@ Feature: Shipping Options
     And I navigate links <TO_A_CA_SHIPPINGOPTION>
     And save the Canadian shipping option uri
     When I navigate links <TO_A_US_DESTINATION_ADDRESS>
-    And I post the selectaction
+    And I use the selectaction
     And return to the saved Canadian shipping option
     Then the HTTP status is not found
 
@@ -71,7 +71,7 @@ Feature: Shipping Options
     And I follow links chosen -> description
     And the field name has value <CANADIAN_SHIPPING_OPTION>
     And I navigate links <TO_A_US_DESTINATION_ADDRESS>
-    And I post the selectaction
+    And I use the selectaction
     Then the HTTP status is OK, created
     And I navigate links <TO_SHIPPINGOPTIONS>
     Then there are no choice links
@@ -88,7 +88,7 @@ Feature: Shipping Options
     And I navigate links <TO_SHIPPINGOPTIONS>
     And I follow links chosen -> description
     And the field name has value <ORIGINAL_SHIPPING_OPTION>
-    And the order total has amount: 117.6, currency: CAD and display: $117.60
+    And the order total has amount: 117.60, currency: CAD and display: $117.60
     When I navigate links <TO_SHIPPINGOPTIONS>
     And I follow links choice
     And I use the selectaction
@@ -96,7 +96,7 @@ Feature: Shipping Options
     And I navigate links <TO_SHIPPINGOPTIONS>
     And I follow links chosen -> description
     Then the field name has value <NEW_SHIPPING_OPTION>
-    And the order total has amount: 123.2, currency: CAD and display: $123.20
+    And the order total has amount: 123.20, currency: CAD and display: $123.20
 
     Examples:
       | PHYSICAL_ITEM   | TO_SHIPPINGOPTIONS                                                              | ORIGINAL_SHIPPING_OPTION | NEW_SHIPPING_OPTION |
@@ -133,7 +133,7 @@ Feature: Shipping Options
       | display-name | Canada Post 2 days |
       | carrier      | Canada Post        |
       | cost         | currency:CAD       |
-      | cost         | amount:5           |
+      | cost         | amount:5.00        |
       | cost         | display:$5.00      |
     And I fill in payment methods needinfo
     When the order is submitted
@@ -144,7 +144,7 @@ Feature: Shipping Options
       | display-name | Canada Post 2 days |
       | carrier      | Canada Post        |
       | cost         | currency:CAD       |
-      | cost         | amount:5           |
+      | cost         | amount:5.00        |
       | cost         | display:$5.00      |
 
     Examples:

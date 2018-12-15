@@ -2,6 +2,8 @@
  * Copyright (c) Elastic Path Software Inc., 2006
  */
 package com.elasticpath.service.rules.impl;
+import static com.elasticpath.domain.rules.RuleScenarios.CART_SCENARIO;
+import static com.elasticpath.domain.rules.RuleScenarios.CATALOG_BROWSE_SCENARIO;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -10,7 +12,6 @@ import org.kie.api.KieBase;
 
 import com.elasticpath.cache.SimpleTimeoutCache;
 import com.elasticpath.domain.rules.EpRuleBase;
-import com.elasticpath.domain.rules.RuleScenarios;
 import com.elasticpath.domain.store.Store;
 
 /**
@@ -36,16 +37,16 @@ public class DBReadingRuleEngineImpl extends AbstractRuleEngineImpl {
 
 			EpRuleBase newRuleBase;
 			if (ruleBase == null) {
-				newRuleBase = getRuleService().findRuleBaseByScenario(store, null, RuleScenarios.CART_SCENARIO);
+				newRuleBase = getRuleService().findRuleBaseByScenario(store, null, CART_SCENARIO);
 			} else {
-				newRuleBase = getRuleService().findChangedStoreRuleBases(code, RuleScenarios.CART_SCENARIO,
+				newRuleBase = getRuleService().findChangedStoreRuleBases(code, CART_SCENARIO,
 						ruleBase.getLastModifiedDate());
 			}
 			if (newRuleBase != null) {
 				ruleBase = newRuleBase;
 			}
 		} else {
-			ruleBase = getRuleService().findRuleBaseByScenario(store, null, RuleScenarios.CART_SCENARIO);
+			ruleBase = getRuleService().findRuleBaseByScenario(store, null, CART_SCENARIO);
 		}
 		
 		if (ruleBase == null) {
@@ -86,9 +87,9 @@ public class DBReadingRuleEngineImpl extends AbstractRuleEngineImpl {
 	private EpRuleBase getValidRuleBase(final Store store, final String code, final EpRuleBase storedRuleBase) {
 		EpRuleBase ruleBase;
 		if (storedRuleBase == null) {
-			ruleBase = getRuleService().findRuleBaseByScenario(null, store.getCatalog(), RuleScenarios.CATALOG_BROWSE_SCENARIO);
+			ruleBase = getRuleService().findRuleBaseByScenario(null, store.getCatalog(), CATALOG_BROWSE_SCENARIO);
 		} else {
-			ruleBase = getRuleService().findChangedCatalogRuleBases(code, RuleScenarios.CATALOG_BROWSE_SCENARIO,
+			ruleBase = getRuleService().findChangedCatalogRuleBases(code, CATALOG_BROWSE_SCENARIO,
 					storedRuleBase.getLastModifiedDate());
 			if (ruleBase == null) {
 				ruleBase = storedRuleBase;

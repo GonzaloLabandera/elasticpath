@@ -68,6 +68,13 @@ public interface FilterOption<T extends Filter<T>> extends EpDomain {
 	void setSeoUrl(String seoUrlFragment);
 
 	/**
+	 * Gets the search filter.
+	 *
+	 * @return the search filter
+	 */
+	T getFilter();
+
+	/**
 	 * Sets the search filter.
 	 *
 	 * @param filter the search filter.
@@ -75,9 +82,16 @@ public interface FilterOption<T extends Filter<T>> extends EpDomain {
 	void setFilter(T filter);
 
 	/**
-	 * Gets the search filter.
+	 * Returns the tag.
 	 *
-	 * @return the search filter
+	 * @return the tag
 	 */
-	T getFilter();
+	String getFilterTag();
+
+	/**
+	 * Sets the tag.
+	 *
+	 * @param filterTag the tag
+	 */
+	void setFilterTag(String filterTag);
 }

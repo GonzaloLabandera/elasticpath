@@ -30,6 +30,8 @@
 		<module>itemdefinitions</module>
 		<module>itemselections</module>
 		<module>items</module>
+		<module>offerdefinitions</module>
+		<module>offers</module>
 		<module>lookups</module>
 		<module>navigations</module>
 		<module>orders</module>

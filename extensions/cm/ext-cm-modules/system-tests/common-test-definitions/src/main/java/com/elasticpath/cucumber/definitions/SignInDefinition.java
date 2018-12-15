@@ -84,6 +84,15 @@ public class SignInDefinition {
 		signInDialog.initialSignIn(username, password);
 	}
 
+	/**
+	 * Sign in to CM per given credentials.
+	 *
+	 * @param username the username.
+	 */
+	@Then("^I sign into CM as (.*)$")
+	public void signInAsUser(final String username) {
+		signInDialog.initialSignIn(username, "111111");
+	}
 
 	/**
 	 * Sign in to CM per given credentials and verify successfully signed in.

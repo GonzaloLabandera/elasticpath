@@ -1,5 +1,6 @@
 package com.elasticpath.selenium.dialogs;
 
+import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 
 import com.elasticpath.selenium.common.AbstractPageObject;
@@ -36,6 +37,30 @@ public abstract class AbstractDialog extends AbstractPageObject {
 	 */
 	public void clickCancel() {
 		clickButton(CANCEL_BUTTON_CSS, "Cancel");
+	}
+
+	/**
+	 * Closes dialog if it is opened.
+	 */
+	public void closeDialogIfOpened(){
+		if (isCancelButtonPresent()) {
+			clickCancel();
+		}
+	}
+
+	/**
+	 * Returns true if cancel button is present on the page, otherwise - false
+	 *
+	 * @return true if cancel button is present on the page, otherwise - false
+	 */
+	private boolean isCancelButtonPresent() {
+		setWebDriverImplicitWait(1);
+		if (getDriver().findElements(By.cssSelector(CANCEL_BUTTON_CSS)).size() > 0) {
+			setWebDriverImplicitWaitToDefault();
+			return true;
+		}
+		setWebDriverImplicitWaitToDefault();
+		return false;
 	}
 
 	/**

@@ -12,6 +12,7 @@ import com.elasticpath.common.pricing.service.PriceLookupFacade;
 import com.elasticpath.commons.beanframework.BeanFactory;
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.catalog.ProductSku;
+import com.elasticpath.domain.shoppingcart.ShoppingCart;
 import com.elasticpath.domain.shoppingcart.ShoppingItem;
 import com.elasticpath.service.catalog.ProductSkuLookup;
 import com.elasticpath.service.shoppingcart.validation.ShoppingCartValidationContext;
@@ -31,20 +32,21 @@ public class ShoppingItemDelegateFromShoppingCartValidatorImpl implements Shoppi
 
 	@Override
 	public Collection<StructuredErrorMessage> validate(final ShoppingCartValidationContext shoppingCartValidationContext) {
-		Map<ShoppingItem, ProductSku> shoppingItemProductSkuMap = shoppingCartValidationContext.getShoppingCart().getShoppingItemProductSkuMap();
+		final ShoppingCart shoppingCart = shoppingCartValidationContext.getShoppingCart();
+		Map<ShoppingItem, ProductSku> shoppingItemProductSkuMap = shoppingCart.getShoppingItemProductSkuMap();
 
 		return shoppingItemProductSkuMap.entrySet().stream()
 				.flatMap(entry -> {
 					ShoppingItem shoppingItem = entry.getKey();
 					ProductSku productSku = entry.getValue();
-					ProductSku parentProductSku = getParentProductSku(shoppingItemProductSkuMap, shoppingItem);
+					ProductSku parentProductSku = shoppingCart.getParentProductSku(shoppingItem);
 
 					ShoppingItemValidationContext context = beanFactory.getBean(ContextIdNames.SHOPPING_ITEM_VALIDATION_CONTEXT);
 					context.setProductSku(productSku);
 					context.setParentProductSku(parentProductSku);
-					context.setShopper(shoppingCartValidationContext.getShoppingCart().getShopper());
-					context.setStore(shoppingCartValidationContext.getShoppingCart().getStore());
-					context.setShoppingCart(shoppingCartValidationContext.getShoppingCart());
+					context.setShopper(shoppingCart.getShopper());
+					context.setStore(shoppingCart.getStore());
+					context.setShoppingCart(shoppingCart);
 					context.setShoppingItem(shoppingItem);
 					context.setPromotedPrice(priceLookupFacade.getPromotedPriceForSku(productSku, context.getStore(), context.getShopper()));
 					return shoppingItemValidators.stream().flatMap(validator -> validator.validate(context).stream());
@@ -52,14 +54,6 @@ public class ShoppingItemDelegateFromShoppingCartValidatorImpl implements Shoppi
 				.collect(Collectors.toSet());
 	}
 
-	private ProductSku getParentProductSku(final Map<ShoppingItem, ProductSku> shoppingItemProductSkuMap, final ShoppingItem childShoppingItem) {
-		for (Map.Entry<ShoppingItem, ProductSku> shoppingItemProductSkuEntry : shoppingItemProductSkuMap.entrySet()) {
-			if (shoppingItemProductSkuEntry.getKey().getChildren().contains(childShoppingItem)) {
-				return shoppingItemProductSkuEntry.getValue();
-			}
-		}
-		return null;
-	}
 
 	protected Collection<ShoppingItemValidator> getShoppingItemValidators() {
 		return shoppingItemValidators;

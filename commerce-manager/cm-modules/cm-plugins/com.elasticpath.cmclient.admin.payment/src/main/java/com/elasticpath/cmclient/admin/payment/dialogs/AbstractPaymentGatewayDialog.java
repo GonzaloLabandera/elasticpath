@@ -428,6 +428,8 @@ public abstract class AbstractPaymentGatewayDialog extends AbstractEpDialog {
 			gatewayPropsModified = true;
 
 			gatewayPropsViewer.refresh();
+
+			getOkButton().setEnabled(true);
 		}
 	}
 
@@ -469,7 +471,7 @@ public abstract class AbstractPaymentGatewayDialog extends AbstractEpDialog {
 		final String candidateName = gatewayNewName;
 
 		// current gateway's name equals to the name in UI.
-		if (gatewayNewName.equals(paymentGateway.getName())) {
+		if (gatewayNewName == null || gatewayNewName.equals(paymentGateway.getName())) {
 			return true;
 		}
 

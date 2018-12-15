@@ -30,80 +30,80 @@ public class OrderReturnQueryComposerImpl extends AbstractQueryComposerImpl {
 	public Query composeQueryInternal(final SearchCriteria searchCriteria, final SearchConfig searchConfig) {
 		final OrderReturnSearchCriteria orderReturnSearchCriteria = (OrderReturnSearchCriteria) searchCriteria;
 
-		final BooleanQuery booleanQuery = new BooleanQuery();
+		final BooleanQuery.Builder booleanQueryBuilder = new BooleanQuery.Builder();
 		boolean hasSomeCriteria = false;
 
 		if (orderReturnSearchCriteria.getCustomerSearchCriteria() != null
-				&& composeQueryForCustomerSearchCriteria(orderReturnSearchCriteria, booleanQuery, searchConfig)) {
+				&& composeQueryForCustomerSearchCriteria(orderReturnSearchCriteria, booleanQueryBuilder, searchConfig)) {
 			hasSomeCriteria = true;
 		}
 
-		hasSomeCriteria |= composeQueryForOtherSearchCriteria(orderReturnSearchCriteria, booleanQuery, searchConfig);
+		hasSomeCriteria |= composeQueryForOtherSearchCriteria(orderReturnSearchCriteria, booleanQueryBuilder, searchConfig);
 
 		if (!hasSomeCriteria) {
 			throw new EpEmptySearchCriteriaException("Empty search criteria is not allowed!");
 		}
 
-		return booleanQuery;
+		return booleanQueryBuilder.build();
 	}
 
 	@Override
 	public Query composeFuzzyQueryInternal(final SearchCriteria searchCriteria, final SearchConfig searchConfig) {
 		final OrderReturnSearchCriteria orderReturnSearchCriteria = (OrderReturnSearchCriteria) searchCriteria;
 
-		final BooleanQuery booleanQuery = new BooleanQuery();
+		final BooleanQuery.Builder booleanQueryBuilder = new BooleanQuery.Builder();
 		boolean hasSomeCriteria = false;
 
 		if (orderReturnSearchCriteria.getCustomerSearchCriteria() != null
-				&& composeFuzzyQueryForCustomerSearchCriteria(orderReturnSearchCriteria, booleanQuery, searchConfig)) {
+				&& composeFuzzyQueryForCustomerSearchCriteria(orderReturnSearchCriteria, booleanQueryBuilder, searchConfig)) {
 			hasSomeCriteria = true;
 		}
 
-		hasSomeCriteria |= composeQueryForOtherSearchCriteria(orderReturnSearchCriteria, booleanQuery, searchConfig);
+		hasSomeCriteria |= composeQueryForOtherSearchCriteria(orderReturnSearchCriteria, booleanQueryBuilder, searchConfig);
 
 		if (!hasSomeCriteria) {
 			throw new EpEmptySearchCriteriaException("Empty search criteria is not allowed!");
 		}
 
-		return booleanQuery;
+		return booleanQueryBuilder.build();
 	}
 
 	private boolean composeQueryForOtherSearchCriteria(final OrderReturnSearchCriteria orderReturnSearchCriteria,
-			final BooleanQuery booleanQuery, final SearchConfig searchConfig) {
+			final BooleanQuery.Builder booleanQueryBuilder, final SearchConfig searchConfig) {
 		boolean hasSomeCriteria = false;
 
 		hasSomeCriteria |= addWholeFieldToQuery(SolrIndexConstants.ORDER_NUMBER, orderReturnSearchCriteria.getOrderNumber(),
-				null, searchConfig, booleanQuery, Occur.MUST, true);
+				null, searchConfig, booleanQueryBuilder, Occur.MUST, true);
 		hasSomeCriteria |= addWholeFieldToQuery(SolrIndexConstants.RMA_CODE, orderReturnSearchCriteria.getRmaCode(), null,
-				searchConfig, booleanQuery, Occur.MUST, true);
+				searchConfig, booleanQueryBuilder, Occur.MUST, true);
 		hasSomeCriteria |= addWholeFieldToQuery(SolrIndexConstants.OBJECT_UID, orderReturnSearchCriteria.getFilteredUids(), null,
-				searchConfig, booleanQuery, Occur.MUST_NOT, false);
+				searchConfig, booleanQueryBuilder, Occur.MUST_NOT, false);
 		hasSomeCriteria |= addWholeFieldToQuery(SolrIndexConstants.WAREHOUSES_CODE, orderReturnSearchCriteria.getWarehouseCodes(), null,
-				searchConfig, booleanQuery, Occur.MUST, true);
+				searchConfig, booleanQueryBuilder, Occur.MUST, true);
 
 		return hasSomeCriteria;
 	}
 
 	private boolean composeQueryForCustomerSearchCriteria(final OrderReturnSearchCriteria orderReturnSearchCriteria,
-			final BooleanQuery booleanQuery, final SearchConfig searchConfig) {
+			final BooleanQuery.Builder booleanQueryBuilder, final SearchConfig searchConfig) {
 		boolean hasSomeCriteria = false;
 
 		hasSomeCriteria |= addSplitFieldToQuery(SolrIndexConstants.FIRST_NAME, orderReturnSearchCriteria
-				.getCustomerSearchCriteria().getFirstName(), null, searchConfig, booleanQuery, Occur.MUST, true);
+				.getCustomerSearchCriteria().getFirstName(), null, searchConfig, booleanQueryBuilder, Occur.MUST, true);
 		hasSomeCriteria |= addSplitFieldToQuery(SolrIndexConstants.LAST_NAME, orderReturnSearchCriteria
-				.getCustomerSearchCriteria().getLastName(), null, searchConfig, booleanQuery, Occur.MUST, true);
+				.getCustomerSearchCriteria().getLastName(), null, searchConfig, booleanQueryBuilder, Occur.MUST, true);
 
 		return hasSomeCriteria;
 	}
 
 	private boolean composeFuzzyQueryForCustomerSearchCriteria(final OrderReturnSearchCriteria orderReturnSearchCriteria,
-			final BooleanQuery booleanQuery, final SearchConfig searchConfig) {
+			final BooleanQuery.Builder booleanQueryBuilder, final SearchConfig searchConfig) {
 		boolean hasSomeCriteria = false;
 
 		hasSomeCriteria |= addSplitFuzzyFieldToQuery(SolrIndexConstants.FIRST_NAME, orderReturnSearchCriteria
-				.getCustomerSearchCriteria().getFirstName(), null, searchConfig, booleanQuery, Occur.MUST, true);
+				.getCustomerSearchCriteria().getFirstName(), null, searchConfig, booleanQueryBuilder, Occur.MUST, true);
 		hasSomeCriteria |= addSplitFuzzyFieldToQuery(SolrIndexConstants.LAST_NAME, orderReturnSearchCriteria
-				.getCustomerSearchCriteria().getLastName(), null, searchConfig, booleanQuery, Occur.MUST, true);
+				.getCustomerSearchCriteria().getLastName(), null, searchConfig, booleanQueryBuilder, Occur.MUST, true);
 
 		return hasSomeCriteria;
 	}

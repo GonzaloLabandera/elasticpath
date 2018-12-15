@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.apache.log4j.Logger;
-import org.apache.solr.client.solrj.SolrServer;
+import org.apache.solr.client.solrj.SolrClient;
 
 import com.elasticpath.common.pricing.service.PromotedPriceLookupService;
 import com.elasticpath.commons.util.IntervalTimer;
@@ -137,8 +137,8 @@ public class ProductIndexBuilder extends AbstractIndexBuilder { // NOPMD
 	}
 
 	@Override
-	public void onIndexUpdated(final SolrServer server) {
-		spellingUpdater.rebuildSpellingIndex(server);
+	public void onIndexUpdated(final SolrClient client) {
+		spellingUpdater.rebuildSpellingIndex(client);
 	}
 
 	protected PromotedPriceLookupService getPromotedPriceLookupService() {
@@ -150,8 +150,8 @@ public class ProductIndexBuilder extends AbstractIndexBuilder { // NOPMD
 	}
 
 	@Override
-	public void onIndexUpdating(final SolrServer server) {
-		super.onIndexUpdating(server);
+	public void onIndexUpdating(final SolrClient client) {
+		super.onIndexUpdating(client);
 
 		// The rule base needs to recompile here because the writing of the rule base quite often
 		// happens after a product has been indexed (as they happen in different threads). Not
@@ -241,10 +241,10 @@ public class ProductIndexBuilder extends AbstractIndexBuilder { // NOPMD
 	protected interface SpellingUpdater {
 		/**
 		 * Informs this instance that a rebuild is desired.
-		 * @param server the server to rebuild the spelling index.
+		 * @param client the client to rebuild the spelling index.
 		 * @return true if the index rebuild runs
 		 */
-		boolean rebuildSpellingIndex(SolrServer server);
+		boolean rebuildSpellingIndex(SolrClient client);
 
 	}
 
@@ -271,13 +271,13 @@ public class ProductIndexBuilder extends AbstractIndexBuilder { // NOPMD
 		 * SpellingUpdater thread is not already running and the required
 		 * interval has elapsed between rebuilds then the SpellingIndex Rebuild will
 		 * be started.
-		 * @param server the server to rebuild the spelling index.
+		 * @param client the client to rebuild the spelling index.
 		 * @return true if the SpellingIndex Rebuild gets started
 		 */
 		@Override
-		public boolean rebuildSpellingIndex(final SolrServer server) {
+		public boolean rebuildSpellingIndex(final SolrClient client) {
 			if (okToRunSpellingRebuild()) {
-				spellingRebuilderThread = new Thread(createSpellingUpdaterRunnable(server), "Spelling Updater");
+				spellingRebuilderThread = new Thread(createSpellingUpdaterRunnable(client), "Spelling Updater");
 				spellingRebuilderThread.start();
 				return true;
 			}
@@ -286,11 +286,11 @@ public class ProductIndexBuilder extends AbstractIndexBuilder { // NOPMD
 
 		/**
 		 *
-		 * @param server server SolrServer instance
+		 * @param client client SolrClient instance
 		 * @return a Thread to do the SpellingUpdate
 		 */
-		protected Runnable createSpellingUpdaterRunnable(final SolrServer server) {
-			return new SpellingUpdaterRunnable(server);
+		protected Runnable createSpellingUpdaterRunnable(final SolrClient client) {
+			return new SpellingUpdaterRunnable(client);
 		}
 
 		private boolean okToRunSpellingRebuild() {
@@ -307,16 +307,16 @@ public class ProductIndexBuilder extends AbstractIndexBuilder { // NOPMD
 		 */
 		private class SpellingUpdaterRunnable implements Runnable {
 
-			private final SolrServer server;
+			private final SolrClient client;
 
-			SpellingUpdaterRunnable(final SolrServer server) {
-				this.server = server;
+			SpellingUpdaterRunnable(final SolrClient client) {
+				this.client = client;
 			}
 
 			@Override
 			public void run() {
 				LOG.info("SpellingUpdaterRunnable.run start");
-				getSolrManager().rebuildSpelling(server);
+				getSolrManager().rebuildSpelling(client);
 				timer.setStartPointToNow();
 				LOG.info("SpellingUpdaterRunnable.run complete");
 			}
@@ -333,9 +333,9 @@ public class ProductIndexBuilder extends AbstractIndexBuilder { // NOPMD
 	}
 
 	/**
-	 * Returns the {@link SolrManager} instance that was used to create the SOLR servers.
+	 * Returns the {@link SolrManager} instance that was used to create the SOLR clients.
 	 *
-	 * @return the {@link SolrManager} instance that was used to create the SOLR servers
+	 * @return the {@link SolrManager} instance that was used to create the SOLR clients
 	 */
 	protected SolrManager getSolrManager() {
 		return solrManager;

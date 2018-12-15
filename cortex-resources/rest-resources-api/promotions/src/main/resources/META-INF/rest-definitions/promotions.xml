@@ -13,7 +13,7 @@ Promotions are linked to a number of different resources:
 
 * [Promotions][promotions] - The promotions resource provides a list of all the promotions available for the store.
 * [Items][items] - Promotions are linked to items when a promotion exists for that item and the shopper is eligible to receive the promotion.
-* [Carts][carts] - Promotions are linked to carts when the contents of the shopper’s cart meet the conditions of the promotion.
+* [Carts][carts] - Promotions are linked to carts when the contents of the shopper's cart meet the conditions of the promotion.
 * Cart line items - Promotions are linked to cart line items when the line item meets the conditions of the promotion.
 * Shipping options - Promotions are linked to shipping options on an order shipment when the option meets the conditions of the promotion.
 * [Purchases][purchases] - Promotions are linked to purchases when the purchase had promotions applied to it.

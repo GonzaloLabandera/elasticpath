@@ -12,7 +12,6 @@ import java.util.Optional;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
@@ -45,7 +44,7 @@ public class CustomerFirstTimeBuyerTagStrategyTest {
 	public void testTagName() {
 		String actualName = classUnderTest.tagName();
 
-		assertEquals(actualName, CustomerFirstTimeBuyerTagStrategy.FIRST_TIME_BUYER);
+		assertEquals(CustomerFirstTimeBuyerTagStrategy.FIRST_TIME_BUYER, actualName);
 	}
 
 	@Test

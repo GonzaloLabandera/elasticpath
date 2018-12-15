@@ -99,6 +99,8 @@ public class ProductMerchandisingAssociationDialog extends AbstractEpDialog impl
 				CatalogMessages.get().ProductMerchandisingAssociationDialog_Add_Accessory);
 		ADD_ASSOCIATIONTYPE_DIALOG_MSG.put(ProductAssociationType.REPLACEMENT,
 				CatalogMessages.get().ProductMerchandisingAssociationDialog_Add_Replacement);
+		ADD_ASSOCIATIONTYPE_DIALOG_MSG.put(ProductAssociationType.DEPENDENT_ITEM,
+				CatalogMessages.get().ProductMerchandisingAssociationDialog_Add_Dependent_Item);
 	}
 
 	private static final Map<ProductAssociationType, String> EDIT_ASSOCIATIONTYPE_DIALOG_MSG = new HashMap<>();
@@ -114,6 +116,8 @@ public class ProductMerchandisingAssociationDialog extends AbstractEpDialog impl
 				CatalogMessages.get().ProductMerchandisingAssociationDialog_Edit_Accessory);
 		EDIT_ASSOCIATIONTYPE_DIALOG_MSG.put(ProductAssociationType.REPLACEMENT,
 				CatalogMessages.get().ProductMerchandisingAssociationDialog_Edit_Replacement);
+		EDIT_ASSOCIATIONTYPE_DIALOG_MSG.put(ProductAssociationType.DEPENDENT_ITEM,
+				CatalogMessages.get().ProductMerchandisingAssociationDialog_Edit_Dependent_Item);
 	}
 
 	/**

@@ -64,33 +64,20 @@
 		<plan>
 			<name>add-data-policy-consent</name>
 			<description><![CDATA[Add data policy consent for a customer.]]></description>
-			<template>
-				<name>controls.form-control-template</name>
-				<replace>
-					<key>start-resource</key>
-					<value>data-policy</value>
-				</replace>
-				<replace>
-					<key>read-form-link</key>
-					<value>datapolicyconsentform</value>
-				</replace>
-				<replace>
-					<key>form-resource</key>
-					<value>data-policy-consent-form</value>
-				</replace>
-				<replace>
-					<key>submit-action-link</key>
-					<value>consentaction</value>
-				</replace>
-				<replace>
-					<key>submit-resource</key>
-					<value>data-policy-consent</value>
-				</replace>
-				<replace>
-					<key>submit-result</key>
-					<value>data-policy</value>
-				</replace>
-			</template>
+			<step>
+				<description><![CDATA[Data-policy to data-policy-consent-form.]]></description>
+				<start>data-policy</start>
+				<follow-link>datapolicyconsentform</follow-link>
+				<result>data-policy-consent-form</result>
+			</step>
+			<step>
+				<description><![CDATA[Submit the form to consent.]]></description>
+				<start>data-policy-consent-form</start>
+				<submit></submit>
+				<to>data-policy-consent-form</to>
+				<via-link>consentaction</via-link>
+				<result>data-policy</result>
+			</step>
 		</plan>
 	</family>
 </definitions>

@@ -59,4 +59,9 @@ public class EhcacheCacheAdapter<K, V> implements com.elasticpath.cache.Cache<K,
 	public <T> T unwrap(final Class<T> clazz) {
 		return (T) cache;
 	}
+
+	@Override
+	public boolean containsKey(final K key) {
+		return cache.getKeys().contains(key);
+	}
 }

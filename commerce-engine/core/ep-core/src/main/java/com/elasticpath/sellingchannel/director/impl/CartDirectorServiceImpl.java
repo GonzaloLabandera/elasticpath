@@ -7,6 +7,9 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.google.common.collect.ImmutableList;
+
+import com.elasticpath.base.common.dto.StructuredErrorMessage;
 import com.elasticpath.common.dto.ShoppingItemDto;
 import com.elasticpath.domain.shopper.Shopper;
 import com.elasticpath.domain.shoppingcart.ShoppingCart;
@@ -15,10 +18,13 @@ import com.elasticpath.domain.shoppingcart.WishList;
 import com.elasticpath.domain.store.Store;
 import com.elasticpath.sellingchannel.director.CartDirector;
 import com.elasticpath.sellingchannel.director.CartDirectorService;
+import com.elasticpath.service.shoppingcart.CantDeleteAutoselectableBundleItemsException;
 import com.elasticpath.service.shoppingcart.PricingSnapshotService;
 import com.elasticpath.service.shoppingcart.ShoppingCartService;
 import com.elasticpath.service.shoppingcart.WishListService;
 import com.elasticpath.service.shoppingcart.impl.AddToWishlistResult;
+import com.elasticpath.service.shoppingcart.validation.RemoveShoppingItemFromCartValidationService;
+import com.elasticpath.service.shoppingcart.validation.ShoppingItemValidationContext;
 
 /**
  * Service which wraps CartDirector's shopping cart update functionality within Container managed
@@ -32,6 +38,7 @@ public class CartDirectorServiceImpl implements CartDirectorService {
 	private WishListService wishListService;
 	private ShoppingCartService shoppingCartService;
 	private PricingSnapshotService pricingSnapshotService;
+	private RemoveShoppingItemFromCartValidationService removeShoppingItemFromCartValidationService;
 
 	@Override
 	public ShoppingItem addItemToCart(final ShoppingCart shoppingCart, final ShoppingItemDto dto) {
@@ -89,10 +96,21 @@ public class CartDirectorServiceImpl implements CartDirectorService {
 	@Override
 	public ShoppingCart removeItemsFromCart(final ShoppingCart shoppingCart, final String... doomedItemGuids) {
 		for (final String doomedItemGuid : doomedItemGuids) {
+			validateCartItemBeforeDeletion(shoppingCart, doomedItemGuid);
 			shoppingCart.removeCartItem(doomedItemGuid);
 		}
 
 		return saveShoppingCart(shoppingCart);
+	}
+
+	private void validateCartItemBeforeDeletion(final ShoppingCart shoppingCart, final String itemGuid) {
+		final ShoppingItemValidationContext validationContext = removeShoppingItemFromCartValidationService.buildContext(shoppingCart,
+				shoppingCart.getCartItemByGuid(itemGuid));
+		Collection<StructuredErrorMessage> validationMessages = removeShoppingItemFromCartValidationService.validate(validationContext);
+		if (!validationMessages.isEmpty()) {
+			throw new CantDeleteAutoselectableBundleItemsException("Remove item from cart validation failure.",
+					ImmutableList.copyOf(validationMessages));
+		}
 	}
 
 	@Override
@@ -201,5 +219,10 @@ public class CartDirectorServiceImpl implements CartDirectorService {
 
 	public void setPricingSnapshotService(final PricingSnapshotService pricingSnapshotService) {
 		this.pricingSnapshotService = pricingSnapshotService;
+	}
+
+	public void setRemoveShoppingItemFromCartValidationService(
+			final RemoveShoppingItemFromCartValidationService removeShoppingItemFromCartValidationService) {
+		this.removeShoppingItemFromCartValidationService = removeShoppingItemFromCartValidationService;
 	}
 }

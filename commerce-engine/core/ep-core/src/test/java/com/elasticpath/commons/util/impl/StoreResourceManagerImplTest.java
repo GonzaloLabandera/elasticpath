@@ -1,11 +1,13 @@
-/**
+/*
  * Copyright (c) Elastic Path Software Inc., 2008
  */
 package com.elasticpath.commons.util.impl;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.io.File;
 import java.io.Reader;
@@ -22,15 +24,11 @@ import org.apache.velocity.runtime.resource.ResourceManager;
 import org.apache.velocity.runtime.resource.loader.ResourceLoader;
 import org.apache.velocity.runtime.resource.loader.StringResourceLoader;
 import org.apache.velocity.runtime.resource.util.StringResourceRepository;
-import org.jmock.Expectations;
-import org.jmock.Sequence;
-import org.jmock.integration.junit4.JUnitRuleMockery;
-import org.jmock.lib.concurrent.Synchroniser;
-import org.jmock.lib.legacy.ClassImposteriser;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
+import org.mockito.InOrder;
+import org.mockito.Mockito;
 
 import com.elasticpath.commons.util.AssetRepository;
 import com.elasticpath.service.catalogview.StoreConfig;
@@ -42,19 +40,9 @@ import com.elasticpath.settings.provider.SettingValueProvider;
 public class StoreResourceManagerImplTest {
 	private static final String THEME1 = "theme1";
 
-	private static final String NO_EXCEPTION_EXPECTED = "No exception should have been thrown";
-
-	@Rule
-	public final JUnitRuleMockery context = new JUnitRuleMockery() {
-		{
-			setImposteriser(ClassImposteriser.INSTANCE);
-			setThreadingPolicy(new Synchroniser());
-		}
-	};
-
 	// this is the instance that spring creates with storeCode = ""
 	private static final StoreResourceManagerImpl MAIN_INSTANCE_STORE_RESOURCE_MANAGER =
-													(StoreResourceManagerImpl) StoreResourceManagerImpl.getInstance();
+			(StoreResourceManagerImpl) StoreResourceManagerImpl.getInstance();
 	private StoreResourceManagerImpl storeResourceManagerForTestStore;
 
 	private static final String CMASSETS = "cmassets";
@@ -64,8 +52,6 @@ public class StoreResourceManagerImplTest {
 	private static final String TEST_VM = "test.vm";
 
 	private static final String GLOBAL_VM = "email" + File.separator + "global1.vm";
-
-	private static final String RESOURCE_SHOULD_HAVE_BEEN_FOUND = "Resource should have been found";
 
 	private static final String RESOURCE_SHOULD_NOT_BE_NULL = "Resource should not be null";
 
@@ -87,6 +73,7 @@ public class StoreResourceManagerImplTest {
 	private static final ResourceLoader STRING_RESOURCE_LOADER = new StringResourceLoader();
 
 	private static final List<String> RESOURCE_NAMES = new ArrayList<>();
+
 	static {
 		RESOURCE_NAMES.add(DEFAULT_TEMPLATES_TEST_VM);
 		RESOURCE_NAMES.add(TESTSTORE_TEMPLATES_TEST_VM);
@@ -110,35 +97,20 @@ public class StoreResourceManagerImplTest {
 		loaderID.append('.').append(RuntimeConstants.RESOURCE_LOADER);
 		runtimeConfiguration.addProperty(loaderID + ".instance", STRING_RESOURCE_LOADER);
 
-		themeProvider = context.mock(SettingValueProvider.class);
+		themeProvider = mock(SettingValueProvider.class);
 		StoreResourceManagerImpl.setStoreThemeProvider(themeProvider);
-
-		final RuntimeServices rsvc = context.mock(RuntimeServices.class);
+		
+		final RuntimeServices rsvc = mock(RuntimeServices.class);
 		// create a threadlocal
-		final StoreConfig mockStoreConfig = context.mock(StoreConfig.class);
-		context.checking(new Expectations() {
-			{
-				allowing(rsvc).getConfiguration();
-				will(returnValue(runtimeConfiguration));
+		final StoreConfig mockStoreConfig = mock(StoreConfig.class);
 
-				allowing(rsvc).getLog();
-				will(returnValue(new Log()));
-
-				allowing(rsvc).getBoolean(with(any(String.class)), with(any(Boolean.class)));
-				will(returnValue(true));
-
-				allowing(rsvc).getString(with(any(String.class)));
-				will(returnValue(null));
-
-				allowing(rsvc).getInt(with(any(String.class)), with(any(Integer.class)));
-				will(returnValue(0));
-
-				allowing(rsvc).parse(with(any(Reader.class)), with(any(String.class)));
-				will(returnValue(new SimpleNode(0)));
-				allowing(mockStoreConfig).getStoreCode();
-				will(returnValue(TESTSTORE));
-			}
-		});
+		when(rsvc.getConfiguration()).thenReturn(runtimeConfiguration);
+		when(rsvc.getLog()).thenReturn(new Log());
+		when(rsvc.getBoolean(any(String.class), any(Boolean.class))).thenReturn(true);
+		when(rsvc.getString(any(String.class))).thenReturn(null);
+		when(rsvc.getInt(any(String.class), any(Integer.class))).thenReturn(0);
+		when(rsvc.parse(any(Reader.class), any(String.class))).thenReturn(new SimpleNode(0));
+		when(mockStoreConfig.getStoreCode()).thenReturn(TESTSTORE);
 
 		// attach a storeConfig to our instance
 		MAIN_INSTANCE_STORE_RESOURCE_MANAGER.setStoreConfig(mockStoreConfig);
@@ -168,25 +140,17 @@ public class StoreResourceManagerImplTest {
 	 * lookup cache.
 	 */
 	@Test
-	public void testGetResourceFromLastResolvedLocation() {
-		final Resource testStoreResource = context.mock(Resource.class);
-		context.checking(new Expectations() {
-			{
-				oneOf(testStoreResource).getName();
-				will(returnValue(TESTSTORE_TEMPLATES_TEST_VM));
-			}
-		});
+	public void testGetResourceFromLastResolvedLocation() throws Exception {
+		final Resource testStoreResource = mock(Resource.class);
+		when(testStoreResource.getName()).thenReturn(TESTSTORE_TEMPLATES_TEST_VM);
 		storeResourceManagerForTestStore.getResourceLookupCache().put(TEST_VM, testStoreResource);
 
 		final StringResourceRepository repo = StringResourceLoader.getRepository();
 		repo.putStringResource(TESTSTORE_TEMPLATES_TEST_VM, "");
-		try {
-			Resource resource = storeResourceManagerForTestStore
+		Resource resource = storeResourceManagerForTestStore
 					.getResourceFromLastResolvedLocation(TEST_VM, ResourceManager.RESOURCE_TEMPLATE, UTF_8);
-			assertNotNull(RESOURCE_SHOULD_NOT_BE_NULL, resource);
-		} catch (Exception e) {
-			fail(RESOURCE_SHOULD_HAVE_BEEN_FOUND);
-		}
+		assertThat(resource).as(RESOURCE_SHOULD_NOT_BE_NULL).isNotNull();
+		verify(testStoreResource).getName();
 	}
 
 	/**
@@ -195,14 +159,10 @@ public class StoreResourceManagerImplTest {
 	 * lookup cache.
 	 */
 	@Test
-	public void testGetResourceFromLastResolvedLocationWhenNotYetLoaded() {
-		try {
-			Resource resource = storeResourceManagerForTestStore.getResourceFromLastResolvedLocation(TEST_VM,
-																							ResourceManager.RESOURCE_TEMPLATE, UTF_8);
-			assertNull(RESOURCE_SHOULD_BE_NULL, resource);
-		} catch (Exception e) {
-			fail(NO_EXCEPTION_EXPECTED);
-		}
+	public void testGetResourceFromLastResolvedLocationWhenNotYetLoaded() throws Exception {
+		Resource resource = storeResourceManagerForTestStore.getResourceFromLastResolvedLocation(TEST_VM,
+			ResourceManager.RESOURCE_TEMPLATE, UTF_8);
+		assertThat(resource).as(RESOURCE_SHOULD_BE_NULL).isNull();
 	}
 
 	/**
@@ -211,25 +171,18 @@ public class StoreResourceManagerImplTest {
 	 * cache, but can no longer be found by the resource loaders. Also verify that the entry is then removed from the lookup cache.
 	 */
 	@Test
-	public void testGetResourceFromLastResolvedLocationWhenNoLongerThere() {
-		final Resource testStoreResource = context.mock(Resource.class);
-		context.checking(new Expectations() {
-			{
-				oneOf(testStoreResource).getName();
-				will(returnValue(TESTSTORE_TEMPLATES_TEST_VM));
-			}
-		});
+	public void testGetResourceFromLastResolvedLocationWhenNoLongerThere() throws Exception {
+		final Resource testStoreResource = mock(Resource.class);
+		when(testStoreResource.getName()).thenReturn(TESTSTORE_TEMPLATES_TEST_VM);
 		storeResourceManagerForTestStore.getResourceLookupCache().put(TEST_VM, testStoreResource);
 
-		try {
-			Resource resource = storeResourceManagerForTestStore.getResourceFromLastResolvedLocation(TEST_VM,
-																					ResourceManager.RESOURCE_TEMPLATE, UTF_8);
-			assertNull(RESOURCE_SHOULD_BE_NULL, resource);
-			assertNull("Resource should have been removed from the cache", storeResourceManagerForTestStore.getResourceLookupCache().get(TEST_VM,
-					ResourceManager.RESOURCE_TEMPLATE, UTF_8));
-		} catch (Exception e) {
-			fail(RESOURCE_SHOULD_HAVE_BEEN_FOUND);
-		}
+		Resource resource = storeResourceManagerForTestStore.getResourceFromLastResolvedLocation(TEST_VM,
+			ResourceManager.RESOURCE_TEMPLATE, UTF_8);
+		assertThat(resource).as(RESOURCE_SHOULD_BE_NULL).isNull();
+		assertThat(storeResourceManagerForTestStore.getResourceLookupCache().get(TEST_VM, ResourceManager.RESOURCE_TEMPLATE, UTF_8))
+			.as("Resource should have been removed from the cache")
+			.isNull();
+		verify(testStoreResource).getName();
 	}
 
 	/**
@@ -237,15 +190,11 @@ public class StoreResourceManagerImplTest {
 	 * {@link StoreResourceManagerImpl#getResourceStoreSpecific(java.lang.String, int, java.lang.String, java.lang.String)}.
 	 */
 	@Test
-	public void testGetResourceStoreSpecific() {
+	public void testGetResourceStoreSpecific() throws Exception {
 		final StringResourceRepository repo = StringResourceLoader.getRepository();
 		repo.putStringResource(TESTSTORE_TEMPLATES_TEST_VM, "");
-		try {
-			Resource resource = storeResourceManagerForTestStore.getResourceStoreSpecific(TEST_VM, ResourceManager.RESOURCE_TEMPLATE, UTF_8, THEME1);
-			assertNotNull(RESOURCE_SHOULD_NOT_BE_NULL, resource);
-		} catch (Exception e) {
-			fail(NO_EXCEPTION_EXPECTED);
-		}
+		Resource resource = storeResourceManagerForTestStore.getResourceStoreSpecific(TEST_VM, ResourceManager.RESOURCE_TEMPLATE, UTF_8, THEME1);
+		assertThat(resource).as(RESOURCE_SHOULD_NOT_BE_NULL).isNotNull();
 	}
 
 	/**
@@ -253,16 +202,12 @@ public class StoreResourceManagerImplTest {
 	 * {@link StoreResourceManagerImpl#getResourceFromThemeDefault(java.lang.String, int, java.lang.String, java.lang.String)}.
 	 */
 	@Test
-	public void testGetResourceFromThemeDefault() {
+	public void testGetResourceFromThemeDefault() throws Exception {
 		final StringResourceRepository repo = StringResourceLoader.getRepository();
 		repo.putStringResource(DEFAULT_TEMPLATES_TEST_VM, "");
-		try {
-			Resource resource = storeResourceManagerForTestStore.getResourceFromThemeDefault(TEST_VM,
-																			ResourceManager.RESOURCE_TEMPLATE, UTF_8, THEME1);
-			assertNotNull(RESOURCE_SHOULD_NOT_BE_NULL, resource);
-		} catch (Exception e) {
-			fail(NO_EXCEPTION_EXPECTED);
-		}
+		Resource resource = storeResourceManagerForTestStore.getResourceFromThemeDefault(TEST_VM,
+			ResourceManager.RESOURCE_TEMPLATE, UTF_8, THEME1);
+		assertThat(resource).as(RESOURCE_SHOULD_NOT_BE_NULL).isNotNull();
 	}
 
 	/**
@@ -270,49 +215,32 @@ public class StoreResourceManagerImplTest {
 	 * {@link StoreResourceManagerImpl#getResource(String, int, String)}.
 	 */
 	@Test
-	public void testGetResourceFallbackLogicForStoreResource() {
-		final StoreResourceManagerImpl mockStoreResourceManager = context.mock(StoreResourceManagerImpl.class);
-		final Sequence fallbackSequence = context.sequence("fallback-sequence");
-		final StoreConfig storeConfig = context.mock(StoreConfig.class, "willFallback");
+	public void testGetResourceFallbackLogicForStoreResource() throws Exception {
+		final StoreResourceManagerImpl mockStoreResourceManager = mock(StoreResourceManagerImpl.class);
+		final InOrder fallbackSequence = Mockito.inOrder(mockStoreResourceManager);
+		final StoreConfig storeConfig = mock(StoreConfig.class, "willFallback");
 
-		try {
-			context.checking(new Expectations() {
-				{
-					oneOf(mockStoreResourceManager).getResourceFromLastResolvedLocation(TEST_VM, ResourceManager.RESOURCE_TEMPLATE, UTF_8);
-					inSequence(fallbackSequence);
-					will(returnValue(null));
+		when(mockStoreResourceManager.getResourceFromLastResolvedLocation(TEST_VM, ResourceManager.RESOURCE_TEMPLATE, UTF_8))
+			.thenReturn(null);
+		when(mockStoreResourceManager.getResourceStoreSpecific(TEST_VM, ResourceManager.RESOURCE_TEMPLATE, UTF_8, THEME1))
+			.thenReturn(null);
+		when(mockStoreResourceManager.getResourceFromThemeDefault(TEST_VM, ResourceManager.RESOURCE_TEMPLATE, UTF_8, THEME1))
+			.thenReturn(null);
+		when(mockStoreResourceManager.getResourceFromParent(TEST_VM, ResourceManager.RESOURCE_TEMPLATE, UTF_8))
+			.thenReturn(null);
 
-					oneOf(mockStoreResourceManager).getResourceStoreSpecific(TEST_VM, ResourceManager.RESOURCE_TEMPLATE, UTF_8, THEME1);
-					inSequence(fallbackSequence);
-					will(returnValue(null));
-
-					oneOf(mockStoreResourceManager).getResourceFromThemeDefault(TEST_VM, ResourceManager.RESOURCE_TEMPLATE, UTF_8, THEME1);
-					inSequence(fallbackSequence);
-					will(returnValue(null));
-
-					oneOf(mockStoreResourceManager).getResourceFromParent(TEST_VM, ResourceManager.RESOURCE_TEMPLATE, UTF_8);
-					inSequence(fallbackSequence);
-					will(returnValue(null));
-
-					allowing(storeConfig).getStoreCode();
-					will(returnValue(TESTSTORE));
-
-					allowing(storeConfig).getSettingValue(themeProvider);
-					will(returnValue(THEME1));
-				}
-			});
-		} catch (Exception e) {
-			fail("Something went very wrong here");
-		}
-
+		when(storeConfig.getStoreCode()).thenReturn(TESTSTORE);
+		when(storeConfig.getSettingValue(themeProvider)).thenReturn(THEME1);
+		
 		final StoreResourceManagerImpl resourceManagerWithFallbackTracking = new TraceableStoreResourceManager(mockStoreResourceManager);
 		resourceManagerWithFallbackTracking.setStoreConfig(storeConfig);
 
-		try {
-			resourceManagerWithFallbackTracking.getResource(TEST_VM, ResourceManager.RESOURCE_TEMPLATE, UTF_8);
-		} catch (Exception e) {
-			fail(NO_EXCEPTION_EXPECTED);
-		}
+		resourceManagerWithFallbackTracking.getResource(TEST_VM, ResourceManager.RESOURCE_TEMPLATE, UTF_8);
+
+		fallbackSequence.verify(mockStoreResourceManager).getResourceFromLastResolvedLocation(TEST_VM, ResourceManager.RESOURCE_TEMPLATE, UTF_8);
+		fallbackSequence.verify(mockStoreResourceManager).getResourceStoreSpecific(TEST_VM, ResourceManager.RESOURCE_TEMPLATE, UTF_8, THEME1);
+		fallbackSequence.verify(mockStoreResourceManager).getResourceFromThemeDefault(TEST_VM, ResourceManager.RESOURCE_TEMPLATE, UTF_8, THEME1);
+		fallbackSequence.verify(mockStoreResourceManager).getResourceFromParent(TEST_VM, ResourceManager.RESOURCE_TEMPLATE, UTF_8);
 	}
 
 	/**
@@ -320,42 +248,27 @@ public class StoreResourceManagerImplTest {
 	 * {@link StoreResourceManagerImpl#getResource(String, int, String)}.
 	 */
 	@Test
-	public void testGetResourceFallbackLogicForCmResource() {
-		final StoreResourceManagerImpl mockStoreResourceManager = context.mock(StoreResourceManagerImpl.class);
-		final Sequence fallbackSequence = context.sequence("fallback-sequence");
-		final StoreConfig storeConfig = context.mock(StoreConfig.class, "willFallback");
+	public void testGetResourceFallbackLogicForCmResource() throws Exception {
+		final StoreResourceManagerImpl mockStoreResourceManager = mock(StoreResourceManagerImpl.class);
+		final InOrder fallbackSequence = Mockito.inOrder(mockStoreResourceManager);
+		final StoreConfig storeConfig = mock(StoreConfig.class, "willFallback");
 
-		try {
-			context.checking(new Expectations() {
-				{
-					oneOf(mockStoreResourceManager).getResourceFromLastResolvedLocation(TEST_VM, ResourceManager.RESOURCE_TEMPLATE, UTF_8);
-					inSequence(fallbackSequence);
-					will(returnValue(null));
-
-					oneOf(mockStoreResourceManager).getResourceCMGlobal(TEST_VM, ResourceManager.RESOURCE_TEMPLATE, UTF_8);
-					inSequence(fallbackSequence);
-					will(returnValue(null));
-
-					oneOf(mockStoreResourceManager).getResourceFromParent(TEST_VM, ResourceManager.RESOURCE_TEMPLATE, UTF_8);
-					inSequence(fallbackSequence);
-					will(returnValue(null));
-
-					allowing(storeConfig).getStoreCode();
-					will(returnValue(null));
-				}
-			});
-		} catch (Exception e) {
-			fail("Something went very wrong here");
-		}
+		when(mockStoreResourceManager.getResourceFromLastResolvedLocation(TEST_VM, ResourceManager.RESOURCE_TEMPLATE, UTF_8))
+			.thenReturn(null);
+		when(mockStoreResourceManager.getResourceCMGlobal(TEST_VM, ResourceManager.RESOURCE_TEMPLATE, UTF_8))
+			.thenReturn(null);
+		when(mockStoreResourceManager.getResourceFromParent(TEST_VM, ResourceManager.RESOURCE_TEMPLATE, UTF_8))
+			.thenReturn(null);
+		when(storeConfig.getStoreCode()).thenReturn(null);
 
 		final StoreResourceManagerImpl resourceManagerWithFallbackTracking = new TraceableStoreResourceManager(mockStoreResourceManager);
 		resourceManagerWithFallbackTracking.setStoreConfig(storeConfig);
 
-		try {
-			resourceManagerWithFallbackTracking.getResource(TEST_VM, ResourceManager.RESOURCE_TEMPLATE, UTF_8);
-		} catch (Exception e) {
-			fail(NO_EXCEPTION_EXPECTED);
-		}
+		resourceManagerWithFallbackTracking.getResource(TEST_VM, ResourceManager.RESOURCE_TEMPLATE, UTF_8);
+
+		fallbackSequence.verify(mockStoreResourceManager).getResourceFromLastResolvedLocation(TEST_VM, ResourceManager.RESOURCE_TEMPLATE, UTF_8);
+		fallbackSequence.verify(mockStoreResourceManager).getResourceCMGlobal(TEST_VM, ResourceManager.RESOURCE_TEMPLATE, UTF_8);
+		fallbackSequence.verify(mockStoreResourceManager).getResourceFromParent(TEST_VM, ResourceManager.RESOURCE_TEMPLATE, UTF_8);
 	}
 
 	/**
@@ -363,26 +276,18 @@ public class StoreResourceManagerImplTest {
 	 * {@link StoreResourceManagerImpl#getResourceCMGlobal(java.lang.String, int, java.lang.String)}.
 	 */
 	@Test
-	public void testGetResourceCMGlobal() {
-		final AssetRepository assetRepository = context.mock(AssetRepository.class);
+	public void testGetResourceCMGlobal() throws Exception {
+		final AssetRepository assetRepository = mock(AssetRepository.class);
 
-		context.checking(new Expectations() {
-			{
-				oneOf(assetRepository).getCmAssetsSubfolder();
-				will(returnValue(CMASSETS));
-			}
-		});
+		when(assetRepository.getCmAssetsSubfolder()).thenReturn(CMASSETS);
 
 		storeResourceManagerForTestStore.setAssetRepository(assetRepository);
 		final StringResourceRepository repo = StringResourceLoader.getRepository();
 		repo.putStringResource(GLOBAL_TEMPLATES_TEST_VM, "");
 
-		try {
-			Resource resource = storeResourceManagerForTestStore.getResourceCMGlobal(GLOBAL_VM, ResourceManager.RESOURCE_TEMPLATE, UTF_8);
-			assertNotNull(RESOURCE_SHOULD_NOT_BE_NULL, resource);
-		} catch (Exception e) {
-			fail(NO_EXCEPTION_EXPECTED);
-		}
+		Resource resource = storeResourceManagerForTestStore.getResourceCMGlobal(GLOBAL_VM, ResourceManager.RESOURCE_TEMPLATE, UTF_8);
+		assertThat(resource).as(RESOURCE_SHOULD_NOT_BE_NULL).isNotNull();
+		verify(assetRepository).getCmAssetsSubfolder();
 	}
 
 	/**
@@ -393,8 +298,9 @@ public class StoreResourceManagerImplTest {
 	public void testGetLoaderNameForStoreResource() {
 		final StringResourceRepository repo = StringResourceLoader.getRepository();
 		repo.putStringResource(TESTSTORE_TEMPLATES_TEST_VM, "");
-		assertNotNull("Resource Loader should have been found for this resource.", storeResourceManagerForTestStore
-				.getLoaderNameForResource(TESTSTORE_TEMPLATES_TEST_VM));
+		assertThat(storeResourceManagerForTestStore.getLoaderNameForResource(TESTSTORE_TEMPLATES_TEST_VM))
+			.as("Resource Loader should have been found for this resource.")
+			.isNotNull();
 	}
 
 	/**
@@ -403,8 +309,9 @@ public class StoreResourceManagerImplTest {
 	 */
 	@Test
 	public void testGetLoaderNameForNonExistantResource() {
-		assertNull("Resource Loader should be null for this resource.",
-											storeResourceManagerForTestStore.getLoaderNameForResource(TESTSTORE_TEMPLATES_TEST_VM));
+		assertThat(storeResourceManagerForTestStore.getLoaderNameForResource(TESTSTORE_TEMPLATES_TEST_VM))
+			.as("Resource Loader should be null for this resource.")
+			.isNull();
 	}
 
 	/**
@@ -446,5 +353,4 @@ public class StoreResourceManagerImplTest {
 			return delegate.getResourceStoreSpecific(resourceName, resourceType, encoding, theme);
 		}
 	}
-
 }

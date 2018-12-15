@@ -2,6 +2,10 @@
 <!--Copyright © 2014 Elastic Path Software Inc. All rights reserved.-->
 
 <Context>
+	<Resources
+			cachingAllowed="true"
+			cacheMaxSize="${ep.tomcat.maxcachesize}"
+	/>
 	<Resource auth="Container" name="mail/Session" type="javax.mail.Session"/>
 	<Resource
 		name="jdbc/epjndi"
@@ -18,17 +22,18 @@
 		username="${epdb.username}"
 		password="${epdb.password}"
 		driverClassName="${epdb.jdbc.driver}"
+		factory="org.apache.tomcat.jdbc.pool.DataSourceFactory"
 		url="${epdb.url}"
 	/>
 
 	<Resource auth="Container"
-			  name="jms/JMSConnectionFactory"
-			  type="${ep.jms.type}"
-			  maxConnections="25"
-			  maximumActiveSessionPerConnection="25"
-			  idleTimeout="10000"
-			  description="JMS Connection Factory"
-			  factory="${ep.jms.factory}"
-			  brokerURL="${ep.jms.url}"/>
+		name="jms/JMSConnectionFactory"
+		type="${ep.jms.type}"
+		maxConnections="25"
+		maximumActiveSessionPerConnection="25"
+		idleTimeout="10000"
+		description="JMS Connection Factory"
+		factory="${ep.jms.factory}"
+		brokerURL="${ep.jms.url}"/>
 </Context>
 

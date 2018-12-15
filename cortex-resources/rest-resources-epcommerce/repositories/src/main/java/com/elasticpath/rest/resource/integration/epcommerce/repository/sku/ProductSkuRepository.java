@@ -3,9 +3,11 @@
  */
 package com.elasticpath.rest.resource.integration.epcommerce.repository.sku;
 
+import io.reactivex.Observable;
 import io.reactivex.Single;
 
 import com.elasticpath.domain.catalog.ProductSku;
+import com.elasticpath.domain.skuconfiguration.SkuOption;
 import com.elasticpath.rest.command.ExecutionResult;
 
 /**
@@ -19,17 +21,7 @@ public interface ProductSkuRepository {
 	 * @param skuCode the sku Code.
 	 * @return the product sku.
 	 */
-	Single<ProductSku> getProductSkuWithAttributesByCodeAsSingle(String skuCode);
-
-	/**
-	 * Gets the SKU with attributes based on the given sku code.
-	 *
-	 * @param skuCode the sku Code.
-	 * @return the product sku.
-	 * @deprecated use {@link ProductSkuRepository#getProductSkuWithAttributesByCodeAsSingle} where possible
-	 */
-	@Deprecated
-	ExecutionResult<ProductSku> getProductSkuWithAttributesByCode(String skuCode);
+	Single<ProductSku> getProductSkuWithAttributesByCode(String skuCode);
 
 	/**
 	 * Gets the product sku with attributes by the sku guid.
@@ -54,15 +46,23 @@ public interface ProductSkuRepository {
 	 * @param skuGuid product sku guid
 	 * @return product is a product bundle
 	 */
-	ExecutionResult<Boolean> isProductBundle(String skuGuid);
+	Single<Boolean> isProductBundleByGuid(String skuGuid);
 
 	/**
-	 * Verifies whether SKU exists for given item id.
+	 * Determines if a product associated to a product sku (identified by the skuCode) is a product bundle.
 	 *
-	 * @param encodedItemId encoded item id
+	 * @param skuCode product sku code
+	 * @return product is a product bundle
+	 */
+	Single<Boolean> isProductBundleByCode(String skuCode);
+
+	/**
+	 * Verifies whether SKU exists for given sku code.
+	 *
+	 * @param skuCode sku code
 	 * @return true if product sku exists
 	 */
-	ExecutionResult<Boolean> isProductSkuExist(String encodedItemId);
+	Single<Boolean> isProductSkuExistByCode(String skuCode);
 
 	/**
 	 * Verifies whether SKU is displayable for the given store.
@@ -72,4 +72,12 @@ public interface ProductSkuRepository {
 	 * @return true if product sku is displayable in this context
 	 */
 	Single<Boolean> isDisplayableProductSkuForStore(String productSkuCode, String storeCode);
+
+	/**
+	 * Gets the SKU options based on the given sku code.
+	 *
+	 * @param skuCode skuCode
+	 * @return SKU options
+	 */
+	Observable<SkuOption> getProductSkuOptionsByCode(String skuCode);
 }

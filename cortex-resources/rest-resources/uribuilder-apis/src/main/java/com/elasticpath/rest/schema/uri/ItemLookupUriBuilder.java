@@ -5,7 +5,10 @@ package com.elasticpath.rest.schema.uri;
 
 /**
  * Builder of item lookup URIs.
+ *
+ * @deprecated remove once dependent resources are converted to Helix.
  */
+@Deprecated
 public interface ItemLookupUriBuilder extends ReadFromOtherUriBuilder<ItemLookupUriBuilder> {
 
 	/**

@@ -9,7 +9,7 @@ import org.jsoup.select.Elements;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 
-import com.elasticpath.cucumber.util.CortexMacrosTestBase;
+import com.elasticpath.cortexTestObjects.Purchase;
 import com.elasticpath.selenium.common.AbstractPageObject;
 
 /**
@@ -174,10 +174,10 @@ public class ReportPane extends AbstractPageObject {
 	 * Verifies the order number in returns and exchanges report.
 	 */
 	public void verifyOrderNumberInReturnAndExchangeReport() {
-		Element row = getRowByColumnValue(CortexMacrosTestBase.PURCHASE_NUMBER, 1);
+		Element row = getRowByColumnValue(Purchase.getPurchaseNumber(), 1);
 		assertThat(row.select("td").get(0).text())
 				.as("Return or exchange order number is not as expected")
-				.isEqualTo(CortexMacrosTestBase.PURCHASE_NUMBER);
+				.isEqualTo(Purchase.getPurchaseNumber());
 	}
 
 	/**
@@ -186,7 +186,7 @@ public class ReportPane extends AbstractPageObject {
 	 * @param orderTotal the order total
 	 */
 	public void verifyOrderTotalInOrderStatusReport(final String orderTotal) {
-		Element row = getRowByColumnValue(CortexMacrosTestBase.PURCHASE_NUMBER, 1);
+		Element row = getRowByColumnValue(Purchase.getPurchaseNumber(), 1);
 		//The html values are returning with &nbsp value at the end and jsoup is mapping &nbsp to u00a0.
 		assertThat(row.select("td").get(ORDER_STATUS_TOTAL_COLUMN_NUMBER).text().replace("\u00a0", ""))
 				.as("Order total in Order Status report is not as expected")

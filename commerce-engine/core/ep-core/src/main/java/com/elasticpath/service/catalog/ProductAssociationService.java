@@ -3,7 +3,6 @@
  */
 package com.elasticpath.service.catalog;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
@@ -13,9 +12,7 @@ import com.elasticpath.domain.catalog.ProductAssociation;
 import com.elasticpath.domain.catalog.ProductAssociationLoadTuner;
 import com.elasticpath.domain.catalog.ProductAssociationType;
 import com.elasticpath.domain.catalog.ProductLoadTuner;
-import com.elasticpath.domain.catalog.ProductSku;
 import com.elasticpath.domain.catalogview.StoreProduct;
-import com.elasticpath.domain.store.Store;
 import com.elasticpath.persistence.api.LoadTuner;
 import com.elasticpath.service.EpPersistenceService;
 import com.elasticpath.service.search.query.ProductAssociationSearchCriteria;
@@ -204,7 +201,7 @@ public interface ProductAssociationService extends EpPersistenceService {
 	/**
 	 * Gets all product associations of a given type for a given source product, in the given catalog. Note that this may return associations whose
 	 * source and/or target products are not in the catalog that owns the association unless you set the validInCatalogOnly parameter to true.
-	 * 
+	 *
 	 * @param sourceProductCode the code for the product that is associated to other products
 	 * @param associationType the type of product association
 	 * @param catalogCode the code for the catalog in which the product has associated products
@@ -212,14 +209,7 @@ public interface ProductAssociationService extends EpPersistenceService {
 	 * @return the set of <code>ProductAssociation</code>s
 	 */
 	Set<ProductAssociation> getAssociationsByType(String sourceProductCode, ProductAssociationType associationType, String catalogCode,
-			boolean withinCatalogOnly);
+												  boolean withinCatalogOnly);
 
-	/**
-	 * Gets all dependent items for the given store and item sku.
-	 *
-	 * @param store         The {@link Store}
-	 * @param parentItemSku The {@link ProductSku} of parent item
-	 * @return a collection of {@link ProductSku}s dependent on given parent item sku. never {@code null}.
-	 */
-	Collection<ProductSku> findDependentItemsForSku(Store store, ProductSku parentItemSku);
+
 }

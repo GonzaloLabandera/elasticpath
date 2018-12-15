@@ -55,7 +55,20 @@
     </warehouse>
 </sku>
 
-<sku code="tt966001av_sd_buy"/>
+    <sku code="hama_bt_sku">
+        <warehouse code="MOBEE_Warehouse">
+            <onhand>200</onhand>
+            <available>200</available>
+            <allocated>2</allocated>
+            <reserved>2</reserved>
+            <reordermin>1</reordermin>
+            <reorderqty>1</reorderqty>
+        </warehouse>
+    </sku>
+
+    <sku code="eco_h_sku"/>
+
+    <sku code="tt966001av_sd_buy"/>
 
 <sku code="tt966001av_hd_buy"/>
 

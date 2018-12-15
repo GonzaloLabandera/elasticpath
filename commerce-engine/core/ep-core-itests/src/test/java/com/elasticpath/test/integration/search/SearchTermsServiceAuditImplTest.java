@@ -3,9 +3,7 @@
  */
 package com.elasticpath.test.integration.search;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.List;
 
@@ -60,8 +58,9 @@ public class SearchTermsServiceAuditImplTest extends BasicSpringContextTest {
 		SearchTermsId id1 = searchTermsService.saveIfNotExists(searchTerms1);
 
 		List<SearchTermsActivity> searchActivity = getSearchTermsActivity(id1);
-		assertFalse("Acvitity not logged", searchActivity.isEmpty());
-		assertEquals("1 save should only have a single log entry", 1, searchActivity.size());
+		assertThat(searchActivity)
+			.as("Activity should have a single log entry")
+			.hasSize(1);
 	}
 
 	private List<SearchTermsActivity> getSearchTermsActivity(final SearchTermsId identifier) {
@@ -78,11 +77,14 @@ public class SearchTermsServiceAuditImplTest extends BasicSpringContextTest {
 		SearchTermsId id1 = searchTermsService.saveIfNotExists(searchTerms1);
 		SearchTerms searchTerms2 = createSearchTerms(KEYWORDS1);
 		SearchTermsId id2 = searchTermsService.saveIfNotExists(searchTerms2);
-		assertTrue("Equal keywords for search terms should give back the same ID", id1.equals(id2));
+		assertThat(id2)
+			.as("Equal keywords for search terms should give back the same ID")
+			.isEqualTo(id1);
 
 		List<SearchTermsActivity> searchActivity = getSearchTermsActivity(id1);
-		assertFalse("Activity not logged", searchActivity.isEmpty());
-		assertEquals("2 saves should have 2 log entries", 2, searchActivity.size());
+		assertThat(searchActivity)
+			.as("2 saves should have 2 log entries")
+			.hasSize(2);
 	}
 
 	/**
@@ -95,11 +97,14 @@ public class SearchTermsServiceAuditImplTest extends BasicSpringContextTest {
 		SearchTermsId id1 = searchTermsService.saveIfNotExists(searchTerms1);
 
 		List<SearchTermsActivity> searchActivity = getSearchTermsActivity(id1);
-		assertFalse("Acvitity not logged", searchActivity.isEmpty());
-		assertEquals("1 save should only have a single log entry", 1, searchActivity.size());
+		assertThat(searchActivity)
+			.as("1 save should only have a single log entry")
+			.hasSize(1);
 
 		searchTermsService.load(id1);
 		searchActivity = getSearchTermsActivity(id1);
-		assertEquals("Load didn't trigger a log entry", 2, searchActivity.size());
+		assertThat(searchActivity)
+			.as("Load didn't trigger a log entry")
+			.hasSize(2);
 	}
 }

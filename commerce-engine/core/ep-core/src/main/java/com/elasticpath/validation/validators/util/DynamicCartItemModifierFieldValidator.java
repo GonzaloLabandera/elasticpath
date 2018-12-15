@@ -5,7 +5,7 @@
 package com.elasticpath.validation.validators.util;
 
 import java.lang.annotation.ElementType;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.Set;
 import javax.validation.ConstraintViolation;
 import javax.validation.Validation;
@@ -119,8 +119,6 @@ public class DynamicCartItemModifierFieldValidator {
 	}
 
 	private ValidationProviderResolver createValidationProviderResolver(final ValidationProvider<?> provider) {
-		return () -> {
-			return Arrays.asList(provider);
-		};
+		return () -> Collections.singletonList(provider);
 	}
 }

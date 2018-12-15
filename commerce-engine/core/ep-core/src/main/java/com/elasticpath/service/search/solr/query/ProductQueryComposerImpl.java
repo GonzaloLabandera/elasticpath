@@ -11,6 +11,7 @@ import java.util.Set;
 import org.apache.commons.lang.StringUtils;
 import org.apache.lucene.search.BooleanClause.Occur;
 import org.apache.lucene.search.BooleanQuery;
+import org.apache.lucene.search.BoostQuery;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.TermRangeQuery;
 
@@ -55,29 +56,29 @@ public class ProductQueryComposerImpl extends AbstractQueryComposerImpl {
 		}
 
 		final ProductSearchCriteria productSearchCriteria = (ProductSearchCriteria) searchCriteria;
-		final BooleanQuery booleanQuery = new BooleanQuery();
+		final BooleanQuery.Builder booleanQueryBuilder = new BooleanQuery.Builder();
 		boolean hasSomeCriteria = false;
 
 		if (productSearchCriteria.getCatalogSearchableLocales().isEmpty()) {
 			hasSomeCriteria |= addSplitFieldToQuery(SolrIndexConstants.PRODUCT_NAME,
 					productSearchCriteria.getProductName(), productSearchCriteria.getLocale(),
-					searchConfig, booleanQuery, Occur.MUST, true);
+					searchConfig, booleanQueryBuilder, Occur.MUST, true);
 		} else {
 			hasSomeCriteria |= addSplitFieldToQueryWithMultipleLocales(SolrIndexConstants.PRODUCT_NAME,
 					productSearchCriteria.getProductName(), productSearchCriteria.getCatalogSearchableLocales(),
-					searchConfig, booleanQuery, Occur.MUST, true);
+					searchConfig, booleanQueryBuilder, Occur.MUST, true);
 		}
 
 		hasSomeCriteria |= addWholeFieldToQuery(SolrIndexConstants.PRODUCT_SKU_CODE, productSearchCriteria.getProductSku(), null,
-				searchConfig, booleanQuery, Occur.MUST, true);
+				searchConfig, booleanQueryBuilder, Occur.MUST, true);
 
-		hasSomeCriteria |= addFuzzyInvariableTerms(productSearchCriteria, booleanQuery, searchConfig);
+		hasSomeCriteria |= addFuzzyInvariableTerms(productSearchCriteria, booleanQueryBuilder, searchConfig);
 
 		if (!hasSomeCriteria) {
 			throw new EpEmptySearchCriteriaException("Empty search criteria is not allowed!");
 		}
 
-		return booleanQuery;
+		return booleanQueryBuilder.build();
 	}
 
 	@Override
@@ -87,72 +88,72 @@ public class ProductQueryComposerImpl extends AbstractQueryComposerImpl {
 		}
 
 		final ProductSearchCriteria productSearchCriteria = (ProductSearchCriteria) searchCriteria;
-		final BooleanQuery booleanQuery = new BooleanQuery();
+		final BooleanQuery.Builder booleanQueryBuilder = new BooleanQuery.Builder();
 		boolean hasSomeCriteria = false;
 
 		if (productSearchCriteria.getCatalogSearchableLocales().isEmpty()) {
 			hasSomeCriteria |= addSplitFuzzyFieldToQuery(SolrIndexConstants.PRODUCT_NAME,
 					productSearchCriteria.getProductName(), searchCriteria.getLocale(),
-					searchConfig, booleanQuery, Occur.MUST, true);
+					searchConfig, booleanQueryBuilder, Occur.MUST, true);
 		} else {
 			hasSomeCriteria |= addSplitFuzzyFieldToQueryWithMultipleLocales(SolrIndexConstants.PRODUCT_NAME,
 					productSearchCriteria.getProductName(), productSearchCriteria.getCatalogSearchableLocales(),
-					searchConfig, booleanQuery, Occur.MUST, true);
+					searchConfig, booleanQueryBuilder, Occur.MUST, true);
 		}
 
 		hasSomeCriteria |= addWholeFuzzyFieldToQuery(SolrIndexConstants.PRODUCT_SKU_CODE, productSearchCriteria.getProductSku(), null,
-				searchConfig, booleanQuery, Occur.MUST, true);
+				searchConfig, booleanQueryBuilder, Occur.MUST, true);
 
-		hasSomeCriteria |= addFuzzyInvariableTerms(productSearchCriteria, booleanQuery, searchConfig);
+		hasSomeCriteria |= addFuzzyInvariableTerms(productSearchCriteria, booleanQueryBuilder, searchConfig);
 
 		if (!hasSomeCriteria) {
 			throw new EpEmptySearchCriteriaException("Empty search criteria is not allowed!");
 		}
 
-		return booleanQuery;
+		return booleanQueryBuilder.build();
 	}
 
 
 	/**
 	 * Add the invariable search terms to the product index query.
 	 * @param productSearchCriteria the product search criteria
-	 * @param booleanQuery the query being composed
+	 * @param booleanQueryBuilder the query being composed
 	 * @param searchConfig the search configuration
 	 * @return true if any fields were added to the query, false if not
 	 */
-	protected boolean addFuzzyInvariableTerms(final ProductSearchCriteria productSearchCriteria, final BooleanQuery booleanQuery,
+	protected boolean addFuzzyInvariableTerms(final ProductSearchCriteria productSearchCriteria, final BooleanQuery.Builder booleanQueryBuilder,
 			final SearchConfig searchConfig) {
 		boolean hasSomeCriteria = false;
 
 		hasSomeCriteria |= addWholeFieldToQuery(SolrIndexConstants.PRODUCT_CODE, productSearchCriteria.getProductCode(), null,
-				searchConfig, booleanQuery, Occur.MUST, true);
+				searchConfig, booleanQueryBuilder, Occur.MUST, true);
 		hasSomeCriteria |= addWholeFieldToQuery(SolrIndexConstants.BRAND_CODE, productSearchCriteria.getBrandCode(), null,
-				searchConfig, booleanQuery, Occur.MUST, true);
+				searchConfig, booleanQueryBuilder, Occur.MUST, true);
 
 		hasSomeCriteria |= addWholeFieldToQuery(SolrIndexConstants.CATALOG_CODE, productSearchCriteria.getCatalogCodes(),
-				null, searchConfig, booleanQuery, Occur.MUST, true);
+				null, searchConfig, booleanQueryBuilder, Occur.MUST, true);
 
 		hasSomeCriteria |= addWholeFieldToQuery(SolrIndexConstants.OBJECT_UID, productSearchCriteria.getFilteredUids(), null,
-				searchConfig, booleanQuery, Occur.MUST_NOT, false);
+				searchConfig, booleanQueryBuilder, Occur.MUST_NOT, false);
 
 		if (productSearchCriteria.isDisplayableOnly()) {
 			if (StringUtils.isBlank(productSearchCriteria.getStoreCode())) {
 				throw new EpUnsupportedOperationException("StoreCode must be defined to include displayable products");
 			}
 			hasSomeCriteria |= addWholeFieldToQuery(getIndexUtility().createDisplayableFieldName(SolrIndexConstants.DISPLAYABLE,
-					productSearchCriteria.getStoreCode()), String.valueOf(true), null, searchConfig, booleanQuery, Occur.MUST,
+					productSearchCriteria.getStoreCode()), String.valueOf(true), null, searchConfig, booleanQueryBuilder, Occur.MUST,
 					false);
 		}
 
 		if (productSearchCriteria.getProductUid() != null && productSearchCriteria.getProductUid() > 0) {
 			hasSomeCriteria |= addWholeFieldToQuery(SolrIndexConstants.OBJECT_UID, String.valueOf(productSearchCriteria
-					.getProductUid()), null, searchConfig, booleanQuery, Occur.MUST, false);
+					.getProductUid()), null, searchConfig, booleanQueryBuilder, Occur.MUST, false);
 		}
 
-		hasSomeCriteria |= addFeaturedFieldsToQuery(productSearchCriteria, booleanQuery, searchConfig);
-		hasSomeCriteria |= addTermsForCategories(productSearchCriteria, booleanQuery, searchConfig);
-		hasSomeCriteria |= addTermForActiveOnly(productSearchCriteria, booleanQuery);
-		hasSomeCriteria |= addTermForInActiveOnly(productSearchCriteria, booleanQuery, searchConfig);
+		hasSomeCriteria |= addFeaturedFieldsToQuery(productSearchCriteria, booleanQueryBuilder, searchConfig);
+		hasSomeCriteria |= addTermsForCategories(productSearchCriteria, booleanQueryBuilder, searchConfig);
+		hasSomeCriteria |= addTermForActiveOnly(productSearchCriteria, booleanQueryBuilder);
+		hasSomeCriteria |= addTermForInActiveOnly(productSearchCriteria, booleanQueryBuilder, searchConfig);
 
 		return hasSomeCriteria;
 	}
@@ -162,22 +163,22 @@ public class ProductQueryComposerImpl extends AbstractQueryComposerImpl {
 	 * that the caller wants only featured products.</p>
 	 *
 	 * @param productSearchCriteria the product search criteria
-	 * @param booleanQuery the query object
+	 * @param booleanQueryBuilder the query object
 	 * @param searchConfig the search configuration object
 	 * @return true if any fields were added to the query, false if not
 	 */
 	protected boolean addFeaturedFieldsToQuery(
-			final ProductSearchCriteria productSearchCriteria, final BooleanQuery booleanQuery, final SearchConfig searchConfig) {
+			final ProductSearchCriteria productSearchCriteria, final BooleanQuery.Builder booleanQueryBuilder, final SearchConfig searchConfig) {
 		boolean hasSomeCriteria = false;
 		if (productSearchCriteria.isOnlyFeaturedProducts()) {
 			hasSomeCriteria |= addWholeFieldToQuery(SolrIndexConstants.FEATURED, String.valueOf(productSearchCriteria
-					.isOnlyFeaturedProducts()), null, searchConfig, booleanQuery, Occur.MUST, true);
+					.isOnlyFeaturedProducts()), null, searchConfig, booleanQueryBuilder, Occur.MUST, true);
 
 			// this really only makes sense with a category UID
 			if (productSearchCriteria.isFeaturedOnlyInCategory() && productSearchCriteria.getCategoryUid() != null
 					&& productSearchCriteria.getCategoryUid() > 0) {
 				addWholeFieldToQuery(getIndexUtility().createFeaturedField(productSearchCriteria.getCategoryUid()),
-						String.valueOf(0), null, searchConfig, booleanQuery, Occur.MUST_NOT, false);
+						String.valueOf(0), null, searchConfig, booleanQueryBuilder, Occur.MUST_NOT, false);
 			}
 		}
 		return hasSomeCriteria;
@@ -186,10 +187,10 @@ public class ProductQueryComposerImpl extends AbstractQueryComposerImpl {
 	/**
 	 * Add query for active products.
 	 * @param productSearchCriteria search criteria
-	 * @param booleanQuery boolean query
+	 * @param booleanQueryBuilder boolean query
 	 * @return return true if flag isActive activated
 	 */
-	protected boolean addTermForActiveOnly(final ProductSearchCriteria productSearchCriteria, final BooleanQuery booleanQuery) {
+	protected boolean addTermForActiveOnly(final ProductSearchCriteria productSearchCriteria, final BooleanQuery.Builder booleanQueryBuilder) {
 		boolean hasSomeCriteria = false;
 
 		if (productSearchCriteria.isActiveOnly()) {
@@ -197,33 +198,32 @@ public class ProductQueryComposerImpl extends AbstractQueryComposerImpl {
 			// only query for products currently active
 			Date now = new Date();
 			BooleanQuery dateRangeQuery = getSolrQueryFactory().createTermsForStartEndDateRange(now);
-			booleanQuery.add(dateRangeQuery, Occur.MUST);
+			booleanQueryBuilder.add(dateRangeQuery, Occur.MUST);
 		}
 		return hasSomeCriteria;
 
 	}
 
-	private boolean addTermForInActiveOnly(final ProductSearchCriteria productSearchCriteria, final BooleanQuery booleanQuery,
+	private boolean addTermForInActiveOnly(final ProductSearchCriteria productSearchCriteria, final BooleanQuery.Builder booleanQueryBuilder,
 			final SearchConfig searchConfig) {
 		boolean hasSomeCriteria = false;
 
 		if (productSearchCriteria.isInActiveOnly()) {
-			final BooleanQuery innerQuery = new BooleanQuery();
+			final BooleanQuery.Builder innerQueryBuilder = new BooleanQuery.Builder();
 			hasSomeCriteria = true;
 			final String nowAnalyzed = getAnalyzer().analyze(new Date());
 
 			// start date is in the future
-			final Query futureStartDateQuery = TermRangeQuery.newStringRange(SolrIndexConstants.START_DATE, nowAnalyzed, null,
-					true, true);
-			futureStartDateQuery.setBoost(searchConfig.getBoostValue(SolrIndexConstants.START_DATE));
-			innerQuery.add(futureStartDateQuery, Occur.SHOULD);
+			final Query futureStartDateQuery = new BoostQuery(TermRangeQuery.newStringRange(SolrIndexConstants.START_DATE, nowAnalyzed, null,
+					true, true), searchConfig.getBoostValue(SolrIndexConstants.START_DATE));
+			innerQueryBuilder.add(futureStartDateQuery, Occur.SHOULD);
 
 			// OR end date in the past
-			final Query pastEndDateQuery = TermRangeQuery.newStringRange(SolrIndexConstants.END_DATE, null, nowAnalyzed, true, true);
-			pastEndDateQuery.setBoost(searchConfig.getBoostValue(SolrIndexConstants.END_DATE));
-			innerQuery.add(pastEndDateQuery, Occur.SHOULD);
+			final Query pastEndDateQuery = new BoostQuery(TermRangeQuery.newStringRange(SolrIndexConstants.END_DATE, null, nowAnalyzed, true, true),
+			searchConfig.getBoostValue(SolrIndexConstants.END_DATE));
+			innerQueryBuilder.add(pastEndDateQuery, Occur.SHOULD);
 
-			booleanQuery.add(innerQuery, Occur.MUST);
+			booleanQueryBuilder.add(innerQueryBuilder.build(), Occur.MUST);
 		}
 		return hasSomeCriteria;
 	}
@@ -232,11 +232,11 @@ public class ProductQueryComposerImpl extends AbstractQueryComposerImpl {
 	 * Adds the Category and Ancestor Category product search criteria to the search query, if they are specified.
 	 * This implementation calls {@link #getCategoryCodeFromProductSearchCriteria(ProductSearchCriteria)}.
 	 * @param productSearchCriteria the product search criteria
-	 * @param booleanQuery the search query
+	 * @param booleanQueryBuilder the search query
 	 * @param searchConfig the search configuration
 	 * @return true if any category search terms were specified that resulted in a new query field being added, false if not
 	 */
-	protected boolean addTermsForCategories(final ProductSearchCriteria productSearchCriteria, final BooleanQuery booleanQuery,
+	protected boolean addTermsForCategories(final ProductSearchCriteria productSearchCriteria, final BooleanQuery.Builder booleanQueryBuilder,
 			final SearchConfig searchConfig) {
 		boolean hasSomeCriteria = false;
 
@@ -251,26 +251,26 @@ public class ProductQueryComposerImpl extends AbstractQueryComposerImpl {
 							productSearchCriteria
 									.getMasterCategoryCatalogCode());
 			hasSomeCriteria |= addWholeFieldToQuery(masterCategoryFieldName, productSearchCriteria.getMasterCategoryCode(), null,
-					searchConfig, booleanQuery, Occur.MUST, true);
+					searchConfig, booleanQueryBuilder, Occur.MUST, true);
 		} else if (productSearchCriteria.isOnlyWithinDirectCategory()) {
 			if (categoryCode != null) {
 				final String categoryFieldName = getIndexUtility().createProductCategoryFieldName(SolrIndexConstants.PRODUCT_CATEGORY, catalogCode);
 				hasSomeCriteria |= addWholeFieldToQuery(categoryFieldName, categoryCode, null,
-						searchConfig, booleanQuery, Occur.MUST, true);
+						searchConfig, booleanQueryBuilder, Occur.MUST, true);
 			}
 			hasSomeCriteria |= addWholeFieldToQuery(SolrIndexConstants.PARENT_CATEGORY_CODES, ancestorCategoryCodes, null, searchConfig,
-					booleanQuery, Occur.MUST, true);
+					booleanQueryBuilder, Occur.MUST, true);
 		} else {
-			final BooleanQuery innerQuery = new BooleanQuery();
+			final BooleanQuery.Builder innerQueryBuilder = new BooleanQuery.Builder();
 			if (categoryCode != null) {
 				final String categoryFieldName = getIndexUtility().createProductCategoryFieldName(SolrIndexConstants.PRODUCT_CATEGORY, catalogCode);
 				hasSomeCriteria |= addWholeFieldToQuery(categoryFieldName, categoryCode, null,
-						searchConfig, innerQuery, Occur.SHOULD, true);
+						searchConfig, innerQueryBuilder, Occur.SHOULD, true);
 			}
 			hasSomeCriteria |= addWholeFieldToQuery(SolrIndexConstants.PARENT_CATEGORY_CODES, ancestorCategoryCodes, null, searchConfig,
-					innerQuery, Occur.SHOULD, true);
+					innerQueryBuilder, Occur.SHOULD, true);
 
-			booleanQuery.add(innerQuery, Occur.MUST);
+			booleanQueryBuilder.add(innerQueryBuilder.build(), Occur.MUST);
 		}
 		return hasSomeCriteria;
 	}

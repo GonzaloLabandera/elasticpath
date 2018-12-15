@@ -78,7 +78,7 @@ public class OrderCouponToCouponinfoRepository<E extends CouponEntity, I extends
 		return cartOrderRepository.findByGuidAsSingle(storeCode, cartOrderGuid)
 				.flatMap(cartOrder -> Single.just(cartOrder.removeCoupon(couponId)) //Save cart order after coupons have been removed
 						.flatMap(removed -> removed ? cartOrderRepository.saveCartOrderAsSingle(cartOrder) : Single.never()))
-				.toCompletable();
+				.ignoreElement();
 	}
 
 	/**

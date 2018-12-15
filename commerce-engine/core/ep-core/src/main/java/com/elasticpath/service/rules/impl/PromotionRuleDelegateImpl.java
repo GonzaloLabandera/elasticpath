@@ -752,11 +752,14 @@ public class PromotionRuleDelegateImpl implements PromotionRuleDelegate {
 	 * @return true if coupon usage can multiply the discount quantity
 	 */
 	protected boolean isCouponDrawdownValid(final String ruleCode, final String customerEmailAddress) {
+		if (customerEmailAddress == null) {
+			return false;
+		}
+
 		CouponConfig couponConfig = couponConfigService.findByRuleCode(ruleCode);
 		return couponConfig != null
-				&& !CouponUsageType.LIMIT_PER_COUPON.equals(couponConfig.getUsageType())
-				&& !couponConfig.isUnlimited()
-				&& customerEmailAddress != null;
+			&& !CouponUsageType.LIMIT_PER_COUPON.equals(couponConfig.getUsageType())
+			&& !couponConfig.isUnlimited();
 	}
 
 

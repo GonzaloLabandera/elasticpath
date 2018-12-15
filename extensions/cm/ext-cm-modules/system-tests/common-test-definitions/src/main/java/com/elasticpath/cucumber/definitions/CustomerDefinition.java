@@ -1,5 +1,7 @@
 package com.elasticpath.cucumber.definitions;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import java.util.List;
 import java.util.Map;
 
@@ -17,6 +19,7 @@ import com.elasticpath.selenium.util.DBConnector;
 /**
  * Customer step definition.
  */
+@SuppressWarnings({"PMD.TooManyMethods"})
 public class CustomerDefinition {
 	private final CustomerService customerService;
 	private CustomerSearchResultsPane customerSearchResultsPane;
@@ -40,23 +43,56 @@ public class CustomerDefinition {
 	}
 
 	/**
-	 * Search for customer.
+	 * Search for customer by email or user id.
 	 *
 	 * @param customerEmailID the customer email id.
 	 */
-	@When("^I search for customer with email ID (.+)$")
-	public void searchCustomer(final String customerEmailID) {
-		clicksCustomersTab();
-		enterCustomerEmailID(customerEmailID);
+	@When("^I search for customer by email ID (.+)$")
+	public void searchCustomerIdEmail(final String customerEmailID) {
+		searchCustomer(() -> enterCustomerEmailID(customerEmailID));
+	}
+
+	/**
+	 * Search for customer by email or user id with Store filter.
+	 *
+	 * @param customerEmailID the customer email id.
+	 * @param store           Store associated with the customer
+	 */
+	@When("^I search for customer by email (.+) with store filter (.+)$")
+	public void searchCustomerEmailAndStore(final String customerEmailID, final String store) {
+		fillSearchForm(() -> customerService.enterEmailUserID(customerEmailID));
+		customerService.selectStore(store);
 		clickCustomerSearch();
+	}
 
-		int index = 0;
+	/**
+	 * Search for customer by First name.
+	 *
+	 * @param firstName a customer First name.
+	 */
+	@When("^I search for customer by first name (.+)$")
+	public void searchCustomerFirstName(final String firstName) {
+		searchCustomer(() -> customerService.enterFirstName(firstName));
+	}
 
-		while (!customerSearchResultsPane.isCustomerInList(customerEmailID, "Email Address") && index < Constants.UUID_END_INDEX) {
-			customerSearchResultsPane.sleep(Constants.SLEEP_HALFSECOND_IN_MILLIS);
-			clickCustomerSearch();
-			index++;
-		}
+	/**
+	 * Search for customer by Last name.
+	 *
+	 * @param lastName a customer Last name.
+	 */
+	@When("^I search for customer by last name (.+)$")
+	public void searchCustomerLastName(final String lastName) {
+		searchCustomer(() -> customerService.enterLastName(lastName));
+	}
+
+	/**
+	 * Search for customer by Zip Code.
+	 *
+	 * @param zipCode a customer Zip Code.
+	 */
+	@When("^I search for customer by zip code (.+)$")
+	public void searchCustomerZipCode(final String zipCode) {
+		searchCustomer(() -> customerService.enterPostalCode(zipCode));
 	}
 
 	/**
@@ -66,7 +102,85 @@ public class CustomerDefinition {
 	 */
 	@Then("^I should see customer with email ID (.+) in result list$")
 	public void verifyCustomerExists(final String expectedCustomerID) {
-		customerSearchResultsPane.verifyCustomerExists(expectedCustomerID);
+		verifyCustomerSearchResult(expectedCustomerID, CustomerSearchResultsPane.EMAIL_ADDRESS_COLUMN);
+	}
+
+	/**
+	 * Checks if there is entry with provided First name in a search result table.
+	 *
+	 * @param expectedFirstName an expected First name.
+	 */
+	@Then("^I should see customer with first name (.+) in result list$")
+	public void verifyFirstNameEntryInList(final String expectedFirstName) {
+		verifyCustomerSearchResult(expectedFirstName, CustomerSearchResultsPane.FIRST_NAME_COLUMN);
+	}
+
+	/**
+	 * Checks if there is entry with provided Last name in a search result table.
+	 *
+	 * @param expectedLastName an expected First name.
+	 */
+	@Then("^I should see customer with last name (.+) in result list$")
+	public void verifyLastNameEntryInList(final String expectedLastName) {
+		verifyCustomerSearchResult(expectedLastName, CustomerSearchResultsPane.LAST_NAME_COLUMN);
+	}
+
+	/**
+	 * Checks if there is entry with provided Zip code in a search result table.
+	 *
+	 * @param expectedZipCode an expected zip code.
+	 */
+	@Then("^I should see customer with zip code (.+) in result list$")
+	public void verifyZipCodeEntryInList(final String expectedZipCode) {
+		verifyCustomerSearchResultPartialMatch(expectedZipCode, CustomerSearchResultsPane.BILLING_ADDRESS_COLUMN_INDEX);
+	}
+
+	/**
+	 * Checks if there is entry with provided Phone number in a search result table.
+	 *
+	 * @param phoneNumber an expected phone number.
+	 */
+	@Then("^I should see customer with phone number (.+) in result list$")
+	public void verifyPhoneNumberEntryInList(final String phoneNumber) {
+		verifyCustomerSearchResult(phoneNumber, CustomerSearchResultsPane.PHONE_NUMBER_COLUMN);
+	}
+
+	/**
+	 * Checks if search result table is empty.
+	 */
+	@Then("^I should see empty search results table$")
+	public void verifyEmptyResultTable() {
+		assertThat(customerSearchResultsPane.isSearchResultTableEmpty())
+				.as("Search result table should be empty, but contains at least one row")
+				.isTrue();
+	}
+
+	/**
+	 * Checks if search result table has specified amount of results.
+	 */
+	@Then("^I should see more than one row in result list$")
+	public void verifyResultTableRowsAmountGreaterThanOne() {
+		assertThat(customerSearchResultsPane.getSearchResultTableRowsAmount())
+				.as("Search result table doesn't contain expected rows amount")
+				.isGreaterThan(1);
+	}
+
+	/**
+	 * Checks if all entries of search results table contain provided email address (partial match).
+	 *
+	 * @param expectedEmailAddress  expected email address for verification
+	 */
+	@Then("^All entries in result list have (.+) as a part of Email Address$")
+	public void verifyUserIdEntriesInList(final String expectedEmailAddress) {
+		customerSearchResultsPane.isCustomerValueInAllListEntries(expectedEmailAddress, CustomerSearchResultsPane.EMAIL_ADDRESS_COLUMN_INDEX);
+	}
+
+	/**
+	 * Closes customer search results tab.
+	 */
+	@Then("^I close customer search results tab$")
+	public void closeSearchResultsTab() {
+		customerSearchResultsPane.closeCustomerSearchResultsPane();
 	}
 
 	/**
@@ -90,18 +204,7 @@ public class CustomerDefinition {
 	 */
 	@When("^I search for customer by phone number (.+)$")
 	public void searchCustomerByPhone(final String phoneNumber) {
-		activityToolbar.clickCustomerServiceButton();
-		customerService.clickCustomersTab();
-		customerService.clearInputFieldsInCustomersTab();
-		enterPhoneNumber(phoneNumber);
-		clickCustomerSearch();
-
-		int index = 0;
-		while (!customerSearchResultsPane.isCustomerInList(phoneNumber, "Telephone #") && index < Constants.UUID_END_INDEX) {
-			customerSearchResultsPane.sleep(Constants.SLEEP_HALFSECOND_IN_MILLIS);
-			clickCustomerSearch();
-			index++;
-		}
+		searchCustomer(() -> customerService.enterPhoneNumber(phoneNumber));
 	}
 
 	/**
@@ -139,6 +242,8 @@ public class CustomerDefinition {
 
 	private void clickCustomerSearch() {
 		customerSearchResultsPane = customerService.clickCustomerSearch();
+		//this call ensures that the search results table appears on the page
+		customerSearchResultsPane.isSearchResultTableEmpty();
 	}
 
 	/**
@@ -154,6 +259,7 @@ public class CustomerDefinition {
 
 	/**
 	 * Verifies data point value per data point.
+	 *
 	 * @param customerDataMap map
 	 */
 	@Then("^the following data points (?:captured correct customer data|remain captured)$")
@@ -230,12 +336,70 @@ public class CustomerDefinition {
 
 	/**
 	 * Resets Data Policy State.
+	 *
 	 * @param dataPolicyName String.
 	 */
 	private void resetDataPolicyState(final String dataPolicyName) {
 		DBConnector dbConnector = new DBConnector();
 		dbConnector.executeUpdateQuery("UPDATE TDATAPOLICY SET STATE='1', END_DATE=NULL WHERE POLICY_NAME='" + dataPolicyName + "';");
 		dbConnector.closeAll();
+	}
+
+	/**
+	 * Runs a search for customer with full or partial search value and verifies that result table appears.
+	 *
+	 * @param runnable function which fills search field.
+	 */
+	private void searchCustomer(final Runnable runnable) {
+		fillSearchForm(runnable);
+		clickCustomerSearch();
+	}
+
+	/**
+	 * Navigates to search form and fills it
+	 *
+	 * @param runnable function which fills search field.
+	 */
+	private void fillSearchForm(final Runnable runnable) {
+		clicksCustomersTab();
+		customerService.clearInputFieldsInCustomersTab();
+		runnable.run();
+	}
+
+	/**
+	 * Verify a customer is in a result list in a Search Results Table using full match equality for expected value in the table.
+	 *
+	 * @param verificationCriteria customer value for verification
+	 * @param columnName           column name of the Search result table associated with verification criteria
+	 */
+	private void verifyCustomerSearchResult(final String verificationCriteria, final String columnName) {
+		int index = 0;
+		while (!customerSearchResultsPane.isCustomerInListFullMatch(verificationCriteria, columnName) && index < Constants.UUID_END_INDEX) {
+			customerSearchResultsPane.sleep(Constants.SLEEP_HALFSECOND_IN_MILLIS);
+			clickCustomerSearch();
+			index++;
+		}
+		assertThat(customerSearchResultsPane.isCustomerInListFullMatch(verificationCriteria, columnName))
+				.as("The search result doesn't contain expected entry")
+				.isTrue();
+	}
+
+	/**
+	 * Verify a customer is in a result list in a Search Results Table using partial match equality for expected value in the table.
+	 *
+	 * @param verificationCriteria customer value for verification
+	 * @param columnIndex          an index of the table column for verification
+	 */
+	private void verifyCustomerSearchResultPartialMatch(final String verificationCriteria, final int columnIndex) {
+		int index = 0;
+		while (!customerSearchResultsPane.isCustomerInListPartialMatch(verificationCriteria, columnIndex) && index < Constants.UUID_END_INDEX) {
+			customerSearchResultsPane.sleep(Constants.SLEEP_HALFSECOND_IN_MILLIS);
+			clickCustomerSearch();
+			index++;
+		}
+		assertThat(customerSearchResultsPane.isCustomerInListPartialMatch(verificationCriteria, columnIndex))
+				.as("The search result doesn't contain expected entry")
+				.isTrue();
 	}
 
 }

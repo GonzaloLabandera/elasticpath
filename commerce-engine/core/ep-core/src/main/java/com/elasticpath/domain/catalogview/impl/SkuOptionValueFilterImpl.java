@@ -4,16 +4,12 @@
 package com.elasticpath.domain.catalogview.impl;
 
 import java.util.HashMap;
-import java.util.LinkedHashSet;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Set;
 
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.commons.constants.SeoConstants;
-import com.elasticpath.domain.catalogview.EpCatalogViewRequestBindException;
 import com.elasticpath.domain.catalogview.SkuOptionValueFilter;
-import com.elasticpath.domain.skuconfiguration.SkuOption;
 import com.elasticpath.domain.skuconfiguration.SkuOptionValue;
 import com.elasticpath.service.catalog.SkuOptionService;
 
@@ -25,40 +21,16 @@ public class SkuOptionValueFilterImpl extends AbstractFilterImpl<SkuOptionValueF
 	/** Serial version id. */
 	private static final long serialVersionUID = 5000000001L;
 
-	private final Set<SkuOptionValue> skuOptionValues = new LinkedHashSet<>();
+	private SkuOptionValue skuOptionValue;
 
 	@Override
 	public String getDisplayName(final Locale locale) {
-		if (skuOptionValues.isEmpty()) {
-			return null;
-		}
-
-		StringBuilder skuOptionValueDisplayNameBuilder = new StringBuilder();
-		for (SkuOptionValue skuOptionValue : skuOptionValues) {
-			if (skuOptionValueDisplayNameBuilder.length() > 0) {
-				skuOptionValueDisplayNameBuilder.append(',');
-			}
-			skuOptionValueDisplayNameBuilder.append(skuOptionValue.getDisplayName(locale, true));
-		}
-
-		StringBuilder builder = new StringBuilder();
-		SkuOption skuOption = skuOptionValues.iterator().next().getSkuOption();
-		builder.append(skuOption.getDisplayName(locale, true));
-		if (skuOptionValueDisplayNameBuilder.length() > 0) {
-			builder.append(':');
-		}
-		builder.append(skuOptionValueDisplayNameBuilder);
-
-		return builder.toString();
+		return skuOptionValue.getDisplayName(locale, true);
 	}
 
 	@Override
 	public String getSeoName(final Locale locale) {
-		final String displayName = this.getDisplayName(locale);
-		if (displayName == null) {
-			return null;
-		}
-		return getUtility().escapeName2UrlFriendly(displayName, locale);
+		return getDisplayName(locale);
 	}
 
 	/**
@@ -68,61 +40,20 @@ public class SkuOptionValueFilterImpl extends AbstractFilterImpl<SkuOptionValueF
 	 */
 	@Override
 	public String getSeoId() {
-		StringBuilder seoIdBuilder = new StringBuilder();
-		for (SkuOptionValue skuOptionValue : skuOptionValues) {
-			if (seoIdBuilder.length() > 0) {
-				seoIdBuilder.append(getSeparatorInToken());
-			}
-			seoIdBuilder.append(skuOptionValue.getOptionValueKey());
-		}
-		seoIdBuilder.insert(0, SeoConstants.SKU_OPTION_VALUE_PREFIX);
-		return seoIdBuilder.toString();
+		return SeoConstants.SKU_OPTION_VALUE_PREFIX + skuOptionValue.getSkuOption().getOptionKey() + skuOptionValue.getOptionValueKey();
 	}
 
 	@Override
-	public Map<String, Object> parseFilterString(final String filterIdStr) throws EpCatalogViewRequestBindException {
-		final String idWithoutPrefix = filterIdStr.substring(filterIdStr.indexOf(SeoConstants.SKU_OPTION_VALUE_PREFIX)
-				+ SeoConstants.SKU_OPTION_VALUE_PREFIX.length());
-
-		final String[] tokens = idWithoutPrefix.split(getSeparatorInToken());
-
-		final SkuOptionService skuOptionService = getSkuOptionService();
-		final Set<SkuOptionValue> values = new LinkedHashSet<>();
-		for (String optionValueKey : tokens) {
-			SkuOptionValue skuOptionValue = null;
-			try {
-				skuOptionValue = skuOptionService.findOptionValueByKey(optionValueKey);
-				values.add(skuOptionValue);
-			} catch (RuntimeException e) {
-				throw new EpCatalogViewRequestBindException("cannot find sku option value key for " + optionValueKey, e);
-			}
-		}
+	public Map<String, Object> parseFilterString(final String filterIdStr) {
 		Map<String, Object> tokenMap = new HashMap<>();
-		tokenMap.put(SKU_OPTION_VALUES_PROPERTY_KEY, values);
+		tokenMap.put(SKU_OPTION_VALUE_PROPERTY_KEY, skuOptionValue);
 		return tokenMap;
-	}
-
-	private void addSkuOptionValue(final SkuOptionValue skuOptionValue) {
-		if (skuOptionValue == null) {
-			return;
-		}
-		if (!skuOptionValues.isEmpty()) {
-			SkuOption skuOption = skuOptionValues.iterator().next().getSkuOption();
-			if (!skuOption.equals(skuOptionValue.getSkuOption())) {
-				throw new EpCatalogViewRequestBindException(
-						"the sku option values don't belong to the same sku option");
-			}
-		}
-		skuOptionValues.add(skuOptionValue);
 	}
 
 	@Override
 	public void initialize(final Map<String, Object> properties) {
-		@SuppressWarnings("unchecked")
-		Set<SkuOptionValue> skuOptionValues = (Set<SkuOptionValue>) properties.get(SKU_OPTION_VALUES_PROPERTY_KEY);
-		for (SkuOptionValue skuOptionValue : skuOptionValues) {
-			addSkuOptionValue(skuOptionValue);
-		}
+		skuOptionValue = (SkuOptionValue) properties.get(SKU_OPTION_VALUE_PROPERTY_KEY);
+		setId(getSeoId());
 	}
 
 	/**
@@ -140,10 +71,8 @@ public class SkuOptionValueFilterImpl extends AbstractFilterImpl<SkuOptionValueF
 	}
 
 	@Override
-	public Set<SkuOptionValue> getSkuOptionValues() {
-		return this.skuOptionValues;
+	public SkuOptionValue getSkuOptionValue() {
+		return this.skuOptionValue;
 	}
-
-
 
 }

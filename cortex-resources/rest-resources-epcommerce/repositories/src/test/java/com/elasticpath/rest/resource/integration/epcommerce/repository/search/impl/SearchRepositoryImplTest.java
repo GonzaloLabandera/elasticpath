@@ -10,6 +10,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.stream.IntStream;
 
 import io.reactivex.Maybe;
 import io.reactivex.Single;
@@ -25,7 +26,7 @@ import com.elasticpath.domain.catalog.impl.ProductImpl;
 import com.elasticpath.persistence.api.EpPersistenceException;
 import com.elasticpath.rest.ResourceOperationFailure;
 import com.elasticpath.rest.ResourceStatus;
-import com.elasticpath.rest.command.ExecutionResultFactory;
+import com.elasticpath.rest.definition.searches.SearchKeywordsEntity;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.item.ItemRepository;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.pagination.PaginatedResult;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.product.StoreProductRepository;
@@ -100,6 +101,27 @@ public class SearchRepositoryImplTest {
 				.assertValue(paginatedResult -> expectedItemIds.size() == paginatedResult.getTotalNumberOfResults());
 	}
 
+	@Test
+	public void ensureSearchForMultipleOfferIdsLessThanPageSizeReturnsThemAll() {
+		final int page = 1;
+		final int pageSize = 10;
+
+		final ProductCategorySearchCriteria searchCriteria = new KeywordSearchCriteria();
+		final Collection<String> expectedItemIds = Arrays.asList("id1", "id2", "id3");
+
+		final List<Long> resultUids = mockIndexSearch(page, pageSize, searchCriteria, expectedItemIds.size());
+		mockProductAndItemCalls(resultUids, expectedItemIds);
+
+		Single<PaginatedResult> itemIdsSearchExecutionResult = repository.searchForProductIds(searchCriteria, page, pageSize);
+
+		itemIdsSearchExecutionResult.test()
+				.assertComplete()
+				.assertValue(paginatedResult -> page == paginatedResult.getCurrentPage())
+				.assertValue(paginatedResult -> 1 == paginatedResult.getNumberOfPages())
+				.assertValue(paginatedResult -> pageSize == paginatedResult.getResultsPerPage())
+				.assertValue(paginatedResult -> expectedItemIds.size() == paginatedResult.getTotalNumberOfResults());
+	}
+
 	private List<Long> mockIndexSearch(final int page, final int pageSize, final ProductCategorySearchCriteria searchCriteria,
 									   final int numberOfSearchResultsToReturn) {
 		final List<Long> resultUids = Collections.emptyList();
@@ -129,7 +151,7 @@ public class SearchRepositoryImplTest {
 			Product product = productsIterator.next();
 			String itemId = expectedItemIdsIterator.next();
 
-			when(itemRepository.getDefaultItemIdForProduct(product)).thenReturn(ExecutionResultFactory.createReadOK(itemId));
+			when(itemRepository.getDefaultItemIdForProduct(product)).thenReturn(itemId);
 		}
 	}
 
@@ -175,6 +197,21 @@ public class SearchRepositoryImplTest {
 				.thenThrow(new EpPersistenceException("persistence exception during search"));
 
 		repository.searchForItemIds(page, pageSize, searchCriteria)
+				.test()
+				.assertFailure(EpPersistenceException.class);
+	}
+
+	@Test
+	public void ensureSearchOfferIdsWithException() {
+		final int page = 1;
+		final int pageSize = 10;
+		final ProductCategorySearchCriteria searchCriteria = new KeywordSearchCriteria();
+
+		when(indexSearchService.search(searchCriteria)).thenReturn(indexSearchResult);
+		when(indexSearchResult.getResults(page - 1, pageSize))
+				.thenThrow(new EpPersistenceException("persistence exception during search"));
+
+		repository.searchForProductIds(searchCriteria, page, pageSize)
 				.test()
 				.assertFailure(EpPersistenceException.class);
 	}
@@ -228,6 +265,45 @@ public class SearchRepositoryImplTest {
 						throwable -> ResourceStatus.SERVER_ERROR
 								.equals(((ResourceOperationFailure) throwable).getResourceStatus())
 				);
+	}
+
+	@Test
+	public void shouldNotValidateEntityForEmptyKeyword() {
+		repository.validate(SearchKeywordsEntity.builder().withKeywords("").build())
+				.test()
+				.assertError(ResourceOperationFailure.class)
+				.assertError(throwable -> ResourceStatus.BAD_REQUEST_BODY.equals(
+						((ResourceOperationFailure) throwable).getResourceStatus()));
+
+	}
+
+	@Test
+	public void shouldNotValidateEntityForTooLongKeyword() {
+		final int maxKeywordsToGenerate = 600;
+		StringBuilder kewyordBuilder = new StringBuilder();
+		IntStream.range(0, maxKeywordsToGenerate).forEach(kewyordBuilder::append);
+		repository.validate(SearchKeywordsEntity.builder().withKeywords(kewyordBuilder.toString()).build())
+				.test()
+				.assertError(ResourceOperationFailure.class)
+				.assertError(throwable -> ResourceStatus.BAD_REQUEST_BODY.equals(
+						((ResourceOperationFailure) throwable).getResourceStatus()));
+
+	}
+
+	@Test
+	public void shouldNotValidateEntityForInvalidPageSize() {
+		repository.validate(SearchKeywordsEntity.builder().withKeywords("a").withPageSize(-10).build())
+				.test()
+				.assertError(ResourceOperationFailure.class)
+				.assertError(throwable -> ResourceStatus.BAD_REQUEST_BODY.equals(
+						((ResourceOperationFailure) throwable).getResourceStatus()));
+	}
+
+	@Test
+	public void shouldValidateEntityForUndefinedPageSize() {
+		repository.validate(SearchKeywordsEntity.builder().withKeywords("a").withPageSize(null).build())
+				.test()
+				.assertComplete();
 	}
 
 }

@@ -3,11 +3,12 @@
  */
 package com.elasticpath.service.search.solr;
 
+import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 
 import org.apache.solr.client.solrj.SolrQuery;
-import org.apache.solr.client.solrj.SolrServer;
+import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.params.SolrParams;
@@ -40,7 +41,7 @@ public class SolrSpellIndexSearcherImplTest {
 
 	private SolrProvider solrProvider;
 
-	private SolrServer solrServer;
+	private SolrClient solrServer;
 
 	private SolrQueryFactory queryFactory;
 
@@ -61,7 +62,7 @@ public class SolrSpellIndexSearcherImplTest {
 		spellSuggestions.add("someString");
 		spellSuggestions.add("anotherString");
 		
-		solrServer = context.mock(SolrServer.class);
+		solrServer = context.mock(SolrClient.class);
 		solrProvider = context.mock(SolrProvider.class);
 		queryFactory = context.mock(SolrQueryFactory.class);
 		final SearchConfig searchConfig = new SearchConfigImpl();
@@ -90,7 +91,7 @@ public class SolrSpellIndexSearcherImplTest {
 	 * @throws SolrServerException in case of a solr server exception
 	 */
 	@Test
-	public void testSuggest() throws SolrServerException {
+	public void testSuggest() throws SolrServerException, IOException {
 		final QueryResponse response = new QueryResponse();
 		response.setResponse(new NamedList<>());
 		context.checking(new Expectations() {

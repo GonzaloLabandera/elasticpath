@@ -1,4 +1,4 @@
-@Carts @HeaderAuth
+@carts @headerAuth
 Feature: Clear Cart Items
   As the developer
   I want to ensure the shopper cart is empty at the start of any new transactional session
@@ -25,15 +25,15 @@ Feature: Clear Cart Items
 
   Scenario Outline: Clear cart with cart promotion item
     Given I add item with code <ITEM_CODE> to my cart
-    And I go to my default cart
-    And the list of applied promotions contains promotion <PROMOTION>
+    When I go to my default cart
+    Then the list of applied promotions contains promotion <PROMOTION>
     And the cart total has amount: 47.47, currency: CAD and display: $47.47
     And the total quantity in the cart is 1
     When I clear the cart
     Then the total quantity in the cart is 0
     And there are no lineitems in the cart
     And the list of applied promotions is empty
-    And the cart total has amount: 0.0, currency: CAD and display: $0.00
+    And the cart total has amount: 0.00, currency: CAD and display: $0.00
 
     Examples:
       | ITEM_CODE                                     | PROMOTION              |

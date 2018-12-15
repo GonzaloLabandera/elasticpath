@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 import org.apache.solr.client.solrj.SolrQuery;
-import org.apache.solr.client.solrj.SolrServer;
+import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.common.params.CommonParams;
 import org.apache.solr.common.params.SolrParams;
@@ -34,7 +34,7 @@ public class SolrManagerImplTest {
 		}
 	};
 
-	private SolrServer mockSolrServer;
+	private SolrClient mockSolrServer;
 
 
 	/**
@@ -44,18 +44,18 @@ public class SolrManagerImplTest {
 	 */
 	@Before
 	public void setUp() throws Exception {
-		mockSolrServer = context.mock(SolrServer.class);
+		mockSolrServer = context.mock(SolrClient.class);
 		solrManager = new DefaultSolrManager();
 	}
 
 	/**
 	 * Test method for
-	 * 'com.elasticpath.persistence.impl.SolrManagerImpl.addUpdateDocument(SolrServer,
+	 * 'com.elasticpath.persistence.impl.SolrManagerImpl.addUpdateDocument(SolrClient,
 	 * SolrInputDocument)'.
 	 */
 	@Test
 	public void testAddUpdateDocumentSolrServerSolrInputDocument() throws Exception {
-		final SolrServer server = mockSolrServer;
+		final SolrClient client = mockSolrServer;
 		final SolrInputDocument document = new SolrInputDocument();
 		// give some sort of meaningful data
 		document.addField("some field", "some value");
@@ -64,17 +64,17 @@ public class SolrManagerImplTest {
 				oneOf(mockSolrServer).add(document);
 			}
 		});
-		solrManager.addUpdateDocument(server, document);
+		solrManager.addUpdateDocument(client, document);
 	}
 
 	/**
 	 * Test method for
-	 * 'com.elasticpath.persistence.impl.SolrManagerImpl.addUpdateDocument(SolrServer,
+	 * 'com.elasticpath.persistence.impl.SolrManagerImpl.addUpdateDocument(SolrClient,
 	 * Collection)'.
 	 */
 	@Test
 	public void testAddUpdateDocumentSolrServerCollection() throws Exception {
-		final SolrServer server = mockSolrServer;
+		final SolrClient client = mockSolrServer;
 		final Collection<SolrInputDocument> documents = new ArrayList<>();
 		// give some sort of meaningful data
 		documents.add(new SolrInputDocument());
@@ -84,32 +84,32 @@ public class SolrManagerImplTest {
 				oneOf(mockSolrServer).add(documents);
 			}
 		});
-		solrManager.addUpdateDocument(server, documents);
+		solrManager.addUpdateDocument(client, documents);
 	}
 
 	/**
 	 * Test method for
-	 * 'com.elasticpath.persistence.impl.SolrManagerImpl.deleteDocument(SolrServer, long)'.
+	 * 'com.elasticpath.persistence.impl.SolrManagerImpl.deleteDocument(SolrClient, long)'.
 	 */
 	@Test
 	public void testDeleteDocument() throws Exception {
-		final SolrServer server = mockSolrServer;
+		final SolrClient client = mockSolrServer;
 		final long uid = 0;
 		context.checking(new Expectations() {
 			{
 				oneOf(mockSolrServer).deleteById(String.valueOf(uid));
 			}
 		});
-		solrManager.deleteDocument(server, uid);
+		solrManager.deleteDocument(client, uid);
 	}
 
 	/**
 	 * Test method for
-	 * 'com.elasticpath.persistence.impl.SolrManagerImpl.rebuildSpelling(SolrServer)'.
+	 * 'com.elasticpath.persistence.impl.SolrManagerImpl.rebuildSpelling(SolrClient)'.
 	 */
 	@Test
 	public void testRebuildSpelling() throws Exception {
-		final SolrServer server = mockSolrServer;
+		final SolrClient client = mockSolrServer;
 		final SolrQuery spellingQuery = new SolrQuery();
 		spellingQuery.set(CommonParams.QT, SolrIndexConstants.SPELL_CHECKER);
 		final SolrQuery rebuildQuery = new SolrQuery();
@@ -119,7 +119,7 @@ public class SolrManagerImplTest {
 				oneOf(mockSolrServer).query(with(toStringContains(spellingQuery, rebuildQuery)));
 			}
 		});
-		solrManager.rebuildSpelling(server);
+		solrManager.rebuildSpelling(client);
 	}
 
 	private TypeSafeMatcher<SolrParams> toStringContains(final Object... values) {

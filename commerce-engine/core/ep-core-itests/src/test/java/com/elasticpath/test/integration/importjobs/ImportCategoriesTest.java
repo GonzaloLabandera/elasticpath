@@ -3,11 +3,7 @@
  */
 package com.elasticpath.test.integration.importjobs;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.Locale;
 
@@ -15,11 +11,9 @@ import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
-import com.elasticpath.commons.util.Utility;
 import com.elasticpath.domain.catalog.Category;
 import com.elasticpath.domain.catalog.LocaleDependantFields;
 import com.elasticpath.service.catalog.CategoryLookup;
-import com.elasticpath.service.catalog.CategoryService;
 import com.elasticpath.test.integration.DirtiesDatabase;
 
 /**
@@ -27,10 +21,6 @@ import com.elasticpath.test.integration.DirtiesDatabase;
  */
 public class ImportCategoriesTest extends ImportJobTestCase {
 
-	@Autowired
-	private Utility utility;
-	@Autowired
-	private CategoryService categoryService;
 	@Autowired
 	@Qualifier("categoryLookup")
 	private CategoryLookup categoryLookup;
@@ -44,23 +34,23 @@ public class ImportCategoriesTest extends ImportJobTestCase {
 		executeImportJob(createInsertCategoriesImportJob());
 
 		Category category = categoryLookup.findByCategoryCodeAndCatalog("100001", scenario.getCatalog());
-		assertNotNull("Category should have been found", category);
+		assertThat(category)
+			.as("Category should have been found")
+			.isNotNull();
 
 		Locale locale = Locale.ENGLISH;
 		LocaleDependantFields localeDependantFields = category.getLocaleDependantFields(locale);
-		assertEquals("100001", category.getCode());
-		assertEquals(null, category.getParentGuid());
-		assertEquals("Office Desks", localeDependantFields.getDisplayName());
-		assertEquals(string2Date("Thu Mar 1 12:00:00 2007", locale), category.getStartDate());
-		assertEquals(string2Date("Sat Mar 1 12:00:00 2008", locale), category.getEndDate());
-		assertFalse(category.isHidden());
-		assertEquals(1, category.getOrdering());
-		assertEquals(null, localeDependantFields.getUrl());
-		assertEquals("Office Desks", localeDependantFields.getTitle());
-		assertEquals("Office desks for your office.", localeDependantFields.getKeyWords());
-		assertEquals(null, localeDependantFields.getDescription());
-		// assertEquals(null, category.getAttributeValueMap().get("catImage"));
-		// assertEquals("This is a category for office desks.", category.getAttributeValueMap().get("catDescription_en").getStringValue());
+		assertThat(category.getCode()).isEqualTo("100001");
+		assertThat(category.getParentGuid()).isNull();
+		assertThat(localeDependantFields.getDisplayName()).isEqualTo("Office Desks");
+		assertThat(category.getStartDate()).isEqualTo("2007-03-01T12:00:00");
+		assertThat(category.getEndDate()).isEqualTo("2008-03-01T12:00:00");
+		assertThat(category.isHidden()).isFalse();
+		assertThat(category.getOrdering()).isEqualTo(1);
+		assertThat(localeDependantFields.getUrl()).isNull();
+		assertThat(localeDependantFields.getTitle()).isEqualTo("Office Desks");
+		assertThat(localeDependantFields.getKeyWords()).isEqualTo("Office desks for your office.");
+		assertThat(localeDependantFields.getDescription()).isNull();
 	}
 
 	/**
@@ -77,46 +67,40 @@ public class ImportCategoriesTest extends ImportJobTestCase {
 		// assert existing category was not changed during update
 		Locale locale = Locale.ENGLISH;
 		LocaleDependantFields localeDependantFields1 = category1.getLocaleDependantFields(locale);
-		assertEquals("100001", category1.getCode());
-		assertEquals(null, category1.getParentGuid());
-		assertEquals("Office Desks", localeDependantFields1.getDisplayName());
-		assertEquals(string2Date("Thu Mar 1 12:00:00 2007", locale), category1.getStartDate());
-		assertEquals(string2Date("Sat Mar 1 12:00:00 2008", locale), category1.getEndDate());
-		assertFalse(category1.isHidden());
-		assertEquals(1, category1.getOrdering());
-		assertEquals(null, localeDependantFields1.getUrl());
-		assertEquals("Office Desks", localeDependantFields1.getTitle());
-		assertEquals("Office desks for your office.", localeDependantFields1.getKeyWords());
-		assertEquals(null, localeDependantFields1.getDescription());
-		// assertEquals(null, category1.getAttributeValueMap().get("catImage"));
-		// assertEquals("This is a category for office desks.", category1.getAttributeValueMap().get("catDescription_en").getStringValue());
+		assertThat(category1.getCode()).isEqualTo("100001");
+		assertThat(category1.getParentGuid()).isNull();
+		assertThat(localeDependantFields1.getDisplayName()).isEqualTo("Office Desks");
+		assertThat(category1.getStartDate()).isEqualTo("2007-03-01T12:00:00");
+		assertThat(category1.getEndDate()).isEqualTo("2008-03-01T12:00:00");
+		assertThat(category1.isHidden()).isFalse();
+		assertThat(category1.getOrdering()).isEqualTo(1);
+		assertThat(localeDependantFields1.getUrl()).isNull();
+		assertThat(localeDependantFields1.getTitle()).isEqualTo("Office Desks");
+		assertThat(localeDependantFields1.getKeyWords()).isEqualTo("Office desks for your office.");
+		assertThat(localeDependantFields1.getDescription()).isNull();
 
 		// assert existing category has been updated during import
 		Category category2 = categoryLookup.findByCategoryCodeAndCatalog("100002", scenario.getCatalog());
 		LocaleDependantFields localeDependantFields2 = category2.getLocaleDependantFields(locale);
-		assertEquals("100002", category2.getCode());
-		assertEquals(null, category2.getParentGuid());
-		assertEquals("Contemporary Dining Tables", localeDependantFields2.getDisplayName());
-		assertEquals("Contemporary Dining Tables", localeDependantFields2.getTitle());
-		assertEquals("Contemporary Dining tables for your dining room.", localeDependantFields2.getKeyWords());
-		assertEquals(null, localeDependantFields2.getDescription());
-		// assertEquals("This is a category for contemporary dining tables.", category2.getAttributeValueMap().get("catDescription_en")
-		// .getStringValue());
+		assertThat(category2.getCode()).isEqualTo("100002");
+		assertThat(category2.getParentGuid()).isNull();
+		assertThat(localeDependantFields2.getDisplayName()).isEqualTo("Contemporary Dining Tables");
+		assertThat(localeDependantFields2.getTitle()).isEqualTo("Contemporary Dining Tables");
+		assertThat(localeDependantFields2.getKeyWords()).isEqualTo("Contemporary Dining tables for your dining room.");
+		assertThat(localeDependantFields2.getDescription()).isNull();
 
 		// assert new category has been created during import
 		Category category3 = categoryLookup.findByCategoryCodeAndCatalog("100004", scenario.getCatalog());
 		LocaleDependantFields localeDependantFields3 = category3.getLocaleDependantFields(locale);
-		assertEquals("100004", category3.getCode());
-		assertEquals(null, category3.getParentGuid());
-		assertEquals("Dining Chairs", localeDependantFields3.getDisplayName());
-		assertTrue(category3.isHidden());
-		assertEquals(3, category3.getOrdering());
-		assertEquals(null, localeDependantFields3.getUrl());
-		assertEquals("Dining Chairs", localeDependantFields3.getTitle());
-		assertEquals("Dining chairs for your dining room.", localeDependantFields3.getKeyWords());
-		assertEquals(null, localeDependantFields3.getDescription());
-		// assertEquals(null, category3.getAttributeValueMap().get("catImage"));
-		// assertEquals("This is a category for dining chairs.", category3.getAttributeValueMap().get("catDescription_en").getStringValue());
+		assertThat(category3.getCode()).isEqualTo("100004");
+		assertThat(category3.getParentGuid()).isNull();
+		assertThat(localeDependantFields3.getDisplayName()).isEqualTo("Dining Chairs");
+		assertThat(category3.isHidden()).isTrue();
+		assertThat(category3.getOrdering()).isEqualTo(3);
+		assertThat(localeDependantFields3.getUrl()).isNull();
+		assertThat(localeDependantFields3.getTitle()).isEqualTo("Dining Chairs");
+		assertThat(localeDependantFields3.getKeyWords()).isEqualTo("Dining chairs for your dining room.");
+		assertThat(localeDependantFields3.getDescription()).isNull();
 	}
 
 	/**
@@ -129,23 +113,21 @@ public class ImportCategoriesTest extends ImportJobTestCase {
 		executeImportJob(createUpdateCategoriesImportJob());
 
 		Category category = categoryLookup.findByCategoryCodeAndCatalog("100001", scenario.getCatalog());
-		assertNotNull("Category should have been found", category);
+		assertThat(category).isNotNull();
 
 		Locale locale = Locale.ENGLISH;
 		LocaleDependantFields localeDependantFields = category.getLocaleDependantFields(locale);
-		assertEquals("100001", category.getCode());
-		assertEquals(null, category.getParentGuid());
-		assertEquals("Large Office Desks", localeDependantFields.getDisplayName());
-		assertEquals(string2Date("Thu Mar 1 12:00:00 2007", locale), category.getStartDate());
-		assertEquals(string2Date("Sat Mar 1 12:00:00 2008", locale), category.getEndDate());
-		assertFalse(category.isHidden());
-		assertEquals(1, category.getOrdering());
-		assertEquals(null, localeDependantFields.getUrl());
-		assertEquals("Office Desks", localeDependantFields.getTitle());
-		assertEquals("Office desks for your office.", localeDependantFields.getKeyWords());
-		assertEquals(null, localeDependantFields.getDescription());
-		// assertEquals(null, category.getAttributeValueMap().get("catImage"));
-		// assertEquals("This is a category for large office desks.", category.getAttributeValueMap().get("catDescription_en").getStringValue());
+		assertThat(category.getCode()).isEqualTo("100001");
+		assertThat(category.getParentGuid()).isNull();
+		assertThat(localeDependantFields.getDisplayName()).isEqualTo("Large Office Desks");
+		assertThat(category.getStartDate()).isEqualTo("2007-03-01T12:00:00");
+		assertThat(category.getEndDate()).isEqualTo("2008-03-01T12:00:00");
+		assertThat(category.isHidden()).isFalse();
+		assertThat(category.getOrdering()).isEqualTo(1);
+		assertThat(localeDependantFields.getUrl()).isNull();
+		assertThat(localeDependantFields.getTitle()).isEqualTo("Office Desks");
+		assertThat(localeDependantFields.getKeyWords()).isEqualTo("Office desks for your office.");
+		assertThat(localeDependantFields.getDescription()).isNull();
 	}
 
 	/**
@@ -157,8 +139,8 @@ public class ImportCategoriesTest extends ImportJobTestCase {
 		executeImportJob(createInsertCategoriesImportJob());
 		executeImportJob(createDeleteCategoriesImportJob());
 
-		assertNotNull(categoryLookup.findByCategoryCodeAndCatalog("100001", scenario.getCatalog()));
-		assertNull(categoryLookup.findByCategoryCodeAndCatalog("100002", scenario.getCatalog()));
-		assertNotNull(categoryLookup.findByCategoryCodeAndCatalog("100003", scenario.getCatalog()));
+		assertThat(categoryLookup.<Category>findByCategoryCodeAndCatalog("100001", scenario.getCatalog())).isNotNull();
+		assertThat(categoryLookup.<Category>findByCategoryCodeAndCatalog("100002", scenario.getCatalog())).isNull();
+		assertThat(categoryLookup.<Category>findByCategoryCodeAndCatalog("100003", scenario.getCatalog())).isNotNull();
 	}
 }

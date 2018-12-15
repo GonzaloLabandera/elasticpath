@@ -10,7 +10,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.collections.Predicate;
 
 import com.elasticpath.domain.customer.Address;
 import com.elasticpath.domain.order.OrderReturn;
@@ -50,9 +49,7 @@ public class TaxDocumentModificationContext implements Serializable {
 		case UPDATE:
 		case CANCEL:
 			if (item.getModificationType() == null || item.getModificationType() != TaxDocumentModificationType.NEW) {				
-				item.setPreviousTaxDocumentId(orderShipment.getTaxDocumentId().toString());
-				item.setPreviousAddress(address);
-				item.setModificationType(modificationType);
+				setItemFields(orderShipment, address, modificationType, item);
 			}
 			break;
 		default:
@@ -61,7 +58,14 @@ public class TaxDocumentModificationContext implements Serializable {
 		
 		taxDocumentModificationItems.put(taxDocumentReferenceId, item);
 	}
-	
+
+	private void setItemFields(final OrderShipment orderShipment, final Address address,
+	                           final TaxDocumentModificationType modificationType, final TaxDocumentModificationItem item) {
+		item.setPreviousTaxDocumentId(orderShipment.getTaxDocumentId().toString());
+		item.setPreviousAddress(address);
+		item.setModificationType(modificationType);
+	}
+
 	/**
 	 * Adds order return for modification.
 	 * 
@@ -95,12 +99,8 @@ public class TaxDocumentModificationContext implements Serializable {
 			return  Collections.unmodifiableCollection(taxDocumentModificationItems.values());
 		}
 		
-		return Collections.unmodifiableCollection(CollectionUtils.select(taxDocumentModificationItems.values(), new Predicate() {
-			@Override
-			public boolean evaluate(final Object item) {
-				return ((TaxDocumentModificationItem) item).getModificationType().equals(modificationType);
-			}
-		}));
+		return Collections.unmodifiableCollection(CollectionUtils.select(taxDocumentModificationItems.values(), item ->
+				((TaxDocumentModificationItem) item).getModificationType().equals(modificationType)));
 	}
 	
 	/**

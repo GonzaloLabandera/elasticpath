@@ -1,3 +1,6 @@
+/**
+ * Copyright (c) Elastic Path Software Inc., 2018
+ */
 package com.elasticpath.extensions.commons;
 
 import com.elasticpath.commons.util.extenum.AbstractExtensibleEnum;
@@ -58,7 +61,7 @@ public class EnumLoader {
 	 */
 	public List<Class<? extends AbstractExtensibleEnum<ExtensibleEnum>>> getEnums() {
 		if (this.enums == null) {
-			this.enums = new ArrayList<Class<? extends AbstractExtensibleEnum<ExtensibleEnum>>>();
+			this.enums = new ArrayList<>();
 		}
 		return this.enums;
 	}

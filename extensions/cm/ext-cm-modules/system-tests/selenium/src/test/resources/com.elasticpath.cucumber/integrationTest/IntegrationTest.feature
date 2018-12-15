@@ -1,10 +1,11 @@
-@smoketest @integration
+@regressionTest
 Feature: Integration Test
 
   Background:
     Given I sign in to CM as admin user
     And I go to Catalog Management
 
+  @smokeTest
   Scenario: Purchase new product and complete order shipment
     When I create new product with following attributes
       | catalog        | category    | productName | productType | taxCode | brand  | storeVisible | availability     | shippableType | priceList               | listPrice |

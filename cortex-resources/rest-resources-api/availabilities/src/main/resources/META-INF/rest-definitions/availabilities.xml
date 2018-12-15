@@ -25,6 +25,15 @@ purchasability. For example, in Elastic Path Commerce Engine the following state
 		</resource>
 
 		<resource>
+			<name>availability-for-offer</name>
+			<description>
+				<![CDATA[The offer's availability. The availability defines the offer's purchasability]]>
+			</description>
+			<uri>{base.family}/{offers.offer}</uri>
+			<entity>availability</entity>
+		</resource>
+
+		<resource>
 			<name>availability-for-cart-line-item</name>
 			<description>
 				<![CDATA[The line item's availability. The availability identifies the purchasability of the item(s) in the line item.]]></description>
@@ -52,6 +61,15 @@ purchasability. For example, in Elastic Path Commerce Engine the following state
 			<to>availability-for-item</to>
 		</relationship>
 
+		<relationship>
+			<name>offer-to-availability</name>
+			<description><![CDATA[Read an offer's availability. The availability rule identifies the offer's purchasability.]]></description>
+			<rel>availability</rel>
+			<rev>offer</rev>
+			<from>offers.offer</from>
+			<to>availability-for-offer</to>
+		</relationship>
+
 		<entity>
 			<name>availability</name>
 			<description><![CDATA[The availability information for an item.]]></description>
@@ -61,7 +79,7 @@ purchasability. For example, in Elastic Path Commerce Engine the following state
 					<![CDATA[
 The state of availability for an item or line item. In Elastic Path Commerce Engine, the states are:
 
-*  ALWAYS
+*  AVAILABLE
 *  NOT\_AVAILABLE
 *  AVAILABLE\_FOR\_BACK\_ORDER
 *  AVAILABLE\_FOR\_PRE\_ORDER

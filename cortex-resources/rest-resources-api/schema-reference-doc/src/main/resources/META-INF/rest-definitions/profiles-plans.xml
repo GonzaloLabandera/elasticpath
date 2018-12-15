@@ -5,29 +5,17 @@
 		<name>profiles</name>
 
 		<plan>
-			<name>alias-default-profile</name>
-			<description><![CDATA[Retrieve the customer's default profile.]]></description>
-			<step>
-				<description><![CDATA[The customer's default profile.]]></description>
-				<start>default-profile</start>
-				<read-self/>
-			</step>
-		</plan>
-
-		<plan>
-			<name>read-profile</name>
+			<name>read-default-profile</name>
 			<description>
-				<![CDATA[
-Retrieve the customer's first name, last name, username, [addresses][address], and link to the customer's [paymentmethods][paymentmethods].
-
-[address]: #address
-[paymentmethods]: #paymentmethods
+				<![CDATA[Retrieve the customer's default profile.
+				Retrieve the customer's first name, last name, username, [addresses][addresses], and link to the customer's [paymentmethods][paymentmethods].
 				]]>
 			</description>
 			<step>
-				<description><![CDATA[The customer's profile.]]></description>
-				<start>profile</start>
-				<read-self/>
+				<description><![CDATA[Root to the customer's default profile.]]></description>
+				<start>base.root</start>
+				<follow-link>defaultprofile</follow-link>
+				<result>profile</result>
 			</step>
 		</plan>
 

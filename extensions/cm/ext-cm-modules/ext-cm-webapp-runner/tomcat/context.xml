@@ -1,5 +1,9 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <Context>
+	<Resources
+			cachingAllowed="true"
+			cacheMaxSize="${ep.tomcat.maxcachesize}"
+	/>
 	<Resource name="jdbc/epjndi"
 			  auth="Container"
 			  scope="Shareable"
@@ -11,9 +15,12 @@
 			  username="${epdb.username}"
 			  password="${epdb.password}"
 			  driverClassName="${epdb.jdbc.driver}"
+			  factory="org.apache.tomcat.jdbc.pool.DataSourceFactory"
 			  connectionProperties="${epdb.jdbc.properties}"
 			  url="${epdb.url}"
 	/>
+
+
 
 	<Resource auth="Container"
 			  name="jms/JMSConnectionFactory"

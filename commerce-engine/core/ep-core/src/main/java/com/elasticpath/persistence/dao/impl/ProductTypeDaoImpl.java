@@ -336,15 +336,8 @@ public class ProductTypeDaoImpl extends AbstractDaoImpl implements ProductTypeDa
 		// Check for an existing ProductType with the same name, but different uidPk
 		final Long count = getPersistenceEngine().<Long>retrieveByNamedQuery("PRODUCT_TYPE_COUNT_BY_NAME", type.getName(), type.getUidPk()).get(0);
 
-		if (count.longValue() == 0) {
-			// No such ProductType found
-			return false;
-		}
-
-		// ProductType found
-		return true;
+		return count != 0;
 	}
-
 
 	/**
 	 * Check if the productType type is existed.

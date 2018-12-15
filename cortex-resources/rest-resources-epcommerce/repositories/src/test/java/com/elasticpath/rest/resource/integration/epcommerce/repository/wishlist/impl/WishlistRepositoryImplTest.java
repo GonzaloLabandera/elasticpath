@@ -3,6 +3,7 @@
  */
 package com.elasticpath.rest.resource.integration.epcommerce.repository.wishlist.impl;
 
+import static com.elasticpath.rest.resource.integration.epcommerce.repository.item.ItemRepository.SKU_CODE_KEY;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
@@ -11,7 +12,9 @@ import static org.mockito.Mockito.when;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
+import com.google.common.collect.ImmutableSortedMap;
 import com.google.common.collect.Lists;
 import io.reactivex.Single;
 import org.junit.Before;
@@ -33,6 +36,7 @@ import com.elasticpath.rest.ResourceOperationFailure;
 import com.elasticpath.rest.resource.ResourceOperationContext;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.customer.CustomerSessionRepository;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.item.ItemRepository;
+import com.elasticpath.rest.resource.integration.epcommerce.repository.sku.ProductSkuRepository;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.store.StoreRepository;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.transform.impl.ReactiveAdapterImpl;
 import com.elasticpath.service.shoppingcart.WishListService;
@@ -50,7 +54,7 @@ public final class WishlistRepositoryImplTest {
 	private static final String BAD_WL_GUID = "bad-wl-guid";
 	private static final String SKU_CODE = "sku-code";
 	private static final String STORE_CODE = "store-code";
-	private static final String ITEM_ID = "item-id";
+	private static final Map<String, String> ITEM_ID_MAP = ImmutableSortedMap.of(SKU_CODE_KEY, SKU_CODE);
 
 	@Mock
 	private WishListService wishListService;
@@ -68,6 +72,9 @@ public final class WishlistRepositoryImplTest {
 	private ItemRepository itemRepository;
 
 	@Mock
+	private ProductSkuRepository productSkuRepository;
+
+	@Mock
 	private ResourceOperationContext resourceOperationContext;
 
 	@InjectMocks
@@ -77,7 +84,7 @@ public final class WishlistRepositoryImplTest {
 
 	@Before
 	public void initialize() {
-		repository = new WishlistRepositoryImpl(wishListService, customerSessionRepository, itemRepository, storeRepository,
+		repository = new WishlistRepositoryImpl(wishListService, customerSessionRepository, itemRepository, productSkuRepository, storeRepository,
 				resourceOperationContext, reactiveAdapterImpl);
 	}
 
@@ -166,12 +173,12 @@ public final class WishlistRepositoryImplTest {
 		CustomerSession customerSession = createMockSession();
 		ProductSku productSku = createMockProductSku();
 
-		when(itemRepository.getSkuForItemIdAsSingle(ITEM_ID)).thenReturn(Single.just(productSku));
+		when(itemRepository.getSkuForItemId(ITEM_ID_MAP)).thenReturn(Single.just(productSku));
 		when(customerSessionRepository.findOrCreateCustomerSessionAsSingle()).thenReturn(Single.just(customerSession));
 		when(wishListService.findOrCreateWishListByShopper(mockShopper)).thenReturn(wishlist);
 		when(wishListService.save(wishlist)).thenReturn(wishlist);
 
-		repository.findWishlistsContainingItem(ITEM_ID)
+		repository.findWishlistsContainingItem(ITEM_ID_MAP)
 				.test()
 				.assertNoErrors()
 				.assertValueCount(0);
@@ -189,12 +196,12 @@ public final class WishlistRepositoryImplTest {
 		CustomerSession customerSession = createMockSession();
 		ProductSku productSku = createMockProductSku();
 
-		when(itemRepository.getSkuForItemIdAsSingle(ITEM_ID)).thenReturn(Single.just(productSku));
+		when(itemRepository.getSkuForItemId(ITEM_ID_MAP)).thenReturn(Single.just(productSku));
 		when(customerSessionRepository.findOrCreateCustomerSessionAsSingle()).thenReturn(Single.just(customerSession));
 		when(wishListService.findOrCreateWishListByShopper(mockShopper)).thenReturn(wishlist);
 		when(wishListService.save(wishlist)).thenReturn(wishlist);
 
-		repository.findWishlistsContainingItem(ITEM_ID)
+		repository.findWishlistsContainingItem(ITEM_ID_MAP)
 				.test()
 				.assertNoErrors()
 				.assertValueCount(0);
@@ -211,12 +218,12 @@ public final class WishlistRepositoryImplTest {
 		CustomerSession customerSession = createMockSession();
 		ProductSku productSku = createMockProductSku();
 
-		when(itemRepository.getSkuForItemIdAsSingle(ITEM_ID)).thenReturn(Single.just(productSku));
+		when(itemRepository.getSkuForItemId(ITEM_ID_MAP)).thenReturn(Single.just(productSku));
 		when(customerSessionRepository.findOrCreateCustomerSessionAsSingle()).thenReturn(Single.just(customerSession));
 		when(wishListService.findOrCreateWishListByShopper(mockShopper)).thenReturn(wishlist);
 		when(wishListService.save(wishlist)).thenReturn(wishlist);
 
-		repository.findWishlistsContainingItem(ITEM_ID)
+		repository.findWishlistsContainingItem(ITEM_ID_MAP)
 				.test()
 				.assertNoErrors()
 				.assertValueCount(1);

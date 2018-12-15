@@ -323,7 +323,7 @@ public class ChangeSetDaoImpl implements ChangeSetDao {
 	}
 
 	private List<String> makeStringListFrom(final Collection<?> changeSetStateCodes) {
-		return changeSetStateCodes.stream().map(state -> state.toString()).collect(Collectors.toList());
+		return changeSetStateCodes.stream().map(Object::toString).collect(Collectors.toList());
 	}
 
 }

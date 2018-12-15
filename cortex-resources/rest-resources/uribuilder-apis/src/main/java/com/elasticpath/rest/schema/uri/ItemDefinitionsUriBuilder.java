@@ -5,7 +5,10 @@ package com.elasticpath.rest.schema.uri;
 
 /**
  * Builds a URI for an item definition.
+ *
+ * @deprecated remove once dependent resources are converted to Helix.
  */
+@Deprecated
 public interface ItemDefinitionsUriBuilder extends ScopedUriBuilder<ItemDefinitionsUriBuilder> {
 	/**
 	 * Sets the item id.

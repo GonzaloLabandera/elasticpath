@@ -10,7 +10,6 @@ import java.util.Currency;
 import java.util.List;
 import java.util.Map;
 
-import com.google.common.base.Function;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.Maps;
 
@@ -95,12 +94,7 @@ public class TaxSnapshotServiceImpl implements TaxSnapshotService {
 
 		// splits cart items depending on their shippable state into electronic and physical
 		final Collection<ShoppingItem> apportionedLeafItems = shoppingCart.getApportionedLeafItems();
-		final Collection<OrderSku> orderSkus = Collections2.transform(apportionedLeafItems, new Function<ShoppingItem, OrderSku>() {
-			@Override
-			public OrderSku apply(final ShoppingItem input) {
-				return (OrderSku) input;
-			}
-		});
+		final Collection<OrderSku> orderSkus = Collections2.transform(apportionedLeafItems, input -> (OrderSku) input);
 		splitCartItems(orderSkus, physicalCartItems, electronicCartItems);
 
 		boolean isSplitShipment = !physicalCartItems.isEmpty() && !electronicCartItems.isEmpty();
@@ -108,12 +102,7 @@ public class TaxSnapshotServiceImpl implements TaxSnapshotService {
 		Map<String, BigDecimal> discountByShoppingItem = null;
 		if (isSplitShipment) {
 			final Map<? extends ShoppingItem, ShoppingItemPricingSnapshot> shoppingItemPricingSnapshotMap =
-				Maps.toMap(orderSkus, new Function<OrderSku, ShoppingItemPricingSnapshot>() {
-					@Override
-					public ShoppingItemPricingSnapshot apply(final OrderSku orderSku) {
-						return cartPricingSnapshot.getShoppingItemPricingSnapshot(orderSku);
-					}
-				});
+				Maps.toMap(orderSkus, cartPricingSnapshot::getShoppingItemPricingSnapshot);
 
 			discountByShoppingItem = getDiscountApportioningCalculator()
 				.apportionDiscountToShoppingItems(shoppingCart.getSubtotalDiscountMoney(), shoppingItemPricingSnapshotMap);
@@ -183,12 +172,7 @@ public class TaxSnapshotServiceImpl implements TaxSnapshotService {
 			.build();
 
 		final Map<? extends ShoppingItem, ShoppingItemPricingSnapshot> shoppingItemPricingSnapshotMap =
-			Maps.toMap(shoppingItems, new Function<OrderSku, ShoppingItemPricingSnapshot>() {
-				@Override
-				public ShoppingItemPricingSnapshot apply(final OrderSku input) {
-					return (ShoppingItemPricingSnapshot) input;
-				}
-			});
+			Maps.toMap(shoppingItems, input -> (ShoppingItemPricingSnapshot) input);
 
 		final TaxCalculationResult newTaxCalculationResult = getTaxCalculationService().calculateTaxesAndAddToResult(
 			taxCalculationResult,

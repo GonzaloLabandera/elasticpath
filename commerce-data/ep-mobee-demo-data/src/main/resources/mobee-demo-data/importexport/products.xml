@@ -4777,6 +4777,110 @@
     </seo>
 </product>
 
+
+    <product>
+        <code>eco_fee_headphones</code>
+        <name>
+            <value language="fr_CA">Eco fee headphones</value>
+            <value language="en">Eco fee headphones</value>
+        </name>
+        <type>Fee</type>
+        <taxcode>NONE</taxcode>
+        <brand>None</brand>
+        <availability>
+            <storevisible>true</storevisible>
+            <notsoldseperately>false</notsoldseperately>
+            <enabledate>2015-12-30T11:33:00-08:00</enabledate>
+            <minorderqty>1</minorderqty>
+            <availabilityrule>ALWAYS_AVAILABLE</availabilityrule>
+            <orderlimit>0</orderlimit>
+        </availability>
+        <attributes/>
+        <skus>
+            <sku guid="AEFEC2F9-D0B5-7D37-86DC-85854BSFD2A1">
+                <code>eco_h_sku</code>
+                <shippable enabled="false">
+                    <weight units="KG">0</weight>
+                    <width units="CM">0</width>
+                    <length units="CM">0</length>
+                    <height units="CM">0</height>
+                </shippable>
+                <digitalasset enabled="true"/>
+            </sku>
+        </skus>
+        <seo>
+            <url>
+                <value language="fr_CA"></value>
+                <value language="en"></value>
+            </url>
+            <title>
+                <value language="fr_CA"></value>
+                <value language="en"></value>
+            </title>
+            <keywords>
+                <value language="fr_CA"></value>
+                <value language="en"></value>
+            </keywords>
+            <description>
+                <value language="fr_CA"></value>
+                <value language="en"></value>
+            </description>
+        </seo>
+    </product>
+
+
+
+<product>
+        <code>handsfree_no_hama</code>
+        <name>
+            <value language="fr_CA">Hama Bluetooth Headset</value>
+            <value language="en">Hama Bluetooth Headset</value>
+        </name>
+        <type>Headset</type>
+        <taxcode>GOODS</taxcode>
+        <brand>Hama</brand>
+        <availability>
+            <storevisible>true</storevisible>
+            <notsoldseperately>false</notsoldseperately>
+            <enabledate>2015-12-30T11:33:00-08:00</enabledate>
+            <minorderqty>1</minorderqty>
+            <availabilityrule>AVAILABLE_WHEN_IN_STOCK</availabilityrule>
+            <orderlimit>0</orderlimit>
+        </availability>
+        <attributes/>
+        <skus>
+            <sku guid="AEFAC2F9-D035-7D31-86BC-85244AFFD1A9">
+                <code>hama_bt_sku</code>
+                <shippable enabled="true">
+                    <weight units="KG">0</weight>
+                    <width units="CM">0</width>
+                    <length units="CM">0</length>
+                    <height units="CM">0</height>
+                </shippable>
+                <digitalasset enabled="false"/>
+            </sku>
+        </skus>
+        <seo>
+            <url>
+                <value language="fr_CA"></value>
+                <value language="en"></value>
+            </url>
+            <title>
+                <value language="fr_CA"></value>
+                <value language="en"></value>
+            </title>
+            <keywords>
+                <value language="fr_CA"></value>
+                <value language="en"></value>
+            </keywords>
+            <description>
+                <value language="fr_CA"></value>
+                <value language="en"></value>
+            </description>
+        </seo>
+</product>
+
+
 <product>
     <code>galaxys2</code>
     <name>
@@ -9286,5 +9390,359 @@ L'écran est également très bien. L'iPhone 5 conserve la technologie d'afficha
             <value language="en_US"/>
         </description>
     </seo>
+</product>
+<product bundle="true" pricingMechanism="assigned">
+    <code>bundleDependentLineItemsScheme1AssignedPrice</code>
+    <name>
+        <value language="en">Bundle for dependent line items test with assigned price</value>
+        <value language="en_US">bundleDependentLineItemsScheme1AssignedPrice</value>
+        <value language="fr"></value>
+        <value language="fr_CA"></value>
+    </name>
+    <type>PhysicalBundle</type>
+    <brand>None</brand>
+    <image></image>
+    <availability>
+        <storevisible>true</storevisible>
+        <notsoldseperately>false</notsoldseperately>
+        <enabledate>2018-09-12T10:09:00-07:00</enabledate>
+        <minorderqty>1</minorderqty>
+        <availabilityrule>ALWAYS_AVAILABLE</availabilityrule>
+        <orderlimit>0</orderlimit>
+    </availability>
+    <attributes/>
+    <skus>
+        <sku guid="7ad83820-009e-4f76-ac7c-c200e0d7675c">
+            <code>bundleDependentLineItemsScheme1AssignedPrice_sku</code>
+            <shippable enabled="true">
+                <weight units="KG">0</weight>
+                <width units="CM">0</width>
+                <length units="CM">0</length>
+                <height units="CM">0</height>
+            </shippable>
+            <digitalasset enabled="false"/>
+        </sku>
+    </skus>
+    <seo>
+        <url>
+            <value language="fr_CA"/>
+            <value language="fr"/>
+            <value language="en"/>
+            <value language="en_US"/>
+        </url>
+        <title>
+            <value language="fr_CA"/>
+            <value language="fr"/>
+            <value language="en"/>
+            <value language="en_US"/>
+        </title>
+        <keywords>
+            <value language="fr_CA"/>
+            <value language="fr"/>
+            <value language="en"/>
+            <value language="en_US"/>
+        </keywords>
+        <description>
+            <value language="fr_CA"/>
+            <value language="fr"/>
+            <value language="en"/>
+            <value language="en_US"/>
+        </description>
+    </seo>
+</product>
+<product bundle="true" pricingMechanism="assigned">
+    <code>bundlePhysicalDigitalItemsAssignedPrice</code>
+    <name>
+        <value language="en">Bundle with physical and digital items and assigned price</value>
+        <value language="en_US">bundlePhysicalDigitalItemsAssignedPrice</value>
+        <value language="fr"></value>
+        <value language="fr_CA"></value>
+    </name>
+    <type>PhysicalBundle</type>
+    <brand>None</brand>
+    <image></image>
+    <availability>
+        <storevisible>true</storevisible>
+        <notsoldseperately>false</notsoldseperately>
+        <enabledate>2018-09-12T10:01:00-07:00</enabledate>
+        <minorderqty>1</minorderqty>
+        <availabilityrule>ALWAYS_AVAILABLE</availabilityrule>
+        <orderlimit>0</orderlimit>
+    </availability>
+    <attributes/>
+    <skus>
+        <sku guid="5bf5568a-6f6a-4586-ba5f-19987a2f64f4">
+            <code>bundlePhysicalDigitalItemsAssignedPrice_sku</code>
+            <shippable enabled="true">
+                <weight units="KG">0</weight>
+                <width units="CM">0</width>
+                <length units="CM">0</length>
+                <height units="CM">0</height>
+            </shippable>
+            <digitalasset enabled="false"/>
+        </sku>
+    </skus>
+    <seo>
+        <url>
+            <value language="fr_CA"/>
+            <value language="fr"/>
+            <value language="en"/>
+            <value language="en_US"/>
+        </url>
+        <title>
+            <value language="fr_CA"/>
+            <value language="fr"/>
+            <value language="en"/>
+            <value language="en_US"/>
+        </title>
+        <keywords>
+            <value language="fr_CA"/>
+            <value language="fr"/>
+            <value language="en"/>
+            <value language="en_US"/>
+        </keywords>
+        <description>
+            <value language="fr_CA"/>
+            <value language="fr"/>
+            <value language="en"/>
+            <value language="en_US"/>
+        </description>
+    </seo>
+</product>
+<product bundle="true" pricingMechanism="calculated">
+    <code>bundleDependentLineItemsScheme1CalculatedPrice</code>
+    <name>
+        <value language="en">Bundle for dependent line items test with calculated price</value>
+        <value language="en_US">bundleDependentLineItemsScheme1CalculatedPrice</value>
+        <value language="fr"></value>
+        <value language="fr_CA"></value>
+    </name>
+    <type>PhysicalBundle</type>
+    <brand>None</brand>
+    <image></image>
+    <availability>
+        <storevisible>true</storevisible>
+        <notsoldseperately>false</notsoldseperately>
+        <enabledate>2018-09-18T09:21:00-07:00</enabledate>
+        <minorderqty>1</minorderqty>
+        <availabilityrule>ALWAYS_AVAILABLE</availabilityrule>
+        <orderlimit>0</orderlimit>
+    </availability>
+    <attributes/>
+    <skus>
+        <sku guid="8d0b85ff-b903-4c8d-b5b4-c97fd7ed23ff">
+            <code>bundleDependentLineItemsScheme1CalculatedPrice_sku</code>
+            <shippable enabled="true">
+                <weight units="KG">0</weight>
+                <width units="CM">0</width>
+                <length units="CM">0</length>
+                <height units="CM">0</height>
+            </shippable>
+            <digitalasset enabled="false"/>
+        </sku>
+    </skus>
+    <seo>
+        <url>
+            <value language="fr_CA"/>
+            <value language="fr"/>
+            <value language="en"/>
+            <value language="en_US"/>
+        </url>
+        <title>
+            <value language="fr_CA"/>
+            <value language="fr"/>
+            <value language="en"/>
+            <value language="en_US"/>
+        </title>
+        <keywords>
+            <value language="fr_CA"/>
+            <value language="fr"/>
+            <value language="en"/>
+            <value language="en_US"/>
+        </keywords>
+        <description>
+            <value language="fr_CA"/>
+            <value language="fr"/>
+            <value language="en"/>
+            <value language="en_US"/>
+        </description>
+    </seo>
+</product>
+<product bundle="true" pricingMechanism="calculated">
+    <code>bundlePhysicalDigitalItemsCalculatedPrice</code>
+    <name>
+        <value language="en">Bundle with physical and digital items and calculated price</value>
+        <value language="en_US">bundlePhysicalDigitalItemsCalculatedPrice</value>
+        <value language="fr"></value>
+        <value language="fr_CA"></value>
+    </name>
+    <type>PhysicalBundle</type>
+    <brand>None</brand>
+    <image></image>
+    <availability>
+        <storevisible>true</storevisible>
+        <notsoldseperately>false</notsoldseperately>
+        <enabledate>2018-09-18T09:16:00-07:00</enabledate>
+        <minorderqty>1</minorderqty>
+        <availabilityrule>ALWAYS_AVAILABLE</availabilityrule>
+        <orderlimit>0</orderlimit>
+    </availability>
+    <attributes/>
+    <skus>
+        <sku guid="389a0785-aca2-423e-8eca-859021ea383b">
+            <code>bundlePhysicalDigitalItemsCalculatedPrice_sku</code>
+            <shippable enabled="true">
+                <weight units="KG">0</weight>
+                <width units="CM">0</width>
+                <length units="CM">0</length>
+                <height units="CM">0</height>
+            </shippable>
+            <digitalasset enabled="false"/>
+        </sku>
+    </skus>
+    <seo>
+        <url>
+            <value language="fr_CA"/>
+            <value language="fr"/>
+            <value language="en"/>
+            <value language="en_US"/>
+        </url>
+        <title>
+            <value language="fr_CA"/>
+            <value language="fr"/>
+            <value language="en"/>
+            <value language="en_US"/>
+        </title>
+        <keywords>
+            <value language="fr_CA"/>
+            <value language="fr"/>
+            <value language="en"/>
+            <value language="en_US"/>
+        </keywords>
+        <description>
+            <value language="fr_CA"/>
+            <value language="fr"/>
+            <value language="en"/>
+            <value language="en_US"/>
+        </description>
+    </seo>
+</product>
+<product bundle="true" pricingMechanism="assigned">
+	<code>bundleDependentLineItemsScheme2AssignedPrice</code>
+	<name>
+		<value language="en">Bundle for 3 dependent line items test with assigned price</value>
+		<value language="en_US">bundleDependentLineItemsScheme2AssignedPrice</value>
+		<value language="fr"></value>
+		<value language="fr_CA"></value>
+	</name>
+	<type>PhysicalBundle</type>
+	<brand>None</brand>
+	<image></image>
+	<availability>
+		<storevisible>true</storevisible>
+		<notsoldseperately>false</notsoldseperately>
+		<enabledate>2018-09-18T11:11:00-07:00</enabledate>
+		<minorderqty>1</minorderqty>
+		<availabilityrule>ALWAYS_AVAILABLE</availabilityrule>
+		<orderlimit>0</orderlimit>
+	</availability>
+	<attributes/>
+	<skus>
+		<sku guid="3cef0edd-ded1-4dfb-b1db-119f8065202a">
+			<code>bundleDependentLineItemsScheme2AssignedPrice_sku</code>
+			<shippable enabled="true">
+				<weight units="KG">0</weight>
+				<width units="CM">0</width>
+				<length units="CM">0</length>
+				<height units="CM">0</height>
+			</shippable>
+			<digitalasset enabled="false"/>
+		</sku>
+	</skus>
+	<seo>
+		<url>
+			<value language="fr_CA"/>
+			<value language="fr"/>
+			<value language="en"/>
+			<value language="en_US"/>
+		</url>
+		<title>
+			<value language="fr_CA"/>
+			<value language="fr"/>
+			<value language="en"/>
+			<value language="en_US"/>
+		</title>
+		<keywords>
+			<value language="fr_CA"/>
+			<value language="fr"/>
+			<value language="en"/>
+			<value language="en_US"/>
+		</keywords>
+		<description>
+			<value language="fr_CA"/>
+			<value language="fr"/>
+			<value language="en"/>
+			<value language="en_US"/>
+		</description>
+	</seo>
+</product>
+<product bundle="true" pricingMechanism="calculated">
+	<code>bundleDependentLineItemsScheme2CalculatedPrice</code>
+	<name>
+		<value language="en">Bundle for 3 dependent line items test with calculated price</value>
+		<value language="en_US">bundleDependentLineItemsScheme2CalculatedPrice</value>
+		<value language="fr"></value>
+		<value language="fr_CA"></value>
+	</name>
+	<type>PhysicalBundle</type>
+	<brand>None</brand>
+	<image></image>
+	<availability>
+		<storevisible>true</storevisible>
+		<notsoldseperately>false</notsoldseperately>
+		<enabledate>2018-09-18T13:45:00-07:00</enabledate>
+		<minorderqty>1</minorderqty>
+		<availabilityrule>ALWAYS_AVAILABLE</availabilityrule>
+		<orderlimit>0</orderlimit>
+	</availability>
+	<attributes/>
+	<skus>
+		<sku guid="5a057af4-3059-4bea-9ae9-d401aa079d08">
+			<code>bundleDependentLineItemsScheme2CalculatedPrice_sku</code>
+			<shippable enabled="true">
+				<weight units="KG">0</weight>
+				<width units="CM">0</width>
+				<length units="CM">0</length>
+				<height units="CM">0</height>
+			</shippable>
+			<digitalasset enabled="false"/>
+		</sku>
+	</skus>
+	<seo>
+		<url>
+			<value language="fr_CA"/>
+			<value language="fr"/>
+			<value language="en"/>
+			<value language="en_US"/>
+		</url>
+		<title>
+			<value language="fr_CA"/>
+			<value language="fr"/>
+			<value language="en"/>
+			<value language="en_US"/>
+		</title>
+		<keywords>
+			<value language="fr_CA"/>
+			<value language="fr"/>
+			<value language="en"/>
+			<value language="en_US"/>
+		</keywords>
+		<description>
+			<value language="fr_CA"/>
+			<value language="fr"/>
+			<value language="en"/>
+			<value language="en_US"/>
+		</description>
+	</seo>
 </product>
 </products>

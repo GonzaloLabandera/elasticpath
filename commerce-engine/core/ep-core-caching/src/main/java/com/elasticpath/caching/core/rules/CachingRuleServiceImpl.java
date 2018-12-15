@@ -5,14 +5,23 @@
 package com.elasticpath.caching.core.rules;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
+
+import com.google.common.collect.Lists;
 
 import com.elasticpath.base.exception.EpServiceException;
 import com.elasticpath.cache.Cache;
+import com.elasticpath.caching.core.CodeUidDateCacheKey;
 import com.elasticpath.commons.exception.DuplicateNameException;
+import com.elasticpath.domain.catalog.Catalog;
+import com.elasticpath.domain.rules.EpRuleBase;
 import com.elasticpath.domain.rules.Rule;
+import com.elasticpath.domain.store.Store;
 import com.elasticpath.service.rules.DuplicatePromoCodeException;
 import com.elasticpath.service.rules.RuleService;
 import com.elasticpath.service.rules.impl.CacheableRuleService;
@@ -33,6 +42,15 @@ public class CachingRuleServiceImpl implements CacheableRuleService {
 
 	// Rule uidPks -> Rule codes
 	private Cache<Collection<Long>, Collection<String>> ruleCodesByRuleUidsCache;
+
+	// Rule base by scenario
+	private Cache<Collection<Long>, EpRuleBase> ruleBaseByScenarioCache;
+
+	// Rule base by store, scenario and date
+	private Cache<CodeUidDateCacheKey, EpRuleBase> changedStoreRuleBaseCache;
+
+	// Rule base by catalog, scenario and date
+	private Cache<CodeUidDateCacheKey, EpRuleBase> changedCatalogRuleBaseCache;
 
 	private RuleService decorated;
 	
@@ -176,6 +194,59 @@ public class CachingRuleServiceImpl implements CacheableRuleService {
 	}
 
 	@Override
+	public EpRuleBase findRuleBaseByScenario(final Store store, final Catalog catalog, final int scenarioId) {
+		long storeUid = Optional.ofNullable(store)
+			.map(Store::getUidPk)
+			.orElse(-1L);
+
+		long catalogUid = Optional.ofNullable(catalog)
+			.map(Catalog::getUidPk)
+			.orElse(-1L);
+
+
+		Collection<Long> cacheKeyIds = Lists.newLinkedList(Arrays.asList(storeUid, catalogUid, (long) scenarioId));
+
+		if (ruleBaseByScenarioCache.containsKey(cacheKeyIds)) {
+			return ruleBaseByScenarioCache.get(cacheKeyIds);
+		}
+
+		final EpRuleBase ruleBase = getDecorated().findRuleBaseByScenario(store, catalog, scenarioId);
+		ruleBaseByScenarioCache.put(cacheKeyIds, ruleBase);
+
+		return ruleBase;
+	}
+
+	@Override
+	public EpRuleBase findChangedStoreRuleBases(final String storeCode, final int scenarioId, final Date date) {
+
+		CodeUidDateCacheKey cacheKey = new CodeUidDateCacheKey(storeCode, scenarioId, date);
+
+		if (changedStoreRuleBaseCache.containsKey(cacheKey)) {
+			return changedStoreRuleBaseCache.get(cacheKey);
+		}
+
+		final EpRuleBase ruleBase = getDecorated().findChangedStoreRuleBases(storeCode, scenarioId, date);
+		changedStoreRuleBaseCache.put(cacheKey, ruleBase);
+
+		return ruleBase;
+	}
+
+	@Override
+	public EpRuleBase findChangedCatalogRuleBases(final String catalogCode, final int scenarioId, final Date date) {
+
+		CodeUidDateCacheKey cacheKey = new CodeUidDateCacheKey(catalogCode, scenarioId, date);
+
+		if (changedCatalogRuleBaseCache.containsKey(cacheKey)) {
+			return changedCatalogRuleBaseCache.get(cacheKey);
+		}
+
+		final EpRuleBase ruleBase = getDecorated().findChangedCatalogRuleBases(catalogCode, scenarioId, date);
+		changedCatalogRuleBaseCache.put(cacheKey, ruleBase);
+
+		return ruleBase;
+	}
+
+	@Override
 	public void setDecorated(final RuleService decorated) {
 		this.decorated = decorated;
 	}
@@ -231,5 +302,16 @@ public class CachingRuleServiceImpl implements CacheableRuleService {
 
 	public void setRuleCodesByRuleUidsCache(final Cache<Collection<Long>, Collection<String>> ruleCodesByRuleUidsCache) {
 		this.ruleCodesByRuleUidsCache = ruleCodesByRuleUidsCache;
+	}
+	public void setRuleBaseByScenarioCache(final Cache<Collection<Long>, EpRuleBase> ruleBaseByScenarioCache) {
+				this.ruleBaseByScenarioCache = ruleBaseByScenarioCache;
+	}
+
+	public void setChangedStoreRuleBaseCache(final Cache<CodeUidDateCacheKey, EpRuleBase> changedStoreRuleBaseCache) {
+		this.changedStoreRuleBaseCache = changedStoreRuleBaseCache;
+	}
+
+	public void setChangedCatalogRuleBaseCache(final Cache<CodeUidDateCacheKey, EpRuleBase> changedCatalogRuleBaseCache) {
+		this.changedCatalogRuleBaseCache = changedCatalogRuleBaseCache;
 	}
 }

@@ -19,6 +19,8 @@ public class OrderSearchResultPane extends AbstractPageObject {
 	private static final String RESULTS_PANE_PARENT_CSS = "div[pane-location='center-pane-inner'][seeable='true'] ";
 	private static final String RESULTS_LIST_TABLE_PARENT_CSS = RESULTS_PANE_PARENT_CSS + "div[widget-id='Order Search Result Table'] ";
 	private static final String RESULTS_COLUMN_CSS = RESULTS_LIST_TABLE_PARENT_CSS + "div[column-id='%s']";
+	private static final String ORDER_STATUS_VALUE_CSS = "div[automation-id='com.elasticpath.cmclient.fulfillment"
+			+ ".FulfillmentMessages.OrderStatus_%s']";
 	private final CustomerService customerService;
 
 	/**
@@ -49,7 +51,7 @@ public class OrderSearchResultPane extends AbstractPageObject {
 		}
 
 		assertThat(isOrderInList)
-				.as("Order " + columnValue + "does not exist in search result - " + columnName)
+				.as("Order " + columnValue + " does not exist in search result - " + columnName)
 				.isTrue();
 	}
 
@@ -103,4 +105,16 @@ public class OrderSearchResultPane extends AbstractPageObject {
 		return RESULTS_LIST_TABLE_PARENT_CSS.trim();
 	}
 
+	/**
+	 * Verify given order status returns orders in result.
+	 * @param expectedStatus String
+	 */
+	public void verifyOrderStatusExistInResult(final String expectedStatus) {
+		String trimedExpectedStatus = expectedStatus.replaceAll("\\s", "");
+		setWebDriverImplicitWait(Constants.IMPLICIT_WAIT_FOR_ELEMENT_THREE_SECONDS);
+		assertThat(isElementPresent(By.cssSelector(String.format(ORDER_STATUS_VALUE_CSS, trimedExpectedStatus))))
+				.as("Unable to find the order with the order status - " + expectedStatus)
+				.isTrue();
+		setWebDriverImplicitWaitToDefault();
+	}
 }

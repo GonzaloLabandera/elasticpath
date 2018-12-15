@@ -8,8 +8,9 @@
 			<description><![CDATA[Retrieve a list of countries available to a scope.]]></description>
 			<step>
 				<description><![CDATA[Retrieve the list of countries.]]></description>
-				<start>countries</start>
-				<read-self/>
+				<start>base.root</start>
+				<follow-link>countries</follow-link>
+				<result>countries</result>
 			</step>
 		</plan>
 

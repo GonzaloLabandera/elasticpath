@@ -7,7 +7,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
 import java.io.FileInputStream;
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -101,27 +100,16 @@ public class ExportCustomerWithPaymentMethodsSteps {
 	}
 
 	/**
-	 * Export a customer using a card number filter.
-	 *
-	 * @param cardNumberFilterValue the filter to use
-	 * @throws Exception in case of error
-	 */
-	@When("^I export the customer with CARD_NUMBER_FILTER set to (\\w+)$")
-	public void executeExportWithCardNumberFilterValue(final String cardNumberFilterValue) throws Exception {
-		configureAndExportCustomerWithCardNumberFilterValue(cardNumberFilterValue);
-	}
-
-	/**
 	 * Export a customer.
 	 *
 	 * @throws Exception in case of error
 	 */
 	@When("^I export the customer$")
 	public void executeExport() throws Exception {
-		configureAndExportCustomerWithCardNumberFilterValue("STATIC");
+		configureAndExportCustomer();
 	}
 
-	private void configureAndExportCustomerWithCardNumberFilterValue(final String cardNumberFilterValue) throws IOException, ConfigurationException {
+	private void configureAndExportCustomer() throws ConfigurationException {
 		final String epQLSearchQuery = EXISTING_CUSTOMER_EPQL_QUERY + existingCustomer.getGuid();
 
 		List<Long> customerUids = Collections.singletonList(existingCustomer.getUidPk());
@@ -135,7 +123,6 @@ public class ExportCustomerWithPaymentMethodsSteps {
 				ExportConfigurationBuilder.newInstance()
 						.setDeliveryTarget(EXPORT_DIRECTORY_PATH)
 						.setExporterTypes(Collections.singletonList(RequiredJobType.CUSTOMER))
-						.addExporterOption(RequiredJobType.CUSTOMER, "CARD_NUMBER_FILTER", cardNumberFilterValue)
 						.build();
 
 		SearchConfiguration searchConfiguration = new SearchConfiguration();

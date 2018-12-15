@@ -205,7 +205,7 @@ public class CartItemModifiersRepositoryImpl implements CartItemModifiersReposit
 
 	@Override
 	public Single<LineItemConfigurationEntity> getConfiguration(final String itemId) {
-		return productSkuRepository.getProductSkuWithAttributesByCodeAsSingle(itemId)
+		return productSkuRepository.getProductSkuWithAttributesByCode(itemId)
 				.map(this::buildLineItemConfigurationEntity);
 	}
 

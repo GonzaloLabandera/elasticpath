@@ -27,6 +27,8 @@ import com.elasticpath.service.catalog.CategoryLookup;
  */
 public class CategoryFilterImpl extends AbstractFilterImpl<CategoryFilter> implements CategoryFilter {
 
+	public static final String CATEGORY_KEY = "category";
+
 	/** Serial version id. */
 	private static final long serialVersionUID = 5000000001L;
 
@@ -194,7 +196,7 @@ public class CategoryFilterImpl extends AbstractFilterImpl<CategoryFilter> imple
 
 	@Override
 	public void initialize(final Map<String, Object> properties) {
-		this.setCategory((Category) properties.get("category"));
+		this.setCategory((Category) properties.get(CATEGORY_KEY));
 		this.setId(getSeoId());
 	}
 
@@ -213,7 +215,7 @@ public class CategoryFilterImpl extends AbstractFilterImpl<CategoryFilter> imple
 			throw new EpCatalogViewRequestBindException("Invalid category filter id:" + filterIdStr);
 		}
 		Map<String, Object> tokenMap = new HashMap<>();
-		tokenMap.put("category", category);
+		tokenMap.put(CATEGORY_KEY, category);
 		return tokenMap;
 	}
 

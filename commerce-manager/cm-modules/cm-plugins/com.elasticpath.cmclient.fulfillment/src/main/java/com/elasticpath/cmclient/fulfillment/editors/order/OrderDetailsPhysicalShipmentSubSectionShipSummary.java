@@ -21,6 +21,7 @@ import org.eclipse.ui.forms.widgets.Section;
 import org.eclipse.ui.forms.widgets.TableWrapData;
 
 import com.elasticpath.cmclient.core.CmClientResources;
+import com.elasticpath.cmclient.core.ServiceLocator;
 import com.elasticpath.cmclient.core.binding.EpBindingConfiguration;
 import com.elasticpath.cmclient.core.binding.EpBindingConfiguration.UpdatePolicy;
 import com.elasticpath.cmclient.core.binding.EpControlBindingProvider;
@@ -36,9 +37,10 @@ import com.elasticpath.cmclient.core.ui.framework.IEpLayoutComposite;
 import com.elasticpath.cmclient.core.ui.framework.IEpLayoutData;
 import com.elasticpath.cmclient.core.validation.EpValidatorFactory;
 import com.elasticpath.cmclient.fulfillment.FulfillmentMessages;
+import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.order.Order;
 import com.elasticpath.domain.order.PhysicalOrderShipment;
-
+import com.elasticpath.service.shipping.PhysicalOrderShipmentShippingCostRefresher;
 /**
  * Represents the physical shipment shipping summary sub section.
  */
@@ -254,6 +256,9 @@ public class OrderDetailsPhysicalShipmentSubSectionShipSummary implements IPrope
 				final BigDecimal oldSubtotalDiscount = shipment.getSubtotalDiscount();
 				if (!newSubtotalDiscount.equals(oldSubtotalDiscount)) {  // NOPMD  '!='
 					shipment.setSubtotalDiscount(newSubtotalDiscount);
+					final PhysicalOrderShipmentShippingCostRefresher physicalOrderShipmentShippingCostRefresher =
+							ServiceLocator.getService(ContextIdNames.PHYSICAL_ORDER_SHIPMENT_SHIPPING_COST_REFRESHER);
+					physicalOrderShipmentShippingCostRefresher.refresh(shipment);
 				}
 				return Status.OK_STATUS;
 			}

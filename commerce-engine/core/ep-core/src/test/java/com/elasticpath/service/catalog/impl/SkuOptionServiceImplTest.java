@@ -38,6 +38,7 @@ public class SkuOptionServiceImplTest extends AbstractEPServiceTestCase {
 	private ProductDao mockProductDao;
 
 	@Override
+	@SuppressWarnings("unchecked")
 	public void setUp() throws Exception {
 		super.setUp();
 		skuOptionService = new SkuOptionServiceImpl();

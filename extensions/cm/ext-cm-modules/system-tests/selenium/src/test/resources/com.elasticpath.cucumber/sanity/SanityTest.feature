@@ -1,4 +1,4 @@
-@sanity @smoketest
+@sanityTest @regressionTest @smokeTest
 Feature: Admin user can navigate all activities
 
   Background:
@@ -11,8 +11,7 @@ Feature: Admin user can navigate all activities
     Then Product Listing should contain following products
       | Portable TV |
 
-    When I search for product name Samsung Focus
-    Then Product name Samsung Focus should appear in result
+    When I search for product by name Samsung Focus and verify it appears in a result list
 
     When I go to Price List Manager
     And I search for price list
@@ -55,4 +54,3 @@ Feature: Admin user can navigate all activities
     When I go to Stores
     And I edit store MOBEE in editor
     Then The store code MOBEE should match in the store editor
-

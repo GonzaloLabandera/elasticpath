@@ -12,7 +12,6 @@ import org.osgi.service.component.annotations.Reference;
 import com.elasticpath.repository.LinksRepository;
 import com.elasticpath.rest.definition.items.ItemIdentifier;
 import com.elasticpath.rest.definition.wishlists.WishlistIdentifier;
-import com.elasticpath.rest.id.transform.IdentifierTransformerProvider;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.wishlist.WishlistRepository;
 
 /**
@@ -27,13 +26,9 @@ public class WishlistsForItemRepositoryImpl<I extends ItemIdentifier, LI extends
 
 	private WishlistRepository wishlistRepository;
 
-	private IdentifierTransformerProvider identifierTransformerProvider;
-
 	@Override
 	public Observable<WishlistIdentifier> getElements(final ItemIdentifier itemIdentifier) {
-		//Deep down item repository expects an encoded id
-		String encodedItemId = identifierTransformerProvider.forUriPart(ItemIdentifier.ITEM_ID).identifierToUri(itemIdentifier.getItemId());
-		return wishlistRepository.findWishlistsContainingItem(encodedItemId)
+		return wishlistRepository.findWishlistsContainingItem(itemIdentifier.getItemId().getValue())
 				.map(wishList -> buildWishlistIdentifier(wishList.getStoreCode(), wishList.getGuid()))
 				.toObservable();
 	}
@@ -41,10 +36,5 @@ public class WishlistsForItemRepositoryImpl<I extends ItemIdentifier, LI extends
 	@Reference
 	public void setWishlistRepository(final WishlistRepository wishlistRepository) {
 		this.wishlistRepository = wishlistRepository;
-	}
-
-	@Reference
-	public void setIdentifierTransformerProvider(final IdentifierTransformerProvider identifierTransformerProvider) {
-		this.identifierTransformerProvider = identifierTransformerProvider;
 	}
 }

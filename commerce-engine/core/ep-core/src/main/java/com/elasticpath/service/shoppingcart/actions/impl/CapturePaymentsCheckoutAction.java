@@ -9,7 +9,6 @@ import java.util.HashSet;
 import java.util.Set;
 
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.collections.Predicate;
 
 import com.elasticpath.base.exception.EpSystemException;
 import com.elasticpath.domain.order.Order;
@@ -56,13 +55,8 @@ public class CapturePaymentsCheckoutAction implements ReversibleCheckoutAction {
 			
 			Set<OrderPayment> orderPayments = new HashSet<>(context.getOrder().getOrderPayments());
 			
-			CollectionUtils.filter(orderPayments, new Predicate() {
-
-				@Override
-				public boolean evaluate(final Object object) {
-					return ((OrderPayment) object).getTransactionType().equals(OrderPayment.CAPTURE_TRANSACTION);
-				}
-			});
+			CollectionUtils.filter(orderPayments, object -> ((OrderPayment) object)
+					.getTransactionType().equals(OrderPayment.CAPTURE_TRANSACTION));
 			
 			paymentService.rollBackPayments(orderPayments);
 		}

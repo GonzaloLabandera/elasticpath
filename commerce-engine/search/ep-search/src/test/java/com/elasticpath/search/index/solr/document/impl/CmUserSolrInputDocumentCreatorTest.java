@@ -3,19 +3,18 @@
  */
 package com.elasticpath.search.index.solr.document.impl;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
-import java.util.Arrays;
-
-import org.apache.commons.collections.CollectionUtils;
 import org.apache.solr.common.SolrInputDocument;
-import org.jmock.Expectations;
-import org.jmock.integration.junit4.JUnitRuleMockery;
+import org.assertj.core.api.SoftAssertions;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.elasticpath.domain.catalog.Catalog;
 import com.elasticpath.domain.catalog.impl.CatalogImpl;
@@ -34,17 +33,16 @@ import com.elasticpath.service.search.solr.SolrIndexConstants;
 /**
  * Test construction of {@link SolrInputDocument}s from {@link CmUser}s using {@link CmUserSolrInputDocumentCreator}.
  */
-
+@RunWith(MockitoJUnitRunner.class)
 public class CmUserSolrInputDocumentCreatorTest {
-	@Rule
-	public final JUnitRuleMockery context = new JUnitRuleMockery();
 
 	private CmUserSolrInputDocumentCreator documentCreator;
 
+	@Mock
 	private PipelinePerformance pipelinePerformance;
 
-	@SuppressWarnings("unchecked")
-	private final IndexingStage<SolrInputDocument, ?> nextStage = context.mock(IndexingStage.class);
+	@Mock
+	private IndexingStage<SolrInputDocument, ?> nextStage;
 
 	/**
 	 * Set up the test case.
@@ -52,7 +50,6 @@ public class CmUserSolrInputDocumentCreatorTest {
 	@Before
 	public void setUp() {
 		documentCreator = new CmUserSolrInputDocumentCreator();
-		pipelinePerformance = context.mock(PipelinePerformance.class);
 
 		documentCreator.setAnalyzer(new AnalyzerImpl());
 		documentCreator.setPipelinePerformance(pipelinePerformance);
@@ -66,15 +63,10 @@ public class CmUserSolrInputDocumentCreatorTest {
 	public void testRun() {
 		final CmUser cmUser = createCmUser();
 		documentCreator.setEntity(cmUser);
-
-		context.checking(new Expectations() {
-			{
-				exactly(2).of(pipelinePerformance).addCount(with(any(String.class)), with(any(Long.class)));
-				oneOf(nextStage).send(with(any(SolrInputDocument.class)));
-			}
-		});
-
 		documentCreator.run();
+
+		verify(pipelinePerformance, times(2)).addCount(any(String.class), any(Long.class));
+		verify(nextStage).send(any(SolrInputDocument.class));
 	}
 
 	/**
@@ -83,7 +75,6 @@ public class CmUserSolrInputDocumentCreatorTest {
 	@Test
 	public void testRunNullCmUser() {
 		documentCreator.setEntity(null);
-
 		documentCreator.run();
 	}
 
@@ -107,24 +98,22 @@ public class CmUserSolrInputDocumentCreatorTest {
 
 		final SolrInputDocument createdDocument = documentCreator.createDocument();
 
-		assertEquals(String.valueOf(cmUser.getUidPk()), createdDocument.getFieldValue(SolrIndexConstants.OBJECT_UID));
-		assertEquals(cmUser.getUserName(), createdDocument.getFieldValue(SolrIndexConstants.USER_NAME));
-		assertEquals(cmUser.getLastName(), createdDocument.getFieldValue(SolrIndexConstants.LAST_NAME));
-		assertEquals(cmUser.getFirstName(), createdDocument.getFieldValue(SolrIndexConstants.FIRST_NAME));
-		assertEquals(cmUser.getEmail(), createdDocument.getFieldValue(SolrIndexConstants.EMAIL));
-		assertEquals(UserStatus.ENABLED.getPropertyKey(), createdDocument.getFieldValue(SolrIndexConstants.STATUS));
-		assertEquals(String.valueOf(cmUser.isAllCatalogsAccess()), createdDocument.getFieldValue(SolrIndexConstants.ALL_CATALOGS_ACCESS));
-		assertEquals(String.valueOf(cmUser.isAllStoresAccess()), createdDocument.getFieldValue(SolrIndexConstants.ALL_STORES_ACCESS));
+		SoftAssertions softly = new SoftAssertions();
+		softly.assertThat(createdDocument.getFieldValue(SolrIndexConstants.OBJECT_UID)).isEqualTo(String.valueOf(cmUser.getUidPk()));
+		softly.assertThat(createdDocument.getFieldValue(SolrIndexConstants.USER_NAME)).isEqualTo(cmUser.getUserName());
+		softly.assertThat(createdDocument.getFieldValue(SolrIndexConstants.LAST_NAME)).isEqualTo(cmUser.getLastName());
+		softly.assertThat(createdDocument.getFieldValue(SolrIndexConstants.FIRST_NAME)).isEqualTo(cmUser.getFirstName());
+		softly.assertThat(createdDocument.getFieldValue(SolrIndexConstants.EMAIL)).isEqualTo(cmUser.getEmail());
+		softly.assertThat(createdDocument.getFieldValue(SolrIndexConstants.STATUS)).isEqualTo(UserStatus.ENABLED.getPropertyKey());
+		softly.assertThat(createdDocument.getFieldValue(SolrIndexConstants.ALL_CATALOGS_ACCESS))
+			.isEqualTo(String.valueOf(cmUser.isAllCatalogsAccess()));
+		softly.assertThat(createdDocument.getFieldValue(SolrIndexConstants.ALL_STORES_ACCESS)).isEqualTo(String.valueOf(cmUser.isAllStoresAccess()));
 
-		assertTrue(CollectionUtils.subtract(Arrays.asList("role1", "role2"), 
-				createdDocument.getFieldValues(SolrIndexConstants.USER_ROLE)).size() == 0);
+		softly.assertThat(createdDocument.getFieldValues(SolrIndexConstants.USER_ROLE)).containsExactlyInAnyOrder("role1", "role2");
+		softly.assertThat(createdDocument.getFieldValues(SolrIndexConstants.CATALOG_CODE)).containsExactlyInAnyOrder("catalog1", "catalog2");
+		softly.assertThat(createdDocument.getFieldValues(SolrIndexConstants.STORE_CODE)).containsExactlyInAnyOrder("store1", "store2");
 
-		assertTrue(CollectionUtils.subtract(Arrays.asList("catalog1", "catalog2"), 
-				createdDocument.getFieldValues(SolrIndexConstants.CATALOG_CODE))
-				.size() == 0);
-
-		assertTrue(CollectionUtils.subtract(Arrays.asList("store1", "store2"), 
-				createdDocument.getFieldValues(SolrIndexConstants.STORE_CODE)).size() == 0);
+		softly.assertAll();
 	}
 
 	/**
@@ -133,7 +122,7 @@ public class CmUserSolrInputDocumentCreatorTest {
 	@Test
 	public void testCreateDocumentWithNullCmUser() {
 		final SolrInputDocument createdDocument = documentCreator.createDocument();
-		assertNull(createdDocument);
+		assertThat((Object) createdDocument).isNull();
 	}
 
 	/**
@@ -141,12 +130,12 @@ public class CmUserSolrInputDocumentCreatorTest {
 	 */
 	@Test
 	public void testSetEntity() {
-		assertNull(documentCreator.getEntity());
+		assertThat(documentCreator.getEntity()).isNull();
 
 		final CmUserImpl entity = new CmUserImpl();
 		documentCreator.setEntity(entity);
 
-		assertEquals(documentCreator.getEntity(), entity);
+		assertThat(documentCreator.getEntity()).isEqualTo(entity);
 	}
 
 	private CmUser createCmUser() {

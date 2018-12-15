@@ -9,6 +9,7 @@ import static org.hamcrest.core.IsInstanceOf.instanceOf;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
@@ -89,8 +90,8 @@ import com.elasticpath.test.jmock.AbstractCatalogDataTestCase;
 /**
  * Test <code>ShoppingCartImpl</code>.
  */
-@SuppressWarnings({ "PMD.NonStaticInitializer", "PMD.ExcessiveClassLength", "PMD.ExcessiveImports", "PMD.TooManyMethods",
-		"PMD.CouplingBetweenObjects", "PMD.AvoidDuplicateLiterals", "PMD.GodClass" })
+@SuppressWarnings({"PMD.NonStaticInitializer", "PMD.ExcessiveClassLength", "PMD.ExcessiveImports", "PMD.TooManyMethods",
+		"PMD.CouplingBetweenObjects", "PMD.AvoidDuplicateLiterals", "PMD.GodClass"})
 public class ShoppingCartImplTest extends AbstractCatalogDataTestCase {
 
 	private static final String CODE = "Code ";
@@ -140,12 +141,12 @@ public class ShoppingCartImplTest extends AbstractCatalogDataTestCase {
 		initializeShoppingCart(shoppingCart);
 
 		stubGetBean(ContextIdNames.GIFT_CERTIFICATE_SERVICE,
-					new GiftCertificateServiceImpl() {
-						@Override
-						public BigDecimal getBalance(final GiftCertificate giftCertificate) {
-							return giftCertificate.getPurchaseAmount();
-						}
-					});
+				new GiftCertificateServiceImpl() {
+					@Override
+					public BigDecimal getBalance(final GiftCertificate giftCertificate) {
+						return giftCertificate.getPurchaseAmount();
+					}
+				});
 
 		AllocationServiceImpl allocationServiceImpl = new AllocationServiceImpl();
 		allocationServiceImpl.setProductInventoryManagementService(new ProductInventoryManagementServiceImpl());
@@ -414,7 +415,7 @@ public class ShoppingCartImplTest extends AbstractCatalogDataTestCase {
 
 		assertNotNull(shoppingCart.getTotalMoney());
 		assertEquals("Total should be zero if we apply a GC with a balance greater than the total previously",
-					 0, BigDecimal.ZERO.compareTo(shoppingCart.getTotalMoney().getAmount()));
+				0, BigDecimal.ZERO.compareTo(shoppingCart.getTotalMoney().getAmount()));
 	}
 
 	private long getUniqueUid() {
@@ -428,7 +429,7 @@ public class ShoppingCartImplTest extends AbstractCatalogDataTestCase {
 	public void testGetShippingCost() {
 		assertNotNull(this.shoppingCart.getShippingCost());
 		assertEquals("Shipping cost should compare to zero.",
-					 0, BigDecimal.ZERO.compareTo(this.shoppingCart.getShippingCost().getAmount()));
+				0, BigDecimal.ZERO.compareTo(this.shoppingCart.getShippingCost().getAmount()));
 	}
 
 	/**
@@ -459,7 +460,7 @@ public class ShoppingCartImplTest extends AbstractCatalogDataTestCase {
 
 	}
 
-	private ShoppingCart shippableItemsCart(final boolean ... items) {
+	private ShoppingCart shippableItemsCart(final boolean... items) {
 		final List<ShoppingItem> cartItems = new ArrayList<>();
 
 		for (final boolean shippable : items) {
@@ -705,8 +706,8 @@ public class ShoppingCartImplTest extends AbstractCatalogDataTestCase {
 		final CustomerSession customerSession = shoppingCart.getCustomerSession();
 
 		GiftCertificate giftCertificate = mockGiftCertificate(shoppingCart.getStore(),
-															  BigDecimal.TEN,
-															  customerSession.getCurrency());
+				BigDecimal.TEN,
+				customerSession.getCurrency());
 		shoppingCart.applyGiftCertificate(giftCertificate);
 		assertTrue(shoppingCart.getAppliedGiftCertificates().contains(giftCertificate));
 	}
@@ -759,12 +760,12 @@ public class ShoppingCartImplTest extends AbstractCatalogDataTestCase {
 		final BigDecimal balance = BigDecimal.ZERO;
 
 		stubGetBean(ContextIdNames.GIFT_CERTIFICATE_SERVICE,
-					new GiftCertificateServiceImpl() {
-						@Override
-						public BigDecimal getBalance(final GiftCertificate giftCertificate) {
-							return balance;
-						}
-					});
+				new GiftCertificateServiceImpl() {
+					@Override
+					public BigDecimal getBalance(final GiftCertificate giftCertificate) {
+						return balance;
+					}
+				});
 
 		final ShoppingCart shoppingCart = getShoppingCart();
 		final CustomerSession customerSession = shoppingCart.getCustomerSession();
@@ -790,7 +791,7 @@ public class ShoppingCartImplTest extends AbstractCatalogDataTestCase {
 
 		Currency currency = Currency.getInstance(Locale.ITALY);
 		assertThat("Shopping cart currency must not be the gift certificate currency", customerSession.getCurrency(),
-				   Matchers.not(equalTo(currency)));
+				Matchers.not(equalTo(currency)));
 		GiftCertificate giftCertificate = mockGiftCertificate(shoppingCart.getStore(), BigDecimal.TEN, currency);
 
 		try {
@@ -812,11 +813,11 @@ public class ShoppingCartImplTest extends AbstractCatalogDataTestCase {
 
 		shoppingCart.setStore(new StoreImpl());
 		GiftCertificate giftCertificate = mockGiftCertificate(shoppingCart.getStore(), BigDecimal.TEN,
-															  shoppingCart.getCustomerSession().getCurrency());
+				shoppingCart.getCustomerSession().getCurrency());
 		shoppingCart.applyGiftCertificate(giftCertificate);
 
 		assertEquals("The redeemed GC amount should be not more than the shopping cart total",
-					 BigDecimal.ONE, shoppingCart.getGiftCertificateDiscount());
+				BigDecimal.ONE, shoppingCart.getGiftCertificateDiscount());
 	}
 
 	/**
@@ -829,11 +830,11 @@ public class ShoppingCartImplTest extends AbstractCatalogDataTestCase {
 		shoppingCart.setStore(new StoreImpl());
 
 		GiftCertificate giftCertificate = mockGiftCertificate(shoppingCart.getStore(), BigDecimal.TEN,
-															  shoppingCart.getCustomerSession().getCurrency());
+				shoppingCart.getCustomerSession().getCurrency());
 		shoppingCart.applyGiftCertificate(giftCertificate);
 
 		assertEquals("The redeemed GC amount should exactly its amount when total > GC amount",
-					 BigDecimal.TEN, shoppingCart.getGiftCertificateDiscount());
+				BigDecimal.TEN, shoppingCart.getGiftCertificateDiscount());
 	}
 
 
@@ -884,17 +885,17 @@ public class ShoppingCartImplTest extends AbstractCatalogDataTestCase {
 		giftCertificate2.setStore(shoppingCart.getStore());
 
 		stubGetBean(ContextIdNames.GIFT_CERTIFICATE_SERVICE,
-					new GiftCertificateServiceImpl() {
-						@Override
-						public BigDecimal getBalance(final GiftCertificate giftCert) {
-							if (giftCert.getUidPk() == uidPkGc1) {
-								return giftCertificate.getPurchaseAmount();
-							} else if (giftCert.getUidPk() == uidPkGc2) {
-								return giftCertificate2.getPurchaseAmount();
-							}
-							return null;
+				new GiftCertificateServiceImpl() {
+					@Override
+					public BigDecimal getBalance(final GiftCertificate giftCert) {
+						if (giftCert.getUidPk() == uidPkGc1) {
+							return giftCertificate.getPurchaseAmount();
+						} else if (giftCert.getUidPk() == uidPkGc2) {
+							return giftCertificate2.getPurchaseAmount();
 						}
-					});
+						return null;
+					}
+				});
 
 		shoppingCart.applyGiftCertificate(giftCertificate2);
 
@@ -1294,7 +1295,7 @@ public class ShoppingCartImplTest extends AbstractCatalogDataTestCase {
 
 		final DiscountRecord discountRecord = promotionRecordContainer.getDiscountRecord(ruleId1, ACTION_ID);
 		assertFalse("Expected existing discount not to be marked as superseded when a better discount is applied to a different shipping service "
-							+ "level", discountRecord.isSuperceded());
+				+ "level", discountRecord.isSuperceded());
 	}
 
 	/**
@@ -1365,7 +1366,7 @@ public class ShoppingCartImplTest extends AbstractCatalogDataTestCase {
 		shoppingCart.setSelectedShippingOption(shippingOptionSelected);
 
 		assertEquals("Expected shipping cost to equal the amount from the snapshot of the selected shipping option",
-					 oneDollar, shoppingCart.getShippingCost());
+				oneDollar, shoppingCart.getShippingCost());
 	}
 
 	@Test
@@ -1392,7 +1393,7 @@ public class ShoppingCartImplTest extends AbstractCatalogDataTestCase {
 		shoppingCart.setShippingCostOverride(tenDollars.getAmount());
 
 		assertEquals("Expected shipping cost to ignore the amount from the selected shipping option, and instead return the override value",
-					 tenDollars, shoppingCart.getShippingCost());
+				tenDollars, shoppingCart.getShippingCost());
 	}
 
 	@Test
@@ -1401,7 +1402,7 @@ public class ShoppingCartImplTest extends AbstractCatalogDataTestCase {
 		shoppingCart.addShoppingCartItem(shoppingItem);
 
 		assertEquals("Expected a flat shipping cost of $0.00 when the cart does not contain any shippable items",
-					 Money.valueOf(BigDecimal.ZERO, CURRENCY), shoppingCart.getShippingCost());
+				Money.valueOf(BigDecimal.ZERO, CURRENCY), shoppingCart.getShippingCost());
 	}
 
 	@Test
@@ -1461,16 +1462,16 @@ public class ShoppingCartImplTest extends AbstractCatalogDataTestCase {
 		assertNotNull("The shipping address should be set on the cart", shoppingCart.getShippingAddress());
 		assertTrue("The shopping cart should have a shipping option selected", selectedShippingOption.isPresent());
 		assertEquals("The shopping cart should have the specific shipping option selected", SELECTED_SHIPPING_OPTION_CODE,
-					 selectedShippingOption.get().getCode());
+				selectedShippingOption.get().getCode());
 		assertNotNull("The shipping price should be calculated whilst the shipping address is set",
-					  shoppingCart.getShippingListPrice(SELECTED_SHIPPING_OPTION_CODE));
+				shoppingCart.getShippingListPrice(SELECTED_SHIPPING_OPTION_CODE));
 
 		// When we clear the shipping address
 		shoppingCart.setShippingAddress(null);
 
 		// Then the selected and available shipping options should be cleared as no longer valid
 		assertFalse("Selected shipping option should be cleared after the shipping address has been cleared.",
-					shoppingCart.getSelectedShippingOption().isPresent());
+				shoppingCart.getSelectedShippingOption().isPresent());
 	}
 
 	@Test
@@ -1482,9 +1483,9 @@ public class ShoppingCartImplTest extends AbstractCatalogDataTestCase {
 		assertNotNull("The shipping address should be set on the cart", shoppingCart.getShippingAddress());
 		assertTrue("The shopping cart should have a shipping option selected", selectedShippingOption.isPresent());
 		assertEquals("The shopping cart should have the specific shipping option selected", SELECTED_SHIPPING_OPTION_CODE,
-					 selectedShippingOption.get().getCode());
+				selectedShippingOption.get().getCode());
 		assertNotNull("The shipping price should be calculated whilst the shipping address is set",
-					  shoppingCart.getShippingListPrice(SELECTED_SHIPPING_OPTION_CODE));
+				shoppingCart.getShippingListPrice(SELECTED_SHIPPING_OPTION_CODE));
 
 		// When we set the shipping address to a different address
 		final Address differentAddress = getAddress();
@@ -1493,7 +1494,46 @@ public class ShoppingCartImplTest extends AbstractCatalogDataTestCase {
 
 		// Then the selected and available shipping options should be cleared as no longer valid
 		assertFalse("Selected shipping option should be cleared after the shipping address has been cleared.",
-				   shoppingCart.getSelectedShippingOption().isPresent());
+				shoppingCart.getSelectedShippingOption().isPresent());
+	}
+
+	@Test
+	public void verifyCorrectParentProductSkuReturned() {
+		final ShoppingCartImpl shoppingCart = getShoppingCart();
+		final Collection<ShoppingItem> allShoppingItems = shoppingCart.getAllShoppingItems();
+		final ShoppingItem child = new ShoppingItemImpl();
+		final ProductSku childProductSku = getProductSku();
+		child.setSkuGuid(childProductSku.getGuid());
+
+		ShoppingItem parent = null;
+		final Optional<ShoppingItem> firstShoppingItem = allShoppingItems.stream().findFirst();
+		if (firstShoppingItem.isPresent()) {
+			parent = firstShoppingItem.get();
+			parent.addChildItem(child);
+		}
+
+		final ProductSku parentProductSku = shoppingCart.getParentProductSku(child);
+		assertEquals("Correct parent product sku should be returned", parentProductSku.getGuid(), parent.getSkuGuid());
+	}
+
+
+
+	@Test
+	public void verifyNullIsReturnedWhenThereIsNoParent() {
+		final ShoppingCartImpl shoppingCart = getShoppingCart();
+		final Collection<ShoppingItem> allShoppingItems = shoppingCart.getAllShoppingItems();
+		final ShoppingItem child = new ShoppingItemImpl();
+		final ProductSku childProductSku = getProductSku();
+		child.setSkuGuid(childProductSku.getGuid());
+
+		ShoppingItem parent = null;
+		final Optional<ShoppingItem> firstShoppingItem = allShoppingItems.stream().findFirst();
+		if (firstShoppingItem.isPresent()) {
+			parent = firstShoppingItem.get();
+			parent.addChildItem(child);
+		}
+
+		assertNull("Null is returned when there is no parent", shoppingCart.getParentProductSku(parent));
 	}
 
 	protected ShippingOption createShippingOption(final String shippingOptionCode) {

@@ -31,106 +31,106 @@ public class UserQueryComposerImpl extends AbstractQueryComposerImpl {
 	@Override
 	public Query composeQueryInternal(final SearchCriteria searchCriteria, final SearchConfig searchConfig) {
 		final UserSearchCriteria userSearchCriteria = (UserSearchCriteria) searchCriteria;
-		final BooleanQuery booleanQuery = new BooleanQuery();
+		final BooleanQuery.Builder booleanQueryBuilder = new BooleanQuery.Builder();
 		boolean hasSomeCriteria = false;
 
-		hasSomeCriteria |= addSplitFieldToQuery(SolrIndexConstants.FIRST_NAME, userSearchCriteria.getFirstName(), null, searchConfig, booleanQuery,
+		hasSomeCriteria |= addSplitFieldToQuery(SolrIndexConstants.FIRST_NAME, userSearchCriteria.getFirstName(), null, searchConfig, booleanQueryBuilder,
 				Occur.MUST, true);
-		hasSomeCriteria |= addSplitFieldToQuery(SolrIndexConstants.LAST_NAME, userSearchCriteria.getLastName(), null, searchConfig, booleanQuery,
+		hasSomeCriteria |= addSplitFieldToQuery(SolrIndexConstants.LAST_NAME, userSearchCriteria.getLastName(), null, searchConfig, booleanQueryBuilder,
 				Occur.MUST, true);
-		hasSomeCriteria |= addSplitFieldToQuery(SolrIndexConstants.USER_NAME, userSearchCriteria.getUserName(), null, searchConfig, booleanQuery,
+		hasSomeCriteria |= addSplitFieldToQuery(SolrIndexConstants.USER_NAME, userSearchCriteria.getUserName(), null, searchConfig, booleanQueryBuilder,
 				Occur.MUST, true);
 
-		hasSomeCriteria |= addWholeFieldToQuery(SolrIndexConstants.EMAIL, userSearchCriteria.getEmail(), null, searchConfig, booleanQuery,
+		hasSomeCriteria |= addWholeFieldToQuery(SolrIndexConstants.EMAIL, userSearchCriteria.getEmail(), null, searchConfig, booleanQueryBuilder,
 				Occur.MUST, true);
 
 		if (userSearchCriteria.getStoreCode() != null) {
-			final BooleanQuery innerQuery = new BooleanQuery();
-			hasSomeCriteria |= addWholeFieldToQuery(SolrIndexConstants.ALL_STORES_ACCESS, String.valueOf(true), null, searchConfig, innerQuery,
+			final BooleanQuery.Builder innerQueryBuilder = new BooleanQuery.Builder();
+			hasSomeCriteria |= addWholeFieldToQuery(SolrIndexConstants.ALL_STORES_ACCESS, String.valueOf(true), null, searchConfig, innerQueryBuilder,
 					Occur.SHOULD, true);
-			
-			hasSomeCriteria |= addWholeFieldToQuery(SolrIndexConstants.STORE_CODE, userSearchCriteria.getStoreCode(), null, searchConfig, innerQuery,
+
+			hasSomeCriteria |= addWholeFieldToQuery(SolrIndexConstants.STORE_CODE, userSearchCriteria.getStoreCode(), null, searchConfig, innerQueryBuilder,
 					Occur.SHOULD, true);
-			booleanQuery.add(innerQuery, Occur.MUST);
+			booleanQueryBuilder.add(innerQueryBuilder.build(), Occur.MUST);
 		}
 
 		if (userSearchCriteria.getCatalogCode() != null) {
-			final BooleanQuery innerQuery = new BooleanQuery();
-			hasSomeCriteria |= addWholeFieldToQuery(SolrIndexConstants.ALL_CATALOGS_ACCESS, String.valueOf(true), null, searchConfig, innerQuery,
+			final BooleanQuery.Builder innerQueryBuilder = new BooleanQuery.Builder();
+			hasSomeCriteria |= addWholeFieldToQuery(SolrIndexConstants.ALL_CATALOGS_ACCESS, String.valueOf(true), null, searchConfig, innerQueryBuilder,
 					Occur.SHOULD, true);
 			hasSomeCriteria |= addWholeFieldToQuery(SolrIndexConstants.CATALOG_CODE, userSearchCriteria.getCatalogCode(), null, searchConfig,
-					innerQuery, Occur.SHOULD, true);
-			booleanQuery.add(innerQuery, Occur.MUST);
+					innerQueryBuilder, Occur.SHOULD, true);
+			booleanQueryBuilder.add(innerQueryBuilder.build(), Occur.MUST);
 		}
 
 		if (userSearchCriteria.getUserStatus() != null) {
 			hasSomeCriteria |= addWholeFieldToQuery(SolrIndexConstants.STATUS, userSearchCriteria.getUserStatus().getPropertyKey(), null,
-					searchConfig, booleanQuery, Occur.MUST, true);
+					searchConfig, booleanQueryBuilder, Occur.MUST, true);
 		}
 
 		if (userSearchCriteria.getUserRoleName() != null) {
 			hasSomeCriteria |= addWholeFieldToQuery(SolrIndexConstants.USER_ROLE, userSearchCriteria.getUserRoleName(), null, searchConfig,
-					booleanQuery, Occur.MUST, true);
+					booleanQueryBuilder, Occur.MUST, true);
 		}
 
 		if (!hasSomeCriteria) {
 			throw new EpEmptySearchCriteriaException("Empty search criteria is not allowed!");
 		}
 
-		return booleanQuery;
+		return booleanQueryBuilder.build();
 	}
 
 	@Override
 	public Query composeFuzzyQueryInternal(final SearchCriteria searchCriteria, final SearchConfig searchConfig) {
 		final UserSearchCriteria userSearchCriteria = (UserSearchCriteria) searchCriteria;
-		final BooleanQuery booleanQuery = new BooleanQuery();
+		final BooleanQuery.Builder booleanQueryBuilder = new BooleanQuery.Builder();
 		boolean hasSomeCriteria = false;
 
 		hasSomeCriteria |= addSplitFuzzyFieldToQuery(SolrIndexConstants.FIRST_NAME, userSearchCriteria.getFirstName(), null, searchConfig,
-				booleanQuery, Occur.MUST, true);
+				booleanQueryBuilder, Occur.MUST, true);
 		hasSomeCriteria |= addSplitFuzzyFieldToQuery(SolrIndexConstants.LAST_NAME, userSearchCriteria.getLastName(), null, searchConfig,
-				booleanQuery, Occur.MUST, true);
+				booleanQueryBuilder, Occur.MUST, true);
 		hasSomeCriteria |= addSplitFuzzyFieldToQuery(SolrIndexConstants.USER_NAME, userSearchCriteria.getUserName(), null, searchConfig,
-				booleanQuery, Occur.MUST, true);
+				booleanQueryBuilder, Occur.MUST, true);
 
-		hasSomeCriteria |= addWholeFuzzyFieldToQuery(SolrIndexConstants.EMAIL, userSearchCriteria.getEmail(), null, searchConfig, booleanQuery,
+		hasSomeCriteria |= addWholeFuzzyFieldToQuery(SolrIndexConstants.EMAIL, userSearchCriteria.getEmail(), null, searchConfig, booleanQueryBuilder,
 				Occur.MUST, true);
 
 
 		if (userSearchCriteria.getStoreCode() != null) {
-			final BooleanQuery innerQuery = new BooleanQuery();
+			final BooleanQuery.Builder innerQueryBuilder = new BooleanQuery.Builder();
 			hasSomeCriteria |= addWholeFuzzyFieldToQuery(SolrIndexConstants.ALL_STORES_ACCESS, String.valueOf(true), null, searchConfig,
-					innerQuery, Occur.SHOULD, true);
+					innerQueryBuilder, Occur.SHOULD, true);
 			hasSomeCriteria |= addWholeFuzzyFieldToQuery(SolrIndexConstants.STORE_CODE, userSearchCriteria.getStoreCode(), null, searchConfig,
-					innerQuery, Occur.SHOULD, true);
-			booleanQuery.add(innerQuery, Occur.MUST);
+					innerQueryBuilder, Occur.SHOULD, true);
+			booleanQueryBuilder.add(innerQueryBuilder.build(), Occur.MUST);
 		}
 
 
 		if (userSearchCriteria.getCatalogCode() != null) {
-			final BooleanQuery innerQuery = new BooleanQuery();
+			final BooleanQuery.Builder innerQueryBuilder = new BooleanQuery.Builder();
 			hasSomeCriteria |= addWholeFuzzyFieldToQuery(SolrIndexConstants.ALL_CATALOGS_ACCESS, String.valueOf(true), null, searchConfig,
-					innerQuery, Occur.SHOULD, true);
+					innerQueryBuilder, Occur.SHOULD, true);
 			hasSomeCriteria |= addWholeFuzzyFieldToQuery(SolrIndexConstants.CATALOG_CODE, userSearchCriteria.getCatalogCode(), null, searchConfig,
-					innerQuery, Occur.SHOULD, true);
-			booleanQuery.add(innerQuery, Occur.MUST);
+					innerQueryBuilder, Occur.SHOULD, true);
+			booleanQueryBuilder.add(innerQueryBuilder.build(), Occur.MUST);
 		}
 
 		if (userSearchCriteria.getUserStatus() != null) {
 			hasSomeCriteria |= addWholeFuzzyFieldToQuery(SolrIndexConstants.STATUS, userSearchCriteria.getUserStatus().getPropertyKey(), null,
-					searchConfig, booleanQuery, Occur.MUST, true);
+					searchConfig, booleanQueryBuilder, Occur.MUST, true);
 		}
 
 		if (userSearchCriteria.getUserRoleName() != null) {
 			hasSomeCriteria |= addWholeFuzzyFieldToQuery(SolrIndexConstants.USER_ROLE, userSearchCriteria.getUserRoleName(), null,
-					searchConfig, booleanQuery, Occur.MUST, true);
+					searchConfig, booleanQueryBuilder, Occur.MUST, true);
 		}
 
 		if (!hasSomeCriteria) {
 			throw new EpEmptySearchCriteriaException("Empty search criteria is not allowed!");
 		}
 
-		return booleanQuery;
+		return booleanQueryBuilder.build();
 	}
 	
 	@Override

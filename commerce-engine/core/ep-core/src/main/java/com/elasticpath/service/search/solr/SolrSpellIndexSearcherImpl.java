@@ -3,14 +3,15 @@
  */
 package com.elasticpath.service.search.solr;
 
+import java.io.IOException;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrQuery;
-import org.apache.solr.client.solrj.SolrServer;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.util.NamedList;
@@ -39,17 +40,19 @@ public class SolrSpellIndexSearcherImpl implements SpellIndexSearcher {
 	 */
 	@Override
 	public Map<String, List<String>> suggest(final SpellSuggestionSearchCriteria searchCriteria) throws EpPersistenceException {
-		SolrServer server = solrProvider.getServer(searchCriteria.getIndexType());
+		SolrClient client = solrProvider.getServer(searchCriteria.getIndexType());
 		SearchConfig config = solrProvider.getSearchConfig(searchCriteria.getIndexType());
 		
 		SolrQuery query = solrQueryFactory.composeSpellingQuery(searchCriteria, config);
 		QueryResponse queryResponse = null;
 		try {
-			queryResponse = server.query(query);
+			queryResponse = client.query(query);
 		} catch (SolrServerException e) {
 			throw new EpPersistenceException("SOLR Error -- spelling suggestion", e);
+		} catch (IOException e) {
+			throw new EpPersistenceException("SOLR Error -- IO Exception", e);
 		}
-		
+
 		NamedList<Object> responseDoc = queryResponse.getResponse();
 		if (responseDoc == null) {
 			return Collections.emptyMap();

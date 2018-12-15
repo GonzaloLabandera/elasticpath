@@ -26,7 +26,7 @@ import com.elasticpath.settings.provider.SettingValueProvider;
 @SuppressWarnings("PMD.GodClass")
 public class StoreResourceManagerImpl extends ResourceManagerImpl implements InvalidatableCache {
 
-	private static final Logger LOG = Logger.getLogger(StoreResourceManagerImpl.class);
+	private static final Logger LOGGER = Logger.getLogger(StoreResourceManagerImpl.class);
 
 	private static StoreConfig storeConfig;
 
@@ -87,8 +87,8 @@ public class StoreResourceManagerImpl extends ResourceManagerImpl implements Inv
 	 */
 	@Override
 	public Resource getResource(final String resourceName, final int resourceType, final String encoding) throws Exception {
-		if (LOG.isTraceEnabled()) {
-			LOG.trace("Resource being requested from manager: " + resourceName);
+		if (LOGGER.isTraceEnabled()) {
+			LOGGER.trace("Resource being requested from manager: " + resourceName);
 		}
 
 		Resource resource = getResourceFromLastResolvedLocation(resourceName, resourceType, encoding);
@@ -182,8 +182,8 @@ public class StoreResourceManagerImpl extends ResourceManagerImpl implements Inv
 		final String storeSpecificResourcePath = StoreVelocityConfigHelper.getStoreSpecificResourcePath(resourceName, theme, storeConfig
 				.getStoreCode());
 
-		if (LOG.isTraceEnabled()) {
-			LOG.trace("Attempting to retrieve store-specific resource: " + storeSpecificResourcePath);
+		if (LOGGER.isTraceEnabled()) {
+			LOGGER.trace("Attempting to retrieve store-specific resource: " + storeSpecificResourcePath);
 		}
 		return getResourceInternal(storeSpecificResourcePath, resourceType, encoding);
 	}
@@ -199,8 +199,8 @@ public class StoreResourceManagerImpl extends ResourceManagerImpl implements Inv
 	protected Resource getResourceFromThemeDefault(final String resourceName, final int resourceType, final String encoding, final String theme)
 			throws Exception {
 		final String defaultResourcePath = StoreVelocityConfigHelper.getDefaultResourcePath(resourceName, theme);
-		if (LOG.isTraceEnabled()) {
-			LOG.trace("Store-specific resource not found, attempting to use fallback: " + defaultResourcePath);
+		if (LOGGER.isTraceEnabled()) {
+			LOGGER.trace("Store-specific resource not found, attempting to use fallback: " + defaultResourcePath);
 		}
 		return getResourceInternal(defaultResourcePath, resourceType, encoding);
 	}
@@ -216,8 +216,8 @@ public class StoreResourceManagerImpl extends ResourceManagerImpl implements Inv
 	 * @throws Exception if a problem in parse
 	 */
 	protected Resource getResourceFromParent(final String resourceName, final int resourceType, final String encoding) throws Exception {
-		if (LOG.isTraceEnabled()) {
-			LOG.trace("Attempting to use resource manager default resource loader");
+		if (LOGGER.isTraceEnabled()) {
+			LOGGER.trace("Attempting to use resource manager default resource loader");
 		}
 		return super.getResource(resourceName, resourceType, encoding);
 	}
@@ -231,8 +231,8 @@ public class StoreResourceManagerImpl extends ResourceManagerImpl implements Inv
 	 */
 	protected Resource getResourceCMGlobal(final String resourceName, final int resourceType, final String encoding) throws Exception {
 		final String cmResourcePath = StoreVelocityConfigHelper.getCMResourcePath(resourceName, getCMAssetsDir());
-		if (LOG.isTraceEnabled()) {
-			LOG.trace("Attempting to retrieve global resource: " + cmResourcePath);
+		if (LOGGER.isTraceEnabled()) {
+			LOGGER.trace("Attempting to retrieve global resource: " + cmResourcePath);
 		}
 		return getResourceInternal(cmResourcePath, resourceType, encoding);
 	}
@@ -254,15 +254,15 @@ public class StoreResourceManagerImpl extends ResourceManagerImpl implements Inv
 		try {
 			// Check that a loader can get the resource before getting it. Avoids an un helpful error in log.
 			if (getLoaderNameForResource(resourceName) == null) {
-				if (LOG.isTraceEnabled()) {
-					LOG.trace("Resource not found: " + resourceName);
+				if (LOGGER.isTraceEnabled()) {
+					LOGGER.trace("Resource not found: " + resourceName);
 				}
 			} else {
 				resource = super.getResource(resourceName, resourceType, encoding);
 			}
 		} catch (ResourceNotFoundException rnfe) {
-			if (LOG.isTraceEnabled()) {
-				LOG.trace("Resource not found: " + resourceName);
+			if (LOGGER.isTraceEnabled()) {
+				LOGGER.trace("Resource not found: " + resourceName);
 			}
 		}
 		return resource;
@@ -551,7 +551,7 @@ public class StoreResourceManagerImpl extends ResourceManagerImpl implements Inv
 		// when the bean "storeResourceManager" get initialized
 		// this should not happen
 		if (StringUtils.isEmpty(instanceKey)) {
-			LOG.debug("Invalidate got called for store with key: " + instanceKey);
+			LOGGER.debug("Invalidate got called for store with key: " + instanceKey);
 			return;
 		}
 

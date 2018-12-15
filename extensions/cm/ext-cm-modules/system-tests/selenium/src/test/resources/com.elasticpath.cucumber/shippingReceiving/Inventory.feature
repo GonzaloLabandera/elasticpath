@@ -1,4 +1,4 @@
-@smoketest @shippingReceiving @inventory
+@regressionTest @shippingReceiving @inventory
 Feature: Inventory
 
   Background:

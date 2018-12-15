@@ -3,20 +3,20 @@
  */
 package com.elasticpath.domain.contentspace.impl;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import org.jmock.Expectations;
-import org.jmock.integration.junit4.JUnitRuleMockery;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.elasticpath.domain.contentspace.ContentWrapper;
 import com.elasticpath.domain.contentspace.ContentWrapperLoader;
@@ -25,6 +25,7 @@ import com.elasticpath.settings.test.support.SimpleSettingValueProvider;
 /**
  * Tests the content wrapper repository to ensure that it functions as intended.
  */
+@RunWith(MockitoJUnitRunner.class)
 public class ContentWrapperRepositoryImplTest {
 
 	/** Constant for a template name #1. */
@@ -34,7 +35,7 @@ public class ContentWrapperRepositoryImplTest {
 	private static final String TEMPLATE2 = "template2";
 	
 	/** Constant for a template name #3. */
-	protected static final String TEMPLATE3 = "template3";
+	private static final String TEMPLATE3 = "template3";
 
 	/** Constant for a wrapper Id #1. */
 	private static final String CS1 = "cs1";
@@ -43,7 +44,10 @@ public class ContentWrapperRepositoryImplTest {
 	private static final String CS2 = "cs2";
 	
 	/** Constant for a wrapper Id #3. */
-	protected static final String CS3 = "cs3";
+	private static final String CS3 = "cs3";
+
+	/** Constant for a wrapper Id #4. */
+	private static final String CS4 = "cs4";
 
 	private ContentWrapperRepositoryImpl repository;
 	
@@ -53,15 +57,14 @@ public class ContentWrapperRepositoryImplTest {
 	/** The interval that must elapse before a load is done in seconds. **/
 	private static final int LOAD_INTERVAL = 10;
 
-	/** Mock content wrapper loader. **/
-	@Rule
-	public final JUnitRuleMockery context = new JUnitRuleMockery();
-
+	@Mock
 	private ContentWrapperLoader mockLoader;
-	
-	/** Mock missing content wrappers cache. **/
-	@SuppressWarnings("unchecked")
-	private final Map<String, Long> mockMissingContentWrappers = context.mock(Map.class);
+
+	/**
+	 * Mock missing content wrappers cache.
+	 **/
+	@Mock
+	private Map<String, Long> mockMissingContentWrappers;
 
 	/**
 	 * The set up that is required before each test is run.
@@ -70,10 +73,6 @@ public class ContentWrapperRepositoryImplTest {
 	public void setUp() {
 		repository = new ContentWrapperRepositoryImpl();
 		repository.setLoadIntervalProvider(new SimpleSettingValueProvider<>(LOAD_INTERVAL));
-		
-		//Create a mock missed content wrapper cache, and use a mock content wrapper loader for loading
-		//of content wrappers
-		mockLoader = context.mock(ContentWrapperLoader.class);
 		
 		//Set the content wrapper repository to use the mock missed cache, and the mock loader
 		repository.setMissingContentWrappers(mockMissingContentWrappers);
@@ -109,31 +108,25 @@ public class ContentWrapperRepositoryImplTest {
 	public void testFindById() {
 		//Create a map that will have two content wrappers within it (with mapped wrapper Id's)
 		final Map<String, ContentWrapper> wrappers = setupTwoContentWrappers();
-		
+
 		//The mock loader expects to load the content wrappers, which will return the two wrappers
 		//we have already set up, the missed cache will attempt to remove the content wrappers 
 		//from within the cache as they are not "missing" (this is to ensure that if previously
 		//they were recorded missing that they are not still considered missing).
-		context.checking(new Expectations() {
-			{
-				oneOf(mockLoader).loadContentWrappers();
-				will(returnValue(wrappers));
-
-				oneOf(mockMissingContentWrappers).remove(CS1);
-				oneOf(mockMissingContentWrappers).remove(CS2);
-			}
-		});
+		when(mockLoader.loadContentWrappers()).thenReturn(wrappers);
 
 		//Invoke the find content wrapper by Id method to find the wrapper with Id "cs1"
 		//and ensure that the returned wrapper contains the correct information
 		ContentWrapper returnedWrapper = repository.findContentWrapperById(CS1);
-		assertTrue(returnedWrapper.getTemplateName().equals(TEMPLATE1));
-		
+		assertThat(returnedWrapper.getTemplateName()).isEqualTo(TEMPLATE1);
+		verify(mockMissingContentWrappers).remove(CS1);
+
 		//Invoke the find content wrapper by Id method to find the wrapper with Id "cs2"
 		//and ensure that the returned wrapper contains the correct information
 		returnedWrapper = repository.findContentWrapperById(CS2);
-		assertTrue(returnedWrapper.getTemplateName().equals(TEMPLATE2));
-		
+		assertThat(returnedWrapper.getTemplateName()).isEqualTo(TEMPLATE2);
+		verify(mockMissingContentWrappers).remove(CS2);
+
 	}
 
 	
@@ -147,29 +140,22 @@ public class ContentWrapperRepositoryImplTest {
 		//Obtain a map of two content wrappers (cs1 and cs2)
 		final Map<String, ContentWrapper> twoWrappers = setupTwoContentWrappers();
 		//Ensure that when loading content wrappers, two are loaded
-		context.checking(new Expectations() {
-			{
-				oneOf(mockLoader).loadContentWrappers();
-				will(returnValue(twoWrappers));
-			}
-		});
-		
+		when(mockLoader.loadContentWrappers()).thenReturn(twoWrappers);
+
 		//The missing cache will contain the key for (cs3) and will be a valid entry, thus marking
 		//the content wrapper as missing
-		context.checking(new Expectations() {
-			{
-				oneOf(mockMissingContentWrappers).containsKey(CS3);
-				will(returnValue(true));
+		when(mockMissingContentWrappers.containsKey(CS3)).thenReturn(true);
 
-				oneOf(mockMissingContentWrappers).get(CS3);
-				will(returnValue(System.currentTimeMillis() + LOAD_INTERVAL * MILLI + 1));
-			}
-		});
-		
+		when(mockMissingContentWrappers.get(CS3)).thenReturn(System.currentTimeMillis() + LOAD_INTERVAL * MILLI + 1);
+
 		//If a content wrapper is in the missing cache, and the entry is valid then we should be returned
-		//a null content wrapper 
+		//a null content wrapper
 		ContentWrapper returnedWrapper = repository.findContentWrapperById(CS3);
-		assertNull(returnedWrapper);
+		assertThat(returnedWrapper).isNull();
+
+		verify(mockLoader).loadContentWrappers();
+		verify(mockMissingContentWrappers).containsKey(CS3);
+		verify(mockMissingContentWrappers).get(CS3);
 	}
 	
 	/**
@@ -184,7 +170,7 @@ public class ContentWrapperRepositoryImplTest {
 	public void testFindByIdInMissedCacheExpiredFoundOnReload() {
 		//Obtain a map of two content wrapper objects
 		final Map<String, ContentWrapper> twoWrappers = setupTwoContentWrappers();
-		
+
 		//Obtain a map of two content wrapper objects and add a third
 		//content wrapper to it (cs3 in addition to cs1 and cs2)
 		final Map<String, ContentWrapper> threeWrappers = setupTwoContentWrappers();
@@ -192,40 +178,32 @@ public class ContentWrapperRepositoryImplTest {
 		wrapper3.setWrapperId(CS3);
 		wrapper3.setTemplateName(TEMPLATE3);
 		threeWrappers.put(wrapper3.getWrapperId(), wrapper3);
-		
+
 		//The content wrapper will return two wrappers the first time loadContentWrappers method is called,
 		//to simulate when a third content wrapper xml file was not present but on the subsequent call it will
 		//return three content wrappers simulating a reload where another file was found
-		context.checking(new Expectations() {
-			{
-		atLeast(1).of(mockLoader).loadContentWrappers();
-				will(onConsecutiveCalls(returnValue(twoWrappers), returnValue(threeWrappers)));
-			}
-		});
-		
+		when(mockLoader.loadContentWrappers()).thenReturn(twoWrappers).thenReturn(threeWrappers);
+
 		//The missed cache should contain the wrapper Id for cs3 but it will be an expired entry, this
 		//means that a reload of the content wrappers will have to take place
-		context.checking(new Expectations() {
-			{
-				oneOf(mockMissingContentWrappers).containsKey(CS3);
-				will(returnValue(true));
+		when(mockMissingContentWrappers.containsKey(CS3)).thenReturn(true);
 
-				oneOf(mockMissingContentWrappers).get(CS3);
-				will(returnValue(System.currentTimeMillis() - LOAD_INTERVAL * MILLI - 1));
-
-				//Since the new content wrapper will be found, the method should be trying to remove the entry
-				//if it exists for cs3 from the missed cache
-				oneOf(mockMissingContentWrappers).remove(CS3);
-			}
-		});
+		when(mockMissingContentWrappers.get(CS3)).thenReturn(System.currentTimeMillis() - LOAD_INTERVAL * MILLI - 1);
 
 		//Invoke the findContentWrapperById method to try to find the content wrapper with Id cs3, since
 		//it will be found when the reload occurs it should not be null and contain all of the pertinent
 		//information
 		ContentWrapper returnedWrapper = repository.findContentWrapperById(CS3);
-		assertNotNull(returnedWrapper);
-		assertEquals(CS3, returnedWrapper.getWrapperId());
-		assertEquals(TEMPLATE3, returnedWrapper.getTemplateName());
+		assertThat(returnedWrapper).isNotNull();
+		assertThat(returnedWrapper.getWrapperId()).isEqualTo(CS3);
+		assertThat(returnedWrapper.getTemplateName()).isEqualTo(TEMPLATE3);
+
+		verify(mockMissingContentWrappers).containsKey(CS3);
+		verify(mockMissingContentWrappers).get(CS3);
+
+		//Since the new content wrapper will be found, the method should be trying to remove the entry
+		//if it exists for cs3 from the missed cache
+		verify(mockMissingContentWrappers).remove(CS3);
 	}
 	
 	/**
@@ -240,36 +218,28 @@ public class ContentWrapperRepositoryImplTest {
 	public void testFindByIdInMissedCacheExpiredNotFoundOnReload() {
 		//Obtain a map of two content wrapper objects
 		final Map<String, ContentWrapper> twoWrappers = setupTwoContentWrappers();
-		
+
 		//The mock content wrapper loader should on consecutive calls to the loaderContentWrappers method
 		//return both times a map of two content wrappers, simulating a case where no additional content
 		//wrapper xml files were found
-		context.checking(new Expectations() {
-			{
-				atLeast(1).of(mockLoader).loadContentWrappers();
-				will(onConsecutiveCalls(returnValue(twoWrappers), returnValue(twoWrappers)));
-			}
-		});
-		
+		when(mockLoader.loadContentWrappers()).thenReturn(twoWrappers).thenReturn(twoWrappers);
+
 		//The missing cache should contain the wrapper Id for the desired content wrapper (cs3) and the 
 		//entry should be expired meaning that a reload of the content wrappers should occur
-		context.checking(new Expectations() {
-			{
-				oneOf(mockMissingContentWrappers).containsKey(CS3);
-				will(returnValue(true));
+		when(mockMissingContentWrappers.containsKey(CS3)).thenReturn(true);
 
-				oneOf(mockMissingContentWrappers).get(CS3);
-				will(returnValue(System.currentTimeMillis() - LOAD_INTERVAL * MILLI - 1));
-
-				//Since the new content wrapper will not be found, the missed cache should insert itself with
-				//the content wrapper Id, overriding any old one since it is a map along with a current time stamp (not expired now)
-				oneOf(mockMissingContentWrappers).put(with(CS3), with(any(Long.class)));
-			}
-		});
-
+		when(mockMissingContentWrappers.get(CS3)).thenReturn(System.currentTimeMillis() - LOAD_INTERVAL * MILLI - 1);
 		//Invoking the findContentWrapperId to find the cs3 content wrapper will return null since the content wrapper was not found
 		ContentWrapper returnedWrapper = repository.findContentWrapperById(CS3);
-		assertNull(returnedWrapper);
+		assertThat(returnedWrapper).isNull();
+
+		verify(mockMissingContentWrappers).containsKey(CS3);
+		verify(mockMissingContentWrappers).get(CS3);
+
+		//Since the new content wrapper will not be found, the missed cache should insert itself with
+		//the content wrapper Id, overriding any old one since it is a map along with a current time stamp (not expired now)
+		verify(mockMissingContentWrappers).put(eq(CS3), any(Long.class));
+
 	}
 	
 	/**
@@ -283,7 +253,7 @@ public class ContentWrapperRepositoryImplTest {
 	public void testFindByIdNotInMissedCacheFoundOnReload() {
 		//Obtain a map of two content wrapper objects
 		final Map<String, ContentWrapper> twoWrappers = setupTwoContentWrappers();
-		
+
 		//Obtain a map of two content wrapper objects and add a third
 		//content wrapper to it (cs3 in addition to cs1 and cs2)
 		final Map<String, ContentWrapper> wrappers = setupTwoContentWrappers();
@@ -291,35 +261,26 @@ public class ContentWrapperRepositoryImplTest {
 		wrapper3.setWrapperId(CS3);
 		wrapper3.setTemplateName(TEMPLATE3);
 		wrappers.put(wrapper3.getWrapperId(), wrapper3);
-		
+
 		//The content wrapper will return two wrappers the first time loadContentWrappers method is called,
 		//to simulate when a third content wrapper xml file was not present but on the subsequent call it will
 		//return three content wrappers simulating a reload where another file was found
-		context.checking(new Expectations() {
-			{
-		atLeast(1).of(mockLoader).loadContentWrappers();
-				will(onConsecutiveCalls(returnValue(twoWrappers), returnValue(wrappers)));
-			}
-		});
-		
+		when(mockLoader.loadContentWrappers()).thenReturn(twoWrappers).thenReturn(wrappers);
+
 		//The missing cache should NOT contain the wrapper Id for the desired content wrapper (cs3), and
 		//since the new content wrapper file will be found we try to try to remove any stale references to
 		//the content wrapper Id in the missing cache if they exist
-		context.checking(new Expectations() {
-			{
-				oneOf(mockMissingContentWrappers).containsKey(CS3);
-				will(returnValue(false));
-
-				oneOf(mockMissingContentWrappers).remove(CS3);
-			}
-		});
+		when(mockMissingContentWrappers.containsKey(CS3)).thenReturn(false);
 
 		//Invoke the findContentWrapperById to find the content wrapper Id cs3, since it will be found it
 		//should not be null and the information should be the same as what we had put in.
 		ContentWrapper returnedWrapper = repository.findContentWrapperById(CS3);
-		assertNotNull(returnedWrapper);
-		assertEquals(wrapper3.getWrapperId(), returnedWrapper.getWrapperId());
-		assertEquals(wrapper3.getTemplateName(), returnedWrapper.getTemplateName());
+		assertThat(returnedWrapper).isNotNull();
+		assertThat(returnedWrapper.getWrapperId()).isEqualTo(wrapper3.getWrapperId());
+		assertThat(returnedWrapper.getTemplateName()).isEqualTo(wrapper3.getTemplateName());
+
+		verify(mockMissingContentWrappers).containsKey(CS3);
+		verify(mockMissingContentWrappers).remove(CS3);
 	}
 	
 	/**
@@ -335,50 +296,21 @@ public class ContentWrapperRepositoryImplTest {
 		final Map<String, ContentWrapper> wrappers = setupTwoContentWrappers();
 
 		//The content wrapper will on consecutive calls return two wrappers
-		context.checking(new Expectations() {
-			{
-				atLeast(1).of(mockLoader).loadContentWrappers();
-				will(returnValue(wrappers));
-			}
-		});
-		
+		when(mockLoader.loadContentWrappers()).thenReturn(wrappers);
+
 		//The missing cache will not contain the wrapper Id for cs4 but since that content wrapper will not be found
 		//(only cs1 and cs2) will be found, then we must put the cs4 wrapper Id into the missed cache along
 		//with the time the load was attempted 
-		context.checking(new Expectations() {
-			{
-				oneOf(mockMissingContentWrappers).containsKey("cs4");
-				will(returnValue(false));
-
-				oneOf(mockMissingContentWrappers).put(with("cs4"), with(any(Long.class)));
-			}
-		});
+		when(mockMissingContentWrappers.containsKey(CS4)).thenReturn(false);
 		//Invoke the findContentWrapperById method that will attempt to find the cs4 wrapper but since
 		//this will not be found it will return null
-		ContentWrapper returnedWrapper = repository.findContentWrapperById("cs4");
-		assertNull(returnedWrapper);
+		ContentWrapper returnedWrapper = repository.findContentWrapperById(CS4);
+		assertThat(returnedWrapper).isNull();
+
+		verify(mockMissingContentWrappers).containsKey(CS4);
+		verify(mockMissingContentWrappers).put(eq(CS4), any(Long.class));
 	}
 
-	/**
-	 * Tests to ensure that the get method for the content wrappers will return
-	 * an empty map of wrapper Ids mapped to content wrappers if there are no content wrappers/null.
-	 */
-	/*
-	 * This test is incorrect since we are dynamicly loading content wrappers
-	 * using loaded they are never set manually.
-	 * 
-	 * public void testGetContentWrappersEmptyMap() {
-		
-		repository.setContentWrappers(null);
-		Map<String, ContentWrapper> wrappers = repository.getContentWrappers();
-		assertNull(wrappers);
-		
-		Map<String, ContentWrapper> newMap = new HashMap<String, ContentWrapper>();
-		repository.setContentWrappers(newMap);
-		wrappers = repository.getContentWrappers();
-		assertEquals(wrappers.size(), 0);
-	}*/
-	
 	/**
 	 * Test method for hasLoadingIntervalElapsed, which should only return true if the spell 
 	 * checking interval has elapsed since the previous rebuild.
@@ -387,18 +319,21 @@ public class ContentWrapperRepositoryImplTest {
 	public void testHasLoadingIntervalElapsed() {
 		
 		// First call to load/reload, lastLoadTime is 0
-		assertTrue("Loading interval should have elapsed.", 
-				repository.hasLoadingIntervalElapsed(repository.getLastLoadTime()));
+		assertThat(repository.hasLoadingIntervalElapsed(repository.getLastLoadTime()))
+			.as("Loading interval should have elapsed.")
+			.isTrue();
 		
 		// Second, and immediate, call should not trigger reload since interval has not elapsed
 		repository.setLastLoadTime(System.currentTimeMillis());
-		assertFalse("Loading interval should not have elapsed.", 
-				repository.hasLoadingIntervalElapsed(repository.getLastLoadTime()));
+		assertThat(repository.hasLoadingIntervalElapsed(repository.getLastLoadTime()))
+			.as("Loading interval should not have elapsed.")
+			.isFalse();
 		
 		// third delayed call should trigger spell checking rebuild
 		long delayedTime = System.currentTimeMillis() - LOAD_INTERVAL * MILLI - 1;
 		repository.setLastLoadTime(delayedTime);
-		assertTrue("Loading interval should have elasped.", 
-				repository.hasLoadingIntervalElapsed(repository.getLastLoadTime()));
+		assertThat(repository.hasLoadingIntervalElapsed(repository.getLastLoadTime()))
+			.as("Loading interval should have elasped.")
+			.isTrue();
 	}
 }

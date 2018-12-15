@@ -3,10 +3,7 @@
  */
 package com.elasticpath.domain.rules.impl;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -91,10 +88,10 @@ public class AbstractRuleElementImplTest {
 	 */
 	@Test
 	public void testGetSetKind() {
-		assertEquals(ruleElementImpl.getKind(), CONDITION_KIND);
+		assertThat(ruleElementImpl.getKind()).isEqualTo(CONDITION_KIND);
 		final String kind = "testKind";
 		ruleElementImpl.setKind(kind);
-		assertEquals(ruleElementImpl.getKind(), kind);
+		assertThat(ruleElementImpl.getKind()).isEqualTo(kind);
 	}
 
 	/**
@@ -104,7 +101,7 @@ public class AbstractRuleElementImplTest {
 	public void testGetSetParameters() {
 		Set<RuleParameter> paramSet = getParameterSet();
 		ruleElementImpl.setParameters(paramSet);
-		assertEquals(ruleElementImpl.getParameters(), paramSet);
+		assertThat(ruleElementImpl.getParameters()).isEqualTo(paramSet);
 	}
 
 	/**
@@ -122,7 +119,7 @@ public class AbstractRuleElementImplTest {
 		int numParams = paramSet.size();
 		ruleElementImpl.addParameter(ruleParameter);
 
-		assertEquals(ruleElementImpl.getParameters().size(), numParams + 1);
+		assertThat(ruleElementImpl.getParameters()).hasSize(numParams + 1);
 	}
 
 	/**
@@ -131,7 +128,7 @@ public class AbstractRuleElementImplTest {
 	@Test
 	public void testGetParamValue() {
 		ruleElementImpl.setParameters(getParameterSet());
-		assertEquals(ruleElementImpl.getParamValue(KEY1), VALUE1);
+		assertThat(ruleElementImpl.getParamValue(KEY1)).isEqualTo(VALUE1);
 	}
 	
 	/**
@@ -139,7 +136,7 @@ public class AbstractRuleElementImplTest {
 	 */
 	@Test
 	public void testGetType() {
-		assertTrue(ruleElementImpl.getType().equals(CONDITION_TYPE.getPropertyKey()));
+		assertThat(ruleElementImpl.getType()).isEqualTo(CONDITION_TYPE.getPropertyKey());
 	}
 	
 	/**
@@ -147,7 +144,7 @@ public class AbstractRuleElementImplTest {
 	 */
 	@Test
 	public void testGetElementType() {
-		assertNotNull(ruleElementImpl.getElementType());
+		assertThat(ruleElementImpl.getElementType()).isNotNull();
 	}
 	
 	/**
@@ -155,7 +152,7 @@ public class AbstractRuleElementImplTest {
 	 */
 	@Test
 	public void testScenarioApplication() {
-		assertFalse(ruleElementImpl.appliesInScenario(-1));
+		assertThat(ruleElementImpl.appliesInScenario(-1)).isFalse();
 	}
 	
 	private Set<RuleParameter> getParameterSet() {
@@ -190,7 +187,7 @@ public class AbstractRuleElementImplTest {
 		categoryException.setParameters(paramSet1);
 		ruleExceptions.add(categoryException);
 		ruleElementImpl.setExceptions(ruleExceptions);
-		assertEquals(RULE_EXCEPTION_STR1, ruleElementImpl.getExceptionStr());
+		assertThat(ruleElementImpl.getExceptionStr()).isEqualTo(RULE_EXCEPTION_STR1);
 		
 		RuleException productException = new ProductExceptionImpl();
 		Set<RuleParameter> paramSet2 = new HashSet<>();
@@ -211,6 +208,6 @@ public class AbstractRuleElementImplTest {
 		ruleExceptions.add(productException);
 		ruleExceptions.add(skuException);
 		ruleElementImpl.setExceptions(ruleExceptions);
-		assertEquals(RULE_EXCEPTION_STR2, ruleElementImpl.getExceptionStr());
+		assertThat(ruleElementImpl.getExceptionStr()).isEqualTo(RULE_EXCEPTION_STR2);
 	}
 }

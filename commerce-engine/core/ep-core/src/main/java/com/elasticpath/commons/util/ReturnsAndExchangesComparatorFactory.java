@@ -23,23 +23,16 @@ public final class ReturnsAndExchangesComparatorFactory {
 	 * @return a returns and exchanges comparator instance
 	 */
 	public static Comparator<OrderReturn> getReturnsAndExchangesCompatator() {
-		return new Comparator<OrderReturn>() {
-			/**
-			 * Compare by created date in descending order.
-			 */
-			@Override
-			public int compare(final OrderReturn arg0, final OrderReturn arg1) {
-				String firstKey = arg0.getReturnType().getPropertyKey();
-				String secondKey = arg1.getReturnType().getPropertyKey();
-				if (!firstKey.equals(secondKey)) {
-					if (firstKey.equals(OrderReturnType.RETURN.getPropertyKey())) {
-						return -1;
-					}
-					return 1;
+		return (arg0, arg1) -> {
+			String firstKey = arg0.getReturnType().getPropertyKey();
+			String secondKey = arg1.getReturnType().getPropertyKey();
+			if (!firstKey.equals(secondKey)) {
+				if (firstKey.equals(OrderReturnType.RETURN.getPropertyKey())) {
+					return -1;
 				}
-				return arg0.getRmaCode().compareTo(arg1.getRmaCode());
+				return 1;
 			}
+			return arg0.getRmaCode().compareTo(arg1.getRmaCode());
 		};
 	}
-
 }

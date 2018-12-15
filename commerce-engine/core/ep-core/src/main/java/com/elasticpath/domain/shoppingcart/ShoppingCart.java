@@ -513,4 +513,12 @@ public interface ShoppingCart extends EpDomain, StoreObject, ShoppingItemContain
 	 * @return a map of ShoppingItems in the cart, associated to the related ProductSku
 	 */
 	Map<ShoppingItem, ProductSku> getShoppingItemProductSkuMap();
+
+	/**
+	 * Looks up the parent ProductSku for a shopping item
+	 *
+	 * @param shoppingItem shopping item
+	 * @return parent product sku or null if there is no parent
+	 */
+	ProductSku getParentProductSku(ShoppingItem shoppingItem);
 }

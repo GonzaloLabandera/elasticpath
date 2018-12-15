@@ -80,6 +80,11 @@ import com.elasticpath.persistence.support.FetchGroupConstants;
 		@FetchAttribute(name = "startDate"),
 		@FetchAttribute(name = "endDate")
 		}),
+		@FetchGroup(name = FetchGroupConstants.PRODUCT_SKU_INDEX, attributes = { @FetchAttribute(name = "weight"),
+				@FetchAttribute(name = "length"),
+				@FetchAttribute(name = "width"),
+				@FetchAttribute(name = "height")
+		}),
 	@FetchGroup(name = FetchGroupConstants.ORDER_DEFAULT, attributes = {
 			@FetchAttribute(name = "optionValueMap"),
 			@FetchAttribute(name = "productInternal", recursionDepth = -1) })

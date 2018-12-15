@@ -3,12 +3,8 @@
  */
 package com.elasticpath.test.integration;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Fail.fail;
 
 import java.math.BigDecimal;
 import java.util.Currency;
@@ -78,13 +74,15 @@ public class BaseAmountServiceImplTest extends BasicSpringContextTest {
 		final BigDecimal salePrice = new BigDecimal("12");
 		final BaseAmount amount = baFactory.createBaseAmount(null, objectGuid, objectType, qty, listPrice, salePrice, plGuid);
 
-		assertNotNull("The BaseAmount created by the factory should have a non-null GUID", amount.getObjectGuid());
+		assertThat(amount.getObjectGuid())
+			.as("The BaseAmount created by the factory should have a non-null GUID")
+			.isNotNull();
 		//Persist the new BaseAmount
 		final BaseAmount saved = baseAmountService.add(amount);
-		assertEquals(amount.getGuid(), saved.getGuid());
-		assertEquals(qty, saved.getQuantity());
-		assertEquals(objectGuid, saved.getObjectGuid());
-		assertEquals(objectType, saved.getObjectType());
+		assertThat(saved.getGuid()).isEqualTo(amount.getGuid());
+		assertThat(saved.getQuantity()).isEqualTo(qty);
+		assertThat(saved.getObjectGuid()).isEqualTo(objectGuid);
+		assertThat(saved.getObjectType()).isEqualTo(objectType);
 	}
 
 	/**
@@ -150,10 +148,10 @@ public class BaseAmountServiceImplTest extends BasicSpringContextTest {
 	@Test
 	public void testCRUD() {
 		final BaseAmount amount = baFactory.createBaseAmount(null, "OBJ_GUID", "SKU",
-				new BigDecimal(12), new BigDecimal(13), new BigDecimal(11), plGuid);
-		assertNotNull(amount.getObjectGuid());
+			new BigDecimal(12), new BigDecimal(13), new BigDecimal(11), plGuid);
+		assertThat(amount.getObjectGuid()).isNotNull();
 		final BaseAmount savedAmount = baseAmountService.add(amount);
-		assertEquals(savedAmount.getGuid(), baseAmountService.findByGuid(amount.getGuid()).getGuid());
+		assertThat(baseAmountService.findByGuid(amount.getGuid()).getGuid()).isEqualTo(savedAmount.getGuid());
 
 		savedAmount.setListValue(BigDecimal.TEN);
 		savedAmount.setSaleValue(BigDecimal.ONE);
@@ -163,17 +161,21 @@ public class BaseAmountServiceImplTest extends BasicSpringContextTest {
 		} catch (final BaseAmountNotExistException e) {
 			fail("Couldn't find BA on update");
 		}
-		assertEquals(savedAmount.getListValue(), updatedAmount.getListValue());
-		assertEquals(savedAmount.getSaleValue(), updatedAmount.getSaleValue());
+		assertThat(updatedAmount.getListValue()).isEqualTo(savedAmount.getListValue());
+		assertThat(updatedAmount.getSaleValue()).isEqualTo(savedAmount.getSaleValue());
 
-		assertEquals("The updated BaseAmount should have the same guid as the original baseAmount.",
-				savedAmount.getGuid(), updatedAmount.getGuid());
-		assertTrue("The BaseAmount returned from update() should have the same Quantity as the BaseAmount passed into the method.",
-				savedAmount.getQuantity().compareTo(updatedAmount.getQuantity()) == 0);
-		assertEquals("The BaseAmount returned from update() should have the same ObjectGuid as the BaseAmount passed into the method.",
-				savedAmount.getObjectGuid(), updatedAmount.getObjectGuid());
-		assertEquals("The BaseAmount returned from update() should have the same ObjectType as the BaseAmount passed into the method.",
-				savedAmount.getObjectType(), updatedAmount.getObjectType());
+		assertThat(updatedAmount.getGuid())
+			.as("The updated BaseAmount should have the same guid as the original baseAmount.")
+			.isEqualTo(savedAmount.getGuid());
+		assertThat(savedAmount.getQuantity())
+			.as("The BaseAmount returned from update() should have the same Quantity as the BaseAmount passed into the method.")
+			.isEqualByComparingTo(updatedAmount.getQuantity());
+		assertThat(updatedAmount.getObjectGuid())
+			.as("The BaseAmount returned from update() should have the same ObjectGuid as the BaseAmount passed into the method.")
+			.isEqualTo(savedAmount.getObjectGuid());
+		assertThat(updatedAmount.getObjectType())
+			.as("The BaseAmount returned from update() should have the same ObjectType as the BaseAmount passed into the method.")
+			.isEqualTo(savedAmount.getObjectType());
 
 		baseAmountService.delete(updatedAmount);
 	}
@@ -190,18 +192,20 @@ public class BaseAmountServiceImplTest extends BasicSpringContextTest {
 		final String priceListDescriptorGuid = scenario.getCatalog().getCode() + "_" + currency.getCurrencyCode();
 		final PriceListDescriptor priceListDescriptor = priceListDescriptorService.findByGuid(priceListDescriptorGuid);
 
-		assertNotNull(priceListDescriptor);
+		assertThat(priceListDescriptor).isNotNull();
 		final Product product = getTac().getPersistersFactory().getCatalogTestPersister().persistSimpleProduct("BASE_AMOUNT_TEST_PRODUCT", "newTestType",
-									scenario.getCatalog(), scenario.getCategory(),
-									getTac().getPersistersFactory().getTaxTestPersister().getTaxCode(TaxTestPersister.TAX_CODE_GOODS));
+			scenario.getCatalog(), scenario.getCategory(),
+			getTac().getPersistersFactory().getTaxTestPersister().getTaxCode(TaxTestPersister.TAX_CODE_GOODS));
 		getTac().getPersistersFactory().getCatalogTestPersister().addProductBaseAmount(baseAmountGuid, priceListDescriptorGuid,
-														product.getCode(), new BigDecimal(13), new BigDecimal(13), new BigDecimal(11));
+			product.getCode(), new BigDecimal(13), new BigDecimal(13), new BigDecimal(11));
 
-		final BaseAmount savedAmount =  baseAmountService.findByGuid(baseAmountGuid);
-		assertNotNull(savedAmount.getGuid());
+		final BaseAmount savedAmount = baseAmountService.findByGuid(baseAmountGuid);
+		assertThat(savedAmount.getGuid()).isNotNull();
 
 		baseAmountService.delete(savedAmount);
-		assertNull("BaseAmount is not longer in database after delele", baseAmountService.findByGuid(baseAmountGuid));
+		assertThat(baseAmountService.findByGuid(baseAmountGuid))
+			.as("BaseAmount is not longer in database after delele")
+			.isNull();
 	}
 	/**
 	 * Test that with no UIDPK set to the BaseAmount, we can still do an update.
@@ -213,10 +217,10 @@ public class BaseAmountServiceImplTest extends BasicSpringContextTest {
 	@SuppressWarnings("deprecation")
 	public void testUpdateWithNoUid() {
 		final BaseAmount amount = baFactory.createBaseAmount(null, "OBJ_GUID", "SKU",
-				new BigDecimal(12), new BigDecimal(13), new BigDecimal(11), plGuid);
-		assertNotNull(amount.getObjectGuid());
+			new BigDecimal(12), new BigDecimal(13), new BigDecimal(11), plGuid);
+		assertThat(amount.getObjectGuid()).isNotNull();
 		final BaseAmount savedAmount = baseAmountService.add(amount);
-		assertEquals(savedAmount.getGuid(), baseAmountService.findByGuid(amount.getGuid()).getGuid());
+		assertThat(baseAmountService.findByGuid(amount.getGuid()).getGuid()).isEqualTo(savedAmount.getGuid());
 		savedAmount.setListValue(BigDecimal.TEN);
 		savedAmount.setSaleValue(BigDecimal.ONE);
 		//Set UID to 0. i.e. looks unpersisted
@@ -227,17 +231,21 @@ public class BaseAmountServiceImplTest extends BasicSpringContextTest {
 		} catch (final BaseAmountNotExistException e) {
 			fail("Couldn't find BA on update");
 		}
-		assertEquals(savedAmount.getListValue(), updatedAmount.getListValue());
-		assertTrue(savedAmount.getSaleValue().compareTo(updatedAmount.getSaleValue()) == 0);
+		assertThat(updatedAmount.getListValue()).isEqualTo(savedAmount.getListValue());
+		assertThat(savedAmount.getSaleValue()).isEqualByComparingTo(updatedAmount.getSaleValue());
 
-		assertEquals("The updated BaseAmount should have the same guid as the original baseAmount.",
-				savedAmount.getGuid(), updatedAmount.getGuid());
-		assertTrue("The BaseAmount returned from update() should have the same Quantity as the BaseAmount passed into the method.",
-				savedAmount.getQuantity().compareTo(updatedAmount.getQuantity()) == 0);
-		assertEquals("The BaseAmount returned from update() should have the same ObjectGuid as the BaseAmount passed into the method.",
-				savedAmount.getObjectGuid(), updatedAmount.getObjectGuid());
-		assertEquals("The BaseAmount returned from update() should have the same ObjectType as the BaseAmount passed into the method.",
-				savedAmount.getObjectType(), updatedAmount.getObjectType());
+		assertThat(updatedAmount.getGuid())
+			.as("The updated BaseAmount should have the same guid as the original baseAmount.")
+			.isEqualTo(savedAmount.getGuid());
+		assertThat(updatedAmount.getQuantity())
+			.as("The BaseAmount returned from update() should have the same Quantity as the BaseAmount passed into the method.")
+			.isEqualByComparingTo(savedAmount.getQuantity());
+		assertThat(updatedAmount.getObjectGuid())
+			.as("The BaseAmount returned from update() should have the same ObjectGuid as the BaseAmount passed into the method.")
+			.isEqualTo(savedAmount.getObjectGuid());
+		assertThat(updatedAmount.getObjectType())
+			.as("The BaseAmount returned from update() should have the same ObjectType as the BaseAmount passed into the method.")
+			.isEqualTo(savedAmount.getObjectType());
 
 		baseAmountService.delete(updatedAmount);
 	}
@@ -258,21 +266,25 @@ public class BaseAmountServiceImplTest extends BasicSpringContextTest {
 
 	@Test
 	public void testFindUidByGuid() {
-	     boolean result = baseAmountService.guidExists("nonExistentBaseAmount");
-	    assertFalse("base amount should not exist", result);
+		boolean result = baseAmountService.guidExists("nonExistentBaseAmount");
+		assertThat(result)
+			.as("base amount should not exist")
+			.isFalse();
 
-	       //Create a new BaseAmount
-        final String objectGuid = "OBJ_GUID";
-        final String objectType = "SKU";
-        final BigDecimal qty = new BigDecimal("5");
-        final BigDecimal listPrice = new BigDecimal("13");
-        final BigDecimal salePrice = new BigDecimal("12");
-        final BaseAmount amount = baFactory.createBaseAmount(null, objectGuid, objectType, qty, listPrice, salePrice, plGuid);
-        final BaseAmount addedBaseAmount = baseAmountService.add(amount);
+		//Create a new BaseAmount
+		final String objectGuid = "OBJ_GUID";
+		final String objectType = "SKU";
+		final BigDecimal qty = new BigDecimal("5");
+		final BigDecimal listPrice = new BigDecimal("13");
+		final BigDecimal salePrice = new BigDecimal("12");
+		final BaseAmount amount = baFactory.createBaseAmount(null, objectGuid, objectType, qty, listPrice, salePrice, plGuid);
+		final BaseAmount addedBaseAmount = baseAmountService.add(amount);
 
 
-         result = baseAmountService.guidExists(addedBaseAmount.getGuid());
-        assertTrue("base amount should exist", result);
+		result = baseAmountService.guidExists(addedBaseAmount.getGuid());
+		assertThat(result)
+			.as("base amount should exist")
+			.isTrue();
 
 
 	}

@@ -12,8 +12,8 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import org.apache.commons.lang.time.StopWatch;
 import org.apache.log4j.Logger;
-import org.apache.solr.client.solrj.SolrServer;
-import org.apache.solr.client.solrj.impl.HttpSolrServer;
+import org.apache.solr.client.solrj.SolrClient;
+import org.apache.solr.client.solrj.impl.HttpSolrClient;
 import org.apache.solr.common.SolrInputDocument;
 import org.springframework.core.task.SyncTaskExecutor;
 import org.springframework.core.task.TaskExecutor;
@@ -50,7 +50,7 @@ public class QueueingSolrDocumentPublisher implements SolrDocumentPublisher {
 
 	private static final int BUFFER_SIZE = 510;
 
-	private SolrServer solrServer;
+	private SolrClient solrServer;
 
 	private TaskExecutor taskExecutor;
 
@@ -83,8 +83,8 @@ public class QueueingSolrDocumentPublisher implements SolrDocumentPublisher {
 		@Override
 		public void run() {
 
-			if (solrServer instanceof HttpSolrServer) {
-				Thread.currentThread().setName("QueueingPublisher to " + ((HttpSolrServer) solrServer).getBaseURL());
+			if (solrServer instanceof HttpSolrClient) {
+				Thread.currentThread().setName("QueueingPublisher to " + ((HttpSolrClient) solrServer).getBaseURL());
 			} else {
 				Thread.currentThread().setName("QueueingPublisher talking to " + solrServer);
 			}
@@ -138,8 +138,8 @@ public class QueueingSolrDocumentPublisher implements SolrDocumentPublisher {
 					LOG.error("Error processing command.", e);
 				}
 			}
-			if (solrServer instanceof HttpSolrServer) {
-				LOG.info("Updated " + localCopy.size() + " documents against " + ((HttpSolrServer) solrServer).getBaseURL());
+			if (solrServer instanceof HttpSolrClient) {
+				LOG.info("Updated " + localCopy.size() + " documents against " + ((HttpSolrClient) solrServer).getBaseURL());
 			}
 			stopWatch.stop();
 			getPipelinePerformance().addValue("publish:time", stopWatch.getTime());
@@ -231,11 +231,11 @@ public class QueueingSolrDocumentPublisher implements SolrDocumentPublisher {
 	}
 
 	@Override
-	public void setSolrServer(final SolrServer solrServer) {
+	public void setSolrServer(final SolrClient solrServer) {
 		this.solrServer = solrServer;
 	}
 
-	public SolrServer getSolrServer() {
+	public SolrClient getSolrServer() {
 		return solrServer;
 	}
 

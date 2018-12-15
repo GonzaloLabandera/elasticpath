@@ -3,9 +3,7 @@
  */
 package com.elasticpath.importexport.common.marshalling;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.ByteArrayInputStream;
 import java.util.ArrayList;
@@ -31,10 +29,11 @@ public class XMLUnmarshallerTest {
 		byte[] byteXml = sourceXml.getBytes("UTF-8");
 		ByteArrayInputStream input = new ByteArrayInputStream(byteXml);
 		Object out = xmlUnmarshaller.unmarshall(input);
-		assertTrue(out instanceof FakeObjectDTO);
+		assertThat(out).isInstanceOf(FakeObjectDTO.class);
 		FakeObjectDTO fakeObjectDTO = (FakeObjectDTO) out;
-		assertNotNull(fakeObjectDTO.getFakeRelatedObjectList());
-		assertEquals(0, fakeObjectDTO.getFakeRelatedObjectList().size());
+		assertThat(fakeObjectDTO.getFakeRelatedObjectList())
+			.isNotNull()
+			.isEmpty();
 	}
 	
 	/**
@@ -54,7 +53,7 @@ public class XMLUnmarshallerTest {
 		byte[] byteXml = sourceXml.getBytes("UTF-8");
 		ByteArrayInputStream input = new ByteArrayInputStream(byteXml);
 		Object out = xmlUnmarshaller.unmarshall(input);
-		assertTrue(out instanceof FakeObjectDTO);
+		assertThat(out).isInstanceOf(FakeObjectDTO.class);
 		FakeObjectDTO actualObjectDTO = (FakeObjectDTO) out;
 		FakeObjectDTO expectedObjectDTO = new FakeObjectDTO();
 		expectedObjectDTO.setCode("123");
@@ -62,7 +61,7 @@ public class XMLUnmarshallerTest {
 		List<FakeRelatedObjectDTO> expectedRelatedObjectList = new ArrayList<>();
 		expectedRelatedObjectList.add(new FakeRelatedObjectDTO());
 		expectedObjectDTO.setFakeRelatedObjectList(expectedRelatedObjectList);
-		assertTrue(expectedObjectDTO.equals(actualObjectDTO)); // NOPMD 
+		assertThat(actualObjectDTO).isEqualTo(expectedObjectDTO);
 	}
 
 }

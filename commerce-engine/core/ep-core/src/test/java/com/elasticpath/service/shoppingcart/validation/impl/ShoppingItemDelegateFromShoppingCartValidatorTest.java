@@ -19,7 +19,6 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import com.google.common.collect.ImmutableList;
-import org.assertj.core.util.Lists;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -31,7 +30,9 @@ import com.elasticpath.base.common.dto.StructuredErrorMessage;
 import com.elasticpath.common.pricing.service.PriceLookupFacade;
 import com.elasticpath.commons.beanframework.BeanFactory;
 import com.elasticpath.commons.constants.ContextIdNames;
+import com.elasticpath.domain.catalog.AvailabilityCriteria;
 import com.elasticpath.domain.catalog.ProductSku;
+import com.elasticpath.domain.catalog.impl.ProductSkuImpl;
 import com.elasticpath.domain.shopper.Shopper;
 import com.elasticpath.domain.shoppingcart.ShoppingCart;
 import com.elasticpath.domain.shoppingcart.ShoppingItem;
@@ -75,6 +76,7 @@ public class ShoppingItemDelegateFromShoppingCartValidatorTest {
 
 	private static final String CODE = "Code";
 
+
 	@InjectMocks
 	private ShoppingItemDelegateFromShoppingCartValidatorImpl delegateValidator;
 
@@ -93,6 +95,16 @@ public class ShoppingItemDelegateFromShoppingCartValidatorTest {
 	@SuppressWarnings("PMD.UnusedPrivateField")
 	@Mock
 	private PriceLookupFacade priceLookupFacade;
+
+	private ShoppingItem level2ShoppingItem;
+
+	private ShoppingItem level1aShoppingItem;
+
+	private ShoppingItem level1bShoppingItem;
+
+	private ShoppingItem rootShoppingItem1;
+
+	private ShoppingItem rootShoppingItem2;
 
 	@Before
 	public void setup() {
@@ -119,8 +131,8 @@ public class ShoppingItemDelegateFromShoppingCartValidatorTest {
 	@Test
 	public void testValidateWithTwoStandardShoppingItems() {
 		// Given
-		ShoppingItem shoppingItem1 = getShoppingItem(SKU_GUID_ROOT_1, Lists.emptyList());
-		ShoppingItem shoppingItem2 = getShoppingItem(SKU_GUID_ROOT_2, Lists.emptyList());
+		ShoppingItem shoppingItem1 = getShoppingItem(SKU_GUID_ROOT_1);
+		ShoppingItem shoppingItem2 = getShoppingItem(SKU_GUID_ROOT_2);
 		Map<ShoppingItem, ProductSku> shoppingItemProductSkuMap = ImmutableList.of(shoppingItem1, shoppingItem2).stream()
 				.collect(Collectors.toMap(shoppingItem -> shoppingItem, shoppingItem -> getMockProductSku(shoppingItem.getSkuGuid())));
 		when(shoppingCart.getShoppingItemProductSkuMap()).thenReturn(shoppingItemProductSkuMap);
@@ -151,6 +163,14 @@ public class ShoppingItemDelegateFromShoppingCartValidatorTest {
 				.collect(Collectors.toMap(shoppingItem -> shoppingItem, shoppingItem -> getMockProductSku(shoppingItem.getSkuGuid())));
 		when(shoppingCart.getShoppingItemProductSkuMap()).thenReturn(shoppingItemProductSkuMap);
 
+		when(shoppingCart.getParentProductSku(level1aShoppingItem)).thenReturn(new ProductSkuImpl(SKU_GUID_ROOT_1 + CODE, AvailabilityCriteria
+				.ALWAYS_AVAILABLE));
+		when(shoppingCart.getParentProductSku(level1bShoppingItem)).thenReturn(new ProductSkuImpl(SKU_GUID_ROOT_2 + CODE, AvailabilityCriteria
+				.ALWAYS_AVAILABLE));
+		when(shoppingCart.getParentProductSku(level2ShoppingItem)).thenReturn(new ProductSkuImpl(SKU_GUID_LEVEL_1_A + CODE, AvailabilityCriteria
+				.ALWAYS_AVAILABLE));
+
+
 		// When
 		final ShoppingCartValidationContext context = new ShoppingCartValidationContextImpl();
 		context.setShoppingCart(shoppingCart);
@@ -170,11 +190,15 @@ public class ShoppingItemDelegateFromShoppingCartValidatorTest {
 	}
 
 	private List<ShoppingItem> getDeeplyNestedShoppingItems() {
-		List<ShoppingItem> level2List = Arrays.asList(getShoppingItem(SKU_GUID_LEVEL_2,  Lists.emptyList()));
-		List<ShoppingItem> level1aList = Arrays.asList(getShoppingItem(SKU_GUID_LEVEL_1_A, level2List));
-		List<ShoppingItem> level1bList = Arrays.asList(getShoppingItem(SKU_GUID_LEVEL_1_B, Lists.emptyList()));
-		ShoppingItem rootShoppingItem1 = getShoppingItem(SKU_GUID_ROOT_1, level1aList);
-		ShoppingItem rootShoppingItem2 = getShoppingItem(SKU_GUID_ROOT_2, level1bList);
+
+		level2ShoppingItem = getShoppingItem(SKU_GUID_LEVEL_2);
+		List<ShoppingItem> level2List = Arrays.asList(level2ShoppingItem);
+		level1aShoppingItem = getShoppingItem(SKU_GUID_LEVEL_1_A);
+		List<ShoppingItem> level1aList = Arrays.asList(level1aShoppingItem);
+		level1bShoppingItem = getShoppingItem(SKU_GUID_LEVEL_1_B);
+		List<ShoppingItem> level1bList = Arrays.asList(level1bShoppingItem);
+		rootShoppingItem1 = getShoppingItem(SKU_GUID_ROOT_1);
+		rootShoppingItem2 = getShoppingItem(SKU_GUID_ROOT_2);
 
 		List<ShoppingItem> allShoppingItems = new ArrayList<>();
 		allShoppingItems.add(rootShoppingItem1);
@@ -185,10 +209,9 @@ public class ShoppingItemDelegateFromShoppingCartValidatorTest {
 		return allShoppingItems;
 	}
 
-	private ShoppingItem getShoppingItem(final String skuGuid, final List<ShoppingItem> children) {
+	private ShoppingItem getShoppingItem(final String skuGuid) {
 		final ShoppingItem shoppingItem = mock(ShoppingItem.class);
 		when(shoppingItem.getSkuGuid()).thenReturn(skuGuid);
-		when(shoppingItem.getChildren()).thenReturn(children);
 		return shoppingItem;
 	}
 

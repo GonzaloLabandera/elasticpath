@@ -1,7 +1,9 @@
-/**
+/*
  * Copyright (c) Elastic Path Software Inc., 2014
  */
 package com.elasticpath.cucumber.tax;
+
+import java.lang.reflect.InvocationTargetException;
 
 import cucumber.api.DataTable;
 import cucumber.api.java.en.Then;
@@ -23,7 +25,8 @@ public class OrderTaxStepDefinitions {
 	 * @param taxJournalDataTable the data of expected tax journal
 	 */
 	@Then("^I expect that the tax journal should have purchase entries and reversal entries at the same tax rates as the purchase$")
-	public void verifyTaxJournalEntriesForOrderAndReversal(final DataTable taxJournalDataTable) {
+	public void verifyTaxJournalEntriesForOrderAndReversal(final DataTable taxJournalDataTable)
+			throws IllegalAccessException, NoSuchMethodException, InvocationTargetException {
 		
 		orderTaxStepDefinitionsHelper.verifyTaxJournalEntriesForOrder(taxJournalDataTable.asMaps(String.class, String.class));
 	}
@@ -34,7 +37,8 @@ public class OrderTaxStepDefinitions {
 	 * @param taxJournalDataTable the data of expected tax journal
 	 */
 	@Then("^I expect that the tax journal should have purchase entries and reversal entries at the corresponding tax rates$")
-	public void verifyTaxJournalEntriesForOrderShipmentModification(final DataTable taxJournalDataTable) {
+	public void verifyTaxJournalEntriesForOrderShipmentModification(final DataTable taxJournalDataTable)
+			throws IllegalAccessException, NoSuchMethodException, InvocationTargetException {
 		
 		orderTaxStepDefinitionsHelper.verifyTaxJournalEntriesForOrder(taxJournalDataTable.asMaps(String.class, String.class));
 	}
@@ -45,7 +49,8 @@ public class OrderTaxStepDefinitions {
 	 * @param taxJournalDataTable the data of expected tax journal
 	 */
 	@Then("^I expect that the tax journal of exchange order should have purchase entries at the new tax rates$")
-	public void verifyTaxJournalEntriesForOrderExchange(final DataTable taxJournalDataTable) {
+	public void verifyTaxJournalEntriesForOrderExchange(final DataTable taxJournalDataTable)
+			throws IllegalAccessException, NoSuchMethodException, InvocationTargetException {
 		
 		orderTaxStepDefinitionsHelper.verifyTaxJournalEntriesForExchange(taxJournalDataTable.asMaps(String.class, String.class));
 	}
@@ -56,7 +61,8 @@ public class OrderTaxStepDefinitions {
 	 * @param taxJournalDataTable the data of expected tax journal
 	 */
 	@Then("^I expect that the tax journal should have purchase entries$")
-	public void verifyTaxJournalEntriesForOrder(final DataTable taxJournalDataTable) {
+	public void verifyTaxJournalEntriesForOrder(final DataTable taxJournalDataTable)
+			throws IllegalAccessException, NoSuchMethodException, InvocationTargetException {
 		
 		orderTaxStepDefinitionsHelper.verifyTaxJournalEntriesForOrder(taxJournalDataTable.asMaps(String.class, String.class));
 	}
@@ -67,7 +73,8 @@ public class OrderTaxStepDefinitions {
 	 * @param orderDataTable the data of expected order
 	 */
 	@Then("^I expect that the order should have fields$")
-	public void verifyOrderFields(final DataTable orderDataTable) {
+	public void verifyOrderFields(final DataTable orderDataTable)
+			throws IllegalAccessException, NoSuchMethodException, InvocationTargetException {
 
 		orderTaxStepDefinitionsHelper.verifyOrderEntries(orderDataTable.asMaps(String.class, String.class));
 	}

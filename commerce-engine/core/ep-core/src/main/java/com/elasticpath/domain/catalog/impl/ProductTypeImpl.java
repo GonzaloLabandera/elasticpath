@@ -168,21 +168,18 @@ public class ProductTypeImpl extends AbstractLegacyEntityImpl implements Product
 
 	@Override
 	public List<SkuOption> getSortedSkuOptionListForRecurringItems(final ProductSku defaultSku) {
-		final List<SkuOption> sortedSkuOptionList = new ArrayList<>(this.getSkuOptions(defaultSku));
-		final Comparator<SkuOption> comparator = new Comparator<SkuOption>() {
-			@Override
-			public int compare(final SkuOption skuOption1, final SkuOption skuOption2) {
-				if (skuOption1.getOptionKey().equals(SkuOption.FREQUENCY_OPTION_KEY)) {
-					return 1;
-				}
-				if (skuOption2.getOptionKey().equals(SkuOption.FREQUENCY_OPTION_KEY)) {
-					return -1;
-				}
-				final Locale defaultLocale = ProductTypeImpl.this.getCatalog().getDefaultLocale();
-				return skuOption1.getDisplayName(defaultLocale, true).compareTo(skuOption2.getDisplayName(defaultLocale, true));
+		final Comparator<SkuOption> comparator = (skuOption1, skuOption2) -> {
+			if (skuOption1.getOptionKey().equals(SkuOption.FREQUENCY_OPTION_KEY)) {
+				return 1;
 			}
-
+			if (skuOption2.getOptionKey().equals(SkuOption.FREQUENCY_OPTION_KEY)) {
+				return -1;
+			}
+			final Locale defaultLocale = ProductTypeImpl.this.getCatalog().getDefaultLocale();
+			return skuOption1.getDisplayName(defaultLocale, true).compareTo(skuOption2.getDisplayName(defaultLocale, true));
 		};
+
+		final List<SkuOption> sortedSkuOptionList = new ArrayList<>(this.getSkuOptions(defaultSku));
 		sortedSkuOptionList.sort(comparator);
 		return sortedSkuOptionList;
 	}

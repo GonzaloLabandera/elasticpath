@@ -61,10 +61,10 @@ public class FilteredQueryComposerImpl extends AbstractQueryComposerImpl {
 		}
 
 		final QueryComposer composer = queryComposerFactory.getComposerForCriteria(getInnerCriteria(filteredSearchCriteria));
-		final BooleanQuery booleanQuery = new BooleanQuery();
+		final BooleanQuery.Builder booleanQueryBuilder = new BooleanQuery.Builder();
 
 		for (Entry<? extends SearchCriteria, ? extends Collection<? extends SearchCriteria>> entry : filteredSearchCriteria) {
-			final BooleanQuery conditionQuery = new BooleanQuery();
+			final BooleanQuery.Builder conditionQueryBuilder = new BooleanQuery.Builder();
 			Query searchQuery, filterQuery;
 
 			// first add the initial search to the query
@@ -74,7 +74,7 @@ public class FilteredQueryComposerImpl extends AbstractQueryComposerImpl {
 				searchQuery = composer.composeQuery(entry.getKey(), searchConfig);
 			}
 			// they must be ANDed as ORed filters make no sense
-			conditionQuery.add(searchQuery, Occur.MUST);
+			conditionQueryBuilder.add(searchQuery, Occur.MUST);
 
 			// now add the filters to that same query
 			for (SearchCriteria filter : entry.getValue()) {
@@ -84,13 +84,13 @@ public class FilteredQueryComposerImpl extends AbstractQueryComposerImpl {
 					filterQuery = composer.composeQuery(filter, searchConfig);
 				}
 				// they must be ANDed as ORed filters make no sense
-				conditionQuery.add(filterQuery, Occur.MUST_NOT);
+				conditionQueryBuilder.add(filterQuery, Occur.MUST_NOT);
 			}
 
-			booleanQuery.add(conditionQuery, occur);
+			booleanQueryBuilder.add(conditionQueryBuilder.build(), occur);
 		}
 
-		return booleanQuery;
+		return booleanQueryBuilder.build();
 	}
 
 	private SearchCriteria getInnerCriteria(final FilteredSearchCriteria<? extends SearchCriteria> filteredSearchCriteria) {

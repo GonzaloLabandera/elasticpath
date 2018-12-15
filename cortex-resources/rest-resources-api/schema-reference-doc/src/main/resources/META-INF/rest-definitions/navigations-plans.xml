@@ -3,6 +3,18 @@
 
 	<family>
 		<name>navigations</name>
+
+		<plan>
+			<name>read-navigations</name>
+			<description><![CDATA[Read a list of navigations.]]></description>
+			<step>
+				<description><![CDATA[Read a list of navigations.]]></description>
+				<start>base.root</start>
+				<follow-link>navigations</follow-link>
+				<result>navigations</result>
+			</step>
+		</plan>
+
 		<plan>
 			<name>read-navigation</name>
 			<description><![CDATA[Read a single navigation node.]]></description>
@@ -54,5 +66,23 @@
 			</step>
 		</plan>
 
+		<plan>
+			<name>lookup-navigation-by-code</name>
+			<description><![CDATA[Lookup for a Navigation item by category code.]]></description>
+			<step>
+				<description><![CDATA[Lookups to navigation lookup form.]]></description>
+				<start>lookups.lookups</start>
+				<follow-link>navigationlookupform</follow-link>
+				<result>navigation-lookup-form</result>
+			</step>
+			<step>
+				<description><![CDATA[Submit a navigation lookup for an navigation.]]></description>
+				<start>navigation-lookup-form</start>
+				<submit></submit>
+				<to>navigation-lookup-form</to>
+				<via-link>navigationlookupaction</via-link>
+				<result>navigation</result>
+			</step>
+		</plan>
 	</family>
 </definitions>

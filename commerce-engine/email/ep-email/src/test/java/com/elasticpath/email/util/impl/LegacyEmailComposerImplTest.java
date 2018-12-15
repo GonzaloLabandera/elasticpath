@@ -3,9 +3,13 @@
  */
 package com.elasticpath.email.util.impl;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.util.Collections;
 import java.util.Locale;
@@ -14,12 +18,11 @@ import java.util.Map;
 import org.apache.commons.mail.EmailException;
 import org.apache.velocity.app.VelocityEngine;
 import org.apache.velocity.exception.VelocityException;
-import org.jmock.Expectations;
-import org.jmock.auto.Mock;
-import org.jmock.integration.junit4.JUnitRuleMockery;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.elasticpath.base.exception.EpServiceException;
 import com.elasticpath.commons.util.StoreMessageSource;
@@ -32,20 +35,23 @@ import com.elasticpath.service.catalogview.impl.ThreadLocalStorageImpl;
 import com.elasticpath.service.store.StoreService;
 import com.elasticpath.settings.provider.SettingValueProvider;
 
-/** Test cases for <code>EmailServiceImpl</code>. */
+/**
+ * Test cases for <code>EmailServiceImpl</code>.
+ */
+@RunWith(MockitoJUnitRunner.class)
 public class LegacyEmailComposerImplTest {
-
-	private static final String UNEXPECTED_EXCEPTION = "unexpected exception";
 
 	private LegacyEmailComposerImpl emailComposer;
 
 	private EmailProperties emailProperties;
 
-	@Rule
-	public final JUnitRuleMockery context = new JUnitRuleMockery();
-
+	@Mock
 	private StoreService mockStoreService;
+	
+	@Mock
 	private StoreMessageSource mockStoreMessageSource;
+
+	@Mock
 	private EmailContextFactory emailContextFactory;
 
 	@Mock
@@ -63,16 +69,12 @@ public class LegacyEmailComposerImplTest {
 	 * @throws Exception on error
 	 */
 	@Before
-	public void setUp() throws Exception {
-		emailContextFactory = context.mock(EmailContextFactory.class);
-		mockStoreService = context.mock(StoreService.class);
-		mockStoreMessageSource = context.mock(StoreMessageSource.class);
-
+	public void setUp() {
 		// Create an email service that is stubbed for testing
 		emailComposer = new LegacyEmailComposerImpl() {
 			@Override
 			protected String mergeTemplateIntoString(final String txtTemplate, final Map<String, Object> velocityTemplateResources,
-					final String storeCode) throws VelocityException {
+													 final String storeCode) throws VelocityException {
 				return "Processed Template";
 			}
 		};
@@ -81,16 +83,18 @@ public class LegacyEmailComposerImplTest {
 		emailComposer.setStoreService(mockStoreService);
 		emailComposer.setStoreMessageSource(mockStoreMessageSource);
 		emailComposer.setVelocityEngineFactory(new VelocityEngineInstanceFactory() {
-			/** stubbed **/
+			/**
+			 * stubbed
+			 **/
 			@Override
 			public VelocityEngine getVelocityEngine(final String storeCode) {
 				return null;
 			}
 		});
 
-		emailProperties  = createAndInitializeEmailProperties();
+		emailProperties = createAndInitializeEmailProperties();
 
-		assertNotNull(emailProperties.getStoreCode()); // can't be null for tests
+		assertThat(emailProperties.getStoreCode()).isNotNull(); // can't be null for tests
 	}
 
 	private EmailProperties createAndInitializeEmailProperties() {
@@ -113,21 +117,13 @@ public class LegacyEmailComposerImplTest {
 	public void testSendEmailListStoreSpecificBadStoreCode() {
 		emailProperties.setStoreCode("some store");
 		// expectations
-		context.checking(new Expectations() {
-			{
-				oneOf(mockStoreService).findStoreWithCode(emailProperties.getStoreCode());
-				will(returnValue(null));
-			}
-		});
+		when(mockStoreService.findStoreWithCode(emailProperties.getStoreCode())).thenReturn(null);
 
-		try {
-			emailComposer.composeMessage(emailProperties);
-			fail("emailComposer should throw exception for non-existing store code");
-		} catch (EpServiceException e) { // NOPMD -- nothing to assert, empty block OK
-			// pass
-		} catch (EmailException e) {
-			fail(UNEXPECTED_EXCEPTION);
-		}
+		assertThatThrownBy(() -> emailComposer.composeMessage(emailProperties))
+			.as("emailComposer should throw exception for non-existing store code")
+			.isInstanceOf(EpServiceException.class)
+			.isNotInstanceOf(EmailException.class);
+		verify(mockStoreService).findStoreWithCode(emailProperties.getStoreCode());
 	}
 
 	/**
@@ -139,122 +135,77 @@ public class LegacyEmailComposerImplTest {
 		emailProperties.setHtmlTemplate(null);
 		emailProperties.setRecipientAddress("whatever@asif.com");
 
-		final Store mockStore = context.mock(Store.class);
-		context.checking(new Expectations() {
-			{
-				oneOf(mockStore).getEmailSenderAddress();
-				will(returnValue("test@elasticpath.com"));
+		final Store mockStore = mock(Store.class);
+		when(mockStore.getEmailSenderAddress()).thenReturn("test@elasticpath.com");
 
-				oneOf(mockStore).getEmailSenderName();
-				will(returnValue("test"));
+		when(mockStore.getEmailSenderName()).thenReturn("test");
 
-				oneOf(mockStore).getContentEncoding();
-				will(returnValue("UTF-8"));
+		when(mockStore.getContentEncoding()).thenReturn("UTF-8");
 
-				oneOf(mockStoreService).findStoreWithCode(emailProperties.getStoreCode());
-				will(returnValue(mockStore));
+		when(mockStoreService.findStoreWithCode(emailProperties.getStoreCode())).thenReturn(mockStore);
 
-				allowing(emailContextFactory).createVelocityContext(mockStore, emailProperties); will(returnValue(Collections.emptyMap()));
-			}
-		});
-		try {
-			emailComposer.composeMessage(emailProperties);
-		} catch (EmailException e) {
-			fail(UNEXPECTED_EXCEPTION);
-		}
+		when(emailContextFactory.createVelocityContext(mockStore, emailProperties)).thenReturn(Collections.emptyMap());
+		assertThatCode(() -> emailComposer.composeMessage(emailProperties)).doesNotThrowAnyException();
 
 		// test non-existing store
 		emailProperties.setStoreCode("some store");
 		// expectations
-		context.checking(new Expectations() {
-			{
-				oneOf(mockStoreService).findStoreWithCode(emailProperties.getStoreCode());
-				will(returnValue(null));
-			}
-		});
+		when(mockStoreService.findStoreWithCode(emailProperties.getStoreCode())).thenReturn(null);
 
-		try {
-			emailComposer.composeMessage(emailProperties);
-			fail("emailComposer should throw exception for non-persisted store code");
-		} catch (EpServiceException e) { // NOPMD -- nothing to assert, empty block OK
-			// pass
-		} catch (EmailException e) {
-			fail(UNEXPECTED_EXCEPTION);
-		}
+		assertThatThrownBy(() -> emailComposer.composeMessage(emailProperties))
+			.as("emailComposer should throw exception for non-persisted store code")
+			.isInstanceOf(EpServiceException.class)
+			.isNotInstanceOf(EmailException.class);
+		verify(mockStore).getEmailSenderAddress();
+		verify(mockStore).getEmailSenderName();
+		verify(mockStore).getContentEncoding();
+		verify(mockStoreService).findStoreWithCode(emailProperties.getStoreCode());
+		verify(mockStoreService).findStoreWithCode(emailProperties.getStoreCode());
 	}
 
 	/**
 	 * Test method for 'com.elasticpath.service.misc.impl.emailComposerImpl.sendMail(EmailProperties)'.
 	 */
 	@Test
-	public void testComposeHtmlEmail() {
+	public void testComposeHtmlEmail() throws EmailException {
 		emailProperties.setRecipientAddress("whatever@asif.com");
 		emailProperties.setTextOnly(false);
 
-		context.checking(new Expectations() {
-			{
-				oneOf(emailTextTemplateEnabled).get();
-				will(returnValue(false));
-			}
-		});
+		when(emailTextTemplateEnabled.get()).thenReturn(false);
 
 		emailComposer.setEmailTextTemplateEnabledProvider(emailTextTemplateEnabled);
 
-		final Store mockStore = context.mock(Store.class);
-		context.checking(new Expectations() {
-			{
-				oneOf(mockStore).getEmailSenderAddress();
-				will(returnValue("test@elasticpath.com"));
+		final Store mockStore = mock(Store.class);
+		when(mockStore.getEmailSenderAddress()).thenReturn("test@elasticpath.com");
 
-				oneOf(mockStore).getEmailSenderName();
-				will(returnValue("test"));
+		when(mockStore.getEmailSenderName()).thenReturn("test");
 
-				oneOf(mockStoreService).findStoreWithCode(emailProperties.getStoreCode());
-				will(returnValue(mockStore));
+		when(mockStoreService.findStoreWithCode(emailProperties.getStoreCode())).thenReturn(mockStore);
 
-				allowing(emailContextFactory).createVelocityContext(mockStore, emailProperties); will(returnValue(Collections.emptyMap()));
-			}
-		});
-		try {
-			emailComposer.composeMessage(emailProperties);
-		} catch (EmailException e) {
-			fail(UNEXPECTED_EXCEPTION);
-		}
+		when(emailContextFactory.createVelocityContext(mockStore, emailProperties)).thenReturn(Collections.emptyMap());
+		emailComposer.composeMessage(emailProperties);
+		verify(mockStore).getEmailSenderAddress();
+		verify(mockStore).getEmailSenderName();
+		verify(mockStoreService).findStoreWithCode(emailProperties.getStoreCode());
 	}
 
 	/**
 	 * Test method for 'com.elasticpath.service.misc.impl.emailComposerImpl.composeMessage(EmailProperties)'.
 	 */
 	@Test
-	public void testUseGlobalTemplates() {
+	public void testUseGlobalTemplates() throws EmailException {
 		emailProperties.setRecipientAddress("whatever@asif.com");
 		emailProperties.setStoreCode(null);
 
-		context.checking(new Expectations() {
-			{
-				oneOf(emailGlobalSenderAddress).get();
-				will(returnValue("customerService@SomeDomain.com"));
-			}
-		});
+		when(emailGlobalSenderAddress.get()).thenReturn("customerService@SomeDomain.com");
 		emailComposer.setEmailGlobalSenderAddressProvider(emailGlobalSenderAddress);
 
-		context.checking(new Expectations() {
-			{
-				oneOf(emailGlobalSenderName).get();
-				will(returnValue("Customer Service"));
-			}
-		});
+		when(emailGlobalSenderName.get()).thenReturn("Customer Service");
 		emailComposer.setEmailGlobalSenderNameProvider(emailGlobalSenderName);
 
-		context.checking(new Expectations() { {
-			allowing(emailContextFactory).createVelocityContext(null, emailProperties); will(returnValue(Collections.emptyMap()));
-		} });
+		when(emailContextFactory.createVelocityContext(null, emailProperties)).thenReturn(Collections.emptyMap());
 
-		try {
-			emailComposer.composeMessage(emailProperties);
-		} catch (EmailException e) {
-			fail(UNEXPECTED_EXCEPTION);
-		}
+		emailComposer.composeMessage(emailProperties);
 	}
 	/**
 	 * Test method for 'com.elasticpath.service.misc.impl.emailComposerImpl.getEmailSubject(EmailProperties)'.
@@ -266,34 +217,30 @@ public class LegacyEmailComposerImplTest {
 
 		//only default message
 		emailProp.setDefaultSubject(defaultSubject);
-		assertEquals("No message key, will get the default message", defaultSubject, emailComposer.getEmailSubject(emailProp));
+		assertThat(emailComposer.getEmailSubject(emailProp))
+			.as("No message key, will get the default message")
+			.isEqualTo(defaultSubject);
 
 		//property key exists, but message not found
 		emailProp.setLocaleDependentSubjectKey("my.english.key");
 		emailProp.setEmailLocale(Locale.CANADA);
-		context.checking(new Expectations() {
-			{
-				oneOf(mockStoreMessageSource).getMessage(
-						emailProp.getStoreCode(), emailProp.getLocaleDependentSubjectKey(), emailProp.getEmailLocale());
-				will(returnValue(null));
-			}
-		});
+		when(mockStoreMessageSource.getMessage(emailProp.getStoreCode(), emailProp.getLocaleDependentSubjectKey(), emailProp.getEmailLocale()))
+			.thenReturn(null);
 
-		assertEquals("Message key exists, but no message found in properties files", defaultSubject, emailComposer.getEmailSubject(emailProp));
+		assertThat(emailComposer.getEmailSubject(emailProp))
+			.as("Message key exists, but no message found in properties files")
+			.isEqualTo(defaultSubject);
 
 		//property key exists, and message found
 		final String englishTranslationMessage = "my meesage for en locale";
-		context.checking(new Expectations() {
-			{
+		when(mockStoreMessageSource.getMessage(emailProp.getStoreCode(), emailProp.getLocaleDependentSubjectKey(), emailProp.getEmailLocale()))
+			.thenReturn(englishTranslationMessage);
 
-				oneOf(mockStoreMessageSource).getMessage(
-						emailProp.getStoreCode(), emailProp.getLocaleDependentSubjectKey(), emailProp.getEmailLocale());
-				will(returnValue(englishTranslationMessage));
-			}
-		});
-
-		assertEquals("Message key exists, and message found in properties files",
-				englishTranslationMessage, emailComposer.getEmailSubject(emailProp));
+		assertThat(emailComposer.getEmailSubject(emailProp))
+			.as("Message key exists, and message found in properties files")
+			.isEqualTo(englishTranslationMessage);
+		verify(mockStoreMessageSource, atLeastOnce())
+			.getMessage(emailProp.getStoreCode(), emailProp.getLocaleDependentSubjectKey(), emailProp.getEmailLocale());
 
 	}
 

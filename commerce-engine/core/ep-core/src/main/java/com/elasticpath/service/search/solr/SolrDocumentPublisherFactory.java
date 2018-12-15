@@ -10,7 +10,7 @@ public interface SolrDocumentPublisherFactory {
 
 	/**
 	 * Create a {@code SolrDocumentPublisher}. After creation you must call
-	 * {@code SolrDocumentPublisher#setSolrServer(org.apache.solr.client.solrj.SolrServer)} to assign a SolrServer to it.
+	 * {@code SolrDocumentPublisher#setSolrServer(org.apache.solr.client.solrj.SolrClient)} to assign a SolrClient to it.
 	 * 
 	 * @return a fresh SolrDocumentPublisher
 	 */

@@ -14,6 +14,7 @@
 				<value>attributeValues</value>
 				<value>catalog</value>
 				<value>categoryIndex</value>
+				<value>productSkuIndex</value>
 				<!-- For applying promotion rules in nested categories -->
 				<value>infiniteParentCategoryDepth</value>
 				<value>productHashMinimal</value><!-- For storeCode -->

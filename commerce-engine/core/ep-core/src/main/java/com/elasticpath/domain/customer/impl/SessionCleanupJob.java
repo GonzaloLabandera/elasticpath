@@ -53,14 +53,11 @@ public class SessionCleanupJob {
 		private final Date beforeDate;
 		private final int batchSize;
 
-		private final Predicate shopperWithCustomerPredicate = new Predicate() {
-			@Override
-			public boolean evaluate(final Object object) {
-				// Note: Not bothering to check if object == shopper because this is all private and
-				// whoever is writing/updating this better make sure this is the case.
-				final ShopperMemento shopperMemento = (ShopperMemento) object;
-				return shopperMemento.getCustomer() != null;
-			}
+		private final Predicate shopperWithCustomerPredicate = object -> {
+			// Note: Not bothering to check if object == shopper because this is all private and
+			// whoever is writing/updating this better make sure this is the case.
+			final ShopperMemento shopperMemento = (ShopperMemento) object;
+			return shopperMemento.getCustomer() != null;
 		};
 
 		SessionCleanupRunner(final Date beforeDate, final int batchSize) {

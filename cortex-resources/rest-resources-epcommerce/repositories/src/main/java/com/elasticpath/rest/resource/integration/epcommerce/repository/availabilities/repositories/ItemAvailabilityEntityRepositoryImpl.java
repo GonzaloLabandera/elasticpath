@@ -14,8 +14,6 @@ import com.elasticpath.domain.catalogview.StoreProduct;
 import com.elasticpath.repository.Repository;
 import com.elasticpath.rest.definition.availabilities.AvailabilityEntity;
 import com.elasticpath.rest.definition.availabilities.AvailabilityForItemIdentifier;
-import com.elasticpath.rest.definition.items.ItemIdentifier;
-import com.elasticpath.rest.id.transform.IdentifierTransformerProvider;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.item.ItemRepository;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.product.StoreProductRepository;
 
@@ -32,15 +30,11 @@ public class ItemAvailabilityEntityRepositoryImpl<E extends AvailabilityEntity, 
 	private ItemRepository itemRepository;
 	private StoreProductRepository storeProductRepository;
 	private ConversionService conversionService;
-	private IdentifierTransformerProvider identifierTransformerProvider;
 
 	@Override
 	public Single<AvailabilityEntity> findOne(final AvailabilityForItemIdentifier identifier) {
-		final String scope = identifier.getItem().getItems().getScope().getValue();
-		final String encodedItemId = identifierTransformerProvider.forUriPart(ItemIdentifier.ITEM_ID)
-				.identifierToUri(identifier.getItem().getItemId());
-
-		return itemRepository.getSkuForItemIdAsSingle(encodedItemId)
+		final String scope = identifier.getItem().getScope().getValue();
+		return itemRepository.getSkuForItemId(identifier.getItem().getItemId().getValue())
 				.flatMap(productSku -> getStoreProduct(scope, productSku)
 						.map(storeProduct -> convertStoreProductSkuToAvailabilityEntity(storeProduct, productSku)));
 	}
@@ -53,7 +47,7 @@ public class ItemAvailabilityEntityRepositoryImpl<E extends AvailabilityEntity, 
 	 * @return the store product
 	 */
 	protected Single<StoreProduct> getStoreProduct(final String scope, final ProductSku productSku) {
-		return storeProductRepository.findDisplayableStoreProductWithAttributesByProductGuidAsSingle(scope, productSku.getProduct().getGuid());
+		return storeProductRepository.findDisplayableStoreProductWithAttributesByProductGuid(scope, productSku.getProduct().getGuid());
 	}
 
 	/**
@@ -80,10 +74,5 @@ public class ItemAvailabilityEntityRepositoryImpl<E extends AvailabilityEntity, 
 	@Reference
 	public void setConversionService(final ConversionService conversionService) {
 		this.conversionService = conversionService;
-	}
-
-	@Reference
-	public void setIdentifierTransformerProvider(final IdentifierTransformerProvider identifierTransformerProvider) {
-		this.identifierTransformerProvider = identifierTransformerProvider;
 	}
 }

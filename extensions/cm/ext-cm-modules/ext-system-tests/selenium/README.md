@@ -1,3 +1,8 @@
+# Prerequisite
+  * build project /ep-commerce/extensions/cortex/system-tests to install required dependency with following command:
+   ```java
+    mvn clean install -DskipAllTests
+   ```
 # ext-cm-selenium-test
 
 **Setting up commerce/ep-commerce/extensions/cm/ext-cm-modules/ext-system-tests Project in IntelliJ**

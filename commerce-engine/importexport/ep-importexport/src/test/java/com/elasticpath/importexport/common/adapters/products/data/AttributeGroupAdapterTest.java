@@ -32,7 +32,6 @@ import com.elasticpath.domain.attribute.AttributeValueGroup;
 import com.elasticpath.importexport.common.caching.CachingService;
 import com.elasticpath.importexport.common.dto.products.AttributeGroupDTO;
 import com.elasticpath.importexport.common.dto.products.AttributeValuesDTO;
-import com.elasticpath.importexport.common.util.LocalizedAttributeKeyLocaleTranslator;
 import com.elasticpath.validation.service.ValidatorUtils;
 
 /**
@@ -59,8 +58,6 @@ public class AttributeGroupAdapterTest {
 	@Mock
 	private ValidatorUtils validatorUtils;
 	@Mock
-	private LocalizedAttributeKeyLocaleTranslator localizedAttributeKeyLocaleTranslator;
-	@Mock
 	private AttributeValueGroup attributeValueGroup;
 	@Mock
 	private AttributeValue attributeValue;
@@ -78,7 +75,6 @@ public class AttributeGroupAdapterTest {
 		AttributeValuesAdapter attributeValuesAdapter = new AttributeValuesAdapter();
 		attributeValuesAdapter.setCachingService(cachingService);
 		attributeValuesAdapter.setValidatorUtils(validatorUtils);
-		attributeValuesAdapter.setLocalizedAttributeKeyLocaleTranslator(localizedAttributeKeyLocaleTranslator);
 
 		adapterUnderTest.setAttributeValuesAdapter(attributeValuesAdapter);
 	}
@@ -98,7 +94,6 @@ public class AttributeGroupAdapterTest {
 		when(attribute.isLocaleDependant()).thenReturn(true);
 		when(attributeValue.getAttribute()).thenReturn(attribute);
 		when(attributeValue.getValue()).thenReturn("Attribute value");
-		when(localizedAttributeKeyLocaleTranslator.getLanguageTagFromLocalizedKeyName(KEY_EN)).thenReturn(LOCALE.toLanguageTag());
 
 		//real method invocation
 		AttributeGroupDTO expectedDto = new AttributeGroupDTO();
@@ -119,7 +114,6 @@ public class AttributeGroupAdapterTest {
 		verify(attribute).isLocaleDependant();
 		verify(attributeValue).getStringValue();
 		verify(attributeValue).getLocalizedAttributeKey();
-		verify(localizedAttributeKeyLocaleTranslator).getLanguageTagFromLocalizedKeyName(KEY_EN);
 	}
 
 	/**
@@ -146,7 +140,6 @@ public class AttributeGroupAdapterTest {
 		when(attributeValueGroup.getAttributeValueFactory()).thenReturn(attributeValueFactory);
 		when(attributeValueFactory.createAttributeValue(attribute, KEY_EN)).thenReturn(attributeValue);
 		when(attribute.getCatalog()).thenReturn(null);
-		when(localizedAttributeKeyLocaleTranslator.convertLocaleStringToLocale(LOCALE.toString())).thenReturn(LOCALE);
 
 		//real method invocation
 		adapterUnderTest.populateDomain(dto, attributeValueGroup);
@@ -161,7 +154,6 @@ public class AttributeGroupAdapterTest {
 		verify(attribute).getCatalog();
 		verify(attributeValue).setStringValue(DISPLAY_VALUE.getValue());
 		verify(attributeValue).getLocalizedAttributeKey();
-		verify(localizedAttributeKeyLocaleTranslator).convertLocaleStringToLocale(LOCALE.toString());
 		verify(cachingService).findAttribiteByKey(KEY);
 	}
 

@@ -45,4 +45,27 @@
 	<bean factory-bean="baseAmountFinderProxy" factory-method="bindImplementation">
 		<constructor-arg ref="cachingBaseAmountFinder"/>
 	</bean>
+
+	<bean factory-bean="categoryServiceProxy" factory-method="bindImplementation">
+		<constructor-arg ref="cachingCategoryService"/>
+	</bean>
+	<bean factory-bean="cachingFilteredNavigationConfigurationLoaderProxy" factory-method="bindImplementation">
+		<constructor-arg ref="cachingFacetConfigurationLoader"/>
+	</bean>
+	<bean factory-bean="cachingSolrQueryFactoryProxy" factory-method="bindImplementation">
+		<constructor-arg ref="cachingSolrQueryFactory"/>
+	</bean>
+	<bean factory-bean="facetServiceProxy" factory-method="bindImplementation">
+		<constructor-arg ref="cachingFacetService"/>
+	</bean>
+
+	<bean factory-bean="cachingSkuOptionServiceProxy" factory-method="bindImplementation">
+		<constructor-arg ref="cachingSkuOptionService"/>
+	</bean>
+
+
+
+	<bean factory-bean="attributeServiceProxy" factory-method="bindImplementation">
+		<constructor-arg ref="cachingAttributeService"/>
+	</bean>
 </beans>

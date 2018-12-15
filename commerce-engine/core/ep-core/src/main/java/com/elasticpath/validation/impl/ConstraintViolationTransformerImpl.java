@@ -44,7 +44,7 @@ public class ConstraintViolationTransformerImpl implements ConstraintViolationTr
 		}
 
 		return errors.stream()
-				.map(constraintViolation -> transform(constraintViolation))
+				.map(this::transform)
 				.filter(Objects::nonNull)
 				.collect(Collectors.toList());
 	}

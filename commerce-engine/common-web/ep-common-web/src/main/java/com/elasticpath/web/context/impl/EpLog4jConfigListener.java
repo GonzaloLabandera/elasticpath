@@ -11,7 +11,6 @@ import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Map;
 import java.util.Properties;
-import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.servlet.ServletContext;
@@ -44,7 +43,9 @@ import com.elasticpath.base.exception.EpSystemException;
  * ContextLoaderServlet javadoc for details.
  */
 public class EpLog4jConfigListener implements ServletContextListener {
-	/** Parameter specifying the location of the Log4J config file. */
+	/**
+	 * Parameter specifying the location of the Log4J config file.
+	 */
 	public static final String CONFIG_LOCATION_PARAM = "log4jConfigLocation";
 
 	/**
@@ -140,8 +141,6 @@ public class EpLog4jConfigListener implements ServletContextListener {
 	}
 
 
-
-
 	/**
 	 * Implementation of Log4j's RepositorySelector.
 	 * Returns new repository with hierarchy name equal to JNDI value set in webapp's web.xml.
@@ -169,26 +168,19 @@ public class EpLog4jConfigListener implements ServletContextListener {
 		 */
 		@Override
 		public LoggerRepository getLoggerRepository() {
-			String loggingContextName = null;
-
 			try {
-				Context ctx = new InitialContext();
-				loggingContextName = (String) ctx.lookup(JNDI_CONTEXT);
-			} catch (NamingException ne) { //NOPMD
-				// we can't log here
-			}
+				String loggingContextName = (String) new InitialContext().lookup(JNDI_CONTEXT);
 
-			//Maintain and retrieve from hashTable cache
-			if (loggingContextName != null) {
 				Hierarchy hierarchy = loggerHashTable.get(loggingContextName);
 				if (hierarchy == null) {
 					hierarchy = new Hierarchy(new RootLogger(Level.DEBUG));
 					loggerHashTable.put(loggingContextName, hierarchy);
 				}
 				return hierarchy;
+			} catch (NamingException ne) {
+				// we can't log here
 			}
 			return defaultHierarchy;
 		}
 	}
-
 }

@@ -74,7 +74,7 @@ public class AddToCartAdvisorServiceImplTest {
 
 		given(shoppingCartRepository.getShoppingCart(SHOPPING_CART_GUID)).willReturn(Single.just(shoppingCart));
 
-		given(productSkuRepository.getProductSkuWithAttributesByCodeAsSingle(SKU_CODE)).willReturn(Single.just(productSku));
+		given(productSkuRepository.getProductSkuWithAttributesByCode(SKU_CODE)).willReturn(Single.just(productSku));
 
 		given(addToCartValidationService.buildContext(any(), any(), any(), any())).willReturn(validationContext);
 	}

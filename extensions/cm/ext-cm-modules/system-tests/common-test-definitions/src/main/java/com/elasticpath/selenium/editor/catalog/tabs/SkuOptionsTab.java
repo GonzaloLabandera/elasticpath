@@ -2,6 +2,7 @@ package com.elasticpath.selenium.editor.catalog.tabs;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.util.stream.Collectors;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
@@ -19,6 +20,8 @@ public class SkuOptionsTab extends AbstractPageObject {
 	private static final String SKU_OPTION_PARENT_CSS = "[active-editor='true'] [appearance-id='tree'] ";
 	private static final String SKU_OPTION_COLUMN_CSS = SKU_OPTION_PARENT_CSS + "div[column-id*='%s']";
 	private static final String SKU_OPTION_ROW_CSS = SKU_OPTION_PARENT_CSS + "div[row-id='%s']";
+	private static final String SKU_OPTION_ROWS_CSS = SKU_OPTION_PARENT_CSS + " div[widget-type='row']";
+	private static final String SKU_OPTION_ROWS_COLUMN_CSS = " div:nth-child(%s)";
 	private static final String SKU_OPTION_ADD_BUTTON =
 			"[automation-id='com.elasticpath.cmclient.catalog.CatalogMessages.CatalogSkuOptionsSection_AddSkuOptionButton']";
 	private static final String SKU_OPTION_REMOVE_BUTTON =
@@ -64,7 +67,7 @@ public class SkuOptionsTab extends AbstractPageObject {
 	 * @param skuOption the sku option type
 	 */
 	public void verifySkuOption(final String skuOption) {
-		assertThat(selectItemInEditorPaneWithScrollBar(SKU_OPTION_PARENT_CSS, SKU_OPTION_COLUMN_CSS, skuOption))
+		assertThat(selectItemInEditorPaneWithScrollBarNonJSCheck(SKU_OPTION_PARENT_CSS, SKU_OPTION_COLUMN_CSS, skuOption))
 				.as("Unable to find sku option - " + skuOption)
 				.isTrue();
 	}
@@ -99,7 +102,7 @@ public class SkuOptionsTab extends AbstractPageObject {
 	 * @param expandIconFullCss the full css selector of the expand icon.
 	 */
 	public void expandSkuOptionTreeRow(final String expandIconFullCss) {
-		click(getWaitDriver().waitForElementToBeClickable(By.cssSelector(expandIconFullCss)));
+		click(getWaitDriver().waitForElementToBeClickableNonJSCheck(By.cssSelector(expandIconFullCss)));
 		getWaitDriver().waitFor(1);
 	}
 
@@ -161,5 +164,23 @@ public class SkuOptionsTab extends AbstractPageObject {
 			}
 		}
 		return itemExists;
+	}
+
+	/**
+	 * Returns sku option code retrieved from the page by sky option name.
+	 *
+	 * @param skuOptionName sku option name which code should by retrieved
+	 * @return sku option code retrieved from the page by sky option name, "" if sky option was not found
+	 */
+	public String getSkuOptionCodeByName(final String skuOptionName) {
+		return getDriver()
+				.findElements(By.cssSelector(SKU_OPTION_ROWS_CSS))
+				.stream()
+				.collect(Collectors.toMap(
+						element -> element.findElement(
+								By.cssSelector(String.format(SKU_OPTION_ROWS_COLUMN_CSS, "2"))).getAttribute("column-id"),
+						element -> element.findElement(
+								By.cssSelector(String.format(SKU_OPTION_ROWS_COLUMN_CSS, "1"))).getAttribute("column-id")))
+				.getOrDefault(skuOptionName, "");
 	}
 }

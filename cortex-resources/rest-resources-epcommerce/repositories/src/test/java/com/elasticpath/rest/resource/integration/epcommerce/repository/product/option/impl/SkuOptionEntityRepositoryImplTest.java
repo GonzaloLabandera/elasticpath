@@ -3,54 +3,64 @@
  */
 package com.elasticpath.rest.resource.integration.epcommerce.repository.product.option.impl;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.when;
 
-import org.jmock.Expectations;
-import org.jmock.integration.junit4.JUnitRuleMockery;
-import org.junit.Rule;
+import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.elasticpath.domain.skuconfiguration.SkuOption;
 import com.elasticpath.domain.skuconfiguration.SkuOptionValue;
-import com.elasticpath.domain.skuconfiguration.impl.SkuOptionImpl;
-import com.elasticpath.domain.skuconfiguration.impl.SkuOptionValueImpl;
-import com.elasticpath.jmock.MockeryFactory;
-import com.elasticpath.rest.ResourceStatus;
-import com.elasticpath.rest.command.ExecutionResult;
-import com.elasticpath.rest.resource.integration.epcommerce.repository.product.option.SkuOptionRepository;
+import com.elasticpath.rest.ResourceOperationFailure;
+import com.elasticpath.rest.resource.integration.epcommerce.repository.transform.impl.ReactiveAdapterImpl;
 import com.elasticpath.service.catalog.SkuOptionService;
 
 /**
  * Tests for {@link SkuOptionRepositoryImpl}.
  */
+@RunWith(MockitoJUnitRunner.class)
 public class SkuOptionEntityRepositoryImplTest {
 
+	private static final String CANNOT_FIND_OPTION_VALUE_MESSAGE = "Cannot find option value.";
 	private static final String SKU_OPTION_NAME_KEY = "SKU_OPTION_NAME_KEY";
 	private static final String SKU_OPTION_VALUE_KEY = "SKU_OPTION_VALUE_KEY";
 	private static final String ALTERNATE_SKU_OPTION_NAME_KEY = "ALTERNATE_SKU_OPTION_NAME_KEY";
 
-	@Rule
-	public final JUnitRuleMockery context = MockeryFactory.newRuleInstance();
+	@Mock
+	private SkuOptionService skuOptionService;
 
-	private final SkuOptionService skuOptionService = context.mock(SkuOptionService.class);
+	@InjectMocks
+	private ReactiveAdapterImpl reactiveAdapter;
 
-	private final SkuOptionRepository skuOptionRepository = new SkuOptionRepositoryImpl(skuOptionService);
+	private SkuOptionRepositoryImpl skuOptionRepository;
+
+	@Mock
+	private SkuOption skuOption;
+
+	@Mock
+	SkuOptionValue skuOptionValue;
+
+	@Before
+	public void initialize() {
+		skuOptionRepository = new SkuOptionRepositoryImpl(skuOptionService, reactiveAdapter);
+	}
 
 	/**
 	 * Test find sku option by value key with a successful result.
 	 */
 	@Test
 	public void testFindSkuOptionByValueKey() {
-		SkuOption skuOption = createSkuOption(SKU_OPTION_NAME_KEY);
-		SkuOptionValue expectedSkuOptionValue = createSkuOptionValue(SKU_OPTION_VALUE_KEY, skuOption);
+		when(skuOptionService.findOptionValueByKey(SKU_OPTION_VALUE_KEY)).thenReturn(skuOptionValue);
+		when(skuOptionValue.getSkuOption()).thenReturn(skuOption);
+		when(skuOption.getOptionKey()).thenReturn(SKU_OPTION_NAME_KEY);
 
-		shouldFindOptionValueByKeyWithResult(SKU_OPTION_VALUE_KEY, expectedSkuOptionValue);
-
-		ExecutionResult<SkuOptionValue> result = skuOptionRepository.findSkuOptionValueByKey(SKU_OPTION_NAME_KEY, SKU_OPTION_VALUE_KEY);
-
-		assertTrue("This should be a successful operation.", result.isSuccessful());
-		assertEquals("The resulting data should contain the expected skuOptionValue.", expectedSkuOptionValue, result.getData());
+		skuOptionRepository.findSkuOptionValueByKey(SKU_OPTION_NAME_KEY, SKU_OPTION_VALUE_KEY)
+				.test()
+				.assertNoErrors()
+				.assertValue(skuOptionValue);
 	}
 
 	/**
@@ -58,12 +68,12 @@ public class SkuOptionEntityRepositoryImplTest {
 	 */
 	@Test
 	public void testFindSkuOptionByValueKeyWhenNoSkuOptionValueFound() {
-		shouldFindOptionValueByKeyWithResult(SKU_OPTION_VALUE_KEY, null);
+		when(skuOptionService.findOptionValueByKey(SKU_OPTION_VALUE_KEY)).thenReturn(null);
 
-		ExecutionResult<SkuOptionValue> result = skuOptionRepository.findSkuOptionValueByKey(SKU_OPTION_NAME_KEY, SKU_OPTION_VALUE_KEY);
-
-		assertTrue("This should result in failure.", result.isFailure());
-		assertEquals("The result status should be as expected.", ResourceStatus.NOT_FOUND, result.getResourceStatus());
+		skuOptionRepository.findSkuOptionValueByKey(SKU_OPTION_NAME_KEY, SKU_OPTION_VALUE_KEY)
+				.test()
+				.assertError(ResourceOperationFailure.notFound(CANNOT_FIND_OPTION_VALUE_MESSAGE))
+				.assertNoValues();
 	}
 
 	/**
@@ -71,37 +81,13 @@ public class SkuOptionEntityRepositoryImplTest {
 	 */
 	@Test
 	public void testFindSkuOptionByValueKeyWhenCannotMatchOptionValueKeys() {
-		SkuOption skuOption = createSkuOption(ALTERNATE_SKU_OPTION_NAME_KEY);
-		SkuOptionValue expectedSkuOptionValue = createSkuOptionValue(SKU_OPTION_VALUE_KEY, skuOption);
+		when(skuOptionService.findOptionValueByKey(SKU_OPTION_VALUE_KEY)).thenReturn(skuOptionValue);
+		when(skuOptionValue.getSkuOption()).thenReturn(skuOption);
+		when(skuOption.getOptionKey()).thenReturn(ALTERNATE_SKU_OPTION_NAME_KEY);
 
-		shouldFindOptionValueByKeyWithResult(SKU_OPTION_VALUE_KEY, expectedSkuOptionValue);
-
-		ExecutionResult<SkuOptionValue> result = skuOptionRepository.findSkuOptionValueByKey(SKU_OPTION_NAME_KEY, SKU_OPTION_VALUE_KEY);
-
-		assertTrue("This should result in failure.", result.isFailure());
-		assertEquals("The result status should be as expected.", ResourceStatus.NOT_FOUND, result.getResourceStatus());
+		skuOptionRepository.findSkuOptionValueByKey(SKU_OPTION_NAME_KEY, SKU_OPTION_VALUE_KEY)
+				.test()
+				.assertError(ResourceOperationFailure.notFound(CANNOT_FIND_OPTION_VALUE_MESSAGE))
+				.assertNoValues();
 	}
-
-	private void shouldFindOptionValueByKeyWithResult(final String skuOptionValueKey, final SkuOptionValue result) {
-		context.checking(new Expectations() {
-			{
-				oneOf(skuOptionService).findOptionValueByKey(skuOptionValueKey);
-				will(returnValue(result));
-			}
-		});
-	}
-
-	private SkuOption createSkuOption(final String skuOptionKeyName) {
-		SkuOption skuOption = new SkuOptionImpl();
-		skuOption.setOptionKey(skuOptionKeyName);
-		return skuOption;
-	}
-
-	private SkuOptionValue createSkuOptionValue(final String optionValueKey, final SkuOption skuOption) {
-		SkuOptionValue skuOptionValue = new SkuOptionValueImpl();
-		skuOptionValue.setOptionValueKey(optionValueKey);
-		skuOptionValue.setSkuOption(skuOption);
-		return skuOptionValue;
-	}
-
 }

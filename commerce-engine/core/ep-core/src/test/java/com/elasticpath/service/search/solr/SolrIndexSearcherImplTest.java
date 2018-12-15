@@ -8,11 +8,12 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
+import com.google.common.collect.ImmutableMap;
+import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrQuery;
-import org.apache.solr.client.solrj.SolrServer;
+import org.apache.solr.client.solrj.SolrRequest;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.request.QueryRequest;
 import org.apache.solr.common.util.NamedList;
@@ -26,7 +27,6 @@ import org.junit.Test;
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.ElasticPath;
 import com.elasticpath.domain.attribute.impl.AttributeImpl;
-import com.elasticpath.domain.catalog.Catalog;
 import com.elasticpath.domain.catalogview.AttributeRangeFilter;
 import com.elasticpath.domain.catalogview.AttributeValueFilter;
 import com.elasticpath.domain.catalogview.FilterOption;
@@ -37,7 +37,7 @@ import com.elasticpath.domain.catalogview.impl.FilterOptionImpl;
 import com.elasticpath.domain.catalogview.impl.PriceFilterImpl;
 import com.elasticpath.domain.misc.SearchConfig;
 import com.elasticpath.domain.misc.impl.SearchConfigImpl;
-import com.elasticpath.service.catalogview.FilterFactory;
+import com.elasticpath.service.catalogview.filterednavigation.impl.FilteredNavigationConfigurationImpl;
 import com.elasticpath.service.search.IndexType;
 import com.elasticpath.service.search.index.QueryComposer;
 import com.elasticpath.service.search.index.QueryComposerFactory;
@@ -59,10 +59,10 @@ public class SolrIndexSearcherImplTest {
 	};
 	
 	private final ElasticPath elasticPath = context.mock(ElasticPath.class);
-	
+
 	private SolrProvider solrProvider;
 
-	private SolrServer solrServer;
+	private SolrClient solrClient;
 
 	private SolrQueryFactory queryFactory;
 
@@ -80,8 +80,9 @@ public class SolrIndexSearcherImplTest {
 	 * @throws Exception in case of error
 	 */
 	@Before
+	@SuppressWarnings("unchecked")
 	public void setUp() throws Exception {
-		solrServer = context.mock(SolrServer.class);
+		solrClient = context.mock(SolrClient.class);
 		solrProvider = context.mock(SolrProvider.class);
 		queryFactory = context.mock(SolrQueryFactory.class);
 		queryComposer = context.mock(QueryComposer.class);
@@ -89,15 +90,15 @@ public class SolrIndexSearcherImplTest {
 		
 		context.checking(new Expectations() {
 			{
-				allowing(solrProvider).getServer(with(any(IndexType.class))); will(returnValue(solrServer));
+				allowing(solrProvider).getServer(with(any(IndexType.class))); will(returnValue(solrClient));
 				allowing(solrProvider).getSearchConfig(with(any(IndexType.class))); will(returnValue(new SearchConfigImpl()));
 				
 				allowing(queryFactory).composeSpecificQuery(with(queryComposer), with(any(SearchCriteria.class)), with(any(Integer.class)),
-						with(any(Integer.class)), with(any(SearchConfig.class)), with(any(Boolean.class)));
+						with(any(Integer.class)), with(any(SearchConfig.class)), with(any(Boolean.class)), with(any(Map.class)));
 				will(returnValue(new SolrQuery()));
 				
 				allowing(queryFactory).composeKeywordQuery(with(any(KeywordSearchCriteria.class)), with(any(Integer.class)),
-						with(any(Integer.class)), with(any(SearchConfig.class)), with(any(Boolean.class)));
+						with(any(Integer.class)), with(any(SearchConfig.class)), with(any(Boolean.class)), with(any(Map.class)));
 				will(returnValue(new SolrQuery()));
 			}
 		});
@@ -105,7 +106,6 @@ public class SolrIndexSearcherImplTest {
 		solrIndexSearcherImpl = new SolrIndexSearcherImpl();
 		solrIndexSearcherImpl.setSolrProvider(solrProvider);
 		solrIndexSearcherImpl.setSolrQueryFactory(queryFactory);
-
 		solrIndexSearcherImpl.setQueryComposerFactory(queryComposerFactory);
 	}
 
@@ -129,7 +129,7 @@ public class SolrIndexSearcherImplTest {
 				allowing(queryComposerFactory).getComposerForCriteria(with(aNonNull(ProductSearchCriteria.class)));
 				will(returnValue(queryComposer));
 				
-				oneOf(solrServer).request(with(aNonNull(QueryRequest.class)));
+				oneOf(solrClient).request(with(aNonNull(QueryRequest.class)), with(aNull(String.class)));
 				will(returnValue(new NamedList<>()));
 			}
 		});
@@ -155,7 +155,7 @@ public class SolrIndexSearcherImplTest {
 				allowing(queryComposerFactory).getComposerForCriteria(with(aNonNull(ProductSearchCriteria.class)));
 				will(returnValue(queryComposer));
 				
-				exactly(2).of(solrServer).request(with(aNonNull(QueryRequest.class)));
+				exactly(2).of(solrClient).request(with(aNonNull(SolrRequest.class)), with(aNull(String.class)));
 				will(returnValue(new NamedList<>()));
 			}
 		});
@@ -181,7 +181,7 @@ public class SolrIndexSearcherImplTest {
 				allowing(queryComposerFactory).getComposerForCriteria(with(aNonNull(ProductSearchCriteria.class)));
 				will(returnValue(queryComposer));
 				
-				exactly(2).of(solrServer).request(with(aNonNull(QueryRequest.class)));
+				exactly(2).of(solrClient).request(with(aNonNull(QueryRequest.class)), with(aNull(String.class)));
 				will(returnValue(new NamedList<>()));
 			}
 		});
@@ -210,7 +210,7 @@ public class SolrIndexSearcherImplTest {
 				allowing(queryComposerFactory).getComposerForCriteria(with(aNonNull(ProductSearchCriteria.class)));
 				will(returnValue(queryComposer));
 				
-				oneOf(solrServer).request(with(aNonNull(QueryRequest.class)));
+				oneOf(solrClient).request(with(aNonNull(QueryRequest.class)), with(aNull(String.class)));
 				will(returnValue(new NamedList<>()));
 			}
 		});
@@ -246,9 +246,9 @@ public class SolrIndexSearcherImplTest {
 		final FilterOption<AttributeRangeFilter> filterOption = new FilterOptionImpl<>();
 		final SolrIndexSearchResult searchResult = new SolrIndexSearchResult();		
 		final SolrFacetAdapter facetAdapter = new SolrFacetAdapter();
+		facetAdapter.setConfig(new FilteredNavigationConfigurationImpl());
 		final AttributeRangeFilter attributeRangeFilter = new AttributeRangeFilterImpl();
 		attributeRangeFilter.setAttribute(new AttributeImpl());
-		facetAdapter.getFilterLookupMap().put(attributeRangeKey, attributeRangeFilter);		
 		final Map<String, Integer> facetQueries = new HashMap<>();
 		facetQueries.put(attributeRangeKey, 2);
 		
@@ -258,7 +258,7 @@ public class SolrIndexSearcherImplTest {
 		
 		solrIndexSearcherImpl.setSolrFacetAdapter(facetAdapter);
 		solrIndexSearcherImpl.setElasticPath(elasticPath);
-		solrIndexSearcherImpl.parseFacetQueries(searchResult, facetQueries);
+		solrIndexSearcherImpl.parseFacetQueries(searchResult, facetQueries, ImmutableMap.of(attributeRangeKey, attributeRangeFilter));
 		
 		assertFalse(searchResult.getAttributeRangeFilterOptions().isEmpty());
 		assertTrue(searchResult.getAttributeValueFilterOptions().isEmpty());
@@ -275,9 +275,9 @@ public class SolrIndexSearcherImplTest {
 		final FilterOption<AttributeValueFilter> filterOption = new FilterOptionImpl<>();
 		final SolrIndexSearchResult searchResult = new SolrIndexSearchResult();		
 		final SolrFacetAdapter facetAdapter = new SolrFacetAdapter();
+		facetAdapter.setConfig(new FilteredNavigationConfigurationImpl());
 		final AttributeValueFilter attributeValueFilter = new AttributeValueFilterImpl();
 		attributeValueFilter.setAttribute(new AttributeImpl());
-		facetAdapter.getFilterLookupMap().put(attributeValueKey, attributeValueFilter);		
 		final Map<String, Integer> facetQueries = new HashMap<>();
 		facetQueries.put(attributeValueKey, 2);
 		
@@ -287,7 +287,7 @@ public class SolrIndexSearcherImplTest {
 		
 		solrIndexSearcherImpl.setSolrFacetAdapter(facetAdapter);
 		solrIndexSearcherImpl.setElasticPath(elasticPath);
-		solrIndexSearcherImpl.parseFacetQueries(searchResult, facetQueries);
+		solrIndexSearcherImpl.parseFacetQueries(searchResult, facetQueries, ImmutableMap.of(attributeValueKey, attributeValueFilter));
 		
 		assertTrue(searchResult.getAttributeRangeFilterOptions().isEmpty());
 		assertFalse(searchResult.getAttributeValueFilterOptions().isEmpty());
@@ -305,7 +305,7 @@ public class SolrIndexSearcherImplTest {
 		final SolrIndexSearchResult searchResult = new SolrIndexSearchResult();		
 		final SolrFacetAdapter facetAdapter = new SolrFacetAdapter();
 		final PriceFilter priceFilter = new PriceFilterImpl();
-		facetAdapter.getFilterLookupMap().put(priceValueKey, priceFilter);		
+		facetAdapter.setConfig(new FilteredNavigationConfigurationImpl());
 		final Map<String, Integer> facetQueries = new HashMap<>();
 		facetQueries.put(priceValueKey, 2);
 		
@@ -315,7 +315,7 @@ public class SolrIndexSearcherImplTest {
 		
 		solrIndexSearcherImpl.setSolrFacetAdapter(facetAdapter);
 		solrIndexSearcherImpl.setElasticPath(elasticPath);
-		solrIndexSearcherImpl.parseFacetQueries(searchResult, facetQueries);
+		solrIndexSearcherImpl.parseFacetQueries(searchResult, facetQueries, ImmutableMap.of(priceValueKey, priceFilter));
 		
 		assertTrue(searchResult.getAttributeRangeFilterOptions().isEmpty());
 		assertTrue(searchResult.getAttributeValueFilterOptions().isEmpty());
@@ -335,40 +335,10 @@ public class SolrIndexSearcherImplTest {
 		facetQueries.put(priceValueKey, 0);
 		facetQueries.put(randomValueKey, 2);
 		
-		solrIndexSearcherImpl.parseFacetQueries(searchResult, facetQueries);
+		solrIndexSearcherImpl.parseFacetQueries(searchResult, facetQueries, ImmutableMap.of());
 		
 		assertTrue(searchResult.getAttributeRangeFilterOptions().isEmpty());
 		assertTrue(searchResult.getAttributeValueFilterOptions().isEmpty());
 		assertTrue(searchResult.getPriceFilterOptions().isEmpty());
-	}
-
-	/**
-	 * Test search result options with remember options set.
-	 * Ensures that filters are not created by the FilterFactory.
-	 * @throws IOException in case of error during solr request 
-	 * @throws SolrServerException in case of error during solr request
-	 */
-	@SuppressWarnings("unchecked")
-	@Test
-	public void testFiltersNotCreatedWithRememberOptionsSet() throws SolrServerException, IOException {		
-		final FilterFactory filterFactory = context.mock(FilterFactory.class);
-		solrIndexSearcherImpl.setFilterFactory(filterFactory);
-		final SolrIndexSearchResult result = context.mock(SolrIndexSearchResult.class);
-		
-		context.checking(new Expectations() {
-			{
-				never(filterFactory).createCategoryFilter(with(any(String.class)), with(any(Catalog.class)));
-				
-				allowing(result).isRememberOptions(); will(returnValue(true));
-				allowing(result).setNumFound(with(any(Integer.class)));
-				allowing(result).setResultUids(with(any(List.class)));
-				allowing(result).getLastNumFound(); will(returnValue(1));
-				
-				oneOf(solrServer).request(with(aNonNull(QueryRequest.class)));
-				will(returnValue(new NamedList<>()));
-			}
-		});
-		
-		solrIndexSearcherImpl.search(new KeywordSearchCriteria(), 1, result);
 	}
 }

@@ -3,13 +3,17 @@
  */
 package com.elasticpath.rest.resource.integration.epcommerce.repository;
 
+import java.util.Currency;
+import java.util.Locale;
 import java.util.Map;
 
 import com.google.common.collect.ImmutableMap;
 
+import com.elasticpath.rest.definition.searches.SearchOfferEntity;
 import com.elasticpath.rest.id.IdentifierPart;
 import com.elasticpath.rest.id.type.CompositeIdentifier;
 import com.elasticpath.rest.id.type.StringIdentifier;
+import com.elasticpath.rest.pagination.PaginationEntity;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.item.ItemRepository;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.shipmentdetails.ShipmentDetailsConstants;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.shipmentdetails.ShipmentDetailsUtil;
@@ -116,6 +120,41 @@ public final class ResourceTestConstants {
 	 */
 	public static final String CART_GUID = "cart_guid";
 
+	/**
+	 * Test catalog code.
+	 */
+	public static final String CATALOG_CODE = "catalogCode";
+
+	/**
+	 * Test locale.
+	 */
+	public static final Locale LOCALE = Locale.ENGLISH;
+
+	/**
+	 * Test currency.
+	 */
+	public static final Currency CURRENCY = Currency.getInstance("CAD");
+
+	/**
+	 * Test page size.
+	 */
+	public static final String PAGE_SIZE = "1";
+
+	/**
+	 * Test keyword.
+	 */
+	public static final String KEYWORD = "keyword";
+
+	/**
+	 * Test search id.
+	 */
+	public static final Map<String, String> SEARCH_ID_MAP = ImmutableMap.of(PaginationEntity.PAGE_SIZE_PROPERTY, PAGE_SIZE,
+			SearchOfferEntity.KEYWORDS_PROPERTY, KEYWORD);
+
+	/**
+	 * Test search identifier part.
+	 */
+	public static final IdentifierPart<Map<String, String>> SEARCH_IDENTIFIER_MAP = CompositeIdentifier.of(SEARCH_ID_MAP);
 
 	private ResourceTestConstants() {
 	}

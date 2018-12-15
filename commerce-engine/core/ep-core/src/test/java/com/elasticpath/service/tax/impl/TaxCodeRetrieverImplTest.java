@@ -3,7 +3,7 @@
  */
 package com.elasticpath.service.tax.impl;
 
-import static org.junit.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -74,7 +74,7 @@ public class TaxCodeRetrieverImplTest {
 	public void testGetEffectiveTaxCodeFromProductSku() {
 		TaxCode effectiveTaxCode = taxCodeRetrieverImpl.getEffectiveTaxCode(productSku);
 
-		assertEquals(productSkuTaxCode, effectiveTaxCode);
+		assertThat(effectiveTaxCode).isEqualTo(productSkuTaxCode);
 	}
 
 	@Test
@@ -83,7 +83,7 @@ public class TaxCodeRetrieverImplTest {
 
 		TaxCode effectiveTaxCode = taxCodeRetrieverImpl.getEffectiveTaxCode(productSku);
 
-		assertEquals(productTaxCode, effectiveTaxCode);
+		assertThat(effectiveTaxCode).isEqualTo(productTaxCode);
 	}
 
 	@Test
@@ -93,7 +93,7 @@ public class TaxCodeRetrieverImplTest {
 
 		TaxCode effectiveTaxCode = taxCodeRetrieverImpl.getEffectiveTaxCode(productSku);
 
-		assertEquals(productTypeTaxCode, effectiveTaxCode);
+		assertThat(effectiveTaxCode).isEqualTo(productTypeTaxCode);
 	}
 
 	@Test
@@ -104,13 +104,16 @@ public class TaxCodeRetrieverImplTest {
 
 		TaxCode effectiveTaxCode = taxCodeRetrieverImpl.getEffectiveTaxCode(productSku);
 
-		assertEquals(null, effectiveTaxCode);
+		assertThat(effectiveTaxCode).isNull();
 	}
 
+	@Test
 	public void testGetEffectiveTaxCodeFromProduct() {
 		TaxCode effectiveTaxCode = taxCodeRetrieverImpl.getEffectiveTaxCode(product);
 
-		assertEquals("The product's tax code override should have been returned", productTaxCode, effectiveTaxCode);
+		assertThat(effectiveTaxCode)
+			.as("The product's tax code override should have been returned")
+			.isEqualTo(productTaxCode);
 	}
 
 	@Test
@@ -118,7 +121,9 @@ public class TaxCodeRetrieverImplTest {
 		product.setTaxCodeOverride(null);
 
 		TaxCode effectiveTaxCode = taxCodeRetrieverImpl.getEffectiveTaxCode(product);
-		assertEquals("The tax code from the product type should have been returned", productTypeTaxCode, effectiveTaxCode);
+		assertThat(effectiveTaxCode)
+			.as("The tax code from the product type should have been returned")
+			.isEqualTo(productTypeTaxCode);
 	}
 
 }

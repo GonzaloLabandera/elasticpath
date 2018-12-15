@@ -68,31 +68,26 @@
 			<scope>runtime</scope>
 		</dependency>
 
-		<!--jaxb-impl is included due to jboss failing to load content wrappers RE-421-->
 		<dependency>
-			<groupId>com.sun.xml.bind</groupId>
-			<artifactId>jaxb-impl</artifactId>
+			<groupId>com.elasticpath</groupId>
+			<artifactId>ep-health-monitoring</artifactId>
 		</dependency>
-        <dependency>
-            <groupId>com.elasticpath</groupId>
-            <artifactId>ep-health-monitoring</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.elasticpath</groupId>
-            <artifactId>ep-health-monitoring-plugin-jms</artifactId>
-        </dependency>
+		<dependency>
+			<groupId>com.elasticpath</groupId>
+			<artifactId>ep-health-monitoring-plugin-jms</artifactId>
+		</dependency>
 	</dependencies>
 
 	<properties>
 		<m2eclipse.wtp.contextRoot>${ep.integration.context}</m2eclipse.wtp.contextRoot>
-    </properties>
+	</properties>
 
 	<build>
 		<pluginManagement>
 			<plugins>
 				<plugin>
 					<groupId>org.apache.tomcat.maven</groupId>
-					<artifactId>tomcat7-maven-plugin</artifactId>
+					<artifactId>tomcat8-maven-plugin</artifactId>
 					<configuration>
 						<path>${ep.integration.context}</path>
 						<port>${ep.integration.tomcat.port.http}</port>
@@ -170,11 +165,11 @@
 						</webResources>
 					</configuration>
 				</plugin>
-                <plugin>
-                    <groupId>com.google.code.maven-replacer-plugin</groupId>
-                    <artifactId>replacer</artifactId>
-                    <version>{maven-replacer-plugin.version}</version>
-                </plugin>
+				<plugin>
+					<groupId>com.google.code.maven-replacer-plugin</groupId>
+					<artifactId>replacer</artifactId>
+					<version>{maven-replacer-plugin.version}</version>
+				</plugin>
 			</plugins>
 		</pluginManagement>
 	</build>

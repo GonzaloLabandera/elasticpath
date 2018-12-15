@@ -7,13 +7,13 @@
 			<![CDATA[
 ####Entry Point: /registrations/{scope}/newaccount
 
-The registrations resource enables you to create new customers.
+The registrations resource family enables you to create new customers.
 			]]>
 		</description>
 
 		<!-- this plan is not using template because it doesn't have a start resource to fetch form. Form is fetched directly with URI: {base.family}/{base.scope}/newaccount/form -->
 		<plan>
-			<name>register-newaccount</name>
+			<name>register-new-account</name>
 			<description>
 				<![CDATA[
 Register a new account for a customer.

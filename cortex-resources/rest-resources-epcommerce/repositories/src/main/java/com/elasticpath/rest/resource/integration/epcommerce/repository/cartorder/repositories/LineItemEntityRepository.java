@@ -66,8 +66,8 @@ public class LineItemEntityRepository<E extends LineItemEntity, I extends LineIt
 		return getShoppingCartForItemIdentifier(identifier)
 				.flatMap(cart -> shoppingCartRepository.getShoppingItem(lineItemId, cart)
 						.flatMap(shoppingItem -> productSkuRepository.getProductSkuWithAttributesByGuidAsSingle(shoppingItem.getSkuGuid())
-								.flatMap(productSku -> itemRepository.getItemIdForSkuAsSingle(productSku)
-										.flatMap(itemId -> buildLineItemEntity(cartId, lineItemId, shoppingItem, itemId)))));
+								.flatMap(productSku ->
+										buildLineItemEntity(cartId, lineItemId, shoppingItem, itemRepository.getItemIdForSku(productSku)))));
 	}
 
 	/**

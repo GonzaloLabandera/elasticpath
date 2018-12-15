@@ -3,11 +3,14 @@
  */
 package com.elasticpath.cache;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.awaitility.Awaitility.await;
+
+import java.util.concurrent.TimeUnit;
 
 import net.sf.ehcache.Cache;
 import net.sf.ehcache.CacheManager;
+import org.awaitility.Duration;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -19,8 +22,6 @@ public class SimpleTimeoutCacheTest {
 
 	private static final String FRED = "fred";
 	private static final String FREDS_INFORMATION = "fred's information";
-	private static final long ONE_SEC = 1000L;
-	private static final long ONE_AND_HALF_SEC = 1500L;
 
 	private final CacheManager cacheManager = CacheManager.getInstance();
 	private final SimpleTimeoutCache<String, String> fixture = new SimpleTimeoutCache<>();
@@ -44,22 +45,22 @@ public class SimpleTimeoutCacheTest {
 	 */
 	@Test
 	public void testSimpleCaching() {
-		final long sleepTime = 1050L;
+		final Duration sleepTime = new Duration(1050L, TimeUnit.MILLISECONDS);
 		final long timeout = 1000L;
 
 		fixture.changeTimeout(timeout);
 		fixture.put(FRED, FREDS_INFORMATION);
 
-		assertEquals(FREDS_INFORMATION, fixture.get(FRED));
+		assertThat(fixture.get(FRED)).isEqualTo(FREDS_INFORMATION);
 		
 		// Make sure it's available after the first call
-		assertEquals(FREDS_INFORMATION, fixture.get(FRED));
-		assertEquals(FREDS_INFORMATION, fixture.get(FRED));
-		assertEquals(FREDS_INFORMATION, fixture.get(FRED));
+		assertThat(fixture.get(FRED)).isEqualTo(FREDS_INFORMATION);
+		assertThat(fixture.get(FRED)).isEqualTo(FREDS_INFORMATION);
+		assertThat(fixture.get(FRED)).isEqualTo(FREDS_INFORMATION);
 
-		sleep(sleepTime);
+		await().between(Duration.ONE_SECOND, sleepTime).until(() ->
+			assertThat(fixture.get(FRED)).isNull());
 
-		assertNull(fixture.get(FRED));
 	}
 	
 	/** 
@@ -72,9 +73,8 @@ public class SimpleTimeoutCacheTest {
 		fixture.changeTimeout(timeout);
 		fixture.put(FRED, FREDS_INFORMATION);
 
-		sleep(ONE_SEC);
-
-		assertEquals(FREDS_INFORMATION, fixture.get(FRED));
+		await().atMost(Duration.ONE_SECOND).until(() ->
+			assertThat(fixture.get(FRED)).isEqualTo(FREDS_INFORMATION));
 	}
 	
 	/** 
@@ -87,9 +87,8 @@ public class SimpleTimeoutCacheTest {
 		fixture.changeTimeout(timeout);
 		fixture.put(FRED, FREDS_INFORMATION);
 
-		sleep(ONE_SEC);
-
-		assertNull("Information should not have been cached", fixture.get(FRED));
+		await().atMost(Duration.ONE_SECOND).until(() ->
+			assertThat(fixture.get(FRED)).isNull());
 	}
 	
 	
@@ -103,16 +102,10 @@ public class SimpleTimeoutCacheTest {
 		fixture.changeTimeout(timeout);
 		fixture.put(FRED, FREDS_INFORMATION);  // put in at time=0 - should expire after 3s
 
-		assertEquals(FREDS_INFORMATION, fixture.get(FRED));
-		
-		sleep(ONE_SEC);
-		assertEquals(FREDS_INFORMATION, fixture.get(FRED));
+		assertThat(fixture.get(FRED)).isEqualTo(FREDS_INFORMATION);
 
-		sleep(ONE_SEC);
-		assertEquals(FREDS_INFORMATION, fixture.get(FRED));
-
-		sleep(ONE_AND_HALF_SEC);
-		assertNull("Cached entry should have expired", fixture.get(FRED));
+		await().atLeast(timeout, TimeUnit.MILLISECONDS).until(() ->
+			assertThat(fixture.get(FRED)).as("Cached entry should have expired").isNull());
 	}
 
 	/**
@@ -121,10 +114,10 @@ public class SimpleTimeoutCacheTest {
 	@Test
 	public void testNullKeysAndValues() {
 		fixture.put(null, null);
-		assertNull("Returned cached entry must be null", fixture.get(null));
+		assertThat(fixture.get(null)).as("Returned cached entry must be null").isNull();
 
 		fixture.put(null, FRED);
-		assertNull("Returned cached entry must be null if key is null, regardless of value", fixture.get(null));
+		assertThat(fixture.get(null)).as("Returned cached entry must be null if key is null, regardless of value").isNull();
 	}
 
 	/**
@@ -145,23 +138,15 @@ public class SimpleTimeoutCacheTest {
 		simpleCache2.setCache(ehCache2);
 
 		//assert ehCache1 params
-		assertEquals(2, simpleCache1.getCache().getCacheConfiguration().getMaxEntriesLocalHeap());
-		assertEquals(1L, simpleCache1.getCache().getCacheConfiguration().getTimeToIdleSeconds());
-		assertEquals(1L, simpleCache1.getCache().getCacheConfiguration().getTimeToLiveSeconds());
+		assertThat(simpleCache1.getCache().getCacheConfiguration().getMaxEntriesLocalHeap()).isEqualTo(2);
+		assertThat(simpleCache1.getCache().getCacheConfiguration().getTimeToIdleSeconds()).isEqualTo(1L);
+		assertThat(simpleCache1.getCache().getCacheConfiguration().getTimeToLiveSeconds()).isEqualTo(1L);
 
 		//assert ehCache2 params
-		assertEquals(maxElementsInHeap, simpleCache2.getCache().getCacheConfiguration().getMaxEntriesLocalHeap());
-		assertEquals(timeout, simpleCache2.getCache().getCacheConfiguration().getTimeToIdleSeconds());
-		assertEquals(timeout, simpleCache2.getCache().getCacheConfiguration().getTimeToLiveSeconds());
+		assertThat(simpleCache2.getCache().getCacheConfiguration().getMaxEntriesLocalHeap()).isEqualTo(maxElementsInHeap);
+		assertThat(simpleCache2.getCache().getCacheConfiguration().getTimeToIdleSeconds()).isEqualTo(timeout);
+		assertThat(simpleCache2.getCache().getCacheConfiguration().getTimeToLiveSeconds()).isEqualTo(timeout);
 
-	}
-
-	private void sleep(final long timeToWait) {
-
-		try {
-			Thread.sleep(timeToWait);
-		} catch (Exception e) {
-		}
 	}
 
 	private Cache createEhcacheInstance(final String name, final int maxElementsInHeap, final long timeToIdleSeconds, final long timeToLiveSeconds) {

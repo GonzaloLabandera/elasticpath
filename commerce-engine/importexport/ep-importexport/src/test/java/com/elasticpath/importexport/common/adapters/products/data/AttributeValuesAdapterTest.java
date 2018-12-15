@@ -3,11 +3,7 @@
  */
 package com.elasticpath.importexport.common.adapters.products.data;
 
-import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
-import static org.hamcrest.collection.IsEmptyCollection.empty;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.startsWith;
@@ -42,7 +38,6 @@ import com.elasticpath.domain.attribute.impl.ProductAttributeValueImpl;
 import com.elasticpath.domain.catalog.Catalog;
 import com.elasticpath.importexport.common.caching.CachingService;
 import com.elasticpath.importexport.common.dto.products.AttributeValuesDTO;
-import com.elasticpath.importexport.common.util.LocalizedAttributeKeyLocaleTranslator;
 import com.elasticpath.validation.service.ValidatorUtils;
 
 /**
@@ -61,13 +56,18 @@ public class AttributeValuesAdapterTest {
 	private AttributeValueGroup attributeValueGroup;
 
 	@Mock
-	private LocalizedAttributeKeyLocaleTranslator localizedAttributeKeyLocaleTranslator;
-
-	@Mock
 	private AttributeValueFactory attributeValueFactory;
 
 	@InjectMocks
 	private AttributeValuesAdapter adapterUnderTest;
+
+	private static final String[] SAMPLE_LANGUAGE_TAGS = new String[]{
+			"sr-Latn-RS",
+			"en-CA",
+			"fr-CA",
+			"fr",
+			"en"
+	};
 
 	@Before
 	public void setUp() {
@@ -77,22 +77,11 @@ public class AttributeValuesAdapterTest {
 	@Test
 	public void verifyLocaleDependentAttributeValuesAddedToDto() {
 		final String attributeName = "attribute_name";
-		final int numOfTestLocaleStrings = 100;
-
-		final String[] localeStrings = new String[numOfTestLocaleStrings];
 
 		final Attribute attribute = createAttribute(attributeName);
 		givenAttributeIsLocaleDependent(attribute);
 
-		for (int i = 0; i < numOfTestLocaleStrings; i++) {
-			final String localeString = String.valueOf(i);
-			localeStrings[i] = localeString;
-
-			when(localizedAttributeKeyLocaleTranslator.getLanguageTagFromLocalizedKeyName(attributeName + "_" + localeString))
-				.thenReturn(localeString);
-		}
-
-		final Collection<AttributeValue> attributeValues = createAttributeValuesForLanguageTags(attribute, attributeName, localeStrings);
+		final Collection<AttributeValue> attributeValues = createAttributeValuesForLanguageTags(attribute, attributeName, SAMPLE_LANGUAGE_TAGS);
 
 		final AttributeValuesDTO dto = new AttributeValuesDTO();
 
@@ -100,14 +89,11 @@ public class AttributeValuesAdapterTest {
 
 		final List<DisplayValue> displayValues = dto.getValues();
 
-		for (final String languageTag : localeStrings) {
-			assertTrue("No display language found for supported language tag",
-				displayValues.stream()
-					.anyMatch(displayValue -> languageTag.equals(displayValue.getLanguage())));
+		for (final String languageTag : SAMPLE_LANGUAGE_TAGS) {
+			assertThat(displayValues.stream())
+					.as("No display language found for supported language tag")
+					.anyMatch(displayValue -> languageTag.equals(displayValue.getLanguage()));
 		}
-
-		verify(localizedAttributeKeyLocaleTranslator, times(numOfTestLocaleStrings))
-			.getLanguageTagFromLocalizedKeyName(startsWith(attributeName));
 
 		verifyZeroInteractions(attributeValueGroup);
 		verifyZeroInteractions(cachingService);
@@ -130,15 +116,15 @@ public class AttributeValuesAdapterTest {
 
 		final List<DisplayValue> displayValues = dto.getValues();
 
-		assertThat("Expected a single, locale-less value when the attribute key does not contain locale info", displayValues, hasSize(1));
+		assertThat(displayValues).as("Expected a single, locale-less value when the attribute key does not contain locale info").hasSize(1);
 
 		final Optional<DisplayValue> displayValue = displayValues.stream().findFirst();
 
-		assertTrue(displayValue.isPresent());
-		assertNull("Expected the attribute value not to have a language property when the attribute key does not contain locale info",
-			displayValue.get().getLanguage());
+		assertThat(displayValue).isPresent();
+		assertThat(displayValue.get().getLanguage())
+				.as("Expected the attribute value not to have a language property when the attribute key does not contain locale info")
+				.isNull();
 
-		verifyZeroInteractions(localizedAttributeKeyLocaleTranslator);
 		verifyZeroInteractions(cachingService);
 		verifyZeroInteractions(attributeValueFactory);
 		verifyZeroInteractions(validatorUtils);
@@ -170,15 +156,17 @@ public class AttributeValuesAdapterTest {
 
 			final List<DisplayValue> displayValues = dto.getValues();
 
-			assertThat("Expected a single, locale-less value when the attribute key does not contain locale info", displayValues, hasSize(1));
+			assertThat(displayValues)
+					.as("Expected a single, locale-less value when the attribute key does not contain locale info")
+					.hasSize(1);
 
 			final Optional<DisplayValue> displayValue = displayValues.stream().findFirst();
 
-			assertTrue(displayValue.isPresent());
-			assertNull("Expected the attribute value not to have a language property when the attribute key does not contain locale info",
-				displayValue.get().getLanguage());
+			assertThat(displayValue).isPresent();
+			assertThat(displayValue.get().getLanguage())
+					.as("Expected the attribute value not to have a language property when the attribute key does not contain locale info")
+					.isNull();
 
-			verifyZeroInteractions(localizedAttributeKeyLocaleTranslator);
 			verifyZeroInteractions(cachingService);
 			verifyZeroInteractions(attributeValueFactory);
 			verifyZeroInteractions(validatorUtils);
@@ -200,7 +188,6 @@ public class AttributeValuesAdapterTest {
 
 		final Attribute attribute = createAttribute(attributeKey);
 
-		when(localizedAttributeKeyLocaleTranslator.convertLocaleStringToLocale(null)).thenReturn(null);
 		when(attributeValueGroup.getAttributeValue(attributeKey, null)).thenReturn(null);
 		when(attributeValueFactory.createAttributeValue(attribute, attributeKey))
 			.thenReturn(createAttributeValuePrototype(attribute, attributeKey));
@@ -209,13 +196,12 @@ public class AttributeValuesAdapterTest {
 		adapterUnderTest.populateDomain(dto, actualAttributeValues);
 
 		for (final DisplayValue displayValue : displayValues) {
-			assertTrue("No attribute value found",
-				actualAttributeValues.stream()
+			assertThat(actualAttributeValues.stream())
+					.as("No attribute value found")
 					.anyMatch(attributeValue -> displayValue.getValue().equals(attributeValue.getStringValue())
-						&& attributeKey.equals(attributeValue.getLocalizedAttributeKey())));
+							&& attributeKey.equals(attributeValue.getLocalizedAttributeKey()));
 		}
 
-		verify(localizedAttributeKeyLocaleTranslator).convertLocaleStringToLocale(null);
 		verify(cachingService).findAttribiteByKey(attributeKey);
 		verify(attributeValueFactory).createAttributeValue(attribute, attributeKey);
 		verify(validatorUtils).validateAttributeValue(any(AttributeValue.class));
@@ -227,7 +213,7 @@ public class AttributeValuesAdapterTest {
 		final AttributeValuesDTO dto = new AttributeValuesDTO();
 
 		final String attributeKey = "attribute.name";
-		final int numOfTestLocaleStrings = 100;
+		final int numOfTestLocaleStrings = SAMPLE_LANGUAGE_TAGS.length;
 
 		dto.setKey(attributeKey);
 
@@ -236,22 +222,19 @@ public class AttributeValuesAdapterTest {
 		final Collection<String> expectedLocalisedAttributeKeys = new ArrayList<>();
 		final Attribute attribute = createAttribute(attributeKey);
 
-		for (int i = 0; i < numOfTestLocaleStrings; i++) {
-			final String testLocaleString = String.valueOf(i);
-			final Locale locale = new Locale(testLocaleString);
+		for (final String languageTag : SAMPLE_LANGUAGE_TAGS) {
+			final Locale locale = Locale.forLanguageTag(languageTag);
 
 			catalogSupportedLocales.add(locale);
 
-			final String localisedAttributeKey = attributeKey + "_" + testLocaleString;
+			final String localisedAttributeKey = attributeKey + "_" + locale;
 			expectedLocalisedAttributeKeys.add(localisedAttributeKey);
 
-			when(localizedAttributeKeyLocaleTranslator.convertLocaleStringToLocale(testLocaleString)).thenReturn(locale);
-
-			displayValues.add(new DisplayValue(testLocaleString, testLocaleString + ".value"));
+			displayValues.add(new DisplayValue(languageTag, languageTag + ".value"));
 
 			when(attributeValueGroup.getAttributeValue(attributeKey, locale)).thenReturn(null);
 			when(attributeValueFactory.createAttributeValue(attribute, localisedAttributeKey))
-				.thenReturn(createAttributeValuePrototype(attribute, localisedAttributeKey));
+					.thenReturn(createAttributeValuePrototype(attribute, localisedAttributeKey));
 		}
 
 		givenAttributeHasCatalogWithSupportedLocales(attribute, catalogSupportedLocales);
@@ -263,12 +246,11 @@ public class AttributeValuesAdapterTest {
 		adapterUnderTest.populateDomain(dto, actualAttributeValues);
 
 		for (final String expectedLocalisedAttributeKey : expectedLocalisedAttributeKeys) {
-			assertTrue("No attribute value found for locale",
-				actualAttributeValues.stream()
-					.anyMatch(attributeValue -> expectedLocalisedAttributeKey.equals(attributeValue.getLocalizedAttributeKey())));
+			assertThat(actualAttributeValues.stream())
+					.as("No attribute value found for locale")
+					.anyMatch(attributeValue -> expectedLocalisedAttributeKey.equals(attributeValue.getLocalizedAttributeKey()));
 		}
 
-		verify(localizedAttributeKeyLocaleTranslator).convertLocaleStringToLocale("0");
 		verify(cachingService).findAttribiteByKey(attributeKey);
 		verify(attributeValueFactory, times(numOfTestLocaleStrings)).createAttributeValue(eq(attribute), startsWith(attributeKey));
 		verify(validatorUtils, times(numOfTestLocaleStrings)).validateAttributeValue(any(AttributeValue.class));
@@ -286,9 +268,6 @@ public class AttributeValuesAdapterTest {
 		final List<DisplayValue> displayValues = new ArrayList<>();
 		final Attribute attribute = createAttribute(attributeKey);
 		final String testLocaleString = "en-CA";
-		final Locale locale = new Locale(testLocaleString);
-
-		when(localizedAttributeKeyLocaleTranslator.convertLocaleStringToLocale(testLocaleString)).thenReturn(locale);
 
 		displayValues.add(new DisplayValue(testLocaleString, testLocaleString + ".value"));
 
@@ -300,10 +279,10 @@ public class AttributeValuesAdapterTest {
 
 		adapterUnderTest.populateDomain(dto, actualAttributeValues);
 
-		assertThat("Expected no attribute values to be produced when the locale is not supported by the catalog",
-			actualAttributeValues, empty());
+		assertThat(actualAttributeValues)
+				.as("Expected no attribute values to be produced when the locale is not supported by the catalog")
+				.isEmpty();
 
-		verify(localizedAttributeKeyLocaleTranslator).convertLocaleStringToLocale(testLocaleString);
 		verify(cachingService).findAttribiteByKey(attributeKey);
 		verifyZeroInteractions(attributeValueFactory);
 		verifyZeroInteractions(validatorUtils);
@@ -376,4 +355,5 @@ public class AttributeValuesAdapterTest {
 
 		return productAttributeValue;
 	}
+
 }

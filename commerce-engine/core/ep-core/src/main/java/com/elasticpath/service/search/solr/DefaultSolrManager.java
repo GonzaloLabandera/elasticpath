@@ -8,10 +8,10 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrQuery;
-import org.apache.solr.client.solrj.SolrServer;
 import org.apache.solr.client.solrj.SolrServerException;
-import org.apache.solr.client.solrj.impl.HttpSolrServer;
+import org.apache.solr.client.solrj.impl.HttpSolrClient;
 import org.apache.solr.common.SolrInputDocument;
 
 import com.elasticpath.base.exception.EpServiceException;
@@ -35,27 +35,27 @@ public class DefaultSolrManager implements SolrManager {
 	private SolrDocumentPublisherFactory solrDocumentPublisherFactory;
 
 	@Override
-	public SolrServer getServer(final IndexType indexType) throws EpPersistenceException {
+	public SolrClient getServer(final IndexType indexType) throws EpPersistenceException {
 		SolrHolder holder;
 		synchronized (solrServers) {
 			holder = solrServers.get(indexType);
 
 			if (holder == null) {
-				SolrServer httpServer = createServer(indexType);
+				SolrClient httpServer = createServer(indexType);
 
 				SolrDocumentPublisher publisher = getSolrDocumentPublisherFactory().createSolrDocumentPublisher();
 				publisher.setSolrServer(httpServer);
 				publisher.start();
 
 				holder = new SolrHolder();
-				holder.server = httpServer;
+				holder.client = httpServer;
 				holder.publisher = publisher;
 
 				solrServers.put(indexType, holder);
 			}
 		}
 
-		return holder.server;
+		return holder.client;
 	}
 
 	@Override
@@ -75,9 +75,9 @@ public class DefaultSolrManager implements SolrManager {
 	}
 
 	@Override
-	public void addUpdateDocument(final SolrServer server, final SolrInputDocument document) throws EpPersistenceException {
+	public void addUpdateDocument(final SolrClient client, final SolrInputDocument document) throws EpPersistenceException {
 		try {
-			server.add(document);
+			client.add(document);
 		} catch (SolrServerException e) {
 			throw new EpPersistenceException("SOLR Error -- add document", e);
 		} catch (IOException e) {
@@ -86,9 +86,9 @@ public class DefaultSolrManager implements SolrManager {
 	}
 
 	@Override
-	public void addUpdateDocument(final SolrServer server, final Collection<SolrInputDocument> documents) throws EpPersistenceException {
+	public void addUpdateDocument(final SolrClient client, final Collection<SolrInputDocument> documents) throws EpPersistenceException {
 		try {
-			server.add(documents);
+			client.add(documents);
 		} catch (SolrServerException e) {
 			throw new EpPersistenceException("SOLR Error -- add document", e);
 		} catch (IOException e) {
@@ -97,9 +97,9 @@ public class DefaultSolrManager implements SolrManager {
 	}
 
 	@Override
-	public void deleteDocument(final SolrServer server, final long uid) throws EpPersistenceException {
+	public void deleteDocument(final SolrClient client, final long uid) throws EpPersistenceException {
 		try {
-			server.deleteById(String.valueOf(uid));
+			client.deleteById(String.valueOf(uid));
 		} catch (SolrServerException e) {
 			throw new EpPersistenceException("SOLR Error -- delete document", e);
 		} catch (IOException e) {
@@ -108,26 +108,26 @@ public class DefaultSolrManager implements SolrManager {
 	}
 
 	@Override
-	public void flushChanges(final SolrServer server, final boolean optimize) throws EpPersistenceException {
-		// the list of solr servers is generally low, iterating shouldn't degrade performance
+	public void flushChanges(final SolrClient client, final boolean optimize) throws EpPersistenceException {
+		// the list of solr clients is generally low, iterating shouldn't degrade performance
 		boolean known = false;
 		synchronized (solrServers) {
 			for (SolrHolder holder : solrServers.values()) {
-				if (holder.server.equals(server)) {
+				if (holder.client.equals(client)) {
 					known = true;
 					break;
 				}
 			}
 		}
 		if (!known) {
-			throw new EpPersistenceException("Unable to flush changes of an unmanaged SOLR server.");
+			throw new EpPersistenceException("Unable to flush changes of an unmanaged SOLR client.");
 		}
 
 		try {
 			if (optimize) {
-				server.optimize();
+				client.optimize();
 			} else {
-				server.commit();
+				client.commit();
 			}
 		} catch (SolrServerException e) {
 			throw new EpServiceException("SOLR Error -- flush", e);
@@ -137,13 +137,13 @@ public class DefaultSolrManager implements SolrManager {
 	}
 
 	@Override
-	public void rebuildSpelling(final SolrServer server) throws EpPersistenceException {
+	public void rebuildSpelling(final SolrClient client) throws EpPersistenceException {
 		final SolrQuery query = new SolrQuery();
-		query.setQueryType(SolrIndexConstants.SPELL_CHECKER);
+		query.setRequestHandler(SolrIndexConstants.SPELL_CHECKER);
 		query.set("cmd", "rebuild");
 		try {
-			server.query(query);
-		} catch (SolrServerException e) {
+			client.query(query);
+		} catch (SolrServerException | IOException e) {
 			throw new EpPersistenceException("SOLR Error -- spelling rebuild", e);
 		}
 	}
@@ -161,13 +161,13 @@ public class DefaultSolrManager implements SolrManager {
 	}
 
 	/**
-	 * Creates a HTTP SOLR server for a particular server name.
+	 * Creates a HTTP SOLR client for a particular client name.
 	 *
-	 * @param indexType {@link IndexType} to create a server for
-	 * @return a HTTP SOLR server
+	 * @param indexType {@link IndexType} to create a client for
+	 * @return a HTTP SOLR client
 	 * @throws EpServiceException in case of any errors
 	 */
-	protected SolrServer createServer(final IndexType indexType) {
+	protected SolrClient createServer(final IndexType indexType) {
 		String name = indexType.getIndexName();
 		String searchUrl = getSearchConfig(name).getSearchHost();
 		// check in case of user error
@@ -175,7 +175,7 @@ public class DefaultSolrManager implements SolrManager {
 			searchUrl = searchUrl.concat("/");
 		}
 		searchUrl = searchUrl.concat(name);
-		return new HttpSolrServer(searchUrl);
+		return new HttpSolrClient.Builder().withBaseSolrUrl(searchUrl).build();
 	}
 
 	protected SearchConfigFactory getSearchConfigFactory() {
@@ -200,7 +200,7 @@ public class DefaultSolrManager implements SolrManager {
 
 	/** Container class for solr index lookups. */
 	private static class SolrHolder {
-		private SolrServer server;
+		private SolrClient client;
 
 		private SolrDocumentPublisher publisher;
 	}

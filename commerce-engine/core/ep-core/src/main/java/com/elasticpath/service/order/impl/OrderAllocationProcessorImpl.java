@@ -34,20 +34,8 @@ public class OrderAllocationProcessorImpl implements OrderAllocationProcessor {
 	/**
 	 * Inventory listener implementation.
 	 */
-	private final InventoryListener inventoryListener = new InventoryListener() {
-
-		/**
-		 * Notified on inventory change.
-		 *
-		 * @param skuCode the SKU code
-		 * @param warehouseCode the warehouse code
-		 */
-		@Override
-		public void newInventory(final String skuCode, final String warehouseCode) {
+	private final InventoryListener inventoryListener = (skuCode, warehouseCode) ->
 			getOrderAllocationProcessor().processOutstandingOrders(skuCode, warehouseCode);
-		}
-
-	};
 
 	private OrderService orderService;
 	private ProductSkuLookup productSkuLookup;

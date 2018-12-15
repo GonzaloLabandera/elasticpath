@@ -12,12 +12,11 @@ import java.util.Set;
 import java.util.function.Predicate;
 
 import org.apache.log4j.Logger;
-import org.apache.solr.client.solrj.SolrServer;
+import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrServerException;
-import org.apache.solr.client.solrj.impl.HttpSolrServer;
+import org.apache.solr.client.solrj.impl.HttpSolrClient;
 import org.springframework.jmx.export.annotation.ManagedOperation;
 import org.springframework.jmx.export.annotation.ManagedOperationParameter;
-import org.springframework.jmx.export.annotation.ManagedOperationParameters;
 import org.springframework.jmx.export.annotation.ManagedResource;
 
 import com.elasticpath.base.exception.EpServiceException;
@@ -139,7 +138,7 @@ public class IndexBuildServiceImpl extends AbstractIndexServiceImpl {
 	@Override
 	protected void build(final IndexType indexType, final boolean rebuild) {
 		final IndexBuilder indexBuilder = getIndexBuilder(indexType);
-		final SolrServer solrServer = getSolrManager().getServer(indexBuilder.getIndexType());
+		final SolrClient solrClient = getSolrManager().getServer(indexBuilder.getIndexType());
 
 		int operations = 0;
 
@@ -147,11 +146,11 @@ public class IndexBuildServiceImpl extends AbstractIndexServiceImpl {
 			// just find notifications for indexType and then clear this notifications then buildFinished(..) called
 			indexBuilder.getIndexNotificationProcessor().findAllNewNotifications(indexType);
 
-			operations = rebuildInternal(indexBuilder, solrServer);
+			operations = rebuildInternal(indexBuilder, solrClient);
 		} else {
-			operations = buildInternal(indexBuilder, solrServer);
+			operations = buildInternal(indexBuilder, solrClient);
 		}
-		buildFinished(indexBuilder, operations, solrServer);
+		buildFinished(indexBuilder, operations, solrClient);
 	}
 
 	/**
@@ -190,10 +189,10 @@ public class IndexBuildServiceImpl extends AbstractIndexServiceImpl {
 	 * Finds all the uids to be updated and/or deleted and adds/deletes them to/from the index.
 	 *
 	 * @param indexBuilder the index builder to use
-	 * @param solrServer the solr server instance to use
+	 * @param solrClient the solr client instance to use
 	 * @return the number of changes done to the indexes in terms of updating them
 	 */
-	protected int buildInternal(final IndexBuilder indexBuilder, final SolrServer solrServer) {
+	protected int buildInternal(final IndexBuilder indexBuilder, final SolrClient solrClient) {
 		final Date lastBuildDate = getLastBuildDate(indexBuilder.getIndexType());
 
 		// add or update the corresponding documents in the index for products that were added or updated since the last build
@@ -206,13 +205,13 @@ public class IndexBuildServiceImpl extends AbstractIndexServiceImpl {
 
 		if (isIndexToBeUpdated) {
 
-			onIndexUpdatingInternal(indexBuilder, solrServer);
+			onIndexUpdatingInternal(indexBuilder, solrClient);
 
 			operations = addedOrModifiedUids.size();
 
 			if (operations > 0) {
 
-				onAddUpdateDocuments(indexBuilder, addedOrModifiedUids, solrServer, operations);
+				onAddUpdateDocuments(indexBuilder, addedOrModifiedUids, solrClient, operations);
 
 				indexBuilder.submit(addedOrModifiedUids);
 
@@ -241,10 +240,10 @@ public class IndexBuildServiceImpl extends AbstractIndexServiceImpl {
 	 * Rebuild an index by removing all the elements and building it from scratch.
 	 *
 	 * @param indexBuilder the index builder to use
-	 * @param solrServer the solr server to use
+	 * @param solrClient the solr client to use
 	 * @return the number of changes done to the index
 	 */
-	protected int rebuildInternal(final IndexBuilder indexBuilder, final SolrServer solrServer) {
+	protected int rebuildInternal(final IndexBuilder indexBuilder, final SolrClient solrClient) {
 		// if rebuild, create new index
 		if (LOG.isDebugEnabled()) {
 			LOG.debug("Building Index -- recreate start: " + indexBuilder.getName());
@@ -261,15 +260,15 @@ public class IndexBuildServiceImpl extends AbstractIndexServiceImpl {
 		// this need has gone away and we attempt to appease code that expects these numbers.
 		int operations = 0;
 
-		onIndexUpdatingInternal(indexBuilder, solrServer);
+		onIndexUpdatingInternal(indexBuilder, solrClient);
 
-		deleteIndex(solrServer);
+		deleteIndex(solrClient);
 
 		operations = allUids.size();
 
 		if (operations > 0) {
 
-			onAddUpdateDocuments(indexBuilder, allUids, solrServer, operations);
+			onAddUpdateDocuments(indexBuilder, allUids, solrClient, operations);
 
 			indexBuilder.submit(allUids);
 
@@ -287,7 +286,7 @@ public class IndexBuildServiceImpl extends AbstractIndexServiceImpl {
 				}
 			}
 		} else {
-			commitWithEmptyIndex(solrServer);
+			commitWithEmptyIndex(solrClient);
 		}
 
 		return operations;
@@ -298,14 +297,14 @@ public class IndexBuildServiceImpl extends AbstractIndexServiceImpl {
 	 *
 	 * @param indexBuilder the index builder
 	 * @param operations the number of solr operations performed during the build
-	 * @param server the solr server instance
+	 * @param client the solr client instance
 	 */
-	protected void buildFinished(final IndexBuilder indexBuilder, final int operations, final SolrServer server) {
+	protected void buildFinished(final IndexBuilder indexBuilder, final int operations, final SolrClient client) {
 		if (LOG.isDebugEnabled()) {
 			LOG.debug("Building Index -- finished: " + indexBuilder.getName());
 		}
 		if (operations > 0) {
-			onIndexUpdatedInternal(indexBuilder, server);
+			onIndexUpdatedInternal(indexBuilder, client);
 		}
 		final IndexNotificationProcessor indexNotificationProcessor = indexBuilder.getIndexNotificationProcessor();
 		indexNotificationProcessor.removeStoredNotifications();
@@ -320,12 +319,12 @@ public class IndexBuildServiceImpl extends AbstractIndexServiceImpl {
 	 *
 	 * @param indexBuilder the index builder
 	 * @param uidList the list of UID
-	 * @param solrServer the Solr server
+	 * @param solrClient the Solr client
 	 * @param operations the number of operations done so far
 	 */
 	protected void onAddUpdateDocuments(final IndexBuilder indexBuilder,
 			final Collection<Long> uidList,
-			final SolrServer solrServer,
+			final SolrClient solrClient,
 			final int operations) {
 		// by default does nothing
 	}
@@ -365,18 +364,18 @@ public class IndexBuildServiceImpl extends AbstractIndexServiceImpl {
 	}
 
 	/**
-	 * Removes all indexes from a SOLR server.
+	 * Removes all indexes from a SOLR client.
 	 *
-	 * @param server the server to operate on
+	 * @param client the client to operate on
 	 */
-	private void deleteIndex(final SolrServer server) {
-		LOG.debug("Removing all indexes from server " + server);
+	private void deleteIndex(final SolrClient client) {
+		LOG.debug("Removing all indexes from client " + client);
 
 		try {
-			server.deleteByQuery("*:*");
+			client.deleteByQuery("*:*");
 		} catch (final SolrServerException e) {
-			if (server instanceof HttpSolrServer) {
-				LOG.error("Error executing search. Solr Manager url : " + ((HttpSolrServer) server).getBaseURL(), e);
+			if (client instanceof HttpSolrClient) {
+				LOG.error("Error executing search. Solr Manager url : " + ((HttpSolrClient) client).getBaseURL(), e);
 			}
 			throw new EpPersistenceException("remove all indexes", e);
 		} catch (final IOException e) {
@@ -384,12 +383,12 @@ public class IndexBuildServiceImpl extends AbstractIndexServiceImpl {
 		}
 	}
 
-	private void commitWithEmptyIndex(final SolrServer solrServer) {
+	private void commitWithEmptyIndex(final SolrClient solrClient) {
 		try {
-			solrServer.commit();
+			solrClient.commit();
 		} catch (final SolrServerException e) {
-			if (solrServer instanceof HttpSolrServer) {
-				LOG.error("Error executing rebuild on empty index. Solr Manager url : " + ((HttpSolrServer) solrServer).getBaseURL(), e);
+			if (solrClient instanceof HttpSolrClient) {
+				LOG.error("Error executing rebuild on empty index. Solr Manager url : " + ((HttpSolrClient) solrClient).getBaseURL(), e);
 			}
 			throw new EpPersistenceException("Rebuild on empty index", e);
 		} catch (final IOException e) {
@@ -401,7 +400,7 @@ public class IndexBuildServiceImpl extends AbstractIndexServiceImpl {
 		return solrManager;
 	}
 
-	private void onIndexUpdatedInternal(final IndexBuilder indexBuilder, final SolrServer server) {
+	private void onIndexUpdatedInternal(final IndexBuilder indexBuilder, final SolrClient client) {
 		final IndexBuildEventListener buildEventListener = indexBuilder.getIndexBuildEventListener();
 		if (buildEventListener != null) {
 			buildEventListener.indexBuildComplete();
@@ -413,7 +412,7 @@ public class IndexBuildServiceImpl extends AbstractIndexServiceImpl {
 		getSolrManager().getDocumentPublisher(indexBuilder.getIndexType()).flush();
 		getSolrManager().getDocumentPublisher(indexBuilder.getIndexType()).commit();
 
-		indexBuilder.onIndexUpdated(server);
+		indexBuilder.onIndexUpdated(client);
 	}
 
 	protected IndexBuildPolicy getIndexBuildPolicy() {
@@ -424,8 +423,8 @@ public class IndexBuildServiceImpl extends AbstractIndexServiceImpl {
 		this.indexBuildPolicy = indexBuildPolicy;
 	}
 
-	private void onIndexUpdatingInternal(final IndexBuilder indexBuilder, final SolrServer server) {
-		indexBuilder.onIndexUpdating(server);
+	private void onIndexUpdatingInternal(final IndexBuilder indexBuilder, final SolrClient client) {
+		indexBuilder.onIndexUpdating(client);
 	}
 
 	private Collection<Long> findAffectedUidsByQuery(final IndexType indexType, final String query) {
@@ -474,21 +473,21 @@ public class IndexBuildServiceImpl extends AbstractIndexServiceImpl {
 	 * @param indexTypeName the string name of the {@code IndexType}
 	 */
 	@ManagedOperation(description = "Request that the named IndexType be rebuilt.")
-	@ManagedOperationParameters({ @ManagedOperationParameter(name = "indexTypeName", description = "The string value of the IndexType.") })
+	@ManagedOperationParameter(name = "indexTypeName", description = "The string value of the IndexType.")
 	public void rebuildIndex(final String indexTypeName) {
 		final IndexType indexType = IndexType.findFromName(indexTypeName);
 		build(indexType, true);
 	}
 
 	/**
-	 * Optimizes an index using the {@link SolrServer} instance of that index.
+	 * Optimizes an index using the {@link SolrClient} instance of that index.
 	 *
 	 * @param indexType the index type
 	 */
 	protected void optimizeIndex(final IndexType indexType) {
 		try {
-			final SolrServer solrServer = getSolrManager().getServer(indexType);
-			solrServer.optimize();
+			final SolrClient solrClient = getSolrManager().getServer(indexType);
+			solrClient.optimize();
 		} catch (final Exception exc) {
 			LOG.warn("Could not optimize the index: " + indexType, exc);
 		}

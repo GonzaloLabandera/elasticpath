@@ -10,6 +10,8 @@
 			maxActive="100"
 			maxIdle="30"
 			maxWait="10000"
+			minIdle="0"
+			minEvictableIdleTimeMillis="1000"
 			testWhileIdle="true"
 			validationQuery="SELECT 1"
 			removeAbandoned="true"
@@ -18,6 +20,7 @@
 			password="sa"
 			driverClassName="org.h2.Driver"
 			url="jdbc:h2:file:database/DEMODB;DB_CLOSE_DELAY=-1;AUTO_SERVER=TRUE;MVCC=TRUE"
+			factory="org.apache.tomcat.jdbc.pool.DataSourceFactory"
 			/>
 
 	<Resource auth="Container"

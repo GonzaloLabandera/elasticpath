@@ -5,7 +5,7 @@
 	<parent>
 		<artifactId>core</artifactId>
 		<groupId>com.elasticpath</groupId>
-		<version>703.0.0-SNAPSHOT</version>
+		<version>704.0.0-SNAPSHOT</version>
 	</parent>
 	<modelVersion>4.0.0</modelVersion>
 
@@ -68,8 +68,26 @@
 							com.elasticpath.commons.beanframework,
 							com.elasticpath.cache.impl,
 							com.elasticpath.cache.factory.impl,
+							com.elasticpath.domain.discounts,
+							com.elasticpath.domain.shoppingcart,
+							com.elasticpath.domain.discounts.impl,
 							com.elasticpath.service.catalog.impl,
 							com.elasticpath.settings.beanframework,
+							org.drools.core,
+							org.drools.core.base,
+							org.drools.core.common,
+							org.drools.core.conflict,
+							org.drools.core.factmodel,
+							org.drools.core.factmodel.traits,
+							org.drools.core.impl,
+							org.drools.core.reteoo,
+							org.drools.core.reteoo.builder,
+							org.drools.core.rule,
+							org.drools.core.util,
+							org.kie.api.conf,
+							org.kie.internal.builder.conf,
+							org.kie.internal.conf,
+							org.kie.internal.utils,
 							org.springframework.aop,
 							org.springframework.aop.framework,
 							org.springframework.cache.ehcache,

@@ -14,7 +14,7 @@ public class RmaEditor extends AbstractPageObject {
 	private static final String EDITOR_BUTTON_CSS = EDITOR_PANE_PARENT_CSS + "div[widget-id='%s'][seeable='true']";
 	private static final String ITEMS_TABLE_PARENT_CSS = EDITOR_PANE_PARENT_CSS + "div[widget-id='Order Return Details Table'] ";
 	private static final String RETURNED_QUANTITY_COLUMN_CSS = ITEMS_TABLE_PARENT_CSS + "div[row-id='%s'] div[column-num='4']";
-	private static final String RETURNED_QUANTITY_COLUMN_INPUT_CSS = ITEMS_TABLE_PARENT_CSS + " input:not([readonly])";
+	private static final String RETURNED_QUANTITY_COLUMN_INPUT_CSS = ITEMS_TABLE_PARENT_CSS + "input:not([readonly])";
 	private static final String RETURNED_STATE_COLUMN_CSS = ITEMS_TABLE_PARENT_CSS + "div[row-id='%s'] div[column-num='5']";
 
 	/**

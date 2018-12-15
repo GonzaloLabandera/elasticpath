@@ -1,0 +1,45 @@
+<?xml version="1.0"?>
+<definitions xmlns="http://www.elasticpath.com/schema/rest/0.5">
+
+	<family>
+		<name>offerdefinitions</name>
+		<description>
+			<![CDATA[An offer definition describes the offer.]]>
+		</description>
+
+		<resource>
+			<name>offer-definition</name>
+			<description><![CDATA[An offer's definition.]]></description>
+			<uri>{base.family}/{base.scope}/{offers.offer-id}</uri>
+			<entity>offer-definition</entity>
+		</resource>
+
+		<relationship>
+			<name>offer-definition-for-offer</name>
+			<description><![CDATA[Read the offer definition from the offer.]]></description>
+			<rel>definition</rel>
+			<rev>offer</rev>
+			<from>offers.offer</from>
+			<to>offer-definition</to>
+		</relationship>
+
+		<entity>
+			<name>offer-definition</name>
+			<description><![CDATA[An offer definition is a description of an offer.]]></description>
+			<property>
+				<name>display-name</name>
+				<description><![CDATA[The localized name of the offer, intended for display in the client application.]]></description>
+				<string/>
+			</property>
+			<property>
+				<name>details</name>
+				<description><![CDATA[The product attributes of the offer.]]></description>
+				<array>
+					<is-a>base.details</is-a>
+				</array>
+			</property>
+			<entity-type>offerdefinitions.offer-definition</entity-type>
+		</entity>
+
+	</family>
+</definitions>

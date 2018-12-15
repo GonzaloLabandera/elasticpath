@@ -1358,6 +1358,11 @@ public class CategoryServiceImpl implements CategoryService {
 		return Lists.reverse(path);
 	}
 
+	@Override
+	public List<Category> findCategoriesByCatalogUid(final long catalogUid) {
+		return getPersistenceEngine().retrieveByNamedQuery("FIND_CATEGORIES_BY_CATALOG_UID", catalogUid);
+	}
+
 	/**
 	 * Retrieves a bean from the bean factory.
 	 *

@@ -29,6 +29,8 @@ public class FilterOptionImpl<T extends Filter<T>> extends AbstractEpDomainImpl 
 
 	private String queryString;
 
+	private String filterTag;
+
 	/**
 	 * Returns the number of hits in the filter option.
 	 *
@@ -130,5 +132,25 @@ public class FilterOptionImpl<T extends Filter<T>> extends AbstractEpDomainImpl 
 			return queryString;
 		}
 		return seoUrl;
+	}
+
+	/**
+	 * Returns the tag.
+	 *
+	 * @return the tag
+	 */
+	@Override
+	public String getFilterTag() {
+		return filterTag;
+	}
+
+	/**
+	 * Sets the tag.
+	 *
+	 * @param filterTag the tag
+	 */
+	@Override
+	public void setFilterTag(final String filterTag) {
+		this.filterTag = filterTag;
 	}
 }

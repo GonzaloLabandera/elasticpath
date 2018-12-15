@@ -47,13 +47,9 @@ import com.elasticpath.domain.order.Order;
 import com.elasticpath.domain.order.OrderAddress;
 import com.elasticpath.domain.order.OrderShipmentStatus;
 import com.elasticpath.domain.order.PhysicalOrderShipment;
+import com.elasticpath.service.shipping.PhysicalOrderShipmentShippingCostRefresher;
 import com.elasticpath.service.shipping.ShippingOptionService;
-import com.elasticpath.service.shipping.transformers.PricedShippableItemContainerFromOrderShipmentTransformer;
-import com.elasticpath.shipping.connectivity.commons.constants.ShippingContextIdNames;
-import com.elasticpath.shipping.connectivity.dto.PricedShippableItem;
-import com.elasticpath.shipping.connectivity.dto.PricedShippableItemContainer;
 import com.elasticpath.shipping.connectivity.dto.ShippingOption;
-import com.elasticpath.shipping.connectivity.service.ShippingCalculationService;
 
 /**
  * Represents the physical shipment shipping information sub section.
@@ -121,7 +117,7 @@ public class OrderDetailsPhysicalShipmentSubSectionShippingInfo implements IProp
 		EpState state;
 		if (((OrderEditor) editor).isAuthorizedAndAvailableForEdit()
 				&& (shipment.getShipmentStatus() == OrderShipmentStatus.AWAITING_INVENTORY
-						|| shipment.getShipmentStatus() == OrderShipmentStatus.INVENTORY_ASSIGNED)
+				|| shipment.getShipmentStatus() == OrderShipmentStatus.INVENTORY_ASSIGNED)
 				&& !shipment.getOrder().isExchangeOrder()) {
 			state = EpState.EDITABLE;
 		} else {
@@ -134,7 +130,7 @@ public class OrderDetailsPhysicalShipmentSubSectionShippingInfo implements IProp
 	/**
 	 * Creates the controls.
 	 *
-	 * @param client the composite
+	 * @param client  the composite
 	 * @param toolkit the form tool kit
 	 */
 	protected void createControls(final Composite client, final FormToolkit toolkit) {
@@ -209,21 +205,7 @@ public class OrderDetailsPhysicalShipmentSubSectionShippingInfo implements IProp
 							shipment.setCarrierName(selectedShippingOption.getCarrierDisplayName().orElse(null));
 							shipment.setShippingOptionName(selectedShippingOption
 									.getDisplayName(CorePlugin.getDefault().getDefaultLocale()).orElse(null));
-							final PricedShippableItemContainerFromOrderShipmentTransformer<PricedShippableItem> shippableItemContainerTransformer
-									= ServiceLocator.getService(ContextIdNames.PRICED_SHIPPABLE_CONTAINER_FROM_SHIPMENT_TRANSFORMER);
 
-							final PricedShippableItemContainer<PricedShippableItem> pricedShippableItemContainer
-									= shippableItemContainerTransformer.apply(shipment);
-
-							final List<ShippingOption> shippingOptions
-									= ((ShippingCalculationService) ServiceLocator.getService(ShippingContextIdNames.SHIPPING_CALCULATION_SERVICE))
-									.getPricedShippingOptions(pricedShippableItemContainer).getAvailableShippingOptions();
-
-							final ShippingOption foundShippingOption = shippingOptions.stream()
-									.filter(shippingOption -> shippingOption.getCode().equals(shipment.getShippingOptionCode()))
-									.findFirst().get();
-
-							shipment.setShippingCost(foundShippingOption.getShippingCost().get().getAmount());
 							fireShippingMethodChangeEvent();
 						}
 						return Status.OK_STATUS;
@@ -330,6 +312,11 @@ public class OrderDetailsPhysicalShipmentSubSectionShippingInfo implements IProp
 	 */
 	private void fireChangeEvent() {
 		editor.controlModified();
+
+		final PhysicalOrderShipmentShippingCostRefresher physicalOrderShipmentShippingCostRefresher =
+				ServiceLocator.getService(ContextIdNames.PHYSICAL_ORDER_SHIPMENT_SHIPPING_COST_REFRESHER);
+		physicalOrderShipmentShippingCostRefresher.refresh(shipment);
+
 		// fire changes to editor to notify summary sub section about address/service option change event
 		((OrderEditor) editor).fireShipmentAddressMethodChanges();
 	}

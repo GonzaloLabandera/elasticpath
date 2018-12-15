@@ -13,9 +13,11 @@ public class ChangeTimezoneDialog extends AbstractDialog {
 	 */
 	public static final String CHANGE_TIMEZONE_PARENT = "div[widget-id='Change Time Zone'][widget-type='Shell'] ";
 	private static final String USE_CUSTOM_TIMEZONE = CHANGE_TIMEZONE_PARENT + "div[widget-id='Use custom time zone']";
+	private static final String USE_BROWSER_TIMEZONE = CHANGE_TIMEZONE_PARENT
+			+ "div[automation-id='com.elasticpath.cmclient.core.CoreMessages.ChangeTimezoneDialog_Browser']";
 	private static final String CUSTOM_TIMEZONE_COMBOBOX = CHANGE_TIMEZONE_PARENT
 			+ "div[automation-id='com.elasticpath.cmclient.core.CoreMessages.ChangeTimezoneDialog_Description'][appearance-id='ccombo']";
-	private static final String UTC_TIMEZONE = "(UTC+00:00) Coordinated Universal Time";
+	private static final String COMBOBOX_OPTION_INPUT = CUSTOM_TIMEZONE_COMBOBOX + ">div>input";
 	private static final String SAVE_BUTTON_CSS = CHANGE_TIMEZONE_PARENT + "div[widget-id='Save']";
 	private static final String CANCEL_BUTTON_CSS = CHANGE_TIMEZONE_PARENT + "div[widget-id='Cancel']";
 
@@ -29,17 +31,58 @@ public class ChangeTimezoneDialog extends AbstractDialog {
 	}
 
 	/**
-	 * Selects the UTC timezone from the dropdown.
+	 * Selects timezone from the dropdown.
+	 *
+	 * @param timeZone which should be chosen
 	 */
-	public void selectUTCTimezone() {
+	public void selectTimezone(final String timeZone) {
 		click(By.cssSelector(USE_CUSTOM_TIMEZONE));
-		selectComboBoxItem(CUSTOM_TIMEZONE_COMBOBOX, UTC_TIMEZONE);
+		selectComboBoxItem(CUSTOM_TIMEZONE_COMBOBOX, timeZone);
 	}
+
+	/**
+	 * Selects a browser timezone from the dropdown.
+	 */
+	public void selectBrowserTimezone() {
+		click(By.cssSelector(USE_BROWSER_TIMEZONE));
+	}
+
 	/**
 	 * Clicks Save button.
 	 */
 	public void clickSaveButton() {
 		clickButton(SAVE_BUTTON_CSS, "Save");
+	}
+
+	/**
+	 * Checks if custom time zone is selected.
+	 *
+	 * @return true if custom time zone is selected, else returns false
+	 */
+	public boolean isCustomTimeZoneSelected() {
+		if (isSelected(USE_CUSTOM_TIMEZONE)) {
+			return true;
+		}
+		return false;
+	}
+
+	/**
+	 * Checks if browser time zone is selected.
+	 *
+	 * @return true if browser time zone is selected, else returns false
+	 */
+	public boolean isBrowserTimeZoneSelected() {
+		if (isSelected(USE_BROWSER_TIMEZONE)) {
+			return true;
+		}
+		return false;
+	}
+
+	/**
+	 * Returns custom time zone value.
+	 */
+	public String getCustomTimeZone() {
+		return getDriver().findElement(By.cssSelector(COMBOBOX_OPTION_INPUT)).getAttribute("value");
 	}
 
 	/**

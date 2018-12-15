@@ -47,6 +47,8 @@
 		<module>geographies</module>
 		<module>itemdefinitions</module>
 		<module>items</module>
+		<module>offerdefinitions</module>
+		<module>offers</module>
 		<module>itemselections</module>
 		<module>lookups</module>
 		<module>navigations</module>

@@ -3,8 +3,9 @@
  */
 package com.elasticpath.domain.catalogview.search.impl;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -14,14 +15,12 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
-import org.jmock.Expectations;
-import org.jmock.integration.junit4.JUnitRuleMockery;
-import org.junit.After;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
 
-import com.elasticpath.commons.beanframework.BeanFactory;
 import com.elasticpath.domain.attribute.Attribute;
 import com.elasticpath.domain.attribute.AttributeType;
 import com.elasticpath.domain.attribute.AttributeValueWithType;
@@ -34,29 +33,26 @@ import com.elasticpath.domain.catalogview.impl.AttributeValueFilterImpl;
 import com.elasticpath.service.attribute.AttributeService;
 import com.elasticpath.service.catalog.BrandService;
 import com.elasticpath.service.catalogview.FilterFactory;
-import com.elasticpath.test.BeanFactoryExpectationsFactory;
 
 /**
  * Test for AdvancedSearchConfigurationProviderImpl.
  *
  */
+@RunWith(MockitoJUnitRunner.class)
 public class AdvancedSearchConfigurationProcessorTest {
 
-	private static final int THREE = 3;
 	private static final String ATTRIBUTE_KEY = "A00556";
 	private static final String STORE_CODE = "testStore";
 
-	@Rule
-	public final JUnitRuleMockery context = new JUnitRuleMockery();
 	private AdvancedSearchConfigurationProviderImpl advancedSearchConfigurationProcessor;
 	private Attribute attribute;
 	private AttributeValueFilter attributeValueFilterTest1;
 	private AttributeValueFilter attributeValueFilterTest2;
 
+	@Mock
 	private FilterFactory filterFactory;
+
 	private String brandOneCode;
-	private BeanFactory beanFactory;
-	private BeanFactoryExpectationsFactory expectationsFactory;
 
 	/**
 	 * Set up of data.
@@ -65,8 +61,7 @@ public class AdvancedSearchConfigurationProcessorTest {
 	public void setUp() {
 		advancedSearchConfigurationProcessor = new AdvancedSearchConfigurationProviderImpl();
 
-		filterFactory = context.mock(FilterFactory.class);
-		final AttributeService attributeService = context.mock(AttributeService.class);
+		final AttributeService attributeService = mock(AttributeService.class);
 
 		advancedSearchConfigurationProcessor.setAttributeService(attributeService);
 		advancedSearchConfigurationProcessor.setFilterFactory(filterFactory);
@@ -75,20 +70,7 @@ public class AdvancedSearchConfigurationProcessorTest {
 		attribute.setKey(ATTRIBUTE_KEY);
 		attribute.setLocaleDependant(true);
 
-		beanFactory = context.mock(BeanFactory.class);
-		expectationsFactory = new BeanFactoryExpectationsFactory(context, beanFactory);
-
-		context.checking(new Expectations() {
-			{
-				allowing(filterFactory).getAllSimpleValuesMap(STORE_CODE);
-				will(returnValue(initiateAndBuildSimpleValuesMap()));
-			}
-		});
-	}
-
-	@After
-	public void tearDown() {
-		expectationsFactory.close();
+		when(filterFactory.getAllSimpleValuesMap(STORE_CODE)).thenReturn(initiateAndBuildSimpleValuesMap());
 	}
 
 	/**
@@ -103,13 +85,12 @@ public class AdvancedSearchConfigurationProcessorTest {
 				advancedSearchConfigurationProcessor.getAttributeValueFilterMap(STORE_CODE, locale);
 
 		//only has 1 attribute
-		assertEquals(1, resultMap.size());
+		assertThat(resultMap).hasSize(1);
 
 		//make sure our attributeValue has 2 AttributeValueFilters
 		List<AttributeValueFilter> attributeValueFilterList = resultMap.get(attribute);
-		assertEquals(2, attributeValueFilterList.size());
-		assertTrue(attributeValueFilterList.contains(attributeValueFilterTest1));
-		assertTrue(attributeValueFilterList.contains(attributeValueFilterTest2));
+		assertThat(attributeValueFilterList)
+			.containsExactlyInAnyOrder(attributeValueFilterTest1, attributeValueFilterTest2);
 
 	}
 
@@ -177,8 +158,7 @@ public class AdvancedSearchConfigurationProcessorTest {
 	 */
 	@Test
 	public void testGetThreeBrandsInListSorted() {
-		final BrandService brandService = context.mock(BrandService.class);
-
+		final BrandService brandService = mock(BrandService.class);
 
 		advancedSearchConfigurationProcessor.setBrandService(brandService);
 
@@ -206,27 +186,16 @@ public class AdvancedSearchConfigurationProcessorTest {
 		brandCodesFromConfiguration.add(brandOneCode);
 		brandCodesFromConfiguration.add(brandTwoCode);
 
+		when(brandService.getBrandInUseList()).thenReturn(brandsInUse);
 
-		context.checking(new Expectations() {
-			{
-				allowing(brandService).getBrandInUseList();
-				will(returnValue(brandsInUse));
-
-				allowing(filterFactory).getDefinedBrandCodes(STORE_CODE);
-				will(returnValue(brandCodesFromConfiguration));
-			}
-		});
+		when(filterFactory.getDefinedBrandCodes(STORE_CODE)).thenReturn(brandCodesFromConfiguration);
 
 		advancedSearchConfigurationProcessor.getBrandListSortedByName(Locale.ENGLISH, STORE_CODE);
 
 		List<Brand> brandListSortedByName = advancedSearchConfigurationProcessor.
-				getBrandListSortedByName(Locale.ENGLISH, STORE_CODE);
+			getBrandListSortedByName(Locale.ENGLISH, STORE_CODE);
 
-		assertEquals(THREE, brandListSortedByName.size());
-		//make sure it's sorted
-		assertTrue(brandListSortedByName.get(0).equals(brandOne));
-		assertTrue(brandListSortedByName.get(1).equals(brandTwo));
-		assertTrue(brandListSortedByName.get(2).equals(brandThree));
+		assertThat(brandListSortedByName).containsExactly(brandOne, brandTwo, brandThree);
 	}
 
 	/**
@@ -235,7 +204,7 @@ public class AdvancedSearchConfigurationProcessorTest {
 	 */
 	@Test
 	public void oneBrandOnlyInConfiguration() {
-		final BrandService brandService = context.mock(BrandService.class);
+		final BrandService brandService = mock(BrandService.class);
 
 
 		advancedSearchConfigurationProcessor.setBrandService(brandService);
@@ -254,23 +223,16 @@ public class AdvancedSearchConfigurationProcessorTest {
 		brandCodesFromConfiguration.add(brandOneCode);
 		brandCodesFromConfiguration.add(brandTwoCode);
 
-		context.checking(new Expectations() {
-			{
-				allowing(brandService).getBrandInUseList();
-				will(returnValue(brandsInUse));
+		when(brandService.getBrandInUseList()).thenReturn(brandsInUse);
 
-				allowing(filterFactory).getDefinedBrandCodes(STORE_CODE);
-				will(returnValue(brandCodesFromConfiguration));
-			}
-		});
+		when(filterFactory.getDefinedBrandCodes(STORE_CODE)).thenReturn(brandCodesFromConfiguration);
 
 		advancedSearchConfigurationProcessor.getBrandListSortedByName(Locale.ENGLISH, STORE_CODE);
 
 		List<Brand> brandListSortedByName = advancedSearchConfigurationProcessor.
-				getBrandListSortedByName(Locale.ENGLISH, STORE_CODE);
+			getBrandListSortedByName(Locale.ENGLISH, STORE_CODE);
 
-		assertEquals(1, brandListSortedByName.size());
-		assertTrue(brandListSortedByName.get(0).equals(brand1));
+		assertThat(brandListSortedByName).containsOnly(brand1);
 	}
 
 	/**
@@ -279,7 +241,7 @@ public class AdvancedSearchConfigurationProcessorTest {
 	 */
 	@Test
 	public void oneBrandOnlyInStore() {
-		final BrandService brandService = context.mock(BrandService.class);
+		final BrandService brandService = mock(BrandService.class);
 
 
 		advancedSearchConfigurationProcessor.setBrandService(brandService);
@@ -295,23 +257,16 @@ public class AdvancedSearchConfigurationProcessorTest {
 		final Set<String> brandCodesFromConfiguration = new HashSet<>();
 		brandCodesFromConfiguration.add(brandOneCode);
 
-		context.checking(new Expectations() {
-			{
-				allowing(brandService).getBrandInUseList();
-				will(returnValue(brandsInUse));
+		when(brandService.getBrandInUseList()).thenReturn(brandsInUse);
 
-				allowing(filterFactory).getDefinedBrandCodes(STORE_CODE);
-				will(returnValue(brandCodesFromConfiguration));
-			}
-		});
+		when(filterFactory.getDefinedBrandCodes(STORE_CODE)).thenReturn(brandCodesFromConfiguration);
 
 		advancedSearchConfigurationProcessor.getBrandListSortedByName(Locale.ENGLISH, STORE_CODE);
 
 		List<Brand> brandListSortedByName = advancedSearchConfigurationProcessor.
-				getBrandListSortedByName(Locale.ENGLISH, STORE_CODE);
+			getBrandListSortedByName(Locale.ENGLISH, STORE_CODE);
 
-		assertEquals(1, brandListSortedByName.size());
-		assertTrue(brandListSortedByName.get(0).equals(brand1));
+		assertThat(brandListSortedByName).containsExactly(brand1);
 	}
 
 	/**
@@ -319,7 +274,7 @@ public class AdvancedSearchConfigurationProcessorTest {
 	 */
 	@Test
 	public void noPreDefinedBrands() {
-		final BrandService brandService = context.mock(BrandService.class);
+		final BrandService brandService = mock(BrandService.class);
 
 		advancedSearchConfigurationProcessor.setBrandService(brandService);
 
@@ -333,22 +288,16 @@ public class AdvancedSearchConfigurationProcessorTest {
 
 		final Set<String> brandCodesFromConfiguration = new HashSet<>();
 
-		context.checking(new Expectations() {
-			{
-				allowing(brandService).getBrandInUseList();
-				will(returnValue(brandsInUse));
+		when(brandService.getBrandInUseList()).thenReturn(brandsInUse);
 
-				allowing(filterFactory).getDefinedBrandCodes(STORE_CODE);
-				will(returnValue(brandCodesFromConfiguration));
-			}
-		});
+		when(filterFactory.getDefinedBrandCodes(STORE_CODE)).thenReturn(brandCodesFromConfiguration);
 
 		advancedSearchConfigurationProcessor.getBrandListSortedByName(Locale.ENGLISH, STORE_CODE);
 
 		List<Brand> brandListSortedByName = advancedSearchConfigurationProcessor.
-				getBrandListSortedByName(Locale.ENGLISH, STORE_CODE);
+			getBrandListSortedByName(Locale.ENGLISH, STORE_CODE);
 
-		assertEquals(0, brandListSortedByName.size());
+		assertThat(brandListSortedByName).isEmpty();
 	}
 
 	/**

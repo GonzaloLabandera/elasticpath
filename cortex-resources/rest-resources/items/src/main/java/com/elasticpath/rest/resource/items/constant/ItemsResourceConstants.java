@@ -8,9 +8,12 @@ package com.elasticpath.rest.resource.items.constant;
  */
 public final class ItemsResourceConstants {
 
+	private ItemsResourceConstants() {
+	}
+
 	/**
-	 * Default max-age for items.
+	 * Cache-Control max age.
 	 */
-	public static final int DEFAULT_MAX_AGE = 600;
+	public static final int MAX_AGE = 600;
 
 }

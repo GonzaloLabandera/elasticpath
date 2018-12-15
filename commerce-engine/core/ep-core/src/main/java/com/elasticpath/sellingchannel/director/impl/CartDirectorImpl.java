@@ -31,7 +31,7 @@ import com.elasticpath.domain.store.Store;
 import com.elasticpath.sellingchannel.ProductUnavailableException;
 import com.elasticpath.sellingchannel.director.CartDirector;
 import com.elasticpath.sellingchannel.director.ShoppingItemAssembler;
-import com.elasticpath.service.catalog.ProductAssociationService;
+import com.elasticpath.service.catalog.DependentItemLookup;
 import com.elasticpath.service.catalog.ProductSkuLookup;
 import com.elasticpath.service.misc.TimeService;
 import com.elasticpath.service.shoppingcart.validation.AddOrUpdateShoppingItemDtoToCartValidationService;
@@ -55,7 +55,7 @@ public class CartDirectorImpl implements CartDirector {
 
 	private TimeService timeService;
 
-	private ProductAssociationService productAssociationService;
+	private DependentItemLookup dependentItemLookup;
 
 	private AddOrUpdateShoppingItemDtoToCartValidationService validationService;
 
@@ -105,9 +105,12 @@ public class CartDirectorImpl implements CartDirector {
 	 */
 	protected void addDependentItemsForParentItem(final ShoppingCart shoppingCart, final ShoppingItem parentItemAdded) {
 		final ProductSku parentProductSku = getProductSkuLookup().findByGuid(parentItemAdded.getSkuGuid());
-		getProductAssociationService().findDependentItemsForSku(shoppingCart.getStore(), parentProductSku).stream()
-			.map(sku -> getShoppingItemDtoFactory().createDto(sku.getSkuCode(), sku.getProduct().getMinOrderQty()))
-			.forEach(dependentShoppingItem -> addItemToCart(shoppingCart, dependentShoppingItem, parentItemAdded));
+
+		getDependentItemLookup().findDependentItemsForSku(shoppingCart.getStore(),
+				parentProductSku).entrySet().stream()
+				// quantity of the dependent items added equal to the quantity the parent item
+				.map(dependentItem -> getShoppingItemDtoFactory().createDto(dependentItem.getKey(), parentItemAdded.getQuantity()))
+				.forEach(dependentShoppingItem -> addItemToCart(shoppingCart, dependentShoppingItem, parentItemAdded));
 	}
 
 	private ShoppingItem createShoppingItem(final ShoppingItemDto shoppingItemDto) {
@@ -455,11 +458,11 @@ public class CartDirectorImpl implements CartDirector {
 		return Objects.equals(shoppingItem.getSkuGuid(), existingItem.getSkuGuid());
 	}
 
-	public void setProductAssociationService(final ProductAssociationService productAssociationService) {
-		this.productAssociationService = productAssociationService;
+	protected DependentItemLookup getDependentItemLookup() {
+		return this.dependentItemLookup;
 	}
 
-	public ProductAssociationService getProductAssociationService() {
-		return productAssociationService;
+	public void setDependentItemLookup(final DependentItemLookup dependentItemLookup) {
+		this.dependentItemLookup = dependentItemLookup;
 	}
 }

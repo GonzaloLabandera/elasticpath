@@ -442,6 +442,25 @@ public final class EpValidatorFactory {
 	public static final IValidator NON_POSITIVE_BIG_DECIMAL = new NonPositiveBigDecimalValidator(
 			CoreMessages.get().EpValidatorFactory_NonPositiveBigDecimal);
 
+	/** Checks that the input is a an asterisk or big decimal. */
+	public static final IValidator ASTERISK_OR_BIG_DECIMAL_REQUIRED = object -> {
+		/**
+		 * Value to be validated.
+		 */
+		String value = (String) object;
+
+		if ((StringUtils.isNotEmpty(value) && StringUtils.isNumeric(value)) || "*".equals(value)) {
+			return Status.OK_STATUS;
+		}
+
+		return new Status(
+				IStatus.ERROR,
+				CorePlugin.PLUGIN_ID,
+				IStatus.ERROR,
+				CoreMessages.get().EpValidatorFactory_BigDecimal_Asterisk,
+				null);
+	};
+
 	/** Checks that the input is a valid string  - may be blank or have leading or trailing spaces. */
 	private static final class GenericStringPatternValidator implements IValidator {
 

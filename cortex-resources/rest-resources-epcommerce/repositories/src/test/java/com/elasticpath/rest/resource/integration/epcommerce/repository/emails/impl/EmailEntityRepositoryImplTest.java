@@ -85,6 +85,16 @@ public class EmailEntityRepositoryImplTest {
 	}
 
 	@Test
+	public void findAllDoesNotReturnWhenEmailDoesNotExist() {
+		when(customerRepository.getCustomer(USER_ID)).thenReturn(Single.just(customer));
+		when(customer.getEmail()).thenReturn(null);
+		emailEntityRepository.findAll(StringIdentifier.of(SCOPE))
+				.test()
+				.assertNoErrors()
+				.assertNoValues();
+	}
+
+	@Test
 	public void findAllDoesNotCompleteAndFailsWhenCustomerNotFound() {
 		when(customerRepository.getCustomer(USER_ID))
 				.thenReturn(Single.error(ResourceOperationFailure.notFound(CUSTOMER_WAS_NOT_FOUND)));

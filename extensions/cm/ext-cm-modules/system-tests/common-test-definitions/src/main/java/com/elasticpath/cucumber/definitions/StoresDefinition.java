@@ -2,6 +2,7 @@ package com.elasticpath.cucumber.definitions;
 
 import java.util.Map;
 
+import cucumber.api.java.After;
 import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
 
@@ -9,6 +10,8 @@ import com.elasticpath.selenium.editor.StoreEditor;
 import com.elasticpath.selenium.resultspane.StoresResultPane;
 import com.elasticpath.selenium.setup.SetUp;
 import com.elasticpath.selenium.toolbars.ConfigurationActionToolbar;
+import com.elasticpath.selenium.util.Constants;
+import com.elasticpath.selenium.util.DBConnector;
 import com.elasticpath.selenium.util.Utility;
 
 /**
@@ -29,6 +32,7 @@ public class StoresDefinition {
 	 */
 	public StoresDefinition() {
 		configurationActionToolbar = new ConfigurationActionToolbar(SetUp.getDriver());
+		this.storeCode = "";
 	}
 
 	/**
@@ -150,6 +154,17 @@ public class StoresDefinition {
 	@When("^I change the store state to (.+)$")
 	public void changeStoreState(final String newStoreState) {
 		storeEditor.clickTab("Summary");
+		storeEditor.changeStoreStateAndConfirm(newStoreState);
+	}
+
+	/**
+	 * Change store state without clicking confirmation button.
+	 *
+	 * @param newStoreState String
+	 */
+	@When("^I change the store state without confirmation to (.+)$")
+	public void changeStoreStateWithoutConfirmation(final String newStoreState) {
+		storeEditor.clickTab("Summary");
 		storeEditor.changeStoreState(newStoreState);
 	}
 
@@ -187,5 +202,23 @@ public class StoresDefinition {
 	@Then("^Data Policies for the store is enabled$")
 	public void verifyStoreDataPolicyEnabled() {
 		storeEditor.verifyDataPolicyEnabled();
+	}
+
+	/**
+	 * Delete the newly created store after test.
+	 */
+	@After("@cleanupStore")
+	public void cleanupStore() {
+		deleteStore();
+		verifyStoreDoesntExist();
+	}
+
+	/**
+	 * Delete the newly created store after test using DB
+	 */
+	@After(value = "@cleanUpStoreDB", order = Constants.CLEANUP_ORDER_FIRST)
+	public void deleteNewlyCreatedStore() {
+		DBConnector dbc = new DBConnector();
+		dbc.deleteStore(this.storeCode);
 	}
 }

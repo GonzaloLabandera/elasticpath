@@ -3,6 +3,8 @@ package com.elasticpath.selenium.toolbars;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 
+import com.elasticpath.selenium.util.Constants;
+
 /**
  * Change Set Toolbar.
  */
@@ -28,6 +30,7 @@ public class ChangeSetActionToolbar extends AbstractToolbar {
 	 * @param changeSetName the change set name.
 	 */
 	public void selectChangeSet(final String changeSetName) {
+		sleep(Constants.SLEEP_THREE_SECONDS_IN_MILLIS);
 		click(getDriver().findElement(By.cssSelector(CHANGE_SET_LIST_CSS)));
 		hoverMouseOverElement(getDriver().findElement(By.cssSelector(SAVE_ALL_BUTTON_CSS)));
 		click(getWaitDriver().waitForElementToBeClickable(By.cssSelector(String.format(CHANGE_SET_MENU_ITEM_CSS, changeSetName))));

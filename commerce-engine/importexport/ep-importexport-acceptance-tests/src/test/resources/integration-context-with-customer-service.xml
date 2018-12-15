@@ -14,6 +14,8 @@
 	<import resource="classpath*:spring/importexport-adapters.xml"/>
 	<import resource="classpath*:spring/service/messages.xml" />
 	<import resource="classpath:integration-core-context.xml"/>
+	<!-- importexport-domain.xml needs to override the default locale policy that gets pulled in from integration-core-context.xml -->
+	<import resource="classpath*:spring/importexport-domain.xml"/>
 	<import resource="classpath:ep-test-application.xml"/>
 
 	<bean id="glueCodeScope" class="cucumber.runtime.java.spring.GlueCodeScope"></bean>

@@ -1,9 +1,9 @@
-/**
+/*
  * Copyright (c) Elastic Path Software Inc., 2013
  */
 package com.elasticpath.importexport.exporter.configuration;
 
-import static org.junit.Assert.fail;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.io.ByteArrayInputStream;
 import java.util.HashMap;
@@ -44,7 +44,7 @@ public class ExportConfigurationLoaderTest {
 	 * Test with valid configuration.
 	 */
 	@Test
-	public void testValidConfiguration() {
+	public void testValidConfiguration() throws ConfigurationException {
 		String xml = "<?xml version=\"1.0\"?><exportconfiguration><exporter type=\"PRODUCT\" />"
 				+ "<packager type=\"ZIP\" packagename=\"export.zip\" />"
 				+ "<delivery><method>FILE</method><target>./exportProduction</target></delivery></exportconfiguration>";
@@ -68,7 +68,7 @@ public class ExportConfigurationLoaderTest {
 	 * Test detects missing exporters.
 	 */
 	@Test
-	public void testNoExporters() {
+	public void testNoExporters() throws ConfigurationException {
 		String xml = "<?xml version=\"1.0\"?><exportconfiguration>" + "<packager type=\"ZIP\" />"
 				+ "<delivery><method>FILE</method><target>./exportProduction</target></delivery></exportconfiguration>";
 		assertSucceeds(xml);
@@ -139,21 +139,14 @@ public class ExportConfigurationLoaderTest {
 		assertFails(xml);
 	}
 
-	private void assertSucceeds(final String xml) {
-		try {
-			loader.load(new ByteArrayInputStream(xml.getBytes()), ExportConfiguration.class);
-		} catch (ConfigurationException e) {
-			fail("Unexpected configuration exception " + e.getMessage());
-		}
+	private void assertSucceeds(final String xml) throws ConfigurationException {
+		loader.load(new ByteArrayInputStream(xml.getBytes()), ExportConfiguration.class);
 	}
 
 	private void assertFails(final String xml) {
-		try {
-			loader.load(new ByteArrayInputStream(xml.getBytes()), ExportConfiguration.class);
-			fail("Expected configuration exception");
-		} catch (ConfigurationException e) { // NOPMD
-			// expected
-		}
+		assertThatThrownBy(() -> loader.load(new ByteArrayInputStream(xml.getBytes()), ExportConfiguration.class))
+			.as("Expected configuration exception")
+			.isInstanceOf(ConfigurationException.class);
 	}
 
 }
