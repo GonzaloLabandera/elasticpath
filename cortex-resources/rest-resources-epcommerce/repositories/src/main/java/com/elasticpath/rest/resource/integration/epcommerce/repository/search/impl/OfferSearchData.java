@@ -13,26 +13,27 @@ public final class OfferSearchData {
 
 	private final int pageId;
 	private final int pageSize;
-	private final String searchKeyword;
 	private final String scope;
 	private final Map<String, String> appliedFacets;
+
+	private final String searchKeyword;
+	private String categoryCode;
 
 	/**
 	 * Constructor.
 	 *
 	 * @param pageId        page id
 	 * @param pageSize      page size
-	 * @param searchKeyword search keyword
 	 * @param scope         scope
 	 * @param appliedFacets applied facets
+	 * @param keyword       the keyword used to search
 	 */
-	public OfferSearchData(final int pageId, final int pageSize, final String searchKeyword, final String scope,
-						   final Map<String, String> appliedFacets) {
+	public OfferSearchData(final int pageId, final int pageSize, final String scope, final Map<String, String> appliedFacets, final String keyword) {
 		this.pageId = pageId;
 		this.pageSize = pageSize;
-		this.searchKeyword = searchKeyword;
 		this.scope = scope;
 		this.appliedFacets = appliedFacets;
+		this.searchKeyword = keyword;
 	}
 
 
@@ -85,6 +86,14 @@ public final class OfferSearchData {
 
 	public Map<String, String> getAppliedFacets() {
 		return appliedFacets;
+	}
+
+	public String getCategoryCode() {
+		return categoryCode;
+	}
+
+	public void setCategoryCode(final String categoryCode) {
+		this.categoryCode = categoryCode;
 	}
 }
 

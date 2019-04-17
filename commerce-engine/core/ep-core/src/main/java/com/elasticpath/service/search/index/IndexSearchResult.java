@@ -158,6 +158,12 @@ public interface IndexSearchResult {
 	void setFacetMap(Map<String, Facet> facetMap);
 
 	/**
+	 * Retrieves the cached uipks from a previous search.
+	 * @return result uidpks.
+	 */
+	List<Long> getCachedResultUids();
+
+	/**
 	 * Returns a map with a key on Sku Option containing the list of sku option value filters.
 	 * @return map of sku option value filters
 	 */
@@ -170,7 +176,7 @@ public interface IndexSearchResult {
 	void setSkuOptionValueFilterOptions(Map<String, List<FilterOption<SkuOptionValueFilter>>> skuOptionValueFilterOptions);
 
 	/**
-	 * Returns a map of size range filter options with a key on the size type
+	 * Returns a map of size range filter options with a key on the size type.
 	 * @return map of size range filters.
 	 */
 	Map<String, List<FilterOption<SizeRangeFilter>>> getSizeRangeFilterOptions();
@@ -183,16 +189,14 @@ public interface IndexSearchResult {
 
 	/**
 	 * Get facet infos from the search result containing the localized field name and type.
-	 * @param maxResults maxResults to use for the query
 	 * @return facet infos
 	 */
-	List<String> getFacetFields(int maxResults);
+	List<String> getFacetFields();
 
 	/**
 	 * Get facet values given a facet info.
 	 * @param facetGuid the facet guid
-	 * @param maxResults the max results.
 	 * @return facet values
 	 */
-	List<FacetValue> getFacetValues(String facetGuid, int maxResults);
+	List<FacetValue> getFacetValues(String facetGuid);
 }

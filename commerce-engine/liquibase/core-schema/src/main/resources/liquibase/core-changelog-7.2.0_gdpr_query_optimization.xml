@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright (c) Elastic Path Software Inc., 2018
+  -->
+<databaseChangeLog xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+				   xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+				   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd"
+				   logicalFilePath="com/elasticpath/core/db/core-changelog-7.2.0_PB-4913.xml">
+
+	<changeSet id="7.2.0_PB-4913-create-customer-consent-history-table" author="elasticpath">
+		<createTable tableName="TCUSTOMERCONSENTHISTORY">
+			<column name="UIDPK" type="BIGINT">
+				<constraints primaryKey="true"/>
+			</column>
+			<column name="GUID" type="VARCHAR(255)">
+				<constraints nullable="false" unique="true"/>
+			</column>
+			<column name="DATAPOLICY_UID" type="BIGINT">
+				<constraints nullable="false"/>
+			</column>
+			<column name="CUSTOMER_GUID" type="VARCHAR(64)">
+				<constraints nullable="false"/>
+			</column>
+			<column name="CONSENT_DATE" defaultValueDate="CURRENT_TIMESTAMP" type="TIMESTAMP">
+				<constraints nullable="false"/>
+			</column>
+			<column name="ACTION" type="INT">
+				<constraints nullable="false"/>
+			</column>
+		</createTable>
+
+		<addForeignKeyConstraint constraintName="TCUSTOMERCONSENTHISTORY_IBFK_1" baseTableName="TCUSTOMERCONSENTHISTORY" baseColumnNames="DATAPOLICY_UID"
+								 referencedTableName="TDATAPOLICY" referencedColumnNames="UIDPK"/>
+
+		<addForeignKeyConstraint constraintName="TCUSTOMERCONSENTHISTORY_IBFK_2" baseTableName="TCUSTOMERCONSENTHISTORY" baseColumnNames="CUSTOMER_GUID"
+								 referencedTableName="TCUSTOMER" referencedColumnNames="GUID"/>
+
+		<createIndex tableName="TCUSTOMERCONSENT" indexName="I_CUSTOMERCONSENT_CONSENTDATE">
+			<column name="CONSENT_DATE"/>
+		</createIndex>
+	</changeSet>
+
+
+	<changeSet id="7.2.0_PB-4913-populate-customer-consent-history-table" author="elasticpath">
+		<sql>
+			INSERT INTO TCUSTOMERCONSENTHISTORY
+			SELECT * FROM TCUSTOMERCONSENT;
+		</sql>
+	</changeSet>
+
+	<changeSet id="7.2.0_PB-4913-cleanup-history-in-customer-consent-table" author="elasticpath">
+		<createTable tableName="TTEMPCUSTOMERCONSENTOLD">
+			<column name="UIDPK" type="BIGINT">
+				<constraints primaryKey="true"/>
+			</column>
+		</createTable>
+		<sql>
+			INSERT INTO TTEMPCUSTOMERCONSENTOLD
+			SELECT cc.uidPk
+			FROM TCUSTOMERCONSENT cc
+			WHERE cc.uidPk NOT IN (
+				SELECT max(cc2.uidPk)
+				FROM TCUSTOMERCONSENT cc2 WHERE cc2.CUSTOMER_GUID = cc.CUSTOMER_GUID AND cc2.DATAPOLICY_UID = cc.DATAPOLICY_UID
+				AND cc2.CONSENT_DATE=(
+					SELECT max(cc3.CONSENT_DATE)
+					FROM TCUSTOMERCONSENT cc3 WHERE cc3.CUSTOMER_GUID = cc2.CUSTOMER_GUID AND cc3.DATAPOLICY_UID = cc2.DATAPOLICY_UID
+				)
+			);
+
+			DELETE FROM TCUSTOMERCONSENT
+			WHERE uidpk IN (
+				SELECT uidPk FROM TTEMPCUSTOMERCONSENTOLD
+			);
+		</sql>
+		<dropTable tableName="TTEMPCUSTOMERCONSENTOLD"/>
+	</changeSet>
+
+	<changeSet id="7.2.0_PB-4913-add-unique-constraint-to-customer-consent" author="elasticpath">
+		<addUniqueConstraint tableName="TCUSTOMERCONSENT" columnNames="DATAPOLICY_UID,CUSTOMER_GUID"/>
+	</changeSet>
+</databaseChangeLog>

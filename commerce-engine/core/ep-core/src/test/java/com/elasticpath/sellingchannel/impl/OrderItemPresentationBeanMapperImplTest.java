@@ -5,62 +5,75 @@ package com.elasticpath.sellingchannel.impl;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 
 import java.util.Currency;
 
+import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.elasticpath.common.dto.OrderItemDto;
+import com.elasticpath.commons.beanframework.BeanFactory;
 import com.elasticpath.commons.tree.impl.TreeNodeMemento;
 import com.elasticpath.domain.catalog.DigitalAsset;
 import com.elasticpath.domain.catalog.ProductSku;
 import com.elasticpath.domain.catalog.impl.ProductSkuImpl;
 import com.elasticpath.money.Money;
 import com.elasticpath.sellingchannel.presentation.OrderItemPresentationBean;
+import com.elasticpath.sellingchannel.presentation.impl.OrderItemPresentationBeanImpl;
 import com.elasticpath.sellingchannel.presentation.impl.OrderItemPresentationBeanMapperImpl;
 import com.elasticpath.sellingchannel.presentation.impl.OrderItemPresentationBeanMapperImpl.CopyFunctor;
 
 /**
  * Tests {@link OrderItemPresentationBeanMapperImpl}.
  */
+@RunWith(MockitoJUnitRunner.class)
 public class OrderItemPresentationBeanMapperImplTest {
-	
+
 	private static final int THIRTY = 30;
-
 	private static final int TEN = 10;
-	// Verifying that the PreOrderTraverser is used is done by inspection - it's too simple to test.
-
 	private static final int FIVE = 5;
 	private static final int THREE = 3;
 
+	private CopyFunctorTestable functor;
+	private OrderItemPresentationBeanMapperTestable mapper;
 
-	/** Required for testing. */
-	private class CopyFunctorTestable extends CopyFunctor {
-		@Override
-		protected boolean isGC(final OrderItemDto sourceNode) {
-			return true;
-		}
+	/**
+	 * Prepare for the test.
+	 */
+	@Before
+	public void init() {
+		BeanFactory beanFactory = spy(new BeanFactory() {
+			@Override
+			@SuppressWarnings("unchecked")
+			public <T> T getBean(final String name) {
+				return (T) new OrderItemPresentationBeanImpl();
+			}
+
+			@Override
+			public <T> Class<T> getBeanImplClass(final String beanName) {
+				return null;
+			}
+		});
+
+		functor = new CopyFunctorTestable();
+		functor.setBeanFactory(beanFactory);
+
+		mapper = new OrderItemPresentationBeanMapperTestable();
+		mapper.setBeanFactory(beanFactory);
 	}
-	
-	/** Required for testing. */
-	private class OrderItemPresentationBeanMapperTestable extends OrderItemPresentationBeanMapperImpl {
-		OrderItemPresentationBeanMapperTestable() {
-			super();
-			setFunctor(new CopyFunctorTestable());
-		}
-	}
-	
+
 	/**
 	 * Tests that an {@code OrderItemFormBean} can be created from an {@code OrderItemDto}.
 	 */
 	@Test
 	public void testMapToDtoNoChild() {
-		CopyFunctorTestable functor = new CopyFunctorTestable();
-		
 		final OrderItemDto orderItemDto = new OrderItemDto();
-		
+
 		TreeNodeMemento<OrderItemPresentationBean> formBean = functor.processNode(orderItemDto, null, null, 0);
-		
+
 		assertThat(formBean).isNotNull();
 	}
 	
@@ -69,17 +82,16 @@ public class OrderItemPresentationBeanMapperImplTest {
 	 */
 	@Test
 	public void testMapThreeLevelTree() {
-		OrderItemPresentationBeanMapperTestable mapper = new OrderItemPresentationBeanMapperTestable();
-		
 		final OrderItemDto orderItemDto = new OrderItemDto();
 		orderItemDto.setQuantity(1);
 		final OrderItemDto childDto = new OrderItemDto();
 		childDto.setQuantity(1);
 		final OrderItemDto grandchildDto = new OrderItemDto();
 		grandchildDto.setQuantity(1);
+
 		orderItemDto.addChild(childDto);
 		childDto.addChild(grandchildDto);
-		
+
 		OrderItemPresentationBean presentationBean = mapper.mapFrom(orderItemDto);
 		
 		assertThat(presentationBean).isNotNull();
@@ -99,8 +111,6 @@ public class OrderItemPresentationBeanMapperImplTest {
 	@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 	@Test
 	public void testFunctor() {
-		CopyFunctorTestable functor = new CopyFunctorTestable();
-		
 		OrderItemDto dto = new OrderItemDto();
 		
 		dto.setDisplayName("display");
@@ -138,8 +148,7 @@ public class OrderItemPresentationBeanMapperImplTest {
 	
 	/** Tests that the quantity on the formBeans is the per bundle quantity instead of the shippable quantity. */
 	@Test
-	public void testMapFromHavingPerBundleQuantity() {		
-		OrderItemPresentationBeanMapperTestable mapper = new OrderItemPresentationBeanMapperTestable();
+	public void testMapFromHavingPerBundleQuantity() {
 		OrderItemDto root = createFakeOrderItemDto();
 
 		OrderItemPresentationBean actualPresentationBeanRoot = mapper.mapFrom(root);
@@ -155,6 +164,22 @@ public class OrderItemPresentationBeanMapperImplTest {
 		OrderItemPresentationBean actualFormBeanChild2 = actualPresentationBeanRoot.getChildren().get(1);
 		assertThat(actualFormBeanChild2.getQuantity()).isEqualTo(THREE);
 		assertThat(actualFormBeanChild2.getChildren()).isEmpty();
+	}
+
+	/** Required for testing. */
+	private class CopyFunctorTestable extends CopyFunctor {
+		@Override
+		protected boolean isGC(final OrderItemDto sourceNode) {
+			return true;
+		}
+	}
+
+	/** Required for testing. */
+	private class OrderItemPresentationBeanMapperTestable extends OrderItemPresentationBeanMapperImpl {
+		OrderItemPresentationBeanMapperTestable() {
+			super();
+			setFunctor(new CopyFunctorTestable());
+		}
 	}
 
 	/**

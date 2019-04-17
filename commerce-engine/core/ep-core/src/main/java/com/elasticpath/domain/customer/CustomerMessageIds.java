@@ -9,10 +9,6 @@ package com.elasticpath.domain.customer;
  */
 public final class CustomerMessageIds {
 	/**
-	 * User id already exists error where email address is already defined.
-	 */
-	public static final String EMAIL_ALREADY_EXISTS = "profile.email.already.exists";
-	/**
 	 * User id already exists error where user id is already defined.
 	 */
 	public static final String USERID_ALREADY_EXISTS = "profile.userid.already.exists";

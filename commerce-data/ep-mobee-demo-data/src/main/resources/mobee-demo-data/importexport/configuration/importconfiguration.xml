@@ -120,6 +120,9 @@
 	  <importer type="CUSTOMER_CONSENT">
 		  <importstrategy>INSERT</importstrategy>
 	  </importer>
+	  <importer type="FACET">
+		  <importstrategy>INSERT_OR_UPDATE</importstrategy>
+	  </importer>
   </importstrategy>
   <packager type="NONE"/>
   <retrieval>

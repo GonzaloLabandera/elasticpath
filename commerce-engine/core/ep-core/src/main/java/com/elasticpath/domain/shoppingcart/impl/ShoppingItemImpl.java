@@ -12,6 +12,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import javax.persistence.Access;
+import javax.persistence.AccessType;
 import javax.persistence.Basic;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -22,7 +25,6 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.MapKey;
 import javax.persistence.OneToMany;
-import javax.persistence.OrderBy;
 import javax.persistence.Table;
 import javax.persistence.TableGenerator;
 import javax.persistence.Temporal;
@@ -31,9 +33,12 @@ import javax.persistence.Transient;
 
 import org.apache.openjpa.persistence.DataCache;
 import org.apache.openjpa.persistence.ElementDependent;
+import org.apache.openjpa.persistence.Externalizer;
+import org.apache.openjpa.persistence.Factory;
 import org.apache.openjpa.persistence.FetchAttribute;
 import org.apache.openjpa.persistence.FetchGroup;
 import org.apache.openjpa.persistence.FetchGroups;
+import org.apache.openjpa.persistence.Persistent;
 import org.apache.openjpa.persistence.jdbc.ElementForeignKey;
 import org.apache.openjpa.persistence.jdbc.ElementJoinColumn;
 
@@ -41,6 +46,7 @@ import com.elasticpath.domain.DatabaseCreationDate;
 import com.elasticpath.domain.impl.AbstractItemData;
 import com.elasticpath.domain.impl.AbstractShoppingItemImpl;
 import com.elasticpath.domain.shoppingcart.ExchangeItem;
+import com.elasticpath.domain.shoppingcart.ItemType;
 import com.elasticpath.domain.shoppingcart.PriceCalculator;
 import com.elasticpath.domain.shoppingcart.ShoppingItem;
 import com.elasticpath.domain.shoppingcart.ShoppingItemRecurringPrice;
@@ -61,18 +67,13 @@ import com.elasticpath.service.shoppingcart.impl.TaxHandlingEnum;
 @DataCache(enabled = false)
 @FetchGroups({
 	@FetchGroup(
-			name = FetchGroupConstants.SHOPPING_ITEM_CHILD_ITEMS, 
-			attributes = {
-					@FetchAttribute(name = "childItemsInternal", recursionDepth = -1)
-			}
-	),
-	@FetchGroup(
 			name = FetchGroupConstants.ORDER_DEFAULT, 
 			attributes = {
 					@FetchAttribute(name = "recurringPrices")
 			}
 	)
 })
+@Access(AccessType.PROPERTY)
 @SuppressWarnings("PMD.GodClass")
 public class ShoppingItemImpl extends AbstractShoppingItemImpl implements CartItem, ExchangeItem, DatabaseCreationDate {
 	/**
@@ -102,6 +103,15 @@ public class ShoppingItemImpl extends AbstractShoppingItemImpl implements CartIt
 	private boolean taxInclusive;
 
 	private Date creationDate;
+
+	private Long childItemCartUid;
+
+	@Access(AccessType.FIELD)
+	@Basic
+	@Column(name = "PARENT_ITEM_UID")
+	private Long parentItemUid;
+
+	private ItemType itemType = ItemType.SIMPLE;
 
 	/**
 	 * Internal JPA method to get Item Data.
@@ -135,27 +145,39 @@ public class ShoppingItemImpl extends AbstractShoppingItemImpl implements CartIt
 	 * 
 	 * @return the set of dependent cart items.
 	 */
-	@OneToMany(targetEntity = ShoppingItemImpl.class, cascade = { CascadeType.ALL }, fetch = FetchType.EAGER)
+	@OneToMany(targetEntity = ShoppingItemImpl.class, cascade = { CascadeType.ALL }, fetch = FetchType.LAZY)
 	@ElementJoinColumn(name = "PARENT_ITEM_UID")
 	@ElementForeignKey
 	@ElementDependent
-	@OrderBy("ordering")
-	@Override
-	protected List<ShoppingItem> getChildItemsInternal() { // the set should be of CartItem implementors
+	public List<ShoppingItem> getChildShoppingItems() { // the set should be of CartItem implementors
 		return this.childItems;
 	}
 
-	/**
-	 * Internal accessor used by JPA.
-	 * 
-	 * @param childItems the set of dependent cart items.
-	 */
+	@Transient
+	@Override
+	public List<ShoppingItem> getChildItemsInternal() {
+		if (this.childItems == null) {
+			this.childItems = new ArrayList<>();
+		}
+
+		return childItems;
+	}
+
 	@Override
 	protected void setChildItemsInternal(final List<ShoppingItem> childItems) {
 		this.childItems = childItems;
 	}
-	
-	
+
+	/**
+	 * Internal accessor used by JPA.
+	 *
+	 * @param childItems the set of dependent cart items.
+	 */
+	protected void setChildShoppingItems(final List<ShoppingItem> childItems) {
+		this.childItems = childItems;
+	}
+
+
 	/**
 	 * Gets the cart uid.
 	 * 
@@ -198,6 +220,17 @@ public class ShoppingItemImpl extends AbstractShoppingItemImpl implements CartIt
 	@TableGenerator(name = TABLE_NAME, table = "JPA_GENERATED_KEYS", pkColumnName = "ID", valueColumnName = "LAST_VALUE", pkColumnValue = TABLE_NAME)
 	public long getUidPk() {
 		return this.uidPk;
+	}
+
+	@Basic
+	@Column(name = "CHILD_ITEM_CART_UID")
+	public Long getChildItemCartUid() {
+		return this.childItemCartUid;
+	}
+
+	@Override
+	public void setChildItemCartUid(final Long childItemCartUid) {
+		this.childItemCartUid = childItemCartUid;
 	}
 
 	/**
@@ -359,6 +392,26 @@ public class ShoppingItemImpl extends AbstractShoppingItemImpl implements CartIt
 
 	public void setCreationDate(final Date creationDate) {
 		this.creationDate = creationDate;
+	}
+
+
+	@Override
+	public Long getParentItemUid() {
+		return parentItemUid;
+	}
+
+	@Persistent
+	@Column(name = "ITEM_TYPE")
+	@Externalizer("getOrdinal")
+	@Factory("fromOrdinal")
+	@Override
+	public ItemType getItemType() {
+		return itemType;
+	}
+
+	@Override
+	public void setItemType(final ItemType itemType) {
+		this.itemType = itemType;
 	}
 
 	/**

@@ -11,7 +11,7 @@ Feature: Resend Order Confirmation Email
     And I am shopping in Store "Test Store"
     And the Store supports the en_US locale
     And my shopping locale is en_US
-    And my email address customer@example.org has been registered in my user account
+    And my email address customer@example.org has been used to register my user account
     And I have an item in my shopping cart
 
   Scenario: A gift certificate email is resent

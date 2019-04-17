@@ -35,5 +35,32 @@ The list is empty if the item is not in your cart.]]></description>
 				<result>read-cart-memberships</result>
 			</step>
 		</plan>
+
+		<plan>
+			<name>read-add-items-to-cart-form</name>
+			<description>
+				<![CDATA[Retrieve the add items to cart form on the cart.]]>
+			</description>
+			<step>
+				<description><![CDATA[Retrieve the cart with cart-id default.]]></description>
+				<start>cart</start>
+				<follow-link>additemstocartform</follow-link>
+				<result>add-items-to-cart-form</result>
+			</step>
+		</plan>
+
+		<plan>
+			<name>add-items-to-cart</name>
+			<description><![CDATA[Add multiple items to the cart.]]></description>
+			<step>
+				<description><![CDATA[Submit the add-items-to-cart form]]></description>
+				<start>add-items-to-cart-form</start>
+				<submit></submit>
+				<to>add-items-to-cart-form</to>
+				<via-link>additemstocartaction</via-link>
+				<result>cart</result>
+			</step>
+		</plan>
+
 	</family>
 </definitions>

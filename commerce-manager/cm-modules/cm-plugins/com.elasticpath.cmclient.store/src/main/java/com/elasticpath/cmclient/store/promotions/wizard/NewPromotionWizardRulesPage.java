@@ -794,11 +794,7 @@ public class NewPromotionWizardRulesPage extends AbstractEPWizardPage<Rule> impl
 
 	@Override
 	public boolean isPageComplete() {
-		if (hasRequiredRules() && checkProductCategorySkuPromotionSelected()) {
-			return super.isPageComplete();
-		}
-		return false;
-
+		return hasRequiredRules() && checkProductCategorySkuPromotionSelected();
 	}
 
 	private boolean hasRequiredRules() {

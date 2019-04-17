@@ -32,6 +32,15 @@ public interface CartDirectorService {
 	ShoppingItem addItemToCart(ShoppingCart shoppingCart, ShoppingItemDto dto);
 
 	/**
+	 * Adds the given list of shopping items to the cart and persists the cart afterwards.  Returns the updated ShoppingCart.
+	 *
+	 * @param shoppingCart shoppingCart
+	 * @param dtoList      dtoList
+	 * @return updated shoppingCart
+	 */
+	ShoppingCart addItemsToCart(ShoppingCart shoppingCart, List<ShoppingItemDto> dtoList);
+
+	/**
 	 * Updates the given shopping item in the cart and persists the cart afterwards.  Returns the updated ShoppingCart.
 	 *
 	 * @param shoppingCart {@code ShoppingCart}

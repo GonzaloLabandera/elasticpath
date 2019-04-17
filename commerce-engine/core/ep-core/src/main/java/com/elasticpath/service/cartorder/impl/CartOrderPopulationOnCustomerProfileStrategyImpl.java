@@ -21,9 +21,11 @@ import com.elasticpath.service.rules.CartOrderCouponAutoApplier;
  */
 public class CartOrderPopulationOnCustomerProfileStrategyImpl implements CartOrderPopulationStrategy {
 
-	/** The prototype bean factory. */
+	/**
+	 * The prototype bean factory.
+	 */
 	private BeanFactory prototypeBeanFactory;
-	
+
 	private CartOrderShippingService cartOrderShippingService;
 
 	private CartOrderCouponAutoApplier cartOrderCouponAutoApplier;
@@ -58,7 +60,11 @@ public class CartOrderPopulationOnCustomerProfileStrategyImpl implements CartOrd
 
 		cartOrder = populateDefaultPaymentMethodOnCartOrder(cartOrder, customer);
 
-		return populateCouponsFromProfile(cartOrder, shoppingCart.getStore(), customer.getEmail());
+		if (!customer.isAnonymous()) {
+			cartOrder = populateCouponsFromProfile(cartOrder, shoppingCart.getStore(), customer.getEmail());
+		}
+
+		return cartOrder;
 	}
 
 	private CartOrder populateCouponsFromProfile(final CartOrder cartOrder, final Store store, final String customerEmail) {
@@ -68,7 +74,7 @@ public class CartOrderPopulationOnCustomerProfileStrategyImpl implements CartOrd
 
 	private CartOrder populateDefaultPaymentMethodOnCartOrder(final CartOrder cartOrder, final Customer customer) {
 		PaymentMethod defaultPaymentMethod = customer.getPaymentMethods().getDefault();
-		
+
 		if (defaultPaymentMethod != null) {
 			cartOrder.usePaymentMethod(defaultPaymentMethod);
 		}

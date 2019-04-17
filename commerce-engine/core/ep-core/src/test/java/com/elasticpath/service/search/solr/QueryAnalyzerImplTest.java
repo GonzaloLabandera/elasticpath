@@ -13,7 +13,6 @@ import org.junit.Test;
  */
 public class QueryAnalyzerImplTest {
 
-
 	private QueryAnalyzerImpl queryAnalyzer;
 	private static final String FORMAT = "test%sTest";
 	private static final char EXPECTED_QUOTATION_MARK = '"';
@@ -47,7 +46,7 @@ public class QueryAnalyzerImplTest {
 			String value = String.format(FORMAT, illegalCharacter);
 			String analyze = queryAnalyzer.analyze(value);
 
-			assertThat(analyze.charAt(0)).as("expected " + illegalCharacter +" to be in quotation marks").isEqualTo(EXPECTED_QUOTATION_MARK);
+			assertThat(analyze.charAt(0)).as("expected " + illegalCharacter + " to be in quotation marks").isEqualTo(EXPECTED_QUOTATION_MARK);
 		}
 	}
 
@@ -71,7 +70,7 @@ public class QueryAnalyzerImplTest {
 			String analyze = queryAnalyzer.analyze(value);
 
 			assertThat(analyze.charAt(analyze.indexOf(illegalCharacter)))
-					.as("expected " + illegalCharacter +"  to be in proceeded by escape character in `" + analyze + "`")
+					.as("expected " + illegalCharacter + " to be in proceeded by escape character in `" + analyze + "`")
 					.isEqualTo('\\');
 			assertThat(analyze.charAt(0))
 					.as("expected no quotation mark at beginning of string")

@@ -18,6 +18,10 @@ import com.elasticpath.service.catalog.ProductSkuLookup;
  * Represents a quantity of SKUs in a shopping cart, in progress cart, wish list, etc.
  */
 public interface ShoppingItem extends Entity, TreeNode<ShoppingItem>, DatabaseLastModifiedDate {
+
+	/** Serial version ID. */
+	long serialVersionUID = 8800000002L;
+
 	/**
 	 * Returns the guid of the product sku being purchased by this item.
 	 * @return the guid of the product sku being purchased by this item.
@@ -274,4 +278,39 @@ public interface ShoppingItem extends Entity, TreeNode<ShoppingItem>, DatabaseLa
 	 */
 	boolean hasPrice();
 
+	/**
+	 * Setter for child item's shopping cart uid.
+	 * @param childItemCartUid the cart uid.
+	 */
+	default void setChildItemCartUid(Long childItemCartUid) {
+		//do nothing - intended for optimization of fetching orders
+	}
+
+	/**
+	 * Get parent item uid.
+	 * @return parent item uid.
+	 */
+	default Long getParentItemUid() {
+		//intended for optimization of fetching orders
+		return 0L;
+	}
+
+	/**
+	 * See {@ItemType} for all available types.
+	 *
+	 * @return the item type.
+	 */
+	default ItemType getItemType() {
+		//intended for optimization of fetching orders
+		return null;
+	}
+
+	/**
+	 * Set item type.
+	 *
+	 * @param itemType new item type.
+	 */
+	default void setItemType(ItemType itemType) {
+		//do nothing - intended for optimization of fetching orders
+	}
 }

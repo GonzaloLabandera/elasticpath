@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.Set;
 
 import com.elasticpath.domain.catalogview.Filter;
@@ -16,6 +17,7 @@ import com.elasticpath.service.search.SpellSuggestionSearchCriteria;
 /**
  * A criteria for advanced product search.
  */
+@SuppressWarnings("PMD.GodClass")
 public class ProductSearchCriteria extends AbstractProductCategorySearchCriteria implements SpellSuggestionSearchCriteria {
 
 	/** Serial version id. */
@@ -32,6 +34,8 @@ public class ProductSearchCriteria extends AbstractProductCategorySearchCriteria
 	private Set<Long> ancestorCategoryUids;
 
 	private Long directCategoryUid;
+
+	private Boolean onlyInCategoryAndSubCategory = false;
 
 	private Boolean onlyWithinDirectCategory = true;
 
@@ -50,7 +54,66 @@ public class ProductSearchCriteria extends AbstractProductCategorySearchCriteria
 	private String masterCategoryCatalogCode;
 
 	private Boolean onlySearchMasterCategory = false;
-	
+
+	@Override
+	public boolean equals(final Object object) {
+		if (this == object) {
+			return true;
+		}
+
+		if (object == null || getClass() != object.getClass()) {
+			return false;
+		}
+
+		ProductSearchCriteria other = (ProductSearchCriteria) object;
+
+		return areProductFieldsEqual(other)
+				&& categorySearchValuesEqual(other)
+				&& categorySearchTypeEqual(other);
+	}
+
+	private boolean categorySearchTypeEqual(final ProductSearchCriteria other) {
+		boolean featuredProductSearchEqual = Objects.equals(featuredProductsOnly, other.featuredProductsOnly)
+				&& Objects.equals(featuredOnlyInCategory, other.featuredOnlyInCategory);
+
+		boolean categorySearchTypeEqual = Objects.equals(onlyInCategoryAndSubCategory, other.onlyInCategoryAndSubCategory)
+				&& Objects.equals(onlyWithinDirectCategory, other.onlyWithinDirectCategory)
+				&& Objects.equals(onlySearchMasterCategory, other.onlySearchMasterCategory);
+
+		return categorySearchTypeEqual
+				&& featuredProductSearchEqual
+				&& Objects.equals(inActiveOnly, other.inActiveOnly);
+	}
+
+	private boolean categorySearchValuesEqual(final ProductSearchCriteria other) {
+		boolean masterCategoryCodeEqual = Objects.equals(masterCategoryCode, other.masterCategoryCode)
+				&& Objects.equals(masterCategoryCatalogCode, other.masterCategoryCatalogCode);
+
+		boolean categoryUidsEqual = Objects.equals(ancestorCategoryUids, other.ancestorCategoryUids)
+				&& Objects.equals(directCategoryUid, other.directCategoryUid);
+
+		return categoryUidsEqual
+				&& Objects.equals(catalogSearchableLocales, other.catalogSearchableLocales)
+				&& masterCategoryCodeEqual;
+	}
+
+	private boolean areProductFieldsEqual(final ProductSearchCriteria other) {
+		boolean productStringsEqual = Objects.equals(productName, other.productName)
+				&& Objects.equals(productSku, other.productSku)
+				&& Objects.equals(productCode, other.productCode);
+
+		return Objects.equals(brandCode, other.brandCode)
+				&& productStringsEqual
+				&& Objects.equals(productUid, other.productUid);
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(brandCode, productCode, productName, productSku, productUid, ancestorCategoryUids, directCategoryUid,
+				onlyWithinDirectCategory, featuredOnlyInCategory, featuredProductsOnly, inActiveOnly, catalogSearchableLocales,
+				masterCategoryCatalogCode, masterCategoryCode, onlySearchMasterCategory, onlyInCategoryAndSubCategory);
+	}
+
 	/**
 	 * Gets the list of potential misspelled strings. Currently product name, and product
 	 * attributes could be misspelled.
@@ -411,5 +474,21 @@ public class ProductSearchCriteria extends AbstractProductCategorySearchCriteria
 	 */
 	public boolean isOnlySearchMasterCategory() {
 		return onlySearchMasterCategory;
+	}
+
+	/**
+	 * If set to true, it will return results for the category and all sub categories.
+	 * @return true or false
+	 */
+	public Boolean isOnlyInCategoryAndSubCategory() {
+		return onlyInCategoryAndSubCategory;
+	}
+
+	/**
+	 * Setter for enabling category and sub category search.
+	 * @param onlyInCategoryAndSubCategory onlyInCategoryAndSubCategory
+	 */
+	public void setOnlyInCategoryAndSubCategory(final Boolean onlyInCategoryAndSubCategory) {
+		this.onlyInCategoryAndSubCategory = onlyInCategoryAndSubCategory;
 	}
 }

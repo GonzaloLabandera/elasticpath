@@ -68,7 +68,6 @@ public class PromotionRuleDelegateImpl implements PromotionRuleDelegate {
 	private ProductSkuLookup productSkuLookup;
 	private ProductService productService;
 	private ShippingOptionService shippingOptionService;
-
 	private BeanFactory beanFactory;
 
 	@Override
@@ -283,7 +282,8 @@ public class PromotionRuleDelegateImpl implements PromotionRuleDelegate {
 											   final String exceptionStr) {
 		final int qualifyingQuantity = shoppingCart.getAllShoppingItems().stream()
 				.filter(shoppingItem -> !shoppingItem.isBundleConstituent())
-				.filter(shoppingItem -> isShoppingItemQualifiedForCategoryMatch(discountItemContainer, compoundCategoryGuid, exceptionStr, shoppingItem))
+				.filter(shoppingItem -> isShoppingItemQualifiedForCategoryMatch(discountItemContainer, compoundCategoryGuid, exceptionStr,
+						shoppingItem))
 				.mapToInt(ShoppingItem::getQuantity)
 				.sum();
 
@@ -318,7 +318,7 @@ public class PromotionRuleDelegateImpl implements PromotionRuleDelegate {
 	}
 
 	/**
-	 * Applies a discount to the specified price.
+	 * Applies a discount to the specified price by amount.
 	 *
 	 * @param ruleId the ID of the rule that applied this discount
 	 * @param actionId the ID of the rule action that applied this discount
@@ -334,12 +334,13 @@ public class PromotionRuleDelegateImpl implements PromotionRuleDelegate {
 			final DiscountRecord discountRecord =
 					createDiscountRecord(ruleId, actionId, prePromotionAmount, discountAmount, discountedAmount, price);
 
-			priceTier.setComputedPriceIfLower(discountedAmount);
-			priceTier.addDiscountRecord(discountRecord);
+			discountAndAddRecord(priceTier, discountedAmount, discountRecord);
 		}
 	}
 
 	/**
+	 * Applies a discount to the specified price by percent.
+	 *
 	 * @param ruleId the ID of the rule that applied this discount
 	 * @param actionId the ID of the rule action that applied this discount
 	 * @param discountPercent BigDecimal value for percent to discount
@@ -356,7 +357,20 @@ public class PromotionRuleDelegateImpl implements PromotionRuleDelegate {
 			final DiscountRecord discountRecord =
 					createDiscountRecord(ruleId, actionId, prePromotionAmount, discountAmount, discountedAmount, price);
 
-			priceTier.setComputedPriceIfLower(discountedAmount);
+			discountAndAddRecord(priceTier, discountedAmount, discountRecord);
+		}
+	}
+
+	/**
+	 * Applies a specific discount to the priceTier computed price and adds a discount record in case the price has changed.
+	 *
+	 * @param priceTier priceTier object
+	 * @param discountedAmount discountedAmount object
+	 * @param discountRecord discountRecord object
+	 */
+	protected void discountAndAddRecord(final PriceTier priceTier, final BigDecimal discountedAmount, final DiscountRecord discountRecord) {
+		if (priceTier.setComputedPriceIfLower(discountedAmount)) {
+			priceTier.clearDiscountRecords();
 			priceTier.addDiscountRecord(discountRecord);
 		}
 	}
@@ -762,54 +776,57 @@ public class PromotionRuleDelegateImpl implements PromotionRuleDelegate {
 			&& !couponConfig.isUnlimited();
 	}
 
-
 	@Override
 	public void assignCouponToCustomer(final ShoppingCart shoppingCart, final long ruleId) {
 		// Mark the rule as applied so that the CheckoutService gets it in the ruleApplied list.
 		shoppingCart.ruleApplied(ruleId, 0, null, null, 0);
 	}
 
-	/**
-	 *
-	 * @param couponUsageService The coupon usage service to set.
-	 */
 	public void setCouponUsageService(final CouponUsageService couponUsageService) {
 		this.couponUsageService = couponUsageService;
 	}
 
-	/**
-	 *
-	 * @param couponConfigService the couponConfigService to set
-	 */
+	protected CouponUsageService getCouponUsageService() {
+		return couponUsageService;
+	}
+
 	public void setCouponConfigService(final CouponConfigService couponConfigService) {
 		this.couponConfigService = couponConfigService;
 	}
 
-	protected ProductSkuLookup getProductSkuLookup() {
-		return productSkuLookup;
+	protected CouponConfigService getCouponConfigService() {
+		return couponConfigService;
 	}
 
 	public void setProductSkuLookup(final ProductSkuLookup productSkuLookup) {
 		this.productSkuLookup = productSkuLookup;
 	}
 
-	protected ProductService getProductService() {
-		return productService;
+	protected ProductSkuLookup getProductSkuLookup() {
+		return productSkuLookup;
 	}
 
 	public void setBeanFactory(final BeanFactory beanFactory) {
 		this.beanFactory = beanFactory;
 	}
 
+	protected BeanFactory getBeanFactory() {
+		return beanFactory;
+	}
+
 	public void setProductService(final ProductService productService) {
 		this.productService = productService;
 	}
 
-	protected ShippingOptionService getShippingOptionService() {
-		return this.shippingOptionService;
+	protected ProductService getProductService() {
+		return productService;
 	}
 
 	public void setShippingOptionService(final ShippingOptionService shippingOptionService) {
 		this.shippingOptionService = shippingOptionService;
+	}
+
+	protected ShippingOptionService getShippingOptionService() {
+		return this.shippingOptionService;
 	}
 }

@@ -84,13 +84,16 @@ $widget_border_radius: 2px;
 $widget_border_color: $gray-light;
 $widget_field_padding: 5px 5px;
 $widget_body_color: $secondary-color;
+$widget_active_tab_font_color: #6A74E6;
+$widget_active_tab_color: #F6F9FC;
+$widget_shell_top_color: #0033cc;
 
 // ccombo
 $ccombo_field_padding: 4px 4px;
 
 // icons
 $icon-spacing: 3px; // because the icons have spacing, default is 0
-$icon-spacing-spacious: 5px; 
+$icon-spacing-spacious: 5px;
 $field-icon-width: 30px;
 
 // shadows
@@ -102,4 +105,8 @@ $table_border_color: $widget_border_color;
 $table_cell_border_color: $gray-lighter;
 $table_header_padding: 8px 7px 9px;
 $table_cell_padding: 2px 7px 4px;
-
+$table_cell_selected_color: #fcd669;
+@mixin table-selected-rgba($variable-name, $opacity: 1) {
+  #{$variable-name}: rgba(252, 214, 105, $opacity);
+}
+$tab_selected_color: #6a74e6;

@@ -26,6 +26,7 @@ public class SettingBeanDefinitionParserTest {
 	private static final String CONTEXT = "CONTEXT";
 	public static final String PATH_ATTRIBUTE = "path";
 	public static final String CONTEXT_ATTRIBUTE = "context";
+	public static final String SYSTEM_PROPERTY_OVERRIDEKEY = "systemPropertyOverrideKey";
 	public static final String SETTINGS_READER = "settingsReader";
 	private static final String SETTING_VALUE_TYPE_CONVERTER = "settingValueTypeConverter";
 
@@ -65,6 +66,22 @@ public class SettingBeanDefinitionParserTest {
 
 		verify(beanDefinitionBuilder).addPropertyValue(PATH_ATTRIBUTE, PATH);
 		verify(beanDefinitionBuilder).addPropertyValue(CONTEXT_ATTRIBUTE, CONTEXT);
+		verify(beanDefinitionBuilder).addPropertyReference(SETTINGS_READER, SETTINGS_READER);
+		verify(beanDefinitionBuilder).addPropertyReference(SETTING_VALUE_TYPE_CONVERTER, SETTING_VALUE_TYPE_CONVERTER);
+	}
+
+	@Test
+	public void verifyDoParseWillConstructABeanDefinitionWithPathAndSystemPropertyOverrideKey() {
+		final Element element = mock(Element.class);
+		final BeanDefinitionBuilder beanDefinitionBuilder = mock(BeanDefinitionBuilder.class);
+
+		when(element.getAttribute(PATH_ATTRIBUTE)).thenReturn(PATH);
+		when(element.getAttribute(SYSTEM_PROPERTY_OVERRIDEKEY)).thenReturn(SYSTEM_PROPERTY_OVERRIDEKEY);
+
+		parser.doParse(element, beanDefinitionBuilder);
+
+		verify(beanDefinitionBuilder).addPropertyValue(PATH_ATTRIBUTE, PATH);
+		verify(beanDefinitionBuilder).addPropertyValue(SYSTEM_PROPERTY_OVERRIDEKEY, SYSTEM_PROPERTY_OVERRIDEKEY);
 		verify(beanDefinitionBuilder).addPropertyReference(SETTINGS_READER, SETTINGS_READER);
 		verify(beanDefinitionBuilder).addPropertyReference(SETTING_VALUE_TYPE_CONVERTER, SETTING_VALUE_TYPE_CONVERTER);
 	}

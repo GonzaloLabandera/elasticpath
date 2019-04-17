@@ -99,9 +99,10 @@
           <action
                   class="com.elasticpath.cmclient.jobs.actions.ViewCatalogImportJobs"
                   definitionId="com.elasticpath.cmclient.jobs.commands.viewCatalogJobs"
-                  icon="icons/csv-import_default_34.png"
+                  icon="icons/file_upload_18px.png"
+                  mode="FORCE_TEXT"
                   id="com.elasticpath.cmclient.jobs.commands.viewCatalogJobsAction"
-                  label="%catalogImportJobs"
+                  label="%importForBaseAmount.name"
                   toolbarPath="com.elasticpath.cmclient.core.toolbars.actions/com.elasticpath.cmclient.catalog.commands.editGlobalAttributes"
                   tooltip="%catalogImportJobs">
           </action>
@@ -225,9 +226,10 @@
                 locationURI="toolbar:com.elasticpath.cmclient.core.toolbars.actions?after=com.elasticpath.cmclient.pricelistmanager.toolbarMenus.createPriceListAssignment">
             <command
                    commandId="com.elasticpath.cmclient.jobs.commands.viewPriceListJobs"
-                   icon="icons/csv-import_default_34.png"
+                   icon="icons/file_upload_18px.png"
                    id="com.elasticpath.cmclient.jobs.toolbarMenus.viewPriceListJobs"
-                   label="%runCsvImportForBaseAmount.name"
+                   mode="FORCE_TEXT"
+                   label="%importForBaseAmount.name"
                    tooltip="%runCsvImportForBaseAmount.tooltip">
                  <visibleWhen>
                    <with

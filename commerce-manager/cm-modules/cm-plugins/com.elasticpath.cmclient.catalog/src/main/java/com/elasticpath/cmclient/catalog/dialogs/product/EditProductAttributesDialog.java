@@ -149,7 +149,7 @@ public class EditProductAttributesDialog  extends AbstractPolicyAwareDialog impl
 	private AttributeValue[] getAttributes() {
 
 		final List<AttributeValue> list = product.getFullAttributeValues(selectedLocale);
-		Collections.sort(list, new AttributeValueComparatorByNameIgnoreCase());
+		Collections.sort(list, new AttributeValueComparatorByNameIgnoreCase(selectedLocale));
 		return list.toArray(new AttributeValue[list.size()]);
 	}
 

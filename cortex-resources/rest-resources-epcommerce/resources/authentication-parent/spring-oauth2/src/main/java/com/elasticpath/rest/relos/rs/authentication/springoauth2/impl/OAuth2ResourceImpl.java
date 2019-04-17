@@ -1,11 +1,12 @@
 /*
- * Copyright © 2018 Elastic Path Software Inc. All rights reserved.
+ * Copyright © 2019 Elastic Path Software Inc. All rights reserved.
  */
 package com.elasticpath.rest.relos.rs.authentication.springoauth2.impl;
 
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -26,6 +27,8 @@ import com.google.common.collect.ImmutableMap;
 import org.apache.commons.lang3.StringUtils;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 
 import com.elasticpath.rest.ResourceTypeFactory;
@@ -34,16 +37,17 @@ import com.elasticpath.rest.chain.Ensure;
 import com.elasticpath.rest.chain.ExecutionResultChain;
 import com.elasticpath.rest.command.ExecutionResult;
 import com.elasticpath.rest.command.ExecutionResultFactory;
+import com.elasticpath.rest.relos.rs.authentication.AuthHeaderUtil;
 import com.elasticpath.rest.relos.rs.authentication.client.AuthenticationClient;
 import com.elasticpath.rest.relos.rs.authentication.dto.AuthenticationRequestDto;
 import com.elasticpath.rest.relos.rs.authentication.dto.AuthenticationResponseDto;
 import com.elasticpath.rest.relos.rs.authentication.springoauth2.OAuthAccessTokenService;
-import com.elasticpath.rest.relos.rs.authentication.springoauth2.util.AuthHeaderUtil;
 import com.elasticpath.rest.relos.rs.common.ResourceStatusToStatusType;
 import com.elasticpath.rest.relos.rs.events.EventSender;
 import com.elasticpath.rest.relos.rs.events.RoleTransitionEvent;
 import com.elasticpath.rest.relos.rs.jaxrs.JaxRsResource;
 import com.elasticpath.rest.relos.rs.subject.SubjectHeaderConstants;
+import com.elasticpath.rest.toggles.FeatureToggles;
 import com.elasticpath.rest.util.collection.CollectionUtil;
 
 
@@ -55,8 +59,13 @@ import com.elasticpath.rest.util.collection.CollectionUtil;
 @Path("/oauth2/tokens")
 public final class OAuth2ResourceImpl implements JaxRsResource {
 
+	private static final Logger LOG = LoggerFactory.getLogger(OAuth2ResourceImpl.class);
+
 	private static final String PASSWORD_GRANT_TYPE = "password";
 	private static final String ALLOW = "Allow";
+
+	private final boolean trustedSubjectHeaderModeEnabled =
+			FeatureToggles.getFeatureToggle(FeatureToggles.Toggle.TRUSTED_SUBJECT_HEADER_MODE);
 
 	@Reference
 	private OAuthAccessTokenService oAuthAccessTokenService;
@@ -102,6 +111,10 @@ public final class OAuth2ResourceImpl implements JaxRsResource {
 			final UriInfo uriInfo,
 			@Context
 			final HttpServletRequest httpRequest) {
+
+		if (trustedSubjectHeaderModeEnabled) {
+			return handleDisabled();
+		}
 
 		ExecutionResultChain chain = new ExecutionResultChain() {
 			@Override
@@ -201,6 +214,10 @@ public final class OAuth2ResourceImpl implements JaxRsResource {
 			@Context
 			final HttpHeaders headers) {
 
+		if (trustedSubjectHeaderModeEnabled) {
+			return handleDisabled();
+		}
+
 		Response result;
 
 		String serializedToken = AuthHeaderUtil.parseToken(headers);
@@ -222,6 +239,10 @@ public final class OAuth2ResourceImpl implements JaxRsResource {
 	 */
 	@OPTIONS
 	public Response options() {
+		if (trustedSubjectHeaderModeEnabled) {
+			return handleDisabled();
+		}
+
 		return Response.noContent()
 				.header(ALLOW, "OPTIONS,POST,DELETE")
 				.build();
@@ -234,6 +255,11 @@ public final class OAuth2ResourceImpl implements JaxRsResource {
 		Ensure.isTrue(grantType.equals(PASSWORD_GRANT_TYPE),
 				ExecutionResultFactory.createBadRequestBody("Grant type must be password."));
 		return ExecutionResultFactory.createReadOK(null);
+	}
+
+	private Response handleDisabled() {
+		LOG.info("Attempted to request disabled OAuth2 resource");
+		return handleError(ExecutionResultFactory.createNotFound());
 	}
 
 	private Response handleError(final ExecutionResult<?> execResult) {

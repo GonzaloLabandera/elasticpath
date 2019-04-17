@@ -65,10 +65,6 @@
 	<!-- As service.xml is imported, the beans referenced by service.xml but not defined in that file should be defined here or in any xml file imported. -->
 	<bean id="storeMessageSourceDelegate" class="com.elasticpath.commons.util.impl.StoreMessageSourceImpl" />
 
-	<bean id="applicationInitialization" class="com.elasticpath.tools.sync.beanfactory.local.LocalPersistenceEngineInitialization" init-method="init">
-		<property name="sessionFactory" ref="sessionFactory" />
-		<property name="dataSourceProperties" ref="dataSourceProperties" />
-	</bean>
 	<import resource="service/sync-configuration.xml" />
 
 	<import resource="service/sync-merge-configuration.xml" />
@@ -91,7 +87,10 @@
 		<entry key="openjpa.MetaDataRepository" value="Preload=false"/>
 	</util:map>
 
-	<alias name="basePersistenceUnitManager" alias="persistenceUnitManager"/>
+	<import resource="sync-clisupport-context.xml" />
+
+	<alias name="injectedDataSource" alias="dataSource"/>
+
 	<bean id="entityManagerFactory" parent="abstractEntityManagerFactory"/>
 
 	<import resource="classpath*:META-INF/elasticpath/conf/spring/plugin.xml"/>

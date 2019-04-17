@@ -4,16 +4,16 @@
    <extension-point id="Extender" name="Extender"   schema="../com.elasticpath.cmclient.core/schema/extender.exsd"/>
    <extension-point id="StatePolicyExtender" name="StatePolicyExtender"   schema="../com.elasticpath.cmclient.core/schema/statePolicyExtender.exsd"/>
 
-   <extension-point 
-   		id="com.elasticpath.cmclient.fulfillment.order.contributedactions" 
-   		name="Order Data ContributedActions" 
+   <extension-point
+   		id="com.elasticpath.cmclient.fulfillment.order.contributedactions"
+   		name="Order Data ContributedActions"
    		schema="schema/com.elasticpath.cmclient.fulfillment.order.contributedactions.exsd"/>
-   		
-   <extension-point 
-   		id="com.elasticpath.cmclient.fulfillment.ordersku.contributedactions" 
-   		name="Order Sku Data ContributedActions" 
+
+   <extension-point
+   		id="com.elasticpath.cmclient.fulfillment.ordersku.contributedactions"
+   		name="Order Sku Data ContributedActions"
    		schema="schema/com.elasticpath.cmclient.fulfillment.ordersku.contributedactions.exsd"/>
-   		
+
    <extension
          point="org.eclipse.ui.perspectives">
       <perspective
@@ -106,16 +106,16 @@
             id="com.elasticpath.cmclient.fulfillment.editors.order.OrderEditor"
             contributorClass="com.elasticpath.cmclient.core.editors.BaseCmClientEditorContributor">
       </editor>
-      
+
       <editor
             name="EP Browser Editor"
             icon="icons/order_default_22.png"
             class="com.elasticpath.cmclient.fulfillment.editors.browser.EpBrowserEditor"
             id="com.elasticpath.cmclient.fulfillment.editors.browser.EpBrowserEditor">
       </editor>
-      
+
    </extension>
-   
+
    <extension
          point="org.eclipse.ui.perspectiveExtensions">
       <perspectiveExtension
@@ -125,7 +125,7 @@
          </actionSet>
       </perspectiveExtension>
    </extension>
-   
+
    <extension
          point="org.eclipse.ui.actionSets">
       <actionSet
@@ -133,7 +133,7 @@
             label="Create Order ActionSet">
       </actionSet>
    </extension>
-   
+
    <extension point="com.elasticpath.cmclient.core.authorizations">
       <permissions>
          <permission
@@ -188,7 +188,9 @@
                     commandId="com.elasticpath.cmclient.fulfillment.command.openPerspective"
                     icon="icons/user_default_34.png"
                     id="perspectiveMenu.fulfillmentItem"
-                    tooltip="%fulfillmentMenu.name">
+                    tooltip="%fulfillmentMenu.name"
+                    label="%fulfillmentMenu.name"
+                    mode="FORCE_TEXT">
                <visibleWhen
                        checkEnabled="true">
                </visibleWhen>

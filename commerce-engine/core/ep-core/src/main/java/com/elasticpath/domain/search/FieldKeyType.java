@@ -29,7 +29,9 @@ public enum FieldKeyType {
 
 	/**
 	 * Constructor.
-	 * @param name name
+	 *
+	 * @param name name of the field key type
+	 * @param ordinal ordinal value of the field key type
 	 */
 	FieldKeyType(final String name, final int ordinal) {
 		this.name = name;

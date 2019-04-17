@@ -3,9 +3,14 @@
  */
 package com.elasticpath.rest.resource.integration.epcommerce.repository.search.impl;
 
+import static com.elasticpath.rest.resource.integration.epcommerce.repository.search.OfferSearchUtil.createNavigationSearchCriteria;
+import static com.elasticpath.rest.resource.integration.epcommerce.repository.search.OfferSearchUtil.createSearchCriteria;
+
 import java.util.ArrayList;
+import java.util.Currency;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 
@@ -21,17 +26,20 @@ import org.osgi.service.component.annotations.Reference;
 
 import com.elasticpath.domain.catalog.Product;
 import com.elasticpath.domain.search.Facet;
+import com.elasticpath.domain.store.Store;
 import com.elasticpath.rest.ResourceOperationFailure;
 import com.elasticpath.rest.cache.CacheResult;
 import com.elasticpath.rest.definition.searches.SearchKeywordsEntity;
 import com.elasticpath.rest.id.util.CompositeIdUtil;
 import com.elasticpath.rest.identity.util.SubjectUtil;
 import com.elasticpath.rest.resource.ResourceOperationContext;
+import com.elasticpath.rest.resource.integration.epcommerce.repository.category.CategoryRepository;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.item.ItemRepository;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.pagination.PaginatedResult;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.product.StoreProductRepository;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.search.SearchRepository;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.settings.SettingsRepository;
+import com.elasticpath.rest.resource.integration.epcommerce.repository.store.StoreRepository;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.transform.ReactiveAdapter;
 import com.elasticpath.rest.util.math.NumberUtil;
 import com.elasticpath.service.search.FacetService;
@@ -47,6 +55,9 @@ import com.elasticpath.service.search.solr.IndexUtility;
 @Component
 public class SearchRepositoryImpl implements SearchRepository {
 
+	/**
+	 * Page ID of the first page.
+	 */
 	public static final int FIRST_PAGE = 1;
 	/**
 	 * Composite ID product Guid Key.
@@ -64,6 +75,8 @@ public class SearchRepositoryImpl implements SearchRepository {
 	private SettingsRepository settingsRepository;
 	private IndexSearchService indexSearchService;
 	private StoreProductRepository storeProductRepository;
+	private StoreRepository storeRepository;
+	private CategoryRepository categoryRepository;
 	private ItemRepository itemRepository;
 	private IndexUtility indexUtility;
 	private ReactiveAdapter reactiveAdapter;
@@ -110,6 +123,16 @@ public class SearchRepositoryImpl implements SearchRepository {
 		this.resourceOperationContext = resourceOperationContext;
 	}
 
+	@Reference
+	public void setStoreRepository(final StoreRepository storeRepository) {
+		this.storeRepository = storeRepository;
+	}
+
+	@Reference
+	public void setCategoryRepository(final CategoryRepository categoryRepository) {
+		this.categoryRepository = categoryRepository;
+	}
+
 	@Override
 	@CacheResult
 	public Single<Integer> getDefaultPageSize(final String storeCode) {
@@ -137,31 +160,28 @@ public class SearchRepositoryImpl implements SearchRepository {
 	@Override
 	public Single<PaginatedResult> searchForItemIds(final int startPageNumber, final int numberOfResultsPerPage,
 													final ProductCategorySearchCriteria productSearchCriteria) {
-		return reactiveAdapter.fromServiceAsSingle(() -> indexSearchService.search(productSearchCriteria))
+		return getSearchResultAsSingle(productSearchCriteria, (startPageNumber - 1) * numberOfResultsPerPage, numberOfResultsPerPage)
 				.flatMap(productSearchResult -> createPaginatedSearchResult(startPageNumber, numberOfResultsPerPage, productSearchResult));
 	}
 
 	@Override
-	@CacheResult
 	public Observable<String> getFacetFields(final ProductCategorySearchCriteria productSearchCriteria,
-											 final int numberOfResultsPerPage) {
+											 final int startPageNumber, final int numberOfResultsPerPage) {
 		return productSearchCriteria.isFacetingEnabled()
-				? getFacetFieldsSearchResult(productSearchCriteria, numberOfResultsPerPage)
+				? getFacetFieldsSearchResult(productSearchCriteria, (startPageNumber - 1) * numberOfResultsPerPage, numberOfResultsPerPage)
 				: Observable.empty();
 	}
 
 	private Observable<String> getFacetFieldsSearchResult(final ProductCategorySearchCriteria productSearchCriteria,
-														  final int numberOfResultsPerPage) {
-		return reactiveAdapter.fromServiceAsSingle(() -> indexSearchService.search(productSearchCriteria, 0, numberOfResultsPerPage))
-				.flatMapObservable(searchResult -> Observable.fromIterable(searchResult.getFacetFields(numberOfResultsPerPage)));
+														  final int startIndex, final int maxResults) {
+		return getSearchResultAsSingle(productSearchCriteria, startIndex, maxResults)
+				.flatMapObservable(searchResult -> Observable.fromIterable(searchResult.getFacetFields()));
 	}
 
 	@Override
-	@CacheResult
-	public Observable<FacetValue> getFacetValues(final String facetGuid, final ProductCategorySearchCriteria productSearchCriteria,
-												 final int maxResults) {
-		return reactiveAdapter.fromServiceAsSingle(() -> indexSearchService.search(productSearchCriteria))
-				.flatMapObservable(searchResult -> Observable.fromIterable(searchResult.getFacetValues(facetGuid, maxResults)))
+	public Observable<FacetValue> getFacetValues(final String facetGuid, final ProductCategorySearchCriteria productSearchCriteria) {
+		return getSearchResultAsSingle(productSearchCriteria, 0, 0)
+				.flatMapObservable(searchResult -> Observable.fromIterable(searchResult.getFacetValues(facetGuid)))
 				.onErrorResumeNext(throwNotFound(facetGuid));
 	}
 
@@ -170,25 +190,34 @@ public class SearchRepositoryImpl implements SearchRepository {
 				String.format(FACET_FIELD_WITH_TYPE_NOT_FOUND, facetGuid)));
 	}
 
+	private Single<IndexSearchResult> getSearchResultAsSingle(final ProductCategorySearchCriteria productSearchCriteria,
+													  final int startPageNumber, final int numberOfResultsPerPage) {
+		return reactiveAdapter.fromServiceAsSingle(() -> getSearchResult(productSearchCriteria, startPageNumber, numberOfResultsPerPage));
+	}
+
+	@CacheResult
+	private IndexSearchResult getSearchResult(final ProductCategorySearchCriteria productSearchCriteria,
+											  final int startPageNumber, final int numberOfResultsPerPage) {
+		return indexSearchService.search(productSearchCriteria, startPageNumber, numberOfResultsPerPage);
+	}
+
 	@Override
 	public Single<PaginatedResult> searchForProductIds(final ProductCategorySearchCriteria productSearchCriteria,
 													   final int startPageNumber, final int numberOfResultsPerPage) {
 
-		return reactiveAdapter.fromServiceAsSingle(() -> indexSearchService.search(productSearchCriteria))
-				.flatMap(productSearchResult ->
-						Single.just(productSearchResult.getResults((startPageNumber - 1) * numberOfResultsPerPage, numberOfResultsPerPage))
-								.flatMap(this::getSortedProducts)
+		return getSearchResultAsSingle(productSearchCriteria, (startPageNumber - 1) * numberOfResultsPerPage, numberOfResultsPerPage)
+								.flatMap(searchResult -> getSortedProducts(searchResult.getCachedResultUids())
 								.map(sortedProducts -> sortedProducts.stream()
 										.map(product -> ImmutableSortedMap.of(PRODUCT_GUID_KEY, product.getGuid()))
 										.map(CompositeIdUtil::encodeCompositeId)
 										.collect(Collectors.toList()))
-								.map(productIds -> new PaginatedResult(productIds, startPageNumber, numberOfResultsPerPage, productSearchResult
+								.map(productIds -> new PaginatedResult(productIds, startPageNumber, numberOfResultsPerPage, searchResult
 										.getLastNumFound())));
 	}
 
 	private Single<PaginatedResult> createPaginatedSearchResult(final int startPageNumber, final int numberOfResultsPerPage,
 																final IndexSearchResult productSearchResult) {
-		return Single.just(productSearchResult.getResults((startPageNumber - 1) * numberOfResultsPerPage, numberOfResultsPerPage))
+		return Single.just(productSearchResult.getCachedResultUids())
 				.flatMap(this::getSortedProducts)
 				.map(this::getItemIds)
 				.map(itemIds -> new PaginatedResult(itemIds, startPageNumber, numberOfResultsPerPage, productSearchResult
@@ -239,5 +268,27 @@ public class SearchRepositoryImpl implements SearchRepository {
 		return Single.just(facetService.findByGuid(facetGuid))
 				.map(Facet::getDisplayNameMap)
 				.map(map -> map.get(locale));
+	}
+
+	@Override
+	public Single<ProductCategorySearchCriteria> getSearchCriteria(final String categoryCode, final String storeCode, final Locale locale,
+																   final Currency currency, final Map<String, String> appliedFacets,
+																   final String keyword) {
+		return storeRepository.findStoreAsSingle(storeCode)
+				.flatMap(store -> buildSearchCriteria(categoryCode, locale, currency, appliedFacets, keyword, store));
+	}
+
+	private Single<ProductCategorySearchCriteria> buildNavigationSearchCriteria(final String categoryCode,
+																				final Locale locale, final Currency currency,
+																				final Map<String, String> appliedFacets, final String storeCode) {
+		return categoryRepository.findByStoreAndCategoryCode(storeCode, categoryCode)
+				.map(category -> createNavigationSearchCriteria(appliedFacets, locale, currency, true, category, storeCode));
+	}
+
+	private Single<ProductCategorySearchCriteria> buildSearchCriteria(final String categoryCode, final Locale locale,
+															  final Currency currency, final Map<String, String> appliedFacets,
+															  final String keyword, final Store store) {
+		return categoryCode == null ? Single.just(createSearchCriteria(keyword, store, appliedFacets, locale, currency, true))
+				: buildNavigationSearchCriteria(categoryCode, locale, currency, appliedFacets, store.getCode());
 	}
 }

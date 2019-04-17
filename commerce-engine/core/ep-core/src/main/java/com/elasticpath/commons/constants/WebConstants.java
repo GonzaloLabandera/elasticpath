@@ -371,21 +371,6 @@ public final class WebConstants {
 	/** Error Key. */
 	public static final String ERROR_KEY = "errorKey";
 
-	/**
-	 * the user id mode.
-	 */
-	public static final int USE_EMAIL_AS_USER_ID_MODE = 1;
-
-	/**
-	 * the user id mode.
-	 */
-	public static final int GENERATE_UNIQUE_PERMANENT_USER_ID_MODE = 2;
-
-	/**
-	 * the user id mode.
-	 */
-	public static final int INDEPENDANT_EMAIL_AND_USER_ID_MODE = 3;
-
 	//==================================================
 	// Key for cmclient csr login
 	//==================================================

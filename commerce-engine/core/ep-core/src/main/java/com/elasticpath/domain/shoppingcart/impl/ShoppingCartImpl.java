@@ -29,6 +29,8 @@ import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
+
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.ObjectUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
@@ -55,6 +57,7 @@ import com.elasticpath.domain.shopper.Shopper;
 import com.elasticpath.domain.shoppingcart.DiscountRecord;
 import com.elasticpath.domain.shoppingcart.MutablePromotionRecordContainer;
 import com.elasticpath.domain.shoppingcart.PromotionRecordContainer;
+import com.elasticpath.domain.shoppingcart.ItemType;
 import com.elasticpath.domain.shoppingcart.ShippingPricingSnapshot;
 import com.elasticpath.domain.shoppingcart.ShoppingCart;
 import com.elasticpath.domain.shoppingcart.ShoppingCartMemento;
@@ -395,9 +398,21 @@ public class ShoppingCartImpl extends AbstractEpDomainImpl implements ShoppingCa
 
 	@Override
 	public ShoppingItem addShoppingCartItem(final ShoppingItem cartItem) {
+		final Long shoppingCartUidPk = getShoppingCartMemento().getUidPk();
+
 		if (isCartItem(cartItem)) {
-			((CartItem) cartItem).setCartUid(getShoppingCartMemento().getUidPk());
+			((CartItem) cartItem).setCartUid(shoppingCartUidPk);
 		}
+
+		final List<ShoppingItem> children = cartItem.getChildren();
+
+		if (CollectionUtils.isNotEmpty(children)) {
+			cartItem.setItemType(ItemType.BUNDLE);
+			updateChildShoppingCartUid(shoppingCartUidPk, children);
+		} else {
+			cartItem.setItemType(ItemType.SIMPLE);
+		}
+
 		getCartMementoItems(getShoppingCartMemento()).add(cartItem);
 
 		// if we get a cart item manually added by a customer we should remove it from the list of manually removed cart items
@@ -408,6 +423,14 @@ public class ShoppingCartImpl extends AbstractEpDomainImpl implements ShoppingCa
 		estimateMode = false;
 
 		return cartItem;
+	}
+
+	//set shopping cart id to children recursively
+	private void updateChildShoppingCartUid(final Long shoppingCartUidPk, final List<ShoppingItem> children) {
+		children.forEach(child -> {
+			child.setChildItemCartUid(shoppingCartUidPk);
+			updateChildShoppingCartUid(shoppingCartUidPk, child.getChildren());
+		});
 	}
 
 	private boolean isCartItem(final ShoppingItem cartItem) {
@@ -1921,6 +1944,11 @@ public class ShoppingCartImpl extends AbstractEpDomainImpl implements ShoppingCa
 				.findFirst()
 				.map(Map.Entry::getValue)
 				.orElse(null);
+	}
+
+	@Override
+	public void setChildShoppingCartUid(final ShoppingItem shoppingItem) {
+		shoppingItem.setChildItemCartUid(getShoppingCartMemento().getUidPk());
 	}
 
 	/**

@@ -262,7 +262,11 @@ public class OrderItemPresentationBeanImpl implements OrderItemPresentationBean 
 	
 	@Override
 	public String getFilteredSkuOptionValues(final Locale locale) {
-		FilteredSkuOptionDisplay display = new FilteredSkuOptionDisplay();
-		return display.getFilteredSkuDisplay(getProductSku(), locale);
+		return SkuOptionDisplay.getFilteredSkuDisplay(getProductSku(), locale);
+	}
+
+	@Override
+	public String getSkuOptionValueByName(final Locale locale, final String name) {
+		return SkuOptionDisplay.getSkuOptionDisplayName(getProductSku(), locale, name);
 	}
 }

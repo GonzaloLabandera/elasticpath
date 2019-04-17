@@ -6,9 +6,6 @@ package com.elasticpath.rest.relos.rs.authentication.epcommerce.impl;
 import java.util.Collection;
 import java.util.Collections;
 
-import com.elasticpath.rest.relos.rs.authentication.epcommerce.UserTokenService;
-import com.elasticpath.rest.resource.integration.epcommerce.repository.customer.CustomerRepository;
-
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -30,9 +27,11 @@ import com.elasticpath.rest.command.ExecutionResultFactory;
 import com.elasticpath.rest.relos.rs.authentication.User;
 import com.elasticpath.rest.relos.rs.authentication.UserAuthenticationStrategy;
 import com.elasticpath.rest.relos.rs.authentication.dto.AuthenticationResponseDto;
+import com.elasticpath.rest.relos.rs.authentication.epcommerce.UserTokenService;
 import com.elasticpath.rest.relos.rs.authentication.epcommerce.transformer.AuthoritiesTransformer;
 import com.elasticpath.rest.relos.rs.authentication.epcommerce.validation.AuthenticationRequestValidator;
 import com.elasticpath.rest.resource.integration.epcommerce.common.authentication.AuthenticationConstants;
+import com.elasticpath.rest.resource.integration.epcommerce.repository.customer.CustomerRepository;
 
 /**
  * User authentication.
@@ -149,15 +148,6 @@ public class UserAuthenticationStrategyImpl implements UserAuthenticationStrateg
 		Customer customer = customerRepository.createNewCustomerEntity();
 		customer.setAnonymous(true);
 		customer.setStoreCode(storeCode);
-
-		/*
-		 * Core bases the user Id on the email, with a value that depends upon a UserIdMode being set.
-		 * This ensures that both the userId and email are set appropriately based on the supplied username.
-		 */
-		customer.setEmail(AuthenticationConstants.ANONYMOUS_USER_ID);
-		if (customer.getUserId() == null) {
-			customer.setUserId(AuthenticationConstants.ANONYMOUS_USER_ID);
-		}
 
 		return customer;
 	}

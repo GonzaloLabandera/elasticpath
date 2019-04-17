@@ -37,6 +37,7 @@ import com.elasticpath.domain.shoppingcart.WishList;
 import com.elasticpath.domain.shoppingcart.impl.CartItem;
 import com.elasticpath.domain.shoppingcart.impl.ShoppingItemImpl;
 import com.elasticpath.domain.store.Store;
+import com.elasticpath.sellingchannel.ProductUnavailableException;
 import com.elasticpath.sellingchannel.director.CartDirector;
 import com.elasticpath.service.shoppingcart.CantDeleteAutoselectableBundleItemsException;
 import com.elasticpath.service.shoppingcart.PricingSnapshotService;
@@ -50,6 +51,7 @@ import com.elasticpath.service.shoppingcart.validation.ShoppingItemValidationCon
 public class CartDirectorServiceImplTest {
 
 	private static final String SKU_CODE = "skuCode";
+	private static final String SKU_CODE_2 = "skuCode2";
 	private static final String WISHLIST_LINE_ITEM_GUID = "WISHLIST_LINE_ITEM_GUID";
 	private static final String CART_LINE_ITEM_GUID = "CART_LINE_ITEM_GUID";
 
@@ -98,6 +100,49 @@ public class CartDirectorServiceImplTest {
 
 		verify(cartDirector).addItemToCart(shoppingCart, dto);
 		expectThatShoppingCartWillBePersisted();
+	}
+
+	@Test
+	public void testAddItemsToCartHappyPath() {
+		final ShoppingItemDto dto1 = new ShoppingItemDto(SKU_CODE, 1);
+		final ShoppingItemDto dto2 = new ShoppingItemDto(SKU_CODE_2, 1);
+
+		List<ShoppingItemDto> dtos = new ArrayList<>();
+		dtos.add(dto1);
+		dtos.add(dto2);
+
+		final ShoppingItem addedShoppingItem1 = mock(ShoppingItem.class);
+		final ShoppingItem addedShoppingItem2 = mock(ShoppingItem.class);
+
+		when(cartDirector.addItemToCart(shoppingCart, dto1, null)).thenReturn(addedShoppingItem1);
+		when(cartDirector.addItemToCart(shoppingCart, dto2, null)).thenReturn(addedShoppingItem2);
+
+		setupSaveShoppingCartAction();
+
+		service.addItemsToCart(shoppingCart, dtos);
+
+		verify(cartDirector).addItemToCart(shoppingCart, dto1, null);
+		verify(cartDirector).addItemToCart(shoppingCart, dto2, null);
+		expectThatShoppingCartWillBePersisted();
+	}
+
+	@Test(expected = ProductUnavailableException.class)
+	public void testAddItemsToCartOneItemCannotBeAdded() {
+		final ShoppingItemDto dto1 = new ShoppingItemDto(SKU_CODE, 1);
+		final ShoppingItemDto dto2 = new ShoppingItemDto(SKU_CODE_2, 1);
+
+		List<ShoppingItemDto> dtos = new ArrayList<>();
+		dtos.add(dto1);
+		dtos.add(dto2);
+
+		final ShoppingItem addedShoppingItem1 = mock(ShoppingItem.class);
+
+		when(cartDirector.addItemToCart(shoppingCart, dto1, null)).thenReturn(addedShoppingItem1);
+		when(cartDirector.addItemToCart(shoppingCart, dto2, null)).thenReturn(null);
+
+		setupSaveShoppingCartAction();
+
+		service.addItemsToCart(shoppingCart, dtos);
 	}
 
 	@Test

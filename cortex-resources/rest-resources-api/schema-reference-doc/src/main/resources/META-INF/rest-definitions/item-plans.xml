@@ -5,7 +5,7 @@
 
 		<plan>
 			<name>lookup-item-by-code</name>
-			<description><![CDATA[Lookup for an item by item code.]]></description>
+			<description><![CDATA[Look up an item by item code.]]></description>
 			<step>
 				<description><![CDATA[Lookups to item lookup form.]]></description>
 				<start>lookups.lookups</start>

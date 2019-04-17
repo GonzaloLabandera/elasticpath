@@ -192,9 +192,6 @@
 	<bean id="customerAuthenticationService" parent="txProxyTemplate">
 		<property name="target">
 			<bean class="com.elasticpath.service.impl.CustomerAuthenticationServiceImpl">
-				<property name="elasticPath">
-					<ref bean="elasticPath" />
-				</property>
 				<property name="customerSessionService">
 					<ref bean="customerSessionService" />
 				</property>

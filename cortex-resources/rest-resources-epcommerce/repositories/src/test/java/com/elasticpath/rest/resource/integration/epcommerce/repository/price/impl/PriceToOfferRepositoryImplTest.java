@@ -20,7 +20,7 @@ import com.elasticpath.rest.resource.integration.epcommerce.repository.Identifie
 import com.elasticpath.rest.resource.integration.epcommerce.repository.price.PriceRepository;
 
 /**
- * Tests for {@link PriceRangeToOfferRepositoryImpl}
+ * Tests for {@link PriceRangeToOfferRepositoryImpl}.
  */
 @RunWith(MockitoJUnitRunner.class)
 public class PriceToOfferRepositoryImplTest {

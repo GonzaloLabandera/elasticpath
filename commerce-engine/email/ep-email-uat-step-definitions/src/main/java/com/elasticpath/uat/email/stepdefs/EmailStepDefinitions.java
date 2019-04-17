@@ -23,6 +23,7 @@ import javax.mail.BodyPart;
 import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.Part;
+import javax.mail.internet.AddressException;
 import javax.mail.internet.MimeMultipart;
 
 import com.google.common.base.Predicate;
@@ -31,7 +32,9 @@ import cucumber.api.java.After;
 import cucumber.api.java.en.Given;
 import cucumber.api.java.en.Then;
 import org.apache.camel.builder.NotifyBuilder;
+import org.apache.log4j.Logger;
 import org.apache.velocity.tools.generic.DateTool;
+import org.junit.Assert;
 import org.jvnet.mock_javamail.Mailbox;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -60,6 +63,10 @@ public class EmailStepDefinitions {
 	private static final String DEFAULT_DATE_FORMAT_STRING = "MMMM d, yyyy";
 
 	private static final long MAX_SECONDS_TO_WAIT_FOR_EMAIL = 20;
+	private static final int TIME_TO_SLEEP = 1000;
+
+	private static final Logger LOG = Logger.getLogger(EmailStepDefinitions.class);
+
 
 	@Autowired
 	private EmailEnabler emailEnabler;
@@ -112,8 +119,8 @@ public class EmailStepDefinitions {
 		assertTrue("Timed out waiting for email to be sent",
 				   notifyBuilder.matches(MAX_SECONDS_TO_WAIT_FOR_EMAIL, TimeUnit.SECONDS));
 
-		final Mailbox messages = Mailbox.get(recipientEmailAddress);
-		assertEquals("Mailbox contains an unexpected number of email messages", expectedNumberOfEmails, messages.size());
+
+		final Mailbox messages = getMessages(expectedNumberOfEmails, recipientEmailAddress);
 
 		final Map<String, Message> emailMessageMap = new HashMap<>(messages.size());
 		for (final Message message : messages) {
@@ -130,6 +137,29 @@ public class EmailStepDefinitions {
 		}
 
 		emailMessagesHolder.set(emailMessageMap);
+	}
+
+	private Mailbox getMessages(final int expectedNumberOfEmails, final String recipientEmailAddress) throws AddressException {
+
+		int retries = 0;
+		Mailbox messages;
+		do {
+			messages = Mailbox.get(recipientEmailAddress);
+			retries++;
+			if (messages.size() != expectedNumberOfEmails) {
+				try {
+					Thread.sleep(TIME_TO_SLEEP);
+					LOG.debug("Mailbox has " + messages.size()  + " expected " + expectedNumberOfEmails + " sleeping " + retries);
+				} catch (InterruptedException interruptedException) {
+					Assert.fail(interruptedException.getMessage());
+					Thread.currentThread().interrupt();
+				}
+			}
+
+		} while (retries < MAX_SECONDS_TO_WAIT_FOR_EMAIL && messages.size() < expectedNumberOfEmails);
+
+		assertEquals("Mailbox contains an unexpected number of email messages", expectedNumberOfEmails, messages.size());
+		return messages;
 	}
 
 	@Then("^the subject of(?: one of)? the emails? should be \"([^\"]*)\"$")

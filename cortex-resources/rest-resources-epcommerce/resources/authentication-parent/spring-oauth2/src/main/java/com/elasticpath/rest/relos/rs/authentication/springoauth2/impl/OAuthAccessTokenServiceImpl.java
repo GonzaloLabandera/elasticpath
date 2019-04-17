@@ -1,9 +1,6 @@
-/**
- * Copyright © 2016 Elastic Path Software Inc. All rights reserved.
- */
 /*
-* Copyright © 2013 Elastic Path Software Inc. All rights reserved.
-*/
+ * Copyright © 2019 Elastic Path Software Inc. All rights reserved.
+ */
 package com.elasticpath.rest.relos.rs.authentication.springoauth2.impl;
 
 import java.util.Date;
@@ -21,8 +18,8 @@ import com.elasticpath.rest.chain.ExecutionResultChain;
 import com.elasticpath.rest.command.ExecutionResult;
 import com.elasticpath.rest.command.ExecutionResultFactory;
 import com.elasticpath.rest.relos.rs.authentication.AuthHeaderConstants;
+import com.elasticpath.rest.relos.rs.authentication.dto.AccessTokenDto;
 import com.elasticpath.rest.relos.rs.authentication.springoauth2.OAuthAccessTokenService;
-import com.elasticpath.rest.relos.rs.authentication.springoauth2.dto.AccessTokenDto;
 import com.elasticpath.rest.relos.rs.authentication.springoauth2.security.TokenExpiryResolver;
 import com.elasticpath.rest.relos.rs.authentication.springoauth2.tokenstore.TokenStoreStrategy;
 import com.elasticpath.rest.relos.rs.authentication.springoauth2.transform.AccessTokenDtoTransformer;

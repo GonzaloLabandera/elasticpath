@@ -198,12 +198,12 @@ public abstract class AbstractEpDualListBoxControl<T> {
 				IEpLayoutData.CENTER));
 		buttonsComposite.addEmptyComponent(null);
 
-		addOneButton = buttonsComposite.addPushButton(">", epState, null); //$NON-NLS-1$
-		addOneButton.setToolTipText(CoreMessages.get().button_Add);
+		addOneButton = buttonsComposite.addPushButton(CoreMessages.get().button_Add, epState, null); //$NON-NLS-1$
+		addOneButton.setImage(CoreImageRegistry.getImage(CoreImageRegistry.ARROW_RIGHT_ICON));
 		addOneButton.addSelectionListener(selectionListener);
 		if (!isStyleEnabled(DISABLE_REMOVAL_BUTTONS)) {
-			removeOneButton = buttonsComposite.addPushButton("<", epState, null); //$NON-NLS-1$
-			removeOneButton.setToolTipText(CoreMessages.get().button_Remove);
+			removeOneButton = buttonsComposite.addPushButton(CoreMessages.get().button_Remove, epState, null); //$NON-NLS-1$
+			addOneButton.setImage(CoreImageRegistry.getImage(CoreImageRegistry.ARROW_LEFT_ICON));
 			removeOneButton.addSelectionListener(selectionListener);
 		}
 		if (isStyleEnabled(ALL_BUTTONS)) {

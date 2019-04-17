@@ -110,7 +110,7 @@ public class EmailSendingRouteBuilder extends RouteBuilder {
 		if (StringUtils.isNotBlank(getMailUsername())) {
 			builder.setUserInfo(getMailUsername());
 			if (StringUtils.isNotBlank(getMailPassword())) {
-				builder.setParameter("password", getMailPassword());
+				builder.setParameter("password", "RAW(" + getMailPassword() + ")");
 			}
 		}
 

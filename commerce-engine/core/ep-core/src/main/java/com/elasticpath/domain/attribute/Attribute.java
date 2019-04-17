@@ -3,7 +3,12 @@
  */
 package com.elasticpath.domain.attribute;
 
+import java.util.Locale;
+import java.util.Map;
+
 import com.elasticpath.domain.catalog.CatalogObject;
+import com.elasticpath.domain.misc.LocalizedProperties;
+import com.elasticpath.domain.misc.LocalizedPropertyValue;
 import com.elasticpath.persistence.api.Entity;
 
 /**
@@ -48,18 +53,64 @@ public interface Attribute extends Entity, Comparable<Attribute>, CatalogObject 
 	 */
 	void setAttributeType(AttributeType attributeType);
 
+	/**
+	 * Returns the <code>LocalizedProperties</code>.
+	 *
+	 * @return the <code>LocalizedProperties</code>
+	 */
+	LocalizedProperties getLocalizedProperties();
 
 	/**
-	 * Get the product system name.
-	 * @return the product system name
+	 * Sets the <code>LocalizedProperties</code>.
+	 *
+	 * @param localizedProperties the <code>LocalizedProperties</code>
 	 */
-	String getName();
+	void setLocalizedProperties(LocalizedProperties localizedProperties);
 
 	/**
-	 * Set the product system name.
-	 * @param name the product system name
+	 * Get the localized properties map.
+	 *
+	 * @return the map
 	 */
-	void setName(String name);
+	Map<String, LocalizedPropertyValue> getLocalizedPropertiesMap();
+
+	/**
+	 * Set the property map.
+	 *
+	 * @param localizedPropertiesMap the map to set
+	 */
+	void setLocalizedPropertiesMap(Map<String, LocalizedPropertyValue> localizedPropertiesMap);
+
+	/**
+	 * Get the localized product display name in the given locale.
+	 * In the event of no match, retries with broadened versions of
+	 * the locale.
+	 *
+	 * @param locale the locale in which to return the display name
+	 * @return the product's display name
+	 */
+	String getDisplayName(Locale locale);
+
+	/**
+	 * Gets the display name of this Attribute for the given locale, optionally
+	 * supporting locale broadening, and/or falling back to the Attribute's Catalog's default
+	 * locale (in that order). Returns null if the display name for the Attribute isn't found.
+	 *
+	 * @param locale        the locale for which the display name should be returned
+	 * @param broadenLocale true if locale broadening should be used to find a match
+	 * @param fallback      true if the Attribute's Catalog's default locale should
+	 *                      be used as a fallback, false if there is no fallback
+	 * @return the display name
+	 */
+	String getDisplayName(Locale locale, boolean broadenLocale, boolean fallback);
+
+	/**
+	 * Set the product system display name.
+	 *
+	 * @param name   the product system display name
+	 * @param locale the display name's locale
+	 */
+	void setDisplayName(String name, Locale locale);
 
 	/**
 	 * Return the <code>AttributeUsage</code> of this attribute.

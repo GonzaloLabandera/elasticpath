@@ -2,11 +2,14 @@ package com.elasticpath.cortex.dce.validation
 
 import static com.elasticpath.cortex.dce.ClasspathFluentRelosClientFactory.getClient
 import static org.assertj.core.api.Assertions.assertThat
+import static org.assertj.core.api.Assertions.fail
 
 import cucumber.api.DataTable
 import cucumber.api.java.en.And
 import cucumber.api.java.en.Then
 import cucumber.api.java.en.When
+
+import java.util.stream.Collectors
 
 import com.elasticpath.CucumberDTO.ValidationStructuredError
 import com.elasticpath.cortexTestObjects.Cart
@@ -32,36 +35,30 @@ class ValidationSteps {
 	 * that stores the attributes.
 	 */
 	@Then('^I should see validation error message with message type, message id, debug message, and field$')
-	static void verifyStructuredMessageFields(DataTable error) {
-		def structuredErrorList = error.asList(ValidationStructuredError)
-
+	static void verifyStructuredMessageFields(DataTable errorDataTable) {
 		assertValidationErrorStatus(client.response.status)
 
-		/**
-		 * First loop is looping the data table coming from feature.
-		 * Second loop is looping each message.
-		 */
-		for (ValidationStructuredError structureError : structuredErrorList) {
-			boolean messageExists = false;
-			client.body.messages.each { message ->
-				if (message.data.'field-name' == structureError.getFieldName()) {
-					assertThat(message.'type')
-							.as("Error type is not as expected")
-							.isEqualTo(structureError.getMessageType())
-					assertThat(message.'id')
-							.as("Error Id is not as expected")
-							.isEqualTo(structureError.getMessageId())
-					assertThat(message.'debug-message')
-							.as("Debug Message is not as expected")
-							.isEqualTo(structureError.getDebugMessage())
+		def expectedErrors = new HashSet(errorDataTable.asList(ValidationStructuredError))
 
-					messageExists = true
-					return true
-				}
+		def actualErrors = client.body.messages.stream()
+			.map { ValidationStructuredError.fromResponseMessage it }
+			.collect(Collectors.toSet())
+
+		def commonErrors = expectedErrors.intersect(actualErrors)
+		expectedErrors.removeAll(commonErrors)
+		actualErrors.removeAll(commonErrors)
+
+		if (expectedErrors.size() > 0 || actualErrors.size() > 0) {
+			def msgBuilder = StringBuilder.newInstance()
+			if (expectedErrors.size() > 0) {
+				msgBuilder.append("Expected error messages but not found ")
+				msgBuilder.append(expectedErrors).append("\n")
 			}
-			assertThat(messageExists)
-					.as("Unable to retrieve expected error - " + structureError.getFieldName())
-					.isTrue()
+			if (actualErrors.size() > 0) {
+				msgBuilder.append("Unexpected error messages ")
+				msgBuilder.append(actualErrors).append("\n")
+			}
+			fail(msgBuilder.toString())
 		}
 	}
 

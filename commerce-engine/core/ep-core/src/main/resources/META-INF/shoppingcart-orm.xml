@@ -81,6 +81,14 @@
 				WHERE sc.shopperUid IN (:list)
 			</query>
 		</named-query>
+	<named-query name="DELETE_ALL_INACTIVE_SHOPPING_CARTS_BY_SHOPPER_UID">
+		<query>
+			DELETE
+			FROM ShoppingCartMementoImpl sc
+			WHERE sc.shopperUid IN (:list)
+			AND sc.status = 'INACTIVE'
+		</query>
+	</named-query>
 		<named-query name="FIND_SHOPPING_CART_GUIDS_LAST_MODIFIED_BEFORE_DATE">
 			<query>
 				SELECT sc.guid
@@ -155,6 +163,13 @@
 				DELETE
 				FROM WishListImpl wl
 				WHERE wl.shopperUid IN (:list)
+			</query>
+		</named-query>
+		<named-query name="CART_ITEMS_BY_CART_UID">
+			<query>
+				SELECT item
+				FROM ShoppingItemImpl item
+				WHERE item.childItemCartUid = ?1
 			</query>
 		</named-query>
 

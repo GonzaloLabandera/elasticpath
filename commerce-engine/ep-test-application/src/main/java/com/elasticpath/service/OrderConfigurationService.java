@@ -3,12 +3,10 @@
  */
 package com.elasticpath.service;
 
-import java.util.List;
 import java.util.Map;
 
 import com.elasticpath.domain.catalog.ProductSku;
 import com.elasticpath.domain.customer.Customer;
-import com.elasticpath.domain.order.Order;
 import com.elasticpath.domain.order.OrderPayment;
 import com.elasticpath.domain.shopper.Shopper;
 import com.elasticpath.domain.shoppingcart.ShoppingCart;
@@ -58,14 +56,6 @@ public interface OrderConfigurationService {
 	 * @return the order payment
 	 */
 	OrderPayment createOrderPayment(Customer customer, String tokenValue);
-
-	/**
-	 * Gets the list of orders by customer email.
-	 *
-	 * @param customerEmail customer email address
-	 * @return the list of orders
-	 */
-	List<Order> getCustomerOrders(String customerEmail);
 
 	/**
 	 * Gets the shopper service.

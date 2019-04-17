@@ -25,13 +25,13 @@ public final class CatalogImageRegistry extends AbstractImageRegistry {
 	public static final ImageDescriptor CATEGORY_TREE = getImageDescriptor(PLUGIN_ID, "category_default_22x16.png"); //$NON-NLS-1$
 
 	/** Category Create Icon. * */
-	public static final ImageDescriptor CATEGORY_CREATE = getImageDescriptor(PLUGIN_ID, "category-create_default_22.png"); //$NON-NLS-1$
+	public static final ImageDescriptor CATEGORY_CREATE = getImageDescriptor(PLUGIN_ID, "add_category_22.png"); //$NON-NLS-1$
 
 	/** Category Exclude Icon. * */
-	public static final ImageDescriptor CATEGORY_EXCLUDE = getImageDescriptor(PLUGIN_ID, "category-exclude_default_22.png"); //$NON-NLS-1$
+	public static final ImageDescriptor CATEGORY_EXCLUDE = getImageDescriptor(PLUGIN_ID, "link_category_22.png"); //$NON-NLS-1$
 
 	/** Category Include Icon. * */
-	public static final ImageDescriptor CATEGORY_INCLUDE = getImageDescriptor(PLUGIN_ID, "category-include_default_22.png"); //$NON-NLS-1$
+	public static final ImageDescriptor CATEGORY_INCLUDE = getImageDescriptor(PLUGIN_ID, "link_category_22.png"); //$NON-NLS-1$
 
 	/** Category Linked Icon. * */
 	public static final ImageDescriptor CATEGORY_LINKED = getImageDescriptor(PLUGIN_ID, "category-linked_default_22.png"); //$NON-NLS-1$
@@ -48,7 +48,7 @@ public final class CatalogImageRegistry extends AbstractImageRegistry {
 			getImageDescriptor(PLUGIN_ID, "category-linked-excluded_default_22x16.png"); //$NON-NLS-1$
 
 	/** Category Linked Add Icon. * */
-	public static final ImageDescriptor CATEGORY_LINKED_ADD = getImageDescriptor(PLUGIN_ID, "category-linked-add_default_22.png"); //$NON-NLS-1$
+	public static final ImageDescriptor CATEGORY_LINKED_ADD = getImageDescriptor(PLUGIN_ID, "add_sub_category_22.png"); //$NON-NLS-1$
 	
 	/** Category Linked Remove Icon. * */
 	public static final ImageDescriptor CATEGORY_LINKED_REMOVE = getImageDescriptor(PLUGIN_ID, "category-linked-remove_default_22.png"); //$NON-NLS-1$

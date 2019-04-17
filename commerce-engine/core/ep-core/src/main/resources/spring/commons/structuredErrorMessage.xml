@@ -12,8 +12,6 @@
 
 		<entry key="{com.elasticpath.validation.constraints.requiredAttribute}"
 			   value="field.required"/>
-		<entry key="{com.elasticpath.validation.constraints.CustomerUsernameUserIdModeEmail.message}"
-			   value="field.required"/>
 		<entry key="{com.elasticpath.validation.constraints.emailPattern}"
 			   value="field.invalid.email.format"/>
 		<entry key="{com.elasticpath.validation.constraints.LongTextValueSize.message}"

@@ -38,7 +38,7 @@ public final class FreePortScanner {
 
     private static final int MAX_PORT = 65535;
 
-    private static final Random random = new Random();
+    private static final Random RANDOM = new Random();
 
     private FreePortScanner() {
         // Prohibit instances of this class being created.
@@ -46,6 +46,7 @@ public final class FreePortScanner {
 
     /**
      * Returns the number of a free port in the default range.
+     * @return a free port in the default range
      */
     public static int getFreePort() {
         return getFreePort(MIN_SAFE_PORT, MAX_PORT);
@@ -53,6 +54,9 @@ public final class FreePortScanner {
 
     /**
      * Returns the number of a free port in the given range.
+     * @param minPort the lower end of the port range to scan
+     * @param maxPort the upper end of the port range to scan
+     * @return a free port in the default range
      */
     public static int getFreePort(final int minPort, final int maxPort) {
         Assert.isTrue(minPort > 0, "'minPort' must be larger than 0");
@@ -73,15 +77,14 @@ public final class FreePortScanner {
     }
 
     private static int getRandomPort(final int minPort, final int portRange) {
-        return minPort + random.nextInt(portRange);
+        return minPort + RANDOM.nextInt(portRange);
     }
 
     private static boolean isPortAvailable(final int port) {
         ServerSocket serverSocket;
         try {
             serverSocket = new ServerSocket();
-        }
-        catch (IOException ex) {
+        } catch (IOException ex) {
             throw new IllegalStateException("Unable to create ServerSocket.", ex);
         }
 
@@ -89,15 +92,12 @@ public final class FreePortScanner {
             InetSocketAddress sa = new InetSocketAddress(port);
             serverSocket.bind(sa);
             return true;
-        }
-        catch (IOException ex) {
+        } catch (IOException ex) {
             return false;
-        }
-        finally {
+        } finally {
             try {
                 serverSocket.close();
-            }
-            catch (IOException ex) {
+            } catch (IOException ex) {
                 // ignore
             }
         }

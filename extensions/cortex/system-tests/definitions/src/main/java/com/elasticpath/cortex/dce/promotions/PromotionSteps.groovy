@@ -97,6 +97,11 @@ class PromotionSteps {
 		Cart.getCart()
 	}
 
+	@When('^I navigate to apply coupon form$')
+	static void navigateToCouponForm() {
+		Order.navigateToCouponForm()
+	}
+
 	@When('^I apply a coupon code (.+) to my order$')
 	static void applyCouponToOrder(String couponCode) {
 		Order.applyCoupon(couponCode)

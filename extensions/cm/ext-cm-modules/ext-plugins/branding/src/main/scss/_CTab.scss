@@ -3,8 +3,9 @@ $ctab_padding: 7px 15px 7px 12px; // because left icons have space in image
 @mixin tab_style() {
 	// http://download.eclipse.org/rt/rap/doc/3.1/guide/reference/theming/CTabFolder.html
 	&Folder {
-		border-color: $widget_border_color; // window border
-		border-radius: $widget_border_radius;
+		color: #FFFFFF;
+		border-color: $gray-light; // window border
+		border: 1px solid;
 	}
 
 	// http://download.eclipse.org/rt/rap/doc/3.1/guide/reference/theming/CTabFolder.html#CTabItem
@@ -18,7 +19,9 @@ $ctab_padding: 7px 15px 7px 12px; // because left icons have space in image
 		text-shadow: none;
 
 		&:selected {
-			color: $default-font-color;
+			background-color: $widget_active_tab_color;
+			color: $secondary-color;
+			border-color: $widget_active_tab_color;
 		}
 
 		&:disabled {
@@ -42,5 +45,22 @@ $ctab_padding: 7px 15px 7px 12px; // because left icons have space in image
 }
 
 CTab {
-	@include tab_style();
+	&Item {
+		color: $default-font-color;
+		font: $default-font;
+		padding: $ctab_padding;
+		spacing: $icon-spacing;
+		text-decoration: none;
+		text-shadow: none;
+		&:selected {
+			color: $default-font-color;
+			border-color: $widget_active_tab_color;
+			border: 1px solid;
+		}
+		&:disabled {
+			background-color: $default-bg;
+			background-image: none;
+			color: $default-font-color;
+		}
+	}
 }

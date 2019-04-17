@@ -264,13 +264,11 @@ public class OrderDefinition {
 	}
 
 	/**
-	 * Clear search results window.
-	 *
-	 * @param tabName the tab name.
+	 * Close order search results tab.
 	 */
-	@When("^I close the window (.+)")
-	public void clearSearchResults(final String tabName) {
-		orderSearchResultPane.close(tabName);
+	@And("^I close order search results tab")
+	public void closeOrderSearchResultsTab() {
+		orderSearchResultPane.closeOrderSearchResultsPane();
 	}
 
 	/**
@@ -379,6 +377,42 @@ public class OrderDefinition {
 	public void verifySkuCodePresentInList(final List<String> skuCodeList) {
 		for (String skuCode : skuCodeList) {
 			orderEditor.verifyAndSelectOrderSkuCode(skuCode);
+		}
+	}
+
+	/**
+	 * Verifies sku and quantity present in the list.
+	 *
+	 * @param shipmentItemMap shipment list of order skus
+	 */
+	@When("^I should see the following skus? and quantity in physical shipment list$")
+	public void verifySkuCodeAndQuantityPresentInList(final Map<String, String> shipmentItemMap) {
+		for (Map.Entry<String, String> entry : shipmentItemMap.entrySet()) {
+			orderEditor.verifyPhysicalShipmentSkuCodeAndQuantity(entry.getKey(), entry.getValue());
+		}
+	}
+
+	/**
+	 * Verifies sku present in the E-shipment list.
+	 *
+	 * @param skuCodeList list of order skus
+	 */
+	@When("^I should see the following skus? in the E-shipment item list$")
+	public void verifySkuCodePresentInEshipmentList(final List<String> skuCodeList) {
+		for (String skuCode : skuCodeList) {
+			orderEditor.verifyAndSelectOrderEshipmentSkuCode(skuCode);
+		}
+	}
+
+	/**
+	 * Verifies sku and quantity present in the E-shipment list.
+	 *
+	 * @param shipmentItemMap shipment list of order skus
+	 */
+	@When("^I should see the following skus? and quantity in e-shipment list$")
+	public void verifySkuCodeAndQuantityPresentInEshipmentList(final Map<String, String> shipmentItemMap) {
+		for (Map.Entry<String, String> entry : shipmentItemMap.entrySet()) {
+			orderEditor.verifyEShipmentSkuCodeAndQuantity(entry.getKey(), entry.getValue());
 		}
 	}
 
@@ -664,7 +698,7 @@ public class OrderDefinition {
 	/**
 	 * Update Shipping Address and Shipping Method for the Order.
 	 *
-	 * @param addressMap the address map
+	 * @param addressMap     the address map
 	 * @param shippingMethod the new shipping method
 	 */
 	@When("^I update the shipping address and set \"(.+)\" shipping method for the order$")
@@ -694,7 +728,7 @@ public class OrderDefinition {
 	@Then("^I should see the following Shipment Summary$")
 	public void verifyShipmentSummary(final List<Map<String, String>> shipments) {
 		List<Shipment> shipmentObjects = orderEditor.populateShipments(shipments);
-
+		activityToolbar.clickReloadActiveEditor();
 		for (Shipment shipment : shipmentObjects) {
 			orderEditor.verifyShipmentSubtotal(shipment.getShipmentNumber(), shipment.getItemSubTotal());
 			orderEditor.verifyShipmentDiscount(shipment.getShipmentNumber(), shipment.getLessShipmentDiscount());
@@ -788,6 +822,7 @@ public class OrderDefinition {
 	 */
 	@When("^I search for latest order by Order Status (.+)$")
 	public void searchLatestOrderByStatus(final String orderStatus) {
+		closeOrderSearchResultPaneIfOpen();
 		customerService.clearInputFieldsInOrdersTab();
 
 		customerService.enterOrderNumber(getLatestOrderNumber());
@@ -852,6 +887,7 @@ public class OrderDefinition {
 	 */
 	@When("^I search for latest order by Order Shipment Status (.+)$")
 	public void searchOrderByShipmentStatus(final String orderShipmentStatus) {
+		closeOrderSearchResultPaneIfOpen();
 		customerService.clearInputFieldsInOrdersTab();
 		customerService.enterOrderNumber(getLatestOrderNumber());
 		customerService.selectShipmentStatus(orderShipmentStatus);
@@ -865,6 +901,7 @@ public class OrderDefinition {
 	 */
 	@When("^I search for latest order by SKU Code (.+)$")
 	public void searchOrderBySkuCode(final String skuCode) {
+		closeOrderSearchResultPaneIfOpen();
 		customerService.clearInputFieldsInOrdersTab();
 		customerService.enterOrderNumber(getLatestOrderNumber());
 		customerService.enterSkuCode(skuCode);
@@ -876,6 +913,7 @@ public class OrderDefinition {
 	 */
 	@When("^I search for order by Dates between current date and next date$")
 	public void searchOrderByDateRange() {
+		closeOrderSearchResultPaneIfOpen();
 		customerService.clearInputFieldsInOrdersTab();
 		customerService.enterOrderNumber(getLatestOrderNumber());
 		customerService.enterFromDate();
@@ -941,15 +979,46 @@ public class OrderDefinition {
 	}
 
 	/**
-	 * Update Shipping Method.
+	 * Update Shipping Method with Payment Auth.
 	 *
 	 * @param newShipmentInfoMap new shipment values
 	 */
 	@When("^I change the Shipping Method to the following$")
 	public void updateShippingMethod(final Map<String, String> newShipmentInfoMap) {
-		orderEditor.selectShippingMethod(newShipmentInfoMap.get("Shipping Method"));
-		paymentAuthorizationWizard = customerServiceActionToolbar.clickSaveAllButton();
+		updateShippingMethodWithShipmentNumberAndPaymentAuth(1, newShipmentInfoMap);
+	}
+
+	/**
+	 * Update Shipping Method without Payment Auth.
+	 *
+	 * @param shippingMethod the new shipment method
+	 */
+	@When("^I change the Shipping Method to (.+) without authorizing payment$")
+	public void updateShippingMethodWithoutAuth(final String shippingMethod) {
+		updateShippingMethodWithShipmentNumberAndWithoutAuth(1, shippingMethod);
+	}
+
+	/**
+	 * Update Shipping Method with Shipment Number and Payment Auth.
+	 *
+	 * @param newShipmentInfoMap new shipment values
+	 */
+	@When("^I change the shipment number (\\d+) Shipping Method to the following$")
+	public void updateShippingMethodWithShipmentNumberAndPaymentAuth(final int shipmentNumber, final Map<String, String> newShipmentInfoMap) {
+		updateShippingMethodWithShipmentNumberAndWithoutAuth(shipmentNumber, newShipmentInfoMap.get("Shipping Method"));
 		paymentAuthorizationWizard.completePaymentAuthorization(newShipmentInfoMap.get(PAYMENT_SOURCE));
+	}
+
+	/**
+	 * Update Shipping Method with Shipment Number and without Payment Auth.
+	 *
+	 * @param shippingMethod the new shipment method
+	 * @param shipmentNumber the shipment number
+	 */
+	@When("^I change the shipment number (\\d+) Shipping Method to (.+) without authorizing payment$")
+	public void updateShippingMethodWithShipmentNumberAndWithoutAuth(final int shipmentNumber, final String shippingMethod) {
+		orderEditor.selectShippingMethodByShipmentNumber(shipmentNumber, shippingMethod);
+		paymentAuthorizationWizard = customerServiceActionToolbar.clickSaveAllButton();
 	}
 
 	/**
@@ -1015,7 +1084,7 @@ public class OrderDefinition {
 	}
 
 	/**
-	 *  Modify shipment line item discount
+	 * Modify shipment line item discount
 	 *
 	 * @param discount item discount value to be set
 	 */
@@ -1037,7 +1106,7 @@ public class OrderDefinition {
 	}
 
 	/**
-	 *  Enters shipment discount value for the order
+	 * Enters shipment discount value for the order
 	 *
 	 * @param discount discount amount to be set
 	 */
@@ -1048,7 +1117,7 @@ public class OrderDefinition {
 	}
 
 	/**
-	 *  Enters new shipping cost for the order
+	 * Enters new shipping cost for the order
 	 *
 	 * @param cost new value to be set
 	 */
@@ -1062,4 +1131,11 @@ public class OrderDefinition {
 		catalogManagementActionToolbar.saveAll();
 		catalogManagementActionToolbar.clickReloadActiveEditor();
 	}
+
+	private void closeOrderSearchResultPaneIfOpen() {
+		if (orderSearchResultPane != null) {
+			orderSearchResultPane.closeOrderSearchResultsPaneIfOpen();
+		}
+	}
+
 }

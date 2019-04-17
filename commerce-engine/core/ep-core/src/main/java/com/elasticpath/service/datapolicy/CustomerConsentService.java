@@ -28,11 +28,11 @@ public interface CustomerConsentService {
 	/**
 	 * Updates the given customer consent. NOTE: To be used when updating the customer guid when merging customers.
 	 *
-	 * @param customerConsentUids the list of customer consent uids to update.
-	 * @param customerGuid        the customer guid to update to.
+	 * @param oldCustomerGuid      the customer guid to update from.
+	 * @param newCustomerGuid        the customer guid to update to.
 	 * @throws DuplicateKeyException - if trying to add an existing customer consent.
 	 */
-	void updateCustomerGuids(List<Long> customerConsentUids, String customerGuid) throws DuplicateKeyException;
+	void updateCustomerGuids(String oldCustomerGuid, String newCustomerGuid) throws DuplicateKeyException;
 
 	/**
 	 * List all customer consents stored in the database.
@@ -41,6 +41,14 @@ public interface CustomerConsentService {
 	 * @throws EpServiceException - in case of any errors.
 	 */
 	List<CustomerConsent> list() throws EpServiceException;
+
+	/**
+	 * List all customer consents history stored in the database.
+	 *
+	 * @return a list of customer consents history.
+	 * @throws EpServiceException - in case of any errors.
+	 */
+	List<CustomerConsent> listHistory() throws EpServiceException;
 
 	/**
 	 * Load the customer consent with the given UID. Throw an unrecoverable exception if there is no matching database row.
@@ -85,7 +93,31 @@ public interface CustomerConsentService {
 	 * @return the customer consents with the given guid.
 	 * @throws EpServiceException - in case of any errors.
 	 */
-	List<CustomerConsent> findByCustomerGuid(String customerGuid) throws EpServiceException;
+	List<CustomerConsent> findActiveConsentsByCustomerGuid(String customerGuid) throws EpServiceException;
+
+	/**
+	 * Retrieve the list of customer consents history for a given customer guid.
+	 *
+	 * @param customerGuid the customer guid of the customer consent.
+	 * @return the customer consents history with the given guid.
+	 * @throws EpServiceException - in case of any errors.
+	 */
+	List<CustomerConsent> findHistoryByCustomerGuid(String customerGuid) throws EpServiceException;
+
+	/**
+	 * Delete the customer consents for a given customer guid and data policy.
+	 *
+	 * @param customerGuid the customer guid of the customer consent.
+	 * @param dataPolicyGuid the data policy guid of the customer consent.
+	 */
+	void deleteByDataPolicyGuidForCustomer(String dataPolicyGuid, String customerGuid);
+
+	/**
+	 * Delete the customer consents for a given customer uids.
+	 *
+	 * @param customerUids the customer uids of the customer consent.
+	 */
+	void deleteByCustomerUids(List<Long> customerUids);
 
 	/**
 	 * Retrieve a list of customer consents with data policies in {@link com.elasticpath.domain.datapolicy.DataPolicyState#ACTIVE} state

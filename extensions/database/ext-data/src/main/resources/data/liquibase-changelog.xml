@@ -22,4 +22,7 @@
 	<!-- This is test data that should be used only in development, qa and similar environments -->
 	<include file="test-data/liquibase-changelog.xml" relativeToChangelogFile="true" />
 
+	<!-- This is performance test data that should be used only in development, qa and similar environments -->
+	<include file="perf-test-data/liquibase-changelog.xml" relativeToChangelogFile="true" />
+
 </databaseChangeLog>

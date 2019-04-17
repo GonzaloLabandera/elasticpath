@@ -19,7 +19,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
 import com.elasticpath.domain.customer.Customer;
-import com.elasticpath.rest.command.ExecutionResult;
+import com.elasticpath.domain.customer.CustomerAuthentication;
 import com.elasticpath.rest.command.ExecutionResultFactory;
 import com.elasticpath.rest.identity.RolePrincipal;
 import com.elasticpath.rest.relos.rs.authentication.User;
@@ -48,6 +48,8 @@ public class UserAuthenticationDetailsServiceImplTest {
 	private CustomerTransformer mockCustomerTransformer;
 	@Mock
 	private Customer customer;
+	@Mock
+	private CustomerAuthentication customerAuthentication;
 
 	@InjectMocks
 	private UserAuthenticationDetailsServiceImpl userAuthenticationDetailsService;
@@ -60,9 +62,11 @@ public class UserAuthenticationDetailsServiceImplTest {
 	public void testLoadByUserName() {
 		User expectedUser = createValidUser();
 
-		shouldFindCustomerByUserId(DEFAULT_STORE_CODE, VALID_USER_NAME, ExecutionResultFactory.createReadOK(customer));
-		shouldEnableCustomer(true, customer);
-		shouldTransformToUser(expectedUser, customer);
+		when(customerRepository.findCustomerByUserId(DEFAULT_STORE_CODE, VALID_USER_NAME))
+				.thenReturn(ExecutionResultFactory.createReadOK(customer));
+		when(customer.getCustomerAuthentication()).thenReturn(customerAuthentication);
+		when(customer.isEnabled()).thenReturn(true);
+		when(mockCustomerTransformer.transform(customer)).thenReturn(expectedUser);
 
 		String storePlusUser = AuthenticationUtil.combinePrincipals(DEFAULT_STORE_CODE, VALID_USER_NAME);
 		UserDetails userDetails = userAuthenticationDetailsService.loadUserByUsername(storePlusUser);
@@ -75,7 +79,7 @@ public class UserAuthenticationDetailsServiceImplTest {
 	@Test(expected = UsernameNotFoundException.class)
 	public void testLoadWithInvalidStoreCode() {
 		when(customerRepository.findCustomerByUserId(INVALID_STORE_CODE, INVALID_STORE_CODE))
-				.thenReturn(ExecutionResultFactory.<Customer>createNotFound());
+				.thenReturn(ExecutionResultFactory.createNotFound());
 		userAuthenticationDetailsService.loadUserByUsername(INVALID_STORE_CODE, INVALID_STORE_CODE);
 	}
 
@@ -84,9 +88,23 @@ public class UserAuthenticationDetailsServiceImplTest {
 	 */
 	@Test(expected = UsernameNotFoundException.class)
 	public void testLoadInvalidUser() {
-		shouldFindCustomerByUserId(DEFAULT_STORE_CODE, INVALID_USER_NAME, ExecutionResultFactory.<Customer>createNotFound());
+		when(customerRepository.findCustomerByUserId(DEFAULT_STORE_CODE, INVALID_USER_NAME))
+				.thenReturn(ExecutionResultFactory.createNotFound());
 
 		String storePlusUser = AuthenticationUtil.combinePrincipals(DEFAULT_STORE_CODE, INVALID_USER_NAME);
+		userAuthenticationDetailsService.loadUserByUsername(storePlusUser);
+	}
+
+	/**
+	 * Test loadUserByUsername() with unauthenticatable user.
+	 */
+	@Test(expected = UsernameNotFoundException.class)
+	public void testLoadUnauthenticatableUser() {
+		when(customerRepository.findCustomerByUserId(DEFAULT_STORE_CODE, DISABLED_USER_NAME))
+				.thenReturn(ExecutionResultFactory.createReadOK(customer));
+		when(customer.getCustomerAuthentication()).thenReturn(null);
+
+		String storePlusUser = AuthenticationUtil.combinePrincipals(DEFAULT_STORE_CODE, DISABLED_USER_NAME);
 		userAuthenticationDetailsService.loadUserByUsername(storePlusUser);
 	}
 
@@ -95,24 +113,13 @@ public class UserAuthenticationDetailsServiceImplTest {
 	 */
 	@Test(expected = UsernameNotFoundException.class)
 	public void testLoadDisabledUser() {
-		shouldFindCustomerByUserId(DEFAULT_STORE_CODE, DISABLED_USER_NAME, ExecutionResultFactory.createReadOK(customer));
-		shouldEnableCustomer(false, customer);
+		when(customerRepository.findCustomerByUserId(DEFAULT_STORE_CODE, DISABLED_USER_NAME))
+				.thenReturn(ExecutionResultFactory.createReadOK(customer));
+		when(customer.getCustomerAuthentication()).thenReturn(customerAuthentication);
+		when(customer.isEnabled()).thenReturn(false);
 
 		String storePlusUser = AuthenticationUtil.combinePrincipals(DEFAULT_STORE_CODE, DISABLED_USER_NAME);
 		userAuthenticationDetailsService.loadUserByUsername(storePlusUser);
-	}
-
-
-	private void shouldTransformToUser(final User expectedUser, final Customer customer) {
-		when(mockCustomerTransformer.transform(customer)).thenReturn(expectedUser);
-	}
-
-	private void shouldFindCustomerByUserId(final String storeCode, final String username, final ExecutionResult<Customer> expectedResult) {
-		when(customerRepository.findCustomerByUserId(storeCode, username)).thenReturn(expectedResult);
-	}
-
-	private void shouldEnableCustomer(final boolean enabled, final Customer customer) {
-		when(customer.isEnabled()).thenReturn(enabled);
 	}
 
 	private User createValidUser() {

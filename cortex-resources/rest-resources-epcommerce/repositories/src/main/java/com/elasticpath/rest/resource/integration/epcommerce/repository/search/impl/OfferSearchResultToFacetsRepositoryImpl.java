@@ -3,8 +3,6 @@
  */
 package com.elasticpath.rest.resource.integration.epcommerce.repository.search.impl;
 
-import static com.elasticpath.rest.resource.integration.epcommerce.repository.search.OfferSearchUtil.createSearchCriteria;
-
 import java.util.Currency;
 import java.util.Locale;
 import java.util.Map;
@@ -17,17 +15,16 @@ import org.osgi.service.component.annotations.Reference;
 
 import com.elasticpath.repository.LinksRepository;
 import com.elasticpath.rest.ResourceOperationFailure;
-import com.elasticpath.rest.definition.searches.FacetsIdentifier;
-import com.elasticpath.rest.definition.searches.OfferSearchResultIdentifier;
-import com.elasticpath.rest.definition.searches.SearchOfferEntity;
-import com.elasticpath.rest.definition.searches.SearchesIdentifier;
+import com.elasticpath.rest.definition.offersearches.FacetsIdentifier;
+import com.elasticpath.rest.definition.offersearches.OfferSearchResultIdentifier;
+import com.elasticpath.rest.definition.offersearches.SearchOfferEntity;
 import com.elasticpath.rest.id.IdentifierPart;
 import com.elasticpath.rest.identity.Subject;
 import com.elasticpath.rest.identity.util.SubjectUtil;
 import com.elasticpath.rest.pagination.PaginationEntity;
 import com.elasticpath.rest.resource.ResourceOperationContext;
+import com.elasticpath.rest.resource.integration.epcommerce.repository.search.OffersResourceConstants;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.search.SearchRepository;
-import com.elasticpath.rest.resource.integration.epcommerce.repository.store.StoreRepository;
 
 /**
  * Repository for showing facets link if there are facets.
@@ -40,7 +37,6 @@ public class OfferSearchResultToFacetsRepositoryImpl<I extends OfferSearchResult
 
 	private SearchRepository searchRepository;
 	private ResourceOperationContext resourceOperationContext;
-	private StoreRepository storeRepository;
 
 	@Override
 	public Observable<FacetsIdentifier> getElements(final OfferSearchResultIdentifier identifier) {
@@ -65,24 +61,24 @@ public class OfferSearchResultToFacetsRepositoryImpl<I extends OfferSearchResult
 		Currency currency = SubjectUtil.getCurrency(subject);
 
 		String keyword = searchId.get(SearchOfferEntity.KEYWORDS_PROPERTY);
-		SearchesIdentifier searchesIdentifier = identifier.getSearches();
-		String scope = searchesIdentifier.getScope().getValue();
+		String categoryCode = searchId.get(OffersResourceConstants.CATEGORY_CODE_PROPERTY);
+		String scope = identifier.getScope().getValue();
 
-		return storeRepository.findStoreAsSingle(scope)
-				.map(store -> createSearchCriteria(keyword, store, appliedFacets, locale, currency, true))
-				.flatMapObservable(searchCriteria -> searchRepository.getFacetFields(searchCriteria,
-						pageSize))
+		int startPageNumber = identifier.getPageId().getValue();
+
+		return searchRepository.getSearchCriteria(categoryCode, scope, locale, currency, appliedFacets, keyword)
+				.flatMapObservable(searchCriteria -> searchRepository.getFacetFields(searchCriteria, startPageNumber, pageSize))
 				.isEmpty()
 				.flatMapObservable(empty -> empty ? Observable.empty()
-						: buildFacetsIdentifier(appliedFacetsIdentifier, searchIdentifier, searchesIdentifier));
+						: buildFacetsIdentifier(appliedFacetsIdentifier, searchIdentifier, identifier.getScope()));
 	}
 
 	private Observable<FacetsIdentifier> buildFacetsIdentifier(final IdentifierPart<Map<String, String>> appliedFacets,
 															   final IdentifierPart<Map<String, String>> searchIdentifier,
-															   final SearchesIdentifier searchesIdentifier) {
+															   final IdentifierPart<String> scope) {
 		return Observable.just(FacetsIdentifier.builder()
 				.withAppliedFacets(appliedFacets)
-				.withSearches(searchesIdentifier)
+				.withScope(scope)
 				.withSearchId(searchIdentifier)
 				.build());
 	}
@@ -95,10 +91,5 @@ public class OfferSearchResultToFacetsRepositoryImpl<I extends OfferSearchResult
 	@Reference
 	public void setResourceOperationContext(final ResourceOperationContext resourceOperationContext) {
 		this.resourceOperationContext = resourceOperationContext;
-	}
-
-	@Reference
-	public void setStoreRepository(final StoreRepository storeRepository) {
-		this.storeRepository = storeRepository;
 	}
 }

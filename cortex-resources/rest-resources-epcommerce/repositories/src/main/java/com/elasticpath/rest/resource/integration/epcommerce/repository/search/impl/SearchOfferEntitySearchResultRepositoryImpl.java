@@ -3,6 +3,7 @@
  */
 package com.elasticpath.rest.resource.integration.epcommerce.repository.search.impl;
 
+import static com.elasticpath.rest.resource.integration.epcommerce.repository.search.OffersResourceConstants.DEFAULT_APPLIED_FACETS;
 import static com.elasticpath.rest.resource.integration.epcommerce.repository.search.impl.SearchRepositoryImpl.FIRST_PAGE;
 
 import com.google.common.collect.ImmutableMap;
@@ -11,10 +12,9 @@ import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
 import com.elasticpath.repository.Repository;
-import com.elasticpath.rest.definition.searches.OfferSearchResultIdentifier;
+import com.elasticpath.rest.definition.offersearches.OfferSearchResultIdentifier;
+import com.elasticpath.rest.definition.offersearches.SearchOfferEntity;
 import com.elasticpath.rest.definition.searches.SearchKeywordsEntity;
-import com.elasticpath.rest.definition.searches.SearchOfferEntity;
-import com.elasticpath.rest.definition.searches.SearchesIdentifier;
 import com.elasticpath.rest.form.SubmitResult;
 import com.elasticpath.rest.form.SubmitStatus;
 import com.elasticpath.rest.id.IdentifierPart;
@@ -35,11 +35,11 @@ public class SearchOfferEntitySearchResultRepositoryImpl<E extends SearchOfferEn
 	private SearchRepository searchRepository;
 
 	@Override
-	public Single<SubmitResult<OfferSearchResultIdentifier>> submit(final SearchOfferEntity searchKeywordsEntity,
+	public Single<SubmitResult<OfferSearchResultIdentifier>> submit(final SearchOfferEntity searchOfferEntity,
 																	  final IdentifierPart<String> scope) {
-		return searchRepository.validate(searchKeywordsEntity)
+		return searchRepository.validate(searchOfferEntity)
 				.andThen(Single.just(SubmitResult.<OfferSearchResultIdentifier>builder()
-						.withIdentifier(buildKeywordSearchResultIdentifier(searchKeywordsEntity, scope))
+						.withIdentifier(buildKeywordSearchResultIdentifier(searchOfferEntity, scope))
 						.withStatus(SubmitStatus.CREATED)
 						.build()));
 	}
@@ -52,9 +52,8 @@ public class SearchOfferEntitySearchResultRepositoryImpl<E extends SearchOfferEn
 						SearchKeywordsEntity.PAGE_SIZE_PROPERTY, String.valueOf(searchKeywordsEntity.getPageSize())
 				)))
 				.withPageId(IntegerIdentifier.of(FIRST_PAGE))
-				.withSearches(SearchesIdentifier.builder().withScope(scope).build())
-				// cortex does not accept empty map, so if there are no applied facets, a dummy entry needs to be added
-				.withAppliedFacets(CompositeIdentifier.of(ImmutableMap.of("", "")))
+				.withScope(scope)
+				.withAppliedFacets(CompositeIdentifier.of(DEFAULT_APPLIED_FACETS))
 				.build();
 	}
 

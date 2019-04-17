@@ -7,6 +7,7 @@ import io.reactivex.Observable;
 import io.reactivex.Single;
 
 import com.elasticpath.domain.catalog.Category;
+import com.elasticpath.domain.catalog.Product;
 
 /**
  * Repository class for parentCategory search.
@@ -46,4 +47,11 @@ public interface CategoryRepository {
 	 * @return ExecutionResult with the category
 	 */
 	Single<Category> findByGuid(String categoryGuid);
+
+	/**
+	 * Get all featured products for the category.
+	 * @param categoryUid category uidpk
+	 * @return featured products
+	 */
+	Observable<Product> getFeaturedProducts(long categoryUid);
 }

@@ -12,6 +12,7 @@ import org.apache.log4j.Logger;
 import com.elasticpath.base.exception.EpServiceException;
 import com.elasticpath.persistence.api.PersistenceEngine;
 import com.elasticpath.service.customer.AnonymousCustomerCleanupService;
+import com.elasticpath.service.datapolicy.CustomerConsentService;
 import com.elasticpath.service.shopper.ShopperCleanupService;
 
 /**
@@ -24,6 +25,8 @@ public class AnonymousCustomerCleanupServiceImpl implements AnonymousCustomerCle
 	private PersistenceEngine persistenceEngine;
 
 	private ShopperCleanupService shopperCleanupService;
+
+	private CustomerConsentService customerConsentService;
 
 	/**
 	 * Delete anonymous customers.
@@ -65,6 +68,8 @@ public class AnonymousCustomerCleanupServiceImpl implements AnonymousCustomerCle
 		List<Long> shopperUidsToDelete = getShopperUidsAssociatedWithCustomerUids(customerUids);
 		LOG.debug(String.format("The following shopper uids are associated with customers to be deleted: %s", shopperUidsToDelete));
 		shopperCleanupService.removeShoppersByUidListAndTheirDependents(shopperUidsToDelete);
+
+		customerConsentService.deleteByCustomerUids(customerUids);
 
 		return deleteCustomersByUids(customerUids);
 	}
@@ -112,5 +117,23 @@ public class AnonymousCustomerCleanupServiceImpl implements AnonymousCustomerCle
 	 */
 	public void setShopperCleanupService(final ShopperCleanupService shopperCleanupService) {
 		this.shopperCleanupService = shopperCleanupService;
+	}
+
+	/**
+	 * Gets the customer consent service.
+	 *
+	 * @return the customer consent service.
+	 */
+	public CustomerConsentService getCustomerConsentService() {
+		return customerConsentService;
+	}
+
+	/**
+	 * Sets the customer consent service.
+	 *
+	 * @param customerConsentService the new customer consent service
+	 */
+	public void setCustomerConsentService(final CustomerConsentService customerConsentService) {
+		this.customerConsentService = customerConsentService;
 	}
 }

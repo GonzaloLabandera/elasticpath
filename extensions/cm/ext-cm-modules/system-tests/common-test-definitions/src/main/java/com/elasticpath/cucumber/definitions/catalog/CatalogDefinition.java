@@ -8,7 +8,6 @@ import cucumber.api.java.After;
 import cucumber.api.java.en.And;
 import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
-
 import org.openqa.selenium.WebDriver;
 
 import com.elasticpath.cucumber.definitions.NavigationDefinition;
@@ -41,7 +40,6 @@ import com.elasticpath.selenium.toolbars.ActivityToolbar;
 import com.elasticpath.selenium.toolbars.CatalogManagementActionToolbar;
 import com.elasticpath.selenium.toolbars.ChangeSetActionToolbar;
 import com.elasticpath.selenium.util.Constants;
-import com.elasticpath.selenium.util.DBConnector;
 import com.elasticpath.selenium.util.Utility;
 import com.elasticpath.selenium.wizards.CreateCategoryWizard;
 
@@ -978,15 +976,6 @@ public class CatalogDefinition {
 			this.categoryTypesTabDefinition.deleteNewCategoryType();
 			this.categoryTypesTabDefinition.verifyNewCategoryTypeDelete();
 		}
-	}
-
-	/**
-	 * Delete new category or subcategory using Db query.
-	 */
-	@After(value = "@cleanUpCategoryDB", order = Constants.CLEANUP_ORDER_SECOND)
-	public void deleteNewlyCreatedCategoryUsingDb() {
-		DBConnector dbc = new DBConnector();
-		dbc.deleteCategory(this.category.getCategoryName());
 	}
 
 	/**

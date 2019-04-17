@@ -9,8 +9,8 @@ import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
 import com.elasticpath.repository.Repository;
-import com.elasticpath.rest.definition.searches.OfferSearchFormIdentifier;
-import com.elasticpath.rest.definition.searches.SearchOfferEntity;
+import com.elasticpath.rest.definition.offersearches.OfferSearchFormIdentifier;
+import com.elasticpath.rest.definition.offersearches.SearchOfferEntity;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.search.SearchRepository;
 
 /**
@@ -33,7 +33,7 @@ public class SearchOfferEntitySearchFormRepositoryImpl<E extends SearchOfferEnti
 
 	@Override
 	public Single<SearchOfferEntity> findOne(final OfferSearchFormIdentifier identifier) {
-		return searchRepository.getDefaultPageSize(identifier.getSearches().getScope().getValue())
+		return searchRepository.getDefaultPageSize(identifier.getScope().getValue())
 				.map(pageSize -> SearchOfferEntity.builder()
 						.withKeywords(StringUtils.EMPTY)
 						.withPageSize(pageSize)

@@ -14,7 +14,6 @@ import java.util.Locale;
 import java.util.Set;
 
 import org.apache.lucene.search.BooleanQuery;
-import org.apache.lucene.search.Query;
 import org.jmock.integration.junit4.JUnitRuleMockery;
 import org.junit.After;
 import org.junit.Before;
@@ -80,8 +79,8 @@ public class SolrFacetAdapterTest {
 	public void testGetPriceFacetForEmptyStack() {
 		PriceFilter filter = context.mock(PriceFilter.class);
 		List<String> stackGuids = new ArrayList<>();
-		Query emptyQuery = solrFacetAdapter.getPriceQueryForStack(filter, CATALOG_CODE, stackGuids);
-		assertEquals("An empty stack should return an empty query", "", emptyQuery.toString());
+		String emptyQuery = solrFacetAdapter.getPriceQueryForStack(filter, CATALOG_CODE, stackGuids);
+		assertEquals("An empty stack should return an empty query", "", emptyQuery);
 	}
 
 	/**
@@ -94,9 +93,9 @@ public class SolrFacetAdapterTest {
 		filter.setUpperValue(BigDecimal.TEN);
 		List<String> stackGuids = new ArrayList<>();
 		stackGuids.add("PriceList1");
-		Query query = solrFacetAdapter.getPriceQueryForStack(filter, CATALOG_CODE, stackGuids);
+		String query = solrFacetAdapter.getPriceQueryForStack(filter, CATALOG_CODE, stackGuids);
 		assertEquals("There should be a single facet query for the given price list", 
-				"price_catalog_PriceList1:1 price_catalog_PriceList1:{1 TO 10}", query.toString());
+				"price_catalog_PriceList1:[1 TO 10}", query);
 	}
 	
 	/**
@@ -110,10 +109,9 @@ public class SolrFacetAdapterTest {
 		List<String> stackGuids = new ArrayList<>();
 		stackGuids.add("PriceList1");
 		stackGuids.add("PriceList2");
-		Query query = solrFacetAdapter.getPriceQueryForStack(filter, CATALOG_CODE, stackGuids);
-		String expected = "(price_catalog_PriceList1:1 price_catalog_PriceList1:{1 TO 10}) " 
-			+ "(-price_catalog_PriceList1:[* TO *] +(price_catalog_PriceList2:1 price_catalog_PriceList2:{1 TO 10}))";
-		assertEquals("There should be a facet query that excludes already included results", expected, query.toString());
+		String query = solrFacetAdapter.getPriceQueryForStack(filter, CATALOG_CODE, stackGuids);
+		String expected = "price_catalog_PriceList1:[1 TO 10} price_catalog_PriceList2:[1 TO 10}";
+		assertEquals("There should be a facet query that excludes already included results", expected, query);
 		
 	}
 
@@ -129,13 +127,11 @@ public class SolrFacetAdapterTest {
 		stackGuids.add("PL1");
 		stackGuids.add("PL2");
 		stackGuids.add("PL3");
-		Query query = solrFacetAdapter.getPriceQueryForStack(filter, CATALOG_CODE, stackGuids);
-		String expected = "(price_catalog_PL1:1 price_catalog_PL1:{1 TO 10}) " 
-			+ "(-price_catalog_PL1:[* TO *] +((price_catalog_PL2:1 price_catalog_PL2:{1 TO 10}) (-price_catalog_PL2:[* TO *] "
-			+ "+(price_catalog_PL3:1 price_catalog_PL3:{1 TO 10}))))";
+		String query = solrFacetAdapter.getPriceQueryForStack(filter, CATALOG_CODE, stackGuids);
+		String expected = "price_catalog_PL1:[1 TO 10} price_catalog_PL2:[1 TO 10} price_catalog_PL3:[1 TO 10}";
 		assertEquals("There should be a facet query that excludes already included results", 
 				expected, 
-				query.toString());
+				query);
 		
 	}
 
@@ -154,7 +150,7 @@ public class SolrFacetAdapterTest {
 		};
 		filter.setLowerValue(BigDecimal.ONE);
 		filter.setUpperValue(BigDecimal.TEN);
-		assertEquals("field:1 field:{1 TO 10}", solrFacetAdapter.constructRangeFilterQuery(filter, "field").toString());
+		assertEquals("field:[1 TO 10}", solrFacetAdapter.buildRangeFacetQuery(filter, "field"));
 	}
 
 	/**
@@ -171,7 +167,7 @@ public class SolrFacetAdapterTest {
 			}
 		};
 		filter.setUpperValue(BigDecimal.TEN);
-		assertEquals("field:{* TO 10}", solrFacetAdapter.constructRangeFilterQuery(filter, "field").toString());
+		assertEquals("field:[* TO 10}", solrFacetAdapter.buildRangeFacetQuery(filter, "field"));
 	}
 	
 	
@@ -190,7 +186,7 @@ public class SolrFacetAdapterTest {
 		};
 		
 		filter.setLowerValue(BigDecimal.ONE);
-		assertEquals("field:[1 TO *]", solrFacetAdapter.constructRangeFilterQuery(filter, "field").toString());
+		assertEquals("field:[1 TO *}", solrFacetAdapter.buildRangeFacetQuery(filter, "field"));
 	}
 	
 	/**

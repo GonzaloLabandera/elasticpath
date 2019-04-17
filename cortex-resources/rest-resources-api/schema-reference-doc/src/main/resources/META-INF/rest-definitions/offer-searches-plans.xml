@@ -12,15 +12,21 @@
 				<description><![CDATA[The offer search form.]]></description>
 				<start>searches</start>
 				<follow-link>offersearchform</follow-link>
-				<result>offer-search-form</result>
+				<result>offersearches.offer-search-form</result>
 			</step>
 			<step>
 				<description><![CDATA[The offer search form.]]></description>
-				<start>offer-search-form</start>
+				<start>offersearches.offer-search-form</start>
 				<submit/>
 				<to>offer-search-form</to>
 				<via-link>offersearchaction</via-link>
-				<result>offer-search-result</result>
+				<result>offersearches.offer-search-result</result>
+			</step>
+			<step>
+				<description><![CDATA[The offer.]]></description>
+				<start>offersearches.offer-search-result</start>
+				<follow-link>element</follow-link>
+				<result>offers.offer</result>
 			</step>
 		</plan>
 

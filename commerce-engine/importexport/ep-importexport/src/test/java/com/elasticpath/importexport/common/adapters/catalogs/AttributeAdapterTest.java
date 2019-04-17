@@ -6,16 +6,23 @@ package com.elasticpath.importexport.common.adapters.catalogs;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
+import java.util.Arrays;
+import java.util.Locale;
+
+import org.apache.commons.lang.LocaleUtils;
 import org.jmock.Expectations;
 import org.jmock.integration.junit4.JUnitRuleMockery;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 
+import com.elasticpath.common.dto.DisplayValue;
 import com.elasticpath.commons.beanframework.BeanFactory;
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.attribute.Attribute;
 import com.elasticpath.domain.attribute.AttributeMultiValueType;
+import com.elasticpath.domain.attribute.impl.AttributeImpl;
+import com.elasticpath.domain.catalog.Catalog;
 import com.elasticpath.importexport.common.caching.CachingService;
 import com.elasticpath.importexport.common.dto.catalogs.AttributeDTO;
 import com.elasticpath.importexport.common.dto.catalogs.AttributeMultiValueTypeType;
@@ -31,7 +38,11 @@ public class AttributeAdapterTest {
 
 	private static final String ATTRIBUTE_KEY = "AttributeKey0";
 
-	private static final String ATTRIBUTE_NAME = null;
+	private static final String LANGUAGE = "en";
+
+	private static final DisplayValue DISPLAY_VALUE = new DisplayValue(LANGUAGE, "attr_name");
+
+	private static final Locale LANGUAGE_LOCALE = LocaleUtils.toLocale(LANGUAGE);
 
 	private static final AttributeUsageType ATTRIBUTE_USAGE = AttributeUsageType.Product;
 
@@ -51,6 +62,8 @@ public class AttributeAdapterTest {
 	private BeanFactory mockBeanFactory;
 	
 	private Attribute mockAttributeDomain;
+
+	private Catalog mockCatalogDomain;
 	
 	private CachingService mockCachingService;
 	
@@ -62,6 +75,7 @@ public class AttributeAdapterTest {
 		
 		attributeDto = new AttributeDTO();
 		mockAttributeDomain = context.mock(Attribute.class);
+		mockCatalogDomain = context.mock(Catalog.class);
 		mockCachingService = context.mock(CachingService.class);
 		
 		attributeAdapter = new AttributeAdapter();
@@ -71,14 +85,14 @@ public class AttributeAdapterTest {
 		context.checking(new Expectations() {
 			{
 				allowing(mockBeanFactory).getBean(ContextIdNames.ATTRIBUTE);
-				will(returnValue(mockAttributeDomain));
+				will(returnValue(new AttributeImpl()));
 			}
 		});
 	}
 	
 	private void setUpDefaultDto() {
 		attributeDto.setKey(ATTRIBUTE_KEY);
-		attributeDto.setName(ATTRIBUTE_NAME);
+		attributeDto.setNameValues(Arrays.asList(DISPLAY_VALUE));
 		attributeDto.setUsage(ATTRIBUTE_USAGE);
 		attributeDto.setType(ATTRIBUTE_TYPE);
 		attributeDto.setMultiLanguage(ATTRIBUTE_LOCALE_DEPENDANT);
@@ -94,10 +108,16 @@ public class AttributeAdapterTest {
 	public void testPopulateDTO() {
 		context.checking(new Expectations() {
 			{
+
+				atLeast(2).of(mockAttributeDomain).getCatalog();
+				will(returnValue(mockCatalogDomain));
+				allowing(mockCatalogDomain).getSupportedLocales();
+				will(returnValue(Arrays.asList(LANGUAGE_LOCALE)));
+				oneOf(mockAttributeDomain).getDisplayName(LANGUAGE_LOCALE);
+				will(returnValue(DISPLAY_VALUE.getValue()));
+
 				oneOf(mockAttributeDomain).getKey();
 				will(returnValue(ATTRIBUTE_KEY));
-				oneOf(mockAttributeDomain).getName();
-				will(returnValue(ATTRIBUTE_NAME));
 				oneOf(mockAttributeDomain).getAttributeUsage();
 				will(returnValue(ATTRIBUTE_USAGE.usage()));
 				oneOf(mockAttributeDomain).getAttributeType();
@@ -118,7 +138,8 @@ public class AttributeAdapterTest {
 		attributeAdapter.populateDTO(mockAttributeDomain, dto);
 		
 		assertEquals(ATTRIBUTE_KEY, dto.getKey());
-		assertEquals(ATTRIBUTE_NAME, dto.getName());
+		assertEquals(1, dto.getNameValues().size());
+		assertEquals(DISPLAY_VALUE.getValue(), dto.getNameValues().get(0).getValue());
 		assertEquals(ATTRIBUTE_USAGE, dto.getUsage());
 		assertEquals(ATTRIBUTE_TYPE, dto.getType());
 		assertEquals(ATTRIBUTE_LOCALE_DEPENDANT, dto.getMultiLanguage());
@@ -136,8 +157,15 @@ public class AttributeAdapterTest {
 
 		context.checking(new Expectations() {
 			{
+				allowing(mockCatalogDomain).getSupportedLocales();
+				will(returnValue(Arrays.asList(LANGUAGE_LOCALE)));
+				allowing(mockAttributeDomain).getCatalog();
+				will(returnValue(mockCatalogDomain));
+				allowing(mockCatalogDomain).getSupportedLocales();
+				will(returnValue(Arrays.asList(LANGUAGE_LOCALE)));
+
 				oneOf(mockAttributeDomain).setKey(ATTRIBUTE_KEY);
-				oneOf(mockAttributeDomain).setName(ATTRIBUTE_NAME);
+				oneOf(mockAttributeDomain).setDisplayName(DISPLAY_VALUE.getValue(), LANGUAGE_LOCALE);
 				oneOf(mockAttributeDomain).setAttributeUsage(ATTRIBUTE_USAGE.usage());
 				oneOf(mockAttributeDomain).setAttributeType(ATTRIBUTE_TYPE.type());
 				oneOf(mockAttributeDomain).setMultiValueType(AttributeMultiValueType.SINGLE_VALUE);

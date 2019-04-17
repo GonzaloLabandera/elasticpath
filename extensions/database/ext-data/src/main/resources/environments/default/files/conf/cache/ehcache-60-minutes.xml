@@ -1,0 +1,235 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<ehcache xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="ehcache.xsd"
+		 name="ep-default-cache"
+		 updateCheck="false">
+
+	<!--
+	   Read the Ehcache documentation for help on configuring this file.
+	   The <defaultCache> configuration is used as the default for programmatically created caches.
+	   <cache> entries will not inherit configuration from <defaultCache>.
+	-->
+	<defaultCache
+			timeToIdleSeconds="1"
+			timeToLiveSeconds="1"
+			maxEntriesLocalHeap="10000"
+			eternal="false"
+			diskExpiryThreadIntervalSeconds="120"
+			memoryStoreEvictionPolicy="LRU"
+			statistics="true"
+	/>
+
+	<cache name="openjpa-querycache"
+		   timeToIdleSeconds="3600"
+		   timeToLiveSeconds="3600"
+		   maxEntriesLocalHeap="10000"
+		   eternal="false"
+		   statistics="true"
+	/>
+
+	<!--
+	   Override application cache configuration.
+	-->
+	<cache name="baseAmountCache"
+		   timeToIdleSeconds="3600"
+		   timeToLiveSeconds="3600"
+		   maxEntriesLocalHeap="10000"
+		   statistics="true"
+	/>
+
+	<cache name="bundlePriceAdjustmentCache"
+		   timeToIdleSeconds="3600"
+		   timeToLiveSeconds="3600"
+		   maxEntriesLocalHeap="10000"
+		   statistics="true"
+	/>
+
+	<cache name="catalogRuleBaseCache"
+		   timeToIdleSeconds="3600"
+		   timeToLiveSeconds="3600"
+		   maxEntriesLocalHeap="10000"
+		   statistics="true"
+	/>
+
+	<cache name="categoryByUidCache"
+		   timeToIdleSeconds="3600"
+		   timeToLiveSeconds="3600"
+		   maxEntriesLocalHeap="10000"
+		   statistics="true"
+	/>
+
+	<cache name="categoryUidByGuidCache"
+		   timeToIdleSeconds="3600"
+		   timeToLiveSeconds="3600"
+		   maxEntriesLocalHeap="10000"
+		   statistics="true"
+	/>
+
+	<cache name="categoryUidByCompoundGuidCache"
+		   timeToIdleSeconds="3600"
+		   timeToLiveSeconds="3600"
+		   maxEntriesLocalHeap="10000"
+		   statistics="true"
+	/>
+
+	<cache name="childCategoryLookupCache"
+		   timeToIdleSeconds="3600"
+		   timeToLiveSeconds="3600"
+		   maxEntriesLocalHeap="10000"
+		   statistics="true"
+	/>
+
+	<cache name="dynamicContentDeliveryCache"
+		   timeToIdleSeconds="3600"
+		   timeToLiveSeconds="3600"
+		   maxEntriesLocalHeap="10000"
+		   statistics="true"
+	/>
+
+	<cache name="groovyConditionCache"
+		   timeToIdleSeconds="3600"
+		   timeToLiveSeconds="3600"
+		   maxEntriesLocalHeap="10000"
+		   statistics="true"
+	/>
+
+	<cache name="groovyEvaluationCache"
+		   timeToIdleSeconds="3600"
+		   timeToLiveSeconds="3600"
+		   maxEntriesLocalHeap="10000"
+		   statistics="true"
+	/>
+
+	<cache name="groovyScriptCache"
+		   timeToIdleSeconds="3600"
+		   timeToLiveSeconds="3600"
+		   maxEntriesLocalHeap="10000"
+		   statistics="true"
+	/>
+
+	<cache name="priceListAssignmentCache"
+		   timeToIdleSeconds="3600"
+		   timeToLiveSeconds="3600"
+		   maxEntriesLocalHeap="10000"
+		   statistics="true"
+	/>
+
+	<cache name="productCharacteristicsCache"
+		   timeToIdleSeconds="3600"
+		   timeToLiveSeconds="3600"
+		   maxEntriesLocalHeap="10000"
+		   statistics="true"
+	/>
+
+	<cache name="productByUidCache"
+		   timeToIdleSeconds="3600"
+		   timeToLiveSeconds="3600"
+		   maxEntriesLocalHeap="10000"
+		   statistics="true"
+	/>
+
+	<cache name="productUidByGuidCache"
+		   timeToIdleSeconds="3600"
+		   timeToLiveSeconds="3600"
+		   maxEntriesLocalHeap="10000"
+		   statistics="true"
+	/>
+
+	<cache name="productUidBySkuCodeCache"
+		   timeToIdleSeconds="3600"
+		   timeToLiveSeconds="3600"
+		   maxEntriesLocalHeap="10000"
+		   statistics="true"
+	/>
+
+	<cache name="productUidBySkuGuidCache"
+		   timeToIdleSeconds="3600"
+		   timeToLiveSeconds="3600"
+		   maxEntriesLocalHeap="10000"
+		   statistics="true"
+	/>
+
+	<cache name="productUidBySkuUidCache"
+		   timeToIdleSeconds="3600"
+		   timeToLiveSeconds="3600"
+		   maxEntriesLocalHeap="10000"
+		   statistics="true"
+	/>
+
+	<cache name="ruleCache"
+		   timeToIdleSeconds="3600"
+		   timeToLiveSeconds="3600"
+		   maxEntriesLocalHeap="10000"
+		   statistics="true"
+	/>
+
+	<cache name="ruleCodeByRuleNameCache"
+		   timeToIdleSeconds="3600"
+		   timeToLiveSeconds="3600"
+		   maxEntriesLocalHeap="10000"
+		   statistics="true"
+	/>
+
+	<cache name="ruleCodeByRuleUidCache"
+		   timeToIdleSeconds="3600"
+		   timeToLiveSeconds="3600"
+		   maxEntriesLocalHeap="10000"
+		   statistics="true"
+	/>
+
+	<cache name="ruleCodesByRuleUidsCache"
+		   timeToIdleSeconds="3600"
+		   timeToLiveSeconds="3600"
+		   maxEntriesLocalHeap="10000"
+		   statistics="true"
+	/>
+
+	<cache name="ruleSessionConfigurationCache"
+		   timeToIdleSeconds="3600"
+		   timeToLiveSeconds="3600"
+		   maxEntriesLocalHeap="10000"
+		   statistics="true"
+	/>
+
+	<cache name="skuExistsBySkuCodeCache"
+		   timeToIdleSeconds="3600"
+		   timeToLiveSeconds="3600"
+		   maxEntriesLocalHeap="10000"
+		   statistics="true"
+	/>
+
+	<cache name="storeCache"
+		   timeToIdleSeconds="3600"
+		   timeToLiveSeconds="3600"
+		   maxEntriesLocalHeap="10000"
+		   statistics="true"
+	/>
+
+	<cache name="tagDefinitionCache"
+		   timeToIdleSeconds="3600"
+		   timeToLiveSeconds="3600"
+		   maxEntriesLocalHeap="10000"
+		   statistics="true"
+	/>
+
+	<cache name="tagDefinitionGuidCache"
+		   timeToIdleSeconds="3600"
+		   timeToLiveSeconds="3600"
+		   maxEntriesLocalHeap="10000"
+		   statistics="true"
+	/>
+
+	<cache name="taxDocumentCache"
+		   timeToIdleSeconds="3600"
+		   timeToLiveSeconds="3600"
+		   maxEntriesLocalHeap="10000"
+		   statistics="true"
+	/>
+
+	<cache name="threadlocalStoreCache"
+		   timeToIdleSeconds="3600"
+		   timeToLiveSeconds="3600"
+		   maxEntriesLocalHeap="10000"
+		   statistics="true"
+	/>
+
+</ehcache>

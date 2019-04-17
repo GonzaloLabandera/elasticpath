@@ -3,12 +3,14 @@
  */
 package com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder;
 
+import java.util.List;
 import java.util.Map;
 
 import io.reactivex.Completable;
 import io.reactivex.Observable;
 import io.reactivex.Single;
 
+import com.elasticpath.common.dto.ShoppingItemDto;
 import com.elasticpath.domain.catalog.ProductSku;
 import com.elasticpath.domain.shoppingcart.ShoppingCart;
 import com.elasticpath.domain.shoppingcart.ShoppingItem;
@@ -76,6 +78,25 @@ public interface ShoppingCartRepository {
 	 * @return the new ShoppingItem
 	 */
 	Single<ShoppingItem> addItemToCart(ShoppingCart cart, String skuCode, int quantity, Map<String, String> fields);
+
+	/**
+	 * Get the shopping item dto given the sku code, quantity and configurable fields.
+	 *
+	 * @param skuCode  skuCode
+	 * @param quantity quantity
+	 * @param fields   fields
+	 * @return shopping item dto
+	 */
+	ShoppingItemDto getShoppingItemDto(String skuCode, int quantity, Map<String, String> fields);
+
+	/**
+	 * Add a list of items to the cart.
+	 *
+	 * @param cart    the shopping cart
+	 * @param dtoList dtoList
+	 * @return the updated shopping cart
+	 */
+	Single<ShoppingCart> addItemsToCart(ShoppingCart cart, List<ShoppingItemDto> dtoList);
 
 	/**
 	 * Moves an item to the cart from a wishlist.

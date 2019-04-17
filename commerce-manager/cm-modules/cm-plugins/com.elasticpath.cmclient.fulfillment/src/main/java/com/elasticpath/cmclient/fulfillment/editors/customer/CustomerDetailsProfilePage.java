@@ -19,10 +19,8 @@ import com.elasticpath.cmclient.fulfillment.FulfillmentMessages;
 import com.elasticpath.cmclient.fulfillment.FulfillmentPermissions;
 import com.elasticpath.cmclient.fulfillment.FulfillmentPlugin;
 import com.elasticpath.commons.constants.ContextIdNames;
-import com.elasticpath.commons.constants.WebConstants;
 import com.elasticpath.domain.customer.Customer;
 import com.elasticpath.service.customer.CustomerService;
-import com.elasticpath.settings.SettingsService;
 
 /**
  * Represents the UI of the customer details profile page.
@@ -106,20 +104,11 @@ public class CustomerDetailsProfilePage extends AbstractCmClientEditorPage imple
 			final Customer customer = (Customer) ((AbstractCmClientFormEditor) getEditor()).getModel();
 			final CustomerService customerService =
 					ServiceLocator.getService(ContextIdNames.CUSTOMER_SERVICE);
-			if (getUserIdMode() == WebConstants.GENERATE_UNIQUE_PERMANENT_USER_ID_MODE) {
-				customerService.resetPassword(customer.getEmail(), customer.getStoreCode());	//Weblogic style login using email
-			} else {
-				customerService.resetPassword(customer.getUserId(), customer.getStoreCode());
-			}
-			MessageDialog.openInformation(getSite().getShell(), 
+			customerService.resetPassword(customer.getUserId(), customer.getStoreCode());
+			MessageDialog.openInformation(getSite().getShell(),
 					FulfillmentMessages.get().CustomerDetailsPage_ResetPassInfoTitle,
 					FulfillmentMessages.get().CustomerDetailsPage_ResetPassInfoMessage);
 		}
-	}
-
-	private int getUserIdMode() {
-		return Integer.parseInt(((SettingsService) ServiceLocator.getService(ContextIdNames.SETTINGS_SERVICE))
-						.getSettingValue("COMMERCE/SYSTEM/userIdMode").getValue());  //$NON-NLS-1$
 	}
 
 	@Override

@@ -18,9 +18,10 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 
+import org.junit.Test;
+
 import org.drools.core.SessionConfiguration;
 import org.jmock.Expectations;
-import org.junit.Test;
 
 import com.elasticpath.cache.SimpleTimeoutCache;
 import com.elasticpath.commons.constants.ContextIdNames;
@@ -33,7 +34,6 @@ import com.elasticpath.domain.catalog.impl.BrandImpl;
 import com.elasticpath.domain.catalog.impl.CatalogImpl;
 import com.elasticpath.domain.catalog.impl.ProductImpl;
 import com.elasticpath.domain.customer.CustomerSession;
-import com.elasticpath.domain.customer.impl.CustomerAuthenticationImpl;
 import com.elasticpath.domain.discounts.DiscountItemContainer;
 import com.elasticpath.domain.discounts.impl.LimitedTotallingApplierImpl;
 import com.elasticpath.domain.discounts.impl.ShoppingCartDiscountItemContainerImpl;
@@ -69,7 +69,6 @@ import com.elasticpath.domain.store.Store;
 import com.elasticpath.domain.store.impl.StoreImpl;
 import com.elasticpath.money.Money;
 import com.elasticpath.money.StandardMoneyFormatter;
-import com.elasticpath.service.customer.CustomerService;
 import com.elasticpath.service.misc.TimeService;
 import com.elasticpath.service.rules.EpRuleEngine;
 import com.elasticpath.service.rules.PromotionRuleDelegate;
@@ -125,7 +124,6 @@ public class EpRuleEngineTest extends AbstractCatalogDataTestCase {
 		limitedTotallingApplier.setProductSkuLookup(getProductSkuLookup());
 
 		stubGetBean(ContextIdNames.ATTRIBUTE_USAGE, AttributeUsageImpl.class);
-		stubGetBean(ContextIdNames.CUSTOMER_AUTHENTICATION, CustomerAuthenticationImpl.class);
 		stubGetBean(ContextIdNames.EP_RULE_BASE, EpRuleBaseImpl.class);
 		stubGetBean(ContextIdNames.MONEY_FORMATTER, StandardMoneyFormatter.class);
 		stubGetBean(ContextIdNames.PRODUCT_SERVICE, getProductService());
@@ -135,15 +133,6 @@ public class EpRuleEngineTest extends AbstractCatalogDataTestCase {
 
 		TaxAddressAdapter adapter = new TaxAddressAdapter();
 		stubGetBean(ContextIdNames.TAX_ADDRESS_ADAPTER, adapter);
-
-		final CustomerService mockCustomerService = context.mock(CustomerService.class);
-		context.checking(new Expectations() {
-			{
-				allowing(mockCustomerService).getUserIdMode();
-				will(returnValue(1));
-			}
-		});
-		stubGetBean(ContextIdNames.CUSTOMER_SERVICE, mockCustomerService);
 
 		final EpRuleEngine mockRuleEngine = context.mock(EpRuleEngine.class);
 		stubGetBean(ContextIdNames.EP_RULE_ENGINE, mockRuleEngine);

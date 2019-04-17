@@ -9,7 +9,7 @@ import java.util.Map;
 
 import com.google.common.collect.ImmutableMap;
 
-import com.elasticpath.rest.definition.searches.SearchOfferEntity;
+import com.elasticpath.rest.definition.offersearches.SearchOfferEntity;
 import com.elasticpath.rest.id.IdentifierPart;
 import com.elasticpath.rest.id.type.CompositeIdentifier;
 import com.elasticpath.rest.id.type.StringIdentifier;

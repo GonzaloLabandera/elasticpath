@@ -21,7 +21,7 @@ else
   exit 101
 fi
 
-exactversion=`expr "$($_java -version 2>&1)" : '.*java version "\(.*\)"'`
+exactversion=`expr "$($_java -version 2>&1)" : '.*openjdk version "\(.*\)"'`
 versionarray=(${exactversion//./ })
 version=${versionarray[0]}${versionarray[1]}
 if [[ "$version" != "18" ]]; then

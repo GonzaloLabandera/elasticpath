@@ -47,6 +47,7 @@ public class SearchServerLauncher {
 
 	private static Object searchServerLock = new Object();
 
+	private static final int MAX_ATTEMPTS_TO_FIND_FREE_PORT = 10;
 	private static final int MAX_EPHEMERAL_PORT_NUMBER = 65535;
 	private static final int MIN_EPHEMERAL_PORT_NUMBER = 49152;
 
@@ -94,7 +95,7 @@ public class SearchServerLauncher {
 			return searchPort;
 		}
 
-		synchronized(searchServerLock) {
+		synchronized (searchServerLock) {
 			if (!searchServerStarted) {
 				boolean successful = false;
 				int tries = 0;
@@ -114,7 +115,7 @@ public class SearchServerLauncher {
 					} catch (Exception e) {
 						throw new EpServiceException("Can't start jetty. ", e);
 					}
-				} while (tries < 10 && !successful);
+				} while (tries < MAX_ATTEMPTS_TO_FIND_FREE_PORT && !successful);
 
 				if (successful) {
 					searchPort = port;
@@ -188,13 +189,23 @@ public class SearchServerLauncher {
 		}
 	}
 
+	/**
+	 * Get list of scheduler bean names.
+	 *
+	 * @return scheduler bean names
+	 */
 	protected List<String> getSchedulerBeanNames() {
 		if (schedulers == null) {
 			schedulers = findMatchingBeans(Matchers.containsString("ThreadPoolTaskScheduler"));
 		}
 		return schedulers;
 	}
-	
+
+	/**
+	 * Get list of registrar bean names.
+	 *
+	 * @return registrar bean names
+	 */
 	protected List<String> getRegistrarBeanNames() {
 		if (registrars == null) {
 			registrars = findMatchingBeans(Matchers.containsString("ScheduledTaskRegistrar"));

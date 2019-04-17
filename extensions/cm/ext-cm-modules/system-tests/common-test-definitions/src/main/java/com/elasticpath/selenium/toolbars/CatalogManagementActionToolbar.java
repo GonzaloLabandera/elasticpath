@@ -16,11 +16,11 @@ public class CatalogManagementActionToolbar extends AbstractToolbar {
 
 	private static final String APPEARANCE_ID_CSS = "[appearance-id='toolbar-button']";
 	private static final String CREATE_CATALOG_BUTTON_CSS = APPEARANCE_ID_CSS
-			+ "[widget-id='Create Catalog']";
+			+ "[widget-id='CATALOG']";
 	private static final String CREATE_VIRTUAL_CATALOG_BUTTON_CSS = APPEARANCE_ID_CSS
-			+ "[widget-id='Create Virtual Catalog']";
+			+ "[widget-id='VIRTUAL CATALOG']";
 	private static final String EDIT_GLOBAL_ATTRIBUTE_BUTTON_CSS = APPEARANCE_ID_CSS
-			+ "[widget-id='Edit Global Attributes']";
+			+ "[widget-id='GLOBAL']";
 
 	/**
 	 * Constructor.
@@ -37,7 +37,7 @@ public class CatalogManagementActionToolbar extends AbstractToolbar {
 	 * @return CreateCatalogDialog
 	 */
 	public CreateCatalogDialog clickCreateCatalogButton() {
-		clickButton(CREATE_CATALOG_BUTTON_CSS, "Create Catalog", CreateCatalogDialog.CREATE_CATALOG_PARENT_CSS);
+		clickButton(CREATE_CATALOG_BUTTON_CSS, "CATALOG", CreateCatalogDialog.CREATE_CATALOG_PARENT_CSS);
 		return new CreateCatalogDialog(getDriver());
 	}
 
@@ -48,7 +48,7 @@ public class CatalogManagementActionToolbar extends AbstractToolbar {
 	 */
 	public CreateEditVirtualCatalogDialog clickCreateVirtualCatalogButton() {
 		final String dialogName = "Create";
-		clickButton(CREATE_VIRTUAL_CATALOG_BUTTON_CSS, "Create Virtual Catalog", String.format(CreateEditVirtualCatalogDialog
+		clickButton(CREATE_VIRTUAL_CATALOG_BUTTON_CSS, "VIRTUAL CATALOG", String.format(CreateEditVirtualCatalogDialog
 				.CREATE_EDIT_VIRTUAL_CATALOG_PARENT_CSS_TEMPLATE, dialogName));
 		return new CreateEditVirtualCatalogDialog(getDriver(), dialogName);
 	}

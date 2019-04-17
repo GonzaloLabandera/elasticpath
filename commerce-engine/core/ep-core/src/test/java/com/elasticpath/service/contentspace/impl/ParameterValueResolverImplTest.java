@@ -56,6 +56,9 @@ public class ParameterValueResolverImplTest  {
 	private static final String PRODUCT_CODE = "123456789";
 	private static final int INT_NUMBER_20 = 20;
 	private static final int INT_NUMBER_123 = 123;
+	private static final int INT_NUMBER_3 = 3;
+	private static final float FLOAT_NUMBER_2 = 2f;
+	private static final float FLOAT_NUMBER_5 = 5f;
 
 	private static final List<Parameter> NULL_PARAMETERS = null;
 
@@ -641,9 +644,9 @@ public class ParameterValueResolverImplTest  {
 			new HashMap<>(), null);
 
 		assertThat(resolvedValues).containsOnly(
-			entry(DOUBLE_VAR1, String.valueOf(3)),
-			entry(DOUBLE_VAR2, String.valueOf(2f)),
-			entry("rez", String.valueOf(5f)));
+			entry(DOUBLE_VAR1, String.valueOf(INT_NUMBER_3)),
+			entry(DOUBLE_VAR2, String.valueOf(FLOAT_NUMBER_2)),
+			entry("rez", String.valueOf(FLOAT_NUMBER_5)));
 
 		verify(mockSimpleTimeoutCache).get(script);
 		verify(mockSimpleTimeoutCache).put(eq(script), any(FutureTask.class));

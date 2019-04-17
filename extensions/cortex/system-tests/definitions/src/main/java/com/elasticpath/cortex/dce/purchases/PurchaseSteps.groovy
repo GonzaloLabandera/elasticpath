@@ -91,6 +91,11 @@ class PurchaseSteps {
 				.stopIfFailure()
 	}
 
+	@When('^the purchase line items should contain following skus?$')
+	static void verifyPurchaseLineItems(List<String> skuCodeList) {
+		Purchase.verifyPurchaseItemsBySkuCode(skuCodeList)
+	}
+
 	@When('^all (.+) constituents of a purchase line item (.+) are displayed as components$')
 	static void verifyPurchaseLineItemComponents(int componentsAmount, String skuCode) {
 		CommonMethods.verifyNumberOfElements(componentsAmount)
@@ -700,21 +705,21 @@ class PurchaseSteps {
 	}
 
 	@And('^I (?:create|have) an order with Canadian address for scope (.+) with following skus?$')
-	static void purchaseWithCanadianAddress(String scope, DataTable dataTable){
+	static void purchaseWithCanadianAddress(String scope, DataTable dataTable) {
 		purchaseWithBillingCountryCode(scope, "CA", dataTable)
 	}
 
 	@And('^I (?:create|have) an order with US address for scope (.+) with following skus?$')
-	static void purchaseWithUSAddress(String scope, DataTable dataTable){
+	static void purchaseWithUSAddress(String scope, DataTable dataTable) {
 		purchaseWithBillingCountryCode(scope, "US", dataTable)
 	}
 
 	static void purchaseWithBillingCountryCode(String scope, String countryCode, DataTable dataTable) {
 		LoginSteps.registerNewShopperAndLoginWithScope(scope)
 		CommonMethods.addItemsToCart(dataTable)
-		if(countryCode.equals("CA")) {
+		if (countryCode.equals("CA")) {
 			Profile.addCanadianBillingAddress()
-		}else if(countryCode.equals("US")){
+		} else if (countryCode.equals("US")) {
 			Profile.addUSBillingAddress()
 		}
 		Order.addDefaultToken()
@@ -738,6 +743,13 @@ class PurchaseSteps {
 		CommonMethods.addDefaultTokenAndBillingAddress()
 		Order.applyCoupon(couponCode)
 		Order.submitPurchase()
+	}
+
+	@Then('^purchase shipping option cost is (.+)$')
+	static void verifyPurchaseShippingCost(String shippingCost) {
+		assertThat(Purchase.getShippingOptionCost())
+				.as("The purchase shipping option cost is not as expected")
+				.isEqualTo(shippingCost)
 	}
 
 }

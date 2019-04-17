@@ -53,7 +53,7 @@ public class FilterFactoryImpl implements FilterFactory {
 	private static final Logger LOG = Logger.getLogger(FilterFactoryImpl.class);
 	private static final String WITH_ID_MSG_PART = " with ID = ";
 	private static final String WAS_NOT_FOUND_CREATING_A_NEW_ONE_MSG_PART = " was not found. Creating a new one.";
-	public static final String UNDERSCORE = "_";
+	private static final String UNDERSCORE = "_";
 
 	private FilteredNavigationConfigurationLoader fncLoader;
 

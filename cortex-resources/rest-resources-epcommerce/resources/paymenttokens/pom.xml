@@ -16,10 +16,6 @@
 
 	<dependencies>
 		<dependency>
-			<groupId>com.elasticpath.rest.relos.rs.authentication</groupId>
-			<artifactId>ep-rs-authentication-api</artifactId>
-		</dependency>
-		<dependency>
 			<groupId>com.elasticpath.rest.relos.rs</groupId>
 			<artifactId>ep-rs-bridge-common</artifactId>
 		</dependency>

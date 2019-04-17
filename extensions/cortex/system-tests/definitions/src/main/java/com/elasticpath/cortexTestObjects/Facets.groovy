@@ -14,13 +14,13 @@ class Facets extends CommonMethods {
 		return client["display-name"]
 	}
 
-	static void selectFacetChoice(String choice) {
+	static void selectFacetChoice(String choice, String status) {
 		boolean choiceExists = false;
 
 		def facetSelector = client.save()
 
 		client.body.links.find {
-			if (it.rel == "choice") {
+			if (it.rel == status) {
 				client.GET(it.href)
 				def choiceSelector = client.save()
 				client.description()
@@ -40,15 +40,17 @@ class Facets extends CommonMethods {
 
 	static def getFacetResultDisplayNameList() {
 		def actualList = []
-		client.body.links.findAll {
-			if(it.rel == "element") {
+		def links = client.body.links
+		if (client.body._next != null) {
+			links.addAll(client.body._next[0].links)
+		}
+		links.findAll {
+			if (it.rel == "element") {
 				client.GET(it.href)
 						.definition()
 				actualList.add(client["display-name"])
 			}
 		}
 		return actualList
-
 	}
-
 }

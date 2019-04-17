@@ -3,8 +3,13 @@
  */
 package com.elasticpath.sellingchannel.director.impl;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import com.google.common.collect.ImmutableList;
@@ -16,6 +21,7 @@ import com.elasticpath.domain.shoppingcart.ShoppingCart;
 import com.elasticpath.domain.shoppingcart.ShoppingItem;
 import com.elasticpath.domain.shoppingcart.WishList;
 import com.elasticpath.domain.store.Store;
+import com.elasticpath.sellingchannel.ProductUnavailableException;
 import com.elasticpath.sellingchannel.director.CartDirector;
 import com.elasticpath.sellingchannel.director.CartDirectorService;
 import com.elasticpath.service.shoppingcart.CantDeleteAutoselectableBundleItemsException;
@@ -48,6 +54,48 @@ public class CartDirectorServiceImpl implements CartDirectorService {
 
 		return persistedShoppingCart.getCartItemByGuid(shoppingItem.getGuid());
 	}
+
+	@Override
+	public ShoppingCart addItemsToCart(final ShoppingCart shoppingCart, final List<ShoppingItemDto> dtos) {
+
+		Set<StructuredErrorMessage> errorMessagesCollected = new HashSet<>();
+
+		for (ShoppingItemDto dto : dtos) {
+			errorMessagesCollected.addAll(addItem(shoppingCart, dto, null));
+		}
+
+		if (errorMessagesCollected.isEmpty()) {
+			return saveShoppingCart(shoppingCart);
+		} else {
+			throw new ProductUnavailableException("One or mode products could not be added to cart", new ArrayList<>(errorMessagesCollected));
+		}
+	}
+
+	private Set<StructuredErrorMessage> addItem(final ShoppingCart shoppingCart,
+												final ShoppingItemDto shoppingItemDto,
+												final ShoppingItem parentItem) {
+		Set<StructuredErrorMessage> results = new HashSet<>();
+		ShoppingItem newItem = cartDirector.addItemToCart(shoppingCart, shoppingItemDto, parentItem);
+
+		if (newItem == null) {
+			StructuredErrorMessage structuredErrorMessage = constructStructuredErrorMessage(shoppingItemDto);
+			results.add(structuredErrorMessage);
+		}
+
+		return results;
+	}
+
+	private StructuredErrorMessage constructStructuredErrorMessage(final ShoppingItemDto dto) {
+		String sku = dto.getSkuCode();
+		String debugMessage = "Item " + sku + " is not available";
+		String messageId = "item.not.available";
+		Map<String, String> errorData = new HashMap<>();
+		errorData.put("item-code", sku);
+
+		return new StructuredErrorMessage(messageId, debugMessage, errorData);
+	}
+
+
 
 	@Override
 	public ShoppingCart updateCartItem(final ShoppingCart shoppingCart, final long itemId, final ShoppingItemDto dto) {

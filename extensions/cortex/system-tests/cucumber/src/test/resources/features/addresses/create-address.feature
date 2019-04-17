@@ -54,7 +54,7 @@ Feature: Create Address
     And save the address uri
     When I authenticate as a registered shopper harry.potter@elasticpath.com with the default scope
     And attempt to access the other shoppers address
-    Then the HTTP status is not found
+    Then the HTTP status is forbidden
     And attempt to delete the other shoppers address
     And the HTTP status is forbidden
 

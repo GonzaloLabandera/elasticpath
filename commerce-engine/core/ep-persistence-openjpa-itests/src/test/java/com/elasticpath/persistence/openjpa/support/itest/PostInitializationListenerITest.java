@@ -185,7 +185,7 @@ public class PostInitializationListenerITest {
 		}
 	}
 
-	protected Master persistMaster(Detail ... details) {
+	protected Master persistMaster(final Detail ... details) {
 		Transaction persistTx = persistenceEngine.getSharedPersistenceSession().beginTransaction();
 		final Master persistedMaster = new Master();
 		try {

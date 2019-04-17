@@ -13,6 +13,7 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.commons.collections.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,7 +27,7 @@ import com.elasticpath.service.impl.AbstractEpPersistenceServiceImpl;
 import com.elasticpath.service.search.FacetService;
 
 /**
- * Default implementation of {@link FacetService}
+ * Default implementation of {@link FacetService}.
  */
 @SuppressWarnings("unchecked")
 public class FacetServiceImpl extends AbstractEpPersistenceServiceImpl implements FacetService {
@@ -34,6 +35,8 @@ public class FacetServiceImpl extends AbstractEpPersistenceServiceImpl implement
 	private static final Logger LOG = LoggerFactory.getLogger(FacetServiceImpl.class);
 
 	private static final String CATALOG_IDS_LABEL = "catalogIds";
+
+	private static final String FACET_GUIDS_LABEL = "facetGuids";
 
 	private final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -51,6 +54,7 @@ public class FacetServiceImpl extends AbstractEpPersistenceServiceImpl implement
 		getPersistenceEngine().delete(facet);
 	}
 
+	@Override
 	public Facet getFacet(final long facetUid) throws EpServiceException {
 		sanityCheck();
 		if (facetUid <= 0) {
@@ -72,6 +76,23 @@ public class FacetServiceImpl extends AbstractEpPersistenceServiceImpl implement
 		}
 
 		return facetsFromDatabase;
+	}
+
+	@Override
+	public Facet findFacetByStoreAndBusinessObjectId(final String storeCode, final String businessObjectId) throws EpServiceException {
+		sanityCheck();
+
+		final List<Facet> facetsFromDatabase = getPersistenceEngine()
+				.retrieveByNamedQuery("FIND_FACET_BY_STORE_AND_BUSINESS_OBJECT_ID", storeCode, businessObjectId);
+		if (CollectionUtils.isEmpty(facetsFromDatabase)) {
+			throw new EpServiceException("Can't find facet with businessObjectId=" + businessObjectId + " and storeCode=" + storeCode);
+		}
+		final Facet singleFacet = facetsFromDatabase.get(0);
+		if (singleFacet != null) {
+			singleFacet.setDisplayNameMap(getFacetDisplayMap(singleFacet));
+			singleFacet.setSortedRangeFacet(getRangeFacetMap(singleFacet.getRangeFacetValues()));
+		}
+		return singleFacet;
 	}
 
 	@Override
@@ -155,5 +176,19 @@ public class FacetServiceImpl extends AbstractEpPersistenceServiceImpl implement
 		return facetList.stream()
 				.findFirst()
 				.orElse(null);
+	}
+
+	@Override
+	public List<Facet> findByGuids(final List<String> facetGuids) {
+		sanityCheck();
+
+		return getPersistenceEngine().retrieveByNamedQueryWithList("FACET_FIND_BY_GUIDS", FACET_GUIDS_LABEL, facetGuids);
+	}
+
+	@Override
+	public List<String> findAllGuids() {
+		sanityCheck();
+
+		return getPersistenceEngine().retrieveByNamedQuery("SELECT_ALL_GUIDS");
 	}
 }

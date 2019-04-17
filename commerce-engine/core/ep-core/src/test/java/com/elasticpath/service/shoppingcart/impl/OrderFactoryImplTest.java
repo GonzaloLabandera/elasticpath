@@ -5,7 +5,6 @@ package com.elasticpath.service.shoppingcart.impl;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -13,16 +12,18 @@ import java.util.Currency;
 import java.util.Date;
 import java.util.Locale;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
-import org.jmock.Expectations;
-import org.jmock.integration.junit4.JUnitRuleMockery;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
+import org.jmock.Expectations;
+import org.jmock.integration.junit4.JUnitRuleMockery;
+
 import com.elasticpath.commons.beanframework.BeanFactory;
 import com.elasticpath.commons.constants.ContextIdNames;
+import com.elasticpath.domain.customer.Address;
 import com.elasticpath.domain.customer.Customer;
 import com.elasticpath.domain.customer.CustomerAddress;
 import com.elasticpath.domain.customer.CustomerSession;
@@ -168,73 +169,44 @@ public class OrderFactoryImplTest {
 				oneOf(cartOrderService).getCartOrderGuidByShoppingCartGuid(shoppingCart.getGuid());
 				will(returnValue(CART_ORDER_GUID));
 
-				oneOf(customerService).update(customer); will(returnValue(customer));
+				oneOf(customerService).updateCustomerFromAddress(customer, billingAddress);
+				will(returnValue(customer));
 			}
 		});
 
 		Order newOrder = orderFactory.createAndPersistNewEmptyOrder(customer, customerSession, shoppingCart, false, false);
 		newOrder = orderFactory.fillInNewOrderFromShoppingCart(newOrder, customer, customerSession, shoppingCart, pricingSnapshot);
-		assertEquals("The customer first name should have been set", billingAddress.getFirstName(), newOrder.getCustomer().getFirstName());
-		assertEquals("The customer last name should have been set", billingAddress.getLastName(), newOrder.getCustomer().getLastName());
-		assertEquals("The customer phone number should have been set", billingAddress.getPhoneNumber(), newOrder.getCustomer().getPhoneNumber());
 		assertEquals("The tax exemption ID should have been set", taxExemption.getExemptionId(), newOrder.getTaxExemption().getExemptionId());
 		assertEquals("The tax exemption data should have been set",
 				taxExemption.getData("data1Key"), newOrder.getTaxExemption().getData("data1Key"));
-	}
-
-	/**
-	 * Test that existing profile information on an anonymous customer doesn't get overwritten.
-	 */
-	@Test
-	public void testUpdateAnonymousCustomerWithExistingProfile() {
-		final Customer customer = createCustomer();
-		customer.setAnonymous(true);
-		customer.setFirstName("Jean-Luc");
-		customer.setLastName("Picard");
-		customer.setPhoneNumber("555-639-8436");
-
-		ignoreCustomerSessionInteractions();
-		final ShoppingCart shoppingCart = createShoppingCart();
-		addBillingAddressToCart(shoppingCart);
-
-		setupOrder();
-
-		context.checking(new Expectations() {
-			{
-				oneOf(cartOrderService).getCartOrderGuidByShoppingCartGuid(shoppingCart.getGuid());
-				will(returnValue(CART_ORDER_GUID));
-
-				never(customerService).update(customer);
-			}
-		});
-
-		Order newOrder = orderFactory.createAndPersistNewEmptyOrder(customer, customerSession, shoppingCart, false, false);
-		assertEquals("The customer first name should have been preserved", "Jean-Luc", newOrder.getCustomer().getFirstName());
-		assertEquals("The customer last name should have been preserved", "Picard", newOrder.getCustomer().getLastName());
-		assertEquals("The customer phone number should have been preserved", "555-639-8436", newOrder.getCustomer().getPhoneNumber());
 	}
 
 	@Test
 	public void testUpdateAnonymousCustomerWithNullBillingAddress() {
 		final Customer customer = createCustomer();
 		customer.setAnonymous(true);
+
 		ignoreCustomerSessionInteractions();
+
 		final ShoppingCart shoppingCart = createShoppingCart();
+		final ShoppingCartTaxSnapshot pricingSnapshot = createShoppingCart();
+
 		setupOrder();
 
 		context.checking(new Expectations() {
 			{
-				oneOf(cartOrderService).getCartOrderGuidByShoppingCartGuid(shoppingCart.getGuid());
+				allowing(ruleService).findByUids(Collections.emptySet());
+				will(returnValue(Collections.emptyList()));
+
+				allowing(cartOrderService).getCartOrderGuidByShoppingCartGuid(shoppingCart.getGuid());
 				will(returnValue(CART_ORDER_GUID));
 
-				never(customerService).update(customer);
+				never(customerService).updateCustomerFromAddress(with(any(Customer.class)), with(any(Address.class)));
 			}
 		});
 
 		Order newOrder = orderFactory.createAndPersistNewEmptyOrder(customer, customerSession, shoppingCart, false, false);
-		assertNull("The customer first name should be null", newOrder.getCustomer().getFirstName());
-		assertNull("The customer last name should be null", newOrder.getCustomer().getLastName());
-		assertNull("The customer phone number should be null", newOrder.getCustomer().getPhoneNumber());
+		orderFactory.fillInNewOrderFromShoppingCart(newOrder, customer, customerSession, shoppingCart, pricingSnapshot);
 	}
 
 	@SuppressWarnings("PMD.AvoidUsingHardCodedIP")

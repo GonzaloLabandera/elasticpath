@@ -3,6 +3,8 @@
  */
 package com.elasticpath.validation.service.impl;
 
+import java.util.Locale;
+import java.util.Optional;
 import javax.validation.ConstraintViolation;
 
 import com.elasticpath.domain.attribute.AttributeValue;
@@ -30,11 +32,13 @@ public class CustomerConstraintViolationsSummariser extends SimpleConstraintViol
 			CustomerProfile customerProfile = (CustomerProfile) super.getInvalidValue(violation);
 			String attributeKey = getCustomerProfileAttributeKey(violation);
 			AttributeValue attributeValue = customerProfile.getProfileValueMap().get(attributeKey);
-			if (attributeValue == null) {
-				return attributeKey;
-			} else {
-				return attributeValue.getAttribute().getName();
+			Optional<String> attributeDisplayName = Optional.empty();
+			if (attributeValue != null) {
+				// Fallback to attributeKey if the corresponding default locale display name is not set.
+				attributeDisplayName = Optional.ofNullable(attributeValue.getAttribute().getDisplayName(Locale.getDefault()));
 			}
+
+			return attributeDisplayName.isPresent() ? attributeDisplayName.get() : attributeKey;
 		}
 		return super.getPropertyName(violation);
 	}

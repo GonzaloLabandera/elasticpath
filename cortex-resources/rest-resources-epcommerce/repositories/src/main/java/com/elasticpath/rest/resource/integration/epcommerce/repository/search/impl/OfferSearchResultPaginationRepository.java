@@ -3,8 +3,6 @@
  */
 package com.elasticpath.rest.resource.integration.epcommerce.repository.search.impl;
 
-import static com.elasticpath.rest.resource.integration.epcommerce.repository.search.OfferSearchUtil.createSearchCriteria;
-
 import java.util.Currency;
 import java.util.Locale;
 import java.util.Map;
@@ -21,8 +19,8 @@ import org.slf4j.LoggerFactory;
 import com.elasticpath.repository.PaginationRepository;
 import com.elasticpath.rest.ResourceOperationFailure;
 import com.elasticpath.rest.definition.offers.OfferIdentifier;
-import com.elasticpath.rest.definition.searches.OfferSearchResultIdentifier;
-import com.elasticpath.rest.definition.searches.SearchOfferEntity;
+import com.elasticpath.rest.definition.offersearches.OfferSearchResultIdentifier;
+import com.elasticpath.rest.definition.offersearches.SearchOfferEntity;
 import com.elasticpath.rest.id.IdentifierPart;
 import com.elasticpath.rest.id.type.CompositeIdentifier;
 import com.elasticpath.rest.id.type.StringIdentifier;
@@ -33,9 +31,9 @@ import com.elasticpath.rest.pagination.PaginationEntity;
 import com.elasticpath.rest.pagination.PagingLink;
 import com.elasticpath.rest.resource.ResourceOperationContext;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.pagination.PaginatedResult;
+import com.elasticpath.rest.resource.integration.epcommerce.repository.search.OffersResourceConstants;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.search.SearchRepository;
-import com.elasticpath.rest.resource.integration.epcommerce.repository.store.StoreRepository;
-import com.elasticpath.service.search.query.KeywordSearchCriteria;
+import com.elasticpath.service.search.ProductCategorySearchCriteria;
 
 /**
  * Repository that provides lookup of item data through indexed offer search.
@@ -52,7 +50,6 @@ public class OfferSearchResultPaginationRepository<I extends OfferSearchResultId
 	private static final int FIRST_PAGE_ID = 1;
 
 	private ResourceOperationContext resourceOperationContext;
-	private StoreRepository storeRepository;
 	private SearchRepository searchRepository;
 
 	@Override
@@ -97,8 +94,8 @@ public class OfferSearchResultPaginationRepository<I extends OfferSearchResultId
 			return Single.error(ResourceOperationFailure.badRequestBody(unknownPageIdErrorMsg));
 		}
 
-		String pageSizeString = offerSearchResultIdentifier.getSearchId().getValue()
-				.get(PaginationEntity.PAGE_SIZE_PROPERTY);
+		final Map<String, String> searchId = offerSearchResultIdentifier.getSearchId().getValue();
+		String pageSizeString = searchId.get(PaginationEntity.PAGE_SIZE_PROPERTY);
 
 		if ("null".equals(pageSizeString) || StringUtils.isBlank(pageSizeString)) {
 			pageSizeString = "0";
@@ -106,13 +103,23 @@ public class OfferSearchResultPaginationRepository<I extends OfferSearchResultId
 		if (!NumberUtils.isDigits(pageSizeString)) {
 			return Single.error(ResourceOperationFailure.badRequestBody("Invalid page size"));
 		}
+
+		String searchOffers = searchId.get(SearchOfferEntity.KEYWORDS_PROPERTY);
+		String categoryCode = searchId.get(OffersResourceConstants.CATEGORY_CODE_PROPERTY);
+
+		if (searchOffers == null && categoryCode == null) {
+			return Single.error(ResourceOperationFailure.badRequestBody("Search keyword or category code must be defined."));
+		}
+
 		int pageSize = Integer.parseInt(pageSizeString);
 
-		String searchOffers = offerSearchResultIdentifier.getSearchId().getValue().get(SearchOfferEntity
-				.KEYWORDS_PROPERTY);
-		String scope = offerSearchResultIdentifier.getSearches().getScope().getValue();
+		String scope = offerSearchResultIdentifier.getScope().getValue();
 		Map<String, String> appliedFacets = offerSearchResultIdentifier.getAppliedFacets().getValue();
-		return Single.just(new OfferSearchData(pageId, pageSize, searchOffers, scope, appliedFacets));
+
+		OfferSearchData offerSearchData = new OfferSearchData(pageId, pageSize, scope, appliedFacets, searchOffers);
+		offerSearchData.setCategoryCode(categoryCode);
+
+		return Single.just(offerSearchData);
 	}
 
 	/**
@@ -173,17 +180,25 @@ public class OfferSearchResultPaginationRepository<I extends OfferSearchResultId
 	 * @return paginated result
 	 */
 	protected Single<PaginatedResult> getPaginatedResult(final OfferSearchData offerSearchData) {
-		Subject subject = resourceOperationContext.getSubject();
-		Locale locale = SubjectUtil.getLocale(subject);
-		Currency currency = SubjectUtil.getCurrency(subject);
-		String keyword = offerSearchData.getSearchKeyword();
-		Map<String, String> appliedFacets = offerSearchData.getAppliedFacets();
-		return storeRepository.findStoreAsSingle(offerSearchData.getScope())
-				.map(store -> createSearchCriteria(keyword, store, appliedFacets, locale, currency, true))
+		return getSearchCriteria(offerSearchData)
 				.flatMap(offerSearchCriteria ->
 						getPageSizeUsed(offerSearchData.getScope(), offerSearchData.getPageSize())
 								.flatMap(pageSizeUsed -> search(offerSearchData.getPageId(), offerSearchCriteria, pageSizeUsed))
 				).flatMap(paginatedResult -> validateSearchResult(offerSearchData, paginatedResult));
+	}
+
+	private Single<ProductCategorySearchCriteria> getSearchCriteria(final OfferSearchData offerSearchData) {
+		Subject subject = resourceOperationContext.getSubject();
+		Locale locale = SubjectUtil.getLocale(subject);
+		Currency currency = SubjectUtil.getCurrency(subject);
+
+		Map<String, String> appliedFacets = offerSearchData.getAppliedFacets();
+
+		String keyword = offerSearchData.getSearchKeyword();
+		String categoryCode = offerSearchData.getCategoryCode();
+		String storeCode = offerSearchData.getScope();
+
+		return searchRepository.getSearchCriteria(categoryCode, storeCode, locale, currency, appliedFacets, keyword);
 	}
 
 	private Single<PaginatedResult> validateSearchResult(final OfferSearchData offerSearchData,
@@ -197,7 +212,7 @@ public class OfferSearchResultPaginationRepository<I extends OfferSearchResultId
 		return Single.just(paginatedResult);
 	}
 
-	private Single<PaginatedResult> search(final int currentPageNumber, final KeywordSearchCriteria searchCriteria,
+	private Single<PaginatedResult> search(final int currentPageNumber, final ProductCategorySearchCriteria searchCriteria,
 										   final Integer pageSizeUsed) {
 		return searchRepository.searchForProductIds(searchCriteria, currentPageNumber, pageSizeUsed);
 	}
@@ -219,13 +234,7 @@ public class OfferSearchResultPaginationRepository<I extends OfferSearchResultId
 	}
 
 	@Reference
-	public void setStoreRepository(final StoreRepository storeRepository) {
-		this.storeRepository = storeRepository;
-	}
-
-	@Reference
 	public void setSearchRepository(final SearchRepository searchRepository) {
 		this.searchRepository = searchRepository;
 	}
-
 }

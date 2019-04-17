@@ -13,8 +13,8 @@ public class EditAttributeDialog extends AbstractDialog {
 	 */
 	public static final String EDIT_ATTRUBUTE_PARENT_CSS
 			= "div[automation-id='com.elasticpath.cmclient.catalog.CatalogMessages.AttributeAddDialog_WinTitle_Edit'] ";
-	private static final String ATTRUBUTE_NAME_INPUT_CSS = EDIT_ATTRUBUTE_PARENT_CSS
-			+ "div[automation-id='com.elasticpath.cmclient.catalog.CatalogMessages.AttributeAddDialog_AttributeName'] > input";
+	private static final String ATTRIBUTE_LANGUAGE_CSS = EDIT_ATTRUBUTE_PARENT_CSS + "div[widget-id='Display Name'] ";
+	private static final String ATTRUBUTE_NAME_INPUT_CSS = ATTRIBUTE_LANGUAGE_CSS + "+ div[widget-type='Text'] > input";
 	private static final String OK_BUTTON_CSS = EDIT_ATTRUBUTE_PARENT_CSS
 			+ "div[automation-id='com.elasticpath.cmclient.core.CoreMessages.AbstractEpDialog_ButtonOK'][seeable='true']";
 

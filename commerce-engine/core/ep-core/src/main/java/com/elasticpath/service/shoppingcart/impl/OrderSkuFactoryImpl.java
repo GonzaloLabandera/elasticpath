@@ -249,6 +249,7 @@ public class OrderSkuFactoryImpl implements OrderSkuFactory {
 		orderSku.setDisplaySkuOptions(getSkuOptionsDisplayString(productSku, locale));
 		orderSku.setDisplayName(product.getDisplayName(locale));
 		orderSku.setBundleConstituent(shoppingItem.isBundleConstituent());
+		orderSku.setItemType(shoppingItem.getItemType());
 		if (productSku.getImage() != null) {
 			orderSku.setImage(productSku.getImage());
 		}

@@ -122,7 +122,7 @@ public class LastModifiedDateTest extends BasicSpringContextTest {
 		AttributeImpl attribute = new AttributeImpl();
 		attribute.setKey("TEST_ATTRIBUTE");
 		attribute.setAttributeType(AttributeType.BOOLEAN);
-		attribute.setName("TestName");
+		attribute.setDisplayName("TestName", Locale.ENGLISH);
 		attribute.setAttributeUsage(AttributeUsageImpl.CUSTOMERPROFILE_USAGE);
 		attribute.setGlobal(false);
 		

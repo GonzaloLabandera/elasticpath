@@ -1,15 +1,11 @@
-/**
- * Copyright © 2016 Elastic Path Software Inc. All rights reserved.
- */
 /*
-* Copyright © 2013 Elastic Path Software Inc. All rights reserved.
-*/
+ * Copyright © 2019 Elastic Path Software Inc. All rights reserved.
+ */
 package com.elasticpath.rest.relos.rs.authentication.springoauth2.transformer.impl;
 
 import java.util.Iterator;
 
 import com.google.common.base.Splitter;
-
 import org.apache.commons.lang3.StringUtils;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -20,7 +16,7 @@ import com.elasticpath.domain.auth.OAuth2AuthenticationMemento;
 import com.elasticpath.domain.auth.UserAuthenticationMemento;
 import com.elasticpath.rest.ResourceTypeFactory;
 import com.elasticpath.rest.chain.Assign;
-import com.elasticpath.rest.relos.rs.authentication.springoauth2.dto.AccessTokenDto;
+import com.elasticpath.rest.relos.rs.authentication.dto.AccessTokenDto;
 import com.elasticpath.rest.relos.rs.authentication.springoauth2.transformer.AccessTokenMementoTransformer;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.oauth2.OAuth2AccessTokenRepository;
 

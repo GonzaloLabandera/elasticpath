@@ -145,6 +145,20 @@ public class CustomerRepositoryImpl implements CustomerRepository {
 		}.execute();
 	}
 
+	@Override
+	@CacheResult
+	public ExecutionResult<Void> isCustomerGuidExists(final String guid) {
+		return new ExecutionResultChain() {
+			public ExecutionResult<?> build() {
+				final boolean customerExists = customerService.isCustomerGuidExists(guid);
+				if (!customerExists) {
+					return ExecutionResultFactory.createNotFound();
+				}
+				return ExecutionResultFactory.createReadOK(null);
+			}
+		}.execute();
+	}
+
 	private ExecutionResult<CustomerSession> findByCustomerSessionByGuidWithoutException(final String guid) {
 		try {
 			return customerSessionRepository.findCustomerSessionByGuid(guid);
@@ -205,7 +219,8 @@ public class CustomerRepositoryImpl implements CustomerRepository {
 	 * @return Completable
 	 */
 	protected Completable updateShippingAddressOnCustomerCart(final Customer updatedCustomer, final CustomerAddress address) {
-		if (updatedCustomer.getPreferredShippingAddress().getGuid().equals(address.getGuid())) {
+		if (updatedCustomer.getPreferredShippingAddress() != null
+				&& updatedCustomer.getPreferredShippingAddress().getGuid().equals(address.getGuid())) {
 			CartOrderRepository cartOrderRepository = cartOrderRepositoryProvider.get();
 			return cartOrderRepository.findCartOrderGuidsByCustomerAsObservable(updatedCustomer.getStoreCode(), updatedCustomer.getGuid())
 					.firstElement()

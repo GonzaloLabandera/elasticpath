@@ -156,7 +156,7 @@ public class SettingValueBackedPredicateITest extends CamelTestSupport {
 		private final Endpoint incomingEndpoint;
 		private final Endpoint outgoingEndpoint;
 
-		public PredicateRoute(final Endpoint incomingEndpoint, final Endpoint outgoingEndpoint, final SettingValueBackedPredicate predicate) {
+		PredicateRoute(final Endpoint incomingEndpoint, final Endpoint outgoingEndpoint, final SettingValueBackedPredicate predicate) {
 			this.incomingEndpoint = incomingEndpoint;
 			this.outgoingEndpoint = outgoingEndpoint;
 			this.predicate = predicate;

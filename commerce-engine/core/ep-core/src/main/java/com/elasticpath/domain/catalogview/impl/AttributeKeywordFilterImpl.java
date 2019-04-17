@@ -97,7 +97,7 @@ public class AttributeKeywordFilterImpl extends AbstractFilterImpl<AttributeKeyw
 		}
 
 		if (this.getAttribute() != null) {
-			return this.getAttribute().getName();
+			return this.getAttribute().getDisplayName(locale);
 		}
 		return null;
 	}

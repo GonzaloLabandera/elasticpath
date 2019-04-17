@@ -17,6 +17,9 @@ import com.elasticpath.tools.sync.target.result.SyncResultItem;
  */
 public class SummaryImpl implements Summary {
 
+	private long startTime;
+	private long endTime;
+
 	private final List<SyncErrorResultItem> errorItems = new ArrayList<>();
 	
 	private final List<SyncResultItem> successItems = new ArrayList<>();
@@ -57,6 +60,26 @@ public class SummaryImpl implements Summary {
 		all.addAll(getSuccessResults());
 		all.addAll(getSyncErrors());
 		return all;
+	}
+
+	@Override
+	public void setStartTime(final Long startTime) {
+		this.startTime = startTime;
+	}
+
+	@Override
+	public void setEndTime(final Long endTime) {
+		this.endTime = endTime;
+	}
+
+	@Override
+	public Long getEndTime() {
+		return this.endTime;
+	}
+
+	@Override
+	public Long getStartTime() {
+		return this.startTime;
 	}
 
 	@Override

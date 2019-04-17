@@ -8,7 +8,7 @@ package com.elasticpath.rest.resource.coupons.constants;
  */
 public final class CouponsResourceConstants {
 
-	private CouponsResourceConstants() {}
+	private CouponsResourceConstants() { }
 
 	/**
 	 * Cache-Control max age.

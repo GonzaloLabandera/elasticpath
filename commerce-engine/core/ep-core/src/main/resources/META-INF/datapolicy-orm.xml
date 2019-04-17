@@ -94,18 +94,18 @@
 		</query>
 	</named-query>
 
-	<named-query name="CUSTOMERCONSENT_FIND_BY_GUID">
+	<named-query name="CUSTOMERCONSENTHISTORY_FIND_BY_GUID">
 		<query>
 			SELECT c
-			FROM CustomerConsentImpl c
+			FROM CustomerConsentHistoryImpl c
 			WHERE c.guid = ?1
 		</query>
 	</named-query>
 
-	<named-query name="CUSTOMERCONSENT_FIND_BY_GUIDS">
+	<named-query name="CUSTOMERCONSENTHISTORY_FIND_BY_GUIDS">
 		<query>
 			SELECT c
-			FROM CustomerConsentImpl c
+			FROM CustomerConsentHistoryImpl c
 			WHERE c.guid IN (:list)
 		</query>
 	</named-query>
@@ -118,11 +118,42 @@
 		</query>
 	</named-query>
 
-	<named-query name="CUSTOMERCONSENT_UPDATE_CUSTOMER_GUID_BY_UIDS">
+	<named-query name="CUSTOMERCONSENTHISTORY_FIND_BY_CUSTOMER_GUID">
+		<query>
+			SELECT c
+			FROM CustomerConsentHistoryImpl c
+			WHERE c.customerGuid = ?1
+		</query>
+	</named-query>
+
+	<named-query name="CUSTOMERCONSENT_UPDATE_CUSTOMER_GUID_BY_OLD_CUSTOMER_GUID">
 		<query>
 			UPDATE CustomerConsentImpl c
-			SET c.customerGuid = ?1
-			WHERE c.uidPk IN (:list)
+			SET c.customerGuid = ?2
+			WHERE c.customerGuid = ?1
+		</query>
+	</named-query>
+
+	<named-query name="CUSTOMERCONSENTHISTORY_UPDATE_CUSTOMER_GUID_BY_OLD_CUSTOMER_GUID">
+		<query>
+			UPDATE CustomerConsentHistoryImpl ch
+			SET ch.customerGuid = ?2
+			WHERE ch.customerGuid = ?1
+		</query>
+	</named-query>
+
+	<named-query name="CUSTOMERCONSENT_FIND_BY_CUSTOMER_GUIDS">
+		<query>
+			SELECT c
+			FROM CustomerConsentImpl c
+			WHERE c.customerGuid in (:list)
+		</query>
+	</named-query>
+
+	<named-query name="CUSTOMERCONSENT_CLEANUP_BY_UIDPKS">
+		<query>
+			DELETE FROM CustomerConsentImpl c
+			WHERE c.uidPk in (:list)
 		</query>
 	</named-query>
 
@@ -130,6 +161,13 @@
 		<query>
 			SELECT c
 			FROM CustomerConsentImpl c
+		</query>
+	</named-query>
+
+	<named-query name="CUSTOMERCONSENTHISTORY_SELECT_ALL">
+		<query>
+			SELECT c
+			FROM CustomerConsentHistoryImpl c
 		</query>
 	</named-query>
 
@@ -148,9 +186,29 @@
 			FROM CustomerConsentImpl cc1
 			WHERE cc1.customerGuid = ?1
 			AND cc1.dataPolicy.guid = ?2
-			AND cc1.consentDate=(SELECT max(cc2.consentDate)
-				FROM CustomerConsentImpl cc2 WHERE cc2.customerGuid = cc1.customerGuid AND cc2.dataPolicy = cc1.dataPolicy)
 			ORDER BY cc1.uidPk DESC
+		</query>
+	</named-query>
+
+	<named-query name="CUSTOMER_CONSENT_DELETE_BY_CUSTOMER_AND_DATA_POLICY_GUID_LATEST">
+		<query>
+			DELETE FROM CustomerConsentImpl cc1
+			WHERE cc1.customerGuid = ?1
+			AND cc1.dataPolicy.guid = ?2
+		</query>
+	</named-query>
+
+	<named-query name="CUSTOMER_CONSENT_DELETE_BY_CUSTOMER_UIDS">
+		<query>
+			DELETE FROM CustomerConsentHistoryImpl cc1
+			WHERE cc1.customerGuid in (SELECT cust.guid FROM CustomerImpl cust WHERE cust.uidPk IN (:list))
+		</query>
+	</named-query>
+
+	<named-query name="CUSTOMER_CONSENT_DELETE_BY_CUSTOMER_UIDS_LATEST">
+		<query>
+			DELETE FROM CustomerConsentImpl cc1
+			WHERE cc1.customerGuid in (SELECT cust.guid FROM CustomerImpl cust WHERE cust.uidPk IN (:list))
 		</query>
 	</named-query>
 
@@ -160,8 +218,6 @@
 			JOIN rc.dataPolicy rpol
 			JOIN rpol.dataPoints rpt
 			WHERE rc.action = com.elasticpath.domain.datapolicy.ConsentAction.REVOKED
-				AND rc.consentDate = (SELECT max(ic.consentDate)
-					FROM CustomerConsentImpl ic WHERE ic.customerGuid = rc.customerGuid AND ic.dataPolicy = rc.dataPolicy)
 				AND rpt.removable = true
 				AND rpt.uidPk NOT IN (
 					SELECT gpt.uidPk
@@ -171,8 +227,7 @@
 					WHERE gpt.removable = true
 						AND rc.customerGuid=gcons.customerGuid
 						AND gcons.action = com.elasticpath.domain.datapolicy.ConsentAction.GRANTED
-						AND gcons.consentDate = (SELECT max(ic.consentDate)
-							FROM CustomerConsentImpl ic WHERE ic.customerGuid = gcons.customerGuid AND ic.dataPolicy = gcons.dataPolicy))
+				)
 		</query>
 	</named-query>
 
@@ -182,8 +237,6 @@
 			JOIN rc.dataPolicy rpol
 			JOIN rpol.dataPoints rpt
 			WHERE rc.action = com.elasticpath.domain.datapolicy.ConsentAction.GRANTED
-				AND rc.consentDate = (SELECT max(ic.consentDate)
-					FROM CustomerConsentImpl ic WHERE ic.customerGuid = rc.customerGuid AND ic.dataPolicy = rc.dataPolicy)
 				AND rpt.removable = true
 		</query>
 	</named-query>
@@ -238,12 +291,6 @@
 			FROM CustomerConsentImpl cc
 			WHERE cc.customerGuid = ?1
 			AND cc.action = ?2
-			AND cc.uidPk=(
-				SELECT max(cc2.uidPk)
-				FROM CustomerConsentImpl cc2 WHERE cc2.customerGuid = cc.customerGuid AND cc2.dataPolicy = cc.dataPolicy
-				AND cc2.consentDate=(
-					SELECT max(cc3.consentDate)
-					FROM CustomerConsentImpl cc3 WHERE cc3.customerGuid = cc2.customerGuid AND cc3.dataPolicy = cc2.dataPolicy))
 		</query>
 	</named-query>
 
@@ -252,12 +299,6 @@
 			SELECT cc
 			FROM CustomerConsentImpl cc
 			WHERE cc.customerGuid = ?1
-			AND cc.uidPk=(
-				SELECT max(cc2.uidPk)
-				FROM CustomerConsentImpl cc2 WHERE cc2.customerGuid = cc.customerGuid AND cc2.dataPolicy = cc.dataPolicy
-				AND cc2.consentDate=(
-					SELECT max(cc3.consentDate)
-					FROM CustomerConsentImpl cc3 WHERE cc3.customerGuid = cc2.customerGuid AND cc3.dataPolicy = cc2.dataPolicy))
 			AND cc.dataPolicy.state = com.elasticpath.domain.datapolicy.DataPolicyState.ACTIVE
 		</query>
 	</named-query>
@@ -267,12 +308,6 @@
 			SELECT cc
 			FROM CustomerConsentImpl cc
 			WHERE cc.customerGuid = ?1
-			AND cc.uidPk=(
-				SELECT max(cc2.uidPk)
-				FROM CustomerConsentImpl cc2 WHERE cc2.customerGuid = cc.customerGuid AND cc2.dataPolicy = cc.dataPolicy
-				AND cc2.consentDate=(
-					SELECT max(cc3.consentDate)
-					FROM CustomerConsentImpl cc3 WHERE cc3.customerGuid = cc2.customerGuid AND cc3.dataPolicy = cc2.dataPolicy))
 			AND (cc.dataPolicy.state = com.elasticpath.domain.datapolicy.DataPolicyState.ACTIVE
 				OR cc.dataPolicy.state = com.elasticpath.domain.datapolicy.DataPolicyState.DISABLED)
 		</query>

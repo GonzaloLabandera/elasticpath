@@ -40,10 +40,10 @@
 	   icon="icons/price-list-assignment_default_22.png"
 	   id="com.elasticpath.cmclient.pricelistassignments.views.PriceListAssigmentsSearchView"
 	   name="%priceListAssignmentSearchResultsView.name">
-      </view>      
-      
+      </view>
+
    </extension>
-   
+
    <extension point="org.eclipse.ui.editors">
 	     <editor
 	     	name="%priceListEditor.name"
@@ -54,8 +54,8 @@
 			contributorClass="com.elasticpath.cmclient.core.editors.BaseCmClientEditorContributor"
 	     >
 	     </editor>
-   </extension>   
-   
+   </extension>
+
    <extension point="com.elasticpath.cmclient.core.authorizations">
 	   <permissions>
       	 <permission
@@ -79,13 +79,13 @@
                name="%runProductPriceListsExport.name">
          </permission>
 	   </permissions>
-	   
+
       <activity
             id="com.elasticpath.cmclient.pricelistmanager.authorizations.activity"
             name="%manageProductPricingPermission.name"
             perspectiveId="com.elasticpath.cmclient.pricelistmanager.perspective">
       </activity>
-   </extension>   
+   </extension>
 
    <extension
          point="org.eclipse.ui.perspectiveExtensions">
@@ -96,7 +96,7 @@
          </actionSet>
       </perspectiveExtension>
    </extension>
-   
+
 
    <extension
          point="org.eclipse.ui.actionSets">
@@ -104,7 +104,7 @@
             id="com.elasticpath.cmclient.pricelistmanager.workbenchActionSet"
             label="Create Price List ActionSet">
       </actionSet>
-   </extension>   
+   </extension>
 
    <extension
           point="org.eclipse.ui.menus">
@@ -113,9 +113,10 @@
             <command
                     commandId="com.elasticpath.cmclient.pricelistmanager.command.openPerspective"
                     id="perspectiveMenu.pricelistmanagerItem"
-                    label="%priceListManagerMenu.name"
                     icon="icons/price-list_default_34.png"
-                    tooltip="%priceListManagerMenu.name">
+                    label="%priceListManagerMenu.name"
+                    tooltip="%priceListManagerMenu.name"
+                    mode="FORCE_TEXT">
                <visibleWhen
                        checkEnabled="true">
                </visibleWhen>
@@ -173,7 +174,7 @@
 	   <command
           id="com.elasticpath.cmclient.pricelistmanager.command.openPerspective"
           name="Open Price List Manager Perspective">
-       </command>	   
+       </command>
       <category
             description="Create Price List Command"
             id="com.elasticpath.cmclient.pricelistmanager.commands"
@@ -186,7 +187,7 @@
             id="com.elasticpath.cmclient.pricelistmanager.command.create.pricelist"
             name="%commands.createPriceList.name">
       </command>
-      
+
       <category
             description="Create Price List Assignment Command"
             id="com.elasticpath.cmclient.pricelistmanager.commands"
@@ -199,7 +200,7 @@
             id="com.elasticpath.cmclient.pricelistmanager.command.create.pricelistassignment"
             name="%commands.createPriceListAssignment.name">
       </command>
-      
+
    </extension>
 
    <extension
@@ -211,7 +212,7 @@
          </class>
       </handler>
    </extension>
-   
+
    <extension
          point="org.eclipse.ui.bindings">
        <key
@@ -239,7 +240,7 @@
              priority="10"
              statePolicy="com.elasticpath.cmclient.pricelistmanager.policy.CsvExportPricelistActionStatePolicy"
              targetId="csvExportPricelistAction">
-       </statePolicyContribution>          
+       </statePolicyContribution>
        <statePolicyContribution
              priority="10"
              statePolicy="com.elasticpath.cmclient.pricelistmanager.policy.CreatePriceListHandlerStatePolicy"
@@ -249,7 +250,7 @@
              priority="10"
              statePolicy="com.elasticpath.cmclient.pricelistmanager.policy.CreatePriceListHandlerStatePolicy"
              targetId="createPlaHandler">
-       </statePolicyContribution>       
+       </statePolicyContribution>
        <statePolicyContribution
              priority="10"
              statePolicy="com.elasticpath.cmclient.pricelistmanager.policy.PriceListEditorAuthorizationStatePolicy"
@@ -274,11 +275,11 @@
              priority="10"
              statePolicy="com.elasticpath.cmclient.pricelistmanager.policy.PriceListViewSelectionStatePolicy"
              targetId="deletePriceListAction">
-	   </statePolicyContribution>             
+	   </statePolicyContribution>
        <statePolicyContribution
              priority="10"
              statePolicy="com.elasticpath.cmclient.pricelistmanager.policy.PriceListViewSelectionStatePolicy"
-             targetId="csvExportPricelistAction">             
+             targetId="csvExportPricelistAction">
        </statePolicyContribution>
        <statePolicyContribution
              priority="10"

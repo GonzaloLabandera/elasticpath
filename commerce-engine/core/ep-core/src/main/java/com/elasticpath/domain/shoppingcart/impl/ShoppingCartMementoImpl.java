@@ -48,7 +48,7 @@ import com.elasticpath.persistence.support.FetchGroupConstants;
 	@FetchGroup(
 			name = FetchGroupConstants.SHOPPING_ITEM_CHILD_ITEMS, 
 			attributes = {
-					@FetchAttribute(name = "allItems", recursionDepth = -1),
+					@FetchAttribute(name = "allItems"),
 					@FetchAttribute(name = "storeCode")
 			}
 		)

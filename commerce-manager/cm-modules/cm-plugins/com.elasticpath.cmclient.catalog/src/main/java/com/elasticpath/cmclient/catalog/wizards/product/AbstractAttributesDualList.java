@@ -161,7 +161,7 @@ public abstract class AbstractAttributesDualList extends AbstractPolicyAwareDual
 		@Override
 		public String getText(final Object element) {
 			final Attribute attr = (Attribute) element;
-			return attr.getName();
+			return attr.getDisplayName(attr.getCatalog().getDefaultLocale(), true, true);
 		}
 	}
 

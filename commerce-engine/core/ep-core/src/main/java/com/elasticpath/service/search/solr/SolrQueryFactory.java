@@ -34,7 +34,8 @@ public interface SolrQueryFactory {
 	 * @return a {@link SolrQuery} specific query
 	 */
 	SolrQuery composeSpecificQuery(QueryComposer luceneQueryComposer, SearchCriteria searchCriteria,
-								   int startIndex, int maxResults, SearchConfig searchConfig, boolean fuzzyQuery, Map<String, Filter<?>> filterLookup);
+								   int startIndex, int maxResults, SearchConfig searchConfig, boolean fuzzyQuery,
+								   Map<String, Filter<?>> filterLookup);
 
 	/**
 	 * Composes a keyword search query.

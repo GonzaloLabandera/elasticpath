@@ -13,10 +13,11 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
-import org.apache.commons.lang.StringUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
+import org.apache.commons.lang.StringUtils;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.security.authentication.encoding.PasswordEncoder;
@@ -83,7 +84,7 @@ public class CustomerImplTest {
 	 */
 	@Test
 	public void testGetUserId() {
-		assertThat(customerImpl.getUserId()).isNull();
+		assertThat(customerImpl.getUserId()).isNotNull();
 	}
 
 	/**

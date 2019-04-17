@@ -16,6 +16,8 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.StringTokenizer;
+import java.util.UUID;
+
 import javax.persistence.Basic;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -38,8 +40,6 @@ import javax.persistence.TemporalType;
 import javax.persistence.Transient;
 
 import com.google.common.base.Objects;
-import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
 import org.apache.openjpa.persistence.DataCache;
 import org.apache.openjpa.persistence.ElementDependent;
 import org.apache.openjpa.persistence.FetchAttribute;
@@ -51,7 +51,6 @@ import org.apache.openjpa.persistence.jdbc.ForeignKey;
 import org.springframework.security.core.GrantedAuthority;
 
 import com.elasticpath.commons.constants.ContextIdNames;
-import com.elasticpath.commons.constants.WebConstants;
 import com.elasticpath.commons.util.PasswordGenerator;
 import com.elasticpath.domain.attribute.Attribute;
 import com.elasticpath.domain.attribute.CustomerProfileValue;
@@ -82,8 +81,6 @@ import com.elasticpath.plugin.payment.dto.PaymentMethod;
 		"PMD.UselessOverridingMethod", "PMD.ExcessiveClassLength", "PMD.TooManyMethods", "PMD.ExcessivePublicCount", "PMD.ExcessiveImports",
 		"PMD.GodClass" })
 public class CustomerImpl extends AbstractLegacyEntityImpl implements Customer {
-
-	private static final Logger LOG = Logger.getLogger(CustomerImpl.class);
 
 	private static final int CURRENCY_LENGTH_ISO4217 = 3;
 
@@ -200,21 +197,20 @@ public class CustomerImpl extends AbstractLegacyEntityImpl implements Customer {
 	private Collection<PaymentMethod> paymentMethods = new ArrayList<>();
 
 	private PaymentMethod defaultPaymentMethod;
-	private int userIdMode;
 
 	private boolean firstTimeBuyer = true;
 
 	@Override
 	public void initialize() {
 		super.initialize();
+		if (getUserId() == null) {
+			setUserId(UUID.randomUUID().toString());
+		}
 		if (getCreationDate() == null) {
 			setCreationDate(new Date());
 		}
 		if (getLastEditDate() == null) {
 			setLastEditDate(new Date());
-		}
-		if (getCustomerAuthenticationInternal() == null) {
-			initCustomerAuthentication();
 		}
 	}
 
@@ -249,53 +245,6 @@ public class CustomerImpl extends AbstractLegacyEntityImpl implements Customer {
 	@Override
 	public void setEmail(final String email) {
 		getCustomerProfile().setStringProfileValue(ATT_KEY_CP_EMAIL, email);
-		if (StringUtils.isBlank(getUserId())) {
-			setUserIdBasedOnUserIdMode(email);
-		}
-	}
-
-	@Override
-	public void setUserIdAsEmail() {
-		setUserIdBasedOnUserIdMode(getEmail());
-	}
-
-	@Override
-	@SuppressWarnings("deprecation")
-	public void setUserIdBasedOnUserIdMode(final String userId) {
-		if (StringUtils.isBlank(userId)) {
-			LOG.debug("Blank user ID.");
-		}
-		// Generate the userId according to user Id mode
-		final int userIdMode = getUserIdMode();
-		if (userIdMode == WebConstants.USE_EMAIL_AS_USER_ID_MODE) {
-			setUserId(userId);
-		} else if (userIdMode == WebConstants.GENERATE_UNIQUE_PERMANENT_USER_ID_MODE) {
-			setUserId(userId + getUtility().getRandomStringWithLength(SUFFIX_LENGTH));
-		}
-	}
-
-	/**
-	 * Gets user ID mode.  For new customer objects, this is normally set by the bean factory
-	 * (see prototypes.xml).  For existing customer objects loaded from persistence, this is set by
-	 * OpenJPA via the {@link com.elasticpath.service.customer.impl.CustomerPostLoadStrategy}.
-	 *
-	 * @return user ID mode.
-	 */
-	@Override
-	@Transient
-	public int getUserIdMode() {
-		return userIdMode;
-	}
-
-	/**
-	 * Sets the user ID mode.  For new customer objects, this is normally set by the bean factory
-	 * (see prototypes.xml).  For existing customer objects loaded from persistence, this is set by
-	 * OpenJPA via the {@link com.elasticpath.service.customer.impl.CustomerPostLoadStrategy}.
-	 *
-	 * @param userIdMode the user id mode
-	 */
-	public void setUserIdMode(final int userIdMode) {
-		this.userIdMode = userIdMode;
 	}
 
 	@Override
@@ -497,22 +446,31 @@ public class CustomerImpl extends AbstractLegacyEntityImpl implements Customer {
 	@Override
 	@Transient
 	public String getPassword() {
+		if (getCustomerAuthentication() == null) {
+			return null;
+		}
 		return getCustomerAuthentication().getPassword();
 	}
 
 	@Override
-	public void setPassword(final String password) {
+	public void setPassword(final String password, final String salt) {
+		initCustomerAuthentication();
 		getCustomerAuthentication().setPassword(password);
+		getCustomerAuthentication().setSalt(salt);
 	}
 
 	@Override
 	public void setClearTextPassword(final String clearTextPassword) {
+		initCustomerAuthentication();
 		getCustomerAuthentication().setClearTextPassword(clearTextPassword);
 	}
 
 	@Override
 	@Transient
 	public String getClearTextPassword() {
+		if (getCustomerAuthentication() == null) {
+			return null;
+		}
 		return getCustomerAuthentication().getClearTextPassword();
 	}
 
@@ -760,14 +718,7 @@ public class CustomerImpl extends AbstractLegacyEntityImpl implements Customer {
 	@Override
 	@Transient
 	public String getUsername() {
-		String userName;
-		int userIdMode = getUserIdMode();
-		if (userIdMode == WebConstants.GENERATE_UNIQUE_PERMANENT_USER_ID_MODE) {
-			userName = getEmail();
-		} else {
-			userName = getUserId();
-		}
-		return userName;
+		return getUserId();
 	}
 
 	@Override
@@ -833,34 +784,23 @@ public class CustomerImpl extends AbstractLegacyEntityImpl implements Customer {
 		((CustomerProfileImpl) getCustomerProfile()).setCustomerProfileAttributeMap(attributes);
 	}
 
+	@Override
 	@OneToOne(targetEntity = CustomerAuthenticationImpl.class, cascade = { CascadeType.ALL }, fetch = FetchType.EAGER)
 	@JoinColumn(name = "AUTHENTICATION_UID")
-	public CustomerAuthentication getCustomerAuthenticationInternal() {
-		return customerAuthentication;
-	}
-
-	public void setCustomerAuthenticationInternal(final CustomerAuthentication customerAuthentication) {
-		this.customerAuthentication = customerAuthentication;
-	}
-
-	@Override
-	@Transient
 	public CustomerAuthentication getCustomerAuthentication() {
-		if (getCustomerAuthenticationInternal() == null) {
-			initCustomerAuthentication();
-		}
-
-		return getCustomerAuthenticationInternal();
-	}
-
-	private void initCustomerAuthentication() {
-		CustomerAuthentication customerAuthentication = getBean(ContextIdNames.CUSTOMER_AUTHENTICATION);
-		setCustomerAuthenticationInternal(customerAuthentication);
+		return customerAuthentication;
 	}
 
 	@Override
 	public void setCustomerAuthentication(final CustomerAuthentication customerAuthentication) {
-		setCustomerAuthenticationInternal(customerAuthentication);
+		this.customerAuthentication = customerAuthentication;
+	}
+
+	private void initCustomerAuthentication() {
+		if (getCustomerAuthentication() == null) {
+			CustomerAuthentication customerAuthentication = getBean(ContextIdNames.CUSTOMER_AUTHENTICATION);
+			setCustomerAuthentication(customerAuthentication);
+		}
 	}
 
 	@Override

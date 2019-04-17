@@ -23,19 +23,24 @@ public class ActivityToolbar extends AbstractToolbar {
 
 	private static final String TOOLBAR_APPEARANCE_ID_CSS = "div[appearance-id='toolbar-button']";
 	private static final String TOOLBAR_CATALOG_MANAGEMENT_BUTTON_CSS
-			= TOOLBAR_APPEARANCE_ID_CSS + "[widget-id*='Catalog Management']";
+			= TOOLBAR_APPEARANCE_ID_CSS + "[widget-id^='Catalog']";
 	private static final String TOOLBAR_PRICE_LIST_MANAGER_BUTTON_CSS
-			= TOOLBAR_APPEARANCE_ID_CSS + "[widget-id*='Price List Manager']";
+			= TOOLBAR_APPEARANCE_ID_CSS + "[widget-id*='Price List'],"
+			+ TOOLBAR_APPEARANCE_ID_CSS + "[widget-id='Price List (Alt+2)']";
 	private static final String TOOLBAR_PROMOTIONS_SHIPPING_BUTTON_CSS
-			= TOOLBAR_APPEARANCE_ID_CSS + "[widget-id*='Promotions/Shipping']";
+			= TOOLBAR_APPEARANCE_ID_CSS + "[widget-id*='Store'],"
+			+	TOOLBAR_APPEARANCE_ID_CSS + "[widget-id='Store (Alt+3)']";
 	private static final String TOOLBAR_CUSTOMER_SERVICE_BUTTON_CSS
-			= TOOLBAR_APPEARANCE_ID_CSS + "[widget-id*='Customer Service']";
+			= TOOLBAR_APPEARANCE_ID_CSS + "[widget-id*='Customers'],"
+			+	TOOLBAR_APPEARANCE_ID_CSS + "[widget-id='Customers (Alt+4)']";
 	private static final String TOOLBAR_SHIPPING_RECEIVING_BUTTON_CSS
-			= TOOLBAR_APPEARANCE_ID_CSS + "[widget-id*='Shipping/Receiving']";
+      = TOOLBAR_APPEARANCE_ID_CSS + "[widget-id*='Warehouse']";
 	private static final String TOOLBAR_REPORTING_BUTTON_CSS
-			= TOOLBAR_APPEARANCE_ID_CSS + "[widget-id*='Reporting']";
+			= TOOLBAR_APPEARANCE_ID_CSS + "[widget-id*='Reporting'],"
+			+	TOOLBAR_APPEARANCE_ID_CSS + "[widget-id='Reporting (Alt+8)']";
 	private static final String TOOLBAR_CONFIGURATION_BUTTON_CSS
-			= TOOLBAR_APPEARANCE_ID_CSS + "[widget-id*='Configuration']";
+			= TOOLBAR_APPEARANCE_ID_CSS + "[widget-id*='Configuration'],"
+			+	TOOLBAR_APPEARANCE_ID_CSS + "[widget-id='Configuration (Alt+8)']";
 	private static final String TOOLBAR_CHANGE_SET_BUTTON_CSS
 			= TOOLBAR_APPEARANCE_ID_CSS + "[widget-id*='Change Set']";
 	private static final String CHANGESET_TOOL_ITEM
@@ -75,7 +80,7 @@ public class ActivityToolbar extends AbstractToolbar {
 	 * @return CustomerService
 	 */
 	public CustomerService clickCustomerServiceButton() {
-		clickToolbarButton(TOOLBAR_CUSTOMER_SERVICE_BUTTON_CSS, "Customer Service");
+		clickToolbarButton(TOOLBAR_CUSTOMER_SERVICE_BUTTON_CSS, "Customers");
 		return new CustomerService(getDriver());
 	}
 
@@ -86,7 +91,7 @@ public class ActivityToolbar extends AbstractToolbar {
 	 * @return CatalogManagement
 	 */
 	public CatalogManagement clickCatalogManagementButton() {
-		clickToolbarButton(TOOLBAR_CATALOG_MANAGEMENT_BUTTON_CSS, "Catalog Management");
+		clickToolbarButton(TOOLBAR_CATALOG_MANAGEMENT_BUTTON_CSS, "Catalog");
 		return new CatalogManagement(getDriver());
 	}
 
@@ -96,7 +101,7 @@ public class ActivityToolbar extends AbstractToolbar {
 	 * @return PriceListManagement
 	 */
 	public PriceListManagement clickPriceListManagementButton() {
-		clickToolbarButton(TOOLBAR_PRICE_LIST_MANAGER_BUTTON_CSS, "Price List Manager");
+		clickToolbarButton(TOOLBAR_PRICE_LIST_MANAGER_BUTTON_CSS, "Price List");
 		return new PriceListManagement(getDriver());
 	}
 
@@ -106,7 +111,7 @@ public class ActivityToolbar extends AbstractToolbar {
 	 * @return StoreMarketing
 	 */
 	public PromotionsShipping clickPromotionsShippingButton() {
-		clickToolbarButton(TOOLBAR_PROMOTIONS_SHIPPING_BUTTON_CSS, "Promotions/Shipping");
+		clickToolbarButton(TOOLBAR_PROMOTIONS_SHIPPING_BUTTON_CSS, "Warehouse");
 		return new PromotionsShipping(getDriver());
 	}
 
@@ -116,7 +121,7 @@ public class ActivityToolbar extends AbstractToolbar {
 	 * @return ShippingReceiving
 	 */
 	public ShippingReceiving clickShippingReceivingButton() {
-		clickToolbarButton(TOOLBAR_SHIPPING_RECEIVING_BUTTON_CSS, "Shipping Receiving");
+		clickToolbarButton(TOOLBAR_SHIPPING_RECEIVING_BUTTON_CSS, "Warehouse");
 		return new ShippingReceiving(getDriver());
 	}
 

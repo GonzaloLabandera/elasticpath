@@ -4,6 +4,7 @@
 package com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder.impl;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
@@ -15,6 +16,7 @@ import com.google.common.annotations.VisibleForTesting;
 import io.reactivex.Completable;
 import io.reactivex.Observable;
 import io.reactivex.Single;
+
 import com.elasticpath.common.dto.ShoppingItemDto;
 import com.elasticpath.common.dto.sellingchannel.ShoppingItemDtoFactory;
 import com.elasticpath.domain.catalog.ProductSku;
@@ -178,18 +180,28 @@ public class ShoppingCartRepositoryImpl implements ShoppingCartRepository {
 	@Override
 	@CacheRemove(typesToInvalidate = {ShoppingCart.class, ShoppingCartPricingSnapshot.class, ShoppingCartTaxSnapshot.class})
 	public Single<ShoppingItem> addItemToCart(final ShoppingCart cart, final String skuCode, final int quantity, final Map<String, String> fields) {
-		ShoppingItemDto shoppingItemDto = shoppingItemDtoFactory.createDto(skuCode, quantity);
-		shoppingItemDto.setItemFields(fields);
+		ShoppingItemDto shoppingItemDto = getShoppingItemDto(skuCode, quantity, fields);
 
 		return reactiveAdapter.fromServiceAsSingle(() -> cartDirectorService.addItemToCart(cart, shoppingItemDto));
+	}
+
+	@Override
+	public ShoppingItemDto getShoppingItemDto(final String skuCode, final int quantity, final Map<String, String> fields) {
+		ShoppingItemDto shoppingItemDto = shoppingItemDtoFactory.createDto(skuCode, quantity);
+		shoppingItemDto.setItemFields(fields);
+		return shoppingItemDto;
+	}
+
+	@Override
+	public Single<ShoppingCart> addItemsToCart(final ShoppingCart cart, final List<ShoppingItemDto> dtoList) {
+		return reactiveAdapter.fromServiceAsSingle(() -> cartDirectorService.addItemsToCart(cart, dtoList));
 	}
 
 	@Override
 	@CacheRemove(typesToInvalidate = {ShoppingCart.class, WishList.class, ShoppingCartPricingSnapshot.class, ShoppingCartTaxSnapshot.class})
 	public Single<ShoppingItem> moveItemToCart(final ShoppingCart cart, final String wishlistLineItemGuid, final String skuCode,
 											   final int quantity, final Map<String, String> fields) {
-		ShoppingItemDto dto = shoppingItemDtoFactory.createDto(skuCode, quantity);
-		dto.setItemFields(fields);
+		ShoppingItemDto dto = getShoppingItemDto(skuCode, quantity, fields);
 		return reactiveAdapter.fromServiceAsSingle(() -> cartDirectorService.moveItemFromWishListToCart(cart, dto, wishlistLineItemGuid));
 	}
 
@@ -218,8 +230,7 @@ public class ShoppingCartRepositoryImpl implements ShoppingCartRepository {
 		Map<String, String> itemFields = Optional.ofNullable(shoppingItem.getFields())
 				.orElse(Collections.emptyMap());
 
-		ShoppingItemDto shoppingItemDto = shoppingItemDtoFactory.createDto(skuCode, quantity);
-		shoppingItemDto.setItemFields(itemFields);
+		ShoppingItemDto shoppingItemDto = getShoppingItemDto(skuCode, quantity, itemFields);
 
 		return reactiveAdapter.fromServiceAsCompletable(() -> cartDirectorService.updateCartItem(cart, shoppingItem.getUidPk(),
 				shoppingItemDto));

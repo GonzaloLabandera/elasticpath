@@ -28,3 +28,13 @@ Feature: HTTP Caching - Lookups
     Examples:
       | ITEM_CODE                     |
       | product_with_no_discounts_sku |
+
+  Scenario: Batch Offer lookup form should have HTTP caching
+    Given I go to batchofferslookupform
+    Then I should see the Cache-Control header in the response with a valid max age and private directive
+    And I should see an ETag header in the response
+
+  Scenario: Offer lookup form should have HTTP caching
+    Given I go to offerlookupform
+    Then I should see the Cache-Control header in the response with a valid max age and private directive
+    And I should see an ETag header in the response

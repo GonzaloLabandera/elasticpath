@@ -155,6 +155,9 @@
 						</goals>
 						<configuration>
 							<forkCount>${failsafe.fork.count}</forkCount>
+							<systemPropertyVariables>
+								<ep.rest.baseurl>${ep.rest.baseurl}</ep.rest.baseurl>
+							</systemPropertyVariables>
 						</configuration>
 					</execution>
 				</executions>

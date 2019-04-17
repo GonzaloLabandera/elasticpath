@@ -48,7 +48,7 @@ public class ShopperServiceImplIntegrationTest extends AbstractCartIntegrationTe
 		final String storeCode = scenario.getStore().getCode();
 
 		Customer customer = getBeanFactory().getBean(ContextIdNames.CUSTOMER);
-		customer.setEmail("testFindByCustomerAndStore@ShopperServiceImplIntegrationTest.com");
+		customer.setAnonymous(true);
 		customer.setStoreCode(storeCode);
 		customer = customerService.add(customer);
 
@@ -69,13 +69,12 @@ public class ShopperServiceImplIntegrationTest extends AbstractCartIntegrationTe
 		final String storeCode = scenario.getStore().getCode();
 
 		Customer customer = getBeanFactory().getBean(ContextIdNames.CUSTOMER);
-		customer.setEmail("testFindByCustomerAndStore@ShopperServiceImplIntegrationTest.com");
+		customer.setAnonymous(true);
 		customer.setStoreCode(storeCode);
 		customer.setGuid(GUID);
 		customer = customerService.add(customer);
 
 		Shopper expectedShopper = getBeanFactory().getBean(ContextIdNames.SHOPPER);
-		expectedShopper.setGuid(GUID);
 		expectedShopper.setCustomer(customer);
 		shopperService.save(expectedShopper);
 
@@ -94,13 +93,11 @@ public class ShopperServiceImplIntegrationTest extends AbstractCartIntegrationTe
 		final String storeCode = scenario.getStore().getCode();
 
 		Customer customer = getBeanFactory().getBean(ContextIdNames.CUSTOMER);
-		customer.setEmail("testFindByCustomerAndStore@ShopperServiceImplIntegrationTest.com");
+		customer.setUserId("testFindByCustomerAndStore@ShopperServiceImplIntegrationTest.com");
 		customer.setStoreCode(storeCode);
-		customer.setGuid(GUID);
 		customer = customerService.add(customer);
 
 		Shopper expectedShopper = getBeanFactory().getBean(ContextIdNames.SHOPPER);
-		expectedShopper.setGuid(GUID);
 		expectedShopper.setCustomer(customer);
 		expectedShopper.setStoreCode(storeCode);
 		shopperService.save(expectedShopper);

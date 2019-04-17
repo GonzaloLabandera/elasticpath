@@ -120,15 +120,6 @@
 				WHERE op.giftCertificate.uidPk = ?1
 			</query>
 		</named-query>
-		<named-query name="ORDER_COUNT_BY_EMAIL">
-			<query>
-				SELECT COUNT(o.uidPk)
-				FROM OrderImpl AS o, StoreImpl AS s
-				WHERE o.customer.userId = ?1
-				AND o.storeCode = s.code
-				AND s.uidPk = ?2
-			</query>
-		</named-query>
 		<named-query name="ORDER_UID_FOR_FAILED_ORDERS_BEFORE_DATE">
 			<query>
 				SELECT o.uidPk

@@ -153,10 +153,10 @@
 		<!-- Setting for clustered search server deployments. -->
 		<!-- <property name="requiresMaster" value="true" /> -->
 		<property name="defaultSearchHostLocationProvider">
-			<settings:setting path="COMMERCE/SYSTEM/SEARCH/searchHost" context="default"/>
+			<settings:setting path="COMMERCE/SYSTEM/SEARCH/searchHost" context="default" systemPropertyOverrideKey="ep.search.default.url"/>
 		</property>
 		<property name="masterSearchHostLocationProvider">
-			<settings:setting path="COMMERCE/SYSTEM/SEARCH/searchHost" context="master"/>
+			<settings:setting path="COMMERCE/SYSTEM/SEARCH/searchHost" context="master" systemPropertyOverrideKey="ep.search.master.url"/>
 		</property>
 	</bean>
 
@@ -226,7 +226,6 @@
 	<bean id="cmChangeSetHelper" class="com.elasticpath.cmclient.core.helpers.ChangeSetHelper">
 		<property name="changeSetService" ref="changeSetService"/>
 		<property name="timeService" ref="timeService"/>
-		<property name="settingsReader" ref="cachedSettingsReader"/>
 	</bean>
 
 </beans>

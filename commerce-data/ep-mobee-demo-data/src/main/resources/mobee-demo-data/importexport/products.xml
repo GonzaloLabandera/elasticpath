@@ -4541,7 +4541,7 @@
         <sku guid="01459956-390F-3F13-B684-E842ED3036DA">
             <code>FocUSsku</code>
             <shippable enabled="true">
-                <weight units="KG">0</weight>
+                <weight units="KG">2.50</weight>
                 <width units="CM">0</width>
                 <length units="CM">0</length>
                 <height units="CM">0</height>
@@ -5281,7 +5281,7 @@
         <notsoldseperately>false</notsoldseperately>
         <enabledate>2013-08-15T10:28:38.832-07:00</enabledate>
         <minorderqty>1</minorderqty>
-        <availabilityrule>AVAILABLE_WHEN_IN_STOCK</availabilityrule>
+        <availabilityrule>ALWAYS_AVAILABLE</availabilityrule>
         <orderlimit>0</orderlimit>
     </availability>
     <attributes>
@@ -5314,7 +5314,7 @@ L'écran est également très bien. L'iPhone 5 conserve la technologie d'afficha
         <sku guid="5c47007a-2a84-4f3c-878a-b90b9d0fab9b">
             <code>iphone10</code>
             <shippable enabled="true">
-                <weight units="KG">0</weight>
+                <weight units="KG">3.0</weight>
                 <width units="CM">0</width>
                 <length units="CM">0</length>
                 <height units="CM">0</height>

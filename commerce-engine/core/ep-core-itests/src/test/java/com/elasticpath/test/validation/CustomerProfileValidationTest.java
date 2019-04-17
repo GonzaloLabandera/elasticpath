@@ -6,6 +6,7 @@ package com.elasticpath.test.validation;
 import static org.junit.Assert.assertEquals;
 
 import java.util.Arrays;
+import java.util.Locale;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import javax.validation.ConstraintViolation;
@@ -62,7 +63,7 @@ public class CustomerProfileValidationTest extends AbstractValidationTest {
 			final boolean required) {
 		Attribute attribute = getBeanFactory().getBean(ContextIdNames.ATTRIBUTE);
 
-		attribute.setName(Utils.uniqueCode(String.format("attribute-%d", count.incrementAndGet())));
+		attribute.setDisplayName(Utils.uniqueCode(String.format("attribute-%d", count.incrementAndGet())), Locale.ENGLISH);
 		attribute.setGlobal(true);
 		attribute.setRequired(required);
 		attribute.setKey(key);

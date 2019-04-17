@@ -9,14 +9,16 @@ import static org.mockito.Mockito.when;
 
 import java.util.HashSet;
 import java.util.Set;
+
 import javax.validation.ConstraintViolation;
 
-import org.apache.commons.lang3.ArrayUtils;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+
+import org.apache.commons.lang3.ArrayUtils;
 
 import com.elasticpath.domain.cartmodifier.CartItemModifierField;
 import com.elasticpath.domain.cartmodifier.CartItemModifierFieldOption;
@@ -54,9 +56,6 @@ public class DynamicCartItemModifierFieldValidatorTest {
 	@Test
 	public void shouldHaveRequiredConstraintViolation() {
 		when(referentField.isRequired()).thenReturn(true);
-		when(referentField.getMaxSize()).thenReturn(MEDIUM_MAX_SIZE);
-		when(referentField.getFieldType()).thenReturn(CartItemModifierType.SHORT_TEXT);
-		when(referentField.getCartItemModifierFieldOptions()).thenReturn(new HashSet<>());
 
 		DynamicCartItemModifierField fieldToValidate = new DynamicCartItemModifierField("sender name", "", referentField);
 

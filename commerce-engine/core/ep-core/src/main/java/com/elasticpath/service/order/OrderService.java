@@ -103,15 +103,6 @@ public interface OrderService extends EpPersistenceService {
 	List<Order> findOrdersByCustomerGuidAndStoreCode(String customerGuid, String storeCode, boolean retrieveFullInfo);
 
 	/**
-	 * Retrieve the list of orders by the customer's email address.
-	 *
-	 * @param customerEmail the customer's email address.
-	 * @param isExactMatch true for doing an exact match; false for doing a fuzzy match.
-	 * @return list of orders matching the customer's email address.
-	 */
-	List<Order> findOrderByCustomerEmail(String customerEmail, boolean isExactMatch);
-
-	/**
 	 * order count function based on the OrderSearchCriteria.
 	 *
 	 * @param orderSearchCriteria the order search criteria.
@@ -502,15 +493,6 @@ public interface OrderService extends EpPersistenceService {
 	 * @param limitedUsagePromotionCodes - list of Limited Usage Promotion codes (stored in ShoppingCart)
 	 */
 	void updateLimitedUsagePromotionCurrentNumbers(Collection<Long> appliedRuleUids, List<String> limitedUsagePromotionCodes);
-
-	/**
-	 * Get the order count for a given customer email address.
-	 *
-	 * @param email the email address of the customer
-	 * @param storeId the store to get orders from
-	 * @return the order count
-	 */
-	long getCustomerOrderCountByEmail(String email, long storeId);
 
 	/**
 	 * Gets a list of order UIDs for "failed" orders that are created before the given date.

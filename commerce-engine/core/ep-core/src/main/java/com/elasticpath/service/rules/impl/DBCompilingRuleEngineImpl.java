@@ -28,7 +28,6 @@ import org.kie.internal.builder.KnowledgeBuilderFactory;
 import org.kie.internal.io.ResourceFactory;
 
 import com.elasticpath.base.exception.EpServiceException;
-import com.elasticpath.commons.beanframework.BeanFactory;
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.catalog.Catalog;
 import com.elasticpath.domain.rules.EpRuleBase;
@@ -79,8 +78,6 @@ public class DBCompilingRuleEngineImpl extends AbstractRuleEngineImpl implements
 	private final Map<String, KieBase> cartRuleBaseMap = new ConcurrentHashMap<>();
 
 	private Properties configProps;
-
-	private BeanFactory beanFactory;
 
 	/**
 	 * Default constructor.
@@ -180,7 +177,7 @@ public class DBCompilingRuleEngineImpl extends AbstractRuleEngineImpl implements
 
 				throw new RulesPackageCompilationException(errorMsg);
 			}
-			
+
 			// add the package to a rulebase (deploy the rule package).
 			ruleBase = createRuleBase();
 			ruleBase.addPackages(builder.getKnowledgePackages());
@@ -189,7 +186,7 @@ public class DBCompilingRuleEngineImpl extends AbstractRuleEngineImpl implements
 		} catch (Exception e) {
 			throw new EpServiceException("Failed to readRuleBase.", e);
 		}
-		
+
 		if (ruleSet.getScenario() == RuleScenarios.CART_SCENARIO) {
 			storeRuleBase(ruleBase, ruleSet, store, null);
 		} else if (ruleSet.getScenario() == RuleScenarios.CATALOG_BROWSE_SCENARIO) {
@@ -198,7 +195,7 @@ public class DBCompilingRuleEngineImpl extends AbstractRuleEngineImpl implements
 			LOG.debug("Unknown rule scenario ID, assuming store based");
 			storeRuleBase(ruleBase, ruleSet, store, null);
 		}
-		
+
 		LOG.info("Successfully re-compiled rule base for scenario " + ruleSet.getScenario());
 		return ruleBase;
 	}
@@ -206,7 +203,7 @@ public class DBCompilingRuleEngineImpl extends AbstractRuleEngineImpl implements
 	/**
 	 * Retrieve the last update date from the properties file. This implementation formats the
 	 * date with a UTC XML date string.
-	 * 
+	 *
 	 * @return the last update date
 	 */
 	protected Date getLastSuccessfulCompilationBeginDate() {
@@ -234,7 +231,7 @@ public class DBCompilingRuleEngineImpl extends AbstractRuleEngineImpl implements
 
 	/**
 	 * Set the date of the last update to the current date/time. This implementation formats the date with a UTC XML date string.
-	 * 
+	 *
 	 * @param compilationBeginDate compilation begin date
 	 */
 	protected void setLastSuccessfulCompilationBeginDate(final Date compilationBeginDate) {
@@ -261,7 +258,7 @@ public class DBCompilingRuleEngineImpl extends AbstractRuleEngineImpl implements
 	public void recompileRuleBase() {
 		final long startTime = System.currentTimeMillis();
 		LOG.info("Start recompile rule base quartz job at: " + new Date(startTime));
-		
+
 		Date compilationBeginDate = getTimeService().getCurrentTime();
 		Date lastSuccessfulCompilationBeginDate = getLastSuccessfulCompilationBeginDate();
 		if (lastSuccessfulCompilationBeginDate == null) {
@@ -288,12 +285,12 @@ public class DBCompilingRuleEngineImpl extends AbstractRuleEngineImpl implements
 		setLastSuccessfulCompilationBeginDate(compilationBeginDate);
 		LOG.info("Recompile rule base quartz job completed in (ms): " + (System.currentTimeMillis() - startTime));
 	}
-	
+
 	/**
 	 * Stores the given {@link InternalKnowledgeBase} for later retrieval. If a rule base already exists,
 	 * updates the existing rule base. Generally either the {@code store} or {@code catalog}
 	 * should be {@code null}, but not both.
-	 * 
+	 *
 	 * @param ruleBase the compiled rule base to store
 	 * @param ruleSet the rule set to this rule base is based on
 	 * @param store the store of the rule base
@@ -305,7 +302,7 @@ public class DBCompilingRuleEngineImpl extends AbstractRuleEngineImpl implements
 		// first try and find the existing rule base
 		EpRuleBase epRuleBase = getRuleService().findRuleBaseByScenario(store, catalog, ruleSet.getScenario());
 		if (epRuleBase == null) {
-			epRuleBase = beanFactory.getBean(ContextIdNames.EP_RULE_BASE);
+			epRuleBase = getBeanFactory().getBean(ContextIdNames.EP_RULE_BASE);
 		}
 
 		epRuleBase.setRuleBase(ruleBase);
@@ -323,61 +320,36 @@ public class DBCompilingRuleEngineImpl extends AbstractRuleEngineImpl implements
 		this.cartRuleBaseMap.clear();
 		this.catalogRuleBaseMap.clear();
 	}
-	
-	/**
-	 * Set the DAO used to load properties.
-	 *
-	 * @param propertiesDao the DAO used to load properties.
-	 */
+
 	public void setPropertiesDao(final PropertiesDao propertiesDao) {
 		this.propertiesDao = propertiesDao;
 	}
 
-	/**
-	 * Sets the {@link TimeService} instance to use.
-	 *
-	 * @param timeService the {@link TimeService} instance to use
-	 */
+	protected PropertiesDao getPropertiesDao() {
+		return propertiesDao;
+	}
+
 	public void setTimeService(final TimeService timeService) {
 		this.timeService = timeService;
 	}
 
-
-	/**
-	 * Get the injected {@link TimeService} instance.
-	 *
-	 * @return injected {@link TimeService} instance
-	 */
 	protected TimeService getTimeService() {
 		return this.timeService;
 	}
 
-	/**
-	 * Sets the {@link StoreService} instance to use.
-	 *
-	 * @param storeService the {@link StoreService} instance to use
-	 */
 	public void setStoreService(final StoreService storeService) {
 		this.storeService = storeService;
 	}
-		
-	/**
-	 * @return configuration properties for drools rule engine.
-	 */
-	protected Properties getRuleEngineConfigProps() {
-		return configProps;
+
+	protected StoreService getStoreService() {
+		return storeService;
 	}
-	
-	/**
-	 * @param props configuration properties for drools rule engine.
-	 */
+
 	public void setRuleEngineConfigProps(final Properties props) {
 		this.configProps = props;
 	}
 
-	@Override
-	public void setBeanFactory(final BeanFactory beanFactory) {
-		super.setBeanFactory(beanFactory);
-		this.beanFactory = beanFactory;
+	protected Properties getRuleEngineConfigProps() {
+		return configProps;
 	}
 }

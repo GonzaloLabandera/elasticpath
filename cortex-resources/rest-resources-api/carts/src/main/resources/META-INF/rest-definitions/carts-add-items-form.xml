@@ -1,0 +1,62 @@
+<?xml version="1.0"?>
+<definitions xmlns="http://www.elasticpath.com/schema/rest/0.5">
+
+	<family>
+		<name>carts</name>
+
+		<advisor>
+			<name>add-items-to-cart</name>
+			<description>Advisor on the form to add items to cart.</description>
+			<advises>add-items-to-cart-form</advises>
+		</advisor>
+
+		<resource>
+			<name>add-items-to-cart-form</name>
+			<description><![CDATA[The form to add items to the cart.]]></description>
+			<uri>/{carts.cart}/form</uri>
+			<form>
+				<entity>add-items-to-cart-form</entity>
+				<action-rel>additemstocartaction</action-rel>
+				<result>carts.cart</result>
+			</form>
+		</resource>
+
+		<relationship>
+			<name>add-items-to-cart-form-from-cart</name>
+			<description><![CDATA[Cart to the add items to cart form ]]></description>
+			<rel>additemstocartform</rel>
+			<from>carts.cart</from>
+			<to>add-items-to-cart-form</to>
+		</relationship>
+
+		<entity>
+			<name>add-items-to-cart-form</name>
+			<description><![CDATA[The form to add items to the cart.]]></description>
+			<property>
+				<name>items</name>
+				<description><![CDATA[The items.]]></description>
+				<array>
+					<is-a>item</is-a>
+				</array>
+			</property>
+			<entity-type>carts.add-items-to-cart-form</entity-type>
+		</entity>
+
+		<entity>
+			<name>item</name>
+			<description>Item entity</description>
+			<property>
+				<name>code</name>
+				<description><![CDATA[The sku code of the item to add to cart.]]></description>
+				<string/>
+			</property>
+			<property>
+				<name>quantity</name>
+				<description><![CDATA[The total number of items to add to cart.]]></description>
+				<integer/>
+			</property>
+			<entity-type>carts.item</entity-type>
+		</entity>
+
+	</family>
+</definitions>

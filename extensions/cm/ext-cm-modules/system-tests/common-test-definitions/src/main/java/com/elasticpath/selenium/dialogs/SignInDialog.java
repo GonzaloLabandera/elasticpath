@@ -6,7 +6,6 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 
 import com.elasticpath.selenium.common.CM;
-import com.elasticpath.selenium.setup.PublishEnvSetUp;
 import com.elasticpath.selenium.setup.SetUp;
 import com.elasticpath.selenium.util.Constants;
 
@@ -137,7 +136,8 @@ public class SignInDialog extends AbstractDialog {
 	 * @param password the password.
 	 */
 	public void signInToPublish(final String username, final String password) {
-		new CM(PublishEnvSetUp.getDriver()).openPublishCM();
+		openPublishTab();
+		getDriver().get(getPublishEnvURL());
 		performSignIn(username, password);
 	}
 

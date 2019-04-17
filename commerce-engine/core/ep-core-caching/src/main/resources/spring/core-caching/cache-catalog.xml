@@ -14,7 +14,7 @@
 	</bean>
 
 	<!-- Category Reader -->
-	<bean id="categoryLookupCache"
+	<bean id="categoryLookupCacheTemplate" abstract="true"
 		  class="com.elasticpath.commons.beanframework.EhCacheDefaultConfigurationFactoryBean">
 		<property name="name" value="categoryLookupCache"/>
 		<property name="cacheManager" ref="epEhcacheManager"/>
@@ -35,31 +35,26 @@
 		</property>
 	</bean>
 
-	<bean id="childCategoryLookupEhcache"
-		  class="com.elasticpath.commons.beanframework.EhCacheDefaultConfigurationFactoryBean">
+	<bean id="childCategoryLookupEhcache" parent="categoryLookupCacheTemplate">
 		<property name="name" value="childCategoryLookupCache"/>
-		<property name="cacheManager" ref="epEhcacheManager"/>
-		<property name="timeToLive">
-			<bean class="com.elasticpath.settings.beanframework.SettingFactoryBean">
-				<property name="path" value="COMMERCE/SYSTEM/CACHING/CATEGORY/timeToLive" />
-			</bean>
-		</property>
-		<property name="timeToIdle">
-			<bean class="com.elasticpath.settings.beanframework.SettingFactoryBean">
-				<property name="path" value="COMMERCE/SYSTEM/CACHING/CATEGORY/timeToIdle" />
-			</bean>
-		</property>
-		<property name="maxEntriesLocalHeap">
-			<bean class="com.elasticpath.settings.beanframework.SettingFactoryBean">
-				<property name="path" value="COMMERCE/SYSTEM/CACHING/CATEGORY/maxEntriesLocalHeap" />
-			</bean>
-		</property>
 	</bean>
 
-	<bean id="categoryLookupEntityCache"
-		  factory-bean="localEntityCacheFactory" factory-method="createCache"
-		  depends-on="categoryLookupCache">
-		<constructor-arg value="categoryLookupCache"/>
+	<bean id="categoryUidByGuidEhcache" parent="categoryLookupCacheTemplate">
+		<property name="name" value="categoryUidByGuidCache"/>
+	</bean>
+
+	<bean id="categoryUidByCompoundGuidEhcache" parent="categoryLookupCacheTemplate">
+		<property name="name" value="categoryUidByCompoundGuidCache"/>
+	</bean>
+
+	<bean id="categoryByEhcache" parent="categoryLookupCacheTemplate">
+		<property name="name" value="categoryByUidCache"/>
+	</bean>
+
+	<bean id="categoryByUidCache"
+		  factory-bean="localCacheFactory" factory-method="createCache"
+		  depends-on="categoryByEhcache">
+		<constructor-arg value="categoryByUidCache"/>
 	</bean>
 
 	<bean id="childCategoryLookupCache"
@@ -68,26 +63,29 @@
 		<constructor-arg value="childCategoryLookupCache"/>
 	</bean>
 
+	<bean id="categoryUidByGuidCache"
+		  factory-bean="localCacheFactory" factory-method="createCache"
+		  depends-on="categoryUidByGuidEhcache">
+		<constructor-arg value="categoryUidByGuidCache"/>
+	</bean>
+
+	<bean id="categoryUidByCompoundGuidCache"
+		  factory-bean="localCacheFactory" factory-method="createCache"
+		  depends-on="categoryUidByCompoundGuidEhcache">
+		<constructor-arg value="categoryUidByCompoundGuidCache"/>
+	</bean>
+
 	<bean id="cachingCategoryLookup"
 		  class="com.elasticpath.caching.core.catalog.CachingCategoryLookupImpl">
-		<property name="categoryCache">
-			<bean class="com.elasticpath.cache.impl.MultiKeyCacheImpl">
-				<property name="keyProperties">
-					<list>
-						<value>uidPk</value>
-						<value>guid</value>
-						<value>compoundGuid</value>
-					</list>
-				</property>
-				<property name="cache" ref="categoryLookupEntityCache"/>
-			</bean>
-		</property>
+		<property name="categoryByUidCache" ref="categoryByUidCache"/>
+		<property name="categoryUidByGuidCache" ref="categoryUidByGuidCache"/>
+		<property name="categoryUidByCompoundGuidCache" ref="categoryUidByCompoundGuidCache"/>
 		<property name="childCategoryCache" ref="childCategoryLookupCache"/>
 		<property name="fallbackReader" ref="nonCachingCategoryLookup"/>
 	</bean>
 
 	<!-- Product Lookup -->
-	<bean id="productLookupCache"
+	<bean id="productLookupCacheTemplate" abstract="true"
 		  class="com.elasticpath.commons.beanframework.EhCacheDefaultConfigurationFactoryBean">
 		<property name="name" value="productLookupCache"/>
 		<property name="cacheManager" ref="epEhcacheManager"/>
@@ -108,25 +106,32 @@
 		</property>
 	</bean>
 
-	<bean id="productLookupEntityCache"
-		  factory-bean="localEntityCacheFactory" factory-method="createCache"
-		  depends-on="productLookupCache">
-		<constructor-arg value="productLookupCache"/>
+	<bean id="productUidByGuidEhcache" parent="productLookupCacheTemplate">
+		<property name="name" value="productUidByGuidCache"/>
 	</bean>
+
+	<bean id="productUidByGuidCache"
+		  factory-bean="localCacheFactory" factory-method="createCache"
+		  depends-on="productUidByGuidEhcache">
+		<constructor-arg value="productUidByGuidCache"/>
+	</bean>
+
+	<bean id="productByUidEhcache" parent="productLookupCacheTemplate">
+		<property name="name" value="productByUidCache"/>
+	</bean>
+
+	<bean id="productByUidCache"
+		  factory-bean="localCacheFactory" factory-method="createCache"
+		  depends-on="productByUidEhcache">
+		<constructor-arg value="productByUidCache"/>
+	</bean>
+
+
 
 	<bean id="cachingProductLookup"
 		  class="com.elasticpath.caching.core.catalog.CachingProductLookupImpl">
-		<property name="cache">
-			<bean class="com.elasticpath.cache.impl.MultiKeyCacheImpl">
-				<property name="keyProperties">
-					<list>
-						<value>uidPk</value>
-						<value>guid</value>
-					</list>
-				</property>
-				<property name="cache" ref="productLookupEntityCache"/>
-			</bean>
-		</property>
+		<property name="productByUidCache" ref="productByUidCache"/>
+		<property name="productUidByGuidCache" ref="productUidByGuidCache"/>
 		<property name="fallbackLookup" ref="nonCachingProductLookup"/>
 	</bean>
 
@@ -365,7 +370,7 @@
 	</bean>
 
 	<bean id="cachingFacetService" class="com.elasticpath.caching.core.faceting.CachingFacetServiceImpl">
-		<property name="fallbackFacetService" ref="facetService" />
+		<property name="decorated" ref="facetService" />
 		<property name="findByGuidCache" ref="facetServiceFindByGuidCache" />
 		<property name="searchableFacetsCache" ref="facetServiceSearchableFacetsCache" />
 	</bean>

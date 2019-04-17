@@ -74,7 +74,7 @@ public class CustomerConsentExporterImplTest {
 		final List<CustomerConsent> customerConsentList = Arrays.asList(customerConsent1, customerConsent2, customerConsent3);
 		final List<String> foundGuids = Arrays.asList(GUID1, GUID2, GUID3);
 
-		when(customerConsentService.list()).thenReturn(customerConsentList);
+		when(customerConsentService.listHistory()).thenReturn(customerConsentList);
 
 		exportContext = new ExportContext(new ExportConfiguration(), new SearchConfiguration());
 		customerConsentExporterImpl.initialize(exportContext);
@@ -121,7 +121,7 @@ public class CustomerConsentExporterImplTest {
 		ExportConfiguration exportConfiguration = new ExportConfiguration();
 		SearchConfiguration searchConfiguration = new SearchConfiguration();
 
-		when(customerConsentService.list()).thenReturn(Collections.emptyList());
+		when(customerConsentService.listHistory()).thenReturn(Collections.emptyList());
 
 		customerConsentExporterImpl.initialize(new ExportContext(exportConfiguration, searchConfiguration));
 		customerConsentExporterImpl.getContext()

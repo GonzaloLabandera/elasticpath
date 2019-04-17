@@ -59,6 +59,8 @@ import com.elasticpath.domain.catalog.ProductCategory;
 import com.elasticpath.domain.catalog.ProductSku;
 import com.elasticpath.domain.catalog.ProductType;
 import com.elasticpath.domain.localization.LocaleFallbackPolicy;
+import com.elasticpath.domain.misc.impl.AttributeLocalizedPropertyValueImpl;
+import com.elasticpath.domain.misc.impl.LocalizedPropertiesImpl;
 import com.elasticpath.domain.misc.impl.RandomGuidImpl;
 import com.elasticpath.domain.tax.TaxCode;
 import com.elasticpath.domain.tax.impl.TaxCodeImpl;
@@ -104,6 +106,8 @@ public class ProductImplTest {
 	public void setUp() throws Exception {
 		beanFactory = context.mock(BeanFactory.class);
 		expectationsFactory = new BeanFactoryExpectationsFactory(context, beanFactory);
+		expectationsFactory.allowingBeanFactoryGetBean(ContextIdNames.LOCALIZED_PROPERTIES, LocalizedPropertiesImpl.class);
+		expectationsFactory.allowingBeanFactoryGetBean(ContextIdNames.ATTRIBUTE_LOCALIZED_PROPERTY_VALUE, AttributeLocalizedPropertyValueImpl.class);
 
 		productImpl = new ProductImpl();
 
@@ -1229,7 +1233,7 @@ public class ProductImplTest {
 	public void testThatExtensionClassesCanOverrideAttributeValueImplementations() {
 		AttributeImpl attribute = new AttributeImpl();
 		attribute.setAttributeType(AttributeType.SHORT_TEXT);
-		attribute.setName("name");
+		attribute.setDisplayName("name", Locale.ENGLISH);
 		attribute.setKey("name");
 
 		ExtProductImpl product = new ExtProductImpl();

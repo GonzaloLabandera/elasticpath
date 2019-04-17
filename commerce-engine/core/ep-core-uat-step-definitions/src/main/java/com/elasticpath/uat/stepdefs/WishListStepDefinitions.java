@@ -56,6 +56,9 @@ public class WishListStepDefinitions {
 	private ScenarioContextValueHolder<CustomerBuilder> customerBuilderHolder;
 
 	@Autowired
+	private ScenarioContextValueHolder<Customer> customerHolder;
+
+	@Autowired
 	private TestDataPersisterFactory persisterFactory;
 
 	@Autowired
@@ -103,9 +106,10 @@ public class WishListStepDefinitions {
 
 	private Shopper createShopper() {
 		final Customer customer = customerBuilderHolder.get().build();
-		customerService.add(customer);
+		Customer addedCustomer = customerService.add(customer);
+		customerHolder.set(addedCustomer);
 
-		final CustomerSession customerSession = persisterFactory.getStoreTestPersister().persistCustomerSessionWithAssociatedEntities(customer);
+		final CustomerSession customerSession = persisterFactory.getStoreTestPersister().persistCustomerSessionWithAssociatedEntities(addedCustomer);
 		return customerSession.getShopper();
 	}
 

@@ -5,9 +5,13 @@ package com.elasticpath.settings.impl;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Locale;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
@@ -32,6 +36,7 @@ public class SettingsServiceImpl implements SettingsService {
 
 	private SettingsDao settingsDao;
 	private SettingValueFactory settingValueFactory;
+	private Map<String, String> systemPropertyOverrides = new HashMap<>();
 
 	/**
 	 * Get all setting definitions that are identified by the given partial path.
@@ -67,6 +72,19 @@ public class SettingsServiceImpl implements SettingsService {
 		} catch (final EpPersistenceException ex) {
 			throw new EpServiceException("Unable to find any setting definitions.", ex);
 		}
+	}
+
+	@Override
+	public Set<SettingDefinition> getAllNonOverriddenSettingDefinitions() {
+		final Set<String> actualOverrides = systemPropertyOverrides.entrySet().stream()
+				.filter(override -> StringUtils.isNotEmpty(System.getProperty(override.getKey())))
+				.map(Entry::getValue)
+				.collect(Collectors.toSet());
+
+		final Set<SettingDefinition> settingDefinitions = getAllSettingDefinitions();
+		return settingDefinitions.stream()
+				.filter(definition -> !actualOverrides.contains(definition.getPath()))
+				.collect(Collectors.toSet());
 	}
 
 	/**
@@ -337,4 +355,9 @@ public class SettingsServiceImpl implements SettingsService {
 	public Set<SettingDefinition> findSettingDefinitionsByMetadata(final String metadataKey) {
 		return settingsDao.findSettingDefinitionsByMetadata(metadataKey);
 	}
+
+	public void setSystemPropertyOverrides(final Map<String, String> systemPropertyOverrides) {
+		this.systemPropertyOverrides = systemPropertyOverrides;
+	}
+
 }

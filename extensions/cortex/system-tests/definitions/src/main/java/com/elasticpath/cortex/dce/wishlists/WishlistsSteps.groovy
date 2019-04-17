@@ -50,6 +50,12 @@ class WishlistsSteps {
 		Item.addItemToWishList()
 	}
 
+	@When('^I navigate to add to wishlist form for item with code (.+)$')
+	static void navigateToAddToWishlistFormByCode(String itemCode) {
+		CommonMethods.lookup(itemCode)
+		Item.addtowishlistform()
+	}
+
 	@When('^I add selected multisku item to the wishlist')
 	static void addItemToWishlist() {
 		Item.addItemToWishList()
@@ -153,6 +159,14 @@ class WishlistsSteps {
 				.stopIfFailure()
 	}
 
+	@When('^I navigate to move to cart form for item with code (.+)$')
+	static void navigateToMoveToCartFormByCode(String itemCode) {
+		navigateToWishListLineItems()
+
+		getLineItemUriForItemCode(itemCode)
+		client.movetocartform()
+	}
+
 	@When('^I move item with code (.+) to my cart with quantity (.+)$')
 	static void moveItemFromWishlistToCartByCode(String itemCode, String itemQuantity) {
 		navigateToWishListLineItems()
@@ -193,6 +207,13 @@ class WishlistsSteps {
 		assertThat(client.response.status)
 				.as("HTTP response status is not as expected")
 				.isEqualTo(201)
+	}
+
+	@When('^I navigate to move to wishlist form for item with code (.+)$')
+	static void navigateToMoveToWishlistFormByCode(String itemCode) {
+		Cart.lineitems()
+		getLineItemUriForItemCode(itemCode)
+		Item.movetowishlistform()
 	}
 
 	@When('^I move an item with code (.+) from my cart to my default wishlist$')

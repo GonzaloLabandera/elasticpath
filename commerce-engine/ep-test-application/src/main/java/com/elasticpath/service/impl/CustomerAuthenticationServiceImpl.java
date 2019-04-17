@@ -6,9 +6,7 @@ package com.elasticpath.service.impl;
 import java.util.Date;
 import java.util.UUID;
 
-import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.commons.util.Utility;
-import com.elasticpath.domain.ElasticPath;
 import com.elasticpath.domain.customer.Customer;
 import com.elasticpath.domain.customer.CustomerSession;
 import com.elasticpath.domain.shopper.Shopper;
@@ -27,8 +25,6 @@ import com.elasticpath.test.common.exception.TestApplicationException;
  */
 public class CustomerAuthenticationServiceImpl implements CustomerAuthenticationService {
 
-	private ElasticPath elasticPath;
-
 	private CustomerSessionService customerSessionService;
 
 	private ShoppingCartService shoppingCartService;
@@ -40,83 +36,19 @@ public class CustomerAuthenticationServiceImpl implements CustomerAuthentication
 	private Utility utility;
 
 	@Override
-	public void loginStore(final Store store, final String email) {
-		loginStoreInternal(store, email, true);
+	public void loginStore(final Store store, final String userId) {
+		loginStoreInternal(store, userId, true);
 	}
 
-	@Override
-	public void loginSecondarySessionToStore(final Store store, final String email) {
-		loginStoreInternal(store, email, false);
-	}
+	private void loginStoreInternal(final Store store, final String userId, final boolean primaryCustomerSession) {
+		validate(store, userId);
 
-	@Override
-	public void loginStore(final Store store, final String email, final CustomerSession oldCustomerSession) {
-		if (oldCustomerSession == null) {
-			throw new TestApplicationException("oldCustomerSession cannot be null");
-		}
-
-		loginStoreInternal(store, email, oldCustomerSession);
-	}
-
-	@Override
-	public void guestLoginStore(final Store store, final String email) {
-		guestLoginStoreInternal(store, email, ShoppingTestData.getInstance().getCustomerSession());
-	}
-
-	@Override
-	public void guestLoginStoreAsSecondarySession(final Store store, final String email) {
-		guestLoginStoreInternal(store, email, ShoppingTestData.getInstance().getSecondaryCustomerSession());
-	}
-
-	@Override
-	public void createAnonymousCustomerSession(final Store store) {
-		final Customer anonymousCustomer = createAnonymousCustomer(store);
-		createAndAddAnonymousCustomerSession(store, obtainCustomerSessionGuid(), anonymousCustomer);
-	}
-
-	@Override
-	public void createAnonymousCustomerSessionAsSecondarySession(final Store store) {
-		final Customer anonymousCustomer = createAnonymousCustomer(store);
-		createAndAddAnonymousCustomerSession(store, obtainCustomerSessionGuid(), anonymousCustomer, false);
-	}
-
-	public void createGuestCustomerSession(final Store store, final Customer customer) {
-		createAndAddAnonymousCustomerSession(store, obtainCustomerSessionGuid(), customer);
-	}
-
-	public void createGuestCustomerSessionAsSecondarySession(final Store store, final Customer customer) {
-		createAndAddAnonymousCustomerSession(store, obtainCustomerSessionGuid(), customer, false);
-	}
-
-	// -----------------------------------------------------------------------------------------------------------------------
-
-	private void guestLoginStoreInternal(final Store store, final String email, final CustomerSession oldCustomerSession) {
-		validate(store, email);
-
-		final Customer customer = createAndSaveGuestCustomer(store, email);
-		handleSignIn(store, customer, oldCustomerSession);
-	}
-
-	private void loginStoreInternal(final Store store, final String email, final boolean primaryCustomerSession) {
-		validate(store, email);
-
-		final Customer customer = findCustomer(store, email);
+		final Customer customer = findCustomer(store, userId);
 		if (customer == null) {
-			throw new TestApplicationException("Couldn't log into store " + store.getCode() + " with email address " + email);
+			throw new TestApplicationException("Couldn't log into store " + store.getCode() + " with user id " + userId);
 		}
 
 		handleSignIn(store, customer, primaryCustomerSession);
-	}
-
-	private void loginStoreInternal(final Store store, final String email, final CustomerSession oldCustomerSession) {
-		validate(store, email);
-
-		final Customer customer = findCustomer(store, email);
-		if (customer == null) {
-			throw new TestApplicationException("Couldn't log into store " + store.getCode() + " with email address " + email);
-		}
-
-		handleSignIn(store, customer, oldCustomerSession);
 	}
 
 	private void handleSignIn(final Store store, final Customer customer, final boolean primaryCustomerSession) {
@@ -124,51 +56,22 @@ public class CustomerAuthenticationServiceImpl implements CustomerAuthentication
 		ShoppingTestData.getInstance().setStore(store);
 	}
 
-	private void handleSignIn(final Store store, final Customer customer, final CustomerSession oldCustomerSession) {
-		handleCustomerSignIn(store.getCode(), customer, oldCustomerSession);
-		ShoppingTestData.getInstance().setStore(store);
-	}
-
-	private void validate(final Store store, final String email) {
+	private void validate(final Store store, final String userId) {
 		if (store == null) {
 			throw new TestApplicationException("Store cannot be null");
 		}
 
-		if (email == null) {
-			throw new TestApplicationException("Email cannot be null");
+		if (userId == null) {
+			throw new TestApplicationException("User id cannot be null");
 		}
 	}
 
-	private Customer findCustomer(final Store store, final String email) {
-		final Customer customer = customerService.findByEmail(email, store.getCode(), true);
+	private Customer findCustomer(final Store store, final String userId) {
+		final Customer customer = customerService.findByUserId(userId, store.getCode());
 		if (customer != null) {
 			customer.setPreferredLocale(store.getDefaultLocale());
 		}
 		return customer;
-	}
-
-	private Customer createAndSaveGuestCustomer(final Store store, final String email) {
-		// In elastic path, not only a customer, but also a non-customer can
-		// browse the catalog
-		// and put items into the shopping cart.
-		// During the shopping process, a non-customer might be asked to
-		// input some personal data,
-		// so we create an empty customer in the customer session to hold
-		// this personal data.
-		// The uid of the empty customer is 0, which means it's not
-		// persistent.
-		// It could be persisted at another point of the check-out process.
-		final Customer customer = elasticPath.getBean(ContextIdNames.CUSTOMER);
-		customer.setPreferredLocale(store.getDefaultLocale());
-		customer.setPreferredCurrency(store.getDefaultCurrency());
-		customer.setStoreCode(store.getCode());
-		customer.setEmail(email);
-		customer.setAnonymous(true);
-		return customerService.add(customer);
-	}
-
-	private void createAndAddAnonymousCustomerSession(final Store store, final String customerSessionGuid, final Customer customer) {
-		createAndAddAnonymousCustomerSession(store, customerSessionGuid, customer, true);
 	}
 
 	private void createAndAddAnonymousCustomerSession(
@@ -203,31 +106,6 @@ public class CustomerAuthenticationServiceImpl implements CustomerAuthentication
 			ShoppingTestData.getInstance().setSecondaryCustomerSession(customerSession);
 		}
 		ShoppingTestData.getInstance().setStore(store);
-	}
-
-	/**
-	 * Handle cases of anonymous customers without an email.
-	 *
-	 * @param store the store
-	 * @return an anonymous customer
-	 */
-	private Customer createAnonymousCustomer(final Store store) {
-		// In elastic path, not only a customer, but also a non-customer can
-		// browse the catalog
-		// and put items into the shopping cart.
-		// During the shopping process, a non-customer might be asked to
-		// input some personal data,
-		// so we create an empty customer in the customer session to hold
-		// this personal data.
-		// The uid of the empty customer is 0, which means it's not
-		// persistent.
-		// It could be persisted at another point of the check-out process.
-		final Customer customer = elasticPath.getBean(ContextIdNames.CUSTOMER);
-		customer.setPreferredLocale(store.getDefaultLocale());
-		customer.setPreferredCurrency(store.getDefaultCurrency());
-		customer.setStoreCode(store.getCode());
-		customer.setAnonymous(true);
-		return customer;
 	}
 
 	private void handleCustomerSignIn(final Store store, final Customer customer, final boolean primaryCustomerSession) {
@@ -288,11 +166,6 @@ public class CustomerAuthenticationServiceImpl implements CustomerAuthentication
 	@Override
 	public Utility getUtility() {
 		return utility;
-	}
-
-	@Override
-	public void setElasticPath(final ElasticPath elasticPath) {
-		this.elasticPath = elasticPath;
 	}
 
 	@Override

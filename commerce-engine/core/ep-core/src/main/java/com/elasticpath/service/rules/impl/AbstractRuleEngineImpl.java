@@ -327,33 +327,23 @@ public abstract class AbstractRuleEngineImpl implements EpRuleEngine {
 		this.promotionRuleDelegate = promotionRuleDelegate;
 	}
 
-	/**
-	 * @return the rule service
-	 */
-	protected RuleService getRuleService() {
-		return ruleService;
+	protected PromotionRuleDelegate getPromotionRuleDelegate() {
+		return promotionRuleDelegate;
 	}
 
-	/**
-	 * Sets the {@link RuleService} instance to use.
-	 *
-	 * @param ruleService the {@link RuleService} instance to use
-	 */
 	public void setRuleService(final RuleService ruleService) {
 		this.ruleService = ruleService;
 	}
 
-	/**
-	 * @param dataStrategy the dataStrategy to set
-	 */
+	protected RuleService getRuleService() {
+		return ruleService;
+	}
+
 	public void setDataStrategy(final RuleEngineDataStrategy dataStrategy) {
 		this.dataStrategy = dataStrategy;
 	}
 
-	/**
-	 * @return the dataStrategy
-	 */
-	public RuleEngineDataStrategy getDataStrategy() {
+	protected RuleEngineDataStrategy getDataStrategy() {
 		return dataStrategy;
 	}
 
@@ -361,15 +351,23 @@ public abstract class AbstractRuleEngineImpl implements EpRuleEngine {
 		this.conditionEvaluatorService = conditionEvaluatorService;
 	}
 
+	protected ConditionEvaluatorService getConditionEvaluatorService() {
+		return conditionEvaluatorService;
+	}
+
 	public void setBeanFactory(final BeanFactory beanFactory) {
 		this.beanFactory = beanFactory;
 	}
 
-	public SimpleTimeoutCache<String, SessionConfiguration> getStatefulSessionConfiguration() {
-		return statefulSessionConfiguration;
+	protected BeanFactory getBeanFactory() {
+		return beanFactory;
 	}
 
 	public void setStatefulSessionConfiguration(final SimpleTimeoutCache<String, SessionConfiguration> statefulSessionConfiguration) {
 		this.statefulSessionConfiguration = statefulSessionConfiguration;
+	}
+
+	protected SimpleTimeoutCache<String, SessionConfiguration> getStatefulSessionConfiguration() {
+		return statefulSessionConfiguration;
 	}
 }

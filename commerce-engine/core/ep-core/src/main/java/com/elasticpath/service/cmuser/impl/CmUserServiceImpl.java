@@ -12,6 +12,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import org.apache.commons.lang.StringUtils;
+
 import com.elasticpath.base.exception.EpServiceException;
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.commons.exception.EmailExistException;
@@ -399,6 +401,18 @@ public class CmUserServiceImpl extends AbstractEpPersistenceServiceImpl implemen
 				update(cmuser);
 			}
 		}
+	}
+
+	@Override
+	public void addFailedLoginAttempt(final String userName) {
+		sanityCheck();
+		if (StringUtils.isBlank(userName)) {
+			throw new EpServiceException("Cannot increment user when userName is null or empty.");
+		}
+
+		getPersistenceEngine().executeNamedQuery("INCREMENT_CMUSER_FAILEDLOGINS_BY_USERNAME", userName);
+
+
 	}
 
 	public void setIndexNotificationService(

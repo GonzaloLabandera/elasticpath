@@ -1,0 +1,14 @@
+Deprecation notice
+------------------
+
+The use of the "dev" environment name has been discontinued within Elastic Path because it is does
+not accurately describe the environment's role within the development infrastructure.
+
+The following names are used instead:
+* ci
+* qa
+* perf
+* stage
+
+There is no problem if project teams want to continue using the "dev" environment name, as there is no
+restriction to environment names.

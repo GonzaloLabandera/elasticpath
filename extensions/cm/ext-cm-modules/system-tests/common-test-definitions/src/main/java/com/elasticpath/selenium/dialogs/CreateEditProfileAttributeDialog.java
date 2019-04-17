@@ -18,7 +18,8 @@ public class CreateEditProfileAttributeDialog extends AbstractDialog {
 	private static final String CREATE_EDIT_PROFILE_ATTRIBUTE_PARENT_INPUT_CSS = "div[automation-id='com.elasticpath.cmclient.admin.customers"
 			+ ".AdminCustomersMessages";
 	private static final String PROFILE_ATTRIBUTE_KEY_INPUT_CSS = CREATE_EDIT_PROFILE_ATTRIBUTE_PARENT_INPUT_CSS + ".AttributeKey'] input";
-	private static final String PROFILE_ATTRIBUTE_NAME_INPUT_CSS = CREATE_EDIT_PROFILE_ATTRIBUTE_PARENT_INPUT_CSS + ".AttributeName'] input";
+	private static final String ATTRIBUTE_LANGUAGE_CSS = CREATE_EDIT_PROFILE_ATTRIBUTE_PARENT_INPUT_CSS + ".AttributeName'] ";
+	private static final String PROFILE_ATTRIBUTE_NAME_INPUT_CSS = ATTRIBUTE_LANGUAGE_CSS + "+ div[widget-type='Text'] > input";
 	private static final String PROFILE_ATTRIBUTE_TYPE_COMBO_CSS = CREATE_EDIT_PROFILE_ATTRIBUTE_PARENT_INPUT_CSS
 			+ ".AttributeType'][widget-type='CCombo']";
 	private static final String SAVE_BUTTON_CSS = "div[automation-id='com.elasticpath.cmclient.core.CoreMessages"

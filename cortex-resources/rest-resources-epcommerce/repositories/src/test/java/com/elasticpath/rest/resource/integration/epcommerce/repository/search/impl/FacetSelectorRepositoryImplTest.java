@@ -4,7 +4,6 @@
 package com.elasticpath.rest.resource.integration.epcommerce.repository.search.impl;
 
 import static com.elasticpath.rest.resource.integration.epcommerce.repository.ErrorCheckPredicate.createErrorCheckPredicate;
-import static com.elasticpath.rest.resource.integration.epcommerce.repository.ResourceTestConstants.CATALOG_CODE;
 import static com.elasticpath.rest.resource.integration.epcommerce.repository.ResourceTestConstants.CURRENCY;
 import static com.elasticpath.rest.resource.integration.epcommerce.repository.ResourceTestConstants.LOCALE;
 import static com.elasticpath.rest.resource.integration.epcommerce.repository.ResourceTestConstants.SCOPE;
@@ -16,11 +15,14 @@ import static com.elasticpath.service.search.solr.FacetConstants.FACET_VALUE_COU
 import static com.elasticpath.service.search.solr.FacetConstants.FACET_VALUE_DISPLAY_NAME;
 import static com.elasticpath.service.search.solr.FacetConstants.FACET_VALUE_FILTER;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.when;
 
+import java.util.Currency;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import com.google.common.collect.ImmutableList;
@@ -30,33 +32,30 @@ import io.reactivex.Single;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Answers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import com.elasticpath.domain.store.Store;
 import com.elasticpath.rest.ResourceOperationFailure;
 import com.elasticpath.rest.ResourceStatus;
-import com.elasticpath.rest.definition.searches.FacetIdIdentifierPart;
-import com.elasticpath.rest.definition.searches.FacetIdentifier;
-import com.elasticpath.rest.definition.searches.FacetSelectorChoiceIdentifier;
-import com.elasticpath.rest.definition.searches.FacetSelectorIdentifier;
-import com.elasticpath.rest.definition.searches.FacetValueIdentifier;
-import com.elasticpath.rest.definition.searches.FacetsIdentifier;
-import com.elasticpath.rest.definition.searches.SearchesIdentifier;
+import com.elasticpath.rest.definition.offersearches.FacetIdIdentifierPart;
+import com.elasticpath.rest.definition.offersearches.FacetIdentifier;
+import com.elasticpath.rest.definition.offersearches.FacetSelectorChoiceIdentifier;
+import com.elasticpath.rest.definition.offersearches.FacetSelectorIdentifier;
+import com.elasticpath.rest.definition.offersearches.FacetValueIdentifier;
+import com.elasticpath.rest.definition.offersearches.FacetsIdentifier;
 import com.elasticpath.rest.id.type.CompositeIdentifier;
 import com.elasticpath.rest.id.type.StringIdentifier;
 import com.elasticpath.rest.identity.TestSubjectFactory;
 import com.elasticpath.rest.resource.ResourceOperationContext;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.search.SearchRepository;
-import com.elasticpath.rest.resource.integration.epcommerce.repository.store.StoreRepository;
 import com.elasticpath.rest.selector.ChoiceStatus;
-import com.elasticpath.service.search.query.KeywordSearchCriteria;
+import com.elasticpath.service.search.ProductCategorySearchCriteria;
+import com.elasticpath.service.search.query.ProductSearchCriteria;
 import com.elasticpath.service.search.solr.FacetValue;
 
 /**
- * Test for {@link FacetSelectorRepositoryImpl}
+ * Test for {@link FacetSelectorRepositoryImpl}.
  */
 @RunWith(MockitoJUnitRunner.class)
 public class FacetSelectorRepositoryImplTest {
@@ -79,7 +78,7 @@ public class FacetSelectorRepositoryImplTest {
 
 	private static final FacetsIdentifier FACETS_IDENTIFIER = FacetsIdentifier.builder()
 			.withSearchId(SEARCH_IDENTIFIER_MAP)
-			.withSearches(SearchesIdentifier.builder().withScope(StringIdentifier.of(SCOPE)).build())
+			.withScope(StringIdentifier.of(SCOPE))
 			.withAppliedFacets(CompositeIdentifier.of(APPLIED_FACETS))
 			.build();
 
@@ -99,17 +98,13 @@ public class FacetSelectorRepositoryImplTest {
 			ImmutableMap.of(FACET_VALUE_DISPLAY_NAME, CHOOSABLE_DISPLAY, FACET_VALUE_COUNT, COUNT,
 					FACET_VALUE_FILTER, CHOOSABLE_FACET);
 
+	private final ProductCategorySearchCriteria searchCriteria = new ProductSearchCriteria();
+
 	@InjectMocks
 	private FacetSelectorRepositoryImpl<FacetSelectorIdentifier, FacetSelectorChoiceIdentifier> repository;
 
 	@Mock
 	private SearchRepository searchRepository;
-
-	@Mock
-	private StoreRepository storeRepository;
-
-	@Mock(answer = Answers.RETURNS_DEEP_STUBS)
-	private Store store;
 
 	@Mock
 	private ResourceOperationContext resourceOperationContext;
@@ -118,16 +113,16 @@ public class FacetSelectorRepositoryImplTest {
 	public void setUp() {
 		when(resourceOperationContext.getSubject())
 				.thenReturn(TestSubjectFactory.createWithScopeAndUserIdAndLocaleAndCurrency(SCOPE, USER_ID, LOCALE, CURRENCY));
-		when(storeRepository.findStoreAsSingle(SCOPE)).thenReturn(Single.just(store));
-		when(store.getCode()).thenReturn(SCOPE);
-		when(store.getCatalog().getCode()).thenReturn(CATALOG_CODE);
+		when(searchRepository.getSearchCriteria(
+				nullable(String.class), anyString(), any(Locale.class), any(Currency.class), anyMap(), nullable(String.class)))
+				.thenReturn(Single.just(searchCriteria));
 	}
 	@Test
 	public void ensureGetChoicesReturnChosenAndChoosableFacetValues() {
 		FacetValue chosen = new FacetValue(CHOSEN_DISPLAY, CHOSEN_FACET, COUNT);
 		FacetValue choosable = new FacetValue(CHOOSABLE_DISPLAY, CHOOSABLE_FACET, COUNT);
 		List<FacetValue> facetValues = ImmutableList.of(chosen, choosable);
-		when(searchRepository.getFacetValues(anyString(), any(KeywordSearchCriteria.class), anyInt()))
+		when(searchRepository.getFacetValues(anyString(), any(ProductCategorySearchCriteria.class)))
 				.thenReturn(Observable.fromIterable(facetValues));
 
 		repository.getChoices(FACET_SELECTOR_IDENTIFIER)
@@ -138,7 +133,7 @@ public class FacetSelectorRepositoryImplTest {
 
 	@Test
 	public void ensureGetChoicesReturnsNotFoundWhenGetFacetValuesThrowAnError() {
-		when(searchRepository.getFacetValues(anyString(), any(KeywordSearchCriteria.class), anyInt()))
+		when(searchRepository.getFacetValues(anyString(), any(ProductCategorySearchCriteria.class)))
 				.thenReturn(Observable.error(ResourceOperationFailure.notFound(NOT_FOUND)));
 
 		repository.getChoices(FACET_SELECTOR_IDENTIFIER)

@@ -17,10 +17,12 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
-import com.google.common.testing.EqualsTester;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
+import com.google.common.testing.EqualsTester;
+
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
@@ -43,6 +45,7 @@ import com.elasticpath.domain.catalog.impl.ProductTypeImpl;
 import com.elasticpath.domain.misc.impl.RandomGuidImpl;
 import com.elasticpath.domain.quantity.Quantity;
 import com.elasticpath.domain.shoppingcart.DiscountRecord;
+import com.elasticpath.domain.shoppingcart.ItemType;
 import com.elasticpath.domain.shoppingcart.ShoppingItem;
 import com.elasticpath.domain.shoppingcart.ShoppingItemRecurringPrice;
 import com.elasticpath.domain.shoppingcart.impl.CartItem;
@@ -166,6 +169,7 @@ public class AbstractShoppingItemImplTest {
 		sku1.setGuid(sku1.getSkuCode());
 		child1.setSkuGuid(sku1.getGuid());
 		child1.setBundleConstituent(true);
+		child1.setItemType(ItemType.BUNDLE_CONSTITUENT);
 
 		ShoppingItemImpl child2 = new ShoppingItemImpl();
 		ProductSku sku2 = new ProductSkuImpl();
@@ -173,7 +177,7 @@ public class AbstractShoppingItemImplTest {
 		sku2.setGuid(sku2.getSkuCode());
 		child2.setSkuGuid(sku2.getGuid());
 		child2.setBundleConstituent(true);
-
+		child2.setItemType(ItemType.BUNDLE_CONSTITUENT);
 		item.addChildItem(child1);
 		item.addChildItem(child2);
 
@@ -198,6 +202,7 @@ public class AbstractShoppingItemImplTest {
 		cartItemImpl.setSkuGuid(sku.getGuid());
 		CartItem bundleConstituentCartItem = new ShoppingItemImpl();
 		bundleConstituentCartItem.setBundleConstituent(true);
+		bundleConstituentCartItem.setItemType(ItemType.BUNDLE_CONSTITUENT);
 		assertThat(cartItemImpl.hasBundleItems(productSkuLookup)).isFalse();
 		cartItemImpl.addChildItem(bundleConstituentCartItem);
 		assertThat(cartItemImpl.hasBundleItems(productSkuLookup)).isTrue();

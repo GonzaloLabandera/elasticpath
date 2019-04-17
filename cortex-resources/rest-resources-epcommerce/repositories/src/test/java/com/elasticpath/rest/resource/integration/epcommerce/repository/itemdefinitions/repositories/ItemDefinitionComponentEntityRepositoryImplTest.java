@@ -65,7 +65,8 @@ public class ItemDefinitionComponentEntityRepositoryImplTest {
 		when(bundleConstituent.getConstituent()).thenReturn(constituentItem);
 		when(constituentItem.getProductSku()).thenReturn(productSku);
 		when(itemRepository.getItemIdForSku(productSku)).thenReturn(CompositeIdUtil.encodeCompositeId(STANDALONE_ITEM_ID_MAP));
-		when(conversionService.convert(bundleConstituent, ItemDefinitionComponentEntity.class)).thenReturn(ItemDefinitionComponentEntity.builder().build());
+		when(conversionService.convert(bundleConstituent, ItemDefinitionComponentEntity.class))
+				.thenReturn(ItemDefinitionComponentEntity.builder().build());
 		when(bundleConstituent.getGuid()).thenReturn(COMPONENT_ID);
 	}
 
@@ -83,7 +84,8 @@ public class ItemDefinitionComponentEntityRepositoryImplTest {
 
 	@Test
 	public void findOneReturnErrorWhenNoBundleConstituentFoundForGivenItemId() {
-		when(itemRepository.findBundleConstituentAtPathEnd(eq(ITEM_ID_MAP), any())).thenReturn(Single.error(ResourceOperationFailure.notFound(COMPONENT_NOT_FOUND)));
+		when(itemRepository.findBundleConstituentAtPathEnd(eq(ITEM_ID_MAP), any()))
+				.thenReturn(Single.error(ResourceOperationFailure.notFound(COMPONENT_NOT_FOUND)));
 		repository.findOne(identifier)
 				.test()
 				.assertError(ResourceOperationFailure.notFound(COMPONENT_NOT_FOUND))

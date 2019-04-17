@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>com.elasticpath</groupId>
 		<artifactId>grandparent</artifactId>
-		<version>104</version>
+		<version>105</version>
 		<relativePath/>
 	</parent>
 
@@ -14,7 +14,7 @@
 	<packaging>pom</packaging>
 
 	<name>Commerce Parent POM</name>
-	<version>704.0.0-SNAPSHOT</version>
+	<version>0.0.0-SNAPSHOT</version>
 
 	<properties>
 		<!-- Start of plugin properties -->
@@ -22,16 +22,16 @@
 		<org.apache.camel.version>2.21.1</org.apache.camel.version>
 		<hamcrest.version>1.3</hamcrest.version>
 
-		<api-platform.version>1.22.0.20181214215737-0d528</api-platform.version>
+		<api-platform.version>1.24.0.0e39d44361</api-platform.version>
 
-		<cmclient.version>704.0.0-SNAPSHOT</cmclient.version>
+		<cmclient.version>0.0.0-SNAPSHOT</cmclient.version>
 		<cortex.ep.integration.version>0.0.0-SNAPSHOT</cortex.ep.integration.version>
 
 		<commons.pool.version>1.6</commons.pool.version>
 		<hawtbuf.version>1.9</hawtbuf.version>
 		<!-- End of plugin properties -->
 
-		<org.apache.activemq.version>5.14.3</org.apache.activemq.version>
+		<org.apache.activemq.version>5.15.8</org.apache.activemq.version>
 		<!-- Default webapp ports when deployed in a single Tomcat container -->
 		<!-- NOTE: Deprecated because webapps are more stable if deployed in separate Tomcat containers -->
 		<!--       Use port assignments from ep-developer profile instead for development -->
@@ -40,6 +40,8 @@
 		<ep.search.tomcat.port.http>8080</ep.search.tomcat.port.http>
 		<ep.integration.tomcat.port.http>8080</ep.integration.tomcat.port.http>
 		<ep.integration.tomcat.port.https>8443</ep.integration.tomcat.port.https>
+		<ep.datasync.tomcat.port.http>8080</ep.datasync.tomcat.port.http>
+		<ep.datasync.tomcat.port.https>8443</ep.datasync.tomcat.port.https>
 		<ep.batch.tomcat.port.http>8080</ep.batch.tomcat.port.http>
 		<ep.cortex.tomcat.port.http>8080</ep.cortex.tomcat.port.http>
 		<ep.studio.tomcat.port.http>8080</ep.studio.tomcat.port.http>
@@ -62,7 +64,6 @@
 		<keytool.maven.plugin.version>1.0</keytool.maven.plugin.version>
 		<maven.release.plugin.version>2.4</maven.release.plugin.version>
 		<maven.failsafe.plugin.version>2.19</maven.failsafe.plugin.version>
-		<!--<org.apache.activemq.version>5.14.3</org.apache.activemq.version>-->
 		<org.apache.openjpa.version>2.4.0-ep2.1</org.apache.openjpa.version>
 		<org.liquibase.version>3.4.2</org.liquibase.version>
 		<slf4j.version>1.7.25</slf4j.version>
@@ -89,6 +90,9 @@
 
 		<!-- Batch Server Settings -->
 		<ep.batch.context>/batch</ep.batch.context>
+
+		<!-- Data Sync Server Settings -->
+		<ep.datasync.context>/datasync</ep.datasync.context>
 
 		<!-- Where your assets are located on your machine during development. -->
 		<!-- This setting it put into your configured database by the snapitup-data artifact. -->
@@ -144,8 +148,8 @@
 		<maven.shade.plugin.version>2.4.3</maven.shade.plugin.version>
 
 		<!-- Commerce Data and Data Population -->
-		<ep.data.population.version>704.0.0-SNAPSHOT</ep.data.population.version>
-		<ep.commerce.data.version>704.0.0-SNAPSHOT</ep.commerce.data.version>
+		<ep.data.population.version>0.0.0-SNAPSHOT</ep.data.population.version>
+		<ep.commerce.data.version>0.0.0-SNAPSHOT</ep.commerce.data.version>
 
 		<!-- Health Monitor Properties -->
 		<ep.health.monitoring.context>/healthcheck</ep.health.monitoring.context>
@@ -157,7 +161,9 @@
 		<dependency.directory>lib</dependency.directory>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-		<checkstyle.ruleset>rulesets/checkstyle-elasticpath-itest-rules.xml</checkstyle.ruleset>
+		<checkstyle.ruleset>rulesets/checkstyle-elasticpath-rules.xml</checkstyle.ruleset>
+		<checkstyle.itest.ruleset>rulesets/checkstyle-elasticpath-itest-rules.xml</checkstyle.itest.ruleset>
+		<pmd.ruleset>rulesets/pmd-elasticpath-rules.xml</pmd.ruleset>
 		<pmd.itest.ruleset>rulesets/pmd-elasticpath-itest-rules.xml</pmd.itest.ruleset>
 
 		<jaxb.version>2.2.11</jaxb.version>
@@ -185,7 +191,7 @@
 			<dependency>
 				<groupId>com.elasticpath</groupId>
 				<artifactId>bill-of-materials</artifactId>
-				<version>704.0.0-SNAPSHOT</version>
+				<version>0.0.0-SNAPSHOT</version>
 				<scope>import</scope>
 				<type>pom</type>
 			</dependency>
@@ -225,6 +231,7 @@
 				<ep.search.tomcat.port.http>8082</ep.search.tomcat.port.http>
 				<ep.integration.tomcat.port.http>8083</ep.integration.tomcat.port.http>
 				<ep.batch.tomcat.port.http>8084</ep.batch.tomcat.port.http>
+				<ep.datasync.tomcat.port.http>8085</ep.datasync.tomcat.port.http>
 				<ep.cortex.tomcat.port.http>9080</ep.cortex.tomcat.port.http>
 				<ep.studio.tomcat.port.http>9081</ep.studio.tomcat.port.http>
 
@@ -248,6 +255,7 @@
 				<ep.integration.port.http>${ep.integration.tomcat.port.http}</ep.integration.port.http>
 				<ep.integration.port.https>${ep.integration.tomcat.port.https}</ep.integration.port.https>
 				<ep.batch.port.http>${ep.batch.tomcat.port.http}</ep.batch.port.http>
+				<ep.datasync.port.http>${ep.datasync.tomcat.port.http}</ep.datasync.port.http>
 				<ep.cortex.port.http>${ep.cortex.tomcat.port.http}</ep.cortex.port.http>
 				<ep.studio.port.http>${ep.studio.tomcat.port.http}</ep.studio.port.http>
 			</properties>
@@ -293,6 +301,27 @@
 				</plugins>
 			</build>
 		</profile>
+		<profile>
+			<id>mysql-dev-db</id>
+			<!-- This profile introduces configurations to DST target DB configuration.
+				  This is an example configuration and in project development this should be added to the relevant DB profile in settings.xml to
+				  avoid build contamination. DO NOT USE this configuration in production. -->
+			<properties>
+				<epdb.synctarget.jdbc.driver>com.mysql.jdbc.Driver</epdb.synctarget.jdbc.driver>
+				<epdb.synctarget.host>127.0.0.1</epdb.synctarget.host>
+				<epdb.synctarget.port>3306</epdb.synctarget.port>
+				<epdb.synctarget.schemaname>COMMERCEDB_TARGET</epdb.synctarget.schemaname>
+				<epdb.synctarget.databasename>${epdb.synctarget.schemaname}</epdb.synctarget.databasename>
+				<epdb.synctarget.username>ep</epdb.synctarget.username>
+				<epdb.synctarget.password>ep</epdb.synctarget.password>
+				<epdb.synctarget.params>?characterEncoding=UTF-8</epdb.synctarget.params>
+				<epdb.synctarget.validation.query>SELECT 1</epdb.synctarget.validation.query>
+				<epdb.synctarget.removeabandonedtimeout>86400</epdb.synctarget.removeabandonedtimeout>
+				<epdb.synctarget.url>
+					jdbc:mysql://${epdb.synctarget.host}:${epdb.synctarget.port}/${epdb.synctarget.databasename}${epdb.synctarget.params}
+				</epdb.synctarget.url>
+			</properties>
+		</profile>
 	</profiles>
 
 	<build>
@@ -322,7 +351,7 @@
 				<plugin>
 					<groupId>com.elasticpath.tools</groupId>
 					<artifactId>ep-core-tool</artifactId>
-					<version>704.0.0-SNAPSHOT</version>
+					<version>0.0.0-SNAPSHOT</version>
 					<dependencies>
 						<dependency>
 							<groupId>${epdb.maven.groupId}</groupId>

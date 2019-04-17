@@ -63,6 +63,10 @@
 			<artifactId>ep-dataimport-email-handler</artifactId>
 		</dependency>
 		<dependency>
+			<groupId>com.elasticpath</groupId>
+			<artifactId>ep-sync-message-listener-email</artifactId>
+		</dependency>
+		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-context</artifactId>
 			<scope>runtime</scope>
@@ -92,6 +96,16 @@
 						<path>${ep.integration.context}</path>
 						<port>${ep.integration.tomcat.port.http}</port>
 						<contextFile>${project.build.directory}/tomcatconf/context.xml</contextFile>
+						<systemProperties>
+							<ep.changesets.enabled>${ep.changesets.enabled}</ep.changesets.enabled>
+							<ep.search.default.url>${ep.search.url}</ep.search.default.url>
+							<ep.asset.location>${ep.local.asset.path}</ep.asset.location>
+							<ep.smtp.scheme>${ep.smtp.scheme}</ep.smtp.scheme>
+							<ep.smtp.host>${ep.smtp.host}</ep.smtp.host>
+							<ep.smtp.port>${ep.smtp.port}</ep.smtp.port>
+							<ep.smtp.username>${ep.smtp.username}</ep.smtp.username>
+							<ep.smtp.password>${ep.smtp.password}</ep.smtp.password>
+						</systemProperties>
 					</configuration>
 					<dependencies>
 						<dependency>

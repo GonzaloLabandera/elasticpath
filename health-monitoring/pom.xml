@@ -6,11 +6,11 @@
 	<parent>
 		<groupId>com.elasticpath</groupId>
 		<artifactId>commerce-parent</artifactId>
-		<version>704.0.0-SNAPSHOT</version>
+		<version>0.0.0-SNAPSHOT</version>
 	</parent>
 
 	<artifactId>health-monitoring</artifactId>
-	<version>704.0.0-SNAPSHOT</version>
+	<version>0.0.0-SNAPSHOT</version>
 	<packaging>pom</packaging>
 	<name>Health Monitoring Parent</name>
 

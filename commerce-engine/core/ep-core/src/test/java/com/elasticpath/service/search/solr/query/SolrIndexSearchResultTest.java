@@ -283,13 +283,13 @@ public class SolrIndexSearchResultTest {
 		final int negNum3 = -345345;
 		final int negNum4 = -3445;
 
-		assertNull(solrIndexSearchResult.getResultUids());
+		assertNull(solrIndexSearchResult.getCachedResultUids());
 		solrIndexSearchResult.getResults(negNum1, negNum1);
-		assertNotNull(solrIndexSearchResult.getResultUids());
+		assertNotNull(solrIndexSearchResult.getCachedResultUids());
 		solrIndexSearchResult.getResults(negNum4, negNum2);
-		assertNotNull(solrIndexSearchResult.getResultUids());
+		assertNotNull(solrIndexSearchResult.getCachedResultUids());
 		solrIndexSearchResult.getResults(negNum4, negNum3);
-		assertNotNull(solrIndexSearchResult.getResultUids());
+		assertNotNull(solrIndexSearchResult.getCachedResultUids());
 	}
 
 	/**
@@ -325,7 +325,7 @@ public class SolrIndexSearchResultTest {
 
 		solrIndexSearchResult.getResults(startIndex, maxResults); // calls clearAllFilters()
 
-		assertTrue(solrIndexSearchResult.getResultUids().isEmpty());
+		assertTrue(solrIndexSearchResult.getCachedResultUids().isEmpty());
 		assertEquals(solrIndexSearchResult.getCategoryFilterOptions().isEmpty(), !rememberOptions);
 		assertEquals(solrIndexSearchResult.getBrandFilterOptions().isEmpty(), !rememberOptions);
 		assertEquals(solrIndexSearchResult.getPriceFilterOptions().isEmpty(), !rememberOptions);

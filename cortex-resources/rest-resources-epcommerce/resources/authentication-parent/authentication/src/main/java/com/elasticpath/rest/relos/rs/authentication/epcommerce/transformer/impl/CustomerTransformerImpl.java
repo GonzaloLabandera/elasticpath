@@ -21,18 +21,17 @@ public class CustomerTransformerImpl implements CustomerTransformer {
 	@Override
 	public User transform(final Customer customer) {
 		assert customer != null : "Customer is null.";
+		assert customer.getCustomerAuthentication() != null : "Customer authentication is null";
 
 		User user = new UserImpl();
 
 		user.setRequestedScope(customer.getStoreCode());
 		user.setUsername(customer.getUserId());
-		if (customer.getPassword() != null) {
-			user.setPassword(customer.getPassword());
-		}
+		user.setPassword(customer.getCustomerAuthentication().getPassword());
+		user.setSalt(customer.getCustomerAuthentication().getSalt());
 		user.setPrincipals(PrincipalsUtil.createRolePrincipals(customer.getCustomerRoleMapper().getAllRoles()));
 		setUserStatesFromCustomerStatus(user, customer.getStatus());
 		user.setUserId(customer.getGuid());
-		user.setSalt(customer.getCustomerAuthentication().getSalt());
 		user.setAccountExpired(!customer.isAccountNonExpired());
 
 		return user;

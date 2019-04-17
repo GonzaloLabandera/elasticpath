@@ -14,7 +14,7 @@ import javax.persistence.Table;
 import com.elasticpath.persistence.api.AbstractPersistableImpl;
 
 /**
- * Sample entity class with owned by Master
+ * Sample entity class with owned by Master.
  */
 @Entity
 @Table(name = "detail")

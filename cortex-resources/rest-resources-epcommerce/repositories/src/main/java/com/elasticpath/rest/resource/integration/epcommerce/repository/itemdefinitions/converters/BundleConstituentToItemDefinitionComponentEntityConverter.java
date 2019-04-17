@@ -60,6 +60,13 @@ public class BundleConstituentToItemDefinitionComponentEntityConverter implement
 				.build();
 	}
 
+	/**
+	 * Create {@link DetailsEntity} objects from the passed {@link ConstituentItem}.
+	 *
+	 * @param constituentItem the constituent item to use to create the details entity
+	 * @param locale the locale to use when retrieving attributes
+	 * @return a collection of {@link DetailsEntity}s
+	 */
 	protected Collection<DetailsEntity> createDetailsEntities(final ConstituentItem constituentItem, final Locale locale) {
 		Product product = constituentItem.getProduct();
 		List<AttributeValue> productAttributeValues = product.getFullAttributeValues(locale);

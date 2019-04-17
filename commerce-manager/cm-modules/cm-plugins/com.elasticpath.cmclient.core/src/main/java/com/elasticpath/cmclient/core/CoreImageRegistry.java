@@ -102,19 +102,19 @@ public final class CoreImageRegistry extends AbstractImageRegistry {
 	public static final ImageDescriptor IMAGE_SAVE = getImageDescriptor(PLUGIN_ID, "save_default_22.png"); //$NON-NLS-1$
 
 	/** Save image. */
-	public static final ImageDescriptor IMAGE_SAVE_LARGE = getImageDescriptor(PLUGIN_ID, "save_default_34.png"); //$NON-NLS-1$
+	public static final ImageDescriptor IMAGE_SAVE_LARGE = getImageDescriptor(PLUGIN_ID, "baseline-save-18px.png"); //$NON-NLS-1$
 
 	/** Save image. */
-	public static final ImageDescriptor IMAGE_SAVE_ACTIVE_LARGE = getImageDescriptor(PLUGIN_ID, "save_active_34.png"); //$NON-NLS-1$
+	public static final ImageDescriptor IMAGE_SAVE_ACTIVE_LARGE = getImageDescriptor(PLUGIN_ID, "baseline-save-18px.png"); //$NON-NLS-1$
 
 	/** Save all image. */
 	public static final ImageDescriptor IMAGE_SAVE_ALL = getImageDescriptor(PLUGIN_ID, "save-all_default_22.png"); //$NON-NLS-1$
 
 	/** Save all image. */
-	public static final ImageDescriptor IMAGE_SAVE_ALL_LARGE = getImageDescriptor(PLUGIN_ID, "save-all_default_34.png"); //$NON-NLS-1$
+	public static final ImageDescriptor IMAGE_SAVE_ALL_LARGE = getImageDescriptor(PLUGIN_ID, "baseline-collections-18px.png"); //$NON-NLS-1$
 
 	/** Save all image. */
-	public static final ImageDescriptor IMAGE_SAVE_ALL_ACTIVE_LARGE = getImageDescriptor(PLUGIN_ID, "save-all_active_34.png"); //$NON-NLS-1$
+	public static final ImageDescriptor IMAGE_SAVE_ALL_ACTIVE_LARGE = getImageDescriptor(PLUGIN_ID, "baseline-collections-18px.png"); //$NON-NLS-1$
 
 	/** Save as image. */
 	public static final ImageDescriptor IMAGE_SAVE_AS = getImageDescriptor(PLUGIN_ID, "save-as_default_22.png"); //$NON-NLS-1$
@@ -148,7 +148,7 @@ public final class CoreImageRegistry extends AbstractImageRegistry {
 
 	/** Branding image for LoginDialog. **/
 	public static final ImageDescriptor BRANDING_IMAGE = getImageDescriptor(PLUGIN_ID, "login_branding.png"); //$NON-NLS-1$
-	
+
 	/** View jobs icon. **/
 	public static final ImageDescriptor IMAGE_VIEW_IMPORT_JOBS = getImageDescriptor(PLUGIN_ID, "csv-import_default_22.png"); //$NON-NLS-1$
 
@@ -159,13 +159,13 @@ public final class CoreImageRegistry extends AbstractImageRegistry {
 	public static final ImageDescriptor IMAGE_CSV_EXPORT = getImageDescriptor(PLUGIN_ID, "csv-export_default_22.png"); //$NON-NLS-1$
 
 	/** Refresh icon. **/
-	public static final ImageDescriptor IMAGE_REFRESH = getImageDescriptor(PLUGIN_ID, "arrow-refresh_default_22.png"); //$NON-NLS-1$
+	public static final ImageDescriptor IMAGE_REFRESH = getImageDescriptor(PLUGIN_ID, "baseline-sync-22px.png"); //$NON-NLS-1$
 
 	/** Refresh icon. **/
-	public static final ImageDescriptor IMAGE_REFRESH_LARGE = getImageDescriptor(PLUGIN_ID, "arrow-refresh_default_34.png"); //$NON-NLS-1$
+	public static final ImageDescriptor IMAGE_REFRESH_LARGE = getImageDescriptor(PLUGIN_ID, "baseline-sync-18px.png"); //$NON-NLS-1$
 
 	/** Refresh icon. **/
-	public static final ImageDescriptor IMAGE_REFRESH_ACTIVE_LARGE = getImageDescriptor(PLUGIN_ID, "arrow-refresh_active_34.png"); //$NON-NLS-1$
+	public static final ImageDescriptor IMAGE_REFRESH_ACTIVE_LARGE = getImageDescriptor(PLUGIN_ID, "baseline-sync-18px.png"); //$NON-NLS-1$
 
 	/** Inline edit icon. */
 	public static final ImageDescriptor IMAGE_EDIT_CELL_SMALL = getImageDescriptor(PLUGIN_ID, "edit-cell_default_16.png"); //$NON-NLS-1$
@@ -190,19 +190,19 @@ public final class CoreImageRegistry extends AbstractImageRegistry {
 
 	/** Change password icon. */
 	public static final ImageDescriptor CHANGE_PASSWORD = getImageDescriptor(PLUGIN_ID, "password-change_default_22.png"); //$NON-NLS-1$
-	
+
 	/** Change pagination icon. */
 	public static final ImageDescriptor CHANGE_PAGINATION = getImageDescriptor(PLUGIN_ID, "pagination-change_default_22.png"); //$NON-NLS-1$
 
 	/** Open icon. */
-	public static final ImageDescriptor IMAGE_OPEN = getImageDescriptor(PLUGIN_ID, "open_default_22.png"); //$NON-NLS-1$
+	public static final ImageDescriptor IMAGE_OPEN = getImageDescriptor(PLUGIN_ID, "baseline-open_in_new-22px.png"); //$NON-NLS-1$
 
 	/** Help contents icon. */
 	public static final ImageDescriptor IMAGE_HELP_CONTENTS = getImageDescriptor(PLUGIN_ID, "help_default_22.png"); //$NON-NLS-1$
-	
+
 	/** Price list image. */
 	public static final ImageDescriptor IMAGE_PRICE_LIST = getImageDescriptor(PLUGIN_ID, "price-list_default_22.png"); //$NON-NLS-1$
-	
+
 	/** plus image. */
 	public static final ImageDescriptor IMAGE_PLUS = getImageDescriptor(PLUGIN_ID, "add_default_22.png"); //$NON-NLS-1$
 
@@ -256,12 +256,22 @@ public final class CoreImageRegistry extends AbstractImageRegistry {
 	 */
 	public static final ImageDescriptor CONFIGURATION_ICON = getImageDescriptor(PLUGIN_ID, "configuration_default.png"); //$NON-NLS-1$
 
+	/**
+	 * Arrow right image.
+	 */
+	public static final ImageDescriptor ARROW_RIGHT_ICON = getImageDescriptor(PLUGIN_ID, "arrow_right_16.png"); //$NON-NLS-1$
+
+	/**
+	 * Arrow right image.
+	 */
+	public static final ImageDescriptor ARROW_LEFT_ICON = getImageDescriptor(PLUGIN_ID, "arrow_left_16.png"); //$NON-NLS-1$
+
 
 	/**
 	 * Gets the proper image for {@link Product}.
-	 * 
+	 *
 	 * @param product {@link Product}. Can't be null.
-	 * 
+	 *
 	 * @return {@link Image}.
 	 */
 	public static Image getImageForProduct(final Product product) {
@@ -313,6 +323,10 @@ public final class CoreImageRegistry extends AbstractImageRegistry {
 	 * @return image indicating selection
 	 */
 	public static Image createPerspectiveDecoratedImage(final Image image) {
-		return new DecorationOverlayIcon(image, PERSPECTIVE_SELECTED, IDecoration.UNDERLAY).createImage();
+		if (image != null) {
+			return new DecorationOverlayIcon(image, PERSPECTIVE_SELECTED, IDecoration.UNDERLAY).createImage();
+		}
+
+		return null;
 	}
 }

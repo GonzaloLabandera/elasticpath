@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013 Elastic Path Software Inc. All rights reserved.
+ * Copyright © 2019 Elastic Path Software Inc. All rights reserved.
  */
 package com.elasticpath.rest.relos.rs.authentication.springoauth2.tokenstore.impl;
 
@@ -11,13 +11,20 @@ import org.osgi.service.component.annotations.Component;
 
 import com.elasticpath.rest.command.ExecutionResult;
 import com.elasticpath.rest.command.ExecutionResultFactory;
-import com.elasticpath.rest.relos.rs.authentication.springoauth2.dto.AccessTokenDto;
+import com.elasticpath.rest.relos.rs.authentication.dto.AccessTokenDto;
 import com.elasticpath.rest.relos.rs.authentication.springoauth2.tokenstore.TokenStoreStrategy;
+import com.elasticpath.rest.relos.rs.authentication.token.AccessTokenStrategy;
 
 /**
  * An in memory token store strategy implementation. Usually not present in a deployment but is useful for testing.
  */
-@Component(property = Constants.SERVICE_RANKING + ":Integer=100")
+@Component(
+		property = Constants.SERVICE_RANKING + ":Integer=100",
+		service = {
+				AccessTokenStrategy.class,
+				TokenStoreStrategy.class
+		}
+)
 public class InMemoryTokenStoreStrategyImpl implements TokenStoreStrategy {
 
 	private final Map<String, AccessTokenDto> accessTokens = new ConcurrentHashMap<>();

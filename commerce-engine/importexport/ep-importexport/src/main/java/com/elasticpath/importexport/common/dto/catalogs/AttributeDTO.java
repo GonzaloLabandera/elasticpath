@@ -3,15 +3,19 @@
  */
 package com.elasticpath.importexport.common.dto.catalogs;
 
+import java.util.Collections;
+import java.util.List;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.commons.lang.builder.ToStringStyle;
 
+import com.elasticpath.common.dto.DisplayValue;
 import com.elasticpath.common.dto.Dto;
 
 /**
@@ -32,8 +36,9 @@ public class AttributeDTO implements Dto {
 	@XmlElement(name = "key", required = true)
 	private String key;
 
-	@XmlElement(name = "name", required = true)
-	private String name;
+	@XmlElementWrapper(name = "name")
+	@XmlElement(name = "value", required = true)
+	private List<DisplayValue> nameValues;
 
 	@XmlElement(name = "usage", required = true)
 	private AttributeUsageType usage;
@@ -72,21 +77,24 @@ public class AttributeDTO implements Dto {
 	}
 
 	/**
-	 * Gets the name.
+	 * Gets the display name values for different locales.
 	 *
-	 * @return the name
+	 * @return the nameValues
 	 */
-	public String getName() {
-		return name;
+	public List<DisplayValue> getNameValues() {
+		if (nameValues == null) {
+			return Collections.emptyList();
+		}
+		return nameValues;
 	}
 
 	/**
-	 * Sets the name.
+	 * Sets the display name values for different locales.
 	 *
-	 * @param name the name to set
+	 * @param nameValues the nameValues to set
 	 */
-	public void setName(final String name) {
-		this.name = name;
+	public void setNameValues(final List<DisplayValue> nameValues) {
+		this.nameValues = nameValues;
 	}
 
 	/**
@@ -205,7 +213,7 @@ public class AttributeDTO implements Dto {
 	public String toString() {
 		return new ToStringBuilder(this, ToStringStyle.MULTI_LINE_STYLE)
 			.append("key", getKey())
-			.append("name", getName())
+			.append("nameValues", getNameValues())
 			.append("usage", getUsage())
 			.append("type", getType())
 			.append("multiLanguage", getMultiLanguage())

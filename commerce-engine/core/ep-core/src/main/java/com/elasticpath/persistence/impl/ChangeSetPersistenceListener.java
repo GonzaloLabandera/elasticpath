@@ -338,15 +338,23 @@ public class ChangeSetPersistenceListener extends AbstractLifecycleListener {
 	 */
 	protected void processChangeSetData(final BusinessObjectDescriptor objectDescriptor, final ChangeType changeType) {
 		if (objectDescriptor != null) {
-			// switch off temporarily the auto commit
+			// switch off temporarily the auto commit only if necessary, e.g. csv import process doesn't use AUTO,
 			// in order to avoid issues with committing data before everything has been put together
-			getOpenJPAEntityManager().setFlushMode(FlushModeType.COMMIT);
+			FlushModeType currentFlushMode = getOpenJPAEntityManager().getFlushMode();
+			boolean resetFlushMode = false;
+			if (currentFlushMode != FlushModeType.COMMIT) {
+				getOpenJPAEntityManager().setFlushMode(FlushModeType.COMMIT);
+				resetFlushMode = true;
+			}
+
 			// in case that step is enabled - add the object to the change set
 			addObjectToChangeSet(objectDescriptor);
 			addOrUpdateMetadata(objectDescriptor, changeType);
 
-			// enable again the auto commit
-			getOpenJPAEntityManager().setFlushMode(FlushModeType.AUTO);
+			// enable again the auto commit if necessary
+			if (resetFlushMode) {
+				getOpenJPAEntityManager().setFlushMode(currentFlushMode);
+			}
 		}
 	}
 

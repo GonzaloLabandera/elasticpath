@@ -16,7 +16,7 @@ import com.elasticpath.rest.helix.data.annotation.RequestIdentifier;
 import com.elasticpath.rest.helix.data.annotation.ResourceRepository;
 
 /**
- * OfferComponents for Offer Relationship link
+ * OfferComponents for Offer Relationship link.
  */
 public class OfferComponentsForOfferRelationshipImpl implements OfferComponentsForOfferRelationship.LinkTo {
 

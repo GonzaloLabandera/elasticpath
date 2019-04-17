@@ -127,4 +127,23 @@ public class SettingFactoryBeanTest {
 		settingFactoryBean.setPath("");
 	}
 
+	@Test
+	public void verifySystemPropertyOverrideValueIsApplied() throws Exception {
+
+		final String overrideKey = "overrideKey";
+		final String overrideValue = "overrideValue";
+		final String path = "/TEST/PATH/TO/setting";
+
+		System.setProperty(overrideKey, overrideValue);
+		settingFactoryBean.setPath(path);
+		settingFactoryBean.setSystemPropertyOverrideKey(overrideKey);
+
+		final SettingValue settingValue = mock(SettingValue.class);
+		when(settingsReader.getSettingValue(path)).thenReturn(settingValue);
+
+		assertThat(settingFactoryBean.createInstance())
+				.as("Expected the override value to be set")
+				.isEqualTo(overrideValue);
+	}
+
 }

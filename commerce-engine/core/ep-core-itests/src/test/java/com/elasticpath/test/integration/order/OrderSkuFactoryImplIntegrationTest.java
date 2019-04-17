@@ -37,6 +37,7 @@ import com.elasticpath.domain.catalog.impl.PriceImpl;
 import com.elasticpath.domain.catalog.impl.ProductTypeImpl;
 import com.elasticpath.domain.misc.impl.RandomGuidImpl;
 import com.elasticpath.domain.order.OrderSku;
+import com.elasticpath.domain.shoppingcart.ItemType;
 import com.elasticpath.domain.shoppingcart.ShoppingCart;
 import com.elasticpath.domain.shoppingcart.ShoppingCartTaxSnapshot;
 import com.elasticpath.domain.shoppingcart.ShoppingItem;
@@ -137,8 +138,11 @@ public class OrderSkuFactoryImplIntegrationTest extends BasicSpringContextTest {
 		ShoppingItem skuShoeItem = createShoppingItemWithRandomGuids(SKU_SHOE, SKU_SHOE_PRICE, ZERO, 1, false);
 
 		skuBallItem.setBundleConstituent(true);
+		skuBallItem.setItemType(ItemType.BUNDLE_CONSTITUENT);
 		skuNetItem.setBundleConstituent(true);
+		skuNetItem.setItemType(ItemType.BUNDLE_CONSTITUENT);
 		skuShoeItem.setBundleConstituent(true);
+		skuShoeItem.setItemType(ItemType.BUNDLE_CONSTITUENT);
 
 		rootShoppingItem.addChildItem(skuBallItem);
 		rootShoppingItem.addChildItem(skuNetItem);
@@ -165,8 +169,11 @@ public class OrderSkuFactoryImplIntegrationTest extends BasicSpringContextTest {
 		ShoppingItem skuShoeItem = createShoppingItemWithRandomGuids(SKU_SHOE, SKU_SHOE_PRICE, ZERO, 1, false);
 
 		skuBallItem.setBundleConstituent(true);
+		skuBallItem.setItemType(ItemType.BUNDLE_CONSTITUENT);
 		skuNetItem.setBundleConstituent(true);
+		skuNetItem.setItemType(ItemType.BUNDLE_CONSTITUENT);
 		skuShoeItem.setBundleConstituent(true);
+		skuShoeItem.setItemType(ItemType.BUNDLE_CONSTITUENT);
 
 		rootShoppingItem.addChildItem(skuBallItem);
 		rootShoppingItem.addChildItem(skuNetItem);
@@ -193,8 +200,11 @@ public class OrderSkuFactoryImplIntegrationTest extends BasicSpringContextTest {
 		ShoppingItem skuFreeItem = createShoppingItemWithRandomGuids(SKU_FREE_ITEM, SKU_FREE_ITEM_PRICE, ZERO, 1, false);
 
 		skuBallItem.setBundleConstituent(true);
+		skuBallItem.setItemType(ItemType.BUNDLE_CONSTITUENT);
 		skuNetItem.setBundleConstituent(true);
+		skuNetItem.setItemType(ItemType.BUNDLE_CONSTITUENT);
 		skuFreeItem.setBundleConstituent(true);
+		skuFreeItem.setItemType(ItemType.BUNDLE_CONSTITUENT);
 
 		rootShoppingItem.addChildItem(skuBallItem);
 		rootShoppingItem.addChildItem(skuNetItem);
@@ -225,6 +235,10 @@ public class OrderSkuFactoryImplIntegrationTest extends BasicSpringContextTest {
 		skuFreeItem1.setBundleConstituent(true);
 		skuFreeItem2.setBundleConstituent(true);
 		skuFreeItem3.setBundleConstituent(true);
+		skuBallItem.setItemType(ItemType.BUNDLE_CONSTITUENT);
+		skuFreeItem1.setItemType(ItemType.BUNDLE_CONSTITUENT);
+		skuFreeItem2.setItemType(ItemType.BUNDLE_CONSTITUENT);
+		skuFreeItem3.setItemType(ItemType.BUNDLE_CONSTITUENT);
 
 		rootShoppingItem.addChildItem(skuBallItem);
 		rootShoppingItem.addChildItem(skuFreeItem1);
@@ -250,6 +264,7 @@ public class OrderSkuFactoryImplIntegrationTest extends BasicSpringContextTest {
 		ShoppingItem rootShoppingItem = createShoppingItemWithRandomGuids(SKU_BUNDLE, BUNDLE_PRICE1, ZERO, 1, true);
 		ShoppingItem skuBallItem = createShoppingItemWithRandomGuids(SKU_BALL, SKU_BALL_PRICE, ZERO, 1, false);
 		skuBallItem.setBundleConstituent(true);
+		skuBallItem.setItemType(ItemType.BUNDLE_CONSTITUENT);
 		rootShoppingItem.addChildItem(skuBallItem);
 
 		Collection<OrderSku> orderSkus = factory.createOrderSkus(Arrays.asList(rootShoppingItem), pricingSnapshot, Locale.US);
@@ -271,8 +286,11 @@ public class OrderSkuFactoryImplIntegrationTest extends BasicSpringContextTest {
 		ShoppingItem skuShoeItem = createShoppingItemWithRandomGuids(SKU_SHOE, SKU_SHOE_PRICE, ZERO, 13, false);
 
 		skuBallItem.setBundleConstituent(true);
+		skuBallItem.setItemType(ItemType.BUNDLE_CONSTITUENT);
 		skuNetItem.setBundleConstituent(true);
+		skuNetItem.setItemType(ItemType.BUNDLE_CONSTITUENT);
 		skuShoeItem.setBundleConstituent(true);
+		skuShoeItem.setItemType(ItemType.BUNDLE_CONSTITUENT);
 
 		rootShoppingItem.addChildItem(skuBallItem);
 		rootShoppingItem.addChildItem(skuNetItem);
@@ -303,8 +321,11 @@ public class OrderSkuFactoryImplIntegrationTest extends BasicSpringContextTest {
 		ShoppingItem nestedSkuShoeItem = createShoppingItemWithRandomGuids("NESTED_" + SKU_SHOE, SKU_SHOE_PRICE, ZERO, 1, false);
 
 		nestedSkuBallItem.setBundleConstituent(true);
+		nestedSkuBallItem.setItemType(ItemType.BUNDLE_CONSTITUENT);
 		nestedSkuNetItem.setBundleConstituent(true);
+		nestedSkuNetItem.setItemType(ItemType.BUNDLE_CONSTITUENT);
 		nestedSkuShoeItem.setBundleConstituent(true);
+		nestedSkuShoeItem.setItemType(ItemType.BUNDLE_CONSTITUENT);
 
 		nestedShoppingItem.addChildItem(nestedSkuBallItem);
 		nestedShoppingItem.addChildItem(nestedSkuNetItem);
@@ -314,8 +335,11 @@ public class OrderSkuFactoryImplIntegrationTest extends BasicSpringContextTest {
 		ShoppingItem skuShoeItem = createShoppingItemWithRandomGuids(SKU_SHOE, SKU_SHOE_PRICE, ZERO, 1, false);
 
 		skuNetItem.setBundleConstituent(true);
+		skuNetItem.setItemType(ItemType.BUNDLE_CONSTITUENT);
 		skuShoeItem.setBundleConstituent(true);
+		skuShoeItem.setItemType(ItemType.BUNDLE_CONSTITUENT);
 		nestedShoppingItem.setBundleConstituent(true);
+		nestedShoppingItem.setItemType(ItemType.BUNDLE_CONSTITUENT);
 
 		rootShoppingItem.addChildItem(nestedShoppingItem);
 		rootShoppingItem.addChildItem(skuNetItem);
@@ -353,7 +377,9 @@ public class OrderSkuFactoryImplIntegrationTest extends BasicSpringContextTest {
 		ShoppingItem nestedGrandchildItem2 = createShoppingItemWithRandomGuids("NESTED_" + SKU_BALL, SKU_BALL_PRICE, ZERO, 1, false);
 
 		nestedGrandchildItem1.setBundleConstituent(true);
+		nestedGrandchildItem1.setItemType(ItemType.BUNDLE_CONSTITUENT);
 		nestedGrandchildItem2.setBundleConstituent(true);
+		nestedGrandchildItem2.setItemType(ItemType.BUNDLE_CONSTITUENT);
 
 		nestedShoppingItem1.addChildItem(nestedGrandchildItem1);
 		nestedShoppingItem2.addChildItem(nestedGrandchildItem2);
@@ -361,7 +387,9 @@ public class OrderSkuFactoryImplIntegrationTest extends BasicSpringContextTest {
 		ShoppingItem rootShoppingItem = createShoppingItemWithRandomGuids(SKU_BUNDLE, BUNDLE_PRICE1.add(SKU_BALL_PRICE), ZERO, 1, true);
 
 		nestedShoppingItem1.setBundleConstituent(true);
+		nestedShoppingItem1.setItemType(ItemType.BUNDLE_CONSTITUENT);
 		nestedShoppingItem2.setBundleConstituent(true);
+		nestedShoppingItem2.setItemType(ItemType.BUNDLE_CONSTITUENT);
 
 		rootShoppingItem.addChildItem(nestedShoppingItem1);
 		rootShoppingItem.addChildItem(nestedShoppingItem2);
@@ -394,7 +422,9 @@ public class OrderSkuFactoryImplIntegrationTest extends BasicSpringContextTest {
 		ShoppingItem nestedGrandchildItem2 = createShoppingItemWithRandomGuids("NESTED_" + SKU_BALL, SKU_BALL_PRICE, ZERO, 1, false);
 
 		nestedGrandchildItem1.setBundleConstituent(true);
+		nestedGrandchildItem1.setItemType(ItemType.BUNDLE_CONSTITUENT);
 		nestedGrandchildItem2.setBundleConstituent(true);
+		nestedGrandchildItem2.setItemType(ItemType.BUNDLE_CONSTITUENT);
 
 		nestedShoppingItem1.addChildItem(nestedGrandchildItem1);
 		nestedShoppingItem2.addChildItem(nestedGrandchildItem2);
@@ -402,7 +432,9 @@ public class OrderSkuFactoryImplIntegrationTest extends BasicSpringContextTest {
 		ShoppingItem rootShoppingItem = createShoppingItemWithRandomGuids(SKU_BUNDLE, BUNDLE_PRICE1.add(SKU_BALL_PRICE), ZERO, 1, true);
 
 		nestedShoppingItem1.setBundleConstituent(true);
+		nestedShoppingItem1.setItemType(ItemType.BUNDLE_CONSTITUENT);
 		nestedShoppingItem2.setBundleConstituent(true);
+		nestedShoppingItem2.setItemType(ItemType.BUNDLE_CONSTITUENT);
 
 		rootShoppingItem.addChildItem(nestedShoppingItem1);
 		rootShoppingItem.addChildItem(nestedShoppingItem2);
@@ -432,8 +464,11 @@ public class OrderSkuFactoryImplIntegrationTest extends BasicSpringContextTest {
 		ShoppingItem skuShoeItem = createShoppingItemWithRandomGuids(SKU_SHOE, SKU_SHOE_PRICE, ZERO, 9, false);
 
 		skuBallItem.setBundleConstituent(true);
+		skuBallItem.setItemType(ItemType.BUNDLE_CONSTITUENT);
 		skuNetItem.setBundleConstituent(true);
+		skuNetItem.setItemType(ItemType.BUNDLE_CONSTITUENT);
 		skuShoeItem.setBundleConstituent(true);
+		skuShoeItem.setItemType(ItemType.BUNDLE_CONSTITUENT);
 
 		rootShoppingItem.addChildItem(skuBallItem);
 		rootShoppingItem.addChildItem(skuNetItem);
@@ -463,8 +498,11 @@ public class OrderSkuFactoryImplIntegrationTest extends BasicSpringContextTest {
 		ShoppingItem skuShoeItem = createShoppingItemWithRandomGuids(SKU_SHOE, SKU_SHOE_PRICE, ZERO, 99, false);
 
 		skuBallItem.setBundleConstituent(true);
+		skuBallItem.setItemType(ItemType.BUNDLE_CONSTITUENT);
 		skuNetItem.setBundleConstituent(true);
+		skuNetItem.setItemType(ItemType.BUNDLE_CONSTITUENT);
 		skuShoeItem.setBundleConstituent(true);
+		skuShoeItem.setItemType(ItemType.BUNDLE_CONSTITUENT);
 
 		rootShoppingItem.addChildItem(skuBallItem);
 		rootShoppingItem.addChildItem(skuNetItem);
@@ -496,10 +534,15 @@ public class OrderSkuFactoryImplIntegrationTest extends BasicSpringContextTest {
 		ShoppingItem pd32Item = createShoppingItemWithRandomGuids("PD32", valueOf(55.00), ZERO, 2, false);
 
 		pd1Item.setBundleConstituent(true);
+		pd1Item.setItemType(ItemType.BUNDLE_CONSTITUENT);
 		pd21Item.setBundleConstituent(true);
+		pd21Item.setItemType(ItemType.BUNDLE_CONSTITUENT);
 		pd22Item.setBundleConstituent(true);
+		pd22Item.setItemType(ItemType.BUNDLE_CONSTITUENT);
 		pd31Item.setBundleConstituent(true);
+		pd31Item.setItemType(ItemType.BUNDLE_CONSTITUENT);
 		pd32Item.setBundleConstituent(true);
+		pd32Item.setItemType(ItemType.BUNDLE_CONSTITUENT);
 
 		rootShoppingItem.addChildItem(pd1Item);
 		rootShoppingItem.addChildItem(pd21Item);

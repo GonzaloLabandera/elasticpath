@@ -44,7 +44,6 @@ Feature: Manage Virtual Catalog
       | ERROR_MESSAGE                     |
       | The catalog is in use by a store. |
 
-  @cleanUpCategoryDB @cleanUpProductDB
   Scenario Outline: Newly created subcategories and products in Master Catalog are reflected in linked Virtual Catalog
     When I create new subcategory for category <category> in catalog <masterCatalog> with following data
       | categoryName | categoryType | storeVisible | attrLongTextName     | attrLongTextValue | attrDecimalName | attrDecimalValue | attrShortTextName | attrShortTextValue |
@@ -65,7 +64,6 @@ Feature: Manage Virtual Catalog
       | masterCatalog  | category | virtualCatalog         |
       | Mobile Catalog | Movies   | Mobile Virtual Catalog |
 
-  @cleanUpCategoryDB
   Scenario: Create Remove Category and add item to category in Virtual Catalog
     When I create new category for Mobile Virtual Catalog with following data
       | categoryName   | categoryType | storeVisible | attrLongTextName     | attrLongTextValue | attrDecimalName | attrDecimalValue | attrShortTextName | attrShortTextValue |

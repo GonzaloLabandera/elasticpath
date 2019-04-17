@@ -8,7 +8,7 @@ Feature: Customer Password Reset Email
 	And the customer is shopping in Store "Test Store"
 	And the Store supports the en_US locale
 	And the customer's shopping locale is en_US
-	And the customer's email address customer@example.org has been registered in their user account
+	And the customer's email address customer@example.org has been used to register their user account
 
   Scenario: a customer has their password reset and is sent the new password in an email.
 	When the customer's password is reset

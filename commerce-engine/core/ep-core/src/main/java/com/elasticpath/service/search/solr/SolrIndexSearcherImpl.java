@@ -206,6 +206,7 @@ public class SolrIndexSearcherImpl {
 	 * Parses facet queries for attribute values, attribute ranges or price values.
 	 * @param searchResult search result
 	 * @param facetQueries facet queries
+	 * @param filterLookup map keyed on solr query filter with a value containing the filter
 	 */
 	void parseFacetQueries(final SolrIndexSearchResult searchResult, final Map<String, Integer> facetQueries,
 						   final Map<String, Filter<?>> filterLookup) {

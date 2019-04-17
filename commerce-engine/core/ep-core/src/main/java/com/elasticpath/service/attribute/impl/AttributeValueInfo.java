@@ -5,7 +5,7 @@
 package com.elasticpath.service.attribute.impl;
 
 /**
- * Value object for holding attribute value information
+ * Value object for holding attribute value information.
  */
 public class AttributeValueInfo {
 

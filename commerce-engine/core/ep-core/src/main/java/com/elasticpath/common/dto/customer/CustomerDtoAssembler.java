@@ -49,8 +49,10 @@ public class CustomerDtoAssembler extends AbstractDtoAssembler<CustomerDTO, Cust
 		target.setGuid(source.getGuid());
 		target.setLastEditDate(source.getLastEditDate());
 
-		target.setPassword(source.getPassword());
-		target.setSalt(source.getCustomerAuthentication().getSalt());
+		if (source.getCustomerAuthentication() != null) {
+			target.setPassword(source.getCustomerAuthentication().getPassword());
+			target.setSalt(source.getCustomerAuthentication().getSalt());
+		}
 
 		if (source.getPreferredBillingAddress() != null) {
 			target.setPreferredBillingAddressGuid(source.getPreferredBillingAddress().getGuid());
@@ -139,8 +141,7 @@ public class CustomerDtoAssembler extends AbstractDtoAssembler<CustomerDTO, Cust
 		target.setGuid(source.getGuid());
 		target.setLastEditDate(source.getLastEditDate());
 
-		target.setPassword(source.getPassword());
-		target.getCustomerAuthentication().setSalt(source.getSalt());
+		target.setPassword(source.getPassword(), source.getSalt());
 
 		target.setPreferredBillingAddress(target.getAddressByGuid(source.getPreferredBillingAddressGuid()));
 		target.setPreferredShippingAddress(target.getAddressByGuid(source.getPreferredShippingAddressGuid()));

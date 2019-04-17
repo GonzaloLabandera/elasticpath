@@ -5,8 +5,6 @@ package com.elasticpath.rest.resource.integration.epcommerce.repository.price.im
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Currency;
-import java.util.Locale;
 import java.util.Objects;
 import java.util.Set;
 import javax.inject.Inject;
@@ -54,10 +52,6 @@ import com.elasticpath.rest.resource.integration.epcommerce.transform.MoneyTrans
 public class PriceRepositoryImpl implements PriceRepository {
 
 	/**
-	 * cache identifier.
-	 */
-	public static final String CACHE_PRICE_REPO_KEY_PREFIX = "priceRepository";
-	/**
 	 * error message when product price not found.
 	 */
 	public static final String PRODUCT_PRICE_NOT_FOUND = "No price found for product with guid = '%s'";
@@ -65,8 +59,8 @@ public class PriceRepositoryImpl implements PriceRepository {
 	 * error message when sku price not found.
 	 */
 	public static final String SKU_PRICE_NOT_FOUND = "No price found for sku with code = '%s'";
+
 	private static final int SINGLE_QTY = 1;
-	public static final Money EMPTY_MONEY = Money.valueOf(0, Currency.getInstance(Locale.getDefault()));
 
 	private final ShoppingItemDtoFactory shoppingItemDtoFactory;
 	private final StoreRepository storeRepository;
@@ -95,8 +89,12 @@ public class PriceRepositoryImpl implements PriceRepository {
 	 * @param customerSessionRepository customer session repository
 	 * @param priceLookupFacade         price lookup facade
 	 * @param productSkuRepository      product sku repository
+	 * @param storeProductRepository    store product repository
 	 * @param reactiveAdapter           reactive adapter
+	 * @param coreBeanFactory           core bean factory
+	 * @param moneyTransformer          money transformer
 	 */
+	@SuppressWarnings("checkstyle:parameternumber")
 	@Inject
 	PriceRepositoryImpl(
 			@Named("shoppingItemDtoFactory") final ShoppingItemDtoFactory shoppingItemDtoFactory,

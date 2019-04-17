@@ -6,8 +6,12 @@ package com.elasticpath.domain.attribute.impl;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 
 import java.util.HashSet;
+import java.util.Locale;
 import java.util.Set;
 
 import org.junit.Before;
@@ -15,6 +19,7 @@ import org.junit.Test;
 
 import com.elasticpath.domain.attribute.Attribute;
 import com.elasticpath.domain.attribute.AttributeGroupAttribute;
+import com.elasticpath.domain.misc.LocalizedProperties;
 
 /**
  * Test <code>AttributeGroupImpl</code>.
@@ -51,7 +56,9 @@ public class AttributeGroupImplTest {
 	 */
 	@Test
 	public void testAddAttributeGroupAttribute() {
-		final Attribute attribute = new AttributeImpl();
+		final Attribute attribute = spy(new AttributeImpl());
+		doReturn(mock(LocalizedProperties.class)).when(attribute).getLocalizedProperties();
+		attribute.setDisplayName("attr1", Locale.ENGLISH);
 		final AttributeGroupAttribute attributeGroupAttribute = new AttributeGroupAttributeImpl();
 		attributeGroupAttribute.setAttribute(attribute);
 		this.attributeGroupImpl.addAttributeGroupAttribute(attributeGroupAttribute);

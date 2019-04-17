@@ -75,7 +75,10 @@ public enum EPQueryType {
 	SAVED_CONDITION("SavedCondition", TargetLanguage.JPQL),
 	
 	/** Query type for Import Job. */
-	CM_IMPORT_JOB("CmImportJob", TargetLanguage.JPQL);
+	CM_IMPORT_JOB("CmImportJob", TargetLanguage.JPQL),
+
+	/** Query type for Facet Job. */
+	FACET("Facet", TargetLanguage.JPQL);
 	
 	/** The identifier of the type - useful for naming. */
 	private String typeName;

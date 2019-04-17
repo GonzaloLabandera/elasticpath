@@ -7,19 +7,20 @@
 	<parent>
 		<groupId>com.elasticpath</groupId>
 		<artifactId>grandparent</artifactId>
-		<version>104</version>
+		<version>105</version>
 		<relativePath/>
 	</parent>
 
 	<artifactId>bill-of-materials</artifactId>
-	<version>704.0.0-SNAPSHOT</version>
+	<version>0.0.0-SNAPSHOT</version>
 	<packaging>pom</packaging>
 
 	<properties>
 		<aopalliance.version>1.0_5</aopalliance.version>
-		<api-platform.version>1.22.0.20181214215737-0d528</api-platform.version>
+		<apache.poi.version>4.0.1</apache.poi.version>
+		<api-platform.version>1.24.0.0e39d44361</api-platform.version>
 		<aspectj.rt.version>1.8.9</aspectj.rt.version>
-		<assertj>3.11.1</assertj>
+		<assertj-core.version>3.11.1</assertj-core.version>
 		<awaitility.version>2.0.0</awaitility.version>
 
 		<com.h2database.version>1.3.170</com.h2database.version>
@@ -30,8 +31,8 @@
 		<com.sun.istack.version>2.3</com.sun.istack.version>
 		<com.sun.mail.version>1.5.6</com.sun.mail.version>
 		<com.thoughtworks.xstream.version>1.4.10</com.thoughtworks.xstream.version>
-		<cmclient.platform.feature.version>704.0.0-SNAPSHOT</cmclient.platform.feature.version>
-		<cmclient.version>704.0.0-SNAPSHOT</cmclient.version>
+		<cmclient.platform.feature.version>0.0.0-SNAPSHOT</cmclient.platform.feature.version>
+		<cmclient.version>0.0.0-SNAPSHOT</cmclient.version>
 		<commons-beanutils.version>1.9.3</commons-beanutils.version>
 		<commons-codec.version>1.11</commons-codec.version>
 		<commons-fileupload.version>1.3.3</commons-fileupload.version>
@@ -42,10 +43,10 @@
 		<ep.cortex.macros.version>1.4.2</ep.cortex.macros.version>
 		<cxf-uritemplate-utils.version>1.13</cxf-uritemplate-utils.version>
 
-		<dce.version>704.0.0-SNAPSHOT</dce.version>
+		<dce.version>0.0.0-SNAPSHOT</dce.version>
 		<drools.version>7.6.0.Final</drools.version>
 
-		<ep.health.monitoring.version>704.0.0-SNAPSHOT</ep.health.monitoring.version>
+		<ep.health.monitoring.version>0.0.0-SNAPSHOT</ep.health.monitoring.version>
 		<esapi.version>2.1.0.1</esapi.version>
 
 		<felix.configadmin.version>1.8.16</felix.configadmin.version>
@@ -81,10 +82,12 @@
 		<gherkin.version>5.0.0</gherkin.version>
 		<cucumber-groovy.version>2.0.1</cucumber-groovy.version>
 
-		<jackson.version>2.9.6</jackson.version>
+		<jackson.version>2.9.8</jackson.version>
 		<javax.annotation.version>1.3.2</javax.annotation.version>
 		<javax.cache.version>1.1.0</javax.cache.version>
 		<javax.el.version>2.2.4</javax.el.version>
+		<javax.json-api.version>1.1.4</javax.json-api.version>
+		<javax.json.version>1.1.4</javax.json.version>
 		<jaxb.version>2.2.11</jaxb.version>
 		<javax.inject.version>1</javax.inject.version>
 		<javax.validation.api.version>1.1.0.Final</javax.validation.api.version>
@@ -92,7 +95,7 @@
 		<jmock.version>2.8.4</jmock.version>
 		<jregex.version>1.2_01-ep1.0.0</jregex.version>
 		<junit.version>4.12</junit.version>
-		<javassist.version>3.23.1-GA</javassist.version>
+		<javassist.version>3.24.1-GA</javassist.version>
 		<javax.servlet.version>3.1.0</javax.servlet.version>
 		<javax.security.jacc.version>1.5</javax.security.jacc.version>
 
@@ -105,33 +108,34 @@
 
 		<natty.version>0.13</natty.version>
 
-		<org.apache.activemq.version>5.14.3</org.apache.activemq.version>
+		<org.apache.activemq.version>5.15.8</org.apache.activemq.version>
 		<org.apache.ant.version>1.7.1</org.apache.ant.version>
-		<org.apache.batic.version>1.6.0.v201011041432</org.apache.batic.version>
-		<org.apache.camel.version>2.21.1</org.apache.camel.version>
+		<org.apache.batic.version>1.11</org.apache.batic.version>
+		<org.apache.camel.version>2.23.1</org.apache.camel.version>
 		<org.apache.commons.lang3.version>3.8</org.apache.commons.lang3.version>
 		<org.apache.geronimo.specs.version>1.0.1</org.apache.geronimo.specs.version>
 		<org.apache.openjpa.version>2.4.0-ep2.1</org.apache.openjpa.version>
 		<org.apache.servicemix.bundles.quartz.version>2.1.7_1</org.apache.servicemix.bundles.quartz.version>
 		<org.apache.servicemix.spring.ldap.version>2.3.2.RELEASE_1</org.apache.servicemix.spring.ldap.version>
-		<org.apache.servicemix.spring.version>4.3.16.RELEASE_1</org.apache.servicemix.spring.version>
+		<org.apache.servicemix.spring.version>4.3.19.RELEASE_1</org.apache.servicemix.spring.version>
 		<org.apache.servicemix.spring.security.version>4.2.4.RELEASE_1</org.apache.servicemix.spring.security.version>
+		<org.apache.derby.version>10.11.1.1</org.apache.derby.version>
 		<org.eclipse.emf.version>2.12.0.v20160420-0247</org.eclipse.emf.version>
-		<org.hibernate.version>5.2.4.Final</org.hibernate.version>
+		<org.hibernate.version>5.4.3.Final</org.hibernate.version>
 		<org.json.version>20170516</org.json.version>
 		<org.kubek2k.version>1.0.8</org.kubek2k.version>
 		<org.liquibase.version>3.4.2</org.liquibase.version>
 		<org.mvel.mvel2.version>2.4.0.Final</org.mvel.mvel2.version>
-		<org.springframework.security.version>4.2.6.RELEASE</org.springframework.security.version>
-		<org.springframework.version>4.3.16.RELEASE</org.springframework.version>
+		<org.springframework.security.version>4.2.11.RELEASE</org.springframework.security.version>
+		<org.springframework.version>4.3.19.RELEASE</org.springframework.version>
 		<org.springframework.shell.version>1.0.0.RELEASE</org.springframework.shell.version>
-		<org.springframework.security-oauth2.version>2.3.3.RELEASE</org.springframework.security-oauth2.version>
+		<org.springframework.security-oauth2.version>2.3.5.RELEASE</org.springframework.security-oauth2.version>
 		<org.springframework.spring.batch.version>4.0.1.RELEASE</org.springframework.spring.batch.version>
 		<osgi.core.version>6.0.0</osgi.core.version>
 
 		<peaberry.version>1.3</peaberry.version>
 
-		<rxjava.version>2.2.2</rxjava.version>
+		<rxjava.version>2.2.7</rxjava.version>
 
 		<selenium.version>3.14.0</selenium.version>
 		<servicemix.bundles.aspectj.version>1.8.8_1</servicemix.bundles.aspectj.version>
@@ -141,7 +145,7 @@
 		<solr.version>7.2.1</solr.version>
 		<springsource.org.json.version>1.0.0</springsource.org.json.version>
 
-		<tomcat.version>9.0.10</tomcat.version>
+		<tomcat.version>9.0.16</tomcat.version>
 		<tomcatLogging.version>8.5.2</tomcatLogging.version>
 
 		<ws-rs.version>2.1.1</ws-rs.version>
@@ -478,7 +482,6 @@
 				<artifactId>javax.mail</artifactId>
 				<version>${com.sun.mail.version}</version>
 			</dependency>
-
 			<dependency>
 				<groupId>commons-collections</groupId>
 				<artifactId>commons-collections</artifactId>
@@ -498,7 +501,7 @@
 			<dependency>
 				<groupId>org.assertj</groupId>
 				<artifactId>assertj-core</artifactId>
-				<version>${assertj}</version>
+				<version>${assertj-core.version}</version>
 				<scope>test</scope>
 			</dependency>
 			<dependency>
@@ -616,7 +619,7 @@
 			<dependency>
 				<groupId>org.directwebremoting</groupId>
 				<artifactId>dwr</artifactId>
-				<version>2.0.6</version>
+				<version>2.0.8</version>
 				<exclusions>
 					<exclusion>
 						<groupId>xom</groupId>
@@ -924,6 +927,18 @@
 			<dependency>
 				<groupId>com.elasticpath</groupId>
 				<artifactId>ep-sync</artifactId>
+				<version>${dce.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>com.elasticpath</groupId>
+				<artifactId>ep-sync-message-listener-camel</artifactId>
+				<version>${dce.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>com.elasticpath</groupId>
+				<artifactId>ep-sync-message-listener-email</artifactId>
 				<version>${dce.version}</version>
 			</dependency>
 
@@ -1373,6 +1388,18 @@
 			</dependency>
 
 			<dependency>
+				<groupId>javax.json</groupId>
+				<artifactId>javax.json-api</artifactId>
+				<version>${javax.json-api.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.glassfish</groupId>
+				<artifactId>javax.json</artifactId>
+				<version>${javax.json.version}</version>
+			</dependency>
+
+
+			<dependency>
 				<groupId>com.sun.xml.ws</groupId>
 				<artifactId>jaxws-rt</artifactId>
 				<version>2.1.3</version>
@@ -1470,7 +1497,7 @@
 			<dependency>
 				<groupId>org.owasp.esapi</groupId>
 				<artifactId>esapi</artifactId>
-				<version>2.0.1</version>
+				<version>2.1.0.1</version>
 				<exclusions>
 					<exclusion>
 						<groupId>xml-apis</groupId>
@@ -1647,6 +1674,16 @@
 			<dependency>
 				<groupId>org.apache.camel</groupId>
 				<artifactId>camel-core-xml</artifactId>
+				<version>${org.apache.camel.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.camel</groupId>
+				<artifactId>camel-mail</artifactId>
+				<version>${org.apache.camel.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.camel</groupId>
+				<artifactId>camel-jsonpath</artifactId>
 				<version>${org.apache.camel.version}</version>
 			</dependency>
 			<dependency>
@@ -2094,6 +2131,11 @@
 				<artifactId>ep-resource-offers-api</artifactId>
 				<version>${cortex.ep.integration.version}</version>
 			</dependency>
+			<dependency>
+				<groupId>com.elasticpath.rest.definitions</groupId>
+				<artifactId>ep-resource-offersearch-api</artifactId>
+				<version>${cortex.ep.integration.version}</version>
+			</dependency>
 			<!-- test -->
 			<dependency>
 				<groupId>org.jmock</groupId>
@@ -2133,7 +2175,6 @@
 				<version>${awaitility.version}</version>
 				<scope>test</scope>
 			</dependency>
-
 			<dependency>
 				<groupId>org.springframework.security.oauth</groupId>
 				<artifactId>spring-security-oauth2</artifactId>
@@ -2249,7 +2290,7 @@
 			<dependency>
 				<groupId>org.apache.poi</groupId>
 				<artifactId>poi</artifactId>
-				<version>3.0.1-FINAL</version>
+				<version>${apache.poi.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.json</groupId>
@@ -2274,12 +2315,12 @@
 			<dependency>
 				<groupId>com.elasticpath.cmclient</groupId>
 				<artifactId>com.elasticpath.cmclient.libs</artifactId>
-				<version>704.0.0-SNAPSHOT</version>
+				<version>0.0.0-SNAPSHOT</version>
 			</dependency>
 			<dependency>
 				<groupId>com.elasticpath.cmclient</groupId>
 				<artifactId>com.elasticpath.cmclient.testlibs</artifactId>
-				<version>704.0.0-SNAPSHOT</version>
+				<version>0.0.0-SNAPSHOT</version>
 			</dependency>
 			<dependency>
 				<groupId>com.elasticpath.cmclient</groupId>
@@ -2495,6 +2536,11 @@
 			<dependency>
 				<groupId>com.elasticpath.rest.resource.cortex</groupId>
 				<artifactId>ep-resource-navigations</artifactId>
+				<version>${cortex.ep.integration.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.elasticpath.rest.resource.cortex</groupId>
+				<artifactId>ep-resource-offersearch</artifactId>
 				<version>${cortex.ep.integration.version}</version>
 			</dependency>
 			<dependency>

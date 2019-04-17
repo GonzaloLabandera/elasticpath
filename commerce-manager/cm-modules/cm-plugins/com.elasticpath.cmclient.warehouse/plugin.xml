@@ -34,7 +34,7 @@
 	   name="%searchView.name">
       </view>
    </extension>
-   
+
    <extension point="org.eclipse.ui.editors">
 	   <editor
 		  name="%orderReturnEditor.name"
@@ -42,16 +42,16 @@
 		  class="com.elasticpath.cmclient.warehouse.editors.orderreturn.OrderReturnEditor"
 		  id="com.elasticpath.cmclient.warehouse.editors.orderreturn.OrderReturnEditor"
 		  contributorClass="com.elasticpath.cmclient.core.editors.BaseCmClientEditorContributor">
-	   </editor>      
+	   </editor>
 	   <editor
 		  name="%inventoryEditor.name"
 		  icon="icons/inventory_default_22.png"
 		  class="com.elasticpath.cmclient.warehouse.editors.inventory.InventoryEditor"
 		  id="com.elasticpath.cmclient.warehouse.editors.inventory.InventoryEditor"
 		  contributorClass="com.elasticpath.cmclient.core.editors.BaseCmClientEditorContributor">
-	   </editor>         
-   </extension>   
-   
+	   </editor>
+   </extension>
+
    <extension point="com.elasticpath.cmclient.core.authorizations">
 	   <permissions>
 		   <permission
@@ -69,18 +69,18 @@
 		   <permission
 			      activityId="com.elasticpath.cmclient.warehouse.authorizations.activity"
 			      key="WAREHOUSE_MANAGE_INVENTORY"
-			      name="%manageInventoryPermission.name"/>               
+			      name="%manageInventoryPermission.name"/>
 		   <permission
 			      activityId="com.elasticpath.cmclient.warehouse.authorizations.activity"
 			      key="WAREHOUSE_RECEIVE_INVENTORY"
-			      name="%receiveInventoryPermission.name"/>         
+			      name="%receiveInventoryPermission.name"/>
 	   </permissions>
 	   <activity
 		    id="com.elasticpath.cmclient.warehouse.authorizations.activity"
 		    name="%shippingReceivingActivity.name"
 		    perspectiveId="com.elasticpath.cmclient.warehouse.perspective">
 	   </activity>
-   </extension>   
+   </extension>
 
    <extension
          point="org.eclipse.ui.perspectiveExtensions">
@@ -91,7 +91,7 @@
          </actionSet>
       </perspectiveExtension>
    </extension>
-   
+
    <extension point="org.eclipse.ui.actionSets">
       <actionSet
             id="com.elasticpath.cmclient.warehouse.workbenchActionSet"
@@ -119,10 +119,10 @@
 			   locationURI="toolbar:com.elasticpath.cmclient.core.toolbars.activities?after=perspectiveMenu.fulfillmentItem">
 			   <command
 					   commandId="com.elasticpath.cmclient.warehouse.command.openPerspective"
-					   icon="icons/warehouse_default_34.png"
-					   id="perspectiveMenu.warehouseItem"
 					   label="%warehouseMenu.name"
-					   tooltip="%warehouseMenu.name">
+						 icon="icons/warehouse_default_34.png"
+					   id="perspectiveMenu.warehouseItem"
+						 mode="FORCE_TEXT">
 				   <visibleWhen
 						   checkEnabled="true">
 				   </visibleWhen>
@@ -201,5 +201,5 @@
       </perspectiveOpenCommand>
    </extension>
 
-  
+
 </plugin>

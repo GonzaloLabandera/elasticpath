@@ -252,6 +252,17 @@ public class ProductQueryComposerImpl extends AbstractQueryComposerImpl {
 									.getMasterCategoryCatalogCode());
 			hasSomeCriteria |= addWholeFieldToQuery(masterCategoryFieldName, productSearchCriteria.getMasterCategoryCode(), null,
 					searchConfig, booleanQueryBuilder, Occur.MUST, true);
+		} else if (productSearchCriteria.isOnlyInCategoryAndSubCategory()) {
+			BooleanQuery.Builder categoryAndSubCategoryQuery = new BooleanQuery.Builder();
+			String categoryFieldName = getIndexUtility().createProductCategoryFieldName(SolrIndexConstants.PRODUCT_CATEGORY, catalogCode);
+
+			hasSomeCriteria |= addWholeFieldToQuery(categoryFieldName, categoryCode, null,
+					searchConfig, categoryAndSubCategoryQuery, Occur.SHOULD, true);
+
+			hasSomeCriteria |= addWholeFieldToQuery(SolrIndexConstants.PARENT_CATEGORY_CODES, categoryCode, null,
+					searchConfig, categoryAndSubCategoryQuery, Occur.SHOULD, true);
+
+			booleanQueryBuilder.add(categoryAndSubCategoryQuery.build(), Occur.MUST);
 		} else if (productSearchCriteria.isOnlyWithinDirectCategory()) {
 			if (categoryCode != null) {
 				final String categoryFieldName = getIndexUtility().createProductCategoryFieldName(SolrIndexConstants.PRODUCT_CATEGORY, catalogCode);

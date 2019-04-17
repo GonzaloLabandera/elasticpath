@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+		 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>com.elasticpath</groupId>
+		<artifactId>sync</artifactId>
+		<version>0.0.0-SNAPSHOT</version>
+	</parent>
+
+	<artifactId>ep-sync-message-listener-camel</artifactId>
+	<name>DST Message Listener Camel</name>
+	<description>This plugin for the integration server automates the syncing of a changeset in one EP environment into a destination EP environment
+	</description>
+
+	<dependencies>
+		<dependency>
+			<groupId>com.elasticpath</groupId>
+			<artifactId>ep-core-changeset-messaging</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.elasticpath</groupId>
+			<artifactId>ep-sync</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.elasticpath</groupId>
+			<artifactId>ep-messaging-api</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.camel</groupId>
+			<artifactId>camel-core</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.camel</groupId>
+			<artifactId>camel-spring</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.camel</groupId>
+			<artifactId>camel-mail</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.camel</groupId>
+			<artifactId>camel-jsonpath</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.elasticpath</groupId>
+			<artifactId>ep-core</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.elasticpath</groupId>
+			<artifactId>ep-settings</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.elasticpath</groupId>
+			<artifactId>ep-messaging-camel</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.elasticpath</groupId>
+			<artifactId>ep-messaging-camel-test-support</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.google.guava</groupId>
+			<artifactId>guava</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.jmock</groupId>
+			<artifactId>jmock-junit4</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.mockito</groupId>
+			<artifactId>mockito-core</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.assertj</groupId>
+			<artifactId>assertj-core</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.camel</groupId>
+			<artifactId>camel-test</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.h2database</groupId>
+			<artifactId>h2</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.jayway.jsonpath</groupId>
+			<artifactId>json-path</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>javax.inject</groupId>
+			<artifactId>javax.inject</artifactId>
+		</dependency>
+	</dependencies>
+
+	<build>
+		<plugins>
+			<plugin>
+				<artifactId>maven-pmd-plugin</artifactId>
+			</plugin>
+			<plugin>
+				<artifactId>maven-checkstyle-plugin</artifactId>
+			</plugin>
+
+		</plugins>
+	</build>
+
+</project>

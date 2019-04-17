@@ -16,7 +16,6 @@ import cucumber.api.java.en.Then;
 import org.apache.velocity.tools.generic.DateTool;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.elasticpath.domain.builder.customer.CustomerBuilder;
 import com.elasticpath.domain.customer.Customer;
 import com.elasticpath.uat.ScenarioContextValueHolder;
 
@@ -31,7 +30,7 @@ public class CustomerEmailStepDefinitions {
 	private ScenarioContextValueHolder<Map<String, Message>> emailMessagesHolder;
 
 	@Autowired
-	private ScenarioContextValueHolder<CustomerBuilder> customerBuilderHolder;
+	private ScenarioContextValueHolder<Customer> customerHolder;
 
 	@Then("^the(?: \"(.+)\")? email should contain the customer account user ID")
 	public void verifyEmailContainsCustomerAccountNumber(final String emailSubject) throws Exception {
@@ -72,7 +71,7 @@ public class CustomerEmailStepDefinitions {
 	}
 
 	private Customer getCustomer() {
-		return customerBuilderHolder.get().build();
+		return customerHolder.get();
 	}
 
 }

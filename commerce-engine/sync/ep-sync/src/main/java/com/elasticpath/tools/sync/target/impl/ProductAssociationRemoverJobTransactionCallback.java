@@ -35,7 +35,7 @@ public class ProductAssociationRemoverJobTransactionCallback implements JobTrans
 	@Override
 	public void postUpdateJobEntryHook(final JobEntry jobEntry, final Persistable targetPersistence) {
 		if (jobEntry.getSourceObject() instanceof Product) {
-			Product product = (Product) jobEntry.getSourceObject();
+			Product product = (Product) targetPersistence;
 			LOG.trace("Removing all product associations for product with Guid: " + product.getGuid());
 
 			ProductAssociationSearchCriteria criteria = new ProductAssociationSearchCriteria();

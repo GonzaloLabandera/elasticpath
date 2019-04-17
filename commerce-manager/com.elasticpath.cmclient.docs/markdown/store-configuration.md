@@ -319,9 +319,9 @@ Use this procedure to configure boolean or string type facets, such as feature o
 Merchandisers can define ranges for decimal or integer type facets, such as price, weight, or length. A shopper can refine the search results by selecting appropriate ranges. When the shopper selects a range in the search query, the search engine returns the results within the selected range, excluding the upper bound value.<br/>
 
 <b>Example</b> <br/>
-**Store details**: For a laptop store, a merchandiser configures the price attribute as facetable and the offer price range from $500 to $5000. The ranges for this price facet are $500-$750, $750-$1000, $1000-$2000, $2000-$3000, and $3000-$4000. <br/>
-**Action**: A shopper searches for a laptop in the range _$750-$1000_. <br/>
-**Result**: The Search engine returns all laptops that cost $750 to $999.
+**Store details**: For a laptop store, a merchandiser configures the price attribute as facetable and the offer price range from $500 to $5000. The ranges for this price facet are $500-$749.99, $750-$999.99, $1000-$1999.99, $2000-$2999.99, and $3000-$3999.99. <br/>
+**Action**: A shopper searches for a laptop in the range _$750-$999.99_. <br/>
+**Result**: The Search engine returns all laptops that cost $750 to $999.99.
 
 1. Click **Configuration**>**Store** and select a store.
 2. Click the **Facet Configuration** tab.

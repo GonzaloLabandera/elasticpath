@@ -12,9 +12,10 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.apache.commons.lang.StringUtils;
 import org.junit.Before;
 import org.junit.Test;
+
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.elasticpath.common.dto.ShoppingItemDto;
@@ -501,6 +502,7 @@ public class SessionCleanupJobIntegrationTest extends AbstractCartIntegrationTes
 
 	private Customer createAndSaveCustomer(final String email) {
 		final Customer customer = getBeanFactory().getBean(ContextIdNames.CUSTOMER);
+		customer.setUserId(email);
 		customer.setEmail(email);
 		customer.setStoreCode(getScenarioStore().getCode());
 		customer.setAnonymous(false);

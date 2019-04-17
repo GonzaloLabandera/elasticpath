@@ -30,11 +30,6 @@
 
 		<dependency>
 			<groupId>com.elasticpath.rest.definitions</groupId>
-			<artifactId>ep-resource-offers-api</artifactId>
-		</dependency>
-
-		<dependency>
-			<groupId>com.elasticpath.rest.definitions</groupId>
 			<artifactId>ep-resource-navigations-api</artifactId>
 		</dependency>
 	</dependencies>

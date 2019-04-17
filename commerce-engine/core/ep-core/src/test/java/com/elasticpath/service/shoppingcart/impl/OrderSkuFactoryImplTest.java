@@ -23,8 +23,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
 
-import com.google.common.collect.ImmutableMap;
-import org.assertj.core.api.SoftAssertions;
 import org.jmock.Expectations;
 import org.jmock.auto.Mock;
 import org.jmock.integration.junit4.JUnitRuleMockery;
@@ -32,6 +30,10 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+
+import com.google.common.collect.ImmutableMap;
+
+import org.assertj.core.api.SoftAssertions;
 
 import com.elasticpath.commons.beanframework.BeanFactory;
 import com.elasticpath.commons.constants.ContextIdNames;
@@ -43,6 +45,7 @@ import com.elasticpath.domain.catalog.impl.ProductBundleImpl;
 import com.elasticpath.domain.catalog.impl.ProductSkuImpl;
 import com.elasticpath.domain.order.OrderSku;
 import com.elasticpath.domain.order.impl.OrderSkuImpl;
+import com.elasticpath.domain.shoppingcart.ItemType;
 import com.elasticpath.domain.shoppingcart.ShoppingCartPricingSnapshot;
 import com.elasticpath.domain.shoppingcart.ShoppingCartTaxSnapshot;
 import com.elasticpath.domain.shoppingcart.ShoppingItem;
@@ -199,7 +202,9 @@ public class OrderSkuFactoryImplTest {
 		ShoppingItem child11 = createShoppingItem(ID_ONE_ONE_ONE, BigDecimal.TEN, BigDecimal.TEN, 1);
 
 		child1.setBundleConstituent(true);
+		child1.setItemType(ItemType.BUNDLE_CONSTITUENT);
 		child11.setBundleConstituent(true);
+		child11.setItemType(ItemType.BUNDLE_CONSTITUENT);
 
 		root1.addChild(child1);
 		child1.addChild(child11);
@@ -226,6 +231,7 @@ public class OrderSkuFactoryImplTest {
 		rootSku.setProduct(new ProductBundleImpl());
 		ShoppingItem child1 = createShoppingItem(ID_ONE_ONE, BigDecimal.TEN, BigDecimal.TEN, 1);
 		child1.setBundleConstituent(true);
+		child1.setItemType(ItemType.BUNDLE_CONSTITUENT);
 
 		root1.addChild(child1);
 
@@ -258,7 +264,9 @@ public class OrderSkuFactoryImplTest {
 		ShoppingItem child2 = createShoppingItem(ID_ONE_TWO, BigDecimal.TEN, BigDecimal.TEN, 1);
 
 		child1.setBundleConstituent(true);
+		child1.setItemType(ItemType.BUNDLE_CONSTITUENT);
 		child2.setBundleConstituent(true);
+		child2.setItemType(ItemType.BUNDLE_CONSTITUENT);
 
 		root1.addChild(child1);
 		root1.addChild(child2);
@@ -283,7 +291,9 @@ public class OrderSkuFactoryImplTest {
 		ShoppingItem child2 = createShoppingItem(ID_ONE_TWO, BigDecimal.ONE, BigDecimal.ONE, 1);
 
 		child1.setBundleConstituent(true);
+		child1.setItemType(ItemType.BUNDLE_CONSTITUENT);
 		child2.setBundleConstituent(true);
+		child2.setItemType(ItemType.BUNDLE_CONSTITUENT);
 
 		root1.addChild(child1);
 		root1.addChild(child2);
@@ -322,7 +332,9 @@ public class OrderSkuFactoryImplTest {
 		ShoppingItem child12 = createShoppingItem(ID_ONE_ONE_TWO, SEVEN, SEVEN, TWO);
 
 		child1.setBundleConstituent(true);
+		child1.setItemType(ItemType.BUNDLE_CONSTITUENT);
 		child12.setBundleConstituent(true);
+		child12.setItemType(ItemType.BUNDLE_CONSTITUENT);
 
 		root.addChild(child1);
 		child1.addChild(child12);
@@ -537,8 +549,8 @@ public class OrderSkuFactoryImplTest {
 		return expectedCreatedDate;
 	}
 
-	private ShoppingItem createShoppingItem(final String itemGuid, final ProductSku productSku, final BigDecimal totalUnitPrice, final BigDecimal totalUnitDiscount,
-											final int quantity, final boolean bundleConstituent) {
+	private ShoppingItem createShoppingItem(final String itemGuid, final ProductSku productSku, final BigDecimal totalUnitPrice,
+											final BigDecimal totalUnitDiscount, final int quantity, final boolean bundleConstituent) {
 		ShoppingItem item = new ShoppingItemImpl() {
 			private static final long serialVersionUID = 1950286126608207488L;
 
@@ -551,6 +563,11 @@ public class OrderSkuFactoryImplTest {
 		item.setSkuGuid(productSku.getGuid());
 
 		item.setBundleConstituent(bundleConstituent);
+		if (bundleConstituent) {
+			item.setItemType(ItemType.BUNDLE_CONSTITUENT);
+		} else {
+			item.setItemType(ItemType.DEPENDENT);
+		}
 
 		return item;
 	}

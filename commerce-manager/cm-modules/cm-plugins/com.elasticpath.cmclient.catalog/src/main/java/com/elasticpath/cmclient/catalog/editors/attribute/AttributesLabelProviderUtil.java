@@ -4,7 +4,9 @@
 package com.elasticpath.cmclient.catalog.editors.attribute;
 
 import java.util.Date;
+import java.util.Locale;
 
+import com.elasticpath.cmclient.core.CorePlugin;
 import com.elasticpath.cmclient.core.util.DateTimeUtilFactory;
 import org.eclipse.jface.viewers.ColumnLabelProvider;
 import org.eclipse.swt.graphics.Image;
@@ -26,17 +28,27 @@ import com.elasticpath.domain.attribute.AttributeValue;
 @SuppressWarnings({"PMD.CyclomaticComplexity" })
 public class AttributesLabelProviderUtil {
 	
-	
 	private EpState rolePermission;
+	private final Locale locale;
 
 	/**
 	 * Constructor.
 	 * @param rolePermission the role permission
 	 */
 	public AttributesLabelProviderUtil(final EpState rolePermission) {
-		this.rolePermission = rolePermission;
+		this(rolePermission, CorePlugin.getDefault().getDefaultLocale());
 	}
-	
+
+	/**
+	 * Alternate constructor that also provides the locale in use for displaying localized properties.
+	 * @param rolePermission the role permission
+	 * @param selectedLocale the selected locale
+	 */
+	public AttributesLabelProviderUtil(final EpState rolePermission, final Locale selectedLocale) {
+		this.rolePermission = rolePermission;
+		this.locale = selectedLocale;
+	}
+
 	/**
 	 * Set the label for attribute name column.
 	 * @param nameColumn the name column
@@ -46,7 +58,11 @@ public class AttributesLabelProviderUtil {
 			@Override
 			public String getText(final Object element) {
 				final AttributeValue attribute = (AttributeValue) element;
-				return attribute.getAttribute().getName();
+				String displayName = attribute.getAttribute().getDisplayName(locale, true, true);
+				if (displayName.isEmpty()) {
+					displayName = attribute.getAttribute().getDisplayName(CorePlugin.getDefault().getDefaultLocale());
+				}
+				return displayName;
 			}
 		});
 	}

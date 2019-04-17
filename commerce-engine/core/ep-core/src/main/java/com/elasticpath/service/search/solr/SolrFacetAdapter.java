@@ -6,15 +6,18 @@ package com.elasticpath.service.search.solr;
 import static com.elasticpath.service.search.solr.FacetConstants.BRAND;
 import static com.elasticpath.service.search.solr.FacetConstants.CATEGORY;
 import static com.elasticpath.service.search.solr.FacetConstants.PRICE;
+import static org.apache.commons.lang.StringUtils.EMPTY;
 
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Currency;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang.StringUtils;
@@ -24,7 +27,6 @@ import org.apache.lucene.search.BooleanClause.Occur;
 import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.TermQuery;
-import org.apache.lucene.search.TermRangeQuery;
 import org.apache.solr.client.solrj.SolrQuery;
 
 import com.elasticpath.base.exception.EpServiceException;
@@ -58,6 +60,7 @@ import com.elasticpath.service.search.CatalogAwareSearchCriteria;
 import com.elasticpath.service.search.FacetService;
 import com.elasticpath.service.search.StoreAwareSearchCriteria;
 import com.elasticpath.service.search.index.Analyzer;
+import com.elasticpath.service.search.query.ProductSearchCriteria;
 import com.elasticpath.service.search.query.SearchCriteria;
 import com.elasticpath.service.search.query.SearchHint;
 import com.elasticpath.settings.provider.SettingValueProvider;
@@ -69,8 +72,12 @@ import com.elasticpath.settings.provider.SettingValueProvider;
 public class SolrFacetAdapter {
 	private static final Logger LOG = Logger.getLogger(SolrFacetAdapter.class);
 
-	private static final String DEFAULT_RANGE_QUERY = null;
 	private static final String EXCLUDE_TAG = "{!ex=%s}%s";
+
+	private static final String COLON_BRACKET = ":[";
+	private static final String BETWEEN_TO = " TO ";
+	private static final char CURLY_BRACKET = '}';
+	private static final String ASTERISK = "*";
 
 	private FilteredNavigationConfiguration config;
 
@@ -123,7 +130,9 @@ public class SolrFacetAdapter {
 			addBrandFacets(query, queryLookup, filterLookup);
 
 			if (catalogCode != null) {
-				addCategoryFacets(query, catalogCode, queryLookup, filterLookup);
+				Long categoryUid = searchCriteria instanceof ProductSearchCriteria
+						? ((ProductSearchCriteria) searchCriteria).getDirectCategoryUid() : null;
+				addCategoryFacets(query, catalogCode, queryLookup, filterLookup, categoryUid);
 			}
 
 			addFacetValues(query, locale, queryLookup, filterLookup);
@@ -164,7 +173,7 @@ public class SolrFacetAdapter {
 
 		if (filter instanceof PriceFilter) {
 			final String catalogCode = getCatalogCodeFromSearchCriteria(searchCriteria);
-			return getPriceQueryForStack((PriceFilter) filter, catalogCode, getPriceListStackFromSearchCriteria(searchCriteria)).toString();
+			return getPriceQueryForStack((PriceFilter) filter, catalogCode, getPriceListStackFromSearchCriteria(searchCriteria));
 
 		} else if (filter instanceof AttributeRangeFilter) {
 			queries = constructAttributeRangeFilterQuery((AttributeRangeFilter) filter);
@@ -223,25 +232,13 @@ public class SolrFacetAdapter {
 	 * @param stackGuids the guids of the price lists on the stack
 	 * @return a facet query string
 	 */
-	protected Query getPriceQueryForStack(final PriceFilter priceFilter, final String catalogCode, final List<String> stackGuids) {
+	protected String getPriceQueryForStack(final PriceFilter priceFilter, final String catalogCode, final List<String> stackGuids) {
 		if (stackGuids == null || stackGuids.isEmpty()) {
-			return new BooleanQuery.Builder().build();
+			return EMPTY;
 		}
-		String priceListGuid = stackGuids.get(0);
-		Query facetForPriceList = constructPriceFilterQuery(priceFilter, catalogCode, priceListGuid);
-		if (stackGuids.size() == 1) {
-			return facetForPriceList;
-		}
-		BooleanQuery.Builder facetQueryBuilder = new BooleanQuery.Builder();
-		facetQueryBuilder.add(facetForPriceList, Occur.SHOULD);
-
-		BooleanQuery.Builder subQueryBuilder = new BooleanQuery.Builder();
-		String fieldName = getIndexUtility().createPriceFieldName(SolrIndexConstants.PRICE, catalogCode, priceListGuid);
-		final Query excludeQuery = TermRangeQuery.newStringRange(fieldName, DEFAULT_RANGE_QUERY, DEFAULT_RANGE_QUERY, true, true);
-		subQueryBuilder.add(excludeQuery, Occur.MUST_NOT);
-		subQueryBuilder.add(getPriceQueryForStack(priceFilter, catalogCode, stackGuids.subList(1, stackGuids.size())), Occur.MUST);
-		facetQueryBuilder.add(subQueryBuilder.build(), Occur.SHOULD);
-		return facetQueryBuilder.build();
+		String priceFieldPrefix = getIndexUtility().createPriceFieldName(SolrIndexConstants.PRICE, catalogCode, EMPTY);
+		return stackGuids.stream().map(guid -> buildRangeFacetQuery(priceFilter, priceFieldPrefix + guid))
+				.collect(Collectors.joining(" "));
 	}
 
 	private void addLuceneQuery(final SolrQuery query, final Filter<?> filter, final String luceneQuery, final String guid,
@@ -307,7 +304,7 @@ public class SolrFacetAdapter {
 				.filter(priceFilter -> priceFilter.getRangeType() != RangeFilterType.ALL)
 				.forEach(priceFilter -> {
 					String guid = config.getOthersGuidMap().get(PRICE);
-					addLuceneQuery(query, priceFilter, getPriceQueryForStack(priceFilter, catalogCode, priceListGuids).toString(), guid,
+					addLuceneQuery(query, priceFilter, getPriceQueryForStack(priceFilter, catalogCode, priceListGuids), guid,
 							queryLookup, filterLookup);
 				});
 	}
@@ -329,13 +326,15 @@ public class SolrFacetAdapter {
 	}
 
 	private String constructSizeFilterQuery(final SizeRangeFilter sizeRangeFilter) {
-		return constructRangeFilterQuery(sizeRangeFilter, sizeRangeFilter.getSizeType().getLabel().toLowerCase()).toString();
+		return buildRangeFacetQuery(sizeRangeFilter, sizeRangeFilter.getSizeType().getLabel().toLowerCase(Locale.ENGLISH));
 	}
 
 	/**
 	 * Adds the Brand facets to the given query.
 	 *
-	 * @param query the query
+	 * @param query        the query
+	 * @param queryLookup  map keyed on filter id with a value containing the solr query filter
+	 * @param filterLookup map keyed on solr query filter with a value containing the filter
 	 */
 	void addBrandFacets(final SolrQuery query, final Map<String, String> queryLookup, final Map<String, Filter<?>> filterLookup) {
 		String guid = config.getOthersGuidMap().get(BRAND);
@@ -350,31 +349,28 @@ public class SolrFacetAdapter {
 	 * @param catalogCode   the catalog code
 	 * @param queryLookup   map keyed on filter id with a value containing the solr query filter
 	 * @param filterLookup  map keyed on solr query filter with a value containing the filter
+	 * @param categoryUid   the category uid used for a product search criteria, null otherwise
 	 */
 	void addCategoryFacets(final SolrQuery query, final String catalogCode, final Map<String, String> queryLookup,
-						   final Map<String, Filter<?>> filterLookup) {
+						   final Map<String, Filter<?>> filterLookup, final Long categoryUid) {
 		String guid = config.getOthersGuidMap().get(CATEGORY);
-		config.getCategoryFilters().forEach(categoryFilter ->
-						addLuceneQuery(query, categoryFilter,
-								constructCategoryFilterQuery(categoryFilter, catalogCode).toString(), guid, queryLookup, filterLookup));
-	}
-
-	private Query constructPriceFilterQuery(final PriceFilter filter, final String catalogCode, final String priceListGuid) {
-		if (priceListGuid == null) {
-			throw new EpServiceException("The price list guid cannot be null to filter on Price");
+		if (categoryUid == null) {
+			config.getCategoryFilters().forEach(categoryFilter ->
+					addLuceneQuery(query, categoryFilter,
+							constructCategoryFilterQuery(categoryFilter, catalogCode).toString(), guid, queryLookup, filterLookup));
+		} else {
+			Set<Long> descendants = new HashSet<>(getCategoryService().findDescendantCategoryUids(categoryUid));
+			config.getCategoryFilters().stream()
+					.filter(categoryFilter -> descendants.contains(categoryFilter.getCategory().getUidPk()))
+					.forEach(categoryFilter -> addLuceneQuery(query, categoryFilter,
+							constructCategoryFilterQuery(categoryFilter, catalogCode).toString(), guid, queryLookup, filterLookup));
 		}
-		if (catalogCode == null) {
-			throw new EpServiceException("The catalog code cannot be null to filter on Price");
-		}
-
-		final String fieldName = getIndexUtility().createPriceFieldName(SolrIndexConstants.PRICE, catalogCode, priceListGuid);
-		return constructRangeFilterQuery(filter, fieldName);
 	}
 
 	private String constructAttributeRangeFilterQuery(final AttributeRangeFilter filter) {
 		Attribute attribute = filter.getAttribute();
 		String fieldName = getIndexUtility().createAttributeFieldName(attribute, filter.getLocale(), false, true);
-		return constructRangeFilterQuery(filter, fieldName).toString();
+		return buildRangeFacetQuery(filter, fieldName);
 	}
 
 	private String constructSkuOptionValueFilterQuery(final SkuOptionValueFilter filter, final Locale locale) {
@@ -386,34 +382,33 @@ public class SolrFacetAdapter {
 	}
 
 	/**
-	 * Construct a range query.
-	 *
-	 * @param filter The filter's range type property to use, such as BETWEEN, LT or MT.
-	 * @param fieldName The field to query.
-	 * @return The range query.
+	 * Construct a range facet solr query.
+	 * @param filter the range filter
+	 * @param fieldName field name to be prefixed in the query
+	 * @return range facet solr query
 	 */
-	Query constructRangeFilterQuery(final RangeFilter<?, ?> filter, final String fieldName) {
-
+	protected String buildRangeFacetQuery(final RangeFilter<?, ?> filter, final String fieldName) {
 		switch (filter.getRangeType()) {
 			case BETWEEN:
 				String lowerValue = filter.getLowerValue().toString();
 				String upperValue = filter.getUpperValue().toString();
 
-				BooleanQuery.Builder outerQueryBuilder = new BooleanQuery.Builder();
-				outerQueryBuilder.add(new TermQuery(new Term(fieldName, lowerValue)), Occur.SHOULD);
-				outerQueryBuilder.add(TermRangeQuery.newStringRange(fieldName, lowerValue, upperValue, false, false), Occur.SHOULD);
-				return outerQueryBuilder.build();
+				return buildRangeQuery(fieldName, lowerValue, upperValue);
 			case LESS_THAN:
 				upperValue = filter.getUpperValue().toString();
-				return TermRangeQuery.newStringRange(fieldName, DEFAULT_RANGE_QUERY, upperValue, false, false);
+				return buildRangeQuery(fieldName, ASTERISK, upperValue);
 			case MORE_THAN:
 				lowerValue = filter.getLowerValue().toString();
-				return TermRangeQuery.newStringRange(fieldName, lowerValue, DEFAULT_RANGE_QUERY, true, true);
+				return buildRangeQuery(fieldName, lowerValue, ASTERISK);
 			default:
 				break;
 		}
 
 		return null;
+	}
+
+	private String buildRangeQuery(final String fieldName, final String lowerValue, final String upperValue) {
+		return fieldName + COLON_BRACKET + lowerValue + BETWEEN_TO + upperValue + CURLY_BRACKET;
 	}
 
 	/**

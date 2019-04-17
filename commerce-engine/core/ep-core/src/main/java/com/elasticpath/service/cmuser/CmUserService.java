@@ -242,4 +242,11 @@ public interface CmUserService extends EpPersistenceService {
 	 */
 	void removePriceListFromUsers(String priceListGuid);
 
+
+	/**
+	 * Increments the failedLogin count for user with the given username.
+	 * @param userName the user name to increment.
+	 */
+	void addFailedLoginAttempt(String userName);
+
 }

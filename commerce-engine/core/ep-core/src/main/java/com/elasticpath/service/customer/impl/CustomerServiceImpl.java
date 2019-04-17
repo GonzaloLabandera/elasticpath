@@ -11,11 +11,11 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
 import javax.validation.ConstraintViolation;
 import javax.validation.Validator;
 
@@ -28,16 +28,14 @@ import com.elasticpath.base.exception.EpServiceException;
 import com.elasticpath.base.exception.EpSystemException;
 import com.elasticpath.base.exception.structured.EpValidationException;
 import com.elasticpath.commons.constants.ContextIdNames;
-import com.elasticpath.commons.constants.WebConstants;
-import com.elasticpath.commons.exception.EmailExistException;
 import com.elasticpath.commons.exception.UserIdExistException;
 import com.elasticpath.commons.exception.UserIdNonExistException;
 import com.elasticpath.commons.exception.UserStatusInactiveException;
 import com.elasticpath.core.messaging.customer.CustomerEventType;
 import com.elasticpath.domain.EpDomainException;
+import com.elasticpath.domain.customer.Address;
 import com.elasticpath.domain.customer.Customer;
 import com.elasticpath.domain.customer.CustomerAddress;
-import com.elasticpath.domain.customer.CustomerAuthentication;
 import com.elasticpath.domain.customer.CustomerDeleted;
 import com.elasticpath.domain.customer.CustomerGroup;
 import com.elasticpath.domain.customer.CustomerMessageIds;
@@ -58,15 +56,13 @@ import com.elasticpath.service.search.IndexNotificationService;
 import com.elasticpath.service.search.IndexType;
 import com.elasticpath.service.shopper.ShopperCleanupService;
 import com.elasticpath.service.store.StoreService;
-import com.elasticpath.settings.MalformedSettingValueException;
 import com.elasticpath.settings.SettingsReader;
-import com.elasticpath.settings.provider.SettingValueProvider;
 import com.elasticpath.validation.ConstraintViolationTransformer;
 
 /**
  * The default implementation of <code>CustomerService</code>.
  */
-@SuppressWarnings({"PMD.CyclomaticComplexity", "PMD.TooManyMethods", "PMD.GodClass", "PMD.ExcessiveClassLength"})
+@SuppressWarnings({"PMD.CyclomaticComplexity", "PMD.TooManyMethods", "PMD.GodClass", "PMD.ExcessiveClassLength", "PMD.NPathComplexity"})
 public class CustomerServiceImpl extends AbstractEpPersistenceServiceImpl implements CustomerService {
 
 	private static final String STRUCTURED_ERROR_MESSAGE_DATA_FIELD_UNDEFINED = "undefined";
@@ -104,8 +100,6 @@ public class CustomerServiceImpl extends AbstractEpPersistenceServiceImpl implem
 	// Turn off line too long PMD warning
 	private ConstraintViolationTransformer constraintViolationTransformer; //NOPMD
 
-	private SettingValueProvider<Integer> userIdModeProvider;
-
 
 	public void setValidator(final Validator validator) {
 		this.validator = validator;
@@ -137,7 +131,6 @@ public class CustomerServiceImpl extends AbstractEpPersistenceServiceImpl implem
 	 * @throws UserIdExistException - if trying to add an customer using an user Id.
 	 */
 	@Override
-	@SuppressWarnings("PMD.NPathComplexity")
 	public Customer addByAuthenticate(final Customer customer, final boolean isAuthenticated) throws UserIdExistException {
 		sanityCheck();
 
@@ -145,27 +138,12 @@ public class CustomerServiceImpl extends AbstractEpPersistenceServiceImpl implem
 		if (StringUtils.isBlank(storeCode)) {
 			throw new EpServiceException("Customer has no store attached.");
 		}
-		if (!isAuthenticated) {
-			// verify that the email does not exist in the system for non-anonymous customers
-			if (!customer.isAnonymous() && isEmailExists(customer.getEmail(), customer.getStoreCode())) {
-				String errorMessage = "Customer with the given Email address already exists.";
-				throw new UserIdExistException(
-						errorMessage,
-						asList(
-								new StructuredErrorMessage(
-										CustomerMessageIds.EMAIL_ALREADY_EXISTS,
-										errorMessage,
-										ImmutableMap.of("email", customer.getEmail() == null
-												? STRUCTURED_ERROR_MESSAGE_DATA_FIELD_UNDEFINED : customer.getEmail())
-								)
-						)
-				);
-			}
-			customer.setUserIdAsEmail();
-		}
 
-		// check if the user Id is unique in the store (if private)
-		if (!customer.isAnonymous() && isUserIdExists(customer.getUserId(), customer.getStoreCode())) {
+		final boolean anyCustomerWithUserIdExists =
+				findCustomerGuidsByUserIdInStoreOrAssociatedStores(customer.getUserId(), customer.getStoreCode())
+						.stream().findAny().isPresent();
+
+		if (anyCustomerWithUserIdExists) {
 			String errorMessage = "Customer with the given user Id already exists";
 			throw new UserIdExistException(
 					errorMessage,
@@ -196,12 +174,12 @@ public class CustomerServiceImpl extends AbstractEpPersistenceServiceImpl implem
 		// persist the customer
 		getPersistenceEngine().save(customer);
 
-		// send confirmation email
+		// send confirmation email and update index
 		if (!customer.isAnonymous()) {
 			sendCustomerEvent(CustomerEventType.CUSTOMER_REGISTERED, customer.getGuid(), null);
+			indexNotificationService.addNotificationForEntityIndexUpdate(IndexType.CUSTOMER, customer.getUidPk());
 		}
 
-		indexNotificationService.addNotificationForEntityIndexUpdate(IndexType.CUSTOMER, customer.getUidPk());
 		return customer;
 	}
 
@@ -217,34 +195,11 @@ public class CustomerServiceImpl extends AbstractEpPersistenceServiceImpl implem
 	public Customer update(final Customer customer) throws UserIdExistException {
 		sanityCheck();
 
-		switch (getUserIdMode()) {
-			case WebConstants.USE_EMAIL_AS_USER_ID_MODE:
-				customer.setUserId(customer.getEmail());
-				break;
-			case WebConstants.GENERATE_UNIQUE_PERMANENT_USER_ID_MODE:
-				// we check the Email address as it is considered as a "user Id" in SF for this mode
-				// but to unify the exception as UserIdExistException
-				if (!customer.isAnonymous() && emailExistsInStore(customer, customer.getStoreCode())) {
-					String errorMessage = "Customer with the given Email address already exists.";
-					throw new UserIdExistException(
-							errorMessage,
-							asList(
-									new StructuredErrorMessage(
-											CustomerMessageIds.EMAIL_ALREADY_EXISTS,
-											errorMessage,
-											ImmutableMap.of("email", customer.getEmail() == null
-													? STRUCTURED_ERROR_MESSAGE_DATA_FIELD_UNDEFINED : customer.getEmail())
-									)
-							)
-					);
-				}
-				break;
-			default:
-				// do nothing
-				break;
-		}
+		final boolean anotherCustomerWithUserIdExists =
+				findCustomerGuidsByUserIdInStoreOrAssociatedStores(customer.getUserId(), customer.getStoreCode())
+						.stream().anyMatch(guid -> !guid.equals(customer.getGuid()));
 
-		if (!customer.isAnonymous() && userIdExistsInStore(customer, customer.getStoreCode())) {
+		if (anotherCustomerWithUserIdExists) {
 			String errorMessage = "Customer with the given user Id already exists";
 			throw new UserIdExistException(
 					errorMessage,
@@ -279,8 +234,17 @@ public class CustomerServiceImpl extends AbstractEpPersistenceServiceImpl implem
 		defaultCustomerGroupCheck(customer);
 
 		Customer persistedCustomer = getPersistenceEngine().update(customer);
+
+		if (isNotSearchable(customer)) {
+			return persistedCustomer;
+		}
+
 		indexNotificationService.addNotificationForEntityIndexUpdate(IndexType.CUSTOMER, persistedCustomer.getUidPk());
 		return persistedCustomer;
+	}
+
+	private boolean isNotSearchable(final Customer customer) {
+		return customer.isAnonymous() && StringUtils.isEmpty(customer.getFirstName()) && StringUtils.isEmpty(customer.getLastName());
 	}
 
 	/**
@@ -405,20 +369,13 @@ public class CustomerServiceImpl extends AbstractEpPersistenceServiceImpl implem
 	@Override
 	public Customer get(final long customerUid, final FetchGroupLoadTuner loadTuner) throws EpServiceException {
 		sanityCheck();
-		Customer customer = null;
+		Customer customer;
 		if (customerUid <= 0) {
 			customer = getBean(ContextIdNames.CUSTOMER);
 		} else {
 			fetchPlanHelper.configureFetchGroupLoadTuner(loadTuner);
 			customer = getPersistentBeanFinder().get(ContextIdNames.CUSTOMER, customerUid);
 			fetchPlanHelper.clearFetchPlan();
-		}
-		if (customer == null) {
-			return null;
-		}
-		if (customer.getCustomerAuthentication() == null) {
-			CustomerAuthentication customerAuthentication = getBean(ContextIdNames.CUSTOMER_AUTHENTICATION);
-			customer.setCustomerAuthentication(customerAuthentication);
 		}
 		return customer;
 	}
@@ -452,6 +409,11 @@ public class CustomerServiceImpl extends AbstractEpPersistenceServiceImpl implem
 		return customers.get(0);
 	}
 
+	@Override
+	public boolean isCustomerGuidExists(final String guid) {
+		return !getPersistenceEngine().retrieveByNamedQuery("CUSTOMER_EXISTS_BY_GUID", guid).isEmpty();
+	}
+
 	/**
 	 * Generic load method for all persistable domain models.
 	 *
@@ -465,86 +427,16 @@ public class CustomerServiceImpl extends AbstractEpPersistenceServiceImpl implem
 	}
 
 	/**
-	 * Find the customer with the given email address. Filtered by Store. If store is null or store is shared login, no filtering is done.
-	 *
-	 * @param email     the customer email address
-	 * @param storeCode the store to look in
-	 * @return the customers with the given email address.
-	 * @throws EpServiceException - in case of any errors
-	 */
-	@Override
-	public Customer findByEmail(final String email, final String storeCode) throws EpServiceException {
-		return findByEmail(email, storeCode, false);
-	}
-
-	/**
-	 * Find the customer with the given email address. Filtered by Store. If store is null or store is shared login, no filtering is done.
-	 *
-	 * @param email            the customer email address
-	 * @param storeCode        the store to look in
-	 * @param includeAnonymous if true includes in the search the anonymous users
-	 * @return the customers with the given email address.
-	 * @throws EpServiceException - in case of any errors
-	 */
-	@Override
-	public Customer findByEmail(final String email, final String storeCode, final boolean includeAnonymous) throws EpServiceException {
-		sanityCheck();
-		if (email == null || storeCode == null) {
-			throw new EpServiceException("Cannot retrieve customer without userId or store");
-		}
-
-		Store store = storeService.findStoreWithCode(storeCode);
-		Set<Long> storeUids = new HashSet<>();
-		storeUids.add(store.getUidPk());
-		storeUids.addAll(store.getAssociatedStoreUids());
-
-		final List<Customer> allResults = getPersistenceEngine().retrieveByNamedQueryWithList("CUSTOMER_FIND_BY_EMAIL_IN_STORES",
-				LIST_PLACEHOLDER,
-				storeUids,
-				prepareEmailForDbOperation(email));
-
-		return getLastCustomer(allResults, store, includeAnonymous);
-	}
-
-	/**
-	 * Prepares the customer email to be used for comparison with database values.
-	 *
-	 * @param email the customer email
-	 * @return the converted email
-	 */
-	protected String prepareEmailForDbOperation(final String email) {
-		if (email == null) {
-			return null;
-		}
-		return email.toLowerCase(Locale.ENGLISH);
-	}
-
-	/**
-	 * Find the customer with the given userId registered with the store. If it cannot find the customer in the given store, returns oldest record
+	 * Find the customer with the given userId associated with the store. If it cannot find the customer in the given store, returns oldest record
 	 * from the store's associated stores.
 	 *
-	 * @param userId    the customer userId address
+	 * @param userId    the customer userId
 	 * @param storeCode the store to search in
-	 * @return the customers with the given userId address.
+	 * @return the customers with the given userId.
 	 * @throws EpServiceException - in case of any errors
 	 */
 	@Override
 	public Customer findByUserId(final String userId, final String storeCode) throws EpServiceException {
-		return findByUserId(userId, storeCode, false);
-	}
-
-	/**
-	 * Find the customer with the given userId registered with the store. If it cannot find the customer in the given store, returns oldest record
-	 * from the store's associated stores.
-	 *
-	 * @param userId           the customer userId address
-	 * @param storeCode        the store to search in
-	 * @param includeAnonymous includes anonymous users
-	 * @return the customers with the given userId address.
-	 * @throws EpServiceException - in case of any errors
-	 */
-	@Override
-    	public Customer findByUserId(final String userId, final String storeCode, final boolean includeAnonymous) throws EpServiceException {
 		sanityCheck();
 		if (userId == null || storeCode == null) {
 			throw new EpServiceException("Cannot retrieve customer without userId or store");
@@ -564,33 +456,28 @@ public class CustomerServiceImpl extends AbstractEpPersistenceServiceImpl implem
 				storeUids,
 				userId);
 
-		return getLastCustomer(allResults, store, includeAnonymous);
+		return getCustomerForStoreOrNewest(allResults, store);
 	}
 
 	/**
-	 * Returns either the customer matching the store, or if matching store not found, returns the most recently modified customer.
+	 * Returns either the customer matching the store, or if matching store not found, returns the most recently created customer.
 	 *
 	 * @param customers
 	 * @param store
 	 * @return customer
 	 */
-	private Customer getLastCustomer(final List<Customer> customers, final Store store, final boolean includingAnonymous) {
-		if (customers.isEmpty()) {
-			return null;
-		}
+	private Customer getCustomerForStoreOrNewest(final List<Customer> customers, final Store store) {
 		Customer customer = null;
 		for (Customer candidateCustomer : customers) {
-			if (includingAnonymous || !candidateCustomer.isAnonymous()) {
-				if (customer == null || candidateCustomer.getCreationDate().after(customer.getCreationDate())) {
-					customer = candidateCustomer;
-				}
-				if (candidateCustomer.getStoreCode().equals(store.getCode())) {
-					break;
-				}
+			if (customer == null || candidateCustomer.getCreationDate().after(customer.getCreationDate())) {
+				customer = candidateCustomer;
+			}
+			if (candidateCustomer.getStoreCode().equals(store.getCode())) {
+				break;
 			}
 		}
-		//ensure that last customer has always correct store code
 		if (customer != null) {
+			// Field is updated for customers that are not native to the store
 			customer.setStoreCode(store.getCode());
 		}
 
@@ -599,18 +486,10 @@ public class CustomerServiceImpl extends AbstractEpPersistenceServiceImpl implem
 
 	@Override
 	public void resetPassword(final String userId, final String storeCode) throws UserIdNonExistException {
-
-		final int userIdMode = getUserIdMode();
-		Customer customer = null;
-		if (userIdMode == WebConstants.USE_EMAIL_AS_USER_ID_MODE) {
-			customer = findByUserId(userId, storeCode);
-		} else if (userIdMode == WebConstants.GENERATE_UNIQUE_PERMANENT_USER_ID_MODE) {
-			// In this user Id mode, the SF or CM should submit the Email address
-			customer = findByEmail(userId, storeCode);
-		}
+		Customer customer = findByUserId(userId, storeCode);
 
 		if (customer == null) {
-			throw new UserIdNonExistException("The given email address doesn't exist: " + userId + " In store: " + storeCode);
+			throw new UserIdNonExistException("The given user id doesn't exist: " + userId + " In store: " + storeCode);
 		}
 
 		// Needed in order to get Spring to create another transactional context
@@ -701,97 +580,22 @@ public class CustomerServiceImpl extends AbstractEpPersistenceServiceImpl implem
 	}
 
 	/**
-	 * Checks the given user Id exists or not within the store.
+	 * Looks up customer guids by user id within a store and its associated stores.
 	 *
-	 * @param userId    the user Id
-	 * @param storeCode the code of the store to check
-	 * @return true if the given user Id exists
-	 * @throws EpServiceException - in case of any errors
-	 */
-	@Override
-	public boolean isUserIdExists(final String userId, final String storeCode) throws EpServiceException {
-		if (userId == null || storeCode == null) {
-			return false;
-		}
-
-		final Customer customer = findByUserId(userId, storeCode);
-		return customer != null;
-	}
-
-	/**
-	 * Checks the given email exists or not.
-	 *
-	 * @param email     the user Id
-	 * @param storeCode the store to look in
-	 * @return true if the given user Id exists
-	 * @throws EpServiceException - in case of any errors
-	 */
-	@Override
-	public boolean isEmailExists(final String email, final String storeCode) throws EpServiceException {
-		if (email == null || storeCode == null) {
-			return false;
-		}
-
-		final Customer customer = findByEmail(email, storeCode);
-		return customer != null;
-	}
-
-	/**
-	 * Check the given customer's user Id exists or not.
-	 *
-	 * @param customer  the customer to check
+	 * @param userId  the user id
 	 * @param storeCode the store code
-	 * @return true if the given user Id exists
+	 * @return a set of customer guids
 	 * @throws EpServiceException - in case of any errors
 	 */
-	protected boolean userIdExistsInStore(final Customer customer, final String storeCode) throws EpServiceException {
-		if (customer.getUserId() == null) {
-			return false;
-		}
-		List<Long> results = getPersistenceEngine().retrieveByNamedQuery(
-				"OTHER_CUSTOMER_COUNT_BY_USERID_BY_STORES_EXCLUDING_ANONYMOUS",
-				customer.getUserId(),
-				customer.getGuid(),
+	protected Set<String> findCustomerGuidsByUserIdInStoreOrAssociatedStores(
+			final String userId, final String storeCode) throws EpServiceException {
+
+		List<String> results = getPersistenceEngine().retrieveByNamedQuery(
+				"CUSTOMER_GUIDS_BY_USERID_IN_STORE_AND_ASSOCIATED_STORES",
+				userId,
 				storeCode);
 
-		return results.get(0) > 0;
-	}
-
-	/**
-	 * Check the given customer's email exists or not.
-	 *
-	 * @param customer  the customer to check
-	 * @param storeCode the store code
-	 * @return true if the given email exists
-	 * @throws EpServiceException - in case of any errors
-	 */
-	protected boolean emailExistsInStore(final Customer customer, final String storeCode) throws EpServiceException {
-		if (customer.getEmail() == null) {
-			return false;
-		}
-
-		final List<Long> results = getPersistenceEngine().retrieveByNamedQuery("OTHER_CUSTOMER_COUNT_BY_EMAIL_BY_STORE_EXCLUDING_ANONYMOUS",
-				prepareEmailForDbOperation(customer.getEmail()),
-				storeCode,
-				customer.getGuid());
-
-		// there is another customer have same email but different Guid
-		return results.get(0) > 0;
-	}
-
-	/**
-	 * Validate the new customer has the valid email address (not used by any existing non-anonymous customer).
-	 *
-	 * @param customer the new customer.
-	 * @throws EmailExistException - if the new customer's email address already exists in system.
-	 */
-	@Override
-	public void validateNewCustomer(final Customer customer) throws EmailExistException {
-		// Make sure the customer's email address is not taken by any existing non-anonymous
-		// customer
-		if (!customer.isAnonymous() && isUserIdExists(customer.getUserId(), customer.getStoreCode())) {
-			throw new EmailExistException("Customer with the given email address already exists");
-		}
+		return new HashSet<>(results);
 	}
 
 	/**
@@ -814,15 +618,16 @@ public class CustomerServiceImpl extends AbstractEpPersistenceServiceImpl implem
 	}
 
 	/**
-	 * Retrieves list of <code>Customer</code> uids where the last modified date is later than the specified date.
+	 * Retrieves list of searchable <code>Customer</code> uids where the last modified date is later than the specified date.
+	 * A customer is searchable if they have defined their first name or last name.
 	 *
 	 * @param date date to compare with the last modified date
 	 * @return list of <code>Customer</code> whose last modified date is later than the specified date
 	 */
 	@Override
-	public List<Long> findUidsByModifiedDate(final Date date) {
+	public List<Long> findSearchableUidsByModifiedDate(final Date date) {
 		sanityCheck();
-		return getPersistenceEngine().retrieveByNamedQuery("CUSTOMER_UIDS_SELECT_BY_MODIFIED_DATE", date);
+		return getPersistenceEngine().retrieveByNamedQuery("SEARCHABLE_CUSTOMER_UIDS_SELECT_BY_MODIFIED_DATE", date);
 	}
 
 	/**
@@ -912,18 +717,6 @@ public class CustomerServiceImpl extends AbstractEpPersistenceServiceImpl implem
 	}
 
 	/**
-	 * Retrieve customer by userid(email). List may contain duplicates, and should be filtered.
-	 *
-	 * @param userid the customer userid to search
-	 * @return the list of customers matching given userid
-	 * @throws EpServiceException - in case of exception
-	 */
-	public List<Customer> findCustomerByUserId(final String userid) throws EpServiceException {
-		sanityCheck();
-		return getPersistenceEngine().retrieveByNamedQuery("CUSTOMER_FIND_BY_USERID", userid);
-	}
-
-	/**
 	 * Sets the {@link FetchPlanHelper} instance to use.
 	 *
 	 * @param fetchPlanHelper the {@link FetchPlanHelper} instance to use
@@ -992,6 +785,39 @@ public class CustomerServiceImpl extends AbstractEpPersistenceServiceImpl implem
 		return customerAddress;
 	}
 
+	@Override
+	public Customer updateCustomerFromAddress(final Customer customer, final Address address) {
+		Customer customerToUpdate = customer;
+		if (customer.isPersisted()) {
+			customerToUpdate = get(customer.getUidPk());
+		}
+
+		boolean modified = setCustomerProfileFromAddress(customerToUpdate, address);
+		if (modified) {
+			return update(customerToUpdate);
+		} else {
+			return customerToUpdate;
+		}
+	}
+
+	private boolean setCustomerProfileFromAddress(final Customer customer, final Address address) {
+		boolean modified = false;
+
+		// First & last names belong together
+		if (customer.getFirstName() == null && customer.getLastName() == null) {
+			customer.setFirstName(address.getFirstName());
+			customer.setLastName(address.getLastName());
+			modified = true;
+		}
+
+		if (customer.getPhoneNumber() == null) {
+			customer.setPhoneNumber(address.getPhoneNumber());
+			modified = true;
+		}
+
+		return modified;
+	}
+
 	/**
 	 * @param indexNotificationService instance to set
 	 */
@@ -1014,15 +840,6 @@ public class CustomerServiceImpl extends AbstractEpPersistenceServiceImpl implem
 
 		} catch (final Exception e) {
 			throw new EpSystemException("Failed to publish Event Message", e);
-		}
-	}
-
-	@Override
-	public int getUserIdMode() {
-		try {
-			return getUserIdModeProvider().get();
-		} catch (final MalformedSettingValueException e) {
-			return WebConstants.USE_EMAIL_AS_USER_ID_MODE; // default value
 		}
 	}
 
@@ -1075,14 +892,6 @@ public class CustomerServiceImpl extends AbstractEpPersistenceServiceImpl implem
 
 	protected EventMessagePublisher getEventMessagePublisher() {
 		return eventMessagePublisher;
-	}
-
-	public void setUserIdModeProvider(final SettingValueProvider<Integer> userIdModeProvider) {
-		this.userIdModeProvider = userIdModeProvider;
-	}
-
-	protected SettingValueProvider<Integer> getUserIdModeProvider() {
-		return userIdModeProvider;
 	}
 
 }

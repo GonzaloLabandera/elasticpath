@@ -21,7 +21,7 @@ public class CouponUsageType extends AbstractExtensibleEnum<CouponUsageType> {
 	/** Ordinal constant for LIMIT_PER_COUPON. */
 	public static final int LIMIT_PER_COUPON_ORDINAL = 1;
 
-	/** Coupon usage is limited to a specific number of uses per coupon. */ 
+	/** Coupon usage is limited to a specific number of uses across all users. */
 	public static final CouponUsageType LIMIT_PER_COUPON = new CouponUsageType(LIMIT_PER_COUPON_ORDINAL, "limitPerCoupon");
 	
 	/** Ordinal constant for LIMIT_PER_ANY_USER. */
@@ -33,7 +33,7 @@ public class CouponUsageType extends AbstractExtensibleEnum<CouponUsageType> {
 	/** Ordinal constant for LIMIT_PER_SPECIFIED_USER. */
 	public static final int LIMIT_PER_SPECIFIED_USER_ORDINAL = 3;
 
-	/** Coupon usage is limited to a specific number of uses for a set of users associated to the coupon. */
+	/** Coupon usage is limited to a specific number of uses between a set of users associated to the coupon. */
 	public static final CouponUsageType LIMIT_PER_SPECIFIED_USER = new CouponUsageType(LIMIT_PER_SPECIFIED_USER_ORDINAL, "limitPerSpecifiedUser");
 	
 	private final String usageName;

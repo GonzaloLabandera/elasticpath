@@ -3,6 +3,8 @@
  */
 package com.elasticpath.tools.sync.client.controller.impl;
 
+import javax.sql.DataSource;
+
 import org.apache.log4j.Logger;
 
 import com.elasticpath.tools.sync.client.SyncJobConfiguration;
@@ -14,6 +16,8 @@ import com.elasticpath.tools.sync.job.TransactionJobBuilder;
 public class ExportController extends FullController {
 
 	private static final Logger LOG = Logger.getLogger(ExportController.class);
+
+	private DataSource dataSource;
 
 	@Override
 	protected void synchronizationCompleted(final SyncJobConfiguration syncJobConfiguration) {
@@ -29,7 +33,11 @@ public class ExportController extends FullController {
 	@Override
 	protected void initConfig(final SystemConfig sourceSystem, final SystemConfig targetSystem) {
 		// only the source system is required when doing export
-		sourceSystem.initSystem();
+		if (dataSource == null) {
+			sourceSystem.initSystem();
+		} else {
+			sourceSystem.initSystem(dataSource);
+		}
 	}
 
 	/**

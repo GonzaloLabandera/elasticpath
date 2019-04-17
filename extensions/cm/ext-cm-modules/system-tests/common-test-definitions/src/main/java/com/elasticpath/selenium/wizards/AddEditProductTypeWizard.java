@@ -16,7 +16,7 @@ public class AddEditProductTypeWizard extends AbstractWizard {
 			= "div[automation-id*='com.elasticpath.cmclient.catalog.CatalogMessages.ProductTypeAddEditWizard'][widget-type='Shell'] ";
 	private static final String PRODUCT_TYPE_NAME_INPUT_CSS = ADD_PRODUCT_TYPE_PARENT_CSS
 			+ "div[automation-id='com.elasticpath.cmclient.catalog.CatalogMessages.ProductTypeAddEditWizard_Name'] input";
-	private static final String MOVE_RIGHT_BUTTON_CSS = ADD_PRODUCT_TYPE_PARENT_CSS + "div[widget-id='>']";
+	private static final String MOVE_RIGHT_BUTTON_CSS = ADD_PRODUCT_TYPE_PARENT_CSS + "div[widget-id='Add']";
 	private static final String AVAILABLE_ATTRIBUTES_PARENT_CSS
 			= "div[automation-id='com.elasticpath.cmclient.catalog.CatalogMessages.ProductTypeAddEditWizard_AvailableAttributes']"
 			+ "[widget-type='Table'] ";
@@ -33,7 +33,7 @@ public class AddEditProductTypeWizard extends AbstractWizard {
 	private static final String ASSIGNED_CART_ITEM_MODIFIER_GROUP_PARENT_CSS = "div[automation-id='com.elasticpath.cmclient.catalog"
 			+ ".CatalogMessages.ProductTypeAddEditWizard_AssignedCartItemModifierGroups'][widget-type='Table'] ";
 	private static final String ASSIGNED_CART_ITEM_MODIFIER_GROUP_COLUMN_CSS = ASSIGNED_CART_ITEM_MODIFIER_GROUP_PARENT_CSS + DIV_COLUMN_ID_S;
-	private static final String ASSIGN_GROUP_MOVE_RIGHT_CSS = " div[widget-id='>']";
+	private static final String ASSIGN_GROUP_MOVE_RIGHT_CSS = " div[widget-id='Add']";
 
 	/**
 	 * Constructor.

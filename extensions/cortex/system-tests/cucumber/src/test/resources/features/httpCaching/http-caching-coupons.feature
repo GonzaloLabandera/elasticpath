@@ -31,3 +31,9 @@ Feature: HTTP Caching - Coupons
     Examples:
     | COUPON                                                   | ACTIVE_PROMOTION_ITEM              |
     | CouponWillApply10PercentOffTheProductWith10PercentCoupon | Product With 10 Percent Off Coupon |
+
+  Scenario: Apply coupon to order form should have HTTP caching
+    Given I login as a newly registered shopper
+    When I navigate to apply coupon form
+    Then I should see the Cache-Control header in the response with a valid max age and private directive
+    And I should see an ETag header in the response

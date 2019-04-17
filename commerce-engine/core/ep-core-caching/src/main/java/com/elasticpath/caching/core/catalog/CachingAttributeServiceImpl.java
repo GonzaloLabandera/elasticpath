@@ -195,6 +195,7 @@ public class CachingAttributeServiceImpl extends AbstractEpPersistenceServiceImp
 		return fallbackAttributeService.findByCatalogAndUsage(catalogUid, attributeUsageId);
 	}
 
+	@Override
 	public List<AttributeValueInfo> findProductAttributeValueByAttributeUid(final Attribute attribute) {
 		long attributeUid = attribute.getUidPk();
 

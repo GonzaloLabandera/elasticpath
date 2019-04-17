@@ -971,7 +971,7 @@ public class JpaPersistenceEngineImpl implements JpaPersistenceEngineInternal {
 			if (isString) {
 				result.append('\'');
 			}
-			result.append(item);
+			result.append(escapeParameter(item));
 			if (isString) {
 				result.append('\'');
 			}

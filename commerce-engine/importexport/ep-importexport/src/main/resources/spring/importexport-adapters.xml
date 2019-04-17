@@ -308,6 +308,11 @@
 		<property name="assembler" ref="warehouseDtoAssembler" />
 	</bean>
 
+	<bean id="facetAdapter" class="com.elasticpath.importexport.common.adapters.DtoAssemblerDelegatingAdapter"
+		  parent="abstractDomainAdapter">
+		<property name="assembler" ref="facetDtoAssembler"/>
+	</bean>
+
 	<bean id="storeAdapter" class="com.elasticpath.importexport.common.adapters.DtoAssemblerDelegatingAdapter"
 		parent="abstractDomainAdapter">
 		<property name="assembler" ref="storeDtoAssembler" />

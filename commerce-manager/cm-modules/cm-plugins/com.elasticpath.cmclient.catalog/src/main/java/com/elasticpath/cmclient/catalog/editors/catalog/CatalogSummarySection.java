@@ -87,20 +87,20 @@ public class CatalogSummarySection extends AbstractCmClientEditorPageSectionPart
 		}
 
 		controlPane = CompositeFactory.createTableWrapLayoutComposite(parent, 2, false);
-		final IEpLayoutData labelData = controlPane.createLayoutData(IEpLayoutData.END, IEpLayoutData.CENTER);
-		final IEpLayoutData fieldData = controlPane.createLayoutData(IEpLayoutData.FILL, IEpLayoutData.CENTER);
+		final IEpLayoutData labelData = controlPane.createLayoutData(IEpLayoutData.FILL, IEpLayoutData.CENTER, true, false);
+		final IEpLayoutData fieldData = controlPane.createLayoutData(IEpLayoutData.FILL, IEpLayoutData.CENTER, true, false);
 		final IEpLayoutData dualListData = controlPane.createLayoutData(IEpLayoutData.FILL, IEpLayoutData.CENTER, true, true, 2,
 				1);
 
 		controlPane.addLabelBold(CatalogMessages.get().CatalogSummarySection_CatalogCode, labelData);
+		controlPane.addLabelBoldRequired(CatalogMessages.get().CatalogSummarySection_CatalogName, epState, labelData);
+
 		catalogCode = controlPane.addTextField(EpState.READ_ONLY, fieldData);
 		catalogCode.setTextLimit(CODE_MAXLENGTH);
-
-		controlPane.addLabelBoldRequired(CatalogMessages.get().CatalogSummarySection_CatalogName, epState, labelData);
 		catalogName = controlPane.addTextField(epState, fieldData);
 
 		controlPane.addLabelBold(CatalogMessages.get().CatalogSummarySection_DefaultLanguage, labelData);
-		controlPane.addLabel(getModel().getDefaultLocale().getDisplayName(), fieldData);
+		controlPane.addLabel(getModel().getDefaultLocale().getDisplayName(), labelData);
 
 		final IEpLayoutComposite dualListComposite = CompositeFactory.createTableWrapLayoutComposite(controlPane
 				.getSwtComposite(), 1, true);

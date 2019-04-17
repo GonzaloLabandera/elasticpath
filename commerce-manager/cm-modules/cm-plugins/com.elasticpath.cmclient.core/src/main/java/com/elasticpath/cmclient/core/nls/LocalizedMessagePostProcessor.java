@@ -44,15 +44,14 @@ public final class LocalizedMessagePostProcessor {
 
 	private static <T> T process(final T localizedClass) {
 		if (UITestUtil.isEnabled()) {
-			Class clazz = localizedClass.getClass();
-
 			synchronized (convertedClasses) {
+				Class clazz = localizedClass.getClass();
 				if (convertedClasses.contains(clazz)) {
 					return localizedClass;
 				}
 				convertedClasses.add(clazz);
+				return postProcessConvertIdsToTestIds(localizedClass, clazz);
 			}
-			return postProcessConvertIdsToTestIds(localizedClass, clazz);
 		} else {
 			return localizedClass;
 		}

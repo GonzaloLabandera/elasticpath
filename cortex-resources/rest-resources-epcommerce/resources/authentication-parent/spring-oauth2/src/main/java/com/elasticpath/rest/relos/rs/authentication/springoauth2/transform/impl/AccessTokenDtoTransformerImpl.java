@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013 Elastic Path Software Inc. All rights reserved.
+ * Copyright © 2019 Elastic Path Software Inc. All rights reserved.
  */
 package com.elasticpath.rest.relos.rs.authentication.springoauth2.transform.impl;
 
@@ -12,7 +12,7 @@ import org.osgi.service.component.annotations.Component;
 import org.springframework.security.oauth2.common.DefaultOAuth2AccessToken;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
 
-import com.elasticpath.rest.relos.rs.authentication.springoauth2.dto.AccessTokenDto;
+import com.elasticpath.rest.relos.rs.authentication.dto.AccessTokenDto;
 import com.elasticpath.rest.relos.rs.authentication.springoauth2.transform.AccessTokenDtoTransformer;
 
 /**

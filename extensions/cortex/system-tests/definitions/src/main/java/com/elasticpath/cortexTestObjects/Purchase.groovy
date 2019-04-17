@@ -16,7 +16,7 @@ class Purchase extends CommonMethods {
 		purchaseNumber = client["purchase-number"]
 	}
 
-	static String getPurchaseNumber(){
+	static String getPurchaseNumber() {
 		return purchaseNumber
 	}
 
@@ -109,8 +109,10 @@ class Purchase extends CommonMethods {
 	}
 
 	static void verifyPurchaseItemsBySkuCode(List<String> skuCodeList) {
-		resume()
-		LineItems.verifyLineItemsBySkuCode(skuCodeList)
+		for (String skuCode : skuCodeList) {
+			resume()
+			LineItems.verifyLineItemsBySkuCode(skuCode)
+		}
 	}
 
 	static void verifyCoupon(def couponCode) {
@@ -152,6 +154,12 @@ class Purchase extends CommonMethods {
 	static void selectPaymentMeans(String paymentMeans) {
 		paymentmeans()
 		openLinkRelWithFieldWithValue("element", "display-name", paymentMeans)
+	}
+
+	static def getShippingOptionCost() {
+		shipmentsElement()
+		shippingoption()
+		return client["cost"]["display"][0]
 	}
 
 }

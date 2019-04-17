@@ -52,7 +52,7 @@ public class ActiveMqVirtualTopicConsumptionITest {
 	private Endpoint consumerEndpointTwo;
 
 	// Used to validate that each consumer actually consumed a message.
-	@EndpointInject(uri="mock:monitor", context = "ep-messaging-camel-itest")
+	@EndpointInject(uri = "mock:monitor", context = "ep-messaging-camel-itest")
 	private MockEndpoint monitor;
 
 	/**

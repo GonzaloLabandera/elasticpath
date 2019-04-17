@@ -102,8 +102,9 @@ public class ImportDataTypeBaseAmountImpl extends AbstractImportDataTypeImpl imp
 			public void setStringValue(final Object object, final String value, final ImportGuidHelper service) {
 				typeCheck(object);
 				verifyNotNull(value, super.getName());
-				if (BaseAmountObjectType.getObjectType(value) == null) {
-					throw new EpBindException("Base amounts cannot be imported for this type.");
+				BaseAmountObjectType objectType = BaseAmountObjectType.getObjectType(value);
+				if (objectType == null || !value.equals(objectType.toString())) {
+					throw new EpBindException("Base amounts cannot be imported for type: " + value);
 				}
 				((BaseAmountDTO) object).setObjectType(value);
 			}

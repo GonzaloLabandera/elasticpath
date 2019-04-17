@@ -126,13 +126,39 @@ public class ImportCustomerConsentSteps {
 	 * @param dataTable customer consent info.
 	 * @throws ParseException in case of date parsing error.
 	 */
+	@Then("^the imported latest customer consents records should equal$")
+	public void verifyLatestCustomerConsents(final DataTable dataTable) throws ParseException {
+		final List<Map<String, String>> customerConsentsMap = dataTable.asMaps(String.class, String.class);
+		final List<CustomerConsent> expectedCustomerConsents = CustomerConsentSteps.parseCustomerConsentsFromDataTable(customerConsentsMap,
+				dataPolicyService, customerConsentBuilder);
+
+		List<CustomerConsent> importedCustomerConsents = customerConsentService.list();
+
+		assertThat(importedCustomerConsents)
+				.as(String.format("imported customer consents are incorrect"))
+				.hasSize(expectedCustomerConsents.size());
+
+		for (CustomerConsent expectedCustomerConsent : expectedCustomerConsents) {
+			CustomerConsent importedCustomerConsent = importedCustomerConsents.get(importedCustomerConsents.indexOf(expectedCustomerConsent));
+
+			assertThat(importedCustomerConsent)
+					.isEqualToComparingOnlyGivenFields(expectedCustomerConsent, "guid", "action", "customerGuid", "dataPolicy.guid");
+		}
+	}
+
+	/**
+	 * Verify the tests with customer consents.
+	 *
+	 * @param dataTable customer consent info.
+	 * @throws ParseException in case of date parsing error.
+	 */
 	@Then("^the imported customer consents records should equal$")
 	public void verifyCustomerConsents(final DataTable dataTable) throws ParseException {
 		final List<Map<String, String>> customerConsentsMap = dataTable.asMaps(String.class, String.class);
 		final List<CustomerConsent> expectedCustomerConsents = CustomerConsentSteps.parseCustomerConsentsFromDataTable(customerConsentsMap,
 				dataPolicyService, customerConsentBuilder);
 
-		List<CustomerConsent> importedCustomerConsents = customerConsentService.list();
+		List<CustomerConsent> importedCustomerConsents = customerConsentService.listHistory();
 
 		assertThat(importedCustomerConsents)
 				.as(String.format("imported customer consents are incorrect"))

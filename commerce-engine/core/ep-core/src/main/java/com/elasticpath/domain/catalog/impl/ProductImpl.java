@@ -1506,9 +1506,9 @@ public class ProductImpl extends AbstractLegacyEntityImpl implements Product, Pr
 		if (attrValue == null || StringUtils.isEmpty(attrValue.getStringValue())) {
 			// update the type into the product in case of any missing attributes, to be able to use the updated type
 			if (locale == null) {
-				attributesThatAreMissingValues.add(attrGroup.getAttribute().getName());
+				attributesThatAreMissingValues.add(attrGroup.getAttribute().getDisplayName(getMasterCatalog().getDefaultLocale()));
 			} else {
-				attributesThatAreMissingValues.add(attrGroup.getAttribute().getName() + " - " + locale.getDisplayName());
+				attributesThatAreMissingValues.add(attrGroup.getAttribute().getDisplayName(locale) + " - " + locale.getDisplayName());
 			}
 		}
 	}

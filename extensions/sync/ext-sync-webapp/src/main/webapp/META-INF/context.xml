@@ -1,0 +1,54 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<Context>
+
+	<!-- In order to run the datasync war the resources below must be defined in the context. -->
+	<Resources
+			cachingAllowed="true"
+			cacheMaxSize="${ep.tomcat.maxcachesize}"
+	/>
+	<Resource name="jdbc/epjndi"
+		auth="Container"
+		scope="Shareable"
+		type="javax.sql.DataSource"
+		maxActive="100"
+		maxIdle="30"
+		maxWait="10000"
+		testWhileIdle="true"
+		validationQuery="${epdb.validation.query}"
+		removeAbandoned="true"
+		username="${epdb.username}"
+		password="${epdb.password}"
+		driverClassName="${epdb.jdbc.driver}"
+			  factory="org.apache.tomcat.jdbc.pool.DataSourceFactory"
+		url="${epdb.url}"
+		/>
+	<Resource name="jdbc/targetepjndi"
+		auth="Container"
+		scope="Shareable"
+		type="javax.sql.DataSource"
+		maxActive="100"
+		maxIdle="30"
+		maxWait="10000"
+		testWhileIdle="true"
+		validationQuery="${epdb.synctarget.validation.query}"
+		removeAbandoned="true"
+		removeAbandonedTimeout="${epdb.synctarget.removeabandonedtimeout}"
+		username="${epdb.synctarget.username}"
+		password="${epdb.synctarget.password}"
+		driverClassName="${epdb.synctarget.jdbc.driver}"
+			  factory="org.apache.tomcat.jdbc.pool.DataSourceFactory"
+			  url="${epdb.synctarget.url}"
+	  />
+	<Resource auth="Container"
+		name="jms/JMSConnectionFactory"
+		type="${ep.jms.type}"
+		maxConnections="25"
+		maximumActiveSessionPerConnection="25"
+		idleTimeout="10000"
+		description="JMS Connection Factory"
+		factory="${ep.jms.factory}"
+		brokerURL="${ep.jms.url}"
+		/>
+
+</Context>
+

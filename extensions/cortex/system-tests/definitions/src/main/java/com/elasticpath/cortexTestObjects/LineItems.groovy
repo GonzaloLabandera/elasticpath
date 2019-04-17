@@ -10,14 +10,11 @@ import com.elasticpath.cortex.dce.CommonMethods
  */
 class LineItems extends CommonMethods {
 
+	static void verifyLineItemsBySkuCode(String skuCode) {
+		assertThat(isLineitemsContainElementWithSkuCode(skuCode))
+				.as("Unable to find " + skuCode)
+				.isTrue()
 
-	static void verifyLineItemsBySkuCode(List<String> skuCodeList) {
-
-		for (String skuCode : skuCodeList) {
-			assertThat(isLineitemsContainElementWithSkuCode(skuCode))
-					.as("Unable to find " + skuCode)
-					.isTrue()
-		}
 		client.resume(CortexResponse.lineItemResponse)
 	}
 

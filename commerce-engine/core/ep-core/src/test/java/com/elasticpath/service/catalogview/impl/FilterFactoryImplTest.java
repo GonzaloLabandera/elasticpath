@@ -45,6 +45,7 @@ import com.elasticpath.test.BeanFactoryExpectationsFactory;
 public class FilterFactoryImplTest {
 
 	private static final String STORE_CODE = "MyCode";
+	private static final String UNDERSCORE = "_";
 
 	@Rule
 	public JUnitRuleMockery context = new JUnitRuleMockery();
@@ -275,7 +276,7 @@ public class FilterFactoryImplTest {
 			Filter<?> filterBean = filterFactory.getFilterBean(filterBeanName);
 
 			assertNotNull(filterBean);
-			assertEquals(FilterFactoryImpl.UNDERSCORE, filterBean.getSeparatorInToken());
+			assertEquals(UNDERSCORE, filterBean.getSeparatorInToken());
 		} finally {
 			expectationsFactory.close();
 		}

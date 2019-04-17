@@ -73,6 +73,44 @@
 				<result>offer-components</result>
 			</step>
 		</plan>
+		
+		<plan>
+			<name>lookup-offer-by-code</name>
+			<description><![CDATA[Look up an offer by product code.]]></description>
+			<step>
+				<description><![CDATA[Lookups to offer lookup form.]]></description>
+				<start>lookups.lookups</start>
+				<follow-link>offerlookupform</follow-link>
+				<result>offer-lookup-form</result>
+			</step>
+			<step>
+				<description><![CDATA[Submit a lookup for an offer.]]></description>
+				<start>offer-lookup-form</start>
+				<submit/>
+				<to>offer-lookup-form</to>
+				<via-link>offerlookupaction</via-link>
+				<result>offer</result>
+			</step>
+		</plan>
+
+		<plan>
+			<name>lookup-batch-offers</name>
+			<description><![CDATA[Look up a batch of offers with a list of codes.]]></description>
+			<step>
+				<description><![CDATA[Lookups to batch offers lookup form.]]></description>
+				<start>lookups.lookups</start>
+				<follow-link>batchofferslookupform</follow-link>
+				<result>batch-offers-lookup-form</result>
+			</step>
+			<step>
+				<description><![CDATA[Submit a batch lookup for offers.]]></description>
+				<start>batch-offers-lookup-form</start>
+				<submit/>
+				<to>batch-offers-lookup-form</to>
+				<via-link>batchofferslookupaction</via-link>
+				<result>batch-offers</result>
+			</step>
+		</plan>
 
 	</family>
 </definitions>

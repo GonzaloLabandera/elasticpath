@@ -18,11 +18,12 @@ import javax.persistence.Transient;
 import org.apache.openjpa.persistence.DataCache;
 
 import com.elasticpath.common.dto.search.RangeFacet;
+import com.elasticpath.commons.constants.GlobalConstants;
 import com.elasticpath.domain.search.Facet;
 import com.elasticpath.persistence.api.AbstractPersistableImpl;
 
 /**
- * Default implementation of {@link Facet}
+ * Default implementation of {@link Facet}.
  */
 @Entity
 @Table(name = FacetImpl.TABLE_NAME)
@@ -31,10 +32,12 @@ public class FacetImpl extends AbstractPersistableImpl implements Facet {
 
 	private static final long serialVersionUID = 5000000001L;
 
+	/**
+	 * The name of the table & generator to use for persistence.
+	 */
 	public static final String TABLE_NAME = "TFACET";
 
 	private long uidPk;
-
 	private String facetGuid;
 	private String businessObjectId;
 	private String facetName;
@@ -98,7 +101,7 @@ public class FacetImpl extends AbstractPersistableImpl implements Facet {
 
 	@Override
 	@Basic(optional = false)
-	@Column(name = "DISPLAY_NAME", length = 512)
+	@Column(name = "DISPLAY_NAME", length = GlobalConstants.MEDIUM_TEXT_MAX_LENGTH)
 	public String getDisplayName() {
 		return displayName;
 	}
@@ -132,7 +135,7 @@ public class FacetImpl extends AbstractPersistableImpl implements Facet {
 	}
 
 	@Override
-	@Column(name = "RANGE_FACET_VALUES", length = 1024)
+	@Column(name = "RANGE_FACET_VALUES", length = GlobalConstants.MEDIUM_LONG_TEXT_MAX_LENGTH)
 	public String getRangeFacetValues() {
 		return rangeFacetValues;
 	}

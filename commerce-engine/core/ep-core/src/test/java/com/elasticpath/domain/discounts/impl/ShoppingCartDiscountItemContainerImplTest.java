@@ -21,12 +21,13 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.function.Predicate;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
 import org.jmock.Expectations;
 import org.junit.Before;
 import org.junit.Test;
+
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.catalog.Catalog;
@@ -36,6 +37,7 @@ import com.elasticpath.domain.catalog.Product;
 import com.elasticpath.domain.catalog.ProductSku;
 import com.elasticpath.domain.catalog.ProductType;
 import com.elasticpath.domain.catalog.impl.PriceImpl;
+import com.elasticpath.domain.shoppingcart.ItemType;
 import com.elasticpath.domain.shoppingcart.ShoppingCart;
 import com.elasticpath.domain.shoppingcart.ShoppingItem;
 import com.elasticpath.domain.shoppingcart.impl.ShoppingCartImpl;
@@ -809,6 +811,7 @@ public class ShoppingCartDiscountItemContainerImplTest extends AbstractCatalogDa
 		final ShoppingItem shoppingItem = new ShoppingItemImpl();
 		shoppingItem.setSkuGuid(skuGuid);
 		shoppingItem.setBundleConstituent(false);
+		shoppingItem.setItemType(ItemType.DEPENDENT);
 		shoppingItem.setGuid(UUID.randomUUID().toString());
 
 		return shoppingItem;

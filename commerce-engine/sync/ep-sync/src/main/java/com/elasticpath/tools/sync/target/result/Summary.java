@@ -59,4 +59,29 @@ public interface Summary {
 	 * @return list of SyncResultItem instances.
 	 */
 	List<SyncResultItem> getAllResults();
+
+	/**
+	 * Setup the start time for the sync job.
+	 * @param startTime the start time.
+	 */
+	void setStartTime(Long startTime);
+
+	/**
+	 * setup the end time for the sync job.
+	 * @param endTime the end time.
+	 */
+	void setEndTime(Long endTime);
+
+	/**
+	 * return the end time of the sync job.
+	 * @return endTime : end time of the sync job.
+	 */
+	Long getEndTime();
+
+	/**
+	 * return the start time of the sync job.
+	 * @return start time of the sync job
+	 */
+	Long getStartTime();
+
 }

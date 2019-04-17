@@ -181,6 +181,11 @@
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
+			<groupId>org.glassfish</groupId>
+			<artifactId>javax.json</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
 			<groupId>org.apache.felix</groupId>
 			<artifactId>org.apache.felix.inventory</artifactId>
 			<scope>provided</scope>
@@ -958,6 +963,11 @@
 		</dependency>
 		<dependency>
 			<groupId>com.elasticpath.rest.resource.cortex</groupId>
+			<artifactId>ep-resource-offersearch</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.elasticpath.rest.resource.cortex</groupId>
 			<artifactId>ep-resource-navigations</artifactId>
 			<scope>provided</scope>
 		</dependency>
@@ -1357,7 +1367,9 @@
 								shiro-core,
 								<!-- dependant: ep-rest-spi -->
 								msgpack-core,
-								spring-security-oauth2-bundle
+								spring-security-oauth2-bundle,
+								<!-- dependant: ep-rs-authentication-epcommerce -->
+								javax.json
 							</includeArtifactIds>
 						</configuration>
 					</execution>
@@ -1547,6 +1559,7 @@
 						</felix.fileinstall.dir>
 						<org.aspectj.tracing.messages>true</org.aspectj.tracing.messages>
 						<org.aspectj.tracing.factory>org.aspectj.weaver.tools.CommonsTraceFactory</org.aspectj.tracing.factory>
+						<ep.search.default.url>${ep.search.url}</ep.search.default.url>
 					</systemProperties>
 					<webapps>
 						<webapp>
@@ -1782,7 +1795,7 @@
 				<dependency>
 					<groupId>com.elasticpath.cortex.dce</groupId>
 					<artifactId>cortex-dce-h2-database</artifactId>
-					<version>0-SNAPSHOT</version>
+					<version>0.0.0-SNAPSHOT</version>
 					<type>zip</type>
 					<scope>provided</scope>
 				</dependency>
@@ -1803,7 +1816,7 @@
 										<artifactItem>
 											<groupId>com.elasticpath.cortex.dce</groupId>
 											<artifactId>cortex-dce-h2-database</artifactId>
-											<version>0-SNAPSHOT</version>
+											<version>0.0.0-SNAPSHOT</version>
 											<overWrite>true</overWrite>
 											<type>zip</type>
 											<outputDirectory>${project.build.directory}/database</outputDirectory>

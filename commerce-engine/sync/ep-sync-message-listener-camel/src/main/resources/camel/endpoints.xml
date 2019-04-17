@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans
+		xmlns="http://www.springframework.org/schema/beans"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xsi:schemaLocation="
+			http://www.springframework.org/schema/beans
+			http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+		">
+
+	<!-- NOTE:  The following bean helps retrieve settings from the database by wiring it with a path value.
+				Use this pattern only for setting values that are not expected to be modified during the
+				application run time. The Spring initialized setting values are only useful for scenarios
+				where the setting value is expected to be read once per application start.
+
+				An alternative is to inject and use settingsReader -->
+
+	<!--
+	 	<bean id="exampleSourceEndpointUri" parent="settingFactoryBean">
+			<property name="path" value="EXAMPLE/SETTING/PATH/sourceEndpointUri" />
+		</bean>
+	-->
+
+	<bean id="endpointFactoryBean.ep-camel-datasync.changesets" parent="changeSetEventExternalEndpoint" abstract="true">
+		<property name="camelContextId" value="ep-camel-datasync"/>
+	</bean>
+
+	<bean id="changeSetPublishEndpoint" parent="endpointFactoryBean.ep-camel-datasync.changesets">
+		<property name="context" value="com.elasticpath.tools.sync.dstmessagelistener.publishing.ChangeSetPublisher"/>
+	</bean>
+
+	<bean id="deadLetterQueueEndpoint" parent="camelEndpointFactoryBean.ep-camel-datasync">
+		<property name="uri" value="${camel.datasync.endpoint.uri.deadLetterQueueEndpointUri:jms:queue:ep.changesets.invalid}"/>
+	</bean>
+
+</beans>

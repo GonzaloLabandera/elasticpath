@@ -50,7 +50,21 @@
 			abstract="true">
 		<property name="settingsDao" ref="settingsDao"/>
 		<property name="settingValueFactory" ref="settingValueFactory"/>
+		<property name="systemPropertyOverrides" ref="settingsSystemPropertyOverrides"/>
 	</bean>
+
+	<!-- Potentital settings overrides via JVM system properties -->
+	<util:map id="settingsSystemPropertyOverrides" key-type="java.lang.String">
+		<entry key="ep.asset.location" value="COMMERCE/SYSTEM/ASSETS/assetLocation"/>
+		<entry key="ep.changesets.enabled" value="COMMERCE/SYSTEM/CHANGESETS/enable"/>
+		<entry key="ep.smtp.host" value="COMMERCE/SYSTEM/EMAIL/mailHost"/>
+		<entry key="ep.smtp.port" value="COMMERCE/SYSTEM/EMAIL/mailPort"/>
+		<entry key="ep.smtp.scheme" value="COMMERCE/SYSTEM/EMAIL/smtpScheme"/>
+		<entry key="ep.smtp.username" value="COMMERCE/SYSTEM/EMAIL/emailAuthenticationUser"/>
+		<entry key="ep.smtp.password" value="COMMERCE/SYSTEM/EMAIL/emailAuthenticationPassword"/>
+		<entry key="ep.search.default.url" value="COMMERCE/SYSTEM/SEARCH/searchHost"/>
+		<entry key="ep.search.master.url" value="COMMERCE/SYSTEM/SEARCH/searchHost"/>
+	</util:map>
 
 	<bean id="settingsServiceTarget" parent="settingsServiceTargetTemplate"/>
 

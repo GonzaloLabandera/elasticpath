@@ -6,6 +6,7 @@ package com.elasticpath.cmclient.fulfillment.editors.customer;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import org.eclipse.core.databinding.DataBindingContext;
@@ -24,6 +25,7 @@ import org.eclipse.ui.forms.widgets.ExpandableComposite;
 import org.eclipse.ui.forms.widgets.FormToolkit;
 import org.eclipse.ui.forms.widgets.TableWrapData;
 
+import com.elasticpath.cmclient.core.CorePlugin;
 import com.elasticpath.cmclient.core.ServiceLocator;
 import com.elasticpath.cmclient.core.util.DateTimeUtilFactory;
 import com.elasticpath.cmclient.core.binding.EpControlBindingProvider;
@@ -123,11 +125,12 @@ public class CustomerDetailsProfileAttributesSection extends AbstractCmClientEdi
 		final IEpLayoutData fieldData = this.mainPane.createLayoutData(IEpLayoutData.FILL, IEpLayoutData.BEGINNING, true, false);
 
 		if (!attribute.isSystem()) {
+			final Locale defaultLocale = CorePlugin.getDefault().getDefaultLocale();
 			// add label
 			if (attribute.isRequired()) {
-				mainPane.addLabelBoldRequired(attribute.getName(), epState, labelData);
+				mainPane.addLabelBoldRequired(attribute.getDisplayName(defaultLocale, true, true), epState, labelData);
 			} else {
-				mainPane.addLabelBold(attribute.getName(), labelData);
+				mainPane.addLabelBold(attribute.getDisplayName(defaultLocale, true, true), labelData);
 			}
 			// add text, button or date/time component
 			switch (attribute.getAttributeType().getTypeId()) {

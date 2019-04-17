@@ -58,7 +58,7 @@ public class CustomerConsentServiceImplTest extends AbstractDataPolicyTest {
 
 		Customer newCustomer = createPersistedCustomer(scenario.getStore().getCode(), TEST_EMAIL2, true);
 
-		customerConsentService.updateCustomerGuids(Collections.singletonList(customerConsent.getUidPk()), newCustomer.getGuid());
+		customerConsentService.updateCustomerGuids(customerConsent.getCustomerGuid() , newCustomer.getGuid());
 
 		CustomerConsent updateCustomerConsent = customerConsentService.get(customerConsent.getUidPk());
 
@@ -119,12 +119,28 @@ public class CustomerConsentServiceImplTest extends AbstractDataPolicyTest {
 	@Test
 	@DirtiesDatabase
 	public void verifyReturnsListOfAllCustomerConsentsWhenUsingListMethod() {
-		createAndSaveCustomerConsent(scenario.getStore().getCode(), CUSTOMER_CONSENT_UNIQUE_CODE, TEST_EMAIL);
+		DataPolicy dataPolicy = createAndSaveDataPolicy(scenario.getStore().getCode());
+		Customer persistedCustomer = createPersistedCustomer(scenario.getStore().getCode(), TEST_EMAIL, false);
+
+		createAndSaveCustomerConsent(CUSTOMER_CONSENT_UNIQUE_CODE, persistedCustomer, dataPolicy);
+		CustomerConsent consent = createAndSaveCustomerConsent(CUSTOMER_CONSENT_UNIQUE_CODE2, persistedCustomer, dataPolicy);
 
 		List<CustomerConsent> all = customerConsentService.list();
 
 		assertThat(all)
-				.isNotEmpty();
+				.containsExactly(consent);
+	}
+
+	@Test
+	@DirtiesDatabase
+	public void verifyReturnsListHistoryOfAllCustomerConsentsWhenUsingListMethod() {
+		CustomerConsent consent = createAndSaveCustomerConsent(scenario.getStore().getCode(), CUSTOMER_CONSENT_UNIQUE_CODE, TEST_EMAIL);
+		CustomerConsent consent2 = createAndSaveCustomerConsent(scenario.getStore().getCode(), CUSTOMER_CONSENT_UNIQUE_CODE2, TEST_EMAIL);
+
+		List<CustomerConsent> all = customerConsentService.listHistory();
+
+		assertThat(all)
+				.containsExactlyInAnyOrder(consent, consent2);
 	}
 
 	@Test

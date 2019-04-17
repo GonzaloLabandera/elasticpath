@@ -13,10 +13,9 @@ import java.util.Date;
 import java.util.Locale;
 
 import org.junit.Test;
+
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.elasticpath.commons.constants.ContextIdNames;
-import com.elasticpath.domain.customer.Customer;
 import com.elasticpath.domain.customer.CustomerSession;
 import com.elasticpath.domain.factory.TestCustomerSessionFactoryForTestApplication;
 import com.elasticpath.domain.factory.TestShopperFactoryForTestApplication;
@@ -34,8 +33,6 @@ import com.elasticpath.test.db.DbTestCase;
  */
 public class CustomerSessionServiceImplTest extends DbTestCase {
 
-	private static final int NUMBER_OF_CUSTOMER_SESSIONS = 6;
-
 	/** The main object under test. */
 	@Autowired
 	private CustomerSessionService customerSessionService;
@@ -51,45 +48,6 @@ public class CustomerSessionServiceImplTest extends DbTestCase {
 
 	@Autowired
 	private ShopperService shopperService;
-
-	/**
-	 * Test that we can find a customer session with just a customer ID and a StoreCode, and test that the session returned is the latest one.
-	 */
-	@Test
-	public void testFindByCustomerIdAndStoreCode() {
-		final String customerId = "testuser@elasticpath.com";
-
-		final Customer customer = createPersistedCustomer(customerId, scenario.getStore());
-
-		// Create a few persisted sessions
-		final Calendar calendar = Calendar.getInstance();
-		CustomerSession lastCustomerSession = null;
-		for (int count = 0; count < NUMBER_OF_CUSTOMER_SESSIONS; count++) {
-			calendar.add(Calendar.MINUTE, 1);
-			lastCustomerSession = createPersistedCustomerSessionWithCustomerAndFixedGuid(customer, String.valueOf(count), calendar.getTime());
-		}
-
-		final CustomerSession returnedSession = customerSessionService.findByCustomerIdAndStoreCode(customer.getUserId(),
-				customer.getStoreCode());
-		assertEquals("The most recently created CustomerSession should be returned: Guid", lastCustomerSession.getGuid(), returnedSession.getGuid());
-	}
-
-	private CustomerSession createPersistedCustomerSessionWithCustomerAndFixedGuid(final Customer customer, final String guid, final Date timeStamp) {
-		Store store = storeService.findStoreWithCode(customer.getStoreCode());
-		final CustomerSession session = createCustomerSessionWithTimestamp(timeStamp, store);
-
-		persistCustomerSessionWithCustomerAndFixedGuid(session, customer, guid);
-
-		return session;
-	}
-
-	private void persistCustomerSessionWithCustomerAndFixedGuid(final CustomerSession session, final Customer customer, final String guid) {
-		session.getShopper().setCustomer(customer);
-		session.setGuid(guid);
-		Shopper persistedShopper = shopperService.save(session.getShopper());
-		session.setShopper(persistedShopper);
-		customerSessionService.add(session);
-	}
 
 	private CustomerSession createCustomerSessionWithTimestamp(final Date timeStamp, final Store store) {
 
@@ -108,15 +66,6 @@ public class CustomerSessionServiceImplTest extends DbTestCase {
 
 	private CustomerSession createCustomerSession(final Store store) {
 		return createCustomerSessionWithTimestamp(Calendar.getInstance().getTime(), store);
-	}
-
-	private Customer createPersistedCustomer(final String emailAddress, final Store store) {
-		final Customer customer = getBeanFactory().getBean(ContextIdNames.CUSTOMER);
-		customer.setEmail(emailAddress);
-		customer.setStoreCode(store.getCode());
-		customer.setAnonymous(false);
-
-		return customerService.add(customer);
 	}
 
 	/**

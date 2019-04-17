@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013 Elastic Path Software Inc. All rights reserved.
+ * Copyright © 2019 Elastic Path Software Inc. All rights reserved.
  */
 package com.elasticpath.rest.relos.rs.authentication.springoauth2.tokenstore.impl;
 
@@ -10,7 +10,7 @@ import org.junit.Test;
 
 import com.elasticpath.rest.ResourceStatus;
 import com.elasticpath.rest.ResourceTypeFactory;
-import com.elasticpath.rest.relos.rs.authentication.springoauth2.dto.AccessTokenDto;
+import com.elasticpath.rest.relos.rs.authentication.dto.AccessTokenDto;
 import com.elasticpath.rest.relos.rs.authentication.springoauth2.tokenstore.TokenStoreStrategy;
 
 /**

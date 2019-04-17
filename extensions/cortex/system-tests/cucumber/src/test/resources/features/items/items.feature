@@ -56,7 +56,7 @@ Feature: Items
 
     Examples:
       | LANGUAGE | ITEM          | ATTRIBUTE_NAME | ATTRIBUTE_VALUE                                                                                                                                                                      |
-      | fr-ca    | tt0970179_sku | Storyline      | L'invention de "Hugo Cabret" concerne un orphelin de 12 ans qui vit dans les murs d'une gare de Paris en 1930 et un mystère impliquant le garçon, son père décédé et un robot.       |
+      | fr-ca    | tt0970179_sku | Scénario       | L'invention de "Hugo Cabret" concerne un orphelin de 12 ans qui vit dans les murs d'une gare de Paris en 1930 et un mystère impliquant le garçon, son père décédé et un robot.       |
       | en-ca    | tt0970179_sku | Storyline      | The "Invention of Hugo Cabret" concerns a 12-year-old orphan who lives in the walls of a Paris train station in 1930 and a mystery involving the boy, his late father and a robot. " |
 
   Scenario Outline: Item with no attributes associated with it will not display details field

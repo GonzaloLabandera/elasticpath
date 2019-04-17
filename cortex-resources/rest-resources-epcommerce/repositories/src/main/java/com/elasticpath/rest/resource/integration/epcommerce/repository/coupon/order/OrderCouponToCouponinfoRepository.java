@@ -1,5 +1,5 @@
 /*
- * Copyright © 2017 Elastic Path Software Inc. All rights reserved.
+ * Copyright © 2019 Elastic Path Software Inc. All rights reserved.
  */
 
 package com.elasticpath.rest.resource.integration.epcommerce.repository.coupon.order;
@@ -8,11 +8,13 @@ import java.util.Set;
 
 import io.reactivex.Completable;
 import io.reactivex.Single;
+import org.apache.commons.lang3.StringUtils;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
 import com.elasticpath.domain.cartorder.CartOrder;
 import com.elasticpath.domain.rules.Coupon;
+import com.elasticpath.domain.shoppingcart.ShoppingCart;
 import com.elasticpath.repository.Repository;
 import com.elasticpath.rest.ResourceOperationFailure;
 import com.elasticpath.rest.definition.coupons.CouponEntity;
@@ -55,9 +57,13 @@ public class OrderCouponToCouponinfoRepository<E extends CouponEntity, I extends
 		String couponCode = entity.getCode();
 		return cartOrderRepository.findByGuidAsSingle(storeCode, orderId)
 				.flatMap(cartOrder -> shoppingCartRepository.getShoppingCart(cartOrder.getShoppingCartGuid())
-						.map(shoppingCart -> shoppingCart.getShopper().getCustomer().getEmail())
+						.map(this::getCustomerEmailForCoupon)
 						.flatMap(shopperEmail -> couponRepository.validateCoupon(couponCode, storeCode, shopperEmail)
 								.andThen(buildOrderCouponIdentifier(cartOrder, storeCode, couponCode, orderId))));
+	}
+
+	private String getCustomerEmailForCoupon(final ShoppingCart shoppingCart) {
+		return StringUtils.defaultIfBlank(shoppingCart.getShopper().getCustomer().getEmail(), "");
 	}
 
 	@Override

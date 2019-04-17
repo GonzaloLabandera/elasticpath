@@ -45,7 +45,7 @@ public class CachingShippingCalculationServiceImpl implements ShippingCalculatio
 
 		if (LOG.isDebugEnabled()) {
 			LOG.debug(format("Searching for unpriced shipping calculation result in cache using store [%s] and destination [%s]...",
-					storeCode, destination.toString()));
+					storeCode, destination));
 		}
 
 		final ShippingCalculationResultCacheKey unpricedCacheKey = createUnpricedCacheKey(shippableItemContainer);
@@ -73,7 +73,7 @@ public class CachingShippingCalculationServiceImpl implements ShippingCalculatio
 
 		if (LOG.isDebugEnabled()) {
 			LOG.debug(format("Searching for priced shipping calculation result in cache using store [%s] and destination [%s]...",
-					storeCode, destination.toString()));
+					storeCode, destination));
 		}
 
 		final ShippingCalculationResultCacheKey cacheKey = createPricedCacheKey(pricedShippableItemContainer);
@@ -102,7 +102,7 @@ public class CachingShippingCalculationServiceImpl implements ShippingCalculatio
 
 		if (LOG.isDebugEnabled()) {
 			LOG.debug(format("Searching for all shipping calculation result in cache using store [%s] and locale [%s]...",
-					storeCode, locale.toString()));
+					storeCode, locale));
 		}
 
 		final ShippingCalculationResultCacheKey cacheKey = getCacheKeyBuilderSupplier().get()
@@ -130,7 +130,7 @@ public class CachingShippingCalculationServiceImpl implements ShippingCalculatio
 
 		if (LOG.isDebugEnabled()) {
 			LOG.debug(format("Searching for unpriced shipping calculation result in cache using store [%s] and destination [%s]...",
-					storeCode, locale.toString()));
+					storeCode, locale));
 		}
 
 		final ShippingCalculationResultCacheKey cacheKey = getCacheKeyBuilderSupplier().get()

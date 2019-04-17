@@ -41,6 +41,14 @@ public interface CustomerRepository {
 	ExecutionResult<Customer> findCustomerByGuid(String guid);
 
 	/**
+	 * Checks whether a customer exists with the given guid.
+	 *
+	 * @param guid the guid
+	 * @return success if customer exists
+	 */
+	ExecutionResult<Void> isCustomerGuidExists(String guid);
+
+	/**
 	 * Gets the customer.
 	 *
 	 * @param guid customer guid.

@@ -4,7 +4,6 @@ import static com.elasticpath.cortex.dce.ClasspathFluentRelosClientFactory.getCl
 import static com.elasticpath.cortex.dce.SharedConstants.DEFAULT_CART_URL
 import static com.elasticpath.cortex.dce.SharedConstants.DEFAULT_SCOPE
 import static com.elasticpath.cortex.dce.SharedConstants.ELEMENT_LINK
-
 import static com.elasticpath.rest.ws.assertions.RelosAssert.assertLinkDoesNotExist
 import static org.assertj.core.api.Assertions.assertThat
 
@@ -31,6 +30,12 @@ class CartSteps {
 	@When('^I go to add to cart form$')
 	static void getAddToCartForm() {
 		Item.addtocartform()
+	}
+	@When('^I go to add to bulk add cart form$')
+	static void getBulkAddToCartForm() {
+		Cart.getCart()
+		client.additemstocartform()
+				.stopIfFailure()
 	}
 
 	@When('^I add to cart with quantity of (.+)$')
@@ -296,6 +301,12 @@ class CartSteps {
 	@When('^I go to my cart$')
 	static void getDefaultCart() {
 		Cart.getCart()
+	}
+
+	@When('^I add the following SKU codes and their quantities to the cart$')
+	static void addItemsToCart(DataTable itemsTable) {
+		List<Map<String, String>> items = itemsTable.asMaps(String.class, String.class)
+		Cart.addItemsToCart(items)
 	}
 
 	@Then('^the number of cart lineitems is (.+)$')

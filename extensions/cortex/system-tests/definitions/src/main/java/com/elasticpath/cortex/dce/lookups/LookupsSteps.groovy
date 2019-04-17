@@ -14,6 +14,7 @@ import com.elasticpath.cortex.dce.CommonMethods
 import com.elasticpath.cortexTestObjects.Cart
 import com.elasticpath.cortexTestObjects.FindItemBy
 import com.elasticpath.cortexTestObjects.Item
+import com.elasticpath.cortexTestObjects.Offer
 
 class LookupsSteps {
 
@@ -53,6 +54,14 @@ class LookupsSteps {
 	static void addMultipleItemsToCart(DataTable skuList) {
 		for (def sku : skuList.asList(String)) {
 			CommonMethods.lookupAndAddToCart(sku, 1)
+		}
+	}
+
+	@When('^I add following items? with quantity to the cart$')
+	static void addItemsToCartWithQuantity(DataTable skuQuantityTable) {
+		Map<String, Integer> skuQuantityMap = skuQuantityTable.asMap(String, Integer)
+		skuQuantityMap.each {
+			CommonMethods.lookupAndAddToCart(it.getKey(), it.value)
 		}
 	}
 
@@ -212,5 +221,30 @@ class LookupsSteps {
 		assertThat(client.response.status)
 				.as("The response status is not as expected")
 				.isEqualTo(400)
+	}
+
+	@When('^I lookup an offer with code (.+)$')
+	static void lookupOfferWithCode(String productCode) {
+		Offer.lookupOfferWithCode(productCode)
+	}
+
+	@Then('^There is a code link with code (.+)$')
+	static void verifyCode(String productCode) {
+		Offer.getSkuCode() == productCode
+	}
+
+	@When('I submit a batch of product codes (.+)')
+	static void submitProductCodes(String productCodes) {
+		Offer.batchLookupOfferWithCodes(productCodes)
+	}
+
+	@When('I go to batchofferslookupform')
+	static void goToBatchOffersLookupForm() {
+		Offer.navigateToBatchOfferLookupForm();
+	}
+
+	@When('I go to offerlookupform')
+	static void goToOfferLookupForm() {
+		Offer.navigateToOfferLookupForm();
 	}
 }

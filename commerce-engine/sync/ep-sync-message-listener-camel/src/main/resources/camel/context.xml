@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans
+		xmlns="http://www.springframework.org/schema/beans"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xsi:schemaLocation="
+			http://www.springframework.org/schema/beans
+			http://www.springframework.org/schema/beans/spring-beans-3.2.xsd
+		">
+
+	<!-- The camelEndpointFactoryBean is also specific to the camel context -->
+	<bean id="camelEndpointFactoryBean.ep-camel-datasync" abstract="true"
+		  class="org.apache.camel.spring.CamelEndpointFactoryBean">
+		<property name="camelContextId" value="ep-camel-datasync"/>
+	</bean>
+
+	<import resource="context-common.xml"/>
+
+	<beans profile="author" >
+		<import resource="context-author.xml"/>
+	</beans>
+	<beans profile="live">
+		<import resource="context-live.xml"/>
+	</beans>
+</beans>

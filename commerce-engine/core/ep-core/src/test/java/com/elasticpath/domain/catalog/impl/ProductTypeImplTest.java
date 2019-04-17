@@ -7,6 +7,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
 
 import java.util.HashSet;
 import java.util.List;
@@ -24,6 +25,7 @@ import com.elasticpath.domain.attribute.impl.AttributeGroupImpl;
 import com.elasticpath.domain.attribute.impl.AttributeImpl;
 import com.elasticpath.domain.catalog.Catalog;
 import com.elasticpath.domain.catalog.ProductSku;
+import com.elasticpath.domain.misc.LocalizedProperties;
 import com.elasticpath.domain.skuconfiguration.SkuOption;
 import com.elasticpath.domain.skuconfiguration.impl.SkuOptionImpl;
 import com.elasticpath.domain.tax.TaxCode;
@@ -88,6 +90,8 @@ public class ProductTypeImplTest {
 	@Test
 	public void testAddAttributeGroupAttributes() {
 		final Attribute attribute = new AttributeImpl();
+		attribute.setLocalizedProperties(mock(LocalizedProperties.class));
+		attribute.setDisplayName("attr1", Locale.ENGLISH);
 		final AttributeGroupAttribute ptAttribute = new AttributeGroupAttributeImpl();
 		ptAttribute.setAttribute(attribute);
 		this.productType.getProductAttributeGroup().addAttributeGroupAttribute(ptAttribute);
@@ -215,5 +219,4 @@ public class ProductTypeImplTest {
 		skuOption.setOptionKey(optionKey);
 		return skuOption;
 	}
-
 }

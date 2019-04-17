@@ -82,6 +82,8 @@
 		</property>
 	</bean>
 
+	<import resource="sync-jndisupport-context.xml" />
+
 	<bean id="jobDescriptorDaoFactory" class="com.elasticpath.tools.sync.job.descriptor.dao.impl.JobDescriptorDaoFactoryImpl">
 		<property name="fileSystemHelperFactory" ref="fileSystemHelperFactory" />
 		<property name="jobDescriptorFileName" value="jobdescriptor.xml" />

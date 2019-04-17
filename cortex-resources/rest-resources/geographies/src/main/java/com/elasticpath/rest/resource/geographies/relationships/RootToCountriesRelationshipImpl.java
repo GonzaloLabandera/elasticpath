@@ -25,7 +25,9 @@ public class RootToCountriesRelationshipImpl implements RootToCountriesRelations
 	 * @param scopes scopes
 	 */
 	@Inject
-	public RootToCountriesRelationshipImpl(@UserScopes final Iterable<String> scopes) { this.scopes = scopes; }
+	public RootToCountriesRelationshipImpl(@UserScopes final Iterable<String> scopes) {
+		this.scopes = scopes;
+	}
 
 	@Override
 	public Observable<CountriesIdentifier> onLinkTo() {

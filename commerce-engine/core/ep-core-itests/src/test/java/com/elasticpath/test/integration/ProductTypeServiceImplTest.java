@@ -16,6 +16,7 @@ import static org.junit.Assert.fail;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 
 import org.junit.Before;
@@ -396,7 +397,7 @@ public class ProductTypeServiceImplTest extends DbTestCase {
 		Attribute skuAttribute = getBeanFactory().getBean(ContextIdNames.ATTRIBUTE);
 		skuAttribute.initialize();
 		skuAttribute.setKey(attributeKey);
-		skuAttribute.setName(attributeKey);
+		skuAttribute.setDisplayName(attributeKey, Locale.ENGLISH);
 		skuAttribute.setAttributeType(AttributeType.BOOLEAN);
 		skuAttribute.setAttributeUsageId(AttributeUsage.SKU);
 		

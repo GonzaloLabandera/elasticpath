@@ -4,8 +4,9 @@
 package com.elasticpath.cmclient.core.helpers;
 
 import java.lang.reflect.Field;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
 import org.eclipse.rap.rwt.client.service.JavaScriptExecutor;
 import org.eclipse.rap.rwt.internal.lifecycle.UITestUtil;
 
@@ -26,6 +27,7 @@ import com.elasticpath.cmclient.core.util.ServiceUtil;
 @SuppressWarnings({"checkstyle:magicnumber", "PMD"})
 public final class TestIdMapManager {
 
+
 	private static final String BEGINNING_ENCODING_MARKER = "\uFEFF"; //zero width no-break space
 	private static final String END_ENCODING_MARKER = "\u180E"; //mongolian vowel separator
 
@@ -35,7 +37,7 @@ public final class TestIdMapManager {
 	private static final String TEMPLATE_STRING = "[0]";
 	private static final String QUOTE = "'";
 
-	private static Map<String, String> minifiedMap = new HashMap<>();
+	private static Map<String, String> minifiedMap = new ConcurrentHashMap<>();
 	private static int counter;
 
 	/**

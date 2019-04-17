@@ -33,14 +33,6 @@ public interface CustomerSessionService extends EpPersistenceService {
 	void add(CustomerSession customerSession) throws EpServiceException;
 
 	/**
-	 * Updates the given {@link CustomerSession}.
-	 *
-	 * @param customerSession the {@link CustomerSession} to update
-	 * @throws EpServiceException - in case of any errors
-	 */
-	void update(CustomerSession customerSession) throws EpServiceException;
-
-	/**
 	 * Handles a ShopperChange (such as merging {@link com.elasticpath.domain.shoppingcart.ShoppingCart}s
 	 * and {@link com.elasticpath.domain.shoppingcart.WishList}s) and updating the {@link CustomerSession}.
 	 *
@@ -63,15 +55,6 @@ public interface CustomerSessionService extends EpPersistenceService {
 	void changeFromAnonymousToRegisteredCustomer(CustomerSession customerSession, Customer customer, String storeCode) throws EpServiceException;
 
 	/**
-	 * Updates the given customer session.
-	 *
-	 * @param customerSession the customer session to update
-	 * @param customer the customer to be used to update customer session instance
-	 * @throws EpServiceException - in case of any errors
-	 */
-	void updateCustomerAndSave(CustomerSession customerSession, Customer customer) throws EpServiceException;
-
-	/**
 	 * Find the customer session with the given guid.
 	 *
 	 * @param guid the customer session guid
@@ -79,17 +62,6 @@ public interface CustomerSessionService extends EpPersistenceService {
 	 * @throws EpServiceException - in case of any errors
 	 */
 	CustomerSession findByGuid(String guid) throws EpServiceException;
-
-	/**
-	 * Find the customer session with the given customerUid and storeCode. If more than
-	 * one session is found that matches the criteria, returns only one.
-	 *
-	 * @param customerUsername the customer username
-	 * @param storeCode the code for the store in which the customer should have a session
-	 * @return the customer session if one exists, otherwise null
-	 * @throws EpServiceException - in case of any errors
-	 */
-	CustomerSession findByCustomerIdAndStoreCode(String customerUsername, String storeCode) throws EpServiceException;
 
 	/**
 	 * Initializes a {@link CustomerSession} such that it can be used for pricing computations.

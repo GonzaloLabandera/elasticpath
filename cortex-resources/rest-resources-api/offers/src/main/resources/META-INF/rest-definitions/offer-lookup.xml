@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+<definitions xmlns="http://www.elasticpath.com/schema/rest/0.5">
+
+	<family>
+		<name>offers</name>
+
+		<resource>
+			<name>offer-lookup-form</name>
+			<description>An Offer Lookup form resource.</description>
+			<uri>/{base.family}/{base.scope}/lookups/form</uri>
+			<form>
+				<entity>code</entity>
+				<action-rel>offerlookupaction</action-rel>
+				<result>offer</result>
+			</form>
+		</resource>
+
+		<relationship>
+			<name>lookups-to-offer-lookup-form</name>
+			<description>Link from the Lookups resource to the Offer Lookup form.</description>
+			<rel>offerlookupform</rel>
+			<from>lookups.lookups</from>
+			<to>offer-lookup-form</to>
+		</relationship>
+		
+	</family>
+</definitions>

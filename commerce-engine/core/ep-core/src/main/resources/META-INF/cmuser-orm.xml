@@ -77,7 +77,13 @@
 				WHERE c.uidPk in (:list)
 			</query>
 		</named-query>
-
+	<named-query name="INCREMENT_CMUSER_FAILEDLOGINS_BY_USERNAME">
+		<query>
+			UPDATE CmUserImpl c
+			SET c.failedLoginAttempts = c.failedLoginAttempts + 1
+			WHERE LOWER(c.userName) = LOWER(?1)
+		</query>
+	</named-query>
     <!-- Named queries for UserRoleImpl -->
    		<named-query name="USERROLE_FIND_BY_NAME">
 			<query>

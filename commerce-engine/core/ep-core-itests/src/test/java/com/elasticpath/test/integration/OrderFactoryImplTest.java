@@ -8,7 +8,6 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
-import java.util.Collections;
 import java.util.Currency;
 import java.util.Date;
 import java.util.HashSet;
@@ -81,12 +80,9 @@ public class OrderFactoryImplTest extends DbTestCase {
 	@Autowired
 	private TaxSnapshotService taxSnapshotService;
 
-	/**
-	 * An anonymous customer, you can use them to make orders.
-	 */
-	private Customer anonymousCustomer;
+	private Customer customer;
 
-	private ShoppingContext anonymousShoppingContext;
+	private ShoppingContext shoppingContext;
 
 	/**
 	 * Get a reference to TestApplicationContext for use within the test. Setup scenarios.
@@ -96,12 +92,12 @@ public class OrderFactoryImplTest extends DbTestCase {
 	@Before
 	public void setUp() throws Exception {
 		scenario.getStore().setPaymentGateways(setUpPaymentGatewayAndProperties());
-		anonymousCustomer = persisterFactory.getStoreTestPersister().createDefaultCustomer(scenario.getStore());
-		anonymousShoppingContext = shoppingContextBuilder
-				.withCustomer(anonymousCustomer)
+		customer = persisterFactory.getStoreTestPersister().createDefaultCustomer(scenario.getStore());
+		shoppingContext = shoppingContextBuilder
+				.withCustomer(customer)
 				.withStoreCode(scenario.getStore().getCode())
 				.build();
-		shopperService.save(anonymousShoppingContext.getShopper());
+		shopperService.save(shoppingContext.getShopper());
 
 		// Reset the payment gateway for each test.
 		NullPaymentGatewayPluginImpl.setFailOnCapture(false);
@@ -124,7 +120,7 @@ public class OrderFactoryImplTest extends DbTestCase {
 	@DirtiesDatabase
 	@Test
 	public void testOrderFactoryPopulatesCartOrderGuidOnOrderFailure() {
-		final ShoppingCart shoppingCart = createAnonymousShoppingCartWithScenarioStore();
+		final ShoppingCart shoppingCart = createShoppingCartWithScenarioStore();
 		cartDirector.addItemToCart(shoppingCart, shoppingItemDtoFactory.createDto(createPhysicalProduct(), 1));
 
 		CartOrder cartOrder = getBeanFactory().getBean(ContextIdNames.CART_ORDER);
@@ -140,7 +136,7 @@ public class OrderFactoryImplTest extends DbTestCase {
 		final ShoppingCartTaxSnapshot taxSnapshot = taxSnapshotService.getTaxSnapshotForCart(shoppingCart, pricingSnapshot);
 
 		CheckoutResults checkoutResult = checkoutService.checkout(
-				shoppingCart, taxSnapshot, anonymousShoppingContext.getCustomerSession(), templateOrderPayment, false);
+				shoppingCart, taxSnapshot, shoppingContext.getCustomerSession(), templateOrderPayment, false);
 		assertTrue("order should fail", checkoutResult.isOrderFailed());
 
 		Order order = checkoutResult.getOrder();
@@ -155,7 +151,7 @@ public class OrderFactoryImplTest extends DbTestCase {
 	@DirtiesDatabase
 	@Test
 	public void testOrderFactoryPopulatesCartOrderGuidOnOrderSuccess() {
-		final ShoppingCart shoppingCart = createAnonymousShoppingCartWithScenarioStore();
+		final ShoppingCart shoppingCart = createShoppingCartWithScenarioStore();
 		cartDirector.addItemToCart(shoppingCart, shoppingItemDtoFactory.createDto(createPhysicalProduct(), 1));
 
 		CartOrder cartOrder = getBeanFactory().getBean(ContextIdNames.CART_ORDER);
@@ -171,7 +167,7 @@ public class OrderFactoryImplTest extends DbTestCase {
 		final ShoppingCartTaxSnapshot taxSnapshot = taxSnapshotService.getTaxSnapshotForCart(shoppingCart, pricingSnapshot);
 
 		CheckoutResults checkoutResult = checkoutService.checkout(
-				shoppingCart, taxSnapshot, anonymousShoppingContext.getCustomerSession(), templateOrderPayment, false);
+				shoppingCart, taxSnapshot, shoppingContext.getCustomerSession(), templateOrderPayment, false);
 		assertFalse("The order should not have failed", checkoutResult.isOrderFailed());
 
 		Order order = checkoutResult.getOrder();
@@ -181,16 +177,16 @@ public class OrderFactoryImplTest extends DbTestCase {
 	}
 
 	/**
-	 * Creates the anonymous shopping cart with scenario store.
+	 * Creates the shopping cart with scenario store.
 	 *
 	 * @return the shopping cart
 	 */
-	private ShoppingCart createAnonymousShoppingCartWithScenarioStore() {
+	private ShoppingCart createShoppingCartWithScenarioStore() {
 		final ShoppingCart shoppingCart = TestShoppingCartFactoryForTestApplication.getInstance().createNewCartWithMemento(
-				anonymousShoppingContext.getShopper(),
+				shoppingContext.getShopper(),
 				scenario.getStore());
 
-		final CustomerSession customerSession = anonymousShoppingContext.getCustomerSession();
+		final CustomerSession customerSession = shoppingContext.getCustomerSession();
 		customerSession.setCurrency(Currency.getInstance(Locale.US));
 
 		// FIXME: Remove once shoppingCart does not delegate back to CustomerSession.
@@ -215,7 +211,7 @@ public class OrderFactoryImplTest extends DbTestCase {
 		final OrderPayment orderPayment = getBeanFactory().getBean(ContextIdNames.ORDER_PAYMENT);
 		orderPayment.setCreatedDate(new Date());
 		orderPayment.setCurrencyCode("USD");
-		orderPayment.setEmail(anonymousCustomer.getEmail());
+		orderPayment.setEmail(customer.getEmail());
 		orderPayment.setPaymentMethod(PaymentType.PAYMENT_TOKEN);
 		return orderPayment;
 	}

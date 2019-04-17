@@ -19,8 +19,6 @@ import com.elasticpath.domain.changeset.ChangeSetObjectStatus;
 import com.elasticpath.service.changeset.ChangeSetMemberAction;
 import com.elasticpath.service.changeset.ChangeSetService;
 import com.elasticpath.service.misc.TimeService;
-import com.elasticpath.settings.SettingsReader;
-import com.elasticpath.settings.domain.SettingValue;
 
 /**
  * Class to assist in Change Set related functionality.
@@ -34,11 +32,9 @@ public class ChangeSetHelper {
 	/** Spring bean id. */
 	public static final String BEAN_ID = "cmChangeSetHelper";
 
-	private static final String SETTING_CHANGESET_ENABLED = "COMMERCE/SYSTEM/CHANGESETS/enable"; //$NON-NLS-1$
-	
 	private ChangeSetService changeSetService;
 	private TimeService timeService;
-	private SettingsReader settingsReader;
+	private Boolean changeSetEnabled;
 
 	/**
 	 * Checks if change sets are enabled.
@@ -46,9 +42,10 @@ public class ChangeSetHelper {
 	 * @return True, if change sets are enabled.
 	 */
 	public boolean isChangeSetsEnabled() {
-		SettingValue settingValue = settingsReader.getSettingValue(SETTING_CHANGESET_ENABLED);
-
-		return settingValue != null && settingValue.getBooleanValue();
+		if (changeSetEnabled == null) {
+			changeSetEnabled = changeSetService.isChangeSetEnabled();
+		}
+		return changeSetEnabled;
 	}
 
 	/**
@@ -270,7 +267,4 @@ public class ChangeSetHelper {
 		this.timeService = timeService;
 	}
 
-	public void setSettingsReader(final SettingsReader settingsReader) {
-		this.settingsReader = settingsReader;
-	}
 }

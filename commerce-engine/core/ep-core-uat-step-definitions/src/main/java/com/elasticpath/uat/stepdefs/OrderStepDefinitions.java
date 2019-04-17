@@ -53,6 +53,10 @@ public class OrderStepDefinitions {
 	private ScenarioContextValueHolder<CustomerBuilder> customerBuilderHolder;
 
 	@Autowired
+	@Qualifier("customerHolder")
+	private ScenarioContextValueHolder<Customer> customerHolder;
+
+	@Autowired
 	@Qualifier("storeScenarioHolder")
 	private ScenarioContextValueHolder<SimpleStoreScenario> scenarioHolder;
 
@@ -83,22 +87,21 @@ public class OrderStepDefinitions {
 	public void createOrder() throws Exception {
 		// Defer execution until we are ready to check for the email
 		emailSendingCommandHolder.set(() -> {
-			final Customer customer = customerBuilderHolder.get().build();
-			customerService.add(customer);
+			final Customer customer = buildAndAddCustomer();
 
-		final ShoppingContext shoppingContext = shoppingContextBuilder.withCustomer(customer)
-				.build();
-		shoppingContextPersister.persist(shoppingContext);
+			final ShoppingContext shoppingContext = shoppingContextBuilder.withCustomer(customer)
+					.build();
+			shoppingContextPersister.persist(shoppingContext);
 
-		final CheckoutTestCartBuilder checkoutTestCartBuilder = checkoutTestCartBuilderHolder.get()
-				.withScenario(scenarioHolder.get())
-				.withCustomerSession(shoppingContext.getCustomerSession())
-				.withTestDoubleGateway();
+			final CheckoutTestCartBuilder checkoutTestCartBuilder = checkoutTestCartBuilderHolder.get()
+					.withScenario(scenarioHolder.get())
+					.withCustomerSession(shoppingContext.getCustomerSession())
+					.withTestDoubleGateway();
 
-			orderHolder.set(orderBuilder.withCheckoutTestCartBuilder(checkoutTestCartBuilder)
-									.withTokenizedTemplateOrderPayment()
-									.withShoppingContext(shoppingContext)
-									.checkout());
+				orderHolder.set(orderBuilder.withCheckoutTestCartBuilder(checkoutTestCartBuilder)
+										.withTokenizedTemplateOrderPayment()
+										.withShoppingContext(shoppingContext)
+										.checkout());
 		});
 	}
 
@@ -115,8 +118,7 @@ public class OrderStepDefinitions {
 	
 	@Given("^(?:I have|a customer has) previously made a purchase$")
 	public void createInProgressOrder() {
-		final Customer customer = customerBuilderHolder.get().build();
-		customerService.add(customer);
+		final Customer customer = buildAndAddCustomer();
 
 		final ShoppingContext shoppingContext = shoppingContextBuilder.withCustomer(customer)
 				.build();
@@ -176,6 +178,13 @@ public class OrderStepDefinitions {
 		}
 
 		return count;
+	}
+
+	private Customer buildAndAddCustomer() {
+		final Customer customer = customerBuilderHolder.get().build();
+		final Customer addedCustomer = customerService.add(customer);
+		customerHolder.set(addedCustomer);
+		return addedCustomer;
 	}
 
 }

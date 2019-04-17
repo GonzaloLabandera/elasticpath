@@ -1,12 +1,12 @@
 package com.elasticpath.cucumber.definitions;
 
+import cucumber.api.java.en.And;
 import cucumber.api.java.en.Given;
 import cucumber.api.java.en.Then;
 
 import com.elasticpath.selenium.dialogs.SignInDialog;
 import com.elasticpath.selenium.domainobjects.DST;
 import com.elasticpath.selenium.framework.util.PropertyManager;
-import com.elasticpath.selenium.setup.PublishEnvSetUp;
 import com.elasticpath.selenium.setup.SetUp;
 
 /**
@@ -48,7 +48,24 @@ public class SignInDefinition {
 	 */
 	@Given("^I sign in to the publish environment CM as admin user$")
 	public void signInToPublishServerAsAdmin() {
-		new SignInDialog(PublishEnvSetUp.getDriver()).signInToPublish(adminID, adminPassword);
+		signInDialog.signInToPublish(adminID, adminPassword);
+	}
+
+
+	/**
+	 * Switches to Author window.
+	 */
+	@And("^I switch to author environment$")
+	public void switchToAuthorTab() {
+		signInDialog.switchToAuthorTab();
+	}
+
+	/**
+	 * Switches to Publish window.
+	 */
+	@And("^I switch to publish environment$")
+	public void switchToPublishTab() {
+		signInDialog.switchToPublishTab();
 	}
 
 	/**

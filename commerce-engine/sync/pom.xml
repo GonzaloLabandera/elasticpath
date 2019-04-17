@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>com.elasticpath</groupId>
 		<artifactId>parent</artifactId>
-		<version>704.0.0-SNAPSHOT</version>
+		<version>0.0.0-SNAPSHOT</version>
 	</parent>
 
 	<artifactId>sync</artifactId>
@@ -20,5 +20,7 @@
 		<module>ep-sync</module>
 		<module>ep-sync-cli</module>
 		<module>ep-sync-itests</module>
+		<module>ep-sync-message-listener-camel</module>
+		<module>ep-sync-message-listener-email</module>
 	</modules>
 </project>

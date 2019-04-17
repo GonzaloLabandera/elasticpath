@@ -1297,7 +1297,7 @@ public class CatalogTestPersister {
 		if (attribute == null) {
 			attribute = beanFactory.getBean(ContextIdNames.ATTRIBUTE);
 			attribute.setAttributeType(AttributeType.LONG_TEXT);
-			attribute.setName("Product Description");
+			attribute.setDisplayName("Product Description", Locale.ENGLISH);
 			attribute.setKey(productDescriptionAttributeKey);
 			attribute.setAttributeUsage(AttributeUsageImpl.PRODUCT_USAGE);
 			attribute.setLocaleDependant(true);
@@ -2024,7 +2024,7 @@ public class CatalogTestPersister {
 		}
 
 		attribute.setKey(attributeKey);
-		attribute.setName(attributeName);
+		attribute.setDisplayName(attributeName, Locale.ENGLISH);
 
 		final Object[] usageKeys = attributeService.getAttributeUsageMap().keySet().toArray();
 		final Object[] typeKeys = attributeService.getAttributeTypeMap().keySet().toArray();
@@ -2414,7 +2414,7 @@ public class CatalogTestPersister {
 		return sku;
 	}
 
-	public void persistProductBundle(final Catalog catalog, final Category category, final String bundleCode, final String... productCodes) {
+	public Product persistProductBundle(final Catalog catalog, final Category category, final String bundleCode, final String... productCodes) {
 		Product product = createSimpleProductBundle(bundleCode, catalog, category);
 		BigDecimal price = new BigDecimal("10.00");
 		Currency currency = Currency.getInstance("CAD");
@@ -2438,6 +2438,6 @@ public class CatalogTestPersister {
 			Product productConstituent = productLookup.findByGuid(productCode);
 			bundle.addConstituent(createSimpleBundleConstituent(productConstituent, 1));
 		}
-		productService.saveOrUpdate(bundle);
+		return productService.saveOrUpdate(bundle);
 	}
 }

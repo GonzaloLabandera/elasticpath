@@ -12,8 +12,8 @@ import java.util.Map;
 import com.google.common.collect.Lists;
 
 import com.elasticpath.base.exception.EpServiceException;
+import com.elasticpath.cache.Cache;
 import com.elasticpath.cache.CacheLoader;
-import com.elasticpath.cache.MultiKeyCache;
 import com.elasticpath.domain.catalog.Product;
 import com.elasticpath.service.catalog.ProductLookup;
 
@@ -21,44 +21,52 @@ import com.elasticpath.service.catalog.ProductLookup;
  * A cached version of the {@link ProductLookup} interface.
  */
 public class CachingProductLookupImpl implements ProductLookup {
-	private static final String CACHE_KEY_UIDPK = "uidPk";
-	private static final String CACHE_KEY_GUID = "guid";
 
-	private final CacheLoader<String, Product> productsByGuidLoader = new ProductsByGuidLoader();
-	private final CacheLoader<Long, Product> productsByUidpkLoader = new ProductsByUidpkLoader();
+	private final CacheLoader<String, Long> productByGuidLoader = new ProductByGuidLoader();
+	private final CacheLoader<Long, Product> productByUidLoader = new ProductByUidLoader();
 
-	private MultiKeyCache<Product> cache;
+	private Cache<Long, Product> productByUidCache;
+	private Cache<String, Long> productUidByGuidCache;
+
 	private ProductLookup fallbackLookup;
 
 	@Override
 	@SuppressWarnings("unchecked")
 	public <P extends Product> P findByUid(final long uidpk) throws EpServiceException {
-		return (P) getCache().get(CACHE_KEY_UIDPK, uidpk, productsByUidpkLoader);
+		return (P) getProductByUidCache().get(uidpk, productByUidLoader);
 	}
 
 	@Override
 	@SuppressWarnings("unchecked")
 	public <P extends Product> List<P> findByUids(final Collection<Long> uidPks) throws EpServiceException {
-		Map<Long, Product> result = getCache().getAll(CACHE_KEY_UIDPK, uidPks, productsByUidpkLoader);
+		Map<Long, Product> result = getProductByUidCache().getAll(uidPks, productByUidLoader);
 
-		List<P> resultList = new ArrayList<>(result.size());
-		resultList.addAll((Collection<P>) result.values());
-
-		return resultList;
+		return new ArrayList<>((Collection<P>) result.values());
 	}
 
 	@Override
 	@SuppressWarnings("unchecked")
 	public <P extends Product> P findByGuid(final String guid) throws EpServiceException {
-		return (P) getCache().get(CACHE_KEY_GUID, guid, productsByGuidLoader);
+		Long productUidPk = getProductUidByGuidCache().get(guid, productByGuidLoader);
+
+		return (P) getProductByUidCache().get(productUidPk);
 	}
 
-	protected MultiKeyCache<Product> getCache() {
-		return cache;
+	protected Cache<Long, Product> getProductByUidCache() {
+		return productByUidCache;
 	}
 
-	public void setCache(final MultiKeyCache<Product> cache) {
-		this.cache = cache;
+	public void setProductByUidCache(final Cache<Long, Product> productByUidCache) {
+
+		this.productByUidCache = productByUidCache;
+	}
+
+	protected Cache<String, Long> getProductUidByGuidCache() {
+		return productUidByGuidCache;
+	}
+
+	public void setProductUidByGuidCache(final Cache<String, Long> productUidByGuidCache) {
+		this.productUidByGuidCache = productUidByGuidCache;
 	}
 
 	public void setFallbackLookup(final ProductLookup lookup) {
@@ -72,10 +80,14 @@ public class CachingProductLookupImpl implements ProductLookup {
 	/**
 	 * A CacheLoader which loads Products by uidPk.
 	 */
-	private class ProductsByUidpkLoader implements CacheLoader<Long, Product> {
+	private class ProductByUidLoader implements CacheLoader<Long, Product> {
 		@Override
 		public Product load(final Long key) {
-			return getFallbackLookup().findByUid(key);
+			Product product =  getFallbackLookup().findByUid(key);
+
+			cacheProductUidByGuidIfRequired(product);
+
+			return product;
 		}
 
 		@Override
@@ -84,23 +96,48 @@ public class CachingProductLookupImpl implements ProductLookup {
 			Map<Long, Product> productMap = new LinkedHashMap<>(products.size() * 2);
 			for (Product product : products) {
 				productMap.put(product.getUidPk(), product);
+				cacheProductUidByGuidIfRequired(product);
 			}
 
 			return productMap;
 		}
+
+		/*
+		This method is called from findByUid and findByUids methods and used for
+		caching a guid-uidPk pair so findByGuid calls can utilize cache more efficiently
+	 */
+		private void cacheProductUidByGuidIfRequired(final Product dbProduct) {
+			if (dbProduct != null && getProductUidByGuidCache().get(dbProduct.getGuid()) == null) {
+				getProductUidByGuidCache().put(dbProduct.getGuid(), dbProduct.getUidPk());
+			}
+		}
 	}
 
 	/**
-	 * A CacheLoader which loads Products by guid (code).
+	 * A CacheLoader which loads Product by guid (code) and cache product in
+	 * ProductUidToProductCache cache.
+	 *
+	 * Load product by GUID should rarely occur, if ever.
 	 */
-	private class ProductsByGuidLoader implements CacheLoader<String, Product> {
+	private class ProductByGuidLoader implements CacheLoader<String, Long> {
 		@Override
-		public Product load(final String key) {
-			return getFallbackLookup().findByGuid(key);
+		public Long load(final String guid) {
+			final Product product = getFallbackLookup().findByGuid(guid);
+
+			//null check is required for sync tool when syncing deleted products
+			if (product != null) {
+				final Long productUidPk = product.getUidPk();
+
+				getProductByUidCache().put(productUidPk, product);
+
+				return productUidPk;
+			}
+
+			return null;
 		}
 
 		@Override
-		public Map<String, Product> loadAll(final Iterable<? extends String> keys) {
+		public Map<String, Long> loadAll(final Iterable<? extends String> keys) {
 			throw new UnsupportedOperationException("Not yet implemented");
 		}
 	}

@@ -183,9 +183,9 @@ class OrdersSteps {
 		client.DELETE(billingAddressUri)
 
 		assertThat(client.response.status)
-			.as("HTTP response status is not as expected")
-			.isEqualTo(204)
-}
+				.as("HTTP response status is not as expected")
+				.isEqualTo(204)
+	}
 
 	private static void removeShippingAddressOnOrderIfItExists() {
 		Order.deliveries()

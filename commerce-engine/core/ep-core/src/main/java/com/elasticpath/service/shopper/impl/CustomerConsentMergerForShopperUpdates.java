@@ -3,19 +3,13 @@
  */
 package com.elasticpath.service.shopper.impl;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
-
 import com.elasticpath.domain.customer.CustomerSession;
-import com.elasticpath.domain.datapolicy.CustomerConsent;
 import com.elasticpath.domain.shopper.Shopper;
 import com.elasticpath.service.customer.CustomerSessionShopperUpdateHandler;
 import com.elasticpath.service.datapolicy.CustomerConsentService;
 
 /**
- * Handles what happens to the {@link CustomerConsent} when an anonymous client logs in.
+ * Handles what happens to the {@link com.elasticpath.domain.datapolicy.CustomerConsent} when an anonymous client logs in.
  */
 public final class CustomerConsentMergerForShopperUpdates implements CustomerSessionShopperUpdateHandler {
 
@@ -41,16 +35,7 @@ public final class CustomerConsentMergerForShopperUpdates implements CustomerSes
 			return;
 		}
 
-		final List<CustomerConsent> invalidatedCustomerConsents =
-				Optional.ofNullable(customerConsentService.findByCustomerGuid(invalidShopper.getCustomer().getGuid()))
-						.orElseGet(ArrayList::new);
-
-		if (invalidatedCustomerConsents.isEmpty()) {
-			return;
-		}
-
-		List<Long> customerConsentUids = invalidatedCustomerConsents.stream().map(CustomerConsent::getUidPk).collect(Collectors.toList());
-
-		customerConsentService.updateCustomerGuids(customerConsentUids, customerSession.getShopper().getCustomer().getGuid());
+		customerConsentService.updateCustomerGuids(invalidShopper.getCustomer().getGuid(), customerSession.getShopper()
+				.getCustomer().getGuid());
 	}
 }

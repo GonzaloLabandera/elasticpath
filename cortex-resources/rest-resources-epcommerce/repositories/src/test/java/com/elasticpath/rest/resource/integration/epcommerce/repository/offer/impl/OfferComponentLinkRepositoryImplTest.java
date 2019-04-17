@@ -36,8 +36,11 @@ public class OfferComponentLinkRepositoryImplTest {
 	public void testHasLink() {
 		ProductBundleImpl productBundle = Mockito.mock(ProductBundleImpl.class);
 		when(storeProductRepository.findByGuid(anyString())).thenReturn(Single.just(productBundle));
-		offerComponentLinkRepository.getElements(OfferIdentifier.builder()
-				.withOfferId(OfferIdIdentifierPart.of(SearchRepositoryImpl.PRODUCT_GUID_KEY, "id")).withScope(ScopeIdentifierPart.of("hello")).build())
+		offerComponentLinkRepository.getElements(
+					OfferIdentifier.builder()
+					.withOfferId(OfferIdIdentifierPart.of(SearchRepositoryImpl.PRODUCT_GUID_KEY, "id"))
+					.withScope(ScopeIdentifierPart.of("hello"))
+					.build())
 				.test()
 				.assertValueCount(1);
 	}
@@ -46,8 +49,11 @@ public class OfferComponentLinkRepositoryImplTest {
 	public void testNoLink() {
 		ProductImpl productBundle = Mockito.mock(ProductImpl.class);
 		when(storeProductRepository.findByGuid(anyString())).thenReturn(Single.just(productBundle));
-		offerComponentLinkRepository.getElements(OfferIdentifier.builder()
-				.withOfferId(OfferIdIdentifierPart.of(SearchRepositoryImpl.PRODUCT_GUID_KEY, "id")).withScope(ScopeIdentifierPart.of("hello")).build())
+		offerComponentLinkRepository.getElements(
+					OfferIdentifier.builder()
+					.withOfferId(OfferIdIdentifierPart.of(SearchRepositoryImpl.PRODUCT_GUID_KEY, "id"))
+					.withScope(ScopeIdentifierPart.of("hello"))
+					.build())
 				.test()
 				.assertNoValues();
 	}

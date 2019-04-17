@@ -448,7 +448,8 @@ public class SolrQueryFactoryImplTest {
 		keywordSearchCriteria.setCatalogCode("catalogCode1");
 		solrQueryFactoryImpl.setShowBundlesFirstProvider(new SimpleSettingValueProvider<>(false));
 		solrQueryFactoryImpl.setAttributeService(attributeService);
-		SolrQuery query = solrQueryFactoryImpl.composeKeywordQuery(keywordSearchCriteria, START_INDEX, MAX_ROWS, searchConfig, false, ImmutableMap.of());
+		SolrQuery query = solrQueryFactoryImpl.composeKeywordQuery(keywordSearchCriteria, START_INDEX, MAX_ROWS, searchConfig, false,
+				ImmutableMap.of());
 
 		SolrQuery startIndexQuery = new SolrQuery();
 		startIndexQuery.setStart(START_INDEX);

@@ -1198,6 +1198,9 @@ public final class ContextIdNames {
 	/** bean id for {@link com.elasticpath.domain.misc.LocalizedPropertyValue}. */
 	public static final String TAX_CATEGORY_LOCALIZED_PROPERTY_VALUE = "taxCategoryLocalizedPropertyValue";
 
+	/** bean id for {@link com.elasticpath.domain.misc.LocalizedPropertyValue}. */
+	public static final String ATTRIBUTE_LOCALIZED_PROPERTY_VALUE = "attributeLocalizedPropertyValue";
+
 	/** bean id for {@link com.elasticpath.csvimport.CsvReadResult}. */
 	public static final String CSV_READ_RESULT = "csvReadResult";
 
@@ -1676,6 +1679,9 @@ public final class ContextIdNames {
 	 */
 	public static final String PRODUCT_SKU_VALIDATION_CONTEXT = "productSkuValidationContext";
 
+	/** bean id for implementation of com.elasticpath.domain.datapolicy.impl.CustomerConsentImpl. */
+	public static final String CUSTOMER_CONSENT_HISTORY = "customerConsentHistory";
+
 	/** bean id for implementation of com.elasticpath.service.datapolicy.impl.DataPolicyServiceImpl. */
 	public static final String DATA_POLICY_SERVICE = "dataPolicyService";
 
@@ -1687,8 +1693,6 @@ public final class ContextIdNames {
 
 	/** bean id for implementation of com.elasticpath.domain.datapolicy.impl.CustomerConsentServiceImpl. */
 	public static final String CUSTOMER_CONSENT_SERVICE = "customerConsentService";
-
-
 
 	/** Bean id for {@link com.elasticpath.service.shipping.transformers.impl.ShippingAddressTransformerImpl}. */
 	public static final String SHIPPING_ADDRESS_TRANSFORMER = "shippingAddressTransformer";
@@ -1706,6 +1710,8 @@ public final class ContextIdNames {
 	/** bean id for implementation of com.elasticpath.service.search.FacetService. */
 	public static final String FACET_SERVICE = "facetService";
 
+	/** bean id for implementation of com.elasticpath.domain.search.Facet. */
+	public static final String FACET = "facet";
 
 	private ContextIdNames() {
 		// Do not instantiate this class

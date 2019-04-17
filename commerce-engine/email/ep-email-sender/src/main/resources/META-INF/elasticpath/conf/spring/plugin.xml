@@ -58,26 +58,31 @@
 		<property name="smtpScheme">
 			<bean parent="settingFactoryBean">
 				<property name="path" value="COMMERCE/SYSTEM/EMAIL/smtpScheme"/>
+				<property name="systemPropertyOverrideKey" value="ep.smtp.scheme"/>
 			</bean>
 		</property>
 		<property name="mailHost">
 			<bean parent="settingFactoryBean">
 				<property name="path" value="COMMERCE/SYSTEM/EMAIL/mailHost"/>
+				<property name="systemPropertyOverrideKey" value="ep.smtp.host"/>
 			</bean>
 		</property>
 		<property name="mailPort">
 			<bean parent="settingFactoryBean">
 				<property name="path" value="COMMERCE/SYSTEM/EMAIL/mailPort"/>
+				<property name="systemPropertyOverrideKey" value="ep.smtp.port"/>
 			</bean>
 		</property>
 		<property name="mailUsername">
 			<bean parent="settingFactoryBean">
 				<property name="path" value="COMMERCE/SYSTEM/EMAIL/emailAuthenticationUsername"/>
+				<property name="systemPropertyOverrideKey" value="ep.smtp.username"/>
 			</bean>
 		</property>
 		<property name="mailPassword">
 			<bean parent="settingFactoryBean">
 				<property name="path" value="COMMERCE/SYSTEM/EMAIL/emailAuthenticationPassword"/>
+				<property name="systemPropertyOverrideKey" value="ep.smtp.password"/>
 			</bean>
 		</property>
 	</bean>

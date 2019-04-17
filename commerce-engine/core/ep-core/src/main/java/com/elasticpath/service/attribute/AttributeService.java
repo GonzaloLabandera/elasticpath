@@ -250,12 +250,17 @@ public interface AttributeService extends EpPersistenceService {
 	boolean nameExistsInAttributeUsage(String name, AttributeUsage attributeUsage) throws EpServiceException;
 
 	/**
+	 * @deprecated Use nameExistsInAttributeUsage(final String name, final AttributeUsage attributeUsage) which searches for name existence
+	 * 	 irrespective of locale. Since attribute names can differ by locale, this method assumes the locale as
+	 * 	 "Locale.getDefault()" for Customer profile attributes, and Catalog.getDefaultLocale() for rest.
+	 *
 	 * Checks whether the given attribute name exists in this attribute usage or not.
 	 *
 	 * @param attribute the attribute to check
 	 * @return true if a different attribute with the given attribute's name exists
 	 * @throws EpServiceException - in case of any errors
 	 */
+	@Deprecated
 	boolean nameExistsInAttributeUsage(Attribute attribute) throws EpServiceException;
 
 	/**

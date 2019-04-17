@@ -8,7 +8,7 @@ package com.elasticpath.rest.resource.addresses.constants;
  */
 public final class AddressesResourceConstants {
 
-	private AddressesResourceConstants() {}
+	private AddressesResourceConstants() { }
 
 	/**
 	 * Cache-Control max age.

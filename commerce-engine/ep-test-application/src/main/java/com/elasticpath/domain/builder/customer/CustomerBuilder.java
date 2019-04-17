@@ -6,6 +6,7 @@ package com.elasticpath.domain.builder.customer;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.Locale;
+import java.util.function.Consumer;
 
 import org.apache.commons.lang.ObjectUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -132,11 +133,11 @@ public class CustomerBuilder implements DomainObjectBuilder<Customer> {
     @Override
     public Customer build() {
         Customer customer = beanFactory.getBean(ContextIdNames.CUSTOMER);
-		customer.setGuid((String) ObjectUtils.defaultIfNull(guid, "testGuid"));
-		customer.setUidPk((Long) ObjectUtils.defaultIfNull(uidPk, 0L));
-        customer.setEmail((String) ObjectUtils.defaultIfNull(email, "john.smith@elasticpath.com"));
-        customer.setUserId((String) ObjectUtils.defaultIfNull(userId, customer.getEmail()));
-        customer.setPreferredLocale((Locale) ObjectUtils.defaultIfNull(preferredLocale, Locale.ENGLISH));
+        setIfNotNull(customer::setUidPk, uidPk);
+        setIfNotNull(customer::setGuid, guid);
+        setIfNotNull(customer::setUserId, userId);
+		customer.setEmail((String) ObjectUtils.defaultIfNull(email, "john.smith@elasticpath.com"));
+		customer.setPreferredLocale((Locale) ObjectUtils.defaultIfNull(preferredLocale, Locale.ENGLISH));
         customer.setFirstName((String) ObjectUtils.defaultIfNull(firstName, "James"));
         customer.setLastName((String) ObjectUtils.defaultIfNull(lastName, "Bond"));
         customer.setCreationDate((Date) ObjectUtils.defaultIfNull(creationDate, new Date()));
@@ -160,6 +161,12 @@ public class CustomerBuilder implements DomainObjectBuilder<Customer> {
 
         return customer;
     }
+
+    private <T> void setIfNotNull(final Consumer<T> setter, final T value) {
+		if (value != null) {
+			setter.accept(value);
+		}
+	}
 
 	public void setBeanFactory(final BeanFactory beanFactory) {
 		this.beanFactory = beanFactory;

@@ -251,10 +251,7 @@ public class ClearingCartOrderShippingInformationSanitizerTest {
 		assertThat(cartOrder.getShippingOptionCode()).as(SHIPPING_OPTION_CODE_SHOULD_BE_CLEARED).isNull();
 		assertThat(cartOrderWasUpdated).as(CART_ORDER_SHOULD_BE_CHANGED).isTrue();
 
-		verify(customerSessionService).findByCustomerIdAndStoreCode(USER_ID, STORE_CODE);
 		verify(cart).getCustomerSession();
-		verify(shopper).getStoreCode();
-		verify(shopper).getCustomer();
 		verify(customerSessionService).createWithShopper(shopper);
 		verify(customerSession).setLocale(Locale.getDefault());
 		verify(customerAddressDao).findByGuid(SHIPPING_ADDRESS_GUID);
@@ -272,9 +269,7 @@ public class ClearingCartOrderShippingInformationSanitizerTest {
 		store.setDefaultCurrency(CURRENCY);
 
 		when(shopper.getStoreCode()).thenReturn(STORE_CODE);
-		when(shopper.getCustomer()).thenReturn(customer);
 		when(cart.getCustomerSession()).thenReturn(null);
-		when(customerSessionService.findByCustomerIdAndStoreCode(USER_ID, STORE_CODE)).thenReturn(null);
 		when(customerSessionService.createWithShopper(shopper)).thenReturn(customerSession);
 		when(storeService.findStoreWithCode(STORE_CODE)).thenReturn(store);
 	}

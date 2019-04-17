@@ -33,12 +33,24 @@ Feature: Offer Search facets
     When I open the element with field display-name and value Languages
     And I follow the link facetselector
     Then the expected facet choice list matches the following list
-      | value    | count |
-      | EN       | 3     |
-      | Japanese | 7     |
-      | Chinese  | 4     |
-      | English  | 35    |
-      | Spanish  | 6     |
+      | value      | count |
+      | EN         | 3     |
+      | Japanese   | 7     |
+      | Chinese    | 4     |
+      | English    | 35    |
+      | Spanish    | 6     |
+      | Italien    | 7     |
+      | Italian    | 8     |
+      | Anglais    | 11    |
+      | Hindi      | 10    |
+      | Allemand   | 7     |
+      | Portuguese | 1     |
+      | German     | 3     |
+      | Russian    | 10    |
+      | Korean     | 8     |
+      | française  | 8     |
+      | French     | 17    |
+      | Français   | 11    |
     And there are no chosen links
     When I select the choice EN
     Then there is 1 link of rel chosen

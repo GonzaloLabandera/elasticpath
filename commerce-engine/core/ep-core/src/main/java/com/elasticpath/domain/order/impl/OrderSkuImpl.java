@@ -193,9 +193,12 @@ public class OrderSkuImpl extends AbstractShoppingItemImpl implements OrderSku, 
 	@Override
 	protected List<ShoppingItem> getChildItemsInternal() {
 		List<ShoppingItem> items = new ArrayList<>();
-		for (OrderSku orderSku : getChildOrderSkus()) {
-			items.add(orderSku);
+		if (this.childOrderSkus == null) {
+			this.childOrderSkus = new ArrayList<>();
 		}
+
+		items.addAll(this.childOrderSkus);
+
 		return items;
 	}
 

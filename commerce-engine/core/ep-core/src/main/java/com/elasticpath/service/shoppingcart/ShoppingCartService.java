@@ -113,7 +113,16 @@ public interface ShoppingCartService extends EpPersistenceService {
 	 * @return The list of ShoppingCart GUIDS or an empty list if there are none.
 	 */
 	List<String> findByCustomerAndStore(String customerGuid, String storeCode);
-	
+
+	/**
+	 * Deletes all inactive shopping carts that are associated with the list of {@link Shopper} uids.
+	 * Even the ones that are not empty.
+	 *
+	 * @param shopperUids the shopping context uids.
+	 * @return the number of deleted shopping carts
+	 */
+	int deleteAllInactiveShoppingCartsByShopperUids(List<Long> shopperUids);
+
 	/**
 	 * Gets the last modified date of the shopping cart.
 	 *

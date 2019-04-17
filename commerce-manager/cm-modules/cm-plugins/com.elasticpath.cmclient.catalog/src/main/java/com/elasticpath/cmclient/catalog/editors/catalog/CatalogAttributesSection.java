@@ -1,6 +1,7 @@
 /**
  * Copyright (c) Elastic Path Software Inc., 2017
  */
+
 package com.elasticpath.cmclient.catalog.editors.catalog;
 
 import java.lang.reflect.InvocationTargetException;
@@ -8,6 +9,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.Locale;
+import java.util.Observable;
+import java.util.Observer;
 import java.util.Set;
 
 import org.eclipse.core.databinding.DataBindingContext;
@@ -40,6 +44,7 @@ import com.elasticpath.cmclient.core.CoreMessages;
 import com.elasticpath.cmclient.core.EpUiException;
 import com.elasticpath.cmclient.core.ServiceLocator;
 import com.elasticpath.cmclient.core.comparator.AttributeViewerComparatorByNameIgnoreCase;
+import com.elasticpath.cmclient.core.editors.AbstractCmClientEditorPage;
 import com.elasticpath.cmclient.core.editors.AbstractCmClientFormEditor;
 import com.elasticpath.cmclient.core.event.ItemChangeEvent;
 import com.elasticpath.cmclient.core.event.ItemChangeEvent.EventType;
@@ -47,6 +52,7 @@ import com.elasticpath.cmclient.core.helpers.ChangeSetHelper;
 import com.elasticpath.cmclient.core.service.CatalogEventService;
 import com.elasticpath.cmclient.core.ui.framework.EpControlFactory.EpState;
 import com.elasticpath.cmclient.core.ui.framework.IEpTableViewer;
+import com.elasticpath.cmclient.policy.PolicyPlugin;
 import com.elasticpath.cmclient.policy.StatePolicy;
 import com.elasticpath.cmclient.policy.ui.AbstractPolicyAwareEpTableSection;
 import com.elasticpath.commons.constants.ContextIdNames;
@@ -71,7 +77,10 @@ public class CatalogAttributesSection extends AbstractPolicyAwareEpTableSection<
 
 	private final AttributeService attributeService;
 
-	private List<Attribute> catalogAttributes;
+	private final List<Attribute> catalogAttributes;
+
+	private final CatalogAttributesSection.CatalogAttributesSectionObservable observable =
+			new CatalogAttributesSection.CatalogAttributesSectionObservable();
 
 	/**
 	 * Parameter holder class for passing a parameter between threads.
@@ -108,8 +117,36 @@ public class CatalogAttributesSection extends AbstractPolicyAwareEpTableSection<
 	 * @param editor the editor
 	 */
 	public CatalogAttributesSection(final FormPage formPage, final AbstractCmClientFormEditor editor) {
+		this(formPage, editor, null);
+	}
+
+	/**
+	 * Constructor used when you already have a list of attributes to populate the table.
+	 *
+	 * @param formPage          the form page
+	 * @param editor            the editor
+	 * @param catalogAttributes the list of attributes
+	 */
+	public CatalogAttributesSection(final FormPage formPage, final AbstractCmClientFormEditor editor, final List<Attribute> catalogAttributes) {
 		super(formPage, editor);
 		attributeService = ServiceLocator.getService(ContextIdNames.ATTRIBUTE_SERVICE);
+		setTableItems(getModel().getAttributeTableItems());
+
+		if (catalogAttributes == null) {
+			final Collection<Integer> catalogUsageTypes = getCatalogAttributeUsageTypes();
+			final Catalog catalogFromModel = getModel().getCatalog();
+			final Collection<Attribute> readOnlyCatalogAttributes = attributeService.findAllCatalogAndGlobalAttributesByType(
+					catalogFromModel.getUidPk(), catalogUsageTypes);
+
+			this.catalogAttributes = new ArrayList<>(readOnlyCatalogAttributes.size());
+			this.catalogAttributes.addAll(readOnlyCatalogAttributes);
+		} else {
+			this.catalogAttributes = catalogAttributes;
+		}
+
+		if (formPage instanceof Observer) {
+			observable.addObserver((Observer) formPage);
+		}
 	}
 
 	@Override
@@ -117,12 +154,22 @@ public class CatalogAttributesSection extends AbstractPolicyAwareEpTableSection<
 		super.addAddedItem(item);
 		catalogAttributes.add(item);
 		markDirty();
+		observable.setChanged();
+		notifyParent();
+	}
+
+	private void notifyParent() {
+		notifyParent(catalogAttributes);
+	}
+
+	private void notifyParent(final List<Attribute> catalogAttributes) {
+		observable.notifyObservers(catalogAttributes);
 	}
 
 	@Override
 	protected Attribute addItemAction() {
 		final CatalogAttributesAddEditDialog dialog = new CatalogAttributesAddEditDialog(getSection().getShell(), null, false,
-				getModel());
+				getModel(), getSelectedLocale());
 
 		if (dialog.open() == Window.OK) {
 			final Attribute attribute = dialog.getAttribute();
@@ -203,7 +250,7 @@ public class CatalogAttributesSection extends AbstractPolicyAwareEpTableSection<
 	@Override
 	protected boolean editItemAction(final Attribute object) {
 		final CatalogAttributesAddEditDialog dialog = new CatalogAttributesAddEditDialog(getSection().getShell(), object, false,
-				getModel());
+				getModel(), getSelectedLocale());
 		return dialog.open() == Window.OK;
 	}
 
@@ -215,7 +262,8 @@ public class CatalogAttributesSection extends AbstractPolicyAwareEpTableSection<
 	@Override
 	protected String getItemName(final Attribute attribute) {
 		return String.format("%1$s - %2$s - %3$s", //$NON-NLS-1$
-				attribute.getKey(), attribute.getName(), CoreMessages.get().getMessage(attribute.getAttributeType().getNameMessageKey()));
+				attribute.getKey(), attribute.getDisplayName(getSelectedLocale(), true, true),
+				CoreMessages.get().getMessage(attribute.getAttributeType().getNameMessageKey()));
 	}
 
 	@Override
@@ -225,9 +273,7 @@ public class CatalogAttributesSection extends AbstractPolicyAwareEpTableSection<
 
 	@Override
 	protected String getRemoveDialogDescription(final Attribute item) {
-		return
-			NLS.bind(CatalogMessages.get().CatalogAttributesSection_RemoveDialog_description,
-			getItemName(item));
+		return NLS.bind(CatalogMessages.get().CatalogAttributesSection_RemoveDialog_description, getItemName(item));
 	}
 
 	@Override
@@ -250,13 +296,6 @@ public class CatalogAttributesSection extends AbstractPolicyAwareEpTableSection<
 
 		addLabelProvider();
 
-		final Collection<Integer> catalogUsageTypes = getCatalogAttributeUsageTypes();
-		final Catalog catalogFromModel = getModel().getCatalog();
-		final Collection<Attribute> readOnlyCatalogAttributes = attributeService.findAllCatalogAndGlobalAttributesByType(
-				catalogFromModel.getUidPk(), catalogUsageTypes);
-		catalogAttributes = new ArrayList<>(readOnlyCatalogAttributes.size());
-		catalogAttributes.addAll(readOnlyCatalogAttributes);
-
 		refreshViewerInput();
 	}
 
@@ -271,7 +310,8 @@ public class CatalogAttributesSection extends AbstractPolicyAwareEpTableSection<
 				CatalogMessages.get().CatalogAttributesSection_TableAttributeType,
 				CatalogMessages.get().CatalogAttributesSection_TableAttributeUsage,
 				CatalogMessages.get().CatalogAttributesSection_TableAttributeRequired,
-				CatalogMessages.get().CatalogAttributesSection_TableAttributeGlobal };
+				CatalogMessages.get().CatalogAttributesSection_TableAttributeGlobal
+		};
 		final int[] columnWidths = { 120, 180, 120, 80, 80, 80 };
 
 		for (int i = 0; i < columnNames.length; ++i) {
@@ -283,9 +323,9 @@ public class CatalogAttributesSection extends AbstractPolicyAwareEpTableSection<
 		if (changeSetColumnDecorator.isDecoratable()) {
 			getViewer().setLabelProvider(new CatalogAttributeTableLabelProviderDecorator(
 					new ChangeSetTableLabelProviderDecorator<>(
-							new TableLabelProviderAdapter(), getModel().getAttributeTableItems())));
+							new TableLabelProviderAdapter(), getModel().getAttributeTableItems()), getSelectedLocale()));
 		} else {
-			getViewer().setLabelProvider(new CatalogAttributeTableLabelProviderDecorator(new TableLabelProviderAdapter()));
+			getViewer().setLabelProvider(new CatalogAttributeTableLabelProviderDecorator(new TableLabelProviderAdapter(), getSelectedLocale()));
 		}
 	}
 
@@ -294,8 +334,17 @@ public class CatalogAttributesSection extends AbstractPolicyAwareEpTableSection<
 	 *
 	 * @return a collection of usage types
 	 */
-	protected Collection<Integer> getCatalogAttributeUsageTypes() {
+	private Collection<Integer> getCatalogAttributeUsageTypes() {
 		return Arrays.asList(AttributeUsage.CATEGORY, AttributeUsage.PRODUCT, AttributeUsage.SKU);
+	}
+
+	/**
+	 * Gets the selected locale from this Editor page.
+	 *
+	 * @return the locale
+	 */
+	protected Locale getSelectedLocale() {
+		return ((AbstractCmClientEditorPage) getPage()).getSelectedLocale();
 	}
 
 	@Override
@@ -325,6 +374,7 @@ public class CatalogAttributesSection extends AbstractPolicyAwareEpTableSection<
 						getModel().getAttributeTableItems().addRemovedItem(object);
 					}
 				}
+
 				private boolean isNewObjectAndInList(final Attribute object, final Set<Attribute> list) {
 					return list.contains(object) && !object.isPersisted();
 				}
@@ -335,9 +385,7 @@ public class CatalogAttributesSection extends AbstractPolicyAwareEpTableSection<
 
 		if (!passer.canRemove) {
 			MessageDialog.openError(getPage().getSite().getShell(), CatalogMessages.get().CatalogAttributesSection_ErrorDialog_InUse_title,
-
-					NLS.bind(CatalogMessages.get().CatalogAttributesSection_ErrorDialog_InUse_desc,
-					getItemName(object)));
+					NLS.bind(CatalogMessages.get().CatalogAttributesSection_ErrorDialog_InUse_desc, getItemName(object)));
 		}
 
 		return passer.canRemove;
@@ -399,4 +447,21 @@ public class CatalogAttributesSection extends AbstractPolicyAwareEpTableSection<
 		return CATALOG_ATTRIBUTES_TABLE;
 	}
 
+	@Override
+	public void dispose() {
+		super.dispose();
+		observable.deleteObservers();
+		PolicyPlugin.getDefault().unregisterStatePolicyTarget(this);
+	}
+
+	/**
+	 * An observable subclass. Sub-classed to have access to setChanged().
+	 */
+	class CatalogAttributesSectionObservable extends Observable {
+		@Override
+		@SuppressWarnings("PMD.UselessOverridingMethod")
+		protected void setChanged() {
+			super.setChanged();
+		}
+	}
 }

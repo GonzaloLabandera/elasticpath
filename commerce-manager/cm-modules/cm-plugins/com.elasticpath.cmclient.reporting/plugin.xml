@@ -46,7 +46,8 @@
                icon="icons/report_default_34.png"
                id="perspectiveMenu.reportingItem"
                label="%reportingMenu.name"
-               tooltip="%reportingMenu.name">
+               tooltip="%reportingMenu.name"
+               mode="FORCE_TEXT">
             <visibleWhen
                     checkEnabled="true">
             </visibleWhen>

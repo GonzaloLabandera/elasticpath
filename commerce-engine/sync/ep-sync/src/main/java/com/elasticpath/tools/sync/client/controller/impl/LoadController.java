@@ -3,6 +3,8 @@
  */
 package com.elasticpath.tools.sync.client.controller.impl;
 
+import javax.sql.DataSource;
+
 import org.apache.log4j.Logger;
 
 import com.elasticpath.tools.sync.client.SyncJobConfiguration;
@@ -10,7 +12,6 @@ import com.elasticpath.tools.sync.job.dao.TransactionJobDao;
 import com.elasticpath.tools.sync.job.dao.TransactionJobDaoFactory;
 import com.elasticpath.tools.sync.processing.SerializableObjectListener;
 import com.elasticpath.tools.sync.processing.SyncJobObjectProcessor;
-
 /**
  * The LoadController loads data from a TransactionJob. 
  * It does only use the target system. It synchronizes by deploying the data to the target system.
@@ -22,6 +23,16 @@ public class LoadController extends AbstractSyncController {
 	private TransactionJobDaoFactory transactionJobDaoFactory;
 
 	private SyncJobObjectProcessor objectProcessor;
+
+	private DataSource target;
+
+	public DataSource getTarget() {
+		return target;
+	}
+
+	public void setTarget(final DataSource target) {
+		this.target = target;
+	}
 
 	/**
 	 * Reads TransactionJob from default file.
@@ -78,7 +89,11 @@ public class LoadController extends AbstractSyncController {
 	 */
 	@Override
 	protected void initConfig(final SystemConfig sourceSystem, final SystemConfig targetSystem) {
-		targetSystem.initSystem();
+		if (target == null) {
+			targetSystem.initSystem();
+		} else {
+			targetSystem.initSystem(target);
+		}
 	}
 
 	/**

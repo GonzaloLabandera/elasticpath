@@ -12,6 +12,7 @@ import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
 import java.util.Date;
+import java.util.Locale;
 
 import org.jmock.Expectations;
 import org.junit.Test;
@@ -28,6 +29,7 @@ import com.elasticpath.domain.catalog.Catalog;
 import com.elasticpath.domain.catalog.Category;
 import com.elasticpath.domain.catalog.CategoryType;
 import com.elasticpath.domain.localization.LocaleFallbackPolicy;
+import com.elasticpath.domain.misc.impl.LocalizedPropertiesImpl;
 import com.elasticpath.domain.misc.impl.RandomGuidImpl;
 import com.elasticpath.test.jmock.AbstractEPTestCase;
 
@@ -54,6 +56,9 @@ public class LinkedCategoryImplTest extends AbstractEPTestCase {
 	@Override
 	public void setUp() throws Exception {
 		super.setUp();
+
+		stubGetBean(ContextIdNames.CATALOG_LOCALE, CatalogLocaleImpl.class);
+		stubGetBean(ContextIdNames.LOCALIZED_PROPERTIES, LocalizedPropertiesImpl.class);
 		
 		setupCategoryType();
 
@@ -81,12 +86,14 @@ public class LinkedCategoryImplTest extends AbstractEPTestCase {
 		final AttributeGroupAttribute caAttr1 = new AttributeGroupAttributeImpl();
 		final Attribute attr1 = new AttributeImpl();
 		attr1.setAttributeType(AttributeType.INTEGER);
+		attr1.setCatalog(getCatalog());
 		caAttr1.setAttribute(attr1);
 		categoryType.getAttributeGroup().addAttributeGroupAttribute(caAttr1);
 
 		final AttributeGroupAttribute caAttr2 = new AttributeGroupAttributeImpl();
 		final Attribute attr2 = new AttributeImpl();
 		attr2.setAttributeType(AttributeType.SHORT_TEXT);
+		attr2.setCatalog(getCatalog());
 		caAttr2.setAttribute(attr2);
 		categoryType.getAttributeGroup().addAttributeGroupAttribute(caAttr2);
 	}
@@ -314,6 +321,7 @@ public class LinkedCategoryImplTest extends AbstractEPTestCase {
 			masterCatalog = new CatalogImpl();
 			masterCatalog.setMaster(true);
 			masterCatalog.setCode("irrelevant catalog code");
+			masterCatalog.setDefaultLocale(Locale.ENGLISH);
 		}
 		return masterCatalog;
 	}

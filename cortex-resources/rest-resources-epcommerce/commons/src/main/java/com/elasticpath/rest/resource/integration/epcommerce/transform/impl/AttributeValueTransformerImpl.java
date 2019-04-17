@@ -53,7 +53,7 @@ public class AttributeValueTransformerImpl extends
 				detailsEntity = DetailsEntity.builder()
 						.withName(domainAttribute.getKey())
 						.withValue(convertToProperValue(valueObject))
-						.withDisplayName(domainAttribute.getName())
+						.withDisplayName(domainAttribute.getDisplayName(locale, true, true))
 						.withDisplayValue(convertRawValueToDisplayValue(valueObject, attributeValue.getAttributeType(), locale)).build();
 
 			}

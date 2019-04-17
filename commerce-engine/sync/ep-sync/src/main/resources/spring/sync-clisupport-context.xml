@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans
+		xmlns="http://www.springframework.org/schema/beans"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xmlns:context="http://www.springframework.org/schema/context"
+		xsi:schemaLocation="
+			http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+			http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+		"
+	profile="!webapp">
+
+	<description>This configuration file defines all the beans for the Data Sync Tool's own Spring context.
+		This does not include the source/target contexts which are initialized on demand by the ContextInitializerFactory.</description>
+
+
+	<bean id="applicationInitialization" class="com.elasticpath.tools.sync.beanfactory.local.LocalPersistenceEngineInitialization"
+		  init-method="init">
+		<property name="sessionFactory" ref="sessionFactory" />
+		<property name="dataSourceProperties" ref="dataSourceProperties" />
+	</bean>
+
+	<alias name="basePersistenceUnitManager" alias="persistenceUnitManager"/>
+
+</beans>

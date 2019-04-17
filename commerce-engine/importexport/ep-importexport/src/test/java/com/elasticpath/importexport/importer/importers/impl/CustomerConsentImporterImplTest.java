@@ -6,13 +6,13 @@ package com.elasticpath.importexport.importer.importers.impl;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.apache.log4j.Appender;
 import org.apache.log4j.Level;
@@ -124,7 +124,7 @@ public class CustomerConsentImporterImplTest {
 		customerConsentImporterImpl.initialize(new ImportContext(importConfiguration), mockSavingStrategy);
 		boolean status = customerConsentImporterImpl.executeImport(createCustomerConsentDTO());
 
-		verify(mockAppender, times(0)).doAppend(captorLoggingEvent.capture());
+		mockAppender.doAppend(captorLoggingEvent.capture());
 
 		List<LoggingEvent> loggingEvent = captorLoggingEvent.getAllValues();
 
@@ -134,7 +134,9 @@ public class CustomerConsentImporterImplTest {
 				.isNotNull();
 		assertThat(status)
 				.isTrue();
-		assertThat(loggingEvent)
+		assertThat(loggingEvent.stream()
+				.filter(event -> event.getLevel().equals(Level.INFO))
+				.collect(Collectors.toList()))
 				.isEmpty();
 	}
 

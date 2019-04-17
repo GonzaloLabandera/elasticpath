@@ -19,7 +19,7 @@ public abstract class AbstractToolbar extends AbstractPageObject {
 	/**
 	 * CSS String of Save All button.
 	 */
-	protected static final String SAVE_ALL_BUTTON_CSS = "div[widget-id='Save All (Ctrl+Shift+S)']";
+	protected static final String SAVE_ALL_BUTTON_CSS = "div[widget-id='Save All (Ctrl+Shift+S)'],div[widget-id='SAVE ALL'],div[widget-id='Save All']";
 	/**
 	 * CSS String of Reload button.
 	 */
@@ -28,7 +28,7 @@ public abstract class AbstractToolbar extends AbstractPageObject {
 	/**
 	 * CSS String of Save button.
 	 */
-	protected static final String SAVE_BUTTON_CSS = "div[widget-id='Save (Ctrl+S)']";
+	protected static final String SAVE_BUTTON_CSS = "div[widget-id='Save (Ctrl+S)'],div[widget-id='SAVE'],div[widget-id='Save']";
 	private static final String CHANGE_PAGINATION_SETTINGS_CSS = "div[widget-id='Change Pagination Settings']";
 
 

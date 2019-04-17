@@ -86,6 +86,9 @@
 	<reference id="productService"
 			interface="com.elasticpath.service.catalog.ProductService"/>
 
+	<reference id="productBundleService"
+			   interface="com.elasticpath.service.catalog.ProductBundleService"/>
+
 	<reference id="productSkuLookup"
 			   interface="com.elasticpath.service.catalog.ProductSkuLookup"
 			   filter="(caching=true)"/>
@@ -281,6 +284,9 @@
 
 	<service ref="shoppingCartRepository"
 			interface="com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder.ShoppingCartRepository"/>
+
+	<service ref="addItemsToCartAdvisorService"
+			 interface="com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder.AddItemsToCartAdvisorService"/>
 
 	<service ref="addToCartAdvisorService"
 			 interface="com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder.AddToCartAdvisorService"/>

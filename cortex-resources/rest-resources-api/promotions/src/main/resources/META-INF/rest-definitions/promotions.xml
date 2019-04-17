@@ -4,7 +4,7 @@
 		<name>promotions</name>
 		<description>
 			<![CDATA[
-Promotions are incentives offered to shoppers to promote the purchase of [items][items] in a store. A store’s marketer creates promotions
+Promotions are incentives offered to shoppers to promote the purchase of [items][items] in a store. A store's marketer creates promotions
 and defines a set of conditions that must be met before the promotion is applied to a given shopper. Promotions may trigger discounts or
 may trigger other incentives such as free [items][items]. When a promotion triggers a discount, the discounts are automatically applied to
 the item price, cart line item price, shipping option cost, line items total, cart total, and the order [total][totals].

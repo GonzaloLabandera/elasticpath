@@ -39,7 +39,12 @@ class FacetsSteps {
 
 	@When('^I select the choice (.+)$')
 	static void selectFaceetChoice(String choice) {
-		Facets.selectFacetChoice(choice)
+		Facets.selectFacetChoice(choice, "choice")
+	}
+
+	@When('^I unselect the choice (.+)$')
+	static void unselectFaceetChoice(String choice) {
+		Facets.selectFacetChoice(choice, "chosen")
 	}
 
 	@Then('^the offer search results list contains items with display-names$')

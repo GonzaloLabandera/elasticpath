@@ -4,14 +4,18 @@
 package com.elasticpath.settings.impl;
 
 import static java.util.Locale.getDefault;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import org.junit.Test;
@@ -25,6 +29,7 @@ import com.elasticpath.settings.SettingMaxOverrideException;
 import com.elasticpath.settings.dao.SettingsDao;
 import com.elasticpath.settings.domain.SettingDefinition;
 import com.elasticpath.settings.domain.SettingValue;
+import com.elasticpath.settings.domain.impl.SettingDefinitionImpl;
 
 /**
  * Tests for com.elasticpath.settings.impl.SettingsServiceImpl.
@@ -102,6 +107,42 @@ public class SettingsServiceImplTest {
 		boolean value = returnedDefs.add(mock(SettingDefinition.class));
 		assertThat(value).isTrue();
 
+	}
+
+	/**
+	 * Test that the getAllNonOverriddenSettingDefinitions method only returns settings that have not been
+	 * overridden with non-empty JVM system properties.
+	 */
+	@Test
+	public void testGetAllNonOverriddenSettingDefinitions() {
+		final Set<SettingDefinition> defs = new HashSet<>();
+		defs.add(createTestDefinition("PATH/one"));
+		defs.add(createTestDefinition("PATH/two"));
+
+		final Map<String, String> settingsOverrides = new HashMap<>();
+		settingsOverrides.put("prop.one.a", "PATH/one");
+		settingsOverrides.put("prop.one.b", "PATH/one");
+		settingsOverrides.put("prop.two", "PATH/two");
+		service.setSystemPropertyOverrides(settingsOverrides);
+
+		System.setProperty("prop.one.a", "overrideValue");
+		System.setProperty("prop.two", "");
+
+		when(mockSettingsDao.findAllSettingDefinitions()).thenReturn(defs);
+		Set<SettingDefinition> returnedDefs = service.getAllNonOverriddenSettingDefinitions();
+		assertEquals(1, returnedDefs.size());
+		assertEquals("PATH/two", returnedDefs.iterator().next().getPath());
+		verify(mockSettingsDao).findAllSettingDefinitions();
+
+		//check that the set is modifiable
+		boolean value = returnedDefs.add(mock(SettingDefinition.class));
+		assertThat(value).isTrue();
+	}
+
+	private SettingDefinition createTestDefinition(final String path) {
+		SettingDefinition definition = new SettingDefinitionImpl();
+		definition.setPath(path);
+		return definition;
 	}
 
 	/**

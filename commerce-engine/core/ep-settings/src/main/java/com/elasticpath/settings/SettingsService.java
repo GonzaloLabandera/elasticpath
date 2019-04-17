@@ -31,6 +31,14 @@ public interface SettingsService extends SettingsReader {
 	Set<SettingDefinition> getAllSettingDefinitions();
 
 	/**
+	 * Get all setting definitions that are persistent in the system, except those that have
+	 * been overridden by JVM system properties.
+	 * @return all setting definitions in the system that are not overridden at runtime
+	 * @throws com.elasticpath.base.exception.EpServiceException in case of error
+	 */
+	Set<SettingDefinition> getAllNonOverriddenSettingDefinitions();
+
+	/**
 	 * Creates a SettingValue object from a SettingDefinition.
 	 * This implementation uses the {@link SettingValueFactory} to create a new SettingValue.
 	 * @param definition the SettingDefinition from which to create a SettingValue

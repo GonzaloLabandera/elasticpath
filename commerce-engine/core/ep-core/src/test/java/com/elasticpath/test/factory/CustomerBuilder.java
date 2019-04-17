@@ -17,7 +17,6 @@ import java.util.List;
 import java.util.Locale;
 
 import com.elasticpath.commons.beanframework.BeanFactory;
-import com.elasticpath.commons.constants.WebConstants;
 import com.elasticpath.domain.EpDomainException;
 import com.elasticpath.domain.customer.CustomerAddress;
 import com.elasticpath.domain.customer.CustomerAuthentication;
@@ -54,7 +53,6 @@ public class CustomerBuilder extends CustomerImplBuilderBase<CustomerBuilder> {
 		}
 		customer.initialize();
 		customer.setCustomerProfileAttributes(new TestCustomerProfileFactory().getProfile());
-		customer.setUserIdMode(WebConstants.USE_EMAIL_AS_USER_ID_MODE);
 
 		return customer;
 	}
@@ -84,12 +82,6 @@ class CustomerImplBuilderBase<GeneratorT extends CustomerImplBuilderBase<Generat
 
 	public GeneratorT withEmail(final String aValue) {
 		instance.setEmail(aValue);
-
-		return (GeneratorT) this;
-	}
-
-	public GeneratorT withUserIdBasedOnUserIdMode(final String aValue) {
-		instance.setUserIdBasedOnUserIdMode(aValue);
 
 		return (GeneratorT) this;
 	}
@@ -146,8 +138,8 @@ class CustomerImplBuilderBase<GeneratorT extends CustomerImplBuilderBase<Generat
 		return (GeneratorT) this;
 	}
 
-	public GeneratorT withPassword(final String aValue) {
-		instance.setPassword(aValue);
+	public GeneratorT withPassword(final String password, final String salt) {
+		instance.setPassword(password, salt);
 
 		return (GeneratorT) this;
 	}

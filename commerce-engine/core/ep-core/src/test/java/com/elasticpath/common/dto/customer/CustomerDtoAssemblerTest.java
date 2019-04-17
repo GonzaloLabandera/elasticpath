@@ -37,7 +37,6 @@ import com.elasticpath.domain.attribute.AttributeType;
 import com.elasticpath.domain.attribute.CustomerProfileValue;
 import com.elasticpath.domain.customer.Customer;
 import com.elasticpath.domain.customer.CustomerAddress;
-import com.elasticpath.domain.customer.CustomerAuthentication;
 import com.elasticpath.domain.customer.CustomerGroup;
 import com.elasticpath.domain.customer.impl.CustomerAddressImpl;
 import com.elasticpath.domain.customer.impl.CustomerAuthenticationImpl;
@@ -416,8 +415,7 @@ public class CustomerDtoAssemblerTest {
 			.withAddedAddress(address)
 			.withPreferredBillingAddress(address)
 			.withPreferredShippingAddress(address)
-			.withCustomerAuthentication(createCustomerAuthentication())
-			.withPassword(PASSWORD)
+			.withPassword(PASSWORD, SALT)
 			.withStatus(Customer.STATUS_ACTIVE)
 			.withStoreCode(STORE_CODE)
 			.withUserId(USER_ID)
@@ -438,14 +436,6 @@ public class CustomerDtoAssemblerTest {
 			.withFaxNumber(FAX_NUMBER)
 			.withFirstTimeBuyer(false)
 			.build();
-	}
-
-	private CustomerAuthentication createCustomerAuthentication() {
-		CustomerAuthentication customerAuthentication = new CustomerAuthenticationImpl();
-
-		customerAuthentication.setSalt(SALT);
-
-		return customerAuthentication;
 	}
 
 	private CustomerGroup createDefaultCustomerGroup() {

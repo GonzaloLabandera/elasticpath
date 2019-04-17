@@ -17,7 +17,7 @@
             id="com.elasticpath.cmclient.admin.views.AdminSectionsNavigationView"
             name="%administrationView.name">
       </view>
-   </extension>  
+   </extension>
    <extension
          point="org.eclipse.ui.perspectives">
       <perspective
@@ -53,7 +53,9 @@
                     commandId="com.elasticpath.cmclient.admin.command.openPerspective"
                     icon="icons/configuration_default_34.png"
                     id="perspectiveMenu.adminItem"
-                    tooltip="%administrationMenu.name">
+                    label="%administrationView.name"
+                    tooltip="%administrationMenu.name"
+                    mode="FORCE_TEXT">
                <visibleWhen
                      checkEnabled="true">
                </visibleWhen>

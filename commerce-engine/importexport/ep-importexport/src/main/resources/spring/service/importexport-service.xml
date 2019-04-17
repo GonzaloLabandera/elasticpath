@@ -416,6 +416,13 @@
 		<property name="schemaPath" value="schema/schemaWarehouse.xsd" />
 	</bean>
 
+	<bean id="facetImporter" class="com.elasticpath.importexport.importer.importers.impl.FacetImporterImpl"
+		  parent="abstractImporter">
+		<property name="facetService" ref="facetService" />
+		<property name="facetAdapter" ref="facetAdapter" />
+		<property name="schemaPath" value="schema/schemaFacet.xsd" />
+	</bean>
+
 	<bean id="storeImporter" class="com.elasticpath.importexport.importer.importers.impl.StoreImporter" parent="abstractImporter">
 		<property name="storeService" ref="nonCachingStoreService" />
 		<property name="storeAdapter" ref="storeAdapter" />
@@ -635,6 +642,9 @@
 				<entry key="CUSTOMER_CONSENT">
 					<ref bean="customerConsentImporter" />
 				</entry>
+				<entry key="FACET">
+					<ref bean="facetImporter"/>
+				</entry>
 			</map>
 		</property>
 	</bean>
@@ -847,6 +857,11 @@
 						<ref bean="customerConsentExporter" />
 					</list>
 				</entry>
+				<entry key="FACET">
+					<list>
+						<ref bean="facetExporter"/>
+					</list>
+				</entry>
 			</map>
 		</property>
 		<property name="availableOptionalJobMap">
@@ -931,6 +946,12 @@
 		<property name="importExportSearcher" ref="importExportSearcher" />
 		<property name="warehouseAdapter" ref="warehouseAdapter" />
 		<property name="warehouseService" ref="warehouseService" />
+	</bean>
+
+	<bean id="facetExporter" class="com.elasticpath.importexport.exporter.exporters.impl.FacetExporter">
+		<property name="importExportSearcher" ref="importExportSearcher" />
+		<property name="facetAdapter" ref="facetAdapter" />
+		<property name="facetService" ref="facetService" />
 	</bean>
 
 	<bean id="storeExporter" class="com.elasticpath.importexport.exporter.exporters.impl.StoreExporter">
@@ -1483,6 +1504,7 @@
 				<value>CM_IMPORT_JOB</value>
 				<value>DATA_POLICY</value>
 				<value>CUSTOMER_CONSENT</value>
+				<value>FACET</value>
 			</list>
 		</property>
 	</bean>
@@ -1623,10 +1645,10 @@
 		<!-- Setting for clustered search server deployments. -->
 		<!-- <property name="requiresMaster" value="true" /> -->
 		<property name="defaultSearchHostLocationProvider">
-			<settings:setting path="COMMERCE/SYSTEM/SEARCH/searchHost" context="default"/>
+			<settings:setting path="COMMERCE/SYSTEM/SEARCH/searchHost" context="default" systemPropertyOverrideKey="ep.search.default.url"/>
 		</property>
 		<property name="masterSearchHostLocationProvider">
-			<settings:setting path="COMMERCE/SYSTEM/SEARCH/searchHost" context="master"/>
+			<settings:setting path="COMMERCE/SYSTEM/SEARCH/searchHost" context="master" systemPropertyOverrideKey="ep.search.master.url"/>
 		</property>
 	</bean>
 

@@ -15,13 +15,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.google.common.collect.ImmutableMap;
 import org.jmock.Expectations;
 import org.jmock.integration.junit4.JUnitRuleMockery;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+
+import com.google.common.collect.ImmutableMap;
 
 import com.elasticpath.base.common.dto.StructuredErrorMessage;
 import com.elasticpath.base.exception.EpSystemException;
@@ -53,6 +54,7 @@ import com.elasticpath.domain.shopper.Shopper;
 import com.elasticpath.domain.shopper.ShopperMemento;
 import com.elasticpath.domain.shopper.impl.ShopperImpl;
 import com.elasticpath.domain.shopper.impl.ShopperMementoImpl;
+import com.elasticpath.domain.shoppingcart.ItemType;
 import com.elasticpath.domain.shoppingcart.ShoppingCartMessageIds;
 import com.elasticpath.domain.shoppingcart.ShoppingItem;
 import com.elasticpath.domain.shoppingcart.impl.ShoppingItemImpl;
@@ -365,7 +367,10 @@ public class CalculatedBundleShoppingItemPriceBuilderTest {
 
 	private List<ShoppingItem> createBundleItems(final ShoppingItem... items) {
 		Arrays.stream(items)
-				.forEach(shoppingItem -> shoppingItem.setBundleConstituent(true));
+				.forEach(shoppingItem -> {
+					shoppingItem.setBundleConstituent(true);
+					shoppingItem.setItemType(ItemType.BUNDLE_CONSTITUENT);
+				});
 		return Arrays.asList(items);
 	}
 

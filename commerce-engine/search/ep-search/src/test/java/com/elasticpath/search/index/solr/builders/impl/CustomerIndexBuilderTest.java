@@ -86,9 +86,9 @@ public class CustomerIndexBuilderTest {
 	@Test
 	public void testFindAddedOrModifiedUids() {
 		final ArrayList<Long> uidList = new ArrayList<>();
-		when(mockCustomerService.findUidsByModifiedDate(any(Date.class))).thenReturn(uidList);
+		when(mockCustomerService.findSearchableUidsByModifiedDate(any(Date.class))).thenReturn(uidList);
 		assertThat(this.customerIndexBuilder.findAddedOrModifiedUids(new Date())).isEqualTo(uidList);
-		verify(mockCustomerService).findUidsByModifiedDate(any(Date.class));
+		verify(mockCustomerService).findSearchableUidsByModifiedDate(any(Date.class));
 	}
 
 	/**
@@ -97,9 +97,9 @@ public class CustomerIndexBuilderTest {
 	@Test
 	public void testFindAllUids() {
 		final ArrayList<Long> uidList = new ArrayList<>();
-		when(mockCustomerService.findUidsByModifiedDate(any(Date.class))).thenReturn(uidList);
+		when(mockCustomerService.findSearchableUidsByModifiedDate(any(Date.class))).thenReturn(uidList);
 		assertThat(this.customerIndexBuilder.findAddedOrModifiedUids(new Date())).isEqualTo(uidList);
-		verify(mockCustomerService).findUidsByModifiedDate(any(Date.class));
+		verify(mockCustomerService).findSearchableUidsByModifiedDate(any(Date.class));
 	}
 
 	/**

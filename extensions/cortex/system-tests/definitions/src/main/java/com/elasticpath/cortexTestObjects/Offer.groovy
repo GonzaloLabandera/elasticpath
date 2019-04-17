@@ -67,4 +67,32 @@ class Offer extends CommonMethods {
 			.isEqualTo(priceValue)
 	}
 
+	static void lookupOfferWithCode(String productCode) {
+		client.GET("/")
+				.lookups()
+				.offerlookupform()
+				.offerlookupaction([code: productCode])
+	}
+
+	static void batchLookupOfferWithCodes(String productCodes) {
+		client.GET("/")
+				.lookups()
+				.batchofferslookupform()
+				.batchofferslookupaction([codes: productCodes])
+				.follow()
+				.stopIfFailure()
+	}
+
+	static void navigateToBatchOfferLookupForm() {
+		client.GET("/")
+				.lookups()
+				.batchofferslookupform()
+	}
+
+	static void navigateToOfferLookupForm() {
+		client.GET("/")
+				.lookups()
+				.offerlookupform()
+	}
+
 }

@@ -157,4 +157,20 @@ public class SettingValueProviderImplTest {
 				.isEqualTo(expected);
 	}
 
+	@Test
+	public void verifySystemPropertyOverrideValueIsApplied() throws Exception {
+		final String overrideKey = "overrideKey";
+		final String overrideValue = "overrideValue";
+
+		System.setProperty(overrideKey, overrideValue);
+		settingValueProvider.setSystemPropertyOverrideKey(overrideKey);
+
+		when(settingsReader.getSettingValue(PATH, CONTEXT)).thenReturn(settingValue);
+		when(settingValue.getValue()).thenReturn("originalValue");
+
+		assertThat(settingValueProvider.get(CONTEXT))
+				.as("Expected the context value to be used to determine the setting value")
+				.isEqualTo(overrideValue);
+	}
+
 }

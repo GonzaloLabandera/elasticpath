@@ -10,9 +10,10 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
-import com.google.common.collect.ImmutableList;
 import org.junit.Before;
 import org.junit.Test;
+
+import com.google.common.collect.ImmutableList;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.elasticpath.common.dto.ShoppingItemDto;
@@ -425,7 +426,9 @@ public class ShoppingCartServiceImplTest extends BasicSpringContextTest {
 
 	private Customer createSavedCustomer() {
 		final Customer customer = getBeanFactory().getBean(ContextIdNames.CUSTOMER);
-		customer.setEmail("a@b.com");
+		String email = "a@b.com";
+		customer.setUserId(email);
+		customer.setEmail(email);
 		customer.setStoreCode(scenario.getStore().getCode());
 		customer.setAnonymous(false);
 		return customerService.add(customer);

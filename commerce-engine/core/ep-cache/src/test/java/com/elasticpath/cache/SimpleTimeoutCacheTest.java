@@ -39,31 +39,27 @@ public class SimpleTimeoutCacheTest {
 	public void after() {
 		ehCache.dispose();
 	}
-	
+
 	/**
 	 * Simple test for putting and getting from the SimpleTimeoutCache.
 	 */
 	@Test
 	public void testSimpleCaching() {
-		final Duration sleepTime = new Duration(1050L, TimeUnit.MILLISECONDS);
 		final long timeout = 1000L;
 
 		fixture.changeTimeout(timeout);
 		fixture.put(FRED, FREDS_INFORMATION);
 
 		assertThat(fixture.get(FRED)).isEqualTo(FREDS_INFORMATION);
-		
+
 		// Make sure it's available after the first call
 		assertThat(fixture.get(FRED)).isEqualTo(FREDS_INFORMATION);
-		assertThat(fixture.get(FRED)).isEqualTo(FREDS_INFORMATION);
-		assertThat(fixture.get(FRED)).isEqualTo(FREDS_INFORMATION);
 
-		await().between(Duration.ONE_SECOND, sleepTime).until(() ->
+		await().atMost(Duration.TWO_SECONDS).until(() ->
 			assertThat(fixture.get(FRED)).isNull());
-
 	}
-	
-	/** 
+
+	/**
 	 * Test that with a zero timeout values are cached indefinitely (eternal cache).
 	 */
 	@Test
@@ -76,8 +72,8 @@ public class SimpleTimeoutCacheTest {
 		await().atMost(Duration.ONE_SECOND).until(() ->
 			assertThat(fixture.get(FRED)).isEqualTo(FREDS_INFORMATION));
 	}
-	
-	/** 
+
+	/**
 	 * Test that with a negative timeout values nothing is cached (timeout must be in negative seconds).
 	 */
 	@Test
@@ -90,8 +86,8 @@ public class SimpleTimeoutCacheTest {
 		await().atMost(Duration.ONE_SECOND).until(() ->
 			assertThat(fixture.get(FRED)).isNull());
 	}
-	
-	
+
+
 	/**
 	 * Test the timeout works as expected.
 	 */
@@ -158,5 +154,5 @@ public class SimpleTimeoutCacheTest {
 	}
 
 	//TODO tests for cache event listener and timeout; test ordering
-	
+
 }

@@ -13,7 +13,6 @@ import org.openqa.selenium.logging.LogEntry;
 import org.openqa.selenium.logging.LogType;
 
 import com.elasticpath.selenium.dialogs.ProblemOccurredDialog;
-import com.elasticpath.selenium.setup.PublishEnvSetUp;
 import com.elasticpath.selenium.setup.SetUp;
 import com.elasticpath.selenium.util.Constants;
 
@@ -46,7 +45,6 @@ public class TestBase {
 			SetUp.getDriver().switchTo().alert().accept();
 		} finally {
 			SetUp.quitDriver();
-			PublishEnvSetUp.quitDriver();
 		}
 	}
 

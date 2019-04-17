@@ -6,8 +6,8 @@ package com.elasticpath.rest.resource.integration.epcommerce.repository.search.i
 import org.junit.Before;
 import org.junit.Test;
 
-import com.elasticpath.rest.definition.searches.OfferSearchResultIdentifier;
-import com.elasticpath.rest.definition.searches.SearchOfferEntity;
+import com.elasticpath.rest.definition.offersearches.OfferSearchResultIdentifier;
+import com.elasticpath.rest.definition.offersearches.SearchOfferEntity;
 import com.elasticpath.rest.id.IdentifierPart;
 import com.elasticpath.rest.id.type.StringIdentifier;
 

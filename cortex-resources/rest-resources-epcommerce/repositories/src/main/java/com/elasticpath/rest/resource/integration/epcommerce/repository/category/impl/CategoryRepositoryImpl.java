@@ -16,6 +16,7 @@ import com.elasticpath.commons.beanframework.BeanFactory;
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.catalog.Catalog;
 import com.elasticpath.domain.catalog.Category;
+import com.elasticpath.domain.catalog.Product;
 import com.elasticpath.domain.store.Store;
 import com.elasticpath.rest.cache.CacheResult;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.category.CategoryRepository;
@@ -23,6 +24,7 @@ import com.elasticpath.rest.resource.integration.epcommerce.repository.store.Sto
 import com.elasticpath.rest.resource.integration.epcommerce.repository.transform.ReactiveAdapter;
 import com.elasticpath.service.catalog.CategoryLookup;
 import com.elasticpath.service.catalog.CategoryService;
+import com.elasticpath.service.catalog.ProductLookup;
 
 /**
  * Repository class for general search.
@@ -38,35 +40,33 @@ public class CategoryRepositoryImpl implements CategoryRepository {
 	private final CategoryService categoryService;
 	private final CategoryLookup categoryLookup;
 	private final StoreRepository storeRepository;
+	private final ProductLookup productLookup;
 	private final BeanFactory coreBeanFactory;
 	private final ReactiveAdapter reactiveAdapter;
 
 	/**
 	 * Default constructor.
-	 *
 	 * @param categoryLookup the category lookup.
 	 * @param storeRepository the store repository.
 	 * @param coreBeanFactory the core bean factory.
 	 * @param categoryService the category service.
+	 * @param productLookup the product lookup.
 	 * @param reactiveAdapter reactive adapter.
 	 */
 	@Inject
 	CategoryRepositoryImpl(
-			@Named("categoryLookup")
-			final CategoryLookup categoryLookup,
-			@Named("storeRepository")
-			final StoreRepository storeRepository,
-			@Named("coreBeanFactory")
-			final BeanFactory coreBeanFactory,
-			@Named("categoryService")
-			final CategoryService categoryService,
-			@Named("reactiveAdapter")
-			final ReactiveAdapter reactiveAdapter) {
+			@Named("categoryLookup") final CategoryLookup categoryLookup,
+			@Named("storeRepository") final StoreRepository storeRepository,
+			@Named("coreBeanFactory") final BeanFactory coreBeanFactory,
+			@Named("categoryService") final CategoryService categoryService,
+			@Named("productLookup") final ProductLookup productLookup,
+			@Named("reactiveAdapter") final ReactiveAdapter reactiveAdapter) {
 
 		this.categoryLookup = categoryLookup;
 		this.categoryService = categoryService;
 		this.coreBeanFactory = coreBeanFactory;
 		this.storeRepository = storeRepository;
+		this.productLookup = productLookup;
 		this.reactiveAdapter = reactiveAdapter;
 
 	}
@@ -118,5 +118,10 @@ public class CategoryRepositoryImpl implements CategoryRepository {
 		return reactiveAdapter.fromServiceAsSingle(() -> categoryLookup.findChildren(parent));
 	}
 
-
+	@Override
+	@CacheResult
+	public Observable<Product> getFeaturedProducts(final long categoryUid) {
+		List<Long> uids = categoryService.findFeaturedProductUidList(categoryUid);
+		return Observable.fromIterable(productLookup.findByUids(uids));
+	}
 }

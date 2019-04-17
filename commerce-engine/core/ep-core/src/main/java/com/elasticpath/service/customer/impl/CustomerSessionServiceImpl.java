@@ -49,16 +49,6 @@ public class CustomerSessionServiceImpl extends AbstractEpPersistenceServiceImpl
 	}
 
 	@Override
-	public void update(final CustomerSession customerSession) throws EpServiceException {
-
-		final CustomerSessionMemento previousCustomerSessionMemento = customerSession.getCustomerSessionMemento();
-		final CustomerSessionMemento updatedCustomerSessionMemento =
-				getPersistenceEngine().update(previousCustomerSessionMemento);
-
-		customerSession.setCustomerSessionMemento(updatedCustomerSessionMemento);
-	}
-
-	@Override
 	public void handleShopperChangeAndUpdate(final CustomerSession customerSession, final String storeCode) throws EpServiceException {
 		final Customer incomingCustomer = customerSession.getShopper().getCustomer();
 		changeShopper(customerSession, storeCode, incomingCustomer);
@@ -82,7 +72,6 @@ public class CustomerSessionServiceImpl extends AbstractEpPersistenceServiceImpl
 		// Call list of CustomerSessionShopperUpdateHandlers.
 		handleShopperUpdate(customerSession, invalidatedShopper);
 
-		getCustomerSessionService().update(customerSession);
 		cleanupShopper(invalidatedShopper, customerSession.getShopper());
 		shopperService.save(customerSession.getShopper());
 	}
@@ -101,12 +90,6 @@ public class CustomerSessionServiceImpl extends AbstractEpPersistenceServiceImpl
 		if (!currentShopper.equals(invalidatedShopper)) {
 			shopperService.removeIfOrphaned(invalidatedShopper);
 		}
-	}
-
-	@Override
-	public void updateCustomerAndSave(final CustomerSession customerSession, final Customer customer) throws EpServiceException {
-		customerSession.getShopper().setCustomer(customer);
-		update(customerSession);
 	}
 
 	/**
@@ -141,42 +124,6 @@ public class CustomerSessionServiceImpl extends AbstractEpPersistenceServiceImpl
 
 		return recreatePersistedCustomerSessionWithShopper(customerSessionMemento);
 	}
-
-
-
-	/**
-	 * Find the customer session with the given userId and storeCode. If more than
-	 * one session is found that matches the criteria, returns only one.
-	 * The Store value that is saved on the Customer is actually the store where the client was created,
-	 * is not actually the store associated with the session.
-	 * Should be used the same select that is used in <code>CustomerService.findByUserId</code>
-	 *
-	 * @param userId the customer userId
-	 * @param storeCode the code for the store in which the customer should have a session
-	 * @return the customer session if guid address exists, otherwise null
-	 * @throws EpServiceException - in case of any errors
-	 */
-	@Override
-	public CustomerSession findByCustomerIdAndStoreCode(final String userId, final String storeCode) throws EpServiceException {
-		if (userId == null || storeCode == null) {
-			throw new EpServiceException("Both CustomerId and StoreCode must be supplied.");
-		}
-
-		final List<CustomerSessionMemento> results = getPersistenceEngine()
-			.retrieveByNamedQuery("CUSTOMER_SESSION_FIND_BY_CUSTOMER_USERNAME_AND_STORE_CODE", new Object[] { userId, storeCode }, 0, 1);
-
-		if (results.isEmpty()) {
-			return null;
-		}
-
-		// get the first result. there can be more than one valid session for a given username
-		final CustomerSessionMemento customerSessionMemento = results.get(0);
-
-		// The JPQL query finds the store through the customerInternal, so both customerInternal and store must be filled.
-
-		return recreatePersistedCustomerSessionWithShopper(customerSessionMemento);
-	}
-
 
 	/**
 	 * Load the customer session with the given UID.

@@ -25,7 +25,6 @@ import com.elasticpath.commons.beanframework.BeanFactory;
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.commons.util.Utility;
 import com.elasticpath.commons.util.impl.UtilityImpl;
-import com.elasticpath.domain.attribute.Attribute;
 import com.elasticpath.domain.attribute.AttributeGroupAttribute;
 import com.elasticpath.domain.attribute.AttributeType;
 import com.elasticpath.domain.attribute.impl.AttributeGroupAttributeImpl;
@@ -41,6 +40,7 @@ import com.elasticpath.domain.catalog.Category;
 import com.elasticpath.domain.catalog.CategoryType;
 import com.elasticpath.domain.catalog.LocaleDependantFields;
 import com.elasticpath.domain.localization.LocaleFallbackPolicy;
+import com.elasticpath.domain.misc.LocalizedProperties;
 import com.elasticpath.domain.misc.impl.RandomGuidImpl;
 
 /**
@@ -123,13 +123,15 @@ public class CategoryImplTest  {
 		this.categoryType.setAttributeGroup(new AttributeGroupImpl());
 
 		final AttributeGroupAttribute caAttr1 = new AttributeGroupAttributeImpl();
-		final Attribute attr1 = new AttributeImpl();
+		final AttributeImpl attr1 = new AttributeImpl();
+		attr1.setLocalizedProperties(mock(LocalizedProperties.class));
 		attr1.setAttributeType(AttributeType.INTEGER);
 		caAttr1.setAttribute(attr1);
 		categoryType.getAttributeGroup().addAttributeGroupAttribute(caAttr1);
 
 		final AttributeGroupAttribute caAttr2 = new AttributeGroupAttributeImpl();
-		final Attribute attr2 = new AttributeImpl();
+		final AttributeImpl attr2 = new AttributeImpl();
+		attr2.setLocalizedProperties(mock(LocalizedProperties.class));
 		attr2.setAttributeType(AttributeType.SHORT_TEXT);
 		caAttr2.setAttribute(attr2);
 		categoryType.getAttributeGroup().addAttributeGroupAttribute(caAttr2);
@@ -371,8 +373,9 @@ public class CategoryImplTest  {
 	@Test
 	public void testThatExtensionClassesCanOverrideAttributeValueImplementations() {
 		AttributeImpl attribute = new AttributeImpl();
+		attribute.setLocalizedProperties(mock(LocalizedProperties.class));
 		attribute.setAttributeType(AttributeType.SHORT_TEXT);
-		attribute.setName("name");
+		attribute.setDisplayName("name", Locale.ENGLISH);
 		attribute.setKey("name");
 
 		ExtCategoryImpl category = new ExtCategoryImpl();

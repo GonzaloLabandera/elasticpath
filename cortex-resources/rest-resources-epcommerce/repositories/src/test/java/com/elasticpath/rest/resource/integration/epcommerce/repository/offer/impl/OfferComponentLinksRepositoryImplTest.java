@@ -58,8 +58,10 @@ public class OfferComponentLinksRepositoryImplTest {
 		when(storeProductRepository.findByGuid(anyString())).thenReturn(Single.just(productBundle));
 		when(itemRepository.asProductBundle(any())).thenReturn(Single.just(productBundle));
 		offerComponentLinksRepository.getElements(OfferComponentsIdentifier.builder()
-				.withOffer(OfferIdentifier.builder()
-						.withOfferId(OfferIdIdentifierPart.of(SearchRepositoryImpl.PRODUCT_GUID_KEY, "id")).withScope(ScopeIdentifierPart.of("hello")).build()).build())
+					.withOffer(OfferIdentifier.builder()
+							.withOfferId(OfferIdIdentifierPart.of(SearchRepositoryImpl.PRODUCT_GUID_KEY, "id"))
+							.withScope(ScopeIdentifierPart.of("hello")).build())
+					.build())
 				.map(identifier -> ((OfferIdentifier) identifier).getOfferId().getValue().get(SearchRepositoryImpl.PRODUCT_GUID_KEY))
 				.test()
 				.assertValue("guid");
@@ -77,8 +79,10 @@ public class OfferComponentLinksRepositoryImplTest {
 		when(storeProductRepository.findByGuid(anyString())).thenReturn(Single.just(productBundle));
 		when(itemRepository.asProductBundle(any())).thenReturn(Single.just(productBundle));
 		offerComponentLinksRepository.getElements(OfferComponentsIdentifier.builder()
-				.withOffer(OfferIdentifier.builder()
-						.withOfferId(ItemIdIdentifierPart.of(SearchRepositoryImpl.PRODUCT_GUID_KEY, "id")).withScope(ScopeIdentifierPart.of("hello")).build()).build())
+					.withOffer(OfferIdentifier.builder()
+							.withOfferId(ItemIdIdentifierPart.of(SearchRepositoryImpl.PRODUCT_GUID_KEY, "id"))
+							.withScope(ScopeIdentifierPart.of("hello")).build())
+					.build())
 				.map(identifier -> ((ItemIdentifier) identifier).getItemId().getValue().get(ItemRepository.SKU_CODE_KEY))
 				.test()
 				.assertValue("sku");

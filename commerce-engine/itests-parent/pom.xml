@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>com.elasticpath</groupId>
 		<artifactId>parent</artifactId>
-		<version>704.0.0-SNAPSHOT</version>
+		<version>0.0.0-SNAPSHOT</version>
 	</parent>
 
 	<artifactId>itests-parent</artifactId>
@@ -149,7 +149,7 @@
 										-->
 										<violationSeverity>warning</violationSeverity>
 										<logViolationsToConsole>true</logViolationsToConsole>
-										<configLocation>${checkstyle.ruleset}</configLocation>
+										<configLocation>${checkstyle.itest.ruleset}</configLocation>
 										<suppressionsLocation>${checkstyle.suppressions.location}</suppressionsLocation>
 										<suppressionsFileExpression>checkstyle.suppressions.file</suppressionsFileExpression>
 										<includeTestSourceDirectory>true</includeTestSourceDirectory>

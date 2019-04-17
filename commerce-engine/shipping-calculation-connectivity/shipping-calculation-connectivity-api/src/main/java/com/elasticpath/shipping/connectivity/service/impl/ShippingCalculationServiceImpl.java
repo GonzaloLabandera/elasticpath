@@ -15,7 +15,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-import org.apache.commons.lang.ObjectUtils;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.log4j.Logger;
 
 import com.elasticpath.base.exception.EpServiceException;
@@ -111,7 +111,7 @@ public class ShippingCalculationServiceImpl implements ShippingCalculationServic
 
 		if (LOG.isDebugEnabled()) {
 			LOG.debug(format("Getting priced shipping calculation provider for store [%s] and destination [%s]...",
-					storeCode, destination.toString()));
+					storeCode, destination));
 		}
 
 		final ShippingCalculationPlugin pricedProvider = getPricedShippingCalculationPlugin(shippableItems, destination, storeCode);

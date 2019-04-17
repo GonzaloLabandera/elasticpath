@@ -9,8 +9,11 @@ import com.elasticpath.selenium.common.AbstractPageObject;
  * RMA Editor.
  */
 public class RmaEditor extends AbstractPageObject {
-
-	private static final String EDITOR_PANE_PARENT_CSS = "div[pane-location='editor-pane'] div[active-editor='true'] ";
+	/**
+	 * RMA editor parent css.
+	 */
+	public static final String EDITOR_PANE_PARENT_CSS = "div[pane-location='editor-pane'] div[automation-id='com.elasticpath.cmclient.warehouse"
+			+ ".editors.orderreturn.OrderReturnPage'][active-editor='true'][seeable='true'] ";
 	private static final String EDITOR_BUTTON_CSS = EDITOR_PANE_PARENT_CSS + "div[widget-id='%s'][seeable='true']";
 	private static final String ITEMS_TABLE_PARENT_CSS = EDITOR_PANE_PARENT_CSS + "div[widget-id='Order Return Details Table'] ";
 	private static final String RETURNED_QUANTITY_COLUMN_CSS = ITEMS_TABLE_PARENT_CSS + "div[row-id='%s'] div[column-num='4']";

@@ -4,7 +4,7 @@ Feature: JMS publish message
   @lockAndFinalize
   Scenario: Publish change set sends a message to JMS queue
 #    Listening to JMS Queue
-    Given I am listening to ep.changesets queue
+    Given I am listening to Consumer.test.VirtualTopic.ep.changesets queue
     And I sign into CM as cs_jms
     And I create and select the newly created change set CSetCI_JMS
     And I go to Catalog Management
@@ -14,7 +14,7 @@ Feature: JMS publish message
     And I delete newly created virtual catalog
     When I lock and publish latest change set
 #    Reading from JMS Queue
-    And I read ep.changesets message from queue
+    And I read Consumer.test.VirtualTopic.ep.changesets message from queue
     Then the json guid value should be same as change set guid
     And json eventType should contain following values
       | key  | value                        |

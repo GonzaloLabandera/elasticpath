@@ -6,7 +6,7 @@
    <extension-point id="Extender" name="Extender"   schema="../com.elasticpath.cmclient.core/schema/extender.exsd"/>
    <extension-point id="StatePolicyExtender" name="StatePolicyExtender"   schema="../com.elasticpath.cmclient.core/schema/statePolicyExtender.exsd"/>
 
-   <!-- Store Perspective -->	
+   <!-- Store Perspective -->
    <extension
          point="org.eclipse.ui.perspectives">
       <perspective
@@ -33,7 +33,7 @@
               label="Store">
       </actionSet>
    </extension>
-   
+
    <!-- Store Editors -->
    <extension
          point="org.eclipse.ui.editors">
@@ -70,13 +70,13 @@
    <!-- Store Views -->
    <extension
          point="org.eclipse.ui.views">
-         
+
    <!-- Promotions Category -->
       <category
             name="%viewsCategory.name"
             id="com.elasticpath.cmclient.store.views.category">
       </category>
-      
+
    <!-- Promotions Search View -->
       <view
             category="com.elasticpath.cmclient.store.views.category"
@@ -85,7 +85,7 @@
             id="com.elasticpath.cmclient.store.views.SearchView"
             name="%searchView.name">
       </view>
-      
+
    <!-- Promotions Search Results View -->
       <view
             category="com.elasticpath.cmclient.store.promotions.views.category"
@@ -95,30 +95,30 @@
             name="%promotionsSearchResultsView.name">
       </view>
 
-   <!-- Shipping Search Results View -->      
+   <!-- Shipping Search Results View -->
       <view
             category="com.elasticpath.cmclient.store.views.category"
             class="com.elasticpath.cmclient.store.shipping.views.ShippingLevelsSearchResultsView"
             icon="icons/shipping_default_22.png"
             id="com.elasticpath.cmclient.store.shipping.views.ShippingLevelsSearchResultsView"
             name="%shippingSearchResultsView.name">
-      </view>      
+      </view>
 
-   <!-- Dynamic Content Search Results View -->      
+   <!-- Dynamic Content Search Results View -->
       <view
             category="com.elasticpath.cmclient.store.views.targetedselling"
             class="com.elasticpath.cmclient.store.targetedselling.dynamiccontent.views.DynamicContentSearchResultsView"
             icon="icons/dynamic_content.png"
             id="com.elasticpath.cmclient.store.targetedselling.dynamiccontent.views.DynamicContentSearchResultsView"
             name="%dynamicContentSearchResultsView.name">
-      </view>      
+      </view>
    <!-- Dynamic Content Delivery Search Results View -->
       <view
             category="com.elasticpath.cmclient.store.views.targetedselling"
             class="com.elasticpath.cmclient.store.targetedselling.delivery.views.DynamicContentDeliverySearchResultsView"
             icon="icons/dynamic_content_delivery.png"
             id="com.elasticpath.cmclient.store.targetedselling.delivery.views.DynamicContentDeliverySearchResultsView"
-            name="%dcaSearchResultsView.name">            
+            name="%dcaSearchResultsView.name">
       </view>
       <view
             category="com.elasticpath.cmclient.store.targetedselling.conditionalexpression"
@@ -127,10 +127,10 @@
             id="com.elasticpath.cmclient.store.targetedselling.conditionalexpression.views.ConditionalExpressionSearchResultsView"
             name="%conditionalExpressionSearchResultsView.name">
       </view>
-            
-   
+
+
    </extension>
-   
+
    <extension
          point="com.elasticpath.cmclient.core.authorizations">
       <permissions>
@@ -170,7 +170,7 @@
                 name="%manageDynamicContentDeliveryPermission.name">
           </permission>
       </permissions>
-      
+
       <activity
             id="com.elasticpath.cmclient.store.authorizations.activity"
             name="%activityPermission.name"
@@ -184,9 +184,11 @@
               locationURI="toolbar:com.elasticpath.cmclient.core.toolbars.activities?after=perspectiveMenu.pricelistmanagerItem">
             <command
                     commandId="com.elasticpath.cmclient.store.command.openPerspective"
-                    icon="icons/promotion_default_34.png"
+                    icon="icons/store_default_34.png"
                     id="perspectiveMenu.storeItem"
-                    tooltip="%storeMenu.name">
+                    label="%storeMenu.name"
+                    tooltip="%storeMenu.name"
+                    mode="FORCE_TEXT">
                <visibleWhen
                        checkEnabled="true">
                </visibleWhen>
@@ -271,9 +273,9 @@
              schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
              sequence="M3+3">
        </key>
-                  
+
     </extension>
-    
+
     <!-- This should not be used for actions. -->
     <extension
           point="org.eclipse.ui.actionSets">
@@ -381,11 +383,11 @@
              priority="10"
              statePolicy="com.elasticpath.cmclient.store.policy.DcdWizardAuthorizationStatePolicy"
              targetId="dcdWizardNewEntity">
-	   </statePolicyContribution>             
+	   </statePolicyContribution>
        <statePolicyContribution
              priority="10"
              statePolicy="com.elasticpath.cmclient.store.policy.DcdWizardStatePolicy"
-             targetId="dcdWizardNewEntity">                                       
+             targetId="dcdWizardNewEntity">
        </statePolicyContribution>
        <statePolicyContribution
              priority="10"
@@ -401,7 +403,7 @@
              priority="10"
              statePolicy="com.elasticpath.cmclient.store.policy.DcdViewSelectionStatePolicy"
              targetId="deleteDcdAction">
-       </statePolicyContribution> 
+       </statePolicyContribution>
        <statePolicyContribution
              priority="10"
              statePolicy="com.elasticpath.cmclient.store.policy.ShoppingCartPromotionAuthorizationStatePolicy"
@@ -431,5 +433,5 @@
              objectType="Dynamic Content Delivery">
        </wizard>
     </extension>
-    
+
 </plugin>

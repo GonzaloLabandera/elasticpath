@@ -32,6 +32,8 @@ import com.elasticpath.service.search.IndexType;
 public class SearchIndexExistencePredicateTest {
 
 	private static final IndexType INDEX_TYPE = IndexType.PRODUCT;
+	private static final long LONG_2 = 2L;
+	private static final long LONG_3 = 3L;
 
 	private final File indexDir = new File(".");
 
@@ -65,7 +67,7 @@ public class SearchIndexExistencePredicateTest {
 
 	@Test
 	public void verifyDirectoryDoesNotExistWhenIndexVersionIsTwo() {
-		when(indexVersionNumberSupplier.get()).thenReturn(2L);
+		when(indexVersionNumberSupplier.get()).thenReturn(LONG_2);
 
 		assertThat(searchIndexExistencePredicate.test(IndexType.PRODUCT))
 				.isFalse();
@@ -73,7 +75,7 @@ public class SearchIndexExistencePredicateTest {
 
 	@Test
 	public void verifyDirectoryExistsWhenIndexVersionGreaterThanTwo() {
-		when(indexVersionNumberSupplier.get()).thenReturn(3L);
+		when(indexVersionNumberSupplier.get()).thenReturn(LONG_3);
 
 		assertThat(searchIndexExistencePredicate.test(IndexType.PRODUCT))
 				.isTrue();

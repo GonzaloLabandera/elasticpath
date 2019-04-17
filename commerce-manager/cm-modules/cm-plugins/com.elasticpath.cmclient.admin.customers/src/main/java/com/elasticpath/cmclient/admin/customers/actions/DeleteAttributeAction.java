@@ -4,6 +4,7 @@
 package com.elasticpath.cmclient.admin.customers.actions;
 
 import java.util.List;
+import java.util.Locale;
 
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -12,6 +13,7 @@ import org.eclipse.osgi.util.NLS;
 
 import com.elasticpath.cmclient.admin.customers.AdminCustomersMessages;
 import com.elasticpath.cmclient.admin.customers.views.AttributeListView;
+import com.elasticpath.cmclient.core.CorePlugin;
 import com.elasticpath.cmclient.core.ServiceLocator;
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.attribute.Attribute;
@@ -41,12 +43,13 @@ public class DeleteAttributeAction extends Action {
 		AttributeService attributeService = ServiceLocator.getService(ContextIdNames.ATTRIBUTE_SERVICE);
 
 		Attribute attribute = listView.getSelectedAttribute();
+		Locale defaultLocale = CorePlugin.getDefault().getDefaultLocale();
 
 		Attribute attributeToEdit = attributeService.findByKey(attribute.getKey());
 		if (attributeToEdit == null) {
 			MessageDialog.openInformation(listView.getSite().getShell(), AdminCustomersMessages.get().EditAttribute,
 				NLS.bind(AdminCustomersMessages.get().ProfileAttributeNoLongerExists,
-				attribute.getKey(), attribute.getName()));
+				attribute.getKey(), attribute.getDisplayName(defaultLocale)));
 			listView.refreshViewerInput();
 			return;
 		}
@@ -55,14 +58,14 @@ public class DeleteAttributeAction extends Action {
 		if (uidsInUse.contains(attributeToEdit.getUidPk())) {
 			MessageDialog.openInformation(listView.getSite().getShell(), AdminCustomersMessages.get().ProfileAttributeInUseTitle,
 				NLS.bind(AdminCustomersMessages.get().ProfileAttributeInUseMessage,
-				attributeToEdit.getKey(), attributeToEdit.getName()));
+				attributeToEdit.getKey(), attributeToEdit.getDisplayName(defaultLocale)));
 			return;
 		}
 
 		boolean confirmed = MessageDialog.openConfirm(listView.getSite().getShell(), AdminCustomersMessages.get().DeleteProfileAttributeTitle,
 
 				NLS.bind(AdminCustomersMessages.get().DeleteProfileAttributeText,
-				attribute.getKey(), attribute.getName()));
+				attribute.getKey(), attribute.getDisplayName(defaultLocale)));
 
 		if (confirmed) {
 			attributeService.remove(attributeToEdit);

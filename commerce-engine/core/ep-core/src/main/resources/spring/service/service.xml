@@ -158,9 +158,6 @@
 		<property name="eventMessagePublisher" ref="customerEventMessagePublisher" />
 		<property name="validator" ref="validator" />
 		<property name="constraintViolationTransformer" ref="constraintViolationTransformer" />
-		<property name="userIdModeProvider">
-			<settings:setting path="COMMERCE/SYSTEM/userIdMode" />
-		</property>
 	</bean>
 
 	<bean id="customerServiceTarget" parent="customerServiceTargetTemplate"
@@ -210,15 +207,10 @@
 
 	<bean id="customerPostLoadStrategy" class="com.elasticpath.service.customer.impl.CustomerPostLoadStrategy">
 		<property name="attributeService" ref="attributeService"/>
-		<property name="customerService" ref="customerService"/>
 	</bean>
 
 	<bean id="customerProfileAttributes"
 		  factory-bean="attributeService" factory-method="getCustomerProfileAttributesMap"
-		  scope="prototype"/>
-
-	<bean id="customerUserIdMode"
-		  factory-bean="customerService" factory-method="getUserIdMode"
 		  scope="prototype"/>
 
 	<bean id="catalogPromoQueryComposerHelper" class="com.elasticpath.service.search.impl.CatalogPromoQueryComposerHelperImpl">
@@ -1565,7 +1557,7 @@
 		<property name="changeSetDao" ref="changeSetDao"/>
 		<property name="beanFactory" ref="coreBeanFactory"/>
 		<property name="changeSetEnabledProvider">
-			<settings:setting path="COMMERCE/SYSTEM/CHANGESETS/enable"/>
+			<settings:setting path="COMMERCE/SYSTEM/CHANGESETS/enable" systemPropertyOverrideKey="ep.changesets.enabled"/>
 		</property>
 	</bean>
 
@@ -2075,7 +2067,9 @@
 		<property name="orderItemPresentationBeanMapper" ref="orderItemPresentationBeanMapper" />
 	</bean>
 
-	<bean id="orderItemPresentationBeanMapper" class="com.elasticpath.sellingchannel.presentation.impl.OrderItemPresentationBeanMapperImpl"/>
+	<bean id="orderItemPresentationBeanMapper" class="com.elasticpath.sellingchannel.presentation.impl.OrderItemPresentationBeanMapperImpl">
+		<property name="beanFactory" ref="coreBeanFactory"/>
+	</bean>
 
 	<bean id="orderPresentationHelper" class="com.elasticpath.sellingchannel.presentation.impl.OrderPresentationHelperImpl">
 		<property name="orderDirector" ref="orderDirector" />
@@ -2230,7 +2224,7 @@
 		  abstract="true">
 		<property name="environmentInfoService" ref="environmentInfoService"/>
 		<property name="assetsPathProvider">
-			<settings:setting path="COMMERCE/SYSTEM/ASSETS/assetLocation"/>
+			<settings:setting path="COMMERCE/SYSTEM/ASSETS/assetLocation" systemPropertyOverrideKey="ep.asset.location"/>
 		</property>
 		<property name="cmAssetsSubfolderProvider">
 			<settings:setting path="COMMERCE/SYSTEM/ASSETS/cmAssetsSubfolder"/>
@@ -2268,6 +2262,10 @@
 		<constructor-arg ref="customerConsentService" />
 	</bean>
 
+	<bean id="inactiveShoppingCartsRemoverForShopperUpdates" class="com.elasticpath.service.shopper.impl.InactiveShoppingCartsRemoverForShopperUpdates">
+		<constructor-arg ref="shoppingCartService" />
+	</bean>
+
     <bean id="promotionCodeInvalidatorForShopperUpdates"
         class="com.elasticpath.service.shopper.impl.PromotionCodeInvalidatorForShopperUpdates" lazy-init="false">
         <constructor-arg ref="couponService" />
@@ -2282,6 +2280,7 @@
 		<ref bean="promotionCodeInvalidatorForShopperUpdates"/>
 		<ref bean="cartOrderCouponsMergerForShopperUpdates"/>
 		<ref bean="customerConsentMergerForShopperUpdates"/>
+		<ref bean="inactiveShoppingCartsRemoverForShopperUpdates"/>
 	</util:list>
 
 	<alias name="coreShopperUpdateHandlers" alias="shopperUpdateHandlers" />
@@ -2333,6 +2332,7 @@
         <property name="target" >
             <bean class="com.elasticpath.service.customer.impl.AnonymousCustomerCleanupServiceImpl" >
               <property name="shopperCleanupService" ref="shopperCleanupService" />
+              <property name="customerConsentService" ref="customerConsentService" />
               <property name="persistenceEngine" ref="persistenceEngine"/>
             </bean>
         </property>
@@ -2395,6 +2395,10 @@
 	</bean>
 
 	<bean id="warehouseDtoAssembler" class="com.elasticpath.common.dto.warehouse.WarehouseDtoAssembler">
+		<property name="beanFactory" ref="coreBeanFactory"/>
+	</bean>
+
+	<bean id="facetDtoAssembler" class="com.elasticpath.common.dto.search.FacetDtoAssembler">
 		<property name="beanFactory" ref="coreBeanFactory"/>
 	</bean>
 

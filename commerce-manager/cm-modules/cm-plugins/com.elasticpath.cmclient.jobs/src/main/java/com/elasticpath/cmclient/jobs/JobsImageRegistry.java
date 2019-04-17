@@ -22,7 +22,7 @@ public final class JobsImageRegistry extends AbstractImageRegistry {
 	public static final ImageDescriptor JOB_CREATE = getImageDescriptor(PLUGIN_ID, "csv-import-create_default_22.png"); //$NON-NLS-1$
 	
 	/** Job search .csv file Icon. * */
-	public static final ImageDescriptor JOB_SEARCH_FILE = getImageDescriptor(PLUGIN_ID, "search_default_22.png"); //$NON-NLS-1$
+	public static final ImageDescriptor JOB_SEARCH_FILE = getImageDescriptor(PLUGIN_ID, "baseline-search-22px.png"); //$NON-NLS-1$
 
 	/** Job delete Icon. * */
 	public static final ImageDescriptor JOB_DELETE = getImageDescriptor(PLUGIN_ID, "csv-import-delete_default_22.png"); //$NON-NLS-1$

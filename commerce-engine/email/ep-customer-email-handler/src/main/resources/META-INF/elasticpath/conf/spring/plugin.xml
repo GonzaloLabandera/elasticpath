@@ -21,7 +21,9 @@
 		<property name="camelId" value="ep-customer-email-handler"/>
 	</bean>
 
-	<bean id="emailPropertyHelperCustomer" scope="prototype" class="com.elasticpath.email.handler.customer.helper.impl.CustomerEmailPropertyHelperImpl"/>
+	<bean id="emailPropertyHelperCustomer" scope="prototype" class="com.elasticpath.email.handler.customer.helper.impl.CustomerEmailPropertyHelperImpl">
+		<property name="storeService" ref="storeService"/>
+	</bean>
 
 	<bean id="wishListEmailPropertyHelper" class="com.elasticpath.email.handler.customer.helper.impl.WishListEmailPropertyHelperImpl">
 		<property name="productSkuLookup" ref="productSkuLookup"/>

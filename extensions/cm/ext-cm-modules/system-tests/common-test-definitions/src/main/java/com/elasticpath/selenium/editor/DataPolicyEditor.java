@@ -40,7 +40,7 @@ public class DataPolicyEditor extends AbstractPageObject {
 	private static final String AVAILABLE_DATA_POINTS_COLUMN_CSS = AVAILABLE_DATA_POINTS_PARENT_CSS + "div[column-id='%s']";
 	private static final String ASSIGNED_DATA_POINTS_PARENT_CSS = "div[widget-id='Assigned Data Points'][widget-type='Table'] ";
 	private static final String ASSIGNED_DATA_POINTS_COLUMN_CSS = ASSIGNED_DATA_POINTS_PARENT_CSS + "div[column-id='%s']";
-	private static final String MOVE_RIGHT_BUTTON_CSS = DATA_POLICY_EDITOR_PARENT_CSS + "div[widget-id='>']";
+	private static final String MOVE_RIGHT_BUTTON_CSS = DATA_POLICY_EDITOR_PARENT_CSS + "div[widget-id='Add']";
 	private static final String DATA_POLICY_SEGMENT_INPUT_CSS = DATA_POLICY_EDITOR_FIELD_PARENT_CSS + ".DataPolicyEditor_SegmentsPage_Dialog_Title']"
 			+ " input";
 	private static final String ADD_SEGMENT_BUTTON_CSS = DATA_POLICY_EDITOR_PARENT_CSS + "div[widget-id='Add Segment']";

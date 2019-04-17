@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013 Elastic Path Software Inc. All rights reserved.
+ * Copyright © 2019 Elastic Path Software Inc. All rights reserved.
  */
 package com.elasticpath.rest.relos.rs.authentication.springoauth2.transformer.impl;
 
@@ -25,7 +25,7 @@ import com.elasticpath.domain.auth.impl.OAuth2AccessTokenMementoImpl;
 import com.elasticpath.rest.ResourceTypeFactory;
 import com.elasticpath.rest.command.ExecutionResultFactory;
 import com.elasticpath.rest.identity.TestRoleConstants;
-import com.elasticpath.rest.relos.rs.authentication.springoauth2.dto.AccessTokenDto;
+import com.elasticpath.rest.relos.rs.authentication.dto.AccessTokenDto;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.oauth2.OAuth2AccessTokenRepository;
 
 /**

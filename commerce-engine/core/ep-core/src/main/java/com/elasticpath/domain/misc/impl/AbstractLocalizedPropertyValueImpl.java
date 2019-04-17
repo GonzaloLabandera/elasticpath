@@ -37,6 +37,10 @@ import com.elasticpath.persistence.support.FetchGroupConstants;
 	@FetchGroup(name = FetchGroupConstants.PRODUCT_SKU_INDEX, attributes = { 
 			@FetchAttribute(name = "localizedPropertyKey"),
 			@FetchAttribute(name = "value")
+	}),
+	@FetchGroup(name = FetchGroupConstants.CATEGORY_ATTRIBUTES, attributes = {
+			@FetchAttribute(name = "localizedPropertyKey"),
+			@FetchAttribute(name = "value")
 	})
 })
 public abstract class AbstractLocalizedPropertyValueImpl extends AbstractPersistableImpl implements LocalizedPropertyValue {

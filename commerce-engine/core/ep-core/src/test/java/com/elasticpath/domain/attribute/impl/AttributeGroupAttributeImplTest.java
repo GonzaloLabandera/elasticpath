@@ -7,10 +7,16 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
+import java.util.Locale;
+
 import org.junit.Before;
 import org.junit.Test;
 
 import com.elasticpath.domain.attribute.Attribute;
+import com.elasticpath.domain.misc.LocalizedProperties;
+import com.elasticpath.domain.misc.LocalizedPropertyValue;
+import com.elasticpath.domain.misc.impl.AttributeLocalizedPropertyValueImpl;
+import com.elasticpath.domain.misc.impl.LocalizedPropertiesImpl;
 
 /**
  * Test <code>AttributeGroupAttributeImpl</code>.
@@ -48,7 +54,7 @@ public class AttributeGroupAttributeImplTest {
 	public void testSetAttribute() {
 		final Attribute attributeImpl = new AttributeImpl();
 		productTypeAttribute1.setAttribute(attributeImpl);
-		assertEquals(attributeImpl, productTypeAttribute1.getAttribute());		
+		assertEquals(attributeImpl, productTypeAttribute1.getAttribute());
 	}
 
 	/**
@@ -85,13 +91,27 @@ public class AttributeGroupAttributeImplTest {
 		productTypeAttribute2.setOrdering(ordering);
 
 		final Attribute attribute1 = new AttributeImpl();
-		attribute1.setName("key1");
+		attribute1.setLocalizedProperties(createLocalizedProperties());
+		attribute1.setDisplayName("key1", Locale.ENGLISH);
 		productTypeAttribute1.setAttribute(attribute1);
 
 		final Attribute attribute2 = new AttributeImpl();
-		attribute2.setName("key2");
+		attribute2.setLocalizedProperties(createLocalizedProperties());
+		attribute2.setDisplayName("key2", Locale.ENGLISH);
 		productTypeAttribute2.setAttribute(attribute2);
 
 		assertTrue(productTypeAttribute1.compareTo(productTypeAttribute2) < 0);
+	}
+
+	private LocalizedProperties createLocalizedProperties() {
+		final LocalizedProperties localizedProperties = new LocalizedPropertiesImpl() {
+			static final long serialVersionUID = -1L;
+
+			@Override
+			protected LocalizedPropertyValue getNewLocalizedPropertyValue() {
+				return new AttributeLocalizedPropertyValueImpl();
+			}
+		};
+		return localizedProperties;
 	}
 }

@@ -34,20 +34,23 @@ public class FormEntityToCustomerEnhancerImplTest {
 
 	private static final String LAST_NAME = "Doe";
 	private static final String FIST_NAME = "John";
+	private static final String USERNAME = "john@doe.com";
+	private static final String PASSWORD = "password";
 
 	@Test
 	public void registrationEntityToCustomerShouldReturnCustomerWithFirstNameLastNamePasswordEmail() {
 		when(registrationEntity.getFamilyName()).thenReturn(LAST_NAME);
 		when(registrationEntity.getGivenName()).thenReturn(FIST_NAME);
-		when(registrationEntity.getPassword()).thenReturn("password");
-		when(registrationEntity.getUsername()).thenReturn("john@doe.com");
+		when(registrationEntity.getPassword()).thenReturn(PASSWORD);
+		when(registrationEntity.getUsername()).thenReturn(USERNAME);
 
 		formEntityToCustomerEnhancer.registrationEntityToCustomer(registrationEntity, customer);
 
 		verify(customer).setLastName(LAST_NAME);
 		verify(customer).setFirstName(FIST_NAME);
 		verify(customer).setClearTextPassword("password");
-		verify(customer).setEmail("john@doe.com");
+		verify(customer).setUserId(USERNAME);
+		verify(customer).setEmail(USERNAME);
 	}
 
 }

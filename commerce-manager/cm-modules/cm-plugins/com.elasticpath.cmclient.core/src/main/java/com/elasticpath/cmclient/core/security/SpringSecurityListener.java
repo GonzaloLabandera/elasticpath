@@ -5,8 +5,10 @@ package com.elasticpath.cmclient.core.security;
 
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationListener;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.LockedException;
 import org.springframework.security.authentication.event.AuthenticationFailureBadCredentialsEvent;
+import org.springframework.security.core.AuthenticationException;
 
 import com.elasticpath.domain.cmuser.CmUser;
 import com.elasticpath.service.cmuser.CmUserService;
@@ -24,15 +26,28 @@ public class SpringSecurityListener implements ApplicationListener<ApplicationEv
 		if (event instanceof AuthenticationFailureBadCredentialsEvent) {
 			final AuthenticationFailureBadCredentialsEvent badCredentialsEvent = (AuthenticationFailureBadCredentialsEvent) event;
 
+			handleBadCredentialsEvent(badCredentialsEvent);
+		}
+
+	}
+
+	private void handleBadCredentialsEvent(final AuthenticationFailureBadCredentialsEvent badCredentialsEvent) {
+		final AuthenticationException exception = badCredentialsEvent.getException();
+		final String userName = badCredentialsEvent.getAuthentication().getPrincipal().toString();
+		if (exception instanceof BadCredentialsException && userName != null) {
+
+			handleCmUserFailedLoginAttempt(userName);
 			final CmUser cmUser = (CmUser) badCredentialsEvent.getAuthentication().getDetails();
 			if (cmUser != null) {
-				cmUser.addFailedLoginAttempt();
-				cmUserService.update(cmUser);
-				
 				handleLastAttempt(cmUser);
 			}
 		}
+	}
 
+	private void handleCmUserFailedLoginAttempt(final String userName) {
+		if (userName != null) {
+			cmUserService.addFailedLoginAttempt(userName);
+		}
 	}
 
 	private void handleLastAttempt(final CmUser cmUser) {

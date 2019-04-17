@@ -3,18 +3,22 @@
  */
 package com.elasticpath.settings.beanframework;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.config.AbstractFactoryBean;
 
 import com.elasticpath.settings.SettingsReader;
 import com.elasticpath.settings.domain.SettingValue;
+import com.elasticpath.settings.impl.OverridingSettingValueImpl;
 
 /**
  * Reads EP setting values as a Spring bean.
  */
 public class SettingFactoryBean extends AbstractFactoryBean<String> {
+
+	private static final Logger LOG = Logger.getLogger(SettingFactoryBean.class);
 
 	/**
 	 * The @Autowired is necessary as otherwise we do not get the settings reader injected in time for createInstance().
@@ -27,6 +31,10 @@ public class SettingFactoryBean extends AbstractFactoryBean<String> {
 
 	private String context;
 
+	private String systemPropertyOverrideKey;
+
+	private String systemPropertyOverrideValue;
+
 	@Override
 	public Class<?> getObjectType() {
 		return String.class;
@@ -38,10 +46,14 @@ public class SettingFactoryBean extends AbstractFactoryBean<String> {
 			throw new IllegalStateException("Path property must be set prior to invoking this method");
 		}
 
-		final SettingValue settingValue = getSettingValue();
+		SettingValue settingValue = getSettingValue();
 
 		if (settingValue == null) {
 			throw new IllegalArgumentException("Failed to load setting " + path + " in context " + context);
+		}
+
+		if (systemPropertyOverrideKey != null) {
+			settingValue = applyPossibleSystemPropertyOverride(settingValue);
 		}
 
 		return settingValue.getValue();
@@ -53,6 +65,25 @@ public class SettingFactoryBean extends AbstractFactoryBean<String> {
 		}
 
 		return settingsReader.getSettingValue(path);
+	}
+
+	private SettingValue applyPossibleSystemPropertyOverride(final SettingValue settingValue) {
+
+		if (systemPropertyOverrideValue == null) {
+			final String overrideValue = System.getProperty(systemPropertyOverrideKey);
+			if (StringUtils.isNotEmpty(overrideValue)) {
+				systemPropertyOverrideValue = overrideValue;
+				LOG.info(
+						String.format("Setting override applied for path: '%s', context: '%s' and systemPropertyOverrideKey: '%s'",
+								path,
+								context == null ? "" : context,
+								systemPropertyOverrideKey));
+			}
+		}
+		if (systemPropertyOverrideValue != null) {
+			return new OverridingSettingValueImpl(settingValue, systemPropertyOverrideValue);
+		}
+		return settingValue;
 	}
 
 	/**
@@ -80,6 +111,10 @@ public class SettingFactoryBean extends AbstractFactoryBean<String> {
 
 	protected void setSettingsReader(final SettingsReader settingsReader) {
 		this.settingsReader = settingsReader;
+	}
+
+	public void setSystemPropertyOverrideKey(final String systemPropertyOverrideKey) {
+		this.systemPropertyOverrideKey = systemPropertyOverrideKey;
 	}
 
 }

@@ -46,7 +46,7 @@ public class CustomerConsentExporterImpl extends AbstractExporterImpl<CustomerCo
 	protected void initializeExporter(final ExportContext context) throws ConfigurationException {
 		customerConsentGuids = new ArrayList<>();
 
-		for (CustomerConsent customerConsent : customerConsentService.list()) {
+		for (CustomerConsent customerConsent : customerConsentService.listHistory()) {
 			customerConsentGuids.add(customerConsent.getGuid());
 		}
 		LOG.info("The list for " + customerConsentGuids.size() + " customer consent(s) is retrieved from the database.");

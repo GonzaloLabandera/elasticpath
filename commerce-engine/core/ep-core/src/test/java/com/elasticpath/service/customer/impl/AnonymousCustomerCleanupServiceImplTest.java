@@ -18,6 +18,7 @@ import org.junit.Test;
 
 import com.elasticpath.base.exception.EpServiceException;
 import com.elasticpath.persistence.api.PersistenceEngine;
+import com.elasticpath.service.datapolicy.CustomerConsentService;
 import com.elasticpath.service.shopper.ShopperCleanupService;
 
 /**
@@ -28,6 +29,7 @@ public class AnonymousCustomerCleanupServiceImplTest {
 	private AnonymousCustomerCleanupServiceImpl anonymousCustomerCleanupServiceImpl;
 	private PersistenceEngine persistenceEngine;
 	private ShopperCleanupService shopperCleanupService;
+	private CustomerConsentService customerConsentService;
 
 	@Rule
 	public final JUnitRuleMockery context = new JUnitRuleMockery();
@@ -39,9 +41,11 @@ public class AnonymousCustomerCleanupServiceImplTest {
 	public void initializeObjectUnderTestWithMocks() {
 		persistenceEngine = context.mock(PersistenceEngine.class);
 		shopperCleanupService = context.mock(ShopperCleanupService.class);
+		customerConsentService = context.mock(CustomerConsentService.class);
 		anonymousCustomerCleanupServiceImpl = new AnonymousCustomerCleanupServiceImpl();
 		anonymousCustomerCleanupServiceImpl.setPersistenceEngine(persistenceEngine);
 		anonymousCustomerCleanupServiceImpl.setShopperCleanupService(shopperCleanupService);
+		anonymousCustomerCleanupServiceImpl.setCustomerConsentService(customerConsentService);
 	}
 
 	/**
@@ -92,6 +96,8 @@ public class AnonymousCustomerCleanupServiceImplTest {
 
 				allowing(shopperCleanupService).removeShoppersByUidListAndTheirDependents(shopperUidsToDelete);
 				will(returnValue(shopperUidsToDelete.size()));
+
+				allowing(customerConsentService).deleteByCustomerUids(customerUidsToDelete);
 
 				allowing(persistenceEngine).executeNamedQueryWithList("DELETE_CUSTOMER_BY_UID_LIST", "list", customerUidsToDelete);
 				will(returnValue(customerUidsToDelete.size()));

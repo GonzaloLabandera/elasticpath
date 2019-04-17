@@ -24,7 +24,7 @@ public class OfferComponentsPrototype implements OfferComponentsResource.Read {
 	private final LinksRepository<OfferComponentsIdentifier, ResourceIdentifier> repository;
 
 	/**
-	 * Constructor
+	 * Constructor.
 	 *
 	 * @param offerComponentsIdentifier identifier
 	 * @param repository                repository

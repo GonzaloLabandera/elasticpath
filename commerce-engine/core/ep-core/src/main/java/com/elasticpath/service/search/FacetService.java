@@ -55,6 +55,16 @@ public interface FacetService extends EpPersistenceService {
 	List<Facet> findAllFacetsForStore(String storeCode, Locale defaultLocale) throws EpServiceException;
 
 	/**
+	 * Finds a facets in store by businessObjectId.
+	 *
+	 * @param storeCode the store code
+	 * @param businessObjectId tbusinessObjectId.
+	 * @return a facet.
+	 * @throws EpServiceException in case of any errors.
+	 */
+	Facet findFacetByStoreAndBusinessObjectId(String storeCode, String businessObjectId) throws EpServiceException;
+
+	/**
 	 * Finds all searchable facets in store and set the localized display name for the given locale.
 	 *
 	 * @param storeCode the store code
@@ -64,7 +74,8 @@ public interface FacetService extends EpPersistenceService {
 	List<Facet> findAllFacetableFacetsForStore(String storeCode) throws EpServiceException;
 
 	/**
-	 * Finds all searchable attributes
+	 * Finds all searchable attributes.
+	 *
 	 * @param storeCode store code
 	 * @return attributes that are searchable
 	 */
@@ -98,4 +109,17 @@ public interface FacetService extends EpPersistenceService {
 	 * @return facet object
 	 */
 	Facet findByGuid(String facetGuid);
+
+	/**
+	 * Find facets with guids in the list.
+	 * @param facetGuids guids
+	 * @return Facets
+	 */
+	List<Facet> findByGuids(List<String> facetGuids);
+
+	/**
+	 * Get all facet guids.
+	 * @return guids
+	 */
+	List<String> findAllGuids();
 }

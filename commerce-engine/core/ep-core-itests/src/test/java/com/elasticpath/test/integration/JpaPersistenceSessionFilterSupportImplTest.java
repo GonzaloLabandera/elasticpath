@@ -7,9 +7,10 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertSame;
 
-import org.apache.log4j.Logger;
 import org.junit.Before;
 import org.junit.Test;
+
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
@@ -101,6 +102,7 @@ public class JpaPersistenceSessionFilterSupportImplTest extends BasicSpringConte
 
 	private Customer createPersistedCustomer(final String emailAddress, final Store store) {
 		final Customer customer = beanFactory.getBean(ContextIdNames.CUSTOMER);
+		customer.setUserId(emailAddress);
 		customer.setEmail(emailAddress);
 		customer.setStoreCode(store.getCode());
 		customer.setAnonymous(false);

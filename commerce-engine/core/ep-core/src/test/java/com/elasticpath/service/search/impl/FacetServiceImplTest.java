@@ -18,7 +18,7 @@ import com.elasticpath.domain.search.impl.FacetImpl;
 import com.elasticpath.test.jmock.AbstractEPServiceTestCase;
 
 /**
- * Test case for {@link FacetServiceImpl}
+ * Test case for {@link FacetServiceImpl}.
  */
 public class FacetServiceImplTest extends AbstractEPServiceTestCase {
 

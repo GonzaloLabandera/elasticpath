@@ -44,13 +44,13 @@ public class DataPopulationCoreTest extends AbstractDataPopulationTestSetup {
 	public ExpectedException expectedException = ExpectedException.none();
 
 	@After
-	public void deleteTemporaryDirectories() throws IOException{
+	public void deleteTemporaryDirectories() throws IOException {
 		FileUtils.deleteDirectory(getWorkingDirectory());
 		FileUtils.deleteDirectory(getOutputDirectory());
 	}
 
 	@Test
-	public void testFilterDataActionWillRun() throws IOException {
+	public void testFilterDataActionWillRun() {
 		FilterActionConfiguration actionConfigurer = new FilterActionConfiguration();
 		actionConfigurer.setFilterOutputDirectory(getOutputDirectory());
 		getCore().getDataPopulationContext().setActionConfiguration(actionConfigurer);
@@ -58,7 +58,7 @@ public class DataPopulationCoreTest extends AbstractDataPopulationTestSetup {
 	}
 
 	@Test
-	public void testResetDatabaseActionWillRun() throws IOException {
+	public void testResetDatabaseActionWillRun() {
 		getCore().runActionExecutor(RESET_DATABASE_CLI_COMMAND);
 	}
 

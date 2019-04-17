@@ -30,4 +30,16 @@ Tree {
 
 		}
 	}
+	&Item {
+		background-image: none;
+		color: #000;
+		&:selected, &:hover {
+			background-color: #f6e6b5;
+		}
+	}
+	&-RowOverlay {
+		&:hover, &:selected {
+			background-color: #f6e6b5;
+		}
+	}
 }

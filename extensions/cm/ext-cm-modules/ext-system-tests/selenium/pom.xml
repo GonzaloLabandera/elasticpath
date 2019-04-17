@@ -134,6 +134,10 @@
 						</goals>
 						<configuration>
 							<forkCount>${failsafe.fork.count}</forkCount>
+							<systemPropertyVariables>
+								<ep.rest.baseurl>${ep.rest.baseurl}</ep.rest.baseurl>
+								<ep.rest.authtype>${ep.rest.authtype}</ep.rest.authtype>
+							</systemPropertyVariables>
 						</configuration>
 					</execution>
 				</executions>

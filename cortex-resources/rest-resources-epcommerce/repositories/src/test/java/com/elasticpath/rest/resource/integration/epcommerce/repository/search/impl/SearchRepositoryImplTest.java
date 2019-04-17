@@ -3,13 +3,18 @@
  */
 package com.elasticpath.rest.resource.integration.epcommerce.repository.search.impl;
 
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Currency;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 import java.util.stream.IntStream;
 
 import io.reactivex.Maybe;
@@ -21,18 +26,29 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import com.elasticpath.domain.catalog.Catalog;
+import com.elasticpath.domain.catalog.Category;
 import com.elasticpath.domain.catalog.Product;
 import com.elasticpath.domain.catalog.impl.ProductImpl;
+import com.elasticpath.domain.search.Facet;
+import com.elasticpath.domain.store.Store;
 import com.elasticpath.persistence.api.EpPersistenceException;
 import com.elasticpath.rest.ResourceOperationFailure;
 import com.elasticpath.rest.ResourceStatus;
 import com.elasticpath.rest.definition.searches.SearchKeywordsEntity;
+import com.elasticpath.rest.identity.Subject;
+import com.elasticpath.rest.identity.attribute.LocaleSubjectAttribute;
+import com.elasticpath.rest.identity.attribute.SubjectAttribute;
+import com.elasticpath.rest.resource.ResourceOperationContext;
+import com.elasticpath.rest.resource.integration.epcommerce.repository.category.CategoryRepository;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.item.ItemRepository;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.pagination.PaginatedResult;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.product.StoreProductRepository;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.settings.SettingsRepository;
+import com.elasticpath.rest.resource.integration.epcommerce.repository.store.StoreRepository;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.transform.ExceptionTransformer;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.transform.impl.ReactiveAdapterImpl;
+import com.elasticpath.service.search.FacetService;
 import com.elasticpath.service.search.ProductCategorySearchCriteria;
 import com.elasticpath.service.search.index.IndexSearchResult;
 import com.elasticpath.service.search.index.IndexSearchService;
@@ -47,7 +63,8 @@ public class SearchRepositoryImplTest {
 	private static final String STORE_CODE = "store";
 	private static final String PAGINATION_SETTING = "COMMERCE/STORE/listPagination";
 	private static final Integer DEFAULT_PAGE_SIZE = 10;
-
+	private static final int INVALID_PAGE_SIZE = -10;
+	private static final String EXPECTED_DISPLAY_NAME = "expectedDisplayName";
 	@Mock
 	private IndexSearchService indexSearchService;
 	@Mock
@@ -63,6 +80,16 @@ public class SearchRepositoryImplTest {
 	@SuppressWarnings({"PMD.UnusedPrivateField"})
 	@Mock
 	private ExceptionTransformer exceptionTransformer;
+	@Mock
+	private ResourceOperationContext resourceOperationContext;
+	@Mock
+	private FacetService facetService;
+	@Mock
+	private StoreRepository storeRepository;
+	@Mock
+	private CategoryRepository categoryRepository;
+
+
 	@InjectMocks
 	private ReactiveAdapterImpl reactiveAdapter;
 
@@ -77,6 +104,10 @@ public class SearchRepositoryImplTest {
 		repository.setReactiveAdapter(reactiveAdapter);
 		repository.setSettingsRepository(settingsRepository);
 		repository.setStoreProductRepository(storeProductRepository);
+		repository.setResourceOperationContext(resourceOperationContext);
+		repository.setFacetService(facetService);
+		repository.setStoreRepository(storeRepository);
+		repository.setCategoryRepository(categoryRepository);
 	}
 
 	@Test
@@ -126,8 +157,8 @@ public class SearchRepositoryImplTest {
 									   final int numberOfSearchResultsToReturn) {
 		final List<Long> resultUids = Collections.emptyList();
 
-		when(indexSearchService.search(searchCriteria)).thenReturn(indexSearchResult);
-		when(indexSearchResult.getResults(page - 1, pageSize)).thenReturn(resultUids);
+		when(indexSearchService.search(searchCriteria, page - 1, pageSize)).thenReturn(indexSearchResult);
+		when(indexSearchResult.getCachedResultUids()).thenReturn(resultUids);
 		when(indexSearchResult.getLastNumFound()).thenReturn(numberOfSearchResultsToReturn);
 
 		return resultUids;
@@ -192,8 +223,7 @@ public class SearchRepositoryImplTest {
 		final int pageSize = 10;
 		final ProductCategorySearchCriteria searchCriteria = new KeywordSearchCriteria();
 
-		when(indexSearchService.search(searchCriteria)).thenReturn(indexSearchResult);
-		when(indexSearchResult.getResults(page - 1, pageSize))
+		when(indexSearchService.search(searchCriteria, page - 1, pageSize))
 				.thenThrow(new EpPersistenceException("persistence exception during search"));
 
 		repository.searchForItemIds(page, pageSize, searchCriteria)
@@ -207,8 +237,7 @@ public class SearchRepositoryImplTest {
 		final int pageSize = 10;
 		final ProductCategorySearchCriteria searchCriteria = new KeywordSearchCriteria();
 
-		when(indexSearchService.search(searchCriteria)).thenReturn(indexSearchResult);
-		when(indexSearchResult.getResults(page - 1, pageSize))
+		when(indexSearchService.search(searchCriteria, page - 1, pageSize))
 				.thenThrow(new EpPersistenceException("persistence exception during search"));
 
 		repository.searchForProductIds(searchCriteria, page, pageSize)
@@ -292,7 +321,7 @@ public class SearchRepositoryImplTest {
 
 	@Test
 	public void shouldNotValidateEntityForInvalidPageSize() {
-		repository.validate(SearchKeywordsEntity.builder().withKeywords("a").withPageSize(-10).build())
+		repository.validate(SearchKeywordsEntity.builder().withKeywords("a").withPageSize(INVALID_PAGE_SIZE).build())
 				.test()
 				.assertError(ResourceOperationFailure.class)
 				.assertError(throwable -> ResourceStatus.BAD_REQUEST_BODY.equals(
@@ -304,6 +333,64 @@ public class SearchRepositoryImplTest {
 		repository.validate(SearchKeywordsEntity.builder().withKeywords("a").withPageSize(null).build())
 				.test()
 				.assertComplete();
+	}
+	@Test
+	public void testGetDisplayNameByGuid() {
+		Subject mockSubject = mock(Subject.class);
+		when(resourceOperationContext.getSubject()).thenReturn(mockSubject);
+		LocaleSubjectAttribute localeSubjectAttribute = new LocaleSubjectAttribute("key", Locale.ENGLISH);
+		Collection<SubjectAttribute> attributes = Collections.singleton(localeSubjectAttribute);
+		when(mockSubject.getAttributes()).thenReturn(attributes);
+
+
+		String guid = "guid";
+		Facet facet = mock(Facet.class);
+		when(facetService.findByGuid(guid)).thenReturn(facet);
+		Map<String, String> displayNameMap = new HashMap<>();
+		displayNameMap.put(Locale.ENGLISH.toString(), EXPECTED_DISPLAY_NAME);
+		when(facet.getDisplayNameMap()).thenReturn(displayNameMap);
+
+		repository.getDisplayNameByGuid(guid)
+				.test()
+				.assertComplete()
+				.assertValue(EXPECTED_DISPLAY_NAME);
+	}
+
+	@Test
+	public void testGetSearchCriteria() {
+		Map<String, String> appliedFacets = new HashMap<>();
+		String keyword = "KEYWORD";
+		long categoryUID = 1L;
+		Currency currency = Currency.getInstance("CAD");
+
+		Store store = mock(Store.class);
+		Category category = mock(Category.class);
+		Catalog catalog = mock(Catalog.class);
+
+
+		when(storeRepository.findStoreAsSingle(STORE_CODE))
+				.thenReturn(Single.just(store));
+		when(storeRepository.findStoreAsSingle(STORE_CODE))
+				.thenReturn(Single.just(store));
+
+		when(store.getCode()).thenReturn(STORE_CODE);
+		when(categoryRepository.findByStoreAndCategoryCode(STORE_CODE,
+				"categoryCode")).thenReturn(Single.just(category));
+		when(category.getUidPk()).thenReturn(categoryUID);
+		when(category.getCatalog()).thenReturn(catalog);
+		when(catalog.getCode()).thenReturn("CatalogCode");
+
+
+		Single<ProductCategorySearchCriteria> categoryCode = repository.getSearchCriteria("categoryCode", STORE_CODE, Locale.ENGLISH,
+				currency, appliedFacets, keyword);
+		categoryCode
+				.test()
+				.assertNoErrors()
+				.assertValue(criteria -> criteria.getCategoryUid().equals(categoryUID))
+				.assertValue(criteria -> criteria.getCurrency().equals(currency))
+				.assertValue(criteria -> criteria.getLocale().equals(Locale.ENGLISH))
+				.assertValue(criteria -> criteria.getCatalogCode().equals("CatalogCode"));
+
 	}
 
 }

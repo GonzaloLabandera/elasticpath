@@ -677,9 +677,7 @@ public abstract class AbstractShoppingItemImpl extends AbstractLegacyEntityImpl 
 	public void setBundleItems(final List<ShoppingItem> bundleItems) {
 		this.getChildItemsInternal().clear();
 		if (bundleItems != null) {
-			for (ShoppingItem item : bundleItems) {
-				getChildItemsInternal().add(item);
-			}
+			getChildItemsInternal().addAll(bundleItems);
 		}
 	}
 

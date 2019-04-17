@@ -5,7 +5,7 @@
 
 	<configuration_setting>
 		<name_space>COMMERCE/SYSTEM/SEARCH/searchHost</name_space>
-		<description>The search server's URL. If this is not set correctly, searching and browsing in the storefront and in Commerce Manager will not work. For a search server cluster, this setting must contain two values. The default value must be set to the load balancer URL. A defined value with the context set to 'master' must be set to the master search server URL.</description>
+		<description>DEPRECATED (Use -Dep.search.default.url and -Dep.search.master.url system properties) The search server's URL. If this is not set correctly, searching and browsing in the Cortex and in Commerce Manager will not work. For a search server cluster, this setting must contain two values. The default value must be set to the load balancer URL. A defined value with the context set to 'master' must be set to the master search server URL.</description>
 		<default_value type="url">${ep.search.url}</default_value>
 		<max_overrides>-1</max_overrides>
 		<setting_metadata>
@@ -16,8 +16,8 @@
 
 	<configuration_setting>
 		<name_space>COMMERCE/SYSTEM/ASSETS/assetLocation</name_space>
-		<description>The path to the directory that contains assets required by the application, including images, theme files, and digital goods.</description>
-		<default_value type="String">${ep.local.asset.path}</default_value>
+		<description>DEPRECATED (Use -Dep.asset.location system property) The path to the directory that contains assets required by the application, including images, theme files, and digital goods.</description>
+		<default_value type="String">${ep.local.asset.path:/ep/assets}</default_value>
 		<max_overrides>1</max_overrides>
 		<setting_metadata>
 			<value key="environmentSpecific">false</value>
@@ -27,7 +27,7 @@
 
 	<configuration_setting>
 		<name_space>COMMERCE/SYSTEM/EMAIL/mailHost</name_space>
-		<description>The host name of the email server.</description>
+		<description>DEPRECATED (Use -Dep.smtp.host system property) The host name of the email server.</description>
 		<default_value type="String">${ep.smtp.host:localhost}</default_value>
 		<max_overrides>1</max_overrides>
 		<setting_metadata>
@@ -37,11 +37,22 @@
 
 	<configuration_setting>
 		<name_space>COMMERCE/SYSTEM/EMAIL/mailPort</name_space>
-		<description>The listener port of the email server.</description>
+		<description>DEPRECATED (Use -Dep.smtp.port system property) The listener port of the email server.</description>
 		<default_value type="Integer">25</default_value>
 		<max_overrides>1</max_overrides>
 		<setting_metadata>
 			<value key="environmentSpecific">true</value>
+		</setting_metadata>
+	</configuration_setting>
+
+	<configuration_setting>
+		<name_space>COMMERCE/SYSTEM/CHANGESETS/enable</name_space>
+		<description>WARNING (Can be overridden at runtime with -Dep.changesets.enabled system property) Determines whether change sets are enabled. When set to true, CM users can add objects to a change set to prevent others from editing them. Setting this to false will disable the feature.</description>
+		<default_value type="Boolean">${ep.changesets.enabled:false}</default_value>
+		<max_overrides>1</max_overrides>
+		<setting_metadata>
+			<value key="environmentSpecific">false</value>
+			<value key="apiRefreshStrategy">interval:timeout=COMMERCE/Cache/Cache_1</value>
 		</setting_metadata>
 	</configuration_setting>
 

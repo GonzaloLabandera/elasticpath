@@ -59,14 +59,15 @@ class WishList extends CommonMethods {
 
 	static void verifyWishListItemsBySkuCode(List<String> skuCodeList) {
 		CortexResponse.wishListResponse = null
-		getDefaultWishList()
-		LineItems.verifyLineItemsBySkuCode(skuCodeList)
+		for(String skuCode : skuCodeList) {
+			getDefaultWishList()
+			LineItems.verifyLineItemsBySkuCode(skuCode)
+		}
 	}
 
 	static void verifyWishListItemsBySkuCode(def skuCode) {
-		List<String> skuList = new ArrayList<>()
-		skuList.add(skuCode)
-		verifyWishListItemsBySkuCode(skuList)
+		getDefaultWishList()
+		LineItems.verifyLineItemsBySkuCode(skuCode)
 	}
 
 	static void findWishListElementBySkuCode(def skuCode) {

@@ -30,11 +30,11 @@ import com.elasticpath.service.rules.dao.CouponUsageDao;
 @SuppressWarnings({ "PMD.AvoidDuplicateLiterals", "PMD.GodClass" })
 public class CouponUsageDaoImpl extends AbstractDaoImpl implements CouponUsageDao {
 
-	public static final String CANNOT_RETRIEVE_NULL_COUPON_CODE = "Cannot retrieve null coupon code.";
+	private static final String CANNOT_RETRIEVE_NULL_COUPON_CODE = "Cannot retrieve null coupon code.";
+	private static final String PER_COUPON_USAGE = "perCouponUsage";
+
 	private PersistenceEngine persistenceEngine;
 	private TimeService timeService;
-
-	private static final String PER_COUPON_USAGE = "perCouponUsage";
 
 	@Override
 	public CouponUsage get(final long couponUsageUid) throws EpPersistenceException {

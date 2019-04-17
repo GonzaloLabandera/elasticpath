@@ -110,18 +110,13 @@ public class ClearingCartOrderShippingInformationSanitizer implements CartOrderS
 		if (shoppingCart.getCustomerSession() == null) {
 
 			final String storeCode = shopper.getStoreCode();
-			CustomerSession result = getCustomerSessionService().findByCustomerIdAndStoreCode(shopper.getCustomer().getUserId(), storeCode);
+			CustomerSession result = getCustomerSessionService().createWithShopper(shopper);
 
-			if (result == null) {
-				result = getCustomerSessionService().createWithShopper(shopper);
+			final Store store = getStoreService().findStoreWithCode(storeCode);
+			result.setLocale(store.getDefaultLocale());
 
-				final Store store = getStoreService().findStoreWithCode(storeCode);
-				result.setLocale(store.getDefaultLocale());
+			getCustomerSessionService().initializeCustomerSessionForPricing(result, storeCode, store.getDefaultCurrency());
 
-				getCustomerSessionService().initializeCustomerSessionForPricing(result, storeCode, store.getDefaultCurrency());
-			} else {
-				shopper.updateTransientDataWith(result);
-			}
 		}
 	}
 

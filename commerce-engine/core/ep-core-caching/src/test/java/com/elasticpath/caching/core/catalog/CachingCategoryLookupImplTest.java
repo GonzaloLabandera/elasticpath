@@ -12,24 +12,21 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
-import static com.elasticpath.caching.core.catalog.CachingCategoryLookupImpl.CACHE_KEY_COMPOUND_GUID;
-import static com.elasticpath.caching.core.catalog.CachingCategoryLookupImpl.CACHE_KEY_GUID;
-import static com.elasticpath.caching.core.catalog.CachingCategoryLookupImpl.CACHE_KEY_UIDPK;
-
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import com.google.common.collect.ImmutableMap;
 import org.junit.Before;
 import org.junit.Test;
+
+import com.google.common.collect.ImmutableMap;
+
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import com.elasticpath.cache.Cache;
 import com.elasticpath.cache.CacheLoader;
-import com.elasticpath.cache.MultiKeyCache;
 import com.elasticpath.domain.catalog.Category;
 import com.elasticpath.domain.catalog.impl.CatalogImpl;
 import com.elasticpath.domain.catalog.impl.CategoryImpl;
@@ -38,7 +35,11 @@ import com.elasticpath.service.catalog.CategoryLookup;
 @SuppressWarnings("unchecked")
 public class CachingCategoryLookupImplTest {
 
-	@Mock private MultiKeyCache<Category> cache;
+	private static final String NULL_CATEGORY_MSG = "Null category should have been returned";
+
+	@Mock private Cache<Long, Category> categoryByUidCache;
+	@Mock private Cache<String, Long> categoryUidByGuidCache;
+	@Mock private Cache<String, Long> categoryUidByCompoundGuidCache;
 	@Mock private Cache<Long, List<Long>> childCache;
 	@Mock private CategoryLookup fallbackReader;
 	private CachingCategoryLookupImpl cachingCategoryLookup;
@@ -67,7 +68,9 @@ public class CachingCategoryLookupImplTest {
 		category2.setParent(category);
 
 		cachingCategoryLookup = new CachingCategoryLookupImpl();
-		cachingCategoryLookup.setCategoryCache(cache);
+		cachingCategoryLookup.setCategoryByUidCache(categoryByUidCache);
+		cachingCategoryLookup.setCategoryUidByGuidCache(categoryUidByGuidCache);
+		cachingCategoryLookup.setCategoryUidByCompoundGuidCache(categoryUidByCompoundGuidCache);
 		cachingCategoryLookup.setChildCategoryCache(childCache);
 		cachingCategoryLookup.setFallbackReader(fallbackReader);
 	}
@@ -75,7 +78,7 @@ public class CachingCategoryLookupImplTest {
 	@Test
 	public void testFindByUidDelegatesToCacheWithFallbackLoader() {
 		// Given
-		when(cache.get(eq(CACHE_KEY_UIDPK), eq(category.getUidPk()), any(CacheLoader.class))).thenReturn(category);
+		when(categoryByUidCache.get(eq(category.getUidPk()), any(CacheLoader.class))).thenReturn(category);
 
 		// When
 		Category found = cachingCategoryLookup.findByUid(category.getUidPk());
@@ -88,11 +91,8 @@ public class CachingCategoryLookupImplTest {
 	public void testFindByUidsDelegatesToMultiKeyCacheWithFallbackLoader() {
 		// Given
 		final List<Long> categoryUids = Arrays.asList(category.getUidPk(), category2.getUidPk());
-		when(cache.getAll(eq(CACHE_KEY_UIDPK), eq(categoryUids), any(CacheLoader.class))).thenReturn(
-				ImmutableMap.of(
-						category.getUidPk(), category,
-						category2.getUidPk(), category2
-				));
+		when(categoryByUidCache.getAll(eq(categoryUids), any(CacheLoader.class))).thenReturn(
+				ImmutableMap.of(category.getUidPk(), category, category2.getUidPk(), category2));
 
 		// When
 		List<Category> found = cachingCategoryLookup.findByUids(categoryUids);
@@ -105,8 +105,8 @@ public class CachingCategoryLookupImplTest {
 	@Test
 	public void testFindByGuidDelegatesToCacheWithFallbackLoader() {
 		// Given
-		when(cache.get(eq(CACHE_KEY_GUID), eq(category.getGuid()), any(CacheLoader.class))).thenReturn(category);
-
+		when(categoryUidByGuidCache.get(eq(category.getGuid()), any(CacheLoader.class))).thenReturn(category.getUidPk());
+		when(categoryByUidCache.get(eq(category.getUidPk()))).thenReturn(category);
 		// When
 		Category found = cachingCategoryLookup.findByGuid(category.getGuid());
 
@@ -116,11 +116,9 @@ public class CachingCategoryLookupImplTest {
 	@Test
 	public void testFindByCategoryCodeAndCatalogDelegatesToCache() {
 		// Given
-		when(cache.get(
-				eq(CACHE_KEY_COMPOUND_GUID),
-				eq(category.getGuid() + "|" + catalog.getGuid()),
-				any(CacheLoader.class)))
-			.thenReturn(category);
+		when(categoryUidByCompoundGuidCache.get(eq(category.getGuid() + "|" + catalog.getGuid()), any(CacheLoader.class)))
+			.thenReturn(category.getUidPk());
+		when(categoryByUidCache.get(eq(category.getUidPk()))).thenReturn(category);
 
 		// When
 		Category found = cachingCategoryLookup.findByCategoryCodeAndCatalog(category.getGuid(), catalog);
@@ -131,11 +129,9 @@ public class CachingCategoryLookupImplTest {
 	@Test
 	public void testFindByCategoryAndCatalogCodeDelegatesToCache() {
 		// Given
-		when(cache.get(
-				eq(CACHE_KEY_COMPOUND_GUID),
-				eq(category.getGuid() + "|" + catalog.getGuid()),
-				any(CacheLoader.class)))
-				.thenReturn(category);
+		when(categoryUidByCompoundGuidCache.get(eq(category.getGuid() + "|" + catalog.getGuid()), any(CacheLoader.class)))
+			.thenReturn(category.getUidPk());
+		when(categoryByUidCache.get(eq(category.getUidPk()))).thenReturn(category);
 
 		// When
 		Category found = cachingCategoryLookup.findByCategoryAndCatalogCode(category.getGuid(), catalog.getCode());
@@ -146,11 +142,9 @@ public class CachingCategoryLookupImplTest {
 	@Test
 	public void testFindByCompoundCategoryAndCatalogCodesDelegatesToCache() {
 		// Given
-		when(cache.get(
-				eq(CACHE_KEY_COMPOUND_GUID),
-				eq(category.getCode() + "|" + catalog.getCode()),
-				any(CacheLoader.class)))
-				.thenReturn(category);
+		when(categoryUidByCompoundGuidCache.get(eq(category.getCode() + "|" + catalog.getCode()), any(CacheLoader.class)))
+			.thenReturn(category.getUidPk());
+		when(categoryByUidCache.get(eq(category.getUidPk()))).thenReturn(category);
 
 		// When
 		Category found = cachingCategoryLookup.findByCompoundCategoryAndCatalogCodes(category.getCode() + "|" + catalog.getCode());
@@ -161,7 +155,8 @@ public class CachingCategoryLookupImplTest {
 	@Test
 	public void testFindParentDelegatesToFindByGuid() {
 		// Given
-		when(cache.get(eq(CACHE_KEY_GUID), eq(category.getGuid()), any(CacheLoader.class))).thenReturn(category);
+		when(categoryUidByGuidCache.get(eq(category.getGuid()), any(CacheLoader.class))).thenReturn(category.getUidPk());
+		when(categoryByUidCache.get(eq(category.getUidPk()))).thenReturn(category);
 
 		// When
 		Category found = cachingCategoryLookup.findParent(category2);
@@ -175,7 +170,9 @@ public class CachingCategoryLookupImplTest {
 		Category found = cachingCategoryLookup.findParent(category);
 
 		assertNull(found);
-		verifyNoMoreInteractions(cache);
+
+		verifyNoMoreInteractions(categoryUidByGuidCache);
+		verifyNoMoreInteractions(categoryByUidCache);
 	}
 
 	@Test
@@ -183,7 +180,7 @@ public class CachingCategoryLookupImplTest {
 		// Given
 		when(childCache.get(category.getUidPk()))
 				.thenReturn(Collections.singletonList(category2.getUidPk()));
-		when(cache.getAll(eq(CACHE_KEY_UIDPK), eq(Collections.singletonList(category2.getUidPk())), any(CacheLoader.class)))
+		when(categoryByUidCache.getAll(eq(Collections.singletonList(category2.getUidPk())), any(CacheLoader.class)))
 				.thenReturn(Collections.singletonMap(category2.getUidPk(), category2));
 
 		// When
@@ -232,7 +229,7 @@ public class CachingCategoryLookupImplTest {
 		when(fallbackReader.findByUid(category.getUidPk())).thenReturn(category);
 
 		// When
-		CacheLoader<Long, Category> loader = cachingCategoryLookup.getCategoriesByUidpkLoader();
+		CacheLoader<Long, Category> loader = cachingCategoryLookup.getCategoriesByUidLoader();
 		Category found = loader.load(category.getUidPk());
 
 		// Then
@@ -246,7 +243,7 @@ public class CachingCategoryLookupImplTest {
 				.thenReturn(Arrays.<Category>asList(category, category2));
 
 		// When
-		CacheLoader<Long, Category> loader = cachingCategoryLookup.getCategoriesByUidpkLoader();
+		CacheLoader<Long, Category> loader = cachingCategoryLookup.getCategoriesByUidLoader();
 		Map<Long, Category> found = loader.loadAll(Arrays.asList(category.getUidPk(), category2.getUidPk()));
 
 		// Then
@@ -261,25 +258,89 @@ public class CachingCategoryLookupImplTest {
 	public void testCategoriesByGuidLoaderDelegatesToFallbackForSingleIds() {
 		// Given
 		when(fallbackReader.findByGuid(category.getGuid())).thenReturn(category);
+		when(categoryByUidCache.get(category.getUidPk()))
+			.thenReturn(null)
+			.thenReturn(category);
 
 		// When
-		CacheLoader<String, Category> loader = cachingCategoryLookup.getCategoriesByGuidLoader();
-		Category found = loader.load(category.getGuid());
-
+		CacheLoader<String, Long> loader = cachingCategoryLookup.getCategoryUidByGuidLoader();
+		Long categoryUidPk = loader.load(category.getGuid());
+		Category found = categoryByUidCache.get(categoryUidPk);
 		// Then
 		assertSame("guid Loader should delegate to fallback", category, found);
+
+		verify(categoryByUidCache).put(categoryUidPk, category);
+		verify(categoryUidByCompoundGuidCache).put(category.getCompoundGuid(), categoryUidPk);
 	}
 
 	@Test
 	public void testCategoriesByCodeLoaderDelegatesToFallbackForSingleIds() {
 		// Given
 		when(fallbackReader.findByCompoundCategoryAndCatalogCodes(category.getCompoundGuid())).thenReturn(category);
+		when(categoryByUidCache.get(category.getUidPk()))
+			.thenReturn(null)
+			.thenReturn(category);
 
 		// When
-		CacheLoader<String, Category> loader = cachingCategoryLookup.getCategoriesByCodeLoader();
-		Category found = loader.load(category.getCompoundGuid());
+		CacheLoader<String, Long> loader = cachingCategoryLookup.getCategoryUidByCompoundGuidLoader();
+		Long categoryUidPk = loader.load(category.getCompoundGuid());
+		Category found = categoryByUidCache.get(categoryUidPk);
 
 		// Then
 		assertSame("guid Loader should delegate to fallback", category, found);
+
+		verify(categoryByUidCache).put(categoryUidPk, category);
+		verify(categoryUidByGuidCache).put(category.getGuid(), categoryUidPk);
+	}
+
+	//the following tests verify caching robustness for situations where valid input must be provided, but the invalid one is provided instead
+	@Test
+	public void testFindByGuidReturnsNullOnCacheMiss() {
+		// Given
+		when(categoryUidByGuidCache.get(eq(category.getGuid()), any(CacheLoader.class))).thenReturn(null);
+		when(categoryByUidCache.get(null)).thenReturn(null);
+		// When
+		Category found = cachingCategoryLookup.findByGuid(category.getGuid());
+
+		assertNull(NULL_CATEGORY_MSG, found);
+	}
+
+	@Test
+	public void testFindByCategoryCodeAndCatalogReturnsNullOnCacheMiss() {
+		// Given
+		when(categoryUidByCompoundGuidCache.get(eq(category.getGuid() + "|" + catalog.getGuid()), any(CacheLoader.class)))
+			.thenReturn(null);
+		when(categoryByUidCache.get(null)).thenReturn(null);
+
+		// When
+		Category found = cachingCategoryLookup.findByCategoryCodeAndCatalog(category.getGuid(), catalog);
+
+		assertNull(NULL_CATEGORY_MSG, found);
+	}
+
+	@Test
+	public void testFindByCategoryAndCatalogCodeReturnsNullOnCacheMiss() {
+		// Given
+		when(categoryUidByCompoundGuidCache.get(eq(category.getGuid() + "|" + catalog.getGuid()), any(CacheLoader.class)))
+			.thenReturn(null);
+		when(categoryByUidCache.get(null)).thenReturn(null);
+
+		// When
+		Category found = cachingCategoryLookup.findByCategoryAndCatalogCode(category.getGuid(), catalog.getCode());
+
+		assertNull(NULL_CATEGORY_MSG, found);
+	}
+
+	@Test
+	public void testFindByCompoundCategoryAndCatalogCodesReturnsNullOnCacheMiss() {
+		// Given
+		when(categoryUidByCompoundGuidCache.get(eq(category.getCode() + "|" + catalog.getCode()), any(CacheLoader.class)))
+			.thenReturn(null);
+		when(categoryByUidCache.get(null)).thenReturn(null);
+
+		// When
+		Category found = cachingCategoryLookup.findByCompoundCategoryAndCatalogCodes(category.getCode() + "|" + catalog.getCode());
+
+		assertNull(NULL_CATEGORY_MSG, found);
 	}
 }

@@ -29,9 +29,10 @@ import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.UUID;
 
-import org.hamcrest.Matchers;
 import org.jmock.Expectations;
 import org.junit.Test;
+
+import org.hamcrest.Matchers;
 
 import com.elasticpath.base.exception.EpServiceException;
 import com.elasticpath.commons.constants.ContextIdNames;
@@ -49,7 +50,6 @@ import com.elasticpath.domain.catalog.impl.ProductSkuImpl;
 import com.elasticpath.domain.customer.Address;
 import com.elasticpath.domain.customer.CustomerSession;
 import com.elasticpath.domain.customer.impl.CustomerAddressImpl;
-import com.elasticpath.domain.customer.impl.CustomerAuthenticationImpl;
 import com.elasticpath.domain.customer.impl.CustomerSessionImpl;
 import com.elasticpath.domain.customer.impl.CustomerSessionMementoImpl;
 import com.elasticpath.domain.misc.LocalizedProperties;
@@ -60,6 +60,7 @@ import com.elasticpath.domain.shopper.Shopper;
 import com.elasticpath.domain.shopper.impl.ShopperImpl;
 import com.elasticpath.domain.shopper.impl.ShopperMementoImpl;
 import com.elasticpath.domain.shoppingcart.DiscountRecord;
+import com.elasticpath.domain.shoppingcart.ItemType;
 import com.elasticpath.domain.shoppingcart.ShippingPricingSnapshot;
 import com.elasticpath.domain.shoppingcart.ShoppingCart;
 import com.elasticpath.domain.shoppingcart.ShoppingItem;
@@ -123,7 +124,6 @@ public class ShoppingCartImplTest extends AbstractCatalogDataTestCase {
 	public void setUp() throws Exception {
 		super.setUp();
 
-		stubGetBean(ContextIdNames.CUSTOMER_AUTHENTICATION, CustomerAuthenticationImpl.class);
 		stubGetBean(ContextIdNames.MONEY_FORMATTER, StandardMoneyFormatter.class);
 		stubGetBean(ContextIdNames.SHOPPING_CART_MEMENTO, ShoppingCartMementoImpl.class);
 		stubGetBean(ContextIdNames.TAX_CATEGORY, TaxCategoryImpl.class);
@@ -1556,6 +1556,8 @@ public class ShoppingCartImplTest extends AbstractCatalogDataTestCase {
 			{
 				allowing(shoppingItem).isShippable(getProductSkuLookup());
 				will(returnValue(true));
+				allowing(shoppingItem).getChildren(); will(returnValue(new ArrayList<>()));
+				allowing(shoppingItem).setItemType(ItemType.SIMPLE);
 			}
 		});
 
@@ -1569,6 +1571,8 @@ public class ShoppingCartImplTest extends AbstractCatalogDataTestCase {
 			{
 				allowing(shoppingItem).isShippable(getProductSkuLookup());
 				will(returnValue(false));
+				allowing(shoppingItem).getChildren(); will(returnValue(new ArrayList<>()));
+				allowing(shoppingItem).setItemType(ItemType.SIMPLE);
 			}
 		});
 

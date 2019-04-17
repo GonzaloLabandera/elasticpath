@@ -13,6 +13,7 @@ import org.apache.log4j.Logger;
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
 
 import com.elasticpath.cortexTestObjects.Purchase;
 import com.elasticpath.selenium.common.AbstractPageObject;
@@ -32,7 +33,7 @@ import com.elasticpath.selenium.wizards.CreateReturnWizard;
 /**
  * Order Editor.
  */
-@SuppressWarnings({"PMD.TooManyMethods", "PMD.GodClass"})
+@SuppressWarnings({"PMD.TooManyMethods", "PMD.GodClass", "PMD.ExcessiveClassLength"})
 public class OrderEditor extends AbstractPageObject {
 
 	//TODO: the pane-location disappears if re-login to an idled CM. Re-check again when PB-3174 fixed.
@@ -56,7 +57,12 @@ public class OrderEditor extends AbstractPageObject {
 	private static final String EXTERNAL_ORDER_NUMBER_INPUT_CSS = EDITOR_PANE_PARENT_CSS + "div[widget-id='External Order #'] > input";
 	private static final String ORDER_DETAIL_SHIPMENT_TABLE_PARENT_CSS = EDITOR_PANE_PARENT_CSS + "div[widget-id*='Shipment Table']"
 			+ "[widget-type='Table'][seeable='true'] ";
-	private static final String ORDER_SHIPMENT_DETAIL_TABLE_CSS = EDITOR_PANE_PARENT_CSS + "div[widget-id*='%s Table'][widget-type='Table'][seeable='true'] ";
+	private static final String E_SHIPMENT_PARENT_CSS = EDITOR_PANE_PARENT_CSS + "div[automation-id*='ElectronicShipmentSection_Title'] + div ";
+	private static final String E_SHIPMENT_RETURN_BUTTON_CSS = E_SHIPMENT_PARENT_CSS + "div[automation-id*='CreateReturnButton']";
+	private static final String ORDER_DETAIL_E_SHIPMENT_TABLE_PARENT_CSS = EDITOR_PANE_PARENT_CSS + "div[widget-id*='Electronic Shipment Table']"
+			+ "[widget-type='Table'][seeable='true'] ";
+	private static final String ORDER_SHIPMENT_DETAIL_TABLE_CSS = EDITOR_PANE_PARENT_CSS + "div[widget-id*='%s Table'][widget-type='Table'][seeable"
+			+ "='true'] ";
 	private static final String ORDER_DETAIL_SHIPMENT_TABLE_COLUMN_CSS = ORDER_DETAIL_SHIPMENT_TABLE_PARENT_CSS + "div[column-id='%s']";
 	private static final String ATTRIBUTE_VALUE = "value";
 	private static final String EMAIL_ADDRESS_CSS = EDITOR_PANE_PARENT_CSS + "div[widget-type='Hyperlink'][seeable='true']";
@@ -78,7 +84,8 @@ public class OrderEditor extends AbstractPageObject {
 	private static final int SLEEP_TIME = 500;
 	private static final String UNLOCK_ORDER_CSS = "div[automation-id='com.elasticpath.cmclient.fulfillment.FulfillmentMessages"
 			+ ".OrderActionUnlockOrder'][seeable='true']";
-	private static final String SHIPMENT_SUMMARY_PRICE_VALUE_CSS = "[widget-id*='%s'] + div div[automation-id$=%s][widget-type='Text'] "
+	private static final String SHIPMENT_SECTION_BY_NUMBER_CSS = "div[widget-id*='%s'] + div ";
+	private static final String SHIPMENT_SUMMARY_PRICE_VALUE_CSS = SHIPMENT_SECTION_BY_NUMBER_CSS + "div[automation-id$=%s][widget-type='Text'] "
 			+ "+ div[widget-type='Text'] > input";
 	private static final String SHIPMENT_SUMMARY_SHIPMENT_DISCOUNT_CSS = "div[widget-id*=' Shipment Discount'][ widget-type='Text'] + div > input";
 	private static final String SHIPMENT_SUMMARY_SHIPMENT_COST_CSS = "div[widget-id='Shipping Cost:'][ widget-type='Text'] + div > input";
@@ -114,6 +121,11 @@ public class OrderEditor extends AbstractPageObject {
 			SKU_CODE_COLUMN_NAME, PRODUCT_NAME_COLUMN_NAME, SKU_OPTION_COLUMN_NAME, LIST_PRICE_COLUMN_NAME, SALE_PRICE_COLUMN_NAME,
 			QUANTITY_COLUMN_NAME, DISCOUNT_COLUMN_NAME, TOTAL_PRICE_COLUMN_NAME, PAYMENT_SCHEDULE_COLUMN_NAME);
 	private static final Logger LOGGER = Logger.getLogger(OrderEditor.class);
+	private static final String PHYSICAL_SHIPMENT_ITEM_ROW_CSS = EDITOR_PANE_PARENT_CSS
+			+ "div[parent-widget-id='Order Details Physical Shipment Table'][widget-type='table_row']";
+	private static final String E_SHIPMENT_ITEM_ROW_CSS = EDITOR_PANE_PARENT_CSS
+			+ "div[parent-widget-id='Order Details Electronic Shipment Table'][widget-type='table_row']";
+	private static WebElement shipmentItemRow;
 
 	/**
 	 * Constructor.
@@ -393,7 +405,23 @@ public class OrderEditor extends AbstractPageObject {
 	public void verifyAndSelectOrderSkuCode(final String skuCode) {
 		sleep(SLEEP_TIME);
 		assertThat(selectItemInDialog(ORDER_DETAIL_SHIPMENT_TABLE_PARENT_CSS, ORDER_DETAIL_SHIPMENT_TABLE_COLUMN_CSS, skuCode, SKU_CODE_COLUMN_NAME))
-				.as("Unable to find order sku - " + skuCode)
+				.as("Unable to find order Shipment sku - " + skuCode)
+				.isTrue();
+	}
+
+	/**
+	 * Verifies and select order sku code in E-shipment list.
+	 *
+	 * @param skuCode the sku code
+	 */
+	public void verifyAndSelectOrderEshipmentSkuCode(final String skuCode) {
+		sleep(SLEEP_TIME);
+		scrollWidgetIntoView(E_SHIPMENT_RETURN_BUTTON_CSS);
+		sleep(SLEEP_TIME);
+
+		assertThat(selectItemInDialog(ORDER_DETAIL_E_SHIPMENT_TABLE_PARENT_CSS, ORDER_DETAIL_SHIPMENT_TABLE_COLUMN_CSS, skuCode,
+				SKU_CODE_COLUMN_NAME))
+				.as("Unable to find order E-shipment sku - " + skuCode)
 				.isTrue();
 	}
 
@@ -524,44 +552,70 @@ public class OrderEditor extends AbstractPageObject {
 	 */
 	public void verifyOrderItemsTableValues(final ShipmentTableRecord record) {
 		String webElement;
-		switch(record.getShipmentType()) {
+		switch (record.getShipmentType()) {
 			case "physical":
 				webElement = String.format(ORDER_SHIPMENT_DETAIL_TABLE_CSS, "Physical Shipment");
-				verifyShipmentTableLineItemRow(webElement, SHIPMENT_TABLE_COLUMN_HEADER_VALUES.indexOf(BUNDLE_NAME_COLUMN_NAME), record.getBundleName());
-				verifyShipmentTableLineItemRow(webElement, SHIPMENT_TABLE_COLUMN_HEADER_VALUES.indexOf(INVENTORY_COLUMN_NAME), record.getInventory());
+				verifyShipmentTableLineItemRow(webElement, SHIPMENT_TABLE_COLUMN_HEADER_VALUES.indexOf(BUNDLE_NAME_COLUMN_NAME),
+						record.getBundleName());
+				verifyShipmentTableLineItemRow(webElement, SHIPMENT_TABLE_COLUMN_HEADER_VALUES.indexOf(INVENTORY_COLUMN_NAME),
+						record.getInventory());
 				verifyShipmentTableLineItemRow(webElement, SHIPMENT_TABLE_COLUMN_HEADER_VALUES.indexOf(SKU_CODE_COLUMN_NAME), record.getSkuCode());
-				verifyShipmentTableLineItemRow(webElement, SHIPMENT_TABLE_COLUMN_HEADER_VALUES.indexOf(PRODUCT_NAME_COLUMN_NAME), record.getProductName());
-				verifyShipmentTableLineItemRow(webElement, SHIPMENT_TABLE_COLUMN_HEADER_VALUES.indexOf(SKU_OPTION_COLUMN_NAME), record.getSkuOptions());
-				verifyShipmentTableLineItemRow(webElement, SHIPMENT_TABLE_COLUMN_HEADER_VALUES.indexOf(LIST_PRICE_COLUMN_NAME), record.getListPrice());
-				verifyShipmentTableLineItemRow(webElement, SHIPMENT_TABLE_COLUMN_HEADER_VALUES.indexOf(SALE_PRICE_COLUMN_NAME), record.getSalePrice());
+				verifyShipmentTableLineItemRow(webElement, SHIPMENT_TABLE_COLUMN_HEADER_VALUES.indexOf(PRODUCT_NAME_COLUMN_NAME),
+						record.getProductName());
+				verifyShipmentTableLineItemRow(webElement, SHIPMENT_TABLE_COLUMN_HEADER_VALUES.indexOf(SKU_OPTION_COLUMN_NAME),
+						record.getSkuOptions());
+				verifyShipmentTableLineItemRow(webElement, SHIPMENT_TABLE_COLUMN_HEADER_VALUES.indexOf(LIST_PRICE_COLUMN_NAME),
+						record.getListPrice());
+				verifyShipmentTableLineItemRow(webElement, SHIPMENT_TABLE_COLUMN_HEADER_VALUES.indexOf(SALE_PRICE_COLUMN_NAME),
+						record.getSalePrice());
 				verifyShipmentTableLineItemRow(webElement, SHIPMENT_TABLE_COLUMN_HEADER_VALUES.indexOf(QUANTITY_COLUMN_NAME), record.getQuantity());
 				verifyShipmentTableLineItemRow(webElement, SHIPMENT_TABLE_COLUMN_HEADER_VALUES.indexOf(DISCOUNT_COLUMN_NAME), record.getDiscount());
-				verifyShipmentTableLineItemRow(webElement, SHIPMENT_TABLE_COLUMN_HEADER_VALUES.indexOf(TOTAL_PRICE_COLUMN_NAME), record.getTotalPrice());
+				verifyShipmentTableLineItemRow(webElement, SHIPMENT_TABLE_COLUMN_HEADER_VALUES.indexOf(TOTAL_PRICE_COLUMN_NAME),
+						record.getTotalPrice());
 				break;
 			case "e-shipment":
 				webElement = String.format(ORDER_SHIPMENT_DETAIL_TABLE_CSS, "Electronic Shipment");
-				verifyShipmentTableLineItemRow(webElement, ELECTRONIC_SHIPMENT_TABLE_COLUMN_HEADER_VALUES.indexOf(BUNDLE_NAME_COLUMN_NAME), record.getBundleName());
-				verifyShipmentTableLineItemRow(webElement, ELECTRONIC_SHIPMENT_TABLE_COLUMN_HEADER_VALUES.indexOf(SKU_CODE_COLUMN_NAME), record.getSkuCode());
-				verifyShipmentTableLineItemRow(webElement, ELECTRONIC_SHIPMENT_TABLE_COLUMN_HEADER_VALUES.indexOf(PRODUCT_NAME_COLUMN_NAME), record.getProductName());
-				verifyShipmentTableLineItemRow(webElement, ELECTRONIC_SHIPMENT_TABLE_COLUMN_HEADER_VALUES.indexOf(SKU_OPTION_COLUMN_NAME), record.getSkuOptions());
-				verifyShipmentTableLineItemRow(webElement, ELECTRONIC_SHIPMENT_TABLE_COLUMN_HEADER_VALUES.indexOf(LIST_PRICE_COLUMN_NAME), record.getListPrice());
-				verifyShipmentTableLineItemRow(webElement, ELECTRONIC_SHIPMENT_TABLE_COLUMN_HEADER_VALUES.indexOf(SALE_PRICE_COLUMN_NAME), record.getSalePrice());
-				verifyShipmentTableLineItemRow(webElement, ELECTRONIC_SHIPMENT_TABLE_COLUMN_HEADER_VALUES.indexOf(QUANTITY_COLUMN_NAME), record.getQuantity());
-				verifyShipmentTableLineItemRow(webElement, ELECTRONIC_SHIPMENT_TABLE_COLUMN_HEADER_VALUES.indexOf(DISCOUNT_COLUMN_NAME), record.getDiscount());
-				verifyShipmentTableLineItemRow(webElement, ELECTRONIC_SHIPMENT_TABLE_COLUMN_HEADER_VALUES.indexOf(TOTAL_PRICE_COLUMN_NAME), record.getTotalPrice());
+				verifyShipmentTableLineItemRow(webElement, ELECTRONIC_SHIPMENT_TABLE_COLUMN_HEADER_VALUES.indexOf(BUNDLE_NAME_COLUMN_NAME),
+						record.getBundleName());
+				verifyShipmentTableLineItemRow(webElement, ELECTRONIC_SHIPMENT_TABLE_COLUMN_HEADER_VALUES.indexOf(SKU_CODE_COLUMN_NAME),
+						record.getSkuCode());
+				verifyShipmentTableLineItemRow(webElement, ELECTRONIC_SHIPMENT_TABLE_COLUMN_HEADER_VALUES.indexOf(PRODUCT_NAME_COLUMN_NAME),
+						record.getProductName());
+				verifyShipmentTableLineItemRow(webElement, ELECTRONIC_SHIPMENT_TABLE_COLUMN_HEADER_VALUES.indexOf(SKU_OPTION_COLUMN_NAME),
+						record.getSkuOptions());
+				verifyShipmentTableLineItemRow(webElement, ELECTRONIC_SHIPMENT_TABLE_COLUMN_HEADER_VALUES.indexOf(LIST_PRICE_COLUMN_NAME),
+						record.getListPrice());
+				verifyShipmentTableLineItemRow(webElement, ELECTRONIC_SHIPMENT_TABLE_COLUMN_HEADER_VALUES.indexOf(SALE_PRICE_COLUMN_NAME),
+						record.getSalePrice());
+				verifyShipmentTableLineItemRow(webElement, ELECTRONIC_SHIPMENT_TABLE_COLUMN_HEADER_VALUES.indexOf(QUANTITY_COLUMN_NAME),
+						record.getQuantity());
+				verifyShipmentTableLineItemRow(webElement, ELECTRONIC_SHIPMENT_TABLE_COLUMN_HEADER_VALUES.indexOf(DISCOUNT_COLUMN_NAME),
+						record.getDiscount());
+				verifyShipmentTableLineItemRow(webElement, ELECTRONIC_SHIPMENT_TABLE_COLUMN_HEADER_VALUES.indexOf(TOTAL_PRICE_COLUMN_NAME),
+						record.getTotalPrice());
 				break;
 			case "recurring":
 				webElement = String.format(ORDER_SHIPMENT_DETAIL_TABLE_CSS, "Recurring Items");
-				verifyShipmentTableLineItemRow(webElement, RECURRING_SHIPMENT_TABLE_COLUMN_HEADER_VALUES.indexOf(BUNDLE_NAME_COLUMN_NAME), record.getBundleName());
-				verifyShipmentTableLineItemRow(webElement, RECURRING_SHIPMENT_TABLE_COLUMN_HEADER_VALUES.indexOf(SKU_CODE_COLUMN_NAME), record.getSkuCode());
-				verifyShipmentTableLineItemRow(webElement, RECURRING_SHIPMENT_TABLE_COLUMN_HEADER_VALUES.indexOf(PRODUCT_NAME_COLUMN_NAME), record.getProductName());
-				verifyShipmentTableLineItemRow(webElement, RECURRING_SHIPMENT_TABLE_COLUMN_HEADER_VALUES.indexOf(SKU_OPTION_COLUMN_NAME), record.getSkuOptions());
-				verifyShipmentTableLineItemRow(webElement, RECURRING_SHIPMENT_TABLE_COLUMN_HEADER_VALUES.indexOf(LIST_PRICE_COLUMN_NAME), record.getListPrice());
-				verifyShipmentTableLineItemRow(webElement, RECURRING_SHIPMENT_TABLE_COLUMN_HEADER_VALUES.indexOf(SALE_PRICE_COLUMN_NAME), record.getSalePrice());
-				verifyShipmentTableLineItemRow(webElement, RECURRING_SHIPMENT_TABLE_COLUMN_HEADER_VALUES.indexOf(QUANTITY_COLUMN_NAME), record.getQuantity());
-				verifyShipmentTableLineItemRow(webElement, RECURRING_SHIPMENT_TABLE_COLUMN_HEADER_VALUES.indexOf(DISCOUNT_COLUMN_NAME), record.getDiscount());
-				verifyShipmentTableLineItemRow(webElement, RECURRING_SHIPMENT_TABLE_COLUMN_HEADER_VALUES.indexOf(TOTAL_PRICE_COLUMN_NAME), record.getTotalPrice());
-				verifyShipmentTableLineItemRow(webElement, RECURRING_SHIPMENT_TABLE_COLUMN_HEADER_VALUES.indexOf(PAYMENT_SCHEDULE_COLUMN_NAME), record.getPaymentSchedule());
+				verifyShipmentTableLineItemRow(webElement, RECURRING_SHIPMENT_TABLE_COLUMN_HEADER_VALUES.indexOf(BUNDLE_NAME_COLUMN_NAME),
+						record.getBundleName());
+				verifyShipmentTableLineItemRow(webElement, RECURRING_SHIPMENT_TABLE_COLUMN_HEADER_VALUES.indexOf(SKU_CODE_COLUMN_NAME),
+						record.getSkuCode());
+				verifyShipmentTableLineItemRow(webElement, RECURRING_SHIPMENT_TABLE_COLUMN_HEADER_VALUES.indexOf(PRODUCT_NAME_COLUMN_NAME),
+						record.getProductName());
+				verifyShipmentTableLineItemRow(webElement, RECURRING_SHIPMENT_TABLE_COLUMN_HEADER_VALUES.indexOf(SKU_OPTION_COLUMN_NAME),
+						record.getSkuOptions());
+				verifyShipmentTableLineItemRow(webElement, RECURRING_SHIPMENT_TABLE_COLUMN_HEADER_VALUES.indexOf(LIST_PRICE_COLUMN_NAME),
+						record.getListPrice());
+				verifyShipmentTableLineItemRow(webElement, RECURRING_SHIPMENT_TABLE_COLUMN_HEADER_VALUES.indexOf(SALE_PRICE_COLUMN_NAME),
+						record.getSalePrice());
+				verifyShipmentTableLineItemRow(webElement, RECURRING_SHIPMENT_TABLE_COLUMN_HEADER_VALUES.indexOf(QUANTITY_COLUMN_NAME),
+						record.getQuantity());
+				verifyShipmentTableLineItemRow(webElement, RECURRING_SHIPMENT_TABLE_COLUMN_HEADER_VALUES.indexOf(DISCOUNT_COLUMN_NAME),
+						record.getDiscount());
+				verifyShipmentTableLineItemRow(webElement, RECURRING_SHIPMENT_TABLE_COLUMN_HEADER_VALUES.indexOf(TOTAL_PRICE_COLUMN_NAME),
+						record.getTotalPrice());
+				verifyShipmentTableLineItemRow(webElement, RECURRING_SHIPMENT_TABLE_COLUMN_HEADER_VALUES.indexOf(PAYMENT_SCHEDULE_COLUMN_NAME),
+						record.getPaymentSchedule());
 				break;
 			default:
 				fail("Unrecognized shipment type - " + record.getShipmentType());
@@ -600,7 +654,7 @@ public class OrderEditor extends AbstractPageObject {
 	 * @param key            of the shipment property to verify
 	 */
 	private void verifyShipmentSummaryValue(final String shipmentNumber, final String expectedValue, final String key) {
-		assertThat(getWaitDriver().waitForElementToBeVisible(By.cssSelector(String.format(SHIPMENT_SUMMARY_PRICE_VALUE_CSS, shipmentNumber, key)))
+		assertThat(getWaitDriver().waitForElementToBeVisibleAndToBeNotStale(String.format(SHIPMENT_SUMMARY_PRICE_VALUE_CSS, shipmentNumber, key))
 				.getAttribute(ATTRIBUTE_VALUE))
 				.as("Expected " + key + " value does not match.")
 				.isEqualTo(expectedValue);
@@ -740,6 +794,19 @@ public class OrderEditor extends AbstractPageObject {
 	}
 
 	/**
+	 * Selects Shipping Method in combo box by shipment number.
+	 *
+	 * @param shipmentNumber the shipment number
+	 * @param shippingMethod the shipment method
+	 */
+	public void selectShippingMethodByShipmentNumber(final int shipmentNumber, final String shippingMethod) {
+		sleep(Constants.SLEEP_FIVE_SECONDS_IN_MILLIS);
+		assertThat(selectComboBoxItem(String.format(SHIPMENT_SECTION_BY_NUMBER_CSS, Purchase.getPurchaseNumber() + "-" + shipmentNumber) + ORDER_DETAILS_SHIPPING_METHOD_CSS, shippingMethod))
+				.as("Unable to find Shipping Method - " + shippingMethod)
+				.isTrue();
+	}
+
+	/**
 	 * Verifies Shipping Method.
 	 *
 	 * @param expectedShippingMethod the expected shipping method.
@@ -778,8 +845,8 @@ public class OrderEditor extends AbstractPageObject {
 	/**
 	 * Set value to specified field in the row in the Items table for a Shipment.
 	 *
-	 * @param column		the column to set new value
-	 * @param expectedValue	new value to be set
+	 * @param column        the column to set new value
+	 * @param expectedValue new value to be set
 	 */
 	private void setShipmentLineItemRowValue(final String column, final String expectedValue) {
 		click(getWaitDriver().waitForElementToBeVisible(By.cssSelector(String.format(SHIPMENT_TABLE_COLUMN_CSS,
@@ -796,7 +863,9 @@ public class OrderEditor extends AbstractPageObject {
 	 *
 	 * @param sku the price expected.
 	 */
-	public void verifyShipmentLineItemSkuCode(final String sku) { verifyShipmentLineItemRow("SKU Code", sku); }
+	public void verifyShipmentLineItemSkuCode(final String sku) {
+		verifyShipmentLineItemRow("SKU Code", sku);
+	}
 
 	/**
 	 * Verify the value of Sale Price column in a particular row of the Items table of a Shipment.
@@ -835,21 +904,25 @@ public class OrderEditor extends AbstractPageObject {
 	}
 
 	/**
-	 *  Set new quantity for the order shipment line item
+	 * Set new quantity for the order shipment line item
 	 *
 	 * @param quantity new line item quantity
 	 */
-	public void setShipmentLineItemQuantity(final String quantity) { setShipmentLineItemRowValue("Qty", quantity); }
+	public void setShipmentLineItemQuantity(final String quantity) {
+		setShipmentLineItemRowValue("Qty", quantity);
+	}
 
 	/**
-	 *  Set order shipment line item discount
+	 * Set order shipment line item discount
 	 *
 	 * @param discount discount amount to be set
 	 */
-	public void setShipmentLineItemDiscount(final String discount) { setShipmentLineItemRowValue("Discount", discount); }
+	public void setShipmentLineItemDiscount(final String discount) {
+		setShipmentLineItemRowValue("Discount", discount);
+	}
 
 	/**
-	 *  Set new value in order Less Shipment Discount field
+	 * Set new value in order Less Shipment Discount field
 	 *
 	 * @param discount new value to be set
 	 */
@@ -858,7 +931,7 @@ public class OrderEditor extends AbstractPageObject {
 	}
 
 	/**
-	 *  Set new value in order Shipping Cost field
+	 * Set new value in order Shipping Cost field
 	 *
 	 * @param cost new value to be set
 	 */
@@ -867,7 +940,7 @@ public class OrderEditor extends AbstractPageObject {
 	}
 
 	/**
-	 *  Set provided value into specified by CSS WebElement
+	 * Set provided value into specified by CSS WebElement
 	 *
 	 * @param fieldCSS CSS value for WebElement to be modified
 	 * @param newValue new value to be set
@@ -876,4 +949,113 @@ public class OrderEditor extends AbstractPageObject {
 		getWaitDriver().waitForElementToBeVisible(By.cssSelector(fieldCSS));
 		clearAndTypeNonJSCheck(fieldCSS, newValue);
 	}
+
+	/**
+	 * Returns list of shipment item row.
+	 *
+	 * @param shipmentItemRowCss the shipment item row css
+	 * @return List of webElement
+	 */
+	private List<WebElement> getShipmentRow(final String shipmentItemRowCss) {
+		return getDriver().findElements(By.cssSelector(shipmentItemRowCss));
+	}
+
+	/**
+	 * Returns shipment item row.
+	 *
+	 * @param skuCode            the sku code
+	 * @param shipmentItemRowCss the shipment item row css
+	 * @return webElement the shipment item row
+	 */
+	private WebElement getShipmentItemRow(final String skuCode, final String shipmentItemRowCss) {
+		shipmentItemRow = null;
+		for (WebElement itemRow : getShipmentRow(shipmentItemRowCss)) {
+			if (itemRow.findElement(By.cssSelector(
+					"div[column-num='" + SHIPMENT_TABLE_COLUMN_HEADER_VALUES.indexOf(SKU_CODE_COLUMN_NAME) + "']")).getText().equals(skuCode)) {
+				shipmentItemRow = itemRow;
+				itemRow.click();
+				break;
+			}
+		}
+		assertThat(shipmentItemRow)
+				.as("Unable to find shipment item sku: " + skuCode)
+				.isNotNull();
+		return shipmentItemRow;
+	}
+
+	/**
+	 * Returns physical shipment item row.
+	 *
+	 * @param skuCode the sku code
+	 * @return physical shipment item row
+	 */
+	private WebElement getPhysicalShipmentItemRow(final String skuCode) {
+		return getShipmentItemRow(skuCode, PHYSICAL_SHIPMENT_ITEM_ROW_CSS);
+	}
+
+	/**
+	 * Verifies physical shipment item sku code.
+	 *
+	 * @param skuCode the sku code
+	 */
+	public void verifyPhysicalShipmentItemSkuCode(final String skuCode) {
+		getPhysicalShipmentItemRow(skuCode);
+	}
+
+	/**
+	 * Verifies physical shipment sku code and quantity.
+	 *
+	 * @param skuCode  the sku code
+	 * @param quantity the quantity
+	 */
+	public void verifyPhysicalShipmentSkuCodeAndQuantity(final String skuCode, final String quantity) {
+		verifyPhysicalShipmentItemSkuCode(skuCode);
+		verifyShipmentItemColumnValue(QUANTITY_COLUMN_NAME, quantity);
+	}
+
+	/**
+	 * Returns e-shipment item row.
+	 *
+	 * @param skuCode the sku code
+	 * @return e-shipment item row
+	 */
+	private WebElement getEShipmentItemRow(final String skuCode) {
+		return getShipmentItemRow(skuCode, E_SHIPMENT_ITEM_ROW_CSS);
+	}
+
+	/**
+	 * Verifies e-shipment item sku code.
+	 *
+	 * @param skuCode the sku code
+	 */
+	public void verifyEShipmentItemSkuCode(final String skuCode) {
+		getEShipmentItemRow(skuCode);
+	}
+
+	/**
+	 * Verifies e-shipment sku code and quantity.
+	 *
+	 * @param skuCode  the sku code
+	 * @param quantity the quantity
+	 */
+	public void verifyEShipmentSkuCodeAndQuantity(final String skuCode, final String quantity) {
+		scrollWidgetIntoView(E_SHIPMENT_RETURN_BUTTON_CSS);
+		verifyEShipmentItemSkuCode(skuCode);
+		verifyShipmentItemColumnValue(QUANTITY_COLUMN_NAME, quantity);
+	}
+
+	/**
+	 * Verifies shipment item column value.
+	 *
+	 * @param columnName    the column name
+	 * @param expectedValue the expected value
+	 */
+	private void verifyShipmentItemColumnValue(final String columnName, final String expectedValue) {
+		String actualValue = shipmentItemRow.findElement(
+				By.cssSelector("div[column-num='" + SHIPMENT_TABLE_COLUMN_HEADER_VALUES.indexOf(columnName) + "']")).getText();
+		assertThat(actualValue)
+				.as("Shipment item " + columnName + " is not as expected")
+				.isEqualTo(expectedValue);
+	}
+
 }

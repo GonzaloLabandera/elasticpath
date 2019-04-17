@@ -3,11 +3,13 @@ Feature: Update profile
 
   Scenario: Create email id as public shopper
     When I login as a public shopper
-    Then I create my email id and I can see the new email id in my profile
+    And I create an email
+    Then I can see the new email id in my profile
 
   Scenario: Update email id as registered shopper
     When I have authenticated as a newly registered shopper
-    Then I update my email id with new email and I can see the new email id in my profile
+    And I create an email
+    Then I can see the new email id in my profile
 
   Scenario Outline: Update family-name and given-name as registered shopper
     When I have authenticated as a newly registered shopper

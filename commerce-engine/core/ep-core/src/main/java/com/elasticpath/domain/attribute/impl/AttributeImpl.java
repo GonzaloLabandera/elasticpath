@@ -4,24 +4,35 @@
 package com.elasticpath.domain.attribute.impl;
 
 import java.util.Comparator;
+import java.util.HashMap;
+import java.util.Locale;
+import java.util.Map;
 import javax.persistence.Basic;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.MapKey;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.TableGenerator;
 import javax.persistence.Transient;
 
+import org.apache.openjpa.persistence.ElementDependent;
 import org.apache.openjpa.persistence.Externalizer;
 import org.apache.openjpa.persistence.Factory;
 import org.apache.openjpa.persistence.FetchAttribute;
 import org.apache.openjpa.persistence.FetchGroup;
 import org.apache.openjpa.persistence.FetchGroups;
 import org.apache.openjpa.persistence.Persistent;
+import org.apache.openjpa.persistence.jdbc.ElementClassCriteria;
+import org.apache.openjpa.persistence.jdbc.ElementJoinColumn;
+import org.apache.openjpa.persistence.jdbc.ForeignKey;
 
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.EpDomainException;
@@ -32,40 +43,46 @@ import com.elasticpath.domain.attribute.AttributeUsage;
 import com.elasticpath.domain.catalog.Catalog;
 import com.elasticpath.domain.catalog.impl.CatalogImpl;
 import com.elasticpath.domain.impl.AbstractLegacyEntityImpl;
+import com.elasticpath.domain.misc.LocalizedProperties;
+import com.elasticpath.domain.misc.LocalizedPropertyValue;
+import com.elasticpath.domain.misc.impl.AttributeLocalizedPropertyValueImpl;
 import com.elasticpath.persistence.support.FetchGroupConstants;
 
 /**
  * <code>Attribute</code> represents a customized property of an object like <code>Category</code> or <code>Product</code>.
  */
-@SuppressWarnings({ "PMD.CyclomaticComplexity", "PMD.NPathComplexity", "PMD.GodClass" })
+@SuppressWarnings({"PMD.CyclomaticComplexity", "PMD.NPathComplexity", "PMD.GodClass"})
 @Entity
 @Table(name = AttributeImpl.TABLE_NAME)
 @FetchGroups({
 		@FetchGroup(name = FetchGroupConstants.CATEGORY_ATTRIBUTES,
-				attributes = { @FetchAttribute(name = "name"), @FetchAttribute(name = "required"),
-						@FetchAttribute(name = "system"), @FetchAttribute(name = "valueLookupEnabled") },
-				fetchGroups = { FetchGroupConstants.PRODUCT_INDEX }),
-		@FetchGroup(name = FetchGroupConstants.PRODUCT_INDEX, attributes = { @FetchAttribute(name = "localeDependant"),
-				@FetchAttribute(name = "multiValueType"), @FetchAttribute(name = "attributeTypeId"), @FetchAttribute(name = "key") })
+				attributes = {@FetchAttribute(name = "required"), @FetchAttribute(name = "system"), @FetchAttribute(name = "valueLookupEnabled"),
+						@FetchAttribute(name = "localizedPropertiesMap")
+				},
+				fetchGroups = {FetchGroupConstants.PRODUCT_INDEX}),
+		@FetchGroup(name = FetchGroupConstants.PRODUCT_INDEX, attributes = {@FetchAttribute(name = "localeDependant"),
+				@FetchAttribute(name = "multiValueType"), @FetchAttribute(name = "attributeTypeId"), @FetchAttribute(name = "key")
+		})
 })
 public class AttributeImpl extends AbstractLegacyEntityImpl implements Attribute {
-	/**
-	 * Serial version id.
-	 */
-	private static final long serialVersionUID = 5000000001L;
-
 	/**
 	 * The name of the table & generator to use for persistence.
 	 */
 	public static final String TABLE_NAME = "TATTRIBUTE";
 
+	/**
+	 * The name of localized property -- display name.
+	 */
+	public static final String LOCALIZED_PROPERTY_DISPLAY_NAME = "attributeDisplayName";
+
+	/**
+	 * Serial version id.
+	 */
+	private static final long serialVersionUID = 5000000001L;
 	// Give an empty string as default key to make comparison easier.
 	private String key = "";
 
 	private boolean localeDependant;
-
-	// Give an empty string as default name to make comparison easier.
-	private String name = "";
 
 	private boolean required;
 
@@ -74,16 +91,20 @@ public class AttributeImpl extends AbstractLegacyEntityImpl implements Attribute
 	private boolean system;
 
 	private AttributeMultiValueType multiValueType = AttributeMultiValueType.SINGLE_VALUE;
-	
+
 	private int attributeTypeId;
 
 	private int attributeUsageId;
-	
+
 	private long uidPk;
 
 	private Catalog catalog;
 
 	private boolean global;
+
+	private LocalizedProperties localizedProperties;
+
+	private Map<String, LocalizedPropertyValue> localizedPropertiesMap = new HashMap<>();
 
 	/**
 	 * Get the attribute key.
@@ -158,26 +179,79 @@ public class AttributeImpl extends AbstractLegacyEntityImpl implements Attribute
 		}
 	}
 
-	/**
-	 * Get the product system name.
-	 *
-	 * @return the product system name
-	 */
 	@Override
-	@Basic
-	@Column(name = "NAME")
-	public String getName() {
-		return name;
+	@Transient
+	public String getDisplayName(final Locale locale) {
+		return getDisplayName(locale, true, false);
+	}
+
+	@Override
+	@Transient
+	public String getDisplayName(final Locale locale, final boolean broadenLocale, final boolean fallback) {
+		String displayName = broadenLocale ? getLocalizedProperties().getValue(LOCALIZED_PROPERTY_DISPLAY_NAME, locale)
+				: getLocalizedProperties().getValueWithoutFallBack(LOCALIZED_PROPERTY_DISPLAY_NAME, locale);
+
+		if (displayName == null && fallback) {
+			Locale fallbackLocale;
+			if (catalog == null) {
+				// Catalog might not exist in case of Customer Profile attributes, hence use JVM default locale.
+				// Commerce Manager Admin call for customer profile attributes uses Accept-Language request header.
+				fallbackLocale = Locale.getDefault();
+			} else {
+				// For, Catalog, Product, SKU attributes use the Catalog's default locale to find a display name for the Attribute
+				fallbackLocale = getCatalog().getDefaultLocale();
+			}
+			displayName = getLocalizedProperties().getValue(LOCALIZED_PROPERTY_DISPLAY_NAME, fallbackLocale);
+		}
+
+		if (displayName == null) {
+			displayName = "";
+		}
+
+		return displayName;
+	}
+
+	@Override
+	@Transient
+	public LocalizedProperties getLocalizedProperties() {
+		if (localizedProperties == null) {
+			localizedProperties = getBean(ContextIdNames.LOCALIZED_PROPERTIES);
+			localizedProperties.setLocalizedPropertiesMap(getLocalizedPropertiesMap(), ContextIdNames.ATTRIBUTE_LOCALIZED_PROPERTY_VALUE);
+		}
+		return localizedProperties;
+	}
+
+	@Override
+	public void setLocalizedProperties(final LocalizedProperties localizedProperties) {
+		this.localizedProperties = localizedProperties;
+		if (localizedProperties != null) {
+			setLocalizedPropertiesMap(localizedProperties.getLocalizedPropertiesMap());
+		}
 	}
 
 	/**
-	 * Set the product system name.
+	 * Set the product system display name.
 	 *
-	 * @param name the product system name
+	 * @param name   the product system display name
+	 * @param locale the display name's locale
 	 */
 	@Override
-	public void setName(final String name) {
-		this.name = name;
+	public void setDisplayName(final String name, final Locale locale) {
+		getLocalizedProperties().setValue(LOCALIZED_PROPERTY_DISPLAY_NAME, locale, name);
+	}
+
+	@OneToMany(targetEntity = AttributeLocalizedPropertyValueImpl.class, fetch = FetchType.EAGER, cascade = {CascadeType.ALL
+	}, orphanRemoval = true)
+	@MapKey(name = "localizedPropertyKey")
+	@ElementJoinColumn(name = "OBJECT_UID", referencedColumnName = "UIDPK", nullable = false)
+	@ElementClassCriteria
+	@ElementDependent
+	public Map<String, LocalizedPropertyValue> getLocalizedPropertiesMap() {
+		return localizedPropertiesMap;
+	}
+
+	public void setLocalizedPropertiesMap(final Map<String, LocalizedPropertyValue> localizedPropertiesMap) {
+		this.localizedPropertiesMap = localizedPropertiesMap;
 	}
 
 	/**
@@ -189,10 +263,21 @@ public class AttributeImpl extends AbstractLegacyEntityImpl implements Attribute
 	 */
 	@Override
 	public int compareTo(final Attribute attribute) throws EpDomainException {
-		return Comparator.comparing(Attribute::getName)
-			.thenComparing(Attribute::getKey)
-			.thenComparingLong(Attribute::getUidPk)
-			.compare(this, attribute);
+		return Comparator.comparing((Attribute other) -> other.getDisplayName(getLocaleForAttribute(attribute)))
+				.thenComparing(Attribute::getKey)
+				.thenComparingLong(Attribute::getUidPk)
+				.compare(this, attribute);
+	}
+
+	/**
+	 * Derives the locale applicable for a attribute based on attribute usage value. Catalog, Product and SKU use
+	 * corresponding catalog's default locale, customer profile attributes use Locale.getDefault.
+	 *
+	 * @param attribute Attribute for which associated locale is being derived.
+	 * @return Locale of the attribute specified.
+	 */
+	private Locale getLocaleForAttribute(final Attribute attribute) {
+		return attribute.getCatalog() == null ? Locale.getDefault() : attribute.getCatalog().getDefaultLocale();
 	}
 
 	/**
@@ -310,7 +395,7 @@ public class AttributeImpl extends AbstractLegacyEntityImpl implements Attribute
 
 	/**
 	 * Return true if the attribute can have multi value.
-	 * 
+	 *
 	 * @return true if the attribute can have multi value.
 	 */
 	@Transient
@@ -322,7 +407,7 @@ public class AttributeImpl extends AbstractLegacyEntityImpl implements Attribute
 	/**
 	 * Unpacks the integer representation of multi value type and returns
 	 * the AttributeMultiValueType of this attribute.
-	 * 
+	 *
 	 * @return attribute multi value type
 	 */
 	@Override
@@ -333,16 +418,17 @@ public class AttributeImpl extends AbstractLegacyEntityImpl implements Attribute
 	public AttributeMultiValueType getMultiValueType() {
 		return multiValueType;
 	}
-	
+
 	/**
 	 * Unpacks the ordinal value of the type to persist in the database.
+	 *
 	 * @param multiValueType the multi value type
 	 */
 	@Override
 	public void setMultiValueType(final AttributeMultiValueType multiValueType) {
 		this.multiValueType = multiValueType;
 	}
-	
+
 	/**
 	 * Get the attribute type Id.
 	 *
@@ -375,6 +461,15 @@ public class AttributeImpl extends AbstractLegacyEntityImpl implements Attribute
 	}
 
 	/**
+	 * Set the attribute usage Id.
+	 *
+	 * @param attributeUsageId the Id
+	 */
+	protected void setAttributeUsageIdInternal(final int attributeUsageId) {
+		this.attributeUsageId = attributeUsageId;
+	}
+
+	/**
 	 * Get the attribute usage Id.
 	 *
 	 * @return the Id
@@ -382,15 +477,6 @@ public class AttributeImpl extends AbstractLegacyEntityImpl implements Attribute
 	@Transient
 	public int getAttributeUsageId() {
 		return getAttributeUsageIdInternal();
-	}
-
-	/**
-	 * Set the attribute usage Id.
-	 *
-	 * @param attributeUsageId the Id
-	 */
-	protected void setAttributeUsageIdInternal(final int attributeUsageId) {
-		this.attributeUsageId = attributeUsageId;
 	}
 
 	/**
@@ -409,7 +495,7 @@ public class AttributeImpl extends AbstractLegacyEntityImpl implements Attribute
 			return null;
 		}
 		return ((AttributeUsageImpl) getBean(ContextIdNames.ATTRIBUTE_USAGE))
-			.getAttributeUsageById(attributeUsageId);
+				.getAttributeUsageById(attributeUsageId);
 	}
 
 	/**
@@ -442,8 +528,9 @@ public class AttributeImpl extends AbstractLegacyEntityImpl implements Attribute
 	 * @return the catalog
 	 */
 	@Override
-	@ManyToOne(optional = true, targetEntity = CatalogImpl.class)
+	@ManyToOne(optional = true, targetEntity = CatalogImpl.class, cascade = {CascadeType.REFRESH, CascadeType.MERGE})
 	@JoinColumn(name = "CATALOG_UID", nullable = true)
+	@ForeignKey
 	public Catalog getCatalog() {
 		return catalog;
 	}
@@ -507,9 +594,9 @@ public class AttributeImpl extends AbstractLegacyEntityImpl implements Attribute
 	@Override
 	public String toString() {
 		final StringBuilder sbf = new StringBuilder();
-		sbf.append("Attribute -> name: ").append(getName());
+		sbf.append("Attribute -> GUID: ").append(getGuid());
+		sbf.append(" Localized Properties: ").append(getLocalizedProperties());
 		sbf.append(" Type Usage: ").append(getAttributeUsage());
-		sbf.append(" GUID: ").append(getGuid());
 		return sbf.toString();
 	}
 

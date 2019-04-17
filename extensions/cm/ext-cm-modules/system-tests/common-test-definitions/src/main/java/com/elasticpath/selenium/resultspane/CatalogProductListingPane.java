@@ -81,7 +81,7 @@ public class CatalogProductListingPane extends AbstractPageObject {
 
 		int counter = 0;
 		while (selectItemInCenterPane(PRODUCT_TABLE_PARENT_CSS, PRODUCT_ROW_COLUMN_CSS, expectedProductName, PRODUCT_NAME) && counter < Constants
-				.RETRY_COUNTER_3) {
+				.RETRY_COUNTER_5) {
 			sleep(Constants.SLEEP_HALFSECOND_IN_MILLIS);
 			closePane("Product Listing");
 			catalogManagement.doubleClickCategory(categoryName);
@@ -89,7 +89,7 @@ public class CatalogProductListingPane extends AbstractPageObject {
 		}
 
 		assertThat(selectItemInCenterPane(PRODUCT_TABLE_PARENT_CSS, PRODUCT_ROW_COLUMN_CSS, expectedProductName, PRODUCT_NAME))
-				.as("Expected Product does not exist in product listing - " + expectedProductName)
+				.as("Expected Product should not exist in product listing - " + expectedProductName)
 				.isFalse();
 
 		setWebDriverImplicitWaitToDefault();

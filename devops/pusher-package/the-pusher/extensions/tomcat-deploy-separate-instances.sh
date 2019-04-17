@@ -46,6 +46,9 @@ deployTomcatAppSeparateInstance() {
         # Set the debug port in the setenv.sh script
         ssh $localUser@$server "sed -i -r 's|(.*)(,address=)([0-9]+)(.*)|\1\2$debugPort\4|' $baseDirectory/$currentContextPath/bin/setenv.sh"
 
+        # Set EP JVM variables to configure deployment
+        ssh $localUser@$server "echo 'ep.changesets.enabled=$cmChangesetEnabled' >> $baseDirectory/$appServer/conf/catalina.properties"
+        ssh $localUser@$server "echo 'org.eclipse.rap.rwt.enableUITests=$cmRapEnableUITests' >> $baseDirectory/$appServer/conf/catalina.properties"
     else
         # Stop Tomcat if it's running
         log detail "Stopping $currentContextPath on $server..."

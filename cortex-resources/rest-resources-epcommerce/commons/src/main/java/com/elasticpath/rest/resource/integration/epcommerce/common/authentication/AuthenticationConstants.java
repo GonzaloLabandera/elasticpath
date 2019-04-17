@@ -9,11 +9,6 @@ package com.elasticpath.rest.resource.integration.epcommerce.common.authenticati
 public class AuthenticationConstants {
 
 	/**
-	 * A centralised anonymous user id for anonymous Cortex users.
-	 */
-	public static final String ANONYMOUS_USER_ID = "public@ep-cortex.com";
-
-	/**
 	 * Public role name.
 	 */
 	public static final String PUBLIC_ROLENAME = "PUBLIC";

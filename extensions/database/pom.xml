@@ -24,6 +24,7 @@
 		<data.population.reset_password>${epdb.reset_password}</data.population.reset_password>
 		<data.population.params>${epdb.params}</data.population.params>
 		<data.population.jdbc.driver>${epdb.jdbc.driver}</data.population.jdbc.driver>
+		<data.population.username.short>${epdb.username.short}</data.population.username.short>
 		<data.population.default.tablespace>${epdb.default.tablespace}</data.population.default.tablespace>
 		<data.population.temporary.tablespace>${epdb.temporary.tablespace}</data.population.temporary.tablespace>
 		<data.population.schemaspy.dbType>${epdb.schemaspy.dbType}</data.population.schemaspy.dbType>

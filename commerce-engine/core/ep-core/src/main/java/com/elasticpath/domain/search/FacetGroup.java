@@ -4,7 +4,7 @@
 package com.elasticpath.domain.search;
 
 /**
- * Field group type of a facet
+ * Field group type of a facet.
  */
 public enum FacetGroup {
 	/**

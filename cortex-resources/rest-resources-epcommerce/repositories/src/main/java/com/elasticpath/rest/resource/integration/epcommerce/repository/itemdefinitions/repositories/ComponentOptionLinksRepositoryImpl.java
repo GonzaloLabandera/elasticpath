@@ -47,9 +47,10 @@ public class ComponentOptionLinksRepositoryImpl
 	}
 
 	/**
-	 * Build an ItemDefinitionComponentOptionIdentifier.
+	 * Build an ItemDefinitionComponentOptionIdentifier from an ItemDefinitionComponentOptionsIdentifier and a sku option.
 	 *
 	 * @param identifier ItemDefinitionComponentOptionsIdentifier
+	 * @param skuOption the sku option
 	 * @return ItemDefinitionComponentOptionIdentifier
 	 */
 	protected Observable<ItemDefinitionComponentOptionIdentifier> buildItemDefinitionComponentOptionIdentifier(

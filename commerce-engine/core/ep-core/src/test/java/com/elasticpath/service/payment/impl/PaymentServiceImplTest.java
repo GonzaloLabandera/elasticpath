@@ -33,7 +33,6 @@ import com.elasticpath.domain.catalog.impl.ProductSkuImpl;
 import com.elasticpath.domain.customer.Address;
 import com.elasticpath.domain.customer.Customer;
 import com.elasticpath.domain.customer.impl.CustomerAddressImpl;
-import com.elasticpath.domain.customer.impl.CustomerAuthenticationImpl;
 import com.elasticpath.domain.customer.impl.CustomerImpl;
 import com.elasticpath.domain.misc.impl.RandomGuidImpl;
 import com.elasticpath.domain.order.Order;
@@ -127,7 +126,6 @@ public class PaymentServiceImplTest extends AbstractCatalogDataTestCase {
 		final TokenPaymentHandler tokenPaymentHandler = new TokenPaymentHandler();
 		tokenPaymentHandler.setProductSkuLookup(getProductSkuLookup());
 
-		stubGetBean(ContextIdNames.CUSTOMER_AUTHENTICATION, CustomerAuthenticationImpl.class);
 		stubGetBean(ContextIdNames.MONEY_FORMATTER, StandardMoneyFormatter.class);
 		stubGetBean(ContextIdNames.ORDER_ADDRESS, OrderAddressImpl.class);
 		stubGetBean(ContextIdNames.ORDER_PAYMENT, OrderPaymentImpl.class);

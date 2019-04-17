@@ -39,13 +39,13 @@ Button {
         &[FLAT] {
             padding: $button_size_xs;
         }
-        
+
     }
 
     &, &[PUSH] {
         // Applies for shell default button.
         &:default {
-            background-color: $primary-color;
+            background-color: $widget_shell_top_color;
             background-image: none;
             border: 1px solid  $primary-color2;
             color: $widget_body_color; // invert
@@ -113,7 +113,7 @@ Button {
     &-RadioIcon {
         @include radio_icon();
     }
-    
+
     // http://download.eclipse.org/rt/rap/doc/3.1/guide/reference/theming/Button.html#Button-ArrowIcon
     &-ArrowIcon {
 

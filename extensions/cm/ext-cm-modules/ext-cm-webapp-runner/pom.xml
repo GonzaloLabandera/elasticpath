@@ -63,6 +63,16 @@
 					<path>${ep.cm.context}</path>
 					<port>${ep.cm.tomcat.port.http}</port>
 					<contextFile>${cm.contextFilePath}</contextFile>
+					<systemProperties>
+						<ep.changesets.enabled>${ep.changesets.enabled}</ep.changesets.enabled>
+						<ep.search.default.url>${ep.search.url}</ep.search.default.url>
+						<ep.asset.location>${ep.local.asset.path}</ep.asset.location>
+						<ep.smtp.scheme>${ep.smtp.scheme}</ep.smtp.scheme>
+						<ep.smtp.host>${ep.smtp.host}</ep.smtp.host>
+						<ep.smtp.port>${ep.smtp.port}</ep.smtp.port>
+						<ep.smtp.username>${ep.smtp.username}</ep.smtp.username>
+						<ep.smtp.password>${ep.smtp.password}</ep.smtp.password>
+					</systemProperties>
 				</configuration>
 				<dependencies>
 					<!-- Include JDBC driver dependency -->

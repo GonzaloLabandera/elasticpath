@@ -15,6 +15,8 @@ import com.elasticpath.domain.ElasticPath;
 import com.elasticpath.domain.objectgroup.BusinessObjectDescriptor;
 import com.elasticpath.domain.objectgroup.BusinessObjectGroupMember;
 import com.elasticpath.persistence.api.PersistenceEngine;
+import com.elasticpath.persistence.openjpa.QueryParameterEscaper;
+import com.elasticpath.persistence.openjpa.impl.QueryParameterEscaperImpl;
 import com.elasticpath.service.DirectedSortingFieldException;
 import com.elasticpath.service.changeset.ChangeSetMemberSortingField;
 import com.elasticpath.service.objectgroup.dao.BusinessObjectGroupDao;
@@ -26,6 +28,7 @@ public class BusinessObjectGroupDaoImpl implements BusinessObjectGroupDao {
 
 	private PersistenceEngine persistenceEngine;
 	private ElasticPath elasticPath;
+	private final QueryParameterEscaper paramEscaper = new QueryParameterEscaperImpl();
 
 	@Override
 	public void addGroupMember(final BusinessObjectGroupMember objectGroupMember) {
@@ -71,7 +74,7 @@ public class BusinessObjectGroupDaoImpl implements BusinessObjectGroupDao {
 					hasComma = true;
 				}
 
-				objectTypesToFilter.append('\'').append(objectType).append('\'');
+				objectTypesToFilter.append('\'').append(paramEscaper.escapeStringParameter(objectType)).append('\'');
 			}
 
 			objectTypesToFilter.append(") ");

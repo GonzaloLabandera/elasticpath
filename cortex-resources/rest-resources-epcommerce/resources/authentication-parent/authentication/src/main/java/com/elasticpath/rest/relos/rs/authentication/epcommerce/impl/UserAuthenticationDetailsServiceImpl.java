@@ -50,15 +50,29 @@ public class UserAuthenticationDetailsServiceImpl implements UserDetailsService 
 
 		ExecutionResult<Customer> customerLookupResult = customerRepository.findCustomerByUserId(scope, username);
 
-		if (customerLookupResult.isSuccessful()) {
-			Customer customer = customerLookupResult.getData();
-			if (isCustomerDisabled(customer)) {
-				throw new UsernameNotFoundException(String.format("User with username %s is disabled", username));
-			}
-
-			return customerTransformer.transform(customer);
+		if (!customerLookupResult.isSuccessful()) {
+			throw createUserNotExistsException(username);
 		}
-		throw new UsernameNotFoundException(String.format("User with username %s does not exist", username));
+
+		Customer customer = customerLookupResult.getData();
+
+		if (!isAuthenticationAllowed(customer)) {
+			throw createUserNotExistsException(username);
+		}
+
+		if (isCustomerDisabled(customer)) {
+			throw new UsernameNotFoundException(String.format("User with username %s is disabled", username));
+		}
+
+		return customerTransformer.transform(customer);
+	}
+
+	private static UsernameNotFoundException createUserNotExistsException(final String username) {
+		return new UsernameNotFoundException(String.format("User with username %s does not exist", username));
+	}
+
+	private boolean isAuthenticationAllowed(final Customer customer) {
+		return customer.getCustomerAuthentication() != null;
 	}
 
 	private boolean isCustomerDisabled(final Customer customer) {

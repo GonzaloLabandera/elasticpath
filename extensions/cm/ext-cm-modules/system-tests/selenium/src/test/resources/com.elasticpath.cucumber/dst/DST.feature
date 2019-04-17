@@ -118,28 +118,28 @@ Feature: Data Sync tool
     Given I sign in to the author environment CM as admin user
     And I create and select the newly created change set DST_Update_Product
     And I go to Catalog Management
-    And I am viewing the <order_editor_tab> tab of an existing product with product code <product_code>
+    And I am viewing the <product_editor_tab> tab of an existing product with product code <product_code>
     And I click add item to change set button
     And I add product code <cross_sell_product> to merchandising association <merchandising_tab>
     And I lock and publish latest change set
     And I run the data sync tool
     And I finalize the latest change set
     When I sign in to the publish environment CM as admin user
-    And in publish environment I am viewing the <order_editor_tab> tab of product with code <product_code>
-    Then the product code <cross_sell_product> exists under merchandising association
+    And in publish environment I am viewing the <product_editor_tab> tab of product with code <product_code>
+    Then the product code <cross_sell_product> exists under merchandising association <merchandising_tab>
     When I switch to author environment
     And in staging environment I create and select a new change set DST_Delete_MA
     And I go to Catalog Management
-    And I am viewing the <order_editor_tab> tab of an existing product with product code <product_code>
+    And I am viewing the <product_editor_tab> tab of an existing product with product code <product_code>
     And I click add item to change set button
     And I delete product code <cross_sell_product>
     And I lock and publish latest change set
     And I run the data sync tool
     And I finalize the latest change set
     And I switch to publish environment
-    And in publish environment I am viewing the <order_editor_tab> tab of product with code <product_code>
-    Then the product code <cross_sell_product> is no longer under merchandising association
+    And in publish environment I am viewing the <product_editor_tab> tab of product with code <product_code>
+    Then the product code <cross_sell_product> is no longer in merchandising association <merchandising_tab>
 
     Examples:
-      | merchandising_tab | order_editor_tab           | product_code       | cross_sell_product |
+      | merchandising_tab | product_editor_tab         | product_code       | cross_sell_product |
       | Cross Sell        | Merchandising Associations | handsfree_efah1234 | alien              |

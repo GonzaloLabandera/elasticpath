@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import org.jmock.Expectations;
@@ -29,6 +30,8 @@ import com.elasticpath.domain.attribute.AttributeType;
 import com.elasticpath.domain.attribute.AttributeUsage;
 import com.elasticpath.domain.attribute.impl.AttributeImpl;
 import com.elasticpath.domain.attribute.impl.AttributeUsageImpl;
+import com.elasticpath.domain.misc.impl.AttributeLocalizedPropertyValueImpl;
+import com.elasticpath.domain.misc.impl.LocalizedPropertiesImpl;
 import com.elasticpath.persistence.api.PersistenceEngine;
 import com.elasticpath.persistence.support.impl.DistinctAttributeValueCriterionImpl;
 import com.elasticpath.service.attribute.AttributeService;
@@ -43,6 +46,8 @@ public class AttributeServiceImplTest extends AbstractEPServiceTestCase {
 	private static final long ATTRIBUTE_UID = 123L;
 
 	private static final String SERVICE_EXCEPTION_EXPECTED = "EpServiceException expected.";
+
+	private static final Locale LANGUAGE_LOCALE = Locale.ENGLISH;
 
 	private AttributeService attributeService;
 
@@ -61,6 +66,8 @@ public class AttributeServiceImplTest extends AbstractEPServiceTestCase {
 		attributeService.setPersistenceEngine(mockPersistenceEngine);
 
 		stubGetBean(ContextIdNames.ATTRIBUTE_USAGE, AttributeUsageImpl.class);
+		stubGetBean(ContextIdNames.LOCALIZED_PROPERTIES, LocalizedPropertiesImpl.class);
+		stubGetBean(ContextIdNames.ATTRIBUTE_LOCALIZED_PROPERTY_VALUE, AttributeLocalizedPropertyValueImpl.class);
 	}
 
 	/**
@@ -95,7 +102,7 @@ public class AttributeServiceImplTest extends AbstractEPServiceTestCase {
 		attribute.setAttributeUsage(AttributeUsageImpl.PRODUCT_USAGE);
 		final String key = "attKeyAdd";
 		attribute.setKey(key);
-		attribute.setName("testName");
+		attribute.setDisplayName("testName", LANGUAGE_LOCALE);
 
 		final List<Attribute> attributeList = new ArrayList<>();
 		context.checking(new Expectations() {
@@ -104,7 +111,7 @@ public class AttributeServiceImplTest extends AbstractEPServiceTestCase {
 				will(returnValue(attributeList));
 
 				allowing(mockPersistenceEngine).retrieveByNamedQuery("ATTRIBUTE_FIND_BY_NAME_USAGE",
-						attribute.getName(),
+						attribute.getDisplayName(LANGUAGE_LOCALE),
 						attribute.getAttributeUsage().getValue());
 				will(returnValue(attributeList));
 
@@ -170,7 +177,7 @@ public class AttributeServiceImplTest extends AbstractEPServiceTestCase {
 		attribute.setAttributeUsage(AttributeUsageImpl.PRODUCT_USAGE);
 		final String key = "attKeyUpdate";
 		attribute.setKey(key);
-		attribute.setName("testName");
+		attribute.setDisplayName("testName", LANGUAGE_LOCALE);
 		final List<Attribute> attributeList = new ArrayList<>();
 		context.checking(new Expectations() {
 			{
@@ -178,7 +185,7 @@ public class AttributeServiceImplTest extends AbstractEPServiceTestCase {
 				will(returnValue(attributeList));
 
 				allowing(mockPersistenceEngine).retrieveByNamedQuery("ATTRIBUTE_FIND_BY_NAME_USAGE",
-						attribute.getName(),
+						attribute.getDisplayName(LANGUAGE_LOCALE),
 						attribute.getAttributeUsage().getValue());
 				will(returnValue(attributeList));
 

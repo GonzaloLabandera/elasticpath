@@ -24,7 +24,6 @@ import com.elasticpath.domain.catalog.ProductDeleted;
 import com.elasticpath.domain.catalog.ProductLoadTuner;
 import com.elasticpath.domain.catalog.ProductSku;
 import com.elasticpath.domain.catalog.ProductType;
-import com.elasticpath.domain.catalog.impl.ProductLoadTunerImpl;
 import com.elasticpath.domain.order.OrderSku;
 import com.elasticpath.domain.shoppingcart.WishList;
 import com.elasticpath.domain.skuconfiguration.SkuOption;
@@ -705,7 +704,7 @@ public class ProductDaoImpl extends AbstractDaoImpl implements ProductDao {
 			getPersistenceEngine().delete(productAssociation);
 		}
 
-		final ProductLoadTuner productLoadTuner = new ProductLoadTunerImpl();
+		ProductLoadTuner productLoadTuner = getBean(ContextIdNames.PRODUCT_LOAD_TUNER);
 		productLoadTuner.setLoadingSkus(true);
 
 		// delete the product list

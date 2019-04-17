@@ -52,7 +52,7 @@ public class CustomerIndexBuilder extends AbstractIndexBuilder {
 	 */
 	@Override
 	public List<Long> findAddedOrModifiedUids(final Date lastBuildDate) {
-		return customerService.findUidsByModifiedDate(lastBuildDate);
+		return customerService.findSearchableUidsByModifiedDate(lastBuildDate);
 	}
 
 	/**

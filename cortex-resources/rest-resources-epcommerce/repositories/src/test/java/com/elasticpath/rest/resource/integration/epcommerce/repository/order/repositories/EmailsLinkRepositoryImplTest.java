@@ -5,9 +5,10 @@ package com.elasticpath.rest.resource.integration.epcommerce.repository.order.re
 
 import static org.mockito.Mockito.when;
 
-import io.reactivex.Single;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
+import io.reactivex.Single;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
@@ -18,7 +19,6 @@ import com.elasticpath.rest.definition.orders.EmailInfoIdentifier;
 import com.elasticpath.rest.definition.orders.OrderIdentifier;
 import com.elasticpath.rest.id.type.StringIdentifier;
 import com.elasticpath.rest.resource.ResourceOperationContext;
-import com.elasticpath.rest.resource.integration.epcommerce.common.authentication.AuthenticationConstants;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.customer.CustomerRepository;
 
 /**
@@ -52,18 +52,6 @@ public class EmailsLinkRepositoryImplTest {
 				.test()
 				.assertNoErrors()
 				.assertValue(emailIdentifier -> emailIdentifier.getEmailId().getValue().equals(VALID_EMAIL));
-	}
-
-	@Test
-	public void shouldNotReturnEmailWhenAnonymousUser() {
-		when(resourceOperationContext.getUserIdentifier()).thenReturn(USER_ID);
-		when(customerRepository.getCustomer(USER_ID)).thenReturn(Single.just(customer));
-		when(customer.getEmail()).thenReturn(AuthenticationConstants.ANONYMOUS_USER_ID);
-
-		repository.getElements(getEmailInfoIdentifier())
-				.test()
-				.assertNoErrors()
-				.assertNoValues();
 	}
 
 	@Test

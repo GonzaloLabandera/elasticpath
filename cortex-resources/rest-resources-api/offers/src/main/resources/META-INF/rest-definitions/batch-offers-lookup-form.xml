@@ -1,0 +1,41 @@
+<?xml version="1.0"?>
+<definitions xmlns="http://www.elasticpath.com/schema/rest/0.5">
+	<family>
+		<name>offers</name>
+
+		<uri-part>
+			<name>batch-id</name>
+			<description>The batch id.</description>
+			<array>
+				<string/>
+			</array>
+		</uri-part>
+
+		<resource>
+			<name>batch-offers</name>
+			<description><![CDATA[Provides a batched list of offers.]]></description>
+			<uri>{batch-offers-lookup-form}/{batch-id}</uri>
+			<list-of>offer</list-of>
+		</resource>
+
+		<resource>
+			<name>batch-offers-lookup-form</name>
+			<description><![CDATA[Provides the form with which to search for offers by a list of codes.]]></description>
+			<uri>{base.family}/{base.scope}/lookups/batches/form</uri>
+			<form>
+				<entity>items.codes</entity>
+				<action-rel>batchofferslookupaction</action-rel>
+				<result>batch-offers</result>
+			</form>
+		</resource>
+
+		<relationship>
+			<name>lookups-to-batch-offers-lookup-form</name>
+			<description>A link from the lookups resource to the batch offers form.</description>
+			<rel>batchofferslookupform</rel>
+			<from>lookups.lookups</from>
+			<to>batch-offers-lookup-form</to>
+		</relationship>
+
+	</family>
+</definitions>

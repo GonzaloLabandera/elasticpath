@@ -68,8 +68,11 @@ public class CustomerTransformerTest {
 		when(customer.getUserId())
 			.thenReturn(USER_ID);
 
-		when(customer.getPassword())
+		when(customer.getCustomerAuthentication().getPassword())
 			.thenReturn(ENCODED_PASSWORD);
+
+		when(customer.getCustomerAuthentication().getSalt())
+			.thenReturn(SALT);
 
 		when(customer.getCustomerRoleMapper().getAllRoles())
 			.thenReturn(roleNames);
@@ -82,8 +85,5 @@ public class CustomerTransformerTest {
 
 		when(customer.getGuid())
 			.thenReturn(CUSTOMER_GUID);
-
-		when(customer.getCustomerAuthentication().getSalt())
-			.thenReturn(SALT);
 	}
 }

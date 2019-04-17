@@ -3,14 +3,16 @@
  */
 package com.elasticpath.rest.resource.integration.epcommerce.repository.emails.impl;
 
+import io.reactivex.Completable;
+import io.reactivex.Maybe;
 import io.reactivex.Observable;
 import io.reactivex.Single;
-import org.apache.commons.lang3.StringUtils;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
 import com.elasticpath.domain.customer.Customer;
 import com.elasticpath.repository.Repository;
+import com.elasticpath.rest.ResourceOperationFailure;
 import com.elasticpath.rest.definition.emails.EmailEntity;
 import com.elasticpath.rest.definition.emails.EmailIdentifier;
 import com.elasticpath.rest.definition.emails.EmailsIdentifier;
@@ -31,60 +33,67 @@ import com.elasticpath.rest.resource.integration.epcommerce.repository.customer.
 public class EmailEntityRepositoryImpl<E extends EmailEntity, I extends EmailIdentifier>
 		implements Repository<EmailEntity, EmailIdentifier> {
 
+	private static final String EMAIL_NOT_FOUND = "Email not found";
+
 	private CustomerRepository customerRepository;
 	private ResourceOperationContext resourceOperationContext;
 
 	@Override
 	public Single<SubmitResult<EmailIdentifier>> submit(final EmailEntity emailEntity, final IdentifierPart<String> scope) {
-
-		String customerGuid = resourceOperationContext.getUserIdentifier();
-
 		String email = emailEntity.getEmail();
 
-		return customerRepository.getCustomer(customerGuid)
-				.flatMap(customer -> saveAndUpdateCustomerEmail(customer, email, scope));
+		return customerRepository.getCustomer(resourceOperationContext.getUserIdentifier())
+				.flatMapCompletable(customer -> updateCustomerWithEmail(customer, email))
+				.toSingle(() -> SubmitResult.<EmailIdentifier>builder()
+						.withIdentifier(buildEmailIdentifier(email, scope))
+						.withStatus(SubmitStatus.CREATED)
+						.build());
+	}
+
+	private Completable updateCustomerWithEmail(final Customer customer, final String email) {
+		// TODO: We will eventually want to migrate to a model where userId and email are ALWAYS independent
+		//  but we're keeping this here until we provide a way for users to manage their userId
+		if (isCustomerUserIdLinkedToEmail(customer)) {
+			customer.setUserId(email);
+		}
+
+		customer.setEmail(email);
+
+		return customerRepository.updateCustomerAsCompletable(customer);
+	}
+
+	private boolean isCustomerUserIdLinkedToEmail(final Customer customer) {
+		return customer.getUserId().equals(customer.getEmail());
 	}
 
 	@Override
 	public Single<EmailEntity> findOne(final EmailIdentifier identifier) {
-
 		String emailId = identifier.getEmailId().getValue();
 
 		return customerRepository.getCustomer(resourceOperationContext.getUserIdentifier())
-				.map(customer -> EmailEntity.builder()
+				.flatMapMaybe(customer -> Maybe.fromCallable(customer::getEmail))
+				.map(email -> EmailEntity.builder()
 						.withEmailId(emailId)
-						.withEmail(customer.getEmail())
-						.build());
+						.withEmail(email)
+						.build())
+				.switchIfEmpty(Single.error(ResourceOperationFailure.notFound(EMAIL_NOT_FOUND)));
 	}
 
 	@Override
 	public Observable<EmailIdentifier> findAll(final IdentifierPart<String> scope) {
-
 		return customerRepository.getCustomer(resourceOperationContext.getUserIdentifier())
-				.flatMapObservable(customer -> getEmailIdentifier(scope, customer.getEmail()));
+				.flatMapMaybe(customer -> Maybe.fromCallable(customer::getEmail))
+				.map(email -> buildEmailIdentifier(email, scope))
+				.toObservable();
 	}
 
-	/**
-	 * Get email identifier if customer email is not empty.
-	 *
-	 * @param scope         the scope
-	 * @param customerEmail the customer email
-	 * @return email identifier (if any)
-	 */
-	protected Observable<EmailIdentifier> getEmailIdentifier(final IdentifierPart<String> scope, final String customerEmail) {
-
-		if (StringUtils.isNotEmpty(customerEmail)) {
-			final EmailsIdentifier emails = EmailsIdentifier.builder()
-					.withScope(scope)
-					.build();
-
-			return Observable.just(EmailIdentifier.builder()
-					.withEmails(emails)
-					.withEmailId(StringIdentifier.of(customerEmail))
-					.build());
-		}
-
-		return Observable.empty();
+	private EmailIdentifier buildEmailIdentifier(final String email, final IdentifierPart<String> scope) {
+		return EmailIdentifier.builder()
+				.withEmailId(StringIdentifier.of(email))
+				.withEmails(EmailsIdentifier.builder()
+						.withScope(scope)
+						.build())
+				.build();
 	}
 
 	@Reference
@@ -95,38 +104,6 @@ public class EmailEntityRepositoryImpl<E extends EmailEntity, I extends EmailIde
 	@Reference
 	public void setResourceOperationContext(final ResourceOperationContext resourceOperationContext) {
 		this.resourceOperationContext = resourceOperationContext;
-	}
-
-	/**
-	 * Sets and updates a customers email.
-	 *
-	 * @param customer	the customer
-	 * @param email		customer's email
-	 * @param scope		the scope
-	 * @return Single<EmailIdentifier>
-	 */
-	protected Single<SubmitResult<EmailIdentifier>> saveAndUpdateCustomerEmail(final Customer customer, final String email, final
-	IdentifierPart<String> scope) {
-
-		String emailTrim = StringUtils.trimToNull(email);
-
-		customer.setEmail(emailTrim);
-
-		return customerRepository.updateCustomerAsCompletable(customer)
-				.toSingle(() -> SubmitResult.<EmailIdentifier>builder()
-						.withIdentifier(buildEmailIdentifier(email, scope))
-						.withStatus(SubmitStatus.CREATED)
-						.build());
-
-	}
-
-	private EmailIdentifier buildEmailIdentifier(final String email, final IdentifierPart<String> scope) {
-		return EmailIdentifier.builder()
-				.withEmailId(StringIdentifier.of(email))
-				.withEmails(EmailsIdentifier.builder()
-						.withScope(scope)
-						.build())
-				.build();
 	}
 
 }

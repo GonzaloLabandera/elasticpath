@@ -308,8 +308,12 @@ class Profile extends CommonMethods {
 		delete(client.body.self.uri)
 	}
 
-	static void addEmailWithoutFollow(String userName) {
+	static void navigateToAddEmailForm() {
 		emailform()
+	}
+
+	static void addEmailWithoutFollow(String userName) {
+		navigateToAddEmailForm()
 		client.createemailaction("email": userName)
 				.stopIfFailure()
 	}

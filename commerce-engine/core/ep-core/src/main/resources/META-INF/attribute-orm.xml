@@ -20,7 +20,8 @@
 			<query>
 				SELECT a
 				FROM AttributeImpl a
-				WHERE a.name = ?1
+				INNER JOIN a.localizedPropertiesMap lpm
+				WHERE lpm.value = ?1
 				AND a.attributeUsageIdInternal = ?2
 			</query>
 		</named-query>
@@ -104,9 +105,11 @@
 		</named-query>
 		<named-query name="ATTRIBUTE_NAME_BY_KEY">
 			<query>
-				SELECT a.name
+				SELECT lpm.value
 				FROM AttributeImpl a
+				INNER JOIN a.localizedPropertiesMap lpm
 				WHERE a.key = ?1
+				AND lpm.localizedPropertyKey = CONCAT('attributeDisplayName_',a.catalog.defaultLocaleInternal)
 			</query>
 		</named-query>
 		<named-query name="SKU_ATTRIBUTE_IN_USE">

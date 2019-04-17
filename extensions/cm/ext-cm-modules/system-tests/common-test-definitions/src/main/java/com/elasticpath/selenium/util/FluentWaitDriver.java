@@ -168,6 +168,18 @@ public class FluentWaitDriver extends WaitDriver {
 	}
 
 	/**
+	 * Waits until an element is visible and not stale.
+	 *
+	 * @param cssString the css string
+	 * @return the webElement that is visible and not stale
+	 */
+	public WebElement waitForElementToBeVisibleAndToBeNotStale(final String cssString) {
+		wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector(cssString)));
+		waitForElementToBeNotStale(cssString);
+		return webDriver.findElement(By.cssSelector(cssString));
+	}
+
+	/**
 	 * Waits until an element is invisible.
 	 *
 	 * @param findBy the FindBy condition
@@ -290,7 +302,6 @@ public class FluentWaitDriver extends WaitDriver {
 		});
 	}
 
-
 	/**
 	 * Waits for an element to no longer be stale.
 	 *
@@ -298,15 +309,25 @@ public class FluentWaitDriver extends WaitDriver {
 	 * @return boolean
 	 */
 	public boolean waitForElementToBeNotStale(final String cssString) {
+		return waitForElementToBeNotStale(By.cssSelector(cssString));
+	}
+
+	/**
+	 * Waits for an element to no longer be stale.
+	 *
+	 * @param bySelector the By selector
+	 * @return boolean
+	 */
+	public boolean waitForElementToBeNotStale(final By bySelector) {
 
 		return wait.until(driver -> {
 			driver.manage().timeouts().implicitlyWait(1, TimeUnit.SECONDS);
 
 			try {
-				driver.findElement(By.cssSelector(cssString)).getText();
+				driver.findElement(bySelector).getText();
 
 			} catch (StaleElementReferenceException e) {
-				LOGGER.debug("Element " + cssString + " is stale at this point ");
+				LOGGER.debug("Element is stale at this point ");
 				return false;
 			} finally {
 				driver.manage().timeouts().implicitlyWait(WEBDRIVER_DEFAULT_TIMEOUT, TimeUnit.SECONDS);

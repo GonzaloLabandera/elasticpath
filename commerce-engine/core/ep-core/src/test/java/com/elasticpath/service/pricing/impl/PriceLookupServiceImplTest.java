@@ -72,14 +72,15 @@ public class PriceLookupServiceImplTest {
 	private static final String SKU = "SKU";
 
 	private static final String ANY = "any";
+	private static final int ANY_PRICE_TIERS_COUNT = 2;
 	private static final String ANY1 = "any1";
+	private static final int ANY1_PRICE_TIERS_COUNT = 3;
 	private static final String ANY2 = "any2";
+	private static final int ANY2_PRICE_TIERS_COUNT = 1;
 
 	private static final String PRODUCT_GUID = "PRODUCT-GUID";
 	private static final String SKU_GUID1 = "SKU-GUID1";
 	private static final String PL_GUID = "PLR";
-
-
 
 	private static final int TWELVE = 12;
 	private static final int THIRTEEN = 13;
@@ -252,11 +253,11 @@ public class PriceLookupServiceImplTest {
 
 		assertThat(rez).isNotNull();
 
-		assertThat(rez.get(ANY2).getPriceTiers()).hasSize(1);
+		assertThat(rez.get(ANY2).getPriceTiers()).hasSize(ANY2_PRICE_TIERS_COUNT);
 
-		assertThat(rez.get(ANY).getPriceTiers()).hasSize(2);
+		assertThat(rez.get(ANY).getPriceTiers()).hasSize(ANY_PRICE_TIERS_COUNT);
 
-		assertThat(rez.get(ANY1).getPriceTiers()).hasSize(3);
+		assertThat(rez.get(ANY1).getPriceTiers()).hasSize(ANY1_PRICE_TIERS_COUNT);
 	}
 
 	/**
@@ -321,7 +322,8 @@ public class PriceLookupServiceImplTest {
 			final List<String> skuGuids = new ArrayList<>();
 			skuGuids.add(PRODUCT_GUID);
 			skuGuids.add(skuGuid);
-			when(baseAmountService.getBaseAmounts(eq(plStack.getPriceListStack()), argThat(MatcherFactory.listContaining(skuGuids)))).thenReturn(list);
+			when(baseAmountService.getBaseAmounts(eq(plStack.getPriceListStack()), argThat(MatcherFactory.listContaining(skuGuids))))
+					.thenReturn(list);
 		}
 
 		when(paymentScheduleHelper.isPaymentScheduleCapable(storeProduct)).thenReturn(false);
@@ -329,7 +331,8 @@ public class PriceLookupServiceImplTest {
 		when(paymentScheduleHelper.getPaymentSchedule(sku0)).thenReturn(null);
 		when(paymentScheduleHelper.getPaymentSchedule(sku1)).thenReturn(null);
 
-		assertThat(service.getProductPrice(product, plStack).getListPrice(TWELVE).getAmount()).isEqualTo(verifyPrice.getListPrice(TWELVE).getAmount());
+		assertThat(service.getProductPrice(product, plStack).getListPrice(TWELVE).getAmount())
+				.isEqualTo(verifyPrice.getListPrice(TWELVE).getAmount());
 
 		Collection<Product> storeProducts = new ArrayList<>();
 		storeProducts.add(storeProduct);
@@ -347,8 +350,7 @@ public class PriceLookupServiceImplTest {
 		productBundle.setCalculated(Boolean.FALSE);
 		productBundle.setGuid(GUID);
 
-
-		when(priceAdjustmentService.findByPriceListAndBundleConstituentsAsMap(INVALID_PL_GUID, new ArrayList<>())).thenReturn(new HashMap<String, PriceAdjustment>());
+		when(priceAdjustmentService.findByPriceListAndBundleConstituentsAsMap(INVALID_PL_GUID, new ArrayList<>())).thenReturn(new HashMap<>());
 
 		assertThat(service.getProductBundlePriceAdjustmentsMap(productBundle, INVALID_PL_GUID))
 			.as("Should not return null when no price adjustments are found due to an invalid price list GUID.")
@@ -601,15 +603,15 @@ public class PriceLookupServiceImplTest {
 		when(constituentProductProductSku.getProduct()).thenReturn(constituentProduct);
 		when(constituentProductProductSku.isWithinDateRange(any(Date.class))).thenReturn(true);
 
-		when(baseAmountService.getBaseAmounts(eq(stack.getPriceListStack()), argThat(MatcherFactory.listContaining(constitutentGuids)))).thenReturn(amounts);
+		when(baseAmountService.getBaseAmounts(eq(stack.getPriceListStack()), argThat(MatcherFactory.listContaining(constitutentGuids))))
+				.thenReturn(amounts);
 
 		when(paymentScheduleHelper.isPaymentScheduleCapable(constituentProduct)).thenReturn(false);
 		when(paymentScheduleHelper.getPaymentSchedule(constituentProductProductSku)).thenReturn(null);
 		Price skuPrice = service.getSkuPrice(productSku, stack);
 		assertThat(skuPrice).isNotNull();
-
-
 	}
+
 	/**
 	 * Test that a calculated bundle doesn't get a price when one of the constituents has a null price,
 	 * even if the bundle itself has a base amount.

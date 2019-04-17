@@ -91,7 +91,10 @@ public enum RequiredJobType {
 	DATA_POLICY(JobType.DATA_POLICY),
 
 	/** Customer Consents. */
-	CUSTOMER_CONSENT(JobType.CUSTOMER_CONSENT);
+	CUSTOMER_CONSENT(JobType.CUSTOMER_CONSENT),
+
+	/** Facet. */
+	FACET(JobType.FACET);
 
 	private JobType jobType;
 

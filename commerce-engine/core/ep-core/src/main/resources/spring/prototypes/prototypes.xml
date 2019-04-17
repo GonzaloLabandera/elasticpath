@@ -35,7 +35,6 @@
 	<bean id="topSellerProduct" scope="prototype" class="com.elasticpath.domain.catalog.impl.TopSellerProductImpl"/>
 	<bean id="customer" scope="prototype" class="com.elasticpath.domain.customer.impl.CustomerImpl">
 		<property name="customerProfileAttributes" ref="customerProfileAttributes"/>
-		<property name="userIdMode" ref="customerUserIdMode"/>
 	</bean>
 	<bean id="customerAuthentication" scope="prototype" class="com.elasticpath.domain.customer.impl.CustomerAuthenticationImpl"/>
 	<bean id="customerDeleted" scope="prototype" class="com.elasticpath.domain.customer.impl.CustomerDeletedImpl"/>
@@ -283,6 +282,7 @@
 			scope="prototype" class="com.elasticpath.domain.misc.impl.SkuOptionValueLocalizedPropertyValueImpl"/>
 	<bean id="taxCategoryLocalizedPropertyValue"
 			scope="prototype" class="com.elasticpath.domain.misc.impl.TaxCategoryLocalizedPropertyValueImpl"/>
+	<bean id="attributeLocalizedPropertyValue" scope="prototype" class="com.elasticpath.domain.misc.impl.AttributeLocalizedPropertyValueImpl"/>
 	<bean id="csvReadResult" scope="prototype" class="com.elasticpath.csvimport.impl.CsvReadResultImpl"/>
 	<bean id="csvReaderConfiguration" scope="prototype" class="com.elasticpath.csvimport.impl.CsvReaderConfigurationImpl"/>
 	<bean id="shippingServiceLevelSearchCriteria"
@@ -343,6 +343,7 @@
 	<bean id="templateOrderShipment" scope="prototype" class="com.elasticpath.domain.order.impl.TemplateOrderShipmentImpl"/>
 	<bean id="taxJournalRecord" scope="prototype" class="com.elasticpath.domain.order.impl.TaxJournalRecordImpl"/>
 	<bean id="taxDocumentModificationContext" scope="prototype" class="com.elasticpath.service.tax.TaxDocumentModificationContext"/>
+	<bean id="orderItemPresentationBean" class="com.elasticpath.sellingchannel.presentation.impl.OrderItemPresentationBeanImpl" scope="prototype"/>
 
 	<!-- Payment Gateway Connectivity API DTO classes -->
 	<bean id="addressDto" scope="prototype" class="com.elasticpath.plugin.payment.dto.impl.AddressDtoImpl"/>
@@ -374,6 +375,7 @@
 	<bean id="dataPoint" scope="prototype" class="com.elasticpath.domain.datapolicy.impl.DataPointImpl"/>
 	<bean id="dataPolicy" scope="prototype" class="com.elasticpath.domain.datapolicy.impl.DataPolicyImpl"/>
 	<bean id="customerConsent" scope="prototype" class="com.elasticpath.domain.datapolicy.impl.CustomerConsentImpl"/>
+	<bean id="customerConsentHistory" scope="prototype" class="com.elasticpath.domain.datapolicy.impl.CustomerConsentHistoryImpl"/>
 
 	<!-- Shipping Calculation -->
 	<bean id="shippingOptionResult" scope="prototype" class="com.elasticpath.service.shipping.impl.ShippingOptionResultImpl" />

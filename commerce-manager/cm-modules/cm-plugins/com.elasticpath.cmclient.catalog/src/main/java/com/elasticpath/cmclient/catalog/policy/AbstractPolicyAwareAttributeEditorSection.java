@@ -70,7 +70,8 @@ public abstract class AbstractPolicyAwareAttributeEditorSection extends Abstract
 		attributesViewPart = new PolicyAwareAttributesViewPart(
 				getModel(), getManagedForm().getForm().getToolBarManager(), 
 				createButtonPolicyActionContainer(),
-				createTablePolicyActionContainer());
+				createTablePolicyActionContainer(),
+				getLocale());
 		attributesViewPart.createControls(mainComposite);
 		partContainer.addDelegate(attributesViewPart);
 		

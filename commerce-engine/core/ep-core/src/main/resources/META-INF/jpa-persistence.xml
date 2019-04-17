@@ -96,6 +96,7 @@
 		<class>com.elasticpath.domain.misc.impl.SkuOptionLocalizedPropertyValueImpl</class>
 		<class>com.elasticpath.domain.misc.impl.SkuOptionValueLocalizedPropertyValueImpl</class>
 		<class>com.elasticpath.domain.misc.impl.TaxCategoryLocalizedPropertyValueImpl</class>
+		<class>com.elasticpath.domain.misc.impl.AttributeLocalizedPropertyValueImpl</class>
 		<class>com.elasticpath.domain.order.impl.OrderAddressImpl</class>
 		<class>com.elasticpath.domain.order.impl.OrderImpl</class>
 		<class>com.elasticpath.domain.order.impl.OrderDataImpl</class>
@@ -269,6 +270,7 @@
 		<class>com.elasticpath.domain.datapolicy.impl.DataPointImpl</class>
 		<class>com.elasticpath.domain.datapolicy.impl.DataPolicyImpl</class>
 		<class>com.elasticpath.domain.datapolicy.impl.CustomerConsentImpl</class>
+		<class>com.elasticpath.domain.datapolicy.impl.CustomerConsentHistoryImpl</class>
 
 		<!-- Facets -->
 		<class>com.elasticpath.domain.search.impl.FacetImpl</class>

@@ -4,6 +4,7 @@
 package com.elasticpath.cmclient.catalog.policy;
 
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
 import org.eclipse.jface.action.IToolBarManager;
@@ -92,6 +93,8 @@ public class PolicyAwareAttributesViewPart extends DefaultStatePolicyDelegateImp
 
 	private final ICellEditorDialogService dialogService;
 
+	private final Locale selectedLocale;
+
 	private StatePolicy statePolicy;
 
 	/**
@@ -105,14 +108,18 @@ public class PolicyAwareAttributesViewPart extends DefaultStatePolicyDelegateImp
 	 *            the policy action container to use for the buttons
 	 * @param tableActionContainer
 	 *            the policy action container to use to control in-line table editing
+	 * @param selectedLocale
+	 *            the currently selected locale
 	 */
 	public PolicyAwareAttributesViewPart(final Object model, final IToolBarManager toolbarManager, 
 			final PolicyActionContainer buttonPolicyActionContainer,
-			final PolicyActionContainer tableActionContainer) {
+			final PolicyActionContainer tableActionContainer,
+			final Locale selectedLocale) {
 		this.model = model;
 		this.toolbarManager = toolbarManager;
 		this.buttonContainer = buttonPolicyActionContainer;
 		this.tableContainer = tableActionContainer;
+		this.selectedLocale = selectedLocale;
 		getPolicyActionContainers().put(buttonContainer.getName(), buttonContainer);
 		getPolicyActionContainers().put(tableContainer.getName(), tableContainer);
 		dialogService = new DialogService();
@@ -220,7 +227,7 @@ public class PolicyAwareAttributesViewPart extends DefaultStatePolicyDelegateImp
 		if (attributesTableViewer.getSwtTable().isDisposed()) {
 			return;
 		}
-		final AttributesLabelProviderUtil labelProviderUtil = new AttributesLabelProviderUtil(state);
+		final AttributesLabelProviderUtil labelProviderUtil = new AttributesLabelProviderUtil(state, selectedLocale);
 
 		labelProviderUtil.setNameColumnLabel(columns.get("name")); //$NON-NLS-1$
 		labelProviderUtil.setTypeColumnLabel(columns.get("type")); //$NON-NLS-1$

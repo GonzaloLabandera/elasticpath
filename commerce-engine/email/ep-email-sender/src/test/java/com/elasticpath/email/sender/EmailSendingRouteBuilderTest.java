@@ -137,7 +137,7 @@ public class EmailSendingRouteBuilderTest extends CamelTestSupport {
 
 	@Test
 	public void verifyOutgoingEndpointIsConstructedUsingMailConfigurationSettings() throws Exception {
-		final String expectedEndpointUri = "smtps://username@localhost:25?password=password";
+		final String expectedEndpointUri = "smtps://username@localhost:25?password=RAW(password)";
 
 		final Endpoint endpoint = routeBuilder.getOutgoingEndpoint();
 

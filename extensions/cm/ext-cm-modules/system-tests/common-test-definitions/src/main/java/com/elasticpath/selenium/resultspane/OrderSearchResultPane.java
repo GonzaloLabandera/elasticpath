@@ -4,7 +4,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
 
 import com.elasticpath.selenium.common.AbstractPageObject;
 import com.elasticpath.selenium.editor.OrderEditor;
@@ -21,12 +20,13 @@ public class OrderSearchResultPane extends AbstractPageObject {
 	private static final String RESULTS_COLUMN_CSS = RESULTS_LIST_TABLE_PARENT_CSS + "div[column-id='%s']";
 	private static final String ORDER_STATUS_VALUE_CSS = "div[automation-id='com.elasticpath.cmclient.fulfillment"
 			+ ".FulfillmentMessages.OrderStatus_%s']";
+	private static final String SEARCH_RESULTS_PANE_WIDGET_ID = "Order Search Results";
 	private final CustomerService customerService;
 
 	/**
 	 * Constructor.
 	 *
-	 * @param driver WebDriver which drives this page.
+	 * @param driver WebDriver which drives his page.
 	 */
 	public OrderSearchResultPane(final WebDriver driver) {
 		super(driver);
@@ -85,15 +85,22 @@ public class OrderSearchResultPane extends AbstractPageObject {
 	}
 
 	/**
-	 * Close the order search result pane.
-	 *
-	 * @param tabName the tab name.
+	 * Closes Order Search Results pane.
 	 */
-	public void close(final String tabName) {
-		getWaitDriver().waitForElementToBeInteractable("[widget-id='" + tabName + "'][active-tab='true'][appearance-id='ctab-item']");
-		String closeCSS = "[widget-id='" + tabName + "'][active-tab='true'][appearance-id='ctab-item'] :nth-toolTipTextChild(3)";
-		WebElement element = getWaitDriver().waitForElementToBeVisible(By.cssSelector(closeCSS));
-		click(element);
+	public void closeOrderSearchResultsPane() {
+		closePane(SEARCH_RESULTS_PANE_WIDGET_ID);
+	}
+
+	/**
+	 * Close Order Search Results pane if it's open.
+	 */
+	public void closeOrderSearchResultsPaneIfOpen() {
+		setWebDriverImplicitWait(Constants.IMPLICIT_WAIT_FOR_ELEMENT_THREE_SECONDS);
+		if (isElementPresent(By.cssSelector("div[widget-id='" + SEARCH_RESULTS_PANE_WIDGET_ID + "']"))) {
+			setWebDriverImplicitWaitToDefault();
+			closeOrderSearchResultsPane();
+		}
+		setWebDriverImplicitWaitToDefault();
 	}
 
 	/**
@@ -107,6 +114,7 @@ public class OrderSearchResultPane extends AbstractPageObject {
 
 	/**
 	 * Verify given order status returns orders in result.
+	 *
 	 * @param expectedStatus String
 	 */
 	public void verifyOrderStatusExistInResult(final String expectedStatus) {

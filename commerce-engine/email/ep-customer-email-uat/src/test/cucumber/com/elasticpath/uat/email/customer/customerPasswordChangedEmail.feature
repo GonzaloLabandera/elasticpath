@@ -11,7 +11,7 @@ Feature: Customer Password Changed Email
 	And I am shopping in Store "Test Store"
 	And the Store supports the en_US locale
 	And my shopping locale is en_US
-	And my email address customer@example.org has been registered in my user account
+	And my email address customer@example.org has been used to register my user account
 
   Scenario: a customer updates their password and is sent a confirmation email.
 	When I change my password

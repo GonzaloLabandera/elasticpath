@@ -7,6 +7,7 @@ import org.eclipse.jface.action.ICoolBarManager;
 import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.action.ToolBarContributionItem;
 import org.eclipse.jface.action.ToolBarManager;
+import org.eclipse.jface.action.ActionContributionItem;
 import org.eclipse.swt.SWT;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.actions.ActionFactory;
@@ -22,10 +23,13 @@ public class ApplicationActionBarAdvisor extends ActionBarAdvisor {
 	private static final String TOOLBAR_ID = "save"; //$NON-NLS-1$
 
 	private IWorkbenchAction saveAction;
+	private ActionContributionItem saveViewItem;
 
 	private IWorkbenchAction saveAllAction;
+	private ActionContributionItem saveAllViewItem;
 
 	private IWorkbenchAction reloadEditorAction;
+	private ActionContributionItem reloadViewItem;
 
 	/**
 	 * Constructor.
@@ -49,13 +53,21 @@ public class ApplicationActionBarAdvisor extends ActionBarAdvisor {
 		register(logoutAction);
 
 		saveAction = ActionFactory.SAVE.create(window);
+		saveAction.setText(CoreMessages.get().SaveAction_Name);
 		saveAction.setImageDescriptor(CoreImageRegistry.IMAGE_SAVE_ACTIVE_LARGE);
 		saveAction.setDisabledImageDescriptor(CoreImageRegistry.IMAGE_SAVE_LARGE);
+
+		saveViewItem = new ActionContributionItem(saveAction);
+		saveViewItem.setMode(ActionContributionItem.MODE_FORCE_TEXT);
 		register(saveAction);
 
 		saveAllAction = ActionFactory.SAVE_ALL.create(window);
+		saveAllAction.setText(CoreMessages.get().SaveAllAction_Name);
 		saveAllAction.setImageDescriptor(CoreImageRegistry.IMAGE_SAVE_ALL_ACTIVE_LARGE);
 		saveAllAction.setDisabledImageDescriptor(CoreImageRegistry.IMAGE_SAVE_ALL_LARGE);
+
+		saveAllViewItem = new ActionContributionItem(saveAllAction);
+		saveAllViewItem.setMode(ActionContributionItem.MODE_FORCE_TEXT);
 		register(saveAllAction);
 
 		reloadEditorAction = ActionFactory.REFRESH.create(window);
@@ -63,6 +75,9 @@ public class ApplicationActionBarAdvisor extends ActionBarAdvisor {
 		reloadEditorAction.setToolTipText(CoreMessages.get().RefreshAction_Tooltip);
 		reloadEditorAction.setImageDescriptor(CoreImageRegistry.IMAGE_REFRESH_ACTIVE_LARGE);
 		reloadEditorAction.setDisabledImageDescriptor(CoreImageRegistry.IMAGE_REFRESH_LARGE);
+
+		reloadViewItem = new ActionContributionItem(reloadEditorAction);
+		reloadViewItem.setMode(ActionContributionItem.MODE_FORCE_TEXT);
 		register(reloadEditorAction);
 
 		register(ActionFactory.UNDO.create(window));
@@ -83,8 +98,8 @@ public class ApplicationActionBarAdvisor extends ActionBarAdvisor {
 	protected void fillCoolBar(final ICoolBarManager coolBar) {
 		final IToolBarManager toolbar = new ToolBarManager(SWT.FLAT | SWT.RIGHT);
 		coolBar.add(new ToolBarContributionItem(toolbar, TOOLBAR_ID));
-		toolbar.add(saveAction);
-		toolbar.add(saveAllAction);
-		toolbar.add(reloadEditorAction);
+		toolbar.add(saveViewItem);
+		toolbar.add(saveAllViewItem);
+		toolbar.add(reloadViewItem);
 	}
 }

@@ -3,6 +3,10 @@
  */
 package com.elasticpath.rest.resource.integration.epcommerce.repository.search;
 
+import java.util.Currency;
+import java.util.Locale;
+import java.util.Map;
+
 import io.reactivex.Completable;
 import io.reactivex.Observable;
 import io.reactivex.Single;
@@ -53,20 +57,20 @@ public interface SearchRepository {
 	 * Returns a list objects containing the facet field and facet type.
 	 *
 	 * @param productSearchCriteria search criteria
+	 * @param startPageNumber starting page number of the request
 	 * @param numberOfResultsPerPage the number of results per page.
 	 * @return list of facet fields
 	 */
-	Observable<String> getFacetFields(ProductCategorySearchCriteria productSearchCriteria, int numberOfResultsPerPage);
+	Observable<String> getFacetFields(ProductCategorySearchCriteria productSearchCriteria, int startPageNumber, int numberOfResultsPerPage);
 
 	/**
 	 * Returns a list of facet values.
 	 *
 	 * @param facetGuid facet guid
 	 * @param productSearchCriteria search criteria
-	 * @param maxResults max results to use for the query
 	 * @return list of facet values
 	 */
-	Observable<FacetValue> getFacetValues(String facetGuid, ProductCategorySearchCriteria productSearchCriteria, int maxResults);
+	Observable<FacetValue> getFacetValues(String facetGuid, ProductCategorySearchCriteria productSearchCriteria);
 
 	/**
 	 * Validate search keywords entity.
@@ -83,4 +87,17 @@ public interface SearchRepository {
 	 * @return facet display name
 	 */
 	Single<String> getDisplayNameByGuid(String facetGuid);
+
+	/**
+	 * Get the search criteria given the search details.
+	 * @param categoryCode the category code if its a navigated search, else null
+	 * @param storeCode the store code
+	 * @param locale locale
+	 * @param currency currency
+	 * @param appliedFacets applied facets map
+	 * @param keyword the keyword if its an offer search, else null
+	 * @return a search criteria
+	 */
+	Single<ProductCategorySearchCriteria> getSearchCriteria(String categoryCode, String storeCode, Locale locale, Currency currency,
+															Map<String, String> appliedFacets, String keyword);
 }

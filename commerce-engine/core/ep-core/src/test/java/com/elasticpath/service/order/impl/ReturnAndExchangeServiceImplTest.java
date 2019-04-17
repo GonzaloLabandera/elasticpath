@@ -48,7 +48,6 @@ import com.elasticpath.domain.customer.Address;
 import com.elasticpath.domain.customer.Customer;
 import com.elasticpath.domain.customer.CustomerSession;
 import com.elasticpath.domain.customer.impl.CustomerAddressImpl;
-import com.elasticpath.domain.customer.impl.CustomerAuthenticationImpl;
 import com.elasticpath.domain.customer.impl.CustomerImpl;
 import com.elasticpath.domain.customer.impl.CustomerSessionImpl;
 import com.elasticpath.domain.event.EventOriginator;
@@ -229,7 +228,6 @@ public class ReturnAndExchangeServiceImplTest extends AbstractEPServiceTestCase 
 		super.setUp();
 
 		mockProductSkuLookup = context.mock(ProductSkuLookup.class);
-		stubGetBean(ContextIdNames.CUSTOMER_AUTHENTICATION, CustomerAuthenticationImpl.class);
 		stubGetBean(ContextIdNames.MONEY_FORMATTER, StandardMoneyFormatter.class);
 		stubGetBean(ContextIdNames.PRODUCT_SKU_LOOKUP, mockProductSkuLookup);
 		stubGetBean(ContextIdNames.SHOPPING_ITEM_SUBTOTAL_CALCULATOR, shoppingItemSubtotalCalculator);

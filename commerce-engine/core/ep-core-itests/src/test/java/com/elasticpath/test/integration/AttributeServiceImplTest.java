@@ -151,7 +151,7 @@ public class AttributeServiceImplTest extends DbTestCase {
 		attr.setKey(key);
 		attr.setGlobal(global);
 		attr.setLocaleDependant(false);
-		attr.setName(Utils.uniqueCode("Attr Name"));
+		attr.setDisplayName(Utils.uniqueCode("Attr Name"), Locale.ENGLISH);
 		attr.setMultiValueType(AttributeMultiValueType.LEGACY);
 		return attr;
 	}

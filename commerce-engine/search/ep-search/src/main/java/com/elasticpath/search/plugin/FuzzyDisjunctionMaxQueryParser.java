@@ -15,7 +15,6 @@ import org.apache.lucene.search.Query;
 import org.apache.solr.search.QParser;
 import org.apache.solr.search.SolrQueryParser;
 import org.apache.solr.search.SyntaxError;
-import org.apache.solr.util.SolrPluginUtils;
 
 /**
  * A subclass of SolrQueryParser that supports aliasing fields for
@@ -108,7 +107,6 @@ public class FuzzyDisjunctionMaxQueryParser extends SolrQueryParser {
 		 *                    DisjunctionMaxQuery.
 		 * @param tiebreaker  to the tiebreaker to be used in the
 		 *                    DisjunctionMaxQuery
-		 * @see SolrPluginUtils#parseFieldBoosts
 		 */
 		public void addAlias(final String field, final float tiebreaker,
 		                     final Map<String, Float> fieldBoosts) {

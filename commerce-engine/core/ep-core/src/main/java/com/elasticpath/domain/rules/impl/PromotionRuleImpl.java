@@ -14,7 +14,6 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.openjpa.persistence.DataCache;
 
 import com.elasticpath.commons.constants.ContextIdNames;
-import com.elasticpath.domain.EpDomainException;
 import com.elasticpath.domain.rules.ImpliedRuleCondition;
 import com.elasticpath.domain.rules.Rule;
 import com.elasticpath.domain.rules.RuleAction;
@@ -111,7 +110,6 @@ public class PromotionRuleImpl extends AbstractRuleImpl {
 	 * Returns the Drools code corresponding to this rule.
 	 *
 	 * @return the rule code.
-	 * @throws EpDomainException if the rule is not well formed
 	 */
 	@Override
 	@Transient

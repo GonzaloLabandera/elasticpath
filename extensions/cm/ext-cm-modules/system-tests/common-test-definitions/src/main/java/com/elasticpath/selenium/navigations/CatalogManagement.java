@@ -56,11 +56,11 @@ public class CatalogManagement extends AbstractNavigation {
 	private static final String RIGHT_CLICK_ADD_EXISTING_PRODUCT_CSS
 			= "div[appearance-id='menu'] div[widget-id='Add Existing Product'][seeable='true']";
 	private static final String OPEN_CATALOG_CATEGORY_EDITOR_ICON_CSS
-			= "div[widget-id='Catalog Browse ToolBar'][widget-type='ToolBar'] div[widget-id='Open...']";
+			= "div[widget-id='Catalog Browse ToolBar'][widget-type='ToolBar'] div[widget-id='Open']";
 	private static final String CATALOG_BROWSE_TOOLBAR = "div[widget-id='Catalog Browse ToolBar'][widget-type='ToolBar'] ";
-	private static final String CATALOG_SEARCH_TAB_CSS = "div[widget-id^='Sea'][appearance-id='ctab-item'][seeable='true']";
+	private static final String CATALOG_SEARCH_TAB_CSS = "div[widget-id^='Bro'][appearance-id='ctab-item'][seeable='true'] + div";
 	private static final String CATALOG_BROWSE_TAB_CSS = "div[pane-location='left-pane-outer'] "
-			+ "div[widget-id^='Ca'][appearance-id='ctab-item'][seeable='true']";
+			+ "div[widget-id^='Br'][appearance-id='ctab-item'][seeable='true']";
 	private static final String SKU_SEARCH_TAB_CSS = "div[automation-id='com.elasticpath.cmclient.catalog.CatalogMessages.SkuBundle_Tab_Title']";
 	private static final String PRODUCT_SKU_SEARCH_BUTTON_CSS = LEFT_PANE_INNER_PARENT_CSS + "div[widget-id='Search'][seeable='true']";
 	private static final String CLEAR_INPUTS_BUTTON_CSS = LEFT_PANE_INNER_PARENT_CSS + "div[widget-id='Clear'][seeable='true']";
@@ -411,14 +411,15 @@ public class CatalogManagement extends AbstractNavigation {
 		}
 		setWebDriverImplicitWaitToDefault();
 
-		getWaitDriver().waitForElementToBeInteractable(String.format(CATALOG_BROWSE_TREE_ITEM_CSS, categoryName));
-		doubleClick(getDriver().findElement(By.cssSelector(String.format(CATALOG_BROWSE_TREE_ITEM_CSS, categoryName))));
+		String categoryCss = String.format(CATALOG_BROWSE_TREE_ITEM_CSS + " div[column-id='%1$s']", categoryName);
+		getWaitDriver().waitForElementToBeInteractable(categoryCss);
+		doubleClick(getDriver().findElement(By.cssSelector(categoryCss)));
 
 		int counter = 0;
 		while (!isResultPanePresent(CatalogProductListingPane.PRODUCT_TABLE_PARENT_CSS.trim()) && counter < Constants.RETRY_COUNTER_3) {
 			sleep(Constants.SLEEP_HALFSECOND_IN_MILLIS);
-			getWaitDriver().waitForElementToBeInteractable(String.format(CATALOG_BROWSE_TREE_ITEM_CSS, categoryName));
-			doubleClick(getDriver().findElement(By.cssSelector(String.format(CATALOG_BROWSE_TREE_ITEM_CSS, categoryName))));
+			getWaitDriver().waitForElementToBeInteractable(categoryCss);
+			doubleClick(getDriver().findElement(By.cssSelector(categoryCss)));
 			counter++;
 		}
 
@@ -434,9 +435,9 @@ public class CatalogManagement extends AbstractNavigation {
 	 * @return the pane.
 	 */
 	public CatalogProductListingPane doubleClickSubcategory(final String catalogName, final String categoryName, final String subcategoryName) {
-		return waitAndDoubleClickCatalogTreeItem(
-				String.format(CATALOG_BROWSE_TREE_ITEM_WITH_TWO_PRECEDED_ELEMENTS_CSS, catalogName, categoryName, subcategoryName)
-		);
+		String subCategoryCss = String.format(CATALOG_BROWSE_TREE_ITEM_WITH_TWO_PRECEDED_ELEMENTS_CSS + " div[column-id='%3$s']", catalogName,
+				categoryName, subcategoryName);
+		return waitAndDoubleClickCatalogTreeItem(String.format(subCategoryCss));
 	}
 
 	/**
@@ -492,7 +493,7 @@ public class CatalogManagement extends AbstractNavigation {
 	 * @return the category editor.
 	 */
 	public CategoryEditor clickOpenCategoryIcon() {
-		clickButton(OPEN_CATALOG_CATEGORY_EDITOR_ICON_CSS, "Open...");
+		clickButton(OPEN_CATALOG_CATEGORY_EDITOR_ICON_CSS, "Open");
 		return new CategoryEditor(getDriver());
 	}
 
@@ -502,7 +503,7 @@ public class CatalogManagement extends AbstractNavigation {
 	 * @return The catalog editor
 	 */
 	public CatalogEditor clickOpenCatalogCategoryButton() {
-		clickButton(OPEN_CATALOG_CATEGORY_BUTTON_CSS, "Open...");
+		clickButton(OPEN_CATALOG_CATEGORY_BUTTON_CSS, "Open");
 		return new CatalogEditor(getDriver());
 	}
 
@@ -513,7 +514,7 @@ public class CatalogManagement extends AbstractNavigation {
 	 */
 	public CreateEditVirtualCatalogDialog clickOpenVirtualCatalogButton() {
 		final String dialogName = "Edit";
-		clickButton(OPEN_CATALOG_CATEGORY_BUTTON_CSS, "Open...", String.format(CreateEditVirtualCatalogDialog
+		clickButton(OPEN_CATALOG_CATEGORY_BUTTON_CSS, "Open", String.format(CreateEditVirtualCatalogDialog
 				.CREATE_EDIT_VIRTUAL_CATALOG_PARENT_CSS_TEMPLATE, dialogName));
 		return new CreateEditVirtualCatalogDialog(getDriver(), dialogName);
 	}
@@ -579,11 +580,10 @@ public class CatalogManagement extends AbstractNavigation {
 
 	/**
 	 * Scrolling sku search input section up by 200 px.
-	 *
 	 */
 	public void scrollSkuSearchSectionUp() {
 		setWebDriverImplicitWait(1);
-		if(getDriver().findElements(By.cssSelector(SKU_SEARCH_SCROLL_BAR_CSS)).size() > 0){
+		if (getDriver().findElements(By.cssSelector(SKU_SEARCH_SCROLL_BAR_CSS)).size() > 0) {
 			Actions action = new Actions(getDriver());
 			WebElement activeSkuFilter = getDriver().findElement(By.cssSelector(SKU_SEARCH_SCROLL_BAR_CSS));
 			action.moveToElement(activeSkuFilter).clickAndHold().moveByOffset(0, -200).release().build().perform();

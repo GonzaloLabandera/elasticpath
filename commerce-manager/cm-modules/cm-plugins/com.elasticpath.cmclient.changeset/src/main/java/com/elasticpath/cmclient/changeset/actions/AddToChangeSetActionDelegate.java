@@ -282,7 +282,7 @@ public class AddToChangeSetActionDelegate extends ActionDelegate implements IWor
 			} else if (changeSetObjectSelection instanceof DynamicContentDelivery) {
 				name = ((DynamicContentDelivery) changeSetObjectSelection).getName();
 			} else if (changeSetObjectSelection instanceof Attribute) {
-				name = ((Attribute) changeSetObjectSelection).getName();
+				name = ((Attribute) changeSetObjectSelection).getDisplayName(CorePlugin.getDefault().getDefaultLocale());
 			} else if (changeSetObjectSelection instanceof CategoryType) {
 				name = ((CategoryType) changeSetObjectSelection).getName();
 			} else if (changeSetObjectSelection instanceof SkuOption) {

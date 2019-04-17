@@ -292,20 +292,28 @@ class CommonMethods {
 		FindItemBy.offerBySkuCode(skuCode)
 	}
 
-	static def search(keyword, pageSize) {
+	static def getKeywordSearchForm() {
 		client.GET("/")
 				.searches()
 				.keywordsearchform()
+	}
+
+	static def search(keyword, pageSize) {
+		getKeywordSearchForm()
 				.itemkeywordsearchaction(
 				['keywords' : keyword,
 				 'page-size': pageSize]
 		)
 	}
 
-	static def searchForOffer(keyword, pageSize) {
+	static def getOfferSearchForm() {
 		client.GET("/")
 				.searches()
 				.offersearchform()
+	}
+
+	static def searchForOffer(keyword, pageSize) {
+		getOfferSearchForm()
 				.offersearchaction(
 				['keywords' : keyword,
 				 'page-size': pageSize]

@@ -4,7 +4,7 @@
 package com.elasticpath.rest.resource.integration.epcommerce.repository.search.impl;
 
 import static com.elasticpath.rest.resource.integration.epcommerce.repository.search.OfferSearchUtil.buildFacetIdentifier;
-import static com.elasticpath.rest.resource.integration.epcommerce.repository.search.OfferSearchUtil.createSearchCriteria;
+import static com.elasticpath.rest.resource.integration.epcommerce.repository.search.OffersResourceConstants.DEFAULT_APPLIED_FACETS;
 import static com.elasticpath.service.search.solr.FacetConstants.APPLIED_FACETS_SEPARATOR;
 import static com.elasticpath.service.search.solr.FacetConstants.FACET_VALUE_COUNT;
 import static com.elasticpath.service.search.solr.FacetConstants.FACET_VALUE_DISPLAY_NAME;
@@ -19,25 +19,22 @@ import com.google.common.collect.ImmutableMap;
 import io.reactivex.Observable;
 import io.reactivex.Single;
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang3.math.NumberUtils;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
 import com.elasticpath.repository.SelectorRepository;
-import com.elasticpath.rest.ResourceOperationFailure;
-import com.elasticpath.rest.definition.searches.FacetIdentifier;
-import com.elasticpath.rest.definition.searches.FacetSelectorChoiceIdentifier;
-import com.elasticpath.rest.definition.searches.FacetSelectorIdentifier;
-import com.elasticpath.rest.definition.searches.FacetValueIdentifier;
-import com.elasticpath.rest.definition.searches.FacetsIdentifier;
-import com.elasticpath.rest.definition.searches.SearchOfferEntity;
+import com.elasticpath.rest.definition.offersearches.FacetIdentifier;
+import com.elasticpath.rest.definition.offersearches.FacetSelectorChoiceIdentifier;
+import com.elasticpath.rest.definition.offersearches.FacetSelectorIdentifier;
+import com.elasticpath.rest.definition.offersearches.FacetValueIdentifier;
+import com.elasticpath.rest.definition.offersearches.FacetsIdentifier;
+import com.elasticpath.rest.definition.offersearches.SearchOfferEntity;
 import com.elasticpath.rest.id.type.CompositeIdentifier;
 import com.elasticpath.rest.identity.Subject;
 import com.elasticpath.rest.identity.util.SubjectUtil;
-import com.elasticpath.rest.pagination.PaginationEntity;
 import com.elasticpath.rest.resource.ResourceOperationContext;
+import com.elasticpath.rest.resource.integration.epcommerce.repository.search.OffersResourceConstants;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.search.SearchRepository;
-import com.elasticpath.rest.resource.integration.epcommerce.repository.store.StoreRepository;
 import com.elasticpath.rest.selector.Choice;
 import com.elasticpath.rest.selector.ChoiceStatus;
 import com.elasticpath.rest.selector.SelectResult;
@@ -55,7 +52,6 @@ import com.elasticpath.service.search.solr.FacetValue;
 public class FacetSelectorRepositoryImpl<SI extends FacetSelectorIdentifier, CI extends FacetSelectorChoiceIdentifier>
 		implements SelectorRepository<FacetSelectorIdentifier, FacetSelectorChoiceIdentifier> {
 
-	private StoreRepository storeRepository;
 	private SearchRepository searchRepository;
 	private ResourceOperationContext resourceOperationContext;
 
@@ -63,19 +59,7 @@ public class FacetSelectorRepositoryImpl<SI extends FacetSelectorIdentifier, CI 
 	public Observable<SelectorChoice> getChoices(final FacetSelectorIdentifier facetSelectorIdentifier) {
 		FacetIdentifier facetIdentifier = facetSelectorIdentifier.getFacet();
 		FacetsIdentifier facetsIdentifier = facetIdentifier.getFacets();
-
-		String pageSizeString = facetsIdentifier.getSearchId().getValue()
-				.get(PaginationEntity.PAGE_SIZE_PROPERTY);
-
-		if ("null".equals(pageSizeString) || StringUtils.isBlank(pageSizeString)) {
-			pageSizeString = "0";
-		}
-		if (!NumberUtils.isDigits(pageSizeString)) {
-			return Observable.error(ResourceOperationFailure.badRequestBody("Invalid page size"));
-		}
-		int pageSize = Integer.parseInt(pageSizeString);
-
-		String scope = facetsIdentifier.getSearches().getScope().getValue();
+		String scope = facetsIdentifier.getScope().getValue();
 
 		Subject subject = resourceOperationContext.getSubject();
 		Locale locale = SubjectUtil.getLocale(subject);
@@ -85,11 +69,11 @@ public class FacetSelectorRepositoryImpl<SI extends FacetSelectorIdentifier, CI 
 		Map<String, String> searchId = facetsIdentifier.getSearchId().getValue();
 
 		String keyword = searchId.get(SearchOfferEntity.KEYWORDS_PROPERTY);
+		String categoryCode = searchId.get(OffersResourceConstants.CATEGORY_CODE_PROPERTY);
 		Map<String, String> appliedFacets = facetSelectorIdentifier.getFacet().getFacets().getAppliedFacets().getValue();
-		return storeRepository.findStoreAsSingle(scope)
-				.map(store -> createSearchCriteria(keyword, store, appliedFacets, locale, currency, true))
-				.flatMapObservable(searchCriteria -> searchRepository.getFacetValues(facetGuid, searchCriteria,
-						pageSize)
+
+		return searchRepository.getSearchCriteria(categoryCode, scope, locale, currency, appliedFacets, keyword)
+				.flatMapObservable(searchCriteria -> searchRepository.getFacetValues(facetGuid, searchCriteria)
 				.map(facetValue -> buildSelectorChoice(facetIdentifier, facetGuid, appliedFacets, facetValue)));
 	}
 
@@ -187,9 +171,9 @@ public class FacetSelectorRepositoryImpl<SI extends FacetSelectorIdentifier, CI 
 
 	private FacetsIdentifier buildFacetsIdentifier(final FacetsIdentifier facetsIdentifier, final Map<String, String> appliedFacetsMap) {
 		return FacetsIdentifier.builder()
-				.withSearches(facetsIdentifier.getSearches())
+				.withScope(facetsIdentifier.getScope())
 				.withSearchId(facetsIdentifier.getSearchId())
-				.withAppliedFacets(CompositeIdentifier.of(appliedFacetsMap))
+				.withAppliedFacets(CompositeIdentifier.of(appliedFacetsMap.isEmpty() ? DEFAULT_APPLIED_FACETS : appliedFacetsMap))
 				.build();
 	}
 
@@ -211,11 +195,6 @@ public class FacetSelectorRepositoryImpl<SI extends FacetSelectorIdentifier, CI 
 			stringBuilder.append(facetName);
 		}
 		return stringBuilder.toString();
-	}
-
-	@Reference
-	public void setStoreRepository(final StoreRepository storeRepository) {
-		this.storeRepository = storeRepository;
 	}
 
 	@Reference

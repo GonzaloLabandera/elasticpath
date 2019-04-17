@@ -22,6 +22,7 @@ import com.elasticpath.cmclient.admin.customers.AdminCustomersPlugin;
 import com.elasticpath.cmclient.admin.customers.actions.CreateAttributeAction;
 import com.elasticpath.cmclient.admin.customers.actions.DeleteAttributeAction;
 import com.elasticpath.cmclient.admin.customers.actions.EditAttributeAction;
+import com.elasticpath.cmclient.core.CorePlugin;
 import com.elasticpath.cmclient.core.ServiceLocator;
 import com.elasticpath.cmclient.core.CoreMessages;
 import com.elasticpath.cmclient.core.ui.framework.IEpTableViewer;
@@ -191,7 +192,7 @@ public class AttributeListView extends AbstractListView {
 			case AttributeListView.INDEX_ATTRIBUTE_KEY:
 				return attribute.getKey();
 			case AttributeListView.INDEX_ATTRIBUTE_NAME:
-				return attribute.getName();
+				return attribute.getDisplayName(CorePlugin.getDefault().getDefaultLocale());
 			case AttributeListView.INDEX_ATTRIBUTE_TYPE:
 				return CoreMessages.get().getMessage(attribute.getAttributeType().getNameMessageKey());
 			case AttributeListView.INDEX_SYSTEM_ATTRIBUTE:

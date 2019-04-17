@@ -44,7 +44,10 @@ public class OrderTaxStepDefinitionsHelper {
 	/**
 	 * Verifies the tax journal entries for the cancelled order shipment.
 	 *
-	 * @param taxJournalData the expected tax journals for verifying
+	 * @param taxJournalData a list of maps where the key is the taxJournal field and value is the value
+	 * @throws IllegalAccessException if the field specified in the map cannot be accessed on the TaxJournal object
+	 * @throws InvocationTargetException if the TaxJournal property accessor method throws an exception
+	 * @throws NoSuchMethodException if the field specified in the map does not exist on the TaxJournal object
 	 */
 	public void verifyTaxJournalEntriesForOrder(final List<Map<String, String>> taxJournalData)
 			throws IllegalAccessException, NoSuchMethodException, InvocationTargetException {
@@ -55,7 +58,10 @@ public class OrderTaxStepDefinitionsHelper {
 	/**
 	 * Verifies the tax journal entries for the cancelled order shipment.
 	 *
-	 * @param taxJournalData the expected tax journals for verifying
+	 * @param taxJournalData a list of maps where the key is the taxJournal field and value is the value
+	 * @throws IllegalAccessException if the field specified in the map cannot be accessed on the TaxJournal object
+	 * @throws InvocationTargetException if the TaxJournal property accessor method throws an exception
+	 * @throws NoSuchMethodException if the field specified in the map does not exist on the TaxJournal object
 	 */
 	public void verifyTaxJournalEntriesForExchange(final List<Map<String, String>> taxJournalData)
 			throws IllegalAccessException, NoSuchMethodException, InvocationTargetException {
@@ -76,6 +82,9 @@ public class OrderTaxStepDefinitionsHelper {
 	 * Verifies fields on an order.
 	 *
 	 * @param orderEntriesMapList the expected order fields
+	 * @throws IllegalAccessException if the field specified in the map cannot be accessed on the TaxJournal object
+	 * @throws InvocationTargetException if the TaxJournal property accessor method throws an exception
+	 * @throws NoSuchMethodException if the field specified in the map does not exist on the TaxJournal object
 	 */
 	public void verifyOrderEntries(final List<Map<String, String>> orderEntriesMapList)
 			throws IllegalAccessException, NoSuchMethodException, InvocationTargetException {

@@ -39,7 +39,8 @@ public class ItemDefinitionOptionsLinksRepositoryImpl<I extends ItemDefinitionId
 	 * @param itemDefinitionIdentifier itemDefinitionIdentifier
 	 * @return the ItemDefinitionOptionsIdentifier
 	 */
-	protected Observable<ItemDefinitionOptionsIdentifier> buildItemDefinitionOptionsIdentifier(final ItemDefinitionIdentifier itemDefinitionIdentifier) {
+	protected Observable<ItemDefinitionOptionsIdentifier> buildItemDefinitionOptionsIdentifier(
+			final ItemDefinitionIdentifier itemDefinitionIdentifier) {
 		return Observable.just(ItemDefinitionOptionsIdentifier.builder()
 				.withItemDefinition(itemDefinitionIdentifier)
 				.build());

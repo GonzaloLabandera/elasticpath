@@ -192,35 +192,15 @@ public class OrderFactoryImpl implements OrderFactory {
 	 * @param customer the anonymous customer
 	 */
 	protected void updateAnonymousCustomer(final Order order, final Customer customer) {
-
 		final OrderAddress billingAddress = order.getBillingAddress();
 		if (billingAddress == null) {
 			return;
 		}
 
 		final CustomerService customerService = getBean(ContextIdNames.CUSTOMER_SERVICE);
-		Customer customerToUpdate = customer;
-		if (customer.isPersisted()) {
-			customerToUpdate = customerService.findByGuid(customer.getGuid());
-		}
+		final Customer updatedCustomer = customerService.updateCustomerFromAddress(customer, billingAddress);
 
-		boolean customerUpdated = false;
-		// First & last names belong together
-		if (customerToUpdate.getFirstName() == null && customer.getLastName() == null) {
-			customerToUpdate.setFirstName(billingAddress.getFirstName());
-			customerToUpdate.setLastName(billingAddress.getLastName());
-			customerUpdated = true;
-		}
-
-		if (customerToUpdate.getPhoneNumber() == null) {
-			customerToUpdate.setPhoneNumber(billingAddress.getPhoneNumber());
-			customerUpdated = true;
-		}
-
-		if (customerUpdated) {
-			final Customer updatedCustomer = customerService.update(customerToUpdate);
-			order.setCustomer(updatedCustomer);
-		}
+		order.setCustomer(updatedCustomer);
 	}
 
 	private void createOrderSkusFromCartItems(final ShoppingCart shoppingCart, final ShoppingCartTaxSnapshot taxSnapshot,

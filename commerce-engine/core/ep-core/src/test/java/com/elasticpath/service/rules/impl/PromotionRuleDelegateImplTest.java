@@ -150,8 +150,8 @@ public class PromotionRuleDelegateImplTest {
 	@Test
 	public void testCatalogProductInCategoryNotExcludedTrue() {
 		ProductInCategoryTestFixture testData = new ProductInCategoryTestFixture();
-
 		final boolean productShouldBeInTheCategory = true;
+
 		assertProductInCategory(testData, productShouldBeInTheCategory);
 	}
 
@@ -162,8 +162,8 @@ public class PromotionRuleDelegateImplTest {
 	@Test
 	public void testCatalogProductInCategoryNotExcludedFalse() {
 		ProductInCategoryTestFixture testData = new ProductInCategoryTestFixture();
-
 		final boolean productShouldBeInTheCategory = false;
+
 		assertProductNotInCategory(testData, productShouldBeInTheCategory);
 	}
 
@@ -173,6 +173,9 @@ public class PromotionRuleDelegateImplTest {
 	 */
 	@Test
 	public void testCatalogProductInCategoryExcludedFalse() {
+		final boolean productShouldBeInTheCategory = true;
+		ProductInCategoryTestFixture testData = new ProductInCategoryTestFixture();
+
 		ruleDelegate = new PromotionRuleDelegateImpl() {
 			@Override
 			PromotionRuleExceptions getPromotionRuleExceptions(final String exceptionStr) {
@@ -187,8 +190,7 @@ public class PromotionRuleDelegateImplTest {
 				return true;
 			}
 		};
-		final boolean productShouldBeInTheCategory = true;
-		ProductInCategoryTestFixture testData = new ProductInCategoryTestFixture();
+
 		assertProductNotInCategory(testData, productShouldBeInTheCategory);
 	}
 
@@ -198,6 +200,9 @@ public class PromotionRuleDelegateImplTest {
 	 */
 	@Test
 	public void testCatalogProductInCategoryExcludedTrue() {
+		final boolean productShouldBeInTheCategory = false;
+		ProductInCategoryTestFixture testData = new ProductInCategoryTestFixture();
+
 		ruleDelegate = new PromotionRuleDelegateImpl() {
 			@Override
 			PromotionRuleExceptions getPromotionRuleExceptions(final String exceptionStr) {
@@ -212,8 +217,7 @@ public class PromotionRuleDelegateImplTest {
 				return true;
 			}
 		};
-		final boolean productShouldBeInTheCategory = false;
-		ProductInCategoryTestFixture testData = new ProductInCategoryTestFixture();
+
 		assertProductInCategory(testData, productShouldBeInTheCategory);
 	}
 
@@ -223,6 +227,9 @@ public class PromotionRuleDelegateImplTest {
 	 */
 	@Test
 	public void testCatalogProductInCategoryFalse() {
+		final boolean productShouldBeInTheCategory = true;
+		ProductInCategoryTestFixture testData = new ProductInCategoryTestFixture();
+
 		ruleDelegate = new PromotionRuleDelegateImpl() {
 			@Override
 			PromotionRuleExceptions getPromotionRuleExceptions(final String exceptionStr) {
@@ -237,8 +244,7 @@ public class PromotionRuleDelegateImplTest {
 				return false;
 			}
 		};
-		final boolean productShouldBeInTheCategory = true;
-		ProductInCategoryTestFixture testData = new ProductInCategoryTestFixture();
+
 		assertProductNotInCategory(testData, productShouldBeInTheCategory);
 	}
 
@@ -248,6 +254,9 @@ public class PromotionRuleDelegateImplTest {
 	 */
 	@Test
 	public void testCatalogProductInCategoryTrue() {
+		final boolean productShouldBeInTheCategory = false;
+		ProductInCategoryTestFixture testData = new ProductInCategoryTestFixture();
+
 		ruleDelegate = new PromotionRuleDelegateImpl() {
 			@Override
 			PromotionRuleExceptions getPromotionRuleExceptions(final String exceptionStr) {
@@ -262,8 +271,7 @@ public class PromotionRuleDelegateImplTest {
 				return false;
 			}
 		};
-		final boolean productShouldBeInTheCategory = false;
-		ProductInCategoryTestFixture testData = new ProductInCategoryTestFixture();
+
 		assertProductInCategory(testData, productShouldBeInTheCategory);
 	}
 
@@ -274,6 +282,10 @@ public class PromotionRuleDelegateImplTest {
 	 */
 	@Test
 	public void testCatalogProductInCategoryProductExcludedFromDiscount() {
+		final boolean productShouldBeInTheCategory = true;
+		ProductInCategoryTestFixture testData = new ProductInCategoryTestFixture();
+		testData.getProduct().getProductType().setExcludedFromDiscount(true);
+
 		ruleDelegate = new PromotionRuleDelegateImpl() {
 			@Override
 			PromotionRuleExceptions getPromotionRuleExceptions(final String exceptionStr) {
@@ -288,9 +300,7 @@ public class PromotionRuleDelegateImplTest {
 				return true;
 			}
 		};
-		final boolean productShouldBeInTheCategory = true;
-		ProductInCategoryTestFixture testData = new ProductInCategoryTestFixture();
-		testData.getProduct().getProductType().setExcludedFromDiscount(true);
+
 		assertProductNotInCategory(testData, productShouldBeInTheCategory);
 	}
 
@@ -396,7 +406,6 @@ public class PromotionRuleDelegateImplTest {
 	 */
 	@Test
 	public void testApplyCatalogCurrencyDiscountAmount() {
-		expectationsFactory.allowingBeanFactoryGetBean(ContextIdNames.MONEY_FORMATTER, StandardMoneyFormatter.class);
 		final String discountAmount = "4.00";
 		final String computedAmount = "6.00"; // $10 - $4 = $6
 		final DiscountRecord expectedDiscountRecord = new CatalogItemDiscountRecordImpl(RULE_UID, ACTION_UID, new BigDecimal(discountAmount));
@@ -406,7 +415,11 @@ public class PromotionRuleDelegateImplTest {
 		Price price2 = get10Cad();
 		prices.add(price1);
 		prices.add(price2);
+
+		expectationsFactory.allowingBeanFactoryGetBean(ContextIdNames.MONEY_FORMATTER, StandardMoneyFormatter.class);
+
 		ruleDelegate.applyCatalogCurrencyDiscountAmount(RULE_UID, ACTION_UID, prices, CAD, CAD, discountAmount);
+
 		assertEquals(0, Money.valueOf(computedAmount, CANADIAN).compareTo(price1.getComputedPrice(1)));
 		assertEquals(0, Money.valueOf(computedAmount, CANADIAN).compareTo(price2.getComputedPrice(1)));
 		assertThat(price1.getDiscountRecords(1), contains(expectedDiscountRecord));
@@ -418,8 +431,6 @@ public class PromotionRuleDelegateImplTest {
 	 */
 	@Test
 	public void testDiscountPriceTierByPercent() {
-		expectationsFactory.allowingBeanFactoryGetBean(ContextIdNames.MONEY_FORMATTER, StandardMoneyFormatter.class);
-
 		final String discountPercentNumber = "40";
 		final String discountPercentAmount = "4.00"; // $10 x 40% = $4
 		final String computedAmount = "6.00"; // $10 - 40% = $6
@@ -428,10 +439,48 @@ public class PromotionRuleDelegateImplTest {
 
 		// The shopping cart's currency is CAD, so the discount shall be applied
 		final BigDecimal discountPercent = ruleDelegate.setDiscountPercentScale(new BigDecimal(discountPercentNumber));
+
+		expectationsFactory.allowingBeanFactoryGetBean(ContextIdNames.MONEY_FORMATTER, StandardMoneyFormatter.class);
+
 		ruleDelegate.discountPriceByPercent(RULE_UID, ACTION_UID, discountPercent, price);
+
 		assertEquals(Money.valueOf(computedAmount, CANADIAN), price.getComputedPrice(1));
 		assertThat(price.getDiscountRecords(1), contains(expectedDiscountRecord));
 	}
+
+	@Test
+	public void testDiscountPriceTierByPercentMultipleTimes() {
+		final String discount40Percent = "40", discount20Percent = "20", discount5Percent = "5", discountPercentAmount = "4.00";
+		final String discount3 = "3", discount2 = "2", discount5 = "0.5";
+		final DiscountRecord expectedDiscountRecord = new CatalogItemDiscountRecordImpl(RULE_UID, ACTION_UID, new BigDecimal(discountPercentAmount));
+		Price price = get10Cad();
+
+		expectationsFactory.allowingBeanFactoryGetBean(ContextIdNames.MONEY_FORMATTER, StandardMoneyFormatter.class);
+
+		ruleDelegate.discountPriceByPercent(RULE_UID, ACTION_UID, ruleDelegate.setDiscountPercentScale(new BigDecimal(discount40Percent)), price);
+		ruleDelegate.discountPriceByPercent(RULE_UID, ACTION_UID, ruleDelegate.setDiscountPercentScale(new BigDecimal(discount20Percent)), price);
+		ruleDelegate.discountPriceByPercent(RULE_UID, ACTION_UID, ruleDelegate.setDiscountPercentScale(new BigDecimal(discount5Percent)), price);
+		ruleDelegate.discountPriceByAmount(RULE_UID, ACTION_UID, new BigDecimal(discount3), price);
+		ruleDelegate.discountPriceByAmount(RULE_UID, ACTION_UID, new BigDecimal(discount2), price);
+		ruleDelegate.discountPriceByAmount(RULE_UID, ACTION_UID, new BigDecimal(discount5), price);
+
+		assertEquals(1, price.getDiscountRecords().size());
+		assertEquals(expectedDiscountRecord, price.getDiscountRecords().toArray()[0]);
+	}
+
+	@Test
+	public void testDiscountPriceTierTwiceWithTheEqualPromotion() {
+		final String discount50Percent = "50", discount5 = "5", discountAmount = "5.00";
+		final DiscountRecord expectedDiscountRecord = new CatalogItemDiscountRecordImpl(RULE_UID, ACTION_UID, new BigDecimal(discountAmount));
+		Price price = get10Cad();
+		
+		ruleDelegate.discountPriceByPercent(RULE_UID, ACTION_UID, ruleDelegate.setDiscountPercentScale(new BigDecimal(discount50Percent)), price);
+		ruleDelegate.discountPriceByAmount(RULE_UID, ACTION_UID, new BigDecimal(discount5), price);
+
+		assertEquals(1, price.getDiscountRecords().size());
+		assertEquals(expectedDiscountRecord, price.getDiscountRecords().toArray()[0]);
+	}
+
 
 	private Price get10Cad() {
 		Price price = new PriceImpl();
@@ -450,11 +499,10 @@ public class PromotionRuleDelegateImplTest {
 	 */
 	@Test
 	public void testCartSubtotalAtLeast() {
-		expectationsFactory.allowingBeanFactoryGetBean(ContextIdNames.MONEY_FORMATTER, StandardMoneyFormatter.class);
-
 		final BigDecimal subTotal = new BigDecimal("40.00");
-
 		final DiscountItemContainer discountItemContainer = context.mock(DiscountItemContainer.class);
+
+		expectationsFactory.allowingBeanFactoryGetBean(ContextIdNames.MONEY_FORMATTER, StandardMoneyFormatter.class);
 
 		context.checking(new Expectations() {
 			{
@@ -475,9 +523,6 @@ public class PromotionRuleDelegateImplTest {
 	 */
 	@Test
 	public void testApplyShippingDiscountAmount() {
-
-		expectationsFactory.allowingBeanFactoryGetBean(ContextIdNames.MONEY_FORMATTER, StandardMoneyFormatter.class);
-
 		final ShoppingCart shoppingCart = aCart(context)
 				.withCurrency(CANADIAN)
 				.build();
@@ -487,6 +532,8 @@ public class PromotionRuleDelegateImplTest {
 
 		final BigDecimal discountAmount = Money.valueOf(BigDecimal.ONE, CANADIAN).getAmount();
 		final String shippingOptionCode = "SSLCode001";
+
+		expectationsFactory.allowingBeanFactoryGetBean(ContextIdNames.MONEY_FORMATTER, StandardMoneyFormatter.class);
 
 		// logic flow driver
 		context.checking(new Expectations() {
@@ -513,10 +560,7 @@ public class PromotionRuleDelegateImplTest {
 	 */
 	@Test
 	public void testApplyShippingDiscountPercent() {
-
 		//Given
-		expectationsFactory.allowingBeanFactoryGetBean(ContextIdNames.MONEY_FORMATTER, StandardMoneyFormatter.class);
-
 		final ShoppingCart shoppingCart = aCart(context)
 				.withCurrency(CANADIAN)
 				.build();
@@ -528,6 +572,8 @@ public class PromotionRuleDelegateImplTest {
 
 		final ShippingOption shippingOption = context.mock(ShippingOption.class);
 		final DiscountItemContainer discountItemContainer = context.mock(DiscountItemContainer.class);
+
+		expectationsFactory.allowingBeanFactoryGetBean(ContextIdNames.MONEY_FORMATTER, StandardMoneyFormatter.class);
 
 		// logic flow driver
 		context.checking(new Expectations() {
@@ -550,7 +596,6 @@ public class PromotionRuleDelegateImplTest {
 					RULE_UID, ACTION_UID, shippingDiscountAmount.getAmount().setScale(expectedScale));
 		} });
 
-		//When
 		this.ruleDelegate.applyShippingDiscountPercent(
 				shoppingCart, discountItemContainer, RULE_UID, ACTION_UID, discountPercent, shippingOptionCode, CANADIAN);
 	}
@@ -560,19 +605,19 @@ public class PromotionRuleDelegateImplTest {
 	 */
 	@Test
 	public void testCartCurrencyMatches() {
+		final CustomerSession customerSession = context.mock(CustomerSession.class);
+		final ShoppingCart shoppingCart = aCart(context)
+				.withCustomerSession(customerSession)
+				.build();
+
 		expectationsFactory.allowingBeanFactoryGetBean(ContextIdNames.SHOPPING_CART_MEMENTO, ShoppingCartMementoImpl.class);
 
-		final CustomerSession customerSession = context.mock(CustomerSession.class);
 		context.checking(new Expectations() {
 			{
 				allowing(customerSession).getCurrency();
 				will(returnValue(CANADIAN));
 			}
 		});
-
-		final ShoppingCart shoppingCart = aCart(context)
-				.withCustomerSession(customerSession)
-				.build();
 
 		assertTrue(ruleDelegate.cartCurrencyMatches(shoppingCart, CAD));
 		assertFalse(ruleDelegate.cartCurrencyMatches(shoppingCart, "USD"));
@@ -673,6 +718,8 @@ public class PromotionRuleDelegateImplTest {
 	@Test
 	public void testCartContainsItemsofCategory() {
 		final Product product = new ProductImpl();
+		final ShoppingCart shoppingCart = context.mock(ShoppingCart.class);
+		final DiscountItemContainer discountItemContainer = context.mock(DiscountItemContainer.class);
 
 		ruleDelegate = new PromotionRuleDelegateImpl() {
 			// Stub out this method
@@ -683,9 +730,6 @@ public class PromotionRuleDelegateImplTest {
 		};
 		ruleDelegate.setBeanFactory(beanFactory);
 		ruleDelegate.setProductSkuLookup(productSkuLookup);
-
-		final ShoppingCart shoppingCart = context.mock(ShoppingCart.class);
-		final DiscountItemContainer discountItemContainer = context.mock(DiscountItemContainer.class);
 
 		context.checking(new Expectations() {
 			{
@@ -741,6 +785,10 @@ public class PromotionRuleDelegateImplTest {
 		final Customer customer = context.mock(Customer.class);
 		final List<CustomerGroup> customerGroups = new ArrayList<>();
 
+		CustomerGroup customerGroup = new CustomerGroupImpl();
+		customerGroup.setUidPk(CUSTOMER_GROUP);
+		customerGroups.add(customerGroup);
+
 		context.checking(new Expectations() { {
 			allowing(customerSession).getShopper();
 			will(returnValue(shopper));
@@ -751,11 +799,6 @@ public class PromotionRuleDelegateImplTest {
 			allowing(customer).getCustomerGroups();
 			will(returnValue(customerGroups));
 		} });
-
-		CustomerGroup customerGroup = new CustomerGroupImpl();
-		customerGroup.setUidPk(CUSTOMER_GROUP);
-
-		customerGroups.add(customerGroup);
 
 		assertTrue(ruleDelegate.customerInGroup(customerSession, CUSTOMER_GROUP));
 		assertFalse(ruleDelegate.customerInGroup(customerSession, CUSTOMER_GROUP - 1));
@@ -775,9 +818,11 @@ public class PromotionRuleDelegateImplTest {
 	@Test
 	public void testIsExistingCustomerDoesntExistIfUsingNonPersistedUidPk() {
 		final Customer customer = context.mock(Customer.class);
+
 		context.checking(new Expectations() { {
 			oneOf(customer).getUidPk(); will(returnValue(Long.valueOf(0)));
 		} });
+
 		assertFalse(ruleDelegate.isExistingCustomer(customer));
 	}
 
@@ -787,10 +832,12 @@ public class PromotionRuleDelegateImplTest {
 	@Test
 	public void testIsExistingCustomerDoesExitIfIsRegisteredCustomer() {
 		final Customer customer = context.mock(Customer.class);
+
 		context.checking(new Expectations() { {
 			oneOf(customer).getUidPk(); will(returnValue(Long.valueOf(CUSTOMER_UID)));
 			oneOf(customer).isAnonymous(); will(returnValue(false));
 		} });
+
 		assertTrue(ruleDelegate.isExistingCustomer(customer));
 	}
 
@@ -800,10 +847,12 @@ public class PromotionRuleDelegateImplTest {
 	@Test
 	public void testIsExistingCustomerDoesntExitIfIsAnonymousCustomer() {
 		final Customer customer = context.mock(Customer.class);
+
 		context.checking(new Expectations() { {
 			oneOf(customer).getUidPk(); will(returnValue(Long.valueOf(CUSTOMER_UID)));
 			oneOf(customer).isAnonymous(); will(returnValue(true));
 		} });
+
 		assertFalse(ruleDelegate.isExistingCustomer(customer));
 	}
 

@@ -3,6 +3,8 @@
  */
 package com.elasticpath.tools.sync.client.controller.impl;
 
+import javax.sql.DataSource;
+
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.BeanFactory;
 
@@ -49,6 +51,11 @@ public abstract class AbstractSyncController implements SyncToolController {
 		 */
 		void initSystem();
 
+		/**
+		 * Initializes a system configuration with injected Datasource.
+		 * @param dataSource injected
+		 */
+		void initSystem(DataSource dataSource);
 		/**
 		 * Destroy system.
 		 */
@@ -220,52 +227,59 @@ public abstract class AbstractSyncController implements SyncToolController {
 
 	/** SystemConfig for source. */
 	private class SourceSystemConfig implements SystemConfig {
-		private BeanFactory beanFactory;
-		private ContextInitializer initializer;
+		private BeanFactory sourceBeanFactory;
+		private ContextInitializer sourceContextInitializer;
 
 		@Override
 		public void initSystem() {
+			initSystem(null);
+		}
+
+		@Override
+		public void initSystem(final DataSource dataSource) {
 			ConnectionConfiguration sourceSystemConnectionConfig = getSyncToolConfiguration().getSourceConfig();
-			String destinationType = "source";
-			String connectionType = sourceSystemConnectionConfig.getType();
-			ContextInitializer sourceContextInitializer = contextInitializerFactory.create(connectionType, destinationType);
-			BeanFactory sourceBeanFactory = sourceContextInitializer.initializeContext(sourceSystemConnectionConfig);
-			initializer = sourceContextInitializer;
-			beanFactory = sourceBeanFactory;
+			sourceContextInitializer = contextInitializerFactory.create(sourceSystemConnectionConfig.getType(), "source");
+			if (dataSource == null) {
+				sourceBeanFactory = sourceContextInitializer.initializeContext(sourceSystemConnectionConfig);
+			} else {
+				sourceBeanFactory = sourceContextInitializer.initializeContext(dataSource);
+			}
 			getSyncBeanFactory().setSourceBeanFactory(sourceBeanFactory);
 		}
 
 		@Override
 		public void destroySystem() {
-			initializer.destroyContext(beanFactory);
+			sourceContextInitializer.destroyContext(sourceBeanFactory);
 		}
 	}
 
 	/** SystemConfig for target. */
 	private class TargetSystemConfig implements SystemConfig {
-		private BeanFactory beanFactory;
-
-		private ContextInitializer initializer;
+		private BeanFactory targetBeanFactory;
+		private ContextInitializer targetContextInitializer;
 
 		@Override
 		public void initSystem() {
-			ConnectionConfiguration targetSystemConnectionConfig = getSyncToolConfiguration().getTargetConfig();
-			String destinationType = "target";
-			String connectionType = targetSystemConnectionConfig.getType();
-			ContextInitializer targetContextInitializer = contextInitializerFactory.create(connectionType, destinationType);
-			BeanFactory targetBeanFactory = targetContextInitializer.initializeContext(targetSystemConnectionConfig);
-			initializer = targetContextInitializer;
-			beanFactory = targetBeanFactory;
-			getSyncBeanFactory().setTargetBeanFactory(targetBeanFactory);
-
+			initSystem(null);
 		}
+
+		@Override
+		public void initSystem(final DataSource dataSource) {
+			ConnectionConfiguration targetSystemConnectionConfig = getSyncToolConfiguration().getTargetConfig();
+			targetContextInitializer = contextInitializerFactory.create(targetSystemConnectionConfig.getType(), "target");
+			if (dataSource == null) {
+				targetBeanFactory = targetContextInitializer.initializeContext(targetSystemConnectionConfig);
+			} else {
+				targetBeanFactory = targetContextInitializer.initializeContext(dataSource);
+			}
+			getSyncBeanFactory().setTargetBeanFactory(targetBeanFactory);
+		}
+
 		@Override
 		public void destroySystem() {
-			// This may be null in the case of an export
-			if (initializer != null) {
-				initializer.destroyContext(beanFactory);
+			if (targetContextInitializer != null) {
+				targetContextInitializer.destroyContext(targetBeanFactory);
 			}
 		}
-
 	}
 }

@@ -9,9 +9,9 @@
 			<description><![CDATA[Retrieve the facets available for the search query to refine the search results.]]></description>
 			<step>
 				<description><![CDATA[Offer search to facets.]]></description>
-				<start>offer-search-result</start>
+				<start>offersearches.offer-search-result</start>
 				<follow-link>facets</follow-link>
-				<result>facets</result>
+				<result>offersearches.facets</result>
 			</step>
 		</plan>
 
@@ -20,9 +20,9 @@
 			<description><![CDATA[Retrieve the display name of the facet and facet value selector resource.]]></description>
 			<step>
 				<description><![CDATA[Retrieve a facet.]]></description>
-				<start>facets</start>
+				<start>offersearches.facets</start>
 				<follow-link>element</follow-link>
-				<result>facet</result>
+				<result>offersearches.facet</result>
 			</step>
 		</plan>
 
@@ -31,49 +31,49 @@
 			<description>
 				<![CDATA[
 				Retrieve the facet values available for the selected facet and the facet selector resource to select the required facet values.
-				You can refine the search results by selecting the required choices and retrieve the updated results using the offer search result resource.
+				You can refine the search results by selecting the required choices in multiple facets and retrieve the updated results using the offer search result resource.
 				]]>
 			</description>
 			<step>
 				<description><![CDATA[Retrieve the facet selector.]]></description>
-				<start>facet</start>
+				<start>offersearches.facet</start>
 				<follow-link>facetselector</follow-link>
 				<link-back>facet</link-back>
-				<result>facet-selector</result>
+				<result>offersearches.facet-selector</result>
 			</step>
 			<step>
 				<description><![CDATA[Retrieve a choice.]]></description>
-				<start>facet-selector</start>
+				<start>offersearches.facet-selector</start>
 				<follow-link>choice</follow-link>
 				<link-back>selector</link-back>
-				<result>facet-selector-choice</result>
+				<result>offersearches.facet-selector-choice</result>
 			</step>
 			<step>
 				<description><![CDATA[Retrieve a selected choice, if any.]]></description>
-				<start>facet-selector</start>
+				<start>offersearches.facet-selector</start>
 				<follow-link>chosen</follow-link>
 				<link-back>selector</link-back>
-				<result>facet-selector-choice</result>
+				<result>offersearches.facet-selector-choice</result>
 			</step>
 			<step>
 				<description><![CDATA[Retrieve updated offer search results.]]></description>
-				<start>facet-selector</start>
+				<start>offersearches.facet-selector</start>
 				<follow-link>offersearchresult</follow-link>
-				<result>searches.offer-search-result</result>
+				<result>offersearches.offer-search-result</result>
 			</step>
 			<step>
 				<description><![CDATA[Retrieve the details of the selected facet value.]]></description>
-				<start>facet-selector-choice</start>
+				<start>offersearches.facet-selector-choice</start>
 				<follow-link>description</follow-link>
-				<result>facet-value</result>
+				<result>offersearches.facet-value</result>
 			</step>
 			<step>
 				<description><![CDATA[Select a choice.]]></description>
-				<start>facet-selector-choice</start>
+				<start>offersearches.facet-selector-choice</start>
 				<submit/>
-				<to>facet-selector-choice</to>
+				<to>offersearches.facet-selector-choice</to>
 				<via-link>selectaction</via-link>
-				<result>facet-selector</result>
+				<result>offersearches.facet-selector</result>
 			</step>
 		</plan>
 
@@ -84,9 +84,9 @@
 			</description>
 			<step>
 				<description><![CDATA[Facet value.]]></description>
-				<start>facet-selector-choice</start>
+				<start>offersearches.facet-selector-choice</start>
 				<follow-link>description</follow-link>
-				<result>facet-value</result>
+				<result>offersearches.facet-value</result>
 			</step>
 		</plan>
 

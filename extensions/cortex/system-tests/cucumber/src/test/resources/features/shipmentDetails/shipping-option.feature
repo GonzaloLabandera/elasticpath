@@ -1,5 +1,4 @@
 @shipping
-
 Feature: Shipping Options
 
   Background:
@@ -16,7 +15,6 @@ Feature: Shipping Options
       | PHYSICAL_ITEM   | TO_THE_CHOSEN_SHIPPING_OPTION                                                             |
       | Samsung Headset | defaultcart -> order -> deliveries -> element -> shippingoptioninfo -> selector -> chosen |
 
-
   Scenario Outline: Correct choice shows
     Given I add item <PHYSICAL_ITEM> to the cart
     When I navigate links <TO_THE_SHIPPING_OPTION_CHOICE>
@@ -32,7 +30,6 @@ Feature: Shipping Options
     Examples:
       | PHYSICAL_ITEM   | TO_THE_SHIPPING_OPTION_CHOICE                                                                            |
       | Samsung Headset | defaultcart -> order -> deliveries -> element -> shippingoptioninfo -> selector -> choice -> description |
-
 
   Scenario Outline: No shipping option for selected destination
     Given I add item <PHYSICAL_ITEM> to the cart
@@ -56,7 +53,7 @@ Feature: Shipping Options
     When I add an address with country CA and region BC
     And I navigate links <TO_SHIPPINGOPTIONS>
     And I follow links selector
-    Then there are 3 links of rel choice
+    Then there are 4 links of rel choice
     And there are 1 links of rel chosen
 
     Examples:
@@ -66,7 +63,7 @@ Feature: Shipping Options
   Scenario Outline: Delivery methods relevant to currently selected shipping address are displayed
     Given I add item <PHYSICAL_ITEM> to the cart
     And I navigate links <TO_SHIPPINGOPTIONS>
-    And there are 3 links of rel choice
+    And there are 4 links of rel choice
     And there are 1 links of rel chosen
     And I follow links chosen -> description
     And the field name has value <CANADIAN_SHIPPING_OPTION>

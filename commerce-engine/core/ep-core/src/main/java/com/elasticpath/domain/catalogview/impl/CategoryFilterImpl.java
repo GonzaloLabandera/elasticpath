@@ -27,6 +27,9 @@ import com.elasticpath.service.catalog.CategoryLookup;
  */
 public class CategoryFilterImpl extends AbstractFilterImpl<CategoryFilter> implements CategoryFilter {
 
+	/**
+	 * Property key for the category.
+	 */
 	public static final String CATEGORY_KEY = "category";
 
 	/** Serial version id. */

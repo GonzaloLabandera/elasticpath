@@ -28,8 +28,6 @@
 
 	<bean class="com.elasticpath.validation.validators.impl.AttributeRequiredValidatorForCustomerProfile" scope="prototype"/>
 
-	<bean class="com.elasticpath.validation.validators.impl.CustomerUsernameUserIdModeEmailValidator" scope="prototype"/>
-
 	<bean class="com.elasticpath.validation.validators.impl.CountryValidatorForString" scope="prototype">
 		<property name="geography" ref="geography"/>
 	</bean>

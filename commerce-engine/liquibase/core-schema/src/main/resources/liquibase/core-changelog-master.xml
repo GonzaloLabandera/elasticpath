@@ -17,14 +17,16 @@
 	<include file="liquibase/core-changelog-6.11.0.xml"/>
 	<include file="liquibase/core-changelog-6.14.0.xml"/>
 	<include file="liquibase/core-changelog-6.14.1.xml"/>
-    <include file="liquibase/core-changelog-6.15.0.xml"/>
+	<include file="liquibase/core-changelog-6.15.0.xml"/>
 	<include file="liquibase/core-changelog-6.15.2-mssql.xml"/>
 	<include file="liquibase/core-changelog-6.16.0.xml"/>
 	<include file="liquibase/core-changelog-6.17.0.xml"/>
 	<include file="liquibase/core-changelog-7.0.0.xml"/>
 	<include file="liquibase/core-changelog-7.1.0.xml"/>
 	<include file="liquibase/core-changelog-7.2.0.xml"/>
+	<include file="liquibase/core-changelog-7.2.0_gdpr_query_optimization.xml"/>
 	<include file="liquibase/core-changelog-7.3.0.xml"/>
 	<include file="liquibase/core-changelog-7.4.0.xml"/>
+	<include file="liquibase/core-changelog-7.5.0.xml"/>
 
 </databaseChangeLog>

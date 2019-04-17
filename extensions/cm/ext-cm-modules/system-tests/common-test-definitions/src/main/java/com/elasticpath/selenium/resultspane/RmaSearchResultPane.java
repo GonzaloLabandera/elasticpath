@@ -47,7 +47,7 @@ public class RmaSearchResultPane extends AbstractPageObject {
 	 */
 	public RmaEditor selectOrderAndOpenRmaEditor(final String columnValue, final String columnName) {
 		verifyOrderColumnValueAndSelectRow(columnValue, columnName);
-		doubleClick(getSelectedElement());
+		doubleClick(getSelectedElement(), RmaEditor.EDITOR_PANE_PARENT_CSS);
 		return new RmaEditor(getDriver());
 	}
 }

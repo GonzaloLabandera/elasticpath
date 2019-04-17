@@ -49,6 +49,7 @@
 		<module>items</module>
 		<module>offerdefinitions</module>
 		<module>offers</module>
+		<module>offersearch</module>
 		<module>itemselections</module>
 		<module>lookups</module>
 		<module>navigations</module>

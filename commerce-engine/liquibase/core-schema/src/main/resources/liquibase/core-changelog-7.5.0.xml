@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright (c) Elastic Path Software Inc., 2019
+  -->
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+				   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+				   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd"
+				   logicalFilePath="com/elasticpath/core/db/core-changelog-7.5.0.xml">
+
+	<changeSet id="7.5.0-add-new-TCARTITEM-fields-and-index-to-improve-performance" author="elasticpath" context="performance">
+		<comment>Reduces the number of db calls when fetching a large cart by offloading fetching of children items in a separate call</comment>
+
+		<addColumn tableName="TCARTITEM">
+			<column name="CHILD_ITEM_CART_UID" type="BIGINT"/>
+		</addColumn>
+
+		<addColumn tableName="TCARTITEM">
+			<column name="ITEM_TYPE" type="TINYINT" />
+		</addColumn>
+
+		<createIndex tableName="TCARTITEM" indexName="I_CHILD_ITEM_CART_UID">
+			<column name="CHILD_ITEM_CART_UID" />
+		</createIndex>
+	</changeSet>
+
+	<changeSet id="7.5.0-migrate-cart-items" author="elasticpath" context="performance-data-migration">
+		<comment>To achieve optimal retrieval of cart items, dependent and bundle items, as well as, parents
+		must be properly structured</comment>
+		<customChange class="liquibase.ext.elasticpath.CartItemTableOptimizer">
+			<param name="batchRootParentRows">5000</param>
+		</customChange>
+	</changeSet>
+
+	<changeSet id="7.5.0-decouple-customer-userid-from-email" author="elasticpath">
+		<comment>Decouple customer user_id from email and remove userIdMode</comment>
+
+		<customChange class="liquibase.ext.elasticpath.MigrateCustomersForUserIdModeRemoval">
+			<param name="customerBatchSize">1000</param>
+		</customChange>
+
+		<!-- Update CP_EMAIL customer profile attribute to be optional -->
+		<update tableName="TATTRIBUTE">
+			<column name="REQUIRED" value="0" />
+			<where>ATTRIBUTE_KEY = 'CP_EMAIL'</where>
+		</update>
+
+		<!-- Delete userIdMode setting -->
+		<delete tableName="TSETTINGVALUE">
+			<where>
+				SETTING_DEFINITION_UID = (
+					select UIDPK from TSETTINGDEFINITION
+					where PATH = 'COMMERCE/SYSTEM/userIdMode')
+			</where>
+		</delete>
+		<delete tableName="TSETTINGMETADATA">
+			<where>
+				SETTING_DEFINITION_UID = (
+					select UIDPK from TSETTINGDEFINITION
+					where PATH = 'COMMERCE/SYSTEM/userIdMode')
+			</where>
+		</delete>
+		<delete tableName="TSETTINGDEFINITION">
+			<where>PATH = 'COMMERCE/SYSTEM/userIdMode'</where>
+		</delete>
+	</changeSet>
+
+	<changeSet id="7.5.0-consume-dst-message-listener-accelerator" author="elasticpath">
+		<comment>Consume the liquibase changes from the DST Message Listener Accelerator - system_configuration</comment>
+
+		<update tableName="TSETTINGDEFINITION">
+			<column name="DEFAULT_VALUE" value="jms:topic:VirtualTopic.ep.changesets"/>
+			<where>PATH LIKE 'COMMERCE/SYSTEM/MESSAGING/CHANGESETS/channelUri'</where>
+		</update>
+		<update tableName="TSETTINGMETADATA">
+			<column name="METADATA_KEY" value="apiRefreshStrategy" />
+			<where>UIDPK = '1108'</where>
+		</update>
+		<update tableName="TSETTINGMETADATA">
+			<column name="VALUE" value="true" />
+			<where>UIDPK = '1107'</where>
+		</update>
+		<insert tableName="TSETTINGVALUE">
+			<column name="UIDPK" value="120"/>
+			<column name="SETTING_DEFINITION_UID" value="116"/>
+			<column name="CONTEXT" value="ChangeSetPublisher"/>
+			<column name="CONTEXT_VALUE" value="jms:queue:Consumer.ChangeSetPublisher.VirtualTopic.ep.changesets"/>
+		</insert>
+		<insert tableName="TSETTINGVALUE">
+			<column name="UIDPK" value="121"/>
+			<column name="SETTING_DEFINITION_UID" value="116"/>
+			<column name="CONTEXT" value="datasyncSplitter"/>
+			<column name="CONTEXT_VALUE" value="jms:queue:Consumer.DataSyncSplitter.VirtualTopic.ep.changesets"/>
+		</insert>
+		<insert tableName="TSETTINGDEFINITION">
+			<column name="UIDPK" valueNumeric="161" />
+			<column name="PATH" value="COMMERCE/SYSTEM/DATASYNC/ERROREMAIL/address" />
+			<column name="VALUE_TYPE" value="String" />
+			<column name="MAX_OVERRIDE_VALUES" value="1" />
+			<column name="DEFAULT_VALUE" value="no-reply@elasticpath.com" />
+			<column name="DESCRIPTION" value="The email address to receive the result of the automated sync tool in case of error." />
+		</insert>
+		<insert tableName="TSETTINGMETADATA">
+			<column name="UIDPK" valueNumeric="1502" />
+			<column name="SETTING_DEFINITION_UID" valueNumeric="161" />
+			<column name="METADATA_KEY" value="apiRefreshStrategy" />
+			<column name="VALUE" value="application" />
+		</insert>
+		<insert tableName="TSETTINGMETADATA">
+			<column name="UIDPK" valueNumeric="1503" />
+			<column name="SETTING_DEFINITION_UID" valueNumeric="161" />
+			<column name="METADATA_KEY" value="environmentSpecific" />
+			<column name="VALUE" value="false" />
+		</insert>
+		<insert tableName="TSETTINGDEFINITION">
+			<column name="UIDPK" valueNumeric="162" />
+			<column name="PATH" value="COMMERCE/SYSTEM/MESSAGING/DATASYNC/channelUri" />
+			<column name="VALUE_TYPE" value="String" />
+			<column name="MAX_OVERRIDE_VALUES" value="1" />
+			<column name="DEFAULT_VALUE" value="jms:queue:ep.dst" />
+			<column name="DESCRIPTION" value="The URI of the channel on which DST Event messages are sent and received.  Please note that changes will not take effect until the application(s) using this setting have been restarted." />
+		</insert>
+		<insert tableName="TSETTINGMETADATA">
+			<column name="UIDPK" valueNumeric="1504" />
+			<column name="SETTING_DEFINITION_UID" valueNumeric="162" />
+			<column name="METADATA_KEY" value="apiRefreshStrategy" />
+			<column name="VALUE" value="application" />
+		</insert>
+		<insert tableName="TSETTINGMETADATA">
+			<column name="UIDPK" valueNumeric="1505" />
+			<column name="SETTING_DEFINITION_UID" valueNumeric="162" />
+			<column name="METADATA_KEY" value="environmentSpecific" />
+			<column name="VALUE" value="false" />
+		</insert>
+
+	</changeSet>
+
+	<changeSet id="7.5.0-copy-attribute-values-to-localized-properties" author="elasticpath" context="pre-app-upgrade">
+		<customChange class="liquibase.ext.elasticpath.ConvertAttributeNamesToLocalizedProperties"/>
+	</changeSet>
+
+	<changeSet id="7.5.0-remove-name-from-attribute" author="elasticpath" context="post-app-upgrade">
+		<dropColumn tableName="TATTRIBUTE" columnName="NAME" />
+	</changeSet>
+</databaseChangeLog>

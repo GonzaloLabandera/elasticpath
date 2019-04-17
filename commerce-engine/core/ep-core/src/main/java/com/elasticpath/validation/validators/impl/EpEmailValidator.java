@@ -33,8 +33,10 @@ public class EpEmailValidator implements ConstraintValidator<EpEmail, String> {
 
 	@Override
 	public boolean isValid(final String value, final ConstraintValidatorContext context) {
-		if (StringUtils.isBlank(value)) {
+		if (value == null) {
 			return true;
+		} else if (StringUtils.isBlank(value)) {
+			return false;
 		}
 		return isEmailValid(value);
 	}

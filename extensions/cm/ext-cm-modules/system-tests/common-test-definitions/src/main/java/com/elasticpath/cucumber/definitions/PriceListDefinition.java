@@ -35,7 +35,7 @@ import com.elasticpath.selenium.wizards.CreatePriceListAssignmentWizard;
 /**
  * Price List definition steps.
  */
-@SuppressWarnings({"PMD.TooManyMethods", "PMD.GodClass"})
+@SuppressWarnings({"PMD.TooManyMethods", "PMD.GodClass", "PMD.ExcessiveClassLength"})
 public class PriceListDefinition {
 	private static final Logger LOGGER = Logger.getLogger(AbstractPageObject.class);
 	private final PriceListManagement priceListManagement;
@@ -374,8 +374,17 @@ public class PriceListDefinition {
 	 */
 	@Then("^The deleted price list no longer exists$")
 	public void verifyPriceListDeleted() {
+		verifyPriceListDeleted(uniquePriceListName);
+	}
+
+	/**
+	 * Verify price list is deleted.
+	 *
+	 * @param priceListName the price list name
+	 */
+	public void verifyPriceListDeleted(final String priceListName) {
 		clickSearchForPriceLists();
-		priceListsResultPane.verifyPriceListDeleted(uniquePriceListName);
+		priceListsResultPane.verifyPriceListDeleted(priceListName);
 	}
 
 	/**
@@ -801,9 +810,13 @@ public class PriceListDefinition {
 	}
 
 	@Then("^I click create price list assignment wizard save button$")
-	public void clickFinishButton() { createPriceListAssignmentWizard.clickFinish(); }
+	public void clickFinishButton() {
+		createPriceListAssignmentWizard.clickFinish();
+	}
 
-	private void selectPriceListName(final String priceListName) { createPriceListAssignmentWizard.selectPriceList(priceListName); }
+	private void selectPriceListName(final String priceListName) {
+		createPriceListAssignmentWizard.selectPriceList(priceListName);
+	}
 
 	private void selectCatalogNameForPriceListAssignment(final String catalogName) {
 		createPriceListAssignmentWizard.selectCatalogName(catalogName);
@@ -919,8 +932,8 @@ public class PriceListDefinition {
 	 * Create Price List Assignment
 	 *
 	 * @param priceList the price list
-	 * @param catalog the catalog to assign it to
-	 * @param priority price list assignment priority
+	 * @param catalog   the catalog to assign it to
+	 * @param priority  price list assignment priority
 	 */
 	public void createPLA(final String priceList, final String catalog, final String priority) {
 		mandatoryPLASteps(priceList, catalog, priority);
@@ -947,8 +960,8 @@ public class PriceListDefinition {
 	 * Common steps to create price list assignment
 	 *
 	 * @param priceList the price list
-	 * @param catalog the catalog to assign it to
-	 * @param priority price list assignment priority
+	 * @param catalog   the catalog to assign it to
+	 * @param priority  price list assignment priority
 	 */
 	private void mandatoryPLASteps(final String priceList, final String catalog, final String priority) {
 		clickCreatePriceListAssignment();
@@ -982,7 +995,7 @@ public class PriceListDefinition {
 	 */
 	private void deletePLAIfPresent(final String priceList, final String priceListAssignment) {
 		searchPriceListAssignment(priceList);
-		if(priceListAssignmentsResultPane.deletePriceListAssignmentIfPresent(priceListAssignment)){
+		if (priceListAssignmentsResultPane.deletePriceListAssignmentIfPresent(priceListAssignment)) {
 			new ConfirmDialog(SetUp.getDriver()).clickOKButton("PriceListManagerMessages.ConfirmDeletePriceListAssignment");
 			LOGGER.debug("Price list assignment was deleted.");
 			return;

@@ -35,7 +35,9 @@ public class FormEntityToCustomerEnhancerImpl implements FormEntityToCustomerEnh
 		}
 
 		if (registrationEntity.getUsername() != null) {
-			customer.setEmail(StringUtils.trimToNull(registrationEntity.getUsername()));
+			String email = StringUtils.trimToNull(registrationEntity.getUsername());
+			customer.setUserId(email);
+			customer.setEmail(email);
 		}
 
 		return customer;

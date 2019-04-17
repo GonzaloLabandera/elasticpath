@@ -37,9 +37,6 @@ import com.elasticpath.service.store.StoreService;
  */
 public class CustomerConsentSteps {
 
-	private static final String DATE_FORMAT = "YYYY-MM-DD hh:mm:ss";
-	private static final String TEST_EMAIL = "test@elasticpath.com";
-
 	@Autowired
 	private CustomerConsentService customerConsentService;
 
@@ -87,7 +84,7 @@ public class CustomerConsentSteps {
 			customerConsentService.save(customerConsent);
 		}
 
-		assertThat(customerConsentService.list())
+		assertThat(customerConsentService.listHistory())
 				.isNotNull()
 				.hasSize(customerConsentsMap.size());
 	}
@@ -126,8 +123,8 @@ public class CustomerConsentSteps {
 	private void createPersistedAnonymousCustomer(final String customerFirstName, final String customerLastName) {
 		final Customer anonymousCustomer = beanFactory.getBean(ContextIdNames.CUSTOMER);
 		anonymousCustomer.setGuid(CustomerSteps.generateCustomerGuidFromName(customerFirstName, customerLastName));
-		anonymousCustomer.setEmail(TEST_EMAIL);
 		anonymousCustomer.setStoreCode(storeService.findAllStores().get(0).getCode());
+		anonymousCustomer.setAnonymous(true);
 		generatedCustomer = customerService.add(anonymousCustomer);
 
 		assertThat(generatedCustomer)

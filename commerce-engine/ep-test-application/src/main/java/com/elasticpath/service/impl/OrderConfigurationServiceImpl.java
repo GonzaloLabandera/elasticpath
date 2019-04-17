@@ -7,7 +7,6 @@ package com.elasticpath.service.impl;
 import static java.lang.String.format;
 import static java.util.Collections.singletonList;
 
-import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -15,16 +14,15 @@ import java.util.Map.Entry;
 import com.google.common.collect.ImmutableMap;
 import org.apache.commons.lang.StringUtils;
 
+import com.elasticpath.base.common.dto.StructuredErrorMessage;
 import com.elasticpath.base.exception.EpServiceException;
 import com.elasticpath.common.dto.ShoppingItemDto;
 import com.elasticpath.commons.beanframework.BeanFactory;
 import com.elasticpath.commons.constants.ContextIdNames;
-import com.elasticpath.base.common.dto.StructuredErrorMessage;
 import com.elasticpath.domain.catalog.ProductSku;
 import com.elasticpath.domain.customer.Customer;
 import com.elasticpath.domain.customer.CustomerAddress;
 import com.elasticpath.domain.customer.PaymentToken;
-import com.elasticpath.domain.order.Order;
 import com.elasticpath.domain.order.OrderPayment;
 import com.elasticpath.domain.shopper.Shopper;
 import com.elasticpath.domain.shoppingcart.ShoppingCart;
@@ -36,7 +34,6 @@ import com.elasticpath.sellingchannel.director.CartDirector;
 import com.elasticpath.service.CustomerAuthenticationService;
 import com.elasticpath.service.CustomerOrderingService;
 import com.elasticpath.service.OrderConfigurationService;
-import com.elasticpath.service.order.OrderService;
 import com.elasticpath.service.shipping.ShippingOptionResult;
 import com.elasticpath.service.shipping.ShippingOptionService;
 import com.elasticpath.service.shopper.ShopperService;
@@ -52,8 +49,6 @@ public class OrderConfigurationServiceImpl implements OrderConfigurationService 
 	private ShopperService shopperService;
 
 	private CustomerOrderingService customerOrderingService;
-
-	private OrderService orderService;
 
 	private CartDirector cartDirector;
 
@@ -72,7 +67,7 @@ public class OrderConfigurationServiceImpl implements OrderConfigurationService 
 	@Override
 	public ShoppingCart createShoppingCart(final Store store, final Customer customer, final Map<ProductSku, Integer> skuMap) {
 		final ShoppingTestData shoppingTestData = ShoppingTestData.getInstance();
-		customerAuthenticationService.loginStore(store, customer.getEmail());
+		customerAuthenticationService.loginStore(store, customer.getUserId());
 		ShoppingCart shoppingCart = shoppingTestData.getCustomerSession().getShopper().getCurrentShoppingCart();
 		for (Entry<ProductSku, Integer> entry : skuMap.entrySet()) {
 			cartDirector.addItemToCart(shoppingCart, new ShoppingItemDto(entry.getKey().getSkuCode(), entry.getValue()));
@@ -196,15 +191,6 @@ public class OrderConfigurationServiceImpl implements OrderConfigurationService 
 
 	public void setCustomerOrderingService(final CustomerOrderingService customerOrderingService) {
 		this.customerOrderingService = customerOrderingService;
-	}
-
-	public void setOrderService(final OrderService orderService) {
-		this.orderService = orderService;
-	}
-
-	@Override
-	public List<Order> getCustomerOrders(final String customerEmail) {
-		return orderService.findOrderByCustomerEmail(customerEmail, true);
 	}
 
 	public void setCartDirector(final CartDirector cartDirector) {

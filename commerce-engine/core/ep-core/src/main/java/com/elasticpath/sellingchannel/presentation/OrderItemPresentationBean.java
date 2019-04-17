@@ -280,4 +280,12 @@ public interface OrderItemPresentationBean extends TreeNode<OrderItemPresentatio
 	 */
 	String getFilteredSkuOptionValues(Locale locale);
 
+	/**
+	 * Return specific  the sku option value for the given locale.
+	 * @param locale the locale to use.
+	 * @param name the name of the option.
+	 * @return display name
+	 */
+	String getSkuOptionValueByName(Locale locale, String name);
+
 }

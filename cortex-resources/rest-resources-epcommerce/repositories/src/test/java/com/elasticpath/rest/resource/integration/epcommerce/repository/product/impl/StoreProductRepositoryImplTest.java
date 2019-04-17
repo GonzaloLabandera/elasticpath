@@ -41,8 +41,8 @@ public class StoreProductRepositoryImplTest {
 	private static final String PRODUCT_GUID_1 = "product_code_1";
 	private static final String SCOPE = "scope";
 	private static final long PRODUCT_UID_1 = 1L;
-	private static final String ERROR_STORE_PRODUCT_NOT_FOUND = "Store product not found";
-	private static final String ERROR_PRODUCT_NOT_FOUND = "Product not found";
+	private static final String ERROR_STORE_PRODUCT_NOT_FOUND = "Offer not found in store";
+	private static final String ERROR_PRODUCT_NOT_FOUND = "Offer not found";
 	private static final String SKU_GUID = "sku guid";
 
 	private final Product product1 = new ProductImpl();

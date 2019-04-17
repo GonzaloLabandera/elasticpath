@@ -69,9 +69,9 @@ public class EpEmailValidatorTest {
 	 * Empty string should be valid.
 	 */
 	@Test
-	public void shouldBeValidWithEmptyString() {
-		assertTrue("Expect valid with empty string", validator.isValid("", validatorContext));
-		assertTrue("Expect valid with empty string", validator.isValid(" ", validatorContext));
+	public void shouldBeInvalidWithEmptyString() {
+		assertFalse("Expect invalid with empty string", validator.isValid("", validatorContext));
+		assertFalse("Expect invalid with empty string", validator.isValid(" ", validatorContext));
 	}
 
 	/**

@@ -18,7 +18,6 @@
 		testWhileIdle="true"
 		validationQuery="${epdb.validation.query}"
 		removeAbandoned="true"
-		logAbandoned="true"
 		username="${epdb.username}"
 		password="${epdb.password}"
 		driverClassName="${epdb.jdbc.driver}"

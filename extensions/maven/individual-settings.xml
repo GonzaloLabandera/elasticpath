@@ -41,12 +41,12 @@
 		<profile>
 			<id>mysql-dev-db</id>
 			<properties>
-				<data.population.environment>local</data.population.environment>
 				<epdb.schemaname>COMMERCEDB</epdb.schemaname>
 				<epdb.username>ep</epdb.username>
 				<epdb.password>ep</epdb.password>
 				<epdb.reset_user>root</epdb.reset_user>
 				<epdb.reset_password>YOUR_ROOT_PASSWORD</epdb.reset_password>
+				<ep.database.timezone>UTC</ep.database.timezone>
 			</properties>
 		</profile>
 
@@ -55,7 +55,6 @@
 		<profile>
 			<id>oracle-dev-db</id>
 			<properties>
-				<data.population.environment>local</data.population.environment>
 				<epdb.schemaname>COMMERCEDB</epdb.schemaname>
 				<epdb.databasename>XE</epdb.databasename>
 				<epdb.username>${epdb.schemaname}</epdb.username>
@@ -64,6 +63,7 @@
 				<epdb.reset_password>YOUR_SYS_PASSWORD</epdb.reset_password>
 				<epdb.default.tablespace>users</epdb.default.tablespace>
 				<epdb.temporary.tablespace>temp</epdb.temporary.tablespace>
+				<ep.database.timezone>UTC</ep.database.timezone>
 			</properties>
 		</profile>
 
@@ -74,8 +74,15 @@
 			<properties>
 				<ep.local.asset.path>YOUR_PROJECT_DIR/extensions/assets/ext-assets/src/main/assets</ep.local.asset.path>
 				<ep.smtp.host>YOUR_SMTP_HOST</ep.smtp.host>
+
 				<ep.local.cache.timeout>5</ep.local.cache.timeout>
-				<ep.database.timezone>PST</ep.database.timezone>
+				<data.population.environment>local</data.population.environment>
+
+				<!-- Use these values for local performance testing -->
+				<!--
+				<ep.local.cache.timeout>3600</ep.local.cache.timeout>
+				<data.population.environment>local-perf</data.population.environment>
+				-->
 			</properties>
 		</profile>
 

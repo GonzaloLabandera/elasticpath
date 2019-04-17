@@ -335,24 +335,6 @@ public class OrderServiceImpl extends AbstractEpPersistenceServiceImpl implement
 	}
 
 	/**
-	 * Retrieve the list of orders by the customer's email address.
-	 *
-	 * @param customerEmail the customer's email address.
-	 * @param isExactMatch true for doing an exact match; false for doing a fuzzy match.
-	 * @return list of orders matching the customer's email address.
-	 */
-	@Override
-	public List<Order> findOrderByCustomerEmail(final String customerEmail, final boolean isExactMatch) {
-		sanityCheck();
-		prepareFetchPlan();
-		final OrderCriterion orderCriterion = getBean(ContextIdNames.ORDER_CRITERION);
-		final CriteriaQuery query = orderCriterion.getOrderCustomerProfileCriteria("CP_EMAIL", customerEmail, isExactMatch);
-		final List<Order> orderList = getPersistenceEngine().retrieve(query.getQuery(), query.getParameters().toArray());
-		fetchPlanHelper.clearFetchPlan();
-		return populateRelationships(orderList);
-	}
-
-	/**
 	 * order count function based on the OrderSearchCriteria.
 	 *
 	 * @param orderSearchCriteria the order search criteria.
@@ -1496,16 +1478,6 @@ public class OrderServiceImpl extends AbstractEpPersistenceServiceImpl implement
 				getPersistenceEngine().merge(rule);
 			}
 		}
-	}
-
-	@Override
-	public long getCustomerOrderCountByEmail(final String email, final long storeId) {
-		final List<Object> results = getPersistenceEngine().retrieveByNamedQuery("ORDER_COUNT_BY_EMAIL", email, storeId);
-		Long count = 0L;
-		if (!results.isEmpty()) {
-			count = (Long) results.get(0);
-		}
-		return count;
 	}
 
 	@Override

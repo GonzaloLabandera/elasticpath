@@ -31,8 +31,10 @@ public class ComponentOptionToOptionValueRelationshipImpl implements ValueForIte
 	 */
 	@Inject
 	public ComponentOptionToOptionValueRelationshipImpl(
-			@RequestIdentifier final ItemDefinitionComponentOptionIdentifier itemDefinitionComponentOptionIdentifier,
-			@ResourceRepository final LinksRepository<ItemDefinitionComponentOptionIdentifier, ItemDefinitionComponentOptionValueIdentifier> repository) {
+			@RequestIdentifier
+			final ItemDefinitionComponentOptionIdentifier itemDefinitionComponentOptionIdentifier,
+			@ResourceRepository
+			final LinksRepository<ItemDefinitionComponentOptionIdentifier, ItemDefinitionComponentOptionValueIdentifier> repository) {
 		this.itemDefinitionComponentOptionIdentifier = itemDefinitionComponentOptionIdentifier;
 		this.repository = repository;
 	}

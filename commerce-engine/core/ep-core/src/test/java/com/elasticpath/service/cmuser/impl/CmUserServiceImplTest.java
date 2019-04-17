@@ -627,5 +627,19 @@ public class CmUserServiceImplTest extends AbstractEPServiceTestCase {
 
 		cmUserServiceImpl.removePriceListFromUsers(priceListGuid);
 	}
+	/**
+	 * Test method for 'com.elasticpath.service.CmUserServiceImpl.addFailedLoginAttempt(String)'.
+	 */
+	@Test
+	public void testAddFailedLoginAttempt() {
 
+		// expectations
+		context.checking(new Expectations() {
+			{
+				oneOf(mockPersistenceEngine).executeNamedQuery("INCREMENT_CMUSER_FAILEDLOGINS_BY_USERNAME", USER_NAME);
+			}
+		});
+
+		cmUserServiceImpl.addFailedLoginAttempt(USER_NAME);
+	}
 }

@@ -4,6 +4,8 @@
 package com.elasticpath.rest.resource.integration.epcommerce.transform.impl;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.spy;
 
 import java.math.BigDecimal;
 import java.util.Arrays;
@@ -18,6 +20,10 @@ import com.elasticpath.domain.attribute.AttributeType;
 import com.elasticpath.domain.attribute.AttributeValue;
 import com.elasticpath.domain.attribute.impl.AttributeImpl;
 import com.elasticpath.domain.attribute.impl.ProductAttributeValueImpl;
+import com.elasticpath.domain.misc.LocalizedProperties;
+import com.elasticpath.domain.misc.LocalizedPropertyValue;
+import com.elasticpath.domain.misc.impl.AttributeLocalizedPropertyValueImpl;
+import com.elasticpath.domain.misc.impl.LocalizedPropertiesImpl;
 import com.elasticpath.rest.definition.base.DetailsEntity;
 import com.elasticpath.rest.resource.integration.epcommerce.transform.AttributeValueTransformer;
 import com.elasticpath.rest.util.date.DateUtil;
@@ -29,6 +35,7 @@ public class AttributeValueTransformerImplTest {
 
 	private static final String EXPECTED_INTEGER_STRING_VALUE = "10345";
 	private static final String SHORT_TEXT_MULTIVALUE_VALUE = "property1, property2, property3";
+	private static final Locale LOCALE = Locale.ENGLISH;
 	private static final String NAME = "NAME";
 	private static final String KEY = "KEY";
 	private static final double EXPECTED_DOUBLE = 7.40;
@@ -214,9 +221,10 @@ public class AttributeValueTransformerImplTest {
 	}
 
 	private Attribute createAttribute(final String name, final String key, final boolean multiValueEnabled) {
-		Attribute attribute = new AttributeImpl();
+		final Attribute attribute = spy(new AttributeImpl());
+		doReturn(createLocalizedProperties(name, LOCALE)).when(attribute).getLocalizedProperties();
 
-		attribute.setName(name);
+		attribute.setDisplayName(name, LOCALE);
 		attribute.setKey(key);
 		attribute.setMultiValueType(AttributeMultiValueType.createAttributeMultiValueType(String.valueOf(multiValueEnabled)));
 
@@ -233,6 +241,20 @@ public class AttributeValueTransformerImplTest {
 		return attributeValue;
 	}
 
+	private LocalizedProperties createLocalizedProperties(final String displayName, final Locale locale) {
+		LocalizedProperties localizedProperties = new LocalizedPropertiesImpl()
+		{
+			private static final long serialVersionUID = -1L;
+
+			@Override
+			protected LocalizedPropertyValue getNewLocalizedPropertyValue() {
+				return new AttributeLocalizedPropertyValueImpl(); // arbitrary implementation
+			}
+		};
+		localizedProperties.setValue(AttributeImpl.LOCALIZED_PROPERTY_DISPLAY_NAME, locale, displayName);
+		return localizedProperties;
+	}
+
 	private void assertDetailsEntityEquals(final DetailsEntity expected, final DetailsEntity actual) {
 		if (expected == null || actual == null) {
 			assertEquals("The details entities should both be null.", expected, actual);
@@ -243,5 +265,4 @@ public class AttributeValueTransformerImplTest {
 			assertEquals("The display values should be the same.", expected.getDisplayValue(), actual.getDisplayValue());
 		}
 	}
-
 }

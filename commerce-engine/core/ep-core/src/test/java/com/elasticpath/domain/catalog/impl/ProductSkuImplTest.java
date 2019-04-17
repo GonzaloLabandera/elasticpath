@@ -47,6 +47,7 @@ import com.elasticpath.domain.catalog.AvailabilityCriteria;
 import com.elasticpath.domain.catalog.DigitalAsset;
 import com.elasticpath.domain.catalog.Product;
 import com.elasticpath.domain.catalog.ProductSku;
+import com.elasticpath.domain.misc.LocalizedProperties;
 import com.elasticpath.domain.skuconfiguration.SkuOption;
 import com.elasticpath.domain.skuconfiguration.SkuOptionValue;
 import com.elasticpath.domain.skuconfiguration.impl.JpaAdaptorOfSkuOptionValueImpl;
@@ -666,8 +667,9 @@ public class ProductSkuImplTest {
 	@Test
 	public void testThatExtensionClassesCanOverrideAttributeValueImplementations() {
 		AttributeImpl attribute = new AttributeImpl();
+		attribute.setLocalizedProperties(mock(LocalizedProperties.class));
 		attribute.setAttributeType(AttributeType.SHORT_TEXT);
-		attribute.setName("name");
+		attribute.setDisplayName("name", Locale.ENGLISH);
 		attribute.setKey("name");
 
 		ExtProductSkuImpl sku = new ExtProductSkuImpl();

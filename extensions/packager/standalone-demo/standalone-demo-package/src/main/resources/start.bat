@@ -1,7 +1,7 @@
 @echo off
 
 setlocal ENABLEEXTENSIONS ENABLEDELAYEDEXPANSION
-set KEY_NAME=HKLM\SOFTWARE\JavaSoft\Java Runtime Environment
+set KEY_NAME=HKLM\SOFTWARE\Azul Systems\Zulu\zulu-8
 set VALUE_NAME=CurrentVersion
 FOR /F "usebackq skip=2 tokens=3" %%A IN (`REG QUERY "%KEY_NAME%" /v %VALUE_NAME% 2^>nul`) DO (
 	set CurrentJavaRuntime=%%A
@@ -14,8 +14,8 @@ if not defined CurrentJavaRuntime (
 
 if "%JRE_HOME%" == "" (
 	if "%JAVA_HOME%" == "" (
-		set JAVA_CURRENT=%KEY_NAME%\%CurrentJavaRuntime%
-		FOR /F "usebackq skip=2 tokens=3*" %%A IN (`REG QUERY "!JAVA_CURRENT!" /v JavaHome 2^>nul`) DO (
+		set JAVA_CURRENT=%KEY_NAME%
+		FOR /F "usebackq skip=2 tokens=3*" %%A IN (`REG QUERY "!JAVA_CURRENT!" /v InstallationPath 2^>nul`) DO (
 			set _JavaHome=%%A %%B
 		)
 	) else (

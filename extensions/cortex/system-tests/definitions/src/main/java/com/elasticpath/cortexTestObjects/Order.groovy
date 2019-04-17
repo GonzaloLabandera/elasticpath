@@ -104,6 +104,11 @@ class Order extends CommonMethods {
 				.stopIfFailure()
 	}
 
+	static void navigateToCouponForm() {
+		couponinfo()
+		client.couponform()
+	}
+
 	static void applyCoupon(def couponCode) {
 		couponinfo()
 		client.couponform()
@@ -267,6 +272,11 @@ class Order extends CommonMethods {
 		assertThat(serviceLevelExists)
 				.as("Unable to find shipping service level $name")
 				.isTrue()
+	}
+
+	static def getShippingServiceLevelCost(String shippingOption) {
+		getShippingServiceLevel(shippingOption)
+		return client["cost"]["display"][0]
 	}
 
 	static void chosenShippingOptionDescription() {

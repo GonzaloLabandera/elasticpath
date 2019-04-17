@@ -1,4 +1,4 @@
-Elastic Path Commerce 7.4.0 (build 7.4.0.20181214215737-ba8a72)
+Elastic Path Commerce 7.5.0 (build 7.5.0.20190416232429-65538f)
 ------------------------------------------------
 This package contains the following source code folders and resources for Elastic Path Commerce.
 
@@ -26,4 +26,4 @@ The source distribution relies on additional Elastic Path projects that are avai
 
 Project name        Version                            References
 ------------        -------                            ----------
-Cortex/Helix        1.22.0.20181214215737-0d528        <api-platform.version> property in pom.xml and bill-of-materials/pom.xml
+Cortex/Helix        1.24.0.0e39d44361        <api-platform.version> property in pom.xml and bill-of-materials/pom.xml

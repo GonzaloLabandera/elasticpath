@@ -129,6 +129,12 @@
 			<version>${project.version}</version>
 			<type>war</type>
 		</dependency>
+		<dependency>
+			<groupId>com.elasticpath.extensions</groupId>
+			<artifactId>ext-sync-webapp</artifactId>
+			<version>${project.version}</version>
+			<type>war</type>
+		</dependency>
 
 		<!-- Data population tools -->
 		<dependency>

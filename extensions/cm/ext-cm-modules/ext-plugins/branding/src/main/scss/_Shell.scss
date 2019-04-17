@@ -42,14 +42,18 @@ Shell {
 		padding: $shell_title_padding;
 		spacing: $icon-spacing;
 		text-shadow: none;
+		background-color: $widget_shell_top_color;
+		color: $secondary-color;
+		border-color: $widget_shell_top_color;
 
 		&:inactive {
 			background-color: $gray-fair;
 			// background-gradient-color: none;
 			background-image: none;
 			border: none;
-			border-bottom: 1px solid $widget_border_color;
+			// border-bottom: 1px solid $widget_border_color;
 			color: $default-font-color;
+			border: 1px solid $widget_border_color;
 			// padding: $shell_padding;
 			// spacing: $icon-spacing;
 		}

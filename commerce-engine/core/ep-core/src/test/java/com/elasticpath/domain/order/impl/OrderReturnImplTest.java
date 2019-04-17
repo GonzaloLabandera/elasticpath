@@ -44,7 +44,6 @@ import com.elasticpath.domain.catalog.impl.ProductSkuImpl;
 import com.elasticpath.domain.cmuser.CmUser;
 import com.elasticpath.domain.cmuser.impl.CmUserImpl;
 import com.elasticpath.domain.customer.Customer;
-import com.elasticpath.domain.customer.impl.CustomerAuthenticationImpl;
 import com.elasticpath.domain.customer.impl.CustomerImpl;
 import com.elasticpath.domain.misc.impl.RandomGuidImpl;
 import com.elasticpath.domain.order.Order;
@@ -129,7 +128,6 @@ public class OrderReturnImplTest extends AbstractEPServiceTestCase {
 	@Override
 	public void setUp() throws Exception {
 		super.setUp();
-		stubGetBean(ContextIdNames.CUSTOMER_AUTHENTICATION, CustomerAuthenticationImpl.class);
 		stubGetBean(ContextIdNames.MONEY_FORMATTER, StandardMoneyFormatter.class);
 		stubGetBean(ContextIdNames.PRODUCT_SKU_LOOKUP, productSkuLookup);
 		stubGetBean(ContextIdNames.PRICE, PriceImpl.class);

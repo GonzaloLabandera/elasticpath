@@ -5,14 +5,14 @@
 	<parent>
 		<groupId>com.elasticpath</groupId>
 		<artifactId>commerce-parent</artifactId>
-		<version>704.0.0-SNAPSHOT</version>
+		<version>0.0.0-SNAPSHOT</version>
 	</parent>
 
 	<artifactId>parent</artifactId>
 	<packaging>pom</packaging>
 
 	<name>Elastic Path Parent</name>
-	<version>704.0.0-SNAPSHOT</version>
+	<version>0.0.0-SNAPSHOT</version>
 
 	<inceptionYear>2000</inceptionYear>
 	<url>http://www.elasticpath.com</url>

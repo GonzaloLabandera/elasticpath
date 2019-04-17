@@ -16,7 +16,6 @@ import java.util.List;
 
 import org.apache.log4j.Logger;
 
-import com.elasticpath.cucumber.definitions.PerformanceDefinitions;
 import com.elasticpath.selenium.framework.util.PropertyManager;
 
 /**
@@ -24,7 +23,7 @@ import com.elasticpath.selenium.framework.util.PropertyManager;
  */
 public class DBConnector {
 
-	private static final Logger LOGGER = Logger.getLogger(PerformanceDefinitions.class);
+	private static final Logger LOGGER = Logger.getLogger(DBConnector.class);
 	private static final String TCATEGORYLDF_TABLE = "TCATEGORYLDF";
 	private static final String TPRODUCTLDF_TABLE = "TPRODUCTLDF";
 	private static final String INNER_JOIN = "INNER JOIN ";
@@ -192,59 +191,6 @@ public class DBConnector {
 			this.closeAll();
 		}
 		return uid;
-	}
-
-	/**
-	 * Delete a category or subcategory.
-	 *
-	 * @param categoryName a category name
-	 */
-	public void deleteCategory(final String categoryName) {
-		executeUpdateQuery(
-				"DELETE lcat "
-						+ "FROM TLINKEDCATEGORY lcat "
-						+ INNER_JOIN + TCATEGORYLDF_TABLE + " catldf "
-						+ "ON lcat.MASTER_CATEGORY_UID = catldf.CATEGORY_UID "
-						+ "WHERE catldf.DISPLAY_NAME = '" + categoryName + "';"
-		);
-
-		executeUpdateQuery(
-				"DELETE cat "
-						+ "FROM TCATEGORY cat "
-						+ INNER_JOIN + TCATEGORYLDF_TABLE + " catldf "
-						+ "ON cat.UIDPK = catldf.CATEGORY_UID "
-						+ "WHERE catldf.DISPLAY_NAME = '" + categoryName + "';"
-		);
-
-		int uid = getCategoryUid(categoryName);
-		executeUpdateQuery("DELETE FROM " + TCATEGORYLDF_TABLE + " WHERE CATEGORY_UID = '" + uid + "';");
-	}
-
-	/**
-	 * Delete a product.
-	 *
-	 * @param productName a product name
-	 */
-	public void deleteProduct(final String productName) {
-		executeUpdateQuery(
-				"DELETE pcat "
-						+ "FROM TPRODUCTCATEGORY pcat "
-						+ INNER_JOIN + TPRODUCTLDF_TABLE + " pldf "
-						+ "ON pcat.PRODUCT_UID = pldf.PRODUCT_UID "
-						+ "WHERE pldf.DISPLAY_NAME = '" + productName + "'"
-		);
-
-		executeUpdateQuery(
-				"DELETE psku "
-						+ "FROM TPRODUCTSKU psku "
-						+ INNER_JOIN + TPRODUCTLDF_TABLE + " pldf "
-						+ "ON psku.PRODUCT_UID = pldf.PRODUCT_UID "
-						+ "WHERE pldf.DISPLAY_NAME = '" + productName + "';"
-		);
-
-		int uid = getProductUid(productName);
-		executeUpdateQuery("DELETE FROM " + TPRODUCTLDF_TABLE + " WHERE PRODUCT_UID = '" + uid + "';");
-		executeUpdateQuery("DELETE FROM TPRODUCT WHERE UIDPK = '" + uid + "';");
 	}
 
 	/**

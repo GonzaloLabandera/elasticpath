@@ -49,7 +49,7 @@ Feature: Shipment Destination
     And I add item <PHYSICAL_ITEM> to the cart
     And I navigate links <TO_THE_DESTINATION_SELECTOR>
     And attempt to select the original shoppers address
-    Then the HTTP status is not found
+    Then the HTTP status is forbidden
 
     Examples:
       | PHYSICAL_ITEM          | TO_THE_DESTINATION_SELECTOR                                                  |

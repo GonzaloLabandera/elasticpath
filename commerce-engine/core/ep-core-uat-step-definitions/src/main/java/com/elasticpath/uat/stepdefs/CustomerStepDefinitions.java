@@ -24,6 +24,9 @@ public class CustomerStepDefinitions {
 	private ScenarioContextValueHolder<CustomerBuilder> customerBuilderHolder;
 
 	@Autowired
+	private ScenarioContextValueHolder<Customer> customerHolder;
+
+	@Autowired
 	private CustomerBuilder customerBuilder;
 
 	@Autowired
@@ -45,18 +48,20 @@ public class CustomerStepDefinitions {
 		customerBuilderHolder.set(customerBuilderHolder.get().withPreferredLocale(LocaleUtils.toLocale(localeStr)));
 	}
 
-	@Given("^(?:the customer's|my) email address (.+) has been registered in (?:my|their) user account$")
-	public void setCustomerEmailAddress(final String customerEmailAddress) {
-		customerBuilderHolder.set(customerBuilderHolder.get().withEmail(customerEmailAddress));
+	@Given("^(?:the customer's|my) email address (.+) has been used to register (?:my|their) user account$")
+	public void setCustomerUserIdAndEmail(final String customerEmailAddress) {
+		customerBuilderHolder.set(customerBuilderHolder.get()
+				.withUserId(customerEmailAddress)
+				.withEmail(customerEmailAddress));
 	}
 
 	@When("^(?:I|(?:a|the) customer) registers? as a new user with email address (.+)$")
 	public void registerNewCustomer(final String emailAddress) throws Exception {
 		// Defer execution until we are ready to check for the email
 		emailSendingCommandHolder.set(() -> {
-			setCustomerEmailAddress(emailAddress);
-			final Customer customer = customerBuilderHolder.get().build();
-			customerService.addByAuthenticate(customer, false);
+			setCustomerUserIdAndEmail(emailAddress);
+			final Customer customer = buildCustomer();
+			customerHolder.set(customerService.addByAuthenticate(customer, false));
 		});
 	}
 
@@ -64,9 +69,11 @@ public class CustomerStepDefinitions {
 	public void registerAnonymousCustomer(final String emailAddress) throws Exception {
 		// Defer execution until we are ready to check for the email
 		emailSendingCommandHolder.set(() -> {
-			setCustomerEmailAddress(emailAddress);
-			final Customer customer = customerBuilderHolder.get().build();
-			customerRegistrationService.registerCustomer(customer);
+			final Customer customer = buildCustomer();
+			final Customer persistedAnonymousCustomer = customerService.addByAuthenticate(customer, false);
+			persistedAnonymousCustomer.setUserId(emailAddress);
+			persistedAnonymousCustomer.setEmail(emailAddress);
+			customerHolder.set(customerRegistrationService.registerCustomer(persistedAnonymousCustomer));
 		});
 	}
 
@@ -74,9 +81,9 @@ public class CustomerStepDefinitions {
 	public void registerCustomerFromCsr(final String emailAddress) throws Throwable {
 		// Defer execution until we are ready to check for the email
 		emailSendingCommandHolder.set(() -> {
-			setCustomerEmailAddress(emailAddress);
-			final Customer customer = customerBuilderHolder.get().build();
-			customerRegistrationService.registerCustomerAndSendPassword(customer);
+			setCustomerUserIdAndEmail(emailAddress);
+			final Customer customer = buildCustomer();
+			customerHolder.set(customerRegistrationService.registerCustomerAndSendPassword(customer));
 		});
 	}
 
@@ -84,8 +91,8 @@ public class CustomerStepDefinitions {
 	public void changeCustomerPassword() throws Throwable {
 		// Defer execution until we are ready to check for the email
 		emailSendingCommandHolder.set(() -> {
-			final Customer customer = customerBuilderHolder.get().build();
-			customerService.changePasswordAndSendEmail(customer, "NEWPASSWORD");
+			final Customer customer = buildCustomer();
+			customerHolder.set(customerService.changePasswordAndSendEmail(customer, "NEWPASSWORD"));
 		});
 	}
 
@@ -93,9 +100,22 @@ public class CustomerStepDefinitions {
 	public void resetCustomerPassword() throws Throwable {
 		// Defer execution until we are ready to check for the email
 		emailSendingCommandHolder.set(() -> {
-			final Customer customer = customerBuilderHolder.get().build();
-			customerService.auditableResetPassword(customer);
+			final Customer customer = buildCustomer();
+
+			Customer updatedCustomer = customerService.auditableResetPassword(customer);
+			// The clear text password is a transient field that is mutated by auditableResetPassword
+			// on the input customer. The updated customer returned would not have this field set,
+			// but we need to know what the password is to make assertions in other test steps.
+			updatedCustomer.setClearTextPassword(customer.getClearTextPassword());
+
+			customerHolder.set(updatedCustomer);
 		});
+	}
+
+	private Customer buildCustomer() {
+		Customer customer = customerBuilderHolder.get().build();
+		customerHolder.set(customer);
+		return customer;
 	}
 
 }

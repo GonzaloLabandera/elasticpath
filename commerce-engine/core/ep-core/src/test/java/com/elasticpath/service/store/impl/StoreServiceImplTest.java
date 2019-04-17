@@ -470,8 +470,6 @@ public class StoreServiceImplTest {
 			List<Store> findStoresWithState(final StoreState state) {
 				return ImmutableList.of(persistentStore);
 			}
-
-			;
 		};
 
 		assertThat(service.isStoreUrlUniqueForState(newStore, StoreState.OPEN))
@@ -498,8 +496,6 @@ public class StoreServiceImplTest {
 			List<Store> findStoresWithState(final StoreState state) {
 				return ImmutableList.of(persistentStore);
 			}
-
-			;
 		};
 
 		assertThat(service.isStoreUrlUniqueForState(newStore, StoreState.OPEN))
@@ -631,7 +627,8 @@ public class StoreServiceImplTest {
 	@Test
 	public void testFindAllCompleteStores() {
 		final List<Store> completeStores = Collections.emptyList();
-		doReturn(completeStores).when(persistenceEngine).retrieveByNamedQuery(FIND_ALL_COMPLETE_STORES, StoreState.UNDER_CONSTRUCTION, StoreState.RESTRICTED);
+		doReturn(completeStores).when(persistenceEngine).retrieveByNamedQuery(FIND_ALL_COMPLETE_STORES, StoreState.UNDER_CONSTRUCTION,
+				StoreState.RESTRICTED);
 
 		assertThat(storeServiceImpl.findAllCompleteStores()).isEqualTo(completeStores);
 		verify(persistenceEngine).retrieveByNamedQuery(FIND_ALL_COMPLETE_STORES, StoreState.UNDER_CONSTRUCTION, StoreState.RESTRICTED);
@@ -647,7 +644,8 @@ public class StoreServiceImplTest {
 	public void testFindAllCompleteStoresWithLoadTuner() {
 		final List<Store> completeStores = Collections.emptyList();
 		final FetchGroupLoadTuner loadTuner = mock(FetchGroupLoadTuner.class);
-		doReturn(completeStores).when(persistenceEngine).retrieveByNamedQuery(FIND_ALL_COMPLETE_STORES, StoreState.UNDER_CONSTRUCTION, StoreState.RESTRICTED);
+		doReturn(completeStores).when(persistenceEngine).retrieveByNamedQuery(FIND_ALL_COMPLETE_STORES, StoreState.UNDER_CONSTRUCTION,
+				StoreState.RESTRICTED);
 
 		assertThat(storeServiceImpl.findAllCompleteStores(loadTuner)).isEqualTo(completeStores);
 
@@ -662,7 +660,8 @@ public class StoreServiceImplTest {
 	@Test
 	public void testFindAllCompleteStoreUids() {
 		final List<Long> stores = Collections.emptyList();
-		doReturn(stores).when(persistenceEngine).retrieveByNamedQuery("FIND_ALL_COMPLETE_STORE_UIDS", StoreState.UNDER_CONSTRUCTION, StoreState.RESTRICTED);
+		doReturn(stores).when(persistenceEngine).retrieveByNamedQuery("FIND_ALL_COMPLETE_STORE_UIDS", StoreState.UNDER_CONSTRUCTION,
+				StoreState.RESTRICTED);
 
 		assertThat(storeServiceImpl.findAllCompleteStoreUids()).isEqualTo(stores);
 

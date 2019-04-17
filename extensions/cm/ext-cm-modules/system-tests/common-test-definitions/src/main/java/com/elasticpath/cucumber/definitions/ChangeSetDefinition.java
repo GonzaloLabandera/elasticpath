@@ -7,7 +7,6 @@ import cucumber.api.java.en.And;
 import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
 
-import com.elasticpath.cucumber.definitions.dst.DSTDefinition;
 import com.elasticpath.selenium.dialogs.AddEditBrandDialog;
 import com.elasticpath.selenium.dialogs.CreateChangeSetDialog;
 import com.elasticpath.selenium.dialogs.MoveSelectedObjectsDialog;
@@ -471,7 +470,7 @@ public class ChangeSetDefinition {
 	 */
 	@After(value = "@lockAndFinalizeStaging", order = Constants.CLEANUP_ORDER_FOURTH)
 	public void lockAndFinalizeStagingChangeSet() {
-		DSTDefinition.switchToAuthorWindow();
+		changeSetSearchResultPane.switchToAuthorTab();
 		lockAndFinalizeNewChangeSet();
 	}
 

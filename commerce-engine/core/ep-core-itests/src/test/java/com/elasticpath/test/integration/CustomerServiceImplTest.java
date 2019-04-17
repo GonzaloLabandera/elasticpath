@@ -14,13 +14,14 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.junit.Before;
+import org.junit.Test;
+
 import com.google.common.base.Joiner;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import org.apache.commons.collections.CollectionUtils;
-import org.junit.Before;
-import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
@@ -30,7 +31,6 @@ import com.elasticpath.base.common.dto.StructuredErrorMessage;
 import com.elasticpath.base.exception.structured.EpValidationException;
 import com.elasticpath.commons.beanframework.BeanFactory;
 import com.elasticpath.commons.constants.ContextIdNames;
-import com.elasticpath.commons.constants.WebConstants;
 import com.elasticpath.commons.exception.UserIdExistException;
 import com.elasticpath.domain.builder.customer.CustomerGroupBuilder;
 import com.elasticpath.domain.customer.Customer;
@@ -46,8 +46,6 @@ import com.elasticpath.persistence.api.PersistenceEngine;
 import com.elasticpath.plugin.payment.dto.PaymentMethod;
 import com.elasticpath.service.customer.CustomerGroupService;
 import com.elasticpath.service.customer.CustomerService;
-import com.elasticpath.settings.SettingsService;
-import com.elasticpath.settings.domain.SettingDefinition;
 import com.elasticpath.test.persister.testscenarios.SimpleStoreScenario;
 import com.elasticpath.test.util.Utils;
 
@@ -56,8 +54,10 @@ import com.elasticpath.test.util.Utils;
  */
 public class CustomerServiceImplTest extends BasicSpringContextTest {
 
-	private static final String TEST_EMAIL_1 = "test@elasticpath.com";
+	private static final String TEST_USERID_1 = "7fc7f73c-688b-471b-886d-9898dbeb5bef";
+	private static final String TEST_USERID_2 = "ba628c3b-3067-453f-96a6-e0c648e8aa9c";
 
+	private static final String TEST_EMAIL_1 = "test@elasticpath.com";
 	private static final String TEST_EMAIL_2 = "test2@elasticpath.com";
 
 	private static final String PASSWORD = "password";
@@ -92,97 +92,144 @@ public class CustomerServiceImplTest extends BasicSpringContextTest {
 	}
 
 	/**
-	 * Testing the ability to create a new customer with the same email (userId) as an existing (anonymous) customer. The service call should NOT
-	 * throw a UserIdExistException since anonymous customers should not be included in the duplicate id check.
+	 * Test creating a new customer with the same userId as an existing anonymous customer.
 	 */
 	@DirtiesDatabase
 	@Test
 	public void testCreateCustomerWithSameUserIdAsAnonymousCustomer() {
-		createPersistedAnonymousCustomer(TEST_EMAIL_1, scenario.getStore());
+		Customer anonymousCustomer = createPersistedAnonymousCustomer(scenario.getStore());
 
-		assertThatCode(() -> createPersistedCustomer(TEST_EMAIL_1, scenario.getStore()))
-			.as("Should be able to add a new customer with the same userId as an existing anonymous customer.")
-			.doesNotThrowAnyException();
-
-	}
-
-	/**
-	 * Testing the ability to update a customer's email address to the same email (userId) as an existing (anonymous) customer. The service call
-	 * should NOT throw a UserIdExistException since anonymous customers should not be included in the duplicate id check.
-	 */
-	@DirtiesDatabase
-	@Test
-	public void testUpdateCustomerWithSameUserIdAsAnonymousCustomer() {
-		createPersistedAnonymousCustomer(TEST_EMAIL_1, scenario.getStore());
-
-		assertThatCode(() -> {
-			Customer customer = createPersistedCustomer(TEST_EMAIL_2, scenario.getStore());
-			customer.setEmail(TEST_EMAIL_1);
-			service.update(customer);
-		})
-			.as("Should be able to add a new customer with the same userId as an existing anonymous customer.")
-			.doesNotThrowAnyException();
-	}
-
-	/**
-	 * Test that a customer can be updated when in User ID Mode 2.
-	 */
-	@DirtiesDatabase
-	@Test
-	public void testUpdateCustomerWithGeneratedUserId() {
-		changeUserIdMode(WebConstants.GENERATE_UNIQUE_PERMANENT_USER_ID_MODE);
-
-		Customer customer = createPersistedCustomer(TEST_EMAIL_2, scenario.getStore());
-		//Assert the correct customer has been created.
-		assertThat(customer.getEmail()).isEqualTo(TEST_EMAIL_2);
-
-		customer.setEmail(TEST_EMAIL_1);
-		service.update(customer);
-
-		assertThat(customer.getEmail()).isEqualTo(TEST_EMAIL_1);
-	}
-
-	/**
-	 * Testing the ability to create a new customer with the same email (userId) as an existing customer. The service call should throw a
-	 * UserIdExistException as this is not allowed.
-	 */
-	@DirtiesDatabase
-	@Test
-	public void testAttemptCreateCustomerWithSameUserIdAsExistingCustomer() {
-		createPersistedCustomer(TEST_EMAIL_1, scenario.getStore());
-
-		UserIdExistException uidee = catchThrowableOfType(() -> createPersistedCustomer(TEST_EMAIL_1, scenario.getStore()),
-			UserIdExistException.class);
-
-		assertThat(uidee.getStructuredErrorMessages())
-				.extracting(StructuredErrorMessage::getMessageId)
-				.containsOnly(CustomerMessageIds.EMAIL_ALREADY_EXISTS);
-		assertThat(uidee.getStructuredErrorMessages())
-				.extracting(structuredErrorMessage -> structuredErrorMessage.getData().get("email"))
-				.containsOnly(TEST_EMAIL_1);
-	}
-
-	/**
-	 * Testing the ability to update a customer's email address to the same email (userId) as an existing customer. The service call should throw a
-	 * UserIdExistException since this is not allowed.
-	 */
-	@DirtiesDatabase
-	@Test
-	public void testAttemptUpdateCustomerWithSameUserIdAsExistingCustomer() {
-		createPersistedCustomer(TEST_EMAIL_1, scenario.getStore());
-
-		UserIdExistException uidee = catchThrowableOfType(() -> {
-			Customer customerB = createPersistedCustomer(TEST_EMAIL_2, scenario.getStore());
-			customerB.setEmail(TEST_EMAIL_1);
-			service.update(customerB);
-		}, UserIdExistException.class);
+		UserIdExistException uidee = catchThrowableOfType(
+				() -> createPersistedCustomer(anonymousCustomer.getUserId(), TEST_EMAIL_1, scenario.getStore()),
+				UserIdExistException.class);
 
 		assertThat(uidee.getStructuredErrorMessages())
 				.extracting(StructuredErrorMessage::getMessageId)
 				.containsOnly(CustomerMessageIds.USERID_ALREADY_EXISTS);
 		assertThat(uidee.getStructuredErrorMessages())
 				.extracting(structuredErrorMessage -> structuredErrorMessage.getData().get("user-id"))
-				.containsOnly(TEST_EMAIL_1);
+				.containsOnly(anonymousCustomer.getUserId());
+	}
+
+	/**
+	 * Test creating a new customer with the same userId as an existing non-anonymous customer.
+	 */
+	@DirtiesDatabase
+	@Test
+	public void testCreateCustomerWithSameUserIdAsExistingCustomer() {
+		Customer customer = createPersistedCustomer(TEST_USERID_1, TEST_EMAIL_1, scenario.getStore());
+
+		UserIdExistException uidee = catchThrowableOfType(
+				() -> createPersistedCustomer(customer.getUserId(), TEST_EMAIL_2, scenario.getStore()),
+				UserIdExistException.class);
+
+		assertThat(uidee.getStructuredErrorMessages())
+				.extracting(StructuredErrorMessage::getMessageId)
+				.containsOnly(CustomerMessageIds.USERID_ALREADY_EXISTS);
+		assertThat(uidee.getStructuredErrorMessages())
+				.extracting(structuredErrorMessage -> structuredErrorMessage.getData().get("user-id"))
+				.containsOnly(TEST_USERID_1);
+	}
+
+	/**
+	 * Test creating a new customer with the same email as another existing customer.
+	 */
+	@DirtiesDatabase
+	@Test
+	public void testCreateCustomerWithSameEmailAsExistingCustomer() {
+		createPersistedCustomer(TEST_USERID_1, TEST_EMAIL_1, scenario.getStore());
+
+		assertThatCode(() -> createPersistedCustomer(TEST_USERID_2, TEST_EMAIL_1, scenario.getStore()))
+				.as("Should be able to add a new customer with the same email as another existing customer.")
+				.doesNotThrowAnyException();
+	}
+
+	/**
+	 * Test updating a customer to have the same userId as an existing anonymous customer.
+	 */
+	@DirtiesDatabase
+	@Test
+	public void testUpdateCustomerWithSameUserIdAsAnonymousCustomer() {
+		Customer anonymousCustomer = createPersistedAnonymousCustomer(scenario.getStore());
+
+		Customer customer2 = createPersistedCustomer(TEST_USERID_2, TEST_EMAIL_2, scenario.getStore());
+		UserIdExistException uidee = catchThrowableOfType(
+				() -> {
+					customer2.setUserId(anonymousCustomer.getUserId());
+					service.update(customer2);
+				},
+				UserIdExistException.class);
+
+		assertThat(uidee.getStructuredErrorMessages())
+				.extracting(StructuredErrorMessage::getMessageId)
+				.containsOnly(CustomerMessageIds.USERID_ALREADY_EXISTS);
+		assertThat(uidee.getStructuredErrorMessages())
+				.extracting(structuredErrorMessage -> structuredErrorMessage.getData().get("user-id"))
+				.containsOnly(anonymousCustomer.getUserId());
+	}
+
+	/**
+	 * Test updating a customer to have the same userId as an existing non-anonymous customer.
+	 */
+	@DirtiesDatabase
+	@Test
+	public void testUpdateCustomerWithSameUserIdAsExistingCustomer() {
+		Customer customer1 = createPersistedCustomer(TEST_USERID_1, TEST_EMAIL_1, scenario.getStore());
+
+		Customer customer2 = createPersistedCustomer(TEST_USERID_2, TEST_EMAIL_2, scenario.getStore());
+		UserIdExistException uidee = catchThrowableOfType(
+				() -> {
+					customer2.setUserId(customer1.getUserId());
+					service.update(customer2);
+				},
+				UserIdExistException.class);
+
+		assertThat(uidee.getStructuredErrorMessages())
+				.extracting(StructuredErrorMessage::getMessageId)
+				.containsOnly(CustomerMessageIds.USERID_ALREADY_EXISTS);
+		assertThat(uidee.getStructuredErrorMessages())
+				.extracting(structuredErrorMessage -> structuredErrorMessage.getData().get("user-id"))
+				.containsOnly(TEST_USERID_1);
+	}
+
+	/**
+	 * Test updating a customer to have the same email as another existing customer.
+	 */
+	@DirtiesDatabase
+	@Test
+	public void testUpdateCustomerWithSameEmailAsExistingCustomer() {
+		Customer customer1 = createPersistedCustomer(TEST_USERID_1, TEST_EMAIL_1, scenario.getStore());
+
+		Customer customer2 = createPersistedCustomer(TEST_USERID_2, TEST_EMAIL_2, scenario.getStore());
+		assertThatCode(() -> {
+			customer2.setEmail(customer1.getEmail());
+			service.update(customer2);
+		})
+				.as("Should be able to update a customer's email "
+						+ "to be the same as another existing customer's email.")
+				.doesNotThrowAnyException();
+	}
+
+	/**
+	 * Test updating an anonymous customer into a non-anonymous customer using an email address as userId.
+	 */
+	@DirtiesDatabase
+	@Test
+	public void testUpdateAnonymousCustomerIntoNonAnonymousCustomer() {
+		Customer customer = createPersistedAnonymousCustomer(scenario.getStore());
+
+		assertThatCode(() -> {
+			customer.setUserId(TEST_EMAIL_1);
+			customer.setEmail(TEST_EMAIL_1);
+			customer.setFirstName("Tester");
+			customer.setLastName("Testerson");
+			customer.setClearTextPassword(PASSWORD);
+			customer.setAnonymous(false);
+			service.update(customer);
+		})
+				.as("Should be able to update an anonymous customer "
+						+ "into a non-anonymous customer using an email as the userId.")
+				.doesNotThrowAnyException();
 	}
 
 	/**
@@ -425,7 +472,7 @@ public class CustomerServiceImplTest extends BasicSpringContextTest {
 	@DirtiesDatabase
 	@Test
 	public void testGetLastModifiedDate() {
-		Customer customer = createPersistedAnonymousCustomer(TEST_EMAIL_1, scenario.getStore());
+		Customer customer = createPersistedAnonymousCustomer(scenario.getStore());
 		Date dateFromCustomer = customer.getLastModifiedDate();
 		Date dateFromService = service.getCustomerLastModifiedDate(customer.getGuid());
 		assertThat(dateFromService)
@@ -577,8 +624,8 @@ public class CustomerServiceImplTest extends BasicSpringContextTest {
 	@Test
 	@DirtiesDatabase
 	public void ensureFilterSearchableFiltersOutAnonymousCustomers() {
-		Customer signedInCustomer = createPersistedCustomer("foo@foo.com", scenario.getStore());
-		Customer anonymousCustomer = createPersistedAnonymousCustomer("anon@foo.com", scenario.getStore());
+		Customer signedInCustomer = createPersistedCustomer(TEST_USERID_1, TEST_EMAIL_1, scenario.getStore());
+		Customer anonymousCustomer = createPersistedAnonymousCustomer(scenario.getStore());
 
 		Collection<Long> filteredUids = service.filterSearchable(ImmutableList.of(signedInCustomer.getUidPk(), anonymousCustomer.getUidPk()));
 		Set<Long> filteredUidSet = new HashSet<>(filteredUids);
@@ -624,16 +671,8 @@ public class CustomerServiceImplTest extends BasicSpringContextTest {
 	@Test(expected= EpValidationException.class)
 	@DirtiesDatabase
 	public void verifyAddingInvalidEmailToAnonymousCustomerResultsInStructuredErrorMessage() {
-		Customer anonymousCustomer = createPersistedAnonymousCustomer(TEST_EMAIL_1, scenario.getStore());
+		Customer anonymousCustomer = createPersistedAnonymousCustomer(scenario.getStore());
 		anonymousCustomer.setEmail("invalid email string");
-		service.update(anonymousCustomer);
-	}
-
-	@Test(expected= EpValidationException.class)
-	@DirtiesDatabase
-	public void verifyAddingEmptyEmailToAnonymousCustomerResultsInStructuredErrorMessage() {
-		Customer anonymousCustomer = createPersistedAnonymousCustomer(TEST_EMAIL_1, scenario.getStore());
-		anonymousCustomer.setEmail("");
 		service.update(anonymousCustomer);
 	}
 
@@ -641,20 +680,20 @@ public class CustomerServiceImplTest extends BasicSpringContextTest {
 	// Setup methods
 	//====================================================================================================================
 
-	private Customer createPersistedAnonymousCustomer(final String emailAddress, final Store store) {
+	private Customer createPersistedAnonymousCustomer(final Store store) {
 		final Customer anonymousCustomer = beanFactory.getBean(ContextIdNames.CUSTOMER);
-		anonymousCustomer.setEmail(emailAddress);
 		anonymousCustomer.setStoreCode(store.getCode());
 		anonymousCustomer.setAnonymous(true);
 
 		return service.add(anonymousCustomer);
 	}
 
-	private Customer createPersistedCustomer(final String emailAddress, final Store store) {
+	private Customer createPersistedCustomer(final String userId, final String email, final Store store) {
 		final Customer customer = beanFactory.getBean(ContextIdNames.CUSTOMER);
+		customer.setUserId(userId);
+		customer.setEmail(email);
 		customer.setFirstName("Test");
 		customer.setLastName("Test");
-		customer.setEmail(emailAddress);
 		customer.setStoreCode(store.getCode());
 		customer.setAnonymous(false);
 
@@ -686,12 +725,5 @@ public class CustomerServiceImplTest extends BasicSpringContextTest {
 		customer.setEmail("test" + Math.round(Math.random() * 1000) + "@elasticpath.com");
 		customer.setStoreCode(scenario.getStore().getCode());
 		return customer;
-	}
-
-	private void changeUserIdMode(final int userIdMode) {
-		SettingsService settingsService = beanFactory.getBean(ContextIdNames.SETTINGS_SERVICE);
-		SettingDefinition userIdSetting = settingsService.getSettingDefinition("COMMERCE/SYSTEM/userIdMode");
-		userIdSetting.setDefaultValue(String.valueOf(userIdMode));
-		settingsService.updateSettingDefinition(userIdSetting);
 	}
 }

@@ -7,6 +7,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -22,6 +23,7 @@ import com.elasticpath.commons.beanframework.BeanFactory;
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.catalog.Catalog;
 import com.elasticpath.domain.catalog.Category;
+import com.elasticpath.domain.catalog.Product;
 import com.elasticpath.domain.catalog.impl.CategoryImpl;
 import com.elasticpath.domain.misc.impl.OrderingComparatorImpl;
 import com.elasticpath.domain.store.Store;
@@ -30,6 +32,7 @@ import com.elasticpath.rest.resource.integration.epcommerce.repository.store.Sto
 import com.elasticpath.rest.resource.integration.epcommerce.repository.transform.impl.ReactiveAdapterImpl;
 import com.elasticpath.service.catalog.CategoryLookup;
 import com.elasticpath.service.catalog.CategoryService;
+import com.elasticpath.service.catalog.ProductLookup;
 
 /**
  * Tests {@link CategoryRepositoryImpl}.
@@ -44,6 +47,7 @@ public class CategoryRepositoryImplTest {
 	private static final String CATEGORY_GUID = "CATEGORY_GUID";
 	private static final String STORE_CODE = "STORE_CODE";
 	public static final String NOT_FOUND = "not found";
+	private static final long CATEGORY_UID = 0;
 
 	@Mock
 	private CategoryService categoryService;
@@ -57,10 +61,18 @@ public class CategoryRepositoryImplTest {
 	private ReactiveAdapterImpl reactiveAdapter;
 	@InjectMocks
 	private CategoryRepositoryImpl categoryRepository;
+	@Mock
+	private ProductLookup productLookup;
 
 	@Before
 	public void setUp() {
-		categoryRepository = new CategoryRepositoryImpl(categoryLookup, storeRepository, coreBeanFactory, categoryService, reactiveAdapter);
+		categoryRepository = new CategoryRepositoryImpl(
+				categoryLookup,
+				storeRepository,
+				coreBeanFactory,
+				categoryService,
+				productLookup,
+				reactiveAdapter);
 	}
 	
 	@Test
@@ -177,6 +189,29 @@ public class CategoryRepositoryImplTest {
 		categoryRepository.findChildren(STORE_CODE, CATEGORY_CODE)
 				.test()
 				.assertValueSequence(categories);
+	}
+
+	@Test
+	public void testFeaturedProduct() {
+		List<Product> featuredProductList = new ArrayList<>();
+		Product product = mock(Product.class);
+		Product product2 = mock(Product.class);
+		featuredProductList.add(product);
+		featuredProductList.add(product2);
+
+		final long prodId1 = 123L;
+		final long prodId2 = 456L;
+
+		List uids = Arrays.asList(prodId1, prodId2);
+
+		when(categoryService.findFeaturedProductUidList(CATEGORY_UID)).thenReturn(uids);
+		when(productLookup.findByUids(uids)).thenReturn(featuredProductList);
+
+		categoryRepository.getFeaturedProducts(CATEGORY_UID)
+				.test()
+				.assertNoErrors()
+				.assertValueAt(0, product)
+				.assertValueAt(1, product2);
 	}
 
 	private void shouldFindStoreWithResult(final Store store) {

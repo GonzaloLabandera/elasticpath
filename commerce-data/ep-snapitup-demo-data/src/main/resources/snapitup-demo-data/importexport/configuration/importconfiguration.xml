@@ -132,6 +132,9 @@
         <dependentelement type="CM_IMPORT_MAPPINGS">CLEAR_COLLECTION</dependentelement>
       </dependentelements>
     </importer>
+    <importer type="FACET">
+      <importstrategy>INSERT_OR_UPDATE</importstrategy>
+    </importer>
   </importstrategy>
   <packager type="NONE"/>
   <retrieval>

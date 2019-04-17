@@ -19,10 +19,10 @@
 		<!-- Set to true to use master COMMERCE/SYSTEM/SEARCH/searchHost setting in a clustered deployment -->
 		<property name="requiresMaster" value="${ep.search.requires.master:false}"/>
 		<property name="defaultSearchHostLocationProvider">
-			<settings:setting path="COMMERCE/SYSTEM/SEARCH/searchHost" context="default"/>
+			<settings:setting path="COMMERCE/SYSTEM/SEARCH/searchHost" context="default" systemPropertyOverrideKey="ep.search.default.url"/>
 		</property>
 		<property name="masterSearchHostLocationProvider">
-			<settings:setting path="COMMERCE/SYSTEM/SEARCH/searchHost" context="master"/>
+			<settings:setting path="COMMERCE/SYSTEM/SEARCH/searchHost" context="master" systemPropertyOverrideKey="ep.search.master.url"/>
 		</property>
 	</bean>
 

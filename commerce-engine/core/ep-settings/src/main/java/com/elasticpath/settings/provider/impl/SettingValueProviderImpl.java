@@ -3,10 +3,12 @@
  */
 package com.elasticpath.settings.provider.impl;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.log4j.Logger;
 
 import com.elasticpath.settings.SettingsReader;
 import com.elasticpath.settings.domain.SettingValue;
+import com.elasticpath.settings.impl.OverridingSettingValueImpl;
 import com.elasticpath.settings.provider.SettingValueProvider;
 import com.elasticpath.settings.provider.converter.SettingValueTypeConverter;
 
@@ -17,6 +19,8 @@ import com.elasticpath.settings.provider.converter.SettingValueTypeConverter;
  */
 public class SettingValueProviderImpl<T> implements SettingValueProvider<T> {
 
+	private static final Logger LOG = Logger.getLogger(SettingValueProviderImpl.class);
+
 	private String path;
 
 	private String context;
@@ -24,6 +28,10 @@ public class SettingValueProviderImpl<T> implements SettingValueProvider<T> {
 	private SettingsReader settingsReader;
 
 	private SettingValueTypeConverter settingValueTypeConverter;
+
+	private String systemPropertyOverrideKey;
+
+	private String systemPropertyOverrideValue;
 
 	@Override
 	public T get() {
@@ -34,21 +42,48 @@ public class SettingValueProviderImpl<T> implements SettingValueProvider<T> {
 	public T get(final String context) {
 		verifyDependencies();
 
-		final SettingValue settingValue = getSettingValue(context);
+		SettingValue settingValue = getSettingValue(context);
+
+		if (systemPropertyOverrideKey != null) {
+			settingValue = applyPossibleSystemPropertyOverride(settingValue);
+		}
 
 		return getSettingValueTypeConverter().convert(settingValue);
 	}
 
+	@SuppressWarnings("PMD.ConfusingTernary")
 	private SettingValue getSettingValue(final String context) {
+
+		SettingValue settingValue;
+
 		if (!StringUtils.isBlank(context)) {
-			return getSettingsReader().getSettingValue(getPath(), context);
+			settingValue = getSettingsReader().getSettingValue(getPath(), context);
+		} else if (!StringUtils.isBlank(getContext())) {
+			settingValue = getSettingsReader().getSettingValue(getPath(), getContext());
+		} else {
+			settingValue = getSettingsReader().getSettingValue(getPath());
 		}
 
-		if (!StringUtils.isBlank(getContext())) {
-			return getSettingsReader().getSettingValue(getPath(), getContext());
-		}
+		return settingValue;
+	}
 
-		return getSettingsReader().getSettingValue(getPath());
+	private SettingValue applyPossibleSystemPropertyOverride(final SettingValue settingValue) {
+
+		if (systemPropertyOverrideValue == null) {
+			final String overrideValue = System.getProperty(systemPropertyOverrideKey);
+			if (StringUtils.isNotEmpty(overrideValue)) {
+				systemPropertyOverrideValue = overrideValue;
+				LOG.info(
+						String.format("Setting override applied for path: '%s', context: '%s' and systemPropertyOverrideKey: '%s'",
+								path,
+								context == null ? "" : context,
+								systemPropertyOverrideKey));
+			}
+		}
+		if (systemPropertyOverrideValue != null) {
+			return new OverridingSettingValueImpl(settingValue, systemPropertyOverrideValue);
+		}
+		return settingValue;
 	}
 
 	private void verifyDependencies() {
@@ -96,4 +131,9 @@ public class SettingValueProviderImpl<T> implements SettingValueProvider<T> {
 	public SettingValueTypeConverter getSettingValueTypeConverter() {
 		return settingValueTypeConverter;
 	}
+
+	public void setSystemPropertyOverrideKey(final String systemPropertyOverrideKey) {
+		this.systemPropertyOverrideKey = systemPropertyOverrideKey;
+	}
+
 }

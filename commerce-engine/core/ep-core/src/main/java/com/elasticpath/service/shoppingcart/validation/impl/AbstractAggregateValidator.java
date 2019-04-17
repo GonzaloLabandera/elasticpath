@@ -10,9 +10,10 @@ import com.elasticpath.base.common.dto.StructuredErrorMessage;
 import com.elasticpath.service.shoppingcart.validation.Validator;
 
 /**
- * Aggregates several validators into one.
- * @param <T> the type the inner validators validate.
- * @param <S> the type the aggregate should validate.
+ * Collects the results from several embedded validators when a single validate call is made on this validator.
+ *
+ * @param <T> the type of context object that the embedded validators expect.
+ * @param <S> the type of context object that this validator expects.
  */
 public abstract class AbstractAggregateValidator<T, S extends T> implements Validator<S> {
 

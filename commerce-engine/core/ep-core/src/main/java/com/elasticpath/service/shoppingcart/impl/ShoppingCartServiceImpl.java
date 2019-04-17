@@ -5,8 +5,14 @@ package com.elasticpath.service.shoppingcart.impl;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
+
 import org.apache.log4j.Logger;
 
 import com.elasticpath.base.exception.EpServiceException;
@@ -17,9 +23,11 @@ import com.elasticpath.domain.catalog.ProductSkuLoadTuner;
 import com.elasticpath.domain.catalog.ShoppingItemLoadTuner;
 import com.elasticpath.domain.customer.CustomerSession;
 import com.elasticpath.domain.shopper.Shopper;
+import com.elasticpath.domain.shoppingcart.ItemType;
 import com.elasticpath.domain.shoppingcart.ShoppingCart;
 import com.elasticpath.domain.shoppingcart.ShoppingCartMemento;
 import com.elasticpath.domain.shoppingcart.ShoppingCartMementoHolder;
+import com.elasticpath.domain.shoppingcart.ShoppingItem;
 import com.elasticpath.domain.store.Store;
 import com.elasticpath.service.impl.AbstractEpPersistenceServiceImpl;
 import com.elasticpath.service.misc.FetchPlanHelper;
@@ -32,12 +40,15 @@ import com.elasticpath.service.store.StoreService;
 /** Service for retrieving and saving Shopping Carts. */
 @SuppressWarnings("PMD.GodClass")
 public class ShoppingCartServiceImpl extends AbstractEpPersistenceServiceImpl implements ShoppingCartService {
+	private static final String LIST_PARAMETER = "list";
 	private static final Logger LOG = Logger.getLogger(ShoppingCartServiceImpl.class);
 
 	/** OpenJPA Query Name. */
 	protected static final String SHOPPING_CART_FIND_BY_GUID_EAGER = "SHOPPING_CART_FIND_BY_GUID_EAGER";
 	/** OpenJPA Query Name. */
 	protected static final String ACTIVE_SHOPPING_CART_FIND_BY_SHOPPER_UID = "ACTIVE_SHOPPING_CART_FIND_BY_SHOPPER_UID";
+	/** A list with valid types for root items having children. */
+	protected static final List<ItemType> ROOT_ITEM_WITH_CHILDREN_TYPES = Lists.newArrayList(ItemType.BUNDLE, ItemType.SKU_WITH_DEPENDENTS);
 
 	private FetchPlanHelper fetchPlanHelper;
 	private ProductSkuLoadTuner productSkuLoadTuner;
@@ -219,14 +230,72 @@ public class ShoppingCartServiceImpl extends AbstractEpPersistenceServiceImpl im
 	 * @return the requested memento , or null if it cannot be found.
 	 */
 	private ShoppingCartMemento loadShoppingCartMemento(final String guid) {
-		final List<ShoppingCartMemento> carts = getPersistenceEngine().retrieveByNamedQuery(SHOPPING_CART_FIND_BY_GUID_EAGER, guid);
+		return loadShoppingCartMemento(guid, getShoppingCartFindByGuidEagerNamedQuery());
+	}
+
+	/**
+	 * Could be called from extensions with a different query name.
+	 *
+	 * @param guid the guid
+	 * @param queryName the query name
+	 * @return shopping cart memento
+	 */
+	protected ShoppingCartMemento loadShoppingCartMemento(final String guid, final String queryName) {
+		final List<ShoppingCartMemento> carts = getPersistenceEngine().retrieveByNamedQuery(queryName, guid);
 		if (carts.size() == 1) {
-			return carts.get(0);
+			ShoppingCartMemento shoppingCartMemento = carts.get(0);
+
+			restoreDependents(shoppingCartMemento);
+
+			return shoppingCartMemento;
 		}
 		if (carts.size() > 1) {
 			throw new EpServiceException("Inconsistent data -- duplicate guid:" + guid);
 		}
 		return null;
+	}
+
+	/*
+		The call in loadShoppingCartMemento fetches only 1st (root) level items, while the call in this method
+		brings all children from the given cart and the roots.
+		The children are then added to their relevant roots.
+	 */
+	private void restoreDependents(final ShoppingCartMemento shoppingCartMemento) {
+		if (shoppingCartMemento != null && !shoppingCartMemento.getAllItems().isEmpty()) {
+
+			//map parent UID to parent item - filter roots without children (dependent items or bundle constituents)
+			Map<Long, ShoppingItem> parentUidToItemMap = shoppingCartMemento.getAllItems().stream()
+				.filter(rootItem -> ROOT_ITEM_WITH_CHILDREN_TYPES.contains(rootItem.getItemType()))
+				.collect(Collectors.toMap(ShoppingItem::getUidPk, Function.identity()));
+
+			if (parentUidToItemMap.isEmpty()) {
+				return;
+			}
+
+			List<ShoppingItem> children = getPersistenceEngine().retrieveByNamedQuery("CART_ITEMS_BY_CART_UID",
+				shoppingCartMemento.getUidPk());
+
+			//map child UID to child item (some children can be parents as well)
+			Map<Long, ShoppingItem> childUidToItemMap = new TreeMap<>();
+
+			children.forEach(shoppingItem -> childUidToItemMap.put(shoppingItem.getUidPk(), shoppingItem));
+
+			//attach children to parents
+			for (Map.Entry<Long, ShoppingItem> childEntry : childUidToItemMap.entrySet()) {
+				ShoppingItem childItem = childEntry.getValue();
+
+				Long parentUid = childItem.getParentItemUid();
+				ShoppingItem root = parentUidToItemMap.get(parentUid);
+
+				if (root == null) {
+					root = childUidToItemMap.get(parentUid);
+				}
+
+				if (root != null) {
+					root.addChildItem(childItem);
+				}
+			}
+		}
 	}
 
 	@Override
@@ -298,12 +367,34 @@ public class ShoppingCartServiceImpl extends AbstractEpPersistenceServiceImpl im
 	public ShoppingCart findOrCreateByShopper(final Shopper shopper) throws EpServiceException {
 		configureLoadTuners();
 
-		final List<ShoppingCartMemento> carts = getPersistenceEngine().retrieveByNamedQuery(ACTIVE_SHOPPING_CART_FIND_BY_SHOPPER_UID,
-				new Object[]{shopper.getUidPk()}, 0, 1);
+		final List<ShoppingCartMemento> carts = getPersistenceEngine().retrieveByNamedQuery(getFindOrCreateByShopperNamedQuery(),
+			new Object[]{shopper.getUidPk()}, 0, 1);
 
 		fetchPlanHelper.clearFetchPlan();
 
-		return createShoppingCart(shopper, Iterables.getFirst(carts, null));
+		ShoppingCartMemento shoppingCartMemento = Iterables.getFirst(carts, null);
+
+		restoreDependents(shoppingCartMemento);
+
+		return createShoppingCart(shopper, shoppingCartMemento);
+	}
+
+	/**
+	 * Return the default name query for finding active shopping cart by shopper uid.
+	 *
+	 * @return the default query name
+	 */
+	protected String getFindOrCreateByShopperNamedQuery() {
+		return ACTIVE_SHOPPING_CART_FIND_BY_SHOPPER_UID;
+	}
+
+	/**
+	 * Return the default name query for finding shopping cart by shopper guid.
+	 *
+	 * @return the default query name
+	 */
+	protected String getShoppingCartFindByGuidEagerNamedQuery() {
+		return SHOPPING_CART_FIND_BY_GUID_EAGER;
 	}
 
 	@Override
@@ -373,7 +464,7 @@ public class ShoppingCartServiceImpl extends AbstractEpPersistenceServiceImpl im
 			return 0;
 		}
 
-		return getPersistenceEngine().executeNamedQueryWithList("DELETE_EMPTY_SHOPPING_CARTS_BY_SHOPPER_UID", "list", shopperUids);
+		return getPersistenceEngine().executeNamedQueryWithList("DELETE_EMPTY_SHOPPING_CARTS_BY_SHOPPER_UID", LIST_PARAMETER, shopperUids);
 	}
 
 	@Override
@@ -385,8 +476,21 @@ public class ShoppingCartServiceImpl extends AbstractEpPersistenceServiceImpl im
 			return 0;
 		}
 
-		getPersistenceEngine().executeNamedQueryWithList("DELETE_ALL_CART_ORDERS_BY_SHOPPER_UID", "list", shopperUids);
-		return getPersistenceEngine().executeNamedQueryWithList("DELETE_ALL_SHOPPING_CARTS_BY_SHOPPER_UID", "list", shopperUids);
+		getPersistenceEngine().executeNamedQueryWithList("DELETE_ALL_CART_ORDERS_BY_SHOPPER_UID", LIST_PARAMETER, shopperUids);
+		return getPersistenceEngine().executeNamedQueryWithList("DELETE_ALL_SHOPPING_CARTS_BY_SHOPPER_UID", LIST_PARAMETER, shopperUids);
+	}
+
+	@Override
+	public int deleteAllInactiveShoppingCartsByShopperUids(final List<Long> shopperUids) {
+		if (shopperUids == null) {
+			throw new EpServiceException("shopperUids must not be null");
+		}
+		if (shopperUids.isEmpty()) {
+			return 0;
+		}
+
+		getPersistenceEngine().executeNamedQueryWithList("DELETE_ALL_INACTIVE_CART_ORDERS_BY_SHOPPER_UID", LIST_PARAMETER, shopperUids);
+		return getPersistenceEngine().executeNamedQueryWithList("DELETE_ALL_INACTIVE_SHOPPING_CARTS_BY_SHOPPER_UID", LIST_PARAMETER, shopperUids);
 	}
 
 	@Override

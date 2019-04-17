@@ -132,7 +132,7 @@ public class SystemConfigurationResultPane extends AbstractPageObject {
 	public void verifyNumberOfDefinedValuesRecords(final Integer count) {
 		setWebDriverImplicitWait(Constants.IMPLICIT_WAIT_FOR_ELEMENT_THREE_SECONDS);
 		List<WebElement> allRecords = getWaitDriver().waitForElementToBeVisible(
-				By.cssSelector(DEFINED_VALUES_TABLE_CSS)).findElements(By.cssSelector("div[widget-id*='e'][widget-type='row']"));
+				By.cssSelector(DEFINED_VALUES_TABLE_CSS)).findElements(By.cssSelector("div[widget-id*='6'][widget-type='row']"));
 		assertThat(allRecords.size())
 				.as("Unexpected number of Defined Values record(s)")
 				.isEqualTo(count);

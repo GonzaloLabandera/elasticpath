@@ -3,24 +3,6 @@
  */
 package com.elasticpath.service.order.impl;
 
-import static java.lang.System.currentTimeMillis;
-import static java.util.Arrays.asList;
-import static java.util.Collections.singleton;
-import static java.util.Collections.singletonList;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.assertj.core.api.Assertions.catchThrowable;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.anyVararg;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
 import static com.elasticpath.domain.catalog.InventoryAudit.EVENT_ORIGINATOR_WS;
 import static com.elasticpath.domain.order.OrderPaymentStatus.PENDING;
 import static com.elasticpath.domain.order.OrderShipmentStatus.INVENTORY_ASSIGNED;
@@ -31,6 +13,23 @@ import static com.elasticpath.domain.order.OrderStatus.COMPLETED;
 import static com.elasticpath.domain.order.OrderStatus.FAILED;
 import static com.elasticpath.domain.order.OrderStatus.IN_PROGRESS;
 import static com.elasticpath.domain.order.OrderStatus.PARTIALLY_SHIPPED;
+import static java.lang.System.currentTimeMillis;
+import static java.util.Arrays.asList;
+import static java.util.Collections.singleton;
+import static java.util.Collections.singletonList;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.catchThrowable;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.anyVararg;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -44,10 +43,11 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
-import com.google.common.collect.ImmutableMap;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
+import com.google.common.collect.ImmutableMap;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
@@ -127,8 +127,6 @@ public class OrderServiceImplTest {
 	private static final String ORDER_NUMBER = "order_1";
 
 	private static final long MINUTE_IN_MILLIS = 60000;
-
-	private static final String EMAIL_VALUE = "support@elasticpath.ca";
 
 	private OrderCriterion orderCriterion;
 	private Store store;
@@ -247,20 +245,6 @@ public class OrderServiceImplTest {
 		final List<Order> resultList2 = orderServiceImpl.findOrder("orderNumber", ORDER_NUMBER, false);
 		assertThat(resultList2).isEqualTo(singletonList(order));
 		assertThat(order.getStore()).as("Store should be populated via the store code").isEqualTo(store);
-	}
-
-	/**
-	 * Test method for 'com.elasticpath.service.OrderServiceImpl.findOrderByCustomerCriteria'.
-	 */
-	@Test
-	public void testFindOrderByCustomerEmail() {
-		when(persistenceEngine.retrieve(anyString(), anyVararg())).thenReturn(singletonList(order));
-		assertThat(orderServiceImpl.findOrderByCustomerEmail(EMAIL_VALUE, true)).isEqualTo(singletonList(order));
-		assertStoreIsPopulated(store, order);
-
-		when(persistenceEngine.retrieve(anyString(), anyVararg())).thenReturn(singletonList(order2));
-		assertThat(orderServiceImpl.findOrderByCustomerEmail(EMAIL_VALUE, false)).isEqualTo(singletonList(order2));
-		assertStoreIsPopulated(store, order2);
 	}
 
 	@Test

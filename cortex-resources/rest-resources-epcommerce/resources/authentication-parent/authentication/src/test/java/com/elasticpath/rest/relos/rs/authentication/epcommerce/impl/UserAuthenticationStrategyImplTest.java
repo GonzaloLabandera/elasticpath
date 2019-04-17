@@ -154,7 +154,6 @@ public class UserAuthenticationStrategyImplTest {
 	private Customer createCustomer() {
 		Customer customer = mock(Customer.class);
 		Mockito.doNothing().when(customer).setAnonymous(true);
-		when(customer.getUserId()).thenReturn(null);
 		when(customer.getGuid()).thenReturn(USER_ID);
 		when(customer.getStoreCode()).thenReturn(SCOPE);
 

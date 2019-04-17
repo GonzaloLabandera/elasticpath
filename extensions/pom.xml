@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>com.elasticpath</groupId>
 		<artifactId>commerce-parent</artifactId>
-		<version>704.0.0-SNAPSHOT</version>
+		<version>0.0.0-SNAPSHOT</version>
 	</parent>
 
 	<name>Extension Commerce Engine Parent</name>
@@ -32,16 +32,15 @@
 	</modules>
 
 	<properties>
-		<cmclient.platform.feature.version>704.0.0-SNAPSHOT</cmclient.platform.feature.version>
+		<cmclient.platform.feature.version>0.0.0-SNAPSHOT</cmclient.platform.feature.version>
 
-		<dce.version>704.0.0-SNAPSHOT</dce.version>
+		<dce.version>0.0.0-SNAPSHOT</dce.version>
 
 		<!-- log4j -->
 		<ep.log.to>CONSOLE, FILE</ep.log.to>
 		<ep.log.level>INFO</ep.log.level>
 		<ep.log.dir>target/logs</ep.log.dir>
 
-		<org.apache.activemq.version>5.14.3</org.apache.activemq.version>
 		<org.apache.activemq.tooling.version>5.14.3</org.apache.activemq.tooling.version>
 		<org.apache.commons.pool2.version>2.4.2</org.apache.commons.pool2.version>
 		<org.apache.geronimo.specs.version>1.1.1</org.apache.geronimo.specs.version>

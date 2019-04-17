@@ -45,6 +45,8 @@
 
    <exporter type="DATA_POLICY"/>
    <exporter type="CUSTOMER_CONSENT"/>
+
+   <exporter type="FACET"/>
  
   </exporters>
   <packager type="NONE"/>

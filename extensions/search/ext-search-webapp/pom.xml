@@ -60,6 +60,9 @@
 						<path>${ep.search.contextUrl}</path>
 						<port>${ep.search.tomcat.port.http}</port>
 						<contextFile>${project.build.directory}/tomcatconf/context.xml</contextFile>
+						<systemProperties>
+							<ep.search.default.url>${ep.search.url}</ep.search.default.url>
+						</systemProperties>
 					</configuration>
 					<dependencies>
 						<dependency>

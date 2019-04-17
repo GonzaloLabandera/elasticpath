@@ -3,13 +3,11 @@ package com.elasticpath.cortex.dce.zoom
 import static com.elasticpath.cortex.dce.ClasspathFluentRelosClientFactory.getClient
 import static org.assertj.core.api.Assertions.assertThat
 
+import com.jayway.jsonpath.JsonPath
+import com.jayway.jsonpath.PathNotFoundException
 import cucumber.api.java.en.And
 import cucumber.api.java.en.Then
 import cucumber.api.java.en.When
-
-import com.jayway.jsonpath.JsonPath
-import com.jayway.jsonpath.PathNotFoundException
-
 import org.assertj.core.data.Percentage
 
 import com.elasticpath.cortex.dce.DatabaseAnalyzerClient
@@ -164,7 +162,7 @@ class ZoomSteps {
 	@Then('^the json path (.+) equals (.+)$')
 	static void verifyJSONPathEqualsTo(def jsonpath, def expected) {
 		try {
-			assertThat(JsonPath.read(client.body, "\$." + jsonpath))
+			assertThat(String.valueOf(JsonPath.read(client.body, "\$." + jsonpath)))
 					.as("The result is not as expected")
 					.isEqualTo(expected)
 		}
@@ -212,5 +210,34 @@ class ZoomSteps {
 	static void addZoomToCurrentURL(def zoom) {
 		client.GET(client.body.self.uri + "?zoom=$zoom")
 		client.stopIfFailure()
+	}
+
+	@When('^I zoom the (.+) with zoom (.+)$')
+	static void openElementByFieldZoom(String elementName, String zoom) {
+		zoomResources(elementName, zoom)
+	}
+
+	static void zoomResources(def resources, def zoom) {
+		List<String> path = new ArrayList<String>()
+		path.addAll(resources.split("->"))
+
+		for (String rel : path) {
+			def links = client.body.links.findAll { link ->
+				link.rel == rel.trim()
+			}
+			assertThat(links)
+					.size()
+					.as("rel $rel not found")
+					.isGreaterThan(0)
+
+			String link = links.get(0).href
+			if (link.contains('?')) {
+				link = link + "&zoom=" + zoom
+			} else {
+				link = link + "?zoom=" + zoom
+			}
+			client.GET(link)
+					.stopIfFailure()
+		}
 	}
 }

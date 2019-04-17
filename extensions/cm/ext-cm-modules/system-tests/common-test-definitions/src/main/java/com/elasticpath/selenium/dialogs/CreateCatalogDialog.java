@@ -16,7 +16,7 @@ public class CreateCatalogDialog extends AbstractDialog {
 	public static final String CREATE_CATALOG_PARENT_CSS = "div[widget-id='Create Catalog'][widget-type='Shell'] ";
 	private static final String CATALOG_CODE_INPUT_CSS = CREATE_CATALOG_PARENT_CSS + "div[widget-id='Catalog Code'] input";
 	private static final String CATALOG_NAME_INPUT_CSS = CREATE_CATALOG_PARENT_CSS + "div[widget-id='Catalog Name'] input";
-	private static final String MOVE_RIGHT_BUTTON_CSS = CREATE_CATALOG_PARENT_CSS + "div[widget-id='>']";
+	private static final String MOVE_RIGHT_BUTTON_CSS = CREATE_CATALOG_PARENT_CSS + "div[widget-id='Add']";
 	private static final String DEFAULT_LANGUAGE_COMBO_LIST_PARENT_CSS = "div[widget-id='Default Language'][widget-type='CCombo']";
 	private static final String SAVE_BUTTON_CSS = CREATE_CATALOG_PARENT_CSS + "div[widget-id='Save'][seeable='true']";
 	private static final String AVAILABLE_LANGUAGES_PARENT_CSS = "div[widget-id='Available Languages'][widget-type='Table'] ";

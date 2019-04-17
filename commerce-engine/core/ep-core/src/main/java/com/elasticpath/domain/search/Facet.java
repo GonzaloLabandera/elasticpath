@@ -106,7 +106,8 @@ public interface Facet extends Persistable {
 	SortedSet<RangeFacet> getSortedRangeFacet();
 
 	/**
-	 * Set the range facet map
+	 * Set the range facet map.
+	 *
 	 * @param sortedRangeFacet range facet map
 	 */
 	void setSortedRangeFacet(SortedSet<RangeFacet> sortedRangeFacet);
@@ -173,7 +174,7 @@ public interface Facet extends Persistable {
 	String getBusinessObjectId();
 
 	/**
-	 * Set the business object id
+	 * Set the business object id.
 	 *
 	 * @param businessObjectId the business object id
 	 */

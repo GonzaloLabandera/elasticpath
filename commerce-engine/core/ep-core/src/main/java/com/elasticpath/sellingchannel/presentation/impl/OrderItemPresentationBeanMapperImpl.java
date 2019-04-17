@@ -4,12 +4,12 @@
 package com.elasticpath.sellingchannel.presentation.impl;
 
 import com.elasticpath.common.dto.OrderItemDto;
+import com.elasticpath.commons.beanframework.BeanFactory;
 import com.elasticpath.commons.tree.Functor;
 import com.elasticpath.commons.tree.impl.PreOrderTreeTraverser;
 import com.elasticpath.commons.tree.impl.TreeNodeMemento;
 import com.elasticpath.sellingchannel.presentation.OrderItemPresentationBean;
 import com.elasticpath.sellingchannel.presentation.OrderItemPresentationBeanMapper;
-
 
 /**
  * Default implementation of {@link OrderItemPresentationBeanMapper}.
@@ -20,6 +20,14 @@ public class OrderItemPresentationBeanMapperImpl implements OrderItemPresentatio
 
 	private final PreOrderTreeTraverser<OrderItemDto, OrderItemDocumentMapperStackMemento> traverser
 			= new PreOrderTreeTraverser<>();
+
+	/**
+	 * Sets the bean factory.
+	 * @param beanFactory bean factory to set
+	 */
+	public void setBeanFactory(final BeanFactory beanFactory) {
+		functor.setBeanFactory(beanFactory);
+	}
 
 	/**
 	 * Sets the functor. Necessary for testing.
@@ -39,11 +47,17 @@ public class OrderItemPresentationBeanMapperImpl implements OrderItemPresentatio
 	 * Functor for use with {@code PreOrderTreeTraverser}. Copies the {@code OrderItemDto} tree to an {@code OrderItemFormBean} tree.
 	 */
 	public static class CopyFunctor implements Functor<OrderItemDto, OrderItemDocumentMapperStackMemento> {
+		private BeanFactory beanFactory;
+
+		public void setBeanFactory(final BeanFactory beanFactory) {
+			this.beanFactory = beanFactory;
+		}
+
 		@Override
 		public OrderItemDocumentMapperStackMemento processNode(final OrderItemDto sourceNode, final OrderItemDto parentNode,
 				final OrderItemDocumentMapperStackMemento parentStackMemento, final int level) {
 
-			OrderItemPresentationBean destDocument = new OrderItemPresentationBeanImpl();
+			OrderItemPresentationBean destDocument = beanFactory.getBean("orderItemPresentationBean");
 
 			destDocument.setLevel(level);
 			destDocument.setDisplayName(sourceNode.getDisplayName());

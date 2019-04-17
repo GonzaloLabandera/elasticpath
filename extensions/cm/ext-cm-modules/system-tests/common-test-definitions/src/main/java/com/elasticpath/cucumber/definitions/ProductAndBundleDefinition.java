@@ -16,6 +16,7 @@ import cucumber.api.java.en.When;
 import org.openqa.selenium.InvalidElementStateException;
 import org.openqa.selenium.WebDriver;
 
+import com.elasticpath.cortexTestObjects.Purchase;
 import com.elasticpath.selenium.common.AbstractPageObject;
 import com.elasticpath.selenium.dialogs.AddEditMerchandisingAssociationsDialog;
 import com.elasticpath.selenium.dialogs.AddItemDialog;
@@ -31,6 +32,7 @@ import com.elasticpath.selenium.domainobjects.Category;
 import com.elasticpath.selenium.domainobjects.DST;
 import com.elasticpath.selenium.domainobjects.Product;
 import com.elasticpath.selenium.domainobjects.ProductType;
+import com.elasticpath.selenium.editor.OrderEditor;
 import com.elasticpath.selenium.editor.SkuDetailsEditor;
 import com.elasticpath.selenium.editor.product.ProductEditor;
 import com.elasticpath.selenium.editor.product.tabs.AttributesTab;
@@ -87,6 +89,7 @@ public class ProductAndBundleDefinition {
 	private ProductEditor productEditor;
 	private final ChangeSetActionToolbar changeSetActionToolbar;
 	private CatalogSkuSearchResultPane catalogSkuSearchResultPane;
+	private static String dependentLineItem;
 
 	/**
 	 * Constructor.
@@ -200,8 +203,17 @@ public class ProductAndBundleDefinition {
 	 */
 	@Then("^the (?:product|bundle) is deleted$")
 	public void verifyProductIsDeleted() {
-		searchForProductByName(this.product.getProductName());
-		catalogSearchResultPane.verifyProductIsDeleted(this.product.getProductName());
+		verifyProductIsDeleted(this.product.getProductName());
+	}
+
+	/**
+	 * Verify product is deleted.
+	 *
+	 * @param prodName the product name
+	 */
+	public void verifyProductIsDeleted(final String prodName) {
+		searchForProductByName(prodName);
+		catalogSearchResultPane.verifyProductIsDeleted(prodName);
 	}
 
 	/**
@@ -1083,6 +1095,8 @@ public class ProductAndBundleDefinition {
 		merchandisingTab.clickMerchandisingTab(tabName);
 		addEditMerchandisingAssociationsDialog = merchandisingTab.clickAddMerchandisingAssociationsButton();
 		addEditMerchandisingAssociationsDialog.enterProductCode(productCode);
+		dependentLineItem = productCode;
+		addEditMerchandisingAssociationsDialog.selectPreviousMonthEnableDate();
 		addEditMerchandisingAssociationsDialog.clickAddButton();
 		catalogManagementActionToolbar.saveAll();
 		catalogManagementActionToolbar.clickReloadActiveEditor();
@@ -1095,7 +1109,7 @@ public class ProductAndBundleDefinition {
 	 * @param tabName     Merchandising Associations Tab.
 	 */
 	@When("^the product code (.+) exists under merchandising association (.+)$")
-	public void verifyProductFromMerchandisingTab(final String productCode, final String tabName) {
+	public void verifyProductInMerchandisingTab(final String productCode, final String tabName) {
 		merchandisingTab.clickMerchandisingTab(tabName);
 		merchandisingTab.verifySelectProductCode(productCode);
 	}
@@ -1131,6 +1145,17 @@ public class ProductAndBundleDefinition {
 	}
 
 	/**
+	 * Deletes dependent item.
+	 */
+	@After(value = "@cleanupDependentItem", order = Constants.CLEANUP_ORDER_FIRST)
+	public void deleteCatalogMerchandisingTabProduct() {
+		new OrderEditor(SetUp.getDriver()).closePane("#" + Purchase.getPurchaseNumber());
+		merchandisingTab.selectCatalogTab("Mobile Virtual Catalog");
+		merchandisingTab.clickMerchandisingTab("Dependent Item");
+		deleteMerchandisingTabProduct(dependentLineItem);
+	}
+
+	/**
 	 * Verify Merchandising Associations product is deleted.
 	 *
 	 * @param productCode Product Code.
@@ -1139,6 +1164,7 @@ public class ProductAndBundleDefinition {
 	@When("^the product code (.+) is no longer in merchandising association (.+)$")
 	public void verifyProductIsDeletedFromMerchandisingTab(final String productCode, final String tabName) {
 		merchandisingTab.clickMerchandisingTab(tabName);
+		activityToolbar.clickReloadActiveEditor();
 		merchandisingTab.verifyProductCodeIsDeleted(productCode);
 		productEditor.closeProductEditor(this.product.getProductCode());
 	}
@@ -1174,6 +1200,14 @@ public class ProductAndBundleDefinition {
 	@Then("^I close product search results tab$")
 	public void closeSearchResultsTab() {
 		catalogSearchResultPane.closeProductSearchResultsPane();
+	}
+
+	/**
+	 * Selects the catalog tab.
+	 */
+	@And("^I select the catalog (.+) tab$")
+	public void selectCatalogTab(final String catalogName) {
+		merchandisingTab.selectCatalogTab(catalogName);
 	}
 
 	/**
@@ -1303,15 +1337,6 @@ public class ProductAndBundleDefinition {
 		assertThat(productEditor.getSkuCode())
 				.as("Unexpected sku code in the search results")
 				.isEqualTo(expectedSku);
-	}
-
-	/**
-	 * deletes new product using DB
-	 */
-	@After(value = "@cleanUpProductDB", order = Constants.CLEANUP_ORDER_FIRST)
-	public void deleteNewlyCreatedProductUsingDb() {
-		DBConnector dbc = new DBConnector();
-		dbc.deleteProduct(this.product.getProductName());
 	}
 
 	/**

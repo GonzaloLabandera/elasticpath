@@ -3,6 +3,15 @@
  */
 package com.elasticpath.cache;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+
+import com.elasticpath.base.exception.EpServiceException;
+import com.elasticpath.cache.impl.CacheUtil;
+
 /**
  * EP Specific Cache interface.  Note that this interface is a strict subset of {@link javax.cache.Cache}.
  * This vendor specific sub-interface exists only because not all of the Cache Providers that EP interfaces
@@ -28,6 +37,96 @@ public interface Cache<K, V> {
 	 *                               configured for the {@link Cache}
 	 */
 	V get(K key);
+
+	/**
+	 * Retrieves an object from cache using the given key.
+	 *
+	 * @param key the name of the key to retrieve the object by
+	 * @param fallbackLoader a cache loader to use to load the value if the value cannot be found in cache
+	 * @return the cached object
+	 *
+	 * @throws NullPointerException if either argument is null
+	 */
+	default V get(K key, CacheLoader<K, V> fallbackLoader) {
+		V found = get(key);
+		if (found == null) {
+			found = fallbackLoader.load(key);
+			if (found == null) {
+				return null;
+			} else {
+				put(key, found);
+			}
+		}
+
+		return found;
+	}
+
+	/**
+	 * Retrieves a map with cached values using given keys.
+	 *
+	 * @param keyValues the list of key values
+	 * @return A map of entries that were found for the given keys. Keys not found
+	 *         in the cache are not in the returned map.
+	 *
+	 * @throws NullPointerException if either argument is null
+	 */
+	default Map<K, V> getAll(Collection<? extends K> keyValues) {
+		Map<K, V> result = new LinkedHashMap<>();
+		for (K keyVal : keyValues) {
+			V value = get(keyVal);
+			if (value != null) {
+				result.put(keyVal, value);
+			}
+		}
+
+		return result;
+	}
+
+	/**
+	 * Retrieves an object from cache using the given keys.
+	 *
+	 * @param keyValues the list of key values
+	 * @param fallbackLoader a cache loader to use to load the value if values cannot be found in cache
+	 * @return A map of entries that were found for the given keys. Keys not found
+	 *         in the cache are not in the returned map.
+	 *
+	 * @throws NullPointerException if either argument is null
+	 */
+	default Map<K, V> getAll(Collection<? extends K> keyValues, CacheLoader<K, V> fallbackLoader) {
+		Map<K, V> cachedValuesMap = getAll(keyValues);
+
+		int cachedValuesSize = cachedValuesMap.size();
+		int keyValuesSize = keyValues.size();
+
+		if (cachedValuesSize == keyValuesSize) {
+			return cachedValuesMap;
+		}
+
+		if (keyValuesSize > cachedValuesSize) {
+			//more keys than cached values are provided.. need to update the cache
+			final List<K> uncachedKeys = new ArrayList<>(keyValues);
+
+			boolean isCollectionModified = uncachedKeys.removeAll(cachedValuesMap.keySet());
+
+			if (isCollectionModified || cachedValuesMap.isEmpty()) {
+				Map<K, V> unCachedValueMap = fallbackLoader.loadAll(uncachedKeys);
+				for (Map.Entry<K, V> unCachedEntry : unCachedValueMap.entrySet()) {
+					put(unCachedEntry.getKey(), unCachedEntry.getValue());
+				}
+
+				if (cachedValuesMap.isEmpty()) {
+					return unCachedValueMap;
+				}
+
+				return CacheUtil.mergeResults(keyValues, cachedValuesMap, unCachedValueMap);
+
+			} else {
+				throw new EpServiceException("Couldn't remove elements from keyValues collection");
+			}
+		}
+
+		return cachedValuesMap;
+	}
 
 	/**
 	 * Associates the specified value with the specified key in the cache.

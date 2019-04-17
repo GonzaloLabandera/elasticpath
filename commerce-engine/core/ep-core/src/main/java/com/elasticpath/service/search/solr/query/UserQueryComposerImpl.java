@@ -34,12 +34,12 @@ public class UserQueryComposerImpl extends AbstractQueryComposerImpl {
 		final BooleanQuery.Builder booleanQueryBuilder = new BooleanQuery.Builder();
 		boolean hasSomeCriteria = false;
 
-		hasSomeCriteria |= addSplitFieldToQuery(SolrIndexConstants.FIRST_NAME, userSearchCriteria.getFirstName(), null, searchConfig, booleanQueryBuilder,
-				Occur.MUST, true);
-		hasSomeCriteria |= addSplitFieldToQuery(SolrIndexConstants.LAST_NAME, userSearchCriteria.getLastName(), null, searchConfig, booleanQueryBuilder,
-				Occur.MUST, true);
-		hasSomeCriteria |= addSplitFieldToQuery(SolrIndexConstants.USER_NAME, userSearchCriteria.getUserName(), null, searchConfig, booleanQueryBuilder,
-				Occur.MUST, true);
+		hasSomeCriteria |= addSplitFieldToQuery(SolrIndexConstants.FIRST_NAME, userSearchCriteria.getFirstName(), null, searchConfig,
+				booleanQueryBuilder, Occur.MUST, true);
+		hasSomeCriteria |= addSplitFieldToQuery(SolrIndexConstants.LAST_NAME, userSearchCriteria.getLastName(), null, searchConfig,
+				booleanQueryBuilder, Occur.MUST, true);
+		hasSomeCriteria |= addSplitFieldToQuery(SolrIndexConstants.USER_NAME, userSearchCriteria.getUserName(), null, searchConfig,
+				booleanQueryBuilder, Occur.MUST, true);
 
 		hasSomeCriteria |= addWholeFieldToQuery(SolrIndexConstants.EMAIL, userSearchCriteria.getEmail(), null, searchConfig, booleanQueryBuilder,
 				Occur.MUST, true);
@@ -49,15 +49,15 @@ public class UserQueryComposerImpl extends AbstractQueryComposerImpl {
 			hasSomeCriteria |= addWholeFieldToQuery(SolrIndexConstants.ALL_STORES_ACCESS, String.valueOf(true), null, searchConfig, innerQueryBuilder,
 					Occur.SHOULD, true);
 
-			hasSomeCriteria |= addWholeFieldToQuery(SolrIndexConstants.STORE_CODE, userSearchCriteria.getStoreCode(), null, searchConfig, innerQueryBuilder,
-					Occur.SHOULD, true);
+			hasSomeCriteria |= addWholeFieldToQuery(SolrIndexConstants.STORE_CODE, userSearchCriteria.getStoreCode(), null, searchConfig,
+					innerQueryBuilder, Occur.SHOULD, true);
 			booleanQueryBuilder.add(innerQueryBuilder.build(), Occur.MUST);
 		}
 
 		if (userSearchCriteria.getCatalogCode() != null) {
 			final BooleanQuery.Builder innerQueryBuilder = new BooleanQuery.Builder();
-			hasSomeCriteria |= addWholeFieldToQuery(SolrIndexConstants.ALL_CATALOGS_ACCESS, String.valueOf(true), null, searchConfig, innerQueryBuilder,
-					Occur.SHOULD, true);
+			hasSomeCriteria |= addWholeFieldToQuery(SolrIndexConstants.ALL_CATALOGS_ACCESS, String.valueOf(true), null, searchConfig,
+					innerQueryBuilder, Occur.SHOULD, true);
 			hasSomeCriteria |= addWholeFieldToQuery(SolrIndexConstants.CATALOG_CODE, userSearchCriteria.getCatalogCode(), null, searchConfig,
 					innerQueryBuilder, Occur.SHOULD, true);
 			booleanQueryBuilder.add(innerQueryBuilder.build(), Occur.MUST);

@@ -1,20 +1,18 @@
 package com.elasticpath.cortex.dce
 
-import static com.elasticpath.cortex.dce.ClasspathFluentRelosClientFactory.getClient
+import static com.elasticpath.cortex.dce.ClasspathFluentRelosClientFactory.client
 import static com.elasticpath.cortex.dce.CommonAssertion.assertMap
 import static com.elasticpath.rest.ws.assertions.RelosAssert.assertLinkDoesNotExist
 import static com.elasticpath.rest.ws.assertions.RelosAssert.assertLinkExists
 import static org.assertj.core.api.Assertions.assertThat
 
+import com.jayway.jsonpath.JsonPath
 import cucumber.api.DataTable
-import cucumber.api.java.en.And
 import cucumber.api.java.en.Then
 import cucumber.api.java.en.When
 import org.json.JSONArray
 
-import com.elasticpath.CucumberDTO.Facet
 import com.elasticpath.cortexTestObjects.Facets
-import com.elasticpath.cortexTestObjects.Navigation
 
 class CommonSteps {
 
@@ -77,6 +75,11 @@ class CommonSteps {
 		navigateResources(resources)
 	}
 
+	@Then('^I follow the (\\d+) link with rel (.+)$')
+	static void navigateToResource(int id, String resources) {
+		navigateResources(resources, id)
+	}
+
 	@Then('^I navigate links (.+)$')
 	static void navigateToResourceFromRoot(String resources) {
 		/* this step will follow a list of links separated by '->'
@@ -84,6 +87,12 @@ class CommonSteps {
 		 */
 		client.GET("/")
 		navigateResources(resources)
+	}
+
+	@When('^I navigate to root$')
+	static void getRoot() {
+		client.GET("/")
+				.stopIfFailure()
 	}
 
 	static void navigateResources(def resources) {
@@ -211,6 +220,14 @@ class CommonSteps {
 				.contains(regex)
 	}
 
+	@Then('^the json path (.+) contains value (.+)$')
+	static void verifyJsonPath(String field, String regex) {
+		assertThat(JsonPath.read(client.getBody(), field))
+				.as("The field $field is not as expected")
+				.contains(regex)
+	}
+
+
 	@Then('^the field (.+) does not exist$')
 	static void verifyFieldNotExists(def field) {
 		assertThat(client[field])
@@ -269,6 +286,36 @@ class CommonSteps {
 		assertThat(client.body.links.toString().count("rel:$rel"))
 				.as("The number of links is not as expected")
 				.isEqualTo(count)
+	}
+
+	@Then('^I should see the field links is empty$')
+	static void verifyNoOtherLinks() {
+		def actualLinks = getClient().body.links.collect{link -> link.rel}
+
+		// Verifies if the list is exactly the same and in the same order.
+		assertThat(actualLinks)
+				.as("links list is not as expected")
+				.isEmpty()
+	}
+
+	@Then('^I should see the following links$')
+	static void verifyLinksListMatches(DataTable linksTable) {
+		def linksList = linksTable.asList(String)
+		def actualLinks = getClient().body.links.collect{link -> link.rel}
+
+		assertThat(actualLinks)
+				.as("links list is not as expected")
+				.containsExactlyInAnyOrderElementsOf(linksList)
+	}
+
+	@Then('^I should not see the following links$')
+	static void verifyLinksListDoesNotMatchAny(DataTable linksTable) {
+		def linksList = linksTable.asList(String)
+		def actualLinks = getClient().body.links.collect{link -> link.rel}
+
+		assertThat(actualLinks)
+				.as("links list is not as expected")
+				.doesNotContainAnyElementsOf(linksList)
 	}
 
 	@Then('^I GET (.+)$')
@@ -509,6 +556,44 @@ class CommonSteps {
 		client.selectaction()
 				.follow()
 				.stopIfFailure()
+	}
+
+	@Then('^there are the following facets$')
+	static void thereAreTheFollowingFacets(DataTable dataTable) throws Throwable {
+		dataTable.raw().each {
+			def value = it.get(0)
+			def valueField = "_element[?(@['display-name']==$value)].display-name"
+			assertThat(JsonPath.read(client.getBody(), valueField))
+					.as("The field $valueField doesn't contain $value")
+					.contains(value)
+		}
+	}
+
+	@Then('^there are the following facet values$')
+	static void checkFacetValues(DataTable table) {
+		table.raw().each {
+			def value = it.get(0)
+			def count = it.get(1)
+			def valueField = "_choice[*]._description[?(@.value=='" + value + "')].value"
+			def countField = "_choice[*]._description[?(@.value=='" + value + "')].count"
+			assertThat(JsonPath.read(client.getBody(), valueField))
+					.as("The field $valueField doesn't contain $value")
+					.contains(value)
+			assertThat(JsonPath.read(client.getBody(), countField))
+					.as("The field $countField doesn't contain $count")
+					.contains(count)
+		}
+	}
+
+	@Then('^there are the following offers$')
+	static void thereAreTheFollowingOffers(DataTable dataTable) throws Throwable {
+		dataTable.raw().each {
+			def value = it.get(0)
+			def valueField = "_element[*]._code[?(@.code=='$value')].code"
+			assertThat(JsonPath.read(client.getBody(), valueField))
+					.as("The field $valueField doesn't contain $value")
+					.contains(value)
+		}
 	}
 
 	static class KeyValue {

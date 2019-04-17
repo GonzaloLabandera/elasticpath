@@ -22,7 +22,6 @@
 			<bean class="com.elasticpath.service.impl.OrderConfigurationServiceImpl">
 				<property name="customerAuthenticationService" ref="customerAuthenticationService"/>
 				<property name="customerOrderingService" ref="customerOrderingService"/>
-				<property name="orderService" ref="orderService"/>
 				<property name="shopperService" ref="shopperService"/>
 				<property name="cartDirector" ref="cartDirector"/>
 				<property name="beanFactory" ref="coreBeanFactory" />

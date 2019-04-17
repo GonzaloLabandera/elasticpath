@@ -8,7 +8,7 @@
       <view
             category="com.elasticpath.cmclient.catalog.category.main"
             class="com.elasticpath.cmclient.advancedsearch.views.CatalogAdvancedSearchView"
-            icon="icons/advanced-search_default_22.png"
+            icon="icons/search_default_22.png"
             id="com.elasticpath.advancedsearch.CatalogAdvancedSearchView"
             name="%advancedSearchView.name">
       </view>

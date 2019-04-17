@@ -4,14 +4,15 @@
 package com.elasticpath.tools.sync.beanfactory.impl;
 
 import java.util.Properties;
+import javax.sql.DataSource;
 
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.BeanFactory;
-import org.springframework.beans.factory.xml.XmlBeanFactory;
+import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.context.support.GenericApplicationContext;
-import org.springframework.core.io.ClassPathResource;
 
 import com.elasticpath.tools.sync.beanfactory.ContextInitializer;
 import com.elasticpath.tools.sync.beanfactory.local.DataSourceProperties;
@@ -23,6 +24,7 @@ import com.elasticpath.tools.sync.configuration.ConnectionConfiguration;
 public class LocalContextInitializerImpl implements ContextInitializer {
 
 	private static final String BEAN_NAME_DATA_SOURCE_PROPERTIES = "dataSourceProperties";
+	private static final String BEAN_NAME_DATA_SOURCE = "injectedDataSource";
 
 	private static final Logger LOG = Logger.getLogger(LocalContextInitializerImpl.class);
 	
@@ -41,19 +43,32 @@ public class LocalContextInitializerImpl implements ContextInitializer {
 		ProxyBeanFactoryImpl parentBeanFactory = new ProxyBeanFactoryImpl();
 		parentBeanFactory.addProxyBean(BEAN_NAME_DATA_SOURCE_PROPERTIES, createDataSourceProperties(config));
 
-		final XmlBeanFactory beanFactory = new XmlBeanFactory(
-				new ClassPathResource(pathToXmlFile), parentBeanFactory);
-		ApplicationContext appContext = new GenericApplicationContext(beanFactory);
-		((GenericApplicationContext) appContext).refresh();
-		
+		ApplicationContext appContext = refreshApplicationContext(parentBeanFactory);
 		LOG.info("Local context has been read and initalized");
-		
+		return appContext;
+	}
+
+	/**
+	 * Initialize a context with the injected datasource.
+	 * and passes the {@code dataSourceProperties} bean to the underlying context.
+	 *
+	 * @param dataSource the datasource
+	 * @return the bean factory for this context
+	 */
+	@Override
+	public BeanFactory initializeContext(final DataSource dataSource) {
+		LOG.info("Initializing context using  datasource : " + dataSource);
+		ProxyBeanFactoryImpl parentBeanFactory = new ProxyBeanFactoryImpl();
+		parentBeanFactory.addProxyBean(BEAN_NAME_DATA_SOURCE, dataSource);
+
+		ApplicationContext appContext = refreshApplicationContext(parentBeanFactory);
+		LOG.info("Local context has been read and initalized");
 		return appContext;
 	}
 
 	/**
 	 * Creates the data source properties bean out of a {@link ConnectionConfiguration}.
-	 * 
+	 *
 	 * @param connectionConfiguration the connection configuration
 	 * @return data source properties
 	 */
@@ -92,5 +107,13 @@ public class LocalContextInitializerImpl implements ContextInitializer {
 	public void destroyContext(final BeanFactory beanFactory) {
 		LOG.info("Closing local bean application factory");
 		((ConfigurableApplicationContext) beanFactory).close();
+	}
+
+	private ApplicationContext refreshApplicationContext(final BeanFactory beanFactory) {
+		GenericApplicationContext genericAppContext = new GenericApplicationContext(new DefaultListableBeanFactory(beanFactory));
+		genericAppContext.refresh();
+		// refresh of child context is implied by the type of constructor, but parent must be refreshed prior
+		// to passing into constructor
+		return new ClassPathXmlApplicationContext(new String[]{pathToXmlFile}, genericAppContext);
 	}
 }

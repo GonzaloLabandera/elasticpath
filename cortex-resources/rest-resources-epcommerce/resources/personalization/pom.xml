@@ -24,10 +24,6 @@
 			<artifactId>ep-rest-commons-epcommerce</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>com.elasticpath.rest.relos.rs.authentication</groupId>
-			<artifactId>ep-rs-authentication-api</artifactId>
-		</dependency>
-		<dependency>
 			<groupId>javax.servlet</groupId>
 			<artifactId>javax.servlet-api</artifactId>
 		</dependency>

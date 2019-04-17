@@ -49,8 +49,8 @@ Feature: Admin user can navigate all activities
     Then the number of orders for Order Summary report should have increased
 
     When I go to Configuration
-    And I enter setting name mailHost in filter
-    Then I should see setting COMMERCE/SYSTEM/EMAIL/mailHost in the filter result
+    And I enter setting name emailEnabled in filter
+    Then I should see setting COMMERCE/SYSTEM/emailEnabled in the filter result
     When I go to Stores
     And I edit store MOBEE in editor
     Then The store code MOBEE should match in the store editor

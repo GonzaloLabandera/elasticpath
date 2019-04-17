@@ -27,6 +27,9 @@ deployTomcatApp() {
                 # We need to change the default CATALINA_HOME variable in the setenv.sh script before we can start Tomcat
                 ssh $localUser@$server "sed -i 's|"\$HOME\/ep\/tomcat"|"$baseDirectory\/$appServer"|' $baseDirectory/$appServer/bin/setenv.sh"
 
+                # Set EP JVM variables to configure deployment
+                ssh $localUser@$server "echo 'ep.changesets.enabled=$cmChangesetEnabled' >> $baseDirectory/$appServer/conf/catalina.properties"
+                ssh $localUser@$server "echo 'org.eclipse.rap.rwt.enableUITests=$cmRapEnableUITests' >> $baseDirectory/$appServer/conf/catalina.properties"
         else
             # Stop Tomcat if it's running
             log detail "Stopping Tomcat on $server..."

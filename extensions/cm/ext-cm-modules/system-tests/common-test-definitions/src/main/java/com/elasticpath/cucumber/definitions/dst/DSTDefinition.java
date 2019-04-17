@@ -5,20 +5,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 import cucumber.api.java.en.And;
 import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
-import org.openqa.selenium.WebDriver;
 
+import com.elasticpath.cucumber.definitions.PriceListDefinition;
+import com.elasticpath.cucumber.definitions.ProductAndBundleDefinition;
 import com.elasticpath.selenium.domainobjects.DST;
-import com.elasticpath.selenium.editor.product.ProductEditor;
-import com.elasticpath.selenium.editor.product.tabs.MerchandisingTab;
-import com.elasticpath.selenium.navigations.CatalogManagement;
-import com.elasticpath.selenium.navigations.PriceListManagement;
-import com.elasticpath.selenium.resultspane.CatalogSearchResultPane;
-import com.elasticpath.selenium.resultspane.PriceListsResultPane;
-import com.elasticpath.selenium.setup.PublishEnvSetUp;
 import com.elasticpath.selenium.setup.SetUp;
 import com.elasticpath.selenium.toolbars.ActivityToolbar;
-import com.elasticpath.selenium.toolbars.CustomerServiceActionToolbar;
-import com.elasticpath.selenium.util.Constants;
 import com.elasticpath.sync.SyncConfig;
 
 /**
@@ -26,22 +18,22 @@ import com.elasticpath.sync.SyncConfig;
  */
 public class DSTDefinition {
 
-	private static final Object LOCKOBJ = new Object();
 	private final DST dst;
-	private static WebDriver driver;
-	private CatalogManagement catalogManagement;
-	private CatalogSearchResultPane catalogSearchResultPane;
-	private ProductEditor productEditor;
-	private MerchandisingTab merchandisingTab;
-	private CustomerServiceActionToolbar customerServiceActionToolbar;
+	private final PriceListDefinition priceListDefinition;
+	private final ActivityToolbar activityToolbar;
+	private final ProductAndBundleDefinition productAndBundleDefinition;
+
 
 	/**
 	 * Constructor.
 	 *
 	 * @param dst the DST class
 	 */
-	public DSTDefinition(final DST dst) {
+	public DSTDefinition(final DST dst, final PriceListDefinition priceListDefinition, final ProductAndBundleDefinition productAndBundleDefinition) {
 		this.dst = dst;
+		this.priceListDefinition = priceListDefinition;
+		activityToolbar = new ActivityToolbar(SetUp.getDriver());
+		this.productAndBundleDefinition = productAndBundleDefinition;
 	}
 
 	/**
@@ -63,7 +55,7 @@ public class DSTDefinition {
 	 */
 	@When("^I go to the publish environment Price List Manager$")
 	public void clickPublishPriceListManager() {
-		new ActivityToolbar(getDriver()).clickPriceListManagementButton();
+		activityToolbar.clickPriceListManagementButton();
 	}
 
 	/**
@@ -71,7 +63,7 @@ public class DSTDefinition {
 	 */
 	@When("^I go to the publish environment Catalog Management$")
 	public void clickPublishCatalogManagement() {
-		new ActivityToolbar(getDriver()).clickCatalogManagementButton();
+		activityToolbar.clickCatalogManagementButton();
 	}
 
 	/**
@@ -79,8 +71,8 @@ public class DSTDefinition {
 	 */
 	@Then("^I should see the new price list in the publish environment")
 	public void verifyNewlyCreatedPriceList() {
-		new PriceListManagement(getDriver()).clickPriceListsSearch();
-		new PriceListsResultPane(getDriver()).verifyPriceListExists(dst.getPriceListName());
+		priceListDefinition.clickSearchForPriceLists();
+		priceListDefinition.verifyPriceLists(dst.getPriceListName());
 	}
 
 	/**
@@ -88,8 +80,7 @@ public class DSTDefinition {
 	 */
 	@Then("^the deleted price list no longer exists in publish environment$")
 	public void verifyPriceListIsDeleted() {
-		PriceListsResultPane priceListsResultPane = new PriceListManagement(getDriver()).clickPriceListsSearch();
-		priceListsResultPane.verifyPriceListDeleted(dst.getPriceListName());
+		priceListDefinition.verifyPriceListDeleted(dst.getPriceListName());
 	}
 
 	/**
@@ -97,26 +88,7 @@ public class DSTDefinition {
 	 */
 	@Then("^I should see the new (?:product|bundle) in publish environment$")
 	public void verifyNewlyCreatedProductExists() {
-		String productName = dst.getProductName();
-		catalogManagement = new CatalogManagement(getDriver());
-		catalogManagement.clickCatalogSearchTab();
-		searchProductByName(productName);
-		catalogSearchResultPane = new CatalogSearchResultPane(getDriver());
-
-		int index = 0;
-		while (!catalogSearchResultPane.isProductNameInList(productName) && index < Constants.UUID_END_INDEX) {
-			catalogSearchResultPane.sleep(Constants.SLEEP_HALFSECOND_IN_MILLIS);
-			searchProductByName(productName);
-			index++;
-		}
-		catalogSearchResultPane.setWebDriverImplicitWait(Constants.IMPLICIT_WAIT_FOR_ELEMENT_THREE_SECONDS);
-		catalogSearchResultPane.verifyProductNameExists(productName);
-		catalogSearchResultPane.setWebDriverImplicitWaitToDefault();
-	}
-
-	private void searchProductByName(final String productName) {
-		catalogManagement.enterProductName(productName);
-		catalogManagement.clickCatalogSearch();
+		productAndBundleDefinition.verifyProductByName(dst.getProductName());
 	}
 
 	/**
@@ -124,25 +96,8 @@ public class DSTDefinition {
 	 */
 	@Then("^the deleted (?:product|bundle) no longer exists in publish environment$")
 	public void verifyProductIsDeleted() {
-		catalogSearchResultPane.closePane("Product Search Results");
-		searchProductByName(dst.getProductName());
-		catalogSearchResultPane.verifyProductIsDeleted(dst.getProductName());
-	}
-
-	/**
-	 * Switches to Author window.
-	 */
-	@And("^I switch to author environment$")
-	public static void switchToAuthorWindow() {
-		SetUp.getDriver().switchTo().window(SetUp.getDriver().getWindowHandle());
-	}
-
-	/**
-	 * Switches to Publish window.
-	 */
-	@And("^I switch to publish environment$")
-	public static void switchToPublishWindow() {
-		getDriver().switchTo().window(getDriver().getWindowHandle());
+		activityToolbar.closePane("Product Search Results");
+		productAndBundleDefinition.verifyProductIsDeleted(dst.getProductName());
 	}
 
 	/**
@@ -153,43 +108,7 @@ public class DSTDefinition {
 	 */
 	@And("^in publish environment I am viewing the (.+) tab of product with code (.+)$")
 	public void searchOpenProductEditorTabWithCode(final String tabName, final String productCode) {
-		catalogManagement = new CatalogManagement(getDriver());
-		catalogManagement.clickCatalogSearchTab();
-		catalogManagement.enterProductCode(productCode);
-		catalogManagement.clickCatalogSearch();
-		catalogSearchResultPane = new CatalogSearchResultPane(getDriver());
-		productEditor = catalogSearchResultPane.openProductEditorWithProductCode(productCode);
-		productEditor.selectTab(tabName);
-	}
-
-	/**
-	 * Verify Added Merchandising Associations product in publish environment.
-	 *
-	 * @param productCode Product Code.
-	 */
-	@When("^the product code (.+) exists under merchandising association$")
-	public void verifyProductFromMerchandisingTab(final String productCode) {
-		merchandisingTab = new MerchandisingTab(getDriver());
-		merchandisingTab.verifySelectProductCode(productCode);
-	}
-
-	/**
-	 * Verify Merchandising Associations product is deleted in publish environment.
-	 *
-	 * @param productCode Product Code.
-	 */
-	@When("^the product code (.+) is no longer under merchandising association$")
-	public void verifyProductIsDeletedFromMerchandisingTab(final String productCode) {
-		customerServiceActionToolbar = new CustomerServiceActionToolbar(getDriver());
-		customerServiceActionToolbar.clickReloadActiveEditor();
-		merchandisingTab.verifyProductCodeIsDeleted(productCode);
-	}
-
-	private static WebDriver getDriver() {
-		synchronized (LOCKOBJ) {
-			driver = PublishEnvSetUp.getDriver();
-		}
-		return driver;
+		productAndBundleDefinition.searchOpenProductEditorTabWithCode(tabName, productCode);
 	}
 
 }

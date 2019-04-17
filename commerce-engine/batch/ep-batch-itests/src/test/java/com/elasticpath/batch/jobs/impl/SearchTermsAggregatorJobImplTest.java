@@ -42,6 +42,9 @@ public class SearchTermsAggregatorJobImplTest extends AbstractJUnit4SpringContex
 
 	private static final String KEYWORDS1 = "keyword1 keyword2";
 	private static final String KEYWORDS2 = "keyword3 keyword4";
+	private static final long TWO_SECONDS_IN_MILLISECONDS = 2000L;
+	private static final int SEARCH_TERMS_COUNT = 10;
+
 	@Autowired
 	private TestApplicationContext tac;
 	@Autowired
@@ -65,7 +68,7 @@ public class SearchTermsAggregatorJobImplTest extends AbstractJUnit4SpringContex
 	}
 
 	private void updateSearchTermsActivity() {
-		Uninterruptibles.sleepUninterruptibly(2000L, TimeUnit.MILLISECONDS);
+		Uninterruptibles.sleepUninterruptibly(TWO_SECONDS_IN_MILLISECONDS, TimeUnit.MILLISECONDS);
 		/*
 		 * Since we instantiate searchTermsAggregatorJob (instead of having spring do it), it won't be wrapped in a
 		 * transaction proxy --- help it out.
@@ -257,13 +260,13 @@ public class SearchTermsAggregatorJobImplTest extends AbstractJUnit4SpringContex
 	public void testCleanup() {
 		SearchTerms searchTerms = createSearchTerms(KEYWORDS1);
 		SearchTermsId identifier = searchTermsService.saveIfNotExists(searchTerms);
-		for (int i = 0; i < 10; ++i) {
+		for (int i = 0; i < SEARCH_TERMS_COUNT; ++i) {
 			searchTermsService.load(identifier);
 		}
 
 		assertThat(getSearchTermsActivity(identifier).size())
 			.as("There should be a bunch of activities.")
-			.isGreaterThan(10);
+			.isGreaterThan(SEARCH_TERMS_COUNT);
 		updateSearchTermsActivity();
 		assertThat(getSearchTermsActivity(identifier))
 			.as("Old activity should be cleaned up.")

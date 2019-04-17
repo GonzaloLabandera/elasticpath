@@ -89,9 +89,11 @@ public class TransactionJobBuilderImplTest {
 	public void testAssociatedJobEntries() {
 		@SuppressWarnings("unchecked") final DaoAdapter<? super Persistable> ruleAdaptor = mock(DaoAdapter.class, "ruleAdaptor");
 
-		@SuppressWarnings("unchecked") final AssociatedDaoAdapter<? super Persistable> couponConfigAdapter = mock(AssociatedDaoAdapter.class, "couponConfigAdaptor");
+		@SuppressWarnings("unchecked") final AssociatedDaoAdapter<? super Persistable> couponConfigAdapter = mock(AssociatedDaoAdapter.class,
+				"couponConfigAdaptor");
 
-		@SuppressWarnings("unchecked") final AssociatedDaoAdapter<? super Persistable> couponAdapter = mock(AssociatedDaoAdapter.class, "couponAdaptor");
+		@SuppressWarnings("unchecked") final AssociatedDaoAdapter<? super Persistable> couponAdapter = mock(AssociatedDaoAdapter.class,
+				"couponAdaptor");
 
 		final Map<Class<?>, DaoAdapter<? super Persistable>> syncAdapters = new HashMap<>();
 		syncAdapters.put(Rule.class, ruleAdaptor);

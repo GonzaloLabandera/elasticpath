@@ -15,6 +15,7 @@
 
 	<properties>
 		<data.location>${project.build.directory}/exported/data</data.location>
+		<ep.changesets.enabled></ep.changesets.enabled>
 	</properties>
 
 	<dependencies>
@@ -59,6 +60,7 @@
 						<configuration>
 							<executable>java</executable>
 							<arguments>
+								<argument>-Dep.search.default.url=${ep.search.url}</argument>
 								<argument>-Xms256m</argument>
 								<argument>-Xmx1024m</argument>
 								<argument>-agentlib:jdwp=transport=dt_socket,address=${ep.debug.port},server=y,suspend=n</argument>
@@ -102,6 +104,7 @@
 						<configuration>
 							<executable>java</executable>
 							<arguments>
+								<argument>-Dep.changesets.enabled=${ep.changesets.enabled}</argument>
 								<argument>-Xms256m</argument>
 								<argument>-Xmx1024m</argument>
 								<argument>-agentlib:jdwp=transport=dt_socket,address=${ep.debug.port},server=y,suspend=n</argument>

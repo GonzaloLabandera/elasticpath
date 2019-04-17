@@ -5,7 +5,6 @@ package com.elasticpath.sellingchannel.director.impl;
 
 import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -27,10 +26,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.google.common.collect.ImmutableMap;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
+import com.google.common.collect.ImmutableMap;
+
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.internal.stubbing.answers.ReturnsArgumentAt;
@@ -170,7 +171,7 @@ public class CartDirectorImplTest {
 		when(addedShoppingItem.getSkuGuid()).thenReturn(productSku.getGuid());
 		when(addedShoppingItem.getQuantity()).thenReturn(1);
 
-		verify(cartDirector, never()).addDependentItemsForParentItem(shoppingCart, addedShoppingItem);
+		verify(cartDirector, never()).addDependentItemsToParentItem(shoppingCart, addedShoppingItem);
 		cartDirector.addToCart(addedShoppingItem, shoppingCart, null);
 		verify(shoppingCart).addShoppingCartItem(addedShoppingItem);
 	}
@@ -209,12 +210,13 @@ public class CartDirectorImplTest {
 		given(addedShoppingItem.getSkuGuid()).willReturn(SKU_GUID);
 		given(productSkuLookup.findByGuid(SKU_GUID)).willReturn(parentProductSkuAdded);
 		given(parentProductSkuAdded.getProduct().isNotSoldSeparately()).willReturn(false);
- 		given(dependentItemLookup.findDependentItemsForSku(store, parentProductSkuAdded)).willReturn(ImmutableMap.of(DEPENDENT_SKU_CODE, DEPENDENT_ITEM_QUANTITY));
+		given(dependentItemLookup.findDependentItemsForSku(store, parentProductSkuAdded)).willReturn(ImmutableMap.of(DEPENDENT_SKU_CODE,
+				DEPENDENT_ITEM_QUANTITY));
 		given(dependentProductSkuToAdd.getProduct().getMinOrderQty()).willReturn(1);
 		given(shoppingItemDtoFactory.createDto(DEPENDENT_SKU_CODE, PARENT_ITEM_QUANTITY)).willReturn(dependentShoppingItemDto);
 		given(shoppingItemAssembler.createShoppingItem(dependentShoppingItemDto)).willReturn(dependentShoppingItem);
 
-		cartDirector.addDependentItemsForParentItem(shoppingCart, addedShoppingItem);
+		cartDirector.addDependentItemsToParentItem(shoppingCart, addedShoppingItem);
 
 		verify(addedShoppingItem).addChildItem(dependentShoppingItem);
 	}
@@ -360,7 +362,7 @@ public class CartDirectorImplTest {
 
 		cartDirector.addToCart(addedShoppingItem, shoppingCart, null);
 
-		verify(cartDirector).addDependentItemsForParentItem(shoppingCart, addedShoppingItem);
+		verify(cartDirector).addDependentItemsToParentItem(shoppingCart, addedShoppingItem);
 		verify(shoppingCart).addShoppingCartItem(addedShoppingItem);
 		verifyQuantityNotChanged();
 	}
@@ -374,7 +376,7 @@ public class CartDirectorImplTest {
 
 		cartDirector.addToCart(addedShoppingItem, shoppingCart, null);
 
-		verify(cartDirector, never()).addDependentItemsForParentItem(shoppingCart, addedShoppingItem);
+		verify(cartDirector, never()).addDependentItemsToParentItem(shoppingCart, addedShoppingItem);
 		verify(shoppingCart, never()).addShoppingCartItem(addedShoppingItem);
 		verifyQuantityChanged(2);
 	}
@@ -383,7 +385,7 @@ public class CartDirectorImplTest {
 	public void testAddToCartWithNoCartItemDataIncreasesQuantity() {
 		cartDirector.addToCart(addedShoppingItem, shoppingCart, null);
 
-		verify(cartDirector, never()).addDependentItemsForParentItem(shoppingCart, addedShoppingItem);
+		verify(cartDirector, never()).addDependentItemsToParentItem(shoppingCart, addedShoppingItem);
 		verify(shoppingCart, never()).addShoppingCartItem(addedShoppingItem);
 		verifyQuantityChanged(2);
 	}
@@ -399,7 +401,7 @@ public class CartDirectorImplTest {
 
 		cartDirector.addToCart(addedShoppingItem, shoppingCart, null);
 
-		verify(cartDirector).addDependentItemsForParentItem(shoppingCart, addedShoppingItem);
+		verify(cartDirector).addDependentItemsToParentItem(shoppingCart, addedShoppingItem);
 		verify(shoppingCart).addShoppingCartItem(addedShoppingItem);
 		verifyQuantityNotChanged();
 	}

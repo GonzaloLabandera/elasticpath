@@ -14,7 +14,6 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Currency;
 import java.util.Date;
 import java.util.HashSet;
@@ -81,8 +80,6 @@ import com.elasticpath.test.util.Utils;
  */
 @SuppressWarnings({ "PMD.ExcessiveParameterList", "PMD.GodClass" })
 public class StoreTestPersister {
-
-	private static final int RANDOMIZER_SEED = 1000;
 
 	private static final String USA = "USA";
 
@@ -221,15 +218,13 @@ public class StoreTestPersister {
 				"891312345007");
 		final CustomerAddress address2 = createCustomerAddress("Bond", "James", "28 Main Street", "", "Toronto", "CA", "ON", "K6J5G4",
 				"912348724938");
-		final PaymentToken paymentToken1 = createCustomerPaymentToken("testPaymentToken1");
-		persistCustomerSessionWithAssociatedEntities(persistCustomer(null, store, "james@bond.com", paymentToken1, address1, address2));
+		persistCustomerSessionWithAssociatedEntities(persistCustomer(null, store, "james@bond.com", address1, address2));
 
 		final CustomerAddress address3 = createCustomerAddress("John", "Smith", "73 Oak Street", "", "Washington", "US", "WA", "832901",
 				"782390129353");
 		final CustomerAddress address4 = createCustomerAddress("John", "Smith", "11 Peace Street", "", "New York", "US", "NY", "818923",
 				"728930174927");
-		final PaymentToken paymentToken2 = createCustomerPaymentToken("testPaymentToken2");
-		persistCustomerSessionWithAssociatedEntities(persistCustomer(null, store, "john@smith.com", paymentToken2, address3, address4));
+		persistCustomerSessionWithAssociatedEntities(persistCustomer(null, store, "john@smith.com", address3, address4));
 	}
 
 	/**
@@ -286,7 +281,7 @@ public class StoreTestPersister {
 	 */
 	public Customer persistCustomer(final Store store, final String email, final String password) {
 		final Customer customer = beanFactory.getBean(ContextIdNames.CUSTOMER);
-		customer.setUserId(Utils.uniqueCode("id"));
+		customer.setUserId(email);
 		customer.setFirstName("Test");
 		customer.setLastName("Test");
 		customer.setCreationDate(new Date());
@@ -306,15 +301,14 @@ public class StoreTestPersister {
 	 * @param store             the store customer to be registered in
 	 * @param email             unique email within the store
 	 * @param customerAddresses array of available customer addresses
-	 * @param paymentToken the payment token.
 	 * @return persisted customer
 	 */
-	public Customer persistCustomer(final String guid, final Store store, final String email, final PaymentToken paymentToken,
+	public Customer persistCustomer(final String guid, final Store store, final String email,
 									final CustomerAddress... customerAddresses) {
 		final Customer customer = beanFactory.getBean(ContextIdNames.CUSTOMER);
 		customer.setFirstName("Test");
 		customer.setLastName("Test");
-		customer.setUserId(Utils.uniqueCode("id"));
+		customer.setUserId(email);
 		customer.setCreationDate(new Date());
 		customer.setLastEditDate(new Date());
 		customer.setStatus(Customer.STATUS_ACTIVE);
@@ -826,18 +820,9 @@ public class StoreTestPersister {
 	 * @return a customer
 	 */
 	public Customer createCustomerWithAddress(final String customerGuid, final Store store, final CustomerAddress customerAddress) {
-		final PaymentToken paymentToken = createCustomerPaymentToken("");
-		Customer customer = null;
-		String randomEmail = null;
-		//if there is already a customer with the 'random' email the persistCustomer call will fail,
-		//so lets be sure the customer doesnt exist already.
-		do {
-			randomEmail = "test" + Math.round(Math.random() * RANDOMIZER_SEED) + "@elasticpath.com";
-			customer = customerService.findByEmail(randomEmail, store.getCode());
-		}
-		while (customer != null);
+		String randomEmail = Utils.uniqueCode("test") + "@elasticpath.com";
 
-		return persistCustomer(customerGuid, store, randomEmail, paymentToken, customerAddress);
+		return persistCustomer(customerGuid, store, randomEmail, customerAddress);
 	}
 
 	public Customer getCustomerByGuid(final String customerGuid) {

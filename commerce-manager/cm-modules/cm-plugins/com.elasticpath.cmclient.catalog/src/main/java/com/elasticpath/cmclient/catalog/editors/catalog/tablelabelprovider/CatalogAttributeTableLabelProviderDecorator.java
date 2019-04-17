@@ -4,6 +4,7 @@
 package com.elasticpath.cmclient.catalog.editors.catalog.tablelabelprovider;
 
 import java.util.Arrays;
+import java.util.Locale;
 
 import com.elasticpath.cmclient.catalog.CatalogMessages;
 import com.elasticpath.cmclient.core.CoreMessages;
@@ -29,14 +30,17 @@ public class CatalogAttributeTableLabelProviderDecorator extends AbstractTableLa
 	private final String[] attributeIndexes = { KEY_COLUMN_INDEX, NAME_COLUMN_INDEX, TYPE_COLUMN_INDEX, USAGE_COLUMN_INDEX, REQUIRED_COLUMN_INDEX,
 			GLOBAL_COLUMN_INDEX };
 
+	private final Locale locale;
+
 	/**
 	 * Constructor.
 	 *
 	 * @param decoratedTableLabelProvider the table label provider to be decorated
+	 * @param locale the locale used to display Attribute names
 	 */
-	public CatalogAttributeTableLabelProviderDecorator(final ExtensibleTableLabelProvider decoratedTableLabelProvider) {
+	public CatalogAttributeTableLabelProviderDecorator(final ExtensibleTableLabelProvider decoratedTableLabelProvider, final Locale locale) {
 		super(decoratedTableLabelProvider);
-
+		this.locale = locale;
 		// add categoryType indexes to the list
 		getDecoratedTableLabelProvider().addAllColumnIndexRegistry(Arrays.asList(attributeIndexes));
 	}
@@ -50,7 +54,7 @@ public class CatalogAttributeTableLabelProviderDecorator extends AbstractTableLa
 		if (KEY_COLUMN_INDEX.equals(columnName)) {
 			token = attribute.getKey();
 		} else if (NAME_COLUMN_INDEX.equals(columnName)) {
-			token = attribute.getName();
+			token = attribute.getDisplayName(locale, false, false);
 		} else if (TYPE_COLUMN_INDEX.equals(columnName)) {
 			token = getAttributeTypeMessage(attribute);
 		} else if (USAGE_COLUMN_INDEX.equals(columnName)) {

@@ -44,6 +44,7 @@ import com.elasticpath.domain.catalog.impl.ProductSkuImpl;
 import com.elasticpath.domain.catalog.impl.ProductTypeImpl;
 import com.elasticpath.domain.catalog.impl.SelectionRuleImpl;
 import com.elasticpath.domain.misc.impl.RandomGuidImpl;
+import com.elasticpath.domain.shoppingcart.ItemType;
 import com.elasticpath.domain.shoppingcart.ShoppingItem;
 import com.elasticpath.domain.shoppingcart.impl.ShoppingItemImpl;
 import com.elasticpath.domain.store.Store;
@@ -342,6 +343,7 @@ public class ShoppingItemAssemblerImplTest {
 		final ShoppingItem nestedShoppingItem = new TestShoppingItemImpl();
 		nestedShoppingItem.setSkuGuid(selectedSku.getGuid());
 		nestedShoppingItem.setBundleConstituent(true);
+		nestedShoppingItem.setItemType(ItemType.BUNDLE_CONSTITUENT);
 		shoppingItem.addChild(nestedShoppingItem);
 
 		// Assemble the ShoppingItemDto and check it.
@@ -397,12 +399,14 @@ public class ShoppingItemAssemblerImplTest {
 		childItem.setUidPk(SHOPPING_ITEM_UIDPK + 1);
 		childItem.setGuid("Child");
 		childItem.setBundleConstituent(true);
+		childItem.setItemType(ItemType.BUNDLE_CONSTITUENT);
 
 		final ShoppingItem grandChildItem = new TestShoppingItemImpl();
 		grandChildItem.setSkuGuid(grandChildProductSku.getGuid());
 		grandChildItem.setUidPk(SHOPPING_ITEM_UIDPK + 2);
 		grandChildItem.setGuid("Grandchild");
 		grandChildItem.setBundleConstituent(true);
+		grandChildItem.setItemType(ItemType.BUNDLE_CONSTITUENT);
 
 		childItem.addChildItem(grandChildItem);
 		rootItem.addChildItem(childItem);
@@ -567,6 +571,7 @@ public class ShoppingItemAssemblerImplTest {
 
 		final ShoppingItem child1 = createFakeShoppingItem(product.getSkuByCode(PRODUCT_SKU_CODE_2).getGuid());
 		child1.setBundleConstituent(true);
+		child1.setItemType(ItemType.BUNDLE_CONSTITUENT);
 		root.addChildItem(child1);
 
 		given(productSkuLookup.findByGuid(root.getSkuGuid())).willReturn(bundle.getDefaultSku());

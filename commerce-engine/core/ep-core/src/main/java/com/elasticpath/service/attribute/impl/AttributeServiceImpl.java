@@ -3,14 +3,18 @@
  */
 package com.elasticpath.service.attribute.impl;
 
+import static com.elasticpath.domain.attribute.impl.AbstractAttributeValueImpl.parseShortTextMultiValues;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import com.elasticpath.base.exception.EpServiceException;
 import com.elasticpath.commons.constants.ContextIdNames;
@@ -18,6 +22,7 @@ import com.elasticpath.commons.constants.ImportConstants;
 import com.elasticpath.commons.exception.DuplicateKeyException;
 import com.elasticpath.commons.util.csv.CsvStringEncoder;
 import com.elasticpath.domain.attribute.Attribute;
+import com.elasticpath.domain.attribute.AttributeMultiValueType;
 import com.elasticpath.domain.attribute.AttributeType;
 import com.elasticpath.domain.attribute.AttributeUsage;
 import com.elasticpath.persistence.support.DistinctAttributeValueCriterion;
@@ -30,8 +35,12 @@ import com.elasticpath.service.impl.AbstractEpPersistenceServiceImpl;
 @SuppressWarnings("PMD.GodClass")
 public class AttributeServiceImpl extends AbstractEpPersistenceServiceImpl implements AttributeService {
 
+	private static final int VALUE_INDEX = 0;
+	private static final int ATTRIBUTE_KEY_INDEX = 1;
+
 	private static final String ATTRIBUTE_FIND_BY_USAGE = "ATTRIBUTE_FIND_BY_USAGE";
 	private static final String ATTRIBUTE_FIND_BY_USAGE_IDS = "ATTRIBUTE_FIND_BY_USAGE_IDS";
+
 	private DistinctAttributeValueCriterion distinctAttributeValueCriterion;
 
 	/**
@@ -46,10 +55,6 @@ public class AttributeServiceImpl extends AbstractEpPersistenceServiceImpl imple
 		sanityCheck();
 		if (keyExists(attribute.getKey())) {
 			throw new DuplicateKeyException("Attribute with the key \"" + attribute.getKey() + "\" already exists.");
-		}
-
-		if (this.nameExistsInAttributeUsage(attribute.getName(), attribute.getAttributeUsage())) {
-			throw new DuplicateKeyException("Attribute with the name \"" + attribute.getName() + "\" already exists.");
 		}
 
 		getPersistenceEngine().save(attribute);
@@ -70,10 +75,6 @@ public class AttributeServiceImpl extends AbstractEpPersistenceServiceImpl imple
 		if (keyExists(attribute)) {
 			throw new DuplicateKeyException("Attribute with the key \"" + attribute.getKey() + "\" already exists");
 		}
-		if (this.nameExistsInAttributeUsage(attribute)) {
-			throw new DuplicateKeyException("Attribute with the name \"" + attribute.getName() + "\" already exists");
-		}
-
 		return getPersistenceEngine().merge(attribute);
 	}
 
@@ -254,6 +255,10 @@ public class AttributeServiceImpl extends AbstractEpPersistenceServiceImpl imple
 	}
 
 	/**
+	 * @deprecated Use nameExistsInAttributeUsage(final String name, final AttributeUsage attributeUsage) which searches for name existence
+	 * irrespective of locale. Since attribute names can differ by locale, this method assumes the locale as
+	 * "Locale.getDefault()" for Customer profile attributes, and Catalog.getDefaultLocale() for rest.
+	 *
 	 * Checks whether the given attribute name exists in this attribute usage or not.
 	 *
 	 * @param attribute the attribute to check
@@ -261,18 +266,19 @@ public class AttributeServiceImpl extends AbstractEpPersistenceServiceImpl imple
 	 * @throws EpServiceException - in case of any errors
 	 */
 	@Override
+	@Deprecated
 	public boolean nameExistsInAttributeUsage(final Attribute attribute) throws EpServiceException {
-		if (attribute.getName() == null) {
+		Locale attributeLocale = attribute.getCatalog() == null ? Locale.getDefault() : attribute.getCatalog().getDefaultLocale();
+		if (attribute.getDisplayName(attributeLocale) == null) {
 			return false;
 		}
-		final Attribute existingAttribute = this.findByNameAndUsage(attribute.getName(), attribute.getAttributeUsage());
+		final Attribute existingAttribute = this.findByNameAndUsage(attribute.getDisplayName(attributeLocale), attribute.getAttributeUsage());
 		boolean nameExists = false;
 		if (existingAttribute != null && existingAttribute.getUidPk() != attribute.getUidPk()) {
 			nameExists = true;
 		}
 		return nameExists;
 	}
-
 	/**
 	 * Lists all attribute stored in the database.
 	 *
@@ -579,16 +585,17 @@ public class AttributeServiceImpl extends AbstractEpPersistenceServiceImpl imple
 
 		String queryType = "PRODUCT_ATTRIBUTE_VALUE_BY_ATTRIBUTE_" + getAttributeTypeQuery(attribute);
 
-		return getPersistenceEngine().<Object[]>retrieveByNamedQuery(queryType, attribute.getUidPk()).stream()
-				.map(element -> new AttributeValueInfo(element[1].toString(), element[0].toString()))
-				.collect(Collectors.toList());
+		List<Object[]> attributeValues = getPersistenceEngine().retrieveByNamedQuery(queryType, attribute.getUidPk());
+
+		return buildAttributeValueInfo(attribute, attributeValues);
 	}
 
 	@Override
 	public List<Attribute> getProductAttributes(final List<String> attributeKeys) {
 		sanityCheck();
 
-		return getPersistenceEngine().retrieveByNamedQueryWithList("FIND_UNEXCLUDED_ATTRIBUTES_BY_USAGE", "keys", attributeKeys, AttributeUsage.PRODUCT);
+		return getPersistenceEngine().retrieveByNamedQueryWithList("FIND_UNEXCLUDED_ATTRIBUTES_BY_USAGE", "keys", attributeKeys,
+				AttributeUsage.PRODUCT);
 	}
 
 	@Override
@@ -597,9 +604,9 @@ public class AttributeServiceImpl extends AbstractEpPersistenceServiceImpl imple
 
 		String queryType = "PRODUCT_SKU_ATTRIBUTE_VALUE_BY_ATTRIBUTE_" + getAttributeTypeQuery(attribute);
 
-		return getPersistenceEngine().<Object[]>retrieveByNamedQuery(queryType, attribute.getUidPk()).stream()
-				.map(element -> new AttributeValueInfo(element[1].toString(), element[0].toString()))
-				.collect(Collectors.toList());
+		List<Object[]> attributeValues = getPersistenceEngine().retrieveByNamedQuery(queryType, attribute.getUidPk());
+
+		return buildAttributeValueInfo(attribute, attributeValues);
 	}
 
 	private String getAttributeTypeQuery(final Attribute attribute) {
@@ -613,5 +620,24 @@ public class AttributeServiceImpl extends AbstractEpPersistenceServiceImpl imple
 		} else {
 			return attributeType.getName();
 		}
+	}
+
+	private List<AttributeValueInfo> buildAttributeValueInfo(final Attribute attribute, final List<Object[]> attributeValues) {
+		AttributeMultiValueType attributeMultiValueType = attribute.getMultiValueType();
+		if (attribute.isMultiValueEnabled()) {
+			return attributeValues.stream()
+					.flatMap(attributeValue -> parseMultiValue(attributeMultiValueType, attributeValue))
+					.collect(Collectors.toList());
+		}
+
+		return attributeValues.stream()
+				.map(element -> new AttributeValueInfo(element[ATTRIBUTE_KEY_INDEX].toString(), element[VALUE_INDEX].toString()))
+				.collect(Collectors.toList());
+	}
+
+	private Stream<AttributeValueInfo> parseMultiValue(final AttributeMultiValueType attributeMultiValueType, final Object[] attributeValue) {
+		return parseShortTextMultiValues(attributeValue[VALUE_INDEX].toString(), attributeMultiValueType).stream()
+				.distinct()
+				.map(value -> new AttributeValueInfo(attributeValue[ATTRIBUTE_KEY_INDEX].toString(), value));
 	}
 }

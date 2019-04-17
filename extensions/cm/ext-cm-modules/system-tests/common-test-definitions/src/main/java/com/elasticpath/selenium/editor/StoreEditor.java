@@ -27,9 +27,9 @@ public class StoreEditor extends AbstractPageObject {
 			+ "Gateway'][widget-type='CCombo']";
 	private static final String TAB_CSS = "div[widget-id='%s'][seeable='true']";
 	private static final String STORE_RADIO_BUTTON_CSS = "div[widget-id='%s'][appearance-id='radio-button']";
-	private static final String STORE_ADD_LANGUAGE_BUTTON_CSS = "div[widget-id='Language Selection']~ div div div[widget-id='>']";
+	private static final String STORE_ADD_LANGUAGE_BUTTON_CSS = "div[widget-id='Language Selection']~ div div div[widget-id='Add']";
 	private static final String STORE_DEFAULT_LANGUAGE_COMBO_CSS = "div[widget-id='Default Language'][widget-type='CCombo']";
-	private static final String STORE_ADD_CURRENCY_BUTTON_CSS = "div[widget-id='Currency Selection']~ div div div[widget-id='>']";
+	private static final String STORE_ADD_CURRENCY_BUTTON_CSS = "div[widget-id='Currency Selection']~ div div div[widget-id='Add']";
 	private static final String STORE_DEFAULT_CURRENCY_COMBO_CSS = "div[widget-id='Default Currency'][widget-type='CCombo']";
 	private static final String AVAILABLE_LANGUAGES_PARENT_CSS = "div[widget-id='Available Languages'][widget-type='Table'] ";
 	private static final String AVAILABLE_LANGUAGES_COLUMN_CSS = AVAILABLE_LANGUAGES_PARENT_CSS + "div[column-id='%s']";

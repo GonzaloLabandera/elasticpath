@@ -11,13 +11,15 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Currency;
 import java.util.Locale;
+
+import org.junit.Test;
 
 import org.jmock.Expectations;
 import org.jmock.auto.Mock;
 import org.jmock.integration.junit4.JUnitRuleMockery;
-import org.junit.Test;
 
 import com.elasticpath.commons.beanframework.BeanFactory;
 import com.elasticpath.commons.constants.ContextIdNames;
@@ -39,6 +41,7 @@ import com.elasticpath.domain.rules.impl.PromotionRuleImpl;
 import com.elasticpath.domain.rules.impl.ShippingAmountDiscountActionImpl;
 import com.elasticpath.domain.shopper.Shopper;
 import com.elasticpath.domain.shoppingcart.DiscountRecord;
+import com.elasticpath.domain.shoppingcart.ItemType;
 import com.elasticpath.domain.shoppingcart.ShoppingCart;
 import com.elasticpath.domain.shoppingcart.ShoppingCartMemento;
 import com.elasticpath.domain.shoppingcart.ShoppingCartMementoHolder;
@@ -108,8 +111,13 @@ public class ShoppingCartImplJunit4Test {
 				allowing(cartItem2).getSkuGuid(); will(returnValue(productSku2.getGuid()));
 				allowing(cartItem1).getGuid(); will(returnValue(CART_ITEM_1_GUID));
 				allowing(cartItem2).getGuid(); will(returnValue(CART_ITEM_2_GUID));
+				allowing(cartItem1).getChildren(); will(returnValue(new ArrayList<>()));
+				allowing(cartItem2).getChildren(); will(returnValue(new ArrayList<>()));
+
 				allowing(cartItem1).getOrdering(); will(returnValue(1));
 				allowing(cartItem2).getOrdering(); will(returnValue(2));
+				allowing(cartItem1).setItemType(ItemType.SIMPLE);
+				allowing(cartItem2).setItemType(ItemType.SIMPLE);
 
 				allowing(productSkuLookup).findByGuid(productSku1.getGuid());
 				will(returnValue(productSku1));
@@ -504,7 +512,6 @@ public class ShoppingCartImplJunit4Test {
 	@Test
 	public void testApplyCouponDoesNotCreateCouponUseForAnonymousCustomer() {
 		final String code = "CODE";
-		final String cortexAnonymousEmail = "public@ep-cortex.com";
 
 		final BeanFactory beanFactory = context.mock(BeanFactory.class);
 		final CouponConfig couponConfig = context.mock(CouponConfig.class);
@@ -516,7 +523,7 @@ public class ShoppingCartImplJunit4Test {
 
 		ShoppingCart shoppingCart = getShoppingCart(beanFactory);
 		shoppingCart.setStore(store);
-		Customer customer = getCustomer(shoppingCart, cortexAnonymousEmail);
+		Customer customer = getCustomer(shoppingCart, null);
 
 		Coupon coupon = new CouponImpl();
 		coupon.setCouponCode(code);

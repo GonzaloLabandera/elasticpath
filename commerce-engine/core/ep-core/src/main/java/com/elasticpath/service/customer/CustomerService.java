@@ -8,10 +8,10 @@ import java.util.Date;
 import java.util.List;
 
 import com.elasticpath.base.exception.EpServiceException;
-import com.elasticpath.commons.exception.EmailExistException;
 import com.elasticpath.commons.exception.UserIdExistException;
 import com.elasticpath.commons.exception.UserIdNonExistException;
 import com.elasticpath.commons.exception.UserStatusInactiveException;
+import com.elasticpath.domain.customer.Address;
 import com.elasticpath.domain.customer.Customer;
 import com.elasticpath.domain.customer.CustomerAddress;
 import com.elasticpath.persistence.api.FetchGroupLoadTuner;
@@ -31,7 +31,7 @@ public interface CustomerService extends EpPersistenceService {
 	 *
 	 * @param customer the customer to add
 	 * @return the persisted instance of customer
-	 * @throws UserIdExistException - if trying to add an customer using an existing email address.
+	 * @throws UserIdExistException - if trying to add an customer using an existing user id.
 	 *
 	 * @ws.property
 	 * @ws.param ori-type="com.elasticpath.domain.customer.Customer"
@@ -58,16 +58,6 @@ public interface CustomerService extends EpPersistenceService {
 	 * @throws EpServiceException - in case of any errors
 	 */
 	void remove(Customer customer) throws EpServiceException;
-
-	/**
-	 * Check the given email exists or not.
-	 *
-	 * @param email the email address
-	 * @param storeCode the code of the store to check
-	 * @return true if the given email exists
-	 * @throws EpServiceException - in case of any errors
-	 */
-	boolean isUserIdExists(String email, String storeCode) throws EpServiceException;
 
 	/**
 	 * List all customers stored in the database.
@@ -116,7 +106,6 @@ public interface CustomerService extends EpPersistenceService {
 	 */
 	Customer findByGuid(String guid) throws EpServiceException;
 
-	
 	/**
 	 * Retrieve the customer with the given guid, with an optional load tuner.
 	 * 
@@ -127,17 +116,13 @@ public interface CustomerService extends EpPersistenceService {
 	 */
 	Customer findByGuid(String guid, FetchGroupLoadTuner loadTuner) throws EpServiceException;
 
-	
 	/**
-	 * Find the customer with the given email address in the store.
-	 * If it cannot find the customer in the given store, also look within the store's associated stores.
+	 * Checks whether a customer exists with the given guid.
 	 *
-	 * @param email the customer email address
-	 * @param storeCode the store to look in.
-	 * @return the customer with the given email address.
-	 * @throws EpServiceException - in case of any errors
+	 * @param guid the guid
+	 * @return true if customer exists
 	 */
-	Customer findByEmail(String email, String storeCode) throws EpServiceException;
+	boolean isCustomerGuidExists(String guid);
 
 	/**
 	 * Resets the customer's password for the specified email.
@@ -195,13 +180,6 @@ public interface CustomerService extends EpPersistenceService {
 	List<Customer> findByUids(Collection<Long> customerUids);
 
 	/**
-	 * Validate the new customer has the valid email address (not used by any existing non-anonymous customer).
-	 * @param customer the nre customer.
-	 * @throws EmailExistException - if the new customer's email address already exists in system.
-	 */
-	void validateNewCustomer(Customer customer) throws EmailExistException;
-
-	/**
 	 * Returns all customer uids as a list.
 	 *
 	 * @return all customer uids as a list
@@ -216,12 +194,13 @@ public interface CustomerService extends EpPersistenceService {
 	Collection<Long> filterSearchable(Collection<Long> uids);
 
 	/**
-	 * Retrieves list of <code>Customer</code> uids where the last modified date is later than the specified date.
+	 * Retrieves list of searchable <code>Customer</code> uids where the last modified date is later than the specified date.
+	 * A customer is searchable if they have defined their first name or last name.
 	 *
 	 * @param date date to compare with the last modified date
-	 * @return list of <code>Customer</code> whose last modified date is later than the specified date
+	 * @return list of <code>Customer</code> uid
 	 */
-	List<Long> findUidsByModifiedDate(Date date);
+	List<Long> findSearchableUidsByModifiedDate(Date date);
 
 	/**
 	 * Retrieves list of customer uids where the deleted date is later than the specified date.
@@ -237,16 +216,6 @@ public interface CustomerService extends EpPersistenceService {
 	 * @throws EpServiceException in case of any errors.
 	 */
 	void setCustomerDefaultGroup(Customer customer);
-
-	/**
-	 * Checks the given email exists or not.
-	 *
-	 * @param email the user Id
-	 * @param storeCode the store to look in
-	 * @return true if the given user Id exists
-	 * @throws EpServiceException - in case of any errors
-	 */
-	boolean isEmailExists(String email, String storeCode) throws EpServiceException;
 
 	/**
 	 * Find the customer with the given userId address.
@@ -272,7 +241,7 @@ public interface CustomerService extends EpPersistenceService {
 	 * @param customer the customer to add
 	 * @param isAuthenticated true if the Customer is already authenticated via external source
 	 * @return the persisted instance of customer
-	 * @throws UserIdExistException - if trying to add an customer using an existing email address.
+	 * @throws UserIdExistException - if trying to add an customer using an existing user id.
 	 */
 	Customer addByAuthenticate(Customer customer, boolean isAuthenticated) throws UserIdExistException;
 
@@ -346,37 +315,13 @@ public interface CustomerService extends EpPersistenceService {
 	Customer addOrUpdateCustomerShippingAddress(Customer customer, CustomerAddress address);
 
 	/**
-	 * Find the customer with the given email address. Filtered by Store. If store is null or
-	 * store is shared login, no filtering is done.
+	 * Updates the customer's profile using information in an address.
 	 *
-	 * @param email the customer email address
-	 * @param storeCode the store to look in
-	 * @param includeAnonymous if true includes in the search the anonymous users
-	 * @return the customers with the given email address.
-	 * @throws EpServiceException - in case of any errors
+	 * @param customer the customer to update
+	 * @param address the address
+	 * @return the updated instance of the customer
 	 */
-	Customer findByEmail(String email, String storeCode, boolean includeAnonymous) throws EpServiceException;
-
-	/**
-	 * Find the customer with the given userId registered with the store.
-	 * If it cannot find the customer in the given store, returns oldest record from the store's associated stores.
-	 *
-	 * @param userId the customer userId address
-	 * @param storeCode the store to search in
-	 * @param includeAnonymous includes anonymous users
-	 * @return the customers with the given userId address.
-	 * @throws EpServiceException - in case of any errors
-	 */
-	Customer findByUserId(String userId, String storeCode, boolean includeAnonymous) throws EpServiceException;
-
-	/**
-	 * Return the mode to generate user Id. 1 - Use user email as user Id, this is default value. 2 - Generate unique permanent user Id, currently
-	 * will append a random four digit suffix to email address, and use it as User Id. The user Id is created when the customer is created first
-	 * time. Later on, when the customer change the email address, the user Id will not be changed. 3 - Independent email and user Id
-	 * 
-	 * @return the flag to indicate how to generate user Id
-	 */
-	int getUserIdMode();
+	Customer updateCustomerFromAddress(Customer customer, Address address);
 
 	/**
 	 * Gets the customer last modified date given the customer GUID.

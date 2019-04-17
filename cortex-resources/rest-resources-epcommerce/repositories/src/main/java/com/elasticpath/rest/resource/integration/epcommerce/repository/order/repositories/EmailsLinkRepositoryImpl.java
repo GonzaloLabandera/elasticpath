@@ -4,7 +4,6 @@
 package com.elasticpath.rest.resource.integration.epcommerce.repository.order.repositories;
 
 import io.reactivex.Observable;
-import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -17,7 +16,6 @@ import com.elasticpath.rest.definition.orders.EmailInfoIdentifier;
 import com.elasticpath.rest.id.IdentifierPart;
 import com.elasticpath.rest.id.type.StringIdentifier;
 import com.elasticpath.rest.resource.ResourceOperationContext;
-import com.elasticpath.rest.resource.integration.epcommerce.common.authentication.AuthenticationConstants;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.customer.CustomerRepository;
 
 /**
@@ -55,11 +53,7 @@ public class EmailsLinkRepositoryImpl<I extends EmailInfoIdentifier, LI extends 
 	 * @return email identifier (if any)
 	 */
 	protected Observable<EmailIdentifier> getEmailIdentifier(final IdentifierPart<String> scope, final String customerEmail) {
-
-		boolean validEmail = StringUtils.isNotEmpty(customerEmail)
-				&& ObjectUtils.notEqual(AuthenticationConstants.ANONYMOUS_USER_ID, customerEmail);
-
-		if (validEmail) {
+		if (StringUtils.isNotEmpty(customerEmail)) {
 			EmailsIdentifier emails = EmailsIdentifier.builder()
 					.withScope(scope)
 					.build();

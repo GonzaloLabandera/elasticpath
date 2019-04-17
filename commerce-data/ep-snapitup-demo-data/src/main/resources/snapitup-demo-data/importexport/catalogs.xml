@@ -80,7 +80,7 @@
     <attributes>
         <attribute>
             <key>A01010</key>
-            <name>Optical System / Prism System</name>
+            <name><value language="en">Optical System / Prism System</value></name>
             <usage>Product</usage>
             <type>ShortText</type>
             <multilanguage>false</multilanguage>
@@ -90,7 +90,7 @@
         </attribute>
         <attribute>
             <key>A01283</key>
-            <name>Camera / Film Speed Range</name>
+            <name><value language="en">Camera / Film Speed Range</value></name>
             <usage>Product</usage>
             <type>ShortText</type>
             <multilanguage>false</multilanguage>
@@ -100,7 +100,7 @@
         </attribute>
         <attribute>
             <key>A00556</key>
-            <name>Viewfinder / Viewfinder Type</name>
+            <name><value language="en">Viewfinder / Viewfinder Type</value></name>
             <usage>Product</usage>
             <type>ShortText</type>
             <multilanguage>true</multilanguage>
@@ -110,7 +110,7 @@
         </attribute>
         <attribute>
             <key>A00373</key>
-            <name>Miscellaneous / Color</name>
+            <name><value language="en">Miscellaneous / Color</value></name>
             <usage>Product</usage>
             <type>ShortText</type>
             <multilanguage>true</multilanguage>
@@ -120,7 +120,7 @@
         </attribute>
         <attribute>
             <key>A00140</key>
-            <name>Display (Projector) / Diagonal Size</name>
+            <name><value language="en">Display (Projector) / Diagonal Size</value></name>
             <usage>Product</usage>
             <type>Decimal</type>
             <multilanguage>false</multilanguage>
@@ -130,7 +130,7 @@
         </attribute>
         <attribute>
             <key>A01280</key>
-            <name>Camera / Shooting Modes</name>
+            <name><value language="en">Camera / Shooting Modes</value></name>
             <usage>Product</usage>
             <type>ShortText</type>
             <multilanguage>true</multilanguage>
@@ -140,7 +140,7 @@
         </attribute>
         <attribute>
             <key>A01448</key>
-            <name>Optical Viewfinder / Magnification</name>
+            <name><value language="en">Optical Viewfinder / Magnification</value></name>
             <usage>Product</usage>
             <type>ShortText</type>
             <multilanguage>false</multilanguage>
@@ -150,7 +150,7 @@
         </attribute>
         <attribute>
             <key>A00409</key>
-            <name>Flash Memory / Form Factor</name>
+            <name><value language="en">Flash Memory / Form Factor</value></name>
             <usage>Product</usage>
             <type>ShortText</type>
             <multilanguage>true</multilanguage>
@@ -160,7 +160,7 @@
         </attribute>
         <attribute>
             <key>A00429</key>
-            <name>System Requirements / OS Required</name>
+            <name><value language="en">System Requirements / OS Required</value></name>
             <usage>Product</usage>
             <type>ShortText</type>
             <multilanguage>true</multilanguage>
@@ -170,7 +170,7 @@
         </attribute>
         <attribute>
             <key>A01244</key>
-            <name>Optical System / Image Stabilizer</name>
+            <name><value language="en">Optical System / Image Stabilizer</value></name>
             <usage>Product</usage>
             <type>ShortText</type>
             <multilanguage>true</multilanguage>
@@ -180,7 +180,7 @@
         </attribute>
         <attribute>
             <key>A01287</key>
-            <name>Optical Viewfinder / Type</name>
+            <name><value language="en">Optical Viewfinder / Type</value></name>
             <usage>Product</usage>
             <type>ShortText</type>
             <multilanguage>true</multilanguage>
@@ -190,7 +190,7 @@
         </attribute>
         <attribute>
             <key>A00871</key>
-            <name>Audio Input / Microphone Operation Mode</name>
+            <name><value language="en">Audio Input / Microphone Operation Mode</value></name>
             <usage>Product</usage>
             <type>ShortText</type>
             <multilanguage>true</multilanguage>
@@ -200,7 +200,7 @@
         </attribute>
         <attribute>
             <key>A00919</key>
-            <name>Video Input / Media Type</name>
+            <name><value language="en">Video Input / Media Type</value></name>
             <usage>Product</usage>
             <type>ShortText</type>
             <multilanguage>false</multilanguage>
@@ -210,7 +210,7 @@
         </attribute>
         <attribute>
             <key>A02805</key>
-            <name>Digital Camera / Digital Camera Type</name>
+            <name><value language="en">Digital Camera / Digital Camera Type</value></name>
             <usage>Product</usage>
             <type>ShortText</type>
             <multilanguage>false</multilanguage>
@@ -220,7 +220,7 @@
         </attribute>
         <attribute>
             <key>A00260</key>
-            <name>Video Input / Digital Video Format</name>
+            <name><value language="en">Video Input / Digital Video Format</value></name>
             <usage>Product</usage>
             <type>ShortText</type>
             <multilanguage>false</multilanguage>
@@ -230,7 +230,7 @@
         </attribute>
         <attribute>
             <key>A01072</key>
-            <name>Optical System / Magnification</name>
+            <name><value language="en">Optical System / Magnification</value></name>
             <usage>Product</usage>
             <type>ShortText</type>
             <multilanguage>false</multilanguage>
@@ -240,7 +240,7 @@
         </attribute>
         <attribute>
             <key>catImage</key>
-            <name>Category Image</name>
+            <name><value language="en">Category Image</value></name>
             <usage>Category</usage>
             <type>Image</type>
             <multilanguage>false</multilanguage>
@@ -250,7 +250,7 @@
         </attribute>
         <attribute>
             <key>A01006</key>
-            <name>Optical System / Objective Lens Diameter</name>
+            <name><value language="en">Optical System / Objective Lens Diameter</value></name>
             <usage>Product</usage>
             <type>Integer</type>
             <multilanguage>false</multilanguage>
@@ -260,7 +260,7 @@
         </attribute>
         <attribute>
             <key>A00981</key>
-            <name>Lens System / Type</name>
+            <name><value language="en">Lens System / Type</value></name>
             <usage>Product</usage>
             <type>ShortText</type>
             <multilanguage>true</multilanguage>
@@ -270,7 +270,7 @@
         </attribute>
         <attribute>
             <key>A01281</key>
-            <name>Camera / Exposure Metering</name>
+            <name><value language="en">Camera / Exposure Metering</value></name>
             <usage>Product</usage>
             <type>ShortText</type>
             <multilanguage>true</multilanguage>
@@ -280,7 +280,7 @@
         </attribute>
         <attribute>
             <key>A00258</key>
-            <name>Video Input / Analog Video Format</name>
+            <name><value language="en">Video Input / Analog Video Format</value></name>
             <usage>Product</usage>
             <type>ShortText</type>
             <multilanguage>false</multilanguage>
@@ -290,7 +290,7 @@
         </attribute>
         <attribute>
             <key>A01206</key>
-            <name>Exposure Parameters / Shooting Programs</name>
+            <name><value language="en">Exposure Parameters / Shooting Programs</value></name>
             <usage>Product</usage>
             <type>LongText</type>
             <multilanguage>true</multilanguage>
@@ -300,7 +300,7 @@
         </attribute>
         <attribute>
             <key>A01007</key>
-            <name>Optical System / Eye Relief</name>
+            <name><value language="en">Optical System / Eye Relief</value></name>
             <usage>Product</usage>
             <type>Decimal</type>
             <multilanguage>false</multilanguage>
@@ -310,7 +310,7 @@
         </attribute>
         <attribute>
             <key>A01207</key>
-            <name>Video Input / Special Effects</name>
+            <name><value language="en">Video Input / Special Effects</value></name>
             <usage>Product</usage>
             <type>ShortText</type>
             <multilanguage>true</multilanguage>
@@ -320,7 +320,7 @@
         </attribute>
         <attribute>
             <key>A00973</key>
-            <name>Camera / Type</name>
+            <name><value language="en">Camera / Type</value></name>
             <usage>Product</usage>
             <type>ShortText</type>
             <multilanguage>true</multilanguage>
@@ -330,7 +330,7 @@
         </attribute>
         <attribute>
             <key>A04393</key>
-            <name>Optical System / Product Type</name>
+            <name><value language="en">Optical System / Product Type</value></name>
             <usage>Product</usage>
             <type>ShortText</type>
             <multilanguage>true</multilanguage>
@@ -340,7 +340,7 @@
         </attribute>
         <attribute>
             <key>AltImage1</key>
-            <name>Alternative Image 1</name>
+            <name><value language="en">Alternative Image 1</value></name>
             <usage>Product</usage>
             <type>Image</type>
             <multilanguage>false</multilanguage>
@@ -350,7 +350,7 @@
         </attribute>
         <attribute>
             <key>A01003</key>
-            <name>Optical System / Telescope Class</name>
+            <name><value language="en">Optical System / Telescope Class</value></name>
             <usage>Product</usage>
             <type>ShortText</type>
             <multilanguage>true</multilanguage>
@@ -360,7 +360,7 @@
         </attribute>
         <attribute>
             <key>A02299</key>
-            <name>System Requirements / Platform</name>
+            <name><value language="en">System Requirements / Platform</value></name>
             <usage>Product</usage>
             <type>ShortText</type>
             <multilanguage>false</multilanguage>
@@ -370,7 +370,7 @@
         </attribute>
         <attribute>
             <key>A00974</key>
-            <name>Camera / Camera Format</name>
+            <name><value language="en">Camera / Camera Format</value></name>
             <usage>Product</usage>
             <type>ShortText</type>
             <multilanguage>true</multilanguage>
@@ -380,7 +380,7 @@
         </attribute>
         <attribute>
             <key>A00986</key>
-            <name>Lens System / Min Focus Range</name>
+            <name><value language="en">Lens System / Min Focus Range</value></name>
             <usage>Product</usage>
             <type>Decimal</type>
             <multilanguage>false</multilanguage>
@@ -390,7 +390,7 @@
         </attribute>
         <attribute>
             <key>A01584</key>
-            <name>Display (Projector) / Display Form Factor</name>
+            <name><value language="en">Display (Projector) / Display Form Factor</value></name>
             <usage>Product</usage>
             <type>ShortText</type>
             <multilanguage>true</multilanguage>
@@ -400,7 +400,7 @@
         </attribute>
         <attribute>
             <key>A01013</key>
-            <name>Optical System / Special Functions</name>
+            <name><value language="en">Optical System / Special Functions</value></name>
             <usage>Product</usage>
             <type>ShortText</type>
             <multilanguage>true</multilanguage>
@@ -410,7 +410,7 @@
         </attribute>
         <attribute>
             <key>A00978</key>
-            <name>Camera / Timer Functions</name>
+            <name><value language="en">Camera / Timer Functions</value></name>
             <usage>Product</usage>
             <type>ShortText</type>
             <multilanguage>true</multilanguage>
@@ -420,7 +420,7 @@
         </attribute>
         <attribute>
             <key>description</key>
-            <name>Product Description</name>
+            <name><value language="en">Product Description</value></name>
             <usage>Product</usage>
             <type>LongText</type>
             <multilanguage>true</multilanguage>
@@ -430,7 +430,7 @@
         </attribute>
         <attribute>
             <key>A01454</key>
-            <name>Camera / Date Imprint Selections</name>
+            <name><value language="en">Camera / Date Imprint Selections</value></name>
             <usage>Product</usage>
             <type>ShortText</type>
             <multilanguage>true</multilanguage>
@@ -440,7 +440,7 @@
         </attribute>
         <attribute>
             <key>A00256</key>
-            <name>Video Input / Type</name>
+            <name><value language="en">Video Input / Type</value></name>
             <usage>Product</usage>
             <type>ShortText</type>
             <multilanguage>true</multilanguage>
@@ -450,7 +450,7 @@
         </attribute>
         <attribute>
             <key>A03379</key>
-            <name>Battery / Manufacturer Battery Name</name>
+            <name><value language="en">Battery / Manufacturer Battery Name</value></name>
             <usage>Product</usage>
             <type>ShortText</type>
             <multilanguage>false</multilanguage>
@@ -460,7 +460,7 @@
         </attribute>
         <attribute>
             <key>A01071</key>
-            <name>Lens System / Optical Zoom</name>
+            <name><value language="en">Lens System / Optical Zoom</value></name>
             <usage>Product</usage>
             <type>Decimal</type>
             <multilanguage>false</multilanguage>
@@ -470,7 +470,7 @@
         </attribute>
         <attribute>
             <key>A02638</key>
-            <name>Optical Sensor / Sensor Resolution</name>
+            <name><value language="en">Optical Sensor / Sensor Resolution</value></name>
             <usage>Product</usage>
             <type>Decimal</type>
             <multilanguage>false</multilanguage>
@@ -480,7 +480,7 @@
         </attribute>
         <attribute>
             <key>A03378</key>
-            <name>Battery / Battery Form Factor</name>
+            <name><value language="en">Battery / Battery Form Factor</value></name>
             <usage>Product</usage>
             <type>ShortText</type>
             <multilanguage>true</multilanguage>
@@ -490,7 +490,7 @@
         </attribute>
         <attribute>
             <key>A00995</key>
-            <name>Finderscope / Type</name>
+            <name><value language="en">Finderscope / Type</value></name>
             <usage>Product</usage>
             <type>ShortText</type>
             <multilanguage>true</multilanguage>
@@ -500,7 +500,7 @@
         </attribute>
         <attribute>
             <key>A00600</key>
-            <name>Header / Product Line</name>
+            <name><value language="en">Header / Product Line</value></name>
             <usage>Product</usage>
             <type>ShortText</type>
             <multilanguage>false</multilanguage>
@@ -510,7 +510,7 @@
         </attribute>
         <attribute>
             <key>A03380</key>
-            <name>Battery / Supported Battery Form Factor</name>
+            <name><value language="en">Battery / Supported Battery Form Factor</value></name>
             <usage>Product</usage>
             <type>ShortText</type>
             <multilanguage>false</multilanguage>
@@ -520,7 +520,7 @@
         </attribute>
         <attribute>
             <key>A00548</key>
-            <name>Video Input / Light Sensitivity</name>
+            <name><value language="en">Video Input / Light Sensitivity</value></name>
             <usage>Product</usage>
             <type>ShortText</type>
             <multilanguage>false</multilanguage>
@@ -530,7 +530,7 @@
         </attribute>
         <attribute>
             <key>A00870</key>
-            <name>Audio Input / Microphone Technology</name>
+            <name><value language="en">Audio Input / Microphone Technology</value></name>
             <usage>Product</usage>
             <type>ShortText</type>
             <multilanguage>true</multilanguage>
@@ -540,7 +540,7 @@
         </attribute>
         <attribute>
             <key>catDescription</key>
-            <name>Category Description</name>
+            <name><value language="en">Category Description</value></name>
             <usage>Category</usage>
             <type>LongText</type>
             <multilanguage>true</multilanguage>
@@ -550,7 +550,7 @@
         </attribute>
         <attribute>
             <key>A01376</key>
-            <name>Optical Sensor / Optical Sensor Size</name>
+            <name><value language="en">Optical Sensor / Optical Sensor Size</value></name>
             <usage>Product</usage>
             <type>ShortText</type>
             <multilanguage>false</multilanguage>
@@ -560,7 +560,7 @@
         </attribute>
         <attribute>
             <key>A00652</key>
-            <name>Video Input / Digital Zoom</name>
+            <name><value language="en">Video Input / Digital Zoom</value></name>
             <usage>Product</usage>
             <type>Decimal</type>
             <multilanguage>false</multilanguage>
@@ -570,7 +570,7 @@
         </attribute>
         <attribute>
             <key>A00413</key>
-            <name>Flash Memory / Storage Capacity</name>
+            <name><value language="en">Flash Memory / Storage Capacity</value></name>
             <usage>Product</usage>
             <type>Integer</type>
             <multilanguage>false</multilanguage>
@@ -580,7 +580,7 @@
         </attribute>
         <attribute>
             <key>A00601</key>
-            <name>Header / Model</name>
+            <name><value language="en">Header / Model</value></name>
             <usage>Product</usage>
             <type>ShortText</type>
             <multilanguage>false</multilanguage>
@@ -590,7 +590,7 @@
         </attribute>
         <attribute>
             <key>A03517</key>
-            <name>Optical Sensor / Camcorder Sensor Resolution</name>
+            <name><value language="en">Optical Sensor / Camcorder Sensor Resolution</value></name>
             <usage>Product</usage>
             <type>Decimal</type>
             <multilanguage>false</multilanguage>
@@ -600,7 +600,7 @@
         </attribute>
         <attribute>
             <key>A01278</key>
-            <name>Optical System / Telescope Aperture</name>
+            <name><value language="en">Optical System / Telescope Aperture</value></name>
             <usage>Product</usage>
             <type>Integer</type>
             <multilanguage>false</multilanguage>
@@ -610,7 +610,7 @@
         </attribute>
         <attribute>
             <key>A00430</key>
-            <name>Service &amp; Support / Type</name>
+            <name><value language="en">Service &amp; Support / Type</value></name>
             <usage>Product</usage>
             <type>ShortText</type>
             <multilanguage>true</multilanguage>
@@ -620,7 +620,7 @@
         </attribute>
         <attribute>
             <key>A01015</key>
-            <name>Camera Flash / Type</name>
+            <name><value language="en">Camera Flash / Type</value></name>
             <usage>Product</usage>
             <type>ShortText</type>
             <multilanguage>true</multilanguage>
@@ -630,7 +630,7 @@
         </attribute>
         <attribute>
             <key>AltImage4</key>
-            <name>Alternative Image 4</name>
+            <name><value language="en">Alternative Image 4</value></name>
             <usage>Product</usage>
             <type>Image</type>
             <multilanguage>false</multilanguage>
@@ -640,7 +640,7 @@
         </attribute>
         <attribute>
             <key>A00920</key>
-            <name>Viewfinder / Viewfinder Color Support</name>
+            <name><value language="en">Viewfinder / Viewfinder Color Support</value></name>
             <usage>Product</usage>
             <type>ShortText</type>
             <multilanguage>true</multilanguage>
@@ -650,7 +650,7 @@
         </attribute>
         <attribute>
             <key>A03519</key>
-            <name>Optical Sensor / Camcorder Effective Video Resolution</name>
+            <name><value language="en">Optical Sensor / Camcorder Effective Video Resolution</value></name>
             <usage>Product</usage>
             <type>Decimal</type>
             <multilanguage>false</multilanguage>
@@ -660,7 +660,7 @@
         </attribute>
         <attribute>
             <key>A03190</key>
-            <name>Digital Camera / Supported Flash Memory</name>
+            <name><value language="en">Digital Camera / Supported Flash Memory</value></name>
             <usage>Product</usage>
             <type>ShortText</type>
             <multilanguage>false</multilanguage>
@@ -670,7 +670,7 @@
         </attribute>
         <attribute>
             <key>A00983</key>
-            <name>Lens System / Lens Aperture</name>
+            <name><value language="en">Lens System / Lens Aperture</value></name>
             <usage>Product</usage>
             <type>ShortText</type>
             <multilanguage>false</multilanguage>
@@ -680,7 +680,7 @@
         </attribute>
         <attribute>
             <key>AltImage2</key>
-            <name>Alternative Image 2</name>
+            <name><value language="en">Alternative Image 2</value></name>
             <usage>Product</usage>
             <type>Image</type>
             <multilanguage>false</multilanguage>
@@ -690,7 +690,7 @@
         </attribute>
         <attribute>
             <key>A01250</key>
-            <name>Camera Flash / Flash Modes</name>
+            <name><value language="en">Camera Flash / Flash Modes</value></name>
             <usage>Product</usage>
             <type>ShortText</type>
             <multilanguage>true</multilanguage>
@@ -700,7 +700,7 @@
         </attribute>
         <attribute>
             <key>A00276</key>
-            <name>Audio Input / Type</name>
+            <name><value language="en">Audio Input / Type</value></name>
             <usage>Product</usage>
             <type>ShortText</type>
             <multilanguage>true</multilanguage>
@@ -710,7 +710,7 @@
         </attribute>
         <attribute>
             <key>A00551</key>
-            <name>Optical Sensor / Optical Sensor Type</name>
+            <name><value language="en">Optical Sensor / Optical Sensor Type</value></name>
             <usage>Product</usage>
             <type>ShortText</type>
             <multilanguage>false</multilanguage>
@@ -720,7 +720,7 @@
         </attribute>
         <attribute>
             <key>A00984</key>
-            <name>Lens System / Min Focal Length</name>
+            <name><value language="en">Lens System / Min Focal Length</value></name>
             <usage>Product</usage>
             <type>Decimal</type>
             <multilanguage>false</multilanguage>
@@ -730,7 +730,7 @@
         </attribute>
         <attribute>
             <key>A01282</key>
-            <name>Camera / Auto Focus</name>
+            <name><value language="en">Camera / Auto Focus</value></name>
             <usage>Product</usage>
             <type>ShortText</type>
             <multilanguage>true</multilanguage>
@@ -740,7 +740,7 @@
         </attribute>
         <attribute>
             <key>A01002</key>
-            <name>Optical System / Type</name>
+            <name><value language="en">Optical System / Type</value></name>
             <usage>Product</usage>
             <type>ShortText</type>
             <multilanguage>true</multilanguage>
@@ -750,7 +750,7 @@
         </attribute>
         <attribute>
             <key>A00996</key>
-            <name>Finderscope / Magnification</name>
+            <name><value language="en">Finderscope / Magnification</value></name>
             <usage>Product</usage>
             <type>Integer</type>
             <multilanguage>false</multilanguage>
@@ -760,7 +760,7 @@
         </attribute>
         <attribute>
             <key>A00537</key>
-            <name>Video Input / Still Image Format</name>
+            <name><value language="en">Video Input / Still Image Format</value></name>
             <usage>Product</usage>
             <type>ShortText</type>
             <multilanguage>false</multilanguage>
@@ -770,7 +770,7 @@
         </attribute>
         <attribute>
             <key>A00341</key>
-            <name>Battery / Run Time (Up To)</name>
+            <name><value language="en">Battery / Run Time (Up To)</value></name>
             <usage>Product</usage>
             <type>Decimal</type>
             <multilanguage>false</multilanguage>
@@ -780,7 +780,7 @@
         </attribute>
         <attribute>
             <key>A00152</key>
-            <name>Display (Projector) / Technology</name>
+            <name><value language="en">Display (Projector) / Technology</value></name>
             <usage>Product</usage>
             <type>ShortText</type>
             <multilanguage>true</multilanguage>
@@ -790,7 +790,7 @@
         </attribute>
         <attribute>
             <key>A01570</key>
-            <name>Video Input / Shooting Modes</name>
+            <name><value language="en">Video Input / Shooting Modes</value></name>
             <usage>Product</usage>
             <type>ShortText</type>
             <multilanguage>true</multilanguage>
@@ -800,7 +800,7 @@
         </attribute>
         <attribute>
             <key>A02028</key>
-            <name>Camera Flash / Red Eye Reduction</name>
+            <name><value language="en">Camera Flash / Red Eye Reduction</value></name>
             <usage>Product</usage>
             <type>Boolean</type>
             <multilanguage>false</multilanguage>
@@ -810,7 +810,7 @@
         </attribute>
         <attribute>
             <key>A00138</key>
-            <name>Display (Projector) / Type</name>
+            <name><value language="en">Display (Projector) / Type</value></name>
             <usage>Product</usage>
             <type>ShortText</type>
             <multilanguage>true</multilanguage>
@@ -820,7 +820,7 @@
         </attribute>
         <attribute>
             <key>A00985</key>
-            <name>Lens System / Max Focal Length</name>
+            <name><value language="en">Lens System / Max Focal Length</value></name>
             <usage>Product</usage>
             <type>Decimal</type>
             <multilanguage>false</multilanguage>
@@ -830,7 +830,7 @@
         </attribute>
         <attribute>
             <key>A03497</key>
-            <name>Optical Sensor / Sensor Qty</name>
+            <name><value language="en">Optical Sensor / Sensor Qty</value></name>
             <usage>Product</usage>
             <type>Integer</type>
             <multilanguage>false</multilanguage>
@@ -840,7 +840,7 @@
         </attribute>
         <attribute>
             <key>AltImage3</key>
-            <name>Alternative Image 3</name>
+            <name><value language="en">Alternative Image 3</value></name>
             <usage>Product</usage>
             <type>Image</type>
             <multilanguage>false</multilanguage>
@@ -850,7 +850,7 @@
         </attribute>
         <attribute>
             <key>A01381</key>
-            <name>Video Input / Digital Scene Transition</name>
+            <name><value language="en">Video Input / Digital Scene Transition</value></name>
             <usage>Product</usage>
             <type>LongText</type>
             <multilanguage>true</multilanguage>

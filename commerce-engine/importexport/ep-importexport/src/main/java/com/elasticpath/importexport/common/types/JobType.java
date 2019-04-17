@@ -121,8 +121,11 @@ public enum JobType {
 	DATA_POLICY("data_policies"),
 
 	/** Customer Consents. */
-	CUSTOMER_CONSENT("customer_consents");
-	
+	CUSTOMER_CONSENT("customer_consents"),
+
+	/** Facet. */
+	FACET("facets");
+
 	/*
 	 * The map of Job Types available in the system. XML tag name is the key and JobType is the value.
 	 */

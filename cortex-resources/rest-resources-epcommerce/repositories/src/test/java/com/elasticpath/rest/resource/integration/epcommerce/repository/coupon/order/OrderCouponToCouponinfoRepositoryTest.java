@@ -4,10 +4,12 @@
 
 package com.elasticpath.rest.resource.integration.epcommerce.repository.coupon.order;
 
-import static com.elasticpath.rest.resource.integration.epcommerce.repository.ResourceTestConstants.CART_GUID;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import static com.elasticpath.rest.resource.integration.epcommerce.repository.ResourceTestConstants.CART_GUID;
 import static com.elasticpath.rest.resource.integration.epcommerce.repository.ResourceTestConstants.CART_ORDER_GUID;
 import static com.elasticpath.rest.resource.integration.epcommerce.repository.ResourceTestConstants.COUPON_CODE;
 import static com.elasticpath.rest.resource.integration.epcommerce.repository.ResourceTestConstants.EMAIL;
@@ -19,9 +21,6 @@ import static com.elasticpath.rest.resource.integration.epcommerce.repository.co
 import java.util.Collections;
 import java.util.Set;
 
-import com.google.common.util.concurrent.Runnables;
-import io.reactivex.Completable;
-import io.reactivex.Single;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -29,6 +28,10 @@ import org.mockito.Answers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+
+import com.google.common.util.concurrent.Runnables;
+import io.reactivex.Completable;
+import io.reactivex.Single;
 
 import com.elasticpath.domain.cartorder.CartOrder;
 import com.elasticpath.domain.rules.Coupon;
@@ -94,13 +97,26 @@ public class OrderCouponToCouponinfoRepositoryTest {
 	@Test
 	public void submitValidCouponEntityReturnsSubmitResultOfOrderCouponIdentifier() {
 		when(cartOrderRepository.findByGuidAsSingle(SCOPE, CART_ORDER_GUID)).thenReturn(Single.just(cartOrder));
-		couponRepository.validateCoupon(COUPON_CODE, SCOPE, EMAIL);
 
 		OrderCouponIdentifier orderCouponIdentifier = buildOrderCouponIdentifier(COUPON_CODE, CART_ORDER_GUID, SCOPE);
 
 		repository.submit(COUPON_ENTITY, StringIdentifier.of(SCOPE))
 				.test()
 				.assertValue(orderCouponIdentifierSubmitResult -> orderCouponIdentifierSubmitResult.getIdentifier().equals(orderCouponIdentifier));
+	}
+
+	@Test
+	public void submitByCustomerWithNoEmailUsesEmptyEmail() {
+		when(cartOrderRepository.findByGuidAsSingle(SCOPE, CART_ORDER_GUID)).thenReturn(Single.just(cartOrder));
+		when(shoppingCart.getShopper().getCustomer().getEmail()).thenReturn(null);
+
+		OrderCouponIdentifier orderCouponIdentifier = buildOrderCouponIdentifier(COUPON_CODE, CART_ORDER_GUID, SCOPE);
+
+		repository.submit(COUPON_ENTITY, StringIdentifier.of(SCOPE))
+				.test()
+				.assertValue(orderCouponIdentifierSubmitResult -> orderCouponIdentifierSubmitResult.getIdentifier().equals(orderCouponIdentifier));
+
+		verify(couponRepository).validateCoupon(anyString(), anyString(), eq(""));
 	}
 
 	@Test
@@ -128,7 +144,6 @@ public class OrderCouponToCouponinfoRepositoryTest {
 	@Test
 	public void submitValidExistingCouponEntityReturnsSubmitResultOfOrderCouponIdentifier() {
 		when(cartOrderRepository.findByGuidAsSingle(SCOPE, CART_ORDER_GUID)).thenReturn(Single.just(cartOrder));
-		couponRepository.validateCoupon(COUPON_CODE, SCOPE, EMAIL);
 		when(cartOrder.addCoupon(COUPON_CODE)).thenReturn(false);
 
 

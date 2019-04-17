@@ -23,7 +23,7 @@ public class CreateUserDialog extends AbstractDialog {
 	private static final String AVAILABLE_ROLES_PARENT_CSS = "div[automation-id='com.elasticpath.cmclient.admin.users.AdminUsersMessages"
 			+ ".RoleAssignment_AvailableRoles'][seeable='true'][widget-type='Table'] ";
 	private static final String AVAILABLE_ROLES_COLUMN_CSS = AVAILABLE_ROLES_PARENT_CSS + "div[column-id='%s']";
-	private static final String MOVE_RIGHT_BUTTON_CSS = CREATE_USER_PARENT_CSS + "div[widget-id='>']";
+	private static final String MOVE_RIGHT_BUTTON_CSS = CREATE_USER_PARENT_CSS + "div[widget-id='Add']";
 
 	/**
 	 * Constructor.

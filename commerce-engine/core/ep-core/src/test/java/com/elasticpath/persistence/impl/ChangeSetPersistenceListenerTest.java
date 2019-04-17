@@ -132,6 +132,8 @@ public class ChangeSetPersistenceListenerTest {
 		listener.setMetadataMap(threadLocalMap);
 
 		context.checking(new Expectations() { {
+			oneOf(openJPAEntityManager).getFlushMode();
+			will(returnValue(FlushModeType.AUTO));
 			oneOf(openJPAEntityManager).setFlushMode(FlushModeType.COMMIT);
 			oneOf(changeSetMemberDao).findBusinessObjectMetadataByGroupIdAndMetadataKey(TEST, ACTION);
 			will(returnValue(Collections.emptyList()));
@@ -172,6 +174,8 @@ public class ChangeSetPersistenceListenerTest {
 		metadataList.add(metadata);
 
 		context.checking(new Expectations() { {
+			oneOf(openJPAEntityManager).getFlushMode();
+			will(returnValue(FlushModeType.AUTO));
 			oneOf(openJPAEntityManager).setFlushMode(FlushModeType.COMMIT);
 			allowing(metadata).getMetadataKey(); will(returnValue(ACTION));
 			allowing(metadata).getBusinessObjectGroupMember(); will(returnValue(businessObjectGroupMember));
@@ -234,6 +238,8 @@ public class ChangeSetPersistenceListenerTest {
 		final StateManager stateManager = context.mock(StateManager.class);
 
 		context.checking(new Expectations() { {
+			oneOf(openJPAEntityManager).getFlushMode();
+			will(returnValue(FlushModeType.AUTO));
 			oneOf(object).pcGetStateManager(); will(returnValue(stateManager));
 			oneOf(openJPAEntityManager).setFlushMode(FlushModeType.COMMIT);
 
@@ -276,6 +282,8 @@ public class ChangeSetPersistenceListenerTest {
 		final StateManager stateManager = context.mock(StateManager.class);
 
 		context.checking(new Expectations() { {
+			oneOf(openJPAEntityManager).getFlushMode();
+			will(returnValue(FlushModeType.AUTO));
 			oneOf(object).pcGetStateManager(); will(returnValue(stateManager));
 			oneOf(openJPAEntityManager).setFlushMode(FlushModeType.COMMIT);
 			allowing(metadata).getMetadataKey(); will(returnValue(ACTION));
@@ -334,6 +342,8 @@ public class ChangeSetPersistenceListenerTest {
 
 
 		context.checking(new Expectations() { {
+			oneOf(openJPAEntityManager).getFlushMode();
+			will(returnValue(FlushModeType.AUTO));
 			oneOf(openJPAEntityManager).setFlushMode(FlushModeType.COMMIT);
 
 			oneOf(changeSetMemberDao).findBusinessObjectMetadataByGroupIdAndMetadataKey(TEST, ACTION);
@@ -375,6 +385,8 @@ public class ChangeSetPersistenceListenerTest {
 		metadataList.add(metadata);
 
 		context.checking(new Expectations() { {
+			oneOf(openJPAEntityManager).getFlushMode();
+			will(returnValue(FlushModeType.AUTO));
 			oneOf(openJPAEntityManager).setFlushMode(FlushModeType.COMMIT);
 			allowing(metadata).getMetadataKey(); will(returnValue(ACTION));
 			allowing(metadata).getBusinessObjectGroupMember(); will(returnValue(businessObjectGroupMember));
@@ -500,6 +512,53 @@ public class ChangeSetPersistenceListenerTest {
 		checkResolution(ChangeSetMemberAction.EDIT, ChangeSetMemberAction.DELETE, ChangeSetMemberAction.DELETE);
 		checkResolution(ChangeSetMemberAction.ADD, ChangeSetMemberAction.EDIT, ChangeSetMemberAction.ADD);
 		checkResolution(ChangeSetMemberAction.ADD, ChangeSetMemberAction.DELETE, ChangeSetMemberAction.DELETE);
+	}
+
+	/**
+	 * Tests that if current flush mode type is COMMIT that setting flush mode is bypassed.
+	 */
+	@Test
+	public void testExistingFlushModeCommit() {
+
+		final BusinessObjectMetadata metadata = new BusinessObjectMetadataImpl();
+		final BusinessObjectGroupMember businessObjectGroupMember = new BusinessObjectGroupMemberImpl();
+		metadata.setBusinessObjectGroupMember(businessObjectGroupMember);
+		ChangeSetPersistenceListener listener = new ChangeSetPersistenceListenerTestDouble() {
+			@Override
+			protected BusinessObjectMetadata createAndPopulateMetadata(final String keyAction,
+																	   final ChangeType changeType, final BusinessObjectDescriptor objectDescriptor) {
+				// This method is here so that we can verify that the dao is called with the return.
+				if (ACTION.equals(keyAction) && changeType.equals(ChangeType.CREATE) && objectDescriptor.equals(businessObjectDescriptor)) {
+					return metadata;
+				}
+				return null;
+			}
+		};
+		listener.setMetadataMap(threadLocalMap);
+
+		context.checking(new Expectations() { {
+			oneOf(openJPAEntityManager).getFlushMode();
+			will(returnValue(FlushModeType.COMMIT));
+			oneOf(changeSetMemberDao).findBusinessObjectMetadataByGroupIdAndMetadataKey(TEST, ACTION);
+			will(returnValue(Collections.emptyList()));
+
+			oneOf(changeSetMemberDao).addOrUpdateObjectMetadata(metadata);
+
+			oneOf(threadLocalMap).get(ACTIVE_IMPORT_STAGE);
+			will(returnValue(STAGE2));
+
+			oneOf(threadLocalMap).containsKey(ADD_TO_CHANGE_SET_FLAG);
+			will(returnValue(false));
+
+			never(openJPAEntityManager).setFlushMode(FlushModeType.COMMIT);
+		} });
+
+		// Persisted object just to have something to work with.
+		Product product = new ProductImpl();
+
+		LifecycleEvent event = new LifecycleEvent(product, LifecycleEvent.BEFORE_PERSIST);
+		listener.eventOccurred(event);
+
 	}
 
 	/**

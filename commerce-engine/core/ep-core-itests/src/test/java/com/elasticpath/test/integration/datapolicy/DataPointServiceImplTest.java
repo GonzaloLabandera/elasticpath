@@ -336,6 +336,46 @@ public class DataPointServiceImplTest extends AbstractDataPolicyTest {
 				.containsOnly(dataPolicy1, dataPolicy2);
 	}
 
+
+	@Test
+	@DirtiesDatabase
+	public void verifyFindWithRevokedConsentsLatestWithConsentHistoryReturnsOneKeyOneDataPointTwoDataPolicyMap() {
+		DataPolicy dataPolicy1 = createAndSaveDataPolicy(DATA_POLICY_UNIQUE_CODE);
+		DataPolicy dataPolicy2 = createAndSaveDataPolicy(DATA_POLICY_UNIQUE_CODE2);
+		DataPoint dataPoint = createAndSaveDataPoint(DATA_POINT_NAME);
+		dataPolicy1.getDataPoints().add(dataPoint);
+		dataPolicy2.getDataPoints().add(dataPoint);
+
+		dataPolicyService.update(dataPolicy1);
+		dataPolicyService.update(dataPolicy2);
+
+		Customer registeredCustomer = createPersistedCustomer(scenario.getStore().getCode(), TEST_EMAIL, false);
+		CustomerConsent customerConsent1 = createCustomerConsent(UUID.randomUUID().toString(), dataPolicy1, ConsentAction.GRANTED);
+		customerConsent1.setCustomerGuid(registeredCustomer.getGuid());
+		CustomerConsent customerConsent2 = createCustomerConsent(UUID.randomUUID().toString(), dataPolicy2, ConsentAction.GRANTED);
+		customerConsent2.setCustomerGuid(registeredCustomer.getGuid());
+		customerConsentService.save(customerConsent1);
+		customerConsentService.save(customerConsent2);
+
+		CustomerConsent customerConsent3 = createCustomerConsent(UUID.randomUUID().toString(), dataPolicy1, ConsentAction.REVOKED);
+		customerConsent3.setCustomerGuid(registeredCustomer.getGuid());
+		CustomerConsent customerConsent4 = createCustomerConsent(UUID.randomUUID().toString(), dataPolicy2, ConsentAction.REVOKED);
+		customerConsent4.setCustomerGuid(registeredCustomer.getGuid());
+		customerConsentService.save(customerConsent3);
+		customerConsentService.save(customerConsent4);
+
+		Map<String, Map<DataPoint, Set<DataPolicy>>> customerDataPoints = dataPointService.findWithRevokedConsentsLatest();
+
+		assertThat(customerDataPoints)
+				.containsOnlyKeys(registeredCustomer.getGuid());
+
+		assertThat(customerDataPoints.get(registeredCustomer.getGuid()))
+				.containsOnlyKeys(dataPoint);
+
+		assertThat(customerDataPoints.get(registeredCustomer.getGuid()).get(dataPoint))
+				.containsOnly(dataPolicy1, dataPolicy2);
+	}
+
 	@Test
 	@DirtiesDatabase
 	public void verifyFindWithGrantedConsentsLatestReturnsOneKeyOneDataPointTwoDataPolicyMap() {
@@ -355,6 +395,45 @@ public class DataPointServiceImplTest extends AbstractDataPolicyTest {
 		customerConsent2.setCustomerGuid(registeredCustomer.getGuid());
 		customerConsentService.save(customerConsent1);
 		customerConsentService.save(customerConsent2);
+
+		Map<String, Map<DataPoint, Set<DataPolicy>>> customerDataPoints = dataPointService.findWithGrantedConsentsLatest();
+
+		assertThat(customerDataPoints)
+				.containsOnlyKeys(registeredCustomer.getGuid());
+
+		assertThat(customerDataPoints.get(registeredCustomer.getGuid()))
+				.containsOnlyKeys(dataPoint);
+
+		assertThat(customerDataPoints.get(registeredCustomer.getGuid()).get(dataPoint))
+				.containsOnly(dataPolicy1, dataPolicy2);
+	}
+
+	@Test
+	@DirtiesDatabase
+	public void verifyFindWithGrantedConsentsLatestWithConsentHistoryReturnsOneKeyOneDataPointTwoDataPolicyMap() {
+		DataPolicy dataPolicy1 = createAndSaveDataPolicy(DATA_POLICY_UNIQUE_CODE);
+		DataPolicy dataPolicy2 = createAndSaveDataPolicy(DATA_POLICY_UNIQUE_CODE2);
+		DataPoint dataPoint = createAndSaveDataPoint(DATA_POINT_NAME);
+		dataPolicy1.getDataPoints().add(dataPoint);
+		dataPolicy2.getDataPoints().add(dataPoint);
+
+		dataPolicyService.update(dataPolicy1);
+		dataPolicyService.update(dataPolicy2);
+
+		Customer registeredCustomer = createPersistedCustomer(scenario.getStore().getCode(), TEST_EMAIL, false);
+		CustomerConsent customerConsent1 = createCustomerConsent(UUID.randomUUID().toString(), dataPolicy1, ConsentAction.REVOKED);
+		customerConsent1.setCustomerGuid(registeredCustomer.getGuid());
+		CustomerConsent customerConsent2 = createCustomerConsent(UUID.randomUUID().toString(), dataPolicy2, ConsentAction.REVOKED);
+		customerConsent2.setCustomerGuid(registeredCustomer.getGuid());
+		customerConsentService.save(customerConsent1);
+		customerConsentService.save(customerConsent2);
+
+		CustomerConsent customerConsent3 = createCustomerConsent(UUID.randomUUID().toString(), dataPolicy1, ConsentAction.GRANTED);
+		customerConsent3.setCustomerGuid(registeredCustomer.getGuid());
+		CustomerConsent customerConsent4 = createCustomerConsent(UUID.randomUUID().toString(), dataPolicy2, ConsentAction.GRANTED);
+		customerConsent4.setCustomerGuid(registeredCustomer.getGuid());
+		customerConsentService.save(customerConsent3);
+		customerConsentService.save(customerConsent4);
 
 		Map<String, Map<DataPoint, Set<DataPolicy>>> customerDataPoints = dataPointService.findWithGrantedConsentsLatest();
 
@@ -578,6 +657,73 @@ public class DataPointServiceImplTest extends AbstractDataPolicyTest {
 		CustomerConsent customerConsent3 = createCustomerConsent(UUID.randomUUID().toString(), dataPolicy1, ConsentAction.GRANTED);
 		customerConsent3.setCustomerGuid(registeredCustomer2.getGuid());
 		CustomerConsent customerConsent4 = createCustomerConsent(UUID.randomUUID().toString(), dataPolicy2, ConsentAction.GRANTED);
+		customerConsent4.setCustomerGuid(registeredCustomer2.getGuid());
+
+		customerConsentService.save(customerConsent1);
+		customerConsentService.save(customerConsent2);
+		customerConsentService.save(customerConsent3);
+		customerConsentService.save(customerConsent4);
+
+		Map<String, Map<DataPoint, Set<DataPolicy>>> customerDataPoints = dataPointService.findWithGrantedConsentsLatest();
+
+		assertThat(customerDataPoints)
+				.containsOnlyKeys(registeredCustomer.getGuid(), registeredCustomer2.getGuid());
+
+		assertThat(customerDataPoints.get(registeredCustomer.getGuid()))
+				.containsOnlyKeys(dataPoint1);
+
+		assertThat(customerDataPoints.get(registeredCustomer2.getGuid()))
+				.containsOnlyKeys(dataPoint1, dataPoint2);
+
+		assertThat(customerDataPoints.get(registeredCustomer.getGuid()).get(dataPoint1))
+				.containsOnly(dataPolicy1);
+
+		assertThat(customerDataPoints.get(registeredCustomer2.getGuid()).get(dataPoint1))
+				.containsOnly(dataPolicy1);
+
+		assertThat(customerDataPoints.get(registeredCustomer2.getGuid()).get(dataPoint2))
+				.containsOnly(dataPolicy2);
+	}
+
+	@Test
+	@DirtiesDatabase
+	public void verifyFindWithGrantedConsentsLatestWithConsentHistoryReturnsOneKeysTwoDataPointOneDataPolicyMapWhenOnePolicyRevokedForACustomer() {
+		DataPolicy dataPolicy1 = createAndSaveDataPolicy(DATA_POLICY_UNIQUE_CODE);
+		DataPolicy dataPolicy2 = createAndSaveDataPolicy(DATA_POLICY_UNIQUE_CODE2);
+		DataPoint dataPoint1 = createAndSaveDataPoint(DATA_POINT_NAME, DATA_POINT_KEY_1, DATA_POINT_LOCATION);
+		DataPoint dataPoint2 = createAndSaveDataPoint(DATA_POINT_NAME_2, DATA_POINT_KEY_2, DATA_POINT_LOCATION);
+		dataPolicy1.getDataPoints().add(dataPoint1);
+		dataPolicy2.getDataPoints().add(dataPoint2);
+
+		dataPolicyService.update(dataPolicy1);
+		dataPolicyService.update(dataPolicy2);
+
+		Customer registeredCustomer = createPersistedCustomer(scenario.getStore().getCode(), TEST_EMAIL, false);
+		Customer registeredCustomer2 = createPersistedCustomer(scenario.getStore().getCode(), TEST_EMAIL2, false);
+
+		CustomerConsent customerConsent1 = createCustomerConsent(UUID.randomUUID().toString(), dataPolicy1, ConsentAction.REVOKED);
+		customerConsent1.setCustomerGuid(registeredCustomer.getGuid());
+		CustomerConsent customerConsent2 = createCustomerConsent(UUID.randomUUID().toString(), dataPolicy2, ConsentAction.GRANTED);
+		customerConsent2.setCustomerGuid(registeredCustomer.getGuid());
+
+		CustomerConsent customerConsent3 = createCustomerConsent(UUID.randomUUID().toString(), dataPolicy1, ConsentAction.REVOKED);
+		customerConsent3.setCustomerGuid(registeredCustomer2.getGuid());
+		CustomerConsent customerConsent4 = createCustomerConsent(UUID.randomUUID().toString(), dataPolicy2, ConsentAction.REVOKED);
+		customerConsent4.setCustomerGuid(registeredCustomer2.getGuid());
+
+		customerConsentService.save(customerConsent1);
+		customerConsentService.save(customerConsent2);
+		customerConsentService.save(customerConsent3);
+		customerConsentService.save(customerConsent4);
+
+		customerConsent1 = createCustomerConsent(UUID.randomUUID().toString(), dataPolicy1, ConsentAction.GRANTED);
+		customerConsent1.setCustomerGuid(registeredCustomer.getGuid());
+		customerConsent2 = createCustomerConsent(UUID.randomUUID().toString(), dataPolicy2, ConsentAction.REVOKED);
+		customerConsent2.setCustomerGuid(registeredCustomer.getGuid());
+
+		customerConsent3 = createCustomerConsent(UUID.randomUUID().toString(), dataPolicy1, ConsentAction.GRANTED);
+		customerConsent3.setCustomerGuid(registeredCustomer2.getGuid());
+		customerConsent4 = createCustomerConsent(UUID.randomUUID().toString(), dataPolicy2, ConsentAction.GRANTED);
 		customerConsent4.setCustomerGuid(registeredCustomer2.getGuid());
 
 		customerConsentService.save(customerConsent1);

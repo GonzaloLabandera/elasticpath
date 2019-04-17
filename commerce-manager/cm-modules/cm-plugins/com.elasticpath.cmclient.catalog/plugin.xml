@@ -6,7 +6,7 @@
    <extension-point id="Extender" name="Extender"   schema="../com.elasticpath.cmclient.core/schema/extender.exsd"/>
    <extension-point id="StatePolicyExtender" name="StatePolicyExtender"   schema="../com.elasticpath.cmclient.core/schema/statePolicyExtender.exsd"/>
 
-   <!-- Catalog Perspective -->	
+   <!-- Catalog Perspective -->
    <extension
          point="org.eclipse.ui.perspectives">
       <perspective
@@ -25,16 +25,16 @@
             name="%catalogCategory.name"
             id="com.elasticpath.cmclient.catalog.category.main">
       </category>
-      
-   <!-- Catalog Browse and Search View -->      
+
+   <!-- Catalog Browse and Search View -->
       <view
             name="%catalogBrowseView.name"
-            icon="icons/catalog_default_22.png"
+            icon="icons/empty_1x1.png"
             category="com.elasticpath.cmclient.catalog.category.main"
             class="com.elasticpath.cmclient.catalog.views.CatalogBrowseView"
             id="com.elasticpath.cmclient.catalog.views.CatalogBrowseView">
       </view>
-      
+
       <view
             name="%catalogSearchView.name"
             icon="icons/search_default_22.png"
@@ -43,8 +43,8 @@
             id="com.elasticpath.cmclient.catalog.views.CatalogSearchView">
       </view>
 
-   
-    <!-- Job List View -->	
+
+    <!-- Job List View -->
        <view
              name="%jobListView.name"
              icon="icons/csv-import_default_22.png"
@@ -52,7 +52,7 @@
              class="com.elasticpath.cmclient.catalog.views.JobListView"
              id="com.elasticpath.cmclient.catalog.views.JobListView">
        </view>
-       
+
      <!-- Sku List View -->
        <view
              category="com.elasticpath.cmclient.catalog.category.main"
@@ -61,8 +61,8 @@
              id="com.elasticpath.cmclient.catalog.views.SearchSkuListView"
              name="%searchSkuListView.name">
        </view>
-     
-     <!-- Product List View -->	
+
+     <!-- Product List View -->
        <view
              category="com.elasticpath.cmclient.catalog.category.main"
              class="com.elasticpath.cmclient.catalog.views.SearchProductListView"
@@ -101,7 +101,7 @@
       <editor
             name="%productEditor.name"
             default="true"
-            icon="icons/product_default_22.png"
+            icon="icons/empty_1x1.png"
             class="com.elasticpath.cmclient.catalog.editors.product.ProductEditor"
             id="com.elasticpath.cmclient.catalog.editors.product.ProductEditor"
             contributorClass="com.elasticpath.cmclient.core.editors.BaseCmClientEditorContributor">
@@ -109,7 +109,7 @@
    <!-- Category Editor -->
       <editor
             class="com.elasticpath.cmclient.catalog.editors.category.CategoryEditor"
-            icon="icons/category_default_22.png"
+            icon="icons/empty_1x1.png"
             id="com.elasticpath.cmclient.catalog.editors.category.CategoryEditor"
             contributorClass="com.elasticpath.cmclient.core.editors.BaseCmClientEditorContributor"
             name="%categoryEditor.name">
@@ -118,7 +118,7 @@
       <editor
             class="com.elasticpath.cmclient.catalog.editors.sku.ProductSkuEditor"
             default="true"
-            icon="icons/sku_default_22.png"
+            icon="icons/empty_1x1.png"
             id="com.elasticpath.cmclient.catalog.editors.sku.ProductSkuEditor"
             contributorClass="com.elasticpath.cmclient.core.editors.BaseCmClientEditorContributor"
             name="%productSkuEditor.name">
@@ -126,16 +126,16 @@
    <!-- Catalog Editor -->
       <editor
             class="com.elasticpath.cmclient.catalog.editors.catalog.CatalogEditor"
-            icon="icons/catalog_default_22.png"
+            icon="icons/empty_1x1.png"
             id="com.elasticpath.cmclient.catalog.editors.catalog.CatalogEditor"
             contributorClass="com.elasticpath.cmclient.core.editors.BaseCmClientEditorContributor"
             name="%categoryEditor.name">
       </editor>
    </extension>
-   
+
     <extension point="com.elasticpath.cmclient.core.authorizations">
       <permissions>
-      
+
       	 <permission
                activityId="com.elasticpath.cmclient.fulfillment.authorizations.activity.catalogManagement"
                key="MANAGE_PRODUCT_SKU"
@@ -167,14 +167,14 @@
                activityId="com.elasticpath.cmclient.fulfillment.authorizations.activity.catalogManagement"
                key="MANAGE_VIRTUAL_CATALOG_LINK_CATEGORY"
                name="%manageVirtualCatalogsAndLinkedCategoriesPermission.name">
-         </permission>      
+         </permission>
          <permission
                activityId="com.elasticpath.cmclient.fulfillment.authorizations.activity.catalogManagement"
                description="Permission to manage catalogs."
                key="CATALOG_MANAGE"
                name="%manageCatalogsPermission.name">
-         </permission>        
-            
+         </permission>
+
          <permission
                activityId="com.elasticpath.cmclient.fulfillment.authorizations.activity.catalogManagement"
                description="Permission to edit global attributes"
@@ -203,7 +203,8 @@
                      icon="icons/catalog_default_34.png"
                      id="perspectiveMenu.catalogItem"
                      label="%catalogMenu.name"
-                     tooltip="%catalogMenu.name">
+                     tooltip="%catalogMenu.name"
+                     mode="FORCE_TEXT">
                 <visibleWhen
                         checkEnabled="true">
                 </visibleWhen>
@@ -215,9 +216,10 @@
                   id="com.elasticpath.cmclient.core.toolbars.actions">
               <command
                    commandId="com.elasticpath.cmclient.catalog.commands.createCatalog"
-                   icon="icons/catalog-create_default_34.png"
+                   icon="icons/add_circle_outline_18px.png"
                    id="com.elasticpath.cmclient.catalog.toolbarMenus.createCatalog"
-                   label="%commands.createCatalog.name"
+                   mode="FORCE_TEXT"
+                   label="%createCatalog.name"
                    tooltip="%commands.createCatalog.name">
                 <visibleWhen>
                    <with
@@ -233,9 +235,10 @@
              </command>
              <command
                    commandId="com.elasticpath.cmclient.catalog.commands.createVirtualCatalog"
-                   icon="icons/catalog-virtual-create_default_34.png"
+                   icon="icons/add_circle_outline_18px.png"
                    id="com.elasticpath.cmclient.catalog.toolbarMenus.createVirtualCatalog"
-                   label="%commands.createVirtualCatalog.name"
+                   mode="FORCE_TEXT"
+                   label="%createVirtualCatalog.name"
                    tooltip="%commands.createVirtualCatalog.name">
                 <visibleWhen>
                    <with
@@ -251,9 +254,10 @@
              </command>
              <command
                    commandId="com.elasticpath.cmclient.catalog.commands.editGlobalAttributes"
-                   icon="icons/attribute-edit_default_34.png"
+                   icon="icons/mode_edit_18px.png"
                    id="com.elasticpath.cmclient.catalog.toolbarMenus.editGlobalAttributes"
-                   label="%commands.editGlobalAttributes.name"
+                   mode="FORCE_TEXT"
+                   label="%editGlobalAttributes.name"
                    tooltip="%commands.editGlobalAttributes.name">
                 <visibleWhen>
                    <with
@@ -365,47 +369,47 @@
              priority="10"
              statePolicy="com.elasticpath.cmclient.catalog.policy.EditVirtualCatalogAuthorizationStatePolicy"
              targetId="editCatalogCategoryAction">
-       </statePolicyContribution>                    
+       </statePolicyContribution>
 	   <statePolicyContribution
              priority="10"
              statePolicy="com.elasticpath.cmclient.catalog.policy.ReorderCategoryAuthorizationStatePolicy"
              targetId="reorderCategoryUpAction">
-	   </statePolicyContribution>	   	   
+	   </statePolicyContribution>
 	   <statePolicyContribution
              priority="10"
              statePolicy="com.elasticpath.cmclient.catalog.policy.ReorderCategoryAuthorizationStatePolicy"
              targetId="reorderCategoryDownAction">
 	   </statePolicyContribution>
-	   
+
 	   <statePolicyContribution
              priority="10"
              statePolicy="com.elasticpath.cmclient.catalog.policy.AddLinkedCategoryAuthorizationStatePolicy"
              targetId="addLinkedCategoryAction">
-	   </statePolicyContribution>	   	  	   
+	   </statePolicyContribution>
 	   <statePolicyContribution
              priority="10"
              statePolicy="com.elasticpath.cmclient.catalog.policy.RemoveLinkedCategoryAuthorizationStatePolicy"
              targetId="removeLinkedCategoryAction">
 	   </statePolicyContribution>
-	   	   
+
 	   <statePolicyContribution
              priority="10"
              statePolicy="com.elasticpath.cmclient.catalog.policy.ExcludeLinkedCategoryAuthorizationStatePolicy"
              targetId="excludeLinkedCategoryAction">
-	   </statePolicyContribution>	   
+	   </statePolicyContribution>
 	   <statePolicyContribution
              priority="10"
              statePolicy="com.elasticpath.cmclient.catalog.policy.IncludeLinkedCategoryAuthorizationStatePolicy"
              targetId="includeLinkedCategoryAction">
 	   </statePolicyContribution>
-	   
-                    
+
+
        <statePolicyContribution
              priority="10"
              statePolicy="com.elasticpath.cmclient.catalog.policy.ProductListViewStatePolicy"
              targetId="productListView">
        </statePolicyContribution>
-       
+
        <statePolicyContribution
              priority="10"
              statePolicy="com.elasticpath.cmclient.catalog.policy.CreateCategoryAuthorizationStatePolicy"
@@ -425,8 +429,8 @@
              priority="10"
              statePolicy="com.elasticpath.cmclient.catalog.policy.EditDeleteCatalogAndCategoryAutorizationStatePolicy"
              targetId="deleteCatalogCategory">
-       </statePolicyContribution>     
-       
+       </statePolicyContribution>
+
        <statePolicyContribution
              priority="10"
              statePolicy="com.elasticpath.cmclient.catalog.policy.CreateProductAuthorizationStatePolicy"
@@ -456,13 +460,13 @@
              priority="10"
              statePolicy="com.elasticpath.cmclient.catalog.policy.CatalogCategoryTypeSectionPolicy"
              targetId="catalogCategoryTypesSection">
-       </statePolicyContribution>                   
+       </statePolicyContribution>
        <statePolicyContribution
              priority="10"
              statePolicy="com.elasticpath.cmclient.catalog.policy.CatalogSkuOptionDialogPolicy"
              targetId="addEditSkuOptionDialog">
        </statePolicyContribution>
-       
+
        <statePolicyContribution
              priority="10"
              statePolicy="com.elasticpath.cmclient.catalog.policy.CatalogProductTypeSectionPolicy"
@@ -477,7 +481,7 @@
             priority="10"
             statePolicy="com.elasticpath.cmclient.catalog.policy.AddEditBrandDialogStatePolicy"
             targetId="addEditBrandDialog">
-       </statePolicyContribution>           
+       </statePolicyContribution>
        <statePolicyContribution
              priority="10"
              statePolicy="com.elasticpath.cmclient.catalog.policy.CatalogCartItemModifierGroupsSectionPolicy"
@@ -492,7 +496,7 @@
              priority="10"
              statePolicy="com.elasticpath.cmclient.catalog.policy.CatalogSkuOptionValueDialogPolicy"
              targetId="catalogSkuOptionValueAddEditDialog">
-       </statePolicyContribution>                   
+       </statePolicyContribution>
 	   <statePolicyContribution
              priority="10"
              statePolicy="com.elasticpath.cmclient.catalog.policy.ProductTypeAddEditWizardPolicy"

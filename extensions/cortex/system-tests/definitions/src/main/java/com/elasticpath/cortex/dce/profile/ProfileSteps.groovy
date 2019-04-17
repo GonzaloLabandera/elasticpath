@@ -16,6 +16,7 @@ import com.elasticpath.cortexTestObjects.Registration
 class ProfileSteps {
 
 	def static newUserName
+	def static newEmail
 
 	@When('^I create a new shopper profile with family-name (.+), given-name (.+), password (.+), and unique user name$')
 	static void createNewShopperProfile(String familyName, String givenName, String password) {
@@ -59,17 +60,27 @@ class ProfileSteps {
 				.isEqualTo(givenName)
 	}
 
-	/**
-	 * The OOTB Cortex behaviours is that in order to update email, user needs to use createemailaction
-	 * which will replace the old email value.
-	 */
-	@When('^(?:I create my email id|I update my email id with new email) and I can see the new email id in my profile$')
+	@When('^I navigate to add email form$')
+	static void navigateToEmailForm() {
+		Profile.navigateToAddEmailForm()
+	}
+
+	@When('^I create an email$')
 	static void updateProfileEmail() {
-		def userName = UUID.randomUUID().toString() + "@elasticpath.com"
-		Profile.addEmail(userName)
+		newEmail = generateUniqueEmail()
+		Profile.addEmail(newEmail)
+	}
+
+	@Then('^I can see the new email id in my profile$')
+	static void verifyProfileEmail() {
+		client.GET("/")
+				.defaultprofile()
+				.emails()
+				.element()
+				.stopIfFailure()
 		assertThat(client["email"])
 				.as("The email is not as expected")
-				.isEqualTo(userName)
+				.isEqualTo(newEmail)
 	}
 
 	@When('^I create invalid email (.*)$')
@@ -88,6 +99,11 @@ class ProfileSteps {
 		def profileURI = client.body.self.uri
 		client.authAsRegisteredUser()
 		Profile.updateProfile(profileURI, familyName, givenName)
+	}
+
+	@When('^I navigate to registration form$')
+	static void navigateToRegistrationForm() {
+		Registration.getRegistrationForm()
 	}
 
 	@When('^I POST to registration with body (.+)$')

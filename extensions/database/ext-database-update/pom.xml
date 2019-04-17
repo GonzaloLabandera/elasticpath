@@ -92,6 +92,25 @@
 						<artifactId>maven-resources-plugin</artifactId>
 						<executions>
 							<execution>
+								<id>copy-default-conf-files</id>
+								<phase>process-sources</phase>
+								<goals>
+									<goal>copy-resources</goal>
+								</goals>
+								<configuration>
+									<outputDirectory>${user.home}/ep</outputDirectory>
+									<overwrite>true</overwrite>
+									<useBuildFilters>false</useBuildFilters>
+									<resources>
+										<resource>
+											<directory>${project.build.outputDirectory}/environments/default/files</directory>
+											<filtering>false</filtering>
+											<includes>**/**</includes>
+										</resource>
+									</resources>
+								</configuration>
+							</execution>
+							<execution>
 								<id>copy-conf-files</id>
 								<phase>process-sources</phase>
 								<goals>
@@ -127,6 +146,25 @@
 					<plugin>
 						<artifactId>maven-resources-plugin</artifactId>
 						<executions>
+							<execution>
+								<id>copy-default-conf-files</id>
+								<phase>process-sources</phase>
+								<goals>
+									<goal>copy-resources</goal>
+								</goals>
+								<configuration>
+									<outputDirectory>${user.home}/ep</outputDirectory>
+									<overwrite>true</overwrite>
+									<useBuildFilters>false</useBuildFilters>
+									<resources>
+										<resource>
+											<directory>${project.build.outputDirectory}/environments/default/files</directory>
+											<filtering>false</filtering>
+											<includes>**/**</includes>
+										</resource>
+									</resources>
+								</configuration>
+							</execution>
 							<execution>
 								<id>copy-conf-files</id>
 								<phase>process-sources</phase>

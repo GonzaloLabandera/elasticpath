@@ -74,6 +74,13 @@
 				WHERE c.guid = ?1
 			</query>
         </named-query>
+        <named-query name="CUSTOMER_EXISTS_BY_GUID">
+			<query>
+				SELECT 1
+				FROM CustomerImpl c
+				WHERE c.guid = ?1
+			</query>
+        </named-query>
         <named-query name="CUSTOMER_GUID_SELECT_BY_GUID">
 			<query>
 				SELECT c.guid
@@ -85,38 +92,6 @@
 			<query>
 				SELECT c
 				FROM CustomerImpl c
-			</query>
-        </named-query>
-        <named-query name="CUSTOMER_FIND_BY_USERID">
-			<query>
-				SELECT c
-				FROM CustomerImpl c
-				WHERE c.userId = ?1
-			</query>
-        </named-query>
-        <named-query name="CUSTOMER_FIND_BY_EMAIL">
-			<query>
-				SELECT c
-				FROM CustomerImpl c
-				INNER JOIN c.profileValueMap cp
-				WHERE cp.localizedAttributeKey = 'CP_EMAIL'
-				AND cp.shortTextValue = ?1
-			</query>
-        </named-query>
-        <named-query name="CUSTOMER_UID_FIND_BY_USERID">
-			<query>
-				SELECT c.uidPk
-				FROM CustomerImpl as c
-				WHERE c.userId = ?1
-			</query>
-        </named-query>
-        <named-query name="CUSTOMER_UID_FIND_BY_EMAIL">
-			<query>
-				SELECT c.uidPk
-				FROM CustomerImpl as c
-				INNER JOIN c.profileValueMap as cp
-				WHERE cp.localizedAttributeKey = 'CP_EMAIL'
-				AND cp.shortTextValue = ?1
 			</query>
         </named-query>
         <named-query name="CUSTOMER_UIDS_ALL">
@@ -134,11 +109,14 @@
 				OR c.uidPk IN (SELECT o.customer.uidPk from OrderImpl o))
 				AND c.uidPk IN (:list)</query>
         </named-query>
-        <named-query name="CUSTOMER_UIDS_SELECT_BY_MODIFIED_DATE">
+        <named-query name="SEARCHABLE_CUSTOMER_UIDS_SELECT_BY_MODIFIED_DATE">
 			<query>
-				SELECT c.uidPk
-				FROM CustomerImpl as c
+				SELECT DISTINCT(c.uidPk)
+				FROM CustomerImpl c
+				INNER JOIN c.profileValueMap cp
 				WHERE c.lastEditDate &gt;= ?1
+				AND (cp.localizedAttributeKey = 'CP_FIRST_NAME'
+				OR cp.localizedAttributeKey = 'CP_LAST_NAME')
 			</query>
         </named-query>
         <named-query name="CUSTOMER_STATUS_BY_UID">
@@ -148,50 +126,24 @@
 				WHERE c.uidPk = ?1
 			</query>
         </named-query>
-        <named-query name="CUSTOMER_FIND_BY_USERID_BY_STORE">
+        <named-query name="CUSTOMER_GUIDS_BY_USERID_IN_STORE_AND_ASSOCIATED_STORES">
 			<query>
-				SELECT c
-				FROM CustomerImpl c INNER JOIN c.store st
-				WHERE c.userId = ?1
-				AND UPPER(st.code) = UPPER(?2)
-			</query>
-        </named-query>
-        <named-query name="OTHER_CUSTOMER_COUNT_BY_EMAIL_BY_STORE_EXCLUDING_ANONYMOUS">
-			<query>
-				SELECT count(c.uidPk)
-				FROM CustomerImpl c
-				INNER JOIN c.profileValueMap cp
-				INNER JOIN c.profileValueMap cp2
-				WHERE cp.localizedAttributeKey = 'CP_EMAIL'
-				AND cp.shortTextValue = ?1
-				AND UPPER(c.storeCode) = UPPER(?2)
-				AND c.guid &lt;&gt; ?3
-				AND cp2.localizedAttributeKey = 'CP_ANONYMOUS_CUST'
-				AND cp2.booleanValue = FALSE
-			</query>
-        </named-query>
-          <named-query name="OTHER_CUSTOMER_COUNT_BY_USERID_BY_STORES_EXCLUDING_ANONYMOUS">
-			<query>
-				SELECT COUNT(customer.uidPk)
-				FROM CustomerImpl customer
-				INNER JOIN customer.profileValueMap valueMap, StoreImpl store
+				SELECT customer.guid
+				FROM CustomerImpl customer, StoreImpl store
 				WHERE customer.userId = ?1
 				AND UPPER(customer.storeCode) = UPPER(store.code)
-				AND customer.guid &lt;&gt; ?2
-				AND valueMap.localizedAttributeKey = 'CP_ANONYMOUS_CUST'
-				AND valueMap.booleanValue = FALSE
 				AND (
 						store.uidPk IN (
 							SELECT associatedIds
 							FROM StoreImpl innerStore
 							INNER JOIN innerStore.associatedStoreUids associatedIds
-							WHERE UPPER(innerStore.code) = UPPER(?3)
+							WHERE UPPER(innerStore.code) = UPPER(?2)
 						)
 					OR
 						store.uidPk = (
 							SELECT innerStore.uidPk
 							FROM StoreImpl innerStore
-							WHERE UPPER(innerStore.code) = UPPER(?3)
+							WHERE UPPER(innerStore.code) = UPPER(?2)
 						)
 				)
 
@@ -204,17 +156,6 @@
 				WHERE c.storeCode = st.code
 				AND c.userId = ?1
 				AND st.uidPk IN (:list)
-			</query>
-        </named-query>
-        <named-query name="CUSTOMER_FIND_BY_EMAIL_IN_STORES">
-			<query>
-				SELECT c
-				FROM CustomerImpl c, StoreImpl s
-				INNER JOIN c.profileValueMap cp
-				WHERE cp.localizedAttributeKey = 'CP_EMAIL'
-				AND cp.shortTextValue = ?1
-				AND s.code = c.storeCode
-				AND s.uidPk IN (:list)
 			</query>
         </named-query>
         <named-query name="CUSTOMER_LAST_MODIFIED_DATE">
@@ -263,16 +204,6 @@
 				WHERE cs.guid = ?1
 			</query>
         </named-query>
-        <named-query name="CUSTOMER_SESSION_FIND_BY_CUSTOMER_USERNAME_AND_STORE_CODE">
-            <query>
-				SELECT cs
-				FROM CustomerSessionMementoImpl AS cs, ShopperMementoImpl sh
-				INNER JOIN sh.customer AS c
-				WHERE cs.shopperUid = sh.uidPk
-				AND c.userId = ?1
-				AND UPPER(sh.storeCode) = UPPER(?2) ORDER BY cs.lastAccessedDate DESC
-            </query>
-        </named-query>	
 		<named-query name="CUSTOMER_SESSION_DELETE_BY_GUID_LIST">
 			<query>
                 DELETE FROM CustomerSessionMementoImpl cs 

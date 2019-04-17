@@ -280,7 +280,8 @@ public class PriceRepositoryImplTest {
 		repository.getPriceRange(STORE_CODE, PRODUCT_GUID_CODE)
 				.test()
 				.assertNoErrors()
-				.assertValue(offerPriceRangeEntity -> offerPriceRangeEntity.getListPriceRange().equals(offerPriceRangeEntity.getPurchasePriceRange()));
+				.assertValue(offerPriceRangeEntity -> offerPriceRangeEntity.getListPriceRange()
+						.equals(offerPriceRangeEntity.getPurchasePriceRange()));
 
 	}
 

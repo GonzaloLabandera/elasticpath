@@ -11,6 +11,7 @@ import org.eclipse.osgi.util.NLS;
 import com.elasticpath.cmclient.admin.customers.AdminCustomersMessages;
 import com.elasticpath.cmclient.admin.customers.dialogs.AttributeDialog;
 import com.elasticpath.cmclient.admin.customers.views.AttributeListView;
+import com.elasticpath.cmclient.core.CorePlugin;
 import com.elasticpath.cmclient.core.ServiceLocator;
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.attribute.Attribute;
@@ -43,7 +44,7 @@ public class EditAttributeAction extends Action {
 		if (attributeToEdit == null) {
 			MessageDialog.openInformation(listView.getSite().getShell(), AdminCustomersMessages.get().EditAttribute,
 				NLS.bind(AdminCustomersMessages.get().ProfileAttributeNoLongerExists,
-				attribute.getKey(), attribute.getName()));
+				attribute.getKey(), attribute.getDisplayName(CorePlugin.getDefault().getDefaultLocale())));
 			listView.refreshViewerInput();
 		} else {
 			boolean dialogOk = AttributeDialog.openEditDialog(listView.getSite().getShell(), attributeToEdit);

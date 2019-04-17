@@ -1,8 +1,8 @@
 $tool_bar_padding: 3px;
 $tool_bar_spacing: 2px;
 $tool_item_padding: 4px;
-$tool_item_spacing: 5px;
-
+$tool_item_spacing: 4px;
+$button_hover_color: #F2F6FA;
 
 Tool {
 
@@ -38,14 +38,15 @@ Tool {
 			&,
 			&:first,
 			&:last {
+				padding: 5px 2px;
 				&:hover {
-					background-color: $gray-fair;
+					background-color: $button_hover_color;
 					background-image: none;
-					border: 1px solid $widget_border_color;
+					border: 1px solid $button_hover_color;
 				}
-				&:selected,
-				&:pressed {
-					border: 1px solid $primary-color;
+				&:active {
+					background-color: $button_hover_color;
+					border: 1px solid $button_hover_color;
 				}
 				&:disabled {
 					color: $gray-light;

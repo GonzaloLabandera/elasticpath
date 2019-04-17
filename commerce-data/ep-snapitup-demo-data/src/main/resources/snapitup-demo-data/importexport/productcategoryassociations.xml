@@ -86959,7 +86959,7 @@
     <catalog code="SNAPITUPUS">
         <category code="90000017">
             <default>true</default>
-            <featuredorder>0</featuredorder>
+            <featuredorder>1</featuredorder>
         </category>
     </catalog>
 </product>

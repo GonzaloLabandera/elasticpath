@@ -159,7 +159,7 @@
 		<property name="beanFactory" ref="coreBeanFactory"/>
 		<property name="persistenceEngine" ref="persistenceEngineTarget"/>
 		<property name="changeSetEnabledProvider">
-			<settings:setting path="COMMERCE/SYSTEM/CHANGESETS/enable"/>
+			<settings:setting path="COMMERCE/SYSTEM/CHANGESETS/enable" systemPropertyOverrideKey="ep.changesets.enabled"/>
 		</property>
 	</bean>
 

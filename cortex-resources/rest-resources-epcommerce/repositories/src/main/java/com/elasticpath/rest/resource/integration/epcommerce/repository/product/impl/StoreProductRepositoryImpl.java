@@ -72,7 +72,7 @@ public class StoreProductRepositoryImpl implements StoreProductRepository {
 	@Override
 	@CacheResult
 	public Single<Product> findByGuid(final String productGuid) {
-		return reactiveAdapter.fromServiceAsSingle(() -> coreProductLookup.findByGuid(productGuid), "Product not found");
+		return reactiveAdapter.fromServiceAsSingle(() -> coreProductLookup.findByGuid(productGuid), "Offer not found");
 	}
 
 	@Override
@@ -90,7 +90,7 @@ public class StoreProductRepositoryImpl implements StoreProductRepository {
 	private Single<StoreProduct> findDisplayableStoreProductWithAttributesForProduct(final String storeCode, final Product product) {
 		return storeRepository.findStoreAsSingle(storeCode)
 				.flatMap(store -> reactiveAdapter
-						.fromServiceAsSingle(() -> getProductForStore(product, store), "Store product not found"));
+						.fromServiceAsSingle(() -> getProductForStore(product, store), "Offer not found in store"));
 	}
 
 	@CacheResult

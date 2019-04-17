@@ -44,8 +44,7 @@ public class ApplicationStartupTest {
 	public void testSearchServer() throws FailingHttpStatusCodeException, IOException {
 
 		final WebClient webClient = new WebClient();
-		final Page page = webClient.getPage("http://localhost:"
-				+ settings.getProperty("cargo.port") + settings.getProperty("search.context") + "/status");
+		final Page page = webClient.getPage(getStatusUrl("search.context"));
 
 		assertEquals(HTTP_STATUS_OK, page.getWebResponse().getStatusCode());
 		assertTrue(page instanceof TextPage);
@@ -62,14 +61,13 @@ public class ApplicationStartupTest {
 	 */
 	@Test
 	public void testBatchServer() throws FailingHttpStatusCodeException, IOException {
-		final String QuartzInstanceMBeanName = "quartz:type=QuartzScheduler,name=BatchJmxScheduler,instanceId=NONE_CLUSTER";
+		final String quartzInstanceMBeanName = "quartz:type=QuartzScheduler,name=BatchJmxScheduler,instanceId=NONE_CLUSTER";
 		final WebClient webClient = new WebClient();
-		final Page page = webClient.getPage("http://localhost:"
-				+ settings.getProperty("cargo.port") + settings.getProperty("batch.context") + "/status");
+		final Page page = webClient.getPage(getStatusUrl("batch.context"));
 
 		assertEquals(HTTP_STATUS_OK, page.getWebResponse().getStatusCode());
 		assertTrue(page instanceof TextPage);
-		assertNotNull("Quartz instance not found", jmxClient.getObjectInstance(QuartzInstanceMBeanName));
+		assertNotNull("Quartz instance not found", jmxClient.getObjectInstance(quartzInstanceMBeanName));
 
 		webClient.closeAllWindows();
 	}
@@ -86,8 +84,7 @@ public class ApplicationStartupTest {
 
 		final WebClient webClient = new WebClient();
 
-		final Page page = webClient.getPage("http://localhost:"
-				+ settings.getProperty("cargo.port") + settings.getProperty("cm.context") + settings.getProperty("cm.status.url"));
+		final Page page = webClient.getPage(getBaseUrl() + settings.getProperty("cm.context") + settings.getProperty("cm.status.url"));
 
 		assertEquals(HTTP_STATUS_OK, page.getWebResponse().getStatusCode());
 		assertTrue(page instanceof TextPage);
@@ -105,8 +102,7 @@ public class ApplicationStartupTest {
 	public void testIntegrationServer() throws FailingHttpStatusCodeException, IOException {
 
 		final WebClient webClient = new WebClient();
-		final Page page = webClient.getPage("http://localhost:"
-				+ settings.getProperty("cargo.port") + settings.getProperty("integration.context") + "/status");
+		final Page page = webClient.getPage(getStatusUrl("integration.context"));
 
 		assertEquals(HTTP_STATUS_OK, page.getWebResponse().getStatusCode());
 		assertTrue(page instanceof TextPage);
@@ -120,8 +116,7 @@ public class ApplicationStartupTest {
 		final WebClient webClient = new WebClient();
 		webClient.setJavaScriptEnabled(false);
 
-		final Page page = webClient.getPage("http://localhost:"
-			+ settings.getProperty("cargo.port") + settings.getProperty("activemq.context"));
+		final Page page = webClient.getPage(getBaseUrl() + settings.getProperty("activemq.context"));
 
 		assertEquals(HTTP_STATUS_OK, page.getWebResponse().getStatusCode());
 		assertTrue(page instanceof HtmlPage);
@@ -139,13 +134,20 @@ public class ApplicationStartupTest {
 	@Test
 	public void testCortexServer() throws FailingHttpStatusCodeException, IOException {
 		final WebClient webClient = new WebClient();
-		final Page page = webClient.getPage("http://localhost:"
-				+ settings.getProperty("cargo.port") + settings.getProperty("cortex.context") + "/status");
+		final Page page = webClient.getPage(getStatusUrl("cortex.context"));
 
 		assertEquals(HTTP_STATUS_OK, page.getWebResponse().getStatusCode());
 		assertTrue(page instanceof TextPage);
 
 		webClient.closeAllWindows();
+	}
+
+	private String getBaseUrl() {
+		return "http://localhost:" + settings.getProperty("cargo.port");
+	}
+
+	private String getStatusUrl(final String contextProperty) {
+		return getBaseUrl() + settings.getProperty(contextProperty) + "/status";
 	}
 
 }

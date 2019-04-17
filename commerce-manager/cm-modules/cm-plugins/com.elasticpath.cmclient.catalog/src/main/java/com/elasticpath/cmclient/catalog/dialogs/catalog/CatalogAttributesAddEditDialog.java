@@ -3,7 +3,12 @@
  */
 package com.elasticpath.cmclient.catalog.dialogs.catalog;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
@@ -13,6 +18,8 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.osgi.util.NLS;
 import org.eclipse.swt.custom.CCombo;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
@@ -25,11 +32,13 @@ import com.elasticpath.cmclient.catalog.CatalogPlugin;
 import com.elasticpath.cmclient.catalog.editors.model.CatalogModel;
 import com.elasticpath.cmclient.catalog.editors.model.CatalogModelImpl;
 import com.elasticpath.cmclient.core.CoreMessages;
+import com.elasticpath.cmclient.core.CorePlugin;
 import com.elasticpath.cmclient.core.ObjectGuidReceiver;
 import com.elasticpath.cmclient.core.ServiceLocator;
 import com.elasticpath.cmclient.core.binding.EpControlBindingProvider;
 import com.elasticpath.cmclient.core.binding.EpDialogSupport;
 import com.elasticpath.cmclient.core.binding.ObservableUpdateValueStrategy;
+import com.elasticpath.cmclient.core.ui.framework.EpLocalizedPropertyController;
 import com.elasticpath.cmclient.core.ui.framework.IEpLayoutData;
 import com.elasticpath.cmclient.core.validation.EpValidatorFactory;
 import com.elasticpath.cmclient.policy.StatePolicy;
@@ -41,21 +50,22 @@ import com.elasticpath.domain.attribute.Attribute;
 import com.elasticpath.domain.attribute.AttributeMultiValueType;
 import com.elasticpath.domain.attribute.AttributeType;
 import com.elasticpath.domain.attribute.AttributeUsage;
+import com.elasticpath.domain.attribute.impl.AttributeImpl;
 import com.elasticpath.service.attribute.AttributeService;
 
 /**
  * The class of add/edit attribute dialog presentation.
  */
-@SuppressWarnings({ "PMD.GodClass" })
-public class CatalogAttributesAddEditDialog extends AbstractPolicyAwareDialog implements ObjectGuidReceiver {
+@SuppressWarnings({ "PMD.GodClass", "PMD.TooManyFields" })
+public class CatalogAttributesAddEditDialog extends AbstractPolicyAwareDialog implements ObjectGuidReceiver, SelectionListener {
 
 	private static final int DIALOG_NUMBER_OF_COLUMN = 1;
 
-	private static final int MAIN_COMPOSITE_NUMBER_OF_COLUMN = 2;
+	private static final int MAIN_COMPOSITE_NUMBER_OF_COLUMN = 3;
 
 	private Text attrKeyText;
 
-	private Text attrNameText;
+	private Text attrDisplayNameText;
 
 	private CCombo attrUsageCombo;
 
@@ -83,16 +93,23 @@ public class CatalogAttributesAddEditDialog extends AbstractPolicyAwareDialog im
 
 	private CatalogModel catalogModel;
 
-
 	private PolicyActionContainer nameFieldContainer;
 
 	private PolicyActionContainer addEditAttributeNonEditableDialogContainer;
 	
 	private PolicyActionContainer multiLangCheckContainer; 
 	
-	private PolicyActionContainer multiValuesCheckContainer; 
+	private PolicyActionContainer multiValuesCheckContainer;
 	
 	private final DataBindingContext dataBindingContext = new DataBindingContext();
+
+	private final Collection<Locale> supportedLocales;
+
+	private EpLocalizedPropertyController nameController;
+
+	private CCombo languageCombo;
+
+	private final Locale selectedLocale;
 
 	/**
 	 * @param parentShell
@@ -100,18 +117,23 @@ public class CatalogAttributesAddEditDialog extends AbstractPolicyAwareDialog im
 	 * @param attribute
 	 *            the attribute to be edited or added.
 	 * @param isGlobal whether this is a global attribute
-	 * @param catalogModel the {@link com.elasticpath.cmclient.catalog.editors.model.CatalogModel} 
+	 * @param catalogModel the {@link com.elasticpath.cmclient.catalog.editors.model.CatalogModel}
+	 * @param selectedLocale the selected locale to display localized properties
 	 */
 	public CatalogAttributesAddEditDialog(final Shell parentShell,
 		final Attribute attribute,
 		final boolean isGlobal,
-		final CatalogModel catalogModel) {
+		final CatalogModel catalogModel,
+		final Locale selectedLocale) {
 
 		super(parentShell, DIALOG_NUMBER_OF_COLUMN, false);
 		this.attributeService = ServiceLocator.getService(ContextIdNames.ATTRIBUTE_SERVICE);
 		initializeDialog(attribute, isGlobal, attributeService.getAttributeTypeMap(), getUsageMap());
+		// TODO Review what list of locales to present if there is no Catalog
+		supportedLocales = catalogModel == null ? Arrays.asList(Locale.getAvailableLocales()) : catalogModel.getCatalog().getSupportedLocales();
 		editMode = attribute != null;
 		this.catalogModel = catalogModel;
+		this.selectedLocale = selectedLocale;
 	}
 
 	private void initializeDialog(final Attribute attribute, final boolean isGlobal, final Map<String, String> typeMap,
@@ -128,8 +150,11 @@ public class CatalogAttributesAddEditDialog extends AbstractPolicyAwareDialog im
 	 */
 	public CatalogAttributesAddEditDialog() {
 		super(PlatformUI.getWorkbench().getActiveWorkbenchWindow().getShell(), 2, false);
+		this.supportedLocales = Arrays.asList(Locale.getAvailableLocales());
+		this.selectedLocale = CorePlugin.getDefault().getDefaultLocale();
+
 	}
-	
+
 	/**
 	 * Create a custom update strategy to update the model based on the selected attribute type.
 	 */
@@ -220,9 +245,11 @@ public class CatalogAttributesAddEditDialog extends AbstractPolicyAwareDialog im
 		attrUsageCombo.setVisibleItemCount(attrUsageCombo.getItemCount());
 		attrTypeCombo.setVisibleItemCount(attrTypeCombo.getItemCount());
 
+		final List<Locale> localesList = new ArrayList<>(supportedLocales);
+		nameController.populate(localesList, selectedLocale, getAttribute().getLocalizedProperties());
+
 		if (editMode) {
 			attrKeyText.setText(attribute.getKey());
-			attrNameText.setText(attribute.getName());
 
 			attrUsageCombo.setText(attribute.getAttributeUsage().toString());
 			attrTypeCombo.setText(CoreMessages.get().getMessage(attribute
@@ -280,12 +307,10 @@ public class CatalogAttributesAddEditDialog extends AbstractPolicyAwareDialog im
 		return attribute;
 	}
 
+
 	@Override
 	protected void bindControls() {
-		EpControlBindingProvider.getInstance().bind(dataBindingContext,
-				this.attrNameText, getAttribute(),
-				"name", EpValidatorFactory.STRING_255_REQUIRED, //$NON-NLS-1$
-				null, true);
+		nameController.bind();
 
 		EpControlBindingProvider.getInstance().bind(dataBindingContext,
 				this.attrKeyText, getAttribute(),
@@ -361,24 +386,17 @@ public class CatalogAttributesAddEditDialog extends AbstractPolicyAwareDialog im
 	private AttributeType getAttributeType(final String typekey) {
 		return AttributeType.valueOf(Integer.parseInt(typekey));
 	}
-	
+
 	@Override
 	protected void okPressed() {
 		this.setErrorMessage(null);
-		if (editMode) {
-			if (isNameExist()) {
-				return;	
-			}
-		} else {
-			if (isKeyExist() || isNameExist()) {
-				return;	
-			}		
+		if (!editMode && isKeyExist()) {
+			return;
 		}
 
 		performSaveOperation();
 		super.okPressed();
 	}
-	
 
 	/**
 	 * Currently does nothing, but should be overridden if the dialog should actually save the categoryType.
@@ -387,38 +405,6 @@ public class CatalogAttributesAddEditDialog extends AbstractPolicyAwareDialog im
 	protected void performSaveOperation() {
 		// do nothing
 	}
-	
-	/**
-	 * Returns <code>true</code> if the entered attribute name already exists 
-	 * within attribute usage scope, false otherwise.
-	 * 
-	 * @return <code>true</code> if the entered attribute name already exists 
-	 * within attribute usage scope, false otherwise.
-	 */
-	private boolean isNameExist() {
-		boolean nameExists = attributeService.nameExistsInAttributeUsage(attribute);
-		if (nameExists) {
-			setErrorMessage(
-				NLS.bind(CatalogMessages.get().AttributeAddDialog_NameExists_ErrMsg,
-				attribute.getName()));
-			return true;
-		}
-		
-		//validates the model (newly added items)
-		if (catalogModel != null) {
-			Set<Attribute> addedItems = catalogModel.getAttributeTableItems().getAddedItems();
-			for (Attribute addedItem : addedItems) {
-				if (addedItem.getName().equals(attribute.getName())) {
-					setErrorMessage(
-						NLS.bind(CatalogMessages.get().AttributeAddDialog_NameExists_ErrMsg,
-						attribute.getName()));
-					return true;
-				}
-			}
-		}
-		
-		return false;
-	}	
 	
 	/**
 	 * Returns <code>true</code> if the entered attribute key already exists; false otherwise.
@@ -469,43 +455,53 @@ public class CatalogAttributesAddEditDialog extends AbstractPolicyAwareDialog im
 		multiLangCheckContainer.setPolicyDependent(attribute);
 		multiValuesCheckContainer.setPolicyDependent(attribute);
 
+		final IEpLayoutData labelData = dialogComposite.createLayoutData(IEpLayoutData.END, IEpLayoutData.FILL, false, false);
+		final IEpLayoutData fieldData = dialogComposite.createLayoutData(IEpLayoutData.FILL, IEpLayoutData.FILL, true, false);
+		final IEpLayoutData fieldData2 = dialogComposite.createLayoutData(IEpLayoutData.FILL, IEpLayoutData.FILL, false, false, 2, 1);
+
 		IPolicyTargetLayoutComposite mainComposite = dialogComposite.addGridLayoutComposite(MAIN_COMPOSITE_NUMBER_OF_COLUMN, false,
 				dialogComposite.createLayoutData(IEpLayoutData.FILL, IEpLayoutData.FILL, true, true),
 				addEditAttributeNonEditableDialogContainer);
 
-		final IEpLayoutData labelData = mainComposite.createLayoutData(IEpLayoutData.END, IEpLayoutData.FILL);
-		final IEpLayoutData fieldData = mainComposite.createLayoutData(IEpLayoutData.FILL, IEpLayoutData.FILL, true, false);
-
-		final IEpLayoutData nameFieldComposite = mainComposite.createLayoutData(IEpLayoutData.FILL, IEpLayoutData.FILL, true, false, 4, 1);
-		final int numberOfColumnsInDialog = 3;
-		mainComposite.addGridLayoutComposite(numberOfColumnsInDialog, false, nameFieldComposite, addEditAttributeNonEditableDialogContainer);
-
 		mainComposite.addLabelBoldRequired(CatalogMessages.get().AttributeAddDialog_AttributeKey,
 				labelData, addEditAttributeNonEditableDialogContainer);
-		attrKeyText = mainComposite.addTextField(fieldData, addEditAttributeNonEditableDialogContainer);
+		attrKeyText = mainComposite.addTextField(fieldData2, addEditAttributeNonEditableDialogContainer);
 
 		mainComposite.addLabelBoldRequired(CatalogMessages.get().AttributeAddDialog_AttributeName, labelData, nameFieldContainer);
-		attrNameText = mainComposite.addTextField(fieldData, nameFieldContainer);
+		languageCombo = mainComposite.addComboBox(fieldData, nameFieldContainer);
+		attrDisplayNameText = mainComposite.addTextField(fieldData, nameFieldContainer);
+		nameController = EpLocalizedPropertyController.createEpLocalizedPropertyController(attrDisplayNameText, languageCombo,
+				AttributeImpl.LOCALIZED_PROPERTY_DISPLAY_NAME, true, dataBindingContext, EpValidatorFactory.MAX_LENGTH_255);
 
 		mainComposite.addLabelBoldRequired(CatalogMessages.get().AttributeAddDialog_AttributeUsage, labelData,
 				addEditAttributeNonEditableDialogContainer);
-		attrUsageCombo = mainComposite.addComboBox(fieldData, addEditAttributeNonEditableDialogContainer);
+		attrUsageCombo = mainComposite.addComboBox(fieldData2, addEditAttributeNonEditableDialogContainer);
 
 		mainComposite.addLabelBoldRequired(CatalogMessages.get().AttributeAddDialog_AttributeType, labelData,
 				addEditAttributeNonEditableDialogContainer);
-		attrTypeCombo = mainComposite.addComboBox(fieldData, addEditAttributeNonEditableDialogContainer);
+		attrTypeCombo = mainComposite.addComboBox(fieldData2, addEditAttributeNonEditableDialogContainer);
 
 		mainComposite.addLabelBold(CatalogMessages.get().AttributeAddDialog_MultiLanguage, labelData,
 				addEditAttributeNonEditableDialogContainer);
-		multiLangCheck = mainComposite.addCheckBoxButton(EMPTY_STRING, fieldData, multiLangCheckContainer);
+		multiLangCheck = mainComposite.addCheckBoxButton(EMPTY_STRING, fieldData2, multiLangCheckContainer);
 
 		mainComposite.addLabelBold(CatalogMessages.get().AttributeAddDialog_RequiredAttribute, labelData,
 				addEditAttributeNonEditableDialogContainer);
-		requiredCheck = mainComposite.addCheckBoxButton(EMPTY_STRING, fieldData, addEditAttributeNonEditableDialogContainer);
+		requiredCheck = mainComposite.addCheckBoxButton(EMPTY_STRING, fieldData2, addEditAttributeNonEditableDialogContainer);
 
 		mainComposite.addLabelBold(CatalogMessages.get().AttributeAddDialog_MultiValuesAllowed, labelData,
 				addEditAttributeNonEditableDialogContainer);
-		multiValuesCheck = mainComposite.addCheckBoxButton(EMPTY_STRING, fieldData, multiValuesCheckContainer);
+		multiValuesCheck = mainComposite.addCheckBoxButton(EMPTY_STRING, fieldData2, multiValuesCheckContainer);
+	}
+
+	@Override
+	public void widgetSelected(final SelectionEvent selectionEvent) {
+		// Not used.
+	}
+
+	@Override
+	public void widgetDefaultSelected(final SelectionEvent selectionEvent) {
+		// Not used.
 	}
 
 	@Override

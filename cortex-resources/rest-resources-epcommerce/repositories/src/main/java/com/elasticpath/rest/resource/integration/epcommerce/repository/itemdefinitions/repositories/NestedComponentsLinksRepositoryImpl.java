@@ -39,12 +39,13 @@ public class NestedComponentsLinksRepositoryImpl<I extends ItemDefinitionCompone
 	}
 
 	/**
-	 * Build the ItemDefinitionNestedComponentsIdentifier
+	 * Build the ItemDefinitionNestedComponentsIdentifier.
 	 *
 	 * @param identifier itemDefinitionComponentIdentifier
 	 * @return a ItemDefinitionNestedComponentsIdentifier
 	 */
-	protected Observable<ItemDefinitionNestedComponentsIdentifier> buildNestedComponentsIdentifier(final ItemDefinitionComponentIdentifier identifier) {
+	protected Observable<ItemDefinitionNestedComponentsIdentifier> buildNestedComponentsIdentifier(
+			final ItemDefinitionComponentIdentifier identifier) {
 		return Observable.just(ItemDefinitionNestedComponentsIdentifier.builder()
 				.withItemDefinitionComponent(identifier)
 				.build());

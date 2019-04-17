@@ -119,16 +119,6 @@ public class SolrIndexSearchResult implements IndexSearchResult, Serializable {
 	}
 
 	/**
-	 * Return the current result uid list.  Note: this is not part of the
-	 * IndexSearchResult interface and not intended for external use.
-	 *
-	 * @return the current result uid list.
-	 */
-	public List<Long> getResultUids() {
-		return results;
-	}
-
-	/**
 	 * Retrieves all of the results without pagination.
 	 *
 	 * @return a list of all results without pagination
@@ -346,8 +336,7 @@ public class SolrIndexSearchResult implements IndexSearchResult, Serializable {
 	}
 
 	@Override
-	public List<String> getFacetFields(final int maxResults) {
-		getResults(0, maxResults);
+	public List<String> getFacetFields() {
 		List<String> facetInfos = addDefaultFacets();
 		facetInfos.addAll(getSizeRangeFilterOptions().keySet());
 		facetInfos.addAll(getAttributeRangeFilterOptions().keySet());
@@ -377,8 +366,7 @@ public class SolrIndexSearchResult implements IndexSearchResult, Serializable {
 	}
 
 	@Override
-	public List<FacetValue> getFacetValues(final String facetGuid, final int maxResults) {
-		getResults(0, maxResults);
+	public List<FacetValue> getFacetValues(final String facetGuid) {
 		Locale locale = searchCriteria.getLocale();
 		final Facet facet = getFacetMap().get(facetGuid);
 		final Integer facetGroup = facet.getFacetGroup();
@@ -516,5 +504,10 @@ public class SolrIndexSearchResult implements IndexSearchResult, Serializable {
 	@Override
 	public void setSizeRangeFilterOptions(final Map<String, List<FilterOption<SizeRangeFilter>>> sizeRangeFilterOptions) {
 		this.sizeRangeFilterOptions = sizeRangeFilterOptions;
+	}
+
+	@Override
+	public List<Long> getCachedResultUids() {
+		return results;
 	}
 }

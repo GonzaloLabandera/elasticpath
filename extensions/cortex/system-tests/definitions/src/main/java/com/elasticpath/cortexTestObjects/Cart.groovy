@@ -58,14 +58,15 @@ class Cart extends CommonMethods {
 
 	static void verifyCartItemsBySkuCode(List<String> skuCodeList) {
 		CortexResponse.cartResponse = null
-		getCart()
-		LineItems.verifyLineItemsBySkuCode(skuCodeList)
+		for(String skuCode : skuCodeList){
+			getCart()
+			LineItems.verifyLineItemsBySkuCode(skuCode)
+		}
 	}
 
 	static void verifyCartItemsBySkuCode(String skuCode) {
-		List<String> skuList = new ArrayList<>()
-		skuList.add(skuCode)
-		verifyCartItemsBySkuCode(skuList)
+		getCart()
+		LineItems.verifyLineItemsBySkuCode(skuCode)
 	}
 
 	static void findCartElementBySkuCode(def skuCode) {
@@ -117,6 +118,15 @@ class Cart extends CommonMethods {
 		getCart()
 		client.lineitems()
 		client.DELETE(client.body.self.uri)
+	}
+
+	static void addItemsToCart(def items) {
+		getCart()
+		client.additemstocartform()
+				.additemstocartaction(
+				["items": items
+				])
+				.stopIfFailure()
 	}
 
 }

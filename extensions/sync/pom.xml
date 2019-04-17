@@ -16,6 +16,7 @@
 	<modules>
 		<module>ext-sync</module>
 		<module>ext-sync-cli</module>
+		<module>ext-sync-webapp</module>
 	</modules>
 </project>
 

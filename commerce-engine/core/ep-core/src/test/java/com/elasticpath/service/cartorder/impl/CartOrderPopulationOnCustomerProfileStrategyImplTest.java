@@ -38,14 +38,11 @@ public class CartOrderPopulationOnCustomerProfileStrategyImplTest {
 	private static final String CART_GUID = "CART_GUID";
 
 	private static final String STORE_CODE = "STORE_CODE";
-
-	private final CartOrderPopulationOnCustomerProfileStrategyImpl strategy = new CartOrderPopulationOnCustomerProfileStrategyImpl();
-
 	@Rule
 	public final JUnitRuleMockery context = new JUnitRuleMockery();
-
+	private final CartOrderPopulationOnCustomerProfileStrategyImpl strategy = new CartOrderPopulationOnCustomerProfileStrategyImpl();
 	private final BeanFactory prototypeBeanFactory = context.mock(BeanFactory.class);
-	
+
 	private final CartOrderShippingService cartOrderShippingService = context.mock(CartOrderShippingService.class);
 
 	private final ShoppingCart shoppingCart = context.mock(ShoppingCart.class);
@@ -53,7 +50,7 @@ public class CartOrderPopulationOnCustomerProfileStrategyImplTest {
 	private final Shopper shopper = context.mock(Shopper.class);
 
 	private final Customer customer = context.mock(Customer.class);
-	
+
 	private final Store store = context.mock(Store.class);
 
 	private final CartOrderCouponAutoApplier cartOrderCouponAutoApplier = context.mock(CartOrderCouponAutoApplier.class);
@@ -72,7 +69,7 @@ public class CartOrderPopulationOnCustomerProfileStrategyImplTest {
 		customerAddress.setGuid(CUSTOMER_ADDRESS_GUID);
 
 		context.checking(new Expectations() {
-			{				
+			{
 				oneOf(prototypeBeanFactory).getBean(ContextIdNames.CART_ORDER);
 				will(returnValue(new CartOrderImpl()));
 				allowing(shoppingCart).getStore();
@@ -87,8 +84,8 @@ public class CartOrderPopulationOnCustomerProfileStrategyImplTest {
 				will(returnValue(CART_GUID));
 				allowing(customer).getEmail();
 				will(returnValue("EMAIL"));
-				allowing(cartOrderCouponAutoApplier).filterAndAutoApplyCoupons(with(any(CartOrder.class)),
-						with(any(Store.class)), with(any(String.class)));
+				oneOf(customer).isAnonymous();
+				will(returnValue(true));
 			}
 		});
 	}
@@ -154,7 +151,7 @@ public class CartOrderPopulationOnCustomerProfileStrategyImplTest {
 		assertEquals("Persisted payment method should be the customer's default payment method.", paymentMethod,
 				result.getPaymentMethod());
 	}
-	
+
 	/**
 	 * Test create cart order without default shipping address.
 	 */
@@ -166,10 +163,10 @@ public class CartOrderPopulationOnCustomerProfileStrategyImplTest {
 		shouldHaveDefaultPaymentMethod(paymentMethod);
 
 		strategy.createCartOrder(shoppingCart);
-		
+
 		context.assertIsSatisfied();
 	}
-	
+
 	/**
 	 * Test create cart order with payment token as default.
 	 */
@@ -181,7 +178,7 @@ public class CartOrderPopulationOnCustomerProfileStrategyImplTest {
 		shouldHaveDefaultPaymentMethod(defaultToken);
 		CartOrder result = strategy.createCartOrder(shoppingCart);
 		assertEquals("Customer address GUIDs should be equal.", CUSTOMER_ADDRESS_GUID, result.getBillingAddressGuid());
-		assertEquals("Persisted payment method should be the customer's payment token.", defaultToken,	result.getPaymentMethod());
+		assertEquals("Persisted payment method should be the customer's payment token.", defaultToken, result.getPaymentMethod());
 	}
 
 	private void shouldContainBillingAddress(final CustomerAddress customerAddress) {
@@ -198,10 +195,10 @@ public class CartOrderPopulationOnCustomerProfileStrategyImplTest {
 			{
 				allowing(shoppingCart).getShopper();
 				will(returnValue(shopper));
-				
+
 				allowing(shopper).getStoreCode();
 				will(returnValue(STORE_CODE));
-				
+
 				oneOf(customer).getPreferredShippingAddress();
 				will(returnValue(customerAddress));
 
@@ -222,8 +219,8 @@ public class CartOrderPopulationOnCustomerProfileStrategyImplTest {
 	private PaymentMethod createPaymentMethod() {
 		return new PaymentTokenImpl.TokenBuilder().build();
 	}
-	
-	
+
+
 	private void shouldHaveDefaultPaymentMethod(final PaymentMethod paymentMethod) {
 		final CustomerPaymentMethods customerPaymentMethods = context.mock(CustomerPaymentMethods.class);
 		context.checking(new Expectations() {
@@ -233,6 +230,6 @@ public class CartOrderPopulationOnCustomerProfileStrategyImplTest {
 				atLeast(1).of(customerPaymentMethods).getDefault();
 				will(returnValue(paymentMethod));
 			}
-		});		
+		});
 	}
 }

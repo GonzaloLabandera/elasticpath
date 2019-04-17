@@ -34,3 +34,24 @@ Feature: Shipping Costs
     Examples:
       | ITEM_SKU     | ITEM_PRICE | PERCENTAGE_SHIPPING_COST | AMOUNT | CURRENCY | DISPLAY_AMOUNT |
       | physical_sku | 25         | CanadaPostExpress        | 2.50   | CAD      | $2.50          |
+
+  Scenario Outline: Shipping cost calculation with unit weight
+    And sku <SKU_1> has weight of <WEIGHT_1>
+    And sku <SKU_2> has weight of <WEIGHT_2>
+    And shipping option <SHIPPING_OPTION> has <SHIPPING_OPTION_VALUE> for <CALCULATION_METHOD>
+    When I add following items with quantity to the cart
+      | <SKU_1> | <QTY_1> |
+      | <SKU_2> | <QTY_2> |
+    Then the order shipping option <SHIPPING_OPTION> has cost of <SHIPPING_COST>
+    And I select shipping option <SHIPPING_OPTION>
+    And I make a purchase
+    Then purchase shipping option cost is <SHIPPING_COST>
+
+    Examples:
+      | SKU_1                   | QTY_1 | WEIGHT_1 | SKU_2        | QTY_2 | WEIGHT_2 | SHIPPING_OPTION                 | SHIPPING_OPTION_VALUE | CALCULATION_METHOD    | SHIPPING_COST |
+      | iphone10                | 2     | 3 KG     | FocUSsku     | 1     | 2.5 KG   | CanadaPostWeightPrice           | $5.50                 | price per unit weight | $46.75        |
+      | iphone10                | 1     | 3 KG     | physical_sku | 1     | 0 KG     | CanadaPostWeightPrice           | $5.50                 | price per unit weight | $16.50        |
+      | handsfree_shippable_sku | 1     | 0 KG     | physical_sku | 1     | 0 KG     | CanadaPostWeightPrice           | $5.50                 | price per unit weight | $0.00         |
+      | iphone10                | 2     | 3 KG     | FocUSsku     | 1     | 2.5 KG   | FixedPriceNoPromoShippingOption | $100.00               | fixed price           | $100.00       |
+      | iphone10                | 1     | 3 KG     | physical_sku | 1     | 0 KG     | CanadaPostExpress               | 10%                   | order total           | $80.20        |
+

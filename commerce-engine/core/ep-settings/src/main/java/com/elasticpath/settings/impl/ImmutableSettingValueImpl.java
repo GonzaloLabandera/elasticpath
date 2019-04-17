@@ -84,7 +84,7 @@ public class ImmutableSettingValueImpl implements SettingValue {
 	/**
 	 * Throws an UnsupportedOperationException.
 	 *
-	 * @param value the boolean value to set
+	 * @param value the integer value to set
 	 * @throws UnsupportedOperationException
 	 */
 	@Override

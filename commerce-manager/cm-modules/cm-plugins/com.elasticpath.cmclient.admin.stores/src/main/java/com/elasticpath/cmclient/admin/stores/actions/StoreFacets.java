@@ -84,12 +84,12 @@ public class StoreFacets {
 			}
 			Facet facet = new FacetImpl();
 			facet.setFieldKeyType(fieldKeyType);
+			facet.setFacetName(attribute.getDisplayName(defaultLocale));
 			facet.setFacetGuid(UUID.randomUUID().toString());
-			facet.setFacetName(attribute.getName());
 			facet.setStoreCode(storeCode);
 			facet.setFacetType(FacetType.NO_FACET.getOrdinal());
 			facet.setSearchableOption(true);
-			facet.setDisplayName(attribute.getName());
+			facet.setDisplayName(attribute.getDisplayName(defaultLocale));
 			facet.setBusinessObjectId(attribute.getKey());
 			facet.setFacetGroup(attribute.getAttributeUsage().getValue() == AttributeUsage.PRODUCT
 					? FacetGroup.PRODUCT_ATTRIBUTE.getOrdinal() : FacetGroup.SKU_ATTRIBUTE.getOrdinal());

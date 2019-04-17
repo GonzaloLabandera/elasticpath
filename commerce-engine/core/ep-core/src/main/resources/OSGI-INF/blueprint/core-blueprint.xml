@@ -212,6 +212,9 @@
 	<service ref="productService"
 			 interface="com.elasticpath.service.catalog.ProductService" />
 
+	<service ref="productBundleService"
+			 interface="com.elasticpath.service.catalog.ProductBundleService" />
+
 	<service ref="nonCachingProductSkuLookup"
 			 interface="com.elasticpath.service.catalog.ProductSkuLookup" ranking="100">
 		<service-properties>

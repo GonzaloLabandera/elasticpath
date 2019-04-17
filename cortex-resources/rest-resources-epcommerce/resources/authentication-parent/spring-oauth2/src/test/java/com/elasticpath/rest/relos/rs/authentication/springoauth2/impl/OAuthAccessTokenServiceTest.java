@@ -1,23 +1,17 @@
 /*
- * Copyright © 2015 Elastic Path Software Inc. All rights reserved.
+ * Copyright © 2019 Elastic Path Software Inc. All rights reserved.
  */
 package com.elasticpath.rest.relos.rs.authentication.springoauth2.impl;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
-import static org.assertj.core.api.Assertions.assertThat;
+
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-
-import com.elasticpath.rest.command.ExecutionResult;
-import com.elasticpath.rest.command.ExecutionResultFactory;
-import com.elasticpath.rest.relos.rs.authentication.springoauth2.dto.AccessTokenDto;
-import com.elasticpath.rest.relos.rs.authentication.springoauth2.security.TokenExpiryResolver;
-import com.elasticpath.rest.relos.rs.authentication.springoauth2.tokenstore.TokenStoreStrategy;
-import com.elasticpath.rest.relos.rs.authentication.springoauth2.transform.AccessTokenDtoTransformer;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -29,6 +23,13 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.security.oauth2.common.OAuth2AccessToken;
+
+import com.elasticpath.rest.command.ExecutionResult;
+import com.elasticpath.rest.command.ExecutionResultFactory;
+import com.elasticpath.rest.relos.rs.authentication.dto.AccessTokenDto;
+import com.elasticpath.rest.relos.rs.authentication.springoauth2.security.TokenExpiryResolver;
+import com.elasticpath.rest.relos.rs.authentication.springoauth2.tokenstore.TokenStoreStrategy;
+import com.elasticpath.rest.relos.rs.authentication.springoauth2.transform.AccessTokenDtoTransformer;
 
 /**
  * Test suite for {@link OAuthAccessTokenServiceImpl}.

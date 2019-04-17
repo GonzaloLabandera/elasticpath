@@ -34,6 +34,7 @@
 			<groupId>com.elasticpath</groupId>
 			<artifactId>ep-jms-test-support</artifactId>
 			<version>${dce.version}</version>
+			<scope>compile</scope>
 		</dependency>
 		<dependency>
 			<groupId>io.cucumber</groupId>
@@ -107,6 +108,9 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-checkstyle-plugin</artifactId>
+				<configuration>
+					<configLocation>${checkstyle.itest.ruleset}</configLocation>
+				</configuration>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>

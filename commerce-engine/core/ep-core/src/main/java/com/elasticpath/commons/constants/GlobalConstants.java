@@ -15,6 +15,16 @@ public final class GlobalConstants {
 	public static final int SHORT_TEXT_MAX_LENGTH = 255;
 
 	/**
+	 * Medium text maximum length.
+	 */
+	public static final int MEDIUM_TEXT_MAX_LENGTH = 512;
+
+	/**
+	 * Medium-long text maximum length.
+	 */
+	public static final int MEDIUM_LONG_TEXT_MAX_LENGTH = 1024;
+
+	/**
 	 * Long text maximum length.
 	 */
 	public static final int LONG_TEXT_MAX_LENGTH = 65535;

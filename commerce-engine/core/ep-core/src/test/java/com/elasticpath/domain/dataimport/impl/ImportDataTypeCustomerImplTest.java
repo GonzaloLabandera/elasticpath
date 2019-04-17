@@ -4,8 +4,6 @@
 package com.elasticpath.domain.dataimport.impl;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.reset;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
@@ -16,6 +14,7 @@ import java.util.Locale;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
@@ -47,6 +46,8 @@ import com.elasticpath.validation.service.ValidatorUtils;
 @RunWith(MockitoJUnitRunner.class)
 public class ImportDataTypeCustomerImplTest {
 	private static final String TEST_GUID = "aaa";
+
+	private static final String TEST_USERID = "bbb";
 
 	private static final String NON_ALPHANUMERIC = "This.Is.A.Test;";
 
@@ -203,8 +204,6 @@ public class ImportDataTypeCustomerImplTest {
 	@Test
 	public void testGetImportFieldOfCustomerGuid() {
 		ImportField importField = customerImportType.getImportField(ImportDataTypeCustomerImpl.PREFIX_OF_FIELD_NAME + IMPORT_FIELD_GUID);
-		assertThat(importField.getStringValue(customer)).isNotNull();
-
 		importField.setStringValue(customer, TEST_GUID, importGuidHelper);
 		assertThat(customer.getGuid()).isEqualTo(TEST_GUID);
 	}
@@ -224,10 +223,8 @@ public class ImportDataTypeCustomerImplTest {
 	@Test
 	public void testGetImportFieldOfUserId() {
 		ImportField importField = customerImportType.getImportField(ImportDataTypeCustomerImpl.PREFIX_OF_FIELD_NAME + IMPORT_FIELD_USERID);
-		assertThat(importField.getStringValue(customer)).isNull();
-
-		importField.setStringValue(customer, TEST_GUID, importGuidHelper);
-		assertThat(importField.getStringValue(customer)).isEqualTo(TEST_GUID);
+		importField.setStringValue(customer, TEST_USERID, importGuidHelper);
+		assertThat(importField.getStringValue(customer)).isEqualTo(TEST_USERID);
 	}
 
 	/**
@@ -244,23 +241,13 @@ public class ImportDataTypeCustomerImplTest {
 	 */
 	@Test
 	public void testGetImportFieldOfPasswordNonNull() {
-		final String password = "eightcha";
-
-		when(customerAuthentication.getClearTextPassword()).thenReturn(null);
-
 		ImportField importField = customerImportType.getImportField(ImportDataTypeCustomerImpl.PREFIX_OF_FIELD_NAME + IMPORT_FIELD_PASSWORD);
 		assertThat(importField.getStringValue(customer)).isEqualTo(GlobalConstants.NULL_VALUE);
-		verify(customerAuthentication).getClearTextPassword();
 
-		reset(customerAuthentication);
+		final String password = "eightcha";
 		when(customerAuthentication.getClearTextPassword()).thenReturn(password);
-
 		importField.setStringValue(customer, password, importGuidHelper);
-		assertThat(importField.getStringValue(customer))
-			.as("%s was not set or retrieved properly.", IMPORT_FIELD_PASSWORD)
-			.isEqualTo(password);
-		verify(customerAuthentication).getClearTextPassword();
-		verify(customerAuthentication).setClearTextPassword(password);
+		assertThat(importField.getStringValue(customer)).isEqualTo(password);
 	}
 
 	/**
@@ -268,15 +255,11 @@ public class ImportDataTypeCustomerImplTest {
 	 */
 	@Test
 	public void testGetImportFieldOfPasswordNull() {
-		when(customerAuthentication.getClearTextPassword()).thenReturn(null);
-
 		ImportField importField = customerImportType.getImportField(ImportDataTypeCustomerImpl.PREFIX_OF_FIELD_NAME + IMPORT_FIELD_PASSWORD);
 		assertThat(importField.getStringValue(customer)).isEqualTo(GlobalConstants.NULL_VALUE);
 
-		importField.setStringValue(customer, null, importGuidHelper);
-		assertThat(importField.getStringValue(customer))
-			.as("%s was set to null but is not returning null.", IMPORT_FIELD_PASSWORD)
-			.isEqualTo(GlobalConstants.NULL_VALUE);
+		importField.setStringValue(customer, GlobalConstants.NULL_VALUE, importGuidHelper);
+		assertThat(importField.getStringValue(customer)).isEqualTo(GlobalConstants.NULL_VALUE);
 	}
 
 	/**
@@ -367,7 +350,8 @@ public class ImportDataTypeCustomerImplTest {
 
 		// Check that the importField initially returns a value of today's date
 		final Date creationDate = customer.getCreationDate();
-		assertThat(ConverterUtils.string2Date(importField.getStringValue(customer), DATE_FORMAT, Locale.getDefault()).toString()).isEqualTo(creationDate.toString());
+		assertThat(ConverterUtils.string2Date(importField.getStringValue(customer), DATE_FORMAT,
+				Locale.getDefault()).toString()).isEqualTo(creationDate.toString());
 
 		importField.setStringValue(customer, validDateString, importGuidHelper);
 		assertThat(importField.getStringValue(customer))

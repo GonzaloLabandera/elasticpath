@@ -3,18 +3,22 @@
  */
 package com.elasticpath.service.customer.impl;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
@@ -27,9 +31,6 @@ import javax.validation.Validator;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
-import com.google.common.collect.ImmutableMap;
-
 import org.mockito.InjectMocks;
 import org.mockito.Matchers;
 import org.mockito.Mock;
@@ -37,11 +38,12 @@ import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import com.google.common.collect.ImmutableMap;
+
 import com.elasticpath.base.common.dto.StructuredErrorMessage;
 import com.elasticpath.base.exception.EpServiceException;
 import com.elasticpath.base.exception.structured.EpValidationException;
 import com.elasticpath.commons.constants.ContextIdNames;
-import com.elasticpath.commons.constants.WebConstants;
 import com.elasticpath.commons.exception.UserIdExistException;
 import com.elasticpath.commons.exception.UserIdNonExistException;
 import com.elasticpath.commons.exception.UserStatusInactiveException;
@@ -49,10 +51,10 @@ import com.elasticpath.domain.ElasticPath;
 import com.elasticpath.domain.EpDomainException;
 import com.elasticpath.domain.customer.Customer;
 import com.elasticpath.domain.customer.CustomerAddress;
-import com.elasticpath.domain.customer.CustomerAuthentication;
 import com.elasticpath.domain.customer.CustomerDeleted;
 import com.elasticpath.domain.customer.CustomerGroup;
 import com.elasticpath.domain.customer.CustomerMessageIds;
+import com.elasticpath.domain.order.OrderAddress;
 import com.elasticpath.domain.store.Store;
 import com.elasticpath.messaging.EventMessage;
 import com.elasticpath.messaging.EventMessagePublisher;
@@ -68,8 +70,6 @@ import com.elasticpath.service.search.IndexNotificationService;
 import com.elasticpath.service.search.IndexType;
 import com.elasticpath.service.shopper.ShopperCleanupService;
 import com.elasticpath.service.store.StoreService;
-import com.elasticpath.settings.MalformedSettingValueException;
-import com.elasticpath.settings.provider.SettingValueProvider;
 import com.elasticpath.validation.ConstraintViolationTransformer;
 
 /**
@@ -82,16 +82,20 @@ public class CustomerServiceImplTest {
 	private static final String NEW_PASSWORD = "newPassword";
 	private static final String USER_ID = "User Id";
 	private static final String USER_GUID = "User Guid";
+	private static final String ANOTHER_USER_GUID = "Another User Guid";
+	private static final String USER_FIRST_NAME = "UserFirstname";
+	private static final String USER_LAST_NAME = "UserLastName";
+	private static final String USER_PHONE_NUMBER = "12345";
 	private static final String TEST_STORE_CODE = "SAMPLE_STORECODE";
-	private static final String TEST_EMAIL = "test@elasticpath.com";
 	private static final String STRUCTURED_ERROR_MESSAGES = "structuredErrorMessages";
-	private static final String EMAIL_FIELD = "email";
 	private static final String USER_ID_FIELD = "user-id";
-	private static final String EMAIL_EXISTS_ERROR_MESSAGE = "Customer with the given Email address already exists.";
 	private static final String ID_EXISTS_ERROR_MESSAGE = "Customer with the given user Id already exists";
 	private static final long USER_UIDPK = 1L;
 	private static final String LIST = "list";
 	private static final String CANNOT_RETRIEVE_CUSTOMER_WITHOUT_USER_ID_OR_STORE = "Cannot retrieve customer without userId or store";
+	private static final String ADDRESS_FIRST_NAME = "AddressFirstname";
+	private static final String ADDRESS_LAST_NAME = "AddressLastName";
+	private static final String ADDRESS_PHONE_NUMBER = "OneTwoThreeFourFive";
 
 	@Spy
 	@InjectMocks
@@ -126,6 +130,8 @@ public class CustomerServiceImplTest {
 	@Mock
 	private Customer customer;
 	@Mock
+	private OrderAddress billingAddress;
+	@Mock
 	private ElasticPath elasticPath;
 
 	@Before
@@ -138,7 +144,6 @@ public class CustomerServiceImplTest {
 		when(store.getUidPk()).thenReturn(1L);
 
 		when(customer.getGuid()).thenReturn(USER_GUID);
-		when(customer.getEmail()).thenReturn(TEST_EMAIL);
 		when(customer.getUserId()).thenReturn(USER_ID);
 		when(customer.getStoreCode()).thenReturn(TEST_STORE_CODE);
 		when(customer.getUidPk()).thenReturn(USER_UIDPK);
@@ -162,7 +167,6 @@ public class CustomerServiceImplTest {
 		verify(indexNotificationService).addNotificationForEntityIndexUpdate(IndexType.CUSTOMER, customer.getUidPk());
 		verify(storeService).findValidStoreCode(TEST_STORE_CODE);
 		verify(eventMessagePublisher).publish(any(EventMessage.class));
-		verify(customer).setUserIdAsEmail();
 		verify(customer).setCreationDate(any(Date.class));
 	}
 
@@ -176,9 +180,7 @@ public class CustomerServiceImplTest {
 		assertThat(customerServiceImpl.add(customer)).isEqualTo(customer);
 
 		verify(persistenceEngine).save(customer);
-		verify(customer).setUserIdAsEmail();
-		verifyZeroInteractions(userIdentityService, eventMessagePublisher);
-		verify(indexNotificationService).addNotificationForEntityIndexUpdate(IndexType.CUSTOMER, customer.getUidPk());
+		verifyZeroInteractions(userIdentityService, eventMessagePublisher, indexNotificationService);
 		verify(storeService).findValidStoreCode(TEST_STORE_CODE);
 	}
 
@@ -195,25 +197,12 @@ public class CustomerServiceImplTest {
 	}
 
 	/**
-	 * Adding a customer with an email that already exists throws a UserIdExistException with attached message and structured error message.
-	 */
-	@Test
-	public void verifyErrorMessageReceivedWhenCustomerEmailExists() {
-		doReturn(true).when(customerServiceImpl).isEmailExists(TEST_EMAIL, TEST_STORE_CODE);
-
-		assertThatThrownBy(() -> customerServiceImpl.add(customer))
-				.isInstanceOf(UserIdExistException.class)
-				.hasMessage(EMAIL_EXISTS_ERROR_MESSAGE)
-				.hasFieldOrPropertyWithValue(STRUCTURED_ERROR_MESSAGES, Collections.singletonList(createStructuredErrorMessageForEmail()));
-	}
-
-	/**
 	 * Adding a customer with a user id that already exists throws a UserIdExistException with attached message and structured error message.
 	 */
 	@Test
 	public void verifyErrorMessageReceivedWhenUserIdExists() {
-		doReturn(false).when(customerServiceImpl).isEmailExists(TEST_EMAIL, TEST_STORE_CODE);
-		doReturn(true).when(customerServiceImpl).isUserIdExists(USER_ID, TEST_STORE_CODE);
+		doReturn(Collections.singleton(ANOTHER_USER_GUID))
+				.when(customerServiceImpl).findCustomerGuidsByUserIdInStoreOrAssociatedStores(USER_ID, TEST_STORE_CODE);
 
 		assertThatThrownBy(() -> customerServiceImpl.add(customer))
 				.isInstanceOf(UserIdExistException.class)
@@ -222,35 +211,33 @@ public class CustomerServiceImplTest {
 	}
 
 	/**
-	 * Updating an anonymous customer with valid properties and using the default user Id mode updates and returns the customer.
-	 * In this mode, the user's email is used as that user's Id.
+	 * Updating an anonymous customer with valid properties updates and returns the customer.
 	 */
 	@Test
-	public void updateAnonymousCustomerWithDefaultUserIdModeUpdatesAndReturnsCustomer() {
+	public void updateAnonymousCustomerUpdatesAndReturnsCustomer() {
 		when(customer.isAnonymous()).thenReturn(true);
-		doReturn(WebConstants.USE_EMAIL_AS_USER_ID_MODE).when(customerServiceImpl).getUserIdMode();
+		doReturn(Collections.singleton(USER_GUID))
+				.when(customerServiceImpl).findCustomerGuidsByUserIdInStoreOrAssociatedStores(USER_ID, TEST_STORE_CODE);
 		when(persistenceEngine.update(customer)).thenReturn(customer);
 
 		assertThat(customerServiceImpl.update(customer)).isEqualTo(customer);
 
-		verify(customer).setUserId(TEST_EMAIL);
 		verify(customer).setPreferredBillingAddress(null);
 		verify(customer).setPreferredShippingAddress(null);
 		verify(validator).validateProperty(customer, "username", Customer.class);
 		verify(validator).validateProperty(customer, "email", Customer.class);
-		verify(indexNotificationService).addNotificationForEntityIndexUpdate(IndexType.CUSTOMER, customer.getUidPk());
+		verifyZeroInteractions(userIdentityService, eventMessagePublisher, indexNotificationService);
 		verify(persistenceEngine).update(customer);
 	}
 
 	/**
-	 * Updating a non-anonymous customer with valid properties and using GENERATE_UNIQUE_PERMANENT_USER_ID_MODE updates and returns the customer.
+	 * Updating a non-anonymous customer with valid properties updates and returns the customer.
 	 */
 	@Test
-	public void updateNonAnonymousCustomerWithGenerateUniqueUserIdModeUpdatesAndReturnsCustomer() {
+	public void updateNonAnonymousCustomerUpdatesAndReturnsCustomer() {
 		when(customer.isAnonymous()).thenReturn(false);
-		doReturn(WebConstants.GENERATE_UNIQUE_PERMANENT_USER_ID_MODE).when(customerServiceImpl).getUserIdMode();
-		doReturn(false).when(customerServiceImpl).emailExistsInStore(customer, TEST_STORE_CODE);
-		doReturn(false).when(customerServiceImpl).userIdExistsInStore(customer, TEST_STORE_CODE);
+		doReturn(Collections.singleton(USER_GUID))
+				.when(customerServiceImpl).findCustomerGuidsByUserIdInStoreOrAssociatedStores(USER_ID, TEST_STORE_CODE);
 		when(persistenceEngine.update(customer)).thenReturn(customer);
 
 		assertThat(customerServiceImpl.update(customer)).isEqualTo(customer);
@@ -261,30 +248,13 @@ public class CustomerServiceImplTest {
 	}
 
 	/**
-	 * Updating a customer with an email that already exists in the customer's store throws a
-	 * UserIdExistException with a corresponding message and error message.
-	 */
-	@Test
-	public void updatingWithExistingEmailInStoreThrowsException() {
-		when(customer.isAnonymous()).thenReturn(false);
-		doReturn(WebConstants.GENERATE_UNIQUE_PERMANENT_USER_ID_MODE).when(customerServiceImpl).getUserIdMode();
-		doReturn(true).when(customerServiceImpl).emailExistsInStore(customer, TEST_STORE_CODE);
-
-		assertThatThrownBy(() -> customerServiceImpl.update(customer))
-				.isInstanceOf(UserIdExistException.class)
-				.hasMessage(EMAIL_EXISTS_ERROR_MESSAGE)
-				.hasFieldOrPropertyWithValue(STRUCTURED_ERROR_MESSAGES, Collections.singletonList(createStructuredErrorMessageForEmail()));
-	}
-
-	/**
-	 * Updating a customer with an email that already exists in the customer's store throws a
+	 * Updating a customer with a user id that already exists in the customer's store throws a
 	 * UserIdExistException with a corresponding message and error message.
 	 */
 	@Test
 	public void updatingWithExistingUserIdInStoreThrowsException() {
-		when(customer.isAnonymous()).thenReturn(false);
-		doReturn(WebConstants.USE_EMAIL_AS_USER_ID_MODE).when(customerServiceImpl).getUserIdMode();
-		doReturn(true).when(customerServiceImpl).userIdExistsInStore(customer, TEST_STORE_CODE);
+		doReturn(new HashSet<>(Arrays.asList(USER_GUID, ANOTHER_USER_GUID)))
+				.when(customerServiceImpl).findCustomerGuidsByUserIdInStoreOrAssociatedStores(USER_ID, TEST_STORE_CODE);
 
 		assertThatThrownBy(() -> customerServiceImpl.update(customer))
 				.isInstanceOf(UserIdExistException.class)
@@ -304,8 +274,8 @@ public class CustomerServiceImplTest {
 		constraintViolations.add(constraintViolation);
 
 		when(customer.isAnonymous()).thenReturn(false);
-		doReturn(WebConstants.USE_EMAIL_AS_USER_ID_MODE).when(customerServiceImpl).getUserIdMode();
-		doReturn(false).when(customerServiceImpl).userIdExistsInStore(customer, TEST_STORE_CODE);
+		doReturn(Collections.singleton(USER_GUID))
+				.when(customerServiceImpl).findCustomerGuidsByUserIdInStoreOrAssociatedStores(USER_ID, TEST_STORE_CODE);
 		when(validator.validate(customer)).thenReturn((constraintViolations));
 		when(constraintViolationTransformer.transform(constraintViolations))
 				.thenReturn(Collections.singletonList(createStructuredErrorMessageForId()));
@@ -332,104 +302,6 @@ public class CustomerServiceImplTest {
 		verify(customerDeleted).setCustomerUid(USER_UIDPK);
 		verify(customerDeleted).setDeletedDate(any(Date.class));
 		verify(persistenceEngine).save(customerDeleted);
-	}
-
-	/**
-	 * Verify email existence check returns true with an email that exists in the given store.
-	 */
-	@Test
-	public void isEmailExistsReturnsTrueWhenEmailExists() {
-		when(persistenceEngine.retrieveByNamedQueryWithList(any(String.class), any(String.class),
-				Matchers.<Collection<Long>>any(), any(Object.class))).thenReturn(Collections.singletonList(customer));
-
-		assertThat(customerServiceImpl.isEmailExists(TEST_EMAIL, TEST_STORE_CODE)).isTrue();
-		verify(customerServiceImpl).findByEmail(TEST_EMAIL, TEST_STORE_CODE, false);
-	}
-
-	/**
-	 * Verify email existence check returns false with an email that does not exist in the given store.
-	 */
-	@Test
-	public void isEmailExistsReturnsFalseWhenEmailDoesNotExists() {
-		when(persistenceEngine.retrieveByNamedQueryWithList(any(String.class), any(String.class),
-				Matchers.<Collection<Long>>any(), any(Object.class))).thenReturn(Collections.emptyList());
-
-		assertThat(customerServiceImpl.isEmailExists(TEST_EMAIL, TEST_STORE_CODE)).isFalse();
-		verify(customerServiceImpl).findByEmail(TEST_EMAIL, TEST_STORE_CODE, false);
-	}
-
-	/**
-	 * Verify email existence check returns true if a user is found in another store (to support shared stores).
-	 */
-	@Test
-	public void isEmailExistsReturnsTrueWhenCustomerFoundInAnotherStore() {
-		when(customer.getStoreCode()).thenReturn("New store code");
-
-		when(persistenceEngine.retrieveByNamedQueryWithList(any(String.class), any(String.class),
-				Matchers.<Collection<Long>>any(), any(Object.class))).thenReturn(Collections.singletonList(customer));
-
-		assertThat(customerServiceImpl.isEmailExists(TEST_EMAIL, TEST_STORE_CODE)).isTrue();
-		verify(customerServiceImpl).findByEmail(TEST_EMAIL, TEST_STORE_CODE, false);
-		verify(customer).getStoreCode();
-		verify(customer).setStoreCode(TEST_STORE_CODE);
-	}
-
-	/**
-	 * Verify email existence check returns false in the case of a null email or null store code.
-	 */
-	@Test
-	public void isEmailExistsReturnsFalseForNullArguments() {
-		assertThat(customerServiceImpl.isEmailExists(null, TEST_STORE_CODE)).isFalse();
-		assertThat(customerServiceImpl.isEmailExists(TEST_EMAIL, null)).isFalse();
-	}
-
-	/**
-	 * Verify user id existence check returns true when a user Id exists in the given store.
-	 */
-	@Test
-	public void isUserIdExistsReturnsTrueWhenUserIdExists() {
-		when(persistenceEngine.retrieveByNamedQueryWithList(any(String.class), any(String.class),
-				Matchers.<Collection<Long>>any(), any(Object.class))).thenReturn(Collections.singletonList(customer));
-
-		assertThat(customerServiceImpl.isUserIdExists(USER_ID, TEST_STORE_CODE)).isTrue();
-		verify(customerServiceImpl).findByUserId(USER_ID, TEST_STORE_CODE, false);
-	}
-
-	/**
-	 * Verify user id existence check returns false when a user Id does not exist in the given store.
-	 */
-	@Test
-	public void isUserIdExistsReturnsFalseWhenUserIdDoesNotExists() {
-		when(persistenceEngine.retrieveByNamedQueryWithList(any(String.class), any(String.class),
-				Matchers.<Collection<Long>>any(), any(Object.class))).thenReturn(Collections.emptyList());
-
-		assertThat(customerServiceImpl.isUserIdExists(USER_ID, TEST_STORE_CODE)).isFalse();
-		verify(customerServiceImpl).findByUserId(USER_ID, TEST_STORE_CODE, false);
-	}
-
-	/**
-	 * Verify user id existence check returns true if a user is found in another store (to support shared stores).
-	 */
-	@Test
-	public void isUserIdExistsReturnsTrueWhenCustomerFoundInAnotherStore() {
-		when(customer.getStoreCode()).thenReturn("New store code");
-
-		when(persistenceEngine.retrieveByNamedQueryWithList(any(String.class), any(String.class),
-				Matchers.<Collection<Long>>any(), any(Object.class))).thenReturn(Collections.singletonList(customer));
-
-		assertThat(customerServiceImpl.isUserIdExists(TEST_EMAIL, TEST_STORE_CODE)).isTrue();
-		verify(customerServiceImpl).findByUserId(TEST_EMAIL, TEST_STORE_CODE, false);
-		verify(customer).getStoreCode();
-		verify(customer).setStoreCode(TEST_STORE_CODE);
-	}
-
-	/**
-	 * Verify user id existence check returns false in the case of a null email or null store code.
-	 */
-	@Test
-	public void isUserIdExistsReturnsFalseForNullArguments() {
-		assertThat(customerServiceImpl.isUserIdExists(null, TEST_STORE_CODE)).isFalse();
-		assertThat(customerServiceImpl.isUserIdExists(TEST_EMAIL, null)).isFalse();
 	}
 
 	/**
@@ -470,11 +342,8 @@ public class CustomerServiceImplTest {
 	 * Getting a customer with a valid input UIDPK configures the fetch plan and returns the corresponding customer.
 	 */
 	@Test
-	public void verifyGetDelegationAndProcessingWithoutExistingCustomerAuthentication() {
-		CustomerAuthentication customerAuthentication = mock(CustomerAuthentication.class);
-
+	public void verifyGetDelegationAndProcessing() {
 		when(persistenceEngine.get(Customer.class, USER_UIDPK)).thenReturn(customer);
-		when(elasticPath.getBean(ContextIdNames.CUSTOMER_AUTHENTICATION)).thenReturn(customerAuthentication);
 
 		MockCustomerServiceImpl customerService = new MockCustomerServiceImpl();
 
@@ -485,7 +354,6 @@ public class CustomerServiceImplTest {
 		assertThat(customerService.get(USER_UIDPK)).isEqualTo(customer);
 		verify(fetchPlanHelper).configureFetchGroupLoadTuner(null);
 		verify(fetchPlanHelper).clearFetchPlan();
-		verify(customer).setCustomerAuthentication(customerAuthentication);
 	}
 
 	/**
@@ -493,14 +361,7 @@ public class CustomerServiceImplTest {
 	 */
 	@Test
 	public void gettingCustomerWithUidPkZeroCreatesNewCustomer() {
-		CustomerAuthentication customerAuthentication = mock(CustomerAuthentication.class);
-
-		when(customerServiceImpl.getElasticPath()).thenReturn(elasticPath);
-		when(elasticPath.getBean(ContextIdNames.CUSTOMER_AUTHENTICATION)).thenReturn(customerAuthentication);
-
 		assertThat(customerServiceImpl.get(0)).isEqualTo(customer);
-
-		verify(customer).setCustomerAuthentication(customerAuthentication);
 	}
 
 	/**
@@ -525,11 +386,9 @@ public class CustomerServiceImplTest {
 	 */
 	@Test
 	public void gettingWithFetchGroupLoadTunerDelegatesToConfigureFetchPlanHelper() {
-		CustomerAuthentication customerAuthentication = mock(CustomerAuthentication.class);
 		FetchGroupLoadTuner fetchGroupLoadTuner = mock(FetchGroupLoadTuner.class);
 
 		when(persistenceEngine.get(Customer.class, USER_UIDPK)).thenReturn(customer);
-		when(elasticPath.getBean(ContextIdNames.CUSTOMER_AUTHENTICATION)).thenReturn(customerAuthentication);
 
 		MockCustomerServiceImpl customerService = new MockCustomerServiceImpl();
 
@@ -540,52 +399,6 @@ public class CustomerServiceImplTest {
 		assertThat(customerService.get(USER_UIDPK, fetchGroupLoadTuner)).isEqualTo(customer);
 		verify(fetchPlanHelper).configureFetchGroupLoadTuner(fetchGroupLoadTuner);
 		verify(fetchPlanHelper).clearFetchPlan();
-		verify(customer).setCustomerAuthentication(customerAuthentication);
-	}
-
-
-	/**
-	 * Finding by email with a null input email returns an EpServiceException with an appropriate message.
-	 */
-	@Test
-	public void findByEmailWithNullInputEmailReturnsException() {
-		assertThatThrownBy(() -> customerServiceImpl.findByEmail(null, TEST_STORE_CODE))
-				.isInstanceOf(EpServiceException.class)
-				.hasMessage(CANNOT_RETRIEVE_CUSTOMER_WITHOUT_USER_ID_OR_STORE);
-	}
-
-	/**
-	 * Finding by email with a null input store code returns an EpServiceException with an appropriate message.
-	 */
-	@Test
-	public void findByEmailWithNullInputStoreCodeReturnsException() {
-		assertThatThrownBy(() -> customerServiceImpl.findByEmail(TEST_EMAIL, null))
-				.isInstanceOf(EpServiceException.class)
-				.hasMessage(CANNOT_RETRIEVE_CUSTOMER_WITHOUT_USER_ID_OR_STORE);
-	}
-
-	/**
-	 * Finding by email with a valid email and store code returns the corresponding customer.
-	 */
-	@Test
-	public void findByEmailWithAValidStoreCodeReturnsTheCorrespondingStore() {
-		when(persistenceEngine.retrieveByNamedQueryWithList(any(String.class), any(String.class),
-				Matchers.<Collection<Long>>any(), any(Object.class))).thenReturn(Collections.singletonList(customer));
-
-		assertThat(customerServiceImpl.findByEmail(TEST_EMAIL, TEST_STORE_CODE)).isEqualTo(customer);
-		verify(storeService).findStoreWithCode(TEST_STORE_CODE);
-	}
-
-	/**
-	 * Finding by email returns null when no customer exists for the given email in the store corresponding the input store code.
-	 */
-	@Test
-	public void findByEmailReturnsNullWhenNoStoreCorrespondsToTheGivenStoreCode() {
-		when(persistenceEngine.retrieveByNamedQueryWithList(any(String.class), any(String.class),
-				Matchers.<Collection<Long>>any(), any(Object.class))).thenReturn(Collections.emptyList());
-
-		assertThat(customerServiceImpl.findByEmail(TEST_EMAIL, TEST_STORE_CODE)).isEqualTo(null);
-		verify(storeService).findStoreWithCode(TEST_STORE_CODE);
 	}
 
 	/**
@@ -622,22 +435,10 @@ public class CustomerServiceImplTest {
 	 */
 	@Test
 	public void resetPasswordThrowsExceptionWhenCustomerDoesNotExist() {
-		doReturn(WebConstants.USE_EMAIL_AS_USER_ID_MODE).when(customerServiceImpl).getUserIdMode();
 		assertThatThrownBy(() -> customerServiceImpl.resetPassword(USER_ID, TEST_STORE_CODE))
 				.isInstanceOf(UserIdNonExistException.class)
-				.hasMessage("The given email address doesn't exist: " + USER_ID + " In store: " + TEST_STORE_CODE);
+				.hasMessage("The given user id doesn't exist: " + USER_ID + " In store: " + TEST_STORE_CODE);
 		verify(customerServiceImpl).findByUserId(USER_ID, TEST_STORE_CODE);
-	}
-
-	/**
-	 * Reset password throws UserIdNonExistException with appropriate message when user id mode is "INDEPENDANT_EMAIL_AND_USER_ID_MODE".
-	 */
-	@Test
-	public void resetPasswordThrowsExceptionWhenUserIdModeIsIndependentEmailAndUser() {
-		doReturn(WebConstants.INDEPENDANT_EMAIL_AND_USER_ID_MODE).when(customerServiceImpl).getUserIdMode();
-		assertThatThrownBy(() -> customerServiceImpl.resetPassword(USER_ID, TEST_STORE_CODE))
-				.isInstanceOf(UserIdNonExistException.class)
-				.hasMessage("The given email address doesn't exist: " + USER_ID + " In store: " + TEST_STORE_CODE);
 	}
 
 	/**
@@ -646,12 +447,11 @@ public class CustomerServiceImplTest {
 	@Test
 	public void resetPasswordFindsCustomerAndResetsPassword() {
 		when(elasticPath.getBean(ContextIdNames.CUSTOMER_SERVICE)).thenReturn(customerServiceImpl);
-		doReturn(WebConstants.GENERATE_UNIQUE_PERMANENT_USER_ID_MODE).when(customerServiceImpl).getUserIdMode();
-		doReturn(customer).when(customerServiceImpl).findByEmail(TEST_EMAIL, TEST_STORE_CODE);
+		doReturn(customer).when(customerServiceImpl).findByUserId(USER_ID, TEST_STORE_CODE);
 		doReturn(customer).when(customerServiceImpl).auditableResetPassword(customer);
 
-		customerServiceImpl.resetPassword(TEST_EMAIL, TEST_STORE_CODE);
-		verify(customerServiceImpl).findByEmail(TEST_EMAIL, TEST_STORE_CODE);
+		customerServiceImpl.resetPassword(USER_ID, TEST_STORE_CODE);
+		verify(customerServiceImpl).findByUserId(USER_ID, TEST_STORE_CODE);
 		verify(customerServiceImpl).auditableResetPassword(customer);
 	}
 
@@ -751,8 +551,7 @@ public class CustomerServiceImplTest {
 	public void addOrUpdateAddressWithInvalidAddressThrowsException() {
 		CustomerAddress customerAddress = mock(CustomerAddress.class);
 
-		Throwable exception = new EpValidationException("Address validation failure.",
-				Collections.singletonList(createStructuredErrorMessageForEmail()));
+		Throwable exception = new EpValidationException("Address validation failure.", Collections.emptyList());
 
 		doThrow(exception).when(customerServiceImpl).validateCustomerAddress(customerAddress);
 
@@ -865,20 +664,20 @@ public class CustomerServiceImplTest {
 	}
 
 	/**
-	 * Finding by user id with a null input email throws an EpServiceException with an appropriate message.
+	 * Finding by user id with a null user id throws an EpServiceException with an appropriate message.
 	 */
 	@Test
-	public void findByUserIdWithNullInputUserIdThrowsException() {
+	public void findByUserIdWithNullUserIdThrowsException() {
 		assertThatThrownBy(() -> customerServiceImpl.findByUserId(null, TEST_STORE_CODE))
 				.isInstanceOf(EpServiceException.class)
 				.hasMessage(CANNOT_RETRIEVE_CUSTOMER_WITHOUT_USER_ID_OR_STORE);
 	}
 
 	/**
-	 * Finding by user id with a null input store code throws an EpServiceException with an appropriate message.
+	 * Finding by user id with a null store code throws an EpServiceException with an appropriate message.
 	 */
 	@Test
-	public void findByUserIdWithNullInputStoreCodeThrowsException() {
+	public void findByUserIdWithNullStoreCodeThrowsException() {
 		assertThatThrownBy(() -> customerServiceImpl.findByUserId(USER_ID, null))
 				.isInstanceOf(EpServiceException.class)
 				.hasMessage(CANNOT_RETRIEVE_CUSTOMER_WITHOUT_USER_ID_OR_STORE);
@@ -940,23 +739,74 @@ public class CustomerServiceImplTest {
 				.hasFieldOrPropertyWithValue(STRUCTURED_ERROR_MESSAGES, Collections.singletonList(structuredErrorMessage));
 	}
 
+	/**
+	 * Verify updateCustomerFromAddress sets customer profile values from address.
+	 */
 	@Test
-	public void verifyUserIdModeUsesEmailAddressByDefault() throws Exception {
-		customerServiceImpl.setUserIdModeProvider(new SettingValueProvider<Integer>() {
-			@Override
-			public Integer get() {
-				throw new MalformedSettingValueException("Null setting values can't be converted to integers");
-			}
+	public void testUpdateCustomerFromAddress() {
+		when(customer.isPersisted()).thenReturn(true);
+		doReturn(customer).when(customerServiceImpl).get(USER_UIDPK);
+		doReturn(customer).when(customerServiceImpl).update(customer);
 
-			@Override
-			public Integer get(final String context) {
-				throw new MalformedSettingValueException("Null setting values can't be converted to integers");
-			}
-		});
+		lenient().when(customer.getFirstName()).thenReturn(null);
+		lenient().when(customer.getLastName()).thenReturn(null);
+		lenient().when(customer.getPhoneNumber()).thenReturn(null);
 
-		assertThat(customerServiceImpl.getUserIdMode())
-				.as("Expected WebConstants.USE_EMAIL_AS_USER_ID_MODE by default")
-				.isEqualTo(WebConstants.USE_EMAIL_AS_USER_ID_MODE);
+		lenient().when(billingAddress.getFirstName()).thenReturn(ADDRESS_FIRST_NAME);
+		lenient().when(billingAddress.getLastName()).thenReturn(ADDRESS_LAST_NAME);
+		lenient().when(billingAddress.getPhoneNumber()).thenReturn(ADDRESS_PHONE_NUMBER);
+
+		customerServiceImpl.updateCustomerFromAddress(customer, billingAddress);
+
+		verify(customer).setFirstName(ADDRESS_FIRST_NAME);
+		verify(customer).setLastName(ADDRESS_LAST_NAME);
+		verify(customer).setPhoneNumber(ADDRESS_PHONE_NUMBER);
+		verify(customerServiceImpl).update(customer);
+	}
+
+	/**
+	 * Verify updateCustomerFromAddress does not overwrite existing customer profile values.
+	 */
+	@Test
+	public void testUpdateCustomerFromAddressWithExistingProfile() {
+		when(customer.isPersisted()).thenReturn(true);
+		doReturn(customer).when(customerServiceImpl).get(USER_UIDPK);
+
+		lenient().when(customer.getFirstName()).thenReturn(USER_FIRST_NAME);
+		lenient().when(customer.getLastName()).thenReturn(USER_LAST_NAME);
+		lenient().when(customer.getPhoneNumber()).thenReturn(USER_PHONE_NUMBER);
+
+		lenient().when(billingAddress.getFirstName()).thenReturn(ADDRESS_FIRST_NAME);
+		lenient().when(billingAddress.getLastName()).thenReturn(ADDRESS_LAST_NAME);
+		lenient().when(billingAddress.getPhoneNumber()).thenReturn(ADDRESS_PHONE_NUMBER);
+
+		customerServiceImpl.updateCustomerFromAddress(customer, billingAddress);
+
+		verify(customer, never()).setFirstName(ADDRESS_FIRST_NAME);
+		verify(customer, never()).setLastName(ADDRESS_LAST_NAME);
+		verify(customer, never()).setPhoneNumber(ADDRESS_PHONE_NUMBER);
+		verify(customerServiceImpl, never()).update(customer);
+	}
+
+	/**
+	 * Verify updateCustomerFromAddress does not set name partially.
+	 */
+	@Test
+	public void testUpdateCustomerFromAddressDoesNotSetPartialName() {
+		when(customer.isPersisted()).thenReturn(true);
+		doReturn(customer).when(customerServiceImpl).get(USER_UIDPK);
+		doReturn(customer).when(customerServiceImpl).update(customer);
+
+		lenient().when(customer.getFirstName()).thenReturn(USER_FIRST_NAME);
+		lenient().when(customer.getLastName()).thenReturn(null);
+
+		lenient().when(billingAddress.getFirstName()).thenReturn(ADDRESS_FIRST_NAME);
+		lenient().when(billingAddress.getLastName()).thenReturn(ADDRESS_LAST_NAME);
+
+		customerServiceImpl.updateCustomerFromAddress(customer, billingAddress);
+
+		verify(customer, never()).setFirstName(ADDRESS_FIRST_NAME);
+		verify(customer, never()).setLastName(ADDRESS_LAST_NAME);
 	}
 
 	/**
@@ -967,16 +817,6 @@ public class CustomerServiceImplTest {
 				CustomerMessageIds.USERID_ALREADY_EXISTS,
 				ID_EXISTS_ERROR_MESSAGE,
 				ImmutableMap.of(USER_ID_FIELD, USER_ID));
-	}
-
-	/**
-	 * Helper method returning a new <code>StructuredErrorMessage</code> indicating the user email already exists.
-	 */
-	private StructuredErrorMessage createStructuredErrorMessageForEmail() {
-		return new StructuredErrorMessage(
-				CustomerMessageIds.EMAIL_ALREADY_EXISTS,
-				EMAIL_EXISTS_ERROR_MESSAGE,
-				ImmutableMap.of(EMAIL_FIELD, TEST_EMAIL));
 	}
 
 	/**

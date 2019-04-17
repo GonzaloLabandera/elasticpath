@@ -59,7 +59,13 @@ public class SyncToolLauncherImpl implements SyncToolLauncher {
 			LOG.info("Processing Data Sync Request for ChangeSet: " + jobConfiguration.getAdapterParameter());
 			LOG.debug("Job Configuration: " + jobConfiguration);
 
+			Long startTime = System.nanoTime();
 			final Summary resultSummary = controller.synchronize(jobConfiguration);
+
+			Long endTime = System.nanoTime();
+
+			resultSummary.setStartTime(startTime);
+			resultSummary.setEndTime(endTime);
 
 			LOG.info("Data Sync Request processing complete. Successful: " + !resultSummary.hasErrors());
 

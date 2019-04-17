@@ -12,13 +12,7 @@ import cucumber.api.java.en.When
 import org.json.JSONArray
 
 import com.elasticpath.cortex.dce.CommonMethods
-import com.elasticpath.cortexTestObjects.Cart
-import com.elasticpath.cortexTestObjects.CortexResponse
-import com.elasticpath.cortexTestObjects.DependentLineItems
-import com.elasticpath.cortexTestObjects.FindItemBy
-import com.elasticpath.cortexTestObjects.Item
-import com.elasticpath.cortexTestObjects.LineItem
-import com.elasticpath.cortexTestObjects.Order
+import com.elasticpath.cortexTestObjects.*
 
 class Items {
 

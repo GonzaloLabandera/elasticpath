@@ -1,15 +1,16 @@
 /*
- * Copyright © 2013 Elastic Path Software Inc. All rights reserved.
+ * Copyright © 2019 Elastic Path Software Inc. All rights reserved.
  */
 package com.elasticpath.rest.relos.rs.authentication.springoauth2.tokenstore;
 
 import com.elasticpath.rest.command.ExecutionResult;
-import com.elasticpath.rest.relos.rs.authentication.springoauth2.dto.AccessTokenDto;
+import com.elasticpath.rest.relos.rs.authentication.dto.AccessTokenDto;
+import com.elasticpath.rest.relos.rs.authentication.token.AccessTokenStrategy;
 
 /**
  * Strategy for storing token to token store.
  */
-public interface TokenStoreStrategy {
+public interface TokenStoreStrategy extends AccessTokenStrategy {
 
 	/**
 	 * Store the given token to token store.
@@ -18,14 +19,6 @@ public interface TokenStoreStrategy {
 	 * @return the execution result.
 	 */
 	ExecutionResult<Void> storeToken(AccessTokenDto accessTokenDto);
-
-	/**
-	 * Get the access token with the given token value.
-	 *
-	 * @param tokenValue the token value
-	 * @return the execution result
-	 */
-	ExecutionResult<AccessTokenDto> readAccessToken(String tokenValue);
 
 	/**
 	 * Remove an access token from the database.

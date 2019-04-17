@@ -3,18 +3,20 @@
  */
 package com.elasticpath.rest.resource.integration.epcommerce.repository.search.impl;
 
+import static com.elasticpath.rest.resource.integration.epcommerce.repository.search.OffersResourceConstants.DEFAULT_APPLIED_FACETS;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.Mockito.mock;
+import static org.mockito.ArgumentMatchers.anyMap;
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.when;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Currency;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
-import com.google.common.collect.ImmutableMap;
 import io.reactivex.Single;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -22,18 +24,15 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import com.elasticpath.domain.catalog.Catalog;
-import com.elasticpath.domain.store.Store;
 import com.elasticpath.rest.ResourceOperationFailure;
 import com.elasticpath.rest.ResourceStatus;
 import com.elasticpath.rest.definition.base.ScopeIdentifierPart;
 import com.elasticpath.rest.definition.collections.PaginationEntity;
 import com.elasticpath.rest.definition.offers.OfferIdentifier;
-import com.elasticpath.rest.definition.searches.OfferSearchResultIdentifier;
+import com.elasticpath.rest.definition.offersearches.OfferSearchResultIdentifier;
+import com.elasticpath.rest.definition.offersearches.SearchOfferEntity;
 import com.elasticpath.rest.definition.searches.PageIdIdentifierPart;
 import com.elasticpath.rest.definition.searches.SearchIdIdentifierPart;
-import com.elasticpath.rest.definition.searches.SearchOfferEntity;
-import com.elasticpath.rest.definition.searches.SearchesIdentifier;
 import com.elasticpath.rest.id.IdentifierPart;
 import com.elasticpath.rest.id.type.CompositeIdentifier;
 import com.elasticpath.rest.id.type.IntegerIdentifier;
@@ -43,8 +42,8 @@ import com.elasticpath.rest.identity.TestSubjectFactory;
 import com.elasticpath.rest.resource.ResourceOperationContext;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.pagination.PaginatedResult;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.search.SearchRepository;
-import com.elasticpath.rest.resource.integration.epcommerce.repository.store.StoreRepository;
 import com.elasticpath.service.search.ProductCategorySearchCriteria;
+import com.elasticpath.service.search.query.ProductSearchCriteria;
 
 /**
  * Test class for {@link OfferSearchResultPaginationRepository}.
@@ -55,7 +54,6 @@ public class OfferSearchResultPaginationRepositoryTest {
 	private static final String OFFER_ID = "offer id";
 	private static final int TOTAL_RESULTS = 12842;
 	private static final int TOTAL_PAGES = 2569;
-	private static final String CATALOG_CODE = "catalog_code";
 	private static final String STORE_CODE = "store_code";
 	private static final String USERID = "userid";
 	private static final String SEARCH_OFFERS = "search_offers";
@@ -63,13 +61,10 @@ public class OfferSearchResultPaginationRepositoryTest {
 	private static final int RESULTS_PER_PAGE = 5;
 	private static final int THREE = 3;
 	private static final String SEARCHTERM = "term";
-	private static final Map<String, String> APPLIED_FACETS = ImmutableMap.of("", "");
 	private static final IdentifierPart<String> SCOPE = StringIdentifier.of("scope");
 
 	@Mock
 	private ResourceOperationContext resourceOperationContext;
-	@Mock
-	private StoreRepository storeRepository;
 	@Mock
 	private SearchRepository searchRepository;
 
@@ -84,11 +79,8 @@ public class OfferSearchResultPaginationRepositoryTest {
 		OfferSearchResultIdentifier offerSearchResultIdentifier = OfferSearchResultIdentifier.builder()
 				.withPageId(IntegerIdentifier.of(1))
 				.withSearchId(CompositeIdentifier.of(searchId))
-				.withSearches(
-						SearchesIdentifier.builder()
-								.withScope(SCOPE)
-								.build())
-				.withAppliedFacets(CompositeIdentifier.of(APPLIED_FACETS))
+				.withScope(SCOPE)
+				.withAppliedFacets(CompositeIdentifier.of(DEFAULT_APPLIED_FACETS))
 				.build();
 
 		paginationRepository.validateSearchData(offerSearchResultIdentifier)
@@ -107,11 +99,8 @@ public class OfferSearchResultPaginationRepositoryTest {
 		OfferSearchResultIdentifier offerSearchResultIdentifier = OfferSearchResultIdentifier.builder()
 				.withPageId(IntegerIdentifier.of(1))
 				.withSearchId(CompositeIdentifier.of(searchId))
-				.withSearches(
-						SearchesIdentifier.builder()
-								.withScope(SCOPE)
-								.build())
-				.withAppliedFacets(CompositeIdentifier.of(APPLIED_FACETS))
+				.withScope(SCOPE)
+				.withAppliedFacets(CompositeIdentifier.of(DEFAULT_APPLIED_FACETS))
 				.build();
 
 		paginationRepository.validateSearchData(offerSearchResultIdentifier)
@@ -130,11 +119,8 @@ public class OfferSearchResultPaginationRepositoryTest {
 		OfferSearchResultIdentifier offerSearchResultIdentifier = OfferSearchResultIdentifier.builder()
 				.withPageId(IntegerIdentifier.of(1))
 				.withSearchId(CompositeIdentifier.of(searchId))
-				.withSearches(
-						SearchesIdentifier.builder()
-								.withScope(SCOPE)
-								.build())
-				.withAppliedFacets(CompositeIdentifier.of(APPLIED_FACETS))
+				.withScope(SCOPE)
+				.withAppliedFacets(CompositeIdentifier.of(DEFAULT_APPLIED_FACETS))
 				.build();
 
 		paginationRepository.validateSearchData(offerSearchResultIdentifier)
@@ -154,11 +140,8 @@ public class OfferSearchResultPaginationRepositoryTest {
 		OfferSearchResultIdentifier offerSearchResultIdentifier = OfferSearchResultIdentifier.builder()
 				.withPageId(IntegerIdentifier.of(1))
 				.withSearchId(CompositeIdentifier.of(searchId))
-				.withSearches(
-						SearchesIdentifier.builder()
-								.withScope(SCOPE)
-								.build())
-				.withAppliedFacets(CompositeIdentifier.of(APPLIED_FACETS))
+				.withScope(SCOPE)
+				.withAppliedFacets(CompositeIdentifier.of(DEFAULT_APPLIED_FACETS))
 				.build();
 
 		paginationRepository.validateSearchData(offerSearchResultIdentifier)
@@ -176,17 +159,16 @@ public class OfferSearchResultPaginationRepositoryTest {
 	 */
 	@Test
 	public void testOfferSearch() {
-		Catalog catalog = createMockCatalog();
-		Store store = createMockStore(catalog);
 		Collection<String> offerIds = Collections.singleton(OFFER_ID);
 		PaginatedResult searchResult = new PaginatedResult(offerIds, PAGE, RESULTS_PER_PAGE, TOTAL_RESULTS);
 
 		shouldFindSubject();
-		shouldFindStoreWithResult(Single.just(store));
+		mockSearchCriteria(Single.just(new ProductSearchCriteria()));
 		shouldGetDefaultPageSizeWithResult(Single.just(RESULTS_PER_PAGE));
 		shouldSearchOfferIdsWithResult(Single.just(searchResult));
+		OfferSearchData offerSearchData = new OfferSearchData(PAGE, RESULTS_PER_PAGE, STORE_CODE, DEFAULT_APPLIED_FACETS, SEARCH_OFFERS);
 
-		paginationRepository.getPaginationInfo(new OfferSearchData(PAGE, RESULTS_PER_PAGE, SEARCH_OFFERS, STORE_CODE, APPLIED_FACETS))
+		paginationRepository.getPaginationInfo(offerSearchData)
 				.test()
 				.assertComplete()
 				.assertValue(paginationEntity -> RESULTS_PER_PAGE == paginationEntity.getPageSize())
@@ -201,17 +183,16 @@ public class OfferSearchResultPaginationRepositoryTest {
 	 */
 	@Test
 	public void testOfferSearchWithCustomPageSize() {
-		int pageSize = THREE;
-		Catalog catalog = createMockCatalog();
-		Store store = createMockStore(catalog);
 		Collection<String> offerIds = Collections.singleton(OFFER_ID);
-		PaginatedResult searchResult = new PaginatedResult(offerIds, PAGE, RESULTS_PER_PAGE, pageSize);
+		PaginatedResult searchResult = new PaginatedResult(offerIds, PAGE, RESULTS_PER_PAGE, THREE);
 
 		shouldFindSubject();
-		shouldFindStoreWithResult(Single.just(store));
+		mockSearchCriteria(Single.just(new ProductSearchCriteria()));
 		shouldSearchOfferIdsWithResult(Single.just(searchResult));
 
-		paginationRepository.getPaginationInfo(new OfferSearchData(PAGE, pageSize, SEARCH_OFFERS, STORE_CODE, APPLIED_FACETS))
+		OfferSearchData offerSearchData = new OfferSearchData(PAGE, THREE, STORE_CODE, DEFAULT_APPLIED_FACETS, SEARCH_OFFERS);
+
+		paginationRepository.getPaginationInfo(offerSearchData)
 				.test()
 				.assertComplete()
 				.assertValue(paginationEntity -> THREE == paginationEntity.getPageSize())
@@ -227,9 +208,11 @@ public class OfferSearchResultPaginationRepositoryTest {
 	@Test
 	public void testOfferSearchWithStoreNotFound() {
 		shouldFindSubject();
-		shouldFindStoreWithResult(Single.error(ResourceOperationFailure.notFound("not found")));
+		mockSearchCriteria(Single.error(ResourceOperationFailure.notFound("not found")));
 
-		paginationRepository.getPaginationInfo(new OfferSearchData(PAGE, RESULTS_PER_PAGE, SEARCH_OFFERS, STORE_CODE, APPLIED_FACETS))
+		OfferSearchData offerSearchData = new OfferSearchData(PAGE, RESULTS_PER_PAGE, STORE_CODE, DEFAULT_APPLIED_FACETS, SEARCH_OFFERS);
+
+		paginationRepository.getPaginationInfo(offerSearchData)
 				.test()
 				.assertFailure(ResourceOperationFailure.class)
 				.assertFailure(
@@ -244,18 +227,18 @@ public class OfferSearchResultPaginationRepositoryTest {
 	 */
 	@Test
 	public void testOfferSearchWithPageGreaterThanResultPages() {
-		Catalog catalog = createMockCatalog();
-		Store store = createMockStore(catalog);
 		Collection<String> emptyOfferIds = Collections.emptyList();
 		PaginatedResult searchResult = new PaginatedResult(emptyOfferIds, PAGE, RESULTS_PER_PAGE,
 				RESULTS_PER_PAGE);
 
 		shouldFindSubject();
-		shouldFindStoreWithResult(Single.just(store));
+		mockSearchCriteria(Single.just(new ProductSearchCriteria()));
 		shouldGetDefaultPageSizeWithResult(Single.just(RESULTS_PER_PAGE));
 		shouldSearchOfferIdsWithResult(Single.just(searchResult));
 
-		paginationRepository.getPaginationInfo(new OfferSearchData(PAGE + 1, RESULTS_PER_PAGE, SEARCH_OFFERS, STORE_CODE, APPLIED_FACETS))
+		OfferSearchData offerSearchData = new OfferSearchData(PAGE + 1, RESULTS_PER_PAGE, STORE_CODE, DEFAULT_APPLIED_FACETS, SEARCH_OFFERS);
+
+		paginationRepository.getPaginationInfo(offerSearchData)
 				.test()
 				.assertFailure(ResourceOperationFailure.class)
 				.assertFailure(
@@ -269,14 +252,13 @@ public class OfferSearchResultPaginationRepositoryTest {
 	 */
 	@Test
 	public void testOfferSearchWithInvalidPageSizeReturnedFromSettingsRepository() {
-		Catalog catalog = createMockCatalog();
-		Store store = createMockStore(catalog);
-
 		shouldFindSubject();
-		shouldFindStoreWithResult(Single.just(store));
+		mockSearchCriteria(Single.just(new ProductSearchCriteria()));
 		shouldGetDefaultPageSizeWithResult(Single.error(ResourceOperationFailure.serverError("Invalid pagination setting.")));
 
-		paginationRepository.getPaginationInfo(new OfferSearchData(PAGE, 0, SEARCH_OFFERS, STORE_CODE, APPLIED_FACETS))
+		OfferSearchData offerSearchData = new OfferSearchData(PAGE, 0, STORE_CODE, DEFAULT_APPLIED_FACETS, SEARCH_OFFERS);
+
+		paginationRepository.getPaginationInfo(offerSearchData)
 				.test()
 				.assertFailure(ResourceOperationFailure.class)
 				.assertFailure(
@@ -290,14 +272,13 @@ public class OfferSearchResultPaginationRepositoryTest {
 	 */
 	@Test
 	public void testOfferSearchWithPaginationSettingOfZero() {
-		Catalog catalog = createMockCatalog();
-		Store store = createMockStore(catalog);
-
 		shouldFindSubject();
-		shouldFindStoreWithResult(Single.just(store));
+		mockSearchCriteria(Single.just(new ProductSearchCriteria()));
 		shouldGetDefaultPageSizeWithResult(Single.error(ResourceOperationFailure.serverError("Zero size pagination setting")));
 
-		paginationRepository.getPaginationInfo(new OfferSearchData(PAGE, 0, SEARCH_OFFERS, STORE_CODE, APPLIED_FACETS))
+		OfferSearchData offerSearchData = new OfferSearchData(PAGE, 0, STORE_CODE, DEFAULT_APPLIED_FACETS, SEARCH_OFFERS);
+
+		paginationRepository.getPaginationInfo(offerSearchData)
 				.test()
 				.assertFailure(ResourceOperationFailure.class)
 				.assertFailure(
@@ -311,16 +292,13 @@ public class OfferSearchResultPaginationRepositoryTest {
 	 */
 	@Test
 	public void testOfferSearchWithPageSettingOfZero() {
-		Catalog catalog = createMockCatalog();
-		Store store = createMockStore(catalog);
-
 		shouldFindSubject();
-		shouldFindStoreWithResult(Single.just(store));
+		mockSearchCriteria(Single.just(new ProductSearchCriteria()));
 		shouldGetDefaultPageSizeWithResult(Single.error(ResourceOperationFailure.serverError("Zero size pagination setting")));
 		paginationRepository.validateSearchData(OfferSearchResultIdentifier.builder()
 				.withSearchId(SearchIdIdentifierPart.of("-", "-"))
-				.withSearches(SearchesIdentifier.builder().withScope(ScopeIdentifierPart.of("-")).build())
-				.withAppliedFacets(CompositeIdentifier.of(APPLIED_FACETS))
+				.withScope(ScopeIdentifierPart.of("-"))
+				.withAppliedFacets(CompositeIdentifier.of(DEFAULT_APPLIED_FACETS))
 				.withPageId(PageIdIdentifierPart.of(0)).build())
 				.test()
 				.assertFailure(ResourceOperationFailure.class)
@@ -332,15 +310,14 @@ public class OfferSearchResultPaginationRepositoryTest {
 	 */
 	@Test
 	public void testOfferSearchWithSearchResultFailure() {
-		Catalog catalog = createMockCatalog();
-		Store store = createMockStore(catalog);
-
 		shouldFindSubject();
-		shouldFindStoreWithResult(Single.just(store));
+		mockSearchCriteria(Single.just(new ProductSearchCriteria()));
 		shouldSearchOfferIdsWithResult(Single.error(ResourceOperationFailure.serverError("Server error during search")));
 		shouldGetDefaultPageSizeWithResult(Single.just(RESULTS_PER_PAGE));
 
-		paginationRepository.getPaginationInfo(new OfferSearchData(PAGE, RESULTS_PER_PAGE, SEARCH_OFFERS, STORE_CODE, APPLIED_FACETS))
+		OfferSearchData offerSearchData = new OfferSearchData(PAGE, RESULTS_PER_PAGE, STORE_CODE, DEFAULT_APPLIED_FACETS, SEARCH_OFFERS);
+
+		paginationRepository.getPaginationInfo(offerSearchData)
 				.test()
 				.assertFailure(ResourceOperationFailure.class)
 				.assertFailure(
@@ -351,13 +328,16 @@ public class OfferSearchResultPaginationRepositoryTest {
 
 
 	private void shouldFindSubject() {
-		Subject subject = TestSubjectFactory.createWithScopeAndUserIdAndLocale(STORE_CODE, USERID, Locale.ENGLISH);
+		Subject subject = TestSubjectFactory.createWithScopeAndUserIdAndLocaleAndCurrency(
+				STORE_CODE, USERID, Locale.ENGLISH, Currency.getInstance("CAD"));
 		when(resourceOperationContext.getSubject())
 				.thenReturn(subject);
 	}
 
-	private void shouldFindStoreWithResult(final Single<Store> result) {
-		when(storeRepository.findStoreAsSingle(STORE_CODE)).thenReturn(result);
+	private void mockSearchCriteria(final Single<ProductCategorySearchCriteria> searchCriteria) {
+		when(searchRepository.getSearchCriteria(
+				nullable(String.class), any(String.class), any(Locale.class), any(Currency.class), anyMap(), any(String.class)))
+				.thenReturn(searchCriteria);
 	}
 
 	private void shouldGetDefaultPageSizeWithResult(final Single<Integer> result) {
@@ -366,19 +346,5 @@ public class OfferSearchResultPaginationRepositoryTest {
 
 	private void shouldSearchOfferIdsWithResult(final Single<PaginatedResult> result) {
 		when(searchRepository.searchForProductIds(any(ProductCategorySearchCriteria.class), anyInt(), anyInt())).thenReturn(result);
-	}
-
-	private Catalog createMockCatalog() {
-		Catalog catalog = mock(Catalog.class);
-		when(catalog.getCode()).thenReturn(CATALOG_CODE);
-
-		return catalog;
-	}
-
-	private Store createMockStore(final Catalog catalog) {
-		Store store = mock(Store.class);
-		when(store.getCatalog()).thenReturn(catalog);
-
-		return store;
 	}
 }

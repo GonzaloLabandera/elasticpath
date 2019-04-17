@@ -4,6 +4,7 @@
 package com.elasticpath.cmclient.core.comparator;
 
 import java.util.Comparator;
+import java.util.Locale;
 import java.util.Map;
 
 import com.elasticpath.domain.attribute.Attribute;
@@ -21,10 +22,22 @@ public class AttributeValueComparatorByOrderingAndNameIgnoreCase extends Attribu
 
 	/**
 	 * Instantiates a new attribute value comparator by ordering and name ignore case.
+	 * Uses the default locale for this instance of the JVM.
 	 *
 	 * @param attributeOrderingMap the attribute ordering map
 	 */
 	public AttributeValueComparatorByOrderingAndNameIgnoreCase(final Map<Attribute, Integer> attributeOrderingMap) {
+		this.attributeOrdering = attributeOrderingMap;
+	}
+
+	/**
+	 * Instantiates an Attribute value Comparator by ordering and Attribute display name.
+	 *
+	 * @param attributeOrderingMap the attribute ordering map
+	 * @param locale specify the locale to be used when comparing Attribute names
+	 */
+	public AttributeValueComparatorByOrderingAndNameIgnoreCase(final Map<Attribute, Integer> attributeOrderingMap, final Locale locale) {
+		super(locale);
 		this.attributeOrdering = attributeOrderingMap;
 	}
 	

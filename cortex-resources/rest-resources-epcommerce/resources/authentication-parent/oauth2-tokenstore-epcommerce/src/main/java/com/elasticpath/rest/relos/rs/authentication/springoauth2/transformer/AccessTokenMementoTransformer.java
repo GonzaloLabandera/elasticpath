@@ -1,13 +1,10 @@
-/**
- * Copyright © 2016 Elastic Path Software Inc. All rights reserved.
- */
 /*
-* Copyright © 2013 Elastic Path Software Inc. All rights reserved.
-*/
+ * Copyright © 2019 Elastic Path Software Inc. All rights reserved.
+ */
 package com.elasticpath.rest.relos.rs.authentication.springoauth2.transformer;
 
 import com.elasticpath.domain.auth.OAuth2AccessTokenMemento;
-import com.elasticpath.rest.relos.rs.authentication.springoauth2.dto.AccessTokenDto;
+import com.elasticpath.rest.relos.rs.authentication.dto.AccessTokenDto;
 
 /**
  * Transformer for {@link AccessTokenDto} and {@link OAuth2AccessTokenMemento}.

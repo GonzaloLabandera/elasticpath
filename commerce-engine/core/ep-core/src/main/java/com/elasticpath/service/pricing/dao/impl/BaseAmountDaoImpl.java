@@ -18,6 +18,8 @@ import com.elasticpath.common.pricing.service.BaseAmountFilter;
 import com.elasticpath.domain.pricing.BaseAmount;
 import com.elasticpath.persistence.api.EpPersistenceException;
 import com.elasticpath.persistence.api.PersistenceEngine;
+import com.elasticpath.persistence.openjpa.QueryParameterEscaper;
+import com.elasticpath.persistence.openjpa.impl.QueryParameterEscaperImpl;
 import com.elasticpath.service.pricing.dao.BaseAmountDao;
 
 /**
@@ -201,6 +203,8 @@ public class BaseAmountDaoImpl implements BaseAmountDao {
 		private final String query;
 		private boolean multipleStatements;
 		private static final String SELECT = "SELECT baseAmount FROM BaseAmountImpl AS baseAmount";
+		private final QueryParameterEscaper paramEscaper = new QueryParameterEscaperImpl();
+
 
 		/**
 		 * Builder for BaseAmount queries.
@@ -232,7 +236,7 @@ public class BaseAmountDaoImpl implements BaseAmountDao {
 				if (criteria instanceof BigDecimal) {
 					return queryBuilder.append(String.valueOf(((BigDecimal) criteria).doubleValue())).toString();
 				} else if (criteria instanceof String) {
-					return queryBuilder.append('\'').append(criteria).append('\'').toString();
+					return queryBuilder.append('\'').append(paramEscaper.escapeStringParameter((String) criteria)).append('\'').toString();
 				}
 			}
 			return StringUtils.EMPTY;

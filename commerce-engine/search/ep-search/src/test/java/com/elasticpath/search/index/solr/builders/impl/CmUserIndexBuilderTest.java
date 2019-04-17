@@ -139,7 +139,8 @@ public class CmUserIndexBuilderTest {
 		softly.assertThat(createDocument.getFieldValue(SolrIndexConstants.FIRST_NAME)).isEqualTo(cmUser.getFirstName());
 		softly.assertThat(createDocument.getFieldValue(SolrIndexConstants.EMAIL)).isEqualTo(cmUser.getEmail());
 		softly.assertThat(createDocument.getFieldValue(SolrIndexConstants.STATUS)).isEqualTo(UserStatus.ENABLED.getPropertyKey());
-		softly.assertThat(createDocument.getFieldValue(SolrIndexConstants.ALL_CATALOGS_ACCESS)).isEqualTo(String.valueOf(cmUser.isAllCatalogsAccess()));
+		softly.assertThat(createDocument.getFieldValue(SolrIndexConstants.ALL_CATALOGS_ACCESS)).isEqualTo(
+				String.valueOf(cmUser.isAllCatalogsAccess()));
 		softly.assertThat(createDocument.getFieldValue(SolrIndexConstants.ALL_STORES_ACCESS)).isEqualTo(String.valueOf(cmUser.isAllStoresAccess()));
 
 		softly.assertThat(createDocument.getFieldValues(SolrIndexConstants.USER_ROLE)).containsExactlyInAnyOrder("role1", "role2");

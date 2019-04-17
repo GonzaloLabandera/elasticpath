@@ -50,7 +50,7 @@ public class SettingsModel {
 	 */
 	public Set <SettingDefinition> getAllDefinitions() {
 		if (currentDefinitions == null) {
-			currentDefinitions = settingsService.getAllSettingDefinitions(); 
+			currentDefinitions = settingsService.getAllNonOverriddenSettingDefinitions();
 		}
 		return currentDefinitions;
 	}

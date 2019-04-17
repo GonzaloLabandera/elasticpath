@@ -132,7 +132,9 @@ public class SolrQueryFactoryImpl implements SolrQueryFactory {
 
 		addFiltersToQuery(solrQuery, searchCriteria); //Explicitly define the restricted set of returned values by adding restriction filters
 
-		addFacetsToQuery(solrQuery, searchCriteria, filterLookup); //Group stuff into buckets
+		if (searchCriteria instanceof ProductCategorySearchCriteria) {
+			addFacetsToQuery(solrQuery, (ProductCategorySearchCriteria) searchCriteria, filterLookup);
+		}
 
 		addSorting(solrQuery, searchCriteria, luceneQueryComposer, searchConfig);
 		addInvariantTerms(solrQuery, startIndex, maxResults, searchConfig);
@@ -150,12 +152,14 @@ public class SolrQueryFactoryImpl implements SolrQueryFactory {
 	 * @param searchCriteria the search criteria containing the facets and the store to which the facets apply
 	 * @param filterLookup a map keyed on solr query with a value containing the filter
 	 */
-	void addFacetsToQuery(final SolrQuery query, final SearchCriteria searchCriteria, final Map<String, Filter<?>> filterLookup) {
-		if (searchCriteria instanceof ProductCategorySearchCriteria
-				&& ((ProductCategorySearchCriteria) searchCriteria).isFacetingEnabled()
-				&& IndexType.PRODUCT.equals(searchCriteria.getIndexType())) {
+	void addFacetsToQuery(final SolrQuery query, final ProductCategorySearchCriteria searchCriteria, final Map<String, Filter<?>> filterLookup) {
+		if (searchCriteria.isFacetingEnabled() && IndexType.PRODUCT.equals(searchCriteria.getIndexType())) {
 			Map<String, String> queryLookup = new HashMap<>();
 			solrFacetAdapter.addFacets(query, searchCriteria, queryLookup, filterLookup);
+			Map<String, String> appliedFacets = searchCriteria.getAppliedFacets();
+			if (appliedFacets != null && !appliedFacets.isEmpty()) {
+				addAppliedFacetFilters(query, appliedFacets, queryLookup);
+			}
 		}
 	}
 
@@ -194,6 +198,7 @@ public class SolrQueryFactoryImpl implements SolrQueryFactory {
 		}
 	}
 
+	@Override
 	public String constructSolrQuery(final Filter<?> filter, final SearchCriteria searchCriteria) {
 		return escapeMatchAllQuery(solrFacetAdapter.constructFilterQuery(filter, searchCriteria));
 	}
@@ -296,16 +301,7 @@ public class SolrQueryFactoryImpl implements SolrQueryFactory {
 
 		addFiltersToQuery(query, filterQueries, searchCriteria);
 
-		if (searchCriteria.getStoreCode() != null && searchCriteria.isFacetingEnabled()) {
-			// only returns facet values relevant to the search result
-			query.add("facet.mincount", "1");
-			Map<String, String> queryLookup = new HashMap<>();
-			solrFacetAdapter.addFacets(query, searchCriteria, queryLookup, filterLookup);
-			Map<String, String> appliedFacets = searchCriteria.getAppliedFacets();
-			if (appliedFacets != null && !appliedFacets.isEmpty()) {
-				addAppliedFacetFilters(query, appliedFacets, queryLookup);
-			}
-		}
+		addFacetsToQuery(query, searchCriteria, filterLookup);
 
 		addDefaultSorting(query, searchCriteria);
 		addInvariantTerms(query, startIndex, maxResults, getSearchConfigFactory().getSearchConfig(IndexType.PRODUCT.getIndexName()));
@@ -451,10 +447,13 @@ public class SolrQueryFactoryImpl implements SolrQueryFactory {
 			DisplayableFilter displayableFilter = getBeanFactory().getBean(ContextIdNames.DISPLAYABLE_FILTER);
 			displayableFilter.setStoreCode(searchCriteria.getStoreCode());
 			filterQueries.add(displayableFilter);
+			
+			Date roundedDate = roundDateUpToMinute(new Date());
+			final String now = getAnalyzer().analyze(roundedDate);
 
-			// filter by enabled date (start and end date of product)
-			BooleanQuery booleanQuery = createTermsForStartEndDateRange(new Date());
-			query.addFilterQuery(booleanQuery.toString());
+			// filter by start date less than or equal to now and end date greater than now
+			final String starToNow = ":[* TO " + now + "] ";
+			query.addFilterQuery("+" + SolrIndexConstants.START_DATE + starToNow + "-" + SolrIndexConstants.END_DATE + starToNow);
 		}
 	}
 

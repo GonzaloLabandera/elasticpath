@@ -3,7 +3,8 @@
  */
 package com.elasticpath.rest.resource.integration.epcommerce.repository.promotion.impl.promotions.applied;
 
-import static com.elasticpath.rest.resource.integration.epcommerce.repository.promotion.impl.promotions.PromotionIdentifierUtil.buildPromotionIdentifier;
+import static com.elasticpath.rest.resource.integration.epcommerce.repository.promotion.impl.promotions.PromotionIdentifierUtil
+		.buildPromotionIdentifier;
 
 import io.reactivex.Observable;
 import org.osgi.service.component.annotations.Component;

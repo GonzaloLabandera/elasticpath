@@ -46,15 +46,16 @@ public class PriceTierImpl extends AbstractEpDomainImpl implements PriceTier {
 	}
 
 	@Override
-	public void setComputedPriceIfLower(final BigDecimal computedPrice) {
+	public boolean setComputedPriceIfLower(final BigDecimal newComputedPrice) {
 		// Don't set the computed price unless it is lower than the current price
-		if (this.computedPrice != null && computedPrice != null
-				&& this.computedPrice.compareTo(computedPrice) < 0) {
-			return;
+		if (this.computedPrice != null && newComputedPrice != null
+				&& this.computedPrice.compareTo(newComputedPrice) <= 0) {
+			return false;
 		}
 
 		// If the given price is less than zero, set the computed price to zero
-		this.computedPrice = getNonNegativePrice(computedPrice);
+		this.computedPrice = getNonNegativePrice(newComputedPrice);
+		return true;
 	}
 
 	private BigDecimal getNonNegativePrice(final BigDecimal adjustedPrice) {

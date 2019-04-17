@@ -12,7 +12,7 @@ Feature: RMA Email
 	And I am a customer of Store "Test Store"
 	And the Store supports the en_US locale
 	And my shopping locale is en_US
-	And my email address customer@example.org has been registered in my user account
+	And my email address customer@example.org has been used to register my user account
 
   Scenario: the customer returns an item and receives an RMA email
 	Given I have previously made a purchase

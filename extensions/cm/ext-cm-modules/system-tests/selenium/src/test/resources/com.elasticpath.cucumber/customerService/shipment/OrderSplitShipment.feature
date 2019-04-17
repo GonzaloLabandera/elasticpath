@@ -94,3 +94,80 @@ Feature: Split Shipment
     Examples:
       | coupon               | sku-code-1   | sku-code-2    |
       | halfofselectedmovies | physical_sku | guardians_sku |
+
+  Scenario Outline: Split shipment for shipping method based on unit weight
+    Given I login as a registered shopper
+    And sku <sku-code-1> has weight of <weight-1>
+    And sku <sku-code-2> has weight of <weight-2>
+    And shipping option Canada Post Unit Weight Price has $5.50 for price per unit weight
+    And I add following items with quantity to the cart
+      | <sku-code-1> | <qty-1> |
+      | <sku-code-2> | <qty-2> |
+    And I select shipping option <shipping-option>
+    And I make a purchase
+    And I sign in to CM as CSR user
+    And I go to Customer Service
+    And I search and open order editor for the latest order
+    When I select Details tab in the Order Editor
+    Then I should see the following Shipment Summary
+      | shipment-number | item-sub-total | shipping-cost | shipment-discount | total-before-tax | item-taxes | shipping-taxes | shipment-total |
+      | 1               | 877.00         | 30.25         | 0.00              | 907.25           | 12.00      | 3.63           | 922.88         |
+    When I create a new shipment for sku <sku-code-2> with following values
+      | Address         | 1111 EP Road, Vancouver, BC, v7v7v7 |
+      | Shipment Method | Canada Post Unit Weight Price       |
+      | Payment Source  | test-token                          |
+    Then I should see the following Shipment Summary
+      | shipment-number | item-sub-total | shipping-cost | shipment-discount | total-before-tax | item-taxes | shipping-taxes | shipment-total |
+      | 1               | 777.00         | 16.50         | 0.00              | 793.50           | 0.00       | 1.99           | 795.49         |
+      | 2               | 100.00         | 13.75         | 0.00              | 113.75           | 12.00      | 1.65           | 127.40         |
+
+    Examples:
+      | sku-code-1 | qty-1 | weight-1 | sku-code-2 | qty-2 | weight-2 | shipping-option       |
+      | iphone10   | 1     | 3.0 KG   | FocUSsku   | 1     | 2.5 KG   | CanadaPostWeightPrice |
+
+  Scenario Outline: Shipping cost calculation with unit weight, order total percentage and fixed price
+    Given I login as a registered shopper
+    And sku <sku-code-1> has weight of <weight-1>
+    And sku <sku-code-2> has weight of <weight-2>
+    And shipping option Fixed Price No Promo Shipping Option has $100.00 for fixed price
+    And shipping option Canada Post Unit Weight Price has $5.50 for price per unit weight
+    And shipping option Canada Post Express has 10% for order total
+    And shipping option Canada Post 2 days has 5% for order total
+    And I add following items with quantity to the cart
+      | <sku-code-1> | <qty-1> |
+      | <sku-code-2> | <qty-2> |
+    And I select shipping option <shipping-option>
+    And I make a purchase
+    And I sign in to CM as CSR user
+    And I go to Customer Service
+    And I search and open order editor for the latest order
+    When I select Details tab in the Order Editor
+    Then I should see the following Shipment Summary
+      | shipment-number | item-sub-total | shipping-cost | shipment-discount | total-before-tax | item-taxes | shipping-taxes | shipment-total |
+      | 1               | 802.00         | 100.00        | 0.00              | 902.00           | 0.00       | 12.00          | 914.00         |
+    When I create a new shipment for sku <sku-code-2> with following values
+      | Address         | 1111 EP Road, Vancouver, BC, v7v7v7 |
+      | Shipment Method | Canada Post Unit Weight Price       |
+      | Payment Source  | test-token                          |
+    Then I should see the following Shipment Summary
+      | shipment-number | item-sub-total | shipping-cost | shipment-discount | total-before-tax | item-taxes | shipping-taxes | shipment-total |
+      | 1               | 777.00         | 100.00        | 0.00              | 877.00           | 0.00       | 12.00          | 889.00         |
+      | 2               | 25.00          | 0.00          | 0.00              | 25.00            | 0.00       | 0.00           | 25.00          |
+    When I change the shipment number 1 Shipping Method to Canada Post Express without authorizing payment
+    Then I should see the following Shipment Summary
+      | shipment-number | item-sub-total | shipping-cost | shipment-discount | total-before-tax | item-taxes | shipping-taxes | shipment-total |
+      | 1               | 777.00         | 77.70         | 0.00              | 854.70           | 0.00       | 9.33           | 864.03         |
+    When I change the shipment number 2 Shipping Method to the following
+      | Shipping Method | Canada Post 2 days |
+      | Payment Source  | test-token         |
+    Then I should see the following Shipment Summary
+      | shipment-number | item-sub-total | shipping-cost | shipment-discount | total-before-tax | item-taxes | shipping-taxes | shipment-total |
+      | 2               | 25.00          | 1.25          | 0.00              | 26.25            | 0.00       | 0.15           | 26.40          |
+    When I change the shipment number 1 Shipping Method to Canada Post Unit Weight Price without authorizing payment
+    Then I should see the following Shipment Summary
+      | shipment-number | item-sub-total | shipping-cost | shipment-discount | total-before-tax | item-taxes | shipping-taxes | shipment-total |
+      | 1               | 777.00         | 16.50         | 0.00              | 793.50           | 0.00       | 1.99           | 795.49         |
+
+    Examples:
+      | sku-code-1 | qty-1 | weight-1 | sku-code-2   | qty-2 | weight-2 | shipping-option                 |
+      | iphone10   | 1     | 3.0 KG   | physical_sku | 1     | 0.0 KG   | FixedPriceNoPromoShippingOption |

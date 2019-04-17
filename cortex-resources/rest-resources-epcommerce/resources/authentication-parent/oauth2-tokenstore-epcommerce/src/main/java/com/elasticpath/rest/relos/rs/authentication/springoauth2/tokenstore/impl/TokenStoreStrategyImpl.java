@@ -1,5 +1,5 @@
 /*
- * Copyright © 2013 Elastic Path Software Inc. All rights reserved.
+ * Copyright © 2019 Elastic Path Software Inc. All rights reserved.
  */
 package com.elasticpath.rest.relos.rs.authentication.springoauth2.tokenstore.impl;
 
@@ -12,15 +12,19 @@ import com.elasticpath.rest.chain.ExecutionResultChain;
 import com.elasticpath.rest.chain.OnFailure;
 import com.elasticpath.rest.command.ExecutionResult;
 import com.elasticpath.rest.command.ExecutionResultFactory;
-import com.elasticpath.rest.relos.rs.authentication.springoauth2.dto.AccessTokenDto;
-import com.elasticpath.rest.relos.rs.authentication.springoauth2.transformer.AccessTokenMementoTransformer;
+import com.elasticpath.rest.relos.rs.authentication.dto.AccessTokenDto;
 import com.elasticpath.rest.relos.rs.authentication.springoauth2.tokenstore.TokenStoreStrategy;
+import com.elasticpath.rest.relos.rs.authentication.springoauth2.transformer.AccessTokenMementoTransformer;
+import com.elasticpath.rest.relos.rs.authentication.token.AccessTokenStrategy;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.oauth2.OAuth2AccessTokenRepository;
 
 /**
  * Token store strategy implementation.
  */
-@Component
+@Component(service = {
+		AccessTokenStrategy.class,
+		TokenStoreStrategy.class
+})
 public class TokenStoreStrategyImpl implements TokenStoreStrategy {
 
 	private static final String INVALID_TOKEN = "Invalid access token.";

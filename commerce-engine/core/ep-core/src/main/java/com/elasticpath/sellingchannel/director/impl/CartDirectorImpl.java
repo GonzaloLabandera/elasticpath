@@ -9,9 +9,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import com.google.common.collect.ImmutableList;
+
 import org.apache.log4j.Logger;
 
 import com.elasticpath.base.common.dto.StructuredErrorMessage;
@@ -25,6 +27,7 @@ import com.elasticpath.commons.tree.impl.ProductPriceMemento;
 import com.elasticpath.domain.catalog.Price;
 import com.elasticpath.domain.catalog.ProductSku;
 import com.elasticpath.domain.shopper.Shopper;
+import com.elasticpath.domain.shoppingcart.ItemType;
 import com.elasticpath.domain.shoppingcart.ShoppingCart;
 import com.elasticpath.domain.shoppingcart.ShoppingItem;
 import com.elasticpath.domain.store.Store;
@@ -69,6 +72,13 @@ public class CartDirectorImpl implements CartDirector {
 		ShoppingItem cartItemToAdd = shoppingItem;
 		int quantity = cartItemToAdd.getQuantity();
 
+		if (parentItem != null) {
+			shoppingCart.setChildShoppingCartUid(cartItemToAdd);
+			if (parentItem.getItemType() == ItemType.SKU_WITH_DEPENDENTS) {
+				cartItemToAdd.setItemType(ItemType.DEPENDENT);
+			}
+		}
+
 		final ShoppingItem existingItem = getExistingItemWithSameParent(shoppingCart, shoppingItem, parentItem);
 
 		if (existingItem == null || !itemsAreEqual(shoppingItem, existingItem)) {
@@ -81,7 +91,7 @@ public class CartDirectorImpl implements CartDirector {
 				parentItem.addChildItem(cartItemToAdd);
 			}
 
-			addDependentItemsForParentItem(shoppingCart, cartItemToAdd);
+			addDependentItemsToParentItem(shoppingCart, cartItemToAdd);
 
 			// fire rules & persist here?
 		} else if (parentItem == null) { // non-dependent item
@@ -103,13 +113,22 @@ public class CartDirectorImpl implements CartDirector {
 	 * @param shoppingCart    the shopping cart
 	 * @param parentItemAdded the added parent item
 	 */
-	protected void addDependentItemsForParentItem(final ShoppingCart shoppingCart, final ShoppingItem parentItemAdded) {
+	protected void addDependentItemsToParentItem(final ShoppingCart shoppingCart, final ShoppingItem parentItemAdded) {
 		final ProductSku parentProductSku = getProductSkuLookup().findByGuid(parentItemAdded.getSkuGuid());
 
-		getDependentItemLookup().findDependentItemsForSku(shoppingCart.getStore(),
-				parentProductSku).entrySet().stream()
+		final Set<Map.Entry<String, Integer>> dependentItems = getDependentItemLookup().findDependentItemsForSku(shoppingCart.getStore(),
+				parentProductSku).entrySet();
+
+			if (dependentItems.isEmpty()) {
+				return;
+			}
+
+			//identify a parent as one with dependent items
+			parentItemAdded.setItemType(ItemType.SKU_WITH_DEPENDENTS);
+
+			dependentItems.stream()
 				// quantity of the dependent items added equal to the quantity the parent item
-				.map(dependentItem -> getShoppingItemDtoFactory().createDto(dependentItem.getKey(), parentItemAdded.getQuantity()))
+				.map(dependentItemEntry -> getShoppingItemDtoFactory().createDto(dependentItemEntry.getKey(), parentItemAdded.getQuantity()))
 				.forEach(dependentShoppingItem -> addItemToCart(shoppingCart, dependentShoppingItem, parentItemAdded));
 	}
 

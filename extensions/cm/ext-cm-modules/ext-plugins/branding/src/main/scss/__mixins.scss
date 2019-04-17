@@ -72,7 +72,7 @@
 @mixin form_field($selector: '&,&[BORDER]') {
 	#{$selector} {
 		border: 1px solid $gray-light;
-		border-radius: 0;
+		border-radius: 4px;
 		box-shadow: none;
 		font: $default-font;
 		color: $default-font-color;
@@ -140,10 +140,10 @@
 		background-color: $table_cell_border_color;
 	}
 	&:selected {
-		@include primary-rgba(background-color, 0.2);
+		@include table-selected-rgba(background-color, 0.8);
 		@if $unfocus {
 			&:unfocused {
-				@include primary-rgba(background-color, 0.1);
+				@include table-selected-rgba(background-color, 0.4);
 			}
 		}
 	}

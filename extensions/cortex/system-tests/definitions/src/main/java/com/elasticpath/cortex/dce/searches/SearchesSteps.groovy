@@ -24,6 +24,16 @@ class SearchesSteps {
 		assertLinkExists(client, searchLink)
 	}
 
+	@When('^I navigate to keyword search form$')
+	static void navigateToKeywordSearchForm() {
+		CommonMethods.getKeywordSearchForm()
+	}
+
+	@When('^I navigate to offer search form$')
+	static void navigateToOfferSearchForm() {
+		CommonMethods.getOfferSearchForm()
+	}
+
 	@When('^I search for item name (.+?)$')
 	static void searchForItemByName(String searchItemName) {
 		CommonMethods.searchAndOpenItemWithKeyword(searchItemName)

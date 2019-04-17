@@ -504,20 +504,34 @@ public class CouponUsageServiceImpl implements CouponUsageService {
 	 * @return true if the usage is valid for coupon type.
 	 */
 	protected boolean checkUsage(final CouponConfig couponConfig, final CouponUsage couponUsage, final String customerEmailAddress) {
-		if (CouponUsageType.LIMIT_PER_ANY_USER.equals(couponConfig.getUsageType()) && !StringUtils.isEmpty(customerEmailAddress)
-				&& (couponUsage == null || couponUsage.getUseCount() < couponConfig.getUsageLimit())) {
-			// we don't care about couponUsage other than to run the query
-			return true;
-		} else if (CouponUsageType.LIMIT_PER_COUPON.equals(couponConfig.getUsageType())
-				&& (couponUsage == null || couponUsage.getUseCount() < couponConfig.getUsageLimit())) {
-			// we don't care about customerEmailAddress being null or not
-			// we don't care about couponUsage other than to run the query
-			return true;
-		} else if (CouponUsageType.LIMIT_PER_SPECIFIED_USER.equals(couponConfig.getUsageType()) && !StringUtils.isEmpty(customerEmailAddress)
-				&& couponUsage != null && couponUsage.getUseCount() < couponConfig.getUsageLimit()) {
-			return true;
+		switch (couponConfig.getUsageType().getOrdinal()) {
+			case CouponUsageType.LIMIT_PER_COUPON_ORDINAL:
+				if (couponUsage == null) {
+					return true;
+				}
+				return couponUsage.getUseCount() < couponConfig.getUsageLimit();
+
+			case CouponUsageType.LIMIT_PER_ANY_USER_ORDINAL:
+				if (StringUtils.isEmpty(customerEmailAddress)) {
+					return false;
+				}
+				if (couponUsage == null) {
+					return true;
+				}
+				return couponUsage.getUseCount() < couponConfig.getUsageLimit();
+
+			case CouponUsageType.LIMIT_PER_SPECIFIED_USER_ORDINAL:
+				if (StringUtils.isEmpty(customerEmailAddress)) {
+					return false;
+				}
+				if (couponUsage == null) {
+					return false;
+				}
+				return couponUsage.getUseCount() < couponConfig.getUsageLimit();
+
+			default:
+				return false;
 		}
-		return false;
 	}
 
 	@Override

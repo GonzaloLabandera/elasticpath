@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<definitions xmlns="http://www.elasticpath.com/schema/rest/0.5">
+
+	<family>
+		<name>offersearches</name>
+
+		<uri-part>
+			<name>category-id</name>
+			<description><![CDATA[Contains the category code]]></description>
+			<string/>
+		</uri-part>
+
+		<resource>
+			<name>featured-offers</name>
+			<description><![CDATA[All the featured offers for a navigation category.]]></description>
+			<uri>{base.family}/{base.scope}/featuredoffers/{category-id}</uri>
+			<list-of>offers.offer</list-of>
+		</resource>
+
+		<relationship>
+			<name>navigation-to-featured-offers</name>
+			<description><![CDATA[Link from navigation to featured offer.]]></description>
+			<rel>featuredoffers</rel>
+			<rev>navigation</rev>
+			<from>navigations.navigation</from>
+			<to>featured-offers</to>
+		</relationship>
+
+	</family>
+
+</definitions>

@@ -74,48 +74,58 @@ public class DynamicCartItemModifierFieldValidator {
 	 */
 	public Set<ConstraintViolation<DynamicCartItemModifierField>> validate(final DynamicCartItemModifierField fieldToValidate) {
 
+		addIsRequiredConstraint(fieldToValidate);
+
+		Set<ConstraintViolation<DynamicCartItemModifierField>> violations = validateWithCurrentConstraints(fieldToValidate);
+		if (!violations.isEmpty()) {
+			return violations;
+		}
+
+		addAdditionalConstraints(fieldToValidate);
+
+		return validateWithCurrentConstraints(fieldToValidate);
+	}
+
+	private void addIsRequiredConstraint(final DynamicCartItemModifierField fieldToValidate) {
+		final String fieldName = fieldToValidate.getFieldName();
 		final CartItemModifierField referentField = fieldToValidate.getReferentField();
 
-		addDefaultConstraints(fieldToValidate.getFieldName(), referentField);
+		if (referentField.isRequired() && !isRequiredSuppression) {
+			constraintMappingContext.constraint(
+					new NotBlankDef()
+							.fieldName(fieldName));
+		}
+	}
 
-		addAdditionalConstraints(referentField.getFieldType().getConstraintDefs()
-						.orElse(new AbstractConstraintDef<?>[]{}),
-				fieldToValidate);
+	private void addAdditionalConstraints(final DynamicCartItemModifierField fieldToValidate) {
+		final String fieldName = fieldToValidate.getFieldName();
+		final CartItemModifierField referentField = fieldToValidate.getReferentField();
+		final AbstractConstraintDef<?>[] typeConstraintDefs =
+				referentField.getFieldType().getConstraintDefs().orElse(new AbstractConstraintDef<?>[]{});
+
+		if (referentField.getMaxSize() != null) {
+			constraintMappingContext.constraint(
+					new LengthDef()
+							.max(referentField.getMaxSize())
+							.fieldName(fieldName));
+		}
+
+		// Additional constraints based on field type. Each field may contain one or more constraint definitions
+		final String[] validFieldOptions = fieldToValidate.getValidOptions().orElse(new String[]{});
+		for (AbstractConstraintDef<?> constraintDef : typeConstraintDefs) {
+			constraintDef.validFieldOptions(validFieldOptions);
+			constraintDef.fieldName(fieldName);
+			constraintMappingContext.constraint(constraintDef);
+		}
+	}
+
+	private Set<ConstraintViolation<DynamicCartItemModifierField>> validateWithCurrentConstraints(
+			final DynamicCartItemModifierField fieldToValidate) {
 
 		return configuration.addMapping(constraintMapping)
 				.buildValidatorFactory()
 				.getValidator()
 				.validate(fieldToValidate);
-	}
-
-	//All dynamic fields are verified against default constraints (required and max size [optional])
-	private void addDefaultConstraints(final String fieldName, final CartItemModifierField referentField) {
-
-		if (referentField.isRequired() && !isRequiredSuppression) {
-			constraintMappingContext
-					.constraint(new NotBlankDef()
-							.fieldName(fieldName));
-		}
-
-		if (referentField.getMaxSize() != null) {
-			constraintMappingContext
-					.constraint(new LengthDef()
-							.max(referentField.getMaxSize())
-							.fieldName(fieldName));
-		}
-	}
-
-	//Additional constraints are added based on field type. Each field may contain one or more constraint definitions
-	private void addAdditionalConstraints(final AbstractConstraintDef<?>[] typeConstraintDefs,
-			final DynamicCartItemModifierField fieldToValidate) {
-
-		final String[] validFieldOptions = fieldToValidate.getValidOptions().orElse(new String[]{});
-		for (AbstractConstraintDef<?> constraintDef : typeConstraintDefs) {
-			constraintDef.validFieldOptions(validFieldOptions);
-			constraintDef.fieldName(fieldToValidate.getFieldName());
-			constraintMappingContext
-					.constraint(constraintDef);
-		}
 	}
 
 	private ValidationProviderResolver createValidationProviderResolver(final ValidationProvider<?> provider) {

@@ -8,6 +8,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
@@ -20,7 +21,6 @@ import com.elasticpath.domain.DatabaseLastModifiedDate;
 import com.elasticpath.domain.attribute.CustomerProfileValue;
 import com.elasticpath.domain.customer.impl.CustomerRoleMapper;
 import com.elasticpath.persistence.api.Entity;
-import com.elasticpath.validation.constraints.CustomerUsernameUserIdModeEmail;
 import com.elasticpath.validation.constraints.EpEmail;
 import com.elasticpath.validation.constraints.NotBlank;
 import com.elasticpath.validation.constraints.RegisteredCustomerPasswordNotBlankWithSize;
@@ -31,7 +31,6 @@ import com.elasticpath.validation.groups.PasswordChange;
  */
 @RegisteredCustomerPasswordNotBlankWithSize(
 		min = Customer.MINIMUM_PASSWORD_LENGTH, max = GlobalConstants.SHORT_TEXT_MAX_LENGTH, groups = PasswordChange.class)
-@CustomerUsernameUserIdModeEmail
 public interface Customer extends Entity, UserDetails, DatabaseLastModifiedDate, DatabaseCreationDate {
 
 	/** The minimum length of a password. */
@@ -146,8 +145,9 @@ public interface Customer extends Entity, UserDetails, DatabaseLastModifiedDate,
 	 * By default, the clear-text user input password will be encrypted using the SHA1 secure hash algorithm
 	 *
 	 * @param password the encrypted password.
+	 * @param salt the password salt
 	 */
-	void setPassword(String password);
+	void setPassword(String password, String salt);
 
 	/**
 	 * Sets the clear-text password. <br>
@@ -587,25 +587,6 @@ public interface Customer extends Entity, UserDetails, DatabaseLastModifiedDate,
 	 * @return true if fax number is required, false if not required.
 	 */
 	boolean isFaxNumberRequired();
-
-	/**
-	 * Sets user ID as user's email.
-	 */
-	void setUserIdAsEmail();
-
-	/**
-	 * Sets user ID based on the user ID mode.
-	 *
-	 * @param userId the user ID
-	 */
-	void setUserIdBasedOnUserIdMode(String userId);
-
-	/**
-	 * Gets user ID mode.
-	 *
-	 * @return the user id mode
-	 */
-	int getUserIdMode();
 
 	/**
 	 * Gets a {@link CustomerRoleMapper} associated with this Customer.

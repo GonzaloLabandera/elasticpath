@@ -3,10 +3,11 @@
  */
 package com.elasticpath.persistence.impl;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.Arrays;
 
@@ -16,6 +17,7 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
+
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
@@ -26,7 +28,7 @@ import com.elasticpath.persistence.api.PersistenceSession;
 import com.elasticpath.persistence.api.Query;
 
 /**
- * Test class for {@link CustomerAuthenticationDaoImpl}.
+ * Test class for {@link CmUserAuthenticationDaoImpl}.
  */
 @RunWith(MockitoJUnitRunner.class)
 public class CmUserAuthenticationDaoImplTest {

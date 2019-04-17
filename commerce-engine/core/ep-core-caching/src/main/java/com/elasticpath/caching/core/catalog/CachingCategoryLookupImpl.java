@@ -14,7 +14,6 @@ import com.google.common.collect.Lists;
 
 import com.elasticpath.cache.Cache;
 import com.elasticpath.cache.CacheLoader;
-import com.elasticpath.cache.MultiKeyCache;
 import com.elasticpath.commons.util.CategoryGuidUtil;
 import com.elasticpath.domain.catalog.Catalog;
 import com.elasticpath.domain.catalog.Category;
@@ -25,44 +24,39 @@ import com.elasticpath.service.catalog.CategoryLookup;
  * A Caching implementation of the {@link com.elasticpath.service.catalog.CategoryLookup} interface.
  */
 public class CachingCategoryLookupImpl implements CategoryLookup {
-	/** The cache key used for caching by uidpk. */
-	protected static final String CACHE_KEY_UIDPK = "uidPk";
-	/** The cache key used for caching by guid. */
-	protected static final String CACHE_KEY_GUID = "guid";
-	/** The cache key used for caching by category code + catalog code. */
-	protected static final String CACHE_KEY_COMPOUND_GUID = "compoundGuid";
+	private final CacheLoader<Long, Category> categoriesByUidLoader = new CategoriesByUidpkLoader();
+	private final CacheLoader<String, Long> categoryUidByGuidLoader = new CategoryUidPkByGuidLoader();
+	private final CacheLoader<String, Long> categoryUidByCompoundGuidLoader = new CategoryUidPkByCompoundGuidLoader();
 
-	private final CacheLoader<Long, Category> categoriesByUidpkLoader = new CategoriesByUidpkLoader();
-	private final CacheLoader<String, Category> categoriesByGuidLoader = new CategoriesByGuidLoader();
-	private final CacheLoader<String, Category> categoriesByCodeLoader = new CategoriesByCodeLoader();
 	private final CategoryGuidUtil categoryGuidUtil = new CategoryGuidUtil();
 
-	private MultiKeyCache<Category> categoryCache;
-	private CategoryLookup fallbackReader;
+	private Cache<Long, Category> categoryByUidCache;
+	private Cache<String, Long> categoryUidByGuidCache;
+	private Cache<String, Long> categoryUidByCompoundGuidCache;
 	private Cache<Long, List<Long>> childCategoryCache;
+
+	private CategoryLookup fallbackReader;
+
 
 	@Override
 	@SuppressWarnings("unchecked")
 	public <C extends Category> C findByUid(final long uidPk) {
-		return (C) getCategoryCache().get(CACHE_KEY_UIDPK, uidPk, getCategoriesByUidpkLoader());
+		return (C) getCategoryByUidCache().get(uidPk, categoriesByUidLoader);
 	}
 
 	@Override
 	@SuppressWarnings("unchecked")
 	public <C extends Category> List<C> findByUids(final Collection<Long> categoryUids) {
-		Map<Long, Category> resultMap = getCategoryCache().getAll(
-				CACHE_KEY_UIDPK, categoryUids, getCategoriesByUidpkLoader());
+		Map<Long, Category> resultMap = getCategoryByUidCache().getAll(categoryUids, categoriesByUidLoader);
 
-		List<C> results = new ArrayList<>(resultMap.size());
-		results.addAll((Collection<C>) resultMap.values());
-
-		return results;
+		return new ArrayList<>((Collection<C>) resultMap.values());
 	}
 
 	@Override
 	@SuppressWarnings("unchecked")
 	public <C extends Category> C findByGuid(final String guid) {
-		return (C) getCategoryCache().get(CACHE_KEY_GUID, guid, getCategoriesByGuidLoader());
+		Long categoryUidPk = getCategoryUidByGuidCache().get(guid, categoryUidByGuidLoader);
+		return (C) getCategoryByUidCache().get(categoryUidPk);
 	}
 
 	@Override
@@ -80,7 +74,8 @@ public class CachingCategoryLookupImpl implements CategoryLookup {
 	@Override
 	@SuppressWarnings("unchecked")
 	public <C extends Category> C findByCompoundCategoryAndCatalogCodes(final String compoundGuid) {
-		return (C) getCategoryCache().get(CACHE_KEY_COMPOUND_GUID, compoundGuid, getCategoriesByCodeLoader());
+		Long categoryUidPk = getCategoryUidByCompoundGuidCache().get(compoundGuid, categoryUidByCompoundGuidLoader);
+		return (C) getCategoryByUidCache().get(categoryUidPk);
 	}
 
 	@Override
@@ -107,12 +102,28 @@ public class CachingCategoryLookupImpl implements CategoryLookup {
 		return findByGuid(child.getParentGuid());
 	}
 
-	protected MultiKeyCache<Category> getCategoryCache() {
-		return categoryCache;
+	protected Cache<Long, Category> getCategoryByUidCache() {
+		return categoryByUidCache;
 	}
 
-	public void setCategoryCache(final MultiKeyCache<Category> categoryCache) {
-		this.categoryCache = categoryCache;
+	public void setCategoryByUidCache(final Cache<Long, Category> categoryByUidCache) {
+		this.categoryByUidCache = categoryByUidCache;
+	}
+
+	protected Cache<String, Long> getCategoryUidByGuidCache() {
+		return categoryUidByGuidCache;
+	}
+
+	public void setCategoryUidByGuidCache(final Cache<String, Long> categoryUidByGuidCache) {
+		this.categoryUidByGuidCache = categoryUidByGuidCache;
+	}
+
+	protected Cache<String, Long> getCategoryUidByCompoundGuidCache() {
+		return categoryUidByCompoundGuidCache;
+	}
+
+	public void setCategoryUidByCompoundGuidCache(final Cache<String, Long> categoryUidByCompoundGuidCache) {
+		this.categoryUidByCompoundGuidCache = categoryUidByCompoundGuidCache;
 	}
 
 	protected CategoryLookup getFallbackReader() {
@@ -135,16 +146,16 @@ public class CachingCategoryLookupImpl implements CategoryLookup {
 		return childCategoryCache;
 	}
 
-	protected CacheLoader<Long, Category> getCategoriesByUidpkLoader() {
-		return categoriesByUidpkLoader;
+	protected CacheLoader<Long, Category> getCategoriesByUidLoader() {
+		return categoriesByUidLoader;
 	}
 
-	protected CacheLoader<String, Category> getCategoriesByCodeLoader() {
-		return categoriesByCodeLoader;
+	protected CacheLoader<String, Long> getCategoryUidByGuidLoader() {
+		return categoryUidByGuidLoader;
 	}
 
-	protected CacheLoader<String, Category> getCategoriesByGuidLoader() {
-		return categoriesByGuidLoader;
+	protected CacheLoader<String, Long> getCategoryUidByCompoundGuidLoader() {
+		return categoryUidByCompoundGuidLoader;
 	}
 
 	/**
@@ -153,7 +164,12 @@ public class CachingCategoryLookupImpl implements CategoryLookup {
 	protected class CategoriesByUidpkLoader implements CacheLoader<Long, Category> {
 		@Override
 		public Category load(final Long key) {
-			return getFallbackReader().findByUid(key);
+			Category category = getFallbackReader().findByUid(key);
+
+			cacheCategoryUidIfRequired(category, categoryUidByGuidCache);
+			cacheCategoryUidIfRequired(category, categoryUidByCompoundGuidCache);
+
+			return category;
 		}
 
 		@Override
@@ -162,7 +178,11 @@ public class CachingCategoryLookupImpl implements CategoryLookup {
 			Map<Long, Category> result = new LinkedHashMap<>(loaded.size() * 2);
 			for (Category category : loaded) {
 				result.put(category.getUidPk(), category);
+
+				cacheCategoryUidIfRequired(category, categoryUidByGuidCache);
+				cacheCategoryUidIfRequired(category, categoryUidByCompoundGuidCache);
 			}
+
 			return result;
 		}
 	}
@@ -170,14 +190,21 @@ public class CachingCategoryLookupImpl implements CategoryLookup {
 	/**
 	 * CacheLoader which loads Categories by Guid.
 	 */
-	protected class CategoriesByGuidLoader implements CacheLoader<String, Category> {
+	protected class CategoryUidPkByGuidLoader implements CacheLoader<String, Long> {
 		@Override
-		public Category load(final String key) {
-			return getFallbackReader().findByGuid(key);
+		public Long load(final String key) {
+			Category category = getFallbackReader().findByGuid(key);
+
+			cacheCategoryIfRequired(category, categoryByUidCache);
+			cacheCategoryUidIfRequired(category, categoryUidByCompoundGuidCache);
+
+			return category == null ? null
+				: category.getUidPk();
 		}
 
 		@Override
-		public Map<String, Category> loadAll(final Iterable<? extends String> keys) {
+		public Map<String, Long> loadAll(final Iterable<? extends String> keys) {
+
 			throw new UnsupportedOperationException("Not yet implemented");
 		}
 	}
@@ -185,15 +212,41 @@ public class CachingCategoryLookupImpl implements CategoryLookup {
 	/**
 	 * CacheLoader which loads Categories by Compound Guid (CategoryCode + CatalogCode).
 	 */
-	protected class CategoriesByCodeLoader implements CacheLoader<String, Category> {
+	protected class CategoryUidPkByCompoundGuidLoader implements CacheLoader<String, Long> {
 		@Override
-		public Category load(final String key) {
-			return getFallbackReader().findByCompoundCategoryAndCatalogCodes(key);
+		public Long load(final String key) {
+			Category category = getFallbackReader().findByCompoundCategoryAndCatalogCodes(key);
+
+			cacheCategoryIfRequired(category, categoryByUidCache);
+			cacheCategoryUidIfRequired(category, categoryUidByGuidCache);
+
+			return category == null ? null
+				: category.getUidPk();
 		}
 
 		@Override
-		public Map<String, Category> loadAll(final Iterable<? extends String> keys) {
+		public Map<String, Long> loadAll(final Iterable<? extends String> keys) {
+
 			throw new UnsupportedOperationException("Not yet implemented");
+		}
+	}
+
+	private void cacheCategoryIfRequired(final Category dbCategory, final Cache<Long, Category> cache) {
+		if (dbCategory != null && cache.get(dbCategory.getUidPk()) == null) {
+			cache.put(dbCategory.getUidPk(), dbCategory);
+		}
+	}
+
+	private void cacheCategoryUidIfRequired(final Category dbCategory, final Cache<String, Long> cache) {
+		if (dbCategory == null) {
+			return;
+		}
+
+		String guid = cache.equals(categoryUidByGuidCache) ? dbCategory.getGuid()
+			: dbCategory.getCompoundGuid();
+
+		if (guid != null && cache.get(guid) == null) {
+			cache.put(guid, dbCategory.getUidPk());
 		}
 	}
 }

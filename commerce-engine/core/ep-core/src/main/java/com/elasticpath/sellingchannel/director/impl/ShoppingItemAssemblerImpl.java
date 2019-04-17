@@ -19,6 +19,7 @@ import com.elasticpath.domain.catalog.ConstituentItem;
 import com.elasticpath.domain.catalog.Product;
 import com.elasticpath.domain.catalog.ProductBundle;
 import com.elasticpath.domain.catalog.ProductSku;
+import com.elasticpath.domain.shoppingcart.ItemType;
 import com.elasticpath.domain.shoppingcart.ShoppingItem;
 import com.elasticpath.sellingchannel.ShoppingItemFactory;
 import com.elasticpath.sellingchannel.director.ShoppingItemAssembler;
@@ -78,6 +79,7 @@ public class ShoppingItemAssemblerImpl implements ShoppingItemAssembler {
 				ShoppingItem shoppingItem = getShoppingItemFactory().createShoppingItem(sku, null, bundleItem.getQuantity() * parentShipQuantity,
 						constituentIndex, Collections.emptyMap());
 				shoppingItem.setBundleConstituent(true);
+				shoppingItem.setItemType(ItemType.BUNDLE_CONSTITUENT);
 				parent.addChildItem(shoppingItem);
 				if (constituentProduct.isBundle()) {
 					createShoppingItemTree((ProductBundle) constituentProduct.getProduct(), thisShoppingItemDto, shoppingItem, parentShipQuantity

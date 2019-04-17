@@ -3,6 +3,8 @@
  */
 package com.elasticpath.tools.sync.client.controller.impl;
 
+import javax.sql.DataSource;
+
 import net.sf.ehcache.CacheManager;
 import org.apache.log4j.Logger;
 
@@ -26,7 +28,6 @@ import com.elasticpath.tools.sync.job.descriptor.dao.JobDescriptorDaoFactory;
 import com.elasticpath.tools.sync.processing.SerializableObject;
 import com.elasticpath.tools.sync.processing.SerializableObjectListener;
 import com.elasticpath.tools.sync.processing.SyncJobObjectProcessor;
-
 /**
  * This controller is used to do synchronization between two live systems. It performs the following steps: <li>load data from the source system
  * (usually database) <li>process the data <li>send data to the target system
@@ -44,6 +45,8 @@ public class FullController extends AbstractSyncController {
 	private TransactionJobDaoFactory transactionJobDaoFactory;
 
 	private DomainSorter domainSorter;
+	private DataSource sourceDataSource;
+	private DataSource targetDataSource;
 
 	/**
 	 * Builds TransactionJob.
@@ -241,10 +244,17 @@ public class FullController extends AbstractSyncController {
 	 */
 	@Override
 	protected void initConfig(final SystemConfig sourceSystem, final SystemConfig targetSystem) {
-		sourceSystem.initSystem();
-		targetSystem.initSystem();
+		if (sourceDataSource == null) {
+			sourceSystem.initSystem();
+		} else {
+			sourceSystem.initSystem(sourceDataSource);
+		}
+		if (targetDataSource == null) {
+			targetSystem.initSystem();
+		} else {
+			targetSystem.initSystem(targetDataSource);
+		}
 	}
-
 	/**
 	 * Calls destroy cleanup on both source and target systems.
 	 *
@@ -255,6 +265,21 @@ public class FullController extends AbstractSyncController {
 	protected void destroyConfig(final SystemConfig sourceSystem, final SystemConfig targetSystem) {
 		sourceSystem.destroySystem();
 		targetSystem.destroySystem();
+	}
+	public DataSource getSourceDataSource() {
+		return sourceDataSource;
+	}
+
+	public void setSourceDataSource(final DataSource sourceDataSource) {
+		this.sourceDataSource = sourceDataSource;
+	}
+
+	public DataSource getTargetDataSource() {
+		return targetDataSource;
+	}
+
+	public void setTargetDataSource(final DataSource targetDataSource) {
+		this.targetDataSource = targetDataSource;
 	}
 
 }

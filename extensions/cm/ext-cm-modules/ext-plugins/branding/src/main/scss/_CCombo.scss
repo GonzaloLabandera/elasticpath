@@ -6,7 +6,7 @@ Combo {
 	// http://download.eclipse.org/rt/rap/doc/3.1/guide/reference/theming/CCombo.html#CCombo-Button
 	&-Button {
 		&, &[FLAT] {
-			background-color: $widget_body_color;
+			background-color: transparent;
 			background-image: none;
 			border: none;
 			cursor: pointer;

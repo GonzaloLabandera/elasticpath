@@ -3,6 +3,7 @@
  */
 package com.elasticpath.domain.attribute.impl;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
@@ -12,21 +13,29 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
+import java.util.Locale;
+
 import org.junit.Test;
 
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.attribute.AttributeMultiValueType;
 import com.elasticpath.domain.attribute.AttributeType;
 import com.elasticpath.domain.attribute.AttributeUsage;
+import com.elasticpath.domain.catalog.Catalog;
+import com.elasticpath.domain.catalog.impl.CatalogImpl;
+import com.elasticpath.domain.misc.impl.AttributeLocalizedPropertyValueImpl;
+import com.elasticpath.domain.misc.impl.LocalizedPropertiesImpl;
 import com.elasticpath.test.jmock.AbstractEPTestCase;
 
 /**
  * Test <code>AttributeImpl</code>.
  */
 public class AttributeImplTest extends AbstractEPTestCase {
+	private static final String TEST_ATTRIBUTE_NAME_1 = "test attribute 1";
+
 	private static final String TEST_ATTRIBUTE_NAME_2 = "test attribute 2";
 
-	private static final String TEST_ATTRIBUTE_NAME_1 = "test attribute 1";
+	private static final String TEST_ATTRIBUTE_NAME_3 = "test attribute 3";
 
 	private static final String TEST_ATTRIBUTE_NAME = "test attribute";
 
@@ -40,22 +49,29 @@ public class AttributeImplTest extends AbstractEPTestCase {
 
 	private static final String TEST_ATTRIBUTE_KEY = "test key";
 
+	private static final Locale TEST_LOCALE = Locale.ENGLISH;
+
+	private static final Locale THAI_LOCALE_WITH_VARIANT = new Locale("th", "TH", "TH");
+
+	private static final Locale THAI_LOCALE_NO_VARIANT = new Locale("th", "TH");
+
 	private AttributeImpl attributeImpl1;
 
 	private AttributeImpl attributeImpl2;
 
-
 	/**
 	 * Prepare for tests.
-	 * 
+	 *
 	 * @throws Exception in case of error
 	 */
 	@Override
 	public void setUp() throws Exception {
 		super.setUp();
-		
+
 		stubGetBean(ContextIdNames.ATTRIBUTE_USAGE, AttributeUsageImpl.class);
-        
+		stubGetBean(ContextIdNames.LOCALIZED_PROPERTIES, LocalizedPropertiesImpl.class);
+		stubGetBean(ContextIdNames.ATTRIBUTE_LOCALIZED_PROPERTY_VALUE, AttributeLocalizedPropertyValueImpl.class);
+
 		attributeImpl1 = new AttributeImpl();
 		attributeImpl2 = new AttributeImpl();
 	}
@@ -119,21 +135,21 @@ public class AttributeImplTest extends AbstractEPTestCase {
 	}
 
 	/**
-	 * Test method for 'com.elasticpath.domain.impl.AttributeImpl.getName()'.
+	 * Test method for 'com.elasticpath.domain.impl.AttributeImpl.getDisplayName()'.
 	 */
 	@Test
 	public void testGetName() {
-		assertEquals("", attributeImpl1.getName());
+		assertEquals("", attributeImpl1.getDisplayName(TEST_LOCALE));
 	}
 
 	/**
-	 * Test method for 'com.elasticpath.domain.impl.AttributeImpl.setName(String)'.
+	 * Test method for 'com.elasticpath.domain.impl.AttributeImpl.setDisplayName(String)'.
 	 */
 	@Test
 	public void testSetName() {
 		final String name = "name";
-		attributeImpl1.setName(name);
-		assertSame(name, attributeImpl1.getName());
+		attributeImpl1.setDisplayName(name, TEST_LOCALE);
+		assertSame(name, attributeImpl1.getDisplayName(TEST_LOCALE));
 	}
 
 	/**
@@ -146,20 +162,20 @@ public class AttributeImplTest extends AbstractEPTestCase {
 		assertEquals(0, attributeImpl1.compareTo(attributeImpl2));
 
 		// compare by name
-		attributeImpl1.setName(TEST_ATTRIBUTE_NAME_1);
-		attributeImpl2.setName(TEST_ATTRIBUTE_NAME_2);
+		attributeImpl1.setDisplayName(TEST_ATTRIBUTE_NAME_1, TEST_LOCALE);
+		attributeImpl2.setDisplayName(TEST_ATTRIBUTE_NAME_2, TEST_LOCALE);
 		assertTrue(attributeImpl1.compareTo(attributeImpl2) < 0);
 
 		// compare by key
-		attributeImpl1.setName(TEST_ATTRIBUTE_NAME);
-		attributeImpl2.setName(TEST_ATTRIBUTE_NAME);
+		attributeImpl1.setDisplayName(TEST_ATTRIBUTE_NAME, TEST_LOCALE);
+		attributeImpl2.setDisplayName(TEST_ATTRIBUTE_NAME, TEST_LOCALE);
 		attributeImpl1.setKey(TEST_ATTRIBUTE_KEY1);
 		attributeImpl2.setKey(TEST_ATTRIBUTE_KEY2);
 		assertTrue(attributeImpl1.compareTo(attributeImpl2) < 0);
 
 		// compare by uid
-		attributeImpl1.setName(TEST_ATTRIBUTE_NAME);
-		attributeImpl2.setName(TEST_ATTRIBUTE_NAME);
+		attributeImpl1.setDisplayName(TEST_ATTRIBUTE_NAME, TEST_LOCALE);
+		attributeImpl2.setDisplayName(TEST_ATTRIBUTE_NAME, TEST_LOCALE);
 		attributeImpl1.setKey(TEST_ATTRIBUTE_KEY);
 		attributeImpl2.setKey(TEST_ATTRIBUTE_KEY);
 		attributeImpl1.setUidPk(UID_PK_1);
@@ -167,8 +183,8 @@ public class AttributeImplTest extends AbstractEPTestCase {
 		assertTrue(attributeImpl1.compareTo(attributeImpl2) < 0);
 
 		// compare the same one
-		attributeImpl1.setName(TEST_ATTRIBUTE_NAME);
-		attributeImpl2.setName(TEST_ATTRIBUTE_NAME);
+		attributeImpl1.setDisplayName(TEST_ATTRIBUTE_NAME, TEST_LOCALE);
+		attributeImpl2.setDisplayName(TEST_ATTRIBUTE_NAME, TEST_LOCALE);
 		attributeImpl1.setKey(TEST_ATTRIBUTE_KEY);
 		attributeImpl2.setKey(TEST_ATTRIBUTE_KEY);
 		attributeImpl1.setUidPk(UID_PK_1);
@@ -254,8 +270,8 @@ public class AttributeImplTest extends AbstractEPTestCase {
 		assertEquals(attributeImpl1, attributeImpl2);
 
 		// compare the same one
-		attributeImpl1.setName(TEST_ATTRIBUTE_NAME);
-		attributeImpl2.setName(TEST_ATTRIBUTE_NAME);
+		attributeImpl1.setDisplayName(TEST_ATTRIBUTE_NAME, TEST_LOCALE);
+		attributeImpl2.setDisplayName(TEST_ATTRIBUTE_NAME, TEST_LOCALE);
 		attributeImpl1.setKey(TEST_ATTRIBUTE_KEY);
 		attributeImpl2.setKey(TEST_ATTRIBUTE_KEY);
 		attributeImpl1.setUidPk(UID_PK_1);
@@ -277,8 +293,8 @@ public class AttributeImplTest extends AbstractEPTestCase {
 		attributeImpl2.setAttributeType(AttributeType.SHORT_TEXT);
 		attributeImpl1.setAttributeUsageId(1);
 		attributeImpl2.setAttributeUsageId(1);
-		attributeImpl1.setName(TEST_ATTRIBUTE_NAME);
-		attributeImpl2.setName(TEST_ATTRIBUTE_NAME);
+		attributeImpl1.setDisplayName(TEST_ATTRIBUTE_NAME, TEST_LOCALE);
+		attributeImpl2.setDisplayName(TEST_ATTRIBUTE_NAME, TEST_LOCALE);
 		attributeImpl1.setKey(TEST_ATTRIBUTE_KEY);
 		attributeImpl2.setKey(TEST_ATTRIBUTE_KEY);
 		attributeImpl1.setUidPk(UID_PK_1);
@@ -305,8 +321,8 @@ public class AttributeImplTest extends AbstractEPTestCase {
 		assertEquals(attributeImpl1.hashCode(), attributeImpl2.hashCode());
 
 		// compare the same one
-		attributeImpl1.setName(TEST_ATTRIBUTE_NAME);
-		attributeImpl2.setName(TEST_ATTRIBUTE_NAME);
+		attributeImpl1.setDisplayName(TEST_ATTRIBUTE_NAME, TEST_LOCALE);
+		attributeImpl2.setDisplayName(TEST_ATTRIBUTE_NAME, TEST_LOCALE);
 		attributeImpl1.setKey(TEST_ATTRIBUTE_KEY);
 		attributeImpl2.setKey(TEST_ATTRIBUTE_KEY);
 		attributeImpl1.setUidPk(UID_PK_1);
@@ -328,8 +344,8 @@ public class AttributeImplTest extends AbstractEPTestCase {
 		attributeImpl2.setAttributeType(AttributeType.SHORT_TEXT);
 		attributeImpl1.setAttributeUsageId(1);
 		attributeImpl2.setAttributeUsageId(1);
-		attributeImpl1.setName(TEST_ATTRIBUTE_NAME);
-		attributeImpl2.setName(TEST_ATTRIBUTE_NAME);
+		attributeImpl1.setDisplayName(TEST_ATTRIBUTE_NAME, TEST_LOCALE);
+		attributeImpl2.setDisplayName(TEST_ATTRIBUTE_NAME, TEST_LOCALE);
 		attributeImpl1.setKey(TEST_ATTRIBUTE_KEY);
 		attributeImpl2.setKey(TEST_ATTRIBUTE_KEY);
 		attributeImpl1.setUidPk(UID_PK_1);
@@ -343,4 +359,91 @@ public class AttributeImplTest extends AbstractEPTestCase {
 		assertNotSame(attributeImpl1.hashCode(), attributeImpl2.hashCode());
 	}
 
+	protected Catalog createCatalogWithDefaultLocale(final Locale locale) {
+		Catalog catalog = new CatalogImpl();
+		catalog.setDefaultLocale(locale);
+		return catalog;
+	}
+
+	@Test
+	public void testGetDisplayName() {
+		attributeImpl1.setCatalog(createCatalogWithDefaultLocale(Locale.GERMAN));
+
+		attributeImpl1.setDisplayName(TEST_ATTRIBUTE_NAME_1, Locale.FRENCH);
+		attributeImpl1.setDisplayName(TEST_ATTRIBUTE_NAME_2, THAI_LOCALE_NO_VARIANT);
+		attributeImpl1.setDisplayName(TEST_ATTRIBUTE_NAME_3, Locale.GERMAN);
+		// Mismatching locale, no fallback
+		assertThat(attributeImpl1.getDisplayName(Locale.ENGLISH)).isBlank();
+		// Locale broadening
+		assertThat(attributeImpl1.getDisplayName(Locale.CANADA_FRENCH)).isEqualTo(TEST_ATTRIBUTE_NAME_1);
+		// Locale broadening with variant
+		assertThat(attributeImpl1.getDisplayName(THAI_LOCALE_WITH_VARIANT)).isEqualTo(TEST_ATTRIBUTE_NAME_2);
+		// Match
+		assertThat(attributeImpl1.getDisplayName(Locale.FRENCH)).isEqualTo(TEST_ATTRIBUTE_NAME_1);
+	}
+
+	@Test
+	public void testGetDisplayNameWithFallbackNullCatalog() {
+		attributeImpl1.setDisplayName(TEST_ATTRIBUTE_NAME_1, Locale.FRENCH);
+		// Use mismatching locale to trigger fallback
+		assertThat(attributeImpl1.getDisplayName(Locale.ENGLISH, false, true)).isBlank();
+	}
+
+	@Test
+	public void testGetDisplayNameWithNoBroadeningNoFallback() {
+		attributeImpl1.setCatalog(createCatalogWithDefaultLocale(Locale.GERMAN));
+
+		attributeImpl1.setDisplayName(TEST_ATTRIBUTE_NAME_1, Locale.FRENCH);
+		attributeImpl1.setDisplayName(TEST_ATTRIBUTE_NAME_2, THAI_LOCALE_NO_VARIANT);
+		attributeImpl1.setDisplayName(TEST_ATTRIBUTE_NAME_3, Locale.GERMAN);
+		// Mismatching locale
+		assertThat(attributeImpl1.getDisplayName(Locale.ENGLISH, false, false)).isBlank();
+		// Partial locale broadening implemented in LocalizedPropertiesImpl
+		assertThat(attributeImpl1.getDisplayName(Locale.CANADA_FRENCH, false, false)).isEqualTo(TEST_ATTRIBUTE_NAME_1);
+		// Variants only picked up if locale broadening is requested
+		assertThat(attributeImpl1.getDisplayName(THAI_LOCALE_WITH_VARIANT, false, false)).isBlank();
+		// Match
+		assertThat(attributeImpl1.getDisplayName(Locale.FRENCH, false, false)).isEqualTo(TEST_ATTRIBUTE_NAME_1);
+		// Mismatching and no fallback
+		assertThat(attributeImpl1.getDisplayName(Locale.ENGLISH, false, false)).isBlank();
+	}
+
+	@Test
+	public void testGetDisplayNameWithNoBroadeningWithFallback() {
+		attributeImpl1.setCatalog(createCatalogWithDefaultLocale(Locale.GERMAN));
+
+		attributeImpl1.setDisplayName(TEST_ATTRIBUTE_NAME_1, Locale.FRENCH);
+		attributeImpl1.setDisplayName(TEST_ATTRIBUTE_NAME_2, THAI_LOCALE_NO_VARIANT);
+
+		// No locale broadening requested, but partial locale broadening implemented in LocalizedPropertiesImpl
+		assertThat(attributeImpl1.getDisplayName(Locale.CANADA_FRENCH, false, true)).isEqualTo(TEST_ATTRIBUTE_NAME_1);
+		// Variants only picked up if locale broadening is requested
+		assertThat(attributeImpl1.getDisplayName(THAI_LOCALE_WITH_VARIANT, false, false)).isBlank();
+		// Match
+		assertThat(attributeImpl1.getDisplayName(Locale.FRENCH, false, true)).isEqualTo(TEST_ATTRIBUTE_NAME_1);
+		// Mismatching and no fallback match
+		assertThat(attributeImpl1.getDisplayName(Locale.ENGLISH, false, true)).isBlank();
+
+		attributeImpl1.setDisplayName(TEST_ATTRIBUTE_NAME_2, Locale.GERMAN);
+		// Mismatching locale, hits fallback
+		assertThat(attributeImpl1.getDisplayName(Locale.ENGLISH, false, true)).isEqualTo(TEST_ATTRIBUTE_NAME_2);
+	}
+
+	@Test
+	public void testGetDisplayNameWithBroadeningAndFallback() {
+		attributeImpl1.setCatalog(createCatalogWithDefaultLocale(Locale.GERMAN));
+		attributeImpl1.setDisplayName(TEST_ATTRIBUTE_NAME_1, Locale.FRENCH);
+
+		// Locale broadening is considered before fallback
+		assertThat(attributeImpl1.getDisplayName(Locale.CANADA_FRENCH, true, true)).isEqualTo(TEST_ATTRIBUTE_NAME_1);
+		// Match
+		assertThat(attributeImpl1.getDisplayName(Locale.FRENCH, true, true)).isEqualTo(TEST_ATTRIBUTE_NAME_1);
+		// Mismatching and no fallback match
+		assertThat(attributeImpl1.getDisplayName(Locale.ENGLISH, true, true)).isBlank();
+		// Add displayName matching with catalog locale
+
+		attributeImpl1.setDisplayName(TEST_ATTRIBUTE_NAME_2, Locale.GERMAN);
+		// Mismatching locale, hits fallback
+		assertThat(attributeImpl1.getDisplayName(Locale.ENGLISH, true, true)).isEqualTo(TEST_ATTRIBUTE_NAME_2);
+	}
 }

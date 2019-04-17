@@ -6,11 +6,11 @@ package com.elasticpath.cmclient.core.comparator;
 import static junit.framework.TestCase.assertTrue;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
 import org.junit.Before;
@@ -42,6 +42,8 @@ public class AttributeValueComparatorByOrderingAndNameIgnoreCaseTest {
     @Mock
     private Attribute attribute3;
 
+    private static final Locale LANGUAGE_LOCALE = Locale.ENGLISH;
+
     /**
      * setup the test.
      *
@@ -52,8 +54,7 @@ public class AttributeValueComparatorByOrderingAndNameIgnoreCaseTest {
         orderingMap.put(attribute1, 1);
         orderingMap.put(attribute2, 2);
         orderingMap.put(attribute3, 2);
-        comparator = new AttributeValueComparatorByOrderingAndNameIgnoreCase(orderingMap);
-
+        comparator = new AttributeValueComparatorByOrderingAndNameIgnoreCase(orderingMap, LANGUAGE_LOCALE);
     }
 
     /**
@@ -102,13 +103,13 @@ public class AttributeValueComparatorByOrderingAndNameIgnoreCaseTest {
 
        when(attributeValue1.getAttribute()).thenReturn(attribute1);
        when(attributeValue4.getAttribute()).thenReturn(attribute4);
-       when(attribute1.getName()).thenReturn("attri1"); //$NON-NLS-1$
-       when(attribute4.getName()).thenReturn("attri4"); //$NON-NLS-1$
+       when(attribute1.getDisplayName(LANGUAGE_LOCALE, false, false)).thenReturn("attri1"); //$NON-NLS-1$
+       when(attribute4.getDisplayName(LANGUAGE_LOCALE, false, false)).thenReturn("attri4"); //$NON-NLS-1$
 
-       assertTrue("attributeValue2 should be greater than attributeValue2",  //$NON-NLS-1$
+       assertTrue("attributeValue4 should be greater than attributeValue1",  //$NON-NLS-1$
                   comparator.compare(attributeValue1, attributeValue4) < 0);
 
-       verify(attribute1, times(2)).getName();
-       verify(attribute4, times(2)).getName();
+       verify(attribute1).getDisplayName(LANGUAGE_LOCALE, false, false);
+       verify(attribute4).getDisplayName(LANGUAGE_LOCALE, false, false);
    }
 }

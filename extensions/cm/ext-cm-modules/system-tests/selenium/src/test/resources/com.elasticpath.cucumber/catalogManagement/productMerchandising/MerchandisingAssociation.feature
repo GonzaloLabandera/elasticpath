@@ -19,3 +19,4 @@ Feature: Product Merchandising Association
       | Warranty          |
       | Accessory         |
       | Replacement       |
+      | Dependent Item    |

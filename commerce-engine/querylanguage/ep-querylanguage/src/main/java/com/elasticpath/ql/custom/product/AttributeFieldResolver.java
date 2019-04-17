@@ -92,12 +92,12 @@ public class AttributeFieldResolver implements EpQLFieldResolver {
 		if (attribute.isLocaleDependant() && epQLTerm.getParameter1() != null) {
 			return new Locale(epQLTerm.getParameter1());
 		} else if (attribute.isLocaleDependant() && epQLTerm.getParameter1() == null) {
-			LOG.warn("Locale must be specified for locale dependent attribute: " + attribute.getName());
+			LOG.warn("Locale must be specified for locale dependent attribute: " + attribute.getKey());
 			// method should return nonexistent locale in case attribute is locale dependent and locale is no set because search should not find
 			// something in this case
 			return new Locale("non_existent_locale");
 		} else if (!attribute.isLocaleDependant() && epQLTerm.getParameter1() != null) { // NOPMD
-			LOG.warn("Locale must not be specified for the attribute: " + attribute.getName());
+			LOG.warn("Locale must not be specified for the attribute: " + attribute.getKey());
 		}
 		return null;
 	}

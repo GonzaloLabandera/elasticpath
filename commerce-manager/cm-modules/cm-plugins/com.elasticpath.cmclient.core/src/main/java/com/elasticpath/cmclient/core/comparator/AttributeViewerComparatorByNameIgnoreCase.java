@@ -3,9 +3,12 @@
  */
 package com.elasticpath.cmclient.core.comparator;
 
+import java.util.Locale;
+
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerComparator;
 
+import com.elasticpath.cmclient.core.CorePlugin;
 import com.elasticpath.domain.attribute.Attribute;
 
 /**
@@ -24,9 +27,10 @@ public class AttributeViewerComparatorByNameIgnoreCase extends ViewerComparator 
 		
 		Attribute attribute1 = (Attribute) object1;
 		Attribute attribute2 = (Attribute) object2;
+		Locale locale = CorePlugin.getDefault().getDefaultLocale();
 		
-		String name1 = attribute1.getName();
-		String name2 = attribute2.getName();
+		String name1 = attribute1.getDisplayName(locale, false, false);
+		String name2 = attribute2.getDisplayName(locale, false, false);
 		
 		if (name1 == null) {
 			name1 = ""; //$NON-NLS-1$

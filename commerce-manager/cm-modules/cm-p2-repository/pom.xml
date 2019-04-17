@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>com.elasticpath.cmclient</groupId>
 		<artifactId>cm-modules</artifactId>
-		<version>704.0.0-SNAPSHOT</version>
+		<version>0.0.0-SNAPSHOT</version>
 	</parent>
 
 	<artifactId>cm-p2-repository</artifactId>

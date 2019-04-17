@@ -55,6 +55,9 @@ public abstract class AbstractPageObject extends AbstractPage {
 	private static final String CATALOG_TREE_ITEM_CSS = CATALOG_TREE_PARENT_CSS + "div[row-id='%1$s'] div[column-id='%1$s']";
 	private static final String CLOSE_PANE_ICON_CSS = "div[widget-id*='%s'][active-tab='true'] > div[style*='close.gif']";
 	private static final long WEBDRIVER_DEFAULT_TIMEOUT = Long.parseLong(PropertyManager.getInstance().getProperty("selenium.waitdriver.timeout"));
+	private static String authorTabHandle;
+	private static String publishTabHandle;
+
 	/**
 	 * Editor Tab CSS template.
 	 */
@@ -569,7 +572,7 @@ public abstract class AbstractPageObject extends AbstractPage {
 
 		if (expectedReturnValue) {
 			if (interactableCheckNeeded) {
-			getWaitDriver().waitForElementToBeInteractable(String.format(tableColumnCss, cleanedValue));
+				getWaitDriver().waitForElementToBeInteractable(String.format(tableColumnCss, cleanedValue));
 			} else {
 				getWaitDriver().waitForElementToBeVisible(By.cssSelector(String.format(tableColumnCss, cleanedValue)));
 			}
@@ -604,6 +607,7 @@ public abstract class AbstractPageObject extends AbstractPage {
 	public boolean selectComboBoxItem(final String comboBoxParent, final String value) {
 		scrollToComboItem(comboBoxParent, value);
 		for (int repeat = 0; repeat < COMBO_SCROLL_REPETITIONS; repeat++) {
+			getWaitDriver().waitForElementToBeNotStale(comboBoxParent + " input");
 			WebElement element = getDriver().findElement(By.cssSelector(comboBoxParent + " input"));
 			if (value.equals(element.getAttribute("value").trim())) {
 				this.selectedElement = element;
@@ -641,31 +645,37 @@ public abstract class AbstractPageObject extends AbstractPage {
 	 * @param buttonName  the button name
 	 */
 	public void clickButton(final String cssSelector, final String buttonName) {
-		scrollWidgetIntoView(cssSelector);
-		getWaitDriver().waitForElementToBeInteractable(cssSelector);
-		verifyButtonIsEnabled(cssSelector, buttonName);
-		JavascriptExecutor jse = (JavascriptExecutor) getDriver();
-		jse.executeScript("document.querySelector(\"" + cssSelector + "\").rwtWidget.execute();");
+		clickRwtWidgetButton(cssSelector, buttonName);
 		sleep(Constants.SLEEP_HALFSECOND_IN_MILLIS);
+	}
+
+	/**
+	 * Clicks the button and verifies dialog or wizard is opened.
+	 *
+	 * @param cssSelector  the css Selector
+	 * @param buttonName   the button name
+	 * @param pageObjectId dialog/wizard object id
+	 */
+	public void clickButton(final String cssSelector, final String buttonName, final String pageObjectId) {
+		clickRwtWidgetButton(cssSelector, buttonName);
+		assertThat(isElementPresent(By.cssSelector(pageObjectId)))
+				.as("Clicking element " + getDriver().findElement(By.cssSelector(cssSelector)).getText() + "did not open dialog/wizard identified by"
+						+ " css selector:" + pageObjectId)
+				.isTrue();
 	}
 
 	/**
 	 * Verifies a button is enabled and then clicks it.
 	 *
-	 * @param cssSelector  the css Selector
-	 * @param buttonName   the button name
-	 * @param pageObjectId the page object id
+	 * @param cssSelector the element css selector
+	 * @param buttonName  the button name
 	 */
-	public void clickButton(final String cssSelector, final String buttonName, final String pageObjectId) {
+	private void clickRwtWidgetButton(final String cssSelector, final String buttonName) {
 		scrollWidgetIntoView(cssSelector);
 		getWaitDriver().waitForElementToBeInteractable(cssSelector);
 		verifyButtonIsEnabled(cssSelector, buttonName);
 		JavascriptExecutor jse = (JavascriptExecutor) getDriver();
 		jse.executeScript("document.querySelector(\"" + cssSelector + "\").rwtWidget.execute();");
-		assertThat(isElementPresent(By.cssSelector(pageObjectId)))
-				.as("Clicking element " + getDriver().findElement(By.cssSelector(cssSelector)).getText() + "did not open dialog/wizard identified by"
-						+ " css selector:" + pageObjectId)
-				.isTrue();
 	}
 
 	/**
@@ -1067,6 +1077,7 @@ public abstract class AbstractPageObject extends AbstractPage {
 	public String getFormattedDateTime(final int numberOfDays) {
 		Calendar calendar = Calendar.getInstance();
 		calendar.add(Calendar.DAY_OF_MONTH, numberOfDays);
+		calendar.add(Calendar.MINUTE, -1);
 
 		String dateTimeFormat = PropertyManager.getInstance().getProperty("ep.dateTimeFormat");
 		SimpleDateFormat simpleDateFormat = new SimpleDateFormat(dateTimeFormat, Locale.ENGLISH);
@@ -1124,6 +1135,65 @@ public abstract class AbstractPageObject extends AbstractPage {
 		JavascriptExecutor jse = (JavascriptExecutor) getDriver();
 		getWaitDriver().waitForElementToBeInteractable(checkboxCssSelector);
 		return (Boolean) jse.executeScript("return document.querySelector(\"" + checkboxCssSelector + "\").rwtWidget._selected;");
+	}
+
+	/**
+	 * Opens new tab for publish environment.
+	 */
+	public void openPublishTab() {
+		getAuthorTabHandle();
+
+		JavascriptExecutor javascriptExecutor = (JavascriptExecutor) getDriver();
+		javascriptExecutor.executeScript("window.open('about:blank','_blank');");
+
+		getPublishTabHandle();
+		switchToPublishTab();
+	}
+
+	/**
+	 * Returns Author tab handle.
+	 *
+	 * @return the author tab handle
+	 */
+	public String getAuthorTabHandle() {
+		authorTabHandle = getDriver().getWindowHandle();
+		return authorTabHandle;
+	}
+
+	/**
+	 * Returns Publish tab handle.
+	 */
+	public String getPublishTabHandle() {
+		for (String handle : getDriver().getWindowHandles()) {
+			if (!handle.equals(authorTabHandle)) {
+				publishTabHandle = handle;
+				break;
+			}
+		}
+		return publishTabHandle;
+	}
+
+	/**
+	 * Switches tab.
+	 *
+	 * @param tabHandle the tab handle
+	 */
+	public void switchTab(final String tabHandle) {
+		getDriver().switchTo().window(tabHandle);
+	}
+
+	/**
+	 * Switches to Author tab.
+	 */
+	public void switchToAuthorTab() {
+		switchTab(authorTabHandle);
+	}
+
+	/**
+	 * Stitches to Publish tab.
+	 */
+	public void switchToPublishTab() {
+		switchTab(publishTabHandle);
 	}
 
 }

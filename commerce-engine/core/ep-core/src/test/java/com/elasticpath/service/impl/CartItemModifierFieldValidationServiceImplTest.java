@@ -142,9 +142,7 @@ public class CartItemModifierFieldValidationServiceImplTest {
 		Set<CartItemModifierField> referentFields = new HashSet<>();
 
 		when(referentField.getCode()).thenReturn(messageFieldName);
-		when(referentField.getFieldType()).thenReturn(CartItemModifierType.SHORT_TEXT);
 		when(referentField.isRequired()).thenReturn(true);
-		when(referentField.getMaxSize()).thenReturn(SHORT_MAX_SIZE);
 
 		referentFields.add(referentField);
 

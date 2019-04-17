@@ -95,7 +95,7 @@ public class AttributeValueFilterImpl extends AbstractFilterImpl<AttributeValueF
 		}
 
 		if (this.getAttribute() != null) {
-			return this.getAttribute().getName();
+			return this.getAttribute().getDisplayName(locale);
 		}
 		return null;
 	}

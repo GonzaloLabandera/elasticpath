@@ -90,6 +90,14 @@
 				WHERE facet.storeCode = ?1
 			</query>
 		</named-query>
+		<named-query name="FIND_FACET_BY_STORE_AND_BUSINESS_OBJECT_ID">
+			<query>
+				SELECT facet
+				FROM FacetImpl facet
+				WHERE facet.storeCode = ?1
+				AND facet.businessObjectId = ?2
+			</query>
+		</named-query>
 		<named-query name="FIND_ALL_SEARCHABLE_FACETS_BY_STORE_CODE">
 			<query>
 				SELECT facet
@@ -120,6 +128,19 @@
 				SELECT facet
 				FROM FacetImpl facet
 				WHERE facet.facetGuid = ?1
+			</query>
+		</named-query>
+		<named-query name="FACET_FIND_BY_GUIDS">
+			<query>
+				SELECT facet
+				FROM FacetImpl facet
+				WHERE facet.facetGuid IN (:facetGuids)
+			</query>
+		</named-query>
+		<named-query name="SELECT_ALL_GUIDS">
+			<query>
+				SELECT facet.facetGuid
+				FROM FacetImpl facet
 			</query>
 		</named-query>
 </entity-mappings>

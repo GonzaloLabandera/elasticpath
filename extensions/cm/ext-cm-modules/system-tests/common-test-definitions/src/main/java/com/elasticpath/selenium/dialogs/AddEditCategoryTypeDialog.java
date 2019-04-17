@@ -17,7 +17,7 @@ public class AddEditCategoryTypeDialog extends AbstractDialog {
 			= "div[automation-id*='com.elasticpath.cmclient.catalog.CatalogMessages.CategoryTypeAddEditDialog'][widget-type='Shell'] ";
 	private static final String CATEGORY_TYPE_NAME_INPUT_CSS = ADD_CATEGORY_TYPE_PARENT_CSS
 			+ "div[automation-id='com.elasticpath.cmclient.catalog.CatalogMessages.CategoryTypeAddEditDialog_Name'] input";
-	private static final String MOVE_RIGHT_BUTTON_CSS = ADD_CATEGORY_TYPE_PARENT_CSS + "div[widget-id='>']";
+	private static final String MOVE_RIGHT_BUTTON_CSS = ADD_CATEGORY_TYPE_PARENT_CSS + "div[widget-id='Add']";
 	private static final String AVAILABLE_ATTRIBUTES_PARENT_CSS
 			= "div[automation-id='com.elasticpath.cmclient.catalog.CatalogMessages.CategoryTypeAddEditDialog_AvailableAttributes']"
 			+ "[widget-type='Table'] ";

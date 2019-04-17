@@ -7,6 +7,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Locale;
 
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.DoubleClickEvent;
@@ -35,6 +36,7 @@ import com.elasticpath.cmclient.catalog.CatalogPermissions;
 import com.elasticpath.cmclient.catalog.CatalogPlugin;
 import com.elasticpath.cmclient.core.CoreImageRegistry;
 import com.elasticpath.cmclient.core.CoreMessages;
+import com.elasticpath.cmclient.core.CorePlugin;
 import com.elasticpath.cmclient.core.EpUiException;
 import com.elasticpath.cmclient.core.ServiceLocator;
 import com.elasticpath.cmclient.core.comparator.AttributeViewerComparatorByNameIgnoreCase;
@@ -91,6 +93,8 @@ public class AddEditGlobalAttributesDialog extends AbstractEpDialog implements I
 	private final Collection<Attribute> removedItems = new ArrayList<>();
 
 	private boolean dirty;
+
+	private final Locale defaultLocale = CorePlugin.getDefault().getDefaultLocale();
 
 	/**
 	 * Constructor for adding/creating a global attributes.
@@ -249,8 +253,8 @@ public class AddEditGlobalAttributesDialog extends AbstractEpDialog implements I
 	}
 
 	private Attribute addItemAction() {
-		CatalogAttributesAddEditDialog dialog = new CatalogAttributesAddEditDialog(getShell(), null, true,
-				null);
+		CatalogAttributesAddEditDialog dialog = new CatalogAttributesAddEditDialog(getShell(), null, true, null, defaultLocale);
+
 		if (dialog.open() == Window.OK) {
 			return dialog.getAttribute();
 		}
@@ -258,8 +262,7 @@ public class AddEditGlobalAttributesDialog extends AbstractEpDialog implements I
 	}
 
 	private void editItemAction(final Attribute object) {
-		CatalogAttributesAddEditDialog dialog = new CatalogAttributesAddEditDialog(getShell(), object, true,
-				null);
+		CatalogAttributesAddEditDialog dialog = new CatalogAttributesAddEditDialog(getShell(), object, true, null, defaultLocale);
 		dialog.open();
 	}
 
@@ -291,8 +294,8 @@ public class AddEditGlobalAttributesDialog extends AbstractEpDialog implements I
 
 	private String getItemName(final Attribute attribute) {
 		return String.format("%1$s - %2$s - %3$s", //$NON-NLS-1$
-				attribute.getKey(), attribute.getName(), CoreMessages.get()
-						.getMessage(attribute.getAttributeType().getNameMessageKey()));
+				attribute.getKey(), attribute.getDisplayName(defaultLocale),
+				CoreMessages.get().getMessage(attribute.getAttributeType().getNameMessageKey()));
 	}
 
 	private void addAddedItem(final Attribute item) {
@@ -437,7 +440,7 @@ public class AddEditGlobalAttributesDialog extends AbstractEpDialog implements I
 				case KEY_COLUMN_INDEX:
 					return attribute.getKey();
 				case NAME_COLUMN_INDEX:
-					return attribute.getName();
+					return attribute.getDisplayName(defaultLocale);
 				case TYPE_COLUMN_INDEX:
 					return CoreMessages.get().getMessage(attribute.getAttributeType().getNameMessageKey());
 				case USAGE_COLUMN_INDEX:

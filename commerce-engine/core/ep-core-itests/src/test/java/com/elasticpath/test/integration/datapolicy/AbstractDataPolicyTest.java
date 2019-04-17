@@ -12,6 +12,7 @@ import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.test.context.ContextConfiguration;
 
 import com.elasticpath.common.pricing.service.PriceListHelperService;
 import com.elasticpath.commons.beanframework.BeanFactory;
@@ -35,23 +36,27 @@ import com.elasticpath.service.customer.CustomerService;
 import com.elasticpath.service.datapolicy.CustomerConsentService;
 import com.elasticpath.service.datapolicy.DataPointService;
 import com.elasticpath.service.datapolicy.DataPolicyService;
+import com.elasticpath.service.misc.impl.MockTimeServiceImpl;
 import com.elasticpath.service.shopper.ShopperService;
 import com.elasticpath.test.integration.BasicSpringContextTest;
+import com.elasticpath.test.integration.customer.AnonymousCustomerCleanupServiceImplTest;
 import com.elasticpath.test.persister.SettingsTestPersister;
 import com.elasticpath.test.util.Utils;
 
 public abstract class AbstractDataPolicyTest extends BasicSpringContextTest {
 
+	/** Date for customer last changed */
+	protected static final int EXPECTED_MAX_HISTORY = 60;
 	/** Data point Unique Code 1. */
 	protected static final String DATA_POINT_UNIQUE_CODE = "DATA_POINT";
 	/** Data Policy Unique Code 1. */
 	protected static final String DATA_POLICY_UNIQUE_CODE = "DATA_POLICY";
 	/** Data Policy Unique Code 2. */
 	protected static final String DATA_POLICY_UNIQUE_CODE2 = "DATA_POLICY2";
-	/** Data Policy Unique Code 2. */
+	/** Data Policy Unique Code 3. */
 	protected static final String DATA_POLICY_UNIQUE_CODE3 = "DATA_POLICY3";
 	/** Customer Consent Unique Code 1. */
-	protected static final String CUSTOMER_CONSENT_UNIQUE_CODE = "CUSTOMER_CONSENT";
+	public static final String CUSTOMER_CONSENT_UNIQUE_CODE = "CUSTOMER_CONSENT";
 	/** Customer Consent Unique Code 2. */
 	protected static final String CUSTOMER_CONSENT_UNIQUE_CODE2 = "CUSTOMER_CONSENT2";
 	/** Customer Consent Unique Code 3. */
@@ -67,9 +72,9 @@ public abstract class AbstractDataPolicyTest extends BasicSpringContextTest {
 	protected static final String DATA_POINT_KEY_1 = "DATA_POINT_KEY_1";
 	protected static final String DATA_POINT_KEY_2 = "DATA_POINT_KEY_2";
 	protected static final String DATA_POINT_LOCATION = "DATA_POINT_LOCATION";
-	private static final String DATA_POLICY_NAME = "DATA_POLICY_NAME";
-	private static final String DATA_POLICY_DESCRIPTION = "DATA_POLICY_DESCRIPTION";
-	private static final String DATA_POLICY_REFERENCE_KEY = "DATA_POLICY_REFERENCE_KEY";
+	public static final String DATA_POLICY_NAME = "DATA_POLICY_NAME";
+	public static final String DATA_POLICY_DESCRIPTION = "DATA_POLICY_DESCRIPTION";
+	public static final String DATA_POLICY_REFERENCE_KEY = "DATA_POLICY_REFERENCE_KEY";
 	protected static final String CA = "CA";
 	protected static final String EU = "EU";
 	/** Customer Email 1. */
@@ -229,6 +234,12 @@ public abstract class AbstractDataPolicyTest extends BasicSpringContextTest {
 
 	protected CustomerConsent createAndSaveCustomerConsent(final String customerConsentGuid,
 														   final Customer customer,
+														   final DataPolicy dataPolicy) {
+		return createAndSaveCustomerConsent(customerConsentGuid, customer, dataPolicy, new Date());
+	}
+
+	protected CustomerConsent createAndSaveCustomerConsent(final String customerConsentGuid,
+														   final Customer customer,
 														   final DataPolicy dataPolicy,
 														   final Date consentDate) {
 		final CustomerConsent customerConsent = createCustomerConsent(customerConsentGuid, dataPolicy, ConsentAction.GRANTED);
@@ -251,12 +262,15 @@ public abstract class AbstractDataPolicyTest extends BasicSpringContextTest {
 	protected Customer createPersistedCustomer(final String storeCode, final String email, final boolean anonymous) {
 		final Customer customer = beanFactory.getBean(ContextIdNames.CUSTOMER);
 		customer.setAnonymous(anonymous);
-		customer.setEmail(email);
+		if (!anonymous) {
+			customer.setUserId(email);
+			customer.setEmail(email);
+		}
 		customer.setStoreCode(storeCode);
 		return customerService.add(customer);
 	}
 
-	private Set<String> getSegments() {
+	public static Set<String> getSegments() {
 		final Set<String> segments = new HashSet<>();
 		segments.add(CA);
 		segments.add(EU);

@@ -6,7 +6,7 @@
             <default>true</default>
             <featuredorder>0</featuredorder>
         </category>
-    </catalog>    
+    </catalog>
     <catalog code="Mobile">
         <category code="MobileGames">
             <default>true</default>
@@ -2278,13 +2278,13 @@
     <catalog code="Mobile">
         <category code="AcceptanceTestItems">
             <default>false</default>
-            <featuredorder>52</featuredorder>
+            <featuredorder>0</featuredorder>
         </category>
     </catalog>
     <catalog code="MobileCatalog">
         <category code="AcceptanceTestItems">
             <default>false</default>
-            <featuredorder>52</featuredorder>
+            <featuredorder>0</featuredorder>
         </category>
     </catalog>
 </product>
@@ -2292,13 +2292,13 @@
     <catalog code="Mobile">
         <category code="AcceptanceTestItems">
             <default>false</default>
-            <featuredorder>52</featuredorder>
+            <featuredorder>0</featuredorder>
         </category>
     </catalog>
     <catalog code="MobileCatalog">
         <category code="AcceptanceTestItems">
             <default>false</default>
-            <featuredorder>52</featuredorder>
+            <featuredorder>0</featuredorder>
         </category>
     </catalog>
 </product>
@@ -2306,13 +2306,13 @@
     <catalog code="Mobile">
         <category code="AcceptanceTestItems">
             <default>false</default>
-            <featuredorder>52</featuredorder>
+            <featuredorder>0</featuredorder>
         </category>
     </catalog>
     <catalog code="MobileCatalog">
         <category code="AcceptanceTestItems">
             <default>false</default>
-            <featuredorder>52</featuredorder>
+            <featuredorder>0</featuredorder>
         </category>
     </catalog>
 </product>
@@ -2320,13 +2320,13 @@
     <catalog code="Mobile">
         <category code="AcceptanceTestItems">
             <default>false</default>
-            <featuredorder>52</featuredorder>
+            <featuredorder>0</featuredorder>
         </category>
     </catalog>
     <catalog code="MobileCatalog">
         <category code="AcceptanceTestItems">
             <default>false</default>
-            <featuredorder>52</featuredorder>
+            <featuredorder>0</featuredorder>
         </category>
     </catalog>
 </product>

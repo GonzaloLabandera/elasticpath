@@ -111,7 +111,7 @@ public class AdvancedKeywordFilterSearchStepDefinitionsHelper {
 		attribute.setAttributeType(attributeType);
 		attribute.setAttributeUsage(AttributeUsageImpl.PRODUCT_USAGE);
 		attribute.setGlobal(false);
-		attribute.setName(attributeKey + "name");
+		attribute.setDisplayName(attributeKey + "name", Locale.ENGLISH);
 		attribute.setRequired(false);
 		attribute.setLocaleDependant(false);
 		attributeService.add(attribute);

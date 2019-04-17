@@ -6,12 +6,13 @@
     <name>Search Catalog</name>
     <languages>
         <language>en_CA</language>
+        <language>fr_CA</language>
     </languages>
     <defaultlanguage>en_CA</defaultlanguage>
     <attributes>
         <attribute>
             <key>B00001</key>
-            <name>Length</name>
+            <name><value language="en">Length</value></name>
             <usage>Product</usage>
             <type>Integer</type>
             <multilanguage>false</multilanguage>
@@ -21,7 +22,7 @@
         </attribute>
         <attribute>
             <key>B00003</key>
-            <name>Language</name>
+            <name><value language="en">Language</value></name>
             <usage>Product</usage>
             <type>ShortText</type>
             <multilanguage>false</multilanguage>
@@ -31,7 +32,7 @@
         </attribute>
         <attribute>
             <key>B00002</key>
-            <name>Summary</name>
+            <name><value language="en">Summary</value></name>
             <usage>Product</usage>
             <type>LongText</type>
             <multilanguage>false</multilanguage>
@@ -346,7 +347,7 @@
     <attributes>
         <attribute>
             <key>A00001</key>
-            <name>Plot Keyword</name>
+            <name><value language="en">Plot Keyword</value></name>
             <usage>Product</usage>
             <type>ShortText</type>
             <multilanguage>true</multilanguage>
@@ -356,7 +357,7 @@
         </attribute>
         <attribute>
             <key>A00005</key>
-            <name>Opening DayTime</name>
+            <name><value language="en">Opening DayTime</value></name>
             <usage>Product</usage>
             <type>DateTime</type>
             <multilanguage>false</multilanguage>
@@ -366,7 +367,7 @@
         </attribute>
         <attribute>
             <key>A00004</key>
-            <name>Languages</name>
+            <name><value language="en">Languages</value></name>
             <usage>Product</usage>
             <type>ShortText</type>
             <multilanguage>false</multilanguage>
@@ -376,7 +377,7 @@
         </attribute>
         <attribute>
             <key>A00002</key>
-            <name>Release Date</name>
+            <name><value language="en">Release Date</value></name>
             <usage>Product</usage>
             <type>Date</type>
             <multilanguage>false</multilanguage>
@@ -386,7 +387,10 @@
         </attribute>
         <attribute>
             <key>A00003</key>
-            <name>Storyline</name>
+            <name>
+                <value language="en">Storyline</value>
+                <value language="fr_CA">Scénario</value>
+            </name>
             <usage>Product</usage>
             <type>LongText</type>
             <multilanguage>true</multilanguage>
@@ -396,7 +400,7 @@
         </attribute>
         <attribute>
             <key>A00008</key>
-            <name>Poster</name>
+            <name><value language="en">Poster</value></name>
             <usage>Product</usage>
             <type>Image</type>
             <multilanguage>false</multilanguage>
@@ -406,7 +410,7 @@
         </attribute>
         <attribute>
             <key>A00006</key>
-            <name>Color</name>
+            <name><value language="en">Color</value></name>
             <usage>Product</usage>
             <type>Boolean</type>
             <multilanguage>false</multilanguage>
@@ -416,7 +420,7 @@
         </attribute>
         <attribute>
             <key>A00007</key>
-            <name>Runtime</name>
+            <name><value language="en">Runtime</value></name>
             <usage>Product</usage>
             <type>Integer</type>
             <multilanguage>false</multilanguage>
@@ -426,7 +430,7 @@
         </attribute>
         <attribute>
             <key>A00009</key>
-            <name>Viewer's Rating</name>
+            <name><value language="en">Viewer's Rating</value></name>
             <usage>Product</usage>
             <type>Decimal</type>
             <multilanguage>false</multilanguage>
@@ -436,7 +440,7 @@
         </attribute>
         <attribute>
             <key>A00010</key>
-            <name>SoundTrack</name>
+            <name><value language="en">SoundTrack</value></name>
             <usage>Product</usage>
             <type>File</type>
             <multilanguage>false</multilanguage>
@@ -446,7 +450,7 @@
         </attribute>
         <attribute>
             <key>A00011</key>
-            <name>Tagline</name>
+            <name><value language="en">Tagline</value></name>
             <usage>Product</usage>
             <type>ShortText</type>
             <multilanguage>false</multilanguage>
@@ -456,7 +460,7 @@
         </attribute>
         <attribute>
             <key>A00012</key>
-            <name>Rental Days</name>
+            <name><value language="en">Rental Days</value></name>
             <usage>SKU</usage>
             <type>Integer</type>
             <multilanguage>false</multilanguage>
@@ -466,7 +470,7 @@
         </attribute>
         <attribute>
             <key>A00013</key>
-            <name>Format</name>
+            <name><value language="en">Format</value></name>
             <usage>Product</usage>
             <type>LongText</type>
             <multilanguage>false</multilanguage>
@@ -476,7 +480,7 @@
         </attribute>
         <attribute>
             <key>A00014</key>
-            <name>Specific Resolution</name>
+            <name><value language="en">Specific Resolution</value></name>
             <usage>SKU</usage>
             <type>ShortText</type>
             <multilanguage>false</multilanguage>
@@ -486,7 +490,7 @@
         </attribute>
         <attribute>
             <key>A00016</key>
-            <name>Release Date</name>
+            <name><value language="en">Release Date</value></name>
             <usage>SKU</usage>
             <type>Date</type>
             <multilanguage>false</multilanguage>
@@ -496,7 +500,7 @@
         </attribute>
         <attribute>
             <key>A00015</key>
-            <name>Screen Format</name>
+            <name><value language="en">Screen Format</value></name>
             <usage>SKU</usage>
             <type>ShortText</type>
             <multilanguage>false</multilanguage>
@@ -506,7 +510,7 @@
         </attribute>
         <attribute>
             <key>A00017</key>
-            <name>Specific Available Since</name>
+            <name><value language="en">Specific Available Since</value></name>
             <usage>SKU</usage>
             <type>DateTime</type>
             <multilanguage>false</multilanguage>
@@ -516,7 +520,7 @@
         </attribute>
         <attribute>
             <key>A00018</key>
-            <name>Color</name>
+            <name><value language="en">Color</value></name>
             <usage>SKU</usage>
             <type>Boolean</type>
             <multilanguage>false</multilanguage>
@@ -526,7 +530,7 @@
         </attribute>
         <attribute>
             <key>catReleaseDate</key>
-            <name>Release Date</name>
+            <name><value language="en">Release Date</value></name>
             <usage>Category</usage>
             <type>Date</type>
             <multilanguage>false</multilanguage>
@@ -536,7 +540,7 @@
         </attribute>
         <attribute>
             <key>catImage</key>
-            <name>Category Image</name>
+            <name><value language="en">Category Image</value></name>
             <usage>Category</usage>
             <type>Image</type>
             <multilanguage>false</multilanguage>
@@ -546,7 +550,7 @@
         </attribute>
         <attribute>
             <key>catName</key>
-            <name>Name</name>
+            <name><value language="en">Name</value></name>
             <usage>Category</usage>
             <type>ShortText</type>
             <multilanguage>true</multilanguage>
@@ -556,7 +560,7 @@
         </attribute>
         <attribute>
             <key>catTotalItems</key>
-            <name>Total items</name>
+            <name><value language="en">Total items</value></name>
             <usage>Category</usage>
             <type>Integer</type>
             <multilanguage>false</multilanguage>
@@ -566,7 +570,7 @@
         </attribute>
         <attribute>
             <key>catReleased</key>
-            <name>Released</name>
+            <name><value language="en">Released</value></name>
             <usage>Category</usage>
             <type>Boolean</type>
             <multilanguage>false</multilanguage>
@@ -576,7 +580,7 @@
         </attribute>
         <attribute>
             <key>catTheme</key>
-            <name>Category Theme</name>
+            <name><value language="en">Category Theme</value></name>
             <usage>Category</usage>
             <type>File</type>
             <multilanguage>false</multilanguage>
@@ -586,7 +590,7 @@
         </attribute>
         <attribute>
             <key>catRating</key>
-            <name>Category Rating</name>
+            <name><value language="en">Category Rating</value></name>
             <usage>Category</usage>
             <type>Decimal</type>
             <multilanguage>false</multilanguage>
@@ -596,7 +600,7 @@
         </attribute>
         <attribute>
             <key>catDescription</key>
-            <name>Category Description</name>
+            <name><value language="en">Category Description</value></name>
             <usage>Category</usage>
             <type>LongText</type>
             <multilanguage>false</multilanguage>
@@ -606,7 +610,7 @@
         </attribute>
         <attribute>
             <key>catLastModified</key>
-            <name>Last modified</name>
+            <name><value language="en">Last modified</value></name>
             <usage>Category</usage>
             <type>DateTime</type>
             <multilanguage>false</multilanguage>
@@ -616,7 +620,7 @@
         </attribute>
         <attribute>
             <key>catSubCategories</key>
-            <name>Subcategories</name>
+            <name><value language="en">Subcategories</value></name>
             <usage>Category</usage>
             <type>ShortText</type>
             <multilanguage>true</multilanguage>
@@ -626,7 +630,7 @@
         </attribute>
         <attribute>
             <key>Thumbnail_option</key>
-            <name>Thumbnail for Movie Options</name>
+            <name><value language="en">Thumbnail for Movie Options</value></name>
             <usage>SKU</usage>
             <type>Image</type>
             <multilanguage>false</multilanguage>
@@ -636,7 +640,7 @@
         </attribute>
         <attribute>
             <key>product_image</key>
-            <name>Product Image</name>
+            <name><value language="en">Product Image</value></name>
             <usage>Product</usage>
             <type>Image</type>
             <multilanguage>false</multilanguage>
@@ -646,7 +650,7 @@
         </attribute>
         <attribute>
             <key>fullsize_image</key>
-            <name>Fullsize Image</name>
+            <name><value language="en">Fullsize Image</value></name>
             <usage>Product</usage>
             <type>Image</type>
             <multilanguage>true</multilanguage>
@@ -656,7 +660,7 @@
         </attribute>
         <attribute>
             <key>M0001</key>
-            <name>Full Spec</name>
+            <name><value language="en">Full Spec</value></name>
             <usage>Product</usage>
             <type>File</type>
             <multilanguage>true</multilanguage>
@@ -666,7 +670,7 @@
         </attribute>
         <attribute>
             <key>M0002</key>
-            <name>Product Color</name>
+            <name><value language="en">Product Color</value></name>
             <usage>Product</usage>
             <type>ShortText</type>
             <multilanguage>true</multilanguage>
@@ -676,7 +680,7 @@
         </attribute>
         <attribute>
             <key>description</key>
-            <name>Product Description</name>
+            <name><value language="en">Product Description</value></name>
             <usage>Product</usage>
             <type>LongText</type>
             <multilanguage>true</multilanguage>

@@ -191,7 +191,8 @@ public class ProductModelController {
 		for (AttributeGroupAttribute attrGroup : attributesOfReloadedType) {
 			if (attrGroup.getAttribute().isRequired() && !attributesOfType.contains(attrGroup)) {
 				product.setProductType(reloadedType);
-				throw new RequiredAttributesChangedForProductTypeException("Missing attribute: " + attrGroup.getAttribute().getName()); //$NON-NLS-1$
+				throw new RequiredAttributesChangedForProductTypeException("Missing attribute: " + attrGroup
+						.getAttribute().getDisplayName(attrGroup.getAttribute().getCatalog().getDefaultLocale(), true, true)); //$NON-NLS-1$
 			}
 
 		}

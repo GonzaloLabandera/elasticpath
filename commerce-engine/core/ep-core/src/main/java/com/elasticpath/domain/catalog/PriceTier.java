@@ -108,8 +108,9 @@ public interface PriceTier extends EpDomain, Comparable<PriceTier> {
 	 * to BigDecimal.ZERO.
 	 *
 	 * @param computedPrice the computed price of the price tier
+	 * @return true if the price was set, false otherwise
 	 */
-	void setComputedPriceIfLower(BigDecimal computedPrice);
+	boolean setComputedPriceIfLower(BigDecimal computedPrice);
 
 	/**
 	 * Clear the computed price of the price tier, will set the computed price to null, along with the discount record, if present.
