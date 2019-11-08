@@ -3,10 +3,13 @@
  */
 package com.elasticpath.domain.catalog.impl;
 
+import static com.elasticpath.persistence.support.FetchFieldConstants.CATEGORY_ATTRIBUTE_GROUP_ATTRIBUTES;
+
 import java.util.Objects;
 
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.commons.lang.builder.ToStringStyle;
+import org.apache.openjpa.persistence.FetchPlan;
 
 import com.elasticpath.domain.catalog.CategoryTypeLoadTuner;
 import com.elasticpath.domain.impl.AbstractEpDomainImpl;
@@ -97,6 +100,13 @@ public class CategoryTypeLoadTunerImpl extends AbstractEpDomainImpl implements C
 			return this;
 		}
 		return merge((CategoryTypeLoadTuner) loadTuner);
+	}
+
+	@Override
+	public void configure(final FetchPlan fetchPlan) {
+		if (isLoadingAttributes()) {
+			fetchPlan.addField(CategoryTypeImpl.class, CATEGORY_ATTRIBUTE_GROUP_ATTRIBUTES);
+		}
 	}
 
 	@Override

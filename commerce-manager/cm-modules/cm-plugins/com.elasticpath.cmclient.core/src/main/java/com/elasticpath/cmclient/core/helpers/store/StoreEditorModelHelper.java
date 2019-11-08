@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang.StringUtils;
 
@@ -22,6 +23,7 @@ import com.elasticpath.cmclient.core.ServiceLocator;
 import com.elasticpath.cmclient.core.service.AuthorizationService;
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.cmuser.CmUser;
+import com.elasticpath.domain.customer.StoreCustomerAttribute;
 import com.elasticpath.domain.store.Store;
 import com.elasticpath.domain.store.StoreState;
 import com.elasticpath.domain.store.StoreType;
@@ -31,6 +33,7 @@ import com.elasticpath.service.cmuser.CmUserService;
 import com.elasticpath.service.command.CommandService;
 import com.elasticpath.service.command.UpdateStoreCommand;
 import com.elasticpath.service.command.UpdateStoreCommandResult;
+import com.elasticpath.service.customer.StoreCustomerAttributeService;
 import com.elasticpath.service.datapolicy.DataPolicyService;
 import com.elasticpath.service.store.StoreService;
 import com.elasticpath.settings.SettingsService;
@@ -65,6 +68,8 @@ public class StoreEditorModelHelper {
 	
 	private CmUserService cmUserService;
 
+	private StoreCustomerAttributeService storeCustomerAttributeService;
+
 	/**
 	 * Constructs store editor model helper.
 	 */
@@ -84,6 +89,7 @@ public class StoreEditorModelHelper {
 		editorModelHelper.setCommandService(ServiceLocator.getService(ContextIdNames.COMMAND_SERVICE));
 		editorModelHelper.setUpdateStoreCommand(ServiceLocator.getService(ContextIdNames.UPDATE_STORE_COMMAND));
 		editorModelHelper.setCmUserService(ServiceLocator.getService(ContextIdNames.CMUSER_SERVICE));
+		editorModelHelper.setStoreCustomerAttributeService(ServiceLocator.getService(ContextIdNames.STORE_CUSTOMER_ATTRIBUTE_SERVICE));
 		final FetchGroupLoadTuner fetchGroupLoadTuner = ServiceLocator.getService(ContextIdNames.FETCH_GROUP_LOAD_TUNER);
 		fetchGroupLoadTuner.addFetchGroup(FetchGroupConstants.STORE_FOR_EDIT);
 		editorModelHelper.setFetchGroupLoadTuner(fetchGroupLoadTuner);
@@ -191,6 +197,7 @@ public class StoreEditorModelHelper {
 	void loadSettings(final StoreEditorModel model) {
 		model.setMarketingSettings(getMarketingSettings(model));
 		model.setSystemSettings(getSystemSettings(model));
+		model.setStoreCustomerAttributes(getStoreCustomerAttributes(model));
 		model.setStoreThemeSetting(getSettingValue(COMMERCE_STORE_THEME, model));
 		model.setStoreBrowsingSetting(getSettingValue(COMMERCE_STORE_BROWSING, model));
 		model.setStoreAdvancedSearchSetting(getSettingValue(COMMERCE_STORE_ADVANCED_SEARCH, model));
@@ -266,6 +273,19 @@ public class StoreEditorModelHelper {
 			resultList.add(factory.createSetting(path, storeCode));
 		}
 		return resultList;
+	}
+
+	/**
+	 * Gets the customer attributes for given model.
+	 *
+	 * @param model the model
+	 * @return the list of customer attributes
+	 */
+	List<StoreCustomerAttributeModel> getStoreCustomerAttributes(final StoreEditorModel model) {
+		final StoreCustomerAttributeFactory factory = new StoreCustomerAttributeFactory();
+		return storeCustomerAttributeService.findByStore(model.getStoreCode()).stream()
+				.map(factory::createAttribute)
+				.collect(Collectors.toCollection(ArrayList::new));
 	}
 
 	/**
@@ -409,6 +429,7 @@ public class StoreEditorModelHelper {
 		
 		updateStoreCommand.setStore(store);
 		updateStoreCommand.setSettingValues(getSettingsMap(model));
+		updateStoreCommand.setStoreCustomerAttributes(getStoreCustomerAttributeMap(model));
 		final Store updatedStore = ((UpdateStoreCommandResult) commandService.execute(updateStoreCommand)).getStore();
 		model.setStore(updatedStore);
 	}
@@ -422,6 +443,7 @@ public class StoreEditorModelHelper {
 			addedModel.getStore().getAssociatedStoreUids().add(model.getStore().getUidPk());
 			updateStoreCommand.setStore(addedModel.getStore());
 			updateStoreCommand.setSettingValues(getSettingsMap(addedModel));
+			updateStoreCommand.setStoreCustomerAttributes(getStoreCustomerAttributeMap(addedModel));
 			commandService.execute(updateStoreCommand);
 		}
 	}
@@ -435,6 +457,7 @@ public class StoreEditorModelHelper {
 			removedModel.getStore().getAssociatedStoreUids().remove(model.getStore().getUidPk());
 			updateStoreCommand.setStore(removedModel.getStore());
 			updateStoreCommand.setSettingValues(getSettingsMap(removedModel));
+			updateStoreCommand.setStoreCustomerAttributes(getStoreCustomerAttributeMap(removedModel));
 			commandService.execute(updateStoreCommand);
 		}
 	}
@@ -454,6 +477,26 @@ public class StoreEditorModelHelper {
 		processSettingModels(settingsValueMap, model.getMarketingSettings());
 		processSettingModels(settingsValueMap, model.getSystemSettings());
 		return settingsValueMap;
+	}
+
+	/**
+	 * Gets the customer attributes map from given model.
+	 *
+	 * @param model the model
+	 * @return the customer attributes
+	 */
+	Map<String, StoreCustomerAttribute> getStoreCustomerAttributeMap(final StoreEditorModel model) {
+		return model.getStoreCustomerAttributes().stream()
+				.collect(Collectors.toMap(StoreCustomerAttributeModel::getGuid, this::createStoreCustomerAttribute));
+	}
+
+	private StoreCustomerAttribute createStoreCustomerAttribute(final StoreCustomerAttributeModel attributeModel) {
+		final StoreCustomerAttribute storeCustomerAttribute = ServiceLocator.getService(ContextIdNames.STORE_CUSTOMER_ATTRIBUTE);
+		storeCustomerAttribute.setGuid(attributeModel.getGuid());
+		storeCustomerAttribute.setAttributeKey(attributeModel.getAttributeKey());
+		storeCustomerAttribute.setPolicyKey(attributeModel.getPolicyKey());
+		storeCustomerAttribute.setStoreCode(attributeModel.getStoreCode());
+		return storeCustomerAttribute;
 	}
 
 	private void processSettingModels(final Map<String, String> settingsValueMap, final List<SettingModel> settings) {
@@ -542,5 +585,14 @@ public class StoreEditorModelHelper {
 	 */
 	void setFetchGroupLoadTuner(final FetchGroupLoadTuner fetchGroupLoadTuner) {
 		this.fetchGroupLoadTuner = fetchGroupLoadTuner;
+	}
+
+	/**
+	 * Sets the store customer attribute service.
+	 *
+	 * @param storeCustomerAttributeService the store customer attribute service
+	 */
+	void setStoreCustomerAttributeService(final StoreCustomerAttributeService storeCustomerAttributeService) {
+		this.storeCustomerAttributeService = storeCustomerAttributeService;
 	}
 }

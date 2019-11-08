@@ -11,7 +11,7 @@ Feature: New Product from new cart modifier and product type using change set
     And I go to Catalog Management
     When I create a new catalog with following details
       | catalogName   | language | brand     |
-      | ATest Catalog | English  | TestBrand |
+      | ZTest Catalog | English  | TestBrand |
     And I select CartItemModifierGroups tab in the Catalog Editor
     When I create a new modifier group with group code groupCode and group name groupName
     And I add a new field to this group with following details

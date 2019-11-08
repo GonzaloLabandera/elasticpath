@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright (c) Elastic Path Software Inc., 2018
+  -->
+<beans xmlns="http://www.springframework.org/schema/beans"
+	   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	   xmlns:camel="http://camel.apache.org/schema/spring"
+	   xsi:schemaLocation="
+				http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+				http://camel.apache.org/schema/spring http://camel.apache.org/schema/spring/camel-spring.xsd">
+
+	<camel:camelContext id="ep-catalog-webservice" xmlns="http://camel.apache.org/schema/spring"
+						threadNamePattern="Camel (#camelId#) thread ##counter#">
+		<routeBuilder ref="optionWebServiceRouteBuilder"/>
+		<routeBuilder ref="attributeWebServiceRouteBuilder"/>
+		<routeBuilder ref="offerWebServiceRouteBuilder"/>
+		<routeBuilder ref="fieldMetadataWebServiceRouteBuilder"/>
+		<routeBuilder ref="brandWebServiceRouteBuilder"/>
+		<routeBuilder ref="categoryWebServiceRouteBuilder"/>
+		<routeBuilder ref="catalogWebServiceRestEndpointsRouteBuilder"/>
+	</camel:camelContext>
+
+	<bean id="optionServiceReader" class="com.elasticpath.catalog.webservice.services.impl.OptionServiceImpl">
+		<constructor-arg ref="catalogProjectionPluginProvider"/>
+		<constructor-arg name="timeService" ref="timeService"/>
+
+	</bean>
+	<bean id="attributeServiceReader" class="com.elasticpath.catalog.webservice.services.impl.AttributeServiceImpl">
+		<constructor-arg ref="catalogProjectionPluginProvider"/>
+		<constructor-arg ref="timeService"/>
+	</bean>
+
+	<bean id="offerService" class="com.elasticpath.catalog.webservice.services.impl.OfferServiceImpl">
+		<constructor-arg ref="catalogProjectionPluginProvider"/>
+		<constructor-arg ref="timeService"/>
+	</bean>
+	<bean id="fieldMetadataServiceReader" class="com.elasticpath.catalog.webservice.services.impl.FieldMetadataServiceImpl">
+		<constructor-arg ref="catalogProjectionPluginProvider"/>
+		<constructor-arg name="timeService" ref="timeService"/>
+	</bean>
+
+	<bean id="catalogBrandService" class="com.elasticpath.catalog.webservice.services.impl.BrandServiceImpl">
+		<constructor-arg ref="catalogProjectionPluginProvider"/>
+		<constructor-arg ref="timeService"/>
+	</bean>
+
+	<bean id="categoryServiceReader" class="com.elasticpath.catalog.webservice.services.impl.CategoryServiceImpl">
+		<constructor-arg ref="catalogProjectionPluginProvider"/>
+		<constructor-arg ref="timeService"/>
+	</bean>
+
+	<bean id="json-jackson" class="org.apache.camel.component.jackson.JacksonDataFormat" scope="prototype">
+		<constructor-arg name="mapper" ref="objectMapper"/>
+		<constructor-arg name="unmarshalType" value="java.util.HashMap"/>
+	</bean>
+
+	<bean id="catalogWebServiceRestEndpointsRouteBuilder" class="com.elasticpath.catalog.webservice.CatalogWebServiceRestEndpointsRouteBuilder">
+	</bean>
+	<bean id="optionWebServiceRouteBuilder" class="com.elasticpath.catalog.webservice.OptionWebServiceRouteBuilder">
+		<constructor-arg ref="optionServiceReader"/>
+		<constructor-arg name="requestBodyValidator" ref="requestBodyValidator"/>
+	</bean>
+	<bean id="attributeWebServiceRouteBuilder" class="com.elasticpath.catalog.webservice.AttributeWebServiceRouteBuilder">
+		<constructor-arg ref="attributeServiceReader"/>
+		<constructor-arg name="requestBodyValidator" ref="requestBodyValidator"/>
+	</bean>
+	<bean id="fieldMetadataWebServiceRouteBuilder" class="com.elasticpath.catalog.webservice.FieldMetadataWebServiceRouteBuilder">
+		<constructor-arg ref="fieldMetadataServiceReader"/>
+		<constructor-arg name="requestBodyValidator" ref="requestBodyValidator"/>
+	</bean>
+
+	<bean id="offerWebServiceRouteBuilder" class="com.elasticpath.catalog.webservice.OfferWebServiceRouteBuilder">
+		<constructor-arg name="offerService" ref="offerService"/>
+		<constructor-arg name="requestBodyValidator" ref="requestBodyValidator"/>
+	</bean>
+
+	<bean id="brandWebServiceRouteBuilder" class="com.elasticpath.catalog.webservice.BrandWebServiceRouteBuilder">
+		<constructor-arg name="brandService" ref="catalogBrandService"/>
+		<constructor-arg name="requestBodyValidator" ref="requestBodyValidator"/>
+	</bean>
+
+	<bean id="categoryWebServiceRouteBuilder" class="com.elasticpath.catalog.webservice.CategoryWebServiceRouteBuilder">
+		<constructor-arg name="categoryService" ref="categoryServiceReader"/>
+		<constructor-arg name="requestBodyValidator" ref="requestBodyValidator"/>
+	</bean>
+
+	<bean id="requestBodyValidator" class="com.elasticpath.catalog.webservice.request.validator.RequestBodyJsonValidator">
+		<constructor-arg name="schemaLocation" value="/schema/eventMessage.schema.json"/>
+		<constructor-arg name="objectMapper" ref="objectMapper"/>
+	</bean>
+
+</beans>

@@ -9,6 +9,8 @@ import java.util.Map;
 import io.reactivex.Observable;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.elasticpath.domain.catalog.BundleConstituent;
 import com.elasticpath.domain.catalog.ProductBundle;
@@ -28,6 +30,7 @@ import com.elasticpath.rest.resource.integration.epcommerce.repository.item.Item
 public class NestedComponentLinksRepositoryImpl<I extends ItemDefinitionNestedComponentsIdentifier, LI extends ItemDefinitionComponentIdentifier>
 		implements LinksRepository<ItemDefinitionNestedComponentsIdentifier, ItemDefinitionComponentIdentifier> {
 
+	private static final Logger LOG = LoggerFactory.getLogger(NestedComponentLinksRepositoryImpl.class);
 	private ItemRepository itemRepository;
 
 	@Override
@@ -37,9 +40,12 @@ public class NestedComponentLinksRepositoryImpl<I extends ItemDefinitionNestedCo
 		final Iterator<String> guidPathFromRootItem = itemDefinitionComponent.getComponentId().getValue().iterator();
 
 		return itemRepository.findBundleConstituentAtPathEnd(itemIdMap, guidPathFromRootItem)
-				.flatMap(bundleConstituent -> itemRepository.getProductBundleFromConstituent(bundleConstituent))
+				.doOnError(throwable -> LOG.info("No bundle constituent found for item id '{}'.", itemIdMap))
+				.flatMap(bundleConstituent -> itemRepository.getProductBundleFromConstituent(bundleConstituent)
+						.doOnError(throwable -> LOG.info("No product bundle found for constituent '{}'.", bundleConstituent)))
 				.map(ProductBundle::getConstituents)
 				.flatMapObservable(Observable::fromIterable)
+				.doOnError(throwable -> LOG.info("No constituents found for product bundle.", throwable))
 				.map(bundleConstituent -> buildItemDefinitionComponentIdentifier(identifier, bundleConstituent))
 				.onErrorResumeNext(Observable.empty());
 	}

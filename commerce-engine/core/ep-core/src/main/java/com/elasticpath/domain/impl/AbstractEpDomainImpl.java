@@ -31,13 +31,42 @@ public abstract class AbstractEpDomainImpl implements EpDomain {
 
 	/**
 	 * Convenience method for getting a bean instance from elastic path.
-	 * @param <T> the type of bean to return
+	 *
+	 * @param <T>      the type of bean to return
 	 * @param beanName the name of the bean to get and instance of.
 	 * @return an instance of the requested bean.
+	 * @deprecated This method does not provide enough safety for the consumer. Please use either {@link #getPrototypeBean(String, Class)}
+	 * or {@link #getSingletonBean(String, Class)} to fetch a Spring bean.
 	 */
+	@Deprecated
 	protected <T> T getBean(final String beanName) {
 		return getElasticPath().getBean(beanName);
 	}
+
+	/**
+	 * Convenience method for getting a bean instance from elastic path.
+	 *
+	 * @param <T>      the type of bean to return
+	 * @param beanName the name of the bean to get and instance of.
+	 * @param clazz    bean interface
+	 * @return an instance of the requested bean.
+	 */
+	protected <T> T getPrototypeBean(final String beanName, final Class<T> clazz) {
+		return getElasticPath().getPrototypeBean(beanName, clazz);
+	}
+
+	/**
+	 * Convenience method for getting a bean instance from elastic path.
+	 *
+	 * @param <T>      the type of bean to return
+	 * @param beanName the name of the bean to get and instance of.
+	 * @param clazz    bean interface
+	 * @return an instance of the requested bean.
+	 */
+	protected <T> T getSingletonBean(final String beanName, final Class<T> clazz) {
+		return getElasticPath().getSingletonBean(beanName, clazz);
+	}
+
 
 	/**
 	 * Set default values for those fields need default values and it's somehow expensive to create the default values for them, either from memory
@@ -45,6 +74,7 @@ public abstract class AbstractEpDomainImpl implements EpDomain {
 	 * of a cpu expensive field will be a field like GUID, current date, etc. We prefer this way rather than using the domain object constructor. It
 	 * doesn't make sense to set default values everytime when creating a new domain object, because most of the time the default value you set will
 	 * be overwritten by hibernate immediately.
+	 *
 	 * @deprecated use initialize instead
 	 */
 	@Deprecated
@@ -62,6 +92,7 @@ public abstract class AbstractEpDomainImpl implements EpDomain {
 
 	/**
 	 * Returns the <code>Utility</code> singleton.
+	 *
 	 * @return the <code>Utility</code> singleton.
 	 * @deprecated If the implementation class needs the Utility object it should be retrieved inside that class.
 	 */

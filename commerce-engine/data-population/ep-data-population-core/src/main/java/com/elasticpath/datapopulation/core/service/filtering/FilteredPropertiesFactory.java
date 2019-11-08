@@ -32,6 +32,7 @@ public class FilteredPropertiesFactory implements FactoryBean<Properties> {
 	private List<Resource> sourceLocations;
 
 	private Properties propertiesToFilter;
+	private List<Resource> secureLocationsToFilter;
 	private List<Resource> locationsToFilter;
 
 	private String placeholderPrefix;
@@ -40,6 +41,7 @@ public class FilteredPropertiesFactory implements FactoryBean<Properties> {
 	private boolean includeSourceProperties;
 	private boolean ignoreSourceLocationNotFound;
 	private boolean ignoreLocationToFilterNotFound;
+	private boolean ignoreSecureLocationToFilterNotFound;
 
 	private PropertyResourceLoader propertyResourceLoader;
 
@@ -56,6 +58,7 @@ public class FilteredPropertiesFactory implements FactoryBean<Properties> {
 	 * @throws IOException if the source properties {@link Resource}s cannot be loaded.
 	 */
 	@Override
+	@SuppressWarnings("PMD.NPathComplexity")
 	public Properties getObject() throws IOException {
 		final Properties result = new Properties();
 
@@ -82,6 +85,11 @@ public class FilteredPropertiesFactory implements FactoryBean<Properties> {
 		final Properties propertiesFromLocationsToFilter = getPropertiesFromLocationsToFilter();
 		if (MapUtils.isNotEmpty(propertiesFromLocationsToFilter)) {
 			propertiesToFilter.putAll(propertiesFromLocationsToFilter);
+		}
+
+		final Properties secureProperties = getSecureProperties();
+		if (MapUtils.isNotEmpty(secureProperties)) {
+			propertiesToFilter.putAll(secureProperties);
 		}
 
 		// Before filtering, add the source properties if requested.
@@ -162,6 +170,17 @@ public class FilteredPropertiesFactory implements FactoryBean<Properties> {
 	 */
 	public Properties getPropertiesFromLocationsToFilter() throws IOException {
 		return getPropertyResourceLoader().loadProperties(isIgnoreLocationToFilterNotFound(), getLocationsToFilter());
+	}
+
+	/**
+	 * Load secure properties to filter {@link Resource}s as specified by {@link #getSecureLocationsToFilter()} into a single {@link Properties}
+	 * object which is returned.
+	 *
+	 * @return a {@link Properties} object which contains all property mappings from the secure-filtering {@link Resource}s.
+	 * @throws IOException if there was a problem reading any of the {@link Resource}s.
+	 */
+	protected Properties getSecureProperties() throws IOException {
+		return getPropertyResourceLoader().loadProperties(isIgnoreSecureLocationToFilterNotFound(), getSecureLocationsToFilter());
 	}
 
 	/**
@@ -274,6 +293,41 @@ public class FilteredPropertiesFactory implements FactoryBean<Properties> {
 	 */
 	public void setPropertiesToFilter(final Properties propertiesToFilter) {
 		this.propertiesToFilter = propertiesToFilter;
+	}
+
+	/**
+	 * Sets the {@link Resource} secure properties to filter.
+	 *
+	 * @param secureLocationsToFilter the {@link Resource} secure properties to filter.
+	 */
+	public void setSecureLocationsToFilter(final List<Resource> secureLocationsToFilter) {
+		this.secureLocationsToFilter = secureLocationsToFilter;
+	}
+
+	/**
+	 * Sets the flag of whether the secure property file should be ignored.
+	 *
+	 * @param ignoreSecureLocationToFilterNotFound ignore secure location to filter NotFound
+	 */
+	public void setIgnoreSecureLocationToFilterNotFound(final boolean ignoreSecureLocationToFilterNotFound) {
+		this.ignoreSecureLocationToFilterNotFound = ignoreSecureLocationToFilterNotFound;
+	}
+
+	/**
+	 * Gets the flag that indicates secure properties presence.
+	 * @return true if the presence of the secure properties file should be ignored
+	 */
+	public boolean isIgnoreSecureLocationToFilterNotFound() {
+		return this.ignoreSecureLocationToFilterNotFound;
+	}
+
+	/**
+	 * Gets the list of {@link Resource}s of secure property files.
+	 *
+	 * @return list of secure properties
+	 */
+	public List<Resource> getSecureLocationsToFilter() {
+		return this.secureLocationsToFilter;
 	}
 
 	/**

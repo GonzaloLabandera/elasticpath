@@ -6,6 +6,7 @@ package com.elasticpath.service.catalogview.impl;
 
 import java.util.Date;
 import java.util.Map;
+import java.util.Optional;
 
 import com.elasticpath.common.dto.SkuInventoryDetails;
 import com.elasticpath.domain.catalog.AvailabilityCriteria;
@@ -89,6 +90,37 @@ public class ProductAvailabilityServiceImpl implements ProductAvailabilityServic
 		}
 
 		return false;
+	}
+
+	/**
+	 * Returns <code>true</code> if the the Product can be syndicated.
+	 * Checks whether the product is not hidden, current date is within the product's date range.
+	 *
+	 * @param product the product to be checked for syndicate.
+	 *
+	 * @return <code>true</code> if the the Product can be syndicated, <code>false</code> otherwise
+	 */
+	@Override
+	public boolean canProductSyndicate(final Product product) {
+		return !product.isHidden()
+				&& Optional.ofNullable(product.getEndDate())
+				.map(endDate -> endDate.after(timeService.getCurrentTime()))
+				.orElse(true);
+	}
+
+	/**
+	 * Returns <code>true</code> if the the Product can be syndicated.
+	 * Checks whether current date is within the Sku's date range.
+	 *
+	 * @param productSku the productSku to be checked for syndicate.
+	 *
+	 * @return <code>true</code> if the the Sku can be syndicated, <code>false</code> otherwise
+	 */
+	@Override
+	public boolean canSkuSyndicate(final ProductSku productSku) {
+		return Optional.ofNullable(productSku.getEndDate())
+				.map(endDate -> endDate.after(timeService.getCurrentTime()))
+				.orElse(true);
 	}
 
 	private boolean isInStock(final SkuInventoryDetails details) {

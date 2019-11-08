@@ -4,6 +4,7 @@
 package com.elasticpath.shipping.connectivity.dto.builder.populators;
 
 import java.math.BigDecimal;
+import java.util.Map;
 
 /**
  * Interface defining population methods for building a {@link com.elasticpath.shipping.connectivity.dto.ShippableItem}.
@@ -22,6 +23,19 @@ public interface ShippableItemBuilderPopulator {
 	 * @return currently populated sku guid.
 	 */
 	String getSkuGuid();
+
+	/**
+	 * Sets the field map of item.
+	 *
+	 * @param fieldMap the field map of item.
+	 * @return this populator.
+	 */
+	ShippableItemBuilderPopulator withFields(Map<String, String> fieldMap);
+
+	/**
+	 * @return the field map of the item
+	 */
+	Map<String, String> getFields();
 
 	/**
 	 * Sets the quantity of item.

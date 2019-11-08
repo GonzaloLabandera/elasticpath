@@ -3,12 +3,10 @@
  */
 package com.elasticpath.cmclient.store.promotions;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import org.apache.log4j.Logger;
 
 import com.elasticpath.cmclient.core.helpers.extenders.PluginHelper;
+import com.elasticpath.cmclient.core.nls.BaseMessages;
 import com.elasticpath.cmclient.core.nls.LocalizedMessagePostProcessor;
 import com.elasticpath.cmclient.store.StorePlugin;
 import com.elasticpath.commons.util.extenum.ExtensibleEnum;
@@ -21,7 +19,7 @@ import com.elasticpath.domain.rules.RuleParameterNumItemsQuantifier;
  * Messages class for the promotions plug-in.
  */
 @SuppressWarnings({ "PMD.TooManyFields", "PMD.ExcessivePublicCount", "PMD.VariableNamingConventions" })
-public final class PromotionsMessages {
+public final class PromotionsMessages extends BaseMessages {
 
 	/**
 	 * LOG logger.
@@ -418,9 +416,6 @@ public final class PromotionsMessages {
 
 	public String SkuException;
 
-	// Define the map of enum constants to localized names
-	private final Map<ExtensibleEnum, String> localizedPromotionEnums = new HashMap<>();
-
 	// Sorting
 	public String SearchView_Sort_Promotion_Name;
 
@@ -523,82 +518,84 @@ public final class PromotionsMessages {
 	public String CouponEditorPart_Table_EmptyString;
 	public String promotionNotAvailable;
 
-	// Empty private constructor to ensure this class can never be constructed.
+    // Empty private constructor to ensure this class can never be constructed.
 	private PromotionsMessages() {
 	}
 
-	private void instantiateEnums() {
-		if (localizedPromotionEnums.isEmpty()) {
-			// DiscountTypes
-			localizedPromotionEnums.put(DiscountType.CART_ITEM_DISCOUNT, Discount_Type_Cart_Item);
-			localizedPromotionEnums.put(DiscountType.CART_SUBTOTAL_DISCOUNT, Discount_Type_Cart_Subtotal);
-			localizedPromotionEnums.put(DiscountType.SHIPPING_DISCOUNT, Discount_Type_Shipping);
-			localizedPromotionEnums.put(DiscountType.CATALOG_DISCOUNT, Discount_Type_Catalog);
-			localizedPromotionEnums.put(DiscountType.COUPON_DISCOUNT, Discount_Type_Coupon);
-			// RuleParameter number of item Quantifiers
-			localizedPromotionEnums.put(RuleParameterNumItemsQuantifier.AT_LEAST, PromoRulesDefinition_Label_AtLeast);
-			localizedPromotionEnums.put(RuleParameterNumItemsQuantifier.EXACTLY, PromoRulesDefinition_Label_Exactly);
-			// RuleElementTypes
-			localizedPromotionEnums.put(RuleElementType.CUSTOMER_GROUP_ELIGIBILITY, CustomerGroupEligibility);
-			localizedPromotionEnums.put(RuleElementType.EVERYONE_ELIGIBILITY, EveryoneEligibility);
-			localizedPromotionEnums.put(RuleElementType.EXISTING_CUSTOMER_ELIGIBILITY, ExistingCustomerEligibility);
-			localizedPromotionEnums.put(RuleElementType.FIRST_TIME_BUYER_ELIGIBILITY, FirstTimeBuyerEligibility);
-			localizedPromotionEnums.put(RuleElementType.BRAND_CONDITION, BrandCondition);
-			localizedPromotionEnums.put(RuleElementType.CART_CONTAINS_ITEMS_OF_CATEGORY_CONDITION, CartContainsItemsOfCategoryCondition);
-			localizedPromotionEnums.put(RuleElementType.CART_CURRENCY_CONDITION, CartCurrencyCondition);
-			localizedPromotionEnums.put(RuleElementType.CART_SUBTOTAL_CONDITION, CartSubtotalCondition);
-			localizedPromotionEnums.put(RuleElementType.PRODUCT_CATEGORY_CONDITION, ProductCategoryCondition);
-			localizedPromotionEnums.put(RuleElementType.PRODUCT_CONDITION, ProductCondition);
-			localizedPromotionEnums.put(RuleElementType.PRODUCT_IN_CART_CONDITION, ProductInCartCondition);
-			localizedPromotionEnums.put(RuleElementType.SKU_IN_CART_CONDITION, SkuInCartCondition);
-			localizedPromotionEnums.put(RuleElementType.ANY_SKU_IN_CART_CONDITION, AnySkuInCartCondition);
-			localizedPromotionEnums.put(RuleElementType.CART_CATEGORY_AMOUNT_DISCOUNT_ACTION, CartCategoryAmountDiscountAction);
-			localizedPromotionEnums.put(RuleElementType.CART_CATEGORY_PERCENT_DISCOUNT_ACTION, CartCategoryPercentDiscountAction);
-			localizedPromotionEnums.put(RuleElementType.CART_N_FREE_SKUS_ACTION, CartNFreeSkusAction);
-			localizedPromotionEnums.put(RuleElementType.CART_NTH_PRODUCT_PERCENT_DISCOUNT_ACTION, CartNthProductPercentDiscountAction);
-			localizedPromotionEnums.put(RuleElementType.CART_PRODUCT_AMOUNT_DISCOUNT_ACTION, CartProductAmountDiscountAction);
-			localizedPromotionEnums.put(RuleElementType.CART_PRODUCT_PERCENT_DISCOUNT_ACTION, CartProductPercentDiscountAction);
-			localizedPromotionEnums.put(RuleElementType.CART_SKU_AMOUNT_DISCOUNT_ACTION, CartSkuAmountDiscountAction);
-			localizedPromotionEnums.put(RuleElementType.CART_ANY_SKU_AMOUNT_DISCOUNT_ACTION, CartAnySkuAmountDiscountAction);
-			localizedPromotionEnums.put(RuleElementType.CART_SKU_PERCENT_DISCOUNT_ACTION, CartSkuPercentDiscountAction);
-			localizedPromotionEnums.put(RuleElementType.CART_ANY_SKU_PERCENT_DISCOUNT_ACTION, CartAnySkuPercentDiscountAction);
-			localizedPromotionEnums.put(RuleElementType.CART_SUBTOTAL_AMOUNT_DISCOUNT_ACTION, CartSubtotalAmountDiscountAction);
-			localizedPromotionEnums.put(RuleElementType.CART_SUBTOTAL_PERCENT_DISCOUNT_ACTION, CartSubtotalPercentDiscountAction);
-			localizedPromotionEnums.put(RuleElementType.CART_SUBTOTAL_DISCOUNT_ACTION, CartSubtotalDiscountAction);
-			localizedPromotionEnums.put(RuleElementType.CATALOG_SKU_AMOUNT_DISCOUNT_ACTION, CatelogSkuAmountDiscountAction);
-			localizedPromotionEnums.put(RuleElementType.CATALOG_SKU_PERCENT_DISCOUNT_ACTION, CatelogSkuPercentDiscountAction);
-			localizedPromotionEnums.put(RuleElementType.PRODUCT_AMOUNT_DISCOUNT_ACTION, ProductAmountDiscountAction);
-			localizedPromotionEnums.put(RuleElementType.PRODUCT_PERCENT_DISCOUNT_ACTION, ProductPercentDiscountAction);
-			localizedPromotionEnums.put(RuleElementType.SHIPPING_AMOUNT_DISCOUNT_ACTION, ShippingAmountDiscountAction);
-			localizedPromotionEnums.put(RuleElementType.SHIPPING_PERCENT_DISCOUNT_ACTION, ShippingPercentDiscountAction);
-			localizedPromotionEnums.put(RuleElementType.CATALOG_CURRENCY_AMOUNT_DISCOUNT_ACTION, CatalogCurrencyAmountDiscountAction);
-			localizedPromotionEnums.put(RuleElementType.CATALOG_CURRENCY_PERCENT_DISCOUNT_ACTION, CatalogCurrencyPercentDiscountAction);
-			localizedPromotionEnums.put(RuleElementType.COUPON_ASSIGNMENT_ACTION, CouponAssignmentAction);
+	@Override
+	protected void instantiateEnums() {
+		// DiscountTypes
+		putLocalizedName(DiscountType.CART_ITEM_DISCOUNT, Discount_Type_Cart_Item);
+		putLocalizedName(DiscountType.CART_SUBTOTAL_DISCOUNT, Discount_Type_Cart_Subtotal);
+		putLocalizedName(DiscountType.SHIPPING_DISCOUNT, Discount_Type_Shipping);
+		putLocalizedName(DiscountType.CATALOG_DISCOUNT, Discount_Type_Catalog);
+		putLocalizedName(DiscountType.COUPON_DISCOUNT, Discount_Type_Coupon);
+		// RuleParameter number of item Quantifiers
+		putLocalizedName(RuleParameterNumItemsQuantifier.AT_LEAST, PromoRulesDefinition_Label_AtLeast);
+		putLocalizedName(RuleParameterNumItemsQuantifier.EXACTLY, PromoRulesDefinition_Label_Exactly);
+		// RuleElementTypes
+		putLocalizedName(RuleElementType.CUSTOMER_GROUP_ELIGIBILITY, CustomerGroupEligibility);
+		putLocalizedName(RuleElementType.EVERYONE_ELIGIBILITY, EveryoneEligibility);
+		putLocalizedName(RuleElementType.EXISTING_CUSTOMER_ELIGIBILITY, ExistingCustomerEligibility);
+		putLocalizedName(RuleElementType.FIRST_TIME_BUYER_ELIGIBILITY, FirstTimeBuyerEligibility);
+		putLocalizedName(RuleElementType.BRAND_CONDITION, BrandCondition);
+		putLocalizedName(RuleElementType.CART_CONTAINS_ITEMS_OF_CATEGORY_CONDITION, CartContainsItemsOfCategoryCondition);
+		putLocalizedName(RuleElementType.CART_CURRENCY_CONDITION, CartCurrencyCondition);
+		putLocalizedName(RuleElementType.CART_SUBTOTAL_CONDITION, CartSubtotalCondition);
+		putLocalizedName(RuleElementType.PRODUCT_CATEGORY_CONDITION, ProductCategoryCondition);
+		putLocalizedName(RuleElementType.PRODUCT_CONDITION, ProductCondition);
+		putLocalizedName(RuleElementType.PRODUCT_IN_CART_CONDITION, ProductInCartCondition);
+		putLocalizedName(RuleElementType.SKU_IN_CART_CONDITION, SkuInCartCondition);
+		putLocalizedName(RuleElementType.ANY_SKU_IN_CART_CONDITION, AnySkuInCartCondition);
+		putLocalizedName(RuleElementType.CART_CATEGORY_AMOUNT_DISCOUNT_ACTION, CartCategoryAmountDiscountAction);
+		putLocalizedName(RuleElementType.CART_CATEGORY_PERCENT_DISCOUNT_ACTION, CartCategoryPercentDiscountAction);
+		putLocalizedName(RuleElementType.CART_N_FREE_SKUS_ACTION, CartNFreeSkusAction);
+		putLocalizedName(RuleElementType.CART_NTH_PRODUCT_PERCENT_DISCOUNT_ACTION, CartNthProductPercentDiscountAction);
+		putLocalizedName(RuleElementType.CART_PRODUCT_AMOUNT_DISCOUNT_ACTION, CartProductAmountDiscountAction);
+		putLocalizedName(RuleElementType.CART_PRODUCT_PERCENT_DISCOUNT_ACTION, CartProductPercentDiscountAction);
+		putLocalizedName(RuleElementType.CART_SKU_AMOUNT_DISCOUNT_ACTION, CartSkuAmountDiscountAction);
+		putLocalizedName(RuleElementType.CART_ANY_SKU_AMOUNT_DISCOUNT_ACTION, CartAnySkuAmountDiscountAction);
+		putLocalizedName(RuleElementType.CART_SKU_PERCENT_DISCOUNT_ACTION, CartSkuPercentDiscountAction);
+		putLocalizedName(RuleElementType.CART_ANY_SKU_PERCENT_DISCOUNT_ACTION, CartAnySkuPercentDiscountAction);
+		putLocalizedName(RuleElementType.CART_SUBTOTAL_AMOUNT_DISCOUNT_ACTION, CartSubtotalAmountDiscountAction);
+		putLocalizedName(RuleElementType.CART_SUBTOTAL_PERCENT_DISCOUNT_ACTION, CartSubtotalPercentDiscountAction);
+		putLocalizedName(RuleElementType.CART_SUBTOTAL_DISCOUNT_ACTION, CartSubtotalDiscountAction);
+		putLocalizedName(RuleElementType.CATALOG_SKU_AMOUNT_DISCOUNT_ACTION, CatelogSkuAmountDiscountAction);
+		putLocalizedName(RuleElementType.CATALOG_SKU_PERCENT_DISCOUNT_ACTION, CatelogSkuPercentDiscountAction);
+		putLocalizedName(RuleElementType.PRODUCT_AMOUNT_DISCOUNT_ACTION, ProductAmountDiscountAction);
+		putLocalizedName(RuleElementType.PRODUCT_PERCENT_DISCOUNT_ACTION, ProductPercentDiscountAction);
+		putLocalizedName(RuleElementType.SHIPPING_AMOUNT_DISCOUNT_ACTION, ShippingAmountDiscountAction);
+		putLocalizedName(RuleElementType.SHIPPING_PERCENT_DISCOUNT_ACTION, ShippingPercentDiscountAction);
+		putLocalizedName(RuleElementType.CATALOG_CURRENCY_AMOUNT_DISCOUNT_ACTION, CatalogCurrencyAmountDiscountAction);
+		putLocalizedName(RuleElementType.CATALOG_CURRENCY_PERCENT_DISCOUNT_ACTION, CatalogCurrencyPercentDiscountAction);
+		putLocalizedName(RuleElementType.COUPON_ASSIGNMENT_ACTION, CouponAssignmentAction);
 
-			// RuleExceptionTypes
-			localizedPromotionEnums.put(RuleExceptionType.CATEGORY_EXCEPTION, CategoryException);
-			localizedPromotionEnums.put(RuleExceptionType.PRODUCT_EXCEPTION, ProductException);
-			localizedPromotionEnums.put(RuleExceptionType.SKU_EXCEPTION, SkuException);
-		}
-
+		// RuleExceptionTypes
+		putLocalizedName(RuleExceptionType.CATEGORY_EXCEPTION, CategoryException);
+		putLocalizedName(RuleExceptionType.PRODUCT_EXCEPTION, ProductException);
+		putLocalizedName(RuleExceptionType.SKU_EXCEPTION, SkuException);
 	}
-	
+
 	/**
 	 * Returns the localized name of the given enum constant.
 	 *
 	 * @param anEnum - The enum constant to get a localized name for
 	 * @return The localized name of the given enum constant
 	 */
+	@Override
 	public String getLocalizedName(final ExtensibleEnum anEnum) {
 		try {
-			String localisedString = localizedPromotionEnums.get(anEnum);
+			String localisedString = super.getLocalizedName(anEnum);
 
 			if (localisedString == null) {
 				localisedString = PluginHelper.getExtendedLocalizedString(StorePlugin.PLUGIN_ID, anEnum);
 			}
+			if (localisedString == null) {
+				LOG.warn(String.format("Value for enum '%s' was null, ", anEnum));
+			}
 			return localisedString;
 		} catch (Exception e) {
-			LOG.error("Error getting extended localized string.", e);
+			LOG.error("Error getting extended localized string, returning null.", e);
 		}
 
 		return null;
@@ -610,7 +607,7 @@ public final class PromotionsMessages {
 	 */
 	public static PromotionsMessages get() {
 		PromotionsMessages promotionsMessages = LocalizedMessagePostProcessor.getUTF8Encoded(BUNDLE_NAME, PromotionsMessages.class);
-		promotionsMessages.instantiateEnums();
+		promotionsMessages.initialize();
 
 		return promotionsMessages;
 	}

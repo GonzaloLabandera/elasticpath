@@ -291,7 +291,7 @@ public class PromotionRuleImpl extends AbstractRuleImpl {
 		RuleCondition couponCondition = findPromoCodeCondition(); 
 		if (couponEnabled) {
 			if (couponCondition == null) {
-				couponCondition = getBean(ContextIdNames.LIMITED_USE_COUPON_CODE_COND);
+				couponCondition = getPrototypeBean(ContextIdNames.LIMITED_USE_COUPON_CODE_COND, RuleCondition.class);
 				addCondition(couponCondition);
 			}
 		} else {

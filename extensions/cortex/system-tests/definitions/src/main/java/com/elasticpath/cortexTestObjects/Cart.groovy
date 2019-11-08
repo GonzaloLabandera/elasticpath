@@ -18,6 +18,16 @@ class Cart extends CommonMethods {
 		CortexResponse.cartResponse = client.save()
 	}
 
+	static void addItemToCartWithoutFollow(def quantity, def configurationFields) {
+		client.resume(CortexResponse.elementResponse)
+				.addtocartform()
+				.addtodefaultcartaction(
+						["quantity"   : quantity,
+						 configuration: configurationFields
+						])
+				.stopIfFailure()
+	}
+
 	static void resume() {
 		client.resume(CortexResponse.cartResponse)
 	}

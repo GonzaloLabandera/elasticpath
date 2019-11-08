@@ -31,6 +31,7 @@ public class ShippableItemPopulatorVisitorImpl implements ShippableItemPopulator
 
 		populator.withQuantity(shoppingItem.getQuantity())
 				.withSkuGuid(shoppingItem.getSkuGuid())
+				.withFields(shoppingItem.getFields())
 				.withWeight(productSku.getWeight())
 				.withHeight(productSku.getHeight())
 				.withWidth(productSku.getWidth())

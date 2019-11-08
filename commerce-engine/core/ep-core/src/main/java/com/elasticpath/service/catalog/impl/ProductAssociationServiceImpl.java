@@ -21,7 +21,6 @@ import com.elasticpath.persistence.api.LoadTuner;
 import com.elasticpath.service.catalog.ProductAssociationRetrieveStrategy;
 import com.elasticpath.service.catalog.ProductAssociationService;
 import com.elasticpath.service.impl.AbstractEpPersistenceServiceImpl;
-import com.elasticpath.service.misc.FetchPlanHelper;
 import com.elasticpath.service.search.query.ProductAssociationSearchCriteria;
 
 /**
@@ -31,8 +30,6 @@ import com.elasticpath.service.search.query.ProductAssociationSearchCriteria;
 @SuppressWarnings("PMD.GodClass")
 public class ProductAssociationServiceImpl extends AbstractEpPersistenceServiceImpl
 	implements ProductAssociationService, ProductAssociationRetrieveStrategy  {
-
-	private FetchPlanHelper fetchPlanHelper;
 
 	private ProductLoadTuner productLoadTuner;
 
@@ -110,11 +107,10 @@ public class ProductAssociationServiceImpl extends AbstractEpPersistenceServiceI
 	public List<ProductAssociation> findByCriteria(final ProductAssociationSearchCriteria criteria) throws EpServiceException {
 		sanityCheck();
 		ProductAssociationQuery queryData = createQueryBuilder().buildSearchQuery(criteria);
-		configureFetchPlan();
-		List<ProductAssociation> foundAssociations
-				= getPersistenceEngine().retrieve(queryData.getQueryString(), queryData.getQueryParameters().toArray());
-		fetchPlanHelper.clearFetchPlan();
-		return foundAssociations;
+
+		return getPersistenceEngine()
+			.withLoadTuners(getLoadTuner())
+			.retrieve(queryData.getQueryString(), queryData.getQueryParameters().toArray());
 	}
 
 	/**
@@ -133,11 +129,11 @@ public class ProductAssociationServiceImpl extends AbstractEpPersistenceServiceI
 			final int startIndex, final int maxResults) throws EpServiceException {
 		sanityCheck();
 		ProductAssociationQuery queryData = createQueryBuilder().buildSearchQuery(criteria);
-		configureFetchPlan();
-		List<ProductAssociation> foundAssociations = getPersistenceEngine().retrieve(
+
+		return getPersistenceEngine()
+			.withLoadTuners(getLoadTuner())
+			.retrieve(
 				queryData.getQueryString(), queryData.getQueryParameters().toArray(), startIndex, maxResults);
-		fetchPlanHelper.clearFetchPlan();
-		return foundAssociations;
 	}
 
 	/**
@@ -152,23 +148,19 @@ public class ProductAssociationServiceImpl extends AbstractEpPersistenceServiceI
 		sanityCheck();
 		ProductAssociationQuery queryData = createQueryBuilder().buildSearchQuery(criteria);
 
-		if (loadTuner != null) {
-			fetchPlanHelper.configureLoadTuner(loadTuner);
-		}
-		List<ProductAssociation> foundAssociations
-				= getPersistenceEngine().retrieve(queryData.getQueryString(), queryData.getQueryParameters().toArray());
-
-		fetchPlanHelper.clearFetchPlan();
-		return foundAssociations;
+		return getPersistenceEngine()
+			.withLoadTuners(loadTuner)
+			.retrieve(queryData.getQueryString(), queryData.getQueryParameters().toArray());
 	}
 
 	@Override
 	public Long findCountForCriteria(final ProductAssociationSearchCriteria criteria) throws EpServiceException {
 		sanityCheck();
 		ProductAssociationQuery queryData = createQueryBuilder().buildCountQuery(criteria);
-		configureFetchPlan();
-		List<Long> result = getPersistenceEngine().retrieve(queryData.getQueryString(), queryData.getQueryParameters().toArray());
-		fetchPlanHelper.clearFetchPlan();
+
+		List<Long> result = getPersistenceEngine()
+			.withLoadTuners(getLoadTuner())
+			.retrieve(queryData.getQueryString(), queryData.getQueryParameters().toArray());
 		if (result == null || result.size() != 1) {
 			throw new EpServiceException("Invalid result for product association count");
 		}
@@ -176,14 +168,16 @@ public class ProductAssociationServiceImpl extends AbstractEpPersistenceServiceI
 	}
 
 	/**
-	 * Configures the fetch plan.
+	 * Get appropriate load tuner.
+	 *
+	 * @return appropriate load tuner - if {@link ProductAssociationLoadTuner} is null then {@link ProductLoadTuner} will be used.
 	 */
-	protected void configureFetchPlan() {
+	protected LoadTuner getLoadTuner() {
 		if (productAssociationLoadTuner == null) {
-			fetchPlanHelper.configureProductFetchPlan(productLoadTuner);
-		} else {
-			fetchPlanHelper.configureProductAssociationFetchPlan(productAssociationLoadTuner);
+			return productLoadTuner;
 		}
+
+		return productAssociationLoadTuner;
 	}
 
 	/**
@@ -218,10 +212,9 @@ public class ProductAssociationServiceImpl extends AbstractEpPersistenceServiceI
 	@Override
 	@Deprecated
 	public ProductAssociation getTuned(final long productAssociationUid, final ProductLoadTuner loadTuner) {
-		fetchPlanHelper.configureProductFetchPlan(loadTuner);
-		ProductAssociation association = this.load(productAssociationUid);
-		fetchPlanHelper.clearFetchPlan();
-		return association;
+		getFetchPlanHelper().setLoadTuners(loadTuner);
+
+		return this.load(productAssociationUid);
 	}
 
 	/**
@@ -236,22 +229,12 @@ public class ProductAssociationServiceImpl extends AbstractEpPersistenceServiceI
 	@Override
 	public ProductAssociation getTuned(final long productAssociationUid, final ProductAssociationLoadTuner loadTuner) {
 		if (loadTuner == null) {
-			fetchPlanHelper.configureProductAssociationFetchPlan(this.productAssociationLoadTuner);
+			getFetchPlanHelper().setLoadTuners(productAssociationLoadTuner);
 		} else {
-			fetchPlanHelper.configureProductAssociationFetchPlan(loadTuner);
+			getFetchPlanHelper().setLoadTuners(loadTuner);
 		}
-		ProductAssociation association = this.load(productAssociationUid);
-		fetchPlanHelper.clearFetchPlan();
-		return association;
-	}
 
-	/**
-	 * Sets the fetch plan helper.
-	 *
-	 * @param fetchPlanHelper the fetch plan helper
-	 */
-	public void setFetchPlanHelper(final FetchPlanHelper fetchPlanHelper) {
-		this.fetchPlanHelper = fetchPlanHelper;
+		return this.load(productAssociationUid);
 	}
 
 	/**
@@ -411,9 +394,9 @@ public class ProductAssociationServiceImpl extends AbstractEpPersistenceServiceI
 	public ProductAssociation findByGuid(final String guid, final LoadTuner loadTuner) {
 		String query = "SELECT pa FROM ProductAssociationImpl pa WHERE pa.guid = ?1";
 
-		fetchPlanHelper.configureLoadTuner(loadTuner);
-		List<ProductAssociation> result = getPersistenceEngine().retrieve(query, guid);
-		fetchPlanHelper.clearFetchPlan();
+		List<ProductAssociation> result = getPersistenceEngine()
+			.withLoadTuners(loadTuner)
+			.retrieve(query, guid);
 
 		if (result.size() == 1) {
 			return result.get(0);

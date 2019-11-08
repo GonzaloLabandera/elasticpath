@@ -299,12 +299,12 @@
       <statePolicyContribution
               priority="10"
               statePolicy="com.elasticpath.cmclient.changeset.policy.ChangeSetMemberContainerDependentObjectStatePolicyImpl"
-              targetId="addEditCartItemModifierFieldDialog">
+              targetId="addEditModifierFieldDialog">
       </statePolicyContribution>
       <statePolicyContribution
               priority="10"
               statePolicy="com.elasticpath.cmclient.changeset.policy.ChangeSetMemberContainerDependentObjectStatePolicyImpl"
-              targetId="addEditCartItemModifierFieldOptionDialog">
+              targetId="addEditModifierFieldOptionDialog">
       </statePolicyContribution>
       <statePolicyContribution
             priority="10"

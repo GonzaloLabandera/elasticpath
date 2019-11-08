@@ -1,5 +1,6 @@
 package com.elasticpath.selenium.setup;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
@@ -81,6 +82,8 @@ public final class SetUp {
 		if (!hasOptionSet) {
 			options.addArguments("disable-infobars");
 			options.addArguments("--start-fullscreen");
+			options.setExperimentalOption("excludeSwitches", Collections.singletonList("enable-automation"));
+			options.setExperimentalOption("useAutomationExtension", false);
 			hasOptionSet = true;
 		}
 
@@ -123,5 +126,14 @@ public final class SetUp {
 				driver = null;
 			}
 		}
+	}
+
+	/**
+	 * Returns WebDriver instance.
+	 *
+	 * @return driver WebDriver instance
+	 */
+	public static WebDriver getDriverInstance() {
+		return driver;
 	}
 }

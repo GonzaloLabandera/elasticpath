@@ -213,7 +213,7 @@ Feature: View purchase line item
       | BUNDLE_CODE      | BUNDLE_NAME      | ITEM_CODE     | ITEM_NAME | NESTED_BUNDLE | NESTED_ITEM |
       | tbcp_1234567_sku | Best Series 2011 | tt0970179_sku | Hugo      | House         | Superheroes |
 
-  Scenario Outline: Traverse nested bundle tree from root to the leaf and back
+  Scenario Outline: Traverse nested bundle tree of components from root to the leaf and back
     Given I login as a registered shopper
     And I look up an item with code <BUNDLE_CODE>
     And I follow links addtocartform
@@ -240,7 +240,7 @@ Feature: View purchase line item
       | BUNDLE_TYPE            | BUNDLE_CODE      | BUNDLE_NAME      | LEVEL_1 | LEVEL_2 | LEVEL_3      |
       | Nested assigned bundle | tbcp_1234567_sku | Best Series 2011 | House   | Avatar  | VideoQuality |
 
-  Scenario Outline: Traverse nested bundle tree to the leaf then to the neighbouring leaf and then back to the root
+  Scenario Outline: Traverse nested bundle tree of components to the leaf then to the neighbouring leaf and then back to the root
     Given I login as a registered shopper
     And I look up an item with code <BUNDLE_CODE>
     And I follow links addtocartform
@@ -275,3 +275,50 @@ Feature: View purchase line item
     Then there are advisor messages with the following fields:
       | messageType | messageId  | debugMessage            |
       | needinfo    | cart.empty | Shopping cart is empty. |
+
+  Scenario Outline: Traverse nested bundle tree of line items from root to the leaf and back
+    Given I login as a registered shopper
+    And I look up an item with code <BUNDLE_CODE>
+    And I follow links addtocartform
+    And I add to cart with quantity of 1
+    And I make a purchase
+    Then I open purchase line item <BUNDLE_NAME>
+    And I follow links dependentlineitems
+    And open the element with field name of <LEVEL_1>
+    And I follow links dependentlineitems
+    And open the element with field name of <LEVEL_2>
+    And I follow links parent
+    Then the field name has value <LEVEL_1>
+    And I follow links list
+    And I follow links lineitem
+    Then the field name has value <BUNDLE_NAME>
+
+    Examples:
+      | BUNDLE_TYPE            | BUNDLE_CODE      | BUNDLE_NAME      | LEVEL_1 | LEVEL_2 |
+      | Nested assigned bundle | tbcp_1234567_sku | Best Series 2011 | House   | Avatar  |
+
+
+  Scenario Outline: Traverse nested bundle tree of line items to the leaf then to the neighbouring leaf and then back to the root
+    Given I login as a registered shopper
+    And I look up an item with code <BUNDLE_CODE>
+    And I follow links addtocartform
+    And I add to cart with quantity of 1
+    And I make a purchase
+    Then I open purchase line item <BUNDLE_NAME>
+    And I follow links dependentlineitems
+    And open the element with field name of <LEVEL_1>
+    And I follow links dependentlineitems
+    And open the element with field name of <LEVEL_2>
+    And I follow links parent
+    Then the field name has value <LEVEL_1>
+    And I follow links dependentlineitems
+    And open the element with field name of <LEVEL_2_NEIGHBOUR>
+    And I follow links parent
+    Then the field name has value <LEVEL_1>
+    And I follow links list
+    And I follow links lineitem
+    Then the field name has value <BUNDLE_NAME>
+
+    Examples:
+      | BUNDLE_TYPE            | BUNDLE_CODE      | BUNDLE_NAME      | LEVEL_1 | LEVEL_2 | LEVEL_2_NEIGHBOUR  |
+      | Nested assigned bundle | tbcp_1234567_sku | Best Series 2011 | House   | Avatar  | The Social Network |

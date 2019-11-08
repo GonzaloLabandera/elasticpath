@@ -4,10 +4,8 @@
 	<family>
 		<name>shipmentdetails</name>
 		<description>
-			<![CDATA[
-The shipmentdetails resource defines how and where the physical goods you're purchasing are shipped. The *where* you're shipping
-is the shipping address, while the *how* are the shipping options (i.e. Canada Post, FedEx, etc) available for your store.
-			]]>
+			<![CDATA[The shipmentdetails resource defines how and where the physical goods you're purchasing are shipped. The *where* you're shipping
+is the `shipping address`, while the *how* are the `shipping options` (i.e. Canada Post, FedEx, etc) available for your store.]]>
 		</description>
 
 		<uri-part>

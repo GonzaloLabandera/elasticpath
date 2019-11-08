@@ -1,0 +1,54 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "description": "The subschema for the categories array within offer projections.",
+  "offerCategories": {
+    "description": "Array of categories in which the offer is included.",
+    "type": "array",
+    "items": [
+      {
+        "type": "object",
+        "required": [
+          "code",
+          "path",
+          "default"
+        ],
+        "properties": {
+          "code": {
+            "description": "The category code to which the offer belongs.",
+            "type": "string"
+          },
+          "path": {
+            "description": "Array of category codes, starting from the top level category and ending with the current category's parent.",
+            .",
+            "type": "array",
+            "items": [
+              {
+                "description": "The category code.",
+                "type": "string"
+              }
+            ]
+          },
+          "enableDateTime": {
+            "description": "The date/time when the category is enabled.",
+            "type": "string"
+          },
+          "disableDateTime": {
+            "description": "The date/time when the category is disabled. Field is not present if value is null.",
+            "type": "string"
+          },
+          "default": {
+            "description": "Indicates whether this is the default category for the offer.",
+            "type": "boolean",
+            "enum": [
+              false
+            ]
+          },
+          "featured": {
+            "description": "If present, the order in which the offer should be featured within the category.",
+            "type": "number"
+          }
+        }
+      }
+    ]
+  }
+}

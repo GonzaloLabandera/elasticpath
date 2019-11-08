@@ -25,9 +25,9 @@ import org.apache.log4j.spi.LoggerRepository;
 import org.apache.log4j.spi.RendererSupport;
 
 import com.elasticpath.commons.ThreadLocalMap;
+import com.elasticpath.commons.beanframework.BeanFactory;
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.commons.enums.OperationEnum;
-import com.elasticpath.domain.ElasticPath;
 import com.elasticpath.domain.changeset.ChangeSet;
 import com.elasticpath.importexport.common.ImportExportContextIdNames;
 import com.elasticpath.importexport.common.exception.ConfigurationException;
@@ -44,11 +44,11 @@ import com.elasticpath.service.changeset.ChangeSetService;
 /**
  * The client that is responsible for working with import-export operations.
  */
-@SuppressWarnings({ "PMD.DoNotCallSystemExit", "PMD.GodClass" })
+@SuppressWarnings({"PMD.DoNotCallSystemExit", "PMD.GodClass"})
 public class Index {
 
 	private static final String HELP_STRING = "-i [-c importconfiguration.xml] [-g changeSetGuid] [-s stage1|stage2]\n"
-		+ "-e searchconfiguration.xml [-c exportconfiguration.xml] [-l locale] [-p importexporttool.config]";
+			+ "-e searchconfiguration.xml [-c exportconfiguration.xml] [-l locale] [-p importexporttool.config]";
 
 	private static final Logger LOG = Logger.getLogger(Index.class);
 
@@ -70,18 +70,18 @@ public class Index {
 
 	private static final int WRONG_COMMAND_LINE_ARGUMENTS = 2;
 
-	private static final int WRONG_CONFIGURATION  = 4;
+	private static final int WRONG_CONFIGURATION = 4;
 
 	private static final int COMPLETE_FAIL = 8;
 
 	private static final String FILE_PATH = "file:";
-	
+
 	/**
 	 * Constructs Index.
 	 */
 	public Index() {
 		engine = EngineInitialization.getInstance();
-		messageResolver = engine.getElasticPath().getBean("messageResolver");
+		messageResolver = engine.getBeanFactory().getSingletonBean("messageResolver", MessageResolver.class);
 		configureLogRendering();
 		LOG.info("Engine Initialization...");
 	}
@@ -94,11 +94,11 @@ public class Index {
 	 * -h prints help information
 	 * <p>
 	 * -i starts the import <b>Note: the information for import receives from importconfiguration.xml file by default.
-	 *  Custom configuration filename can be specified by argument for -c option. If the configuration file does not exist exception
+	 * Custom configuration filename can be specified by argument for -c option. If the configuration file does not exist exception
 	 * will be thrown.</b>
 	 * <p>
 	 * -e starts the export <b>Note: the information for export receives from exportconfiguration.xml file.
-	 *  Custom configuration filename can be specified by argument for -c option. If this file does not exist exception
+	 * Custom configuration filename can be specified by argument for -c option. If this file does not exist exception
 	 * will be thrown.</b>
 	 * <p>
 	 * configuration.xml file with search settings must be provided as argument for -e option.
@@ -113,7 +113,7 @@ public class Index {
 		options.addOption("p", "properties", true, "set the import/export tool application properties file location");
 		options.addOption("e", "export", true, "do the export");
 		options.addOption("i", "import", false, "do the import");
-		options.addOption("h", "help",   false, "prints current message");
+		options.addOption("h", "help", false, "prints current message");
 		options.addOption("c", "config", true, "set the import or export configuration file location");
 		options.addOption("l", "locale", true, "set the locale");
 		options.addOption("g", "changeset", true, "set the change set guid to import into");
@@ -130,7 +130,7 @@ public class Index {
 				LOG.info("Setting the config location argument with " + cmd.getOptionValue('p'));
 				System.setProperty("configLocation", FILE_PATH + cmd.getOptionValue("p"));
 			}
-			
+
 			if (cmd.hasOption("e")) {
 				int exitCode = createIndex(cmd).doExport(
 						getConfigurationFileName(cmd, DEFAULT_EXPORT_CONFIGURATION_FILE),
@@ -158,9 +158,9 @@ public class Index {
 	}
 
 	private void processChangeSet() throws ConfigurationException {
-		ChangeSetService changeSetService = getElasticPath().getBean(ContextIdNames.CHANGESET_SERVICE);
+		ChangeSetService changeSetService = getBeanFactory().getSingletonBean(ContextIdNames.CHANGESET_SERVICE, ChangeSetService.class);
 
-		ThreadLocalMap<String, Object> metadataMap = getElasticPath().getBean("persistenceListenerMetadataMap");
+		ThreadLocalMap<String, Object> metadataMap = getThreadLocalMapBean();
 		if (changeSetGuid == null) {
 			importOnly(metadataMap);
 		} else {
@@ -169,7 +169,8 @@ public class Index {
 				importOnly(metadataMap);
 				return;
 			}
-			ChangeSetManagementService changeSetManagementService = getElasticPath().getBean(ContextIdNames.CHANGESET_MANAGEMENT_SERVICE);
+			ChangeSetManagementService changeSetManagementService = getBeanFactory().getSingletonBean(ContextIdNames.CHANGESET_MANAGEMENT_SERVICE,
+					ChangeSetManagementService.class);
 			ChangeSet changeSet = changeSetManagementService.get(changeSetGuid, null);
 			if (changeSet == null) {
 				throw new ConfigurationException(String.format("Change set %s does not exist.", changeSetGuid));
@@ -183,10 +184,15 @@ public class Index {
 		}
 	}
 
+	@SuppressWarnings("unchecked")
+	private ThreadLocalMap<String, Object> getThreadLocalMapBean() {
+		return getBeanFactory().getSingletonBean("persistenceListenerMetadataMap", ThreadLocalMap.class);
+	}
+
 	private void setChangeSetProcessingMode(final ThreadLocalMap<String, Object> metadataMap, final String stageArg) throws ConfigurationException {
 		if (StringUtils.isBlank(stageArg)) {
 			addToChangeSetAndImport(metadataMap);
-		} else 	if ("stage1".equals(stageArg)) {
+		} else if ("stage1".equals(stageArg)) {
 			addToChangeSetOnly(metadataMap);
 		} else if ("stage2".equals(stageArg)) {
 			importOnly(metadataMap);
@@ -230,7 +236,7 @@ public class Index {
 	 */
 	public int doImport(final String configFileName) throws FileNotFoundException {
 
-		ImportController controller = getElasticPath().getBean(ImportExportContextIdNames.IMPORT_CONTROLLER);
+		ImportController controller = getBeanFactory().getSingletonBean(ImportExportContextIdNames.IMPORT_CONTROLLER, ImportController.class);
 
 		try (FileInputStream configStream = new FileInputStream(configFileName)) {
 			processChangeSet();
@@ -262,13 +268,13 @@ public class Index {
 	/**
 	 * Does the Export.
 	 *
-	 * @param configFileName the name of file containing export configuration
+	 * @param configFileName         the name of file containing export configuration
 	 * @param searchCriteriaFileName the name of file containing export search query
 	 * @return result code: SUCCESS, PARTIAL_SUCCESS, WRONG_CONFIGURATION or COMPLETE_FAIL
-	 * @throws FileNotFoundException  in case configuration hasn't been loaded
+	 * @throws FileNotFoundException in case configuration hasn't been loaded
 	 */
 	public int doExport(final String configFileName, final String searchCriteriaFileName) throws FileNotFoundException {
-		ExportController controller = getElasticPath().getBean(ImportExportContextIdNames.EXPORT_CONTROLLER);
+		ExportController controller = getBeanFactory().getSingletonBean(ImportExportContextIdNames.EXPORT_CONTROLLER, ExportController.class);
 		try (FileInputStream configStream = new FileInputStream(configFileName);
 			 FileInputStream searchCriteriaStream = new FileInputStream(searchCriteriaFileName)
 		) {
@@ -297,8 +303,8 @@ public class Index {
 		LOG.info(layout.format(summary));
 	}
 
-	private ElasticPath getElasticPath() {
-		return engine.getElasticPath();
+	private BeanFactory getBeanFactory() {
+		return engine.getBeanFactory();
 	}
 
 	private void setLocale(final Locale locale) {

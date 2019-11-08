@@ -70,8 +70,7 @@ Keywords can be up to 500 characters long. Any longer and Cortex API returns sta
 				<name>page-size</name>
 				<description>
 					<![CDATA[
-Defines the number of search results to list per page. This field is optional. If the field is not specified,
-Cortex API's default page-size value is used, which can differ depending on your implementation.
+Defines the number of search results to list per page. This field is optional. If the field is not specified, Cortex API's default `page-size` value is used, which can differ depending on your implementation.
 					]]>
 				</description>
 				<integer/>

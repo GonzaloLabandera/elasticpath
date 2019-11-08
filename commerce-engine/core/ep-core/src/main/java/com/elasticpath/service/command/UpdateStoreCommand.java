@@ -5,6 +5,7 @@ package com.elasticpath.service.command;
 
 import java.util.Map;
 
+import com.elasticpath.domain.customer.StoreCustomerAttribute;
 import com.elasticpath.domain.store.Store;
 
 /**
@@ -25,4 +26,11 @@ public interface UpdateStoreCommand extends Command {
 	 * @param settingValueMap map between setting keys and values
 	 */
 	void setSettingValues(Map<String, String> settingValueMap);
+
+	/**
+	 * Sets store customer attributes to be updated.
+	 *
+	 * @param storeCustomerAttributes map between attribute guids and values
+	 */
+	void setStoreCustomerAttributes(Map<String, StoreCustomerAttribute> storeCustomerAttributes);
 }

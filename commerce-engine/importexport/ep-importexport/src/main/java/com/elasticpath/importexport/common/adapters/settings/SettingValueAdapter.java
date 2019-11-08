@@ -5,6 +5,7 @@ package com.elasticpath.importexport.common.adapters.settings;
 
 import org.apache.commons.lang.StringEscapeUtils;
 
+import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.importexport.common.adapters.AbstractDomainAdapterImpl;
 import com.elasticpath.importexport.common.dto.settings.DefinedValueDTO;
 import com.elasticpath.settings.domain.SettingValue;
@@ -34,6 +35,6 @@ public class SettingValueAdapter extends AbstractDomainAdapterImpl<SettingValue,
 	
 	@Override
 	public SettingValue createDomainObject() {
-		return getBeanFactory().getBean("settingValue");
+		return getBeanFactory().getPrototypeBean(ContextIdNames.SETTING_VALUE, SettingValue.class);
 	}
 }

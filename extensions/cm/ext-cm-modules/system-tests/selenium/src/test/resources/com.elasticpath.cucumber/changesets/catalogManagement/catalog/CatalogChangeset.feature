@@ -34,7 +34,7 @@ Feature: Catalog with change set
     And I select newly created change set
     And I create a new catalog with following details
       | catalogName   | language |
-      | ATest Catalog | English  |
+      | ZTest Catalog | English  |
     When I select CartItemModifierGroups tab in the Catalog Editor
     And I create a new modifier group with group code groupCode and group name groupName
     And I add a new field to this group with following details
@@ -51,6 +51,7 @@ Feature: Catalog with change set
     And I select newly created change set
     And I open the newly created catalog editor
     And I delete the newly created group
+    And I save my changes
     Then I should see deleted group in the change set
 
   @lockAndFinalize @cleanupCatalog
@@ -60,7 +61,7 @@ Feature: Catalog with change set
     And I select newly created change set
     When I create a new catalog with following details
       | catalogName   | language |
-      | ATest Catalog | English  |
+      | ZTest Catalog | English  |
     And I open the newly created catalog editor
     And I select ProductTypes tab in the Catalog Editor
     When I create a new product type Prod Type with following attributes
@@ -82,7 +83,7 @@ Feature: Catalog with change set
     And I select newly created change set
     And I create a new catalog with following details
       | catalogName   | language |
-      | ATest Catalog | English  |
+      | ZTest Catalog | English  |
     And I open the newly created catalog editor
     And I select Attributes tab in the Catalog Editor
     When I create a new catalog attribute with following details
@@ -108,7 +109,7 @@ Feature: Catalog with change set
     And I select newly created change set
     And I create a new catalog with following details
       | catalogName   | language |
-      | ATest Catalog | English  |
+      | ZTest Catalog | English  |
     And I open the newly created catalog editor
     And I select SkuOptions tab in the Catalog Editor
     When I create a new sku option with sku code f00bar and display name automationTesting

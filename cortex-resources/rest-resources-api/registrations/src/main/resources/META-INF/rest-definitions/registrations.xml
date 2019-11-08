@@ -32,9 +32,7 @@
 				<name>username</name>
 				<description>
 					<![CDATA[
-The username associated with new account. Usernames should be the customer's email address. By default, Cortex API is
-expecting a customer's email address for their username. Your implementation of Cortex API may differ, so check with
-your system administrator for your username rules.
+The username associated with new account. `Username` should be the customer's email address. By default, Cortex API is expecting a customer's email address for their `username`. Your implementation of Cortex API may differ, so check with your system administrator for your `username` rules.
 					]]>
 				</description>
 				<string/>

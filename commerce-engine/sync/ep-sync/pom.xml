@@ -22,9 +22,18 @@
 				</exclusion>
 				<exclusion>
 					<groupId>com.elasticpath</groupId>
+					<artifactId>ep-catalog-message-handler</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>com.elasticpath</groupId>
 					<artifactId>ep-core-order-messaging</artifactId>
 				</exclusion>
 			</exclusions>
+		</dependency>
+
+		<dependency>
+			<groupId>com.elasticpath</groupId>
+			<artifactId>ep-jta</artifactId>
 		</dependency>
 
 		<dependency>

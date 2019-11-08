@@ -251,7 +251,7 @@ public abstract class AbstractImportJobRunnerImpl extends AbstractEpPersistenceS
 		validateChangeSetStatus(nextLine, rowNumber, faults, persistenceObject);
 
 		if (!faults.isEmpty()) {
-			final ImportBadRow importBadRow = getBean(ContextIdNames.IMPORT_BAD_ROW);
+			final ImportBadRow importBadRow = getPrototypeBean(ContextIdNames.IMPORT_BAD_ROW, ImportBadRow.class);
 			importBadRow.setRowNumber(rowNumber);
 			importBadRow.setRow(nextLine[0]);
 			importBadRow.addImportFaults(faults);
@@ -368,7 +368,7 @@ public abstract class AbstractImportJobRunnerImpl extends AbstractEpPersistenceS
 	 * @return an import fault error
 	 */
 	protected ImportFault getImportFaultError() {
-		final ImportFault importFault = getBean(ContextIdNames.IMPORT_FAULT);
+		final ImportFault importFault = getPrototypeBean(ContextIdNames.IMPORT_FAULT, ImportFault.class);
 		importFault.setLevel(ImportFault.ERROR);
 		return importFault;
 	}
@@ -379,7 +379,7 @@ public abstract class AbstractImportJobRunnerImpl extends AbstractEpPersistenceS
 	 * @return an import fault warning
 	 */
 	protected ImportFault getImportFaultWarning() {
-		final ImportFault importFault = getBean(ContextIdNames.IMPORT_FAULT);
+		final ImportFault importFault = getPrototypeBean(ContextIdNames.IMPORT_FAULT, ImportFault.class);
 		importFault.setLevel(ImportFault.WARNING);
 		return importFault;
 	}
@@ -615,7 +615,7 @@ public abstract class AbstractImportJobRunnerImpl extends AbstractEpPersistenceS
 		//LOG.error("Raw data : " + nextLine[rowNumber]); //OutOfBounds
 		LOG.error("Cause : ", exception);
 
-		final ImportBadRow importBadRow = getBean(ContextIdNames.IMPORT_BAD_ROW);
+		final ImportBadRow importBadRow = getPrototypeBean(ContextIdNames.IMPORT_BAD_ROW, ImportBadRow.class);
 		importBadRow.setRowNumber(rowNumber);
 		importBadRow.setRow(nextLine[0]);
 
@@ -924,7 +924,7 @@ public abstract class AbstractImportJobRunnerImpl extends AbstractEpPersistenceS
 		sbf.append(idstr).append(ImportConstants.IMPORT_LEFT_OVER_SUFFIX);
 		final String fileName = sbf.toString();
 
-		final PrintWriter printWriter = getBean(ContextIdNames.PRINT_WRITER);
+		final PrintWriter printWriter = getPrototypeBean(ContextIdNames.PRINT_WRITER, PrintWriter.class);
 		printWriter.open(fileName);
 		final CsvFileReader csvFileReader = getCsvFileReader();
 
@@ -965,7 +965,7 @@ public abstract class AbstractImportJobRunnerImpl extends AbstractEpPersistenceS
 	 * Initialize the import job runner.
 	 */
 	protected void init() {
-		this.importGuidHelper = getBean("importGuidHelper");
+		this.importGuidHelper = getPrototypeBean("importGuidHelper", ImportGuidHelper.class);
 	}
 
 	/**
@@ -974,7 +974,7 @@ public abstract class AbstractImportJobRunnerImpl extends AbstractEpPersistenceS
 	 * @return the csv file reader
 	 */
 	protected CsvFileReader getCsvFileReader() {
-		final CsvFileReader csvFileReader = getBean(ContextIdNames.CSV_FILE_READER);
+		final CsvFileReader csvFileReader = getSingletonBean(ContextIdNames.CSV_FILE_READER, CsvFileReader.class);
 		csvFileReader.open(request.getImportSource(),
 				request.getImportSourceColDelimiter(),
 				request.getImportSourceTextQualifier());

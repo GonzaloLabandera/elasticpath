@@ -60,13 +60,6 @@
 				FROM TagDefinitionImpl AS t
 			</query>
 		</named-query>
-		<named-query name="TAG_DEFINITION_ALL_BY_TAG_DICTIONARY_GUID">
-			<query>
-				SELECT t
-				FROM TagDefinitionImpl AS t
-				WHERE t.tagDictionaryGuid = ?1
-			</query>
-		</named-query>
 
     <!-- Named queries for ConditionalExpressionImpl -->
 		<named-query name="CONDITION_BY_GUID">

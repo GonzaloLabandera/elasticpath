@@ -128,7 +128,7 @@ public class CouponSetAdapter extends AbstractDomainAdapterImpl<CouponSet, Coupo
 	 * @return {@link Coupon}.
 	 */
 	private Coupon createCouponDomain() {
-		return getBeanFactory().getBean(ContextIdNames.COUPON);
+		return getBeanFactory().getPrototypeBean(ContextIdNames.COUPON, Coupon.class);
 	}
 
 	/**

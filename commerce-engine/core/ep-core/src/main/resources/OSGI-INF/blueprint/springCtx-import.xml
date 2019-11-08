@@ -12,8 +12,6 @@
 
 	<import resource="../../spring/prototypes/prototypes.xml"/>
 
-	<import resource="../../spring/models/domainSpecifications.xml" />
-
 	<import resource="../../spring/models/domainModel.xml" />
 
 	<import resource="../../spring/dataaccess/dao.xml" />
@@ -27,6 +25,8 @@
 	<import resource="../../spring/commons/validators.xml" />
 
 	<import resource="classpath*:META-INF/elasticpath/conf/spring/plugin.xml" />
+
+	<import resource="classpath*:META-INF/elasticpath/conf/spring/beans.xml" />
 
 	<bean id="servicePreInterceptors" class="java.util.ArrayList" />
 

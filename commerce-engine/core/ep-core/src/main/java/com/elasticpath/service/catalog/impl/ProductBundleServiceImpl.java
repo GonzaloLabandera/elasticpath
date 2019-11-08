@@ -195,6 +195,21 @@ public class ProductBundleServiceImpl extends ProductServiceImpl implements Prod
 	}
 
 	@Override
+	public Set<String> findAllProductBundleCodesContainingProduct(final String productCode) {
+		final List<Object []> directBundleIds = findProductBundleUidsContainingProductCode(productCode);
+		final Set<String> bundleCodes = extractCodes(directBundleIds);
+
+		//  Recursively loop through and add the codes of ProductBundles that contain any
+		//  ProductBundles that contain our product.
+
+		final Set<String> allBundles = new HashSet<>(bundleCodes);
+
+		bundleCodes.forEach(code -> allBundles.addAll(findAllProductBundleCodesContainingProduct(code)));
+
+		return allBundles;
+	}
+
+	@Override
 	protected ProductBundleService getProductBundleService() {
 		return this;
 	}

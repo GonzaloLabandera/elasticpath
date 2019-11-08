@@ -18,7 +18,7 @@ import com.elasticpath.persistence.api.Entity;
  * Target Product - The other product that is to be displayed when viewing the source product.
  */
 public interface ProductAssociation extends Entity, Comparable<ProductAssociation> {
-	
+
 	/**
 	 * Get the type of this <code>ProductAssociation</code>.
 	 *
@@ -187,4 +187,13 @@ public interface ProductAssociation extends Entity, Comparable<ProductAssociatio
 	 * @return true if the values of both objects are equal for all fields
 	 */
 	boolean isSameAs(ProductAssociation otherAssociation);
+
+	/**
+	 * Returns true if this association is valid because endDate is null or in the future and target product is not hidden and target product
+	 * endDate is null or in the future.
+	 *
+	 * @return true if the product association is valid.
+	 */
+	boolean canSyndicate();
+
 }

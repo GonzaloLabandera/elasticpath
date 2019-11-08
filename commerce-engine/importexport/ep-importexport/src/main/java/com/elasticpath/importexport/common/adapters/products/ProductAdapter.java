@@ -247,7 +247,7 @@ public class ProductAdapter extends AbstractDomainAdapterImpl<Product, ProductDT
 					throw new PopulationRollbackException("IE-10333", productSkuDtoCode);
 				}
 
-				productSku = getBeanFactory().getBean(ContextIdNames.PRODUCT_SKU);
+				productSku = getBeanFactory().getPrototypeBean(ContextIdNames.PRODUCT_SKU, ProductSku.class);
 			}
 
 			productSkuAdapter.populateDomain(productSkuDto, productSku);
@@ -284,7 +284,8 @@ public class ProductAdapter extends AbstractDomainAdapterImpl<Product, ProductDT
 					throw new IllegalArgumentException();
 				}
 				checkLocaleSupportedByCatalog(locale, productDomain);
-				ImportExportLocaleFallbackPolicyFactory factory = getBeanFactory().getBean(ContextIdNames.LOCALE_FALLBACK_POLICY_FACTORY);
+				ImportExportLocaleFallbackPolicyFactory factory = getBeanFactory()
+						.getSingletonBean(ContextIdNames.LOCALE_FALLBACK_POLICY_FACTORY, ImportExportLocaleFallbackPolicyFactory.class);
 				LocaleDependantFields dependantFields  = productDomain.getLocaleDependantFields(
 						factory.createProductLocaleFallbackPolicy(locale, false, productDomain));
 				dependantFields.setDisplayName(displayValue.getValue());
@@ -404,10 +405,10 @@ public class ProductAdapter extends AbstractDomainAdapterImpl<Product, ProductDT
 	private Product chooseDomain(final ProductDTO source, final Product target) {
 		if (target == null) {
 			if (source.isBundle()) {
-				return getBeanFactory().getBean(ContextIdNames.PRODUCT_BUNDLE);
+				return getBeanFactory().getPrototypeBean(ContextIdNames.PRODUCT_BUNDLE, ProductBundle.class);
 			}
 
-			return getBeanFactory().getBean(ContextIdNames.PRODUCT);
+			return getBeanFactory().getPrototypeBean(ContextIdNames.PRODUCT, Product.class);
 		}
 		return target;
 	}

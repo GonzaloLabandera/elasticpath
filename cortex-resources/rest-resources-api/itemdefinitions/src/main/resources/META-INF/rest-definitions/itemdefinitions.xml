@@ -5,11 +5,10 @@
 		<name>itemdefinitions</name>
 		<description>
 			<![CDATA[
-An item definition describes the item. The item's name, media [assets][assets] (pictures of the item), options, components, from price, and details describing the item's characteristics are all part of the item definitions.
+An item definition describes the item. The item's name, media assets (pictures of the item), options, components,
+from price, and details describing the item's characteristics are all part of the item definitions.
 Not every item definition contains assets, options, components, etc. What is available on the item definition depends on
 the item and how your storefront has implemented Cortex API. Some resources may be customized for your implementation, so more, or even less details may exist.
-
-[assets]: #assets
 			]]>
 		</description>
 

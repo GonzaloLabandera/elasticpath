@@ -200,4 +200,12 @@ public interface StoreService extends EpPersistenceService {
 	 * @return valid store code.
 	 */
 	String findValidStoreCode(String storeCode);
+
+	/**
+	 * Gets the cart Type names for a given store.
+	 * @param storeCode the storecode.
+	 * @return the names of the cart types for that store.
+	 */
+	Collection<String> getCartTypeNamesForStore(String storeCode);
+
 }

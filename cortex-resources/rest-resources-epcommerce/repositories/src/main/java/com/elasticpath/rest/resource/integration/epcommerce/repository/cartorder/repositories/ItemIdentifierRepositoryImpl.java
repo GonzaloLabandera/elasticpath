@@ -35,7 +35,7 @@ public class ItemIdentifierRepositoryImpl<I extends LineItemIdentifier, LI exten
 	@Override
 	public Observable<ItemIdentifier> getElements(final LineItemIdentifier identifier) {
 		String lineItemId = identifier.getLineItemId().getValue();
-		String scope = identifier.getLineItems().getCart().getScope().getValue();
+		String scope = identifier.getLineItems().getCart().getCarts().getScope().getValue();
 
 		return shoppingCartRepository.getProductSku(identifier.getLineItems().getCart().getCartId().getValue(), lineItemId)
 				.map(productSku -> itemRepository.getItemIdForProductSku(productSku))

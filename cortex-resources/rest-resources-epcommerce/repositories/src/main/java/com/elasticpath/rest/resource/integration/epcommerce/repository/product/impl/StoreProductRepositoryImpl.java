@@ -3,7 +3,6 @@
  */
 package com.elasticpath.rest.resource.integration.epcommerce.repository.product.impl;
 
-import java.util.ArrayList;
 import java.util.List;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -77,25 +76,13 @@ public class StoreProductRepositoryImpl implements StoreProductRepository {
 
 	@Override
 	public List<Product> findByUids(final List<Long> productUids) {
-		List<Product> productsToReturn = new ArrayList<>();
-
-		for (Long productUid : productUids) {
-			Product product = findByUid(productUid);
-			productsToReturn.add(product);
-		}
-
-		return productsToReturn;
+		return coreProductLookup.findByUids(productUids);
 	}
 
 	private Single<StoreProduct> findDisplayableStoreProductWithAttributesForProduct(final String storeCode, final Product product) {
 		return storeRepository.findStoreAsSingle(storeCode)
 				.flatMap(store -> reactiveAdapter
 						.fromServiceAsSingle(() -> getProductForStore(product, store), "Offer not found in store"));
-	}
-
-	@CacheResult
-	private Product findByUid(final long productUid) {
-		return coreProductLookup.findByUid(productUid);
 	}
 
 	@CacheResult

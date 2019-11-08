@@ -1,0 +1,38 @@
+<?xml version="1.0"?>
+<definitions xmlns="http://www.elasticpath.com/schema/rest/0.5">
+	<family>
+		<name>addresses</name>
+
+		<!--
+			Shipping Address
+		-->
+		<resource>
+			<name>shipping-address-selector</name>
+			<description><![CDATA[
+				The selector for the default shipping-address.
+			]]></description>
+			<uri>{shipping-addresses}/selector</uri>
+			<selector-for>shipping-addresses</selector-for>
+		</resource>
+		<resource>
+			<name>shipping-address-selector-choice</name>
+			<description><![CDATA[
+				The choice for a shipping-address from the selector.
+			]]></description>
+			<uri>{addresses.shipping-address-selector}/{addresses.address}</uri>
+			<choices-for>shipping-address-selector</choices-for>
+		</resource>
+
+		<relationship>
+			<name>shippingaddresses-to-addresses-shippingaddress-selector</name>
+			<description><![CDATA[
+				The relationship from the Address Shipping Addresses resource to the Shipping Default Address Selector resource.
+			]]></description>
+			<rel>selector</rel>
+			<rev>addresses</rev>
+			<from>addresses.shipping-addresses</from>
+			<to>shipping-address-selector</to>
+		</relationship>
+
+	</family>
+</definitions>

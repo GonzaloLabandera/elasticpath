@@ -22,7 +22,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import com.elasticpath.domain.cartmodifier.CartItemModifierField;
+import com.elasticpath.domain.modifier.ModifierField;
 import com.elasticpath.domain.catalog.ProductSku;
 import com.elasticpath.domain.shoppingcart.ShoppingCart;
 import com.elasticpath.domain.shoppingcart.ShoppingItem;
@@ -31,7 +31,7 @@ import com.elasticpath.rest.definition.carts.LineItemEntity;
 import com.elasticpath.rest.definition.carts.LineItemIdentifier;
 import com.elasticpath.rest.form.SubmitStatus;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.IdentifierTestFactory;
-import com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder.CartItemModifiersRepository;
+import com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder.ModifiersRepository;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder.ShoppingCartRepository;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.carts.lineitems.LineItemIdentifierRepository;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.item.ItemRepository;
@@ -60,7 +60,7 @@ public class LineItemEntityRepositoryTest {
 	@Mock
 	private ProductSkuRepository productSkuRepository;
 	@Mock
-	private CartItemModifiersRepository cartItemModifiersRepository;
+	private ModifiersRepository modifiersRepository;
 	@Mock
 	private LineItemIdentifierRepository lineItemIdentifierRepository;
 
@@ -87,10 +87,10 @@ public class LineItemEntityRepositoryTest {
 		setupMocksForFindOne(LINE_ITEM_ID, ENCODED_ITEM_ID);
 		String value = "value";
 		when(shoppingItem.getFields()).thenReturn(Collections.singletonMap("key", value));
-		CartItemModifierField cartItemModifierField = mock(CartItemModifierField.class);
-		when(cartItemModifierField.getCode()).thenReturn("code");
-		when(cartItemModifiersRepository.findCartItemModifierValues(CART_ID, LINE_ITEM_ID))
-				.thenReturn(Single.just(Collections.singletonMap(cartItemModifierField, value)));
+		ModifierField modifierField = mock(ModifierField.class);
+		when(modifierField.getCode()).thenReturn("code");
+		when(modifiersRepository.findModifierValues(CART_ID, LINE_ITEM_ID))
+				.thenReturn(Single.just(Collections.singletonMap(modifierField, value)));
 
 		LineItemIdentifier lineItemIdentifier = IdentifierTestFactory.buildLineItemIdentifier(SCOPE, CART_ID, LINE_ITEM_ID);
 		repository.findOne(lineItemIdentifier)

@@ -3,9 +3,11 @@
  */
 package com.elasticpath.common.dto.store;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Currency;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 
@@ -16,7 +18,9 @@ import com.elasticpath.commons.beanframework.BeanFactory;
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.catalog.Catalog;
 import com.elasticpath.domain.catalog.DefaultValueRemovalForbiddenException;
+import com.elasticpath.domain.modifier.ModifierGroup;
 import com.elasticpath.domain.payment.PaymentGateway;
+import com.elasticpath.domain.shoppingcart.CartType;
 import com.elasticpath.domain.store.CreditCardType;
 import com.elasticpath.domain.store.Store;
 import com.elasticpath.domain.store.StoreState;
@@ -24,6 +28,7 @@ import com.elasticpath.domain.store.Warehouse;
 import com.elasticpath.domain.tax.TaxCode;
 import com.elasticpath.domain.tax.TaxJurisdiction;
 import com.elasticpath.service.catalog.CatalogService;
+import com.elasticpath.service.modifier.ModifierService;
 import com.elasticpath.service.payment.PaymentGatewayService;
 import com.elasticpath.service.store.StoreService;
 import com.elasticpath.service.store.WarehouseService;
@@ -33,6 +38,7 @@ import com.elasticpath.service.tax.TaxJurisdictionService;
 /**
  * Assembler for {@link Store} domain object and {@link StoreDTO}.
  */
+@SuppressWarnings({"PMD.GodClass"})
 public class StoreDtoAssembler extends AbstractDtoAssembler<StoreDTO, Store> {
 
 	private BeanFactory beanFactory;
@@ -48,6 +54,7 @@ public class StoreDtoAssembler extends AbstractDtoAssembler<StoreDTO, Store> {
 	private PaymentGatewayService paymentGatewayService;
 
 	private StoreService storeService;
+	private ModifierService modifierService;
 
 	@Override
 	public Store getDomainInstance() {
@@ -75,6 +82,14 @@ public class StoreDtoAssembler extends AbstractDtoAssembler<StoreDTO, Store> {
 	 */
 	protected CreditCardType creditCardTypeDomainFactory() {
 		return beanFactory.getBean(ContextIdNames.CREDIT_CARD_TYPE);
+	}
+
+	/**
+	 * Factory method for {@link CartType}.
+	 * @return cart type.
+	 */
+	protected CartType cartTypeDomainFactory() {
+		return beanFactory.getPrototypeBean(ContextIdNames.CART_TYPE, CartType.class);
 	}
 
 	@Override
@@ -140,6 +155,25 @@ public class StoreDtoAssembler extends AbstractDtoAssembler<StoreDTO, Store> {
 			target.getCreditCardTypes().add(creditCardType.getCreditCardType());
 		}
 		Collections.sort(target.getCreditCardTypes());
+
+		for (CartType cartType : source.getShoppingCartTypes()) {
+			target.getShoppingCartTypes().add(getCartTypeDTO(cartType));
+		}
+	}
+
+	private CartTypeDTO getCartTypeDTO(final CartType cartType) {
+		CartTypeDTO cartTypeDTO = new CartTypeDTO();
+		cartTypeDTO.setName(cartType.getName());
+		cartTypeDTO.setGuid(cartType.getGuid());
+
+		List<ModifierGroup> modifiers = cartType.getModifiers();
+		List<String> modifierGroupCodes = new ArrayList<>(modifiers.size());
+		for (ModifierGroup modifierGroup: modifiers) {
+			modifierGroupCodes.add(modifierGroup.getCode());
+		}
+		cartTypeDTO.setModifierGroups(modifierGroupCodes);
+		return cartTypeDTO;
+
 	}
 
 	@Override
@@ -179,6 +213,33 @@ public class StoreDtoAssembler extends AbstractDtoAssembler<StoreDTO, Store> {
 		populateTaxJurisdictionsForDomain(source, target);
 		populatePaymentGatewaysForDomain(source, target);
 		populateCreditCardTypesForDomain(source, target);
+
+		populateCartTypesForDomain(source, target);
+	}
+
+	private void populateCartTypesForDomain(final StoreDTO source, final Store target) {
+		List<CartTypeDTO> shoppingCartTypes = source.getShoppingCartTypes();
+		Set<CartType> cartTypes = new HashSet<>(shoppingCartTypes.size());
+
+		for (CartTypeDTO cartTypeDto : shoppingCartTypes) {
+
+			CartType cartType = cartTypeDomainFactory();
+			cartType.setName(cartTypeDto.getName());
+			cartType.setGuid(cartTypeDto.getGuid());
+			cartType.setModifiers(getModifierGroups(cartTypeDto.getModifierGroups()));
+			cartTypes.add(cartType);
+		}
+		// As this is a set, existing cart types are not replaced.
+		cartTypes.addAll(target.getShoppingCartTypes());
+
+		target.setShoppingCartTypes(cartTypes);
+	}
+
+	private List<ModifierGroup> getModifierGroups(final List<String> modifierGroupCodes) {
+		List<ModifierGroup> modifierGroups = new ArrayList<>();
+		modifierGroupCodes.forEach(guid -> modifierGroups.add(modifierService.findModifierGroupByCode(guid)));
+		return modifierGroups;
+
 	}
 
 	private void populateSupportedCurrencies(final StoreDTO source, final Store target) {
@@ -339,4 +400,11 @@ public class StoreDtoAssembler extends AbstractDtoAssembler<StoreDTO, Store> {
 		this.storeService = storeService;
 	}
 
+	public void setModifierService(final ModifierService modifierService) {
+		this.modifierService = modifierService;
+	}
+
+	protected ModifierService getModifierService() {
+		return modifierService;
+	}
 }

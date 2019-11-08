@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans
+		xmlns="http://www.springframework.org/schema/beans"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xmlns:util="http://www.springframework.org/schema/util"
+		xmlns:settings="http://www.elasticpath.com/schema/settings"
+		xsi:schemaLocation="
+				http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+				http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-4.0.xsd
+				http://www.elasticpath.com/schema/settings http://www.elasticpath.com/schema/settings/settings.xsd
+		">
+
+	<bean id="conditionEvaluationService" class="com.elasticpath.tags.service.impl.JavaConditionEvaluatorServiceImpl">
+		<property name="conditionDSLBuilder" ref="tagConditionDSLBuilder"/>
+		<property name="conditionOperatorEvaluators">
+			<set>
+				<bean class="com.elasticpath.tags.service.impl.conditionoperators.EqualToOperatorEvaluatorImpl"/>
+				<bean class="com.elasticpath.tags.service.impl.conditionoperators.NotEqualToOperatorEvaluatorImpl"/>
+				<bean class="com.elasticpath.tags.service.impl.conditionoperators.EqualsIgnoreCaseOperatorEvaluatorImpl"/>
+				<bean class="com.elasticpath.tags.service.impl.conditionoperators.LessThanOperatorEvaluatorImpl"/>
+				<bean class="com.elasticpath.tags.service.impl.conditionoperators.LessThanOrEqualToOperatorEvaluatorImpl"/>
+				<bean class="com.elasticpath.tags.service.impl.conditionoperators.GreaterThanOperatorEvaluatorImpl"/>
+				<bean class="com.elasticpath.tags.service.impl.conditionoperators.GreaterThanOrEqualToOperatorEvaluatorImpl"/>
+				<bean class="com.elasticpath.tags.service.impl.conditionoperators.IncludesOperatorEvaluatorImpl"/>
+				<bean class="com.elasticpath.tags.service.impl.conditionoperators.NotIncludesOperatorEvaluatorImpl"/>
+				<bean class="com.elasticpath.tags.service.impl.conditionoperators.IncludesIgnoreCaseOperatorEvaluatorImpl"/>
+				<bean class="com.elasticpath.tags.service.impl.conditionoperators.ContainsOperatorEvaluatorImpl"/>
+			</set>
+		</property>
+		<property name="decomposedConditionSynchronizedCacheSupport">
+			<bean class="com.elasticpath.service.caching.impl.SynchronizedCacheSupportImpl">
+				<property name="evaluationCache">
+					<bean class="com.elasticpath.cache.SimpleTimeoutCache">
+						<property name="cache" ref="decomposedConditionCache"/>
+					</bean>
+				</property>
+			</bean>
+		</property>
+	</bean>
+
+	<bean id="tagConditionDSLBuilder" class="com.elasticpath.tags.service.impl.GroovyConditionDSLBuilderImpl">
+		<property name="tagDefinitionReader" ref="tagDefinitionReader"/>
+		<property name="validationFacade" ref="conditionValidationFacade"/>
+	</bean>
+
+	<bean id="tagDictionaryService"  parent="txProxyTemplate">
+		<property name="target">
+			<bean class="com.elasticpath.tags.service.impl.TagDictionaryServiceImpl">
+				<property name="tagDictionaryDao" ref="tagDictionaryDao" />
+			</bean>
+		</property>
+	</bean>
+
+	<bean id="tagGroupService"  parent="txProxyTemplate">
+		<property name="target">
+			<bean class="com.elasticpath.tags.service.impl.TagGroupServiceImpl">
+				<property name="tagGroupDao" ref="tagGroupDao" />
+				<property name="tagGroupFactory" ref="tagGroupFactory" />
+			</bean>
+		</property>
+	</bean>
+
+	<bean id="tagValueTypeService" parent="txProxyTemplate">
+		<property name="target">
+			<bean class="com.elasticpath.tags.service.impl.TagValueTypeServiceImpl">
+				<property name="tagValueTypeDao" ref="tagValueTypeDao" />
+			</bean>
+		</property>
+	</bean>
+
+	<bean id="tagDefinitionService"  parent="txProxyTemplate">
+		<property name="target">
+			<bean class="com.elasticpath.tags.service.impl.TagDefinitionServiceImpl">
+				<property name="tagDefinitionDao" ref="tagDefinitionDao" />
+				<property name="tagDefinitionFactory" ref="tagDefinitionFactory" />
+			</bean>
+		</property>
+	</bean>
+
+	<bean id="nonCachedTagDefinitionReader" parent="txProxyTemplate">
+		<property name="target">
+			<bean class="com.elasticpath.tags.service.impl.TagDefinitionReaderImpl">
+				<property name="tagDefinitionDao" ref="tagDefinitionDao" />
+			</bean>
+		</property>
+	</bean>
+
+	<bean id="cachedTagDefinitionReader" class="com.elasticpath.tags.service.impl.CachedTagDefinitionReaderImpl">
+		<property name="tagDefinitionReader" ref="nonCachedTagDefinitionReader" />
+		<property name="tagDefinitionNameToTagDefinitionGuidCache">
+			<bean class="com.elasticpath.commons.beanframework.EhCacheDefaultConfigurationFactoryBean">
+				<property name="name" value="tagDefinitionGuidCache" />
+				<property name="cacheManager" ref="epCoreEhcacheManager"/>
+				<property name="timeToLive" value="600"/>
+				<property name="timeToIdle" value="600"/>
+			</bean>
+		</property>
+		<property name="tagDefinitionGuidToTagDefinitionCache">
+			<bean class="com.elasticpath.commons.beanframework.EhCacheDefaultConfigurationFactoryBean">
+				<property name="name" value="tagDefinitionCache" />
+				<property name="cacheManager" ref="epCoreEhcacheManager"/>
+				<property name="timeToLive" value="600"/>
+				<property name="timeToIdle" value="600"/>
+			</bean>
+		</property>
+	</bean>
+
+	<!-- Remember: <alias name="FromBean" alias="ToBean"/> -->
+	<alias name="nonCachedTagDefinitionReader" alias="tagDefinitionReader"/>
+
+	<bean id="tagConditionService" parent="txProxyTemplate">
+		<property name="target">
+			<bean class="com.elasticpath.tags.service.impl.TagConditionServiceImpl">
+				<property name="tagConditionDao" ref="tagConditionDao" />
+			</bean>
+		</property>
+	</bean>
+
+	<bean id="tagConditionBuilder" class="com.elasticpath.tags.service.impl.ConditionBuilderImpl">
+		<property name="tagDefinitionReader" ref="tagDefinitionReader" />
+	</bean>
+
+	<bean id="tagOperatorService" class="com.elasticpath.tags.service.impl.TagOperatorServiceImpl">
+		<property name="tagOperatorDao" ref="tagOperatorDao" />
+	</bean>
+
+        <bean id="conditionValidationFacade" class="com.elasticpath.tags.service.impl.ConditionValidationFacadeImpl">
+		<property name="validationService" ref="declarativeValidationService" />
+	</bean>
+
+	<util:map id="tagValueTypeConverterMap">
+		<entry key="java.math.BigDecimal" value-ref="stringToBigDecimalConverter"/>
+		<entry key="java.lang.Integer" value-ref="stringToIntegerConverter"/>
+		<entry key="java.lang.Float" value-ref="stringToFloatConverter"/>
+		<entry key="java.lang.Long" value-ref="stringToLongConverter"/>
+		<entry key="java.lang.Boolean" value-ref="stringToBooleanConverter"/>
+		<entry key="java.lang.String" value-ref="stringToStringConverter"/>
+	</util:map>
+
+	<bean id="tagTypeValueConverter" class="com.elasticpath.tags.service.impl.TagTypeValueConverterImpl">
+		<property name="typeConverterMap" ref="tagValueTypeConverterMap" />
+	</bean>
+
+	<bean id="tagFactory" class="com.elasticpath.tags.service.impl.TagFactoryImpl" >
+		<property name="tagTypeValueConverter" ref="tagTypeValueConverter" />
+		<property name="tagDefinitionReader" ref="tagDefinitionReader" />
+	</bean>
+
+	<bean id="tagGroupFactory" class="com.elasticpath.tags.service.impl.TagGroupFactoryImpl" />
+
+	<bean id="tagDefinitionFactory" class="com.elasticpath.tags.service.impl.TagDefinitionFactoryImpl" />
+</beans>

@@ -93,8 +93,26 @@ public enum RequiredJobType {
 	/** Customer Consents. */
 	CUSTOMER_CONSENT(JobType.CUSTOMER_CONSENT),
 
-	/** Facet. */
-	FACET(JobType.FACET);
+	/** Facets. */
+	FACET(JobType.FACET),
+
+	/** Sort attributes. */
+	SORT_ATTRIBUTE(JobType.SORT_ATTRIBUTE),
+
+	/** Store customer attributes. */
+	STORE_CUSTOMER_ATTRIBUTE(JobType.STORE_CUSTOMER_ATTRIBUTE),
+
+	/** Attribute policies. */
+	ATTRIBUTE_POLICY(JobType.ATTRIBUTE_POLICY),
+
+	/** Modifier groups. */
+	MODIFIER_GROUP(JobType.MODIFIERGROUP),
+
+	/** Modifier group filter. */
+	MODIFIER_GROUP_FILTERS(JobType.MODIFIERGROUPFILTER),
+
+	/** Tag Group. */
+	TAGGROUP(JobType.TAGGROUP);
 
 	private JobType jobType;
 

@@ -12,7 +12,7 @@ import com.elasticpath.cmclient.policy.StateDeterminer;
 import com.elasticpath.cmclient.policy.common.PolicyActionContainer;
 import com.elasticpath.domain.changeset.ChangeSetObjectStatus;
 
-import com.elasticpath.domain.cartmodifier.CartItemModifierGroup;
+import com.elasticpath.domain.modifier.ModifierGroup;
 
 /**
  * Change set policy for catalog cart item modifier groups.
@@ -73,10 +73,10 @@ public class CatalogCartItemModifierGroupChangeSetPolicy extends AbstractChangeS
 		 */
 		public EpState determineState(final PolicyActionContainer targetContainer) {
 
-			CartItemModifierGroup cartItemModifierGroup = null;
+			ModifierGroup cartItemModifierGroup = null;
 
-			if (targetContainer.getPolicyDependent() instanceof CartItemModifierGroup) {
-				cartItemModifierGroup = (CartItemModifierGroup) targetContainer.getPolicyDependent();
+			if (targetContainer.getPolicyDependent() instanceof ModifierGroup) {
+				cartItemModifierGroup = (ModifierGroup) targetContainer.getPolicyDependent();
 			}
 
 			if (!getChangeSetHelper().isActiveChangeSet()) {
@@ -107,10 +107,10 @@ public class CatalogCartItemModifierGroupChangeSetPolicy extends AbstractChangeS
 		 */
 		public EpState determineState(final PolicyActionContainer targetContainer) {
 
-			CartItemModifierGroup cartItemModifierGroup = null;
+			ModifierGroup cartItemModifierGroup = null;
 
-			if (targetContainer.getPolicyDependent() instanceof CartItemModifierGroup) {
-				cartItemModifierGroup = (CartItemModifierGroup) targetContainer.getPolicyDependent();
+			if (targetContainer.getPolicyDependent() instanceof ModifierGroup) {
+				cartItemModifierGroup = (ModifierGroup) targetContainer.getPolicyDependent();
 			}
 
 			if (!getChangeSetHelper().isActiveChangeSet()) {

@@ -6,6 +6,7 @@ package com.elasticpath.service.attribute;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import com.elasticpath.base.exception.EpServiceException;
 import com.elasticpath.commons.exception.DuplicateKeyException;
@@ -312,4 +313,10 @@ public interface AttributeService extends EpPersistenceService {
 	 */
 	List<AttributeValueInfo> findProductSkuValueAttributeByAttributeUid(Attribute attribute);
 
+	/**
+	 * Get the set of customer profile attribute keys.
+	 *
+	 * @return the list of attribute keys
+	 */
+	Set<String> getCustomerProfileAttributeKeys();
 }

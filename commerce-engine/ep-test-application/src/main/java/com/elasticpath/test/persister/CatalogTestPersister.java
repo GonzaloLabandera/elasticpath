@@ -17,6 +17,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
@@ -1772,6 +1773,9 @@ public class CatalogTestPersister {
 		category.setCategoryType(categoryType);
 		if (categoryName != null) {
 			category.setDisplayName(categoryName, new Locale(categoryLocale));
+		}
+		if (StringUtils.isBlank(category.getDisplayName(Locale.ENGLISH))) {
+			category.setDisplayName("displayName", Locale.ENGLISH);
 		}
 		return categoryService.add(category);
 	}

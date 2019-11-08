@@ -5,10 +5,20 @@ import static com.elasticpath.cortex.dce.SharedConstants.TEST_EMAIL_VALUE
 import static com.elasticpath.rest.ws.assertions.RelosAssert.assertLinkDoesNotExist
 import static org.assertj.core.api.Assertions.assertThat
 
+import java.util.concurrent.ExecutorService
+import java.util.concurrent.Executors
+import java.util.concurrent.TimeUnit
+
 import cucumber.api.java.en.And
 import cucumber.api.java.en.Then
 import cucumber.api.java.en.When
+import org.apache.http.auth.AUTH
+import org.apache.http.client.methods.CloseableHttpResponse
+import org.apache.http.client.methods.HttpPost
+import org.apache.http.impl.client.CloseableHttpClient
+import org.apache.http.impl.client.HttpClients
 
+import com.elasticpath.cortex.dce.CommonMethods
 import com.elasticpath.cortexTestObjects.Order
 import com.elasticpath.cortexTestObjects.Profile
 
@@ -164,6 +174,15 @@ class OrdersSteps {
 	@And('^there is no (.+) link found$')
 	static void verifyLinkNotExists(def linkName) {
 		assertLinkDoesNotExist(client, linkName)
+	}
+
+	@And('^I submit the order multiple times concurrently$')
+	static void submitPurchaseMultipleTimes() {
+		Order.purchaseform()
+		def baseUrl = client.baseUrl.toString()
+		def submitOrderActionUrl = client.body.self.uri.toString()
+
+		CommonMethods.submitPostNTimesConcurrently(baseUrl.subSequence(0, baseUrl.length() - 1) + submitOrderActionUrl, 10);
 	}
 
 	private static void configureOnlyOneSelectedShippingAddressForUser() {

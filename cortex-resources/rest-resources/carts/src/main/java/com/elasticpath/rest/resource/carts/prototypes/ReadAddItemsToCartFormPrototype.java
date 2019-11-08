@@ -22,7 +22,7 @@ public class ReadAddItemsToCartFormPrototype implements AddItemsToCartFormResour
 		return Single.just(AddItemsToCartFormEntity.builder()
 				.withItems(Collections.singletonList(ItemEntity.builder()
 						.withCode(StringUtils.EMPTY)
-						.withQuantity(0)
+						.withQuantity(1)
 						.build()))
 				.build());
 	}

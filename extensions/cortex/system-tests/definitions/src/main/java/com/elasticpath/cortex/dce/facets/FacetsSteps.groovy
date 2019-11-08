@@ -5,8 +5,6 @@ import static org.assertj.core.api.Assertions.assertThat
 
 import cucumber.api.DataTable
 import cucumber.api.java.en.Then
-import cucumber.api.java.en.When
-
 import com.elasticpath.CucumberDTO.Facet
 import com.elasticpath.cortexTestObjects.Facets
 
@@ -37,16 +35,6 @@ class FacetsSteps {
 		client.resume(resultsUri)
 	}
 
-	@When('^I select the choice (.+)$')
-	static void selectFaceetChoice(String choice) {
-		Facets.selectFacetChoice(choice, "choice")
-	}
-
-	@When('^I unselect the choice (.+)$')
-	static void unselectFaceetChoice(String choice) {
-		Facets.selectFacetChoice(choice, "chosen")
-	}
-
 	@Then('^the offer search results list contains items with display-names$')
 	static void verifyElementListContains(DataTable dataTable) {
 		def facetResultDisplayNameList = dataTable.asList(String)
@@ -55,5 +43,15 @@ class FacetsSteps {
 				.as("Facets list size/order is not as expected")
 				.containsExactlyInAnyOrderElementsOf(facetResultDisplayNameList)
 		client.resume(resultsUri)
+	}
+
+	@Then('^the list of facets does not contain the following$')
+	static void verifyListMatches(DataTable facetsListTable) {
+		def resultsUri = client.body.self.uri
+		def facetList = facetsListTable.asList(String)
+		assertThat(Facets.getActualList("element", "display-name"))
+				.as("Facets list size/order is not as expected")
+				.doesNotContain(facetList)
+		client.GET(resultsUri)
 	}
 }

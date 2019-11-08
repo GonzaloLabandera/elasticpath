@@ -60,7 +60,7 @@ public class ShoppingCartMergerForShopperUpdatesTest extends AbstractCartIntegra
 		shoppingCartMergerForShopperUpdates.invalidateShopper(registeredCustomerSession, anonymousShopper);
 
 		// assert that the shopper is using the registered account shopping cart and not the anonymous one
-		ShoppingCart actualShoppingCart = shoppingCartService.findOrCreateByCustomerSession(registeredCustomerSession);
+		ShoppingCart actualShoppingCart = shoppingCartService.findOrCreateDefaultCartByCustomerSession(registeredCustomerSession);
 		assertEquals("The shopping cart used going forward is the one that was associated with the registered account, not the anonymous cart.",
 				registeredShoppingCart.getGuid(),
 				actualShoppingCart.getGuid());

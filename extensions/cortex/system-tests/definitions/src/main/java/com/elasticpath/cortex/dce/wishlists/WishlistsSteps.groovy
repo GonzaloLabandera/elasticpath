@@ -194,11 +194,6 @@ class WishlistsSteps {
 		WishList.moveItemToCartWithoutFollow(itemQty, configurationFields)
 	}
 
-	@When('^I view my profile$')
-	static void viewProfile() {
-		Profile.getProfile()
-	}
-
 	@When('^I move an item with name (.+) from my cart to my default wishlist$')
 	static void moveItemToWishlist(String itemDisplayName) {
 		Cart.lineitems()

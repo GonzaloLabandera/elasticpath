@@ -1,33 +1,34 @@
 package com.elasticpath.sync;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileWriter;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.PrintWriter;
 import java.net.URL;
 
 import org.apache.log4j.Logger;
 
+import com.elasticpath.selenium.domainobjects.ReplaceString;
 import com.elasticpath.selenium.framework.util.PropertyManager;
 
 /**
  * SyncConfig class.
  */
-
+@SuppressWarnings({"PMD.AvoidUsingHardCodedIP"})
 public class SyncConfig {
 
 	private final PropertyManager propertyManager = PropertyManager.getInstance();
 	private final String resourseFolderPath;
 	private int exitValue = 1;
-	private FileWriter fileWriter;
-	private PrintWriter printWriter;
 	private final String syncCliPath;
 	private static final String SYNC_FILE_NAME = "sync.sh";
-	private static final String SYNC_FILE_NAME_WIN = "sync.bat";
 	private URL loc;
 	private static final Logger LOGGER = Logger.getLogger(SyncConfig.class);
+	private final ReplaceString replaceString;
 
 	/**
 	 * Constructor.
@@ -36,6 +37,7 @@ public class SyncConfig {
 		URL loc = getClass().getClassLoader().getResource(SYNC_FILE_NAME);
 		resourseFolderPath = new File(loc.getFile()).getParent();
 		syncCliPath = resourseFolderPath + "/" + propertyManager.getProperty("sync.cli");
+		replaceString = new ReplaceString();
 	}
 
 	/**
@@ -51,24 +53,20 @@ public class SyncConfig {
 	 * Runs the data sync command in sync.sh file.
 	 *
 	 * @param changeSetGuid the change set guid
-	 * @return the process exist value
 	 */
 
-	public int runDataSync(final String changeSetGuid) {
+	public void runDataSync(final String changeSetGuid) {
+		Process process = null;
+		BufferedReader bufferedReader = null;
 		try {
-			String operatingSystem = System.getProperty("os.name");
-			if (operatingSystem.contains("Windows")) {
-				loc = getClass().getClassLoader().getResource(SYNC_FILE_NAME_WIN);
-			} else{
-				loc = getClass().getClassLoader().getResource("sync.sh");
-				Runtime.getRuntime().exec("chmod 777 " + loc.getPath());
-				Runtime.getRuntime().exec("chmod 777 " + syncCliPath + "/synctool.sh");
-			}
+			loc = getClass().getClassLoader().getResource("sync.sh");
+			Runtime.getRuntime().exec("chmod 777 " + loc.getPath()).waitFor();
+			Runtime.getRuntime().exec("chmod 777 " + syncCliPath + "/synctool.sh").waitFor();
 			String[] cmd = {loc.getPath(), resourseFolderPath + "/" + propertyManager.getProperty("sync.cli"), changeSetGuid};
 			LOGGER.info("cmd ...... : " + resourseFolderPath + "/" + propertyManager.getProperty("sync.cli") + " changeSetGuid: " + changeSetGuid);
-			Process process = Runtime.getRuntime().exec(cmd);
+			process = Runtime.getRuntime().exec(cmd);
 
-			BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+			bufferedReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
 
 			String line;
 			while ((line = bufferedReader.readLine()) != null) {
@@ -77,55 +75,79 @@ public class SyncConfig {
 			exitValue = process.waitFor();
 			LOGGER.info("Process exitValue: " + exitValue);
 		} catch (Exception e) {
-			LOGGER.error(e);
-		}
-
-		return exitValue;
-	}
-
-	/**
-	 * Creates source and target config.xml.
-	 */
-	public void writeToSyncConfig() {
-		writeToSyncConfig("source");
-		writeToSyncConfig("target");
-	}
-
-	private void writeToSyncConfig(final String fileType) {
-		try {
-
-			fileWriter = new FileWriter(syncCliPath + "/" + fileType + "config.xml");
-			printWriter = new PrintWriter(fileWriter);
-
-			printWriter.println("<?xml version='1.0' encoding='UTF-8'?>");
-			printWriter.println("<connectionconfiguration type=\"local\">");
-			printWriter.println("<url>" + propertyManager.getProperty(fileType + ".url") + "</url>");
-			printWriter.println("<login>" + propertyManager.getProperty(fileType + ".login") + "</login>");
-			printWriter.println("<pwd>" + propertyManager.getProperty(fileType + ".pwd") + "</pwd>");
-			printWriter.println("<driver>" + propertyManager.getProperty(fileType + ".driver") + "</driver>");
-			printWriter.println("</connectionconfiguration>");
-
-			closeWriters(fileWriter, printWriter);
-
-		} catch (IOException e) {
-			LOGGER.error(e);
+			LOGGER.error(e.getMessage());
 		} finally {
-			closeWriters(fileWriter, printWriter);
-		}
-	}
-
-	private void closeWriters(final FileWriter fileWriter, final PrintWriter printWriter) {
-		if (fileWriter != null) {
-			try {
-				fileWriter.close();
-			} catch (IOException e) {
-				LOGGER.error(e);
+			if (process != null) {
+				process.destroy();
+			}
+			if (bufferedReader != null) {
+				try {
+					bufferedReader.close();
+				} catch (IOException e) {
+					LOGGER.error(e.getMessage());
+				}
 			}
 		}
 
-		if (printWriter != null) {
-			printWriter.close();
-		}
+		assertThat(exitValue)
+				.as("Sync process failed")
+				.isEqualTo(0);
 	}
 
+	/**
+	 * Updates source and target config.xml.
+	 */
+	public void updateSyncConfigFiles() {
+		modifySourceConfig();
+		modifytargetConfig();
+	}
+
+	private void modifySourceConfig() {
+		String configFileName = "sourceconfig.xml";
+		String filePath = syncCliPath + "/" + configFileName;
+		modifySyncConfig(filePath, propertyManager.getProperty("source.db.host"), propertyManager.getProperty("source.db.port"),
+				propertyManager.getProperty("sync.database.name"), propertyManager.getProperty("source.db.username"),
+				propertyManager.getProperty("source.db.pwd"));
+		printConfigFile(configFileName);
+	}
+
+	private void modifytargetConfig() {
+		String configFileName = "targetconfig.xml";
+		String filePath = syncCliPath + "/" + configFileName;
+		modifySyncConfig(filePath, propertyManager.getProperty("target.db.host"), propertyManager.getProperty("target.db.port"),
+				propertyManager.getProperty("sync.database.name"), propertyManager.getProperty("target.db.username"),
+				propertyManager.getProperty("target.db.pwd"));
+		printConfigFile(configFileName);
+	}
+
+	private void modifySyncConfig(final String filePath, final String dbHost, final String dbPort, final String dbName, final String dbUserName,
+								  final String dbPassword) {
+		replaceString.replaceString(filePath, "localhost", dbHost);
+		replaceString.replaceString(filePath, "127.0.0.1", dbHost);
+		replaceString.replaceString(filePath, "3306", dbPort);
+		replaceString.replaceString(filePath, "COMMERCEDB", dbName);
+		replaceString.replaceString(filePath, "(?s)<login[^>]*>.*?\n",
+				"<login>" + dbUserName + "</login>\n");
+		replaceString.replaceString(filePath, "(?s)<pwd[^>]*>.*?\n",
+				"<pwd>" + dbPassword + "</pwd>\n");
+	}
+
+	/**
+	 * Prints the config file.
+	 *
+	 * @param fileName the config file name
+	 */
+	public void printConfigFile(final String fileName) {
+		LOGGER.info("********** " + fileName + "**********");
+		try (BufferedReader bufferedReader = new BufferedReader(new FileReader(syncCliPath + "/" + fileName))) {
+			String line;
+			while ((line = bufferedReader.readLine()) != null) {
+				LOGGER.info(line);
+			}
+		} catch (FileNotFoundException e) {
+			LOGGER.error(e.getMessage());
+		} catch (IOException e) {
+			LOGGER.error(e.getMessage());
+		}
+	}
 }

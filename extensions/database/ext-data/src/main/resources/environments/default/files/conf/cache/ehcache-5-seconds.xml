@@ -43,13 +43,6 @@
 		   statistics="true"
 	/>
 
-	<cache name="catalogRuleBaseCache"
-		   timeToIdleSeconds="5"
-		   timeToLiveSeconds="5"
-		   maxEntriesLocalHeap="10000"
-		   statistics="true"
-	/>
-
 	<cache name="categoryByUidCache"
 		   timeToIdleSeconds="5"
 		   timeToLiveSeconds="5"
@@ -85,14 +78,7 @@
 		   statistics="true"
 	/>
 
-	<cache name="groovyConditionCache"
-		   timeToIdleSeconds="5"
-		   timeToLiveSeconds="5"
-		   maxEntriesLocalHeap="10000"
-		   statistics="true"
-	/>
-
-	<cache name="groovyEvaluationCache"
+	<cache name="decomposedConditionCache"
 		   timeToIdleSeconds="5"
 		   timeToLiveSeconds="5"
 		   maxEntriesLocalHeap="10000"
@@ -226,6 +212,110 @@
 	/>
 
 	<cache name="threadlocalStoreCache"
+		   timeToIdleSeconds="5"
+		   timeToLiveSeconds="5"
+		   maxEntriesLocalHeap="10000"
+		   statistics="true"
+	/>
+
+	<cache name="facetServiceSearchableFacetsCache"
+		   timeToIdleSeconds="5"
+		   timeToLiveSeconds="5"
+		   maxEntriesLocalHeap="10000"
+		   statistics="true"
+	/>
+
+	<cache name="cachingSolrQueryFactorySearchableAttributeCache"
+		   timeToIdleSeconds="5"
+		   timeToLiveSeconds="5"
+		   maxEntriesLocalHeap="10000"
+		   statistics="true"
+	/>
+
+	<cache name="cachingAttributeServiceAttributesCache"
+		   timeToIdleSeconds="5"
+		   timeToLiveSeconds="5"
+		   maxEntriesLocalHeap="10000"
+		   statistics="true"
+	/>
+
+	<cache name="findProductAttributeValueByAttributeUidCache"
+		   timeToIdleSeconds="5"
+		   timeToLiveSeconds="5"
+		   maxEntriesLocalHeap="10000"
+		   statistics="true"
+	/>
+
+	<cache name="cachingAttributeServicefindByKeyCache"
+		   timeToIdleSeconds="5"
+		   timeToLiveSeconds="5"
+		   maxEntriesLocalHeap="10000"
+		   statistics="true"
+	/>
+
+	<cache name="cachingCategoryServiceFindCodeByUidCache"
+		   timeToIdleSeconds="5"
+		   timeToLiveSeconds="5"
+		   maxEntriesLocalHeap="10000"
+		   statistics="true"
+	/>
+
+	<cache name="descendantCategoriesByUidCache"
+		   timeToIdleSeconds="5"
+		   timeToLiveSeconds="5"
+		   maxEntriesLocalHeap="10000"
+		   statistics="true"
+	/>
+
+	<cache name="featuredProductsUidCache"
+		   timeToIdleSeconds="5"
+		   timeToLiveSeconds="5"
+		   maxEntriesLocalHeap="10000"
+		   statistics="true"
+	/>
+
+	<cache name="cachingSkuOptionServiceFindByKeyCache"
+		   timeToIdleSeconds="5"
+		   timeToLiveSeconds="5"
+		   maxEntriesLocalHeap="10000"
+		   statistics="true"
+	/>
+
+	<cache name="loadFilteredNavigationConfigurationCache"
+		   timeToIdleSeconds="5"
+		   timeToLiveSeconds="5"
+		   maxEntriesLocalHeap="10000"
+		   statistics="true"
+	/>
+
+	<cache name="facetServiceFindByGuidCache"
+		   timeToIdleSeconds="5"
+		   timeToLiveSeconds="5"
+		   maxEntriesLocalHeap="10000"
+		   statistics="true"
+	/>
+
+	<cache name="defaultSortAttributeForStoreCache"
+		   timeToIdleSeconds="5"
+		   timeToLiveSeconds="5"
+		   maxEntriesLocalHeap="10000"
+		   statistics="true"
+	/>
+
+	<cache name="storeAndLocaleCodesCache"
+		   timeToIdleSeconds="5"
+		   timeToLiveSeconds="5"
+		   maxEntriesLocalHeap="10000"
+		   statistics="true"
+	/>
+	<cache name="storeCartTypeCache"
+		   timeToIdleSeconds="5"
+		   timeToLiveSeconds="5"
+		   maxEntriesLocalHeap="10000"
+		   statistics="true"
+	/>
+
+	<cache name="modifiedDateByUidCache"
 		   timeToIdleSeconds="5"
 		   timeToLiveSeconds="5"
 		   maxEntriesLocalHeap="10000"

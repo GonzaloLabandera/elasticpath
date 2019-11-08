@@ -33,6 +33,7 @@ import com.elasticpath.domain.cmuser.CmUser;
 import com.elasticpath.domain.dataimport.CatalogImportField;
 import com.elasticpath.domain.dataimport.ImportBadRow;
 import com.elasticpath.domain.dataimport.ImportDataType;
+import com.elasticpath.domain.dataimport.ImportFault;
 import com.elasticpath.domain.dataimport.ImportField;
 import com.elasticpath.domain.dataimport.ImportJob;
 import com.elasticpath.domain.dataimport.ImportJobRequest;
@@ -57,6 +58,7 @@ import com.elasticpath.service.dataimport.ImportGuidHelper;
 import com.elasticpath.service.dataimport.ImportJobStatusHandler;
 import com.elasticpath.service.dataimport.ImportService;
 import com.elasticpath.test.jmock.AbstractEPServiceTestCase;
+import com.elasticpath.test.jmock.PrototypeBeanCustomStub;
 
 /**
  * Test <code>AbstractImportJobRunnerImpl</code>.
@@ -510,11 +512,18 @@ public class AbstractImportJobRunnerImplTest extends AbstractEPServiceTestCase {
 	 */
 	@Test
 	public void testValidateWithError() {
-		stubGetBean(ContextIdNames.IMPORT_BAD_ROW, ImportBadRowImpl.class);
-		stubGetBean(ContextIdNames.IMPORT_FAULT, ImportFaultImpl.class);
+		context.checking(new Expectations() { 
+			{
+				allowing(getBeanFactory()).getPrototypeBean(ContextIdNames.IMPORT_BAD_ROW, ImportBadRow.class);
+				will(new PrototypeBeanCustomStub(ImportBadRowImpl.class));
+				
+				allowing(getBeanFactory()).getPrototypeBean(ContextIdNames.IMPORT_FAULT, ImportFault.class);
+				will(new PrototypeBeanCustomStub(ImportFaultImpl.class));
+			}
+		});
+		
 		context.checking(new Expectations() {
 			{
-
 
 				allowing(mockImportDataType).isEntityImport();
 				will(returnValue(true));
@@ -865,8 +874,17 @@ public class AbstractImportJobRunnerImplTest extends AbstractEPServiceTestCase {
 	@SuppressWarnings("PMD.ExcessiveMethodLength")
 	@Test
 	public void testPostHandlings() {
-		stubGetBean(ContextIdNames.IMPORT_BAD_ROW, ImportBadRowImpl.class);
-		stubGetBean(ContextIdNames.IMPORT_FAULT, ImportFaultImpl.class);
+		
+		context.checking(new Expectations() { 
+			{
+				allowing(getBeanFactory()).getPrototypeBean(ContextIdNames.IMPORT_BAD_ROW, ImportBadRow.class);
+				will(new PrototypeBeanCustomStub(ImportBadRowImpl.class));
+				
+				allowing(getBeanFactory()).getPrototypeBean(ContextIdNames.IMPORT_FAULT, ImportFault.class);
+				will(new PrototypeBeanCustomStub(ImportFaultImpl.class));
+			}
+		});
+		
 		context.checking(new Expectations() {
 			{
 

@@ -6,7 +6,6 @@ package com.elasticpath.cmclient.admin.stores.editors.facets;
 import java.util.Collection;
 import java.util.Locale;
 
-import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.forms.IManagedForm;
 import org.eclipse.ui.forms.widgets.ExpandableComposite;
@@ -14,6 +13,7 @@ import org.eclipse.ui.forms.widgets.ExpandableComposite;
 import com.elasticpath.cmclient.admin.stores.AdminStoresMessages;
 import com.elasticpath.cmclient.admin.stores.AdminStoresPlugin;
 import com.elasticpath.cmclient.admin.stores.editors.AbstractStorePage;
+import com.elasticpath.cmclient.core.dialog.value.dialog.ConfirmationDialog;
 import com.elasticpath.cmclient.core.editors.AbstractCmClientFormEditor;
 import com.elasticpath.cmclient.core.helpers.store.StoreEditorModel;
 import com.elasticpath.domain.catalog.Catalog;
@@ -45,8 +45,8 @@ public class StoreFacetsPage extends AbstractStorePage {
 		String storeCode = storeEditorModel.getStoreCode();
 		Collection<Locale> supportedLocales = storeEditorModel.getSupportedLocales();
 		if (defaultLocale == null || catalog == null || storeCode == null || supportedLocales == null) {
-			MessageDialog.openError(Display.getCurrent().getActiveShell(), AdminStoresMessages.get().StoreFacetErrorDialogHeader,
-					AdminStoresMessages.get().StoreFacetErrorDialogMessage);
+			new ConfirmationDialog(Display.getCurrent().getActiveShell(), AdminStoresMessages.get().StoreFacetErrorDialogHeader,
+					AdminStoresMessages.get().StoreFacetErrorDialogMessage).open();
 		} else {
 			iManagedForm.addPart(new FacetTable(this, abstractCmClientFormEditor, ExpandableComposite.TITLE_BAR, storeEditorModel));
 			addExtensionEditorSections(abstractCmClientFormEditor, iManagedForm, AdminStoresPlugin.PLUGIN_ID, this.getClass().getSimpleName());

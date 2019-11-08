@@ -17,11 +17,10 @@ import com.elasticpath.domain.store.impl.StoreImpl;
 import com.elasticpath.domain.store.impl.WarehouseAddressImpl;
 import com.elasticpath.domain.store.impl.WarehouseImpl;
 import com.elasticpath.persistence.openjpa.JpaPersistenceEngine;
-import com.elasticpath.service.misc.FetchPlanHelper;
+import com.elasticpath.persistence.openjpa.util.FetchPlanHelper;
 
 /**
- * A parent class for typical service tests that provides a mock <code>PersistenceEngine</code>
- * and a mock <code>FetchPlanHelper</code>.
+ * A parent class for typical service tests that provides a mock <code>PersistenceEngine</code>.
  */
 public abstract class AbstractEPServiceTestCase extends AbstractEPTestCase {
 
@@ -33,8 +32,6 @@ public abstract class AbstractEPServiceTestCase extends AbstractEPTestCase {
 	private JpaPersistenceEngine persistenceEngine;
 
 	private FetchPlanHelper mockFetchPlanHelper;
-
-	private FetchPlanHelper fetchPlanHelper;
 
 	private Store store;
 
@@ -50,8 +47,6 @@ public abstract class AbstractEPServiceTestCase extends AbstractEPTestCase {
 		persistenceEngine = mockPersistenceEngine;
 
 		mockFetchPlanHelper = context.mock(FetchPlanHelper.class);
-		fetchPlanHelper = mockFetchPlanHelper;
-
 		mockEntityManager = context.mock(EntityManager.class);
 	}
 	
@@ -67,20 +62,14 @@ public abstract class AbstractEPServiceTestCase extends AbstractEPTestCase {
 	protected JpaPersistenceEngine getPersistenceEngine() {
 		return persistenceEngine;
 	}
-	
+
 	/**
 	 * @return the <code>Mock</code> instance of the <code>FetchPlanHelper</code>.
 	 */
 	protected FetchPlanHelper getMockFetchPlanHelper() {
 		return mockFetchPlanHelper;
 	}
-	
-	/**
-	 * @return the <code>FetchPlanHelper</code>.
-	 */
-	protected FetchPlanHelper getFetchPlanHelper() {
-		return fetchPlanHelper;
-	}
+
 
 	/**
 	 * Returns the default static mocked store.

@@ -9,6 +9,8 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -18,9 +20,11 @@ import java.util.Set;
 
 import org.junit.Test;
 
+import com.elasticpath.domain.catalog.Category;
 import com.elasticpath.domain.catalog.Product;
 import com.elasticpath.domain.catalog.ProductAssociation;
 import com.elasticpath.domain.catalog.ProductAssociationType;
+import com.elasticpath.domain.catalog.impl.CategoryImpl;
 import com.elasticpath.domain.catalog.impl.ProductAssociationImpl;
 import com.elasticpath.domain.catalog.impl.ProductImpl;
 import com.elasticpath.domain.catalog.impl.ProductSkuImpl;
@@ -299,6 +303,19 @@ public class StoreProductImplTest extends AbstractEPTestCase {
 		storeProduct.setProductAssociations(associations);
 		assertSame(productAssociationCrossSell, storeProduct.getAssociationById(ASSOCIATION_UID_2));
 		assertSame(productAssociationUpSell, storeProduct.getAssociationById(ASSOCIATION_UID_1));
+	}
+
+	/**
+	 * Test that method getProductCategory was called by product.
+	 */
+	@Test
+	public void testThatProductCategoryWasCalledByCorrectProduct() {
+		final Product product = mock(ProductImpl.class);
+		final Category category = mock(CategoryImpl.class);
+		final StoreProductImpl storeProduct = new StoreProductImpl(product);
+		storeProduct.getProductCategory(category);
+
+		verify(product).getProductCategory(category);
 	}
 
 	/**

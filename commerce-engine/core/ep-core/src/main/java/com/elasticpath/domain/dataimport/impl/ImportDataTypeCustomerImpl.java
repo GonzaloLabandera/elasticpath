@@ -341,7 +341,7 @@ public class ImportDataTypeCustomerImpl extends AbstractImportDataTypeImpl {
 
 	@Override
 	public void deleteEntity(final Entity entity) {
-		CustomerService customerService = getBean(ContextIdNames.CUSTOMER_SERVICE);
+		CustomerService customerService = getSingletonBean(ContextIdNames.CUSTOMER_SERVICE, CustomerService.class);
 		customerService.remove((Customer) entity);
 	}
 

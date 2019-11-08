@@ -72,7 +72,7 @@ public class ShippingRegionAdapter extends AbstractDomainAdapterImpl<ShippingReg
 
 		List<ShippingSubRegionsDTO> subRegions = source.getShippingSubRegions();
 		for (ShippingSubRegionsDTO subRegionsDto : subRegions) {
-			Region region = getBeanFactory().getBean(ContextIdNames.REGION);
+			Region region = getBeanFactory().getPrototypeBean(ContextIdNames.REGION, Region.class);
 			region.setCountryCode(subRegionsDto.getCountryCode());
 			region.setSubCountryCodeList(subRegionsDto.getRegionCodes());
 			regionMap.put(subRegionsDto.getCountryCode(), region);
@@ -89,6 +89,6 @@ public class ShippingRegionAdapter extends AbstractDomainAdapterImpl<ShippingReg
 
 	@Override
 	public ShippingRegion createDomainObject() {
-		return getBeanFactory().getBean(SHIPPING_REGION);
+		return getBeanFactory().getPrototypeBean(SHIPPING_REGION, ShippingRegion.class);
 	}
 }

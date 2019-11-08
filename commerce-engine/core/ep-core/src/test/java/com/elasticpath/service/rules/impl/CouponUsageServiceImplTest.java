@@ -20,12 +20,13 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import org.jmock.Expectations;
-import org.jmock.auto.Mock;
-import org.jmock.integration.junit4.JUnitRuleMockery;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+
+import org.jmock.Expectations;
+import org.jmock.auto.Mock;
+import org.jmock.integration.junit4.JUnitRuleMockery;
 
 import com.elasticpath.base.exception.EpServiceException;
 import com.elasticpath.commons.beanframework.BeanFactory;
@@ -1263,7 +1264,8 @@ public class CouponUsageServiceImplTest {
 			will(returnValue(Collections.EMPTY_LIST));
 		} });
 
-		assertTrue(service.isValidCouponUsage("", coupon, null));
+		assertEquals(CouponUsageValidationResultEnum.SUCCESS,
+				service.validateCouponUsage("", coupon, null));
 	}
 
 	/**
@@ -1285,7 +1287,8 @@ public class CouponUsageServiceImplTest {
 			will(returnValue(null));
 		} });
 
-		assertTrue(service.isValidCouponUsage(USER_TEST_EMAIL, coupon, null));
+		assertEquals(CouponUsageValidationResultEnum.SUCCESS,
+				service.validateCouponUsage(USER_TEST_EMAIL, coupon, null));
 	}
 
 	/**
@@ -1312,7 +1315,8 @@ public class CouponUsageServiceImplTest {
 			will(returnValue(couponUsage));
 		} });
 
-		assertTrue(service.isValidCouponUsage(USER_TEST_EMAIL, coupon, couponUsage));
+		assertEquals(CouponUsageValidationResultEnum.SUCCESS,
+				service.validateCouponUsage(USER_TEST_EMAIL, coupon, couponUsage));
 	}
 
 	/**
@@ -1337,7 +1341,8 @@ public class CouponUsageServiceImplTest {
 			will(returnValue(couponUsage));
 		} });
 
-		assertFalse(service.isValidCouponUsage(USER_TEST_EMAIL, coupon, couponUsage));
+		assertEquals(CouponUsageValidationResultEnum.ERROR_USE_COUNT_EXCEEDED,
+				service.validateCouponUsage(USER_TEST_EMAIL, coupon, couponUsage));
 	}
 
 	/**
@@ -1365,7 +1370,8 @@ public class CouponUsageServiceImplTest {
 			will(returnValue(Arrays.asList(couponUsage)));
 		} });
 
-		assertTrue(service.isValidCouponUsage(USER_TEST_EMAIL, coupon, null));
+		assertEquals(CouponUsageValidationResultEnum.SUCCESS,
+				service.validateCouponUsage(USER_TEST_EMAIL, coupon, null));
 	}
 
 	/**
@@ -1390,7 +1396,8 @@ public class CouponUsageServiceImplTest {
 			will(returnValue(Arrays.asList(couponUsage)));
 		} });
 
-		assertFalse(service.isValidCouponUsage(USER_TEST_EMAIL, coupon, null));
+		assertEquals(CouponUsageValidationResultEnum.ERROR_USE_COUNT_EXCEEDED,
+				service.validateCouponUsage(USER_TEST_EMAIL, coupon, null));
 	}
 
 	/**
@@ -1413,7 +1420,8 @@ public class CouponUsageServiceImplTest {
 			will(returnValue(null));
 		} });
 
-		assertTrue(service.isValidCouponUsage(USER_TEST_EMAIL, coupon, null));
+		assertEquals(CouponUsageValidationResultEnum.SUCCESS,
+				service.validateCouponUsage(USER_TEST_EMAIL, coupon, null));
 	}
 
 	/**
@@ -1462,7 +1470,8 @@ public class CouponUsageServiceImplTest {
 			will(returnValue(couponUsage));
 		} });
 
-		assertTrue(service.isValidCouponUsage(USER_TEST_EMAIL, coupon, null));
+		assertEquals(CouponUsageValidationResultEnum.SUCCESS,
+				service.validateCouponUsage(USER_TEST_EMAIL, coupon, null));
 	}
 
 	private CouponUsageServiceImpl getTestCouponUsageService() {
@@ -1515,8 +1524,8 @@ public class CouponUsageServiceImplTest {
 			will(returnValue(couponUsage));
 		} });
 
-
-		assertFalse("Coupon should not be valid after the duration", service.isValidCouponUsage(USER_TEST_EMAIL, coupon, null));
+		assertEquals(CouponUsageValidationResultEnum.ERROR_EXPIRED,
+				service.validateCouponUsage(USER_TEST_EMAIL, coupon, null));
 	}
 
 	/**
@@ -2051,7 +2060,7 @@ public class CouponUsageServiceImplTest {
 			never(dao).findByCouponCodeAndEmail(COUPON_CODE, USER_TEST_EMAIL);
 		} });
 
-		assertFalse(service.isValidCouponUsage(USER_TEST_EMAIL, coupon, couponUsage));
+		assertFalse(service.validateCouponUsage(USER_TEST_EMAIL, coupon, couponUsage).isSuccess());
 	}
 
 	private Collection<CouponUsage> findEligibleUsagesByEmailAddressInStore(final Long allowedLimit) {

@@ -10,6 +10,7 @@ import org.osgi.service.component.annotations.Reference;
 import com.elasticpath.domain.cartorder.CartOrder;
 import com.elasticpath.repository.LinksRepository;
 import com.elasticpath.rest.definition.carts.CartIdentifier;
+import com.elasticpath.rest.definition.carts.CartsIdentifier;
 import com.elasticpath.rest.definition.orders.OrderIdentifier;
 import com.elasticpath.rest.id.IdentifierPart;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.order.OrderRepository;
@@ -44,7 +45,7 @@ public class OrderToCartLinkRepository<I extends OrderIdentifier, LI extends Car
 	 */
 	protected CartIdentifier buildCartIdentifier(final IdentifierPart<String> scope, final CartOrder cartOrder) {
 		return CartIdentifier.builder()
-				.withScope(scope)
+				.withCarts(CartsIdentifier.builder().withScope(scope).build())
 				.withCartId(cartOrder::getShoppingCartGuid)
 				.build();
 	}

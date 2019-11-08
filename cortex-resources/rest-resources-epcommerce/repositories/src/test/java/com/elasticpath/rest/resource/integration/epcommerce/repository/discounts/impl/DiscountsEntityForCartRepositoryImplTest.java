@@ -26,6 +26,7 @@ import com.elasticpath.money.Money;
 import com.elasticpath.rest.ResourceOperationFailure;
 import com.elasticpath.rest.definition.base.CostEntity;
 import com.elasticpath.rest.definition.carts.CartIdentifier;
+import com.elasticpath.rest.definition.carts.CartsIdentifier;
 import com.elasticpath.rest.definition.discounts.DiscountEntity;
 import com.elasticpath.rest.definition.discounts.DiscountForCartIdentifier;
 import com.elasticpath.rest.id.type.StringIdentifier;
@@ -112,7 +113,9 @@ public class DiscountsEntityForCartRepositoryImplTest {
 	private CartIdentifier createCartIdentifer(final String cartId, final String scope) {
 		return CartIdentifier.builder()
 				.withCartId(StringIdentifier.of(cartId))
-				.withScope(StringIdentifier.of(scope))
+				.withCarts(CartsIdentifier.builder()
+						.withScope(StringIdentifier.of(scope))
+						.build())
 				.build();
 	}
 

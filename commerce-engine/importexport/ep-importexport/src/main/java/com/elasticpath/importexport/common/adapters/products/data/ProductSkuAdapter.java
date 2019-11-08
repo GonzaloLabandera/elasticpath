@@ -118,7 +118,7 @@ public class ProductSkuAdapter extends AbstractDomainAdapterImpl<ProductSku, Pro
 	JpaAdaptorOfSkuOptionValueImpl createSkuOptionValue(final ProductSku productSku, final String skuOptionCode) {
 		JpaAdaptorOfSkuOptionValueImpl skuOptionValue = (JpaAdaptorOfSkuOptionValueImpl) productSku.getOptionValueMap().get(skuOptionCode);
 		if (skuOptionValue == null) {
-			skuOptionValue = getBeanFactory().getBean(ContextIdNames.SKU_OPTION_VALUE_JPA_ADAPTOR);
+			skuOptionValue = getBeanFactory().getPrototypeBean(ContextIdNames.SKU_OPTION_VALUE_JPA_ADAPTOR, JpaAdaptorOfSkuOptionValueImpl.class);
 			productSku.getOptionValueMap().put(skuOptionCode, skuOptionValue);
 		}
 		return skuOptionValue;

@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<beans 
+<!--
+  ~ Copyright © 2017 Elastic Path Software Inc. All rights reserved.
+  -->
+<beans
     xmlns="http://www.springframework.org/schema/beans"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd"
@@ -7,9 +10,8 @@
 	<!-- pulled from ep-core.jar -->
 	<import resource="classpath:spring/commons/util-config.xml" /><!-- required by core dataaccess/dao.xml -->
 	<import resource="classpath:spring/dataaccess/dao.xml"/>
+	<import resource="classpath:spring/dataaccess/datasource.xml"/>
 
-	<bean id="dataSource" class="org.springframework.jndi.JndiObjectFactoryBean">
-		<property name="jndiName" value="java:comp/env/jdbc/epjndi"/>
-		<property name="resourceRef" value="true" />
-	</bean>
+	<!-- CM uses master db only -->
+	<alias name="dataSource" alias="readOnlyDataSource"/>
 </beans>

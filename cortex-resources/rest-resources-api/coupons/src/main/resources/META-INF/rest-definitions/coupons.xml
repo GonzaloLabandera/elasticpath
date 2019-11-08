@@ -2,11 +2,15 @@
 <definitions xmlns="http://www.elasticpath.com/schema/rest/0.5">
 	<family>
 		<name>coupons</name>
-		<description>
-			<![CDATA[
+		<description><![CDATA[
 A coupon is a code, consisting of letters or numbers that a shopper can apply to an order. When a coupon is
-applied to an order, it can trigger a promotion which inturn discounts or adds additional incentives to the order.
-			]]>
+applied to an order, it can trigger a promotion which in turn discounts or adds additional incentives to the order.
+
+Coupons for an [order](orders.md) can be managed through the coupon info resource. This is where [coupons](coupons.md)
+that are applied to an [order](orders.md) are listed, as well as a form to apply new [coupons](coupons.md). Each coupon is
+linked to the promotions it triggered. If no promotions were triggered then no promotion link will be present.
+
+Coupons for a [purchase](purchases.md) are coupons that were applied to the shopper's purchase.]]>
 		</description>
 
 		<uri-part>

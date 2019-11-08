@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+import com.elasticpath.domain.shoppingcart.ShoppingItemPricingSnapshot;
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
 import org.eclipse.core.databinding.validation.ValidationStatus;
@@ -63,7 +64,6 @@ import com.elasticpath.domain.order.OrderReturnSkuReason;
 import com.elasticpath.domain.order.OrderShipment;
 import com.elasticpath.domain.order.OrderSku;
 import com.elasticpath.domain.order.PhysicalOrderShipment;
-import com.elasticpath.money.Money;
 import com.elasticpath.service.catalog.ProductSkuLookup;
 import com.elasticpath.service.shoppingcart.PricingSnapshotService;
 
@@ -239,16 +239,8 @@ public class ReturnSubjectPage extends AbstractEPWizardPage<OrderReturn> {
 	 * @return the invoice price
 	 */
 	BigDecimal getInvoicePrice(final OrderSku orderSku) {
-		Money discount = getPricingSnapshotService().getPricingSnapshotForOrderSku(orderSku).getDiscount();
-
-		BigDecimal invoicePrice;
-		if (discount == null || discount.getAmount() == null) {
-			invoicePrice = orderSku.getUnitPrice();
-		} else {
-			invoicePrice = orderSku.getUnitPrice().subtract(discount.getAmount());
-		}
-
-		return invoicePrice;
+		ShoppingItemPricingSnapshot pricingSnapshot = getPricingSnapshotService().getPricingSnapshotForOrderSku(orderSku);
+		return pricingSnapshot.getPriceCalc().withCartDiscounts().getAmount();
 	}
 
 	/**

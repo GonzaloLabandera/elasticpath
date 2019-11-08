@@ -23,21 +23,21 @@
 	   allowMultiple="true"
 	   category="com.elasticpath.cmclient.pricelistmanager.views.category"
 	   class="com.elasticpath.cmclient.pricelistmanager.views.PriceListSearchView"
-	   icon="icons/search_default_22.png"
+	   icon="icons/empty_1x1.png"
 	   id="com.elasticpath.cmclient.pricelistmanager.views.PriceListSearchView"
 	   name="%priceListSearchView.name">
       </view>
       <view
 	   category="com.elasticpath.cmclient.pricelistmanager.views.category"
 	   class="com.elasticpath.cmclient.pricelistmanager.views.PriceListSearchResultsView"
-	   icon="icons/price-list_default_22.png"
+	   icon="icons/empty_1x1.png"
 	   id="com.elasticpath.cmclient.pricelistmanager.views.PriceListSearchResultsView"
 	   name="%priceListSearchResultsView.name">
       </view>
       <view
 	   category="com.elasticpath.cmclient.pricelistmanager.views.category"
 	   class="com.elasticpath.cmclient.pricelistassignments.views.PriceListAssigmentsSearchView"
-	   icon="icons/price-list-assignment_default_22.png"
+	   icon="icons/empty_1x1.png"
 	   id="com.elasticpath.cmclient.pricelistassignments.views.PriceListAssigmentsSearchView"
 	   name="%priceListAssignmentSearchResultsView.name">
       </view>
@@ -133,7 +133,8 @@
                    icon="icons/price-list-add_default_34.png"
                    id="com.elasticpath.cmclient.pricelistmanager.toolbarMenus.createPriceList"
                    label="%commands.createPriceList.name"
-                   tooltip="%commands.createPriceList.name">
+                   tooltip="%commands.createPriceList.name"
+                   mode="FORCE_TEXT">
                 <visibleWhen>
                    <with
                          variable="activeContexts">
@@ -152,7 +153,8 @@
                    icon="icons/price-list-assignment-add_default_34.png"
                    id="com.elasticpath.cmclient.pricelistmanager.toolbarMenus.createPriceListAssignment"
                    label="%commands.createPriceListAssignment.name"
-                   tooltip="%commands.createPriceListAssignment.name">
+                   tooltip="%commands.createPriceListAssignment.name"
+                   mode="FORCE_TEXT">
                 <visibleWhen>
                    <with
                          variable="activeContexts">

@@ -102,7 +102,7 @@ public class CatalogAdapter extends AbstractDomainAdapterImpl<Catalog, CatalogDT
 	
 	@Override
 	public Catalog createDomainObject() {
-		return getBeanFactory().getBean(ContextIdNames.CATALOG);
+		return getBeanFactory().getPrototypeBean(ContextIdNames.CATALOG, Catalog.class);
 	}
 
 	@Override

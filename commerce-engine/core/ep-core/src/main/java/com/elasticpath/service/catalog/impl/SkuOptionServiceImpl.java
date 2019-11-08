@@ -36,6 +36,7 @@ public class SkuOptionServiceImpl extends AbstractEpPersistenceServiceImpl imple
 			throw new SkuOptionKeyExistException("SKU Option with the given key already exists");
 		}
 		getPersistenceEngine().save(skuOption);
+
 		return skuOption;
 	}
 

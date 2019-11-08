@@ -34,7 +34,7 @@ public class CartLineItemAvailabilityEntityRepositoryImpl<E extends Availability
 	@Override
 	public Single<AvailabilityEntity> findOne(final AvailabilityForCartLineItemIdentifier identifier) {
 		final String lineItemId = identifier.getLineItem().getLineItemId().getValue();
-		final String scope = identifier.getLineItem().getLineItems().getCart().getScope().getValue();
+		final String scope = identifier.getLineItem().getLineItems().getCart().getCarts().getScope().getValue();
 
 		return shoppingCartRepository.getProductSku(identifier.getLineItem().getLineItems().getCart().getCartId().getValue(), lineItemId)
 				.flatMap(productSku -> getStoreProduct(scope, productSku)

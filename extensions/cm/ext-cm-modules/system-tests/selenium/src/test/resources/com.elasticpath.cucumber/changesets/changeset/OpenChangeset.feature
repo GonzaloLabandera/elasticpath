@@ -5,7 +5,7 @@ Feature: Open Object in Change set
     Given I sign into CM as cs_changeset
     And I create a new catalog with following details
       | catalogName   | language |
-      | ATest Catalog | English  |
+      | ZTest Catalog | English  |
 
   @lockAndFinalize @cleanupCatalog
   Scenario Outline: Open and edit object in Change Set

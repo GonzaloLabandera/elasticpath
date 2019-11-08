@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<sort_attributes>
+	<sort_attribute>
+		<sort_attribute_guid>fbf2a4ad-e9d3-4d8e-b1b2-3d264647fec5</sort_attribute_guid>
+		<business_object_id>Product Name</business_object_id>
+		<store_code>SNAPITUP</store_code>
+		<descending>false</descending>
+		<sort_attribute_group>FIELD</sort_attribute_group>
+		<sort_attribute_type>STRING</sort_attribute_type>
+		<default_attribute>false</default_attribute>
+		<display_value>
+			<value language="en">name A-Z</value>
+			<value language="fr">name FR A-Z</value>
+		</display_value>
+	</sort_attribute>
+
+	<sort_attribute>
+		<sort_attribute_guid>6c4e60f2-32d9-4c1d-8b70-30bf9d846729</sort_attribute_guid>
+		<business_object_id>Product Name</business_object_id>
+		<store_code>SNAPITUP</store_code>
+		<descending>true</descending>
+		<sort_attribute_group>FIELD</sort_attribute_group>
+		<sort_attribute_type>STRING</sort_attribute_type>
+		<default_attribute>false</default_attribute>
+		<display_value>
+			<value language="en">name Z-A</value>
+			<value language="fr">name FR Z-A</value>
+		</display_value>
+	</sort_attribute>
+
+	<sort_attribute>
+		<sort_attribute_guid>812f8b00-96e6-4b50-9544-5a3af0967e9d</sort_attribute_guid>
+		<business_object_id>A00009</business_object_id>
+		<store_code>SNAPITUP</store_code>
+		<descending>true</descending>
+		<sort_attribute_group>ATTRIBUTE</sort_attribute_group>
+		<sort_attribute_type>NUMBER</sort_attribute_type>
+		<default_attribute>false</default_attribute>
+		<display_value>
+			<value language="en">rating high to low</value>
+			<value language="fr">rating FR high to low</value>
+		</display_value>
+	</sort_attribute>
+
+	<sort_attribute>
+		<sort_attribute_guid>6c8f889e-2761-4fdc-a7b8-e635d36f2e17</sort_attribute_guid>
+		<business_object_id>A00009</business_object_id>
+		<store_code>SNAPITUP</store_code>
+		<descending>false</descending>
+		<sort_attribute_group>ATTRIBUTE</sort_attribute_group>
+		<sort_attribute_type>NUMBER</sort_attribute_type>
+		<default_attribute>false</default_attribute>
+		<display_value>
+			<value language="en">rating low to high</value>
+			<value language="fr">rating FR low to high</value>
+		</display_value>
+	</sort_attribute>
+
+	<sort_attribute>
+		<sort_attribute_guid>1a269d19-a42e-4d1a-8ad9-52551e2d2680</sort_attribute_guid>
+		<business_object_id>Featured</business_object_id>
+		<store_code>SNAPITUP</store_code>
+		<descending>true</descending>
+		<sort_attribute_group>FIELD</sort_attribute_group>
+		<sort_attribute_type>BOOLEAN</sort_attribute_type>
+		<default_attribute>false</default_attribute>
+		<display_value>
+			<value language="en">featured</value>
+			<value language="fr">featuredFR</value>
+		</display_value>
+	</sort_attribute>
+
+	<sort_attribute>
+		<sort_attribute_guid>03148c47-b5c8-4716-9f28-96643de55dd2</sort_attribute_guid>
+		<business_object_id>Featured</business_object_id>
+		<store_code>SNAPITUP</store_code>
+		<descending>false</descending>
+		<sort_attribute_group>FIELD</sort_attribute_group>
+		<sort_attribute_type>BOOLEAN</sort_attribute_type>
+		<default_attribute>false</default_attribute>
+		<display_value>
+			<value language="en">Not Featured</value>
+			<value language="fr">FR Not Featured</value>
+		</display_value>
+	</sort_attribute>
+
+	<sort_attribute>
+		<sort_attribute_guid>b07f9e4d-0aa1-4b4a-a7b3-5f7b0e1acb97</sort_attribute_guid>
+		<business_object_id>Price</business_object_id>
+		<store_code>SNAPITUP</store_code>
+		<descending>false</descending>
+		<sort_attribute_group>FIELD</sort_attribute_group>
+		<sort_attribute_type>NUMBER</sort_attribute_type>
+		<default_attribute>false</default_attribute>
+		<display_value>
+			<value language="en">Price low to high</value>
+			<value language="fr">FR Price low to high</value>
+		</display_value>
+	</sort_attribute>
+
+	<sort_attribute>
+		<sort_attribute_guid>32eef16f-f097-4b1a-995f-d961bfc664e4a83a-c398bf542597</sort_attribute_guid>
+		<business_object_id>Price</business_object_id>
+		<store_code>SNAPITUP</store_code>
+		<descending>true</descending>
+		<sort_attribute_group>FIELD</sort_attribute_group>
+		<sort_attribute_type>NUMBER</sort_attribute_type>
+		<default_attribute>false</default_attribute>
+		<display_value>
+			<value language="en">Price high to low</value>
+			<value language="fr">FR Price high to low</value>
+		</display_value>
+	</sort_attribute>
+
+	<sort_attribute>
+		<sort_attribute_guid>b64df7e8-b810-4c6c-8ea4-548195de065a</sort_attribute_guid>
+		<business_object_id>Relevance</business_object_id>
+		<store_code>SNAPITUP</store_code>
+		<descending>true</descending>
+		<sort_attribute_group>FIELD</sort_attribute_group>
+		<sort_attribute_type>STRING</sort_attribute_type>
+		<default_attribute>true</default_attribute>
+		<display_value>
+			<value language="en">Best Match</value>
+			<value language="fr">FR Best Match</value>
+		</display_value>
+	</sort_attribute>
+
+</sort_attributes>

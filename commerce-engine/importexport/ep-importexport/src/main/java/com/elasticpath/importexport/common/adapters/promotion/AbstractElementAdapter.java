@@ -118,7 +118,7 @@ public abstract class AbstractElementAdapter<DTO extends Dto> extends AbstractDo
 	 * @throws PopulationRollbackException if given exceptionType is not valid
 	 */
 	RuleException createRuleException(final String exceptionType) {
-		RuleException ruleException = getBeanFactory().getBean(exceptionType);
+		RuleException ruleException = getBeanFactory().getPrototypeBean(exceptionType, RuleException.class);
 		
 		if (ruleException == null) {
 			throw new PopulationRollbackException("IE-10700", exceptionType);
@@ -136,7 +136,7 @@ public abstract class AbstractElementAdapter<DTO extends Dto> extends AbstractDo
 	Set<RuleParameter> createRuleParameterSet(final List<ParameterDTO> elementParameterDTOList) {
 		final Set<RuleParameter> parameters = new HashSet<>();
 		for (final ParameterDTO parameterDTO : elementParameterDTOList) {
-			final RuleParameter ruleParameter = getBeanFactory().getBean(ContextIdNames.RULE_PARAMETER);
+			final RuleParameter ruleParameter = getBeanFactory().getPrototypeBean(ContextIdNames.RULE_PARAMETER, RuleParameter.class);
 			
 			ruleParameter.setKey(parameterDTO.getKey());
 			ruleParameter.setValue(parameterDTO.getValue());

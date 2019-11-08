@@ -119,16 +119,30 @@ public class CatalogProductListingPane extends AbstractPageObject {
 	}
 
 	/**
+	 * Selects the last selected product.
+	 */
+	public void selectLastSelectedProduct() {
+		getSelectedElement().click();
+	}
+
+	/**
 	 * Clicks Exclude Product.
 	 */
 	public void clickExcludeProductButton() {
+		if (!isButtonEnabled(EXCLUDE_PRODUCT_BUTTON_CSS)) {
+			getSelectedElement().click();
+		}
 		clickButton(EXCLUDE_PRODUCT_BUTTON_CSS, "Exclude Product");
+
 	}
 
 	/**
 	 * Clicks Include Product.
 	 */
 	public void clickIncludeProductButton() {
+		if (!isButtonEnabled(INCLUDE_PRODUCT_BUTTON_CSS)) {
+			getSelectedElement().click();
+		}
 		clickButton(INCLUDE_PRODUCT_BUTTON_CSS, "Include Product");
 	}
 

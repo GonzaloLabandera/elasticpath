@@ -3,9 +3,7 @@
  */
 package com.elasticpath.cmclient.reporting.ordersbystatus;
 
-import java.util.HashMap;
-import java.util.Map;
-
+import com.elasticpath.cmclient.core.nls.BaseMessages;
 import com.elasticpath.cmclient.core.nls.LocalizedMessagePostProcessor;
 import com.elasticpath.domain.order.OrderStatus;
 
@@ -13,7 +11,7 @@ import com.elasticpath.domain.order.OrderStatus;
  * Messages class for the report plugin.
  */
 @SuppressWarnings({ "PMD.TooManyFields", "PMD.VariableNamingConventions" })
-public final class OrdersByStatusReportMessages {
+public final class OrdersByStatusReportMessages extends BaseMessages {
 
 	private static final String BUNDLE_NAME = "com.elasticpath.cmclient.reporting.ordersbystatus.OrdersByStatusReportMessages"; //$NON-NLS-1$
 
@@ -65,30 +63,18 @@ public final class OrdersByStatusReportMessages {
 	public String exchangeOrderOnly;
 	public String no_as_string;
 	public String yes_as_string;
-	
-	// Define the map of enum constants to localized names
-	private final Map<OrderStatus, String> localizedExtensibleEnums = new HashMap<>();
-
-	private void instantiateEnums() {
-		if (localizedExtensibleEnums.isEmpty()) {
-			localizedExtensibleEnums.put(OrderStatus.CANCELLED, cancelled);
-			localizedExtensibleEnums.put(OrderStatus.COMPLETED, complete);
-			localizedExtensibleEnums.put(OrderStatus.CREATED, created);
-			localizedExtensibleEnums.put(OrderStatus.ONHOLD, onHold);
-			localizedExtensibleEnums.put(OrderStatus.IN_PROGRESS, inProgress);
-			localizedExtensibleEnums.put(OrderStatus.AWAITING_EXCHANGE, waitExchangeComplete);
-			localizedExtensibleEnums.put(OrderStatus.PARTIALLY_SHIPPED, partialShip);
-		}
-	}
 
 	/**
-	 * Returns the localized name of the given enum constant.
-	 * 
-	 * @param enumValue the enum to be localized
-	 * @return the localized string for the enum
+	 * Initialize the localized values for the enumerations.
 	 */
-	public String getLocalizedName(final OrderStatus enumValue) {
-		return localizedExtensibleEnums.get(enumValue);
+	protected void instantiateEnums() {
+		putLocalizedName(OrderStatus.CANCELLED, cancelled);
+		putLocalizedName(OrderStatus.COMPLETED, complete);
+		putLocalizedName(OrderStatus.CREATED, created);
+		putLocalizedName(OrderStatus.ONHOLD, onHold);
+		putLocalizedName(OrderStatus.IN_PROGRESS, inProgress);
+		putLocalizedName(OrderStatus.AWAITING_EXCHANGE, waitExchangeComplete);
+		putLocalizedName(OrderStatus.PARTIALLY_SHIPPED, partialShip);
 	}
 
 	/**
@@ -98,7 +84,7 @@ public final class OrdersByStatusReportMessages {
 	public static OrdersByStatusReportMessages get() {
 		OrdersByStatusReportMessages ordersByStatusReportMessages =
 				LocalizedMessagePostProcessor.getUTF8Encoded(BUNDLE_NAME, OrdersByStatusReportMessages.class);
-		ordersByStatusReportMessages.instantiateEnums();
+		ordersByStatusReportMessages.initialize();
 		return ordersByStatusReportMessages;
 	}
 

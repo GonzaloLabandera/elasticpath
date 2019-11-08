@@ -45,6 +45,10 @@ public class Constants {
 	 */
 	public static final int RETRY_COUNTER_5 = 5;
 	/**
+	 * Number of tries.
+	 */
+	public static final int RETRY_COUNTER_40 = 40;
+	/**
 	 * Wait interval(in sec).
 	 */
 	public static final int IMPLICIT_WAIT_FOR_ELEMENT_THREE_SECONDS = 3;

@@ -169,6 +169,7 @@
 							org.slf4j,
 							org.apache.openjpa.jdbc.kernel,
 							org.apache.openjpa.persistence.query,
+							org.apache.openjpa.persistence.criteria,
 							org.apache.openjpa.persistence.util,
 							org.apache.openjpa.persistence.validation,
 							org.apache.openjpa.kernel.exps,
@@ -177,9 +178,9 @@
 							javax.persistence,
 							javax.persistence.criteria,
 							javax.persistence.spi,
+							javax.persistence.metamodel,
 							!*
 						</Import-Package>
-						<Include-Resource>{maven-resources}</Include-Resource>
 						<_nouses>true</_nouses>
 						<_nodefaultversion>true</_nodefaultversion>
 						<_exportcontents>
@@ -323,6 +324,14 @@
 				<exclusion>
 					<groupId>com.elasticpath</groupId>
 					<artifactId>ep-core-customer-messaging</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>com.elasticpath</groupId>
+					<artifactId>ep-core-domain-messaging</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>com.elasticpath</groupId>
+					<artifactId>ep-catalog-message-handler</artifactId>
 				</exclusion>
 				<exclusion>
 					<groupId>com.elasticpath</groupId>
@@ -550,6 +559,14 @@
 				<exclusion>
 					<groupId>com.elasticpath</groupId>
 					<artifactId>ep-core-customer-messaging</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>com.elasticpath</groupId>
+					<artifactId>ep-core-domain-messaging</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>com.elasticpath</groupId>
+					<artifactId>ep-catalog-message-handler</artifactId>
 				</exclusion>
 				<exclusion>
 					<groupId>com.elasticpath</groupId>

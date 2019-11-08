@@ -1,5 +1,5 @@
 @example
-Feature: Catalog Browse
+Feature: Ext - Catalog Browse
 
   Background:
     Given I sign in to CM as admin user
@@ -17,5 +17,3 @@ Feature: Catalog Browse
     Then Example Definition - Product Listing should contain following products
       | House       |
       | Superheroes |
-
-

@@ -50,7 +50,7 @@ import com.elasticpath.common.dto.pricing.BaseAmountDTO;
 import com.elasticpath.common.dto.pricing.PriceListDescriptorDTO;
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.attribute.Attribute;
-import com.elasticpath.domain.cartmodifier.CartItemModifierGroup;
+import com.elasticpath.domain.modifier.ModifierGroup;
 import com.elasticpath.domain.catalog.Brand;
 import com.elasticpath.domain.catalog.Catalog;
 import com.elasticpath.domain.catalog.Category;
@@ -291,8 +291,8 @@ public class AddToChangeSetActionDelegate extends ActionDelegate implements IWor
 				name = ((Brand) changeSetObjectSelection).getDisplayName(CorePlugin.getDefault().getDefaultLocale(), true);
 			} else if (changeSetObjectSelection instanceof ProductType) {
 				name = ((ProductType) changeSetObjectSelection).getName();
-			} else if (changeSetObjectSelection instanceof CartItemModifierGroup) {
-				name = ((CartItemModifierGroup) changeSetObjectSelection).getCode();
+			} else if (changeSetObjectSelection instanceof ModifierGroup) {
+				name = ((ModifierGroup) changeSetObjectSelection).getCode();
 			}
 		}
 		return name;

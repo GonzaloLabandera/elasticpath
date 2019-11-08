@@ -68,7 +68,7 @@ public class SpringExpressionValidationEngineImplTest {
 
 	private Condition setUpCondition(final String tagDefinitionMockName, final Object value) {
 		final TagDefinition tagDefinition = context.mock(TagDefinition.class, tagDefinitionMockName);
-		return new Condition(tagDefinition, "operator", value);
+		return new Condition(tagDefinition, "", "operator", value);
 	}
 
 	/**

@@ -73,8 +73,9 @@ public class CouponAutoApplyRoleTransitionEventHandler implements ScopedEventEnt
 							String customerEmailAddress = shoppingCart.getShopper().getCustomer().getEmail();
 							return storeRepository.findStoreAsSingle(storeCode)
 									.flatMapCompletable(store -> filterAndAutoApplyCoupons(cartOrder, customerEmailAddress, store)
-											.flatMap(isCartOrderUpdated -> saveCartOrder(cartOrder, isCartOrderUpdated))
-											.ignoreElement());
+											.flatMapCompletable(isCartOrderUpdated -> isCartOrderUpdated 
+													? cartOrderRepository.saveCartOrderAsSingle(cartOrder).ignoreElement() 
+													: Completable.complete()));
 						}));
 	}
 
@@ -84,10 +85,6 @@ public class CouponAutoApplyRoleTransitionEventHandler implements ScopedEventEnt
 
 	private Single<Boolean> filterAndAutoApplyCoupons(final CartOrder cartOrder, final String customerEmailAddress, final Store store) {
 		return reactiveAdapter.fromRepositoryAsSingle(() -> cartOrderRepository.filterAndAutoApplyCoupons(cartOrder, store, customerEmailAddress));
-	}
-
-	private Single<CartOrder> saveCartOrder(final CartOrder cartOrder, final Boolean isCartOrderUpdated) {
-		return isCartOrderUpdated ? cartOrderRepository.saveCartOrderAsSingle(cartOrder) : Single.never();
 	}
 
 }

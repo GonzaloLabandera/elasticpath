@@ -21,6 +21,7 @@ import com.elasticpath.domain.customer.Address;
 import com.elasticpath.domain.customer.CustomerSession;
 import com.elasticpath.domain.order.Order;
 import com.elasticpath.domain.shopper.Shopper;
+import com.elasticpath.domain.shoppingcart.impl.CartData;
 import com.elasticpath.plugin.tax.domain.TaxExemption;
 import com.elasticpath.shipping.connectivity.dto.ShippingOption;
 
@@ -528,4 +529,50 @@ public interface ShoppingCart extends EpDomain, StoreObject, ShoppingItemContain
 	 * @param childShoppingItem the child item
 	 */
 	void setChildShoppingCartUid(ShoppingItem childShoppingItem);
+
+
+	/**
+	 * Assigns {@code value} to {@code name}. Any previous value is replaced.
+	 *
+	 * @param name The name of the field to assign.
+	 * @param value The value to assign to the field.
+	 */
+	void setCartDataFieldValue(String name, String value);
+
+	/**
+	 * Whether this is a default cart.
+	 * @return	true if the cart is default for the shopper. False otherwise.
+	 */
+	boolean isDefault();
+
+	/**
+	 * Sets the default cart flag.
+	 * @param isDefaultCart the default cart flag.
+	 */
+	void setDefault(boolean isDefaultCart);
+
+	/**
+	 * Accesses the field for {@code name} and returns the current value. If the field has not been set
+	 * then will return null.
+	 *
+	 * @param name The name of the field.
+	 * @return The current value of the field or null.
+	 */
+	String getCartDataFieldValue(String name);
+
+
+	/**
+	 * Gets the context data for the shopping cart.
+	 * @return the item data.
+	 */
+	Map<String, CartData> getCartData();
+
+	/**
+	 * Creates context data for the shopping cart.
+	 * @param name the name.
+	 * @param value the value.
+	 * @return the data.
+	 */
+	CartData createCartData(String name, String value);
+
 }

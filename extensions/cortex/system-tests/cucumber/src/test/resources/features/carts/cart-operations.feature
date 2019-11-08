@@ -127,3 +127,11 @@ Feature: Cart operations
     Examples:
       | ITEM_CODE                                  |
       | bundleWithPhysicalAndDigitalComponents_sku |
+
+  Scenario: Attempt to delete default cart
+    When I remove default cart
+    Then the HTTP status code is 409
+    And I should see validation error message with message type, message id, and debug message
+      | messageType | messageId                 | debugMessage                    |
+      | error       | cart.delete.not.permitted | Default Cart cannot be removed. |
+    And there are 1 carts present

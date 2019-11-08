@@ -18,6 +18,7 @@
 	<properties>
 		<skipTests>true</skipTests>
 		<output-directory>${basedir}/target/WEB-INF</output-directory>
+		<output-meta-inf-directory>${basedir}/target/META-INF</output-meta-inf-directory>
 		<cm.basedir>${project.basedir}/..</cm.basedir>
 	</properties>
 
@@ -53,6 +54,13 @@
 										<include>log4j.properties</include>
 									</includes>
 								</resource>
+								<resource>
+									<directory>${basedir}/src/main/filtered-resources/</directory>
+									<filtering>true</filtering>
+									<includes>
+										<include>module.properties</include>
+									</includes>
+								</resource>
 							</resources>
 						</configuration>
 					</execution>
@@ -74,6 +82,25 @@
 									<excludes>
 										<exclude>misc/</exclude>
 									</excludes>
+								</resource>
+							</resources>
+						</configuration>
+					</execution>
+					<execution>
+						<id>copy-meta-inf</id>
+						<phase>generate-resources</phase>
+						<goals>
+							<goal>copy-resources</goal>
+						</goals>
+						<configuration>
+							<outputDirectory>${output-meta-inf-directory}</outputDirectory>
+							<resources>
+								<resource>
+									<directory>${basedir}/src/main/webapp/META-INF</directory>
+									<includes>
+										<include>**</include>
+									</includes>
+
 								</resource>
 							</resources>
 						</configuration>
@@ -145,11 +172,31 @@
 							</artifactItems>
 						</configuration>
 					</execution>
+					<execution>
+						<id>copy</id>
+						<phase>package</phase>
+						<goals>
+							<goal>copy</goal>
+						</goals>
+						<configuration>
+							<artifactItems>
+								<artifactItem>
+									<groupId>org.apache.geronimo.specs</groupId>
+									<artifactId>geronimo-jta_1.1_spec</artifactId>
+									<version>1.1.1</version>
+									<type>jar</type>
+									<overWrite>true</overWrite>
+									<outputDirectory>${output-directory}/lib</outputDirectory>
+								</artifactItem>
+							</artifactItems>
+						</configuration>
+					</execution>
 				</executions>
 			</plugin>
 			<plugin>
 				<groupId>org.eclipse.tycho</groupId>
 				<artifactId>tycho-packaging-plugin</artifactId>
+
 				<configuration>
 					<deployableFeature>true</deployableFeature>
 				</configuration>

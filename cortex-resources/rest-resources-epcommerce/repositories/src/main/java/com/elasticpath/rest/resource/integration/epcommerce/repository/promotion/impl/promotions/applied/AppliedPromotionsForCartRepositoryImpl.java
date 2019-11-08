@@ -40,7 +40,7 @@ public class AppliedPromotionsForCartRepositoryImpl<I extends AppliedPromotionsF
 	public Observable<PromotionIdentifier> getElements(final AppliedPromotionsForCartIdentifier identifier) {
 		CartIdentifier cartIdentifier = identifier.getCart();
 		String cartId = cartIdentifier.getCartId().getValue();
-		String scope = cartIdentifier.getScope().getValue();
+		String scope = cartIdentifier.getCarts().getScope().getValue();
 		return cartOrderRepository.getEnrichedShoppingCartSingle(scope, cartId, CartOrderRepository.FindCartOrder.BY_CART_GUID)
 				.flatMap(this::getPromotionIdentifiersFromShoppingCart)
 				.flatMapObservable(appliedPromotions -> buildPromotionIdentifiers(scope, appliedPromotions));

@@ -57,23 +57,23 @@ public class ShippingLevelsSearchTab implements SelectionListener, IStoreMarketi
 	private ShippingServiceLevelSearchCriteria searchCriteria;
 
 	private final SearchView searchView;
-	
+
 	private EpSortingCompositeControl sortingCompositeControl;
-	
+
 	private final ShippingLevelSearchRequestJob searchRequestHelper = new ShippingLevelSearchRequestJob();
 
 	private final int tabIndex;
 
 	/**
 	 * The constructor.
-	 * 
+	 *
 	 * @param tabFolder parent's searchView tab folder.
 	 * @param tabIndex tabIndex of this tab into tabFolder.
 	 * @param searchView parent SearchView.
 	 */
 	public ShippingLevelsSearchTab(final IEpTabFolder tabFolder, final int tabIndex, final SearchView searchView) {
 
-		final Image shippingLevelsImage = ShippingImageRegistry.getImage(ShippingImageRegistry.IMAGE_SHIPPING_LEVEL);
+		final Image shippingLevelsImage = ShippingImageRegistry.getImage(ShippingImageRegistry.IMAGE_SHIPPING_LEVEL_TAB);
 		final IEpLayoutComposite tabComposite = tabFolder.addTabItem(ShippingLevelsMessages.get().ShippingLevelsSearchTabTitle, shippingLevelsImage,
 				tabIndex, 1, false);
 		this.searchView = searchView;
@@ -96,7 +96,7 @@ public class ShippingLevelsSearchTab implements SelectionListener, IStoreMarketi
 
 		filtersGroup.addLabelBold(ShippingLevelsMessages.get().ShippingLevelState, null);
 		this.stateCombo = filtersGroup.addComboBox(EpState.EDITABLE, layoutData);
-		
+
 		// Add the Shipping Region filter item
 		filtersGroup.addLabelBold(ShippingLevelsMessages.get().ShippingLevelsShippingRegionLabel, null);
 		this.shippingRegionCombo = filtersGroup.addComboBox(EpState.EDITABLE, layoutData);
@@ -114,7 +114,7 @@ public class ShippingLevelsSearchTab implements SelectionListener, IStoreMarketi
 	private void createSortingGroup(final IEpLayoutComposite parentComposite) {
 		this.sortingCompositeControl = new EpSortingCompositeControl(parentComposite, getModel());
 	}
-	
+
 	private void populateDefaultValues() {
 		stateCombo.select(STATE_INDEX_ACTIVE);
 		storeCombo.select(INDEX_ALL);
@@ -137,12 +137,12 @@ public class ShippingLevelsSearchTab implements SelectionListener, IStoreMarketi
 		StoreService storeService = ServiceLocator.getService(ContextIdNames.STORE_SERVICE);
 		stores = storeService.findAllCompleteStores();
 		AuthorizationService.getInstance().removeUnathorizedStoresFrom(stores);
-		
+
 		for (Store store : stores) {
 			storeCombo.setData(store.getName(), store);
 			storeCombo.add(store.getName());
 		}
-		
+
 		int selectedIndex = stateCombo.getSelectionIndex();
 		stateCombo.removeAll();
 		stateCombo.setData(ShippingLevelsMessages.get().Active, true);
@@ -155,7 +155,7 @@ public class ShippingLevelsSearchTab implements SelectionListener, IStoreMarketi
 			stateCombo.select(selectedIndex);
 		}
 	}
-	
+
 	private void populateSortingControl() {
 		sortingCompositeControl.addSortTypeItem(ShippingLevelsMessages.get().ShippingLevelStoreColumnLabel, StandardSortBy.STORE_NAME, true);
 		sortingCompositeControl.addSortTypeItem(ShippingLevelsMessages.get().ShippingLevelRegionColumnLabel, StandardSortBy.REGION);
@@ -164,7 +164,7 @@ public class ShippingLevelsSearchTab implements SelectionListener, IStoreMarketi
 		sortingCompositeControl.addSortTypeItem(ShippingLevelsMessages.get().ShippingLevelNameColumnLabel, StandardSortBy.SERVICE_LEVEL_NAME);
 		sortingCompositeControl.addSortTypeItem(ShippingLevelsMessages.get().ShippingLevelState, StandardSortBy.ACTIVE);
 	}
-	
+
 	/**
 	 * Reinitialize filter list and try to save filter fields if it's possible,
 	 *  if it's not then reset filter fields.
@@ -208,7 +208,7 @@ public class ShippingLevelsSearchTab implements SelectionListener, IStoreMarketi
 
 		// Empty criteria to start
 		searchCriteria.clear();
-		
+
 		// Set search criteria
 		searchCriteria.setActiveFlag((Boolean) stateCombo.getData(stateCombo.getText()));
 
@@ -219,26 +219,26 @@ public class ShippingLevelsSearchTab implements SelectionListener, IStoreMarketi
 		if (shippingRegionCombo.getSelectionIndex() != INDEX_ALL) {
 			searchCriteria.setRegionExact(((ShippingRegion) shippingRegionCombo.getData(shippingRegionCombo.getText())).getName());
 		}
-		
-		searchCriteria.setMatchAll(searchCriteria.getActiveFlag() == null 
+
+		searchCriteria.setMatchAll(searchCriteria.getActiveFlag() == null
 				&& searchCriteria.getStoreExact() == null && searchCriteria.getRegionExact() == null);
-		
+
 		// handleEmptySearchCriteria();
 		sortingCompositeControl.updateSearchCriteriaValues();
-		searchRequestHelper.setSearchCriteria(searchCriteria);		
+		searchRequestHelper.setSearchCriteria(searchCriteria);
 		searchRequestHelper.executeSearch(null);
 	}
-	
+
 	/**
 	 * Unregister from ShippingLevelsEventService.
 	 */
 	public void dispose() {
 		// nothing to dispose
 	}
-	
+
 	/**
 	 * Gets the model object.
-	 * 
+	 *
 	 * @return model object
 	 */
 	public final ShippingServiceLevelSearchCriteria getModel() {
@@ -280,4 +280,3 @@ public class ShippingLevelsSearchTab implements SelectionListener, IStoreMarketi
 		return tabIndex;
 	}
 }
-

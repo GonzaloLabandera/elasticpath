@@ -114,7 +114,7 @@ public class EpRuleBaseImpl extends AbstractPersistableImpl implements EpRuleBas
 	 */
 	public static KieBase ruleBaseFactory(final byte[] ruleBaseStream) {
 		try (final ZipInputStream zippedFile = getZipInputStream(ruleBaseStream);
-			 final ObjectInputStream input = new DroolsObjectInputStream(zippedFile)
+			 final ObjectInputStream input = new DroolsObjectInputStream(zippedFile, EpRuleBaseImpl.class.getClassLoader())
 		) {
 			return (KieBase) input.readObject();
 		} catch (IOException | ClassNotFoundException e) {

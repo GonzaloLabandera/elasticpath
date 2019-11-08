@@ -13,7 +13,7 @@ import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
-import org.springframework.orm.jpa.JpaTransactionManager;
+import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import com.elasticpath.domain.ElasticPath;
@@ -41,7 +41,7 @@ public class MultiDatabaseManager {
 	protected PersistenceEngine persistenceEngine;
 
 	@Autowired
-	protected JpaTransactionManager transactionManager;
+	protected PlatformTransactionManager transactionManager;
 
 	@Autowired
 	protected ElasticPath elasticPath;

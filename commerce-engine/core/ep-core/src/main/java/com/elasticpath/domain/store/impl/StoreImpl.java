@@ -58,6 +58,7 @@ import com.elasticpath.domain.misc.SupportedCurrency;
 import com.elasticpath.domain.misc.SupportedLocale;
 import com.elasticpath.domain.payment.PaymentGateway;
 import com.elasticpath.domain.payment.impl.PaymentGatewayImpl;
+import com.elasticpath.domain.shoppingcart.CartType;
 import com.elasticpath.domain.store.CreditCardType;
 import com.elasticpath.domain.store.Store;
 import com.elasticpath.domain.store.StoreState;
@@ -195,6 +196,8 @@ public class StoreImpl extends AbstractPersistableImpl implements Store, Initial
 	private String emailSenderAddress;
 
 	private String storeAdminEmailAddress;
+
+	private Collection<CartType> shoppingCartTypes = new HashSet<>();
 
 	private Collection<Long> associatedStoreUids = new HashSet<>();
 
@@ -1114,5 +1117,18 @@ public class StoreImpl extends AbstractPersistableImpl implements Store, Initial
 	@Override
 	public boolean supportsPaymentGatewayType(final PaymentGatewayType paymentGatewayType) {
 		return getPaymentGatewayMap().containsKey(paymentGatewayType);
+	}
+
+	@Override
+	@ManyToMany(targetEntity = CartType.class, fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+	@JoinTable(name = "TSTORECARTTYPE", joinColumns = @JoinColumn(name = "STORE_UID"),
+			inverseJoinColumns = @JoinColumn(name = "CARTTYPE_UID"))
+	public Collection<CartType> getShoppingCartTypes() {
+		return shoppingCartTypes;
+	}
+
+	@Override
+	public void setShoppingCartTypes(final Collection<CartType> shoppingCartTypes) {
+		this.shoppingCartTypes = shoppingCartTypes;
 	}
 }

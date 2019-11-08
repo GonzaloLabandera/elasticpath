@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xsi:schemaLocation="
+				http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+		">
+
+	<bean id="entityModifiedListener" class="com.elasticpath.persistence.impl.EntityModifiedListener">
+		<property name="hdsSupportBean" ref="hdsSupportBean"/>
+		<property name="queryUtil" ref="queryUtil"/>
+	</bean>
+
+	<bean id="abstractReadOnlyEntityMangerFactory" class="com.elasticpath.persistence.openjpa.impl.ConfigurableLocalContainerEntityManagerFactoryBean"
+		  init-method="getObject"
+		  abstract="true">
+		<property name="persistenceUnitManager" ref="readOnlyPersistenceUnitManager"/>
+		<property name="lifecycleListeners" ref="entityManagerLifecycleListeners"/>
+		<property name="hdsSupportSwitch" ref="hdsSupportSwitch"/>
+		<property name="fallbackEntityManagerFactory" ref="entityManagerFactory"/>
+		<property name="jpaPropertyMap">
+			<map>
+				<entry key="openjpa.DataCacheManager" value="default"/>
+				<entry key="openjpa.DataCache" value="false"/>
+			</map>
+		</property>
+	</bean>
+
+	<bean id="readOnlyPersistenceUnitManager" parent="basePersistenceUnitManager">
+		<property name="defaultDataSource" ref="readOnlyDataSource"/>
+	</bean>
+
+	<bean id="readOnlyEntityManagerFactory" parent="abstractReadOnlyEntityMangerFactory" depends-on="entityManagerFactory"/>
+
+	<bean id="readOnlyEntityManager" class="org.springframework.orm.jpa.support.SharedEntityManagerBean">
+		<property name="entityManagerFactory">
+			<ref bean="readOnlyEntityManagerFactory"/>
+		</property>
+	</bean>
+
+	<bean id="readOnlySessionFactory" class="com.elasticpath.persistence.openjpa.impl.JpaSessionFactoryImpl">
+		<property name="entityManagerFactory" ref="readOnlyEntityManagerFactory"/>
+		<property name="transactionManager" ref="transactionManager"/>
+	</bean>
+
+	<bean id="queryRouter" class="com.elasticpath.persistence.openjpa.routing.QueryRouter" init-method="init">
+		<property name="readWriteEntityManager" ref="entityManager"/>
+		<property name="readOnlyEntityManager" ref="readOnlyEntityManager"/>
+		<property name="queryRouterMetaInfoHolder" ref="queryRouterMetaInfoHolder"/>
+		<property name="hdsSupportBean" ref="hdsSupportBean"/>
+	</bean>
+
+	<bean id="fetchPlanHelper" class="com.elasticpath.persistence.openjpa.util.OpenJPAFetchPlanHelperImpl">
+		<property name="hdsSupportBean" ref="hdsSupportBean"/>
+	</bean>
+
+	<bean id="namedQueryParser" class="com.elasticpath.persistence.openjpa.util.NamedQueryParser">
+		<property name="readWriteEntityManager" ref="entityManager"/>
+	</bean>
+
+	<bean id="jpaAnnotationParser" class="com.elasticpath.persistence.openjpa.util.JPAAnnotationParser"/>
+
+	<bean id="queryReader" class="com.elasticpath.persistence.openjpa.impl.QueryReader"/>
+	<bean id="queryUtil" class="com.elasticpath.persistence.openjpa.util.QueryUtil"/>
+
+	<bean id="queryRouterMetaInfoHolder" class="com.elasticpath.persistence.openjpa.util.QueryRouterMetaInfoHolder">
+		<property name="hdsSupportBean" ref="hdsSupportBean"/>
+		<property name="namedQueryParser" ref="namedQueryParser"/>
+		<property name="jpaAnnotationParser" ref="jpaAnnotationParser"/>
+	</bean>
+
+	<bean id="hdsSupportSwitch" class="com.elasticpath.persistence.openjpa.util.HDSSupportSwitch">
+		<property name="hdsSupportBean" ref="hdsSupportBean"/>
+		<property name="readOnlyDataSource" ref="readOnlyDataSource"/>
+	</bean>
+
+	<bean id="hdsSupportBean" class="com.elasticpath.persistence.openjpa.routing.HDSSupportBeanImpl"/>
+
+	<!-- @@@@@@@@@ Query Executors @@@@@@@@@@@@@@@@ -->
+	<bean id="abtractQueryExecutor" class="com.elasticpath.persistence.openjpa.executors.AbstractQueryExecutor" abstract="true">
+		<property name="queryRouter" ref="queryRouter"/>
+		<property name="queryUtil" ref="queryUtil"/>
+		<property name="fetchPlanHelper" ref="fetchPlanHelper"/>
+	</bean>
+
+	<bean id="identityQueryExecutor" class="com.elasticpath.persistence.openjpa.executors.IdentityQueryExecutor" parent="abtractQueryExecutor"
+		  scope="prototype"/>
+	<bean id="dynamicQueryExecutor" class="com.elasticpath.persistence.openjpa.executors.DynamicQueryExecutor" parent="abtractQueryExecutor"
+		  scope="prototype"/>
+	<bean id="namedQueryExecutor" class="com.elasticpath.persistence.openjpa.executors.NamedQueryExecutor" parent="abtractQueryExecutor"
+		  scope="prototype"/>
+	<bean id="namedQueryWithListExecutor" class="com.elasticpath.persistence.openjpa.executors.NamedQueryWithListExecutor"
+		  parent="abtractQueryExecutor" scope="prototype"/>
+
+</beans>

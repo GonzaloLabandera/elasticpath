@@ -5,6 +5,7 @@ package com.elasticpath.cmclient.catalog.wizards.product;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Locale;
 
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ILabelProvider;
@@ -16,6 +17,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Table;
 
 import com.elasticpath.cmclient.catalog.CatalogMessages;
+import com.elasticpath.cmclient.core.CorePlugin;
 import com.elasticpath.cmclient.core.ServiceLocator;
 import com.elasticpath.cmclient.core.ui.framework.IEpLayoutData;
 import com.elasticpath.cmclient.policy.common.PolicyActionContainer;
@@ -161,7 +163,13 @@ public abstract class AbstractAttributesDualList extends AbstractPolicyAwareDual
 		@Override
 		public String getText(final Object element) {
 			final Attribute attr = (Attribute) element;
-			return attr.getDisplayName(attr.getCatalog().getDefaultLocale(), true, true);
+			Locale locale;
+			if (attr.getCatalog() == null) {
+				locale = CorePlugin.getDefault().getDefaultLocale();
+			} else {
+				locale = attr.getCatalog().getDefaultLocale();
+			}
+			return attr.getDisplayName(locale, true, true);
 		}
 	}
 

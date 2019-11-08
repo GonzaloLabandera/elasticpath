@@ -62,5 +62,13 @@
 			<to>offer-items</to>
 		</relationship>
 
+		<relationship>
+			<name>offer-for-item</name>
+			<description><![CDATA[Offer for an item]]></description>
+			<rel>offer</rel>
+			<from>items.item</from>
+			<to>offer</to>
+		</relationship>
+
 	</family>
 </definitions>

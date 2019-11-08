@@ -137,11 +137,88 @@
 				WHERE facet.facetGuid IN (:facetGuids)
 			</query>
 		</named-query>
-		<named-query name="SELECT_ALL_GUIDS">
+		<named-query name="SELECT_ALL_FACET_GUIDS">
 			<query>
 				SELECT facet.facetGuid
 				FROM FacetImpl facet
 			</query>
 		</named-query>
+
+	<named-query name="SORT_ATTRIBUTE_FIND_BY_GUID">
+		<query>
+			SELECT sa
+			FROM SortAttributeImpl sa
+			WHERE sa.guid = ?1
+		</query>
+	</named-query>
+
+	<named-query name="SELECT_ALL_SORT_ATTRIBUTE_GUIDS">
+		<query>
+			SELECT sa.guid
+			FROM SortAttributeImpl sa
+		</query>
+	</named-query>
+
+	<named-query name="SORT_ATTRIBUTE_FIND_BY_GUIDS">
+		<query>
+			SELECT sa
+			FROM SortAttributeImpl sa
+			WHERE sa.guid IN (:sortAttributeGuids)
+		</query>
+	</named-query>
+
+	<named-query name="SORT_ATTRIBUTE_FIND_BY_UID">
+		<query>
+			SELECT sa
+			FROM SortAttributeImpl sa
+			WHERE sa.uidPk = ?1
+		</query>
+	</named-query>
+
+	<named-query name="SORT_ATTRIBUTE_FIND_BY_STORE_CODE">
+		<query>
+			SELECT sa
+			FROM SortAttributeImpl sa
+			WHERE sa.storeCode = ?1
+		</query>
+	</named-query>
+
+	<named-query name="SORT_ATTRIBUTE_FIND_BY_STORE_CODE_AND_LOCALE_CODE">
+		<query>
+			SELECT sa.guid
+			FROM SortAttributeImpl sa JOIN sa.localizedNames sln
+			WHERE sa.storeCode = ?1
+			AND sln.localeCode = ?2
+		</query>
+	</named-query>
+
+	<named-query name="SORT_ATTRIBUTE_NAME_BY_GUID_AND_LOCALE_CODE">
+		<query>
+			SELECT sa.businessObjectId, sa.descending, sa.sortAttributeGroup, sln.name
+			FROM SortAttributeImpl sa JOIN sa.localizedNames sln
+			WHERE sa.guid = ?1
+			AND sln.localeCode = ?2
+		</query>
+	</named-query>
+
+	<named-query name="FIND_SORTABLE_PRODUCT_ATTRIBUTES">
+		<query>
+			SELECT a
+			FROM AttributeImpl a
+			WHERE a.attributeUsageIdInternal = 2
+			AND (a.catalog.uidPk IN (:catalogIds) OR a.global = TRUE)
+			AND a.attributeTypeId &lt;= 5
+		</query>
+	</named-query>
+
+	<named-query name="DEFAULT_SORT_ATTRIBUTE_FIND_BY_STORE_CODE">
+		<query>
+			SELECT sa
+			FROM SortAttributeImpl sa
+			WHERE sa.storeCode = ?1
+			AND sa.defaultAttribute = true
+		</query>
+	</named-query>
+
 </entity-mappings>
 

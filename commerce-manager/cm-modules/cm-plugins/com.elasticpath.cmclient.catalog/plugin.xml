@@ -37,7 +37,7 @@
 
       <view
             name="%catalogSearchView.name"
-            icon="icons/search_default_22.png"
+            icon="icons/empty_1x1.png"
             category="com.elasticpath.cmclient.catalog.category.main"
             class="com.elasticpath.cmclient.catalog.views.CatalogSearchView"
             id="com.elasticpath.cmclient.catalog.views.CatalogSearchView">
@@ -73,7 +73,7 @@
        <view
              category="com.elasticpath.cmclient.catalog.category.main"
              class="com.elasticpath.cmclient.catalog.views.BrowseProductListView"
-             icon="icons/product_default_22.png"
+             icon="icons/empty_1x1.png"
              id="com.elasticpath.cmclient.catalog.views.BrowseProductListView"
              name="%browseProductListView.name">
        </view>
@@ -505,12 +505,12 @@
        <statePolicyContribution
              priority="10"
              statePolicy="com.elasticpath.cmclient.catalog.policy.CatalogAddEditCartItemModifierFieldDialogPolicy"
-             targetId="addEditCartItemModifierFieldDialog">
+             targetId="addEditModifierFieldDialog">
          </statePolicyContribution>
          <statePolicyContribution
              priority="10"
              statePolicy="com.elasticpath.cmclient.catalog.policy.AddEditCartItemModifierFieldOptionDialogPolicy"
-             targetId="addEditCartItemModifierFieldOptionDialog">
+             targetId="addEditModifierFieldOptionDialog">
          </statePolicyContribution>
     </extension>
 
@@ -561,7 +561,7 @@
        </dialog>
        <dialog
         class="com.elasticpath.cmclient.catalog.dialogs.cartitemmodifier.AddEditCartItemModifierFieldDialog"
-        objectType="CartItemModifierField">
+        objectType="ModifierField">
        </dialog>
        <dialog
         class="com.elasticpath.cmclient.catalog.dialogs.cartitemmodifier.UpdatableCartItemModifierGroupDialog"

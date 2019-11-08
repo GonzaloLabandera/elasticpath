@@ -6,6 +6,8 @@ package com.elasticpath.search.index.solr.builders.impl;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import java.util.concurrent.TimeUnit;
+
 import org.apache.solr.client.solrj.SolrClient;
 import org.junit.Test;
 
@@ -17,9 +19,9 @@ public class SpellingUpdaterTest {
 	//in millis
 	private static final int ONE_SECOND_AS_MS = 1000;
 	private static final int TWO_SECONDS_AS_MS = 2000;
-	private static final int THREE_SECONDS_AS_MS = 3000;
-	
-	
+	private static final int FIVE_SECONDS_AS_MS = 5000;
+
+
 	/**
 	 * Tests that a call to IntervalSpellingUpdater.updateSpelling method will return false if
 	 * the initial 'wait to rebuild' interval has not elapsed.
@@ -37,10 +39,9 @@ public class SpellingUpdaterTest {
 	/**
 	 * Tests that a call to IntervalSpellingUpdater.updateSpelling method will return true
 	 * once the interval has elapsed.
-	 * @throws InterruptedException if the Thread.sleep call gets interrupted (it wont)
 	 */
 	@Test
-	public void testUpdateSpellingDoesExecuteAfterInitialIntervalHasElapsed() throws InterruptedException {
+	public void testUpdateSpellingDoesExecuteAfterInitialIntervalHasElapsed() {
 		TestProductIndexBuilder testProductIndexBuilder  = new TestProductIndexBuilder();
 		//pass zero so that IntervalTimer.hasIntervalPassed always returns true
 		testProductIndexBuilder.createSpellingUpdater(0); 
@@ -53,11 +54,10 @@ public class SpellingUpdaterTest {
 	/**
 	 * Tests that a call to IntervalSpellingUpdater.updateSpelling method will return true
 	 * once the interval has elapsed, but that a further call to IntervalSpellingUpdater.updateSpelling
-	 * will return false. 
-	 * @throws InterruptedException if the Thread.sleep call gets interrupted (it wont)
+	 * will return false.
 	 */
 	@Test
-	public void testUpdateSpellingDoesNotExecuteAgainWhilstAlreadyExecuting() throws InterruptedException {
+	public void testUpdateSpellingDoesNotExecuteAgainWhilstAlreadyExecuting() {
 		TestProductIndexBuilder testProductIndexBuilder  = new TestProductIndexBuilder();
 		//pass zero so that IntervalTimer.hasIntervalPassed always returns true
 		testProductIndexBuilder.createSpellingUpdater(0);
@@ -74,9 +74,9 @@ public class SpellingUpdaterTest {
 	
 	/**
 	 * Tests that a call to IntervalSpellingUpdater.updateSpelling method will return true
-	 * once the interval has elapsed, waits enough time for the Thread to run (10 secs) and
+	 * once the interval has elapsed, waits enough time for the Thread to run (5 secs) and
 	 * that a further call to IntervalSpellingUpdater.updateSpelling
-	 * will return true. 
+	 * will return true.
 	 * @throws InterruptedException if the Thread.sleep call gets interrupted (it wont)
 	 */
 	@Test
@@ -88,9 +88,9 @@ public class SpellingUpdaterTest {
 		boolean spellingIndexRebuildStarted = testProductIndexBuilder.getSpellingUpdater().rebuildSpellingIndex(null);
 		
 		assertTrue("spelling index should rebuild after interval has elapsed.", spellingIndexRebuildStarted);
-		
-		Thread.sleep(THREE_SECONDS_AS_MS); //let the thread finish
-		
+
+		TimeUnit.MILLISECONDS.sleep(FIVE_SECONDS_AS_MS);  //let the thread finish
+
 		//the TestSpellingUpdaterRunnable Thread should run for 2 seconds (see below) so 
 		//the IntervalSpellingUpdater is now eligible to run again
 		spellingIndexRebuildStarted = testProductIndexBuilder.getSpellingUpdater().rebuildSpellingIndex(null);

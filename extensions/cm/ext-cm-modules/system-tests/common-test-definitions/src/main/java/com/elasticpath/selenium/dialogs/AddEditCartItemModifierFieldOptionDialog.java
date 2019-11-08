@@ -12,14 +12,14 @@ public class AddEditCartItemModifierFieldOptionDialog extends AbstractDialog {
 	 */
 	public static final String ADD_FIELD_OPTION_PARENT_CSS
 			= "div[automation-id*='com.elasticpath.cmclient.catalog.CatalogMessages."
-			+ "AddEditCartItemModifierFieldOptionDialog_WinIitle'][widget-type='Shell'] ";
+			+ "AddEditModifierFieldOptionDialog_WinIitle'][widget-type='Shell'] ";
 	private static final String FIELD_OPTION_CODE_INPUT_CSS = ADD_FIELD_OPTION_PARENT_CSS
-			+ "div[automation-id='com.elasticpath.cmclient.catalog.CatalogMessages.AddEditCartItemModifierFieldOptionDialog_Value'] input";
+			+ "div[automation-id='com.elasticpath.cmclient.catalog.CatalogMessages.AddEditModifierFieldOptionDialog_Value'] input";
 	private static final String DISPLAY_NAME_INPUT_CSS = ADD_FIELD_OPTION_PARENT_CSS
-			+ "div[automation-id='com.elasticpath.cmclient.catalog.CatalogMessages.AddEditCartItemModifierFieldOptionDialog_DisplayName']"
+			+ "div[automation-id='com.elasticpath.cmclient.catalog.CatalogMessages.AddEditModifierFieldOptionDialog_DisplayName']"
 			+ "[widget-type='CCombo']+[widget-type='Text'] input";
 	private static final String ADD_BUTTON_CSS = ADD_FIELD_OPTION_PARENT_CSS
-			+ "div[automation-id='com.elasticpath.cmclient.catalog.CatalogMessages.AddEditCartItemModifierFieldOptionDialog_Add'][seeable='true']";
+			+ "div[automation-id='com.elasticpath.cmclient.catalog.CatalogMessages.AddEditModifierFieldOptionDialog_Add'][seeable='true']";
 	private static final String OK_BUTTON_CSS = ADD_FIELD_OPTION_PARENT_CSS
 			+ "div[automation-id='com.elasticpath.cmclient.core.CoreMessages.AbstractEpDialog_ButtonOK']";
 
@@ -53,6 +53,15 @@ public class AddEditCartItemModifierFieldOptionDialog extends AbstractDialog {
 	public void enterFieldOptionDisplayName(final String displayName) {
 		this.displayName = displayName;
 		clearAndType(DISPLAY_NAME_INPUT_CSS, displayName);
+	}
+
+	/**
+	 * Returns field option display name retrieved from form.
+	 *
+	 * @return field option display name retrieved from form.
+	 */
+	public String getFieldOptionDisplayName() {
+		return getDriver().findElement(By.cssSelector(DISPLAY_NAME_INPUT_CSS)).getAttribute("value");
 	}
 
 	/**

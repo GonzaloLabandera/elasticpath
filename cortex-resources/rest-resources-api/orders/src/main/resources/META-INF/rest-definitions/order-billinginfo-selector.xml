@@ -3,12 +3,6 @@
 
 	<family>
 		<name>orders</name>
-		<description>
-			<![CDATA[
-Use a selector to select the billing address to use for the purchase. Follow the workflow to read the billing address info
-and then create a choice to select the billing address to use for the purchase.
-				]]>
-		</description>
 
 		<resource>
 			<name>billingaddress-info-selector</name>

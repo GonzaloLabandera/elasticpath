@@ -30,4 +30,12 @@ public interface ShoppingItemService {
 	 * @throws com.elasticpath.base.exception.EpServiceException on error
 	 */
 	ShoppingItem saveOrUpdate(ShoppingItem shoppingItem);
+
+	/**
+	 * Delete shopping items using provided list of guids.
+	 *
+	 * @param guids the list of item guids.
+	 * @return the number of deleted items.
+	 */
+	int deleteItemsByGuids(String... guids);
 }

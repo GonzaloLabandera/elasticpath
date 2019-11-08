@@ -48,6 +48,22 @@ public interface JmsTestConsumer {
 	List<TextMessage> readText(long readTimeout);
 
 	/**
+	 * Reads all messages from a channel and returns them as a list of JSON objects.
+	 * Uses the default read timeout configured in the properties file.
+	 *
+	 * @return the messages as a list of JSONObject objects
+	 */
+	List<JSONObject> readByte();
+
+	/**
+	 * Reads all messages from a channel and returns them as a list of JSON objects.
+	 *
+	 * @param readTimeout the time to wait in ms for the read to complete.
+	 * @return the messages as a list of JSONObject objects
+	 */
+	List<JSONObject> readByte(long readTimeout);
+
+	/**
 	 * Deletes all messages from a channel.
 	 */
 	void drain();

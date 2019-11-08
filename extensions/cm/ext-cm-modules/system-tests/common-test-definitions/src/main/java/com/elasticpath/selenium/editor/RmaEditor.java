@@ -4,6 +4,7 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 
 import com.elasticpath.selenium.common.AbstractPageObject;
+import com.elasticpath.selenium.util.Constants;
 
 /**
  * RMA Editor.
@@ -17,7 +18,10 @@ public class RmaEditor extends AbstractPageObject {
 	private static final String EDITOR_BUTTON_CSS = EDITOR_PANE_PARENT_CSS + "div[widget-id='%s'][seeable='true']";
 	private static final String ITEMS_TABLE_PARENT_CSS = EDITOR_PANE_PARENT_CSS + "div[widget-id='Order Return Details Table'] ";
 	private static final String RETURNED_QUANTITY_COLUMN_CSS = ITEMS_TABLE_PARENT_CSS + "div[row-id='%s'] div[column-num='4']";
-	private static final String RETURNED_QUANTITY_COLUMN_INPUT_CSS = ITEMS_TABLE_PARENT_CSS + "input:not([readonly])";
+	private static final String RETURNED_QUANTITY_COLUMN_INPUT_CSS = ITEMS_TABLE_PARENT_CSS
+			+ "div:not([appearance-id='ccombo-field']) > input:not([readonly])";
+	private static final String RETURNED_QUANTITY_COLUMN_DISABLED_INPUT_CSS = ITEMS_TABLE_PARENT_CSS
+			+ "div:not([appearance-id='ccombo-field'])[style*='display: none'] > input:not([readonly])";
 	private static final String RETURNED_STATE_COLUMN_CSS = ITEMS_TABLE_PARENT_CSS + "div[row-id='%s'] div[column-num='5']";
 
 	/**
@@ -38,6 +42,14 @@ public class RmaEditor extends AbstractPageObject {
 	 */
 	public void setReturnedQuantity(final String returnedSku, final String returnedQuantity) {
 		click(getDriver().findElement(By.cssSelector(String.format(RETURNED_QUANTITY_COLUMN_CSS, returnedSku))));
+		int count = 0;
+		setWebDriverImplicitWait(1);
+		while (isElementPresent(By.cssSelector(String.format(RETURNED_QUANTITY_COLUMN_DISABLED_INPUT_CSS, returnedSku))) && count < Constants.RETRY_COUNTER_3) {
+			sleep(500);
+			click(getDriver().findElement(By.cssSelector(String.format(RETURNED_QUANTITY_COLUMN_CSS, returnedSku))));
+			count++;
+		}
+		setWebDriverImplicitWaitToDefault();
 		clearAndType(RETURNED_QUANTITY_COLUMN_INPUT_CSS, returnedQuantity);
 		click(getDriver().findElement(By.cssSelector(String.format(RETURNED_STATE_COLUMN_CSS, returnedSku))));
 	}

@@ -140,14 +140,24 @@ public class CustomerGroupDtoAssemblerTest {
 		return new BeanFactory() {
 			@Override
 			public Object getBean(final String name) {
-				if (ContextIdNames.CUSTOMER_ROLE.equals(name)) {
-					return new CustomerRoleImpl();
-				}
 				return null;
 			}
 
 			@Override
 			public <T> Class<T> getBeanImplClass(final String beanName) {
+				return null;
+			}
+
+			@Override
+			public <T> T getPrototypeBean(final String name, final Class<T> clazz) {
+				if (ContextIdNames.CUSTOMER_ROLE.equals(name)) {
+					return (T) new CustomerRoleImpl();
+				}
+				return null;
+			}
+
+			@Override
+			public <T> T getSingletonBean(final String name, final Class<T> clazz) {
 				return null;
 			}
 		};

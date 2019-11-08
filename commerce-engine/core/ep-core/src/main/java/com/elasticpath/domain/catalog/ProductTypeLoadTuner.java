@@ -44,14 +44,14 @@ public interface ProductTypeLoadTuner extends LoadTuner {
 	 *
 	 * @return <code>true</code> if cart item modifier groups is requested.
 	 */
-	boolean isLoadingCartItemModifierGroups();
+	boolean isLoadingModifierGroups();
 
 	/**
 	 * Sets the flag of loading cart item modifier groups.
 	 *
 	 * @param flag sets it to <code>true</code> to request loading cart item modifier groups.
 	 */
-	void setLoadingCartItemModifierGroups(boolean flag);
+	void setLoadingModifierGroups(boolean flag);
 
 	/**
 	 * Returns <code>true</code> if this load tuner is super set of the given load tuner, otherwise, <code>false</code>.

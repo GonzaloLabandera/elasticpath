@@ -14,8 +14,8 @@ import org.springframework.util.Assert;
  * This is the {@link Supplier} equivalent of Spring's {@link org.springframework.beans.factory.config.ProviderCreatingFactoryBean}
  * class which allows code which takes {@link Supplier} arguments to be dependency injected via a Spring prototype.
  * <p>
- * The reason this is useful, rather than just having the bean under DI injected with a {@link javax.inject.Provider} rather than a {@link Supplier}
- * is that {@link javax.inject.Provider} is designed for DI and so having the bean declare a field with that type implicitly implies that this bean
+ * The reason this is useful, rather than just having the bean under DI injected with a {javax.inject.Provider} rather than a {@link Supplier}
+ * is that {javax.inject.Provider} is designed for DI and so having the bean declare a field with that type implicitly implies that this bean
  * will be created by a DI framework, whereas using a {@link Supplier} the class is deliberately ignoring whether it is being instantiated
  * manually or via a DI framework, it just wants a standard {@link Supplier} object passed in and if it is supplied via a DI framework,
  * it is irrelevant.

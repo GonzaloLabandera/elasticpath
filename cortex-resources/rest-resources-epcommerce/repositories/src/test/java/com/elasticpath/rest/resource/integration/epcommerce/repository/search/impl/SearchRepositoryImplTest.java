@@ -17,6 +17,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.stream.IntStream;
 
+import com.google.common.collect.ImmutableList;
 import io.reactivex.Maybe;
 import io.reactivex.Single;
 import org.junit.Before;
@@ -31,6 +32,8 @@ import com.elasticpath.domain.catalog.Category;
 import com.elasticpath.domain.catalog.Product;
 import com.elasticpath.domain.catalog.impl.ProductImpl;
 import com.elasticpath.domain.search.Facet;
+import com.elasticpath.domain.search.SortAttribute;
+import com.elasticpath.domain.search.SortValue;
 import com.elasticpath.domain.store.Store;
 import com.elasticpath.persistence.api.EpPersistenceException;
 import com.elasticpath.rest.ResourceOperationFailure;
@@ -50,6 +53,7 @@ import com.elasticpath.rest.resource.integration.epcommerce.repository.transform
 import com.elasticpath.rest.resource.integration.epcommerce.repository.transform.impl.ReactiveAdapterImpl;
 import com.elasticpath.service.search.FacetService;
 import com.elasticpath.service.search.ProductCategorySearchCriteria;
+import com.elasticpath.service.search.SortAttributeService;
 import com.elasticpath.service.search.index.IndexSearchResult;
 import com.elasticpath.service.search.index.IndexSearchService;
 import com.elasticpath.service.search.query.KeywordSearchCriteria;
@@ -61,10 +65,16 @@ import com.elasticpath.service.search.solr.IndexUtility;
 @RunWith(MockitoJUnitRunner.class)
 public class SearchRepositoryImplTest {
 	private static final String STORE_CODE = "store";
+	private static final String LOCALE_CODE = Locale.ENGLISH.getLanguage();
 	private static final String PAGINATION_SETTING = "COMMERCE/STORE/listPagination";
 	private static final Integer DEFAULT_PAGE_SIZE = 10;
 	private static final int INVALID_PAGE_SIZE = -10;
 	private static final String EXPECTED_DISPLAY_NAME = "expectedDisplayName";
+	@Mock
+	private Store store;
+
+	@Mock
+	private SortAttributeService sortAttributeService;
 	@Mock
 	private IndexSearchService indexSearchService;
 	@Mock
@@ -106,8 +116,9 @@ public class SearchRepositoryImplTest {
 		repository.setStoreProductRepository(storeProductRepository);
 		repository.setResourceOperationContext(resourceOperationContext);
 		repository.setFacetService(facetService);
-		repository.setStoreRepository(storeRepository);
 		repository.setCategoryRepository(categoryRepository);
+		repository.setStoreRepository(storeRepository);
+		repository.setSortAttributeService(sortAttributeService);
 	}
 
 	@Test
@@ -374,23 +385,65 @@ public class SearchRepositoryImplTest {
 				.thenReturn(Single.just(store));
 
 		when(store.getCode()).thenReturn(STORE_CODE);
+		String categoryCode = "categoryCode";
 		when(categoryRepository.findByStoreAndCategoryCode(STORE_CODE,
-				"categoryCode")).thenReturn(Single.just(category));
+				categoryCode)).thenReturn(Single.just(category));
 		when(category.getUidPk()).thenReturn(categoryUID);
 		when(category.getCatalog()).thenReturn(catalog);
 		when(catalog.getCode()).thenReturn("CatalogCode");
 
+		OfferSearchData offerSearchData = new OfferSearchData(1, DEFAULT_PAGE_SIZE, STORE_CODE, appliedFacets, keyword);
+		offerSearchData.setCategoryCode(categoryCode);
 
-		Single<ProductCategorySearchCriteria> categoryCode = repository.getSearchCriteria("categoryCode", STORE_CODE, Locale.ENGLISH,
-				currency, appliedFacets, keyword);
-		categoryCode
+		Single<ProductCategorySearchCriteria> searchCriteria = repository.getSearchCriteria(offerSearchData, Locale.ENGLISH, currency);
+
+		searchCriteria
 				.test()
 				.assertNoErrors()
 				.assertValue(criteria -> criteria.getCategoryUid().equals(categoryUID))
 				.assertValue(criteria -> criteria.getCurrency().equals(currency))
 				.assertValue(criteria -> criteria.getLocale().equals(Locale.ENGLISH))
 				.assertValue(criteria -> criteria.getCatalogCode().equals("CatalogCode"));
+	}
 
+	@Test
+	public void shouldReturnAttributeGuids() {
+		String guid = "guid";
+		String guid2 = "guid2";
+
+		when(storeRepository.findStoreAsSingle(STORE_CODE)).thenReturn(Single.just(store));
+		when(store.getCode()).thenReturn(STORE_CODE);
+		when(sortAttributeService.findSortAttributeGuidsByStoreCodeAndLocalCode(STORE_CODE, LOCALE_CODE))
+				.thenReturn(ImmutableList.of(guid, guid2));
+
+		repository.getSortAttributeGuidsForStoreAndLocale(STORE_CODE, LOCALE_CODE)
+				.test()
+				.assertValueCount(2);
+	}
+
+	@Test
+	public void shouldReturnSortValue() {
+		SortValue sortValue = mock(SortValue.class);
+		when(sortAttributeService.findSortValueByGuidAndLocaleCode(STORE_CODE, LOCALE_CODE))
+				.thenReturn(sortValue);
+
+		repository.getSortValueByGuidAndLocaleCode(STORE_CODE, LOCALE_CODE)
+				.test()
+				.assertValueCount(1);
+	}
+
+	@Test
+	public void shouldReturnSortAttribute() {
+		SortAttribute sortAttribute = mock(SortAttribute.class);
+
+		when(storeRepository.findStoreAsSingle(STORE_CODE)).thenReturn(Single.just(store));
+		when(store.getCode()).thenReturn(STORE_CODE);
+		when(sortAttributeService.getDefaultSortAttributeForStore(STORE_CODE)).thenReturn(sortAttribute);
+
+		repository.getDefaultSortAttributeForStore(STORE_CODE)
+				.test()
+				.assertNoErrors()
+				.assertValueCount(1);
 	}
 
 }

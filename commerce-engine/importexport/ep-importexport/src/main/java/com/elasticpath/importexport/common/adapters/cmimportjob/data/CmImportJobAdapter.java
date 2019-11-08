@@ -168,6 +168,6 @@ public class CmImportJobAdapter extends AbstractDomainAdapterImpl<ImportJob, CmI
 
 	@Override
 	public ImportJob createDomainObject() {
-		return getBeanFactory().getBean(ContextIdNames.IMPORT_JOB);
+		return getBeanFactory().getPrototypeBean(ContextIdNames.IMPORT_JOB, ImportJob.class);
 	}
 }

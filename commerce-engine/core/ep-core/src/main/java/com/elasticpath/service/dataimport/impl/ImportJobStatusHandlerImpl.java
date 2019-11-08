@@ -186,7 +186,7 @@ public class ImportJobStatusHandlerImpl implements ImportJobStatusHandler {
 			LOG.debug("Found an existing status: " + statusInDb);
 			return statusInDb;
 		}
-		ImportJobStatusMutator importJobStatus = beanFactory.getBean(ContextIdNames.IMPORT_JOB_STATUS);
+		ImportJobStatusMutator importJobStatus = beanFactory.getPrototypeBean(ContextIdNames.IMPORT_JOB_STATUS, ImportJobStatusMutator.class);
 		importJobStatus.setImportJob(importJob);
 		importJobStatus.setStartedBy(initiator);
 		importJobStatus.setState(ImportJobState.QUEUED_FOR_VALIDATION);

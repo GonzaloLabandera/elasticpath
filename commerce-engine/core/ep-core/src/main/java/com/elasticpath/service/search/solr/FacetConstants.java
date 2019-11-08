@@ -3,11 +3,14 @@
  */
 package com.elasticpath.service.search.solr;
 
+import java.util.Map;
 import java.util.Set;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 
 import com.elasticpath.domain.catalogview.SizeType;
+import com.elasticpath.domain.search.SortAttributeType;
 
 /**
  * Facet constants.
@@ -26,6 +29,18 @@ public final class FacetConstants {
 	 * Price.
 	 */
 	public static final String PRICE = "Price";
+	/**
+	 * Price.
+	 */
+	public static final String FEATURED = "Featured";
+	/**
+	 * Price.
+	 */
+	public static final String SALES_COUNT = "Sales Count";
+	/**
+	 * Relevance.
+	 */
+	public static final String RELEVANCE = "Relevance";
 	/**
 	 * Category.
 	 */
@@ -86,6 +101,25 @@ public final class FacetConstants {
 	 * All indexed size attributes.
 	 */
 	public static final Set<String> SIZE_ATTRIBUTES = ImmutableSet.of(HEIGHT, WEIGHT, LENGTH, WIDTH);
+
+	/**
+	 * Attribute label.
+	 */
+	public static final String ATTRIBUTE_LABEL = "(ATR) ";
+
+	/**
+	 * Field label.
+	 */
+	public static final String FIELD_LABEL = "(FLD) ";
+
+	/**
+	 * Sort field group.
+	 */
+	public static final Map<String, SortAttributeType> SORT_FIELD_GROUP = ImmutableMap.of(PRODUCT_NAME, SortAttributeType.BOOLEAN_TYPE,
+			PRICE, SortAttributeType.NUMBER_TYPE,
+			SALES_COUNT, SortAttributeType.NUMBER_TYPE,
+			FEATURED, SortAttributeType.BOOLEAN_TYPE,
+			RELEVANCE, SortAttributeType.STRING_TYPE);
 
 	private FacetConstants() {
 		// prevent instantiation

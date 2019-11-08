@@ -14,7 +14,7 @@ import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.contentspace.ContentSpace;
 import com.elasticpath.domain.contentspace.impl.ContentSpaceImpl;
 import com.elasticpath.persistence.api.PersistenceEngine;
-import com.elasticpath.service.misc.FetchPlanHelper;
+import com.elasticpath.persistence.openjpa.util.FetchPlanHelper;
 import com.elasticpath.service.query.CriteriaBuilder;
 import com.elasticpath.service.query.QueryCriteria;
 import com.elasticpath.service.query.QueryService;
@@ -57,7 +57,6 @@ public class ContentSpaceQueryServiceTest {
 			{
 				allowing(beanFactory).getBeanImplClass(ContextIdNames.CONTENTSPACE);
 				will(returnValue(ContentSpaceImpl.class));
-				allowing(fetchPlanHelper).clearFetchPlan();
 			}
 		});
 	}

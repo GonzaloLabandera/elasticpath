@@ -56,6 +56,20 @@ public class RawJsonDefinitions {
 	}
 
 	/**
+	 * Reads messages from topic channel.
+	 *
+	 * @param queueName name of the channel to read messages from
+	 */
+	@When("^I read byte message from queue (.+)$")
+	public void getByteQueueMessage(final String queueName) {
+		jsonObjectList = jmsTestFactory.getConsumer(queueName, JmsChannelType.QUEUE).readByte();
+
+		assertThat(jsonObjectList)
+				.as("Json Object is empty")
+				.isNotEmpty();
+	}
+
+	/**
 	 * Verifies email value.
 	 *
 	 * @param key   the key

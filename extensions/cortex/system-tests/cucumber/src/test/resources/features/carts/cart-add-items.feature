@@ -161,3 +161,27 @@ Feature: Cart Add Items
     Examples:
       | ITEM_1_CODE                                 | ITEM_2_CODE | ITEM_1_QTY  | ITEM_2_QTY | TOTAL_QTY | NUM_LINE_ITEMS | ITEM_1_INVENTORY |
       | physicalNoInventory_sku                     | sony_bt_sku | 25          | 3          | 0         | 0              | 0                |
+
+  Scenario Outline: Single SKU products use product enable date and not the SKU enable date.
+    When I add the following SKU codes and their quantities to the cart
+      | code               | quantity     |
+      | <ITEM_1_CODE>      | <ITEM_QTY>   |
+    Then the HTTP status code is 201
+    And the cart total-quantity is <TOTAL_QTY>
+
+    Examples:
+      | ITEM_1_CODE              | ITEM_QTY | TOTAL_QTY |
+      | skuFutureEnableDate      | 1        | 1         |
+
+  Scenario Outline: Large number of skus are rejected.
+    When I send 4000 duplicate items to be added to the cart
+      | code        | quantity   |
+      | <ITEM_CODE> | <ITEM_QTY> |
+    Then the HTTP status code is 413
+    And Structured error message contains:
+      | The request is too large. The maximum number of items that can be added to a cart in a single request is 2000. To add more items, create another request. |
+    And the cart total-quantity is <TOTAL_QTY>
+
+    Examples:
+      | ITEM_CODE | ITEM_QTY | TOTAL_QTY |
+      | alien_sku | 1        | 0         |

@@ -14,6 +14,7 @@ import com.elasticpath.common.dto.ShoppingItemDto;
 import com.elasticpath.domain.catalog.ProductSku;
 import com.elasticpath.domain.shoppingcart.ShoppingCart;
 import com.elasticpath.domain.shoppingcart.ShoppingItem;
+import com.elasticpath.domain.shoppingcart.impl.CartData;
 import com.elasticpath.service.shoppingcart.impl.AddToWishlistResult;
 
 /**
@@ -33,6 +34,13 @@ public interface ShoppingCartRepository {
 	 * @return Single with the cart guid.
 	 */
 	Single<String> getDefaultShoppingCartGuid();
+
+	/**
+	 * Gets the descriptors for a given cart.
+	 * @param cartGuid the cart.
+	 * @return the map of cartData descriptors. map.
+	 */
+	Map<String, CartData> getCartDescriptors(String cartGuid);
 
 	/**
 	 * Gets the default shopping cart for the customer.
@@ -187,4 +195,27 @@ public interface ShoppingCartRepository {
 	 * @return the storecode.
 	 */
 	Single<String> findStoreForCartGuid(String cartGuid);
+
+	/**
+	 * Create a cart for the given cart identifier.
+	 * @param identifier the identifiers.
+	 * @param scope the scope.
+	 * @return the shopping cart.
+	 */
+	Single<ShoppingCart> createCart(Map<String, String> identifier, String scope);
+
+	/**
+	 * Delete named shopping cart.
+	 *
+	 * @param shoppingCartGuid shopping cart guid
+	 * @return if removal was successful
+	 */
+	Completable removeCart(String shoppingCartGuid);
+
+	/**
+	 * Checks whether a given storecode supports creating a cart.
+	 * @param storeCode the storeCode.
+	 * @return true if carts can be created for the store.
+	 */
+	boolean canCreateCart(String storeCode);
 }

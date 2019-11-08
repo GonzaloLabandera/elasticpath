@@ -13,6 +13,7 @@ import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 
+import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Dimension;
@@ -43,6 +44,8 @@ public abstract class AbstractPageObject extends AbstractPage {
 	private static final int MAX_COUNT = 100;
 	private final String siteURL;
 	private final String publishEnvURL;
+	private final String exportEnvURL;
+	private final String importEnvURL;
 	private final FluentWaitDriver fluentWaitDriver;
 	private WebElement selectedElement;
 	private static final String CENTER_PANE_FIRST_BUTTON_CSS = "div[widget-id='First Page'][appearance-id='toolbar-button'][seeable='true']";
@@ -53,6 +56,7 @@ public abstract class AbstractPageObject extends AbstractPage {
 	private static final String CATALOG_TREE_PARENT_CSS = "div[pane-location='left-pane-inner'] div[widget-id='Catalog Browse "
 			+ "Tree'][widget-type='Tree'] ";
 	private static final String CATALOG_TREE_ITEM_CSS = CATALOG_TREE_PARENT_CSS + "div[row-id='%1$s'] div[column-id='%1$s']";
+	private static final String CATALOG_TREE_ITEM_PARTIAL_CSS = CATALOG_TREE_PARENT_CSS + "div[widget-id*='%s'][widget-type='row']";
 	private static final String CLOSE_PANE_ICON_CSS = "div[widget-id*='%s'][active-tab='true'] > div[style*='close.gif']";
 	private static final long WEBDRIVER_DEFAULT_TIMEOUT = Long.parseLong(PropertyManager.getInstance().getProperty("selenium.waitdriver.timeout"));
 	private static String authorTabHandle;
@@ -83,6 +87,8 @@ public abstract class AbstractPageObject extends AbstractPage {
 
 		siteURL = getPropertyManager().getProperty("selenium.session.baseurl");
 		publishEnvURL = getPropertyManager().getProperty("selenium.session.publish.baseurl");
+		exportEnvURL = getPropertyManager().getProperty("selenium.session.export.baseurl");
+		importEnvURL = getPropertyManager().getProperty("selenium.session.import.baseurl");
 		jsDriver = (JavascriptExecutor) driver;
 	}
 
@@ -109,6 +115,24 @@ public abstract class AbstractPageObject extends AbstractPage {
 		return publishEnvURL;
 	}
 
+	/**
+	 * Get export site url.
+	 *
+	 * @return the export url.
+	 */
+	public String getExportEnvURL() {
+		return exportEnvURL;
+	}
+
+	/**
+	 * Get import site url.
+	 *
+	 * @return the import url.
+	 */
+	public String getImportEnvURL() {
+		return importEnvURL;
+	}
+
 	@Override
 	public FluentWaitDriver getWaitDriver() {
 		return fluentWaitDriver;
@@ -119,7 +143,7 @@ public abstract class AbstractPageObject extends AbstractPage {
 		List<WebElement> elementList = new ArrayList<>();
 		elementList.add(element);
 		getWaitDriver().waitForElementsToBeNotStale(elementList);
-
+		element.click();
 		element.clear();
 
 		if (text != null && !text.isEmpty()) {
@@ -162,6 +186,27 @@ public abstract class AbstractPageObject extends AbstractPage {
 			WebElement element = getDriver().findElement(By.cssSelector(cssString));
 			waitForElementToLoad(element);
 
+			retryFunction((WebDriver driver) -> {
+				WebElement webElement = driver.findElement(By.cssSelector(cssString));
+				webElement.clear();
+				webElement.click();
+				sleep(Constants.SLEEP_HUNDRED_MILLI_SECONDS);
+				webElement.sendKeys(text);
+				return true;
+			}, POLLING_INTERVAL, WEBDRIVER_DEFAULT_TIMEOUT);
+
+			sleep(Constants.SLEEP_HALFSECOND_IN_MILLIS);
+		}
+	}
+
+	/**
+	 * Clears given field and types in new text.
+	 *
+	 * @param cssString the css of a field
+	 * @param text      the text which should be entered
+	 */
+	public void clearAndTypeTextWithoutLoadedCheck(final String cssString, final String text) {
+		if (text != null && !text.isEmpty()) {
 			retryFunction((WebDriver driver) -> {
 				WebElement webElement = driver.findElement(By.cssSelector(cssString));
 				webElement.clear();
@@ -386,13 +431,12 @@ public abstract class AbstractPageObject extends AbstractPage {
 	/**
 	 * Selects item in center pane by cell css in a pane without pagination.
 	 *
-	 * @param tableParentCss parent table css to wait until the table is rendered
-	 * @param cellCss        cell css to be selected
+	 * @param cellCss cell css to be selected
 	 * @return true if an element was selected, else returns false
 	 */
-	public boolean selectItemInCenterPaneFirstPageByCell(final String tableParentCss, final String cellCss) {
-		getWaitDriver().waitForElementToBeInteractable(tableParentCss);
-		setWebDriverImplicitWait(1);
+	public boolean selectItemInCenterPaneFirstPageByCell(final String cellCss) {
+		getWaitDriver().waitForElementToBeInteractable(cellCss);
+		setWebDriverImplicitWait(Constants.IMPLICIT_WAIT_FOR_ELEMENT_THREE_SECONDS);
 		if (isElementPresent(By.cssSelector(cellCss))) {
 			assertThat(getWaitDriver().waitForElementToBeNotStale(cellCss))
 					.as("Failed to select cell - " + cellCss)
@@ -630,7 +674,27 @@ public abstract class AbstractPageObject extends AbstractPage {
 		if (isElementPresent(By.cssSelector(String.format(CATALOG_TREE_ITEM_CSS, catalogTreeItem)))) {
 			WebElement treeItem = getDriver().findElement(By.cssSelector(String.format(CATALOG_TREE_ITEM_CSS, catalogTreeItem)));
 			if (catalogTreeItem.equals(treeItem.getText())) {
-				click(getWaitDriver().waitForElementToBeClickable(treeItem));
+				clickWithoutScrollWidgetIntoView(getWaitDriver().waitForElementToBeClickable(treeItem));
+				this.selectedElement = treeItem;
+				itemExists = true;
+			}
+		}
+		return itemExists;
+	}
+
+	/**
+	 * Selects item from catalog tree by its partial name.
+	 *
+	 * @param partialName the catalog tree item partial name.
+	 * @return true if selected.
+	 */
+	public boolean selectCatalogTreeItemPartialName(final String partialName) {
+		boolean itemExists = false;
+		String selector = String.format(CATALOG_TREE_ITEM_PARTIAL_CSS, partialName);
+		if (isElementPresent(By.cssSelector(selector))) {
+			WebElement treeItem = getDriver().findElement(By.cssSelector(selector));
+			if (treeItem.getText().startsWith(partialName)) {
+				clickWithoutScrollWidgetIntoView(getWaitDriver().waitForElementToBeClickable(treeItem));
 				this.selectedElement = treeItem;
 				itemExists = true;
 			}
@@ -679,16 +743,42 @@ public abstract class AbstractPageObject extends AbstractPage {
 	}
 
 	/**
-	 * Clicks an element and if exceptions occur, it will retry click every POLLING_INTERVAL and
+	 * Clicks an element with scrollWidgetIntoView and if exceptions occur, it will retry click every POLLING_INTERVAL and
 	 * ignore the exceptions for a total of timeout seconds.
 	 *
 	 * @param element element to click
 	 */
 	public void click(final WebElement element) {
 		scrollWidgetIntoView(element);
+		clickWithoutScrollWidgetIntoView(element);
+	}
+
+	/**
+	 * Clicks an element without scrollWidgetIntoView and if exceptions occur, it will retry click every POLLING_INTERVAL and
+	 * ignore the exceptions for a total of timeout seconds.
+	 *
+	 * @param element element to click
+	 */
+	public void clickWithoutScrollWidgetIntoView(final WebElement element) {
+		retry(element::click, 30, "click element at " + element.getLocation());
+		sleep(Constants.SLEEP_HALFSECOND_IN_MILLIS);
+	}
+
+	/**
+	 * Finds an element and clicks it without scrollWidgetIntoView and if exceptions occur, it will retry click every POLLING_INTERVAL and
+	 * ignore the exceptions for a total of timeout seconds.
+	 *
+	 * @param elementCss css of the element to click
+	 */
+	public void clickWithoutScrollWidgetIntoViewByCss(final String elementCss, final String elementToBeVisibleCss) {
 		retryFunction((WebDriver driver) -> {
+			boolean isElementVisible = false;
+			WebElement element = driver.findElement(By.cssSelector(elementCss));
 			element.click();
-			return true;
+			if (isElementPresent(By.cssSelector(elementToBeVisibleCss))) {
+				isElementVisible = true;
+			}
+			return isElementVisible;
 		}, POLLING_INTERVAL, WEBDRIVER_DEFAULT_TIMEOUT);
 		sleep(Constants.SLEEP_HALFSECOND_IN_MILLIS);
 	}
@@ -715,6 +805,27 @@ public abstract class AbstractPageObject extends AbstractPage {
 				.ignoring(StaleElementReferenceException.class, WebDriverException.class)
 				.until(func);
 		setWebDriverImplicitWaitToDefault();
+	}
+
+	/**
+	 * Retries the function func repeatedly specified amount of times ignoring any WebDriverException.
+	 *
+	 * @param run        the function to execute
+	 * @param retryCount number of needed retries
+	 * @param logMessage function description which will be logged
+	 */
+	private void retry(final Runnable run, int retryCount, final String logMessage) {
+		if (retryCount > 0) {
+			try {
+				LOGGER.log(Level.WARN, "Trying to " + logMessage + ".");
+				run.run();
+			} catch (WebDriverException e) {
+				LOGGER.log(Level.WARN, e.toString());
+				sleep(300);
+				retryCount--;
+				retry(run, retryCount, logMessage);
+			}
+		}
 	}
 
 	/**
@@ -772,7 +883,6 @@ public abstract class AbstractPageObject extends AbstractPage {
 		}, POLLING_INTERVAL, WEBDRIVER_DEFAULT_TIMEOUT);
 		sleep(Constants.SLEEP_HALFSECOND_IN_MILLIS);
 	}
-
 
 	/**
 	 * Clicks an element and if exceptions occur, it will retry click every POLLING_INTERVAL and
@@ -1151,11 +1261,18 @@ public abstract class AbstractPageObject extends AbstractPage {
 	}
 
 	/**
+	 * Opens new tab for import environment.
+	 */
+	public void openImportTab() {
+		openPublishTab();
+	}
+
+	/**
 	 * Returns Author tab handle.
 	 *
 	 * @return the author tab handle
 	 */
-	public String getAuthorTabHandle() {
+	private String getAuthorTabHandle() {
 		authorTabHandle = getDriver().getWindowHandle();
 		return authorTabHandle;
 	}
@@ -1163,7 +1280,7 @@ public abstract class AbstractPageObject extends AbstractPage {
 	/**
 	 * Returns Publish tab handle.
 	 */
-	public String getPublishTabHandle() {
+	private String getPublishTabHandle() {
 		for (String handle : getDriver().getWindowHandles()) {
 			if (!handle.equals(authorTabHandle)) {
 				publishTabHandle = handle;

@@ -14,6 +14,7 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
+import org.apache.openjpa.persistence.DataCache;
 import org.apache.openjpa.persistence.Externalizer;
 import org.apache.openjpa.persistence.Factory;
 import org.apache.openjpa.persistence.Persistent;
@@ -28,6 +29,7 @@ import com.elasticpath.persistence.api.AbstractEntityImpl;
  */
 @Entity
 @Table(name = CustomerConsentHistoryImpl.TABLE_NAME)
+@DataCache(enabled = false)
 public class CustomerConsentHistoryImpl extends AbstractEntityImpl implements CustomerConsent {
 
 	/**

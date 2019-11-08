@@ -65,9 +65,12 @@ public class FacetRepositoryImpl<I extends FacetsIdentifier, LI extends FacetIde
 		String keyword = searchId.get(SearchOfferEntity.KEYWORDS_PROPERTY);
 		String categoryCode = searchId.get(OffersResourceConstants.CATEGORY_CODE_PROPERTY);
 		String scope = identifier.getScope().getValue();
-
 		Map<String, String> appliedFacets = identifier.getAppliedFacets().getValue();
-		return searchRepository.getSearchCriteria(categoryCode, scope, locale, currency, appliedFacets, keyword)
+
+		OfferSearchData offerSearchData = new OfferSearchData(1, 1, scope, appliedFacets, keyword);
+		offerSearchData.setCategoryCode(categoryCode);
+
+		return searchRepository.getSearchCriteria(offerSearchData, locale, currency)
 				.flatMapObservable(searchCriteria -> searchRepository.getFacetFields(searchCriteria, 1,
 						pageSize))
 				.map(facetGuid -> buildFacetIdentifier(identifier, facetGuid));

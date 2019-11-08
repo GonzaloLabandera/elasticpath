@@ -20,7 +20,7 @@ public final class PromotionsImageRegistry extends AbstractImageRegistry {
 	/**
 	 * Catalog Promotion image.
 	 */
-	public static final ImageDescriptor PROMOTION_CATALOG = getImageDescriptor(PLUGIN_ID, "promotion_default_22.png"); //$NON-NLS-1$
+	public static final ImageDescriptor PROMOTION_CATALOG = getImageDescriptor(PLUGIN_ID, "empty_1x1.png"); //$NON-NLS-1$
 
 	/**
 	 * Catalog Promotion image for tables.

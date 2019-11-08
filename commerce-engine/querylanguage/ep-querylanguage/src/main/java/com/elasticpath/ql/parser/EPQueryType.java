@@ -78,8 +78,15 @@ public enum EPQueryType {
 	CM_IMPORT_JOB("CmImportJob", TargetLanguage.JPQL),
 
 	/** Query type for Facet Job. */
-	FACET("Facet", TargetLanguage.JPQL);
+	FACET("Facet", TargetLanguage.JPQL),
 	
+	/** Query type for SortAttribute Job. */
+	SORT_ATTRIBUTE("SortAttribute", TargetLanguage.JPQL),
+
+	/** Query type for TagGroup Job. */
+	TAGGROUP("TagGroup", TargetLanguage.JPQL);
+
+
 	/** The identifier of the type - useful for naming. */
 	private String typeName;
 

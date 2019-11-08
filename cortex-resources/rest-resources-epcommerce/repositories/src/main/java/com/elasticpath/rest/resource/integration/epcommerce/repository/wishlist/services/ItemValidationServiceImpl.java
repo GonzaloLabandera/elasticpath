@@ -35,7 +35,7 @@ public class ItemValidationServiceImpl implements ItemValidationService {
 
 		return shoppingCartRepository.getDefaultShoppingCartGuid()
 				.flatMapObservable(cartGuid -> wishlistRepository.getWishlist(wishlistId)
-						.flatMapObservable(toMessages(cartGuid, lineItemGuid)));
+						.flatMapObservable(toMessages(lineItemGuid)));
 
 
 	}
@@ -43,13 +43,12 @@ public class ItemValidationServiceImpl implements ItemValidationService {
 	/**
 	 * Get structured advise messages, if any.
 	 *
-	 * @param  cartId the cart id.
 	 * @param lineItemGuid the line item guid.
 	 * @return the function
 	 */
-	protected Function<WishList, Observable<Message>> toMessages(final String cartId, final String lineItemGuid) {
+	protected Function<WishList, Observable<Message>> toMessages(final String lineItemGuid) {
 		return wishList -> wishlistRepository.getProductSku(wishList, lineItemGuid)
-				.flatMapObservable(productSku -> addToCartAdvisorService.validateItemPurchasable(wishList.getStoreCode(), cartId, productSku, null));
+				.flatMapObservable(productSku -> addToCartAdvisorService.validateItemPurchasable(wishList.getStoreCode(), productSku, null));
 	}
 
 	@Reference

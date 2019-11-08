@@ -65,7 +65,7 @@ public class CategoryTypeAdapterTest {
 				allowing(mockCachingService).findAttribiteByKey(ATTRIBUTE_KEY);
 				will(returnValue(mockAttribute));
 
-				allowing(mockBeanFactory).getBean(ContextIdNames.CATEGORY_TYPE);
+				allowing(mockBeanFactory).getPrototypeBean(ContextIdNames.CATEGORY_TYPE, CategoryType.class);
 				will(returnValue(new CategoryTypeImpl()));
 			}
 		});

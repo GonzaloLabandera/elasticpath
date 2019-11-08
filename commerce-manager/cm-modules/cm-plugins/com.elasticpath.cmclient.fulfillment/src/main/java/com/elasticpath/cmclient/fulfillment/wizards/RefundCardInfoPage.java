@@ -218,7 +218,7 @@ public class RefundCardInfoPage extends AbstractEPWizardPage<Order> {
 		protected void createControls(final Composite client, final FormToolkit toolkit) {
 			IEpLayoutComposite sectionComposite = CompositeFactory.createTableWrapLayoutComposite(client, 1, false);
 			paymentControl = new OrderPaymentControl(getModel(), sectionComposite, sectionComposite.createLayoutData(
-					IEpLayoutData.BEGINNING, IEpLayoutData.BEGINNING), getDataBindingContext());
+					IEpLayoutData.BEGINNING, IEpLayoutData.BEGINNING), getDataBindingContext(), OrderPaymentControl.PurposeEnum.REFUND);
 
 			paymentControl.setOriginalPaymentSourceRadioButtonLabel(FulfillmentMessages.get().RefundWizard_OriginalPaymentSource);
 

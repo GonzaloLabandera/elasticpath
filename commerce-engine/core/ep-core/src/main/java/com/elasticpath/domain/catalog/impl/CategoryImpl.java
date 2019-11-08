@@ -121,7 +121,6 @@ public class CategoryImpl extends AbstractCategoryImpl {
 
 	private boolean virtual;
 
-
 	/**
 	 * Default constructor.
 	 */

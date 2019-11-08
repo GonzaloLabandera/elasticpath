@@ -577,6 +577,11 @@ public class PromotionRuleDelegateImpl implements PromotionRuleDelegate {
 									   final ShoppingCart shoppingCart,
 									   final DiscountItemContainer discountItemContainer,
 									   final Currency currency) {
+			BigDecimal originalShippingCost = discountItemContainer.getPrePromotionPriceAmount(shippingOption);
+			BigDecimal shippingCostMinusDiscount = originalShippingCost.subtract(discountAmount);
+			if (shippingCostMinusDiscount.compareTo(BigDecimal.ZERO) < 0) {
+				return Money.valueOf(originalShippingCost, currency);
+			}
 			return Money.valueOf(discountAmount, currency);
 		}
 	}

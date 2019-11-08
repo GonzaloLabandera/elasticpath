@@ -6,6 +6,7 @@ package com.elasticpath.test.integration;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.util.Currency;
@@ -142,7 +143,8 @@ public class OrderFactoryImplTest extends DbTestCase {
 		Order order = checkoutResult.getOrder();
 		assertNotNull("There should have been an order on the checkout results", order);
 		assertTrue("The order should be persistent", order.isPersisted());
-		assertEquals("The order cart order GUID should be set to the corresponding cart order GUID", cartOrder.getGuid(), order.getCartOrderGuid());
+		assertNull("The order cart order GUID should be null to allow the order to be resubmitted since there is a unique constraint on the "
+				+ "CART_ORDER_GUID", order.getCartOrderGuid());
 	}
 
 	/**

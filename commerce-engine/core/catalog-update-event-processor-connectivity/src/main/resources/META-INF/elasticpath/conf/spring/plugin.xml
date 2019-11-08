@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xmlns="http://www.springframework.org/schema/beans"
+		xsi:schemaLocation="
+				http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd">
+
+	<bean name="projectionTranslationExtractor"
+		  class="com.elasticpath.catalog.update.processor.connectivity.impl.projection.extractor.CatalogTranslationExtractorImpl"/>
+
+	<bean name="skuOptionToProjectionConverter"
+		  class="com.elasticpath.catalog.update.processor.connectivity.impl.projection.converter.impl.SkuOptionToProjectionConverter">
+		<constructor-arg ref="projectionTranslationExtractor"/>
+		<constructor-arg ref="timeService"/>
+	</bean>
+
+	<bean name="modifierToProjectionConverter"
+		  class="com.elasticpath.catalog.update.processor.connectivity.impl.projection.converter.impl.FieldMetadataToProjectionConverter">
+		<constructor-arg ref="projectionTranslationExtractor"/>
+		<constructor-arg ref="timeService"/>
+		<constructor-arg ref="modifierService" />
+	</bean>
+
+	<bean name="skuOptionProjectionService"
+		  class="com.elasticpath.catalog.update.processor.connectivity.impl.projection.service.ProjectionServiceImpl">
+		<constructor-arg name="storeService" ref="storeService"/>
+		<constructor-arg name="converter" ref="skuOptionToProjectionConverter"/>
+	</bean>
+
+	<bean name="modifierGroupProjectionService"
+		  class="com.elasticpath.catalog.update.processor.connectivity.impl.projection.service.ProjectionServiceImpl">
+		<constructor-arg name="storeService" ref="storeService"/>
+		<constructor-arg name="converter" ref="modifierToProjectionConverter"/>
+	</bean>
+
+	<bean name="skuOptionUpdateProcessor" class="com.elasticpath.catalog.update.processor.connectivity.impl.SkuOptionUpdateProcessorImpl"
+		  depends-on="catalogProjectionPluginProvider">
+		<constructor-arg name="projectionService" ref="skuOptionProjectionService"/>
+		<constructor-arg name="provider" ref="catalogProjectionPluginProvider"/>
+		<constructor-arg name="eventMessagePublisher" ref="domainBulkMessagePublisher"/>
+		<constructor-arg name="eventMessageFactory" ref="eventMessageFactory"/>
+		<constructor-arg name="productDao" ref="productDao"/>
+		<constructor-arg name="bulkChangeMaxEventSize" value="${bulkChangeMaxEventSize:5}"/>
+	</bean>
+
+	<bean name="modifierGroupUpdateProcessor" class="com.elasticpath.catalog.update.processor.connectivity.impl.ModifierGroupUpdateProcessorImpl"
+		  depends-on="catalogProjectionPluginProvider">
+		<constructor-arg name="projectionService" ref="modifierGroupProjectionService"/>
+		<constructor-arg name="provider" ref="catalogProjectionPluginProvider"/>
+	</bean>
+
+	<bean name="brandProjectionService" class="com.elasticpath.catalog.update.processor.connectivity.impl.projection.service.ProjectionServiceImpl">
+		<constructor-arg name="storeService" ref="storeService"/>
+		<constructor-arg name="converter" ref="brandToProjectionConverter"/>
+	</bean>
+
+	<bean name="brandUpdateProcessor" class="com.elasticpath.catalog.update.processor.connectivity.impl.BrandUpdateProcessorImpl"
+		  depends-on="catalogProjectionPluginProvider">
+		<constructor-arg name="projectionService" ref="brandProjectionService"/>
+		<constructor-arg name="provider" ref="catalogProjectionPluginProvider"/>
+		<constructor-arg name="eventMessagePublisher" ref="domainBulkMessagePublisher"/>
+		<constructor-arg name="productQueryService" ref="productQueryService"/>
+		<constructor-arg name="eventMessageFactory" ref="eventMessageFactory"/>
+		<constructor-arg name="bulkChangeMaxEventSize" value="${bulkChangeMaxEventSize:5}"/>
+	</bean>
+
+	<bean name="brandToProjectionConverter"
+		  class="com.elasticpath.catalog.update.processor.connectivity.impl.projection.converter.impl.BrandToProjectionConverter">
+		<constructor-arg ref="projectionTranslationExtractor"/>
+		<constructor-arg ref="timeService"/>
+	</bean>
+
+	<bean id="attributeToProjectionConverter"
+		  class="com.elasticpath.catalog.update.processor.connectivity.impl.projection.converter.impl.AttributeToProjectionConverter">
+		<constructor-arg ref="timeService"/>
+		<constructor-arg ref="projectionTranslationExtractor"/>
+	</bean>
+
+	<bean name="attributeProjectionService"
+		  class="com.elasticpath.catalog.update.processor.connectivity.impl.projection.service.ProjectionServiceImpl">
+		<constructor-arg name="storeService" ref="storeService"/>
+		<constructor-arg name="converter" ref="attributeToProjectionConverter"/>
+	</bean>
+
+	<bean name="attributeUpdateProcessor" class="com.elasticpath.catalog.update.processor.connectivity.impl.AttributeUpdateProcessorImpl"
+		  depends-on="catalogProjectionPluginProvider">
+		<constructor-arg name="projectionService" ref="attributeProjectionService"/>
+		<constructor-arg name="provider" ref="catalogProjectionPluginProvider"/>
+		<constructor-arg name="eventMessagePublisher" ref="domainBulkMessagePublisher"/>
+		<constructor-arg name="eventMessageFactory" ref="eventMessageFactory"/>
+		<constructor-arg name="productDao" ref="productDao"/>
+		<constructor-arg name="categoryService" ref="categoryService"/>
+		<constructor-arg name="productSkuService" ref="productSkuService"/>
+		<constructor-arg name="bulkChangeMaxEventSize" value="${bulkChangeMaxEventSize:5}"/>
+	</bean>
+
+	<bean id="categoryToProjectionConverter"
+		  class="com.elasticpath.catalog.update.processor.connectivity.impl.projection.converter.impl.CategoryToProjectionConverter">
+		<constructor-arg name="categoryService" ref="categoryService"/>
+		<constructor-arg name="timeService" ref="timeService"/>
+		<constructor-arg name="provider" ref="catalogProjectionPluginProvider"/>
+		<constructor-arg name="catalogTranslationExtractor" ref="projectionTranslationExtractor"/>
+		<constructor-arg name="categoryLookup" ref="categoryLookup"/>
+		<constructor-arg name="catalogService" ref="catalogDataService"/>
+		<constructor-arg name="storeService" ref="storeService"/>
+	</bean>
+
+	<bean name="categoryProjectionService"
+		  class="com.elasticpath.catalog.update.processor.connectivity.impl.projection.service.ProjectionServiceImpl">
+		<constructor-arg name="storeService" ref="storeService"/>
+		<constructor-arg name="converter" ref="categoryToProjectionConverter"/>
+	</bean>
+
+	<bean name="categoryUpdateProcessor" class="com.elasticpath.catalog.update.processor.connectivity.impl.CategoryUpdateProcessorImpl"
+		  depends-on="catalogProjectionPluginProvider">
+		<constructor-arg name="projectionService" ref="categoryProjectionService"/>
+		<constructor-arg name="provider" ref="catalogProjectionPluginProvider"/>
+		<constructor-arg name="eventMessagePublisher" ref="domainBulkMessagePublisher"/>
+		<constructor-arg name="productQueryService" ref="productQueryService"/>
+		<constructor-arg name="eventMessageFactory" ref="eventMessageFactory"/>
+		<constructor-arg name="bulkChangeMaxEventSize" value="${bulkChangeMaxEventSize:5}"/>
+	</bean>
+
+	<bean id="productToProjectionConverter"
+		  class="com.elasticpath.catalog.update.processor.connectivity.impl.projection.converter.impl.ProductToProjectionConverter">
+		<constructor-arg ref="storeProductService"/>
+		<constructor-arg ref="timeService"/>
+		<constructor-arg ref="productCharacteristicsService"/>
+		<constructor-arg ref="taxCodeRetriever"/>
+		<constructor-arg ref="productAssociationService"/>
+		<constructor-arg ref="bundleIdentifier"/>
+		<constructor-arg ref="settingsService"/>
+		<constructor-arg ref="projectionTranslationExtractor"/>
+		<constructor-arg ref="catalogProjectionPluginProvider"/>
+	</bean>
+
+	<bean name="productProjectionService"
+		  class="com.elasticpath.catalog.update.processor.connectivity.impl.projection.service.ProjectionServiceImpl">
+		<constructor-arg name="storeService" ref="storeService"/>
+		<constructor-arg name="converter" ref="productToProjectionConverter"/>
+	</bean>
+
+	<bean name="productUpdateProcessor" class="com.elasticpath.catalog.update.processor.connectivity.impl.ProductUpdateProcessorImpl">
+		<constructor-arg name="projectionService" ref="productProjectionService"/>
+		<constructor-arg name="provider" ref="catalogProjectionPluginProvider"/>
+		<constructor-arg name="eventMessagePublisher" ref="domainBulkMessagePublisher"/>
+		<constructor-arg name="eventMessageFactory" ref="eventMessageFactory"/>
+		<constructor-arg name="bulkChangeMaxEventSize" value="${bulkChangeMaxEventSize:5}"/>
+	</bean>
+
+</beans>

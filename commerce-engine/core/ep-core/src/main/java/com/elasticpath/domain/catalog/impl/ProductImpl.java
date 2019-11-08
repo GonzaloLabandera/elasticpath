@@ -1031,11 +1031,11 @@ public class ProductImpl extends AbstractLegacyEntityImpl implements Product, Pr
 	/**
 	 * Get the ProductCategory association object that contains the given Category.
 	 *
-	 * @param category the category to search for
-	 * @return productCategory the <code>ProductCategory</code>
+	 * @param category the category to search for.
+	 * @return productCategory the <code>ProductCategory</code>.
 	 * @throws IllegalArgumentException if the product is not in the given category.
 	 */
-	protected ProductCategory getProductCategory(final Category category) {
+	public ProductCategory getProductCategory(final Category category) {
 		for (ProductCategory productCategory : this.getProductCategories()) {
 			if (productCategory.getCategory().equals(category)) {
 				return productCategory;
@@ -1498,7 +1498,6 @@ public class ProductImpl extends AbstractLegacyEntityImpl implements Product, Pr
 			throw new AttributeValueIsRequiredException(attributesThatAreMissingValues);
 		}
 	}
-
 
 	private void checkIfAttributeValueExistsForLocale(final AttributeValueGroup attributeValueGroup, final AttributeGroupAttribute attrGroup,
 			final Locale locale, final Set<String> attributesThatAreMissingValues) {

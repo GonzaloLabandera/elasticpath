@@ -12,6 +12,7 @@
 
 	<bean id="servicePreInterceptors" class="java.util.ArrayList"/>
 
+	<import resource="classpath*:spring/dataaccess/noop-datasource.xml"/>
 	<import resource="classpath*:spring/prototypes/prototypes.xml"/>
 	<import resource="classpath*:spring/models/domainModel.xml" />
 	<import resource="classpath*:spring/dataaccess/dao.xml" />
@@ -461,28 +462,9 @@
 	</bean>
 
 	<bean id="groovyEhcacheEventListener" class="com.elasticpath.commons.listeners.GroovyEhcacheEventListener"/>
-	<!-- Override the conditionEvaluationService to reduce the cache timeout for the tests. -->
-	<bean id="conditionEvaluationService" class="com.elasticpath.tags.service.impl.GroovyConditionEvaluatorServiceImpl">
-		<property name="conditionProcessingService" ref="conditionProcessingService"/>
-		<property name="excludedFromCacheTags" ref="tagsExcludedFromConditionCache"/>
-		<property name="evaluationCache">
-			<bean class="com.elasticpath.cache.SimpleTimeoutCache">
-				<property name="cache" ref="groovyEvaluationCache"/>
-			</bean>
-		</property>
-	</bean>
 
 	<!-- Tests expect things to change immediately so we don't want to exclude time-based tags here. -->
 	<util:list id="tagsExcludedFromConditionCache" value-type="java.lang.String"/>
-
-	<bean id="conditionProcessingService" class="com.elasticpath.tags.service.impl.GroovyConditionProcessingServiceImpl">
-		<property name="scriptCache">
-			<bean class="com.elasticpath.cache.SimpleTimeoutCache">
-				<property name="cache" ref="groovyConditionCache"/>
-				<property name="cacheEventListener" ref="groovyEhcacheEventListener"/>
-			</bean>
-		</property>
-	</bean>
 
 	<bean id="tagConditionDSLBuilder" class="com.elasticpath.tags.service.impl.GroovyConditionDSLBuilderImpl">
 	   <property name="tagDefinitionReader">

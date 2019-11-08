@@ -3,6 +3,9 @@
  */
 package com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder.repositories;
 
+import java.util.Collections;
+
+import io.reactivex.Completable;
 import io.reactivex.Observable;
 import io.reactivex.Single;
 import org.osgi.service.component.annotations.Component;
@@ -10,12 +13,16 @@ import org.osgi.service.component.annotations.Reference;
 import org.springframework.core.convert.ConversionService;
 
 import com.elasticpath.repository.Repository;
+import com.elasticpath.rest.ResourceOperationFailure;
+import com.elasticpath.rest.advise.Message;
 import com.elasticpath.rest.definition.carts.CartEntity;
 import com.elasticpath.rest.definition.carts.CartIdentifier;
+import com.elasticpath.rest.definition.carts.CartsIdentifier;
 import com.elasticpath.rest.id.IdentifierPart;
 import com.elasticpath.rest.id.type.StringIdentifier;
 import com.elasticpath.rest.resource.ResourceOperationContext;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder.ShoppingCartRepository;
+import com.elasticpath.rest.schema.StructuredMessageTypes;
 
 /**
  * Repository for cart.
@@ -26,6 +33,8 @@ import com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder
 @Component
 public class CartEntityRepositoryImpl<E extends CartEntity, I extends CartIdentifier>
 		implements Repository<CartEntity, CartIdentifier> {
+
+	private static final String DELETE_DEFAULT_CART_EXCEPTION_MESSAGE = "Default Cart cannot be removed.";
 
 	private ShoppingCartRepository shoppingCartRepository;
 
@@ -41,12 +50,34 @@ public class CartEntityRepositoryImpl<E extends CartEntity, I extends CartIdenti
 
 	@Override
 	public Observable<CartIdentifier> findAll(final IdentifierPart<String> scope) {
+
 		String userId = resourceOperationContext.getUserIdentifier();
 		return shoppingCartRepository.findAllCarts(userId, scope.getValue())
 				.map(cartId -> CartIdentifier.builder()
 						.withCartId(StringIdentifier.of(cartId))
-						.withScope(scope)
+						.withCarts(CartsIdentifier.builder().withScope(scope).build())
 						.build());
+	}
+
+	@Override
+	public Completable delete(final CartIdentifier identifier) {
+		String cartGuid = identifier.getCartId().getValue();
+
+		return shoppingCartRepository.getDefaultShoppingCartGuid()
+				.filter(defaultCartGuid -> !defaultCartGuid.equals(cartGuid))
+				.switchIfEmpty(Single.error(ResourceOperationFailure.stateFailure(DELETE_DEFAULT_CART_EXCEPTION_MESSAGE,
+						Collections.singletonList(Message.builder()
+								.withType(StructuredMessageTypes.ERROR)
+								.withId("cart.delete.not.permitted")
+								.withDebugMessage(DELETE_DEFAULT_CART_EXCEPTION_MESSAGE)
+								.build()))))
+				.ignoreElement()
+				.andThen(removeNamedCartByGuid(cartGuid));
+	}
+
+	private Completable removeNamedCartByGuid(final String cartGuid) {
+		return shoppingCartRepository.getShoppingCart(cartGuid)
+				.flatMapCompletable(shoppingCart -> shoppingCartRepository.removeCart(shoppingCart.getGuid()));
 	}
 
 	@Reference

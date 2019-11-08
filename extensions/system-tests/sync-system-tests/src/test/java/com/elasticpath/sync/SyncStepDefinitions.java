@@ -61,7 +61,7 @@ public class SyncStepDefinitions {
 		// creation of change set implemented with liquibase-maven-plugin, id import-create-change-set
 
 		File importConfiguration = new File(MAVEN_OUTPUT_DIRECTORY, "source-import-configuration");
-		Process importexport = new ProcessBuilder(
+		ProcessBuilder importexport = new ProcessBuilder(
 				executable(IMPORT_EXPORT_CLI_DIRECTORY, "importexport"),
 				"-i",
 				"-p",
@@ -69,11 +69,16 @@ public class SyncStepDefinitions {
 				"-c",
 				file(importConfiguration, "import-configuration.xml").toString(),
 				"-g",
-				"01234567-890A-BCDE-F012-34567890ABCD")
-				.directory(filenameStartsWith(MAVEN_BUILD_DIRECTORY, "ext-importexport-cli-"))
+				"01234567-890A-BCDE-F012-34567890ABCD");
+
+		importexport.environment()
+				.put("PROFILE", "non-xa");
+
+		int exitCode = importexport.directory(filenameStartsWith(MAVEN_BUILD_DIRECTORY, "ext-importexport-cli-"))
 				.inheritIO()
-				.start();
-		int exitCode = importexport.waitFor();
+				.start()
+				.waitFor();
+
 		assertEquals(0, exitCode);
 	}
 
@@ -109,18 +114,22 @@ public class SyncStepDefinitions {
 	@Then("^the changes are found on the target system$")
 	public void exportChangesAndVerify() throws IOException, InterruptedException {
 		File exportConfiguration = new File(MAVEN_OUTPUT_DIRECTORY, "target-export-configuration");
-		Process importexport = new ProcessBuilder(
+		ProcessBuilder importexport = new ProcessBuilder(
 				executable(IMPORT_EXPORT_CLI_DIRECTORY, "importexport"),
 				"-e",
 				file(IMPORT_EXPORT_CLI_DIRECTORY, "searchconfiguration.xml").toString(),
 				"-p",
 				file(exportConfiguration, "export.config").toString(),
 				"-c",
-				file(exportConfiguration, "export-configuration.xml").toString())
-				.directory(IMPORT_EXPORT_CLI_DIRECTORY)
+				file(exportConfiguration, "export-configuration.xml").toString());
+
+		importexport.environment()
+				.put("PROFILE", "non-xa");
+
+		int exitCode = importexport.directory(IMPORT_EXPORT_CLI_DIRECTORY)
 				.inheritIO()
-				.start();
-		int exitCode = importexport.waitFor();
+				.start()
+				.waitFor();
 		assertEquals(0, exitCode);
 
 		XMLParser parser = new XMLParser();

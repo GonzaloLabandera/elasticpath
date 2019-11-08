@@ -15,7 +15,7 @@ import com.elasticpath.rest.definition.items.ItemIdentifier;
 import com.elasticpath.rest.helix.data.annotation.ResourceService;
 import com.elasticpath.rest.helix.data.annotation.UriPart;
 import com.elasticpath.rest.id.IdentifierPart;
-import com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder.CartItemModifiersRepository;
+import com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder.ModifiersRepository;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.item.ItemRepository;
 
 /**
@@ -25,26 +25,26 @@ public class ReadAddToDefaultCartFormPrototype implements AddToDefaultCartFormRe
 
 	private final IdentifierPart<Map<String, String>> itemId;
 
-	private final CartItemModifiersRepository cartItemModifiersRepository;
+	private final ModifiersRepository modifiersRepository;
 
 	/**
 	 * Constructor.
 	 *
 	 * @param itemId                      item id
-	 * @param cartItemModifiersRepository cartItemModifiersRepository
+	 * @param modifiersRepository modifiersRepository
 	 */
 	@Inject
 	public ReadAddToDefaultCartFormPrototype(@UriPart(ItemIdentifier.ITEM_ID) final IdentifierPart<Map<String, String>> itemId,
-											 @ResourceService final CartItemModifiersRepository cartItemModifiersRepository) {
+											 @ResourceService final ModifiersRepository modifiersRepository) {
 		this.itemId = itemId;
-		this.cartItemModifiersRepository = cartItemModifiersRepository;
+		this.modifiersRepository = modifiersRepository;
 	}
 
 	@Override
 	public Single<LineItemEntity> onRead() {
-		return cartItemModifiersRepository.getConfiguration(this.itemId.getValue().get(ItemRepository.SKU_CODE_KEY))
+		return modifiersRepository.getConfiguration(this.itemId.getValue().get(ItemRepository.SKU_CODE_KEY))
 				.map(configuration -> LineItemEntity.builder()
-						.withQuantity(0)
+						.withQuantity(1)
 						.withConfiguration(configuration)
 						.build());
 

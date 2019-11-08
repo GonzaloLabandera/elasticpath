@@ -2,12 +2,6 @@
 <definitions xmlns="http://www.elasticpath.com/schema/rest/0.5">
 	<family>
 		<name>paymentmethods</name>
-		<description>
-			<![CDATA[
-Use a selector to select paymentmethod to use for the purchase. Follow the workflow to read the paymentmethodsinfo
-and then create a choice to select the paymentmethod to use for the purchase.
-			]]>
-		</description>
 
 		<resource>
 			<name>paymentmethods-selector</name>

@@ -22,10 +22,12 @@ import com.elasticpath.domain.catalog.Catalog;
 import com.elasticpath.domain.catalog.Category;
 import com.elasticpath.domain.catalog.Product;
 import com.elasticpath.domain.catalog.ProductSku;
+import com.elasticpath.domain.catalog.ProductType;
 import com.elasticpath.domain.catalog.impl.CatalogImpl;
 import com.elasticpath.domain.catalog.impl.CategoryImpl;
 import com.elasticpath.domain.catalog.impl.ProductImpl;
 import com.elasticpath.domain.catalog.impl.ProductSkuImpl;
+import com.elasticpath.domain.catalog.impl.ProductTypeImpl;
 import com.elasticpath.domain.store.Store;
 import com.elasticpath.domain.store.impl.StoreImpl;
 import com.elasticpath.service.misc.TimeService;
@@ -44,11 +46,15 @@ public class ProductAvailabilityServiceImplTest {
 	private TimeService timeService;
 	private ProductSku sku;
 	private ProductSku sku2;
+	private ProductSku singleSku;
 	private Product multiSkuProduct;
+	private Product singleSkuProduct;
 	private Catalog catalog;
 	private Store store;
 	private Category category;
 	private Date currentTime;
+	private ProductType multiSkuProductType;
+	private ProductType singleSkuProductType;
 
 	@Before
 	public void setUp() {
@@ -73,9 +79,23 @@ public class ProductAvailabilityServiceImplTest {
 		sku2 = new ProductSkuImpl();
 		sku2.setSkuCode("sku2");
 
+		singleSku = new ProductSkuImpl();
+		singleSku.setSkuCode("singleSku");
+
+		multiSkuProductType = new ProductTypeImpl();
+		multiSkuProductType.setMultiSku(true);
+
 		multiSkuProduct = new ProductImpl();
 		multiSkuProduct.addOrUpdateSku(sku);
 		multiSkuProduct.addOrUpdateSku(sku2);
+		multiSkuProduct.setProductType(multiSkuProductType);
+
+		singleSkuProductType = new ProductTypeImpl();
+		singleSkuProductType.setMultiSku(false);
+
+		singleSkuProduct = new ProductImpl();
+		singleSkuProduct.addOrUpdateSku(singleSku);
+		singleSkuProduct.setProductType(singleSkuProductType);
 
 		context.checking(new Expectations() { {
 			allowing(timeService).getCurrentTime();
@@ -116,6 +136,19 @@ public class ProductAvailabilityServiceImplTest {
 		inventoryDetails.setAvailableQuantityInStock(1);
 
 		assertFalse(productAvailabilityService.isSkuAvailable(multiSkuProduct, sku, inventoryDetails));
+	}
+
+	@Test
+	public void testSingleSkuSsAvailableWithSkuDateBoundaryMiss() {
+		singleSku.setStartDate(new Date(currentTime.getTime() - 2));
+		singleSku.setEndDate(new Date(currentTime.getTime() - 1));
+		singleSkuProduct.setStartDate(new Date(currentTime.getTime() - 2));
+
+		SkuInventoryDetails inventoryDetails = new SkuInventoryDetails();
+		inventoryDetails.setHasSufficientUnallocatedQty(true);
+		inventoryDetails.setAvailableQuantityInStock(1);
+
+		assertTrue(productAvailabilityService.isSkuAvailable(singleSkuProduct, singleSku, inventoryDetails));
 	}
 
 	@Test
@@ -248,6 +281,82 @@ public class ProductAvailabilityServiceImplTest {
 
 		// test
 		assertTrue(productAvailabilityService.isSkuDisplayable(product, product.getDefaultSku(), store, inventoryDetails));
+	}
+
+	/**
+	 * Tests {@link com.elasticpath.service.catalogview.ProductAvailabilityService#canProductSyndicate(com.elasticpath.domain.catalog.Product)} if it
+	 * returns true when product can be syndicated.
+	 */
+	@Test
+	public void testIsProductCanBeSyndicatedIfItNotHiddenAndEndDateAfterCurrentTime() {
+		// given
+		Product product = createSingleSkuProduct();
+		product.addCategory(category);
+		product.setHidden(false);
+		product.setEndDate(new Date(currentTime.getTime() + 1L));
+
+		// test
+		assertTrue(productAvailabilityService.canProductSyndicate(product));
+	}
+
+	/**
+	 * Tests {@link com.elasticpath.service.catalogview.ProductAvailabilityService#canProductSyndicate(com.elasticpath.domain.catalog.Product)} if it
+	 * returns false when product can not be syndicated.
+	 */
+	@Test
+	public void testIsProductCannotBeSyndicatedIfItHidden() {
+		// given
+		Product product = createSingleSkuProduct();
+		product.addCategory(category);
+		product.setHidden(true);
+		product.setEndDate(new Date(currentTime.getTime() + 1L));
+
+		// test
+		assertFalse(productAvailabilityService.canProductSyndicate(product));
+	}
+
+	/**
+	 * Tests {@link com.elasticpath.service.catalogview.ProductAvailabilityService#canProductSyndicate(com.elasticpath.domain.catalog.Product)} if it
+	 * returns false when product can not be syndicated.
+	 */
+	@Test
+	public void testIsProductCannotBeSyndicatedIfItNotHiddenAndEndDateBeforeCurrentTime() {
+		// given
+		Product product = createSingleSkuProduct();
+		product.addCategory(category);
+		product.setHidden(false);
+		product.setEndDate(new Date(currentTime.getTime() - 1L));
+
+		// test
+		assertFalse(productAvailabilityService.canProductSyndicate(product));
+	}
+
+	/**
+	 * Tests {@link com.elasticpath.service.catalogview.ProductAvailabilityService#canSkuSyndicate(com.elasticpath.domain.catalog.ProductSku)} if it
+	 * returns true when ProductSku can be syndicated.
+	 */
+	@Test
+	public void testIsProductCanBeSyndicatedIfEndDateAfterCurrentTime() {
+		// given
+		ProductSku productSku = new ProductSkuImpl();
+		productSku.setEndDate(new Date(currentTime.getTime() + 1L));
+
+		// test
+		assertTrue(productAvailabilityService.canSkuSyndicate(productSku));
+	}
+
+	/**
+	 * Tests {@link com.elasticpath.service.catalogview.ProductAvailabilityService#canSkuSyndicate(com.elasticpath.domain.catalog.ProductSku)} if it
+	 * returns false when ProductSku can not be syndicated.
+	 */
+	@Test
+	public void testIsProductCannotBeSyndicatedIfEndDateBeforeCurrentTime() {
+		// given
+		ProductSku productSku = new ProductSkuImpl();
+		productSku.setEndDate(new Date(currentTime.getTime() - 1L));
+
+		// test
+		assertFalse(productAvailabilityService.canSkuSyndicate(productSku));
 	}
 
 	private Product createSingleSkuProduct() {

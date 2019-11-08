@@ -1,0 +1,315 @@
+{
+  "$schema": "http://json-schema.org/draft-06/schema#",
+  "title": "The schema for offer projections.",
+
+  "definitions": {
+
+    "item": {
+      "description": "Subschema for an offer item.",
+      "type": "object",
+      "required": [ "itemCode", "properties", "availabilityRules", "extensions" ],
+      "properties": {
+        "itemCode": {
+          "description": "The item code.",
+          "type": "string"
+        },
+        "extensions": { "$ref": "extensions.schema.json#/itemExtensions" },
+        "properties": { "$ref": "properties.schema.json#/itemProperties" },
+        "availabilityRules": {
+          "type": "object",
+          "properties": {
+            "enableDateTime": {
+              "description": "The date/time that the item is enabled.",
+              "type": "string"
+            },
+            "disableDateTime": {
+              "description": "The date/time that the item is disabled. Not present if value is null.",
+              "type": "string"
+            }
+          }
+        },
+        "shippingProperties": {
+          "description": "Shipping properties for physical items.",
+          "type": "object",
+          "properties": {
+            "weight": {
+              "description": "The weight in unitsWeight.",
+              "type": "number"
+            },
+            "width": {
+              "description": "The width in unitsLength.",
+              "type": "number"
+            },
+            "length": {
+              "description": "The length in unitsLength.",
+              "type": "number"
+            },
+            "height": {
+              "description": "The height in unitsLength.",
+              "type": "number"
+            },
+            "unitsWeight": {
+              "description": "Units for weight.",
+              "type": "string"
+            },
+            "unitsLength": {
+              "description": "Units for width, length and height.",
+              "type": "string"
+            }
+          }
+        },
+        "translations": {
+          "description": "Array of objects that have localized fields.",
+          "type": "array",
+          "items": [
+            {
+              "$ref": "#/definitions/itemTranslation"
+            }
+          ]
+        }
+      }
+    },
+
+    "associationValue": {
+      "description": "An associated offer.",
+      "type": "object",
+      "required": [ "offer" ],
+      "properties": {
+        "offer": {
+          "description": "The associated offer code.",
+          "type": "string"
+        },
+        "enableDateTime": {
+          "description": "The date/time that the associated offer is enabled.",
+          "type": "string"
+        },
+        "disableDateTime": {
+          "description": "The date/time that the associated offer is disabled. Not present if value is null.",
+          "type": "string"
+        }
+      }
+    },
+
+    "translationUnit": {
+      "type": "object",
+      "required": [ "displayName", "name"],
+      "properties": {
+        "displayName": {
+          "description": "The localized display name.",
+          "type": "string"
+        },
+        "name": {
+          "description": "The non-localized name.",
+          "type": "string"
+        }
+      }
+    },
+
+    "offerTranslation": {
+      "type": "object",
+      "required": [
+        "brand",
+        "options",
+        "details"
+      ],
+      "properties": {
+        "language": {
+          "description": "The language code and optional country code for the translation.",
+          "type": "string"
+        },
+        "displayName": {
+          "description": "The localized offer name.",
+          "type": "string"
+        },
+        "brand": {
+          "$ref": "#/definitions/translationUnit"
+        },
+        "options": {
+          "description": "The options defined for the offer.",
+          "type": "array",
+          "items": [
+            {
+              "$ref": "#/definitions/translationUnit"
+            }
+          ]
+        },
+        "details": {
+          "$ref": "definitions.schema.json#/attributes"
+        }
+      }
+    },
+
+    "itemTranslation": {
+      "type": "object",
+      "properties": {
+        "language": {
+          "description": "The language code and optional country code for the translation.",
+          "type": "string"
+        },
+        "options": {
+          "type": "array",
+          "items": [
+            {
+              "type": "object",
+              "required": [ "displayValue", "value", "displayName", "name" ],
+              "properties": {
+                "displayName": {
+                  "description": "The localized option name.",
+                  "type": "string"
+                },
+                "displayValue": {
+                  "description": "The localized option value.",
+                  "type": "string"
+                },
+                "name": {
+                  "description": "The non-localized option name.",
+                  "type": "string"
+                },
+                "value": {
+                  "description": "The non-localized option value.",
+                  "type": "string"
+                }
+              }
+            }
+          ]
+        },
+        "details": {
+          "$ref": "definitions.schema.json#/attributes"
+        }
+      }
+    },
+
+    "association": {
+      "description": "The associated offers for the specified type.",
+      "type": "object",
+      "required": [ "type", "list" ],
+      "properties": {
+        "type": {
+          "description": "The association type as defined by the ProductAssociationType extensible enumeration: crosssell, upsell, warranty, accessory, replacement, recommendation, dependentItem.",
+          "type": "string"
+        },
+        "list": {
+          "description": "The list of associated offers.",
+          "type": "array",
+          "items": [
+            {
+              "$ref": "#/definitions/associationValue"
+            }
+          ]
+        }
+      }
+    }
+  },
+
+  "type": "object",
+  "oneOf": [
+    {
+      "$ref": "definitions.schema.json#/deletedObject"
+    },
+    {
+      "type": "object",
+      "required": [ "identity", "modifiedDateTime", "deleted", "properties", "availabilityRules", "associations", "selectionRules", "extensions", "categories"],
+      "properties": {
+        "identity": { "$ref": "definitions.schema.json#/nameIdentity" },
+        "modifiedDateTime": {
+          "description": "The date/time that the projection was modified.",
+          "type": "string"
+        },
+        "deleted": {
+          "description": "Indicates whether the projection is available.",
+          "type": "boolean",
+          "enum": [ false ]
+        },
+        "items": {
+          "description": "List of items for the offer.",
+          "type": "array",
+          "items": [
+            {
+              "$ref": "#/definitions/item"
+            }
+          ]
+        },
+        "extensions": { "$ref": "extensions.schema.json#/offerExtensions" },
+        "properties": { "$ref": "properties.schema.json#/offerProperties" },
+        "availabilityRules": {
+          "type": "object",
+          "properties": {
+            "enableDateTime": {
+              "description": "The date/time that the offer is enabled.",
+              "type": "string"
+            },
+            "disableDateTime": {
+              "description": "The date/time that the offer is disabled. Not present if value is null.",
+              "type": "string"
+            },
+            "canDiscover": {
+              "description": "Defines the conditions under which the offer can be discovered as defined by the StoreAvailabilityRules extensible enumeration: ALWAYS, PRE_ORDER, HAS_STOCK, BACK_ORDER.",
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "canView": {
+              "description": "Defines the conditions under which the offer can be discovered as defined by the StoreAvailabilityRules extensible enumeration: ALWAYS, PRE_ORDER, HAS_STOCK, BACK_ORDER.",
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "canAddToCart": {
+              "description": "Defines the conditions under which the offer can be discovered as defined by the StoreAvailabilityRules extensible enumeration: ALWAYS, PRE_ORDER, HAS_STOCK, BACK_ORDER.",
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "associations": {
+          "type": "array",
+          "items": [
+            {
+              "$ref": "#/definitions/association"
+            }
+          ]
+        },
+        "selectionRules": {
+          "type": "object",
+          "properties": {
+            "selectionType": {
+              "description": "Defines how the items or components are selected by the user.",
+              "type": "string",
+              "enum": [
+                "NONE",
+                "ITEM",
+                "COMPONENT"
+              ]
+            },
+            "quantity": {
+              "description": "The maximum number of items or components that can be selected.",
+              "type": "integer"
+            },
+            "formFields": {
+              "description": "Additional fields to be presented to the user when adding an offer item to the cart.",
+              "type": "array",
+              "items": {
+                "description": "The fieldMetadata code.",
+                "type": "string"
+              }
+            }
+          }
+        },
+        "translations": {
+          "description": "Array of objects that have localized fields.",
+          "type": "array",
+          "items": [
+            {
+              "$ref": "#/definitions/offerTranslation"
+            }
+          ]
+        }
+        },
+        "categories": {"$ref": "offerCategories.schema.json#/offerCategories"}
+    }
+  ]
+}

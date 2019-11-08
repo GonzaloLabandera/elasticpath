@@ -22,7 +22,6 @@ import com.elasticpath.domain.catalog.ProductType;
 import com.elasticpath.domain.catalog.ProductTypeLoadTuner;
 import com.elasticpath.domain.catalog.impl.ProductTypeImpl;
 import com.elasticpath.persistence.dao.ProductTypeDao;
-import com.elasticpath.service.misc.FetchPlanHelper;
 import com.elasticpath.service.misc.TimeService;
 
 /**
@@ -31,8 +30,6 @@ import com.elasticpath.service.misc.TimeService;
 public class ProductTypeDaoImpl extends AbstractDaoImpl implements ProductTypeDao {
 
 	private TimeService timeService;
-
-	private FetchPlanHelper fetchPlanHelper;
 
 	private ProductTypeLoadTuner productTypeLoadTunerAll;
 
@@ -60,16 +57,10 @@ public class ProductTypeDaoImpl extends AbstractDaoImpl implements ProductTypeDa
 	 */
 	@Override
 	public Object getObject(final long uid, final Collection<String> fieldsToLoad) throws EpServiceException {
-		fetchPlanHelper.addFields(ProductTypeImpl.class, fieldsToLoad);
 
-		Object object = null;
-		try {
-			object = get(uid);
-		} finally {
-			fetchPlanHelper.clearFetchPlan();
-		}
+		getFetchPlanHelper().setLazyFields(ProductTypeImpl.class, fieldsToLoad);
 
-		return object;
+		return get(uid);
 	}
 
 	/**
@@ -123,9 +114,9 @@ public class ProductTypeDaoImpl extends AbstractDaoImpl implements ProductTypeDa
 			throw new EpServiceException("Cannot retrieve null name.");
 		}
 
-		fetchPlanHelper.configureProductTypeFetchPlan(productTypeLoadTunerAttributes);
-		final List<ProductType> typeList = getPersistenceEngine().retrieveByNamedQuery("PRODUCT_TYPE_FIND_BY_NAME", name);
-		fetchPlanHelper.clearFetchPlan();
+		final List<ProductType> typeList = getPersistenceEngine()
+			.withLoadTuners(productTypeLoadTunerAttributes)
+			.retrieveByNamedQuery("PRODUCT_TYPE_FIND_BY_NAME", name);
 
 		ProductType productType = null;
 		if (typeList.size() == 1) {
@@ -220,13 +211,9 @@ public class ProductTypeDaoImpl extends AbstractDaoImpl implements ProductTypeDa
 	@Override
 	public ProductType initialize(final ProductType productType) {
 		sanityCheck();
-		fetchPlanHelper.configureProductTypeFetchPlan(productTypeLoadTunerAll);
-		final ProductType freshProductType = getPersistentBeanFinder().load(ContextIdNames.PRODUCT_TYPE, productType.getUidPk());
-		fetchPlanHelper.clearFetchPlan();
-		if (freshProductType == null) {
-			return null;
-		}
-		return freshProductType;
+		return getPersistentBeanFinder()
+			.withLoadTuners(productTypeLoadTunerAll)
+			.load(ContextIdNames.PRODUCT_TYPE, productType.getUidPk());
 	}
 
 	/**
@@ -291,15 +278,11 @@ public class ProductTypeDaoImpl extends AbstractDaoImpl implements ProductTypeDa
 	@Override
 	public ProductType get(final long uid) throws EpServiceException {
 		sanityCheck();
-
-		ProductType productType = null;
 		if (uid <= 0) {
-			productType = getBean(ContextIdNames.PRODUCT_TYPE);
-		} else {
-			productType = getPersistentBeanFinder().get(ContextIdNames.PRODUCT_TYPE, uid);
+			return getBean(ContextIdNames.PRODUCT_TYPE);
 		}
 
-		return productType;
+		return getPersistentBeanFinder().get(ContextIdNames.PRODUCT_TYPE, uid);
 	}
 
 	/**
@@ -348,16 +331,6 @@ public class ProductTypeDaoImpl extends AbstractDaoImpl implements ProductTypeDa
 		if (productTypeExists(type)) {
 			throw new DuplicateKeyException("ProductType name '" + type.getName() + "' already exists.");
 		}
-	}
-
-	/**
-	 * Sets the fetch plan helper.
-	 *
-	 * @param fetchPlanHelper the fetch plan helper
-	 */
-	@Override
-	public void setFetchPlanHelper(final FetchPlanHelper fetchPlanHelper) {
-		this.fetchPlanHelper = fetchPlanHelper;
 	}
 
 	/**

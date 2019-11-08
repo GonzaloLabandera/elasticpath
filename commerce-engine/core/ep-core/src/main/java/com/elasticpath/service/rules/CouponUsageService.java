@@ -18,6 +18,7 @@ import com.elasticpath.domain.rules.CouponConfig;
 import com.elasticpath.domain.rules.CouponUsage;
 import com.elasticpath.domain.shoppingcart.ShoppingCart;
 import com.elasticpath.domain.shoppingcart.ShoppingCartPricingSnapshot;
+import com.elasticpath.service.rules.impl.CouponUsageValidationResultEnum;
 
 /**
  * Service for managing {@code CouponUsage}s.
@@ -191,15 +192,33 @@ public interface CouponUsageService {
 	 */
 	List<CouponUsage> findByUids(Collection<Long> uids);
 
-
 	/**
-	 *
-	 * Checks that the coupon usage is valid for coupon usage and email address.
+	 * Validate coupon usage.
 	 *
 	 * @param customerEmailAddress customer email address
 	 * @param coupon coupon
 	 * @param couponUsage coupon usage
-	 * @return true is coupon usage is valid, false otherwise.
+	 * @return the validation result.
 	 */
-	boolean isValidCouponUsage(String customerEmailAddress, Coupon coupon, CouponUsage couponUsage);
+	CouponUsageValidationResultEnum validateCouponUsage(String customerEmailAddress, Coupon coupon, CouponUsage couponUsage);
+
+	/**
+	 * Validate coupon rule and coupon usage.
+	 *
+	 * @param coupon coupon
+	 * @param storeCode store code
+	 * @param customerEmailAddress customer email address
+	 * @return the validation result
+	 */
+	CouponUsageValidationResultEnum validateCouponRuleAndUsage(Coupon coupon, String storeCode, String customerEmailAddress);
+
+	/**
+	 * Validate coupon rule and coupon usage, throws StructuredErrorMessageException on validation errors.
+	 *
+	 * @param coupon coupon
+	 * @param couponCode couponCode
+	 * @param storeCode store code
+	 * @param customerEmailAddress customer email address
+	 */
+	void ensureValidCouponRuleAndUsage(Coupon coupon, String couponCode, String storeCode, String customerEmailAddress);
 }

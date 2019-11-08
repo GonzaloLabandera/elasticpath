@@ -158,7 +158,7 @@
 						<value>com.elasticpath.domain.attribute.impl.AttributeImpl</value>
 						<value>com.elasticpath.domain.skuconfiguration.impl.SkuOptionImpl</value>
 						<value>com.elasticpath.domain.skuconfiguration.impl.SkuOptionValueImpl</value>
-						<value>com.elasticpath.domain.cartmodifier.impl.CartItemModifierGroupImpl</value>
+						<value>com.elasticpath.domain.modifier.impl.ModifierGroupImpl</value>
 					</set>
 				</entry>
 				<entry key="com.elasticpath.domain.catalog.impl.BrandImpl">
@@ -166,7 +166,7 @@
 						<value>com.elasticpath.domain.catalog.impl.CatalogImpl</value>
 					</set>
 				</entry>
-				<entry key="com.elasticpath.domain.cartmodifier.impl.CartItemModifierGroupImpl">
+				<entry key="com.elasticpath.domain.modifier.impl.ModifierGroupImpl">
 					<set>
 						<value>com.elasticpath.domain.catalog.impl.CatalogImpl</value>
 					</set>
@@ -304,10 +304,15 @@
 		<property name="couponUsageService" ref="couponUsageService"/>
     </bean>
 
-	<bean id="cartItemModifierGroupLocator" class="com.elasticpath.tools.sync.merge.configuration.impl.CartItemModifierGroupLocatorImpl">
-		<property name="cartItemModifierService" ref="cartItemModifierService"/>
+	<bean id="cartItemModifierGroupLocator" class="com.elasticpath.tools.sync.merge.configuration.impl.ModifierGroupLocatorImpl">
+		<property name="modifierService" ref="modifierService"/>
 	</bean>
-        
+
+
+	<bean id="modifierGroupLocator" class="com.elasticpath.tools.sync.merge.configuration.impl.ModifierGroupLocatorImpl">
+		<property name="modifierService" ref="modifierService"/>
+	</bean>
+
       <bean id="simpleLRUCache" class="org.apache.commons.collections.map.LRUMap">
        <constructor-arg type="int"><value>2048</value></constructor-arg>
        </bean>
@@ -349,6 +354,8 @@
 				<ref bean="couponUsageLocator" />
 				<ref bean="productCategoryLocator"/>
 				<ref bean="cartItemModifierGroupLocator"/>
+				<ref bean="modifierGroupLocator"/>
+
 			</list>
 		</property>
 		<property name="emptyFetchGroupLoadTuner">
@@ -399,12 +406,19 @@
 				<entry key="com.elasticpath.domain.rules.impl.CouponConfigImpl"><value>getRuleCode</value></entry>
 				<entry key="com.elasticpath.domain.rules.impl.CouponImpl"><value>getGuid</value></entry>
 				<entry key="com.elasticpath.domain.rules.impl.CouponUsageImpl"><value>getGuid</value></entry>
-				<entry key="com.elasticpath.domain.cartmodifier.impl.CartItemModifierGroupImpl" value="getCode"/>
-				<entry key="com.elasticpath.domain.cartmodifier.impl.CartItemModifierGroupLdfImpl" value="getLocale"/>
-				<entry key="com.elasticpath.domain.cartmodifier.impl.CartItemModifierFieldImpl" value="getCode"/>
-				<entry key="com.elasticpath.domain.cartmodifier.impl.CartItemModifierFieldLdfImpl" value="getLocale"/>
-				<entry key="com.elasticpath.domain.cartmodifier.impl.CartItemModifierFieldOptionImpl" value="getValue"/>
-				<entry key="com.elasticpath.domain.cartmodifier.impl.CartItemModifierFieldOptionLdfImpl" value="getLocale"/>
+				<entry key="com.elasticpath.domain.modifier.impl.ModifierGroupImpl" value="getCode"/>
+				<entry key="com.elasticpath.domain.modifier.impl.ModifierGroupLdfImpl" value="getLocale"/>
+				<entry key="com.elasticpath.domain.modifier.impl.ModifierFieldImpl" value="getCode"/>
+				<entry key="com.elasticpath.domain.modifier.impl.ModifierFieldLdfImpl" value="getLocale"/>
+				<entry key="com.elasticpath.domain.modifier.impl.ModifierFieldOptionImpl" value="getValue"/>
+				<entry key="com.elasticpath.domain.modifier.impl.ModifierFieldOptionLdfImpl" value="getLocale"/>
+				<entry key="com.elasticpath.domain.modifier.impl.ModifierGroupImpl" value="getCode"/>
+				<entry key="com.elasticpath.domain.modifier.impl.ModifierGroupLdfImpl" value="getLocale"/>
+				<entry key="com.elasticpath.domain.modifier.impl.ModifierFieldImpl" value="getCode"/>
+				<entry key="com.elasticpath.domain.modifier.impl.ModifierFieldLdfImpl" value="getLocale"/>
+				<entry key="com.elasticpath.domain.modifier.impl.ModifierFieldOptionImpl" value="getValue"/>
+				<entry key="com.elasticpath.domain.modifier.impl.ModifierFieldOptionLdfImpl" value="getLocale"/>
+
 			</map>
 		</property>
 	</bean>

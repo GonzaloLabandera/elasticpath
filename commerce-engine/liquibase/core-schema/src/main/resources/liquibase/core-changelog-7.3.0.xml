@@ -466,4 +466,11 @@
 		<dropNotNullConstraint tableName="TORDERSKU" columnName="BUNDLE_CONSTITUENT" columnDataType="boolean" />
 	</changeSet>
 
+	<changeSet id="7.3.0-remove-ORDER_PAYMENT_CARD_HOLDER_NAME-datapoint-from-TDATAPOINT" author="elasticpath" failOnError="false">
+		<comment>[SUP-210] - Remove ORDER_PAYMENT_CARD_HOLDER_NAME datapoint to fix customer personal data report</comment>
+		<delete tableName="TDATAPOINT">
+			<where>DATA_LOCATION='ORDER_PAYMENT_CARD_HOLDER_NAME' and DATA_KEY = 'ORDER_PAYMENT_CARD_HOLDER_NAME'</where>
+		</delete>
+	</changeSet>
+
 </databaseChangeLog>

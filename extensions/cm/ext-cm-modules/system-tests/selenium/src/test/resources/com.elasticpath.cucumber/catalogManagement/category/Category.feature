@@ -30,7 +30,7 @@ Feature: Create & Edit Category
   Scenario: Create new category with newly created category type
     Given a new catalog with following details
       | catalogName   | language |
-      | ATest Catalog | English  |
+      | ZTest Catalog | English  |
     And I select CategoryTypes tab in the Catalog Editor
     And I create a new category type TestCat Type with following attributes
       | Category Description |

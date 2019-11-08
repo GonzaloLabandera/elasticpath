@@ -16,6 +16,8 @@ import javax.persistence.TableGenerator;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
+import org.apache.openjpa.persistence.DataCache;
+
 import com.elasticpath.domain.order.TaxJournalRecord;
 import com.elasticpath.persistence.api.AbstractPersistableImpl;
 
@@ -25,6 +27,7 @@ import com.elasticpath.persistence.api.AbstractPersistableImpl;
 
 @Entity
 @Table(name = TaxJournalRecordImpl.TABLE_NAME)
+@DataCache(enabled = false)
 public class TaxJournalRecordImpl extends AbstractPersistableImpl implements TaxJournalRecord {
 	
 	private static final long serialVersionUID = 500000000001L;

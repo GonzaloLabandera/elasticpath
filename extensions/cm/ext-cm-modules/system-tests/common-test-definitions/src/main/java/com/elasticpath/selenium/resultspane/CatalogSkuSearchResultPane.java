@@ -71,8 +71,8 @@ public class CatalogSkuSearchResultPane extends AbstractPageObject {
 	 * @return the product editor.
 	 */
 	public ProductEditor openProductEditorForFirstSearchResultEntry() {
-		assertThat(selectItemInCenterPaneFirstPageByCell(TABLE_CSS, FIRST_CELL_CSS))
-				.as("Failed to open product editor for the first search result entry. There are no entries in a result table")
+		assertThat(selectItemInCenterPaneFirstPageByCell(FIRST_CELL_CSS))
+				.as("There are no entries in a result table")
 				.isTrue();
 		doubleClick(getSelectedElement(), ProductEditor.PRODUCT_EDITOR_PARENT_CSS);
 		return new ProductEditor(getDriver());

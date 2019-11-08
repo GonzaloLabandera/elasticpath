@@ -3,14 +3,19 @@
  */
 package com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder.validators.impl;
 
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.IntStream;
 
-import com.google.common.collect.ImmutableMap;
 import io.reactivex.Single;
+import io.reactivex.functions.Predicate;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -18,18 +23,19 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import com.elasticpath.base.common.dto.StructuredErrorMessage;
-import com.elasticpath.base.exception.structured.EpValidationException;
 import com.elasticpath.domain.catalog.Catalog;
 import com.elasticpath.domain.catalog.Product;
 import com.elasticpath.domain.catalog.ProductSku;
 import com.elasticpath.domain.catalog.ProductType;
 import com.elasticpath.domain.catalog.impl.ProductSkuImpl;
 import com.elasticpath.domain.store.Store;
+import com.elasticpath.rest.ResourceOperationFailure;
+import com.elasticpath.rest.advise.Message;
 import com.elasticpath.rest.definition.carts.AddItemsToCartFormEntity;
 import com.elasticpath.rest.definition.carts.ItemEntity;
 import com.elasticpath.rest.definitions.validator.constants.ValidationMessages;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.store.StoreRepository;
+import com.elasticpath.rest.schema.StructuredMessageTypes;
 import com.elasticpath.service.catalog.ProductSkuLookup;
 
 /**
@@ -38,6 +44,7 @@ import com.elasticpath.service.catalog.ProductSkuLookup;
 @RunWith(MockitoJUnitRunner.class)
 public class AddItemsToCartValidatorImplTest {
 
+	private static final int TOTAL_ITEMS = 5000;
 	@Mock
 	private ProductSkuLookup productSkuLookup;
 
@@ -68,6 +75,10 @@ public class AddItemsToCartValidatorImplTest {
 	private static final String INVALID_QUANTITY_IN_REQUEST_BODY = "'quantity' value must be greater than or equal to '1'.";
 
 	private static final String INVALID_QUANTITY_MESSAGE_ID = "field.invalid.minimum.value";
+	
+	private static final String DUPLICATE_ITEM_MESSAGE = "Item 'SKUCODE' has multiple entries. Please combine duplicate items into one entry.";
+
+	private static final String ITEM_IS_DUPLICATE_ID = "item.is.duplicate";
 
 	private static final String CATALOG_CODE = "catalog_code";
 
@@ -77,33 +88,12 @@ public class AddItemsToCartValidatorImplTest {
 
 	@Test
 	public void testNullFormEntity() {
-		assertThatThrownBy(() -> addItemsToCartValidator.validate(null, SCOPE))
-				.isInstanceOf(EpValidationException.class)
-				.hasMessageContaining(EP_VALIDATION_EXCEPTION_MESSAGE)
-				.extracting(exception -> ((EpValidationException) exception)
-						.getStructuredErrorMessages()
-						.iterator().next()
-						.getDebugMessage()
-				)
-				.isEqualTo(ValidationMessages.MISSING_REQUIRED_REQUEST_BODY);
-
-		assertThatThrownBy(() -> addItemsToCartValidator.validate(null, SCOPE))
-				.extracting((exception) -> ((EpValidationException) exception)
-						.getStructuredErrorMessages()
-						.iterator().next()
-						.getMessageId()
-				)
-				.isEqualTo(MESSAGE_ID);
-
-		assertThatThrownBy(() -> addItemsToCartValidator.validate(null, SCOPE))
-				.extracting((exception) -> ((EpValidationException) exception)
-						.getStructuredErrorMessages()
-						.iterator().next()
-						.getData()
-				)
-				.isEqualTo(ImmutableMap.of(
-						FIELD_NAME, ITEMS_FIELD_NAME
-				));
+		Message errorMessage = buildErrorMessage(ValidationMessages.MISSING_REQUIRED_REQUEST_BODY, MESSAGE_ID, ITEMS_FIELD_NAME);
+		addItemsToCartValidator.validate(null, SCOPE)
+				.test()
+				.assertError(throwable -> throwable.getMessage().equals(EP_VALIDATION_EXCEPTION_MESSAGE))
+				.assertError(assertErrorMessages(Collections.singletonList(errorMessage)))
+				.assertNotComplete();
 	}
 
 	@Test
@@ -112,23 +102,12 @@ public class AddItemsToCartValidatorImplTest {
 		AddItemsToCartFormEntity addItemsToCartFormEntity = AddItemsToCartFormEntity.builder()
 				.build();
 
-		assertThatThrownBy(() -> addItemsToCartValidator.validate(addItemsToCartFormEntity, SCOPE))
-				.isInstanceOf(EpValidationException.class)
-				.hasMessageContaining(EP_VALIDATION_EXCEPTION_MESSAGE)
-				.extracting((exception) -> ((EpValidationException) exception)
-						.getStructuredErrorMessages()
-						.iterator().next()
-						.getDebugMessage()
-				)
-				.isEqualTo(ValidationMessages.MISSING_REQUIRED_REQUEST_BODY);
-
-		assertThatThrownBy(() -> addItemsToCartValidator.validate(addItemsToCartFormEntity, SCOPE))
-				.extracting((exception) -> ((EpValidationException) exception)
-						.getStructuredErrorMessages()
-						.iterator().next()
-						.getMessageId()
-				)
-				.isEqualTo(MESSAGE_ID);
+		Message errorMessage = buildErrorMessage(ValidationMessages.MISSING_REQUIRED_REQUEST_BODY, MESSAGE_ID, ITEMS_FIELD_NAME);
+		addItemsToCartValidator.validate(addItemsToCartFormEntity, SCOPE)
+				.test()
+				.assertError(throwable -> throwable.getMessage().equals(EP_VALIDATION_EXCEPTION_MESSAGE))
+				.assertError(assertErrorMessages(Collections.singletonList(errorMessage)))
+				.assertNotComplete();
 	}
 
 	@Test
@@ -143,33 +122,12 @@ public class AddItemsToCartValidatorImplTest {
 				.build();
 
 		// Then
-		assertThatThrownBy(() -> addItemsToCartValidator.validate(addItemsToCartFormEntity, SCOPE))
-				.isInstanceOf(EpValidationException.class)
-				.hasMessageContaining(EP_VALIDATION_EXCEPTION_MESSAGE)
-				.extracting((exception) -> ((EpValidationException) exception)
-						.getStructuredErrorMessages()
-						.iterator().next()
-						.getDebugMessage()
-				)
-				.isEqualTo(MISSING_CODE_IN_REQUEST_BODY);
-
-		assertThatThrownBy(() -> addItemsToCartValidator.validate(addItemsToCartFormEntity, SCOPE))
-				.extracting((exception) -> ((EpValidationException) exception)
-						.getStructuredErrorMessages()
-						.iterator().next()
-						.getMessageId()
-				)
-				.isEqualTo(MESSAGE_ID);
-
-		assertThatThrownBy(() -> addItemsToCartValidator.validate(addItemsToCartFormEntity, SCOPE))
-				.extracting((exception) -> ((EpValidationException) exception)
-						.getStructuredErrorMessages()
-						.iterator().next()
-						.getData()
-				)
-				.isEqualTo(ImmutableMap.of(
-						FIELD_NAME, ITEM_CODE_FIELD_NAME
-				));
+		Message errorMessage = buildErrorMessage(MISSING_CODE_IN_REQUEST_BODY, MESSAGE_ID, ITEM_CODE_FIELD_NAME);
+		addItemsToCartValidator.validate(addItemsToCartFormEntity, SCOPE)
+				.test()
+				.assertError(throwable -> throwable.getMessage().equals(EP_VALIDATION_EXCEPTION_MESSAGE))
+				.assertError(assertErrorMessages(Collections.singletonList(errorMessage)))
+				.assertNotComplete();
 	}
 
 	@Test
@@ -188,33 +146,12 @@ public class AddItemsToCartValidatorImplTest {
 		mockItemIsConfigurable(product, false);
 
 		// Then
-		assertThatThrownBy(() -> addItemsToCartValidator.validate(addItemsToCartFormEntity, SCOPE))
-				.isInstanceOf(EpValidationException.class)
-				.hasMessageContaining(EP_VALIDATION_EXCEPTION_MESSAGE)
-				.extracting((exception) -> ((EpValidationException) exception)
-						.getStructuredErrorMessages()
-						.iterator().next()
-						.getDebugMessage()
-				)
-				.isEqualTo(INVALID_QUANTITY_IN_REQUEST_BODY);
-
-		assertThatThrownBy(() -> addItemsToCartValidator.validate(addItemsToCartFormEntity, SCOPE))
-				.extracting((exception) -> ((EpValidationException) exception)
-						.getStructuredErrorMessages()
-						.iterator().next()
-						.getMessageId()
-				)
-				.isEqualTo(INVALID_QUANTITY_MESSAGE_ID);
-
-		assertThatThrownBy(() -> addItemsToCartValidator.validate(addItemsToCartFormEntity, SCOPE))
-				.extracting((exception) -> ((EpValidationException) exception)
-						.getStructuredErrorMessages()
-						.iterator().next()
-						.getData()
-				)
-				.isEqualTo(ImmutableMap.of(
-						FIELD_NAME, QUANTITY_FIELD_NAME
-				));
+		Message errorMessage = buildErrorMessage(INVALID_QUANTITY_IN_REQUEST_BODY, INVALID_QUANTITY_MESSAGE_ID, QUANTITY_FIELD_NAME);
+		addItemsToCartValidator.validate(addItemsToCartFormEntity, SCOPE)
+				.test()
+				.assertError(throwable -> throwable.getMessage().equals(EP_VALIDATION_EXCEPTION_MESSAGE))
+				.assertError(assertErrorMessages(Collections.singletonList(errorMessage)))
+				.assertNotComplete();
 	}
 
 	@Test
@@ -230,34 +167,13 @@ public class AddItemsToCartValidatorImplTest {
 				.build();
 
 		// Then
-		assertThatThrownBy(() -> addItemsToCartValidator.validate(addItemsToCartFormEntity, SCOPE))
-				.isInstanceOf(EpValidationException.class)
-				.hasMessageContaining(EP_VALIDATION_EXCEPTION_MESSAGE)
-				.extracting((exception) -> ((EpValidationException) exception)
-						.getStructuredErrorMessages()
-						.iterator().next()
-						.getDebugMessage()
-				)
-				.isEqualTo("Item with code '" + SKUCODE + "' does not exist.");
-
-		assertThatThrownBy(() -> addItemsToCartValidator.validate(addItemsToCartFormEntity, SCOPE))
-				.extracting((exception) -> ((EpValidationException) exception)
-						.getStructuredErrorMessages()
-						.iterator().next()
-						.getMessageId()
-				)
-				.isEqualTo(MESSAGE_ID);
-
-		assertThatThrownBy(() -> addItemsToCartValidator.validate(addItemsToCartFormEntity, SCOPE))
-				.extracting((exception) -> ((EpValidationException) exception)
-						.getStructuredErrorMessages()
-						.iterator().next()
-						.getData()
-				)
-				.isEqualTo(ImmutableMap.of(
-						FIELD_NAME, ITEM_CODE_FIELD_NAME,
-						FIELD_VALUE, SKUCODE
-				));
+		String debugMessage = "Item with code '" + SKUCODE + "' does not exist.";
+		Message errorMessage = buildErrorMessage(debugMessage, MESSAGE_ID, ITEM_CODE_FIELD_NAME, SKUCODE);
+		addItemsToCartValidator.validate(addItemsToCartFormEntity, SCOPE)
+				.test()
+				.assertError(throwable -> throwable.getMessage().equals(EP_VALIDATION_EXCEPTION_MESSAGE))
+				.assertError(assertErrorMessages(Collections.singletonList(errorMessage)))
+				.assertNotComplete();
 	}
 
 	@Test
@@ -273,69 +189,15 @@ public class AddItemsToCartValidatorImplTest {
 				.build();
 
 		// Then
-		assertThatThrownBy(() -> addItemsToCartValidator.validate(addItemsToCartFormEntity, SCOPE))
-				.isInstanceOf(EpValidationException.class)
-				.hasMessageContaining(EP_VALIDATION_EXCEPTION_MESSAGE)
-				.extracting((exception) -> ((EpValidationException) exception)
-						.getStructuredErrorMessages()
-						.iterator().next()
-						.getDebugMessage()
-				)
-				.isEqualTo("Item with code '" + SKUCODE + "' does not exist.");
+		String debugMessage = "Item with code '" + SKUCODE + "' does not exist.";
+		Message invalidCodeErrorMessage = buildErrorMessage(debugMessage, MESSAGE_ID, ITEM_CODE_FIELD_NAME, SKUCODE);
+		Message invalidQtyErrorMessage = buildErrorMessage(INVALID_QUANTITY_IN_REQUEST_BODY, INVALID_QUANTITY_MESSAGE_ID, QUANTITY_FIELD_NAME);
 
-		assertThatThrownBy(() -> addItemsToCartValidator.validate(addItemsToCartFormEntity, SCOPE))
-				.extracting((exception) -> ((EpValidationException) exception)
-						.getStructuredErrorMessages()
-						.iterator().next()
-						.getMessageId()
-				)
-				.isEqualTo(MESSAGE_ID);
-
-		assertThatThrownBy(() -> addItemsToCartValidator.validate(addItemsToCartFormEntity, SCOPE))
-				.extracting((exception) -> ((EpValidationException) exception)
-						.getStructuredErrorMessages()
-						.iterator().next()
-						.getData()
-				)
-				.isEqualTo(ImmutableMap.of(
-						FIELD_NAME, ITEM_CODE_FIELD_NAME,
-						FIELD_VALUE, SKUCODE
-				));
-
-		// Then
-		assertThatThrownBy(() -> addItemsToCartValidator.validate(addItemsToCartFormEntity, SCOPE))
-				.isInstanceOf(EpValidationException.class)
-				.hasMessageContaining(EP_VALIDATION_EXCEPTION_MESSAGE)
-				.extracting((exception) -> ((EpValidationException) exception)
-						.getStructuredErrorMessages()
-						.stream().skip(1)
-						.findFirst()
-						.map(StructuredErrorMessage::getDebugMessage)
-						.orElse(null)
-				)
-				.isEqualTo(INVALID_QUANTITY_IN_REQUEST_BODY);
-
-		assertThatThrownBy(() -> addItemsToCartValidator.validate(addItemsToCartFormEntity, SCOPE))
-				.extracting((exception) -> ((EpValidationException) exception)
-						.getStructuredErrorMessages()
-						.stream().skip(1)
-						.findFirst()
-						.map(StructuredErrorMessage::getMessageId)
-						.orElse(null)
-				)
-				.isEqualTo(INVALID_QUANTITY_MESSAGE_ID);
-
-		assertThatThrownBy(() -> addItemsToCartValidator.validate(addItemsToCartFormEntity, SCOPE))
-				.extracting((exception) -> ((EpValidationException) exception)
-						.getStructuredErrorMessages()
-						.stream().skip(1)
-						.findFirst()
-						.map(StructuredErrorMessage::getData)
-						.orElse(null)
-				)
-				.isEqualTo(ImmutableMap.of(
-						FIELD_NAME, QUANTITY_FIELD_NAME
-				));
+		addItemsToCartValidator.validate(addItemsToCartFormEntity, SCOPE)
+				.test()
+				.assertError(throwable -> throwable.getMessage().equals(EP_VALIDATION_EXCEPTION_MESSAGE))
+				.assertError(assertErrorMessages(Arrays.asList(invalidCodeErrorMessage, invalidQtyErrorMessage)))
+				.assertNotComplete();
 	}
 
 	@Test
@@ -347,7 +209,7 @@ public class AddItemsToCartValidatorImplTest {
 		// given
 		ItemEntity itemEntity = ItemEntity.builder()
 				.withCode(SKUCODE)
-				.withQuantity(0)
+				.withQuantity(1)
 				.build();
 
 		AddItemsToCartFormEntity addItemsToCartFormEntity = AddItemsToCartFormEntity.builder()
@@ -355,35 +217,65 @@ public class AddItemsToCartValidatorImplTest {
 				.build();
 
 		// Then
-		assertThatThrownBy(() -> addItemsToCartValidator.validate(addItemsToCartFormEntity, SCOPE))
-				.isInstanceOf(EpValidationException.class)
-				.hasMessageContaining(EP_VALIDATION_EXCEPTION_MESSAGE)
-				.extracting((exception) -> ((EpValidationException) exception)
-						.getStructuredErrorMessages()
-						.iterator().next()
-						.getDebugMessage()
-				)
-				.isEqualTo("Item '" + SKUCODE + "' is a configurable product. Please add it individually using 'additemtocart' form.");
+		String debugMessage = "Item '" + SKUCODE + "' is a configurable product. Please add it individually using 'additemtocart' form.";
+		Message errorMessage = buildErrorMessage(debugMessage, ITEM_IS_CONFIGURABLE, ITEM_CODE_FIELD_NAME, SKUCODE);
+		addItemsToCartValidator.validate(addItemsToCartFormEntity, SCOPE)
+				.test()
+				.assertError(throwable -> throwable.getMessage().equals(EP_VALIDATION_EXCEPTION_MESSAGE))
+				.assertError(assertErrorMessages(Collections.singletonList(errorMessage)))
+				.assertNotComplete();
 
-		assertThatThrownBy(() -> addItemsToCartValidator.validate(addItemsToCartFormEntity, SCOPE))
-				.extracting((exception) -> ((EpValidationException) exception)
-						.getStructuredErrorMessages()
-						.iterator().next()
-						.getMessageId()
-				)
-				.isEqualTo(ITEM_IS_CONFIGURABLE);
+	}
 
-		assertThatThrownBy(() -> addItemsToCartValidator.validate(addItemsToCartFormEntity, SCOPE))
-				.extracting((exception) -> ((EpValidationException) exception)
-						.getStructuredErrorMessages()
-						.iterator().next()
-						.getData()
-				)
-				.isEqualTo(ImmutableMap.of(
-						FIELD_NAME, ITEM_CODE_FIELD_NAME,
-						FIELD_VALUE, SKUCODE
-				));
+	@Test
+	public void testDuplicateItems() {
+		// given
+		ItemEntity itemEntity = ItemEntity.builder()
+				.withCode(SKUCODE)
+				.withQuantity(1)
+				.build();
 
+		AddItemsToCartFormEntity addItemsToCartFormEntity = AddItemsToCartFormEntity.builder()
+				.withItems(Arrays.asList(itemEntity, itemEntity))
+				.build();
+
+		Product product = mockItemCodeExisting();
+		mockItemIsConfigurable(product, false);
+
+		// Then
+		Message errorMessage = buildErrorMessage(DUPLICATE_ITEM_MESSAGE, ITEM_IS_DUPLICATE_ID, ITEM_CODE_FIELD_NAME, SKUCODE);
+		addItemsToCartValidator.validate(addItemsToCartFormEntity, SCOPE)
+				.test()
+				.assertError(throwable -> throwable.getMessage().equals(EP_VALIDATION_EXCEPTION_MESSAGE))
+				.assertError(assertErrorMessages(Collections.singletonList(errorMessage)))
+				.assertNotComplete();
+	}
+
+	@Test
+	public void testValidatingLargeRequestWithDuplicateItems() {
+		// given
+		ItemEntity itemEntity = ItemEntity.builder()
+				.withCode(SKUCODE)
+				.withQuantity(1)
+				.build();
+
+		List<ItemEntity> itemEntities = new ArrayList<>();
+		IntStream.range(1, TOTAL_ITEMS) // about 2500 items cause a stackoverflow error
+				.forEach(value -> itemEntities.add(itemEntity));
+		AddItemsToCartFormEntity addItemsToCartFormEntity = AddItemsToCartFormEntity.builder()
+				.withItems(itemEntities)
+				.build();
+
+		Product product = mockItemCodeExisting();
+		mockItemIsConfigurable(product, false);
+
+		// Then
+		Message errorMessage = buildErrorMessage(DUPLICATE_ITEM_MESSAGE, ITEM_IS_DUPLICATE_ID, ITEM_CODE_FIELD_NAME, SKUCODE);
+		addItemsToCartValidator.validate(addItemsToCartFormEntity, SCOPE)
+				.test()
+				.assertError(throwable -> throwable.getMessage().equals(EP_VALIDATION_EXCEPTION_MESSAGE))
+				.assertError(assertErrorMessages(Collections.singletonList(errorMessage)))
+				.assertNotComplete();
 	}
 
 	private void mockItemIsConfigurable(final Product product, final boolean isConfigurable) {
@@ -397,14 +289,13 @@ public class AddItemsToCartValidatorImplTest {
 		Store store = createMockStore(catalog);
 		Product product = createMockProduct();
 
-		when(product.isInCatalog(catalog, true)).thenReturn(true);
+		when(product.isInCatalog(catalog)).thenReturn(true);
 
 		ProductSku productSku = createProductSku(SKUCODE, product);
 
 		when(productSkuLookup.findBySkuCode(SKUCODE)).thenReturn(productSku);
 		when(storeRepository.findStoreAsSingle(SCOPE)).thenReturn(Single.just(store));
-
-
+		
 		return product;
 	}
 
@@ -441,4 +332,51 @@ public class AddItemsToCartValidatorImplTest {
 		return store;
 	}
 
+	private Message buildErrorMessage(final String debugMessage, final String messageId, final String fieldName) {
+		Map<String, String> errorData = new HashMap<>();
+		errorData.put(FIELD_NAME, fieldName);
+
+		return Message.builder()
+				.withType(StructuredMessageTypes.ERROR)
+				.withId(messageId)
+				.withDebugMessage(debugMessage)
+				.withData(errorData)
+				.build();
+	}
+
+	private Message buildErrorMessage(final String debugMessage, final String messageId, final String fieldName, final String fieldValue) {
+		Map<String, String> errorData = new HashMap<>();
+		errorData.put(FIELD_NAME, fieldName);
+		errorData.put(FIELD_VALUE, fieldValue);
+
+		return Message.builder()
+				.withType(StructuredMessageTypes.ERROR)
+				.withId(messageId)
+				.withDebugMessage(debugMessage)
+				.withData(errorData)
+				.build();
+	}
+
+	private Predicate<Throwable> assertErrorMessages(final List<Message> expectedMessages) {
+		return throwable -> {
+			ResourceOperationFailure failure = (ResourceOperationFailure) throwable;
+
+			if (failure.getMessages().size() != expectedMessages.size()) {
+				return false;
+			}
+
+			for (Message expectedMsg : expectedMessages) {
+				boolean noneMatch = failure.getMessages().stream()
+						.noneMatch(message ->
+								message.getData().equals(expectedMsg.getData())
+										&& message.getDebugMessage().equals(expectedMsg.getDebugMessage())
+										&& message.getId().equals(expectedMsg.getId()));
+
+				if (noneMatch) {
+					return false;
+				}
+			}
+			return true;
+		};
+	}
 }

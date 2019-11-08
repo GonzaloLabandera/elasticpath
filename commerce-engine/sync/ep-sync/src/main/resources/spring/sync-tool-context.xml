@@ -109,11 +109,13 @@
 				<entry key="local.source">
 					<bean class="com.elasticpath.tools.sync.beanfactory.impl.LocalContextInitializerImpl">
 						<property name="pathToXmlFile" value="spring/sync-source-local-context.xml" />
+						<property name="springProfile" value="${ep.spring.profile:default}"/>
 					</bean>
 				</entry>
 				<entry key="local.target">
 					<bean class="com.elasticpath.tools.sync.beanfactory.impl.LocalContextInitializerImpl">
 						<property name="pathToXmlFile" value="spring/sync-target-local-context.xml" />
+						<property name="springProfile" value="${ep.spring.profile:default}"/>
 					</bean>
 				</entry>
 			</map>
@@ -153,9 +155,9 @@
 				<entry key="com.elasticpath.domain.attribute.Attribute" value="-12500" />
 				<entry key="com.elasticpath.domain.catalog.Brand" value="-12400" />
 				<entry key="com.elasticpath.domain.catalog.CategoryType" value="-12000" />
-				<entry key="com.elasticpath.domain.cartmodifier.CartItemModifierGroup" value="-11500"/>
-				<entry key="com.elasticpath.domain.cartmodifier.CartItemModifierField" value="-11490"/>
-				<entry key="com.elasticpath.domain.cartmodifier.CartItemModifierGroupLdf" value="-11480"/>
+				<entry key="com.elasticpath.domain.modifier.ModifierGroup" value="-11500"/>
+				<entry key="com.elasticpath.domain.modifier.ModifierField" value="-11490"/>
+				<entry key="com.elasticpath.domain.modifier.ModifierGroupLdf" value="-11480"/>
 				<entry key="com.elasticpath.domain.catalog.ProductType" value="-11000" />
 				<entry key="com.elasticpath.domain.catalog.Category" value="-10000" />
 				<entry key="com.elasticpath.domain.catalog.Product" value="-9000" />

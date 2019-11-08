@@ -23,7 +23,7 @@ public class BaseAmountDTOGuidResolver implements ObjectGuidResolver {
 	public String resolveGuid(final Object object) {
 		BaseAmountDTO dto = (BaseAmountDTO) object;
 		if (dto.getGuid() == null) {
-			return getBeanFactory().<RandomGuid>getBean(ContextIdNames.RANDOM_GUID).toString();
+			return getBeanFactory().getPrototypeBean(ContextIdNames.RANDOM_GUID, RandomGuid.class).toString();
 		}
 		return dto.getGuid();
 	}

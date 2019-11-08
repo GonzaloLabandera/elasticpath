@@ -162,10 +162,14 @@ public class TestConditionBuilder {
 		block1.setParentLogicalOperator(topModel);
 		block2.setParentLogicalOperator(topModel);
 
-		Condition condition01 = new Condition(tagDefinitions.get(1), "equalTo", "5.0"); //$NON-NLS-1$ //$NON-NLS-2$
-		Condition condition02 = new Condition(tagDefinitions.get(NUM_3), "greaterThan", "value02"); //$NON-NLS-1$ //$NON-NLS-2$
-		Condition condition11 = new Condition(tagDefinitions.get(NUM_4), "lessThan", "value11"); //$NON-NLS-1$ //$NON-NLS-2$ 
-		Condition condition12 = new Condition(tagDefinitions.get(2), "greaterThanOrEqualTo", "value12"); //$NON-NLS-1$ //$NON-NLS-2$ 
+		Condition condition01 = new Condition(tagDefinitions.get(1), tagDefinitions.get(1).getName(),
+				"equalTo", "5.0"); //$NON-NLS-1$ //$NON-NLS-2$
+		Condition condition02 = new Condition(tagDefinitions.get(NUM_3), tagDefinitions.get(NUM_3).getName(),
+				"greaterThan", "value02"); //$NON-NLS-1$ //$NON-NLS-2$
+		Condition condition11 = new Condition(tagDefinitions.get(NUM_4), tagDefinitions.get(NUM_4).getName(),
+				"lessThan", "value11"); //$NON-NLS-1$ //$NON-NLS-2$
+		Condition condition12 = new Condition(tagDefinitions.get(2), tagDefinitions.get(2).getName(),
+				"greaterThanOrEqualTo", "value12"); //$NON-NLS-1$ //$NON-NLS-2$
 
 		condition01.setParentLogicalOperator(block1);
 		condition02.setParentLogicalOperator(block1);

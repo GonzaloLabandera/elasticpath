@@ -1,0 +1,76 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "description": "Subschemas for property arrays.",
+
+  "offerProperties": {
+    "description": "Array of offer properties as defined in OfferPropertyNames.",
+    "type": "array",
+    "items": [
+      {
+        "type": "object",
+        "required": [
+          "name",
+          "value"
+        ],
+        "properties": {
+          "name": {
+            "description": "The property name: OFFER_TYPE, NOT_SOLD_SEPARATELY, MINIMUM_ORDER_QUANTITY, BUNDLE_PRICING.",
+            "type": "string"
+          },
+          "value": {
+            "description": "The property value.",
+            "type": "string"
+          }
+        }
+      }
+    ]
+  },
+
+  "itemProperties": {
+    "description": "Array of item properties as defined in OfferPropertyNames.",
+    "type": "array",
+    "items": [
+      {
+        "type": "object",
+        "required": [
+          "name",
+          "value"
+        ],
+        "properties": {
+          "name": {
+            "description": "The property name: ITEM_TYPE, TAX_CODE.",
+            "type": "string"
+          },
+          "value": {
+            "description": "The property value.",
+            "type": "string"
+          }
+        }
+      }
+    ]
+  },
+
+  "categoryProperties": {
+    "description": "Array of category properties as defined in CategoryPropertiesNames.",
+    "type": "array",
+    "items": [
+      {
+        "type": "object",
+        "required": [
+          "name",
+          "value"
+        ],
+        "properties": {
+          "name": {
+            "description": "The property name: CATEGORY_TYPE.",
+            "type": "string"
+          },
+          "value": {
+            "description": "The property value.",
+            "type": "string"
+          }
+        }
+      }
+    ]
+  }
+}

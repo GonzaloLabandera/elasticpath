@@ -107,6 +107,7 @@ public class ProductSolrInputDocumentCreator extends AbstractDocumentCreatingTas
 		addProductDisplayCodeToDocument(solrInputDocument, getEntity());
 		addFeaturenessToDocument(solrInputDocument, getEntity());
 		addDisplayableFieldsToDocument(solrInputDocument, getEntity(), catalogUidAvailability, stores);
+		addDocValueProductAttributes(solrInputDocument, getEntity());
 		addPriceFieldsToDocument(solrInputDocument, getEntity(), stores);
 		addStoreSpecificFieldsToDocument(solrInputDocument, catalogUidAvailability);
 		addLocaleSpecificFieldsToDocument(solrInputDocument, getEntity());
@@ -121,6 +122,38 @@ public class ProductSolrInputDocumentCreator extends AbstractDocumentCreatingTas
 		}
 
 		return solrInputDocument;
+	}
+
+	private void addDocValueProductAttributes(final SolrInputDocument solrInputDocument, final Product product) {
+		getAllLocales(product)
+				.forEach(locale -> addDocValuesToDocument(product, locale, solrInputDocument));
+	}
+
+	private void addDocValuesToDocument(final Product product, final Locale locale, final SolrInputDocument solrInputDocument) {
+		product.getAttributeValues(locale).stream()
+				.filter(attributeValue -> !attributeValue.getAttribute().isMultiValueEnabled()
+						&& attributeValue.getAttributeType().getOrdinal() <= AttributeType.BOOLEAN.getOrdinal())
+				.forEach(attributeValue -> {
+					Attribute attribute = attributeValue.getAttribute();
+					String fieldName = getIndexUtility().createAttributeDocValues(attribute, locale);
+					if (!solrInputDocument.containsKey(fieldName)) {
+						addFieldToDocument(solrInputDocument, fieldName, getAnalyzedValue(attributeValue, attribute));
+					}
+				});
+	}
+
+	private String getAnalyzedValue(final AttributeValue attributeValue, final Attribute attribute) {
+		String analyzedValue;
+		// Date and Date & Time attribute values must be parsed using the analyzer
+		final AttributeType attributeType = attribute.getAttributeType();
+		if (AttributeType.DATE.equals(attributeType) || AttributeType.DATETIME.equals(attributeType)) {
+			analyzedValue = getAnalyzer().analyze((Date) attributeValue.getValue());
+		} else if (AttributeType.DECIMAL.equals(attributeType)) {
+			analyzedValue = getAnalyzer().analyze((BigDecimal) attributeValue.getValue());
+		} else {
+			analyzedValue = getAnalyzer().analyze(attributeValue.getStringValue());
+		}
+		return analyzedValue;
 	}
 
 	private void addSizesAndWeightsToDocument(final SolrInputDocument solrInputDocument, final Product product) {
@@ -558,16 +591,7 @@ public class ProductSolrInputDocumentCreator extends AbstractDocumentCreatingTas
 			final Collection<String> values = ((AttributeValueWithType) attributeValue).getShortTextMultiValues();
 			addFieldToDocument(document, fieldName, values);
 		} else {
-			String analyzedValue;
-			// Date and Date & Time attribute values must be parsed using the analyzer
-			final AttributeType attributeType = attribute.getAttributeType();
-			if (AttributeType.DATE.equals(attributeType) || AttributeType.DATETIME.equals(attributeType)) {
-				analyzedValue = getAnalyzer().analyze((Date) attributeValue.getValue());
-			} else if (AttributeType.DECIMAL.equals(attributeType)) {
-				analyzedValue = getAnalyzer().analyze((BigDecimal) attributeValue.getValue());
-			} else {
-				analyzedValue = getAnalyzer().analyze(attributeValue.getStringValue());
-			}
+			String analyzedValue = getAnalyzedValue(attributeValue, attribute);
 			addFieldToDocument(document, fieldName, analyzedValue);
 		}
 	}
@@ -583,7 +607,7 @@ public class ProductSolrInputDocumentCreator extends AbstractDocumentCreatingTas
 	 */
 	protected Price lookupPrice(final Product product, final PriceListDescriptor priceListDescriptor, final Store store,
 			final BaseAmountDataSourceFactory baseAmountDataSourceFactory) {
-		final PriceListStack singleStack = getBeanFactory().getBean(ContextIdNames.PRICE_LIST_STACK);
+		final PriceListStack singleStack = getBeanFactory().getPrototypeBean(ContextIdNames.PRICE_LIST_STACK, PriceListStack.class);
 
 		singleStack.addPriceList(priceListDescriptor.getGuid());
 		singleStack.setCurrency(Currency.getInstance(priceListDescriptor.getCurrencyCode()));
@@ -649,7 +673,8 @@ public class ProductSolrInputDocumentCreator extends AbstractDocumentCreatingTas
 	 * @return the data-set factory
 	 */
 	protected BaseAmountDataSourceFactory initDataSourceFactory(final Product product, final Collection<Store> stores) {
-		final BaseAmountDataSourceFactoryBuilder builder = getBeanFactory().getBean(ContextIdNames.BASE_AMOUNT_DATA_SOURCE_FACTORY_BUILDER);
+		final BaseAmountDataSourceFactoryBuilder builder = getBeanFactory().getPrototypeBean(ContextIdNames.BASE_AMOUNT_DATA_SOURCE_FACTORY_BUILDER,
+				BaseAmountDataSourceFactoryBuilder.class);
 		builder.products(product);
 		for (final Store store : stores) {
 			builder.priceListAssignments(getPriceListAssignmentByStore(store));

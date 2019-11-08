@@ -30,6 +30,9 @@ public class LocalContextInitializerImpl implements ContextInitializer {
 	
 	private String pathToXmlFile;
 
+	private String springProfile;
+
+
 	/**
 	 * Initialize a context with the requested connection configuration.
 	 * and passes the {@code dataSourceProperties} bean to the underlying context.
@@ -83,6 +86,22 @@ public class LocalContextInitializerImpl implements ContextInitializer {
 	}
 
 	/**
+	 * Gets the spring profile.
+	 * @return the spring profile.
+	 */
+	public String getSpringProfile() {
+		return springProfile;
+	}
+
+	/**
+	 * Sets the spring profile.
+	 * @param springProfile the spring profile.
+	 */
+	public void setSpringProfile(final String springProfile) {
+		this.springProfile = springProfile;
+	}
+
+	/**
 	 *
 	 * @return the pathToXmlFile
 	 */
@@ -111,9 +130,16 @@ public class LocalContextInitializerImpl implements ContextInitializer {
 
 	private ApplicationContext refreshApplicationContext(final BeanFactory beanFactory) {
 		GenericApplicationContext genericAppContext = new GenericApplicationContext(new DefaultListableBeanFactory(beanFactory));
+
+		String profileToAdd = getSpringProfile();
+		if (profileToAdd != null) {
+			genericAppContext.getEnvironment().addActiveProfile(profileToAdd);
+		}
 		genericAppContext.refresh();
 		// refresh of child context is implied by the type of constructor, but parent must be refreshed prior
 		// to passing into constructor
 		return new ClassPathXmlApplicationContext(new String[]{pathToXmlFile}, genericAppContext);
 	}
+
+
 }

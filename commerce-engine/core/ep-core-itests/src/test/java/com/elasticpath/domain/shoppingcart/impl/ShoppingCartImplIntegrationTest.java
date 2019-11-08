@@ -33,7 +33,6 @@ public class ShoppingCartImplIntegrationTest extends DbTestCase {
 		shoppingCart.getRuleService();
 		shoppingCart.getCouponUsageService();
 		shoppingCart.getCouponService();
-		shoppingCart.getValidCouponUseSpecification();
 
 		ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
 		ObjectOutputStream objectOutputStream = new ObjectOutputStream(byteArrayOutputStream);

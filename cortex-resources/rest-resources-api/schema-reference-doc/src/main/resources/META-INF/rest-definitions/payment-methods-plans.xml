@@ -7,10 +7,8 @@
 		<plan>
 			<name>orders-paymentmethods-selector</name>
 			<description>
-				<![CDATA[
-Use a selector to select paymentmethod to use for the purchase. Follow the workflow to read the paymentmethodsinfo
-and then create a choice to select the paymentmethod to use for the purchase.
-				]]>
+				<![CDATA[Use a selector to select paymentmethod to use for the purchase. Follow the workflow to read the paymentmethodsinfo
+and then create a choice to select the paymentmethod to use for the purchase.]]>
 			</description>
 			<step>
 				<description><![CDATA[Retrieve the selector.]]></description>
@@ -70,10 +68,8 @@ and then create a choice to select the paymentmethod to use for the purchase.
 		<plan>
 			<name>read-paymentmethod-needinfo-from-order</name>
 			<description>
-				<![CDATA[
-Read payment-needinfo from order. When a paymentmethod needinfo is on the order, it means the payment method has not been selected for the purchase.
-Follow the workflow to read the needinfo.
-				]]>
+				<![CDATA[Read payment-needinfo from order. When a paymentmethod needinfo is on the order, it means the payment method has not
+been selected for the purchase. Follow the workflow to read the needinfo.]]>
 			</description>
 			<step>
 				<description><![CDATA[Read payment-needinfo from order. ]]></description>
@@ -86,10 +82,8 @@ Follow the workflow to read the needinfo.
 		<plan>
 			<name>read-paymentmethod-needinfo-from-purchaseform</name>
 			<description>
-				<![CDATA[
-Read payment needinfo from the purchase form. When a payment method needinfo is on the purchase form, it means the payment method has not been selected
-for the purchase. Follow the workflow to read the needinfo.
-				]]>
+				<![CDATA[Read payment needinfo from the purchase form. When a payment method needinfo is on the purchase form, it means
+the payment method has not been selected for the purchase. Follow the workflow to read the needinfo.]]>
 			</description>
 			<step>
 				<description><![CDATA[Read payment needinfo from purchase form.]]></description>
@@ -136,10 +130,9 @@ for the purchase. Follow the workflow to read the needinfo.
 		<plan>
 			<name>delete-payment-method</name>
 			<description>
-				<![CDATA[
-Delete a payment method from a shopper's profile. If you delete a payment method that has already been selected for an order, that payment method
-will be deleted from the profile but not from the order. The payment method will remain selected on the order until that order is purchased.
-				]]>
+				<![CDATA[Delete a payment method from a shopper's profile. If you delete a payment method that has already been selected for an order,
+that payment method will be deleted from the profile but not from the order. The payment method will remain selected on the order until
+that order is purchased.]]>
 			</description>
 			<step>
 				<description><![CDATA[Read a payment method from the list of available customer payment methods.]]></description>
@@ -151,30 +144,6 @@ will be deleted from the profile but not from the order. The payment method will
 				<description><![CDATA[Delete a payment method.]]></description>
 				<start>paymentmethod</start>
 				<delete-self/>
-			</step>
-		</plan>
-
-		<plan>
-			<name>read-paymentmethod-needinfo-from-order</name>
-			<description>
-				<![CDATA[Read payment-needinfo from order. When a paymentmethod needinfo is on the order, it means the paymentmethod has not been selected for the purchase. Follow the workflow to read the needinfo.]]></description>
-			<step>
-				<description><![CDATA[Read payment-needinfo from order. ]]></description>
-				<start>orders.order</start>
-				<follow-link>needinfo</follow-link>
-				<result>paymentmethod-info</result>
-			</step>
-		</plan>
-
-		<plan>
-			<name>read-paymentmethod-needinfo-from-purchaseform</name>
-			<description>
-				<![CDATA[Read payment needinfo from the purchase form. When a paymentmethod needinfo is on the purchase form, it means the paymentmethod has not been selected for the purchase. Follow the workflow to read the needinfo.]]></description>
-			<step>
-				<description><![CDATA[Read payment needinfo from purchase form.]]></description>
-				<start>purchases.create-purchase-form</start>
-				<follow-link>needinfo</follow-link>
-				<result>paymentmethod-info</result>
 			</step>
 		</plan>
 

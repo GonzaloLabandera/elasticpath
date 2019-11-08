@@ -13,6 +13,8 @@ import static com.elasticpath.domain.order.OrderStatus.COMPLETED;
 import static com.elasticpath.domain.order.OrderStatus.FAILED;
 import static com.elasticpath.domain.order.OrderStatus.IN_PROGRESS;
 import static com.elasticpath.domain.order.OrderStatus.PARTIALLY_SHIPPED;
+import static com.elasticpath.persistence.support.FetchFieldConstants.PRODUCT_SKU;
+import static com.elasticpath.persistence.support.FetchFieldConstants.SHIPMENT_ORDER_SKUS_INTERNAL;
 import static java.lang.System.currentTimeMillis;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singleton;
@@ -22,10 +24,12 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.anyVararg;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -43,6 +47,8 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.openjpa.lib.jdbc.ReportingSQLException;
+import org.apache.openjpa.persistence.PersistenceException;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -63,6 +69,7 @@ import com.elasticpath.domain.event.OrderEventHelper;
 import com.elasticpath.domain.event.impl.EventOriginatorHelperImpl;
 import com.elasticpath.domain.event.impl.EventOriginatorImpl;
 import com.elasticpath.domain.impl.ElasticPathImpl;
+import com.elasticpath.domain.order.DuplicateOrderException;
 import com.elasticpath.domain.order.Order;
 import com.elasticpath.domain.order.OrderPayment;
 import com.elasticpath.domain.order.OrderReturn;
@@ -88,13 +95,14 @@ import com.elasticpath.messaging.EventMessagePublisher;
 import com.elasticpath.messaging.factory.EventMessageFactory;
 import com.elasticpath.money.Money;
 import com.elasticpath.persistence.api.FetchGroupLoadTuner;
+import com.elasticpath.persistence.api.LoadTuner;
 import com.elasticpath.persistence.api.Persistable;
 import com.elasticpath.persistence.api.PersistenceEngine;
+import com.elasticpath.persistence.openjpa.util.FetchPlanHelper;
 import com.elasticpath.persistence.support.OrderCriterion;
 import com.elasticpath.persistence.support.impl.FetchGroupLoadTunerImpl;
 import com.elasticpath.persistence.support.impl.OrderCriterionImpl;
 import com.elasticpath.plugin.payment.PaymentType;
-import com.elasticpath.service.misc.FetchPlanHelper;
 import com.elasticpath.service.misc.TimeService;
 import com.elasticpath.service.order.CompleteShipmentFailedException;
 import com.elasticpath.service.order.OrderService;
@@ -133,6 +141,11 @@ public class OrderServiceImplTest {
 	private StoreImpl store2;
 	private Order order, order2;
 
+	@Mock private Order duplicateOrder;
+	@Mock private PersistenceException persistenceException;
+	@Mock private PersistenceException nestedPersistenceException;
+	@Mock private ReportingSQLException duplicateSQLException;
+
 	@Mock private TimeService mockTimeService;
 	@Mock private PaymentService mockPaymentService;
 	@Mock private StoreService mockStoreService;
@@ -147,6 +160,10 @@ public class OrderServiceImplTest {
 
 	@SuppressWarnings("PMD.DontUseElasticPathImplGetInstance")
 	private final ElasticPathImpl elasticPath = (ElasticPathImpl) ElasticPathImpl.getInstance();
+
+	private static final String UNIQUE_CONSTRAINT_VIOLATION_ERROR_CODE = "23000";
+	private static final int MYSQL_DUPLICATE_ENTRY_ERROR_CODE = 1062;
+	private static final int ORACLE_DUPLICATE_ENTRY_ERROR_CODE = 1;
 
 	/**
 	 * Prepares for tests.
@@ -201,6 +218,9 @@ public class OrderServiceImplTest {
 		order2 = new OrderImpl();
 		order2.setUidPk(1L);
 		order2.setStoreCode(store.getCode());
+
+		when(persistenceEngine.withLoadTuners(any(LoadTuner.class))).thenReturn(persistenceEngine);
+		when(persistenceEngine.withLoadTuners((LoadTuner[]) null)).thenReturn(persistenceEngine);
 
 	}
 
@@ -379,6 +399,13 @@ public class OrderServiceImplTest {
 	 */
 	@Test
 	public void testGetOrderDetail() {
+		final FetchGroupLoadTuner mockFGLoadTuner = mock(FetchGroupLoadTuner.class);
+		orderServiceImpl.setDefaultLoadTuner(mockFGLoadTuner);
+
+		final Map<Class<?>, String> lazyFields = new HashMap<>();
+		lazyFields.put(AbstractOrderShipmentImpl.class, SHIPMENT_ORDER_SKUS_INTERNAL);
+		lazyFields.put(OrderSkuImpl.class, PRODUCT_SKU);
+
 		when(persistenceEngine.get(OrderImpl.class, order.getUidPk())).thenAnswer(answer -> order);
 
 		final Order loadedOrder = orderServiceImpl.getOrderDetail(order.getUidPk());
@@ -386,8 +413,8 @@ public class OrderServiceImplTest {
 		assertStoreIsPopulated(store, order);
 
 		verify(persistenceEngine).get(OrderImpl.class, order.getUidPk());
-		verify(fetchPlanHelper).addField(OrderSkuImpl.class, "productSku");
-		verify(fetchPlanHelper).addField(AbstractOrderShipmentImpl.class, "shipmentOrderSkusInternal");
+		verify(fetchPlanHelper).setLoadTuners(mockFGLoadTuner);
+		verify(fetchPlanHelper).setLazyFields(lazyFields);
 	}
 
 	private OrderSku createOrderSku(final String guid, final long uid, final int qty) {
@@ -480,6 +507,7 @@ public class OrderServiceImplTest {
 		// expectations
 		final List<Order> orders = asList(order, order2);
 		when(persistenceEngine.retrieveByNamedQueryWithList("ORDER_BY_UIDS", "list", orderUids)).thenAnswer(answer -> orders);
+		when(persistenceEngine.withLazyFields(anyMap())).thenReturn(persistenceEngine);
 		assertThat(this.orderServiceImpl.findByUids(orderUids)).isEqualTo(orders);
 		assertStoreIsPopulated(store, order);
 
@@ -1119,6 +1147,28 @@ public class OrderServiceImplTest {
 		// Then there should be no call to paymentService.processShipment
 		verify(mockPaymentService, never()).processShipmentPayment(electronicShipment);
 	}
+
+	@Test(expected = DuplicateOrderException.class)
+	public void verifyDuplicateOrderExceptionIsThrownMySQL() {
+		mockDuplicatePersistenceException(MYSQL_DUPLICATE_ENTRY_ERROR_CODE);
+		orderServiceImpl.add(duplicateOrder);
+	}
+
+	@Test(expected = DuplicateOrderException.class)
+	public void verifyDuplicateOrderExceptionIsThrownOracle() {
+		mockDuplicatePersistenceException(ORACLE_DUPLICATE_ENTRY_ERROR_CODE);
+		orderServiceImpl.add(duplicateOrder);
+	}
+
+	private void mockDuplicatePersistenceException(final int mySqlOracleErrorCode) {
+		PersistenceException[] nestedThrowables = {nestedPersistenceException};
+		when(duplicateSQLException.getErrorCode()).thenReturn(mySqlOracleErrorCode);
+		when(duplicateSQLException.getSQLState()).thenReturn(UNIQUE_CONSTRAINT_VIOLATION_ERROR_CODE);
+		when(persistenceException.getNestedThrowables()).thenReturn(nestedThrowables);
+		when(nestedPersistenceException.getCause()).thenReturn(duplicateSQLException);
+		doThrow(persistenceException).when(persistenceEngine).save(duplicateOrder);
+	}
+
 
 	private void assertStoreIsPopulated(final Store expectedStore, final Order order) {
 		//  Pointless PMD-enforced craziness

@@ -50,7 +50,7 @@ public final class ShoppingCartMergerForShopperUpdates implements CustomerSessio
 
 	private void mergeCartIntoCustomerSession(final ShoppingCart cart, final CustomerSession customerSession) {
 		final Shopper currentShopper = customerSession.getShopper();
-		final ShoppingCart preExistingPersistedCart = shoppingCartService.findOrCreateByCustomerSession(customerSession);
+		final ShoppingCart preExistingPersistedCart = shoppingCartService.findOrCreateDefaultCartByCustomerSession(customerSession);
 
 		final ShoppingCart mergedShoppingCart = shoppingCartMerger.merge(preExistingPersistedCart, cart);
 

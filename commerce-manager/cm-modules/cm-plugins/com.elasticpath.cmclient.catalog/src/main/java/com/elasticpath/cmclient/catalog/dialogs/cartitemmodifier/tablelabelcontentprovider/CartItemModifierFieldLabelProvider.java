@@ -12,8 +12,8 @@ import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.graphics.Image;
 
-import com.elasticpath.domain.cartmodifier.CartItemModifierFieldOption;
-import com.elasticpath.domain.cartmodifier.CartItemModifierFieldOptionLdf;
+import com.elasticpath.domain.modifier.ModifierFieldOption;
+import com.elasticpath.domain.modifier.ModifierFieldOptionLdf;
 
 /**
  * Label provider for AddEditCartItemModifierFieldDialog TableViewer.
@@ -44,12 +44,12 @@ public class CartItemModifierFieldLabelProvider extends LabelProvider implements
 	public String getColumnText(final Object element, final int columnIndex) {
 		String result = null;
 		String dispName = "";
-		CartItemModifierFieldOption opt = (CartItemModifierFieldOption) element;
-		Set<CartItemModifierFieldOptionLdf> ldfs = new HashSet<>();
+		ModifierFieldOption opt = (ModifierFieldOption) element;
+		Set<ModifierFieldOptionLdf> ldfs = new HashSet<>();
 
-		ldfs.addAll(opt.getCartItemModifierFieldOptionsLdf());
+		ldfs.addAll(opt.getModifierFieldOptionsLdf());
 		if (!ldfs.isEmpty()) {
-			for (CartItemModifierFieldOptionLdf tmp : ldfs) {
+			for (ModifierFieldOptionLdf tmp : ldfs) {
 				if (tmp.getLocale().trim().equals(this.defaultLocal.toString().trim())) {
 					dispName = tmp.getDisplayName();
 				}

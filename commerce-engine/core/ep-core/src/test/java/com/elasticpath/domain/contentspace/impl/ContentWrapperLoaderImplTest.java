@@ -223,13 +223,23 @@ public class ContentWrapperLoaderImplTest {
 	private static final class BeanFactoryStubImpl implements BeanFactory {
 		@Override
 		@SuppressWarnings("unchecked")
-		public <T> T getBean(final String beanName) {
+		public <T> T getPrototypeBean(final String name, final Class<T> clazz) {
 			return (T) new ContentWrapperImpl();
 		}
 
 		@Override
-		public <T> Class<T> getBeanImplClass(final String beanName) {
+		public <T> T getSingletonBean(final String name, final Class<T> clazz) {
+			throw new UnsupportedOperationException("This should not be called.");
+		}
+
+		@Override
+		public <T> T getBean(final String beanName) {
 			return null;
+		}
+
+		@Override
+		public <T> Class<T> getBeanImplClass(final String beanName) {
+			throw new UnsupportedOperationException("This should not be called.");
 		}
 	}
 

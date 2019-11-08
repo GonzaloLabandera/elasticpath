@@ -9,6 +9,7 @@ import javax.inject.Singleton;
 import com.elasticpath.domain.shoppingcart.ShoppingCart;
 import com.elasticpath.domain.shoppingcart.ShoppingItem;
 import com.elasticpath.rest.definition.carts.CartIdentifier;
+import com.elasticpath.rest.definition.carts.CartsIdentifier;
 import com.elasticpath.rest.definition.carts.LineItemIdentifier;
 import com.elasticpath.rest.definition.carts.LineItemsIdentifier;
 import com.elasticpath.rest.id.type.StringIdentifier;
@@ -25,7 +26,9 @@ public class LineItemIdentifierRepositoryImpl implements LineItemIdentifierRepos
 	public LineItemIdentifier buildLineItemIdentifier(final ShoppingCart cart, final ShoppingItem shoppingItem) {
 		final CartIdentifier cartIdentifier = CartIdentifier.builder()
 				.withCartId(StringIdentifier.of(cart.getGuid()))
-				.withScope(StringIdentifier.of(cart.getStore().getCode()))
+				.withCarts(CartsIdentifier.builder()
+						.withScope(StringIdentifier.of(cart.getStore().getCode()))
+						.build())
 				.build();
 
 		return buildLineItemIdentifier(cartIdentifier, shoppingItem);

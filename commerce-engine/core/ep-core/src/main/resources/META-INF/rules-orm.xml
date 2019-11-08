@@ -9,7 +9,7 @@
 				WHERE rb.catalog.code = ?1
 				AND rb.store IS NULL
 				AND rb.scenarioId = ?2
-				AND rb.lastModifiedDate &gt; ?3
+				AND rb.lastModifiedDate &gt;= ?3
 			</query>
 		</named-query>
 		<named-query name="EP_RULE_BASE_FIND_CHANGED_STORECODE_SCENARIO">
@@ -19,7 +19,7 @@
 				WHERE rb.store.code = ?1
 				AND rb.catalog IS NULL
 				AND rb.scenarioId = ?2
-				AND rb.lastModifiedDate &gt; ?3
+				AND rb.lastModifiedDate &gt;= ?3
 			</query>
 		</named-query>
 		<named-query name="EP_RULE_BASE_FIND_BY_STORE_SCENARIO">
@@ -97,6 +97,13 @@
 				SELECT r.uidPk
 				FROM PromotionRuleImpl as r
 				WHERE r.lastModifiedDate &gt;= ?1
+			</query>
+		</named-query>
+		<named-query name="RULE_BASE_MODIFIED_DATE_BY_UID">
+			<query>
+				SELECT r.lastModifiedDate
+				FROM EpRuleBaseImpl as r
+				WHERE r.uidPk = ?1
 			</query>
 		</named-query>
 		<named-query name="RULE_UIDS_SCOPE_CHANGED">

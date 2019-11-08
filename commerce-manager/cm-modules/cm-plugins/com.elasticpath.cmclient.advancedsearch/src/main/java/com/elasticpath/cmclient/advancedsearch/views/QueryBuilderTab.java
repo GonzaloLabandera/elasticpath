@@ -95,7 +95,7 @@ public class QueryBuilderTab implements SelectionListener, ModifyListener {
 
 	private final DataBindingContext bindingContext;
 
-	private static final String HELP_QUERY_BUILDER_URL = "help/html/AppendixD.html";
+	private static final String HELP_QUERY_BUILDER_URL = "https://documentation.elasticpath.com/commerce-manager/docs/references/query-language.html";
 
 	/**
 	 * Constructor.
@@ -392,16 +392,16 @@ public class QueryBuilderTab implements SelectionListener, ModifyListener {
 		syntxErrorImage.setVisible(false);
 		syntxErrorMessage.setVisible(false);
 	}
-	
+
 	/**
 	 * Gets search query in use.
-	 * 
+	 *
 	 * @return the searchQuery
 	 */
 	public AdvancedSearchQuery getSearchQuery() {
 		return searchQuery;
 	}
-	
+
 	private boolean isAuthorized() {
 		return AuthorizationService.getInstance().isAuthorizedWithPermission(AdvancedSearchPermissions.CREATE_QUERIES)
 				|| AuthorizationService.getInstance().isAuthorizedWithPermission(AdvancedSearchPermissions.MANAGE_QUERIES);

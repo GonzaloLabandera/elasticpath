@@ -142,7 +142,7 @@ public class DataPointServiceImplTest {
 	}
 
 	@Test
-	public void gettingWithFetchGroupLoadTunerDelegatesToConfigureFetchPlanHelper() {
+	public void shouldReturnDataPointInstanceForGivenUidPk() {
 		MockDataPointServiceImpl dataPointService = new MockDataPointServiceImpl();
 
 		when(persistenceEngine.get(DataPoint.class, DATAPOINT_UIDPK)).thenReturn(dataPoint1);

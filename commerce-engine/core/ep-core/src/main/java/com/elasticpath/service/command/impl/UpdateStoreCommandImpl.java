@@ -6,11 +6,13 @@ package com.elasticpath.service.command.impl;
 import java.util.Map;
 
 import com.elasticpath.commons.constants.ContextIdNames;
+import com.elasticpath.domain.customer.StoreCustomerAttribute;
 import com.elasticpath.domain.impl.ElasticPathImpl;
 import com.elasticpath.domain.store.Store;
 import com.elasticpath.service.command.CommandResult;
 import com.elasticpath.service.command.UpdateStoreCommand;
 import com.elasticpath.service.command.UpdateStoreCommandResult;
+import com.elasticpath.service.customer.StoreCustomerAttributeService;
 import com.elasticpath.service.store.StoreService;
 import com.elasticpath.settings.SettingsService;
 import com.elasticpath.settings.domain.SettingValue;
@@ -25,6 +27,8 @@ public class UpdateStoreCommandImpl implements UpdateStoreCommand {
 	private Store store;
 
 	private Map<String, String> settingValueMap;
+
+	private Map<String, StoreCustomerAttribute> storeCustomerAttributes;
 
 	private UpdateStoreCommandResult updateStoreCommandResult;
 
@@ -42,7 +46,17 @@ public class UpdateStoreCommandImpl implements UpdateStoreCommand {
 			settingValue.setValue(settingValueEntry.getValue());
 			getSettingsService().updateSettingValue(settingValue);
 		}
+
+		updateStoreCustomerAttributes();
+
 		return updateStoreCommandResult;
+	}
+
+	/**
+	 * Updates store customer attributes.
+	 */
+	protected void updateStoreCustomerAttributes() {
+		getStoreCustomerAttributeService().updateAll(store.getCode(), storeCustomerAttributes);
 	}
 
 	@Override
@@ -65,7 +79,16 @@ public class UpdateStoreCommandImpl implements UpdateStoreCommand {
 		return ElasticPathImpl.getInstance().getBean(ContextIdNames.SETTINGS_SERVICE);
 	}
 
+	@SuppressWarnings("PMD.DontUseElasticPathImplGetInstance")
+	private StoreCustomerAttributeService getStoreCustomerAttributeService() {
+		return ElasticPathImpl.getInstance().getBean(ContextIdNames.STORE_CUSTOMER_ATTRIBUTE_SERVICE);
+	}
+
 	public void setUpdateStoreCommandResult(final UpdateStoreCommandResult updateStoreCommandResult) {
 		this.updateStoreCommandResult = updateStoreCommandResult;
+	}
+
+	public void setStoreCustomerAttributes(final Map<String, StoreCustomerAttribute> storeCustomerAttributes) {
+		this.storeCustomerAttributes = storeCustomerAttributes;
 	}
 }

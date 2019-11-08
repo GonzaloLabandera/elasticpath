@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+
+<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
+	<soap:Body>
+		<GetInventoryRequest>
+			<InventoryLine>
+				<sku>123abc</sku>
+			</InventoryLine>
+			<InventoryLine>
+				<sku>456abc</sku>
+			</InventoryLine>
+			<InventoryLine>
+				<sku>789abc</sku>
+			</InventoryLine>
+		</GetInventoryRequest>
+	</soap:Body>
+</soap:Envelope>

@@ -61,6 +61,7 @@ public abstract class AbstractCartIntegrationTestParent extends DbTestCase {
 		shoppingCart.setStore(getScenario().getStore());
 		shoppingCart.setCustomerSession(customerSession);
 		customerSession.setShoppingCart(shoppingCart);
+		shoppingCart.setDefault(true);
 		return shoppingCart;
 	}
 

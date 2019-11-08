@@ -6,7 +6,9 @@ package com.elasticpath.service.catalogview.impl;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.elasticpath.domain.catalog.Category;
 import com.elasticpath.domain.catalog.Product;
+import com.elasticpath.domain.catalog.ProductCategory;
 import com.elasticpath.service.catalogview.IndexProduct;
 
 /**
@@ -16,10 +18,10 @@ public class IndexProductImpl extends AbstractWrappedProductImpl implements Inde
 
 	/** Serial version id. */
 	private static final long serialVersionUID = 5000000001L;
-	
+
 	private final Map<String, Boolean> availabilityMap = new HashMap<>();
 	private final Map<String, Boolean> displayabilityMap = new HashMap<>();
-	
+
 	/**
 	 * Constructor.
 	 * 
@@ -71,4 +73,13 @@ public class IndexProductImpl extends AbstractWrappedProductImpl implements Inde
 		availabilityMap.put(storeCode, displayable);
 	}
 
+	/**
+	 * Get the ProductCategory association object that contains the given Category.
+	 *
+	 * @param category the category to search for.
+	 * @return productCategory the <code>ProductCategory</code>.
+	 */
+	public ProductCategory getProductCategory(final Category category) {
+		return this.getWrappedProduct().getProductCategory(category);
+	}
 }

@@ -6,6 +6,9 @@ package com.elasticpath.rest.resource.integration.epcommerce.repository.search.i
 import java.util.Map;
 import java.util.Objects;
 
+import com.elasticpath.service.search.query.SortBy;
+import com.elasticpath.service.search.query.SortOrder;
+
 /**
  * Offer Search data.
  */
@@ -18,6 +21,8 @@ public final class OfferSearchData {
 
 	private final String searchKeyword;
 	private String categoryCode;
+	private SortBy sortBy;
+	private SortOrder sortOrder;
 
 	/**
 	 * Constructor.
@@ -94,6 +99,22 @@ public final class OfferSearchData {
 
 	public void setCategoryCode(final String categoryCode) {
 		this.categoryCode = categoryCode;
+	}
+
+	public SortBy getSortBy() {
+		return sortBy;
+	}
+
+	public void setSortBy(final SortBy sortBy) {
+		this.sortBy = sortBy;
+	}
+
+	public SortOrder getSortOrder() {
+		return sortOrder;
+	}
+
+	public void setSortOrder(final SortOrder sortOrder) {
+		this.sortOrder = sortOrder;
 	}
 }
 

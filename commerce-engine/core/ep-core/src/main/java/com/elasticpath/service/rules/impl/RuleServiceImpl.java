@@ -41,7 +41,6 @@ import com.elasticpath.domain.store.Store;
 import com.elasticpath.persistence.api.FetchGroupLoadTuner;
 import com.elasticpath.service.ProcessingHook;
 import com.elasticpath.service.impl.AbstractEpPersistenceServiceImpl;
-import com.elasticpath.service.misc.FetchPlanHelper;
 import com.elasticpath.service.misc.TimeService;
 import com.elasticpath.service.rules.CouponConfigService;
 import com.elasticpath.service.rules.DuplicatePromoCodeException;
@@ -73,8 +72,6 @@ public class RuleServiceImpl extends AbstractEpPersistenceServiceImpl implements
 
 	private TimeService timeService;
 
-	private FetchPlanHelper fetchPlanHelper;
-
 	private ProcessingHook processingHook;
 
 	private static final String QUOTE = "\"";
@@ -84,7 +81,7 @@ public class RuleServiceImpl extends AbstractEpPersistenceServiceImpl implements
 	private ReportingRuleService reportingRuleService;
 
 	private IndexNotificationService indexNotificationService;
-	
+
 	private transient ConditionEvaluatorService conditionEvaluatorService;
 
 	/**
@@ -249,15 +246,13 @@ public class RuleServiceImpl extends AbstractEpPersistenceServiceImpl implements
 	@Override
 	public Rule get(final long ruleUid, final FetchGroupLoadTuner loadTuner) throws EpServiceException {
 		sanityCheck();
-		Rule rule = null;
 		if (ruleUid <= 0) {
-			rule = getBean(ContextIdNames.PROMOTION_RULE);
-		} else {
-			fetchPlanHelper.configureFetchGroupLoadTuner(loadTuner);
-			rule = getPersistentBeanFinder().get(ContextIdNames.PROMOTION_RULE, ruleUid);
-			fetchPlanHelper.clearFetchPlan();
+			return getBean(ContextIdNames.PROMOTION_RULE);
 		}
-		return rule;
+
+		return getPersistentBeanFinder()
+			.withLoadTuners(loadTuner)
+			.get(ContextIdNames.PROMOTION_RULE, ruleUid);
 	}
 
 	/**
@@ -380,11 +375,9 @@ public class RuleServiceImpl extends AbstractEpPersistenceServiceImpl implements
 			return Collections.emptyList();
 		}
 
-		fetchPlanHelper.configureFetchGroupLoadTuner(fetchGroupLoadTuner);
-		final List<Rule> result = getPersistenceEngine().retrieveByNamedQueryWithList("RULE_FIND_BY_UIDS", PLACEHOLDER_FOR_LIST,
-				ruleUids);
-		fetchPlanHelper.clearFetchPlan();
-		return result;
+		return getPersistenceEngine()
+			.withLoadTuners(fetchGroupLoadTuner)
+			.retrieveByNamedQueryWithList("RULE_FIND_BY_UIDS", PLACEHOLDER_FOR_LIST, ruleUids);
 	}
 
 	/**
@@ -399,6 +392,17 @@ public class RuleServiceImpl extends AbstractEpPersistenceServiceImpl implements
 	public List<Long> findUidsByModifiedDate(final Date date) {
 		sanityCheck();
 		return getPersistenceEngine().retrieveByNamedQuery("RULE_UIDS_SELECT_BY_MODIFIED_DATE", date);
+	}
+
+	@Override
+	public Date getModifiedDateForRuleBase(final long ruleUid) {
+		sanityCheck();
+		List<Object> ruleBaseModifiedDates = getPersistenceEngine().
+				retrieveByNamedQuery("RULE_BASE_MODIFIED_DATE_BY_UID", ruleUid);
+		if (ruleBaseModifiedDates.isEmpty()) {
+			return null;
+		}
+		return (Date) ruleBaseModifiedDates.get(0);
 	}
 
 	/**
@@ -862,15 +866,6 @@ public class RuleServiceImpl extends AbstractEpPersistenceServiceImpl implements
 	 */
 	public void setTimeService(final TimeService timeService) {
 		this.timeService = timeService;
-	}
-
-	/**
-	 * Sets the {@link FetchPlanHelper} instance to use.
-	 *
-	 * @param fetchPlanHelper the {@link FetchPlanHelper} instance to use
-	 */
-	public void setFetchPlanHelper(final FetchPlanHelper fetchPlanHelper) {
-		this.fetchPlanHelper = fetchPlanHelper;
 	}
 
 	/**

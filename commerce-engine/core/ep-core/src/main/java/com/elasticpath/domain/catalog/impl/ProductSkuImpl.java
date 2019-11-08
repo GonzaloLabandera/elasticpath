@@ -853,6 +853,9 @@ public class ProductSkuImpl extends AbstractListenableEntityImpl implements Prod
 	@Override
 	@Transient
 	public boolean isWithinDateRange(final Date currentDate) {
+		if (!getProduct().hasMultipleSkus()) {
+			return true;
+		}
 		Date startDate = this.getStartDate();
 		Date endDate = this.getEndDate();
 		if (startDate != null && currentDate.getTime() < startDate.getTime()) {
@@ -923,17 +926,23 @@ public class ProductSkuImpl extends AbstractListenableEntityImpl implements Prod
 	@Override
 	@Transient
 	public Date getEffectiveStartDate() {
-		return (Date) ObjectUtils.max(getStartDate(), getProduct().getStartDate());
+		if (getProduct().hasMultipleSkus()) {
+			return (Date) ObjectUtils.max(getStartDate(), getProduct().getStartDate());
+		}
+		return getProduct().getStartDate();
 	}
 
 	@Override
 	@Transient
 	public Date getEffectiveEndDate() {
-		Date effectiveEndDate = (Date) ObjectUtils.min(getEndDate(), getProduct().getEndDate());
-		if (effectiveEndDate != null && effectiveEndDate.compareTo(getEffectiveStartDate()) < 0) {
-			effectiveEndDate = getEffectiveStartDate();
+		if (getProduct().hasMultipleSkus()) {
+			Date effectiveEndDate = (Date) ObjectUtils.min(getEndDate(), getProduct().getEndDate());
+			if (effectiveEndDate != null && effectiveEndDate.compareTo(getEffectiveStartDate()) < 0) {
+				effectiveEndDate = getEffectiveStartDate();
+			}
+			return effectiveEndDate;
 		}
-		return effectiveEndDate;
+		return getProduct().getEndDate();
 	}
 
 	@Override

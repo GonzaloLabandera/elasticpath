@@ -96,6 +96,16 @@
 
 		<dependency>
 			<groupId>com.elasticpath</groupId>
+			<artifactId>ep-core-domain-messaging</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>com.elasticpath</groupId>
+			<artifactId>ep-catalog-message-handler</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>com.elasticpath</groupId>
 			<artifactId>openjpa-osgi-wrapper</artifactId>
 		</dependency>
 
@@ -228,6 +238,20 @@
 			<artifactId>ep-core-changeset-messaging</artifactId>
 			<scope>test</scope>
 		</dependency>
+
+		<dependency>
+			<groupId>com.elasticpath</groupId>
+			<artifactId>ep-core-dataimport-messaging</artifactId>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.awaitility</groupId>
+			<artifactId>awaitility</artifactId>
+			<version>3.1.6</version>
+			<scope>test</scope>
+		</dependency>
+
 	</dependencies>
 
 	<build>

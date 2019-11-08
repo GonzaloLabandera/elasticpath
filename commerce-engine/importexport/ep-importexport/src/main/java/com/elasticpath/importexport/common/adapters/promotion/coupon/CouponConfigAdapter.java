@@ -37,7 +37,7 @@ public class CouponConfigAdapter extends AbstractDomainAdapterImpl<CouponConfig,
 	
 	@Override
 	public CouponConfig createDomainObject() {
-		return getBeanFactory().getBean(ContextIdNames.COUPON_CONFIG);
+		return getBeanFactory().getPrototypeBean(ContextIdNames.COUPON_CONFIG, CouponConfig.class);
 	}
 	
 	@Override

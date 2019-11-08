@@ -22,15 +22,15 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import com.elasticpath.common.dto.ShoppingItemDto;
 import com.elasticpath.base.common.dto.StructuredErrorMessage;
-import com.elasticpath.domain.cartmodifier.CartItemModifierField;
-import com.elasticpath.domain.cartmodifier.CartItemModifierGroup;
-import com.elasticpath.domain.cartmodifier.CartItemModifierType;
+import com.elasticpath.domain.modifier.ModifierField;
+import com.elasticpath.domain.modifier.ModifierGroup;
 import com.elasticpath.domain.catalog.Product;
 import com.elasticpath.domain.catalog.ProductSku;
 import com.elasticpath.domain.catalog.ProductType;
+import com.elasticpath.domain.modifier.ModifierType;
 import com.elasticpath.service.shoppingcart.validation.ShoppingItemDtoValidationContext;
 import com.elasticpath.validation.impl.ConstraintViolationTransformerImpl;
-import com.elasticpath.validation.service.impl.CartItemModifierFieldValidationServiceImpl;
+import com.elasticpath.validation.service.impl.ModifierFieldValidationServiceImpl;
 
 @RunWith(MockitoJUnitRunner.class)
 public class CartItemModifierShoppingItemDtoValidatorTest {
@@ -43,7 +43,7 @@ public class CartItemModifierShoppingItemDtoValidatorTest {
 	@Mock
 	private ShoppingItemDtoValidationContext context;
 
-	private final CartItemModifierFieldValidationServiceImpl validationService = new CartItemModifierFieldValidationServiceImpl();
+	private final ModifierFieldValidationServiceImpl validationService = new ModifierFieldValidationServiceImpl();
 
 	private final ConstraintViolationTransformerImpl constraintViolationTransformer = new ConstraintViolationTransformerImpl();
 
@@ -57,13 +57,13 @@ public class CartItemModifierShoppingItemDtoValidatorTest {
 	private ProductType productType;
 
 	@Mock
-	private CartItemModifierGroup modifierGroup;
+	private ModifierGroup modifierGroup;
 
 	@Mock
 	private ShoppingItemDto shoppingItemDto;
 
 	@Mock
-	private CartItemModifierField referentField;
+	private ModifierField referentField;
 
 	@Before
 	public void setUp() {
@@ -71,12 +71,12 @@ public class CartItemModifierShoppingItemDtoValidatorTest {
 		given(context.getProductSku()).willReturn(productSku);
 		given(productSku.getProduct()).willReturn(product);
 		given(product.getProductType()).willReturn(productType);
-		given(productType.getCartItemModifierGroups()).willReturn(ImmutableSet.of(modifierGroup));
+		given(productType.getModifierGroups()).willReturn(ImmutableSet.of(modifierGroup));
 		given(context.getShoppingItemDto()).willReturn(shoppingItemDto);
 
 		validationService.setConstraintViolationTransformer(constraintViolationTransformer);
 
-		validator.setCartItemModifierFieldValidationService(validationService);
+		validator.setModifierFieldValidationService(validationService);
 
 	}
 
@@ -95,17 +95,17 @@ public class CartItemModifierShoppingItemDtoValidatorTest {
 		Map<String, String> itemsToValidate = new HashMap<>();
 		itemsToValidate.put(decimalFieldName, fieldValue);
 
-		Set<CartItemModifierField> referentFields = new HashSet<>();
+		Set<ModifierField> referentFields = new HashSet<>();
 
 		given(referentField.getCode()).willReturn(decimalFieldName);
-		given(referentField.getFieldType()).willReturn(CartItemModifierType.DECIMAL);
+		given(referentField.getFieldType()).willReturn(ModifierType.DECIMAL);
 		given(referentField.isRequired()).willReturn(true);
 		given(referentField.getMaxSize()).willReturn(MEDIUM_MAX_SIZE);
 
 		referentFields.add(referentField);
 
 
-		given(modifierGroup.getCartItemModifierFields()).willReturn(referentFields);
+		given(modifierGroup.getModifierFields()).willReturn(referentFields);
 
 		given(shoppingItemDto.getItemFields()).willReturn(itemsToValidate);
 
@@ -140,17 +140,17 @@ public class CartItemModifierShoppingItemDtoValidatorTest {
 		Map<String, String> itemsToValidate = new HashMap<>();
 		itemsToValidate.put(decimalFieldName, fieldValue);
 
-		Set<CartItemModifierField> referentFields = new HashSet<>();
+		Set<ModifierField> referentFields = new HashSet<>();
 
 		given(referentField.getCode()).willReturn(decimalFieldName);
-		given(referentField.getFieldType()).willReturn(CartItemModifierType.DECIMAL);
+		given(referentField.getFieldType()).willReturn(ModifierType.DECIMAL);
 		given(referentField.isRequired()).willReturn(true);
 		given(referentField.getMaxSize()).willReturn(MEDIUM_MAX_SIZE);
 
 		referentFields.add(referentField);
 
 
-		given(modifierGroup.getCartItemModifierFields()).willReturn(referentFields);
+		given(modifierGroup.getModifierFields()).willReturn(referentFields);
 
 		given(shoppingItemDto.getItemFields()).willReturn(itemsToValidate);
 

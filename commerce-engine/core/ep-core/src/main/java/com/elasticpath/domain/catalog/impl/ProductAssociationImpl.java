@@ -509,6 +509,15 @@ public class ProductAssociationImpl extends AbstractLegacyEntityImpl implements 
 
 	}
 
+	@Override
+	@Transient
+	public boolean canSyndicate() {
+		final Date currentDate = new Date();
+		final boolean isAssociationEndDateValid = getEndDate() == null || getEndDate().after(currentDate);
+		final boolean isProductEndDateValid = getTargetProduct().getEndDate() == null || getTargetProduct().getEndDate().after(currentDate);
+
+		return isAssociationEndDateValid && !getTargetProduct().isHidden() && isProductEndDateValid;
+	}
 
 	/**
 	 * Set default values for those fields need default values.

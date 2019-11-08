@@ -33,7 +33,7 @@ public class ProductTypeDTO extends CategoryTypeDTO {
 
 	@XmlElementWrapper(name = "assignedcartitemmodifiergroups")
 	@XmlElement(name = "code")
-	private List<String> assignedCartItemModifierGroups;
+	private List<String> assignedModifierGroups;
 
 	/**
 	 * Gets the defaultTaxCode.
@@ -89,21 +89,21 @@ public class ProductTypeDTO extends CategoryTypeDTO {
 	}
 
 	/**
-	 * Gets the AssignedCartItemModifierGroups.
+	 * Gets the AssignedModifierGroups.
 	 *
-	 * @return the AssignedCartItemModifierGroups
+	 * @return the AssignedModifierGroups
 	 * */
-	public List<String> getAssignedCartItemModifierGroups() {
-		return assignedCartItemModifierGroups;
+	public List<String> getAssignedModifierGroups() {
+		return assignedModifierGroups;
 	}
 
 	/**
-	 * Set the AssignedCartItemModifierGroups.
+	 * Set the AssignedModifierGroups.
 	 *
-	 * @param assignedCartItemModifierGroups the AssignedCartItemModifierGroups
+	 * @param assignedModifierGroups the AssignedModifierGroups
 	 * */
-	public void setAssignedCartItemModifierGroups(final List<String> assignedCartItemModifierGroups) {
-		this.assignedCartItemModifierGroups = assignedCartItemModifierGroups;
+	public void setAssignedModifierGroups(final List<String> assignedModifierGroups) {
+		this.assignedModifierGroups = assignedModifierGroups;
 	}
 
 	@Override
@@ -112,7 +112,7 @@ public class ProductTypeDTO extends CategoryTypeDTO {
 			.append("defaultTaxCode", getDefaultTaxCode())
 			.append("multiSku", getMultiSku())
 			.append("noDiscount", getNoDiscount())
-			.append("assignedcartitemmodifiergroups", getAssignedCartItemModifierGroups())
+			.append("assignedcartitemmodifiergroups", getAssignedModifierGroups())
 			.toString();
 	}
 }

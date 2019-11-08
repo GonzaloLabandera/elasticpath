@@ -3,44 +3,43 @@
  */
 package com.elasticpath.domain.catalog.impl;
 
+import static com.elasticpath.persistence.support.FetchFieldConstants.ATTRIBUTE_VALUE_MAP;
+import static com.elasticpath.persistence.support.FetchFieldConstants.LOCALE_DEPENDANT_FIELDS;
+import static com.elasticpath.persistence.support.FetchFieldConstants.LOCALIZED_PROPERTIES_MAP;
+import static com.elasticpath.persistence.support.FetchFieldConstants.PRODUCT_CATEGORIES;
+import static com.elasticpath.persistence.support.FetchFieldConstants.PRODUCT_SKUS_INTERNAL;
+import static com.elasticpath.persistence.support.FetchFieldConstants.PRODUCT_TYPE;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
-import org.jmock.integration.junit4.JUnitRuleMockery;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+
+import org.apache.openjpa.persistence.FetchPlan;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.elasticpath.commons.beanframework.BeanFactory;
+import com.elasticpath.domain.catalog.CategoryLoadTuner;
 import com.elasticpath.domain.catalog.ProductLoadTuner;
+import com.elasticpath.domain.catalog.ProductSkuLoadTuner;
 import com.elasticpath.domain.catalog.ProductTypeLoadTuner;
-import com.elasticpath.test.BeanFactoryExpectationsFactory;
+import com.elasticpath.domain.impl.ElasticPathImpl;
+import com.elasticpath.persistence.support.FetchGroupConstants;
 
 /**
  * Test <code>ProductLoadTunerImpl</code>.
  */
+@RunWith(MockitoJUnitRunner.class)
 public class ProductLoadTunerImplTest {
 
-	@Rule
-	public final JUnitRuleMockery context = new JUnitRuleMockery();
-	private BeanFactory beanFactory;
-	private BeanFactoryExpectationsFactory expectationsFactory;
-
-	/**
-	 * Set up required before each test.
-	 */
-	@Before
-	public void setUp() {
-		beanFactory = context.mock(BeanFactory.class);
-		expectationsFactory = new BeanFactoryExpectationsFactory(context, beanFactory);
-	}
-
-	@After
-	public void tearDown() {
-		expectationsFactory.close();
-	}
+	@Mock
+	private FetchPlan mockFetchPlan;
 
 	/**
 	 * Test method for 'com.elasticpath.domain.catalog.impl.ProductLoadTunerImpl.contains(ProductLoadTuner)'.
@@ -102,9 +101,8 @@ public class ProductLoadTunerImplTest {
 	 */
 	@Test
 	public void testMerge() {
-		expectationsFactory.allowingBeanFactoryGetBean("productSkuLoadTuner", ProductSkuLoadTunerImpl.class);
-		expectationsFactory.allowingBeanFactoryGetBean("categoryLoadTuner", CategoryLoadTunerImpl.class);
-		expectationsFactory.allowingBeanFactoryGetBean("productTypeLoadTuner", ProductTypeLoadTunerImpl.class);
+
+		mockBeanFactory();
 
 		final ProductLoadTuner loadTuner1 = new ProductLoadTunerImpl();
 		final ProductLoadTuner loadTuner2 = new ProductLoadTunerImpl();
@@ -135,5 +133,71 @@ public class ProductLoadTunerImplTest {
 		loadTuner3 = loadTuner1.merge(loadTuner2);
 		assertTrue(loadTuner3.contains(loadTuner1));
 		assertTrue(loadTuner3.contains(loadTuner2));
+	}
+
+	@Test
+	public void shouldConfigureWithLazyFieldsOnly() {
+		final ProductLoadTuner loadTuner = new ProductLoadTunerImpl();
+
+		loadTuner.setLoadingAttributeValue(true);
+		loadTuner.setLoadingCategories(true);
+		loadTuner.setLoadingProductType(true);
+		loadTuner.setLoadingSkus(true);
+
+		loadTuner.configure(mockFetchPlan);
+
+		verify(mockFetchPlan).addField(ProductImpl.class, ATTRIBUTE_VALUE_MAP);
+		verify(mockFetchPlan).addField(ProductImpl.class, LOCALE_DEPENDANT_FIELDS);
+		verify(mockFetchPlan).addField(BrandImpl.class, LOCALIZED_PROPERTIES_MAP);
+		verify(mockFetchPlan).addField(ProductImpl.class, PRODUCT_CATEGORIES);
+		verify(mockFetchPlan).addField(ProductImpl.class, PRODUCT_TYPE);
+		verify(mockFetchPlan).addField(ProductImpl.class, PRODUCT_SKUS_INTERNAL);
+		verify(mockFetchPlan).addFetchGroup(FetchGroupConstants.BUNDLE_CONSTITUENTS);
+		verify(mockFetchPlan).addFetchGroup(FetchGroupConstants.PRODUCT_INDEX);
+		verify(mockFetchPlan).addFetchGroup(FetchGroupConstants.PRODUCT_SKU_INDEX);
+		verify(mockFetchPlan).setMaxFetchDepth(FetchPlan.DEPTH_INFINITE);
+	}
+
+	@Test
+	public void shouldConfigureWithLazyFieldsAndProvidedLoadTuners() {
+		final ProductLoadTuner loadTuner = new ProductLoadTunerImpl();
+
+		CategoryLoadTuner mockCategoryLoadTuner = mock(CategoryLoadTuner.class);
+		ProductSkuLoadTuner mockProductSkuLoadTuner = mock(ProductSkuLoadTuner.class);
+		ProductTypeLoadTuner mockProductTypeLoadTuner = mock(ProductTypeLoadTuner.class);
+
+		loadTuner.setCategoryLoadTuner(mockCategoryLoadTuner);
+		loadTuner.setProductTypeLoadTuner(mockProductTypeLoadTuner);
+		loadTuner.setProductSkuLoadTuner(mockProductSkuLoadTuner);
+		loadTuner.setLoadingDefaultSku(true);
+		loadTuner.setLoadingCategories(true);
+		loadTuner.setLoadingProductType(true);
+		loadTuner.setLoadingSkus(true);
+
+		loadTuner.configure(mockFetchPlan);
+
+		verify(mockFetchPlan).addField(ProductImpl.class, LOCALE_DEPENDANT_FIELDS);
+		verify(mockFetchPlan).addField(BrandImpl.class, LOCALIZED_PROPERTIES_MAP);
+		verify(mockFetchPlan).addField(ProductImpl.class, PRODUCT_CATEGORIES);
+		verify(mockFetchPlan).addField(ProductImpl.class, PRODUCT_TYPE);
+		verify(mockFetchPlan).addField(ProductImpl.class, PRODUCT_SKUS_INTERNAL);
+		verify(mockFetchPlan).addFetchGroup(FetchGroupConstants.BUNDLE_CONSTITUENTS);
+		verify(mockFetchPlan).addFetchGroup(FetchGroupConstants.PRODUCT_INDEX);
+		verify(mockFetchPlan).addFetchGroup(FetchGroupConstants.PRODUCT_SKU_INDEX);
+		verify(mockFetchPlan).setMaxFetchDepth(FetchPlan.DEPTH_INFINITE);
+		verify(mockCategoryLoadTuner).configure(mockFetchPlan);
+		verify(mockProductSkuLoadTuner, times(2)).configure(mockFetchPlan);
+		verify(mockProductTypeLoadTuner).configure(mockFetchPlan);
+	}
+
+	//CategoryTunerLoadTunerImpl#merge calls ElasticPathImpl to obtain a bean. When that one is fixed then @SuppressWarnings can be removed
+	@SuppressWarnings("PMD.DontUseElasticPathImplGetInstance")
+	private void mockBeanFactory() {
+		BeanFactory beanFactory = mock(BeanFactory.class);
+		((ElasticPathImpl) ElasticPathImpl.getInstance()).setBeanFactory(beanFactory);
+
+		when(beanFactory.getBean("productSkuLoadTuner")).thenAnswer(invocation -> new ProductSkuLoadTunerImpl());
+		when(beanFactory.getBean("categoryLoadTuner")).thenAnswer(invocation -> new CategoryLoadTunerImpl());
+		when(beanFactory.getBean("productTypeLoadTuner")).thenAnswer(invocation -> new ProductTypeLoadTunerImpl());
 	}
 }

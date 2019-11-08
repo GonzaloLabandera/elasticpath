@@ -428,7 +428,7 @@ public class IndexBuildServiceImpl extends AbstractIndexServiceImpl {
 	}
 
 	private Collection<Long> findAffectedUidsByQuery(final IndexType indexType, final String query) {
-		final LuceneRawSearchCriteria searchCriteria = getBean(ContextIdNames.LUCENE_RAW_SEARCH_CRITERIA);
+		final LuceneRawSearchCriteria searchCriteria = getPrototypeBean(ContextIdNames.LUCENE_RAW_SEARCH_CRITERIA, LuceneRawSearchCriteria.class);
 		searchCriteria.setIndexType(indexType);
 		searchCriteria.setQuery(query);
 		return indexSearchService.search(searchCriteria).getAllResults();

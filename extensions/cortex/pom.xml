@@ -28,6 +28,7 @@
 		<module>ext-commerce-engine-wrapper</module>
 		<module>ext-cortex-webapp</module>
 		<module>system-tests</module>
+		<module>ext-system-tests</module>
 		<module>ext-health-monitor</module>
 	</modules>
 

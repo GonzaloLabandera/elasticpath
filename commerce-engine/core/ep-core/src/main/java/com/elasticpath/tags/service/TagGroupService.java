@@ -1,5 +1,5 @@
-/**
- * Copyright (c) Elastic Path Software Inc., 2013
+/*
+ * Copyright (c) Elastic Path Software Inc., 2019
  */
 package com.elasticpath.tags.service;
 
@@ -44,5 +44,11 @@ public interface TagGroupService {
 	 * @param tagGroup tagGroup.
 	 */
 	void delete(TagGroup tagGroup);
+
+	/**
+	 * Create a new TagGroup instance.
+	 * @return an empty (non-persisted) TagGroup
+	 */
+	TagGroup create();
 
 }

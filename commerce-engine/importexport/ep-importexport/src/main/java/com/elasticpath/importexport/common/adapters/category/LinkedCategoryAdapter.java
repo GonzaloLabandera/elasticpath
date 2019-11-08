@@ -37,6 +37,6 @@ public class LinkedCategoryAdapter extends AbstractDomainAdapterImpl<Category, L
 	
 	@Override
 	public Category createDomainObject() {
-		return getBeanFactory().getBean(ContextIdNames.LINKED_CATEGORY);
+		return getBeanFactory().getPrototypeBean(ContextIdNames.LINKED_CATEGORY, Category.class);
 	}
 }

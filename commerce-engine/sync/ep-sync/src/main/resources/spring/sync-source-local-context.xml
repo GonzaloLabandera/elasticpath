@@ -47,6 +47,10 @@
 		<property name="serviceInterface" value="com.elasticpath.messaging.factory.EventMessageFactory"/>
 	</bean>
 
+	<bean id="domainEventMessagePublisher" class="com.elasticpath.messaging.stub.EventMessagePublisherStubImpl"/>
+
+	<bean id="catalogEventMessagePublisher" class="com.elasticpath.messaging.stub.EventMessagePublisherStubImpl"/>
+
 	<bean id="changeSetEventMessagePublisher" class="com.elasticpath.commons.beanframework.NoOpProxyFactoryBean">
 		<property name="serviceInterface" value="com.elasticpath.messaging.EventMessagePublisher"/>
 	</bean>
@@ -102,6 +106,8 @@
 	<alias name="injectedDataSource" alias="dataSource"/>
 
 	<bean id="entityManagerFactory" parent="abstractEntityManagerFactory"/>
+
+	<import resource="sync-hdssupport-context.xml" />
 
 	<import resource="classpath*:META-INF/elasticpath/conf/spring/plugin.xml"/>
 

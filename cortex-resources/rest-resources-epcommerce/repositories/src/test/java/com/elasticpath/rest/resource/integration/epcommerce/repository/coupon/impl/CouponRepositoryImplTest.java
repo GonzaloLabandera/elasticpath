@@ -4,7 +4,6 @@
 package com.elasticpath.rest.resource.integration.epcommerce.repository.coupon.impl;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
@@ -16,8 +15,6 @@ import static com.elasticpath.rest.resource.integration.epcommerce.repository.Re
 
 import java.util.Collections;
 
-import io.reactivex.Completable;
-import io.reactivex.Single;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -25,7 +22,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import com.elasticpath.domain.coupon.specifications.PotentialCouponUse;
+import io.reactivex.Completable;
+import io.reactivex.Single;
+
 import com.elasticpath.domain.order.Order;
 import com.elasticpath.domain.rules.AppliedCoupon;
 import com.elasticpath.domain.rules.AppliedRule;
@@ -35,8 +34,8 @@ import com.elasticpath.rest.resource.integration.epcommerce.repository.order.Ord
 import com.elasticpath.rest.resource.integration.epcommerce.repository.transform.ExceptionTransformer;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.transform.impl.ReactiveAdapterImpl;
 import com.elasticpath.service.rules.CouponService;
+import com.elasticpath.service.rules.CouponUsageService;
 import com.elasticpath.service.rules.impl.CouponNotValidException;
-import com.elasticpath.service.rules.impl.RuleValidationResultEnum;
 
 /**
  * The tests for {@link CouponRepositoryImpl}.
@@ -48,6 +47,9 @@ public class CouponRepositoryImplTest {
 
 	@Mock
 	private CouponService couponService;
+
+	@Mock
+	private CouponUsageService couponUsageService;
 
 	@Mock
 	private OrderRepository orderRepository;
@@ -66,21 +68,21 @@ public class CouponRepositoryImplTest {
 
 	@Before
 	public void setUp() {
-		couponRepository = new CouponRepositoryImpl(couponService, orderRepository, reactiveAdapter);
+		couponRepository = new CouponRepositoryImpl(couponService, couponUsageService, orderRepository, reactiveAdapter);
 		when(orderRepository.findByGuidAsSingle(SCOPE, PURCHASE_ID)).thenReturn(Single.just(order));
 	}
 
 	@Test
 	public void testCouponIsValidInStore() {
 		setUpCouponServiceToReturnCoupon();
-		setUpSpecificationToBeSatisfied(RuleValidationResultEnum.SUCCESS);
+		setUpCouponValidationToBeSuccessful(true);
 		couponRepository.validateCoupon(COUPON_CODE, SCOPE, CUSTOMER_EMAIL).test().assertNoErrors();
 	}
 
 	@Test
 	public void testCouponRuleIsInvalidInStore() {
 		setUpCouponServiceToReturnCoupon();
-		setUpSpecificationToBeSatisfied(RuleValidationResultEnum.ERROR_UNSPECIFIED);
+		setUpCouponValidationToBeSuccessful(false);
 		couponRepository.validateCoupon(COUPON_CODE, SCOPE, CUSTOMER_EMAIL).test()
 				.assertError(CouponNotValidException.class)
 				.assertErrorMessage("Coupon 'coupon_code' is not valid");
@@ -93,11 +95,12 @@ public class CouponRepositoryImplTest {
 	}
 
 
-	private void setUpSpecificationToBeSatisfied(final RuleValidationResultEnum isSatisfied) {
-		if (isSatisfied.isSuccess()) {
-			doNothing().when(couponService).validateCoupon(any(PotentialCouponUse.class), anyString());
+	private void setUpCouponValidationToBeSuccessful(final boolean success) {
+		if (success) {
+			doNothing().when(couponUsageService).ensureValidCouponRuleAndUsage(any(), any(), any(), any());
 		} else {
-			doThrow(new CouponNotValidException("coupon_code")).when(couponService).validateCoupon(any(PotentialCouponUse.class), anyString());
+			doThrow(new CouponNotValidException("coupon_code"))
+					.when(couponUsageService).ensureValidCouponRuleAndUsage(any(), any(), any(), any());
 		}
 	}
 

@@ -49,9 +49,24 @@
 		<url-pattern>/</url-pattern>
 	</servlet-mapping>
 
+	<!-- Datasource Configuration -->
 	<resource-ref>
 		<description>DB Connection</description>
 		<res-ref-name>jdbc/epjndi</res-ref-name>
+		<res-type>javax.sql.DataSource</res-type>
+		<res-auth>Container</res-auth>
+	</resource-ref>
+
+	<resource-ref>
+		<description>XA DB Connection</description>
+		<res-ref-name>jdbc/epjndi-xa</res-ref-name>
+		<res-type>javax.sql.XADataSource</res-type>
+		<res-auth>Container</res-auth>
+	</resource-ref>
+
+	<resource-ref>
+		<description>Read-Only DB Connection</description>
+		<res-ref-name>jdbc/epjndiReadOnly</res-ref-name>
 		<res-type>javax.sql.DataSource</res-type>
 		<res-auth>Container</res-auth>
 	</resource-ref>
@@ -60,6 +75,13 @@
 		<description>JMS Connection Factory</description>
 		<res-ref-name>jms/JMSConnectionFactory</res-ref-name>
 		<res-type>javax.jms.ConnectionFactory</res-type>
+		<res-auth>Container</res-auth>
+	</resource-ref>
+
+	<resource-ref>
+		<description>XA JMS Connection Factory</description>
+		<res-ref-name>jms/JMSConnectionFactory-xa</res-ref-name>
+		<res-type>javax.jms.XAConnectionFactory</res-type>
 		<res-auth>Container</res-auth>
 	</resource-ref>
 

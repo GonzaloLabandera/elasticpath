@@ -31,7 +31,7 @@ public class PossiblePromotionsForCartRepositoryImpl<I extends PossiblePromotion
 	@Override
 	public Observable<PromotionIdentifier> getElements(final PossiblePromotionsForCartIdentifier identifier) {
 		CartIdentifier cartIdentifier = identifier.getCart();
-		String scope = cartIdentifier.getScope().getValue();
+		String scope = cartIdentifier.getCarts().getScope().getValue();
 		String cartId = cartIdentifier.getCartId().getValue();
 		return promotionRepository.getPossiblePromotionsForCart(scope, cartId)
 				.map(possiblePromotions -> buildPromotionIdentifier(scope, possiblePromotions));

@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<entity-mappings xmlns="http://java.sun.com/xml/ns/persistence/orm" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+				 xsi:schemaLocation="http://java.sun.com/xml/ns/persistence/orm http://java.sun.com/xml/ns/persistence/orm_2_0.xsd" version="2.0">
+
+	<!-- Named queries for ModifierGroup family tree -->
+
+	<named-query name="MODIFIER_GROUP_BY_CODE">
+		<query>
+			SELECT mg
+			FROM ModifierGroupImpl mg
+			WHERE mg.code = ?1
+		</query>
+	</named-query>
+
+	<named-query name="MODIFIER_GROUP_BY_CATALOG_UID">
+		<query>
+			SELECT mg
+			FROM ProductTypeImpl pt, IN(pt.modifierGroups) mg
+			WHERE pt.catalog.uidPk = ?1
+			ORDER BY mg.code
+		</query>
+	</named-query>
+	<named-query name="CATALOG_FOR_MODIFIER_UID">
+		<query>
+			SELECT pt.catalog
+			FROM ProductTypeImpl pt, IN(pt.modifierGroups) mg
+			WHERE  mg.uidPk = ?1
+
+		</query>
+	</named-query>
+
+
+
+	<named-query name="MODIFIER_GROUPS">
+		<query>
+			SELECT mg
+			FROM ModifierGroupImpl mg
+		</query>
+	</named-query>
+	<named-query name="MODIFIER_GROUPS_BY_CODES">
+		<query>
+			SELECT mg
+			FROM ModifierGroupImpl mg
+			WHERE mg.code IN (:list)
+
+		</query>
+	</named-query>
+	<named-query name="MODIFIER_GROUPS_BY_FILTER">
+		<query>
+			SELECT mg
+			FROM ModifierGroupImpl mg, ModifierGroupFilterImpl f
+			WHERE mg.code = f.modifierCode
+			AND f.type = ?1
+			AND f.referenceGuid = ?2
+
+		</query>
+	</named-query>
+	<named-query name="MODIFIER_FILTERS_BY_CODE_AND_REFERENCE">
+		<query>
+			SELECT mf
+			FROM  ModifierGroupFilterImpl mf
+			WHERE mf.modifierCode = ?1
+			AND mf.referenceGuid = ?2
+			AND mf.type = ?3
+
+		</query>
+	</named-query>
+	<named-query name="MODIFIER_GROUP_FILTERS_BY_UIDS">
+		<query>
+			SELECT mf
+			FROM ModifierGroupFilterImpl mf
+			WHERE mf.uidPk IN (:list)
+
+		</query>
+	</named-query>
+	<named-query name="MODIFIER_GROUP_FILTERS">
+		<query>
+			SELECT mf
+			FROM  ModifierGroupFilterImpl mf
+		</query>
+	</named-query>
+
+
+	<named-query name="MODIFIER_FIELD_BY_CODE">
+		<query>
+			SELECT mf
+			FROM ModifierFieldImpl mf
+			WHERE mf.code = ?1
+		</query>
+	</named-query>
+
+	<named-query name="MODIFIER_GROUP_IN_USE">
+		<query>
+			SELECT mg.uidPk
+			FROM ProductTypeImpl pt, IN(pt.modifierGroups) mg
+			WHERE mg.uidPk = ?1
+		</query>
+	</named-query>
+</entity-mappings>
+

@@ -22,6 +22,10 @@ public class MerchandisingTab extends AbstractPageObject {
 	private static final String MERCHANDISING_ITEM_REMOVE_BUTTON = "div[widget-id='Remove...'][widget-type='Button'][seeable='true']";
 	private static final String MERCHANDISING_CATALOG_TAB_CSS = "div[automation-id='productMerchandisingAssociation'][seeable='true'] "
 			+ "div[widget-id='%s']";
+	private static final String MERCHANDISING_TAB = "div[automation-id='com.elasticpath.cmclient.catalog.CatalogMessages"
+			+ ".ProductMerchandisingAssociationPage_Title'][seeable='true']";
+	private static final String MERCHANDISING_TAB_DOWN = "div[automation-id='com.elasticpath.cmclient.catalog.CatalogMessages"
+			+ ".ProductMerchandisingAssociationSection_Move_Down'][seeable='true']";
 
 	/**
 	 * constructor.
@@ -91,6 +95,11 @@ public class MerchandisingTab extends AbstractPageObject {
 	public void clickMerchandisingTab(final String tabName) {
 		assertThat(getWaitDriver().waitForElementToBeNotStale(String.format(MERCHANDISING_TAB_CSS, tabName))).as(tabName + " is stale").isTrue();
 		click(String.format(MERCHANDISING_TAB_CSS, tabName));
+		setWebDriverImplicitWait(1);
+		if (!isElementPresent(By.cssSelector(MERCHANDISING_TAB_CSS + "[active-tab='true']"))) {
+			click(String.format(MERCHANDISING_TAB_CSS, tabName));
+		}
+		setWebDriverImplicitWaitToDefault();
 		getWaitDriver().waitForElementToBeInteractable(String.format(MERCHANDISING_TAB_SELECTED_CSS, tabName));
 	}
 
@@ -103,4 +112,21 @@ public class MerchandisingTab extends AbstractPageObject {
 		click(getDriver().findElement(By.cssSelector(String.format(MERCHANDISING_CATALOG_TAB_CSS, catalogName))));
 	}
 
+
+	/**
+	 * Clicks on the catalog tab.
+	 */
+	public void selectMerchandisingTab() {
+		click(getDriver().findElement(By.cssSelector(String.format(MERCHANDISING_TAB))));
+		click(String.format(MERCHANDISING_TAB));
+	}
+
+
+	/**
+	 * Clicks on the catalog tab.
+	 */
+	public void selectMerchandisingTabDown() {
+		click(getDriver().findElement(By.cssSelector(String.format(MERCHANDISING_TAB_DOWN))));
+		click(String.format(MERCHANDISING_TAB_DOWN));
+	}
 }

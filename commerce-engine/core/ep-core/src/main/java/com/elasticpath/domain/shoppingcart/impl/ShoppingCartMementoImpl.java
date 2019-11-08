@@ -5,7 +5,9 @@ package com.elasticpath.domain.shoppingcart.impl; //NOPMD
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import javax.persistence.Basic;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -14,12 +16,14 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.MapKey;
 import javax.persistence.OneToMany;
 import javax.persistence.OrderBy;
 import javax.persistence.Table;
 import javax.persistence.TableGenerator;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.persistence.Transient;
 
 import org.apache.openjpa.persistence.DataCache;
 import org.apache.openjpa.persistence.ElementDependent;
@@ -74,12 +78,75 @@ public class ShoppingCartMementoImpl extends AbstractShoppingListImpl implements
 	/** List of ALL the objects in this Cart. */
 	private List<ShoppingItem> allItems = new ArrayList<>();
 
+
+	private static final String FK_COLUMN_NAME = "SHOPPING_CART_UID";
+	private Map<String, CartData> cartData = new HashMap<>();
+	private boolean defaultCart;
+
+
 	/**
 	 * Default Constructor.
 	 */
 	public ShoppingCartMementoImpl() {
 		super();
 	}
+
+	
+	/**
+	 * Accesses the field for {@code name} and returns the current value. If the field has not been set
+	 * then will return null.
+	 *
+	 * @param name The name of the field.
+	 * @return The current value of the field or null.
+	 */
+	@Override
+	@Transient
+	public String getCartDataFieldValue(final String name) {
+		CartData data = getCartData().get(name);
+		if (data == null) {
+			return null;
+		}
+		return data.getValue();
+	}
+
+	@Override
+	public void setCartDataFieldValue(final String name, final String value) {
+		CartData data;
+		if (getCartData().containsKey(name)) {
+			data = getCartData().get(name);
+			data.setValue(value);
+		} else {
+			data = createCartData(name, value);
+			getCartData().put(name, data);
+		}
+	}
+
+	private CartData createCartData(final String name, final String value) {
+		return new CartData(name, value);
+	}
+
+	/**
+	 * Internal JPA method to get Item Data.
+	 * @return the item data
+	 *
+	 *
+
+	 */
+	@OneToMany(targetEntity = CartData.class, cascade = { CascadeType.ALL }, fetch = FetchType.EAGER)
+	@ElementJoinColumn(name = FK_COLUMN_NAME, nullable = false)
+	@ElementForeignKey
+	@MapKey(name = "key")
+	@ElementDependent
+	@Override
+	public Map<String, CartData> getCartData() {
+		return this.cartData;
+	}
+
+	@Override
+	public void setCartData(final Map<String, CartData> cartData) {
+		this.cartData = cartData;
+	}
+
 
 	/**
 	 * Initializes the shopping cart. Call setElasticPath before initializing.
@@ -179,4 +246,22 @@ public class ShoppingCartMementoImpl extends AbstractShoppingListImpl implements
 	public void setStatus(final ShoppingCartStatus status) {
 		this.status = status;
 	}
+
+
+
+	@Basic(optional = false)
+	@Column(name = "DEFAULTCART")
+	@Override
+	public boolean isDefault() {
+		return defaultCart;
+	}
+
+	@Override
+	public void setDefault(final boolean defaultCart) {
+		this.defaultCart = defaultCart;
+	}
+
+
+
+
 }

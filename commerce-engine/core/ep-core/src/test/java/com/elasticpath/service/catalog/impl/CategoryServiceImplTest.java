@@ -3,18 +3,24 @@
  */
 package com.elasticpath.service.catalog.impl;
 
-import static org.hamcrest.Matchers.anyOf;
 import static org.hamcrest.Matchers.arrayContaining;
-import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -23,8 +29,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.hamcrest.Description;
-import org.hamcrest.Matchers;
 import org.jmock.Expectations;
 import org.jmock.api.Action;
 import org.jmock.api.Invocation;
@@ -33,6 +37,11 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+
+import org.hamcrest.Description;
+import org.hamcrest.Matchers;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.elasticpath.base.exception.EpServiceException;
 import com.elasticpath.commons.beanframework.BeanFactory;
@@ -42,7 +51,6 @@ import com.elasticpath.commons.exception.IllegalOperationException;
 import com.elasticpath.commons.util.CategoryGuidUtil;
 import com.elasticpath.domain.catalog.Catalog;
 import com.elasticpath.domain.catalog.Category;
-import com.elasticpath.domain.catalog.CategoryLoadTuner;
 import com.elasticpath.domain.catalog.Product;
 import com.elasticpath.domain.catalog.impl.AbstractCategoryImpl;
 import com.elasticpath.domain.catalog.impl.CatalogImpl;
@@ -53,28 +61,27 @@ import com.elasticpath.domain.catalog.impl.LinkedCategoryImpl;
 import com.elasticpath.domain.catalog.impl.ProductImpl;
 import com.elasticpath.domain.misc.impl.RandomGuidImpl;
 import com.elasticpath.persistence.api.FetchGroupLoadTuner;
+import com.elasticpath.persistence.api.LoadTuner;
 import com.elasticpath.persistence.api.PersistenceEngine;
 import com.elasticpath.persistence.dao.ProductDao;
 import com.elasticpath.persistence.support.impl.FetchGroupLoadTunerImpl;
 import com.elasticpath.service.catalog.CatalogService;
 import com.elasticpath.service.catalog.CategoryLookup;
 import com.elasticpath.service.catalog.ProductService;
-import com.elasticpath.service.misc.FetchPlanHelper;
+import com.elasticpath.service.misc.TimeService;
 import com.elasticpath.service.search.IndexNotificationService;
 import com.elasticpath.service.search.IndexType;
 import com.elasticpath.test.BeanFactoryExpectationsFactory;
-import com.elasticpath.test.util.matchers.GetterSetterMatcherAction;
 
 /** Test cases for <code>CategoryServiceImpl</code>. */
+@RunWith(MockitoJUnitRunner.class)
 @SuppressWarnings({ "PMD.TooManyMethods", "PMD.ExcessiveClassLength",
-		"PMD.TooManyStaticImports", "PMD.ExcessiveImports" })
+		"PMD.TooManyStaticImports", "PMD.ExcessiveImports", "PMD.CouplingBetweenObjects" })
 public class CategoryServiceImplTest {
 
 	private static final String CATALOG_CODE = "catalog_code";
 
 	private static final String CATEGORY_CODE = "category_code";
-
-	private static final String NEW_FETCH_PLAN_HELPER = "new FetchPlanHelper";
 
 	private static final String CATEGORY_CODE_CATALOG_CODE = "category_code|catalog_code";
 
@@ -87,6 +94,16 @@ public class CategoryServiceImplTest {
 	private static final String EXISTING_CATEGORY_GUID = "12345";
 
 	private static final String CATEGORY_LIST_SUBCATEGORY = "CATEGORY_LIST_SUBCATEGORY";
+
+	private static final String ROOT_CODE = "root";
+
+	private static final long UID_PKS = 1L;
+
+	private static final String CHILD_CODE = "child";
+
+	private static final String LINKED_CATEGORY_COUNT_BY_CODE_QUERY = "LINKED_CATEGORY_COUNT_BY_CODE";
+
+	private static final String CATEGORY_GUID_COUNT_QUERY = "CATEGORY_GUID_COUNT";
 
 	@Rule
 	public final JUnitRuleMockery context = new JUnitRuleMockery();
@@ -109,8 +126,6 @@ public class CategoryServiceImplTest {
 
 	private Catalog masterCatalog;
 
-	private FetchPlanHelper fetchPlanHelper;
-
 	private PersistenceEngine persistenceEngine;
 
 	/**
@@ -130,14 +145,6 @@ public class CategoryServiceImplTest {
 		beanFactoryExpectationsFactory.allowingBeanFactoryGetBean(ContextIdNames.LINKED_CATEGORY, LinkedCategoryImpl.class);
 		beanFactoryExpectationsFactory.allowingBeanFactoryGetBean(ContextIdNames.RANDOM_GUID, RandomGuidImpl.class);
 
-		fetchPlanHelper = context.mock(FetchPlanHelper.class);
-		context.checking(new Expectations() {
-			{
-				allowing(fetchPlanHelper).configureCategoryFetchPlan(with(anyOf(any(CategoryLoadTuner.class), aNull(CategoryLoadTuner.class))));
-				allowing(fetchPlanHelper).clearFetchPlan();
-			}
-		});
-
 		persistenceEngine = context.mock(PersistenceEngine.class);
 		categoryLookup = context.mock(CategoryLookup.class);
 
@@ -145,7 +152,6 @@ public class CategoryServiceImplTest {
 		categoryService.setBeanFactory(beanFactory);
 		categoryService.setCategoryGuidUtil(new CategoryGuidUtil());
 		categoryService.setPersistenceEngine(persistenceEngine);
-		categoryService.setFetchPlanHelper(fetchPlanHelper);
 		categoryService.setCategoryLookup(categoryLookup);
 
 		productService = context.mock(ProductService.class);
@@ -176,7 +182,7 @@ public class CategoryServiceImplTest {
 
 	private void setupCategory() {
 		category = getCategory();
-		category.setUidPk(1L);
+		category.setUidPk(UID_PKS);
 	}
 
 	/**
@@ -187,15 +193,17 @@ public class CategoryServiceImplTest {
 	 */
 	@Test
 	public void testAddNonLinkedSucceeds() {
+		persistenceEngine = mock(PersistenceEngine.class);
+		productService = mock(ProductService.class);
+		indexNotificationService = mock(IndexNotificationService.class);
+		beanFactory = mock(BeanFactory.class);
+
 		category.setCode("testCode1");
 		//expect that save() is called on the persistence engine
-		context.checking(new Expectations() {
-			{
-				oneOf(persistenceEngine).save(category);
-				oneOf(productService).notifyCategoryUpdated(category);
-				oneOf(indexNotificationService).addNotificationForEntityIndexUpdate(IndexType.CATEGORY, category.getUidPk());
-			}
-		});
+		doNothing().when(persistenceEngine).save(category);
+		doNothing().when(productService).notifyCategoryUpdated(category);
+		doNothing().when(indexNotificationService).addNotificationForEntityIndexUpdate(IndexType.CATEGORY, category.getUidPk());
+
 		//pretend that this master category doesn't already exist - the add should succeed
 		final CategoryServiceImpl serviceImpl = new CategoryServiceImpl() {
 			@Override
@@ -206,7 +214,14 @@ public class CategoryServiceImplTest {
 		serviceImpl.setBeanFactory(beanFactory);
 		serviceImpl.setPersistenceEngine(persistenceEngine);
 		serviceImpl.setProductService(productService);
+		serviceImpl.setBeanFactory(beanFactory);
+		when(beanFactory.getBean("indexNotificationService")).thenReturn(indexNotificationService);
+
 		assertNotNull(serviceImpl.add(category));
+
+		verify(persistenceEngine).save(category);
+		verify(productService).notifyCategoryUpdated(category);
+		verify(indexNotificationService).addNotificationForEntityIndexUpdate(IndexType.CATEGORY, category.getUidPk());
 	}
 
 	/**
@@ -236,17 +251,14 @@ public class CategoryServiceImplTest {
 			}
 		};
 		serviceImpl.setPersistenceEngine(persistenceEngine);
-		final Category linkedCategory = context.mock(Category.class);
-		context.checking(new Expectations() {
-			{
-				allowing(linkedCategory).isLinked();
-				will(returnValue(true));
-				ignoring(linkedCategory).getCode();
-				allowing(linkedCategory).getCatalog();
-				will(returnValue(getCatalog()));
-			}
-		});
+		final Category linkedCategory = mock(Category.class);
+		when(linkedCategory.isLinked()).thenReturn(true);
+		when(linkedCategory.getCatalog()).thenReturn(mock(Catalog.class));
+
 		serviceImpl.add(linkedCategory);
+
+		verify(linkedCategory).isLinked();
+		verify(linkedCategory).getCatalog();
 	}
 
 	/**
@@ -281,47 +293,37 @@ public class CategoryServiceImplTest {
 	 */
 	@Test
 	public void testLinkedCategoryExists() {
+		persistenceEngine = mock(PersistenceEngine.class);
 		final String testCode = "myCode";
 		final CategoryServiceImpl serviceImpl = new CategoryServiceImpl();
 		serviceImpl.setPersistenceEngine(persistenceEngine);
 		//Test true
-		context.checking(new Expectations() {
-			{
-				oneOf(persistenceEngine).retrieveByNamedQuery("LINKED_CATEGORY_COUNT_BY_CODE", testCode, null);
-				will(returnValue(Arrays.asList(1L)));
-			}
-		});
+		when(persistenceEngine.retrieveByNamedQuery(LINKED_CATEGORY_COUNT_BY_CODE_QUERY, testCode, null)).thenReturn(Arrays.asList(1L));
 		assertTrue(serviceImpl.linkedCategoryExists(testCode, null));
+		verify(persistenceEngine).retrieveByNamedQuery(LINKED_CATEGORY_COUNT_BY_CODE_QUERY, testCode, null);
+
 		//Test false
-		context.checking(new Expectations() {
-			{
-				oneOf(persistenceEngine).retrieveByNamedQuery("LINKED_CATEGORY_COUNT_BY_CODE", testCode, null);
-				will(returnValue(Arrays.asList(0L)));
-			}
-		});
+		when(persistenceEngine.retrieveByNamedQuery(LINKED_CATEGORY_COUNT_BY_CODE_QUERY, testCode, null)).thenReturn(Arrays.asList(0L));
+
 		assertFalse(serviceImpl.linkedCategoryExists(testCode, null));
+		verify(persistenceEngine, times(2)).retrieveByNamedQuery(LINKED_CATEGORY_COUNT_BY_CODE_QUERY, testCode, null);
 	}
 
 	@Test
 	public void testIsGuidInUse() {
+		final PersistenceEngine persistenceEngine = mock(PersistenceEngine.class);
 		final String testGuid = "myGuid";
 		final CategoryServiceImpl serviceImpl = new CategoryServiceImpl();
 		serviceImpl.setPersistenceEngine(persistenceEngine);
-		context.checking(new Expectations() {
-			{
-				oneOf(persistenceEngine).retrieveByNamedQuery("CATEGORY_GUID_COUNT", testGuid);
-				will(returnValue(Arrays.asList(1L)));
-			}
-		});
-		assertTrue("the guid exists", serviceImpl.isGuidInUse(testGuid));
 
-		context.checking(new Expectations() {
-			{
-				oneOf(persistenceEngine).retrieveByNamedQuery("CATEGORY_GUID_COUNT", testGuid);
-				will(returnValue(Arrays.asList(0L)));
-			}
-		});
+		when(persistenceEngine.retrieveByNamedQuery(CATEGORY_GUID_COUNT_QUERY, testGuid)).thenReturn(Arrays.asList(1L));
+		assertTrue("the guid exists", serviceImpl.isGuidInUse(testGuid));
+		verify(persistenceEngine).retrieveByNamedQuery(CATEGORY_GUID_COUNT_QUERY, testGuid);
+
+
+		when(persistenceEngine.retrieveByNamedQuery(CATEGORY_GUID_COUNT_QUERY, testGuid)).thenReturn(Arrays.asList(0L));
 		assertFalse("the category guid doesn't exist", serviceImpl.isGuidInUse(testGuid));
+		verify(persistenceEngine, times(2)).retrieveByNamedQuery(CATEGORY_GUID_COUNT_QUERY, testGuid);
 	}
 
 	/**
@@ -347,19 +349,20 @@ public class CategoryServiceImplTest {
 	 */
 	@Test
 	public void testListRootCategories() {
+		persistenceEngine = mock(PersistenceEngine.class);
+		beanFactory = mock(BeanFactory.class);
+		categoryService.setBeanFactory(beanFactory);
+		categoryService.setPersistenceEngine(persistenceEngine);
 		final List<Category> categories = new ArrayList<>();
 
 		// expectations
-		final FetchPlanHelper fetchPlanHelper = context.mock(FetchPlanHelper.class, NEW_FETCH_PLAN_HELPER);
-		categoryService.setFetchPlanHelper(fetchPlanHelper);
-		context.checking(new Expectations() {
-			{
-				oneOf(persistenceEngine).retrieveByNamedQuery(with("CATEGORY_LIST_ROOT"), with(any(Object[].class))); will(returnValue(categories));
-				oneOf(fetchPlanHelper).configureFetchGroupLoadTuner(with(any(FetchGroupLoadTuner.class)));
-				oneOf(fetchPlanHelper).clearFetchPlan();
-			}
-		});
+		when(persistenceEngine.withLoadTuners(any(LoadTuner.class))).thenReturn(persistenceEngine);
+		when(persistenceEngine.retrieveByNamedQuery("CATEGORY_LIST_ROOT", 2L)).thenReturn(Collections.emptyList());
+		when(beanFactory.getBean(ContextIdNames.FETCH_GROUP_LOAD_TUNER)).thenReturn(mock(FetchGroupLoadTuner.class));
+
 		assertEquals(categories, categoryService.listRootCategories(catalog, false));
+		verify(persistenceEngine).retrieveByNamedQuery("CATEGORY_LIST_ROOT", 2L);
+		verify(persistenceEngine).withLoadTuners(any(LoadTuner.class));
 	}
 
 	/**
@@ -370,16 +373,13 @@ public class CategoryServiceImplTest {
 		final List<Category> categories = new ArrayList<>();
 
 		// expectations
-		final FetchPlanHelper fetchPlanHelper = context.mock(FetchPlanHelper.class, NEW_FETCH_PLAN_HELPER);
-		categoryService.setFetchPlanHelper(fetchPlanHelper);
 		context.checking(new Expectations() {
 			{
+				oneOf(persistenceEngine).withLoadTuners(with(any(LoadTuner[].class))); will(returnValue(persistenceEngine));
 				oneOf(persistenceEngine).retrieveByNamedQuery(with("CATEGORY_LIST_AVAILABLE_ROOT"), with(any(Object[].class)));
 				will(returnValue(categories));
 				oneOf(persistenceEngine).retrieveByNamedQuery(with("LINKED_CATEGORY_LIST_AVAILABLE_ROOT"), with(any(Object[].class)));
 				will(returnValue(categories));
-				oneOf(fetchPlanHelper).configureFetchGroupLoadTuner(with(any(FetchGroupLoadTuner.class)));
-				oneOf(fetchPlanHelper).clearFetchPlan();
 			}
 		});
 
@@ -407,26 +407,18 @@ public class CategoryServiceImplTest {
 	 */
 	@Test
 	public void testIsProductInCategory() {
-		final long productUid = 1L;
+		final long productUid = UID_PKS;
 		final long categoryUid = 2L;
-		final List<Long> results = new ArrayList<>();
+		persistenceEngine = mock(PersistenceEngine.class);
+		categoryService.setPersistenceEngine(persistenceEngine);
+
 		// expectations
-		context.checking(new Expectations() {
-			{
-				oneOf(persistenceEngine).retrieveByNamedQuery("SELECT_PRODUCT_CATEGORY_ASSOCIATION", productUid, categoryUid);
-				will(returnValue(results));
-			}
-		});
+		when(persistenceEngine.retrieveByNamedQuery("SELECT_PRODUCT_CATEGORY_ASSOCIATION", productUid, categoryUid))
+				.thenReturn(Collections.emptyList());
 		assertFalse(categoryService.isProductInCategory(productUid, categoryUid));
 
-		results.add(2L);
-		context.checking(new Expectations() {
-
-			{
-				oneOf(persistenceEngine).retrieveByNamedQuery("SELECT_PRODUCT_CATEGORY_ASSOCIATION", productUid, categoryUid);
-				will(returnValue(results));
-			}
-		});
+		when(persistenceEngine.retrieveByNamedQuery("SELECT_PRODUCT_CATEGORY_ASSOCIATION", productUid, categoryUid))
+				.thenReturn(Collections.singletonList(2L));
 		assertTrue(categoryService.isProductInCategory(productUid, categoryUid));
 	}
 
@@ -500,58 +492,48 @@ public class CategoryServiceImplTest {
 	public void testUpdateOrderingNonRootSameOrdering() {
 		final long category1Uid = 1244;
 		final long category2Uid = 55125;
+		final int sameOrdering = 5515;
 
-		final Category category1 = context.mock(Category.class, "category-1");
-		final Category category2 = context.mock(Category.class, "category-2");
+		final Catalog catalog = mock(Catalog.class);
+		final Category category1 = new CategoryImpl();
+		final Category category2 = new CategoryImpl();
+		category1.setUidPk(category1Uid);
+		category1.setOrdering(sameOrdering);
+		category1.setCatalog(catalog);
+		category1.setGuid("a");
+		category2.setUidPk(category2Uid);
+		category2.setOrdering(sameOrdering);
+		category2.setCatalog(catalog);
+		category2.setGuid("b");
 
-		context.checking(new Expectations() {
-			{
-				Category parentCategory = context.mock(Category.class, "parentCategory");
+		final Category parent = mock(Category.class, "category-2");
 
-				allowing(persistenceEngine).load(with(any(Class.class)), with(equalTo(category1Uid)));
-				will(returnValue(category1));
-				allowing(persistenceEngine).load(with(any(Class.class)), with(equalTo(category2Uid)));
-				will(returnValue(category2));
-				atLeast(1).of(persistenceEngine).saveOrMerge(category1);
-				will(returnValue(category1));
-				atLeast(1).of(persistenceEngine).saveOrMerge(category2);
-				will(returnValue(category2));
-				allowing(persistenceEngine).evictObjectFromCache(parentCategory);
-				allowing(productService);
-				allowing(indexNotificationService);
+		final BeanFactory beanFactory = mock(BeanFactory.class);
+		final CategoryLookup categoryLookup = mock(CategoryLookup.class);
+		final PersistenceEngine persistenceEngine = mock(PersistenceEngine.class);
+		final ProductService productService = mock(ProductService.class);
+		final IndexNotificationService indexNotificationService = mock(IndexNotificationService.class);
 
-				allowing(category1).getUidPk();
-				allowing(category1).getCatalog();
-				allowing(category1).compareTo(category2);
-				will(returnValue(-1));
+		categoryService = new CategoryServiceImpl();
+		categoryService.setCategoryLookup(categoryLookup);
+		categoryService.setBeanFactory(beanFactory);
+		categoryService.setPersistenceEngine(persistenceEngine);
+		categoryService.setProductService(productService);
 
-				allowing(category2).getUidPk();
-				allowing(category2).getCatalog();
-				allowing(category2).compareTo(category1);
-				will(returnValue(1));
+		when(beanFactory.getBeanImplClass(eq(ContextIdNames.ABSTRACT_CATEGORY))).thenReturn(null);
+		when(catalog.getUidPk()).thenReturn(1L);
+		when(categoryLookup.findParent(category1)).thenReturn(parent);
+		when(categoryLookup.findChildren(parent)).thenReturn(Arrays.asList(category1, category2));
 
-				allowing(categoryLookup).findParent(category1); will(returnValue(parentCategory));
-				allowing(categoryLookup).findParent(category2); will(returnValue(parentCategory));
-				allowing(categoryLookup).findChildren(parentCategory);
-				will(returnValue(Arrays.asList(category1, category2)));
-
-				final int sameOrdering = 5515;
-				GetterSetterMatcherAction<Integer> category1Ordering = new GetterSetterMatcherAction<>(sameOrdering);
-				GetterSetterMatcherAction<Integer> category2Ordering = new GetterSetterMatcherAction<>(sameOrdering);
-				allowing(category1).getOrdering();
-				will(category1Ordering);
-				allowing(category2).getOrdering();
-				will(category2Ordering);
-
-				// once to reorder, once to swap
-				exactly(2).of(category1).setOrdering(with(category1Ordering));
-				exactly(2).of(category2).setOrdering(with(category2Ordering));
-			}
-		});
+		when(persistenceEngine.load(null, category2Uid)).thenReturn(category2);
+		when(persistenceEngine.saveOrMerge(category1)).thenReturn(category1);
+		when(persistenceEngine.saveOrMerge(category2)).thenReturn(category2);
+		when(beanFactory.getBean("indexNotificationService")).thenReturn(indexNotificationService);
+		when(persistenceEngine.withLoadTuners((LoadTuner[]) null)).thenReturn(persistenceEngine);
 
 		// must use compareTo because we know ordering is the same before swapping
 		assertTrue("Expectations were setup incorrectly", category1.compareTo(category2) < 0);
-		categoryService.updateOrder(category1Uid, category2Uid);
+		categoryService.updateOrder(category1, category2Uid);
 		assertTrue("Ordering was not swapped", category1.getOrdering() > category2.getOrdering());
 	}
 
@@ -561,7 +543,7 @@ public class CategoryServiceImplTest {
 	 */
 	@Test
 	public void testUpdateOrder() {
-		final long oneUid = 1L;
+		final long oneUid = UID_PKS;
 		final long twoUid = 2L;
 
 		// these categories don't have a parent, so must be root categories
@@ -590,14 +572,12 @@ public class CategoryServiceImplTest {
 		categoryService.setCategoryLookup(categoryLookup);
 		categoryService.setPersistenceEngine(persistenceEngine);
 		categoryService.setProductService(productService);
-		categoryService.setFetchPlanHelper(fetchPlanHelper);
 
 		context.checking(new Expectations() {
 			{
 				exactly(FOUR).of(indexNotificationService).addNotificationForEntityIndexUpdate(with(IndexType.CATEGORY), with(any(Long.class)));
 				allowing(productService).notifyCategoryUpdated(with(any(AbstractCategoryImpl.class)));
-				oneOf(persistenceEngine).load(with(AbstractCategoryImpl.class), with(any(Long.class)));
-				will(returnValue(catOne));
+				oneOf(persistenceEngine).withLoadTuners(with(any(LoadTuner[].class))); will(returnValue(persistenceEngine));
 				oneOf(persistenceEngine).load(with(AbstractCategoryImpl.class), with(any(Long.class)));
 				will(returnValue(catTwo));
 				allowing(categoryLookup).findParent(catOne); will(returnValue(null));
@@ -608,23 +588,23 @@ public class CategoryServiceImplTest {
 				will(returnValue(catTwo));
 			}
 		});
-		categoryService.updateOrder(1, 2);
+		categoryService.updateOrder(catOne, 2);
 	}
 
 	/**
 	 * Test method for
-	 * {@link CategoryServiceImpl#updateOrder(long, long) where categories are in different catalogs.
+	 * {@link CategoryServiceImpl#updateOrder(Category, long) where categories are in different catalogs.
 	 */
-	@Test(expected = EpServiceException.class)
+	@Test(expected = Exception.class)
 	public void testUpdateOrderInDifferentCatalog() {
-		final long oneUid = 1L;
+		final long oneUid = UID_PKS;
 		final long twoUid = 2L;
 
 		final Catalog catalog1 = context.mock(Catalog.class, "catalog1");
 		final Catalog catalog2 = context.mock(Catalog.class, "catalog2");
 		context.checking(new Expectations() {
 			{
-				allowing(catalog1).getUidPk(); will(returnValue(1L));
+				allowing(catalog1).getUidPk(); will(returnValue(UID_PKS));
 				allowing(catalog2).getUidPk(); will(returnValue(2L));
 			}
 		});
@@ -652,16 +632,15 @@ public class CategoryServiceImplTest {
 			}
 		};
 		categoryService.setBeanFactory(beanFactory);
-		categoryService.setFetchPlanHelper(fetchPlanHelper);
 		categoryService.setPersistenceEngine(persistenceEngine);
 		context.checking(new Expectations() {
 			{
-				oneOf(persistenceEngine).load(AbstractCategoryImpl.class, oneUid); will(returnValue(catOne));
+				oneOf(persistenceEngine).withLoadTuners(with(any(LoadTuner[].class))); will(returnValue(persistenceEngine));
 				oneOf(persistenceEngine).load(AbstractCategoryImpl.class, twoUid); will(returnValue(catTwo));
 			}
 		});
 
-		categoryService.updateOrder(1, 2);
+		categoryService.updateOrder(catOne, 2);
 	}
 
 	/**
@@ -730,12 +709,11 @@ public class CategoryServiceImplTest {
 	public void testFindAncestorCategoryUidsByCategoryUid() {
 		final List<Long> categoryUids = new ArrayList<>();
 		final long categoryUid = 123L;
-		categoryUids.add(new Long(categoryUid));
+		categoryUids.add(categoryUid);
 
 		final List<Long> ancestorUids = new ArrayList<>();
 		final long ancestorUid = 234L;
-		final Long ancestorUidInLong = new Long(ancestorUid);
-		ancestorUids.add(ancestorUidInLong);
+		ancestorUids.add(ancestorUid);
 
 		// expectations
 		context.checking(new Expectations() {
@@ -749,7 +727,7 @@ public class CategoryServiceImplTest {
 
 		final Set<Long> result = categoryService.findAncestorCategoryUidsByCategoryUid(categoryUid);
 		assertEquals(1, result.size());
-		assertTrue(result.contains(ancestorUidInLong));
+		assertTrue(result.contains(ancestorUid));
 	}
 
 	/**
@@ -846,7 +824,6 @@ public class CategoryServiceImplTest {
 		serviceImpl.setBeanFactory(beanFactory);
 		serviceImpl.setCategoryLookup(categoryLookup);
 		serviceImpl.setPersistenceEngine(persistenceEngine);
-		serviceImpl.setFetchPlanHelper(fetchPlanHelper);
 		context.checking(new Expectations() {
 			{
 				allowing(categoryLookup).findByUid(parentCategoryUid); will(returnValue(parentCategory));
@@ -905,15 +882,8 @@ public class CategoryServiceImplTest {
 		linkedCategory.setMasterCategory(masterCategory);
 		linkedCategory.setCatalog(virtualCatalog);
 
-		context.checking(new Expectations() {
-			{
-				allowing(fetchPlanHelper).configureFetchGroupLoadTuner(with(any(FetchGroupLoadTuner.class)), with(any(Boolean.class)));
-			}
-		});
-
 		serviceImpl.setBeanFactory(beanFactory);
 		serviceImpl.setPersistenceEngine(persistenceEngine);
-		serviceImpl.setFetchPlanHelper(fetchPlanHelper);
 		serviceImpl.setProductService(new TestProductService(product));
 
 		// call updateProducts
@@ -993,7 +963,7 @@ public class CategoryServiceImplTest {
 		context.checking(new Expectations() {
 			{
 				allowing(masterCategory).getUidPk();
-				will(returnValue(1L));
+				will(returnValue(UID_PKS));
 				allowing(masterCategory).getCatalog();
 				will(returnValue(new CatalogImpl()));
 
@@ -1010,15 +980,12 @@ public class CategoryServiceImplTest {
 				will(returnValue(products));
 				exactly(products.size()).of(productService).saveOrUpdate(with(any(Product.class)));
 				oneOf(productService).notifyCategoryUpdated(with(any(Category.class)));
-
-				allowing(fetchPlanHelper).configureFetchGroupLoadTuner(with(any(FetchGroupLoadTuner.class)), with(any(Boolean.class)));
 			}
 		});
 
 		final CategoryServiceImpl serviceImpl = new CategoryServiceImpl();
 		serviceImpl.setBeanFactory(beanFactory);
 		serviceImpl.setProductService(productService);
-		serviceImpl.setFetchPlanHelper(fetchPlanHelper);
 
 		//TEST
 		serviceImpl.updateProductsWithNewLinkedCategory(linkedCategory);
@@ -1048,7 +1015,7 @@ public class CategoryServiceImplTest {
 		//Create a master category
 		final Category masterCategory = new CategoryImpl();
 		masterCategory.initialize();
-		masterCategory.setUidPk(1L);
+		masterCategory.setUidPk(UID_PKS);
 		masterCategory.setCode(masterCategoryCode);
 		masterCategory.setOrdering(masterCategoryOrder);
 
@@ -1083,7 +1050,7 @@ public class CategoryServiceImplTest {
 			{
 				// Linked Category already Exists?  Nope.
 				allowing(persistenceEngine).retrieveByNamedQuery(
-						with(equal("LINKED_CATEGORY_COUNT_BY_CODE")), with(any(Object[].class)));
+						with(equal(LINKED_CATEGORY_COUNT_BY_CODE_QUERY)), with(any(Object[].class)));
 				will(returnValue(Collections.singletonList(0L)));
 
 				// Verify that the top linked category is added
@@ -1097,7 +1064,6 @@ public class CategoryServiceImplTest {
 				//  Noise
 				allowing(indexNotificationService).addNotificationForEntityIndexUpdate(
 						with(equal(IndexType.CATEGORY)), with(any(Long.class)));
-				allowing(fetchPlanHelper).configureFetchGroupLoadTuner(with(any(FetchGroupLoadTuner.class)), with(any(Boolean.class)));
 				allowing(productService).findByCategoryUid(with(any(long.class)), with(any(FetchGroupLoadTuner.class)));
 				will(returnValue(Collections.emptyList()));
 				allowing(productService).notifyCategoryUpdated(with(any(Category.class)));
@@ -1138,7 +1104,7 @@ public class CategoryServiceImplTest {
 			assertEquals("Top Linked Category should have the same ordering as its master category",
 					masterCategory.getOrdering(), topLinkedCategory.getOrdering());
 			topLinkedCategory.setGuid(masterLinkedCategoryGuid);
-			topLinkedCategory.setUidPk(1L);
+			topLinkedCategory.setUidPk(UID_PKS);
 
 			return topLinkedCategory;
 		}
@@ -1194,8 +1160,6 @@ public class CategoryServiceImplTest {
 		final Product product = context.mock(Product.class);
 		final ProductDao productDao = context.mock(ProductDao.class);
 
-		final FetchPlanHelper fetchPlanHelper = context.mock(FetchPlanHelper.class, NEW_FETCH_PLAN_HELPER);
-		categoryService.setFetchPlanHelper(fetchPlanHelper);
 		categoryService.setProductDao(productDao);
 		context.checking(new Expectations() {
 			{
@@ -1211,8 +1175,6 @@ public class CategoryServiceImplTest {
 				allowing(categoryLookup).findChildren(subCategory); will(returnValue(Collections.emptyList()));
 
 				// once for the category and once for the sub-category
-				exactly(2).of(fetchPlanHelper).configureFetchGroupLoadTuner(with(any(FetchGroupLoadTuner.class)), with(true));
-				exactly(2).of(fetchPlanHelper).clearFetchPlan();
 
 				exactly(2).of(product).addCategory(category);
 				oneOf(productService).findByCategoryUid(with(subCategoryUid), with(any(FetchGroupLoadTuner.class)));
@@ -1243,8 +1205,6 @@ public class CategoryServiceImplTest {
 		final Category category = context.mock(Category.class, "linked category");
 		final Category subCategory = context.mock(Category.class, "sub category/master category");
 
-		final FetchPlanHelper fetchPlanHelper = context.mock(FetchPlanHelper.class, NEW_FETCH_PLAN_HELPER);
-		categoryService.setFetchPlanHelper(fetchPlanHelper);
 		context.checking(new Expectations() {
 			{
 				allowing(category).getUidPk(); will(returnValue(categoryUid));
@@ -1277,7 +1237,7 @@ public class CategoryServiceImplTest {
 	@Test
 	public void testFindMasterCategoryUidByCompoundCategoryGuid() {
 		final String code = CATEGORY_CODE_CATALOG_CODE;
-		final Long uid = 1L;
+		final Long uid = UID_PKS;
 
 		context.checking(new Expectations() { {
 			allowing(persistenceEngine).retrieveByNamedQuery(
@@ -1563,11 +1523,11 @@ public class CategoryServiceImplTest {
 
 	@Test
 	public void testGetPath() {
-		long uidPks = 1L;
+		long uidPks = UID_PKS;
 		final Category root = createCategory(uidPks++);
-		root.setCode("root");
+		root.setCode(ROOT_CODE);
 		final Category child = createCategory(uidPks++, root);
-		child.setCode("child");
+		child.setCode(CHILD_CODE);
 		final Category grandChild = createCategory(uidPks++, child);
 		grandChild.setCode("grandChild");
 		final Category leaf = createCategory(uidPks++, grandChild);
@@ -1585,6 +1545,156 @@ public class CategoryServiceImplTest {
 		assertEquals("getPath() should return a path from the root to the specified category",
 				Arrays.asList(root, child, grandChild),
 				categoryService.getPath(grandChild));
+	}
+
+	@Test
+	public void testThatNotHiddenAndNotExpiredCategoryWithNotHiddenAndNotExpiredParentCanSyndicate() {
+		long uidPks = UID_PKS;
+		final Category root = createCategory(uidPks++);
+		root.setCode(ROOT_CODE);
+		root.setHidden(false);
+		final Category child = createCategory(uidPks++, root);
+		child.setCode(CHILD_CODE);
+		child.setHidden(false);
+		CategoryServiceImpl categoryService = mockCategoryService(child, root);
+		Date expiredDate = new Date(categoryService.getTimeService().getCurrentTime().getTime() + 1);
+		root.setEndDate(expiredDate);
+		child.setEndDate(expiredDate);
+
+		Category checked = categoryService.findByCode(child.getCode());
+		assertTrue(categoryService.canSyndicate(checked));
+	}
+
+	@Test
+	public void testThatHiddenAndNotExpiredCategoryWithNotHiddenAndNotExpiredParentCannotSyndicate() {
+		long uidPks = UID_PKS;
+		final Category root = createCategory(uidPks++);
+		root.setCode(ROOT_CODE);
+		root.setHidden(false);
+		final Category child = createCategory(uidPks++, root);
+		child.setCode(CHILD_CODE);
+		child.setHidden(true);
+		CategoryServiceImpl categoryService = mockCategoryService(child, root);
+		Date expiredDate = new Date(categoryService.getTimeService().getCurrentTime().getTime() + 1);
+		root.setEndDate(expiredDate);
+		child.setEndDate(expiredDate);
+
+		Category checked = categoryService.findByCode(child.getCode());
+		assertFalse(categoryService.canSyndicate(checked));
+	}
+
+	@Test
+	public void testThatNotHiddenAndNotExpiredCategoryWithHiddenAndNotExpiredParentCannotSyndicate() {
+		long uidPks = UID_PKS;
+		final Category root = createCategory(uidPks++);
+		root.setCode(ROOT_CODE);
+		root.setHidden(true);
+		final Category child = createCategory(uidPks++, root);
+		child.setCode(CHILD_CODE);
+		child.setHidden(false);
+		CategoryServiceImpl categoryService = mockCategoryService(child, root);
+		Date expiredDate = new Date(categoryService.getTimeService().getCurrentTime().getTime() + 1);
+		root.setEndDate(expiredDate);
+		child.setEndDate(expiredDate);
+
+		Category checked = categoryService.findByCode(child.getCode());
+		assertFalse(categoryService.canSyndicate(checked));
+	}
+
+	@Test
+	public void testThatNotHiddenAndExpiredCategoryWithNotHiddenAndNotExpiredParentCannotSyndicate() {
+		long uidPks = UID_PKS;
+		final Category root = createCategory(uidPks++);
+		root.setCode(ROOT_CODE);
+		root.setHidden(false);
+		final Category child = createCategory(uidPks++, root);
+		child.setCode(CHILD_CODE);
+		child.setHidden(false);
+		CategoryServiceImpl categoryService = mockCategoryService(child, root);
+		Date expiredChildDate = new Date(categoryService.getTimeService().getCurrentTime().getTime() - 1);
+		Date expiredParentDate = new Date(categoryService.getTimeService().getCurrentTime().getTime() + 1);
+
+		root.setEndDate(expiredParentDate);
+		child.setEndDate(expiredChildDate);
+
+		Category checked = categoryService.findByCode(child.getCode());
+		assertFalse(categoryService.canSyndicate(checked));
+	}
+
+	@Test
+	public void testThatNotHiddenAndNotExpiredCategoryWithNotHiddenAndExpiredParentCannotSyndicate() {
+		long uidPks = UID_PKS;
+		final Category root = createCategory(uidPks++);
+		root.setCode(ROOT_CODE);
+		root.setHidden(false);
+		final Category child = createCategory(uidPks++, root);
+		child.setCode(CHILD_CODE);
+		child.setHidden(false);
+		CategoryServiceImpl categoryService = mockCategoryService(child, root);
+		Date expiredChildDate = new Date(categoryService.getTimeService().getCurrentTime().getTime() + 1);
+		Date expiredParentDate = new Date(categoryService.getTimeService().getCurrentTime().getTime() - 1);
+
+		root.setEndDate(expiredParentDate);
+		child.setEndDate(expiredChildDate);
+
+		Category checked = categoryService.findByCode(child.getCode());
+		assertFalse(categoryService.canSyndicate(checked));
+	}
+
+	@Test
+	public void testThatLinkedCategoryIsSyndicatedWhenMasterParentCanSyndicate() {
+		long uidPks = UID_PKS;
+		final Category rootMaster = createCategory(uidPks++);
+		rootMaster.setCode(ROOT_CODE);
+		rootMaster.setHidden(false);
+		final Category childMaster = createCategory(uidPks++, rootMaster);
+		childMaster.setCode(CHILD_CODE);
+		childMaster.setHidden(false);
+		CategoryServiceImpl categoryService = mockCategoryService(childMaster, rootMaster);
+		Date validEndDate = new Date(categoryService.getTimeService().getCurrentTime().getTime() + 1);
+		rootMaster.setEndDate(validEndDate);
+		childMaster.setEndDate(validEndDate);
+
+		final Category linked = getLinkedCategory(childMaster);
+
+		assertTrue(categoryService.canSyndicate(linked));
+	}
+
+	@Test
+	public void testThatLinkedCategoryIsNotSyndicatedWhenMasterParentCannotSyndicate() {
+		long uidPks = UID_PKS;
+		final Category tombstoneRootMaster = createCategory(uidPks++);
+		tombstoneRootMaster.setCode(ROOT_CODE);
+		tombstoneRootMaster.setHidden(true);
+		final Category childMaster = createCategory(uidPks++, tombstoneRootMaster);
+		childMaster.setCode(CHILD_CODE);
+		childMaster.setHidden(false);
+		CategoryServiceImpl categoryService = mockCategoryService(childMaster, tombstoneRootMaster);
+		Date validEndDate = new Date(categoryService.getTimeService().getCurrentTime().getTime() + 1);
+		tombstoneRootMaster.setEndDate(validEndDate);
+		childMaster.setEndDate(validEndDate);
+
+		final Category linked = getLinkedCategory(childMaster);
+
+		assertFalse(categoryService.canSyndicate(linked));
+	}
+
+	private CategoryServiceImpl mockCategoryService(final Category child, final Category root) {
+		CategoryLookup categoryLookup = mock(CategoryLookup.class);
+		PersistenceEngine persistenceEngine = mock(PersistenceEngine.class);
+		TimeService timeService = mock(TimeService.class);
+
+		CategoryServiceImpl categoryService = new CategoryServiceImpl();
+		categoryService.setCategoryLookup(categoryLookup);
+		categoryService.setPersistenceEngine(persistenceEngine);
+		categoryService.setTimeService(timeService);
+		when(categoryLookup.findParent(child)).thenReturn(root);
+
+		when(persistenceEngine.retrieveByNamedQuery("CATEGORY_SELECT_BY_CODE", child.getCode())).thenReturn(Collections.singletonList(child));
+		when(timeService.getCurrentTime()).thenReturn(new Date());
+		when(persistenceEngine.withLoadTuners((LoadTuner[]) null)).thenReturn(persistenceEngine);
+
+		return categoryService;
 	}
 
 	/**
@@ -1629,7 +1739,7 @@ public class CategoryServiceImplTest {
 	/**
 	 * @return a new <code>Category</code> instance.
 	 */
-	protected Category getCategory() {
+	private Category getCategory() {
 		final Category category = new CategoryImpl();
 		category.initialize();
 		category.setCode(new RandomGuidImpl().toString());
@@ -1638,14 +1748,27 @@ public class CategoryServiceImplTest {
 		return category;
 	}
 
-	protected Category createCategory(final long uidPk) {
+	/**
+	 * @return a new <code>Category</code> instance.
+	 * @param childMaster
+	 */
+	private Category getLinkedCategory(final Category childMaster) {
+		final Category category = new LinkedCategoryImpl();
+		category.initialize();
+		category.setCatalog(getCatalog());
+		category.setMasterCategory(childMaster);
+
+		return category;
+	}
+
+	private Category createCategory(final long uidPk) {
 		Category category = getCategory();
 		category.setUidPk(uidPk);
 
 		return category;
 	}
 
-	protected Category createCategory(final long uidPk, final Category parentCategory) {
+	private Category createCategory(final long uidPk, final Category parentCategory) {
 		Category category = createCategory(uidPk);
 		category.setParent(parentCategory);
 

@@ -41,15 +41,17 @@ public class ElasticPathTaxProviderPluginImpl extends AbstractTaxProviderPluginS
 		return getTaxCalculator().calculate(container, getTaxOperationResolvers());
 	}
 
+
 	private TaxOperationResolvers getTaxOperationResolvers() {
-		
-		if (taxOperationResolvers == null) {
-			taxOperationResolvers = new TaxOperationResolvers();
-			
-			TaxRateDescriptorResolver taxRateDescriptorResolver = getBeanFactory().getBean(TaxContextIdNames.TAX_RATE_DESCRIPTOR_RESOLVER);
-			taxOperationResolvers.putResolver(TaxRateDescriptorResolver.class, taxRateDescriptorResolver);
+		synchronized (ElasticPathTaxProviderPluginImpl.class) {
+			if (taxOperationResolvers == null) {
+				taxOperationResolvers = new TaxOperationResolvers();
+
+				TaxRateDescriptorResolver taxRateDescriptorResolver = getBeanFactory().getBean(TaxContextIdNames.TAX_RATE_DESCRIPTOR_RESOLVER);
+				taxOperationResolvers.putResolver(TaxRateDescriptorResolver.class, taxRateDescriptorResolver);
+			}
+			return taxOperationResolvers;
 		}
-		return taxOperationResolvers;
 	}
 
 	public TaxCalculator getTaxCalculator() {

@@ -26,7 +26,7 @@ public class PossiblePromotionsForCartIdentifierRepositoryImpl<I extends CartIde
 
 	@Override
 	public Observable<PossiblePromotionsForCartIdentifier> getElements(final CartIdentifier identifier) {
-		String scope = identifier.getScope().getValue();
+		String scope = identifier.getCarts().getScope().getValue();
 		String cartId = identifier.getCartId().getValue();
 		return promotionRepository.cartHasPossiblePromotions(scope, cartId)
 				.flatMapObservable(exists ->

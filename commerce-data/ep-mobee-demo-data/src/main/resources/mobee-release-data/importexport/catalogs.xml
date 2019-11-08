@@ -1,0 +1,323 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<catalogs>
+	<catalog>
+		<code>Syndication2StoresCatalog</code>
+		<type>master</type>
+		<name>Syndication Two Stores Catalog</name>
+		<languages>
+			<language>en</language>
+			<language>fr</language>
+		</languages>
+		<defaultlanguage>en</defaultlanguage>
+		<attributes>
+			<attribute>
+				<key>attributeTestAttribute1</key>
+				<name>
+					<value language="en">attributeTestAttribute1En12345</value>
+					<value language="fr">attributeTestAttribute1Fr12345</value>
+				</name>
+				<usage>Product</usage>
+				<type>ShortText</type>
+				<multilanguage>true</multilanguage>
+				<required>true</required>
+				<multivalue>rfc4180</multivalue>
+				<global>false</global>
+			</attribute>
+			<attribute>
+				<key>categoryTestAttr1</key>
+				<name>
+					<value language="en">categoryTestAttr1En</value>
+					<value language="fr">categoryTestAttr1Fr</value>
+				</name>
+				<usage>Category</usage>
+				<type>ShortText</type>
+				<multilanguage>false</multilanguage>
+				<required>true</required>
+				<multivalue>false</multivalue>
+				<global>false</global>
+			</attribute>
+			<attribute>
+				<key>categoryTestAttr2</key>
+				<name>
+					<value language="en">categoryTestAttr2En</value>
+					<value language="fr">categoryTestAttr2Fr</value>
+				</name>
+				<usage>Category</usage>
+				<type>LongText</type>
+				<multilanguage>false</multilanguage>
+				<required>true</required>
+				<multivalue>false</multivalue>
+				<global>false</global>
+			</attribute>
+			<attribute>
+				<key>productTestAttribute1</key>
+				<name>
+					<value language="en">productTestAttribute1En</value>
+					<value language="fr">productTestAttribute1Fr</value>
+				</name>
+				<usage>Product</usage>
+				<type>ShortText</type>
+				<multilanguage>false</multilanguage>
+				<required>false</required>
+				<multivalue>false</multivalue>
+				<global>false</global>
+			</attribute>
+			<attribute>
+				<key>productTestAttribute2</key>
+				<name>
+					<value language="en">productTestAttribute2En</value>
+					<value language="fr">productTestAttribute2Fr</value>
+				</name>
+				<usage>Product</usage>
+				<type>LongText</type>
+				<multilanguage>false</multilanguage>
+				<required>false</required>
+				<multivalue>false</multivalue>
+				<global>false</global>
+			</attribute>
+			<attribute>
+				<key>productTestAttribute3</key>
+				<name>
+					<value language="en">productTestAttribute3En</value>
+					<value language="fr">productTestAttribute3Fr</value>
+				</name>
+				<usage>SKU</usage>
+				<type>ShortText</type>
+				<multilanguage>false</multilanguage>
+				<required>false</required>
+				<multivalue>false</multivalue>
+				<global>false</global>
+			</attribute>
+			<attribute>
+				<key>productTestAttribute4</key>
+				<name>
+					<value language="en">productTestAttribute4En</value>
+					<value language="fr">productTestAttribute4Fr</value>
+				</name>
+				<usage>SKU</usage>
+				<type>ShortText</type>
+				<multilanguage>false</multilanguage>
+				<required>false</required>
+				<multivalue>false</multivalue>
+				<global>false</global>
+			</attribute>
+			<attribute>
+				<key>productTestAttribute5</key>
+				<name>
+					<value language="en">productTestAttribute5En</value>
+					<value language="fr">productTestAttribute5Fr</value>
+				</name>
+				<usage>Product</usage>
+				<type>ShortText</type>
+				<multilanguage>false</multilanguage>
+				<required>false</required>
+				<multivalue>false</multivalue>
+				<global>false</global>
+			</attribute>
+		</attributes>
+		<categorytypes>
+			<categorytype>
+				<guid>5e7716dd-247f-45d8-89eb-a077b765538e</guid>
+				<name>categoryTestCatType</name>
+				<assignedattributes>
+					<attributekey>categoryTestAttr1</attributekey>
+					<attributekey>categoryTestAttr2</attributekey>
+				</assignedattributes>
+			</categorytype>
+			<categorytype>
+				<guid>66b4cd12-103e-47e0-b94f-6cf279df0e05</guid>
+				<name>productTestCatType1</name>
+				<assignedattributes/>
+			</categorytype>
+		</categorytypes>
+		<producttypes>
+			<producttype>
+				<guid>25b0dfe3-ef79-4bd9-81cf-b283bf1b78b8</guid>
+				<name>productTestSingleSkuProductType1</name>
+				<assignedattributes>
+					<attributekey>productTestAttribute1</attributekey>
+					<attributekey>productTestAttribute2</attributekey>
+				</assignedattributes>
+				<defaulttaxcode>NONE</defaulttaxcode>
+				<nodiscount>false</nodiscount>
+				<assignedcartitemmodifiergroups>
+					<code>productTestGroup1</code>
+					<code>productTestGroup2</code>
+				</assignedcartitemmodifiergroups>
+			</producttype>
+			<producttype>
+				<guid>54333349-7aa0-4eec-b3e5-64216b82dc2b</guid>
+				<name>productTestMultiSkuProductType1</name>
+				<assignedattributes>
+					<attributekey>productTestAttribute1</attributekey>
+					<attributekey>productTestAttribute5</attributekey>
+				</assignedattributes>
+				<defaulttaxcode>NONE</defaulttaxcode>
+				<multisku>
+					<assignedskuoptions>
+						<skuoption>prodTestOption1</skuoption>
+						<skuoption>prodTestOption2</skuoption>
+						<skuoption>prodTestOption3</skuoption>
+					</assignedskuoptions>
+					<assignedattributes>
+						<attributekey>productTestAttribute3</attributekey>
+						<attributekey>productTestAttribute4</attributekey>
+					</assignedattributes>
+				</multisku>
+				<nodiscount>false</nodiscount>
+				<assignedcartitemmodifiergroups>
+					<code>productTestGroup1</code>
+					<code>productTestGroup2</code>
+				</assignedcartitemmodifiergroups>
+			</producttype>
+		</producttypes>
+		<skuoptions>
+			<skuoption>
+				<code>optionTestOption1</code>
+				<name>
+					<value language="en">optionTestOption1En12345</value>
+					<value language="fr">optionTestOption1Fr12345</value>
+				</name>
+				<skuoptionvalues>
+					<skuoptionvalue>
+						<code>optionTestOption1value1</code>
+						<name>
+							<value language="en">optionTestOption1value1En12345</value>
+							<value language="fr">optionTestOption1value1Fr12345</value>
+						</name>
+						<ordering>10</ordering>
+					</skuoptionvalue>
+					<skuoptionvalue>
+						<code>optionTestOption1value2</code>
+						<name>
+							<value language="en">optionTestOption1value2En12345</value>
+							<value language="fr">optionTestOption1value2Fr12345</value>
+						</name>
+						<ordering>20</ordering>
+					</skuoptionvalue>
+				</skuoptionvalues>
+			</skuoption>
+			<skuoption>
+				<code>prodTestOption1</code>
+				<name>
+					<value language="en">prodTestOption1En</value>
+					<value language="fr">prodTestOption1Fr</value>
+				</name>
+				<skuoptionvalues>
+					<skuoptionvalue>
+						<code>prodTestOption1v1</code>
+						<name>
+							<value language="en">prodTestOption1v1En</value>
+							<value language="fr">prodTestOption1v1Fr</value>
+						</name>
+						<ordering>10</ordering>
+					</skuoptionvalue>
+					<skuoptionvalue>
+						<code>prodTestOption1v2</code>
+						<name>
+							<value language="en">prodTestOption1v2En</value>
+							<value language="fr">prodTestOption1v2Fr</value>
+						</name>
+						<ordering>20</ordering>
+					</skuoptionvalue>
+					<skuoptionvalue>
+						<code>prodTestOption1v3</code>
+						<name>
+							<value language="en">prodTestOption1v3En</value>
+							<value language="fr">prodTestOption1v3Fr</value>
+						</name>
+						<ordering>30</ordering>
+					</skuoptionvalue>
+				</skuoptionvalues>
+			</skuoption>
+			<skuoption>
+				<code>prodTestOption2</code>
+				<name>
+					<value language="en">prodTestOption2En</value>
+					<value language="fr">prodTestOption2Fr</value>
+				</name>
+				<skuoptionvalues>
+					<skuoptionvalue>
+						<code>prodTestOption2v1</code>
+						<name>
+							<value language="en">prodTestOption2v1En</value>
+							<value language="fr">prodTestOption2v1Fr</value>
+						</name>
+						<ordering>10</ordering>
+					</skuoptionvalue>
+					<skuoptionvalue>
+						<code>prodTestOption2v2</code>
+						<name>
+							<value language="en">prodTestOption2v2En</value>
+							<value language="fr">prodTestOption2v2Fr</value>
+						</name>
+						<ordering>20</ordering>
+					</skuoptionvalue>
+					<skuoptionvalue>
+						<code>prodTestOption2v3</code>
+						<name>
+							<value language="en">prodTestOption2v3En</value>
+							<value language="fr">prodTestOption2v3Fr</value>
+						</name>
+						<ordering>30</ordering>
+					</skuoptionvalue>
+				</skuoptionvalues>
+			</skuoption>
+			<skuoption>
+				<code>prodTestOption3</code>
+				<name>
+					<value language="en">prodTestOption3En</value>
+					<value language="fr">prodTestOption3Fr</value>
+				</name>
+				<skuoptionvalues>
+					<skuoptionvalue>
+						<code>prodTestOption3v1</code>
+						<name>
+							<value language="en">prodTestOption3v1En</value>
+							<value language="fr">prodTestOption3v1Fr</value>
+						</name>
+						<ordering>10</ordering>
+					</skuoptionvalue>
+					<skuoptionvalue>
+						<code>prodTestOption3v2</code>
+						<name>
+							<value language="en">prodTestOption3v2En</value>
+							<value language="fr">prodTestOption3v2Fr</value>
+						</name>
+						<ordering>20</ordering>
+					</skuoptionvalue>
+					<skuoptionvalue>
+						<code>prodTestOption3v3</code>
+						<name>
+							<value language="en">prodTestOption3v3En</value>
+							<value language="fr">prodTestOption3v3Fr</value>
+						</name>
+						<ordering>30</ordering>
+					</skuoptionvalue>
+				</skuoptionvalues>
+			</skuoption>
+		</skuoptions>
+		<brands>
+			<brand>
+				<code>brandTestBrand1</code>
+				<name>
+					<value language="en">brandTestBrand1En12345</value>
+					<value language="fr">brandTestBrand1Fr12345</value>
+				</name>
+			</brand>
+			<brand>
+				<code>productTestBrand1</code>
+				<name>
+					<value language="en">productTestBrand1En</value>
+					<value language="fr">productTestBrand1Fr</value>
+				</name>
+			</brand>
+		</brands>
+	</catalog>
+	<catalog>
+		<code>SyndicationVirtualCatalog</code>
+		<type>virtual</type>
+		<name>Syndication Virtual Catalog</name>
+		<defaultlanguage>en</defaultlanguage>
+	</catalog>
+</catalogs>

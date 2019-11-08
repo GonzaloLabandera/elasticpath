@@ -15,7 +15,7 @@ import com.elasticpath.cmclient.core.util.ServiceUtil;
  */
 public class DocsHandler extends AbstractHandler {
 
-	private static final String DOCS_INDEX = "help/html/index.html"; //$NON-NLS-1$
+	private static final String DOCS_INDEX = "https://documentation.elasticpath.com/commerce-manager/docs/index.html"; //$NON-NLS-1$
 
 	@Override
 	public Object execute(final ExecutionEvent executionEvent) throws ExecutionException {

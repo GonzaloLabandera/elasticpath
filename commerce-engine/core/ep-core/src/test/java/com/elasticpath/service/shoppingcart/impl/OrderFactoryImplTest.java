@@ -1,34 +1,40 @@
 /**
  * Copyright (c) Elastic Path Software Inc., 2017
  */
+
 package com.elasticpath.service.shoppingcart.impl;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Currency;
 import java.util.Date;
 import java.util.Locale;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import org.jmock.Expectations;
-import org.jmock.integration.junit4.JUnitRuleMockery;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.rules.ExpectedException;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import com.elasticpath.commons.beanframework.BeanFactory;
 import com.elasticpath.commons.constants.ContextIdNames;
-import com.elasticpath.domain.customer.Address;
 import com.elasticpath.domain.customer.Customer;
 import com.elasticpath.domain.customer.CustomerAddress;
 import com.elasticpath.domain.customer.CustomerSession;
 import com.elasticpath.domain.customer.impl.CustomerAddressImpl;
 import com.elasticpath.domain.customer.impl.CustomerImpl;
+import com.elasticpath.domain.event.EventOriginator;
 import com.elasticpath.domain.event.EventOriginatorHelper;
 import com.elasticpath.domain.order.Order;
 import com.elasticpath.domain.order.impl.OrderAddressImpl;
@@ -54,7 +60,6 @@ import com.elasticpath.service.order.OrderService;
 import com.elasticpath.service.order.impl.ShoppingItemHasRecurringPricePredicate;
 import com.elasticpath.service.rules.RuleService;
 import com.elasticpath.service.shoppingcart.OrderSkuFactory;
-import com.elasticpath.test.BeanFactoryExpectationsFactory;
 import com.elasticpath.test.factory.TestCustomerProfileFactory;
 import com.elasticpath.test.factory.TestShopperFactory;
 import com.elasticpath.test.factory.TestShoppingCartFactory;
@@ -62,26 +67,36 @@ import com.elasticpath.test.factory.TestShoppingCartFactory;
 /**
  * Test that {@link OrderFactoryImpl} behaves as expected.
  */
+@SuppressWarnings("PMD.ExcessiveImports")
+@RunWith(MockitoJUnitRunner.class)
 public class OrderFactoryImplTest {
 
 	@org.junit.Rule
-	public JUnitRuleMockery context = new JUnitRuleMockery();
+	public ExpectedException expectedException = ExpectedException.none();
 
 	private static final String CART_ORDER_GUID = "cart_order_guid";
 	private static final Locale LOCALE = Locale.CANADA;
 	private static final String RULE_DELETED_MESSAGE = "Referenced rule was deleted";
 
-	private final BeanFactory beanFactory = context.mock(BeanFactory.class);
-	private final OrderService orderService = context.mock(OrderService.class);
-	private final CartOrderService cartOrderService = context.mock(CartOrderService.class);
-	private final TimeService timeService = context.mock(TimeService.class);
-	private final CustomerService customerService = context.mock(CustomerService.class);
-	private final OrderSkuFactory orderSkuFactory = context.mock(OrderSkuFactory.class);
-	private final ProductSkuLookup productSkuLookup = context.mock(ProductSkuLookup.class);
-	private final RuleService ruleService = context.mock(RuleService.class);
-	private final AppliedRule.Visitor appliedRuleVisitor = appliedRule -> { };
+	@Mock
+	private BeanFactory beanFactory;
+	@Mock
+	private OrderService orderService;
+	@Mock
+	private CartOrderService cartOrderService;
+	@Mock
+	private TimeService timeService;
+	@Mock
+	private CustomerService customerService;
+	@Mock
+	private OrderSkuFactory orderSkuFactory;
+	@Mock
+	private ProductSkuLookup productSkuLookup;
+	@Mock
+	private RuleService ruleService;
 
-	private final BeanFactoryExpectationsFactory beanExpectations = new BeanFactoryExpectationsFactory(context, beanFactory);
+	private final AppliedRule.Visitor appliedRuleVisitor = appliedRule -> {
+	};
 
 	private OrderFactoryImpl orderFactory;
 	private CustomerSession customerSession;
@@ -103,43 +118,27 @@ public class OrderFactoryImplTest {
 		orderFactory.setRuleService(ruleService);
 		orderFactory.setAppliedRuleVisitor(appliedRuleVisitor);
 
-		customerSession = context.mock(CustomerSession.class);
-		store = context.mock(Store.class);
+		customerSession = mock(CustomerSession.class);
+		store = mock(Store.class);
 
-		final EventOriginatorHelper eventOriginatorHelper = context.mock(EventOriginatorHelper.class);
-		context.checking(new Expectations() {
-			{
-				ignoring(eventOriginatorHelper).getCustomerOriginator(with(any(Customer.class)));
-				ignoring(cartOrderService).findByShoppingCartGuid(with(any(String.class))); will(returnValue(null));
-				ignoring(orderSkuFactory);
+		final EventOriginatorHelper eventOriginatorHelper = mock(EventOriginatorHelper.class);
 
-				allowing(timeService).getCurrentTime();
-				will(returnValue(new Date()));
+		when(eventOriginatorHelper.getCustomerOriginator(any(Customer.class))).thenReturn(mock(EventOriginator.class));
 
-				allowing(customerSession).getCurrency();
-				will(returnValue(Currency.getInstance("CAD")));
-
-				allowing(customerSession).getLocale();
-				will(returnValue(LOCALE));
-
-				allowing(store).getCode(); will(returnValue("store"));
-			}
-		});
+		when(timeService.getCurrentTime()).thenReturn(new Date());
+		when(customerSession.getCurrency()).thenReturn(Currency.getInstance("CAD"));
+		when(customerSession.getLocale()).thenReturn(LOCALE);
+		when(store.getCode()).thenReturn("store");
 
 		final ShoppingItemHasRecurringPricePredicate recurringPricePredicate = new ShoppingItemHasRecurringPricePredicate();
 		final ShipmentTypeShoppingCartVisitor shoppingCartVisitor = new ShipmentTypeShoppingCartVisitor(recurringPricePredicate, productSkuLookup);
 
-		beanExpectations.allowingBeanFactoryGetBean(ContextIdNames.EVENT_ORIGINATOR_HELPER, eventOriginatorHelper);
-		beanExpectations.allowingBeanFactoryGetBean(ContextIdNames.CUSTOMER_SERVICE, customerService);
-		beanExpectations.allowingBeanFactoryGetBean(ContextIdNames.SHOPPING_CART_MEMENTO, ShoppingCartMementoImpl.class);
-		beanExpectations.allowingBeanFactoryGetBean(ContextIdNames.ORDER_ADDRESS, OrderAddressImpl.class);
-		beanExpectations.allowingBeanFactoryGetBean(ContextIdNames.SHIPMENT_TYPE_SHOPPING_CART_VISITOR, shoppingCartVisitor);
+		mockBeanFactoryExpectation(beanFactory, ContextIdNames.EVENT_ORIGINATOR_HELPER, eventOriginatorHelper);
+		mockBeanFactoryExpectation(beanFactory, ContextIdNames.CUSTOMER_SERVICE, customerService);
+		mockBeanFactoryExpectation(beanFactory, ContextIdNames.SHOPPING_CART_MEMENTO, mock(ShoppingCartMementoImpl.class));
+		mockBeanFactoryExpectation(beanFactory, ContextIdNames.ORDER_ADDRESS, mock(OrderAddressImpl.class));
+		mockBeanFactoryExpectation(beanFactory, ContextIdNames.SHIPMENT_TYPE_SHOPPING_CART_VISITOR, shoppingCartVisitor);
 
-	}
-
-	@After
-	public void tearDown() {
-		beanExpectations.close();
 	}
 
 	/**
@@ -151,28 +150,17 @@ public class OrderFactoryImplTest {
 		final Customer customer = createCustomer();
 		customer.setAnonymous(true);
 
-		ignoreCustomerSessionInteractions();
-
 		final ShoppingCart shoppingCart = createShoppingCart();
 		final ShoppingCartTaxSnapshot pricingSnapshot = createShoppingCart();
 
-		CustomerAddress billingAddress = addBillingAddressToCart(shoppingCart);
+		addBillingAddressToCart(shoppingCart);
 		TaxExemption taxExemption = addTaxExemptionToCart(shoppingCart);
 
 		setupOrder();
 
-		context.checking(new Expectations() {
-			{
-				allowing(ruleService).findByUids(Collections.emptySet());
-				will(returnValue(Collections.emptyList()));
-
-				oneOf(cartOrderService).getCartOrderGuidByShoppingCartGuid(shoppingCart.getGuid());
-				will(returnValue(CART_ORDER_GUID));
-
-				oneOf(customerService).updateCustomerFromAddress(customer, billingAddress);
-				will(returnValue(customer));
-			}
-		});
+		when(ruleService.findByUids(Collections.emptySet())).thenReturn(Collections.emptyList());
+		when(cartOrderService.getCartOrderGuidByShoppingCartGuid(shoppingCart.getGuid())).thenReturn(CART_ORDER_GUID);
+		when(beanFactory.getSingletonBean(ContextIdNames.CUSTOMER_SERVICE, CustomerService.class)).thenReturn(customerService);
 
 		Order newOrder = orderFactory.createAndPersistNewEmptyOrder(customer, customerSession, shoppingCart, false, false);
 		newOrder = orderFactory.fillInNewOrderFromShoppingCart(newOrder, customer, customerSession, shoppingCart, pricingSnapshot);
@@ -186,39 +174,25 @@ public class OrderFactoryImplTest {
 		final Customer customer = createCustomer();
 		customer.setAnonymous(true);
 
-		ignoreCustomerSessionInteractions();
-
 		final ShoppingCart shoppingCart = createShoppingCart();
 		final ShoppingCartTaxSnapshot pricingSnapshot = createShoppingCart();
 
 		setupOrder();
 
-		context.checking(new Expectations() {
-			{
-				allowing(ruleService).findByUids(Collections.emptySet());
-				will(returnValue(Collections.emptyList()));
-
-				allowing(cartOrderService).getCartOrderGuidByShoppingCartGuid(shoppingCart.getGuid());
-				will(returnValue(CART_ORDER_GUID));
-
-				never(customerService).updateCustomerFromAddress(with(any(Customer.class)), with(any(Address.class)));
-			}
-		});
+		when(ruleService.findByUids(Collections.emptySet())).thenReturn(Collections.emptyList());
+		when(cartOrderService.getCartOrderGuidByShoppingCartGuid(shoppingCart.getGuid())).thenReturn(CART_ORDER_GUID);
 
 		Order newOrder = orderFactory.createAndPersistNewEmptyOrder(customer, customerSession, shoppingCart, false, false);
 		orderFactory.fillInNewOrderFromShoppingCart(newOrder, customer, customerSession, shoppingCart, pricingSnapshot);
+
+		verify(customerService, never()).updateCustomerFromAddress(any(), any());
 	}
 
 	@SuppressWarnings("PMD.AvoidUsingHardCodedIP")
 	@Test
 	public void verifyOrderIsCreatedWithIpAddress() throws Exception {
-		context.checking(new Expectations() {
-			{
-				ignoring(customerSession).getShopper();
-				allowing(customerSession).getLocale();
-				will(returnValue(Locale.CANADA));
-			}
-		});
+		when(customerSession.getLocale()).thenReturn(Locale.CANADA);
+
 		final ShoppingCart shoppingCart = createShoppingCart();
 		final Customer customer = createCustomer();
 
@@ -226,15 +200,8 @@ public class OrderFactoryImplTest {
 
 		setupOrder();
 
-		context.checking(new Expectations() {
-			{
-				oneOf(cartOrderService).getCartOrderGuidByShoppingCartGuid(shoppingCart.getGuid());
-				will(returnValue(CART_ORDER_GUID));
-
-				oneOf(customerSession).getIpAddress();
-				will(returnValue(expectedIpAddress));
-			}
-		});
+		when(cartOrderService.getCartOrderGuidByShoppingCartGuid(shoppingCart.getGuid())).thenReturn(CART_ORDER_GUID);
+		when(customerSession.getIpAddress()).thenReturn(expectedIpAddress);
 
 		final Order populatedOrder = orderFactory.createAndPersistNewEmptyOrder(
 				customer,
@@ -252,11 +219,9 @@ public class OrderFactoryImplTest {
 		final Customer customer = createCustomer();
 		customer.setAnonymous(true);
 
-		ignoreCustomerSessionInteractions();
-
 		final ShoppingCart shoppingCart = createShoppingCart();
-		final ShoppingCartTaxSnapshot taxSnapshot = context.mock(ShoppingCartTaxSnapshot.class);
-		final ShoppingCartPricingSnapshot pricingSnapshot = context.mock(ShoppingCartPricingSnapshot.class);
+		final ShoppingCartTaxSnapshot taxSnapshot = mock(ShoppingCartTaxSnapshot.class);
+		final ShoppingCartPricingSnapshot pricingSnapshot = mock(ShoppingCartPricingSnapshot.class);
 
 		final Long ruleId1 = 1L;
 		final Long ruleId2 = 2L;
@@ -265,68 +230,46 @@ public class OrderFactoryImplTest {
 		final Rule rule1 = createRule(ruleId1);
 		final Rule rule2 = createRule(ruleId2);
 
-		final AppliedRule expectedAppliedRule1 = context.mock(AppliedRule.class, "AppliedRule 1");
-		final AppliedRule expectedAppliedRule2 = context.mock(AppliedRule.class, "AppliedRule 2");
-		final AppliedRule expectedAppliedRule3 = context.mock(AppliedRule.class, "AppliedRule 3");
+		final AppliedRule expectedAppliedRule1 = mock(AppliedRule.class, "AppliedRule 1");
+		final AppliedRule expectedAppliedRule2 = mock(AppliedRule.class, "AppliedRule 2");
+		final AppliedRule expectedAppliedRule3 = mock(AppliedRule.class, "AppliedRule 3");
 
 		setupOrder();
 
-		context.checking(new Expectations() {
-			{
-				allowing(cartOrderService).getCartOrderGuidByShoppingCartGuid(shoppingCart.getGuid());
-				will(returnValue(CART_ORDER_GUID));
+		when(cartOrderService.getCartOrderGuidByShoppingCartGuid(shoppingCart.getGuid())).thenReturn(CART_ORDER_GUID);
+		when(taxSnapshot.getShoppingCartPricingSnapshot()).thenReturn(pricingSnapshot);
 
-				allowing(customerService).update(customer); will(returnValue(customer));
+		final PromotionRecordContainer promotionRecordContainer = mock(PromotionRecordContainer.class);
+		when(pricingSnapshot.getPromotionRecordContainer()).thenReturn(promotionRecordContainer);
 
-				allowing(taxSnapshot).getShoppingCartPricingSnapshot();
-				will(returnValue(pricingSnapshot));
+		final ImmutableSet<Long> ruleIds = ImmutableSet.of(ruleId1, ruleId2, ruleId3);
+		when(promotionRecordContainer.getAppliedRules()).thenReturn(ruleIds);
 
-				final PromotionRecordContainer promotionRecordContainer = context.mock(PromotionRecordContainer.class);
+		when(ruleService.findByUids(ruleIds)).thenReturn(ImmutableList.of(rule1, rule2));
 
-				allowing(pricingSnapshot).getPromotionRecordContainer();
-				will(returnValue(promotionRecordContainer));
-
-				final Collection<Long> ruleIds = ImmutableSet.of(ruleId1, ruleId2, ruleId3);
-
-				oneOf(promotionRecordContainer).getAppliedRules();
-				will(returnValue(ruleIds));
-
-				oneOf(ruleService).findByUids(ruleIds);
-				will(returnValue(ImmutableList.of(rule1, rule2)));
-
-				atLeast(1).of(beanFactory).getBean(ContextIdNames.APPLIED_RULE);
-				will(onConsecutiveCalls(
-						returnValue(expectedAppliedRule1), returnValue(expectedAppliedRule2), returnValue(expectedAppliedRule3)));
-
-				oneOf(expectedAppliedRule1).initialize(rule1, LOCALE);
-				oneOf(expectedAppliedRule1).accept(appliedRuleVisitor);
-
-				oneOf(expectedAppliedRule2).initialize(rule2, LOCALE);
-				oneOf(expectedAppliedRule2).accept(appliedRuleVisitor);
-
-				oneOf(expectedAppliedRule3).setRuleUid(ruleId3);
-				oneOf(expectedAppliedRule3).setRuleCode(RULE_DELETED_MESSAGE);
-				oneOf(expectedAppliedRule3).setRuleName(RULE_DELETED_MESSAGE);
-			}
-		});
+		when(beanFactory.getBean(ContextIdNames.APPLIED_RULE)).thenReturn(expectedAppliedRule1).thenReturn(expectedAppliedRule2)
+				.thenReturn(expectedAppliedRule3);
 
 		final Order newOrder = orderFactory.createAndPersistNewEmptyOrder(customer, customerSession, shoppingCart, false, false);
 		final Order populatedOrder = orderFactory.fillInNewOrderFromShoppingCart(newOrder, customer, customerSession, shoppingCart, taxSnapshot);
 
 		assertThat(populatedOrder.getAppliedRules())
 				.containsExactlyInAnyOrder(expectedAppliedRule1, expectedAppliedRule2, expectedAppliedRule3);
+
+		verify(expectedAppliedRule1, times(1)).initialize(rule1, LOCALE);
+		verify(expectedAppliedRule1, times(1)).accept(appliedRuleVisitor);
+
+		verify(expectedAppliedRule2, times(1)).initialize(rule2, LOCALE);
+		verify(expectedAppliedRule2, times(1)).accept(appliedRuleVisitor);
+
+		verify(expectedAppliedRule3, times(1)).setRuleUid(ruleId3);
+		verify(expectedAppliedRule3, times(1)).setRuleCode(RULE_DELETED_MESSAGE);
+		verify(expectedAppliedRule3, times(1)).setRuleName(RULE_DELETED_MESSAGE);
 	}
 
 	private Rule createRule(final Long ruleId) {
-		final Rule rule = context.mock(Rule.class, "Rule " + ruleId);
-
-		context.checking(new Expectations() {
-			{
-				allowing(rule).getUidPk();
-				will(returnValue(ruleId));
-			}
-		});
-
+		final Rule rule = mock(Rule.class, "Rule " + ruleId);
+		when(rule.getUidPk()).thenReturn(ruleId);
 		return rule;
 	}
 
@@ -340,6 +283,7 @@ public class OrderFactoryImplTest {
 	private ShoppingCartImpl createShoppingCart() {
 		final Shopper shopper = TestShopperFactory.getInstance().createNewShopperWithMemento();
 		final ShoppingCartImpl cart = TestShoppingCartFactory.getInstance().createNewCartWithMemento(shopper, store);
+		when(customerSession.getShopper()).thenReturn(shopper);
 		cart.setCustomerSession(customerSession);
 		return cart;
 	}
@@ -361,22 +305,15 @@ public class OrderFactoryImplTest {
 		return taxExemption;
 	}
 
-	private void setupOrder() {
+	private Order setupOrder() {
 		final Order order = new OrderImpl();
-		context.checking(new Expectations() {
-			{
-				allowing(beanFactory).getBean(ContextIdNames.ORDER); will(returnValue(order));
-				allowing(orderService).add(order); will(returnValue(order));
-			}
-		});
+		when(beanFactory.getBean(ContextIdNames.ORDER)).thenReturn(order);
+		when(orderService.add(order)).thenReturn(order);
+		return order;
 	}
 
-	private void ignoreCustomerSessionInteractions() {
-		context.checking(new Expectations() {
-			{
-				ignoring(customerSession);
-			}
-		});
+	private void mockBeanFactoryExpectation(final BeanFactory beanFactory, final String beanName, final Object bean) {
+		when(beanFactory.getBean(beanName)).thenReturn(bean);
 	}
 
 }

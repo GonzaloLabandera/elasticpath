@@ -22,14 +22,6 @@
 				<module>ext-deployment-package</module>
 			</modules>
 		</profile>
-
-		<profile>
-			<id>with-demo-package</id>
-			<modules>
-				<module>standalone-demo</module>
-			</modules>
-		</profile>
 	</profiles>
 
 </project>
-

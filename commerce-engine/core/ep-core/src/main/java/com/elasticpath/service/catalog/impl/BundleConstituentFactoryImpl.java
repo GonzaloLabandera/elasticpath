@@ -40,7 +40,7 @@ public class BundleConstituentFactoryImpl implements BundleConstituentFactory {
 	 * @return {@link BundleConstituent}
 	 */
 	protected BundleConstituent createBundleConstituentInternal() {
-		return getBeanFactory().getBean(ContextIdNames.BUNDLE_CONSTITUENT);
+		return getBeanFactory().getPrototypeBean(ContextIdNames.BUNDLE_CONSTITUENT, BundleConstituent.class);
 	}
 
 	/**

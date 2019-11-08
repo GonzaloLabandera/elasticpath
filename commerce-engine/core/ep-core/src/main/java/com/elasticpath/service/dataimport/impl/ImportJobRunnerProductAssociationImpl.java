@@ -71,7 +71,7 @@ public class ImportJobRunnerProductAssociationImpl extends AbstractImportJobRunn
 	 */
 	@Override
 	protected Entity createNewEntity(final Object baseObject) {
-		ProductAssociation productAssociation = getBean(ContextIdNames.PRODUCT_ASSOCIATION);
+		ProductAssociation productAssociation = getPrototypeBean(ContextIdNames.PRODUCT_ASSOCIATION, ProductAssociation.class);
 		productAssociation.setGuid(new RandomGuidImpl().toString());
 		productAssociation.setCatalog(this.getImportJob().getCatalog());
 		return productAssociation;
@@ -366,7 +366,7 @@ public class ImportJobRunnerProductAssociationImpl extends AbstractImportJobRunn
 	 * @param nextLine
 	 */
 	private void reportDuplicateRow(final String[] nextLine) {
-		final ImportBadRow importBadRow = getBean(ContextIdNames.IMPORT_BAD_ROW);
+		final ImportBadRow importBadRow = getPrototypeBean(ContextIdNames.IMPORT_BAD_ROW, ImportBadRow.class);
 		importBadRow.setRowNumber(rowNumber);
 		importBadRow.setRow(nextLine[0]);
 

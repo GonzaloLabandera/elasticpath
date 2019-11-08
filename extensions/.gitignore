@@ -5,6 +5,8 @@
 .openjpaenhancer
 ImportExport-*.log
 velocity.log
+tmlog.lck
+tmlog*.log
 
 # Ignore Manifest file, except for those in cm, because they are necessary for cm plugins and tycho
 **/MANIFEST.MF

@@ -1,0 +1,112 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		 xmlns="http://maven.apache.org/POM/4.0.0"
+		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>com.elasticpath.extensions</groupId>
+		<artifactId>http-mock-server-parent</artifactId>
+		<version>0.0.0-SNAPSHOT</version>
+	</parent>
+
+	<artifactId>ext-mock-webapp</artifactId>
+	<packaging>war</packaging>
+	<name>Mock Server</name>
+
+	<dependencies>
+		<dependency>
+			<groupId>com.elasticpath.extensions</groupId>
+			<artifactId>ext-mock</artifactId>
+			<version>0.0.0-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>com.elasticpath.extensions</groupId>
+			<artifactId>http-mock-server-examples</artifactId>
+			<version>0.0.0-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>com.elasticpath.extensions</groupId>
+			<artifactId>http-mock-server-services</artifactId>
+			<version>0.0.0-SNAPSHOT</version>
+		</dependency>
+	</dependencies>
+
+	<build>
+		<plugins>
+			<!-- Merge wiremock mapping root directory for examples and services modules into one spot in the war. -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-dependency-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>copy</id>
+						<phase>compile</phase>
+						<goals>
+							<goal>unpack</goal>
+						</goals>
+						<configuration>
+							<artifactItems>
+								<artifactItem>
+									<groupId>com.elasticpath.extensions</groupId>
+									<artifactId>http-mock-server-examples</artifactId>
+									<overWrite>false</overWrite>
+									<type>jar</type>
+									<outputDirectory>${project.build.outputDirectory}/mocks</outputDirectory>
+									<includes>wiremock/**</includes>
+									<excludes>**/*.class</excludes>
+								</artifactItem>
+								<artifactItem>
+									<groupId>com.elasticpath.extensions</groupId>
+									<artifactId>http-mock-server-services</artifactId>
+									<overWrite>false</overWrite>
+									<type>jar</type>
+									<outputDirectory>${project.build.outputDirectory}/mocks</outputDirectory>
+									<includes>wiremock/**</includes>
+									<excludes>**/*.class</excludes>
+								</artifactItem>
+							</artifactItems>
+							<overWriteReleases>true</overWriteReleases>
+							<overWriteSnapshots>true</overWriteSnapshots>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.tomcat.maven</groupId>
+				<artifactId>tomcat8-maven-plugin</artifactId>
+				<configuration>
+					<path>${ep.mock.context}</path>
+					<port>${ep.mock.tomcat.port.http}</port>
+					<systemProperties>
+						<ep.mock.port.http>${ep.mock.tomcat.port.http}</ep.mock.port.http>
+					</systemProperties>
+				</configuration>
+			</plugin>
+			<plugin>
+				<artifactId>maven-war-plugin</artifactId>
+				<configuration>
+					<warName>mock</warName>
+					<escapeString>\</escapeString>
+					<webResources>
+						<resource>
+							<directory>src/main/webapp</directory>
+							<filtering>true</filtering>
+							<includes>
+								<include>**/log4j.properties</include>
+							</includes>
+						</resource>
+						<resource>
+							<directory>src/main/webapp</directory>
+							<filtering>false</filtering>
+							<excludes>
+								<exclude>**/log4j.properties</exclude>
+							</excludes>
+						</resource>
+					</webResources>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+
+</project>

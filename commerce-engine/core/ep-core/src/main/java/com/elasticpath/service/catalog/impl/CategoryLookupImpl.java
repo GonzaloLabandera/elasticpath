@@ -8,6 +8,8 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
+import org.apache.commons.collections.CollectionUtils;
+
 import com.elasticpath.base.exception.EpServiceException;
 import com.elasticpath.commons.beanframework.BeanFactory;
 import com.elasticpath.commons.constants.ContextIdNames;
@@ -18,7 +20,6 @@ import com.elasticpath.persistence.api.FetchGroupLoadTuner;
 import com.elasticpath.persistence.api.PersistenceEngine;
 import com.elasticpath.persistence.support.FetchGroupConstants;
 import com.elasticpath.service.catalog.CategoryLookup;
-import com.elasticpath.service.misc.FetchPlanHelper;
 
 /**
  * {@link com.elasticpath.service.catalog.CategoryLookup} implementation that reads categories directly from the persistence engine.
@@ -36,45 +37,36 @@ public class CategoryLookupImpl implements CategoryLookup {
 	private static final String PLACE_HOLDER_FOR_LIST = "list";
 
 	private PersistenceEngine persistenceEngine;
-	private FetchPlanHelper fetchPlanHelper;
 	private BeanFactory beanFactory;
 	private FetchGroupLoadTuner loadTuner;
 
 	@Override
 	@SuppressWarnings("unchecked")
 	public <C extends Category> C findByUid(final long uidPk) {
-		getFetchPlanHelper().configureFetchGroupLoadTuner(getLoadTuner());
-		try {
-			return (C) getPersistenceEngine().get(AbstractCategoryImpl.class, uidPk);
-		} finally {
-			getFetchPlanHelper().clearFetchPlan();
-		}
+		return (C) getPersistenceEngine()
+			.withLoadTuners(getLoadTuner())
+			.get(AbstractCategoryImpl.class, uidPk);
 	}
 
 	@Override
 	public <C extends Category> List<C> findByUids(final Collection<Long> categoryUids) {
-		getFetchPlanHelper().configureFetchGroupLoadTuner(getLoadTuner());
-		try {
-			return getPersistenceEngine().retrieveByNamedQueryWithList("CATEGORY_BY_UIDS", PLACE_HOLDER_FOR_LIST, categoryUids);
-		} finally {
-			getFetchPlanHelper().clearFetchPlan();
-		}
+		return getPersistenceEngine()
+			.withLoadTuners(getLoadTuner())
+			.retrieveByNamedQueryWithList("CATEGORY_BY_UIDS", PLACE_HOLDER_FOR_LIST, categoryUids);
 	}
 
 	@Override
 	@SuppressWarnings("unchecked")
 	public <C extends Category> C findByGuid(final String guid) {
-		getFetchPlanHelper().configureFetchGroupLoadTuner(getLoadTuner());
-		try {
-			final List<Category> categories = getPersistenceEngine().retrieveByNamedQuery(CATEGORY_SELECT_BY_GUID, guid);
-			if (categories.isEmpty()) {
-				return null;
-			}
+		final List<Category> categories = getPersistenceEngine()
+			.withLoadTuners(getLoadTuner())
+			.retrieveByNamedQuery(CATEGORY_SELECT_BY_GUID, guid);
 
-			return (C) categories.get(0);
-		} finally {
-			getFetchPlanHelper().clearFetchPlan();
+		if (categories.isEmpty()) {
+			return null;
 		}
+
+		return (C) categories.get(0);
 	}
 
 	@Override
@@ -89,23 +81,21 @@ public class CategoryLookupImpl implements CategoryLookup {
 			throw new EpServiceException("catalogCode cannot be null");
 		}
 
-		getFetchPlanHelper().configureFetchGroupLoadTuner(getLoadTuner());
-		try {
-			List<Category> categories = getPersistenceEngine().retrieveByNamedQuery(CATEGORY_SELECT_BY_CODE_AND_CATALOG_CODE,
-					categoryCode, catalogCode);
-			if (categories == null || categories.isEmpty()) {
-				categories = getPersistenceEngine().retrieveByNamedQuery(
-						LINKED_CATEGORY_FIND_BY_CODE_AND_CATALOG_CODE, categoryCode, catalogCode);
-			}
+		List<Category> categories = getPersistenceEngine()
+			.withLoadTuners(getLoadTuner())
+			.retrieveByNamedQuery(CATEGORY_SELECT_BY_CODE_AND_CATALOG_CODE, categoryCode, catalogCode);
 
-			if (categories.isEmpty()) {
-				return null;
-			}
-
-			return (C) categories.get(0);
-		} finally {
-			getFetchPlanHelper().clearFetchPlan();
+		if (CollectionUtils.isEmpty(categories)) {
+			categories = getPersistenceEngine()
+				.withLoadTuners(getLoadTuner())
+				.retrieveByNamedQuery(LINKED_CATEGORY_FIND_BY_CODE_AND_CATALOG_CODE, categoryCode, catalogCode);
 		}
+
+		if (categories.isEmpty()) {
+			return null;
+		}
+
+		return (C) categories.get(0);
 	}
 
 	@Override
@@ -122,16 +112,14 @@ public class CategoryLookupImpl implements CategoryLookup {
 
 	@Override
 	public <C extends Category> List<C> findChildren(final Category category) {
-		getFetchPlanHelper().configureFetchGroupLoadTuner(getLoadTuner());
-		try {
-			List<C> children = getPersistenceEngine().retrieveByNamedQuery(SUBCATEGORY_SELECT_BY_PARENT_GUID, category.getGuid());
-			List<C> sortedChildren = new ArrayList<>(children);
-			Collections.sort(sortedChildren);
+		List<C> children = getPersistenceEngine()
+			.withLoadTuners(getLoadTuner())
+			.retrieveByNamedQuery(SUBCATEGORY_SELECT_BY_PARENT_GUID, category.getGuid());
 
-			return sortedChildren;
-		} finally {
-			getFetchPlanHelper().clearFetchPlan();
-		}
+		List<C> sortedChildren = new ArrayList<>(children);
+		Collections.sort(sortedChildren);
+
+		return sortedChildren;
 	}
 
 	@Override
@@ -149,14 +137,6 @@ public class CategoryLookupImpl implements CategoryLookup {
 
 	public void setPersistenceEngine(final PersistenceEngine persistenceEngine) {
 		this.persistenceEngine = persistenceEngine;
-	}
-
-	public void setFetchPlanHelper(final FetchPlanHelper fetchPlanHelper) {
-		this.fetchPlanHelper = fetchPlanHelper;
-	}
-
-	public FetchPlanHelper getFetchPlanHelper() {
-		return fetchPlanHelper;
 	}
 
 	public void setBeanFactory(final BeanFactory beanFactory) {

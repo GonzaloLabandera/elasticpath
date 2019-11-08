@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Set;
 
 import com.elasticpath.base.exception.EpServiceException;
+import com.elasticpath.domain.attribute.Attribute;
 import com.elasticpath.domain.catalog.Catalog;
 import com.elasticpath.domain.catalog.Category;
 
@@ -53,6 +54,21 @@ public interface CategoryService {
 	 * @throws EpServiceException in case of any error
 	 */
 	Category findByCode(String categoryCode);
+
+	/**
+	 * Find a list of categories uids that use the given attribute.
+	 *
+	 * @param attribute the attribute to search by
+	 * @return a list of category uids.
+	 */
+	List<Long> findUidsByAttribute(Attribute attribute);
+
+	/**
+	 * Get the Category Codes for a list of Category Uids.
+	 * @param categoryUids The list of Category Uids. Cannot be null.
+	 * @return A list of Category Uids to Category Codes.
+	 */
+	List<String> findCodesByUids(List<Long> categoryUids);
 
 	/**
 	 * Save or update the given category.
@@ -128,11 +144,11 @@ public interface CategoryService {
 	/**
 	 * Re orders (swaps the ordering field) of the two parameter categories.
 	 *
-	 * @param uidOne UID of a category to reorder
+	 * @param categoryOne the category to reorder
 	 * @param uidTwo UID of a category to reorder
 	 * @throws EpServiceException in case of any errors
 	 */
-	void updateOrder(long uidOne, long uidTwo) throws EpServiceException;
+	void updateOrder(Category categoryOne, long uidTwo) throws EpServiceException;
 
 	/**
 	 * Returns all available category UIDs as a list.
@@ -431,4 +447,12 @@ public interface CategoryService {
 	 * @return categories
 	 */
 	List<Category> findCategoriesByCatalogUid(long catalogUid);
+
+	/**
+	 * Get the indicator of whether or not this category can be syndicated.
+	 *
+	 * @param category category.
+	 * @return true if this category can be syndicated.
+	 */
+	boolean canSyndicate(Category category);
 }

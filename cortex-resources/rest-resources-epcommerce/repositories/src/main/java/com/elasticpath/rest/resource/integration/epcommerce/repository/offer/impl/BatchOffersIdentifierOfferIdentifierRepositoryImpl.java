@@ -9,6 +9,8 @@ import com.google.common.collect.ImmutableMap;
 import io.reactivex.Observable;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.elasticpath.domain.catalog.Product;
 import com.elasticpath.repository.LinksRepository;
@@ -29,12 +31,15 @@ public class BatchOffersIdentifierOfferIdentifierRepositoryImpl<LI extends Batch
 
 	private StoreProductRepository storeProductRepository;
 
+	private static final Logger LOG = LoggerFactory.getLogger(BatchOffersIdentifierOfferIdentifierRepositoryImpl.class);
+
 	@Override
 	public Observable<OfferIdentifier> getElements(final BatchOffersIdentifier identifier) {
 		IdentifierPart<String> storeCode = identifier.getBatchOffersLookupForm().getScope();
 		return Observable.fromIterable(identifier.getBatchId().getValue())
 				.flatMapSingle(productCode ->
-						storeProductRepository.findDisplayableStoreProductWithAttributesByProductGuid(storeCode.getValue(), productCode), true)
+						storeProductRepository.findDisplayableStoreProductWithAttributesByProductGuid(storeCode.getValue(), productCode)
+								.doOnError(throwable -> LOG.info("There was a problem finding product code '{}'.", productCode)), true)
 				.map(storeProduct -> buildOfferIdentifier(storeProduct, storeCode))
 				.onErrorResumeNext(Observable.empty());
 	}

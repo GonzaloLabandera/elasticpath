@@ -16,17 +16,19 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
 import javax.persistence.EntityManager;
 import javax.persistence.FlushModeType;
+
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import org.apache.openjpa.ee.ManagedRuntime;
 import org.apache.openjpa.kernel.Broker;
 import org.apache.openjpa.meta.FieldMetaData;
 import org.apache.openjpa.meta.ValueMetaData;
 import org.apache.openjpa.persistence.OpenJPAEntityManager;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
@@ -43,6 +45,7 @@ import com.elasticpath.persistence.api.PersistenceSession;
 import com.elasticpath.persistence.api.Transaction;
 import com.elasticpath.persistence.openjpa.JpaPersistenceEngine;
 import com.elasticpath.persistence.openjpa.impl.JpaPersistenceEngineImpl;
+import com.elasticpath.persistence.openjpa.impl.QueryReader;
 import com.elasticpath.service.audit.AuditDao;
 
 /**
@@ -62,6 +65,9 @@ public class AuditEntityListenerTest {
 	private BeanFactory beanFactory;
 
 	private final JpaPersistenceEngineImpl realJpaPersistenceEngine = new JpaPersistenceEngineImpl();
+
+	@Mock
+	private QueryReader queryReader;
 
 	@Mock
 	private JpaPersistenceEngine mockJpaPersistenceEngine;
@@ -108,6 +114,8 @@ public class AuditEntityListenerTest {
 		};
 		auditEntityListener.setBeanFactory(beanFactory);
 		auditEntityListener.setMetadataMap(metadataMap);
+
+		realJpaPersistenceEngine.setQueryReader(queryReader);
 
 		when(beanFactory.getBean(ContextIdNames.AUDIT_DAO)).thenReturn(auditDao);
 	}
@@ -310,7 +318,7 @@ public class AuditEntityListenerTest {
 		realJpaPersistenceEngine.setEntityManager(entityManager);
 
 		when(entity.getUidPk()).thenReturn(UIDPK);
-		doReturn(oldEntity).when(entityManager).find(entity.getClass(), UIDPK);
+		doReturn(oldEntity).when(queryReader).load(entity.getClass(), UIDPK);
 		when(oldEntity.getField()).thenReturn(oldCollection);
 		when(removedMember.getGuid()).thenReturn("OLDGUID");
 		when(newMember.getGuid()).thenReturn("NEWGUID");
@@ -318,7 +326,7 @@ public class AuditEntityListenerTest {
 		auditEntityListener.recordCollectionChanged(entity, fieldName, newCollection, ChangeType.UPDATE);
 
 		verify(entity).getUidPk();
-		verify(entityManager).find(entity.getClass(), UIDPK);
+		verify(queryReader).load(entity.getClass(), UIDPK);
 		verify(oldEntity).getField();
 		verify(removedMember).getGuid();
 		verify(newMember).getGuid();
@@ -347,14 +355,14 @@ public class AuditEntityListenerTest {
 
 		when(entity.getUidPk()).thenReturn(UIDPK);
 
-		doReturn(oldEntity).when(entityManager).find(entity.getClass(), UIDPK);
+		doReturn(oldEntity).when(queryReader).load(entity.getClass(), UIDPK);
 
 		when(oldEntity.getField()).thenReturn(oldField);
 
 		auditEntityListener.recordFieldChanged(entity, "updateField", field, ChangeType.UPDATE);
 
 		verify(entity).getUidPk();
-		verify(entityManager).find(entity.getClass(), UIDPK);
+		verify(queryReader).load(entity.getClass(), UIDPK);
 		verify(oldEntity).getField();
 		verify(auditDao).persistDataChanged(entity, "updateField", ChangeType.UPDATE, oldField, field, operation);
 	}
@@ -483,7 +491,7 @@ public class AuditEntityListenerTest {
 		realJpaPersistenceEngine.setEntityManager(entityManager);
 
 		when(entity.getUidPk()).thenReturn(UIDPK);
-		doReturn(oldEntity).when(entityManager).find(entity.getClass(), UIDPK);
+		doReturn(oldEntity).when(queryReader).load(entity.getClass(), UIDPK);
 		when(oldEntity.getField()).thenReturn(oldMap);
 
 		when(oldMember.getGuid()).thenReturn("OLDGUID");
@@ -494,7 +502,7 @@ public class AuditEntityListenerTest {
 		auditEntityListener.recordMapChanged(entity, fieldName, newMap, ChangeType.UPDATE);
 
 		verify(entity).getUidPk();
-		verify(entityManager).find(entity.getClass(), UIDPK);
+		verify(queryReader).load(entity.getClass(), UIDPK);
 		verify(oldEntity).getField();
 		verify(oldMember).getGuid();
 		verify(orphanMember).getGuid();

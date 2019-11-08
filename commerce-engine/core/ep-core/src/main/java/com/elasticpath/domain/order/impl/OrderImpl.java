@@ -1267,7 +1267,7 @@ public class OrderImpl extends AbstractListenableEntityImpl implements Order, Pr
 	@Override
 	@Transient
 	public TaxExemption getTaxExemption() {
-		if (taxExemption == null) {
+		if (taxExemption == null && taxExemptionId != null) {
 			taxExemption = TaxExemptionBuilder
 					.newBuilder()
 					.withTaxExemptionId(taxExemptionId)
@@ -1434,6 +1434,7 @@ public class OrderImpl extends AbstractListenableEntityImpl implements Order, Pr
 
 	@Override
 	public void failOrder() {
+		setCartOrderGuid(null);
 		setStatus(OrderStatus.FAILED);
 		for (OrderShipment orderShipment : getAllShipments()) {
 			orderShipment.setStatus(OrderShipmentStatus.FAILED_ORDER);

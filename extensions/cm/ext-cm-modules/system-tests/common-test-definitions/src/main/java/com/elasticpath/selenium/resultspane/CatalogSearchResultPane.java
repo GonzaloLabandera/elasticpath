@@ -22,7 +22,7 @@ public class CatalogSearchResultPane extends AbstractPageObject {
 	private static final String PRODUCT_SEARCH_RESULT_ROW_CSS = PRODUCT_SEARCH_RESULT_PARENT_CSS + "div[parent-widget-id='Search Product List']";
 	private static final String PRODUCT_SEARCH_RESULT_COLUMN_CSS = PRODUCT_SEARCH_RESULT_PARENT_CSS + "div[column-id='%s']";
 	private static final String PRODUCT_SEARCH_RESULT_FIRST_CELL_CSS = PRODUCT_SEARCH_RESULT_PARENT_CSS
-			+ "div[widget-type='table_row'] div[column-num='1']";
+			+ "div[widget-id='%s'][widget-type*='row']";
 	private static final String PRODUCT_NAME_COLUMN_NAME = "Product Name";
 	private static final String PRODUCT_CODE_COLUMN_NAME = "Product Code";
 
@@ -137,11 +137,12 @@ public class CatalogSearchResultPane extends AbstractPageObject {
 	/**
 	 * Selects first product from search result table and opens editor.
 	 *
+	 * @param productCode the product code
 	 * @return the product editor.
 	 */
-	public ProductEditor openProductEditorForFirstSearchResultEntry() {
-		assertThat(selectItemInCenterPaneFirstPageByCell(PRODUCT_SEARCH_RESULT_PARENT_CSS, PRODUCT_SEARCH_RESULT_FIRST_CELL_CSS))
-				.as("Failed to open product editor for the first search result entry")
+	public ProductEditor openProductEditorForFirstSearchResultEntry(final String productCode) {
+		assertThat(selectItemInCenterPaneFirstPageByCell(String.format(PRODUCT_SEARCH_RESULT_FIRST_CELL_CSS, productCode)))
+				.as("Failed to select the search result entry")
 				.isTrue();
 		doubleClick(getSelectedElement(), ProductEditor.PRODUCT_EDITOR_PARENT_CSS);
 		return new ProductEditor(getDriver());

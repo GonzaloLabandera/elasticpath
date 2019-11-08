@@ -9,6 +9,7 @@
 		<mapping-file>META-INF/cartorder-orm.xml</mapping-file>
 		<mapping-file>META-INF/cmuser-orm.xml</mapping-file>
 		<mapping-file>META-INF/customer-orm.xml</mapping-file>
+		<mapping-file>META-INF/profileattribute-orm.xml</mapping-file>
 		<mapping-file>META-INF/dataimport-orm.xml</mapping-file>
 		<mapping-file>META-INF/inventory-orm.xml</mapping-file>
 		<mapping-file>META-INF/order-orm.xml</mapping-file>
@@ -31,6 +32,7 @@
 		<mapping-file>META-INF/oauthtoken-orm.xml</mapping-file>
 		<mapping-file>META-INF/paymenttoken-orm.xml</mapping-file>
 		<mapping-file>META-INF/cartitemmodifier-orm.xml</mapping-file>
+		<mapping-file>META-INF/modifier-orm.xml</mapping-file>
 		<mapping-file>META-INF/datapolicy-orm.xml</mapping-file>
 		<mapping-file>META-INF/datapoint-value-orm.xml</mapping-file>
 		<mapping-file>META-INF/dependent-items-orm.xml</mapping-file>
@@ -159,6 +161,8 @@
 		<class>com.elasticpath.domain.search.query.impl.SearchTermsActivitySummaryImpl</class>
 		<class>com.elasticpath.domain.shoppingcart.impl.ShoppingCartMementoImpl</class>
 		<class>com.elasticpath.domain.shoppingcart.impl.ShoppingItemImpl</class>
+		<class>com.elasticpath.domain.shoppingcart.impl.CartData</class>
+		<class>com.elasticpath.domain.shoppingcart.CartType</class>
 		<class>com.elasticpath.domain.skuconfiguration.impl.JpaAdaptorOfSkuOptionValueImpl</class>
 		<class>com.elasticpath.domain.skuconfiguration.impl.SkuOptionImpl</class>
 		<class>com.elasticpath.domain.skuconfiguration.impl.SkuOptionValueImpl</class>
@@ -207,6 +211,8 @@
 		<class>com.elasticpath.domain.auth.UserAuthenticationMemento</class>
 		<class>com.elasticpath.domain.customer.impl.AbstractPaymentMethodImpl</class>
 		<class>com.elasticpath.domain.customer.impl.PaymentTokenImpl</class>
+		<class>com.elasticpath.domain.customer.impl.StoreCustomerAttributeImpl</class>
+		<class>com.elasticpath.domain.customer.impl.AttributePolicyImpl</class>
 
 		<!-- tagging framework start -->
 
@@ -258,13 +264,14 @@
 		<class>com.elasticpath.domain.cartorder.impl.CartOrderImpl</class>
 		<class>com.elasticpath.domain.order.impl.TaxJournalRecordImpl</class>
 
-		<!-- Cart Modifier -->
-		<class>com.elasticpath.domain.cartmodifier.impl.CartItemModifierFieldImpl</class>
-		<class>com.elasticpath.domain.cartmodifier.impl.CartItemModifierFieldLdfImpl</class>
-		<class>com.elasticpath.domain.cartmodifier.impl.CartItemModifierFieldOptionImpl</class>
-		<class>com.elasticpath.domain.cartmodifier.impl.CartItemModifierFieldOptionLdfImpl</class>
-		<class>com.elasticpath.domain.cartmodifier.impl.CartItemModifierGroupImpl</class>
-		<class>com.elasticpath.domain.cartmodifier.impl.CartItemModifierGroupLdfImpl</class>
+		<!-- General Modifier -->
+		<class>com.elasticpath.domain.modifier.impl.ModifierFieldImpl</class>
+		<class>com.elasticpath.domain.modifier.impl.ModifierFieldLdfImpl</class>
+		<class>com.elasticpath.domain.modifier.impl.ModifierFieldOptionImpl</class>
+		<class>com.elasticpath.domain.modifier.impl.ModifierFieldOptionLdfImpl</class>
+		<class>com.elasticpath.domain.modifier.impl.ModifierGroupImpl</class>
+		<class>com.elasticpath.domain.modifier.impl.ModifierGroupLdfImpl</class>
+		<class>com.elasticpath.domain.modifier.impl.ModifierGroupFilterImpl</class>
 
 		<!-- Data Policy -->
 		<class>com.elasticpath.domain.datapolicy.impl.DataPointImpl</class>
@@ -274,6 +281,9 @@
 
 		<!-- Facets -->
 		<class>com.elasticpath.domain.search.impl.FacetImpl</class>
+
+		<class>com.elasticpath.domain.search.impl.SortAttributeImpl</class>
+		<class>com.elasticpath.domain.search.impl.SortLocalizedNameImpl</class>
 
 		<exclude-unlisted-classes>true</exclude-unlisted-classes>
 
@@ -294,7 +304,6 @@
 			<property name="openjpa.Multithreaded" value="true"/>
 			<property name="openjpa.AutoDetach" value="close, commit, nontx-read"/>
 			<property name="openjpa.jdbc.DBDictionary" value="batchLimit=100, SupportsSubselect=true, SupportsCorrelatedSubselect=false"/>
-			<property name="openjpa.jdbc.TransactionIsolation" value="read-committed"/>
 			<!-- Uncomment the section below to enable data caching, comment them out to disable -->
 			<property name="openjpa.DataCache" value="true"/>
 			<property name="openjpa.RemoteCommitProvider" value="sjvm"/>

@@ -18,6 +18,11 @@ public final class DateUtils {
 	 * Internal data/time formatter. This is the Complete ISO 8601 Date syntax, which is used for SOLR date queries.
 	 */
 	public static final String DATE_TIME_FORMAT_STRING_US_INTERNAL = "yyyy-MM-dd'T'HH:mm:ss'Z'";
+
+	/**
+	 * Date/time formatter for ISO 8601 without the UTC qualifier, signifying local time zone.
+	 */
+	public static final String DATE_TIME_FORMAT_STRING_LOCAL_TIMEZONE = "yyyy-MM-dd'T'HH:mm:ss";
 	private static final String TIMESTAMP_PATTERN = "yyyy_MM_dd_HH_mm_ss.SSS";
 
 	private static final int ELEVEN_O_CLOCK = 23;

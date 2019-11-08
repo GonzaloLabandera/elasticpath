@@ -63,7 +63,7 @@ public class BrandAdapterTest {
 
 		context.checking(new Expectations() {
 			{
-				allowing(mockBeanFactory).getBean(ContextIdNames.BRAND);
+				allowing(mockBeanFactory).getPrototypeBean(ContextIdNames.BRAND, Brand.class);
 				will(returnValue(new BrandImpl()));
 			}
 		});

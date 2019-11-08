@@ -3,10 +3,17 @@
  */
 package com.elasticpath.domain.catalog.impl;
 
+import static com.elasticpath.persistence.support.FetchFieldConstants.CART_ITEM_MODIFIER_GROUPS;
+import static com.elasticpath.persistence.support.FetchFieldConstants.OPTION_VALUE_MAP;
+import static com.elasticpath.persistence.support.FetchFieldConstants.PRODUCT_ATTRIBUTE_GROUP_ATTRIBUTES;
+import static com.elasticpath.persistence.support.FetchFieldConstants.SKU_ATTRIBUTE_GROUP_ATTRIBUTES;
+import static com.elasticpath.persistence.support.FetchFieldConstants.SKU_OPTIONS;
+
 import java.util.Objects;
 
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.commons.lang.builder.ToStringStyle;
+import org.apache.openjpa.persistence.FetchPlan;
 
 import com.elasticpath.domain.catalog.ProductTypeLoadTuner;
 import com.elasticpath.domain.impl.AbstractEpDomainImpl;
@@ -26,7 +33,7 @@ public class ProductTypeLoadTunerImpl extends AbstractEpDomainImpl implements Pr
 
 	private boolean loadingSkuOptions;
 
-	private boolean loadingCartItemModifierGroups;
+	private boolean loadingModifierGroups;
 
 	/**
 	 * Return <code>true</code> if attributes is requested.
@@ -69,13 +76,13 @@ public class ProductTypeLoadTunerImpl extends AbstractEpDomainImpl implements Pr
 	}
 
 	@Override
-	public boolean isLoadingCartItemModifierGroups() {
-		return loadingCartItemModifierGroups;
+	public boolean isLoadingModifierGroups() {
+		return loadingModifierGroups;
 	}
 
 	@Override
-	public void setLoadingCartItemModifierGroups(final boolean flag) {
-		loadingCartItemModifierGroups = flag;
+	public void setLoadingModifierGroups(final boolean flag) {
+		loadingModifierGroups = flag;
 	}
 
 	/**
@@ -103,7 +110,7 @@ public class ProductTypeLoadTunerImpl extends AbstractEpDomainImpl implements Pr
 			return false;
 		}
 
-		return !(!isLoadingCartItemModifierGroups() && productTypeLoadTuner.isLoadingCartItemModifierGroups());
+		return !(!isLoadingModifierGroups() && productTypeLoadTuner.isLoadingModifierGroups());
 	}
 
 	/**
@@ -121,6 +128,21 @@ public class ProductTypeLoadTunerImpl extends AbstractEpDomainImpl implements Pr
 		mergedProductTypeLoadTuner.loadingAttributes = loadingAttributes || productTypeLoadTuner.isLoadingAttributes();
 		mergedProductTypeLoadTuner.loadingSkuOptions = loadingSkuOptions || productTypeLoadTuner.isLoadingSkuOptions();
 		return mergedProductTypeLoadTuner;
+	}
+
+	@Override
+	public void configure(final FetchPlan fetchPlan) {
+		if (isLoadingAttributes()) {
+			fetchPlan.addField(ProductTypeImpl.class, PRODUCT_ATTRIBUTE_GROUP_ATTRIBUTES);
+			fetchPlan.addField(ProductTypeImpl.class, SKU_ATTRIBUTE_GROUP_ATTRIBUTES);
+		}
+		if (isLoadingSkuOptions()) {
+			fetchPlan.addField(ProductTypeImpl.class, SKU_OPTIONS);
+			fetchPlan.addField(ProductSkuImpl.class, OPTION_VALUE_MAP);
+		}
+		if (isLoadingModifierGroups()) {
+			fetchPlan.addFields(ProductTypeImpl.class, CART_ITEM_MODIFIER_GROUPS);
+		}
 	}
 
 	/**

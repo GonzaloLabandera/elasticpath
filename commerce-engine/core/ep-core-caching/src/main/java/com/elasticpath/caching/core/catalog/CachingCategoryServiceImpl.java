@@ -9,6 +9,7 @@ import java.util.Set;
 
 import com.elasticpath.base.exception.EpServiceException;
 import com.elasticpath.cache.Cache;
+import com.elasticpath.domain.attribute.Attribute;
 import com.elasticpath.domain.catalog.Catalog;
 import com.elasticpath.domain.catalog.Category;
 import com.elasticpath.service.catalog.CategoryService;
@@ -20,6 +21,8 @@ import com.elasticpath.service.catalog.CategoryService;
 public class CachingCategoryServiceImpl implements CategoryService {
 
 	private Cache<Long, String> findCodeByUidCache;
+	private Cache<Long, List<Long>> findDescendantCategoriesByUidCache;
+	private Cache<Long, List<Long>> findFeaturedProductsUidCache;
 	private CategoryService fallbackCategoryService;
 
 
@@ -54,6 +57,16 @@ public class CachingCategoryServiceImpl implements CategoryService {
 	}
 
 	@Override
+	public List<Long> findUidsByAttribute(final Attribute attribute) {
+		return fallbackCategoryService.findUidsByAttribute(attribute);
+	}
+
+	@Override
+	public List<String> findCodesByUids(final List<Long> productUids) {
+		return fallbackCategoryService.findCodesByUids(productUids);
+	}
+
+	@Override
 	public Category saveOrUpdate(final Category category) throws EpServiceException {
 		return fallbackCategoryService.saveOrUpdate(category);
 	}
@@ -65,7 +78,15 @@ public class CachingCategoryServiceImpl implements CategoryService {
 
 	@Override
 	public List<Long> findDescendantCategoryUids(final long categoryUid) {
-		return fallbackCategoryService.findDescendantCategoryUids(categoryUid);
+		List<Long> descendantCategoryUids = findDescendantCategoriesByUidCache.get(categoryUid);
+		if (descendantCategoryUids != null) {
+			return descendantCategoryUids;
+		}
+
+		descendantCategoryUids = fallbackCategoryService.findDescendantCategoryUids(categoryUid);
+		findDescendantCategoriesByUidCache.put(categoryUid, descendantCategoryUids);
+
+		return descendantCategoryUids;
 	}
 
 	@Override
@@ -94,8 +115,8 @@ public class CachingCategoryServiceImpl implements CategoryService {
 	}
 
 	@Override
-	public void updateOrder(final long uidOne, final long uidTwo) throws EpServiceException {
-		fallbackCategoryService.updateOrder(uidOne, uidTwo);
+	public void updateOrder(final Category categoryOne, final long uidTwo) throws EpServiceException {
+		fallbackCategoryService.updateOrder(categoryOne, uidTwo);
 	}
 
 	@Override
@@ -165,7 +186,16 @@ public class CachingCategoryServiceImpl implements CategoryService {
 
 	@Override
 	public List<Long> findFeaturedProductUidList(final long categoryUid) {
-		return fallbackCategoryService.findFeaturedProductUidList(categoryUid);
+
+		List<Long> featuredProductUids = findFeaturedProductsUidCache.get(categoryUid);
+
+		if (featuredProductUids != null) {
+			return featuredProductUids;
+		}
+
+		featuredProductUids = fallbackCategoryService.findFeaturedProductUidList(categoryUid);
+		findFeaturedProductsUidCache.put(categoryUid, featuredProductUids);
+		return featuredProductUids;
 	}
 
 	@Override
@@ -263,11 +293,24 @@ public class CachingCategoryServiceImpl implements CategoryService {
 		return fallbackCategoryService.findCategoriesByCatalogUid(catalogUid);
 	}
 
+	@Override
+	public boolean canSyndicate(final Category category) {
+		return fallbackCategoryService.canSyndicate(category);
+	}
+
 	public void setFindCodeByUidCache(final Cache<Long, String> findCodeByUidCache) {
 		this.findCodeByUidCache = findCodeByUidCache;
 	}
 
 	public void setFallbackCategoryService(final CategoryService fallbackCategoryService) {
 		this.fallbackCategoryService = fallbackCategoryService;
+	}
+
+	public void setFindDescendantCategoriesByUidCache(final Cache<Long, List<Long>> findDescendantCategoriesByUidCache) {
+		this.findDescendantCategoriesByUidCache = findDescendantCategoriesByUidCache;
+	}
+
+	public void setFindFeaturedProductsUidCache(final Cache<Long, List<Long>> findFeaturedProductsUidCache) {
+		this.findFeaturedProductsUidCache = findFeaturedProductsUidCache;
 	}
 }

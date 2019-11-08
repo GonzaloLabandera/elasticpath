@@ -35,6 +35,10 @@ public class GenerateImportExportFileActionImpl implements DataPopulationAction 
 	@Qualifier("filteredPropertiesForImportExport")
 	private Properties filterProperties;
 
+	@Autowired
+	@Qualifier("jmsProperties")
+	private Properties jmsProperties;
+
 	private File output;
 
 	@Autowired
@@ -60,7 +64,7 @@ public class GenerateImportExportFileActionImpl implements DataPopulationAction 
 		}
 
 		try {
-			filterService.filter(input, getOutput(), filterProperties);
+			filterService.filter(input, getOutput(), filterProperties, jmsProperties);
 		} catch (final IOException e) {
 			throw new DataPopulationActionException("Unable to filter Import/Export file. Input: " + input + "; output: " + getOutput()
 					+ ". " + DpUtils.getNestedExceptionMessage(e), e);

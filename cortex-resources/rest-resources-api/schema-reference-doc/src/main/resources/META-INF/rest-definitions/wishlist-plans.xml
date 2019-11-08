@@ -52,11 +52,8 @@
 		<plan>
 			<name>read-wishlist-line-item</name>
 			<description><![CDATA[
-			Retrieves wishlist item details, which include:
-			 - A link to the list of wishlist items
-			 - A link to the wishlist
-			 - A link to the item in the items resource
-			 - A link to the movetocart form
+Retrieves wishlist item details, which include:
+A link to the list of wishlist items, a link to the wishlist, a link to the item in the items resource, a link to the movetocart form
 			]]></description>
 			<step>
 				<description>><![CDATA[Read wishlist line item.]]></description>
@@ -110,8 +107,9 @@
 
 		<plan>
 			<name>move-from-wishlist-to-cart</name>
-			<description><![CDATA[Moves a line item from the wishlist to the cart. You must specify the quantity in the request body.<br/><br/>
-Once posted, the item deletes from the wishlist and adds to the cart. Then Cortex returns a redirect link to the newly added cart line item.
+			<description><![CDATA[Moves a line item from the wishlist to the cart. You must specify the quantity in the request body.
+
+Once POSTed, the item deletes from the wishlist and adds to the cart. Then Cortex returns a redirect link to the newly added cart line item.
 You can also get to the movetocart form by following the link in a wishlist line item. The movetocart form contains an action link to move the item to the cart. Note that the action link will only be present if the wishlist line item is purchasable. If the wishlist line item is not purchasable, the action link will not appear on the form. Only purchasable items can be moved from wishlists into a cart.]]></description>
 			<step>
 				<description><![CDATA[Start at a wish list line item]]></description>
@@ -131,8 +129,9 @@ You can also get to the movetocart form by following the link in a wishlist line
 
 		<plan>
 			<name>move-from-cart-to-wishlist</name>
-			<description><![CDATA[Moves a line item from the cart to the wishlist.<br/><br/>
-Once posted, Cortex will return a redirect link to the newly added wishlist line item. You can also get to the movetowishlist form by following the link in a cart line item. The movetowishlist form contains an action link to move the item to the wishlist.]]></description>
+			<description><![CDATA[Moves a line item from the cart to the wishlist.
+
+Once POSTed, Cortex will return a redirect link to the newly added wishlist line item. You can also get to the movetowishlist form by following the link in a cart line item. The movetowishlist form contains an action link to move the item to the wishlist.]]></description>
 			<step>
 				<description><![CDATA[Start at a cart line item]]></description>
 				<start>carts.line-item</start>
@@ -153,9 +152,6 @@ Once posted, Cortex will return a redirect link to the newly added wishlist line
 		<name>read-wishlist-memberships</name>
 		<description><![CDATA[
 Retrieves the list of wishlists that the item has been added to.
-
-	GET:{cortex}/wishlists/memberships/{item_uri}
-
 The list is empty if the item is not in your wishlist.]]></description>
 			<step>
 				<description><![CDATA[Retrieves the list of wishlists that the item has been added to.]]></description>

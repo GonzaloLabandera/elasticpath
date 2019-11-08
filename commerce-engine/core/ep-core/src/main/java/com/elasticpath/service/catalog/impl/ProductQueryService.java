@@ -37,12 +37,12 @@ public class ProductQueryService extends AbstractQueryService<Product> {
 		if (criteria.getModifiedAfter() != null) {
 			processModifiedAfterCriteria(criteria, queryBuilder);
 		}
-		
+
 		if (criteria.getStartDate() != null) {
 			processDateRangeCriteria(criteria, queryBuilder);
 		}
 	}
-	
+
 	/**
 	 * Process modified after criteria.
 	 *
@@ -67,10 +67,10 @@ public class ProductQueryService extends AbstractQueryService<Product> {
 		whereGroup.appendWhere(getSelfRelation().getAlias() + ".startDate", "<=", criteria.getStartDate(), JpqlMatchType.AS_IS);
 		JpqlQueryBuilderWhereGroup endDateWhereGroup = queryBuilder.createNewWhereGroup();
 		whereGroup.appendWhereGroup(endDateWhereGroup);
-		endDateWhereGroup.appendWhere(getSelfRelation().getAlias() + ".endDate IS NULL OR " 
+		endDateWhereGroup.appendWhere(getSelfRelation().getAlias() + ".endDate IS NULL OR "
 				+ getSelfRelation().getAlias() + ".endDate", ">=", criteria.getEndDate(), JpqlMatchType.AS_IS);
 	}
-	
+
 	/**
 	 * Configure load tuner.
 	 *
@@ -80,9 +80,9 @@ public class ProductQueryService extends AbstractQueryService<Product> {
 	protected void configureLoadTuner(final LoadTuner loadTuner) {
 		if (loadTuner != null) {
 			if (loadTuner instanceof ProductLoadTuner) {
-				getFetchPlanHelper().configureProductFetchPlan((ProductLoadTuner) loadTuner);
+				getFetchPlanHelper().setLoadTuners((ProductLoadTuner) loadTuner);
 			} else if (loadTuner instanceof FetchGroupLoadTuner) {
-				getFetchPlanHelper().configureFetchGroupLoadTuner((FetchGroupLoadTuner) loadTuner);
+				getFetchPlanHelper().setLoadTuners((FetchGroupLoadTuner) loadTuner);
 			} else {
 				throw new UnsupportedLoadTunerException("Unsupported load tuner.");
 			}

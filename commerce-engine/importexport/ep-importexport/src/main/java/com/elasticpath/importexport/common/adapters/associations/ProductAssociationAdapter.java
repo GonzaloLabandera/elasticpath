@@ -100,7 +100,7 @@ public class ProductAssociationAdapter extends AbstractDomainAdapterImpl<Product
 	 */
 	@Override
 	public ProductAssociation createDomainObject() {
-		return getBeanFactory().getBean(ContextIdNames.PRODUCT_ASSOCIATION);
+		return getBeanFactory().getPrototypeBean(ContextIdNames.PRODUCT_ASSOCIATION, ProductAssociation.class);
 	}
 
 	/**

@@ -72,7 +72,7 @@ public class SkuOptionAdapter extends AbstractDomainAdapterImpl<SkuOption, SkuOp
 				if (skuOptionService.optionValueKeyExists(skuOptionValueDTO.getCode())) {
 					throw new PopulationRollbackException("IE-10010", skuOptionValueDTO.getCode(), target.getOptionKey());
 				}
-				skuOptionValue = getBeanFactory().getBean(ContextIdNames.SKU_OPTION_VALUE);
+				skuOptionValue = getBeanFactory().getPrototypeBean(ContextIdNames.SKU_OPTION_VALUE, SkuOptionValue.class);
 				skuOptionValueAdapter.populateDomain(skuOptionValueDTO, skuOptionValue);
 				// adding a SkuOptionValue to a SkuOption should only happen when the value is a new instance
 				// otherwise for a large data set of option values JPA gets confused 
@@ -156,7 +156,7 @@ public class SkuOptionAdapter extends AbstractDomainAdapterImpl<SkuOption, SkuOp
 
 	@Override
 	public SkuOption createDomainObject() {
-		return getBeanFactory().getBean(ContextIdNames.SKU_OPTION);
+		return getBeanFactory().getPrototypeBean(ContextIdNames.SKU_OPTION, SkuOption.class);
 	}
 
 	@Override

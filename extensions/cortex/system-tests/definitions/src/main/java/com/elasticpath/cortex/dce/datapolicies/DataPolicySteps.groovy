@@ -28,16 +28,6 @@ class DataPolicySteps {
 		return actualDataPolicyList
 	}
 
-	@Given('^the following data policies are assigned to data policy segment (.+)$')
-	static void assignDataPoliciesStatement(String value, DataTable dataPolicyListTable) {
-		//	Non implementation Given statement.
-	}
-
-	@Given('^the following data policies with segment (.+) are in (?:Disabled|Draft) state$')
-	static void verifyDataPoliciesDraftState(String segment, DataTable dataPolicyListTable) {
-		//	Non implementation Given statement.
-	}
-
 	@When('^I access the data policies$')
 	@Then('^I can follow a link to data policies')
 	static void getDataPolicies() {

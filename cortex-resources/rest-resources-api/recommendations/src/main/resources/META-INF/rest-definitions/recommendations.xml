@@ -7,13 +7,22 @@
 			<![CDATA[
 Recommendations suggest additional items that may interest shoppers. For example, if a shopper is viewing an iPod,
 you may want to display related items such as iPod accessories. If the shopper is viewing items in a Digital Camera
-[navigation node][navigations] then you can use recommendations to highlight a set of featured digital cameras in that node.
+[navigation node](navigations.md) then you can use recommendations to highlight a set of featured digital cameras in that node.
 
-Recommendations are lists of items, accessible through [item][items] for item recommendations,  [navigation nodes][navigations]
+Recommendations are lists of items, accessible through [item](items.md) for item recommendations,  [navigation nodes](navigations.md)
 for navigation recommendations, and the recommendations entry point for store recommendations.
-The recommendation's rel name reflects the type of recommendation.  For example, when accessing an item's recommendations
+The recommendation-group-rel name reflects the type of recommendation.  For example, when accessing an item's recommendations
  a rel name could be "crosssells", which indicates the rel links to a list of "cross-sell" items.
-			]]>
+
+The *recommendation-group-rel* can be:
+
+- `crosssell`
+- `upsell`
+- `warranty`
+- `accessory`
+- `replacement`
+- `recommendation`
+]]>
 		</description>
 
 		<uri-part>

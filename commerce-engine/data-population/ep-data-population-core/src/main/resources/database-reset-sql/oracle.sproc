@@ -23,5 +23,9 @@ BEGIN
 
         -- SQL to grant the necessary database permissions on a new EP database
         EXECUTE IMMEDIATE 'GRANT CONNECT, CREATE TABLE, CREATE SEQUENCE, CREATE PROCEDURE TO ${data.population.username}';
+        EXECUTE IMMEDIATE 'GRANT EXECUTE ON DBMS_XA TO ${data.population.username}';
+        EXECUTE IMMEDIATE 'GRANT SELECT ON PENDING_TRANS$ TO ${data.population.username}';
+        EXECUTE IMMEDIATE 'GRANT SELECT ON DBA_2PC_PENDING TO ${data.population.username}';
+        EXECUTE IMMEDIATE 'GRANT SELECT ON DBA_PENDING_TRANSACTIONS TO ${data.population.username}';
     END;
 END;

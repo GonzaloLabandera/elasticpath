@@ -4,11 +4,11 @@
 	<family>
 		<name>purchases</name>
 		<description><![CDATA[
-####Entry Point: /purchases/{scope}
+**Entry Point:** `/purchases/{scope}`
 
 A purchase is a receipt of an executed order. A Purchase lists the order's total cost, purchase date, purchase status
 (COMPLETE or FAILED), tax paid, paymentmeans, which lists the billing and shipping details as well as
-customer's [paymentmethods][paymentmethods], and line items, which are lists of the [items][items] the customer
+customer's [paymentmethods](paymentmethods.md), and line items, which are lists of the [items](items.md) the customer
 purchased.
 
 Each time customers make successful purchases, Cortex API records them in its database. Using the purchases resource,
@@ -17,9 +17,12 @@ check for correctness, and track the purchase's status. Cortex API records each 
 purchase. Cortex API does not track each failed purchase, it only records the last failed purchase. Once the purchase
 completes, the failed purchase is removed from the record and a successful purchase is recorded.
 
-[paymentmethods]: #paymentmethods
-[items]: #items
-			]]>
+Purchase line items are collections of items the customer purchased. Each line item can contain one or more of the same item,
+but will not have two different items. For example, one line item can have 7 Rock-Star t-shirts or one Rock-Star t-shirt,
+but it won't have one Rock-Star t-shirt and a Song track. The Song track and t-shirt would be in separate line items.
+
+The Paymentmeans resource is responsible for recording a purchase's billing details,
+such as a customer's billing address and [paymentmethod](paymentmethods.md)]]>
 		</description>
 
 		<uri-part>
@@ -76,7 +79,7 @@ completes, the failed purchase is removed from the record and a successful purch
 
 		<entity>
 			<name>purchase</name>
-			<description><![CDATA[An order to be purchased.]]></description>
+			<description><![CDATA[A purchase.]]></description>
 			<property>
 				<name>order-id</name>
 				<description><![CDATA[The internal order identifier.]]></description>
@@ -93,8 +96,7 @@ completes, the failed purchase is removed from the record and a successful purch
 				<name>purchase-number</name>
 				<description>
 					<![CDATA[
-Purchase number associated with the purchase. This is the reference customers use
-if they need to communicate with the store's customer service representative.
+Purchase number associated with the purchase. This is the reference customers use if they need to communicate with the store's customer service representative.
 					]]>
 				</description>
 				<string/>
@@ -103,11 +105,7 @@ if they need to communicate with the store's customer service representative.
 				<name>status</name>
 				<description>
 					<![CDATA[
-Indicates the status of the purchase. The following are possible status values:
-
-* IN_PROGRESS - The purchase is being processed.
-* COMPLETED - The purchase is processed.
-* CANCELLED - The purchase is cancelled.
+Indicates the status of the purchase. The following are possible `status` values: IN_PROGRESS - The purchase is being processed, COMPLETED - The purchase is processed, CANCELLED - The purchase is cancelled.
 				]]>
 				</description>
 				<string/>

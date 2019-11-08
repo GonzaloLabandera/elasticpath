@@ -19,6 +19,10 @@ public class CatalogEditor extends AbstractPageObject {
 	private static final String ATTRIBUTE_COLUMN_CSS = ATTRIBUTE_PARENT_CSS + "div[column-id='%s']";
 	private static final String TAB_CSS
 			= "div[automation-id='com.elasticpath.cmclient.catalog.CatalogMessages.Catalog%sPage_Title'][seeable='true']";
+	private static final String AVAILABLE_LANGUAGES_PARENT_CSS = "div[widget-id='Available Languages'][widget-type='Table'] ";
+	private static final String AVAILABLE_LANGUAGES_COLUMN_CSS = AVAILABLE_LANGUAGES_PARENT_CSS + "div[column-id='%s']";
+	private static final String MOVE_RIGHT_BUTTON_CSS = "div[widget-id='>']";
+	private static final String OK_WARNING = "div[widget-id='OK']";
 	/**
 	 * CSS selector template for some buttons in CatalogEditor.
 	 */
@@ -41,7 +45,13 @@ public class CatalogEditor extends AbstractPageObject {
 	 * @param tabName the tab name.
 	 */
 	public void selectTab(final String tabName) {
-		click(getWaitDriver().waitForElementToBeClickable(By.cssSelector(String.format(TAB_CSS, tabName))));
+		String cssSelector = String.format(TAB_CSS, tabName);
+		click(getWaitDriver().waitForElementToBeClickable(By.cssSelector(cssSelector)));
+		setWebDriverImplicitWait(1);
+		if (!isElementPresent(By.cssSelector(cssSelector + "[active-tab='true']"))) {
+			click(getWaitDriver().waitForElementToBeClickable(By.cssSelector(cssSelector)));
+		}
+		setWebDriverImplicitWaitToDefault();
 	}
 
 	/**
@@ -142,4 +152,28 @@ public class CatalogEditor extends AbstractPageObject {
 		selectTab("Brands");
 	}
 
+	/**
+	 * Select language.
+	 *
+	 * @param language language which should be chosen
+	 */
+	public void selectAvailableLanguage(final String language) {
+		assertThat(selectItemInDialog(AVAILABLE_LANGUAGES_PARENT_CSS, AVAILABLE_LANGUAGES_COLUMN_CSS, language, ""))
+				.as("Unable to find language - " + language)
+				.isTrue();
+	}
+
+	/**
+	 * Click move right button.
+	 */
+	public void clickMoveRightButton() {
+		clickButton(MOVE_RIGHT_BUTTON_CSS, "> (Move Right)");
+	}
+
+	/**
+	 * Click ok button.
+	 */
+	public void clickOk() {
+		clickButton(OK_WARNING, "OK");
+	}
 }

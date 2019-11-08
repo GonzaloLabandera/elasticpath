@@ -10,9 +10,10 @@
 	<artifactId>ext-batch-parent</artifactId>
 	<name>Extension Batch Server Parent</name>
 	<packaging>pom</packaging>
-	
-  <modules>
-    <module>ext-batch</module>
-    <module>ext-batch-webapp</module>
-  </modules>
+
+	<modules>
+		<module>ext-batch</module>
+		<module>ext-batch-webapp</module>
+		<module>ext-batch-itests</module>
+	</modules>
 </project>

@@ -38,12 +38,12 @@ import com.elasticpath.domain.attribute.AttributeGroup;
 import com.elasticpath.domain.attribute.AttributeGroupAttribute;
 import com.elasticpath.domain.attribute.impl.ProductTypeProductAttributeImpl;
 import com.elasticpath.domain.attribute.impl.ProductTypeSkuAttributeImpl;
-import com.elasticpath.domain.cartmodifier.CartItemModifierGroup;
-import com.elasticpath.domain.cartmodifier.impl.CartItemModifierGroupImpl;
 import com.elasticpath.domain.catalog.Catalog;
 import com.elasticpath.domain.catalog.ProductSku;
 import com.elasticpath.domain.catalog.ProductType;
 import com.elasticpath.domain.impl.AbstractLegacyEntityImpl;
+import com.elasticpath.domain.modifier.ModifierGroup;
+import com.elasticpath.domain.modifier.impl.ModifierGroupImpl;
 import com.elasticpath.domain.skuconfiguration.SkuOption;
 import com.elasticpath.domain.skuconfiguration.SkuOptionValue;
 import com.elasticpath.domain.skuconfiguration.impl.SkuOptionImpl;
@@ -101,7 +101,7 @@ public class ProductTypeImpl extends AbstractLegacyEntityImpl implements Product
 
 	private String guid;
 
-	private Set<CartItemModifierGroup> cartItemModifierGroups = new HashSet<>();
+	private Set<ModifierGroup> modifierGroups = new HashSet<>();
 
 	/**
 	 * The default constructor.
@@ -536,22 +536,22 @@ public class ProductTypeImpl extends AbstractLegacyEntityImpl implements Product
 	}
 
 	@Override
-	@ManyToMany(targetEntity = CartItemModifierGroupImpl.class, fetch = FetchType.EAGER, cascade = {CascadeType.REFRESH, CascadeType.MERGE})
-	@JoinTable(name = "TPRODTYPECARTITEMMODIFIERGRP", joinColumns = {@JoinColumn(name = "PRODUCT_TYPE_UID")}, inverseJoinColumns = {
-		@JoinColumn(name = "CART_ITEM_MOD_GRP_UID")
+	@ManyToMany(targetEntity = ModifierGroupImpl.class, fetch = FetchType.EAGER, cascade = {CascadeType.REFRESH, CascadeType.MERGE})
+	@JoinTable(name = "TPRODTYPEMODIFIERGRP", joinColumns = {@JoinColumn(name = "PRODUCT_TYPE_UID")}, inverseJoinColumns = {
+		@JoinColumn(name = "MOD_GRP_UID")
 	})
-	public Set<CartItemModifierGroup> getCartItemModifierGroups() {
-		return cartItemModifierGroups;
+	public Set<ModifierGroup> getModifierGroups() {
+		return modifierGroups;
 	}
 
 	@Override
-	public void setCartItemModifierGroups(final Set<CartItemModifierGroup> cartItemModifierGroups) {
-		this.cartItemModifierGroups = cartItemModifierGroups;
+	public void setModifierGroups(final Set<ModifierGroup> modifierGroups) {
+		this.modifierGroups = modifierGroups;
 	}
 
 	@Override
-	public void removeAllCartItemModifierGroups() {
-		this.cartItemModifierGroups.clear();
+	public void removeAllModifierGroups() {
+		this.modifierGroups.clear();
 	}
 
 	@Override
@@ -561,6 +561,6 @@ public class ProductTypeImpl extends AbstractLegacyEntityImpl implements Product
 
 	@Override
 	public boolean isConfigurable() {
-		return !this.getCartItemModifierGroups().isEmpty();
+		return !this.getModifierGroups().isEmpty();
 	}
 }

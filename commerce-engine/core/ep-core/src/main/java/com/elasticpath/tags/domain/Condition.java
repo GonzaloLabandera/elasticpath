@@ -18,6 +18,7 @@ public class Condition implements Serializable {
 	private static final long serialVersionUID = 200903032L;
 
 	private TagDefinition tagDefinition;
+	private String tagDefinitionString;
 	private Object tagValue;
 	private String operator;
 	private LogicalOperator parent;
@@ -32,16 +33,19 @@ public class Condition implements Serializable {
 	/**
 	 * Constructor.
 	 * @param tagDefinition the left operand of the expression which is tag definition
+	 * @param tagDefinitionString the string representation of the tag definition key
 	 * @param operator the operator
 	 * @param tagValue the right operand of the expression which is value for the expression
 	 * @throws UnsupportedOperationException if the right operand is an instance of Arrays, Maps or Collections.
 	 */
-	public Condition(final TagDefinition tagDefinition, final String operator, final Object tagValue) throws UnsupportedOperationException {
+	public Condition(final TagDefinition tagDefinition, final String tagDefinitionString, final String operator,
+					 final Object tagValue) throws UnsupportedOperationException {
 		if (!isSupportedOperand(tagValue)) {
 			throw new UnsupportedOperationException("Operations with null values, Array types, Collections and Maps are not supported!");
 		}
 		
 		this.tagDefinition = tagDefinition;
+		this.tagDefinitionString = tagDefinitionString;
 		this.operator = operator;
 		this.tagValue = tagValue;
 	}
@@ -62,6 +66,10 @@ public class Condition implements Serializable {
 	 */
 	public void setTagDefinition(final TagDefinition tagDefinition) {
 		this.tagDefinition = tagDefinition;
+	}
+
+	public String getTagDefinitionString() {
+		return tagDefinitionString;
 	}
 	/**
 	 * @return the rightOperand
@@ -98,6 +106,7 @@ public class Condition implements Serializable {
 	public LogicalOperator getParentLogicalOperator() {
 		return parent;
 	}
+
 	/**
 	 * @param parent the parent to set
 	 */

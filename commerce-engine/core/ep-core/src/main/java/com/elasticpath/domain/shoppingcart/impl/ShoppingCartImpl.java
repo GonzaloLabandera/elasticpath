@@ -29,7 +29,6 @@ import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
 import com.google.common.base.Strings;
 import com.google.common.collect.ImmutableList;
-
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.ObjectUtils;
 import org.apache.commons.lang.StringUtils;
@@ -40,7 +39,6 @@ import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.catalog.GiftCertificate;
 import com.elasticpath.domain.catalog.Product;
 import com.elasticpath.domain.catalog.ProductSku;
-import com.elasticpath.domain.coupon.specifications.PotentialCouponUse;
 import com.elasticpath.domain.customer.Address;
 import com.elasticpath.domain.customer.CustomerSession;
 import com.elasticpath.domain.impl.AbstractEpDomainImpl;
@@ -55,9 +53,9 @@ import com.elasticpath.domain.shipping.ShipmentType;
 import com.elasticpath.domain.shipping.evaluator.impl.ShoppingCartShipmentTypeEvaluator;
 import com.elasticpath.domain.shopper.Shopper;
 import com.elasticpath.domain.shoppingcart.DiscountRecord;
+import com.elasticpath.domain.shoppingcart.ItemType;
 import com.elasticpath.domain.shoppingcart.MutablePromotionRecordContainer;
 import com.elasticpath.domain.shoppingcart.PromotionRecordContainer;
-import com.elasticpath.domain.shoppingcart.ItemType;
 import com.elasticpath.domain.shoppingcart.ShippingPricingSnapshot;
 import com.elasticpath.domain.shoppingcart.ShoppingCart;
 import com.elasticpath.domain.shoppingcart.ShoppingCartMemento;
@@ -69,7 +67,6 @@ import com.elasticpath.domain.shoppingcart.ShoppingItem;
 import com.elasticpath.domain.shoppingcart.ShoppingItemPricingSnapshot;
 import com.elasticpath.domain.shoppingcart.ShoppingItemTaxSnapshot;
 import com.elasticpath.domain.shoppingcart.ShoppingList;
-import com.elasticpath.domain.specifications.Specification;
 import com.elasticpath.domain.store.Store;
 import com.elasticpath.domain.tax.TaxCategory;
 import com.elasticpath.money.Money;
@@ -406,7 +403,7 @@ public class ShoppingCartImpl extends AbstractEpDomainImpl implements ShoppingCa
 
 		final List<ShoppingItem> children = cartItem.getChildren();
 
-		if (CollectionUtils.isNotEmpty(children)) {
+		if (CollectionUtils.isNotEmpty(children) || cartItem.isCalculatedBundle(getProductSkuLookup())) {
 			cartItem.setItemType(ItemType.BUNDLE);
 			updateChildShoppingCartUid(shoppingCartUidPk, children);
 		} else {
@@ -491,6 +488,10 @@ public class ShoppingCartImpl extends AbstractEpDomainImpl implements ShoppingCa
 	}
 
 	private void internalRemoveCartItem(final ShoppingItem currItem, final boolean addToRemovedList) {
+		// Remove an item if it is a bundle constituent.
+		if (currItem.isBundleConstituent()) {
+			getAllShoppingItems().forEach(item -> item.getChildren().remove(currItem));
+		}
 		// Remove any cross-referenced dependent items
 		final List<ShoppingItem> cartItems = getCartMementoItems(getShoppingCartMemento());
 		for (ShoppingItem item : cartItems) {
@@ -1257,13 +1258,10 @@ public class ShoppingCartImpl extends AbstractEpDomainImpl implements ShoppingCa
 
 		Rule limitedUseRule;
 		String couponCode;
-		PotentialCouponUse potentialCouponUse;
 
 		boolean areCodesApplied = false;
 		for (Coupon coupon : couponCodeToCoupon.values()) {
-			potentialCouponUse = new PotentialCouponUse(coupon, storeCode, customerEmailAddress);
-
-			if (getValidCouponUseSpecification().isSatisfiedBy(potentialCouponUse).isSuccess()) {
+			if (getCouponUsageService().validateCouponRuleAndUsage(coupon, storeCode, customerEmailAddress).isSuccess()) {
 
 				couponCode = coupon.getCouponCode();
 				limitedUseRule = couponCodeToLimitedUseRule.get(couponCode);
@@ -1295,8 +1293,8 @@ public class ShoppingCartImpl extends AbstractEpDomainImpl implements ShoppingCa
 			return true;
 		}
 
-		PotentialCouponUse potentialCouponUse = new PotentialCouponUse(coupon, getStore().getCode(), getCustomerEmailAddress());
-		if (!getValidCouponUseSpecification().isSatisfiedBy(potentialCouponUse).isSuccess()) {
+		if (!getCouponUsageService().validateCouponRuleAndUsage(
+				coupon, getStore().getCode(), getCustomerEmailAddress()).isSuccess()) {
 			return false;
 		}
 
@@ -1419,8 +1417,7 @@ public class ShoppingCartImpl extends AbstractEpDomainImpl implements ShoppingCa
 	}
 
 	private boolean isCouponUsageValid(final String customerEmailAddress, final Coupon coupon, final CouponUsage couponUsage) {
-
-		return getCouponUsageService().isValidCouponUsage(customerEmailAddress, coupon, couponUsage);
+		return getCouponUsageService().validateCouponUsage(customerEmailAddress, coupon, couponUsage).isSuccess();
 	}
 
 	/**
@@ -1852,6 +1849,16 @@ public class ShoppingCartImpl extends AbstractEpDomainImpl implements ShoppingCa
 				.collect(Collectors.toMap(item -> item, item -> productSkuMap.get(item.getSkuGuid())));
 	}
 
+	@Override
+	public boolean isDefault() {
+		return getShoppingCartMemento().isDefault();
+	}
+
+	@Override
+	public void setDefault(final boolean isDefaultCart) {
+		getShoppingCartMemento().setDefault(isDefaultCart);
+	}
+
 	/**
 	 * Lazy loads the product sku lookup.
 	 * @return a product sku lookup
@@ -1872,15 +1879,6 @@ public class ShoppingCartImpl extends AbstractEpDomainImpl implements ShoppingCa
 			discountCalculator = getBean(ContextIdNames.DISCOUNT_APPORTIONING_CALCULATOR);
 		}
 		return discountCalculator;
-	}
-
-	/**
-	 * Get coupon validation for potential coupon use specification.
-	 *
-	 * @return specification for potential coupon use.
-	 */
-	protected Specification<PotentialCouponUse> getValidCouponUseSpecification() {
-		return this.getBean(ContextIdNames.VALID_COUPON_USE_SPEC);
 	}
 
 	/**
@@ -1932,6 +1930,35 @@ public class ShoppingCartImpl extends AbstractEpDomainImpl implements ShoppingCa
 
 
 	/**
+	 * Accesses the field for {@code name} and returns the current value. If the field has not been set
+	 * then will return null.
+	 *
+	 * @param name The name of the field.
+	 * @return The current value of the field or null.
+	 */
+	@Override
+	public String getCartDataFieldValue(final String name) {
+		return  getShoppingCartMemento().getCartDataFieldValue(name);
+	}
+
+	@Override
+	public void setCartDataFieldValue(final String name, final String value) {
+		getShoppingCartMemento().setCartDataFieldValue(name, value);
+	}
+
+
+	public Map<String, CartData> getCartData() {
+		return getShoppingCartMemento().getCartData();
+	}
+
+
+
+	@Override
+	public CartData createCartData(final String name, final String value) {
+		return new CartData(name, value);
+	}
+
+	/**
 	 * Returns parent product sku for a shopping item.
 	 *
 	 * @param shoppingItem shopping item
@@ -1948,7 +1975,12 @@ public class ShoppingCartImpl extends AbstractEpDomainImpl implements ShoppingCa
 
 	@Override
 	public void setChildShoppingCartUid(final ShoppingItem shoppingItem) {
-		shoppingItem.setChildItemCartUid(getShoppingCartMemento().getUidPk());
+		final Long cartUid = getShoppingCartMemento().getUidPk();
+
+		shoppingItem.setChildItemCartUid(cartUid);
+		List<ShoppingItem> children = shoppingItem.getChildren();
+
+		updateChildShoppingCartUid(cartUid, children);
 	}
 
 	/**

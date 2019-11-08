@@ -176,7 +176,7 @@ public class AbstractElementAdapterTest {
 		final RuleException ruleException = givenANewRuleException();
 
 		context.checking(new Expectations() { {
-			oneOf(mockBeanFactory).getBean(RuleExceptionType.PRODUCT_EXCEPTION.getPropertyKey());
+			oneOf(mockBeanFactory).getPrototypeBean(RuleExceptionType.PRODUCT_EXCEPTION.getPropertyKey(), RuleException.class);
 			will(returnValue(ruleException));
 		} });
 
@@ -199,7 +199,7 @@ public class AbstractElementAdapterTest {
 		elementAdapter.setBeanFactory(mockBeanFactory);
 
 		context.checking(new Expectations() { {
-			oneOf(mockBeanFactory).getBean(RuleExceptionType.PRODUCT_EXCEPTION.getPropertyKey());
+			oneOf(mockBeanFactory).getPrototypeBean(RuleExceptionType.PRODUCT_EXCEPTION.getPropertyKey(), RuleException.class);
 			will(returnValue(null));
 		} });
 
@@ -223,9 +223,9 @@ public class AbstractElementAdapterTest {
 		elementAdapter.setBeanFactory(mockBeanFactory);
 
 		context.checking(new Expectations() { {
-			oneOf(mockBeanFactory).getBean(ContextIdNames.RULE_PARAMETER);
+			oneOf(mockBeanFactory).getPrototypeBean(ContextIdNames.RULE_PARAMETER, RuleParameter.class);
 			will(returnValue(new RuleParameterImpl()));
-			oneOf(mockBeanFactory).getBean(ContextIdNames.RULE_PARAMETER);
+			oneOf(mockBeanFactory).getPrototypeBean(ContextIdNames.RULE_PARAMETER, RuleParameter.class);
 			will(returnValue(new RuleParameterImpl()));
 		} });
 
@@ -254,11 +254,11 @@ public class AbstractElementAdapterTest {
 		final RuleException ruleException2 = givenANewRuleException();
 
 		context.checking(new Expectations() { {
-			oneOf(mockBeanFactory).getBean(RuleExceptionType.PRODUCT_EXCEPTION.getPropertyKey());
+			oneOf(mockBeanFactory).getPrototypeBean(RuleExceptionType.PRODUCT_EXCEPTION.getPropertyKey(), RuleException.class);
 			will(returnValue(ruleException1));
-			oneOf(mockBeanFactory).getBean(RuleExceptionType.CATEGORY_EXCEPTION.getPropertyKey());
+			oneOf(mockBeanFactory).getPrototypeBean(RuleExceptionType.CATEGORY_EXCEPTION.getPropertyKey(), RuleException.class);
 			will(returnValue(ruleException2));
-			exactly(2).of(mockBeanFactory).getBean(ContextIdNames.RULE_PARAMETER);
+			exactly(2).of(mockBeanFactory).getPrototypeBean(ContextIdNames.RULE_PARAMETER, RuleParameter.class);
 			will(returnValue(new RuleParameterImpl()));
 		} });
 

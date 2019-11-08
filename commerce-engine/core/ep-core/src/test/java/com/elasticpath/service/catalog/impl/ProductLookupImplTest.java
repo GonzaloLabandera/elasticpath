@@ -20,7 +20,6 @@ import com.elasticpath.domain.catalog.Product;
 import com.elasticpath.domain.catalog.ProductLoadTuner;
 import com.elasticpath.domain.catalog.impl.ProductImpl;
 import com.elasticpath.persistence.api.PersistenceEngine;
-import com.elasticpath.service.misc.FetchPlanHelper;
 import com.elasticpath.service.query.QueryCriteria;
 import com.elasticpath.service.query.QueryService;
 import com.elasticpath.service.query.impl.QueryResultImpl;
@@ -32,7 +31,6 @@ public class ProductLookupImplTest {
 	public final JUnitRuleMockery context = new JUnitRuleMockery();
 
 	@Mock private QueryService<Product> queryService;
-	@Mock private FetchPlanHelper fetchPlanHelper;
 	@Mock private ProductLoadTuner loadTuner;
 	@Mock private PersistenceEngine persistenceEngine;
 
@@ -47,25 +45,20 @@ public class ProductLookupImplTest {
 
 		lookup = new ProductLookupImpl();
 		lookup.setQueryService(queryService);
-		lookup.setFetchPlanHelper(fetchPlanHelper);
 		lookup.setProductLoadTuner(loadTuner);
 		lookup.setPersistenceEngine(persistenceEngine);
 	}
 
 	@Test
 	@SuppressWarnings("unchecked")
-	public void testFindByGuid() throws Exception {
+	public void testFindByGuid() {
 		//  Given
 		context.checking(new Expectations() {
 			{
-				oneOf(fetchPlanHelper).configureProductFetchPlan(loadTuner);
-
 				QueryResultImpl<Product> result = new QueryResultImpl<>();
-				result.setResults(Collections.<Product>singletonList(product));
+				result.setResults(Collections.singletonList(product));
 				allowing(queryService).query(with(any(QueryCriteria.class)));
 				will(returnValue(result));
-
-				oneOf(fetchPlanHelper).clearFetchPlan();
 			}
 		});
 
@@ -81,12 +74,9 @@ public class ProductLookupImplTest {
 		//  Given
 		context.checking(new Expectations() {
 			{
-				oneOf(fetchPlanHelper).configureProductFetchPlan(loadTuner);
-
+				oneOf(persistenceEngine).withLoadTuners(loadTuner); will(returnValue(persistenceEngine));
 				allowing(persistenceEngine).get(ProductImpl.class, PRODUCT_UID);
 				will(returnValue(product));
-
-				oneOf(fetchPlanHelper).clearFetchPlan();
 			}
 		});
 
@@ -104,14 +94,10 @@ public class ProductLookupImplTest {
 		//  Given
 		context.checking(new Expectations() {
 			{
-				oneOf(fetchPlanHelper).configureProductFetchPlan(loadTuner);
-
 				QueryResultImpl<Product> result = new QueryResultImpl<>();
-				result.setResults(Collections.<Product>singletonList(product));
+				result.setResults(Collections.singletonList(product));
 				allowing(queryService).query(with(any(QueryCriteria.class)));
 				will(returnValue(result));
-
-				oneOf(fetchPlanHelper).clearFetchPlan();
 			}
 		});
 

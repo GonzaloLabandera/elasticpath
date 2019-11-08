@@ -20,6 +20,7 @@
 	<modules>
 		<module>ep-batch</module>
 		<module>ep-batch-itests</module>
+		<module>ep-catalog-batch</module>
 	</modules>
 
 </project>

@@ -5,6 +5,7 @@
     <resource>tax_jurisdictions.xml</resource>
     <resource>warehouses.xml</resource>
     <resource>payment_gateways.xml</resource>
+    <resource>modifiergroups.xml</resource>
     <resource>catalogs.xml</resource>
     <resource>categories.xml</resource>
     <resource>stores.xml</resource>
@@ -34,4 +35,6 @@
     <resource>shipping_regions.xml</resource>
     <resource>shipping_service_levels.xml</resource>
     <resource>cmimportjobs.xml</resource>
+    <resource>sort_attributes.xml</resource>
+
 </manifest>

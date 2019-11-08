@@ -4,11 +4,9 @@
 	<family>
 		<name>paymentmethods</name>
 		<description>
-			<![CDATA[
-The Payment Methods resource is responsible for the customer's paymentmethods. This resource lists all the paymentmethods
+			<![CDATA[The Payment Methods resource is responsible for the customer's paymentmethods. This resource lists all the paymentmethods
 defined for the customer payment tokens. Selecting a payment method for a purchase is set
-during the purchase's order phase.
-			]]>
+during the purchase's order phase.]]>
 		</description>
 
 		<uri-part>

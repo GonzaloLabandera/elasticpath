@@ -3,17 +3,6 @@
 
 	<family>
 		<name>orders</name>
-		<description>
-			<![CDATA[
-Billing Address Info:
-
-The Billing address info resource provides the customer with a selector to select the billing address to use for
-the [purchase][purchase] and an addressform to create a billing address to use for the purchase. The billing
-address is the address that is related to the payment means, which in some cases is the address your credit card uses.
-
-[purchase]: #purchases
-			]]>
-		</description>
 
 		<resource>
 			<name>billingaddress-info</name>

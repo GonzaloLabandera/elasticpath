@@ -55,6 +55,7 @@
 	<util:list id="finalizeActions" list-class="java.util.ArrayList">
 		<ref bean="clearShoppingCartCheckoutAction" />
 		<ref bean="postCheckoutCheckoutAction" />
+		<ref bean="logContextOverrideDateSetAction" />
 	</util:list>
 	<!-- !!!! DOCshippingServiceLevelService -->
 
@@ -100,7 +101,7 @@
 		<property name="taxOperationService" ref="taxOperationService"/>
 		<property name="eventMessageFactory" ref="eventMessageFactory"/>
 		<property name="eventMessagePublisher" ref="orderEventMessagePublisher"/>
-		<property name="orderShipmentHandlerFactory" ref="orderShipmentHandlerFactory"></property>
+		<property name="orderShipmentHandlerFactory" ref="orderShipmentHandlerFactory"/>
         <property name="orderReturnValidator">
             <bean class="com.elasticpath.service.order.impl.CompositeOrderReturnValidatorImpl">
                 <property name="validators">
@@ -211,6 +212,11 @@
 		  class="com.elasticpath.service.shoppingcart.actions.impl.ClearShoppingCartCheckoutAction">
 		<property name="shoppingCartService" ref="shoppingCartService" />
 		<property name="cartOrderService" ref="cartOrderService" />
+	</bean>
+
+	<bean id="logContextOverrideDateSetAction"
+		  class="com.elasticpath.service.shoppingcart.actions.impl.LogShoppingContextDateOverriddenAction">
+		<property name="orderEventHelper" ref="orderEventHelper" />
 	</bean>
 
 	<bean id="postCheckoutCheckoutAction"

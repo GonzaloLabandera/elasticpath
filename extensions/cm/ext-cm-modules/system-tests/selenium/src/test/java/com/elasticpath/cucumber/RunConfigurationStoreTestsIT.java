@@ -8,7 +8,7 @@ import org.junit.runner.RunWith;
  * This class is used to run Cucumber Features test scenarios.
  */
 @RunWith(Cucumber.class)
-@CucumberOptions(format = {"pretty", "html:target/cucumber-html-reports/configuration/stores", "json:target/configuration/stores.json"},
+@CucumberOptions(plugin = {"pretty", "html:target/cucumber-html-reports/configuration/stores", "json:target/configuration/stores.json"},
 		glue = {"classpath:com.elasticpath.cucumber", "classpath:com.elasticpath.cortex"},
 		tags = {"@regressionTest", "@configuration", "@store"},
 		features = "src/test/resources/com.elasticpath.cucumber/configuration/stores")

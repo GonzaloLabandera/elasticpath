@@ -106,6 +106,7 @@ import com.elasticpath.inventory.impl.InventoryDtoImpl;
 import com.elasticpath.money.Money;
 import com.elasticpath.money.StandardMoneyFormatter;
 import com.elasticpath.persistence.api.FetchGroupLoadTuner;
+import com.elasticpath.persistence.api.LoadTuner;
 import com.elasticpath.persistence.support.OrderCriterion;
 import com.elasticpath.persistence.support.impl.FetchGroupLoadTunerImpl;
 import com.elasticpath.persistence.support.impl.OrderCriterionImpl;
@@ -115,7 +116,6 @@ import com.elasticpath.service.catalog.ProductSkuLookup;
 import com.elasticpath.service.customer.CustomerSessionService;
 import com.elasticpath.service.misc.TimeService;
 import com.elasticpath.service.misc.impl.DatabaseServerTimeServiceImpl;
-import com.elasticpath.service.misc.impl.OpenJPAFetchPlanHelperImpl;
 import com.elasticpath.service.order.IllegalReturnStateException;
 import com.elasticpath.service.order.OrderReturnValidator;
 import com.elasticpath.service.order.ReturnAndExchangeService;
@@ -352,7 +352,6 @@ public class ReturnAndExchangeServiceImplTest extends AbstractEPServiceTestCase 
 			}
 		};
 		orderServiceImpl.setPersistenceEngine(getPersistenceEngine());
-		orderServiceImpl.setFetchPlanHelper(getFetchPlanHelper());
 
 		OrderCriterion orderCriterion = new OrderCriterionImpl();
 		stubGetBean(ContextIdNames.ORDER_CRITERION, orderCriterion);
@@ -636,23 +635,14 @@ public class ReturnAndExchangeServiceImplTest extends AbstractEPServiceTestCase 
 		final long uidPk = 1;
 		final OrderReturn orderReturn = new OrderReturnImpl();
 		orderReturn.setUidPk(uidPk);
+		exchangeService.setFetchPlanHelper(getMockFetchPlanHelper());
 
-		exchangeService.setFetchPlanHelper(new OpenJPAFetchPlanHelperImpl() {
-			@Override
-			public void clearFetchPlan() {
-				// empty
-			}
-
-			@Override
-			public void configureFetchGroupLoadTuner(final FetchGroupLoadTuner loadTuner) {
-				// empty
-			}
-
-		});
 		context.checking(new Expectations() {
 			{
 				oneOf(getMockPersistenceEngine()).get(with(same(OrderReturnImpl.class)), with(uidPk));
 				will(returnValue(orderReturn));
+
+				oneOf(getMockFetchPlanHelper()).setLoadTuners(with(any(LoadTuner[].class)));
 			}
 		});
 

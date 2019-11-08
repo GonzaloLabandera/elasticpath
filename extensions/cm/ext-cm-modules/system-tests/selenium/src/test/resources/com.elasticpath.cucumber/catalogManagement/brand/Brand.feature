@@ -9,7 +9,7 @@ Feature: Catalog Brand Management
   Scenario: Update, Edit, Delete new brand for an existing catalog
     Given I create a new catalog with following details
       | catalogName   | language |
-      | ATest Catalog | English  |
+      | ZTest Catalog | English  |
     And I go to Catalog Management
     And I open the newly created catalog editor
     When I add a brand testBrand

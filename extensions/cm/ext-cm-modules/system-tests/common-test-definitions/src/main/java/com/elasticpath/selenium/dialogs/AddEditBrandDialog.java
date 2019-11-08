@@ -21,6 +21,9 @@ public class AddEditBrandDialog extends AbstractDialog {
 			+ ".CatalogMessages.BrandAddEditDialog_BrandName'][widget-type='CCombo']+[widget-type='Text'] input";
 	private static final String ADD_BUTTON_CSS_TEMPLATE = "div[automation-id='com.elasticpath.cmclient.core.CoreMessages"
 			+ ".AbstractEpDialog_ButtonSave'][seeable='true']";
+	private static final String ADD_BRAND_PARENT_CSS = "div[automation-id*='com.elasticpath.cmclient.catalog.CatalogMessages.BrandAddEditDialog']"
+			+ "[widget-type='Shell'] ";
+	private static final String LANGUAGE_COMBO_BOX_CSS = ADD_BRAND_PARENT_CSS + "div[widget-type='CCombo']";
 	private final String addEditBrandDialogCSS;
 	private final String brandCodeInputCSS;
 	private final String brandNameInputCSS;
@@ -99,5 +102,23 @@ public class AddEditBrandDialog extends AbstractDialog {
 					.isEqualTo(true);
 		}
 		setWebDriverImplicitWaitToDefault();
+	}
+
+	/**
+	 * Select language.
+	 *
+	 * @param language language which should be chosen.
+	 */
+	public void selectLanguage(final String language) {
+		selectComboBoxItem(LANGUAGE_COMBO_BOX_CSS, language);
+	}
+
+	/**
+	 * Returns brand display name displayed in dialog.
+	 *
+	 * @return brand display name displayed in dialog.
+	 */
+	public String getBrandDisplayName() {
+		return getDriver().findElement(By.cssSelector(brandNameInputCSS)).getAttribute("value");
 	}
 }

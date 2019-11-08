@@ -11,6 +11,11 @@
 	<artifactId>ep-importexport-acceptance-tests</artifactId>
 	<name>EP Import Export Acceptance Tests</name>
 
+	<properties>
+		<org.apache.activemq.tooling.version>5.14.3</org.apache.activemq.tooling.version>
+		<ep.activemq.configUri>broker:(tcp://localhost:61621)?useJmx=false&amp;persistent=false</ep.activemq.configUri>
+	</properties>
+
 	<dependencies>
 		<dependency>
 			<groupId>com.elasticpath</groupId>
@@ -97,6 +102,34 @@
 			</testResource>
 		</testResources>
 		<plugins>
+			<plugin>
+				<groupId>org.apache.activemq.tooling</groupId>
+				<artifactId>activemq-maven-plugin</artifactId>
+				<version>${org.apache.activemq.tooling.version}</version>
+				<configuration>
+					<skip>${skipAllTests}</skip>
+				</configuration>
+				<executions>
+					<execution>
+						<id>activemq-embedded-tcp</id>
+						<goals>
+							<goal>run</goal>
+						</goals>
+						<phase>process-test-resources</phase>
+						<configuration>
+							<fork>true</fork>
+							<configUri>${ep.activemq.configUri}</configUri>
+						</configuration>
+					</execution>
+					<execution>
+						<id>stop-embedded-tcp</id>
+						<goals>
+							<goal>stop</goal>
+						</goals>
+						<phase>post-integration-test</phase>
+					</execution>
+				</executions>
+			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-failsafe-plugin</artifactId>

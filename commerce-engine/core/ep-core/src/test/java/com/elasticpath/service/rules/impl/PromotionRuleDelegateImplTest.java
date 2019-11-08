@@ -473,7 +473,7 @@ public class PromotionRuleDelegateImplTest {
 		final String discount50Percent = "50", discount5 = "5", discountAmount = "5.00";
 		final DiscountRecord expectedDiscountRecord = new CatalogItemDiscountRecordImpl(RULE_UID, ACTION_UID, new BigDecimal(discountAmount));
 		Price price = get10Cad();
-		
+
 		ruleDelegate.discountPriceByPercent(RULE_UID, ACTION_UID, ruleDelegate.setDiscountPercentScale(new BigDecimal(discount50Percent)), price);
 		ruleDelegate.discountPriceByAmount(RULE_UID, ACTION_UID, new BigDecimal(discount5), price);
 
@@ -540,6 +540,8 @@ public class PromotionRuleDelegateImplTest {
 			{
 				oneOf(shippingOption).getCode();
 				will(returnValue(shippingOptionCode));
+				oneOf(discountItemContainer).getPrePromotionPriceAmount(shippingOption);
+				will(returnValue(BigDecimal.TEN));
 			}
 		});
 
@@ -549,6 +551,47 @@ public class PromotionRuleDelegateImplTest {
 		context.checking(new Expectations() { {
 			// The rule must set the shipping discount on the shipping option
 			oneOf(discountItemContainer).applyShippingOptionDiscount(shippingOption, RULE_UID, ACTION_UID, discountAmount);
+		} });
+
+		this.ruleDelegate.applyShippingDiscountAmount(
+				shoppingCart, discountItemContainer, RULE_UID, ACTION_UID, discountAmount.toString(), shippingOptionCode, CANADIAN);
+	}
+
+	/**
+	 * Test when shipping discount amount is greater than the original shipping cost.
+	 * In this case, exactly the entire original shipping cost should be discounted to avoid negative values.
+	 */
+	@Test
+	public void testApplyShippingDiscountAmountGreaterThanShippingAmountAppliesFullPositiveShippingCostAmount() {
+		final ShoppingCart shoppingCart = aCart(context)
+				.withCurrency(CANADIAN)
+				.build();
+
+		final ShippingOption shippingOption = context.mock(ShippingOption.class);
+		final DiscountItemContainer discountItemContainer = context.mock(DiscountItemContainer.class);
+
+		final BigDecimal discountAmount = Money.valueOf(BigDecimal.TEN, CANADIAN).getAmount();
+		final Money finalDiscount = Money.valueOf(BigDecimal.ONE, CANADIAN);
+		final String shippingOptionCode = "SSLCode001";
+
+		expectationsFactory.allowingBeanFactoryGetBean(ContextIdNames.MONEY_FORMATTER, StandardMoneyFormatter.class);
+
+		// logic flow driver
+		context.checking(new Expectations() {
+			{
+				oneOf(shippingOption).getCode();
+				will(returnValue(shippingOptionCode));
+				oneOf(discountItemContainer).getPrePromotionPriceAmount(shippingOption);
+				will(returnValue(BigDecimal.ONE));
+			}
+		});
+
+		mockShippingOptionServiceToReturnUnpriced(shoppingCart, singletonList(shippingOption));
+
+		// Actual test expectations
+		context.checking(new Expectations() { {
+			// The rule must set the shipping discount on the shipping option
+			oneOf(discountItemContainer).applyShippingOptionDiscount(shippingOption, RULE_UID, ACTION_UID, finalDiscount.getAmount());
 		} });
 
 		this.ruleDelegate.applyShippingDiscountAmount(

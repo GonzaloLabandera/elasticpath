@@ -13,8 +13,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import javax.persistence.Access;
-import javax.persistence.AccessType;
 import javax.persistence.Basic;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -73,7 +71,6 @@ import com.elasticpath.service.shoppingcart.impl.TaxHandlingEnum;
 			}
 	)
 })
-@Access(AccessType.PROPERTY)
 @SuppressWarnings("PMD.GodClass")
 public class ShoppingItemImpl extends AbstractShoppingItemImpl implements CartItem, ExchangeItem, DatabaseCreationDate {
 	/**
@@ -106,9 +103,6 @@ public class ShoppingItemImpl extends AbstractShoppingItemImpl implements CartIt
 
 	private Long childItemCartUid;
 
-	@Access(AccessType.FIELD)
-	@Basic
-	@Column(name = "PARENT_ITEM_UID")
 	private Long parentItemUid;
 
 	private ItemType itemType = ItemType.SIMPLE;
@@ -394,10 +388,18 @@ public class ShoppingItemImpl extends AbstractShoppingItemImpl implements CartIt
 		this.creationDate = creationDate;
 	}
 
-
 	@Override
+	@Basic
+	@Column(name = "PARENT_ITEM_UID")
 	public Long getParentItemUid() {
 		return parentItemUid;
+	}
+
+	@Override
+	public void setParentItemUid(final Long newParentItemUid) {
+		if (newParentItemUid != null) {
+			this.parentItemUid = newParentItemUid;
+		}
 	}
 
 	@Persistent

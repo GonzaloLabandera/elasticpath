@@ -8,6 +8,7 @@ import javax.inject.Inject;
 
 import io.reactivex.Observable;
 
+import com.elasticpath.rest.definition.carts.CartsIdentifier;
 import com.elasticpath.rest.definition.carts.DefaultCartIdentifier;
 import com.elasticpath.rest.definition.carts.RootToDefaultCartRelationship;
 import com.elasticpath.rest.helix.data.annotation.UserScopes;
@@ -26,7 +27,9 @@ public class RootToDefaultCartRelationshipImpl implements RootToDefaultCartRelat
 	public Observable<DefaultCartIdentifier> onLinkTo() {
 		return Observable.fromIterable(scopes)
 				.map(StringIdentifier::of)
-				.map(scopeId -> DefaultCartIdentifier.builder().withScope(scopeId).build())
+				.map(scopeId -> DefaultCartIdentifier.builder()
+						.withCarts(CartsIdentifier.builder().withScope(scopeId).build())
+						.build())
 				.firstElement()
 				.toObservable();
 	}

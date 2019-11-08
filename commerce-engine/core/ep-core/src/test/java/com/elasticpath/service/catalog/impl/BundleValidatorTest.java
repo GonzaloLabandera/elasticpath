@@ -20,7 +20,9 @@ import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.catalog.BundleConstituent;
 import com.elasticpath.domain.catalog.Product;
 import com.elasticpath.domain.catalog.ProductBundle;
+import com.elasticpath.domain.catalog.ProductConstituent;
 import com.elasticpath.domain.catalog.ProductSku;
+import com.elasticpath.domain.catalog.ProductSkuConstituent;
 import com.elasticpath.domain.catalog.ProductType;
 import com.elasticpath.domain.catalog.impl.BundleConstituentImpl;
 import com.elasticpath.domain.catalog.impl.ProductBundleImpl;
@@ -29,6 +31,7 @@ import com.elasticpath.domain.catalog.impl.ProductSkuConstituentImpl;
 import com.elasticpath.domain.skuconfiguration.SkuOption;
 import com.elasticpath.domain.skuconfiguration.SkuOptionValue;
 import com.elasticpath.domain.skuconfiguration.impl.SkuOptionValueImpl;
+import com.elasticpath.domain.subscriptions.PaymentSchedule;
 import com.elasticpath.domain.subscriptions.impl.PaymentScheduleImpl;
 import com.elasticpath.service.catalog.BundleValidator;
 import com.elasticpath.service.pricing.impl.PaymentScheduleHelperImpl;
@@ -53,8 +56,9 @@ public class BundleValidatorTest {
 		beanFactory = context.mock(BeanFactory.class);
 		expectationsFactory = new BeanFactoryExpectationsFactory(context, beanFactory);
 
-		expectationsFactory.allowingBeanFactoryGetBean("productConstituent", ProductConstituentImpl.class);
-		expectationsFactory.allowingBeanFactoryGetBean("productSkuConstituent", ProductSkuConstituentImpl.class);
+		expectationsFactory.allowingBeanFactoryGetPrototypeBean("productConstituent", ProductConstituent.class, ProductConstituentImpl.class);
+		expectationsFactory.allowingBeanFactoryGetPrototypeBean("productSkuConstituent", ProductSkuConstituent.class,
+				ProductSkuConstituentImpl.class);
 
 		setupBundleValidator();
 	}
@@ -76,7 +80,7 @@ public class BundleValidatorTest {
 		};
 
 		paymentScheduleHelper.setBeanFactory(beanFactory);
-		expectationsFactory.allowingBeanFactoryGetBean(ContextIdNames.PAYMENT_SCHEDULE, PaymentScheduleImpl.class);
+		expectationsFactory.allowingBeanFactoryGetPrototypeBean(ContextIdNames.PAYMENT_SCHEDULE, PaymentSchedule.class, PaymentScheduleImpl.class);
 
 		((BundleValidatorImpl) bundleValidator).setPaymentScheduleHelper(paymentScheduleHelper);
 	}

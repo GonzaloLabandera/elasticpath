@@ -300,7 +300,34 @@
 			</action>
 		</actions>
 	</rule>
-
+	<rule>
+		<code>a10edbb4-0f9c-4b2c-baf6-f5d9b895354e</code>
+		<conditions>
+			<and>
+				<condition>
+					<kind>Condition</kind>
+					<type>anySkuInCartCondition</type>
+					<parameters>
+						<parameter>
+							<key>numItems</key>
+							<value>1</value>
+						</parameter>
+						<parameter>
+							<key>numItemsQuantifier</key>
+							<value>AT_LEAST</value>
+						</parameter>
+					</parameters>
+					<exceptions/>
+				</condition>
+			</and>
+		</conditions>
+		<actions>
+			<action>
+				<type>ShoppingCartPromotion</type>
+				<code>a10edbb4-0f9c-4b2c-baf6-f5d9b895354e</code>
+			</action>
+		</actions>
+	</rule>
 	<rule>
 		<code>940fb358-7235-463c-961f-1e2ad1f051ea</code>
 		<conditions>

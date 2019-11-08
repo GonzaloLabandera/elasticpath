@@ -11,6 +11,7 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -31,12 +32,12 @@ import com.elasticpath.domain.attribute.impl.AttributeGroupAttributeImpl;
 import com.elasticpath.domain.attribute.impl.AttributeGroupImpl;
 import com.elasticpath.domain.attribute.impl.AttributeImpl;
 import com.elasticpath.domain.catalog.ProductType;
-import com.elasticpath.domain.catalog.ProductTypeLoadTuner;
 import com.elasticpath.domain.catalog.impl.ProductTypeImpl;
 import com.elasticpath.domain.skuconfiguration.SkuOption;
+import com.elasticpath.persistence.api.LoadTuner;
 import com.elasticpath.persistence.api.Persistable;
 import com.elasticpath.persistence.api.PersistenceEngine;
-import com.elasticpath.service.misc.FetchPlanHelper;
+import com.elasticpath.persistence.openjpa.util.FetchPlanHelper;
 import com.elasticpath.service.misc.TimeService;
 
 /**
@@ -155,10 +156,9 @@ public class ProductTypeDaoImplTest {
 
 		context.checking(new Expectations() {
 			{
-				oneOf(mockFetchPlanHelper).configureProductTypeFetchPlan(with(aNull(ProductTypeLoadTuner.class)));
+				oneOf(mockFetchPlanHelper).setLoadTuners(new LoadTuner[]{null});
 				oneOf(mockPersistenceEngine).load(ProductTypeImpl.class, productType.getUidPk());
 				will(returnValue(null));
-				oneOf(mockFetchPlanHelper).clearFetchPlan();
 
 				oneOf(mockBeanFactory).getBeanImplClass(ContextIdNames.PRODUCT_TYPE);
 				will(returnValue(ProductTypeImpl.class));
@@ -196,12 +196,9 @@ public class ProductTypeDaoImplTest {
 
 		context.checking(new Expectations() {
 			{
-				oneOf(mockFetchPlanHelper).configureProductTypeFetchPlan(with(aNull(ProductTypeLoadTuner.class)));
-
+				oneOf(mockFetchPlanHelper).setLoadTuners(new LoadTuner[]{null});
 				oneOf(mockPersistenceEngine).load(ProductTypeImpl.class, productType.getUidPk());
 				will(returnValue(productType));
-
-				oneOf(mockFetchPlanHelper).clearFetchPlan();
 
 				oneOf(mockBeanFactory).getBeanImplClass(ContextIdNames.PRODUCT_TYPE);
 				will(returnValue(ProductTypeImpl.class));
@@ -349,8 +346,7 @@ public class ProductTypeDaoImplTest {
 		final List<String> fieldsToLoad = new ArrayList<>();
 		context.checking(new Expectations() {
 			{
-				oneOf(mockFetchPlanHelper).addFields(ProductTypeImpl.class, fieldsToLoad);
-				oneOf(mockFetchPlanHelper).clearFetchPlan();
+				oneOf(mockFetchPlanHelper).setLazyFields(ProductTypeImpl.class, Collections.emptyList());
 				oneOf(mockBeanFactory).getBean(ContextIdNames.PRODUCT_TYPE);
 				will(returnValue(productType));
 			}
@@ -473,9 +469,7 @@ public class ProductTypeDaoImplTest {
 				oneOf(mockPersistenceEngine).executeNamedQuery(with(any(String.class)), with(any(Object[].class)));
 				will(returnValue(1));
 
-				oneOf(mockFetchPlanHelper).configureProductTypeFetchPlan(with(aNull(ProductTypeLoadTuner.class)));
-				oneOf(mockFetchPlanHelper).clearFetchPlan();
-
+				oneOf(mockFetchPlanHelper).setLoadTuners(new LoadTuner[]{null});
 				oneOf(mockTimeService).getCurrentTime();
 
 				exactly(2).of(mockBeanFactory).getBeanImplClass(ContextIdNames.PRODUCT_TYPE);

@@ -82,7 +82,7 @@ public class TaxCalculationResultImplTest {
 			private static final long serialVersionUID = 740L;
 
 			@Override
-			protected <T> T getBean(final String beanName) {
+			public <T> T getBean(final String beanName) {
 				return beanFactory.getBean(beanName);
 			}
 		};
@@ -372,7 +372,7 @@ public class TaxCalculationResultImplTest {
 			private static final long serialVersionUID = 740L;
 
 			@Override
-			protected <T> T getBean(final String beanName) {
+			public <T> T getBean(final String beanName) {
 				return beanFactory.getBean(beanName);
 			}
 		};

@@ -15,7 +15,6 @@ import com.elasticpath.domain.catalog.ProductLoadTuner;
 import com.elasticpath.domain.catalog.impl.ProductImpl;
 import com.elasticpath.persistence.api.PersistenceEngine;
 import com.elasticpath.service.catalog.ProductLookup;
-import com.elasticpath.service.misc.FetchPlanHelper;
 import com.elasticpath.service.query.CriteriaBuilder;
 import com.elasticpath.service.query.QueryResult;
 import com.elasticpath.service.query.QueryService;
@@ -29,7 +28,6 @@ public class ProductLookupImpl implements ProductLookup {
 
 	private static final int BATCH_SIZE = 2000; //Batch size is 2000 to remain under the MSSQL 2100 parameter limit.
 	private QueryService<Product> queryService;
-	private FetchPlanHelper fetchPlanHelper;
 	private ProductLoadTuner productLoadTuner;
 	private PersistenceEngine persistenceEngine;
 
@@ -37,12 +35,9 @@ public class ProductLookupImpl implements ProductLookup {
 	@Override
 	@SuppressWarnings("unchecked")
 	public <P extends Product> P findByUid(final long uidpk) throws EpServiceException {
-		getFetchPlanHelper().configureProductFetchPlan(getProductLoadTuner());
-		try {
-			return (P) getPersistenceEngine().get(ProductImpl.class, uidpk);
-		} finally {
-			getFetchPlanHelper().clearFetchPlan();
-		}
+			return (P) getPersistenceEngine()
+				.withLoadTuners(getProductLoadTuner())
+				.get(ProductImpl.class, uidpk);
 	}
 
 	@Override
@@ -64,14 +59,13 @@ public class ProductLookupImpl implements ProductLookup {
 	 * @throws com.elasticpath.base.exception.EpServiceException - in case of any errors
 	 */
 	protected <P extends Product> List<P> findByUidsInternal(final Collection<Long> uidPks) throws EpServiceException {
-		getFetchPlanHelper().configureProductFetchPlan(getProductLoadTuner());
-		try {
-			QueryResult<P> queryResult = getQueryService().query(productCriteria()
-					.with(ProductRelation.having().uids(uidPks)).returning(ResultType.ENTITY));
+			QueryResult<P> queryResult = getQueryService()
+				.query(productCriteria()
+					.with(ProductRelation.having().uids(uidPks))
+					.usingLoadTuner(getProductLoadTuner())
+					.returning(ResultType.ENTITY));
+
 			return queryResult.getResults();
-		} finally {
-			getFetchPlanHelper().clearFetchPlan();
-		}
 	}
 
 	@Override
@@ -80,14 +74,13 @@ public class ProductLookupImpl implements ProductLookup {
 			throw new EpServiceException("Cannot retrieve null code.");
 		}
 
-		getFetchPlanHelper().configureProductFetchPlan(getProductLoadTuner());
-		try {
-			QueryResult<P> queryResult = getQueryService().query(productCriteria()
-					.with(ProductRelation.having().codes(guid)).returning(ResultType.ENTITY));
-			return queryResult.getSingleResult();
-		} finally {
-			getFetchPlanHelper().clearFetchPlan();
-		}
+		QueryResult<P> queryResult = getQueryService()
+			.query(productCriteria()
+				.with(ProductRelation.having().codes(guid))
+				.usingLoadTuner(getProductLoadTuner())
+				.returning(ResultType.ENTITY));
+
+		return queryResult.getSingleResult();
 
 	}
 
@@ -107,14 +100,6 @@ public class ProductLookupImpl implements ProductLookup {
 
 	public void setQueryService(final QueryService<Product> queryService) {
 		this.queryService = queryService;
-	}
-
-	protected FetchPlanHelper getFetchPlanHelper() {
-		return fetchPlanHelper;
-	}
-
-	public void setFetchPlanHelper(final FetchPlanHelper fetchPlanHelper) {
-		this.fetchPlanHelper = fetchPlanHelper;
 	}
 
 	protected ProductLoadTuner getProductLoadTuner() {

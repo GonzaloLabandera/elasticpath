@@ -24,13 +24,17 @@
 	<modules>
 		<module>ext-cm-libs</module>
 		<module>ext-cm-modules/ext-cm-repository</module>
-
+		<module>ext-cm-modules/system-tests</module>
 	</modules>
 
 	<dependencies>
 		<dependency>
 			<groupId>com.elasticpath.extensions</groupId>
 			<artifactId>ep-cortex-common-test-definitions</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.elasticpath.extensions</groupId>
+			<artifactId>ext-cortex-common-test-definitions</artifactId>
 		</dependency>
 	</dependencies>
 
@@ -79,7 +83,6 @@
 			<id>with-tycho-modules</id>
 			<modules>
 				<module>ext-cm-modules</module>
-				<module>ext-cm-modules/system-tests</module>
 			</modules>
 		</profile>
 	</profiles>

@@ -16,5 +16,11 @@ public interface SortBy extends ExtensibleEnum {
 	 * @return the string representation of the sorting type
 	 */
 	String getSortString();
+
+	/**
+	 * Set the sort string.
+	 * @param sortString sort string
+	 */
+	void setSortString(String sortString);
 	
 }

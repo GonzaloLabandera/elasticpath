@@ -30,7 +30,7 @@ import com.elasticpath.cmclient.catalog.CatalogMessages;
 import com.elasticpath.cmclient.catalog.dialogs.brand.BrandDialog;
 import com.elasticpath.cmclient.catalog.editors.catalog.tablelabelprovider.CatalogBrandTableLabelProviderDecorator;
 import com.elasticpath.cmclient.catalog.editors.catalog.tablelabelprovider.ChangeSetTableLabelProviderDecorator;
-import com.elasticpath.cmclient.catalog.editors.catalog.tablelabelprovider.TableLabelProviderAdapter;
+import com.elasticpath.cmclient.core.tablelableprovider.TableLabelProviderAdapter;
 import com.elasticpath.cmclient.catalog.editors.model.CatalogModel;
 import com.elasticpath.cmclient.core.EpUiException;
 import com.elasticpath.cmclient.core.ServiceLocator;

@@ -84,7 +84,7 @@ public class AttributeAdapterTest {
 
 		context.checking(new Expectations() {
 			{
-				allowing(mockBeanFactory).getBean(ContextIdNames.ATTRIBUTE);
+				allowing(mockBeanFactory).getPrototypeBean(ContextIdNames.ATTRIBUTE, Attribute.class);
 				will(returnValue(new AttributeImpl()));
 			}
 		});

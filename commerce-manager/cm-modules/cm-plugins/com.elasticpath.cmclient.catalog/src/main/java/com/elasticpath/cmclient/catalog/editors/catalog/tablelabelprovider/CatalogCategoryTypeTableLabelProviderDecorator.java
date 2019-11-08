@@ -6,6 +6,8 @@ package com.elasticpath.cmclient.catalog.editors.catalog.tablelabelprovider;
 import java.util.Arrays;
 import java.util.List;
 
+import com.elasticpath.cmclient.core.tablelableprovider.AbstractTableLabelProviderDecorator;
+import com.elasticpath.cmclient.core.tablelableprovider.ExtensibleTableLabelProvider;
 import com.elasticpath.domain.catalog.CategoryType;
 
 /**

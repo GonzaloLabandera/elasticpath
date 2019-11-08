@@ -52,7 +52,7 @@ Feature: Offer Search facets
       | French     | 17    |
       | Français   | 11    |
     And there are no chosen links
-    When I select the choice EN
+    When I select the choice with field value and value EN
     Then there is 1 link of rel chosen
     When I follow links offersearchresult
     Then the offer search results list contains items with display-names
@@ -62,7 +62,7 @@ Feature: Offer Search facets
     And I follow links facets
     When I open the element with field display-name and value Languages
     And I follow the link facetselector
-    When I select the choice Chinese
+    When I select the choice with field value and value Chinese
     Then there is 2 link of rel chosen
     When I follow links offersearchresult
     Then the offer search results list contains items with display-names
@@ -93,7 +93,7 @@ Feature: Offer Search facets
       | 400 Pixels | 4     |
       | 720 Pixels | 4     |
     And there are no chosen links
-    When I select the choice 400 Pixels
+    When I select the choice with field value and value 400 Pixels
     Then there is 1 link of rel chosen
     When I follow links offersearchresult
     Then the offer search results list contains items with display-names
@@ -105,7 +105,7 @@ Feature: Offer Search facets
     And I open the element with field display-name and value Languages
     And I follow the link facetselector
     Then there are no chosen links
-    When I select the choice Chinese
+    When I select the choice with field value and value Chinese
     And I follow links offersearchresult
     Then the offer search results list contains items with display-names
       | RentMovieLowTVCombo |

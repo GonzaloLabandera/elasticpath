@@ -17,19 +17,37 @@ public class AddEditProductTypeWizard extends AbstractWizard {
 	private static final String PRODUCT_TYPE_NAME_INPUT_CSS = ADD_PRODUCT_TYPE_PARENT_CSS
 			+ "div[automation-id='com.elasticpath.cmclient.catalog.CatalogMessages.ProductTypeAddEditWizard_Name'] input";
 	private static final String MOVE_RIGHT_BUTTON_CSS = ADD_PRODUCT_TYPE_PARENT_CSS + "div[widget-id='Add']";
+	private static final String WIDGET_TYPE = "[widget-type='Table'] ";
 	private static final String AVAILABLE_ATTRIBUTES_PARENT_CSS
 			= "div[automation-id='com.elasticpath.cmclient.catalog.CatalogMessages.ProductTypeAddEditWizard_AvailableAttributes']"
 			+ "[widget-type='Table'] ";
+
+	private static final String AVAILABLE_SKU_ATTRIBUTES_PARENT_CSS
+			= "div[automation-id='com.elasticpath.cmclient.catalog.CatalogMessages.ProductTypeAddEditWizard_AvailSkuAtt']"
+			+ WIDGET_TYPE;
+	private static final String AVAILABLE_SKU_OPTION_PARENT_CSS
+			= "div[automation-id='com.elasticpath.cmclient.catalog.CatalogMessages.ProductTypeAddEditWizard_AvailSku']"
+			+ WIDGET_TYPE;
 	private static final String AVAILABLE_GROUPS_PARENT_CSS
 			= "div[automation-id='com.elasticpath.cmclient.catalog.CatalogMessages.ProductTypeAddEditWizard_AvailableCartItemModifierGroups']"
-			+ "[widget-type='Table'] ";
+			+ WIDGET_TYPE;
 	private static final String DIV_COLUMN_ID_S = "div[column-id='%s']";
 	private static final String AVAILABLE_ATTRIBUTES_COLUMN_CSS = AVAILABLE_ATTRIBUTES_PARENT_CSS + DIV_COLUMN_ID_S;
+	private static final String AVAILABLE_SKU_ATTRIBUTES_COLUMN_CSS = AVAILABLE_SKU_ATTRIBUTES_PARENT_CSS + DIV_COLUMN_ID_S;
+	private static final String AVAILABLE_SKU_OPTION_COLUMN_CSS = AVAILABLE_SKU_OPTION_PARENT_CSS + DIV_COLUMN_ID_S;
 	private static final String AVAILABLE_GROUPS_COLUMN_CSS = AVAILABLE_GROUPS_PARENT_CSS + DIV_COLUMN_ID_S;
 	private static final String ASSIGNED_ATTRIBUTES_PARENT_CSS
 			= "div[automation-id='com.elasticpath.cmclient.catalog.CatalogMessages.ProductTypeAddEditWizard_AssignedAttributes']"
 			+ "[widget-type='Table'] ";
+	private static final String ASSIGNED_SKU_ATTRIBUTES_PARENT_CSS
+			= "div[automation-id='com.elasticpath.cmclient.catalog.CatalogMessages.ProductTypeAddEditWizard_SelectSkuAtt']"
+			+ WIDGET_TYPE;
+	private static final String ASSIGNED_SKU_OPTION_PARENT_CSS
+			= "div[automation-id='com.elasticpath.cmclient.catalog.CatalogMessages.ProductTypeAddEditWizard_SelectSku']"
+			+ WIDGET_TYPE;
 	private static final String ASSIGNED_ATTRIBUTES_COLUMN_CSS = ASSIGNED_ATTRIBUTES_PARENT_CSS + DIV_COLUMN_ID_S;
+	private static final String ASSIGNED_SKU_ATTRIBUTES_COLUMN_CSS = ASSIGNED_SKU_ATTRIBUTES_PARENT_CSS + DIV_COLUMN_ID_S;
+	private static final String ASSIGNED_SKU_OPTION_COLUMN_CSS = ASSIGNED_SKU_OPTION_PARENT_CSS + DIV_COLUMN_ID_S;
 	private static final String ASSIGNED_CART_ITEM_MODIFIER_GROUP_PARENT_CSS = "div[automation-id='com.elasticpath.cmclient.catalog"
 			+ ".CatalogMessages.ProductTypeAddEditWizard_AssignedCartItemModifierGroups'][widget-type='Table'] ";
 	private static final String ASSIGNED_CART_ITEM_MODIFIER_GROUP_COLUMN_CSS = ASSIGNED_CART_ITEM_MODIFIER_GROUP_PARENT_CSS + DIV_COLUMN_ID_S;
@@ -61,6 +79,22 @@ public class AddEditProductTypeWizard extends AbstractWizard {
 	}
 
 	/**
+	 * Clicks '>' button for sku option.
+	 */
+	public void clickMoveRightButtonForSkuOption() {
+		getDriver().findElement(By.cssSelector(AVAILABLE_SKU_OPTION_PARENT_CSS)).findElement(By.xpath("..")).findElement(By.xpath(".."))
+				.findElement(By.cssSelector(ASSIGN_GROUP_MOVE_RIGHT_CSS)).click();
+	}
+
+	/**
+	 * Clicks '>' button for sku attribute.
+	 */
+	public void clickMoveRightButtonForSkuAttribute() {
+		getDriver().findElement(By.cssSelector(AVAILABLE_SKU_ATTRIBUTES_PARENT_CSS)).findElement(By.xpath("..")).findElement(By.xpath(".."))
+				.findElement(By.cssSelector(ASSIGN_GROUP_MOVE_RIGHT_CSS)).click();
+	}
+
+	/**
 	 * Clicks move right to assign group.
 	 */
 	public void clickMoveRightForCartItemModiferGroup() {
@@ -76,6 +110,28 @@ public class AddEditProductTypeWizard extends AbstractWizard {
 	public void selectAvailableAttribute(final String attribute) {
 		assertThat(selectItemInDialog(AVAILABLE_ATTRIBUTES_PARENT_CSS, AVAILABLE_ATTRIBUTES_COLUMN_CSS, attribute, ""))
 				.as("Unable to find available attribute - " + attribute)
+				.isTrue();
+	}
+
+	/**
+	 * Selects attribute from available attributes list.
+	 *
+	 * @param attribute the attribute
+	 */
+	public void selectAvailableSkuAttribute(final String attribute) {
+		assertThat(selectItemInDialog(AVAILABLE_SKU_ATTRIBUTES_PARENT_CSS, AVAILABLE_SKU_ATTRIBUTES_COLUMN_CSS, attribute, ""))
+				.as("Unable to find available attribute - " + attribute)
+				.isTrue();
+	}
+
+	/**
+	 * Selects sku option from available sku option list.
+	 *
+	 * @param skuOption the skuOption.
+	 */
+	public void selectAvailableSkuOption(final String skuOption) {
+		assertThat(selectItemInDialog(AVAILABLE_SKU_OPTION_PARENT_CSS, AVAILABLE_SKU_OPTION_COLUMN_CSS, skuOption, ""))
+				.as("Unable to find sku option attribute - " + skuOption)
 				.isTrue();
 	}
 
@@ -127,5 +183,36 @@ public class AddEditProductTypeWizard extends AbstractWizard {
 				.as("Unable to find assigned attribute - " + attribute)
 				.isTrue();
 		click(getSelectedElement());
+	}
+
+	/**
+	 * Verifies assigned attributes in list.
+	 *
+	 * @param attribute the language.
+	 */
+	public void verifyAssignedSkuAttribute(final String attribute) {
+		assertThat(selectItemInDialog(ASSIGNED_SKU_ATTRIBUTES_PARENT_CSS, ASSIGNED_SKU_ATTRIBUTES_COLUMN_CSS, attribute, ""))
+				.as("Unable to find assigned attribute - " + attribute)
+				.isTrue();
+		click(getSelectedElement());
+	}
+
+	/**
+	 * Verifies assigned sku options in list.
+	 *
+	 * @param skuOption the language.
+	 */
+	public void verifyAssignedSkuOption(final String skuOption ) {
+		assertThat(selectItemInDialog(ASSIGNED_SKU_OPTION_PARENT_CSS, ASSIGNED_SKU_OPTION_COLUMN_CSS, skuOption, ""))
+				.as("Unable to find assigned sku options - " + skuOption)
+				.isTrue();
+		click(getSelectedElement());
+	}
+
+	/**
+	 * Clicks to select multiple sku product type check box.
+	 */
+	public void checkMultipleSkuBox() {
+		click(getWaitDriver().waitForElementToBeClickable(By.xpath("//div[contains(text(), 'Product type has multiple SKUs')]/../../following-sibling::div[1]/div")));
 	}
 }

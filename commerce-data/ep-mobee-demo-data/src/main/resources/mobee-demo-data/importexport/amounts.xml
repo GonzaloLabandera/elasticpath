@@ -1615,4 +1615,12 @@
     <list_price>200.00</list_price>
     <price_list_guid>1A971BA1-D81F-A164-0FF0-53817D83B107</price_list_guid>
 </base_amount>
+<base_amount>
+    <guid>4581B085-F476-4DBB-B775-03ED6EE73D77</guid>
+    <object_guid>singleSkuWithFutureEnableDate</object_guid>
+    <object_type>PRODUCT</object_type>
+    <quantity>1.00</quantity>
+    <list_price>12.00</list_price>
+    <price_list_guid>1A971BA1-D81F-A164-0FF0-53817D83B107</price_list_guid>
+</base_amount>
 </amounts>

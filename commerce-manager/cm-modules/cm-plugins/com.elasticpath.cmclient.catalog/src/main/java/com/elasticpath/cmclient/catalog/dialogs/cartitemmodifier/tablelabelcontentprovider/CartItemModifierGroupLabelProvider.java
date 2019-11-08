@@ -12,8 +12,8 @@ import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.graphics.Image;
 
 import com.elasticpath.cmclient.catalog.CatalogMessages;
-import com.elasticpath.domain.cartmodifier.CartItemModifierField;
-import com.elasticpath.domain.cartmodifier.CartItemModifierFieldLdf;
+import com.elasticpath.domain.modifier.ModifierField;
+import com.elasticpath.domain.modifier.ModifierFieldLdf;
 
 /**
  * Label provider for AddEditCartItemModifierFieldDialog TableViewer.
@@ -30,7 +30,7 @@ public class CartItemModifierGroupLabelProvider extends LabelProvider implements
 
 	private static final int COLUMN_REQUIRED = 3; //$NON-NLS-1$
 
-	private static final String FIELDTYPE_NAME_PREFIX = "CartItemModifierFieldTypeName_";  //$NON-NLS-1$
+	private static final String FIELDTYPE_NAME_PREFIX = "ModifierFieldTypeName_";  //$NON-NLS-1$
 
 	/**
 	 * Constructor.
@@ -50,9 +50,9 @@ public class CartItemModifierGroupLabelProvider extends LabelProvider implements
 	public String getColumnText(final Object element, final int columnIndex) {
 		String result = "";
 		String dispName = "";
-		CartItemModifierField field = (CartItemModifierField) element;
-		Set<CartItemModifierFieldLdf> ldfs = field.getCartItemModifierFieldsLdf();
-		for (CartItemModifierFieldLdf tmp : ldfs) {
+		ModifierField field = (ModifierField) element;
+		Set<ModifierFieldLdf> ldfs = field.getModifierFieldsLdf();
+		for (ModifierFieldLdf tmp : ldfs) {
 			if (tmp.getLocale().trim().equals(this.defaultLocal.toString().trim())) {
 				dispName = tmp.getDisplayName();
 			}

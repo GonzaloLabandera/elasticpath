@@ -156,6 +156,15 @@ public interface RuleService extends EpPersistenceService  {
 	 */
 	List<Long> findUidsByModifiedDate(Date date);
 
+
+	/**
+	 * Retrieves modified date for a specific rule.
+	 *
+	 * @param ruleUid rule base uid
+	 * @return the last modified date for provided uid
+	 */
+	Date getModifiedDateForRuleBase(long ruleUid);
+
 	/**
 	 * Get all the available conditions configured in the
 	 * system.

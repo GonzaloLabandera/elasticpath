@@ -3,9 +3,8 @@
  */
 package com.elasticpath.rest.resource.integration.epcommerce.repository.shipmentdetails;
 
-import static org.mockito.Mockito.when;
-
 import static com.elasticpath.rest.resource.integration.epcommerce.repository.ErrorCheckPredicate.createErrorCheckPredicate;
+import static org.mockito.Mockito.when;
 
 import com.google.common.collect.ImmutableSet;
 import io.reactivex.Single;
@@ -21,7 +20,7 @@ import com.elasticpath.rest.ResourceOperationFailure;
 import com.elasticpath.rest.ResourceStatus;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder.CartOrderRepository;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder.ShoppingCartRepository;
-import com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder.impl.ShoppingCartRepositoryImpl;
+import com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder.impl.ShoppingCartResourceConstants;
 
 /**
  * Test for {@link ShipmentDetailsServiceImpl}.
@@ -50,12 +49,12 @@ public class ShipmentDetailsServiceImplTest {
 		when(cartOrderRepository.getShoppingCartGuid(SCOPE, ORDERID))
 				.thenReturn(CART_ID);
 		when(shoppingCartRepository.getShoppingCart(CART_ID))
-				.thenReturn(Single.error(ResourceOperationFailure.notFound((ShoppingCartRepositoryImpl.DEFAULT_CART_NOT_FOUND))));
+				.thenReturn(Single.error(ResourceOperationFailure.notFound((ShoppingCartResourceConstants.DEFAULT_CART_NOT_FOUND))));
 
 
 		shipmentDetailsService.getShipmentDetailsIdForOrder(SCOPE, ORDERID)
 				.test()
-				.assertError(createErrorCheckPredicate(ShoppingCartRepositoryImpl.DEFAULT_CART_NOT_FOUND, ResourceStatus.NOT_FOUND));
+				.assertError(createErrorCheckPredicate(ShoppingCartResourceConstants.DEFAULT_CART_NOT_FOUND, ResourceStatus.NOT_FOUND));
 	}
 
 	@Test
@@ -68,7 +67,7 @@ public class ShipmentDetailsServiceImplTest {
 
 		shipmentDetailsService.getShipmentDetailsIdForOrder(SCOPE, ORDERID)
 				.test()
-				.assertError(createErrorCheckPredicate(ShipmentDetailsServiceImpl.COULD_NOT_FIND_SHIPMENT, ResourceStatus.NOT_FOUND));
+				.assertNoValues();
 	}
 
 	@Test

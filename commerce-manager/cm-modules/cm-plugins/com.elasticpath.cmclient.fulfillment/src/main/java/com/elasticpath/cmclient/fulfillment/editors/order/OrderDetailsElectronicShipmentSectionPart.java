@@ -252,7 +252,9 @@ public class OrderDetailsElectronicShipmentSectionPart extends AbstractCmClientE
 		@Override
 		public String getText(final Object element) {
 			final OrderSku orderSku = (OrderSku) element;
-			return orderSku.getUnitPrice().toString();
+			final ShoppingItemPricingSnapshot pricingSnapshot = getPricingSnapshotService().getPricingSnapshotForOrderSku(orderSku);
+			return pricingSnapshot.getPriceCalc().withCartDiscounts().getAmount().toString();
+
 		}
 	}
 

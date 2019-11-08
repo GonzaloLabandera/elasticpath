@@ -25,6 +25,6 @@ public class CartItemModifierGroupMetadataResolverImpl extends AbstractMetadataR
 
 	@Override
 	protected boolean isValidResolverForObjectType(final String objectType) {
-		return "CartItemModifierGroup".equals(objectType);
+		return "ModifierGroup".equals(objectType);
 	}
 }

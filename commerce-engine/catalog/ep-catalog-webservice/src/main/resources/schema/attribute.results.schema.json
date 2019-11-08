@@ -1,0 +1,18 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "description": "Schema for attribute results definition",
+  "properties": {
+    "results": {
+      "type": "array",
+      "items": [
+        {
+          "$ref": "resource:/schema/attribute.schema.json"
+        }
+      ],
+      "additionalItems": { "$ref": "resource:/schema/attribute.schema.json" }
+    }
+  },
+  "required": [
+    "results"
+  ]
+}

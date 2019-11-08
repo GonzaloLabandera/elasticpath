@@ -11,7 +11,6 @@ import io.reactivex.Completable;
 import io.reactivex.Observable;
 import io.reactivex.Single;
 
-import com.elasticpath.domain.coupon.specifications.PotentialCouponUse;
 import com.elasticpath.domain.rules.AppliedCoupon;
 import com.elasticpath.domain.rules.Coupon;
 import com.elasticpath.rest.cache.CacheResult;
@@ -19,6 +18,7 @@ import com.elasticpath.rest.resource.integration.epcommerce.repository.coupon.Co
 import com.elasticpath.rest.resource.integration.epcommerce.repository.order.OrderRepository;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.transform.ReactiveAdapter;
 import com.elasticpath.service.rules.CouponService;
+import com.elasticpath.service.rules.CouponUsageService;
 
 /**
  * The facade for Coupon related operations.
@@ -32,6 +32,7 @@ public class CouponRepositoryImpl implements CouponRepository {
 	 */
 	static final String COUPON_CODE_NOT_FOUND = "Coupon Code Not Found";
 	private final CouponService couponService;
+	private final CouponUsageService couponUsageService;
 	private final ReactiveAdapter reactiveAdapter;
 	private final OrderRepository orderRepository;
 
@@ -39,17 +40,20 @@ public class CouponRepositoryImpl implements CouponRepository {
 	/**
 	 * Constructor.
 	 *
-	 * @param couponService   coupon service.
-	 * @param orderRepository order repository
-	 * @param reactiveAdapter reactive adapter
+	 * @param couponService      coupon service.
+	 * @param couponUsageService coupon service.
+	 * @param orderRepository    order repository
+	 * @param reactiveAdapter    reactive adapter
 	 */
 	@Inject
 	public CouponRepositoryImpl(
 			@Named("couponService") final CouponService couponService,
+			@Named("couponUsageService") final CouponUsageService couponUsageService,
 			@Named("orderRepository") final OrderRepository orderRepository,
 			@Named("reactiveAdapter") final ReactiveAdapter reactiveAdapter) {
 
 		this.couponService = couponService;
+		this.couponUsageService = couponUsageService;
 		this.orderRepository = orderRepository;
 		this.reactiveAdapter = reactiveAdapter;
 	}
@@ -57,9 +61,8 @@ public class CouponRepositoryImpl implements CouponRepository {
 	@Override
 	public Completable validateCoupon(final String couponCode, final String storeCode, final String customerEmail) {
 		final Coupon coupon = getByCouponCode(couponCode);
-		final PotentialCouponUse potentialCouponUse = new PotentialCouponUse(coupon, storeCode, customerEmail);
-
-		return reactiveAdapter.fromServiceAsCompletable(() -> couponService.validateCoupon(potentialCouponUse, couponCode));
+		return reactiveAdapter.fromServiceAsCompletable(() ->
+				couponUsageService.ensureValidCouponRuleAndUsage(coupon, couponCode, storeCode, customerEmail));
 	}
 
 	@Override

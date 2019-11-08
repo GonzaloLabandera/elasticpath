@@ -240,4 +240,10 @@ class ZoomSteps {
 					.stopIfFailure()
 		}
 	}
+
+	@When('^I zoom the facets elements with language (.+)$')
+	static void zoomFacet(String locale) {
+		client.headers.put("accept-language", locale)
+		zoomResources("facets", "element")
+	}
 }

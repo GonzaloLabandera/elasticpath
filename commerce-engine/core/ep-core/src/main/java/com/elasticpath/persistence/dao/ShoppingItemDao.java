@@ -30,5 +30,13 @@ public interface ShoppingItemDao {
 	 * @throws com.elasticpath.persistence.api.EpPersistenceException on error
 	 */
 	ShoppingItem saveOrUpdate(ShoppingItem shoppingItem);
+
+	/**
+	 * Delete shopping items using provided list of guids.
+	 *
+	 * @param guids the list of item guids.
+	 * @return the number of deleted items.
+	 */
+	int deleteItemsByGuids(String... guids);
 	
 }

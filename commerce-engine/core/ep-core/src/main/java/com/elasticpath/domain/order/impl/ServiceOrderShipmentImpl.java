@@ -9,6 +9,8 @@ import javax.persistence.DiscriminatorValue;
 import javax.persistence.Entity;
 import javax.persistence.Transient;
 
+import org.apache.openjpa.persistence.DataCache;
+
 import com.elasticpath.domain.order.ServiceOrderShipment;
 import com.elasticpath.domain.shipping.ShipmentType;
 import com.elasticpath.money.Money;
@@ -18,6 +20,7 @@ import com.elasticpath.money.Money;
  */
 @Entity
 @DiscriminatorValue(ShipmentType.SERVICE_STRING)
+@DataCache(enabled = false)
 public class ServiceOrderShipmentImpl extends AbstractOrderShipmentImpl implements ServiceOrderShipment {
 
 	private static final long serialVersionUID = 5000000001L;

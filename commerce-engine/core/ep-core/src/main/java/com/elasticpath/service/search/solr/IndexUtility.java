@@ -66,6 +66,16 @@ public interface IndexUtility {
 			boolean minimalStringAnalysis);
 
 	/**
+	 * Creates an attribute field name for the given {@link Attribute}. If the attribute is not
+	 * locale dependant, the locale that is passed is not used.
+	 *
+	 * @param attribute the {@link Attribute}
+	 * @param locale the locale that is used if the {@link Attribute} is locale dependant
+	 * @return the new name of the field ID
+	 */
+	String createAttributeDocValues(Attribute attribute, Locale locale);
+
+	/**
 	 * Creates a product's featured field for a particular category UID.
 	 *
 	 * @param categoryUid the category UID

@@ -9,6 +9,7 @@ import com.elasticpath.selenium.common.AbstractPageObject;
 import com.elasticpath.selenium.dialogs.ConfirmDialog;
 import com.elasticpath.selenium.dialogs.CreateChangeSetDialog;
 import com.elasticpath.selenium.editor.ChangeSetEditor;
+import com.elasticpath.selenium.navigations.ChangeSet;
 import com.elasticpath.selenium.util.Constants;
 
 /**
@@ -19,7 +20,8 @@ public class ChangeSetSearchResultPane extends AbstractPageObject {
 	private static final String CREATE_BUTTON_CSS
 			= "div[automation-id='com.elasticpath.cmclient.changeset.ChangeSetMessages.ChangeSetsView_CreateChangeSetTooltip']";
 	private static final String CHANGE_SET_SEARCH_RESULT_PARENT = "div[widget-id='Changeset View Table'][widget-type='Table'] ";
-	private static final String CHANGE_SET_SEARCH_RESULT_COLUMN_CSS = CHANGE_SET_SEARCH_RESULT_PARENT + "div[column-id='%s']";
+	private static String divColumnId = "div[column-id='%s']";
+	private static final String CHANGE_SET_SEARCH_RESULT_COLUMN_CSS = CHANGE_SET_SEARCH_RESULT_PARENT + divColumnId;
 	private static final String CHANGE_SET_SEARCH_RESULT_ROW_CSS = CHANGE_SET_SEARCH_RESULT_PARENT + "div[row-id='%s'] ";
 	private static final String LOCK_BUTTON_CSS = "div[widget-id='Lock']";
 	private static final String UNLOCK_BUTTON_CSS = "div[widget-id='Unlock']";
@@ -90,12 +92,12 @@ public class ChangeSetSearchResultPane extends AbstractPageObject {
 		setWebDriverImplicitWait(Constants.IMPLICIT_WAIT_FOR_ELEMENT_THREE_SECONDS);
 		try {
 			getWaitDriver().waitForButtonToBeEnabled(FINALIZE_BUTTON_CSS);
-			if(isButtonEnabled(FINALIZE_BUTTON_CSS)) {
+			if (isButtonEnabled(FINALIZE_BUTTON_CSS)) {
 				clickButton(FINALIZE_BUTTON_CSS, "Finalize");
 				new ConfirmDialog(getDriver()).clickOK();
 				waitTillElementDisappears(By.cssSelector("div[widget-id='OK'][seeable='true']"));
 			}
-		}finally {
+		} finally {
 			setWebDriverImplicitWaitToDefault();
 		}
 	}
@@ -138,13 +140,42 @@ public class ChangeSetSearchResultPane extends AbstractPageObject {
 	 * @param changeSetName the change set name
 	 * @param status        the change set status
 	 */
-	public void verifyChangeSetStatus(final String changeSetName, final String status) {
+	public void verifyChangeSetState(final String changeSetName, final String status) {
 		selectChangeSet(changeSetName);
 		assertThat(getDriver().findElement(By.cssSelector(String.format(CHANGE_SET_SEARCH_RESULT_ROW_CSS, changeSetName)
-				+ String.format("div[column-id='%s']", status))).getText())
+				+ String.format(divColumnId, status))).getText())
 				.as("Change set status validation failed")
 				.isEqualTo(status);
 
+	}
+
+	/**
+	 * Returns change set status.
+	 *
+	 * @param changeSetName the change set name
+	 * @param state         the change set state
+	 */
+	public boolean isChangeSetStateAsExpected(final String changeSetName, final String state) {
+		clickButton(ChangeSet.SEARCH_BUTTON_CSS, "Search");
+		selectChangeSet(changeSetName);
+		int counter = 0;
+		setWebDriverImplicitWait(Constants.IMPLICIT_WAIT_FOR_ELEMENT_THREE_SECONDS);
+		while (!isElementPresent(By.cssSelector(String.format(CHANGE_SET_SEARCH_RESULT_ROW_CSS, changeSetName)
+				+ String.format(divColumnId, state))) && counter < Constants.RETRY_COUNTER_5) {
+			sleep(Constants.SLEEP_HALFSECOND_IN_MILLIS);
+			clickButton(ChangeSet.SEARCH_BUTTON_CSS, "Search");
+			counter++;
+		}
+
+		setWebDriverImplicitWaitToDefault();
+
+		if (isElementPresent(getDriver().findElement(By.cssSelector(String.format(CHANGE_SET_SEARCH_RESULT_ROW_CSS, changeSetName)
+				+ String.format(divColumnId, state))))) {
+			selectChangeSet(changeSetName);
+			return true;
+		}
+
+		return false;
 	}
 
 	/**

@@ -6,7 +6,7 @@ Feature: Create Catalog
     When I go to Catalog Management
     And I create a new catalog with following details
       | catalogName   | language |
-      | ATest Catalog | English  |
+      | ZTest Catalog | English  |
 
   Scenario: Create new catalog
     Given newly created catalog is in the list
@@ -80,7 +80,7 @@ Feature: Create Catalog
     And I select SkuOptions tab in the Catalog Editor
     When I create a new sku option with sku code skuCode and display name testName
     Then newly created sku option is in the list
-    When I create a new sku option value with sku code skuValueCode and display name valueTestName
+    When I create a new sku option value with sku value code skuValueCode and display name valueTestName
     Then newly created sku option value is in the list
     When I edit the sku option name
     Then updated sku option name is in the list
@@ -106,5 +106,6 @@ Feature: Create Catalog
     When I delete the newly created field
     Then the field is deleted
     When I delete the newly created group
+    And I save my changes
     Then the newly created group should be deleted
     And the deleted group should not appear when creating a new Product Type

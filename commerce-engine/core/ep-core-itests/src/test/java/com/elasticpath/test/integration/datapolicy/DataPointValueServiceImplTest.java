@@ -312,6 +312,7 @@ public class DataPointValueServiceImplTest extends AbstractDataPolicyTest {
 			.withCustomerSession(shoppingContext.getCustomerSession())
 			.build();
 
+		cart.setDefault(true);
 		shoppingCartService.saveOrUpdate(cart);
 
 		DataPointValue dataPointValue = createDataPointValueForRemoval(200002L,
@@ -327,7 +328,7 @@ public class DataPointValueServiceImplTest extends AbstractDataPolicyTest {
 			.as("The data point values must be deleted")
 			.isEqualTo(1);
 
-		ShoppingCart updatedCart = shoppingCartService.findOrCreateByCustomerSession(shoppingContext.getCustomerSession());
+		ShoppingCart updatedCart = shoppingCartService.findOrCreateDefaultCartByCustomerSession(shoppingContext.getCustomerSession());
 
 		assertThat(getCartGiftCertificateFieldValue(updatedCart,dataPointKey))
 			.as("The field must be null")

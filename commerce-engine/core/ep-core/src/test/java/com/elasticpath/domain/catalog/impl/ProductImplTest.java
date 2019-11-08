@@ -4,6 +4,7 @@
  */
 package com.elasticpath.domain.catalog.impl;
 
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.sameInstance;
@@ -14,6 +15,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.mockito.Mockito.mock;
 
 import java.math.BigDecimal;
 import java.text.ParseException;
@@ -69,7 +71,7 @@ import com.elasticpath.test.BeanFactoryExpectationsFactory;
 /**
  * Test <code>ProductImpl</code>.
  */
-@SuppressWarnings({ "PMD.ExcessiveClassLength", "PMD.TooManyStaticImports", "PMD.TooManyMethods", "PMD.GodClass" })
+@SuppressWarnings({ "PMD.ExcessiveClassLength", "PMD.TooManyStaticImports", "PMD.TooManyMethods", "PMD.GodClass", "PMD.ExcessiveImports"})
 public class ProductImplTest {
 
 	private static final String GUID_1 = "test product 1";
@@ -1273,6 +1275,35 @@ public class ProductImplTest {
 
 		assertTrue("Extension class should be able to override product/category impl class",
 				product.getProductCategories().iterator().next() instanceof ExtProductCategoryImpl);
+	}
+
+	/**
+	 * ProductCategory is gotten correct by Category.
+	 */
+	@Test
+	public void testThatGettingProductCategoryByCategory() {
+		final Category category = new CategoryImpl();
+		final ProductCategory productCategory = createProductCategory(category);
+		productImpl.setProductCategories(Collections.singleton(productCategory));
+		assertEquals(productImpl.getProductCategory(category), productCategory);
+	}
+
+	/**
+	 * The product is not in the given category.
+	 */
+	@Test
+	public void testThatProductIsNotInTheGivenCategory() {
+		final Category category = mock(Category.class);
+		final Category categoryNew = mock(Category.class);
+		final ProductCategory productCategory = createProductCategory(category);
+		productImpl.setProductCategories(Collections.singleton(productCategory));
+		assertThatThrownBy(() -> productImpl.getProductCategory(categoryNew)).isInstanceOf(IllegalArgumentException.class);
+	}
+
+	private ProductCategory createProductCategory(final Category category) {
+		final ProductCategory productCategory = new ProductCategoryImpl();
+		productCategory.setCategory(category);
+		return productCategory;
 	}
 
 	/**

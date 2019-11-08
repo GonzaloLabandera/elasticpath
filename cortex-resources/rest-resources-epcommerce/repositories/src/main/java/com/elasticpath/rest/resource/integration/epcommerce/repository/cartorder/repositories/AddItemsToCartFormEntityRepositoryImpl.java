@@ -5,6 +5,7 @@ package com.elasticpath.rest.resource.integration.epcommerce.repository.cartorde
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import io.reactivex.Single;
@@ -15,18 +16,22 @@ import com.elasticpath.common.dto.ShoppingItemDto;
 import com.elasticpath.domain.shoppingcart.ShoppingCart;
 import com.elasticpath.repository.Repository;
 import com.elasticpath.rest.definition.carts.AddItemsToCartFormEntity;
+import com.elasticpath.rest.definition.carts.AddItemsToCartFormIdentifier;
 import com.elasticpath.rest.definition.carts.CartIdentifier;
+import com.elasticpath.rest.definition.carts.CartsIdentifier;
 import com.elasticpath.rest.definition.carts.ItemEntity;
 import com.elasticpath.rest.form.SubmitResult;
 import com.elasticpath.rest.form.SubmitStatus;
 import com.elasticpath.rest.id.IdentifierPart;
+import com.elasticpath.rest.id.ResourceIdentifier;
 import com.elasticpath.rest.id.type.StringIdentifier;
+import com.elasticpath.rest.resource.ResourceOperationContext;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder.ShoppingCartRepository;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder.validators.AddItemsToCartValidator;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.transform.ReactiveAdapter;
 
 /**
- * Repository for cart.
+ * Repository for adding items to cart.
  *
  * @param <E> the entity type
  * @param <I> the identifier type
@@ -41,10 +46,23 @@ public class AddItemsToCartFormEntityRepositoryImpl<E extends AddItemsToCartForm
 
 	private ReactiveAdapter reactiveAdapter;
 
+	private ResourceOperationContext resourceOperationContext;
+
 	@Override
 	public Single<SubmitResult<CartIdentifier>> submit(final AddItemsToCartFormEntity entity, final IdentifierPart<String> scope) {
-		return shoppingCartRepository.getDefaultShoppingCart()
-				.flatMap(shoppingCart -> reactiveAdapter.fromServiceAsSingle(() -> createShoppingItemDtos(entity, scope.getValue()))
+
+
+		String cartGuid;
+		Optional<ResourceIdentifier> resourceIdentifier = resourceOperationContext.getResourceIdentifier();
+		if (resourceIdentifier.isPresent()) {
+			cartGuid = ((AddItemsToCartFormIdentifier) resourceIdentifier.get())
+					.getCart().getCartId().getValue();
+		} else {
+			cartGuid = shoppingCartRepository.getDefaultShoppingCartGuid().blockingGet();
+		}
+		return addItemsToCartValidator.validate(entity, scope.getValue())
+				.andThen(shoppingCartRepository.getShoppingCart(cartGuid))
+				.flatMap(shoppingCart -> reactiveAdapter.fromServiceAsSingle(() -> createShoppingItemDtos(entity))
 						.flatMap(shoppingItemDtos -> shoppingCartRepository.addItemsToCart(shoppingCart, shoppingItemDtos)))
 				.map(shoppingCart -> buildResult(shoppingCart, scope));
 	}
@@ -53,12 +71,9 @@ public class AddItemsToCartFormEntityRepositoryImpl<E extends AddItemsToCartForm
 	 * Create a list of ShoppingItemDto from the given form entity.
 	 *
 	 * @param entity entity
-	 * @param scope  scope
 	 * @return list of ShoppingItemDto
 	 */
-	protected List<ShoppingItemDto> createShoppingItemDtos(final AddItemsToCartFormEntity entity, final String scope) {
-		addItemsToCartValidator.validate(entity, scope);
-
+	protected List<ShoppingItemDto> createShoppingItemDtos(final AddItemsToCartFormEntity entity) {
 		return entity.getItems().stream()
 				.map(this::createShoppingItemDto)
 				.collect(Collectors.toList());
@@ -86,7 +101,9 @@ public class AddItemsToCartFormEntityRepositoryImpl<E extends AddItemsToCartForm
 				.withStatus(SubmitStatus.CREATED)
 				.withIdentifier(CartIdentifier.builder()
 						.withCartId(StringIdentifier.of(shoppingCart.getGuid()))
-						.withScope(scope)
+						.withCarts(CartsIdentifier.builder()
+								.withScope(scope)
+								.build())
 						.build())
 				.build();
 	}
@@ -104,5 +121,10 @@ public class AddItemsToCartFormEntityRepositoryImpl<E extends AddItemsToCartForm
 	@Reference
 	public void setReactiveAdapter(final ReactiveAdapter reactiveAdapter) {
 		this.reactiveAdapter = reactiveAdapter;
+	}
+
+	@Reference
+	public void setResourceOperationContext(final ResourceOperationContext resourceOperationContext) {
+		this.resourceOperationContext = resourceOperationContext;
 	}
 }

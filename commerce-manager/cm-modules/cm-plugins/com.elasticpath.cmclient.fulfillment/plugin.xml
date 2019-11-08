@@ -32,7 +32,7 @@
       </category>
       <view
             name="%searchView.name"
-            icon="icons/search_default_22.png"
+            icon="icons/empty_1x1.png"
             category="com.elasticpath.cmclient.fulfillment.views.category"
             class="com.elasticpath.cmclient.fulfillment.views.SearchView"
             id="com.elasticpath.cmclient.fulfillment.views.SearchView">
@@ -40,14 +40,14 @@
       <view
             category="com.elasticpath.cmclient.fulfillment.views.category"
             class="com.elasticpath.cmclient.fulfillment.views.customer.CustomerSearchResultsView"
-            icon="icons/user_default_22.png"
+            icon="icons/empty_1x1.png"
             id="com.elasticpath.cmclient.fulfillment.views.customer.CustomerSearchResultsView"
             name="%searchResultsView.name">
       </view>
       <view
             category="com.elasticpath.cmclient.fulfillment.views.category"
             class="com.elasticpath.cmclient.fulfillment.views.order.OrderSearchResultsView"
-            icon="icons/order_default_22.png"
+            icon="icons/empty_1x1.png"
             id="com.elasticpath.cmclient.fulfillment.views.order.OrderSearchResultsView"
             name="%orderSearchResultsView.name">
       </view>

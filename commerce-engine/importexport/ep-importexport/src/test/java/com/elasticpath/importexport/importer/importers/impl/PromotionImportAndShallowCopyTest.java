@@ -108,8 +108,8 @@ public class PromotionImportAndShallowCopyTest {
 		final long uidPk = 10050L;
 
 		context.checking(new Expectations() { {
-			oneOf(mockElasticPath).getBean(ContextIdNames.PROMOTION_RULE); will(returnValue(mockOriginalRule));
-			oneOf(mockElasticPath).getBean(ContextIdNames.PROMOTION_RULE); will(returnValue(mockWrappedRule));
+			oneOf(mockElasticPath).getPrototypeBean(ContextIdNames.PROMOTION_RULE, Rule.class); will(returnValue(mockOriginalRule));
+			oneOf(mockElasticPath).getPrototypeBean(ContextIdNames.PROMOTION_RULE, Rule.class); will(returnValue(mockWrappedRule));
 			oneOf(mockWrappedRule).getActions(); will(returnValue(actions));
 			oneOf(mockWrappedRule).getCatalog(); will(returnValue(catalog));
 			oneOf(mockOriginalRule).setCatalog(with(equal(catalog)));

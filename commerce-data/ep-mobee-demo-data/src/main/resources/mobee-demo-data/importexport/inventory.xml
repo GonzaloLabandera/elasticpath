@@ -317,4 +317,14 @@
 <sku code="phone_plan_mon_sku"/>
 
 <sku code="phone_plan_wk_sku"/>
+
+    <sku code="prodTestProd2_sku"/>
+
+    <sku code="prodTestProd3_sku"/>
+
+    <sku code="prodTestProd4_sku"/>
+
+    <sku code="prodTestProd5_sku"/>
+
+    <sku code="prodTestProd6_sku"/>
 </inventory>

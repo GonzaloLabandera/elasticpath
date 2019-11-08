@@ -22,6 +22,7 @@
 		<module>paymenttokens</module>
 		<module>personalization</module>
 		<module>subject-lookups</module>
+		<module>hds-support</module>
 	</modules>
 
 	<dependencies>

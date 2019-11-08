@@ -547,7 +547,7 @@ public class ProductIndexBuilderTest {
 				will(returnValue(guid));
 
 				PriceListStack priceListStack = context.mock(PriceListStack.class);
-				allowing(beanFactory).getBean(ContextIdNames.PRICE_LIST_STACK);
+				allowing(beanFactory).getPrototypeBean(ContextIdNames.PRICE_LIST_STACK, PriceListStack.class);
 				will(returnValue(priceListStack));
 				allowing(priceListStack).addPriceList(guid);
 				allowing(priceListStack).setCurrency(currency);
@@ -927,7 +927,7 @@ public class ProductIndexBuilderTest {
 				ignoring(loadTuner);
 				ignoring(storeService);
 
-				allowing(beanFactory).getBean(ContextIdNames.FETCH_GROUP_LOAD_TUNER);
+				allowing(beanFactory).getPrototypeBean(ContextIdNames.FETCH_GROUP_LOAD_TUNER, FetchGroupLoadTuner.class);
 				will(returnValue(loadTuner));
 			}
 		});

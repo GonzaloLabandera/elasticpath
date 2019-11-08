@@ -27,4 +27,11 @@ public class AddEditSkuOptionDialog extends AbstractAddEditSkuOptionDialog {
 	public void enterSkuOptionDisplayName(final String displayName) {
 		super.enterSkuOptionDisplayName(SKU_OPTION_DISPLAY_NAME_INPUT_CSS, displayName);
 	}
+
+	/**
+	 * Returns skuOption display name displayed in dialog.
+	 */
+	public String getSkuOptionDisplayName() {
+		return super.getSkuOptionDisplayName(SKU_OPTION_DISPLAY_NAME_INPUT_CSS);
+	}
 }

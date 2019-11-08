@@ -15,6 +15,7 @@
 
 	<modules>
 		<module>ext-integration-webapp</module>
+		<module>ext-catalog-webservice</module>
 	</modules>
 </project>
 

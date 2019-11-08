@@ -9,7 +9,6 @@ import java.util.List;
 import com.elasticpath.base.exception.EpServiceException;
 import com.elasticpath.commons.exception.DuplicateKeyException;
 import com.elasticpath.domain.catalog.ProductType;
-import com.elasticpath.service.misc.FetchPlanHelper;
 import com.elasticpath.service.misc.TimeService;
 
 /**
@@ -100,13 +99,6 @@ public interface ProductTypeDao {
 	 * @param timeService the <code>TimeService</code> instance.
 	 */
 	void setTimeService(TimeService timeService);
-
-	/**
-	 * Sets the fetch plan helper.
-	 *
-	 * @param fetchPlanHelper the fetch plan helper
-	 */
-	void setFetchPlanHelper(FetchPlanHelper fetchPlanHelper);
 
 	/**
 	 * Updates the given ProductType. Will also remove attribute values for attributes which were removed. There is no need to update sku options

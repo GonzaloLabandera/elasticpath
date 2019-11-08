@@ -1,0 +1,325 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright (c) Elastic Path Software Inc., 2019
+  -->
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+				   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+				   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd"
+				   logicalFilePath="com/elasticpath/core/db/core-changelog-7.6.0-generalmodifiers.xml">
+
+	<changeSet id="7.6.0-generalmodifiers" author="elasticpath">
+
+
+		<comment>Creating General Modifier related tables</comment>
+
+		<createTable tableName="TMODIFIERGROUP">
+			<column name="UIDPK" type="BIGINT">
+				<constraints primaryKey="true"/>
+			</column>
+			<column name="CODE" type="VARCHAR(64)">
+				<constraints nullable="false" unique="true"/>
+			</column>
+
+		</createTable>
+
+		<createTable tableName="TPRODTYPEMODIFIERGRP">
+			<column name="PRODUCT_TYPE_UID" type="BIGINT">
+				<constraints nullable="false" unique="false"/>
+			</column>
+			<column name="MOD_GRP_UID" type="BIGINT">
+				<constraints nullable="false" unique="false"/>
+			</column>
+		</createTable>
+		<addForeignKeyConstraint baseTableName="TPRODTYPEMODIFIERGRP" baseColumnNames="PRODUCT_TYPE_UID"
+								 constraintName="TPRODTYPEMODGRP_IBFK_1" referencedTableName="TPRODUCTTYPE"
+								 referencedColumnNames="UIDPK"/>
+		<addForeignKeyConstraint baseTableName="TPRODTYPEMODIFIERGRP" baseColumnNames="MOD_GRP_UID"
+								 constraintName="TPRODTYPEMODGRP_IBFK_2" referencedTableName="TMODIFIERGROUP"
+								 referencedColumnNames="UIDPK"/>
+
+		<createTable tableName="TMODIFIERGROUPLDF">
+			<column name="UIDPK" type="BIGINT">
+				<constraints primaryKey="true"/>
+			</column>
+			<column name="LOCALE" type="VARCHAR(16)">
+				<constraints nullable="false" unique="false"/>
+			</column>
+			<column name="DISPLAY_NAME" type="VARCHAR(512)">
+				<constraints nullable="false" unique="false"/>
+			</column>
+			<column name="MODIFIER_GROUP_UID" type="BIGINT">
+				<constraints nullable="false" unique="false"/>
+			</column>
+		</createTable>
+		<addForeignKeyConstraint baseTableName="TMODIFIERGROUPLDF" baseColumnNames="MODIFIER_GROUP_UID"
+								 constraintName="TMODGROUPLDF_IBFK_1" referencedTableName="TMODIFIERGROUP"
+								 referencedColumnNames="UIDPK"/>
+
+		<createTable tableName="TMODIFIERFIELD">
+			<column name="UIDPK" type="BIGINT">
+				<constraints primaryKey="true"/>
+			</column>
+			<column name="CODE" type="VARCHAR(64)">
+				<constraints nullable="false" unique="true"/>
+			</column>
+			<column name="REQUIRED" type="BOOLEAN" defaultValue="FALSE">
+				<constraints nullable="false" unique="false"/>
+			</column>
+			<column name="ORDERING" type="BIGINT">
+				<constraints nullable="false" unique="false"/>
+			</column>
+			<column name="MAX_SIZE" type="BIGINT">
+				<constraints nullable="true" unique="false"/>
+			</column>
+			<column name="ATTRIBUTE_TYPE" type="BIGINT">
+				<constraints nullable="false" unique="false"/>
+			</column>
+			<column name="MODIFIER_GROUP_UID" type="BIGINT">
+				<constraints nullable="false" unique="false"/>
+			</column>
+		</createTable>
+		<addForeignKeyConstraint baseTableName="TMODIFIERFIELD" baseColumnNames="MODIFIER_GROUP_UID"
+								 constraintName="TMODIFIERFIELD_IBFK_1" referencedTableName="TMODIFIERGROUP"
+								 referencedColumnNames="UIDPK"/>
+
+		<createTable tableName="TMODIFIERFIELDLDF">
+			<column name="UIDPK" type="BIGINT">
+				<constraints primaryKey="true"/>
+			</column>
+			<column name="LOCALE" type="VARCHAR(16)">
+				<constraints nullable="false" unique="false"/>
+			</column>
+			<column name="DISPLAY_NAME" type="VARCHAR(512)">
+				<constraints nullable="false" unique="false"/>
+			</column>
+			<column name="MODIFIER_FIELD_UID" type="BIGINT">
+				<constraints nullable="false" unique="false"/>
+			</column>
+		</createTable>
+		<addForeignKeyConstraint baseTableName="TMODIFIERFIELDLDF" baseColumnNames="MODIFIER_FIELD_UID"
+								 constraintName="TMODFIELDLDF_IBFK_1" referencedTableName="TMODIFIERFIELD"
+								 referencedColumnNames="UIDPK"/>
+
+		<createTable tableName="TMODIFIERFIELDOPTION">
+			<column name="UIDPK" type="BIGINT">
+				<constraints primaryKey="true"/>
+			</column>
+			<column name="OPTION_VALUE" type="VARCHAR(512)">
+				<constraints nullable="false" unique="false"/>
+			</column>
+			<column name="ORDERING" type="BIGINT">
+				<constraints nullable="false" unique="false"/>
+			</column>
+			<column name="MODIFIER_FIELD_UID" type="BIGINT">
+				<constraints nullable="false" unique="false"/>
+			</column>
+		</createTable>
+
+		<createTable tableName="TMODIFIERFIELDOPTNLDF">
+			<column name="UIDPK" type="BIGINT">
+				<constraints primaryKey="true"/>
+			</column>
+			<column name="LOCALE" type="VARCHAR(16)">
+				<constraints nullable="false" unique="false"/>
+			</column>
+			<column name="DISPLAY_NAME" type="VARCHAR(512)">
+				<constraints nullable="false" unique="false"/>
+			</column>
+			<column name="MOD_FIELD_OPTION_UID" type="BIGINT">
+				<constraints nullable="false" unique="false"/>
+			</column>
+		</createTable>
+
+
+		<createTable tableName="TMODIFIERGROUPFILTER">
+
+			<column name="UIDPK" type="BIGINT">
+				<constraints primaryKey="true"/>
+			</column>
+			<column name="MODIFIER_CODE" type="VARCHAR(255)">
+				<constraints nullable="false"/>
+			</column>
+			<column name="TYPE" type="VARCHAR(255)">
+				<constraints nullable="false"/>
+			</column>
+			<column name="REFERENCE_GUID" type="VARCHAR(255)">
+				<constraints nullable="false"/>
+			</column>
+		</createTable>
+
+		<addForeignKeyConstraint baseTableName="TMODIFIERFIELDOPTION" baseColumnNames="MODIFIER_FIELD_UID"
+								 constraintName="TMODFIELDOPTION_IBFK_1" referencedTableName="TMODIFIERFIELD"
+								 referencedColumnNames="UIDPK"/>
+		<addForeignKeyConstraint baseTableName="TMODIFIERFIELDOPTNLDF" baseColumnNames="MOD_FIELD_OPTION_UID"
+								 constraintName="TMODFIELDOPTLDF_IBFK_1" referencedTableName="TMODIFIERFIELDOPTION"
+								 referencedColumnNames="UIDPK"/>
+
+
+	</changeSet>
+	<changeSet id="7.6.0-generalmodifiers-migration" author="elasticpath">
+
+		<!-- Migrate data from cartitemmodifier to modifier -->
+		<sql
+				dbms="mysql, oracle, h2"
+				endDelimiter="\nGO"
+				splitStatements="true"
+				stripComments="true">insert into TMODIFIERGROUP(UIDPK,CODE) SELECT UIDPK,CODE from TCARTITEMMODIFIERGROUP
+			<comment>Copy cart item modifier groups</comment>
+		</sql>
+
+		<sql
+				dbms="mysql, oracle, h2"
+				endDelimiter="\nGO"
+				splitStatements="true"
+				stripComments="true">insert into TMODIFIERGROUPLDF(UIDPK,LOCALE,DISPLAY_NAME, MODIFIER_GROUP_UID)
+			SELECT UIDPK,LOCALE,DISPLAY_NAME, CART_ITEM_MODIFIER_GROUP_UID FROM TCARTITEMMODIFIERGROUPLDF
+			<comment>Copy cart item modifier group ldf</comment>
+		</sql>
+
+		<sql
+				dbms="mysql, oracle, h2"
+				endDelimiter="\nGO"
+				splitStatements="true"
+				stripComments="true">insert into TMODIFIERFIELD(UIDPK,CODE,REQUIRED, ORDERING, MAX_SIZE, ATTRIBUTE_TYPE, MODIFIER_GROUP_UID)
+			SELECT UIDPK,CODE,REQUIRED, ORDERING, MAX_SIZE, ATTRIBUTE_TYPE, CART_ITEM_MODIFIER_GROUP_UID FROM TCARTITEMMODIFIERFIELD
+			<comment>Copy cart item modifier field</comment>
+		</sql>
+
+		<sql
+				dbms="mysql, oracle, h2"
+				endDelimiter="\nGO"
+				splitStatements="true"
+				stripComments="true">insert into TMODIFIERFIELDLDF(UIDPK, LOCALE, DISPLAY_NAME, MODIFIER_FIELD_UID)
+			SELECT UIDPK, LOCALE, DISPLAY_NAME, CART_ITEM_MODIFIER_FIELD_UID FROM TCARTITEMMODIFIERFIELDLDF
+			<comment>Copy cart item modifier field ldf</comment>
+		</sql>
+		<sql
+				dbms="mysql, oracle, h2"
+				endDelimiter="\nGO"
+				splitStatements="true"
+				stripComments="true">insert into TMODIFIERFIELDOPTION(UIDPK, OPTION_VALUE, ORDERING, MODIFIER_FIELD_UID)
+			SELECT UIDPK, OPTION_VALUE, ORDERING, CART_ITEM_MODIFIER_FIELD_UID FROM TCARTITEMMODIFIERFIELDOPTION
+			<comment>Copy cart item modifier option</comment>
+		</sql>
+
+		<sql
+				dbms="mysql, oracle, h2"
+				endDelimiter="\nGO"
+				splitStatements="true"
+				stripComments="true">insert into TMODIFIERFIELDOPTNLDF(UIDPK, LOCALE, DISPLAY_NAME, MOD_FIELD_OPTION_UID)
+			SELECT UIDPK, LOCALE, DISPLAY_NAME, CART_ITEM_MOD_FIELD_OPTION_UID FROM TCARTITEMMODIFIERFIELDOPTNLDF
+			<comment>Copy cart item modifier option ldf</comment>
+		</sql>
+		<sql
+				dbms="mysql, oracle, h2"
+				endDelimiter="\nGO"
+				splitStatements="true"
+				stripComments="true">insert into TPRODTYPEMODIFIERGRP(PRODUCT_TYPE_UID,MOD_GRP_UID)
+			SELECT PRODUCT_TYPE_UID, CART_ITEM_MOD_GRP_UID  FROM TPRODTYPECARTITEMMODIFIERGRP
+			<comment>Copy cart item modifier option ldf</comment>
+		</sql>
+
+		<!-- Insert LAST_VALUE in JPA_GENERATED_KEYS for new tables -->
+
+		<sql
+				dbms="mysql, oracle, h2"
+				endDelimiter="\nGO"
+				splitStatements="true"
+				stripComments="true">insert into JPA_GENERATED_KEYS(ID,LAST_VALUE)
+			SELECT 'TMODIFIERGROUP', LAST_VALUE  FROM JPA_GENERATED_KEYS where ID='TCARTITEMMODIFIERGROUP'
+			<comment>insert jpa generate key</comment>
+		</sql>
+		<sql
+				dbms="mysql, oracle, h2"
+				endDelimiter="\nGO"
+				splitStatements="true"
+				stripComments="true">insert into JPA_GENERATED_KEYS(ID,LAST_VALUE)
+			SELECT 'TMODIFIERGROUPLDF', LAST_VALUE  FROM JPA_GENERATED_KEYS where ID='TCARTITEMMODIFIERGROUPLDF'
+			<comment>insert jpa generate key</comment>
+		</sql>
+		<sql
+				dbms="mysql, oracle, h2"
+				endDelimiter="\nGO"
+				splitStatements="true"
+				stripComments="true">insert into JPA_GENERATED_KEYS(ID,LAST_VALUE)
+			SELECT 'TMODIFIERFIELDLDF', LAST_VALUE  FROM JPA_GENERATED_KEYS where ID='TCARTITEMMODIFIERFIELDLDF'
+			<comment>insert jpa generate key</comment>
+		</sql>
+		<sql
+				dbms="mysql, oracle, h2"
+				endDelimiter="\nGO"
+				splitStatements="true"
+				stripComments="true">insert into JPA_GENERATED_KEYS(ID,LAST_VALUE)
+			SELECT 'TMODIFIERFIELD', LAST_VALUE  FROM JPA_GENERATED_KEYS where ID='TCARTITEMMODIFIERFIELD'
+			<comment>insert jpa generate key</comment>
+		</sql>
+		<sql
+				dbms="mysql, oracle, h2"
+				endDelimiter="\nGO"
+				splitStatements="true"
+				stripComments="true">insert into JPA_GENERATED_KEYS(ID,LAST_VALUE)
+			SELECT 'TMODIFIERFIELDOPTION', LAST_VALUE  FROM JPA_GENERATED_KEYS where ID='TCARTITEMMODIFIERFIELDOPTION'
+			<comment>insert jpa generate key</comment>
+		</sql>
+		<sql
+				dbms="mysql, oracle, h2"
+				endDelimiter="\nGO"
+				splitStatements="true"
+				stripComments="true">insert into JPA_GENERATED_KEYS(ID,LAST_VALUE)
+			SELECT 'TMODIFIERFIELDOPTNLDF', LAST_VALUE  FROM JPA_GENERATED_KEYS where ID='TCARTITEMMODIFIERFIELDOPTNLDF'
+			<comment>insert jpa generate key</comment>
+		</sql>
+		<sql
+				dbms="mysql, oracle, h2"
+				endDelimiter="\nGO"
+				splitStatements="true"
+				stripComments="true">insert into JPA_GENERATED_KEYS(ID,LAST_VALUE)
+			SELECT 'TPRODTYPEMODIFIERGRP', LAST_VALUE  FROM JPA_GENERATED_KEYS where ID='TPRODTYPECARTITEMMODIFIERGRP'
+			<comment>insert jpa generate key</comment>
+		</sql>
+
+	</changeSet>
+
+	<changeSet id="7.6.0-generalmodifiers-remove_fk" author="elasticpath">
+
+		<dropForeignKeyConstraint baseTableName="TCARTITEMMODIFIERFIELDLDF"
+								   constraintName="TCARTITEMMODFIELDLDF_IBFK_1" />
+
+		<dropForeignKeyConstraint baseTableName="TCARTITEMMODIFIERFIELDOPTION"
+								 constraintName="TCARTITEMMODFIELDOPTION_IBFK_1" />
+
+		<dropForeignKeyConstraint baseTableName="TCARTITEMMODIFIERFIELDOPTNLDF"
+								 constraintName="TCARTITEMMODFIELDOPTLDF_IBFK_1" />
+
+		<dropForeignKeyConstraint baseTableName="TPRODTYPECARTITEMMODIFIERGRP"
+								 constraintName="TPRODTYPECARTITEMMODGRP_IBFK_1" />
+
+		<dropForeignKeyConstraint baseTableName="TPRODTYPECARTITEMMODIFIERGRP"
+								 constraintName="TPRODTYPECARTITEMMODGRP_IBFK_2" />
+
+		<dropForeignKeyConstraint baseTableName="TCARTITEMMODIFIERGROUPLDF"
+								 constraintName="TCARTITEMMODGROUPLDF_IBFK_1"/>
+
+		<dropForeignKeyConstraint baseTableName="TCARTITEMMODIFIERGROUP"
+								 constraintName="TCARTITEMMODIFIERGROUP_IBFK_1" />
+
+	</changeSet>
+	<changeSet id="7.6.0-generalmodifiers-drop-cartitemmodifiers" author="elasticpath">
+		<dropTable tableName="TPRODTYPECARTITEMMODIFIERGRP"/>
+
+		<dropTable tableName="TCARTITEMMODIFIERFIELDOPTNLDF"/>
+		<dropTable tableName="TCARTITEMMODIFIERFIELDOPTION"/>
+
+		<dropTable tableName="TCARTITEMMODIFIERFIELDLDF"/>
+		<dropTable tableName="TCARTITEMMODIFIERFIELD"/>
+
+		<dropTable tableName="TCARTITEMMODIFIERGROUPLDF"/>
+		<dropTable tableName="TCARTITEMMODIFIERGROUP"/>
+
+
+	</changeSet>
+
+</databaseChangeLog>
+
+
+

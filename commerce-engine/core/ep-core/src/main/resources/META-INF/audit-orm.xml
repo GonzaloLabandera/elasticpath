@@ -14,13 +14,4 @@
 				WHERE cso.changeTransaction.transactionId = ?1
 			</query>
 		</named-query>
-		<named-query name="FIND_CHANGE_OPERATIONS_BY_TRANSACTION_ID">
-			<query>
-				SELECT cso
-				FROM ChangeOperationImpl cso
-				WHERE cso.changeTransaction.transactionId = ?1
-				ORDER BY cso.operationOrder
-			</query>
-		</named-query>
-
 </entity-mappings>

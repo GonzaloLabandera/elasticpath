@@ -26,7 +26,7 @@ import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.attribute.Attribute;
 import com.elasticpath.domain.attribute.AttributeGroup;
 import com.elasticpath.domain.attribute.AttributeGroupAttribute;
-import com.elasticpath.domain.cartmodifier.CartItemModifierGroup;
+import com.elasticpath.domain.modifier.ModifierGroup;
 import com.elasticpath.domain.catalog.ProductType;
 import com.elasticpath.domain.skuconfiguration.SkuOption;
 import com.elasticpath.service.catalog.ProductTypeService;
@@ -145,7 +145,7 @@ public class ProductTypeAddEditWizard extends AbstractPolicyAwareWizard<ProductT
 		setProductTypeAttributes((List<Attribute>) step1.getAssignedAttributes());
 		setProductTypeSkuOptions(step2.getAssignedSkuOptions());
 		setProductTypeSkuAttributes((List<Attribute>) step2.getAssignedSkuAttributes());
-		setProductTypeCartItemModifierGroup((List<CartItemModifierGroup>) step1.getAssignedCartItemModifierGroups());
+		setProductTypeCartItemModifierGroup((List<ModifierGroup>) step1.getAssignedCartItemModifierGroups());
 
 		if (editMode) {
 			catalogModel.getProductTypeTableItems().addModifiedItem(getProductType());
@@ -194,14 +194,14 @@ public class ProductTypeAddEditWizard extends AbstractPolicyAwareWizard<ProductT
 				getGroupAttributeFromList(assignedAttributes, ContextIdNames.PRODUCT_TYPE_PRODUCT_ATTRIBUTE));
 	}
 
-private void setProductTypeCartItemModifierGroup(final List<CartItemModifierGroup> assignedCartItemModifierGroup) {
-		final Set<CartItemModifierGroup> groupCartItemModifierGroup = new HashSet<>();
+private void setProductTypeCartItemModifierGroup(final List<ModifierGroup> assignedCartItemModifierGroup) {
+		final Set<ModifierGroup> groupModifierGroup = new HashSet<>();
 
-		for (CartItemModifierGroup cartItemModifierGroup:assignedCartItemModifierGroup) {
-			groupCartItemModifierGroup.add(cartItemModifierGroup);
+		for (ModifierGroup cartItemModifierGroup:assignedCartItemModifierGroup) {
+			groupModifierGroup.add(cartItemModifierGroup);
 		}
 
-		getProductType().setCartItemModifierGroups(groupCartItemModifierGroup);
+		getProductType().setModifierGroups(groupModifierGroup);
 	}
 
 	/**

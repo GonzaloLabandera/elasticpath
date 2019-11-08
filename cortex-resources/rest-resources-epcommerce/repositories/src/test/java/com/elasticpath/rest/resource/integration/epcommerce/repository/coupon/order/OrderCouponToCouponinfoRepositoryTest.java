@@ -202,7 +202,7 @@ public class OrderCouponToCouponinfoRepositoryTest {
 	}
 
 	@Test
-	public void deleteInvalidCouponReturnsNotComplete() {
+	public void deleteInvalidCouponReturnsNotFoundResourceOperationFailure() {
 		when(cartOrderRepository.findByGuidAsSingle(SCOPE, CART_ORDER_GUID)).thenReturn(Single.just(cartOrder));
 		when(cartOrder.removeCoupon(COUPON_CODE)).thenReturn(false);
 
@@ -210,7 +210,8 @@ public class OrderCouponToCouponinfoRepositoryTest {
 
 		repository.delete(orderCouponIdentifier)
 				.test()
-				.assertNotComplete();
+				.assertError(ResourceOperationFailure.notFound(COUPON_IS_NOT_FOUND))
+				.assertTerminated();
 	}
 
 	@Test

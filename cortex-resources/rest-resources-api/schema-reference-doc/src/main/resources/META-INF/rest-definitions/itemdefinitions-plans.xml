@@ -43,5 +43,52 @@
 				<result>item-definition-option-value</result>
 			</step>
 		</plan>
+
+<!--Item Definition Component-->
+		<plan>
+			<name>read-item-definition-component</name>
+			<description><![CDATA[Read the item definition component from the list of available components.]]></description>
+			<step>
+				<description><![CDATA[Item-definition to the list of available components.]]></description>
+				<start>item-definition</start>
+				<follow-link>components</follow-link>
+				<result>item-definition-components</result>
+			</step>
+			<step>
+				<description><![CDATA[Item-definition components to component.]]></description>
+				<start>item-definition-components</start>
+				<follow-link>element</follow-link>
+				<result>item-definition-component</result>
+			</step>
+		</plan>
+
+		<plan>
+			<name>read-nested-item-definition-components</name>
+			<description><![CDATA[Read an single nested item definition component.]]></description>
+			<step>
+				<description><![CDATA[Item-definition component to the list of available nested components.]]></description>
+				<start>item-definition-component</start>
+				<follow-link>components</follow-link>
+				<result>item-definition-nested-components</result>
+			</step>
+			<step>
+				<description><![CDATA[Item-definition nested components to component.]]></description>
+				<start>item-definition-nested-components</start>
+				<follow-link>element</follow-link>
+				<result>item-definition-component</result>
+			</step>
+		</plan>
+
+		<plan>
+			<name>read-item-definition-component-to-standalone-item</name>
+			<description><![CDATA[Read the component's stand alone item. Some components can be purchased separately.]]></description>
+			<step>
+				<description><![CDATA[The stand alone item.]]></description>
+				<start>item-definition-component</start>
+				<follow-link>standaloneitem</follow-link>
+				<result>items.item</result>
+			</step>
+		</plan>
+		
 	</family>
 </definitions>

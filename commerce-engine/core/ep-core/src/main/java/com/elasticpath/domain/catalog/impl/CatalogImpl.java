@@ -316,6 +316,10 @@ public class CatalogImpl extends AbstractLegacyEntityImpl implements Catalog {
 		return code;
 	}
 
+
+
+
+
 	/**
 	 * Sets the unique code associated with the {@link Catalog}.
 	 * 

@@ -31,11 +31,9 @@
 		<selenium.waitdriver.timeout>30</selenium.waitdriver.timeout>
 		<cortex.server.host>localhost</cortex.server.host>
 		<ep.rest.baseurl>http://${cortex.server.host}:${ep.cortex.port.http}${ep.cortex.contextUrl}</ep.rest.baseurl>
-
 	</properties>
 
 	<dependencies>
-
 		<dependency>
 			<groupId>com.elasticpath.extensions.cm</groupId>
 			<artifactId>ep-cm-common-test-definitions</artifactId>
@@ -91,6 +89,10 @@
 		<dependency>
 			<groupId>com.elasticpath.extensions</groupId>
 			<artifactId>ep-cortex-common-test-definitions</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.elasticpath.extensions</groupId>
+			<artifactId>ext-cortex-common-test-definitions</artifactId>
 		</dependency>
 	</dependencies>
 

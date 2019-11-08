@@ -3,10 +3,20 @@
  */
 package com.elasticpath.persistence.dao.impl;
 
+import static com.elasticpath.persistence.support.FetchFieldConstants.DESCRIPTION;
+import static com.elasticpath.persistence.support.FetchFieldConstants.NAME;
+import static com.elasticpath.persistence.support.FetchFieldConstants.OWNER;
+import static com.elasticpath.persistence.support.FetchFieldConstants.QUERY_CONTENT;
+import static com.elasticpath.persistence.support.FetchFieldConstants.QUERY_TYPE;
+import static com.elasticpath.persistence.support.FetchFieldConstants.QUERY_VISIBILITY;
+
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+
+import com.google.common.collect.Lists;
 
 import com.elasticpath.base.exception.EpServiceException;
 import com.elasticpath.commons.beanframework.BeanFactory;
@@ -18,21 +28,18 @@ import com.elasticpath.domain.cmuser.CmUser;
 import com.elasticpath.persistence.api.Persistable;
 import com.elasticpath.persistence.api.PersistenceEngine;
 import com.elasticpath.persistence.dao.AdvancedSearchQueryDao;
-import com.elasticpath.service.misc.FetchPlanHelper;
+import com.elasticpath.persistence.openjpa.util.FetchPlanHelper;
 
 /**
  * Provides <code>AdvancedSearchQuery</code> data access methods.
  */
 public class AdvancedSearchQueryDaoImpl implements AdvancedSearchQueryDao {
 
-	private PersistentBeanFinder persistentBeanFinder = new PersistentBeanFinder();
-
+	private final PersistentBeanFinder persistentBeanFinder = new PersistentBeanFinder();
 	private PersistenceEngine persistenceEngine;
-
+	private FetchPlanHelper fetchPlanHelper;
 	private BeanFactory beanFactory;
 
-	private FetchPlanHelper fetchPlanHelper;
-	
 	/**
 	 * Save or update the given query.
 	 * 
@@ -57,16 +64,13 @@ public class AdvancedSearchQueryDaoImpl implements AdvancedSearchQueryDao {
 	public AdvancedSearchQuery get(final long queryUidPk) {
 		sanityCheck();
 
-		AdvancedSearchQuery searchQuery = null;
 		if (queryUidPk <= 0) {
-			searchQuery = getBean(ContextIdNames.ADVANCED_SEARCH_QUERY);
-		} else {
-			prepareFetchPlanWithDetails();
-			searchQuery = getPersistentBeanFinder().get(ContextIdNames.ADVANCED_SEARCH_QUERY, queryUidPk);
-			fetchPlanHelper.clearFetchPlan();
+			return getBean(ContextIdNames.ADVANCED_SEARCH_QUERY);
 		}
 
-		return searchQuery;
+		return getPersistentBeanFinder()
+			.withCollectionOfLazyFields(getLazyFields(true))
+			.get(ContextIdNames.ADVANCED_SEARCH_QUERY, queryUidPk);
 	}
 
 	/**
@@ -74,8 +78,7 @@ public class AdvancedSearchQueryDaoImpl implements AdvancedSearchQueryDao {
 	 * 
 	 * @param owner the query owner
 	 * @param queryTypes the query types
-	 * @param withDetails is indicator which define what fetch plan must be used. If it is true then fetch plan with query details is used
-	 *            {@link #prepareFetchPlanWithDetails()}. Otherwise, simple fetch plan is used {@link #prepareFetchPlan()}
+	 * @param withDetails if true, additional search query fields will be loaded
 	 * @return list of obtained queries
 	 */
 	@Override
@@ -83,88 +86,79 @@ public class AdvancedSearchQueryDaoImpl implements AdvancedSearchQueryDao {
 																	final boolean withDetails) {
 		sanityCheck();
 
-		if (withDetails) {
-			prepareFetchPlanWithDetails();
-		} else {
-			prepareFetchPlan();
-		}
-
 		Map<String, Object> parameters = new HashMap<>();
 		parameters.put("uidPk", owner.getUidPk());
 		parameters.put("queryVisibility", QueryVisibility.PUBLIC);
 		parameters.put("listQueryType", queryTypes);
-		final List<AdvancedSearchQuery> retrieveByNamedQuery = getPersistenceEngine().retrieveByNamedQuery("ADVANCED_QUERY_FIND_VISIBLE_WITH_TYPES",
-				parameters);
-		fetchPlanHelper.clearFetchPlan();
-		return retrieveByNamedQuery;
+
+		return getPersistenceEngine()
+			.withCollectionOfLazyFields(getLazyFields(withDetails))
+			.retrieveByNamedQuery("ADVANCED_QUERY_FIND_VISIBLE_WITH_TYPES", parameters);
 	}
 
 	/**
 	 * Finds all queries with given query types.
 	 * 
 	 * @param queryTypes the query types
-	 * @param withDetails is indicator which define what fetch plan must be used. If it is true then fetch plan with query details is used
-	 *            {@link #prepareFetchPlanWithDetails()}. Otherwise, simple fetch plan is used {@link #prepareFetchPlan()}
+	 * @param withDetails if true, additional search query fields will be loaded
 	 * @return list of obtained queries
 	 */
 	@Override
 	public List<AdvancedSearchQuery> findAllQueriesWithTypes(final List<AdvancedQueryType> queryTypes, final boolean withDetails) {
 		sanityCheck();
 
-		if (withDetails) {
-			prepareFetchPlanWithDetails();
-		} else {
-			prepareFetchPlan();
-		}
-
 		Map<String, Object> parameters = new HashMap<>();
 		parameters.put("list", queryTypes);
 
-		final List<AdvancedSearchQuery> retrieveByNamedQuery = getPersistenceEngine().retrieveByNamedQuery("ADVANCED_QUERY_FIND_ALL_WITH_TYPES",
-				parameters);
-		fetchPlanHelper.clearFetchPlan();
-		return retrieveByNamedQuery;
+		return getPersistenceEngine()
+			.withCollectionOfLazyFields(getLazyFields(withDetails))
+			.retrieveByNamedQuery("ADVANCED_QUERY_FIND_ALL_WITH_TYPES", parameters);
 	}
 	
 	/**
 	 * Finds queries with the given name.
 	 * 
 	 * @param queryName the query name
-	 * @param withDetails is indicator which define what fetch plan must be used.
+	 * @param withDetails if true, additional search query fields will be loaded
 	 * @return list of queries matching the given name
 	 */
 	@Override
 	public List<AdvancedSearchQuery> findByName(final String queryName, final boolean withDetails) {
 		sanityCheck();
 
-		if (withDetails) {
-			prepareFetchPlanWithDetails();
-		} else {
-			prepareFetchPlan();
-		}
-
 		Map<String, Object> parameters = new HashMap<>();
 		parameters.put("name", queryName.toLowerCase(Locale.getDefault()));
 
-		final List<AdvancedSearchQuery> retrieveByNamedQuery = getPersistenceEngine().retrieveByNamedQuery("ADVANCED_QUERY_FIND_BY_NAME",
-				parameters);
-		fetchPlanHelper.clearFetchPlan();
-		return retrieveByNamedQuery;
+		return getPersistenceEngine()
+			.withCollectionOfLazyFields(getLazyFields(withDetails))
+			.retrieveByNamedQuery("ADVANCED_QUERY_FIND_BY_NAME", parameters);
 	}
 
-	private void prepareFetchPlan() {
-		Class<? extends Persistable> queryClass = beanFactory.getBeanImplClass(ContextIdNames.ADVANCED_SEARCH_QUERY);
-		fetchPlanHelper.addField(queryClass, "name");
-		fetchPlanHelper.addField(queryClass, "description");
-		fetchPlanHelper.addField(queryClass, "queryVisibility");
-		fetchPlanHelper.addField(queryClass, "queryType");
-	}
+	/**
+	 * Get a map with lazy fields. By default, the following fields will be loaded:
+	 *
+	 * <strong>name</strong>, <strong>description</strong>, <strong>queryVisibility</strong>, <strong>queryType</strong>.
+	 *
+	 * If <strong>withDetails</strong> is true, then <strong>queryContent</strong> and <strong>owner</strong> fields will be loaded too.
+	 *
+	 * @param withDetails if true, additional fields will be loaded.
+	 *
+	 * @return a map with lazy fields.
+	 */
+	@SuppressWarnings({"unchecked", "rawtypes"})
+	protected Map<Class<?>, Collection<String>> getLazyFields(final boolean withDetails) {
 
-	private void prepareFetchPlanWithDetails() {
-		prepareFetchPlan();
-		Class<? extends Persistable> queryClass = beanFactory.getBeanImplClass(ContextIdNames.ADVANCED_SEARCH_QUERY);
-		fetchPlanHelper.addField(queryClass, "queryContent");
-		fetchPlanHelper.addField(queryClass, "owner");
+		List<String> fields = Lists.newArrayList(NAME, DESCRIPTION, QUERY_VISIBILITY, QUERY_TYPE);
+
+		if (withDetails) {
+			fields.add(QUERY_CONTENT);
+			fields.add(OWNER);
+		}
+
+		Map<Class<?>, Collection<String>> mapLazyFields = new HashMap<>();
+		mapLazyFields.put(beanFactory.getBeanImplClass(ContextIdNames.ADVANCED_SEARCH_QUERY), fields);
+
+		return mapLazyFields;
 	}
 
 	/**
@@ -191,7 +185,7 @@ public class AdvancedSearchQueryDaoImpl implements AdvancedSearchQueryDao {
 
 	/**
 	 * Gets the persistent bean finder.
-	 * 
+	 *
 	 * @return the persistentBeanFinder
 	 */
 	public PersistentBeanFinder getPersistentBeanFinder() {
@@ -199,17 +193,8 @@ public class AdvancedSearchQueryDaoImpl implements AdvancedSearchQueryDao {
 	}
 
 	/**
-	 * Sets the persistent bean finder.
-	 * 
-	 * @param persistentBeanFinder the persistentBeanFinder to set
-	 */
-	public void setPersistentBeanFinder(final PersistentBeanFinder persistentBeanFinder) {
-		this.persistentBeanFinder = persistentBeanFinder;
-	}
-
-	/**
 	 * Sanity check of this service instance.
-	 * 
+	 *
 	 * @throws EpServiceException - if something goes wrong.
 	 */
 	public void sanityCheck() throws EpServiceException {
@@ -247,7 +232,7 @@ public class AdvancedSearchQueryDaoImpl implements AdvancedSearchQueryDao {
 
 	/**
 	 * Sets fetch plan helper.
-	 * 
+	 *
 	 * @param fetchPlanHelper the fetchPlanHelper to set
 	 */
 	public void setFetchPlanHelper(final FetchPlanHelper fetchPlanHelper) {
@@ -269,7 +254,7 @@ public class AdvancedSearchQueryDaoImpl implements AdvancedSearchQueryDao {
 
 		/**
 		 * Get a persistent instance with the given id. Return null if no matching record exists.
-		 * 
+		 *
 		 * @param <T> the type of the object
 		 * @param beanName the name of the bean to find the implementation class for.
 		 * @param uidPk the persistent instance id.
@@ -281,32 +266,15 @@ public class AdvancedSearchQueryDaoImpl implements AdvancedSearchQueryDao {
 		}
 
 		/**
-		 * Load a persistent instance with a given id. The persistent class to load will be determined from the beanName Throw an unrecoverable
-		 * exception if there is no matching database row.
-		 * 
-		 * @param <T> the type of the object
-		 * @param beanName the name of the bean to find the implementation class for.
-		 * @param uidPk the persistent instance id.
-		 * @return the persistent instance
-		 * @throws com.elasticpath.persistence.api.EpPersistenceException - in case of persistence errors
+		 * Set a map with pairs of Class and a collection of lazy fields to be loaded.
+		 * E.g CustomerImpl.class, {"preferredShippingAddress", "customerProfile"}
+		 *
+		 * @param lazyFields a map with lazy fields to be loaded.
+		 * @return the current instance of {@link PersistenceEngine}
 		 */
-		public <T extends Persistable> T load(final String beanName, final long uidPk) {
-			return getPersistenceEngine().load(beanFactory.<T>getBeanImplClass(beanName), uidPk);
-		}
-
-		/**
-		 * Load a persistent instance with the given id. Throw an unrecoverable exception if there is no matching database row. This method will
-		 * create a new session (EntityManager) to execute the query, and close the new session when completed.
-		 * 
-		 * @param <T> the type of the object
-		 * @param beanName the name of the bean to find the implementation class for.
-		 * @param uidPk the persistent instance id.
-		 * @return the persistent instance
-		 * @throws com.elasticpath.persistence.api.EpPersistenceException in case of persistence errors
-		 */
-		public <T extends Persistable> T loadWithNewSession(final String beanName, final long uidPk) {
-			return getPersistenceEngine().loadWithNewSession(beanFactory.<T>getBeanImplClass(beanName), uidPk);
+		public PersistentBeanFinder withCollectionOfLazyFields(final Map<Class<?>, Collection<String>> lazyFields) {
+			fetchPlanHelper.setCollectionOfLazyFields(lazyFields);
+			return this;
 		}
 	}
-
 }

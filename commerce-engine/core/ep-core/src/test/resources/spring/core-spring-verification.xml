@@ -15,5 +15,6 @@
 	<import resource="service/service.xml" />
 	<import resource="service/serviceRemote.xml" />
 	<import resource="classpath*:META-INF/elasticpath/conf/spring/plugin.xml" />
+	<import resource="classpath*:META-INF/elasticpath/conf/spring/beans.xml" />
 	<import resource="core-mocked-services.xml" />
 </beans>

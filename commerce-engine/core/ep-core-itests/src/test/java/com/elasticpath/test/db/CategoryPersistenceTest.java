@@ -9,6 +9,7 @@ import java.util.Locale;
 
 import org.junit.Before;
 import org.junit.Test;
+
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallback;
 
@@ -17,11 +18,7 @@ import com.elasticpath.domain.catalog.Category;
 import com.elasticpath.domain.catalog.CategoryType;
 import com.elasticpath.domain.catalog.impl.CatalogImpl;
 import com.elasticpath.domain.catalog.impl.CategoryImpl;
-import com.elasticpath.persistence.api.FetchGroupLoadTuner;
 import com.elasticpath.persistence.api.Persistable;
-import com.elasticpath.persistence.support.FetchGroupConstants;
-import com.elasticpath.persistence.support.impl.FetchGroupLoadTunerImpl;
-import com.elasticpath.service.misc.impl.OpenJPAFetchPlanHelperImpl;
 import com.elasticpath.test.integration.DirtiesDatabase;
 import com.elasticpath.test.util.Utils;
 
@@ -34,8 +31,6 @@ public class CategoryPersistenceTest extends DbTestCase {
 	private CategoryType categoryType;
 
 	private Catalog catalog;
-
-	private final OpenJPAFetchPlanHelperImpl fetchPlanHelper = new OpenJPAFetchPlanHelperImpl();
 
 	private Category category1;
 
@@ -62,17 +57,13 @@ public class CategoryPersistenceTest extends DbTestCase {
 		category3.setParent(category2);
 		category4.setParent(category3);
 
-		getTxTemplate().execute(new TransactionCallback<Category>() {
-			@Override
-			public Category doInTransaction(final TransactionStatus arg0) {
+		getTxTemplate().execute(arg0 -> {
 				getPersistenceEngine().saveOrUpdate(category1);
 				getPersistenceEngine().saveOrUpdate(category2);
 				getPersistenceEngine().saveOrUpdate(category3);
 				getPersistenceEngine().saveOrUpdate(category4);
 				return null;
-			}
 		});
-
 	}
 	/**
 	 * Tests category retrieving.
@@ -81,26 +72,12 @@ public class CategoryPersistenceTest extends DbTestCase {
 	@Test
 	public void testRetrieveCategory() {
 
-		Category returnedCategory1 = getTxTemplate().execute(new TransactionCallback<Category>() {
-			@Override
-			public Category doInTransaction(final TransactionStatus arg0) {
+		Category returnedCategory1 = getTxTemplate().execute((TransactionCallback<Category>) arg0 -> {
 
-				fetchPlanHelper.setPersistenceEngine(getPersistenceEngine());
-				fetchPlanHelper.configureFetchGroupLoadTuner(getLoadTuner());
-
-				return getPersistenceEngine().get(CategoryImpl.class, category1.getUidPk());
-			}
+			return getPersistenceEngine().get(CategoryImpl.class, category1.getUidPk());
 		});
 
 		assertNotNull("Category1 not retrieved - null", returnedCategory1);
-	}
-
-	private FetchGroupLoadTuner getLoadTuner() {
-			FetchGroupLoadTuner loadTuner = new FetchGroupLoadTunerImpl();
-			loadTuner.addFetchGroup(FetchGroupConstants.CATEGORY_BASIC,
-					FetchGroupConstants.CATALOG_DEFAULTS // need default locale
-			);
-		return loadTuner;
 	}
 
 	/**
@@ -158,12 +135,9 @@ public class CategoryPersistenceTest extends DbTestCase {
 		catalog.setDefaultLocale(Locale.getDefault());
 		catalog.setName(catalog.getCode());
 
-		getTxTemplate().execute(new TransactionCallback<Catalog>() {
-			@Override
-			public Catalog doInTransaction(final TransactionStatus arg0) {
-				getPersistenceEngine().save(catalog);
-				return catalog;
-			}
+		getTxTemplate().execute(arg0 -> {
+			getPersistenceEngine().save(catalog);
+			return catalog;
 		});
 
 		return catalog;

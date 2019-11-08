@@ -1,0 +1,26 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<Context>
+	<Resources
+			cachingAllowed="true"
+			cacheMaxSize="${ep.tomcat.maxcachesize}"
+	/>
+	<Resource name="jdbc/epjndi"
+		auth="Container"
+		scope="Shareable"
+		type="javax.sql.DataSource"
+		maxActive="100"
+		maxIdle="30"
+		maxWait="10000"
+		testWhileIdle="true"
+		removeAbandoned="true"
+		username="${epdb.username}"
+		password="${epdb.password}"
+		driverClassName="${epdb.jdbc.driver}"
+		factory="org.apache.tomcat.jdbc.pool.DataSourceFactory"
+		url="${epdb.url}"
+		validationQuery="${epdb.validation.query}"
+		validationInterval="${epdb.validation.interval}"
+
+	/>
+</Context>
+

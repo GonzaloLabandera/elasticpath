@@ -3,14 +3,12 @@
  */
 package com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder.repositories;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
 import static com.elasticpath.rest.resource.integration.epcommerce.repository.ResourceTestConstants.CART_ID;
 import static com.elasticpath.rest.resource.integration.epcommerce.repository.ResourceTestConstants.SCOPE;
 import static com.elasticpath.rest.resource.integration.epcommerce.repository.ResourceTestConstants.SCOPE_IDENTIFIER_PART;
 import static com.elasticpath.rest.resource.integration.epcommerce.repository.ResourceTestConstants.USER_ID;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 
 import io.reactivex.Observable;
 import io.reactivex.Single;
@@ -47,7 +45,9 @@ public class CartEntityRepositoryImplTest {
 
 	@Test
 	public void findOne() {
-		CartEntity cartEntity = mock(CartEntity.class);
+		CartEntity cartEntity = CartEntity.builder()
+				.withCartId(CART_ID)
+				.build();
 		when(shoppingCartRepository.getShoppingCart(CART_ID)).thenReturn(Single.just(cart));
 		when(conversionService.convert(cart, CartEntity.class)).thenReturn(cartEntity);
 

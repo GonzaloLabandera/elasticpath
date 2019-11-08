@@ -32,7 +32,7 @@ public class CartTotalEntityRepositoryImpl<E extends TotalEntity, I extends Cart
 	public Single<TotalEntity> findOne(final CartTotalIdentifier cartTotalIdentifier) {
 		final CartIdentifier cartIdentifier = cartTotalIdentifier.getCart();
 
-		String scope = cartIdentifier.getScope().getValue();
+		String scope = cartIdentifier.getCarts().getScope().getValue();
 		String cartID = cartIdentifier.getCartId().getValue();
 
 		return totalsCalculator.calculateTotalForShoppingCart(scope, cartID)

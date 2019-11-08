@@ -51,6 +51,15 @@ public final class ContextIdNames {
 	/** bean id for implementaion of com.elasticpath.service.customer.CustomerRegistrationResult.*/
 	public static final String CUSTOMER_REGISTRATION_RESULT = "customerRegistrationResult";
 
+	/** bean id for {@link com.elasticpath.domain.customer.StoreCustomerAttribute}. */
+	public static final String STORE_CUSTOMER_ATTRIBUTE = "storeCustomerAttribute";
+
+	/** bean id for implementation of {@link com.elasticpath.service.customer.StoreCustomerAttributeService}. */
+	public static final String STORE_CUSTOMER_ATTRIBUTE_SERVICE = "storeCustomerAttributeService";
+
+	/** bean id for implementation of {@link com.elasticpath.domain.customer.AttributePolicy}.*/
+	public static final String ATTRIBUTE_POLICY = "attributePolicy";
+
 	/** bean id for implementation of com.elasticpath.util.impl.RandomGuid. */
 	public static final String RANDOM_GUID = "randomGuid";
 
@@ -603,6 +612,9 @@ public final class ContextIdNames {
 	/** bean id for implemenation of com.elasticpath.service.shoppingcart.CheckoutService. */
 	public static final String CUSTOMER_PERSONAL_DATA_REPORTING_SERVICE = "customerPersonalDataReportingService";
 
+	/** bean id for implementation of com.elasticpath.service.customer.CustomerProfileAttributeService. */
+	public static final String CUSTOMER_PROFILE_ATTRIBUTE_SERVICE = "customerProfileAttributeService";
+
 
 
 	// +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ //
@@ -1149,6 +1161,9 @@ public final class ContextIdNames {
 
 	/** bean id for com.elasticpath.settings.domain.SettingDefinition. */
 	public static final String SETTING_DEFINITION = "settingDefinition";
+	
+	/** bean id for com.elasticpath.settings.domain.SettingValue. */
+	public static final String SETTING_VALUE = "settingValue";
 
 	/** bean id for com.elasticpath.settings.domain.SettingMetadata. */
 	public static final String SETTING_METADATA = "settingMetadata";
@@ -1564,9 +1579,6 @@ public final class ContextIdNames {
 	/** bean id for {@link com.elasticpath.service.shoppingcart.BundleApportioningCalculator}. */
 	public static final String BUNDLE_APPORTIONING_CALCULATOR = "bundleApportioningCalculator";
 
-	/** bean id for implementation of com.elasticpath.domain.coupon.specifications.ValidCouponUseSpecification. */
-	public static final String VALID_COUPON_USE_SPEC = "validCouponUseSpecification";
-
 	/** bean id for {@link com.elasticpath.service.tax.impl.DiscountApportioningCalculatorImpl}. */
 	public static final String DISCOUNT_APPORTIONING_CALCULATOR = "discountApportioningCalculator";
 
@@ -1627,26 +1639,29 @@ public final class ContextIdNames {
 	/** bean id for {@link com.elasticpath.domain.shoppingcart.ExchangeItem}. */
 	public static final String EXCHANGE_ITEM = "exchangeItem";
 
-	/** Bean id for com.elasticpath.service.cartmodifier.CartItemModifierServiceImpl. */
-	public static final String CART_ITEM_MODIFIER_SERVICE = "cartItemModifierService";
+	/** Bean id for com.elasticpath.service.modifier.ModifierServiceImpl. */
+	public static final String  MODIFIER_SERVICE = "modifierService";
 
-	/** Bean id for com.elasticpath.domain.cartmodifier.impl.CartItemModifierGroupImpl. */
-	public static final String CART_ITEM_MODIFIER_GROUP = "cartItemModifierGroup";
+	/** Bean id for com.elasticpath.domain.modifier.impl.ModifierGroupImpl. */
+	public static final String  MODIFIER_GROUP = "modifierGroup";
 
-	/** Bean id for com.elasticpath.domain.cartmodifier.impl.CartItemModifierGroupLdfImpl. */
-	public static final String CART_ITEM_MODIFIER_GROUP_LDF = "cartItemModifierGroupLdf";
+	/** Bean id for com.elasticpath.domain.modifier.impl.ModifierGroupLdfImpl. */
+	public static final String  MODIFIER_GROUP_LDF = "modifierGroupLdf";
 
-	/** Bean id for com.elasticpath.domain.cartmodifier.impl.CartItemModifierFieldImpl. */
-	public static final String CART_ITEM_MODIFIER_FIELD = "cartItemModifierField";
+	/** Bean id for com.elasticpath.domain.modifier.impl.ModifierFieldImpl. */
+	public static final String  MODIFIER_FIELD = "modifierField";
 
-	/** Bean id for com.elasticpath.domain.cartmodifier.impl.CartItemModifierFieldLdfImpl. */
-	public static final String CART_ITEM_MODIFIER_FIELD_LDF = "cartItemModifierFieldLdf";
+	/** Bean id for com.elasticpath.domain.modifier.impl.ModifierFieldLdfImpl. */
+	public static final String  MODIFIER_FIELD_LDF = "modifierFieldLdf";
 
-	/** Bean id for com.elasticpath.domain.cartmodifier.impl.CartItemModifierFieldOptionImpl. */
-	public static final String CART_ITEM_MODIFIER_FIELD_OPTION = "cartItemModifierFieldOption";
+	/** Bean id for com.elasticpath.domain.modifier.impl.ModifierFieldOptionImpl. */
+	public static final String  MODIFIER_FIELD_OPTION = "modifierFieldOption";
 
-	/** Bean id for com.elasticpath.domain.cartmodifier.impl.CartItemModifierFieldOptionLdfImpl. */
-	public static final String CART_ITEM_MODIFIER_OPTION_LDF = "cartItemModifierFieldOptionLdf";
+	/** Bean id for com.elasticpath.domain.modifier.impl.ModifierFieldOptionLdfImpl. */
+	public static final String  MODIFIER_OPTION_LDF = "modifierFieldOptionLdf";
+
+	/** Bean id for com.elasticpath.domain.modifier.impl.ModifierGroupFilterImpl. */
+	public static final String  MODIFIER_GROUP_FILTER = "modifierGroupFilter";
 
 	/** Bean id for PersistenceMetadataMap. */
 	public static final String PERSISTENCELISTENER_METADATA_MAP = "persistenceListenerMetadataMap";
@@ -1704,6 +1719,9 @@ public final class ContextIdNames {
 	/** Bean id for implementation of {@link com.elasticpath.service.shipping.ShippingOptionService}. */
 	public static final String SHIPPING_OPTION_SERVICE = "shippingOptionService";
 
+	/** Bean id for implementation of {@link AttributePolicyService}. */
+	public static final String ATTRIBUTE_POLICY_SERVICE = "attributePolicyService";
+
 	/** Bean id for implementation of {@link com.elasticpath.service.shipping.PhysicalOrderShipmentShippingCostRefresher}. */
 	public static final String PHYSICAL_ORDER_SHIPMENT_SHIPPING_COST_REFRESHER = "physicalOrderShipmentShippingCostRefresher";
 
@@ -1713,7 +1731,23 @@ public final class ContextIdNames {
 	/** bean id for implementation of com.elasticpath.domain.search.Facet. */
 	public static final String FACET = "facet";
 
+	/** bean id for implementation of com.elasticpath.domain.sort.SortAttribute. */
+	public static final String SORT_ATTRIBUTE = "sortAttribute";
+
+	/** bean id for implementation of com.elasticpath.domain.sort.SortLocalizedName. */
+	public static final String SORT_LOCALIZED_NAME = "sortLocalizedName";
+
+	/** bean id for implementation of com.elasticpath.service.search.SortAttributeService. */
+	public static final String SORT_ATTRIBUTE_SERVICE = "sortAttributeService";
+
+	/**
+	 * bean id for implementation of com.elasticpath.service.cart.CartType. */
+	public static final String CART_TYPE = "cartType";
+	/** bean id for implementation of com.elasticpath.service.payment.gateway.PaymentMethodTransformerFactory. */
+	public static final String PAYMENT_METHOD_TRANSFORMER_FACTORY = "paymentMethodTransformerFactory";
+
 	private ContextIdNames() {
 		// Do not instantiate this class
 	}
+
 }

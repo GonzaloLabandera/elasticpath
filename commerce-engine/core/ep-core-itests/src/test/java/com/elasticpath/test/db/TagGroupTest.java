@@ -8,18 +8,15 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-import java.util.Set;
 
 import org.junit.Test;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.orm.jpa.JpaSystemException;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.transaction.TransactionStatus;
@@ -132,53 +129,27 @@ public class TagGroupTest extends DbTestCase {
 	}
 	
 	/**
-	 * Test for group deletion. If the group has assigned tag definitions an exception should be thrown.
+	 * Test for group deletion. If the group has assigned tag definitions the delete should cascade.
 	 */
 	@DirtiesDatabase
 	@Test
 	public void testDeleteGroup() {
 		final TagGroup tagGroupGeoLocation = tagGroupService.findByGuid(GEO_LOCATION_GROUP);
-		final TagGroup tagGroupProfile = tagGroupService.findByGuid(CUSTOMER_PROFILE_GROUP);
 
 		List<TagDefinition> tagDefsList = getTagDefinitionsByGroup(tagGroupGeoLocation);
 
 		assertFalse("Didn't find any tag definitions that should be assigned to the group", 
 				tagDefsList.isEmpty());
 		
-		try {
-			getTxTemplate().execute(new TransactionCallback<Object>() {
-				@Override
-				public Object doInTransaction(final TransactionStatus arg0) {
-						tagGroupService.delete(tagGroupGeoLocation);
-					return null;
-				}
-			});
-			fail("Should have gotten DataIntegrityViolationException - " 
-					+ "trying to delete the group that has assigned tag definitions");			
-		} catch (DataIntegrityViolationException e) {
-			// Expected : intentional
-		} catch (JpaSystemException e2) {
-			// Expected : some RDBMS will result in this exception
-		}
-
-		Set<TagDefinition> tagDefs = tagGroupGeoLocation.getTagDefinitions();	
-
-		for (TagDefinition tagDefinition : tagDefs) {
-			tagGroupProfile.addTagDefinition(tagDefinition);
-		}		
-		tagGroupGeoLocation.getTagDefinitions().clear();
-
 		TagGroup deletedGroup = (TagGroup) getTxTemplate().execute(new TransactionCallback<Object>() {
 			@Override
 			public Object doInTransaction(final TransactionStatus arg0) {
-				tagGroupService.saveOrUpdate(tagGroupProfile);
 				tagGroupService.delete(tagGroupGeoLocation);
 				return tagGroupService.findByGuid(GEO_LOCATION_GROUP);
 			}
 		});
-		
 		assertNull("Group was not deleted", deletedGroup);
-		
+
 		List<TagDefinition> emptyTagDefsList =
 				getTagDefinitionsByGroup(tagGroupGeoLocation);
 		

@@ -3,19 +3,17 @@
  */
 package com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder.impl;
 
-import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.Locale;
 
+import io.reactivex.Observable;
 import io.reactivex.Single;
 import io.reactivex.functions.Predicate;
 import org.junit.Before;
@@ -29,17 +27,16 @@ import com.elasticpath.base.common.dto.StructuredErrorMessage;
 import com.elasticpath.common.dto.ShoppingItemDto;
 import com.elasticpath.common.dto.sellingchannel.ShoppingItemDtoFactory;
 import com.elasticpath.commons.exception.InvalidBusinessStateException;
-import com.elasticpath.domain.customer.CustomerSession;
-import com.elasticpath.domain.shopper.Shopper;
 import com.elasticpath.domain.shoppingcart.ShoppingCart;
 import com.elasticpath.domain.shoppingcart.ShoppingItem;
 import com.elasticpath.domain.shoppingcart.impl.ShoppingItemImpl;
 import com.elasticpath.rest.ResourceOperationFailure;
 import com.elasticpath.rest.ResourceStatus;
 import com.elasticpath.rest.advise.Message;
-import com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder.CartPostProcessor;
-import com.elasticpath.rest.resource.integration.epcommerce.repository.customer.CustomerSessionRepository;
-import com.elasticpath.rest.resource.integration.epcommerce.repository.sku.ProductSkuRepository;
+import com.elasticpath.rest.identity.Subject;
+import com.elasticpath.rest.resource.ResourceOperationContext;
+import com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder.MultiCartResolutionStrategy;
+import com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder.MultiCartResolutionStrategyHolder;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.transform.ExceptionTransformer;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.transform.impl.ReactiveAdapterImpl;
 import com.elasticpath.sellingchannel.ProductUnavailableException;
@@ -67,19 +64,10 @@ public class ShoppingCartRepositoryImplTest {
 	private CartDirectorService cartDirectorService;
 
 	@Mock
-	private CartPostProcessor cartPostProcessor;
-
-	@Mock
-	private Shopper mockShopper;
-
-	@Mock
-	private CustomerSessionRepository customerSessionRepository;
-
-	@Mock
-	private ProductSkuRepository productSkuRepository;
-
-	@Mock
 	private ShoppingItemDtoFactory shoppingItemDtoFactory;
+
+	@Mock
+	private ResourceOperationContext resourceOperationContext;
 
 	@Mock
 	private ExceptionTransformer exceptionTransformer;
@@ -87,12 +75,26 @@ public class ShoppingCartRepositoryImplTest {
 	@InjectMocks
 	private ReactiveAdapterImpl reactiveAdapterImpl;
 
+	@Mock
+	private MultiCartResolutionStrategyHolder multiCartResolutionStrategyHolder;
+
+	@Mock
+	private MultiCartResolutionStrategy strategy;
+
+	@InjectMocks
 	private ShoppingCartRepositoryImpl repository;
+
+	@Mock
+	private Subject subject;
+
+	@Mock
+	ShoppingCart cart;
 
 	@Before
 	public void setUp() {
-		repository = new ShoppingCartRepositoryImpl(shoppingCartService, cartDirectorService, customerSessionRepository,
-				shoppingItemDtoFactory, cartPostProcessor, reactiveAdapterImpl, productSkuRepository);
+
+		when(multiCartResolutionStrategyHolder.getStrategies()).thenReturn(Collections.singletonList(strategy));
+		repository.setReactiveAdapter(reactiveAdapterImpl);
 	}
 
 	/**
@@ -100,90 +102,14 @@ public class ShoppingCartRepositoryImplTest {
 	 */
 	@Test
 	public void testGetDefaultShoppingCart() {
-		CustomerSession mockCustomerSession = createMockCustomerSession();
-		ShoppingCart cart = createMockShoppingCart();
-
-		expectCartPostProcessing(cart);
-		when(shoppingCartService.findOrCreateByCustomerSession(mockCustomerSession)).thenReturn(cart);
-		when(shoppingCartService.saveIfNotPersisted(cart)).thenReturn(cart);
-
+		when(resourceOperationContext.getSubject()).thenReturn(subject);
+		when(strategy.isApplicable(subject)).thenReturn(true);
+		when(strategy.getDefaultShoppingCart()).thenReturn(Single.just(cart));
 		repository.getDefaultShoppingCart()
 				.test()
 				.assertNoErrors()
 				.assertValue(cart);
 
-		verifyPostProcess(cart, mockCustomerSession);
-	}
-
-	/**
-	 * Test the behaviour of get default shopping cart when cart not found.
-	 */
-	@Test
-	public void testGetDefaultShoppingCartWhenCartNotFound() {
-		CustomerSession mockCustomerSession = createMockCustomerSession();
-
-		when(mockCustomerSession.getShopper()).thenReturn(mockShopper);
-
-		repository.getDefaultShoppingCart()
-				.test()
-				.assertError(isResourceOperationFailureNotFound());
-	}
-
-	/**
-	 * Test the behaviour of get default shopping cart guid.
-	 */
-	@Test
-	public void testGetDefaultShoppingCartGuidWhenNotFound() {
-		CustomerSession mockCustomerSession = createMockCustomerSession();
-
-		when(shoppingCartService.findDefaultShoppingCartGuidByShopper(mockCustomerSession.getShopper())).thenReturn(null);
-		repository.getDefaultShoppingCartGuid()
-				.test()
-				.assertError(isResourceOperationFailureNotFound());
-
-	}
-
-	/**
-	 * Test the behaviour of get default shopping cart guid.
-	 */
-	@Test
-	public void testGetDefaultShoppingCartGuid() {
-		CustomerSession mockCustomerSession = createMockCustomerSession();
-
-		when(shoppingCartService.findDefaultShoppingCartGuidByShopper(mockCustomerSession.getShopper())).thenReturn(CART_GUID);
-		repository.getDefaultShoppingCartGuid()
-				.test()
-				.assertNoErrors()
-				.assertValue(CART_GUID);
-
-	}
-
-	private Predicate<Throwable> isResourceOperationFailureNotFound() {
-		return throwable -> throwable instanceof ResourceOperationFailure
-				&& ResourceStatus.NOT_FOUND.equals(((ResourceOperationFailure) throwable).getResourceStatus());
-	}
-
-	/**
-	 * Test the behaviour of get shopping cart.
-	 */
-	@Test
-	public void testGetShoppingCart() {
-		CustomerSession mockCustomerSession = createMockCustomerSession();
-		ShoppingCart cart = createMockShoppingCart();
-
-		when(shoppingCartService.findByGuid(CART_GUID)).thenReturn(cart);
-
-		expectCartPostProcessing(cart);
-
-		Single<ShoppingCart> result = repository.getShoppingCart(CART_GUID);
-
-
-		result.test()
-				.assertNoErrors()
-				.assertValue(cart);
-
-		verifyPostProcess(cart, mockCustomerSession);
-	
 	}
 
 	/**
@@ -191,9 +117,11 @@ public class ShoppingCartRepositoryImplTest {
 	 */
 	@Test
 	public void testGetShoppingCartWhenCartNotFound() {
-		createMockCustomerSession();
+		when(resourceOperationContext.getSubject()).thenReturn(subject);
+		when(strategy.isApplicable(subject)).thenReturn(true);
+		when(strategy.getShoppingCartSingle(CART_GUID))
+				.thenReturn(Single.error(ResourceOperationFailure.notFound()));
 
-		when(shoppingCartService.findByGuid(CART_GUID)).thenReturn(null);
 
 		Single<ShoppingCart> result = repository.getShoppingCart(CART_GUID);
 
@@ -221,7 +149,6 @@ public class ShoppingCartRepositoryImplTest {
 
 	@Test
 	public void testAddItemToCartHappyPath() {
-		ShoppingCart cart = createMockShoppingCart();
 		ShoppingItemDto item = new ShoppingItemDto(SKU_CODE, 1);
 		ShoppingItem addedItem = new ShoppingItemImpl();
 		addedItem.setUidPk(1L);
@@ -237,7 +164,6 @@ public class ShoppingCartRepositoryImplTest {
 
 	@Test
 	public void testUpdateCartItemHappyPath() {
-		ShoppingCart cart = createMockShoppingCart();
 		ShoppingItem shoppingItem = mock(ShoppingItem.class);
 		when(shoppingItem.getUidPk()).thenReturn(1L);
 		ShoppingItemDto shoppingItemDto = new ShoppingItemDto(SKU_CODE, 2);
@@ -255,7 +181,6 @@ public class ShoppingCartRepositoryImplTest {
 
 	@Test
 	public void shouldNotUpdateCartItemWhenProductIsNotPurchasable() {
-		ShoppingCart cart = createMockShoppingCart();
 		ShoppingItem shoppingItem = mock(ShoppingItem.class);
 		when(shoppingItem.getUidPk()).thenReturn(1L);
 		ShoppingItemDto shoppingItemDto = new ShoppingItemDto(SKU_CODE, 2);
@@ -290,7 +215,6 @@ public class ShoppingCartRepositoryImplTest {
 
 	@Test
 	public void testRemoveItemFromCartHappyPath() {
-		ShoppingCart cart = createMockShoppingCart();
 
 		repository.removeItemFromCart(cart, "1") //TODO
 				.test()
@@ -300,13 +224,10 @@ public class ShoppingCartRepositoryImplTest {
 
 	@Test
 	public void testRemoveAllItemsFromDefaultCartHappyPath() {
-		ShoppingCart cart = createMockShoppingCart();
-		CustomerSession mockCustomerSession = createMockCustomerSession();
 
-		expectCartPostProcessing(cart);
-		when(shoppingCartService.findOrCreateByCustomerSession(mockCustomerSession)).thenReturn(cart);
-		when(shoppingCartService.saveIfNotPersisted(cart)).thenReturn(cart);
-
+		when(resourceOperationContext.getSubject()).thenReturn(subject);
+		when(strategy.isApplicable(subject)).thenReturn(true);
+		when(strategy.getDefaultShoppingCart()).thenReturn(Single.just(cart));
 
 		repository.removeAllItemsFromDefaultCart()
 				.test()
@@ -317,7 +238,6 @@ public class ShoppingCartRepositoryImplTest {
 
 	@Test
 	public void testRemoveAllItemsFromCartHappyPath() {
-		ShoppingCart cart = createMockShoppingCart();
 		repository.removeAllItemsFromCart(cart)
 				.test()
 				.assertNoErrors();
@@ -327,9 +247,11 @@ public class ShoppingCartRepositoryImplTest {
 
 	@Test
 	public void testFindAllCarts() {
-		when(shoppingCartService.findByCustomerAndStore(USER_GUID, STORE_CODE.toUpperCase(Locale.getDefault())))
-				.thenReturn(asList(CART_GUID, "OTHER_GUID"));
+		when(resourceOperationContext.getSubject()).thenReturn(subject);
 
+		when(strategy.isApplicable(subject)).thenReturn(true);
+		when(strategy.findAllCarts(USER_GUID, STORE_CODE, subject))
+				.thenReturn(Observable.just(CART_GUID, "OTHER_GUID"));
 		repository.findAllCarts(USER_GUID, STORE_CODE)
 				.test()
 				.assertNoErrors()
@@ -338,7 +260,6 @@ public class ShoppingCartRepositoryImplTest {
 
 	@Test
 	public void testUpdateCartItemWithFields() {
-		ShoppingCart cart = createMockShoppingCart();
 		ShoppingItemDto item = new ShoppingItemDto(SKU_CODE, 1);
 		ShoppingItem addedItem = new ShoppingItemImpl();
 		addedItem.setUidPk(1L);
@@ -371,6 +292,7 @@ public class ShoppingCartRepositoryImplTest {
 				.assertValue(STORE_CODE);
 
 	}
+
 	/**
 	 * Test the behaviour of get storecode for shopping cart guid.
 	 */
@@ -383,28 +305,10 @@ public class ShoppingCartRepositoryImplTest {
 				.assertError(isResourceOperationFailureNotFound());
 
 	}
-	private ShoppingCart createMockShoppingCart() {
-		ShoppingCart cart = mock(ShoppingCart.class);
-		when(cart.getShopper()).thenReturn(mockShopper);
 
-		return cart;
+	private Predicate<Throwable> isResourceOperationFailureNotFound() {
+		return throwable -> throwable instanceof ResourceOperationFailure
+				&& ResourceStatus.NOT_FOUND.equals(((ResourceOperationFailure) throwable).getResourceStatus());
 	}
 
-	private CustomerSession createMockCustomerSession() {
-		CustomerSession mockCustomerSession = mock(CustomerSession.class);
-
-		when(customerSessionRepository.findOrCreateCustomerSessionAsSingle()).thenReturn(Single.just(mockCustomerSession));
-		when(mockCustomerSession.getShopper()).thenReturn(mockShopper);
-
-		return mockCustomerSession;
-	}
-
-	private void expectCartPostProcessing(final ShoppingCart cart) {
-		when(cart.getShopper()).thenReturn(mockShopper);
-	}
-
-	private void verifyPostProcess(final ShoppingCart cart,
-								   final CustomerSession customerSession) {
-		verify(cartPostProcessor, atLeastOnce()).postProcessCart(cart, cart.getShopper(), customerSession);
-	}
 }

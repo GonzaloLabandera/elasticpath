@@ -16,15 +16,12 @@
 		<module>ep-base</module>
 		<module>ep-cache</module>
 		<module>ep-bean-framework</module>
-		<module>ep-persistence-api</module>
-		<module>ep-persistence-openjpa</module>
-		<module>ep-persistence-openjpa-itests</module>
 		<module>ep-core</module>
 		<module>shipping-calculation-epcommerce</module>
 		<module>ep-core-caching</module>
 		<module>ep-core-tool</module>
 		<module>ep-core-tool-cli</module>
-		<module>ep-core-tool-logic</module>		
+		<module>ep-core-tool-logic</module>
 		<module>ep-core-test-utils</module>
 		<module>ep-core-itests</module>
 		<module>ep-core-uat-step-definitions</module>
@@ -35,6 +32,7 @@
 		<module>ep-settings-test-support</module>
 		<module>ep-settings-itests</module>
 		<module>ep-core-customer-messaging</module>
+		<module>ep-core-domain-messaging</module>
 		<module>ep-core-order-messaging</module>
 		<module>ep-core-changeset-messaging</module>
 		<module>ep-core-gift-certificate-messaging</module>
@@ -44,6 +42,12 @@
 		<module>ep-core-cucumber-itests</module>
 		<module>openjpa-osgi-wrapper</module>
 		<module>shipping-calculation-plugin-epcommerce</module>
+		<module>ep-domain-message-handler</module>
+		<module>catalog-update-event-processor-api</module>
+		<module>catalog-update-event-processor-connectivity</module>
+		<module>ep-jta</module>
+		<module>ep-catalog-itests</module>
+		<module>ep-domain-bulk-handler</module>
 	</modules>
 
 </project>

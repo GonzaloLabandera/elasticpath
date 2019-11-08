@@ -4,6 +4,7 @@
 
 package com.elasticpath.cmclient.reporting.customerpersonaldata.parameters;
 
+import java.text.DateFormat;
 import java.util.Date;
 
 import com.elasticpath.cmclient.reporting.common.ReportParameters;
@@ -19,6 +20,7 @@ public class CustomerPersonalDataParameters implements ReportParameters {
 	private Date startDate;
 	private Date endDate;
 	private String userId;
+	private DateFormat dateFormat;
 
 	public String getStore() {
 		return store;
@@ -57,5 +59,13 @@ public class CustomerPersonalDataParameters implements ReportParameters {
 
 	public void setStoreUidPk(final long storeUidPk) {
 		this.storeUidPk = storeUidPk;
+	}
+
+	public DateFormat getDateFormat() {
+		return dateFormat;
+	}
+
+	public void setDateFormat(final DateFormat dateFormat) {
+		this.dateFormat = dateFormat;
 	}
 }

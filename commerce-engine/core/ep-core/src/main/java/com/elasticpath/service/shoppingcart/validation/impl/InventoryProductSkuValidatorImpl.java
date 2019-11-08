@@ -10,6 +10,7 @@ import com.google.common.collect.ImmutableMap;
 
 import com.elasticpath.base.common.dto.StructuredErrorMessage;
 import com.elasticpath.common.dto.SkuInventoryDetails;
+import com.elasticpath.domain.catalog.ProductSku;
 import com.elasticpath.sellingchannel.inventory.ProductInventoryShoppingService;
 import com.elasticpath.service.shoppingcart.validation.ProductSkuValidationContext;
 import com.elasticpath.service.shoppingcart.validation.ProductSkuValidator;
@@ -17,7 +18,7 @@ import com.elasticpath.service.shoppingcart.validation.ProductSkuValidator;
 /**
  * Product availability validator.
  */
-public class InventoryProductSkuValidatorImpl implements ProductSkuValidator {
+public class InventoryProductSkuValidatorImpl extends SuperInventoryValidator implements ProductSkuValidator {
 
 	/**
 	 * Message id for this validation.
@@ -29,7 +30,13 @@ public class InventoryProductSkuValidatorImpl implements ProductSkuValidator {
 	@Override
 	public Collection<StructuredErrorMessage> validate(final ProductSkuValidationContext context) {
 
-		SkuInventoryDetails skuInventoryDetails = productInventoryShoppingService.getSkuInventoryDetails(context.getProductSku(),
+		final ProductSku productSku = context.getProductSku();
+
+		if (availabilityIndependentOfInventory(productSku)) {
+			return Collections.emptyList();
+		}
+
+		SkuInventoryDetails skuInventoryDetails = productInventoryShoppingService.getSkuInventoryDetails(productSku,
 				context.getStore());
 
 		if (skuInventoryDetails.hasSufficientUnallocatedQty()) {
@@ -37,7 +44,7 @@ public class InventoryProductSkuValidatorImpl implements ProductSkuValidator {
 		}
 
 		return Collections.singletonList(new StructuredErrorMessage(MESSAGE_ID,
-				String.format("Item '%s' does not have sufficient inventory.", context.getProductSku().getSkuCode()),
+				String.format("Item '%s' does not have sufficient inventory.", productSku.getSkuCode()),
 				ImmutableMap.of("item-code", context.getProductSku().getSkuCode())));
 	}
 

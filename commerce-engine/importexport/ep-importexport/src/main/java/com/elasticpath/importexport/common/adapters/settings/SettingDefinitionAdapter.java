@@ -138,7 +138,7 @@ public class SettingDefinitionAdapter extends AbstractDomainAdapterImpl<SettingD
 	 * @return populated <code>SettingMetadata</code>
 	 */
 	SettingMetadata createSettingMetaData(final MetadataDTO metadataDTO) {
-		SettingMetadata settingMetadata = getBeanFactory().getBean(ContextIdNames.SETTING_METADATA);
+		SettingMetadata settingMetadata = getBeanFactory().getPrototypeBean(ContextIdNames.SETTING_METADATA, SettingMetadata.class);
 		
 		settingMetadata.setKey(metadataDTO.getKey());
 		settingMetadata.setValue(metadataDTO.getValue());
@@ -153,6 +153,6 @@ public class SettingDefinitionAdapter extends AbstractDomainAdapterImpl<SettingD
 	
 	@Override
 	public SettingDefinition createDomainObject() {
-		return getBeanFactory().getBean(ContextIdNames.SETTING_DEFINITION);
+		return getBeanFactory().getPrototypeBean(ContextIdNames.SETTING_DEFINITION, SettingDefinition.class);
 	}
 }

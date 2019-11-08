@@ -102,6 +102,7 @@ public class TagGroupImpl extends AbstractLegacyEntityImpl implements TagGroup {
 	/**
 	 * @param localizedProperties the <code>LocalizedProperties</code>
 	 */
+	@Override
 	public void setLocalizedProperties(final LocalizedProperties localizedProperties) {
 		this.localizedProperties = localizedProperties;
 		if (localizedProperties != null) {
@@ -130,7 +131,8 @@ public class TagGroupImpl extends AbstractLegacyEntityImpl implements TagGroup {
 	}
 
 	@Override
-	@OneToMany(targetEntity = TagDefinitionImpl.class, fetch = FetchType.EAGER, cascade = { CascadeType.MERGE, CascadeType.REFRESH },
+	@OneToMany(targetEntity = TagDefinitionImpl.class, fetch = FetchType.EAGER, cascade = { CascadeType.REMOVE, CascadeType.MERGE,
+			CascadeType.REFRESH },
 			mappedBy = "group")
 	public Set<TagDefinition> getTagDefinitions() {
 		return this.tagDefinitions;

@@ -35,6 +35,10 @@ public class IndexUtilityImpl implements IndexUtility {
 	private static final Logger LOG = Logger.getLogger(IndexUtilityImpl.class);
 	
 	private static final String DEFAULT_ATTRIBUTE_TYPE = "_st";
+
+	private static final String DEFAULT_ATTRIBUTE_DOC_VALUE = "_s";
+
+	private static final char DOC_VALUE_SUFFIX = 's';
 	
 	/** String type of ints, floats, doubles, etc. */
 	private static final String NON_ANALYZED_STRING_TYPE_FOR_NONSTRING = "_s";
@@ -206,6 +210,25 @@ public class IndexUtilityImpl implements IndexUtility {
 		}
 		strBuf.append(attributeType);
 
+		return strBuf.toString();
+	}
+
+	@Override
+	public String createAttributeDocValues(final Attribute attribute, final Locale locale) {
+		StringBuilder strBuf = new StringBuilder();
+		final String fieldName = SolrIndexConstants.ATTRIBUTE_PREFIX + attribute.getKey();
+
+		if (attribute.isLocaleDependant()) {
+			strBuf.append(createLocaleFieldName(fieldName, locale));
+		} else {
+			strBuf.append(fieldName);
+		}
+
+		String attributeStorageType = attribute.getAttributeType().getStorageType();
+		String attributeType = isStringType(attribute) ? DEFAULT_ATTRIBUTE_DOC_VALUE : solrAttributeTypeExt.get(attributeStorageType);
+
+		strBuf.append(attributeType);
+		strBuf.append(DOC_VALUE_SUFFIX);
 		return strBuf.toString();
 	}
 	

@@ -3,6 +3,7 @@
  */
 package com.elasticpath.service.catalogview.impl;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
@@ -28,8 +29,8 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 
-import com.elasticpath.common.dto.SkuInventoryDetails;
 import com.elasticpath.base.common.dto.StructuredErrorMessage;
+import com.elasticpath.common.dto.SkuInventoryDetails;
 import com.elasticpath.commons.beanframework.BeanFactory;
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.catalog.Availability;
@@ -41,7 +42,9 @@ import com.elasticpath.domain.catalog.Product;
 import com.elasticpath.domain.catalog.ProductAssociation;
 import com.elasticpath.domain.catalog.ProductAssociationType;
 import com.elasticpath.domain.catalog.ProductBundle;
+import com.elasticpath.domain.catalog.ProductConstituent;
 import com.elasticpath.domain.catalog.ProductSku;
+import com.elasticpath.domain.catalog.ProductSkuConstituent;
 import com.elasticpath.domain.catalog.impl.BundleConstituentImpl;
 import com.elasticpath.domain.catalog.impl.CatalogImpl;
 import com.elasticpath.domain.catalog.impl.CategoryImpl;
@@ -53,7 +56,10 @@ import com.elasticpath.domain.catalog.impl.ProductImpl;
 import com.elasticpath.domain.catalog.impl.ProductSkuConstituentImpl;
 import com.elasticpath.domain.catalog.impl.ProductSkuImpl;
 import com.elasticpath.domain.catalogview.StoreProduct;
+import com.elasticpath.domain.catalogview.StoreProductSku;
+import com.elasticpath.domain.catalogview.StoreProductSkuFactory;
 import com.elasticpath.domain.catalogview.impl.StoreProductImpl;
+import com.elasticpath.domain.catalogview.impl.StoreProductSkuFactoryImpl;
 import com.elasticpath.domain.misc.impl.RandomGuidImpl;
 import com.elasticpath.domain.store.Store;
 import com.elasticpath.domain.store.Warehouse;
@@ -74,7 +80,7 @@ import com.elasticpath.test.BeanFactoryExpectationsFactory;
 /**
  * Tests {@link StoreProductServiceImpl}.
  */
-@SuppressWarnings({"PMD.TooManyStaticImports", "PMD.TooManyMethods", "PMD.ExcessiveImports", "PMD.GodClass"})
+@SuppressWarnings({"PMD.TooManyStaticImports", "PMD.TooManyMethods", "PMD.ExcessiveClassLength", "PMD.ExcessiveImports", "PMD.GodClass"})
 public class StoreProductServiceImplTest {
 
 	private static final int DEFAULT_CATALOG_UIDPK = 1234;
@@ -100,6 +106,7 @@ public class StoreProductServiceImplTest {
 	private final BundleIdentifierImpl bundleIdentifier = new BundleIdentifierImpl();
 	private ProductService productService;
 	private ProductLookup productLookup;
+	private StoreProductSkuFactory storeProductSkuFactory;
 
 	/**
 	 * Sets up the test case.
@@ -114,13 +121,15 @@ public class StoreProductServiceImplTest {
 		productService = context.mock(ProductService.class);
 		productLookup = context.mock(ProductLookup.class);
 		productInventoryShoppingService = context.mock(ProductInventoryShoppingService.class);
+		storeProductSkuFactory = new StoreProductSkuFactoryImpl();
 
 		BeanFactory beanFactory;
 		beanFactory = context.mock(BeanFactory.class);
 		expectationsFactory = new BeanFactoryExpectationsFactory(context, beanFactory);
 
-		expectationsFactory.allowingBeanFactoryGetBean("productConstituent", ProductConstituentImpl.class);
-		expectationsFactory.allowingBeanFactoryGetBean("productSkuConstituent", ProductSkuConstituentImpl.class);
+		expectationsFactory.allowingBeanFactoryGetPrototypeBean("productConstituent", ProductConstituent.class, ProductConstituentImpl.class);
+		expectationsFactory.allowingBeanFactoryGetPrototypeBean("productSkuConstituent", ProductSkuConstituent.class,
+				ProductSkuConstituentImpl.class);
 		expectationsFactory.allowingBeanFactoryGetBean(ContextIdNames.PRODUCT_ASSOCIATION, ProductAssociationImpl.class);
 		expectationsFactory.allowingBeanFactoryGetBean(ContextIdNames.BUNDLE_CONSTITUENT, BundleConstituentImpl.class);
 		expectationsFactory.allowingBeanFactoryGetBean(ContextIdNames.RANDOM_GUID, RandomGuidImpl.class);
@@ -130,6 +139,7 @@ public class StoreProductServiceImplTest {
 		storeProductServiceImpl.setProductAvailabilityService(availabilityService);
 		storeProductServiceImpl.setProductInventoryShoppingService(productInventoryShoppingService);
 		storeProductServiceImpl.setProductLookup(productLookup);
+		storeProductServiceImpl.setStoreProductSkuFactory(storeProductSkuFactory);
 	}
 
 	@After
@@ -216,6 +226,10 @@ public class StoreProductServiceImplTest {
 				will(returnValue(true));
 				allowing(availabilityService).isSkuDisplayable(
 						targetProduct, targetSku, store, inventoryDetails);
+				will(returnValue(true));
+				oneOf(availabilityService).canSkuSyndicate(targetSku);
+				will(returnValue(true));
+				oneOf(availabilityService).canProductSyndicate(targetProduct);
 				will(returnValue(true));
 			}
 		});
@@ -348,6 +362,86 @@ public class StoreProductServiceImplTest {
 		assertTrue(storeProduct.isSkuAvailable(SKU));
 	}
 
+	@Test
+	public void verifySkusOmittedWhenDoNotExistInStore() {
+		final String skuCode1 = "sku1";
+		final String skuCode2 = "sku2";
+		final int exactlyCountOfAvailabilityStrategies = 3;
+
+		final ProductSku sku1 = new ProductSkuImpl();
+		sku1.setUidPk(1L);
+		sku1.setSkuCode(skuCode1);
+		final ProductSku sku2 = new ProductSkuImpl();
+		sku2.setUidPk(2L);
+		sku2.setSkuCode(skuCode2);
+
+		final Product product = new ProductImpl();
+		product.setUidPk(1L);
+		product.addOrUpdateSku(sku1);
+		product.addOrUpdateSku(sku2);
+
+		final Store store = new StoreImpl();
+
+		final SkuInventoryDetails skuInventory1 = new SkuInventoryDetails();
+		final SkuInventoryDetails skuInventory2 = new SkuInventoryDetails();
+		final ImmutableMap<String, SkuInventoryDetails> skuInventoryMap = ImmutableMap.of(
+				skuCode1, skuInventory1,
+				skuCode2, skuInventory2);
+
+		context.checking(new Expectations() {
+			{
+				oneOf(productLookup).findByUid(with(product.getUidPk()));
+				will(returnValue(product));
+
+				oneOf(productInventoryShoppingService).getSkuInventoryDetailsForAllSkus(product, store);
+				will(returnValue(skuInventoryMap));
+
+				oneOf(availabilityService).isProductAvailable(product, skuInventoryMap, true);
+				will(returnValue(true));
+				oneOf(availabilityService).isProductDisplayable(product, store, skuInventoryMap, true);
+				will(returnValue(true));
+				oneOf(availabilityService).isSkuAvailable(product, sku1, skuInventory1);
+				will(returnValue(true));
+				oneOf(availabilityService).isSkuDisplayable(product, sku1, store, skuInventory1);
+				will(returnValue(true));
+
+				oneOf(availabilityService).isSkuAvailable(product, sku2, skuInventory2);
+				will(returnValue(true));
+				oneOf(availabilityService).isSkuDisplayable(product, sku2, store, skuInventory2);
+				will(returnValue(true));
+				oneOf(availabilityService).canSkuSyndicate(sku1);
+				will(returnValue(true));
+				oneOf(availabilityService).canSkuSyndicate(sku2);
+				will(returnValue(true));
+				oneOf(availabilityService).canProductSyndicate(product);
+				will(returnValue(true));
+
+				exactly(exactlyCountOfAvailabilityStrategies).of(availabilityStrategy).getAvailability(product, true, true);
+				will(returnValue(Availability.AVAILABLE));
+			}
+		});
+
+		final StoreProductServiceImpl storeProductServiceIncludingOnlySku1 = new StoreProductServiceImpl() {
+			@Override
+			protected boolean skuExistsInStore(final StoreProductSku storeProductSku, final Store store) {
+				return storeProductSku.getSkuCode().equals(skuCode1);
+			}
+		};
+		storeProductServiceIncludingOnlySku1.setProductLookup(productLookup);
+		storeProductServiceIncludingOnlySku1.setProductInventoryShoppingService(productInventoryShoppingService);
+		storeProductServiceIncludingOnlySku1.setProductAvailabilityService(availabilityService);
+		storeProductServiceIncludingOnlySku1.setAvailabilityStrategies(Collections.singletonList(availabilityStrategy));
+		storeProductServiceIncludingOnlySku1.setStoreProductSkuFactory(storeProductSkuFactory);
+
+		final StoreProduct storeProduct = storeProductServiceIncludingOnlySku1.
+				getProductForStore(product.getUidPk(), store, false);
+
+		assertThat(storeProduct.getStoreProductSkus())
+				.hasOnlyOneElementSatisfying(storeProductSku ->
+						assertThat(storeProductSku.getSkuCode())
+								.isEqualTo(skuCode1));
+	}
+
 	/**
 	 * Tests {@link StoreProductServiceImpl#determineSkusAvailability()}. Check
 	 * that the SkuVailability map is populated correctly
@@ -409,6 +503,8 @@ public class StoreProductServiceImplTest {
 			{
 				oneOf(productInventoryShoppingService).getSkuInventoryDetailsForAllSkus(product, store);
 				will(returnValue(Collections.emptyMap()));
+				oneOf(availabilityService).canProductSyndicate(product);
+				will(returnValue(true));
 			}
 		});
 		StoreProduct storeProduct = storeProductServiceImpl.getProductForStore(product, store);
@@ -447,6 +543,10 @@ public class StoreProductServiceImplTest {
 				oneOf(availabilityService).isSkuAvailable(product, sku, skuInventory);
 				will(returnValue(true));
 				oneOf(availabilityService).isSkuDisplayable(product, sku, store, skuInventory);
+				will(returnValue(true));
+				oneOf(availabilityService).canSkuSyndicate(sku);
+				will(returnValue(true));
+				oneOf(availabilityService).canProductSyndicate(product);
 				will(returnValue(true));
 
 				exactly(2).of(availabilityStrategy).getAvailability(product, true, true);
@@ -639,6 +739,11 @@ public class StoreProductServiceImplTest {
 				will(returnValue(false));
 				oneOf(availabilityService).isSkuDisplayable(product, sku, store, skuInventoryDetails);
 				will(returnValue(false));
+				oneOf(availabilityService).canSkuSyndicate(sku);
+				will(returnValue(true));
+
+				oneOf(availabilityService).canProductSyndicate(product);
+				will(returnValue(true));
 
 				exactly(2).of(availabilityStrategy).getAvailability(product, true, false);
 				will(returnValue(Availability.AVAILABLE));
@@ -661,6 +766,8 @@ public class StoreProductServiceImplTest {
 			{
 				oneOf(productInventoryShoppingService).getSkuInventoryDetailsForAllSkus(product, store);
 				will(returnValue(Collections.emptyMap()));
+				oneOf(availabilityService).canProductSyndicate(product);
+				will(returnValue(true));
 			}
 		});
 
@@ -695,6 +802,10 @@ public class StoreProductServiceImplTest {
 				will(returnValue(false));
 				exactly(2).of(availabilityStrategy).getAvailability(product, true, false);
 				will(returnValue(null));
+				oneOf(availabilityService).canSkuSyndicate(sku);
+				will(returnValue(true));
+				oneOf(availabilityService).canProductSyndicate(product);
+				will(returnValue(true));
 			}
 		});
 

@@ -164,7 +164,7 @@ public class PriceListExporterImplTest {
 	public void testAddDependenciesListOfPriceListDescriptorDependencyRegistry() {
 		context.checking(new Expectations() {
 			{
-				oneOf(mockBeanFactory).getBean(ContextIdNames.BASE_AMOUNT_FILTER);
+				oneOf(mockBeanFactory).getPrototypeBean(ContextIdNames.BASE_AMOUNT_FILTER, BaseAmountFilter.class);
 				will(returnValue(baseAmountFilter));
 				oneOf(baseAmountFilter).setPriceListDescriptorGuid(ID_GUID);
 				oneOf(baseAmountService).findBaseAmounts(baseAmountFilter);

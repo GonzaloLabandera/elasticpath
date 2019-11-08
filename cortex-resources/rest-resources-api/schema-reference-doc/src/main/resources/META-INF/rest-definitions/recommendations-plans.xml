@@ -18,7 +18,7 @@
 			<name>read-item-recommendations</name>
 			<description><![CDATA[Read other items recommended for an item.]]></description>
 			<step>
-				<description><![CDATA[Read all recommendation groups for an [item][items].]]></description>
+				<description><![CDATA[Read all recommendation groups for an [item](items.md).]]></description>
 				<start>items.item</start>
 				<follow-link>recommendations</follow-link>
 				<result>item-recommendation-groups</result>
@@ -36,7 +36,7 @@
 			<description><![CDATA[Read recommended items for a navigation node. This API is currently not available.]]></description>
 			<step>
 				<description>
-					<![CDATA[Read all recommendation groups for a [navigation node][navigations].]]></description>
+					<![CDATA[Read all recommendation groups for a [navigation node](navigations.md).]]></description>
 				<start>navigations.navigation</start>
 				<follow-link>recommendations</follow-link>
 				<result>item-recommendation-groups</result>

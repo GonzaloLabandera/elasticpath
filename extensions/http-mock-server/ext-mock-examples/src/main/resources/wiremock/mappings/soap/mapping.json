@@ -1,0 +1,10 @@
+{
+	"request": {
+		"method": "POST",
+		"urlPattern": "/soap"
+	},
+	"response": {
+		"status": 200,
+		"transformers": ["example-soap-transformer"]
+	}
+}

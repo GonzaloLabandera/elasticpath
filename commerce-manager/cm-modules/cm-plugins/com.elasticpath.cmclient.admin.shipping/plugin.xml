@@ -12,7 +12,7 @@
       </category>
       <view
             name="%regionsView.name"
-            icon="icons/shipping-region_default_22.png"
+            icon="icons/empty_1x1.png"
             class="com.elasticpath.cmclient.admin.shipping.views.ShippingRegionListView"
             id="com.elasticpath.cmclient.admin.shipping.regions.views.RegionsList">
       </view>

@@ -5,6 +5,7 @@ package com.elasticpath.tags.domain;
 
 import java.util.Locale;
 
+import com.elasticpath.domain.misc.LocalizedProperties;
 import com.elasticpath.persistence.api.Persistable;
 
 /**
@@ -83,5 +84,11 @@ public interface TagDefinition extends Persistable {
 	 * @param guid the guid of the tag definition
 	 */
 	void setGuid(String guid);
+
+	/**
+	 * Get the LocalizedProperties for this TagDefinitions name.
+	 * @return The LocalizedProperties for the names of this TagDefinition.
+	 */
+	LocalizedProperties getLocalizedProperties();
 
 }

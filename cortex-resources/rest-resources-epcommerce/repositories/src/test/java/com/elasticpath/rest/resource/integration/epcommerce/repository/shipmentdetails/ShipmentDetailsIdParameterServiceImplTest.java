@@ -3,15 +3,14 @@
  */
 package com.elasticpath.rest.resource.integration.epcommerce.repository.shipmentdetails;
 
-import static org.mockito.Mockito.when;
-
 import static com.elasticpath.rest.resource.integration.epcommerce.repository.shipmentdetails.ShipmentDetailsUtil.createShipmentDetailsId;
+import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import io.reactivex.Maybe;
 import io.reactivex.Observable;
-import io.reactivex.Single;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -48,7 +47,7 @@ public class ShipmentDetailsIdParameterServiceImplTest {
 			String cartId = String.valueOf(i);
 			cartIds.add(cartId);
 			when(shipmentDetailsService.getShipmentDetailsIdForOrder(SCOPE, cartId))
-					.thenReturn(Single.just(createShipmentDetailsId(cartId, ShipmentDetailsConstants.SHIPMENT_TYPE)));
+					.thenReturn(Maybe.just(createShipmentDetailsId(cartId, ShipmentDetailsConstants.SHIPMENT_TYPE)));
 		}
 
 		when(cartOrderRepository.findCartOrderGuidsByCustomerAsObservable(SCOPE, USER_ID)).thenReturn(Observable.fromIterable(cartIds));
@@ -79,7 +78,7 @@ public class ShipmentDetailsIdParameterServiceImplTest {
 			String cartId = String.valueOf(i);
 			cartIds.add(cartId);
 			when(shipmentDetailsService.getShipmentDetailsIdForOrder(SCOPE, cartId))
-					.thenReturn(Single.error(ResourceOperationFailure.notFound(ShipmentDetailsServiceImpl.COULD_NOT_FIND_SHIPMENT)));
+					.thenReturn(Maybe.empty());
 		}
 
 		when(cartOrderRepository.findCartOrderGuidsByCustomerAsObservable(SCOPE, USER_ID)).thenReturn(Observable.fromIterable(cartIds));

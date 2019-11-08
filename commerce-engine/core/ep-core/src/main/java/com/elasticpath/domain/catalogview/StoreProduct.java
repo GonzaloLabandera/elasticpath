@@ -4,6 +4,7 @@
 package com.elasticpath.domain.catalogview;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import com.elasticpath.common.dto.SkuInventoryDetails;
@@ -12,12 +13,16 @@ import com.elasticpath.domain.catalog.Product;
 import com.elasticpath.domain.catalog.ProductAssociation;
 import com.elasticpath.domain.catalog.ProductAssociationType;
 import com.elasticpath.domain.catalog.ProductSku;
+import com.elasticpath.domain.catalogview.impl.StoreAvailabilityRule;
 import com.elasticpath.service.catalogview.impl.InventoryMessage;
 
 /**
  * A storefront focused extension to Product.
  */
 public interface StoreProduct extends Product {
+
+	/** Serial version id. */
+	long serialVersionUID = 5000000001L;
 
 	/**
 	 * Returns <code>true</code> if the product is available for purchase.
@@ -37,6 +42,25 @@ public interface StoreProduct extends Product {
 	 *         otherwise
 	 */
 	boolean isProductDisplayable();
+
+	/**
+	 * Returns a set of {@link StoreProductSku}s representing the SKUs contained within this product.
+	 *
+	 * @return the product's {@link StoreProductSku}s
+	 */
+	Set<StoreProductSku> getStoreProductSkus();
+
+	/**
+	 * Returns a {@link StoreProductSku} for a SKU within this product identified by the given {@code skuCode}, if one exists.
+	 *
+	 * @param skuCode the code of the SKU for which a {@link StoreProductSku} should be returned
+	 * @return a {@link StoreProductSku}, if one exists
+	 */
+	default Optional<StoreProductSku> getStoreProductSku(String skuCode) {
+		return getStoreProductSkus().stream()
+				.filter(storeProductSku -> storeProductSku.getSkuCode().equals(skuCode))
+				.findAny();
+	}
 
 	/**
 	 * Gets the message availability code for a sku belonging to this product.
@@ -155,5 +179,32 @@ public interface StoreProduct extends Product {
 	 * @return the availability of the sku.
 	 */
 	Availability getSkuAvailability(String skuCode);
+
+	/**
+	 * Returns <code>true</code> if the StoreProduct can be syndicated.
+	 *
+	 * @return <code>true</code> if the StoreProduct can be syndicated, <code>false</code> otherwise
+	 */
+	boolean canSyndicate();
+
+	/**
+	 * Gets discover rules.
+	 *
+	 * @return discover rules.
+	 */
+	Set<StoreAvailabilityRule> getDiscoverRules();
+	/**
+	 * Gets vies rules.
+	 *
+	 * @return view rules.
+	 */
+	Set<StoreAvailabilityRule> getViewRules();
+
+	/**
+	 * Gets add to cart rules.
+	 *
+	 * @return add to cart rules.
+	 */
+	Set<StoreAvailabilityRule> getAddToCartRules();
 
 }

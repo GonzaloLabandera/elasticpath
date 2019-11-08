@@ -1,0 +1,108 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "title": "The schema for category projections.",
+  "type": "object",
+  "oneOf": [
+    {
+      "$ref": "definitions.schema.json#/deletedObject"
+    },
+    {
+      "properties": {
+        "identity": {
+          "$ref": "definitions.schema.json#/nameIdentity"
+        },
+        "modifiedDateTime": {
+          "description": "The date/time that the projection was modified.",
+          "type": "string"
+        },
+        "deleted": {
+          "description": "Indicates whether the projection is available.",
+          "type": "boolean",
+          "enum": [
+            false
+          ]
+        },
+        "translations": {
+          "description": "Array of objects that have localized fields.",
+          "type": "array",
+          "items": [
+            {
+              "type": "object",
+              "properties": {
+                "language": {
+                  "description": "The language code and optional country code for the translation.",
+                  "type": "string"
+                },
+                "displayName": {
+                  "description": "The localized category name.",
+                  "type": "string"
+                }
+              },
+              "details": {
+                "$ref": "definitions.schema.json#/attributes"
+              },
+              "required": [
+                "language",
+                "displayName"
+              ]
+            }
+          ]
+        },
+        "extensions": {
+          "$ref": "extensions.schema.json#/categoryExtensions"
+        },
+        "properties": {
+          "$ref": "properties.schema.json#/categoryProperties"
+        },
+        "availabilityRules": {
+          "type": "object",
+          "properties": {
+            "enableDateTime": {
+              "description": "The date/time when the category is enabled.",
+              "type": "string"
+            },
+            "disableDateTime": {
+              "description": "The date/time when the category is disabled. Field is not present if value is null.",
+              "type": "string"
+            }
+          }
+        },
+        "parent": {
+          "description": "The parent category code. Top level categories do not have a parent.",
+          "type": "string"
+        },
+        "children": {
+          "description": "Array of child category codes in the order they are to be displayed.",
+          "type": "array",
+          "items": [
+            {
+              "description": "The child category code.",
+              "type": "string"
+            }
+          ]
+        },
+        "path": {
+          "description": "Array of category codes, starting from the top level category and ending with the current category's parent.",
+          "type": "array",
+          "items": [
+            {
+              "description": "The category code.",
+              "type": "string"
+            }
+          ]
+        }
+      },
+      "required": [
+        "identity",
+        "modifiedDateTime",
+        "deleted",
+        "translations",
+        "extensions",
+        "children",
+        "path",
+        "properties",
+        "availabilityRules"
+      ]
+    }
+  ]
+}

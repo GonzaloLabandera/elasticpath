@@ -3,11 +3,12 @@
  */
 package com.elasticpath.domain;
 
+import com.elasticpath.commons.beanframework.BeanFactory;
 
 /**
  * <code>ElasticPath</code> provides configuration and context information to a number of clients across the system.
  */
-public interface ElasticPath {
+public interface ElasticPath extends BeanFactory {
 	/**
 	 * Get the bean with the given id from spring application context.
 	 *

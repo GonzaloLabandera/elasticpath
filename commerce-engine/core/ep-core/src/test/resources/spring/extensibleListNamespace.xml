@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	   xmlns:extensibleList="http://www.elasticpath.com/schema/extensibleList"
+	   xsi:schemaLocation="
+	   	http://www.springframework.org/schema/beans	http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+		http://www.elasticpath.com/schema/extensibleList http://www.elasticpath.com/schema/extensibleList/extensibleList.xsd
+		"
+>
+
+
+	<bean id="testValueRed" class="java.lang.String">
+		<constructor-arg value="red"/>
+	</bean>
+
+	<bean id="testValueGreen" class="java.lang.String">
+		<constructor-arg value="green"/>
+	</bean>
+
+	<bean id="testValueBlue" class="java.lang.String">
+		<constructor-arg value="blue"/>
+	</bean>
+
+	<bean id="testValueWhite" class="java.lang.String">
+		<constructor-arg value="white"/>
+	</bean>
+
+	<bean id="testValueInt" class="java.lang.Integer">
+		<constructor-arg value="1"/>
+	</bean>
+
+	<bean id="testValueLong" class="java.lang.Long">
+		<constructor-arg value="100000"/>
+	</bean>
+
+	<bean id="testValueFloat" class="java.lang.Float">
+		<constructor-arg value="100000.01"/>
+	</bean>
+
+	<extensibleList:create id="testList3Parent" overridableId="testList3" valueType="java.lang.String">
+		<ref bean="testValueRed"/>
+		<ref bean="testValueGreen"/>
+		<ref bean="testValueBlue"/>
+	</extensibleList:create>
+
+	<extensibleList:create id="testList4Parent" overridableId="testList4" valueType="java.lang.String">
+		<ref bean="testValueRed"/>
+		<ref bean="testValueGreen"/>
+		<ref bean="testValueBlue"/>
+	</extensibleList:create>
+
+	<bean id="testValueBlack" class="java.lang.String">
+		<constructor-arg value="black"/>
+	</bean>
+	<extensibleList:modify parent="testList4Parent" id="testList4">
+		<extensibleList:addToList>
+			<ref bean="testValueBlack"/>
+		</extensibleList:addToList>
+	</extensibleList:modify>
+
+	<extensibleList:create id="testList2Parent" overridableId="testList2" valueType="java.lang.String">
+		<ref bean="testValueRed"/>
+		<ref bean="testValueGreen"/>
+		<ref bean="testValueBlue"/>
+	</extensibleList:create>
+
+	<extensibleList:modify parent="testList2Parent" id="testList2">
+		<extensibleList:removeFromList>
+			<ref bean="testValueBlue"/>
+		</extensibleList:removeFromList>
+	</extensibleList:modify>
+
+	<extensibleList:create id="testList1Parent" overridableId="testList1" valueType="java.lang.String">
+		<ref bean="testValueRed"/>
+		<ref bean="testValueGreen"/>
+		<ref bean="testValueBlue"/>
+	</extensibleList:create>
+
+	<extensibleList:modify parent="testList1Parent" id="testList1">
+		<extensibleList:addToList>
+			<ref bean="testValueBlack"/>
+		</extensibleList:addToList>
+		<extensibleList:removeFromList>
+			<ref bean="testValueRed"/>
+			<ref bean="testValueGreen"/>
+			<ref bean="testValueBlue"/>
+		</extensibleList:removeFromList>
+	</extensibleList:modify>
+
+	<extensibleList:create id="testListNumberTypesParent" overridableId="testListNumberTypes" valueType="java.lang.Number">
+		<ref bean="testValueInt"/>
+		<ref bean="testValueLong"/>
+		<ref bean="testValueFloat"/>
+	</extensibleList:create>
+</beans>

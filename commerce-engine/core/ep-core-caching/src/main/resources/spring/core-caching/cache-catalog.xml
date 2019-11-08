@@ -279,9 +279,40 @@
 		<constructor-arg value="cachingCategoryServiceFindCodeByUidCache"/>
 	</bean>
 
+
+	<bean id="descendantCategoriesByUidEhCache"
+		  class="com.elasticpath.commons.beanframework.EhCacheDefaultConfigurationFactoryBean">
+		<property name="name" value="descendantCategoriesByUidCache"/>
+		<property name="cacheManager" ref="epEhcacheManager"/>
+		<property name="timeToLive" value="600"/>
+		<property name="timeToIdle" value="600"/>
+	</bean>
+
+	<bean id="descendantCategoriesByUidCache"
+		  factory-bean="localCacheFactory" factory-method="createCache"
+		  depends-on="descendantCategoriesByUidEhCache">
+		<constructor-arg value="descendantCategoriesByUidCache"/>
+	</bean>
+
+	<bean id="featuredProductsUidEhCache"
+		  class="com.elasticpath.commons.beanframework.EhCacheDefaultConfigurationFactoryBean">
+		<property name="name" value="featuredProductsUidCache"/>
+		<property name="cacheManager" ref="epEhcacheManager"/>
+		<property name="timeToLive" value="600"/>
+		<property name="timeToIdle" value="600"/>
+	</bean>
+
+	<bean id="featuredProductsUidCache"
+		  factory-bean="localCacheFactory" factory-method="createCache"
+		  depends-on="featuredProductsUidEhCache">
+		<constructor-arg value="featuredProductsUidCache"/>
+	</bean>
+
 	<bean id="cachingCategoryService" class="com.elasticpath.caching.core.catalog.CachingCategoryServiceImpl">
 		<property name="fallbackCategoryService" ref="categoryService" />
 		<property name="findCodeByUidCache" ref="cachingCategoryServiceFindCodeByUidCache" />
+		<property name="findDescendantCategoriesByUidCache" ref="descendantCategoriesByUidCache" />
+		<property name="findFeaturedProductsUidCache" ref="featuredProductsUidCache" />
 	</bean>
 
 	<bean id="cachingSkuOptionServiceFindByKeyEhCache"
@@ -375,5 +406,63 @@
 		<property name="searchableFacetsCache" ref="facetServiceSearchableFacetsCache" />
 	</bean>
 
+
+
+	<bean id="defaultSortAttributeForStoreEhCache"
+		  class="com.elasticpath.commons.beanframework.EhCacheDefaultConfigurationFactoryBean">
+		<property name="name" value="defaultSortAttributeForStoreCache"/>
+		<property name="cacheManager" ref="epEhcacheManager"/>
+		<property name="timeToLive" value="600"/>
+		<property name="timeToIdle" value="600"/>
+	</bean>
+
+	<bean id="storeAndLocaleCodesEhCache"
+		  class="com.elasticpath.commons.beanframework.EhCacheDefaultConfigurationFactoryBean">
+		<property name="name" value="storeAndLocaleCodesCache"/>
+		<property name="cacheManager" ref="epEhcacheManager"/>
+		<property name="timeToLive" value="600"/>
+		<property name="timeToIdle" value="600"/>
+	</bean>
+
+	<bean id="defaultSortAttributeForStoreCache"
+		  factory-bean="localCacheFactory" factory-method="createCache"
+		  depends-on="defaultSortAttributeForStoreEhCache">
+		<constructor-arg value="defaultSortAttributeForStoreCache"/>
+	</bean>
+
+	<bean id="storeAndLocaleCodesCache"
+		  factory-bean="localCacheFactory" factory-method="createCache"
+		  depends-on="storeAndLocaleCodesEhCache">
+		<constructor-arg value="storeAndLocaleCodesCache"/>
+	</bean>
+
+
+
+	<bean id="cachingSortAttributeService" class="com.elasticpath.caching.core.search.CachingSortAttributeServiceImpl" >
+		<property name="fallbackService" ref="sortAttributeService" />
+		<property name="findByStoreCodeAndLocaleCodeCache" ref="storeAndLocaleCodesCache" />
+		<property name="defaultSortAttributeForStoreCache" ref="defaultSortAttributeForStoreCache" />
+	</bean>
+
+
+	<bean id="productForStoreEhCache"
+		  class="com.elasticpath.commons.beanframework.EhCacheDefaultConfigurationFactoryBean">
+		<property name="name" value="productForStoreCache"/>
+		<property name="cacheManager" ref="epEhcacheManager"/>
+		<property name="timeToLive" value="600"/>
+		<property name="timeToIdle" value="600"/>
+	</bean>
+
+	<bean id="productForStoreCache"
+		  factory-bean="localCacheFactory" factory-method="createCache"
+		  depends-on="productForStoreEhCache">
+		<constructor-arg value="productForStoreCache"/>
+	</bean>
+
+
+	<bean id="cachingStoreProductService" class="com.elasticpath.caching.core.catalog.CachingStoreProductServiceImpl" >
+		<property name="fallbackService" ref="storeProductService" />
+		<property name="productForStoreCache" ref="productForStoreCache" />
+	</bean>
 
 </beans>

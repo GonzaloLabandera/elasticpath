@@ -10,12 +10,13 @@ public class ConfirmDialog extends AbstractDialog {
 	/**
 	 * CSS selector used to identify the dialog.
 	 */
-	public static final String CONFIRM_OK_BUTTON_CSS = "div[automation-id*='%s'] div[widget-id='OK'][seeable='true']";
-	public static final String DELETE_BUTTON_CSS = "div[automation-id*='%s'] div[widget-id='Delete'][seeable='true']";
+	public static final String DIALOG_CSS = "div[automation-id*='%s'] ";
+	public static final String CONFIRM_OK_BUTTON_CSS = DIALOG_CSS + "div[widget-id='OK'][seeable='true']";
+	public static final String DELETE_BUTTON_CSS = DIALOG_CSS + "div[widget-id='Delete'][seeable='true']";
+	private static final String NO_BUTTON_CSS = DIALOG_CSS + "div[widget-id='No'][seeable='true']";
+	private static final String YES_BUTTON_CSS = DIALOG_CSS + "div[widget-id='Yes'][seeable='true']";
 	public static final String INCLUDE_DATA_POLICY_BUTTON_CSS = "div[automation-id='com.elasticpath.cmclient.fulfillment.FulfillmentMessages"
 			+ ".IncludeDataPointsWithGrantedConsent_Label'][seeable='true']";
-	private static final String NO_BUTTON_CSS = "div[automation-id*='%s'] div[widget-id='No'][seeable='true']";
-	private static final String YES_BUTTON_CSS = "div[automation-id*='%s'] div[widget-id='Yes'][seeable='true']";
 
 	/**
 	 * Constructor.
@@ -73,6 +74,10 @@ public class ConfirmDialog extends AbstractDialog {
 		click(getWaitDriver().waitForElementToBeClickable(By.cssSelector(INCLUDE_DATA_POLICY_BUTTON_CSS)));
 		clickButton(String.format(DELETE_BUTTON_CSS, dialogAutomationId), "Delete");
 		waitTillElementDisappears(By.cssSelector(String.format(DELETE_BUTTON_CSS, dialogAutomationId)));
+	}
+
+	public boolean isDialogDisplayed(final String dialogAutomationId) {
+		return getDriver().findElement(By.cssSelector(String.format(DIALOG_CSS, dialogAutomationId))).isDisplayed();
 	}
 
 }

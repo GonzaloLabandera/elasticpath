@@ -34,7 +34,9 @@ import com.elasticpath.domain.catalog.BundleConstituent;
 import com.elasticpath.domain.catalog.ConstituentItem;
 import com.elasticpath.domain.catalog.Product;
 import com.elasticpath.domain.catalog.ProductBundle;
+import com.elasticpath.domain.catalog.ProductConstituent;
 import com.elasticpath.domain.catalog.ProductSku;
+import com.elasticpath.domain.catalog.ProductSkuConstituent;
 import com.elasticpath.domain.catalog.impl.BundleConstituentImpl;
 import com.elasticpath.domain.catalog.impl.ProductBundleImpl;
 import com.elasticpath.domain.catalog.impl.ProductConstituentImpl;
@@ -88,8 +90,9 @@ public class ProductInventoryShoppingServiceImplTest {
 	public void setUp() {
 		BeanFactory beanFactory = context.mock(BeanFactory.class);
 		expectationsFactory = new BeanFactoryExpectationsFactory(context, beanFactory);
-		expectationsFactory.allowingBeanFactoryGetBean("productConstituent", ProductConstituentImpl.class);
-		expectationsFactory.allowingBeanFactoryGetBean("productSkuConstituent", ProductSkuConstituentImpl.class);
+		expectationsFactory.allowingBeanFactoryGetPrototypeBean("productConstituent", ProductConstituent.class, ProductConstituentImpl.class);
+		expectationsFactory.allowingBeanFactoryGetPrototypeBean("productSkuConstituent", ProductSkuConstituent.class,
+				ProductSkuConstituentImpl.class);
 
 		productInventoryShoppingService = new ProductInventoryShoppingServiceImpl();
 	}

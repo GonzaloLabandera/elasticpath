@@ -4,6 +4,7 @@
 package com.elasticpath.shipping.connectivity.dto.builder.populators.impl;
 
 import java.math.BigDecimal;
+import java.util.Map;
 
 import com.elasticpath.shipping.connectivity.dto.ShippableItem;
 import com.elasticpath.shipping.connectivity.dto.builder.populators.ShippableItemBuilderPopulator;
@@ -27,6 +28,7 @@ public class ShippableItemBuilderPopulatorImpl<I extends ShippableItem, C extend
 		withHeight(shippableItem.getHeight());
 		withWidth(shippableItem.getWidth());
 		withLength(shippableItem.getLength());
+		withFields(shippableItem.getFields());
 	}
 
 	@Override
@@ -38,6 +40,17 @@ public class ShippableItemBuilderPopulatorImpl<I extends ShippableItem, C extend
 	@Override
 	public String getSkuGuid() {
 		return getInstanceUnderBuild().getSkuGuid();
+	}
+
+	@Override
+	public P withFields(final Map<String, String> fieldMap) {
+		getInstanceUnderBuild().setFields(fieldMap);
+		return self();
+	}
+
+	@Override
+	public Map<String, String> getFields() {
+		return getInstanceUnderBuild().getFields();
 	}
 
 	@Override

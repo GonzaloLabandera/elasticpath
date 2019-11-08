@@ -17,6 +17,7 @@ import org.junit.Assert;
  */
 public class CamelContextEndpointDrainerImpl implements CamelContextMessagePurger {
 	private static final Logger LOG = Logger.getLogger(CamelContextEndpointDrainerImpl.class);
+	private static final long POLLING_CONSUMER_RECEIVE_TIMEOUT = 5000;
 
 	/**
 	 * Purges all messages on the given endpoint.
@@ -32,7 +33,7 @@ public class CamelContextEndpointDrainerImpl implements CamelContextMessagePurge
 
 			int deleted = 0;
 			while (!endpoint.getExchanges().isEmpty()) {
-				if (endpoint.createPollingConsumer().receiveNoWait() != null) {
+				if (endpoint.createPollingConsumer().receive(POLLING_CONSUMER_RECEIVE_TIMEOUT) != null) {
 					deleted++;
 				}
 			}

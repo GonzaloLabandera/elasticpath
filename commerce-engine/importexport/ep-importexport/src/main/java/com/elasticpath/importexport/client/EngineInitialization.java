@@ -11,8 +11,8 @@ import org.apache.log4j.Logger;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
+import com.elasticpath.commons.beanframework.BeanFactory;
 import com.elasticpath.commons.constants.ContextIdNames;
-import com.elasticpath.domain.ElasticPath;
 import com.elasticpath.importexport.common.exception.runtime.EngineRuntimeException;
 import com.elasticpath.service.environment.impl.EmbeddedEnvironmentInfoService;
 
@@ -29,7 +29,7 @@ public final class EngineInitialization {
 
 	private ApplicationContext appCtx;
 
-	private ElasticPath elasticPath;
+	private BeanFactory beanFactory;
 
 	private Properties applicationProperties;
 
@@ -57,8 +57,8 @@ public final class EngineInitialization {
 	 *
 	 * @return the elastic path
 	 */
-	public ElasticPath getElasticPath() {
-		return elasticPath;
+	public BeanFactory getBeanFactory() {
+		return beanFactory;
 	}
 
 	private void initializeBeanFactory(final String fileName) {
@@ -67,11 +67,11 @@ public final class EngineInitialization {
 	}
 
 	private void initializeApplicationProperties() {
-		if (elasticPath == null) {
-			elasticPath = (ElasticPath) appCtx.getBean(ContextIdNames.ELASTICPATH);
+		if (beanFactory == null) {
+			beanFactory = (BeanFactory) appCtx.getBean(ContextIdNames.ELASTICPATH);
 		}
 
-		applicationProperties = elasticPath.getBean("applicationProperties");
+		applicationProperties = beanFactory.getSingletonBean("applicationProperties", Properties.class);
 		applicationProperties.put("locale.date.format", "EEE MMM dd HH:mm:ss yyyy");
 		applicationProperties.put("datafile.encoding", "UTF-8");
 		applicationProperties.put("units.length", "cm");

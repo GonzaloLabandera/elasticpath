@@ -90,7 +90,7 @@ public class ProductAssociationAdapterTest {
 				allowing(mockCachingService).findCatalogByCode(with(CATALOG_CODE), with(aNull(LoadTuner.class)));
 				will(returnValue(catalog));
 
-				allowing(mockBeanFactory).getBean(ContextIdNames.PRODUCT_ASSOCIATION);
+				allowing(mockBeanFactory).getPrototypeBean(ContextIdNames.PRODUCT_ASSOCIATION, ProductAssociation.class);
 				will(returnValue(new ProductAssociationImpl()));
 			}
 		});

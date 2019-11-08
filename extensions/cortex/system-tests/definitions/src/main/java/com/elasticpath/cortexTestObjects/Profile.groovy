@@ -20,6 +20,12 @@ class Profile extends CommonMethods {
 		CortexResponse.profileResponse = client.save()
 	}
 
+	static void getProfileAttributes() {
+		getProfile()
+		client.attributes()
+				.stopIfFailure()
+	}
+
 	static void resume() {
 		if (CortexResponse.profileResponse == null) {
 			getProfile()

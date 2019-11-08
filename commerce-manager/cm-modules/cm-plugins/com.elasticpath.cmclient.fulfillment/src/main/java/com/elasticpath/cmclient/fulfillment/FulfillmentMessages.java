@@ -5,14 +5,12 @@ package com.elasticpath.cmclient.fulfillment;
 
 import java.math.BigDecimal;
 import java.util.Currency;
-import java.util.HashMap;
 import java.util.Locale;
-import java.util.Map;
 
 import com.elasticpath.cmclient.core.ServiceLocator;
+import com.elasticpath.cmclient.core.nls.BaseMessages;
 import com.elasticpath.cmclient.core.nls.LocalizedMessagePostProcessor;
 import com.elasticpath.commons.constants.ContextIdNames;
-import com.elasticpath.commons.util.extenum.ExtensibleEnum;
 import com.elasticpath.domain.order.OrderPaymentStatus;
 import com.elasticpath.domain.order.OrderShipmentStatus;
 import com.elasticpath.domain.order.OrderStatus;
@@ -27,7 +25,7 @@ import com.elasticpath.plugin.payment.exceptions.PaymentProcessingException;
  */
 @SuppressWarnings({ "PMD.TooManyFields", "PMD.ExcessiveClassLength", "PMD.ExcessivePublicCount", "PMD.VariableNamingConventions",
 	"PMD.LongVariable" })
-public final class FulfillmentMessages {
+public final class FulfillmentMessages extends BaseMessages {
 	private static final String BUNDLE_NAME = "com.elasticpath.cmclient.fulfillment.FulfillmentPluginResources"; //$NON-NLS-1$
 
 	public static final String EMPTY_STRING = ""; //$NON-NLS-1$
@@ -765,6 +763,8 @@ public final class FulfillmentMessages {
 
 	public String OrderReturn_ErrDlgCollisionMessage;
 
+	public String OrderReturn_Default_CMUser_Shopper;
+
 	public String RAESection_SubSectionStatus;
 
 	public String RAESection_CreateReturnButton;
@@ -1345,33 +1345,6 @@ public final class FulfillmentMessages {
 
 	public String DataPointValueLastUpdated_Label;
 
-	// Define the map of enum constants to localized names
-	private final Map<Enum<?>, String> localizedEnums = new HashMap<>();
-
-	// Define the map of enum constants to localized names
-	private final Map<ExtensibleEnum, String> localizedExtensibleEnums = new HashMap<>();
-
-
-	/**
-	 * Returns the localized name of the given enum constant.
-	 *
-	 * @param enumValue the enum to be localized
-	 * @return the localized string for the enum
-	 */
-	public String getLocalizedName(final Enum<?> enumValue) {
-		return localizedEnums.get(enumValue);
-	}
-
-	/**
-	 * Returns the localized name of the given ExtensibleEnum constant.
-	 *
-	 * @param enumValue the enum to be localized
-	 * @return the localized string for the enum
-	 */
-	public String getLocalizedName(final ExtensibleEnum enumValue) {
-		return localizedExtensibleEnums.get(enumValue);
-	}
-
 	/**
 	 * Build string for amount and currency displaying.
 	 *
@@ -1417,37 +1390,37 @@ public final class FulfillmentMessages {
 	private FulfillmentMessages() {
 	}
 
-	private void instantiateEnums() {
-		//do we need to synchronize this?
-		if (localizedEnums.isEmpty()) {
-			localizedEnums.put(OrderPaymentStatus.APPROVED, PaymentStatus_Approved);
-			localizedEnums.put(OrderPaymentStatus.FAILED, PaymentStatus_Failed);
-			localizedEnums.put(OrderPaymentStatus.PENDING, PaymentStatus_Pending);
-		}
-		if (localizedExtensibleEnums.isEmpty()) {
-			localizedExtensibleEnums.put(OrderStatus.CANCELLED, OrderStatus_Canceled);
-			localizedExtensibleEnums.put(OrderStatus.CREATED, OrderStatus_Created);
-			localizedExtensibleEnums.put(OrderStatus.COMPLETED, OrderStatus_Completed);
-			localizedExtensibleEnums.put(OrderStatus.ONHOLD, OrderStatus_OnHold);
-			localizedExtensibleEnums.put(OrderStatus.IN_PROGRESS, OrderStatus_InProgress);
-			localizedExtensibleEnums.put(OrderStatus.AWAITING_EXCHANGE, OrderStatus_AwaitingExchange);
-			localizedExtensibleEnums.put(OrderStatus.PARTIALLY_SHIPPED, OrderStatus_PartialShip);
-			localizedExtensibleEnums.put(OrderStatus.FAILED, OrderStatus_Failed);
-			localizedExtensibleEnums.put(OrderShipmentStatus.ONHOLD, ShipmentStatus_OnHold);
-			localizedExtensibleEnums.put(OrderShipmentStatus.RELEASED, ShipmentStatus_Released);
-			localizedExtensibleEnums.put(OrderShipmentStatus.SHIPPED, ShipmentStatus_Shipped);
-			localizedExtensibleEnums.put(OrderShipmentStatus.CANCELLED, ShipmentStatus_Cancelled);
-			localizedExtensibleEnums.put(OrderShipmentStatus.AWAITING_INVENTORY, ShipmentStatus_Awaiting);
-			localizedExtensibleEnums.put(OrderShipmentStatus.INVENTORY_ASSIGNED, ShipmentStatus_Assigned);
-			localizedExtensibleEnums.put(OrderShipmentStatus.FAILED_ORDER, ShipmentStatus_FailedOrder);
-			localizedExtensibleEnums.put(PaymentType.CREDITCARD_DIRECT_POST, PaymentType_CreditCard);
-			localizedExtensibleEnums.put(PaymentType.PAYPAL_EXPRESS, PaymentType_PayPalExpress);
-			localizedExtensibleEnums.put(PaymentType.GIFT_CERTIFICATE, PaymentType_GiftCertificate);
-			localizedExtensibleEnums.put(PaymentType.RETURN_AND_EXCHANGE, PaymentType_Exchange);
-			localizedExtensibleEnums.put(PaymentType.PAYMENT_TOKEN, PaymentType_Token);
-			localizedExtensibleEnums.put(PaymentType.HOSTED_PAGE, PaymentType_HostedPage);
-		}
+	/**
+	 * Initialize localized enumeration values.
+	 */
+	protected void instantiateEnums() {
+		putLocalizedName(OrderPaymentStatus.APPROVED, PaymentStatus_Approved);
+		putLocalizedName(OrderPaymentStatus.FAILED, PaymentStatus_Failed);
+		putLocalizedName(OrderPaymentStatus.PENDING, PaymentStatus_Pending);
 
+		putLocalizedName(OrderStatus.CANCELLED, OrderStatus_Canceled);
+		putLocalizedName(OrderStatus.CREATED, OrderStatus_Created);
+		putLocalizedName(OrderStatus.COMPLETED, OrderStatus_Completed);
+		putLocalizedName(OrderStatus.ONHOLD, OrderStatus_OnHold);
+		putLocalizedName(OrderStatus.IN_PROGRESS, OrderStatus_InProgress);
+		putLocalizedName(OrderStatus.AWAITING_EXCHANGE, OrderStatus_AwaitingExchange);
+		putLocalizedName(OrderStatus.PARTIALLY_SHIPPED, OrderStatus_PartialShip);
+		putLocalizedName(OrderStatus.FAILED, OrderStatus_Failed);
+
+		putLocalizedName(OrderShipmentStatus.ONHOLD, ShipmentStatus_OnHold);
+		putLocalizedName(OrderShipmentStatus.RELEASED, ShipmentStatus_Released);
+		putLocalizedName(OrderShipmentStatus.SHIPPED, ShipmentStatus_Shipped);
+		putLocalizedName(OrderShipmentStatus.CANCELLED, ShipmentStatus_Cancelled);
+		putLocalizedName(OrderShipmentStatus.AWAITING_INVENTORY, ShipmentStatus_Awaiting);
+		putLocalizedName(OrderShipmentStatus.INVENTORY_ASSIGNED, ShipmentStatus_Assigned);
+		putLocalizedName(OrderShipmentStatus.FAILED_ORDER, ShipmentStatus_FailedOrder);
+
+		putLocalizedName(PaymentType.CREDITCARD_DIRECT_POST, PaymentType_CreditCard);
+		putLocalizedName(PaymentType.PAYPAL_EXPRESS, PaymentType_PayPalExpress);
+		putLocalizedName(PaymentType.GIFT_CERTIFICATE, PaymentType_GiftCertificate);
+		putLocalizedName(PaymentType.RETURN_AND_EXCHANGE, PaymentType_Exchange);
+		putLocalizedName(PaymentType.PAYMENT_TOKEN, PaymentType_Token);
+		putLocalizedName(PaymentType.HOSTED_PAGE, PaymentType_HostedPage);
 	}
 
 	/**
@@ -1456,7 +1429,7 @@ public final class FulfillmentMessages {
 	 */
 	public static FulfillmentMessages get() {
 		FulfillmentMessages fulfillmentMessages = LocalizedMessagePostProcessor.getUTF8Encoded(BUNDLE_NAME, FulfillmentMessages.class);
-		fulfillmentMessages.instantiateEnums();
+		fulfillmentMessages.initialize();
 		return fulfillmentMessages;
 	}
 }

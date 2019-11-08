@@ -12,13 +12,11 @@
 
     <http request-matcher="regex">
         <intercept-url pattern="^/.*\\?wsdl$" />
-        <intercept-url pattern="/.*" access="hasAnyRole('ROLE_SUPERUSER','ROLE_WSUSER')" requires-channel="${ep.integration.secure.channel}" />
-
-        <port-mappings>
-            <port-mapping http="${ep.integration.port.http}" https="${ep.integration.port.https}" />
-        </port-mappings>
+        <intercept-url pattern="/.*" access="hasAnyRole('ROLE_SUPERUSER','ROLE_WSUSER')" />
 
         <http-basic />
+
+        <csrf disabled="true"/>
     </http>
 
     <authentication-manager alias="authenticationManager">

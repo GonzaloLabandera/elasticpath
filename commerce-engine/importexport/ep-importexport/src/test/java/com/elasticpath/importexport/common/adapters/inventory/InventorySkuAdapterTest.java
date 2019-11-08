@@ -100,10 +100,10 @@ public class InventorySkuAdapterTest {
 				allowing(mockCachingService).findAllWarehouses();
 				will(returnValue(Arrays.asList(mockWarehouse)));
 
-				allowing(mockBeanFactory).getBean(ContextIdNames.PRODUCT_SKU);
+				allowing(mockBeanFactory).getPrototypeBean(ContextIdNames.PRODUCT_SKU, ProductSku.class);
 				will(returnValue(new ProductSkuImpl()));
 
-				allowing(mockBeanFactory).getBean(ContextIdNames.INVENTORYDTO);
+				allowing(mockBeanFactory).getPrototypeBean(ContextIdNames.INVENTORYDTO, InventoryDto.class);
 				will(returnValue(mockInventory));
 
 				allowing(mockInventory).setWarehouseUid(WAREHOUSE_UID);

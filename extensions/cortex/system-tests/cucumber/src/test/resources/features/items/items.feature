@@ -67,3 +67,12 @@ Feature: Items
     Examples:
       | ITEM     |
       | t384lkef |
+
+  Scenario Outline: Lookup for an offer to view offer name is correct.
+    When I look up an item with code <SKU_CODE>
+    Then there is a offer link
+    Then I should see offer name is <PRODUCT_NAME>
+
+    Examples:
+      | SKU_CODE  | PRODUCT_NAME |
+      | alien_sku | Alien        |

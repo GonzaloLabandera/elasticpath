@@ -49,21 +49,12 @@
 		<property name="timeToIdle" value="300" />
 	</bean>
 
-	<bean id="groovyConditionCache"
+	<bean id="decomposedConditionCache"
 		  class="com.elasticpath.commons.beanframework.EhCacheDefaultConfigurationFactoryBean">
-		<property name="name" value="groovyConditionCache"/>
+		<property name="name" value="decomposedConditionCache"/>
 		<property name="cacheManager" ref="epCoreEhcacheManager"/>
-		<property name="timeToLive" value="3600" />
-		<property name="timeToIdle" value="3600" />
+		<property name="timeToLive" value="0" />
+		<property name="timeToIdle" value="86400" />
 	</bean>
-
-	<bean id="groovyEvaluationCache"
-		  class="com.elasticpath.commons.beanframework.EhCacheDefaultConfigurationFactoryBean">
-		<property name="name" value="groovyEvaluationCache"/>
-		<property name="cacheManager" ref="epCoreEhcacheManager"/>
-		<property name="timeToLive" value="600" />
-		<property name="timeToIdle" value="600" />
-	</bean>
-
 
 </beans>

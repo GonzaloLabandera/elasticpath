@@ -2,11 +2,15 @@ package com.elasticpath.selenium.resultspane;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
 
 import com.elasticpath.selenium.common.AbstractPageObject;
-import com.elasticpath.selenium.editor.StoreEditor;
+import com.elasticpath.selenium.editor.store.StoreEditor;
 import com.elasticpath.selenium.util.Constants;
 
 /**
@@ -24,6 +28,8 @@ public class StoresResultPane extends AbstractPageObject {
 	private static final String DELETE_STORE_BUTTON_CSS = "div[automation-id='com.elasticpath.cmclient.admin.stores.AdminStoresMessages"
 			+ ".DeleteStore']";
 	private static final String DELETE_STORE_OK_BUTTON_CSS = "div[widget-id='OK']";
+	private static final String MAXIMIZE_WINDOW_CSS = "div[pane-location='center-pane-outer'] div[appearance-id='ctabfolder-button']"
+			+ "[widget-id='Maximize'][seeable='true']";
 
 	/**
 	 * Constructor.
@@ -44,6 +50,31 @@ public class StoresResultPane extends AbstractPageObject {
 		click(getWaitDriver().waitForElementToBeClickable(By.cssSelector(String.format(TARGET_STORE_CSS, storeCode))));
 		clickButton(EDIT_STORE_BUTTON_CSS, "Edit Store Button");
 		return new StoreEditor(getDriver());
+	}
+
+	/**
+	 * Maximize store window and get all codes of exist stores.
+	 *
+	 * @return List of codes all exist stores.
+	 */
+	public List<String> getExistStoresCodesList() {
+		if (!getDriver().findElements(By.cssSelector(MAXIMIZE_WINDOW_CSS)).isEmpty()) {
+			click(getWaitDriver().waitForElementToBeClickable(By.cssSelector(MAXIMIZE_WINDOW_CSS)));
+		}
+		return findStoreCodesInTable();
+	}
+
+	/**
+	 * Find all codes of exist stores.
+	 *
+	 * @return List of codes all exist stores.
+	 */
+	private List<String> findStoreCodesInTable() {
+		return getDriver()
+				.findElements(By.cssSelector("div[widget-type='table_row'][parent-widget-id='Store']>div[column-num='0']"))
+				.stream()
+				.map(WebElement::getText)
+				.collect(Collectors.toList());
 	}
 
 	/**

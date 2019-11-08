@@ -165,7 +165,7 @@ public class TaxSnapshotServiceImpl implements TaxSnapshotService {
 			.newBuilder()
 			.withCurrency(shoppingCart.getCustomerSession().getCurrency())
 			.withTaxDocumentId(StringTaxDocumentId.fromString(shoppingCart.getGuid()))
-			.withCustomerCode(shoppingCart.getGuid())
+			.withCustomerCode(shoppingCart.getShopper().getCustomer().getUserId())
 			.withTaxJournalType(TaxJournalType.PURCHASE)
 			.withTaxExemption(shoppingCart.getTaxExemption())
 			.withCustomerBusinessNumber(shoppingCart.getCustomerBusinessNumber())

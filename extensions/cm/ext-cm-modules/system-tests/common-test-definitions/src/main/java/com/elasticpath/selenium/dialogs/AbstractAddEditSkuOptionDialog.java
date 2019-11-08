@@ -16,6 +16,7 @@ public abstract class AbstractAddEditSkuOptionDialog extends AbstractDialog {
 			+ "div[automation-id='com.elasticpath.cmclient.catalog.CatalogMessages.SKUOptionAddDialog_Code'] input";
 	private static final String ADD_BUTTON_CSS = ADD_SKU_OPTION_PARENT_CSS
 			+ "div[automation-id='com.elasticpath.cmclient.core.CoreMessages.AbstractEpDialog_ButtonSave'][seeable='true']";
+	private static final String LANGUAGE_COMBO_BOX_CSS = ADD_SKU_OPTION_PARENT_CSS + "div[widget-type='CCombo']";
 
 	private String displayName;
 	private String code;
@@ -51,6 +52,17 @@ public abstract class AbstractAddEditSkuOptionDialog extends AbstractDialog {
 	}
 
 	/**
+	 * Returns skuOption display name displayed in dialog.
+	 *
+	 * @param skuOptionDisplayNameInputCss the skuOption display name input css
+	 * @return skuOption display name displayed in dialog.
+	 */
+	public String getSkuOptionDisplayName(final String skuOptionDisplayNameInputCss) {
+		this.displayName = getDriver().findElement(By.cssSelector(skuOptionDisplayNameInputCss)).getAttribute("value");
+		return this.displayName;
+	}
+
+	/**
 	 * Clicks add button.
 	 */
 	public void clickAddButton() {
@@ -74,6 +86,24 @@ public abstract class AbstractAddEditSkuOptionDialog extends AbstractDialog {
 	 */
 	public String getCode() {
 		return code;
+	}
+
+	/**
+	 * Select language.
+	 *
+	 * @param language language which should be chosen
+	 */
+	public void selectLanguage(final String language) {
+		selectComboBoxItem(LANGUAGE_COMBO_BOX_CSS, language);
+	}
+
+	/**
+	 * Get selected language.
+	 *
+	 * @return selected language value
+	 */
+	public String getLanguage() {
+		return getDriver().findElement(By.cssSelector(LANGUAGE_COMBO_BOX_CSS + " input")).getAttribute("value");
 	}
 
 }

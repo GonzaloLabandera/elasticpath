@@ -57,6 +57,21 @@ public class ProductAdapterNewTest {
 	private static final String BRAND = "Nike";
 
 	private final BeanFactory beanFactory = new BeanFactory() {
+		
+		@SuppressWarnings("unchecked")
+		@Override
+		public <T> T getPrototypeBean(final String name, final Class<T> clazz) {
+			if (ContextIdNames.ATTRIBUTE_USAGE.equals(name)) {
+				return (T) new AttributeUsageImpl();
+			}
+			return null;
+		}
+
+		@Override
+		public <T> T getSingletonBean(final String name, final Class<T> clazz) {
+			throw new UnsupportedOperationException("This is not supported");
+		}
+
 		@SuppressWarnings("unchecked")
 		@Override
 		public <T> T getBean(final String name) {

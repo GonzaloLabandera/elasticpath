@@ -19,14 +19,11 @@ import com.elasticpath.persistence.api.FetchGroupLoadTuner;
 import com.elasticpath.persistence.api.LoadTuner;
 import com.elasticpath.service.catalog.CatalogService;
 import com.elasticpath.service.impl.AbstractEpPersistenceServiceImpl;
-import com.elasticpath.service.misc.FetchPlanHelper;
 
 /**
  * Implementation of <code>CatalogService</code> - methods for servicing the <code>Catalog</code> domain object.
  */
 public class CatalogServiceImpl extends AbstractEpPersistenceServiceImpl implements CatalogService {
-
-	private FetchPlanHelper fetchPlanHelper;
 
 	/**
 	 * Generic method for getting a catalog.
@@ -75,13 +72,11 @@ public class CatalogServiceImpl extends AbstractEpPersistenceServiceImpl impleme
 	@Override
 	public Catalog getCatalog(final long catalogUid) throws EpServiceException {
 		sanityCheck();
-		Catalog catalog = null;
 		if (catalogUid <= 0) {
-			catalog = getBean(ContextIdNames.CATALOG);
-		} else {
-			catalog = getPersistentBeanFinder().get(ContextIdNames.CATALOG, catalogUid);
+			return getBean(ContextIdNames.CATALOG);
 		}
-		return catalog;
+
+		return getPersistentBeanFinder().get(ContextIdNames.CATALOG, catalogUid);
 	}
 
 	/**
@@ -168,12 +163,7 @@ public class CatalogServiceImpl extends AbstractEpPersistenceServiceImpl impleme
 		if (catalogName == null) {
 			return false;
 		}
-		final Catalog existingCatalog = this.findByName(catalogName);
-		boolean catalogExists = false;
-		if (existingCatalog != null) {
-			catalogExists = true;
-		}
-		return catalogExists;
+		return findByName(catalogName) != null;
 	}
 
 	/**
@@ -207,19 +197,9 @@ public class CatalogServiceImpl extends AbstractEpPersistenceServiceImpl impleme
 			return getBean(ContextIdNames.CATALOG);
 		}
 
-		fetchPlanHelper.configureFetchGroupLoadTuner(fetchGroupLoadTuner, cleanExistingGroups);
-		Catalog catalog = getPersistentBeanFinder().load(ContextIdNames.CATALOG, catalogUid);
-		fetchPlanHelper.clearFetchPlan();
-		return catalog;
-	}
-
-	/**
-	 * Sets the fetch plan helper.
-	 *
-	 * @param fetchPlanHelper the fetch plan helper
-	 */
-	public void setFetchPlanHelper(final FetchPlanHelper fetchPlanHelper) {
-		this.fetchPlanHelper = fetchPlanHelper;
+		return getPersistentBeanFinder()
+			.withLoadTuners(fetchGroupLoadTuner.setCleanExistingGroups(cleanExistingGroups))
+			.load(ContextIdNames.CATALOG, catalogUid);
 	}
 
 	/**
@@ -299,13 +279,9 @@ public class CatalogServiceImpl extends AbstractEpPersistenceServiceImpl impleme
 			throw new EpServiceException("Cannot retrieve Catalog with null code.");
 		}
 
-		if (loadTuner != null) {
-			fetchPlanHelper.configureLoadTuner(loadTuner);
-		}
-
-		final List<Catalog> results = getPersistenceEngine().retrieveByNamedQuery("FIND_CATALOG_BY_CODE", code);
-
-		fetchPlanHelper.clearFetchPlan();
+		final List<Catalog> results = getPersistenceEngine()
+			.withLoadTuners(loadTuner)
+			.retrieveByNamedQuery("FIND_CATALOG_BY_CODE", code);
 
 		Catalog catalog = null;
 		if (results.size() == 1) {

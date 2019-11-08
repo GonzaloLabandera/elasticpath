@@ -29,6 +29,7 @@
 		<module>assets</module>
 		<module>system-tests</module>
 		<module>packager</module>
+		<module>http-mock-server</module>
 	</modules>
 
 	<properties>

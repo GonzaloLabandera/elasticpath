@@ -1,7 +1,5 @@
 package com.elasticpath.cucumber.definitions.dst;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 import cucumber.api.java.en.And;
 import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
@@ -42,12 +40,8 @@ public class DSTDefinition {
 	@And("^I run the data sync tool$")
 	public void runSyncTool() {
 		SyncConfig syncConfig = new SyncConfig();
-		syncConfig.writeToSyncConfig();
+		syncConfig.updateSyncConfigFiles();
 		syncConfig.runDataSync(dst.getChangeSetGuid());
-
-		assertThat(syncConfig.getExitValue())
-				.as("Sync failed........")
-				.isEqualTo(0);
 	}
 
 	/**

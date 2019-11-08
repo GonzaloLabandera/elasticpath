@@ -24,5 +24,9 @@ BEGIN
 
         -- SQL to grant the necessary database permissions on a new EP database
         EXECUTE IMMEDIATE 'GRANT CONNECT, CREATE TABLE, CREATE SEQUENCE, CREATE PROCEDURE TO ${data.population.username}';
+        EXECUTE IMMEDIATE 'CALL RDSADMIN.RDSADMIN_UTIL.GRANT_SYS_OBJECT(''DBMS_XA'',UPPER(''${data.population.username}''))';
+        EXECUTE IMMEDIATE 'CALL RDSADMIN.RDSADMIN_UTIL.GRANT_SYS_OBJECT(''PENDING_TRANS$'',UPPER(''${data.population.username}''))';
+        EXECUTE IMMEDIATE 'CALL RDSADMIN.RDSADMIN_UTIL.GRANT_SYS_OBJECT(''DBA_2PC_PENDING'',UPPER(''${data.population.username}''))';
+        EXECUTE IMMEDIATE 'CALL RDSADMIN.RDSADMIN_UTIL.GRANT_SYS_OBJECT(''DBA_PENDING_TRANSACTIONS'',UPPER(''${data.population.username}''))';
     END;
 END;

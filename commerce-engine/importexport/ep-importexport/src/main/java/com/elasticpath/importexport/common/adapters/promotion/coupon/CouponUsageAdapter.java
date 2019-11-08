@@ -31,7 +31,7 @@ public class CouponUsageAdapter extends AbstractDomainAdapterImpl<CouponUsage, C
 	 * @return instance of CouponUsage
 	 */
 	public CouponUsage createDomain() {
-		return getBeanFactory().getBean(ContextIdNames.COUPON_USAGE);
+		return getBeanFactory().getPrototypeBean(ContextIdNames.COUPON_USAGE, CouponUsage.class);
 	}
 	
 	/**

@@ -64,7 +64,7 @@
 						<configuration>
 							<skipTests>${skipITests}</skipTests>
 							<redirectTestOutputToFile>true</redirectTestOutputToFile>
-							<argLine>-Dorg.apache.camel.jmx.disabled=true</argLine>
+							<argLine>-Xmx500m -Xms500m -Dorg.apache.camel.jmx.disabled=true</argLine>
 							<forkCount>0.5C</forkCount>
 							<includes>
 								<include>**/Test*.java</include>

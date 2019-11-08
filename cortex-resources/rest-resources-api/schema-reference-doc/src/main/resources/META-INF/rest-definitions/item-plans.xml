@@ -15,7 +15,7 @@
 			<step>
 				<description><![CDATA[Submit a lookup for an item.]]></description>
 				<start>lookup-item-form</start>
-				<submit></submit>
+				<submit/>
 				<to>lookup-item-form</to>
 				<via-link>itemlookupaction</via-link>
 				<result>item</result>
@@ -34,7 +34,7 @@
 			<step>
 				<description><![CDATA[Submit a batch lookup for items.]]></description>
 				<start>batch-items-form</start>
-				<submit></submit>
+				<submit/>
 				<to>batch-items-form</to>
 				<via-link>batchlookupaction</via-link>
 				<result>batch-items</result>
@@ -43,7 +43,7 @@
 
 		<plan>
 			<name>read-code-for-item</name>
-			<description><![CDATA[Read the code of an [item][items].]]></description>
+			<description><![CDATA[Read the code of an item.]]></description>
 			<step>
 				<description><![CDATA[Follow a link from item to code.]]></description>
 				<start>item</start>

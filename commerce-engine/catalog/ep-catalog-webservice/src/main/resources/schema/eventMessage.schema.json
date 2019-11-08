@@ -1,0 +1,58 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "description": "Schema for an attribute definition",
+  "type": "object",
+  "properties": {
+    "eventType": {
+      "type": "object",
+      "properties": {
+        "@class": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "@class",
+        "name"
+      ]
+    },
+    "guid": {
+      "type": "string"
+    },
+    "data": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string"
+        },
+        "store": {
+          "type": "string"
+        },
+        "modifiedDateTime": {
+          "type": "string"
+        },
+        "codes": {
+          "type": "array",
+          "items": [
+            {
+              "type": "string"
+            }
+          ]
+        }
+      },
+      "required": [
+        "type",
+        "store",
+        "modifiedDateTime",
+        "codes"
+      ]
+    }
+  },
+  "required": [
+    "eventType",
+    "guid",
+    "data"
+  ]
+}

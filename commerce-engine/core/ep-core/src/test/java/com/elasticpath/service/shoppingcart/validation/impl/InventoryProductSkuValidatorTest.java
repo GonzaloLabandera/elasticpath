@@ -20,6 +20,8 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import com.elasticpath.base.common.dto.StructuredErrorMessage;
 import com.elasticpath.common.dto.SkuInventoryDetails;
+import com.elasticpath.domain.catalog.AvailabilityCriteria;
+import com.elasticpath.domain.catalog.Product;
 import com.elasticpath.domain.catalog.ProductSku;
 import com.elasticpath.domain.store.Store;
 import com.elasticpath.sellingchannel.inventory.ProductInventoryShoppingService;
@@ -46,11 +48,18 @@ public class InventoryProductSkuValidatorTest {
 	private SkuInventoryDetails skuInventoryDetails;
 
 	@Mock
+	private Product product;
+
+	@Mock
 	private ProductSku productSku;
 
 	@Before
 	public void setUp() {
+		given(product.getAvailabilityCriteria()).willReturn(AvailabilityCriteria.AVAILABLE_WHEN_IN_STOCK);
+
 		given(productSku.getSkuCode()).willReturn(SKU_CODE);
+		given(productSku.isShippable()).willReturn(true);
+		given(productSku.getProduct()).willReturn(product);
 
 		given(context.getProductSku()).willReturn(productSku);
 		given(context.getStore()).willReturn(store);

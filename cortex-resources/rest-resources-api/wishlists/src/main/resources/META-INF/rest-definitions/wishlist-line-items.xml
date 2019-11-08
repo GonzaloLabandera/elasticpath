@@ -7,9 +7,7 @@
 			<name>line-item-id</name>
 			<description>
 				<![CDATA[
-The line item identifier. This ID is a unique number assigned by Cortex API when the [item][items]is added to a wishlist.
-
-[items]: #items
+The line item identifier. This ID is a unique number assigned by Cortex API when the [item](items.md) is added to a wishlist.
 				]]>
 			</description>
 			<string/>

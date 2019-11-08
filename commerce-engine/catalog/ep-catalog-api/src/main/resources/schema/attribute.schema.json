@@ -1,0 +1,65 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "title": "The schema for attribute projections.",
+  "type": "object",
+  "oneOf": [
+    {
+      "$ref": "definitions.schema.json#/deletedObject"
+    },
+    {
+      "properties": {
+        "identity": {
+          "$ref": "definitions.schema.json#/nameIdentity"
+        },
+        "modifiedDateTime": {
+          "description": "The date/time that the projection was modified.",
+          "type": "string"
+        },
+        "deleted": {
+          "description": "Indicates whether the projection is available.",
+          "type": "boolean",
+          "enum": [ false ]
+        },
+        "translations": {
+          "description": "Array of objects that have localized fields.",
+          "type": "array",
+          "items": [
+            {
+              "type": "object",
+              "properties": {
+                "language": {
+                  "description": "The language code and optional country code for the translation.",
+                  "type": "string"
+                },
+                "displayName": {
+                  "description": "The localized attribute name.",
+                  "type": "string"
+                },
+                "dataType": {
+                  "description": "The attribute field type as defined by the AttributeType extensible enum: ShortText, LongText, Integer, Decimal, Boolean, Image, File, Date, DateTime.",
+                  "type": "string"
+                },
+                "multiValue": {
+                  "description": "Indicates whether the attribute contains multiple values.",
+                  "type": "boolean"
+                }
+              },
+              "required": [
+                "language",
+                "displayName",
+                "dataType",
+                "multiValue"
+              ]
+            }
+          ]
+        }
+      },
+      "required": [
+        "identity",
+        "modifiedDateTime",
+        "translations",
+        "deleted"
+      ]
+    }
+  ]
+}

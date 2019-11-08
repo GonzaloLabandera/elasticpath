@@ -2,8 +2,10 @@
 <manifest>
     <version>6.0</version>
     <resource>warehouses.xml</resource>
+    <resource>modifiergroups.xml</resource>
     <resource>catalogs.xml</resource>
     <resource>categories.xml</resource>
+    <resource>modifiergroupfilters.xml</resource>
     <resource>stores.xml</resource>
     <resource>store_associations.xml</resource>
     <resource>customer_groups.xml</resource>

@@ -3,17 +3,6 @@
 
 	<family>
 		<name>orders</name>
-		<description><![CDATA[
-Deliveries:
-
-The deliveries resource groups the shipment details, which are the how and where your goods are being shipped, for your
-orders. Out of the box, you can't split orders into different shipments, so when you get the list of delivery elements
-for an order only one element appears in the list. The order's shipment details are specified through the
-[shipmentdetails][shipmentdetails] resource.
-
-[shipmentdetails]: #shipmentdetails
-			]]>
-		</description>
 
 		<uri-part>
 			<name>delivery-id</name>
@@ -37,7 +26,7 @@ for an order only one element appears in the list. The order's shipment details 
 
 		<relationship>
 			<name>deliveries-for-order</name>
-			<description><![CDATA[Retreive a list of [deliveries](#order-deliveries) for an order.]]></description>
+			<description><![CDATA[Retreive a list of deliveries for an order.]]></description>
 			<rel>deliveries</rel>
 			<rev>order</rev>
 			<from>order</from>

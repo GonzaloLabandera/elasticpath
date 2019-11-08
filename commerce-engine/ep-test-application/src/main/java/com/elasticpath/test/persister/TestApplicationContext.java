@@ -12,11 +12,11 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.support.GenericApplicationContext;
-import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.context.SecurityContextImpl;
+import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import com.elasticpath.base.exception.EpServiceException;
@@ -67,12 +67,12 @@ public class TestApplicationContext {
 
 	@Autowired
 	private org.springframework.beans.factory.BeanFactory springBeanFactory;
-	
+
 	@Autowired
 	private TestConfig config;
 
 	@Autowired
-	protected JpaTransactionManager transactionManager;
+	protected PlatformTransactionManager transactionManager;
 
 	private TransactionTemplate txTemplate;
 
@@ -82,7 +82,7 @@ public class TestApplicationContext {
 		releaseResources();
 
 		resetRuleEngineCache();
-		}
+	}
 
 	public void clearStaleData() {
 		resetRuleEngineCache();
@@ -100,7 +100,7 @@ public class TestApplicationContext {
 
 		LOG.trace("Completed initializing TestApplicationContext...done");
 	}
-	
+
 	/**
 	 * Integration tests require settings related to the filesystem that may differ from what's being added by the base-insert.sql script. We
 	 * configure the settings needed by integration tests here. These settings should be global. Refrain from adding test specific settings here.
@@ -219,7 +219,7 @@ public class TestApplicationContext {
 		context.setAuthentication(authenticationToken);
 		SecurityContextHolder.setContext(context);
 	}
-	
+
 	public BeanFactory getBeanFactory() {
 		return beanFactory;
 	}

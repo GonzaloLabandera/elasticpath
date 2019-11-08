@@ -21,6 +21,7 @@ import com.elasticpath.money.Money;
 import com.elasticpath.rest.ResourceOperationFailure;
 import com.elasticpath.rest.definition.base.CostEntity;
 import com.elasticpath.rest.definition.carts.CartIdentifier;
+import com.elasticpath.rest.definition.carts.CartsIdentifier;
 import com.elasticpath.rest.definition.carts.LineItemIdentifier;
 import com.elasticpath.rest.definition.carts.LineItemsIdentifier;
 import com.elasticpath.rest.definition.totals.CartLineItemTotalIdentifier;
@@ -86,7 +87,9 @@ public class OrderTotalEntityRepositoryImplTest {
 	private CartLineItemTotalIdentifier createCartLineItemTotalIdentifier() {
 		final CartIdentifier cartIdentifier = CartIdentifier.builder()
 				.withCartId(StringIdentifier.of(CART_ID))
-				.withScope(StringIdentifier.of(SCOPE))
+				.withCarts(CartsIdentifier.builder()
+						.withScope(StringIdentifier.of(SCOPE))
+						.build())
 				.build();
 
 		final LineItemsIdentifier lineItemsIdentifier = LineItemsIdentifier.builder()

@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright (c) Elastic Path Software Inc., 2019
+  -->
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+				   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+				   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd"
+				   logicalFilePath="com/elasticpath/core/db/core-changelog-7.6.0-generalmodifiers.xml">
+
+	<changeSet id="7.6.0-multicarts" author="elasticpath">
+
+
+		<insert tableName="JPA_GENERATED_KEYS">
+			<column name="ID" value="TSHOPPERMODIFIERGRP" />
+			<column name="LAST_VALUE" valueNumeric="100000" />
+		</insert>
+
+
+		<insert tableName="JPA_GENERATED_KEYS">
+			<column name="ID" value="TCARTDATA" />
+			<column name="LAST_VALUE" valueNumeric="100000" />
+		</insert>
+
+		<createTable tableName="TCARTDATA">
+			<column name="UIDPK" type="BIGINT">
+				<constraints primaryKey="true"/>
+			</column>
+			<column name="SHOPPING_CART_UID" type="BIGINT">
+				<constraints nullable="false" />
+			</column>
+			<column name="DATA_KEY" type="VARCHAR(255)">
+				<constraints nullable="false"/>
+			</column>
+			<column name="VALUE" type="VARCHAR(1024)" />
+			<column name="LAST_MODIFIED_DATE" defaultValueDate="CURRENT_TIMESTAMP" type="TIMESTAMP">
+				<constraints nullable="false"/>
+			</column>
+			<column name="CREATION_DATE" defaultValueDate="CURRENT_TIMESTAMP" type="TIMESTAMP">
+				<constraints nullable="false"/>
+			</column>
+		</createTable>
+
+		<createTable tableName="TCARTTYPE">
+			<column name="UIDPK" type="BIGINT">
+				<constraints primaryKey="true"/>
+			</column>
+			<column name="NAME" type="VARCHAR(255)">
+				<constraints nullable="false"/>
+			</column>
+			<column name="GUID" type="VARCHAR(64)" >
+				<constraints nullable="false" />
+			</column>
+
+		</createTable>
+		<insert tableName="JPA_GENERATED_KEYS">
+			<column name="ID" value="TCARTTYPE" />
+			<column name="LAST_VALUE" valueNumeric="100000" />
+		</insert>
+		<createTable tableName="TSTORECARTTYPE">
+			<column name="STORE_UID" type="BIGINT">
+				<constraints nullable="false"/>
+			</column>
+			<column name="CARTTYPE_UID" type="BIGINT">
+				<constraints nullable="false"/>
+			</column>
+		</createTable>
+		<createTable tableName="TCARTTYPEMODIFIERS">
+			<column name="MODIFIER_UID" type="BIGINT">
+				<constraints nullable="false"/>
+			</column>
+			<column name="CARTTYPE_UID" type="BIGINT">
+				<constraints nullable="false"/>
+			</column>
+		</createTable>
+
+
+
+		<addColumn tableName="TSHOPPINGCART">
+			<column name="DEFAULTCART" defaultValueBoolean="true"   type="BOOLEAN">
+				<constraints nullable="false"/>
+			</column>
+		</addColumn>
+	</changeSet>
+
+	<changeSet id="oracle-downgrade-varchar" author="elasticpath" dbms="oracle">
+		<sql
+				dbms="oracle"
+				endDelimiter="\nGO"
+				splitStatements="true"
+				stripComments="true">alter table TCARTDATA MODIFY VALUE long</sql>
+		<sql
+				dbms="oracle"
+				endDelimiter="\nGO"
+				splitStatements="true"
+				stripComments="true">alter table TCARTDATA MODIFY VALUE clob</sql>
+		<comment>migrate tcartdata.value to clob in oracle. Oracle is expecting a CLOB, but liquibase creates it as varchar2
+			which will cause cortex to throw the following error:
+			Invalid column type: getCLOB not implemented for class oracle.jdbc.driver.T4CVarcharAccessor
+
+			The VALUE column cannot be directly modified from a varchar2 into a clob, so it must first be migrated to a long.
+
+			There will be no issue with data migration, as this is a new column on a new table created in the previous changeset.
+		</comment>
+	</changeSet>
+
+
+</databaseChangeLog>
+
+
+

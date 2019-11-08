@@ -13,8 +13,8 @@ import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
 import com.elasticpath.commons.exception.InvalidBundleTreeStructureException;
-import com.elasticpath.domain.cartmodifier.CartItemModifierField;
 import com.elasticpath.domain.catalog.ProductSku;
+import com.elasticpath.domain.modifier.ModifierField;
 import com.elasticpath.domain.shoppingcart.ShoppingCart;
 import com.elasticpath.domain.shoppingcart.ShoppingItem;
 import com.elasticpath.repository.Repository;
@@ -28,7 +28,7 @@ import com.elasticpath.rest.form.SubmitStatus;
 import com.elasticpath.rest.id.IdentifierPart;
 import com.elasticpath.rest.resource.dispatch.operator.annotation.Default;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder.AddToCartAdvisorService;
-import com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder.CartItemModifiersRepository;
+import com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder.ModifiersRepository;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder.ShoppingCartRepository;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.carts.lineitems.LineItemIdentifierRepository;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.item.ItemRepository;
@@ -50,7 +50,7 @@ public class LineItemEntityRepository<E extends LineItemEntity, I extends LineIt
 
 	private ItemRepository itemRepository;
 
-	private CartItemModifiersRepository cartItemModifiersRepository;
+	private ModifiersRepository modifiersRepository;
 
 	private AddToCartAdvisorService addToCartAdvisorService;
 
@@ -86,7 +86,7 @@ public class LineItemEntityRepository<E extends LineItemEntity, I extends LineIt
 		if (fields == null) {
 			lineItemConfigurationEntity = Single.just(LineItemConfigurationEntity.builder().build());
 		} else {
-			lineItemConfigurationEntity = cartItemModifiersRepository.findCartItemModifierValues(cartId, lineItemId)
+			lineItemConfigurationEntity = modifiersRepository.findModifierValues(cartId, lineItemId)
 					.map(this::buildLineItemConfigurationEntity);
 		}
 		return lineItemConfigurationEntity.map(configuration -> LineItemEntity.builder()
@@ -100,12 +100,12 @@ public class LineItemEntityRepository<E extends LineItemEntity, I extends LineIt
 	/**
 	 * Build the line item configuration entity.
 	 *
-	 * @param cartItemModifierValues Cart Item Modifier Values
-	 * @return line item configuration entitiy
+	 * @param modifierValues Cart Item Modifier Values
+	 * @return line item configuration entity
 	 */
-	protected LineItemConfigurationEntity buildLineItemConfigurationEntity(final Map<CartItemModifierField, String> cartItemModifierValues) {
+	protected LineItemConfigurationEntity buildLineItemConfigurationEntity(final Map<ModifierField, String> modifierValues) {
 		LineItemConfigurationEntity.Builder configBuilder = LineItemConfigurationEntity.builder();
-		cartItemModifierValues.forEach((cartItemModifierField, value) -> configBuilder.addingProperty(cartItemModifierField.getCode(), value));
+		modifierValues.forEach((modifierField, value) -> configBuilder.addingProperty(modifierField.getCode(), value));
 		return configBuilder.build();
 	}
 
@@ -187,7 +187,7 @@ public class LineItemEntityRepository<E extends LineItemEntity, I extends LineIt
 	 */
 	protected Completable isItemPurchasable(final String scope,  final LineItemIdentifier identifier) {
 		return shoppingCartRepository.getProductSku(identifier.getLineItems().getCart().getCartId().getValue(), identifier.getLineItemId().getValue())
-				.flatMapCompletable(productSku -> isItemPurchasable(scope, identifier.getLineItems().getCart().getCartId().getValue(),  productSku));
+				.flatMapCompletable(productSku -> isItemPurchasable(scope, productSku));
 	}
 
 	/**
@@ -195,12 +195,11 @@ public class LineItemEntityRepository<E extends LineItemEntity, I extends LineIt
 	 *
 	 *
 	 * @param scope      scope
-	 * @param cartId the cartId.
 	 * @param productSku product sku
 	 * @return ResourceOperationFailure if item is not purchasable
 	 */
-	protected Completable isItemPurchasable(final String scope, final String cartId, final ProductSku productSku) {
-		return addToCartAdvisorService.validateItemPurchasable(scope, cartId, productSku, null)
+	protected Completable isItemPurchasable(final String scope, final ProductSku productSku) {
+		return addToCartAdvisorService.validateItemPurchasable(scope, productSku, null)
 				.flatMapCompletable(this::getStateFailure);
 	}
 
@@ -302,8 +301,8 @@ public class LineItemEntityRepository<E extends LineItemEntity, I extends LineIt
 	}
 
 	@Reference
-	public void setCartItemModifiersRepository(final CartItemModifiersRepository cartItemModifiersRepository) {
-		this.cartItemModifiersRepository = cartItemModifiersRepository;
+	public void setModifiersRepository(final ModifiersRepository modifiersRepository) {
+		this.modifiersRepository = modifiersRepository;
 	}
 
 	@Reference

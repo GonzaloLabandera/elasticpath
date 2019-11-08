@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	   xsi:schemaLocation="
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+">
+
+	<!-- These data sources are used in places where JNDI data source is not required/possible to obtain
+	(e.g tools and tests)
+	In this case the component (tool or test) is responsible for DS creation (e.g. via class)
+	-->
+
+	<bean id="dataSource" class="com.elasticpath.commons.beanframework.NoOpProxyFactoryBean">
+		<property name="serviceInterface" value="org.springframework.jndi.JndiObjectFactoryBean"/>
+	</bean>
+
+	<alias alias="readOnlyDataSource" name="dataSource"/>
+</beans>

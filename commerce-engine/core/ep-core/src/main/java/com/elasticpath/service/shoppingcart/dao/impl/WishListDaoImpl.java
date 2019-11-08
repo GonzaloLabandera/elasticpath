@@ -6,15 +6,11 @@ package com.elasticpath.service.shoppingcart.dao.impl;
 import java.util.List;
 
 import com.elasticpath.base.exception.EpServiceException;
-import com.elasticpath.domain.catalog.CategoryLoadTuner;
-import com.elasticpath.domain.catalog.ProductLoadTuner;
-import com.elasticpath.domain.catalog.ProductSkuLoadTuner;
-import com.elasticpath.domain.catalog.ShoppingItemLoadTuner;
 import com.elasticpath.domain.shopper.Shopper;
 import com.elasticpath.domain.shoppingcart.WishList;
 import com.elasticpath.domain.shoppingcart.impl.WishListImpl;
+import com.elasticpath.persistence.api.LoadTuner;
 import com.elasticpath.persistence.api.PersistenceEngine;
-import com.elasticpath.service.misc.FetchPlanHelper;
 import com.elasticpath.service.shoppingcart.dao.WishListDao;
 
 /**
@@ -23,46 +19,40 @@ import com.elasticpath.service.shoppingcart.dao.WishListDao;
 public class WishListDaoImpl implements WishListDao {
 
 	private PersistenceEngine persistenceEngine;
-	private ProductSkuLoadTuner productSkuLoadTuner;
-	private ProductLoadTuner productLoadTuner;
-	private CategoryLoadTuner categoryLoadTuner;
-	private ShoppingItemLoadTuner shoppingItemLoadTuner;
-	private FetchPlanHelper fetchPlanHelper;
+	private LoadTuner[] loadTuners;
 
 	@Override
 	public WishList findByShopper(final Shopper shopper) {
-		configureLoadTuners();
 
-		PersistenceEngine persister = getPersistenceEngine();
 		Object[] params = new Object[] { shopper.getUidPk()};
-		List<WishList> results = persister.retrieveByNamedQuery("WISHLIST_BY_SHOPPING_CONTEXT", params);
+		List<WishList> results = getPersistenceEngine()
+			.withLoadTuners(getLoadTuners())
+			.retrieveByNamedQuery("WISHLIST_BY_SHOPPING_CONTEXT", params);
 
 		WishList wishList = null;
 		if (!results.isEmpty()) {
 			wishList = results.get(0);
 		}
-		fetchPlanHelper.clearFetchPlan();
 		return wishList;
 	}
 
 	@Override
 	public WishList get(final long uid) throws EpServiceException {
-		configureLoadTuners();
-		WishList wishList = this.getPersistenceEngine().load(WishListImpl.class, uid);
-		fetchPlanHelper.clearFetchPlan();
-		return wishList;
+		return getPersistenceEngine()
+			.withLoadTuners(getLoadTuners())
+			.load(WishListImpl.class, uid);
 	}
 
 	@Override
 	public WishList findByGuid(final String guid) {
-		configureLoadTuners();
-		List<WishList> results = getPersistenceEngine().retrieveByNamedQuery("WISHLIST_BY_GUID", guid);
+		List<WishList> results = getPersistenceEngine()
+			.withLoadTuners(getLoadTuners())
+			.retrieveByNamedQuery("WISHLIST_BY_GUID", guid);
 
 		WishList wishList = null;
 		if (!results.isEmpty()) {
 			wishList = results.get(0);
 		}
-		fetchPlanHelper.clearFetchPlan();
 		return wishList;
 	}
 
@@ -78,105 +68,16 @@ public class WishListDaoImpl implements WishListDao {
 		return getPersistenceEngine().saveOrUpdate(wishList);
 	}
 
-	/**
-	 * Get product sku load tuner. 
-	 *
-	 * @return the product sku load tuner
-	 */
-	public ProductSkuLoadTuner getProductSkuLoadTuner() {
-		return productSkuLoadTuner;
+	// This warning had to suppressed because the code is correct as per
+	// https://pmd.github.io/latest/pmd_rules_java_performance.html#optimizabletoarraycall
+	//TODO remove @SuppressWarnings after upgrading the PMD to 6.x
+	@SuppressWarnings("PMD.OptimizableToArrayCall")
+	public void setLoadTuners(final List<LoadTuner> loadTuners) {
+		this.loadTuners = loadTuners.toArray(new LoadTuner[0]);
 	}
 
-	/**
-	 * Set product sku load tuner. 
-	 *
-	 * @param productSkuLoadTuner the product sku load tuner
-	 */
-	public void setProductSkuLoadTuner(final ProductSkuLoadTuner productSkuLoadTuner) {
-		this.productSkuLoadTuner = productSkuLoadTuner;
-	}
-
-	/**
-	 * Get product load tuner. 
-	 *
-	 * @return the product load tuner
-	 */
-	public ProductLoadTuner getProductLoadTuner() {
-		return productLoadTuner;
-	}
-
-	/**
-	 * Set product load tuner. 
-	 *
-	 * @param productLoadTuner the product load tuner
-	 */
-	public void setProductLoadTuner(final ProductLoadTuner productLoadTuner) {
-		this.productLoadTuner = productLoadTuner;
-	}
-
-	/**
-	 * Get category load tuner.
-	 *
-	 * @return the category load tuner
-	 */
-	public CategoryLoadTuner getCategoryLoadTuner() {
-		return categoryLoadTuner;
-	}
-
-	/**
-	 * Set category load tuner.
-	 *
-	 * @param categoryLoadTuner the category load tuner
-	 */
-	public void setCategoryLoadTuner(final CategoryLoadTuner categoryLoadTuner) {
-		this.categoryLoadTuner = categoryLoadTuner;
-	}
-
-	/**
-	 * Get shopping item load tuner.
-	 *
-	 * @return the shopping item load tuner
-	 */
-	public ShoppingItemLoadTuner getShoppingItemLoadTuner() {
-		return shoppingItemLoadTuner;
-	}
-
-	/**
-	 * Set shopping item load tuner.
-	 *
-	 * @param shoppingItemLoadTuner the shopping item load tuner
-	 */
-	public void setShoppingItemLoadTuner(final ShoppingItemLoadTuner shoppingItemLoadTuner) {
-		this.shoppingItemLoadTuner = shoppingItemLoadTuner;
-	}
-
-	/**
-	 * Get fetch plan helper. 
-	 *
-	 * @return the fetch plan helper
-	 */
-	public FetchPlanHelper getFetchPlanHelper() {
-		return fetchPlanHelper;
-	}
-
-	/**
-	 * Set fetch plan helper. 
-	 *
-	 * @param fetchPlanHelper the fetch plan helper
-	 */
-	public void setFetchPlanHelper(final FetchPlanHelper fetchPlanHelper) {
-		this.fetchPlanHelper = fetchPlanHelper;
-	}
-
-
-	/**
-	 * Configure the load tuners. 
-	 */
-	protected void configureLoadTuners() {
-		fetchPlanHelper.configureLoadTuner(productLoadTuner);
-		fetchPlanHelper.configureLoadTuner(productSkuLoadTuner);
-		fetchPlanHelper.configureLoadTuner(categoryLoadTuner);
-		fetchPlanHelper.configureLoadTuner(shoppingItemLoadTuner);
+	private LoadTuner[] getLoadTuners() {
+		return loadTuners;
 	}
 
 	/**

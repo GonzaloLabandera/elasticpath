@@ -5,6 +5,7 @@ package com.elasticpath.cmclient.fulfillment.wizards;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.observable.list.IObservableList;
@@ -32,6 +33,7 @@ import com.elasticpath.commons.util.PaymentsComparatorFactory;
 import com.elasticpath.domain.order.Order;
 import com.elasticpath.domain.order.OrderPayment;
 import com.elasticpath.plugin.payment.PaymentType;
+import com.elasticpath.service.payment.gateway.PaymentMethodTransformerFactory;
 
 /**
  * Provides selection of payment source - original or input new one.
@@ -90,9 +92,10 @@ public class OrderPaymentControl {
 	 * @param pageComposite composite on which the control will be created.
 	 * @param layoutData layout used to place the control.
 	 * @param bindingContext binding context.
+	 * @param purpose what the selected OrderPayment record will be used for.
 	 */
 	public OrderPaymentControl(final Order order, final IEpLayoutComposite pageComposite, final IEpLayoutData layoutData,
-			final DataBindingContext bindingContext) {
+			final DataBindingContext bindingContext, final PurposeEnum purpose) {
 		blankPayment = ServiceLocator.getService(ContextIdNames.ORDER_PAYMENT);
 		blankPayment.setPaymentMethod(PaymentType.PAYMENT_TOKEN);
 		blankPayment.setCurrencyCode(order.getCurrency().getCurrencyCode());
@@ -100,11 +103,22 @@ public class OrderPaymentControl {
 		this.bindingContext = bindingContext;
 		refundOptionsPageComposite = pageComposite.addTableWrapLayoutComposite(1, false, layoutData);
 
+		List<OrderPayment> availablePaymentMethods = new ArrayList<>();
+		if (purpose == PurposeEnum.AUTHORIZATION) {
+			final PaymentMethodTransformerFactory paymentMethodTransformerFactory = ServiceLocator.getService(
+					ContextIdNames.PAYMENT_METHOD_TRANSFORMER_FACTORY);
+			availablePaymentMethods = order.getCustomer().getPaymentMethods().all().stream()
+					.map(paymentMethod -> paymentMethodTransformerFactory.getTransformerInstance(paymentMethod)
+							.transformToOrderPayment(paymentMethod))
+					.collect(Collectors.toList());
+		} else if (purpose == PurposeEnum.REFUND) {
+			availablePaymentMethods = PaymentsComparatorFactory.getListOfUniquePayments(
+					OrderPayment.CAPTURE_TRANSACTION,
+					order.getOrderPayments(),
+					PaymentType.PAYPAL_EXPRESS, PaymentType.GIFT_CERTIFICATE);
+		}
+		originalPayments.addAll(availablePaymentMethods);
 
-		final List<OrderPayment> allUniqueOrderPayments = PaymentsComparatorFactory.getListOfUniquePayments(OrderPayment.CAPTURE_TRANSACTION, order
-				.getOrderPayments(), PaymentType.PAYPAL_EXPRESS, PaymentType.GIFT_CERTIFICATE);
-
-		originalPayments.addAll(allUniqueOrderPayments);
 		createEpPageContent();
 	}
 
@@ -265,5 +279,20 @@ public class OrderPaymentControl {
 	 */
 	public void setOriginalPaymentSourceRadioButtonLabel(final String label) {
 		originalPaymentRadioButton.setText(label);
+	}
+
+	/**
+	 * Enum representing the purpose of the payment method selection.
+	 */
+	public enum PurposeEnum {
+		/**
+		 * Order payment will be used for doing authorizations.
+		 */
+		AUTHORIZATION,
+
+		/**
+		 * Order payment will be used for doing refunds.
+		 */
+		REFUND
 	}
 }

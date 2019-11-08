@@ -3,6 +3,7 @@
  */
 package com.elasticpath.domain.catalog.impl;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -344,6 +345,105 @@ public class ProductAssociationImplTest {
 
 		ProductAssociation copy = productAssociation.deepCopy();
 		assertEquals(productAssociation, copy);
+	}
+
+	@Test
+	public void canSyndicateShouldReturnTrueWhenEndDateIsNullAndTargetProductIsNotHiddenAndTargetProductEndDateIsNull() {
+		final Product targetProduct = new ProductImpl();
+		targetProduct.setHidden(false);
+		targetProduct.setEndDate(null);
+
+		productAssociation.setEndDate(null);
+		productAssociation.setTargetProduct(targetProduct);
+
+		assertThat(productAssociation.canSyndicate()).isTrue();
+	}
+
+	@Test
+	public void canSyndicateShouldReturnTrueWhenEndDateIsInFutureAndTargetProductIsNotHiddenAndTargetProductEndDateIsNull() {
+		Date now = new Date();
+		Date tomorrow = DateUtils.addDays(now, 1);
+
+		final Product targetProduct = new ProductImpl();
+		targetProduct.setHidden(false);
+		targetProduct.setEndDate(null);
+
+		productAssociation.setEndDate(tomorrow);
+		productAssociation.setTargetProduct(targetProduct);
+
+		assertThat(productAssociation.canSyndicate()).isTrue();
+	}
+
+	@Test
+	public void canSyndicateShouldReturnTrueWhenEndDateIsNullAndTargetProductIsNotHiddenAndTargetProductEndDateIsInFuture() {
+		Date now = new Date();
+		Date tomorrow = DateUtils.addDays(now, 1);
+
+		final Product targetProduct = new ProductImpl();
+		targetProduct.setHidden(false);
+		targetProduct.setEndDate(tomorrow);
+
+		productAssociation.setEndDate(null);
+		productAssociation.setTargetProduct(targetProduct);
+
+		assertThat(productAssociation.canSyndicate()).isTrue();
+	}
+
+	@Test
+	public void canSyndicateShouldReturnTrueWhenEndDateIsInFutureAndTargetProductIsNotHiddenAndTargetProductEndDateIsInFuture() {
+		Date now = new Date();
+		Date tomorrow = DateUtils.addDays(now, 1);
+
+		final Product targetProduct = new ProductImpl();
+		targetProduct.setHidden(false);
+		targetProduct.setEndDate(tomorrow);
+
+		productAssociation.setEndDate(tomorrow);
+		productAssociation.setTargetProduct(targetProduct);
+
+		assertThat(productAssociation.canSyndicate()).isTrue();
+	}
+
+	@Test
+	public void canSyndicateShouldReturnFalseWhenEndDateIsInPastAndTargetProductIsNotHiddenAndTargetProductEndDateIsNull() {
+		Date now = new Date();
+		Date yesterday = DateUtils.addDays(now, -1);
+
+		final Product targetProduct = new ProductImpl();
+		targetProduct.setHidden(false);
+		targetProduct.setEndDate(null);
+
+		productAssociation.setEndDate(yesterday);
+		productAssociation.setTargetProduct(targetProduct);
+
+		assertThat(productAssociation.canSyndicate()).isFalse();
+	}
+
+	@Test
+	public void canSyndicateShouldReturnFalseWhenEndDateIsNullAndTargetProductIsNotHiddenAndTargetProductEndDateIsInPast() {
+		Date now = new Date();
+		Date yesterday = DateUtils.addDays(now, -1);
+
+		final Product targetProduct = new ProductImpl();
+		targetProduct.setHidden(false);
+		targetProduct.setEndDate(yesterday);
+
+		productAssociation.setEndDate(null);
+		productAssociation.setTargetProduct(targetProduct);
+
+		assertThat(productAssociation.canSyndicate()).isFalse();
+	}
+
+	@Test
+	public void canSyndicateShouldReturnFalseWhenEndDateIsNullAndTargetProductIsHiddenAndTargetProductEndDateIsNull() {
+		final Product targetProduct = new ProductImpl();
+		targetProduct.setHidden(true);
+		targetProduct.setEndDate(null);
+
+		productAssociation.setEndDate(null);
+		productAssociation.setTargetProduct(targetProduct);
+
+		assertThat(productAssociation.canSyndicate()).isFalse();
 	}
 
 }

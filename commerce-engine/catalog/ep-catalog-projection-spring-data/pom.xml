@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright (c) Elastic Path Software Inc., 2018
+  -->
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		 xmlns="http://maven.apache.org/POM/4.0.0"
+		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>com.elasticpath</groupId>
+		<artifactId>catalog</artifactId>
+		<version>0.0.0-SNAPSHOT</version>
+	</parent>
+
+	<artifactId>ep-catalog-projection-spring-data</artifactId>
+
+	<name>Catalog Projection Plugin :: Spring Data</name>
+
+	<dependencies>
+		<dependency>
+			<groupId>com.elasticpath</groupId>
+			<artifactId>ep-persistence-api</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.elasticpath</groupId>
+			<artifactId>ep-core</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.elasticpath</groupId>
+			<artifactId>ep-jta</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.elasticpath</groupId>
+			<artifactId>ep-test-application</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.elasticpath</groupId>
+			<artifactId>ep-catalog-projection-spi</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.elasticpath</groupId>
+			<artifactId>ep-catalog-message-handler</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.assertj</groupId>
+			<artifactId>assertj-core</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.data</groupId>
+			<artifactId>spring-data-jpa</artifactId>
+		</dependency>
+	</dependencies>
+
+	<build>
+		<plugins>
+			<plugin>
+				<artifactId>maven-checkstyle-plugin</artifactId>
+			</plugin>
+			<plugin>
+				<artifactId>maven-pmd-plugin</artifactId>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.openjpa</groupId>
+				<artifactId>openjpa-maven-plugin</artifactId>
+				<version>${org.apache.openjpa.version}</version>
+				<configuration>
+					<toolProperties>
+						<property>
+							<name>propertiesFile</name>
+							<value>${basedir}/src/main/resources/META-INF/jpa-persistence.xml</value>
+						</property>
+					</toolProperties>
+				</configuration>
+				<executions>
+					<execution>
+						<id>enhancer</id>
+						<phase>process-classes</phase>
+						<goals>
+							<goal>enhance</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
+</project>

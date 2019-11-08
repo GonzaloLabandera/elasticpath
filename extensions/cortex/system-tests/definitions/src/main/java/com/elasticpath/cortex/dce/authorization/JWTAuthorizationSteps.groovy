@@ -38,9 +38,17 @@ class JWTAuthorizationSteps {
 		String customerGuid = jwtTokenMap.getOrDefault("customer_guid", UUID.randomUUID().toString())
 		String firstName = jwtTokenMap.getOrDefault("first_name", "first_name")
 		String lastName = jwtTokenMap.getOrDefault("last_name", "last_name")
+
+		String jwtUserId = jwtTokenMap.getOrDefault("user-id", "user-id")
+		String jwtUserName = jwtTokenMap.getOrDefault("user-name", "user-name")
+		String jwtUserEmail = jwtTokenMap.getOrDefault("user-email", "user-emails")
+
+
+		String metadata = getMetadata(firstName, lastName, jwtUserId, jwtUserName, jwtUserEmail);
 		int expirationInSeconds = jwtTokenMap.get("expiration_in_seconds") == null ? 300 : Integer.parseInt(jwtTokenMap.get("expiration_in_seconds"))
 
-		String token = createToken(roleString, shopperGuid, scope, customerGuid, firstName, lastName, expirationInSeconds)
+		String token = createToken(roleString, shopperGuid, scope, customerGuid,
+				metadata, expirationInSeconds)
 
 		Map<String, String> headers = new HashMap<String, String>()
 		headers.put("Authorization", "Bearer " + token)
@@ -56,7 +64,7 @@ class JWTAuthorizationSteps {
 
 
 	static String createToken(final String roleString, final String shopperGuid, final String scope, final String customerGuid,
-							  final String firstName, final String lastName, final int expirationInSeconds) {
+							  final String metadata, final int expirationInSeconds) {
 		List<String> roles = roleString.split(",").collect {a -> a.trim().toUpperCase()}
 
 		Instant now = Instant.now()
@@ -72,15 +80,19 @@ class JWTAuthorizationSteps {
 				.claim(CLAIM_SCOPE, scope) // Multiple scopes are encoded into a single space delimited string
 				.claim(CLAIM_ROLES, roles) // Roles are represented by a json list
 				.claim(CLAIM_PROFILE, customerGuid)
-				.claim(CLAIM_METADATA, getMetadata(firstName, lastName))
+				.claim(CLAIM_METADATA, metadata)
 				.signWith(getPrivateKey())
 				.compact()
 	}
 
-	static String getMetadata(final String firstName, final String lastName) {
+	static String getMetadata(final String firstName, final String lastName,
+							  final String userId, final String userName, final String userEmail) {
 		String json = Json.createObjectBuilder()
 				.add("first-name", firstName)
 				.add("last-name", lastName)
+				.add("user-id", userId)
+				.add("user-email", userEmail)
+				.add("user-name", userName )
 				.build()
 				.toString()
 

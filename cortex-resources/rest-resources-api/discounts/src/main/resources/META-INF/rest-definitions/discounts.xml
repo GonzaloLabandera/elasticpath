@@ -5,9 +5,7 @@
 		<name>discounts</name>
 		<description>
 			<![CDATA[
-The Discounts resource provides the discount amount for a [cart][carts] or the discount amount for a [purchase][purchases].
-
-[carts]: #carts
+The Discounts resource provides the discount amount for a [cart](carts.md) or the discount amount for a [purchase](purchases.md).
 			]]>
 		</description>
 
@@ -15,9 +13,7 @@ The Discounts resource provides the discount amount for a [cart][carts] or the d
 			<name>discount-to-cart</name>
 			<description>
 				<![CDATA[
-Retrieve the discount amount applied to a cart [total][totals], excluding line item discounts.
-
-[totals]: #totals
+Retrieve the discount amount applied to a cart [total](totals.md), excluding line item discounts.
 				]]>
 			</description>
 			<rel>cart</rel>
@@ -37,9 +33,7 @@ Retrieve the discount amount applied to a cart [total][totals], excluding line i
 			<name>discount-to-purchase</name>
 			<description>
 				<![CDATA[
-Retrieve the discount amount applied to a [purchase][purchases].
-
-[purchases]: #purchases
+Retrieve the discount amount applied to a [purchase](purchases.md).
 				]]>
 			</description>
 			<rel>purchase</rel>
@@ -62,8 +56,7 @@ Retrieve the discount amount applied to a [purchase][purchases].
 				<name>discount</name>
 				<description>
 					<![CDATA[
-The amount of the discount. Similar to prices, discount is an array because the total may be a combination
-of amounts in multiple currencies, for example $20 CAD + 20000 points.
+The amount of the discount. Similar to prices, `discount` is an array because the total may be a combination of amounts in multiple currencies, for example $20 CAD + 20000 points.
 					]]>
 				</description>
 				<array>

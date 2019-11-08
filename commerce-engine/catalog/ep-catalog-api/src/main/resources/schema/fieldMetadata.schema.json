@@ -1,0 +1,97 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "title": "The schema for fieldMetadata projections.",
+  "type": "object",
+  "oneOf": [
+    {
+      "$ref": "definitions.schema.json#/deletedObject"
+    },
+    {
+      "properties": {
+        "identity": {
+          "$ref": "definitions.schema.json#/nameIdentity"
+        },
+        "modifiedDateTime": {
+          "description": "The date/time that the projection was modified.",
+          "type": "string"
+        },
+        "deleted": {
+          "description": "Indicates whether the projection is available.",
+          "type": "boolean",
+          "enum": [ false ]
+        },
+        "translations": {
+          "description": "Array of objects that have localized fields.",
+          "type": "array",
+          "items": [
+            {
+              "type": "object",
+              "properties": {
+                "language": {
+                  "description": "The language code and optional country code for the translation.",
+                  "type": "string"
+                },
+                "displayName": {
+                  "description": "The localized name for the group of fields.",
+                  "type": "string"
+                },
+                "fields": {
+                  "description": "List of fields in the order they should be presented to the user.",
+                  "type": "array",
+                  "items": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "name": {
+                          "description": "The non-localized field name.",
+                          "type": "string"
+                        },
+                        "displayName": {
+                          "description": "The localized field name.",
+                          "type": "string"
+                        },
+                        "dataType": {
+                          "description": "The field type as defined by the ModifierType extensible enum: ShortText, Decimal, Integer, Boolean, Date, DateTime, PickSingleOption, PickMultiOption, Email.",
+                          "type": "string"
+                        },
+                        "required": {
+                          "description": "Indicates whether the field is required.",
+                          "type": "boolean"
+                        },
+                        "maxSize": {
+                          "description": "Field maximum size.",
+                          "type": "integer"
+                        },
+                        "fieldValues": {
+                          "description": "Array of field values for PickSingleOption and PickMultiOption data types.",
+                          "$ref": "definitions.schema.json#/translatedValues"
+                        }
+                      },
+                      "required": [
+                        "name",
+                        "displayName",
+                        "dataType",
+                        "required"
+                      ]
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "language",
+                "displayName",
+                "fields"
+              ]
+            }
+          ]
+        }
+      },
+      "required": [
+        "identity",
+        "modifiedDateTime",
+        "translations",
+        "deleted"
+      ]
+    }
+  ]
+}

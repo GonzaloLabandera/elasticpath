@@ -42,7 +42,7 @@ public class ReadMoveToCartFormPrototype implements MoveToCartFormResource.Read 
 	public Single<LineItemEntity> onRead() {
 		return repository.findOne(wishlistLineItemIdentifier)
 				.map(entity -> LineItemEntity.builder()
-						.withQuantity(0)
+						.withQuantity(1)
 						.withConfiguration(entity.getConfiguration())
 						.build());
 	}

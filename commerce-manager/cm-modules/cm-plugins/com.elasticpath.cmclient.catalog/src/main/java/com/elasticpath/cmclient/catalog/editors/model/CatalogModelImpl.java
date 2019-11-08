@@ -8,7 +8,7 @@ import java.io.Serializable;
 
 import com.elasticpath.cmclient.core.editors.TableItems;
 import com.elasticpath.domain.attribute.Attribute;
-import com.elasticpath.domain.cartmodifier.CartItemModifierGroup;
+import com.elasticpath.domain.modifier.ModifierGroup;
 import com.elasticpath.domain.catalog.Brand;
 import com.elasticpath.domain.catalog.Catalog;
 import com.elasticpath.domain.catalog.CategoryType;
@@ -33,7 +33,7 @@ public class CatalogModelImpl implements Serializable, CatalogModel {
 
 	private TableItems<Attribute> attributeTableItems;
 
-	private TableItems<CartItemModifierGroup> cartItemModifierGroupTableItems;
+	private TableItems<ModifierGroup> cartItemModifierGroupTableItems;
 
 	private TableItems<ProductType> productTypeTableItems;
 
@@ -94,7 +94,7 @@ public class CatalogModelImpl implements Serializable, CatalogModel {
 	}
 
 	@Override
-	public TableItems<CartItemModifierGroup> getCartItemModifierGroupTableItems() {
+	public TableItems<ModifierGroup> getCartItemModifierGroupTableItems() {
 		return cartItemModifierGroupTableItems;
 	}
 

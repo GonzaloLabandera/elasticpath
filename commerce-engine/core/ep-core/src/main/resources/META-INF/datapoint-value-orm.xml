@@ -18,7 +18,7 @@
 		<named-query name="VERIFY_EXISTS_GIFT_CERTIFICATE_ATTRIBUTE">
 			<query>
 				SELECT 1
-				FROM CartItemModifierFieldImpl cimf
+				FROM ModifierFieldImpl cimf
 				WHERE cimf.code = ?1
 			</query>
 		</named-query>

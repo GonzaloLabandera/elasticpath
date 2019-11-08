@@ -29,18 +29,4 @@ class TotalsSteps {
 		Cart.total()
 	}
 
-	@Then('^the cart total does not include discounts$')
-	static void verifyCartTotalExcludesDiscount() {
-		//do nothing step added for business clarity
-	}
-
-	@Then('^the cost is the sum of each lineitem$')
-	static void verifyTotalCost() {
-		//do nothing step added for business clarity
-	}
-
-	@Then('^there is no lineitem in cart$')
-	static void verifyCartIsEmpty() {
-		//do nothing step added for business clarity
-	}
 }

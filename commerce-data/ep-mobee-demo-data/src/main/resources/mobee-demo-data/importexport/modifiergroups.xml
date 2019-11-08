@@ -1,0 +1,303 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<modifiergroups>
+	<modifiergroup>
+		<code>giftCertificate_mobee</code>
+		<displayname>
+			<value language="en">Gift Certificate</value>
+		</displayname>
+		<modifierfields>
+			<modifierfield>
+				<code>giftCertificate.senderName</code>
+				<type>ShortText</type>
+				<required>true</required>
+				<maxSize>255</maxSize>
+				<ordering>3</ordering>
+				<displayname>
+					<value language="en">Sender Name</value>
+				</displayname>
+				<options/>
+			</modifierfield>
+			<modifierfield>
+				<code>giftCertificate.message</code>
+				<type>ShortText</type>
+				<required>false</required>
+				<maxSize>500</maxSize>
+				<ordering>4</ordering>
+				<displayname>
+					<value language="en">Message</value>
+				</displayname>
+				<options/>
+			</modifierfield>
+			<modifierfield>
+				<code>giftCertificate.recipientEmail</code>
+				<type>Email</type>
+				<required>true</required>
+				<ordering>1</ordering>
+				<displayname>
+					<value language="en">Recipient Email</value>
+				</displayname>
+				<options/>
+			</modifierfield>
+			<modifierfield>
+				<code>giftCertificate.recipientName</code>
+				<type>ShortText</type>
+				<required>true</required>
+				<maxSize>255</maxSize>
+				<ordering>2</ordering>
+				<displayname>
+					<value language="en">Recipient Name</value>
+				</displayname>
+				<options/>
+			</modifierfield>
+		</modifierfields>
+	</modifiergroup>
+	<modifiergroup>
+		<code>allFieldTypes</code>
+		<displayname>
+			<value language="en">AllFieldTypes</value>
+		</displayname>
+		<modifierfields>
+			<modifierfield>
+				<code>allFieldTypes.boolean</code>
+				<type>Boolean</type>
+				<required>false</required>
+				<maxSize xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:nil="true"/>
+				<ordering>4</ordering>
+				<displayname>
+					<value language="en">Boolean</value>
+				</displayname>
+				<options/>
+			</modifierfield>
+			<modifierfield>
+				<code>allFieldTypes.integer</code>
+				<type>Integer</type>
+				<required>true</required>
+				<maxSize xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:nil="true"/>
+				<ordering>3</ordering>
+				<displayname>
+					<value language="en">Integer</value>
+				</displayname>
+				<options/>
+			</modifierfield>
+			<modifierfield>
+				<code>allFieldTypes.date</code>
+				<type>Date</type>
+				<required>true</required>
+				<maxSize xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:nil="true"/>
+				<ordering>6</ordering>
+				<displayname>
+					<value language="en">Date</value>
+				</displayname>
+				<options/>
+			</modifierfield>
+			<modifierfield>
+				<code>allFieldTypes.shortText</code>
+				<type>ShortText</type>
+				<required>true</required>
+				<maxSize>10</maxSize>
+				<ordering>1</ordering>
+				<displayname>
+					<value language="en">Short Text</value>
+				</displayname>
+				<options/>
+			</modifierfield>
+			<modifierfield>
+				<code>allFieldTypes.multiSelectOption</code>
+				<type>PickMultiOption</type>
+				<required>true</required>
+				<maxSize xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:nil="true"/>
+				<ordering>10</ordering>
+				<displayname>
+					<value language="en">Mulit Select Option</value>
+				</displayname>
+				<options>
+					<option>
+						<displayname>
+							<value language="en">Multi Value 1</value>
+						</displayname>
+						<value>multiValue1</value>
+						<ordering>1</ordering>
+					</option>
+					<option>
+						<displayname>
+							<value language="en">Multi Value 2</value>
+						</displayname>
+						<value>multiValue2</value>
+						<ordering>2</ordering>
+					</option>
+					<option>
+						<displayname>
+							<value language="en">Multi Value 3</value>
+						</displayname>
+						<value>multiValue3</value>
+						<ordering>3</ordering>
+					</option>
+				</options>
+			</modifierfield>
+			<modifierfield>
+				<code>allFieldTypes.decimal</code>
+				<type>Decimal</type>
+				<required>false</required>
+				<maxSize xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:nil="true"/>
+				<ordering>2</ordering>
+				<displayname>
+					<value language="en">Decimal</value>
+				</displayname>
+				<options/>
+			</modifierfield>
+			<modifierfield>
+				<code>allFieldTypes.email</code>
+				<type>Email</type>
+				<required>true</required>
+				<ordering>8</ordering>
+				<displayname>
+					<value language="en">Email</value>
+				</displayname>
+				<options/>
+			</modifierfield>
+			<modifierfield>
+				<code>allFieldTypes.dateTime</code>
+				<type>DateTime</type>
+				<required>false</required>
+				<maxSize xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:nil="true"/>
+				<ordering>7</ordering>
+				<displayname>
+					<value language="en">Date Time</value>
+				</displayname>
+				<options/>
+			</modifierfield>
+			<modifierfield>
+				<code>allFieldTypes.singleOption</code>
+				<type>PickSingleOption</type>
+				<required>false</required>
+				<maxSize xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:nil="true"/>
+				<ordering>9</ordering>
+				<displayname>
+					<value language="en">Single Option</value>
+				</displayname>
+				<options>
+					<option>
+						<displayname>
+							<value language="en">Single Value 1</value>
+						</displayname>
+						<value>singleValue1</value>
+						<ordering>1</ordering>
+					</option>
+					<option>
+						<displayname>
+							<value language="en">Single Value 2</value>
+						</displayname>
+						<value>singleValue2</value>
+						<ordering>2</ordering>
+					</option>
+					<option>
+						<displayname>
+							<value language="en">Single Value 3</value>
+						</displayname>
+						<value>singleValue3</value>
+						<ordering>3</ordering>
+					</option>
+				</options>
+			</modifierfield>
+		</modifierfields>
+	</modifiergroup>
+	<modifiergroup>
+		<code>fieldMetadataTest1</code>
+		<displayname>
+			<value language="en">fieldMetadataTest1En12345</value>
+			<value language="fr">fieldMetadataTest1Fr12345</value>
+		</displayname>
+		<modifierfields>
+			<modifierfield>
+				<code>fieldMetadataTest1Field1</code>
+				<type>ShortText</type>
+				<required>true</required>
+				<maxSize>10</maxSize>
+				<ordering>1</ordering>
+				<displayname>
+					<value language="en">fieldMetadataTest1Field1En12345</value>
+					<value language="fr">fieldMetadataTest1Field1Fr12345</value>
+				</displayname>
+				<options/>
+			</modifierfield>
+			<modifierfield>
+				<code>fieldMetadataTest1Field2</code>
+				<type>Decimal</type>
+				<required>false</required>
+				<maxSize xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:nil="true"/>
+				<ordering>2</ordering>
+				<displayname>
+					<value language="en">fieldMetadataTest1Field2En12345</value>
+					<value language="fr">fieldMetadataTest1Field2Fr12345</value>
+				</displayname>
+				<options/>
+			</modifierfield>
+			<modifierfield>
+				<code>fieldMetadataTest1Field3</code>
+				<type>PickMultiOption</type>
+				<required>false</required>
+				<maxSize xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:nil="true"/>
+				<ordering>3</ordering>
+				<displayname>
+					<value language="en">fieldMetadataTest1Field3En12345</value>
+					<value language="fr">fieldMetadataTest1Field3Fr12345</value>
+				</displayname>
+				<options>
+					<option>
+						<displayname>
+							<value language="en">fieldMetadataTest1Field3Option1En12345</value>
+							<value language="fr">fieldMetadataTest1Field3Option1Fr123456</value>
+						</displayname>
+						<value>fieldMetadataTest1Field3Option1</value>
+						<ordering>1</ordering>
+					</option>
+					<option>
+						<displayname>
+							<value language="en">fieldMetadataTest1Field3Option2En12345</value>
+							<value language="fr">fieldMetadataTest1Field3Option2Fr12345</value>
+						</displayname>
+						<value>fieldMetadataTest1Field3Option2</value>
+						<ordering>2</ordering>
+					</option>
+				</options>
+			</modifierfield>
+		</modifierfields>
+	</modifiergroup>
+
+	<modifiergroup>
+		<code>productTestGroup1</code>
+		<displayname>
+			<value language="en">productTestGroup1En</value>
+			<value language="fr">productTestGroup1Fr</value>
+		</displayname>
+		<modifierfields/>
+	</modifiergroup>
+
+	<modifiergroup>
+		<code>productTestGroup2</code>
+		<displayname>
+			<value language="en">productTestGroup2En</value>
+			<value language="fr">productTestGroup2Fr</value>
+		</displayname>
+		<modifierfields/>
+	</modifiergroup>
+	<modifiergroup>
+		<code>multicart</code>
+		<displayname>
+			<value language="en">Multi Cart Modifier Group.</value>
+		</displayname>
+		<modifierfields>
+			<modifierfield>
+				<code>name</code>
+				<type>ShortText</type>
+				<required>true</required>
+				<maxSize>255</maxSize>
+				<ordering>1</ordering>
+				<displayname>
+					<value language="en">Name</value>
+				</displayname>
+				<options/>
+			</modifierfield>
+		</modifierfields>
+	</modifiergroup>
+</modifiergroups>

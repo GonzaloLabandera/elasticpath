@@ -42,6 +42,6 @@ public class AspectJOSGiWeavingHook implements WeavingHook {
 	//TODO this info should be derived from aop.xml
 	private boolean shouldBeInstrumented(final String className) {
 		return className.contains("integration.epcommerce.repository")
-					&& className.endsWith("RepositoryImpl");
+					&& (className.endsWith("RepositoryImpl") || className.endsWith("StrategyImpl"));
 	}
 }

@@ -14,6 +14,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
 import javax.persistence.OptimisticLockException;
 
 import com.google.common.collect.ImmutableMap;
@@ -62,7 +63,6 @@ import com.elasticpath.plugin.payment.exceptions.PaymentGatewayException;
 import com.elasticpath.service.catalog.ProductSkuLookup;
 import com.elasticpath.service.customer.CustomerSessionService;
 import com.elasticpath.service.impl.AbstractEpPersistenceServiceImpl;
-import com.elasticpath.service.misc.FetchPlanHelper;
 import com.elasticpath.service.misc.TimeService;
 import com.elasticpath.service.order.IllegalReturnStateException;
 import com.elasticpath.service.order.OrderReturnOutOfDateException;
@@ -111,8 +111,6 @@ public class ReturnAndExchangeServiceImpl extends AbstractEpPersistenceServiceIm
 	private TimeService timeService;
 
 	private ProductSkuLookup productSkuLookup;
-
-	private FetchPlanHelper fetchPlanHelper;
 
 	private OrderService orderService;
 
@@ -166,16 +164,16 @@ public class ReturnAndExchangeServiceImpl extends AbstractEpPersistenceServiceIm
 		if (loadTuner == null) {
 			tuner = getBean(ContextIdNames.FETCH_GROUP_LOAD_TUNER);
 		}
-		OrderReturn orderReturn = null;
+
 		if (orderReturnUid <= 0) {
-			orderReturn = getBean(ContextIdNames.ORDER_RETURN);
-		} else {
-			tuner.addFetchGroup(FetchGroupConstants.ORDER_NOTES); //added to ensure that the Order's orderEvents field is loaded
-			fetchPlanHelper.configureFetchGroupLoadTuner(tuner);
-			orderReturn = getPersistentBeanFinder().get(ContextIdNames.ORDER_RETURN, orderReturnUid);
-			fetchPlanHelper.clearFetchPlan();
+			return getBean(ContextIdNames.ORDER_RETURN);
 		}
-		return orderReturn;
+
+		tuner.addFetchGroup(FetchGroupConstants.ORDER_NOTES); //added to ensure that the Order's orderEvents field is loaded
+
+		return getPersistentBeanFinder()
+			.withLoadTuners(tuner)
+			.get(ContextIdNames.ORDER_RETURN, orderReturnUid);
 	}
 
 	@Override
@@ -791,21 +789,18 @@ public class ReturnAndExchangeServiceImpl extends AbstractEpPersistenceServiceIm
 		final OrderCriterion orderCriterion = getBean(ContextIdNames.ORDER_CRITERION);
 		CriteriaQuery query = orderCriterion.getOrderReturnSearchCriteria(orderReturnSearchCriteria, ResultType.ENTITY);
 
-		List<OrderReturn> orderReturnList = null;
-
 		FetchGroupLoadTuner loadTuner = getBean(ContextIdNames.FETCH_GROUP_LOAD_TUNER);
 		loadTuner.addFetchGroup(FetchGroupConstants.ORDER_RETURN_INDEX);
-		fetchPlanHelper.configureFetchGroupLoadTuner(loadTuner);
 
 		if (query.getParameters().isEmpty()) {
-			orderReturnList = getPersistenceEngine().retrieve(query.getQuery());
-		} else {
-			orderReturnList = getPersistenceEngine().retrieve(query.getQuery(), query.getParameters().toArray());
+			return getPersistenceEngine()
+				.withLoadTuners(loadTuner)
+				.retrieve(query.getQuery());
 		}
 
-		fetchPlanHelper.clearFetchPlan();
-
-		return orderReturnList;
+		return getPersistenceEngine()
+			.withLoadTuners(loadTuner)
+			.retrieve(query.getQuery(), query.getParameters().toArray());
 	}
 
 	@Override
@@ -818,15 +813,16 @@ public class ReturnAndExchangeServiceImpl extends AbstractEpPersistenceServiceIm
 
 		FetchGroupLoadTuner loadTuner = getBean(ContextIdNames.FETCH_GROUP_LOAD_TUNER);
 		loadTuner.addFetchGroup(FetchGroupConstants.ORDER_RETURN_INDEX);
-		fetchPlanHelper.configureFetchGroupLoadTuner(loadTuner);
 
 		if (query.getParameters().isEmpty()) {
-			orderCount = getPersistenceEngine().retrieve(query.getQuery());
+			orderCount = getPersistenceEngine()
+				.withLoadTuners(loadTuner)
+				.retrieve(query.getQuery());
 		} else {
-			orderCount = getPersistenceEngine().retrieve(query.getQuery(), query.getParameters().toArray());
+			orderCount = getPersistenceEngine()
+				.withLoadTuners(loadTuner)
+				.retrieve(query.getQuery(), query.getParameters().toArray());
 		}
-
-		fetchPlanHelper.clearFetchPlan();
 
 		return orderCount.get(0);
 	}
@@ -990,10 +986,6 @@ public class ReturnAndExchangeServiceImpl extends AbstractEpPersistenceServiceIm
 
 	protected ProductSkuLookup getProductSkuLookup() {
 		return productSkuLookup;
-	}
-
-	public void setFetchPlanHelper(final FetchPlanHelper fetchPlanHelper) {
-		this.fetchPlanHelper = fetchPlanHelper;
 	}
 
 	public void setStoreService(final StoreService storeService) {

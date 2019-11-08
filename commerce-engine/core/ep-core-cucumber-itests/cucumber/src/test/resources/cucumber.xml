@@ -51,6 +51,10 @@ http://www.springframework.org/schema/context http://www.springframework.org/sch
 		</constructor-arg>
 	</bean>
 
+	<alias alias="readOnlyEntityManagerFactory" name="entityManagerFactory"/>
+
+	<alias alias="readOnlyDataSource" name="dataSource"/>
+
 	<bean id="testConfig" class="com.elasticpath.test.persister.TestConfig"
 		  factory-bean="testConfigFactory"
 		  factory-method="createTestConfig"/>

@@ -14,8 +14,8 @@ import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.elasticpath.domain.cartmodifier.CartItemModifierField;
 import com.elasticpath.domain.catalog.ProductSku;
+import com.elasticpath.domain.modifier.ModifierField;
 import com.elasticpath.domain.shoppingcart.ShoppingItem;
 import com.elasticpath.domain.shoppingcart.WishList;
 import com.elasticpath.repository.Repository;
@@ -25,7 +25,7 @@ import com.elasticpath.rest.definition.wishlists.WishlistLineItemEntity;
 import com.elasticpath.rest.definition.wishlists.WishlistLineItemIdentifier;
 import com.elasticpath.rest.form.SubmitResult;
 import com.elasticpath.rest.id.IdentifierPart;
-import com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder.CartItemModifiersRepository;
+import com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder.ModifiersRepository;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.item.ItemRepository;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.transform.ReactiveAdapter;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.wishlist.WishlistRepository;
@@ -44,7 +44,7 @@ public class WishlistLineItemEntityRepositoryImpl<E extends WishlistLineItemEnti
 
 	private WishlistRepository wishlistRepository;
 	private ItemRepository itemRepository;
-	private CartItemModifiersRepository cartItemModifiersRepository;
+	private ModifiersRepository modifiersRepository;
 	private ReactiveAdapter reactiveAdapter;
 
 	@Override
@@ -102,8 +102,8 @@ public class WishlistLineItemEntityRepositoryImpl<E extends WishlistLineItemEnti
 			lineItemConfigurationEntity = Single.just(LineItemConfigurationEntity.builder().build());
 		} else {
 			lineItemConfigurationEntity = reactiveAdapter
-					.fromServiceAsSingle(() -> cartItemModifiersRepository.findCartItemModifiersByProduct(productSku.getProduct()))
-					.map(cartItemModifierFields -> buildLineItemConfigurationEntity(fields, cartItemModifierFields));
+					.fromServiceAsSingle(() -> modifiersRepository.findModifiersByProduct(productSku.getProduct()))
+					.map(modifierFields -> buildLineItemConfigurationEntity(fields, modifierFields));
 		}
 		return lineItemConfigurationEntity.map(configuration -> WishlistLineItemEntity.builder()
 				.withItemId(itemId)
@@ -117,13 +117,13 @@ public class WishlistLineItemEntityRepositoryImpl<E extends WishlistLineItemEnti
 	 * Build the line item configuration entity.
 	 *
 	 * @param fields                 shopping item configuration fields
-	 * @param cartItemModifierFields cart item modifier fields
+	 * @param modifierFields cart item modifier fields
 	 * @return line item configuration entity
 	 */
 	protected LineItemConfigurationEntity buildLineItemConfigurationEntity(final Map<String, String> fields,
-																		   final List<CartItemModifierField> cartItemModifierFields) {
+																		   final List<ModifierField> modifierFields) {
 		LineItemConfigurationEntity.Builder builder = LineItemConfigurationEntity.builder();
-		cartItemModifierFields.forEach(field -> builder.addingProperty(field.getCode(), fields.get(field.getCode())));
+		modifierFields.forEach(field -> builder.addingProperty(field.getCode(), fields.get(field.getCode())));
 		return builder.build();
 	}
 
@@ -145,8 +145,8 @@ public class WishlistLineItemEntityRepositoryImpl<E extends WishlistLineItemEnti
 	}
 
 	@Reference
-	public void setCartItemModifiersRepository(final CartItemModifiersRepository cartItemModifiersRepository) {
-		this.cartItemModifiersRepository = cartItemModifiersRepository;
+	public void setModifiersRepository(final ModifiersRepository modifiersRepository) {
+		this.modifiersRepository = modifiersRepository;
 	}
 
 	@Reference

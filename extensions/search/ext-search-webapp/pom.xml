@@ -59,9 +59,25 @@
 					<configuration>
 						<path>${ep.search.contextUrl}</path>
 						<port>${ep.search.tomcat.port.http}</port>
-						<contextFile>${project.build.directory}/tomcatconf/context.xml</contextFile>
+						<contextFile>${project.build.directory}/${build.finalName}/META-INF/context.xml</contextFile>
 						<systemProperties>
 							<ep.search.default.url>${ep.search.url}</ep.search.default.url>
+							<epdb.username>${epdb.username}</epdb.username>
+							<epdb.password>${epdb.password}</epdb.password>
+							<epdb.jdbc.driver>${epdb.jdbc.driver}</epdb.jdbc.driver>
+							<epdb.data.source.factory>${epdb.data.source.factory}</epdb.data.source.factory>
+							<epdb.url>${epdb.url}</epdb.url>
+							<epdb.data.source.type>${epdb.data.source.type}</epdb.data.source.type>
+							<epdb.data.source.xa.factory>${epdb.data.source.xa.factory}</epdb.data.source.xa.factory>
+							<epdb.data.source.xa.type>${epdb.data.source.xa.type}</epdb.data.source.xa.type>
+							<epdb.validation.query>${epdb.validation.query}</epdb.validation.query>
+							<epdb.validation.interval>${epdb.validation.interval}</epdb.validation.interval>
+							<ep.tomcat.maxcachesize>${ep.tomcat.maxcachesize}</ep.tomcat.maxcachesize>
+							<ep.jms.factory>${ep.jms.factory}</ep.jms.factory>
+							<ep.jms.type>${ep.jms.type}</ep.jms.type>
+							<ep.jms.url>${ep.jms.url}</ep.jms.url>
+							<ep.jms.xa.factory>${ep.jms.xa.factory}</ep.jms.xa.factory>
+							<ep.jms.xa.type>${ep.jms.xa.type}</ep.jms.xa.type>
 						</systemProperties>
 					</configuration>
 					<dependencies>
@@ -197,11 +213,7 @@
 									<directory>${project.build.directory}/${project.build.finalName}/WEB-INF/solrHome</directory>
 									<targetPath>WEB-INF/solrHome</targetPath>
 								</resource>
-								<resource>
-									<directory>src/tomcat</directory>
-									<targetPath>META-INF</targetPath>
-									<filtering>true</filtering>
-								</resource>
+
 							</webResources>
 						</configuration>
 					</plugin>
@@ -231,11 +243,11 @@
 								<configuration>
 									<resources>
 										<resource>
-											<directory>src/tomcat</directory>
-											<filtering>true</filtering>
+											<directory>src/main/webapp/META-INF</directory>
+											<filtering>false</filtering>
 										</resource>
 									</resources>
-									<outputDirectory>${project.build.directory}/tomcatconf</outputDirectory>
+									<outputDirectory>${project.build.directory}/META-INF</outputDirectory>
 								</configuration>
 							</execution>
 						</executions>

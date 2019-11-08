@@ -99,6 +99,16 @@ public class SystemConfigurationDefinition {
 	}
 
 	/**
+	 * Verifies default value
+	 *
+	 * @param defaultValue expected number of records
+	 */
+	@And("^I should see (.+) as default value$")
+	public void verifyNumberOdDefinedValueRecords(final String defaultValue) {
+		systemConfigurationResultPane.verifyDefaultValue(defaultValue);
+	}
+
+	/**
 	 * Deletes record specified by Context/Value pair
 	 *
 	 * @param recordValues Map of record values

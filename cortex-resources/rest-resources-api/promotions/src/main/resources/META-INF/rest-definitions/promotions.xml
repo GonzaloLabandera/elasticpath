@@ -3,25 +3,23 @@
 	<family>
 		<name>promotions</name>
 		<description>
-			<![CDATA[
-Promotions are incentives offered to shoppers to promote the purchase of [items][items] in a store. A store's marketer creates promotions
+<![CDATA[
+Promotions are incentives offered to shoppers to promote the purchase of [items](items.md) in a store. A store's marketer creates promotions
 and defines a set of conditions that must be met before the promotion is applied to a given shopper. Promotions may trigger discounts or
-may trigger other incentives such as free [items][items]. When a promotion triggers a discount, the discounts are automatically applied to
-the item price, cart line item price, shipping option cost, line items total, cart total, and the order [total][totals].
+may trigger other incentives such as free [items](items.md).
+When a promotion triggers a discount, the discounts are automatically applied to the item price, cart line item price,
+shipping option cost, line items total, cart total, and the order [total](totals.md).
 
 Promotions are linked to a number of different resources:
 
-* [Promotions][promotions] - The promotions resource provides a list of all the promotions available for the store.
-* [Items][items] - Promotions are linked to items when a promotion exists for that item and the shopper is eligible to receive the promotion.
-* [Carts][carts] - Promotions are linked to carts when the contents of the shopper's cart meet the conditions of the promotion.
-* Cart line items - Promotions are linked to cart line items when the line item meets the conditions of the promotion.
-* Shipping options - Promotions are linked to shipping options on an order shipment when the option meets the conditions of the promotion.
-* [Purchases][purchases] - Promotions are linked to purchases when the purchase had promotions applied to it.
-* [Coupons][coupons] - Promotion are linked to a coupon when the coupon triggered the promotions to apply.
-
-[orderdeliveries]: #order-deliveries
-[coupons]: #coupons
-			]]>
+* [Promotions](promotions.md) - The promotions resource provides a list of all the promotions available for the store
+* [Items](items.md) - Promotions are linked to items when a promotion exists for that item and the shopper is eligible to receive the promotion
+* [Carts](carts.md) - Promotions are linked to carts when the contents of the shopper's cart meet the conditions of the promotion
+* [Cart line items](carts.md) - Promotions are linked to cart line items when the line item meets the conditions of the promotion
+* [Shipping options](shipments.md) - Promotions are linked to shipping options on an order shipment when the option meets the conditions of the promotion
+* [Purchases](purchases.md) - Promotions are linked to purchases when the purchase had promotions applied to it
+* [Coupons](coupons.md) - Promotion are linked to a coupon when the coupon triggered the promotions to apply
+]]>
 		</description>
 
 		<uri-part>

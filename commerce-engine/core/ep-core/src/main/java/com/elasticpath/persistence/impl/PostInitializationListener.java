@@ -115,6 +115,8 @@ public class PostInitializationListener implements LoadListener, AttachListener,
 				List<PostInitializationStrategy<? extends Persistable>> strategies =
 					new ArrayList<>(postInitStrategyIds.size());
 				for (String beanName : postInitStrategyIds) {
+					// TODO we have no examples of the usages of this class.  Therefore, we don't know
+					//  whether the getBean below should be prototype or singleton.
 					final PostInitializationStrategy<? extends Persistable> strategy =
 							getBeanFactory().getBean(beanName);
 					strategies.add(strategy);

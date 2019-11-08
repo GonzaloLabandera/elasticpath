@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns="http://java.sun.com/xml/ns/javaee"
+		 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		 xsi:schemaLocation="http://java.sun.com/xml/ns/javaee
+	     http://java.sun.com/xml/ns/javaee/web-app_4_0.xsd"
+		 version="3.0">
+
+	<listener>
+		<display-name>wiremock-startup-listener</display-name>
+		<listener-class>com.elasticpath.wiremock.servlet.ExtWireMockWebContextListener</listener-class>
+	</listener>
+
+	<context-param>
+		<param-name>WireMockFileSourceRoot</param-name>
+		<param-value>mocks/wiremock</param-value>
+	</context-param>
+
+	<context-param>
+		<param-name>verboseLoggingEnabled</param-name>
+		<param-value>false</param-value>
+	</context-param>
+
+  <context-param>
+    <param-name>transformerClasses</param-name>
+    <param-value>com.elasticpath.wiremock.examples.simple.DynamicSimpleDefinitionTransformer,com.elasticpath.wiremock.examples.jackson.DynamicJacksonResponseDefinitionTransformer,com.elasticpath.wiremock.examples.soap.DynamicSoapResponseDefinitionTransformer</param-value>
+  </context-param>
+
+  <servlet>
+		<servlet-name>wiremock-mock-service-handler-servlet</servlet-name>
+		<servlet-class>com.github.tomakehurst.wiremock.servlet.WireMockHandlerDispatchingServlet</servlet-class>
+		<init-param>
+			<param-name>RequestHandlerClass</param-name>
+			<param-value>com.github.tomakehurst.wiremock.http.StubRequestHandler</param-value>
+		</init-param>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>wiremock-mock-service-handler-servlet</servlet-name>
+		<url-pattern>/*</url-pattern>
+	</servlet-mapping>
+
+	<welcome-file-list>
+		<welcome-file>index.json</welcome-file>
+		<welcome-file>index.xml</welcome-file>
+		<welcome-file>index.html</welcome-file>
+		<welcome-file>index.txt</welcome-file>
+	</welcome-file-list>
+
+	<mime-mapping>
+		<extension>json</extension>
+		<mime-type>application/json</mime-type>
+	</mime-mapping>
+	<mime-mapping>
+		<extension>xml</extension>
+		<mime-type>application/xml</mime-type>
+	</mime-mapping>
+	<mime-mapping>
+		<extension>html</extension>
+		<mime-type>text/html</mime-type>
+	</mime-mapping>
+	<mime-mapping>
+		<extension>txt</extension>
+		<mime-type>text/plain</mime-type>
+	</mime-mapping>
+
+</web-app>

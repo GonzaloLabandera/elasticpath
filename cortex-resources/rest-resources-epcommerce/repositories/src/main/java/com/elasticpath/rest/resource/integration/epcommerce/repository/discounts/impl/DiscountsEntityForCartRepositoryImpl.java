@@ -39,7 +39,7 @@ public class DiscountsEntityForCartRepositoryImpl<E extends DiscountEntity, I ex
 	public Single<DiscountEntity> findOne(final DiscountForCartIdentifier identifier) {
 
 		String cartId = identifier.getCart().getCartId().getValue();
-		String scope = identifier.getCart().getScope().getValue();
+		String scope = identifier.getCart().getCarts().getScope().getValue();
 
 		Single<Money> subtotalDiscountMoney = getSubtotalDiscountMoney(scope, cartId);
 

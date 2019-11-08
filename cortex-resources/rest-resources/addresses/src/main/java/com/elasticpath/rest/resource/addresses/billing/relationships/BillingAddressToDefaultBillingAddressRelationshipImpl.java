@@ -6,6 +6,8 @@ package com.elasticpath.rest.resource.addresses.billing.relationships;
 import javax.inject.Inject;
 
 import io.reactivex.Observable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.elasticpath.repository.AliasRepository;
 import com.elasticpath.rest.definition.addresses.AddressIdentifier;
@@ -23,6 +25,8 @@ public class BillingAddressToDefaultBillingAddressRelationshipImpl implements De
 	private final BillingAddressesIdentifier billingAddressesIdentifier;
 
 	private final AliasRepository<DefaultBillingAddressIdentifier, AddressIdentifier> repository;
+
+	private static final Logger LOG = LoggerFactory.getLogger(BillingAddressToDefaultBillingAddressRelationshipImpl.class);
 
 	/**
 	 * Constructor.
@@ -46,6 +50,7 @@ public class BillingAddressToDefaultBillingAddressRelationshipImpl implements De
 		return repository.resolve(defaultBillingAddressIdentifier)
 				.toObservable()
 				.map(addressIdentifier -> defaultBillingAddressIdentifier)
+				.doOnError(throwable -> LOG.info("Could not find a default billing address."))
 				.onErrorResumeNext(Observable.empty());
 	}
 }

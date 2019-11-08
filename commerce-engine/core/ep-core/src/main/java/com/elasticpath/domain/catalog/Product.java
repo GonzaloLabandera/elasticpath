@@ -518,4 +518,10 @@ public interface Product extends Comparable<Product>, Entity, ObjectWithLocaleDe
 	 */
 	void validateRequiredAttributes(Set<Locale> allLocales);
 
+	/**
+	 * Get the product category of the product.
+	 * @param category category the {@link Category}
+	 * @return the product category.
+	 */
+	ProductCategory getProductCategory(Category category);
 }

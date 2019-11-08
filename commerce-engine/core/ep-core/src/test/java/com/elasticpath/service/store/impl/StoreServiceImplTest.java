@@ -9,6 +9,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
@@ -19,10 +20,13 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 
-import com.google.common.collect.ImmutableList;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
+import com.google.common.collect.ImmutableList;
+
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
@@ -38,8 +42,9 @@ import com.elasticpath.domain.store.StoreState;
 import com.elasticpath.domain.store.impl.StoreImpl;
 import com.elasticpath.persistence.api.FetchGroupLoadTuner;
 import com.elasticpath.persistence.api.FlushMode;
+import com.elasticpath.persistence.api.LoadTuner;
 import com.elasticpath.persistence.api.PersistenceEngine;
-import com.elasticpath.service.misc.FetchPlanHelper;
+import com.elasticpath.persistence.openjpa.util.FetchPlanHelper;
 import com.elasticpath.service.search.IndexNotificationService;
 import com.elasticpath.service.search.query.ProductSearchCriteria;
 import com.elasticpath.service.search.query.SearchCriteria;
@@ -68,6 +73,7 @@ public class StoreServiceImplTest {
 
 	private static final String STORE_WITH_USER_IN_USE = "STORE_WITH_USER_IN_USE";
 
+	@InjectMocks
 	private StoreServiceImpl storeServiceImpl;
 
 	private static final String PLACEHOLDER_FOR_LIST = "list";
@@ -91,15 +97,6 @@ public class StoreServiceImplTest {
 	 */
 	@Before
 	public void setUp() throws Exception {
-		setupElasticPath();
-
-		storeServiceImpl = new StoreServiceImpl();
-		storeServiceImpl.setPersistenceEngine(persistenceEngine);
-		storeServiceImpl.setFetchPlanHelper(fetchPlanHelper);
-		storeServiceImpl.setIndexNotificationService(indexNotificationService);
-	}
-
-	private void setupElasticPath() {
 		when(beanFactory.getBean(ContextIdNames.PRODUCT_SEARCH_CRITERIA)).thenReturn(new ProductSearchCriteria());
 	}
 
@@ -159,7 +156,7 @@ public class StoreServiceImplTest {
 			}
 
 			@Override
-			protected <T> T getBean(final String beanName) {
+			public <T> T getBean(final String beanName) {
 				return beanFactory.getBean(beanName);
 			}
 		};
@@ -173,7 +170,7 @@ public class StoreServiceImplTest {
 			}
 
 			@Override
-			protected <T> T getBean(final String beanName) {
+			public <T> T getBean(final String beanName) {
 				return beanFactory.getBean(beanName);
 			}
 		};
@@ -356,7 +353,6 @@ public class StoreServiceImplTest {
 			}
 		};
 		storeServiceImpl.setPersistenceEngine(persistenceEngine);
-		storeServiceImpl.setFetchPlanHelper(fetchPlanHelper);
 		storeServiceImpl.setIndexNotificationService(indexNotificationService);
 
 		assertThat(storeServiceImpl.getStore(uidpk)).isEqualTo(store);
@@ -377,7 +373,6 @@ public class StoreServiceImplTest {
 			}
 		};
 		storeServiceImpl.setPersistenceEngine(persistenceEngine);
-		storeServiceImpl.setFetchPlanHelper(fetchPlanHelper);
 		storeServiceImpl.setIndexNotificationService(indexNotificationService);
 
 		assertThat(storeServiceImpl.getStore(nonExistUid)).isNull();
@@ -394,7 +389,7 @@ public class StoreServiceImplTest {
 		storeServiceImpl = new StoreServiceImpl() {
 			@SuppressWarnings("unchecked")
 			@Override
-			protected <T> T getBean(final String beanName) {
+			public <T> T getBean(final String beanName) {
 				return (T) store;
 			}
 		};
@@ -530,21 +525,24 @@ public class StoreServiceImplTest {
 	public void testFindAllStores() {
 		final List<Store> storeList = new ArrayList<>();
 		doReturn(storeList).when(persistenceEngine).retrieveByNamedQuery(FIND_ALL_STORES);
+		when(persistenceEngine.withLoadTuners((LoadTuner[]) null)).thenReturn(persistenceEngine);
+
 		assertThat(storeServiceImpl.findAllStores()).isEqualTo(storeList);
+
 		verify(persistenceEngine).retrieveByNamedQuery(FIND_ALL_STORES);
-		verify(fetchPlanHelper).configureFetchGroupLoadTuner(null);
-		verify(fetchPlanHelper).clearFetchPlan();
+		verifyZeroInteractions(fetchPlanHelper);
 
 		reset(persistenceEngine, fetchPlanHelper);
 
 		// make sure the query returns something seemingly valid
 		final Store store = mock(Store.class);
 		doReturn(storeList).when(persistenceEngine).retrieveByNamedQuery(FIND_ALL_STORES);
+		when(persistenceEngine.withLoadTuners((LoadTuner[]) null)).thenReturn(persistenceEngine);
+
 		storeList.add(store);
 		assertThat(storeServiceImpl.findAllStores()).isEqualTo(storeList);
 		verify(persistenceEngine).retrieveByNamedQuery(FIND_ALL_STORES);
-		verify(fetchPlanHelper).configureFetchGroupLoadTuner(null);
-		verify(fetchPlanHelper).clearFetchPlan();
+		verifyZeroInteractions(fetchPlanHelper);
 	}
 
 	/**
@@ -554,21 +552,23 @@ public class StoreServiceImplTest {
 	@Test
 	public void testStoreInUse() {
 		final long storeUid = 1L;
-		when(persistenceEngine.retrieveByNamedQuery(STORE_WITH_ORDER_IN_USE, storeUid)).thenReturn(new ArrayList<>());
-		when(persistenceEngine.retrieveByNamedQuery(STORE_WITH_USER_IN_USE, storeUid)).thenReturn(new ArrayList<>());
+		when(persistenceEngine.retrieveByNamedQuery("STORE_WITH_ORDER_IN_USE", storeUid)).thenReturn(new ArrayList<>());
+		when(persistenceEngine.retrieveByNamedQuery("STORE_WITH_USER_IN_USE", storeUid)).thenReturn(new ArrayList<>());
 		when(persistenceEngine.retrieveByNamedQuery("STORE_WITH_IMPORTJOB_IN_USE", storeUid)).thenReturn(new ArrayList<>());
 		when(persistenceEngine.retrieveByNamedQuery("STORE_WITH_SHIPPING_SERVICE_LEVEL_IN_USE", storeUid)).thenReturn(new ArrayList<>());
 		when(persistenceEngine.retrieveByNamedQuery("STORE_WITH_STORE_ASSOCIATION_IN_USE", storeUid)).thenReturn(new ArrayList<>());
 		when(persistenceEngine.retrieveByNamedQuery("STORE_WITH_PROMOTION_IN_USE", storeUid)).thenReturn(new ArrayList<>());
+		when(persistenceEngine.retrieveByNamedQuery("STORE_WITH_CUSTOMER_ATTRIBUTE_IN_USE", storeUid)).thenReturn(new ArrayList<>());
 
 		assertThat(storeServiceImpl.storeInUse(storeUid)).isFalse();
 
-		verify(persistenceEngine).retrieveByNamedQuery(STORE_WITH_ORDER_IN_USE, storeUid);
-		verify(persistenceEngine).retrieveByNamedQuery(STORE_WITH_USER_IN_USE, storeUid);
+		verify(persistenceEngine).retrieveByNamedQuery("STORE_WITH_ORDER_IN_USE", storeUid);
+		verify(persistenceEngine).retrieveByNamedQuery("STORE_WITH_USER_IN_USE", storeUid);
 		verify(persistenceEngine).retrieveByNamedQuery("STORE_WITH_IMPORTJOB_IN_USE", storeUid);
 		verify(persistenceEngine).retrieveByNamedQuery("STORE_WITH_SHIPPING_SERVICE_LEVEL_IN_USE", storeUid);
 		verify(persistenceEngine).retrieveByNamedQuery("STORE_WITH_STORE_ASSOCIATION_IN_USE", storeUid);
 		verify(persistenceEngine).retrieveByNamedQuery("STORE_WITH_PROMOTION_IN_USE", storeUid);
+		verify(persistenceEngine).retrieveByNamedQuery("STORE_WITH_CUSTOMER_ATTRIBUTE_IN_USE", storeUid);
 
 		reset(persistenceEngine);
 
@@ -608,6 +608,7 @@ public class StoreServiceImplTest {
 		final FetchGroupLoadTuner loadTuner = mock(FetchGroupLoadTuner.class);
 		final List<Store> stores = ImmutableList.of(store);
 		doReturn(stores).when(persistenceEngine).retrieveByNamedQuery(FIND_ALL_STORES);
+		when(persistenceEngine.withLoadTuners(loadTuner)).thenReturn(persistenceEngine);
 
 		assertThat(storeServiceImpl.findAllStores(loadTuner)).isEqualTo(stores);
 
@@ -616,8 +617,7 @@ public class StoreServiceImplTest {
 		assertThat(storeServiceImpl.findAllStores(loadTuner)).isEmpty();
 
 		verify(persistenceEngine, times(2)).retrieveByNamedQuery(FIND_ALL_STORES);
-		verify(fetchPlanHelper, times(2)).configureFetchGroupLoadTuner(loadTuner);
-		verify(fetchPlanHelper, times(2)).clearFetchPlan();
+		verify(persistenceEngine, times(2)).withLoadTuners(loadTuner);
 	}
 
 	/**
@@ -629,11 +629,11 @@ public class StoreServiceImplTest {
 		final List<Store> completeStores = Collections.emptyList();
 		doReturn(completeStores).when(persistenceEngine).retrieveByNamedQuery(FIND_ALL_COMPLETE_STORES, StoreState.UNDER_CONSTRUCTION,
 				StoreState.RESTRICTED);
+		when(persistenceEngine.withLoadTuners((LoadTuner[]) null)).thenReturn(persistenceEngine);
 
 		assertThat(storeServiceImpl.findAllCompleteStores()).isEqualTo(completeStores);
 		verify(persistenceEngine).retrieveByNamedQuery(FIND_ALL_COMPLETE_STORES, StoreState.UNDER_CONSTRUCTION, StoreState.RESTRICTED);
-		verify(fetchPlanHelper).configureFetchGroupLoadTuner(null);
-		verify(fetchPlanHelper).clearFetchPlan();
+		verify(persistenceEngine).withLoadTuners((LoadTuner[]) null);
 	}
 
 	/**
@@ -646,12 +646,12 @@ public class StoreServiceImplTest {
 		final FetchGroupLoadTuner loadTuner = mock(FetchGroupLoadTuner.class);
 		doReturn(completeStores).when(persistenceEngine).retrieveByNamedQuery(FIND_ALL_COMPLETE_STORES, StoreState.UNDER_CONSTRUCTION,
 				StoreState.RESTRICTED);
+		when(persistenceEngine.withLoadTuners(loadTuner)).thenReturn(persistenceEngine);
 
 		assertThat(storeServiceImpl.findAllCompleteStores(loadTuner)).isEqualTo(completeStores);
 
 		verify(persistenceEngine).retrieveByNamedQuery(FIND_ALL_COMPLETE_STORES, StoreState.UNDER_CONSTRUCTION, StoreState.RESTRICTED);
-		verify(fetchPlanHelper).configureFetchGroupLoadTuner(loadTuner);
-		verify(fetchPlanHelper).clearFetchPlan();
+		verify(persistenceEngine).withLoadTuners(loadTuner);
 	}
 
 	/**

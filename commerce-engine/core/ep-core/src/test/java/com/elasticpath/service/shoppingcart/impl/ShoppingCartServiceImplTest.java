@@ -74,7 +74,7 @@ public class ShoppingCartServiceImplTest extends AbstractEPServiceTestCase {
 			allowing(timeService).getCurrentTime(); will(returnValue(new Date()));
 		} });
 
-		shoppingCartServiceImpl.setFetchPlanHelper(getFetchPlanHelper());
+		shoppingCartServiceImpl.setFetchPlanHelper(getMockFetchPlanHelper());
 		shoppingCartServiceImpl.setShopperService(shopperService);
 		shoppingCartServiceImpl.setStoreService(storeService);
 		shoppingCartServiceImpl.setTimeService(timeService);
@@ -99,9 +99,6 @@ public class ShoppingCartServiceImplTest extends AbstractEPServiceTestCase {
 
 				oneOf(getMockPersistenceEngine()).saveOrUpdate(with(same(cart.getShoppingCartMemento())));
 				will(returnValue(updatedShoppingCartMemento));
-
-				atLeast(1).of(getMockFetchPlanHelper()).configureLoadTuner(with(aNull(LoadTuner.class)));
-				oneOf(getMockFetchPlanHelper()).clearFetchPlan();
 			}
 		});
 
@@ -130,9 +127,6 @@ public class ShoppingCartServiceImplTest extends AbstractEPServiceTestCase {
 
 				oneOf(getMockPersistenceEngine()).saveOrUpdate(with(same(cart.getShoppingCartMemento())));
 				will(returnValue(updatedShoppingCartMemento));
-
-				atLeast(1).of(getMockFetchPlanHelper()).configureLoadTuner(with(aNull(LoadTuner.class)));
-				oneOf(getMockFetchPlanHelper()).clearFetchPlan();
 			}
 		});
 		shoppingCartServiceImpl.saveOrUpdate(cart);
@@ -157,9 +151,6 @@ public class ShoppingCartServiceImplTest extends AbstractEPServiceTestCase {
 
 				oneOf(getMockPersistenceEngine()).saveOrUpdate(with(same(cart.getShoppingCartMemento())));
 				will(returnValue(updatedShoppingCartMemento));
-
-				atLeast(1).of(getMockFetchPlanHelper()).configureLoadTuner(with(aNull(LoadTuner.class)));
-				oneOf(getMockFetchPlanHelper()).clearFetchPlan();
 			}
 		});
 		shoppingCartServiceImpl.saveOrUpdate(cart);
@@ -181,8 +172,7 @@ public class ShoppingCartServiceImplTest extends AbstractEPServiceTestCase {
 
 				allowing(shopperService).get(shopper.getUidPk()); will(returnValue(shopper));
 
-				allowing(getMockFetchPlanHelper()).configureLoadTuner(with(aNull(LoadTuner.class)));
-				oneOf(getMockFetchPlanHelper()).clearFetchPlan();
+				oneOf(getMockFetchPlanHelper()).setLoadTuners((LoadTuner[]) null);
 
 				allowing(storeService).findStoreWithCode(store.getCode()); will(returnValue(store));
 			}
@@ -216,8 +206,7 @@ public class ShoppingCartServiceImplTest extends AbstractEPServiceTestCase {
 				allowing(shopperService).get(shopper.getUidPk()); will(returnValue(shopper));
 				allowing(storeService).findStoreWithCode(store.getCode()); will(returnValue(store));
 
-				atLeast(1).of(getMockFetchPlanHelper()).configureLoadTuner(with(aNull(LoadTuner.class)));
-				oneOf(getMockFetchPlanHelper()).clearFetchPlan();
+				atLeast(1).of(getMockFetchPlanHelper()).setLoadTuners((LoadTuner[]) null);
 			}
 		});
 
@@ -237,14 +226,13 @@ public class ShoppingCartServiceImplTest extends AbstractEPServiceTestCase {
 		context.checking(new Expectations() {
 			{
 				allowing(getMockPersistenceEngine()).retrieveByNamedQuery(
-						with(ShoppingCartServiceImpl.ACTIVE_SHOPPING_CART_FIND_BY_SHOPPER_UID), with(any(Object[].class)),
+						with(ShoppingCartServiceImpl.DEFAULT_SHOPPING_CART_FIND_BY_SHOPPER_UID), with(any(Object[].class)),
 					with(0), with(1));
 				will(returnValue(Collections.singletonList(memento)));
 
 				allowing(shopperService).get(shopper.getUidPk()); will(returnValue(shopper));
 
-				allowing(getMockFetchPlanHelper()).configureLoadTuner(with(aNull(LoadTuner.class)));
-				oneOf(getMockFetchPlanHelper()).clearFetchPlan();
+				oneOf(getMockPersistenceEngine()).withLoadTuners((LoadTuner[]) null);
 
 				allowing(storeService).findStoreWithCode(store.getCode()); will(returnValue(store));
 			}
@@ -293,9 +281,6 @@ public class ShoppingCartServiceImplTest extends AbstractEPServiceTestCase {
 
 				oneOf(getMockPersistenceEngine()).saveOrUpdate(with(same(cart.getShoppingCartMemento())));
 				will(returnValue(updatedShoppingCartMemento));
-
-				allowing(getMockFetchPlanHelper()).configureLoadTuner(with(aNull(LoadTuner.class)));
-				oneOf(getMockFetchPlanHelper()).clearFetchPlan();
 			}
 		});
 

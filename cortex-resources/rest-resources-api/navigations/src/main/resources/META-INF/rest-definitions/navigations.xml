@@ -5,13 +5,11 @@
 		<name>navigations</name>
 		<description>
 			<![CDATA[
-####Entry Point: /navigations/{scope}
+**Entry Point:** `/navigations/{scope}`
 
 Navigation nodes organize your store's catalogs by providing containers to group related items into. Each navigation node
-can contain details (attributes), any number of [items][items], and other child nodes. Your company's marketers create these navigation nodes, also known as categories, using the Commerce Manager. You may need
+can contain details (attributes), any number of [items](items.md), and other child nodes. Your company's marketers create these navigation nodes, also known as categories, using the Commerce Manager. You may need
 to coordinate with your marketers for how the navigation nodes should be used in your client application.
-
-[items]: #items
 ]]></description>
 
 		<uri-part>
@@ -86,8 +84,7 @@ to coordinate with your marketers for how the navigation nodes should be used in
 				<name>details</name>
 				<description>
 					<![CDATA[
-An array of the navigation node's attributes. Attributes describe the details of the navigation node, like the node's name,
-description, associated subcategories, etc. Attributes are different each store. To get a list of navigation attributes, you'll need to coordinate with your store marketer who creates these navigation nodes and attributes.
+An array of the navigation node's attributes. Attributes describe the details of the navigation node, like the node's name, description, associated subcategories, etc. Attributes are different for each store. To get a list of navigation attributes, you'll need to coordinate with your store marketer who creates these navigation nodes and attributes.
 					]]>
 				</description>
 				<array>

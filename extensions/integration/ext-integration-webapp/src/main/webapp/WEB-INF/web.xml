@@ -143,11 +143,32 @@
 		<res-auth>Container</res-auth>
 	</resource-ref>
 
+	<resource-ref>
+		<description>XA DB Connection</description>
+		<res-ref-name>jdbc/epjndi-xa</res-ref-name>
+		<res-type>javax.sql.XADataSource</res-type>
+		<res-auth>Container</res-auth>
+	</resource-ref>
+
+	<resource-ref>
+		<description>Read-Only DB Connection</description>
+		<res-ref-name>jdbc/epjndiReadOnly</res-ref-name>
+		<res-type>javax.sql.DataSource</res-type>
+		<res-auth>Container</res-auth>
+	</resource-ref>
+
 	<!-- JMS Configuration -->
 	<resource-ref>
 		<description>JMS Connection Factory</description>
 		<res-ref-name>jms/JMSConnectionFactory</res-ref-name>
 		<res-type>javax.jms.ConnectionFactory</res-type>
+		<res-auth>Container</res-auth>
+	</resource-ref>
+
+	<resource-ref>
+		<description>XA JMS Connection Factory</description>
+		<res-ref-name>jms/JMSConnectionFactory-xa</res-ref-name>
+		<res-type>javax.jms.XAConnectionFactory</res-type>
 		<res-auth>Container</res-auth>
 	</resource-ref>
 
@@ -158,5 +179,27 @@
 		<env-entry-value>integration</env-entry-value>
 		<env-entry-type>java.lang.String</env-entry-type>
 	</env-entry>
+
+	<!--Camel Servlet -->
+	<servlet>
+		<servlet-name>CamelServlet</servlet-name>
+		<display-name>Camel Http Transport Servlet</display-name>
+		<servlet-class>org.apache.camel.component.servlet.CamelHttpTransportServlet</servlet-class>
+		<load-on-startup>1</load-on-startup>
+	</servlet>
+
+	<!-- Camel Servlet mapping -->
+	<servlet-mapping>
+		<servlet-name>CamelServlet</servlet-name>
+		<url-pattern>/api/*</url-pattern>
+	</servlet-mapping>
+	<filter>
+		<filter-name>apiEtagFilter</filter-name>
+		<filter-class>org.springframework.web.filter.ShallowEtagHeaderFilter</filter-class>
+	</filter>
+	<filter-mapping>
+		<filter-name>apiEtagFilter</filter-name>
+		<url-pattern>/api/*</url-pattern>
+	</filter-mapping>
 
 </web-app>

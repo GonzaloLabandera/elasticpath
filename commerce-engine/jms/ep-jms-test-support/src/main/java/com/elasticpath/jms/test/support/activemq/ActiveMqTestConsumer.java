@@ -4,6 +4,7 @@
 
 package com.elasticpath.jms.test.support.activemq;
 
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
@@ -16,6 +17,7 @@ import javax.jms.MessageConsumer;
 import javax.jms.Session;
 import javax.jms.TextMessage;
 
+import org.apache.activemq.command.ActiveMQBytesMessage;
 import org.apache.log4j.Logger;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -118,6 +120,36 @@ public class ActiveMqTestConsumer implements JmsTestConsumer {
 			LOGGER.debug(e.getMessage());
 		}
 		return txtMessageList;
+	}
+
+	@Override
+	public List<JSONObject> readByte() {
+		return readByte(readTimeout);
+	}
+
+	@Override
+	public List<JSONObject> readByte(final long readTimeout) {
+
+		List<JSONObject> jsonObjectList = new ArrayList<>();
+
+		try {
+			List<Message> messages = getMessages(readTimeout);
+			for (Message message : messages) {
+				ActiveMQBytesMessage byteMessage = (ActiveMQBytesMessage) message;
+				byte[] byteArr = new byte[(int) byteMessage.getBodyLength()];
+				byteMessage.readBytes(byteArr);
+				String msg = new String(byteArr, StandardCharsets.UTF_8);
+				JSONParser parser = new JSONParser();
+				Object obj = parser.parse(msg);
+				JSONObject jsonObject = (JSONObject) obj;
+				jsonObjectList.add(jsonObject);
+				LOGGER.debug("jsonObject: " + jsonObject);
+			}
+
+		} catch (Exception e) {
+			LOGGER.debug(e.getMessage());
+		}
+		return jsonObjectList;
 	}
 
 	private List<Message> getMessages(final long readTimeout) {

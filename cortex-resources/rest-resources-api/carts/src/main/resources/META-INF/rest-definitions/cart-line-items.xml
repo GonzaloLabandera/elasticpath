@@ -3,22 +3,11 @@
 
 	<family>
 		<name>carts</name>
-		<description>
-			<![CDATA[
-A cart's line items is a collection of [items][items] that have been added to a cart. A line item can have one or more of the same [items][items] in it.
-For example, one line item can have seven Rocker T-Shirt or a single Rocker T-Shirt, but it won't have one Rocker T-Shirt and a song track. The song
-track and T-shirt would be in separate line items.
-			]]>
-		</description>
 
 		<uri-part>
 			<name>line-item-id</name>
 			<description>
-				<![CDATA[
-The line item identifier. This ID is a unique number assigned by Cortex API when the [item][items]is added to a cart.
-
-[items]: #items
-				]]>
+				<![CDATA[The line item identifier. This ID is a unique number assigned by Cortex API when the [item](items.md)is added to a cart.]]>
 			</description>
 			<string/>
 		</uri-part>
@@ -40,7 +29,8 @@ The line item identifier. This ID is a unique number assigned by Cortex API when
 		<resource>
 			<name>dependent-line-items</name>
 			<description><![CDATA[A collection of a line item's dependent line items.
-			If item B is dependant on item A, and item A is removed from the cart, item B must be removed from the cart.]]></description>
+If item B is dependant on item A, and item A is removed from the cart, item B must be removed from the cart.]]>
+			</description>
 			<uri>{line-item}/dependents</uri>
 			<list-of>carts.line-item</list-of>
 		</resource>

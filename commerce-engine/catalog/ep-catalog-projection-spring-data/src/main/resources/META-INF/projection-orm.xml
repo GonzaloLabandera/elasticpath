@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<entity-mappings xmlns="http://java.sun.com/xml/ns/persistence/orm" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+				 xsi:schemaLocation="http://java.sun.com/xml/ns/persistence/orm http://java.sun.com/xml/ns/persistence/orm_2_0.xsd" version="2.0">
+
+	<entity class="com.elasticpath.catalog.plugin.entity.ProjectionEntity">
+		<named-query name="FIND_ALL_BY_TYPE_AND_CODE_AND_STORE">
+			<query>
+				SELECT p
+				FROM ProjectionEntity p
+				WHERE p.projectionId.type = ?1 AND p.projectionId.code = ?2 AND p.projectionId.store = ?3
+				ORDER BY p.projectionId.code
+			</query>
+		</named-query>
+		<named-query name="FIND_ALL_BY_TYPE_AND_CODE">
+			<query>
+				SELECT p
+				FROM ProjectionEntity p
+				WHERE p.projectionId.type = ?1 AND p.projectionId.code = ?2
+				ORDER BY p.projectionId.store
+			</query>
+		</named-query>
+
+		<named-query name="FIND_ALL_BY_TYPE_AND_CODE_NOT_DELETED">
+			<query>
+				SELECT p
+				FROM ProjectionEntity p
+				WHERE p.projectionId.type = ?1 AND p.projectionId.code = ?2 AND p.deleted = FALSE
+				ORDER BY p.projectionId.store
+			</query>
+		</named-query>
+		<named-query name="FIND_ALL_BY_TYPE_AND_STORE_WITH_PAGINATION">
+			<query>
+				SELECT p
+				FROM ProjectionEntity p
+				WHERE p.projectionId.type = ?1
+				AND p.projectionId.store = ?2
+				AND p.projectionId.code > ?3
+				ORDER BY p.projectionId.code
+			</query>
+		</named-query>
+		<named-query name="FIND_ALL_BY_TYPE_AND_STORE_WITH_PAGINATION_AND_MODIFIED">
+			<query>
+				SELECT p
+				FROM ProjectionEntity p
+				WHERE p.projectionId.type = ?1
+				AND p.projectionId.store = ?2
+				AND p.projectionId.code > ?3
+				AND p.projectionDateTime > ?4
+				ORDER BY p.projectionId.code
+			</query>
+		</named-query>
+		<named-query name="FIND_LATEST_PROJECTIONS_WITH_CODES_FROM_LIST">
+			<query>
+				SELECT p
+				FROM ProjectionEntity p
+				WHERE p.projectionId.type = ?1 AND p.projectionId.store = ?2 AND p.projectionId.code IN ( :list )
+			</query>
+		</named-query>
+		<named-query name="FIND_LATEST_PROJECTIONS_WITH_CODES_FROM_LIST_FOR_ALL_STORES">
+			<query>
+				SELECT p
+				FROM ProjectionEntity p
+				WHERE p.projectionId.type = ?1 AND p.projectionId.code IN ( :list )
+			</query>
+		</named-query>
+		<named-query name="FIND_NEAREST_EXPIRED_TIME">
+			<query>
+				SELECT min(p.disableDateTime)
+				FROM ProjectionEntity p
+				WHERE p.disableDateTime > ?1 and p.disableDateTime IS NOT NULL
+			</query>
+		</named-query>
+	</entity>
+</entity-mappings>

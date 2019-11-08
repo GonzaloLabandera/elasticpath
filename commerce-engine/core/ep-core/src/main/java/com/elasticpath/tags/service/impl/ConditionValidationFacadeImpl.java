@@ -63,8 +63,9 @@ public class ConditionValidationFacadeImpl implements
 	public ValidationResult validate(final Condition condition, final Object newValue) throws IllegalArgumentException {
 		
 		isValidConditionForArgument(condition);
-		
-		final Condition conditionWithNewValue = new Condition(condition.getTagDefinition(), condition.getOperator(), newValue);
+
+		final Condition conditionWithNewValue = new Condition(condition.getTagDefinition(), condition.getTagDefinitionString(),
+				condition.getOperator(), newValue);
 		
 		return validate(conditionWithNewValue);
 	}

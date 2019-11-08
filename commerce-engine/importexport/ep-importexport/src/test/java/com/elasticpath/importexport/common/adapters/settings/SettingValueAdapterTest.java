@@ -12,6 +12,7 @@ import org.junit.Rule;
 import org.junit.Test;
 
 import com.elasticpath.commons.beanframework.BeanFactory;
+import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.importexport.common.dto.settings.DefinedValueDTO;
 import com.elasticpath.settings.domain.SettingValue;
 import com.elasticpath.settings.domain.impl.SettingValueImpl;
@@ -91,7 +92,7 @@ public class SettingValueAdapterTest {
 	@Test
 	public void testCreateDomainObjct() {
 		context.checking(new Expectations() { {
-			oneOf(mockBeanFactory).getBean("settingValue"); will(returnValue(new SettingValueImpl()));
+			oneOf(mockBeanFactory).getPrototypeBean(ContextIdNames.SETTING_VALUE, SettingValue.class); will(returnValue(new SettingValueImpl()));
 		} });
 		assertEquals(SettingValueImpl.class, settingValueAdapter.createDomainObject().getClass());
 	}

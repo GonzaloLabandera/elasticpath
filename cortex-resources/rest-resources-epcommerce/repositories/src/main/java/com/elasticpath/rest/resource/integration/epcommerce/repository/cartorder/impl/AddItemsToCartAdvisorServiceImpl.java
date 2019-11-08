@@ -37,8 +37,8 @@ public class AddItemsToCartAdvisorServiceImpl implements AddItemsToCartAdvisorSe
 	}
 
 	@Override
-	public Observable<Message> validateEmptyCart() {
-		return shoppingCartRepository.getDefaultShoppingCart()
+	public Observable<Message> validateEmptyCart(final String cartGuid) {
+		return shoppingCartRepository.getShoppingCart(cartGuid)
 				.flatMapObservable(this::isCartEmpty);
 	}
 

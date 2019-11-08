@@ -19,7 +19,7 @@ public final class PriceListManagerImageRegistry extends AbstractImageRegistry {
 	/**
 	 * Select PL image.
 	 */
-	public static final ImageDescriptor IMAGE_PRICE_LIST = getImageDescriptor(PLUGIN_ID, "price-list_default_22.png"); //$NON-NLS-1$
+	public static final ImageDescriptor IMAGE_PRICE_LIST = getImageDescriptor(PLUGIN_ID, "empty_1x1.png"); //$NON-NLS-1$
 	/**
 	 * Select PL add image.
 	 */
@@ -37,7 +37,7 @@ public final class PriceListManagerImageRegistry extends AbstractImageRegistry {
 	 * Select PLA image.
 	 */
 	public static final ImageDescriptor IMAGE_PRICE_LIST_ASSIGN =
-		getImageDescriptor(PLUGIN_ID, "price-list-assignment_default_22.png"); //$NON-NLS-1$
+		getImageDescriptor(PLUGIN_ID, "empty_1x1.png"); //$NON-NLS-1$
 	/**
 	 * Select PLA add image.
 	 */
@@ -73,7 +73,7 @@ public final class PriceListManagerImageRegistry extends AbstractImageRegistry {
 	 * Row selected image.
 	 */
 	public static final ImageDescriptor IMAGE_ROW_SELECTED_SMALL = getImageDescriptor(PLUGIN_ID, "state-ticked_default_16.png"); //$NON-NLS-1$
-	
+
 	/**
 	 * Empty image.
 	 */

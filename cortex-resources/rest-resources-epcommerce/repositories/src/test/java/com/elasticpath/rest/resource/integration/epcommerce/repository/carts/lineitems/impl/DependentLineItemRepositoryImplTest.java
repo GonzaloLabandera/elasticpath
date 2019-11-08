@@ -25,6 +25,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import com.elasticpath.domain.shoppingcart.ShoppingCart;
 import com.elasticpath.domain.shoppingcart.ShoppingItem;
 import com.elasticpath.rest.definition.carts.CartIdentifier;
+import com.elasticpath.rest.definition.carts.CartsIdentifier;
 import com.elasticpath.rest.definition.carts.LineItemIdentifier;
 import com.elasticpath.rest.definition.carts.LineItemsIdentifier;
 import com.elasticpath.rest.id.type.StringIdentifier;
@@ -148,7 +149,9 @@ public class DependentLineItemRepositoryImplTest {
 	private void givenLineItemIdentifierHasCartId(final String cartId) {
 		final CartIdentifier cartIdentifier = CartIdentifier.builder()
 				.withCartId(StringIdentifier.of(cartId))
-				.withScope(StringIdentifier.of("scope"))
+				.withCarts(CartsIdentifier.builder()
+						.withScope(StringIdentifier.of("scope"))
+						.build())
 				.build();
 		final LineItemsIdentifier lineItemsIdentifier = LineItemsIdentifier.builder()
 				.withCart(cartIdentifier)

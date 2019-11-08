@@ -29,7 +29,6 @@ import com.elasticpath.persistence.api.FetchGroupLoadTuner;
 import com.elasticpath.service.cmuser.CmUserService;
 import com.elasticpath.service.cmuser.UserNameExistException;
 import com.elasticpath.service.impl.AbstractEpPersistenceServiceImpl;
-import com.elasticpath.service.misc.FetchPlanHelper;
 import com.elasticpath.service.misc.TimeService;
 import com.elasticpath.service.search.IndexNotificationService;
 import com.elasticpath.service.search.IndexType;
@@ -40,8 +39,6 @@ import com.elasticpath.settings.provider.SettingValueProvider;
  */
 @SuppressWarnings({"PMD.GodClass", "PMD.TooManyMethods"})
 public class CmUserServiceImpl extends AbstractEpPersistenceServiceImpl implements CmUserService {
-
-	private FetchPlanHelper fetchPlanHelper;
 
 	private TimeService timeService;
 
@@ -196,25 +193,19 @@ public class CmUserServiceImpl extends AbstractEpPersistenceServiceImpl implemen
 	@Override
 	public CmUser load(final long cmUserUid) throws EpServiceException {
 		sanityCheck();
-		CmUser cmUser = null;
 		if (cmUserUid <= 0) {
-			cmUser = getBean(ContextIdNames.CMUSER);
-		} else {
-			cmUser = getPersistentBeanFinder().load(ContextIdNames.CMUSER, cmUserUid);
+			return getBean(ContextIdNames.CMUSER);
 		}
-		return cmUser;
+		return getPersistentBeanFinder().load(ContextIdNames.CMUSER, cmUserUid);
 	}
 
 	@Override
 	public CmUser get(final long cmUserUid) throws EpServiceException {
 		sanityCheck();
-		CmUser cmUser = null;
 		if (cmUserUid <= 0) {
-			cmUser = getBean(ContextIdNames.CMUSER);
-		} else {
-			cmUser = getPersistentBeanFinder().get(ContextIdNames.CMUSER, cmUserUid);
+			return getBean(ContextIdNames.CMUSER);
 		}
-		return cmUser;
+		return getPersistentBeanFinder().get(ContextIdNames.CMUSER, cmUserUid);
 	}
 
 	/**
@@ -238,10 +229,9 @@ public class CmUserServiceImpl extends AbstractEpPersistenceServiceImpl implemen
 
 	@Override
 	public Object getObject(final long uid, final Collection<String> fieldsToLoad) throws EpServiceException {
-		fetchPlanHelper.addFields(getBeanImplClass(ContextIdNames.CMUSER), fieldsToLoad);
-		Object object = getObject(uid);
-		fetchPlanHelper.clearFetchPlan();
-		return object;
+		getFetchPlanHelper().setLazyFields(getBeanImplClass(ContextIdNames.CMUSER), fieldsToLoad);
+
+		return getObject(uid);
 	}
 
 	@Override
@@ -324,13 +314,6 @@ public class CmUserServiceImpl extends AbstractEpPersistenceServiceImpl implemen
 	}
 
 	/**
-	 * @param fetchPlanHelper the fetchPlanHelper to set
-	 */
-	public void setFetchPlanHelper(final FetchPlanHelper fetchPlanHelper) {
-		this.fetchPlanHelper = fetchPlanHelper;
-	}
-
-	/**
 	 * Gets the time service.
 	 *
 	 * @return the time service
@@ -367,18 +350,11 @@ public class CmUserServiceImpl extends AbstractEpPersistenceServiceImpl implemen
 
 	@Override
 	public CmUser findByGuid(final String guid, final FetchGroupLoadTuner loadTuner)  {
-		CmUser retrievedCmUser = null;
-
-		if (loadTuner == null) {
-			retrievedCmUser = findByGuid(guid);
-		} else {
-			fetchPlanHelper.clearFetchPlan();
-			fetchPlanHelper.configureFetchGroupLoadTuner(loadTuner, false);
-			retrievedCmUser = findByGuid(guid);
-			fetchPlanHelper.clearFetchPlan();
+		if (loadTuner != null) {
+			getFetchPlanHelper().setLoadTuners(loadTuner.setCleanExistingGroups(false));
 		}
 
-		return retrievedCmUser;
+		return findByGuid(guid);
 	}
 
 	@Override

@@ -28,7 +28,7 @@
 				<entry key="com.elasticpath.domain.contentspace.DynamicContent" value="Dynamic Content"/>
 				<entry key="com.elasticpath.tags.domain.ConditionalExpression" value="Saved Condition"/>
 				<entry key="com.elasticpath.domain.attribute.Attribute" value="Attribute"/>
-				<entry key="com.elasticpath.domain.cartmodifier.CartItemModifierGroup" value="CartItemModifierGroup"/>
+				<entry key="com.elasticpath.domain.modifier.ModifierGroup" value="ModifierGroup"/>
 
 			</map>
 		</property>
@@ -65,6 +65,6 @@
 
 	<bean id="defaultObjectGuidResolver" class="com.elasticpath.service.changeset.impl.DefaultObjectGuidResolver"/>
 
-	<bean id="cartItemModifierGroupMetadataResolver" class="com.elasticpath.service.changeset.impl.CartItemModifierGroupMetadataResolverImpl"/>
+	<bean id="modifierGroupMetadataResolver" class="com.elasticpath.service.changeset.impl.ModifierGroupMetadataResolverImpl"/>
 
 </beans>

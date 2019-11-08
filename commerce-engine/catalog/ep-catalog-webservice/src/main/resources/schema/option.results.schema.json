@@ -1,0 +1,18 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "description": "Schema for option results definition",
+  "properties": {
+    "results": {
+      "type": "array",
+      "items": [
+        {
+          "$ref": "resource:/schema/option.schema.json"
+        }
+      ],
+      "additionalItems": { "$ref": "resource:/schema/option.schema.json" }
+    }
+  },
+  "required": [
+    "results"
+  ]
+}

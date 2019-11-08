@@ -445,7 +445,7 @@
 									cargo.datasource.driver=org.h2.Driver|
 									cargo.datasource.username=sa|
 									cargo.datasource.password=sa|
-									cargo.datasource.properties=scope=Shareable;factory=${ep.jndi.factory};maxActive=250;maxIdle=30;maxWait=10000;removeAbandoned=true;testWhileIdle=true;validationQuery=${epdb.validation.query};removeAbandoned=true|
+									cargo.datasource.properties=scope=Shareable;factory=${ep.jndi.factory};maxActive=250;maxIdle=30;maxWait=10000;removeAbandoned=true;testWhileIdle=true;validationQuery=${epdb.validation.query}|
 									cargo.datasource.jndi=jdbc/epjndi]]>
 									</cargo.datasource.datasource>
 									<cargo.resource.resource>

@@ -58,28 +58,22 @@ public class ImportJobRunnerCategoryImplTest {
 	
 	private ImportJobRunnerCategoryImpl importJobRunnerCategory;
 	private final BeanFactory beanFactory = new BeanFactory() {
-		@SuppressWarnings("unchecked")
+		
 		@Override
 		public <T> T getBean(final String name) {
+			return null;
+		}
+
+		@Override
+		public <T> Class<T> getBeanImplClass(final String beanName) {
+			return null;
+		}
+
+		@Override
+		@SuppressWarnings("unchecked")
+		public <T> T getPrototypeBean(final String name, final Class<T> clazz) {
 			if (ContextIdNames.CATEGORY.equals(name)) {
 				return (T) new CategoryImpl();
-			} else if (ContextIdNames.CSV_FILE_READER.equals(name)) {
-				final CsvFileReader mockCsvFileReader = context.mock(CsvFileReader.class);
-				context.checking(new Expectations() {
-					{
-						allowing(mockCsvFileReader).open(with(aNull(String.class)), with(any(char.class)), with(any(char.class)));
-						allowing(mockCsvFileReader).readNext();
-						will(onConsecutiveCalls(
-								returnValue(new String[] { GUID_FIELD_NAME, IMPORT_FIELD_NAME }), // column title
-								returnValue(new String[] { "guid2", null }), // parent category
-								returnValue(new String[] { "guid1", "guid2" }), // first category
-								returnValue(new String[] { "guid3", "guid4" }), // category with no parent in this csv file
-								returnValue(null) // end of file, no more lines
-						));
-						allowing(mockCsvFileReader).close();
-					}
-				});
-				return (T) mockCsvFileReader;
 			} else if (ContextIdNames.IMPORT_FAULT.equals(name)) {
 				return (T) new ImportFaultImpl();
 			} else if (ContextIdNames.IMPORT_BAD_ROW.equals(name)) {
@@ -89,8 +83,27 @@ public class ImportJobRunnerCategoryImplTest {
 		}
 
 		@Override
-		public <T> Class<T> getBeanImplClass(final String beanName) {
-			return null;
+		@SuppressWarnings("unchecked")
+		public <T> T getSingletonBean(final String name, final Class<T> clazz) {
+			if (ContextIdNames.CSV_FILE_READER.equals(name)) {
+				final CsvFileReader mockCsvFileReader = context.mock(CsvFileReader.class);
+				context.checking(new Expectations() {
+					{
+						allowing(mockCsvFileReader).open(with(aNull(String.class)), with(any(char.class)), with(any(char.class)));
+						allowing(mockCsvFileReader).readNext();
+						will(onConsecutiveCalls(
+								returnValue(new String[]{GUID_FIELD_NAME, IMPORT_FIELD_NAME}), // column title
+								returnValue(new String[]{"guid2", null}), // parent category
+								returnValue(new String[]{"guid1", "guid2"}), // first category
+								returnValue(new String[]{"guid3", "guid4"}), // category with no parent in this csv file
+								returnValue(null) // end of file, no more lines
+						));
+						allowing(mockCsvFileReader).close();
+					}
+				});
+				return (T) mockCsvFileReader;
+			}
+			throw new EpServiceException("unknown bean name: " + name);
 		}
 	};
 	@Rule

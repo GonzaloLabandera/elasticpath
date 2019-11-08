@@ -1,16 +1,18 @@
 /*
  * Copyright (c) Elastic Path Software Inc., 2006
  */
+
 package com.elasticpath.service.rules.impl;
+
 import static com.elasticpath.domain.rules.RuleScenarios.CART_SCENARIO;
 import static com.elasticpath.domain.rules.RuleScenarios.CATALOG_BROWSE_SCENARIO;
 
+import java.util.Date;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.kie.api.KieBase;
 
-import com.elasticpath.cache.SimpleTimeoutCache;
 import com.elasticpath.domain.rules.EpRuleBase;
 import com.elasticpath.domain.store.Store;
 
@@ -22,9 +24,6 @@ public class DBReadingRuleEngineImpl extends AbstractRuleEngineImpl {
 
 	private final Map<String, EpRuleBase> cartRuleBases = new ConcurrentHashMap<>();
 
-	//injected via Spring
-	private SimpleTimeoutCache<String, Boolean> cachedCatalogRuleBaseState;
-
 	private final Map<String, EpRuleBase> catalogRuleBases = new ConcurrentHashMap<>();
 
 	@Override
@@ -35,27 +34,28 @@ public class DBReadingRuleEngineImpl extends AbstractRuleEngineImpl {
 		if (cartRuleBases.containsKey(code)) {
 			ruleBase = cartRuleBases.get(code);
 
-			EpRuleBase newRuleBase;
 			if (ruleBase == null) {
-				newRuleBase = getRuleService().findRuleBaseByScenario(store, null, CART_SCENARIO);
+				ruleBase = getRuleService().findRuleBaseByScenario(store, null, CART_SCENARIO);
 			} else {
-				newRuleBase = getRuleService().findChangedStoreRuleBases(code, CART_SCENARIO,
-						ruleBase.getLastModifiedDate());
-			}
-			if (newRuleBase != null) {
-				ruleBase = newRuleBase;
+				Date modifiedDate = getRuleService().getModifiedDateForRuleBase(ruleBase.getUidPk());
+				if (modifiedDate == null) {
+					ruleBase = null;
+				} else {
+					ruleBase = getRuleService().findChangedStoreRuleBases(code, CART_SCENARIO,
+							modifiedDate);
+				}
 			}
 		} else {
 			ruleBase = getRuleService().findRuleBaseByScenario(store, null, CART_SCENARIO);
 		}
-		
+
 		if (ruleBase == null) {
 			cartRuleBases.remove(code);
 		} else {
 			cartRuleBases.put(code, ruleBase);
 			return ruleBase.getRuleBase();
 		}
-		
+
 		// just in case the rule base will be modified externally
 		return createRuleBase();
 	}
@@ -64,16 +64,12 @@ public class DBReadingRuleEngineImpl extends AbstractRuleEngineImpl {
 	protected KieBase getCatalogRuleBase(final Store store) {
 		final String code = store.getCatalog().getCode();
 
-		Boolean cacheIsValid = cachedCatalogRuleBaseState.get(code);
 		EpRuleBase storedRuleBase = catalogRuleBases.get(code);
-		if (cacheIsValid == null) {
-			storedRuleBase = getValidRuleBase(store, code, storedRuleBase);
-			if (storedRuleBase == null) {
-				catalogRuleBases.remove(code);
-			} else {
-				catalogRuleBases.put(code, storedRuleBase);
-				cachedCatalogRuleBaseState.put(code, true);
-			}
+		storedRuleBase = getValidRuleBase(store, code, storedRuleBase);
+		if (storedRuleBase == null) {
+			catalogRuleBases.remove(code);
+		} else {
+			catalogRuleBases.put(code, storedRuleBase);
 		}
 
 		if (storedRuleBase != null) {
@@ -89,20 +85,15 @@ public class DBReadingRuleEngineImpl extends AbstractRuleEngineImpl {
 		if (storedRuleBase == null) {
 			ruleBase = getRuleService().findRuleBaseByScenario(null, store.getCatalog(), CATALOG_BROWSE_SCENARIO);
 		} else {
-			ruleBase = getRuleService().findChangedCatalogRuleBases(code, CATALOG_BROWSE_SCENARIO,
-					storedRuleBase.getLastModifiedDate());
-			if (ruleBase == null) {
-				ruleBase = storedRuleBase;
+			Date modifiedDate = getRuleService().getModifiedDateForRuleBase(storedRuleBase.getUidPk());
+			if (modifiedDate == null) {
+				ruleBase = null;
+			} else {
+				ruleBase = getRuleService().findChangedCatalogRuleBases(code, CATALOG_BROWSE_SCENARIO,
+						modifiedDate);
 			}
 		}
 		return ruleBase;
 	}
 
-	public SimpleTimeoutCache<String, Boolean> getCachedCatalogRuleBaseState() {
-		return cachedCatalogRuleBaseState;
-	}
-
-	public void setCachedCatalogRuleBaseState(final SimpleTimeoutCache<String, Boolean> cachedCatalogRuleBaseState) {
-		this.cachedCatalogRuleBaseState = cachedCatalogRuleBaseState;
-	}
 }

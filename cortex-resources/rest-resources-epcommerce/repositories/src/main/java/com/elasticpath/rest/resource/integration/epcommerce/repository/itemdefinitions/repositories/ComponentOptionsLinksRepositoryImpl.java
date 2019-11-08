@@ -10,6 +10,8 @@ import io.reactivex.Observable;
 import io.reactivex.Single;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.elasticpath.repository.LinksRepository;
 import com.elasticpath.rest.definition.itemdefinitions.ItemDefinitionComponentIdentifier;
@@ -29,6 +31,7 @@ public class ComponentOptionsLinksRepositoryImpl<I extends ItemDefinitionCompone
 
 	private ItemRepository itemRepository;
 	private ProductSkuRepository productSkuRepository;
+	private static final Logger LOG = LoggerFactory.getLogger(ComponentOptionsLinksRepositoryImpl.class);
 
 	@Override
 	public Observable<ItemDefinitionComponentOptionsIdentifier> getElements(final ItemDefinitionComponentIdentifier identifier) {
@@ -36,6 +39,7 @@ public class ComponentOptionsLinksRepositoryImpl<I extends ItemDefinitionCompone
 		Iterator<String> guidPathFromRootItem = identifier.getComponentId().getValue().iterator();
 
 		return itemRepository.findBundleConstituentAtPathEnd(itemIdMap, guidPathFromRootItem)
+				.doOnError(throwable -> LOG.info("No bundle constituent found for item id '{}'.", itemIdMap))
 				.map(bundleConstituent -> bundleConstituent.getConstituent().getProductSku().getSkuCode())
 				.flatMap(this::doesSkuContainOptions)
 				.flatMapObservable(containsOptions ->
@@ -64,6 +68,7 @@ public class ComponentOptionsLinksRepositoryImpl<I extends ItemDefinitionCompone
 	 */
 	protected Single<Boolean> doesSkuContainOptions(final String skuCode) {
 		return productSkuRepository.getProductSkuOptionsByCode(skuCode)
+				.doOnError(throwable -> LOG.info("Error looking for sku options for sku code '{}'.", skuCode))
 				.isEmpty()
 				.map(isEmpty -> !isEmpty);
 	}

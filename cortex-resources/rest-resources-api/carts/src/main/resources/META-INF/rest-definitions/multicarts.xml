@@ -1,0 +1,125 @@
+<?xml version="1.0"?>
+<definitions xmlns="http://www.elasticpath.com/schema/rest/0.5">
+
+	<family>
+		<name>carts</name>
+
+		<!-- List of carts -->
+		<resource>
+			<name>carts</name>
+			<description><![CDATA[List of carts for shopper.]]></description>
+			<uri>{base.family}/{base.scope}</uri>
+			<list-of>cart</list-of>
+		</resource>
+
+		<relationship>
+			<name>carts-from-root</name>
+			<description><![CDATA[Link to list of carts from root.]]></description>
+			<rel>carts</rel>
+			<from>base.root</from>
+			<to>carts</to>
+		</relationship>
+
+		<!-- Create Cart -->
+
+		<resource>
+			<name>create-cart-form</name>
+			<description><![CDATA[Provides the form with which to create a new cart.
+			A cart descriptor must be suppied to create a new cart.
+			The descriptor is a dynamic set of properties that can be configured per store. ]]></description>
+			<uri>{carts}/form</uri>
+			<form>
+				<entity>create-cart-form</entity>
+				<action-rel>createcartaction</action-rel>
+				<result>cart</result>
+			</form>
+		</resource>
+
+		<relationship>
+			<name>create-cart-form-from-carts</name>
+			<description>![CDATA[A link from the carts to the create-cart form ]].</description>
+			<rel>createcartform</rel>
+			<from>carts</from>
+			<to>create-cart-form</to>
+		</relationship>
+
+		<entity>
+			<name>create-cart-form</name>
+			<description><![CDATA[The entity for creating a cart.]]></description>
+			<property>
+				<name>descriptor</name>
+				<description><![CDATA[The description of the cart.]]></description>
+				<is-a>cart-descriptor</is-a>
+			</property>
+			<entity-type>carts.create-cart-form-entity</entity-type>
+		</entity>
+
+
+		<!-- Add-to-Cart -->
+
+		<resource>
+			<name>add-to-specific-cart-form</name>
+			<description><![CDATA[Provides the form with which to add an item to a specific cart.]]></description>
+			<uri>{carts.cart}/{items.item}/form</uri>
+			<form>
+				<entity>line-item</entity>
+				<action-rel>addtocartaction</action-rel>
+				<result>line-item</result>
+			</form>
+		</resource>
+
+		<relationship>
+				<name>add-to-specific-cart-form-to-cart</name>
+				<description><![CDATA[ A link from the add-to-cart form to the cart that form acts upon.
+					This allows zoom requests to zoom down to the cart descriptor.]]></description>
+				<rel>target</rel>
+				<from>add-to-specific-cart-form</from>
+				<to>cart</to>
+		</relationship>
+
+		<advisor>
+			<name>add-to-specific-cart-form-advisor</name>
+			<description>![CDATA[ Add to cart pre-conditions check ]]</description>
+			<blocks>add-to-specific-cart-form</blocks>
+		</advisor>
+
+		<resource>
+			<name>add-to-cart-forms</name>
+			<description><![CDATA[List of add to cart forms.]]></description>
+			<uri>{carts}/{items.item}/list</uri>
+			<list-of>add-to-specific-cart-form</list-of>
+		</resource>
+
+		<relationship>
+			<name>cart-to-descriptor</name>
+			<description>![CDATA[Link from cart to cart descriptor. ]]</description>
+			<rel>descriptor</rel>
+			<from>cart</from>
+			<to>cart-descriptor</to>
+		</relationship>
+
+		<resource>
+			<name>cart-descriptor</name>
+			<description><![CDATA[ The Cart Descriptor Resource contains a cart-descriptor entity.
+			This adds information to the cart which can be used to define the cart.]]></description>
+			<uri>{cart}/descriptor</uri>
+			<entity>cart-descriptor</entity>
+		</resource>
+
+		<entity>
+			<name>cart-descriptor</name>
+			<description><![CDATA[A cart descriptor is a set of properties that describes a cart.
+			 These properties can be configured per store.]]></description>
+			<dynamic/>
+			<entity-type>cart-descriptor</entity-type>
+		</entity>
+
+		<relationship>
+			<name>add-to-cart-forms</name>
+			<description><![CDATA[Link from item to add-to-cart-form]]></description>
+			<rel>addtocartforms</rel>
+			<from>items.item</from>
+			<to>add-to-cart-forms</to>
+		</relationship>
+	</family>
+</definitions>

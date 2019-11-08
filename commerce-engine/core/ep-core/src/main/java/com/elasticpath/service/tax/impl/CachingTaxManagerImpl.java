@@ -48,7 +48,7 @@ public class CachingTaxManagerImpl implements TaxManager {
 
 		TaxDocument taxDocument = null;
 
-		Integer containerHashCode = taxableContainer.hashCode();
+		Integer containerHashCode = taxableContainer.getTaxCacheKeyHash();
 		Optional<TaxDocument> cachedTaxDocument = getFromCache(containerHashCode);
 
 		if (cachedTaxDocument.isPresent()) {
@@ -110,8 +110,8 @@ public class CachingTaxManagerImpl implements TaxManager {
 		getCache().put(element);
 	}
 
-	private Optional<TaxDocument> getFromCache(final Integer containerHashCode) {
-			Element element = getCache().get(containerHashCode);
+	private Optional<TaxDocument> getFromCache(final int containerHashCode) {
+		Element element = getCache().get(containerHashCode);
 
 		if (element != null && !element.isExpired()) {
 			return Optional.of((TaxDocument) element.getObjectValue());

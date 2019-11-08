@@ -27,7 +27,7 @@ public class PriceListAssignmentAdapter extends AbstractDomainAdapterImpl<PriceL
 
 	@Override
 	public PriceListAssignment createDomainObject() {
-		return getBeanFactory().getBean(ContextIdNames.PRICE_LIST_ASSIGNMENT);
+		return getBeanFactory().getPrototypeBean(ContextIdNames.PRICE_LIST_ASSIGNMENT, PriceListAssignment.class);
 	}
 
 	@Override

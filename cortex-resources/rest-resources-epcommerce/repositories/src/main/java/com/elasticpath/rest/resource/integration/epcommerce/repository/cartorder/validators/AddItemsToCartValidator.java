@@ -3,6 +3,8 @@
  */
 package com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder.validators;
 
+import io.reactivex.Completable;
+
 import com.elasticpath.rest.definition.carts.AddItemsToCartFormEntity;
 
 /**
@@ -15,6 +17,7 @@ public interface AddItemsToCartValidator {
 	 *
 	 * @param addItemsToCartFormEntity addItemsToCartFormEntity
 	 * @param scope                    scope
+	 * @return Completable
 	 */
-	void validate(AddItemsToCartFormEntity addItemsToCartFormEntity, String scope);
+	Completable validate(AddItemsToCartFormEntity addItemsToCartFormEntity, String scope);
 }

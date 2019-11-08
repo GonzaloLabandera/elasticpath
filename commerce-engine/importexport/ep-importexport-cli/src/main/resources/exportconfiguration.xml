@@ -49,6 +49,13 @@
    <exporter type="CUSTOMER_CONSENT"/>
 
    <exporter type="FACET"/>
+
+   <exporter type="SORT_ATTRIBUTE"/>
+
+   <exporter type="STORE_CUSTOMER_ATTRIBUTE"/>
+   <exporter type="ATTRIBUTE_POLICY"/>
+   
+   <exporter type="TAGGROUP"/>
  
   </exporters>
   <packager type="NONE"/>

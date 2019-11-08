@@ -98,13 +98,13 @@ public class DigitalAssetItemAdapterTest {
 	@Test
 	public void testCreateDigitalAsset() {
 		when(mockProductSku.getDigitalAsset()).thenReturn(null);
-		when(mockBeanFactory.getBean(ContextIdNames.DIGITAL_ASSET)).thenReturn(mockDigitalAsset);
+		when(mockBeanFactory.getPrototypeBean(ContextIdNames.DIGITAL_ASSET, DigitalAsset.class)).thenReturn(mockDigitalAsset);
 
 		DigitalAsset result = digitalAssetItemAdapter.createDigitalAsset(mockProductSku);
 
 		assertThat(result).isEqualTo(mockDigitalAsset);
 		verify(mockProductSku).getDigitalAsset();
-		verify(mockBeanFactory).getBean(ContextIdNames.DIGITAL_ASSET);
+		verify(mockBeanFactory).getPrototypeBean(ContextIdNames.DIGITAL_ASSET, DigitalAsset.class);
 	}
 
 	/**

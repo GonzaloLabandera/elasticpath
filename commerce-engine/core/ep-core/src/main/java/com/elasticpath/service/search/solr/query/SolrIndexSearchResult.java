@@ -361,7 +361,7 @@ public class SolrIndexSearchResult implements IndexSearchResult, Serializable {
 
 	private String getFacetInfo(final String facetType) {
 		return getFacetMap().values().stream()
-				.filter(facet -> facet.getFacetGroup() == FacetGroup.OTHERS.getOrdinal() && facetType.equals(facet.getFacetName()))
+				.filter(facet -> facet.getFacetGroup() == FacetGroup.FIELD.getOrdinal() && facetType.equals(facet.getFacetName()))
 				.map(Facet::getFacetGuid).findFirst().orElse(facetType);
 	}
 
@@ -371,7 +371,7 @@ public class SolrIndexSearchResult implements IndexSearchResult, Serializable {
 		final Facet facet = getFacetMap().get(facetGuid);
 		final Integer facetGroup = facet.getFacetGroup();
 		final String type;
-		if (facetGroup == FacetGroup.OTHERS.getOrdinal()) {
+		if (facetGroup == FacetGroup.FIELD.getOrdinal()) {
 			String name = facet.getFacetName();
 			type = FacetConstants.SIZE_ATTRIBUTES.contains(name) ? SIZE : name;
 		} else if (Stream.of(FacetGroup.PRODUCT_ATTRIBUTE, FacetGroup.SKU_ATTRIBUTE).map(FacetGroup::getOrdinal).anyMatch(facetGroup::equals)) {

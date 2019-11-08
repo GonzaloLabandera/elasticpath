@@ -3,10 +3,16 @@
  */
 package com.elasticpath.domain.catalog.impl;
 
+import static com.elasticpath.persistence.support.FetchFieldConstants.ATTRIBUTE_VALUE_MAP;
+import static com.elasticpath.persistence.support.FetchFieldConstants.CATEGORY_TYPE;
+import static com.elasticpath.persistence.support.FetchFieldConstants.LOCALE_DEPENDANT_FIELDS;
+import static com.elasticpath.persistence.support.FetchFieldConstants.MASTER_CATEGORY;
+
 import java.util.Objects;
 
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.commons.lang.builder.ToStringStyle;
+import org.apache.openjpa.persistence.FetchPlan;
 
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.catalog.CategoryLoadTuner;
@@ -222,6 +228,25 @@ public class CategoryLoadTunerImpl extends AbstractEpDomainImpl implements Categ
 			return this;
 		}
 		return merge((CategoryLoadTuner) loadTuner);
+	}
+
+	@Override
+	public void configure(final FetchPlan fetchPlan) {
+		if (isLoadingAttributeValue()) {
+			fetchPlan.addField(CategoryImpl.class, ATTRIBUTE_VALUE_MAP);
+		}
+		if (isLoadingMaster()) {
+			fetchPlan.addField(LinkedCategoryImpl.class, MASTER_CATEGORY);
+		}
+		if (isLoadingCategoryType()) {
+			fetchPlan.addField(CategoryImpl.class, CATEGORY_TYPE);
+		}
+		if (isLoadingLocaleDependantFields()) {
+			fetchPlan.addField(CategoryImpl.class, LOCALE_DEPENDANT_FIELDS);
+		}
+		if (categoryTypeLoadTuner != null) {
+			categoryTypeLoadTuner.configure(fetchPlan);
+		}
 	}
 
 	@Override

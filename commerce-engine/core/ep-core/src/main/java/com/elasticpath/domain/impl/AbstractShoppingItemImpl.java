@@ -42,6 +42,7 @@ import com.elasticpath.domain.EpDomainException;
 import com.elasticpath.domain.catalog.Price;
 import com.elasticpath.domain.catalog.PriceSchedule;
 import com.elasticpath.domain.catalog.PriceScheduleType;
+import com.elasticpath.domain.catalog.Product;
 import com.elasticpath.domain.catalog.ProductBundle;
 import com.elasticpath.domain.catalog.ProductSku;
 import com.elasticpath.domain.catalog.ProductType;
@@ -999,5 +1000,14 @@ public abstract class AbstractShoppingItemImpl extends AbstractLegacyEntityImpl 
 	public void setBundleConstituent(final boolean bundleConstituent) {
 		this.bundleConstituent = bundleConstituent;
 	}
+
+	@Override
+	@Transient
+	public boolean isCalculatedBundle(final ProductSkuLookup productSkuLookup) {
+		Product product = getProductSku(productSkuLookup).getProduct();
+
+		return product instanceof ProductBundle && ((ProductBundle) product).isCalculated();
+	}
+
 
 }

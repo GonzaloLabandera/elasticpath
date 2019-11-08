@@ -146,3 +146,14 @@ Feature: Tests order resource
     When I submit the order
     And the HTTP status is OK, created
     Then new cart is created
+    
+  Scenario: Cant submit the same order more than once
+    Given I login as a public shopper
+    And I fill in billing address needinfo
+    And I fill in email needinfo
+    And I fill in payment methods needinfo
+    And I add item with code tt888456tw to my cart
+    When I submit the order multiple times concurrently
+    Then I view my profile
+    And I follow links purchases
+    And there are 1 links of rel element

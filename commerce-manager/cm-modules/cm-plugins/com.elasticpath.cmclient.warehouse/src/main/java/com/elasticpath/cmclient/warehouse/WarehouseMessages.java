@@ -3,10 +3,8 @@
  */
 package com.elasticpath.cmclient.warehouse;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import com.elasticpath.cmclient.core.CoreMessages;
+import com.elasticpath.cmclient.core.nls.BaseMessages;
 import com.elasticpath.cmclient.core.nls.LocalizedMessagePostProcessor;
 import com.elasticpath.domain.order.OrderReturnStatus;
 import com.elasticpath.domain.order.OrderReturnType;
@@ -16,7 +14,7 @@ import com.elasticpath.domain.order.OrderShipmentStatus;
  * Messages class for the com.elasticpath.cmclient.warehouse plugin.
  */
 @SuppressWarnings({ "PMD.TooManyFields", "PMD.ExcessivePublicCount", "PMD.VariableNamingConventions" })
-public final class WarehouseMessages {
+public final class WarehouseMessages extends BaseMessages {
 	private static final String BUNDLE_NAME = "com.elasticpath.cmclient.warehouse.WarehousePluginResources"; //$NON-NLS-1$
 
 	public static final String EMPTY_STRING = ""; //$NON-NLS-1$
@@ -260,9 +258,6 @@ public final class WarehouseMessages {
 
 	public String SearchView_Error_NoSearchTerms;
 
-	// Define the map of enum constants to localized names
-	private final Map<OrderShipmentStatus, String> localizedExtensibleEnums = new HashMap<>();
-
 	/**
 	 * Returns string or empty string if the string is null.
 	 * 
@@ -297,33 +292,18 @@ public final class WarehouseMessages {
 		return CoreMessages.get().getMessage(orderReturnStatus.getPropertyKey());
 	}
 
-
-	/**
-	 * Returns the localized name of the given enum constant.
-	 * 
-	 * @param enumValue the enum to be localized
-	 * @return the localized string for the enum
-	 */
-	public String getLocalizedName(final OrderShipmentStatus enumValue) {
-		return localizedExtensibleEnums.get(enumValue);
-	}
-
-
-
 	private WarehouseMessages() {
 
 	}
 
-	private void instantiateEnums() {
-		if (localizedExtensibleEnums.isEmpty()) {
-
-			localizedExtensibleEnums.put(OrderShipmentStatus.ONHOLD, ShipmentStatus_OnHold);
-			localizedExtensibleEnums.put(OrderShipmentStatus.RELEASED, ShipmentStatus_Released);
-			localizedExtensibleEnums.put(OrderShipmentStatus.SHIPPED, ShipmentStatus_Completed);
-			localizedExtensibleEnums.put(OrderShipmentStatus.CANCELLED, ShipmentStatus_Cancelled);
-			localizedExtensibleEnums.put(OrderShipmentStatus.AWAITING_INVENTORY, ShipmentStatus_Awaiting);
-			localizedExtensibleEnums.put(OrderShipmentStatus.INVENTORY_ASSIGNED, ShipmentStatus_Assigned);
-		}
+	@Override
+	protected void instantiateEnums() {
+		putLocalizedName(OrderShipmentStatus.ONHOLD, ShipmentStatus_OnHold);
+		putLocalizedName(OrderShipmentStatus.RELEASED, ShipmentStatus_Released);
+		putLocalizedName(OrderShipmentStatus.SHIPPED, ShipmentStatus_Completed);
+		putLocalizedName(OrderShipmentStatus.CANCELLED, ShipmentStatus_Cancelled);
+		putLocalizedName(OrderShipmentStatus.AWAITING_INVENTORY, ShipmentStatus_Awaiting);
+		putLocalizedName(OrderShipmentStatus.INVENTORY_ASSIGNED, ShipmentStatus_Assigned);
 	}
 
 	/**
@@ -332,7 +312,7 @@ public final class WarehouseMessages {
 	 */
 	public static WarehouseMessages get() {
 		WarehouseMessages warehouseMessages = LocalizedMessagePostProcessor.getUTF8Encoded(BUNDLE_NAME, WarehouseMessages.class);
-		warehouseMessages.instantiateEnums();
+		warehouseMessages.initialize();
 		return warehouseMessages;
 	}
 

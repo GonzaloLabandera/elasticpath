@@ -67,7 +67,7 @@ public class PaymentScheduleHelperImpl implements PaymentScheduleHelper {
 		String sovKey = shoppingItemRecurringPrice.getPaymentScheduleName();
 		SkuOptionValue sov = getSkuOptionService().findOptionValueByKey(sovKey);
 		if (sov == null) {
-			PaymentSchedule paymentSchedule = beanFactory.getBean(ContextIdNames.PAYMENT_SCHEDULE);
+			PaymentSchedule paymentSchedule = beanFactory.getPrototypeBean(ContextIdNames.PAYMENT_SCHEDULE, PaymentSchedule.class);
 			paymentSchedule.setName(sovKey);
 			
 			/* There need to be a number for the quantity, because the summary table for recurring prices keys 
@@ -91,7 +91,7 @@ public class PaymentScheduleHelperImpl implements PaymentScheduleHelper {
 			return null;
 		}
 		
-		PaymentSchedule paymentSchedule = beanFactory.getBean(ContextIdNames.PAYMENT_SCHEDULE);
+		PaymentSchedule paymentSchedule = beanFactory.getPrototypeBean(ContextIdNames.PAYMENT_SCHEDULE, PaymentSchedule.class);
 		paymentSchedule.setName(skuOptionValue.getOptionValueKey());
 		
 		/* There need to be a number for the quantity, because the summary table for recurring prices keys 

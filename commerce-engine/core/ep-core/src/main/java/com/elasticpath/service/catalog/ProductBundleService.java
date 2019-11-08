@@ -115,4 +115,14 @@ public interface ProductBundleService extends ProductService {
 	 * @return the product bundle uidpks
 	 */
 	Set<Long> findAllProductBundleUidsContainingProduct(Product product);
+
+	/**
+	 * Returns a collection of the codes of all product bundles in which the product with the given code, or any of the product skus
+	 * exist directly or indirectly (i.e. nested in another bundle).
+	 *
+	 * @param productCode GUID code of the product.
+	 * @return the product bundle codes.
+	 */
+	Set<String> findAllProductBundleCodesContainingProduct(String productCode);
+
 }

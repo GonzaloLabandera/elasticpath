@@ -23,6 +23,7 @@
             </map>
         </property>
 	</bean>
+	<alias alias="readOnlyEntityManagerFactory" name="entityManagerFactory"/>
 
 	<bean id="preEntityManagerInitializationList" class="java.util.ArrayList">
 		<constructor-arg>
@@ -54,6 +55,7 @@
 	</bean>
 
 	<bean id="customerScenario" class="com.elasticpath.test.persister.testscenarios.CustomerScenario"/>
+	<bean id="multiCategoryScenario" class="com.elasticpath.test.persister.testscenarios.MultiCategoryScenario"/>
 
 	<bean id="customerAndCustomerSessionsScenario" class="com.elasticpath.test.persister.testscenarios.CustomerAndCustomerSessionsScenario">
 		<property name="simpleStoreScenario" ref="simpleStoreScenario"/>
@@ -70,6 +72,8 @@
 	</bean>
 	
 	<bean id="singleStoreMultiCatalogScenario" class="com.elasticpath.test.persister.testscenarios.SingleStoreMultiCatalogScenario"/>
+
+	<bean id="storeAndCatalogScenario" class="com.elasticpath.test.persister.testscenarios.StoreAndCatalogScenario"/>
 
 	<bean id="paymentGatewayFactory" class="com.elasticpath.domain.factory.TestPaymentGatewayPluginFactoryImpl">
 		<property name="beanFactory" ref="coreBeanFactory"/>

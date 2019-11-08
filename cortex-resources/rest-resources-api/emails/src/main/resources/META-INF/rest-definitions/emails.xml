@@ -3,7 +3,12 @@
 
 	<family>
 		<name>emails</name>
-		<description><![CDATA[The emails resource stores a customer's emails.]]></description>
+		<description><![CDATA[
+The emails resource stores a customer's emails.
+
+Out of the box, customers can have only one email, which is their user name. If you create a new email for a registered customer,
+this changes the customer's user name.]]>
+		</description>
 
 		<uri-part>
 			<name>email-id</name>

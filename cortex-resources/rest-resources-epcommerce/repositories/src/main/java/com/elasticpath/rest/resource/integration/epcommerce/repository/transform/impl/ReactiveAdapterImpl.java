@@ -156,9 +156,27 @@ public class ReactiveAdapterImpl implements ReactiveAdapter {
 	}
 
 	private <T> ObservableSource<? extends T> handleNull(final Observable<T> observable, final Throwable throwable) {
-		if (throwable instanceof NullPointerException) {
+		if (throwable instanceof NullPointerException && callableReturnedNull((NullPointerException) throwable)) {
 			return observable;
 		}
 		return Observable.error(throwable);
+	}
+
+	/**
+	 * We need to be able to distinguish between NPEs that are
+	 * <p>
+	 * 1. genuine NPEs
+	 * 2. thrown because a callable returns null, and then RxJava does not like nulls
+	 * <p>
+	 * Admittedly this method is bit of a hack, but a fairly reasonable one. We also have unit tests to help us if this hack breaks because in a 
+	 * future version of RxJava.
+	 *
+	 * @param npe the null pointer exception
+	 * @return true if the exception is because the callable returned a null, false if this was a genuine error.
+	 */
+	private boolean callableReturnedNull(final NullPointerException npe) {
+		String message = npe.getMessage();
+		//See the exceptions created in ObservableFromCallable.
+		return message != null && message.contains("Callable") && message.contains("null");
 	}
 }

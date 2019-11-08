@@ -43,7 +43,7 @@
 		<description>A list of codes.</description>
 		<property>
 			<name>codes</name>
-			<description>A list of codes.</description>
+			<description>A list of item SKU codes.</description>
 			<array>
 				<string/>
 			</array>

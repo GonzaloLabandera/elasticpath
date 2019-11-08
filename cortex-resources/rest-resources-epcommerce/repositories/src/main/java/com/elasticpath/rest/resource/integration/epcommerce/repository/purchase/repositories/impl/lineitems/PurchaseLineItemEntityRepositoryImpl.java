@@ -15,8 +15,8 @@ import io.reactivex.Single;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
-import com.elasticpath.domain.cartmodifier.CartItemModifierField;
 import com.elasticpath.domain.catalog.ProductSku;
+import com.elasticpath.domain.modifier.ModifierField;
 import com.elasticpath.domain.order.OrderShipment;
 import com.elasticpath.domain.order.OrderSku;
 import com.elasticpath.domain.shoppingcart.ShoppingItem;
@@ -30,7 +30,7 @@ import com.elasticpath.rest.definition.purchases.PurchaseLineItemEntity;
 import com.elasticpath.rest.definition.purchases.PurchaseLineItemIdentifier;
 import com.elasticpath.rest.identity.util.SubjectUtil;
 import com.elasticpath.rest.resource.ResourceOperationContext;
-import com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder.CartItemModifiersRepository;
+import com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder.ModifiersRepository;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder.PricingSnapshotRepository;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.order.OrderRepository;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.sku.ProductSkuRepository;
@@ -51,7 +51,7 @@ public class PurchaseLineItemEntityRepositoryImpl<E extends PurchaseLineItemEnti
 	private ResourceOperationContext resourceOperationContext;
 	private ProductSkuRepository productSkuRepository;
 	private PricingSnapshotRepository pricingSnapshotRepository;
-	private CartItemModifiersRepository cartItemModifiersRepository;
+	private ModifiersRepository modifiersRepository;
 
 	@Override
 	public Single<PurchaseLineItemEntity> findOne(final PurchaseLineItemIdentifier identifier) {
@@ -109,11 +109,11 @@ public class PurchaseLineItemEntityRepositoryImpl<E extends PurchaseLineItemEnti
 	private Single<PurchaseLineItemConfigurationEntity> createConfiguration(final OrderSku orderSku) {
 		Map<String, String> fields = orderSku.getFields();
 		if (fields != null) {
-			return retrieveCartItemModifierFields(orderSku.getSkuGuid())
-					.map(cartItemModifierFields -> {
+			return retrieveModifierFields(orderSku.getSkuGuid())
+					.map(modifierFields -> {
 						PurchaseLineItemConfigurationEntity.Builder builder = PurchaseLineItemConfigurationEntity.builder();
 
-						cartItemModifierFields.forEach(field -> builder.addingProperty(field.getCode(), fields.get(field.getCode())));
+						modifierFields.forEach(field -> builder.addingProperty(field.getCode(), fields.get(field.getCode())));
 
 						return builder.build();
 					});
@@ -200,10 +200,10 @@ public class PurchaseLineItemEntityRepositoryImpl<E extends PurchaseLineItemEnti
 	 * @param skuGuid the sku guid
 	 * @return the list of fields, can be empty
 	 */
-	private Single<List<CartItemModifierField>> retrieveCartItemModifierFields(final String skuGuid) {
+	private Single<List<ModifierField>> retrieveModifierFields(final String skuGuid) {
 		return productSkuRepository.getProductSkuWithAttributesByGuidAsSingle(skuGuid)
 				.map(ProductSku::getProduct)
-				.map(product -> cartItemModifiersRepository.findCartItemModifiersByProduct(product));
+				.map(product -> modifiersRepository.findModifiersByProduct(product));
 	}
 
 	/**
@@ -242,8 +242,8 @@ public class PurchaseLineItemEntityRepositoryImpl<E extends PurchaseLineItemEnti
 	}
 
 	@Reference
-	public void setCartItemModifiersRepository(final CartItemModifiersRepository cartItemModifiersRepository) {
-		this.cartItemModifiersRepository = cartItemModifiersRepository;
+	public void setModifiersRepository(final ModifiersRepository modifiersRepository) {
+		this.modifiersRepository = modifiersRepository;
 	}
 
 }

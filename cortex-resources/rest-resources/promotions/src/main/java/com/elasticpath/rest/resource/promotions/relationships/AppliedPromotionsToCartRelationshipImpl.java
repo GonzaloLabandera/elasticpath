@@ -33,7 +33,7 @@ public class AppliedPromotionsToCartRelationshipImpl implements AppliedPromotion
 	public Observable<CartIdentifier> onLinkFrom() {
 		return Observable.just(CartIdentifier.builder()
 				.withCartId(cartIdentifier.getCartId())
-				.withScope(cartIdentifier.getScope())
+				.withCarts(cartIdentifier.getCarts())
 				.build());
 	}
 }

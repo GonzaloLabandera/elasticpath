@@ -4,6 +4,7 @@
 package com.elasticpath.shipping.connectivity.dto;
 
 import java.math.BigDecimal;
+import java.util.Map;
 
 /**
  * Interface defining fundamental information of an item which is also able to ship.
@@ -51,4 +52,10 @@ public interface ShippableItem {
 	 * @return the quantity.
 	 */
 	int getQuantity();
+
+	/**
+	 * @return unmodifiable map of all key/value data field pairs
+	 */
+	Map<String, String> getFields();
+
 }

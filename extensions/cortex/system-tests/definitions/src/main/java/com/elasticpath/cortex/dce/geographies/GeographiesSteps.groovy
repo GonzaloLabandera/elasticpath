@@ -40,16 +40,6 @@ class GeographiesSteps {
 				.stopIfFailure()
 	}
 
-	@And('^one of the supported countries is (.+)$')
-	static void verifyCountryIsSupported(def supportedCountry) {
-		// Countries has been defined in the backend system (CE)
-	}
-
-	@Given('^one of the supported regions for (.+) is (.+)$')
-	static void verifyCountrySupportsRegion(def country, def region) {
-		// List of regions has been defined in the backend system (CE)
-	}
-
 	@Given('^there are no supported regions for (.+)$')
 	static void verifyNoSupportedRegionsForCountry(def countryName) {
 		// List of regions has been defined in the backend system (CE)

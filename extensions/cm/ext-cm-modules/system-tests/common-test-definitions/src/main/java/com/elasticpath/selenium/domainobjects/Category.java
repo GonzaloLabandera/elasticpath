@@ -1,11 +1,17 @@
+/*
+ * Copyright (c) Elastic Path Software Inc., 2019
+ */
 package com.elasticpath.selenium.domainobjects;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Category class.
  */
 public class Category {
 	private String categoryCode;
-
+	private final Map<String, String> names = new HashMap<>();
 	private String categoryName;
 	private String categoryType;
 	private String storeVisible;
@@ -15,6 +21,40 @@ public class Category {
 	private String attrDecimalValue;
 	private String attrShortTextName;
 	private String attrShortTextValue;
+	private String enableDateTime;
+	private String disableDateTime;
+	private String parentCategory;
+
+	public String getName(final String language) {
+		return names.get(language);
+	}
+
+	public void setName(final String language, final String name) {
+		names.put(language, name);
+	}
+
+	public String getParentCategory() {
+		return parentCategory;
+	}
+
+	public void setParentCategory(final String parentCategory) {
+		this.parentCategory = parentCategory;
+	}
+	public String getEnableDateTime() {
+		return enableDateTime;
+	}
+
+	public String getDisableDateTime() {
+		return disableDateTime;
+	}
+
+	public void setEnableDateTime(final String enableDateTime) {
+		this.enableDateTime = enableDateTime;
+	}
+
+	public void setDisableDateTime(final String disableDateTime) {
+		this.disableDateTime = disableDateTime;
+	}
 
 	public String getCategoryCode() {
 		return categoryCode;

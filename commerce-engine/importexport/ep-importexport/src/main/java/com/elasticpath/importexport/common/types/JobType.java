@@ -18,6 +18,12 @@ public enum JobType {
 	/** Job Type for ProductBundle. */
 	PRODUCTBUNDLE("bundles"),
 
+	/** Job Type for Modifier Groups. */
+	MODIFIERGROUP("modifiergroups"),
+
+	/** Job type for Modifier Group Filters. **/
+	MODIFIERGROUPFILTER("modifiergroupfilters"),
+
 	/** Job Type for Catalog. */
 	CATALOG("catalogs"),
 
@@ -123,8 +129,20 @@ public enum JobType {
 	/** Customer Consents. */
 	CUSTOMER_CONSENT("customer_consents"),
 
-	/** Facet. */
-	FACET("facets");
+	/** Facets. */
+	FACET("facets"),
+
+	/** Sort attributes. */
+	SORT_ATTRIBUTE("sort_attributes"),
+
+	/** Store customer attributes. */
+	STORE_CUSTOMER_ATTRIBUTE("store_customer_attributes"),
+
+	/** Attribute policies. */
+	ATTRIBUTE_POLICY("attribute_policies"),
+	
+	/** Job Type for TagGroup. */
+	TAGGROUP("tag_groups");
 
 	/*
 	 * The map of Job Types available in the system. XML tag name is the key and JobType is the value.

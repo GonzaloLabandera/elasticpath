@@ -1,0 +1,18 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "description": "Schema for brand results definition",
+  "properties": {
+    "results": {
+      "type": "array",
+      "items": [
+        {
+          "$ref": "resource:/schema/brand.schema.json"
+        }
+      ],
+      "additionalItems": { "$ref": "resource:/schema/brand.schema.json" }
+    }
+  },
+  "required": [
+    "results"
+  ]
+}

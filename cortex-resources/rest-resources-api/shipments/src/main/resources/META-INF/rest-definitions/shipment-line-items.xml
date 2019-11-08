@@ -3,7 +3,6 @@
 
 	<family>
 		<name>shipments</name>
-		<description><![CDATA[Represents shipment line items.]]></description>
 
 		<resource>
 			<name>shipment-line-items</name>

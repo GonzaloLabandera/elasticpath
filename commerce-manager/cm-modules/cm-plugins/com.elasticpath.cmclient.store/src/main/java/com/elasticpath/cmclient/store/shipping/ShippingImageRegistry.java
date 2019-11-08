@@ -21,6 +21,11 @@ public final class ShippingImageRegistry extends AbstractImageRegistry {
 	/**
 	 * Search tab icon.
 	 */
+	public static final ImageDescriptor IMAGE_SHIPPING_LEVEL_TAB = getImageDescriptor(PLUGIN_ID, "empty_1x1.png"); //$NON-NLS-1$
+
+	/**
+	 * Shipping icon.
+	 */
 	public static final ImageDescriptor IMAGE_SHIPPING_LEVEL = getImageDescriptor(PLUGIN_ID, "shipping_default_22.png"); //$NON-NLS-1$
 
 	/**
@@ -32,7 +37,7 @@ public final class ShippingImageRegistry extends AbstractImageRegistry {
 	 * Shipping levels delete action.
 	 */
 	public static final ImageDescriptor IMAGE_SHIPPING_LEVEL_DELETE = getImageDescriptor(PLUGIN_ID, "shipping-delete_default_22.png"); //$NON-NLS-1$
-	
+
 	private ShippingImageRegistry() {
 		// utility class
 	}

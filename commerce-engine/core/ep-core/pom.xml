@@ -498,6 +498,10 @@
 		</dependency>
 		<dependency>
 			<groupId>com.elasticpath</groupId>
+			<artifactId>ep-core-domain-messaging</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.elasticpath</groupId>
 			<artifactId>ep-core-cm-user-messaging</artifactId>
 			<scope>provided</scope>
 		</dependency>

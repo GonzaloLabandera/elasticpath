@@ -3,7 +3,7 @@
  */
 package com.elasticpath.rest.resource.integration.epcommerce.repository.price.impl;
 
-import static com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder.impl.ShoppingCartRepositoryImpl.LINEITEM_WAS_NOT_FOUND;
+import static com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder.impl.ShoppingCartResourceConstants.LINEITEM_WAS_NOT_FOUND;
 
 import io.reactivex.Single;
 import org.osgi.service.component.annotations.Component;
@@ -41,7 +41,7 @@ public class PriceForCartLineItemEntityRepositoryImpl<E extends CartLineItemPric
 	public Single<CartLineItemPriceEntity> findOne(final PriceForCartLineItemIdentifier priceForCartLineItemIdentifier) {
 		CartIdentifier cartIdentifier = priceForCartLineItemIdentifier.getLineItem().getLineItems().getCart();
 		String cartGuid = cartIdentifier.getCartId().getValue();
-		String cartScope = cartIdentifier.getScope().getValue();
+		String cartScope = cartIdentifier.getCarts().getScope().getValue();
 		String lineItemId = priceForCartLineItemIdentifier.getLineItem().getLineItemId().getValue();
 		return getShoppingItemPricingSnapshotSingle(cartGuid, cartScope, lineItemId)
 				.flatMap(this::buildCartLineItemPriceEntitySingle);

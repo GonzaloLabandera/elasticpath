@@ -39,6 +39,15 @@
         <type>Visa</type>
         <type>MasterCard</type>
     </credit_card_types>
+    <cart_types>
+        <cart_type>
+            <name>default</name>
+            <guid>5364a6ef-5f8e-4ea0-ac40-54e6fff10eab</guid>
+            <modifiergroups>
+                <code>multicart</code>
+            </modifiergroups>
+        </cart_type>
+    </cart_types>
 </store>
 
 <store enabled="true" code="SNAPITUPUK">
@@ -84,6 +93,15 @@
         <type>Solo</type>
         <type>MasterCard</type>
     </credit_card_types>
+    <cart_types>
+        <cart_type>
+            <name>default</name>
+            <guid>5364a6ef-5f8e-4ea0-ac40-54e6fff10eac</guid>
+            <modifiergroups>
+                <code>multicart</code>
+            </modifiergroups>
+        </cart_type>
+    </cart_types>
 </store>
 
 <store enabled="true" code="SNAPITUP">
@@ -128,5 +146,14 @@
         <type>Visa</type>
         <type>MasterCard</type>
     </credit_card_types>
+    <cart_types>
+        <cart_type>
+            <name>default</name>
+            <guid>5364a6ef-5f8e-4ea0-ac40-54e6fff10ead</guid>
+            <modifiergroups>
+                <code>multicart</code>
+            </modifiergroups>
+        </cart_type>
+    </cart_types>
 </store>
 </stores>

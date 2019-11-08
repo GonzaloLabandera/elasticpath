@@ -11,6 +11,7 @@ import com.elasticpath.domain.catalog.ProductSku;
 import com.elasticpath.domain.shoppingcart.ShoppingCart;
 import com.elasticpath.repository.LinksRepository;
 import com.elasticpath.rest.definition.carts.CartIdentifier;
+import com.elasticpath.rest.definition.carts.CartsIdentifier;
 import com.elasticpath.rest.definition.items.ItemIdentifier;
 import com.elasticpath.rest.id.type.StringIdentifier;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder.ShoppingCartRepository;
@@ -49,7 +50,8 @@ public class CartsForItemRepository<I extends ItemIdentifier, LI extends CartIde
 			return Observable.empty();
 		} else {
 			return Observable.just(CartIdentifier.builder()
-					.withScope(StringIdentifier.of(cart.getStore().getCode()))
+					.withCarts(CartsIdentifier.builder()
+							.withScope(StringIdentifier.of(cart.getStore().getCode())).build())
 					.withCartId(StringIdentifier.of(cart.getGuid()))
 					.build());
 		}

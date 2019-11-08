@@ -12,18 +12,17 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.jmock.Expectations;
-import org.jmock.integration.junit4.JUnitRuleMockery;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 
-import com.elasticpath.domain.coupon.specifications.PotentialCouponUse;
+import org.jmock.Expectations;
+import org.jmock.integration.junit4.JUnitRuleMockery;
+
 import com.elasticpath.domain.rules.Coupon;
 import com.elasticpath.domain.rules.CouponConfig;
 import com.elasticpath.domain.rules.CouponUsage;
 import com.elasticpath.domain.rules.CouponUsageType;
-import com.elasticpath.domain.specifications.Specification;
 import com.elasticpath.domain.store.Store;
 import com.elasticpath.service.rules.CouponService;
 import com.elasticpath.service.rules.CouponUsageService;
@@ -34,16 +33,14 @@ public class CouponAutoApplierServiceImplTest {
 
 	private static final String COUPON_CODE = "COUPON_CODE";
 
+	private static final String STORECODE = "STORECODE";
+
 	@Rule
 	public final JUnitRuleMockery context = new JUnitRuleMockery();
 
 	private final CouponService mockCouponService = context.mock(CouponService.class);
 
 	private final CouponUsageService mockCouponUsageService = context.mock(CouponUsageService.class);
-
-	@SuppressWarnings("unchecked")
-	private final Specification<PotentialCouponUse> mockValidCouponUseSpecification = (Specification<PotentialCouponUse>) context
-			.mock(Specification.class);
 
 	private final Coupon mockCoupon = context.mock(Coupon.class);
 
@@ -63,20 +60,21 @@ public class CouponAutoApplierServiceImplTest {
 				allowing(mockCoupon).getCouponCode();
 				will(returnValue(COUPON_CODE));
 
-				ignoring(mockStore).getCode();
+				allowing(mockStore).getCode();
+				will(returnValue(STORECODE));
+
 				ignoring(mockStore).getUidPk();
 			}
 		});
 
 		applierService.setCouponService(mockCouponService);
 		applierService.setCouponUsageService(mockCouponUsageService);
-		applierService.setValidCouponUseSpecification(mockValidCouponUseSpecification);
 	}
 
 	@Test
 	public void testFilterKeepsUserSpecificCoupons() {
 		allowingCouponToBeUserSpecific(true);
-		allowingCouponToBeValid(RuleValidationResultEnum.SUCCESS);
+		allowingCouponToValidateAs(CouponUsageValidationResultEnum.SUCCESS);
 
 		Set<String> result = applierService.filterValidCouponsForCustomer(new HashSet<>(Arrays.asList(COUPON_CODE)),
 				mockStore, EMAIL);
@@ -88,7 +86,7 @@ public class CouponAutoApplierServiceImplTest {
 	@Test
 	public void testFilterKeepsInvalidCoupons() {
 		allowingCouponToBeUserSpecific(false);
-		allowingCouponToBeValid(RuleValidationResultEnum.ERROR_UNSPECIFIED);
+		allowingCouponToValidateAs(CouponUsageValidationResultEnum.ERROR_UNSPECIFIED);
 
 		Set<String> result = applierService.filterValidCouponsForCustomer(new HashSet<>(Arrays.asList(COUPON_CODE)),
 				mockStore, EMAIL);
@@ -111,7 +109,7 @@ public class CouponAutoApplierServiceImplTest {
 	public void testRetrieveCouponsForAutoApplyDoesNotReturnInvalidCoupons() {
 		setUpCouponUsageServiceToReturnCouponUsages();
 		allowingCouponUsageToBeActiveInCart(true);
-		allowingCouponToBeValid(RuleValidationResultEnum.ERROR_UNSPECIFIED);
+		allowingCouponToValidateAs(CouponUsageValidationResultEnum.ERROR_UNSPECIFIED);
 
 		Set<String> result = applierService.retrieveCouponsApplicableToAutoApply(mockStore, EMAIL);
 
@@ -122,7 +120,7 @@ public class CouponAutoApplierServiceImplTest {
 	public void testRetrieveCouponsForAutoApplyDoesReturnsActiveAndValidCouponsEligibleForCustomer() {
 		setUpCouponUsageServiceToReturnCouponUsages();
 		allowingCouponUsageToBeActiveInCart(true);
-		allowingCouponToBeValid(RuleValidationResultEnum.SUCCESS);
+		allowingCouponToValidateAs(CouponUsageValidationResultEnum.SUCCESS);
 
 		Set<String> result = applierService.retrieveCouponsApplicableToAutoApply(mockStore, EMAIL);
 
@@ -154,11 +152,11 @@ public class CouponAutoApplierServiceImplTest {
 		});
 	}
 
-	private void allowingCouponToBeValid(final RuleValidationResultEnum isValid) {
+	private void allowingCouponToValidateAs(final CouponUsageValidationResultEnum result) {
 		context.checking(new Expectations() {
 			{
-				allowing(mockValidCouponUseSpecification).isSatisfiedBy(with(any(PotentialCouponUse.class)));
-				will(returnValue(isValid));
+				allowing(mockCouponUsageService).validateCouponRuleAndUsage(mockCoupon, STORECODE, EMAIL);
+				will(returnValue(result));
 			}
 		});
 	}

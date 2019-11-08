@@ -24,7 +24,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import com.elasticpath.domain.cartmodifier.CartItemModifierField;
+import com.elasticpath.domain.modifier.ModifierField;
 import com.elasticpath.domain.catalog.Product;
 import com.elasticpath.domain.catalog.ProductSku;
 import com.elasticpath.domain.shoppingcart.ShoppingItem;
@@ -35,7 +35,7 @@ import com.elasticpath.rest.definition.wishlists.WishlistLineItemEntity;
 import com.elasticpath.rest.definition.wishlists.WishlistLineItemIdentifier;
 import com.elasticpath.rest.form.SubmitResult;
 import com.elasticpath.rest.form.SubmitStatus;
-import com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder.CartItemModifiersRepository;
+import com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder.ModifiersRepository;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.item.ItemRepository;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.transform.impl.ReactiveAdapterImpl;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.wishlist.WishlistRepository;
@@ -58,7 +58,7 @@ public class WishlistLineItemEntityRepositoryImplTest {
 	private WishList wishList;
 
 	@Mock
-	private CartItemModifierField cartItemModifierField;
+	private ModifierField modifierField;
 
 	@Mock
 	private ShoppingItem shoppingItem;
@@ -84,7 +84,7 @@ public class WishlistLineItemEntityRepositoryImplTest {
 	private ItemRepository itemRepository;
 
 	@Mock
-	private CartItemModifiersRepository cartItemModifiersRepository;
+	private ModifiersRepository modifiersRepository;
 
 	@InjectMocks
 	private ReactiveAdapterImpl reactiveAdapter;
@@ -186,8 +186,8 @@ public class WishlistLineItemEntityRepositoryImplTest {
 		when(wishlistRepository.getProductSku(wishList, LINE_ITEM_ID)).thenReturn(Single.just(productSku));
 		when(itemRepository.getItemIdForSku(productSku)).thenReturn(SKU_CODE);
 		when(shoppingItem.getFields()).thenReturn(ITEM_ID_MAP);
-		when(cartItemModifiersRepository.findCartItemModifiersByProduct(product)).thenReturn(ImmutableList.of(cartItemModifierField));
-		when(cartItemModifierField.getCode()).thenReturn(ItemRepository.SKU_CODE_KEY);
+		when(modifiersRepository.findModifiersByProduct(product)).thenReturn(ImmutableList.of(modifierField));
+		when(modifierField.getCode()).thenReturn(ItemRepository.SKU_CODE_KEY);
 		when(wishList.getGuid()).thenReturn(WISHLIST_ID);
 
 		repository.findOne(wishlistLineItemIdentifier)

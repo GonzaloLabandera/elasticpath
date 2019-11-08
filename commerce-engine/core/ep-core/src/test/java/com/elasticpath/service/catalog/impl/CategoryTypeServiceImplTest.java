@@ -27,8 +27,8 @@ import com.elasticpath.domain.attribute.impl.AttributeGroupAttributeImpl;
 import com.elasticpath.domain.attribute.impl.AttributeGroupImpl;
 import com.elasticpath.domain.attribute.impl.AttributeImpl;
 import com.elasticpath.domain.catalog.CategoryType;
-import com.elasticpath.domain.catalog.CategoryTypeLoadTuner;
 import com.elasticpath.domain.catalog.impl.CategoryTypeImpl;
+import com.elasticpath.persistence.api.LoadTuner;
 import com.elasticpath.service.catalog.CategoryTypeService;
 import com.elasticpath.test.jmock.AbstractEPServiceTestCase;
 
@@ -57,8 +57,7 @@ public class CategoryTypeServiceImplTest extends AbstractEPServiceTestCase {
 		};
 
 		categoryTypeService.setPersistenceEngine(getPersistenceEngine());
-
-		categoryTypeService.setFetchPlanHelper(getFetchPlanHelper());
+		categoryTypeService.setFetchPlanHelper(getMockFetchPlanHelper());
 	}
 
 	/**
@@ -146,8 +145,7 @@ public class CategoryTypeServiceImplTest extends AbstractEPServiceTestCase {
 				allowing(getMockPersistenceEngine()).get(CategoryTypeImpl.class, uid);
 				will(returnValue(categoryType));
 
-				oneOf(getMockFetchPlanHelper()).configureCategoryTypeFetchPlan(with(aNull(CategoryTypeLoadTuner.class)));
-				oneOf(getMockFetchPlanHelper()).clearFetchPlan();
+				oneOf(getMockFetchPlanHelper()).setLoadTuners(new LoadTuner[]{null});
 			}
 		});
 
@@ -182,11 +180,9 @@ public class CategoryTypeServiceImplTest extends AbstractEPServiceTestCase {
 		categoryType.setAttributeGroup(group);
 		context.checking(new Expectations() {
 			{
+				oneOf(getMockFetchPlanHelper()).setLoadTuners(new LoadTuner[]{null});
 				oneOf(getMockPersistenceEngine()).get(CategoryTypeImpl.class, categoryType.getUidPk());
 				will(returnValue(null));
-
-				oneOf(getMockFetchPlanHelper()).configureCategoryTypeFetchPlan(with(aNull(CategoryTypeLoadTuner.class)));
-				oneOf(getMockFetchPlanHelper()).clearFetchPlan();
 			}
 		});
 
@@ -213,11 +209,9 @@ public class CategoryTypeServiceImplTest extends AbstractEPServiceTestCase {
 		// expectations
 		context.checking(new Expectations() {
 			{
+				oneOf(getMockFetchPlanHelper()).setLoadTuners(new LoadTuner[]{null});
 				oneOf(getMockPersistenceEngine()).get(CategoryTypeImpl.class, categoryType.getUidPk());
 				will(returnValue(categoryType));
-
-				oneOf(getMockFetchPlanHelper()).configureCategoryTypeFetchPlan(with(aNull(CategoryTypeLoadTuner.class)));
-				oneOf(getMockFetchPlanHelper()).clearFetchPlan();
 			}
 		});
 

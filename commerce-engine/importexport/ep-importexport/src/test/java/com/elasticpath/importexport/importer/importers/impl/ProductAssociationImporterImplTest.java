@@ -18,9 +18,6 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 
-import com.elasticpath.commons.beanframework.BeanFactory;
-import com.elasticpath.commons.constants.ContextIdNames;
-import com.elasticpath.commons.util.impl.UtilityImpl;
 import com.elasticpath.domain.catalog.Catalog;
 import com.elasticpath.domain.catalog.Product;
 import com.elasticpath.domain.catalog.ProductAssociation;
@@ -28,7 +25,6 @@ import com.elasticpath.domain.catalog.ProductAssociationType;
 import com.elasticpath.domain.catalog.impl.CatalogImpl;
 import com.elasticpath.domain.catalog.impl.ProductAssociationImpl;
 import com.elasticpath.domain.catalog.impl.ProductImpl;
-import com.elasticpath.domain.impl.ElasticPathImpl;
 import com.elasticpath.importexport.common.adapters.DomainAdapter;
 import com.elasticpath.importexport.common.dto.productassociation.ProductAssociationDTO;
 import com.elasticpath.importexport.common.dto.productassociation.ProductAssociationTypeDTO;
@@ -129,15 +125,6 @@ public class ProductAssociationImporterImplTest {
 		ImportConfiguration importConfiguration = new ImportConfiguration();
 		importConfiguration.setImporterConfigurationMap(new HashMap<>());
 		
-		final BeanFactory mockBeanFactory = context.mock(BeanFactory.class);
-		context.checking(new Expectations() {
-			{
-				allowing(mockBeanFactory).getBean(ContextIdNames.UTILITY);
-				will(returnValue(new UtilityImpl()));
-			}
-		});
-		((ElasticPathImpl) ElasticPathImpl.getInstance()).setBeanFactory(mockBeanFactory);
-				
 		productAssociationImporter.initialize(new ImportContext(importConfiguration), mockSavingStrategy);
 		
 		CollectionsStrategy<ProductAssociation, ProductAssociationDTO> collectionsStrategy = productAssociationImporter.getCollectionsStrategy();

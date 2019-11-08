@@ -52,7 +52,6 @@ Feature: Search pagination feature
     When I POST to the search form with a 5000 char keyword
     Then the HTTP status is bad request
 
-    #TODO implement expected behaviour determined by CUST-1189
   Scenario: When listPagination setting is set to 0 calling GET on the search form will return a 500 error
     Given I am logged into scope kobee as a public shopper
     When I follow the root searches link

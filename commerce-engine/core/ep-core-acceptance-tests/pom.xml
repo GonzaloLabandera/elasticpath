@@ -93,6 +93,16 @@
 		</dependency>
 		<dependency>
 			<groupId>com.elasticpath</groupId>
+			<artifactId>ep-core-domain-messaging</artifactId>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.elasticpath</groupId>
+			<artifactId>ep-catalog-message-handler</artifactId>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.elasticpath</groupId>
 			<artifactId>openjpa-osgi-wrapper</artifactId>
 			<scope>runtime</scope>
 		</dependency>

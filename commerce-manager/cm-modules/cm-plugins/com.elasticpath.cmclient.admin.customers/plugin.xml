@@ -8,7 +8,7 @@
       <view
             allowMultiple="false"
             class="com.elasticpath.cmclient.admin.customers.views.AttributeListView"
-            icon="icons/attribute_default_22.png"
+            icon="icons/empty_1x1.png"
             id="com.elasticpath.cmclient.admin.customers.views.AttributeListView"
             name="%profileAttributesView.name">
       </view>
@@ -18,11 +18,11 @@
       <view
             allowMultiple="false"
             class="com.elasticpath.cmclient.admin.customers.views.CustomerSegmentListView"
-            icon="icons/customer-segment_default_22.png"
+            icon="icons/empty_1x1.png"
             id="com.elasticpath.cmclient.admin.customers.views.CustomerSegmentListView"
             name="%customerSegmentView.name">
       </view>
-   </extension>   
+   </extension>
    <extension
          point="com.elasticpath.cmclient.admin.adminSections">
       <adminSection
@@ -43,7 +43,7 @@
                activityId="com.elasticpath.cmclient.admin.authorization.activity"
                key="ADMIN_CUSTOMER_SEGMENTS_MANAGE"
                name="%manageCustomerSegment.name">
-         </permission>         
+         </permission>
       </permissions>
    </extension>
    <extension
@@ -79,16 +79,16 @@
               optional="true">
         </commandParameter>
       </command>
-   </extension>   
+   </extension>
    <extension
          point="org.eclipse.ui.editors">
       <editor
             class="com.elasticpath.cmclient.admin.customers.views.CustomerSegmentEditor"
-            icon="icons/customer-segment_default_22.png"
+            icon="icons/empty_1x1.png"
             id="com.elasticpath.cmclient.admin.customers.views.CustomerSegmentEditor"
             contributorClass="com.elasticpath.cmclient.core.editors.BaseCmClientEditorContributor"
             name="%customerSegmentEditor.name">
       </editor>
-   </extension>   
+   </extension>
 
 </plugin>

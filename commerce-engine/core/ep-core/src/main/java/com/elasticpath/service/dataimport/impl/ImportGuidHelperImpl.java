@@ -3,11 +3,13 @@
  */
 package com.elasticpath.service.dataimport.impl;
 
-import java.util.List;
-import javax.persistence.EntityManager;
+import static com.elasticpath.persistence.support.FetchFieldConstants.ATTRIBUTE_VALUE_MAP;
+import static com.elasticpath.persistence.support.FetchFieldConstants.PRODUCT_CATEGORIES;
+import static com.elasticpath.persistence.support.FetchFieldConstants.PRODUCT_SKUS_INTERNAL;
 
-import org.apache.openjpa.persistence.FetchPlan;
-import org.apache.openjpa.persistence.OpenJPAPersistence;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 import com.elasticpath.base.exception.EpServiceException;
 import com.elasticpath.commons.util.CategoryGuidUtil;
@@ -19,7 +21,6 @@ import com.elasticpath.domain.catalog.impl.ProductImpl;
 import com.elasticpath.domain.customer.Customer;
 import com.elasticpath.domain.skuconfiguration.SkuOptionValue;
 import com.elasticpath.domain.tax.TaxCode;
-import com.elasticpath.persistence.openjpa.JpaPersistenceSession;
 import com.elasticpath.service.catalog.CategoryLookup;
 import com.elasticpath.service.catalog.CategoryService;
 import com.elasticpath.service.dataimport.ImportGuidHelper;
@@ -80,22 +81,10 @@ public class ImportGuidHelperImpl extends AbstractEpPersistenceServiceImpl imple
 	public Product findProductByGuid(final String guid, final boolean flagLoadCategories,
 									 final boolean flagLoadAttributes, final boolean flagLoadSkus) throws EpServiceException {
 
-		if (flagLoadCategories) {
-			addFieldToFetchPlan(ProductImpl.class, "productCategories");
-		}
-
-		if (flagLoadAttributes) {
-			addFieldToFetchPlan(ProductImpl.class, "attributeValueMap");
-		}
-
-		if (flagLoadSkus) {
-			addFieldToFetchPlan(ProductImpl.class, "productSkusInternal");
-		}
-
-		final List<Product> products = getPersistenceEngine().retrieveByNamedQuery("PRODUCT_SELECT_BY_GUID", guid);
+		final List<Product> products = getPersistenceEngine()
+			.withLazyFields(ProductImpl.class, getLazyFields(flagLoadCategories, flagLoadAttributes, flagLoadSkus))
+			.retrieveByNamedQuery("PRODUCT_SELECT_BY_GUID", guid);
 		
-		clearFetchPlan();
-
 		if (products.isEmpty()) {
 			return null;
 		}
@@ -283,43 +272,6 @@ public class ImportGuidHelperImpl extends AbstractEpPersistenceServiceImpl imple
 	}
 
 	/**
-	 * Get the fetch plan.
-	 */
-	private FetchPlan getFetchPlan() {
-		EntityManager entityManager;
-		try {
-			entityManager = ((JpaPersistenceSession) getPersistenceEngine().getSharedPersistenceSession()).getEntityManager();
-			return OpenJPAPersistence.cast(entityManager).getFetchPlan();
-		} catch (ClassCastException ex) {
-			return null;
-		}
-	}
-
-	/**
-	 * Add a single field to the fetch plan.
-	 * @param clazz class of the object on which to request the specified fields
-	 * @param fieldToLoad the fields to load in requested objects
-	 */
-	public void addFieldToFetchPlan(final Class<?> clazz, final String fieldToLoad) {
-		FetchPlan fetchPlan = getFetchPlan();
-		if (fetchPlan == null) {
-			return;
-		}
-		fetchPlan.addField(clazz, fieldToLoad);
-	}
-
-	/**
-	 * Clear the fetch plan configuration.
-	 */
-	private void clearFetchPlan() {
-		FetchPlan fetchPlan = getFetchPlan();
-		if (fetchPlan == null) {
-			return;
-		}
-		fetchPlan.clearFields();
-	}
-	
-	/**
 	 * Returns a <code>List</code> of Category objects linked to the Category indicated by the given <code>masterCategoryUid</code>.
 	 * 
 	 * @param masterCategoryUid the master category uid to look up
@@ -341,6 +293,25 @@ public class ImportGuidHelperImpl extends AbstractEpPersistenceServiceImpl imple
 	public boolean isTaxCodeExist(final String taxCode) {
 		List<TaxCode> result = getPersistenceEngine().retrieveByNamedQuery("TAXCODE_FIND_BY_CODE", taxCode);
 		return !result.isEmpty();
+	}
+
+
+	private Collection<String> getLazyFields(final boolean flagLoadCategories, final boolean flagLoadAttributes, final boolean flagLoadSkus) {
+		List<String> lazyFields = new ArrayList<>();
+
+		if (flagLoadCategories) {
+			lazyFields.add(PRODUCT_CATEGORIES);
+		}
+
+		if (flagLoadAttributes) {
+			lazyFields.add(ATTRIBUTE_VALUE_MAP);
+		}
+
+		if (flagLoadSkus) {
+			lazyFields.add(PRODUCT_SKUS_INTERNAL);
+		}
+
+		return lazyFields;
 	}
 
 	public void setCategoryService(final CategoryService categoryService) {

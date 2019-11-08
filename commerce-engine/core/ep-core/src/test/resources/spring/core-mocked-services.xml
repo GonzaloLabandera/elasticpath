@@ -48,12 +48,34 @@
 	<bean id="customerEventMessagePublisher" class="com.elasticpath.commons.beanframework.NoOpProxyFactoryBean">
 		<property name="serviceInterface" value="com.elasticpath.messaging.EventMessagePublisher"/>
 	</bean>
+
+	<bean id="domainEventMessagePublisher" class="com.elasticpath.commons.beanframework.NoOpProxyFactoryBean">
+		<property name="serviceInterface" value="com.elasticpath.messaging.EventMessagePublisher"/>
+	</bean>
+
+	<bean id="catalogEventMessagePublisher" class="com.elasticpath.commons.beanframework.NoOpProxyFactoryBean">
+		<property name="serviceInterface" value="com.elasticpath.messaging.EventMessagePublisher"/>
+	</bean>
+
 	<bean id="orderEventMessagePublisher" class="com.elasticpath.commons.beanframework.NoOpProxyFactoryBean">
 		<property name="serviceInterface" value="com.elasticpath.messaging.EventMessagePublisher"/>
 	</bean>
 
 	<!-- Short-circuit endpoints to avoid settings framework call -->
 	<bean id="customerEventExternalEndpoint" class="org.apache.camel.spring.CamelEndpointFactoryBean">
+		<property name="uri" value="direct:/dev/null"/>
+	</bean>
+	<bean id="domainEventExternalEndpoint" class="org.apache.camel.spring.CamelEndpointFactoryBean">
+		<property name="uri" value="direct:/dev/null" />
+	</bean>
+	<bean id="epDomainMessagingDomainEventExternalEndpoint" class="org.apache.camel.spring.CamelEndpointFactoryBean">
+		<property name="uri" value="direct:/dev/null" />
+		<property name="camelContextId" value="ep-domain-messaging"/>
+	</bean>
+	<bean id="domainDeadLetterEventExternalEndpoint" class="org.apache.camel.spring.CamelEndpointFactoryBean">
+		<property name="uri" value="direct:/dev/null" />
+	</bean>
+	<bean id="catalogEventExternalEndpoint" class="org.apache.camel.spring.CamelEndpointFactoryBean">
 		<property name="uri" value="direct:/dev/null" />
 	</bean>
 	<bean id="orderEventExternalEndpoint" class="org.apache.camel.spring.CamelEndpointFactoryBean">
@@ -74,15 +96,15 @@
 	</bean>
 	<bean id="giftCertificateEventExternalEndpoint" class="org.apache.camel.spring.CamelEndpointFactoryBean">
 		<property name="uri" value="direct:/dev/null" />
-	</bean>	
+	</bean>
 	<bean id="epCmUserMessagingCmUserEventExternalEndpoint" class="org.apache.camel.spring.CamelEndpointFactoryBean">
 		<property name="uri" value="direct:/dev/null" />
 		<property name="camelContextId" value="ep-cm-user-messaging" />
-	</bean>		
+	</bean>
 	<bean id="epDataImportMessagingDataImportEventExternalEndpoint" class="org.apache.camel.spring.CamelEndpointFactoryBean">
 		<property name="uri" value="direct:/dev/null" />
 		<property name="camelContextId" value="ep-dataimport-messaging"/>
-	</bean>	
+	</bean>
 
 	<bean id="priceListStackInvalidator" class="com.elasticpath.domain.customer.impl.TagSetInvalidationDeterminerImpl">
 		<property name="tagDictionaryDao" ref="tagDictionaryDao" />
@@ -105,4 +127,14 @@
 		<property name="serviceInterface" value="com.elasticpath.shipping.connectivity.service.ShippingCalculationService" />
 	</bean>
 
+	<!--
+		It is required to override persistenceEngineTarget bean, defined in openjpa.xml,
+		because a db connection is required for verification of the TX isolation level but
+		there is none since this is not an integration test.
+	-->
+	<bean id="persistenceEngineTarget" class="com.elasticpath.persistence.openjpa.impl.JpaPersistenceEngineImpl"/>
+
+	<alias alias="readOnlyEntityManagerFactory" name="entityManagerFactory"/>
+
+	<alias alias="readOnlyDataSource" name="dataSource"/>
 </beans>

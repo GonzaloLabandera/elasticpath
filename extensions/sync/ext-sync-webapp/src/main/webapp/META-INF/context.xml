@@ -9,7 +9,7 @@
 	<Resource name="jdbc/epjndi"
 		auth="Container"
 		scope="Shareable"
-		type="javax.sql.DataSource"
+		type="${epdb.data.source.type}"
 		maxActive="100"
 		maxIdle="30"
 		maxWait="10000"
@@ -19,7 +19,7 @@
 		username="${epdb.username}"
 		password="${epdb.password}"
 		driverClassName="${epdb.jdbc.driver}"
-			  factory="org.apache.tomcat.jdbc.pool.DataSourceFactory"
+		factory="${epdb.data.source.factory}"
 		url="${epdb.url}"
 		/>
 	<Resource name="jdbc/targetepjndi"
@@ -36,8 +36,8 @@
 		username="${epdb.synctarget.username}"
 		password="${epdb.synctarget.password}"
 		driverClassName="${epdb.synctarget.jdbc.driver}"
-			  factory="org.apache.tomcat.jdbc.pool.DataSourceFactory"
-			  url="${epdb.synctarget.url}"
+		factory="org.apache.tomcat.jdbc.pool.DataSourceFactory"
+		url="${epdb.synctarget.url}"
 	  />
 	<Resource auth="Container"
 		name="jms/JMSConnectionFactory"
@@ -49,6 +49,32 @@
 		factory="${ep.jms.factory}"
 		brokerURL="${ep.jms.url}"
 		/>
+	<Resource name="jdbc/epjndi-xa"
+			  auth="Container"
+			  scope="Shareable"
+			  type="${epdb.data.source.xa.type}"
+			  maxActive="100"
+			  maxIdle="30"
+			  maxWait="10000"
+			  removeAbandoned="true"
+			  user="${epdb.synctarget.username}"
+			  password="${epdb.synctarget.password}"
+			  driverClassName="${epdb.synctarget.jdbc.driver}"
+			  factory="${epdb.data.source.xa.factory}"
+			  pinGlobalTxToPhysicalConnection="true"
+			  url="${epdb.synctarget.url}"
+	/>
+	<Resource name="jms/JMSConnectionFactory-xa"
+			  auth="Container"
+			  type="${ep.jms.xa.type}"
+			  maxConnections="25"
+			  maximumActiveSessionPerConnection="25"
+			  idleTimeout="10000"
+			  description="XA JMS Connection Factory"
+			  factory="${ep.jms.xa.factory}"
+			  brokerURL="${ep.synctarget.jms.url}"
+	/>
+
 
 </Context>
 

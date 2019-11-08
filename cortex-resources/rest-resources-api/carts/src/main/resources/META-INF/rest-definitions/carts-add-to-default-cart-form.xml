@@ -3,7 +3,6 @@
 
 	<family>
 		<name>carts</name>
-		<description><![CDATA[Items are added to the user's default cart by using a form.]]></description>
 
 		<resource>
 			<name>add-to-default-cart-form</name>

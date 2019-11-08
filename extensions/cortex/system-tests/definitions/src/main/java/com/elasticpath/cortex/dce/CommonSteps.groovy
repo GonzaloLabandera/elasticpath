@@ -8,6 +8,7 @@ import static org.assertj.core.api.Assertions.assertThat
 
 import com.jayway.jsonpath.JsonPath
 import cucumber.api.DataTable
+import cucumber.api.java.en.And
 import cucumber.api.java.en.Then
 import cucumber.api.java.en.When
 import org.json.JSONArray
@@ -351,9 +352,9 @@ class CommonSteps {
 		savedRel = client.body.links[0].href
 	}
 
-	@Then('^post to the saved (?:.*)$')
+	@Then('^post to the saved (?:.*) uri$')
 	static void postToSavedURI() {
-		client.POST(savedRel, [:])
+		client.POST(savedUri, [:])
 	}
 
 	@Then('^the uri of (.+) matches the uri of saved (.+) uri$')
@@ -515,6 +516,58 @@ class CommonSteps {
 		client.headers.put(USER_TRAITS_HEADER, "LOCALE=$locale,CURRENCY=$currency")
 	}
 
+	@When('^I (?:unselect|select) the choice with field (.+) and value (.+)')
+	static void selectChoiceWithField(String field, String choice) {
+		boolean choiceExists = false
+
+		client.body.links.find {
+			if (it.rel == "choice" || it.rel == "chosen") {
+				client.GET(it.href)
+				def choiceSelector = client.save()
+				client.description()
+				if (client[field] == choice) {
+					client.resume(choiceSelector)
+					client.selectaction()
+							.follow()
+					choiceExists = true
+				}
+			}
+		}
+
+		assertThat(choiceExists)
+				.as("Unable to find choice - $choice")
+				.isTrue()
+	}
+
+	static boolean isChoiceExists(String field, String choice) {
+		boolean choiceExists = false
+
+		client.body.links.find {
+			if (it.rel == "choice" || it.rel == "chosen") {
+				client.GET(it.href)
+				client.description()
+				if (client[field] == choice) {
+					choiceExists = true
+				}
+			}
+		}
+		return choiceExists
+	}
+
+	@Then('^I should see a choice with field (.+) and value (.+)')
+	static void verifyChoiceExists(String field, String choice) {
+		assertThat(isChoiceExists(field, choice))
+				.as("Unable to find choice - $choice")
+				.isTrue()
+	}
+
+	@Then('^I should not see a choice with field (.+) and value (.+)')
+	static void verifyChoiceNotExists(String field, String choice) {
+		assertThat(isChoiceExists(field, choice))
+				.as("Unable to find choice - $choice")
+				.isFalse()
+	}
+
 	@Then('^the list contains an element with the following (.+)')
 	static void verifyElementListContains(String field, DataTable dataTable) {
 		def elementList = dataTable.asList(String)
@@ -594,6 +647,25 @@ class CommonSteps {
 					.as("The field $valueField doesn't contain $value")
 					.contains(value)
 		}
+	}
+
+	@And('^I attempt to get the uri (.+)$')
+	public void getTheHardcodedUri(String uri) {
+
+		client.GET(uri)
+		.stopIfFailure();
+	}
+
+	@And('^I attempt to post to the uri (.+)$')
+	static void postTheHardcodedUri(String uri) {
+
+		def fields = [:]
+		fields.put('name', "test")
+
+		client.POST(uri, [
+				descriptor: fields
+		])				.stopIfFailure()
+
 	}
 
 	static class KeyValue {

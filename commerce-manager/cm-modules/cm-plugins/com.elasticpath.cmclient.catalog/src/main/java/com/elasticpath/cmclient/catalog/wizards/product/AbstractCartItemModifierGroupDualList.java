@@ -23,19 +23,19 @@ import com.elasticpath.cmclient.policy.common.PolicyActionContainer;
 import com.elasticpath.cmclient.policy.ui.AbstractPolicyAwareDualListBox;
 import com.elasticpath.cmclient.policy.ui.IPolicyTargetLayoutComposite;
 import com.elasticpath.commons.constants.ContextIdNames;
-import com.elasticpath.domain.cartmodifier.CartItemModifierGroup;
+import com.elasticpath.domain.modifier.ModifierGroup;
 import com.elasticpath.domain.catalog.Catalog;
-import com.elasticpath.service.cartitemmodifier.CartItemModifierService;
+import com.elasticpath.service.modifier.ModifierService;
 
 /**
  * The class to display the dual assignment list for product cart item modifier group
  * assignment for adding/Editing cart item modifier group.
  */
-public abstract class AbstractCartItemModifierGroupDualList extends AbstractPolicyAwareDualListBox<List<CartItemModifierGroup>> {
+public abstract class AbstractCartItemModifierGroupDualList extends AbstractPolicyAwareDualListBox<List<ModifierGroup>> {
 
 	private ViewerFilter availableCartItemModifierGroupFilter;
 
-	private List<CartItemModifierGroup> availableCartItemModifierGroupList;
+	private List<ModifierGroup> availableCartItemModifierGroupList;
 
 	private final Catalog catalog;
 
@@ -50,7 +50,7 @@ public abstract class AbstractCartItemModifierGroupDualList extends AbstractPoli
 	 */
 	public AbstractCartItemModifierGroupDualList(final IPolicyTargetLayoutComposite parentComposite,
 			final PolicyActionContainer container,
-			final List<CartItemModifierGroup> model,
+			final List<ModifierGroup> model,
 			final String availableTitle,
 			final String selectedTitle,
 			final IEpLayoutData data,
@@ -106,32 +106,32 @@ public abstract class AbstractCartItemModifierGroupDualList extends AbstractPoli
 		if (selection == null || selection.isEmpty()) {
 			return false;
 		}
-		final List<CartItemModifierGroup> cartItemModifierGroupList = getModel();
+		final List<ModifierGroup> cartItemModifierGroupList = getModel();
 		cartItemModifierGroupList.addAll(selection.toList());
 		return true;
 	}
 
 	@Override
-	public Collection<CartItemModifierGroup> getAssigned() {
+	public Collection<ModifierGroup> getAssigned() {
 		return getModel();
 	}
 
 	@Override
-	public Collection<CartItemModifierGroup> getAvailable() {
+	public Collection<ModifierGroup> getAvailable() {
 		if (availableCartItemModifierGroupList == null) {
-			final CartItemModifierService cartItemModifierService =
-					(ServiceLocator.getService(ContextIdNames.CART_ITEM_MODIFIER_SERVICE));
-			availableCartItemModifierGroupList = getAvailableCartItemModifierGroupsList(cartItemModifierService);
+			final ModifierService modifierService =
+					(ServiceLocator.getService(ContextIdNames.MODIFIER_SERVICE));
+			availableCartItemModifierGroupList = getAvailableCartItemModifierGroupsList(modifierService);
 		}
 		return availableCartItemModifierGroupList;
 	}
 
 	/**
-	 * @param cartItemModifierService the CartItemModifierService object.
+	 * @param modifierService the ModifierService object.
 	 * @return the available Cart Item Modifier list in the database.
 	 */
-	public abstract List<CartItemModifierGroup> getAvailableCartItemModifierGroupsList(
-			CartItemModifierService cartItemModifierService);
+	public abstract List<ModifierGroup> getAvailableCartItemModifierGroupsList(
+			ModifierService modifierService);
 
 	@Override
 	public ViewerFilter getAvailableFilter() {
@@ -151,7 +151,7 @@ public abstract class AbstractCartItemModifierGroupDualList extends AbstractPoli
 		if (selection == null || selection.isEmpty()) {
 			return false;
 		}
-		final List<CartItemModifierGroup> cartItemModifierGroupList = getModel();
+		final List<ModifierGroup> cartItemModifierGroupList = getModel();
 		cartItemModifierGroupList.removeAll(selection.toList());
 		return true;
 	}
@@ -164,7 +164,7 @@ public abstract class AbstractCartItemModifierGroupDualList extends AbstractPoli
 
 		@Override
 		public String getText(final Object element) {
-			final CartItemModifierGroup cartItemModifierGroup = (CartItemModifierGroup) element;
+			final ModifierGroup cartItemModifierGroup = (ModifierGroup) element;
 			return cartItemModifierGroup.getCode();
 		}
 	}

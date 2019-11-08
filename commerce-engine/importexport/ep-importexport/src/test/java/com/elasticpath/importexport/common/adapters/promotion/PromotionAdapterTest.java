@@ -339,10 +339,10 @@ public class PromotionAdapterTest {
 	 */
 	@Test
 	public void testCreateDomainObject() {
-		when(mockBeanFactory.getBean(ContextIdNames.PROMOTION_RULE)).thenReturn(new PromotionRuleImpl());
+		when(mockBeanFactory.getPrototypeBean(ContextIdNames.PROMOTION_RULE, Rule.class)).thenReturn(new PromotionRuleImpl());
 
 		assertThat(promotionAdapter.createDomainObject()).isNotNull();
-		verify(mockBeanFactory).getBean(ContextIdNames.PROMOTION_RULE);
+		verify(mockBeanFactory).getPrototypeBean(ContextIdNames.PROMOTION_RULE, Rule.class);
 	}
 
 	/**
@@ -396,10 +396,10 @@ public class PromotionAdapterTest {
 	public void testCreateRuleActionException() {
 		final String actionType = RuleElementType.CART_ANY_SKU_AMOUNT_DISCOUNT_ACTION.getPropertyKey();
 
-		when(mockBeanFactory.getBean(actionType)).thenReturn(null);
+		when(mockBeanFactory.getPrototypeBean(actionType, RuleAction.class)).thenReturn(null);
 
 		promotionAdapter.createRuleAction(actionType);
-		verify(mockBeanFactory).getBean(actionType);
+		verify(mockBeanFactory).getPrototypeBean(actionType, RuleAction.class);
 	}
 
 	/**
@@ -410,10 +410,10 @@ public class PromotionAdapterTest {
 		final String actionType = RuleElementType.CART_ANY_SKU_AMOUNT_DISCOUNT_ACTION.getPropertyKey();
 		final RuleAction ruleAction = new CartAnySkuAmountDiscountActionImpl();
 
-		when(mockBeanFactory.getBean(actionType)).thenReturn(ruleAction);
+		when(mockBeanFactory.getPrototypeBean(actionType, RuleAction.class)).thenReturn(ruleAction);
 
 		assertThat(promotionAdapter.createRuleAction(actionType)).isEqualTo(ruleAction);
-		verify(mockBeanFactory).getBean(actionType);
+		verify(mockBeanFactory).getPrototypeBean(actionType, RuleAction.class);
 	}
 
 	/**
@@ -455,15 +455,17 @@ public class PromotionAdapterTest {
 
 		final List<ActionDTO> actionDtoList = ImmutableList.of(actionDto1, actionDto2);
 
-		when(mockBeanFactory.getBean(RuleElementType.CART_ANY_SKU_AMOUNT_DISCOUNT_ACTION.getPropertyKey())).thenReturn(ruleAction1);
-		when(mockBeanFactory.getBean(RuleElementType.CART_ANY_SKU_PERCENT_DISCOUNT_ACTION.getPropertyKey())).thenReturn(ruleAction2);
+		when(mockBeanFactory.getPrototypeBean(RuleElementType.CART_ANY_SKU_AMOUNT_DISCOUNT_ACTION.getPropertyKey(), RuleAction.class))
+			.thenReturn(ruleAction1);
+		when(mockBeanFactory.getPrototypeBean(RuleElementType.CART_ANY_SKU_PERCENT_DISCOUNT_ACTION.getPropertyKey(), RuleAction.class))
+			.thenReturn(ruleAction2);
 
 		promotionAdapter.populatedDomainActions(rule, actionDtoList);
 
-		verify(mockBeanFactory).getBean(RuleElementType.CART_ANY_SKU_AMOUNT_DISCOUNT_ACTION.getPropertyKey());
+		verify(mockBeanFactory).getPrototypeBean(RuleElementType.CART_ANY_SKU_AMOUNT_DISCOUNT_ACTION.getPropertyKey(), RuleAction.class);
 		verify(actionAdapter).populateDomain(actionDto1, ruleAction1);
 		verify(rule).addRuleElement(ruleAction1);
-		verify(mockBeanFactory).getBean(RuleElementType.CART_ANY_SKU_PERCENT_DISCOUNT_ACTION.getPropertyKey());
+		verify(mockBeanFactory).getPrototypeBean(RuleElementType.CART_ANY_SKU_PERCENT_DISCOUNT_ACTION.getPropertyKey(), RuleAction.class);
 		verify(actionAdapter).populateDomain(actionDto2, ruleAction2);
 		verify(rule).addRuleElement(ruleAction2);
 	}

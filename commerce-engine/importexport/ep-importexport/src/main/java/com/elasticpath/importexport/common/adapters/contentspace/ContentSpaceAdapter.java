@@ -45,6 +45,6 @@ public class ContentSpaceAdapter extends AbstractDomainAdapterImpl<ContentSpace,
 
 	@Override
 	public ContentSpace createDomainObject() {
-		return getBeanFactory().getBean(ContextIdNames.CONTENTSPACE);
+		return getBeanFactory().getPrototypeBean(ContextIdNames.CONTENTSPACE, ContentSpace.class);
 	}
 }

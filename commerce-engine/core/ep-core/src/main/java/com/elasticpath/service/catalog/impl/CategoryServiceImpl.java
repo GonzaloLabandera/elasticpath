@@ -14,9 +14,13 @@ import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 
 import com.google.common.collect.Lists;
+
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.log4j.Logger;
 
 import com.elasticpath.base.exception.EpServiceException;
@@ -26,12 +30,14 @@ import com.elasticpath.commons.exception.DuplicateKeyException;
 import com.elasticpath.commons.exception.EpCategoryNotEmptyException;
 import com.elasticpath.commons.exception.IllegalOperationException;
 import com.elasticpath.commons.util.CategoryGuidUtil;
+import com.elasticpath.domain.attribute.Attribute;
 import com.elasticpath.domain.catalog.Catalog;
 import com.elasticpath.domain.catalog.Category;
 import com.elasticpath.domain.catalog.CategoryDeleted;
 import com.elasticpath.domain.catalog.CategoryLoadTuner;
 import com.elasticpath.domain.catalog.Product;
 import com.elasticpath.persistence.api.FetchGroupLoadTuner;
+import com.elasticpath.persistence.api.LoadTuner;
 import com.elasticpath.persistence.api.PersistenceEngine;
 import com.elasticpath.persistence.dao.ProductDao;
 import com.elasticpath.persistence.support.FetchGroupConstants;
@@ -39,7 +45,7 @@ import com.elasticpath.service.catalog.CatalogService;
 import com.elasticpath.service.catalog.CategoryLookup;
 import com.elasticpath.service.catalog.CategoryService;
 import com.elasticpath.service.catalog.ProductService;
-import com.elasticpath.service.misc.FetchPlanHelper;
+import com.elasticpath.service.misc.TimeService;
 import com.elasticpath.service.search.IndexNotificationService;
 import com.elasticpath.service.search.IndexType;
 
@@ -56,7 +62,6 @@ public class CategoryServiceImpl implements CategoryService {
 	private CategoryLoadTuner categoryLoadTunerAll;
 	private CategoryLoadTuner categoryLoadTunerMinimal;
 	private CategoryLoadTuner categoryLoadTunerDefault;
-	private FetchPlanHelper fetchPlanHelper;
 	private ProductService productService;
 	private CatalogService catalogService;
 	private FetchGroupLoadTuner defaultFetchGroupLoadTuner;
@@ -70,6 +75,7 @@ public class CategoryServiceImpl implements CategoryService {
 	private static final String DUPLICATE_GUID = "Inconsistent data -- duplicate guid:";
 	private CategoryLookup categoryLookup;
 	private CategoryGuidUtil categoryGuidUtil;
+	private TimeService timeService;
 
 	/**
 	 * Adds the given category.
@@ -183,20 +189,25 @@ public class CategoryServiceImpl implements CategoryService {
 		List<Category> readOnlyResultCategory;
 		List<Category> readOnlyResultLinkedCategory = Collections.emptyList();
 
-		FetchGroupLoadTuner loadTuner = getDefaultFetchGroupLoadTuner();
-		fetchPlanHelper.configureFetchGroupLoadTuner(loadTuner);
+		PersistenceEngine persistenceEngineWithTuner = getPersistenceEngine()
+			.withLoadTuners(getDefaultFetchGroupLoadTuner());
+
 		if (availableOnly) {
 			final Date now = new Date();
-			readOnlyResultCategory = getPersistenceEngine().retrieveByNamedQuery("CATEGORY_LIST_AVAILABLE_ROOT", now, now, catalog.getUidPk());
-			readOnlyResultLinkedCategory = getPersistenceEngine().retrieveByNamedQuery("LINKED_CATEGORY_LIST_AVAILABLE_ROOT",
+
+			readOnlyResultCategory = persistenceEngineWithTuner
+				.retrieveByNamedQuery("CATEGORY_LIST_AVAILABLE_ROOT", now, now, catalog.getUidPk());
+
+			readOnlyResultLinkedCategory = persistenceEngineWithTuner
+				.retrieveByNamedQuery("LINKED_CATEGORY_LIST_AVAILABLE_ROOT",
 					now,
 					now,
 					catalog.getUidPk());
 
 		} else {
-			readOnlyResultCategory = getPersistenceEngine().retrieveByNamedQuery("CATEGORY_LIST_ROOT", catalog.getUidPk());
+			readOnlyResultCategory = persistenceEngineWithTuner
+				.retrieveByNamedQuery("CATEGORY_LIST_ROOT", catalog.getUidPk());
 		}
-		fetchPlanHelper.clearFetchPlan();
 
 		final List<Category> result = new ArrayList<>(readOnlyResultCategory.size() + readOnlyResultLinkedCategory.size());
 		result.addAll(readOnlyResultCategory);
@@ -214,11 +225,9 @@ public class CategoryServiceImpl implements CategoryService {
 	 */
 	@Override
 	public Category findByCode(final String categoryCode) {
-		List<Category> categories;
-		fetchPlanHelper.configureCategoryFetchPlan(categoryLoadTunerMinimal);
-		categories = getPersistenceEngine().retrieveByNamedQuery("CATEGORY_SELECT_BY_CODE", categoryCode);
-
-		fetchPlanHelper.clearFetchPlan();
+		List<Category> categories = getPersistenceEngine()
+			.withLoadTuners(categoryLoadTunerMinimal)
+			.retrieveByNamedQuery("CATEGORY_SELECT_BY_CODE", categoryCode);
 
 		if (categories.isEmpty()) {
 			return null;
@@ -227,11 +236,32 @@ public class CategoryServiceImpl implements CategoryService {
 		if (categories.size() > 1) {
 			throw new EpServiceException(DUPLICATE_GUID + categoryCode);
 		}
+
 		return categories.get(0);
 	}
 
+	/**
+	 * Find a list of category uids that use the given attribute.
+	 *
+	 * @param attribute the attribute to search by.
+	 * @return a list of category uids.
+	 */
+	@Override
+	public List<Long> findUidsByAttribute(final Attribute attribute) {
+		return getPersistenceEngine().retrieveByNamedQuery("CATEGORIES_UIDS_BY_ATTRIBUTE", Long.valueOf(attribute.getUidPk()));
+	}
 
-
+	/**
+	 * Find a list of category codes that use the given category uids.
+	 *
+	 * @param categoryUids the category Uids to search by.
+	 * @return a list of category codes.
+	 */
+	@Override
+	public List<String> findCodesByUids(final List<Long> categoryUids) {
+		return getPersistenceEngine()
+				.retrieveByNamedQueryWithList("CATEGORY_CODES_SELECT_BY_UIDS", PLACE_HOLDER_FOR_LIST, categoryUids);
+	}
 
 	/**
 	 * Retrieve the {@link Category} with the given GUID in a particular catalog. The returned
@@ -250,18 +280,19 @@ public class CategoryServiceImpl implements CategoryService {
 			return null;
 		}
 
-		if (loadTuner == null) {
-			fetchPlanHelper.configureCategoryFetchPlan(categoryLoadTunerDefault);
-		} else {
-			fetchPlanHelper.configureFetchGroupLoadTuner(loadTuner);
-		}
+		LoadTuner activeLoadTuner = loadTuner == null
+			? categoryLoadTunerDefault
+			: loadTuner;
 
-		List<Category> categories = getPersistenceEngine().retrieveByNamedQuery("CATEGORY_FIND_BY_CODE_CATALOG", guid, catalog.getUidPk());
-		if (categories == null || categories.isEmpty()) {
-			categories = getPersistenceEngine().retrieveByNamedQuery("LINKED_CATEGORY_FIND_BY_CODE_CATALOG", guid, catalog.getUidPk());
-		}
+		List<Category> categories = getPersistenceEngine()
+			.withLoadTuners(activeLoadTuner)
+			.retrieveByNamedQuery("CATEGORY_FIND_BY_CODE_CATALOG", guid, catalog.getUidPk());
 
-		fetchPlanHelper.clearFetchPlan();
+		if (CollectionUtils.isEmpty(categories)) {
+			categories = getPersistenceEngine()
+				.withLoadTuners(activeLoadTuner)
+				.retrieveByNamedQuery("LINKED_CATEGORY_FIND_BY_CODE_CATALOG", guid, catalog.getUidPk());
+		}
 
 		if (categories.isEmpty()) {
 			return null;
@@ -368,8 +399,7 @@ public class CategoryServiceImpl implements CategoryService {
 	 */
 	@Override
 	public boolean isProductInCategory(final long productUid, final long categoryUid) {
-		final List<?> result = getPersistenceEngine().retrieveByNamedQuery("SELECT_PRODUCT_CATEGORY_ASSOCIATION",
-				Long.valueOf(productUid), Long.valueOf(categoryUid));
+		final List<?> result = getPersistenceEngine().retrieveByNamedQuery("SELECT_PRODUCT_CATEGORY_ASSOCIATION", productUid, categoryUid);
 		return !result.isEmpty();
 	}
 
@@ -435,17 +465,18 @@ public class CategoryServiceImpl implements CategoryService {
 	 * Re orders (swaps the ordering field) of the two parameter categories. If ordering hasn't been set before, then will go thru the whole parent
 	 * category and order all the child categories first.
 	 *
-	 * @param uidOne UID of a category to reorder
+	 * @param categoryOne the category to reorder
 	 * @param uidTwo UID of a category to reorder
 	 * @throws EpServiceException in case of any errors
 	 */
 	@Override
-	public void updateOrder(final long uidOne, final long uidTwo) throws EpServiceException {
+	public void updateOrder(final Category categoryOne, final long uidTwo) throws EpServiceException {
 		// don't need to populate attributes
-		fetchPlanHelper.configureCategoryFetchPlan(categoryLoadTunerMinimal);
-		Category one = getPersistenceEngine().load(getAbstractCategoryImplClass(), uidOne);
-		Category two = getPersistenceEngine().load(getAbstractCategoryImplClass(), uidTwo);
-		fetchPlanHelper.clearFetchPlan();
+		Category one = categoryOne;
+		Category two = getPersistenceEngine()
+			.withLoadTuners(categoryLoadTunerMinimal)
+			.load(getAbstractCategoryImplClass(), uidTwo);
+
 		if (one.getCatalog().getUidPk() != two.getCatalog().getUidPk()) {
 			throw new EpServiceException("Cannot update the order of categories in different catalogs.");
 		}
@@ -467,7 +498,7 @@ public class CategoryServiceImpl implements CategoryService {
 				final Category result = saveOrUpdate(category);
 
 				// refresh
-				if (result.getUidPk() == uidOne) {
+				if (result.getUidPk() == one.getUidPk()) {
 					one = result;
 				}
 				if (result.getUidPk() == uidTwo) {
@@ -855,15 +886,6 @@ public class CategoryServiceImpl implements CategoryService {
 	}
 
 	/**
-	 * Sets the fetch plan helper.
-	 *
-	 * @param fetchPlanHelper the fetch plan helper
-	 */
-	public void setFetchPlanHelper(final FetchPlanHelper fetchPlanHelper) {
-		this.fetchPlanHelper = fetchPlanHelper;
-	}
-
-	/**
 	 * Creates a new linked category (in the given <code>catalog</code>) to the
 	 * given <code>masterCategory</code>and additional linked categories for
 	 * all of the <code>masterCategory</code>'s sub-categories. The top-level
@@ -976,15 +998,19 @@ public class CategoryServiceImpl implements CategoryService {
 	 */
 	protected void updateProductsWithNewLinkedCategory(final Category subCategory) {
 		// JPA seems to trigger a field access when a category is included.
-		fetchPlanHelper.configureFetchGroupLoadTuner(getLinkProductCategoryLoadTuner(), true);
+		FetchGroupLoadTuner localLinkProductCategoryLoadTuner = getLinkProductCategoryLoadTuner();
+
 		for (final Product currProduct
-				: getProductService().findByCategoryUid(subCategory.getMasterCategory().getUidPk(), getLinkProductCategoryLoadTuner())) {
+				: getProductService()
+					.findByCategoryUid(subCategory.getMasterCategory().getUidPk(), localLinkProductCategoryLoadTuner)) {
+
 			currProduct.addCategory(subCategory);
 			currProduct.setCategoryAsDefault(subCategory);
+
 			getProductService().saveOrUpdate(currProduct);
 		}
+
 		getProductService().notifyCategoryUpdated(subCategory);
-		fetchPlanHelper.clearFetchPlan();
 	}
 
 	/**
@@ -1071,12 +1097,13 @@ public class CategoryServiceImpl implements CategoryService {
 			throw new EpServiceException("linkedCategory must be a linked category");
 		}
 
-		final Collection<Product> products = getProductService().findByCategoryUid(linkedCategory.getMasterCategory().getUidPk(),
-				getLinkProductCategoryLoadTuner());
+		FetchGroupLoadTuner localLinkProductCategoryLoadTuner = getLinkProductCategoryLoadTuner();
+
+		final Collection<Product> products = getProductService()
+			.findByCategoryUid(linkedCategory.getMasterCategory().getUidPk(), localLinkProductCategoryLoadTuner);
 
 		// JPA seems to trigger a field access when a category is added. Use same fetch
 		// plan so that fields aren't loaded because it was cleared in the previous call.
-		fetchPlanHelper.configureFetchGroupLoadTuner(getLinkProductCategoryLoadTuner(), true);
 
 		for (final Product product : products) {
 			product.addCategory(linkedCategory);
@@ -1085,9 +1112,8 @@ public class CategoryServiceImpl implements CategoryService {
 
 		// Set the linked category's Include flag to true
 		linkedCategory.setIncluded(true);
-		final Category result = saveOrUpdate(linkedCategory);
 
-		fetchPlanHelper.clearFetchPlan();
+		final Category result = saveOrUpdate(linkedCategory);
 
 		// Use recursion to include products in any sub-categories
 		for (final Category currCategory : getCategoryLookup().findChildren(result)) {
@@ -1194,7 +1220,7 @@ public class CategoryServiceImpl implements CategoryService {
 		}
 
 		if (categoryUidToSwap != -1) {
-			updateOrder(category.getUidPk(), categoryUidToSwap);
+			updateOrder(category, categoryUidToSwap);
 		}
 	}
 
@@ -1228,7 +1254,7 @@ public class CategoryServiceImpl implements CategoryService {
 		}
 
 		if (categoryUidToSwap != -1) {
-			updateOrder(category.getUidPk(), categoryUidToSwap);
+			updateOrder(category, categoryUidToSwap);
 		}
 	}
 
@@ -1364,6 +1390,33 @@ public class CategoryServiceImpl implements CategoryService {
 	}
 
 	/**
+	 * Get the indicator of whether or not this category can be syndicated.
+	 *
+	 * @param category category.
+	 * @return true if this category can be syndicated.
+	 */
+	public boolean canSyndicate(final Category category) {
+		if (category.isLinked() && !category.isIncluded()) {
+			return false;
+		}
+		final Category parent = categoryLookup.findParent(category);
+		final boolean isExpiredEndDate = Optional.ofNullable(category)
+				.map(Category::getEndDate)
+				.map(endTime -> timeService.getCurrentTime().after(endTime))
+				.orElse(false);
+		final boolean canMasterSyndicate = Optional.ofNullable(category.getMasterCategory())
+				.map(this::canSyndicate)
+				.orElse(true);
+		if (category.isHidden() || isExpiredEndDate || !canMasterSyndicate) {
+			return false;
+		} else if (Objects.isNull(parent)) {
+			return true;
+		} else {
+			return canSyndicate(parent);
+		}
+	}
+
+	/**
 	 * Retrieves a bean from the bean factory.
 	 *
 	 * @param beanName the name of the bean to retrieve
@@ -1404,5 +1457,13 @@ public class CategoryServiceImpl implements CategoryService {
 
 	public void setCategoryGuidUtil(final CategoryGuidUtil categoryGuidUtil) {
 		this.categoryGuidUtil = categoryGuidUtil;
+	}
+
+	protected TimeService getTimeService() {
+		return timeService;
+	}
+
+	public void setTimeService(final TimeService timeService) {
+		this.timeService = timeService;
 	}
 }

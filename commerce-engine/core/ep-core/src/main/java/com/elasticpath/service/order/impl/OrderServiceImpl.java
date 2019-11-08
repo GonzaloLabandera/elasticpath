@@ -3,8 +3,13 @@
  */
 package com.elasticpath.service.order.impl;
 
+import static com.elasticpath.persistence.support.FetchFieldConstants.PRODUCT_SKU;
+import static com.elasticpath.persistence.support.FetchFieldConstants.SHIPMENT_ORDER_SKUS_INTERNAL;
+import static java.util.stream.Collectors.toList;
+
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
@@ -12,16 +17,20 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import com.google.common.collect.HashMultiset;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multiset;
+
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.log4j.Logger;
+import org.apache.openjpa.lib.jdbc.ReportingSQLException;
+import org.apache.openjpa.persistence.PersistenceException;
+import org.apache.openjpa.persistence.jdbc.FetchMode;
 
+import com.elasticpath.base.common.dto.StructuredErrorMessage;
 import com.elasticpath.base.exception.EpServiceException;
 import com.elasticpath.base.exception.EpSystemException;
 import com.elasticpath.commons.constants.ContextIdNames;
@@ -34,9 +43,11 @@ import com.elasticpath.domain.event.EventOriginatorType;
 import com.elasticpath.domain.event.OrderEventHelper;
 import com.elasticpath.domain.order.AllocationEventType;
 import com.elasticpath.domain.order.AllocationResult;
+import com.elasticpath.domain.order.DuplicateOrderException;
 import com.elasticpath.domain.order.Order;
 import com.elasticpath.domain.order.OrderAddress;
 import com.elasticpath.domain.order.OrderLock;
+import com.elasticpath.domain.order.OrderMessageIds;
 import com.elasticpath.domain.order.OrderPayment;
 import com.elasticpath.domain.order.OrderPaymentStatus;
 import com.elasticpath.domain.order.OrderReturn;
@@ -60,14 +71,13 @@ import com.elasticpath.messaging.EventType;
 import com.elasticpath.messaging.factory.EventMessageFactory;
 import com.elasticpath.persistence.api.FetchGroupLoadTuner;
 import com.elasticpath.persistence.api.LoadTuner;
+import com.elasticpath.persistence.api.PersistenceEngine;
 import com.elasticpath.persistence.support.FetchGroupConstants;
 import com.elasticpath.persistence.support.OrderCriterion;
 import com.elasticpath.persistence.support.OrderCriterion.ResultType;
 import com.elasticpath.persistence.support.impl.CriteriaQuery;
 import com.elasticpath.plugin.payment.exceptions.PaymentGatewayException;
 import com.elasticpath.service.impl.AbstractEpPersistenceServiceImpl;
-import com.elasticpath.service.misc.FetchMode;
-import com.elasticpath.service.misc.FetchPlanHelper;
 import com.elasticpath.service.misc.TimeService;
 import com.elasticpath.service.order.AllocationService;
 import com.elasticpath.service.order.CompleteShipmentFailedException;
@@ -97,8 +107,6 @@ public class OrderServiceImpl extends AbstractEpPersistenceServiceImpl implement
 
 	private static final Logger LOG = Logger.getLogger(OrderServiceImpl.class);
 
-	private FetchPlanHelper fetchPlanHelper;
-
 	private TimeService timeService;
 
 	private PaymentService paymentService;
@@ -117,6 +125,18 @@ public class OrderServiceImpl extends AbstractEpPersistenceServiceImpl implement
 
 	private EventMessagePublisher eventMessagePublisher;
 
+
+	private static final String ORDER_ALREADY_SUBMITTED = "Order has already been submitted and can't be resubmitted";
+
+	/**
+	 * SQL Error Codes. See:
+	 * https://docs.oracle.com/cd/E11882_01/appdev.112/e10827/appd.htm
+	 * https://dev.mysql.com/doc/refman/5.7/en/server-error-reference.html
+	 */
+	private static final String UNIQUE_CONSTRAINT_VIOLATION_ERROR_CODE = "23000";
+	private static final int MYSQL_DUPLICATE_ENTRY_ERROR_CODE = 1062;
+	private static final int ORACLE_DUPLICATE_ENTRY_ERROR_CODE = 1;
+
 	/**
 	 * Adds the given order.
 	 *
@@ -128,8 +148,19 @@ public class OrderServiceImpl extends AbstractEpPersistenceServiceImpl implement
 	public Order add(final Order order) throws EpServiceException {
 		sanityCheck();
 		order.setLastModifiedDate(timeService.getCurrentTime());
-		getPersistenceEngine().save(order);
 
+		try {
+			getPersistenceEngine().save(order);
+
+			getPersistenceEngine().flush();
+		} catch (PersistenceException e) {
+			if (isDuplicateOrderException(e)) {
+				final StructuredErrorMessage structuredErrorMessage = new StructuredErrorMessage(OrderMessageIds.ORDER_ALREADY_SUBMITTED,
+						ORDER_ALREADY_SUBMITTED,
+						null);
+				throw new DuplicateOrderException(ORDER_ALREADY_SUBMITTED, Collections.singletonList(structuredErrorMessage), e);
+			}
+		}
 		return populateRelationships(order);
 	}
 
@@ -215,12 +246,11 @@ public class OrderServiceImpl extends AbstractEpPersistenceServiceImpl implement
 			throw new IllegalArgumentException("No status criteria provided. If you need all orders in the system use list() method instead");
 		}
 
-		prepareFetchPlan();
-
 		final OrderCriterion orderCriterion = getBean(ContextIdNames.ORDER_CRITERION);
 		final CriteriaQuery statusCriteria = orderCriterion.getStatusCriteria(orderStatus, paymentStatus, shipmentStatus);
-		List<Order> orders = getPersistenceEngine().retrieve(statusCriteria.getQuery(), statusCriteria.getParameters().toArray());
-		fetchPlanHelper.clearFetchPlan();
+
+		List<Order> orders = getPersistenceEngineWithDefaultLoadTuner()
+			.retrieve(statusCriteria.getQuery(), statusCriteria.getParameters().toArray());
 
 		return populateRelationships(orders);
 	}
@@ -234,9 +264,8 @@ public class OrderServiceImpl extends AbstractEpPersistenceServiceImpl implement
 	@Override
 	public List<Order> findByCreatedDate(final Date date) {
 		sanityCheck();
-		prepareFetchPlan();
-		final List<Order> orders = getPersistenceEngine().retrieveByNamedQuery("ORDER_SELECT_BY_CREATED_DATE", date);
-		fetchPlanHelper.clearFetchPlan();
+		final List<Order> orders = getPersistenceEngineWithDefaultLoadTuner().retrieveByNamedQuery("ORDER_SELECT_BY_CREATED_DATE", date);
+
 		return populateRelationships(orders);
 	}
 
@@ -253,20 +282,20 @@ public class OrderServiceImpl extends AbstractEpPersistenceServiceImpl implement
 		if (propertyName == null || propertyName.length() == 0) {
 			throw new EpServiceException("propertyName not set");
 		}
-		prepareFetchPlan();
 		List<Order> orders;
 		if (StringUtils.isNotBlank(criteriaValue)) {
 			sanityCheck();
 			if (isExactMatch) {
-				orders = getPersistenceEngine().retrieve("SELECT o FROM OrderImpl " + "as o WHERE o." + propertyName + " = ?1", criteriaValue);
+				orders = getPersistenceEngineWithDefaultLoadTuner()
+					.retrieve("SELECT o FROM OrderImpl " + "as o WHERE o." + propertyName + " = ?1", criteriaValue);
 			} else {
-				orders = getPersistenceEngine().retrieve("SELECT o FROM OrderImpl as o WHERE o." + propertyName + " LIKE ?1",
-						"%" + criteriaValue + "%");
+				orders = getPersistenceEngineWithDefaultLoadTuner()
+					.retrieve("SELECT o FROM OrderImpl as o WHERE o." + propertyName + " LIKE ?1", "%" + criteriaValue + "%");
 			}
+
 		} else {
 			orders = Collections.emptyList();
 		}
-		fetchPlanHelper.clearFetchPlan();
 		return populateRelationships(orders);
 	}
 
@@ -281,7 +310,6 @@ public class OrderServiceImpl extends AbstractEpPersistenceServiceImpl implement
 	@Override
 	public List<Order> findOrderByCustomerGuid(final String customerGuid, final boolean isExactMatch) {
 		sanityCheck();
-		prepareFetchPlan();
 
 		CustomerSearchCriteria customerSearchCriteria = getBean(ContextIdNames.CUSTOMER_SEARCH_CRITERIA);
 		customerSearchCriteria.setGuid(customerGuid);
@@ -291,28 +319,26 @@ public class OrderServiceImpl extends AbstractEpPersistenceServiceImpl implement
 		orderSearchCriteria.setCustomerSearchCriteria(customerSearchCriteria);
 		orderSearchCriteria.setExcludedOrderStatus(OrderStatus.FAILED);
 
-		final List<Order> orderList = findOrdersBySearchCriteria(orderSearchCriteria, 0, Integer.MAX_VALUE, null);
-		fetchPlanHelper.clearFetchPlan();
-		return orderList;
+		return findOrdersBySearchCriteria(orderSearchCriteria, 0, Integer.MAX_VALUE, defaultLoadTuner);
 	}
 
 	@Override
 	public List<Order> findOrdersByCustomerGuidAndStoreCode(final String customerGuid, final String storeCode, final boolean retrieveFullInfo) {
 		sanityCheck();
 
+		LoadTuner loadTuner;
 		if (retrieveFullInfo) {
-			this.prepareFetchPlan();
+			loadTuner = defaultLoadTuner;
 		} else {
-			FetchGroupLoadTuner loadTuner = getBean(ContextIdNames.FETCH_GROUP_LOAD_TUNER);
-			loadTuner.addFetchGroup(FetchGroupConstants.ORDER_LIST_BASIC);
-			fetchPlanHelper.configureFetchGroupLoadTuner(loadTuner);
+			loadTuner = getBean(ContextIdNames.FETCH_GROUP_LOAD_TUNER);
+			((FetchGroupLoadTuner) loadTuner).addFetchGroup(FetchGroupConstants.ORDER_LIST_BASIC);
 		}
 
-		final List<Order> orderList = getPersistenceEngine().retrieveByNamedQuery("ORDER_SELECT_BY_CUSTOMER_GUID_AND_STORECODE",
+		final List<Order> orderList = getPersistenceEngineWithLoadTuner(loadTuner)
+			.retrieveByNamedQuery("ORDER_SELECT_BY_CUSTOMER_GUID_AND_STORECODE",
 				customerGuid,
 				storeCode);
 
-		fetchPlanHelper.clearFetchPlan();
 		return populateRelationships(orderList);
 	}
 
@@ -326,11 +352,11 @@ public class OrderServiceImpl extends AbstractEpPersistenceServiceImpl implement
 	@Override
 	public List<Order> findOrderByGiftCertificateCode(final String giftCertificateCode, final boolean isExactMatch) {
 		sanityCheck();
-		prepareFetchPlan();
+
 		final OrderCriterion orderCriterion = getBean(ContextIdNames.ORDER_CRITERION);
-		final List<Order> orderList = getPersistenceEngine().retrieve(
-				orderCriterion.getOrderGiftCertificateCriteria("giftCertificateCode", giftCertificateCode, isExactMatch).getQuery());
-		fetchPlanHelper.clearFetchPlan();
+		final List<Order> orderList = getPersistenceEngineWithDefaultLoadTuner().retrieve(
+			orderCriterion.getOrderGiftCertificateCriteria("giftCertificateCode", giftCertificateCode, isExactMatch).getQuery());
+
 		return populateRelationships(orderList);
 	}
 
@@ -346,23 +372,23 @@ public class OrderServiceImpl extends AbstractEpPersistenceServiceImpl implement
 		final OrderCriterion orderCriterion = getBean(ContextIdNames.ORDER_CRITERION);
 		Collection<String> storeCodes = new LinkedList<>();
 		CriteriaQuery query = orderCriterion.getOrderSearchCriteria(orderSearchCriteria, storeCodes, ResultType.COUNT);
-		List<Long> orderCount = null;
 
 		FetchGroupLoadTuner loadTuner = getBean(ContextIdNames.FETCH_GROUP_LOAD_TUNER);
 		loadTuner.addFetchGroup(FetchGroupConstants.ORDER_SEARCH);
-		fetchPlanHelper.configureFetchGroupLoadTuner(loadTuner);
-		fetchPlanHelper.setFetchMode(FetchMode.JOIN);
+		getFetchPlanHelper().setFetchMode(FetchMode.JOIN);
+
+		List<Long> orderCount;
 
 		if (query.getParameters().isEmpty() && storeCodes.isEmpty()) {
-			orderCount = getPersistenceEngine().retrieve(query.getQuery());
+			orderCount = getPersistenceEngineWithLoadTuner(loadTuner).retrieve(query.getQuery());
 		} else if (storeCodes.isEmpty()) {
-			orderCount = getPersistenceEngine().retrieve(query.getQuery(), query.getParameters().toArray());
+			orderCount = getPersistenceEngineWithLoadTuner(loadTuner)
+				.retrieve(query.getQuery(), query.getParameters().toArray());
 		} else {
-			orderCount = getPersistenceEngine().retrieveWithList(query.getQuery(), "storeList", storeCodes,
-				query.getParameters().toArray(), 0, Integer.MAX_VALUE);
+			orderCount = getPersistenceEngineWithLoadTuner(loadTuner)
+				.retrieveWithList(query.getQuery(), "storeList", storeCodes,
+					query.getParameters().toArray(), 0, Integer.MAX_VALUE);
 		}
-
-		fetchPlanHelper.clearFetchPlan();
 
 		return orderCount.get(0);
 	}
@@ -384,14 +410,10 @@ public class OrderServiceImpl extends AbstractEpPersistenceServiceImpl implement
 
 		FetchGroupLoadTuner loadTuner = getBean(ContextIdNames.FETCH_GROUP_LOAD_TUNER);
 		loadTuner.addFetchGroup(FetchGroupConstants.ORDER_SEARCH);
-		fetchPlanHelper.configureFetchGroupLoadTuner(loadTuner);
-		fetchPlanHelper.setFetchMode(FetchMode.JOIN);
 
-		List<Order> orderList = findOrdersBySearchCriteria(orderSearchCriteria, start, maxResults, null);
+		getFetchPlanHelper().setFetchMode(FetchMode.JOIN);
 
-		fetchPlanHelper.clearFetchPlan();
-
-		return orderList;
+		return findOrdersBySearchCriteria(orderSearchCriteria, start, maxResults, loadTuner);
 	}
 
 	/**
@@ -405,28 +427,22 @@ public class OrderServiceImpl extends AbstractEpPersistenceServiceImpl implement
 	 */
 	@Override
 	public List<Order> findOrdersBySearchCriteria(final OrderSearchCriteria orderSearchCriteria, final int start, final int maxResults,
-			final LoadTuner loadTuner) {
-
-		if (loadTuner != null) {
-			fetchPlanHelper.configureLoadTuner(loadTuner);
-		}
+		final LoadTuner loadTuner) {
 
 		final OrderCriterion orderCriterion = getBean(ContextIdNames.ORDER_CRITERION);
 		Collection<String> storeCodes = new LinkedList<>();
 		CriteriaQuery query = orderCriterion.getOrderSearchCriteria(orderSearchCriteria, storeCodes, ResultType.ENTITY);
 
-		List<Order> orderList = null;
+		List<Order> orderList;
 		if (query.getParameters().isEmpty() && storeCodes.isEmpty()) {
-			orderList = getPersistenceEngine().retrieve(query.getQuery(), start, maxResults);
+			orderList = getPersistenceEngineWithLoadTuner(loadTuner)
+				.retrieve(query.getQuery(), start, maxResults);
 		} else if (storeCodes.isEmpty()) {
-			orderList = getPersistenceEngine().retrieve(query.getQuery(), query.getParameters().toArray(), start, maxResults);
+			orderList = getPersistenceEngineWithLoadTuner(loadTuner)
+				.retrieve(query.getQuery(), query.getParameters().toArray(), start, maxResults);
 		} else {
-			orderList = getPersistenceEngine().retrieveWithList(query.getQuery(), "storeList", storeCodes,
-				query.getParameters().toArray(), start, maxResults);
-		}
-
-		if (loadTuner != null) {
-			fetchPlanHelper.clearFetchPlan();
+			orderList = getPersistenceEngineWithLoadTuner(loadTuner)
+				.retrieveWithList(query.getQuery(), "storeList", storeCodes, query.getParameters().toArray(), start, maxResults);
 		}
 
 		return populateRelationships(orderList);
@@ -461,26 +477,24 @@ public class OrderServiceImpl extends AbstractEpPersistenceServiceImpl implement
 	}
 
 	/**
-	 * Configures the fetch plan helper with a default load tuner.
+	 * Get a map with lazy fields. By default,  <strong>AbstractOrderShipmentImpl.shipmentOrderSkusInternal</strong> field will be loaded.
+	 *
+	 * If <strong>withFullDetails</strong> is true, then <strong>OrderSkuImpl.productSku</strong> field will be loaded too.
+	 *
+	 * @param withFullDetails if true, additional field will be loaded.
+	 *
+	 * @return a map with lazy fields.
 	 */
-	protected void prepareFetchPlan() {
-		fetchPlanHelper.configureLoadTuner(defaultLoadTuner);
-	}
+	protected Map<Class<?>, String> getLazyFields(final boolean withFullDetails) {
 
-	/**
-	 * Configures the fetch plan with a default load tuner, and allows retrieving of orders with partial details, such as shipment order SKUs.
-	 */
-	protected void prepareFetchPlanWithDetails() {
-		prepareFetchPlan();
-		fetchPlanHelper.addField(AbstractOrderShipmentImpl.class, "shipmentOrderSkusInternal");
-	}
+		final Map<Class<?>, String> lazyFields = new HashMap<>();
+		lazyFields.put(AbstractOrderShipmentImpl.class, SHIPMENT_ORDER_SKUS_INTERNAL);
 
-	/**
-	 * Configures the fetch plan with a default load tuner, and allows retrieving of orders with full order details.
-	 */
-	protected void prepareFetchPlanWithFullDetails() {
-		prepareFetchPlanWithDetails();
-		fetchPlanHelper.addField(OrderSkuImpl.class, "productSku");
+		if (withFullDetails) {
+			lazyFields.put(OrderSkuImpl.class, PRODUCT_SKU);
+		}
+
+		return lazyFields;
 	}
 
 	/**
@@ -510,10 +524,10 @@ public class OrderServiceImpl extends AbstractEpPersistenceServiceImpl implement
 	 * Returns a list of <code>Order</code> based on the given uids. The returned orders will be populated based on the given load tuner.
 	 *
 	 * @param orderUids a collection of order uids
-	 * @param isDetailedFetchPlan is indicator which define what fetch plan must be used. If it is true then fetch plan with order details is used
-	 *            {@link #prepareFetchPlanWithFullDetails()}. Otherwise, simple fetch plan is used {@link #prepareFetchPlan()}
+	 * @param isDetailedFetchPlan if true, all lazy fields will be loaded. See #getLazyFields(boolean)
 	 * @return a list of <code>Order</code>s
 	 */
+	@SuppressWarnings({"unchecked", "rawtypes"})
 	private List<Order> findOrdersByUids(final Collection<Long> orderUids, final boolean isDetailedFetchPlan) {
 		sanityCheck();
 
@@ -521,13 +535,14 @@ public class OrderServiceImpl extends AbstractEpPersistenceServiceImpl implement
 			return new ArrayList<>();
 		}
 
-		if (isDetailedFetchPlan) {
-			prepareFetchPlanWithFullDetails();
-		} else {
-			prepareFetchPlan();
-		}
-		final List<Order> orders = getPersistenceEngine().retrieveByNamedQueryWithList("ORDER_BY_UIDS", "list", orderUids);
-		fetchPlanHelper.clearFetchPlan();
+		Map<Class<?>, String> lazyFields = isDetailedFetchPlan
+			? getLazyFields(true)
+			: Collections.emptyMap();
+
+		final List<Order> orders = getPersistenceEngineWithDefaultLoadTuner()
+			.withLazyFields(lazyFields)
+			.retrieveByNamedQueryWithList("ORDER_BY_UIDS", "list", orderUids);
+
 		return populateRelationships(orders);
 	}
 
@@ -540,21 +555,11 @@ public class OrderServiceImpl extends AbstractEpPersistenceServiceImpl implement
 	@Override
 	public List<Order> list() throws EpServiceException {
 		sanityCheck();
-		prepareFetchPlan();
-		final List<Order> orders = getPersistenceEngine().retrieveByNamedQuery("ORDER_SELECT_ALL");
-		fetchPlanHelper.clearFetchPlan();
+		final List<Order> orders = getPersistenceEngineWithDefaultLoadTuner().retrieveByNamedQuery("ORDER_SELECT_ALL");
+
 		return populateRelationships(orders);
 	}
 
-	/**
-	 * Sanity check of this service instance.
-	 */
-	@Override
-	protected void sanityCheck() {
-		if (getPersistenceEngine() == null) {
-			throw new EpServiceException("The persistence engine is not correctly initialized.");
-		}
-	}
 
 	/**
 	 * Get the order with the given UID. Return null if no matching record exists.
@@ -570,9 +575,10 @@ public class OrderServiceImpl extends AbstractEpPersistenceServiceImpl implement
 		if (orderUid <= 0) {
 			order = getBean(ContextIdNames.ORDER);
 		} else {
-			prepareFetchPlanWithDetails();
-			order = getPersistentBeanFinder().get(ContextIdNames.ORDER, orderUid);
-			fetchPlanHelper.clearFetchPlan();
+			order = getPersistentBeanFinder()
+				.withLoadTuners(defaultLoadTuner)
+				.withLazyFields(getLazyFields(false))
+				.get(ContextIdNames.ORDER, orderUid);
 		}
 		return populateRelationships(order);
 	}
@@ -593,10 +599,11 @@ public class OrderServiceImpl extends AbstractEpPersistenceServiceImpl implement
 		if (orderUid <= 0) {
 			order = getBean(ContextIdNames.ORDER);
 		} else {
-			fetchPlanHelper.configureFetchGroupLoadTuner(loadTuner);
-			order = getPersistentBeanFinder().get(ContextIdNames.ORDER, orderUid);
-			fetchPlanHelper.clearFetchPlan();
+			order = getPersistentBeanFinder()
+				.withLoadTuners(loadTuner)
+				.get(ContextIdNames.ORDER, orderUid);
 		}
+
 		return populateRelationships(order);
 	}
 
@@ -626,9 +633,10 @@ public class OrderServiceImpl extends AbstractEpPersistenceServiceImpl implement
 		if (orderUid <= 0) {
 			order = getBean(ContextIdNames.ORDER);
 		} else {
-			prepareFetchPlanWithFullDetails();
-			order = getPersistentBeanFinder().get(ContextIdNames.ORDER, orderUid);
-			fetchPlanHelper.clearFetchPlan();
+			order = getPersistentBeanFinder()
+				.withLoadTuners(defaultLoadTuner)
+				.withLazyFields(getLazyFields(true))
+				.get(ContextIdNames.ORDER, orderUid);
 		}
 		return populateRelationships(order);
 	}
@@ -709,8 +717,7 @@ public class OrderServiceImpl extends AbstractEpPersistenceServiceImpl implement
 	 */
 	@Override
 	public OrderShipment findOrderShipment(final String shipmentNumber, final ShipmentType shipmentType) {
-		OrderShipment shipment = null;
-		prepareFetchPlan();
+
 		String queryName;
 		if (ShipmentType.PHYSICAL.equals(shipmentType)) {
 			queryName = "PHYSICAL_SHIPMENT_BY_SHIPMENT_NUMBER";
@@ -718,12 +725,15 @@ public class OrderServiceImpl extends AbstractEpPersistenceServiceImpl implement
 			queryName = "ELECTRONIC_SHIPMENT_BY_SHIPMENT_NUMBER";
 		}
 
-		final List<OrderShipment> results = getPersistenceEngine().retrieveByNamedQuery(queryName, shipmentNumber);
-		fetchPlanHelper.clearFetchPlan();
+		final List<OrderShipment> results = getPersistenceEngineWithDefaultLoadTuner().retrieveByNamedQuery(queryName, shipmentNumber);
+
+		OrderShipment shipment = null;
 		if (!results.isEmpty()) {
 			shipment = results.get(0);
 		}
+
 		populateRelationships(shipment);
+
 		return shipment;
 	}
 
@@ -968,13 +978,6 @@ public class OrderServiceImpl extends AbstractEpPersistenceServiceImpl implement
 	public List<Long> findUidsByModifiedDate(final Date date) {
 		sanityCheck();
 		return getPersistenceEngine().retrieveByNamedQuery("ORDER_UIDS_SELECT_BY_MODIFIED_DATE", date);
-	}
-
-	/**
-	 * @param fetchPlanHelper the fetchPlanHelper to set
-	 */
-	public void setFetchPlanHelper(final FetchPlanHelper fetchPlanHelper) {
-		this.fetchPlanHelper = fetchPlanHelper;
 	}
 
 	/**
@@ -1273,18 +1276,17 @@ public class OrderServiceImpl extends AbstractEpPersistenceServiceImpl implement
 	@Override
 	public Order findOrderByOrderNumber(final String orderNumber) {
 		sanityCheck();
-		prepareFetchPlan();
-		List<Order> results = getPersistenceEngine().retrieveByNamedQuery("ORDER_SELECT_BY_ORDERNUMBER", orderNumber);
-		if (fetchPlanHelper.doesPlanContainFetchGroup(FetchGroupConstants.ORDER_DEFAULT)) {
-			// Workaround to explicitly initialize "parent" field for all OrderSku entities.
-			results.stream()
-					.filter(order -> order != null && order.getAllShipments() != null)
-					.flatMap(order -> order.getAllShipments().stream())
-					.filter(shipment -> shipment != null && shipment.getShipmentOrderSkus() != null)
-					.flatMap(shipment -> shipment.getShipmentOrderSkus().stream())
-					.forEach(OrderSku::getParent);
-		}
-		fetchPlanHelper.clearFetchPlan();
+		List<Order> results = getPersistenceEngineWithDefaultLoadTuner().retrieveByNamedQuery("ORDER_SELECT_BY_ORDERNUMBER", orderNumber);
+		//FIXME this will be removed when payments branch gets merged
+
+		// Workaround to explicitly initialize "parent" field for all OrderSku entities.
+		results.stream()
+			.filter(order -> order != null && order.getAllShipments() != null)
+			.flatMap(order -> order.getAllShipments().stream())
+			.filter(shipment -> shipment != null && shipment.getShipmentOrderSkus() != null)
+			.flatMap(shipment -> shipment.getShipmentOrderSkus().stream())
+			.forEach(OrderSku::getParent);
+
 		Order order = null;
 		if (results.size() == 1) {
 			order = results.get(0);
@@ -1512,10 +1514,8 @@ public class OrderServiceImpl extends AbstractEpPersistenceServiceImpl implement
 			throw new EpServiceException("shipmentNumber cannot be null or empty.");
 		}
 		OrderShipment shipment = null;
-		prepareFetchPlan();
-		final List<OrderShipment> results = getPersistenceEngine().retrieveByNamedQuery("ABSTRACT_ORDER_SHIPMENT_BY_SHIPMENT_NUMBER",
-				new Object[] { shipmentNumber });
-		fetchPlanHelper.clearFetchPlan();
+		final List<OrderShipment> results = getPersistenceEngineWithDefaultLoadTuner()
+			.retrieveByNamedQuery("ABSTRACT_ORDER_SHIPMENT_BY_SHIPMENT_NUMBER", shipmentNumber);
 		if (!results.isEmpty()) {
 			shipment = results.get(0);
 		}
@@ -1544,7 +1544,7 @@ public class OrderServiceImpl extends AbstractEpPersistenceServiceImpl implement
 	protected List<OrderShipment> getImmediatelyShippableShipments(final Order order) {
 		return order.getAllShipments().stream()
 				.filter(orderShipment -> !(orderShipment instanceof PhysicalOrderShipment))
-				.collect(Collectors.toList());
+				.collect(toList());
 	}
 
 	/**
@@ -1633,6 +1633,24 @@ public class OrderServiceImpl extends AbstractEpPersistenceServiceImpl implement
 		}
 	}
 
+	/**
+	 * Detects if the JpaSystemException thrown from the DB is caused by a duplicate order constraint violation.
+	 *
+	 * @param persistenceException The exception.
+	 * @return boolean indicating the result.
+	 */
+	protected boolean isDuplicateOrderException(final PersistenceException persistenceException) {
+		return Arrays.stream(persistenceException.getNestedThrowables())
+				.filter(nestedThrowable -> nestedThrowable.getCause() instanceof ReportingSQLException)
+				.anyMatch(nestedThrowable -> {
+					ReportingSQLException reportingSQLException = (ReportingSQLException) nestedThrowable.getCause();
+					return reportingSQLException.getSQLState().equals(UNIQUE_CONSTRAINT_VIOLATION_ERROR_CODE)
+							&& (reportingSQLException.getErrorCode() == MYSQL_DUPLICATE_ENTRY_ERROR_CODE
+							|| reportingSQLException.getErrorCode() == ORACLE_DUPLICATE_ENTRY_ERROR_CODE);
+				});
+
+	}
+
 	public void setDefaultLoadTuner(final LoadTuner loadTuner) {
 		defaultLoadTuner = loadTuner;
 	}
@@ -1679,6 +1697,17 @@ public class OrderServiceImpl extends AbstractEpPersistenceServiceImpl implement
 
 	protected EventMessagePublisher getEventMessagePublisher() {
 		return eventMessagePublisher;
+	}
+
+
+	private PersistenceEngine getPersistenceEngineWithDefaultLoadTuner() {
+		return getPersistenceEngine()
+			.withLoadTuners(defaultLoadTuner);
+	}
+
+	private PersistenceEngine getPersistenceEngineWithLoadTuner(final LoadTuner loadTuner) {
+		return getPersistenceEngine()
+			.withLoadTuners(loadTuner);
 	}
 
 }

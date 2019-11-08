@@ -44,7 +44,7 @@ import com.elasticpath.rest.definition.purchases.PurchaseLineItemEntity;
 import com.elasticpath.rest.definition.purchases.PurchaseLineItemIdentifier;
 import com.elasticpath.rest.identity.attribute.LocaleSubjectAttribute;
 import com.elasticpath.rest.resource.ResourceOperationContext;
-import com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder.CartItemModifiersRepository;
+import com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder.ModifiersRepository;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder.PricingSnapshotRepository;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.order.OrderRepository;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.sku.ProductSkuRepository;
@@ -81,7 +81,7 @@ public class PurchaseLineItemEntityRepositoryImplTest {
 	@Mock
 	private PricingSnapshotRepository pricingSnapshotRepository;
 	@Mock
-	private CartItemModifiersRepository cartItemModifiersRepository;
+	private ModifiersRepository modifiersRepository;
 	@Mock
 	private OrderRepository orderRepository;
 	@Mock(answer = Answers.RETURNS_DEEP_STUBS)
@@ -98,7 +98,7 @@ public class PurchaseLineItemEntityRepositoryImplTest {
 
 	@Before
 	public void setUp() {
-		repository.setCartItemModifiersRepository(cartItemModifiersRepository);
+		repository.setModifiersRepository(modifiersRepository);
 
 		when(purchaseLineItemIdentifier.getPurchaseLineItems().getPurchase().getPurchases().getScope().getValue()).thenReturn(SCOPE);
 		when(purchaseLineItemIdentifier.getPurchaseLineItems().getPurchase().getPurchaseId().getValue()).thenReturn(PURCHASE_ID);
@@ -161,7 +161,7 @@ public class PurchaseLineItemEntityRepositoryImplTest {
 
 		when(productSkuRepository.getProductSkuWithAttributesByGuidAsSingle(SKU_GUID)).thenReturn(Single.just(mockProductSku));
 		when(mockProductSku.getProduct()).thenReturn(mockProduct);
-		when(cartItemModifiersRepository.findCartItemModifiersByProduct(mockProduct)).thenReturn(Collections.emptyList());
+		when(modifiersRepository.findModifiersByProduct(mockProduct)).thenReturn(Collections.emptyList());
 
 		PurchaseLineItemEntity purchaseLineItemEntity = repository.buildLineItemEntity(mockOrderSku, LOCALE_EN).blockingGet();
 
@@ -283,13 +283,13 @@ public class PurchaseLineItemEntityRepositoryImplTest {
 	}
 
 	private void createMockConfiguration() {
-		//mock productSku/Product/Type/CartItemModifier relationships
+		//mock productSku/Product/Type/Modifier relationships
 		final ProductSku productSku = mock(ProductSku.class);
 		final Product product = mock(Product.class);
 
 		when(productSkuRepository.getProductSkuWithAttributesByGuidAsSingle(SKU_GUID)).thenReturn(Single.just(productSku));
 		when(productSku.getProduct()).thenReturn(product);
-		when(cartItemModifiersRepository.findCartItemModifiersByProduct(product)).thenReturn(Collections.emptyList());
+		when(modifiersRepository.findModifiersByProduct(product)).thenReturn(Collections.emptyList());
 	}
 
 	private PurchaseLineItemEntity createPurchaseLineItemDto(final List<CostEntity> amountCostEntities,

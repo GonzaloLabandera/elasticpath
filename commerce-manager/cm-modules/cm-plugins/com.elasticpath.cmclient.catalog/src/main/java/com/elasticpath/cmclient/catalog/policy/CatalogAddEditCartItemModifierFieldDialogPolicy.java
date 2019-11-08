@@ -10,34 +10,34 @@ import java.util.Map;
 import com.elasticpath.cmclient.core.ui.framework.EpControlFactory;
 import com.elasticpath.cmclient.policy.StateDeterminer;
 import com.elasticpath.cmclient.policy.common.PolicyActionContainer;
-import com.elasticpath.domain.cartmodifier.CartItemModifierField;
+import com.elasticpath.domain.modifier.ModifierField;
 
 /**
  * Policy for the Catalog Cart Item Modifier Field Add/Edit dialog.
  */
 public class CatalogAddEditCartItemModifierFieldDialogPolicy extends AbstractCatalogDeterminerStatePolicy {
 
-	private CartItemModifierField cartItemModifierField;
+	private ModifierField cartItemModifierField;
 
 	private final Map<String, StateDeterminer> determinerMap = new HashMap<>();
 
 	@Override
 	public void init(final Object dependentObject) {
-		if (dependentObject instanceof CartItemModifierField) {
-			cartItemModifierField = (CartItemModifierField) dependentObject;
+		if (dependentObject instanceof ModifierField) {
+			cartItemModifierField = (ModifierField) dependentObject;
 		}
 	}
 
 
 	@Override
 	protected StateDeterminer getDefaultDeterminer() {
-		return new DefaultManageCartItemModifierFieldAuthorizationDeterminer();
+		return new DefaultManageModifierFieldAuthorizationDeterminer();
 	}
 
 	@Override
 	protected Map<String, StateDeterminer> getDeterminerMap() {
 		if (determinerMap.isEmpty()) {
-			determinerMap.put("cartItemModifierFieldCodeField", new CartItemModifierFieldCodeAuthorizationDeterminer()); //$NON-NLS-1$
+			determinerMap.put("cartItemModifierFieldCodeField", new ModifierFieldCodeAuthorizationDeterminer()); //$NON-NLS-1$
 		}
 		return determinerMap;
 	}
@@ -45,7 +45,7 @@ public class CatalogAddEditCartItemModifierFieldDialogPolicy extends AbstractCat
 	/**
 	 * Determiner for always editable controls.
 	 */
-	public class DefaultManageCartItemModifierFieldAuthorizationDeterminer implements StateDeterminer {
+	public class DefaultManageModifierFieldAuthorizationDeterminer implements StateDeterminer {
 
 		@Override
 		public EpControlFactory.EpState determineState(final PolicyActionContainer targetContainer) {
@@ -56,7 +56,7 @@ public class CatalogAddEditCartItemModifierFieldDialogPolicy extends AbstractCat
 	/**
 	 * Determines state based on persistent state.
 	 */
-	public class CartItemModifierFieldCodeAuthorizationDeterminer implements StateDeterminer {
+	public class ModifierFieldCodeAuthorizationDeterminer implements StateDeterminer {
 
 		@Override
 		public EpControlFactory.EpState determineState(final PolicyActionContainer targetContainer) {

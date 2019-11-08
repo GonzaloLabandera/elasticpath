@@ -104,7 +104,7 @@ public class BrandAdapter extends AbstractDomainAdapterImpl<Brand, BrandDTO> {
 	 */
 	@Override
 	public Brand createDomainObject() {
-		return getBeanFactory().getBean(ContextIdNames.BRAND);
+		return getBeanFactory().getPrototypeBean(ContextIdNames.BRAND, Brand.class);
 	}
 
 	/**

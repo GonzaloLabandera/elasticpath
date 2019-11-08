@@ -25,6 +25,9 @@ public class ConditionalExpressionModelTest  {
 	private static final String EQUAL_TO = "equalTo";
 	private static final String SHOPPING_START_TIME = "SHOPPING_START_TIME";
 	private static final String SELLING_CHANNEL = "SELLING_CHANNEL";
+	private static final String MEMBER_TYPE = "memberType";
+	private static final String AGE = "age";
+	private static final String REFERER_URL = "refererUrl";
 
 	@Rule
 	public final JUnitRuleMockery context = new JUnitRuleMockery();
@@ -50,13 +53,12 @@ public class ConditionalExpressionModelTest  {
 	@Test
 	public void testExpression1() {
 		//Create root level LogicalOperator
-		LogicalOperator root = new LogicalOperator(LogicalOperatorType.AND);		
+		LogicalOperator root = new LogicalOperator(LogicalOperatorType.AND);
 				
-		final TagDefinition refererUrl = context.mock(TagDefinition.class, "refererUrl");
+		final TagDefinition refererUrl = context.mock(TagDefinition.class, REFERER_URL);
 		
 		// add location contains something (leaves)
-		root.addCondition(new Condition(refererUrl,  "includes",
-				"google")); // http://google.com/q?s=fasdfasdfasdfasdf		
+		root.addCondition(new Condition(refererUrl, REFERER_URL, "includes", "google"));
 		
 		// add second level AND operation and add this operator to the root node
 		LogicalOperator secondLevel = new LogicalOperator(LogicalOperatorType.AND);
@@ -68,22 +70,22 @@ public class ConditionalExpressionModelTest  {
 		// we're doing setParent call just because in current implementation we've to explicitly set parent node of the tree
 		ageOrLocation.setParentLogicalOperator(secondLevel); 
 		
-		final TagDefinition memberType = context.mock(TagDefinition.class, "memberType");
+		final TagDefinition memberType = context.mock(TagDefinition.class, MEMBER_TYPE);
 		
 		// add membertype = bum condition to the second level AND operator too
-		secondLevel.addCondition(new Condition(memberType, EQUAL_TO, "bum"));
+		secondLevel.addCondition(new Condition(memberType, MEMBER_TYPE, EQUAL_TO, "bum"));
 		
 		// add third level OR operation and add this operator to the second level AND, just like the OR one
 		LogicalOperator notPoorAndPlatinum = new LogicalOperator(LogicalOperatorType.OR);
 		secondLevel.addLogicalOperator(notPoorAndPlatinum);
 		notPoorAndPlatinum.setParentLogicalOperator(secondLevel);
 		
-		final TagDefinition age = context.mock(TagDefinition.class, "age");
+		final TagDefinition age = context.mock(TagDefinition.class, AGE);
 		final TagDefinition location = context.mock(TagDefinition.class, "location");
 		
 		// let's add some conditions to the third level OR operator
-		ageOrLocation.addCondition(new Condition(age, "lessThan", "5"));
-		ageOrLocation.addCondition(new Condition(location, "notEqualTo", "fr"));
+		ageOrLocation.addCondition(new Condition(age, AGE, "lessThan", "5"));
+		ageOrLocation.addCondition(new Condition(location, "location", "notEqualTo", "fr"));
 		
 		// let's NOT the AND operation on the fourth level
 		// first start adding AND operator to the third level NOT
@@ -92,8 +94,8 @@ public class ConditionalExpressionModelTest  {
 		poorAndPlatinum.setParentLogicalOperator(notPoorAndPlatinum);
 		
 		// add two conditions to fourth level AND
-		poorAndPlatinum.addCondition(new Condition(memberType, "notEqualTo", "poor"));
-		poorAndPlatinum.addCondition(new Condition(memberType, "notEqualTo", "platinum"));
+		poorAndPlatinum.addCondition(new Condition(memberType, MEMBER_TYPE, "notEqualTo", "poor"));
+		poorAndPlatinum.addCondition(new Condition(memberType, MEMBER_TYPE, "notEqualTo", "platinum"));
 		
 	}
 	
@@ -106,17 +108,17 @@ public class ConditionalExpressionModelTest  {
 		final TagDefinition sellingChannel = context.mock(TagDefinition.class, SELLING_CHANNEL);
 		final TagDefinition shoppingStartTime = context.mock(TagDefinition.class, SHOPPING_START_TIME);
 		
-		Condition store1 = new Condition(sellingChannel, 
+		Condition store1 = new Condition(sellingChannel, SELLING_CHANNEL,
 				EQUAL_TO, "1"); //store code #1
-		Condition store2 = new Condition(sellingChannel, 
+		Condition store2 = new Condition(sellingChannel, SELLING_CHANNEL,
 				EQUAL_TO, "2"); //store code #2
-		Condition store3 = new Condition(sellingChannel, 
+		Condition store3 = new Condition(sellingChannel, SELLING_CHANNEL,
 				EQUAL_TO, "3"); //store code #3
 		
 		// date is always in timestamp format
-		Condition dateFrom = new Condition(shoppingStartTime, 
+		Condition dateFrom = new Condition(shoppingStartTime, SHOPPING_START_TIME,
 				"greaterThan", "124567898765678");
-		Condition dateTo   = new Condition(shoppingStartTime, 
+		Condition dateTo   = new Condition(shoppingStartTime, SHOPPING_START_TIME,
 				"lessThan", "124567898782342");
 				
 		LogicalOperator root = new LogicalOperator(LogicalOperatorType.AND);

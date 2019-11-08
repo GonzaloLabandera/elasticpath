@@ -489,7 +489,7 @@ public class GroovyConditionDSLBuilderTest extends BasicSpringContextTest {
 		tagValueType.setJavaType(String.class.getCanonicalName());
 		memberType.setValueType(tagValueType);
 		
-		rootNode.addCondition(new Condition(memberType, "includes", "google"));
+		rootNode.addCondition(new Condition(memberType, "memberType", "includes", "google"));
 		
 		assertEquals(" { AND { memberType.includes 'google' }  } ", groovyDSLBuilder.getConditionalDSLString(rootNode));
 	}
@@ -512,7 +512,7 @@ public class GroovyConditionDSLBuilderTest extends BasicSpringContextTest {
 		tagValueType.setJavaType(Integer.class.getCanonicalName());
 		age.setValueType(tagValueType);
 		
-		rootNode.addCondition(new Condition(age, "equalTo" , Integer.parseInt("3")));
+		rootNode.addCondition(new Condition(age, "age", "equalTo", Integer.parseInt("3")));
 
 		final String condition = groovyDSLBuilder.getConditionalDSLString(rootNode);
 		LOG.debug("-[act]->>" + condition);
@@ -535,7 +535,7 @@ public class GroovyConditionDSLBuilderTest extends BasicSpringContextTest {
 		tagValueType.setJavaType(String.class.getCanonicalName());
 		age.setValueType(tagValueType);
 
-		rootNode.addCondition(new Condition(age, "includes", Collections.singletonList("a")));
+		rootNode.addCondition(new Condition(age, "age", "includes", Collections.singletonList("a")));
 
 		groovyDSLBuilder.getConditionalDSLString(rootNode);
 	}
@@ -556,7 +556,7 @@ public class GroovyConditionDSLBuilderTest extends BasicSpringContextTest {
 		tagValueType.setJavaType(String.class.getCanonicalName());
 		age.setValueType(tagValueType);
 
-		rootNode.addCondition(new Condition(age, "equalTo", Collections.singletonMap("a", "b")));
+		rootNode.addCondition(new Condition(age, "age", "equalTo", Collections.singletonMap("a", "b")));
 
 		groovyDSLBuilder.getConditionalDSLString(rootNode);
 	}
@@ -578,7 +578,7 @@ public class GroovyConditionDSLBuilderTest extends BasicSpringContextTest {
 		age.setValueType(tagValueType);
 
 		
-		rootNode.addCondition(new Condition(age, "equalTo", new String[] { "a" }));
+		rootNode.addCondition(new Condition(age, "age", "equalTo", new String[] { "a" }));
 		
 		groovyDSLBuilder.getConditionalDSLString(rootNode);
 	}

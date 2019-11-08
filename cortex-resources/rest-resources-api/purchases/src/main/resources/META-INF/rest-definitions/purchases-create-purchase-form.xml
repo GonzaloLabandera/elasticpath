@@ -2,14 +2,13 @@
 <definitions xmlns="http://www.elasticpath.com/schema/rest/0.5">
 	<family>
 		<name>purchases</name>
-		<description><![CDATA[Submit the purchase form to complete the purchase.]]></description>
 
 		<resource>
 			<name>create-purchase-form</name>
 			<description><![CDATA[Provides the form with which to purchase an order.]]></description>
 			<uri>{base.family}/{orders.order}/form</uri>
 			<form>
-				<entity>purchase</entity>
+				<entity>purchase-form</entity>
 				<action-rel>submitorderaction</action-rel>
 				<result>purchase</result>
 			</form>
@@ -22,5 +21,10 @@
 			<from>orders.order</from>
 			<to>create-purchase-form</to>
 		</relationship>
+
+		<entity>
+			<name>purchase-form</name>
+			<description>Data needed for completing a purchase. Typically nothing should be needed at this stage as all required information has been provided while resolving any blocking advisors.</description>
+		</entity>
 	</family>
 </definitions>

@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<xs:schema version="1.0" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+  <xs:element name="condition" type="conditionalExpressionDTO"/>
+
+  <xs:element name="tag" type="tagDefinitionDTO"/>
+
+  <xs:element name="tag_group" nillable="true" type="xs:anyType"/>
+
+  <xs:complexType name="conditionalExpressionDTO">
+    <xs:sequence>
+      <xs:element name="guid" type="xs:string"/>
+      <xs:element name="name" type="xs:string"/>
+      <xs:element name="description" type="xs:string" minOccurs="0"/>
+      <xs:element name="condition_string" type="xs:string"/>
+      <xs:element name="dictionary_guid" type="xs:string"/>
+    </xs:sequence>
+    <xs:attribute name="is_named" type="xs:boolean"/>
+  </xs:complexType>
+
+  <xs:complexType name="sellingContextDTO">
+    <xs:sequence>
+      <xs:element name="guid" type="xs:string"/>
+      <xs:element name="name" type="xs:string"/>
+      <xs:element name="description" type="xs:string" minOccurs="0"/>
+      <xs:element name="priority" type="xs:int"/>
+      <xs:element name="conditions" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="condition" minOccurs="0" maxOccurs="unbounded"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="saved_condition_guids" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="saved_condition_guid" type="xs:string" minOccurs="0" maxOccurs="unbounded"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="tagDefinitionDTO">
+    <xs:sequence>
+      <xs:element name="type" type="xs:string"/>
+      <xs:element name="name" type="xs:string"/>
+      <xs:element name="description" type="xs:string" minOccurs="0"/>
+      <xs:element name="displayName" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="value" type="displayValue" maxOccurs="unbounded"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="dictionaries" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="dictionary" type="xs:string" maxOccurs="unbounded"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+    <xs:attribute name="code" type="xs:string"/>
+  </xs:complexType>
+
+  <xs:complexType name="displayValue">
+    <xs:simpleContent>
+      <xs:extension base="xs:string">
+        <xs:attribute name="language" type="xs:string"/>
+      </xs:extension>
+    </xs:simpleContent>
+  </xs:complexType>
+
+  <xs:complexType name="tagDictionaryDTO">
+    <xs:sequence/>
+  </xs:complexType>
+
+  <xs:complexType name="tagGroupDTO">
+    <xs:sequence>
+      <xs:element name="displayName" minOccurs="0">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="value" type="displayValue" maxOccurs="unbounded"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="definitions">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element ref="tag" maxOccurs="unbounded"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+    <xs:attribute name="code" type="xs:string" use="required"/>
+  </xs:complexType>
+</xs:schema>
+

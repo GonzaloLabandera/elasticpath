@@ -12,5 +12,5 @@ CALL %BIN_PATH%\header.bat %*
 IF ERRORLEVEL 1 exit /b 1
 
 :: Invoke the Data Population CLI Tool
-"%JAVA_CMD%" -cp "%DP_CLASSPATH%" %JAVA_DEBUG_PARMS% ^
+"%JAVA_CMD%" -Dspring.profiles.active="%PROFILE%" -cp "%DP_CLASSPATH%" %JAVA_DEBUG_PARMS% ^
     com.elasticpath.datapopulation.cli.tool.DataPopulationCliApplication %*

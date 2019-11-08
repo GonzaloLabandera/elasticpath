@@ -50,41 +50,51 @@ public class SimpleTimeoutCacheTest {
 		fixture.changeTimeout(timeout);
 		fixture.put(FRED, FREDS_INFORMATION);
 
+		// Make sure it's available right after putting
 		assertThat(fixture.get(FRED)).isEqualTo(FREDS_INFORMATION);
 
 		// Make sure it's available after the first call
 		assertThat(fixture.get(FRED)).isEqualTo(FREDS_INFORMATION);
 
-		await().atMost(Duration.TWO_SECONDS).until(() ->
-			assertThat(fixture.get(FRED)).isNull());
+		// Make sure it's not available after timeout expires
+		await().atMost(Duration.FIVE_SECONDS).until(() ->
+				assertThat(fixture.get(FRED)).isNull());
 	}
 
 	/**
 	 * Test that with a zero timeout values are cached indefinitely (eternal cache).
 	 */
 	@Test
-	public void testZeroTimeout() {
+	public void testZeroTimeout() throws InterruptedException {
 		final long timeout = 0L;
 
 		fixture.changeTimeout(timeout);
 		fixture.put(FRED, FREDS_INFORMATION);
 
-		await().atMost(Duration.ONE_SECOND).until(() ->
-			assertThat(fixture.get(FRED)).isEqualTo(FREDS_INFORMATION));
+		// Make sure it's available right after putting
+		assertThat(fixture.get(FRED)).isEqualTo(FREDS_INFORMATION);
+
+		// Make sure it's still available a few seconds after putting
+		TimeUnit.SECONDS.sleep(2);
+		assertThat(fixture.get(FRED)).isEqualTo(FREDS_INFORMATION);
 	}
 
 	/**
 	 * Test that with a negative timeout values nothing is cached (timeout must be in negative seconds).
 	 */
 	@Test
-	public void testNegativeTimeout() {
+	public void testNegativeTimeout() throws InterruptedException {
 		final long timeout = -1000L;
 
 		fixture.changeTimeout(timeout);
 		fixture.put(FRED, FREDS_INFORMATION);
 
-		await().atMost(Duration.ONE_SECOND).until(() ->
-			assertThat(fixture.get(FRED)).isNull());
+		// Make sure it's not available right after putting
+		assertThat(fixture.get(FRED)).isNull();
+
+		// Make sure it's still not available a few seconds after putting
+		TimeUnit.SECONDS.sleep(2);
+		assertThat(fixture.get(FRED)).isNull();
 	}
 
 
@@ -101,7 +111,7 @@ public class SimpleTimeoutCacheTest {
 		assertThat(fixture.get(FRED)).isEqualTo(FREDS_INFORMATION);
 
 		await().atLeast(timeout, TimeUnit.MILLISECONDS).until(() ->
-			assertThat(fixture.get(FRED)).as("Cached entry should have expired").isNull());
+				assertThat(fixture.get(FRED)).as("Cached entry should have expired").isNull());
 	}
 
 	/**

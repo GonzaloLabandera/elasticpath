@@ -49,10 +49,10 @@ public final class CatalogImageRegistry extends AbstractImageRegistry {
 
 	/** Category Linked Add Icon. * */
 	public static final ImageDescriptor CATEGORY_LINKED_ADD = getImageDescriptor(PLUGIN_ID, "add_sub_category_22.png"); //$NON-NLS-1$
-	
+
 	/** Category Linked Remove Icon. * */
 	public static final ImageDescriptor CATEGORY_LINKED_REMOVE = getImageDescriptor(PLUGIN_ID, "category-linked-remove_default_22.png"); //$NON-NLS-1$
-	
+
 	/** Master Catalog Icon. */
 	public static final ImageDescriptor CATALOG_MASTER = getImageDescriptor(PLUGIN_ID, "catalog_default_22.png"); //$NON-NLS-1$
 
@@ -61,7 +61,7 @@ public final class CatalogImageRegistry extends AbstractImageRegistry {
 
 	/** Master Catalog Create Icon. */
 	public static final ImageDescriptor CATALOG_MASTER_CREATE = getImageDescriptor(PLUGIN_ID, "catalog-create_default_22.png"); //$NON-NLS-1$
-	
+
 	/** Virtual Catalog Icon. */
 	public static final ImageDescriptor CATALOG_VIRTUAL = getImageDescriptor(PLUGIN_ID, "catalog-virtual_default_22.png"); //$NON-NLS-1$
 
@@ -70,12 +70,12 @@ public final class CatalogImageRegistry extends AbstractImageRegistry {
 
 	/** Virtual Catalog Create Icon. */
 	public static final ImageDescriptor CATALOG_VIRTUAL_CREATE = getImageDescriptor(PLUGIN_ID, "catalog-virtual-create_default_22.png"); //$NON-NLS-1$
-	
+
 	/** Virtual Catalog Edit Icon. */
 	public static final ImageDescriptor CATALOG_VIRTUAL_EDIT = getImageDescriptor(PLUGIN_ID, "catalog-virtual-edit_default_22.png"); //$NON-NLS-1$
-	
+
 	/** Product Icon. * */
-	public static final ImageDescriptor PRODUCT = getImageDescriptor(PLUGIN_ID, "product_default_22.png"); //$NON-NLS-1$
+	public static final ImageDescriptor PRODUCT = getImageDescriptor(PLUGIN_ID, "empty_1x1.png"); //$NON-NLS-1$
 
 	/** Product Icon. * */
 	public static final ImageDescriptor PRODUCT_SMALL = getImageDescriptor(PLUGIN_ID, "product_default_16.png"); //$NON-NLS-1$
@@ -88,16 +88,16 @@ public final class CatalogImageRegistry extends AbstractImageRegistry {
 
 	/** Product include Icon. * */
 	public static final ImageDescriptor PRODUCT_INCLUDE = getImageDescriptor(PLUGIN_ID, "product-include_default_22.png"); //$NON-NLS-1$
-	
+
 	/** Product exclude Icon. * */
 	public static final ImageDescriptor PRODUCT_EXCLUDE = getImageDescriptor(PLUGIN_ID, "product-exclude_default_22.png"); //$NON-NLS-1$
-	
+
 	/** Product edit Icon. * */
 	public static final ImageDescriptor PRODUCT_EDIT = getImageDescriptor(PLUGIN_ID, "product-edit_default_22.png"); //$NON-NLS-1$
-	
+
 	/** Product private Icon. * */
 	public static final ImageDescriptor PRODUCT_PRIVATE_SMALL = getImageDescriptor(PLUGIN_ID, "product-private_default_16.png"); //$NON-NLS-1$;
-	
+
 	/** Product sku Icon. * */
 	public static final ImageDescriptor PRODUCT_SKU = getImageDescriptor(PLUGIN_ID, "sku_default_22.png"); //$NON-NLS-1$
 
@@ -106,28 +106,28 @@ public final class CatalogImageRegistry extends AbstractImageRegistry {
 
 	/** Add icon. */
 	public static final ImageDescriptor ADD = getImageDescriptor(PLUGIN_ID, "add_default_22.png"); //$NON-NLS-1$
-	
+
 	/** Edit icon. */
 	public static final ImageDescriptor EDIT = getImageDescriptor(PLUGIN_ID, "edit_default_22.png"); //$NON-NLS-1$
-	
+
 	/** Remove icon. */
 	public static final ImageDescriptor REMOVE = getImageDescriptor(PLUGIN_ID, "delete_default_22.png"); //$NON-NLS-1$
-	
+
 	/** Move up icon. */
 	public static final ImageDescriptor MOVE_UP = getImageDescriptor(PLUGIN_ID, "move-up_default_22.png"); //$NON-NLS-1$
-	
+
 	/** Move down icon. */
 	public static final ImageDescriptor MOVE_DOWN = getImageDescriptor(PLUGIN_ID, "move-down_default_22.png"); //$NON-NLS-1$
 
 	/** Not available Image. */
 	public static final ImageDescriptor IMAGE_NOT_AVAILABLE = getImageDescriptor(PLUGIN_ID, "image-not-available.jpg"); //$NON-NLS-1$
-	
+
 	/** Clear attribute value Image. */
 	public static final ImageDescriptor CLEAR = getImageDescriptor(PLUGIN_ID, "clear_default_22.png"); //$NON-NLS-1$
-	
+
 	/** Search Image. */
 	public static final ImageDescriptor SEARCH = getImageDescriptor(PLUGIN_ID, "search_default_22.png"); //$NON-NLS-1$
-	
+
 	/** Edit attributes edit. */
 	public static final ImageDescriptor ATTRIBUTE_EDIT = getImageDescriptor(PLUGIN_ID, "attribute-edit_default_22.png"); //$NON-NLS-1$
 
@@ -142,19 +142,19 @@ public final class CatalogImageRegistry extends AbstractImageRegistry {
 
 	/** product bundle when add. */
 	public static final ImageDescriptor PRODUCT_BUNDLE_CREATE = getImageDescriptor(PLUGIN_ID, "bundle-add_default_22.png"); //$NON-NLS-1$
-	
+
 	/** bullet image for select all. */
 	public static final ImageDescriptor BUNDLE_ITEM_SELECTED = getImageDescriptor(PLUGIN_ID, "tick_default_22.png"); //$NON-NLS-1$
-	
+
 	/** checkbox on for multiple selection. */
 	public static final ImageDescriptor BUNDLE_ITEM_CHECKBOX_ON = getImageDescriptor(PLUGIN_ID, "checkbox-on_default_22.png"); //$NON-NLS-1$
-	
+
 	/** checkbox off for multiple selection. */
 	public static final ImageDescriptor BUNDLE_ITEM_CHECKBOX_OFF = getImageDescriptor(PLUGIN_ID, "checkbox-off_default_22.png"); //$NON-NLS-1$
-	
+
 	/** radio button on for single selection. */
 	public static final ImageDescriptor BUNDLE_ITEM_RADIO_ON = getImageDescriptor(PLUGIN_ID, "radio-on_default_22.png"); //$NON-NLS-1$
-	
+
 	/** radio button off for single selection. */
 	public static final ImageDescriptor BUNDLE_ITEM_RADIO_OFF = getImageDescriptor(PLUGIN_ID, "radio-off_default_22.png"); //$NON-NLS-1$
 

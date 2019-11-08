@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans
+		xmlns="http://www.springframework.org/schema/beans"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xmlns:camel="http://camel.apache.org/schema/spring"
+		xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+				http://camel.apache.org/schema/spring http://camel.apache.org/schema/spring/camel-spring.xsd">
+
+	<camel:camelContext id="ep-domain-bulk-message-handler" errorHandlerRef="bulkDeadLetterErrorHandler" xmlns="http://camel.apache.org/schema/spring"
+						threadNamePattern="Camel (#camelId#) thread ##counter#">
+		<route id="domainBulkEventMessageRoute">
+			<from ref="domainBulkMessageHandlerInternalEndpoint"/>
+			<unmarshal ref="eventMessageDataFormat"/>
+			<process ref="bulkEventProcessor"/>
+		</route>
+		<route id="bulkEventMessageDeadLetterRoute">
+			<from ref="bulkDeadLetterEventExternalEndpoint"/>
+			<process ref="bulkExceptionHandler"/>
+		</route>
+	</camel:camelContext>
+
+	<bean id="bulkDeadLetterErrorHandler" class="org.apache.camel.builder.DeadLetterChannelBuilder">
+		<constructor-arg name="deadLetter" ref="bulkDeadLetterEventExternalEndpoint"/>
+		<property name="useOriginalMessage" value="true"/>
+	</bean>
+
+	<bean id="bulkDeadLetterEventExternalEndpoint" class="com.elasticpath.messaging.camel.SettingValueBackedCamelEndpointFactoryBean">
+		<property name="path" value="COMMERCE/SYSTEM/MESSAGING/DOMAIN/BULK/deadLetterChannelUri"/>
+		<property name="camelContextId" value="ep-domain-bulk-message-handler"/>
+		<property name="settingsReader" ref="settingsReader"/>
+	</bean>
+
+	<bean id="domainBulkMessageHandlerInternalEndpoint" parent="domainBulkEventEndpoint">
+		<property name="camelContextId" value="ep-domain-bulk-message-handler"/>
+		<property name="context" value="projectionBulkChangeHandler"/>
+	</bean>
+
+	<bean id="bulkEventProcessor" class="com.elasticpath.catalog.bulk.BulkEventProcessor">
+		<constructor-arg>
+			<map>
+				<entry key="BRAND_BULK_UPDATE" value-ref="brandBulkUpdateEventHandler"/>
+				<entry key="OPTION_BULK_UPDATE" value-ref="optionBulkUpdateEventHandler"/>
+				<entry key="OFFER_BULK_UPDATE" value-ref="offerBulkUpdateEventHandler"/>
+				<entry key="ATTRIBUTE_BULK_UPDATE" value-ref="attributeBulkUpdateEventHandler"/>
+				<entry key="ATTRIBUTE_CATEGORY_BULK_UPDATE" value-ref="attributeCategoryBulkUpdateEventHandler"/>
+				<entry key="ATTRIBUTE_SKU_BULK_UPDATE" value-ref="attributeSkuBulkUpdateEventHandler"/>
+				<entry key="CATEGORY_BULK_UPDATE" value-ref="categoryBulkUpdateEventHandler"/>
+			</map>
+		</constructor-arg>
+	</bean>
+
+	<bean id="brandBulkUpdateEventHandler" class="com.elasticpath.catalog.bulk.brand.BrandBulkUpdateEventHandler">
+		<constructor-arg name="brandBulkUpdateProcessor" ref="brandBulkUpdateProcessor"/>
+	</bean>
+
+	<bean id="brandBulkUpdateProcessor" class="com.elasticpath.catalog.bulk.brand.BrandBulkUpdateProcessorImpl">
+		<constructor-arg name="catalogService" ref="catalogDataService"/>
+		<constructor-arg name="timeService" ref="timeService"/>
+	</bean>
+
+	<bean id="optionBulkUpdateEventHandler" class="com.elasticpath.catalog.bulk.option.SkuOptionBulkEventHandler">
+		<constructor-arg name="skuOptionBulkUpdateProcessor" ref="optionBulkUpdateProcessor"/>
+	</bean>
+
+	<bean id="optionBulkUpdateProcessor" class="com.elasticpath.catalog.bulk.option.SkuOptionBulkUpdateProcessorImpl">
+		<constructor-arg name="catalogService" ref="catalogDataService"/>
+		<constructor-arg name="timeService" ref="timeService"/>
+	</bean>
+
+	<bean name="categoryBulkUpdateEventHandler" class="com.elasticpath.catalog.bulk.offer.OfferBulkUpdateEventHandler">
+		<constructor-arg name="offerBulkUpdateProcessor" ref="categoryBulkBulkUpdateProcessor"/>
+	</bean>
+
+	<bean name="offerBulkUpdateEventHandler" class="com.elasticpath.catalog.bulk.offer.OfferBulkUpdateEventHandler">
+		<constructor-arg name="offerBulkUpdateProcessor" ref="offerBulkBulkUpdateProcessor"/>
+	</bean>
+
+	<bean id="offerBulkBulkUpdateProcessor" class="com.elasticpath.catalog.bulk.offer.OfferBulkUpdateProcessorImpl">
+		<constructor-arg name="catalogService" ref="catalogDataService"/>
+		<constructor-arg name="productLookup" ref="productLookup"/>
+		<constructor-arg name="storeService" ref="storeService"/>
+		<constructor-arg name="converter" ref="productToProjectionConverter"/>
+	</bean>
+
+	<bean id="categoryBulkBulkUpdateProcessor" class="com.elasticpath.catalog.bulk.offer.CategoryBulkUpdateProcessorImpl">
+		<constructor-arg name="catalogService" ref="catalogDataService"/>
+		<constructor-arg name="productLookup" ref="productLookup"/>
+		<constructor-arg name="projectionService" ref="productProjectionService"/>
+		<constructor-arg name="storeService" ref="storeService"/>
+		<constructor-arg name="converter" ref="productToProjectionConverter"/>
+	</bean>
+
+	<bean id="attributeBulkUpdateEventHandler" class="com.elasticpath.catalog.bulk.attribute.AttributeBulkEventHandler">
+		<constructor-arg name="attributeBulkUpdateProcessor" ref="attributeBulkUpdateProcessor"/>
+	</bean>
+
+	<bean id="attributeBulkUpdateProcessor" class="com.elasticpath.catalog.bulk.attribute.AttributeBulkUpdateProcessorImpl">
+		<constructor-arg name="catalogService" ref="catalogDataService"/>
+		<constructor-arg name="timeService" ref="timeService"/>
+	</bean>
+
+	<bean id="attributeCategoryBulkUpdateEventHandler" class="com.elasticpath.catalog.bulk.attribute.AttributeCategoryBulkEventHandler">
+		<constructor-arg name="attributeCategoryBulkUpdateProcessor" ref="attributeCategoryBulkUpdateProcessor"/>
+	</bean>
+
+	<bean id="attributeCategoryBulkUpdateProcessor" class="com.elasticpath.catalog.bulk.attribute.AttributeCategoryBulkUpdateProcessorImpl">
+		<constructor-arg name="catalogService" ref="catalogDataService"/>
+		<constructor-arg name="timeService" ref="timeService"/>
+	</bean>
+
+	<bean id="attributeSkuBulkUpdateEventHandler" class="com.elasticpath.catalog.bulk.attribute.AttributeSkuBulkEventHandler">
+		<constructor-arg name="attributeSkuBulkUpdateProcessor" ref="attributeSkuBulkUpdateProcessor"/>
+	</bean>
+
+	<bean id="attributeSkuBulkUpdateProcessor" class="com.elasticpath.catalog.bulk.attribute.AttributeSkuBulkUpdateProcessorImpl">
+		<constructor-arg name="catalogService" ref="catalogDataService"/>
+		<constructor-arg name="timeService" ref="timeService"/>
+	</bean>
+
+	<bean name="bulkExceptionHandler" class="com.elasticpath.catalog.bulk.exception.BulkExceptionHandler"/>
+
+</beans>

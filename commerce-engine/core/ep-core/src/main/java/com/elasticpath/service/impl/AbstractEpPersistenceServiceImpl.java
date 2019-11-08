@@ -4,25 +4,30 @@
 package com.elasticpath.service.impl;
 
 import java.util.Collection;
+import java.util.Map;
 
 import org.apache.log4j.Logger;
 
 import com.elasticpath.base.exception.EpServiceException;
+import com.elasticpath.commons.beanframework.BeanFactory;
 import com.elasticpath.domain.ElasticPath;
 import com.elasticpath.domain.impl.ElasticPathImpl;
+import com.elasticpath.persistence.api.LoadTuner;
 import com.elasticpath.persistence.api.Persistable;
 import com.elasticpath.persistence.api.PersistenceEngine;
+import com.elasticpath.persistence.openjpa.util.FetchPlanHelper;
 import com.elasticpath.service.EpPersistenceService;
 
 /**
  * <code>AbstractEpPersistenceServiceImpl</code> is abstract implementation of the base interface for
  * other services of the persistable domain models.
  */
-public abstract class AbstractEpPersistenceServiceImpl implements EpPersistenceService {
+public abstract class AbstractEpPersistenceServiceImpl implements EpPersistenceService, BeanFactory {
 	private static final Logger LOG = Logger.getLogger(AbstractEpPersistenceServiceImpl.class);
 	private PersistenceEngine persistenceEngine;
 	private final PersistentBeanFinder persistentBeanFinder = new PersistentBeanFinder();
 
+	private FetchPlanHelper fetchPlanHelper;
 	private ElasticPath elasticPath;
 
 	/**
@@ -139,6 +144,28 @@ public abstract class AbstractEpPersistenceServiceImpl implements EpPersistenceS
 			return getPersistenceEngine().get(getElasticPath().<T>getBeanImplClass(beanName), uidPk);
 		}
 
+		/**
+		 * Set one or more load tuners.
+		 *
+		 * @param loadTuners an array of load tuners.
+		 * @return the current instance of {@link PersistenceEngine}
+		 */
+		public PersistentBeanFinder withLoadTuners(final LoadTuner... loadTuners) {
+			fetchPlanHelper.setLoadTuners(loadTuners);
+			return this;
+		}
+
+		/**
+		 * Set a map with pairs of Class and a lazy field to be loaded.
+		 * E.g CustomerImpl.class, "preferredShippingAddress"
+		 *
+		 * @param lazyFields a map with lazy fields to be loaded.
+		 * @return the current instance of {@link PersistenceEngine}
+		 */
+		public PersistentBeanFinder withLazyFields(final Map<Class<?>, String> lazyFields) {
+			fetchPlanHelper.setLazyFields(lazyFields);
+			return this;
+		}
 	}
 
 	/**
@@ -163,26 +190,33 @@ public abstract class AbstractEpPersistenceServiceImpl implements EpPersistenceS
 		return ElasticPathImpl.getInstance();
 	}
 
-
-	/**
-	 * Convenience method for getting a bean instance from elastic path.
-	 * @param <T> the type of bean to return
-	 * @param beanName the name of the bean to get and instance of.
-	 * @return an instance of the requested bean.
-	 */
-	protected <T> T getBean(final String beanName) {
+	
+	@Deprecated
+	@Override
+	public <T> T getBean(final String beanName) {
 		return getElasticPath().getBean(beanName);
 	}
-
-	/**
-	 * Return the <code>Class</code> object currently registered with the
-	 * specified <code>beanName</code>.
-	 *
-	 * @param <T> the type of the bean to return.
-	 * @param beanName the name of the bean to get the class for.
-	 * @return the class object if the bean is registered, null otherwise.
-	 */
-	protected <T> Class<T> getBeanImplClass(final String beanName) {
+	
+	@Override
+	public <T> Class<T> getBeanImplClass(final String beanName) {
 		return getElasticPath().getBeanImplClass(beanName);
+	}
+
+	@Override
+	public <T> T getPrototypeBean(final String name, final Class<T> clazz) {
+		return getElasticPath().getPrototypeBean(name, clazz);
+	}
+
+	@Override
+	public <T> T getSingletonBean(final String name, final Class<T> clazz) {
+		return  getElasticPath().getSingletonBean(name, clazz);
+	}
+
+	public FetchPlanHelper getFetchPlanHelper() {
+		return fetchPlanHelper;
+	}
+
+	public void setFetchPlanHelper(final FetchPlanHelper fetchPlanHelper) {
+		this.fetchPlanHelper = fetchPlanHelper;
 	}
 }

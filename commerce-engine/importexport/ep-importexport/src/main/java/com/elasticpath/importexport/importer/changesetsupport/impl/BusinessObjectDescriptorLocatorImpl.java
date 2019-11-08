@@ -51,7 +51,8 @@ public class BusinessObjectDescriptorLocatorImpl implements BusinessObjectDescri
 		throws IllegalArgumentException, SecurityException, IllegalAccessException, 
 				InvocationTargetException, NoSuchMethodException {
 		
-		BusinessObjectDescriptor descriptor = getBeanFactory().getBean(ContextIdNames.BUSINESS_OBJECT_DESCRIPTOR);
+		BusinessObjectDescriptor descriptor 
+			= getBeanFactory().getPrototypeBean(ContextIdNames.BUSINESS_OBJECT_DESCRIPTOR, BusinessObjectDescriptor.class);
 		return objectDescriptorPopulator.populate(descriptor, dto);
 	}
 

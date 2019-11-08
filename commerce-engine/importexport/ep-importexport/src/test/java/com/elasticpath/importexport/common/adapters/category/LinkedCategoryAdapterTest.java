@@ -125,7 +125,7 @@ public class LinkedCategoryAdapterTest {
 	public void testCreateDomainObject() {
 		context.checking(new Expectations() {
 			{
-				allowing(mockBeanFactory).getBean(ContextIdNames.LINKED_CATEGORY);
+				allowing(mockBeanFactory).getPrototypeBean(ContextIdNames.LINKED_CATEGORY, Category.class);
 				will(returnValue(new LinkedCategoryImpl()));
 			}
 		});

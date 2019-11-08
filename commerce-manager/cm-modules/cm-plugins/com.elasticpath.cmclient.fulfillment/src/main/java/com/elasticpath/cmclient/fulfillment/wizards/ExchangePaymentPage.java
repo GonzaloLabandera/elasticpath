@@ -328,7 +328,7 @@ public class ExchangePaymentPage extends AbstractEPWizardPage<OrderReturn> {
 			final IEpLayoutComposite controlPane = CompositeFactory.createTableWrapLayoutComposite(parent, 1, false);
 			final IEpLayoutData tableLayoutData = controlPane.createLayoutData(IEpLayoutData.FILL, IEpLayoutData.FILL, true, true, 1, 1);
 			orderPaymentControl = new OrderPaymentControl(getModel().getOrder(), controlPane, tableLayoutData,
-					ExchangePaymentPage.this.getDataBindingContext());
+					ExchangePaymentPage.this.getDataBindingContext(), OrderPaymentControl.PurposeEnum.AUTHORIZATION);
 		}
 
 		/**

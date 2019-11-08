@@ -5,6 +5,7 @@
 package com.elasticpath.caching.core.rules;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyCollection;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -20,6 +21,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -51,19 +53,21 @@ public class CachingRuleServiceImplTest {
 	private static final String STORE_CODE = "storeCode";
 
 	@Mock
-	private Cache<String, Rule> ruleByRuleCodeCache;
+	private Cache<String, Optional<Rule>> ruleByRuleCodeCache;
 	@Mock
-	private Cache<String, String> ruleCodeByRuleNameCache;
+	private Cache<String, Optional<String>> ruleCodeByRuleNameCache;
 	@Mock
-	private Cache<Long, String> ruleCodeByRuleUidCache;
+	private Cache<Long, Optional<String>> ruleCodeByRuleUidCache;
 	@Mock
-	private Cache<Collection<Long>, Collection<String>> ruleCodesByRuleUidsCache;
+	private Cache<Collection<Long>, Optional<Collection<String>>> ruleCodesByRuleUidsCache;
 	@Mock
-	private Cache<Collection<Long>, EpRuleBase> ruleBaseByScenarioCache;
+	private Cache<Collection<Long>, Optional<EpRuleBase>> ruleBaseByScenarioCache;
 	@Mock
-	private Cache<CodeUidDateCacheKey, EpRuleBase> changedStoreRuleBaseCache;
+	private Cache<CodeUidDateCacheKey, Optional<EpRuleBase>> changedStoreRuleBaseCache;
 	@Mock
-	private Cache<CodeUidDateCacheKey, EpRuleBase> changedCatalogRuleBaseCache;
+	private Cache<CodeUidDateCacheKey, Optional<EpRuleBase>> changedCatalogRuleBaseCache;
+	@Mock
+	private Cache<Long, Optional<Date>> modifiedDateCache;
 	@Mock
 	private RuleService decoratedFallbackService;
 	@Mock
@@ -93,7 +97,7 @@ public class CachingRuleServiceImplTest {
 
 		verify(ruleCodeByRuleUidCache).get(ruleUidPk);
 		verify(decoratedFallbackService).findRuleCodeById(ruleUidPk);
-		verify(ruleCodeByRuleUidCache).put(ruleUidPk, actualRuleCode);
+		verify(ruleCodeByRuleUidCache).put(ruleUidPk, Optional.of(actualRuleCode));
 	}
 
 	@Test
@@ -101,7 +105,7 @@ public class CachingRuleServiceImplTest {
 		final long ruleUidPk = 1L;
 		final String expectedRuleCode = RULE_CODE;
 
-		when(ruleCodeByRuleUidCache.get(ruleUidPk)).thenReturn(expectedRuleCode);
+		when(ruleCodeByRuleUidCache.get(ruleUidPk)).thenReturn(Optional.of(expectedRuleCode));
 
 		String actualRuleCode = fixture.findRuleCodeById(ruleUidPk);
 
@@ -109,7 +113,7 @@ public class CachingRuleServiceImplTest {
 
 		verify(ruleCodeByRuleUidCache).get(ruleUidPk);
 		verify(decoratedFallbackService, never()).findRuleCodeById(anyLong());
-		verify(ruleCodeByRuleUidCache, never()).put(anyLong(), anyString());
+		verify(ruleCodeByRuleUidCache, never()).put(anyLong(), any());
 	}
 
 	@Test
@@ -126,7 +130,7 @@ public class CachingRuleServiceImplTest {
 
 		verify(ruleCodesByRuleUidsCache).get(ruleUidPks);
 		verify(decoratedFallbackService).findCodesByUids(ruleUidPks);
-		verify(ruleCodesByRuleUidsCache).put(ruleUidPks, actualRuleCodes);
+		verify(ruleCodesByRuleUidsCache).put(ruleUidPks, Optional.of(actualRuleCodes));
 	}
 
 	@Test
@@ -134,7 +138,7 @@ public class CachingRuleServiceImplTest {
 		final Collection<Long> ruleUidPks = Arrays.asList(1L, 2L);
 		final Collection<String> expectedRuleCodes = Arrays.asList("ruleCode1", "ruleCode2");
 
-		when(ruleCodesByRuleUidsCache.get(ruleUidPks)).thenReturn(expectedRuleCodes);
+		when(ruleCodesByRuleUidsCache.get(ruleUidPks)).thenReturn(Optional.of(expectedRuleCodes));
 
 		Collection<String> actualRuleCodes = fixture.findCodesByUids(ruleUidPks);
 
@@ -142,12 +146,11 @@ public class CachingRuleServiceImplTest {
 
 		verify(ruleCodesByRuleUidsCache).get(ruleUidPks);
 		verify(decoratedFallbackService, never()).findCodesByUids(anyCollection());
-		verify(ruleCodesByRuleUidsCache, never()).put(anyCollection(), anyCollection());
+		verify(ruleCodesByRuleUidsCache, never()).put(anyCollection(), any());
 	}
 
 	@Test
 	public void shouldFindRulesByUidsInDbOnCacheMiss() {
-
 
 		final Collection<Long> ruleUidPks = Collections.singletonList(RULE_UIDPK);
 
@@ -163,8 +166,8 @@ public class CachingRuleServiceImplTest {
 		verify(ruleCodeByRuleUidCache).get(anyLong());
 		verify(ruleByRuleCodeCache, never()).get(anyString());
 		verify(decoratedFallbackService).findByUids(ruleUidPks);
-		verify(ruleCodeByRuleUidCache).put(RULE_UIDPK, RULE_CODE);
-		verify(ruleByRuleCodeCache).put(RULE_CODE, rule);
+		verify(ruleCodeByRuleUidCache).put(RULE_UIDPK, Optional.of(RULE_CODE));
+		verify(ruleByRuleCodeCache).put(RULE_CODE, Optional.of(rule));
 	}
 
 	@Test
@@ -173,8 +176,8 @@ public class CachingRuleServiceImplTest {
 		final Collection<Long> ruleUidPks = Collections.singletonList(RULE_UIDPK);
 		final List<Rule> expectedRules = Collections.singletonList(rule);
 
-		when(ruleCodeByRuleUidCache.get(RULE_UIDPK)).thenReturn(RULE_CODE);
-		when(ruleByRuleCodeCache.get(RULE_CODE)).thenReturn(rule);
+		when(ruleCodeByRuleUidCache.get(RULE_UIDPK)).thenReturn(Optional.of(RULE_CODE));
+		when(ruleByRuleCodeCache.get(RULE_CODE)).thenReturn(Optional.of(rule));
 
 		Collection<Rule> actualRules = fixture.findByUids(ruleUidPks);
 
@@ -183,7 +186,7 @@ public class CachingRuleServiceImplTest {
 		verify(ruleCodeByRuleUidCache).get(anyLong());
 		verify(ruleByRuleCodeCache).get(anyString());
 		verify(decoratedFallbackService, never()).findCodesByUids(anyCollection());
-		verify(ruleCodesByRuleUidsCache, never()).put(anyCollection(), anyCollection());
+		verify(ruleCodesByRuleUidsCache, never()).put(anyCollection(), any());
 	}
 
 	@Test
@@ -198,15 +201,15 @@ public class CachingRuleServiceImplTest {
 
 		verify(ruleByRuleCodeCache).get(RULE_CODE);
 		verify(decoratedFallbackService).findByRuleCode(RULE_CODE);
-		verify(ruleCodeByRuleUidCache).put(RULE_UIDPK, RULE_CODE);
-		verify(ruleByRuleCodeCache).put(RULE_CODE, rule);
-		verify(ruleCodeByRuleNameCache).put(RULE_NAME, RULE_CODE);
+		verify(ruleCodeByRuleUidCache).put(RULE_UIDPK, Optional.of(RULE_CODE));
+		verify(ruleByRuleCodeCache).put(RULE_CODE, Optional.of(rule));
+		verify(ruleCodeByRuleNameCache).put(RULE_NAME, Optional.of(RULE_CODE));
 	}
 
 	@Test
 	public void shouldFindByRuleCodeInCacheOnCacheHit() {
 
-		when(ruleByRuleCodeCache.get(RULE_CODE)).thenReturn(rule);
+		when(ruleByRuleCodeCache.get(RULE_CODE)).thenReturn(Optional.of(rule));
 
 		Rule actualRule = fixture.findByRuleCode(RULE_CODE);
 
@@ -214,9 +217,9 @@ public class CachingRuleServiceImplTest {
 
 		verify(ruleByRuleCodeCache).get(RULE_CODE);
 		verify(decoratedFallbackService, never()).findByRuleCode(RULE_CODE);
-		verify(ruleCodeByRuleUidCache, never()).put(RULE_UIDPK, RULE_CODE);
-		verify(ruleByRuleCodeCache, never()).put(RULE_CODE, rule);
-		verify(ruleCodeByRuleNameCache, never()).put(RULE_NAME, RULE_CODE);
+		verify(ruleCodeByRuleUidCache, never()).put(RULE_UIDPK, Optional.of(RULE_CODE));
+		verify(ruleByRuleCodeCache, never()).put(RULE_CODE, Optional.of(rule));
+		verify(ruleCodeByRuleNameCache, never()).put(RULE_NAME, Optional.of(RULE_CODE));
 	}
 
 	@Test
@@ -231,15 +234,15 @@ public class CachingRuleServiceImplTest {
 
 		verify(ruleCodeByRuleNameCache).get(RULE_NAME);
 		verify(decoratedFallbackService).findByName(RULE_NAME);
-		verify(ruleCodeByRuleUidCache).put(RULE_UIDPK, RULE_CODE);
-		verify(ruleByRuleCodeCache).put(RULE_CODE, rule);
-		verify(ruleCodeByRuleNameCache).put(RULE_NAME, RULE_CODE);
+		verify(ruleCodeByRuleUidCache).put(RULE_UIDPK, Optional.of(RULE_CODE));
+		verify(ruleByRuleCodeCache).put(RULE_CODE, Optional.of(rule));
+		verify(ruleCodeByRuleNameCache).put(RULE_NAME, Optional.of(RULE_CODE));
 	}
 
 	@Test
 	public void shouldFindByNameInDbOnCacheMissByRuleCode() {
 
-		when(ruleCodeByRuleNameCache.get(RULE_NAME)).thenReturn(RULE_CODE);
+		when(ruleCodeByRuleNameCache.get(RULE_NAME)).thenReturn(Optional.of(RULE_CODE));
 		when(ruleByRuleCodeCache.get(RULE_CODE)).thenReturn(null);
 		when(decoratedFallbackService.findByRuleCode(RULE_CODE)).thenReturn(rule);
 
@@ -250,16 +253,16 @@ public class CachingRuleServiceImplTest {
 		verify(ruleCodeByRuleNameCache).get(RULE_NAME);
 		verify(decoratedFallbackService).findByRuleCode(RULE_CODE);
 		verify(decoratedFallbackService, never()).findByName(RULE_NAME);
-		verify(ruleCodeByRuleUidCache).put(RULE_UIDPK, RULE_CODE);
-		verify(ruleByRuleCodeCache).put(RULE_CODE, rule);
-		verify(ruleCodeByRuleNameCache).put(RULE_NAME, RULE_CODE);
+		verify(ruleCodeByRuleUidCache).put(RULE_UIDPK, Optional.of(RULE_CODE));
+		verify(ruleByRuleCodeCache).put(RULE_CODE, Optional.of(rule));
+		verify(ruleCodeByRuleNameCache).put(RULE_NAME, Optional.of(RULE_CODE));
 	}
 
 	@Test
 	public void shouldFindByNameInCacheOnCacheHit() {
 
-		when(ruleCodeByRuleNameCache.get(RULE_NAME)).thenReturn(RULE_CODE);
-		when(ruleByRuleCodeCache.get(RULE_CODE)).thenReturn(rule);
+		when(ruleCodeByRuleNameCache.get(RULE_NAME)).thenReturn(Optional.of(RULE_CODE));
+		when(ruleByRuleCodeCache.get(RULE_CODE)).thenReturn(Optional.of(rule));
 
 		Rule actualRule = fixture.findByName(RULE_NAME);
 
@@ -267,9 +270,9 @@ public class CachingRuleServiceImplTest {
 
 		verify(ruleCodeByRuleNameCache).get(RULE_NAME);
 		verify(decoratedFallbackService, never()).findByName(RULE_NAME);
-		verify(ruleCodeByRuleUidCache, never()).put(RULE_UIDPK, RULE_CODE);
-		verify(ruleByRuleCodeCache, never()).put(RULE_CODE, rule);
-		verify(ruleCodeByRuleNameCache, never()).put(RULE_NAME, RULE_CODE);
+		verify(ruleCodeByRuleUidCache, never()).put(RULE_UIDPK, Optional.of(RULE_CODE));
+		verify(ruleByRuleCodeCache, never()).put(RULE_CODE, Optional.of(rule));
+		verify(ruleCodeByRuleNameCache, never()).put(RULE_NAME, Optional.of(RULE_CODE));
 	}
 
 	@Test
@@ -323,15 +326,15 @@ public class CachingRuleServiceImplTest {
 		verify(decoratedFallbackService).getObject(RULE_UIDPK);
 		verify(ruleCodeByRuleUidCache).get(RULE_UIDPK);
 		verifyNoMoreInteractions(decoratedFallbackService);
-		verify(ruleCodeByRuleUidCache).put(RULE_UIDPK, RULE_CODE);
-		verify(ruleByRuleCodeCache).put(RULE_CODE, rule);
-		verify(ruleCodeByRuleNameCache).put(RULE_NAME, RULE_CODE);
+		verify(ruleCodeByRuleUidCache).put(RULE_UIDPK, Optional.of(RULE_CODE));
+		verify(ruleByRuleCodeCache).put(RULE_CODE, Optional.of(rule));
+		verify(ruleCodeByRuleNameCache).put(RULE_NAME, Optional.of(RULE_CODE));
 	}
 
 	@Test
 	public void shouldGetObjectByRuleCodeFromDbOnCacheMiss() {
 
-		when(ruleCodeByRuleUidCache.get(RULE_UIDPK)).thenReturn(RULE_CODE);
+		when(ruleCodeByRuleUidCache.get(RULE_UIDPK)).thenReturn(Optional.of(RULE_CODE));
 		when(ruleByRuleCodeCache.get(RULE_CODE)).thenReturn(null);
 		when(decoratedFallbackService.findByRuleCode(RULE_CODE)).thenReturn(rule);
 
@@ -345,16 +348,16 @@ public class CachingRuleServiceImplTest {
 
 		verifyNoMoreInteractions(decoratedFallbackService);
 
-		verify(ruleCodeByRuleUidCache).put(RULE_UIDPK, RULE_CODE);
-		verify(ruleByRuleCodeCache).put(RULE_CODE, rule);
-		verify(ruleCodeByRuleNameCache).put(RULE_NAME, RULE_CODE);
+		verify(ruleCodeByRuleUidCache).put(RULE_UIDPK, Optional.of(RULE_CODE));
+		verify(ruleByRuleCodeCache).put(RULE_CODE, Optional.of(rule));
+		verify(ruleCodeByRuleNameCache).put(RULE_NAME, Optional.of(RULE_CODE));
 	}
 
 	@Test
 	public void shouldGetObjectByRuleCodeFromCacheOnCacheHit() {
 
-		when(ruleCodeByRuleUidCache.get(RULE_UIDPK)).thenReturn(RULE_CODE);
-		when(ruleByRuleCodeCache.get(RULE_CODE)).thenReturn(rule);
+		when(ruleCodeByRuleUidCache.get(RULE_UIDPK)).thenReturn(Optional.of(RULE_CODE));
+		when(ruleByRuleCodeCache.get(RULE_CODE)).thenReturn(Optional.of(rule));
 
 		Rule actualRule = fixture.getObject(RULE_UIDPK);
 
@@ -379,9 +382,9 @@ public class CachingRuleServiceImplTest {
 		verify(decoratedFallbackService).add(newRule);
 		verifyNoMoreInteractions(decoratedFallbackService);
 
-		verify(ruleCodeByRuleUidCache).put(RULE_UIDPK, RULE_CODE);
-		verify(ruleByRuleCodeCache).put(RULE_CODE, rule);
-		verify(ruleCodeByRuleNameCache).put(RULE_NAME, RULE_CODE);
+		verify(ruleCodeByRuleUidCache).put(RULE_UIDPK, Optional.of(RULE_CODE));
+		verify(ruleByRuleCodeCache).put(RULE_CODE, Optional.of(rule));
+		verify(ruleCodeByRuleNameCache).put(RULE_NAME, Optional.of(RULE_CODE));
 	}
 
 	@Test
@@ -401,9 +404,9 @@ public class CachingRuleServiceImplTest {
 		verify(decoratedFallbackService).update(rule);
 		verifyNoMoreInteractions(decoratedFallbackService);
 
-		verify(ruleCodeByRuleUidCache).put(RULE_UIDPK, updatedRuleCode);
-		verify(ruleByRuleCodeCache).put(updatedRuleCode, updatedRule);
-		verify(ruleCodeByRuleNameCache).put(updatedRuleName, updatedRuleCode);
+		verify(ruleCodeByRuleUidCache).put(RULE_UIDPK, Optional.of(updatedRuleCode));
+		verify(ruleByRuleCodeCache).put(updatedRuleCode, Optional.of(updatedRule));
+		verify(ruleCodeByRuleNameCache).put(updatedRuleName, Optional.of(updatedRuleCode));
 	}
 
 	@Test
@@ -463,39 +466,16 @@ public class CachingRuleServiceImplTest {
 
 		Collection<Long> cacheKey = Arrays.asList(store.getUidPk(), catalog.getUidPk(), (long) scenarioId);
 
-		when(ruleBaseByScenarioCache.containsKey(cacheKey)).thenReturn(false);
+		when(ruleBaseByScenarioCache.get(cacheKey)).thenReturn(null);
 		when(decoratedFallbackService.findRuleBaseByScenario(store, catalog, scenarioId)).thenReturn(expectedRuleBase);
 
 		EpRuleBase actualRuleBase = fixture.findRuleBaseByScenario(store, catalog, scenarioId);
 
 		assertThat(actualRuleBase).isEqualTo(expectedRuleBase);
 
-		verify(ruleBaseByScenarioCache).containsKey(cacheKey);
-		verify(decoratedFallbackService).findRuleBaseByScenario(store, catalog, scenarioId);
-		verify(ruleBaseByScenarioCache).put(cacheKey, actualRuleBase);
-	}
-
-	@Test
-	public void shouldReturnNullRuleBaseInCache() {
-		final int scenarioId = 1;
-		final Store store = new StoreImpl();
-		store.setUidPk(1L);
-
-		final Catalog catalog = new CatalogImpl();
-		catalog.setUidPk(2L);
-
-		Collection<Long> cacheKey = Arrays.asList(store.getUidPk(), catalog.getUidPk(), (long) scenarioId);
-
-		when(ruleBaseByScenarioCache.get(cacheKey)).thenReturn(null);
-		when(ruleBaseByScenarioCache.containsKey(cacheKey)).thenReturn(true);
-
-		EpRuleBase actualRuleBase = fixture.findRuleBaseByScenario(store, catalog, scenarioId);
-
-		assertThat(actualRuleBase).isNull();
-
 		verify(ruleBaseByScenarioCache).get(cacheKey);
-		verify(decoratedFallbackService, never()).findRuleBaseByScenario(store, catalog, scenarioId);
-		verify(ruleBaseByScenarioCache, never()).put(cacheKey, actualRuleBase);
+		verify(decoratedFallbackService).findRuleBaseByScenario(store, catalog, scenarioId);
+		verify(ruleBaseByScenarioCache).put(cacheKey, Optional.of(actualRuleBase));
 	}
 
 	@Test
@@ -511,8 +491,7 @@ public class CachingRuleServiceImplTest {
 
 		Collection<Long> cacheKey = Arrays.asList(store.getUidPk(), catalog.getUidPk(), Long.valueOf(scenarioId));
 
-		when(ruleBaseByScenarioCache.containsKey(cacheKey)).thenReturn(true);
-		when(ruleBaseByScenarioCache.get(cacheKey)).thenReturn(expectedRuleBase);
+		when(ruleBaseByScenarioCache.get(cacheKey)).thenReturn(Optional.of(expectedRuleBase));
 
 		EpRuleBase actualRuleBase = fixture.findRuleBaseByScenario(store, catalog, scenarioId);
 
@@ -520,7 +499,7 @@ public class CachingRuleServiceImplTest {
 
 		verify(ruleBaseByScenarioCache).get(cacheKey);
 		verify(decoratedFallbackService, never()).findRuleBaseByScenario(store, catalog, scenarioId);
-		verify(ruleBaseByScenarioCache, never()).put(cacheKey, actualRuleBase);
+		verify(ruleBaseByScenarioCache, never()).put(cacheKey, Optional.of(actualRuleBase));
 	}
 
 	@Test
@@ -532,35 +511,16 @@ public class CachingRuleServiceImplTest {
 
 		CodeUidDateCacheKey cacheKey = new CodeUidDateCacheKey(STORE_CODE, scenarioId, date);
 
-		when(changedStoreRuleBaseCache.containsKey(cacheKey)).thenReturn(false);
+		when(changedStoreRuleBaseCache.get(cacheKey)).thenReturn(null);
 		when(decoratedFallbackService.findChangedStoreRuleBases(STORE_CODE, scenarioId, date)).thenReturn(expectedRuleBase);
 
 		EpRuleBase actualRuleBase = fixture.findChangedStoreRuleBases(STORE_CODE, scenarioId, date);
 
 		assertThat(actualRuleBase).isEqualTo(expectedRuleBase);
 
-		verify(changedStoreRuleBaseCache).containsKey(cacheKey);
-		verify(decoratedFallbackService).findChangedStoreRuleBases(STORE_CODE, scenarioId, date);
-		verify(changedStoreRuleBaseCache).put(cacheKey, actualRuleBase);
-	}
-
-	@Test
-	public void shouldReturnNullChangedStoreRuleBaseInCache() {
-		final int scenarioId = 1;
-		final Date date = new Date();
-
-		CodeUidDateCacheKey cacheKey = new CodeUidDateCacheKey(STORE_CODE, scenarioId, date);
-
-		when(changedStoreRuleBaseCache.get(cacheKey)).thenReturn(null);
-		when(changedStoreRuleBaseCache.containsKey(cacheKey)).thenReturn(true);
-
-		EpRuleBase actualRuleBase = fixture.findChangedStoreRuleBases(STORE_CODE, scenarioId, date);
-
-		assertThat(actualRuleBase).isNull();
-
 		verify(changedStoreRuleBaseCache).get(cacheKey);
-		verify(decoratedFallbackService, never()).findChangedStoreRuleBases(STORE_CODE, scenarioId, date);
-		verify(changedStoreRuleBaseCache, never()).put(cacheKey, actualRuleBase);
+		verify(decoratedFallbackService).findChangedStoreRuleBases(STORE_CODE, scenarioId, date);
+		verify(changedStoreRuleBaseCache).put(cacheKey, Optional.of(actualRuleBase));
 	}
 
 	@Test
@@ -572,17 +532,44 @@ public class CachingRuleServiceImplTest {
 
 		CodeUidDateCacheKey cacheKey = new CodeUidDateCacheKey(STORE_CODE, scenarioId, date);
 
-		when(changedStoreRuleBaseCache.containsKey(cacheKey)).thenReturn(true);
-		when(changedStoreRuleBaseCache.get(cacheKey)).thenReturn(expectedRuleBase);
+		when(changedStoreRuleBaseCache.get(cacheKey)).thenReturn(Optional.of(expectedRuleBase));
 
 		EpRuleBase actualRuleBase = fixture.findChangedStoreRuleBases(STORE_CODE, scenarioId, date);
 
 		assertThat(actualRuleBase).isEqualTo(expectedRuleBase);
 
-		verify(changedStoreRuleBaseCache).containsKey(cacheKey);
 		verify(changedStoreRuleBaseCache).get(cacheKey);
 		verify(decoratedFallbackService, never()).findChangedStoreRuleBases(STORE_CODE, scenarioId, date);
-		verify(changedStoreRuleBaseCache, never()).put(cacheKey, actualRuleBase);
+		verify(changedStoreRuleBaseCache, never()).put(cacheKey, Optional.of(actualRuleBase));
+	}
+
+	public void shouldModifiedDateInCacheOnCacheHit() {
+		final Date date = new Date();
+
+		when(modifiedDateCache.get(RULE_UIDPK)).thenReturn(Optional.of(date));
+
+		Date modifiedDateForRule = fixture.getModifiedDateForRuleBase(RULE_UIDPK);
+
+		assertThat(modifiedDateForRule).isEqualTo(date);
+
+		verify(modifiedDateCache).get(RULE_UIDPK);
+		verify(decoratedFallbackService, never()).getModifiedDateForRuleBase(RULE_UIDPK);
+		verify(modifiedDateCache, never()).put(RULE_UIDPK, Optional.of(date));
+	}
+
+	public void shouldModifiedDateInCacheOnCacheMiss() {
+		final Date date = new Date();
+
+		when(modifiedDateCache.get(RULE_UIDPK)).thenReturn(null);
+		when(decoratedFallbackService.getModifiedDateForRuleBase(RULE_UIDPK)).thenReturn(date);
+
+		Date modifiedDateForRule = fixture.getModifiedDateForRuleBase(RULE_UIDPK);
+
+		assertThat(modifiedDateForRule).isEqualTo(date);
+
+		verify(modifiedDateCache).get(RULE_UIDPK);
+		verify(decoratedFallbackService).getModifiedDateForRuleBase(RULE_UIDPK);
+		verify(modifiedDateCache).put(RULE_UIDPK, Optional.of(date));
 	}
 
 	@Test
@@ -594,35 +581,15 @@ public class CachingRuleServiceImplTest {
 
 		CodeUidDateCacheKey cacheKey = new CodeUidDateCacheKey(STORE_CODE, scenarioId, date);
 
-		when(changedCatalogRuleBaseCache.containsKey(cacheKey)).thenReturn(false);
+		when(changedCatalogRuleBaseCache.get(cacheKey)).thenReturn(null);
 		when(decoratedFallbackService.findChangedCatalogRuleBases(STORE_CODE, scenarioId, date)).thenReturn(expectedRuleBase);
 
 		EpRuleBase actualRuleBase = fixture.findChangedCatalogRuleBases(STORE_CODE, scenarioId, date);
 
 		assertThat(actualRuleBase).isEqualTo(expectedRuleBase);
 
-		verify(changedCatalogRuleBaseCache).containsKey(cacheKey);
 		verify(decoratedFallbackService).findChangedCatalogRuleBases(STORE_CODE, scenarioId, date);
-		verify(changedCatalogRuleBaseCache).put(cacheKey, actualRuleBase);
-	}
-
-	@Test
-	public void shouldReturnNullChangedCatalogRuleBaseInCache() {
-		final int scenarioId = 1;
-		final Date date = new Date();
-
-		CodeUidDateCacheKey cacheKey = new CodeUidDateCacheKey(STORE_CODE, scenarioId, date);
-
-		when(changedCatalogRuleBaseCache.get(cacheKey)).thenReturn(null);
-		when(changedCatalogRuleBaseCache.containsKey(cacheKey)).thenReturn(true);
-
-		EpRuleBase actualRuleBase = fixture.findChangedCatalogRuleBases(STORE_CODE, scenarioId, date);
-
-		assertThat(actualRuleBase).isNull();
-
-		verify(changedCatalogRuleBaseCache).get(cacheKey);
-		verify(decoratedFallbackService, never()).findChangedCatalogRuleBases(STORE_CODE, scenarioId, date);
-		verify(changedCatalogRuleBaseCache, never()).put(cacheKey, actualRuleBase);
+		verify(changedCatalogRuleBaseCache).put(cacheKey, Optional.of(actualRuleBase));
 	}
 
 	@Test
@@ -634,16 +601,14 @@ public class CachingRuleServiceImplTest {
 
 		CodeUidDateCacheKey cacheKey = new CodeUidDateCacheKey(STORE_CODE, scenarioId, date);
 
-		when(changedCatalogRuleBaseCache.get(cacheKey)).thenReturn(expectedRuleBase);
-		when(changedCatalogRuleBaseCache.containsKey(cacheKey)).thenReturn(true);
+		when(changedCatalogRuleBaseCache.get(cacheKey)).thenReturn(Optional.of(expectedRuleBase));
 
 		EpRuleBase actualRuleBase = fixture.findChangedCatalogRuleBases(STORE_CODE, scenarioId, date);
 
 		assertThat(actualRuleBase).isEqualTo(expectedRuleBase);
 
-		verify(changedCatalogRuleBaseCache).containsKey(cacheKey);
 		verify(changedCatalogRuleBaseCache).get(cacheKey);
 		verify(decoratedFallbackService, never()).findChangedCatalogRuleBases(STORE_CODE, scenarioId, date);
-		verify(changedCatalogRuleBaseCache, never()).put(cacheKey, actualRuleBase);
+		verify(changedCatalogRuleBaseCache, never()).put(cacheKey, Optional.of(actualRuleBase));
 	}
 }

@@ -41,15 +41,6 @@ public interface TagDefinitionDao {
 	List<TagDefinition> getTagDefinitions() throws DataAccessException;
 
 	/**
-	 * Gets all the {@link com.elasticpath.tags.domain.TagDefinition}s in the system that has same tag dictionary guid.
-	 *
-	 * @param tagDictionaryGuid a tag dictionary guid
-	 * @return a list of {@link com.elasticpath.tags.domain.TagDefinition}
-	 * @throws DataAccessException might throw a {@link org.springframework.dao.DataAccessException}
-	 */
-	List<TagDefinition> getTagDefinitions(String tagDictionaryGuid) throws DataAccessException;
-
-	/**
 	 * Finds the {@link com.elasticpath.tags.domain.TagDefinition} with given GUID. If it doesn't find, it returns null.
 	 *
 	 * @param guid the guid of a {@link com.elasticpath.tags.domain.TagDefinition}

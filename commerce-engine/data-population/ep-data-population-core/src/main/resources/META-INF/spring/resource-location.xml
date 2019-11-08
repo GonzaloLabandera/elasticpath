@@ -24,6 +24,9 @@
 	<bean id="environmentFilteringProperties" class="org.springframework.beans.factory.config.PropertiesFactoryBean">
 		<property name="location" value="file:///#{configDirectory.getAbsolutePath()}/filtering.properties"/>
 	</bean>
+	<bean id="jmsProperties" class="org.springframework.beans.factory.config.PropertiesFactoryBean">
+		<property name="location" value="file:///#{configDirectory.getAbsolutePath()}/jms.properties"/>
+	</bean>
 	<bean id="globalFilteringProperties" class="org.springframework.beans.factory.config.PropertiesFactoryBean">
 		<property name="location" value="file:///#{dataDirectory.getAbsolutePath()}/config/filtering.properties"/>
 	</bean>
@@ -38,12 +41,16 @@
 		<property name="sourceProperties" value="#{databaseConnectionProperties.getProperties()}"/>
 		<property name="propertiesToFilter" ref="environmentFilteringProperties"/>
 		<property name="includeSourceProperties" value="true"/>
+		<property name="secureLocationsToFilter" value="file:///#{configDirectory.getAbsolutePath()}/secure-filtering.properties"/>
+		<property name="ignoreSecureLocationToFilterNotFound" value="true"/>
 	</bean>
 	<bean id="filterPropertiesForFilteringData" class="com.elasticpath.datapopulation.core.service.filtering.FilteredPropertiesFactory">
 		<property name="sourceLocations" value="file:///#{dataDirectory.getAbsolutePath()}/config/filtering.properties"/>
 		<property name="sourceProperties" ref="dataDirectoryProperties"/>
 		<property name="propertiesToFilter" ref="environmentFilteringProperties"/>
 		<property name="ignoreSourceLocationNotFound" value="true"/>
+		<property name="secureLocationsToFilter" value="file:///#{configDirectory.getAbsolutePath()}/secure-filtering.properties"/>
+		<property name="ignoreSecureLocationToFilterNotFound" value="true"/>
 		<property name="includeSourceProperties" value="true"/>
 	</bean>
 

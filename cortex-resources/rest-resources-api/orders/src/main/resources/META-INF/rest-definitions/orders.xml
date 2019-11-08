@@ -3,21 +3,30 @@
 
 	<family>
 		<name>orders</name>
-		<description>
-			<![CDATA[
+		<description><![CDATA[
 An order is a list of intentions Cortex API will undertake to complete a purchase. For example, an order lists the
 billing and shipping address to use for the purchase, shipping options (Canada Post, FedEx, etc), paymentmethods to use
 for the purchase, the cart containing the items to purchase, and the taxes to pay for the purchase. Once the order is
-POSTed to a [purchase][purchases], Cortex API executes the purchase based on the intentions in the order.
+POSTed to a [purchase](purchases.md), Cortex API executes the purchase based on the intentions in the order.
 
-Just like the [cart][carts], an order is always available, persisted between sessions, and is updated automatically. For example, if a
+Just like the [cart](carts.md), an order is always available, persisted between sessions, and is updated automatically. For example, if a
 customer removes an item from their cart, the order is updated to remove the item. Once the order is POSTed to a purchase, the order is cleared and a new order is created for the customer.
 
 The order contains *NeedInfo* links if the billing address, shipping address, shipping option or the payment methods haven't been selected.
 
-[purchases]: #purchases
-[carts]: #carts
-			]]>
+**Billing Address Info:**
+
+The Billing address info resource provides the customer with a selector to select the billing address to use for
+the [purchase](purchases.md) and an addressform to create a billing address to use for the purchase. The billing
+address is the address that is related to the payment means, which in some cases is the address your credit card uses.
+
+**Deliveries:**
+
+The deliveries resource groups the shipment details, which are the how and where your goods are being shipped, for your
+orders. Out of the box, you can't split orders into different shipments, so when you get the list of delivery elements
+for an order only one element appears in the list. The order's shipment details are specified through the
+[shipmentdetails](shipmentdetails.md) resource.
+]]>
 		</description>
 
 		<uri-part>

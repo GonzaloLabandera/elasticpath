@@ -6,6 +6,7 @@ import cucumber.api.java.After;
 import cucumber.api.java.en.Given;
 import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
+import org.apache.log4j.Logger;
 
 import com.elasticpath.cortex.dce.LoginSteps;
 import com.elasticpath.cortexTestObjects.FindItemBy;
@@ -26,6 +27,7 @@ import com.elasticpath.selenium.util.Utility;
  * Customer Segment step definitions.
  */
 public class CustomerSegmentDefinition {
+	private static final Logger LOGGER = Logger.getLogger(CustomerSegmentDefinition.class);
 	private CustomerSegmentResultPane customerSegmentResultPane;
 	private final ConfigurationActionToolbar configurationActionToolbar;
 	private CustomerSegmentEditor customerSegmentEditor;
@@ -38,6 +40,7 @@ public class CustomerSegmentDefinition {
 	private String customerID = "";
 	private final NavigationDefinition navigationDefinition;
 	private final CustomerDefinition customerDefinition;
+	private final static String TEXT_DISPLAY = "display";
 
 	/**
 	 * Constructor.
@@ -166,7 +169,39 @@ public class CustomerSegmentDefinition {
 		LoginSteps.loginAsRegisteredShopperOnScope(customerID, store);
 		FindItemBy.skuCode(sku);
 		Item.price();
-		assertThat(Item.getPurchasePrice("display"))
+
+		assertThat(Item.getPurchasePrice(TEXT_DISPLAY))
+				.as("Expected item price not match.")
+				.isEqualTo(price);
+	}
+
+	/**
+	 * Verifies change in item price for registered customer.
+	 *
+	 * @param sku        item sku code.
+	 * @param price      item price.
+	 * @param customerID Customer ID.
+	 * @param store      store.
+	 */
+	@Then("^the new item price for sku (.+) is (.+) when customer (.+) retrieve the item price in store (.+)$")
+	public void verifyItemPriceChange(final String sku, final String price, final String customerID, final String store) {
+		verifyItemPriceChangeFromCortex(customerID, price, sku, store);
+	}
+
+	private void verifyItemPriceChangeFromCortex(final String customerID, final String price, final String sku,
+												 final String store) {
+		LoginSteps.loginAsRegisteredShopperOnScope(customerID, store);
+
+		int counter = 0;
+		do {
+			FindItemBy.skuCode(sku);
+			Item.price();
+			activityToolbar.sleep(Constants.SLEEP_HALFSECOND_IN_MILLIS);
+			LOGGER.info(counter + ". actual item price: " + Item.getPurchasePrice(TEXT_DISPLAY) + " expected item price: " + price);
+			counter++;
+		} while (!Item.getPurchasePrice(TEXT_DISPLAY).equals(price) && counter < Constants.RETRY_COUNTER_40);
+
+		assertThat(Item.getPurchasePrice(TEXT_DISPLAY))
 				.as("Expected item price not match.")
 				.isEqualTo(price);
 	}

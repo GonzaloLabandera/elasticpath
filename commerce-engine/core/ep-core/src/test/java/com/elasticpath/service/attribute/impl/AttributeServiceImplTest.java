@@ -30,6 +30,7 @@ import com.elasticpath.domain.attribute.AttributeType;
 import com.elasticpath.domain.attribute.AttributeUsage;
 import com.elasticpath.domain.attribute.impl.AttributeImpl;
 import com.elasticpath.domain.attribute.impl.AttributeUsageImpl;
+import com.elasticpath.domain.customer.impl.CustomerImpl;
 import com.elasticpath.domain.misc.impl.AttributeLocalizedPropertyValueImpl;
 import com.elasticpath.domain.misc.impl.LocalizedPropertiesImpl;
 import com.elasticpath.persistence.api.PersistenceEngine;
@@ -48,6 +49,7 @@ public class AttributeServiceImplTest extends AbstractEPServiceTestCase {
 	private static final String SERVICE_EXCEPTION_EXPECTED = "EpServiceException expected.";
 
 	private static final Locale LANGUAGE_LOCALE = Locale.ENGLISH;
+	private static final String ATTRIBUTE_FIND_BY_USAGE = "ATTRIBUTE_FIND_BY_USAGE";
 
 	private AttributeService attributeService;
 
@@ -395,7 +397,7 @@ public class AttributeServiceImplTest extends AbstractEPServiceTestCase {
 	public void testGetCategoryAttributes() {
 		context.checking(new Expectations() {
 			{
-				oneOf(mockPersistenceEngine).retrieveByNamedQuery("ATTRIBUTE_FIND_BY_USAGE", AttributeUsage.CATEGORY);
+				oneOf(mockPersistenceEngine).retrieveByNamedQuery(ATTRIBUTE_FIND_BY_USAGE, AttributeUsage.CATEGORY);
 			}
 		});
 		attributeService.getCategoryAttributes();
@@ -408,7 +410,7 @@ public class AttributeServiceImplTest extends AbstractEPServiceTestCase {
 	public void testGetProductAttributes() {
 		context.checking(new Expectations() {
 			{
-				oneOf(mockPersistenceEngine).retrieveByNamedQuery("ATTRIBUTE_FIND_BY_USAGE", AttributeUsage.PRODUCT);
+				oneOf(mockPersistenceEngine).retrieveByNamedQuery(ATTRIBUTE_FIND_BY_USAGE, AttributeUsage.PRODUCT);
 			}
 		});
 		attributeService.getProductAttributes();
@@ -421,7 +423,7 @@ public class AttributeServiceImplTest extends AbstractEPServiceTestCase {
 	public void testGetSkuAttributes() {
 		context.checking(new Expectations() {
 			{
-				oneOf(mockPersistenceEngine).retrieveByNamedQuery("ATTRIBUTE_FIND_BY_USAGE", AttributeUsage.SKU);
+				oneOf(mockPersistenceEngine).retrieveByNamedQuery(ATTRIBUTE_FIND_BY_USAGE, AttributeUsage.SKU);
 			}
 		});
 		attributeService.getSkuAttributes();
@@ -534,5 +536,30 @@ public class AttributeServiceImplTest extends AbstractEPServiceTestCase {
 			}
 		});
 		assertTrue(attributeService.isInUse(nonExistantAttributeUid));
+	}
+
+
+	/**
+	 * Test method for 'com.elasticpath.service.AttributeServiceImpl.getCustomerProfileAttributeKeys()'.
+	 */
+	@Test
+	public void testGetCustomerProfileAttributeKeys() {
+		final List<Attribute> attributeList = new ArrayList<>();
+		Attribute attribute = new AttributeImpl();
+		AttributeUsage attributeUsage = new AttributeUsageImpl();
+		attributeUsage.setValue(AttributeUsage.CUSTOMERPROFILE);
+		attribute.setAttributeUsage(attributeUsage);
+		attribute.setKey(CustomerImpl.ATT_KEY_CP_EMAIL);
+		attributeList.add(attribute);
+
+		context.checking(new Expectations() {
+			{
+				oneOf(mockPersistenceEngine).retrieveByNamedQuery(ATTRIBUTE_FIND_BY_USAGE,
+						AttributeUsage.CUSTOMERPROFILE);
+				will(returnValue(attributeList));
+			}
+		});
+		assertEquals(CustomerImpl.ATT_KEY_CP_EMAIL,
+				attributeService.getCustomerProfileAttributeKeys().iterator().next());
 	}
 }

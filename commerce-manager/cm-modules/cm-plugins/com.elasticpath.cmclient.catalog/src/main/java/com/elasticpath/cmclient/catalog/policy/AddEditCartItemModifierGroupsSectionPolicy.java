@@ -10,21 +10,21 @@ import java.util.Map;
 import com.elasticpath.cmclient.core.ui.framework.EpControlFactory;
 import com.elasticpath.cmclient.policy.StateDeterminer;
 import com.elasticpath.cmclient.policy.common.PolicyActionContainer;
-import com.elasticpath.domain.cartmodifier.CartItemModifierGroup;
+import com.elasticpath.domain.modifier.ModifierGroup;
 
 /**
  *  A <code>StatePolicy</code> that will determine UI state for Cart Item Modifier Groups dialog related UI elements.
  */
 public class AddEditCartItemModifierGroupsSectionPolicy extends AbstractCatalogDeterminerStatePolicy {
 
-	private CartItemModifierGroup group;
+	private ModifierGroup group;
 
 	private final Map<String, StateDeterminer> determinerMap = new HashMap<>();
 
 	@Override
 	public void init(final Object dependentObject) {
-		if (dependentObject instanceof CartItemModifierGroup) {
-			group = (CartItemModifierGroup) dependentObject;
+		if (dependentObject instanceof ModifierGroup) {
+			group = (ModifierGroup) dependentObject;
 		}
 	}
 

@@ -371,14 +371,14 @@
 			<query>
 				SELECT c
 				FROM CategoryImpl AS c
-				WHERE UPPER(c.code) = UPPER(?1) 
+				WHERE UPPER(c.code) = UPPER(?1)
 			</query>
 		</named-query>
 		<named-query name="CATEGORY_SELECT_BY_CODE_AND_CATALOG_CODE">
 			<query>
 				SELECT c
 				FROM CategoryImpl AS c
-				WHERE UPPER(c.code) = UPPER(?1) 
+				WHERE UPPER(c.code) = UPPER(?1)
 				AND c.catalog.code = ?2
 			</query>
 		</named-query>
@@ -386,7 +386,7 @@
 			<query>
 				SELECT c.uidPk
 				FROM CategoryImpl c
-				WHERE UPPER(c.code) = UPPER(?1) 
+				WHERE UPPER(c.code) = UPPER(?1)
 				AND c.catalog.uidPk = ?2
 			</query>
 		</named-query>
@@ -394,7 +394,7 @@
 			<query>
 				SELECT c.uidPk
 				FROM CategoryImpl c
-				WHERE UPPER(c.code) = UPPER(?1) 
+				WHERE UPPER(c.code) = UPPER(?1)
 				AND c.catalog.code = ?2
 			</query>
 		</named-query>
@@ -768,13 +768,6 @@
 		</named-query>
 
     <!-- Named queries for ProductAssociationImpl -->
-		<named-query name="PRODUCTASSOCIATION_SELECT_BY_TARGETSKU_UIDS">
-			<query>
-				SELECT pa
-				FROM ProductAssociationImpl pa
-				WHERE pa.targetSku.uidPk in (:list)
-			</query>
-		</named-query>
 		<named-query name="PRODUCTASSOCIATION_SELECT_BY_TARGETPRODUCT_UIDS">
 			<query>
 				SELECT pa
@@ -1126,7 +1119,7 @@
 		</named-query>
 		<named-query name="FEATURED_PRODUCT_SELECT_BY_CAT_UID">
 			<query>
-				SELECT p, pc.featuredProductOrder
+				SELECT p, pc.featuredProductOrder, TYPE(p)
 				FROM ProductImpl p
 				INNER JOIN p.productCategories pc
 				WHERE pc.category.uidPk = ?1
@@ -1615,6 +1608,30 @@
 				SELECT ac
 				FROM AbstractCategoryImpl ac
 				WHERE ac.catalog.uidPk = ?1
+			</query>
+		</named-query>
+
+		<named-query name="PRODUCT_UIDS_BY_ATTRIBUTE">
+			<query>
+				SELECT p.uidPk
+				FROM ProductImpl p INNER JOIN p.attributeValueMap av
+				where av.attribute.uidPk = ?1
+			</query>
+		</named-query>
+
+		<named-query name="CATEGORIES_UIDS_BY_ATTRIBUTE">
+			<query>
+				SELECT c.uidPk
+				FROM CategoryImpl c INNER JOIN c.attributeValueMap av
+				where av.attribute.uidPk = ?1
+			</query>
+		</named-query>
+
+		<named-query name="PRODUCT_SKU_CODES_BY_ATTRIBUTE">
+			<query>
+				SELECT p.productInternal.code
+				FROM ProductSkuImpl p INNER JOIN p.attributeValueMap av
+				where av.attribute.uidPk = ?1
 			</query>
 		</named-query>
 

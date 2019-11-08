@@ -6,7 +6,7 @@
 
 		<plan>
 			<name>read-item-price</name>
-			<description><![CDATA[Read the unit price of an [item][items]. The unit price of an item is the price for one unit (quantity = 1) ]]></description>
+			<description><![CDATA[Read the unit price of an item. The unit price of an item is the price for one unit (quantity = 1) ]]></description>
 			<step>
 				<description><![CDATA[Follow a link from item to price.]]></description>
 				<start>items.item</start>

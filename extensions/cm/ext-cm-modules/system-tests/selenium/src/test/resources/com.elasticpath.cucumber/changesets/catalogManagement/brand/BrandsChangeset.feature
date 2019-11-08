@@ -5,7 +5,7 @@ Feature: Catalog Brand with change set
     Given I sign into CM as cs_brand
     And I create a new catalog with following details
       | catalogName   | language |
-      | ATest Catalog | English  |
+      | ZTest Catalog | English  |
 
   @lockAndFinalize @cleanupCatalog
   Scenario Outline: Add catalog brand to existing catalog with change set

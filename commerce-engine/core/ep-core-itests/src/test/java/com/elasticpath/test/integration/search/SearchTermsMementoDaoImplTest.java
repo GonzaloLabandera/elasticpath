@@ -9,14 +9,14 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
-import javax.persistence.EntityExistsException;
-
 import org.junit.Test;
+
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.elasticpath.domain.search.query.SearchTermsMemento;
 import com.elasticpath.domain.search.query.SearchTermsMemento.SearchTermsId;
 import com.elasticpath.domain.search.query.impl.SearchTermsMementoImpl;
+import com.elasticpath.persistence.api.EpPersistenceException;
 import com.elasticpath.persistence.dao.SearchTermsMementoDao;
 import com.elasticpath.test.integration.BasicSpringContextTest;
 import com.elasticpath.test.integration.DirtiesDatabase;
@@ -88,7 +88,7 @@ public class SearchTermsMementoDaoImplTest extends BasicSpringContextTest {
 	 * Test that a SearchTermsMemento cannot be updated.
 	 */
 	@DirtiesDatabase
-	@Test(expected = EntityExistsException.class)
+	@Test(expected = EpPersistenceException.class)
 	public void testUpdate() {
 		final SearchTermsId id = assertCreateAndSave();
 		SearchTermsMemento retrievedSearchTermsMemento = searchTermsMementoDao.find(id);

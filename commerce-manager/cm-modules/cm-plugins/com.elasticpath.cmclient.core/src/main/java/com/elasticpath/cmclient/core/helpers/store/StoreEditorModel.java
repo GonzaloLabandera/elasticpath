@@ -44,6 +44,8 @@ public class StoreEditorModel {
 
 	private List<SettingModel> systemSettings;
 
+	private List<StoreCustomerAttributeModel> storeCustomerAttributes;
+
 	private String theme;
 
 	private String storeBrowsingSetting;
@@ -166,6 +168,24 @@ public class StoreEditorModel {
 	 */
 	void setMarketingSettings(final List<SettingModel> marketingSettings) {
 		this.marketingSettings = marketingSettings;
+	}
+
+	/**
+	 * Gets the store customer attributes.
+	 *
+	 * @return the list of store customer attributes
+	 */
+	public List<StoreCustomerAttributeModel> getStoreCustomerAttributes() {
+		return storeCustomerAttributes;
+	}
+
+	/**
+	 * Sets the store customer attributes.
+	 *
+	 * @param storeCustomerAttributes the list of store customer attributes
+	 */
+	void setStoreCustomerAttributes(final List<StoreCustomerAttributeModel> storeCustomerAttributes) {
+		this.storeCustomerAttributes = storeCustomerAttributes;
 	}
 
 	/**

@@ -10,6 +10,7 @@ import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.commons.lang.builder.ToStringStyle;
 
+import com.elasticpath.plugin.tax.common.TaxCacheKeyHashCodeBuilder;
 import com.elasticpath.plugin.tax.domain.TaxOperationContext;
 import com.elasticpath.plugin.tax.domain.TaxableItem;
 import com.elasticpath.plugin.tax.domain.TaxableItemContainer;
@@ -57,5 +58,17 @@ public class MutableTaxableItemContainer extends AbstractTaxItemContainer implem
 	public int hashCode() {
 		return HashCodeBuilder.reflectionHashCode(this);
 	}
-	
+
+	@Override
+	public int getTaxCacheKeyHash() {
+		return new TaxCacheKeyHashCodeBuilder()
+				.append(getItems())
+				.append(getTaxOperationContext())
+				.append(isTaxInclusive())
+				.append(getOriginAddress())
+				.append(getDestinationAddress())
+				.append(getStoreCode())
+				.append(getCurrency())
+				.toHashCode();
+	}
 }

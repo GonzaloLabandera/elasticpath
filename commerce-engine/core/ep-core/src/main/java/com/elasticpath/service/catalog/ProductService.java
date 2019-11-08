@@ -334,6 +334,16 @@ public interface ProductService {
 	int setProductCategoryFeatured(long productUid, long categoryUid);
 
 	/**
+	 * Set a <code>ProductCategory</code> as a featured product, if the featuredProductOrder is set to be greater than 0, means this
+	 * productCategory is featured.
+	 *
+	 * @param productUid           the unique identifier for the product.
+	 * @param categoryUid 		   the unique identifier for the category.
+	 * @param featuredProductOrder the feature product order.
+	 */
+	void refreshProductCategoryFeaturedField(long productUid, long categoryUid, int featuredProductOrder);
+
+	/**
 	 * Disable a <code>ProductCategory</code> as a featured product, if the featuredProductOrder
 	 * is set to 0, means this productCategory is not featured.
 	 *

@@ -112,7 +112,7 @@ public class ExportControllerImpl implements ExportController {
 		final PackagerConfiguration packagerConfiguration = exportProperties.getPackagerConfiguration();
 		final Packager packager = createPackager(exportProperties, packagerConfiguration);
 
-		final ManifestBuilder manifestBuilder = beanFactory.getBean(ImportExportContextIdNames.MANIFEST_BUILDER);
+		final ManifestBuilder manifestBuilder = beanFactory.getPrototypeBean(ImportExportContextIdNames.MANIFEST_BUILDER, ManifestBuilder.class);
 		final SimpleSummaryLayout layout = new SimpleSummaryLayout();
 		layout.setMessageResolver(messageResolver);
 
@@ -173,37 +173,35 @@ public class ExportControllerImpl implements ExportController {
 			final ManifestBuilder manifestBuilder) {
 
 		for (Exporter exporter : exporterSequence) {
-			while (!exporter.isFinished()) {
-				ExportEntry exportEntry = null;
-				InputStream transformedStream = null;
+			ExportEntry exportEntry = null;
+			InputStream transformedStream = null;
+			try {
 				try {
-					try {
-						exportEntry = exporter.executeExport();
-					} catch (ExportRuntimeException e) {
-						LOG.error(e.getIEMessage());
-						continue;
-					}
-
-					transformedStream = transformEntry(chainedTransformers, exportEntry);
-
-					LOG.info("Pack and deliver : " + exportEntry.getName());
-					packager.addEntry(transformedStream, exportEntry.getName());
-
-				} finally {
-					try {
-						if (transformedStream != null) {
-							transformedStream.close();
-						}
-					} catch (IOException ioe) {
-						LOG.warn("Failed to close transformed stream", ioe);
-					}
-
-					if (exportEntry != null) {
-						exportEntry.close();
-					}
+					exportEntry = exporter.executeExport();
+				} catch (ExportRuntimeException e) {
+					LOG.error(e.getIEMessage(), e);
+					continue;
 				}
-				manifestBuilder.addResource(exporter.getJobType(), exporter.getJobType().getTagName() + ".xml");
+
+				transformedStream = transformEntry(chainedTransformers, exportEntry);
+
+				LOG.info("Pack and deliver : " + exportEntry.getName());
+				packager.addEntry(transformedStream, exportEntry.getName());
+
+			} finally {
+				try {
+					if (transformedStream != null) {
+						transformedStream.close();
+					}
+				} catch (IOException ioe) {
+					LOG.warn("Failed to close transformed stream", ioe);
+				}
+
+				if (exportEntry != null) {
+					exportEntry.close();
+				}
 			}
+			manifestBuilder.addResource(exporter.getJobType(), exporter.getJobType().getTagName() + ".xml");
 		}
 	}
 

@@ -38,7 +38,7 @@ import com.elasticpath.commons.util.AttributeComparator;
 import com.elasticpath.domain.attribute.Attribute;
 import com.elasticpath.domain.attribute.AttributeGroup;
 import com.elasticpath.domain.attribute.AttributeGroupAttribute;
-import com.elasticpath.domain.cartmodifier.CartItemModifierGroup;
+import com.elasticpath.domain.modifier.ModifierGroup;
 import com.elasticpath.domain.catalog.ProductType;
 import com.elasticpath.domain.tax.TaxCode;
 import com.elasticpath.service.attribute.AttributeService;
@@ -60,7 +60,7 @@ public class ProductTypeAddEditWizardStep1 extends AbstractPolicyAwareWizardPage
 
 	private List<Attribute> availableAttributes;
 
-	private List<CartItemModifierGroup> availableCartItemModifierGroups;
+	private List<ModifierGroup> availableCartItemModifierGroups;
 
 	private final boolean editMode;
 
@@ -76,7 +76,7 @@ public class ProductTypeAddEditWizardStep1 extends AbstractPolicyAwareWizardPage
 
 	private List<Attribute> selectedAttributes;
 
-	private List<CartItemModifierGroup> selectedCartItemModifierGroups;
+	private List<ModifierGroup> selectedCartItemModifierGroups;
 
 	private List<TaxCode> taxCodeList;
 
@@ -334,7 +334,7 @@ public class ProductTypeAddEditWizardStep1 extends AbstractPolicyAwareWizardPage
 	 *
 	 * @return the assigned cart item modifier group list for the given product type.
 	 */
-	public Collection<CartItemModifierGroup> getAssignedCartItemModifierGroups() {
+	public Collection<ModifierGroup> getAssignedCartItemModifierGroups() {
 		return cartItemModifierGroupDualList.getAssigned();
 	}
 
@@ -354,7 +354,7 @@ public class ProductTypeAddEditWizardStep1 extends AbstractPolicyAwareWizardPage
 	 *
 	 * @return the available attribute list in the database.
 	 */
-	public List<CartItemModifierGroup> getAvailableCartItemModifierList() {
+	public List<ModifierGroup> getAvailableCartItemModifierList() {
 		return availableCartItemModifierGroups;
 	}
 
@@ -383,8 +383,8 @@ public class ProductTypeAddEditWizardStep1 extends AbstractPolicyAwareWizardPage
 		return selectedAttributes;
 	}
 
-	private List<CartItemModifierGroup> getProductTypeCartItemModifierGroups() {
-		final Set<CartItemModifierGroup> cartItemModifierGroups = productType.getCartItemModifierGroups();
+	private List<ModifierGroup> getProductTypeCartItemModifierGroups() {
+		final Set<ModifierGroup> cartItemModifierGroups = productType.getModifierGroups();
 		selectedCartItemModifierGroups = new ArrayList<>(cartItemModifierGroups);
 		return selectedCartItemModifierGroups;
 	}
@@ -403,7 +403,7 @@ public class ProductTypeAddEditWizardStep1 extends AbstractPolicyAwareWizardPage
 		return selectedAttributes;
 	}
 
-	private List<CartItemModifierGroup> getSelectedCartItemModifierGroups() {
+	private List<ModifierGroup> getSelectedCartItemModifierGroups() {
 		return selectedCartItemModifierGroups;
 	}
 
@@ -458,7 +458,7 @@ public class ProductTypeAddEditWizardStep1 extends AbstractPolicyAwareWizardPage
 	 *
 	 * @param selectedCartItemModifierGroups the selected Cart Item Modifier Groups list to be set.
 	 */
-	public void setSelectedCartItemModifierGroups(final List<CartItemModifierGroup> selectedCartItemModifierGroups) {
+	public void setSelectedCartItemModifierGroups(final List<ModifierGroup> selectedCartItemModifierGroups) {
 		this.selectedCartItemModifierGroups = selectedCartItemModifierGroups;
 	}
 

@@ -16,6 +16,7 @@ import java.util.stream.Collectors;
 
 import com.google.common.collect.ImmutableSortedMap;
 import io.reactivex.Completable;
+import io.reactivex.Maybe;
 import io.reactivex.Observable;
 import io.reactivex.Single;
 import org.apache.commons.lang3.ObjectUtils;
@@ -26,6 +27,8 @@ import org.osgi.service.component.annotations.Reference;
 
 import com.elasticpath.domain.catalog.Product;
 import com.elasticpath.domain.search.Facet;
+import com.elasticpath.domain.search.SortAttribute;
+import com.elasticpath.domain.search.SortValue;
 import com.elasticpath.domain.store.Store;
 import com.elasticpath.rest.ResourceOperationFailure;
 import com.elasticpath.rest.cache.CacheResult;
@@ -44,8 +47,11 @@ import com.elasticpath.rest.resource.integration.epcommerce.repository.transform
 import com.elasticpath.rest.util.math.NumberUtil;
 import com.elasticpath.service.search.FacetService;
 import com.elasticpath.service.search.ProductCategorySearchCriteria;
+import com.elasticpath.service.search.SortAttributeService;
 import com.elasticpath.service.search.index.IndexSearchResult;
 import com.elasticpath.service.search.index.IndexSearchService;
+import com.elasticpath.service.search.query.SortBy;
+import com.elasticpath.service.search.query.SortOrder;
 import com.elasticpath.service.search.solr.FacetValue;
 import com.elasticpath.service.search.solr.IndexUtility;
 
@@ -81,6 +87,7 @@ public class SearchRepositoryImpl implements SearchRepository {
 	private IndexUtility indexUtility;
 	private ReactiveAdapter reactiveAdapter;
 	private FacetService facetService;
+	private SortAttributeService sortAttributeService;
 	private ResourceOperationContext resourceOperationContext;
 
 	@Reference
@@ -131,6 +138,11 @@ public class SearchRepositoryImpl implements SearchRepository {
 	@Reference
 	public void setCategoryRepository(final CategoryRepository categoryRepository) {
 		this.categoryRepository = categoryRepository;
+	}
+
+	@Reference
+	public void setSortAttributeService(final SortAttributeService sortAttributeService) {
+		this.sortAttributeService = sortAttributeService;
 	}
 
 	@Override
@@ -271,24 +283,50 @@ public class SearchRepositoryImpl implements SearchRepository {
 	}
 
 	@Override
-	public Single<ProductCategorySearchCriteria> getSearchCriteria(final String categoryCode, final String storeCode, final Locale locale,
-																   final Currency currency, final Map<String, String> appliedFacets,
-																   final String keyword) {
+	public Single<ProductCategorySearchCriteria> getSearchCriteria(final OfferSearchData offerSearchData, final Locale locale,
+																   final Currency currency) {
+		String storeCode = offerSearchData.getScope();
 		return storeRepository.findStoreAsSingle(storeCode)
-				.flatMap(store -> buildSearchCriteria(categoryCode, locale, currency, appliedFacets, keyword, store));
+				.flatMap(store -> buildSearchCriteria(offerSearchData, locale, currency, store));
 	}
 
-	private Single<ProductCategorySearchCriteria> buildNavigationSearchCriteria(final String categoryCode,
-																				final Locale locale, final Currency currency,
-																				final Map<String, String> appliedFacets, final String storeCode) {
+	@Override
+	@CacheResult
+	public Observable<String> getSortAttributeGuidsForStoreAndLocale(final String storeCode, final String localeCode) {
+		return storeRepository.findStoreAsSingle(storeCode)
+				.flatMapObservable(store ->
+						Observable.fromIterable(sortAttributeService.findSortAttributeGuidsByStoreCodeAndLocalCode(store.getCode(), localeCode)));
+	}
+
+	@Override
+	public Single<SortValue> getSortValueByGuidAndLocaleCode(final String guid, final String localCode) {
+		return reactiveAdapter.fromServiceAsSingle(() -> sortAttributeService.findSortValueByGuidAndLocaleCode(guid, localCode));
+	}
+
+	private Single<ProductCategorySearchCriteria> buildNavigationSearchCriteria(final String categoryCode, final Locale locale,
+																				final Currency currency, final Map<String, String> appliedFacets,
+																				final String storeCode, final SortBy sortBy,
+																				final SortOrder sortOrder) {
 		return categoryRepository.findByStoreAndCategoryCode(storeCode, categoryCode)
-				.map(category -> createNavigationSearchCriteria(appliedFacets, locale, currency, true, category, storeCode));
+				.map(category -> createNavigationSearchCriteria(appliedFacets, locale, currency, category, storeCode, sortBy, sortOrder));
 	}
 
-	private Single<ProductCategorySearchCriteria> buildSearchCriteria(final String categoryCode, final Locale locale,
-															  final Currency currency, final Map<String, String> appliedFacets,
-															  final String keyword, final Store store) {
-		return categoryCode == null ? Single.just(createSearchCriteria(keyword, store, appliedFacets, locale, currency, true))
-				: buildNavigationSearchCriteria(categoryCode, locale, currency, appliedFacets, store.getCode());
+	private Single<ProductCategorySearchCriteria> buildSearchCriteria(final OfferSearchData offerSearchData, final Locale locale,
+																	  final Currency currency, final Store store) {
+		String categoryCode = offerSearchData.getCategoryCode();
+		String keyword = offerSearchData.getSearchKeyword();
+		SortBy sortBy = offerSearchData.getSortBy();
+		SortOrder sortOrder = offerSearchData.getSortOrder();
+		Map<String, String> appliedFacets = offerSearchData.getAppliedFacets();
+
+		return categoryCode == null ? Single.just(createSearchCriteria(keyword, store, appliedFacets, locale, currency, sortBy, sortOrder))
+				: buildNavigationSearchCriteria(categoryCode, locale, currency, appliedFacets, store.getCode(), sortBy, sortOrder);
+	}
+
+	@Override
+	public Maybe<SortAttribute> getDefaultSortAttributeForStore(final String storeCode) {
+		return storeRepository.findStoreAsSingle(storeCode)
+				.flatMapMaybe(store -> reactiveAdapter.fromServiceAsMaybe(()
+						-> sortAttributeService.getDefaultSortAttributeForStore(store.getCode()), Maybe.empty()));
 	}
 }

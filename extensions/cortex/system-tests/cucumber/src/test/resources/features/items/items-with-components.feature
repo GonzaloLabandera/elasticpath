@@ -80,14 +80,13 @@ Feature: Items with components
   | PURCHASABLE_BUNDLE                         |
   | bundleWithPhysicalAndDigitalComponents_sku |
 
-  # TODO in automation story PB-4286
-#  Scenario Outline: Bundle in the Cart with Dependent Line Items, all Order need infos solved and purchase complete
-#    Given I add <PURCHASABLE_BUNDLE> in the Cart with Dependent Line Items
-#    And I retrieve the order
-#    And I follow links total
-#    Then I see the cost field has amount: 40, currency: CAD and display: $40.00
-#    When I complete the purchase after providing all required order info
-#    Then the LineItems structure under the created Purchase
+  Scenario Outline: Bundle in the Cart with Dependent Line Items, all Order need infos solved and purchase complete
+    Given I add <PURCHASABLE_BUNDLE> in the Cart with Dependent Line Items
+    And I retrieve the order
+    And I follow links total
+    Then I see the cost field has amount: 40, currency: CAD and display: $40.00
+    When I complete the purchase after providing all required order info
+    Then the LineItems structure under the created Purchase
 
     Examples:
       | PURCHASABLE_BUNDLE                         |

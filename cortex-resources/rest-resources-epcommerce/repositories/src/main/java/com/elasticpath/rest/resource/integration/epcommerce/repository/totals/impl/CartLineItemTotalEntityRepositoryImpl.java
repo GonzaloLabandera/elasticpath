@@ -36,7 +36,7 @@ public class CartLineItemTotalEntityRepositoryImpl<E extends TotalEntity, I exte
 
 		String lineItemId = lineItemIdentifier.getLineItemId().getValue();
 		String cartId = cartIdentifier.getCartId().getValue();
-		String scope = cartIdentifier.getScope().getValue();
+		String scope = cartIdentifier.getCarts().getScope().getValue();
 
 		return totalsCalculator.calculateTotalForLineItem(scope, cartId, lineItemId)
 				.map(this::convertMoneyToTotalEntity);

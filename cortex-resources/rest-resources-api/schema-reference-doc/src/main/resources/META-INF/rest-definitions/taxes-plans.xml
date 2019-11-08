@@ -6,7 +6,7 @@
 
 		<plan>
 			<name>read-order-taxes</name>
-			<description><![CDATA[Retrieves the total tax for an order, which includes the order's tax amount, currency, and type of tax (VAT, HST, etc.).]]></description>
+			<description><![CDATA[Retrieves the total tax for an order; which includes the order's tax amount, currency, and type of tax (VAT - Value Added Tax, HST - Harmonized Sales Tax, etc.).]]></description>
 			<step>
 				<description><![CDATA[Read order for specific tax.]]></description>
 				<start>orders.order</start>
@@ -17,7 +17,7 @@
 
 		<plan>
 			<name>read-shipment-taxes</name>
-			<description><![CDATA[Retrieves the total tax for a shipment, which includes the shipments' tax amount, currency, and type of tax (VAT, HST, etc.).]]></description>
+			<description><![CDATA[Retrieves the total tax for a shipment; which includes the shipments' tax amount, currency, and type of tax (VAT, HST, etc.).]]></description>
 			<step>
 				<description><![CDATA[Read tax for specific shipment.]]></description>
 				<start>shipments.shipment</start>

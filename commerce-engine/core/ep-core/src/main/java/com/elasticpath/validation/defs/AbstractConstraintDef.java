@@ -11,8 +11,8 @@ import org.hibernate.validator.cfg.ConstraintDef;
 
 /**
  * Abstract constraint definition that enables addition of valid options for
- * {@link com.elasticpath.domain.cartmodifier.CartItemModifierType#PICK_SINGLE_OPTION} and
- * {@link com.elasticpath.domain.cartmodifier.CartItemModifierType#PICK_MULTI_OPTION} fields.
+ * {@link com.elasticpath.domain.modifier.ModifierType#PICK_SINGLE_OPTION} and
+ * {@link com.elasticpath.domain.modifier.ModifierType#PICK_MULTI_OPTION} fields.
  *
  * @param <A> Annotation type.
  */

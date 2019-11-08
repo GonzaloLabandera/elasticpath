@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<definitions xmlns="http://www.elasticpath.com/schema/rest/0.5">
+
+	<family>
+		<name>profiles</name>
+
+		<resource>
+			<name>attributes</name>
+			<description><![CDATA[The attributes for the customer.]]></description>
+			<uri>{profile}/attributes</uri>
+			<entity>profile-attributes</entity>
+		</resource>
+
+		<relationship>
+			<name>attributes-from-profile</name>
+			<description><![CDATA[Link from profile resource to attribute.]]></description>
+			<rel>attributes</rel>
+			<from>profile</from>
+			<to>attributes</to>
+		</relationship>
+	</family>
+</definitions>

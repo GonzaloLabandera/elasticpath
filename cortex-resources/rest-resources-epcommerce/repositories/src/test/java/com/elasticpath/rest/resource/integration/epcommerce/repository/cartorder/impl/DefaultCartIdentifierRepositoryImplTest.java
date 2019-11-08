@@ -18,6 +18,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import com.elasticpath.domain.shoppingcart.ShoppingCart;
 import com.elasticpath.rest.definition.carts.CartIdentifier;
+import com.elasticpath.rest.definition.carts.CartsIdentifier;
 import com.elasticpath.rest.definition.carts.DefaultCartIdentifier;
 import com.elasticpath.rest.id.type.StringIdentifier;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder.repositories.DefaultCartIdentifierRepositoryImpl;
@@ -47,14 +48,16 @@ public final class DefaultCartIdentifierRepositoryImplTest {
         when(shoppingCartRepository.getDefaultShoppingCartGuid()).thenReturn(Single.just(GUID));
 
         DefaultCartIdentifier defaultCartIdentifier = DefaultCartIdentifier.builder()
-                .withScope(StringIdentifier.of(SCOPE))
+                .withCarts(CartsIdentifier.builder()
+                        .withScope(StringIdentifier.of(SCOPE))
+                        .build())
                 .build();
 
         defaultCartRepository.resolve(defaultCartIdentifier)
                 .test()
                 .assertNoErrors()
                 .assertValue(cartIdentifier -> cartIdentifier.getCartId().getValue().equals(GUID))
-                .assertValue(cartIdentifier -> cartIdentifier.getScope().getValue().equals(SCOPE));
+                .assertValue(cartIdentifier -> cartIdentifier.getCarts().getScope().getValue().equals(SCOPE));
     }
 
     @Test
@@ -67,14 +70,16 @@ public final class DefaultCartIdentifierRepositoryImplTest {
         when(mockCart.getGuid()).thenReturn(GUID);
 
         DefaultCartIdentifier defaultCartIdentifier = DefaultCartIdentifier.builder()
-                .withScope(StringIdentifier.of(SCOPE))
+                .withCarts(CartsIdentifier.builder()
+                        .withScope(StringIdentifier.of(SCOPE))
+                        .build())
                 .build();
 
         defaultCartRepository.resolve(defaultCartIdentifier)
                 .test()
                 .assertNoErrors()
                 .assertValue(cartIdentifier -> cartIdentifier.getCartId().getValue().equals(GUID))
-                .assertValue(cartIdentifier -> cartIdentifier.getScope().getValue().equals(SCOPE));
+                .assertValue(cartIdentifier -> cartIdentifier.getCarts().getScope().getValue().equals(SCOPE));
     }
 
 

@@ -9,6 +9,8 @@ import java.util.Map;
 import io.reactivex.Observable;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.elasticpath.repository.LinksRepository;
 import com.elasticpath.rest.definition.itemdefinitions.ItemDefinitionComponentIdentifier;
@@ -25,6 +27,7 @@ import com.elasticpath.rest.resource.integration.epcommerce.repository.item.Item
 public class NestedComponentsLinksRepositoryImpl<I extends ItemDefinitionComponentIdentifier, LI extends ItemDefinitionNestedComponentsIdentifier>
 		implements LinksRepository<ItemDefinitionComponentIdentifier, ItemDefinitionNestedComponentsIdentifier> {
 
+	private static final Logger LOG = LoggerFactory.getLogger(NestedComponentsLinksRepositoryImpl.class);
 	private ItemRepository itemRepository;
 
 	@Override
@@ -33,6 +36,7 @@ public class NestedComponentsLinksRepositoryImpl<I extends ItemDefinitionCompone
 		final Iterator<String> guidPathFromRootItem = identifier.getComponentId().getValue().iterator();
 
 		return itemRepository.findBundleConstituentAtPathEnd(itemIdMap, guidPathFromRootItem)
+				.doOnError(throwable -> LOG.info("No bundle constituent found for item id '{}'.", itemIdMap))
 				.map(bundleConstituent -> bundleConstituent.getConstituent().isBundle())
 				.flatMapObservable(isBundle -> isBundle ? buildNestedComponentsIdentifier(identifier) : Observable.empty())
 				.onErrorResumeNext(Observable.empty());

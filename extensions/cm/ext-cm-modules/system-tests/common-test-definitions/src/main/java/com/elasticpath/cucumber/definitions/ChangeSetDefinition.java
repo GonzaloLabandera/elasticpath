@@ -269,6 +269,29 @@ public class ChangeSetDefinition {
 	}
 
 	/**
+	 * Clicks the object column.
+	 *
+	 * @param columnName the column name
+	 **/
+	@And("^I click the (.+) column$")
+	public void clickObjectCodeColumn(final String columnName) {
+		changeSetEditor.selectObjectsTab();
+		changeSetActionToolbar.clickReloadActiveEditor();
+		changeSetEditor.clickObjectColumn(columnName);
+	}
+
+	/**
+	 * Verify settings value.
+	 *
+	 * @param objectCode the object code
+	 * @param columnName the column name
+	 **/
+	@And("^I should see (.+) in (.+) column$")
+	public void verifySettingInChangeSet(final String objectCode, final String columnName) {
+		changeSetEditor.verifyObjectExists(objectCode, columnName);
+	}
+
+	/**
 	 * Verifies price list in change set.
 	 **/
 	@Then("^I should see (?:newly created|deleted|edited) price list in the change set$")
@@ -462,7 +485,7 @@ public class ChangeSetDefinition {
 		createChangeSetDialog.closeDialogIfOpened();
 		searchAndLockNewChangeSet(changeSetName);
 		changeSetSearchResultPane.clickFinalizedButton();
-		changeSetSearchResultPane.verifyChangeSetStatus(changeSetName, "Finalized");
+		changeSetSearchResultPane.verifyChangeSetState(changeSetName, "Finalized");
 	}
 
 	/**
@@ -564,7 +587,9 @@ public class ChangeSetDefinition {
 	 **/
 	@Then("^the change set status should be (.+)")
 	public void verifyChangeSetStatus(final String changeSetStatus) {
-		changeSetSearchResultPane.verifyChangeSetStatus(this.changeSetName, changeSetStatus);
+		assertThat(changeSetSearchResultPane.isChangeSetStateAsExpected(this.changeSetName, changeSetStatus))
+				.as("Change set state is not as expected")
+				.isTrue();
 	}
 
 	/**
@@ -574,7 +599,7 @@ public class ChangeSetDefinition {
 	 **/
 	@Then("^the second change set status should be (.+)")
 	public void verifyChangeSetStatusSecond(final String changeSetStatus) {
-		changeSetSearchResultPane.verifyChangeSetStatus(this.secondChangeSetName, changeSetStatus);
+		changeSetSearchResultPane.verifyChangeSetState(this.secondChangeSetName, changeSetStatus);
 	}
 
 	/**
@@ -692,6 +717,15 @@ public class ChangeSetDefinition {
 		assertThat(changeSetSearchResultPane.isChangeSetInList(changeSetName))
 				.as("Changeset '" + changeSetName + "' is not in search result pane as expected")
 				.isTrue();
+	}
+
+	/**
+	 * Returns change set guid.
+	 *
+	 * @return change set guid
+	 */
+	public String getChangeSetGuid() {
+		return changeSetEditor.getChangeSetGuid();
 	}
 
 }

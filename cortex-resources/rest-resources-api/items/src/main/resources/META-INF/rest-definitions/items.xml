@@ -6,20 +6,16 @@
 		<description>
 			<![CDATA[
 An item is a purchasable good like a T-shirt, a movie, a song, a subscription, etc. The Items resource's responsibility
-is to simply identify an item. This should not be confused with [itemdefinitions][itemdefinitions], which are
+is to simply identify an item. This should not be confused with [itemdefinitions](itemdefinitions.md), which are
 descriptions of the item.
 
 Items can be discovered by using the following resources:
 
-- [searches][searches]
+- [searches](searches.md)
 
-- [navigations][navigations]
+- [navigations](navigations.md)
 
-- [lookups][lookups]
-
-[itemdefinitions]: #itemdefinitions
-[searches]: #searches
-[navigations]: #navigations
+- [lookups](lookups.md)
 			]]>
 		</description>
 

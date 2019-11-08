@@ -88,7 +88,7 @@ public class AttributeGroupHelperImpl implements AttributeGroupHelper {
 		for (String attributeKey : assignedAttributes) {
 			Attribute attribute = findAttribute(attributeKey);
 	
-			AttributeGroupAttribute attributeGroupAttribute = beanFactory.getBean(attributeType);
+			AttributeGroupAttribute attributeGroupAttribute = beanFactory.getPrototypeBean(attributeType, AttributeGroupAttribute.class);
 			attributeGroupAttribute.setAttribute(attribute);
 			if (!isAttributeGroupExist(attributeGroupAttributes, attributeGroupAttribute)) {
 				attributeGroupAttributes.add(attributeGroupAttribute);

@@ -9,11 +9,12 @@ import java.util.Map;
 import com.elasticpath.plugin.tax.common.TaxItemObjectType;
 import com.elasticpath.plugin.tax.common.TaxJournalType;
 import com.elasticpath.plugin.tax.common.TaxTransactionType;
+import com.elasticpath.plugin.tax.common.TaxableCacheKeyHash;
 
 /**
  * Interface that defines the context required for tax operations.
  */
-public interface TaxOperationContext {
+public interface TaxOperationContext extends TaxableCacheKeyHash {
 
 
 	/**

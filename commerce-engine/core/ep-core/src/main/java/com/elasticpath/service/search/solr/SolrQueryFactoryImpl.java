@@ -3,10 +3,12 @@
  */
 package com.elasticpath.service.search.solr;
 
+import static com.elasticpath.commons.constants.ContextIdNames.PRICE_LIST_STACK;
+
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collections;
+import java.util.Currency;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
@@ -18,6 +20,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import org.apache.commons.collections.MapUtils;
 import org.apache.commons.lang.StringEscapeUtils;
@@ -37,6 +40,7 @@ import com.elasticpath.base.exception.EpSystemException;
 import com.elasticpath.commons.beanframework.BeanFactory;
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.attribute.Attribute;
+import com.elasticpath.domain.attribute.AttributeUsage;
 import com.elasticpath.domain.catalog.Category;
 import com.elasticpath.domain.catalogview.CategoryFilter;
 import com.elasticpath.domain.catalogview.DisplayableFilter;
@@ -47,6 +51,7 @@ import com.elasticpath.domain.search.Facet;
 import com.elasticpath.domain.search.FacetGroup;
 import com.elasticpath.service.attribute.AttributeService;
 import com.elasticpath.service.catalog.CatalogService;
+import com.elasticpath.service.pricing.PriceListAssignmentService;
 import com.elasticpath.service.search.FacetService;
 import com.elasticpath.service.search.IndexType;
 import com.elasticpath.service.search.ProductCategorySearchCriteria;
@@ -274,8 +279,6 @@ public class SolrQueryFactoryImpl implements SolrQueryFactory {
 			String searchableAttributes = getSearchableAttributes(searchConfig, searchCriteria);
 			if (StringUtils.isEmpty(searchableAttributes)) {
 				searchableAttributes = getSearchableAttributesFromFilterAttributes(searchCriteria, searchConfig);
-
-
 			}
 			query.set(SOLR_QF_PARAMETER, searchableAttributes);
 		} else {
@@ -335,7 +338,7 @@ public class SolrQueryFactoryImpl implements SolrQueryFactory {
 		Locale locale = searchCriteria.getLocale();
 		for (Facet facet : facetService.findAllSearchableFacets(searchCriteria.getStoreCode())) {
 			int facetGroup = facet.getFacetGroup();
-			if (facetGroup == FacetGroup.OTHERS.getOrdinal()) {
+			if (facetGroup == FacetGroup.FIELD.getOrdinal()) {
 				addFieldAttributes(searchConfig, searchKeys, locale, facet);
 			} else if (facetGroup == FacetGroup.SKU_OPTION.getOrdinal()) {
 				addSkuOptions(searchConfig, searchKeys, locale, facet);
@@ -515,7 +518,7 @@ public class SolrQueryFactoryImpl implements SolrQueryFactory {
 
 	private void addSorting(final SolrQuery query, final SearchCriteria searchCriteria,
 							final QueryComposer luceneQueryComposer, final SearchConfig searchConfig) {
-		if (sortingRedundant(searchCriteria)) {
+		if (searchCriteria.getSortingType() == null || searchCriteria.getSortingOrder() == null || sortingRedundant(searchCriteria)) {
 			return;
 		}
 
@@ -584,18 +587,7 @@ public class SolrQueryFactoryImpl implements SolrQueryFactory {
 	private String getSortTypeField(final SearchCriteria searchCriteria) {
 		switch (searchCriteria.getSortingType().getOrdinal()) {
 			case StandardSortBy.PRICE_ORDINAL:
-				if (!(searchCriteria instanceof ProductCategorySearchCriteria)) {
-					throw new EpServiceException("sorting on price is only defined for search criteria's of type "
-							+ ProductCategorySearchCriteria.class);
-				}
-				final StoreAwareSearchCriteria storeAwareSearchCriteria = (StoreAwareSearchCriteria) searchCriteria;
-				if (storeAwareSearchCriteria.getStoreCode() == null) {
-					throw new EpServiceException("Sorting on price requires a store UID");
-				}
-				ProductCategorySearchCriteria productCategorySearchCriteria = (ProductCategorySearchCriteria) searchCriteria;
-				String catalogCode = productCategorySearchCriteria.getCatalogCode();
-				List<String> priceListStack = getPriceListStackFromSearchCriteria(searchCriteria);
-				return indexUtility.createPriceSortFieldName(SolrIndexConstants.PRICE_SORT, catalogCode, priceListStack);
+				return getSortQueryForPrice(searchCriteria);
 			case StandardSortBy.PRODUCT_NAME_ORDINAL:
 				// need exact name here, otherwise we sort on the lowest or highest value of the
 				// tokens
@@ -614,22 +606,49 @@ public class SolrQueryFactoryImpl implements SolrQueryFactory {
 					return SolrIndexConstants.FEATURED;
 				}
 				return indexUtility.createFeaturedField(prodCatSearchCriteria.getCategoryUid());
+			case StandardSortBy.ATTRIBUTE_ORDINAL:
+				return getSortQueryForAttribute(searchCriteria);
 			default:
 				return null;
 		}
 	}
 
-	/**
-	 *
-	 * @param searchCriteria
-	 * @return
-	 */
-	private List<String> getPriceListStackFromSearchCriteria(final SearchCriteria searchCriteria) {
-		SearchHint<PriceListStack> priceListStackHint = searchCriteria.getSearchHint("priceListStack");
-		if (priceListStackHint != null) {
-			return priceListStackHint.getValue().getPriceListStack();
+	private String getSortQueryForPrice(final SearchCriteria searchCriteria) {
+		if (!(searchCriteria instanceof ProductCategorySearchCriteria)) {
+			throw new EpServiceException("Search criteria must be of type ProductCategorySearchCriteria to sort on price");
 		}
-		return Collections.emptyList();
+
+		SearchHint<PriceListStack> priceListStackHint = searchCriteria.getSearchHint(PRICE_LIST_STACK);
+		String catalogCode = ((ProductCategorySearchCriteria) searchCriteria).getCatalogCode();
+		List<String> priceListStack;
+
+		if (priceListStackHint == null) {
+			PriceListAssignmentService priceListAssignmentService = beanFactory.getSingletonBean(ContextIdNames.PRICE_LIST_ASSIGNMENT_SERVICE,
+					PriceListAssignmentService.class);
+			Currency currency = searchCriteria.getCurrency();
+			priceListStack = priceListAssignmentService.listByCatalogAndCurrencyCode(catalogCode, currency.getCurrencyCode())
+					.stream().map(priceListAssignment -> priceListAssignment.getPriceListDescriptor().getGuid())
+					.collect(Collectors.toList());
+		} else {
+			priceListStack = priceListStackHint.getValue().getPriceListStack();
+		}
+
+		return indexUtility.createPriceSortFieldName(SolrIndexConstants.PRICE_SORT, catalogCode, priceListStack);
+	}
+
+	private String getSortQueryForAttribute(final SearchCriteria searchCriteria) {
+		String sortString = searchCriteria.getSortingType().getSortString();
+
+		Attribute attribute = attributeService.findByKey(sortString);
+		if (attribute.isMultiValueEnabled()) {
+			throw new EpServiceException("Cannot sort on a multi-valued attribute.");
+		}
+
+		if (attribute.getAttributeUsage().getValue() != AttributeUsage.PRODUCT) {
+			throw new EpServiceException("Only product attributes can be sorted.");
+		}
+
+		return indexUtility.createAttributeDocValues(attribute, searchCriteria.getLocale());
 	}
 
 	/**

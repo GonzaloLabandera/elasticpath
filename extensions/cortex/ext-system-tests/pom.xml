@@ -13,7 +13,7 @@
 	<packaging>pom</packaging>
 
 	<modules>
-		<module>cucumber</module>
+		<module>definitions</module>
 	</modules>
 
 	<reporting>

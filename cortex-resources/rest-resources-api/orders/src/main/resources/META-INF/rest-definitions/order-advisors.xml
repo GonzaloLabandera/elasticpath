@@ -3,7 +3,6 @@
 
 	<family>
 		<name>orders</name>
-		<description><![CDATA[Advisors on the order resource]]></description>
 
 		<advisor>
 			<name>order-validation-info</name>

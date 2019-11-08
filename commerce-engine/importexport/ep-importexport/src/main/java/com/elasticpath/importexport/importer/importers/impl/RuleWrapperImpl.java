@@ -60,7 +60,7 @@ public class RuleWrapperImpl extends AbstractRuleImpl implements RuleWrapper {
 	 */
 	@Override
 	public void takeSnapshot() {
-		originalRule = getBean(ContextIdNames.PROMOTION_RULE);
+		originalRule = getPrototypeBean(ContextIdNames.PROMOTION_RULE, Rule.class);
 
 		for (RuleAction action : getWrappedRule().getActions()) {
 			originalRule.addAction(action);
@@ -94,7 +94,7 @@ public class RuleWrapperImpl extends AbstractRuleImpl implements RuleWrapper {
 	 */
 	private Rule getWrappedRule() {
 		if (wrappedRule == null) {
-			wrappedRule = getBean(ContextIdNames.PROMOTION_RULE);
+			wrappedRule = getPrototypeBean(ContextIdNames.PROMOTION_RULE, Rule.class);
 		}
 		return wrappedRule;
 	}

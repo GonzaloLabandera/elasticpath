@@ -1,3 +1,6 @@
+/*
+ * Copyright (c) Elastic Path Software Inc., 2019
+ */
 package com.elasticpath.selenium.dialogs;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -47,7 +50,25 @@ public class AddEditCartItemModifierGroupFieldDialog extends AbstractDialog {
 			+ "div[automation-id='com.elasticpath.cmclient.core.CoreMessages.button_MoveUp']";
 	private static final String MOVE_DOWN_BUTTON_CSS = ADD_CART_ITEM_MODIFIER_FIELD_PARENT_CSS
 			+ "div[automation-id='com.elasticpath.cmclient.core.CoreMessages.button_MoveDown']";
+	private static final String LANGUAGE_COMBO_BOX_CSS = ADD_CART_ITEM_MODIFIER_FIELD_PARENT_CSS
+			+ "[automation-id='com.elasticpath.cmclient.catalog.CatalogMessages"
+			+ ".AddEditCartItemModifierFieldDialog_DisplayName'][widget-type='CCombo']";
+	private static final String REQUIRED_CHECK_BOX_CSS = ADD_CART_ITEM_MODIFIER_FIELD_PARENT_CSS
+			+ "[automation-id='com.elasticpath.cmclient.catalog.CatalogMessages.AddEditCartItemModifierFieldDialog_required'][widget-type='Button']";
+	private static final String ADD_CART_ITEM_MODIFIER_FIELD_OPTION_PARENT_CSS = "div[automation-id='com.elasticpath.cmclient.catalog"
+			+ ".CatalogMessages.AddEditModifierFieldOptionDialog_WinIitle_AddModifierField'][widget-type='Shell'] ";
+	private static final String EDIT_CART_ITEM_MODIFIER_FIELD_OPTION_PARENT_CSS = "div[automation-id='com.elasticpath.cmclient.catalog"
+			+ ".CatalogMessages.AddEditModifierFieldOptionDialog_WinIitle_EditModifierField'][widget-type='Shell'] ";
+	private static final String LANGUAGE_COMBO_BOX_ADD_OPTION_CSS = ADD_CART_ITEM_MODIFIER_FIELD_OPTION_PARENT_CSS + "div[automation-id='com"
+			+ ".elasticpath"
+			+ ".cmclient.catalog.CatalogMessages.AddEditModifierFieldOptionDialog_DisplayName'][widget-type='CCombo']";
+	private static final String LANGUAGE_COMBO_BOX_EDIT_OPTION_CSS = EDIT_CART_ITEM_MODIFIER_FIELD_OPTION_PARENT_CSS + "div[automation-id='com"
+			+ ".elasticpath"
+			+ ".cmclient.catalog.CatalogMessages.AddEditModifierFieldOptionDialog_DisplayName'][widget-type='CCombo']";
+
 	private AddEditCartItemModifierFieldOptionDialog fieldOptionDialog;
+	private static final String VALUE_ATTRIBUTE = "value";
+	private static final String INPUT_CSS = " input";
 
 	/**
 	 * Constructor.
@@ -90,6 +111,15 @@ public class AddEditCartItemModifierGroupFieldDialog extends AbstractDialog {
 	}
 
 	/**
+	 * Returns cart item modifier group field display name.
+	 *
+	 * @return cart item modifier group field display name
+	 */
+	public String getDisplayName() {
+		return getDriver().findElement(By.cssSelector(DISPLAY_NAME_INPUT_CSS)).getAttribute(VALUE_ATTRIBUTE);
+	}
+
+	/**
 	 * Selects field type.
 	 *
 	 * @param type field type to select.
@@ -101,6 +131,15 @@ public class AddEditCartItemModifierGroupFieldDialog extends AbstractDialog {
 	}
 
 	/**
+	 * Returns field type.
+	 *
+	 * @return type field.
+	 */
+	public String getFieldType() {
+		return getDriver().findElement(By.cssSelector(FIELD_TYPE_INPUT_CSS + INPUT_CSS)).getAttribute(VALUE_ATTRIBUTE);
+	}
+
+	/**
 	 * Inputs cart item size.
 	 *
 	 * @param size the cart item  size
@@ -109,13 +148,12 @@ public class AddEditCartItemModifierGroupFieldDialog extends AbstractDialog {
 		clearAndType(FIELD_SIZE_INPUT_CSS, size);
 	}
 
-
 	/**
 	 * Clicks 'Add Option' button.
 	 *
 	 * @return AddEditCartItemModifierFieldOptionDialog
 	 */
-	private AddEditCartItemModifierFieldOptionDialog clickAddOptionButton() {
+	public AddEditCartItemModifierFieldOptionDialog clickAddOptionButton() {
 		clickButton("Add Option", new String[]{AddEditCartItemModifierFieldOptionDialog.ADD_FIELD_OPTION_PARENT_CSS});
 		return new AddEditCartItemModifierFieldOptionDialog(getDriver());
 	}
@@ -169,7 +207,6 @@ public class AddEditCartItemModifierGroupFieldDialog extends AbstractDialog {
 		clickButton(OK_BUTTON_CSS, "OK");
 		waitTillElementDisappears(By.cssSelector(ADD_CART_ITEM_MODIFIER_FIELD_PARENT_CSS));
 	}
-
 
 	/**
 	 * Edits option name and verifies the edited option name.
@@ -242,6 +279,68 @@ public class AddEditCartItemModifierGroupFieldDialog extends AbstractDialog {
 		} else {
 			clickButton(String.format(buttonCss, buttonNameLowerCase), buttonName);
 		}
+	}
+
+	/**
+	 * Select language.
+	 *
+	 * @param language language which should be chosen.
+	 * @return true if input language found in select box, false - if not found
+	 */
+	public boolean selectLanguage(final String language) {
+		return selectComboBoxItem(LANGUAGE_COMBO_BOX_CSS, language);
+	}
+
+	/**
+	 * Get selected language.
+	 *
+	 * @return selected language value
+	 */
+	public String getLanguage() {
+		return getDriver().findElement(By.cssSelector(LANGUAGE_COMBO_BOX_CSS + INPUT_CSS)).getAttribute(VALUE_ATTRIBUTE);
+	}
+
+	/**
+	 * Change Required status.
+	 */
+	public void setRequiredStatus() {
+		clickButton(REQUIRED_CHECK_BOX_CSS, "Required");
+	}
+
+	/**
+	 * Select language for Option Field in add case.
+	 *
+	 * @param language language which should be chosen.
+	 */
+	public void selectLanguageForAddOptionField(final String language) {
+		selectComboBoxItem(LANGUAGE_COMBO_BOX_ADD_OPTION_CSS, language);
+	}
+
+	/**
+	 * Get selected language for Option Field in add case.
+	 *
+	 * @return selected language value
+	 */
+	public String getLanguageForAddOptionField() {
+		return getDriver().findElement(By.cssSelector(LANGUAGE_COMBO_BOX_ADD_OPTION_CSS + INPUT_CSS)).getAttribute(VALUE_ATTRIBUTE);
+	}
+
+	/**
+	 * Select language for Option Field in edit case.
+	 *
+	 * @param language language which should be chosen.
+	 */
+	public void selectLanguageForEditOptionField(final String language) {
+		selectComboBoxItem(LANGUAGE_COMBO_BOX_EDIT_OPTION_CSS, language);
+	}
+
+	/**
+	 * Get selected language for Option Field in edit case.
+	 *
+	 * @return selected language value
+	 */
+	public String getLanguageForEditOptionField() {
+		return getDriver().findElement(By.cssSelector(LANGUAGE_COMBO_BOX_EDIT_OPTION_CSS + INPUT_CSS)).getAttribute(VALUE_ATTRIBUTE);
 	}
 
 }

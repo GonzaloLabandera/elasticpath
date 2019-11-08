@@ -107,11 +107,6 @@ class PromotionSteps {
 		Order.applyCoupon(couponCode)
 	}
 
-	@Then('^the corresponding promotion of the coupon is inactive$')
-	static void verifyPromotionInactive() {
-		//do nothing - the promotion will only active if the trigger product is added to cart.
-	}
-
 	@Then('^there is a list of applied promotions on the (?:coupon details|purchase|cart|cart line item|shipping option)$')
 	static void verifyPromotionLinkExists() {
 		assertLinkExists(client, APPLIED_PROMOTIONS_LINK)

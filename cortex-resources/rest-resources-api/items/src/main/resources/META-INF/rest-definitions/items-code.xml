@@ -13,7 +13,7 @@
 
 		<relationship>
 			<name>code-for-item</name>
-			<description><![CDATA[Read the code of an [item][items].]]></description>
+			<description><![CDATA[Read the code of an [item](items.md).]]></description>
 			<rel>code</rel>
 			<rev>item</rev>
 			<from>item</from>

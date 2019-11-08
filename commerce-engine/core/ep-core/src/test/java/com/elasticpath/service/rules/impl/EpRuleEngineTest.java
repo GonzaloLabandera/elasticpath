@@ -436,7 +436,7 @@ public class EpRuleEngineTest extends AbstractCatalogDataTestCase {
 	 */
 	@Test
 	public void testPromotionCodeIncorrect() {
-		stubGetBean(ContextIdNames.LIMITED_USE_COUPON_CODE_COND, LimitedUseCouponCodeConditionImpl.class);
+		stubGetPrototypeBean(ContextIdNames.LIMITED_USE_COUPON_CODE_COND, RuleCondition.class, LimitedUseCouponCodeConditionImpl.class);
 
 		// Assign a promo code to a rule
 		RuleSet orderRuleSet = createShoppingCartRuleSetWithShippingRule();
@@ -476,7 +476,7 @@ public class EpRuleEngineTest extends AbstractCatalogDataTestCase {
 	 */
 	@Test
 	public void testPromotionCodeCorrect() {
-		stubGetBean(ContextIdNames.LIMITED_USE_COUPON_CODE_COND, LimitedUseCouponCodeConditionImpl.class);
+		stubGetPrototypeBean(ContextIdNames.LIMITED_USE_COUPON_CODE_COND, RuleCondition.class, LimitedUseCouponCodeConditionImpl.class);
 
 		// Assign a promo code to a rule
 		RuleSet orderRuleSet = createShoppingCartRuleSetWithShippingRule();
@@ -599,6 +599,7 @@ public class EpRuleEngineTest extends AbstractCatalogDataTestCase {
 				return actions;
 			}
 		};
+		promotionRule.setEnabled(true);
 		promotionRule.setUidPk(RuleSetTestUtility.RULE_UID);
 		promotionRule.initialize();
 		promotionRule.setName("Car Sale");
@@ -666,6 +667,7 @@ public class EpRuleEngineTest extends AbstractCatalogDataTestCase {
 				return actions;
 			}
 		};
+		promotionRule.setEnabled(true);
 		promotionRule.setUidPk(RuleSetTestUtility.RULE_UID);
 		promotionRule.setName("Order Sale");
 		promotionRule.setStore(new StoreImpl());
@@ -771,6 +773,7 @@ public class EpRuleEngineTest extends AbstractCatalogDataTestCase {
 				return actions;
 			}
 		};
+		promotionRule.setEnabled(true);
 		promotionRule.setUidPk(RuleSetTestUtility.RULE_UID);
 		promotionRule.setName("Order Sale");
 		promotionRule.setStore(new StoreImpl());

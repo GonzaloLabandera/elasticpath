@@ -45,6 +45,11 @@
 			<groupId>com.elasticpath</groupId>
 			<artifactId>openjpa-osgi-wrapper</artifactId>
 		</dependency>
+
+		<dependency>
+			<groupId>com.elasticpath</groupId>
+			<artifactId>ep-catalog-batch</artifactId>
+		</dependency>
 		
 		<!-- Extra stuff -->
 

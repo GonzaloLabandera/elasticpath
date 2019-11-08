@@ -16,6 +16,10 @@ if EXIST "%JAVA_HOME%" (
     SET JAVA_CMD=%JAVA_HOME%\bin\java
 )
 
+if ["%PROFILE%"]==[""] (
+    SET PROFILE=default
+)
+
 :: Setup Java debug parms if the environment variable is set
 SET JAVA_DEBUG_PARMS=
 if "%DATA_POPULATION_DEBUG%" == "true" (

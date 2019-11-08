@@ -1,0 +1,295 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright (c) Elastic Path Software Inc., 2019
+  -->
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+				   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+				   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd"
+				   logicalFilePath="com/elasticpath/core/db/core-changelog-7.5.1.xml">
+
+	<changeSet id="7.5.1-trusted-traits-setting" author="elasticpath" >
+		<comment>Adds a setting to control whether trusted traits are allowed.</comment>
+		<insert tableName="TSETTINGDEFINITION">
+			<column name="UIDPK" valueNumeric="153" />
+			<column name="PATH" value="COMMERCE/SYSTEM/API/enableTrustedTraits" />
+			<column name="VALUE_TYPE" value="Boolean" />
+			<column name="MAX_OVERRIDE_VALUES" value="1" />
+			<column name="DEFAULT_VALUE" value="false" />
+			<column name="DESCRIPTION"
+					value="This setting controls whether certain traits (such as SHOPPING_CONTEXT_DATE_OVERRIDE) are enabled that assume that the client is trusted. This should not be enabled if Cortex is exposed on the public Internet." />
+		</insert>
+	</changeSet>
+
+	<changeSet id="7.5.1-add-setting-domain-message-channel-uri" author="elasticpath">
+		<comment>[PB-4355] Adds a setting definition used to define the URI of the channel on which Domain Event messages are sent and received
+		</comment>
+		<insert tableName="TSETTINGDEFINITION">
+			<column name="UIDPK" valueNumeric="154"/>
+			<column name="PATH" value="COMMERCE/SYSTEM/MESSAGING/DOMAIN/channelUri"/>
+			<column name="VALUE_TYPE" value="String"/>
+			<column name="MAX_OVERRIDE_VALUES" value="1"/>
+			<column name="DEFAULT_VALUE" value="jms:topic:VirtualTopic.ep.domain"/>
+			<column name="DESCRIPTION"
+					value="The URI of the channel on which Domain Event messages are sent and received.  Please note that changes will not take effect until the application(s) using this setting have been restarted."/>
+		</insert>
+
+		<insert tableName="TSETTINGDEFINITION">
+			<column name="UIDPK" valueNumeric="155"/>
+			<column name="PATH" value="COMMERCE/SYSTEM/MESSAGING/DOMAIN/deadLetterChannelUri"/>
+			<column name="VALUE_TYPE" value="String"/>
+			<column name="MAX_OVERRIDE_VALUES" value="1"/>
+			<column name="DEFAULT_VALUE" value="jms:topic:VirtualTopic.ep.domain.dlq"/>
+			<column name="DESCRIPTION" value="The URI of the channel on which process Exceptions created by Catalog Event messages processors."/>
+		</insert>
+
+		<insert tableName="TSETTINGMETADATA">
+			<column name="UIDPK" valueNumeric="1406"/>
+			<column name="SETTING_DEFINITION_UID" valueNumeric="154"/>
+			<column name="METADATA_KEY" value="environmentSpecific"/>
+			<column name="VALUE" value="false"/>
+		</insert>
+
+		<insert tableName="TSETTINGMETADATA">
+			<column name="UIDPK" valueNumeric="1407"/>
+			<column name="SETTING_DEFINITION_UID" valueNumeric="154"/>
+			<column name="METADATA_KEY" value="apiRefreshStrategy"/>
+			<column name="VALUE" value="application"/>
+		</insert>
+
+		<insert tableName="TSETTINGDEFINITION">
+			<column name="UIDPK" valueNumeric="156"/>
+			<column name="PATH" value="COMMERCE/SYSTEM/MESSAGING/CATALOG/channelUri"/>
+			<column name="VALUE_TYPE" value="String"/>
+			<column name="MAX_OVERRIDE_VALUES" value="1"/>
+			<column name="DEFAULT_VALUE" value="jms:topic:VirtualTopic.ep.catalog"/>
+			<column name="DESCRIPTION"
+					value="The URI of the channel on which Catalog Event messages are sent and received.  Please note that changes will not take effect until the application(s) using this setting have been restarted."/>
+		</insert>
+
+		<insert tableName="TSETTINGMETADATA">
+			<column name="UIDPK" valueNumeric="1408"/>
+			<column name="SETTING_DEFINITION_UID" valueNumeric="156"/>
+			<column name="METADATA_KEY" value="environmentSpecific"/>
+			<column name="VALUE" value="false"/>
+		</insert>
+
+		<insert tableName="TSETTINGMETADATA">
+			<column name="UIDPK" valueNumeric="1409"/>
+			<column name="SETTING_DEFINITION_UID" valueNumeric="156"/>
+			<column name="METADATA_KEY" value="apiRefreshStrategy"/>
+			<column name="VALUE" value="application"/>
+		</insert>
+	</changeSet>
+
+	<changeSet id="7.5.1-add-projection-entity-related-table" author="elasticpath">
+		<comment>[PB-4358] Adds table for persist ProjectionEntity
+		</comment>
+
+		<createTable tableName="TCATALOGPROJECTIONS">
+			<column name="TYPE" type="VARCHAR(64)">
+				<constraints nullable="false"/>
+			</column>
+			<column name="STORE" type="VARCHAR(64)">
+				<constraints nullable="false"/>
+			</column>
+			<column name="CODE" type="VARCHAR(64)">
+				<constraints nullable="false"/>
+			</column>
+			<column name="VERSION" type="BIGINT">
+				<constraints nullable="false"/>
+			</column>
+			<column name="PROJECTION_DATE_TIME" defaultValueDate="CURRENT_TIMESTAMP" type="TIMESTAMP">
+				<constraints nullable="false"/>
+			</column>
+			<column name="DELETED" type="TINYINT">
+				<constraints nullable="false"/>
+			</column>
+			<column name="SCHEMA_VERSION" type="VARCHAR(64)">
+				<constraints nullable="true"/>
+			</column>
+			<column name="CONTENT_HASH" type="VARCHAR(256)">
+				<constraints nullable="true"/>
+			</column>
+			<column name="CONTENT" type="TEXT(16777215)">
+				<constraints nullable="true"/>
+			</column>
+			<column name="DISABLE_DATE_TIME"  type="TIMESTAMP">
+				<constraints nullable="true"/>
+			</column>
+		</createTable>
+	</changeSet>
+
+	<changeSet id="7.5.1-add-projection-entity-composite-primary-key" author="elasticpath">
+		<comment>[PB-5004] Adds primary key to ProjectionEntity</comment>
+		<addPrimaryKey columnNames="TYPE, STORE, CODE"
+					   constraintName="PK_TCATALOGPROJECTIONS"
+					   tableName="TCATALOGPROJECTIONS"/>
+	</changeSet>
+
+	<changeSet id="7.5.1-add-indexes-to-projection-table" author="elasticpath">
+		<comment>[PB-5004] Adds indexes for TCATALOGPROJECTION
+		</comment>
+
+		<createIndex tableName="TCATALOGPROJECTIONS" indexName="I_CAT_PROJECTION_DATE_TIME">
+			<column name="TYPE"/>
+			<column name="STORE"/>
+			<column name="PROJECTION_DATE_TIME"/>
+			<column name="CODE"/>
+		</createIndex>
+
+		<createIndex tableName="TCATALOGPROJECTIONS" indexName="I_CAT_PROJECTION_CODE">
+			<column name="TYPE"/>
+			<column name="CODE"/>
+		</createIndex>
+	</changeSet>
+
+	<changeSet id="7.5.1-add-projection-entity-related-history-table" author="elasticpath">
+		<comment>[PB-5004] Adds table for persist history of ProjectionEntity
+		</comment>
+
+		<createTable tableName="TCATALOGHISTORY">
+			<column name="TYPE" type="VARCHAR(64)">
+				<constraints nullable="false"/>
+			</column>
+			<column name="STORE" type="VARCHAR(64)">
+				<constraints nullable="false"/>
+			</column>
+			<column name="CODE" type="VARCHAR(64)">
+				<constraints nullable="false"/>
+			</column>
+			<column name="VERSION" type="BIGINT">
+				<constraints nullable="false"/>
+			</column>
+			<column name="PROJECTION_DATE_TIME" defaultValueDate="CURRENT_TIMESTAMP" type="TIMESTAMP">
+				<constraints nullable="false"/>
+			</column>
+			<column name="DELETED" type="TINYINT">
+				<constraints nullable="false"/>
+			</column>
+			<column name="SCHEMA_VERSION" type="VARCHAR(64)">
+				<constraints nullable="true"/>
+			</column>
+			<column name="CONTENT_HASH" type="VARCHAR(256)">
+				<constraints nullable="true"/>
+			</column>
+			<column name="CONTENT" type="TEXT(16777215)">
+				<constraints nullable="true"/>
+			</column>
+		</createTable>
+	</changeSet>
+
+	<changeSet id="7.5.1-add-projection-history-entity-composite-primary-key" author="elasticpath">
+		<comment>[PB-5004] Adds primary key to ProjectionHistoryEntity</comment>
+		<addPrimaryKey columnNames="TYPE, STORE, CODE, VERSION"
+					   constraintName="PK_TCATALOGHISTORY"
+					   tableName="TCATALOGHISTORY"/>
+	</changeSet>
+
+	<changeSet id="7.5.1-add-projection-history-entity-composite-foreign-key" author="elasticpath">
+		<comment>[PB-5004] Adds foreign key to ProjectionHistoryEntity</comment>
+		<addForeignKeyConstraint baseTableName="TCATALOGHISTORY" baseColumnNames="TYPE, STORE, CODE" constraintName="TCATALOGHISTORY_FK"
+								 referencedTableName="TCATALOGPROJECTIONS" referencedColumnNames="TYPE, STORE, CODE" />
+	</changeSet>
+
+	<changeSet id="7.5.1-create-durable-consumer-ep-domain" author="elasticpath">
+		<comment>[PB-5472] Create durable consumer for ep.domain events</comment>
+		<update tableName="TSETTINGDEFINITION">
+			<column name="DEFAULT_VALUE" value="jms:topic:VirtualTopic.ep.domain"/>
+			<where>PATH = 'COMMERCE/SYSTEM/MESSAGING/DOMAIN/channelUri'</where>
+		</update>
+		<insert tableName="TSETTINGVALUE">
+			<column name="UIDPK" value="116"/>
+			<column name="SETTING_DEFINITION_UID" value="154"/>
+			<column name="CONTEXT" value="domainProjectionBuilderHandler"/>
+			<column name="CONTEXT_VALUE" value="jms:queue:Consumer.domainProjectionBuilderHandler.VirtualTopic.ep.domain"/>
+		</insert>
+	</changeSet>
+
+	<changeSet id="7.5.1-brand-driven-bulk-changes" author="elasticpath">
+		<comment>[PB-5460] Brand driven bulk changes</comment>
+		<insert tableName="TSETTINGDEFINITION">
+			<column name="UIDPK" valueNumeric="157"/>
+			<column name="PATH" value="COMMERCE/SYSTEM/MESSAGING/DOMAIN/BULK/channelUri"/>
+			<column name="VALUE_TYPE" value="String"/>
+			<column name="MAX_OVERRIDE_VALUES" value="1"/>
+			<column name="DEFAULT_VALUE" value="jms:topic:VirtualTopic.ep.domain.bulk"/>
+			<column name="DESCRIPTION" value="The URI of the channel on which Domain Bulk Event messages are sent and received."/>
+		</insert>
+		<insert tableName="TSETTINGVALUE">
+			<column name="UIDPK" value="117"/>
+			<column name="SETTING_DEFINITION_UID" value="157"/>
+			<column name="CONTEXT" value="projectionBulkChangeHandler"/>
+			<column name="CONTEXT_VALUE" value="jms:queue:Consumer.projectionBulkChangeHandler.VirtualTopic.ep.domain.bulk"/>
+		</insert>
+	</changeSet>
+
+	<changeSet id="7.5.1-category-driven-bulk-changes" author="elasticpath">
+		<comment>[PB-5041] Category driven bulk changes</comment>
+
+		<insert tableName="TSETTINGDEFINITION">
+			<column name="UIDPK" valueNumeric="158"/>
+			<column name="PATH" value="COMMERCE/SYSTEM/MESSAGING/DOMAIN/BULK/deadLetterChannelUri"/>
+			<column name="VALUE_TYPE" value="String"/>
+			<column name="MAX_OVERRIDE_VALUES" value="1"/>
+			<column name="DEFAULT_VALUE" value="jms:topic:VirtualTopic.ep.domain.bulk.dlq"/>
+			<column name="DESCRIPTION" value="The URI of the channel on which process Exceptions created by Catalog Bulk Event messages processors."/>
+		</insert>
+	</changeSet>
+
+	<changeSet id="7.5.1-create-new-tsortattribute-table" author="elasticpath" context="pre-app-upgrade">
+		<comment>Create the TSORTATTRIBUTE table for sorting search results</comment>
+
+		<createTable tableName="TSORTATTRIBUTE">
+			<column name="UIDPK" type="BIGINT">
+				<constraints primaryKey="true"/>
+			</column>
+			<column name="GUID" type="VARCHAR(64)">
+				<constraints nullable="false" unique="true"/>
+			</column>
+			<column name="BUSINESS_OBJECT_ID" type="VARCHAR(256)">
+				<constraints nullable="false"/>
+			</column>
+			<column name="STORECODE" type="VARCHAR(256)">
+				<constraints nullable="false"/>
+			</column>
+			<column name="IS_DESCENDING" type="BOOLEAN" defaultValue="FALSE">
+				<constraints nullable="false"/>
+			</column>
+			<column name="SORT_ATTRIBUTE_GROUP" type="VARCHAR(20)" defaultValue="FIELD">
+				<constraints nullable="false"/>
+			</column>
+			<column name="SORT_ATTRIBUTE_TYPE" type="VARCHAR(20)" defaultValue="STRING">
+				<constraints nullable="false"/>
+			</column>
+			<column name="IS_DEFAULT_ATTRIBUTE" type="BOOLEAN" defaultValue="FALSE">
+				<constraints nullable="false"/>
+			</column>
+		</createTable>
+
+		<createTable tableName="TSORTLOCALIZEDNAME">
+			<column name="UIDPK" type="BIGINT">
+				<constraints primaryKey="true"/>
+			</column>
+			<column name="SORT_ATTRIBUTE_UID" type="BIGINT">
+				<constraints nullable="false" foreignKeyName="SORT_LOCALIZED_NAME_FK" references="TSORTATTRIBUTE(UIDPK)"/>
+			</column>
+			<column name="LOCALE_CODE" type="VARCHAR(64)">
+				<constraints nullable="false"/>
+			</column>
+			<column name="NAME" type="VARCHAR(256)">
+				<constraints nullable="false"/>
+			</column>
+		</createTable>
+
+		<insert tableName="JPA_GENERATED_KEYS">
+			<column name="ID" value="TSORTATTRIBUTE" />
+			<column name="LAST_VALUE" valueNumeric="200000" />
+		</insert>
+
+		<insert tableName="JPA_GENERATED_KEYS">
+			<column name="ID" value="TSORTLOCALIZEDNAME" />
+			<column name="LAST_VALUE" valueNumeric="200000" />
+		</insert>
+	</changeSet>
+
+</databaseChangeLog>

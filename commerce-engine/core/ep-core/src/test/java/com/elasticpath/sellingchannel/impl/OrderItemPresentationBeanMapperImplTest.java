@@ -4,8 +4,9 @@
 package com.elasticpath.sellingchannel.impl;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.when;
 
 import java.util.Currency;
 
@@ -45,18 +46,8 @@ public class OrderItemPresentationBeanMapperImplTest {
 	 */
 	@Before
 	public void init() {
-		BeanFactory beanFactory = spy(new BeanFactory() {
-			@Override
-			@SuppressWarnings("unchecked")
-			public <T> T getBean(final String name) {
-				return (T) new OrderItemPresentationBeanImpl();
-			}
-
-			@Override
-			public <T> Class<T> getBeanImplClass(final String beanName) {
-				return null;
-			}
-		});
+		BeanFactory beanFactory = mock(BeanFactory.class);
+		when(beanFactory.getBean(any())).thenAnswer(invocation -> new OrderItemPresentationBeanImpl());
 
 		functor = new CopyFunctorTestable();
 		functor.setBeanFactory(beanFactory);

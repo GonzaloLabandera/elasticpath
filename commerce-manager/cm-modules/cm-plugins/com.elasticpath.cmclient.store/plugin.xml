@@ -10,7 +10,7 @@
    <extension
          point="org.eclipse.ui.perspectives">
       <perspective
-            icon="icons/promotion_default_22.png"
+            icon="icons/empty_1x1.png"
             class="com.elasticpath.cmclient.store.perspective.StorePerspectiveFactory"
             id="com.elasticpath.cmclient.store.storeperspective"
             name="%storePerspective.name">
@@ -39,28 +39,28 @@
          point="org.eclipse.ui.editors">
       <editor
             name="%catalogPromotionsEditor.name"
-            icon="icons/promotion-cart_default_22.png"
+            icon="icons/empty_1x1.png"
             class="com.elasticpath.cmclient.store.promotions.editors.ShoppingCartPromotionsEditor"
             id="com.elasticpath.cmclient.store.promotions.editors.PromotionsEditor.ShoppingCart"
             contributorClass="com.elasticpath.cmclient.core.editors.BaseCmClientEditorContributor">
       </editor>
       <editor
             class="com.elasticpath.cmclient.store.promotions.editors.CatalogPromotionsEditor"
-            icon="icons/promotion-catalog_default_22.png"
+            icon="icons/empty_1x1.png"
             id="com.elasticpath.cmclient.store.promotions.editors.PromotionsEditor.Catalog"
             contributorClass="com.elasticpath.cmclient.core.editors.BaseCmClientEditorContributor"
             name="%storePromotionsEditor.name">
       </editor>
       <editor
             class="com.elasticpath.cmclient.store.settings.editors.SettingsEditor"
-            icon="icons/system-configuration_default_22.png"
+            icon="icons/empty_1x1.png"
             id="com.elasticpath.cmclient.store.settings.editors.SettingsEditor"
             contributorClass="com.elasticpath.cmclient.core.editors.BaseCmClientEditorContributor"
             name="%storeEditor.name">
       </editor>
       <editor
             class="com.elasticpath.cmclient.store.targetedselling.conditionalexpression.editors.ConditionEditor"
-            icon="icons/condition.png"
+            icon="icons/empty_1x1.png"
             id="com.elasticpath.cmclient.store.targetedselling.conditionalexpression.editors.ConditionEditor"
             contributorClass="com.elasticpath.cmclient.core.editors.BaseCmClientEditorContributor"
             name="%conditionsEditor.name">
@@ -81,7 +81,7 @@
       <view
             category="com.elasticpath.cmclient.store.views.category"
             class="com.elasticpath.cmclient.store.views.SearchView"
-            icon="icons/search_default_22.png"
+            icon="icons/empty_1x1.png"
             id="com.elasticpath.cmclient.store.views.SearchView"
             name="%searchView.name">
       </view>
@@ -90,7 +90,7 @@
       <view
             category="com.elasticpath.cmclient.store.promotions.views.category"
             class="com.elasticpath.cmclient.store.promotions.views.PromotionsSearchResultsView"
-            icon="icons/promotion_default_22.png"
+            icon="icons/empty_1x1.png"
             id="com.elasticpath.cmclient.store.promotions.views.PromotionsSearchResultsView"
             name="%promotionsSearchResultsView.name">
       </view>
@@ -99,7 +99,7 @@
       <view
             category="com.elasticpath.cmclient.store.views.category"
             class="com.elasticpath.cmclient.store.shipping.views.ShippingLevelsSearchResultsView"
-            icon="icons/shipping_default_22.png"
+            icon="icons/empty_1x1.png"
             id="com.elasticpath.cmclient.store.shipping.views.ShippingLevelsSearchResultsView"
             name="%shippingSearchResultsView.name">
       </view>
@@ -108,7 +108,7 @@
       <view
             category="com.elasticpath.cmclient.store.views.targetedselling"
             class="com.elasticpath.cmclient.store.targetedselling.dynamiccontent.views.DynamicContentSearchResultsView"
-            icon="icons/dynamic_content.png"
+            icon="icons/empty_1x1.png"
             id="com.elasticpath.cmclient.store.targetedselling.dynamiccontent.views.DynamicContentSearchResultsView"
             name="%dynamicContentSearchResultsView.name">
       </view>
@@ -116,14 +116,14 @@
       <view
             category="com.elasticpath.cmclient.store.views.targetedselling"
             class="com.elasticpath.cmclient.store.targetedselling.delivery.views.DynamicContentDeliverySearchResultsView"
-            icon="icons/dynamic_content_delivery.png"
+            icon="icons/empty_1x1.png"
             id="com.elasticpath.cmclient.store.targetedselling.delivery.views.DynamicContentDeliverySearchResultsView"
             name="%dcaSearchResultsView.name">
       </view>
       <view
             category="com.elasticpath.cmclient.store.targetedselling.conditionalexpression"
             class="com.elasticpath.cmclient.store.targetedselling.conditionalexpression.views.ConditionalExpressionSearchResultsView"
-            icon="icons/condition.png"
+            icon="icons/empty_1x1.png"
             id="com.elasticpath.cmclient.store.targetedselling.conditionalexpression.views.ConditionalExpressionSearchResultsView"
             name="%conditionalExpressionSearchResultsView.name">
       </view>
@@ -204,7 +204,8 @@
                    id="com.elasticpath.cmclient.store.toolbarMenus.storePromotions.createCatalogPromo"
                    label="%toolbars.storePromotions.createCatalogPromo.label"
                    mnemonic="g"
-                   tooltip="%toolbars.storePromotions.createCatalogPromo.tooltip">
+                   tooltip="%toolbars.storePromotions.createCatalogPromo.tooltip"
+                   mode="FORCE_TEXT">
                 <visibleWhen>
                    <with
                          variable="activeContexts">
@@ -223,7 +224,8 @@
                    id="com.elasticpath.cmclient.store.toolbarMenus.storePromotions.createStorePromo"
                    label="%toolbars.storePromotions.createStorePromo.label"
                    mnemonic="t"
-                   tooltip="%toolbars.storePromotions.createStorePromo.tooltip">
+                   tooltip="%toolbars.storePromotions.createStorePromo.tooltip"
+                   mode="FORCE_TEXT">
                  <visibleWhen>
                    <with
                          variable="activeContexts">

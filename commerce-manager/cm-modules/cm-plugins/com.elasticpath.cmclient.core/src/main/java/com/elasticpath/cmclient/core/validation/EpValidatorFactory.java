@@ -1053,4 +1053,23 @@ public final class EpValidatorFactory {
 	 */
 	public static final IValidator CURRENCY_CODE = new CurrencyValidator();
 
+	/**
+	 * Validator for TagGroup guid/code.
+	 */
+	public static final IValidator TAG_GROUP_CODE = new CompoundValidator(MAX_LENGTH_64, REQUIRED, NO_SPACES, NO_SPECIAL_CHARACTERS);
+
+	/**
+	 * Validator for TagGroup name.
+	 */
+	public static final IValidator TAG_GROUP_NAME = new CompoundValidator(MAX_LENGTH_255, REQUIRED);
+
+	/**
+	 * Validator for TagDefinition guid/code.
+	 */
+	public static final IValidator TAG_DEFINITION_CODE = new CompoundValidator(MAX_LENGTH_64, REQUIRED, NO_SPACES, NO_SPECIAL_CHARACTERS);
+
+	/**
+	 * Validator for TagDefinition name.
+	 */
+	public static final IValidator TAG_DEFINITION_NAME = new CompoundValidator(MAX_LENGTH_255, REQUIRED);
 }

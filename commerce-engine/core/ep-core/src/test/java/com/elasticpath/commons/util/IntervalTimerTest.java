@@ -4,9 +4,9 @@
 package com.elasticpath.commons.util;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.awaitility.Awaitility.await;
 
-import org.awaitility.Duration;
+import java.util.concurrent.TimeUnit;
+
 import org.junit.Test;
 
 /**
@@ -15,48 +15,49 @@ import org.junit.Test;
 public class IntervalTimerTest {
 	
 	private static final int ONE_SECOND_AS_MS = 1000;
+	private static final int TWO_SECONDS_AS_MS = 2000;
+	private static final int EIGHT_SECONDS_AS_MS = 8000;
 
 	/**
-	 * Tests that an immediate call to hasIntervalPassed to a timer with a 1 second interval returns false.
+	 * Tests that an immediate call to hasIntervalPassed to a timer with an 8 second interval returns false.
 	 */
 	@Test
 	public void testImmediateCallHasIntervalPassedReturnsFalse() {
-		IntervalTimer intervalTimer = new IntervalTimer(ONE_SECOND_AS_MS);
+		IntervalTimer intervalTimer = new IntervalTimer(EIGHT_SECONDS_AS_MS);
 		intervalTimer.setStartPointToNow();
 		assertThat(intervalTimer.hasIntervalPassed()).as("interval should not have elapsed.").isFalse();
 	}
 
 	/**
 	 * Tests that a call to hasIntervalPassed to a timer with a 1 second interval returns true,
-	 * if the current thread sleeps for 3 seconds before calling hasIntervalPassed.
-	 * @throws InterruptedException if the Thread.sleep call gets interrupted (it wont)
+	 * if the current thread sleeps for 2 seconds before calling hasIntervalPassed.
+	 *
+	 * @throws InterruptedException if the TimeUnit.MILLISECONDS.sleep(..) call gets interrupted (it won't)
 	 */
 	@Test
-	public void testCallHasIntervalPassedReturnsTrueAfterWaitingLongerThanInterval() 
-		throws InterruptedException {
+	public void testCallHasIntervalPassedReturnsTrueAfterWaitingLongerThanInterval() throws InterruptedException {
 
 		IntervalTimer intervalTimer = new IntervalTimer(ONE_SECOND_AS_MS);
 		intervalTimer.setStartPointToNow();
-
-		await().atLeast(Duration.ONE_SECOND).until(() ->
-			assertThat(intervalTimer.hasIntervalPassed()).as("interval should have elapsed.").isTrue());
+		TimeUnit.MILLISECONDS.sleep(TWO_SECONDS_AS_MS);
+		assertThat(intervalTimer.hasIntervalPassed()).as("interval should have elapsed.").isTrue();
 	}
 	
 	/**
 	 * Tests that a call to hasIntervalPassed to a timer with a 1 second interval returns true,
-	 * if the current thread sleeps for 3 seconds before calling hasIntervalPassed. 
+	 * if the current thread sleeps for 2 seconds before calling hasIntervalPassed.
 	 * Then tests that a call to startTiming resets the countdown timer.
-	 * @throws InterruptedException if the Thread.sleep call gets interrupted (it wont)
+	 *
+	 * @throws InterruptedException if the TimeUnit.MILLISECONDS.sleep(..) call gets interrupted (it wont)
 	 */
 	@Test
-	public void testImmediateCallHasIntervalPassedReturnsFalseOnPreviouslyElapsedTimer() 
-		throws InterruptedException {
+	public void testImmediateCallHasIntervalPassedReturnsFalseOnPreviouslyElapsedTimer() throws InterruptedException {
 
 		IntervalTimer intervalTimer = new IntervalTimer(ONE_SECOND_AS_MS);
 		intervalTimer.setStartPointToNow();
+		TimeUnit.MILLISECONDS.sleep(TWO_SECONDS_AS_MS);
 
-		await().atLeast(Duration.ONE_SECOND).until(() ->
-			assertThat(intervalTimer.hasIntervalPassed()).as("interval should have elapsed.").isTrue());
+		assertThat(intervalTimer.hasIntervalPassed()).as("interval should have elapsed.").isTrue();
 
 		intervalTimer.setStartPointToNow(); //restart the interval clock
 

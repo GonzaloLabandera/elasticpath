@@ -8,6 +8,7 @@ import javax.inject.Inject;
 import io.reactivex.Observable;
 
 import com.elasticpath.rest.definition.carts.CartIdentifier;
+import com.elasticpath.rest.definition.carts.CartsIdentifier;
 import com.elasticpath.rest.definition.promotions.PossiblePromotionsForCartIdentifier;
 import com.elasticpath.rest.definition.promotions.PossiblePromotionsForCartRelationship;
 import com.elasticpath.rest.helix.data.annotation.RequestIdentifier;
@@ -34,10 +35,11 @@ public class PossiblePromotionsToCartRelationshipImpl implements PossiblePromoti
 	@Override
 	public Observable<CartIdentifier> onLinkFrom() {
 		CartIdentifier cartIdentifier = possiblePromotionsForCartIdentifier.getCart();
-		IdentifierPart<String> scope = cartIdentifier.getScope();
+		IdentifierPart<String> scope = cartIdentifier.getCarts().getScope();
 		IdentifierPart<String> cartId = cartIdentifier.getCartId();
 		return Observable.just(CartIdentifier.builder()
-				.withScope(scope)
+				.withCarts(CartsIdentifier.builder()
+						.withScope(scope).build())
 				.withCartId(cartId)
 				.build());
 	}

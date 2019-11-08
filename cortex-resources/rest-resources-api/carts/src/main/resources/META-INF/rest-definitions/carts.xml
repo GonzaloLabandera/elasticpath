@@ -4,27 +4,24 @@
 	<family>
 		<name>carts</name>
 		<description><![CDATA[
-####Entry Point: /carts/{scope}/default
-
 A cart is basically a basket that customers put items into that they want to purchase. While Cortex API's shopping
 cart has this as its core functionality, there is much more to this shopping cart than just that.
 
 Key concepts developers should know about carts:
 
--  You can't delete a cart, you can only empty a cart of its contents.
+- A default cart is always available, registered users can create additional carts
 
--  The do not need to instantiate the cart, a cart is always available.
+- You can empty a cart's contents
 
--  The do not need to create an order for the cart, an order is always available.
+- All carts except the default cart can be deleted
 
--  Cortex automatically persists carts between customer sessions so a customer can log on through a mobile phone and
-then log on through another device to complete the purchase
+- You do not need to create an order for the cart, an order is always available
 
+- Cortex automatically persists carts between customer sessions so a customer can log on through a mobile phone and then log on through another device to complete the purchase
 
-[items]: #items
-[orders]: #orders
-[totals]: #totals
-			]]>
+A cart's line items is a collection of [items](items.md) that have been added to a cart. A line item can have one
+or more of the same [items](items.md) in it. For example, one line item can have seven Rocker T-Shirt or a single Rocker T-Shirt, but it won't have
+one Rocker T-Shirt and a song track. The song track and T-shirt would be in separate line items.]]>
 		</description>
 
 		<uri-part>
@@ -36,31 +33,24 @@ then log on through another device to complete the purchase
 		<resource>
 			<name>default-cart</name>
 			<description><![CDATA[Alias to the default cart for the current shopper.]]></description>
-			<uri>{base.family}/{base.scope}/default</uri>
+			<uri>{carts}/default</uri>
 			<alias>cart</alias>
 		</resource>
 
 		<resource>
 			<name>cart</name>
 			<description>
-				<![CDATA[
-A cart resource, can have line items, [orders][orders], and [totals][totals].
-
-[orders]: #orders
-[totals]: #totals
-				]]>
+				<![CDATA[A cart resource, can have line items, [orders](orders.md), and [totals](totals.md).]]>
 			</description>
-			<uri>{base.family}/{base.scope}/{cart-id}</uri>
+			<uri>{carts}/{cart-id}</uri>
 			<entity>cart</entity>
 		</resource>
 
 		<relationship>
 			<name>root-to-default-cart</name>
 			<description>
-				<![CDATA[
-Retrieve the shopper's default cart. When using *default* in the cart's URI, default evaluates to the logged in shopper's cart I.D.
-See the main Cortex documentation for more information on *default*.
-			]]>
+				<![CDATA[Retrieve the shopper's default cart. When using *default* in the cart's URI, default evaluates to the logged in
+shopper's cart I.D. See the main Cortex documentation for more information on *default*.]]>
 			</description>
 			<rel>defaultcart</rel>
 			<from>base.root</from>
@@ -79,11 +69,7 @@ See the main Cortex documentation for more information on *default*.
 			<property>
 				<name>total-quantity</name>
 				<description>
-					<![CDATA[
-Lists the total number of [items][items] in the cart.
-
-[items]: #items
-					]]>
+					<![CDATA[Lists the total number of [items](items.md) in the cart.]]>
 				</description>
 				<integer/>
 			</property>

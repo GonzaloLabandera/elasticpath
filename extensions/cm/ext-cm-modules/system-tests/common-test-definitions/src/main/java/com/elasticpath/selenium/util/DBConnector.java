@@ -35,16 +35,42 @@ public class DBConnector {
 	private PreparedStatement preparedStatement;
 	private final PropertyManager propertyManager = PropertyManager.getInstance();
 
+	String dbUrl;
+	String dbClass;
+	String dbUser;
+	String dbPwd;
+
 	/**
 	 * Create connection.
 	 *
 	 * @return the connection
 	 */
 	public Connection getDBConnection() {
-		String dbUrl = propertyManager.getProperty("db.connection.url");
-		String dbClass = propertyManager.getProperty("db.connection.driver.class");
-		String dbUser = propertyManager.getProperty("db.connection.username");
-		String dbPwd = propertyManager.getProperty("db.connection.password");
+		dbUrl = propertyManager.getProperty("db.connection.url");
+		dbClass = propertyManager.getProperty("db.connection.driver.class");
+		dbUser = propertyManager.getProperty("db.connection.username");
+		dbPwd = propertyManager.getProperty("db.connection.password");
+		try {
+			Class.forName(dbClass);
+			connection = DriverManager.getConnection(dbUrl, dbUser, dbPwd);
+		} catch (ClassNotFoundException e) {
+			LOGGER.error(e);
+		} catch (SQLException e) {
+			LOGGER.error(e);
+		}
+		return connection;
+	}
+
+	/**
+	 * PB-7016 - Create import connection.
+	 *
+	 * @return the connection
+	 */
+	public Connection getImportDBConnection() {
+		dbUrl = propertyManager.getProperty("import.db.connection.url");
+		dbClass = propertyManager.getProperty("db.connection.driver.class");
+		dbUser = propertyManager.getProperty("export.import.db.connection.username");
+		dbPwd = propertyManager.getProperty("export.import.db.connection.password");
 
 		try {
 			Class.forName(dbClass);
@@ -58,6 +84,29 @@ public class DBConnector {
 	}
 
 	/**
+	 * Create export db connection.
+	 *
+	 * @return the connection
+	 */
+	public Connection getExportDBConnection() {
+		dbUrl = propertyManager.getProperty("export.db.connection.url");
+		dbClass = propertyManager.getProperty("db.connection.driver.class");
+		dbUser = propertyManager.getProperty("export.import.db.connection.username");
+		dbPwd = propertyManager.getProperty("export.import.db.connection.password");
+
+		try {
+			Class.forName(dbClass);
+			connection = DriverManager.getConnection(dbUrl, dbUser, dbPwd);
+		} catch (ClassNotFoundException e) {
+			LOGGER.error(e);
+		} catch (SQLException e) {
+			LOGGER.error(e);
+		}
+		return connection;
+	}
+
+
+	/**
 	 * Execute a sql query.
 	 *
 	 * @param query the sql query
@@ -67,11 +116,18 @@ public class DBConnector {
 
 		try {
 			connection = this.getDBConnection();
+			connection.setAutoCommit(true);
+			connection.setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
 			statement = connection.createStatement();
 			int result = statement.executeUpdate(query);
 			assertTrue("Failed to update/insert/delete record in the database", result >= 0);
 
 		} catch (SQLException e) {
+			try {
+				connection.rollback();
+			} catch (SQLException e1) {
+				LOGGER.error(e1);
+			}
 			LOGGER.error(e);
 			fail("Failed to update/insert/delete record in the database: " + e.toString());
 		} finally {
@@ -167,6 +223,31 @@ public class DBConnector {
 	}
 
 	/**
+	 * PB-7016 - Return true if product exists else false.
+	 *
+	 * @param productCode the product code
+	 * @return boolean true or false
+	 */
+	public boolean productExists(final String productCode) {
+		boolean productExists = false;
+		try {
+			connection = this.getImportDBConnection();
+			statement = connection.createStatement();
+			resultSet = statement.executeQuery("SELECT * FROM TPRODUCT WHERE CODE='" + productCode + "'");
+
+			if (resultSet.next()) {
+				productExists = true;
+			}
+		} catch (SQLException e) {
+			LOGGER.error(e);
+			fail("Failed to get product by code: " + productCode + " :" + e.toString());
+		} finally {
+			this.closeAll();
+		}
+		return productExists;
+	}
+
+	/**
 	 * Return UID of a given entity.
 	 *
 	 * @param entityName  an entity name
@@ -244,6 +325,49 @@ public class DBConnector {
 	public void updateProductEnableDate(final String productCode, final String enableDate, final String lastUpdate) {
 		executeUpdateQuery("UPDATE TPRODUCT SET START_DATE='" + enableDate + "', LAST_MODIFIED_DATE = '" + lastUpdate
 				+ "' WHERE CODE = '" + productCode + "';");
+	}
+
+
+	public void updateChangeSetFalg(){
+		connection = getImportDBConnection();
+		executeImportExportUpdateQuery(connection,
+				"UPDATE TSETTINGDEFINITION SET DEFAULT_VALUE='true' WHERE PATH='COMMERCE/SYSTEM/CHANGESETS/enable'");
+	}
+
+	public void updateSearchUrl(){
+		connection = getExportDBConnection();
+		executeImportExportUpdateQuery(connection,
+				"UPDATE TSETTINGDEFINITION SET DEFAULT_VALUE='" + propertyManager.getProperty("search.host.url") + "' WHERE PATH='COMMERCE/SYSTEM/SEARCH/searchHost'");
+	}
+
+	/**
+	 * Execute a sql query.
+	 *
+	 * @param query the sql query
+	 */
+	public void executeImportExportUpdateQuery(final Connection connection, final String query) {
+		assert (!query.isEmpty());
+
+		try {
+			connection.setAutoCommit(true);
+			connection.setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
+			statement = connection.createStatement();
+			int result = statement.executeUpdate(query);
+			assertTrue("Failed to update/insert/delete record in the database", result >= 0);
+
+		} catch (SQLException e) {
+			try {
+				if(connection != null) {
+					connection.rollback();
+				}
+			} catch (SQLException e1) {
+				LOGGER.error(e1);
+			}
+			LOGGER.error(e);
+			fail("Failed to update/insert/delete record in the database: " + e.toString());
+		} finally {
+			this.closeAll();
+		}
 	}
 
 

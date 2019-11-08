@@ -159,6 +159,8 @@ public final class AdminStoresMessages {
 
 	public String StoreSystem;
 
+	public String StoreProfileAttributePolicies;
+
 	public String StoreMarketingSettings;
 
 	public String StoreSystemSettings;
@@ -180,6 +182,40 @@ public final class AdminStoresMessages {
 	public String StoreFacetErrorDialogHeader;
 
 	public String StoreFacetErrorDialogMessage;
+
+	public String StoreSortAttributeConfiguration;
+
+	public String StoreSortAttributeErrorDialogHeader;
+
+	public String StoreSortAttributeErrorDialogMessage;
+
+	public String SortAttributeKey;
+
+	public String SortAttributeGroup;
+
+	public String SortAttributeType;
+
+	public String SortAddAttributeDialogTitle;
+
+	public String SortEditAttributeDialogTitle;
+
+	public String SortAttributeKeyDialogLabel;
+
+	public String SortAscending;
+
+	public String SortDescending;
+
+	public String SortOrder;
+
+	public String SortDisplayName;
+
+	public String SortLanguage;
+
+	public String DefaultSort;
+
+	public String SortDeleteTitle;
+
+	public String SortDeleteMessage;
 
 	/** Payment page. */
 	public String Payments;
@@ -289,6 +325,36 @@ public final class AdminStoresMessages {
 	public String PrimarySection;
 
 	public String GiftCertificates_Section;
+
+	public String Store_AttributePolicies_AddValue;
+
+	public String Store_AttributePolicies_EditValue;
+
+	public String Store_AttributePolicies_DeleteValue;
+
+	public String Store_AttributePolicies_Attribute;
+
+	public String Store_AttributePolicies_Policy;
+
+	public String Store_AttributePolicies_Permissions;
+
+	public String PolicyPermission_EMIT;
+
+	public String PolicyPermission_EDIT;
+
+	public String PolicyPermission_NONE;
+
+	public String PolicyPermission_Null;
+
+	public String ConfirmDeleteAttributePolicyMsgBoxTitle;
+
+	public String ConfirmDeleteAttributePolicyMsgBoxText;
+
+	public String Store_AttributePolicies_SelectAttribute;
+
+	public String Store_AttributePolicies_SelectPolicy;
+
+	public String AttributePolicyExists;
 
 	/**
 	 * Return a message String given the message key.

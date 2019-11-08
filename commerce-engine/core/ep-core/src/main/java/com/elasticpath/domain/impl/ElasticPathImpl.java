@@ -9,7 +9,7 @@ import com.elasticpath.domain.ElasticPath;
 /**
  * This class provides elastic path configurations and context to others.
  */
-public class ElasticPathImpl implements ElasticPath, BeanFactory {
+public class ElasticPathImpl implements ElasticPath {
 
 	private static ElasticPath epInstance = new ElasticPathImpl();
 
@@ -40,6 +40,17 @@ public class ElasticPathImpl implements ElasticPath, BeanFactory {
 	}
 
 	@Override
+	public <T> T getPrototypeBean(final String name, final Class<T> clazz) {
+		return beanFactory.getPrototypeBean(name, clazz);
+	}
+
+	@Override
+	public <T> T getSingletonBean(final String name, final Class<T> clazz) {
+		return beanFactory.getSingletonBean(name, clazz);
+	}
+
+	@Override
+	@Deprecated
 	public <T> T getBean(final String name) {
 		return beanFactory.getBean(name);
 	}

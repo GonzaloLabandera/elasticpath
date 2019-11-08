@@ -205,7 +205,7 @@ public class PromotionIndexBuilderTest {
 
 		context.checking(new Expectations() {
 			{
-				oneOf(mockElasticPath).getBean(ContextIdNames.LIMITED_USE_COUPON_CODE_COND);
+				oneOf(mockElasticPath).getPrototypeBean(ContextIdNames.LIMITED_USE_COUPON_CODE_COND, RuleCondition.class);
 				will(returnValue(couponCodeCondition));
 			}
 		});

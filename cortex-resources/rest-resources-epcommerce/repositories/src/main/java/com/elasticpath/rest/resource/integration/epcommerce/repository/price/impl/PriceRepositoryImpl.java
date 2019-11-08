@@ -19,6 +19,8 @@ import io.reactivex.Single;
 import io.reactivex.functions.BiFunction;
 import io.reactivex.functions.Predicate;
 import org.apache.commons.lang.ObjectUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.elasticpath.common.dto.ShoppingItemDto;
 import com.elasticpath.common.dto.sellingchannel.ShoppingItemDtoFactory;
@@ -80,6 +82,8 @@ public class PriceRepositoryImpl implements PriceRepository {
 			price2.getListPrice()) < 0 ? price : price2;
 	private static final BiFunction<Price, Price, Price> MIN_PURCHASE_PRICE_REDUCER = (price, price2) -> ObjectUtils.compare(price.getSalePrice(),
 			price2.getSalePrice()) < 0 ? price : price2;
+
+	private static final Logger LOG = LoggerFactory.getLogger(PriceRepositoryImpl.class);
 
 	/**
 	 * Creates instance with needed services wired in.
@@ -164,7 +168,8 @@ public class PriceRepositoryImpl implements PriceRepository {
 	private Observable<Price> getPrices(final String storeCode, final String guid) {
 		return storeProductRepository.findByGuid(guid)
 				.flatMapObservable(product -> Observable.fromIterable(product.getProductSkus().keySet()))
-				.flatMapSingle(sku -> getPrice(storeCode, sku))
+				.flatMapSingle(sku -> getPrice(storeCode, sku)
+						.doOnError(throwable -> LOG.warn("Unable to get price for store code '{}' and sku '{}'.", storeCode, sku)))
 				.onErrorResumeNext(Observable.empty());
 	}
 

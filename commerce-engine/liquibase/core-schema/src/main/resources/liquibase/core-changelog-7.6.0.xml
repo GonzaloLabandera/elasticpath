@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright (c) Elastic Path Software Inc., 2019
+  -->
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+				   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+				   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd"
+				   logicalFilePath="com/elasticpath/core/db/core-changelog-7.6.0.xml">
+
+	<changeSet id="7.6.0-create-attribute-policy-table" author="elasticpath">
+		<createTable tableName="TATTRIBUTEPOLICY">
+			<column name="UIDPK" type="BIGINT">
+				<constraints nullable="false" primaryKey="true"/>
+			</column>
+			<column name="GUID" type="VARCHAR(64)">
+				<constraints nullable="false" unique="true" uniqueConstraintName="I_SCAP_UNIQUE_GUID"/>
+			</column>
+			<column name="POLICY_KEY" type="VARCHAR(64)">
+				<constraints nullable="false"/>
+			</column>
+			<column name="POLICY_PERMISSION" type="VARCHAR(64)">
+				<constraints nullable="false"/>
+			</column>
+		</createTable>
+
+		<createIndex tableName="TATTRIBUTEPOLICY" indexName="I_ATTRIBUTE_POLICY">
+			<column name="POLICY_KEY"/>
+		</createIndex>
+
+		<insert tableName="JPA_GENERATED_KEYS">
+			<column name="ID" value="TATTRIBUTEPOLICY" />
+			<column name="LAST_VALUE" valueNumeric="200000" />
+		</insert>
+	</changeSet>
+
+	<changeSet id="7.6.0-populate-attribute-policy-table-with-defaults" author="elasticpath">
+		<insert tableName="TATTRIBUTEPOLICY">
+			<column name="UIDPK" value="1"/>
+			<column name="GUID" value="hidden-none"/>
+			<column name="POLICY_KEY" value="HIDDEN"/>
+			<column name="POLICY_PERMISSION" value="NONE"/>
+		</insert>
+
+		<insert tableName="TATTRIBUTEPOLICY">
+			<column name="UIDPK" value="2"/>
+			<column name="GUID" value="visible-emit"/>
+			<column name="POLICY_KEY" value="READ_ONLY"/>
+			<column name="POLICY_PERMISSION" value="EMIT"/>
+		</insert>
+
+		<insert tableName="TATTRIBUTEPOLICY">
+			<column name="UIDPK" value="3"/>
+			<column name="GUID" value="default-emit"/>
+			<column name="POLICY_KEY" value="DEFAULT"/>
+			<column name="POLICY_PERMISSION" value="EMIT"/>
+		</insert>
+
+		<insert tableName="TATTRIBUTEPOLICY">
+			<column name="UIDPK" value="4"/>
+			<column name="GUID" value="default-edit"/>
+			<column name="POLICY_KEY" value="DEFAULT"/>
+			<column name="POLICY_PERMISSION" value="EDIT"/>
+		</insert>
+	</changeSet>
+
+	<changeSet id="7.6.0-create-store-customer-attribute-table" author="elasticpath">
+		<createTable tableName="TSTORECUSTOMERATTRIBUTE">
+			<column name="UIDPK" type="BIGINT">
+				<constraints nullable="false" primaryKey="true"/>
+			</column>
+			<column name="GUID" type="VARCHAR(64)">
+				<constraints nullable="false" unique="true" uniqueConstraintName="I_SCA_UNIQUE_GUID"/>
+			</column>
+			<column name="STORECODE" type="VARCHAR(64)">
+				<constraints nullable="false"/>
+			</column>
+			<column name="ATTRIBUTE_KEY" type="VARCHAR(255)">
+				<constraints nullable="false"/>
+			</column>
+			<column name="POLICY_KEY" type="VARCHAR(64)" defaultValue="DEFAULT">
+				<constraints nullable="false"/>
+			</column>
+		</createTable>
+
+		<addUniqueConstraint tableName="TSTORECUSTOMERATTRIBUTE" constraintName="I_STORE_ATTRIBUTE" columnNames="STORECODE,ATTRIBUTE_KEY"/>
+
+		<addForeignKeyConstraint constraintName="SCA_STORECODE_FK" baseTableName="TSTORECUSTOMERATTRIBUTE" baseColumnNames="STORECODE"
+								 referencedTableName="TSTORE" referencedColumnNames="STORECODE"/>
+
+		<addForeignKeyConstraint constraintName="SCA_ATTRIBUTE_KEY_FK" baseTableName="TSTORECUSTOMERATTRIBUTE" baseColumnNames="ATTRIBUTE_KEY"
+								 referencedTableName="TATTRIBUTE" referencedColumnNames="ATTRIBUTE_KEY"/>
+
+		<insert tableName="JPA_GENERATED_KEYS">
+			<column name="ID" value="TSTORECUSTOMERATTRIBUTE" />
+			<column name="LAST_VALUE" valueNumeric="200000" />
+		</insert>
+	</changeSet>
+
+	<changeSet id="7.6.0-torder-make-cart-order-guids-unique" author="elasticpath">
+		<comment>[PSS-729] Finds duplicate orders, appends the order number to CART_ORDER_GUIDS to ensure they are unique,
+			then adds a uniqueness constraint on the CART_ORDER_GUID column to prevent future duplicate orders
+		</comment>
+		<customChange class="liquibase.ext.elasticpath.UpdateDuplicateOrders"/>
+		<addUniqueConstraint tableName="TORDER" constraintName="TORDER_CART_ORDER_GUID_UNIQUE" columnNames="CART_ORDER_GUID"/>
+	</changeSet>
+</databaseChangeLog>

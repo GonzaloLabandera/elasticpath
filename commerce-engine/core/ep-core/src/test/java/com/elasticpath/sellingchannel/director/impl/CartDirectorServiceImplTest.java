@@ -21,9 +21,10 @@ import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
-import org.assertj.core.util.Lists;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
+import org.assertj.core.util.Lists;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
@@ -42,6 +43,7 @@ import com.elasticpath.sellingchannel.director.CartDirector;
 import com.elasticpath.service.shoppingcart.CantDeleteAutoselectableBundleItemsException;
 import com.elasticpath.service.shoppingcart.PricingSnapshotService;
 import com.elasticpath.service.shoppingcart.ShoppingCartService;
+import com.elasticpath.service.shoppingcart.ShoppingItemService;
 import com.elasticpath.service.shoppingcart.WishListService;
 import com.elasticpath.service.shoppingcart.impl.AddToWishlistResult;
 import com.elasticpath.service.shoppingcart.validation.RemoveShoppingItemFromCartValidationService;
@@ -58,6 +60,7 @@ public class CartDirectorServiceImplTest {
 	@Mock private CartDirector cartDirector;
 	@Mock private ShoppingCartService shoppingCartService;
 	@Mock private WishListService wishListService;
+	@Mock private ShoppingItemService shoppingItemService;
 	@Mock private ShoppingCart shoppingCart;
 	@Mock private Shopper shopper;
 	@Mock private Store store;
@@ -213,12 +216,10 @@ public class CartDirectorServiceImplTest {
 		// When
 		service.removeItemsFromCart(shoppingCart, itemId1, itemId2);
 
-		verify(shoppingCart).removeCartItem(itemId1);
-		verify(shoppingCart).removeCartItem(itemId2);
+		verify(shoppingItemService).deleteItemsByGuids(itemId1, itemId2);
 		verify(removeShoppingItemFromCartValidationService, times(2)).buildContext(eq(shoppingCart), any());
 		verify(removeShoppingItemFromCartValidationService, times(2)).validate(isA(ShoppingItemValidationContext.class));
 
-		expectThatShoppingCartWillBePersisted();
 	}
 
 	@Test
@@ -335,8 +336,7 @@ public class CartDirectorServiceImplTest {
 		service.moveItemFromCartToWishList(shoppingCart, CART_LINE_ITEM_GUID);
 
 		expectThatWishListWillBePersisted();
-		expectThatShoppingCartWillBePersisted();
-		verify(shoppingCart).removeCartItem(any());
+		verify(shoppingItemService).deleteItemsByGuids(any());
 	}
 
 	/**

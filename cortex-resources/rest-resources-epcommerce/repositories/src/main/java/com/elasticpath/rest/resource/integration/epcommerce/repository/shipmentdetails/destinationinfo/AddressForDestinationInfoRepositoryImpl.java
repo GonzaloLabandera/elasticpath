@@ -8,6 +8,8 @@ import java.util.Map;
 import io.reactivex.Observable;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.elasticpath.repository.LinksRepository;
 import com.elasticpath.rest.definition.addresses.AddressIdentifier;
@@ -27,6 +29,7 @@ import com.elasticpath.rest.resource.integration.epcommerce.repository.shipmentd
 public class AddressForDestinationInfoRepositoryImpl<I extends DestinationInfoIdentifier, LI extends AddressIdentifier>
 		implements LinksRepository<DestinationInfoIdentifier, AddressIdentifier> {
 
+	private static final Logger LOG = LoggerFactory.getLogger(AddressForDestinationInfoRepositoryImpl.class);
 	private DestinationInfoService destinationInfoService;
 
 	@Override
@@ -35,6 +38,7 @@ public class AddressForDestinationInfoRepositoryImpl<I extends DestinationInfoId
 		Map<String, String> shipmentDetailsId = identifier.getShipmentDetailsId().getValue();
 		String orderId = shipmentDetailsId.get(ShipmentDetailsConstants.ORDER_ID);
 		return destinationInfoService.getSelectedAddressGuidIfShippable(scopeId.getValue(), orderId)
+				.doOnError(throwable -> LOG.info("Could not find shipment for sope `{}` and order id `{}`.", scopeId.getValue(), orderId))
 				.flatMapObservable(addressId -> Observable.just(buildAddressIdentifier(scopeId, addressId)))
 				.onErrorResumeNext(Observable.empty());
 	}

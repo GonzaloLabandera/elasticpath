@@ -391,10 +391,10 @@ public interface ProductSku extends Entity {
 	Date getEffectiveEndDate();
 
 	/**
-	 * Returns true if the given date is within the start and end dates for this product SKU.
+	 * Returns true if not a multisku product or the given date is within the start and end dates for this product SKU.
 	 *
 	 * @param currentDate the date to compare with
-	 * @return true if the given date is within the start and end dates for this product SKU.
+	 * @return true if not a multisku product or if the given date is within the start and end dates for this product SKU.
 	 * @since 6.2.2
 	 */
 	boolean isWithinDateRange(Date currentDate);

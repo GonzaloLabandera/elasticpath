@@ -15,6 +15,7 @@ import com.elasticpath.selenium.wizards.AddSkuWizard;
 /**
  * Product Editor.
  */
+@SuppressWarnings({"PMD.TooManyMethods"})
 public class ProductEditor extends AbstractPageObject {
 
 	/**
@@ -47,8 +48,21 @@ public class ProductEditor extends AbstractPageObject {
 			+ "div[automation-id='com.elasticpath.cmclient.catalog.CatalogMessages.MultipleSku_OpenParentProduct'][seeable='true']";
 	private static final String ENABLE_DATE_FIELD_CSS = PRODUCT_EDITOR_PARENT_CSS
 			+ "div[widget-id='Enable Date/Time']>div[widget-type='Text']>input";
+	private static final String DISABLE_DATE_FIELD_CSS = PRODUCT_EDITOR_PARENT_CSS
+			+ "div[widget-id='Disable Date/Time']>div[widget-type='Text']>input";
 	public static final String SKU_DETAILS_TAB_ID = "SKU Details";
 	public static final String SKU_CODE_FIELD_ID = "SKU Code";
+	private static final String PRODUCT_LANGUAGE_CSS = PRODUCT_EDITOR_PARENT_CSS
+			+ "div[automation-id='com.elasticpath.cmclient.core.CoreMessages.LanguagePulldownLabelText'][widget-type='CCombo']";
+	private static final String TAX_CODE_COMBO_PARENT_CSS = PRODUCT_EDITOR_PARENT_CSS + "div[widget-id='Tax Code'][widget-type='CCombo']";
+	private static final String PRODUCT_MINIMUM_ORDER_QUANTITY_CSS = PRODUCT_EDITOR_PARENT_CSS
+			+ "div[automation-id='com.elasticpath.cmclient.catalog.CatalogMessages.ProductEditorStoreRuleSection_MinOrderQty'] input";
+	private static final String SHIPPABLE_TYPE_SHIPPABLE_BUTTON_CSS = PRODUCT_EDITOR_PARENT_CSS
+			+ "div[automation-id='com.elasticpath.cmclient.catalog.CatalogMessages.ProductEditorSingleSkuOverview_Shippable'][seeable='true']";
+	private static final String SHIPPABLE_TYPE_DIGITAL_ASSET_BUTTON_CSS = PRODUCT_EDITOR_PARENT_CSS
+			+ "div[automation-id='com.elasticpath.cmclient.catalog.CatalogMessages.ProductEditorSingleSkuOverview_DigitalAsset'][seeable='true']";
+	private static final String PRIMARY_CATEGORY_TAX_CODE = PRODUCT_EDITOR_PARENT_CSS + "div[widget-id='Primary Category'][widget-type='CCombo']";
+	private static final String VALUE = "value";
 
 	/**
 	 * Constructor.
@@ -65,7 +79,7 @@ public class ProductEditor extends AbstractPageObject {
 	 * @param productName the product name.
 	 */
 	public void verifyProductName(final String productName) {
-		assertThat(getWaitDriver().waitForElementToBeVisible(By.cssSelector(PRODUCT_NAME_INPUT_CSS)).getAttribute("value"))
+		assertThat(getWaitDriver().waitForElementToBeVisible(By.cssSelector(PRODUCT_NAME_INPUT_CSS)).getAttribute(VALUE))
 				.as("Product name validation failed")
 				.isEqualTo(productName);
 	}
@@ -80,6 +94,27 @@ public class ProductEditor extends AbstractPageObject {
 		resizeWindow(cssSelector);
 		getWaitDriver().waitForElementToBeInteractable(cssSelector);
 		click(getWaitDriver().waitForElementToBeClickable(By.cssSelector(cssSelector)));
+		setWebDriverImplicitWait(1);
+		if (!isElementPresent(By.cssSelector(cssSelector + "[active-tab='true']"))) {
+			click(getWaitDriver().waitForElementToBeClickable(By.cssSelector(cssSelector)));
+		}
+		setWebDriverImplicitWaitToDefault();
+	}
+
+	/**
+	 * Clicks on tab to select it.
+	 *
+	 * @param tabName the tab name.
+	 */
+	public void selectTabInOpenedEditor(final String tabName) {
+		String cssSelector = String.format(TAB_CSS, tabName);
+		String selectedTabCss = cssSelector + "[active-tab='true']";
+		resizeWindow(cssSelector);
+		getWaitDriver().waitForElementToBeInteractable(cssSelector);
+		clickWithoutScrollWidgetIntoViewByCss(cssSelector, selectedTabCss);
+		assertThat(isElementPresent(By.cssSelector(selectedTabCss)))
+				.as("Tab " + tabName + " was not clicked!")
+				.isTrue();
 	}
 
 	public void selectVirtualCatalogAssignment(final String catalogName) {
@@ -120,6 +155,65 @@ public class ProductEditor extends AbstractPageObject {
 	 */
 	public void enterProductName(final String productName) {
 		clearAndType(PRODUCT_NAME_INPUT_CSS, productName);
+	}
+
+	/**
+	 * Inputs product name.
+	 *
+	 * @param productName the product name.
+	 */
+	public void enterProductNameWithoutLoadedCheck(final String productName) {
+		clearAndTypeTextWithoutLoadedCheck(PRODUCT_NAME_INPUT_CSS, productName);
+	}
+
+	/**
+	 * Selects a product type in combo box.
+	 *
+	 * @param language the product type.
+	 */
+	public void selectLanguage(final String language) {
+		assertThat(selectComboBoxItem(PRODUCT_LANGUAGE_CSS, language))
+				.as("Unable to find product type - " + language)
+				.isTrue();
+	}
+
+	/**
+	 * Selects a tax code in combo box.
+	 *
+	 * @param taxCode the tax code.
+	 */
+	public void selectTaxCode(final String taxCode) {
+		assertThat(selectComboBoxItem(TAX_CODE_COMBO_PARENT_CSS, taxCode))
+				.as("Unable to find tax code - " + taxCode)
+				.isTrue();
+	}
+
+	/**
+	 * Inputs minimum order quantity.
+	 *
+	 * @param minimumOrderQuantity the minimum order quantity.
+	 */
+	public void enterMinimumOrderQuantity(final String minimumOrderQuantity) {
+		clearAndType(getWaitDriver().waitForElementToBeVisible(By.cssSelector(PRODUCT_MINIMUM_ORDER_QUANTITY_CSS)), minimumOrderQuantity);
+	}
+
+	/**
+	 * Check not sold separately box.
+	 */
+	public void checkNotSoldSeparatelyBox() {
+		click(getWaitDriver().waitForElementToBeClickable(By.xpath("//div[contains(text(), "
+				+ "'Not Sold Separately')]/../following-sibling::div[1]/div")));
+	}
+
+	/**
+	 * Select primary category in ComboBox.
+	 *
+	 * @param categoryCode code of category.
+	 */
+	public void selectPrimaryCategory(final String categoryCode) {
+		assertThat(selectComboBoxItem(PRIMARY_CATEGORY_TAX_CODE, categoryCode))
+				.as("Unable to find category code - " + categoryCode)
+				.isTrue();
 	}
 
 	/**
@@ -279,7 +373,7 @@ public class ProductEditor extends AbstractPageObject {
 	 */
 	public String getSkuCode() {
 		getWaitDriver().waitForElementToBeInteractable(String.format(SKU_CODE_FIELD_CSS, SKU_CODE_FIELD_ID));
-		return getDriver().findElement(By.cssSelector(String.format(SKU_CODE_FIELD_CSS, SKU_CODE_FIELD_ID))).getAttribute("value");
+		return getDriver().findElement(By.cssSelector(String.format(SKU_CODE_FIELD_CSS, SKU_CODE_FIELD_ID))).getAttribute(VALUE);
 	}
 
 	/**
@@ -290,7 +384,18 @@ public class ProductEditor extends AbstractPageObject {
 	public String getEnableDate() {
 		scrollWidgetIntoView(By.cssSelector(ENABLE_DATE_FIELD_CSS), 5);
 		getWaitDriver().waitForElementToBeInteractable(ENABLE_DATE_FIELD_CSS);
-		return getDriver().findElement(By.cssSelector(ENABLE_DATE_FIELD_CSS)).getAttribute("value");
+		return getDriver().findElement(By.cssSelector(ENABLE_DATE_FIELD_CSS)).getAttribute(VALUE);
+	}
+
+	/**
+	 * Returns text from Disable Date/Time field of Summary tab
+	 *
+	 * @return text from Disable Date/Time field of Summary tab
+	 */
+	public String getDisableDate() {
+		scrollWidgetIntoView(By.cssSelector(DISABLE_DATE_FIELD_CSS), 5);
+		getWaitDriver().waitForElementToBeInteractable(DISABLE_DATE_FIELD_CSS);
+		return getDriver().findElement(By.cssSelector(DISABLE_DATE_FIELD_CSS)).getAttribute(VALUE);
 	}
 
 	/**
@@ -302,6 +407,24 @@ public class ProductEditor extends AbstractPageObject {
 		scrollWidgetIntoView(By.cssSelector(ENABLE_DATE_FIELD_CSS), 5);
 		getWaitDriver().waitForElementToBeInteractable(ENABLE_DATE_FIELD_CSS);
 		clearAndType(ENABLE_DATE_FIELD_CSS, formattedDateTime);
+	}
+
+	/**
+	 * Types new value in disable Date/Time field of Summary tab
+	 *
+	 * @param formattedDateTime formatted value for disable Date/Time field of Summary tab
+	 */
+	public void setDisableDate(final String formattedDateTime) {
+		scrollWidgetIntoView(By.cssSelector(DISABLE_DATE_FIELD_CSS), 5);
+		getWaitDriver().waitForElementToBeInteractable(DISABLE_DATE_FIELD_CSS);
+		clearAndType(DISABLE_DATE_FIELD_CSS, formattedDateTime);
+	}
+
+	/**
+	 * Clicks Store Visible checkbox of Summary tab.
+	 */
+	public void clickStoreVisible() {
+		click(getWaitDriver().waitForElementToBeClickable(By.xpath("//div[contains(text(), 'Store Visible')]/../following-sibling::div[1]/div")));
 	}
 
 	/**
@@ -328,7 +451,7 @@ public class ProductEditor extends AbstractPageObject {
 	 * Returns true if element is present on a page, else returns false
 	 *
 	 * @param isPresentElement css selector of an element which should be rendered before check
-	 * @param waitForElement css selector of an element for which a check is performed
+	 * @param waitForElement   css selector of an element for which a check is performed
 	 * @return true if element is present on a page, else returns false
 	 */
 	private boolean isElementPresentInCurrentEditor(final String waitForElement, final String isPresentElement) {
@@ -337,5 +460,24 @@ public class ProductEditor extends AbstractPageObject {
 		boolean isPresent = isElementPresent(By.cssSelector(isPresentElement));
 		setWebDriverImplicitWaitToDefault();
 		return isPresent;
+	}
+
+
+	/**
+	 * Selects shippable type.
+	 *
+	 * @param shippableType the shippabe type.
+	 */
+	public void selectShippableType(final String shippableType) {
+		if ("Shippable".equalsIgnoreCase(shippableType)) {
+			click(getDriver().findElement(By.cssSelector(SHIPPABLE_TYPE_SHIPPABLE_BUTTON_CSS)));
+		} else if ("Digital Asset".equalsIgnoreCase(shippableType)) {
+			click(getDriver().findElement(By.cssSelector(SHIPPABLE_TYPE_DIGITAL_ASSET_BUTTON_CSS)));
+			click(getDriver().findElement(By.cssSelector(SHIPPABLE_TYPE_DIGITAL_ASSET_BUTTON_CSS)));
+		} else {
+			assertThat("Shippable".equalsIgnoreCase(shippableType) || "Digital Asset".equalsIgnoreCase(shippableType))
+					.as("Invalid shippable type entered - " + shippableType)
+					.isTrue();
+		}
 	}
 }

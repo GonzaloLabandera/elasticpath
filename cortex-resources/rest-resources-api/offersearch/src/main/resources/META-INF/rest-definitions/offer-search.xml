@@ -3,11 +3,22 @@
 
 	<family>
 		<name>offersearches</name>
+		<description>
+			<![CDATA[
+The offersearches resource family provides access to search for offers as well as facets and sort attributes resources.
+			]]>
+		</description>
 
 		<uri-part>
 			<name>search-id</name>
 			<description><![CDATA[The search object's identifier]]></description>
 			<composite/>
+		</uri-part>
+
+		<uri-part>
+			<name>sort-attribute-id</name>
+			<description><![CDATA[The sort attribute identifier]]></description>
+			<string/>
 		</uri-part>
 
 		<uri-part>
@@ -59,6 +70,52 @@ Offer keywords can be up to 500 characters long. Any longer and Cortex API retur
 			<uri>{base.family}/{base.scope}/offers/{search-id}/filters/{applied-facets}/{page-id}</uri>
 			<paginates>offers.offer</paginates>
 		</resource>
+		
+		<relationship>
+			<name>offer-search-result-to-sort-attribute-selector</name>
+			<description><![CDATA[Link from offer search result to sort attribute selector.]]></description>
+			<rel>sortattributes</rel>
+			<rev>offersearchresult</rev>
+			<from>offer-search-result</from>
+			<to>sort-attribute-selector</to>
+		</relationship>
+
+		<resource>
+			<name>sort-attribute-selector</name>
+			<description><![CDATA[List of sort attributes.]]></description>
+			<uri>{offer-search-result}/sort-attribute-selector/</uri>
+			<selector-for>sort-attribute</selector-for>
+		</resource>
+
+		<resource>
+			<name>sort-attribute-selector-choice</name>
+			<description><![CDATA[Selection choice for sorting attributes.]]></description>
+			<uri>{sort-attribute-selector}/choice/{sort-attribute-id}</uri>
+			<choices-for>sort-attribute-selector</choices-for>
+		</resource>
+
+		<resource>
+			<name>sort-attribute</name>
+			<description><![CDATA[The sort attribute to sort the search result.]]></description>
+			<uri>{sort-attribute-selector-choice}/sortattribute</uri>
+			<entity>sort-attribute</entity>
+		</resource>
+		
+		<relationship>
+			<name>sort-attribute-to-selector-choice</name>
+			<description><![CDATA[Link from sort attribute to selector choice.]]></description>
+			<rel>sortattributeselectorchoice</rel>
+			<from>sort-attribute</from>
+			<to>sort-attribute-selector-choice</to>
+		</relationship>
+
+		<relationship>
+			<name>sort-attribute-selector-to-offer-search-result</name>
+			<description><![CDATA[Link to go to the sorted search result.]]></description>
+			<rel>sortedsearchresult</rel>
+			<from>sort-attribute-selector</from>
+			<to>offer-search-result</to>
+		</relationship>
 
 		<resource>
 			<name>facets</name>
@@ -127,6 +184,17 @@ Offer keywords can be up to 500 characters long. Any longer and Cortex API retur
 				<string/>
 			</property>
 			<entity-type>offersearch.facet</entity-type>
+		</entity>
+
+		<entity>
+			<name>sort-attribute</name>
+			<description><![CDATA[Sort attribute.]]></description>
+			<property>
+				<name>display-name</name>
+				<description><![CDATA[The display name of the attribute in the given locale.]]></description>
+				<string/>
+			</property>
+			<entity-type>offersearch.sort-attribute</entity-type>
 		</entity>
 
 		<relationship>

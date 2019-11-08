@@ -9,6 +9,7 @@ import com.elasticpath.cortex.dce.CommonMethods
  * Item.
  */
 class Item extends CommonMethods {
+	public static addToSpecificCartFormResponse
 
 	static void getItem() {
 		client.resume(CortexResponse.elementResponse)
@@ -63,6 +64,11 @@ class Item extends CommonMethods {
 
 	static void addtocartform() {
 		client.addtocartform()
+				.stopIfFailure()
+	}
+
+	static void addtocartforms() {
+		client.addtocartforms()
 				.stopIfFailure()
 	}
 
@@ -169,6 +175,43 @@ class Item extends CommonMethods {
 				 configuration: configurationFields
 				])
 				.stopIfFailure()
+	}
+
+	static void selectAddToCartFormByName(String cartName) {
+		addtocartforms()
+		def cartExist = false
+		client.body.links.find {
+			if (it.rel == "element") {
+				client.GET(it.href)
+				addToSpecificCartFormResponse = client.save()
+				client.target()
+						.descriptor()
+				if (client["name"] == cartName ) {
+					return cartExist = true
+				}
+			}
+		}
+		assertThat(cartExist)
+				.as("Unable to find the cart with name - $cartName")
+				.isTrue()
+	}
+
+	static void getAddToSpecificCartForm(def cartName) {
+		getItem()
+		selectAddToCartFormByName(cartName)
+	}
+
+	static void addItemToSpecificCartWithoutFollow(def cart, def quantity, def configurationFields = null) {
+		getAddToSpecificCartForm(cart)
+		client.resume(addToSpecificCartFormResponse)
+				.addtocartaction(["quantity"   : quantity,
+								  configuration: configurationFields
+				])
+				.stopIfFailure()
+	}
+
+	static void addItemToSpecificCart(def cart, def quantity, def configurationFields = null) {
+		addItemToSpecificCartWithoutFollow(cart, quantity, configurationFields)
 	}
 
 	static void addtowishlistform() {

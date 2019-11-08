@@ -62,14 +62,14 @@ Feature: Retrieve offer node of navigation node
     And I follow links facets
     And I open the element with field display-name and value Price
     And I follow links facetselector
-    When I select the choice $200 and Above
+    When I select the choice with field value and value $200 and Above
     When I follow links offersearchresult
     Then the offer search results list contains items with display-names
       | RentMovieLowTVCombo |
     And I follow links facets
     And I open the element with field display-name and value Price
     And I follow links facetselector
-    When I select the choice $50 to $200
+    When I select the choice with field value and value $50 to $200
     And  I zoom the offersearchresult with zoom next
     Then the offer search results list contains items with display-names
       | Empty Bundle         |
@@ -84,7 +84,7 @@ Feature: Retrieve offer node of navigation node
     And I follow links facets
     And I open the element with field display-name and value Price
     And I follow links facetselector
-    When I unselect the choice $200 and Above
+    When I unselect the choice with field value and value $200 and Above
     And  I zoom the offersearchresult with zoom next
     Then the offer search results list contains items with display-names
       | Empty Bundle         |
@@ -102,7 +102,7 @@ Feature: Retrieve offer node of navigation node
     And I follow links facets
     And I open the element with field display-name and value Price
     And I follow links facetselector
-    When I select the choice $50 to $200
+    When I select the choice with field value and value $50 to $200
     When I follow links offersearchresult
     And I zoom the current url next
     Then the offer search results list contains items with display-names
@@ -117,7 +117,7 @@ Feature: Retrieve offer node of navigation node
     And I follow links facets
     And I open the element with field display-name and value Languages
     And I follow links facetselector
-    When I select the choice Italien
+    When I select the choice with field value and value Italien
     And I follow links offersearchresult
     Then the offer search results list contains items with display-names
       | Super Bundle         |
@@ -126,7 +126,7 @@ Feature: Retrieve offer node of navigation node
     And I follow links facets
     And I open the element with field display-name and value Languages
     And I follow links facetselector
-    When I unselect the choice Italien
+    When I unselect the choice with field value and value Italien
     And  I zoom the offersearchresult with zoom next
     Then the offer search results list contains items with display-names
       | Empty Bundle         |

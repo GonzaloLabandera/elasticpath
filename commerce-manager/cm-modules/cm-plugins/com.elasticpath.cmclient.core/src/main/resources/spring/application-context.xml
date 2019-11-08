@@ -45,6 +45,7 @@
 			file:${user.home}/ep/conf/ep.override.properties,
 			file:${user.home}/ep/conf/ep.cm.override.properties" />
 
+
 	<import resource="classpath*:META-INF/elasticpath/conf/spring/plugin.xml" />
 	<import resource="classpath*:META-INF/conf/ep-core-plugin.xml" />
 
@@ -53,4 +54,5 @@
 	<!-- Overrides for the healthcheck monitor -->
 	<import resource="classpath*:META-INF/elasticpath/conf/spring/ext-monitoring.xml" />
 
+	<import resource="classpath*:META-INF/elasticpath/conf/spring/jta-plugin.xml"/>
 </beans>

@@ -10,19 +10,19 @@ public enum FacetGroup {
 	/**
 	 * Product attribute.
 	 */
-	PRODUCT_ATTRIBUTE("Product Attributes", 0),
+	PRODUCT_ATTRIBUTE("Product Attribute", 0),
 	/**
 	 * Sku attribute.
 	 */
-	SKU_ATTRIBUTE("SKU Attributes", 1),
+	SKU_ATTRIBUTE("SKU Attribute", 1),
 	/**
 	 * Sku option.
 	 */
-	SKU_OPTION("SKU Options", 2),
+	SKU_OPTION("SKU Option", 2),
 	/**
-	 * Others.
+	 * Product field.
 	 */
-	OTHERS("Others", 3);
+	FIELD("Field", 3);
 
 	private final String name;
 	private final int ordinal;

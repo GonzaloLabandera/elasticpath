@@ -9,6 +9,7 @@ import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import io.reactivex.Single;
@@ -177,17 +178,17 @@ public class StoreProductRepositoryImplTest {
 	}
 
 	@Test
-	public void testFindByUidsWhereAllCacheMiss() {
+	public void testFindByUids() {
 		List<Long> uids = new ArrayList<>();
 		uids.add(PRODUCT_UID_1);
 
-		when(mockProductLookup.findByUid(PRODUCT_UID_1)).thenReturn(product1);
+		when(mockProductLookup.findByUids(uids)).thenReturn(Collections.singletonList(product1));
 
 		List<Product> products = storeProductRepository.findByUids(uids);
 
 		assertEquals(product1, products.get(0));
 		assertEquals(1, products.size());
-		verify(mockProductLookup).findByUid(PRODUCT_UID_1);
+		verify(mockProductLookup).findByUids(uids);
 	}
 
 	@Test

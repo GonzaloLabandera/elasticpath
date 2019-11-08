@@ -3,6 +3,7 @@
  */
 package com.elasticpath.service.search.solr;
 
+import static com.elasticpath.commons.constants.ContextIdNames.PRICE_LIST_STACK;
 import static com.elasticpath.service.search.solr.FacetConstants.BRAND;
 import static com.elasticpath.service.search.solr.FacetConstants.CATEGORY;
 import static com.elasticpath.service.search.solr.FacetConstants.PRICE;
@@ -137,7 +138,8 @@ public class SolrFacetAdapter {
 
 			addFacetValues(query, locale, queryLookup, filterLookup);
 
-			addPriceFacets(query, catalogCode, searchCriteria.getCurrency(), queryLookup, filterLookup);
+			addPriceFacets(query, catalogCode, searchCriteria.getCurrency(), queryLookup, filterLookup,
+					searchCriteria.getSearchHint(PRICE_LIST_STACK));
 
 			addRangeFacets(query, locale, queryLookup, filterLookup);
 
@@ -283,18 +285,22 @@ public class SolrFacetAdapter {
 				});
 	}
 
-	private void addPriceFacets(final SolrQuery query, final String catalogCode,
-								final Currency currency, final Map<String, String> queryLookup, final Map<String, Filter<?>> filterLookup) {
+	private void addPriceFacets(final SolrQuery query, final String catalogCode, final Currency currency, final Map<String, String> queryLookup,
+								final Map<String, Filter<?>> filterLookup, final SearchHint<PriceListStack> priceListStackHint) {
 		if (catalogCode == null || currency == null) {
 			return;
 		}
 
-		PriceListAssignmentService priceListAssignmentService = beanFactory.getBean(ContextIdNames.PRICE_LIST_ASSIGNMENT_SERVICE);
+		List<String> priceListGuids;
 
-
-		List<String> priceListGuids = priceListAssignmentService.listByCatalogAndCurrencyCode(catalogCode, currency.getCurrencyCode())
-				.stream().map(priceListAssignment -> priceListAssignment.getPriceListDescriptor().getGuid())
-				.collect(Collectors.toList());
+		if (priceListStackHint == null) {
+			PriceListAssignmentService priceListAssignmentService = beanFactory.getBean(ContextIdNames.PRICE_LIST_ASSIGNMENT_SERVICE);
+			priceListGuids = priceListAssignmentService.listByCatalogAndCurrencyCode(catalogCode, currency.getCurrencyCode())
+					.stream().map(priceListAssignment -> priceListAssignment.getPriceListDescriptor().getGuid())
+					.collect(Collectors.toList());
+		} else {
+			priceListGuids = priceListStackHint.getValue().getPriceListStack();
+		}
 
 		Collection<PriceFilter> priceFilters = config.getAllPriceRanges().values();
 		// don't want filters for currencies we aren't searching for

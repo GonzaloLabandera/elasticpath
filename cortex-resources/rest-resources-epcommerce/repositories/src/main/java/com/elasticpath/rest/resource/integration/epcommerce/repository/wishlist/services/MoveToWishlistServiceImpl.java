@@ -36,23 +36,25 @@ public class MoveToWishlistServiceImpl implements MoveToWishlistService {
 
 		CartIdentifier cartIdentifier = lineItemIdentifier.getLineItems().getCart();
 		String cartId = cartIdentifier.getCartId().getValue();
-		String scope = cartIdentifier.getScope().getValue();
+		String scope = cartIdentifier.getCarts().getScope().getValue();
 
 		LOG.trace("Moving line id {} from cart {} to wishlist", cartLineItemId, cartId);
 
 		return wishlistRepository.getDefaultWishlistId(scope)
-				.flatMap(toSubmitResult(cartLineItemId, scope));
+				.flatMap(toSubmitResult(lineItemIdentifier.getLineItems().getCart().getCartId().getValue(), cartLineItemId, scope));
 	}
 
 	/**
 	 * Move item to wishlist.
 	 *
+	 * @param cartId the Id of the cart.
 	 * @param cartLineItemId line item id
 	 * @param scope          scope
 	 * @return the function
 	 */
-	protected Function<String, Single<SubmitResult<WishlistLineItemIdentifier>>> toSubmitResult(final String cartLineItemId, final String scope) {
-		return wishlistId -> shoppingCartRepository.getDefaultShoppingCart()
+	protected Function<String, Single<SubmitResult<WishlistLineItemIdentifier>>> toSubmitResult(final String cartId,
+																								final String cartLineItemId, final String scope) {
+		return wishlistId -> shoppingCartRepository.getShoppingCart(cartId)
 				.flatMap(cart -> shoppingCartRepository.moveItemToWishlist(cart, cartLineItemId))
 				.flatMap(addToWishlistResult -> wishlistRepository.buildSubmitResult(scope, wishlistId, addToWishlistResult));
 	}

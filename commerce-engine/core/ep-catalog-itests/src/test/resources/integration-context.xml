@@ -1,0 +1,155 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<beans
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xmlns:context="http://www.springframework.org/schema/context"
+		xmlns:batch="http://www.springframework.org/schema/batch"
+		xmlns="http://www.springframework.org/schema/beans"
+		xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+			http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.0.xsd
+			http://www.springframework.org/schema/batch http://www.springframework.org/schema/batch/spring-batch.xsd">
+
+	<context:annotation-config/>
+
+	<import resource="classpath:integration-core-context.xml"/>
+	<import resource="classpath:ep-test-application.xml"/>
+	<import resource="classpath:integration-checkout-context.xml"/>
+	<import resource="classpath:META-INF/elasticpath/conf/spring/catalog-batch.xml"/>
+	<import resource="classpath*:META-INF/elasticpath/conf/spring/jta-plugin.xml"/>
+
+	<bean id="entityManagerFactory" parent="abstractEntityManagerFactory" depends-on="preEntityManagerInitializationList">
+		<property name="jpaProperties">
+			<map>
+				<entry key="javax.persistence.transactionType" value="JTA"/>
+				<entry key="openjpa.TransactionMode" value="managed"/>
+				<entry key="openjpa.ConnectionFactoryMode" value="managed"/>
+				<entry key="openjpa.ConnectionFactory" value-ref="atomikosJdbcDataSource"/>
+				<entry key="openjpa.ConnectionFactory2" value-ref="dataSource"/>
+				<entry key="openjpa.ManagedRuntime"
+					   value="invocation(TransactionManagerMethod=com.atomikos.icatch.jta.TransactionManagerImp.getTransactionManager)"/>
+				<entry key="openjpa.MetaDataRepository" value="Preload=true"/>
+				<entry key="openjpa.Optimistic" value="false"/>
+				<entry key="openjpa.Compatibility"
+					   value="QuotedNumbersInQueries=true,convertPositionalParametersToNamed=true,ignoreDetachedStateFieldForProxySerialization=true"/>
+				<entry key="openjpa.ConnectionFactoryProperties" value="PrettyPrint=true, PrettyPrintLineLength=80, PrintParameters=true"/>
+			</map>
+		</property>
+	</bean>
+
+	<bean id="jmsBrokerService" class="org.springframework.jndi.JndiObjectFactoryBean">
+		<property name="jndiName" value="java:comp/env/jms/test-broker"/>
+		<property name="resourceRef" value="true"/>
+	</bean>
+
+	<bean id="simpleStoreScenario" class="com.elasticpath.commons.beanframework.NoOpProxyFactoryBean"/>
+
+	<bean id="spyTransactionManager" class="com.elasticpath.catalog.catalog.batch.SpyTransactionManager">
+		<constructor-arg ref="transactionManager"/>
+	</bean>
+
+
+	<batch:job id="RETRY_SUCCEEDING_JOB" job-repository="catalogJobRepository">
+		<batch:step id="succeed" parent="baseStep">
+			<batch:tasklet transaction-manager="spyTransactionManager">
+				<batch:chunk commit-interval="10">
+					<batch:reader>
+						<bean class="com.elasticpath.catalog.catalog.batch.MockSuccessfulReader">
+							<constructor-arg name="itemsToReadBeforeStopping" value="10"/>
+						</bean>
+					</batch:reader>
+					<batch:processor>
+						<bean class="com.elasticpath.catalog.catalog.batch.FailingProcessor">
+							<constructor-arg name="exception">
+								<bean class="org.springframework.dao.DataAccessResourceFailureException">
+									<constructor-arg value="My DataAccessResourceFailureException"/>
+								</bean>
+							</constructor-arg>
+							<constructor-arg name="timesToFail" value="2"/>
+						</bean>
+					</batch:processor>
+					<batch:writer>
+						<bean class="com.elasticpath.catalog.catalog.batch.FileWriter">
+							<constructor-arg value="RETRY_SUCCEEDING_JOB_FILE_WRITER"/>
+						</bean>
+					</batch:writer>
+				</batch:chunk>
+			</batch:tasklet>
+		</batch:step>
+	</batch:job>
+
+	<batch:job id="RETRY_FAILING_JOB" job-repository="catalogJobRepository">
+		<batch:step id="fail" parent="baseStep">
+			<batch:tasklet transaction-manager="spyTransactionManager">
+				<batch:chunk commit-interval="10">
+					<batch:reader>
+						<bean class="com.elasticpath.catalog.catalog.batch.MockSuccessfulReader">
+							<constructor-arg name="itemsToReadBeforeStopping" value="10"/>
+						</bean>
+					</batch:reader>
+					<batch:processor>
+						<bean class="com.elasticpath.catalog.catalog.batch.FailingProcessor">
+							<constructor-arg name="timesToFail" value="100"/>
+							<constructor-arg name="exception">
+								<bean class="org.springframework.dao.DataAccessResourceFailureException">
+									<constructor-arg value="My DataAccessResourceFailureException"/>
+								</bean>
+							</constructor-arg>
+						</bean>
+					</batch:processor>
+					<batch:writer>
+						<bean class="com.elasticpath.catalog.catalog.batch.FileWriter">
+							<constructor-arg value="RETRY_FAILING_JOB_FILE_WRITER"/>
+						</bean>
+					</batch:writer>
+				</batch:chunk>
+			</batch:tasklet>
+		</batch:step>
+	</batch:job>
+
+	<batch:job id="FAILING_JOB_RUNTIME_EXCEPTION" job-repository="catalogJobRepository">
+		<batch:step id="fail_runtime_exception" parent="baseStep">
+			<batch:tasklet transaction-manager="spyTransactionManager">
+				<batch:chunk commit-interval="10">
+					<batch:reader>
+						<bean class="com.elasticpath.catalog.catalog.batch.MockSuccessfulReader">
+							<constructor-arg name="itemsToReadBeforeStopping" value="10"/>
+						</bean>
+					</batch:reader>
+					<batch:processor>
+						<bean class="com.elasticpath.catalog.catalog.batch.SucceedingProcessor">
+							<constructor-arg name="timesToSucceedBeforeFailing" value="8"/>
+							<constructor-arg name="exception">
+								<bean class="com.elasticpath.catalog.exception.ValidationException">
+									<constructor-arg value="My ValidationException"/>
+								</bean>
+							</constructor-arg>
+						</bean>
+					</batch:processor>
+					<batch:writer>
+						<bean class="com.elasticpath.catalog.catalog.batch.FileWriter">
+							<constructor-arg value="FAILING_JOB_RUNTIME_EXCEPTION_FILE_WRITER"/>
+						</bean>
+					</batch:writer>
+				</batch:chunk>
+			</batch:tasklet>
+		</batch:step>
+	</batch:job>
+
+	<bean id="catalogSyndicationBatchJobs" parent="catalogSyndicationBatchJobsParent" class="org.springframework.beans.factory.config.MapFactoryBean">
+		<property name="sourceMap">
+			<map merge="true">
+				<entry key="RETRY_SUCCEEDING_JOB" value-ref="RETRY_SUCCEEDING_JOB"/>
+				<entry key="RETRY_FAILING_JOB" value-ref="RETRY_FAILING_JOB"/>
+				<entry key="FAILING_JOB_RUNTIME_EXCEPTION" value-ref="FAILING_JOB_RUNTIME_EXCEPTION"/>
+			</map>
+		</property>
+	</bean>
+
+	<bean id="expiryJobRunner" class="com.elasticpath.catalog.batch.ExpiredProjectionJobRunner">
+		<constructor-arg name="job" ref="EXPIRE_PROJECTIONS"/>
+		<constructor-arg name="jobLauncher" ref="catalogJobLauncher"/>
+		<constructor-arg name="timeService" ref="timeService"/>
+		<constructor-arg name="catalogService" ref="catalogDataService"/>
+		<constructor-arg name="maxDelay" value="2"/>
+		<constructor-arg name="minDelay" value="1"/>
+	</bean>
+</beans>

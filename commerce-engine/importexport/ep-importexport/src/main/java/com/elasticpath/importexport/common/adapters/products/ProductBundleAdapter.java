@@ -219,7 +219,7 @@ public class ProductBundleAdapter extends AbstractDomainAdapterImpl<ProductBundl
 	 * @return populated SelectionRule object from DTO
 	 */
 	SelectionRule createSelectionRule(final Integer param) {
-		final SelectionRule rule = getBeanFactory().getBean(ContextIdNames.BUNDLE_SELECTION_RULE);
+		final SelectionRule rule = getBeanFactory().getPrototypeBean(ContextIdNames.BUNDLE_SELECTION_RULE, SelectionRule.class);
 		rule.setParameter(param);
 		return rule;
 	}
@@ -431,7 +431,7 @@ public class ProductBundleAdapter extends AbstractDomainAdapterImpl<ProductBundl
 		final ArrayList<PriceAdjustment> priceAdjustments = new ArrayList<>();
 		if (constituentDTO.getAdjustments() != null) {
 			for (PriceAdjustmentDto adjustmentDto : constituentDTO.getAdjustments()) {
-				final PriceAdjustment adjustment = getBeanFactory().getBean(ContextIdNames.PRICE_ADJUSTMENT);
+				final PriceAdjustment adjustment = getBeanFactory().getPrototypeBean(ContextIdNames.PRICE_ADJUSTMENT, PriceAdjustment.class);
 				adjustment.setAdjustmentAmount(adjustmentDto.getAdjustmentAmount());
 				adjustment.setGuid(adjustmentDto.getGuid());
 				adjustment.setPriceListGuid(adjustmentDto.getPriceListGuid());

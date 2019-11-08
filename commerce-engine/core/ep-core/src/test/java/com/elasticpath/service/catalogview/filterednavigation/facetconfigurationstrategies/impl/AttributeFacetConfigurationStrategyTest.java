@@ -35,7 +35,7 @@ public class AttributeFacetConfigurationStrategyTest {
 		assertThat(strategy.shouldProcess(facet)).as(DESCRIPTION).isTrue();
 	}@Test
 	public void shouldProcessReturnsFalseForOtherAttributeTypes() {
-		when(facet.getFacetGroup()).thenReturn(FacetGroup.OTHERS.getOrdinal());
+		when(facet.getFacetGroup()).thenReturn(FacetGroup.FIELD.getOrdinal());
 		assertThat(strategy.shouldProcess(facet)).as(DESCRIPTION).isTrue();
 	}
 

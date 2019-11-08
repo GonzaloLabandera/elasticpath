@@ -63,7 +63,7 @@ public class ProductFacetConfigurationStrategy implements FacetConfigurationStra
 
 	@Override
 	public boolean shouldProcess(final Facet facet) {
-		return facet.getFacetGroup() == FacetGroup.OTHERS.getOrdinal();
+		return facet.getFacetGroup() == FacetGroup.FIELD.getOrdinal();
 	}
 
 	@Override

@@ -3,11 +3,12 @@
  */
 package com.elasticpath.plugin.tax.domain;
 
+import com.elasticpath.plugin.tax.common.TaxableCacheKeyHash;
 
 /**
  * Interface defining a container for {@link TaxableItem}s and associated context information.
  */
-public interface TaxableItemContainer extends TaxItemContainer {
+public interface TaxableItemContainer extends TaxItemContainer, TaxableCacheKeyHash {
 	
 	/**
 	 * Gets the {@link TaxOperationContext}.

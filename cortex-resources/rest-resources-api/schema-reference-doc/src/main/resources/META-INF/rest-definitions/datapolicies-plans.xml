@@ -6,9 +6,7 @@
 		<plan>
 			<name>read-data-policies-for-store-from-profile</name>
 			<description>
-				<![CDATA[
-				Retrieve the list of data policies for a store from a customer profile, based on the data policy segment header(s).
-				]]>
+				<![CDATA[Retrieve the list of data policies for a store from a customer profile, based on the data policy segment header(s).]]>
 			</description>
 			<step>
 				<description><![CDATA[Read data policies for a store.]]></description>
@@ -21,9 +19,7 @@
 		<plan>
 			<name>read-data-policies-for-store-from-root</name>
 			<description>
-				<![CDATA[
-				Retrieve the list of data policies for a store from root, based on the data policy segment header(s).
-				]]>
+				<![CDATA[Retrieve the list of data policies for a store from root, based on the data policy segment header(s).]]>
 			</description>
 			<step>
 				<description><![CDATA[Read data policies for a given store.]]></description>
@@ -34,9 +30,7 @@
 		<plan>
 			<name>read-data-policy</name>
 			<description>
-				<![CDATA[
-				Retrieves a data policy if a valid data policy segment is provided.
-				]]>
+				<![CDATA[Retrieves a data policy if a valid data policy segment is provided.]]>
 			</description>
 			<step>
 				<description><![CDATA[Read a data policy.]]></description>
@@ -49,9 +43,7 @@
 		<plan>
 			<name>read-data-policy-consent-form</name>
 			<description>
-				<![CDATA[
-				Retrieve a data policy consent form for a data policy.
-				]]>
+				<![CDATA[Retrieve a data policy consent form for a data policy.]]>
 			</description>
 			<step>
 				<description><![CDATA[Read a data policy consent form.]]></description>

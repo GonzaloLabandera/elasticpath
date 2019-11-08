@@ -5,7 +5,7 @@ package com.elasticpath.cmclient.catalog.editors.model;
 
 import com.elasticpath.cmclient.core.editors.TableItems;
 import com.elasticpath.domain.attribute.Attribute;
-import com.elasticpath.domain.cartmodifier.CartItemModifierGroup;
+import com.elasticpath.domain.modifier.ModifierGroup;
 import com.elasticpath.domain.catalog.Brand;
 import com.elasticpath.domain.catalog.Catalog;
 import com.elasticpath.domain.catalog.CategoryType;
@@ -60,7 +60,7 @@ public interface CatalogModel {
 	* Gets the Cart Item Modifiers Groups table items.
 	 * @return the attribute table items
 	 * */
-	TableItems<CartItemModifierGroup> getCartItemModifierGroupTableItems();
+	TableItems<ModifierGroup> getCartItemModifierGroupTableItems();
 
 	/**
 	 * Gets the product type table items.

@@ -7,6 +7,7 @@ import static com.elasticpath.cortex.dce.SharedConstants.GIVEN_NAME
 import static com.elasticpath.cortex.dce.SharedConstants.PASSWORD
 import static org.assertj.core.api.Assertions.assertThat
 
+import com.jayway.jsonpath.JsonPath
 import cucumber.api.java.en.Then
 import cucumber.api.java.en.When
 
@@ -114,6 +115,65 @@ class ProfileSteps {
 	@When('^I PUT to profile with json body (.+)$')
 	static void putToProfile(String jsonInput) {
 		Profile.updateProfile(jsonInput)
+	}
+
+	@When('^I view my profile$')
+	static void viewProfile() {
+		Profile.getProfile()
+	}
+
+	@When('^I view my profile attributes$')
+	static void viewProfileAttributes() {
+		Profile.getProfileAttributes()
+	}
+
+	@Then('^I should see profile field (.+)$')
+	static void verifyProfileField(String attributeName) {
+		client.GET("/")
+				.defaultprofile()
+				.stopIfFailure()
+		assertThat(client.getBody().containsKey(attributeName))
+				.as("Attribute is not as expected")
+				.isEqualTo(true)
+	}
+
+	@Then('^I should not see profile field (.+)')
+	static void verifyProfileFieldMissing(String attributeName) {
+		client.GET("/")
+				.defaultprofile()
+				.stopIfFailure()
+		assertThat(client.getBody().containsKey(attributeName))
+				.as("Attribute found where not expected")
+				.isEqualTo(false)
+	}
+
+	@Then('^I should see a null value for profile field (.+)$')
+	static void verifyNullProfileField(String attributeName) {
+		client.GET("/")
+				.defaultprofile()
+				.stopIfFailure()
+		assertThat(client.getBody().containsKey(attributeName))
+				.as("Attribute was not found")
+				.isEqualTo(true)
+		assertThat(client[attributeName])
+				.as("Attribute is not as expected")
+				.isNull()
+	}
+
+	@Then('^I should see profile attribute (.+) with value (.+)$')
+	static void verifyProfileAttributeField(String attributeName, String attributeValue) {
+		Profile.getProfileAttributes()
+		assertThat(client[attributeName])
+				.as("Attribute is not as expected")
+				.isEqualTo(attributeValue)
+	}
+
+	@Then('^I should not see profile attribute (.+)')
+	static void verifyProfileAttributeFieldMissing(String attributeName) {
+		Profile.getProfileAttributes()
+		assertThat(client[attributeName])
+				.as("Attribute found where not expected")
+				.isNull()
 	}
 
 	static def registerShopper(registrationScope, familyName, givenName, password, username) {

@@ -59,7 +59,7 @@ public class DataPolicyAdapter extends AbstractDomainAdapterImpl<DataPolicy, Dat
 
 	@Override
 	public DataPolicy createDomainObject() {
-		return getBeanFactory().getBean(ContextIdNames.DATA_POLICY);
+		return getBeanFactory().getPrototypeBean(ContextIdNames.DATA_POLICY, DataPolicy.class);
 	}
 
 	@Override
@@ -90,7 +90,7 @@ public class DataPolicyAdapter extends AbstractDomainAdapterImpl<DataPolicy, Dat
 		targetDataPolicy.setDataPoints(existingTargetDataPoints);
 
 		for (DataPointDTO sourceDataPoint : sourceDataPolicyDTO.getDataPoints()) {
-			final DataPoint targetDataPoint = getBeanFactory().getBean(ContextIdNames.DATA_POINT);
+			final DataPoint targetDataPoint = getBeanFactory().getPrototypeBean(ContextIdNames.DATA_POINT, DataPoint.class);
 			targetDataPoint.setGuid(sourceDataPoint.getGuid());
 			targetDataPoint.setName(sourceDataPoint.getName());
 			targetDataPoint.setDataLocation(sourceDataPoint.getDataLocation());

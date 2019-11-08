@@ -110,6 +110,10 @@ public class StoreDTO implements Dto {
 	@XmlElement(name = "type")
 	private List<String> creditCardTypes = new ArrayList<>();
 
+	@XmlElementWrapper(name = "cart_types")
+	@XmlElement(name = "cart_type")
+	private List<CartTypeDTO> shoppingCartTypes = new ArrayList<>();
+
 	public String getCode() {
 		return code;
 	}
@@ -286,4 +290,11 @@ public class StoreDTO implements Dto {
 		this.creditCardTypes = creditCardTypes;
 	}
 
+	public List<CartTypeDTO> getShoppingCartTypes() {
+		return shoppingCartTypes;
+	}
+
+	public void setShoppingCartTypes(final List<CartTypeDTO> shoppingCartTypes) {
+		this.shoppingCartTypes = shoppingCartTypes;
+	}
 }

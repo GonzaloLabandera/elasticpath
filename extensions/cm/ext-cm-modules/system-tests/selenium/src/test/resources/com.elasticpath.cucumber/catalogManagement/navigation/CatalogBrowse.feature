@@ -16,6 +16,3 @@ Feature: Catalog Browse
       | House                           |
       | Superheroes                     |
       | TV SciFi Pack - Low Pixel Combo |
-      | The Office                      |
-
-

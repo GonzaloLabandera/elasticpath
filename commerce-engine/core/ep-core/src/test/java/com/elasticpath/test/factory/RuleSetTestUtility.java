@@ -78,6 +78,7 @@ public final class RuleSetTestUtility {
 			}
 
 		};
+		promotionRule.setEnabled(true);
 		promotionRule.setName("Order Sale");
 		promotionRule.setStore(getStore());
 		promotionRule.setUidPk(RULE_UID);
@@ -168,6 +169,7 @@ public final class RuleSetTestUtility {
 			}
 
 		};
+		promotionRule.setEnabled(true);
 		promotionRule.setName("Buy two get one free");
 		promotionRule.setStore(getStore());
 		promotionRule.setUidPk(RULE_UID);
@@ -224,6 +226,7 @@ public final class RuleSetTestUtility {
 				return this.actions;
 			}
 		};
+		promotionRule.setEnabled(true);
 		promotionRule.setName("Buy one get three free");
 
 		promotionRule.setStore(new StoreImpl());

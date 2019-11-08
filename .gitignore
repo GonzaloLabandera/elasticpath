@@ -19,6 +19,12 @@ rebel.xml
 pom.xml.versionsBackup
 mem
 .DS_Store
+*.data
+db-*.log
+*.redo
+lock.
+tmlog.lck
+tmlog*.log
 
 # Ignored directories #
 .idea/

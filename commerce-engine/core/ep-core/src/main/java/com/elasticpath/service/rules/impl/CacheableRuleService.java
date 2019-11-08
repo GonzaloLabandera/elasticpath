@@ -118,6 +118,11 @@ public interface CacheableRuleService extends RuleService {
 	}
 
 	@Override
+	default Date getModifiedDateForRuleBase(long ruleUid) {
+		return getDecorated().getModifiedDateForRuleBase(ruleUid);
+	}
+
+	@Override
 	default Map<Integer, List<RuleCondition>> getAllConditionsMap() {
 		return getDecorated().getAllConditionsMap();
 	}

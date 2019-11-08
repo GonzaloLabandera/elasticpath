@@ -13,12 +13,12 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.jmock.Expectations;
+import org.jmock.integration.junit4.JUnitRuleMockery;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-import org.jmock.Expectations;
-import org.jmock.integration.junit4.JUnitRuleMockery;
 
 import com.elasticpath.base.exception.EpServiceException;
 import com.elasticpath.commons.beanframework.BeanFactory;
@@ -30,8 +30,9 @@ import com.elasticpath.domain.catalog.ProductAssociationType;
 import com.elasticpath.domain.catalog.impl.ProductAssociationImpl;
 import com.elasticpath.domain.catalogview.StoreProduct;
 import com.elasticpath.domain.catalogview.impl.StoreProductImpl;
+import com.elasticpath.persistence.api.LoadTuner;
 import com.elasticpath.persistence.api.PersistenceEngine;
-import com.elasticpath.service.misc.FetchPlanHelper;
+import com.elasticpath.persistence.openjpa.util.FetchPlanHelper;
 import com.elasticpath.service.search.query.ProductAssociationSearchCriteria;
 import com.elasticpath.test.BeanFactoryExpectationsFactory;
 
@@ -83,7 +84,7 @@ public class ProductAssociationServiceImplTest {
 	/**
 	 * Test behaviour when the persistence engine is not set.
 	 */
-	@Test(expected = EpServiceException.class)
+	@Test(expected = Exception.class)
 	public void testPersistenceEngineIsNull() {
 		productAssociationService.setPersistenceEngine(null);
 		productAssociationService.add(new ProductAssociationImpl());
@@ -198,14 +199,13 @@ public class ProductAssociationServiceImplTest {
 
 		context.checking(new Expectations() {
 			{
-				oneOf(mockFetchPlanHelper).configureProductAssociationFetchPlan(with(any(ProductAssociationLoadTuner.class)));
-				oneOf(mockFetchPlanHelper).clearFetchPlan();
-
 				allowing(mockPersistenceEngine).load(ProductAssociationImpl.class, uid);
 				will(returnValue(productAssociation));
 
 				allowing(beanFactory).getBeanImplClass(ContextIdNames.PRODUCT_ASSOCIATION);
 				will(returnValue(ProductAssociationImpl.class));
+
+				allowing(mockFetchPlanHelper).setLoadTuners(with(any(LoadTuner[].class)));
 			}
 		});
 
@@ -361,8 +361,8 @@ public class ProductAssociationServiceImplTest {
 		productAssociationService.setProductAssociationLoadTuner(mockLoadTuner);
 		context.checking(new Expectations() {
 			{
-				oneOf(mockFetchPlanHelper).configureProductAssociationFetchPlan(with(mockLoadTuner));
-				oneOf(mockFetchPlanHelper).clearFetchPlan();
+				allowing(mockPersistenceEngine).withLoadTuners(mockLoadTuner);
+				will(returnValue(mockPersistenceEngine));
 			}
 		});
 	}

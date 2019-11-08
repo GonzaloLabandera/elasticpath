@@ -6,7 +6,10 @@ package com.elasticpath.shipping.connectivity.dto.impl;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.math.BigDecimal;
+import java.util.Collections;
+import java.util.Map;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.common.testing.EqualsTester;
 import org.junit.Before;
 import org.junit.Test;
@@ -24,6 +27,13 @@ public class ShippableItemImplTest {
 	private static final BigDecimal LENGTH = new BigDecimal(101);
 	private static final BigDecimal HEIGHT = new BigDecimal(102);
 	private static final BigDecimal WEIGHT = new BigDecimal(103);
+
+	private static final Map<String, String> FIELD = ImmutableMap.of("key1", "value1", "key2", "value2");
+	private static final Map<String, String> EMPTY_FIELD = Collections.emptyMap();
+
+	private static final String FIELD_KEY = "key3";
+	private static final String FIELD_VALUE = "value3";
+	private static final Map<String, String> OTHER_FIELD = ImmutableMap.of("key1", "value1", "key2", "value2", FIELD_KEY, FIELD_VALUE);
 
 	private ShippableItemImpl shippableItem;
 
@@ -75,6 +85,67 @@ public class ShippableItemImplTest {
 	}
 
 	@Test
+	public void testFieldMap() {
+
+		shippableItem.setFields(OTHER_FIELD);
+		shippableItem.setFields(FIELD);
+
+		assertThat(shippableItem.getFields()).isNotEqualTo(EMPTY_FIELD);
+		assertThat(shippableItem.getFields()).isNotEqualTo(OTHER_FIELD);
+		assertThat(shippableItem.getFields()).isEqualTo(FIELD);
+
+	}
+
+	@Test(expected = UnsupportedOperationException.class)
+	public void testInsertingInImmutableFieldMap() {
+
+		shippableItem.setFields(FIELD);
+		shippableItem.getFields().put(FIELD_KEY, FIELD_VALUE);
+
+	}
+
+	@Test
+	public void testInsertingInMutableFieldMap() {
+
+		shippableItem.setFields(FIELD);
+		shippableItem.setField(FIELD_KEY, FIELD_VALUE);
+
+		assertThat(shippableItem.getFields()).isNotEqualTo(FIELD);
+		assertThat(shippableItem.getFields()).isEqualTo(OTHER_FIELD);
+
+	}
+
+	@Test(expected =  NullPointerException.class)
+	public void testInsertingNullFieldInMutableFieldMap() {
+
+		shippableItem.setFields(FIELD);
+		shippableItem.setFields(null);
+
+	}
+
+	@Test
+	public void testInsertingNullPairInMutableFieldMap() {
+
+		shippableItem.setField(null, null);
+
+		assertThat(shippableItem.getFields()).isNotEqualTo(EMPTY_FIELD);
+		assertThat(shippableItem.getFields().containsKey(null)).isTrue();
+		assertThat(shippableItem.getFields().containsValue(null)).isTrue();
+
+	}
+
+	@Test
+	public void testInsertingValidPairInMutableFieldMap() {
+
+		shippableItem.setField(FIELD_KEY, FIELD_VALUE);
+
+		assertThat(shippableItem.getFields()).isNotEqualTo(EMPTY_FIELD);
+		assertThat(shippableItem.getFields().containsKey(FIELD_KEY)).isTrue();
+		assertThat(shippableItem.getFields().containsValue(FIELD_VALUE)).isTrue();
+
+	}
+
+	@Test
 	public void testQuantity() {
 
 		shippableItem.setQuantity(QUANTITY);
@@ -85,11 +156,11 @@ public class ShippableItemImplTest {
 	@Test
 	public void testToString() {
 
-		final ShippableItem shippableItem = build(HEIGHT, WIDTH, LENGTH, WEIGHT, QUANTITY, SKU_GUID);
+		final ShippableItem shippableItem = buildDefault();
 
 		final String resultToString = shippableItem.toString();
 
-		assertThat(resultToString).contains(HEIGHT.toString(), WIDTH.toString(), LENGTH.toString(), WEIGHT.toString(),
+		assertThat(resultToString).contains(HEIGHT.toString(), WIDTH.toString(), LENGTH.toString(), WEIGHT.toString(), FIELD.toString(),
 			String.valueOf(QUANTITY), SKU_GUID);
 
 	}
@@ -98,21 +169,22 @@ public class ShippableItemImplTest {
 	public void testEquals() {
 		new EqualsTester().addEqualityGroup(shippableItem, buildEmpty())
 				.addEqualityGroup(buildDefault())
-				.addEqualityGroup(build(HEIGHT, null, null, null, 0, null))
-				.addEqualityGroup(build(null, WIDTH, null, null, 0, null))
-				.addEqualityGroup(build(null, null, LENGTH, null, 0, null))
-				.addEqualityGroup(build(null, null, null, WEIGHT, 0, null))
-				.addEqualityGroup(build(null, null, null, null, QUANTITY, null))
-				.addEqualityGroup(build(null, null, null, null, 0, SKU_GUID))
+				.addEqualityGroup(build(HEIGHT, null, null, null, 0, EMPTY_FIELD, null))
+				.addEqualityGroup(build(null, WIDTH, null, null, 0, EMPTY_FIELD, null))
+				.addEqualityGroup(build(null, null, LENGTH, null, 0, EMPTY_FIELD, null))
+				.addEqualityGroup(build(null, null, null, WEIGHT, 0, EMPTY_FIELD, null))
+				.addEqualityGroup(build(null, null, null, null, QUANTITY, EMPTY_FIELD, null))
+				.addEqualityGroup(build(null, null, null, null, 0, FIELD, null))
+				.addEqualityGroup(build(null, null, null, null, 0, EMPTY_FIELD, SKU_GUID))
 				.testEquals();
 	}
 
 	private ShippableItemImpl buildEmpty() {
-		return build(null, null, null, null, 0, null);
+		return build(null, null, null, null, 0, EMPTY_FIELD, null);
 	}
 
 	private ShippableItemImpl buildDefault() {
-		return build(HEIGHT, WIDTH, LENGTH, WEIGHT, QUANTITY, SKU_GUID);
+		return build(HEIGHT, WIDTH, LENGTH, WEIGHT, QUANTITY, FIELD, SKU_GUID);
 	}
 
 	@SuppressWarnings("parameternumber")
@@ -121,6 +193,7 @@ public class ShippableItemImplTest {
 									final BigDecimal length,
 									final BigDecimal weight,
 									final int quantity,
+									final Map<String, String> field,
 									final String skuGuid) {
 
 		final ShippableItemImpl shippableItem = new ShippableItemImpl();
@@ -130,10 +203,10 @@ public class ShippableItemImplTest {
 		shippableItem.setLength(length);
 		shippableItem.setWeight(weight);
 		shippableItem.setQuantity(quantity);
+		shippableItem.setFields(field);
 		shippableItem.setSkuGuid(skuGuid);
 
 		return shippableItem;
-
 	}
 
 }

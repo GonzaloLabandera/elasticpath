@@ -48,6 +48,7 @@ import com.elasticpath.domain.catalog.DigitalAsset;
 import com.elasticpath.domain.catalog.Product;
 import com.elasticpath.domain.catalog.ProductSku;
 import com.elasticpath.domain.misc.LocalizedProperties;
+import com.elasticpath.domain.catalog.ProductType;
 import com.elasticpath.domain.skuconfiguration.SkuOption;
 import com.elasticpath.domain.skuconfiguration.SkuOptionValue;
 import com.elasticpath.domain.skuconfiguration.impl.JpaAdaptorOfSkuOptionValueImpl;
@@ -88,6 +89,12 @@ public class ProductSkuImplTest {
 	private static final int REORDER_MINIMUM = 2;
 
 	private static final String SALES_TAX_CODE_BOOKS = "BOOKS";
+	private static final String DATE_FORMAT = "yyyy-MM-dd";
+	private static final String JAN_1_2010 = "2010-01-01";
+	private static final String JAN_2_2010 = "2010-01-02";
+	private static final String MAR_1_2010 = "2010-03-01";
+	private static final String JAN_3_2010 = "2010-01-03";
+	private static final String JAN_1_2009 = "2009-01-01";
 
 	private ProductSkuImpl productSkuImpl;
 
@@ -115,15 +122,17 @@ public class ProductSkuImplTest {
 	 */
 	@Before
 	public void setUp() throws Exception {
+		when(product.hasMultipleSkus()).thenReturn(true);
 		productSkuImpl = new ProductSkuImpl() {
 			private static final long serialVersionUID = 1L;
 
 			@Override
-			protected <T> T getBean(final String beanName) {
+			public <T> T getBean(final String beanName) {
 				return beanFactory.getBean(beanName);
 			}
 		};
 		productSkuImpl.initialize();
+		productSkuImpl.setProduct(product);
 	}
 
 	/**
@@ -487,50 +496,83 @@ public class ProductSkuImplTest {
 	}
 
 	/**
-	 * Test that the effective start date is calculated correctly.
+	 * Test that the effective start date is calculated correctly for multi-sku products.
 	 *
 	 * @throws ParseException in case of date parsing error.
 	 */
 	@Test
-	public void testEffectiveStartDate() throws ParseException {
+	public void testEffectiveStartDateForMultiSkuProduct() throws ParseException {
 		ProductSku productSku = new ProductSkuImpl();
-		Product product = new ProductImpl();
+		Product product = createProduct(true);
 		productSku.setProduct(product);
 
-		final SimpleDateFormat yyyyMMdd = new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH);
+		final SimpleDateFormat yyyyMMdd = new SimpleDateFormat(DATE_FORMAT, Locale.ENGLISH);
 
-		product.setStartDate(yyyyMMdd.parse("2010-01-01"));
+		product.setStartDate(yyyyMMdd.parse(JAN_1_2010));
 		productSku.setStartDate(null);
 		Date effectiveDate = productSku.getEffectiveStartDate();
-		assertThat(yyyyMMdd.format(effectiveDate)).as("The effective start date should be the non-null date").isEqualTo("2010-01-01");
+		assertThat(yyyyMMdd.format(effectiveDate)).as("The effective start date should be the non-null date").isEqualTo(JAN_1_2010);
 
-		product.setStartDate(yyyyMMdd.parse("2010-01-02"));
-		productSku.setStartDate(yyyyMMdd.parse("2010-03-01"));
+		product.setStartDate(yyyyMMdd.parse(JAN_2_2010));
+		productSku.setStartDate(yyyyMMdd.parse(MAR_1_2010));
 		effectiveDate = productSku.getEffectiveStartDate();
 		assertThat(effectiveDate)
 			.as("The effective start date should be the greater date")
-			.isEqualTo("2010-03-01");
+			.isEqualTo(MAR_1_2010);
 
-		product.setStartDate(yyyyMMdd.parse("2010-01-03"));
-		productSku.setStartDate(yyyyMMdd.parse("2009-01-01"));
+		product.setStartDate(yyyyMMdd.parse(JAN_3_2010));
+		productSku.setStartDate(yyyyMMdd.parse(JAN_1_2009));
 		effectiveDate = productSku.getEffectiveStartDate();
 		assertThat(effectiveDate)
 			.as("The effective start date should be the greater date")
-			.isEqualTo("2010-01-03");
+			.isEqualTo(JAN_3_2010);
 	}
 
 	/**
-	 * Test that the effective end date is calculated correctly.
+	 * Test that the effective start date is calculated correctly for single-sku products.
 	 *
 	 * @throws ParseException in case of date parsing error.
 	 */
 	@Test
-	public void testEffectiveEndDate() throws ParseException {
+	public void testEffectiveStartDateForSingleSkuProduct() throws ParseException {
 		ProductSku productSku = new ProductSkuImpl();
-		Product product = new ProductImpl();
+		Product product = createProduct(false);
 		productSku.setProduct(product);
 
-		final SimpleDateFormat yyyyMMdd = new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH);
+		final SimpleDateFormat yyyyMMdd = new SimpleDateFormat(DATE_FORMAT, Locale.ENGLISH);
+
+		product.setStartDate(yyyyMMdd.parse(JAN_1_2010));
+		productSku.setStartDate(null);
+		Date effectiveDate = productSku.getEffectiveStartDate();
+		assertThat(yyyyMMdd.format(effectiveDate)).as("The effective start date should be the non-null date").isEqualTo(JAN_1_2010);
+
+		product.setStartDate(yyyyMMdd.parse(JAN_2_2010));
+		productSku.setStartDate(yyyyMMdd.parse(MAR_1_2010));
+		effectiveDate = productSku.getEffectiveStartDate();
+		assertThat(effectiveDate)
+				.as("The effective start date should match the product")
+				.isEqualTo(JAN_2_2010);
+
+		product.setStartDate(yyyyMMdd.parse(JAN_3_2010));
+		productSku.setStartDate(yyyyMMdd.parse(JAN_1_2009));
+		effectiveDate = productSku.getEffectiveStartDate();
+		assertThat(effectiveDate)
+				.as("The effective start date should match the product")
+				.isEqualTo(JAN_3_2010);
+	}
+
+	/**
+	 * Test that the effective end date is calculated correctly for multi-sku products.
+	 *
+	 * @throws ParseException in case of date parsing error.
+	 */
+	@Test
+	public void testEffectiveEndDateForMultiSkuProduct() throws ParseException {
+		ProductSku productSku = new ProductSkuImpl();
+		Product product = createProduct(true);
+		productSku.setProduct(product);
+
+		final SimpleDateFormat yyyyMMdd = new SimpleDateFormat(DATE_FORMAT, Locale.ENGLISH);
 
 		product.setEndDate(null);
 		productSku.setEndDate(null);
@@ -539,7 +581,7 @@ public class ProductSkuImplTest {
 			.as("The effective end date should be the null if both end dates are null")
 			.isNull();
 
-		product.setStartDate(yyyyMMdd.parse("2010-01-02"));
+		product.setStartDate(yyyyMMdd.parse(JAN_2_2010));
 
 		product.setEndDate(yyyyMMdd.parse("2010-01-15"));
 		productSku.setEndDate(null);
@@ -574,7 +616,7 @@ public class ProductSkuImplTest {
 		effectiveDate = productSku.getEffectiveEndDate();
 		assertThat(effectiveDate)
 			.as("The effective end date should be the start date if it would have been earlier")
-			.isEqualTo("2010-01-02");
+			.isEqualTo(JAN_2_2010);
 	}
 
 	/**
@@ -584,7 +626,7 @@ public class ProductSkuImplTest {
 	 */
 	@Test
 	public void testIsWithinDateRange() throws ParseException {
-		final SimpleDateFormat yyyyMMdd = new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH);
+		final SimpleDateFormat yyyyMMdd = new SimpleDateFormat(DATE_FORMAT, Locale.ENGLISH);
 		Date dateToCheck = yyyyMMdd.parse("2010-03-03");
 
 		productSkuImpl.setStartDate(yyyyMMdd.parse("2010-02-02"));
@@ -593,7 +635,7 @@ public class ProductSkuImplTest {
 			.as("Sku with no end date that started before given date should be within range")
 			.isTrue();
 
-		productSkuImpl.setStartDate(yyyyMMdd.parse("2010-03-01"));
+		productSkuImpl.setStartDate(yyyyMMdd.parse(MAR_1_2010));
 		productSkuImpl.setEndDate(yyyyMMdd.parse("2010-12-31"));
 		assertThat(productSkuImpl.isWithinDateRange(dateToCheck))
 			.as("Sku within range should be recognized as such")
@@ -694,6 +736,14 @@ public class ProductSkuImplTest {
 		bookTaxCode.setCode(SALES_TAX_CODE_BOOKS);
 		productSkuImpl.setTaxCodeOverride(bookTaxCode);
 		assertThat(productSkuImpl.getTaxCodeOverride()).isEqualTo(bookTaxCode);
+	}
+
+	private Product createProduct(final boolean isMultiSku) {
+		Product product = new ProductImpl();
+		ProductType productType = new ProductTypeImpl();
+		productType.setMultiSku(isMultiSku);
+		product.setProductType(productType);
+		return product;
 	}
 
 	/**

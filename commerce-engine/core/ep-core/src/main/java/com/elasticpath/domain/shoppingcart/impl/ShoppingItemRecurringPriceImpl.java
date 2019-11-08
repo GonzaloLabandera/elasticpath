@@ -19,6 +19,8 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.persistence.TableGenerator;
 
+import org.apache.openjpa.persistence.DataCache;
+
 import com.elasticpath.domain.quantity.Quantity;
 import com.elasticpath.domain.shoppingcart.ShoppingItemRecurringPrice;
 import com.elasticpath.persistence.api.AbstractEntityImpl;
@@ -29,6 +31,7 @@ import com.elasticpath.persistence.api.AbstractEntityImpl;
  */
 @Entity
 @Table(name = ShoppingItemRecurringPriceImpl.TABLE_NAME)
+@DataCache(enabled = false)
 public class ShoppingItemRecurringPriceImpl extends AbstractEntityImpl implements ShoppingItemRecurringPrice {
 	private static final long serialVersionUID = -2984781782890218888L;
 	/** Denotes the table name. */

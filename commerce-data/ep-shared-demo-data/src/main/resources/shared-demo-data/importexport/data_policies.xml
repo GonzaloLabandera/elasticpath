@@ -337,13 +337,6 @@
 				<description_key>Order IP address</description_key>
 				<removable>true</removable>
 			</data_point>
-			<data_point guid="C7D59F1B-E139-4255-9B72-0EC55C8C93A6">
-				<name>Order Payment Card Holder Name</name>
-				<data_location>ORDER_PAYMENT_CARD_HOLDER_NAME</data_location>
-				<data_key>ORDER_PAYMENT_CARD_HOLDER_NAME</data_key>
-				<description_key>Order Payment card holder</description_key>
-				<removable>true</removable>
-			</data_point>
 			<data_point guid="A2855440-F7BD-443E-969B-7C198AB10085">
 				<name>Order data KEY1</name>
 				<data_location>ORDER_DATA</data_location>
@@ -468,6 +461,29 @@
 		<end_date>2018-05-24T22:58:30-07:00</end_date>
 		<state>DISABLED</state>
 		<reference_key>Automation Disabled Policy</reference_key>
+		<description></description>
+		<activities/>
+	</data_policy>
+
+	<data_policy guid="BD5617E4-0DEC-4CE8-B694-24A388904CF2">
+		<policy_name>Profile Fields</policy_name>
+		<retention_period_in_days>365</retention_period_in_days>
+		<retention_type>FROM_LAST_UPDATE</retention_type>
+		<segments>
+			<segment>profile_fields_test</segment>
+		</segments>
+		<data_points>
+			<data_point guid="3093D1CB-FF62-4155-9A7A-9DE389D3831E">
+				<name>Customer Date Of Birth</name>
+				<data_location>CUSTOMER_PROFILE</data_location>
+				<data_key>CP_DOB</data_key>
+				<description_key>Cust dob</description_key>
+				<removable>false</removable>
+			</data_point>
+		</data_points>
+		<start_date>2018-01-01T10:41:00-08:00</start_date>
+		<state>ACTIVE</state>
+		<reference_key>Profile Fields</reference_key>
 		<description></description>
 		<activities/>
 	</data_policy>

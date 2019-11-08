@@ -26,6 +26,7 @@ import com.elasticpath.domain.catalog.GiftCertificate;
 import com.elasticpath.domain.catalog.Product;
 import com.elasticpath.domain.catalog.ProductBundle;
 import com.elasticpath.domain.catalog.ProductCharacteristics;
+import com.elasticpath.domain.catalog.ProductConstituent;
 import com.elasticpath.domain.catalog.ProductSku;
 import com.elasticpath.domain.catalog.ProductType;
 import com.elasticpath.domain.catalog.impl.BundleConstituentImpl;
@@ -70,7 +71,7 @@ public class ProductCharacteristicsServiceImplTest {
 	public void setUp() throws Exception {
 		beanFactory = context.mock(BeanFactory.class);
 		expectationsFactory = new BeanFactoryExpectationsFactory(context, beanFactory);
-		expectationsFactory.allowingBeanFactoryGetBean("productConstituent", ProductConstituentImpl.class);
+		expectationsFactory.allowingBeanFactoryGetPrototypeBean("productConstituent", ProductConstituent.class, ProductConstituentImpl.class);
 
 		productBundleService = context.mock(ProductBundleService.class);
 		productLookup = context.mock(ProductLookup.class);

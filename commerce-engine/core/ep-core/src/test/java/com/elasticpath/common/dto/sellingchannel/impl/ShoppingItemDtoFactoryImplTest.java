@@ -24,7 +24,9 @@ import com.elasticpath.domain.catalog.BundleConstituent;
 import com.elasticpath.domain.catalog.ItemConfiguration;
 import com.elasticpath.domain.catalog.Product;
 import com.elasticpath.domain.catalog.ProductBundle;
+import com.elasticpath.domain.catalog.ProductConstituent;
 import com.elasticpath.domain.catalog.ProductSku;
+import com.elasticpath.domain.catalog.ProductSkuConstituent;
 import com.elasticpath.domain.catalog.impl.BundleConstituentImpl;
 import com.elasticpath.domain.catalog.impl.ItemConfigurationImpl;
 import com.elasticpath.domain.catalog.impl.ProductBundleImpl;
@@ -67,8 +69,10 @@ public class ShoppingItemDtoFactoryImplTest {
 	 */
 	@Before
 	public void setUp() {
-		given(beanFactory.getBean("productConstituent")).will(invocationOnMock -> new ProductConstituentImpl());
-		given(beanFactory.getBean("productSkuConstituent")).will(invocationOnMock -> new ProductSkuConstituentImpl());
+		given(beanFactory.getPrototypeBean("productConstituent", ProductConstituent.class))
+				.will(invocationOnMock -> new ProductConstituentImpl());
+		given(beanFactory.getPrototypeBean("productSkuConstituent", ProductSkuConstituent.class))
+				.will(invocationOnMock -> new ProductSkuConstituentImpl());
 
 		factory.setBundleIdentifier(new BundleIdentifierImpl());
 	}
@@ -161,8 +165,8 @@ public class ShoppingItemDtoFactoryImplTest {
 			private static final long serialVersionUID = 1;
 
 			@Override
-			protected <T> T getBean(final String beanName) {
-				return beanFactory.getBean(beanName);
+			public <T> T getPrototypeBean(final String name, final Class<T> clazz) {
+				return beanFactory.getPrototypeBean(name, clazz);
 			}
 		};
 		bundleConstituent.initialize();
@@ -176,8 +180,8 @@ public class ShoppingItemDtoFactoryImplTest {
 			private static final long serialVersionUID = 1;
 
 			@Override
-			protected <T> T getBean(final String beanName) {
-				return beanFactory.getBean(beanName);
+			public <T> T getPrototypeBean(final String name, final Class<T> clazz) {
+				return beanFactory.getPrototypeBean(name, clazz);
 			}
 		};
 		bundleConstituent.initialize();

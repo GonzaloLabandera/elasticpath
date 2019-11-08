@@ -14,15 +14,16 @@ public class AddAttributeDialog extends AbstractDialog {
 	 */
 	public static final String ADD_ATTRUBUTE_PARENT_CSS
 			= "div[automation-id='com.elasticpath.cmclient.catalog.CatalogMessages.AttributeAddDialog_WinTitle_Add'] ";
-	private static final String ATTRUBUTE_KEY_INPUT_CSS = ADD_ATTRUBUTE_PARENT_CSS + "div[widget-id='Attribute Key'] > input";
+	private static final String ATTRIBUTE_KEY_INPUT_CSS = ADD_ATTRUBUTE_PARENT_CSS + "div[widget-id='Attribute Key'] > input";
 	private static final String ATTRIBUTE_LANGUAGE_CSS = ADD_ATTRUBUTE_PARENT_CSS + "div[widget-id='Display Name'] ";
-	private static final String ATTRUBUTE_NAME_INPUT_CSS = ATTRIBUTE_LANGUAGE_CSS + "+ div[widget-type='Text'] > input";
+	private static final String ATTRIBUTE_NAME_INPUT_CSS = ATTRIBUTE_LANGUAGE_CSS + "+ div[widget-type='Text'] > input";
 	private static final String ATTRIBUTE_USAGE_COMBO_CSS = ADD_ATTRUBUTE_PARENT_CSS + "div[widget-id='Attribute Usage'][widget-type='CCombo']";
 	private static final String ATTRIBUTE_TYPE_COMBO_CSS = ADD_ATTRUBUTE_PARENT_CSS + "div[widget-id='Attribute Type'][widget-type='CCombo']";
 	private static final String CHECK_BOX_XPATH
 			= "//div[@automation-id='com.elasticpath.cmclient.catalog.CatalogMessages.AttributeAddDialog_RequiredAttribute']"
 			+ "/..//following-sibling::div[1]/div";
 	private static final String ADD_BUTTON_CSS = ADD_ATTRUBUTE_PARENT_CSS + "div[widget-id='Add'][style*='opacity: 1']";
+	private static String checkBoxPath = "//div[@automation-id='%s']/..//following-sibling::div/div";
 
 	/**
 	 * Constructor.
@@ -39,7 +40,7 @@ public class AddAttributeDialog extends AbstractDialog {
 	 * @param attributeKey the attribute key.
 	 */
 	public void enterAttributeKey(final String attributeKey) {
-		clearAndType(ATTRUBUTE_KEY_INPUT_CSS, attributeKey);
+		clearAndType(ATTRIBUTE_KEY_INPUT_CSS, attributeKey);
 	}
 
 	/**
@@ -48,7 +49,7 @@ public class AddAttributeDialog extends AbstractDialog {
 	 * @param attributeName the attribute name.
 	 */
 	public void enterAttributeName(final String attributeName) {
-		clearAndType(ATTRUBUTE_NAME_INPUT_CSS, attributeName);
+		clearAndType(ATTRIBUTE_NAME_INPUT_CSS, attributeName);
 	}
 
 	/**
@@ -84,6 +85,23 @@ public class AddAttributeDialog extends AbstractDialog {
 	}
 
 	/**
+	 * Clicks Required Attribute checkbox.
+	 */
+	public void clickRequiredAttributeCheckBox() {
+		click(getDriver().findElement(By.xpath(String.format(
+				checkBoxPath, "com.elasticpath.cmclient.catalog.CatalogMessages.AttributeAddDialog_RequiredAttribute"))));
+	}
+
+	/**
+	 * Clicks Multiple Values Allowed checkbox.
+	 */
+	public void clickMultiValueCheckBox() {
+		click(getDriver().findElement(By.xpath(String.format(
+				checkBoxPath, "com.elasticpath.cmclient.catalog.CatalogMessages.AttributeAddDialog_MultiValuesAllowed"))));
+
+	}
+
+	/**
 	 * Clicks add button.
 	 */
 	public void clickAddButton() {
@@ -91,4 +109,13 @@ public class AddAttributeDialog extends AbstractDialog {
 		waitTillElementDisappears(By.cssSelector(ADD_ATTRUBUTE_PARENT_CSS));
 	}
 
+	/**
+	 * Select language.
+	 *
+	 * @param language language which should be chosen.
+	 * @return true if input language found in select box, false - if not found
+	 */
+	public boolean selectLanguage(final String language) {
+		return selectComboBoxItem(ATTRIBUTE_LANGUAGE_CSS, language);
+	}
 }

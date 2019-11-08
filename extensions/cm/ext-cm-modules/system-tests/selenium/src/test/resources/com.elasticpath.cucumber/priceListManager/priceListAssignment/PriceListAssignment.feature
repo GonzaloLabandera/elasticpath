@@ -78,7 +78,7 @@ Feature: Price List Assignment
       | catalog  | Tokenee Catalog |
       | priority | 1               |
     Then the item price for sku mk34abef is $58.09 when customer harry.potter@elasticpath.com retrieve the item price in store Mobee
-    Then the item price for sku mk34abef is $50.00 when customer jimmy.james@elasticpath.com retrieve the item price in store Tokenee
+    Then the new item price for sku mk34abef is $50.00 when customer jimmy.james@elasticpath.com retrieve the item price in store Tokenee
 
   @cleanupPriceListAssignment
   Scenario: Create Price List Assignment with Customer Conditions

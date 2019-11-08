@@ -10,12 +10,9 @@ import java.util.Set;
 
 import com.elasticpath.base.exception.EpServiceException;
 import com.elasticpath.commons.beanframework.BeanFactory;
-import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.commons.pagination.DirectedSortingField;
 import com.elasticpath.commons.pagination.SearchCriterion;
-import com.elasticpath.domain.coupon.specifications.PotentialCouponUse;
 import com.elasticpath.domain.rules.Coupon;
-import com.elasticpath.domain.specifications.Specification;
 import com.elasticpath.service.rules.CouponCodeGenerator;
 import com.elasticpath.service.rules.CouponService;
 import com.elasticpath.service.rules.DuplicateCouponException;
@@ -225,31 +222,6 @@ public class CouponServiceImpl implements CouponService {
 	@Override
 	public Map<String, Coupon> findCouponsForCodes(final Collection<String> codes) {
 		return getCouponDao().findCouponsForCodes(codes);
-	}
-
-	/**
-	 * Get coupon validation for potential coupon use specification.
-	 *
-	 * @return specification for potential coupon use.
-	 */
-	protected Specification<PotentialCouponUse> getValidCouponUseSpecification() {
-		return beanFactory.getBean(ContextIdNames.VALID_COUPON_USE_SPEC);
-	}
-
-
-	/**
-	 * Check if coupon is valid.
-	 * @param potentialCouponUse PotentialCouponUse object.
-	 * @param couponCode coupon code.
-	 */
-	@Override
-	public void validateCoupon(final PotentialCouponUse potentialCouponUse, final String couponCode) {
-		RuleValidationResultEnum validationResult = getValidCouponUseSpecification().isSatisfiedBy(potentialCouponUse);
-		if (RuleValidationResultEnum.ERROR_EXPIRED.equals(validationResult)) {
-			throw new CouponNoLongerAvailableException(couponCode);
-		} else if (RuleValidationResultEnum.ERROR_UNSPECIFIED.equals(validationResult)) {
-			throw new CouponNotValidException(couponCode);
-		}
 	}
 
 }

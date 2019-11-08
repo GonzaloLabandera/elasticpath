@@ -87,8 +87,10 @@ public class OrderEditor extends AbstractPageObject {
 	private static final String SHIPMENT_SECTION_BY_NUMBER_CSS = "div[widget-id*='%s'] + div ";
 	private static final String SHIPMENT_SUMMARY_PRICE_VALUE_CSS = SHIPMENT_SECTION_BY_NUMBER_CSS + "div[automation-id$=%s][widget-type='Text'] "
 			+ "+ div[widget-type='Text'] > input";
-	private static final String SHIPMENT_SUMMARY_SHIPMENT_DISCOUNT_CSS = "div[widget-id*=' Shipment Discount'][ widget-type='Text'] + div > input";
-	private static final String SHIPMENT_SUMMARY_SHIPMENT_COST_CSS = "div[widget-id='Shipping Cost:'][ widget-type='Text'] + div > input";
+	private static final String SHIPMENT_SUMMARY_SHIPMENT_DISCOUNT_DIV_CSS = "div[widget-id*=' Shipment Discount'][ widget-type='Text'] + div";
+	private static final String SHIPMENT_SUMMARY_SHIPMENT_DISCOUNT_CSS = SHIPMENT_SUMMARY_SHIPMENT_DISCOUNT_DIV_CSS + " > input";
+	private static final String SHIPMENT_SUMMARY_SHIPMENT_COST_DIV_CSS = "div[widget-id='Shipping Cost:'][ widget-type='Text'] + div";
+	private static final String SHIPMENT_SUMMARY_SHIPMENT_COST_CSS = SHIPMENT_SUMMARY_SHIPMENT_COST_DIV_CSS + " > input";
 	private static final String PROMOTION_TABLE_PARENT_CSS = "div[widget-id='Order Promotions Table'] ";
 	private static final String PROMOTION_COLUMN_CSS = PROMOTION_TABLE_PARENT_CSS + COLUMN_ID_CSS + "[column-num='1']";
 	private static final String BILLING_PHONE_NUMBER_CSS = SHIPMENT_SECTION
@@ -126,6 +128,9 @@ public class OrderEditor extends AbstractPageObject {
 	private static final String E_SHIPMENT_ITEM_ROW_CSS = EDITOR_PANE_PARENT_CSS
 			+ "div[parent-widget-id='Order Details Electronic Shipment Table'][widget-type='table_row']";
 	private static WebElement shipmentItemRow;
+	private static final String ORDER_DATA_TABLE_CSS = "div[widget-id='Field Value Table']";
+	private static final String ORDER_DATA_TABLE_ROW_CSS = "div[parent-widget-id='Field Value Table']"
+			+ "[widget-id='%s'] div[column-num='1']";
 
 	/**
 	 * Constructor.
@@ -314,6 +319,12 @@ public class OrderEditor extends AbstractPageObject {
 		String cssSelector = String.format(TAB_CSS, tabName);
 		resizeWindow(cssSelector);
 		click(getWaitDriver().waitForElementToBeClickable(By.cssSelector(cssSelector)));
+		setWebDriverImplicitWait(1);
+		if (!isElementPresent(By.cssSelector(cssSelector + "[active-tab='true']"))) {
+			click(getWaitDriver().waitForElementToBeClickable(By.cssSelector(cssSelector)));
+		}
+		setWebDriverImplicitWaitToDefault();
+
 		switch (tabName) {
 			case "Summary":
 				getWaitDriver().waitForElementToBeVisible(By.cssSelector(ORDER_SUMMARY_TITLE));
@@ -927,6 +938,7 @@ public class OrderEditor extends AbstractPageObject {
 	 * @param discount new value to be set
 	 */
 	public void setLessShipmentDiscountValue(final String discount) {
+		scrollWidgetIntoView(SHIPMENT_SUMMARY_SHIPMENT_DISCOUNT_DIV_CSS);
 		enterNewValueForField(SHIPMENT_SUMMARY_SHIPMENT_DISCOUNT_CSS, discount);
 	}
 
@@ -936,6 +948,7 @@ public class OrderEditor extends AbstractPageObject {
 	 * @param cost new value to be set
 	 */
 	public void setShippingCostValue(final String cost) {
+		scrollWidgetIntoView(SHIPMENT_SUMMARY_SHIPMENT_COST_DIV_CSS);
 		enterNewValueForField(SHIPMENT_SUMMARY_SHIPMENT_COST_CSS, cost);
 	}
 
@@ -969,10 +982,12 @@ public class OrderEditor extends AbstractPageObject {
 	 */
 	private WebElement getShipmentItemRow(final String skuCode, final String shipmentItemRowCss) {
 		shipmentItemRow = null;
+		getWaitDriver().waitForElementToBeInteractable(shipmentItemRowCss);
 		for (WebElement itemRow : getShipmentRow(shipmentItemRowCss)) {
 			if (itemRow.findElement(By.cssSelector(
 					"div[column-num='" + SHIPMENT_TABLE_COLUMN_HEADER_VALUES.indexOf(SKU_CODE_COLUMN_NAME) + "']")).getText().equals(skuCode)) {
 				shipmentItemRow = itemRow;
+				getWaitDriver().waitForElementToBeClickable(itemRow);
 				itemRow.click();
 				break;
 			}
@@ -1056,6 +1071,23 @@ public class OrderEditor extends AbstractPageObject {
 		assertThat(actualValue)
 				.as("Shipment item " + columnName + " is not as expected")
 				.isEqualTo(expectedValue);
+	}
+
+	private String getOrderDataTableValue(final String orderDataKey) {
+		return getDriver().findElement(By.cssSelector(String.format(ORDER_DATA_TABLE_ROW_CSS, orderDataKey))).getText();
+	}
+
+	/**
+	 * Verifies order data values.
+	 *
+	 * @param orderDataKey   the sku code
+	 * @param orderDataValue the quantity
+	 */
+	public void verifyOrderDataTableRow(final String orderDataKey, final String orderDataValue) {
+		scrollWidgetIntoView(ORDER_DATA_TABLE_CSS);
+		assertThat(getOrderDataTableValue(orderDataKey))
+				.as("Unable to find order data info: " + orderDataKey + " - " + orderDataValue)
+				.isEqualTo(orderDataValue);
 	}
 
 }

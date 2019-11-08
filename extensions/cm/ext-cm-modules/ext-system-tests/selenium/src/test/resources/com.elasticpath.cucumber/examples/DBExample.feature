@@ -1,5 +1,5 @@
 @example
-Feature: DB Connector Example
+Feature: Ext - DB Connector Example
 
   Scenario: Create New User and Disable New User
     Given I sign in to CM as admin user

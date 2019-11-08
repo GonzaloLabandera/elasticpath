@@ -7,8 +7,8 @@ Feature: Profile field validations
     Then the HTTP status is bad request
     And I should see validation error message with message type, message id, debug message, and field
       | messageType | messageId      | debugMessage                      | fieldName   |
-      | error       | field.required | family-name attribute is required | family-name |
-      | error       | field.required | given-name attribute is required  | given-name  |
+      | error       | field.required | 'family-name' value is required.  | family-name |
+      | error       | field.required | 'given-name' value is required.   | given-name  |
 
     Examples:
       | FAMILY_NAME | GIVEN_NAME |
@@ -20,7 +20,7 @@ Feature: Profile field validations
     Then the HTTP status is bad request
     And I should see validation error message with message type, message id, debug message, and field
       | messageType | messageId      | debugMessage                     | fieldName  |
-      | error       | field.required | given-name attribute is required | given-name |
+      | error       | field.required | 'given-name' value is required.  | given-name |
 
     Examples:
       | FAMILY_NAME | GIVEN_NAME |

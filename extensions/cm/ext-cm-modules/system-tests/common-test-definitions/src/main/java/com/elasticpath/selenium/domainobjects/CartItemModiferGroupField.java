@@ -1,9 +1,17 @@
+/*
+ * Copyright (c) Elastic Path Software Inc., 2019
+ */
 package com.elasticpath.selenium.domainobjects;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Cart Item Modifier Group Field.
  */
 public class CartItemModiferGroupField {
+	private final Map<String, String> names = new HashMap<>();
+	private final Map<String, Map<String, String>> options = new HashMap<>();
 	private String fieldCode;
 	private String fieldName;
 	private String fieldType;
@@ -11,6 +19,7 @@ public class CartItemModiferGroupField {
 	private String optionValue;
 	private String optionName;
 	private boolean isRequired;
+	private String oldFieldType;
 
 	public String getFieldCode() {
 		return fieldCode;
@@ -66,5 +75,41 @@ public class CartItemModiferGroupField {
 
 	public void setRequired(final boolean required) {
 		isRequired = required;
+	}
+
+	public void setName(final String language, final String name) {
+		names.put(language, name);
+	}
+
+	public Map<String, Map<String, String>> getOptions() {
+		return options;
+	}
+
+	public Map<String, String> getNames() {
+		return names;
+	}
+
+	public String getName(final String language) {
+		return names.get(language);
+	}
+
+	public void setOption(final String optionCode, final String language, final String localizedName) {
+		Map<String, String> optionLocalizedName = options.get(optionCode);
+		if (optionLocalizedName == null) {
+			Map<String, String> names = new HashMap<>();
+			names.put(language, localizedName);
+			options.put(optionCode, names);
+		} else {
+			optionLocalizedName.put(language, localizedName);
+			options.put(optionCode, optionLocalizedName);
+		}
+	}
+
+	public String getOldFieldType() {
+		return oldFieldType;
+	}
+
+	public void setOldFieldType(final String oldFieldType) {
+		this.oldFieldType = oldFieldType;
 	}
 }

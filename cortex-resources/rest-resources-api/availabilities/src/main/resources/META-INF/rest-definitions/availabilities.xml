@@ -5,15 +5,13 @@
 		<name>availabilities</name>
 		<description>
 			<![CDATA[
-Display the [item][items] and line item's availability. The availability identifies the item's
+Display the [item](items.md) and line item's availability. The availability identifies the item's
 purchasability. For example, in Elastic Path Commerce Engine the following states are available:
 
-*  ALWAYS
-*  NOT\_AVAILABLE
-*  AVAILABLE\_FOR\_BACK\_ORDER
-*  AVAILABLE\_FOR\_PRE\_ORDER
-
-[items]: #items
+* `ALWAYS`
+* `NOT_AVAILABLE`
+* `AVAILABLE_FOR_BACK_ORDER`
+* `AVAILABLE_FOR_PRE_ORDER`
 			]]>
 		</description>
 
@@ -77,12 +75,7 @@ purchasability. For example, in Elastic Path Commerce Engine the following state
 				<name>state</name>
 				<description>
 					<![CDATA[
-The state of availability for an item or line item. In Elastic Path Commerce Engine, the states are:
-
-*  AVAILABLE
-*  NOT\_AVAILABLE
-*  AVAILABLE\_FOR\_BACK\_ORDER
-*  AVAILABLE\_FOR\_PRE\_ORDER
+The state of availability for an item or line item. In Elastic Path Commerce Engine, the states are: `AVAILABLE`, `NOT_AVAILABLE`, `AVAILABLE_FOR_BACK_ORDER`, `AVAILABLE_FOR_PRE_ORDER`
 					]]>
 				</description>
 				<string/>
@@ -91,8 +84,7 @@ The state of availability for an item or line item. In Elastic Path Commerce Eng
 				<name>release-date</name>
 				<description>
 					<![CDATA[
-						Optional property. This is the date the item becomes available for purchase.
-						In Elastic Path Commerce Engine, release-date is only visible when the item is available for pre-order.
+Optional property. This is the date the item becomes available for purchase. In Elastic Path Commerce Engine, `release-date` is only visible when the item is available for pre-order.
 					]]>
 				</description>
 				<is-a>base.date</is-a>

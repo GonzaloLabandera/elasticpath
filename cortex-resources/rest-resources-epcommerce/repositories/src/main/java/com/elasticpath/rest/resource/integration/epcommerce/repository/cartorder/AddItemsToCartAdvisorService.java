@@ -15,7 +15,8 @@ public interface AddItemsToCartAdvisorService {
 	/**
 	 * Validate if the cart is empty. Return warning message is cart is not empty.
 	 *
+	 * @param cartGuid the guid of the cart.
 	 * @return warning message is cart is not empty
 	 */
-	Observable<Message> validateEmptyCart();
+	Observable<Message> validateEmptyCart(String cartGuid);
 }

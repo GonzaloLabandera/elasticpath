@@ -12,6 +12,7 @@
 	<logger name="org.apache.http" level="ERROR"/>
 	<logger name="com.elasticpath.search" level="WARN"/>
 	<logger name="com.elasticpath.shopping" level="${ep.cortex.fixture.logger}"/>
+	<logger name="org.glassfish.jersey.internal.inject.Providers" level="ERROR"/>
 
 	<root level="INFO">
 		<appender-ref ref="CONSOLE"/>

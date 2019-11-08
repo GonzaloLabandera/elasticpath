@@ -9,6 +9,13 @@
 				WHERE ci.skuGuid = ?1
 			</query>
 		</named-query>
+		<named-query name="DELETE_CARTITEMS_BY_GUIDS">
+			<query>
+				DELETE
+				FROM ShoppingItemImpl ci
+				WHERE ci.guid IN (:list)
+			</query>
+		</named-query>
 		<named-query name="SHOPPING_ITEM_BY_GUID">
 			<query>
 				SELECT si
@@ -32,20 +39,22 @@
 				WHERE sc.guid IN (:list)
 			</query>
 		</named-query>
-		<named-query name="ACTIVE_SHOPPING_CART_FIND_BY_SHOPPER_UID">
+		<named-query name="DEFAULT_SHOPPING_CART_FIND_BY_SHOPPER_UID">
 			<query>
 				SELECT sc
 				FROM ShoppingCartMementoImpl sc
 				WHERE sc.shopperUid = ?1
 				AND sc.status = 'ACTIVE'
+				AND sc.default = true
 			</query>
 		</named-query>
-	<named-query name="ACTIVE_SHOPPING_CARTGUID_FIND_BY_SHOPPER_UID">
+	<named-query name="DEFAULT_SHOPPING_CARTGUID_FIND_BY_SHOPPER_UID">
 		<query>
 			SELECT sc.guid
 			FROM ShoppingCartMementoImpl sc
 			WHERE sc.shopperUid = ?1
 			AND sc.status = 'ACTIVE'
+			AND sc.default = true
 		</query>
 	</named-query>
 	<named-query name="STORE_BY_CARTGUID">
@@ -63,14 +72,16 @@
 				WHERE sc.shopperUid = s.uidPk
 				AND s.customer.guid = ?1
 				AND sc.status = 'ACTIVE'
+
 				AND UPPER(s.storeCode) = UPPER(?2)
 			</query>
 		</named-query>
-		<named-query name="DELETE_EMPTY_SHOPPING_CARTS_BY_SHOPPER_UID">
+	<named-query name="DELETE_DEFAULT_EMPTY_SHOPPING_CARTS_BY_SHOPPER_UID">
 			<query>
 				DELETE
 				FROM ShoppingCartMementoImpl sc
 				WHERE sc.allItems IS EMPTY
+				AND sc.default = true
 				AND sc.shopperUid IN (:list)
 			</query>
 		</named-query>
@@ -127,6 +138,17 @@
 				AND UPPER(sc.storeCode) = UPPER(?2)
 			</query>
 		</named-query>
+
+	<named-query name="FIND_CART_DATA_FOR_CARTS">
+		<query>
+			SELECT sc.guid, cartData
+			FROM ShoppingCartMementoImpl sc
+			INNER JOIN sc.cartData cartData
+			WHERE sc.guid IN (:list)
+
+		</query>
+
+	</named-query>
 
     <!-- Named queries for WishListImpl -->
 		<named-query name="WISHLIST_BY_SHOPPING_CONTEXT">

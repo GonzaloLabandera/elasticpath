@@ -92,10 +92,9 @@ public class PriceListExporterImpl extends AbstractExporterImpl<PriceListDescrip
 		return PriceListDescriptorDTO.class;
 	}
 
-	@SuppressWarnings("rawtypes")
 	@Override
 	public Class<?>[] getDependentClasses() {
-		return new Class[] { PriceListDescriptor.class, BaseAmount.class };
+		return new Class<?>[] { PriceListDescriptor.class, BaseAmount.class };
 	}
 
 	@Override
@@ -131,7 +130,7 @@ public class PriceListExporterImpl extends AbstractExporterImpl<PriceListDescrip
 	}
 
 	private Collection<BaseAmount> getBaseAmountsOfPriceList(final PriceListDescriptor rule) {
-		BaseAmountFilter baseAmountFilter = beanFactory.getBean(ContextIdNames.BASE_AMOUNT_FILTER);
+		BaseAmountFilter baseAmountFilter = beanFactory.getPrototypeBean(ContextIdNames.BASE_AMOUNT_FILTER, BaseAmountFilter.class);
 		baseAmountFilter.setPriceListDescriptorGuid(rule.getGuid());
 		return baseAmountService.findBaseAmounts(baseAmountFilter);
 	}

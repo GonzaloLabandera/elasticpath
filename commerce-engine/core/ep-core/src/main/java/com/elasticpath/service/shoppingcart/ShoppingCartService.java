@@ -5,11 +5,13 @@ package com.elasticpath.service.shoppingcart;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 import com.elasticpath.base.exception.EpServiceException;
 import com.elasticpath.domain.customer.CustomerSession;
 import com.elasticpath.domain.shopper.Shopper;
 import com.elasticpath.domain.shoppingcart.ShoppingCart;
+import com.elasticpath.domain.shoppingcart.impl.CartData;
 import com.elasticpath.service.EpPersistenceService;
 import com.elasticpath.service.shoppingcart.actions.FinalizeCheckoutActionContext;
 
@@ -79,7 +81,14 @@ public interface ShoppingCartService extends EpPersistenceService {
 	 * @return the shopping cart corresponding to the shopping context or an empty cart if no matching cart can be found
 	 * @throws EpServiceException - in case of any errors
 	 */
-	ShoppingCart findOrCreateByCustomerSession(CustomerSession customerSession) throws EpServiceException;
+	ShoppingCart findOrCreateDefaultCartByCustomerSession(CustomerSession customerSession) throws EpServiceException;
+
+	/**
+	 * Creates a shopping cart for a customer session.
+	 * @param customerSession the customer session.
+	 * @return an empty shopping cart.
+	 */
+	ShoppingCart createByCustomerSession(CustomerSession customerSession);
 
 	/**
 	 * "Touches" the cart by setting the last modified date on the given cart to the current date.
@@ -94,7 +103,7 @@ public interface ShoppingCartService extends EpPersistenceService {
 	 * @param shopperUids the shopping context uids.
 	 * @return the number of deleted shopping carts
 	 */
-	int deleteEmptyShoppingCartsByShopperUids(List<Long> shopperUids);
+	int deleteDefaultEmptyShoppingCartsByShopperUids(List<Long> shopperUids);
 
 	/**
 	 * Deletes all shopping carts that are associated with the list of {@link Shopper} uids.
@@ -122,6 +131,14 @@ public interface ShoppingCartService extends EpPersistenceService {
 	 * @return the number of deleted shopping carts
 	 */
 	int deleteAllInactiveShoppingCartsByShopperUids(List<Long> shopperUids);
+
+	/**
+	 * Deletes shopping carts given their GUIDs.
+	 *
+	 * @param shoppingCartGuids list of guids
+	 * @return the number of deleted shopping carts
+	 */
+	int deleteShoppingCartsByGuid(List<String> shoppingCartGuids);
 
 	/**
 	 * Gets the last modified date of the shopping cart.
@@ -168,13 +185,12 @@ public interface ShoppingCartService extends EpPersistenceService {
 	void disconnectCartFromShopperAndCustomerSession(ShoppingCart oldCart, FinalizeCheckoutActionContext context);
 
 	/**
-	 * Finds the default (active) shopping cart guid for the given Shopper.
-	 * @param shopper the shopper.
+	 * Finds the default (active) shopping cart guid for the given Customer Session.
+	 * @param customerSession the customer session.
 	 * @return the shopping cart guid of the default cart.
 	 * @throws EpServiceException - in case of any errors
 	 */
-	String findDefaultShoppingCartGuidByShopper(Shopper shopper) throws EpServiceException;
-
+	String findDefaultShoppingCartGuidByCustomerSession(CustomerSession customerSession) throws EpServiceException;
 
 	/**
 	 *  Finds the store code for the given cart guid.
@@ -182,4 +198,11 @@ public interface ShoppingCartService extends EpPersistenceService {
 	 * @return the storecode.
 	 */
 	String findStoreCodeByCartGuid(String cartGuid);
+
+	/**
+	 * Retrieves a list of cart data maps.
+	 * @param cartGuids the cart guids.
+	 * @return the list of maps of cartdatas.
+	 */
+	Map<String, List<CartData>> findCartDataForCarts(List<String> cartGuids);
 }

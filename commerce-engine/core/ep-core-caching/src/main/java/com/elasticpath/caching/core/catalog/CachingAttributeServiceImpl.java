@@ -6,6 +6,8 @@ package com.elasticpath.caching.core.catalog;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import com.elasticpath.base.exception.EpServiceException;
 import com.elasticpath.cache.Cache;
@@ -219,6 +221,12 @@ public class CachingAttributeServiceImpl extends AbstractEpPersistenceServiceImp
 		return fallbackAttributeService.findProductSkuValueAttributeByAttributeUid(attribute);
 	}
 
+	@Override
+	public Set<String> getCustomerProfileAttributeKeys() {
+		return getAttributes(AttributeUsage.CUSTOMERPROFILE)
+				.stream().map(Attribute::getKey)
+				.collect(Collectors.toSet());
+	}
 
 	public void setAttributesCache(final Cache<Integer, List<Attribute>> attributesCache) {
 		this.attributesCache = attributesCache;

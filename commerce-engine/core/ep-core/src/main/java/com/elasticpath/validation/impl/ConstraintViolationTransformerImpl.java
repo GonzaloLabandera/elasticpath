@@ -18,7 +18,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import com.elasticpath.base.common.dto.StructuredErrorMessage;
 import com.elasticpath.validation.ConstraintViolationTransformer;
-import com.elasticpath.validation.validators.util.DynamicCartItemModifierField;
+import com.elasticpath.validation.validators.util.DynamicModifierField;
 
 /**
  * Implementation of {@link ConstraintViolationTransformer}.
@@ -103,8 +103,8 @@ public class ConstraintViolationTransformerImpl implements ConstraintViolationTr
 		String invalidKey = "invalid-value";
 
 		Object rootBeanObject = constraintViolation.getRootBean();
-		if (rootBeanObject != null && rootBeanObject.getClass().isAssignableFrom(DynamicCartItemModifierField.class)) {
-			DynamicCartItemModifierField rootBean = (DynamicCartItemModifierField) constraintViolation.getRootBean();
+		if (rootBeanObject != null && rootBeanObject.getClass().isAssignableFrom(DynamicModifierField.class)) {
+			DynamicModifierField rootBean = (DynamicModifierField) constraintViolation.getRootBean();
 			if (rootBean != null) {
 				final String[] invalidOptions = rootBean.getInvalidOptions();
 

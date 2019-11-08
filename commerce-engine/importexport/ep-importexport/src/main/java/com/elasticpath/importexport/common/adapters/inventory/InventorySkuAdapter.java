@@ -150,7 +150,7 @@ public class InventorySkuAdapter extends AbstractDomainAdapterImpl<ProductSku, I
 		
 		InventoryDto inventory = productInventoryManagementService.getInventory(productSku, warehouseUid);
 		if (inventory == null) {
-			inventory = getBeanFactory().getBean(ContextIdNames.INVENTORYDTO);
+			inventory = getBeanFactory().getPrototypeBean(ContextIdNames.INVENTORYDTO, InventoryDto.class);
 			inventory.setWarehouseUid(warehouseUid);
 		}
 		return inventory;
@@ -193,7 +193,7 @@ public class InventorySkuAdapter extends AbstractDomainAdapterImpl<ProductSku, I
 
 	@Override
 	public ProductSku createDomainObject() {
-		return getBeanFactory().getBean(ContextIdNames.PRODUCT_SKU);
+		return getBeanFactory().getPrototypeBean(ContextIdNames.PRODUCT_SKU, ProductSku.class);
 	}
 
 	@Override

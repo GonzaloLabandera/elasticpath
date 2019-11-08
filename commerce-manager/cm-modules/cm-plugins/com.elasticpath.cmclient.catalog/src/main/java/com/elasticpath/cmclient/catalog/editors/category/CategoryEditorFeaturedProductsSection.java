@@ -334,15 +334,12 @@ public class CategoryEditorFeaturedProductsSection extends AbstractPolicyAwareEd
 			currProductToAdd.addCategory(getCategory());
 			productService.saveOrUpdate(currProductToAdd);
 		}
-		// Update the featured products list in the database. Do this by first removing all the featured products in this category and then adding
-		// them back in the correct order
-		for (final Product currFeaturedProduct : this.featuredProducts) {
-			// reset the featured order value to 0
-			productService.resetProductCategoryFeatured(currFeaturedProduct.getUidPk(), getCategory().getUidPk());
-		}
+
+		int featureProductOrder = 0;
 		for (final Product currFeaturedProduct : this.featuredProducts) {
 			// set the order value to the list index
-			productService.setProductCategoryFeatured(currFeaturedProduct.getUidPk(), getCategory().getUidPk());
+			featureProductOrder++;
+			productService.refreshProductCategoryFeaturedField(currFeaturedProduct.getUidPk(), getCategory().getUidPk(), featureProductOrder);
 		}
 		
 		this.deletedFeaturedProductUids.clear();

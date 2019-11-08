@@ -16,7 +16,7 @@ import org.junit.runner.RunWith
 		features = ["src/test/resources/features", "classpath:features"],
 		glue = ["classpath:com.elasticpath.cortex.dce", "classpath:com.elasticpath.cucumber", "classpath:com.elasticpath.jms.cucumber",
 				"classpath:com.elasticpath.repo.cucumber"],
-		tags = ["~@bug", "~@notReady"],
+		tags = ["~@bug", "~@notReady", "~@customerZero"],
 		strict = true
 )
 class CucumberRunnerIT {}

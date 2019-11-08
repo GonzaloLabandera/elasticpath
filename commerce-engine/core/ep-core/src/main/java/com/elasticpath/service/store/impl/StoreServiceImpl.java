@@ -22,7 +22,6 @@ import com.elasticpath.domain.store.StoreState;
 import com.elasticpath.persistence.api.FetchGroupLoadTuner;
 import com.elasticpath.persistence.api.FlushMode;
 import com.elasticpath.service.impl.AbstractEpPersistenceServiceImpl;
-import com.elasticpath.service.misc.FetchPlanHelper;
 import com.elasticpath.service.search.IndexNotificationService;
 import com.elasticpath.service.search.query.ProductSearchCriteria;
 import com.elasticpath.service.search.query.SearchCriteria;
@@ -35,8 +34,6 @@ import com.elasticpath.service.store.StoreService;
 public class StoreServiceImpl extends AbstractEpPersistenceServiceImpl implements StoreService {
 
 	private static final String PLACEHOLDER_FOR_LIST = "list";
-
-	private FetchPlanHelper fetchPlanHelper;
 
 	private IndexNotificationService indexNotificationService;
 
@@ -210,22 +207,15 @@ public class StoreServiceImpl extends AbstractEpPersistenceServiceImpl implement
 	@Override
 	public Store getTunedStore(final long storeUid, final FetchGroupLoadTuner loadTuner) throws EpServiceException {
 		sanityCheck();
-		Store store;
 		if (storeUid <= 0) {
-			store = getBean(ContextIdNames.STORE);
-		} else {
-
-			if (loadTuner == null) {
-				store = getPersistentStore(storeUid);
-
-			} else {
-				fetchPlanHelper.clearFetchPlan();
-				fetchPlanHelper.configureFetchGroupLoadTuner(loadTuner, false);
-				store = getPersistentStore(storeUid);
-				fetchPlanHelper.clearFetchPlan();
-			}
+			return getBean(ContextIdNames.STORE);
 		}
-		return store;
+
+		if (loadTuner != null) {
+			getFetchPlanHelper().setLoadTuners(loadTuner.setCleanExistingGroups(false));
+		}
+
+		return getPersistentStore(storeUid);
 	}
 
 	/**
@@ -239,10 +229,10 @@ public class StoreServiceImpl extends AbstractEpPersistenceServiceImpl implement
 	@Override
 	public Collection<Store> getTunedStores(final Collection<Long> storeUids, final FetchGroupLoadTuner loadTuner) throws EpServiceException {
 		sanityCheck();
-		fetchPlanHelper.configureFetchGroupLoadTuner(loadTuner);
-		List<Store> result = getPersistenceEngine().retrieveByNamedQueryWithList("STORE_WITH_UIDS", PLACEHOLDER_FOR_LIST, storeUids);
-		fetchPlanHelper.clearFetchPlan();
-		return result;
+
+		return getPersistenceEngine()
+			.withLoadTuners(loadTuner)
+			.retrieveByNamedQueryWithList("STORE_WITH_UIDS", PLACEHOLDER_FOR_LIST, storeUids);
 	}
 
 	/**
@@ -351,12 +341,11 @@ public class StoreServiceImpl extends AbstractEpPersistenceServiceImpl implement
 	 */
 	@Override
 	public List<Store> findAllCompleteStores(final FetchGroupLoadTuner loadTuner) throws EpServiceException {
-		getFetchPlanHelper().configureFetchGroupLoadTuner(loadTuner);
-		List<Store> result = getPersistenceEngine().retrieveByNamedQuery("FIND_ALL_COMPLETE_STORES",
+		return getPersistenceEngine()
+			.withLoadTuners(loadTuner)
+			.retrieveByNamedQuery("FIND_ALL_COMPLETE_STORES",
 				StoreState.UNDER_CONSTRUCTION,
 				StoreState.RESTRICTED);
-		getFetchPlanHelper().clearFetchPlan();
-		return result;
 	}
 
 	/**
@@ -392,10 +381,10 @@ public class StoreServiceImpl extends AbstractEpPersistenceServiceImpl implement
 	@Override
 	public List<Store> findAllStores(final FetchGroupLoadTuner loadTuner) throws EpServiceException {
 		sanityCheck();
-		fetchPlanHelper.configureFetchGroupLoadTuner(loadTuner);
-		List<Store> result = getPersistenceEngine().retrieveByNamedQuery("FIND_ALL_STORES");
-		fetchPlanHelper.clearFetchPlan();
-		return result;
+
+		return getPersistenceEngine()
+			.withLoadTuners(loadTuner)
+			.retrieveByNamedQuery("FIND_ALL_STORES");
 	}
 
 	/**
@@ -447,7 +436,8 @@ public class StoreServiceImpl extends AbstractEpPersistenceServiceImpl implement
 				|| !getPersistenceEngine().retrieveByNamedQuery("STORE_WITH_SHIPPING_SERVICE_LEVEL_IN_USE", storeUidPk).isEmpty()
 				|| !getPersistenceEngine().retrieveByNamedQuery("STORE_WITH_PROMOTION_IN_USE", storeUidPk).isEmpty()
 				|| !getPersistenceEngine().retrieveByNamedQuery("STORE_WITH_IMPORTJOB_IN_USE", storeUidPk).isEmpty()
-				|| !getPersistenceEngine().retrieveByNamedQuery("STORE_WITH_STORE_ASSOCIATION_IN_USE", storeUidPk).isEmpty();
+				|| !getPersistenceEngine().retrieveByNamedQuery("STORE_WITH_STORE_ASSOCIATION_IN_USE", storeUidPk).isEmpty()
+				|| !getPersistenceEngine().retrieveByNamedQuery("STORE_WITH_CUSTOMER_ATTRIBUTE_IN_USE", storeUidPk).isEmpty();
 
 	}
 
@@ -477,15 +467,6 @@ public class StoreServiceImpl extends AbstractEpPersistenceServiceImpl implement
 
 
 	/**
-	 * Sets the {@link FetchPlanHelper} instance to use.
-	 *
-	 * @param fetchPlanHelper the {@link FetchPlanHelper} instance to use
-	 */
-	public void setFetchPlanHelper(final FetchPlanHelper fetchPlanHelper) {
-		this.fetchPlanHelper = fetchPlanHelper;
-	}
-
-	/**
 	 * Sets the {@link IndexNotificationService} instance to use.
 	 *
 	 * @param indexNotificationService the {@link IndexNotificationService} instance to use
@@ -494,12 +475,6 @@ public class StoreServiceImpl extends AbstractEpPersistenceServiceImpl implement
 		this.indexNotificationService = indexNotificationService;
 	}
 
-	/**
-	 * @return the fetch plan helper
-	 */
-	FetchPlanHelper getFetchPlanHelper() {
-		return fetchPlanHelper;
-	}
 
 	@Override
 	public Set<String> findAllSupportedCreditCardTypes() {
@@ -518,11 +493,10 @@ public class StoreServiceImpl extends AbstractEpPersistenceServiceImpl implement
 	@Override
 	public Store getTunedStore(final String storeCode, final FetchGroupLoadTuner loadTuner) throws EpServiceException {
 		sanityCheck();
-		fetchPlanHelper.clearFetchPlan();
-		fetchPlanHelper.configureFetchGroupLoadTuner(loadTuner, false);
-		Store store = findStoreWithCode(storeCode);
-		fetchPlanHelper.clearFetchPlan();
-		return store;
+
+		getFetchPlanHelper().setLoadTuners(loadTuner.setCleanExistingGroups(false));
+
+		return findStoreWithCode(storeCode);
 	}
 
 	@Override
@@ -533,5 +507,10 @@ public class StoreServiceImpl extends AbstractEpPersistenceServiceImpl implement
 		}
 
 		return result.get(0);
+	}
+
+	@Override
+	public Collection<String> getCartTypeNamesForStore(final String storeCode) {
+		return getPersistenceEngine().retrieveByNamedQuery("FIND_CART_TYPES_FOR_STORE", storeCode);
 	}
 }

@@ -44,6 +44,7 @@ import com.elasticpath.domain.skuconfiguration.SkuOption;
 import com.elasticpath.domain.skuconfiguration.SkuOptionValue;
 import com.elasticpath.domain.skuconfiguration.impl.SkuOptionImpl;
 import com.elasticpath.domain.skuconfiguration.impl.SkuOptionValueImpl;
+import com.elasticpath.domain.subscriptions.PaymentSchedule;
 import com.elasticpath.domain.subscriptions.impl.PaymentScheduleImpl;
 import com.elasticpath.importexport.common.caching.CachingService;
 import com.elasticpath.importexport.common.dto.products.bundles.ProductBundleConstituentCodeDTO;
@@ -89,16 +90,14 @@ public class ProductBundleAdapterTest {
 		constituentFactory = new BundleConstituentFactoryImpl() {
 			@Override
 			public BundleConstituent createBundleConstituentInternal() {
-				BundleConstituent constituent = new BundleConstituentImpl() {
+				return new BundleConstituentImpl() {
 					private static final long serialVersionUID = 1L;
 
-					@SuppressWarnings("unchecked") //because of a bug in checkstyle, can't use generics in the anonymous inner-class.
 					@Override
-					protected Object getBean(final String beanName) {
-						return mockBeanFactory.getBean(beanName);
+					public <T> T getPrototypeBean(final String name, final Class<T> clazz) {
+						return mockBeanFactory.getPrototypeBean(name, clazz);
 					}
 				};
-				return constituent;
 			}
 
 		};
@@ -235,7 +234,7 @@ public class ProductBundleAdapterTest {
 			@Override
 			void replaceConstituents(final ProductBundle bundle, final Collection<BundleConstituent> newConstituents) {
 				//do nothing
-			};
+			}
 		};
 		productBundleAdapter.setBundleConstituentFactory(constituentFactory);
 		productBundleAdapter.setBundleConstituentCodeTypeResolver(resolver);
@@ -280,7 +279,7 @@ public class ProductBundleAdapterTest {
 			@Override
 			void replaceConstituents(final ProductBundle bundle, final Collection<BundleConstituent> newConstituents) {
 				//do nothing
-			};
+			}
 		};
 
 		productBundleAdapter.setBundleConstituentFactory(constituentFactory);
@@ -348,7 +347,7 @@ public class ProductBundleAdapterTest {
 			@Override
 			void replaceConstituents(final ProductBundle bundle, final Collection<BundleConstituent> newConstituents) {
 				//no-op
-			};
+			}
 		};
 		productBundleAdapter.setBundleConstituentFactory(constituentFactory);
 		productBundleAdapter.setBundleConstituentCodeTypeResolver(resolver);
@@ -506,7 +505,7 @@ public class ProductBundleAdapterTest {
 	private void shouldAllowProductConstituentBeanCreation() {
 		context.checking(new Expectations() {
 			{
-				allowing(mockBeanFactory).getBean("productConstituent");
+				allowing(mockBeanFactory).getPrototypeBean("productConstituent", ProductConstituent.class);
 				will(returnValue(new ProductConstituentImpl()));
 			}
 		});
@@ -515,7 +514,7 @@ public class ProductBundleAdapterTest {
 	private void shouldAllowPriceAdjustmentBeanCreation(final BeanFactory mockBeanFactory) {
 		context.checking(new Expectations() {
 			{
-				allowing(mockBeanFactory).getBean(ContextIdNames.PRICE_ADJUSTMENT);
+				allowing(mockBeanFactory).getPrototypeBean(ContextIdNames.PRICE_ADJUSTMENT, PriceAdjustment.class);
 				will(returnValue(new PriceAdjustmentImpl()));
 			}
 		});
@@ -638,7 +637,7 @@ public class ProductBundleAdapterTest {
 
 		context.checking(new Expectations() {
 			{
-				allowing(mockBeanFactory).getBean(ContextIdNames.PAYMENT_SCHEDULE);
+				allowing(mockBeanFactory).getPrototypeBean(ContextIdNames.PAYMENT_SCHEDULE, PaymentSchedule.class);
 				will(returnValue(new PaymentScheduleImpl()));
 			}
 		});

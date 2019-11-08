@@ -66,7 +66,10 @@ public class OfferSearchResultToFacetsRepositoryImpl<I extends OfferSearchResult
 
 		int startPageNumber = identifier.getPageId().getValue();
 
-		return searchRepository.getSearchCriteria(categoryCode, scope, locale, currency, appliedFacets, keyword)
+		OfferSearchData offerSearchData = new OfferSearchData(1, pageSize, scope, appliedFacets, keyword);
+		offerSearchData.setCategoryCode(categoryCode);
+
+		return searchRepository.getSearchCriteria(offerSearchData, locale, currency)
 				.flatMapObservable(searchCriteria -> searchRepository.getFacetFields(searchCriteria, startPageNumber, pageSize))
 				.isEmpty()
 				.flatMapObservable(empty -> empty ? Observable.empty()

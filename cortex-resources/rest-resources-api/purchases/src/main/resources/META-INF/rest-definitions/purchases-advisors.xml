@@ -3,7 +3,6 @@
 
 	<family>
 		<name>purchases</name>
-		<description><![CDATA[Advisors on the purchase form]]></description>
 
 		<advisor>
 			<name>purchase-form-validation-info</name>

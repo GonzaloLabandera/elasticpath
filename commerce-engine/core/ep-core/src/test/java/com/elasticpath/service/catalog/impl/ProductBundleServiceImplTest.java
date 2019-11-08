@@ -217,4 +217,26 @@ public class ProductBundleServiceImplTest {
 		assertEquals("Unexpected bundles returned from service", expectedBundles, actualBundles);
 	}
 
+	@Test
+	@SuppressWarnings("unchecked")
+	public void testFindAllProductBundleCodesContainingProductCycles() {
+		final Product product = new ProductImpl();
+		product.setCode("product");
+
+		context.checking(new Expectations() { {
+			oneOf(persistenceEngine).retrieveByNamedQuery(with(any(String.class)), with(new Object[] {product.getCode()}));
+			will(returnValue(Collections.singletonList(new Object[] {BUNDLE_1_ID, BUNDLE_1_CODE})));
+			oneOf(persistenceEngine).retrieveByNamedQuery(with(any(String.class)), with(new Object[] {BUNDLE_1_CODE}));
+			will(returnValue(Collections.singletonList(new Object[] {BUNDLE_3_ID, BUNDLE_3_CODE})));
+			oneOf(persistenceEngine).retrieveByNamedQuery(with(any(String.class)), with(new Object[] {BUNDLE_2_CODE}));
+			will(returnValue(Collections.emptyList()));
+			oneOf(persistenceEngine).retrieveByNamedQuery(with(any(String.class)), with(new Object[] {BUNDLE_3_CODE}));
+			will(returnValue(Collections.singletonList(new Object[]{BUNDLE_2_ID, BUNDLE_2_CODE})));
+		} });
+
+		Set<String> codes = service.findAllProductBundleCodesContainingProduct(product.getCode());
+		assertEquals("Return value should return both sku and product collections, plus nested bundle collections",
+				new HashSet<>(Arrays.asList(BUNDLE_1_CODE, BUNDLE_2_CODE, BUNDLE_3_CODE)), codes);
+	}
+
 }

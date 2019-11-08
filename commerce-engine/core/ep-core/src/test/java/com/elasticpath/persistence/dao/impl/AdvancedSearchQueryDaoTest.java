@@ -16,7 +16,7 @@ import com.elasticpath.commons.beanframework.BeanFactory;
 import com.elasticpath.domain.advancedsearch.AdvancedSearchQuery;
 import com.elasticpath.domain.advancedsearch.impl.AdvancedSearchQueryImpl;
 import com.elasticpath.persistence.api.PersistenceEngine;
-import com.elasticpath.service.misc.FetchPlanHelper;
+import com.elasticpath.persistence.openjpa.util.FetchPlanHelper;
 
 /**
  * Tests DAO operations on <code>AdvancedSearchQueryDaoImpl</code>.
@@ -95,8 +95,7 @@ public class AdvancedSearchQueryDaoTest {
 		expectedSearchQuery.setUidPk(queryUidPk);
 		context.checking(new Expectations() {
 			{
-				allowing(mockFetchPlanHelper).addField(with(any(Class.class)), with(any(String.class)));
-				oneOf(mockFetchPlanHelper).clearFetchPlan();
+				allowing(mockFetchPlanHelper).setCollectionOfLazyFields(advancedSearchQueryDao.getLazyFields(true));
 
 				oneOf(mockPersistenceEngine).get(AdvancedSearchQueryImpl.class, queryUidPk);
 				will(returnValue(expectedSearchQuery));

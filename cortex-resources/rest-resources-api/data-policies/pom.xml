@@ -42,6 +42,11 @@
 			<plugin>
 				<groupId>com.elasticpath.rest.definitions</groupId>
 				<artifactId>api-generator-maven-plugin</artifactId>
+				<configuration>
+					<flags>
+						<experimental-advanced-advisor>true</experimental-advanced-advisor>
+					</flags>
+				</configuration>
 			</plugin>
 
 			<plugin>

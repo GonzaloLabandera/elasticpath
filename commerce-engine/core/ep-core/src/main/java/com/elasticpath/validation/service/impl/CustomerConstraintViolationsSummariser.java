@@ -42,8 +42,8 @@ public class CustomerConstraintViolationsSummariser extends SimpleConstraintViol
 		}
 		return super.getPropertyName(violation);
 	}
-	
-	
+
+
 	/**
 	 * Checks if the violation is related to a customer profile attribute.
 	 *

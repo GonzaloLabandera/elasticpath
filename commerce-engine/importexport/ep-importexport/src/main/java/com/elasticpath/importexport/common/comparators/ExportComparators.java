@@ -6,11 +6,11 @@ package com.elasticpath.importexport.common.comparators;
 import java.util.Comparator;
 
 import com.elasticpath.common.dto.DisplayValue;
-import com.elasticpath.importexport.common.dto.catalogs.CartItemModifierFieldDTO;
-import com.elasticpath.importexport.common.dto.catalogs.CartItemModifierFieldOptionDTO;
 import com.elasticpath.importexport.common.dto.catalogs.SkuOptionValueDTO;
 import com.elasticpath.importexport.common.dto.dynamiccontent.ParameterValueDTO;
 import com.elasticpath.importexport.common.dto.inventory.InventoryWarehouseDTO;
+import com.elasticpath.importexport.common.dto.modifier.ModifierFieldDTO;
+import com.elasticpath.importexport.common.dto.modifier.ModifierFieldOptionDTO;
 import com.elasticpath.importexport.common.dto.productcategory.ProductCategoryDTO;
 import com.elasticpath.importexport.common.dto.products.AttributeValuesDTO;
 import com.elasticpath.importexport.common.dto.products.ProductSkuDTO;
@@ -61,16 +61,16 @@ public final class ExportComparators {
 			.comparing(AttributeValuesDTO::getKey);
 
 	/**
-	 * Export comparator for {@link CartItemModifierFieldDTO} objects.
+	 * Export comparator for {@link ModifierFieldDTO} objects.
 	 */
-	public static final Comparator<CartItemModifierFieldDTO> CART_ITEM_MODIFIER_FIELD_DTO = Comparator
-			.comparing(CartItemModifierFieldDTO::getOrdering);
+	public static final Comparator<ModifierFieldDTO> CART_ITEM_MODIFIER_FIELD_DTO = Comparator
+			.comparing(ModifierFieldDTO::getOrdering);
 
 	/**
-	 * Export comparator for {@link CartItemModifierFieldOptionDTO} objects.
+	 * Export comparator for {@link ModifierFieldOptionDTO} objects.
 	 */
-	public static final Comparator<CartItemModifierFieldOptionDTO> CART_ITEM_MODIFIER_FIELD_OPTION_DTO = Comparator
-			.comparing(CartItemModifierFieldOptionDTO::getOrdering);
+	public static final Comparator<ModifierFieldOptionDTO> CART_ITEM_MODIFIER_FIELD_OPTION_DTO = Comparator
+			.comparing(ModifierFieldOptionDTO::getOrdering);
 
 	/**
 	 * Export comparator for {@link ConditionalExpressionDTO} objects.

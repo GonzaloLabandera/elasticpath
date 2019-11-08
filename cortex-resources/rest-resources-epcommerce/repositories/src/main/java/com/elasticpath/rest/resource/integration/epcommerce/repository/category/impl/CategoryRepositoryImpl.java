@@ -104,6 +104,7 @@ public class CategoryRepositoryImpl implements CategoryRepository {
 		return findByStoreAndCategoryCode(storeCode, parentCategoryCode)
 				.flatMap(this::getChildren)
 				.flatMapObservable(Observable::fromIterable)
+				.filter(category -> !category.isLinked() || category.isIncluded())
 				.sorted(comparator);
 	}
 

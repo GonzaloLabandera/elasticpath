@@ -6,12 +6,10 @@ import static org.mockito.Mockito.when;
 
 import java.util.HashMap;
 
+import io.reactivex.Maybe;
 import io.reactivex.Single;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
-import io.reactivex.Maybe;
-
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
@@ -71,7 +69,7 @@ public class ShoppingItemResolutionStrategyTest {
 		ResourceIdentifier resourceIdentifier = resourceIdentifierMaybe.blockingGet();
 		assertTrue("Resource identifier should be a CartLineItemIdentifier", resourceIdentifier instanceof LineItemIdentifier);
 		LineItemIdentifier lineItemIdentifier = (LineItemIdentifier) resourceIdentifier;
-		assertEquals(STORE_CODE, lineItemIdentifier.getLineItems().getCart().getScope().getValue());
+		assertEquals(STORE_CODE, lineItemIdentifier.getLineItems().getCart().getCarts().getScope().getValue());
 		assertEquals(SHOPPING_ITEM_GUID, lineItemIdentifier.getLineItemId().getValue());
 		assertEquals(SHOPPING_CART_GUID, lineItemIdentifier.getLineItems().getCart().getCartId().getValue());
 	}

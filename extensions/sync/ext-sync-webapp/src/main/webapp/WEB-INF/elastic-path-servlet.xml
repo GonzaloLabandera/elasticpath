@@ -61,10 +61,10 @@
 		<property name="type"   value="local" />
 	</bean>
 
-	<bean id="dataSource" class="org.springframework.jndi.JndiObjectFactoryBean">
-		<property name="jndiName" value="java:comp/env/jdbc/epjndi" />
-		<property name="resourceRef" value="true" />
-	</bean>
+	<import resource="classpath:spring/dataaccess/datasource.xml"/>
+
+	<!-- Sync webapp uses master db only -->
+	<alias alias="readOnlyDataSource" name="dataSource"/>
 
 	<import resource="classpath*:spring/settings/ep-settings.xml" />
 

@@ -11,7 +11,7 @@ import io.reactivex.Single;
 
 import com.elasticpath.repository.Repository;
 import com.elasticpath.rest.definition.carts.AddToDefaultCartFormResource;
-import com.elasticpath.rest.definition.carts.CartIdentifier;
+import com.elasticpath.rest.definition.carts.CartsIdentifier;
 import com.elasticpath.rest.definition.carts.LineItemEntity;
 import com.elasticpath.rest.definition.carts.LineItemIdentifier;
 import com.elasticpath.rest.definition.items.ItemIdentifier;
@@ -47,7 +47,7 @@ public class SubmitAddToDefaultCartFormPrototype implements AddToDefaultCartForm
 	@Inject
 	public SubmitAddToDefaultCartFormPrototype(@RequestForm final LineItemEntity lineItemEntity,
 											   @UriPart(ItemIdentifier.ITEM_ID) final IdentifierPart<Map<String, String>> itemId,
-											   @UriPart(CartIdentifier.SCOPE) final IdentifierPart<String> scope,
+											   @UriPart(CartsIdentifier.SCOPE) final IdentifierPart<String> scope,
 											   @ResourceRepository final Repository<LineItemEntity, LineItemIdentifier> repository) {
 		this.lineItemEntity = lineItemEntity;
 		this.itemId = itemId.getValue().get(ItemRepository.SKU_CODE_KEY);

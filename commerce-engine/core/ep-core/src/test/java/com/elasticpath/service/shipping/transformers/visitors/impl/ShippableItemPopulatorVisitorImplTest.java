@@ -4,17 +4,17 @@
 package com.elasticpath.service.shipping.transformers.visitors.impl;
 
 import static java.lang.String.format;
-
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
+import java.util.Map;
 
+import com.google.common.collect.ImmutableMap;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
@@ -39,6 +39,8 @@ public class ShippableItemPopulatorVisitorImplTest {
 	private static final BigDecimal WIDTH = BigDecimal.valueOf(100);
 	private static final BigDecimal LENGTH = BigDecimal.valueOf(1000);
 
+	private static final Map<String, String> FIELD_MAP = ImmutableMap.of("key1", "value1", "key2", "value2");
+
 	@Mock
 	private ShoppingItem shoppingItem;
 
@@ -59,6 +61,7 @@ public class ShippableItemPopulatorVisitorImplTest {
 		when(shoppingItem.getGuid()).thenReturn(SHOPPING_ITEM_GUID);
 		when(shoppingItem.getSkuGuid()).thenReturn(SKU_GUID);
 		when(shoppingItem.getQuantity()).thenReturn(QUANTITY);
+		when(shoppingItem.getFields()).thenReturn(FIELD_MAP);
 
 		when(productSku.getWeight()).thenReturn(WEIGHT);
 		when(productSku.getHeight()).thenReturn(HEIGHT);
@@ -76,6 +79,7 @@ public class ShippableItemPopulatorVisitorImplTest {
 		when(populator.withHeight(HEIGHT)).thenReturn(populator);
 		when(populator.withWidth(WIDTH)).thenReturn(populator);
 		when(populator.withLength(LENGTH)).thenReturn(populator);
+		when(populator.withFields(FIELD_MAP)).thenReturn(populator);
 
 		objectUnderTest.accept(shoppingItem, populator);
 
@@ -85,6 +89,7 @@ public class ShippableItemPopulatorVisitorImplTest {
 		verify(populator).withHeight(HEIGHT);
 		verify(populator).withWidth(WIDTH);
 		verify(populator).withLength(LENGTH);
+		verify(populator).withFields(FIELD_MAP);
 	}
 
 	@Test

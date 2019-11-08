@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.eclipse.core.databinding.DataBindingContext;
 import org.eclipse.core.databinding.observable.value.IObservableValue;
 import org.eclipse.core.runtime.IStatus;
@@ -54,15 +55,15 @@ import com.elasticpath.cmclient.policy.common.PolicyActionContainer;
 import com.elasticpath.cmclient.policy.ui.AbstractPolicyAwareDialog;
 import com.elasticpath.cmclient.policy.ui.IPolicyTargetLayoutComposite;
 import com.elasticpath.commons.constants.ContextIdNames;
-import com.elasticpath.domain.cartmodifier.CartItemModifierField;
-import com.elasticpath.domain.cartmodifier.CartItemModifierFieldLdf;
-import com.elasticpath.domain.cartmodifier.CartItemModifierFieldOption;
-import com.elasticpath.domain.cartmodifier.CartItemModifierGroup;
-import com.elasticpath.domain.cartmodifier.CartItemModifierType;
-import com.elasticpath.service.cartitemmodifier.CartItemModifierService;
+import com.elasticpath.domain.modifier.ModifierField;
+import com.elasticpath.domain.modifier.ModifierFieldLdf;
+import com.elasticpath.domain.modifier.ModifierFieldOption;
+import com.elasticpath.domain.modifier.ModifierGroup;
+import com.elasticpath.domain.modifier.ModifierType;
+import com.elasticpath.service.modifier.ModifierService;
 
 /**
- * The dialog UI class for Adding/Editing CartItemModifierField.
+ * The dialog UI class for Adding/Editing ModifierField.
  */
 @SuppressWarnings({"PMD.GodClass", "PMD.TooManyMethods", "PMD.TooManyFields"})
 public class AddEditCartItemModifierFieldDialog extends AbstractPolicyAwareDialog
@@ -72,10 +73,10 @@ public class AddEditCartItemModifierFieldDialog extends AbstractPolicyAwareDialo
 
 	private static final int THREE_COLUMNS = 3; //$NON-NLS-1$
 
-	private static final String FIELD_TYPE_NAME_PREFIX = "CartItemModifierFieldTypeName_";  //$NON-NLS-1$
+	private static final String FIELD_TYPE_NAME_PREFIX = "ModifierFieldTypeName_";  //$NON-NLS-1$
 	private static final String CART_MODIFIER_FIELD_TABLE = "Cart Modifier Field"; //$NON-NLS-1$
 
-	private CartItemModifierGroup cartItemModifierGroup;
+	private ModifierGroup cartItemModifierGroup;
 
 	private static final int MINIMAL_DIALOG_WIDTH = 525; //$NON-NLS-1$
 
@@ -87,9 +88,11 @@ public class AddEditCartItemModifierFieldDialog extends AbstractPolicyAwareDialo
 
 	private static final int LANGUAGE_CHANGED_CALLER = 1; //$NON-NLS-1$
 
-	private CartItemModifierService cartItemModifierService;
+	private static final int SINGLE_OPTION_VALID_SIZE = 1;
 
-	private CartItemModifierField cartItemModifierField;
+	private ModifierService modifierService;
+
+	private ModifierField cartItemModifierField;
 
 	private Text fieldDisplayNameText;
 
@@ -135,7 +138,7 @@ public class AddEditCartItemModifierFieldDialog extends AbstractPolicyAwareDialo
 
 	private IEpLayoutData textFieldLayoutData3;
 
-	private List<CartItemModifierType> itemsTypes;
+	private List<ModifierType> itemsTypes;
 
 	private final DataBindingContext dataBindingContext;
 
@@ -143,7 +146,7 @@ public class AddEditCartItemModifierFieldDialog extends AbstractPolicyAwareDialo
 
 	private boolean allowRefresh;
 
-	private PolicyActionContainer addEditCartItemModifierFieldContainer;
+	private PolicyActionContainer addEditModifierFieldContainer;
 
 	/**
 	 * Default Constructor.
@@ -159,12 +162,12 @@ public class AddEditCartItemModifierFieldDialog extends AbstractPolicyAwareDialo
 	 * @param allLocales            all the available locales.
 	 * @param selectedLocale        the selected locale.
 	 * @param cartItemModifierField the cart item modifier field to be edited o added
-	 *                              {@link com.elasticpath.domain.cartmodifier.CartItemModifierField}
+	 *                              {@link com.elasticpath.domain.modifier.ModifierField}
 	 * @param cartItemModifierGroup the cart item modifier Group associated
-	 *                              {@link com.elasticpath.domain.cartmodifier.CartItemModifierGroup}
+	 *                              {@link com.elasticpath.domain.modifier.ModifierGroup}
 	 */
 	public AddEditCartItemModifierFieldDialog(final List<Locale> allLocales, final Locale selectedLocale,
-			final CartItemModifierField cartItemModifierField, final CartItemModifierGroup cartItemModifierGroup) {
+			final ModifierField cartItemModifierField, final ModifierGroup cartItemModifierGroup) {
 
 		this();
 		this.editMode = cartItemModifierField != null;
@@ -176,15 +179,15 @@ public class AddEditCartItemModifierFieldDialog extends AbstractPolicyAwareDialo
 		if (this.editMode) {
 			initializeDialog(cartItemModifierField);
 		} else {
-			createCartItemModifierField();
+			createModifierField();
 		}
 
 		this.cartItemModifierGroup = cartItemModifierGroup;
-		this.cartItemModifierService = ServiceLocator.getService(ContextIdNames.CART_ITEM_MODIFIER_SERVICE);
+		this.modifierService = ServiceLocator.getService(ContextIdNames.MODIFIER_SERVICE);
 		this.allowRefresh = false;
 	}
 
-	private void initializeDialog(final CartItemModifierField cartItemModifierField) {
+	private void initializeDialog(final ModifierField cartItemModifierField) {
 		this.cartItemModifierField = cartItemModifierField;
 
 		// remember the original code for validation purposes
@@ -193,11 +196,11 @@ public class AddEditCartItemModifierFieldDialog extends AbstractPolicyAwareDialo
 		}
 
 	/**
-	 * @return the current CartItemModifierField objected edited or added.
+	 * @return the current ModifierField objected edited or added.
 	 */
-	public CartItemModifierField getCartItemModifierField() {
+	public ModifierField getModifierField() {
 		if (cartItemModifierField == null) {
-			createCartItemModifierField();
+			createModifierField();
 		}
 		if (this.cartItemModifierField.getCode() != null) {
 			this.originalCode = this.cartItemModifierField.getCode();
@@ -206,8 +209,8 @@ public class AddEditCartItemModifierFieldDialog extends AbstractPolicyAwareDialo
 		return cartItemModifierField;
 	}
 
-	private void createCartItemModifierField() {
-		this.cartItemModifierField = ServiceLocator.getService(ContextIdNames.CART_ITEM_MODIFIER_FIELD);
+	private void createModifierField() {
+		this.cartItemModifierField = ServiceLocator.getService(ContextIdNames.MODIFIER_FIELD);
 		this.originalCode = "";
 		this.isRequired = false;
 	}
@@ -215,19 +218,19 @@ public class AddEditCartItemModifierFieldDialog extends AbstractPolicyAwareDialo
 	@Override
 	protected void bindControls() {
 		final EpControlBindingProvider bindingProvider = EpControlBindingProvider.getInstance();
-		// update strategy for the CartItemModifierField code control
+		// update strategy for the ModifierField code control
 		final ObservableUpdateValueStrategy valueUpdateStrategy = new ObservableUpdateValueStrategy() {
 			@Override
 			protected IStatus doSet(final IObservableValue observableValue, final Object newValue) {
 				final String code = fieldCodeText.getText();
-				getCartItemModifierField().setCode(code);
+				getModifierField().setCode(code);
 				if (!editMode) {
-					getCartItemModifierField().setOrdering(getMaximumFieldOrdering(cartItemModifierGroup) + 1);
+					getModifierField().setOrdering(getMaximumFieldOrdering(cartItemModifierGroup) + 1);
 				}
 				return Status.OK_STATUS;
 			}
 		};
-		// update strategy for the CartItemModifierFieldLDF
+		// update strategy for the ModifierFieldLDF
 		final ObservableUpdateValueStrategy displayNameUpdateStrategy = new ObservableUpdateValueStrategy() {
 			@Override
 			protected IStatus doSet(final IObservableValue observableValue, final Object newValue) {
@@ -235,21 +238,21 @@ public class AddEditCartItemModifierFieldDialog extends AbstractPolicyAwareDialo
 				return Status.OK_STATUS;
 			}
 		};
-		// update strategy for the CartItemModifierField field Type
+		// update strategy for the ModifierField field Type
 		final ObservableUpdateValueStrategy fieldTypeUpdateStrategy = new ObservableUpdateValueStrategy() {
 			@Override
 			protected IStatus doSet(final IObservableValue observableValue, final Object newValue) {
-				getCartItemModifierField().setFieldType(getActualCartItemModifierType(fieldTypeCombo.getSelectionIndex()));
+				getModifierField().setFieldType(getActualModifierType(fieldTypeCombo.getSelectionIndex()));
 				return Status.OK_STATUS;
 			}
 		};
-		// CartItemModifierField code
+		// ModifierField code
 		bindingProvider.bind(dataBindingContext, this.fieldCodeText,
 				EpValidatorFactory.CARTITEM_MODIFIER_FIELD_CODE, null, valueUpdateStrategy, true);
-		// CartItemModifierField displayName
+		// ModifierField displayName
 		bindingProvider.bind(dataBindingContext, this.fieldDisplayNameText, EpValidatorFactory.STRING_255_REQUIRED, null,
 				displayNameUpdateStrategy, true);
-		// CartItemModifierField Field Type
+		// ModifierField Field Type
 		bindingProvider.bind(dataBindingContext, this.fieldTypeCombo,
 				EpValidatorFactory.createCComboFieldTypeSelectionValidator(this.fieldTypeCombo),
 				null, fieldTypeUpdateStrategy, true);
@@ -299,10 +302,25 @@ public class AddEditCartItemModifierFieldDialog extends AbstractPolicyAwareDialo
 			return;
 		}
 
-		if (getCartItemModifierField().getFieldType().equals(CartItemModifierType.SHORT_TEXT)) {
-			getCartItemModifierField().setMaxSize(Integer.parseInt(fieldMaxSizeText.getText()));
+		if (getModifierField().getFieldType().equals(ModifierType.SHORT_TEXT)) {
+			getModifierField().setMaxSize(Integer.parseInt(fieldMaxSizeText.getText()));
+		} else {
+			getModifierField().setMaxSize(null);
 		}
-		getCartItemModifierField().setRequired(this.requiredBtt.getSelection());
+
+		if (!getModifierField().getFieldType().equals(ModifierType.PICK_MULTI_OPTION)
+				&& !getModifierField().getFieldType().equals(ModifierType.PICK_SINGLE_OPTION)) {
+			removeAll();
+		}
+
+		if (getModifierField().getFieldType().equals(ModifierType.PICK_SINGLE_OPTION)
+				&& getModifierField().getModifierFieldOptions().size() > SINGLE_OPTION_VALID_SIZE) {
+			final Set<ModifierFieldOption> options = getModifierField().getModifierFieldOptions();
+			removeAll();
+			options.stream().findFirst().ifPresent(this::add);
+		}
+
+		getModifierField().setRequired(this.requiredBtt.getSelection());
 
 		super.okPressed();
 	}
@@ -321,22 +339,22 @@ public class AddEditCartItemModifierFieldDialog extends AbstractPolicyAwareDialo
 		} else if (groupFieldName.trim().isEmpty()) {
 			setErrorMessage(CatalogMessages.get().AddEditCartItemModifierFieldDialog_ErrorDialog_noName_desc);
 			return false;
-		} else if (getCartItemModifierField().getFieldType().equals(CartItemModifierType.SHORT_TEXT)
+		} else if (getModifierField().getFieldType().equals(ModifierType.SHORT_TEXT)
 				&& (fieldMaxSizeText.getText().trim().isEmpty()
 				|| !fieldMaxSizeText.getText().trim().matches(DIGITS_ONLY))) { //Short Text Type
 			setErrorMessage(CatalogMessages.get().AddEditCartItemModifierFieldDialog_ErrorDialog_noMaxSize_desc);
 			return false;
-		} else if (getCartItemModifierField().getFieldType().equals(CartItemModifierType.SHORT_TEXT)
+		} else if (getModifierField().getFieldType().equals(ModifierType.SHORT_TEXT)
 				&& Double.parseDouble(fieldMaxSizeText.getText().trim()) > Integer.MAX_VALUE) { // Short Text Type; max size too large
 			setErrorMessage(CatalogMessages.get().AddEditCartItemModifierFieldDialog_ErrorDialog_maxSizeTooLarge);
 			return false;
-		} else if ((getCartItemModifierField().getFieldType().equals(CartItemModifierType.PICK_MULTI_OPTION)
-				|| getCartItemModifierField().getFieldType().equals(CartItemModifierType.PICK_SINGLE_OPTION))
-				&& this.getCartItemModifierField().getCartItemModifierFieldOptions().isEmpty()) { //Multi Select Option Type
+		} else if ((getModifierField().getFieldType().equals(ModifierType.PICK_MULTI_OPTION)
+				|| getModifierField().getFieldType().equals(ModifierType.PICK_SINGLE_OPTION))
+				&& this.getModifierField().getModifierFieldOptions().isEmpty()) { //Multi Select Option Type
 			setErrorMessage(CatalogMessages.get().AddEditCartItemModifierFieldDialog_ErrorDialog_noMulti_desc);
 			return false;
 		} else {
-			final CartItemModifierField groupField = this.cartItemModifierService.findCartItemModifierFieldByCode(groupFieldCode);
+			final ModifierField groupField = this.modifierService.findModifierFieldByCode(groupFieldCode);
 			if (groupField != null) {
 				if (editMode && groupField.getCode().equals(originalCode)) {
 					return true;
@@ -346,23 +364,23 @@ public class AddEditCartItemModifierFieldDialog extends AbstractPolicyAwareDialo
 			}
 			//validates the model (newly added items)
 			if (cartItemModifierGroup != null) {
-				for (CartItemModifierField itemModifierField : cartItemModifierGroup.getCartItemModifierFields()) {
+				for (ModifierField itemModifierField : cartItemModifierGroup.getModifierFields()) {
 					if (editMode && itemModifierField.getCode().equals(originalCode)) {
 						return true;
 					} else if ((!editMode && itemModifierField.getCode().equals(groupFieldCode))
-							&& itemModifierField.findCartItemModifierFieldLdfByLocale(this.selectedLocale.toString()) != null) {
+							&& itemModifierField.findModifierFieldLdfByLocale(this.selectedLocale.toString()) != null) {
 						setErrorMessage(CatalogMessages.get().AddEditCartItemModifierFieldDialog_ErrorDialog_AddInUse_Langdesc);
 						return false;
 					}
 				}
 			}
 		}
-		if ((!this.getCartItemModifierField().getFieldType().equals(CartItemModifierType.PICK_MULTI_OPTION)
-				&& !this.getCartItemModifierField().getFieldType().equals(CartItemModifierType.PICK_SINGLE_OPTION)) && !editMode) {
-			Set<CartItemModifierFieldOption> cartItemModifierFieldOptions = this.getCartItemModifierField().getCartItemModifierFieldOptions();
+		if ((!this.getModifierField().getFieldType().equals(ModifierType.PICK_MULTI_OPTION)
+				&& !this.getModifierField().getFieldType().equals(ModifierType.PICK_SINGLE_OPTION)) && !editMode) {
+			Set<ModifierFieldOption> cartItemModifierFieldOptions = this.getModifierField().getModifierFieldOptions();
 			if (!cartItemModifierFieldOptions.isEmpty()) {
-				for (CartItemModifierFieldOption cartItemModifierFieldOptionTMP : cartItemModifierFieldOptions) {
-					this.getCartItemModifierField().removeCartItemModifierFieldOption(cartItemModifierFieldOptionTMP);
+				for (ModifierFieldOption cartItemModifierFieldOptionTMP : cartItemModifierFieldOptions) {
+					this.getModifierField().removeModifierFieldOption(cartItemModifierFieldOptionTMP);
 				}
 			}
 		}
@@ -375,14 +393,14 @@ public class AddEditCartItemModifierFieldDialog extends AbstractPolicyAwareDialo
 		this.dialogComposite = dialogComposite;
 
 		final PolicyActionContainer codeFieldContainer = addPolicyActionContainer("cartItemModifierFieldCodeField"); //$NON-NLS-1$
-		this.addEditCartItemModifierFieldContainer = addPolicyActionContainer("addEditCartItemModifierFieldDialog"); //$NON-NLS-1$
+		this.addEditModifierFieldContainer = addPolicyActionContainer("addEditModifierFieldDialog"); //$NON-NLS-1$
 		if (editMode) {
 			// force state policy to check if cartItemModifierGroup is in current change set
-			this.addEditCartItemModifierFieldContainer.setPolicyDependent(this.cartItemModifierGroup);
+			this.addEditModifierFieldContainer.setPolicyDependent(this.cartItemModifierGroup);
 			codeFieldContainer.setPolicyDependent(this.cartItemModifierGroup);
 		} else {
 			// force state policy to *not* check if cartItemModifierGroup in current change set
-			this.addEditCartItemModifierFieldContainer.setPolicyDependent(null);
+			this.addEditModifierFieldContainer.setPolicyDependent(null);
 			codeFieldContainer.setPolicyDependent(null);
 		}
 
@@ -397,15 +415,15 @@ public class AddEditCartItemModifierFieldDialog extends AbstractPolicyAwareDialo
 		fieldCodeText = this.dialogComposite.addTextField(textFieldLayoutData3, codeFieldContainer);
 
 		this.dialogComposite.addLabelBoldRequired(
-				CatalogMessages.get().AddEditCartItemModifierFieldDialog_DisplayName, labelLayoutData, this.addEditCartItemModifierFieldContainer);
-		fieldLanguageCombo = this.dialogComposite.addComboBox(fieldData1, this.addEditCartItemModifierFieldContainer);
+				CatalogMessages.get().AddEditCartItemModifierFieldDialog_DisplayName, labelLayoutData, this.addEditModifierFieldContainer);
+		fieldLanguageCombo = this.dialogComposite.addComboBox(fieldData1, this.addEditModifierFieldContainer);
 		fieldLanguageCombo.addSelectionListener(this);
-		fieldDisplayNameText = this.dialogComposite.addTextField(fieldData2, this.addEditCartItemModifierFieldContainer);
+		fieldDisplayNameText = this.dialogComposite.addTextField(fieldData2, this.addEditModifierFieldContainer);
 
 		this.dialogComposite.addLabelBoldRequired(
-				CatalogMessages.get().AddEditCartItemModifierFieldDialog_FieldType, labelLayoutData, this.addEditCartItemModifierFieldContainer);
+				CatalogMessages.get().AddEditCartItemModifierFieldDialog_FieldType, labelLayoutData, this.addEditModifierFieldContainer);
 
-		fieldTypeCombo = this.dialogComposite.addComboBox(textFieldLayoutData3, this.addEditCartItemModifierFieldContainer);
+		fieldTypeCombo = this.dialogComposite.addComboBox(textFieldLayoutData3, this.addEditModifierFieldContainer);
 		fieldTypeCombo.addSelectionListener(this);
 	}
 
@@ -427,14 +445,14 @@ public class AddEditCartItemModifierFieldDialog extends AbstractPolicyAwareDialo
 
 	@Override
 	protected PolicyActionContainer getOkButtonPolicyActionContainer() {
-		return this.addEditCartItemModifierFieldContainer;
+		return this.addEditModifierFieldContainer;
 	}
 
 	@Override
 	protected void populateControls() {
 		this.fieldCodeText.setText(this.originalCode);
 
-		this.fieldTypeCombo.setItems(getCartItemModifierTypeStrings());
+		this.fieldTypeCombo.setItems(getModifierTypeStrings());
 
 		this.allLocalesTags = new ArrayList<>();
 		this.fieldLanguageCombo.removeAll();
@@ -468,13 +486,13 @@ public class AddEditCartItemModifierFieldDialog extends AbstractPolicyAwareDialo
 
 	@Override
 	public String getTargetIdentifier() {
-		return "addEditCartItemModifierFieldDialog"; //$NON-NLS-1$
+		return "addEditModifierFieldDialog"; //$NON-NLS-1$
 	}
 
 	@Override
 	public void setObjectGuid(final String objectGuid) {
 		if (objectGuid == null) {
-			createCartItemModifierField();
+			createModifierField();
 			this.editMode = false;
 		} else {
 			throw new UnsupportedOperationException("Add via ObjectGuidReceiver is not implemented.");
@@ -508,7 +526,7 @@ public class AddEditCartItemModifierFieldDialog extends AbstractPolicyAwareDialo
 	}
 
 	/**
-	 * Check CartItemModifierField LDF and Bind.
+	 * Check ModifierField LDF and Bind.
 	 *
 	 * @param lang    The current locale.
 	 * @param display The current display name.
@@ -517,12 +535,12 @@ public class AddEditCartItemModifierFieldDialog extends AbstractPolicyAwareDialo
 		//If called from binding (ui to model bind)
 		if (caller == BINDING_CALLER) {
 			if (!display.isEmpty()) {
-				CartItemModifierFieldLdf currentFieldLDF = this.getCartItemModifierField().findCartItemModifierFieldLdfByLocale(lang);
+				ModifierFieldLdf currentFieldLDF = this.getModifierField().findModifierFieldLdfByLocale(lang);
 				if (currentFieldLDF == null) {
-					currentFieldLDF = ServiceLocator.getService(ContextIdNames.CART_ITEM_MODIFIER_FIELD_LDF);
+					currentFieldLDF = ServiceLocator.getService(ContextIdNames.MODIFIER_FIELD_LDF);
 					currentFieldLDF.setDisplayName(display);
 					currentFieldLDF.setLocale(lang);
-					this.getCartItemModifierField().addCartItemModifierFieldLdf(currentFieldLDF);
+					this.getModifierField().addModifierFieldLdf(currentFieldLDF);
 				} else {
 					currentFieldLDF.setDisplayName(display);
 					currentFieldLDF.setLocale(lang);
@@ -530,7 +548,7 @@ public class AddEditCartItemModifierFieldDialog extends AbstractPolicyAwareDialo
 			}
 		} else if (caller == LANGUAGE_CHANGED_CALLER) { // If called when language changed (model to ui bind)
 			this.fieldDisplayNameText.setText(CatalogMessages.EMPTY_STRING);
-			CartItemModifierFieldLdf currentFieldLDF = this.getCartItemModifierField().findCartItemModifierFieldLdfByLocale(lang);
+			ModifierFieldLdf currentFieldLDF = this.getModifierField().findModifierFieldLdfByLocale(lang);
 			if (currentFieldLDF != null) {
 				this.fieldDisplayNameText.setText(currentFieldLDF.getDisplayName());
 			}
@@ -544,29 +562,29 @@ public class AddEditCartItemModifierFieldDialog extends AbstractPolicyAwareDialo
 			this.selectedLocale = Locale.forLanguageTag(this.allLocalesTags.get(this.fieldLanguageCombo.getSelectionIndex()));
 			checkLDFAndBind(selectedLocale.toString(), fieldDisplayNameText.getText(), 1);
 		} else if (selectionEvent.getSource().equals(fieldTypeCombo)) { // When Select A Field Type
-			recreateDialogControls(getActualCartItemModifierType(fieldTypeCombo.getSelectionIndex()));
+			recreateDialogControls(getActualModifierType(fieldTypeCombo.getSelectionIndex()));
 		} else if (selectionEvent.getSource().equals(addOptionBtt)) { // When add an option
 			final AddEditCartItemModifierFieldOptionDialog dialog = new AddEditCartItemModifierFieldOptionDialog(this.allLocales,
-					this.selectedLocale, null, this.getCartItemModifierField(), this.cartItemModifierGroup);
+					this.selectedLocale, null, this.getModifierField(), this.cartItemModifierGroup);
 			if (dialog.open() == Window.OK) {
-				this.add(dialog.getCartItemModifierFieldOption());
+				this.add(dialog.getModifierFieldOption());
 			}
 		} else if (selectionEvent.getSource().equals(editOptionBtt) && sel != null) { // When edit an option
-			CartItemModifierFieldOption selectedOpt = (CartItemModifierFieldOption) sel.getFirstElement();
+			ModifierFieldOption selectedOpt = (ModifierFieldOption) sel.getFirstElement();
 			this.edit(selectedOpt);
 		} else if (selectionEvent.getSource().equals(removeOptionBtt) && sel != null) { // When remove an option
-			CartItemModifierFieldOption selectedOpt = (CartItemModifierFieldOption) sel.getFirstElement();
+			ModifierFieldOption selectedOpt = (ModifierFieldOption) sel.getFirstElement();
 			this.remove(selectedOpt);
 			this.refreshTableViewer();
 			sel = null;
 		} else if (selectionEvent.getSource().equals(orderUpBtt)) { // When order up an option
-			CartItemModifierFieldOption selectedOpt = (CartItemModifierFieldOption) sel.getFirstElement();
+			ModifierFieldOption selectedOpt = (ModifierFieldOption) sel.getFirstElement();
 			changeOptionOrder(selectedOpt, -1);
 			refreshTableViewer();
 			this.cartItemModifierFieldOptionsTableViewer.getSwtTable().setFocus();
 			this.cartItemModifierFieldOptionsTableViewer.getSwtTableViewer().setSelection(sel);
 		} else if (selectionEvent.getSource().equals(orderDownBtt)) { // When order down an option
-			CartItemModifierFieldOption selectedOpt = (CartItemModifierFieldOption) sel.getFirstElement();
+			ModifierFieldOption selectedOpt = (ModifierFieldOption) sel.getFirstElement();
 			changeOptionOrder(selectedOpt, +1);
 			refreshTableViewer();
 			this.cartItemModifierFieldOptionsTableViewer.getSwtTable().setFocus();
@@ -585,7 +603,7 @@ public class AddEditCartItemModifierFieldDialog extends AbstractPolicyAwareDialo
 
 	@Override
 	public void doubleClick(final DoubleClickEvent doubleClickEvent) {
-		CartItemModifierFieldOption selectedOpt = (CartItemModifierFieldOption) sel.getFirstElement();
+		ModifierFieldOption selectedOpt = (ModifierFieldOption) sel.getFirstElement();
 		this.edit(selectedOpt);
 	}
 
@@ -621,14 +639,14 @@ public class AddEditCartItemModifierFieldDialog extends AbstractPolicyAwareDialo
 	/**
 	 * Method to recreate the controls by the field type selected.
 	 *
-	 * @param type CartItemModifierType selected.
+	 * @param type ModifierType selected.
 	 */
-	private void recreateDialogControls(final CartItemModifierType type) {
+	private void recreateDialogControls(final ModifierType type) {
 		if (type != null) {
-			if (type.equals(CartItemModifierType.SHORT_TEXT)) {
+			if (type.equals(ModifierType.SHORT_TEXT)) {
 				this.showHideFields(true, false);
 				return;
-			} else if (type.equals(CartItemModifierType.PICK_MULTI_OPTION) || type.equals(CartItemModifierType.PICK_SINGLE_OPTION)) {
+			} else if (type.equals(ModifierType.PICK_MULTI_OPTION) || type.equals(ModifierType.PICK_SINGLE_OPTION)) {
 				this.showHideFields(false, true);
 				return;
 			}
@@ -647,13 +665,13 @@ public class AddEditCartItemModifierFieldDialog extends AbstractPolicyAwareDialo
 
 			if (fieldMaxSizeLabel == null) {
 				fieldMaxSizeLabel = this.dialogComposite.addLabelBoldRequired(CatalogMessages.get().AddEditCartItemModifierFieldDialog_MaxSize,
-						labelLayoutData, this.addEditCartItemModifierFieldContainer);
+						labelLayoutData, this.addEditModifierFieldContainer);
 			}
 
 			if (fieldMaxSizeText == null) {
-				fieldMaxSizeText = this.dialogComposite.addTextField(textFieldLayoutData3, this.addEditCartItemModifierFieldContainer);
+				fieldMaxSizeText = this.dialogComposite.addTextField(textFieldLayoutData3, this.addEditModifierFieldContainer);
 				if (editMode) {
-					fieldMaxSizeText.setText(String.valueOf(this.getCartItemModifierField().getMaxSize()));
+					fieldMaxSizeText.setText(String.valueOf(this.getModifierField().getMaxSize()));
 				}
 			}
 			this.createRequiredButton(this.isRequired);
@@ -734,9 +752,9 @@ public class AddEditCartItemModifierFieldDialog extends AbstractPolicyAwareDialo
 			final IEpLayoutData tableLayoutData =
 					this.dialogComposite.createLayoutData(IEpLayoutData.FILL, IEpLayoutData.FILL, true, true, 3, 7);
 			this.cartItemModifierFieldOptionsTableViewer =
-				this.dialogComposite.addTableViewer(false, tableLayoutData, this.addEditCartItemModifierFieldContainer, CART_MODIFIER_FIELD_TABLE);
+				this.dialogComposite.addTableViewer(false, tableLayoutData, this.addEditModifierFieldContainer, CART_MODIFIER_FIELD_TABLE);
 			this.addColumns(cartItemModifierFieldOptionsTableViewer);
-			this.createCartItemModifierFieldOptionsTableViewerButtons();
+			this.createModifierFieldOptionsTableViewerButtons();
 			this.cartItemModifierFieldOptionsTableViewer.setContentProvider(new ArrayContentProvider());
 			this.refreshTableViewer();
 			this.cartItemModifierFieldOptionsTableViewer.getSwtTableViewer().addSelectionChangedListener(this);
@@ -750,42 +768,42 @@ public class AddEditCartItemModifierFieldDialog extends AbstractPolicyAwareDialo
 	/**
 	 * Method to create TableViewer operation buttons to the composite layout.
 	 */
-	private void createCartItemModifierFieldOptionsTableViewerButtons() {
+	private void createModifierFieldOptionsTableViewerButtons() {
 		IEpLayoutData buttonLayout = this.dialogComposite.createLayoutData(IEpLayoutData.FILL, IEpLayoutData.FILL, true, false);
 		IEpLayoutData buttonLayout2 = this.dialogComposite.createLayoutData(IEpLayoutData.BEGINNING, IEpLayoutData.FILL, true, false);
 
 		// create edit button for invoking the editing
 		Image myimg = CoreImageRegistry.getImage(CoreImageRegistry.IMAGE_EDIT);
 		editOptionBtt = this.dialogComposite.addPushButton(CatalogMessages.get().AddEditCartItemModifierFieldDialog_TableEditButton, myimg,
-				buttonLayout, this.addEditCartItemModifierFieldContainer);
+				buttonLayout, this.addEditModifierFieldContainer);
 
 		editOptionBtt.addSelectionListener(this);
 
 		// create add button for invoking the editing
 		myimg = CoreImageRegistry.getImage(CoreImageRegistry.IMAGE_ADD);
 		addOptionBtt = this.dialogComposite.addPushButton(CatalogMessages.get().AddEditCartItemModifierFieldDialog_TableAddButton, myimg,
-				buttonLayout, this.addEditCartItemModifierFieldContainer);
+				buttonLayout, this.addEditModifierFieldContainer);
 
 		addOptionBtt.addSelectionListener(this);
 
 		// create remove button for invoking the editing
 		myimg = CoreImageRegistry.getImage(CoreImageRegistry.IMAGE_REMOVE);
 		removeOptionBtt = this.dialogComposite.addPushButton(CatalogMessages.get().AddEditCartItemModifierFieldDialog_TableRemoveButton, myimg,
-				buttonLayout, this.addEditCartItemModifierFieldContainer);
+				buttonLayout, this.addEditModifierFieldContainer);
 
 		removeOptionBtt.addSelectionListener(this);
 
 		// create order up button for invoking the editing
 		myimg = CoreImageRegistry.getImage(CoreImageRegistry.IMAGE_UP_ARROW);
 		orderUpBtt = this.dialogComposite.addPushButton(CoreMessages.get().button_MoveUp, myimg,
-				buttonLayout2, this.addEditCartItemModifierFieldContainer);
+				buttonLayout2, this.addEditModifierFieldContainer);
 
 		orderUpBtt.addSelectionListener(this);
 
 		// create order down button for invoking the editing
 		myimg = CoreImageRegistry.getImage(CoreImageRegistry.IMAGE_DOWN_ARROW);
 		orderDownBtt = this.dialogComposite.addPushButton(CoreMessages.get().button_MoveDown, myimg,
-				buttonLayout2, this.addEditCartItemModifierFieldContainer);
+				buttonLayout2, this.addEditModifierFieldContainer);
 
 		orderDownBtt.addSelectionListener(this);
 	}
@@ -793,22 +811,22 @@ public class AddEditCartItemModifierFieldDialog extends AbstractPolicyAwareDialo
 	/**
 	 * Add Cart Item Modifier Group Field Options to Field and refresh table viewer data.
 	 *
-	 * @param option CartItemModifierFieldOption to be added to CartItemModifierField.
+	 * @param option ModifierFieldOption to be added to ModifierField.
 	 */
-	private void add(final CartItemModifierFieldOption option) {
-		this.getCartItemModifierField().addCartItemModifierFieldOption(option);
+	private void add(final ModifierFieldOption option) {
+		this.getModifierField().addModifierFieldOption(option);
 		refreshTableViewer();
 	}
 
 	/**
 	 * Edit Cart Item Modifier Group Field Option of Group Field and refresh table viewer data.
 	 *
-	 * @param selectedFieldOption CartItemModifierFieldOption to be edited of a CartItemModifierGroup.
+	 * @param selectedFieldOption ModifierFieldOption to be edited of a CartItemModifierGroup.
 	 */
-	private void edit(final CartItemModifierFieldOption selectedFieldOption) {
+	private void edit(final ModifierFieldOption selectedFieldOption) {
 		if (selectedFieldOption != null) {
 			final AddEditCartItemModifierFieldOptionDialog dialog = new AddEditCartItemModifierFieldOptionDialog(this.allLocales,
-					this.selectedLocale, selectedFieldOption, getCartItemModifierField(), this.cartItemModifierGroup);
+					this.selectedLocale, selectedFieldOption, getModifierField(), this.cartItemModifierGroup);
 			dialog.open();
 			this.refreshTableViewer();
 		}
@@ -817,11 +835,23 @@ public class AddEditCartItemModifierFieldDialog extends AbstractPolicyAwareDialo
 	/**
 	 * Remove Cart Item Modifier Group Field Options to Field and refresh table viewer data.
 	 *
-	 * @param option CartItemModifierFieldOption to be removed to CartItemModifierField.
+	 * @param option ModifierFieldOption to be removed to ModifierField.
 	 */
-	private void remove(final CartItemModifierFieldOption option) {
-		this.getCartItemModifierField().removeCartItemModifierFieldOption(option);
+	private void remove(final ModifierFieldOption option) {
+		this.getModifierField().removeModifierFieldOption(option);
 		refreshTableViewer();
+	}
+
+
+	/**
+	 * Remove Cart Item Modifier Group Field Options to Field.
+	 */
+	private void removeAll() {
+		final Set<ModifierFieldOption> optionsSet = getModifierField().getModifierFieldOptions();
+		final List<ModifierFieldOption> optionsList = new ArrayList<>(optionsSet.size());
+		CollectionUtils.addAll(optionsList, optionsSet);
+
+		optionsList.forEach(this::remove);
 	}
 
 	/**
@@ -832,7 +862,7 @@ public class AddEditCartItemModifierFieldDialog extends AbstractPolicyAwareDialo
 	private void createRequiredButton(final boolean requiredValue) {
 		if (this.requiredBtt == null) {
 			this.requiredBtt = this.dialogComposite.addCheckBoxButton(CatalogMessages.get().AddEditCartItemModifierFieldDialog_required,
-					textFieldLayoutData3, this.addEditCartItemModifierFieldContainer);
+					textFieldLayoutData3, this.addEditModifierFieldContainer);
 			this.requiredBtt.setSelection(requiredValue);
 			this.requiredBtt.addSelectionListener(this);
 		}
@@ -843,8 +873,8 @@ public class AddEditCartItemModifierFieldDialog extends AbstractPolicyAwareDialo
 	 */
 	private void refreshTableViewer() {
 		if (cartItemModifierFieldOptionsTableViewer != null) {
-			List<CartItemModifierFieldOption> cartItemModifierFieldOptions =
-					new ArrayList<>(this.getCartItemModifierField().getCartItemModifierFieldOptions());
+			List<ModifierFieldOption> cartItemModifierFieldOptions =
+					new ArrayList<>(this.getModifierField().getModifierFieldOptions());
 			Collections.sort(cartItemModifierFieldOptions);
 			this.cartItemModifierFieldOptionsTableViewer.setLabelProvider(new CartItemModifierFieldLabelProvider(this.selectedLocale));
 			this.cartItemModifierFieldOptionsTableViewer.setInput(cartItemModifierFieldOptions);
@@ -856,13 +886,13 @@ public class AddEditCartItemModifierFieldDialog extends AbstractPolicyAwareDialo
 	 *
 	 * @return String[] Of the Field Types names.
 	 */
-	private String[] getCartItemModifierTypeStrings() {
-		itemsTypes = new ArrayList<>(CartItemModifierType.values());
+	private String[] getModifierTypeStrings() {
+		itemsTypes = new ArrayList<>(ModifierType.values());
 		int isize = itemsTypes.size();
 		int iterator = 1;
 		String[] cartItemTypeStrings = new String[isize + 1];
 		cartItemTypeStrings[0] = "Select a type...";
-		for (CartItemModifierType item : itemsTypes) {
+		for (ModifierType item : itemsTypes) {
 			cartItemTypeStrings[iterator] = CatalogMessages.get().getMessage(FIELD_TYPE_NAME_PREFIX + item.getName());
 			iterator++;
 		}
@@ -873,9 +903,9 @@ public class AddEditCartItemModifierFieldDialog extends AbstractPolicyAwareDialo
 	 * Method to get the selected field type.
 	 *
 	 * @param index index to get the object.
-	 * @return CartItemModifierType selected.
+	 * @return ModifierType selected.
 	 */
-	private CartItemModifierType getActualCartItemModifierType(final int index) {
+	private ModifierType getActualModifierType(final int index) {
 		if (index <= 0) {
 			return null;
 		}
@@ -888,15 +918,15 @@ public class AddEditCartItemModifierFieldDialog extends AbstractPolicyAwareDialo
 	 * @param selectedOption the selected field on the table viewer
 	 * @param swapOperation  -1=order up +1= order down
 	 */
-	private void changeOptionOrder(final CartItemModifierFieldOption selectedOption, final int swapOperation) {
-		List<CartItemModifierFieldOption> cartItemModifierFieldOptionsOrdered =
-				new ArrayList<>(this.getCartItemModifierField().getCartItemModifierFieldOptions());
+	private void changeOptionOrder(final ModifierFieldOption selectedOption, final int swapOperation) {
+		List<ModifierFieldOption> cartItemModifierFieldOptionsOrdered =
+				new ArrayList<>(this.getModifierField().getModifierFieldOptions());
 		Collections.sort(cartItemModifierFieldOptionsOrdered);
 		int selectedOptionIndex = cartItemModifierFieldOptionsOrdered.indexOf(selectedOption);
-		CartItemModifierFieldOption optionToSwap = cartItemModifierFieldOptionsOrdered.get(selectedOptionIndex + swapOperation);
+		ModifierFieldOption optionToSwap = cartItemModifierFieldOptionsOrdered.get(selectedOptionIndex + swapOperation);
 		int selectedOptionOrder = selectedOption.getOrdering();
 		int optionToSwapOrder = optionToSwap.getOrdering();
-		for (CartItemModifierFieldOption cartItemModifierFieldOption : getCartItemModifierField().getCartItemModifierFieldOptions()) {
+		for (ModifierFieldOption cartItemModifierFieldOption : getModifierField().getModifierFieldOptions()) {
 			if (cartItemModifierFieldOption.equals(selectedOption)) {
 				cartItemModifierFieldOption.setOrdering(optionToSwapOrder);
 			}
@@ -909,13 +939,13 @@ public class AddEditCartItemModifierFieldDialog extends AbstractPolicyAwareDialo
 	/**
 	 * Method to retrieve the maximum field order of a CartItemModifierGroup.
 	 *
-	 * @param group CartItemModifierGroup to get field max order.
+	 * @param group ModifierGroup to get field max order.
 	 * @return maximum field index.
 	 */
-	private int getMaximumFieldOrdering(final CartItemModifierGroup group) {
+	private int getMaximumFieldOrdering(final ModifierGroup group) {
 		int maximumIndex = 0;
 		if (group != null) {
-			for (CartItemModifierField field : group.getCartItemModifierFields()) {
+			for (ModifierField field : group.getModifierFields()) {
 				if (field.getOrdering() > maximumIndex) {
 					maximumIndex = field.getOrdering();
 				}
@@ -947,7 +977,7 @@ public class AddEditCartItemModifierFieldDialog extends AbstractPolicyAwareDialo
 			this.orderUpBtt.setEnabled(false);
 			this.orderDownBtt.setEnabled(false);
 		} else if (items > 1) {
-			CartItemModifierFieldOption selectedOpt = (CartItemModifierFieldOption) sel.getFirstElement();
+			ModifierFieldOption selectedOpt = (ModifierFieldOption) sel.getFirstElement();
 			this.editOptionBtt.setEnabled(selectedOpt != null);
 			this.removeOptionBtt.setEnabled(selectedOpt != null);
 			final int selectedItem = this.cartItemModifierFieldOptionsTableViewer.getSwtTableViewer().getTable().getSelectionIndex() + 1;

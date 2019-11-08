@@ -84,6 +84,39 @@ public class ReactiveAdapterImplTest {
 	}
 
 	@Test
+	@SuppressWarnings("PMD.AvoidThrowingNullPointerException")
+	public void fromServiceShouldDeferExecutionAndHandleNullPointerExceptions1() {
+
+		reactiveAdapter.fromService(() -> {
+			throw new NullPointerException();
+		})
+				.test()
+				.assertError(NullPointerException.class);
+	}
+
+	@Test
+	@SuppressWarnings("PMD.AvoidThrowingNullPointerException")
+	public void fromServiceShouldDeferExecutionAndHandleNullPointerExceptions2() {
+
+		reactiveAdapter.fromService(() -> {
+			throw new NullPointerException();
+		}, NOT_FOUND_EXCEPTION_MESSAGE)
+				.test()
+				.assertError(NullPointerException.class);
+	}
+
+	@Test
+	@SuppressWarnings("PMD.AvoidThrowingNullPointerException")
+	public void fromServiceShouldDeferExecutionAndHandleNullPointerExceptions3() {
+
+		reactiveAdapter.fromService(() -> {
+			throw new NullPointerException();
+		}, Observable.just(DEFAULT_ITEM))
+				.test()
+				.assertError(NullPointerException.class);
+	}
+
+	@Test
 	public void fromServiceShouldDeferExecutionAndHandleValidationExceptions() {
 		when(exceptionTransformer.getResourceOperationFailure(any(EpValidationException.class)))
 				.thenReturn(ResourceOperationFailure.badRequestBody());

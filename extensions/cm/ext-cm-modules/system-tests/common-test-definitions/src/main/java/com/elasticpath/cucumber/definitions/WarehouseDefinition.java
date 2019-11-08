@@ -7,7 +7,7 @@ import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
 
 import com.elasticpath.selenium.dialogs.CreateEditWarehouseDialog;
-import com.elasticpath.selenium.editor.StoreEditor;
+import com.elasticpath.selenium.editor.store.StoreEditor;
 import com.elasticpath.selenium.resultspane.StoresResultPane;
 import com.elasticpath.selenium.resultspane.WarehousesPane;
 import com.elasticpath.selenium.setup.SetUp;

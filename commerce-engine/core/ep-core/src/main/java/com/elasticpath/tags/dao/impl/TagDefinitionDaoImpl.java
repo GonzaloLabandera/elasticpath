@@ -61,24 +61,6 @@ public class TagDefinitionDaoImpl implements TagDefinitionDao {
 	}
 
 	/**
-	 * Gets all the {@link com.elasticpath.tags.domain.TagDefinition}s in the system that has same tag dictionary guid.
-	 *
-	 * @param tagDictionaryGuid a tag dictionary guid
-	 * @return a list of {@link com.elasticpath.tags.domain.TagDefinition}
-	 * @throws DataAccessException might throw a {@link org.springframework.dao.DataAccessException}
-	 */
-	@Override
-	public List<TagDefinition> getTagDefinitions(final String tagDictionaryGuid) throws DataAccessException {
-		List<TagDefinition> result = this.persistenceEngine.retrieveByNamedQuery("TAG_DEFINITION_ALL_BY_TAG_DICTIONARY_GUID", tagDictionaryGuid);
-
-		if (result.isEmpty()) {
-			return Collections.emptyList();
-		}
-
-		return result;
-	}
-
-	/**
 	 * Finds the {@link com.elasticpath.tags.domain.TagDefinition} with given GUID. If it doesn't find, it returns null.
 	 *
 	 * @param guid the guid of a {@link com.elasticpath.tags.domain.TagDefinition}

@@ -35,7 +35,7 @@ public class DefaultCartIdentifierRepositoryImpl<AI extends DefaultCartIdentifie
 				.onErrorResumeNext(this::getFallback)
 				.flatMap(cartGuid -> Single.just(CartIdentifier.builder()
 						.withCartId(StringIdentifier.of(cartGuid))
-						.withScope(defaultCartIdentifier.getScope())
+						.withCarts(defaultCartIdentifier.getCarts())
 						.build()));
 	}
 

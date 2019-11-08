@@ -15,6 +15,8 @@
 		<epdb.maven.groupId>com.h2database</epdb.maven.groupId>
 		<epdb.maven.artifactId>h2</epdb.maven.artifactId>
 		<epdb.maven.version>${com.h2database.version}</epdb.maven.version>
+		<ep.activemq.configUri>broker:(tcp://localhost:61621)?useJmx=true&amp;persistent=false</ep.activemq.configUri>
+		<ep.spring.profile>${spring.non.jta.profile}</ep.spring.profile>
 	</properties>
 
 	<profiles>
@@ -48,6 +50,7 @@
 											<type>zip</type>
 											<overWrite>true</overWrite>
 											<outputDirectory>${project.build.directory}/source-system</outputDirectory>
+
 										</artifactItem>
 									</artifactItems>
 								</configuration>
@@ -123,6 +126,7 @@
 											<outputDirectory>${project.build.directory}</outputDirectory>
 										</artifactItem>
 									</artifactItems>
+									<excludes>**/ep-jta-*.jar</excludes>
 								</configuration>
 							</execution>
 							<execution>
@@ -146,6 +150,31 @@
 						<configuration>
 							<skip>${skipITests}</skip>
 						</configuration>
+					</plugin>
+					<plugin>
+						<groupId>org.apache.activemq.tooling</groupId>
+						<artifactId>activemq-maven-plugin</artifactId>
+						<version>${org.apache.activemq.tooling.version}</version>
+						<executions>
+							<execution>
+								<id>activemq-embedded-tcp</id>
+								<goals>
+									<goal>run</goal>
+								</goals>
+								<phase>process-resources</phase>
+								<configuration>
+									<fork>true</fork>
+									<configUri>${ep.activemq.configUri}</configUri>
+								</configuration>
+							</execution>
+							<execution>
+								<id>stop-embedded-tcp</id>
+								<goals>
+									<goal>stop</goal>
+								</goals>
+								<phase>verify</phase>
+							</execution>
+						</executions>
 					</plugin>
 					<plugin>
 						<groupId>org.liquibase</groupId>

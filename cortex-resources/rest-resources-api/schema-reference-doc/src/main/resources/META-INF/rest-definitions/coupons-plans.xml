@@ -1,0 +1,82 @@
+<?xml version="1.0"?>
+<definitions xmlns="http://www.elasticpath.com/schema/rest/0.5">
+
+	<family>
+		<name>coupons</name>
+
+		<plan>
+			<name>read-coupons-applied-to-order</name>
+			<description><![CDATA[Read coupons applied to the order.]]></description>
+			<step>
+				<description><![CDATA[Read coupon-info from an order.]]></description>
+				<start>orders.order</start>
+				<follow-link>couponinfo</follow-link>
+				<link-back>order</link-back>
+				<result>couponinfo</result>
+			</step>
+			<step>
+				<description><![CDATA[Read coupon from couponinfo.]]></description>
+				<start>couponinfo</start>
+				<follow-link>coupon</follow-link>
+				<result>order-coupon</result>
+			</step>
+		</plan>
+
+		<plan>
+			<name>apply-coupon-to-order</name>
+			<description><![CDATA[Apply a coupon to the order.]]></description>
+			<step>
+				<description><![CDATA[Read coupon-info from an order.]]></description>
+				<start>orders.order</start>
+				<follow-link>couponinfo</follow-link>
+				<link-back>order</link-back>
+				<result>couponinfo</result>
+			</step>
+			<step>
+				<description><![CDATA[Couponinfo to apply-coupon-to-order-form.]]></description>
+				<start>couponinfo</start>
+				<follow-link>couponform</follow-link>
+				<result>apply-coupon-to-order-form</result>
+			</step>
+			<step>
+				<description><![CDATA[Submit the form to apply an coupon.]]></description>
+				<start>apply-coupon-to-order-form</start>
+				<submit/>
+				<to>apply-coupon-to-order-form</to>
+				<via-link>applycouponaction</via-link>
+				<result>order-coupon</result>
+			</step>
+		</plan>
+
+		<plan>
+			<name>remove-a-coupon-from-order</name>
+			<description><![CDATA[Remove an applied coupon from the order.]]></description>
+			<step>
+				<description><![CDATA[Remove the coupon from an order.]]></description>
+				<start>order-coupon</start>
+				<delete-self/>
+			</step>
+		</plan>
+
+<!--Coupons Purchase Plans-->
+		
+		<plan>
+			<name>read-coupons-appled-to-purchase</name>
+			<description><![CDATA[Read a coupon applied to the purchase.]]></description>
+			<step>
+				<description><![CDATA[Read coupons from an purchase.]]></description>
+				<start>purchases.purchase</start>
+				<follow-link>coupons</follow-link>
+				<link-back>purchases.purchase</link-back>
+				<result>purchase-coupon-list</result>
+			</step>
+			<step>
+				<description><![CDATA[Read coupon from coupons list.]]></description>
+				<start>purchase-coupon-list</start>
+				<follow-link>element</follow-link>
+				<result>purchase-coupon</result>
+			</step>
+		</plan>
+
+	</family>
+</definitions>

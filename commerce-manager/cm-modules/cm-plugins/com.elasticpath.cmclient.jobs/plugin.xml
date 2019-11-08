@@ -88,9 +88,10 @@
                   definitionId="com.elasticpath.cmclient.jobs.commands.viewCustomerJobs"
                   icon="icons/csv-import_default_34.png"
                   id="com.elasticpath.cmclient.jobs.commands.viewCustomerJobsAction"
-                  label="%customerImportJobs"
+                  label="%importForBaseAmount.name"
                   toolbarPath="com.elasticpath.cmclient.core.toolbars.actions/FIRST_ELEMENT_IN_TOOLBAR"
-                  tooltip="%customerImportJobs">
+                  tooltip="%customerImportJobs"
+                  mode="FORCE_TEXT">
           </action>
        </actionSet>
        <actionSet
@@ -115,9 +116,10 @@
                   definitionId="com.elasticpath.cmclient.jobs.commands.viewWarehouseJobs"
                   icon="icons/csv-import_default_34.png"
                   id="com.elasticpath.cmclient.jobs.commands.viewWarehouseJobsAction"
-                  label="%warehouseImportJobs"
+                  label="%importForBaseAmount.name"
                   toolbarPath="com.elasticpath.cmclient.core.toolbars.actions/com.elasticpath.cmclient.warehouse.actions.WarehousePullDownDelegate"
-                  tooltip="%warehouseImportJobs">
+                  tooltip="%warehouseImportJobs"
+                  mode="FORCE_TEXT">
           </action>
        </actionSet>
 

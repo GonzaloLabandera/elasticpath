@@ -3,9 +3,11 @@
 		xmlns="http://www.springframework.org/schema/beans"
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 		xmlns:settings="http://www.elasticpath.com/schema/settings"
+		xmlns:util="http://www.springframework.org/schema/util"
 		xsi:schemaLocation="
 				http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
 				http://www.elasticpath.com/schema/settings http://www.elasticpath.com/schema/settings/settings.xsd
+				http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-4.0.xsd
 		">
 	<import resource="../caching/cache-manager.xml" />
 
@@ -406,7 +408,6 @@
 
 	<bean id="shoppingItemDao" class="com.elasticpath.persistence.dao.impl.ShoppingItemDaoImpl">
 		<property name="persistenceEngine" ref="persistenceEngine"/>
-		<property name="fetchPlanHelper" ref="fetchPlanHelper"/>
 		<property name="shoppingItemLoadTunerDefault" ref="SHOPPING_ITEM_LOAD_TUNER_DEFAULT"/>
 	</bean>
 
@@ -474,11 +475,7 @@
 
 	<bean id="wishListDao" class="com.elasticpath.service.shoppingcart.dao.impl.WishListDaoImpl">
 		<property name="persistenceEngine" ref="persistenceEngine"/>
-		<property name="fetchPlanHelper" ref="fetchPlanHelper"/>
-		<property name="productSkuLoadTuner" ref="PRODUCT_SKU_LOAD_TUNER_ALL"/>
-		<property name="productLoadTuner" ref="PRODUCT_LOAD_TUNER_ALL"/>
-		<property name="categoryLoadTuner" ref="CATEGORY_LOAD_TUNER_MASTER_AND_PARENT"/>
-		<property name="shoppingItemLoadTuner" ref="SHOPPING_ITEM_LOAD_TUNER_DEFAULT"/>
+		<property name="loadTuners" ref="wishListLoadTuners"/>
 	</bean>
 
 	<bean id="shopperDao" class="com.elasticpath.service.shopper.dao.impl.ShopperDaoImpl">
@@ -517,7 +514,7 @@
 			</bean>
 		</property>
 	</bean>
-	
+
 	<bean id="paymentTokenDao" parent="txProxyTemplate">
     	<property name="target">
       		<bean class="com.elasticpath.persistence.dao.impl.PaymentTokenDaoImpl">
@@ -533,4 +530,12 @@
 			</bean>
 		</property>
 	</bean>
+
+	<!-- Tuners -->
+	<util:list id="wishListLoadTuners" value-type="com.elasticpath.persistence.api.LoadTuner">
+		<ref bean="PRODUCT_SKU_LOAD_TUNER_ALL"/>
+		<ref bean="PRODUCT_LOAD_TUNER_ALL"/>
+		<ref bean="CATEGORY_LOAD_TUNER_MASTER_AND_PARENT"/>
+		<ref bean="SHOPPING_ITEM_LOAD_TUNER_DEFAULT"/>
+	</util:list>
 </beans>

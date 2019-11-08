@@ -8,6 +8,8 @@ import java.util.Locale;
 
 import org.apache.commons.lang.StringUtils;
 
+import com.elasticpath.cmclient.core.tablelableprovider.AbstractTableLabelProviderDecorator;
+import com.elasticpath.cmclient.core.tablelableprovider.ExtensibleTableLabelProvider;
 import com.elasticpath.domain.skuconfiguration.SkuOption;
 import com.elasticpath.domain.skuconfiguration.SkuOptionValue;
 

@@ -152,7 +152,7 @@ public class DataPolicyServiceImplTest {
 	}
 
 	@Test
-	public void gettingWithFetchGroupLoadTunerDelegatesToConfigureFetchPlanHelper() {
+	public void shouldReturnDataPolicyInstanceForGivenUidPk() {
 		MockDataPolicyServiceImpl dataPolicyService = new MockDataPolicyServiceImpl();
 
 		when(persistenceEngine.get(DataPolicy.class, DATAPOLICY_UIDPK)).thenReturn(dataPolicy);

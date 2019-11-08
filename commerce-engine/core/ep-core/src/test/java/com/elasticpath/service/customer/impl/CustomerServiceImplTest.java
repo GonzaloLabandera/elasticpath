@@ -3,6 +3,8 @@
  */
 package com.elasticpath.service.customer.impl;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
@@ -14,9 +16,6 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -31,14 +30,15 @@ import javax.validation.Validator;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
+import com.google.common.collect.ImmutableMap;
+
 import org.mockito.InjectMocks;
 import org.mockito.Matchers;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
-
-import com.google.common.collect.ImmutableMap;
 
 import com.elasticpath.base.common.dto.StructuredErrorMessage;
 import com.elasticpath.base.exception.EpServiceException;
@@ -61,10 +61,11 @@ import com.elasticpath.messaging.EventMessagePublisher;
 import com.elasticpath.messaging.EventType;
 import com.elasticpath.messaging.factory.EventMessageFactory;
 import com.elasticpath.persistence.api.FetchGroupLoadTuner;
+import com.elasticpath.persistence.api.LoadTuner;
 import com.elasticpath.persistence.api.PersistenceEngine;
+import com.elasticpath.persistence.openjpa.util.FetchPlanHelper;
 import com.elasticpath.service.auth.UserIdentityService;
 import com.elasticpath.service.customer.CustomerGroupService;
-import com.elasticpath.service.misc.FetchPlanHelper;
 import com.elasticpath.service.misc.TimeService;
 import com.elasticpath.service.search.IndexNotificationService;
 import com.elasticpath.service.search.IndexType;
@@ -352,8 +353,7 @@ public class CustomerServiceImplTest {
 		customerService.setFetchPlanHelper(fetchPlanHelper);
 
 		assertThat(customerService.get(USER_UIDPK)).isEqualTo(customer);
-		verify(fetchPlanHelper).configureFetchGroupLoadTuner(null);
-		verify(fetchPlanHelper).clearFetchPlan();
+		verify(fetchPlanHelper).setLoadTuners((LoadTuner[]) null);
 	}
 
 	/**
@@ -377,15 +377,14 @@ public class CustomerServiceImplTest {
 
 		assertThat(customerService.get(USER_UIDPK)).isEqualTo(null);
 
-		verify(fetchPlanHelper).configureFetchGroupLoadTuner(null);
-		verify(fetchPlanHelper).clearFetchPlan();
+		verify(fetchPlanHelper).setLoadTuners((LoadTuner[]) null);
 	}
 
 	/**
-	 * Getting with a FetchGroupLoadTuner should delegate the given FetchGroupLoadTuner to configure the FetchPlanHelper.
+	 * Getting with a FetchGroupLoadTuner should delegate the given FetchGroupLoadTuner.
 	 */
 	@Test
-	public void gettingWithFetchGroupLoadTunerDelegatesToConfigureFetchPlanHelper() {
+	public void gettingWithFetchGroupLoadTunerDelegatesToConfigureFetchPlanUtil() {
 		FetchGroupLoadTuner fetchGroupLoadTuner = mock(FetchGroupLoadTuner.class);
 
 		when(persistenceEngine.get(Customer.class, USER_UIDPK)).thenReturn(customer);
@@ -397,8 +396,7 @@ public class CustomerServiceImplTest {
 		customerService.setFetchPlanHelper(fetchPlanHelper);
 
 		assertThat(customerService.get(USER_UIDPK, fetchGroupLoadTuner)).isEqualTo(customer);
-		verify(fetchPlanHelper).configureFetchGroupLoadTuner(fetchGroupLoadTuner);
-		verify(fetchPlanHelper).clearFetchPlan();
+		verify(fetchPlanHelper).setLoadTuners(fetchGroupLoadTuner);
 	}
 
 	/**

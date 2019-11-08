@@ -227,6 +227,11 @@ public class CatalogImplTest {
 		}
 
 		final class StubbedElasticPathImpl extends ElasticPathImpl {
+			@Override
+			public <T> T getPrototypeBean(final String name, final Class<T> clazz) {
+				return getBean(name);
+			}
+
 			@SuppressWarnings("unchecked")
 			@Override
 			public <T> T getBean(final String name) {

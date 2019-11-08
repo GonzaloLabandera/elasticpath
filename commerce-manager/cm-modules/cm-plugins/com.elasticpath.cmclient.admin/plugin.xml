@@ -13,7 +13,7 @@
       <view
             category="com.elasticpath.cmclient.admin.category.main"
             class="com.elasticpath.cmclient.admin.views.AdminSectionsNavigationView"
-            icon="icons/configuration_default_22.png"
+            icon="icons/empty_1x1.png"
             id="com.elasticpath.cmclient.admin.views.AdminSectionsNavigationView"
             name="%administrationView.name">
       </view>
@@ -22,7 +22,7 @@
          point="org.eclipse.ui.perspectives">
       <perspective
             class="com.elasticpath.cmclient.admin.perspectives.AdminPerspectiveFactory"
-            icon="icons/configuration_default_22.png"
+            icon="icons/empty_1x1.png"
             id="com.elasticpath.cmclient.admin.perspectives.AdminPerspective"
             name="%adminPerspective.name">
       </perspective>

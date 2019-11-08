@@ -41,7 +41,7 @@ public class DynamicContentDeliveryAssembler extends AbstractDtoAssembler<Dynami
 
 	@Override
 	public DynamicContentDelivery getDomainInstance() {
-		return beanFactory.getBean(ContextIdNames.DYNAMIC_CONTENT_DELIVERY);
+		return beanFactory.getPrototypeBean(ContextIdNames.DYNAMIC_CONTENT_DELIVERY, DynamicContentDelivery.class);
 	}
 
 	@Override

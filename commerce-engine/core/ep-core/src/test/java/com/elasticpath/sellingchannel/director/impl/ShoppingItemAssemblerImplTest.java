@@ -32,6 +32,7 @@ import com.elasticpath.domain.catalog.Catalog;
 import com.elasticpath.domain.catalog.Price;
 import com.elasticpath.domain.catalog.Product;
 import com.elasticpath.domain.catalog.ProductBundle;
+import com.elasticpath.domain.catalog.ProductConstituent;
 import com.elasticpath.domain.catalog.ProductSku;
 import com.elasticpath.domain.catalog.ProductType;
 import com.elasticpath.domain.catalog.impl.BundleConstituentImpl;
@@ -114,7 +115,8 @@ public class ShoppingItemAssemblerImplTest {
 	 */
 	@Before
 	public void setUp() {
-		given(beanFactory.getBean("productConstituent")).will(invocationOnMock -> new ProductConstituentImpl());
+		given(beanFactory.getPrototypeBean("productConstituent", ProductConstituent.class))
+				.will(invocationOnMock -> new ProductConstituentImpl());
 
 		// Yes, this is horrible, but I can only refactor this test so far before I kill myself.
 		ShoppingItemDtoFactoryImpl shoppingItemDtoFactory = new ShoppingItemDtoFactoryImpl();
@@ -176,8 +178,8 @@ public class ShoppingItemAssemblerImplTest {
 			private static final long serialVersionUID = 1;
 
 			@Override
-			protected <T> T getBean(final String beanName) {
-				return beanFactory.getBean(beanName);
+			public <T> T getPrototypeBean(final String name, final Class<T> clazz) {
+				return beanFactory.getPrototypeBean(name, clazz);
 			}
 		};
 		constituentBundle.setConstituent(product);

@@ -20,6 +20,7 @@ import org.slf4j.LoggerFactory;
 import com.elasticpath.domain.customer.Customer;
 import com.elasticpath.domain.customer.CustomerSession;
 import com.elasticpath.domain.shopper.Shopper;
+import com.elasticpath.domain.shopper.ShopperMemento;
 import com.elasticpath.domain.store.Store;
 import com.elasticpath.rest.cache.CacheRemove;
 import com.elasticpath.rest.cache.CacheResult;
@@ -29,7 +30,9 @@ import com.elasticpath.rest.chain.ExecutionResultChain;
 import com.elasticpath.rest.chain.OnFailure;
 import com.elasticpath.rest.command.ExecutionResult;
 import com.elasticpath.rest.command.ExecutionResultFactory;
+import com.elasticpath.rest.identity.ScopePrincipal;
 import com.elasticpath.rest.identity.Subject;
+import com.elasticpath.rest.identity.util.PrincipalsUtil;
 import com.elasticpath.rest.identity.util.SubjectUtil;
 import com.elasticpath.rest.resource.ResourceOperationContext;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.customer.CustomerSessionRepository;
@@ -114,6 +117,22 @@ public class CustomerSessionRepositoryImpl implements CustomerSessionRepository 
 	}
 
 	@Override
+	public Single<CustomerSession> createCustomerSessionAsSingle() {
+			String userGuid = resourceOperationContext.getUserIdentifier();
+			return  Single.just(createCustomerSessionByGuidAndContext(userGuid));
+	}
+
+	private CustomerSession createCustomerSessionByGuidAndContext(final String userGuid) {
+
+		Shopper shopper = createShopperByCustomerGuid(userGuid);
+
+		final Subject subject = resourceOperationContext.getSubject();
+		Locale  locale = SubjectUtil.getLocale(subject);
+		locale = locale == null ? Locale.ENGLISH : locale;
+		return createCustomerSession(shopper, locale);
+	}
+
+	@Override
 	@CacheResult
 	public ExecutionResult<CustomerSession> findCustomerSessionByGuid(final String customerGuid) {
 		return new ExecutionResultChain() {
@@ -150,6 +169,24 @@ public class CustomerSessionRepositoryImpl implements CustomerSessionRepository 
 
 		return shopper;
 	}
+
+
+	private Shopper createShopperByCustomerGuid(final String customerGuid) {
+		final Customer customer = customerService.findByGuid(customerGuid);
+
+		//use the storecode from the store being accessed, not necessarily the one associated with the customer.
+		ScopePrincipal scopePrincipal =
+				PrincipalsUtil.getFirstPrincipalByType(resourceOperationContext.getSubject().getPrincipals(), ScopePrincipal.class);
+		String storeCode = scopePrincipal.getValue();
+
+		final Shopper shopper = shopperService.createAndSaveShopper(storeCode);
+		ShopperMemento shopperMemento =  shopper.getShopperMemento();
+		shopperMemento.setCustomer(customer);
+		shopperMemento.setStoreCode(storeCode);
+		shopperService.save(shopper);
+		return shopper;
+	}
+
 
 	@Override
 	@CacheRemove(typesToInvalidate = CustomerSession.class)

@@ -18,7 +18,7 @@
 	<properties>
 		<skipTests>true</skipTests>
 		<ep.database.timezone>UTC</ep.database.timezone>
-		<cm.contextFilePath>${project.build.directory}/tomcatconf/context.xml</cm.contextFilePath>
+		<contextFile>${project.build.directory}/${build.finalName}/META-INF/context.xml</contextFile>
 		<epdb.jdbc.properties>serverTimezone=${ep.database.timezone};useLegacyDatetimeCode=false</epdb.jdbc.properties>
 	</properties>
 
@@ -72,6 +72,23 @@
 						<ep.smtp.port>${ep.smtp.port}</ep.smtp.port>
 						<ep.smtp.username>${ep.smtp.username}</ep.smtp.username>
 						<ep.smtp.password>${ep.smtp.password}</ep.smtp.password>
+						<epdb.username>${epdb.username}</epdb.username>
+						<epdb.password>${epdb.password}</epdb.password>
+						<epdb.jdbc.driver>${epdb.jdbc.driver}</epdb.jdbc.driver>
+						<epdb.data.source.factory>${epdb.data.source.factory}</epdb.data.source.factory>
+						<epdb.url>${epdb.url}</epdb.url>
+						<epdb.data.source.type>${epdb.data.source.type}</epdb.data.source.type>
+						<epdb.data.source.xa.factory>${epdb.data.source.xa.factory}</epdb.data.source.xa.factory>
+						<epdb.data.source.xa.type>${epdb.data.source.xa.type}</epdb.data.source.xa.type>
+						<epdb.validation.query>${epdb.validation.query}</epdb.validation.query>
+						<epdb.validation.interval>${epdb.validation.interval}</epdb.validation.interval>
+						<ep.tomcat.maxcachesize>${ep.tomcat.maxcachesize}</ep.tomcat.maxcachesize>
+						<ep.jms.factory>${ep.jms.factory}</ep.jms.factory>
+						<ep.jms.type>${ep.jms.type}</ep.jms.type>
+						<ep.jms.url>${ep.jms.url}</ep.jms.url>
+						<ep.jms.xa.factory>${ep.jms.xa.factory}</ep.jms.xa.factory>
+						<ep.jms.xa.type>${ep.jms.xa.type}</ep.jms.xa.type>
+
 					</systemProperties>
 				</configuration>
 				<dependencies>
@@ -123,27 +140,6 @@
 						<version>1.6.6</version>
 					</dependency>
 				</dependencies>
-			</plugin>
-			<plugin>
-				<artifactId>maven-resources-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>create-tomcat-context-xml</id>
-						<phase>process-resources</phase>
-						<goals>
-							<goal>copy-resources</goal>
-						</goals>
-						<configuration>
-							<resources>
-								<resource>
-									<directory>${basedir}/tomcat</directory>
-									<filtering>true</filtering>
-								</resource>
-							</resources>
-							<outputDirectory>${project.build.directory}/tomcatconf</outputDirectory>
-						</configuration>
-					</execution>
-				</executions>
 			</plugin>
 		</plugins>
 	</build>

@@ -9,6 +9,7 @@ import java.util.List;
 
 import com.elasticpath.base.exception.EpServiceException;
 import com.elasticpath.commons.pagination.DirectedSortingField;
+import com.elasticpath.domain.attribute.Attribute;
 import com.elasticpath.domain.catalog.ProductBundle;
 import com.elasticpath.domain.catalog.ProductSku;
 import com.elasticpath.domain.catalog.impl.PreOrBackOrderDetails;
@@ -92,6 +93,13 @@ public interface ProductSkuService {
 	 */
 	boolean canDelete(ProductSku productSku);
 
+	/**
+	 * Find a list of product codes that use the given sku attribute.
+	 *
+	 * @param attribute the attribute to search by
+	 * @return a list of product codes.
+	 */
+	List<String> findCodesByAttribute(Attribute attribute);
 
 	/**
 	 * Checks is a given ProductSku is used within any bundles.

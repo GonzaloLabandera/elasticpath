@@ -5,9 +5,7 @@
 		<name>taxes</name>
 		<description>
 			<![CDATA[
-Taxes describe the amount of tax owing for orders, shipments and shipment lineitems.
-
-[orders]: #orders
+Taxes describe the amount of tax owing for `orders`, `shipments` and `shipment lineitems`.
 			]]>
 		</description>
 
@@ -34,7 +32,7 @@ Taxes describe the amount of tax owing for orders, shipments and shipment lineit
 
 		<relationship>
 			<name>taxes-for-order</name>
-			<description><![CDATA[Retrieves the total tax for an order, which includes the order's tax amount, currency, and type of tax (VAT, HST, etc.).]]></description>
+			<description><![CDATA[Retrieves the total tax for an order; which includes the order's tax amount, currency, and type of tax (VAT, HST, etc.).]]></description>
 			<rel>tax</rel>
 			<rev>order</rev>
 			<from>orders.order</from>
@@ -44,7 +42,7 @@ Taxes describe the amount of tax owing for orders, shipments and shipment lineit
 		<relationship>
 			<name>taxes-for-shipment</name>
 			<description>
-				<![CDATA[Retrieves the total tax for a shipment, which includes the shipments' tax amount, currency, and type of tax (VAT, HST, etc.).]]></description>
+				<![CDATA[Retrieves the total tax for a shipment; which includes the shipments' tax amount, currency, and type of tax (VAT, HST, etc.).]]></description>
 			<rel>tax</rel>
 			<rev>shipment</rev>
 			<from>shipments.shipment</from>

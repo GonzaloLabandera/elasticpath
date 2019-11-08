@@ -661,14 +661,8 @@ public class ReturnElectronicOrderSubjectPage extends AbstractEPWizardPage<Order
 				break;
 			case INVOICE_PRICE_COLUMN_INDEX:
 				OrderSku orderSku = orderReturnSku.getOrderSku();
-				BigDecimal invoicePrice;
 				ShoppingItemPricingSnapshot pricingSnapshot = getPricingSnapshotService().getPricingSnapshotForOrderSku(orderSku);
-				if (pricingSnapshot.getDiscount() == null || pricingSnapshot.getDiscount().getAmount() == null) {
-					invoicePrice = pricingSnapshot.getPriceCalc().forUnitPrice().getAmount();
-				} else {
-					invoicePrice = pricingSnapshot.getPriceCalc().forUnitPrice().getAmount().subtract(pricingSnapshot.getDiscount().getAmount());
-				}
-				text = invoicePrice.toString();
+				text = pricingSnapshot.getPriceCalc().withCartDiscounts().getAmount().toString();
 				break;
 			default:
 				text = FulfillmentMessages.EMPTY_STRING;

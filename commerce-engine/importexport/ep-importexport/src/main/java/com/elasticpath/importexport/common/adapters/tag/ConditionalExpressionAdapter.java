@@ -16,7 +16,7 @@ public class ConditionalExpressionAdapter extends AbstractDomainAdapterImpl<Cond
 
 	@Override
 	public ConditionalExpression createDomainObject() {
-		return getBeanFactory().getBean(ContextIdNames.CONDITIONAL_EXPRESSION);
+		return getBeanFactory().getPrototypeBean(ContextIdNames.CONDITIONAL_EXPRESSION, ConditionalExpression.class);
 	}
 
 	@Override

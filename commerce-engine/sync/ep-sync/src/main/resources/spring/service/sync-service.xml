@@ -97,10 +97,16 @@
 		</property>
     </bean>
 
-	<bean id="cartItemModifierGroupDaoAdapter" class="com.elasticpath.tools.sync.merge.configuration.impl.CartItemModifierGroupDaoAdapterImpl">
-		<property name="cartItemModifierService" ref="cartItemModifierService"/>
+	<bean id="cartItemModifierGroupDaoAdapter" class="com.elasticpath.tools.sync.merge.configuration.impl.ModifierGroupDaoAdapterImpl">
+		<property name="modifierService" ref="modifierService"/>
 		<property name="beanFactory" ref="coreBeanFactory"/>
 	</bean>
+
+	<bean id="modifierGroupDaoAdapter" class="com.elasticpath.tools.sync.merge.configuration.impl.ModifierGroupDaoAdapterImpl">
+		<property name="modifierService" ref="modifierService"/>
+		<property name="beanFactory" ref="coreBeanFactory"/>
+	</bean>
+
 
 	<bean id="indexNotifierCallback"
 		class="com.elasticpath.tools.sync.target.impl.IndexNotificationJobTransactionCallback">
@@ -152,7 +158,9 @@
         		<entry key="com.elasticpath.domain.catalog.Brand" value-ref="brandDaoAdapter"/>
         		<entry key="com.elasticpath.domain.attribute.Attribute" value-ref="attributeDaoAdapter"/>
         		<entry key="com.elasticpath.domain.catalog.ProductCategory" value-ref="productCategoryDaoAdapter"/>
-				<entry key="com.elasticpath.domain.cartmodifier.CartItemModifierGroup" value-ref="cartItemModifierGroupDaoAdapter"/>
+				<entry key="com.elasticpath.domain.modifier.ModifierGroup" value-ref="cartItemModifierGroupDaoAdapter"/>
+				<entry key="com.elasticpath.domain.modifier.ModifierGroup" value-ref="modifierGroupDaoAdapter"/>
+
 			</map>
 		</property>
 	</bean>

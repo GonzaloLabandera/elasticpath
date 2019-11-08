@@ -48,6 +48,8 @@
 	<bean id="customerRole" scope="prototype" class="com.elasticpath.domain.customer.impl.CustomerRoleImpl"/>
 	<bean id="customerAddress" scope="prototype" class="com.elasticpath.domain.customer.impl.CustomerAddressImpl"/>
     <bean id="customerRegistrationResult" scope="prototype" class="com.elasticpath.service.customer.impl.CustomerRegistrationResultImpl" />
+	<bean id="attributePolicy" class="com.elasticpath.domain.customer.impl.AttributePolicyImpl" scope="prototype"/>
+	<bean id="storeCustomerAttribute" class="com.elasticpath.domain.customer.impl.StoreCustomerAttributeImpl" scope="prototype"/>
 	<bean id="abstractCategory" scope="prototype" class="com.elasticpath.domain.catalog.impl.AbstractCategoryImpl"/>
 	<bean id="category" scope="prototype" class="com.elasticpath.domain.catalog.impl.CategoryImpl"/>
 	<bean id="linkedCategory" scope="prototype" class="com.elasticpath.domain.catalog.impl.LinkedCategoryImpl"/>
@@ -344,7 +346,7 @@
 	<bean id="taxJournalRecord" scope="prototype" class="com.elasticpath.domain.order.impl.TaxJournalRecordImpl"/>
 	<bean id="taxDocumentModificationContext" scope="prototype" class="com.elasticpath.service.tax.TaxDocumentModificationContext"/>
 	<bean id="orderItemPresentationBean" class="com.elasticpath.sellingchannel.presentation.impl.OrderItemPresentationBeanImpl" scope="prototype"/>
-
+	<bean id="cartType" scope="prototype" class="com.elasticpath.domain.shoppingcart.CartType" />
 	<!-- Payment Gateway Connectivity API DTO classes -->
 	<bean id="addressDto" scope="prototype" class="com.elasticpath.plugin.payment.dto.impl.AddressDtoImpl"/>
 	<bean id="moneyDto" scope="prototype" class="com.elasticpath.plugin.payment.dto.impl.MoneyDtoImpl"/>
@@ -363,13 +365,16 @@
 	<!-- Price-accessible facade of Shopping Item for Exchanges -->
 	<bean id="exchangeItem" scope="prototype" class="com.elasticpath.domain.shoppingcart.impl.ShoppingItemImpl"/>
 
-	<!-- Cart item modifier -->
-	<bean id="cartItemModifierField" scope="prototype" class="com.elasticpath.domain.cartmodifier.impl.CartItemModifierFieldImpl"/>
-	<bean id="cartItemModifierFieldLdf" scope="prototype" class="com.elasticpath.domain.cartmodifier.impl.CartItemModifierFieldLdfImpl"/>
-	<bean id="cartItemModifierFieldOption" scope="prototype" class="com.elasticpath.domain.cartmodifier.impl.CartItemModifierFieldOptionImpl"/>
-	<bean id="cartItemModifierFieldOptionLdf" scope="prototype" class="com.elasticpath.domain.cartmodifier.impl.CartItemModifierFieldOptionLdfImpl"/>
-	<bean id="cartItemModifierGroup" scope="prototype" class="com.elasticpath.domain.cartmodifier.impl.CartItemModifierGroupImpl"/>
-	<bean id="cartItemModifierGroupLdf" scope="prototype" class="com.elasticpath.domain.cartmodifier.impl.CartItemModifierGroupLdfImpl"/>
+	<!-- General modifier -->
+	<bean id="modifierField" scope="prototype" class="com.elasticpath.domain.modifier.impl.ModifierFieldImpl"/>
+	<bean id="modifierFieldLdf" scope="prototype" class="com.elasticpath.domain.modifier.impl.ModifierFieldLdfImpl"/>
+	<bean id="modifierFieldOption" scope="prototype" class="com.elasticpath.domain.modifier.impl.ModifierFieldOptionImpl"/>
+	<bean id="modifierFieldOptionLdf" scope="prototype" class="com.elasticpath.domain.modifier.impl.ModifierFieldOptionLdfImpl"/>
+	<bean id="modifierGroup" scope="prototype" class="com.elasticpath.domain.modifier.impl.ModifierGroupImpl"/>
+	<bean id="modifierGroupLdf" scope="prototype" class="com.elasticpath.domain.modifier.impl.ModifierGroupLdfImpl"/>
+	<bean id="modifierGroupFilter" scope="prototype" class="com.elasticpath.domain.modifier.impl.ModifierGroupFilterImpl"/>
+
+
 
 	<!-- Data Policy -->
 	<bean id="dataPoint" scope="prototype" class="com.elasticpath.domain.datapolicy.impl.DataPointImpl"/>
@@ -388,4 +393,12 @@
 
 	<!-- Facets -->
 	<bean id="facet" scope="prototype" class="com.elasticpath.domain.search.impl.FacetImpl"/>
+
+	<bean id="sortAttribute" scope="prototype" class="com.elasticpath.domain.search.impl.SortAttributeImpl"/>
+	<bean id="sortLocalizedName" scope="prototype" class="com.elasticpath.domain.search.impl.SortLocalizedNameImpl"/>
+
+	<!-- Tag Localization for Import/Export -->
+	<bean id="tagDefinitionLocalizedPropertyValue" scope="prototype" class="com.elasticpath.domain.misc.impl.TagDefinitionLocalizedPropertyValueImpl"/>
+	<bean id="tagGroupLocalizedPropertyValue" scope="prototype" class="com.elasticpath.domain.misc.impl.TagGroupLocalizedPropertyValueImpl"/>
+
 </beans>

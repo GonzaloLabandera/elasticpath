@@ -13,8 +13,7 @@ import com.elasticpath.selenium.wizards.PaymentAuthorizationWizard;
  */
 public class CustomerServiceActionToolbar extends AbstractToolbar {
 
-	private static final String VIEW_CUSTOMER_IMPORT_JOBS_BUTTON_CSS =
-			"div[widget-id='View Customer Import Jobs']";
+	private static final String VIEW_CUSTOMER_IMPORT_JOBS_BUTTON_CSS = "div[widget-id='IMPORTS']";
 	private static final String SAVE_ALL = "Save All";
 
 	/**

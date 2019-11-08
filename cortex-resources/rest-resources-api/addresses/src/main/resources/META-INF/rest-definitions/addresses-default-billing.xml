@@ -1,0 +1,38 @@
+<?xml version="1.0"?>
+<definitions xmlns="http://www.elasticpath.com/schema/rest/0.5">
+	<family>
+		<name>addresses</name>
+
+		<!--
+			Billing Address
+		-->
+		<resource>
+			<name>billing-address-selector</name>
+			<description><![CDATA[
+				The selector for the default billing address.
+			]]></description>
+			<uri>{billing-addresses}/selector</uri>
+			<selector-for>billing-addresses</selector-for>
+		</resource>
+		<resource>
+			<name>billing-address-selector-choice</name>
+			<description><![CDATA[
+				The choice for a billing address from the selector.
+			]]></description>
+			<uri>{addresses.billing-address-selector}/{addresses.address}</uri>
+			<choices-for>billing-address-selector</choices-for>
+		</resource>
+
+		<relationship>
+			<name>billingaddresses-to-addresses-billingaddress-selector</name>
+			<description><![CDATA[
+				The relationship from the Address Billing Addresses resource to the Billing Address Default Selector resource.
+			]]></description>
+			<rel>selector</rel>
+			<rev>addresses</rev>
+			<from>addresses.billing-addresses</from>
+			<to>billing-address-selector</to>
+		</relationship>
+
+	</family>
+</definitions>

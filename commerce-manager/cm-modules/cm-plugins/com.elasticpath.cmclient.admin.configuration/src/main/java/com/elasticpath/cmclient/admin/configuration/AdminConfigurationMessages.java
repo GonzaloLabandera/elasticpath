@@ -13,10 +13,13 @@ import com.elasticpath.cmclient.core.nls.LocalizedMessagePostProcessor;
 @SuppressWarnings({ "PMD.TooManyFields", "PMD.VariableNamingConventions" })
 public final class AdminConfigurationMessages {
 	private static final String BUNDLE_NAME = "com.elasticpath.cmclient.admin.configuration.AdminConfigurationPluginResources"; //$NON-NLS-1$
-
 	private AdminConfigurationMessages() {
 	}
 
+
+
+
+	public String ConfigurationAdminSection_TagConfiguration;
 	public String ConfigurationAdminSection_SystemConfiguration;
 	public String ConfigurationAdminSection_SearchIndexes;
 
@@ -78,6 +81,39 @@ public final class AdminConfigurationMessages {
 
 	public String progressColumn;
 	public String remainingTimeColumn;
+
+	public String tagGroupGuid;
+	public String tagGroupName;
+	public String languageLabel;
+	public String editGroupButton;
+	public String addGroupButton;
+	public String removeGroupButton;
+	public String addGroupDialogTitle;
+	public String editGroupDialogTitle;
+	public String guidLabel;
+	public String nameLabel;
+
+	public String TagDefinition_Label_Guid;
+	public String TagDefinition_Label_Name;
+	public String TagDefinition_Label_Type;
+	public String TagDefinition_Edit_Button;
+	public String TagDefinition_Add_Button;
+	public String TagDefinition_Remove_Button;
+	public String TagDefinition_Label_TagCode;
+	public String TagDefinition_Label_TagName;
+	public String TagDefinition_Label_Description;
+	public String TagDefinition_Label_FieldType;
+	public String TagDictionary_ColumnHeader_Code;
+	public String TagDictionary_ColumnHeader_Name;
+	public String TagDictionary_ColumnHeader_Purpose;
+	public String editTagDefinitionDialogTitle;
+	public String TagDefinition_Label_SampleHttpHeaderPrefix;
+	public String TagGroupCodeExists;
+	public String TagDefinitionCodeExists;
+	public String TagDefinitionNameExists;
+	public String addTagDefinitionDialogTitle;
+	public String TagGroup_TableName;
+	public String TagDefinition_TableName;
 
 	/**
 	 * Returns a message String by the given message key.

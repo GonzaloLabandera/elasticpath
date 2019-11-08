@@ -24,8 +24,6 @@ public final class CustomerPersonalDataMessages {
 	//Report parameters
 	public String selectStore;
 	public String store;
-	public String fromDate;
-	public String toDate;
 	public String userId;
 
 	/**

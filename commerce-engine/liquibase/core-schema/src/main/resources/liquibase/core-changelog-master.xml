@@ -28,5 +28,8 @@
 	<include file="liquibase/core-changelog-7.3.0.xml"/>
 	<include file="liquibase/core-changelog-7.4.0.xml"/>
 	<include file="liquibase/core-changelog-7.5.0.xml"/>
-
+	<include file="liquibase/core-changelog-7.5.1.xml"/>
+	<include file="liquibase/core-changelog-7.6.0.xml"/>
+	<include file="liquibase/core-changelog-7.6.0-generalmodifiers.xml"/>
+	<include file="liquibase/core-changelog-7.6.0-multicarts.xml"/>
 </databaseChangeLog>

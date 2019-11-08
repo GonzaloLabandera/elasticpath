@@ -5,7 +5,7 @@ package com.elasticpath.rest.resource.integration.epcommerce.repository.shipment
 
 import java.util.Map;
 
-import io.reactivex.Single;
+import io.reactivex.Maybe;
 
 /**
  * Service that retrieves shipment detail ids for an order.
@@ -19,5 +19,5 @@ public interface ShipmentDetailsService {
 	 * @param orderId    cart order id
 	 * @return	shipment details ids
 	 */
-	Single<Map<String, String>> getShipmentDetailsIdForOrder(String scope, String orderId);
+	Maybe<Map<String, String>> getShipmentDetailsIdForOrder(String scope, String orderId);
 }

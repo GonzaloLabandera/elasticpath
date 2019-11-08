@@ -104,7 +104,7 @@ public class Roundtrip {
 	 * @throws FileNotFoundException If an exception occurs.
 	 */
 	public void doImport(final File importConfigurationXml) throws ConfigurationException, FileNotFoundException {
-		ImportController importer = engine.getElasticPath().getBean(ImportExportContextIdNames.IMPORT_CONTROLLER);
+		ImportController importer = engine.getBeanFactory().getSingletonBean(ImportExportContextIdNames.IMPORT_CONTROLLER, ImportController.class);
 		importer.loadConfiguration(new FileInputStream(importConfigurationXml));
 		LOGGER.info("Importing...");
 		importer.executeImport();
@@ -119,7 +119,7 @@ public class Roundtrip {
 	 * @throws FileNotFoundException If an exception occurs.
 	 */
 	public void doExport(final File exportConfigurationXml, final File searchConfigurationXml) throws ConfigurationException, FileNotFoundException {
-		ExportController exporter = engine.getElasticPath().getBean(ImportExportContextIdNames.EXPORT_CONTROLLER);
+		ExportController exporter = engine.getBeanFactory().getSingletonBean(ImportExportContextIdNames.EXPORT_CONTROLLER, ExportController.class);
 		exporter.loadConfiguration(new FileInputStream(exportConfigurationXml), new FileInputStream(searchConfigurationXml));
 		LOGGER.info("Exporting...");
 		exporter.executeExport();

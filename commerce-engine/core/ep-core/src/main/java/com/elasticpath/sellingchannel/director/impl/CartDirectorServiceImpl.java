@@ -27,6 +27,7 @@ import com.elasticpath.sellingchannel.director.CartDirectorService;
 import com.elasticpath.service.shoppingcart.CantDeleteAutoselectableBundleItemsException;
 import com.elasticpath.service.shoppingcart.PricingSnapshotService;
 import com.elasticpath.service.shoppingcart.ShoppingCartService;
+import com.elasticpath.service.shoppingcart.ShoppingItemService;
 import com.elasticpath.service.shoppingcart.WishListService;
 import com.elasticpath.service.shoppingcart.impl.AddToWishlistResult;
 import com.elasticpath.service.shoppingcart.validation.RemoveShoppingItemFromCartValidationService;
@@ -45,6 +46,8 @@ public class CartDirectorServiceImpl implements CartDirectorService {
 	private ShoppingCartService shoppingCartService;
 	private PricingSnapshotService pricingSnapshotService;
 	private RemoveShoppingItemFromCartValidationService removeShoppingItemFromCartValidationService;
+	private ShoppingItemService shoppingItemService;
+
 
 	@Override
 	public ShoppingItem addItemToCart(final ShoppingCart shoppingCart, final ShoppingItemDto dto) {
@@ -148,7 +151,9 @@ public class CartDirectorServiceImpl implements CartDirectorService {
 			shoppingCart.removeCartItem(doomedItemGuid);
 		}
 
-		return saveShoppingCart(shoppingCart);
+		shoppingItemService.deleteItemsByGuids(doomedItemGuids);
+
+		return shoppingCart;
 	}
 
 	private void validateCartItemBeforeDeletion(final ShoppingCart shoppingCart, final String itemGuid) {
@@ -272,5 +277,13 @@ public class CartDirectorServiceImpl implements CartDirectorService {
 	public void setRemoveShoppingItemFromCartValidationService(
 			final RemoveShoppingItemFromCartValidationService removeShoppingItemFromCartValidationService) {
 		this.removeShoppingItemFromCartValidationService = removeShoppingItemFromCartValidationService;
+	}
+
+	public ShoppingItemService getShoppingItemService() {
+		return shoppingItemService;
+	}
+
+	public void setShoppingItemService(final ShoppingItemService shoppingItemService) {
+		this.shoppingItemService = shoppingItemService;
 	}
 }

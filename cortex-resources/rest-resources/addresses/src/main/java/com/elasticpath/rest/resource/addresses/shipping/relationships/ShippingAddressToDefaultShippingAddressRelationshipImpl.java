@@ -6,6 +6,8 @@ package com.elasticpath.rest.resource.addresses.shipping.relationships;
 import javax.inject.Inject;
 
 import io.reactivex.Observable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.elasticpath.repository.AliasRepository;
 import com.elasticpath.rest.definition.addresses.AddressIdentifier;
@@ -23,6 +25,8 @@ public class ShippingAddressToDefaultShippingAddressRelationshipImpl implements 
 	private final ShippingAddressesIdentifier shippingAddressesIdentifier;
 
 	private final AliasRepository<DefaultShippingAddressIdentifier, AddressIdentifier> repository;
+
+	private static final Logger LOG = LoggerFactory.getLogger(ShippingAddressToDefaultShippingAddressRelationshipImpl.class);
 
 	/**
 	 * Constructor.
@@ -46,6 +50,7 @@ public class ShippingAddressToDefaultShippingAddressRelationshipImpl implements 
 		return repository.resolve(defaultShippingAddressIdentifier)
 				.toObservable()
 				.map(addressIdentifier -> defaultShippingAddressIdentifier)
+				.doOnError(throwable -> LOG.info("Could not find a default shipping address."))
 				.onErrorResumeNext(Observable.empty());
 	}
 }

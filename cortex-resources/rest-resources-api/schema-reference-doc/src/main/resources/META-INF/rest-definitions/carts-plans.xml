@@ -7,10 +7,8 @@
 		<plan>
 			<name>read-default-cart</name>
 			<description>
-				<![CDATA[
-Retrieve the shopper's default cart. When using *default* in the cart's URI, default evaluates to the logged in shopper's cart I.D.
-See the main Cortex documentation for more information on *default*.
-				]]>
+				<![CDATA[Retrieve the shopper's default cart. When using *default* in the cart's URI, default evaluates to the logged in
+shopper's cart I.D. See the main Cortex documentation for more information on *default*.]]>
 			</description>
 			<step>
 				<description><![CDATA[Retrieve the cart with cart-id default.]]></description>
@@ -21,18 +19,101 @@ See the main Cortex documentation for more information on *default*.
 		</plan>
 
 		<plan>
-			<name>read-cart-memberships</name>
-			<description><![CDATA[
-Retrieves the list of carts that the item has been added to.
-
-	GET:{cortex}/carts/memberships/{item_uri}
-
-The list is empty if the item is not in your cart.]]></description>
+			<name>read-carts-list</name>
+			<description>
+				<![CDATA[Retrieve the list of carts that belong to a shopper.]]>
+			</description>
 			<step>
-				<description><![CDATA[Retrieves the list of carts that the item has been added to.]]></description>
+				<description><![CDATA[Retrieve the list of carts for a given shopper.]]></description>
+				<start>base.root</start>
+				<follow-link>carts</follow-link>
+				<result>carts</result>
+			</step>
+		</plan>
+
+		<plan>
+			<name>read-cart-descriptor</name>
+			<description>
+				<![CDATA[Retrieve the descriptor that describes a shopping cart.]]>
+			</description>
+			<step>
+				<description>Retrieve a shopping cart.</description>
+				<start>carts</start>
+				<follow-link>element</follow-link>
+				<result>cart</result>
+			</step>
+			<step>
+				<description><![CDATA[Retrieve the descriptor that describes a shopping cart.]]></description>
+				<start>cart</start>
+				<follow-link>descriptor</follow-link>
+				<result>cart-descriptor</result>
+			</step>
+		</plan>
+
+		<plan>
+			<name>create-cart</name>
+			<description>
+				<![CDATA[Retrieve and submit the form to create new carts.]]>
+			</description>
+			<step>
+				<description><![CDATA[Retrieve form to create new carts. This will use a dynamic modifer based on the Cart Type ]]></description>
+				<start>carts</start>
+				<follow-link>createcartform</follow-link>
+				<result>create-cart-form</result>
+			</step>
+			<step>
+				<description><![CDATA[Submit the form to create a cart.]]></description>
+				<start>create-cart-form</start>
+				<submit/>
+				<to>create-cart-form</to>
+				<via-link>createcartaction</via-link>
+				<result>cart</result>
+			</step>
+		</plan>
+		
+<!--		Add Items to Cart-->
+
+		<plan>
+			<name>add-item-to-default-cart</name>
+			<description><![CDATA[Add an item to the user's default cart.]]></description>
+			<step>
+				<description><![CDATA[Item to add-to-cart form]]></description>
 				<start>items.item</start>
-				<follow-link>cartmemberships</follow-link>
-				<result>read-cart-memberships</result>
+				<follow-link>addtocartform</follow-link>
+				<result>add-to-default-cart-form</result>
+			</step>
+			<step>
+				<description><![CDATA[Submit the add-to-cart form]]></description>
+				<start>add-to-default-cart-form</start>
+				<submit/>
+				<to>add-to-default-cart-form</to>
+				<via-link>addtodefaultcartaction</via-link>
+				<result>line-item</result>
+			</step>
+		</plan>
+
+		<plan>
+			<name>add-item-to-specific-cart</name>
+			<description><![CDATA[Add an item to one of the user's carts]]></description>
+			<step>
+				<description><![CDATA[Item to list of add-to-cart forms ]]></description>
+				<start>items.item</start>
+				<follow-link>addtocartforms</follow-link>
+				<result>add-to-cart-forms</result>
+			</step>
+			<step>
+				<description><![CDATA[add-to-cart-forms to individual add-to-cart form]]></description>
+				<start>carts.add-to-cart-forms</start>
+				<follow-link>element</follow-link>
+				<result>carts.add-to-specific-cart-form</result>
+			</step>
+			<step>
+				<description><![CDATA[Submit the add-to-cart form]]></description>
+				<start>carts.add-to-specific-cart-form</start>
+				<submit/>
+				<to>carts.add-to-specific-cart-form</to>
+				<via-link>addtocartaction</via-link>
+				<result>carts.line-item</result>
 			</step>
 		</plan>
 
@@ -55,9 +136,92 @@ The list is empty if the item is not in your cart.]]></description>
 			<step>
 				<description><![CDATA[Submit the add-items-to-cart form]]></description>
 				<start>add-items-to-cart-form</start>
-				<submit></submit>
+				<submit/>
 				<to>add-items-to-cart-form</to>
 				<via-link>additemstocartaction</via-link>
+				<result>cart</result>
+			</step>
+		</plan>
+
+		<plan>
+			<name>read-cart-memberships</name>
+			<description><![CDATA[Retrieves the list of carts that an item has been added to.
+The list is empty if the item is not added to a cart.]]></description>
+			<step>
+				<description><![CDATA[Retrieves the list of carts that the item has been added to.]]></description>
+				<start>items.item</start>
+				<follow-link>cartmemberships</follow-link>
+				<result>read-cart-memberships</result>
+			</step>
+		</plan>
+		
+<!--	Lineitems-->
+
+		<plan>
+			<name>read-line-item</name>
+			<description><![CDATA[Retrieve a single line item from a shopper's cart.]]></description>
+			<step>
+				<description><![CDATA[Retrieve list of line items from a shopper's cart.]]></description>
+				<start>cart</start>
+				<follow-link>lineitems</follow-link>
+				<result>line-items</result>
+			</step>
+			<step>
+				<description><![CDATA[Retrieve a single line item.]]></description>
+				<start>line-items</start>
+				<follow-link>element</follow-link>
+				<result>line-item</result>
+			</step>
+		</plan>
+
+		<plan>
+			<name>update-line-item</name>
+			<description>
+				<![CDATA[
+Update the number of items in a line item. For example, if you have 4 Rockstar T-Shirts in a line item,
+you can use this method to remove 3 of the t-shirts and leave 1 T-shirt in the cart.
+				]]>
+			</description>
+			<step>
+				<description><![CDATA[Update the quantity.]]></description>
+				<start>line-item</start>
+				<update-self/>
+			</step>
+		</plan>
+
+		<plan>
+			<name>delete-line-item</name>
+			<description><![CDATA[Delete a line item from the cart.]]></description>
+			<step>
+				<description><![CDATA[Delete the line item.]]></description>
+				<start>line-item</start>
+				<delete-self/>
+			</step>
+		</plan>
+
+		<plan>
+			<name>empty-cart</name>
+			<description><![CDATA[Remove all line items from the cart.]]></description>
+			<step>
+				<description><![CDATA[Retrieve list of line items from a shopper's cart.]]></description>
+				<start>cart</start>
+				<follow-link>lineitems</follow-link>
+				<result>line-items</result>
+			</step>
+			<step>
+				<description><![CDATA[Delete all of the cart's line items.]]></description>
+				<start>line-items</start>
+				<delete-self/>
+			</step>
+		</plan>
+
+		<plan>
+			<name>read-line-item-cart</name>
+			<description><![CDATA[Retrieve the cart that has the given line item. This workflow is useful when you need to determine which cart the line item belongs to.]]></description>
+			<step>
+				<description><![CDATA[Retrieve the cart that has the given line item.]]></description>
+				<start>line-item</start>
+				<follow-link>cart</follow-link>
 				<result>cart</result>
 			</step>
 		</plan>

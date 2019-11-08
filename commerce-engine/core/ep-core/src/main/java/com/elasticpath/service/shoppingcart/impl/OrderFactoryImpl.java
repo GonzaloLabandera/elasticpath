@@ -1,6 +1,7 @@
 /**
  * Copyright (c) Elastic Path Software Inc., 2017
  */
+
 package com.elasticpath.service.shoppingcart.impl;
 
 import static java.lang.String.format;
@@ -71,10 +72,13 @@ public class OrderFactoryImpl implements OrderFactory {
 	private CartOrderService cartOrderService;
 	private TimeService timeService;
 
-	/** Hook point for alternate logging applied rule strategies. */
+	/**
+	 * Hook point for alternate logging applied rule strategies.
+	 */
 	private Visitor appliedRuleVisitor;
 	private ProductSkuLookup productSkuLookup;
 	private DiscountApportioningCalculator discountCalculator;
+
 
 	@Override
 	public Order createAndPersistNewEmptyOrder(
@@ -98,7 +102,6 @@ public class OrderFactoryImpl implements OrderFactory {
 		}
 
 		setCartOrderGuidOnOrder(order, shoppingCart);
-
 		return getOrderService().add(order);
 	}
 
@@ -182,6 +185,9 @@ public class OrderFactoryImpl implements OrderFactory {
 		// CM user uid, null if order not placed through CSR
 		order.setCmUserUID(shoppingCart.getCmUserUID());
 
+		//add cart data to order data
+		shoppingCart.getCartData().values().forEach(datum -> order.setFieldValue(datum.getKey(), datum.getValue()));
+
 	}
 
 	/**
@@ -197,7 +203,7 @@ public class OrderFactoryImpl implements OrderFactory {
 			return;
 		}
 
-		final CustomerService customerService = getBean(ContextIdNames.CUSTOMER_SERVICE);
+		final CustomerService customerService = getBeanFactory().getSingletonBean(ContextIdNames.CUSTOMER_SERVICE, CustomerService.class);
 		final Customer updatedCustomer = customerService.updateCustomerFromAddress(customer, billingAddress);
 
 		order.setCustomer(updatedCustomer);

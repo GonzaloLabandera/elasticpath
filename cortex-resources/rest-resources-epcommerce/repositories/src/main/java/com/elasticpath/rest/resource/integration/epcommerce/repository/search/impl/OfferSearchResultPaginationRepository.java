@@ -3,6 +3,9 @@
  */
 package com.elasticpath.rest.resource.integration.epcommerce.repository.search.impl;
 
+import static com.elasticpath.rest.resource.integration.epcommerce.repository.search.OffersResourceConstants.CATEGORY_CODE_PROPERTY;
+import static com.elasticpath.rest.resource.integration.epcommerce.repository.search.OffersResourceConstants.SORT;
+
 import java.util.Currency;
 import java.util.Locale;
 import java.util.Map;
@@ -16,6 +19,8 @@ import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.elasticpath.domain.search.SortAttributeGroup;
+import com.elasticpath.domain.search.SortValue;
 import com.elasticpath.repository.PaginationRepository;
 import com.elasticpath.rest.ResourceOperationFailure;
 import com.elasticpath.rest.definition.offers.OfferIdentifier;
@@ -31,9 +36,12 @@ import com.elasticpath.rest.pagination.PaginationEntity;
 import com.elasticpath.rest.pagination.PagingLink;
 import com.elasticpath.rest.resource.ResourceOperationContext;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.pagination.PaginatedResult;
-import com.elasticpath.rest.resource.integration.epcommerce.repository.search.OffersResourceConstants;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.search.SearchRepository;
 import com.elasticpath.service.search.ProductCategorySearchCriteria;
+import com.elasticpath.service.search.query.SortBy;
+import com.elasticpath.service.search.query.SortOrder;
+import com.elasticpath.service.search.query.StandardSortBy;
+import com.elasticpath.service.search.solr.FacetConstants;
 
 /**
  * Repository that provides lookup of item data through indexed offer search.
@@ -105,7 +113,7 @@ public class OfferSearchResultPaginationRepository<I extends OfferSearchResultId
 		}
 
 		String searchOffers = searchId.get(SearchOfferEntity.KEYWORDS_PROPERTY);
-		String categoryCode = searchId.get(OffersResourceConstants.CATEGORY_CODE_PROPERTY);
+		String categoryCode = searchId.get(CATEGORY_CODE_PROPERTY);
 
 		if (searchOffers == null && categoryCode == null) {
 			return Single.error(ResourceOperationFailure.badRequestBody("Search keyword or category code must be defined."));
@@ -119,7 +127,49 @@ public class OfferSearchResultPaginationRepository<I extends OfferSearchResultId
 		OfferSearchData offerSearchData = new OfferSearchData(pageId, pageSize, scope, appliedFacets, searchOffers);
 		offerSearchData.setCategoryCode(categoryCode);
 
+		if (searchId.containsKey(SORT)) {
+			populateSorting(searchId, offerSearchData);
+		}
+
 		return Single.just(offerSearchData);
+	}
+
+	private void populateSorting(final Map<String, String> searchId, final OfferSearchData offerSearchData) {
+		String localeCode = SubjectUtil.getLocale(resourceOperationContext.getSubject()).getLanguage();
+		searchRepository.getSortValueByGuidAndLocaleCode(searchId.get(SORT), localeCode)
+				.subscribe(sortValue -> setOfferSearchData(offerSearchData, sortValue));
+	}
+
+	private void setOfferSearchData(final OfferSearchData offerSearchData, final SortValue sortValue) {
+		offerSearchData.setSortBy(getSortType(sortValue.getBusinessObjectId(), sortValue.getAttributeType()));
+		offerSearchData.setSortOrder(sortValue.isDescending() ? SortOrder.DESCENDING : SortOrder.ASCENDING);
+	}
+
+	/**
+	 *  Returns the sort type (protected for test and extensibility purposes).
+	 * @param sortString the sort string.
+	 * @param sortAttributeType The attribute  type.
+	 * @return the sortby object.
+	 */
+	protected SortBy getSortType(final String sortString, final SortAttributeGroup sortAttributeType) {
+		if (sortAttributeType == SortAttributeGroup.FIELD_TYPE) {
+			switch (sortString) {
+				case FacetConstants.PRODUCT_NAME:
+					return StandardSortBy.PRODUCT_NAME;
+				case FacetConstants.PRICE:
+					return StandardSortBy.PRICE;
+				case FacetConstants.FEATURED:
+					return StandardSortBy.FEATURED_ANYWHERE;
+				case FacetConstants.SALES_COUNT:
+					return StandardSortBy.TOP_SELLER;
+				default:
+					return StandardSortBy.RELEVANCE;
+			}
+		}
+
+		SortBy attribute = StandardSortBy.ATTRIBUTE;
+		attribute.setSortString(sortString);
+		return attribute;
 	}
 
 	/**
@@ -192,13 +242,7 @@ public class OfferSearchResultPaginationRepository<I extends OfferSearchResultId
 		Locale locale = SubjectUtil.getLocale(subject);
 		Currency currency = SubjectUtil.getCurrency(subject);
 
-		Map<String, String> appliedFacets = offerSearchData.getAppliedFacets();
-
-		String keyword = offerSearchData.getSearchKeyword();
-		String categoryCode = offerSearchData.getCategoryCode();
-		String storeCode = offerSearchData.getScope();
-
-		return searchRepository.getSearchCriteria(categoryCode, storeCode, locale, currency, appliedFacets, keyword);
+		return searchRepository.getSearchCriteria(offerSearchData, locale, currency);
 	}
 
 	private Single<PaginatedResult> validateSearchResult(final OfferSearchData offerSearchData,

@@ -54,7 +54,7 @@ public class DigitalAssetItemAdapter extends AbstractDomainAdapterImpl<ProductSk
 	DigitalAsset createDigitalAsset(final ProductSku productSku) {
 		DigitalAsset digitalAsset = productSku.getDigitalAsset();
 		if (digitalAsset == null) {
-			digitalAsset = getBeanFactory().getBean(ContextIdNames.DIGITAL_ASSET);
+			digitalAsset = getBeanFactory().getPrototypeBean(ContextIdNames.DIGITAL_ASSET, DigitalAsset.class);
 		}
 		return digitalAsset;
 	}

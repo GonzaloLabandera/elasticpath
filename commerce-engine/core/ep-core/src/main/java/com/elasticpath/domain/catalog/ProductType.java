@@ -9,7 +9,7 @@ import java.util.Set;
 import com.elasticpath.domain.attribute.Attribute;
 import com.elasticpath.domain.attribute.AttributeGroup;
 import com.elasticpath.domain.attribute.AttributeGroupAttribute;
-import com.elasticpath.domain.cartmodifier.CartItemModifierGroup;
+import com.elasticpath.domain.modifier.ModifierGroup;
 import com.elasticpath.domain.skuconfiguration.SkuOption;
 import com.elasticpath.domain.tax.TaxCode;
 import com.elasticpath.persistence.api.Entity;
@@ -213,23 +213,23 @@ public interface ProductType extends Entity, CatalogObject {
 	Attribute findSkuAttributeByKey(String skuAttributeKey);
 
 	/**
-	 * Get the CartItemModifierGroup.
+	 * Get the ModifierGroup.
 	 *
-	 * @return CartItemModifierGroup the CartItemModifierGroup
+	 * @return ModifierGroup the ModifierGroup
 	 */
-	Set<CartItemModifierGroup> getCartItemModifierGroups();
+	Set<ModifierGroup> getModifierGroups();
 
 	/**
-	 * Set the CartItemModifierGroup.
+	 * Set the ModifierGroup.
 	 *
-	 * @param cartItemModifierGroups the CartItemModifierGroup
+	 * @param modifierGroups the ModifierGroup
 	 */
-	void setCartItemModifierGroups(Set<CartItemModifierGroup> cartItemModifierGroups);
+	void setModifierGroups(Set<ModifierGroup> modifierGroups);
 
 	/**
 	 * Remove all product type cart modifier groups.
 	 */
-	void removeAllCartItemModifierGroups();
+	void removeAllModifierGroups();
 
 	/**
 	 * Checks whether the productType is a gift certificate.
@@ -244,5 +244,6 @@ public interface ProductType extends Entity, CatalogObject {
 	 * @return <code>true</code> if the product type has cart item modifier groups
 	 */
 	boolean isConfigurable();
+
 
 }

@@ -393,6 +393,18 @@
    <dynamicField name="*_b"   type="boolean"  indexed="true" stored="false" multiValued="true"/>
    <dynamicField name="*_stringForDismax"  type="stringForDismax"  indexed="true" stored="false" multiValued="true"/>
 
+   <dynamicField name="*_sis"  type="sint"     docValues="true" stored="false"/>
+   <dynamicField name="*_sls"  type="slong"    docValues="true" stored="false"/>
+   <dynamicField name="*_sfs"  type="sfloat"   docValues="true" stored="false"/>
+   <dynamicField name="*_sds"  type="sdouble"  docValues="true" stored="false"/>
+   <dynamicField name="*_sdts" type="date"     docValues="true" stored="false"/>
+   <dynamicField name="*_is"   type="integer"  docValues="true" stored="false"/>
+   <dynamicField name="*_ls"   type="long"     docValues="true" stored="false"/>
+   <dynamicField name="*_fs"   type="float"    docValues="true" stored="false"/>
+   <dynamicField name="*_ds"   type="double"   docValues="true" stored="false"/>
+   <dynamicField name="*_ss"   type="string"   docValues="true" stored="false"/>
+   <dynamicField name="*_bs"   type="boolean"  docValues="true" stored="false"/>
+
    <!-- uncomment the following to ignore any fields that don't already match an existing 
         field name or dynamic field, rather than reporting them as an error. 
         alternately, change the type="ignored" to some other type e.g. "text" if you want 

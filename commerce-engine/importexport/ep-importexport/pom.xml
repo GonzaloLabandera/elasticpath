@@ -58,16 +58,16 @@
 		<dependency>
 			<groupId>org.apache.camel</groupId>
 			<artifactId>camel-spring</artifactId>
-			<scope>runtime</scope>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.elasticpath</groupId>
+			<artifactId>ep-jms</artifactId>
 		</dependency>
 		<!-- Test -->
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.assertj</groupId>
-			<artifactId>assertj-core</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.jmock</groupId>
@@ -132,8 +132,20 @@
 			<artifactId>log4j</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.assertj</groupId>
-			<artifactId>assertj-core</artifactId>
+			<groupId>org.apache.activemq</groupId>
+			<artifactId>activemq-pool</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>javax.jms</groupId>
+			<artifactId>javax.jms-api</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.camel</groupId>
+			<artifactId>camel-jms</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.elasticpath</groupId>
+			<artifactId>ep-jta</artifactId>
 		</dependency>
 	</dependencies>
 
@@ -304,6 +316,14 @@
 									<classpath refid="maven.compile.classpath" />
 								</schemagen>
 
+								<schemagen destdir="target/classes/schema">
+									<schema namespace="" file="schemaModifier.xsd"/>
+									<src>
+										<pathelement location="src/main/java/com/elasticpath/importexport/common/dto/general"/>
+										<pathelement location="src/main/java/com/elasticpath/importexport/common/dto/modifier"/>
+									</src>
+									<classpath refid="maven.compile.classpath"/>
+								</schemagen>
 								<schemagen destdir="target/classes/schema">
 									<schema namespace="" file="schemaCatalog.xsd" />
 									<src>
@@ -555,10 +575,52 @@
 								</schemagen>
 
 								<schemagen destdir="target/classes/schema">
+									<schema namespace="" file="schemaStoreCustomerProfileAttribute.xsd" />
+									<src>
+										<pathelement location="src/main/java/com/elasticpath/importexport/common/dto/general" />
+										<pathelement location="src/main/java/com/elasticpath/importexport/common/dto/customer" />
+									</src>
+									<exclude name="**/CustomerGroupsDTO.java" />
+									<exclude name="**/CustomersDTO.java" />
+									<exclude name="**/AttributePoliciesDTO.java" />
+									<exclude name="**/CustomerProfileAttributesDTO.java" />
+									<classpath refid="maven.compile.classpath" />
+								</schemagen>
+
+								<schemagen destdir="target/classes/schema">
+									<schema namespace="" file="schemaAttributePolicy.xsd" />
+									<src>
+										<pathelement location="src/main/java/com/elasticpath/importexport/common/dto/general" />
+										<pathelement location="src/main/java/com/elasticpath/importexport/common/dto/customer" />
+									</src>
+									<exclude name="**/CustomerGroupsDTO.java" />
+									<exclude name="**/CustomersDTO.java" />
+									<exclude name="**/StoreCustomerAttributesDTO.java" />
+									<exclude name="**/CustomerProfileAttributesDTO.java" />
+									<classpath refid="maven.compile.classpath" />
+								</schemagen>
+
+								<schemagen destdir="target/classes/schema">
 									<schema namespace="" file="schemaFacet.xsd"/>
 									<src>
 										<pathelement location="src/main/java/com/elasticpath/importexport/common/dto/general"/>
 										<pathelement location="src/main/java/com/elasticpath/importexport/common/dto/facet"/>
+									</src>
+									<classpath refid="maven.compile.classpath"/>
+								</schemagen>
+								<schemagen destdir="target/classes/schema">
+									<schema namespace="" file="schemaSortAttribute.xsd"/>
+									<src>
+										<pathelement location="src/main/java/com/elasticpath/importexport/common/dto/general"/>
+										<pathelement location="src/main/java/com/elasticpath/importexport/common/dto/sort"/>
+									</src>
+									<classpath refid="maven.compile.classpath"/>
+								</schemagen>
+								<schemagen destdir="target/classes/schema">
+									<schema namespace="" file="schemaTagGroup.xsd"/>
+									<src>
+										<pathelement location="src/main/java/com/elasticpath/importexport/common/dto/general"/>
+										<pathelement location="src/main/java/com/elasticpath/importexport/common/dto/tag"/>
 									</src>
 									<classpath refid="maven.compile.classpath"/>
 								</schemagen>

@@ -152,13 +152,20 @@ public class PaymentScheduleHelperImplTest {
 		final String optionValueKey = "Monthly";
 		context.checking(new Expectations() {
 			{
-				allowing(beanFactory).getBean(ContextIdNames.PAYMENT_SCHEDULE); will(returnValue(new PaymentScheduleImpl()));
-				allowing(sku).getOptionValueMap(); will(returnValue(optionMap));
-				allowing(sku).getProduct(); will(returnValue(product));
-				oneOf(skuOptionService).findByKey(PaymentScheduleHelperImpl.FREQUENCY_OPTION_KEY); will(returnValue(skuOption));
-				allowing(sov).getOptionValueKey(); will(returnValue(optionValueKey));
-				allowing(sov).getOrdering(); will(returnValue(0));
-				allowing(sku).getSkuOptionValue(skuOption); will(returnValue(sov));
+				allowing(beanFactory).getPrototypeBean(ContextIdNames.PAYMENT_SCHEDULE, PaymentSchedule.class); 
+				will(returnValue(new PaymentScheduleImpl()));
+				allowing(sku).getOptionValueMap(); 
+				will(returnValue(optionMap));
+				allowing(sku).getProduct(); 
+				will(returnValue(product));
+				oneOf(skuOptionService).findByKey(PaymentScheduleHelperImpl.FREQUENCY_OPTION_KEY); 
+				will(returnValue(skuOption));
+				allowing(sov).getOptionValueKey(); 
+				will(returnValue(optionValueKey));
+				allowing(sov).getOrdering(); 
+				will(returnValue(0));
+				allowing(sku).getSkuOptionValue(skuOption); 
+				will(returnValue(sov));
 			}
 		});
 		
@@ -202,7 +209,8 @@ public class PaymentScheduleHelperImplTest {
 		final BeanFactory beanFactory = context.mock(BeanFactory.class);
 		context.checking(new Expectations() {
 			{
-				allowing(beanFactory).getBean(ContextIdNames.PAYMENT_SCHEDULE); will(returnValue(new PaymentScheduleImpl()));
+				allowing(beanFactory).getPrototypeBean(ContextIdNames.PAYMENT_SCHEDULE, PaymentSchedule.class); 
+				will(returnValue(new PaymentScheduleImpl()));
 			}
 		});
 		psh.setBeanFactory(beanFactory);

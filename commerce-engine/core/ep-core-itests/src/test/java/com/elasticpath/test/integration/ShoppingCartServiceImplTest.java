@@ -256,7 +256,7 @@ public class ShoppingCartServiceImplTest extends BasicSpringContextTest {
 		customerSession.setLocale(Locale.ENGLISH);
 		customerSession = customerSessionService.initializeCustomerSessionForPricing(customerSession, scenario.getStore().getCode(),
 				currency);
-		final ShoppingCart shoppingCart = shoppingCartService.findOrCreateByCustomerSession(customerSession);
+		final ShoppingCart shoppingCart = shoppingCartService.findOrCreateDefaultCartByCustomerSession(customerSession);
 		shoppingCart.setStore(scenario.getStore());
 		((ShoppingCartMementoHolder) shoppingCart).getShoppingCartMemento().setGuid(Utils.uniqueCode("CART-"));
 		return shoppingCart;
@@ -441,7 +441,7 @@ public class ShoppingCartServiceImplTest extends BasicSpringContextTest {
 		savedShopper.setCustomer(savedCustomer);
 		shopperService.save(savedShopper);
 
-		final ShoppingCart shoppingCart = shoppingCartService.findOrCreateByCustomerSession(customerSession);
+		final ShoppingCart shoppingCart = shoppingCartService.findOrCreateDefaultCartByCustomerSession(customerSession);
 		shoppingCart.setStore(scenario.getStore());
 		((ShoppingCartMementoHolder) shoppingCart).getShoppingCartMemento().setGuid(Utils.uniqueCode("CART-"));
 		return shoppingCartService.saveOrUpdate(shoppingCart);
@@ -465,11 +465,11 @@ public class ShoppingCartServiceImplTest extends BasicSpringContextTest {
 	 */
 	@DirtiesDatabase
 	@Test
-	public void testFindShoppingCartGuidByShopper() {
+	public void testFindShoppingCartGuidByCustomerSession() {
 		ShoppingCart shoppingCart = createShoppingCart();
 		shoppingCart = shoppingCartService.saveOrUpdate(shoppingCart);
 
-		String cartGuid = shoppingCartService.findDefaultShoppingCartGuidByShopper(shoppingCart.getShopper());
+		String cartGuid = shoppingCartService.findDefaultShoppingCartGuidByCustomerSession(shoppingCart.getCustomerSession());
 		assertThat(cartGuid).isEqualTo(shoppingCart.getGuid());
 	}
 

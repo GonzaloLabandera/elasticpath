@@ -56,7 +56,7 @@ public class MutableTaxableItemContainerTest {
 	 *
 	 */
 	@Test
-	public void testHashCodeWithDiffTaxableItemsDiffIndex() {
+	public void testTaxCacheKeyHashWithDiffTaxableItemsDiffIndex() {
 
 		container1.setStoreCode(STORE_CODE_USA);
 		container1.setCurrency(Currency.getInstance(Locale.CANADA));
@@ -109,8 +109,8 @@ public class MutableTaxableItemContainerTest {
 		container1.setItems(Arrays.<TaxableItem> asList(taxableItem1, taxableItem2));
 		container2.setItems(Arrays.<TaxableItem> asList(taxableItem2, taxableItem1));
 
-		int hashCode1 = container1.hashCode();
-		int hashCode2 = container2.hashCode();
+		int hashCode1 = container1.getTaxCacheKeyHash();
+		int hashCode2 = container2.getTaxCacheKeyHash();
 
 		assertNotSame(hashCode1, hashCode2);
 	}
@@ -122,7 +122,7 @@ public class MutableTaxableItemContainerTest {
 	 *
 	 */
 	@Test
-	public void testHashCodeWithSameTaxableItemsDiffIndex() {
+	public void testTaxCacheKeyHashWithSameTaxableItemsDiffIndex() {
 
 		container1.setStoreCode(STORE_CODE_USA);
 		container1.setCurrency(Currency.getInstance(Locale.CANADA));
@@ -175,8 +175,8 @@ public class MutableTaxableItemContainerTest {
 		container1.setItems(Arrays.<TaxableItem> asList(taxableItem1, taxableItem2));
 		container2.setItems(Arrays.<TaxableItem> asList(taxableItem2, taxableItem1));
 
-		int hashCode1 = container1.hashCode();
-		int hashCode2 = container2.hashCode();
+		int hashCode1 = container1.getTaxCacheKeyHash();
+		int hashCode2 = container2.getTaxCacheKeyHash();
 
 		assertEquals(hashCode1, hashCode2);
 	}
@@ -234,7 +234,7 @@ public class MutableTaxableItemContainerTest {
 	 *
 	 */
 	@Test
-	public void testHashCodeWithDiffTaxableId() {
+	public void testTaxCacheKeyHashWithDiffTaxableId() {
 
 		container1.setStoreCode(STORE_CODE_USA);
 		container1.setCurrency(Currency.getInstance(Locale.CANADA));
@@ -287,8 +287,8 @@ public class MutableTaxableItemContainerTest {
 		taxableItem2.setItemGuid(ID_2);
 		container2.setItems(Arrays.<TaxableItem> asList(taxableItem2));
 
-		int hashCode1 = container1.hashCode();
-		int hashCode2 = container2.hashCode();
+		int hashCode1 = container1.getTaxCacheKeyHash();
+		int hashCode2 = container2.getTaxCacheKeyHash();
 
 		assertEquals(hashCode1, hashCode2);
 	}
@@ -297,7 +297,7 @@ public class MutableTaxableItemContainerTest {
 	 * Tests with diff taxable Item.
 	 */
 	@Test
-	public void testHashCodeWithDiffTaxableItem() {
+	public void testTaxCacheKeyHashWithDiffTaxableItem() {
 
 		container1.setStoreCode(STORE_CODE_USA);
 		container1.setCurrency(Currency.getInstance(Locale.CANADA));
@@ -350,8 +350,8 @@ public class MutableTaxableItemContainerTest {
 		taxableItem2.setItemGuid(ID_1);
 		container2.setItems(Arrays.<TaxableItem> asList(taxableItem2));
 
-		int hashCode1 = container1.hashCode();
-		int hashCode2 = container2.hashCode();
+		int hashCode1 = container1.getTaxCacheKeyHash();
+		int hashCode2 = container2.getTaxCacheKeyHash();
 
 		assertNotSame(hashCode1, hashCode2);
 	}
@@ -360,7 +360,7 @@ public class MutableTaxableItemContainerTest {
 	 * Tests with diff taxable Document.
 	 */
 	@Test
-	public void testHashCodeWithDiffDocumentId() {
+	public void testTaxCacheKeyHashWithDiffDocumentId() {
 
 		container1.setStoreCode(STORE_CODE_USA);
 		container1.setCurrency(Currency.getInstance(Locale.CANADA));
@@ -407,17 +407,17 @@ public class MutableTaxableItemContainerTest {
 
 		container2.setItems(Arrays.<TaxableItem> asList(taxableItem1));
 
-		int hashCode1 = container1.hashCode();
-		int hashCode2 = container2.hashCode();
+		int hashCode1 = container1.getTaxCacheKeyHash();
+		int hashCode2 = container2.getTaxCacheKeyHash();
 
-		assertNotSame(hashCode1, hashCode2);
+		assertEquals(hashCode1, hashCode2);
 	}
 
 	/**
 	 * Tests with diff tax address.
 	 */
 	@Test
-	public void testHashCodeWithDiffAddress() {
+	public void testTaxCacheKeyHashWithDiffAddress() {
 
 		container1.setStoreCode(STORE_CODE_USA);
 		container1.setCurrency(Currency.getInstance(Locale.CANADA));
@@ -466,8 +466,8 @@ public class MutableTaxableItemContainerTest {
 
 		container2.setItems(Arrays.<TaxableItem> asList(taxableItem1));
 
-		int hashCode1 = container1.hashCode();
-		int hashCode2 = container2.hashCode();
+		int hashCode1 = container1.getTaxCacheKeyHash();
+		int hashCode2 = container2.getTaxCacheKeyHash();
 
 		assertNotSame(hashCode1, hashCode2);
 	}

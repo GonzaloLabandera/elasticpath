@@ -5,7 +5,20 @@ import static com.elasticpath.cortex.dce.SharedConstants.ELEMENT_LINK
 import static com.elasticpath.cortex.dce.SharedConstants.TEST_EMAIL_VALUE
 import static org.assertj.core.api.Assertions.assertThat
 
+import java.util.concurrent.ExecutorService
+import java.util.concurrent.Executors
+import java.util.concurrent.TimeUnit
+
 import cucumber.api.DataTable
+import org.apache.http.HttpEntity
+import org.apache.http.HttpHeaders
+import org.apache.http.auth.AUTH
+import org.apache.http.client.methods.HttpPost
+import org.apache.http.entity.BasicHttpEntity
+import org.apache.http.entity.ContentType
+import org.apache.http.entity.EntityTemplate
+import org.apache.http.impl.client.CloseableHttpClient
+import org.apache.http.impl.client.HttpClients
 
 import com.elasticpath.cortexTestObjects.*
 
@@ -433,6 +446,9 @@ class CommonMethods {
 				.stopIfFailure()
 	}
 
+
+
+
 	static void followSelectedAddress(destinationinfo, String postalCode) {
 		destinationinfo.selector()
 				.findChoice {
@@ -581,7 +597,7 @@ class CommonMethods {
 	}
 
 	static void addDefaultTokenAndBillingAddress(){
-		Order.addDefaultToken()
+		Profile.addDefaultToken()
 		Profile.addUSBillingAddress()
 	}
 
@@ -629,6 +645,26 @@ class CommonMethods {
 				.isTrue()
 
 		client.resume(element)
+	}
+
+	static void submitPostNTimesConcurrently(String url, int numberOfConcurrentSubmissions) {
+		def accessToken = client.headers[AUTH.WWW_AUTH_RESP].toString()
+		ExecutorService threadPool = Executors.newFixedThreadPool(numberOfConcurrentSubmissions)
+		for (int i = 0; i < numberOfConcurrentSubmissions; i++) {
+			threadPool.execute({ ->
+				submitPostRequest(url, accessToken)
+			});
+		}
+		threadPool.awaitTermination(numberOfConcurrentSubmissions, TimeUnit.SECONDS)
+	}
+
+	private static void submitPostRequest(String url, String accessToken) {
+		CloseableHttpClient client = HttpClients.createDefault();
+		HttpPost httpPost = new HttpPost(url);
+		httpPost.addHeader(HttpHeaders.AUTHORIZATION, accessToken);
+		httpPost.addHeader(HttpHeaders.CONTENT_TYPE, ContentType.APPLICATION_JSON.toString())
+		client.execute(httpPost);
+		client.close();
 	}
 
 }

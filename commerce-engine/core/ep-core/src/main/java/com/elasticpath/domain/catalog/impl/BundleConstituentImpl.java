@@ -274,7 +274,7 @@ public class BundleConstituentImpl extends AbstractLegacyEntityImpl implements B
 	public void setConstituent(final Product product) {
 		setProductConstituent(product);
 		setSkuConstituent(null);
-		constituentItem = getBean("productConstituent");
+		constituentItem = getPrototypeBean("productConstituent", ProductConstituent.class);
 		((ProductConstituent) constituentItem).setProduct(product);
 	}
 
@@ -282,7 +282,7 @@ public class BundleConstituentImpl extends AbstractLegacyEntityImpl implements B
 	public void setConstituent(final ProductSku productSku) {
 		setProductConstituent(null);
 		setSkuConstituent(productSku);
-		constituentItem = getBean("productSkuConstituent");
+		constituentItem = getPrototypeBean("productSkuConstituent", ProductSkuConstituent.class);
 		((ProductSkuConstituent) constituentItem).setProductSku(productSku);
 	}
 
@@ -291,13 +291,13 @@ public class BundleConstituentImpl extends AbstractLegacyEntityImpl implements B
 	 */
 	private void setConstituentItem() {
 		if (productConstituent != null) {
-			constituentItem = getBean("productConstituent");
+			constituentItem = getPrototypeBean("productConstituent", ProductConstituent.class);
 			((ProductConstituent) constituentItem).setProduct(productConstituent);
 			return;
 		}
 
 		if (skuConstituent != null) {
-			constituentItem = getBean("productSkuConstituent");
+			constituentItem = getPrototypeBean("productSkuConstituent", ProductSkuConstituent.class);
 			((ProductSkuConstituent) constituentItem).setProductSku(skuConstituent);
 		}
 	}

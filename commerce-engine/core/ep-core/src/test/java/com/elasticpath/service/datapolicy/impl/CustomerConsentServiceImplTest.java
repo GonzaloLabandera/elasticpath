@@ -195,7 +195,7 @@ public class CustomerConsentServiceImplTest {
 	}
 
 	@Test
-	public void gettingWithFetchGroupLoadTunerDelegatesToConfigureFetchPlanHelper() {
+	public void shouldReturnCustomerConsentInstanceForGivenUidPk() {
 		CustomerConsentServiceImplTest.MockCustomerConsentServiceImpl customerConsentService =
 				new CustomerConsentServiceImplTest.MockCustomerConsentServiceImpl();
 

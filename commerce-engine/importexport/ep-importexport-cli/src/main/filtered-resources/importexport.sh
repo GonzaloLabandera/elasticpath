@@ -5,6 +5,10 @@ if [ -z "$JAVA_HOME" ] ; then
 	exit 1;
 fi
 
+if [ -z "$PROFILE" ] ; then
+	PROFILE="default"
+fi
+
 export LIB=${dependency.directory}
 
 for x in $LIB/*.jar; do
@@ -22,4 +26,4 @@ if [ "$1" = "debug" ] || [ "$IE_DEBUG" = "true" ]; then
   fi
 fi
 
-"$JAVA_HOME"/bin/java -cp "$IE_CLASSPATH" -Xmx512m $DEBUG_PARMS com.elasticpath.importexport.client.Index $@
+"$JAVA_HOME"/bin/java -Dspring.profiles.active="$PROFILE" -cp "$IE_CLASSPATH" -Xmx512m $DEBUG_PARMS com.elasticpath.importexport.client.Index $@

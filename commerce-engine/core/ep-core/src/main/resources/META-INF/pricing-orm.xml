@@ -45,16 +45,6 @@
 		</named-query>
 
     <!-- Named queries for PriceAdjustmentImpl -->
-		<named-query name="PRICE_ADJUSTMENT_BY_PL_BCGUID_OLD">
-			<query>
-				SELECT bc.priceAdjustments
-				FROM BundleConstituentImpl AS bc
-				JOIN bc.priceAdjustments AS pa
-				WHERE pa.priceListGuid = ?1
-				AND bc.guid in (:list)
-			</query>
-		</named-query>
-
 		<named-query name="PRICE_ADJUSTMENT_AND_BCGUID_BY_PL_BCGUID">
 			<query>
 				SELECT bc.guid, pa

@@ -44,6 +44,7 @@
 		<property name="assembler" ref="annotationAssembler"/>
 		<property name="namingStrategy" ref="namingStrategy"/>
 		<property name="autodetect" value="true"/>
+		<property name="excludedBeans" value="readOnlyDataSource"/>
 	</bean>
 
 	<bean id="jmxAttributeSource"
@@ -75,7 +76,7 @@
 		<property name="corePoolSize" value="5" />
 		<property name="maxPoolSize" value="10" />
 		<property name="keepAliveSeconds" value="600" />
-		<property name="queueCapacity" value="200000" />
+		<property name="queueCapacity" value="${ep.search.entity.loader.queue.capacity:10000}" />
 		<property name="rejectedExecutionHandler">
 			<bean class="java.util.concurrent.ThreadPoolExecutor.CallerRunsPolicy" />
 		</property>
@@ -89,7 +90,7 @@
 		<property name="corePoolSize" value="25" />
 		<property name="maxPoolSize" value="25" />
 		<property name="keepAliveSeconds" value="600" />
-		<property name="queueCapacity" value="200000" />
+		<property name="queueCapacity" value="${ep.search.document.creator.queue.capacity:10000}" />
 		<property name="rejectedExecutionHandler">
 			<bean class="java.util.concurrent.ThreadPoolExecutor.CallerRunsPolicy" />
 		</property>

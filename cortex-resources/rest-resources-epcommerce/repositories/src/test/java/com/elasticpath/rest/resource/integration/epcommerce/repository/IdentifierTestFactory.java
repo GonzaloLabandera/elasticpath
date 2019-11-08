@@ -8,6 +8,7 @@ import java.util.List;
 import com.google.common.collect.ImmutableMap;
 
 import com.elasticpath.rest.definition.carts.CartIdentifier;
+import com.elasticpath.rest.definition.carts.CartsIdentifier;
 import com.elasticpath.rest.definition.carts.LineItemIdentifier;
 import com.elasticpath.rest.definition.carts.LineItemsIdentifier;
 import com.elasticpath.rest.definition.itemdefinitions.ItemDefinitionComponentIdentifier;
@@ -220,7 +221,9 @@ public final class IdentifierTestFactory {
 	public static CartIdentifier buildCartIdentifier(final String scope, final String cartId) {
 		return CartIdentifier.builder()
 				.withCartId(StringIdentifier.of(cartId))
-				.withScope(StringIdentifier.of(scope))
+				.withCarts(CartsIdentifier.builder()
+						.withScope(StringIdentifier.of(scope))
+						.build())
 				.build();
 	}
 

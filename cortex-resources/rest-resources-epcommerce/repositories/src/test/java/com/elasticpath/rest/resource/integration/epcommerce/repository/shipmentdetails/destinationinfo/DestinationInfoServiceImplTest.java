@@ -27,7 +27,7 @@ import com.elasticpath.rest.ResourceStatus;
 import com.elasticpath.rest.command.ExecutionResultFactory;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder.CartOrderRepository;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder.ShoppingCartRepository;
-import com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder.impl.ShoppingCartRepositoryImpl;
+import com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder.impl.ShoppingCartResourceConstants;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.shipmentdetails.ShipmentDetailsServiceImpl;
 
 /**
@@ -104,12 +104,12 @@ public class DestinationInfoServiceImplTest {
 	@Test
 	public void verifyGetSelectedAddressGuidIfShippableReturnsNotFoundWhenDefaultCartNotFound() {
 		when(shoppingCartRepository.getShoppingCart(CART_ID))
-				.thenReturn(Single.error(ResourceOperationFailure.notFound(ShoppingCartRepositoryImpl.DEFAULT_CART_NOT_FOUND)));
+				.thenReturn(Single.error(ResourceOperationFailure.notFound(ShoppingCartResourceConstants.DEFAULT_CART_NOT_FOUND)));
 		mockCartOrder();
 
 		destinationInfoService.getSelectedAddressGuidIfShippable(SCOPE, ORDER_ID)
 				.test()
-				.assertError(createErrorCheckPredicate(ShoppingCartRepositoryImpl.DEFAULT_CART_NOT_FOUND, ResourceStatus.NOT_FOUND));
+				.assertError(createErrorCheckPredicate(ShoppingCartResourceConstants.DEFAULT_CART_NOT_FOUND, ResourceStatus.NOT_FOUND));
 	}
 
 	@Test

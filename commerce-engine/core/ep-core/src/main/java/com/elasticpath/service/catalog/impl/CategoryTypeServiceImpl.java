@@ -19,15 +19,12 @@ import com.elasticpath.domain.catalog.CategoryType;
 import com.elasticpath.domain.catalog.CategoryTypeLoadTuner;
 import com.elasticpath.service.catalog.CategoryTypeService;
 import com.elasticpath.service.impl.AbstractEpPersistenceServiceImpl;
-import com.elasticpath.service.misc.FetchPlanHelper;
 
 
 /**
  * Default implementation for <code>AttributeService</code>.
  */
 public class CategoryTypeServiceImpl extends AbstractEpPersistenceServiceImpl implements CategoryTypeService {
-
-	private FetchPlanHelper fetchPlanHelper;
 
 	private CategoryTypeLoadTuner categoryTypeLoadTunerAll;
 
@@ -194,13 +191,9 @@ public class CategoryTypeServiceImpl extends AbstractEpPersistenceServiceImpl im
 	@Override
 	public CategoryType initialize(final CategoryType categoryType) {
 		sanityCheck();
-		this.fetchPlanHelper.configureCategoryTypeFetchPlan(this.categoryTypeLoadTunerAll);
-		CategoryType freshCategoryType = getPersistentBeanFinder().get(ContextIdNames.CATEGORY_TYPE, categoryType.getUidPk());
-		this.fetchPlanHelper.clearFetchPlan();
-		if (freshCategoryType == null) {
-			return null;
-		}
-		return freshCategoryType;
+		return getPersistentBeanFinder()
+			.withLoadTuners(categoryTypeLoadTunerAll)
+			.get(ContextIdNames.CATEGORY_TYPE, categoryType.getUidPk());
 	}
 
 	/**
@@ -215,14 +208,11 @@ public class CategoryTypeServiceImpl extends AbstractEpPersistenceServiceImpl im
 	 */
 	public CategoryType get(final long uid) throws EpServiceException {
 		sanityCheck();
-		CategoryType categoryType = null;
 		if (uid <= 0) {
-			categoryType = getBean(ContextIdNames.CATEGORY_TYPE);
-		} else {
-			categoryType = getPersistentBeanFinder().get(ContextIdNames.CATEGORY_TYPE, uid);
+			return getBean(ContextIdNames.CATEGORY_TYPE);
 		}
-		return categoryType;
 
+		return getPersistentBeanFinder().get(ContextIdNames.CATEGORY_TYPE, uid);
 	}
 
 	/**
@@ -249,10 +239,9 @@ public class CategoryTypeServiceImpl extends AbstractEpPersistenceServiceImpl im
 	 */
 	@Override
 	public Object getObject(final long uid, final Collection<String> fieldsToLoad) throws EpServiceException {
-		fetchPlanHelper.addFields(getBeanImplClass(ContextIdNames.CATEGORY_TYPE), fieldsToLoad);
-		Object object = get(uid);
-		fetchPlanHelper.clearFetchPlan();
-		return object;
+		getFetchPlanHelper().setLazyFields(getBeanImplClass(ContextIdNames.CATEGORY_TYPE), fieldsToLoad);
+
+		return get(uid);
 	}
 
 	/**
@@ -263,7 +252,7 @@ public class CategoryTypeServiceImpl extends AbstractEpPersistenceServiceImpl im
 		Long count = getPersistenceEngine().<Long>retrieveByNamedQuery("CATEGORY_TYPE_COUNT_BY_NAME",
 				type.getName(), type.getUidPk())
 				.get(0);
-		if (count.longValue() != 0) {
+		if (count != 0L) {
 			throw new DuplicateKeyException("CategoryType name '" + type.getName()
 				+ "' already exists.");
 		}
@@ -304,10 +293,6 @@ public class CategoryTypeServiceImpl extends AbstractEpPersistenceServiceImpl im
 			throw new EpServiceException("Inconsistent data -- duplicate category type guid: " + guid);
 		}
 		return categoryType;
-	}
-
-	public void setFetchPlanHelper(final FetchPlanHelper fetchPlanHelper) {
-		this.fetchPlanHelper = fetchPlanHelper;
 	}
 
 	public void setCategoryTypeLoadTunerAll(final CategoryTypeLoadTuner categoryTypeLoadTunerAll) {

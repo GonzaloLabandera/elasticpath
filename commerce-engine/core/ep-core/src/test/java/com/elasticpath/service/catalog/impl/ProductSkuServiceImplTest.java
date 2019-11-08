@@ -52,7 +52,6 @@ public class ProductSkuServiceImplTest extends AbstractEPServiceTestCase {
 		productSkuService = new ProductSkuServiceImpl();
 
 		productSkuService.setPersistenceEngine(getPersistenceEngine());
-//		productSkuService.setFetchPlanHelper(getMockFetchPlanHelper());
 		mockProductService = context.mock(ProductService.class);
 		productSkuService.setProductService(mockProductService);
 	}

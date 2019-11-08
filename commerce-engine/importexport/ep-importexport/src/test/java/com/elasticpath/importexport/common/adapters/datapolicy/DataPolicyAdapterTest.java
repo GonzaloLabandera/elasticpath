@@ -5,7 +5,6 @@ package com.elasticpath.importexport.common.adapters.datapolicy;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
@@ -60,7 +59,7 @@ public class DataPolicyAdapterTest {
 	private static final String DESCRIPTION_KEY = "descriptionKey";
 	private static final String DESCRIPTION_KEY_UPPER_CASE = DESCRIPTION_KEY.toUpperCase(Locale.US);
 	private static final String DATA_LOCATION = "dataLocation";
-	public static final String DATA_POINT_NAME = "DATA_POINT_NAME";
+	private static final String DATA_POINT_NAME = "DATA_POINT_NAME";
 
 	@Mock
 	private DataPointService dataPointService;
@@ -132,7 +131,7 @@ public class DataPolicyAdapterTest {
 		DataPolicy expectedDataPolicy = createDataPolicy(null);
 		expectedDataPolicy.getDataPoints().add(createDataPoint(DATA_POINT_GUID, true, DESCRIPTION_KEY));
 
-		when(beanFactory.getBean(ContextIdNames.DATA_POINT)).thenReturn(new DataPointImpl());
+		when(beanFactory.getPrototypeBean(ContextIdNames.DATA_POINT, DataPoint.class)).thenAnswer(invocation -> new DataPointImpl());
 
 		DataPolicy dataPolicy = new DataPolicyImpl();
 		dataPolicyAdapter.buildDomain(dataPolicyDTO, dataPolicy);
@@ -153,7 +152,7 @@ public class DataPolicyAdapterTest {
 		DataPoint expectedDataPoint = createDataPoint(DATA_POINT_GUID, true, DESCRIPTION_KEY);
 		expectedDataPolicy.getDataPoints().add(expectedDataPoint);
 
-		when(beanFactory.getBean(ContextIdNames.DATA_POINT)).thenReturn(new DataPointImpl());
+		when(beanFactory.getPrototypeBean(ContextIdNames.DATA_POINT, DataPoint.class)).thenAnswer(invocation -> new DataPointImpl());
 		when(dataPointService.findByGuids(Arrays.asList(expectedDataPoint.getGuid()))).thenReturn(Arrays.asList(expectedDataPoint));
 
 		DataPolicy dataPolicy = new DataPolicyImpl();
@@ -174,7 +173,7 @@ public class DataPolicyAdapterTest {
 
 		Message expectedMessage = new Message("IE-31201", DATA_POLICY_GUID, DATA_POINT_GUID);
 
-		when(beanFactory.getBean(ContextIdNames.DATA_POINT)).thenReturn(new DataPointImpl());
+		when(beanFactory.getPrototypeBean(ContextIdNames.DATA_POINT, DataPoint.class)).thenAnswer(invocation -> new DataPointImpl());
 		when(dataPointService.findByGuids(Arrays.asList(DATA_POINT_GUID)))
 				.thenReturn(Arrays.asList(createDataPoint(DATA_POINT_GUID, false, DESCRIPTION_KEY)));
 
@@ -195,7 +194,7 @@ public class DataPolicyAdapterTest {
 
 		Message expectedMessage = new Message("IE-31201", DATA_POLICY_GUID, DATA_POINT_GUID);
 
-		when(beanFactory.getBean(ContextIdNames.DATA_POINT)).thenReturn(new DataPointImpl());
+		when(beanFactory.getPrototypeBean(ContextIdNames.DATA_POINT, DataPoint.class)).thenAnswer(invocation -> new DataPointImpl());
 		when(dataPointService.findByGuids(Arrays.asList(DATA_POINT_GUID)))
 				.thenReturn(Arrays.asList(createDataPoint(DATA_POINT_GUID, true, DESCRIPTION_KEY_UPPER_CASE)));
 
@@ -222,16 +221,6 @@ public class DataPolicyAdapterTest {
 		assertThat(expectedDataPolicy.getPolicyName())
 				.as("Unexpected data policy domain created by assembler")
 				.isNotSameAs(dataPolicy.getPolicyName());
-	}
-
-	/**
-	 * Tests createDomainObject.
-	 */
-	@Test
-	public void testCreateDomainObject() {
-		dataPolicyAdapter.createDomainObject();
-
-		verify(beanFactory).getBean(ContextIdNames.DATA_POLICY);
 	}
 
 	/**

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<persistence xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://java.sun.com/xml/ns/persistence" version="2.0"
+			 xsi:schemaLocation="http://java.sun.com/xml/ns/persistence http://java.sun.com/xml/ns/persistence/persistence_2_0.xsd">
+	<persistence-unit name="commerce-persistence-unit">
+
+		<provider>org.apache.openjpa.persistence.PersistenceProviderImpl</provider>
+
+		<mapping-file>META-INF/projection-orm.xml</mapping-file>
+		<class>com.elasticpath.catalog.plugin.entity.ProjectionEntity</class>
+		<class>com.elasticpath.catalog.plugin.entity.ProjectionId</class>
+		<class>com.elasticpath.catalog.plugin.entity.ProjectionHistoryEntity</class>
+		<class>com.elasticpath.catalog.plugin.entity.ProjectionHistoryId</class>
+
+	</persistence-unit>
+
+</persistence>

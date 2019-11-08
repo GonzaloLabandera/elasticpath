@@ -300,18 +300,10 @@ public class OrderDetailsPhysicalShipmentSubSectionItem implements IPropertyList
 				final OrderSku orderSku = (OrderSku) element;
 				ShoppingItemPricingSnapshot pricingSnapshot = getPricingSnapshotService().getPricingSnapshotForOrderSku(orderSku);
 				BigDecimal unitPrice = pricingSnapshot.getPriceCalc().forUnitPrice().getAmount();
-				BigDecimal invoicePrice;
 				if (unitPrice == null) {
 					return ""; //$NON-NLS-1$
 				}
-				if (pricingSnapshot.getDiscount() == null || pricingSnapshot.getDiscount().getAmount() == null) {
-					invoicePrice = unitPrice.multiply(new BigDecimal(orderSku.getQuantity()));
-				} else {
-					BigDecimal totalPrice = unitPrice.multiply(new BigDecimal(orderSku.getQuantity()));
-					BigDecimal totalDiscount = pricingSnapshot.getDiscount().getAmount();
-					invoicePrice = totalPrice.subtract(totalDiscount);
-				}
-				return invoicePrice.toString();
+				return pricingSnapshot.getPriceCalc().withCartDiscounts().getAmount().toString();
 			}
 			@Override
 			public Image getImage(final Object element) {

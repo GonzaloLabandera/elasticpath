@@ -14,6 +14,11 @@
 	<artifactId>ep-cm-selenium-test-parent</artifactId>
 	<name>Extension CM Test Parent </name>
 
+	<properties>
+		<!-- Need to override suppressions ruleset -->
+		<checkstyle.suppressions.location>rulesets/checkstyle-elasticpath-junit-suppressions.xml</checkstyle.suppressions.location>
+	</properties>
+
 	<modules>
 		<module>common-test-definitions</module>
 	</modules>

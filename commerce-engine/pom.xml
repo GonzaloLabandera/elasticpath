@@ -27,6 +27,7 @@
 	<modules>
 		<module>liquibase</module>
 		<module>batch</module>
+		<module>catalog</module>
 		<module>search</module>
 		<module>querylanguage</module>
 		<module>importexport</module>
@@ -40,6 +41,7 @@
 		<module>ep-test-support</module>
 		<module>geoip</module>
 		<module>ep-query-analyzer</module>
+		<module>ep-persistence</module>
 
 		<!-- used in itests -->
 		<module>itests-parent</module>

@@ -189,9 +189,6 @@
 						</goals>
 					</execution>
 				</executions>
-				<configuration>
-					<generatedHtmlFileName>resource_reference_guide.html</generatedHtmlFileName>
-				</configuration>
 			</plugin>
 			<plugin>
 				<artifactId>maven-assembly-plugin</artifactId>

@@ -11,6 +11,7 @@ import com.elasticpath.base.common.dto.StructuredErrorMessage;
 import com.elasticpath.base.common.dto.StructuredErrorResolution;
 import com.elasticpath.domain.shoppingcart.ShoppingItem;
 import com.elasticpath.rest.definition.carts.CartIdentifier;
+import com.elasticpath.rest.definition.carts.CartsIdentifier;
 import com.elasticpath.rest.definition.carts.LineItemIdentifier;
 import com.elasticpath.rest.definition.carts.LineItemsIdentifier;
 import com.elasticpath.rest.id.ResourceIdentifier;
@@ -53,7 +54,9 @@ public class ShoppingItemResolutionStrategy implements StructuredErrorResolution
 			final String scope, final String cartId, final ShoppingItem shoppingItem) {
 		LineItemsIdentifier lineItemsIdentifier = LineItemsIdentifier.builder()
 				.withCart(CartIdentifier.builder()
-						.withScope(StringIdentifier.of(scope))
+						.withCarts(CartsIdentifier.builder()
+								.withScope(StringIdentifier.of(scope))
+								.build())
 						.withCartId(StringIdentifier.of(cartId))
 						.build())
 				.build();

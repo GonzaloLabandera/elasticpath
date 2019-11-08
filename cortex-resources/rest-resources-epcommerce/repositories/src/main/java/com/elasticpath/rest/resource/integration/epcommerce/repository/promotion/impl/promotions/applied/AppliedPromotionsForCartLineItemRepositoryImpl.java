@@ -42,7 +42,7 @@ public class AppliedPromotionsForCartLineItemRepositoryImpl<I extends AppliedPro
 		LineItemIdentifier lineItemIdentifier = identifier.getLineItem();
 		String lineItemId = lineItemIdentifier.getLineItemId().getValue();
 		CartIdentifier cartIdentifier = lineItemIdentifier.getLineItems().getCart();
-		String scope = cartIdentifier.getScope().getValue();
+		String scope = cartIdentifier.getCarts().getScope().getValue();
 		String cartId = cartIdentifier.getCartId().getValue();
 		return cartOrderRepository.getEnrichedShoppingCartSingle(scope, cartId, CartOrderRepository.FindCartOrder.BY_CART_GUID)
 				.flatMap(shoppingCart -> getAppliedPromotionIds(lineItemId, shoppingCart))

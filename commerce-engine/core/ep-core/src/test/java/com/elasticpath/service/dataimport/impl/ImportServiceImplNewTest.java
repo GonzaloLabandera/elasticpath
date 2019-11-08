@@ -70,7 +70,7 @@ public class ImportServiceImplNewTest {
 		}
 		@SuppressWarnings("unchecked")
 		@Override
-		protected <T> T getBean(final String beanName) {
+		public <T> T getBean(final String beanName) {
 			if ("importBadRow".equals(beanName)) {
 				return (T) new ImportBadRowImpl();
 			}

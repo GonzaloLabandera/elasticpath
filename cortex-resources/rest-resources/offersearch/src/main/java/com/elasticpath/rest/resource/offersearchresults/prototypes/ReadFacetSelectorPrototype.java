@@ -3,8 +3,8 @@
  */
 package com.elasticpath.rest.resource.offersearchresults.prototypes;
 
-import static com.elasticpath.rest.resource.integration.epcommerce.repository.search.OffersResourceConstants.SELECTION_RULE;
-import static com.elasticpath.rest.resource.integration.epcommerce.repository.search.OffersResourceConstants.SELECTOR_NAME;
+import static com.elasticpath.rest.resource.integration.epcommerce.repository.search.OffersResourceConstants.FACET_SELECTOR_NAME;
+import static com.elasticpath.rest.resource.integration.epcommerce.repository.search.OffersResourceConstants.SELECTION_RULE_MANY;
 
 import io.reactivex.Single;
 
@@ -19,8 +19,8 @@ public class ReadFacetSelectorPrototype implements FacetSelectorResource.Select 
 	@Override
 	public Single<SelectorEntity> onRead() {
 		return Single.just(SelectorEntity.builder()
-				.withName(SELECTOR_NAME)
-				.withSelectionRule(SELECTION_RULE)
+				.withName(FACET_SELECTOR_NAME)
+				.withSelectionRule(SELECTION_RULE_MANY)
 				.build());
 	}
 }

@@ -103,6 +103,8 @@
 							<epdb.password>${epdb.password}</epdb.password>
 							<epdb.jdbc.driver>${epdb.jdbc.driver}</epdb.jdbc.driver>
 							<epdb.url>${epdb.url}</epdb.url>
+							<epdb.data.source.factory>${epdb.data.source.factory}</epdb.data.source.factory>
+							<epdb.data.source.type>${epdb.data.source.type}</epdb.data.source.type>
 							<ep.datasync.port.http>${ep.datasync.tomcat.port.http}</ep.datasync.port.http>
 							<ep.datasync.port.https>${ep.datasync.tomcat.port.https}</ep.datasync.port.https>
 							<epdb.synctarget.validation.query>${epdb.synctarget.validation.query}</epdb.synctarget.validation.query>
@@ -111,9 +113,15 @@
 							<epdb.synctarget.password>${epdb.synctarget.password}</epdb.synctarget.password>
 							<epdb.synctarget.jdbc.driver>${epdb.synctarget.jdbc.driver}</epdb.synctarget.jdbc.driver>
 							<epdb.synctarget.url>${epdb.synctarget.url}</epdb.synctarget.url>
+							<ep.synctarget.jms.url>${ep.synctarget.jms.url}</ep.synctarget.jms.url>
 							<ep.jms.type>${ep.jms.type}</ep.jms.type>
 							<ep.jms.factory>${ep.jms.factory}</ep.jms.factory>
 							<ep.jms.url>${ep.jms.url}</ep.jms.url>
+							<epdb.data.source.xa.factory>${epdb.data.source.xa.factory}</epdb.data.source.xa.factory>
+							<epdb.data.source.xa.type>${epdb.data.source.xa.type}</epdb.data.source.xa.type>
+							<ep.jms.xa.factory>${ep.jms.xa.factory}</ep.jms.xa.factory>
+							<ep.jms.xa.type>${ep.jms.xa.type}</ep.jms.xa.type>
+							<ep.changesets.enabled>${ep.changesets.enabled}</ep.changesets.enabled>
 						</systemProperties>
 					</configuration>
 

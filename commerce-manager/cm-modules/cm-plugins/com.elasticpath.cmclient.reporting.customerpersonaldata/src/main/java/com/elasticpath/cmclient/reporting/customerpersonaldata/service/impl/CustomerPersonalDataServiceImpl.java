@@ -3,13 +3,13 @@
  */
 package com.elasticpath.cmclient.reporting.customerpersonaldata.service.impl;
 
+import java.text.DateFormat;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Map;
 
 import com.elasticpath.cmclient.core.ServiceLocator;
 import com.elasticpath.cmclient.core.helpers.extenders.PluginHelper;
-import com.elasticpath.cmclient.core.util.DateTimeUtilFactory;
 import com.elasticpath.cmclient.reporting.ReportTypeManager;
 import com.elasticpath.cmclient.reporting.ReportingPlugin;
 import com.elasticpath.cmclient.reporting.customerpersonaldata.CustomerPersonalDataReportPlugin;
@@ -44,18 +44,15 @@ public class CustomerPersonalDataServiceImpl {
 	public Collection<Object[]> getData() {
 
 		final CustomerPersonalDataParameters params = getParameters();
+		final DateFormat dateFormat =  params.getDateFormat();
 
 		Collection<Object[]> data = getCustomerPersonalDataReportingService().getData(params.getStore(), params.getUserId());
 		data.forEach(datum ->  {
-			datum[CREATED_INDEX] = formatDateTime((Date) datum[CREATED_INDEX]);
-			datum[LAST_MODIFED_INDEX] = formatDateTime((Date) datum[LAST_MODIFED_INDEX]);
+			datum[CREATED_INDEX] = (datum[CREATED_INDEX] == null ? "" : dateFormat.format((Date) datum[CREATED_INDEX]));
+			datum[LAST_MODIFED_INDEX] = (datum[LAST_MODIFED_INDEX] == null ? "" : dateFormat.format((Date) datum[LAST_MODIFED_INDEX]));
 		});
 		return data;
 
-	}
-
-	private String formatDateTime(final Date date) {
-		return DateTimeUtilFactory.getDateUtil().formatAsDateTime(date);
 	}
 
 	private CustomerPersonalDataReportingService getCustomerPersonalDataReportingService() {

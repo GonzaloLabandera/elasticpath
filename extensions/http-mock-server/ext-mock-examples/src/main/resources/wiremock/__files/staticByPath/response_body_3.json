@@ -1,0 +1,5 @@
+{
+	"responseId": "{{request.requestLine.pathSegments.[1]}}",
+	"currentDate": "{{now}}",
+	"id": "{{randomValue length=8 type='ALPHANUMERIC' uppercase=true}}"
+}

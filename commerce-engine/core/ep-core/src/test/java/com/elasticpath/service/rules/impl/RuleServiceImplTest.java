@@ -23,12 +23,14 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
-import com.google.common.collect.ImmutableList;
-import org.apache.commons.lang.StringUtils;
-import org.awaitility.Duration;
 import org.jmock.Expectations;
 import org.jmock.Sequence;
 import org.junit.Test;
+
+import com.google.common.collect.ImmutableList;
+
+import org.apache.commons.lang.StringUtils;
+import org.awaitility.Duration;
 
 import com.elasticpath.base.exception.EpServiceException;
 import com.elasticpath.commons.constants.ContextIdNames;
@@ -48,9 +50,9 @@ import com.elasticpath.domain.rules.impl.RuleScenariosImpl;
 import com.elasticpath.domain.rules.impl.RuleSetImpl;
 import com.elasticpath.domain.rules.impl.SkuExceptionImpl;
 import com.elasticpath.persistence.api.FetchGroupLoadTuner;
+import com.elasticpath.persistence.api.LoadTuner;
 import com.elasticpath.persistence.api.PersistenceEngine;
 import com.elasticpath.service.ProcessingHook;
-import com.elasticpath.service.misc.FetchPlanHelper;
 import com.elasticpath.service.rules.CouponConfigService;
 import com.elasticpath.service.rules.RuleSetService;
 import com.elasticpath.service.search.IndexNotificationService;
@@ -64,6 +66,9 @@ import com.elasticpath.test.jmock.AbstractCatalogDataTestCase;
 @SuppressWarnings({ "PMD.TooManyMethods" })
 public class RuleServiceImplTest extends AbstractCatalogDataTestCase {
 
+
+	private static final long RULE_UID = 343456;
+
 	private static final String SERVICE_EXCEPTION_EXPECTED = "EpServiceException expected.";
 
 	private RuleServiceImpl ruleServiceImpl;
@@ -73,8 +78,6 @@ public class RuleServiceImplTest extends AbstractCatalogDataTestCase {
 	private RuleSetService mockRuleSetService;
 
 	private IndexNotificationService mockIndexNotificationService;
-
-	private FetchPlanHelper mockFetchPlanHelper;
 
 	/**
 	 * Prepares for tests.
@@ -87,8 +90,6 @@ public class RuleServiceImplTest extends AbstractCatalogDataTestCase {
 		stubGetBean(ContextIdNames.PROMOTION_RULE, PromotionRuleImpl.class);
 		stubGetBean(ContextIdNames.RULE_SCENARIOS, RuleScenariosImpl.class);
 		stubGetBean(ContextIdNames.CART_SUBTOTAL_COND, CartSubtotalConditionImpl.class);
-
-		mockFetchPlanHelper = getFetchPlanHelper();
 
 		ruleServiceImpl = new RuleServiceImpl();
 		mockPersistenceEngine = getMockPersistenceEngine();
@@ -107,13 +108,7 @@ public class RuleServiceImplTest extends AbstractCatalogDataTestCase {
 		// Mock up the rule set service
 		mockRuleSetService = context.mock(RuleSetService.class);
 		ruleServiceImpl.setRuleSetService(mockRuleSetService);
-
 		ruleServiceImpl.setFetchPlanHelper(getMockFetchPlanHelper());
-		context.checking(new Expectations() {
-			{
-				allowing(getMockFetchPlanHelper()).configureFetchGroupLoadTuner(with(aNull(FetchGroupLoadTuner.class)));
-			}
-		});
 	}
 
 	/**
@@ -125,7 +120,7 @@ public class RuleServiceImplTest extends AbstractCatalogDataTestCase {
 		try {
 			ruleServiceImpl.add(createRule());
 			fail(SERVICE_EXCEPTION_EXPECTED);
-		} catch (final EpServiceException e) {
+		} catch (final Exception e) {
 			// Succeed.
 			assertNotNull(e);
 		}
@@ -447,7 +442,7 @@ public class RuleServiceImplTest extends AbstractCatalogDataTestCase {
 		rule.setUidPk(uid);
 		context.checking(new Expectations() {
 			{
-				oneOf(getMockFetchPlanHelper()).clearFetchPlan();
+				oneOf(getMockFetchPlanHelper()).setLoadTuners(new LoadTuner[]{null});
 
 				allowing(mockPersistenceEngine).get(PromotionRuleImpl.class, uid);
 				will(returnValue(rule));
@@ -468,7 +463,7 @@ public class RuleServiceImplTest extends AbstractCatalogDataTestCase {
 		// expectationss
 		context.checking(new Expectations() {
 			{
-				oneOf(getMockFetchPlanHelper()).clearFetchPlan();
+				oneOf(getMockFetchPlanHelper()).setLoadTuners(new LoadTuner[]{null});
 
 				allowing(mockPersistenceEngine).get(PromotionRuleImpl.class, uid);
 				will(returnValue(rule));
@@ -566,12 +561,10 @@ Tested by FIT?
 		final FetchGroupLoadTuner fGLoadTuner = mockFGLoadTuner;
 		context.checking(new Expectations() {
 			{
-
 				oneOf(mockPersistenceEngine).get(PromotionRuleImpl.class, uid);
 				will(returnValue(rule));
 
-				oneOf(getMockFetchPlanHelper()).configureFetchGroupLoadTuner(with(same(fGLoadTuner)));
-				oneOf(getMockFetchPlanHelper()).clearFetchPlan();
+				oneOf(getMockFetchPlanHelper()).setLoadTuners(fGLoadTuner);
 			}
 		});
 
@@ -583,8 +576,7 @@ Tested by FIT?
 				oneOf(mockPersistenceEngine).get(PromotionRuleImpl.class, nonExistUid);
 				will(returnValue(null));
 
-				oneOf(getMockFetchPlanHelper()).configureFetchGroupLoadTuner(with(same(fGLoadTuner)));
-				oneOf(getMockFetchPlanHelper()).clearFetchPlan();
+				oneOf(getMockFetchPlanHelper()).setLoadTuners(fGLoadTuner);
 			}
 		});
 
@@ -647,6 +639,28 @@ Tested by FIT?
 		assertEquals("There should be 2 display names", 2, res.size());
 		assertEquals("The first promo should map to the English display name", name1, res.get(promo1));
 		assertEquals("The second promo should map to an empty string", StringUtils.EMPTY, res.get(promo2));
+	}
+
+	/**
+	 * Test that getModifiedDateForRule returns correct date.
+	 */
+	@Test
+	public void testGetModifiedDateForRule() {
+
+		Date date = new Date();
+
+		List<Object> dates = new ArrayList<>();
+		dates.add(date);
+
+		context.checking(new Expectations() {
+			{
+				allowing(mockPersistenceEngine).retrieveByNamedQuery("RULE_BASE_MODIFIED_DATE_BY_UID", RULE_UID);
+				will(returnValue(dates));
+			}
+		});
+
+		Date modifiedDateForRule = ruleServiceImpl.getModifiedDateForRuleBase(RULE_UID);
+		assertEquals("There should be correct date", date, modifiedDateForRule);
 	}
 
 	/**
@@ -734,10 +748,4 @@ Tested by FIT?
 		assertThatThrownBy(() -> ruleServiceImpl.getAllowedLimit(ruleId))
 				.isInstanceOf(NumberFormatException.class);
 	}
-
-	@Override
-	public FetchPlanHelper getMockFetchPlanHelper() {
-		return mockFetchPlanHelper;
-	}
-
 }

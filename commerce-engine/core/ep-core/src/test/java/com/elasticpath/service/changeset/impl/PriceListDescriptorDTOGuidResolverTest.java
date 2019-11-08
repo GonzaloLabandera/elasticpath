@@ -32,13 +32,23 @@ public class PriceListDescriptorDTOGuidResolverTest {
 		resolver = new PriceListDescriptorDTOGuidResolver();
 		resolver.setBeanFactory(new BeanFactory() {
 			@Override
-			@SuppressWarnings("unchecked")
 			public <T> T getBean(final String name) {
-				return (T) new RandomGuidImpl();
+				return null;
 			}
 			
 			@Override
 			public <T> Class<T> getBeanImplClass(final String beanName) {
+				return null;
+			}
+
+			@Override
+			@SuppressWarnings("unchecked")
+			public <T> T getPrototypeBean(final String name, final Class<T> clazz) {
+				return (T) new RandomGuidImpl();
+			}
+
+			@Override
+			public <T> T getSingletonBean(final String name, final Class<T> clazz) {
 				return null;
 			}
 		});

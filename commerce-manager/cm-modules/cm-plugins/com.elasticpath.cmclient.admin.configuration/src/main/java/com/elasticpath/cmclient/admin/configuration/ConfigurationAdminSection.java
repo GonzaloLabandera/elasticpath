@@ -11,6 +11,7 @@ import org.eclipse.ui.forms.widgets.FormToolkit;
 import com.elasticpath.cmclient.admin.AbstractAdminSection;
 import com.elasticpath.cmclient.admin.configuration.views.SearchIndexesView;
 import com.elasticpath.cmclient.admin.configuration.views.SystemConfigurationView;
+import com.elasticpath.cmclient.admin.configuration.views.TagGroupView;
 
 /**
  * Configuration admin section.
@@ -25,10 +26,16 @@ public class ConfigurationAdminSection extends AbstractAdminSection {
 		
 		createItem(toolkit, parent, site, SearchIndexesView.VIEW_ID, AdminConfigurationMessages.get().ConfigurationAdminSection_SearchIndexes,
 				AdminConfigurationImageRegistry.getImage(AdminConfigurationImageRegistry.IMAGE_SEARCH_INDEXES));
+
+		createItem(toolkit, parent, site, TagGroupView.VIEW_ID,
+				AdminConfigurationMessages.get().ConfigurationAdminSection_TagConfiguration,
+				AdminConfigurationImageRegistry.getImage(AdminConfigurationImageRegistry.IMAGE_TAG_CONFIGURATION));
+
 	}
 
 	@Override
 	public boolean isAuthorized() {
 		return AdminConfigurationPlugin.isAuthorized();
 	}
+
 }

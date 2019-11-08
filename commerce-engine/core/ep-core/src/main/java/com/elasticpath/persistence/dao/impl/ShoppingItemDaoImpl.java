@@ -6,7 +6,9 @@
  */
 package com.elasticpath.persistence.dao.impl;
 
+import java.util.Arrays;
 import java.util.List;
+
 import javax.persistence.PersistenceException;
 
 import com.elasticpath.domain.catalog.ShoppingItemLoadTuner;
@@ -15,7 +17,6 @@ import com.elasticpath.persistence.api.EpPersistenceException;
 import com.elasticpath.persistence.api.LoadTuner;
 import com.elasticpath.persistence.api.PersistenceEngine;
 import com.elasticpath.persistence.dao.ShoppingItemDao;
-import com.elasticpath.service.misc.FetchPlanHelper;
 
 /**
  * Provides JPA persistence implementation of {@code ShoppingItemDao}.
@@ -23,21 +24,19 @@ import com.elasticpath.service.misc.FetchPlanHelper;
 public class ShoppingItemDaoImpl implements ShoppingItemDao {
 	private PersistenceEngine persistenceEngine;
 
-	private FetchPlanHelper fetchPlanHelper;
-
 	private ShoppingItemLoadTuner shoppingItemLoadTunerDefault;
 
 	@Override
 	public ShoppingItem findByGuid(final String guid, final LoadTuner loadTuner) throws EpPersistenceException {
-		if (loadTuner == null) {
-			fetchPlanHelper.configureLoadTuner(shoppingItemLoadTunerDefault);
-		} else {
-			fetchPlanHelper.configureLoadTuner(loadTuner);
-		}
 
-		List<ShoppingItem> items = getPersistenceEngine().retrieveByNamedQuery("SHOPPING_ITEM_BY_GUID", guid);
+		LoadTuner activeLoadTuner = loadTuner == null
+			? shoppingItemLoadTunerDefault
+			: loadTuner;
 
-		fetchPlanHelper.clearFetchPlan();
+
+		List<ShoppingItem> items = getPersistenceEngine()
+			.withLoadTuners(activeLoadTuner)
+			.retrieveByNamedQuery("SHOPPING_ITEM_BY_GUID", guid);
 
 		if (!items.isEmpty()) {
 			return items.get(0);
@@ -53,6 +52,11 @@ public class ShoppingItemDaoImpl implements ShoppingItemDao {
 		} catch (PersistenceException e) {
 			throw new EpPersistenceException("Save failed.", e);
 		}
+	}
+
+	@Override
+	public int deleteItemsByGuids(final String... guids) {
+		return getPersistenceEngine().executeNamedQueryWithList("DELETE_CARTITEMS_BY_GUIDS", "list", Arrays.asList(guids));
 	}
 
 	/**
@@ -71,15 +75,6 @@ public class ShoppingItemDaoImpl implements ShoppingItemDao {
 		return persistenceEngine;
 	}
 
-	/**
-	 * Setter for {@link FetchPlanHelper}.
-	 * 
-	 * @param fetchPlanHelper {@link FetchPlanHelper}
-	 */
-	public void setFetchPlanHelper(final FetchPlanHelper fetchPlanHelper) {
-		this.fetchPlanHelper = fetchPlanHelper;
-	}
-	
 	/**
 	 * Setter for {@link ShoppingItemLoadTuner}.
 	 * 

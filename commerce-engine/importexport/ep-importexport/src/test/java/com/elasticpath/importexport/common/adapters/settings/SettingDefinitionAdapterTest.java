@@ -232,11 +232,11 @@ public class SettingDefinitionAdapterTest {
 	public void testCreateSettingMetaData() {
 		MetadataDTO metadataDTO = createMetaDataDTO(AVAILABLE_TO_MARKETING, VALUE);
 
-		when(mockBeanFactory.getBean(ContextIdNames.SETTING_METADATA)).thenReturn(settingMetadata);
+		when(mockBeanFactory.getPrototypeBean(ContextIdNames.SETTING_METADATA, SettingMetadata.class)).thenReturn(settingMetadata);
 		assertThat(settingDefinitionAdapter.createSettingMetaData(metadataDTO)).isEqualTo(settingMetadata);
 		verify(settingMetadata, times(1)).setKey(AVAILABLE_TO_MARKETING);
 		verify(settingMetadata, times(1)).setValue(VALUE);
-		verify(mockBeanFactory, times(1)).getBean(ContextIdNames.SETTING_METADATA);
+		verify(mockBeanFactory, times(1)).getPrototypeBean(ContextIdNames.SETTING_METADATA, SettingMetadata.class);
 	}
 
 	private MetadataDTO createMetaDataDTO(final String key, final String value) {
@@ -261,10 +261,10 @@ public class SettingDefinitionAdapterTest {
 	 */
 	@Test
 	public void testCreateDomainObject() {
-		when(mockBeanFactory.getBean(ContextIdNames.SETTING_DEFINITION)).thenReturn(new SettingDefinitionImpl());
+		when(mockBeanFactory.getPrototypeBean(ContextIdNames.SETTING_DEFINITION, SettingDefinition.class)).thenReturn(new SettingDefinitionImpl());
 
 		assertThat(settingDefinitionAdapter.createDomainObject()).isInstanceOf(SettingDefinitionImpl.class);
 
-		verify(mockBeanFactory, times(1)).getBean(ContextIdNames.SETTING_DEFINITION);
+		verify(mockBeanFactory, times(1)).getPrototypeBean(ContextIdNames.SETTING_DEFINITION, SettingDefinition.class);
 	}
 }

@@ -14,9 +14,8 @@ import com.elasticpath.commons.beanframework.BeanFactory;
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.commons.exception.DuplicateKeyException;
 import com.elasticpath.commons.pagination.DirectedSortingField;
-import com.elasticpath.domain.catalog.CategoryLoadTuner;
+import com.elasticpath.domain.attribute.Attribute;
 import com.elasticpath.domain.catalog.ProductBundle;
-import com.elasticpath.domain.catalog.ProductLoadTuner;
 import com.elasticpath.domain.catalog.ProductSku;
 import com.elasticpath.domain.catalog.ProductSkuLoadTuner;
 import com.elasticpath.domain.catalog.impl.PreOrBackOrderDetails;
@@ -30,7 +29,6 @@ import com.elasticpath.service.DirectedSortingFieldException;
 import com.elasticpath.service.catalog.CategoryService;
 import com.elasticpath.service.catalog.ProductService;
 import com.elasticpath.service.catalog.ProductSkuService;
-import com.elasticpath.service.misc.FetchPlanHelper;
 import com.elasticpath.service.pricing.dao.BaseAmountDao;
 
 /**
@@ -44,15 +42,9 @@ public class ProductSkuServiceImpl implements ProductSkuService {
 
 	private ProductSkuLoadTuner productSkuLoadTunerMinimal;
 
-	private ProductLoadTuner productLoadTunerAll;
-
-	private FetchPlanHelper fetchPlanHelper;
-
 	private CategoryService categoryService;
 
 	private ProductService productService;
-
-	private CategoryLoadTuner categoryLoadTuner;
 
 	private BaseAmountDao baseAmountDao;
 
@@ -108,11 +100,10 @@ public class ProductSkuServiceImpl implements ProductSkuService {
 		if (criteriaValue == null || criteriaValue.trim().length() == 0) {
 			return null;
 		}
-		fetchPlanHelper.configureProductSkuFetchPlan(this.productSkuLoadTunerAll);
-		List<ProductSku> result = getPersistenceEngine().retrieve("SELECT ps FROM ProductSkuImpl ps WHERE ps." + propertyName + " LIKE ?1",
+		return getPersistenceEngine()
+			.withLoadTuners(productSkuLoadTunerAll)
+			.retrieve("SELECT ps FROM ProductSkuImpl ps WHERE ps." + propertyName + " LIKE ?1",
 				"%" + criteriaValue + "%");
-		fetchPlanHelper.clearFetchPlan();
-		return result;
 	}
 
 	/**
@@ -131,14 +122,14 @@ public class ProductSkuServiceImpl implements ProductSkuService {
 			return null;
 		}
 		final List<Long> categoryUids = this.categoryService.findDescendantCategoryUids(parentCategoryUid);
-		fetchPlanHelper.configureProductSkuFetchPlan(this.productSkuLoadTunerAll);
-		final List<ProductSku> productSkus = getPersistenceEngine().retrieveByNamedQueryWithList(
+
+		return getPersistenceEngine()
+			.withLoadTuners(productSkuLoadTunerAll)
+			.retrieveByNamedQueryWithList(
 				"PRODUCTSKU_SELECT_BY_SKUCODE_LIKE_AND_CATEGORY_UIDS",
 				"list",
 				categoryUids,
 				"%" + criteriaValue + "%");
-		fetchPlanHelper.clearFetchPlan();
-		return productSkus;
 	}
 
 	/**
@@ -160,16 +151,6 @@ public class ProductSkuServiceImpl implements ProductSkuService {
 	}
 
 	/**
-	 * Sets the <code>ProductLoadTuner</code> for populating all data.
-	 *
-	 * @param productLoadTunerAll the <code>ProductLoadTuner</code> for populating all data.
-	 */
-
-	public void setProductLoadTunerAll(final ProductLoadTuner productLoadTunerAll) {
-		this.productLoadTunerAll = productLoadTunerAll;
-	}
-
-	/**
 	 * Returns a list of <code>ProductSku</code> based on the given product Uid.
 	 *
 	 * @param productUid the product Uid
@@ -179,21 +160,11 @@ public class ProductSkuServiceImpl implements ProductSkuService {
 	// ---- DOCfindByProductUid
 	@Override
 	public List<ProductSku> findByProductUid(final long productUid) {
-		fetchPlanHelper.configureProductSkuFetchPlan(this.productSkuLoadTunerMinimal);
-		List<ProductSku> result = getPersistenceEngine().retrieveByNamedQuery("PRODUCTSKU_SELECT_BY_PRODUCT_UID", Long.valueOf(productUid));
-		fetchPlanHelper.clearFetchPlan();
-		return result;
+		return getPersistenceEngine()
+			.withLoadTuners(productSkuLoadTunerMinimal)
+			.retrieveByNamedQuery("PRODUCTSKU_SELECT_BY_PRODUCT_UID", Long.valueOf(productUid));
 	}
 	// ---- DOCfindByProductUid
-
-	/**
-	 * Configure load tuners for findBySkuCode... operations.
-	 */
-	protected void configureLoadTuners() {
-		fetchPlanHelper.configureProductFetchPlan(productLoadTunerAll);
-		fetchPlanHelper.configureProductSkuFetchPlan(productSkuLoadTunerAll);
-		fetchPlanHelper.configureCategoryFetchPlan(categoryLoadTuner);
-	}
 
 
 	/**
@@ -282,31 +253,6 @@ public class ProductSkuServiceImpl implements ProductSkuService {
 	}
 
 	/**
-	 * Get the fetch plan helper.
-	 * @return the fetchPlanHelper
-	 */
-	public FetchPlanHelper getFetchPlanHelper() {
-		return fetchPlanHelper;
-	}
-
-	/**
-	 * Set the fetch plan helper.
-	 * @param fetchPlanHelper the fetchPlanHelper to set
-	 */
-	public void setFetchPlanHelper(final FetchPlanHelper fetchPlanHelper) {
-		this.fetchPlanHelper = fetchPlanHelper;
-	}
-
-
-	/**
-	 * Set the category load tuner.
-	 * @param categoryLoadTuner category load tuner
-	 */
-	public void setCategoryLoadTuner(final CategoryLoadTuner categoryLoadTuner) {
-		this.categoryLoadTuner = categoryLoadTuner;
-	}
-
-	/**
 	 * Determine whether the given SKU can be deleted.
 	 *
 	 * @param productSku the Sku to check
@@ -322,6 +268,16 @@ public class ProductSkuServiceImpl implements ProductSkuService {
 		return count.intValue() <= 0;
 	}
 
+	/**
+	 * Find a list of product codes that use the given sku attribute.
+	 *
+	 * @param attribute the attribute to search by
+	 * @return a list of product codes.
+	 */
+	@Override
+	public List<String> findCodesByAttribute(final Attribute attribute) {
+		return getPersistenceEngine().retrieveByNamedQuery("PRODUCT_SKU_CODES_BY_ATTRIBUTE", Long.valueOf(attribute.getUidPk()));
+	}
 	@Override
 	public boolean isInBundle(final ProductSku productSku) {
 		return !productBundleDao.findByProductSku(productSku.getSkuCode()).isEmpty();
@@ -358,17 +314,14 @@ public class ProductSkuServiceImpl implements ProductSkuService {
 					String.format("Negative-value argument: startIndex=%d, maxResults=%d", startIndex, maxResults));
 		}
 
-		this.fetchPlanHelper.configureLoadTuner(loadTuner);
-
-		List<ProductSku> result = getPersistenceEngine().retrieve(
+		return getPersistenceEngine()
+			.withLoadTuners(loadTuner)
+			.retrieve(
 				"SELECT ps FROM ProductSkuImpl ps WHERE ps.productInternal.code = ?1 ORDER BY ps."
-				+ sortingFields[0].getSortingField().getName()
-				+ " "
-				+ sortingFields[0].getSortingDirection(),
+					+ sortingFields[0].getSortingField().getName()
+					+ " "
+					+ sortingFields[0].getSortingDirection(),
 				new Object[] { productCode }, startIndex, maxResults);
-		this.fetchPlanHelper.clearFetchPlan();
-
-		return result;
 	}
 
 	/**

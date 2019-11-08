@@ -1,11 +1,11 @@
 package com.elasticpath.cortex.dce.carts
 
 import static com.elasticpath.cortex.dce.ClasspathFluentRelosClientFactory.getClient
-import static com.elasticpath.cortex.dce.SharedConstants.DEFAULT_CART_URL
-import static com.elasticpath.cortex.dce.SharedConstants.DEFAULT_SCOPE
-import static com.elasticpath.cortex.dce.SharedConstants.ELEMENT_LINK
+import static com.elasticpath.cortex.dce.SharedConstants.*
 import static com.elasticpath.rest.ws.assertions.RelosAssert.assertLinkDoesNotExist
 import static org.assertj.core.api.Assertions.assertThat
+
+import java.util.stream.IntStream
 
 import cucumber.api.DataTable
 import cucumber.api.java.After
@@ -306,6 +306,14 @@ class CartSteps {
 	@When('^I add the following SKU codes and their quantities to the cart$')
 	static void addItemsToCart(DataTable itemsTable) {
 		List<Map<String, String>> items = itemsTable.asMaps(String.class, String.class)
+		Cart.addItemsToCart(items)
+	}
+
+	@When('^I send (.+) duplicate items to be added to the cart$')
+	static void addSeveralItemsToCart(int numberOfItems, DataTable itemsTable) {
+		Map<String, String> item = itemsTable.asMaps(String.class, String.class).get(0)
+		List<Map<String, String>> items = new ArrayList<>()
+		IntStream.range(1, numberOfItems).forEach({ value -> items.add(item) })
 		Cart.addItemsToCart(items)
 	}
 

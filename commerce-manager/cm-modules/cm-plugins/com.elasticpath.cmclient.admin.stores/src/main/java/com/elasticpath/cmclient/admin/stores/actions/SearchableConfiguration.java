@@ -49,7 +49,7 @@ public class SearchableConfiguration {
 		for (String attribute : defaultStringProductAttributes) {
 			FacetModel facetModel = new FacetModel(attribute, FieldKeyType.STRING, true, FacetType.NO_FACET,
 					supportedLocales, defaultLocaleString, "");
-			facetModel.setFacetGroup(FacetGroup.OTHERS);
+			facetModel.setFacetGroup(FacetGroup.FIELD);
 			facetModel.setAttributeKey(attribute);
 			facetModel.setGuid(UUID.randomUUID().toString());
 			storeFacetsMap.put(attribute, facetModel);
@@ -57,7 +57,7 @@ public class SearchableConfiguration {
 
 		FacetModel price = new FacetModel(PRICE, FieldKeyType.DECIMAL, true, FacetType.NO_FACET,
 				supportedLocales, defaultLocaleString, "");
-		price.setFacetGroup(FacetGroup.OTHERS);
+		price.setFacetGroup(FacetGroup.FIELD);
 		price.setAttributeKey(PRICE);
 		price.setGuid(UUID.randomUUID().toString());
 		storeFacetsMap.put(PRICE, price);
@@ -65,7 +65,7 @@ public class SearchableConfiguration {
 		for (String attribute : defaultSkuAttributes) {
 			FacetModel facetModel = new FacetModel(attribute, FieldKeyType.DECIMAL, true, FacetType.NO_FACET,
 					supportedLocales, defaultLocaleString, "");
-			facetModel.setFacetGroup(FacetGroup.OTHERS);
+			facetModel.setFacetGroup(FacetGroup.FIELD);
 			facetModel.setAttributeKey(attribute);
 			facetModel.setGuid(UUID.randomUUID().toString());
 			storeFacetsMap.put(attribute, facetModel);

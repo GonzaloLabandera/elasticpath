@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<store_customer_attributes>
+	<store_customer_attribute>
+		<guid>c2178474-769f-4119-a0e7-a69f1bbbfe76</guid>
+		<storecode>MOBEE</storecode>
+		<attribute_key>CP_PREF_LOCALE</attribute_key>
+		<policy_key>DEFAULT</policy_key>
+	</store_customer_attribute>
+	<store_customer_attribute>
+		<guid>2bc63fdb-2ece-4e0c-afdd-55cc69c96050</guid>
+		<storecode>MOBEE</storecode>
+		<attribute_key>CP_TAX_EXEMPTION_ID</attribute_key>
+		<policy_key>DEFAULT</policy_key>
+	</store_customer_attribute>
+</store_customer_attributes>

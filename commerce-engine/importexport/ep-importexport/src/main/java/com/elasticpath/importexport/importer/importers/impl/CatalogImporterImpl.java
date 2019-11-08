@@ -12,7 +12,6 @@ import org.apache.log4j.Logger;
 
 import com.elasticpath.common.dto.Dto;
 import com.elasticpath.domain.attribute.Attribute;
-import com.elasticpath.domain.cartmodifier.CartItemModifierGroup;
 import com.elasticpath.domain.catalog.Brand;
 import com.elasticpath.domain.catalog.Catalog;
 import com.elasticpath.domain.catalog.CatalogObject;
@@ -22,7 +21,6 @@ import com.elasticpath.domain.catalog.ProductType;
 import com.elasticpath.domain.search.SynonymGroup;
 import com.elasticpath.domain.skuconfiguration.SkuOption;
 import com.elasticpath.importexport.common.adapters.DomainAdapter;
-import com.elasticpath.importexport.common.adapters.cartmodifier.CartItemModifierGroupAdapter;
 import com.elasticpath.importexport.common.adapters.catalogs.AttributeAdapter;
 import com.elasticpath.importexport.common.adapters.catalogs.BrandAdapter;
 import com.elasticpath.importexport.common.adapters.catalogs.CatalogAdapter;
@@ -33,7 +31,6 @@ import com.elasticpath.importexport.common.adapters.catalogs.SynonymGroupAdapter
 import com.elasticpath.importexport.common.caching.CachingService;
 import com.elasticpath.importexport.common.dto.catalogs.AttributeDTO;
 import com.elasticpath.importexport.common.dto.catalogs.BrandDTO;
-import com.elasticpath.importexport.common.dto.catalogs.CartItemModifierGroupDTO;
 import com.elasticpath.importexport.common.dto.catalogs.CatalogDTO;
 import com.elasticpath.importexport.common.dto.catalogs.CategoryTypeDTO;
 import com.elasticpath.importexport.common.dto.catalogs.ProductTypeDTO;
@@ -50,7 +47,6 @@ import com.elasticpath.persistence.api.Persistable;
 import com.elasticpath.persistence.support.FetchGroupConstants;
 import com.elasticpath.persistence.support.impl.FetchGroupLoadTunerImpl;
 import com.elasticpath.service.attribute.AttributeService;
-import com.elasticpath.service.cartitemmodifier.CartItemModifierService;
 import com.elasticpath.service.catalog.BrandService;
 import com.elasticpath.service.catalog.CatalogService;
 import com.elasticpath.service.catalog.CategoryTypeService;
@@ -100,12 +96,6 @@ public class CatalogImporterImpl extends AbstractImporterImpl<Catalog, CatalogDT
 	private SavingStrategy<SkuOption, SkuOptionDTO> skuOptionSavingStrategy;
 	private SavingManager<? extends Persistable> commonSavingManager;
 
-	private CartItemModifierService cartItemModifierService;
-
-	private CartItemModifierGroupAdapter cartItemModifierGroupAdapter;
-
-	private SavingStrategy<CartItemModifierGroup, CartItemModifierGroupDTO> cartItemModifierGroupSavingStrategy;
-
 
 	@Override
 	public void initialize(final ImportContext context, final SavingStrategy<Catalog, CatalogDTO> savingStrategy) {
@@ -153,32 +143,11 @@ public class CatalogImporterImpl extends AbstractImporterImpl<Catalog, CatalogDT
 			}
 		};
 
-		final SavingManager<CartItemModifierGroup> cartItemModifierGroupSavingManager = new SavingManager<CartItemModifierGroup>() {
-
-			@Override
-			public CartItemModifierGroup update(final CartItemModifierGroup persistable) {
-				return cartItemModifierService.update(persistable);
-			}
-
-			@Override
-			public void save(final CartItemModifierGroup persistable) {
-				cartItemModifierService.add(persistable);
-			}
-
-		};
-
-
 		attributeSavingStrategy = AbstractSavingStrategy.createStrategy(ImportStrategyType.INSERT_OR_UPDATE, attributeSavingManager);
 		attributeSavingStrategy.setDomainAdapter(attributeAdapter);
 
 		skuOptionSavingStrategy = AbstractSavingStrategy.createStrategy(ImportStrategyType.INSERT_OR_UPDATE, skuOptionSavingManager);
 		skuOptionSavingStrategy.setDomainAdapter(skuOptionAdapter);
-
-		cartItemModifierGroupSavingStrategy = AbstractSavingStrategy.createStrategy(
-			ImportStrategyType.INSERT_OR_UPDATE, cartItemModifierGroupSavingManager);
-		cartItemModifierGroupSavingStrategy.setDomainAdapter(cartItemModifierGroupAdapter);
-
-
 	}
 
 	@Override
@@ -222,13 +191,15 @@ public class CatalogImporterImpl extends AbstractImporterImpl<Catalog, CatalogDT
 
 				@Override
 				public void beforeSave(final Persistable persistable) {
-					((CatalogObject) persistable).setCatalog(catalog);
+					if (persistable instanceof CatalogObject) {
+						((CatalogObject) persistable).setCatalog(catalog);
+					}
 				}
 
 				@Override
 				public void beforePopulate(final Persistable persistable) {
-					CatalogObject catalogObject = (CatalogObject) persistable;
-					if (catalogObject.getCatalog() == null) {
+					if (persistable instanceof CatalogObject && ((CatalogObject) persistable).getCatalog() == null) {
+						CatalogObject catalogObject = (CatalogObject) persistable;
 						catalogObject.setCatalog(catalog);
 					}
 				}
@@ -240,9 +211,7 @@ public class CatalogImporterImpl extends AbstractImporterImpl<Catalog, CatalogDT
 
 			saveBrands(object, catalog, this.<Brand, BrandDTO>createDefaultSavingStrategy(lifecycleListener));
 
-			saveCartItemModifierGroup(object, catalog, lifecycleListener, cartItemModifierGroupSavingStrategy);
 			executeImportExtensionHook(object, catalog, lifecycleListener);
-
 			saveProductTypes(object, catalog, this.<ProductType, ProductTypeDTO>createDefaultSavingStrategy(lifecycleListener));
 			saveCategoryTypes(object, catalog, this.<CategoryType, CategoryTypeDTO>createDefaultSavingStrategy(lifecycleListener));
 			saveSynonymGroups(object, this.<SynonymGroup, SynonymGroupDTO>createDefaultSavingStrategy(lifecycleListener));
@@ -385,29 +354,6 @@ public class CatalogImporterImpl extends AbstractImporterImpl<Catalog, CatalogDT
 			savingStrategy.populateAndSaveObject(brand, brandDTO);
 		}
 	}
-
-	private void saveCartItemModifierGroup(final CatalogDTO object, final Catalog catalog, final LifecycleListener lifecycleListener,
-			final SavingStrategy<CartItemModifierGroup, CartItemModifierGroupDTO> savingStrategy) {
-		if (object.getCartItemModifierGroups() == null) {
-			return;
-		}
-
-		savingStrategy.setLifecycleListener(lifecycleListener);
-
-		for (CartItemModifierGroupDTO cartItemModifierGroupDTO : object.getCartItemModifierGroups()) {
-			CartItemModifierGroup cartItemModifierGroup = cartItemModifierService
-				.findCartItemModifierGroupByCode(cartItemModifierGroupDTO.getCode());
-
-			if (cartItemModifierGroup != null && isIncorrectCatalogObject(catalog, cartItemModifierGroup)) {
-				LOG.warn("Incorrect catalog detected for cartItemModifierGroupDTO with code: " + cartItemModifierGroupDTO.getCode());
-				continue;
-			}
-
-			savingStrategy.populateAndSaveObject(cartItemModifierGroup, cartItemModifierGroupDTO);
-		}
-
-	}
-
 
 	@Override
 	protected DomainAdapter<Catalog, CatalogDTO> getDomainAdapter() {
@@ -759,11 +705,4 @@ public class CatalogImporterImpl extends AbstractImporterImpl<Catalog, CatalogDT
 		return CatalogDTO.class;
 	}
 
-	public void setCartItemModifierService(final CartItemModifierService cartItemModifierService) {
-		this.cartItemModifierService = cartItemModifierService;
-	}
-
-	public void setCartItemModifierGroupAdapter(final CartItemModifierGroupAdapter cartItemModifierGroupAdapter) {
-		this.cartItemModifierGroupAdapter = cartItemModifierGroupAdapter;
-	}
 }

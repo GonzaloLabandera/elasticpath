@@ -18,6 +18,17 @@
 		<!-- to avoid load-order related conflicts. -->
 	</util:map>
 
+	<bean id="predefinedProfileAttributePolicies"
+		  parent="basePredefinedProfileAttributePolicies"
+		  class="org.springframework.beans.factory.config.MapFactoryBean">
+		<property name="sourceMap">
+			<map merge="true">
+				<!-- Extend predefined attribute policies by adding map entries here. -->
+				<!--<entry key="CP_PREF_LOCALE"><util:constant static-field="com.elasticpath.domain.customer.PolicyKey.READ_ONLY"/></entry>-->
+			</map>
+		</property>
+	</bean>
+
 	<!-- Other JPA properties such as excluding unlisted classes or Jta/NonJta data source can be overridden as follows -->
 	<!--
 	<bean id="overridingPersistenceUnitPostProcessor" parent="defaultOverridingPersistenceUnitPostProcessor">

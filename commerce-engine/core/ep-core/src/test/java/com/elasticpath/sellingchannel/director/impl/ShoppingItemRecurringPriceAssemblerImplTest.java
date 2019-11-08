@@ -114,8 +114,10 @@ public class ShoppingItemRecurringPriceAssemblerImplTest {
 		paymentScheduleHelper.setBeanFactory(beanFactory);
 		context.checking(new Expectations() {
 			{
-				allowing(skuOptionService).findOptionValueByKey(MONTHLY); will(returnValue(null));
-				allowing(beanFactory).getBean(ContextIdNames.PAYMENT_SCHEDULE); will(returnValue(new PaymentScheduleImpl()));
+				allowing(skuOptionService).findOptionValueByKey(MONTHLY);
+				will(returnValue(null));
+				allowing(beanFactory).getPrototypeBean(ContextIdNames.PAYMENT_SCHEDULE, PaymentSchedule.class);
+				will(returnValue(new PaymentScheduleImpl()));
 			}
 		});
 

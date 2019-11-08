@@ -27,7 +27,7 @@ public class AddEditCartItemModifierGroupDialog extends AbstractDialog {
 	private static final String GROUP_CODE_INPUT_CSS = ADD_CART_ITEM_MODIFIER_GROUP_PARENT_CSS
 			+ "div[automation-id='com.elasticpath.cmclient.catalog.CatalogMessages.GroupAddEditDialog_GroupCode'] input";
 	private static final String ADD_BUTTON_CSS = ADD_CART_ITEM_MODIFIER_GROUP_PARENT_CSS
-			+ "div[automation-id='com.elasticpath.cmclient.catalog.CatalogMessages.AddEditCartItemModifierFieldOptionDialog_Add']";
+			+ "div[automation-id='com.elasticpath.cmclient.catalog.CatalogMessages.AddEditModifierFieldOptionDialog_Add']";
 	private static final String OK_BUTTON_CSS = ADD_CART_ITEM_MODIFIER_GROUP_PARENT_CSS
 			+ "div[automation-id='com.elasticpath.cmclient.core.CoreMessages.AbstractEpDialog_ButtonOK']";
 	private static final String ADD_FIELD_BUTTON_CSS = ADD_CART_ITEM_MODIFIER_GROUP_PARENT_CSS
@@ -41,8 +41,9 @@ public class AddEditCartItemModifierGroupDialog extends AbstractDialog {
 	private static final String MOVE_DOWN_BUTTON_CSS = ADD_CART_ITEM_MODIFIER_GROUP_PARENT_CSS
 			+ "div[automation-id='com.elasticpath.cmclient.core.CoreMessages.button_MoveDown']";
 
-
+	private static final String LANGUAGE_COMBO_BOX_CSS = ADD_CART_ITEM_MODIFIER_GROUP_PARENT_CSS + "div[widget-type='CCombo']";
 	private String groupName;
+	private String code;
 
 	/**
 	 * Constructor.
@@ -61,6 +62,10 @@ public class AddEditCartItemModifierGroupDialog extends AbstractDialog {
 		this.groupName = groupName;
 	}
 
+	public String getCode() {
+		return code;
+	}
+
 	/**
 	 * Inputs cart item modifier group code.
 	 *
@@ -68,6 +73,7 @@ public class AddEditCartItemModifierGroupDialog extends AbstractDialog {
 	 */
 	public void enterModifierGroupCode(final String groupCode) {
 		clearAndType(GROUP_CODE_INPUT_CSS, groupCode);
+		this.code = groupCode;
 	}
 
 	/**
@@ -205,6 +211,15 @@ public class AddEditCartItemModifierGroupDialog extends AbstractDialog {
 
 		clickButton(String.format(buttonCss, buttonNameLowerCase), buttonName);
 		sleep(Constants.SLEEP_HALFSECOND_IN_MILLIS);
+	}
+
+	/**
+	 * Select language.
+	 *
+	 * @param language language which should be chosen.
+	 */
+	public void selectLanguage(final String language) {
+		selectComboBoxItem(LANGUAGE_COMBO_BOX_CSS, language);
 	}
 
 }

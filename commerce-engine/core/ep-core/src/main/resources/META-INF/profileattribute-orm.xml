@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<entity-mappings xmlns="http://java.sun.com/xml/ns/persistence/orm"
+				 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+				 xsi:schemaLocation="http://java.sun.com/xml/ns/persistence/orm http://java.sun.com/xml/ns/persistence/orm_2_0.xsd"
+				 version="2.0">
+
+	<named-query name="CUSTOMER_ATTRIBUTE">
+		<query>
+			SELECT a
+			FROM StoreCustomerAttributeImpl a
+			WHERE a.storeCode = ?1
+			AND a.attributeKey = ?2
+		</query>
+	</named-query>
+
+	<named-query name="CUSTOMER_ATTRIBUTE_FIND_BY_GUID">
+		<query>
+			SELECT a
+			FROM StoreCustomerAttributeImpl a
+			WHERE a.guid = ?1
+		</query>
+	</named-query>
+
+	<named-query name="CUSTOMER_ATTRIBUTE_FIND_BY_GUIDS">
+		<query>
+			SELECT a
+			FROM StoreCustomerAttributeImpl a
+			WHERE a.guid IN (:list)
+		</query>
+	</named-query>
+
+	<named-query name="CUSTOMER_ATTRIBUTES_FIND_BY_STORE">
+		<query>
+			SELECT a
+			FROM StoreCustomerAttributeImpl a
+			WHERE a.storeCode = ?1
+		</query>
+	</named-query>
+
+	<named-query name="CUSTOMER_ATTRIBUTES_FIND_ALL">
+		<query>
+			SELECT a
+			FROM StoreCustomerAttributeImpl a
+		</query>
+	</named-query>
+
+	<named-query name="ATTRIBUTE_POLICY_FIND_BY_GUID">
+		<query>
+			SELECT p
+			FROM AttributePolicyImpl p
+			WHERE p.guid = ?1
+		</query>
+	</named-query>
+
+	<named-query name="ATTRIBUTE_POLICY_FIND_BY_GUIDS">
+		<query>
+			SELECT p
+			FROM AttributePolicyImpl p
+			WHERE p.guid IN (:list)
+		</query>
+	</named-query>
+
+	<named-query name="ATTRIBUTE_POLICY_FIND_BY_KEY">
+		<query>
+			SELECT p
+			FROM AttributePolicyImpl p
+			WHERE p.policyKey = ?1
+		</query>
+	</named-query>
+
+	<named-query name="ATTRIBUTE_POLICIES_FIND_ALL">
+		<query>
+			SELECT p
+			FROM AttributePolicyImpl p
+		</query>
+	</named-query>
+
+	<named-query name="ATTRIBUTE_POLICIES_FIND_BY_ATTRIBUTE_STORE">
+		<query>
+			SELECT p
+			FROM AttributePolicyImpl p, StoreCustomerAttributeImpl a
+			WHERE p.policyKey = a.policyKey
+			AND a.storeCode = ?1
+			AND a.attributeKey = ?2
+		</query>
+	</named-query>
+
+</entity-mappings>

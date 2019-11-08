@@ -5,26 +5,30 @@ package com.elasticpath.persistence.support.impl;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 
-import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+
+import org.apache.openjpa.meta.FetchGroup;
+import org.apache.openjpa.persistence.FetchPlan;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
 
 /**
  * Test case for {@link FetchGroupLoadTunerImpl}.
  */
+@RunWith(MockitoJUnitRunner.class)
 public class FetchGroupLoadTunerImplTest {
 
-	private FetchGroupLoadTunerImpl fetchGroupLoadTunerImpl;
-	
-	/**
-	 * Prepares for tests.
-	 * 
-	 * @throws Exception in case of any errors
-	 */
-	@Before
-	public void setUp() throws Exception {
-		fetchGroupLoadTunerImpl = new FetchGroupLoadTunerImpl();
-	}
+	private static final String FETCH_GROUP_1 = "fetchGroup1";
+	private static final String FETCH_GROUP_2 = "fetchGroup2";
+
+	@Mock
+	private FetchPlan mockFetchPlan;
+
+	private final FetchGroupLoadTunerImpl fetchGroupLoadTunerImpl = new FetchGroupLoadTunerImpl();
 	
 	/**
 	 * Test method for {@link FetchGroupLoadTunerImpl#addFetchGroup(String...)}.
@@ -79,5 +83,33 @@ public class FetchGroupLoadTunerImplTest {
 			}
 		}
 		assertTrue(containsFG2);
+	}
+
+	@Test
+	public void shouldConfigureWithFetchGroupWithoutCleaningFetchPlan() {
+		fetchGroupLoadTunerImpl.setCleanExistingGroups(false);
+
+		fetchGroupLoadTunerImpl.addFetchGroup(FETCH_GROUP_1);
+		fetchGroupLoadTunerImpl.addFetchGroup(FETCH_GROUP_2);
+
+		fetchGroupLoadTunerImpl.configure(mockFetchPlan);
+
+		verify(mockFetchPlan).addFetchGroup(FETCH_GROUP_1);
+		verify(mockFetchPlan).addFetchGroup(FETCH_GROUP_2);
+		verify(mockFetchPlan, never()).clearFetchGroups();
+		verify(mockFetchPlan, never()).removeFetchGroup(FetchGroup.NAME_DEFAULT);
+	}
+
+	@Test
+	public void shouldConfigureWithFetchGroupWithCleaningFetchPlan() {
+		fetchGroupLoadTunerImpl.addFetchGroup(FETCH_GROUP_1);
+		fetchGroupLoadTunerImpl.addFetchGroup(FETCH_GROUP_2);
+
+		fetchGroupLoadTunerImpl.configure(mockFetchPlan);
+
+		verify(mockFetchPlan).addFetchGroup(FETCH_GROUP_1);
+		verify(mockFetchPlan).addFetchGroup(FETCH_GROUP_2);
+		verify(mockFetchPlan).clearFetchGroups();
+		verify(mockFetchPlan).removeFetchGroup(FetchGroup.NAME_DEFAULT);
 	}
 }

@@ -6,4 +6,6 @@
 
 	<jndi-lookup id="dataSource" jndi-name="jdbc/epjndi" resource-ref="true"
 			xmlns="http://www.springframework.org/schema/jee"/>
+	<jndi-lookup id="readOnlyDataSource" jndi-name="jdbc/epjndiReadOnly" resource-ref="true"
+				 xmlns="http://www.springframework.org/schema/jee"/>
 </beans>

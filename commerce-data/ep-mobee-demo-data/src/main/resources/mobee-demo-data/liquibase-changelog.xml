@@ -10,7 +10,7 @@
 		<comment>Initial import of Cortex Mobee test catalog. This is temporary data until valid project data is created.</comment>
 
 		<customChange class="com.elasticpath.datapopulation.importexport.ImportExportChange">
-			<param name="dataSet" value="mobee-demo-data" />
+			<param name="dataSet" value="mobee-demo-data/mobee-demo-data" />
 		</customChange>
 	</changeSet>
 
@@ -463,5 +463,12 @@
 			<column name="RANGE_FACET_VALUES" value='[{"start":0,"end":100,"displayNameMap":{"fr_CA":"0 - 100","en":"0 - 100","fr":"0 - 100"}},{"start":100,"end":200,"displayNameMap":{"fr_CA":"100 - 200","en":"100 - 200","fr":"100 - 200"}},{"start":200,"end":300,"displayNameMap":{"fr_CA":"200 - 300","en":"200 - 300","fr":"200 - 300"}},{"start":300,"end":null,"displayNameMap":{"fr_CA":"300 +","en":"300 +","fr":"300 +"}}]'/>
 			<column name="FACET_GROUP" valueNumeric='3'/>
 		</insert>
+	</changeSet>
+
+	<changeSet id="enable-trusted-traits" author="elasticpath" context="mobee-data">
+		<update tableName="TSETTINGDEFINITION">
+			<column name="DEFAULT_VALUE" value="true" />
+			<where>PATH = 'COMMERCE/SYSTEM/API/enableTrustedTraits'</where>
+		</update>
 	</changeSet>
 </databaseChangeLog>

@@ -5,14 +5,17 @@ package com.elasticpath.rest.resource.integration.epcommerce.repository.search;
 
 import java.util.Currency;
 import java.util.Locale;
-import java.util.Map;
 
 import io.reactivex.Completable;
+import io.reactivex.Maybe;
 import io.reactivex.Observable;
 import io.reactivex.Single;
 
+import com.elasticpath.domain.search.SortAttribute;
+import com.elasticpath.domain.search.SortValue;
 import com.elasticpath.rest.definition.searches.SearchKeywordsEntity;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.pagination.PaginatedResult;
+import com.elasticpath.rest.resource.integration.epcommerce.repository.search.impl.OfferSearchData;
 import com.elasticpath.service.search.ProductCategorySearchCriteria;
 import com.elasticpath.service.search.solr.FacetValue;
 
@@ -90,14 +93,33 @@ public interface SearchRepository {
 
 	/**
 	 * Get the search criteria given the search details.
-	 * @param categoryCode the category code if its a navigated search, else null
-	 * @param storeCode the store code
+	 * @param offerSearchData offer search data containing search
 	 * @param locale locale
 	 * @param currency currency
-	 * @param appliedFacets applied facets map
-	 * @param keyword the keyword if its an offer search, else null
 	 * @return a search criteria
 	 */
-	Single<ProductCategorySearchCriteria> getSearchCriteria(String categoryCode, String storeCode, Locale locale, Currency currency,
-															Map<String, String> appliedFacets, String keyword);
+	Single<ProductCategorySearchCriteria> getSearchCriteria(OfferSearchData offerSearchData, Locale locale, Currency currency);
+
+	/**
+	 * Get all sort attribute guids for store and locale.
+	 * @param storeCode store code
+	 * @param localeCode locale code
+	 * @return guids
+	 */
+	Observable<String> getSortAttributeGuidsForStoreAndLocale(String storeCode, String localeCode);
+
+	/**
+	 * Get the sort value of the sort attribute given the guid and locale code.
+	 * @param guid guid
+	 * @param localCode locale code
+	 * @return sort value
+	 */
+	Single<SortValue> getSortValueByGuidAndLocaleCode(String guid, String localCode);
+
+	/**
+	 * Get the default sort for the store.
+	 * @param storeCode store code
+	 * @return default sort or null if there is no default
+	 */
+	Maybe<SortAttribute> getDefaultSortAttributeForStore(String storeCode);
 }

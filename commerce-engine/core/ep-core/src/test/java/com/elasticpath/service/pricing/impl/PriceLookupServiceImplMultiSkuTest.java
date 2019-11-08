@@ -29,12 +29,14 @@ import com.elasticpath.domain.catalog.PriceTier;
 import com.elasticpath.domain.catalog.PricingScheme;
 import com.elasticpath.domain.catalog.Product;
 import com.elasticpath.domain.catalog.ProductSku;
+import com.elasticpath.domain.catalog.ProductType;
 import com.elasticpath.domain.catalog.impl.PriceImpl;
 import com.elasticpath.domain.catalog.impl.PriceScheduleImpl;
 import com.elasticpath.domain.catalog.impl.PriceTierImpl;
 import com.elasticpath.domain.catalog.impl.PricingSchemeImpl;
 import com.elasticpath.domain.catalog.impl.ProductImpl;
 import com.elasticpath.domain.catalog.impl.ProductSkuImpl;
+import com.elasticpath.domain.catalog.impl.ProductTypeImpl;
 import com.elasticpath.domain.pricing.BaseAmount;
 import com.elasticpath.domain.pricing.PriceListDescriptor;
 import com.elasticpath.domain.pricing.PriceListStack;
@@ -92,6 +94,7 @@ public class PriceLookupServiceImplMultiSkuTest {
 	private PriceListDescriptor priceList2;
 	private PriceListDescriptor priceList3;
 	private Product product;
+	private ProductType multiSkuProductType;
 	private PriceListStack plStack;
 	private final List<BaseAmount> baseAmounts = new LinkedList<>();
 
@@ -145,6 +148,9 @@ public class PriceLookupServiceImplMultiSkuTest {
 		priceList3 = createPriceListDescriptor(PL3_GUID);
 		product = new ProductImpl();
 		product.setGuid(PRODUCT_GUID);
+		multiSkuProductType = new ProductTypeImpl();
+		multiSkuProductType.setMultiSku(true);
+		product.setProductType(multiSkuProductType);
 
 		expectationsFactory.allowingBeanFactoryGetBean(ContextIdNames.PRICE, PriceImpl.class);
 		expectationsFactory.allowingBeanFactoryGetBean(ContextIdNames.PRICE_TIER, PriceTierImpl.class);

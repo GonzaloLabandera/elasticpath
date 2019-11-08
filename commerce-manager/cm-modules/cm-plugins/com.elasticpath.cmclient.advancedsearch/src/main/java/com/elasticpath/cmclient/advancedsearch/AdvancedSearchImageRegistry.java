@@ -24,12 +24,12 @@ public final class AdvancedSearchImageRegistry extends AbstractImageRegistry {
 	/**
 	 * Query Image.
 	 */
-	public static final ImageDescriptor QUERY = getImageDescriptor(PLUGIN_ID, "query_default_22.png"); //$NON-NLS-1$
+	public static final ImageDescriptor QUERY = getImageDescriptor(PLUGIN_ID, "empty_1x1.png"); //$NON-NLS-1$
 
 	/**
 	 * Query Builder Image.
 	 */
-	public static final ImageDescriptor QUERY_BUILDER = getImageDescriptor(PLUGIN_ID, "query-builder_default_22.png"); //$NON-NLS-1$
+	public static final ImageDescriptor QUERY_BUILDER = getImageDescriptor(PLUGIN_ID, "empty_1x1.png"); //$NON-NLS-1$
 
 	/**
 	 * Query Open Image.

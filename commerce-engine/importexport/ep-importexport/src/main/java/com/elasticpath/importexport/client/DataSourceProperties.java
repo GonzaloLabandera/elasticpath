@@ -24,6 +24,12 @@ public final class DataSourceProperties {
 
 	private static final boolean TEST_ON_BORROW = true;
 
+	private static final String JMS_URL = "jms.url";
+
+	private static final String JMS_MAX_CONNECTIONS = "jms.maxConnections";
+
+	private static final String JMS_IDLE_TIMEOUT = "jms.idleTimeout";
+
 	private static DataSourceProperties instance;
 
 	private Properties properties;
@@ -118,4 +124,30 @@ public final class DataSourceProperties {
 		return TEST_ON_BORROW;
 	}
 
+	/**
+	 * Get JMS broker url.
+	 *
+	 * @return jms url;
+	 */
+	public String getJmsUrl() {
+		return properties.getProperty(JMS_URL);
+	}
+
+	/**
+	 * Get JMS max count of the connections.
+	 *
+	 * @return max count of the connections.
+	 */
+	public String getJmsMaxConnections() {
+		return properties.getProperty(JMS_MAX_CONNECTIONS);
+	}
+
+	/**
+	 * Get JMS Idle timeout.
+	 *
+	 * @return Idle timeout.
+	 */
+	public String getJmsIdleTimeout() {
+		return properties.getProperty(JMS_IDLE_TIMEOUT);
+	}
 }

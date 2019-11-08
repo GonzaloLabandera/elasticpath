@@ -13,12 +13,13 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import com.google.common.collect.Maps;
-import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.commons.lang.builder.ToStringStyle;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 
 import com.elasticpath.base.exception.EpServiceException;
@@ -416,45 +417,6 @@ public class CouponUsageServiceImpl implements CouponUsageService {
 	}
 
 	/**
-	 * @param ruleService
-	 *            the RuleService to set.
-	 */
-	public void setRuleService(final RuleService ruleService) {
-		this.ruleService = ruleService;
-	}
-
-	@Override
-	public boolean isValidCouponUsage(final String customerEmailAddress, final Coupon coupon, final CouponUsage couponUsage) {
-		final CouponConfig couponConfig = coupon.getCouponConfig();
-
-		CouponUsage tmpCouponUsage = couponUsage;
-		if (tmpCouponUsage == null) {
-			tmpCouponUsage = findByCodeAndType(couponConfig, coupon.getCouponCode(), customerEmailAddress);
-		}
-
-		return checkUsage(couponConfig, tmpCouponUsage, customerEmailAddress) && checkDate(couponConfig, tmpCouponUsage)
-				&& checkSuspension(coupon, tmpCouponUsage);
-	}
-
-	/**
-	 * Check suspended status of coupon usage. If coupon is not on a per user
-	 * basis, find the coupon and check its status.
-	 *
-	 * @param coupon
-	 *            coupon
-	 * @param couponUsage
-	 *            coupon usage. may be null if not a
-	 *            {@link CouponUsageType#LIMIT_PER_SPECIFIED_USER}
-	 * @return true if not suspended
-	 */
-	protected boolean checkSuspension(final Coupon coupon, final CouponUsage couponUsage) {
-		if (CouponUsageType.LIMIT_PER_SPECIFIED_USER.equals(coupon.getCouponConfig().getUsageType())) {
-			return !couponUsage.isSuspended();
-		}
-		return !coupon.isSuspended();
-	}
-
-	/**
 	 * find the usage - taking into consideration coupon type.
 	 *
 	 * @param couponConfig
@@ -477,19 +439,36 @@ public class CouponUsageServiceImpl implements CouponUsageService {
 		return result;
 	}
 
-	/**
-	 * Check the Date is valid if a limited duration coupon and for appropriate
-	 * coupon usage.
-	 *
-	 * @param couponConfig
-	 *            CouponConfig.
-	 * @param couponUsage
-	 *            CouponUsage.
-	 * @return true if the date is valid for circumstances.
-	 */
-	protected boolean checkDate(final CouponConfig couponConfig, final CouponUsage couponUsage) {
-		return !(couponConfig.isLimitedDuration() && CouponUsageType.LIMIT_PER_SPECIFIED_USER.equals(couponConfig.getUsageType())
-			&& getTimeService().getCurrentTime().after(couponUsage.getLimitedDurationEndDate()));
+	@Override
+	public CouponUsage findByCouponCodeAndEmail(final String couponCode, final String customerEmailAddress) {
+		return dao.findByCouponCodeAndEmail(couponCode, customerEmailAddress);
+	}
+
+	@Override
+	public CouponUsageValidationResultEnum validateCouponUsage(
+			final String customerEmailAddress, final Coupon coupon, final CouponUsage couponUsage) {
+
+		final CouponConfig couponConfig = coupon.getCouponConfig();
+
+		final CouponUsage tmpCouponUsage = couponUsage == null
+				? findByCodeAndType(couponConfig, coupon.getCouponCode(), customerEmailAddress) : couponUsage;
+
+		return validateSequentially(
+				() -> checkUsage(couponConfig, tmpCouponUsage, customerEmailAddress),
+				() -> checkDate(couponConfig, tmpCouponUsage),
+				() -> checkSuspension(coupon, tmpCouponUsage));
+	}
+
+	@SafeVarargs
+	private static CouponUsageValidationResultEnum validateSequentially(
+			final Supplier<CouponUsageValidationResultEnum> ...validations) {
+		for (Supplier<CouponUsageValidationResultEnum> validation : validations) {
+			CouponUsageValidationResultEnum validationResult = validation.get();
+			if (!validationResult.isSuccess()) {
+				return validationResult;
+			}
+		}
+		return CouponUsageValidationResultEnum.SUCCESS;
 	}
 
 	/**
@@ -501,42 +480,177 @@ public class CouponUsageServiceImpl implements CouponUsageService {
 	 *            CouponUsage.
 	 * @param customerEmailAddress
 	 *            the customerEmail
-	 * @return true if the usage is valid for coupon type.
+	 * @return the validation result.
 	 */
-	protected boolean checkUsage(final CouponConfig couponConfig, final CouponUsage couponUsage, final String customerEmailAddress) {
+	protected CouponUsageValidationResultEnum checkUsage(
+			final CouponConfig couponConfig, final CouponUsage couponUsage, final String customerEmailAddress) {
+
 		switch (couponConfig.getUsageType().getOrdinal()) {
 			case CouponUsageType.LIMIT_PER_COUPON_ORDINAL:
 				if (couponUsage == null) {
-					return true;
+					return CouponUsageValidationResultEnum.SUCCESS;
 				}
-				return couponUsage.getUseCount() < couponConfig.getUsageLimit();
+				return validateUseCount(couponConfig, couponUsage);
 
 			case CouponUsageType.LIMIT_PER_ANY_USER_ORDINAL:
 				if (StringUtils.isEmpty(customerEmailAddress)) {
-					return false;
+					return CouponUsageValidationResultEnum.ERROR_EMAIL_REQUIRED;
 				}
 				if (couponUsage == null) {
-					return true;
+					return CouponUsageValidationResultEnum.SUCCESS;
 				}
-				return couponUsage.getUseCount() < couponConfig.getUsageLimit();
+				return validateUseCount(couponConfig, couponUsage);
 
 			case CouponUsageType.LIMIT_PER_SPECIFIED_USER_ORDINAL:
 				if (StringUtils.isEmpty(customerEmailAddress)) {
-					return false;
+					return CouponUsageValidationResultEnum.ERROR_EMAIL_REQUIRED;
 				}
 				if (couponUsage == null) {
-					return false;
+					return CouponUsageValidationResultEnum.ERROR_UNSPECIFIED;
 				}
-				return couponUsage.getUseCount() < couponConfig.getUsageLimit();
+				return validateUseCount(couponConfig, couponUsage);
 
 			default:
-				return false;
+				return CouponUsageValidationResultEnum.ERROR_UNSPECIFIED;
 		}
 	}
 
+	private CouponUsageValidationResultEnum validateUseCount(final CouponConfig couponConfig, final CouponUsage couponUsage) {
+		boolean isLimitReached = couponUsage.getUseCount() >= couponConfig.getUsageLimit();
+		if (isLimitReached) {
+			return CouponUsageValidationResultEnum.ERROR_USE_COUNT_EXCEEDED;
+		}
+		return CouponUsageValidationResultEnum.SUCCESS;
+	}
+
+	/**
+	 * Check the Date is valid if a limited duration coupon and for appropriate
+	 * coupon usage.
+	 *
+	 * @param couponConfig
+	 *            CouponConfig.
+	 * @param couponUsage
+	 *            CouponUsage.
+	 * @return the validation result.
+	 */
+	protected CouponUsageValidationResultEnum checkDate(final CouponConfig couponConfig, final CouponUsage couponUsage) {
+		switch (couponConfig.getUsageType().getOrdinal()) {
+			case CouponUsageType.LIMIT_PER_SPECIFIED_USER_ORDINAL:
+				if (couponConfig.isLimitedDuration() && isEndDateExceeded(couponUsage)) {
+					return CouponUsageValidationResultEnum.ERROR_EXPIRED;
+				}
+				break;
+
+			case CouponUsageType.LIMIT_PER_COUPON_ORDINAL:
+			case CouponUsageType.LIMIT_PER_ANY_USER_ORDINAL:
+				break;
+
+			default:
+				return CouponUsageValidationResultEnum.ERROR_UNSPECIFIED;
+		}
+
+		return CouponUsageValidationResultEnum.SUCCESS;
+	}
+
+	private boolean isEndDateExceeded(final CouponUsage couponUsage) {
+		return getTimeService().getCurrentTime().after(couponUsage.getLimitedDurationEndDate());
+	}
+
+	/**
+	 * Check suspended status of coupon usage. If coupon is not on a per user
+	 * basis, find the coupon and check its status.
+	 *
+	 * @param coupon
+	 *            coupon
+	 * @param couponUsage
+	 *            coupon usage. may be null if not a
+	 *            {@link CouponUsageType#LIMIT_PER_SPECIFIED_USER}
+	 * @return the validation result
+	 */
+	protected CouponUsageValidationResultEnum checkSuspension(final Coupon coupon, final CouponUsage couponUsage) {
+		switch (coupon.getCouponConfig().getUsageType().getOrdinal()) {
+			case CouponUsageType.LIMIT_PER_SPECIFIED_USER_ORDINAL:
+				if (couponUsage.isSuspended()) {
+					return CouponUsageValidationResultEnum.ERROR_SUSPENDED;
+				}
+				break;
+
+			case CouponUsageType.LIMIT_PER_COUPON_ORDINAL:
+			case CouponUsageType.LIMIT_PER_ANY_USER_ORDINAL:
+				if (coupon.isSuspended()) {
+					return CouponUsageValidationResultEnum.ERROR_SUSPENDED;
+				}
+				break;
+
+			default:
+				return CouponUsageValidationResultEnum.ERROR_UNSPECIFIED;
+		}
+
+		return CouponUsageValidationResultEnum.SUCCESS;
+	}
+
 	@Override
-	public CouponUsage findByCouponCodeAndEmail(final String couponCode, final String customerEmailAddress) {
-		return dao.findByCouponCodeAndEmail(couponCode, customerEmailAddress);
+	public CouponUsageValidationResultEnum validateCouponRuleAndUsage(
+			final Coupon coupon, final String storeCode, final String customerEmailAddress) {
+
+		if (coupon == null) {
+			return CouponUsageValidationResultEnum.ERROR_UNSPECIFIED;
+		}
+
+		String code = coupon.getCouponCode();
+		if (StringUtils.isEmpty(code)) {
+			return CouponUsageValidationResultEnum.ERROR_UNSPECIFIED;
+		}
+
+		Rule rule = ruleService.findByPromoCode(code);
+		RuleValidationResultEnum ruleValidationResult = ruleService.isRuleValid(rule, storeCode);
+		if (!ruleValidationResult.isSuccess()) {
+			if (RuleValidationResultEnum.ERROR_EXPIRED.equals(ruleValidationResult)) {
+				return CouponUsageValidationResultEnum.ERROR_EXPIRED;
+			}
+			return CouponUsageValidationResultEnum.ERROR_UNSPECIFIED;
+		}
+
+		if (rule.hasLimitedUseCondition()) {
+			CouponUsageValidationResultEnum usageValidationResult = validateCouponUsage(
+					customerEmailAddress, coupon, null);
+
+			if (!usageValidationResult.isSuccess()) {
+				return usageValidationResult;
+			}
+		}
+
+		return CouponUsageValidationResultEnum.SUCCESS;
+	}
+
+	@Override
+	public void ensureValidCouponRuleAndUsage(
+			final Coupon coupon, final String couponCode, final String storeCode, final String customerEmailAddress) {
+
+		CouponUsageValidationResultEnum validationResult = validateCouponRuleAndUsage(coupon, storeCode, customerEmailAddress);
+		switch (validationResult) {
+			case SUCCESS:
+				return;
+
+			case ERROR_USE_COUNT_EXCEEDED:
+			case ERROR_EXPIRED:
+			case ERROR_SUSPENDED:
+				throw new CouponNoLongerAvailableException(couponCode);
+
+			case ERROR_EMAIL_REQUIRED:
+				throw new CouponEmailRequiredException(couponCode);
+
+			default:
+				throw new CouponNotValidException(couponCode);
+		}
+	}
+
+	/**
+	 * @param ruleService
+	 *            the RuleService to set.
+	 */
+	public void setRuleService(final RuleService ruleService) {
+		this.ruleService = ruleService;
 	}
 
 	/**

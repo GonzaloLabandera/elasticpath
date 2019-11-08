@@ -503,7 +503,7 @@ public class CategoryAdapterTest {
 	public void testCreateDomainObject() {
 		context.checking(new Expectations() {
 			{
-				allowing(mockBeanFactory).getBean(ContextIdNames.CATEGORY);
+				allowing(mockBeanFactory).getPrototypeBean(ContextIdNames.CATEGORY, Category.class);
 				will(returnValue(new CategoryImpl()));
 			}
 		});

@@ -327,7 +327,7 @@ public class PromotionAdapter extends AbstractDomainAdapterImpl<Rule, PromotionD
 	 * @return instantiated <code>RuleAction</code>
 	 */
 	RuleAction createRuleAction(final String actionType) {
-		final RuleAction ruleAction = getBeanFactory().getBean(actionType);
+		final RuleAction ruleAction = getBeanFactory().getPrototypeBean(actionType, RuleAction.class);
 
 		if (ruleAction == null) {
 			throw new PopulationRollbackException("IE-10706");
@@ -343,7 +343,7 @@ public class PromotionAdapter extends AbstractDomainAdapterImpl<Rule, PromotionD
 
 	@Override
 	public Rule createDomainObject() {
-		return getBeanFactory().getBean(ContextIdNames.PROMOTION_RULE);
+		return getBeanFactory().getPrototypeBean(ContextIdNames.PROMOTION_RULE, Rule.class);
 	}
 
 	/**

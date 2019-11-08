@@ -752,4 +752,15 @@ class PurchaseSteps {
 				.isEqualTo(shippingCost)
 	}
 
+	@And('^I fill in all the required purchase info with (.+) address$')
+	static void createOrderWithPromotion(String countryCode) {
+		Profile.addEmailWithoutFollow(TEST_EMAIL_VALUE)
+		if (countryCode.equals("CA")) {
+			Profile.addCanadianBillingAddress()
+		} else if (countryCode.equals("US")) {
+			Profile.addUSBillingAddress()
+		}
+		Order.addDefaultToken()
+	}
+
 }

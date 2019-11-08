@@ -37,6 +37,7 @@
 			</step>
 		</plan>
 
+
 		<plan>
 			<name>read-shipping-address</name>
 			<description><![CDATA[Read a shipping address from a list of shipping addresses.]]></description>
@@ -55,6 +56,80 @@
 				<description><![CDATA[The default shipping addresses.]]></description>
 				<start>shipping-addresses</start>
 				<follow-link>default</follow-link>
+				<result>address</result>
+			</step>
+		</plan>
+
+		<plan>
+			<name>read-chosen-default-shipping-address</name>
+			<description><![CDATA[Use the default shipping address selector to read the chosen default shipping address.]]></description>
+			<step>
+				<description><![CDATA[The shipping address default selector.]]></description>
+				<start>shipping-addresses</start>
+				<follow-link>selector</follow-link>
+				<result>address</result>
+			</step>
+			<step>
+				<description><![CDATA[Retrieve the chosen choice.]]></description>
+				<start>shipping-address-selector</start>
+				<follow-link>chosen</follow-link>
+				<link-back>selector</link-back>
+				<result>shipping-address-selector-choice</result>
+			</step>
+			<step>
+				<description><![CDATA[Retrieve a choice's description.]]></description>
+				<start>shipping-address-selector-choice</start>
+				<follow-link>description</follow-link>
+				<result>address</result>
+			</step>
+		</plan>
+
+		<plan>
+			<name>read-default-shipping-address-choice</name>
+			<description><![CDATA[Use the default shipping address selector to read a default shipping address choice.]]></description>
+			<step>
+				<description><![CDATA[The shipping address default selector.]]></description>
+				<start>shipping-addresses</start>
+				<follow-link>selector</follow-link>
+				<result>address</result>
+			</step>
+			<step>
+				<description><![CDATA[Retrieve the chosen choice.]]></description>
+				<start>shipping-address-selector</start>
+				<follow-link>choice</follow-link>
+				<link-back>selector</link-back>
+				<result>shipping-address-selector-choice</result>
+			</step>
+			<step>
+				<description><![CDATA[Retrieve a choice's description.]]></description>
+				<start>shipping-address-selector-choice</start>
+				<follow-link>description</follow-link>
+				<result>address</result>
+			</step>
+		</plan>
+
+		<plan>
+			<name>select-default-shipping-address</name>
+			<description><![CDATA[Use the default shipping address selector to select the default shipping address.]]></description>
+			<step>
+				<description><![CDATA[The shipping address default selector.]]></description>
+				<start>shipping-addresses</start>
+				<follow-link>selector</follow-link>
+				<result>address</result>
+			</step>
+			<step>
+				<description><![CDATA[Retrieve a choice.]]></description>
+				<start>shipping-address-selector</start>
+				<follow-link>choice</follow-link>
+				<link-back>selector</link-back>
+				<result>shipping-address-selector-choice</result>
+			</step>
+			<step>
+				<description><![CDATA[Select a choice.]]></description>
+				<start>shipping-address-selector-choice</start>
+				<submit/>
+				<to>shipping-address-selector-choice</to>
+				<via-link>selectaction</via-link>
 				<result>address</result>
 			</step>
 		</plan>
@@ -89,6 +164,80 @@
 				<description><![CDATA[The default billing addresses.]]></description>
 				<start>billing-addresses</start>
 				<follow-link>default</follow-link>
+				<result>address</result>
+			</step>
+		</plan>
+
+		<plan>
+			<name>read-chosen-default-billing-address</name>
+			<description><![CDATA[Use the default billing address selector to read the chosen default billing address.]]></description>
+			<step>
+				<description><![CDATA[The billing address default selector.]]></description>
+				<start>billing-addresses</start>
+				<follow-link>selector</follow-link>
+				<result>address</result>
+			</step>
+			<step>
+				<description><![CDATA[Retrieve the chosen choice.]]></description>
+				<start>billing-address-selector</start>
+				<follow-link>chosen</follow-link>
+				<link-back>selector</link-back>
+				<result>billing-address-selector-choice</result>
+			</step>
+			<step>
+				<description><![CDATA[Retrieve a choice's description.]]></description>
+				<start>billing-address-selector-choice</start>
+				<follow-link>description</follow-link>
+				<result>address</result>
+			</step>
+		</plan>
+
+		<plan>
+			<name>read-default-billing-address-choice</name>
+			<description><![CDATA[Use the default billing address selector to read a default billing address choice.]]></description>
+			<step>
+				<description><![CDATA[The billing address default selector.]]></description>
+				<start>billing-addresses</start>
+				<follow-link>selector</follow-link>
+				<result>address</result>
+			</step>
+			<step>
+				<description><![CDATA[Retrieve the chosen choice.]]></description>
+				<start>billing-address-selector</start>
+				<follow-link>choice</follow-link>
+				<link-back>selector</link-back>
+				<result>billing-address-selector-choice</result>
+			</step>
+			<step>
+				<description><![CDATA[Retrieve a choice's description.]]></description>
+				<start>billing-address-selector-choice</start>
+				<follow-link>description</follow-link>
+				<result>address</result>
+			</step>
+		</plan>
+
+		<plan>
+			<name>select-default-billing-address</name>
+			<description><![CDATA[Use the default billing address selector to select the default billing address.]]></description>
+			<step>
+				<description><![CDATA[The billing address default selector.]]></description>
+				<start>billing-addresses</start>
+				<follow-link>selector</follow-link>
+				<result>address</result>
+			</step>
+			<step>
+				<description><![CDATA[Retrieve a choice.]]></description>
+				<start>billing-address-selector</start>
+				<follow-link>choice</follow-link>
+				<link-back>selector</link-back>
+				<result>billing-address-selector-choice</result>
+			</step>
+			<step>
+				<description><![CDATA[Select a choice.]]></description>
+				<start>billing-address-selector-choice</start>
+				<submit/>
+				<to>billing-address-selector-choice</to>
+				<via-link>selectaction</via-link>
 				<result>address</result>
 			</step>
 		</plan>

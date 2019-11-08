@@ -1,0 +1,18 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "description": "Schema for category results definition",
+  "properties": {
+    "results": {
+      "type": "array",
+      "items": [
+        {
+          "$ref": "resource:/schema/category.schema.json"
+        }
+      ],
+      "additionalItems": { "$ref": "resource:/schema/category.schema.json" }
+    }
+  },
+  "required": [
+    "results"
+  ]
+}

@@ -7,7 +7,7 @@
 		<view
 				allowMultiple="false"
 				class="com.elasticpath.cmclient.admin.datapolicies.views.DataPolicyListView"
-				icon="icons/data-privacy_default_22.png"
+				icon="icons/empty_1x1.png"
 				id="com.elasticpath.cmclient.admin.datapolicies.views.DataPolicyListView"
 				name="%dataPoliciesView.name">
 		</view>
@@ -16,7 +16,7 @@
 			point="org.eclipse.ui.editors">
 		<editor
 				name="%dataPolicyEditor.name"
-				icon="icons/data-privacy_default_22.png"
+				icon="icons/empty_1x1.png"
 				class="com.elasticpath.cmclient.admin.datapolicies.editors.DataPolicyEditor"
 				id="com.elasticpath.cmclient.admin.datapolicies.editors.DataPolicyEditor"
 				contributorClass="com.elasticpath.cmclient.core.editors.BaseCmClientEditorContributor">

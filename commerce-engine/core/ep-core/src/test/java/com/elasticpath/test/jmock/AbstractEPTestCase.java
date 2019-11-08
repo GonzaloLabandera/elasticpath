@@ -18,11 +18,12 @@ import com.elasticpath.test.BeanFactoryExpectationsFactory;
  * Subclass this for an ElasticPath instance with
  * stubbed out <code>getBean()</code> calls, it also subs out those calls on a
  * <code>BeanFactory</code> to help migrate tests and classes away from using ElasticPath.
- *
+ * <p>
  * The stubbed beans have <code>setDefaultValues</code> called on them.
- *
+ * <p>
  * Note: by default RandomGuid bean is stubbed to return RandomGuidImpl as this is used across
  * the whole system.
+ *
  * @deprecated use directly BeanFactoryExpectationsFactory instead
  */
 @Deprecated
@@ -67,7 +68,7 @@ public class AbstractEPTestCase {
 	 * Allow calls to <code>getBean</code> and <code>getBeanImplClass</code> on ElaticPath for
 	 * a particular bean name, creating a new instance of the bean.
 	 *
-	 * @param beanName the bean name to allow getBean for.
+	 * @param beanName  the bean name to allow getBean for.
 	 * @param beanClass the class of the bean to create.
 	 */
 	protected void stubGetBean(final String beanName, final Class<?> beanClass) {
@@ -75,11 +76,23 @@ public class AbstractEPTestCase {
 	}
 
 	/**
+	 * Allow calls to <code>getPrototypeBean</code> and <code>getBeanImplClass</code> on ElaticPath for
+	 * a particular bean name, creating a new instance of the bean.
+	 *
+	 * @param beanName      the bean name to allow getBean for.
+	 * @param beanInterface the interface of the bean to create
+	 * @param beanClass     the class of the bean to create.
+	 */
+	protected void stubGetPrototypeBean(final String beanName, final Class<?> beanInterface, final Class<?> beanClass) {
+		bfef.allowingBeanFactoryGetPrototypeBean(beanName, beanInterface, beanClass);
+	}
+
+	/**
 	 * Allow calls to <code>getBean</code> on ElasticPath for a particular bean name, returning
 	 * the specific object.
 	 *
 	 * @param beanName the bean name to allow getBean for.
-	 * @param object the object to have returned.
+	 * @param object   the object to have returned.
 	 */
 	protected void stubGetBean(final String beanName, final Object object) {
 		bfef.allowingBeanFactoryGetBean(beanName, object);

@@ -1,13 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
-		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-		xmlns:util="http://www.springframework.org/schema/util"
-		xmlns:settings="http://www.elasticpath.com/schema/settings"
-		xsi:schemaLocation="
+	   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	   xmlns:util="http://www.springframework.org/schema/util"
+	   xmlns:settings="http://www.elasticpath.com/schema/settings"
+	   xsi:schemaLocation="
 				http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
 				http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-4.0.xsd
 				http://www.elasticpath.com/schema/settings http://www.elasticpath.com/schema/settings/settings.xsd
 		">
+	<import resource="classpath*:META-INF/elasticpath/conf/spring/beans.xml" />
+
+	<import resource="hds-support.xml"/>
 
 	<!-- empty for use in extension projects -->
 	<util:list id="persistenceMappingExcludedFiles"/>
@@ -32,21 +35,12 @@
 
 	<alias name="defaultOverridingPersistenceUnitPostProcessor" alias="overridingPersistenceUnitPostProcessor"/>
 
-	<bean id="basePersistenceUnitManager" class="com.elasticpath.persistence.openjpa.impl.OverrideAllowingPersistenceUnitManager">
-		<property name="defaultPersistenceUnitName" value="commerce-persistence-unit"/>
-		<property name="persistenceXmlLocation" value="classpath*:META-INF/jpa-persistence.xml"/>
-		<property name="persistenceUnitPostProcessors" ref="persistenceUnitPostProcessors"/>
-	</bean>
-
-	<bean id="persistenceUnitManager" parent="basePersistenceUnitManager">
-		<property name="defaultDataSource" ref="dataSource"/>
-	</bean>
-
 	<!--  These listeners will be attached by the factory to every EntityManager on creation.
 		  Note that these are OpenJPA LifecycleListeners.  Some of these listeners may <em>also</em> be EP PersistenceEngineEntityListeners.
 		  PersistenceEngineOperationListeners are associated directly with the EP PersistenceEngine, not the OpenJPA EntityManager,
 		  so any listeners which do double duty listening to both interfaces must be registered in both locations. -->
 	<util:list id="entityManagerLifecycleListeners">
+		<ref bean="domainEventListener"/>
 		<ref bean="databaseTimestampsEntityListener"/>
 		<ref bean="objectDeletedEntityListener"/>
 		<ref bean="changeSetPersistenceListener"/>
@@ -54,25 +48,87 @@
 		<!--<ref bean="auditEntityListener"/>-->    <!-- Must also be registered in the PersistenceEngine -->
 	</util:list>
 
-	<bean id="abstractEntityManagerFactory" class="com.elasticpath.persistence.openjpa.impl.ConfigurableLocalContainerEntityManagerFactoryBean"
-		  init-method="getObject"
-			abstract="true">
-		<property name="persistenceUnitManager" ref="persistenceUnitManager"/>
-		<property name="lifecycleListeners" ref="entityManagerLifecycleListeners"/>
-	</bean>
-
-	<!-- Entity Manager Factory -->
-	<bean id="entityManagerFactory" parent="abstractEntityManagerFactory" depends-on="elasticPath,coreBeanFactory"/>
-
 	<bean id="sharedEntityManager" class="org.springframework.orm.jpa.support.SharedEntityManagerBean">
 		<property name="entityManagerFactory">
 			<ref bean="entityManagerFactory"/>
 		</property>
 	</bean>
 
-	<bean id="sessionFactory" class="com.elasticpath.persistence.openjpa.impl.JpaSessionFactoryImpl">
-		<property name="entityManagerFactory" ref="entityManagerFactory"/>
-		<property name="transactionManager" ref="transactionManager"/>
+	<bean id="eventTypeFactory" class="com.elasticpath.persistence.impl.DomainEventTypeFactoryImpl">
+		<constructor-arg name="supportedClassByEventTypes" ref="classByEventTypesMap"/>
+	</bean>
+
+	<util:map id="classByEventTypesMap" key-type="java.lang.Class" value-type="java.util.List">
+		<entry key="com.elasticpath.domain.skuconfiguration.impl.SkuOptionImpl">
+			<list value-type="java.lang.String">
+				<value>SKU_OPTION_CREATED</value>
+				<value>SKU_OPTION_UPDATED</value>
+				<value>SKU_OPTION_DELETED</value>
+			</list>
+		</entry>
+		<entry key="com.elasticpath.domain.catalog.impl.BrandImpl">
+			<list value-type="java.lang.String">
+				<value>BRAND_CREATED</value>
+				<value>BRAND_UPDATED</value>
+				<value>BRAND_DELETED</value>
+			</list>
+		</entry>
+		<entry key="com.elasticpath.domain.modifier.impl.ModifierGroupImpl">
+			<list value-type="java.lang.String">
+				<value>MODIFIER_GROUP_CREATED</value>
+				<value>MODIFIER_GROUP_UPDATED</value>
+				<value>MODIFIER_GROUP_DELETED</value>
+			</list>
+		</entry>
+		<entry key="com.elasticpath.domain.attribute.impl.AttributeImpl">
+			<list value-type="java.lang.String">
+				<value>ATTRIBUTE_CREATED</value>
+				<value>ATTRIBUTE_UPDATED</value>
+				<value>ATTRIBUTE_DELETED</value>
+			</list>
+		</entry>
+		<entry key="com.elasticpath.domain.catalog.impl.ProductImpl">
+			<list value-type="java.lang.String">
+				<value>PRODUCT_CREATED</value>
+				<value>PRODUCT_UPDATED</value>
+				<value>PRODUCT_DELETED</value>
+			</list>
+		</entry>
+		<entry key="com.elasticpath.domain.catalog.impl.ProductBundleImpl">
+			<list value-type="java.lang.String">
+				<value>PRODUCT_CREATED</value>
+				<value>PRODUCT_UPDATED</value>
+				<value>PRODUCT_DELETED</value>
+			</list>
+		</entry>
+		<entry key="com.elasticpath.domain.catalog.impl.CategoryImpl">
+			<list value-type="java.lang.String">
+				<value>CATEGORY_CREATED</value>
+				<value>CATEGORY_UPDATED</value>
+				<value>CATEGORY_DELETED</value>
+			</list>
+		</entry>
+		<entry key="com.elasticpath.domain.catalog.impl.LinkedCategoryImpl">
+			<list value-type="java.lang.String">
+				<value>CATEGORY_LINK_CREATED</value>
+				<value>CATEGORY_LINK_UPDATED</value>
+				<value>CATEGORY_LINK_DELETED</value>
+			</list>
+		</entry>
+	</util:map>
+
+	<util:list id="domainEventListenerEventTypes">
+		<util:constant static-field="org.apache.openjpa.event.LifecycleEvent.AFTER_PERSIST"/>
+		<util:constant static-field="org.apache.openjpa.event.LifecycleEvent.AFTER_ATTACH"/>
+		<util:constant static-field="org.apache.openjpa.event.LifecycleEvent.AFTER_DELETE"/>
+	</util:list>
+
+	<bean id="domainEventListener"  class="com.elasticpath.persistence.impl.DomainEventListener">
+		<property name="beanFactory" ref="coreBeanFactory"/>
+		<property name="eventMessagePublisher" ref="domainEventMessagePublisher"/>
+		<property name="eventMessageFactory" ref="eventMessageFactory"/>
+		<property name="eventTypeFactory" ref="eventTypeFactory"/>
+		<property name="eventTypes" ref="domainEventListenerEventTypes" />
 	</bean>
 
 	<bean id="databaseTimestampsEntityListener" class="com.elasticpath.persistence.impl.DatabaseTimestampsEntityListener">
@@ -169,15 +225,8 @@
 
 	<util:list id="persistenceEngineOperationListeners">
 		<!--<ref bean="auditEntityListener"/>-->  <!--Must also be registered in the EntityManagerFactory-->
+		<ref bean="entityModifiedListener"/>
 	</util:list>
-
-	<bean id="persistenceEngineTarget"
-		  class="com.elasticpath.persistence.openjpa.impl.JpaPersistenceEngineImpl">
-		<property name="entityManager" ref="sharedEntityManager"/>
-		<property name="sessionFactory" ref="sessionFactory"/>
-		<property name="transactionManager" ref="transactionManager"/>
-		<property name="persistenceEngineOperationListeners" ref="persistenceEngineOperationListeners"/>
-	</bean>
 
 	<!-- Has a dependency of an applicationInitialization bean which can do any initialization the application requires -->
 	<!-- before the persistence engine is created. -->
@@ -189,11 +238,62 @@
 		</property>
 	</bean>
 
+	<bean id="entityManager" class="org.springframework.orm.jpa.support.SharedEntityManagerBean">
+		<property name="entityManagerFactory">
+			<ref bean="entityManagerFactory"/>
+		</property>
+	</bean>
+
+	<bean id="persistenceEngineTarget" class="com.elasticpath.persistence.openjpa.impl.JpaPersistenceEngineImpl">
+
+		<property name="sessionFactory" ref="sessionFactory"/>
+		<property name="entityManager" ref="entityManager"/>
+
+		<property name="transactionManager" ref="transactionManager"/>
+		<property name="persistenceEngineOperationListeners" ref="persistenceEngineOperationListeners"/>
+
+		<property name="fetchPlanHelper" ref="fetchPlanHelper"/>
+		<property name="queryReader" ref="queryReader"/>
+		<property name="queryUtil" ref="queryUtil"/>
+	</bean>
+
 	<bean id="transactionManager" class="org.springframework.orm.jpa.JpaTransactionManager">
 		<property name="entityManagerFactory" ref="entityManagerFactory"/>
+	</bean>
+
+	<!-- Read/Write Entity Manager Factory -->
+	<bean id="basePersistenceUnitManager" class="com.elasticpath.persistence.openjpa.impl.OverrideAllowingPersistenceUnitManager">
+		<property name="defaultPersistenceUnitName" value="commerce-persistence-unit"/>
+		<property name="persistenceXmlLocation" value="classpath*:META-INF/jpa-persistence.xml"/>
+		<property name="persistenceUnitPostProcessors" ref="persistenceUnitPostProcessors"/>
+	</bean>
+
+	<bean id="persistenceUnitManager" parent="basePersistenceUnitManager">
+		<property name="defaultDataSource" ref="dataSource"/>
+	</bean>
+
+	<bean id="abstractEntityManagerFactory" class="com.elasticpath.persistence.openjpa.impl.ConfigurableLocalContainerEntityManagerFactoryBean"
+		  init-method="getObject"
+		  abstract="true">
+		<property name="persistenceUnitManager" ref="persistenceUnitManager"/>
+		<property name="lifecycleListeners" ref="entityManagerLifecycleListeners"/>
+		<property name="hdsSupportSwitch" ref="hdsSupportSwitch"/>
+	</bean>
+
+	<bean id="entityManagerFactory" parent="abstractEntityManagerFactory" depends-on="elasticPath,coreBeanFactory"/>
+
+	<bean id="sessionFactory" class="com.elasticpath.persistence.openjpa.impl.JpaSessionFactoryImpl">
+		<property name="entityManagerFactory" ref="entityManagerFactory"/>
+		<property name="transactionManager" ref="transactionManager"/>
 	</bean>
 
 	<bean id="persistenceSessionFilterSupport" class="com.elasticpath.persistence.openjpa.impl.JpaPersistenceSessionFilterSupportImpl">
 		<property name="entityManagerFactory" ref="entityManagerFactory"/>
 	</bean>
+
+	<bean id="dbTxIsolationValidator" class="com.elasticpath.persistence.openjpa.impl.DbTxIsolationValidator"
+		  init-method="verifyTxIsolationIsReadCommitted">
+		<property name="persistenceEngine" ref="persistenceEngine"/>
+	</bean>
+
 </beans>

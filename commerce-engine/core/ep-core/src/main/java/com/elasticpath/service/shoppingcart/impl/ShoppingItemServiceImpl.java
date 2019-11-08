@@ -6,6 +6,8 @@
  */
 package com.elasticpath.service.shoppingcart.impl;
 
+import java.util.Arrays;
+
 import com.elasticpath.base.exception.EpServiceException;
 import com.elasticpath.domain.shoppingcart.ShoppingItem;
 import com.elasticpath.persistence.api.EpPersistenceException;
@@ -36,6 +38,15 @@ public class ShoppingItemServiceImpl implements ShoppingItemService {
 			return getDao().saveOrUpdate(shoppingItem);
 		} catch (EpPersistenceException ex) {
 			throw new EpServiceException("Unable to save or update the given ShoppingItem.", ex);
+		}
+	}
+
+	@Override
+	public int deleteItemsByGuids(final String... guids) {
+		try {
+			return getDao().deleteItemsByGuids(guids);
+		} catch (EpPersistenceException ex) {
+			throw new EpServiceException("Error occurred while deleting shopping items with guids [" + Arrays.asList(guids) + "]",	ex);
 		}
 	}
 

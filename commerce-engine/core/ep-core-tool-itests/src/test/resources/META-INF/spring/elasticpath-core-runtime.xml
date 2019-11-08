@@ -31,5 +31,7 @@
 	</bean>
 
 	<import resource="classpath*:META-INF/elasticpath/conf/spring/plugin.xml"/>
+	<import resource="classpath*:META-INF/elasticpath/conf/spring/beans.xml"/>
+
 
 </beans>

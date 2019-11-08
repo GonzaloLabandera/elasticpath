@@ -29,8 +29,8 @@ import com.elasticpath.domain.catalog.impl.ProductLoadTunerImpl;
 import com.elasticpath.domain.store.impl.StoreImpl;
 import com.elasticpath.persistence.api.FetchGroupLoadTuner;
 import com.elasticpath.persistence.api.PersistenceEngine;
+import com.elasticpath.persistence.openjpa.util.FetchPlanHelper;
 import com.elasticpath.persistence.support.impl.FetchGroupLoadTunerImpl;
-import com.elasticpath.service.misc.FetchPlanHelper;
 import com.elasticpath.service.query.CriteriaBuilder;
 import com.elasticpath.service.query.QueryCriteria;
 import com.elasticpath.service.query.QueryResult;
@@ -359,7 +359,7 @@ public class ProductQueryServiceTest {
 
 		context.checking(new Expectations() {
 			{
-				oneOf(fetchPlanHelper).configureProductFetchPlan(productLoadTuner);
+				oneOf(fetchPlanHelper).setLoadTuners(productLoadTuner);
 
 				oneOf(persistenceEngine).retrieve("SELECT p FROM ProductImpl AS p");
 			}
@@ -380,7 +380,7 @@ public class ProductQueryServiceTest {
 
 		context.checking(new Expectations() {
 			{
-				oneOf(fetchPlanHelper).configureFetchGroupLoadTuner(fetchGroupLoadTuner);
+				oneOf(fetchPlanHelper).setLoadTuners(fetchGroupLoadTuner);
 
 				oneOf(persistenceEngine).retrieve("SELECT p FROM ProductImpl AS p");
 			}
@@ -572,7 +572,6 @@ public class ProductQueryServiceTest {
 		context.checking(new Expectations() {
 			{
 				allowing(beanFactory).getBeanImplClass(ContextIdNames.PRODUCT); will(returnValue(ProductImpl.class));
-				allowing(fetchPlanHelper).clearFetchPlan();
 			}
 		});
 	}

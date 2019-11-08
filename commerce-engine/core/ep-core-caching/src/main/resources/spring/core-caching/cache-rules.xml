@@ -105,6 +105,20 @@
 		<constructor-arg value="changedCatalogRuleBaseCache"/>
 	</bean>
 
+	<!-- Caching last modified date for promotion rule base -->
+	<bean id="modifiedDateByUidCacheEhCache" class="com.elasticpath.commons.beanframework.EhCacheDefaultConfigurationFactoryBean">
+		<property name="name" value="modifiedDateByUidCache"/>
+		<property name="cacheManager" ref="epEhcacheManager"/>
+		<property name="timeToLive" value="300" />
+		<property name="timeToIdle" value="300" />
+	</bean>
+
+	<bean id="modifiedDateByUidCache"
+		  factory-bean="localCacheFactory" factory-method="createCache"
+		  depends-on="modifiedDateByUidCacheEhCache">
+		<constructor-arg value="modifiedDateByUidCache"/>
+	</bean>
+
 	<bean id="cachingRuleService" class="com.elasticpath.caching.core.rules.CachingRuleServiceImpl">
 		<property name="decorated" ref="nonCachingRuleService"/>
 		<property name="ruleByRuleCodeCache" ref="ruleByRuleCodeCache" />
@@ -114,6 +128,7 @@
 		<property name="ruleBaseByScenarioCache" ref="ruleBaseByScenarioCache" />
 		<property name="changedStoreRuleBaseCache" ref="changedStoreRuleBaseCache" />
 		<property name="changedCatalogRuleBaseCache" ref="changedCatalogRuleBaseCache" />
+		<property name="modifiedDateCache" ref="modifiedDateByUidCache"/>
 	</bean>
 
 </beans>

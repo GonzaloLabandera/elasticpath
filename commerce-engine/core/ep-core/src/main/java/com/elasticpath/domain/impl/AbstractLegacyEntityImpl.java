@@ -3,6 +3,7 @@
  */
 package com.elasticpath.domain.impl;
 
+import com.elasticpath.commons.beanframework.BeanFactory;
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.commons.util.Utility;
 import com.elasticpath.domain.ElasticPath;
@@ -12,7 +13,7 @@ import com.elasticpath.persistence.api.AbstractEntityImpl;
  * This class provides methods to allow accessing {@link ElasticPath} and getting beans from within the 
  * persistent objects. //REFACTORING
  */
-public abstract class AbstractLegacyEntityImpl extends AbstractEntityImpl {
+public abstract class AbstractLegacyEntityImpl extends AbstractEntityImpl implements BeanFactory {
 	private static final long serialVersionUID = 1L;
 
 	/**
@@ -36,17 +37,29 @@ public abstract class AbstractLegacyEntityImpl extends AbstractEntityImpl {
 	public ElasticPath getElasticPath() {
 		return ElasticPathImpl.getInstance();
 	}
-
-	/**
-	 * Convenience method for getting a bean instance from elastic path.
-	 * @param <T> the type of bean to return
-	 * @param beanName the name of the bean to get and instance of.
-	 * @return an instance of the requested bean.
-	 */
-	protected <T> T getBean(final String beanName) {
-		return getElasticPath().<T>getBean(beanName);
-	}
 	
+	@Deprecated
+	@Override
+	public <T> T getBean(final String beanName) {
+		return getElasticPath().getBean(beanName);
+	}
+
+	@Override
+	public <T> T getPrototypeBean(final String name, final Class<T> clazz) {
+		return getElasticPath().getPrototypeBean(name, clazz);
+	}
+
+	@Override
+	public <T> T getSingletonBean(final String name, final Class<T> clazz) {
+		return getElasticPath().getSingletonBean(name, clazz);
+	}
+
+	@Override
+	public <T> Class<T> getBeanImplClass(final String beanName) {
+		return getElasticPath().getBeanImplClass(beanName);
+	}
+
+
 	/**
 	 * Set default values for those fields need default values and it's somehow expensive to create the default values for them, either from memory
 	 * perspective or cpu perspective. A good example of a memory expensive field will be a field with type <code>Map</code>. Another good example

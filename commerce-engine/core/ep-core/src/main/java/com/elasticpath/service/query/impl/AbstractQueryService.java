@@ -12,7 +12,7 @@ import com.elasticpath.persistence.api.LoadTuner;
 import com.elasticpath.persistence.api.PersistenceEngine;
 import com.elasticpath.persistence.openjpa.support.JpqlQueryBuilder;
 import com.elasticpath.persistence.openjpa.support.JpqlQueryBuilderWhereGroup;
-import com.elasticpath.service.misc.FetchPlanHelper;
+import com.elasticpath.persistence.openjpa.util.FetchPlanHelper;
 import com.elasticpath.service.query.IdentifierType;
 import com.elasticpath.service.query.QueryCriteria;
 import com.elasticpath.service.query.QueryResult;
@@ -212,7 +212,6 @@ public abstract class AbstractQueryService<T> implements QueryService<T> {
 			queryResult.setResults(results);
 		}
 
-		getFetchPlanHelper().clearFetchPlan();
 		return queryResult;
 	}
 
@@ -224,13 +223,10 @@ public abstract class AbstractQueryService<T> implements QueryService<T> {
 	 * @return the list
 	 */
 	protected <R> List<R> retrieveResults(final JpqlQueryBuilder queryBuilder) {
-		List<R> results;
 		if (queryBuilder.getParameterList().isEmpty()) {
-			results = getPersistenceEngine().retrieve(queryBuilder.toString());
-		} else {
-			results = getPersistenceEngine().retrieve(queryBuilder.toString(), queryBuilder.getParameterList().toArray());
+			return getPersistenceEngine().retrieve(queryBuilder.toString());
 		}
-		return results;
+		return getPersistenceEngine().retrieve(queryBuilder.toString(), queryBuilder.getParameterList().toArray());
 	}
 
 	/**
@@ -293,7 +289,7 @@ public abstract class AbstractQueryService<T> implements QueryService<T> {
 		this.beanFactory = beanFactory;
 	}
 
-	protected FetchPlanHelper getFetchPlanHelper() {
+	public FetchPlanHelper getFetchPlanHelper() {
 		return fetchPlanHelper;
 	}
 

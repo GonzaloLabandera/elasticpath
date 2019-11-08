@@ -50,7 +50,7 @@ public class StoreConfigurationForSearchAndFacet {
 		StoreFacets storeFacets = new StoreFacets(storeEditorModel);
 		for (Facet facet : storeFacets.getStoreFacets()) {
 			String fieldKey = facet.getFacetName();
-			if (facet.getFacetGroup() == FacetGroup.OTHERS.getOrdinal()) {
+			if (facet.getFacetGroup() == FacetGroup.FIELD.getOrdinal()) {
 				defaultFacets.remove(fieldKey);
 			}
 			FacetModel facetModel = new FacetModel(fieldKey, FieldKeyType.STRING, true, FacetType.NO_FACET,

@@ -381,7 +381,15 @@ public class CartDirectorImpl implements CartDirector {
 		}
 	}
 
-	private void validateShoppingItemDto(final ShoppingCart shoppingCart, final ShoppingItemDto shoppingItemDto,
+	/**
+	 * Check validity of the shopping item before adding to cart.
+	 *
+	 * @param shoppingCart the shopping cart
+	 * @param shoppingItemDto the shopping item dto
+	 * @param parentShoppingItem parent shopping item (if exists)
+	 * @param isUpdate indicates whether item is being updated or not
+	 */
+	protected void validateShoppingItemDto(final ShoppingCart shoppingCart, final ShoppingItemDto shoppingItemDto,
 										 final ShoppingItem parentShoppingItem, final boolean isUpdate) {
 
 		final ShoppingItemDtoValidationContext context = validationService.buildContext(shoppingCart, shoppingItemDto, parentShoppingItem, isUpdate);

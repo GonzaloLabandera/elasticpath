@@ -1,0 +1,59 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!--Copyright © 2014 Elastic Path Software Inc. All rights reserved.-->
+
+<Context>
+	<Resources
+			cachingAllowed="true"
+			cacheMaxSize="${ep.tomcat.maxcachesize}"
+	/>
+	<Resource
+		name="jdbc/epjndi"
+		auth="Container"
+		scope="Shareable"
+		type="${epdb.data.source.type}"
+		maxActive="150"
+		maxIdle="30"
+		maxWait="10000"
+		testWhileIdle="true"
+		validationQuery="${epdb.validation.query}"
+		validationInterval="${epdb.validation.interval}"
+		removeAbandoned="true"
+		username="${epdb.username}"
+		password="${epdb.password}"
+		driverClassName="${epdb.jdbc.driver}"
+		factory="${epdb.data.source.factory}"
+		url="${epdb.url}"
+	/>
+
+	<Resource name="jdbc/epjndiReadOnly"
+			  defaultReadOnly="true"
+			  defaultAutoCommit="true"
+			  jdbcInterceptors="ConnectionState;StatementFinalizer"
+			  auth="Container"
+			  scope="Shareable"
+			  type="${epdb.data.source.type}"
+			  maxActive="200"
+			  maxIdle="30"
+			  maxWait="10000"
+			  testWhileIdle="true"
+			  validationQuery="${epdb.validation.query}"
+			  validationInterval="${epdb.validation.interval}"
+			  removeAbandoned="true"
+			  username="${epdb.username}"
+			  password="${epdb.password}"
+			  driverClassName="${epdb.jdbc.driver}"
+			  factory="${epdb.data.source.factory}"
+			  url="${epdb.ro.url}"
+	/>
+
+	<Resource auth="Container"
+		name="jms/JMSConnectionFactory"
+		type="${ep.jms.type}"
+		maxConnections="25"
+		maximumActiveSessionPerConnection="25"
+		idleTimeout="10000"
+		description="JMS Connection Factory"
+		factory="${ep.jms.factory}"
+		brokerURL="${ep.jms.url}"/>
+</Context>
+

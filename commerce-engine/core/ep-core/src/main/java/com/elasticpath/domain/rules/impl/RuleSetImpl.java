@@ -6,6 +6,8 @@ package com.elasticpath.domain.rules.impl;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -185,7 +187,9 @@ public class RuleSetImpl extends AbstractEntityImpl implements RuleSet {
 
 		code.append("\n\n");
 
-		for (Rule currRule : getRules()) {
+		Set<Rule> activeRules = filterOutInactiveRules(getRules());
+
+		for (Rule currRule : activeRules) {
 			// filter rules by store or catalog depending on the rule scenario
 			if (getScenario() == RuleScenarios.CATALOG_BROWSE_SCENARIO
 					&& currRule.getCatalog().getUidPk() == store.getCatalog().getUidPk()) {
@@ -201,6 +205,21 @@ public class RuleSetImpl extends AbstractEntityImpl implements RuleSet {
 		}
 
 		return code.toString();
+	}
+
+	/**
+	 * Removes inactive rules to prevent them entering the rules code base.
+	 * This method may be extended to optimize filtering.
+	 * @param rules the set of rules to from which to filter out the inactive rules.
+	 * @return the rules to compile into a running code base.
+	 */
+	protected Set<Rule> filterOutInactiveRules(final Set<Rule> rules) {
+		final Predicate<Rule> isRuleEnabled = rule -> rule.isEnabled();
+		final Predicate<Rule> isRuleNotExpired = rule -> rule.getEndDate() == null || rule.getEndDate().after(new Date());
+
+		return rules.stream()
+				.filter(isRuleEnabled.and(isRuleNotExpired))
+				.collect(Collectors.toSet());
 	}
 
 	/**

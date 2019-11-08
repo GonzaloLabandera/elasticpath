@@ -3,6 +3,7 @@
  */
 package com.elasticpath.batch.jobs.impl;
 
+import static com.elasticpath.batch.jobs.impl.SearchTermsAggregatorJobImplTest.JMS_BROKER_URL;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.List;
@@ -15,7 +16,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestExecutionListeners;
-import org.springframework.test.context.junit4.AbstractJUnit4SpringContextTests;
 import org.springframework.test.context.support.DirtiesContextTestExecutionListener;
 
 import com.elasticpath.commons.beanframework.BeanFactory;
@@ -29,6 +29,8 @@ import com.elasticpath.service.misc.TimeService;
 import com.elasticpath.service.search.query.SearchTermsService;
 import com.elasticpath.test.integration.DirtiesDatabase;
 import com.elasticpath.test.integration.junit.DatabaseHandlingTestExecutionListener;
+import com.elasticpath.test.jta.JmsBrokerConfigurator;
+import com.elasticpath.test.jta.XaTransactionTestSupport;
 import com.elasticpath.test.persister.TestApplicationContext;
 import com.elasticpath.test.support.junit.JmsRegistrationTestExecutionListener;
 
@@ -38,7 +40,10 @@ import com.elasticpath.test.support.junit.JmsRegistrationTestExecutionListener;
 		DatabaseHandlingTestExecutionListener.class,
 		DirtiesContextTestExecutionListener.class
 })
-public class SearchTermsAggregatorJobImplTest extends AbstractJUnit4SpringContextTests {
+@JmsBrokerConfigurator(url = JMS_BROKER_URL)
+public class SearchTermsAggregatorJobImplTest extends XaTransactionTestSupport {
+
+	public static final String JMS_BROKER_URL = "tcp://localhost:61622";
 
 	private static final String KEYWORDS1 = "keyword1 keyword2";
 	private static final String KEYWORDS2 = "keyword3 keyword4";

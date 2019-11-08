@@ -9,6 +9,8 @@ import io.reactivex.Observable;
 import io.reactivex.Single;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.elasticpath.domain.catalog.ProductSku;
 import com.elasticpath.repository.LinksRepository;
@@ -28,6 +30,7 @@ import com.elasticpath.rest.resource.integration.epcommerce.repository.sku.Produ
 public class LineItemToOptionsRepositoryImpl<I extends PurchaseLineItemIdentifier, O extends PurchaseLineItemOptionsIdentifier>
 		implements LinksRepository<PurchaseLineItemIdentifier, PurchaseLineItemOptionsIdentifier> {
 
+	private static final Logger LOG = LoggerFactory.getLogger(LineItemToOptionsRepositoryImpl.class);
 	private ProductSkuRepository productSkuRepository;
 	private OrderRepository orderRepository;
 
@@ -39,6 +42,7 @@ public class LineItemToOptionsRepositoryImpl<I extends PurchaseLineItemIdentifie
 		String purchaseId = purchaseIdentifier.getPurchaseId().getValue();
 		return orderRepository.findProductSku(scope, purchaseId, guidPathFromRootItem)
 				.map(ProductSku::getSkuCode)
+				.doOnError(throwable -> LOG.info("Error looking for product sku."))
 				.flatMap(this::doesSkuContainOptions)
 				.flatMapObservable(containsOptions -> containsOptions ? buildPurchaseLineItemOptionsIdentifier(identifier) : Observable.empty())
 				.onErrorResumeNext(Observable.empty());
@@ -58,6 +62,7 @@ public class LineItemToOptionsRepositoryImpl<I extends PurchaseLineItemIdentifie
 	 */
 	protected Single<Boolean> doesSkuContainOptions(final String skuCode) {
 		return productSkuRepository.getProductSkuOptionsByCode(skuCode)
+				.doOnError(throwable -> LOG.info("Error looking for sku options for sku code '{}'.", skuCode))
 				.isEmpty()
 				.map(empty -> !empty);
 	}

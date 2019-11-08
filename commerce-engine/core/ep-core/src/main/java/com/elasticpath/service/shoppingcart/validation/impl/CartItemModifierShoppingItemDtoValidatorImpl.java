@@ -7,8 +7,8 @@ import java.util.Collection;
 import java.util.Set;
 
 import com.elasticpath.base.common.dto.StructuredErrorMessage;
-import com.elasticpath.domain.cartmodifier.CartItemModifierGroup;
 import com.elasticpath.domain.catalog.ProductSku;
+import com.elasticpath.domain.modifier.ModifierGroup;
 import com.elasticpath.service.shoppingcart.validation.ShoppingItemDtoValidationContext;
 import com.elasticpath.service.shoppingcart.validation.ShoppingItemDtoValidator;
 
@@ -21,8 +21,8 @@ public class CartItemModifierShoppingItemDtoValidatorImpl extends CartModifierVa
 	public Collection<StructuredErrorMessage> validate(final ShoppingItemDtoValidationContext context) {
 		ProductSku productSku = context.getProductSku();
 
-		Set<CartItemModifierGroup> cartItemModifierGroups = productSku.getProduct().getProductType().getCartItemModifierGroups();
-		return baseValidate(context.getShoppingItemDto().getItemFields(), cartItemModifierGroups);
+		Set<ModifierGroup> modifierGroups = productSku.getProduct().getProductType().getModifierGroups();
+		return baseValidate(context.getShoppingItemDto().getItemFields(), modifierGroups);
 	}
 
 }

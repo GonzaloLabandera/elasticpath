@@ -1,5 +1,5 @@
 /**
- * Copyright (c) Elastic Path Software Inc., 2018
+ * Copyright (c) Elastic Path Software Inc., 2019
  */
 package com.elasticpath.commons.beanframework.config;
 
@@ -15,6 +15,28 @@ import org.springframework.beans.factory.config.ListFactoryBean;
 public class ExtensibleListFactoryBean extends ListFactoryBean {
 
 	private List<?> removeList = Collections.emptyList();
+
+	private String valueType;
+
+
+	/**
+	 * Getter for the class name that objects in the list must be assignable to.
+	 *
+	 * @return the String value representation of the class name
+	 */
+	public String getValueType() {
+		return valueType;
+	}
+
+	/**
+	 * Setter for the class name that objects in the list must be assignable to.
+	 *
+	 * @param valueType the String value representation for the class name
+	 */
+	public void setValueType(final String valueType) {
+		this.valueType = valueType;
+	}
+
 
 	/**
 	 * Setter for list of objects to be removed.

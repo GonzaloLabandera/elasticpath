@@ -464,4 +464,12 @@
    <bean id="localeFallbackPolicyFactory" class="com.elasticpath.domain.catalog.impl.CatalogLocaleFallbackPolicyFactory"/>
    
 
+	<!-- Predefined Profile Attribute Policies - An attribute defined in this map will not be allowed to exist as a store customer profile attribute -->
+	<util:map id="basePredefinedProfileAttributePolicies">
+		<entry key="CP_EMAIL"><util:constant static-field="com.elasticpath.domain.customer.PolicyKey.HIDDEN"/></entry>
+		<entry key="CP_ANONYMOUS_CUST"><util:constant static-field="com.elasticpath.domain.customer.PolicyKey.READ_ONLY"/></entry>
+	</util:map>
+
+	<bean id="predefinedProfileAttributePolicies" parent="basePredefinedProfileAttributePolicies" />
+
 </beans>

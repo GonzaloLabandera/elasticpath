@@ -45,13 +45,6 @@
 		   statistics="true"
 	/>
 
-	<cache name="catalogRuleBaseCache"
-		   timeToIdleSeconds="${ep.local.cache.timeout}"
-		   timeToLiveSeconds="${ep.local.cache.timeout}"
-		   maxEntriesLocalHeap="10000"
-		   statistics="true"
-	/>
-
 	<cache name="categoryByUidCache"
 		   timeToIdleSeconds="${ep.local.cache.timeout}"
 		   timeToLiveSeconds="${ep.local.cache.timeout}"
@@ -87,14 +80,7 @@
 		   statistics="true"
 	/>
 
-	<cache name="groovyConditionCache"
-		   timeToIdleSeconds="${ep.local.cache.timeout}"
-		   timeToLiveSeconds="${ep.local.cache.timeout}"
-		   maxEntriesLocalHeap="10000"
-		   statistics="true"
-	/>
-
-	<cache name="groovyEvaluationCache"
+	<cache name="decomposedConditionCache"
 		   timeToIdleSeconds="${ep.local.cache.timeout}"
 		   timeToLiveSeconds="${ep.local.cache.timeout}"
 		   maxEntriesLocalHeap="10000"
@@ -228,6 +214,13 @@
 	/>
 
 	<cache name="threadlocalStoreCache"
+		   timeToIdleSeconds="${ep.local.cache.timeout}"
+		   timeToLiveSeconds="${ep.local.cache.timeout}"
+		   maxEntriesLocalHeap="10000"
+		   statistics="true"
+	/>
+
+	<cache name="modifiedDateByUidCache"
 		   timeToIdleSeconds="${ep.local.cache.timeout}"
 		   timeToLiveSeconds="${ep.local.cache.timeout}"
 		   maxEntriesLocalHeap="10000"

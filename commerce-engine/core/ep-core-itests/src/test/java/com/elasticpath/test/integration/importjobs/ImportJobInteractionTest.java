@@ -3,13 +3,17 @@
  */
 package com.elasticpath.test.integration.importjobs;
 
+import static org.awaitility.Awaitility.await;
+import static org.awaitility.Duration.ONE_MINUTE;
+import static org.awaitility.Duration.TEN_SECONDS;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 import java.util.Locale;
 
+import org.apache.log4j.Logger;
+import org.joda.time.Interval;
 import org.junit.Test;
 
 import com.elasticpath.commons.constants.ContextIdNames;
@@ -25,15 +29,14 @@ import com.elasticpath.test.integration.DirtiesDatabase;
  * Test that the import job running correctly during concurrent modifications.
  */
 public class ImportJobInteractionTest extends ImportJobTestCase {
+	private static final Logger log = Logger.getLogger(ImportJobInteractionTest.class);
 
 	/**
 	 * Tests that in case of import cancellation some data gets skipped.
-	 * 
-	 * @throws InterruptedException if interrupted
 	 */
 	@DirtiesDatabase
 	@Test
-	public void testCancelImportCategories() throws InterruptedException {
+	public void testCancelImportCategories() {
 		CmUser initiator = scenario.getCmUser();
 		ImportJob importJob = createInsertCategoriesImportJobManyRows();
 		ImportJobRequest importJobProcessRequest = new ImportJobRequestImpl();
@@ -41,34 +44,29 @@ public class ImportJobInteractionTest extends ImportJobTestCase {
 		importJobProcessRequest.setImportSource(importJob.getCsvFileName());
 		importJobProcessRequest.setInitiator(initiator);
 		importJobProcessRequest.setReportingLocale(Locale.getDefault());
-		
-		ImportJobStatus status = importService.scheduleImport(importJobProcessRequest);
+
+		final ImportJobStatus status = importService.scheduleImport(importJobProcessRequest);
 
 		new ImportJobProcessorLauncher(getBeanFactory()).launch();
-		
+
 		/** wait until several row gets imported. */
-		final long startTime = System.currentTimeMillis();
-		while (status.getCurrentRow() == 0) {
-			Thread.sleep(100);
-			status = importService.getImportJobStatus(status.getProcessId());
-			if (System.currentTimeMillis() > startTime + 10*1000) {
-			    fail("Timed out waiting for import job status");
-			}
-		}
+		await().atMost(TEN_SECONDS).until(() -> importService.getImportJobStatus(status.getProcessId()).getCurrentRow() != 0);
 		assertEquals(0, status.getFailedRows());
 
 		/** force import cancellation. */
 		importService.cancelImportJob(status.getProcessId(), initiator);
 
 		/** wait until working thread will be actually cancelled and all the statuses are to be set. */
-		Thread.sleep(1500);
+		await().atMost(ONE_MINUTE).until(() -> importService.getImportJobStatus(status.getProcessId()).isCanceled());
 
-		status = importService.getImportJobStatus(status.getProcessId());
-		
-		assertTrue(status.isCanceled());
-		assertTrue(status.isFinished());
+		final ImportJobStatus updatedStatus = importService.getImportJobStatus(status.getProcessId());
+
+		assertTrue(updatedStatus.isFinished());
 		// at least the last category should not be imported, since import job was canceled.
 		CategoryLookup categoryLookup = getBeanFactory().getBean(ContextIdNames.CATEGORY_LOOKUP);
 		assertNull(categoryLookup.findByCategoryCodeAndCatalog("10100", scenario.getCatalog()));
+
+		Interval interval = new Interval(updatedStatus.getStartTime().getTime(), updatedStatus.getEndTime().getTime());
+		log.info("ImportJobInteractionTest#testCancelImportCategories took " + interval.toDurationMillis() + "ms");
 	}
 }

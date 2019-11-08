@@ -2,10 +2,17 @@ package com.elasticpath.selenium.navigations;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.google.common.collect.ImmutableList;
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.Actions;
+
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
 
 import com.elasticpath.selenium.dialogs.CategoryFinderDialog;
 import com.elasticpath.selenium.dialogs.ConfirmDialog;
@@ -33,14 +40,18 @@ public class CatalogManagement extends AbstractNavigation {
 	private static final String CATALOG_BROWSE_TREE_PARENT_CSS
 			= LEFT_PANE_INNER_PARENT_CSS + "div[widget-id='Catalog Browse Tree'][widget-type='Tree'] ";
 	private static final String CATALOG_BROWSE_TREE_ITEM_POSTFIX_CSS = "div[widget-id='%s'][widget-type='row']";
+	private static final String CATALOG_BROWSE_TREE_ITEM_POSTFIX_PARTIAL_CSS = "div[widget-id*='%s'][widget-type='row']";
 	private static final String CATALOG_BROWSE_TREE_ITEM_CSS = CATALOG_BROWSE_TREE_PARENT_CSS + CATALOG_BROWSE_TREE_ITEM_POSTFIX_CSS;
+	private static final String PRECEDED_CSS = " ~ ";
 	private static final String CATALOG_BROWSE_TREE_ITEM_WITH_PRECEDED_ELEMENT_CSS = CATALOG_BROWSE_TREE_ITEM_CSS
-			+ " ~ " + CATALOG_BROWSE_TREE_ITEM_POSTFIX_CSS;
+			+ PRECEDED_CSS + CATALOG_BROWSE_TREE_ITEM_POSTFIX_CSS;
 	private static final String CATALOG_BROWSE_TREE_ITEM_WITH_TWO_PRECEDED_ELEMENTS_CSS = CATALOG_BROWSE_TREE_ITEM_CSS
-			+ " ~ " + CATALOG_BROWSE_TREE_ITEM_POSTFIX_CSS + " ~ " + CATALOG_BROWSE_TREE_ITEM_POSTFIX_CSS;
-	private static final String CATALOG_EXPAND_ICON_CSS = CATALOG_BROWSE_TREE_ITEM_CSS + " div[expand-icon='']";
+			+ PRECEDED_CSS + CATALOG_BROWSE_TREE_ITEM_POSTFIX_CSS + PRECEDED_CSS + CATALOG_BROWSE_TREE_ITEM_POSTFIX_CSS;
+	private final static String EXPAND_ICON_CSS = " div[expand-icon='']";
+	private static final String CATALOG_EXPAND_ICON_CSS = CATALOG_BROWSE_TREE_ITEM_CSS + EXPAND_ICON_CSS;
 	private static final String CATALOG_EXPAND_ICON_WITH_PRECEDED_ELEMENT_CSS = CATALOG_BROWSE_TREE_ITEM_WITH_PRECEDED_ELEMENT_CSS
-			+ " div[expand-icon='']";
+			+ EXPAND_ICON_CSS;
+	private static final String CATEGORY_CHILD_CSS = " + div";
 	private static final String CREATE_PRODUCT_BUTTON_CSS = "div[widget-id='Create Product'][widget-type='ToolItem']";
 	private static final String CREATE_BUNDLE_BUTTON_CSS = "div[widget-id='Create Bundle'][widget-type='ToolItem']";
 	private static final String PRODUCT_SEARCH_INPUT_CSS = LEFT_PANE_INNER_PARENT_CSS
@@ -52,6 +63,8 @@ public class CatalogManagement extends AbstractNavigation {
 	private static final String DELETE_CSS = "div[widget-id='Delete'][seeable='true']";
 	private static final String REMOVE_LINKED_CATEGORY_CSS = "div[automation-id='com.elasticpath.cmclient.catalog.CatalogMessages."
 			+ "CatalogBrowseView_Action_RemoveLinkedCategory'][seeable='true']";
+	private static final String MOVE_UP_CATEGORY_CSS = "div[automation-id='com.elasticpath.cmclient.catalog.CatalogMessages."
+			+ "CatalogBrowseView_Action_ReorderCategoryUp'][seeable='true']";
 	private static final String RIGHT_CLICK_DELETE_CSS = "div[appearance-id='menu'] div[widget-id='Delete'][seeable='true']";
 	private static final String RIGHT_CLICK_ADD_EXISTING_PRODUCT_CSS
 			= "div[appearance-id='menu'] div[widget-id='Add Existing Product'][seeable='true']";
@@ -87,6 +100,7 @@ public class CatalogManagement extends AbstractNavigation {
 	private static final String SKU_SEARCH_SCROLL_BAR_CSS = LEFT_PANE_INNER_PARENT_CSS
 			+ "div[appearance-id='scrolledcomposite'][seeable='true']>div[appearance-id='scrollbar'] div[appearance-id='scrollbar-thumb']";
 	private static final int SLEEP_TIME_IN_MILLI = 1000;
+	private static final Logger LOGGER = Logger.getLogger(CatalogManagement.class);
 
 	/**
 	 * Constructor.
@@ -216,7 +230,7 @@ public class CatalogManagement extends AbstractNavigation {
 	 *
 	 * @param catalogName     a catalog name.
 	 * @param categoryName    a category name
-	 * @param subcategoryName a subcategory nabe
+	 * @param subcategoryName a subcategory name
 	 */
 	public void expandCategoryAndVerifySubcategory(final String catalogName, final String categoryName, final String subcategoryName) {
 		expandTreeAndVerifyItem(
@@ -227,6 +241,36 @@ public class CatalogManagement extends AbstractNavigation {
 				String.format(CATALOG_EXPAND_ICON_WITH_PRECEDED_ELEMENT_CSS, catalogName, categoryName),
 				String.format(CATALOG_BROWSE_TREE_ITEM_WITH_TWO_PRECEDED_ELEMENTS_CSS, catalogName, categoryName, subcategoryName)
 		);
+	}
+
+	/**
+	 * Expands a Category and verifies that a Subcategory is placed under this specified path
+	 *
+	 * @param catalogName a catalog name.
+	 * @param path        categories tree from top to bottom.
+	 */
+	public void expandCategoryVerifySubcategory(final String catalogName, final List<String> path) {
+		List<String> finalPath = new ArrayList<>();
+		finalPath.add(catalogName);
+		finalPath.addAll(path);
+		for (String element : finalPath) {
+			LOGGER.log(Level.WARN, "final path top->bottom: " + element);
+		}
+		for (int i = 0; i < finalPath.size() - 1; i++) {
+			LOGGER.log(Level.WARN, "expand and verified is called time:" + i);
+			LOGGER.log(Level.WARN, "expand: " + String.format(CATALOG_BROWSE_TREE_ITEM_CSS + EXPAND_ICON_CSS, finalPath.get(i)));
+			LOGGER.log(Level.WARN, "verify: " + String.format(
+					CATALOG_BROWSE_TREE_ITEM_CSS + PRECEDED_CSS + CATALOG_BROWSE_TREE_ITEM_POSTFIX_PARTIAL_CSS,
+					finalPath.get(i),
+					finalPath.get(i + 1)));
+			expandTreeAndVerifyItem(
+					String.format(CATALOG_BROWSE_TREE_ITEM_CSS + EXPAND_ICON_CSS, finalPath.get(i)),
+					String.format(
+							CATALOG_BROWSE_TREE_ITEM_CSS + PRECEDED_CSS + CATALOG_BROWSE_TREE_ITEM_POSTFIX_PARTIAL_CSS,
+							finalPath.get(i),
+							finalPath.get(i + 1))
+			);
+		}
 	}
 
 	/**
@@ -289,6 +333,17 @@ public class CatalogManagement extends AbstractNavigation {
 	 */
 	public void selectCategory(final String categoryName) {
 		assertThat(selectCatalogTreeItem(categoryName))
+				.as("Unable to find category - " + categoryName)
+				.isTrue();
+	}
+
+	/**
+	 * Select category by its partial name.
+	 *
+	 * @param categoryName the category name.
+	 */
+	public void selectCategoryPartialName(final String categoryName) {
+		assertThat(selectCatalogTreeItemPartialName(categoryName))
 				.as("Unable to find category - " + categoryName)
 				.isTrue();
 	}
@@ -475,6 +530,17 @@ public class CatalogManagement extends AbstractNavigation {
 	}
 
 	/**
+	 * Clicks move up category icon.
+	 *
+	 * @return the confirm dialog.
+	 */
+	public ConfirmDialog clickMoveUpCategoryIcon() {
+		rightClick(By.cssSelector(MOVE_UP_CATEGORY_CSS));
+		click(getWaitDriver().waitForElementToBeClickable(By.cssSelector(MOVE_UP_CATEGORY_CSS)));
+		return new ConfirmDialog(getDriver());
+	}
+
+	/**
 	 * Verifies Category is deleted.
 	 *
 	 * @param categoryName the category name.
@@ -589,5 +655,22 @@ public class CatalogManagement extends AbstractNavigation {
 			action.moveToElement(activeSkuFilter).clickAndHold().moveByOffset(0, -200).release().build().perform();
 		}
 		setWebDriverImplicitWaitToDefault();
+	}
+
+	/**
+	 * Returns specified amount of children as a list of its names in the order they are rendered in catalog (top -> bottom).
+	 *
+	 * @param categoryName  full category name.
+	 * @param childrenCount amount of children to be returned.
+	 * @return specified amount of children as a list of its names in the order they are rendered in catalog (top -> bottom).
+	 */
+	public ImmutableList<String> getExpandedCategoryChildren(final String categoryName, final int childrenCount) {
+		String childCss = String.format(CATALOG_BROWSE_TREE_ITEM_CSS, categoryName);
+		List<String> children = new LinkedList<>();
+		for (int i = 0; i < childrenCount; i++) {
+			childCss = childCss + CATEGORY_CHILD_CSS;
+			children.add(getDriver().findElement(By.cssSelector(childCss)).getAttribute("widget-id"));
+		}
+		return new ImmutableList.Builder<String>().addAll(children).build();
 	}
 }

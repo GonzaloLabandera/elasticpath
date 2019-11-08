@@ -11,6 +11,8 @@ import com.elasticpath.cmclient.core.CoreImageRegistry;
 import com.elasticpath.cmclient.core.ServiceLocator;
 import com.elasticpath.cmclient.core.editors.TableItems;
 import com.elasticpath.cmclient.core.helpers.ChangeSetHelper;
+import com.elasticpath.cmclient.core.tablelableprovider.AbstractTableLabelProviderDecorator;
+import com.elasticpath.cmclient.core.tablelableprovider.ExtensibleTableLabelProvider;
 import com.elasticpath.domain.changeset.ChangeSetObjectStatus;
 
 /**

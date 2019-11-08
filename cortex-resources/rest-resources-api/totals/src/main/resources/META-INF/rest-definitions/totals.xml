@@ -6,15 +6,11 @@
 			<![CDATA[
 The totals resource calculates the total costs for:
 
-* **[cart][carts]**
-* **[line-item][carts]**
-* **[order][orders]**
-* **[shipment][shipments]**
-* **[shipment-line-item][shipments]**
-
-[carts]: #carts
-[orders]: #orders
-[shipments]: #shipments
+* **[cart](carts.md)**
+* **[line-item](carts.md)**
+* **[order](orders.md)**
+* **[shipment](shipments.md)**
+* **[shipment-line-item](shipments.md)**
 			]]>
 		</description>
 

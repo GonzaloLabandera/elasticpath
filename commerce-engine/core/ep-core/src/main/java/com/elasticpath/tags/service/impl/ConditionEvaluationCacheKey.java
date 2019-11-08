@@ -28,7 +28,7 @@ class ConditionEvaluationCacheKey {
 	 * @param excludedTags a list of tag names to exclude from the key
 	 */
 	ConditionEvaluationCacheKey(final Map<String, Tag> tagMap, final ConditionalExpression conditionalExpression, final List<String> excludedTags) {
-		this.tags = Maps.filterKeys(tagMap, key -> !excludedTags.contains(key));
+		this.tags = Maps.filterKeys(tagMap, key -> !excludedTags.contains(key) && conditionalExpression.getConditionString().contains(key));
 		this.conditionalExpression = conditionalExpression;
 	}
 

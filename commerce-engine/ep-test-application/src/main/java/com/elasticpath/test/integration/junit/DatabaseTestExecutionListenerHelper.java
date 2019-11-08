@@ -21,6 +21,8 @@ import com.elasticpath.test.support.jndi.JndiContextManager;
  */
 public class DatabaseTestExecutionListenerHelper {
 	private static final String JNDI_NAME = "java:comp/env/jdbc/epjndi";
+	private static final String READ_ONLY_JNDI_NAME = "java:comp/env/jdbc/epjndiReadOnly";
+
 	private static final Logger LOG = Logger.getLogger(DatabaseTestExecutionListenerHelper.class);
 
 	private DatabaseTestExecutionListenerHelper() {
@@ -58,8 +60,12 @@ public class DatabaseTestExecutionListenerHelper {
 		dataSource.setUsername(initializer.getUsername());
 		dataSource.setPassword(initializer.getPassword());
 		dataSource.setUrl(connectionURL);
+
 		jndiContextManager.unbind(JNDI_NAME);
 		jndiContextManager.bind(JNDI_NAME, dataSource);
+
+		jndiContextManager.unbind(READ_ONLY_JNDI_NAME);
+		jndiContextManager.bind(READ_ONLY_JNDI_NAME, dataSource);
 	}
 
 }

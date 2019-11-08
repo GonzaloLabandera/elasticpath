@@ -41,6 +41,9 @@ public class SignInDialog extends AbstractDialog {
 	 * @param username the username.
 	 */
 	public void enterUsername(final String username) {
+		if(!getWaitDriver().waitForWindowToMaximize()){
+			getDriver().manage().window().fullscreen();
+		}
 		assertThat(getWaitDriver().waitForWindowToMaximize())
 				.as("Browser is not maximized as expected")
 				.isTrue();
@@ -138,6 +141,30 @@ public class SignInDialog extends AbstractDialog {
 	public void signInToPublish(final String username, final String password) {
 		openPublishTab();
 		getDriver().get(getPublishEnvURL());
+		performSignIn(username, password);
+	}
+
+	/**
+	 * Sign in to Export server environment.
+	 *
+	 * @param username the username.
+	 * @param password the password.
+	 */
+	public void signInToExport(final String username, final String password) {
+		getDriver().get(getExportEnvURL());
+		performSignIn(username, password);
+	}
+
+	/**
+	 * Sign in to Import environment.
+	 *
+	 * @param username the username.
+	 * @param password the password.
+	 */
+	public void signInToImport(final String username, final String password) {
+		//opens new tab
+		openPublishTab();
+		getDriver().get(getImportEnvURL());
 		performSignIn(username, password);
 	}
 

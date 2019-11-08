@@ -399,11 +399,11 @@ public class GiftCertificateServiceImpl extends AbstractEpPersistenceServiceImpl
 		final Set<Pair<String, String>> storeNameCurrencySet = getStoreNameSupportedCurrencySet(storeUidPks, currencyCode);
 
 
-		final List<Object[]> purchased = getPersistenceEngine().retrievePartByNamedQueryWithList(
+		final List<Object[]> purchased = getPersistenceEngine().retrieveByNamedQueryWithList(
 				"GIFT_CERTIFICATE_SUMMARY_PURCHASED_REPORT", PLACEHOLDER_FOR_LIST,	storeUidPks,
 				currencyCode, startDate, endDate);
 
-		final List<Object[]> spend = getPersistenceEngine().retrievePartByNamedQueryWithList(
+		final List<Object[]> spend = getPersistenceEngine().retrieveByNamedQueryWithList(
 				"GIFT_CERTIFICATE_SUMMARY_SPEND_REPORT", PLACEHOLDER_FOR_LIST,	storeUidPks,
 				currencyCode, startDate, endDate);
 

@@ -40,7 +40,7 @@ public class ImportExportLocaleFallbackPolicyFactoryTest {
 		factory = new ImportExportLocaleFallbackPolicyFactory();
 		context.checking(new Expectations() {
 			{
-				allowing(beanFactory).getBean(ContextIdNames.LOCALE_FALLBACK_POLICY_FACTORY);
+				allowing(beanFactory).getSingletonBean(ContextIdNames.LOCALE_FALLBACK_POLICY_FACTORY, ImportExportLocaleFallbackPolicyFactory.class);
 				will(returnValue(factory));
 			}
 		});

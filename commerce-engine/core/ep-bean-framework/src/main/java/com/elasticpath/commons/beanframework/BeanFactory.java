@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) Elastic Path Software Inc., 2013
  */
 package com.elasticpath.commons.beanframework;
@@ -12,12 +12,35 @@ package com.elasticpath.commons.beanframework;
 public interface BeanFactory {
 
 	/**
+	 * Obtain a new instance of a Prototype Bean.
+	 *
+	 * @param name Bean name.
+	 * @param clazz Bean interface.
+	 * @param <T> Expected bean type.
+	 * @return Bean instance.
+	 */
+	<T> T getPrototypeBean(String name, Class<T> clazz);
+
+	/**
+	 * Obtain the instance of a Singleton Bean.
+	 *
+	 * @param name Bean name.
+	 * @param clazz Bean interface.
+	 * @param <T> Expected bean type.
+	 * @return Bean instance.
+	 */
+	<T> T getSingletonBean(String name, Class<T> clazz);
+
+	/**
 	 * Return an instance of the given bean name.
 	 *
 	 * @param <T> the type of the bean to return.
 	 * @param name the 'friendly' name of the bean to return an instance of.
 	 * @return an instance of the bean, or null if the bean name cannot be found.
+	 * @deprecated This method does not provide enough safety for the consumer. Please use either {@link #getPrototypeBean(String, Class)}
+	 *   or {@link #getSingletonBean(String, Class)} to fetch a Spring bean.
 	 */
+	@Deprecated
 	<T> T getBean(String name);
 
 

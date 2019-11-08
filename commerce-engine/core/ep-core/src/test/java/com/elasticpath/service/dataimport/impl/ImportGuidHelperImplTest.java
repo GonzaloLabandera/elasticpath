@@ -9,11 +9,14 @@ import static org.junit.Assert.assertSame;
 import static org.junit.Assert.fail;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
 import org.jmock.Expectations;
 import org.junit.Test;
+
+import org.apache.openjpa.persistence.FetchPlan;
 
 import com.elasticpath.base.exception.EpServiceException;
 import com.elasticpath.commons.constants.ContextIdNames;
@@ -59,10 +62,15 @@ public class ImportGuidHelperImplTest extends AbstractEPServiceTestCase {
 		setupCategoryService();
 
 		final PersistenceSession mockPersistenceSession = context.mock(PersistenceSession.class);
+		final FetchPlan mockFetchPlan = context.mock(FetchPlan.class);
+
 		context.checking(new Expectations() {
 			{
 				allowing(getMockPersistenceEngine()).getSharedPersistenceSession();
 				will(returnValue(mockPersistenceSession));
+
+				allowing(getMockEntityManager()).getDelegate();
+				will(returnValue(mockFetchPlan));
 			}
 		});
 
@@ -81,6 +89,7 @@ public class ImportGuidHelperImplTest extends AbstractEPServiceTestCase {
 	/**
 	 * Test method for 'com.elasticpath.service.impl.AbstractImportJobRunnerImpl.findProductByGuid(String)'.
 	 */
+	@SuppressWarnings("unchecked")
 	@Test
 	public void testFindProductByGuidWithNullReturn() {
 		stubGetBean(ContextIdNames.PRODUCT, ProductImpl.class);
@@ -89,6 +98,9 @@ public class ImportGuidHelperImplTest extends AbstractEPServiceTestCase {
 		
 				allowing(getMockPersistenceEngine()).retrieveByNamedQuery(with(any(String.class)), with(any(Object[].class)));
 				will(returnValue(Collections.emptyList()));
+
+				oneOf(getMockPersistenceEngine()).withLazyFields(with(ProductImpl.class), with(any(Collection.class)));
+				will(returnValue(getMockPersistenceEngine()));
 			}
 		});
 		assertNull(this.importGuidHelper.findProductByGuid(NON_EXIST_GUID, true, true, true));
@@ -97,6 +109,7 @@ public class ImportGuidHelperImplTest extends AbstractEPServiceTestCase {
 	/**
 	 * Test method for 'com.elasticpath.service.impl.AbstractImportJobRunnerImpl.findProductByGuid(String)'.
 	 */
+	@SuppressWarnings("unchecked")
 	@Test
 	public void testFindProductByGuidWithOneReturn() {
 		stubGetBean(ContextIdNames.PRODUCT, ProductImpl.class);
@@ -108,6 +121,9 @@ public class ImportGuidHelperImplTest extends AbstractEPServiceTestCase {
 			{
 				allowing(getMockPersistenceEngine()).retrieveByNamedQuery(with(any(String.class)), with(any(Object[].class)));
 				will(returnValue(products));
+
+				oneOf(getMockPersistenceEngine()).withLazyFields(with(ProductImpl.class), with(any(Collection.class)));
+				will(returnValue(getMockPersistenceEngine()));
 			}
 		});
 		assertSame(product, this.importGuidHelper.findProductByGuid(SOME_GUID, true, true, true));
@@ -116,6 +132,7 @@ public class ImportGuidHelperImplTest extends AbstractEPServiceTestCase {
 	/**
 	 * Test method for 'com.elasticpath.service.impl.AbstractImportJobRunnerImpl.findProductByGuid(String)'.
 	 */
+	@SuppressWarnings("unchecked")
 	@Test
 	public void testFindProductByGuidWithMoreThanOneReturn() {
 		stubGetBean(ContextIdNames.PRODUCT, ProductImpl.class);
@@ -126,6 +143,8 @@ public class ImportGuidHelperImplTest extends AbstractEPServiceTestCase {
 		products.add(product);
 		context.checking(new Expectations() {
 			{
+				oneOf(getMockPersistenceEngine()).withLazyFields(with(ProductImpl.class), with(any(Collection.class)));
+				will(returnValue(getMockPersistenceEngine()));
 				allowing(getMockPersistenceEngine()).retrieveByNamedQuery(with(any(String.class)), with(any(Object[].class)));
 				will(returnValue(products));
 			}

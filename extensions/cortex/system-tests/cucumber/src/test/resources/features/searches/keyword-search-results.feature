@@ -68,22 +68,3 @@ Feature: Search by item name to verify the shown item code is correct
     Examples:
       | NOT_SOLD_SEPARATELY_PRODUCT |
       | Motorola Wireless Headset   |
-
-      #TODO review this test as ordering is not consistant
-  @notReady
-  Scenario: Search results are ordered
-    Given I am logged in as a public shopper
-    When I search for keyword "bundle"
-    Then the items are listed in the follow order
-      | Extreme Movie Bundle |
-      | Super Bundle         |
-      | Top Level Bundle     |
-      | RentMovieLowTVCombo  |
-      | Old Movies           |
-    And I follow links next
-    Then the items are listed in the follow order
-      | Series Mega Bundle    |
-      | Just Released Movies  |
-      | Rent Movies Bundle    |
-      | Movie Classics Bundle |
-      | Dynamic Bundle        |

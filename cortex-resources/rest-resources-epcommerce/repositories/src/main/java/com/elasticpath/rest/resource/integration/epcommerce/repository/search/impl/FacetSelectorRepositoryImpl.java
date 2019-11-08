@@ -72,7 +72,10 @@ public class FacetSelectorRepositoryImpl<SI extends FacetSelectorIdentifier, CI 
 		String categoryCode = searchId.get(OffersResourceConstants.CATEGORY_CODE_PROPERTY);
 		Map<String, String> appliedFacets = facetSelectorIdentifier.getFacet().getFacets().getAppliedFacets().getValue();
 
-		return searchRepository.getSearchCriteria(categoryCode, scope, locale, currency, appliedFacets, keyword)
+		OfferSearchData offerSearchData = new OfferSearchData(1, 1, scope, appliedFacets, keyword);
+		offerSearchData.setCategoryCode(categoryCode);
+
+		return searchRepository.getSearchCriteria(offerSearchData, locale, currency)
 				.flatMapObservable(searchCriteria -> searchRepository.getFacetValues(facetGuid, searchCriteria)
 				.map(facetValue -> buildSelectorChoice(facetIdentifier, facetGuid, appliedFacets, facetValue)));
 	}

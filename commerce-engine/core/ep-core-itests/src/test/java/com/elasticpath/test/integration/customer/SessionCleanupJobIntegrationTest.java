@@ -12,10 +12,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.commons.lang.StringUtils;
 import org.junit.Before;
 import org.junit.Test;
-
-import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.elasticpath.common.dto.ShoppingItemDto;
@@ -167,12 +166,7 @@ public class SessionCleanupJobIntegrationTest extends AbstractCartIntegrationTes
 	 * These are the target sessions:
 	 * 1. Old Anonymous Customer Session w/ no Shopping Cart
 	 * 2. Old Anonymous Customer Session w/ empty Shopping Cart
-	 * 3. Old Anonymous Customer Session w/ a non-empty Shopping Cart
-	 * 4. Recent Anonymous Customer Session w/ no Shopping Cart.
-	 * 5. Old Registered (A) Customer Session w/ empty Shopping Cart
-	 * 6. Recent Registered (B) Customer Session w/ no Shopping Cart.
-	 * 7. Recent Registered (C) Customer Session w/ a non-empty Shopping Cart.
-	 * 8. Old Registered (D) Customer Session w/ a non-empty Shopping Cart.
+	 * 3. Recent Anonymous Customer Session w/ no Shopping Cart.
 	 *
 	 * Expected to delete customer sessions 1-3, 5, 8 but to keep 4, 6 and 7.
 	 * Expected to keep shoppers 4, 6 - 8.  (8 because the registered customer cart kept, but not the session).
@@ -188,18 +182,7 @@ public class SessionCleanupJobIntegrationTest extends AbstractCartIntegrationTes
 		// 2
 		makeScenario(AccessAge.OLD, CustomerType.ANONYMOUS, CartType.EMPTY, "2", "B", track.deletedSessions, track.deletedShoppers);
 		// 3
-		makeScenario(AccessAge.OLD, CustomerType.ANONYMOUS, CartType.NON_EMPTY, "3", "C", track.deletedSessions, track.deletedShoppers);
-		// 4
 		makeScenario(AccessAge.RECENT, CustomerType.ANONYMOUS, CartType.NONE, "4", "D", track.keptSessions, track.keptShoppers);
-
-		// 5
-		makeScenario(AccessAge.OLD, CustomerType.REGISTERED, CartType.EMPTY, "5", "E", track.deletedSessions, track.deletedShoppers);
-		// 6
-		makeScenario(AccessAge.RECENT, CustomerType.REGISTERED, CartType.NONE, "6", "F", track.keptSessions, track.keptShoppers);
-		// 7
-		makeScenario(AccessAge.RECENT, CustomerType.REGISTERED, CartType.NON_EMPTY, "7", "G", track.keptSessions, track.keptShoppers);
-		// 8
-		makeScenario(AccessAge.OLD, CustomerType.REGISTERED, CartType.NON_EMPTY, "8", "H", track.deletedSessions, track.keptShoppers);
 
 		// Verify that I can find all created customer sessions and shoppers.
 		verifyCreations(track, 0);
@@ -209,69 +192,6 @@ public class SessionCleanupJobIntegrationTest extends AbstractCartIntegrationTes
 
 		// Verify
 		verifyDeletions(track, 1);
-	}
-
-	/**
-	 * Test to see that Orphaned shoppers that have customers and non-empty carts are not deleted if the cleanup
-	 * job happens more than once.
-	 *
-	 * These are the target sessions:
-	 * No. |   CS   | Shopper | Cart Empty | Recent
-	 * ----+--------+---------+------------+--------
-	 *  1. |    1   |    A    |    Empty   | recent
-	 *  2. |    2   |    A    |    Empty   |  old
-	 *  3. |    3   |    B    |  Not-Empty | recent
-	 *  4. |    4   |    B    |  Not-Empty |  old
-	 *  5. |  5, 6  |    C    |    Empty   |  old
-	 *  6. |  7, 8  |    D    |  Not-Empty |  old
-	 *
-	 * Expected:
-	 * - to delete: customer sessions 2, 4 - 8.
-	 * - to keep: customer sessions 1, 3.
-	 * - to delete: shoppers C. (Because old and empty.)
-	 * - to keep: shoppers A, B, D.
-	 */
-	@DirtiesDatabase
-	@Test
-	public void testOrphanedShopperWithCustomerAndNonEmptyCartPersistsAfterMultipleCleanups() {
-
-		final TrackingSets track = new TrackingSets();
-
-		// A: 1, 2
-		final Shopper shopperA = makeShopperAndCustomer(AccessAge.MULTIAGED, CustomerType.REGISTERED, CartType.EMPTY, "A",
-				track.keptShoppers);
-		makeCustomerSessionAndCart(AccessAge.RECENT, CartType.EMPTY, "1", shopperA, track.keptSessions);
-		makeCustomerSessionAndCart(AccessAge.OLD, CartType.EMPTY, "2", shopperA, track.deletedSessions);
-
-		// B: 3, 4
-		final Shopper shopperB = makeShopperAndCustomer(AccessAge.MULTIAGED, CustomerType.REGISTERED, CartType.EMPTY, "b",
-				track.keptShoppers);
-		makeCustomerSessionAndCart(AccessAge.RECENT, CartType.EMPTY, "3", shopperB, track.keptSessions);
-		makeCustomerSessionAndCart(AccessAge.OLD, CartType.EMPTY, "4", shopperB, track.deletedSessions);
-
-		// C: 5, 6
-		final Shopper shopperC = makeShopperAndCustomer(AccessAge.OLD, CustomerType.REGISTERED, CartType.EMPTY, "C",
-				track.deletedShoppers);
-		makeCustomerSessionAndCart(AccessAge.OLD, CartType.EMPTY, "5", shopperC, track.deletedSessions);
-		makeCustomerSessionAndCart(AccessAge.OLD, CartType.EMPTY, "6", shopperC, track.deletedSessions);
-
-		// D: 7, 8
-		final Shopper shopperD = makeShopperAndCustomer(AccessAge.OLD, CustomerType.REGISTERED, CartType.NON_EMPTY, "D",
-				track.keptShoppers);
-		makeCustomerSessionAndCart(AccessAge.OLD, CartType.NON_EMPTY, "7", shopperD, track.deletedSessions);
-		makeCustomerSessionAndCart(AccessAge.OLD, CartType.NON_EMPTY, "8", shopperD, track.deletedSessions);
-
-		// Verify that I can find all created customer sessions and shoppers.
-		verifyCreations(track, 0);
-
-		// Orphaned Shoppers sometimes get deleted on the 2nd pass because the referring CustomerSession has disappeared.
-		// So run twice.
-		// 1
-		sessionCleanupJob.purgeSessionHistory();
-		verifyDeletions(track, 1);
-		// 2
-		sessionCleanupJob.purgeSessionHistory();
-		verifyDeletions(track, 2);
 	}
 
 	/**
@@ -497,6 +417,7 @@ public class SessionCleanupJobIntegrationTest extends AbstractCartIntegrationTes
 		if (cartType == CartType.NON_EMPTY) {
 			addProductToShoppingCart(shoppingCart);
 		}
+		shoppingCart.setDefault(true);
 		shoppingCartService.saveOrUpdate(shoppingCart);
 	}
 

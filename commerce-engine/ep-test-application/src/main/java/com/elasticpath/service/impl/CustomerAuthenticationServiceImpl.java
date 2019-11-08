@@ -132,6 +132,7 @@ public class CustomerAuthenticationServiceImpl implements CustomerAuthentication
 		customerSession.setCurrency(store.getDefaultCurrency());
 		shoppingCart.setCustomerSession(customerSession);
 		shoppingCart.setStore(store);
+		shoppingCart.setDefault(true);
 
 		shoppingCart = getShoppingCartService().saveIfNotPersisted(shoppingCart);
 		customerSession.getShopper().setCurrentShoppingCart(shoppingCart);

@@ -5,10 +5,24 @@
 		xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
 		">
 
+	<bean id="storeCartTypeEhCache"
+		  class="com.elasticpath.commons.beanframework.EhCacheDefaultConfigurationFactoryBean">
+		<property name="name" value="storeCartTypeCache"/>
+		<property name="cacheManager" ref="epEhcacheManager"/>
+		<property name="timeToLive" value="600"/>
+		<property name="timeToIdle" value="600"/>
+	</bean>
+
+	<bean id="storeCartTypeCache"
+		  factory-bean="localCacheFactory" factory-method="createCache"
+		  depends-on="storeCartTypeEhCache">
+		<constructor-arg value="storeCartTypeCache"/>
+	</bean>
 
 	<bean id="cachingStoreService" class="com.elasticpath.caching.core.CachingStoreServiceImpl">
 		<property name="storeCache" ref="cachingStoreRetrieveStrategy"/>
 		<property name="fallbackStoreService" ref="nonCachingStoreService"/>
+		<property name="storeCartTypeCache" ref="storeCartTypeCache" />
 	</bean>
 
 	<bean id="storeCache" parent="abstractCacheBean">
@@ -19,5 +33,8 @@
 	<bean id="cachingStoreRetrieveStrategy" class="com.elasticpath.caching.core.EhCacheStoreRetrieveStrategyImpl">
 		<property name="storeCache" ref="storeCache" />
 	</bean>
+
+
+
 
 </beans>

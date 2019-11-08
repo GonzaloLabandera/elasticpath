@@ -1,0 +1,303 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans
+		xmlns="http://www.springframework.org/schema/beans"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xmlns:batch="http://www.springframework.org/schema/batch"
+		xmlns:jdbc="http://www.springframework.org/schema/jdbc"
+		xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+		http://www.springframework.org/schema/batch http://www.springframework.org/schema/batch/spring-batch.xsd
+		http://www.springframework.org/schema/jdbc http://www.springframework.org/schema/jdbc/spring-jdbc.xsd">
+
+	<bean id="catalogSyndicationBatchJobsParent" class="org.springframework.beans.factory.config.MapFactoryBean">
+		<property name="sourceMap">
+			<map>
+				<entry key="BUILD_ALL_OPTIONS" value-ref="BUILD_ALL_OPTIONS"/>
+				<entry key="BUILD_ALL_ATTRIBUTES" value-ref="BUILD_ALL_ATTRIBUTES"/>
+				<entry key="BUILD_ALL_BRANDS" value-ref="BUILD_ALL_BRANDS"/>
+				<entry key="BUILD_ALL_FIELDMETADATA" value-ref="BUILD_ALL_FIELDMETADATA"/>
+				<entry key="BUILD_ALL_OFFERS" value-ref="BUILD_ALL_OFFERS"/>
+				<entry key="BUILD_ALL_CATEGORIES" value-ref="BUILD_ALL_CATEGORIES"/>
+				<entry key="BUILD_ALL_PROJECTIONS" value-ref="BUILD_ALL_PROJECTIONS"/>
+			</map>
+		</property>
+	</bean>
+
+	<bean id="catalogSyndicationBatchJobs" parent="catalogSyndicationBatchJobsParent"
+		  class="org.springframework.beans.factory.config.MapFactoryBean"/>
+
+	<bean id="catalogJobRunner" class="com.elasticpath.catalog.batch.CatalogJobRunnerImpl">
+		<constructor-arg name="jobMap" ref="catalogSyndicationBatchJobs"/>
+		<constructor-arg name="jobLauncher" ref="catalogJobLauncher"/>
+	</bean>
+
+	<bean id="expiryJobRunner" class="com.elasticpath.catalog.batch.ExpiredProjectionJobRunner">
+		<constructor-arg name="job" ref="EXPIRE_PROJECTIONS"/>
+		<constructor-arg name="jobLauncher" ref="catalogJobLauncher"/>
+		<constructor-arg name="timeService" ref="timeService"/>
+		<constructor-arg name="catalogService" ref="catalogDataService"/>
+		<constructor-arg name="maxDelay" value="60"/>
+		<constructor-arg name="minDelay" value="5"/>
+	</bean>
+
+	<bean id="backOffPolicyDefiningBaseStep" class="org.springframework.batch.core.step.factory.FaultTolerantStepFactoryBean" abstract="true">
+		<property name="backOffPolicy">
+			<bean class="org.springframework.retry.backoff.FixedBackOffPolicy">
+				<property name="backOffPeriod" value="${batchBackOffPeriod:2000}"/>
+			</bean>
+		</property>
+	</bean>
+
+	<batch:job id="EXPIRE_PROJECTIONS" job-repository="catalogJobRepository">
+		<batch:step id="expireProjections">
+			<batch:tasklet  transaction-manager="transactionManager">
+				<batch:chunk reader="jpaPagingExpiryProjectionReader" processor="expiryProjectionItemProcessor" writer="expiryProjectionWriter"
+					   commit-interval="100"/>
+			</batch:tasklet>
+		</batch:step>
+	</batch:job>
+
+
+	<batch:step id="baseStep" parent="backOffPolicyDefiningBaseStep" abstract="true">
+		<batch:tasklet transaction-manager="transactionManager">
+			<batch:chunk retry-limit="${batchRetryLimit:3}" commit-interval="${batchCommitInterval:100}">
+				<batch:retryable-exception-classes>
+					<batch:include class="org.springframework.dao.DataAccessException"/>
+					<batch:exclude class="java.lang.Throwable"/>
+				</batch:retryable-exception-classes>
+			</batch:chunk>
+		</batch:tasklet>
+	</batch:step>
+
+	<batch:job id="BUILD_ALL_OPTIONS" job-repository="catalogJobRepository">
+		<batch:step id="cleanUpOptions" next="buildAllOptions">
+			<batch:tasklet ref="optionCleanUpTasklet"/>
+		</batch:step>
+		<batch:step id="buildAllOptions" parent="baseStep">
+			<batch:tasklet>
+				<batch:chunk reader="jpaPagingOptionReader" processor="skuOptionItemProcessor" writer="projectionWriter"/>
+			</batch:tasklet>
+		</batch:step>
+	</batch:job>
+
+	<batch:job id="BUILD_ALL_ATTRIBUTES" job-repository="catalogJobRepository">
+		<batch:step id="cleanUpAttributes" next="buildAllAttributes">
+			<batch:tasklet ref="attributeCleanUpTasklet"/>
+		</batch:step>
+		<batch:step id="buildAllAttributes" parent="baseStep">
+			<batch:tasklet>
+				<batch:chunk reader="jpaPagingAttributeReader" processor="attributeItemProcessor" writer="projectionWriter"/>
+			</batch:tasklet>
+		</batch:step>
+	</batch:job>
+
+	<batch:job id="BUILD_ALL_BRANDS" job-repository="catalogJobRepository">
+		<batch:step id="cleanUpBrands" next="buildAllBrands">
+			<batch:tasklet ref="brandCleanUpTasklet"/>
+		</batch:step>
+		<batch:step id="buildAllBrands" parent="baseStep">
+			<batch:tasklet>
+				<batch:chunk reader="jpaPagingBrandReader" processor="brandItemProcessor" writer="projectionWriter"/>
+			</batch:tasklet>
+		</batch:step>
+	</batch:job>
+
+	<batch:job id="BUILD_ALL_FIELDMETADATA" job-repository="catalogJobRepository">
+		<batch:step id="cleanUpFieldMetadata" next="buildAllFieldMetadata">
+			<batch:tasklet ref="fieldMetadataCleanUpTasklet"/>
+		</batch:step>
+		<batch:step id="buildAllFieldMetadata" parent="baseStep">
+			<batch:tasklet>
+				<batch:chunk reader="jpaPagingFieldMetadataReader" processor="modifierGroupItemProcessor" writer="projectionWriter"/>
+			</batch:tasklet>
+		</batch:step>
+	</batch:job>
+
+	<batch:job id="BUILD_ALL_OFFERS" job-repository="catalogJobRepository">
+		<batch:step id="cleanUpOffers" next="buildAllOffersForProduct">
+			<batch:tasklet ref="offerCleanUpTasklet"/>
+		</batch:step>
+		<batch:step id="buildAllOffersForProduct" parent="baseStep">
+			<tasklet>
+				<chunk reader="jpaPagingProductReader" processor="productItemProcessor" writer="projectionWriter"/>
+			</tasklet>
+		</batch:step>
+	</batch:job>
+
+	<batch:job id="BUILD_ALL_CATEGORIES" job-repository="catalogJobRepository">
+		<batch:step id="cleanUpCategories" next="buildAllCategories">
+			<batch:tasklet ref="categoryCleanUpTasklet"/>
+		</batch:step>
+		<batch:step id="buildAllCategories" parent="baseStep">
+			<batch:tasklet>
+				<batch:chunk reader="jpaPagingCategoryReader" processor="categoryItemProcessor" writer="projectionWriter"/>
+			</batch:tasklet>
+		</batch:step>
+	</batch:job>
+
+	<batch:job id="BUILD_ALL_PROJECTIONS" job-repository="catalogJobRepository">
+		<batch:step id="buildAllProjections.cleanUpOptions" parent="cleanUpOptions" next="buildAllProjections.buildAllOptions"/>
+		<batch:step id="buildAllProjections.buildAllOptions" parent="buildAllOptions" next="buildAllProjections.cleanUpAttributes"/>
+		<batch:step id="buildAllProjections.cleanUpAttributes" parent="cleanUpAttributes" next="buildAllProjections.buildAllAttributes"/>
+		<batch:step id="buildAllProjections.buildAllAttributes" parent="buildAllAttributes" next="buildAllProjections.cleanUpBrands"/>
+		<batch:step id="buildAllProjections.cleanUpBrands" parent="cleanUpBrands" next="buildAllProjections.buildAllBrands"/>
+		<batch:step id="buildAllProjections.buildAllBrands" parent="buildAllBrands" next="buildAllProjections.cleanUpFieldMetadata"/>
+		<batch:step id="buildAllProjections.cleanUpFieldMetadata" parent="cleanUpFieldMetadata" next="buildAllProjections.buildAllFieldMetadata"/>
+		<batch:step id="buildAllProjections.buildAllFieldMetadata" parent="buildAllFieldMetadata" next="buildAllProjections.cleanUpCategories"/>
+		<batch:step id="buildAllProjections.cleanUpCategories" parent="cleanUpCategories" next="buildAllProjections.buildAllCategories"/>
+		<batch:step id="buildAllProjections.buildAllCategories" parent="buildAllCategories" next="buildAllProjections.cleanUpOffers"/>
+		<batch:step id="buildAllProjections.cleanUpOffers" parent="cleanUpOffers" next="buildAllProjections.buildAllOffersForProduct"/>
+		<batch:step id="buildAllProjections.buildAllOffersForProduct" parent="buildAllOffersForProduct"/>
+	</batch:job>
+
+	<bean id="catalogJobLauncher" class="org.springframework.batch.core.launch.support.SimpleJobLauncher">
+		<property name="jobRepository" ref="catalogJobRepository"/>
+		<property name="taskExecutor" ref="catalogJobLauncherTaskExecutor"/>
+	</bean>
+
+	<bean id="catalogJobRepository" class="org.springframework.batch.core.repository.support.JobRepositoryFactoryBean">
+		<property name="dataSource" ref="catalogBatchDataSource"/>
+		<property name="transactionManager" ref="transactionManager"/>
+		<property name="isolationLevelForCreate" value="ISOLATION_SERIALIZABLE"/>
+		<property name="tablePrefix" value="BATCH_"/>
+		<property name="incrementerFactory" ref="catalogDataFieldMaxValueIncrementerFactory"/>
+		<property name="validateTransactionState" value="false"/>
+	</bean>
+
+	<bean id="catalogDataFieldMaxValueIncrementerFactory" class="com.elasticpath.catalog.batch.job.CatalogDataFieldMaxValueIncrementerFactory">
+		<constructor-arg name="dataSource" ref="catalogBatchDataSource"/>
+	</bean>
+
+	<bean id="catalogJobLauncherTaskExecutor" class="org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor">
+		<property name="corePoolSize" value="1"/>
+		<property name="maxPoolSize" value="1"/>
+	</bean>
+
+	<jdbc:initialize-database data-source="catalogBatchDataSource" separator="${ep.catalog.batch.script.separator:;}">
+		<jdbc:script location="${ep.catalog.batch.database.drop.script:CLASSPATH:org/springframework/batch/core/schema-drop-mysql.sql}"/>
+		<jdbc:script location="${ep.catalog.batch.database.create.script:CLASSPATH:org/springframework/batch/core/schema-mysql.sql}"/>
+	</jdbc:initialize-database>
+
+	<alias name="${ep.catalog.batch.datasource:atomikosJdbcDataSource}" alias="catalogBatchDataSource"/>
+
+	<bean id="optionCleanUpTasklet" class="com.elasticpath.catalog.batch.job.DatabaseCleanupTasklet">
+		<constructor-arg name="catalogService" ref="catalogDataService"/>
+		<constructor-arg name="projectionType" value="option"/>
+	</bean>
+
+	<bean id="attributeCleanUpTasklet" class="com.elasticpath.catalog.batch.job.DatabaseCleanupTasklet">
+		<constructor-arg name="catalogService" ref="catalogDataService"/>
+		<constructor-arg name="projectionType" value="attribute"/>
+	</bean>
+
+	<bean id="brandCleanUpTasklet" class="com.elasticpath.catalog.batch.job.DatabaseCleanupTasklet">
+		<constructor-arg name="catalogService" ref="catalogDataService"/>
+		<constructor-arg name="projectionType" value="brand"/>
+	</bean>
+
+	<bean id="fieldMetadataCleanUpTasklet" class="com.elasticpath.catalog.batch.job.DatabaseCleanupTasklet">
+		<constructor-arg name="catalogService" ref="catalogDataService"/>
+		<constructor-arg name="projectionType" value="fieldMetadata"/>
+	</bean>
+
+	<bean id="offerCleanUpTasklet" class="com.elasticpath.catalog.batch.job.DatabaseCleanupTasklet">
+		<constructor-arg name="catalogService" ref="catalogDataService"/>
+		<constructor-arg name="projectionType" value="offer"/>
+	</bean>
+
+	<bean id="categoryCleanUpTasklet" class="com.elasticpath.catalog.batch.job.DatabaseCleanupTasklet">
+		<constructor-arg name="catalogService" ref="catalogDataService"/>
+		<constructor-arg name="projectionType" value="category"/>
+	</bean>
+
+	<bean id="jpaPagingOptionReader" class="org.springframework.batch.item.database.JpaPagingItemReader">
+		<property name="entityManagerFactory" ref="entityManagerFactory"/>
+		<property name="transacted" value="false"/>
+		<property name="queryString" value="select s from SkuOptionImpl s"/>
+		<property name="pageSize" value="1000"/>
+	</bean>
+
+	<bean id="jpaPagingAttributeReader" class="org.springframework.batch.item.database.JpaPagingItemReader">
+		<property name="entityManagerFactory" ref="entityManagerFactory"/>
+		<property name="transacted" value="false"/>
+		<property name="queryString" value="select s from AttributeImpl s"/>
+		<property name="pageSize" value="1000"/>
+	</bean>
+
+	<bean id="jpaPagingBrandReader" class="org.springframework.batch.item.database.JpaPagingItemReader">
+		<property name="entityManagerFactory" ref="entityManagerFactory"/>
+		<property name="transacted" value="false"/>
+		<property name="queryString" value="select s from BrandImpl s"/>
+		<property name="pageSize" value="1000"/>
+	</bean>
+
+	<bean id="jpaPagingFieldMetadataReader" class="org.springframework.batch.item.database.JpaPagingItemReader">
+		<property name="entityManagerFactory" ref="entityManagerFactory"/>
+		<property name="transacted" value="false"/>
+		<property name="queryString" value="select s from ModifierGroupImpl s"/>
+		<property name="pageSize" value="1000"/>
+	</bean>
+
+	<bean id="jpaPagingProductReader" class="org.springframework.batch.item.database.JpaPagingItemReader">
+		<property name="entityManagerFactory" ref="entityManagerFactory"/>
+		<property name="transacted" value="false"/>
+		<property name="queryString" value="select s from ProductImpl s"/>
+		<property name="pageSize" value="1000"/>
+	</bean>
+
+	<bean id="jpaPagingCategoryReader" class="org.springframework.batch.item.database.JpaPagingItemReader">
+		<property name="entityManagerFactory" ref="entityManagerFactory"/>
+		<property name="transacted" value="false"/>
+		<property name="queryString" value="select s from AbstractCategoryImpl s"/>
+		<property name="pageSize" value="1000"/>
+	</bean>
+
+	<bean id="jpaPagingExpiryProjectionReader" class="org.springframework.batch.item.database.JpaPagingItemReader" scope="step">
+		<property name="entityManagerFactory" ref="entityManagerFactory"/>
+		<property name="transacted" value="false"/>
+		<property name="queryString" value="select p from ProjectionEntity p where :time > p.disableDateTime and p.deleted = FALSE"/>
+		<property name="parameterValues">
+			<map>
+				<entry key="time" value="#{jobParameters[time]}"/>
+			</map>
+		</property>
+	</bean>
+
+	<bean id="skuOptionItemProcessor" class="com.elasticpath.catalog.batch.job.DomainEntityProcessor">
+		<constructor-arg name="projectionService" ref="skuOptionProjectionService"/>
+	</bean>
+
+	<bean id="attributeItemProcessor" class="com.elasticpath.catalog.batch.job.DomainEntityProcessor">
+		<constructor-arg name="projectionService" ref="attributeProjectionService"/>
+	</bean>
+
+	<bean id="brandItemProcessor" class="com.elasticpath.catalog.batch.job.DomainEntityProcessor">
+		<constructor-arg name="projectionService" ref="brandProjectionService"/>
+	</bean>
+
+	<bean id="modifierGroupItemProcessor" class="com.elasticpath.catalog.batch.job.DomainEntityProcessor">
+		<constructor-arg name="projectionService" ref="modifierGroupProjectionService"/>
+	</bean>
+
+	<bean id="productItemProcessor" class="com.elasticpath.catalog.batch.job.ProductProcessor">
+		<constructor-arg name="projectionService" ref="productProjectionService"/>
+		<constructor-arg name="productLookup" ref="productLookup"/>
+	</bean>
+
+	<bean id="categoryItemProcessor" class="com.elasticpath.catalog.batch.job.CategoryProcessor">
+		<constructor-arg name="projectionService" ref="categoryProjectionService"/>
+		<constructor-arg name="categoryLookup" ref="categoryLookup"/>
+	</bean>
+
+	<bean id="expiryProjectionItemProcessor" class="com.elasticpath.catalog.batch.job.ExpiredProjectionProcessor">
+		<constructor-arg name="projectionToEntityConverter" ref="projectionToEntityConverter"/>
+	</bean>
+
+	<bean id="projectionWriter" class="com.elasticpath.catalog.batch.job.ProjectionWriter">
+		<constructor-arg name="catalogService" ref="catalogDataService"/>
+	</bean>
+
+	<bean id="expiryProjectionWriter" class="com.elasticpath.catalog.batch.job.ExpiredProjectionWriter">
+		<constructor-arg name="catalogService" ref="catalogDataService"/>
+	</bean>
+
+</beans>

@@ -14,6 +14,7 @@ import java.util.TimeZone;
 import com.elasticpath.domain.catalog.Catalog;
 import com.elasticpath.domain.catalog.DefaultValueRemovalForbiddenException;
 import com.elasticpath.domain.payment.PaymentGateway;
+import com.elasticpath.domain.shoppingcart.CartType;
 import com.elasticpath.domain.tax.TaxCode;
 import com.elasticpath.domain.tax.TaxJurisdiction;
 import com.elasticpath.persistence.api.Persistable;
@@ -452,4 +453,16 @@ public interface Store extends Persistable, Comparable<Store> {
 	 * @return true if a gateway is configured with the supported payment type, false otherwise.
 	 */
 	boolean supportsPaymentGatewayType(PaymentGatewayType paymentGatewayType);
+
+	/**
+	 * Gets the shopping cart types associated with the store.
+	 * @return the cart types.
+	 */
+	Collection<CartType> getShoppingCartTypes();
+
+	/**
+	 * Sets the shopping cart types.
+	 * @param shoppingCartTypes the cart types.
+	 */
+	void setShoppingCartTypes(Collection<CartType> shoppingCartTypes);
 }

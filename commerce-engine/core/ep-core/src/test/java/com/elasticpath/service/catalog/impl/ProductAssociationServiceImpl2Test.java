@@ -28,7 +28,7 @@ import com.elasticpath.domain.catalog.ProductAssociationType;
 import com.elasticpath.domain.catalog.impl.ProductAssociationImpl;
 import com.elasticpath.domain.catalogview.StoreProduct;
 import com.elasticpath.persistence.api.PersistenceEngine;
-import com.elasticpath.service.misc.FetchPlanHelper;
+import com.elasticpath.persistence.openjpa.util.FetchPlanHelper;
 import com.elasticpath.test.BeanFactoryExpectationsFactory;
 
 
@@ -127,7 +127,7 @@ public class ProductAssociationServiceImpl2Test {
 				expectedProductAssociation4);
 
 		final List<ProductAssociation> productAssociations = productAssociationService.getProductAssociationsByType(storeProducts,
-				ProductAssociationType.CROSS_SELL, 10, Collections.<Product>emptySet());
+				ProductAssociationType.CROSS_SELL, 10, Collections.emptySet());
 		assertEquals("Didn't get expected product associations", expectedProductAssociations, productAssociations);
 	}
 
@@ -143,7 +143,7 @@ public class ProductAssociationServiceImpl2Test {
 				expectedProductAssociation3);
 
 		final List<ProductAssociation> productAssociations = productAssociationService.getProductAssociationsByType(storeProducts,
-				ProductAssociationType.CROSS_SELL, 3, Collections.<Product>emptySet());
+				ProductAssociationType.CROSS_SELL, 3, Collections.emptySet());
 		assertEquals("Didn't get expected product associations", expectedProductAssociations, productAssociations);
 	}
 
@@ -202,14 +202,14 @@ public class ProductAssociationServiceImpl2Test {
 	}
 
 	private StoreProduct mockStoreProduct(final String name) {
-		return mockStoreProduct(name, Collections.<ProductAssociation>emptySet());
+		return mockStoreProduct(name, Collections.emptySet());
 	}
 
 	private StoreProduct mockStoreProduct(final String name, final Set<ProductAssociation> productAssociations) {
 		final StoreProduct storeProduct = context.mock(StoreProduct.class, name);
 		context.checking(new Expectations() {
 			{
-				allowing(storeProduct).getAssociationsByType(ProductAssociationType.CROSS_SELL, Collections.<Product>emptySet());
+				allowing(storeProduct).getAssociationsByType(ProductAssociationType.CROSS_SELL, Collections.emptySet());
 				will(returnValue(productAssociations));
 			}
 		});

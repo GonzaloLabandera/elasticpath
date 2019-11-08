@@ -9,11 +9,9 @@ import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
 
-import com.elasticpath.domain.coupon.specifications.PotentialCouponUse;
 import com.elasticpath.domain.rules.Coupon;
 import com.elasticpath.domain.rules.CouponUsage;
 import com.elasticpath.domain.rules.CouponUsageType;
-import com.elasticpath.domain.specifications.Specification;
 import com.elasticpath.domain.store.Store;
 import com.elasticpath.service.rules.CouponAutoApplierService;
 import com.elasticpath.service.rules.CouponService;
@@ -27,8 +25,6 @@ public class CouponAutoApplierServiceImpl implements CouponAutoApplierService {
 	private CouponService couponService;
 
 	private CouponUsageService couponUsageService;
-
-	private Specification<PotentialCouponUse> validCouponUseSpecification;
 
 	@Override
 	public Set<String> filterValidCouponsForCustomer(final Set<String> existingCoupons, final Store store,
@@ -59,12 +55,12 @@ public class CouponAutoApplierServiceImpl implements CouponAutoApplierService {
 		Set<String> userSpecificCoupons = new HashSet<>();
 		if (!StringUtils.isEmpty(customerEmailAddress)) {
 			final Collection<CouponUsage> eligibleUsages =
-					couponUsageService.findEligibleUsagesByEmailAddress(customerEmailAddress, store.getUidPk());
+					getCouponUsageService().findEligibleUsagesByEmailAddress(customerEmailAddress, store.getUidPk());
 			for (CouponUsage usage : eligibleUsages) {
 				final String couponCode = usage.getCoupon().getCouponCode();
 				Coupon coupon = couponService.findByCouponCode(couponCode);
-				PotentialCouponUse potentialCouponUse = new PotentialCouponUse(coupon, store.getCode(), customerEmailAddress);
-				if (usage.isActiveInCart() && getValidCouponUseSpecification().isSatisfiedBy(potentialCouponUse).isSuccess()) {
+				if (usage.isActiveInCart() && getCouponUsageService().validateCouponRuleAndUsage(
+						coupon, store.getCode(), customerEmailAddress).isSuccess()) {
 					userSpecificCoupons.add(couponCode);
 				}
 			}
@@ -84,8 +80,7 @@ public class CouponAutoApplierServiceImpl implements CouponAutoApplierService {
 		final Set<String> couponsToRemove = new HashSet<>();
 		for (String couponCode : coupons) {
 			Coupon coupon = couponService.findByCouponCode(couponCode);
-			PotentialCouponUse potentialCouponUse = new PotentialCouponUse(coupon, storeCode, customerEmailAddress);
-			if (!getValidCouponUseSpecification().isSatisfiedBy(potentialCouponUse).isSuccess()) {
+			if (!getCouponUsageService().validateCouponRuleAndUsage(coupon, storeCode, customerEmailAddress).isSuccess()) {
 				couponsToRemove.add(couponCode);
 			}
 		}
@@ -127,14 +122,6 @@ public class CouponAutoApplierServiceImpl implements CouponAutoApplierService {
 
 	public void setCouponUsageService(final CouponUsageService couponUsageService) {
 		this.couponUsageService = couponUsageService;
-	}
-
-	public Specification<PotentialCouponUse> getValidCouponUseSpecification() {
-		return validCouponUseSpecification;
-	}
-
-	public void setValidCouponUseSpecification(final Specification<PotentialCouponUse> validCouponUseSpecification) {
-		this.validCouponUseSpecification = validCouponUseSpecification;
 	}
 
 }

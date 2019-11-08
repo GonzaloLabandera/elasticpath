@@ -36,7 +36,7 @@ import com.elasticpath.test.support.junit.JmsRegistrationTestExecutionListener;
 })
 public class ActiveMqVirtualTopicConsumptionITest {
 
-	private static final long SECONDS_TO_WAIT_FOR_MESSAGE_CONSUMPTION = 5;
+	private static final long SECONDS_TO_WAIT_FOR_MESSAGE_CONSUMPTION = 10;
 
 	@Autowired
 	@Qualifier("ep-messaging-camel-itest")
@@ -82,13 +82,9 @@ public class ActiveMqVirtualTopicConsumptionITest {
 		context.addRoutes(new MessageConsumer(consumerEndpointOne));
 		context.addRoutes(new MessageConsumer(consumerEndpointTwo));
 
-		Thread.sleep(SECONDS_TO_WAIT_FOR_MESSAGE_CONSUMPTION);
-
 		context.createProducerTemplate().sendBody(publishingEndpoint, "Message");
 
-		Thread.sleep(SECONDS_TO_WAIT_FOR_MESSAGE_CONSUMPTION);
-
-		monitor.assertIsSatisfied();
+		monitor.assertIsSatisfied(SECONDS_TO_WAIT_FOR_MESSAGE_CONSUMPTION);
 	}
 
 	/**

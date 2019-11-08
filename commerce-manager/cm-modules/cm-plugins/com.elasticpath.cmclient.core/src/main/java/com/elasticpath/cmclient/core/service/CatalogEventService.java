@@ -13,7 +13,7 @@ import com.elasticpath.cmclient.core.event.ItemChangeEvent;
 import com.elasticpath.cmclient.core.event.SearchResultEvent;
 import com.elasticpath.cmclient.core.helpers.AttributeListener;
 import com.elasticpath.cmclient.core.helpers.BrandListener;
-import com.elasticpath.cmclient.core.helpers.CartItemModifierGroupListener;
+import com.elasticpath.cmclient.core.helpers.ModifierGroupListener;
 import com.elasticpath.cmclient.core.helpers.CatalogListener;
 import com.elasticpath.cmclient.core.helpers.CategoryListener;
 import com.elasticpath.cmclient.core.helpers.CategoryTypeListener;
@@ -31,7 +31,7 @@ import com.elasticpath.domain.catalog.Product;
 import com.elasticpath.domain.catalog.ProductSku;
 import com.elasticpath.domain.catalog.ProductType;
 import com.elasticpath.domain.store.Warehouse;
-import com.elasticpath.domain.cartmodifier.CartItemModifierGroup;
+import com.elasticpath.domain.modifier.ModifierGroup;
 
 /**
  * The <code>CatalogRcpService</code> provides event notification
@@ -59,7 +59,7 @@ public final class CatalogEventService {
 	
 	private final List<BrandListener> brandListeners = new ArrayList<BrandListener>();
 
-	private final List<CartItemModifierGroupListener> groupListeners = new ArrayList<CartItemModifierGroupListener>();
+	private final List<ModifierGroupListener> groupListeners = new ArrayList<ModifierGroupListener>();
 	
 	private final List<AttributeListener> attributeListeners = new ArrayList<AttributeListener>();
 	
@@ -233,7 +233,7 @@ public final class CatalogEventService {
 	 *
 	 * @param listener the group listener
 	 */
-	public void addGroupListener(final CartItemModifierGroupListener listener) {
+	public void addGroupListener(final ModifierGroupListener listener) {
 		groupListeners.add(listener);
 	}
 
@@ -243,7 +243,7 @@ public final class CatalogEventService {
 	 *
 	 * @param listener the group listener
 	 */
-	public void removeGroupListener(final CartItemModifierGroupListener listener) {
+	public void removeGroupListener(final ModifierGroupListener listener) {
 		groupListeners.remove(listener);
 	}
 	
@@ -393,8 +393,8 @@ public final class CatalogEventService {
 	 *
 	 * @param event the event
 	 */
-	public void notifyGroupChanged(final ItemChangeEvent<CartItemModifierGroup> event) {
-		for (CartItemModifierGroupListener listener : groupListeners) {
+	public void notifyGroupChanged(final ItemChangeEvent<ModifierGroup> event) {
+		for (ModifierGroupListener listener : groupListeners) {
 			listener.groupChange(event);
 		}
 	}

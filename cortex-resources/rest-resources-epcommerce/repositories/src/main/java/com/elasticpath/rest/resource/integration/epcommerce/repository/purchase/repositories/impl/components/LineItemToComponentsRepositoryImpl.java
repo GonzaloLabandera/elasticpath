@@ -8,6 +8,8 @@ import java.util.List;
 import io.reactivex.Observable;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.elasticpath.domain.catalog.ProductBundle;
 import com.elasticpath.domain.catalog.ProductSku;
@@ -27,6 +29,7 @@ import com.elasticpath.rest.resource.integration.epcommerce.repository.order.Ord
 public class LineItemToComponentsRepositoryImpl<LI extends PurchaseLineItemIdentifier, LCI extends PurchaseLineItemComponentsIdentifier>
 		implements LinksRepository<PurchaseLineItemIdentifier, PurchaseLineItemComponentsIdentifier> {
 
+	private static final Logger LOG = LoggerFactory.getLogger(LineItemToComponentsRepositoryImpl.class);
 	private OrderRepository orderRepository;
 
 	@Override
@@ -38,6 +41,7 @@ public class LineItemToComponentsRepositoryImpl<LI extends PurchaseLineItemIdent
 		return orderRepository.findProductSku(scope, purchaseId, guidPathFromRootItem)
 				.map(ProductSku::getProduct)
 				.map(product -> product instanceof ProductBundle)
+				.doOnError(throwable -> LOG.info("Could not find product.", throwable))
 				.flatMapObservable(isBundle -> isBundle ? buildPurchaseLineItemComponentsIdentifier(identifier) : Observable.empty())
 				.onErrorResumeNext(Observable.empty());
 	}

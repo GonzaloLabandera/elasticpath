@@ -1,0 +1,211 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright (c) Elastic Path Software Inc., 2018
+  -->
+<beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	   xmlns:context="http://www.springframework.org/schema/context"
+	   xmlns:jpa="http://www.springframework.org/schema/data/jpa" xmlns:util="http://www.springframework.org/schema/util"
+	   xmlns="http://www.springframework.org/schema/beans"
+	   xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+	   http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.0.xsd
+	   http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-4.0.xsd
+	   http://www.springframework.org/schema/data/jpa http://www.springframework.org/schema/data/jpa/spring-jpa.xsd">
+
+	<context:annotation-config/>
+
+	<jpa:repositories base-package="com.elasticpath.catalog.plugin.repository"/>
+
+	<bean id="catalogProjectionPlugin" class="com.elasticpath.catalog.plugin.CatalogProjectionSpringDataPlugin">
+		<constructor-arg name="writerCapabilities">
+			<map>
+				<entry key="com.elasticpath.catalog.spi.capabilities.AttributeWriterRepository" value-ref="attributeProjectionRepository"/>
+				<entry key="com.elasticpath.catalog.spi.capabilities.BrandWriterRepository" value-ref="brandProjectionRepository"/>
+				<entry key="com.elasticpath.catalog.spi.capabilities.FieldMetadataWriterRepository"
+					   value-ref="fieldMetadataProjectionRepository"/>
+				<entry key="com.elasticpath.catalog.spi.capabilities.OfferWriterRepository" value-ref="offerProjectionRepository"/>
+				<entry key="com.elasticpath.catalog.spi.capabilities.OptionWriterRepository" value-ref="optionProjectionRepository"/>
+				<entry key="com.elasticpath.catalog.spi.capabilities.CategoryWriterRepository" value-ref="categoryProjectionRepository"/>
+			</map>
+		</constructor-arg>
+		<constructor-arg name="readerCapabilities">
+			<map>
+				<entry key="com.elasticpath.catalog.entity.option.OptionReaderCapability" value-ref="optionReader"/>
+				<entry key="com.elasticpath.catalog.entity.offer.OfferReaderCapability" value-ref="offerReader"/>
+				<entry key="com.elasticpath.catalog.entity.brand.BrandReaderCapability" value-ref="brandReader"/>
+				<entry key="com.elasticpath.catalog.entity.attribute.AttributeReaderCapability" value-ref="attributeReader"/>
+				<entry key="com.elasticpath.catalog.entity.fieldmetadata.FieldMetaDataReaderCapability" value-ref="fieldMetadataReader"/>
+				<entry key="com.elasticpath.catalog.entity.category.CategoryReaderCapability" value-ref="categoryReader"/>
+			</map>
+		</constructor-arg>
+	</bean>
+
+	<bean id="attributeProjectionRepository" class="com.elasticpath.catalog.plugin.capability.writer.AttributeCatalogCapabilityRepositoryImpl">
+		<constructor-arg name="catalogService" ref="catalogDataService"/>
+	</bean>
+
+	<bean id="brandProjectionRepository" class="com.elasticpath.catalog.plugin.capability.writer.BrandCatalogCapabilityRepositoryImpl">
+		<constructor-arg name="catalogService" ref="catalogDataService"/>
+	</bean>
+
+	<bean id="fieldMetadataProjectionRepository" class="com.elasticpath.catalog.plugin.capability.writer.FieldMetadataCatalogCapabilityRepositoryImpl">
+		<constructor-arg name="catalogService" ref="catalogDataService"/>
+	</bean>
+
+	<bean id="optionProjectionRepository" class="com.elasticpath.catalog.plugin.capability.writer.OptionCatalogCapabilityRepositoryImpl">
+		<constructor-arg name="catalogService" ref="catalogDataService"/>
+	</bean>
+
+	<bean id="categoryProjectionRepository" class="com.elasticpath.catalog.plugin.capability.writer.CategoryCatalogCapabilityRepositoryImpl">
+		<constructor-arg name="catalogService" ref="catalogDataService"/>
+	</bean>
+
+	<bean id="optionReader" class="com.elasticpath.catalog.plugin.capability.reader.OptionReaderCapabilityImpl">
+		<constructor-arg name="catalogService" ref="catalogDataService"/>
+	</bean>
+
+	<bean id="offerReader" class="com.elasticpath.catalog.plugin.capability.reader.OfferReaderCapabilityImpl">
+		<constructor-arg name="catalogService" ref="catalogDataService"/>
+	</bean>
+
+	<bean id="brandReader" class="com.elasticpath.catalog.plugin.capability.reader.BrandReaderCapabilityImpl">
+		<constructor-arg name="catalogService" ref="catalogDataService"/>
+	</bean>
+
+	<bean id="attributeReader" class="com.elasticpath.catalog.plugin.capability.reader.AttributeReaderCapabilityImpl">
+		<constructor-arg name="catalogService" ref="catalogDataService"/>
+	</bean>
+
+	<bean id="fieldMetadataReader" class="com.elasticpath.catalog.plugin.capability.reader.FieldMetaDataReaderCapabilityImpl">
+		<constructor-arg name="catalogService" ref="catalogDataService"/>
+	</bean>
+
+	<bean id="categoryReader" class="com.elasticpath.catalog.plugin.capability.reader.CategoryReaderCapabilityImpl">
+		<constructor-arg name="catalogService" ref="catalogDataService"/>
+	</bean>
+
+	<bean id="offerProjectionRepository" class="com.elasticpath.catalog.plugin.capability.writer.OfferCatalogCapabilityRepositoryImpl">
+		<constructor-arg name="catalogService" ref="catalogDataService"/>
+	</bean>
+
+	<bean id="catalogDataService" class="com.elasticpath.catalog.plugin.service.CatalogServiceImpl">
+		<constructor-arg name="repository" ref="catalogrepository"/>
+		<constructor-arg name="timeService" ref="timeService"/>
+		<constructor-arg name="projectionToEntityConverter" ref="projectionToEntityConverter"/>
+		<constructor-arg name="eventMessageFactory" ref="eventMessageFactory"/>
+		<constructor-arg name="eventMessagePublisher" ref="catalogEventMessagePublisher"/>
+		<constructor-arg name="eventTypeFactory" ref="catalogEventTypeFactory"/>
+		<constructor-arg name="defaultModifiedSinceOffset" value="30"/>
+	</bean>
+
+	<bean id="catalogrepository" class="com.elasticpath.catalog.plugin.repository.impl.CatalogRepositoryImpl">
+		<constructor-arg name="catalogProjectionRepository" ref="catalogProjectionRepository"/>
+		<constructor-arg name="catalogProjectionHistoryRepository" ref="catalogProjectionHistoryRepository"/>
+	</bean>
+
+	<bean id="catalogEventTypeFactory" class="com.elasticpath.catalog.plugin.service.CatalogEventTypeFactoryImpl">
+		<constructor-arg ref="identityTypeByCatalogEventTypesMap"/>
+	</bean>
+
+	<util:map id="identityTypeByCatalogEventTypesMap" key-type="java.lang.String" value-type="java.util.List">
+		<entry>
+			<key>
+				<util:constant static-field="com.elasticpath.catalog.entity.constants.ProjectionIdentityTypeNames.OPTION_IDENTITY_TYPE"/>
+			</key>
+			<value>OPTIONS_UPDATED</value>
+		</entry>
+		<entry>
+			<key>
+				<util:constant static-field="com.elasticpath.catalog.entity.constants.ProjectionIdentityTypeNames.BRAND_IDENTITY_TYPE"/>
+			</key>
+			<value>BRANDS_UPDATED</value>
+		</entry>
+		<entry>
+			<key>
+				<util:constant static-field="com.elasticpath.catalog.entity.constants.ProjectionIdentityTypeNames.FIELD_METADATA_IDENTITY_TYPE"/>
+			</key>
+			<list value-type="java.lang.String">
+				<value>FIELD_METADATA_UPDATED</value>
+			</list>
+		</entry>
+		<entry>
+			<key>
+				<util:constant static-field="com.elasticpath.catalog.entity.constants.ProjectionIdentityTypeNames.ATTRIBUTE_IDENTITY_TYPE"/>
+			</key>
+			<value>ATTRIBUTES_UPDATED</value>
+		</entry>
+		<entry>
+			<key>
+				<util:constant static-field="com.elasticpath.catalog.entity.constants.ProjectionIdentityTypeNames.OFFER_IDENTITY_TYPE"/>
+			</key>
+			<value>OFFERS_UPDATED</value>
+		</entry>
+		<entry>
+			<key>
+				<util:constant static-field="com.elasticpath.catalog.entity.constants.ProjectionIdentityTypeNames.CATEGORY_IDENTITY_TYPE"/>
+			</key>
+			<value>CATEGORIES_UPDATED</value>
+		</entry>
+	</util:map>
+
+	<bean id="projectionToEntityConverter" class="com.elasticpath.catalog.plugin.converter.impl.ProjectionToEntityConverterImpl">
+		<constructor-arg name="validators" ref="projectionValidators"/>
+		<constructor-arg name="converters" ref="projectionConverters"/>
+		<constructor-arg name="objectMapper" ref="objectMapper"/>
+		<constructor-arg name="schemaVersion" value="${ep.catalog.schema.version:1.0}"/>
+	</bean>
+
+	<bean id="projectionValidators" class="org.springframework.beans.factory.config.MapFactoryBean">
+		<property name="sourceMap">
+			<map>
+				<entry key="attribute" value-ref="attributeContentValidator"/>
+				<entry key="brand" value-ref="brandContentValidator"/>
+				<entry key="fieldMetadata" value-ref="fieldMetadataContentValidator"/>
+				<entry key="option" value-ref="optionContentValidator"/>
+				<entry key="category" value-ref="categoryContentValidator"/>
+			</map>
+		</property>
+	</bean>
+
+	<bean id="projectionConverters" class="org.springframework.beans.factory.config.MapFactoryBean">
+		<property name="sourceMap">
+			<map>
+				<entry key="option" value-ref="optionConverter"/>
+				<entry key="attribute" value-ref="attributeConverter"/>
+				<entry key="offer" value-ref="offerConverter"/>
+				<entry key="fieldMetadata" value-ref="fieldMetadataConverter"/>
+				<entry key="brand" value-ref="brandConverter"/>
+				<entry key="category" value-ref="categoryConverter"/>
+			</map>
+		</property>
+	</bean>
+
+	<bean id="optionConverter" class="com.elasticpath.catalog.plugin.converter.impl.EntityToOptionConverter">
+		<constructor-arg name="objectMapper" ref="objectMapper"/>
+	</bean>
+
+	<bean id="offerConverter" class="com.elasticpath.catalog.plugin.converter.impl.EntityToOfferConverter">
+		<constructor-arg name="objectMapper" ref="objectMapper"/>
+	</bean>
+
+	<bean id="brandConverter" class="com.elasticpath.catalog.plugin.converter.impl.EntityToBrandConverter">
+		<constructor-arg name="objectMapper" ref="objectMapper"/>
+	</bean>
+
+	<bean id="attributeConverter" class="com.elasticpath.catalog.plugin.converter.impl.EntityToAttributeConverter">
+		<constructor-arg name="objectMapper" ref="objectMapper"/>
+	</bean>
+
+	<bean id="fieldMetadataConverter" class="com.elasticpath.catalog.plugin.converter.impl.EntityToFieldMetadataConverter">
+		<constructor-arg name="objectMapper" ref="objectMapper"/>
+	</bean>
+
+	<bean id="categoryConverter" class="com.elasticpath.catalog.plugin.converter.impl.EntityToCategoryConverter">
+		<constructor-arg name="objectMapper" ref="objectMapper"/>
+	</bean>
+
+	<bean id="objectMapper" class="org.springframework.http.converter.json.Jackson2ObjectMapperFactoryBean">
+		<property name="defaultViewInclusion" value="false"/>
+		<property name="failOnEmptyBeans" value="false"/>
+	</bean>
+
+</beans>

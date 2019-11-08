@@ -1,0 +1,18 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "description": "Schema for a field metadata definition",
+  "properties": {
+    "results": {
+      "type": "array",
+      "items": [
+        {
+          "$ref": "resource:/schema/fieldMetadata.schema.json"
+        }
+      ],
+      "additionalItems": { "$ref": "resource:/schema/fieldMetadata.schema.json" }
+    }
+  },
+  "required": [
+    "results"
+  ]
+}

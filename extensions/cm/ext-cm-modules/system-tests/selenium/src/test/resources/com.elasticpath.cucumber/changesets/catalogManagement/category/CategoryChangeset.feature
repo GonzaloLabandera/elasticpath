@@ -36,7 +36,7 @@ Feature: Category with change set
     And I select newly created change set
     When I create a new catalog with following details
       | catalogName   | language |
-      | ATest Catalog | English  |
+      | ZTest Catalog | English  |
     And I open the newly created catalog editor
     And I select CategoryTypes tab in the Catalog Editor
     When I create a new category type TestCat Type with following attributes

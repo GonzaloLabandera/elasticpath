@@ -14,6 +14,7 @@ import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
+import org.apache.openjpa.persistence.DataCache;
 
 import com.elasticpath.domain.customer.PaymentToken;
 
@@ -22,6 +23,7 @@ import com.elasticpath.domain.customer.PaymentToken;
  */
 @Entity
 @Table(name = PaymentTokenImpl.TABLE_NAME)
+@DataCache(enabled = false)
 public final class PaymentTokenImpl extends AbstractPaymentMethodImpl<PaymentTokenImpl> implements PaymentToken {
 	private static final long serialVersionUID = 4781442984950882768L;
 

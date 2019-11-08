@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>com.elasticpath.extensions</groupId>
+		<artifactId>ext-commerce-engine-parent</artifactId>
+		<version>0.0.0-SNAPSHOT</version>
+	</parent>
+
+	<artifactId>http-mock-server-parent</artifactId>
+	<name>Extension HTTP Mock Server Parent</name>
+	<packaging>pom</packaging>
+
+	<modules>
+		<module>ext-mock-webapp</module>
+		<module>ext-mock</module>
+		<module>system-tests</module>
+		<module>ext-mock-examples</module>
+		<module>ext-mock-services</module>
+	</modules>
+
+	<properties>
+		<ep.mock.host>localhost</ep.mock.host>
+		<ep.mock.url>http://${ep.mock.host}:${ep.mock.tomcat.port.http}${ep.mock.context}</ep.mock.url>
+
+		<cargo.plugin.version>1.6.8</cargo.plugin.version>
+	</properties>
+
+	<dependencies>
+		<dependency>
+			<groupId>com.github.tomakehurst</groupId>
+			<artifactId>wiremock</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.assertj</groupId>
+			<artifactId>assertj-core</artifactId>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>jcl-over-slf4j</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-log4j12</artifactId>
+		</dependency>
+	</dependencies>
+
+</project>

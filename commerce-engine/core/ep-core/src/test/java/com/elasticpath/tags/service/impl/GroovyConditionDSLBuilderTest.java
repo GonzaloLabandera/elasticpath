@@ -270,7 +270,7 @@ public class GroovyConditionDSLBuilderTest  {
 		String conditionString = " { AND { CART_SUBTOTAL.greaterThan (1000.0G) }  } ";
 		
 		final LogicalOperator root = new LogicalOperator(LogicalOperatorType.AND);
-		Condition condition = new Condition(cartSubtotalTagDefinition, "greaterThan", new BigDecimal("1000"));
+		Condition condition = new Condition(cartSubtotalTagDefinition, "CART_SUBTOTAL", "greaterThan", new BigDecimal("1000"));
 		root.addCondition(condition);
 		String result = cBuilder.getConditionalDSLString(root);
 		assertEquals(conditionString, result);

@@ -17,12 +17,10 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
+import com.google.common.testing.EqualsTester;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
-import com.google.common.testing.EqualsTester;
-
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
@@ -373,7 +371,7 @@ public class AbstractShoppingItemImplTest {
 			}
 
 			@Override
-			protected <T> T getBean(final String beanName) {
+			public <T> T getBean(final String beanName) {
 				return beanFactory.getBean(beanName);
 			}
 		};
@@ -468,7 +466,7 @@ public class AbstractShoppingItemImplTest {
 		final PaymentScheduleHelperImpl paymentScheduleHelper = new PaymentScheduleHelperImpl();
 		paymentScheduleHelper.setBeanFactory(beanFactory);
 
-		when(beanFactory.getBean(ContextIdNames.PAYMENT_SCHEDULE)).thenReturn(new PaymentScheduleImpl());
+		when(beanFactory.getPrototypeBean(ContextIdNames.PAYMENT_SCHEDULE, PaymentSchedule.class)).thenReturn(new PaymentScheduleImpl());
 
 		return paymentScheduleHelper;
 	}
@@ -775,7 +773,7 @@ public class AbstractShoppingItemImplTest {
 			}
 
 			@Override
-			protected <T> T getBean(final String beanName) {
+			public <T> T getBean(final String beanName) {
 				return beanFactory.getBean(beanName);
 			}
 		};

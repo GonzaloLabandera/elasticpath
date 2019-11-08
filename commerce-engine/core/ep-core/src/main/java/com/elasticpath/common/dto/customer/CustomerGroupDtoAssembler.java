@@ -13,7 +13,6 @@ import com.elasticpath.commons.beanframework.BeanFactory;
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.customer.CustomerGroup;
 import com.elasticpath.domain.customer.CustomerRole;
-import com.elasticpath.domain.customer.impl.CustomerRoleImpl;
 
 /**
  * Assembles CustomerGroup domains and DTOs.
@@ -24,7 +23,7 @@ public class CustomerGroupDtoAssembler extends AbstractDtoAssembler<CustomerGrou
 
 	@Override
 	public CustomerGroup getDomainInstance() {
-		return getBeanFactory().getBean(ContextIdNames.CUSTOMER_GROUP);
+		return getBeanFactory().getPrototypeBean(ContextIdNames.CUSTOMER_GROUP, CustomerGroup.class);
 	}
 
 	@Override
@@ -84,8 +83,8 @@ public class CustomerGroupDtoAssembler extends AbstractDtoAssembler<CustomerGrou
 	 * 
 	 * @return a new CustomerRole instance
 	 */
-	protected CustomerRoleImpl createCustomerRoleDomain() {
-		return getBeanFactory().getBean(ContextIdNames.CUSTOMER_ROLE);
+	protected CustomerRole createCustomerRoleDomain() {
+		return getBeanFactory().getPrototypeBean(ContextIdNames.CUSTOMER_ROLE, CustomerRole.class);
 	}
 
 	public void setBeanFactory(final BeanFactory beanFactory) {

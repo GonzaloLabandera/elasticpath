@@ -44,7 +44,7 @@ import com.elasticpath.cmclient.catalog.CatalogMessages;
 import com.elasticpath.cmclient.catalog.CatalogPermissions;
 import com.elasticpath.cmclient.catalog.editors.catalog.tablelabelprovider.CatalogSkuOptionChangeSetTableLabelProviderDecorator;
 import com.elasticpath.cmclient.catalog.editors.catalog.tablelabelprovider.CatalogSkuOptionTableLabelProviderDecorator;
-import com.elasticpath.cmclient.catalog.editors.catalog.tablelabelprovider.TableLabelProviderAdapter;
+import com.elasticpath.cmclient.core.tablelableprovider.TableLabelProviderAdapter;
 import com.elasticpath.cmclient.catalog.editors.model.CatalogModel;
 import com.elasticpath.cmclient.core.EpUiException;
 import com.elasticpath.cmclient.core.ServiceLocator;

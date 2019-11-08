@@ -9,9 +9,9 @@ import java.util.List;
 import com.elasticpath.cmclient.core.ui.framework.IEpLayoutData;
 import com.elasticpath.cmclient.policy.common.PolicyActionContainer;
 import com.elasticpath.cmclient.policy.ui.IPolicyTargetLayoutComposite;
-import com.elasticpath.domain.cartmodifier.CartItemModifierGroup;
 import com.elasticpath.domain.catalog.Catalog;
-import com.elasticpath.service.cartitemmodifier.CartItemModifierService;
+import com.elasticpath.domain.modifier.ModifierGroup;
+import com.elasticpath.service.modifier.ModifierService;
 
 /**
  * The class to display the dual assignment list for product cart item modifier group
@@ -30,7 +30,7 @@ public class ProductTypeCartItemModifierGroupDualList extends AbstractCartItemMo
 	 */
 	public ProductTypeCartItemModifierGroupDualList(final IPolicyTargetLayoutComposite parentComposite,
 			final PolicyActionContainer container,
-			final List<CartItemModifierGroup> model,
+			final List<ModifierGroup> model,
 			final String availableTitle,
 			final String selectedTitle,
 			final IEpLayoutData data,
@@ -40,7 +40,7 @@ public class ProductTypeCartItemModifierGroupDualList extends AbstractCartItemMo
 	}
 
 	@Override
-	public List<CartItemModifierGroup> getAvailableCartItemModifierGroupsList(final CartItemModifierService cartItemModifierService) {
-		return cartItemModifierService.findCartItemModifierGroupByCatalogUid(this.getCatalog().getUidPk());
+	public List<ModifierGroup> getAvailableCartItemModifierGroupsList(final ModifierService modifierService) {
+		return modifierService.getFilteredModifierGroups(Catalog.class.getSimpleName(), this.getCatalog().getGuid());
 	}
 }

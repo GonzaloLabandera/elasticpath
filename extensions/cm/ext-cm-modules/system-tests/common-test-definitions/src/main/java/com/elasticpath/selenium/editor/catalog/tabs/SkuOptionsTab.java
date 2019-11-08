@@ -3,6 +3,7 @@ package com.elasticpath.selenium.editor.catalog.tabs;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.stream.Collectors;
+
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
@@ -74,9 +75,22 @@ public class SkuOptionsTab extends AbstractPageObject {
 
 	/**
 	 * Clicks edit SkuOption button.
+	 *
+	 * @return object which represents editing sku option dialog.
 	 */
-	public void clickEditSkuOptionButton() {
+	public AddEditSkuOptionDialog clickEditSkuOptionButton() {
 		clickButton(SKU_OPTION_EDIT_BUTTON, "Edit Selection");
+		return new AddEditSkuOptionDialog(getDriver());
+	}
+
+	/**
+	 * Clicks edit Selection button for editing sku option value.
+	 *
+	 * @return object which represents editing sku option value dialog.
+	 */
+	public AddEditSkuOptionValueDialog clickEditSelectedForValueButton() {
+		clickButton(SKU_OPTION_EDIT_BUTTON, "Edit Selection");
+		return new AddEditSkuOptionValueDialog(getDriver());
 	}
 
 	/**

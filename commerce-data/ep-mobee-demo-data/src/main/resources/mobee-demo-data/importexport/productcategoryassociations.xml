@@ -2661,4 +2661,69 @@
         </category>
     </catalog>
 </product>
+<product code="singleSkuWithFutureEnableDate">
+    <catalog code="Toastie">
+        <category code="AcceptanceTestItems">
+            <default>true</default>
+            <featuredorder>0</featuredorder>
+        </category>
+    </catalog>
+    <catalog code="Mobile">
+        <category code="AcceptanceTestItems">
+            <default>true</default>
+            <featuredorder>0</featuredorder>
+        </category>
+    </catalog>
+    <catalog code="MobileCatalog">
+        <category code="AcceptanceTestItems">
+            <default>true</default>
+            <featuredorder>0</featuredorder>
+        </category>
+    </catalog>
+</product>
+    <product code="prodTestProd2">
+        <catalog code="Syndication2StoresCatalog">
+            <category code="productTestTop1">
+                <default>true</default>
+                <featuredorder>0</featuredorder>
+            </category>
+        </catalog>
+    </product>
+
+    <product code="prodTestProd3">
+        <catalog code="Syndication2StoresCatalog">
+            <category code="productTestTop1">
+                <default>true</default>
+                <featuredorder>0</featuredorder>
+            </category>
+        </catalog>
+    </product>
+
+    <product code="prodTestProd4">
+        <catalog code="Syndication2StoresCatalog">
+            <category code="productTestTop1">
+                <default>true</default>
+                <featuredorder>0</featuredorder>
+            </category>
+        </catalog>
+    </product>
+
+    <product code="prodTestProd5">
+        <catalog code="Syndication2StoresCatalog">
+            <category code="productTestTop1">
+                <default>true</default>
+                <featuredorder>0</featuredorder>
+            </category>
+        </catalog>
+    </product>
+
+    <product code="prodTestProd6">
+        <catalog code="Syndication2StoresCatalog">
+            <category code="productTestTop1">
+                <default>true</default>
+                <featuredorder>0</featuredorder>
+            </category>
+        </catalog>
+    </product>
+
 </productcategoryassociations>

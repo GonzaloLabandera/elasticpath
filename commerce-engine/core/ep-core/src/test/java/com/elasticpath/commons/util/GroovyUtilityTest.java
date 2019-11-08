@@ -61,13 +61,13 @@ public class GroovyUtilityTest {
 
 	@Test
 	public void shouldRemoveCompiledScriptClassWhenScriptIsNotNull() {
-		final long sleepTimeMillis = 1010L;
+		final long sleepTimeMillis = 5000L;
 
 		groovyScriptTimeoutCache.put(GROOVY_SCRIPT, mockedCompiler);
 
 		assertThat(groovyScriptTimeoutCache.get(GROOVY_SCRIPT)).isEqualTo(mockedCompiler);
 
-		await().atLeast(sleepTimeMillis, TimeUnit.MILLISECONDS).until(() ->
+		await().atMost(sleepTimeMillis, TimeUnit.MILLISECONDS).until(() ->
 			assertThat(groovyScriptTimeoutCache.get(GROOVY_SCRIPT)).isNull());
 	}
 }

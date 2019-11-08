@@ -13,8 +13,9 @@ import com.elasticpath.commons.beanframework.BeanFactory;
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.contentspace.ParameterValue;
 import com.elasticpath.domain.contentspace.impl.ParameterValueImpl;
+import com.elasticpath.persistence.api.LoadTuner;
 import com.elasticpath.persistence.api.PersistenceEngine;
-import com.elasticpath.service.misc.FetchPlanHelper;
+import com.elasticpath.persistence.openjpa.util.FetchPlanHelper;
 import com.elasticpath.service.query.CriteriaBuilder;
 import com.elasticpath.service.query.QueryCriteria;
 import com.elasticpath.service.query.QueryService;
@@ -55,7 +56,7 @@ public class ParameterValueQueryServiceTest {
 			{
 				allowing(beanFactory).getBeanImplClass(ContextIdNames.DYNAMIC_CONTENT_WRAPPER_PARAMETER_VALUE);
 				will(returnValue(ParameterValueImpl.class));
-				allowing(fetchPlanHelper).clearFetchPlan();
+				allowing(fetchPlanHelper).setLoadTuners((LoadTuner[]) null);
 			}
 		});
 	}

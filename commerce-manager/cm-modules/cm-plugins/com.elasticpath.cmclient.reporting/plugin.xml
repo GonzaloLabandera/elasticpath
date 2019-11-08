@@ -12,7 +12,7 @@
       <view
             category="com.elasticpath.cmclient.reporting.category.main"
             class="com.elasticpath.cmclient.reporting.views.ReportingNavigationView"
-            icon="icons/report_default_22.png"
+            icon="icons/empty_1x1.png"
             id="com.elasticpath.cmclient.reporting.views.ReportingNavigationView"
             name="%reportingView.name">
       </view>
@@ -22,7 +22,7 @@
       <perspective
             class="com.elasticpath.cmclient.reporting.perspectives.ReportingPerspectiveFactory"
             id="com.elasticpath.cmclient.reporting.perspectives.ReportingPerspective"
-            icon="icons/report_default_22.png"
+            icon="icons/empty_1x1.png"
             name="%reportingPerspective.name">
       </perspective>
    </extension>
@@ -31,7 +31,7 @@
       <view
             allowMultiple="false"
             class="com.elasticpath.cmclient.reporting.views.ReportingView"
-            icon="icons/report_default_22.png"
+            icon="icons/empty_1x1.png"
             id="com.elasticpath.cmclient.reporting.views.ReportingView"
             name="report">
       </view>

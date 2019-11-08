@@ -7,11 +7,11 @@ import static com.elasticpath.rest.resource.integration.epcommerce.repository.sh
 
 import java.util.Map;
 
+import io.reactivex.Maybe;
 import io.reactivex.Single;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
-import com.elasticpath.rest.ResourceOperationFailure;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder.CartOrderRepository;
 import com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder.ShoppingCartRepository;
 
@@ -30,10 +30,11 @@ public class ShipmentDetailsServiceImpl implements ShipmentDetailsService {
 
 
 	@Override
-	public Single<Map<String, String>> getShipmentDetailsIdForOrder(final String scope, final String orderId) {
+	public Maybe<Map<String, String>> getShipmentDetailsIdForOrder(final String scope, final String orderId) {
 		return validateOrderDeliveryIsShippable(scope, orderId)
-				.flatMap(isShippable -> isShippable ? Single.just(createShipmentDetailsId(orderId, ShipmentDetailsConstants.SHIPMENT_TYPE))
-						: Single.error(ResourceOperationFailure.notFound(COULD_NOT_FIND_SHIPMENT)));
+				.toMaybe()
+				.flatMap(isShippable -> isShippable ? Maybe.just(createShipmentDetailsId(orderId, ShipmentDetailsConstants.SHIPMENT_TYPE))
+						: Maybe.empty());
 	}
 
 	private Single<Boolean> validateOrderDeliveryIsShippable(final String scope, final String orderId) {

@@ -1138,4 +1138,16 @@ public class OrderDefinition {
 		}
 	}
 
+	/**
+	 * Verifies table containing information of B2B shoppers who placed the order.
+	 *
+	 * @param orderDataMap table containing order data
+	 */
+	@Then("^I should see the following in the order data table$")
+	public void verifyOrderData(final Map<String, String> orderDataMap) {
+		for (Map.Entry<String, String> entry : orderDataMap.entrySet()) {
+			orderEditor.verifyOrderDataTableRow(entry.getKey(), entry.getValue());
+		}
+	}
+
 }

@@ -5,7 +5,7 @@
  <extension-point id="bindings" name="Bindings" schema="schema/bindings.exsd"/>
  <extension-point id="TestExtension" />
  <extension-point id="ModelExtender" name="ModelExtender" schema="schema/modelExtender.exsd"/>
- 
+
    <extension
            point="org.eclipse.rap.ui.entrypoint">
       <entrypoint
@@ -184,25 +184,21 @@
             id="com.elasticpath.cmclient.core.editor.refresh"
             name="%reloadEditor.commandName">
       </command>
-      
+
    </extension>
    <extension
          point="org.eclipse.ui.commandImages">
       <image
-            commandId="com.elasticpath.cmclient.core.commands.ChangePassword"
-            icon="icons/password-change_default_22.png">
+            commandId="com.elasticpath.cmclient.core.commands.ChangePassword">
       </image>
       <image
-            commandId="com.elasticpath.cmclient.core.commands.ChangePagination"
-            icon="icons/pagination-change_default_22.png">
+            commandId="com.elasticpath.cmclient.core.commands.ChangePagination">
       </image>
        <image
-               commandId="com.elasticpath.cmclient.core.commands.ChangeTimezone"
-               icon="icons/timezone-change_default_22.png">
+               commandId="com.elasticpath.cmclient.core.commands.ChangeTimezone">
        </image>
        <image
-               commandId="com.elasticpath.cmclient.core.commands.Docs"
-               icon="icons/help_default_22.png">
+               commandId="com.elasticpath.cmclient.core.commands.Docs">
        </image>
    </extension>
    <extension

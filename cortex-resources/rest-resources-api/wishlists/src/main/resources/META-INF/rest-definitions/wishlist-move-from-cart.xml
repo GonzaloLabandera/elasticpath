@@ -16,7 +16,7 @@
 
 		<entity>
 			<name>move-to-wishlist-form</name>
-			<description>Form for adding an item to a wishlist</description>
+			<description>Form for moving an item to a wishlist</description>
 		</entity>
 
 		<relationship>

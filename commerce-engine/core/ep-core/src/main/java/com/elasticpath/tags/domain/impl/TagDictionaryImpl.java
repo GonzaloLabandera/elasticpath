@@ -5,7 +5,9 @@ package com.elasticpath.tags.domain.impl;
 
 import java.util.HashSet;
 import java.util.Set;
+
 import javax.persistence.Basic;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -100,7 +102,8 @@ public class TagDictionaryImpl extends AbstractEntityImpl implements TagDictiona
 	 * @return a set of {@link TagDefinition}
 	 */
 	@Override
-	@ManyToMany(targetEntity = TagDefinitionImpl.class, fetch = FetchType.EAGER)
+	@ManyToMany(targetEntity = TagDefinitionImpl.class, fetch = FetchType.EAGER, cascade = { CascadeType.MERGE, CascadeType.PERSIST,
+			CascadeType.REFRESH })
 	@JoinTable(
 			name = "TTAGDICTIONARYTAGDEFINITION",
 			joinColumns = { @JoinColumn(name = "TAGDICTIONARY_GUID", referencedColumnName = "GUID") },

@@ -1,0 +1,11 @@
+{
+	"request" : {
+		"urlPathPattern" : "/staticByPath/.*",
+		"method" : "GET"
+	},
+	"response" : {
+		"status" : 200,
+		"transformers": ["response-template"],
+		"bodyFileName" : "staticByPath/response_body_{{request.requestLine.pathSegments.[1]}}.json"
+	}
+}

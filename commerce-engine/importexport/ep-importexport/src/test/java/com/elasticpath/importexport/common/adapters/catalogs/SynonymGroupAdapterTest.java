@@ -61,7 +61,7 @@ public class SynonymGroupAdapterTest {
 
 		context.checking(new Expectations() {
 			{
-				allowing(mockBeanFactory).getBean(ContextIdNames.SYNONYM_GROUP);
+				allowing(mockBeanFactory).getPrototypeBean(ContextIdNames.SYNONYM_GROUP, SynonymGroup.class);
 				will(returnValue(new SynonymGroupImpl()));
 			}
 		});
@@ -117,7 +117,7 @@ public class SynonymGroupAdapterTest {
 				oneOf(mockDomain).setConceptTerm(CONCEPT_TERM);
 				oneOf(mockDomain).setLocale(new Locale(LOCALE_EN));
 
-				oneOf(mockBeanFactory).getBean(ContextIdNames.SYNONYM);
+				oneOf(mockBeanFactory).getPrototypeBean(ContextIdNames.SYNONYM, Synonym.class);
 				will(returnValue(mockSynonym));
 				oneOf(mockSynonym).setSynonym(SYNONYM1);
 

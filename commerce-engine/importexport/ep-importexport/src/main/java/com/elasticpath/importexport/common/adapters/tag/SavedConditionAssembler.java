@@ -24,7 +24,7 @@ public class SavedConditionAssembler extends AbstractDtoAssembler<ConditionalExp
 
 	@Override
 	public ConditionalExpression getDomainInstance() {
-		return beanFactory.getBean(ContextIdNames.CONDITIONAL_EXPRESSION);
+		return beanFactory.getPrototypeBean(ContextIdNames.CONDITIONAL_EXPRESSION, ConditionalExpression.class);
 	}
 
 	@Override

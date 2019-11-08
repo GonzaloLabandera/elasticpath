@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://maven.apache.org/POM/4.0.0"
+		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
 	<parent>
@@ -33,6 +34,26 @@
 		<dependency>
 			<groupId>com.elasticpath</groupId>
 			<artifactId>ep-email-sender</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.elasticpath</groupId>
+			<artifactId>ep-domain-message-handler</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.elasticpath</groupId>
+			<artifactId>ep-domain-bulk-handler</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.elasticpath</groupId>
+			<artifactId>catalog-update-event-processor-connectivity</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.elasticpath</groupId>
+			<artifactId>ep-catalog-connectivity</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.elasticpath</groupId>
+			<artifactId>ep-catalog-projection-spring-data</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>com.elasticpath</groupId>
@@ -80,6 +101,11 @@
 			<groupId>com.elasticpath</groupId>
 			<artifactId>ep-health-monitoring-plugin-jms</artifactId>
 		</dependency>
+		<dependency>
+			<groupId>com.elasticpath.extensions</groupId>
+			<artifactId>ext-catalog-webservice</artifactId>
+			<version>0.0.0-SNAPSHOT</version>
+		</dependency>
 	</dependencies>
 
 	<properties>
@@ -95,7 +121,7 @@
 					<configuration>
 						<path>${ep.integration.context}</path>
 						<port>${ep.integration.tomcat.port.http}</port>
-						<contextFile>${project.build.directory}/tomcatconf/context.xml</contextFile>
+						<contextFile>${project.build.directory}/${build.finalName}/META-INF/context.xml</contextFile>
 						<systemProperties>
 							<ep.changesets.enabled>${ep.changesets.enabled}</ep.changesets.enabled>
 							<ep.search.default.url>${ep.search.url}</ep.search.default.url>
@@ -105,6 +131,28 @@
 							<ep.smtp.port>${ep.smtp.port}</ep.smtp.port>
 							<ep.smtp.username>${ep.smtp.username}</ep.smtp.username>
 							<ep.smtp.password>${ep.smtp.password}</ep.smtp.password>
+							<ep.external.channel.purchases>${ep.external.channel.purchases}</ep.external.channel.purchases>
+							<ep.external.channel.purchases.dlq>${ep.external.channel.purchases.dlq}</ep.external.channel.purchases.dlq>
+							<ep.external.channel.shipments>${ep.external.channel.shipments}</ep.external.channel.shipments>
+							<ep.external.channel.shipments.dlq>${ep.external.channel.shipments.dlq}</ep.external.channel.shipments.dlq>
+							<ep.external.channel.inventory>${ep.external.channel.inventory}</ep.external.channel.inventory>
+							<ep.external.channel.inventory.dlq>${ep.external.channel.inventory.dlq}</ep.external.channel.inventory.dlq>
+							<epdb.username>${epdb.username}</epdb.username>
+							<epdb.password>${epdb.password}</epdb.password>
+							<epdb.jdbc.driver>${epdb.jdbc.driver}</epdb.jdbc.driver>
+							<epdb.data.source.factory>${epdb.data.source.factory}</epdb.data.source.factory>
+							<epdb.url>${epdb.url}</epdb.url>
+							<epdb.data.source.type>${epdb.data.source.type}</epdb.data.source.type>
+							<epdb.data.source.xa.factory>${epdb.data.source.xa.factory}</epdb.data.source.xa.factory>
+							<epdb.data.source.xa.type>${epdb.data.source.xa.type}</epdb.data.source.xa.type>
+							<epdb.validation.query>${epdb.validation.query}</epdb.validation.query>
+							<epdb.validation.interval>${epdb.validation.interval}</epdb.validation.interval>
+							<ep.tomcat.maxcachesize>${ep.tomcat.maxcachesize}</ep.tomcat.maxcachesize>
+							<ep.jms.factory>${ep.jms.factory}</ep.jms.factory>
+							<ep.jms.type>${ep.jms.type}</ep.jms.type>
+							<ep.jms.url>${ep.jms.url}</ep.jms.url>
+							<ep.jms.xa.factory>${ep.jms.xa.factory}</ep.jms.xa.factory>
+							<ep.jms.xa.type>${ep.jms.xa.type}</ep.jms.xa.type>
 						</systemProperties>
 					</configuration>
 					<dependencies>
@@ -217,11 +265,6 @@
 										<exclude>**/log4j.properties</exclude>
 									</excludes>
 								</resource>
-								<resource>
-									<directory>src/tomcat</directory>
-									<targetPath>META-INF</targetPath>
-									<filtering>true</filtering>
-								</resource>
 							</webResources>
 						</configuration>
 					</plugin>
@@ -252,11 +295,11 @@
 								<configuration>
 									<resources>
 										<resource>
-											<directory>src/tomcat</directory>
-											<filtering>true</filtering>
+											<directory>src/main/webapp/META-INF</directory>
+											<filtering>false</filtering>
 										</resource>
 									</resources>
-									<outputDirectory>${project.build.directory}/tomcatconf</outputDirectory>
+									<outputDirectory>${project.build.directory}/META-INF</outputDirectory>
 								</configuration>
 							</execution>
 						</executions>

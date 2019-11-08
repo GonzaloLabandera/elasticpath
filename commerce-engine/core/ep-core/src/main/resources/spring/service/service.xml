@@ -12,10 +12,11 @@
 	<import resource="../caching/cache-manager.xml" />
 	<import resource="shipping-service.xml"/>
 	<import resource="classpath:tax-calculation-connectivity-api.xml"/>
-	<import resource="classpath:spring/models/domainSpecifications.xml"/>
 	<import resource="classpath:spring/commons/structuredErrorMessage.xml"/>
 	<import resource="classpath:spring/service/validation-strategies.xml"/>
 	<import resource="datapolicy.xml" />
+	<import resource="tag-service.xml" />
+
 
 	<bean id="applicationName" class="java.lang.String">
 		<constructor-arg value="CoreOSGiBundle"/>
@@ -132,8 +133,6 @@
 
 		<property name="preInterceptors" ref="servicePreInterceptors"/>
 	</bean>
-
-
 
 	<bean id="customerService" parent="txProxyTemplate">
 		<property name="target">
@@ -311,10 +310,6 @@
 		<property name="propertiesDao" ref="propertiesDao"/>
 	</bean>
 
-	<bean id="fetchPlanHelper" class="com.elasticpath.service.misc.impl.OpenJPAFetchPlanHelperImpl">
-		<property name="persistenceEngine" ref="persistenceEngine"/>
-	</bean>
-
 	<bean id="productServiceParentTemplate" abstract="true">
 		<property name="categoryLookup" ref="categoryLookup" />
 		<property name="categoryService" ref="categoryService" />
@@ -350,7 +345,6 @@
 		  class="com.elasticpath.service.catalog.impl.ProductLookupImpl">
 		<property name="persistenceEngine" ref="persistenceEngine"/>
 		<property name="queryService" ref="productQueryService"/>
-		<property name="fetchPlanHelper" ref="fetchPlanHelper"/>
 		<property name="productLoadTuner" ref="PRODUCT_LOAD_TUNER_LOOKUP"/>
 	</bean>
 
@@ -403,11 +397,8 @@
 			<bean class="com.elasticpath.service.catalog.impl.ProductSkuServiceImpl">
 				<property name="persistenceEngine" ref="persistenceEngine"/>
 				<property name="beanFactory" ref="coreBeanFactory"/>
-				<property name="fetchPlanHelper" ref="fetchPlanHelper"/>
 				<property name="productSkuLoadTunerAll" ref="PRODUCT_SKU_LOAD_TUNER_ALL"/>
 				<property name="productSkuLoadTunerMinimal" ref="PRODUCT_SKU_LOAD_TUNER_MINIMAL"/>
-				<property name="productLoadTunerAll" ref="PRODUCT_LOAD_TUNER_ALL"/>
-				<property name="categoryLoadTuner" ref="CATEGORY_LOAD_TUNER_MASTER_AND_PARENT"/>
 				<property name="categoryService" ref="categoryService"/>
 				<property name="baseAmountDao" ref="baseAmountDao"/>
 				<property name="productBundleDao" ref="productBundleDao"/>
@@ -532,13 +523,10 @@
 		<property name="persistenceEngine" ref="persistenceEngine"/>
 		<property name="elasticPath" ref="elasticPath"/>
 		<property name="fetchPlanHelper" ref="fetchPlanHelper"/>
-		<property name="productSkuLoadTuner" ref="PRODUCT_SKU_LOAD_TUNER_ALL"/>
-		<property name="productLoadTuner" ref="PRODUCT_LOAD_TUNER_ALL"/>
-		<property name="categoryLoadTuner" ref="CATEGORY_LOAD_TUNER_MASTER_AND_PARENT"/>
-		<property name="shoppingItemLoadTuner" ref="SHOPPING_ITEM_LOAD_TUNER_DEFAULT"/>
 		<property name="shopperService" ref="shopperService"/>
 		<property name="storeService" ref="storeService"/>
 		<property name="timeService" ref="timeService" />
+		<property name="loadTuners" ref="shoppingCartServiceLoadTuners" />
 	</bean>
 
 	<bean id="shoppingCartServiceTarget" parent="shoppingCartServiceTargetTemplate"/>
@@ -1017,7 +1005,7 @@
 		<property name="productInventoryManagementService" ref="productInventoryManagementService"/>
 		<property name="productSkuLookup" ref="productSkuLookup"/>
 		<property name="storeService" ref="storeService"/>
-			</bean>
+	</bean>
 
 	<bean id="allocationServiceTarget" parent="allocationServiceTargetTemplate"/>
 
@@ -1593,7 +1581,7 @@
 				<ref bean="skuOptionValueMetadataResolver"/>
 				<ref bean="productTypeMetadataResolver"/>
 				<ref bean="brandMetadataResolver"/>
-				<ref bean="cartItemModifierGroupMetadataResolver"/>
+				<ref bean="modifierGroupMetadataResolver"/>
 			</list>
 		</property>
 		<property name="changeSetDependentResolvers">
@@ -1720,7 +1708,9 @@
 		</property>
 	</bean>
 
-	<bean id="cartItemModifierGroupMetadataResolver" class="com.elasticpath.service.changeset.impl.CartItemModifierGroupMetadataResolverImpl" />
+
+
+	<bean id="modifierGroupMetadataResolver" class="com.elasticpath.service.changeset.impl.ModifierGroupMetadataResolverImpl" />
 
 	<bean id="productBundleChangeSetDependencyResolver" class="com.elasticpath.service.changeset.impl.ProductBundleChangeSetDependencyResolverImpl">
 		<property name="productLookup" ref="productLookup" />
@@ -1738,36 +1728,33 @@
 
 	<!-- tagging framework start -->
 
-	<bean id="conditionEvaluationService" class="com.elasticpath.tags.service.impl.GroovyConditionEvaluatorServiceImpl">
-		<property name="conditionProcessingService" ref="conditionProcessingService"/>
-		<property name="excludedFromCacheTags" ref="tagsExcludedFromConditionCache"/>
-		<property name="evaluationCache">
-			<bean class="com.elasticpath.cache.SimpleTimeoutCache">
-				<property name="cache" ref="groovyEvaluationCache"/>
+	<bean id="conditionEvaluationService" class="com.elasticpath.tags.service.impl.JavaConditionEvaluatorServiceImpl">
+		<property name="conditionDSLBuilder" ref="tagConditionDSLBuilder"/>
+		<property name="conditionOperatorEvaluators">
+			<set>
+				<bean class="com.elasticpath.tags.service.impl.conditionoperators.EqualToOperatorEvaluatorImpl"/>
+				<bean class="com.elasticpath.tags.service.impl.conditionoperators.NotEqualToOperatorEvaluatorImpl"/>
+				<bean class="com.elasticpath.tags.service.impl.conditionoperators.EqualsIgnoreCaseOperatorEvaluatorImpl"/>
+				<bean class="com.elasticpath.tags.service.impl.conditionoperators.LessThanOperatorEvaluatorImpl"/>
+				<bean class="com.elasticpath.tags.service.impl.conditionoperators.LessThanOrEqualToOperatorEvaluatorImpl"/>
+				<bean class="com.elasticpath.tags.service.impl.conditionoperators.GreaterThanOperatorEvaluatorImpl"/>
+				<bean class="com.elasticpath.tags.service.impl.conditionoperators.GreaterThanOrEqualToOperatorEvaluatorImpl"/>
+				<bean class="com.elasticpath.tags.service.impl.conditionoperators.IncludesOperatorEvaluatorImpl"/>
+				<bean class="com.elasticpath.tags.service.impl.conditionoperators.NotIncludesOperatorEvaluatorImpl"/>
+				<bean class="com.elasticpath.tags.service.impl.conditionoperators.IncludesIgnoreCaseOperatorEvaluatorImpl"/>
+				<bean class="com.elasticpath.tags.service.impl.conditionoperators.ContainsOperatorEvaluatorImpl"/>
+			</set>
+		</property>
+		<property name="decomposedConditionSynchronizedCacheSupport">
+			<bean class="com.elasticpath.service.caching.impl.SynchronizedCacheSupportImpl">
+				<property name="evaluationCache">
+					<bean class="com.elasticpath.cache.SimpleTimeoutCache">
+						<property name="cache" ref="decomposedConditionCache"/>
+					</bean>
+				</property>
 			</bean>
 		</property>
 	</bean>
-
-	<!--
-		This list contains tags that we DON'T want used as part of the cache key.
-		It is necessary due to Cortex updating some time-based tags with every request.
-		NOTE: This can affect evaluation of things like promotions and price lists that have
-		time-based conditions using these tags. Set the cache TTL to be an acceptable margin
-		of error around that time.
-	-->
-	<util:list id="tagsExcludedFromConditionCache" value-type="java.lang.String">
-		<value>SHOPPING_START_TIME</value>
-	</util:list>
-
-	<bean id="conditionProcessingService" class="com.elasticpath.tags.service.impl.GroovyConditionProcessingServiceImpl">
-		<property name="scriptCache">
-			<bean class="com.elasticpath.cache.SimpleTimeoutCache">
-				<property name="cache" ref="groovyConditionCache"/>
-				<property name="cacheEventListener" ref="groovyEhcacheEventListener"/>
-			</bean>
-		</property>
-	</bean>
-
 
 	<bean id="tagConditionDSLBuilder" class="com.elasticpath.tags.service.impl.GroovyConditionDSLBuilderImpl">
 		<property name="tagDefinitionReader" ref="tagDefinitionReader"/>
@@ -1786,6 +1773,15 @@
 		<property name="target">
 			<bean class="com.elasticpath.tags.service.impl.TagGroupServiceImpl">
 				<property name="tagGroupDao" ref="tagGroupDao" />
+				<property name="tagGroupFactory" ref="tagGroupFactory" />
+			</bean>
+		</property>
+	</bean>
+
+	<bean id="tagValueTypeService" parent="txProxyTemplate">
+		<property name="target">
+			<bean class="com.elasticpath.tags.service.impl.TagValueTypeServiceImpl">
+				<property name="tagValueTypeDao" ref="tagValueTypeDao" />
 			</bean>
 		</property>
 	</bean>
@@ -1794,6 +1790,7 @@
 		<property name="target">
 			<bean class="com.elasticpath.tags.service.impl.TagDefinitionServiceImpl">
 				<property name="tagDefinitionDao" ref="tagDefinitionDao" />
+				<property name="tagDefinitionFactory" ref="tagDefinitionFactory" />
 			</bean>
 		</property>
 	</bean>
@@ -1845,7 +1842,7 @@
 		<property name="tagOperatorDao" ref="tagOperatorDao" />
 	</bean>
 
-        <bean id="conditionValidationFacade" class="com.elasticpath.tags.service.impl.ConditionValidationFacadeImpl">
+	<bean id="conditionValidationFacade" class="com.elasticpath.tags.service.impl.ConditionValidationFacadeImpl">
 		<property name="validationService" ref="declarativeValidationService" />
 	</bean>
 
@@ -1866,6 +1863,10 @@
 		<property name="tagTypeValueConverter" ref="tagTypeValueConverter" />
 		<property name="tagDefinitionReader" ref="tagDefinitionReader" />
 	</bean>
+
+	<bean id="tagGroupFactory" class="com.elasticpath.tags.service.impl.TagGroupFactoryImpl" />
+
+	<bean id="tagDefinitionFactory" class="com.elasticpath.tags.service.impl.TagDefinitionFactoryImpl" />
 
 	<!-- tagging framework end -->
 
@@ -1916,8 +1917,6 @@
 		<property name="proxy" ref="priceListAssignmentServiceProxy"/>
 	</bean>
 
-
-
 	<!-- bundling end -->
 
 	<bean id="epRuleEngine" class="com.elasticpath.service.rules.impl.DBReadingRuleEngineImpl">
@@ -1926,11 +1925,6 @@
 		<property name="promotionRuleDelegate" ref="promotionRuleDelegate"/>
 		<property name="conditionEvaluatorService" ref="conditionEvaluationService"/>
 		<property name="beanFactory" ref="coreBeanFactory" />
-		<property name="cachedCatalogRuleBaseState">
-			<bean class="com.elasticpath.cache.SimpleTimeoutCache">
-				<property name="cache" ref="catalogRuleBaseCache"/>
-			</bean>
-		</property>
 		<property name="statefulSessionConfiguration">
 			<bean class="com.elasticpath.cache.SimpleTimeoutCache">
 				<property name="cache" ref="ruleSessionConfigurationCache"/>
@@ -1965,9 +1959,12 @@
 			</list>
 		</property>
 		<property name="productAvailabilityService" ref="productAvailabilityService" />
+		<property name="storeProductSkuFactory" ref="storeProductSkuFactory"/>
 	</bean>
 
 	<bean id="storeProductServiceTarget" parent="storeProductServiceTargetTemplate" />
+
+	<bean id="storeProductSkuFactory" class="com.elasticpath.domain.catalogview.impl.StoreProductSkuFactoryImpl"/>
 
 	<bean id="productAvailabilityServiceTemplate" abstract="true"
 		  class="com.elasticpath.service.catalogview.impl.ProductAvailabilityServiceImpl">
@@ -1999,7 +1996,7 @@
 			</map>
 		</property>
 		<property name="beanFactory" ref="coreBeanFactory"/>
-   </bean>
+	</bean>
 
 	<bean id="changeSetMemberPaginator" class="com.elasticpath.service.changeset.impl.ChangeSetMemberPaginator" scope="prototype">
 		<property name="changeSetService" ref="changeSetService"/>
@@ -2134,7 +2131,6 @@
 	<bean id="categoryServiceTargetTemplate" abstract="true" class="com.elasticpath.service.catalog.impl.CategoryServiceImpl">
 		<property name="persistenceEngine" ref="persistenceEngine"/>
 		<property name="beanFactory" ref="coreBeanFactory"/>
-		<property name="fetchPlanHelper" ref="fetchPlanHelper"/>
 		<property name="categoryLookup" ref="nonCachingCategoryLookup"/>
 		<property name="catalogService" ref="catalogService"/>
 		<property name="categoryLoadTunerAll" ref="CATEGORY_LOAD_TUNER_ALL"/>
@@ -2142,6 +2138,7 @@
 		<property name="categoryLoadTunerMinimal" ref="CATEGORY_LOAD_TUNER_MINIMAL"/>
 		<property name="categoryGuidUtil" ref="categoryGuidUtil"/>
 		<property name="productDao" ref="productDao"/>
+		<property name="timeService" ref="timeService"/>
 	</bean>
 
 	<bean id="categoryServiceTarget" parent="categoryServiceTargetTemplate"/>
@@ -2153,7 +2150,6 @@
 	<bean id="nonCachingCategoryLookupTargetTemplate" abstract="true" class="com.elasticpath.service.catalog.impl.CategoryLookupImpl">
 		<property name="persistenceEngine" ref="persistenceEngine"/>
 		<property name="beanFactory" ref="coreBeanFactory"/>
-		<property name="fetchPlanHelper" ref="fetchPlanHelper"/>
 	</bean>
 
 	<bean id="nonCachingCategoryLookupTarget" parent="nonCachingCategoryLookupTargetTemplate"/>
@@ -2165,6 +2161,64 @@
 	<bean id="categoryLookup" class="com.elasticpath.commons.beanframework.SwitchableProxyFactoryBean">
 		<property name="proxyInterface" value="com.elasticpath.service.catalog.CategoryLookup"/>
 		<property name="proxy" ref="categoryLookupProxy"/>
+	</bean>
+
+	<bean id="storeCustomerAttributeServiceTarget" class="com.elasticpath.service.customer.impl.StoreCustomerAttributeServiceImpl">
+		<property name="persistenceEngine" ref="persistenceEngine"/>
+		<property name="storeService" ref="storeService"/>
+	</bean>
+
+	<bean id="storeCustomerAttributeService" parent="txProxyTemplate">
+		<property name="target" ref="storeCustomerAttributeServiceTarget"/>
+	</bean>
+
+	<bean id="attributePolicyServiceTarget" class="com.elasticpath.service.customer.impl.AttributePolicyServiceImpl">
+		<property name="persistenceEngine" ref="persistenceEngine"/>
+	</bean>
+
+	<bean id="attributePolicyService" parent="txProxyTemplate">
+		<property name="target" ref="attributePolicyServiceTarget"/>
+	</bean>
+
+	<bean id="customerProfileAttributeService" class="com.elasticpath.service.customer.impl.CustomerProfileAttributeServiceImpl">
+		<property name="attributeService" ref="attributeService"/>
+		<property name="storeService" ref="storeService"/>
+		<property name="attributePolicyService" ref="attributePolicyService"/>
+		<property name="storeCustomerAttributeService" ref="storeCustomerAttributeService"/>
+		<property name="fetchGroupLoadTuner">
+			<bean class="com.elasticpath.persistence.support.impl.FetchGroupLoadTunerImpl">
+				<property name="fetchGroups">
+					<list>
+						<value>storeSharing</value>
+					</list>
+				</property>
+			</bean>
+		</property>
+		<property name="attributeValueValidationService" ref="attributeValueValidationService"/>
+		<property name="valueRestrictors" ref="targetCustomerProfileAttributeValueRestrictors"/>
+		<property name="predefinedProfileAttributePolicies" ref="predefinedProfileAttributePolicies"/>
+	</bean>
+
+	<util:map id="commonCustomerProfileAttributeValueRestrictors">
+		<entry>
+			<key><util:constant static-field="com.elasticpath.domain.customer.impl.CustomerImpl.ATT_KEY_CP_PREF_CURR"/></key>
+			<bean class="com.elasticpath.service.customer.impl.CurrencyValueRestrictorImpl"/>
+		</entry>
+		<entry>
+			<key><util:constant static-field="com.elasticpath.domain.customer.impl.CustomerImpl.ATT_KEY_CP_PREF_LOCALE"/></key>
+			<bean class="com.elasticpath.service.customer.impl.LocaleValueRestrictorImpl"/>
+		</entry>
+		<entry>
+			<key><util:constant static-field="com.elasticpath.domain.customer.impl.CustomerImpl.ATT_KEY_CP_GENDER"/></key>
+			<bean class="com.elasticpath.service.customer.impl.GenderValueRestrictorImpl"/>
+		</entry>
+	</util:map>
+
+	<bean id="targetCustomerProfileAttributeValueRestrictors"
+		  parent="commonCustomerProfileAttributeValueRestrictors"/>
+
+	<bean id="attributeValueValidationService" class="com.elasticpath.validation.service.impl.AttributeValueValidationServiceImpl">
+		<property name="constraintViolationTransformer" ref="constraintViolationTransformer"/>
 	</bean>
 
 	<bean id="cachingSolrQueryFactoryProxy" class="com.elasticpath.commons.beanframework.SwitchableProxyBinder">
@@ -2193,6 +2247,14 @@
 		<property name="proxy" ref="facetServiceProxy"/>
 	</bean>
 
+	<bean id="sortAttributeServiceProxy" class="com.elasticpath.commons.beanframework.SwitchableProxyBinder">
+		<property name="fallbackImplementation" ref="sortAttributeService"/>
+	</bean>
+
+	<bean id="cachedSortAttributeService" class="com.elasticpath.commons.beanframework.SwitchableProxyFactoryBean">
+		<property name="proxyInterface" value="com.elasticpath.service.search.SortAttributeService" />
+		<property name="proxy" ref="sortAttributeServiceProxy"/>
+	</bean>
 	<bean id="cachingSkuOptionServiceProxy" class="com.elasticpath.commons.beanframework.SwitchableProxyBinder">
 		<property name="fallbackImplementation" ref="skuOptionService"/>
 	</bean>
@@ -2301,7 +2363,7 @@
 		<property name="storeService" ref="storeService" />
 		<property name="eventMessageFactory" ref="eventMessageFactory"/>
 		<property name="eventMessagePublisher" ref="customerEventMessagePublisher"/>
-		<property name="cartItemModifierService" ref="cartItemModifierService"/>
+		<property name="modifierService" ref="modifierService"/>
 	</bean>
 
 	<bean id="wishListTarget" parent="wishListTargetTemplate" abstract="true"/>
@@ -2357,6 +2419,7 @@
 		<property name="wishListService" ref="wishListService"/>
 		<property name="pricingSnapshotService" ref="pricingSnapshotService"/>
 		<property name="removeShoppingItemFromCartValidationService" ref="removeShoppingItemFromCartValidationService"/>
+		<property name="shoppingItemService" ref="shoppingItemService" />
 	</bean>
 
 	<bean id="cartDirectorService" parent="txRequiredProxyTemplate">  <!-- All methods are TRANSACTION_REQUIRED -->
@@ -2402,6 +2465,10 @@
 		<property name="beanFactory" ref="coreBeanFactory"/>
 	</bean>
 
+	<bean id="sortAttributeDtoAssembler" class="com.elasticpath.common.dto.sort.SortAttributeDtoAssembler">
+		<property name="beanFactory" ref="coreBeanFactory"/>
+	</bean>
+
 	<bean id="customerDtoAssembler" class="com.elasticpath.common.dto.customer.CustomerDtoAssembler">
 		<property name="beanFactory" ref="coreBeanFactory" />
 		<property name="customerGroupService" ref="customerGroupService"/>
@@ -2412,6 +2479,18 @@
 		<property name="beanFactory" ref="coreBeanFactory" />
 	</bean>
 
+	<bean id="attributePolicyDtoAssembler" class="com.elasticpath.common.dto.customer.AttributePolicyDtoAssembler">
+		<property name="beanFactory" ref="coreBeanFactory" />
+	</bean>
+
+	<bean id="storeCustomerAttributeDtoAssembler" class="com.elasticpath.common.dto.customer.StoreCustomerAttributeDtoAssembler">
+		<property name="beanFactory" ref="coreBeanFactory" />
+		<property name="attributeService" ref="attributeService" />
+		<property name="storeService" ref="storeService" />
+		<property name="attributePolicyService" ref="attributePolicyService" />
+		<property name="customerProfileAttributeService" ref="customerProfileAttributeService"/>
+	</bean>
+
 	<bean id="storeDtoAssembler" class="com.elasticpath.common.dto.store.StoreDtoAssembler">
 		<property name="beanFactory" ref="coreBeanFactory"/>
 		<property name="catalogService" ref="catalogService"/>
@@ -2420,6 +2499,7 @@
 		<property name="taxJurisdictionService" ref="taxJurisdictionService"/>
 		<property name="warehouseService" ref="warehouseService"/>
 		<property name="storeService" ref="storeService"/>
+		<property name="modifierService" ref="modifierService" />
 	</bean>
 
 	<bean id="storeAssociationDtoAssembler" class="com.elasticpath.common.dto.store.StoreAssociationDtoAssembler">
@@ -2529,8 +2609,6 @@
     <bean id="oAuth2AccessTokenService" parent="txProxyTemplate">
         <property name="target">
             <bean class="com.elasticpath.service.auth.impl.OAuth2AccessTokenServiceImpl">
-                <property name="beanFactory" ref="coreBeanFactory" />
-                <property name="fetchPlanHelper" ref="fetchPlanHelper" />
                 <property name="persistenceEngine" ref="persistenceEngine" />
             </bean>
         </property>
@@ -2629,7 +2707,7 @@
     		<bean class="com.elasticpath.service.catalog.impl.ProductQueryService">
 		    	<property name="persistenceEngine" ref="persistenceEngine"/>
 		    	<property name="beanFactory" ref="coreBeanFactory"/>
-		    	<property name="fetchPlanHelper" ref="fetchPlanHelper"/>
+				<property name="fetchPlanHelper" ref="fetchPlanHelper"/>
     		</bean>
     	</property>
     </bean>
@@ -2651,7 +2729,7 @@
 			<bean class="com.elasticpath.service.targetedselling.impl.ContentSpaceQueryService">
 				<property name="persistenceEngine" ref="persistenceEngine" />
 				<property name="beanFactory" ref="coreBeanFactory" />
-				<property name="fetchPlanHelper" ref="fetchPlanHelper" />
+				<property name="fetchPlanHelper" ref="fetchPlanHelper"/>
 			</bean>
 		</property>
 	</bean>
@@ -2661,7 +2739,7 @@
 			<bean class="com.elasticpath.service.contentspace.impl.ParameterValueQueryService">
 				<property name="persistenceEngine" ref="persistenceEngine" />
 				<property name="beanFactory" ref="coreBeanFactory" />
-				<property name="fetchPlanHelper" ref="fetchPlanHelper" />
+				<property name="fetchPlanHelper" ref="fetchPlanHelper"/>
 			</bean>
 		</property>
 	</bean>
@@ -2756,7 +2834,6 @@
 	</bean>
 
 	<bean id="couponAutoApplierService" class="com.elasticpath.service.rules.impl.CouponAutoApplierServiceImpl">
-		<property name="validCouponUseSpecification" ref="validCouponUseSpecification" />
 		<property name="couponService" ref="couponService" />
 		<property name="couponUsageService" ref="couponUsageService" />
 	</bean>
@@ -2856,17 +2933,21 @@
 		<constructor-arg ref="pricingSnapshotService" />
 	</bean>
 
-	<bean id="cartItemModifierService" parent="txProxyTemplate">
+
+	<bean id="modifierService" parent="txProxyTemplate">
 		<property name="target">
-			<bean class="com.elasticpath.service.cartitemmodifier.impl.CartItemModifierServiceImpl">
+			<bean class="com.elasticpath.service.modifier.impl.ModifierServiceImpl">
 				<property name="persistenceEngine" ref="persistenceEngine"/>
 			</bean>
 		</property>
 	</bean>
 
-	<bean id="cartItemModifierFieldValidationService" class="com.elasticpath.validation.service.impl.CartItemModifierFieldValidationServiceImpl">
+
+
+	<bean id="modifierFieldValidationService" class="com.elasticpath.validation.service.impl.ModifierFieldValidationServiceImpl">
 		<property name="constraintViolationTransformer" ref="constraintViolationTransformer"/>
 	</bean>
+
 
 	<bean id="storeMessageSourceTemplate" class="com.elasticpath.commons.util.impl.StoreMessageSourceImpl"
 		abstract="true">
@@ -2888,6 +2969,14 @@
 		<property name="physicalOrderShipmentShippingCostCalculationService" ref="physicalOrderShipmentShippingCostCalculationService"/>
 	</bean>
 
+	<bean id="sortAttributeService" parent="txProxyTemplate">
+		<property name="target">
+			<bean class="com.elasticpath.service.search.impl.SortAttributeServiceImpl">
+				<property name="persistenceEngine" ref="persistenceEngine"/>
+				<property name="elasticPath" ref="elasticPath"/>
+			</bean>
+		</property>
+	</bean>
 
 	<bean id="facetService" parent="txProxyTemplate">
 		<property name="target">
@@ -2898,4 +2987,10 @@
 		</property>
 	</bean>
 
+	<util:list id="shoppingCartServiceLoadTuners" value-type="com.elasticpath.persistence.api.LoadTuner">
+		<ref bean="PRODUCT_SKU_LOAD_TUNER_ALL"/>
+		<ref bean="PRODUCT_LOAD_TUNER_ALL"/>
+		<ref bean="CATEGORY_LOAD_TUNER_MASTER_AND_PARENT"/>
+		<ref bean="SHOPPING_ITEM_LOAD_TUNER_DEFAULT"/>
+	</util:list>
 </beans>

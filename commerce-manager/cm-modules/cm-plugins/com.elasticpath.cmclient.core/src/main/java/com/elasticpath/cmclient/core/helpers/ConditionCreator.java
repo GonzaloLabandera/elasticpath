@@ -33,7 +33,7 @@ public final class ConditionCreator {
 		
 		if (creatorExtension == null) {
 			LOG.debug("Creating OOTB Condition");
-			return new Condition(tagDefinition, operator, tagValue);
+			return new Condition(tagDefinition, tagDefinition.getName(), operator, tagValue);
 		}
 		
 		LOG.debug("Creating extension Condition");

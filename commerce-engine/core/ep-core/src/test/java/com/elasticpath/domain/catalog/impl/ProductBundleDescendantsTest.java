@@ -16,6 +16,7 @@ import com.elasticpath.commons.beanframework.BeanFactory;
 import com.elasticpath.domain.catalog.BundleConstituent;
 import com.elasticpath.domain.catalog.Product;
 import com.elasticpath.domain.catalog.ProductBundle;
+import com.elasticpath.domain.catalog.ProductConstituent;
 import com.elasticpath.test.BeanFactoryExpectationsFactory;
 
 /**
@@ -49,7 +50,7 @@ public class ProductBundleDescendantsTest {
 	public void setUp() {
 		expectationsFactory = new BeanFactoryExpectationsFactory(context, beanFactory);
 
-		expectationsFactory.allowingBeanFactoryGetBean("productConstituent", ProductConstituentImpl.class);
+		expectationsFactory.allowingBeanFactoryGetPrototypeBean("productConstituent", ProductConstituent.class, ProductConstituentImpl.class);
 
 		bundlex = new ProductBundleImpl();
 		bundlex.setGuid(BUNDLE);

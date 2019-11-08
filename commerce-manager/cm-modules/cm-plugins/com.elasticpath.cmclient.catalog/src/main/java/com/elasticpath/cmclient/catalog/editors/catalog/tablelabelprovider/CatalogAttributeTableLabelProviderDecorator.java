@@ -8,6 +8,8 @@ import java.util.Locale;
 
 import com.elasticpath.cmclient.catalog.CatalogMessages;
 import com.elasticpath.cmclient.core.CoreMessages;
+import com.elasticpath.cmclient.core.tablelableprovider.AbstractTableLabelProviderDecorator;
+import com.elasticpath.cmclient.core.tablelableprovider.ExtensibleTableLabelProvider;
 import com.elasticpath.domain.attribute.Attribute;
 
 /**

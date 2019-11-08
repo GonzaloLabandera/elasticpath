@@ -4,8 +4,10 @@
 package com.elasticpath.persistence.dao.impl;
 
 import com.elasticpath.commons.beanframework.BeanFactory;
+import com.elasticpath.persistence.api.LoadTuner;
 import com.elasticpath.persistence.api.Persistable;
 import com.elasticpath.persistence.api.PersistenceEngine;
+import com.elasticpath.persistence.openjpa.util.FetchPlanHelper;
 
 /**
  * Defines methods useful for all persistable DAO classes.
@@ -15,6 +17,7 @@ public abstract class AbstractDaoImpl {
 
 	private PersistenceEngine persistenceEngine;
 	private BeanFactory beanFactory;
+	private FetchPlanHelper fetchPlanHelper;
 	private final PersistentBeanFinder persistentBeanFinder = new PersistentBeanFinder();
 	
 	/**
@@ -60,19 +63,15 @@ public abstract class AbstractDaoImpl {
 		}
 
 		/**
-		 * Load a persistent instance with the given id. Throw an unrecoverable exception if there is
-		 * no matching database row. This method will create a new session (EntityManager) to execute
-		 * the query, and close the new session when completed.
-		 * 
-		 * @param <T> the type of the object
-		 * @param beanName the name of the bean to find the implementation class for.
-		 * @param uidPk the persistent instance id.
-		 * @return the persistent instance
-		 * @throws com.elasticpath.persistence.api.EpPersistenceException in case of persistence errors
+		 * Set one or more load tuners.
+		 *
+		 * @param loadTuners an array of load tuners.
+		 * @return the current instance of {@link PersistenceEngine}
 		 */
-		public <T extends Persistable> T loadWithNewSession(final String beanName, final long uidPk) {
-			return getPersistenceEngine().loadWithNewSession(beanFactory.<T>getBeanImplClass(beanName), uidPk);		
-		}	
+		public PersistentBeanFinder withLoadTuners(final LoadTuner... loadTuners) {
+			fetchPlanHelper.setLoadTuners(loadTuners);
+			return this;
+		}
 	}
 
 	/**
@@ -133,4 +132,11 @@ public abstract class AbstractDaoImpl {
 		this.persistenceEngine = persistenceEngine;
 	}
 
+	public void setFetchPlanHelper(final FetchPlanHelper fetchPlanHelper) {
+		this.fetchPlanHelper = fetchPlanHelper;
+	}
+
+	public FetchPlanHelper getFetchPlanHelper() {
+		return fetchPlanHelper;
+	}
 }

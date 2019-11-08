@@ -5,10 +5,7 @@
 		<name>prices</name>
 		<description>
 			<![CDATA[
-Prices describe the amount of money required to purchase an item or items. The prices resource server links prices to: [items][items], cart line items and [item definitions][itemdefinitions]
-
-[items]: #items
-[itemdefinitions]: #itemdefinitions
+Prices describe the amount of money required to purchase an item or items. The prices resource links prices to: [items](items.md), cart line items and [item definitions](itemdefinitions.md)
 			]]>
 		</description>
 
@@ -117,8 +114,7 @@ Prices describe the amount of money required to purchase an item or items. The p
 				<name>purchase-price</name>
 				<description>
 					<![CDATA[
-The unit price of an item in the shopper's cart after shopping cart discounts are applied. This represents the price the shopper will
-actually pay for each unit. If no discounts have been applied, the list and purchase price will be the same.
+The unit price of an item in the shopper's cart after shopping cart discounts are applied. This represents the price the shopper will actually pay for each unit. If no discounts have been applied, the list and purchase price will be the same.
 					]]>
 				</description>
 				<array>

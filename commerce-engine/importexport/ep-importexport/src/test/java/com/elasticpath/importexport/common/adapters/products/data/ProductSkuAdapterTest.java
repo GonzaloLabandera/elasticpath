@@ -5,7 +5,6 @@ package com.elasticpath.importexport.common.adapters.products.data;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.entry;
-import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -216,13 +215,11 @@ public class ProductSkuAdapterTest {
 		final Map<String, SkuOptionValue> optionValueMap = new HashMap<>();
 
 		when(mockProductSku.getOptionValueMap()).thenReturn(optionValueMap);
-		when(mockBeanFactory.getBean(ContextIdNames.SKU_OPTION_VALUE_JPA_ADAPTOR)).thenReturn(expectedSkuOptionValue);
+		when(mockBeanFactory.getPrototypeBean(ContextIdNames.SKU_OPTION_VALUE_JPA_ADAPTOR, JpaAdaptorOfSkuOptionValueImpl.class))
+			.thenReturn(expectedSkuOptionValue);
 
 		assertThat(productSkuAdapter.createSkuOptionValue(mockProductSku, SKU_OPTION_CODE)).isEqualTo(expectedSkuOptionValue);
 		assertThat(optionValueMap).containsOnly(entry(SKU_OPTION_CODE, expectedSkuOptionValue));
-
-		verify(mockProductSku, atLeastOnce()).getOptionValueMap();
-		verify(mockBeanFactory).getBean(ContextIdNames.SKU_OPTION_VALUE_JPA_ADAPTOR);
 	}
 
 	/**

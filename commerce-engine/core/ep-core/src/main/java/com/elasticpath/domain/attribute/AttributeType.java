@@ -3,14 +3,21 @@
  */
 package com.elasticpath.domain.attribute;
 
+import java.lang.annotation.Annotation;
 import java.util.Collection;
 import java.util.Locale;
+import java.util.Optional;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.WordUtils;
 
 import com.elasticpath.commons.util.extenum.AbstractExtensibleEnum;
-
+import com.elasticpath.validation.defs.AbstractConstraintDef;
+import com.elasticpath.validation.defs.BooleanDef;
+import com.elasticpath.validation.defs.DecimalDef;
+import com.elasticpath.validation.defs.ISO8601DateDef;
+import com.elasticpath.validation.defs.ISO8601DateTimeDef;
+import com.elasticpath.validation.defs.IntegerDef;
 
 /**
  * Represents an attribute type.
@@ -52,7 +59,7 @@ public class AttributeType extends AbstractExtensibleEnum<AttributeType> {
 	/**
 	 * The attribute type of a non-decimal number.
 	 */
-	public static final AttributeType INTEGER = new AttributeType(INTEGER_TYPE_ID, "INTEGER");
+	public static final AttributeType INTEGER = new AttributeType(INTEGER_TYPE_ID, "INTEGER", new IntegerDef());
 	
 	/**
 	 * Attribute type id for decimal.
@@ -62,7 +69,7 @@ public class AttributeType extends AbstractExtensibleEnum<AttributeType> {
 	/**
 	 * The attribute type of a decimal number.
 	 */
-	public static final AttributeType DECIMAL = new AttributeType(DECIMAL_TYPE_ID, "DECIMAL");
+	public static final AttributeType DECIMAL = new AttributeType(DECIMAL_TYPE_ID, "DECIMAL", new DecimalDef());
 	
 	/**
 	 * Attribute type id for boolean.
@@ -72,7 +79,7 @@ public class AttributeType extends AbstractExtensibleEnum<AttributeType> {
 	/**
 	 * The attribute type of boolean : true or false.
 	 */
-	public static final AttributeType BOOLEAN = new AttributeType(BOOLEAN_TYPE_ID, "BOOLEAN");
+	public static final AttributeType BOOLEAN = new AttributeType(BOOLEAN_TYPE_ID, "BOOLEAN", new BooleanDef());
 	
 	/**
 	 * Attribute type id for image.
@@ -101,7 +108,7 @@ public class AttributeType extends AbstractExtensibleEnum<AttributeType> {
 	/**
 	 * The attribute type for a date.
 	 */
-	public static final AttributeType DATE = new AttributeType(DATE_TYPE_ID, "DATE");
+	public static final AttributeType DATE = new AttributeType(DATE_TYPE_ID, "DATE", new ISO8601DateDef());
 	
 	/**
 	 * Attribute type id for data time.
@@ -111,21 +118,24 @@ public class AttributeType extends AbstractExtensibleEnum<AttributeType> {
 	/**
 	 * The attribute type for a date &amp; time.
 	 */
-	public static final AttributeType DATETIME = new AttributeType(DATETIME_TYPE_ID, "DATE_TIME");
+	public static final AttributeType DATETIME = new AttributeType(DATETIME_TYPE_ID, "DATE_TIME", new ISO8601DateTimeDef());
 	
 	private static final AttributeType[] CUSTOMER_ATTRIBUTE_TYPES = { SHORT_TEXT, INTEGER, DECIMAL, BOOLEAN, DATE, DATETIME };
 
 	private String storageType;
 
 	private String nameMessageKey;
-	
+
+	private final AbstractConstraintDef<?>[] constraintDef;
+
 	/**
 	 * Constructor for this extensible enum.
 	 * @param ordinal the ordinal value
 	 * @param name the named value
+	 * @param constraintDef the optional array of constraint definitions
 	 */
-	protected AttributeType(final int ordinal, final String name) {
-		this(ordinal, name, getStorageType(name));
+	protected AttributeType(final int ordinal, final String name, final AbstractConstraintDef<?>... constraintDef) {
+		this(ordinal, name, getStorageType(name), constraintDef);
 	}
 	
 	/**
@@ -133,11 +143,14 @@ public class AttributeType extends AbstractExtensibleEnum<AttributeType> {
 	 * @param ordinal the ordinal value
 	 * @param name the named value
 	 * @param storageType the storage type
+	 * @param constraintDef the optional array of constraint definitions
 	 */
-	protected AttributeType(final int ordinal, final String name, final String storageType) {
+	protected AttributeType(final int ordinal, final String name, final String storageType,
+			final AbstractConstraintDef<?>... constraintDef) {
 		super(ordinal, name, AttributeType.class);
 		this.storageType = storageType;
-		this.nameMessageKey = getNameMessageKey(name); 
+		this.nameMessageKey = getNameMessageKey(name);
+		this.constraintDef = constraintDef;
 	}
 	
 	/**
@@ -245,5 +258,24 @@ public class AttributeType extends AbstractExtensibleEnum<AttributeType> {
 	
 	public static AttributeType[] getCustomerAttributeTypes() {
 		return CUSTOMER_ATTRIBUTE_TYPES.clone();
+	}
+
+	/**
+	 * Returns the attribute type name after conversion.
+	 *
+	 * @return the attribute type name after conversion.
+	 */
+	public String getCamelCaseName() {
+		return constantToCamelCase(getName());
+	}
+
+	/**
+	 * Get the constraint definitions.
+	 *
+	 * @return optional constraint definitions.
+	 */
+	@SuppressWarnings("unchecked")
+	public Optional<AbstractConstraintDef<Annotation>[]> getConstraintDefs() {
+		return Optional.ofNullable((AbstractConstraintDef<Annotation>[]) constraintDef);
 	}
 }

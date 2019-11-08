@@ -2,7 +2,7 @@
 <stores>
 <store enabled="true" code="searchbee">
     <globalization default_currency="CAD" default_locale="en_CA" content_encoding="UTF-8" sub_country="BC" country="CA" timeZone="Europe/London"/>
-    <url>${searchbee.store.url}</url>
+    <url>https://searchbee.elasticpath.com/storefront</url>
     <name>SearchStore</name>
     <state>200</state>
     <type>B2B</type>
@@ -42,7 +42,7 @@
 
 <store enabled="true" code="Kobee">
     <globalization default_currency="CAD" default_locale="en" content_encoding="UTF-8" sub_country="BC" country="CA" timeZone="Europe/London"/>
-    <url>${kobee.store.url}</url>
+    <url>https://kobee.elasticpath.com/storefront</url>
     <name>Kobee</name>
     <state>200</state>
     <type>B2B</type>
@@ -77,11 +77,20 @@
         <type>Visa</type>
         <type>MasterCard</type>
     </credit_card_types>
+    <cart_types>
+        <cart_type>
+            <name>default</name>
+            <guid>5364a6ef-5f8e-4ea0-ac40-54e6fff10eaa</guid>
+            <modifiergroups>
+                <code>multicart</code>
+            </modifiergroups>
+        </cart_type>
+    </cart_types>
 </store>
 
 <store enabled="true" code="sobee">
     <globalization default_currency="CAD" default_locale="en_CA" content_encoding="UTF-8" sub_country="BC" country="CA" timeZone="America/Vancouver"/>
-    <url>${sobee.store.url}</url>
+    <url>https://sobee.elasticpath.com/storefront</url>
     <name>Sobee</name>
     <state>0</state>
     <type>B2B</type>
@@ -121,7 +130,7 @@
 
 <store enabled="true" code="MOBEE">
     <globalization default_currency="CAD" default_locale="en" content_encoding="UTF-8" sub_country="BC" country="CA" timeZone="Europe/London"/>
-    <url>${mobee.store.url}</url>
+    <url>https://mobee.elasticpath.com/storefront</url>
     <name>Mobee</name>
     <state>200</state>
     <type>B2B</type>
@@ -164,11 +173,20 @@
         <type>Diners Club</type>
         <type>Discover</type>
     </credit_card_types>
+    <cart_types>
+        <cart_type>
+            <name>default</name>
+            <guid>5364a6ef-5f8e-4ea0-ac40-54e6fff10ec0</guid>
+            <modifiergroups>
+                <code>multicart</code>
+            </modifiergroups>
+        </cart_type>
+    </cart_types>
 </store>
 
 <store enabled="true" code="toastie">
     <globalization default_currency="EUR" default_locale="fr_CA" content_encoding="UTF-8" sub_country="BC" country="CA" timeZone="Europe/London"/>
-    <url>${toastie.store.url}</url>
+    <url>https://toastie.elasticpath.com/storefront</url>
     <name>toastie</name>
     <state>200</state>
     <type>B2B</type>
@@ -214,7 +232,7 @@
 
 <store enabled="true" code="Dobee">
     <globalization default_currency="CAD" default_locale="en_CA" content_encoding="UTF-8" sub_country="BC" country="CA" timeZone="Europe/London"/>
-    <url>${dobee.store.url}</url>
+    <url>https://dobee.elasticpath.com/storefront</url>
     <name>Dobee</name>
     <state>100</state>
     <type>B2B</type>
@@ -254,7 +272,7 @@
 
 <store enabled="true" code="tobee123">
     <globalization default_currency="CAD" default_locale="en" content_encoding="UTF-8" sub_country="BC" country="CA" timeZone="Europe/London"/>
-    <url>${tobee123.store.url}</url>
+    <url>https://tobee123.elasticpath.com/storefront</url>
     <name>tobee123</name>
     <state>200</state>
     <type>B2B</type>
@@ -294,7 +312,7 @@
 
 <store enabled="true" code="rockjam">
     <globalization default_currency="CAD" default_locale="en" content_encoding="UTF-8" sub_country="BC" country="CA" timeZone="Europe/London"/>
-    <url>${rockjam.store.url}</url>
+    <url>https://rockjam.elasticpath.com/storefront</url>
     <name>Rock Jam</name>
     <state>200</state>
     <type>B2B</type>
@@ -337,7 +355,7 @@
 
 <store code="Tokenee" enabled="true">
     <globalization timeZone="Europe/London" country="CA" sub_country="BC" content_encoding="UTF-8" default_locale="en" default_currency="CAD"/>
-    <url>${tokenee.store.url}</url>
+    <url>https://tokenee.elasticpath.com/storefront</url>
     <name>Tokenee</name>
     <state>200</state>
     <type>B2B</type>
@@ -376,5 +394,109 @@
         <type>MasterCard</type>
     </credit_card_types>
 </store>
-
+<store code="SyndicationBilingualStore" enabled="true">
+    <globalization timeZone="Europe/London" country="AU" sub_country="" content_encoding="UTF-8" default_locale="en" default_currency="CAD"/>
+    <url>https://SyndicationBilingualStore.com</url>
+    <name>Syndication Bilingual Store</name>
+    <state>0</state>
+    <type>B2B</type>
+    <description></description>
+    <catalog>Syndication2StoresCatalog</catalog>
+    <display_out_of_stock>false</display_out_of_stock>
+    <email_sender_name>SyndicationBilingualStore.com</email_sender_name>
+    <email_sender_address>SyndicationBilingualStore.com</email_sender_address>
+    <store_admin_email>SyndicationBilingualStore.com</store_admin_email>
+    <credit_card_cvv2_enabled>false</credit_card_cvv2_enabled>
+    <store_full_credit_cards>false</store_full_credit_cards>
+    <locales>
+        <locale>en</locale>
+        <locale>fr</locale>
+    </locales>
+    <currencies>
+        <currency>CAD</currency>
+    </currencies>
+    <warehouses>
+        <warehouse>MOBEE_Warehouse</warehouse>
+    </warehouses>
+    <tax_codes/>
+    <tax_jurisdictions/>
+    <payment_gateways>
+        <gateway>DemoTokenPaymentProcessor</gateway>
+        <gateway>GiftCertificate</gateway>
+    </payment_gateways>
+    <credit_card_types>
+        <type>American Express</type>
+        <type>MasterCard</type>
+        <type>Visa</type>
+    </credit_card_types>
+</store>
+<store code="SyndicationSingleLanguageStore" enabled="true">
+    <globalization timeZone="Europe/London" country="AU" sub_country="" content_encoding="UTF-8" default_locale="fr" default_currency="CAD"/>
+    <url>https://SyndicationSingleLanguageStore.com</url>
+    <name>Syndication Single Language Store</name>
+    <state>0</state>
+    <type>B2B</type>
+    <description></description>
+    <catalog>Syndication2StoresCatalog</catalog>
+    <display_out_of_stock>false</display_out_of_stock>
+    <email_sender_name>SyndicationSingleLanguageStore.com</email_sender_name>
+    <email_sender_address>SyndicationSingleLanguageStore.com</email_sender_address>
+    <store_admin_email>SyndicationSingleLanguageStore.com</store_admin_email>
+    <credit_card_cvv2_enabled>false</credit_card_cvv2_enabled>
+    <store_full_credit_cards>false</store_full_credit_cards>
+    <locales>
+        <locale>fr</locale>
+    </locales>
+    <currencies>
+        <currency>CAD</currency>
+    </currencies>
+    <warehouses>
+        <warehouse>MOBEE_Warehouse</warehouse>
+    </warehouses>
+    <tax_codes/>
+    <tax_jurisdictions/>
+    <payment_gateways>
+        <gateway>DemoTokenPaymentProcessor</gateway>
+        <gateway>GiftCertificate</gateway>
+    </payment_gateways>
+    <credit_card_types>
+        <type>American Express</type>
+        <type>MasterCard</type>
+        <type>Visa</type>
+    </credit_card_types>
+</store>
+<store code="SyndicationVirtualCatalogStore" enabled="true">
+    <globalization timeZone="Europe/London" country="AU" sub_country="" content_encoding="UTF-8" default_locale="en" default_currency="CAD"/>
+    <url>https://SyndicationVirtualCatalogStore.com</url>
+    <name>Syndication Virtual Catalog Store</name>
+    <state>0</state>
+    <type>B2B</type>
+    <description></description>
+    <catalog>SyndicationVirtualCatalog</catalog>
+    <display_out_of_stock>false</display_out_of_stock>
+    <email_sender_name>SyndicationVirtualCatalogStore.com</email_sender_name>
+    <email_sender_address>SyndicationVirtualCatalogStore.com</email_sender_address>
+    <store_admin_email>SyndicationVirtualCatalogStore.com</store_admin_email>
+    <credit_card_cvv2_enabled>false</credit_card_cvv2_enabled>
+    <store_full_credit_cards>false</store_full_credit_cards>
+    <locales>
+        <locale>en</locale>
+    </locales>
+    <currencies>
+        <currency>CAD</currency>
+    </currencies>
+    <warehouses>
+        <warehouse>MOBEE_Warehouse</warehouse>
+    </warehouses>
+    <tax_codes/>
+    <tax_jurisdictions/>
+    <payment_gateways>
+        <gateway>DemoTokenPaymentProcessor</gateway>
+    </payment_gateways>
+    <credit_card_types>
+        <type>American Express</type>
+        <type>MasterCard</type>
+        <type>Visa</type>
+    </credit_card_types>
+</store>
 </stores>

@@ -36,7 +36,7 @@ import com.elasticpath.service.attribute.AttributeService;
  */
 public class AttributeListView extends AbstractListView {
 	/** The view ID. */
-	public static final String VIEW_ID = "com.elasticpath.cmclient.admin.customers.views.AttributeListView"; //$NON-NLS-1$	
+	public static final String VIEW_ID = "com.elasticpath.cmclient.admin.customers.views.AttributeListView"; //$NON-NLS-1$
 
 	private static final String ATTRIBUTE_LIST_TABLE = "Attribute List"; //$NON-NLS-1$
 
@@ -50,7 +50,7 @@ public class AttributeListView extends AbstractListView {
 	private static final int INDEX_ATTRIBUTE_TYPE = 3;
 
 	private static final int INDEX_SYSTEM_ATTRIBUTE = 4;
-	
+
 	private static final int INDEX_REQUIRED_ATTRIBUTE = 5;
 
 	private Action createAttributeAction;
@@ -76,7 +76,7 @@ public class AttributeListView extends AbstractListView {
 
 	@Override
 	protected void initializeViewToolbar() {
-		
+
 		final Separator attributeActionGroup = new Separator("customerActionGroup"); //$NON-NLS-1$
 		getToolbarManager().add(attributeActionGroup);
 
@@ -130,7 +130,7 @@ public class AttributeListView extends AbstractListView {
 
 	/**
 	 * Return a copy of the table's selected attribute item.
-	 * 
+	 *
 	 * @return the copy of the selected attribute
 	 */
 	public Attribute getSelectedAttribute() {
@@ -163,7 +163,7 @@ public class AttributeListView extends AbstractListView {
 
 		/**
 		 * Get the image to put in each column.
-		 * 
+		 *
 		 * @param element the row object
 		 * @param columnIndex the column index
 		 * @return the Image to put in the column
@@ -178,7 +178,7 @@ public class AttributeListView extends AbstractListView {
 
 		/**
 		 * Get the text to put in each column.
-		 * 
+		 *
 		 * @param element the row object
 		 * @param columnIndex the column index
 		 * @return the String to put in the column

@@ -58,13 +58,9 @@ public class ProductBundleDaoImpl extends ProductDaoImpl implements ProductBundl
 			throw new EpServiceException("ProductLoadTuner can't be null");
 		}
 
-		getFetchPlanHelper().configureLoadTuner(productLoadTuner);
+		getFetchPlanHelper().setLoadTuners(productLoadTuner);
 
-		final List<ProductBundle> bundles = findByGuids(guids);
-
-		getFetchPlanHelper().clearFetchPlan();
-
-		return bundles;
+		return findByGuids(guids);
 	}
 
 	/**

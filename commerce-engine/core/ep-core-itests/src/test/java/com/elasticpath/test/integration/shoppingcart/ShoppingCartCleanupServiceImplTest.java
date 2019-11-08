@@ -364,7 +364,7 @@ public class ShoppingCartCleanupServiceImplTest extends BasicSpringContextTest {
 		customerSession = customerSessionService
 				.initializeCustomerSessionForPricing(customerSession, storeScenario.getStore().getCode(), currency);
 
-		final ShoppingCart shoppingCart = shoppingCartService.findOrCreateByCustomerSession(customerSession);
+		final ShoppingCart shoppingCart = shoppingCartService.findOrCreateDefaultCartByCustomerSession(customerSession);
 		shoppingCart.setStore(storeScenario.getStore());
 
 		final ShoppingCartMemento memento = ((ShoppingCartMementoHolder)shoppingCart).getShoppingCartMemento();

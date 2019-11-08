@@ -3,29 +3,38 @@
  */
 package com.elasticpath.domain.shoppingcart.impl;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Currency;
+import java.util.List;
 import java.util.Locale;
-
-import org.junit.Test;
 
 import org.jmock.Expectations;
 import org.jmock.auto.Mock;
 import org.jmock.integration.junit4.JUnitRuleMockery;
+import org.junit.Test;
 
 import com.elasticpath.commons.beanframework.BeanFactory;
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.catalog.ProductSku;
 import com.elasticpath.domain.catalog.impl.ProductSkuImpl;
-import com.elasticpath.domain.coupon.specifications.PotentialCouponUse;
 import com.elasticpath.domain.customer.Customer;
 import com.elasticpath.domain.rules.Coupon;
 import com.elasticpath.domain.rules.CouponConfig;
@@ -46,7 +55,6 @@ import com.elasticpath.domain.shoppingcart.ShoppingCart;
 import com.elasticpath.domain.shoppingcart.ShoppingCartMemento;
 import com.elasticpath.domain.shoppingcart.ShoppingCartMementoHolder;
 import com.elasticpath.domain.shoppingcart.ShoppingItem;
-import com.elasticpath.domain.specifications.Specification;
 import com.elasticpath.domain.store.Store;
 import com.elasticpath.money.Money;
 import com.elasticpath.plugin.tax.domain.TaxExemption;
@@ -55,7 +63,7 @@ import com.elasticpath.service.catalog.ProductSkuLookup;
 import com.elasticpath.service.rules.CouponService;
 import com.elasticpath.service.rules.CouponUsageService;
 import com.elasticpath.service.rules.RuleService;
-import com.elasticpath.service.rules.impl.RuleValidationResultEnum;
+import com.elasticpath.service.rules.impl.CouponUsageValidationResultEnum;
 import com.elasticpath.shipping.connectivity.dto.ShippingOption;
 import com.elasticpath.shipping.connectivity.dto.impl.ShippingOptionImpl;
 import com.elasticpath.test.BeanFactoryExpectationsFactory;
@@ -64,7 +72,7 @@ import com.elasticpath.test.BeanFactoryExpectationsFactory;
  * Tests how {@code ShoppingCartImpl} interacts with {@code ShoppingItem}. New test created instead of
  * modifying {@code ShoppingCartImplTest} because of the latter's complexity and reliance on ElasticPathTestCase.
  */
-@SuppressWarnings("PMD.AvoidDuplicateLiterals")
+@SuppressWarnings({"PMD.AvoidDuplicateLiterals", "PMD.ExcessiveImports"})
 public class ShoppingCartImplJunit4Test {
 
 	private static final String DISCOUNT_0_50 = "0.50";
@@ -76,6 +84,7 @@ public class ShoppingCartImplJunit4Test {
 	private static final String CART_ITEM_1_GUID = "11111";
 	private static final String CART_ITEM_2_GUID = "22222";
 	private static final Currency CAD = Currency.getInstance(Locale.CANADA);
+	private static final String STORECODE = "STORECODE";
 
 	@org.junit.Rule
 	public final JUnitRuleMockery context = new JUnitRuleMockery();
@@ -118,6 +127,10 @@ public class ShoppingCartImplJunit4Test {
 				allowing(cartItem2).getOrdering(); will(returnValue(2));
 				allowing(cartItem1).setItemType(ItemType.SIMPLE);
 				allowing(cartItem2).setItemType(ItemType.SIMPLE);
+				allowing(cartItem1).getItemType(); will(returnValue(ItemType.SIMPLE));
+				allowing(cartItem2).getItemType(); will(returnValue(ItemType.SIMPLE));
+				allowing(cartItem1).isCalculatedBundle(productSkuLookup); will(returnValue(false));
+				allowing(cartItem2).isCalculatedBundle(productSkuLookup); will(returnValue(false));
 
 				allowing(productSkuLookup).findByGuid(productSku1.getGuid());
 				will(returnValue(productSku1));
@@ -453,7 +466,6 @@ public class ShoppingCartImplJunit4Test {
 
 	}
 
-	@SuppressWarnings("unchecked")
 	@Test
 	public void testApplyCouponCreatesCouponUseForRegisteredCustomer() {
 		final String code = "CODE";
@@ -463,7 +475,6 @@ public class ShoppingCartImplJunit4Test {
 		final CouponConfig couponConfig = context.mock(CouponConfig.class);
 		final CouponService couponService = context.mock(CouponService.class);
 		final CouponUsageService couponUsageService = context.mock(CouponUsageService.class);
-		final Specification<PotentialCouponUse> spec = context.mock(Specification.class);
 		final Rule rule = context.mock(Rule.class);
 		final RuleService ruleService = context.mock(RuleService.class);
 		final Store store = context.mock(Store.class);
@@ -480,23 +491,24 @@ public class ShoppingCartImplJunit4Test {
 
 		context.checking(new Expectations() {
 			{
-				allowing(beanFactory).getBean(ContextIdNames.VALID_COUPON_USE_SPEC); will(returnValue(spec));
 				allowing(beanFactory).getBean(ContextIdNames.COUPON_USAGE_SERVICE); will(returnValue(couponUsageService));
 				allowing(beanFactory).getBean(ContextIdNames.COUPON_USAGE); will(returnValue(couponUsage));
 				allowing(beanFactory).getBean(ContextIdNames.COUPON_SERVICE); will(returnValue(couponService));
 				allowing(beanFactory).getBean(ContextIdNames.RULE_SERVICE); will(returnValue(ruleService));
 				allowing(rule).getUidPk(); will(returnValue(1L));
-				allowing(store).getCode(); will(returnValue("STORECODE"));
+				allowing(store).getCode(); will(returnValue(STORECODE));
 
 				oneOf(customer).isAnonymous(); will(returnValue(false));
 
 				oneOf(couponService).findByCouponCode(code); will(returnValue(coupon));
-				oneOf(spec).isSatisfiedBy(with(any(PotentialCouponUse.class))); will(returnValue(RuleValidationResultEnum.SUCCESS));
+				oneOf(couponUsageService).validateCouponRuleAndUsage(coupon, STORECODE, email);
+				will(returnValue(CouponUsageValidationResultEnum.SUCCESS));
 				oneOf(ruleService).getLimitedUseRule(code); will(returnValue(rule));
 				oneOf(rule).hasLimitedUseCondition(); will(returnValue(true));
 				oneOf(couponConfig).getUsageType(); will(returnValue(CouponUsageType.LIMIT_PER_ANY_USER));
 				oneOf(couponUsageService).findByCodeAndType(couponConfig, code, email); will(returnValue(null));
-				oneOf(couponUsageService).isValidCouponUsage(email, coupon, null); will(returnValue(true));
+				oneOf(couponUsageService).validateCouponUsage(email, coupon, null);
+				will(returnValue(CouponUsageValidationResultEnum.SUCCESS));
 				oneOf(couponUsageService).add(couponUsage);
 			}
 		});
@@ -508,7 +520,6 @@ public class ShoppingCartImplJunit4Test {
 
 	}
 
-	@SuppressWarnings("unchecked")
 	@Test
 	public void testApplyCouponDoesNotCreateCouponUseForAnonymousCustomer() {
 		final String code = "CODE";
@@ -516,9 +527,9 @@ public class ShoppingCartImplJunit4Test {
 		final BeanFactory beanFactory = context.mock(BeanFactory.class);
 		final CouponConfig couponConfig = context.mock(CouponConfig.class);
 		final CouponService couponService = context.mock(CouponService.class);
+		final CouponUsageService couponUsageService = context.mock(CouponUsageService.class);
 		final Rule rule = context.mock(Rule.class);
 		final RuleService ruleService = context.mock(RuleService.class);
-		final Specification<PotentialCouponUse> spec = context.mock(Specification.class);
 		final Store store = context.mock(Store.class);
 
 		ShoppingCart shoppingCart = getShoppingCart(beanFactory);
@@ -531,16 +542,17 @@ public class ShoppingCartImplJunit4Test {
 
 		context.checking(new Expectations() {
 			{
-				allowing(beanFactory).getBean(ContextIdNames.VALID_COUPON_USE_SPEC); will(returnValue(spec));
+				allowing(beanFactory).getBean(ContextIdNames.COUPON_USAGE_SERVICE); will(returnValue(couponUsageService));
 				allowing(beanFactory).getBean(ContextIdNames.COUPON_SERVICE); will(returnValue(couponService));
 				allowing(beanFactory).getBean(ContextIdNames.RULE_SERVICE); will(returnValue(ruleService));
 				allowing(rule).getUidPk(); will(returnValue(1L));
-				allowing(store).getCode(); will(returnValue("STORECODE"));
+				allowing(store).getCode(); will(returnValue(STORECODE));
 
 				oneOf(customer).isAnonymous(); will(returnValue(true));
 
 				oneOf(couponService).findByCouponCode(code); will(returnValue(coupon));
-				oneOf(spec).isSatisfiedBy(with(any(PotentialCouponUse.class))); will(returnValue(RuleValidationResultEnum.SUCCESS));
+				oneOf(couponUsageService).validateCouponRuleAndUsage(coupon, STORECODE, null);
+				will(returnValue(CouponUsageValidationResultEnum.SUCCESS));
 				oneOf(ruleService).getLimitedUseRule(code); will(returnValue(rule));
 				oneOf(rule).hasLimitedUseCondition(); will(returnValue(true));
 
@@ -550,6 +562,183 @@ public class ShoppingCartImplJunit4Test {
 		});
 
 		shoppingCart.applyPromotionCode(code);
+
+	}
+
+	@Test
+	public void testRemoveLevelOneCartItem() {
+		final ShoppingItem parentCartItem = getMockBundleConstituent("parentCartItem");
+		final ShoppingItem levelOneCartItem = getMockBundleConstituent("levelOneCartItem");
+		final ShoppingItem levelTwoCartItem1 = getMockBundleConstituent("levelTwoCartItem1");
+		final ShoppingItem levelTwoCartItem2 = getMockBundleConstituent("levelTwoCartItem2");
+		final ShoppingItem levelThreeCartItem1 = getMockBundleConstituent("levelThreeCartItem1");
+		final ShoppingItem levelThreeCartItem2 = getMockBundleConstituent("levelThreeCartItem2");
+		final ShoppingItem levelThreeCartItem3 = getMockBundleConstituent("levelThreeCartItem3");
+		final ShoppingItem levelThreeCartItem4 = getMockBundleConstituent("levelThreeCartItem4");
+
+		parentCartItem.addChild(levelOneCartItem);
+		levelOneCartItem.addChild(levelTwoCartItem1);
+		levelOneCartItem.addChild(levelTwoCartItem2);
+		levelTwoCartItem1.addChild(levelThreeCartItem1);
+		levelTwoCartItem1.addChild(levelThreeCartItem2);
+		levelTwoCartItem2.addChild(levelThreeCartItem3);
+		levelTwoCartItem2.addChild(levelThreeCartItem4);
+
+		final ShoppingCart mockShoppingCart = getMockShoppingCart(parentCartItem, levelOneCartItem, levelTwoCartItem1, levelTwoCartItem2,
+				levelThreeCartItem1, levelThreeCartItem2, levelThreeCartItem3, levelThreeCartItem4);
+
+		assertThat(parentCartItem.getChildren()).containsExactly(levelOneCartItem);
+		assertThat(parentCartItem.getChildren().get(0).getChildren()).containsExactly(levelTwoCartItem1, levelTwoCartItem2);
+		assertThat(parentCartItem.getChildren().get(0).getChildren().get(0).getChildren()).containsExactly(levelThreeCartItem1, levelThreeCartItem2);
+		assertThat(parentCartItem.getChildren().get(0).getChildren().get(1).getChildren()).containsExactly(levelThreeCartItem3, levelThreeCartItem4);
+
+		mockShoppingCart.removeCartItems(Collections.singletonList(levelOneCartItem.getGuid()));
+
+		assertThat(parentCartItem.getChildren()).isEmpty();
+	}
+
+	@Test
+	public void testRemoveLevelTwoCartItem() {
+		final ShoppingItem parentCartItem = getMockBundleConstituent("parentCartItem");
+		final ShoppingItem levelOneCartItem = getMockBundleConstituent("levelOneCartItem");
+		final ShoppingItem levelTwoCartItem1 = getMockBundleConstituent("levelTwoCartItem1");
+		final ShoppingItem levelTwoCartItem2 = getMockBundleConstituent("levelTwoCartItem2");
+		final ShoppingItem levelThreeCartItem1 = getMockBundleConstituent("levelThreeCartItem1");
+		final ShoppingItem levelThreeCartItem2 = getMockBundleConstituent("levelThreeCartItem2");
+		final ShoppingItem levelThreeCartItem3 = getMockBundleConstituent("levelThreeCartItem3");
+		final ShoppingItem levelThreeCartItem4 = getMockBundleConstituent("levelThreeCartItem4");
+
+		parentCartItem.addChild(levelOneCartItem);
+		levelOneCartItem.addChild(levelTwoCartItem1);
+		levelOneCartItem.addChild(levelTwoCartItem2);
+		levelTwoCartItem1.addChild(levelThreeCartItem1);
+		levelTwoCartItem1.addChild(levelThreeCartItem2);
+		levelTwoCartItem2.addChild(levelThreeCartItem3);
+		levelTwoCartItem2.addChild(levelThreeCartItem4);
+
+		final ShoppingCart mockShoppingCart = getMockShoppingCart(parentCartItem, levelOneCartItem, levelTwoCartItem1, levelTwoCartItem2,
+				levelThreeCartItem1, levelThreeCartItem2, levelThreeCartItem3, levelThreeCartItem4);
+
+		assertThat(parentCartItem.getChildren()).containsExactly(levelOneCartItem);
+		assertThat(parentCartItem.getChildren().get(0).getChildren()).containsExactly(levelTwoCartItem1, levelTwoCartItem2);
+		assertThat(parentCartItem.getChildren().get(0).getChildren().get(0).getChildren()).containsExactly(levelThreeCartItem1, levelThreeCartItem2);
+		assertThat(parentCartItem.getChildren().get(0).getChildren().get(1).getChildren()).containsExactly(levelThreeCartItem3, levelThreeCartItem4);
+
+		mockShoppingCart.removeCartItems(Collections.singletonList(levelTwoCartItem2.getGuid()));
+
+		assertThat(parentCartItem.getChildren()).containsExactly(levelOneCartItem);
+		assertThat(parentCartItem.getChildren().get(0).getChildren()).containsExactly(levelTwoCartItem1);
+		assertThat(parentCartItem.getChildren().get(0).getChildren()).doesNotContain(levelTwoCartItem2);
+
+		mockShoppingCart.removeCartItems(Collections.singletonList(levelTwoCartItem1.getGuid()));
+
+		assertThat(parentCartItem.getChildren()).containsExactly(levelOneCartItem);
+		assertThat(parentCartItem.getChildren().get(0).getChildren()).isEmpty();
+
+		mockShoppingCart.removeCartItems(Collections.singletonList(levelOneCartItem.getGuid()));
+
+		assertThat(parentCartItem.getChildren()).isEmpty();
+	}
+
+	@Test
+	public void testRemoveLevelThreeCartItem() {
+		final ShoppingItem parentCartItem = getMockBundleConstituent("parentCartItem");
+		final ShoppingItem levelOneCartItem = getMockBundleConstituent("levelOneCartItem");
+		final ShoppingItem levelTwoCartItem1 = getMockBundleConstituent("levelTwoCartItem1");
+		final ShoppingItem levelTwoCartItem2 = getMockBundleConstituent("levelTwoCartItem2");
+		final ShoppingItem levelThreeCartItem1 = getMockBundleConstituent("levelThreeCartItem1");
+		final ShoppingItem levelThreeCartItem2 = getMockBundleConstituent("levelThreeCartItem2");
+		final ShoppingItem levelThreeCartItem3 = getMockBundleConstituent("levelThreeCartItem3");
+		final ShoppingItem levelThreeCartItem4 = getMockBundleConstituent("levelThreeCartItem4");
+
+		parentCartItem.addChild(levelOneCartItem);
+		levelOneCartItem.addChild(levelTwoCartItem1);
+		levelOneCartItem.addChild(levelTwoCartItem2);
+		levelTwoCartItem1.addChild(levelThreeCartItem1);
+		levelTwoCartItem1.addChild(levelThreeCartItem2);
+		levelTwoCartItem2.addChild(levelThreeCartItem3);
+		levelTwoCartItem2.addChild(levelThreeCartItem4);
+
+		final ShoppingCart mockShoppingCart = getMockShoppingCart(parentCartItem, levelOneCartItem, levelTwoCartItem1, levelTwoCartItem2,
+				levelThreeCartItem1, levelThreeCartItem2, levelThreeCartItem3, levelThreeCartItem4);
+
+		assertThat(parentCartItem.getChildren()).containsExactly(levelOneCartItem);
+		assertThat(parentCartItem.getChildren().get(0).getChildren()).containsExactly(levelTwoCartItem1, levelTwoCartItem2);
+		assertThat(parentCartItem.getChildren().get(0).getChildren().get(0).getChildren()).containsExactly(levelThreeCartItem1, levelThreeCartItem2);
+		assertThat(parentCartItem.getChildren().get(0).getChildren().get(1).getChildren()).containsExactly(levelThreeCartItem3, levelThreeCartItem4);
+
+		mockShoppingCart.removeCartItems(Collections.singletonList(levelThreeCartItem1.getGuid()));
+
+		assertThat(parentCartItem.getChildren()).containsExactly(levelOneCartItem);
+		assertThat(parentCartItem.getChildren().get(0).getChildren()).containsExactly(levelTwoCartItem1, levelTwoCartItem2);
+		assertThat(parentCartItem.getChildren().get(0).getChildren().get(1).getChildren()).containsExactly(levelThreeCartItem3, levelThreeCartItem4);
+		assertThat(parentCartItem.getChildren().get(0).getChildren().get(0).getChildren()).containsExactly(levelThreeCartItem2);
+		assertThat(parentCartItem.getChildren().get(0).getChildren().get(0).getChildren()).doesNotContain(levelThreeCartItem1);
+
+		mockShoppingCart.removeCartItems(Collections.singletonList(levelThreeCartItem2.getGuid()));
+
+		assertThat(parentCartItem.getChildren()).containsExactly(levelOneCartItem);
+		assertThat(parentCartItem.getChildren().get(0).getChildren()).containsExactly(levelTwoCartItem1, levelTwoCartItem2);
+		assertThat(parentCartItem.getChildren().get(0).getChildren().get(1).getChildren()).containsExactly(levelThreeCartItem3, levelThreeCartItem4);
+		assertThat(parentCartItem.getChildren().get(0).getChildren().get(0).getChildren()).isEmpty();
+
+		mockShoppingCart.removeCartItems(Collections.singletonList(levelThreeCartItem3.getGuid()));
+
+		assertThat(parentCartItem.getChildren()).containsExactly(levelOneCartItem);
+		assertThat(parentCartItem.getChildren().get(0).getChildren()).containsExactly(levelTwoCartItem1, levelTwoCartItem2);
+		assertThat(parentCartItem.getChildren().get(0).getChildren().get(1).getChildren()).containsExactly(levelThreeCartItem4);
+		assertThat(parentCartItem.getChildren().get(0).getChildren().get(1).getChildren()).doesNotContain(levelThreeCartItem3);
+		assertThat(parentCartItem.getChildren().get(0).getChildren().get(0).getChildren()).isEmpty();
+
+		mockShoppingCart.removeCartItems(Collections.singletonList(levelThreeCartItem4.getGuid()));
+
+		assertThat(parentCartItem.getChildren()).containsExactly(levelOneCartItem);
+		assertThat(parentCartItem.getChildren().get(0).getChildren()).containsExactly(levelTwoCartItem1, levelTwoCartItem2);
+		assertThat(parentCartItem.getChildren().get(0).getChildren().get(1).getChildren()).isEmpty();
+		assertThat(parentCartItem.getChildren().get(0).getChildren().get(0).getChildren()).isEmpty();
+
+		mockShoppingCart.removeCartItems(Collections.singletonList(levelTwoCartItem2.getGuid()));
+
+		assertThat(parentCartItem.getChildren()).containsExactly(levelOneCartItem);
+		assertThat(parentCartItem.getChildren().get(0).getChildren()).containsExactly(levelTwoCartItem1);
+		assertThat(parentCartItem.getChildren().get(0).getChildren()).doesNotContain(levelTwoCartItem2);
+
+		mockShoppingCart.removeCartItems(Collections.singletonList(levelTwoCartItem1.getGuid()));
+
+		assertThat(parentCartItem.getChildren()).containsExactly(levelOneCartItem);
+		assertThat(parentCartItem.getChildren().get(0).getChildren()).isEmpty();
+
+		mockShoppingCart.removeCartItems(Collections.singletonList(levelOneCartItem.getGuid()));
+
+		assertThat(parentCartItem.getChildren()).isEmpty();
+	}
+
+	private static ShoppingItem getMockBundleConstituent(final String guid) {
+		final ShoppingItemImpl shoppingItem = new ShoppingItemImpl();
+		shoppingItem.setGuid(guid);
+		shoppingItem.setBundleConstituent(true);
+		return shoppingItem;
+	}
+
+	@SuppressWarnings("unchecked")
+	private static ShoppingCart getMockShoppingCart(final ShoppingItem... cartItems) {
+		final ShoppingCartImpl mockShoppingCart = spy(ShoppingCartImpl.class);
+		final ProductSkuLookup lookup = mock(ProductSkuLookup.class);
+		final ProductSku productSku = mock(ProductSku.class);
+		final ShoppingCartMemento mockShoppingCartMemento = mock(ShoppingCartMemento.class);
+		final List<ShoppingItem> cartItemsList = new ArrayList<>(Arrays.asList(cartItems));
+
+		when(productSku.getSkuCode()).thenReturn("sku");
+		when(lookup.findByGuid(any())).thenReturn(productSku);
+		when(mockShoppingCartMemento.getAllItems()).thenReturn(cartItemsList);
+
+		doReturn(lookup).when(mockShoppingCart).getProductSkuLookup();
+		doReturn(mock(Collection.class)).when(mockShoppingCart).getRemovedCartItemSkus();
+		doReturn(mockShoppingCartMemento).when(mockShoppingCart).getShoppingCartMemento();
+		doReturn(cartItemsList).when(mockShoppingCart).getAllShoppingItems();
+		doAnswer(invocation -> Arrays.stream(cartItems)).when(mockShoppingCart).getAllShoppingItemsStream();
+
+		return mockShoppingCart;
 
 	}
 

@@ -14,8 +14,8 @@ import org.apache.commons.lang.StringUtils;
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.attribute.AttributeGroup;
 import com.elasticpath.domain.attribute.AttributeGroupAttribute;
-import com.elasticpath.domain.cartmodifier.CartItemModifierGroup;
 import com.elasticpath.domain.catalog.ProductType;
+import com.elasticpath.domain.modifier.ModifierGroup;
 import com.elasticpath.domain.skuconfiguration.SkuOption;
 import com.elasticpath.domain.tax.TaxCode;
 import com.elasticpath.importexport.common.adapters.AbstractDomainAdapterImpl;
@@ -23,7 +23,7 @@ import com.elasticpath.importexport.common.adapters.catalogs.helper.AttributeGro
 import com.elasticpath.importexport.common.dto.catalogs.MultiSkuDTO;
 import com.elasticpath.importexport.common.dto.catalogs.ProductTypeDTO;
 import com.elasticpath.importexport.common.exception.runtime.PopulationRollbackException;
-import com.elasticpath.service.cartitemmodifier.CartItemModifierService;
+import com.elasticpath.service.modifier.ModifierService;
 
 /**
  * The implementation of <code>DomainAdapter</code> interface.<br>
@@ -33,7 +33,7 @@ public class ProductTypeAdapter extends AbstractDomainAdapterImpl<ProductType, P
 
 	private AttributeGroupHelper attributeGroupHelper;
 
-	private CartItemModifierService cartItemModifierService;
+	private ModifierService modifierService;
 
 
 	@Override
@@ -48,15 +48,15 @@ public class ProductTypeAdapter extends AbstractDomainAdapterImpl<ProductType, P
 			productTypeDTO.setMultiSku(createMultiSkuDTO(productType));
 		}
 
-		if (productType.getCartItemModifierGroups() == null || productType.getCartItemModifierGroups().isEmpty()) {
+		if (productType.getModifierGroups() == null || productType.getModifierGroups().isEmpty()) {
 			return;
 		}
 
-		productTypeDTO.setAssignedCartItemModifierGroups(new ArrayList<>());
-		for (CartItemModifierGroup cartItemModifierGroup : productType.getCartItemModifierGroups()) {
-			productTypeDTO.getAssignedCartItemModifierGroups().add(cartItemModifierGroup.getCode());
+		productTypeDTO.setAssignedModifierGroups(new ArrayList<>());
+		for (ModifierGroup cartItemModifierGroup : productType.getModifierGroups()) {
+			productTypeDTO.getAssignedModifierGroups().add(cartItemModifierGroup.getCode());
 		}
-		Collections.sort(productTypeDTO.getAssignedCartItemModifierGroups());
+		Collections.sort(productTypeDTO.getAssignedModifierGroups());
 	}
 
 
@@ -105,16 +105,16 @@ public class ProductTypeAdapter extends AbstractDomainAdapterImpl<ProductType, P
 		
 		populateWithMultipleSkus(productType, productTypeDTO.getMultiSku());
 
-		if (productTypeDTO.getAssignedCartItemModifierGroups() == null || productTypeDTO.getAssignedCartItemModifierGroups().isEmpty()) {
+		if (productTypeDTO.getAssignedModifierGroups() == null || productTypeDTO.getAssignedModifierGroups().isEmpty()) {
 			return;
 		}
 
-		for (String cartItemModifierGroupCode : productTypeDTO.getAssignedCartItemModifierGroups()) {
-			CartItemModifierGroup cartItemModifierGroup = cartItemModifierService.findCartItemModifierGroupByCode(cartItemModifierGroupCode);
+		for (String cartItemModifierGroupCode : productTypeDTO.getAssignedModifierGroups()) {
+			ModifierGroup cartItemModifierGroup = modifierService.findModifierGroupByCode(cartItemModifierGroupCode);
 			if (cartItemModifierGroup == null) {
-				throw new IllegalStateException("Cannot find CartItemModifierGroup with code " + cartItemModifierGroupCode + " on the database");
+				throw new IllegalStateException("Cannot find ModifierGroup with code " + cartItemModifierGroupCode + " on the database");
 			}
-			productType.getCartItemModifierGroups().add(cartItemModifierGroup);
+			productType.getModifierGroups().add(cartItemModifierGroup);
 		}
 	}
 
@@ -213,7 +213,7 @@ public class ProductTypeAdapter extends AbstractDomainAdapterImpl<ProductType, P
 
 	@Override
 	public ProductType createDomainObject() {
-		return getBeanFactory().getBean(ContextIdNames.PRODUCT_TYPE);
+		return getBeanFactory().getPrototypeBean(ContextIdNames.PRODUCT_TYPE, ProductType.class);
 	}
 	
 	@Override
@@ -239,11 +239,11 @@ public class ProductTypeAdapter extends AbstractDomainAdapterImpl<ProductType, P
 		this.attributeGroupHelper = attributeGroupHelper;
 	}
 
-	protected CartItemModifierService getCartItemModifierService() {
-		return cartItemModifierService;
+	protected ModifierService getModifierService() {
+		return modifierService;
 	}
 
-	public void setCartItemModifierService(final CartItemModifierService cartItemModifierService) {
-		this.cartItemModifierService = cartItemModifierService;
+	public void setModifierService(final ModifierService cartItemModifierService) {
+		this.modifierService = cartItemModifierService;
 	}
 }

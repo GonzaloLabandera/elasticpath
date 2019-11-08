@@ -103,13 +103,13 @@ public class SessionCleanupJobTest {
 				
 				oneOf(shopperCleanupService).findShoppersOrphanedFromCustomerSessions(BATCH_SIZE); will(returnValue(orphanedShoppers));
 
-				oneOf(shoppingCartService).deleteAllShoppingCartsByShopperUids(anonymousUids);
-				oneOf(wishlistService).deleteAllWishListsByShopperUids(anonymousUids);
+				oneOf(shoppingCartService).deleteDefaultEmptyShoppingCartsByShopperUids(anonymousUids);
+				oneOf(wishlistService).deleteEmptyWishListsByShopperUids(anonymousUids);
 				oneOf(shopperCleanupService).removeShoppersByUidList(anonymousUids);
 
-				oneOf(shoppingCartService).deleteEmptyShoppingCartsByShopperUids(registeredUids);
-				oneOf(wishlistService).deleteEmptyWishListsByShopperUids(registeredUids);
-				oneOf(shopperCleanupService).removeShoppersByUidList(registeredUids);
+				never(shoppingCartService).deleteDefaultEmptyShoppingCartsByShopperUids(registeredUids);
+				never(wishlistService).deleteEmptyWishListsByShopperUids(registeredUids);
+				never(shopperCleanupService).removeShoppersByUidList(registeredUids);
 			}
 		});
 		job.purgeSessionHistory();
@@ -125,7 +125,7 @@ public class SessionCleanupJobTest {
 		
 		context.checking(new Expectations() {
 			{
-				allowing(timeService).getCurrentTime();
+				oneOf(timeService).getCurrentTime();
 				will(returnValue(calendar.getTime()));
 			}
 		});
@@ -140,7 +140,13 @@ public class SessionCleanupJobTest {
 	 */
 	private ShopperMemento createRegisteredShopper(final long uidPk) {
 		ShopperMemento shopper = new ShopperMementoImpl();
-		Customer customer = context.mock(Customer.class);
+		Customer customer = context.mock(Customer.class, "registered");
+		context.checking(new Expectations() {
+			{
+				allowing(customer).isAnonymous();
+				will(returnValue(false));
+			}
+		});
 		shopper.setUidPk(uidPk);
 		shopper.setCustomer(customer);
 		return shopper;
@@ -154,6 +160,14 @@ public class SessionCleanupJobTest {
 	 */
 	private ShopperMemento createAnonymousShopper(final long uidPk) {
 		ShopperMemento shopper = new ShopperMementoImpl();
+		Customer customer = context.mock(Customer.class, "anonymous");
+		context.checking(new Expectations() {
+			{
+				allowing(customer).isAnonymous();
+				will(returnValue(true));
+			}
+		});
+		shopper.setCustomer(customer);
 		shopper.setUidPk(uidPk);
 		return shopper;
 	}

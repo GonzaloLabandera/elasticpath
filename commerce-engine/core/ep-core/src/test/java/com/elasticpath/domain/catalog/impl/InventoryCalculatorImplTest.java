@@ -21,6 +21,7 @@ import com.elasticpath.domain.catalog.AvailabilityCriteria;
 import com.elasticpath.domain.catalog.BundleConstituent;
 import com.elasticpath.domain.catalog.Product;
 import com.elasticpath.domain.catalog.ProductBundle;
+import com.elasticpath.domain.catalog.ProductConstituent;
 import com.elasticpath.domain.catalog.ProductSku;
 import com.elasticpath.inventory.InventoryDto;
 import com.elasticpath.inventory.impl.InventoryDtoImpl;
@@ -105,7 +106,7 @@ public class InventoryCalculatorImplTest {
 	@Test
 	public void testGetAvailableQuantityInStockBundleOne() {
 
-		expectationsFactory.allowingBeanFactoryGetBean(PRODUCT_CONSTITUENT, ProductConstituentImpl.class);
+		expectationsFactory.allowingBeanFactoryGetPrototypeBean(PRODUCT_CONSTITUENT, ProductConstituent.class, ProductConstituentImpl.class);
 
 		ProductSkuImpl productSkuRoot = new ProductSkuImpl();
 
@@ -146,7 +147,7 @@ public class InventoryCalculatorImplTest {
 	@Test
 	public void testGetAvailableQuantityInStockBundleMany() {
 
-		expectationsFactory.allowingBeanFactoryGetBean(PRODUCT_CONSTITUENT, ProductConstituentImpl.class);
+		expectationsFactory.allowingBeanFactoryGetPrototypeBean(PRODUCT_CONSTITUENT, ProductConstituent.class, ProductConstituentImpl.class);
 
 		ProductSkuImpl productSkuRoot = new ProductSkuImpl();
 		productSkuRoot.setGuid("skuRoot");
@@ -210,7 +211,7 @@ public class InventoryCalculatorImplTest {
 	@Test
 	public void testGetAvailableQuantityInStockBundleDeep() {
 
-		expectationsFactory.allowingBeanFactoryGetBean(PRODUCT_CONSTITUENT, ProductConstituentImpl.class);
+		expectationsFactory.allowingBeanFactoryGetPrototypeBean(PRODUCT_CONSTITUENT, ProductConstituent.class, ProductConstituentImpl.class);
 
 		ProductSkuImpl productSkuRoot = new ProductSkuImpl();
 
@@ -267,7 +268,7 @@ public class InventoryCalculatorImplTest {
 	@Test
 	public void testGetAvailableQuantityInStockTwoOfSameSku() {
 
-		expectationsFactory.allowingBeanFactoryGetBean(PRODUCT_CONSTITUENT, ProductConstituentImpl.class);
+		expectationsFactory.allowingBeanFactoryGetPrototypeBean(PRODUCT_CONSTITUENT, ProductConstituent.class, ProductConstituentImpl.class);
 
 		ProductSkuImpl productSkuRoot = new ProductSkuImpl();
 		productSkuRoot.setSkuCode("skuRoot");
@@ -320,7 +321,7 @@ public class InventoryCalculatorImplTest {
 	@Test
 	public void testGetAvailableQuantityBundleQuantity() {
 
-		expectationsFactory.allowingBeanFactoryGetBean(PRODUCT_CONSTITUENT, ProductConstituentImpl.class);
+		expectationsFactory.allowingBeanFactoryGetPrototypeBean(PRODUCT_CONSTITUENT, ProductConstituent.class, ProductConstituentImpl.class);
 
 		ProductSkuImpl productSkuRoot = new ProductSkuImpl();
 		productSkuRoot.setSkuCode("skuRoot");
@@ -367,7 +368,7 @@ public class InventoryCalculatorImplTest {
 	@Test
 	public void testGetAvailableQuantityInStockBundleQuantityDeep() {
 
-		expectationsFactory.allowingBeanFactoryGetBean(PRODUCT_CONSTITUENT, ProductConstituentImpl.class);
+		expectationsFactory.allowingBeanFactoryGetPrototypeBean(PRODUCT_CONSTITUENT, ProductConstituent.class, ProductConstituentImpl.class);
 
 		ProductSkuImpl productSkuRoot = new ProductSkuImpl();
 
@@ -424,7 +425,7 @@ public class InventoryCalculatorImplTest {
 	public void testGetAvailableQuantityNestedConstituentAlwaysAvailable() {
 
 		// Setup is one bundle with two direct children. One with available if in stock and the other is always available.
-		expectationsFactory.allowingBeanFactoryGetBean(PRODUCT_CONSTITUENT, ProductConstituentImpl.class);
+		expectationsFactory.allowingBeanFactoryGetPrototypeBean(PRODUCT_CONSTITUENT, ProductConstituent.class, ProductConstituentImpl.class);
 
 		ProductSkuImpl productSkuRoot = new ProductSkuImpl();
 

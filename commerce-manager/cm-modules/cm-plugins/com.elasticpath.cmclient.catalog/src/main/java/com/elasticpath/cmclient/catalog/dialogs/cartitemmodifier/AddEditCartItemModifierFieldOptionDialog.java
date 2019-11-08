@@ -36,10 +36,10 @@ import com.elasticpath.cmclient.policy.common.PolicyActionContainer;
 import com.elasticpath.cmclient.policy.ui.AbstractPolicyAwareDialog;
 import com.elasticpath.cmclient.policy.ui.IPolicyTargetLayoutComposite;
 import com.elasticpath.commons.constants.ContextIdNames;
-import com.elasticpath.domain.cartmodifier.CartItemModifierField;
-import com.elasticpath.domain.cartmodifier.CartItemModifierFieldOption;
-import com.elasticpath.domain.cartmodifier.CartItemModifierFieldOptionLdf;
-import com.elasticpath.domain.cartmodifier.CartItemModifierGroup;
+import com.elasticpath.domain.modifier.ModifierField;
+import com.elasticpath.domain.modifier.ModifierFieldOption;
+import com.elasticpath.domain.modifier.ModifierFieldOptionLdf;
+import com.elasticpath.domain.modifier.ModifierGroup;
 
 /**
  * The dialog UI class for Adding/Editing cartItemModifierFieldOption.
@@ -58,9 +58,9 @@ public class AddEditCartItemModifierFieldOptionDialog extends AbstractPolicyAwar
 
 	private final DataBindingContext dataBindingContext;
 
-	private CartItemModifierFieldOption cartItemModifierFieldOption;
+	private ModifierFieldOption cartItemModifierFieldOption;
 
-	private CartItemModifierField cartItemModifierField;
+	private ModifierField cartItemModifierField;
 
 	private Text optionDisplayNameText;
 
@@ -79,12 +79,12 @@ public class AddEditCartItemModifierFieldOptionDialog extends AbstractPolicyAwar
 	private List<String> allLocalesTags;
 
 
-	private CartItemModifierGroup cartItemModifierGroup;
+	private ModifierGroup cartItemModifierGroup;
 
 	/**
 	 * Policy container for the dialog controls.
 	 */
-	private PolicyActionContainer addEditCartItemModifierFieldOptionContainer;
+	private PolicyActionContainer addEditModifierFieldOptionContainer;
 
 	/**
 	 * Default Constructor.
@@ -100,13 +100,13 @@ public class AddEditCartItemModifierFieldOptionDialog extends AbstractPolicyAwar
 	 * @param allLocales                  All Locales available.
 	 * @param selectedLocale              the selected locale.
 	 * @param cartItemModifierFieldOption the cart item modifier field option to be edited o added
-	 *                                    {@link CartItemModifierFieldOption}
-	 * @param cartItemModifierField       the cart item modifier field associated {@link CartItemModifierField}
-	 * @param cartItemModifierGroup       the cart item modifier group
+	 *                                    {@link ModifierFieldOption}
+	 * @param modifierField       the cart item modifier field associated {@link ModifierField}
+	 * @param modifierGroup       the cart item modifier group
 	 */
 	public AddEditCartItemModifierFieldOptionDialog(final List<Locale> allLocales,
-			final Locale selectedLocale, final CartItemModifierFieldOption cartItemModifierFieldOption,
-			final CartItemModifierField cartItemModifierField, final CartItemModifierGroup cartItemModifierGroup) {
+			final Locale selectedLocale, final ModifierFieldOption cartItemModifierFieldOption,
+			final ModifierField modifierField, final ModifierGroup modifierGroup) {
 
 		this();
 		this.allLocales = allLocales;
@@ -116,13 +116,13 @@ public class AddEditCartItemModifierFieldOptionDialog extends AbstractPolicyAwar
 		if (editMode) {
 			initializeDialog(cartItemModifierFieldOption);
 		} else {
-			createCartItemModifierFieldOption();
+			createModifierFieldOption();
 		}
-		this.cartItemModifierField = cartItemModifierField;
-		this.cartItemModifierGroup = cartItemModifierGroup;
+		this.cartItemModifierField = modifierField;
+		this.cartItemModifierGroup = modifierGroup;
 	}
 
-	private void initializeDialog(final CartItemModifierFieldOption newField) {
+	private void initializeDialog(final ModifierFieldOption newField) {
 		this.cartItemModifierFieldOption = newField;
 
 		// remember the original code for validation purposes
@@ -130,11 +130,11 @@ public class AddEditCartItemModifierFieldOptionDialog extends AbstractPolicyAwar
 	}
 
 	/**
-	 * @return the current CartItemModifierField object edited or added.
+	 * @return the current ModifierField object edited or added.
 	 */
-	public CartItemModifierFieldOption getCartItemModifierFieldOption() {
+	public ModifierFieldOption getModifierFieldOption() {
 		if (cartItemModifierFieldOption == null) {
-			createCartItemModifierFieldOption();
+			createModifierFieldOption();
 		}
 		if (this.cartItemModifierFieldOption.getValue() != null) {
 			this.originalValue = this.cartItemModifierFieldOption.getValue();
@@ -142,8 +142,8 @@ public class AddEditCartItemModifierFieldOptionDialog extends AbstractPolicyAwar
 		return cartItemModifierFieldOption;
 	}
 
-	private void createCartItemModifierFieldOption() {
-		this.cartItemModifierFieldOption = ServiceLocator.getService(ContextIdNames.CART_ITEM_MODIFIER_FIELD_OPTION);
+	private void createModifierFieldOption() {
+		this.cartItemModifierFieldOption = ServiceLocator.getService(ContextIdNames.MODIFIER_FIELD_OPTION);
 		this.originalValue = "";
 	}
 
@@ -155,9 +155,9 @@ public class AddEditCartItemModifierFieldOptionDialog extends AbstractPolicyAwar
 			@Override
 			protected IStatus doSet(final IObservableValue observableValue, final Object newValue) {
 				final String value = optionValueText.getText();
-				getCartItemModifierFieldOption().setValue(value);
+				getModifierFieldOption().setValue(value);
 				if (!editMode) {
-					getCartItemModifierFieldOption().setOrdering(getMaximumFieldOptionOrdering(cartItemModifierField) + 1);
+					getModifierFieldOption().setOrdering(getMaximumFieldOptionOrdering(cartItemModifierField) + 1);
 				}
 				return Status.OK_STATUS;
 			}
@@ -170,10 +170,10 @@ public class AddEditCartItemModifierFieldOptionDialog extends AbstractPolicyAwar
 				return Status.OK_STATUS;
 			}
 		};
-		// CartItemModifierFieldOption value
+		// ModifierFieldOption value
 		bindingProvider.bind(dataBindingContext, this.optionValueText,
 				EpValidatorFactory.CARTITEM_MODIFIER_OPTION_VALUE, null, valueUpdateStrategy, true);
-		// CartItemModifierFieldOption displayName
+		// ModifierFieldOption displayName
 		bindingProvider.bind(dataBindingContext, this.optionDisplayNameText, EpValidatorFactory.STRING_255_REQUIRED, null,
 				displayNameUpdateStrategy, true);
 		EpDialogSupport.create(this, dataBindingContext);
@@ -182,17 +182,17 @@ public class AddEditCartItemModifierFieldOptionDialog extends AbstractPolicyAwar
 	@Override
 	protected String getTitle() {
 		if (!editMode) {
-			return CatalogMessages.get().AddEditCartItemModifierFieldOptionDialog_Iitle_AddModifierField;
+			return CatalogMessages.get().AddEditModifierFieldOptionDialog_Iitle_AddModifierField;
 		}
-		return CatalogMessages.get().AddEditCartItemModifierFieldOptionDialog_Iitle_EditModifierField;
+		return CatalogMessages.get().AddEditModifierFieldOptionDialog_Iitle_EditModifierField;
 	}
 
 	@Override
 	protected String getInitialMessage() {
 		if (!editMode) {
-			return CatalogMessages.get().AddEditCartItemModifierFieldOptionDialog_InitMsg_AddNewModifierField;
+			return CatalogMessages.get().AddEditModifierFieldOptionDialog_InitMsg_AddNewModifierField;
 		}
-		return CatalogMessages.get().AddEditCartItemModifierFieldOptionDialog_InitMsg_EditAnModifierField;
+		return CatalogMessages.get().AddEditModifierFieldOptionDialog_InitMsg_EditAnModifierField;
 	}
 
 	@Override
@@ -204,9 +204,9 @@ public class AddEditCartItemModifierFieldOptionDialog extends AbstractPolicyAwar
 	@Override
 	protected String getWindowTitle() {
 		if (!editMode) {
-			return CatalogMessages.get().AddEditCartItemModifierFieldOptionDialog_WinIitle_AddModifierField;
+			return CatalogMessages.get().AddEditModifierFieldOptionDialog_WinIitle_AddModifierField;
 		}
-		return CatalogMessages.get().AddEditCartItemModifierFieldOptionDialog_WinIitle_EditModifierField;
+		return CatalogMessages.get().AddEditModifierFieldOptionDialog_WinIitle_EditModifierField;
 	}
 
 	@Override
@@ -226,20 +226,20 @@ public class AddEditCartItemModifierFieldOptionDialog extends AbstractPolicyAwar
 		final String optFieldValue = optionValueText.getText();
 		final String optFieldName = optionDisplayNameText.getText();
 		if (optFieldValue.trim().isEmpty()) {
-			setErrorMessage(CatalogMessages.get().AddEditCartItemModifierFieldOptionDialog_ErrorDialog_noValue_desc);
+			setErrorMessage(CatalogMessages.get().AddEditModifierFieldOptionDialog_ErrorDialog_noValue_desc);
 			return false;
 		} else if (optFieldName.trim().isEmpty()) {
-			setErrorMessage(CatalogMessages.get().AddEditCartItemModifierFieldOptionDialog_ErrorDialog_noName_desc);
+			setErrorMessage(CatalogMessages.get().AddEditModifierFieldOptionDialog_ErrorDialog_noName_desc);
 			return false;
 		} else {
 			//validates the model (newly added items) to not have 2 values with same locale
 			if (cartItemModifierField != null) {
-				for (CartItemModifierFieldOption itemModifierFieldOption : cartItemModifierField.getCartItemModifierFieldOptions()) {
+				for (ModifierFieldOption itemModifierFieldOption : cartItemModifierField.getModifierFieldOptions()) {
 					if (editMode && itemModifierFieldOption.getValue().equals(originalValue)) {
 						return true;
 					} else if ((!editMode && itemModifierFieldOption.getValue().equals(optFieldValue))
-							&& itemModifierFieldOption.getCartItemModifierFieldOptionsLdfByLocale(this.selectedLocale.toString()) != null) {
-						setErrorMessage(CatalogMessages.get().AddEditCartItemModifierFieldOptionDialog_ErrorDialog_AddInUse_Langdesc);
+							&& itemModifierFieldOption.getModifierFieldOptionsLdfByLocale(this.selectedLocale.toString()) != null) {
+						setErrorMessage(CatalogMessages.get().AddEditModifierFieldOptionDialog_ErrorDialog_AddInUse_Langdesc);
 						return false;
 					}
 				}
@@ -250,18 +250,18 @@ public class AddEditCartItemModifierFieldOptionDialog extends AbstractPolicyAwar
 
 	@Override
 	protected void createDialogContent(final IPolicyTargetLayoutComposite dialogComposite) {
-		this.addEditCartItemModifierFieldOptionContainer = addPolicyActionContainer("addEditCartItemModifierFieldOptionDialog");
+		this.addEditModifierFieldOptionContainer = addPolicyActionContainer("addEditModifierFieldOptionDialog");
 
 		IPolicyTargetLayoutComposite mainComposite = dialogComposite.addGridLayoutComposite(MAIN_COMPOSITE_NUMBER_OF_COLUMN, false,
 				dialogComposite.createLayoutData(IEpLayoutData.FILL, IEpLayoutData.FILL, true, true),
-				addEditCartItemModifierFieldOptionContainer);
+				addEditModifierFieldOptionContainer);
 
 		if (editMode) {
 			// force state policy to check if cartItemModifierGroup is in current change set
-			this.addEditCartItemModifierFieldOptionContainer.setPolicyDependent(this.cartItemModifierGroup);
+			this.addEditModifierFieldOptionContainer.setPolicyDependent(this.cartItemModifierGroup);
 		} else {
 			// force state policy to *not* check if cartItemModifierGroup in current change set
-			this.addEditCartItemModifierFieldOptionContainer.setPolicyDependent(null);
+			this.addEditModifierFieldOptionContainer.setPolicyDependent(null);
 		}
 
 		final IEpLayoutData labelLayoutData = mainComposite.createLayoutData(IEpLayoutData.END, IEpLayoutData.FILL, false, false);
@@ -271,17 +271,17 @@ public class AddEditCartItemModifierFieldOptionDialog extends AbstractPolicyAwar
 		final IEpLayoutData textFieldLayoutData2 = mainComposite.createLayoutData(IEpLayoutData.FILL, IEpLayoutData.FILL, true, false, 2, 1);
 
 		mainComposite.addLabelBoldRequired(
-				CatalogMessages.get().AddEditCartItemModifierFieldOptionDialog_Value, labelLayoutData,
-				this.addEditCartItemModifierFieldOptionContainer);
-		optionValueText = mainComposite.addTextField(textFieldLayoutData2, this.addEditCartItemModifierFieldOptionContainer);
+				CatalogMessages.get().AddEditModifierFieldOptionDialog_Value, labelLayoutData,
+				this.addEditModifierFieldOptionContainer);
+		optionValueText = mainComposite.addTextField(textFieldLayoutData2, this.addEditModifierFieldOptionContainer);
 
-		mainComposite.addEmptyComponent(textFieldLayoutData3, this.addEditCartItemModifierFieldOptionContainer);
+		mainComposite.addEmptyComponent(textFieldLayoutData3, this.addEditModifierFieldOptionContainer);
 
-		mainComposite.addLabelBoldRequired(CatalogMessages.get().AddEditCartItemModifierFieldOptionDialog_DisplayName,
-				labelLayoutData, this.addEditCartItemModifierFieldOptionContainer);
-		optionLanguageCombo = mainComposite.addComboBox(fieldData1, this.addEditCartItemModifierFieldOptionContainer);
+		mainComposite.addLabelBoldRequired(CatalogMessages.get().AddEditModifierFieldOptionDialog_DisplayName,
+				labelLayoutData, this.addEditModifierFieldOptionContainer);
+		optionLanguageCombo = mainComposite.addComboBox(fieldData1, this.addEditModifierFieldOptionContainer);
 		optionLanguageCombo.addSelectionListener(this);
-		optionDisplayNameText = mainComposite.addTextField(fieldData2, this.addEditCartItemModifierFieldOptionContainer);
+		optionDisplayNameText = mainComposite.addTextField(fieldData2, this.addEditModifierFieldOptionContainer);
 	}
 
 	@Override
@@ -296,7 +296,7 @@ public class AddEditCartItemModifierFieldOptionDialog extends AbstractPolicyAwar
 
 	@Override
 	protected PolicyActionContainer getOkButtonPolicyActionContainer() {
-		return this.addEditCartItemModifierFieldOptionContainer;
+		return this.addEditModifierFieldOptionContainer;
 	}
 
 
@@ -329,7 +329,7 @@ public class AddEditCartItemModifierFieldOptionDialog extends AbstractPolicyAwar
 	 * @return The OK button text
 	 */
 	private String setButtonLabel() {
-		String bttLabel = CatalogMessages.get().AddEditCartItemModifierFieldOptionDialog_Add;
+		String bttLabel = CatalogMessages.get().AddEditModifierFieldOptionDialog_Add;
 		if (editMode) {
 			bttLabel = CoreMessages.get().AbstractEpDialog_ButtonOK;
 		}
@@ -338,13 +338,13 @@ public class AddEditCartItemModifierFieldOptionDialog extends AbstractPolicyAwar
 
 	@Override
 	public String getTargetIdentifier() {
-		return "addEditCartItemModifierFieldOptionDialog";
+		return "addEditModifierFieldOptionDialog";
 	}
 
 	@Override
 	public void setObjectGuid(final String objectGuid) {
 		if (objectGuid == null) {
-			createCartItemModifierFieldOption();
+			createModifierFieldOption();
 			editMode = false;
 		} else {
 			throw new UnsupportedOperationException("Add via ObjectGuidReceiver is not implemented.");
@@ -372,13 +372,13 @@ public class AddEditCartItemModifierFieldOptionDialog extends AbstractPolicyAwar
 		//If called from binding (ui to model bind)
 		if (caller == BINDING_CALLER) {
 			if (!display.isEmpty()) {
-				CartItemModifierFieldOptionLdf currentOptionLDF =
-						this.getCartItemModifierFieldOption().getCartItemModifierFieldOptionsLdfByLocale(lang);
+				ModifierFieldOptionLdf currentOptionLDF =
+						this.getModifierFieldOption().getModifierFieldOptionsLdfByLocale(lang);
 				if (currentOptionLDF == null) {
-					currentOptionLDF = ServiceLocator.getService(ContextIdNames.CART_ITEM_MODIFIER_OPTION_LDF);
+					currentOptionLDF = ServiceLocator.getService(ContextIdNames.MODIFIER_OPTION_LDF);
 					currentOptionLDF.setDisplayName(display);
 					currentOptionLDF.setLocale(lang);
-					this.getCartItemModifierFieldOption().addCartItemModifierFieldOptionLdf(currentOptionLDF);
+					this.getModifierFieldOption().addModifierFieldOptionLdf(currentOptionLDF);
 				} else {
 					currentOptionLDF.setDisplayName(display);
 					currentOptionLDF.setLocale(lang);
@@ -386,7 +386,7 @@ public class AddEditCartItemModifierFieldOptionDialog extends AbstractPolicyAwar
 			}
 		} else if (caller == LANGUAGE_CHANGED_CALLER) { // If called when language changed (model to ui bind)
 			optionDisplayNameText.setText(CatalogMessages.EMPTY_STRING);
-			CartItemModifierFieldOptionLdf currentOptionLDF = getCartItemModifierFieldOption().getCartItemModifierFieldOptionsLdfByLocale(lang);
+			ModifierFieldOptionLdf currentOptionLDF = getModifierFieldOption().getModifierFieldOptionsLdfByLocale(lang);
 			if (currentOptionLDF != null) {
 				optionDisplayNameText.setText(currentOptionLDF.getDisplayName());
 			}
@@ -407,15 +407,15 @@ public class AddEditCartItemModifierFieldOptionDialog extends AbstractPolicyAwar
 	}
 
 	/**
-	 * Method to retrieve the maximum field order of a CartItemModifierField.
+	 * Method to retrieve the maximum field order of a ModifierField.
 	 *
-	 * @param field CartItemModifierField to get field options  max order.
+	 * @param field ModifierField to get field options  max order.
 	 * @return maximum field option index.
 	 */
-	private int getMaximumFieldOptionOrdering(final CartItemModifierField field) {
+	private int getMaximumFieldOptionOrdering(final ModifierField field) {
 		int maximumIndex = 0;
 		if (field != null) {
-			for (CartItemModifierFieldOption option : field.getCartItemModifierFieldOptions()) {
+			for (ModifierFieldOption option : field.getModifierFieldOptions()) {
 				if (option.getOrdering() > maximumIndex) {
 					maximumIndex = option.getOrdering();
 				}

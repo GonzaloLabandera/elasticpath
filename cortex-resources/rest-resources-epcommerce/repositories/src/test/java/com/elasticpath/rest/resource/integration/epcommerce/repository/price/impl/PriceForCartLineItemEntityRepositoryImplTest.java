@@ -3,14 +3,13 @@
  */
 package com.elasticpath.rest.resource.integration.epcommerce.repository.price.impl;
 
-import static org.mockito.Mockito.when;
-
 import static com.elasticpath.rest.resource.integration.epcommerce.repository.ErrorCheckPredicate.createErrorCheckPredicate;
 import static com.elasticpath.rest.resource.integration.epcommerce.repository.ResourceTestConstants.CART_ID;
 import static com.elasticpath.rest.resource.integration.epcommerce.repository.ResourceTestConstants.LINE_ITEM_ID;
 import static com.elasticpath.rest.resource.integration.epcommerce.repository.ResourceTestConstants.NOT_FOUND;
 import static com.elasticpath.rest.resource.integration.epcommerce.repository.ResourceTestConstants.SCOPE;
-import static com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder.impl.ShoppingCartRepositoryImpl.LINEITEM_WAS_NOT_FOUND;
+import static com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder.impl.ShoppingCartResourceConstants.LINEITEM_WAS_NOT_FOUND;
+import static org.mockito.Mockito.when;
 
 import java.util.Currency;
 

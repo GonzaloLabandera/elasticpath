@@ -89,7 +89,7 @@ public class SkuOptionAdapterTest {
 
 		context.checking(new Expectations() {
 			{
-				allowing(mockBeanFactory).getBean(ContextIdNames.SKU_OPTION);
+				allowing(mockBeanFactory).getPrototypeBean(ContextIdNames.SKU_OPTION, SkuOption.class);
 				will(returnValue(new SkuOptionImpl()));
 			}
 		});
@@ -121,7 +121,7 @@ public class SkuOptionAdapterTest {
 				oneOf(mockDomain).getOptionValues();
 				will(returnValue(Arrays.asList(mockSkuOptionValue)));
 
-				allowing(mockBeanFactory).getBean(ContextIdNames.SKU_OPTION_VALUE);
+				allowing(mockBeanFactory).getPrototypeBean(ContextIdNames.SKU_OPTION_VALUE, SkuOptionValue.class);
 				will(returnValue(mockSkuOptionValue));
 
 				oneOf(mockSkuOptionValue).getOptionValueKey();
@@ -192,7 +192,7 @@ public class SkuOptionAdapterTest {
 				oneOf(mockDomain).getCatalog();
 				will(returnValue(catalog));
 
-				allowing(mockBeanFactory).getBean(ContextIdNames.SKU_OPTION_VALUE);
+				allowing(mockBeanFactory).getPrototypeBean(ContextIdNames.SKU_OPTION_VALUE, SkuOptionValue.class);
 				will(returnValue(mockSkuOptionValue));
 
 				oneOf(mockSkuOptionValue).setOptionValueKey(SKU_OPTION_VALUE_CODE);

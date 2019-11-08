@@ -6,8 +6,11 @@ package com.elasticpath.shipping.connectivity.dto.impl;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.util.Collections;
+import java.util.Map;
 import java.util.Objects;
 
+import com.google.common.collect.Maps;
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.commons.lang.builder.ToStringStyle;
 import org.apache.commons.lang3.builder.CompareToBuilder;
@@ -33,6 +36,8 @@ public class ShippableItemImpl implements ShippableItem, Comparable<ShippableIte
 
 	private BigDecimal length;
 
+	private Map<String, String> fields;
+
 	public void setSkuGuid(final String skuGuid) {
 		this.skuGuid = skuGuid;
 	}
@@ -55,6 +60,28 @@ public class ShippableItemImpl implements ShippableItem, Comparable<ShippableIte
 
 	public void setLength(final BigDecimal length) {
 		this.length = length;
+	}
+
+	/**
+	 * Sets metadata field.
+	 *
+	 * @param fields the input metadata field
+	 */
+	public void setFields(final Map<String, String> fields) {
+		Objects.requireNonNull(fields);
+
+		getMutableFields().clear();
+		getMutableFields().putAll(fields);
+	}
+
+	/**
+	 * Sets metadata field with Key and Value.
+	 *
+	 * @param fieldKey key of the field
+	 * @param fieldValue value of the field
+	 */
+	public void setField(final String fieldKey, final String fieldValue) {
+		getMutableFields().put(fieldKey, fieldValue);
 	}
 
 	@Override
@@ -88,6 +115,24 @@ public class ShippableItemImpl implements ShippableItem, Comparable<ShippableIte
 	}
 
 	@Override
+	public Map<String, String> getFields() {
+		return Collections.unmodifiableMap(getMutableFields());
+	}
+
+	/**
+	 * Gets the modifiable fields of Shippable Item.
+	 *
+	 * @return the modifiable fields.
+	 */
+	protected Map<String, String> getMutableFields() {
+		if (fields == null) {
+			fields = Maps.newHashMap();
+		}
+
+		return fields;
+	}
+
+	@Override
 	public String toString() {
 		return ToStringBuilder.reflectionToString(this, ToStringStyle.SHORT_PREFIX_STYLE);
 	}
@@ -110,6 +155,7 @@ public class ShippableItemImpl implements ShippableItem, Comparable<ShippableIte
 				.append(getWidth(), other.getWidth())
 				.append(getLength(), other.getLength())
 				.append(getQuantity(), other.getQuantity())
+				.append(getFields(), other.getFields())
 				.toComparison();
 
 	}
@@ -132,7 +178,8 @@ public class ShippableItemImpl implements ShippableItem, Comparable<ShippableIte
 				&& Objects.equals(getHeight(), other.getHeight())
 				&& Objects.equals(getWidth(), other.getWidth())
 				&& Objects.equals(getLength(), other.getLength())
-				&& Objects.equals(getQuantity(), other.getQuantity());
+				&& Objects.equals(getQuantity(), other.getQuantity())
+				&& Objects.equals(getFields(), other.getFields());
 
 	}
 
@@ -145,9 +192,8 @@ public class ShippableItemImpl implements ShippableItem, Comparable<ShippableIte
 				getHeight(),
 				getWidth(),
 				getLength(),
-				getQuantity());
-
+				getQuantity(),
+				getFields());
 	}
-
 
 }

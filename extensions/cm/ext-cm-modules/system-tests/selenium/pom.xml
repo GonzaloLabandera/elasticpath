@@ -37,17 +37,41 @@
 		<ep.locale>en-US</ep.locale>
 
 		<!-- data sync tool properties -->
-		<db.driver>${epdb.jdbc.driver}</db.driver>
-		<ext.sync.cli>ext-sync-cli-</ext.sync.cli>
-		<cli.version>${project.version}</cli.version>
-		<source.url>${epdb.url}</source.url>
-		<source.login>${epdb.username}</source.login>
-		<source.pwd>${epdb.password}</source.pwd>
-		<source.driver>${db.driver}</source.driver>
-		<target.url>jdbc:mysql://localhost:3306/ElasticPathDB?characterEncoding=UTF-8</target.url>
-		<target.login>${epdb.username}</target.login>
-		<target.pwd>${epdb.password}</target.pwd>
-		<target.driver>${db.driver}</target.driver>
+		<sync.database.name>${epdb.schemaname}</sync.database.name>
+		<source.db.host>${epdb.host}</source.db.host>
+		<source.db.port>${epdb.port}</source.db.port>
+		<source.db.username>${epdb.username}</source.db.username>
+		<source.db.pwd>${epdb.password}</source.db.pwd>
+		<source.db.driver>${epdb.jdbc.driver}</source.db.driver>
+		<target.db.host>${epdb.live.host}</target.db.host>
+		<target.db.port>${epdb.live.port}</target.db.port>
+		<target.db.username>${epdb.live.username}</target.db.username>
+		<target.db.pwd>${epdb.live.password}</target.db.pwd>
+		<target.db.driver>${epdb.jdbc.driver}</target.db.driver>
+
+		<!-- import export properties -->
+		<!-- live server with change sets disabled -->
+		<ep.export.cm.host>localhost</ep.export.cm.host>
+		<!-- auth server with change sets enabled -->
+		<ep.import.cm.host>localhost</ep.import.cm.host>
+		<ep.export.cm.port>8081</ep.export.cm.port>
+		<ep.import.cm.port>8081</ep.import.cm.port>
+		<selenium.session.export.baseurl>http://${ep.export.cm.host}:${ep.export.cm.port}${ep.cm.context}</selenium.session.export.baseurl>
+		<selenium.session.import.baseurl>http://${ep.import.cm.host}:${ep.import.cm.port}${ep.cm.context}</selenium.session.import.baseurl>
+		<export.db.connection.host>${ep.export.cm.host}</export.db.connection.host>
+		<export.db.connection.port>3306</export.db.connection.port>
+		<export.import.db.connection.username>epDbUser</export.import.db.connection.username>
+		<export.import.db.connection.password>epDbPassword</export.import.db.connection.password>
+		<export.import.db.schemaname>ElasticPathDB</export.import.db.schemaname>
+		<export.db.connection.url>
+			jdbc:mysql://${export.db.connection.host}:${export.db.connection.port}/${epdb.schemaname}${epdb.params}
+		</export.db.connection.url>
+		<import.db.connection.host>${ep.import.cm.host}</import.db.connection.host>
+		<import.db.connection.port>3306</import.db.connection.port>
+		<import.db.connection.url>
+			jdbc:mysql://${import.db.connection.host}:${import.db.connection.port}/${epdb.schemaname}${epdb.params}
+		</import.db.connection.url>
+		<search.host.url>http://${ep.export.cm.host}:8085/search</search.host.url>
 
 		<!-- JMS properties -->
 		<ep.jms.host>localhost</ep.jms.host>
@@ -204,7 +228,16 @@
 								<artifactItem>
 									<groupId>com.elasticpath.extensions</groupId>
 									<artifactId>ext-sync-cli</artifactId>
-									<version>${cli.version}</version>
+									<version>${project.version}</version>
+									<classifier>bin</classifier>
+									<type>zip</type>
+									<overWrite>true</overWrite>
+									<outputDirectory>${project.build.directory}/test-classes/</outputDirectory>
+								</artifactItem>
+								<artifactItem>
+									<groupId>com.elasticpath.extensions</groupId>
+									<artifactId>ext-importexport-cli</artifactId>
+									<version>${project.version}</version>
 									<classifier>bin</classifier>
 									<type>zip</type>
 									<overWrite>true</overWrite>

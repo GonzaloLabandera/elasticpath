@@ -54,7 +54,7 @@ public class ImportJobRunnerCategoryImpl extends AbstractImportJobRunnerImpl {
 	 */
 	@Override
 	protected Entity createNewEntity(final Object baseObject) {
-		final Category category = getBean(ContextIdNames.CATEGORY);
+		final Category category = getPrototypeBean(ContextIdNames.CATEGORY, Category.class);
 		category.setCategoryType((CategoryType) baseObject);
 		category.setCatalog(this.getImportJob().getCatalog());
 		return category;
@@ -130,7 +130,7 @@ public class ImportJobRunnerCategoryImpl extends AbstractImportJobRunnerImpl {
 			validateChangeSetStatus(nextLine, rowNumber, faults, entity);
 
 			if (!faults.isEmpty()) {
-				final ImportBadRow importBadRow = getBean(ContextIdNames.IMPORT_BAD_ROW);
+				final ImportBadRow importBadRow = getPrototypeBean(ContextIdNames.IMPORT_BAD_ROW, ImportBadRow.class);
 				importBadRow.setRowNumber(rowNumber);
 				importBadRow.setRow(nextLine[0]);
 				importBadRow.addImportFaults(faults);

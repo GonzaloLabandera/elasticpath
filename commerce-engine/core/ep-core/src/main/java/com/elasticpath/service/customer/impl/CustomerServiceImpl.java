@@ -20,6 +20,7 @@ import javax.validation.ConstraintViolation;
 import javax.validation.Validator;
 
 import com.google.common.collect.ImmutableMap;
+
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
@@ -50,7 +51,6 @@ import com.elasticpath.service.customer.CustomerGroupService;
 import com.elasticpath.service.customer.CustomerService;
 import com.elasticpath.service.customer.dao.CustomerAddressDao;
 import com.elasticpath.service.impl.AbstractEpPersistenceServiceImpl;
-import com.elasticpath.service.misc.FetchPlanHelper;
 import com.elasticpath.service.misc.TimeService;
 import com.elasticpath.service.search.IndexNotificationService;
 import com.elasticpath.service.search.IndexType;
@@ -78,8 +78,6 @@ public class CustomerServiceImpl extends AbstractEpPersistenceServiceImpl implem
 	private StoreService storeService;
 
 	private static final String LIST_PLACEHOLDER = "list";
-
-	private FetchPlanHelper fetchPlanHelper;
 
 	private IndexNotificationService indexNotificationService;
 
@@ -373,21 +371,17 @@ public class CustomerServiceImpl extends AbstractEpPersistenceServiceImpl implem
 		if (customerUid <= 0) {
 			customer = getBean(ContextIdNames.CUSTOMER);
 		} else {
-			fetchPlanHelper.configureFetchGroupLoadTuner(loadTuner);
-			customer = getPersistentBeanFinder().get(ContextIdNames.CUSTOMER, customerUid);
-			fetchPlanHelper.clearFetchPlan();
+			customer = getPersistentBeanFinder()
+				.withLoadTuners(loadTuner)
+				.get(ContextIdNames.CUSTOMER, customerUid);
 		}
 		return customer;
 	}
 
 	@Override
 	public Customer findByGuid(final String guid, final FetchGroupLoadTuner loadTuner) throws EpServiceException {
-		try {
-			fetchPlanHelper.configureFetchGroupLoadTuner(loadTuner);
-			return findByGuid(guid);
-		} finally {
-			fetchPlanHelper.clearFetchPlan();
-		}
+		getFetchPlanHelper().setLoadTuners(loadTuner);
+		return findByGuid(guid);
 	}
 
 	/**
@@ -714,15 +708,6 @@ public class CustomerServiceImpl extends AbstractEpPersistenceServiceImpl implem
 				);
 			}
 		}
-	}
-
-	/**
-	 * Sets the {@link FetchPlanHelper} instance to use.
-	 *
-	 * @param fetchPlanHelper the {@link FetchPlanHelper} instance to use
-	 */
-	public void setFetchPlanHelper(final FetchPlanHelper fetchPlanHelper) {
-		this.fetchPlanHelper = fetchPlanHelper;
 	}
 
 	/**

@@ -8,8 +8,10 @@ import java.util.Arrays;
 import java.util.Locale;
 import java.util.Set;
 
-import com.elasticpath.domain.cartmodifier.CartItemModifierGroup;
-import com.elasticpath.domain.cartmodifier.CartItemModifierGroupLdf;
+import com.elasticpath.cmclient.core.tablelableprovider.AbstractTableLabelProviderDecorator;
+import com.elasticpath.cmclient.core.tablelableprovider.ExtensibleTableLabelProvider;
+import com.elasticpath.domain.modifier.ModifierGroup;
+import com.elasticpath.domain.modifier.ModifierGroupLdf;
 
 /**
  * A concrete TableLabelProviderDecorator for Catalog ProductTypes.
@@ -44,9 +46,9 @@ public class CatalogCartItemModifierGroupsTableLabelProviderDecorator extends Ab
 		String token = getDecoratedTableLabelProvider().getColumnText(element, columnIndex);
 		String dspName = "";
 		final String columnName = getColumnIndexRegistryName(columnIndex);
-		final CartItemModifierGroup group = (CartItemModifierGroup) element;
-		Set<CartItemModifierGroupLdf> ldfs = group.getCartItemModifierGroupLdf();
-		for (CartItemModifierGroupLdf ldf : ldfs) {
+		final ModifierGroup group = (ModifierGroup) element;
+		Set<ModifierGroupLdf> ldfs = group.getModifierGroupLdf();
+		for (ModifierGroupLdf ldf : ldfs) {
 			if (ldf.getLocale().trim().equals(this.locale.toString().trim())) {
 				dspName = ldf.getDisplayName();
 			}

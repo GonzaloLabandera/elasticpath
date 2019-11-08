@@ -89,7 +89,7 @@ public class ItemValidationServiceImplTest {
 		when(wishlistRepository.getWishlist(WISHLIST_ID)).thenReturn(Single.just(wishList));
 		when(wishlistRepository.getProductSku(wishList, LINE_ITEM_ID)).thenReturn(Single.just(productSku));
 		when(wishList.getStoreCode()).thenReturn(SCOPE);
-		when(addToCartAdvisorService.validateItemPurchasable(SCOPE, CART_GUID, productSku, null))
+		when(addToCartAdvisorService.validateItemPurchasable(SCOPE, productSku, null))
 				.thenReturn(Observable.error(ResourceOperationFailure.notFound(NOT_FOUND)));
 
 
@@ -104,7 +104,7 @@ public class ItemValidationServiceImplTest {
 		when(wishlistRepository.getWishlist(WISHLIST_ID)).thenReturn(Single.just(wishList));
 		when(wishlistRepository.getProductSku(wishList, LINE_ITEM_ID)).thenReturn(Single.just(productSku));
 		when(wishList.getStoreCode()).thenReturn(SCOPE);
-		when(addToCartAdvisorService.validateItemPurchasable(SCOPE, CART_GUID, productSku, null))
+		when(addToCartAdvisorService.validateItemPurchasable(SCOPE, productSku, null))
 				.thenReturn(Observable.just(message));
 
 		service.isItemPurchasable(wishlistLineItemIdentifier)

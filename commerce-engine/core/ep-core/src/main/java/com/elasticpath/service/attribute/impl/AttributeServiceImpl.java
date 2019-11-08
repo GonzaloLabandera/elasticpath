@@ -384,7 +384,12 @@ public class AttributeServiceImpl extends AbstractEpPersistenceServiceImpl imple
 	 */
 	@Override
 	public List<Long> getCustomerProfileAttributeInUseUidList() {
-		return getPersistenceEngine().retrieveByNamedQuery("ATTRIBUTE_IN_USE_CUSTOMER_PROFILE_TYPE");
+		final List<Long> attributeUidList = new ArrayList<>();
+		List<Long> queryResponse = getPersistenceEngine().retrieveByNamedQuery("ATTRIBUTE_IN_USE_CUSTOMER_PROFILE_TYPE");
+		attributeUidList.addAll(queryResponse);
+		queryResponse = getPersistenceEngine().retrieveByNamedQuery("ATTRIBUTE_IN_USE_STORE_ATTRIBUTES");
+		attributeUidList.addAll(queryResponse);
+		return attributeUidList;
 
 	}
 
@@ -607,6 +612,13 @@ public class AttributeServiceImpl extends AbstractEpPersistenceServiceImpl imple
 		List<Object[]> attributeValues = getPersistenceEngine().retrieveByNamedQuery(queryType, attribute.getUidPk());
 
 		return buildAttributeValueInfo(attribute, attributeValues);
+	}
+
+	@Override
+	public Set<String> getCustomerProfileAttributeKeys() {
+		return getAttributes(AttributeUsage.CUSTOMERPROFILE)
+				.stream().map(Attribute::getKey)
+				.collect(Collectors.toSet());
 	}
 
 	private String getAttributeTypeQuery(final Attribute attribute) {

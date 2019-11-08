@@ -3,10 +3,16 @@
  */
 package com.elasticpath.domain.catalog.impl;
 
+import static com.elasticpath.persistence.support.FetchFieldConstants.ATTRIBUTE_VALUE_MAP;
+import static com.elasticpath.persistence.support.FetchFieldConstants.DIGITAL_ASSET_INTERNAL;
+import static com.elasticpath.persistence.support.FetchFieldConstants.OPTION_VALUE_MAP;
+import static com.elasticpath.persistence.support.FetchFieldConstants.PRODUCT_INTERNAL;
+
 import java.util.Objects;
 
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.commons.lang.builder.ToStringStyle;
+import org.apache.openjpa.persistence.FetchPlan;
 
 import com.elasticpath.domain.catalog.ProductSkuLoadTuner;
 import com.elasticpath.domain.impl.AbstractEpDomainImpl;
@@ -168,6 +174,22 @@ public class ProductSkuLoadTunerImpl extends AbstractEpDomainImpl implements Pro
 		mergedProductSkuLoadTuner.loadingProduct = loadingProduct || productSkuLoadTuner.isLoadingProduct();
 
 		return mergedProductSkuLoadTuner;
+	}
+
+	@Override
+	public void configure(final FetchPlan fetchPlan) {
+		if (isLoadingAttributeValue()) {
+			fetchPlan.addField(ProductSkuImpl.class, ATTRIBUTE_VALUE_MAP);
+		}
+		if (isLoadingOptionValue()) {
+			fetchPlan.addField(ProductSkuImpl.class, OPTION_VALUE_MAP);
+		}
+		if (isLoadingProduct()) {
+			fetchPlan.addField(ProductSkuImpl.class, PRODUCT_INTERNAL);
+		}
+		if (isLoadingDigitalAsset()) {
+			fetchPlan.addField(ProductSkuImpl.class, DIGITAL_ASSET_INTERNAL);
+		}
 	}
 
 	/**

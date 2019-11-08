@@ -30,6 +30,12 @@ public interface CustomerSessionRepository {
 	Single<CustomerSession> findOrCreateCustomerSessionAsSingle();
 
 	/**
+	 * Finds or creates the customer session for the given context.
+	 * @return the customer session.
+	 */
+	Single<CustomerSession> createCustomerSessionAsSingle();
+
+	/**
 	 * Creates a customer session for a given customer.
 	 *
 	 * @param customerGuid the customer guid.

@@ -192,6 +192,44 @@ public class CategoryRepositoryImplTest {
 	}
 
 	@Test
+	public void testGettingChildNodesThatAreLinkedCategories() {
+		Catalog catalog = createMockCatalog(CATALOG_CODE);
+		Store store = createMockStore(catalog);
+		shouldFindStoreWithResult(store);
+		Category category = createMockLinkedCategory(true);
+		when(categoryLookup.findByCategoryAndCatalogCode(CATEGORY_CODE, CATALOG_CODE)).thenReturn(category);
+		List<Category> categories = Collections.singletonList(category);
+		shouldGetSubCategories(category, categories);
+		shouldGetBean();
+
+		categoryRepository.findChildren(STORE_CODE, CATEGORY_CODE)
+				.test()
+				.assertValueSequence(categories);
+	}
+	@Test
+	public void testGettingChildNodesThatAreLinkedCategoriesNotIncluded() {
+		Catalog catalog = createMockCatalog(CATALOG_CODE);
+		Store store = createMockStore(catalog);
+		shouldFindStoreWithResult(store);
+		Category category = createMockLinkedCategory(false);
+		when(categoryLookup.findByCategoryAndCatalogCode(CATEGORY_CODE, CATALOG_CODE)).thenReturn(category);
+		List<Category> categories = Collections.emptyList();
+		shouldGetSubCategories(category, categories);
+		shouldGetBean();
+
+		categoryRepository.findChildren(STORE_CODE, CATEGORY_CODE)
+				.test()
+				.assertValueSequence(categories);
+	}
+
+	private Category createMockLinkedCategory(final boolean isIncluded) {
+		Category category = mock(Category.class);
+		when(category.isLinked()).thenReturn(true);
+		when(category.isIncluded()).thenReturn(isIncluded);
+		return category;
+	}
+
+	@Test
 	public void testFeaturedProduct() {
 		List<Product> featuredProductList = new ArrayList<>();
 		Product product = mock(Product.class);

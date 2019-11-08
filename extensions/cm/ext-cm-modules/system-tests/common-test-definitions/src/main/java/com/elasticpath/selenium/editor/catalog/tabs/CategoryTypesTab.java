@@ -62,9 +62,13 @@ public class CategoryTypesTab extends AbstractPageObject {
 
 	/**
 	 * Clicks edit category type button.
+	 *
+	 * @return AddEditCategoryTypeDialog
 	 */
-	public void clickEditCategoryTypeButton() {
-		clickButton("Edit");
+	public AddEditCategoryTypeDialog clickEditCategoryTypeButton() {
+		final String buttonName = "Edit";
+		clickButton(String.format(BUTTON_CSS, buttonName), buttonName, AddEditCategoryTypeDialog.EDIT_CATEGORY_TYPE_PARENT_CSS);
+		return new AddEditCategoryTypeDialog(getDriver());
 	}
 
 	/**

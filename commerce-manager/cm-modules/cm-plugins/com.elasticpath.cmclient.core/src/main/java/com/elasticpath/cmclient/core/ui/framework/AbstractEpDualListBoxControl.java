@@ -203,18 +203,18 @@ public abstract class AbstractEpDualListBoxControl<T> {
 		addOneButton.addSelectionListener(selectionListener);
 		if (!isStyleEnabled(DISABLE_REMOVAL_BUTTONS)) {
 			removeOneButton = buttonsComposite.addPushButton(CoreMessages.get().button_Remove, epState, null); //$NON-NLS-1$
-			addOneButton.setImage(CoreImageRegistry.getImage(CoreImageRegistry.ARROW_LEFT_ICON));
+			removeOneButton.setImage(CoreImageRegistry.getImage(CoreImageRegistry.ARROW_LEFT_ICON));
 			removeOneButton.addSelectionListener(selectionListener);
 		}
 		if (isStyleEnabled(ALL_BUTTONS)) {
 			buttonsComposite.addEmptyComponent(null);
 
-			addAllButton = buttonsComposite.addPushButton(">>", epState, null); //$NON-NLS-1$
-			addAllButton.setToolTipText(CoreMessages.get().button_AddAll);
+			addAllButton = buttonsComposite.addPushButton(CoreMessages.get().button_AddAll, epState, null); //$NON-NLS-1$
+			addAllButton.setImage(CoreImageRegistry.getImage(CoreImageRegistry.ARROW_FORWARD_ICON));
 			addAllButton.addSelectionListener(selectionListener);
 			if (!isStyleEnabled(DISABLE_REMOVAL_BUTTONS)) {
-				removeAllButton = buttonsComposite.addPushButton("<<", epState, null); //$NON-NLS-1$
-				removeAllButton.setToolTipText(CoreMessages.get().button_RemoveAll);
+				removeAllButton = buttonsComposite.addPushButton(CoreMessages.get().button_RemoveAll, epState, null); //$NON-NLS-1$
+				removeAllButton.setImage(CoreImageRegistry.getImage(CoreImageRegistry.ARROW_REWIND_ICON));
 				removeAllButton.addSelectionListener(selectionListener);
 			}
 		}

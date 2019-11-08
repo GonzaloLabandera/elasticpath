@@ -294,6 +294,44 @@
 
 	<promotion type="Cart">
 		<store_code>MOBEE</store_code>
+		<name>ExpiredCartPromoMobee</name>
+		<displayName>
+			<value language="en">Expired Cart Promotion Mobee</value>
+			<value language="en_CA">Expired Cart Promo</value>
+		</displayName>
+		<code>a10edbb4-0f9c-4b2c-baf6-f5d9b895354e</code>
+		<description></description>
+		<availability>
+			<enabled>true</enabled>
+		</availability>
+		<actions>
+			<action type="cartSubtotalPercentDiscountAction">
+				<parameters>
+					<parameter>
+						<key>discountPercent</key>
+						<value>10</value>
+					</parameter>
+				</parameters>
+				<exceptions/>
+			</action>
+		</actions>
+		<selling_context>
+			<guid>12ff39e2-4cce-4466-b8f4-18da7c9e0eba</guid>
+			<name>ExpiredCartPromoMobee</name>
+			<priority>0</priority>
+			<conditions>
+				<condition>
+					<guid>a6f0155f-3031-41e9-bbe9-50d87b2de47e</guid>
+					<name>1940056754222916</name>
+					<condition_string> { AND { SHOPPING_START_TIME.greaterThan (1549062900000L) }  { SHOPPING_START_TIME.lessThan (1551395700000L) }  } </condition_string>
+					<dictionary_guid>TIME</dictionary_guid>
+				</condition>
+			</conditions>
+		</selling_context>
+	</promotion>
+
+	<promotion type="Cart">
+		<store_code>MOBEE</store_code>
 		<name>50PercentOffProductWith50PercentOffCartItemDiscount</name>
 		<displayName>
 			<value language="en">50% off Product With 50 Percent Cart Item Discount</value>
@@ -560,6 +598,7 @@
 		<description>10% off Cart Total</description>
 		<availability>
 			<enabled>true</enabled>
+			<enabledate>2019-03-01T12:51:38-07:00</enabledate>
 		</availability>
 		<actions>
 			<action type="cartSubtotalPercentDiscountAction">
@@ -572,6 +611,19 @@
 				<exceptions/>
 			</action>
 		</actions>
+		<selling_context>
+			<guid>21cc33cf-1e42-4234-aaf6-83f05beea29e</guid>
+			<name>10% off Cart Total</name>
+			<priority>0</priority>
+			<conditions>
+				<condition>
+					<guid>d62fe3d2-779e-499d-8c0d-1a4a2f9f6ccc</guid>
+					<name>744166141697690</name>
+					<condition_string> { AND { SHOPPING_START_TIME.greaterThan (1551487740000L) }  } </condition_string>
+					<dictionary_guid>TIME</dictionary_guid>
+				</condition>
+			</conditions>
+		</selling_context>
 	</promotion>
 	<promotion type="Cart">
 		<store_code>MOBEE</store_code>

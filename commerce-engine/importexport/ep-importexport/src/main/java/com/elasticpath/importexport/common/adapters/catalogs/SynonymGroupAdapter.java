@@ -51,7 +51,7 @@ public class SynonymGroupAdapter extends AbstractDomainAdapterImpl<SynonymGroup,
 
 		final List<Synonym> synonyms = new ArrayList<>();
 		for (String synonymName : source.getSynonyms()) {			
-			Synonym synonym = getBeanFactory().getBean(ContextIdNames.SYNONYM);
+			Synonym synonym = getBeanFactory().getPrototypeBean(ContextIdNames.SYNONYM, Synonym.class);
 			synonym.setSynonym(synonymName);
 			synonyms.add(synonym);
 		}
@@ -60,7 +60,7 @@ public class SynonymGroupAdapter extends AbstractDomainAdapterImpl<SynonymGroup,
 	
 	@Override
 	public SynonymGroup createDomainObject() {
-		return getBeanFactory().getBean(ContextIdNames.SYNONYM_GROUP);
+		return getBeanFactory().getPrototypeBean(ContextIdNames.SYNONYM_GROUP, SynonymGroup.class);
 	}
 
 	@Override

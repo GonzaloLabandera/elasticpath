@@ -106,7 +106,7 @@ public class ContentWrapperLoaderImpl implements ContentWrapperLoader {
 	 * @return content wrapper
 	 */
 	private ContentWrapper loadContentWrapperXmlFile(final Unmarshaller unmarshaller, final File file) {
-		ContentWrapper wrapper = beanFactory.getBean(ContextIdNames.CONTENT_WRAPPER);
+		ContentWrapper wrapper = beanFactory.getPrototypeBean(ContextIdNames.CONTENT_WRAPPER, ContentWrapper.class);
 
 		try {
 			wrapper = (ContentWrapper) unmarshaller.unmarshal(file);

@@ -149,8 +149,7 @@ public class ShippingServiceLevelAdapter extends AbstractDomainAdapterImpl<Shipp
 	}
 	
 	private ShippingCostCalculationMethod createShippingCostCalculationMethod(final ShippingCostCalculationMethodDTO source) {
-		ShippingCostCalculationMethod target
-			= getBeanFactory().getBean(source.getType());
+		ShippingCostCalculationMethod target = getBeanFactory().getPrototypeBean(source.getType(), ShippingCostCalculationMethod.class);
 		
 		target.setType(source.getType());
 		target.setParameters(createShippingCostCalculationParams(source));
@@ -188,7 +187,7 @@ public class ShippingServiceLevelAdapter extends AbstractDomainAdapterImpl<Shipp
 
 	@Override
 	public ShippingServiceLevel createDomainObject() {
-		return getBeanFactory().getBean(SHIPPING_SERVICE_LEVEL);
+		return getBeanFactory().getPrototypeBean(SHIPPING_SERVICE_LEVEL, ShippingServiceLevel.class);
 	}
 	
 	public StoreService getStoreService() {

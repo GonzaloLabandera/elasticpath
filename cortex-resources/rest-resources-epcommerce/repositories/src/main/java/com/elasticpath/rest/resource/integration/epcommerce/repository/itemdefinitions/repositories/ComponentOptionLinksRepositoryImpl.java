@@ -9,6 +9,8 @@ import java.util.Map;
 import io.reactivex.Observable;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.elasticpath.domain.skuconfiguration.SkuOption;
 import com.elasticpath.repository.LinksRepository;
@@ -32,6 +34,7 @@ public class ComponentOptionLinksRepositoryImpl
 
 	private ItemRepository itemRepository;
 	private ProductSkuRepository productSkuRepository;
+	private static final Logger LOG = LoggerFactory.getLogger(ComponentOptionLinksRepositoryImpl.class);
 
 	@Override
 	public Observable<ItemDefinitionComponentOptionIdentifier> getElements(final ItemDefinitionComponentOptionsIdentifier identifier) {
@@ -40,8 +43,10 @@ public class ComponentOptionLinksRepositoryImpl
 		Iterator<String> guidPathFromRootItem = itemDefinitionComponent.getComponentId().getValue().iterator();
 
 		return itemRepository.findBundleConstituentAtPathEnd(itemIdMap, guidPathFromRootItem)
+				.doOnError(throwable -> LOG.info("No bundle constituent found for item id '{}'.", itemIdMap))
 				.map(bundleConstituent -> bundleConstituent.getConstituent().getProductSku().getSkuCode())
-				.flatMapObservable(skuCode -> productSkuRepository.getProductSkuOptionsByCode(skuCode))
+				.flatMapObservable(skuCode -> productSkuRepository.getProductSkuOptionsByCode(skuCode)
+						.doOnError(throwable -> LOG.info("No sku option found for sku code '{}'.", skuCode)))
 				.flatMap(skuOption -> buildItemDefinitionComponentOptionIdentifier(identifier, skuOption))
 				.onErrorResumeNext(Observable.empty());
 	}

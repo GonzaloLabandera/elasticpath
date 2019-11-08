@@ -9,17 +9,21 @@ import com.elasticpath.selenium.dialogs.AddShortTextAttributeDialog;
 import com.elasticpath.selenium.dialogs.BasePriceEditorDialog;
 import com.elasticpath.selenium.dialogs.EditDecimalValueAttributeDialog;
 import com.elasticpath.selenium.dialogs.EditIntegerValueAttributeDialog;
+import com.elasticpath.selenium.dialogs.EditShortTextAttributeDialog;
 import com.elasticpath.selenium.dialogs.EditShortTextMultiValueAttributeDialog;
 import com.elasticpath.selenium.util.Constants;
 
 /**
  * Create Product Dialog.
  */
+@SuppressWarnings({"PMD.TooManyMethods"})
 public class CreateProductWizard extends AbstractWizard {
-
+	private static final String MESSAGE = "Unable to find attribute - ";
 	private static final String CREATE_PRODUCT_PARENT_CSS = "div[widget-id='Create Product'][widget-type='Shell'] ";
 	private static final String PRODUCT_CODE_INPUT_CSS = CREATE_PRODUCT_PARENT_CSS + "div[widget-id='Product Code'] > input";
 	private static final String PRODUCT_NAME_INPUT_CSS = CREATE_PRODUCT_PARENT_CSS + "div[widget-id='Product Name'] > input";
+	private static final String PRODUCT_MINIMUM_ORDER_QUANTITY_CSS = CREATE_PRODUCT_PARENT_CSS
+			+ "div[automation-id='com.elasticpath.cmclient.catalog.CatalogMessages.ProductEditorStoreRuleSection_MinOrderQty'] input";
 	private static final String PRODUCT_TYPE_COMBO_PARENT_CSS = CREATE_PRODUCT_PARENT_CSS + "div[widget-id='Product Type'][widget-type='CCombo']";
 	private static final String TAX_CODE_COMBO_PARENT_CSS = CREATE_PRODUCT_PARENT_CSS + "div[widget-id='Tax Code'][widget-type='CCombo']";
 	private static final String BRAND_COMBO_PARENT_CSS = CREATE_PRODUCT_PARENT_CSS + "div[widget-id='Brand'][widget-type='CCombo']";
@@ -38,7 +42,20 @@ public class CreateProductWizard extends AbstractWizard {
 	private static final String CREATE_PRODUCT_ATTRIBUTE_COLUMN_CSS = CREATE_PRODUCT_ATTRIBUTE_PARENT_CSS + "div[column-id='%s']";
 	private static final String ATTRIBUTE_NAME_COLUMNNAME = "Name";
 	private static final String ADD_SKU_BUTTON_CSS = CREATE_PRODUCT_PARENT_CSS + "div[widget-id='Add SKU...'][seeable='true']";
-
+	private static final String SHIPPING_WEIGHT_CSS = CREATE_PRODUCT_PARENT_CSS
+			+ "div[automation-id='com.elasticpath.cmclient.catalog.CatalogMessages.ProductEditorSingleSkuShipping_ShippingWeight'] input";
+	private static final String SHIPPING_WIDTH_CSS = CREATE_PRODUCT_PARENT_CSS
+			+ "div[automation-id='com.elasticpath.cmclient.catalog.CatalogMessages.ProductEditorSingleSkuShipping_ShippingWidth'] input";
+	private static final String SHIPPING_LENGTH_CSS = CREATE_PRODUCT_PARENT_CSS
+			+ "div[automation-id='com.elasticpath.cmclient.catalog.CatalogMessages.ProductEditorSingleSkuShipping_ShippingLength'] input";
+	private static final String SHIPPING_HEIGHT_CSS = CREATE_PRODUCT_PARENT_CSS
+			+ "div[automation-id='com.elasticpath.cmclient.catalog.CatalogMessages.ProductEditorSingleSkuShipping_ShippingHeight'] input";
+	private static final String ENABLE_DATE_TIME_CSS = CREATE_PRODUCT_PARENT_CSS
+			+ "div[automation-id='com.elasticpath.cmclient.catalog.CatalogMessages.Item_EnableDateTime'] input";
+	private static final String DISABLE_DATE_TIME_CSS = CREATE_PRODUCT_PARENT_CSS
+			+ "div[automation-id='com.elasticpath.cmclient.catalog.CatalogMessages.Item_DisableDateTime'] input";
+	private static final String RELEASE_DATE_TIME_CSS = CREATE_PRODUCT_PARENT_CSS
+			+ "div[automation-id='com.elasticpath.cmclient.catalog.CatalogMessages.ProductEditorStoreRuleSection_ExpReleaseDate'] textarea";
 
 	/**
 	 * Constructor.
@@ -56,6 +73,78 @@ public class CreateProductWizard extends AbstractWizard {
 	 */
 	public void enterProductCode(final String productCode) {
 		clearAndType(PRODUCT_CODE_INPUT_CSS, productCode);
+	}
+
+	/**
+	 * Inputs minimum order quantity.
+	 *
+	 * @param minimumOrderQuantity the minimum order quantity.
+	 */
+	public void enterMinimumOrderQuantity(final String minimumOrderQuantity) {
+		clearAndType(getWaitDriver().waitForElementToBeVisible(By.cssSelector(PRODUCT_MINIMUM_ORDER_QUANTITY_CSS)), minimumOrderQuantity);
+	}
+
+	/**
+	 * Inputs enable dateTime.
+	 *
+	 * @param enableDateTime the enable dateTime.
+	 */
+	public void enterEnableDateTime(final String enableDateTime) {
+		clearAndType(ENABLE_DATE_TIME_CSS, enableDateTime);
+	}
+
+	/**
+	 * Inputs disable dateTime.
+	 *
+	 * @param disableDateTime the disable dateTime.
+	 */
+	public void enterDisableDateTime(final String disableDateTime) {
+		clearAndType(DISABLE_DATE_TIME_CSS, disableDateTime);
+	}
+
+	/**
+	 * Inputs release dateTime.
+	 *
+	 * @param releaseDateTime the release dateTime.
+	 */
+	public void enterReleaseDateTime(final String releaseDateTime) {
+		clearAndType(RELEASE_DATE_TIME_CSS, releaseDateTime);
+	}
+
+	/**
+	 * Inputs shipping weight.
+	 *
+	 * @param shippingWeight the shipping weight.
+	 */
+	public void enterShippingWeight(final String shippingWeight) {
+		clearAndType(SHIPPING_WEIGHT_CSS, shippingWeight);
+	}
+
+	/**
+	 * Inputs shipping width.
+	 *
+	 * @param shippingWidth the shipping width.
+	 */
+	public void enterShippingWidth(final String shippingWidth) {
+		clearAndType(SHIPPING_WIDTH_CSS, shippingWidth);
+	}
+
+	/**
+	 * Inputs shipping length.
+	 *
+	 * @param shippingLength the shipping length.
+	 */
+	public void enterShippingLength(final String shippingLength) {
+		clearAndType(SHIPPING_LENGTH_CSS, shippingLength);
+	}
+
+	/**
+	 * Inputs shipping height.
+	 *
+	 * @param shippingHeight the shipping height.
+	 */
+	public void enterShippingHeight(final String shippingHeight) {
+		clearAndType(SHIPPING_HEIGHT_CSS, shippingHeight);
 	}
 
 	/**
@@ -101,6 +190,17 @@ public class CreateProductWizard extends AbstractWizard {
 	 * @param productType the product type.
 	 */
 	public void selectProductType(final String productType) {
+		assertThat(selectComboBoxItem(PRODUCT_TYPE_COMBO_PARENT_CSS, productType))
+				.as("Unable to find product type - " + productType)
+				.isTrue();
+	}
+
+	/**
+	 * Selects a product type in combo box.
+	 *
+	 * @param productType the product type.
+	 */
+	public void selectLanguage(final String productType) {
 		assertThat(selectComboBoxItem(PRODUCT_TYPE_COMBO_PARENT_CSS, productType))
 				.as("Unable to find product type - " + productType)
 				.isTrue();
@@ -166,7 +266,7 @@ public class CreateProductWizard extends AbstractWizard {
 	public void enterAttributeShortTextMultiValue(final String value, final String attributeName) {
 		assertThat(selectItemInDialog(CREATE_PRODUCT_ATTRIBUTE_PARENT_CSS, CREATE_PRODUCT_ATTRIBUTE_COLUMN_CSS, attributeName,
 				ATTRIBUTE_NAME_COLUMNNAME))
-				.as("Unable to find attribute - " + attributeName)
+				.as(MESSAGE + attributeName)
 				.isTrue();
 
 		EditShortTextMultiValueAttributeDialog editShortTextMultiValueAttributeDialog = clickEditAttributeButtonShortTextMultiValue();
@@ -185,7 +285,7 @@ public class CreateProductWizard extends AbstractWizard {
 	public void enterAttributeIntegerValue(final String value, final String attributeName) {
 		assertThat(selectItemInDialog(CREATE_PRODUCT_ATTRIBUTE_PARENT_CSS, CREATE_PRODUCT_ATTRIBUTE_COLUMN_CSS, attributeName,
 				ATTRIBUTE_NAME_COLUMNNAME))
-				.as("Unable to find attribute - " + attributeName)
+				.as(MESSAGE + attributeName)
 				.isTrue();
 
 		EditIntegerValueAttributeDialog editIntegerValueAttributeDialog = clickEditAttributeButtonIntegerValue();
@@ -202,7 +302,7 @@ public class CreateProductWizard extends AbstractWizard {
 	public void enterAttributeDecimalValue(final String value, final String attributeName) {
 		assertThat(selectItemInDialog(CREATE_PRODUCT_ATTRIBUTE_PARENT_CSS, CREATE_PRODUCT_ATTRIBUTE_COLUMN_CSS, attributeName,
 				ATTRIBUTE_NAME_COLUMNNAME))
-				.as("Unable to find attribute - " + attributeName)
+				.as(MESSAGE + attributeName)
 				.isTrue();
 
 		EditDecimalValueAttributeDialog editDecimalValueAttributeDialog = clickEditAttributeButtonDecimalValue();
@@ -283,4 +383,30 @@ public class CreateProductWizard extends AbstractWizard {
 		return new AddSkuWizard(getDriver());
 	}
 
+	/**
+	 * Enter attribute short text.
+	 *
+	 * @param value         the value.
+	 * @param attributeName the attribute name.
+	 */
+	public void enterAttributeText(final String value, final String attributeName) {
+		assertThat(selectItemInDialog(CREATE_PRODUCT_ATTRIBUTE_PARENT_CSS, CREATE_PRODUCT_ATTRIBUTE_COLUMN_CSS, attributeName,
+				ATTRIBUTE_NAME_COLUMNNAME))
+				.as(MESSAGE + attributeName)
+				.isTrue();
+
+		EditShortTextAttributeDialog editShortTextAttributeDialog = clickEditAttributeButtonShortText();
+		editShortTextAttributeDialog.enterShortTextValue(value);
+		editShortTextAttributeDialog.clickOKButton();
+	}
+
+	/**
+	 * Click edit attribute button for short text.
+	 *
+	 * @return the dialog.
+	 */
+	public EditShortTextAttributeDialog clickEditAttributeButtonShortText() {
+		clickEditAttributeValueButton(EditShortTextAttributeDialog.PARENT_EDIT_SHORT_TEXT_CSS);
+		return new EditShortTextAttributeDialog(getDriver());
+	}
 }

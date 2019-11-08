@@ -5,9 +5,12 @@ package com.elasticpath.service.catalogview;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 import com.elasticpath.domain.catalog.Product;
+import com.elasticpath.domain.catalog.ProductSku;
 import com.elasticpath.domain.catalogview.StoreProduct;
+import com.elasticpath.domain.catalogview.StoreProductSku;
 import com.elasticpath.domain.store.Store;
 import com.elasticpath.persistence.api.FetchGroupLoadTuner;
 
@@ -46,6 +49,15 @@ public interface StoreProductService {
 	 * @return the store product
 	 */
 	StoreProduct getProductForStore(Product product, Store store);
+
+	/**
+	 * Gets a store product SKU for the specified SKU and store.
+	 *
+	 * @param productSku the product SKU to get the store product SKU for
+	 * @param store      the store within which the store product SKU exists
+	 * @return the store product SKU, if it exists within this Store
+	 */
+	Optional<StoreProductSku> getProductSkuForStore(ProductSku productSku, Store store);
 
 	/**
 	 * Retrieves a list of {@link Product}s from a list of {@link Product} uids and returns them as {@link IndexProduct}s.

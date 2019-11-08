@@ -7,9 +7,7 @@
 			<name>read-discount-applied-to-cart</name>
 			<description>
 				<![CDATA[
-Retrieve the discount amount applied to a cart [total][totals], excluding line item discounts.
-
-[totals]: #totals
+Retrieve the discount amount applied to a cart total, excluding line item discounts.
 				]]>
 			</description>
 			<step>
@@ -25,9 +23,7 @@ Retrieve the discount amount applied to a cart [total][totals], excluding line i
 			<name>read-discount-applied-to-purchase</name>
 			<description>
 				<![CDATA[
-Retrieve the discount amount applied to a [purchase][purchases].
-
-[purchases]: #purchases
+Retrieve the discount amount applied to a purchase.
 				]]>
 			</description>
 			<step>

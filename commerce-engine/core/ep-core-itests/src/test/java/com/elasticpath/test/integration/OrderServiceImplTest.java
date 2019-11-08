@@ -44,7 +44,13 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
+
 import javax.persistence.EntityManager;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Ignore;
+import org.junit.Test;
 
 import org.apache.camel.CamelContext;
 import org.apache.camel.Endpoint;
@@ -53,10 +59,6 @@ import org.apache.camel.builder.NotifyBuilder;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.mock.MockEndpoint;
 import org.apache.camel.spi.DataFormat;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.test.annotation.DirtiesContext;
@@ -235,7 +237,7 @@ public class OrderServiceImplTest extends BasicSpringContextTest {
 	@Autowired
 	private EventOriginatorHelper eventOriginatorHelper;
 	@Autowired
-	private EntityManager em;
+	private EntityManager entityManager;
 
 	/**
 	 * Get a reference to TestApplicationContext for use within the test. Setup scenarios.
@@ -784,6 +786,18 @@ public class OrderServiceImplTest extends BasicSpringContextTest {
 	}
 
 	/**
+	 * Test that failOrder sets the cart order guid to null.
+	 */
+	@Test
+	public void testFailedOrderShouldHaveNullCartOrderGuid() {
+		Order order = createOrder();
+
+		order.failOrder();
+		orderService.update(order);
+		assertNull("The Cart Order Guid for a failed Order should be null", order.getCartOrderGuid());
+	}
+
+	/**
 	 * Test that findOrderByCustomerGuidAndStoreCode finds regular orders but excludes failed orders.
 	 */
 	@Test
@@ -1290,21 +1304,6 @@ public class OrderServiceImplTest extends BasicSpringContextTest {
 	}
 
 	/**
-	 * Test finding latest order GUID by cart order GUID when many orders exist for a cart order.
-	 */
-	@Test
-	public void testFindLatestOrderGuidByCartOrderGuidWhenManyOrdersExistForACartOrder() {
-		Order firstOrder = createOrderWithCartOrderGuid(product, CART_ORDER_GUID);
-		Order secondOrder = createOrderWithCartOrderGuid(product, CART_ORDER_GUID);
-		Order thirdOrder = createOrderWithCartOrderGuid(product, CART_ORDER_GUID);
-
-		String result = orderService.findLatestOrderGuidByCartOrderGuid(CART_ORDER_GUID);
-		assertFalse("The returned order guid should not equal the first order created.", firstOrder.getGuid().equals(result));
-		assertFalse("The returned order guid should not equal the second order created.", secondOrder.getGuid().equals(result));
-		assertThat(result).as("The order guid should be the same as the last order created.").isEqualTo(thirdOrder.getGuid());
-	}
-
-	/**
 	 * Test finding an order by cart order GUID will not return an order that does not match the cart order GUID.
 	 */
 	@Test
@@ -1475,7 +1474,7 @@ public class OrderServiceImplTest extends BasicSpringContextTest {
 		assertThat(order.getStatus()).isEqualTo(ONHOLD);
 
 		// Detach and Release order
-		em.detach(order);
+		entityManager.detach(order);
 
 		eventOriginatorHelper = new EventOriginatorHelperImpl();
 		order.setModifiedBy(eventOriginatorHelper.getSystemOriginator());

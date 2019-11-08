@@ -11,7 +11,6 @@ import java.util.Set;
 import com.elasticpath.base.exception.EpServiceException;
 import com.elasticpath.commons.pagination.DirectedSortingField;
 import com.elasticpath.commons.pagination.SearchCriterion;
-import com.elasticpath.domain.coupon.specifications.PotentialCouponUse;
 import com.elasticpath.domain.rules.Coupon;
 
 /**
@@ -180,10 +179,4 @@ public interface CouponService {
 	 */
 	Map<String, Coupon> findCouponsForCodes(Collection<String> codes);
 
-	/**
-	 * Check if coupon is valid.
-	 * @param potentialCouponUse PotentialCouponUse object.
-	 * @param couponCode coupon code.
-	 */
-	void validateCoupon(PotentialCouponUse potentialCouponUse, String couponCode);
 }

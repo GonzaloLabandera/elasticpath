@@ -6,6 +6,7 @@ package com.elasticpath.tags.domain;
 import java.util.Locale;
 import java.util.Set;
 
+import com.elasticpath.domain.misc.LocalizedProperties;
 import com.elasticpath.persistence.api.Persistable;
 
 /**
@@ -37,6 +38,12 @@ public interface TagGroup extends Persistable {
 	void setGuid(String guid);
 
 	/**
+	 * Set the LocalizedProperties map for this tag group.
+	 * @param localizedProperties the instance of the localized properties map
+	 */
+	void setLocalizedProperties(LocalizedProperties localizedProperties);
+
+	/**
 	 * @return a set of {@link TagDefinition}
 	 */
 	Set<TagDefinition> getTagDefinitions();
@@ -61,5 +68,12 @@ public interface TagGroup extends Persistable {
 	 * @param tagDefinitions a set of {@link TagDefinition}
 	 */
 	void setTagDefinitions(Set<TagDefinition> tagDefinitions);
+
+	/**
+	 * Gets the set of map of properties that represent the localized display names for this tag group.
+	 *
+	 * @return The LocalizedProperties that contain the localized display names for this tag group.
+	 */
+	LocalizedProperties getLocalizedProperties();
 
 }

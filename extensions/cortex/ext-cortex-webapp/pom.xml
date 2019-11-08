@@ -30,129 +30,43 @@
 	</properties>
 
 	<dependencies>
+		<!-- RelOS webapp war overlay -->
+		<dependency>
+			<groupId>com.elasticpath.cortex</groupId>
+			<artifactId>ep-relos-runtime-webapp</artifactId>
+			<type>war</type>
+		</dependency>
 
-		<!-- Add Extension resources or Integration modules as maven dependencies here. -->
-		<dependency>
-			<groupId>com.elasticpath.extensions</groupId>
-			<artifactId>ext-commerce-engine-wrapper</artifactId>
-			<version>${project.version}</version>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>com.elasticpath.rest.relos.platforms</groupId>
-			<artifactId>platforms-commons</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>com.elasticpath.rest.relos.platforms</groupId>
-			<artifactId>ep-relos-webapp-housing</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>javax.validation</groupId>
-			<artifactId>validation-api</artifactId>
-		</dependency>
+		<!-- Non-OSGi dependencies -->
 		<dependency>
 			<groupId>com.sun.xml.bind</groupId>
 			<artifactId>jaxb-core</artifactId>
 		</dependency>
-		<dependency>
-			<groupId>org.apache.felix</groupId>
-			<artifactId>org.apache.felix.framework</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.felix</groupId>
-			<artifactId>org.apache.felix.http.proxy</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.geronimo.specs</groupId>
-			<artifactId>geronimo-jms_1.1_spec</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.geronimo.specs</groupId>
-			<artifactId>geronimo-j2ee-management_1.1_spec</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>com.google.protobuf</groupId>
-			<artifactId>protobuf-java</artifactId>
-			<scope>provided</scope>
-		</dependency>
-
-		<!-- Spring -->
-		<dependency>
-			<groupId>org.apache.servicemix.bundles</groupId>
-			<artifactId>org.apache.servicemix.bundles.spring-core</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.servicemix.bundles</groupId>
-			<artifactId>org.apache.servicemix.bundles.spring-beans</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.servicemix.bundles</groupId>
-			<artifactId>org.apache.servicemix.bundles.spring-context</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.servicemix.bundles</groupId>
-			<artifactId>org.apache.servicemix.bundles.spring-expression</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.servicemix.bundles</groupId>
-			<artifactId>org.apache.servicemix.bundles.spring-web</artifactId>
-		</dependency>
-
-		<!-- logging -->
-		<dependency>
-			<groupId>ch.qos.logback</groupId>
-			<artifactId>logback-classic</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>ch.qos.logback</groupId>
-			<artifactId>logback-core</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>com.elasticpath.rest.relos</groupId>
-			<artifactId>ep-relos-logback-config</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>jcl-over-slf4j</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>log4j-over-slf4j</artifactId>
-			<version>${slf4j.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-api</artifactId>
-			<version>${slf4j.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.osgi</groupId>
-			<artifactId>org.osgi.service.log</artifactId>
-			<version>1.3.0</version>
-		</dependency>
-		<!-- exclude log4j from WEB-INF/lib by marking them as provided. -->
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-log4j12</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>log4j</groupId>
-			<artifactId>log4j</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<!-- Non-OSGi Drools dependencies -->
+		<!-- Drools -->
 		<dependency>
 			<groupId>org.mvel</groupId>
 			<artifactId>mvel2</artifactId>
 		</dependency>
 
 		<!-- Bundles. Everything below this comment should be marked as "provided" -->
+
+		<!-- Add Extension resources or Integration modules as maven dependencies here. -->
 		<dependency>
-			<groupId>org.apache.servicemix.bundles</groupId>
-			<artifactId>org.apache.servicemix.bundles.aspectj</artifactId>
+			<groupId>com.elasticpath.extensions</groupId>
+			<artifactId>ext-commerce-engine-wrapper</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.elasticpath.extensions.rest.repositories</groupId>
+			<artifactId>ext-cortex-repositories</artifactId>
+			<scope>provided</scope>
+		</dependency>
+
+
+		<!-- Third party dependencies -->
+		<dependency>
+			<groupId>com.google.protobuf</groupId>
+			<artifactId>protobuf-java</artifactId>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
@@ -163,11 +77,6 @@
 		<dependency>
 			<groupId>com.thoughtworks.xstream</groupId>
 			<artifactId>xstream</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>javax.cache</groupId>
-			<artifactId>cache-api</artifactId>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
@@ -186,125 +95,35 @@
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
-			<groupId>org.apache.felix</groupId>
-			<artifactId>org.apache.felix.inventory</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.felix</groupId>
-			<artifactId>org.apache.felix.scr</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.felix</groupId>
-			<artifactId>org.apache.felix.configadmin</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.felix</groupId>
-			<artifactId>org.apache.felix.metatype</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.felix</groupId>
-			<artifactId>org.apache.felix.fileinstall</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.felix</groupId>
-			<artifactId>org.apache.felix.http.api</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.felix</groupId>
-			<artifactId>org.apache.felix.http.bridge</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.felix</groupId>
-			<artifactId>org.apache.felix.http.servlet-api</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.felix</groupId>
-			<artifactId>org.apache.felix.eventadmin</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>javax.ws.rs</groupId>
-			<artifactId>javax.ws.rs-api</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>javax.annotation</groupId>
-			<artifactId>javax.annotation-api</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.commons</groupId>
-			<artifactId>commons-lang3</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>com.google.guava</groupId>
-			<artifactId>guava</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>com.fasterxml.uuid</groupId>
-			<artifactId>java-uuid-generator</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>net.sourceforge.jregex</groupId>
-			<artifactId>jregex</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>io.reactivex.rxjava2</groupId>
-			<artifactId>rxjava</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>com.google.inject</groupId>
-			<artifactId>guice</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>com.google.inject.extensions</groupId>
-			<artifactId>guice-multibindings</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.eclipse.sisu</groupId>
-			<artifactId>org.eclipse.sisu.inject</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.ops4j</groupId>
-			<artifactId>peaberry</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
 			<groupId>org.apache.servicemix.bundles</groupId>
 			<artifactId>org.apache.servicemix.bundles.aopalliance</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>javax.cache</groupId>
+			<artifactId>cache-api</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>commons-lang</groupId>
+			<artifactId>commons-lang</artifactId>
 			<scope>provided</scope>
 		</dependency>
 
 		<!-- Spring -->
 		<dependency>
 			<groupId>org.apache.servicemix.bundles</groupId>
-			<artifactId>org.apache.servicemix.bundles.spring-context-support</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.servicemix.bundles</groupId>
-			<artifactId>org.apache.servicemix.bundles.spring-aop</artifactId>
+			<artifactId>org.apache.servicemix.bundles.spring-web</artifactId>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.servicemix.bundles</groupId>
 			<artifactId>org.apache.servicemix.bundles.spring-webmvc</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.servicemix.bundles</groupId>
+			<artifactId>org.apache.servicemix.bundles.spring-context-support</artifactId>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
@@ -322,35 +141,10 @@
 			<artifactId>org.apache.servicemix.bundles.spring-jms</artifactId>
 			<scope>provided</scope>
 		</dependency>
-		<dependency>
-			<groupId>org.apache.servicemix.bundles</groupId>
-			<artifactId>org.apache.servicemix.bundles.spring-ldap</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.batch</groupId>
-			<artifactId>spring-batch-core</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.batch</groupId>
-			<artifactId>spring-batch-infrastructure</artifactId>
-			<scope>provided</scope>
-		</dependency>
 
 		<dependency>
 			<groupId>commons-codec</groupId>
 			<artifactId>commons-codec</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>commons-pool</groupId>
-			<artifactId>commons-pool</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>commons-lang</groupId>
-			<artifactId>commons-lang</artifactId>
 			<scope>provided</scope>
 		</dependency>
 
@@ -364,15 +158,10 @@
 			<groupId>org.apache.servicemix.bundles</groupId>
 			<artifactId>org.apache.servicemix.bundles.spring-security-web</artifactId>
 			<scope>provided</scope>
-			</dependency>
-		<dependency>
-			<groupId>org.apache.servicemix.bundles</groupId>
-			<artifactId>org.apache.servicemix.bundles.spring-security-config</artifactId>
-			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.servicemix.bundles</groupId>
-			<artifactId>org.apache.servicemix.bundles.spring-security-ldap</artifactId>
+			<artifactId>org.apache.servicemix.bundles.spring-security-config</artifactId>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
@@ -474,125 +263,7 @@
 			<scope>provided</scope>
 		</dependency>
 
-		<dependency>
-			<groupId>com.elasticpath</groupId>
-			<artifactId>cxf-uritemplate-utils</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<!-- OSGi webconsole - start -->
-		<dependency>
-			<groupId>org.apache.felix</groupId>
-			<artifactId>org.apache.felix.webconsole</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<!-- the following artifacts are webconsole dependencies which can be removed on webconsole removal  -->
-		<dependency>
-			<groupId>commons-fileupload</groupId>
-			<artifactId>commons-fileupload</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.json</groupId>
-			<artifactId>com.springsource.org.json</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>commons-io</groupId>
-			<artifactId>commons-io</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<!-- webconsole plugins -->
-		<dependency>
-			<groupId>org.apache.felix</groupId>
-			<artifactId>org.apache.felix.webconsole.plugins.ds</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.felix</groupId>
-			<artifactId>org.apache.felix.webconsole.plugins.event</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.felix</groupId>
-			<artifactId>org.apache.felix.webconsole.plugins.memoryusage</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.felix</groupId>
-			<artifactId>org.apache.felix.webconsole.plugins.packageadmin</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<!-- OSGi webconsole - end -->
-
-		<!-- OSGi bundled versions -->
-		<dependency>
-			<groupId>org.aopalliance</groupId>
-			<artifactId>com.springsource.org.aopalliance</artifactId>
-			<scope>provided</scope>
-		</dependency>
-
-		<!-- Gemini blueprint -->
-		<dependency>
-			<groupId>org.eclipse.gemini.blueprint</groupId>
-			<artifactId>gemini-blueprint-core</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.eclipse.gemini.blueprint</groupId>
-			<artifactId>gemini-blueprint-io</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.eclipse.gemini.blueprint</groupId>
-			<artifactId>gemini-blueprint-extender</artifactId>
-			<scope>provided</scope>
-		</dependency>
-
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>osgi-over-slf4j</artifactId>
-			<scope>provided</scope>
-		</dependency>
-
-		<!-- Helix -->
-		<dependency>
-			<groupId>com.elasticpath.rest.helix</groupId>
-			<artifactId>helix-api</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>com.elasticpath.rest.helix</groupId>
-			<artifactId>helix-data-injectors</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>com.elasticpath.rest.helix</groupId>
-			<artifactId>helix-commons</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>com.elasticpath.rest.helix</groupId>
-			<artifactId>helix-validator</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>com.elasticpath.rest.helix</groupId>
-			<artifactId>helix-runtime</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>com.elasticpath.rest.helix</groupId>
-			<artifactId>helix-resource-bootstrap</artifactId>
-			<scope>provided</scope>
-		</dependency>
-
 		<!-- Commerce Engine -->
-		<dependency>
-			<groupId>com.elasticpath.extensions.rest.repositories</groupId>
-			<artifactId>ext-cortex-repositories</artifactId>
-			<scope>provided</scope>
-			<version>${project.version}</version>
-		</dependency>
 		<dependency>
 			<groupId>com.elasticpath</groupId>
 			<artifactId>ep-converters</artifactId>
@@ -621,6 +292,16 @@
 		<dependency>
 			<groupId>com.elasticpath</groupId>
 			<artifactId>ep-core-customer-messaging</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.elasticpath</groupId>
+			<artifactId>ep-core-domain-messaging</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.elasticpath</groupId>
+			<artifactId>ep-catalog-message-handler</artifactId>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
@@ -664,17 +345,8 @@
 			<artifactId>ep-bean-framework</artifactId>
 			<scope>provided</scope>
 		</dependency>
+
 		<!-- Subject -->
-		<dependency>
-			<groupId>com.elasticpath.rest.relos.rs.subject</groupId>
-			<artifactId>ep-rs-subject-api</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>com.elasticpath.rest.relos.rs.subject</groupId>
-			<artifactId>ep-rs-subject-impl</artifactId>
-			<scope>provided</scope>
-		</dependency>
 		<dependency>
 			<groupId>com.elasticpath.rest.integration.epcommerce</groupId>
 			<artifactId>ep-rs-subject-lookup-epcommerce</artifactId>
@@ -683,22 +355,11 @@
 
 		<!-- Events -->
 		<dependency>
-			<groupId>com.elasticpath.rest.relos.rs.events</groupId>
-			<artifactId>ep-rs-events-api</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>com.elasticpath.rest.relos.rs.events</groupId>
-			<artifactId>ep-rs-events-impl</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
 			<groupId>com.elasticpath.rest.integration.epcommerce</groupId>
 			<artifactId>ep-resource-event-handlers-epcommerce</artifactId>
 			<version>${cortex.ep.integration.version}</version>
 			<scope>provided</scope>
 		</dependency>
-
 
 		<!-- Subject Attributes -->
 		<dependency>
@@ -708,201 +369,26 @@
 			<scope>provided</scope>
 		</dependency>
 
-		<!-- RelOS -->
+		<!-- OAuth2 EP Commerce Integration -->
 		<dependency>
-			<groupId>com.elasticpath.rest.relos</groupId>
-			<artifactId>ep-relos-system-ready</artifactId>
+			<groupId>com.elasticpath.rest.integration.epcommerce</groupId>
+			<artifactId>ep-rs-authentication-epcommerce</artifactId>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
-			<groupId>com.elasticpath.rest.relos</groupId>
-			<artifactId>ep-relos-kernel</artifactId>
+			<groupId>com.elasticpath.rest.integration.epcommerce</groupId>
+			<artifactId>ep-rs-authentication-spring-oauth2</artifactId>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
-			<groupId>com.elasticpath.rest.resource.cortex</groupId>
-			<artifactId>ep-root-resource</artifactId>
+			<groupId>com.elasticpath.rest.integration.epcommerce</groupId>
+			<artifactId>ep-rs-authentication-spring-oauth2-tokenstore-epcommerce</artifactId>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
-			<groupId>com.elasticpath.rest</groupId>
-			<artifactId>ep-rest-spi</artifactId>
+			<groupId>com.elasticpath.rest.integration.epcommerce</groupId>
+			<artifactId>ep-hds-support</artifactId>
 			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>com.elasticpath.rest</groupId>
-			<artifactId>ep-rest-spi-impl</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>com.elasticpath.rest</groupId>
-			<artifactId>ep-rest-api</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>com.elasticpath.rest</groupId>
-			<artifactId>ep-rest-identifiers</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>com.elasticpath.rest</groupId>
-			<artifactId>ep-rest-commons</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>com.elasticpath.rest.relos.rs</groupId>
-			<artifactId>ep-rs-bridge</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>com.elasticpath.rest.relos.rs</groupId>
-			<artifactId>ep-rs-bridge-common</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>com.elasticpath.rest.relos.rs</groupId>
-			<artifactId>ep-rs-hal-support</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>com.elasticpath.rest.relos.rs</groupId>
-			<artifactId>ep-rs-jaxrs-resource-provider</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>com.elasticpath.rest.relos.rs</groupId>
-			<artifactId>ep-rs-jersey-integration</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>com.elasticpath.rest</groupId>
-			<artifactId>ep-rest-json-jackson</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>com.elasticpath.rest.relos.rs</groupId>
-			<artifactId>ep-rs-external</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>com.elasticpath.rest</groupId>
-			<artifactId>ep-rest-resource-blueprint-extender</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>com.elasticpath.rest</groupId>
-			<artifactId>ep-dispatch-extender</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>com.elasticpath.rest.relos.rs</groupId>
-			<artifactId>ep-rs-healthcheck</artifactId>
-			<scope>provided</scope>
-		</dependency>
-
-		<!-- jackson -->
-		<dependency>
-			<groupId>com.fasterxml.jackson.core</groupId>
-			<artifactId>jackson-core</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>com.fasterxml.jackson.core</groupId>
-			<artifactId>jackson-annotations</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>com.fasterxml.jackson.core</groupId>
-			<artifactId>jackson-databind</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>com.fasterxml.jackson.jaxrs</groupId>
-			<artifactId>jackson-jaxrs-base</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>com.fasterxml.jackson.jaxrs</groupId>
-			<artifactId>jackson-jaxrs-json-provider</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>com.fasterxml.jackson.module</groupId>
-			<artifactId>jackson-module-jaxb-annotations</artifactId>
-			<scope>provided</scope>
-		</dependency>
-
-		<!-- jersey -->
-		<dependency>
-			<groupId>org.glassfish.jersey.containers</groupId>
-			<artifactId>jersey-container-servlet</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.glassfish.jersey.inject</groupId>
-			<artifactId>jersey-hk2</artifactId>
-			<scope>provided</scope>
-		</dependency>
-
-		<dependency>
-			<groupId>org.apache.shiro</groupId>
-			<artifactId>shiro-core</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>io.dropwizard.metrics</groupId>
-			<artifactId>metrics-core</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>io.dropwizard.metrics</groupId>
-			<artifactId>metrics-healthchecks</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>io.dropwizard.metrics</groupId>
-			<artifactId>metrics-graphite</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.msgpack</groupId>
-			<artifactId>msgpack-core</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.javassist</groupId>
-			<artifactId>javassist</artifactId>
-			<scope>provided</scope>
-		</dependency>
-
-		<!-- Security -->
-		<dependency>
-			<groupId>com.elasticpath.bundles</groupId>
-			<artifactId>esapi-osgi-bundle</artifactId>
-			<scope>provided</scope>
-		</dependency>
-
-		<!-- Camel -->
-		<dependency>
-			<groupId>org.apache.camel</groupId>
-			<artifactId>camel-core</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.camel</groupId>
-			<artifactId>camel-jackson</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.camel</groupId>
-			<artifactId>camel-jms</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.camel</groupId>
-			<artifactId>camel-spring</artifactId>
-			<scope>provided</scope>
-
 		</dependency>
 
 		<!-- Resource Servers -->
@@ -1212,66 +698,21 @@
 							<goal>copy-dependencies</goal>
 						</goals>
 						<configuration>
-							<outputDirectory>${war-bundle-directory-level-4}</outputDirectory>
+							<outputDirectory>${war-bundle-directory}</outputDirectory>
 							<includeScope>provided</includeScope>
 							<includeGroupIds>
 								com.elasticpath.rest.definitions,
 								com.elasticpath.rest.resource.cortex,
 								com.elasticpath.rest.integration.epcommerce,
+								com.elasticpath.extensions.rest,
 								com.elasticpath.extensions.rest.repositories,
 								com.elasticpath.extensions.rest.resource
-
 							</includeGroupIds>
 							<excludeArtifactIds>
+								ep-resource-base-api,
 								ep-resource-collections-api,
 								ep-rest-repositories-epcommerce
 							</excludeArtifactIds>
-						</configuration>
-					</execution>
-
-					<!-- Resource Exceptions -->
-					<execution>
-						<id>copy-resource-exceptions</id>
-						<phase>prepare-package</phase>
-						<goals>
-							<goal>copy-dependencies</goal>
-						</goals>
-						<configuration>
-							<outputDirectory>${war-bundle-directory-level-2}</outputDirectory>
-							<includeScope>provided</includeScope>
-							<includeArtifactIds>
-								ep-resource-collections-api
-							</includeArtifactIds>
-						</configuration>
-					</execution>
-
-					<!-- Cortex Bundles -->
-					<execution>
-						<id>copy-cortex-OSGi-bundles</id>
-						<phase>prepare-package</phase>
-						<goals>
-							<goal>copy-dependencies</goal>
-						</goals>
-						<configuration>
-							<outputDirectory>${war-bundle-directory-level-2}</outputDirectory>
-							<includeScope>provided</includeScope>
-							<includeGroupIds>
-								com.elasticpath.rest,
-								org.glassfish,
-								javax.annotation,
-								javax.ws.rs,
-								com.fasterxml.jackson,
-								com.fasterxml.uuid,
-								io.reactivex.rxjava2,
-								org.reactivestreams
-							</includeGroupIds>
-							<excludeGroupIds>
-								com.elasticpath.rest.definitions,
-								com.elasticpath.rest.resource.cortex,
-								com.elasticpath.rest.integration.epcommerce,
-								org.glassfish.web,
-								com.fasterxml.jackson.dataformat
-							</excludeGroupIds>
 						</configuration>
 					</execution>
 
@@ -1283,10 +724,9 @@
 							<goal>copy-dependencies</goal>
 						</goals>
 						<configuration>
-							<outputDirectory>${war-bundle-directory-level-2}</outputDirectory>
+							<outputDirectory>${war-bundle-directory}</outputDirectory>
 							<includeScope>provided</includeScope>
 							<includeArtifactIds>
-								${ep-commerce-engine-wrapper-artifact-id},
 								ep-bean-framework,
 								ep-persistence-api,
 								ep-converters,
@@ -1294,14 +734,13 @@
 								ep-messaging-camel,
 								ep-jms,
 								ep-core-customer-messaging,
+								ep-core-domain-messaging,
 								ep-cache,
 								ep-core-caching,
 								ep-core-order-messaging,
 								openjpa-osgi-wrapper,
 								org.apache.servicemix.bundles.ehcache,
 								org.apache.bval.bundle,
-								commons-beanutils,
-								org.apache.servicemix.bundles.commons-collections,
 								camel-core,
 								camel-jackson,
 								camel-jms,
@@ -1318,15 +757,14 @@
 							<goal>copy-dependencies</goal>
 						</goals>
 						<configuration>
-							<outputDirectory>${war-bundle-directory-level-2}</outputDirectory>
+							<outputDirectory>${war-bundle-directory}</outputDirectory>
 							<includeScope>provided</includeScope>
 							<includeArtifactIds>
 								<!-- Shipping Calculation API -->
 								shipping-calculation-connectivity-api,
 								shipping-calculation-connectivity-caching,
-
 								<!-- Shipping Calculation SPI -->
-								shipping-calculation-plugin-epcommerce,
+								shipping-calculation-plugin-epcommerce
 							</includeArtifactIds>
 						</configuration>
 					</execution>
@@ -1338,56 +776,14 @@
 							<goal>copy-dependencies</goal>
 						</goals>
 						<configuration>
-							<outputDirectory>${war-bundle-directory-level-2}</outputDirectory>
+							<outputDirectory>${war-bundle-directory}</outputDirectory>
 							<excludeTransitive>true</excludeTransitive>
 							<includeScope>provided</includeScope>
 							<includeArtifactIds>
-								<!-- shared libs -->
-								cache-api,
-								org.apache.servicemix.bundles.aspectj,
-								commons-lang3,
-								guava,
-								org.eclipse.sisu.inject,
-								guice,
-								guice-multibindings,
-								org.apache.servicemix.bundles.aopalliance,
-								peaberry,
-								javassist,
-								jregex,
-								rxjava,
-								esapi-osgi-bundle,
-								<!-- dependant: ep-rest-commons -->
-								cxf-uritemplate-utils,
-								<!-- dependant: ep-relos-kernel -->
-								rxjava,
-								metrics-core,
-								metrics-healthchecks,
-								metrics-graphite,
-								<!-- dependant: ep-relos-kernel -->
-								shiro-core,
 								<!-- dependant: ep-rest-spi -->
-								msgpack-core,
 								spring-security-oauth2-bundle,
 								<!-- dependant: ep-rs-authentication-epcommerce -->
 								javax.json
-							</includeArtifactIds>
-						</configuration>
-					</execution>
-					<!-- logging - not in scope"provided" as they are needed by the webapp also-->
-					<execution>
-						<id>copy-logging-OSGi-bundles</id>
-						<phase>prepare-package</phase>
-						<goals>
-							<goal>copy-dependencies</goal>
-						</goals>
-						<configuration>
-							<outputDirectory>${war-bundle-directory-level-2}</outputDirectory>
-							<excludeTransitive>true</excludeTransitive>
-							<includeArtifactIds>
-								jcl-over-slf4j,
-								log4j-over-slf4j,
-								org.osgi.service.log,
-								osgi-over-slf4j
 							</includeArtifactIds>
 						</configuration>
 					</execution>
@@ -1400,82 +796,24 @@
 							<goal>copy-dependencies</goal>
 						</goals>
 						<configuration>
-							<outputDirectory>${war-bundle-directory-level-2}</outputDirectory>
+							<outputDirectory>${war-bundle-directory}</outputDirectory>
 							<excludeTransitive>true</excludeTransitive>
 							<includeGroupIds>
+								javax.cache,
 								org.apache.servicemix.bundles,
-								org.springframework.security,
 								org.drools,
-								org.springframework.batch,
 								org.kie,
-								org.kie.soup,
 								org.jbpm,
 								com.thoughtworks.xstream,
 								com.google.protobuf,
 								com.sun.mail,
-								commons-codec,
 								commons-lang,
-								commons-pool,
-								com.sun.xml.bind,
-								org.aopalliance,
-								org.eclipse.gemini
+								commons-codec,
+								com.sun.xml.bind
 							</includeGroupIds>
 							<excludeArtifactIds>
 								jaxb-impl
 							</excludeArtifactIds>
-						</configuration>
-					</execution>
-
-					<!-- osgi container stuff -->
-					<execution>
-						<id>copy-osgi-base-OSGi-bundles</id>
-						<phase>prepare-package</phase>
-						<goals>
-							<goal>copy-dependencies</goal>
-						</goals>
-						<configuration>
-							<outputDirectory>${war-bundle-directory-level-2}</outputDirectory>
-							<excludeTransitive>true</excludeTransitive>
-							<includeScope>provided</includeScope>
-							<includeGroupIds>
-								org.apache.felix
-							</includeGroupIds>
-						</configuration>
-					</execution>
-
-					<!-- OSGi webconsole -->
-					<execution>
-						<id>copy-osgi-webconsole-OSGi-bundles</id>
-						<phase>prepare-package</phase>
-						<goals>
-							<goal>copy-dependencies</goal>
-						</goals>
-						<configuration>
-							<outputDirectory>${war-bundle-directory-level-2}</outputDirectory>
-							<excludeTransitive>true</excludeTransitive>
-							<includeScope>provided</includeScope>
-							<includeArtifactIds>
-								org.apache.felix.webconsole,
-								commons-io,
-								commons-fileupload,
-								com.springsource.org.json
-							</includeArtifactIds>
-						</configuration>
-					</execution>
-
-					<!-- Add Extension Resource Bundles -->
-					<execution>
-						<id>copy-cortex-resource-bundles</id>
-						<phase>prepare-package</phase>
-						<goals>
-							<goal>copy-dependencies</goal>
-						</goals>
-						<configuration>
-							<outputDirectory>${war-bundle-directory-level-4}</outputDirectory>
-							<includeScope>provided</includeScope>
-							<includeGroupIds>
-								com.elasticpath.extensions.rest
-							</includeGroupIds>
 						</configuration>
 					</execution>
 
@@ -1487,7 +825,7 @@
 							<goal>copy</goal>
 						</goals>
 						<configuration>
-							<outputDirectory>${war-bundle-directory-level-2}</outputDirectory>
+							<outputDirectory>${war-bundle-directory}</outputDirectory>
 							<artifactItems>
 								<artifactItem>
 									<groupId>com.elasticpath.extensions</groupId>
@@ -1508,37 +846,18 @@
 						<resource>
 							<directory>src/main/webapp</directory>
 							<filtering>true</filtering>
+							<excludes>
+								<exclude>META-INF/context.xml</exclude>
+							</excludes>
+						</resource>
+						<resource>
+							<directory>src/main/webapp</directory>
+							<filtering>false</filtering>
+							<includes>
+								<includes>META-INF/context.xml</includes>
+							</includes>
 						</resource>
 					</webResources>
-					<escapeString>\</escapeString>
-				</configuration>
-			</plugin>
-
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-resources-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>create-tomcat-context-xml</id>
-						<phase>process-resources</phase>
-						<goals>
-							<goal>copy-resources</goal>
-						</goals>
-						<configuration>
-							<resources>
-								<resource>
-									<directory>src/tomcat</directory>
-									<filtering>true</filtering>
-									<includes>
-										<include>context.xml</include>
-									</includes>
-								</resource>
-							</resources>
-							<outputDirectory>${project.build.directory}/tomcatconf</outputDirectory>
-						</configuration>
-					</execution>
-				</executions>
-				<configuration>
 					<escapeString>\</escapeString>
 				</configuration>
 			</plugin>
@@ -1552,7 +871,7 @@
 					<warSourceDirectory>${project.build.directory}/${project.artifactId}-${project.version}</warSourceDirectory>
 					<path>${ep.cortex.contextUrl}</path>
 					<port>${ep.cortex.tomcat.port.http}</port>
-					<contextFile>${project.build.directory}/tomcatconf/context.xml</contextFile>
+					<contextFile>${project.build.directory}/${build.finalName}/META-INF/context.xml</contextFile>
 					<systemProperties>
 						<felix.fileinstall.dir>
 							${user.home}/ep/conf/cortex/permissions,${user.home}/ep/conf/cortex,/ep/conf/cortex/permissions,/ep/conf/cortex,/etc/ep/cortex/resources/config/permissions,/etc/ep/cortex/system/config
@@ -1560,6 +879,20 @@
 						<org.aspectj.tracing.messages>true</org.aspectj.tracing.messages>
 						<org.aspectj.tracing.factory>org.aspectj.weaver.tools.CommonsTraceFactory</org.aspectj.tracing.factory>
 						<ep.search.default.url>${ep.search.url}</ep.search.default.url>
+						<epdb.username>${epdb.username}</epdb.username>
+						<epdb.password>${epdb.password}</epdb.password>
+						<epdb.jdbc.driver>${epdb.jdbc.driver}</epdb.jdbc.driver>
+						<epdb.data.source.factory>${epdb.data.source.factory}</epdb.data.source.factory>
+						<epdb.url>${epdb.url}</epdb.url>
+						<epdb.ro.url>${epdb.ro.url}</epdb.ro.url>
+						<epdb.data.source.type>${epdb.data.source.type}</epdb.data.source.type>
+						<epdb.validation.query>${epdb.validation.query}</epdb.validation.query>
+						<epdb.validation.interval>${epdb.validation.interval}</epdb.validation.interval>
+						<ep.tomcat.maxcachesize>${ep.tomcat.maxcachesize}</ep.tomcat.maxcachesize>
+						<ep.jms.factory>${ep.jms.factory}</ep.jms.factory>
+						<ep.jms.type>${ep.jms.type}</ep.jms.type>
+						<ep.jms.url>${ep.jms.url}</ep.jms.url>
+
 					</systemProperties>
 					<webapps>
 						<webapp>
@@ -1759,7 +1092,7 @@
 										<goal>copy</goal>
 									</goals>
 									<configuration>
-										<outputDirectory>${war-bundle-directory-level-2}</outputDirectory>
+										<outputDirectory>${war-bundle-directory-level-1}</outputDirectory>
 										<artifactItems>
 											<artifactItem>
 												<groupId>org.apache.felix</groupId>
@@ -1901,11 +1234,7 @@
 										<directory>src/main/webapp</directory>
 										<filtering>true</filtering>
 									</resource>
-									<resource>
-										<directory>src/tomcat</directory>
-										<targetPath>META-INF</targetPath>
-										<filtering>true</filtering>
-									</resource>
+
 								</webResources>
 							</configuration>
 						</plugin>
@@ -1936,47 +1265,6 @@
 					</plugins>
 				</pluginManagement>
 			</build>
-		</profile>
-		<profile>
-			<id>with-oauth2-resource</id>
-			<dependencies>
-				<dependency>
-					<groupId>com.elasticpath.rest.relos.rs.authentication</groupId>
-					<artifactId>ep-rs-authentication-api</artifactId>
-					<scope>provided</scope>
-				</dependency>
-				<dependency>
-					<groupId>com.elasticpath.rest.relos.rs.authentication</groupId>
-					<artifactId>ep-rs-authentication-client-local</artifactId>
-					<scope>provided</scope>
-				</dependency>
-				<dependency>
-					<groupId>com.elasticpath.rest.relos.rs.authentication</groupId>
-					<artifactId>ep-rs-authentication-handler</artifactId>
-					<scope>provided</scope>
-				</dependency>
-				<dependency>
-					<groupId>com.elasticpath.rest.relos.rs.authentication</groupId>
-					<artifactId>ep-rs-authentication-resource</artifactId>
-					<scope>provided</scope>
-				</dependency>
-				<!-- EP Commerce Integration -->
-				<dependency>
-					<groupId>com.elasticpath.rest.integration.epcommerce</groupId>
-					<artifactId>ep-rs-authentication-epcommerce</artifactId>
-					<scope>provided</scope>
-				</dependency>
-				<dependency>
-					<groupId>com.elasticpath.rest.integration.epcommerce</groupId>
-					<artifactId>ep-rs-authentication-spring-oauth2</artifactId>
-					<scope>provided</scope>
-				</dependency>
-				<dependency>
-					<groupId>com.elasticpath.rest.integration.epcommerce</groupId>
-					<artifactId>ep-rs-authentication-spring-oauth2-tokenstore-epcommerce</artifactId>
-					<scope>provided</scope>
-				</dependency>
-			</dependencies>
 		</profile>
 
 	</profiles>

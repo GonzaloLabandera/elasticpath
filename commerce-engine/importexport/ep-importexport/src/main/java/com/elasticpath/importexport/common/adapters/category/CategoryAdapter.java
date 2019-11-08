@@ -235,7 +235,7 @@ public class CategoryAdapter extends AbstractDomainAdapterImpl<Category, Categor
 
 	@Override
 	public Category createDomainObject() {
-		return getBeanFactory().getBean(ContextIdNames.CATEGORY);
+		return getBeanFactory().getPrototypeBean(ContextIdNames.CATEGORY, Category.class);
 	}
 
 	@Override

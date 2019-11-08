@@ -112,6 +112,8 @@ public class ImportExportCLISteps {
 			builder.environment()
 				   .put("IE_CLASSPATH", importExportWorkingDir.resolve("dependencies")
 															  .toString() + File.separator + "*");
+			builder.environment()
+					.put("PROFILE", "test");
 
 			return builder.inheritIO()
 						  .directory(importExportWorkingDir.toFile())

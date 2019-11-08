@@ -47,7 +47,7 @@
 		<plan>
 			<name>read-navigation-offers</name>
 			<description>
-				<![CDATA[Searches for the offers associated with the navigation node. For more information, see the [searches][searches] and [offers][offers] sections]]>
+				<![CDATA[Searches for the offers associated with the navigation node. For more information, see the [searches](searches.md) and [offers](offers.md) sections]]>
 			</description>
 			<step>
 				<description><![CDATA[Read the paginated list of offers from the navigation node.]]></description>

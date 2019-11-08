@@ -4,14 +4,10 @@
 	<family>
 		<name>profiles</name>
 		<description><![CDATA[
-####Entry Point: /profiles/{scope}/default
+**Entry Point:** `/profiles/{scope}/default`
 
-The profiles resource provides access to the currently logged in customer and his/her details. Using the resource you can retrieve and update
-a customer's first name, last name, username, [addresses][address]. You can also retrieve the customer's [purchases][purchases] and [paymentmethods][paymentmethods] through this resource.
-
-[address]: #address
-[purchases]: #purchases
-[paymentmethods]: #paymentmethods
+The profiles resource provides access to the currently logged in customer and their details. Using the resource you can retrieve and update
+a customer's first name, last name, username, [addresses](addresses.md). You can also retrieve the customer's [purchases](purchases.md) and [paymentmethods](paymentmethods.md) through this resource.
 			]]>
 		</description>
 
@@ -44,8 +40,16 @@ a customer's first name, last name, username, [addresses][address]. You can also
 		</relationship>
 
 		<entity>
+			<name>profile-attributes</name>
+			<description><![CDATA[The profile of the logged in customer.]]></description>
+			<dynamic/>
+			<entity-type>profiles.profileattributes</entity-type>
+		</entity>
+
+		<entity>
 			<name>profile</name>
 			<description><![CDATA[The profile of the logged in customer.]]></description>
+			<is-a>profile-attributes</is-a>
 			<property>
 				<name>given-name</name>
 				<description><![CDATA[Customer's first name.]]></description>

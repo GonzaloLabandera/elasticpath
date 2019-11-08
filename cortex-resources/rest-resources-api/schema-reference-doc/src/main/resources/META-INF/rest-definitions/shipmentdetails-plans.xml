@@ -10,9 +10,9 @@
 				<![CDATA[
 Retrieves the order's destinationinfo, which contains links to:
 
-* A selector for choosing the order's shipping address: [Select Shipping Address](#shipmentdetails_select-shipping-address)
-* The shipping address currently selected for the order: [Read Order Shipping Address](#shipmentdetails_select_read-order-shipping-address)
-* The delivery the destinationinfo belongs to: [Read Order Delivery](#orders_read-order-delivery)
+* A selector for choosing the order's shipping address: [Select Shipping Address](shipmentdetails.md#select-shipping-address)
+* The shipping address currently selected for the order: [Read Order Shipping Address](shipmentdetails.md#read-order-shipping-address)
+* The delivery the destinationinfo belongs to: [Read Order Delivery](orders.md#read-order-delivery)
 				]]>
 			</description>
 			<step>
@@ -92,9 +92,9 @@ Retrieves the order's destinationinfo, which contains links to:
 				<![CDATA[
 Retrieves the order's shippingoptioninfo, which contains links to:
 
-* A selector for choosing the order's shipping option: [Select Shipping Choice](#shipmentdetails_select-shipping-choice)
-* The shipping option selected for the order: [Read Order Shipping Option](#shipmentdetails_read-order-shipping-option)
-* The delivery the shipping option belongs to: [Read Order Delivery](#orders_read-order-delivery)
+* A selector for choosing the order's shipping option: [Select Shipping Choice](shipmentdetails.md#select-shipping-option)
+* The shipping option selected for the order: [Read Order Shipping Option](shipmentdetails.md#read-order-shipping-option)
+* The delivery the shipping option belongs to: [Read Order Delivery](orders.md#read-order-delivery)
 				]]>
 			</description>
 			<step>
@@ -113,7 +113,7 @@ Retrieves the order's shippingoptioninfo, which contains links to:
 Retrieves the shipping option that is currently selected for the order. The shipping option is how the order will be shipped,
 i.e. (FedEx, Canada Post, etc). If a shipping option has not been selected for the order, the shipping option link will
 not appear on the shippingoptioninfo. For information on how to select the shippingoption,
-see [Select Shipping Choice](#shipmentdetails_select-shipping-choice)
+see [Select Shipping Choice](shipmentdetails.md#select-shipping-option)
 				]]>
 			</description>
 			<step>
@@ -230,8 +230,8 @@ Needinfo links can appear on the order, the purchase form, and the delivery.
 			<name>read-shippingoption-needinfo-from-delivery</name>
 			<description>
 				<![CDATA[
-					Read the needinfo for the shipping option from the order. This needinfo appears when a shipping option has not been selected for
-					the order. Needinfo links can appear on the order, the purchase form, and the delivery.
+Read the needinfo for the shipping option from the order. This needinfo appears when a shipping option has not been selected for
+the order. Needinfo links can appear on the order, the purchase form, and the delivery.
 				]]>
 			</description>
 			<step>
@@ -246,14 +246,15 @@ Needinfo links can appear on the order, the purchase form, and the delivery.
 			<name>read-shippingoption-needinfo-from-purchaseform</name>
 			<description>
 				<![CDATA[
-					Read the needinfo for the shipping option from the purchaseform. This needinfo appears when a shiping option has not been selected
-					for the order. Needinfo links can appear on the order, the purchase form, and the delivery.
+Read the needinfo for the shipping option from the purchaseform. This needinfo appears when a shipping option has not been selected
+for the order. Needinfo links can appear on the order, the purchase form, and the delivery.
 				]]>
 			</description>
 			<step>
 				<description>
-					<![CDATA[Read the needinfo for the shipping option from the purchaseform. This needinfo appears when a shipping option has not
-					been selected for the order. Needinfo links can appear on the order, the purchase form, and the delivery.
+					<![CDATA[
+Read the needinfo for the shipping option from the purchaseform. This needinfo appears when a shipping option has not
+been selected for the order. Needinfo links can appear on the order, the purchase form, and the delivery.
 					]]>
 				</description>
 				<start>purchases.create-purchase-form</start>

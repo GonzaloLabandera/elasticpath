@@ -102,4 +102,24 @@ public interface ProductAvailabilityService {
 	 */
 	boolean isProductDisplayable(Product product, Store store, Map<String, SkuInventoryDetails> skuInventoryDetails,
 			boolean checkProductStartEndDate);
+
+	/**
+	 * Returns <code>true</code> if the the Product can be syndicated.
+	 * Checks whether the product is not hidden, current date is within the product's date range.
+	 *
+	 * @param product the product to be checked for syndicate.
+	 *
+	 * @return <code>true</code> if the the Product can be syndicated, <code>false</code> otherwise
+	 */
+	boolean canProductSyndicate(Product product);
+
+	/**
+	 * Returns <code>true</code> if the the Product can be syndicated.
+	 * Checks whether current date is within the Sku's date range.
+	 *
+	 * @param productSku the productSku to be checked for syndicate.
+	 *
+	 * @return <code>true</code> if the the Sku can be syndicated, <code>false</code> otherwise
+	 */
+	boolean canSkuSyndicate(ProductSku productSku);
 }

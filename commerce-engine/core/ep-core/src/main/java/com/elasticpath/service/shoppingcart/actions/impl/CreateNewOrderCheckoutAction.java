@@ -1,6 +1,7 @@
 /**
  * Copyright (c) Elastic Path Software Inc., 2015
  */
+
 package com.elasticpath.service.shoppingcart.actions.impl;
 
 import java.util.Collection;

@@ -21,7 +21,7 @@ public abstract class AbstractDialog extends AbstractPageObject {
 	protected static final String OK_BUTTON_CSS = "div[widget-id='OK'][seeable='true']";
 	private static final String SAVE_BUTTON_CSS = "div[widget-id='Save']";
 	private static final String MOVERIGHT_BUTTON_CSS = "div[automation-id*='%s'] div[widget-id='Add']";
-	private static final String MOVEALLLEFT_BUTTON_CSS = "div[automation-id*='%s'] div[widget-id='<<']";
+	private static final String MOVEALLLEFT_BUTTON_CSS = "div[automation-id*='%s'] div[widget-id='Remove All']";
 
 	/**
 	 * constructor.

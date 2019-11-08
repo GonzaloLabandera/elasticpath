@@ -69,7 +69,7 @@ public class MoveToWishlistServiceImplTest {
 	@Test
 	public void verifyMoveReturnNotFoundWhenShoppingCartNotFound() {
 		when(wishlistRepository.getDefaultWishlistId(SCOPE)).thenReturn(Single.just(WISHLIST_ID));
-		when(shoppingCartRepository.getDefaultShoppingCart()).thenReturn(Single.error(ResourceOperationFailure.notFound(NOT_FOUND)));
+		when(shoppingCartRepository.getShoppingCart(CART_ID)).thenReturn(Single.error(ResourceOperationFailure.notFound(NOT_FOUND)));
 
 		service.move(lineItemIdentifier)
 				.test()
@@ -79,7 +79,7 @@ public class MoveToWishlistServiceImplTest {
 	@Test
 	public void verifyMoveReturnNotFoundWhenAddToWishlistFails() {
 		when(wishlistRepository.getDefaultWishlistId(SCOPE)).thenReturn(Single.just(WISHLIST_ID));
-		when(shoppingCartRepository.getDefaultShoppingCart()).thenReturn(Single.just(shoppingCart));
+		when(shoppingCartRepository.getShoppingCart(CART_ID)).thenReturn(Single.just(shoppingCart));
 		when(shoppingCartRepository.moveItemToWishlist(shoppingCart, LINE_ITEM_ID))
 				.thenReturn(Single.error(ResourceOperationFailure.notFound(NOT_FOUND)));
 
@@ -91,7 +91,7 @@ public class MoveToWishlistServiceImplTest {
 	@Test
 	public void verifyMoveReturnNotFoundWhenSubmitResultNotFound() {
 		when(wishlistRepository.getDefaultWishlistId(SCOPE)).thenReturn(Single.just(WISHLIST_ID));
-		when(shoppingCartRepository.getDefaultShoppingCart()).thenReturn(Single.just(shoppingCart));
+		when(shoppingCartRepository.getShoppingCart(CART_ID)).thenReturn(Single.just(shoppingCart));
 		when(shoppingCartRepository.moveItemToWishlist(shoppingCart, LINE_ITEM_ID))
 				.thenReturn(Single.just(addToWishlistResult));
 		when(wishlistRepository.buildSubmitResult(SCOPE, WISHLIST_ID, addToWishlistResult))
@@ -109,7 +109,7 @@ public class MoveToWishlistServiceImplTest {
 				.build();
 
 		when(wishlistRepository.getDefaultWishlistId(SCOPE)).thenReturn(Single.just(WISHLIST_ID));
-		when(shoppingCartRepository.getDefaultShoppingCart()).thenReturn(Single.just(shoppingCart));
+		when(shoppingCartRepository.getShoppingCart(CART_ID)).thenReturn(Single.just(shoppingCart));
 		when(shoppingCartRepository.moveItemToWishlist(shoppingCart, LINE_ITEM_ID))
 				.thenReturn(Single.just(addToWishlistResult));
 		when(wishlistRepository.buildSubmitResult(SCOPE, WISHLIST_ID, addToWishlistResult))

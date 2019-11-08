@@ -24,7 +24,9 @@ import com.elasticpath.domain.catalog.AvailabilityCriteria;
 import com.elasticpath.domain.catalog.BundleConstituent;
 import com.elasticpath.domain.catalog.Product;
 import com.elasticpath.domain.catalog.ProductBundle;
+import com.elasticpath.domain.catalog.ProductConstituent;
 import com.elasticpath.domain.catalog.ProductSku;
+import com.elasticpath.domain.catalog.ProductSkuConstituent;
 import com.elasticpath.domain.catalog.SelectionRule;
 import com.elasticpath.test.BeanFactoryExpectationsFactory;
 
@@ -61,8 +63,9 @@ public class ProductBundleImplTest {
 		expectationsFactory = new BeanFactoryExpectationsFactory(context, beanFactory);
 		bundle = new ProductBundleImpl();
 		setupConstituent(bundle);
-		expectationsFactory.allowingBeanFactoryGetBean("productConstituent", ProductConstituentImpl.class);
-		expectationsFactory.allowingBeanFactoryGetBean("productSkuConstituent", ProductSkuConstituentImpl.class);
+		expectationsFactory.allowingBeanFactoryGetPrototypeBean("productConstituent", ProductConstituent.class, ProductConstituentImpl.class);
+		expectationsFactory.allowingBeanFactoryGetPrototypeBean("productSkuConstituent", ProductSkuConstituent.class,
+				ProductSkuConstituentImpl.class);
 	}
 
 	@After

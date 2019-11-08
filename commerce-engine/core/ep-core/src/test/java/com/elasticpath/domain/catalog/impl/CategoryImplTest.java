@@ -441,7 +441,7 @@ public class CategoryImplTest  {
 		}
 
 		@Override
-		protected <T> T getBean(final String beanName) {
+		public <T> T getBean(final String beanName) {
 			return beanFactory.getBean(beanName);
 		}
 	}

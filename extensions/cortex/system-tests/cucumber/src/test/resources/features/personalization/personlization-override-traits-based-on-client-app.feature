@@ -48,3 +48,12 @@ Feature: Test overriding traits from a client application
       | Twilight | GEOIP_COUNTRY_CODE | CA           | $27.99 |
       | Twilight | GEOIP_COUNTRY_CODE | US           | $47.47 |
       | Twilight | GEOIP_COUNTRY_CODE | ''           | $47.47 |
+
+  Scenario: Verify the shopper can override the shopping start time
+    Given I am logged into scope MOBEE as a public shopper
+    And I add Alien to my default cart with quantity 1
+    And I go to my default cart
+    And the list of applied promotions is empty
+    When I append to the overwritten personalization header the key SHOPPING_CONTEXT_DATE_OVERRIDE and value 2019-02-10T00:00:00
+    And I go to my default cart
+    Then the list of applied promotions contains promotion ExpiredCartPromoMobee

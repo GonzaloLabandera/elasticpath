@@ -5,8 +5,8 @@ import static org.assertj.core.api.Assertions.fail;
 
 import java.util.List;
 
-import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.By;
+import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 
 import com.elasticpath.selenium.common.AbstractPageObject;
@@ -27,10 +27,15 @@ public class SystemConfigurationResultPane extends AbstractPageObject {
 	private static final String RESTORE_WINDOW_CSS = "div[pane-location='left-pane-outer'] div[appearance-id='ctabfolder-button']"
 			+ "[widget-id='Restore'][seeable='true']";
 	private static final String DEFINED_VALUES_PARENT_CSS = "div[appearance-id='label-wrapper'][widget-id='Defined Values'][seeable='true'] + div";
-	private static final String NEW_DEFINED_VALUE_BUTTON_CSS = DEFINED_VALUES_PARENT_CSS + " div[appearance-id='push-button'][widget-id='New...'][seeable='true']";
-	private static final String EDIT_DEFINED_VALUE_BUTTON_CSS = DEFINED_VALUES_PARENT_CSS + " div[appearance-id='push-button'][widget-id='Edit...'][seeable='true']";
-	private static final String REMOVE_DEFINED_VALUE_BUTTON_CSS = DEFINED_VALUES_PARENT_CSS + " div[appearance-id='push-button'][widget-id='Remove'][seeable='true']";
+	private static final String NEW_DEFINED_VALUE_BUTTON_CSS = DEFINED_VALUES_PARENT_CSS
+			+ " div[appearance-id='push-button'][widget-id='New...'][seeable='true']";
+	private static final String EDIT_DEFINED_VALUE_BUTTON_CSS = DEFINED_VALUES_PARENT_CSS
+			+ " div[appearance-id='push-button'][widget-id='Edit...'][seeable='true']";
+	private static final String REMOVE_DEFINED_VALUE_BUTTON_CSS = DEFINED_VALUES_PARENT_CSS
+			+ " div[appearance-id='push-button'][widget-id='Remove'][seeable='true']";
 	private static final String DEFINED_VALUES_TABLE_CSS = DEFINED_VALUES_PARENT_CSS + " div[appearance-id='table'][seeable='true']";
+	private static final String DEFAULT_VALUE_TEXTAREA_CSS =
+			"div[automation-id='com.elasticpath.cmclient.admin.configuration.AdminConfigurationMessages.settingDefDefaultValue'] + div > textarea";
 
 	/**
 	 * Constructor.
@@ -121,6 +126,17 @@ public class SystemConfigurationResultPane extends AbstractPageObject {
 	}
 
 	/**
+	 * Verifies Default value.
+	 *
+	 * @param defaultValue the default setting value
+	 */
+	public void verifyDefaultValue(final String defaultValue) {
+		assertThat(getDriver().findElement(By.cssSelector(DEFAULT_VALUE_TEXTAREA_CSS)).getAttribute("value"))
+				.as("Default value is not as expected")
+				.isEqualTo(defaultValue);
+	}
+
+	/**
 	 * Verifies quantity of Defined Values records for selected system setting
 	 *
 	 * NOTE: Method is implemented with limitation due to the way Defined Values table behaves
@@ -143,7 +159,7 @@ public class SystemConfigurationResultPane extends AbstractPageObject {
 	 * Selects specific record and then clicks Remove button
 	 *
 	 * @param context Defined Values table Context column value
-	 * @param value Defined Values table Value column value
+	 * @param value   Defined Values table Value column value
 	 */
 	public void removeDefinedValueRecord(final String context, final String value) {
 		selectDefinedValueRecord(context, value);
@@ -163,11 +179,11 @@ public class SystemConfigurationResultPane extends AbstractPageObject {
 					By.cssSelector(DEFINED_VALUES_TABLE_CSS)).findElements(By.cssSelector("div[widget-id][widget-type='row']"));
 
 			for (WebElement record : allRecords) {
-				if ("null".equalsIgnoreCase(context)) {		// no context provided
+				if ("null".equalsIgnoreCase(context)) {        // no context provided
 					if (value.equalsIgnoreCase(record.findElement(By.cssSelector("div[column-num='1']")).getText())) {
 						click(record);
 						break;
-					} else {	// both context and value provided
+					} else {    // both context and value provided
 						if (context.equalsIgnoreCase(record.findElement(By.cssSelector("div[column-num='0']")).getText())
 								&& value.equalsIgnoreCase(record.findElement(By.cssSelector("div[column-num='1']")).getText())) {
 							click(record);

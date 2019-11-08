@@ -60,7 +60,7 @@ public class ConditionBuilderImpl implements ConditionBuilder {
 		
 		final String javaType = tagDefinition.getValueType().getJavaType();
 		if (value.getClass().getName().equals(javaType)) {
-			return new Condition(tagDefinition, operator, value);
+			return new Condition(tagDefinition, tagDefinitionName, operator, value);
 		}
 		
 		final String message = "Condition [" + tagDefinitionName + "," + operator 

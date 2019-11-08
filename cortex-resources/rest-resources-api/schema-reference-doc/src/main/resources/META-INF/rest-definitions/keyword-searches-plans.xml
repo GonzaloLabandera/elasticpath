@@ -5,22 +5,22 @@
 		<name>searches</name>
 		<description>
 			<![CDATA[
-####Entry Point: /searches/{scope}
+**Entry Point:** `/searches/{scope}`
 
 The searches resource family performs search actions using the Elastic Path Search server. Cortex API sends the search keywords entered by the shopper to the search server for processing and the server returns the results to Cortex API.
 
 Elastic Path provides the following options:
 
-- Offer search : Retrieves offers and the available facets.
-- Keyword search: Retrieves the results that match the keywords.
+- Offer search : Retrieves offers and the available facets
+- Keyword search: Retrieves the results that match the keywords
 
 Search workflow:
 
-1. Get the search form.
-2. Populate the form with the search keywords.
-3. POST the search form to create the search.
-4. Follow the link returned by Cortex API to
-retrieve the search results.
+1. `GET` the search form
+2. Populate the form with the search keywords
+3. `POST` the search form to create the search
+4. Follow the link returned by Cortex API to retrieve the search results
+
 Search results for the keywords are paginated and ordered according to the relevance to the keywords.
 			]]>
 		</description>
@@ -47,7 +47,7 @@ Search results for the keywords are paginated and ordered according to the relev
 			</step>
 			<step>
 				<description><![CDATA[Submit the keyword search form.]]></description>
-				<start>searches</start>
+				<start>keyword-search-form</start>
 				<submit/>
 				<to>keyword-search-form</to>
 				<via-link>itemkeywordsearchaction</via-link>

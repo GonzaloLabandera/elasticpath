@@ -26,10 +26,9 @@ import com.elasticpath.domain.catalog.impl.AbstractCategoryImpl;
 import com.elasticpath.domain.catalog.impl.CatalogImpl;
 import com.elasticpath.domain.catalog.impl.CategoryImpl;
 import com.elasticpath.domain.catalog.impl.LinkedCategoryImpl;
-import com.elasticpath.persistence.api.FetchGroupLoadTuner;
+import com.elasticpath.persistence.api.LoadTuner;
 import com.elasticpath.persistence.api.PersistenceEngine;
 import com.elasticpath.persistence.support.impl.FetchGroupLoadTunerImpl;
-import com.elasticpath.service.misc.FetchPlanHelper;
 import com.elasticpath.test.BeanFactoryExpectationsFactory;
 
 public class CategoryLookupImplTest {
@@ -40,7 +39,6 @@ public class CategoryLookupImplTest {
 	public final JUnitRuleMockery context = new JUnitRuleMockery();
 
 	@Mock private PersistenceEngine persistenceEngine;
-	@Mock private FetchPlanHelper fetchPlanHelper;
 	@Mock private BeanFactory beanFactory;
 	private CategoryLookupImpl categoryLookup;
 	private Catalog catalog, virtualCatalog;
@@ -81,7 +79,6 @@ public class CategoryLookupImplTest {
 
 		categoryLookup = new CategoryLookupImpl();
 		categoryLookup.setBeanFactory(beanFactory);
-		categoryLookup.setFetchPlanHelper(fetchPlanHelper);
 		categoryLookup.setPersistenceEngine(persistenceEngine);
 	}
 
@@ -94,10 +91,9 @@ public class CategoryLookupImplTest {
 	public void testFindByUidWhenUidIsFound() {
 		context.checking(new Expectations() {
 			{
-				oneOf(fetchPlanHelper).configureFetchGroupLoadTuner(with(any(FetchGroupLoadTuner.class)));
+				oneOf(persistenceEngine).withLoadTuners(with(any(LoadTuner[].class))); will(returnValue(persistenceEngine));
 				oneOf(persistenceEngine).get(AbstractCategoryImpl.class, CATEGORY_UID); will(returnValue(category));
-				oneOf(fetchPlanHelper).clearFetchPlan();
-			}
+				}
 		});
 		assertSame(category, categoryLookup.findByUid(CATEGORY_UID));
 	}
@@ -106,10 +102,9 @@ public class CategoryLookupImplTest {
 	public void testFindByUidWhenUidIsNotFound() {
 		context.checking(new Expectations() {
 			{
-				oneOf(fetchPlanHelper).configureFetchGroupLoadTuner(with(any(FetchGroupLoadTuner.class)));
+				oneOf(persistenceEngine).withLoadTuners(with(any(LoadTuner[].class))); will(returnValue(persistenceEngine));
 				oneOf(persistenceEngine).get(AbstractCategoryImpl.class, CATEGORY_UID); will(returnValue(null));
-				oneOf(fetchPlanHelper).clearFetchPlan();
-			}
+				}
 		});
 		assertNull(categoryLookup.findByUid(CATEGORY_UID));
 	}
@@ -122,14 +117,13 @@ public class CategoryLookupImplTest {
 		// expectations
 		context.checking(new Expectations() {
 			{
-				oneOf(fetchPlanHelper).configureFetchGroupLoadTuner(with(any(FetchGroupLoadTuner.class)));
+				oneOf(persistenceEngine).withLoadTuners(with(any(LoadTuner[].class))); will(returnValue(persistenceEngine));
 
 				oneOf(persistenceEngine).retrieveByNamedQueryWithList(
 						"CATEGORY_BY_UIDS", "list", Collections.singletonList(CATEGORY_UID));
 				will(returnValue(Collections.singletonList(category)));
 
-				oneOf(fetchPlanHelper).clearFetchPlan();
-			}
+				}
 		});
 
 		// Should return an empty list if no product UID is given.
@@ -141,14 +135,13 @@ public class CategoryLookupImplTest {
 	public void testFindByCodeAndCatalogWhenMasterCategoryIsFound() {
 		context.checking(new Expectations() {
 			{
-				oneOf(fetchPlanHelper).configureFetchGroupLoadTuner(with(any(FetchGroupLoadTuner.class)));
+				oneOf(persistenceEngine).withLoadTuners(with(any(LoadTuner[].class))); will(returnValue(persistenceEngine));
 
 				oneOf(persistenceEngine).retrieveByNamedQuery(
 						CategoryLookupImpl.CATEGORY_SELECT_BY_CODE_AND_CATALOG_CODE, CATEGORY_CODE, catalog.getCode());
 				will(returnValue(Collections.singletonList(category)));
 
-				oneOf(fetchPlanHelper).clearFetchPlan();
-			}
+				}
 		});
 
 		assertSame(category, categoryLookup.findByCategoryCodeAndCatalog(CATEGORY_CODE, catalog));
@@ -158,7 +151,7 @@ public class CategoryLookupImplTest {
 	public void testFindByCodeAndCatalogWhenLinkedCategoryIsFound() {
 		context.checking(new Expectations() {
 			{
-				oneOf(fetchPlanHelper).configureFetchGroupLoadTuner(with(any(FetchGroupLoadTuner.class)));
+				exactly(2).of(persistenceEngine).withLoadTuners(with(any(LoadTuner[].class))); will(returnValue(persistenceEngine));
 
 				oneOf(persistenceEngine).retrieveByNamedQuery(
 						CategoryLookupImpl.CATEGORY_SELECT_BY_CODE_AND_CATALOG_CODE, CATEGORY_CODE, virtualCatalog.getCode());
@@ -167,8 +160,7 @@ public class CategoryLookupImplTest {
 						CategoryLookupImpl.LINKED_CATEGORY_FIND_BY_CODE_AND_CATALOG_CODE, CATEGORY_CODE, virtualCatalog.getCode());
 				will(returnValue(Collections.singletonList(linkedCategory)));
 
-				oneOf(fetchPlanHelper).clearFetchPlan();
-			}
+				}
 		});
 
 		assertSame(linkedCategory, categoryLookup.findByCategoryCodeAndCatalog(CATEGORY_CODE, virtualCatalog));
@@ -178,7 +170,7 @@ public class CategoryLookupImplTest {
 	public void testFindByCodeAndCatalogWhenNeitherAMasterNorLinkedCategoryIsFound() {
 		context.checking(new Expectations() {
 			{
-				oneOf(fetchPlanHelper).configureFetchGroupLoadTuner(with(any(FetchGroupLoadTuner.class)));
+				exactly(2).of(persistenceEngine).withLoadTuners(with(any(LoadTuner[].class))); will(returnValue(persistenceEngine));
 
 				oneOf(persistenceEngine).retrieveByNamedQuery(
 						CategoryLookupImpl.CATEGORY_SELECT_BY_CODE_AND_CATALOG_CODE, CATEGORY_CODE, catalog.getCode());
@@ -187,8 +179,7 @@ public class CategoryLookupImplTest {
 						CategoryLookupImpl.LINKED_CATEGORY_FIND_BY_CODE_AND_CATALOG_CODE, CATEGORY_CODE, catalog.getCode());
 				will(returnValue(Collections.emptyList()));
 
-				oneOf(fetchPlanHelper).clearFetchPlan();
-			}
+				}
 		});
 		assertNull(categoryLookup.findByCategoryCodeAndCatalog(CATEGORY_CODE, catalog));
 	}
@@ -197,14 +188,13 @@ public class CategoryLookupImplTest {
 	public void testFindByGuidWhenCategoryIsFound() {
 		context.checking(new Expectations() {
 			{
-				oneOf(fetchPlanHelper).configureFetchGroupLoadTuner(with(any(FetchGroupLoadTuner.class)));
+				oneOf(persistenceEngine).withLoadTuners(with(any(LoadTuner[].class))); will(returnValue(persistenceEngine));
 
 				oneOf(persistenceEngine).retrieveByNamedQuery(
 						CategoryLookupImpl.CATEGORY_SELECT_BY_GUID, category.getGuid());
 				will(returnValue(Collections.singletonList(category)));
 
-				oneOf(fetchPlanHelper).clearFetchPlan();
-			}
+				}
 		});
 
 		assertSame(category, categoryLookup.findByGuid(category.getGuid()));
@@ -214,8 +204,7 @@ public class CategoryLookupImplTest {
 	public void testFindByGuidWhenCategoryIsNotFoundReturnsNull() {
 		context.checking(new Expectations() {
 			{
-				allowing(fetchPlanHelper);
-
+				oneOf(persistenceEngine).withLoadTuners(with(any(LoadTuner[].class))); will(returnValue(persistenceEngine));
 				oneOf(persistenceEngine).retrieveByNamedQuery(
 						CategoryLookupImpl.CATEGORY_SELECT_BY_GUID, category.getGuid());
 				will(returnValue(Collections.emptyList()));
@@ -229,14 +218,13 @@ public class CategoryLookupImplTest {
 	public void testFindByCodeAndCatalogCodeWhenMasterCategoryIsFound() {
 		context.checking(new Expectations() {
 			{
-				oneOf(fetchPlanHelper).configureFetchGroupLoadTuner(with(any(FetchGroupLoadTuner.class)));
+				oneOf(persistenceEngine).withLoadTuners(with(any(LoadTuner[].class))); will(returnValue(persistenceEngine));
 
 				oneOf(persistenceEngine).retrieveByNamedQuery(
 						CategoryLookupImpl.CATEGORY_SELECT_BY_CODE_AND_CATALOG_CODE, CATEGORY_CODE, catalog.getCode());
 				will(returnValue(Collections.singletonList(category)));
 
-				oneOf(fetchPlanHelper).clearFetchPlan();
-			}
+				}
 		});
 
 		assertSame(category, categoryLookup.findByCategoryAndCatalogCode(CATEGORY_CODE, catalog.getCode()));
@@ -246,7 +234,7 @@ public class CategoryLookupImplTest {
 	public void testFindByCodeAndCatalogCodeWhenLinkedCategoryIsFound() {
 		context.checking(new Expectations() {
 			{
-				oneOf(fetchPlanHelper).configureFetchGroupLoadTuner(with(any(FetchGroupLoadTuner.class)));
+				exactly(2).of(persistenceEngine).withLoadTuners(with(any(LoadTuner[].class))); will(returnValue(persistenceEngine));
 
 				oneOf(persistenceEngine).retrieveByNamedQuery(
 						CategoryLookupImpl.CATEGORY_SELECT_BY_CODE_AND_CATALOG_CODE, CATEGORY_CODE, virtualCatalog.getCode());
@@ -255,8 +243,7 @@ public class CategoryLookupImplTest {
 						CategoryLookupImpl.LINKED_CATEGORY_FIND_BY_CODE_AND_CATALOG_CODE, CATEGORY_CODE, virtualCatalog.getCode());
 				will(returnValue(Collections.singletonList(linkedCategory)));
 
-				oneOf(fetchPlanHelper).clearFetchPlan();
-			}
+				}
 		});
 
 		assertSame(linkedCategory, categoryLookup.findByCategoryAndCatalogCode(CATEGORY_CODE, virtualCatalog.getCode()));
@@ -266,7 +253,7 @@ public class CategoryLookupImplTest {
 	public void testFindByCodeAndCatalogCodeWhenNeitherAMasterNorLinkedCategoryIsFound() {
 		context.checking(new Expectations() {
 			{
-				oneOf(fetchPlanHelper).configureFetchGroupLoadTuner(with(any(FetchGroupLoadTuner.class)));
+				exactly(2).of(persistenceEngine).withLoadTuners(with(any(LoadTuner[].class))); will(returnValue(persistenceEngine));
 
 				oneOf(persistenceEngine).retrieveByNamedQuery(
 						CategoryLookupImpl.CATEGORY_SELECT_BY_CODE_AND_CATALOG_CODE, CATEGORY_CODE, catalog.getCode());
@@ -275,8 +262,7 @@ public class CategoryLookupImplTest {
 						CategoryLookupImpl.LINKED_CATEGORY_FIND_BY_CODE_AND_CATALOG_CODE, CATEGORY_CODE, catalog.getCode());
 				will(returnValue(Collections.emptyList()));
 
-				oneOf(fetchPlanHelper).clearFetchPlan();
-			}
+				}
 		});
 		assertNull(categoryLookup.findByCategoryAndCatalogCode(CATEGORY_CODE, catalog.getCode()));
 	}
@@ -285,14 +271,13 @@ public class CategoryLookupImplTest {
 	public void testFindByCompoundCodeWhenMasterCategoryIsFound() {
 		context.checking(new Expectations() {
 			{
-				oneOf(fetchPlanHelper).configureFetchGroupLoadTuner(with(any(FetchGroupLoadTuner.class)));
+				oneOf(persistenceEngine).withLoadTuners(with(any(LoadTuner[].class))); will(returnValue(persistenceEngine));
 
 				oneOf(persistenceEngine).retrieveByNamedQuery(
 						CategoryLookupImpl.CATEGORY_SELECT_BY_CODE_AND_CATALOG_CODE, CATEGORY_CODE, catalog.getCode());
 				will(returnValue(Collections.singletonList(category)));
 
-				oneOf(fetchPlanHelper).clearFetchPlan();
-			}
+				}
 		});
 
 		assertSame(category, categoryLookup.findByCompoundCategoryAndCatalogCodes(CATEGORY_CODE + "|" + catalog.getCode()));
@@ -302,7 +287,7 @@ public class CategoryLookupImplTest {
 	public void testFindByCompoundCodeWhenLinkedCategoryIsFound() {
 		context.checking(new Expectations() {
 			{
-				oneOf(fetchPlanHelper).configureFetchGroupLoadTuner(with(any(FetchGroupLoadTuner.class)));
+				exactly(2).of(persistenceEngine).withLoadTuners(with(any(LoadTuner[].class))); will(returnValue(persistenceEngine));
 
 				oneOf(persistenceEngine).retrieveByNamedQuery(
 						CategoryLookupImpl.CATEGORY_SELECT_BY_CODE_AND_CATALOG_CODE, CATEGORY_CODE, virtualCatalog.getCode());
@@ -311,8 +296,7 @@ public class CategoryLookupImplTest {
 						CategoryLookupImpl.LINKED_CATEGORY_FIND_BY_CODE_AND_CATALOG_CODE, CATEGORY_CODE, virtualCatalog.getCode());
 				will(returnValue(Collections.singletonList(linkedCategory)));
 
-				oneOf(fetchPlanHelper).clearFetchPlan();
-			}
+				}
 		});
 
 		assertSame(linkedCategory, categoryLookup.findByCompoundCategoryAndCatalogCodes(CATEGORY_CODE + "|" + virtualCatalog.getCode()));
@@ -322,7 +306,7 @@ public class CategoryLookupImplTest {
 	public void testFindByCompoundCodeWhenNeitherAMasterNorLinkedCategoryIsFound() {
 		context.checking(new Expectations() {
 			{
-				oneOf(fetchPlanHelper).configureFetchGroupLoadTuner(with(any(FetchGroupLoadTuner.class)));
+				exactly(2).of(persistenceEngine).withLoadTuners(with(any(LoadTuner[].class))); will(returnValue(persistenceEngine));
 
 				oneOf(persistenceEngine).retrieveByNamedQuery(
 						CategoryLookupImpl.CATEGORY_SELECT_BY_CODE_AND_CATALOG_CODE, CATEGORY_CODE, catalog.getCode());
@@ -331,8 +315,7 @@ public class CategoryLookupImplTest {
 						CategoryLookupImpl.LINKED_CATEGORY_FIND_BY_CODE_AND_CATALOG_CODE, CATEGORY_CODE, catalog.getCode());
 				will(returnValue(Collections.emptyList()));
 
-				oneOf(fetchPlanHelper).clearFetchPlan();
-			}
+				}
 		});
 		assertNull(categoryLookup.findByCompoundCategoryAndCatalogCodes(CATEGORY_CODE + "|" + catalog.getCode()));
 	}
@@ -341,14 +324,13 @@ public class CategoryLookupImplTest {
 	public void testFindChildrenByParentQueriesDatabaseForResults() {
 		context.checking(new Expectations() {
 			{
-				oneOf(fetchPlanHelper).configureFetchGroupLoadTuner(with(any(FetchGroupLoadTuner.class)));
+				oneOf(persistenceEngine).withLoadTuners(with(any(LoadTuner[].class))); will(returnValue(persistenceEngine));
 
 				allowing(persistenceEngine).retrieveByNamedQuery(
 						CategoryLookupImpl.SUBCATEGORY_SELECT_BY_PARENT_GUID, category.getGuid());
 				will(returnValue(Collections.singletonList(childCategory)));
 
-				oneOf(fetchPlanHelper).clearFetchPlan();
-			}
+				}
 		});
 
 		List<CategoryImpl> children = categoryLookup.findChildren(category);
@@ -360,7 +342,7 @@ public class CategoryLookupImplTest {
 	public void testFindParentByChild() {
 		context.checking(new Expectations() {
 			{
-				allowing(fetchPlanHelper);
+				oneOf(persistenceEngine).withLoadTuners(with(any(LoadTuner[].class))); will(returnValue(persistenceEngine));
 				oneOf(persistenceEngine).retrieveByNamedQuery(
 						with(any(String.class)), with(equal(new Object[] {category.getGuid()})));
 				will(returnValue(Collections.singletonList(category)));

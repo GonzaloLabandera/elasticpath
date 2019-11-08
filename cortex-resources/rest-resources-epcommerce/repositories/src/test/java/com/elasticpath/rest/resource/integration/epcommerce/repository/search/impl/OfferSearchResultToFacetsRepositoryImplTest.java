@@ -10,9 +10,6 @@ import static com.elasticpath.rest.resource.integration.epcommerce.repository.Re
 import static com.elasticpath.rest.resource.integration.epcommerce.repository.search.OffersResourceConstants.DEFAULT_APPLIED_FACETS;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.anyMap;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.when;
 
 import java.util.Currency;
@@ -73,8 +70,7 @@ public class OfferSearchResultToFacetsRepositoryImplTest {
 	public void setUp() {
 		when(resourceOperationContext.getSubject())
 				.thenReturn(TestSubjectFactory.createWithScopeAndUserIdAndLocaleAndCurrency(SCOPE, USER_ID, LOCALE, CURRENCY));
-		when(searchRepository.getSearchCriteria(
-				nullable(String.class), anyString(), any(Locale.class), any(Currency.class), anyMap(), nullable(String.class)))
+		when(searchRepository.getSearchCriteria(any(OfferSearchData.class), any(Locale.class), any(Currency.class)))
 				.thenReturn(Single.just(searchCriteria));
 	}
 

@@ -2,8 +2,11 @@ package com.elasticpath.selenium.editor;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.util.List;
+
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
 
 import com.elasticpath.selenium.common.AbstractPageObject;
 
@@ -47,7 +50,27 @@ public class CartPromotionEditor extends AbstractPageObject {
 	 * Clicks to un-check Enable in Store box.
 	 */
 	public void disableCartPromotion() {
-		click(getWaitDriver().waitForElementToBeClickable(By.cssSelector(ENABLE_ICON_CSS)));
+		int attempts = 0;
+		boolean isDisable = false;
+		List<WebElement> checkedCheckbox;
+		setWebDriverImplicitWait(1);
+		while (!isDisable && attempts < 10) {
+			checkedCheckbox = getDriver().findElements(By.cssSelector(ENABLE_ICON_CSS));
+			if (checkedCheckbox.isEmpty()) {
+				isDisable = true;
+			} else {
+				click(getWaitDriver().waitForElementToBeClickable(By.cssSelector(ENABLE_ICON_CSS)));
+				checkedCheckbox = getDriver().findElements(By.cssSelector(ENABLE_ICON_CSS));
+				if (checkedCheckbox.isEmpty()) {
+					isDisable = true;
+				}
+			}
+			attempts++;
+		}
+		setWebDriverImplicitWaitToDefault();
+		assertThat(isDisable)
+				.as("Failed to disable opened promotion.")
+				.isTrue();
 	}
 
 	/**

@@ -1558,6 +1558,8 @@ public class ShoppingCartImplTest extends AbstractCatalogDataTestCase {
 				will(returnValue(true));
 				allowing(shoppingItem).getChildren(); will(returnValue(new ArrayList<>()));
 				allowing(shoppingItem).setItemType(ItemType.SIMPLE);
+				allowing(shoppingItem).getItemType(); will(returnValue(ItemType.SIMPLE));
+				allowing(shoppingItem).isCalculatedBundle(getProductSkuLookup()); will(returnValue(false));
 			}
 		});
 
@@ -1573,6 +1575,8 @@ public class ShoppingCartImplTest extends AbstractCatalogDataTestCase {
 				will(returnValue(false));
 				allowing(shoppingItem).getChildren(); will(returnValue(new ArrayList<>()));
 				allowing(shoppingItem).setItemType(ItemType.SIMPLE);
+				allowing(shoppingItem).getItemType(); will(returnValue(ItemType.SIMPLE));
+				allowing(shoppingItem).isCalculatedBundle(getProductSkuLookup()); will(returnValue(false));
 			}
 		});
 

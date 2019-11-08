@@ -14,7 +14,10 @@ import com.elasticpath.selenium.util.Constants;
 public class ChangeSet extends AbstractNavigation {
 
 	private static final String LEFT_PANE_INNER_CSS = "div[pane-location='left-pane-inner'][seeable='true'] ";
-	private static final String SEARCH_BUTTON_CSS
+	/**
+	 * Search button css.
+	 */
+	public static final String SEARCH_BUTTON_CSS
 			= LEFT_PANE_INNER_CSS + "div[automation-id='com.elasticpath.cmclient.changeset.ChangeSetMessages.ChangeSetSearchView_SearchButton']";
 	private static final String CLEAR_BUTTON_CSS
 			= LEFT_PANE_INNER_CSS + "div[automation-id='com.elasticpath.cmclient.changeset.ChangeSetMessages.ChangeSetSearchView_ClearButton']";

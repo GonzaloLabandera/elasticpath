@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0"
-		 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		 xmlns="http://maven.apache.org/POM/4.0.0"
 		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
 	<parent>
 		<groupId>com.elasticpath</groupId>
 		<artifactId>grandparent</artifactId>
-		<version>105</version>
+		<version>112</version>
 		<relativePath/>
 	</parent>
 
@@ -18,17 +18,15 @@
 	<properties>
 		<aopalliance.version>1.0_5</aopalliance.version>
 		<apache.poi.version>4.0.1</apache.poi.version>
-		<api-platform.version>1.24.0.0e39d44361</api-platform.version>
+		<api-platform.version>1.38.0.cdc4382051</api-platform.version>
 		<aspectj.rt.version>1.8.9</aspectj.rt.version>
 		<assertj-core.version>3.11.1</assertj-core.version>
 		<awaitility.version>2.0.0</awaitility.version>
 
 		<com.h2database.version>1.3.170</com.h2database.version>
 		<com.google.protobuf.version>2.6.0</com.google.protobuf.version>
-		<com.jayway.java-uuid-generator.version>3.1.5</com.jayway.java-uuid-generator.version>
 		<com.jayway.jsonpath.json-path.version>1.2.0</com.jayway.jsonpath.json-path.version>
 		<com.springsource.org.aopalliance.version>1.0.0</com.springsource.org.aopalliance.version>
-		<com.sun.istack.version>2.3</com.sun.istack.version>
 		<com.sun.mail.version>1.5.6</com.sun.mail.version>
 		<com.thoughtworks.xstream.version>1.4.10</com.thoughtworks.xstream.version>
 		<cmclient.platform.feature.version>0.0.0-SNAPSHOT</cmclient.platform.feature.version>
@@ -40,7 +38,6 @@
 		<commons-lang.version>2.6</commons-lang.version>
 		<commons.pool.version>1.6</commons.pool.version>
 		<cortex.ep.integration.version>0.0.0-SNAPSHOT</cortex.ep.integration.version>
-		<ep.cortex.macros.version>1.4.2</ep.cortex.macros.version>
 		<cxf-uritemplate-utils.version>1.13</cxf-uritemplate-utils.version>
 
 		<dce.version>0.0.0-SNAPSHOT</dce.version>
@@ -49,23 +46,8 @@
 		<ep.health.monitoring.version>0.0.0-SNAPSHOT</ep.health.monitoring.version>
 		<esapi.version>2.1.0.1</esapi.version>
 
-		<felix.configadmin.version>1.8.16</felix.configadmin.version>
-		<felix.eventadmin.version>1.4.10</felix.eventadmin.version>
-		<felix.fileinstall.version>3.6.4</felix.fileinstall.version>
 		<felix.framework.version>5.6.10</felix.framework.version>
-		<felix.http.api.version>3.0.0</felix.http.api.version>
-		<felix.http.bridge.version>4.0.2</felix.http.bridge.version>
-		<felix.http.proxy.version>3.0.2</felix.http.proxy.version>
-		<felix.http.servlet-api.version>1.1.2</felix.http.servlet-api.version>
-		<felix.inventory.version>1.0.6</felix.inventory.version>
-		<felix.metatype.version>1.1.6</felix.metatype.version>
-		<felix.scr.version>2.0.14</felix.scr.version>
-		<felix.webconsole.ds.version>2.0.8</felix.webconsole.ds.version>
-		<felix.webconsole.event.version>1.1.8</felix.webconsole.event.version>
-		<felix.webconsole.memoryusage.version>1.0.8</felix.webconsole.memoryusage.version>
-		<felix.webconsole.packageadmin.version>1.0.4</felix.webconsole.packageadmin.version>
 		<felix.webconsole.version>4.3.4</felix.webconsole.version>
-		<fitnesse.version>20111025-ep1.2</fitnesse.version>
 
 		<gemini.blueprint.version>2.1.0.RELEASE</gemini.blueprint.version>
 		<groovy.version>2.4.15</groovy.version>
@@ -83,15 +65,13 @@
 		<cucumber-groovy.version>2.0.1</cucumber-groovy.version>
 
 		<jackson.version>2.9.8</jackson.version>
-		<javax.annotation.version>1.3.2</javax.annotation.version>
 		<javax.cache.version>1.1.0</javax.cache.version>
 		<javax.el.version>2.2.4</javax.el.version>
 		<javax.json-api.version>1.1.4</javax.json-api.version>
 		<javax.json.version>1.1.4</javax.json.version>
-		<jaxb.version>2.2.11</jaxb.version>
+		<jaxb.version>2.3.0</jaxb.version>
 		<javax.inject.version>1</javax.inject.version>
 		<javax.validation.api.version>1.1.0.Final</javax.validation.api.version>
-		<jersey.version>2.27</jersey.version>
 		<jmock.version>2.8.4</jmock.version>
 		<jregex.version>1.2_01-ep1.0.0</jregex.version>
 		<junit.version>4.12</junit.version>
@@ -107,6 +87,8 @@
 		<msgpack.version>0.8.13</msgpack.version>
 
 		<natty.version>0.13</natty.version>
+
+		<okhttp.version>3.14.1</okhttp.version>
 
 		<org.apache.activemq.version>5.15.8</org.apache.activemq.version>
 		<org.apache.ant.version>1.7.1</org.apache.ant.version>
@@ -138,16 +120,17 @@
 		<rxjava.version>2.2.7</rxjava.version>
 
 		<selenium.version>3.14.0</selenium.version>
+		<fluent.relos.client.version>1.10.44</fluent.relos.client.version>
 		<servicemix.bundles.aspectj.version>1.8.8_1</servicemix.bundles.aspectj.version>
 		<shiro-core.version>1.3.2</shiro-core.version>
 		<sisu.version>0.3.2</sisu.version>
 		<slf4j.version>1.7.25</slf4j.version>
 		<solr.version>7.2.1</solr.version>
-		<springsource.org.json.version>1.0.0</springsource.org.json.version>
 
 		<tomcat.version>9.0.16</tomcat.version>
 		<tomcatLogging.version>8.5.2</tomcatLogging.version>
 
+		<wiremock.version>2.23.2</wiremock.version>
 		<ws-rs.version>2.1.1</ws-rs.version>
 
 		<xerces.version>2.9.1</xerces.version>
@@ -156,6 +139,17 @@
 		<org.reflections.version>0.9.11</org.reflections.version>
 
 		<mysql-connector-java.version>5.1.44</mysql-connector-java.version>
+
+		<json-schema-validator.version>2.2.6</json-schema-validator.version>
+
+		<spring-data.version>1.11.16.RELEASE</spring-data.version>
+
+		<rest-assured.version>3.2.0</rest-assured.version>
+
+		<javax.jms.version>2.0</javax.jms.version>
+
+		<com.atomikos.version>4.0.6</com.atomikos.version>
+		<activemq.kahadb.store.version>5.14.3</activemq.kahadb.store.version>
 
 		<!--Plugins-->
 		<version.allowMajor>false</version.allowMajor>
@@ -182,6 +176,11 @@
 				<artifactId>geronimo-jms_1.1_spec</artifactId>
 				<version>${org.apache.geronimo.specs.version}</version>
 				<scope>provided</scope>
+			</dependency>
+			<dependency>
+				<groupId>javax.jms</groupId>
+				<artifactId>javax.jms-api</artifactId>
+				<version>${javax.jms.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.activemq</groupId>
@@ -289,18 +288,6 @@
 				<version>${groovy.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>org.codehaus.gmaven.runtime</groupId>
-				<artifactId>gmaven-runtime-1.8</artifactId>
-				<version>1.4</version>
-				<scope>test</scope>
-				<exclusions>
-					<exclusion>
-						<groupId>org.sonatype.gossip</groupId>
-						<artifactId>gossip</artifactId>
-					</exclusion>
-				</exclusions>
-			</dependency>
-			<dependency>
 				<groupId>org.codehaus.groovy</groupId>
 				<artifactId>groovy-all</artifactId>
 				<version>${groovy.version}</version>
@@ -325,11 +312,6 @@
 			<dependency>
 				<groupId>org.springframework</groupId>
 				<artifactId>spring-beans</artifactId>
-				<version>${org.springframework.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.springframework</groupId>
-				<artifactId>spring-aspects</artifactId>
 				<version>${org.springframework.version}</version>
 			</dependency>
 			<dependency>
@@ -392,42 +374,11 @@
 				<version>${org.mvel.mvel2.version}</version>
 				<scope>runtime</scope>
 			</dependency>
-			<dependency>
-				<groupId>org.tuckey</groupId>
-				<artifactId>urlrewritefilter</artifactId>
-				<version>3.1.0</version>
-			</dependency>
-
-			<dependency>
-				<groupId>javax.xml.ws</groupId>
-				<artifactId>jaxws-api</artifactId>
-				<version>2.1-1</version>
-				<exclusions>
-					<exclusion>
-						<groupId>activation</groupId>
-						<artifactId>activation</artifactId>
-					</exclusion>
-					<exclusion>
-						<groupId>javax.jws</groupId>
-						<artifactId>jsr181</artifactId>
-					</exclusion>
-					<exclusion>
-						<groupId>javax.xml.stream</groupId>
-						<artifactId>stax-api</artifactId>
-					</exclusion>
-				</exclusions>
-			</dependency>
 
 			<dependency>
 				<groupId>javax.activation</groupId>
 				<artifactId>activation</artifactId>
 				<version>1.1</version>
-			</dependency>
-
-			<dependency>
-				<groupId>org.apache.commons</groupId>
-				<artifactId>commons-csv</artifactId>
-				<version>1.5</version>
 			</dependency>
 
 			<dependency>
@@ -465,11 +416,6 @@
 				<artifactId>commons-fileupload</artifactId>
 				<version>${commons-fileupload.version}</version>
 			</dependency>
-			<dependency>
-				<groupId>org.json</groupId>
-				<artifactId>com.springsource.org.json</artifactId>
-				<version>${springsource.org.json.version}</version>
-			</dependency>
 			<!-- webconsole plugins -->
 
 			<dependency>
@@ -482,6 +428,7 @@
 				<artifactId>javax.mail</artifactId>
 				<version>${com.sun.mail.version}</version>
 			</dependency>
+
 			<dependency>
 				<groupId>commons-collections</groupId>
 				<artifactId>commons-collections</artifactId>
@@ -548,12 +495,6 @@
 						<artifactId>commons-lang</artifactId>
 					</exclusion>
 				</exclusions>
-			</dependency>
-
-			<dependency>
-				<groupId>org.fitnesse</groupId>
-				<artifactId>fitnesse</artifactId>
-				<version>${fitnesse.version}</version>
 			</dependency>
 
 			<dependency>
@@ -730,63 +671,10 @@
 				<scope>test</scope>
 			</dependency>
 			<dependency>
-				<groupId>com.elasticpath.repo</groupId>
-				<artifactId>ep-cortex-macros</artifactId>
-				<version>${ep.cortex.macros.version}</version>
-			</dependency>
-			<dependency>
 				<groupId>org.kubek2k</groupId>
 				<artifactId>springockito</artifactId>
 				<version>${org.kubek2k.version}</version>
 				<scope>test</scope>
-			</dependency>
-			<dependency>
-				<groupId>org.jvnet.jax-ws-commons.spring</groupId>
-				<artifactId>jaxws-spring</artifactId>
-				<version>1.8</version>
-				<exclusions>
-					<exclusion>
-						<groupId>javax.xml.bind</groupId>
-						<artifactId>jaxb-api</artifactId>
-					</exclusion>
-					<exclusion>
-						<groupId>com.sun.xml.bind</groupId>
-						<artifactId>jaxb-impl</artifactId>
-					</exclusion>
-					<exclusion>
-						<groupId>javax.servlet</groupId>
-						<artifactId>servlet-api</artifactId>
-					</exclusion>
-					<exclusion>
-						<groupId>org.springframework</groupId>
-						<artifactId>spring</artifactId>
-					</exclusion>
-					<exclusion>
-						<groupId>org.springframework</groupId>
-						<artifactId>spring-core</artifactId>
-					</exclusion>
-					<exclusion>
-						<groupId>org.springframework</groupId>
-						<artifactId>spring-context</artifactId>
-					</exclusion>
-					<exclusion>
-						<groupId>activation</groupId>
-						<artifactId>activation</artifactId>
-					</exclusion>
-					<exclusion>
-						<groupId>com.sun.xml.stream.buffer</groupId>
-						<artifactId>streambuffer</artifactId>
-					</exclusion>
-					<exclusion>
-						<groupId>org.jvnet.staxex</groupId>
-						<artifactId>stax-ex</artifactId>
-					</exclusion>
-				</exclusions>
-			</dependency>
-			<dependency>
-				<groupId>com.sun.istack</groupId>
-				<artifactId>istack-commons-runtime</artifactId>
-				<version>${com.sun.istack.version}</version>
 			</dependency>
 
 			<dependency>
@@ -822,6 +710,60 @@
 				<groupId>com.elasticpath</groupId>
 				<artifactId>ep-core-caching</artifactId>
 				<version>${dce.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>com.elasticpath</groupId>
+				<artifactId>catalog-update-event-processor-api</artifactId>
+				<version>${dce.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>com.elasticpath</groupId>
+				<artifactId>catalog-update-event-processor-connectivity</artifactId>
+				<version>${dce.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>com.elasticpath</groupId>
+				<artifactId>ep-catalog-projection-spi</artifactId>
+				<version>${dce.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>com.elasticpath</groupId>
+				<artifactId>ep-catalog-projection-spring-data</artifactId>
+				<version>${dce.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>com.elasticpath</groupId>
+				<artifactId>ep-catalog-webservice</artifactId>
+				<version>${dce.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>com.elasticpath</groupId>
+				<artifactId>ep-catalog-batch</artifactId>
+				<version>${dce.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.springframework.data</groupId>
+				<artifactId>spring-data-jpa</artifactId>
+				<version>${spring-data.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>com.elasticpath</groupId>
+				<artifactId>ep-catalog-connectivity</artifactId>
+				<version>${dce.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>com.github.fge</groupId>
+				<artifactId>json-schema-validator</artifactId>
+				<version>${json-schema-validator.version}</version>
 			</dependency>
 
 			<dependency>
@@ -876,7 +818,11 @@
 				<artifactId>ep-cortex-common-test-definitions</artifactId>
 				<version>${commerce.extensions.version}</version>
 			</dependency>
-
+			<dependency>
+				<groupId>com.elasticpath.extensions</groupId>
+				<artifactId>ext-cortex-common-test-definitions</artifactId>
+				<version>${commerce.extensions.version}</version>
+			</dependency>
 			<dependency>
 				<groupId>com.elasticpath</groupId>
 				<artifactId>ep-querylanguage</artifactId>
@@ -929,7 +875,6 @@
 				<artifactId>ep-sync</artifactId>
 				<version>${dce.version}</version>
 			</dependency>
-
 			<dependency>
 				<groupId>com.elasticpath</groupId>
 				<artifactId>ep-sync-message-listener-camel</artifactId>
@@ -978,6 +923,81 @@
 			<dependency>
 				<groupId>com.elasticpath</groupId>
 				<artifactId>ep-core-customer-messaging</artifactId>
+				<version>${dce.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>com.elasticpath</groupId>
+				<artifactId>ep-messaging-api</artifactId>
+				<version>${dce.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>com.elasticpath</groupId>
+				<artifactId>ep-messaging-camel</artifactId>
+				<version>${dce.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>com.elasticpath</groupId>
+				<artifactId>ep-core-uat-step-definitions</artifactId>
+				<version>${dce.version}</version>
+				<scope>test</scope>
+			</dependency>
+
+			<dependency>
+				<groupId>com.elasticpath</groupId>
+				<artifactId>ep-email-uat-step-definitions</artifactId>
+				<version>${dce.version}</version>
+				<scope>test</scope>
+			</dependency>
+
+			<dependency>
+				<groupId>com.elasticpath</groupId>
+				<artifactId>ep-customer-email-uat-step-definitions</artifactId>
+				<version>${dce.version}</version>
+				<scope>test</scope>
+			</dependency>
+
+			<dependency>
+				<groupId>com.elasticpath</groupId>
+				<artifactId>ep-core-customer-messaging</artifactId>
+				<version>${dce.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>com.elasticpath</groupId>
+				<artifactId>ep-catalog-api</artifactId>
+				<version>${dce.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>com.elasticpath</groupId>
+				<artifactId>ep-core-domain-messaging</artifactId>
+				<version>${dce.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>com.elasticpath</groupId>
+				<artifactId>ep-catalog-message-handler</artifactId>
+				<version>${dce.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>com.elasticpath</groupId>
+				<artifactId>ep-domain-message-handler</artifactId>
+				<version>${dce.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>com.elasticpath</groupId>
+				<artifactId>ep-domain-bulk</artifactId>
+				<version>${dce.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>com.elasticpath</groupId>
+				<artifactId>ep-domain-bulk-handler</artifactId>
 				<version>${dce.version}</version>
 			</dependency>
 
@@ -1364,13 +1384,6 @@
 				<scope>runtime</scope>
 			</dependency>
 
-
-			<dependency>
-				<groupId>javax.jws</groupId>
-				<artifactId>jsr181-api</artifactId>
-				<version>1.0-MR1</version>
-			</dependency>
-
 			<dependency>
 				<groupId>javax.xml.bind</groupId>
 				<artifactId>jaxb-api</artifactId>
@@ -1396,33 +1409,6 @@
 				<groupId>org.glassfish</groupId>
 				<artifactId>javax.json</artifactId>
 				<version>${javax.json.version}</version>
-			</dependency>
-
-
-			<dependency>
-				<groupId>com.sun.xml.ws</groupId>
-				<artifactId>jaxws-rt</artifactId>
-				<version>2.1.3</version>
-				<exclusions>
-					<exclusion>
-						<groupId>javax.xml.stream</groupId>
-						<artifactId>stax-api</artifactId>
-					</exclusion>
-					<exclusion>
-						<groupId>javax.xml.ws</groupId>
-						<artifactId>jaxws-api</artifactId>
-					</exclusion>
-					<exclusion>
-						<groupId>activation</groupId>
-						<artifactId>activation</artifactId>
-					</exclusion>
-					<!-- pom for jaxws-rt specifies saaj 1.3 which is missing META-INF/services dir -->
-					<!-- See http://forums.java.net/jive/thread.jspa?messageID=271162 -->
-					<exclusion>
-						<groupId>com.sun.xml.messaging.saaj</groupId>
-						<artifactId>saaj-impl</artifactId>
-					</exclusion>
-				</exclusions>
 			</dependency>
 
 			<dependency>
@@ -1562,6 +1548,11 @@
 				<artifactId>jackson-jaxrs-base</artifactId>
 				<version>${jackson.version}</version>
 			</dependency>
+			<dependency>
+				<groupId>com.fasterxml.jackson.datatype</groupId>
+				<artifactId>jackson-datatype-jsr310</artifactId>
+				<version>${jackson.version}</version>
+			</dependency>
 
 			<dependency>
 				<groupId>org.apache.xmlbeans</groupId>
@@ -1692,6 +1683,22 @@
 				<version>${org.apache.camel.version}</version>
 				<scope>test</scope>
 			</dependency>
+			<dependency>
+				<groupId>org.apache.camel</groupId>
+				<artifactId>camel-test</artifactId>
+				<version>${org.apache.camel.version}</version>
+				<scope>test</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.camel</groupId>
+				<artifactId>camel-servlet</artifactId>
+				<version>${org.apache.camel.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.camel</groupId>
+				<artifactId>camel-swagger-java</artifactId>
+				<version>${org.apache.camel.version}</version>
+			</dependency>
 
 			<dependency>
 				<groupId>net.sf.supercsv</groupId>
@@ -1714,6 +1721,38 @@
 				<groupId>com.elasticpath.db</groupId>
 				<artifactId>schema-documentation</artifactId>
 				<version>${dce.version}</version>
+			</dependency>
+
+			<!-- Atomikos dependencies -->
+			<dependency>
+				<groupId>com.atomikos</groupId>
+				<artifactId>transactions-jta</artifactId>
+				<version>${com.atomikos.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.atomikos</groupId>
+				<artifactId>transactions-jdbc</artifactId>
+				<version>${com.atomikos.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.atomikos</groupId>
+				<artifactId>transactions-jms</artifactId>
+				<version>${com.atomikos.version}</version>
+			</dependency>
+
+			<!-- JTA Support -->
+			<dependency>
+				<groupId>com.elasticpath</groupId>
+				<artifactId>ep-jta</artifactId>
+				<version>${dce.version}</version>
+			</dependency>
+
+			<!-- Embedded ActiveMQ support for tests -->
+			<dependency>
+				<groupId>org.apache.activemq</groupId>
+				<artifactId>activemq-kahadb-store</artifactId>
+				<version>${activemq.kahadb.store.version}</version>
+				<scope>test</scope>
 			</dependency>
 
 			<!-- EP Core Tool -->
@@ -1742,9 +1781,9 @@
 				<version>${api-platform.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>com.elasticpath.rest</groupId>
-				<artifactId>ep-relos-legacy</artifactId>
-				<version>${api-platform.version}</version>
+				<groupId>com.elasticpath.rest.tests</groupId>
+				<artifactId>fluent-relos-client</artifactId>
+				<version>${fluent.relos.client.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>com.elasticpath.rest.helix</groupId>
@@ -2087,27 +2126,12 @@
 			</dependency>
 			<dependency>
 				<groupId>com.elasticpath.rest.relos.rs.authentication</groupId>
-				<artifactId>ep-rs-authentication-resource</artifactId>
-				<version>${api-platform.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>com.elasticpath.rest.relos.rs.authentication</groupId>
 				<artifactId>ep-rs-authentication-api</artifactId>
-				<version>${api-platform.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>com.elasticpath.rest.relos.rs.authentication</groupId>
-				<artifactId>ep-rs-authentication-handler</artifactId>
 				<version>${api-platform.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>com.elasticpath.rest.relos.rs</groupId>
 				<artifactId>ep-rs-bridge-common</artifactId>
-				<version>${api-platform.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>com.elasticpath.rest.relos.rs</groupId>
-				<artifactId>ep-rs-hal-support</artifactId>
 				<version>${api-platform.version}</version>
 			</dependency>
 			<dependency>
@@ -2176,6 +2200,19 @@
 				<scope>test</scope>
 			</dependency>
 			<dependency>
+				<groupId>io.rest-assured</groupId>
+				<artifactId>rest-assured</artifactId>
+				<version>${rest-assured.version}</version>
+				<scope>compile</scope>
+			</dependency>
+			<dependency>
+				<groupId>io.rest-assured</groupId>
+				<artifactId>json-schema-validator</artifactId>
+				<version>${rest-assured.version}</version>
+				<scope>compile</scope>
+			</dependency>
+
+			<dependency>
 				<groupId>org.springframework.security.oauth</groupId>
 				<artifactId>spring-security-oauth2</artifactId>
 				<version>${org.springframework.security-oauth2.version}</version>
@@ -2188,16 +2225,6 @@
 			<dependency>
 				<groupId>org.springframework.security</groupId>
 				<artifactId>spring-security-web</artifactId>
-				<version>${org.springframework.security.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.springframework.security</groupId>
-				<artifactId>spring-security-aspects</artifactId>
-				<version>${org.springframework.security.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.springframework.security</groupId>
-				<artifactId>spring-security-ldap</artifactId>
 				<version>${org.springframework.security.version}</version>
 			</dependency>
 			<dependency>
@@ -2264,17 +2291,6 @@
 					<exclusion>
 						<groupId>org.springframework</groupId>
 						<artifactId>spring-web</artifactId>
-					</exclusion>
-				</exclusions>
-			</dependency>
-			<dependency>
-				<groupId>org.springframework.batch</groupId>
-				<artifactId>spring-batch-infrastructure</artifactId>
-				<version>${org.springframework.spring.batch.version}</version>
-				<exclusions>
-					<exclusion>
-						<groupId>org.springframework</groupId>
-						<artifactId>spring-core</artifactId>
 					</exclusion>
 				</exclusions>
 			</dependency>
@@ -2747,69 +2763,19 @@
 			</dependency>
 			<!-- RelOS -->
 			<dependency>
-				<groupId>com.elasticpath.rest.relos</groupId>
-				<artifactId>ep-relos-system-ready</artifactId>
-				<version>${api-platform.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>com.elasticpath.rest.relos</groupId>
-				<artifactId>ep-relos-kernel</artifactId>
-				<version>${api-platform.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>com.elasticpath.rest.resource.cortex</groupId>
-				<artifactId>ep-root-resource</artifactId>
-				<version>${api-platform.version}</version>
-			</dependency>
-			<dependency>
 				<groupId>com.elasticpath.rest</groupId>
 				<artifactId>ep-rest-spi-impl</artifactId>
-				<version>${api-platform.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>com.elasticpath.rest</groupId>
-				<artifactId>ep-dispatch-extender</artifactId>
-				<version>${api-platform.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>com.elasticpath.rest</groupId>
-				<artifactId>ep-rest-identifiers</artifactId>
-				<version>${api-platform.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>com.elasticpath.rest</groupId>
-				<artifactId>ep-rest-resource-blueprint-extender</artifactId>
-				<version>${api-platform.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>com.elasticpath.rest.relos.rs</groupId>
-				<artifactId>ep-rs-external</artifactId>
-				<version>${api-platform.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>com.elasticpath.rest.relos.rs</groupId>
-				<artifactId>ep-rs-bridge</artifactId>
-				<version>${api-platform.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>com.elasticpath.rest.relos.rs</groupId>
-				<artifactId>ep-rs-jersey-integration</artifactId>
-				<version>${api-platform.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>com.elasticpath.rest</groupId>
-				<artifactId>ep-rest-json-jackson</artifactId>
-				<version>${api-platform.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>com.elasticpath.rest.relos.rs</groupId>
-				<artifactId>ep-rs-healthcheck</artifactId>
 				<version>${api-platform.version}</version>
 			</dependency>
 
 			<dependency>
 				<groupId>com.elasticpath.extensions</groupId>
 				<artifactId>ext-core</artifactId>
+				<version>${commerce.extensions.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.elasticpath.extensions</groupId>
+				<artifactId>ext-commerce-engine-wrapper</artifactId>
 				<version>${commerce.extensions.version}</version>
 			</dependency>
 			<dependency>
@@ -2852,17 +2818,6 @@
 				<version>${msgpack.version}</version>
 			</dependency>
 
-			<!-- jersey -->
-			<dependency>
-				<groupId>org.glassfish.jersey.containers</groupId>
-				<artifactId>jersey-container-servlet</artifactId>
-				<version>${jersey.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.glassfish.jersey.inject</groupId>
-				<artifactId>jersey-hk2</artifactId>
-				<version>${jersey.version}</version>
-			</dependency>
 			<!-- Security -->
 			<dependency>
 				<groupId>com.elasticpath.bundles</groupId>
@@ -2948,28 +2903,6 @@
 				<version>${cmclient.version}</version>
 			</dependency>
 
-			<!--Helix-->
-			<dependency>
-				<groupId>com.elasticpath.rest.helix</groupId>
-				<artifactId>helix-commons</artifactId>
-				<version>${api-platform.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>com.elasticpath.rest.helix</groupId>
-				<artifactId>helix-validator</artifactId>
-				<version>${api-platform.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>com.elasticpath.rest.helix</groupId>
-				<artifactId>helix-runtime</artifactId>
-				<version>${api-platform.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>com.elasticpath.rest.helix</groupId>
-				<artifactId>helix-resource-bootstrap</artifactId>
-				<version>${api-platform.version}</version>
-			</dependency>
-
 			<dependency>
 				<groupId>com.elasticpath.extensions</groupId>
 				<artifactId>smoketest-h2-database</artifactId>
@@ -3017,11 +2950,6 @@
 			</dependency>
 
 			<dependency>
-				<groupId>javax.annotation</groupId>
-				<artifactId>javax.annotation-api</artifactId>
-				<version>${javax.annotation.version}</version>
-			</dependency>
-			<dependency>
 				<groupId>net.sourceforge.jregex</groupId>
 				<artifactId>jregex</artifactId>
 				<version>${jregex.version}</version>
@@ -3051,26 +2979,31 @@
 				<groupId>org.apache.servicemix.bundles</groupId>
 				<artifactId>org.apache.servicemix.bundles.quartz</artifactId>
 				<version>${org.apache.servicemix.bundles.quartz.version}</version>
+				<scope>provided</scope>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.servicemix.bundles</groupId>
 				<artifactId>org.apache.servicemix.bundles.spring-core</artifactId>
 				<version>${org.apache.servicemix.spring.version}</version>
+				<scope>provided</scope>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.servicemix.bundles</groupId>
 				<artifactId>org.apache.servicemix.bundles.spring-beans</artifactId>
 				<version>${org.apache.servicemix.spring.version}</version>
+				<scope>provided</scope>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.servicemix.bundles</groupId>
 				<artifactId>org.apache.servicemix.bundles.spring-context</artifactId>
 				<version>${org.apache.servicemix.spring.version}</version>
+				<scope>provided</scope>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.servicemix.bundles</groupId>
 				<artifactId>org.apache.servicemix.bundles.spring-context-support</artifactId>
 				<version>${org.apache.servicemix.spring.version}</version>
+				<scope>provided</scope>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.servicemix.bundles</groupId>
@@ -3084,58 +3017,51 @@
 			</dependency>
 			<dependency>
 				<groupId>org.apache.servicemix.bundles</groupId>
+				<artifactId>org.apache.servicemix.bundles.spring-tx</artifactId>
+				<version>${org.apache.servicemix.spring.version}</version>
+				<scope>provided</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.servicemix.bundles</groupId>
 				<artifactId>org.apache.servicemix.bundles.spring-jdbc</artifactId>
 				<version>${org.apache.servicemix.spring.version}</version>
+				<scope>provided</scope>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.servicemix.bundles</groupId>
 				<artifactId>org.apache.servicemix.bundles.spring-jms</artifactId>
 				<version>${org.apache.servicemix.spring.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.apache.servicemix.bundles</groupId>
-				<artifactId>org.apache.servicemix.bundles.spring-ldap</artifactId>
-				<version>${org.apache.servicemix.spring.ldap.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.apache.servicemix.bundles</groupId>
-				<artifactId>org.apache.servicemix.bundles.spring-tx</artifactId>
-				<version>${org.apache.servicemix.spring.version}</version>
+				<scope>provided</scope>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.servicemix.bundles</groupId>
 				<artifactId>org.apache.servicemix.bundles.spring-web</artifactId>
 				<version>${org.apache.servicemix.spring.version}</version>
+				<scope>provided</scope>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.servicemix.bundles</groupId>
 				<artifactId>org.apache.servicemix.bundles.spring-webmvc</artifactId>
 				<version>${org.apache.servicemix.spring.version}</version>
+				<scope>provided</scope>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.servicemix.bundles</groupId>
 				<artifactId>org.apache.servicemix.bundles.spring-security-core</artifactId>
 				<version>${org.apache.servicemix.spring.security.version}</version>
+				<scope>provided</scope>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.servicemix.bundles</groupId>
 				<artifactId>org.apache.servicemix.bundles.spring-security-config</artifactId>
 				<version>${org.apache.servicemix.spring.security.version}</version>
+				<scope>provided</scope>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.servicemix.bundles</groupId>
 				<artifactId>org.apache.servicemix.bundles.spring-security-web</artifactId>
 				<version>${org.apache.servicemix.spring.security.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.apache.servicemix.bundles</groupId>
-				<artifactId>org.apache.servicemix.bundles.spring-security-aspects</artifactId>
-				<version>${org.apache.servicemix.spring.security.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.apache.servicemix.bundles</groupId>
-				<artifactId>org.apache.servicemix.bundles.spring-security-ldap</artifactId>
-				<version>${org.apache.servicemix.spring.security.version}</version>
+				<scope>provided</scope>
 			</dependency>
 
 
@@ -3151,43 +3077,9 @@
 				</exclusions>
 			</dependency>
 			<dependency>
-				<groupId>org.eclipse.gemini.blueprint</groupId>
-				<artifactId>gemini-blueprint-extender</artifactId>
-				<version>${gemini.blueprint.version}</version>
-				<exclusions>
-					<exclusion>
-						<groupId>org.springframework</groupId>
-						<artifactId>org.springframework.beans</artifactId>
-					</exclusion>
-					<exclusion>
-						<groupId>org.springframework</groupId>
-						<artifactId>org.springframework.context</artifactId>
-					</exclusion>
-					<exclusion>
-						<groupId>org.springframework</groupId>
-						<artifactId>org.springframework.core</artifactId>
-					</exclusion>
-				</exclusions>
-			</dependency>
-			<dependency>
-				<groupId>com.elasticpath.rest.relos</groupId>
-				<artifactId>ep-relos-logback-config</artifactId>
-				<version>${api-platform.version}</version>
-			</dependency>
-			<dependency>
 				<groupId>commons-pool</groupId>
 				<artifactId>commons-pool</artifactId>
 				<version>${commons.pool.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>com.elasticpath.rest.relos.rs.subject</groupId>
-				<artifactId>ep-rs-subject-impl</artifactId>
-				<version>${api-platform.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>com.elasticpath.rest.relos.rs.authentication</groupId>
-				<artifactId>ep-rs-authentication-client-local</artifactId>
-				<version>${api-platform.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>com.elasticpath.rest.integration.epcommerce</groupId>
@@ -3205,6 +3097,11 @@
 				<version>${cortex.ep.integration.version}</version>
 			</dependency>
 			<dependency>
+				<groupId>com.elasticpath.rest.integration.epcommerce</groupId>
+				<artifactId>ep-hds-support</artifactId>
+				<version>${cortex.ep.integration.version}</version>
+			</dependency>
+			<dependency>
 				<groupId>com.elasticpath.rest.resource.cortex</groupId>
 				<artifactId>ep-resource-carts</artifactId>
 				<version>${cortex.ep.integration.version}</version>
@@ -3214,11 +3111,6 @@
 				<artifactId>ep-resource-data-policies</artifactId>
 				<version>${cortex.ep.integration.version}</version>
 				<scope>provided</scope>
-			</dependency>
-			<dependency>
-				<groupId>com.elasticpath.rest.relos.rs.events</groupId>
-				<artifactId>ep-rs-events-impl</artifactId>
-				<version>${api-platform.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>com.elasticpath.rest.integration.epcommerce</groupId>
@@ -3257,33 +3149,16 @@
 			</dependency>
 
 			<dependency>
-				<groupId>com.elasticpath.rest.relos.platforms</groupId>
-				<artifactId>platforms-commons</artifactId>
+				<groupId>com.elasticpath.cortex</groupId>
+				<artifactId>ep-relos-runtime-webapp</artifactId>
 				<version>${api-platform.version}</version>
-			</dependency>
-
-			<dependency>
-				<groupId>com.elasticpath.rest.relos.platforms</groupId>
-				<artifactId>ep-relos-webapp-housing</artifactId>
-				<version>${api-platform.version}</version>
-				<exclusions>
-					<exclusion>
-						<groupId>org.springframework</groupId>
-						<artifactId>spring-web</artifactId>
-					</exclusion>
-				</exclusions>
+				<type>war</type>
 			</dependency>
 
 			<dependency>
 				<groupId>org.apache.geronimo.specs</groupId>
 				<artifactId>geronimo-j2ee-management_1.1_spec</artifactId>
 				<version>${org.apache.geronimo.specs.version}</version>
-			</dependency>
-
-			<dependency>
-				<groupId>com.fasterxml.uuid</groupId>
-				<artifactId>java-uuid-generator</artifactId>
-				<version>${com.jayway.java-uuid-generator.version}</version>
 			</dependency>
 
 			<dependency>
@@ -3300,92 +3175,9 @@
 
 			<dependency>
 				<groupId>org.apache.felix</groupId>
-				<artifactId>org.apache.felix.http.proxy</artifactId>
-				<version>${felix.http.proxy.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.apache.felix</groupId>
-				<artifactId>org.apache.felix.http.api</artifactId>
-				<version>${felix.http.api.version}</version>
-				<scope>provided</scope>
-			</dependency>
-			<dependency>
-				<groupId>org.apache.felix</groupId>
-				<artifactId>org.apache.felix.http.bridge</artifactId>
-				<version>${felix.http.bridge.version}</version>
-				<scope>provided</scope>
-			</dependency>
-			<dependency>
-				<groupId>org.apache.felix</groupId>
-				<artifactId>org.apache.felix.http.servlet-api</artifactId>
-				<version>${felix.http.servlet-api.version}</version>
-				<scope>provided</scope>
-			</dependency>
-			<dependency>
-				<groupId>org.apache.felix</groupId>
 				<artifactId>org.apache.felix.framework</artifactId>
 				<version>${felix.framework.version}</version>
 				<scope>runtime</scope>
-			</dependency>
-			<dependency>
-				<groupId>org.apache.felix</groupId>
-				<artifactId>org.apache.felix.inventory</artifactId>
-				<version>${felix.inventory.version}</version>
-				<scope>runtime</scope>
-			</dependency>
-			<dependency>
-				<groupId>org.apache.felix</groupId>
-				<artifactId>org.apache.felix.scr</artifactId>
-				<version>${felix.scr.version}</version>
-				<scope>provided</scope>
-			</dependency>
-			<dependency>
-				<groupId>org.apache.felix</groupId>
-				<artifactId>org.apache.felix.configadmin</artifactId>
-				<version>${felix.configadmin.version}</version>
-				<scope>provided</scope>
-			</dependency>
-			<dependency>
-				<groupId>org.apache.felix</groupId>
-				<artifactId>org.apache.felix.metatype</artifactId>
-				<version>${felix.metatype.version}</version>
-				<scope>provided</scope>
-			</dependency>
-			<dependency>
-				<groupId>org.apache.felix</groupId>
-				<artifactId>org.apache.felix.fileinstall</artifactId>
-				<version>${felix.fileinstall.version}</version>
-				<scope>provided</scope>
-			</dependency>
-			<dependency>
-				<groupId>org.apache.felix</groupId>
-				<artifactId>org.apache.felix.eventadmin</artifactId>
-				<version>${felix.eventadmin.version}</version>
-				<scope>provided</scope>
-			</dependency>
-			<dependency>
-				<groupId>org.apache.felix</groupId>
-				<artifactId>org.apache.felix.webconsole.plugins.ds</artifactId>
-				<version>${felix.webconsole.ds.version}</version>
-				<scope>provided</scope>
-			</dependency>
-			<dependency>
-				<groupId>org.apache.felix</groupId>
-				<artifactId>org.apache.felix.webconsole.plugins.event</artifactId>
-				<version>${felix.webconsole.event.version}</version>
-				<scope>provided</scope>
-			</dependency>
-			<dependency>
-				<groupId>org.apache.felix</groupId>
-				<artifactId>org.apache.felix.webconsole.plugins.memoryusage</artifactId>
-				<version>${felix.webconsole.memoryusage.version}</version>
-				<scope>provided</scope>
-			</dependency>
-			<dependency>
-				<groupId>org.apache.felix</groupId>
-				<artifactId>org.apache.felix.webconsole.plugins.packageadmin</artifactId>
-				<version>${felix.webconsole.packageadmin.version}</version>
-				<scope>provided</scope>
 			</dependency>
 
 			<!-- Data population cli-->
@@ -3423,6 +3215,16 @@
 				<groupId>com.joestelmach</groupId>
 				<artifactId>natty</artifactId>
 				<version>${natty.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.github.tomakehurst</groupId>
+				<artifactId>wiremock</artifactId>
+				<version>${wiremock.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.squareup.okhttp3</groupId>
+				<artifactId>okhttp</artifactId>
+				<version>${okhttp.version}</version>
 			</dependency>
 		</dependencies>
 

@@ -18,6 +18,8 @@ import javax.persistence.TableGenerator;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
+import org.apache.openjpa.persistence.DataCache;
+
 import com.elasticpath.domain.DatabaseCreationDate;
 import com.elasticpath.domain.DatabaseLastModifiedDate;
 import com.elasticpath.domain.impl.AbstractItemData;
@@ -27,6 +29,7 @@ import com.elasticpath.domain.impl.AbstractItemData;
  */
 @Entity
 @Table(name = ShoppingItemData.TABLE_NAME)
+@DataCache(enabled = false)
 public class ShoppingItemData extends AbstractItemData implements DatabaseCreationDate, DatabaseLastModifiedDate {
 	private static final long serialVersionUID = 4449647744232193936L;
 

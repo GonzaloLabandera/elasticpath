@@ -34,7 +34,7 @@ public class BundleItemsTab extends AbstractPageObject {
 			"div[automation-id='com.elasticpath.cmclient.catalog.CatalogMessages.ProductBundleEditConstituentsDialog_Title'] "
 					+ "div[widget-id='Quantity'] input";
 	private static final String TAB_CSS
-			= "div[automation-id='com.elasticpath.cmclient.catalog.CatalogMessages.Product%sPage_Title'][seeable='true']";
+			= "div[automation-id='com.elasticpath.cmclient.catalog.CatalogMessages.Product%sPage_Title'][widget-type='CTabItem'][seeable='true']";
 	private static final String BUNDLE_SELECTION_RULE_PARAMETER_CSS = "div[automation-id='com.elasticpath.cmclient.catalog.CatalogMessages"
 			+ ".Bundle_Selection_Parameter'] input";
 	private static final String BUNDLE_SELECTION_RULE_CCOMBO_CSS = "div[automation-id='com.elasticpath.cmclient.catalog.CatalogMessages"
@@ -132,25 +132,20 @@ public class BundleItemsTab extends AbstractPageObject {
 		clickButton(REMOVE_ITEM_DIALOG_OK_BUTTON, "OK");
 	}
 
-//	/**
-//	 * Clicks button.
-//	 *
-//	 * @param automationId the button name
-//	 */
-//	public void clickButtonWithId(final String automationId) {
-//		getWaitDriver().waitForElementToBeInteractable(automationId);
-//		click(getWaitDriver().waitForElementToBeClickable(By.cssSelector(automationId)));
-//	}
-
 	/**
 	 * Clicks on tab to select it.
 	 *
 	 * @param tabName the tab name.
 	 */
 	public void selectTab(final String tabName) {
+		String cssSelector = String.format(TAB_CSS, tabName);
 		click(getWaitDriver().waitForElementToBeClickable(By.cssSelector(String.format(TAB_CSS, tabName))));
+		setWebDriverImplicitWait(1);
+		if (!isElementPresent(By.cssSelector(cssSelector + "[active-tab='true']"))) {
+			click(getWaitDriver().waitForElementToBeClickable(By.cssSelector(cssSelector)));
+		}
+		setWebDriverImplicitWaitToDefault();
 	}
-
 
 	/**
 	 * Verify bundle selection rule.
@@ -158,7 +153,9 @@ public class BundleItemsTab extends AbstractPageObject {
 	 * @param expSelectionRule Expected selection rule.
 	 */
 	public void verifyBundleSelectionRule(final String expSelectionRule) {
-		assertThat(getWaitDriver().waitForElementToBeVisible(By.cssSelector(BUNDLE_SELECTION_RULE_SELECTED_VALUE_CSS)).getAttribute("widget-id"))
+		getWaitDriver().waitForElementToBeVisible(By.cssSelector(BUNDLE_SELECTION_RULE_SELECTED_VALUE_CSS));
+		getWaitDriver().waitForElementToBeNotStale(By.cssSelector(BUNDLE_SELECTION_RULE_SELECTED_VALUE_CSS));
+		assertThat(getDriver().findElement(By.cssSelector(BUNDLE_SELECTION_RULE_SELECTED_VALUE_CSS)).getAttribute("widget-id"))
 				.as("Bundle selection rule  verification failed")
 				.isEqualTo(expSelectionRule);
 	}

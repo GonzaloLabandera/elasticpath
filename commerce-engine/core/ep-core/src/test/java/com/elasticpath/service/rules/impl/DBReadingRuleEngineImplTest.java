@@ -3,19 +3,20 @@
  */
 package com.elasticpath.service.rules.impl;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
 
 import java.util.Date;
 
-import org.drools.core.impl.InternalKnowledgeBase;
-import org.jmock.Expectations;
-import org.jmock.integration.junit4.JUnitRuleMockery;
-import org.jmock.lib.legacy.ClassImposteriser;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+import org.jmock.Expectations;
+import org.jmock.integration.junit4.JUnitRuleMockery;
+import org.jmock.lib.legacy.ClassImposteriser;
+
+import org.drools.core.impl.InternalKnowledgeBase;
 
 import com.elasticpath.cache.SimpleTimeoutCache;
 import com.elasticpath.domain.catalog.Catalog;
@@ -30,6 +31,7 @@ import com.elasticpath.service.rules.RuleService;
 public class DBReadingRuleEngineImplTest {
 
 	private static final String CODE = "some code";
+	public static final long UID = 2000001L;
 
 	private DBReadingRuleEngineImpl ruleEngine;
 
@@ -92,7 +94,6 @@ public class DBReadingRuleEngineImplTest {
 			}
 		});
 
-		ruleEngine.setCachedCatalogRuleBaseState(mockSimpleTimeoutCache);
 	}
 
 	/**
@@ -151,7 +152,6 @@ public class DBReadingRuleEngineImplTest {
 				allowing(mockEpRuleBase).getRuleBase();
 				will(returnValue(ruleBase));
 
-
 				allowing(mockRuleService).findRuleBaseByScenario(store, null, RuleScenarios.CART_SCENARIO);
 				will(returnValue(epRuleBase));
 			}
@@ -161,15 +161,20 @@ public class DBReadingRuleEngineImplTest {
 		final Date date = new Date();
 		context.checking(new Expectations() {
 			{
+				allowing(epRuleBase).getUidPk();
+				will(returnValue(UID));
+
 				allowing(mockEpRuleBase).getLastModifiedDate();
 				will(returnValue(date));
 
+				allowing(mockRuleService).getModifiedDateForRuleBase(UID);
+				will(returnValue(date));
 
 				oneOf(mockRuleService).findChangedStoreRuleBases(CODE, RuleScenarios.CART_SCENARIO, date);
 				will(returnValue(null));
 			}
 		});
-		assertSame(ruleBase, ruleEngine.getCartRuleBase(store));
+		assertTrue(ruleEngine.getCartRuleBase(store) instanceof InternalKnowledgeBase);
 	}
 
 	/**
@@ -209,9 +214,14 @@ public class DBReadingRuleEngineImplTest {
 		final Date date = new Date();
 		context.checking(new Expectations() {
 			{
+				allowing(epRuleBase).getUidPk();
+				will(returnValue(UID));
+
 				allowing(mockEpRuleBase).getLastModifiedDate();
 				will(returnValue(date));
 
+				allowing(mockRuleService).getModifiedDateForRuleBase(UID);
+				will(returnValue(date));
 
 				oneOf(mockRuleService).findChangedStoreRuleBases(CODE, RuleScenarios.CART_SCENARIO, date);
 				will(returnValue(updatedEpRuleBase));
@@ -280,7 +290,6 @@ public class DBReadingRuleEngineImplTest {
 				allowing(mockEpRuleBase).getRuleBase();
 				will(returnValue(ruleBase));
 
-
 				allowing(mockRuleService).findRuleBaseByScenario(null, catalog, RuleScenarios.CATALOG_BROWSE_SCENARIO);
 				will(returnValue(epRuleBase));
 			}
@@ -290,15 +299,17 @@ public class DBReadingRuleEngineImplTest {
 		final Date date = new Date();
 		context.checking(new Expectations() {
 			{
-				allowing(mockEpRuleBase).getLastModifiedDate();
-				will(returnValue(date));
+				allowing(epRuleBase).getUidPk();
+				will(returnValue(UID));
 
+				allowing(mockRuleService).getModifiedDateForRuleBase(UID);
+				will(returnValue(date));
 
 				oneOf(mockRuleService).findChangedCatalogRuleBases(CODE, RuleScenarios.CATALOG_BROWSE_SCENARIO, date);
 				will(returnValue(null));
 			}
 		});
-		assertEquals(ruleBase, ruleEngine.getCatalogRuleBase(store));
+		assertTrue(ruleEngine.getCatalogRuleBase(store) instanceof InternalKnowledgeBase);
 	}
 
 	/**
@@ -338,9 +349,11 @@ public class DBReadingRuleEngineImplTest {
 		final Date date = new Date();
 		context.checking(new Expectations() {
 			{
-				allowing(mockEpRuleBase).getLastModifiedDate();
-				will(returnValue(date));
+				allowing(epRuleBase).getUidPk();
+				will(returnValue(UID));
 
+				allowing(mockRuleService).getModifiedDateForRuleBase(UID);
+				will(returnValue(date));
 
 				oneOf(mockRuleService).findChangedCatalogRuleBases(CODE, RuleScenarios.CATALOG_BROWSE_SCENARIO, date);
 				will(returnValue(updatedEpRuleBase));

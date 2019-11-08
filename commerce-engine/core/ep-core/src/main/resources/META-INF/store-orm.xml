@@ -129,6 +129,13 @@
 				WHERE ?1 MEMBER OF s.associatedStoreUids.uidPk
 			</query>
 		</named-query>
+		<named-query name="STORE_WITH_CUSTOMER_ATTRIBUTE_IN_USE">
+			<query>
+				SELECT sca
+				FROM StoreCustomerAttributeImpl sca, StoreImpl s
+				WHERE sca.storeCode = s.code AND s.uidPk = ?1
+			</query>
+		</named-query>
 		<named-query name="STORE_WITH_UIDS">
 			<query>
 				SELECT s
@@ -230,6 +237,13 @@
 		<named-query name="FIND_VALID_STORE_CODE">
 		<query>
 			SELECT s.code
+			FROM StoreImpl s
+			WHERE UPPER(s.code) = UPPER(?1)
+		</query>
+	</named-query>
+	<named-query name="FIND_CART_TYPES_FOR_STORE">
+		<query>
+			SELECT s.shoppingCartTypes.name
 			FROM StoreImpl s
 			WHERE UPPER(s.code) = UPPER(?1)
 		</query>

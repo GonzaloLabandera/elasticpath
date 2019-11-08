@@ -186,8 +186,8 @@
 		<property name="attributeGroupHelper">
 			<ref bean="attributeGroupHelper"/>
 		</property>
-		<property name="cartItemModifierService">
-			<ref bean="cartItemModifierService"/>
+		<property name="modifierService">
+			<ref bean="modifierService"/>
 		</property>
 	</bean>
 	
@@ -279,7 +279,7 @@
 		parent="abstractDomainAdapter">
 		<property name="assembler" ref="savedConditionAssembler" />
 	</bean>
-	
+
 	<bean id="dcdAssembler" class="com.elasticpath.importexport.common.adapters.targetedselling.DynamicContentDeliveryAssembler">
 		<property name="beanFactory" ref="elasticPath" />
 		<property name="contentSpaceService" ref="contentspaceService" />
@@ -313,6 +313,12 @@
 		<property name="assembler" ref="facetDtoAssembler"/>
 	</bean>
 
+	<bean id="sortAttributeAdapter" class="com.elasticpath.importexport.common.adapters.DtoAssemblerDelegatingAdapter"
+		  parent="abstractDomainAdapter">
+		<property name="assembler" ref="sortAttributeDtoAssembler"/>
+	</bean>
+
+
 	<bean id="storeAdapter" class="com.elasticpath.importexport.common.adapters.DtoAssemblerDelegatingAdapter"
 		parent="abstractDomainAdapter">
 		<property name="assembler" ref="storeDtoAssembler" />
@@ -333,6 +339,16 @@
 	<bean id="customerGroupAdapter" class="com.elasticpath.importexport.common.adapters.DtoAssemblerDelegatingAdapter"
 		parent="abstractDomainAdapter">
 		<property name="assembler" ref="customerGroupDtoAssembler" />
+	</bean>
+
+	<bean id="attributePolicyAdapter" class="com.elasticpath.importexport.common.adapters.DtoAssemblerDelegatingAdapter"
+		  parent="abstractDomainAdapter">
+		<property name="assembler" ref="attributePolicyDtoAssembler" />
+	</bean>
+
+	<bean id="storeCustomerAttributeAdapter" class="com.elasticpath.importexport.common.adapters.DtoAssemblerDelegatingAdapter"
+		  parent="abstractDomainAdapter">
+		<property name="assembler" ref="storeCustomerAttributeDtoAssembler" />
 	</bean>
 
 	<bean id="cmUserAdapter" class="com.elasticpath.importexport.common.adapters.DtoAssemblerDelegatingAdapter"
@@ -402,8 +418,25 @@
 		
 	<bean id="conditionalExpressionAdapter" class="com.elasticpath.importexport.common.adapters.tag.ConditionalExpressionAdapter" 
 		parent="abstractDomainAdapter">
-	</bean>	
-			
+	</bean>
+
+	<bean id="tagDefinitionAdapter" class="com.elasticpath.importexport.common.adapters.tag.TagDefinitionAdapter"
+		  parent="abstractDomainAdapter">
+		<property name="tagDictionaryService">
+			<ref bean="tagDictionaryService"/>
+		</property>
+		<property name="tagValueTypeService">
+			<ref bean="tagValueTypeService"/>
+		</property>
+	</bean>
+
+	<bean id="tagGroupAdapter" class="com.elasticpath.importexport.common.adapters.tag.TagGroupAdapter"
+		  parent="abstractDomainAdapter">
+		<property name="tagDefinitionAdapter">
+			<ref bean="tagDefinitionAdapter"/>
+		</property>
+	</bean>
+
 	<bean id="sellingContextAdapter" class="com.elasticpath.importexport.common.adapters.tag.SellingContextAdapter" parent="abstractDomainAdapter">
 		<property name="conditionalExpressionAdapter">
 			<ref bean="conditionalExpressionAdapter"/>
@@ -423,14 +456,18 @@
         <property name="warehouseService" ref="warehouseService" />
 	</bean>
 
-	<bean id="cartItemModifierGroupAdapter" class="com.elasticpath.importexport.common.adapters.cartmodifier.CartItemModifierGroupAdapter"
+	<bean id="modifierGroupAdapter" class="com.elasticpath.importexport.common.adapters.modifier.ModifierGroupAdapter"
 		  parent="abstractDomainAdapter">
-		<property name="cartItemModifierFieldAdapter">
-			<ref bean="cartItemModifierFieldAdapter"/>
+		<property name="modifierFieldAdapter">
+			<ref bean="modifierFieldAdapter"/>
 		</property>
-		<property name="cartItemModifierService">
-			<ref bean="cartItemModifierService"/>
+		<property name="modifierService">
+			<ref bean="modifierService"/>
 		</property>
+	</bean>
+
+	<bean id="modifierGroupFilterAdapter" class="com.elasticpath.importexport.common.adapters.modifier.ModifierGroupFilterAdapter"
+		  parent="abstractDomainAdapter">
 	</bean>
 
 	<bean id="dataPolicyAdapter" class="com.elasticpath.importexport.common.adapters.datapolicy.DataPolicyAdapter"
@@ -443,15 +480,15 @@
 		<property name="assembler" ref="customerConsentAssembler" />
 	</bean>
 
-	<bean id="cartItemModifierFieldAdapter" class="com.elasticpath.importexport.common.adapters.cartmodifier.CartItemModifierFieldAdapter"
+	<bean id="modifierFieldAdapter" class="com.elasticpath.importexport.common.adapters.modifier.ModifierFieldAdapter"
 		  parent="abstractDomainAdapter">
-		<property name="cartItemModifierFieldOptionAdapter">
-			<ref bean="cartItemModifierFieldOptionAdapter"/>
+		<property name="modifierFieldOptionAdapter">
+			<ref bean="modifierFieldOptionAdapter"/>
 		</property>
 
 	</bean>
 
-	<bean id="cartItemModifierFieldOptionAdapter" class="com.elasticpath.importexport.common.adapters.cartmodifier.CartItemModifierFieldOptionAdapter"
+	<bean id="modifierFieldOptionAdapter" class="com.elasticpath.importexport.common.adapters.modifier.ModifierFieldOptionAdapter"
 		  parent="abstractDomainAdapter">
 	</bean>
 

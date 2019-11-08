@@ -30,11 +30,11 @@ public class LogicalTreeBuilder {
   /**
    * Adds a condition leaf to the active logical operator tree.
    */
-  def addCondition(key, Object params, functionName) {
+  def addCondition(key, keyString, Object params, functionName) {
 	  if (params.getClass().isArray()) {
-		  this.currentNodeList.peek().addCondition(new Condition(key, functionName, params[0]))
+		  this.currentNodeList.peek().addCondition(new Condition(key, keyString, functionName, params[0]))
 	  } else {
-		  this.currentNodeList.peek().addCondition(new Condition(key, functionName, params))  
+		  this.currentNodeList.peek().addCondition(new Condition(key, keyString, functionName, params))
 	  }	  
   }
   

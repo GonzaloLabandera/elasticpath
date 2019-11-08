@@ -4,17 +4,15 @@
 
 package com.elasticpath.cmclient.reporting.returnsandexchanges;
 
+import com.elasticpath.cmclient.core.nls.BaseMessages;
 import com.elasticpath.cmclient.core.nls.LocalizedMessagePostProcessor;
 import com.elasticpath.domain.order.OrderReturnStatus;
-
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * Messages class for the report plugin.
  */
 @SuppressWarnings({ "PMD.TooManyFields", "PMD.VariableNamingConventions" })
-public final class ReturnsAndExchangesReportMessages {
+public final class ReturnsAndExchangesReportMessages extends BaseMessages {
 
 	private static final String BUNDLE_NAME = "com.elasticpath.cmclient.reporting.returnsandexchanges." + //$NON-NLS-1$
 			"ReturnsAndExchangesReportPluginResources"; //$NON-NLS-1$
@@ -65,27 +63,16 @@ public final class ReturnsAndExchangesReportMessages {
 	public String OrderReturnType_Return;
 
 
-	// Define the map of enum constants to localized names
-	private final Map<OrderReturnStatus, String> localizedExtensibleEnums = new HashMap<>();
-
-	private void instantiateEnums() {
-		if (localizedExtensibleEnums.isEmpty()) {
-			localizedExtensibleEnums.put(OrderReturnStatus.AWAITING_COMPLETION, OrderReturnStatus_AwaitingCompletion);
-			localizedExtensibleEnums.put(OrderReturnStatus.AWAITING_STOCK_RETURN, OrderReturnStatus_AwaitingStockReturn);
-			localizedExtensibleEnums.put(OrderReturnStatus.CANCELLED, OrderReturnStatus_Cancelled);
-			localizedExtensibleEnums.put(OrderReturnStatus.COMPLETED, OrderReturnStatus_Completed);
-		}
-	}
-
 	/**
-	 * Returns the localized name of the given enum constant.
-	 *
-	 * @param enumValue the enum to be localized
-	 * @return the localized string for the enum
+	 * Provide the localization values for the enums.
 	 */
-	public String getLocalizedName(final OrderReturnStatus enumValue) {
-		return localizedExtensibleEnums.get(enumValue);
+	protected void instantiateEnums() {
+		putLocalizedName(OrderReturnStatus.AWAITING_COMPLETION, OrderReturnStatus_AwaitingCompletion);
+		putLocalizedName(OrderReturnStatus.AWAITING_STOCK_RETURN, OrderReturnStatus_AwaitingStockReturn);
+		putLocalizedName(OrderReturnStatus.CANCELLED, OrderReturnStatus_Cancelled);
+		putLocalizedName(OrderReturnStatus.COMPLETED, OrderReturnStatus_Completed);
 	}
+
 	/**
 	 * Gets the NLS localize message class.
 	 * @return the localized message class.
@@ -93,7 +80,7 @@ public final class ReturnsAndExchangesReportMessages {
 	public static ReturnsAndExchangesReportMessages get() {
 		ReturnsAndExchangesReportMessages returnsAndExchangesReportMessages =
 				LocalizedMessagePostProcessor.getUTF8Encoded(BUNDLE_NAME, ReturnsAndExchangesReportMessages.class);
-		returnsAndExchangesReportMessages.instantiateEnums();
+		returnsAndExchangesReportMessages.initialize();
 		return returnsAndExchangesReportMessages;
 	}
 

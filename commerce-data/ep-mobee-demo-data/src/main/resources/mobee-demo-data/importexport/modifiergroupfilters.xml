@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<modifiergroupfilters>
+    <modifiergroupfilter>
+        <modifiercode>giftCertificate_mobee</modifiercode>
+        <referenceGuid>MobileCatalog</referenceGuid>
+        <type>Catalog</type>
+    </modifiergroupfilter>
+    <modifiergroupfilter>
+        <modifiercode>allFieldTypes</modifiercode>
+        <referenceGuid>MobileCatalog</referenceGuid>
+        <type>Catalog</type>
+    </modifiergroupfilter>
+    <modifiergroupfilter>
+        <modifiercode>fieldMetadataTest1</modifiercode>
+        <referenceGuid>Syndication2StoresCatalog</referenceGuid>
+        <type>Catalog</type>
+    </modifiergroupfilter>
+    <modifiergroupfilter>
+        <modifiercode>productTestGroup1</modifiercode>
+        <referenceGuid>Syndication2StoresCatalog</referenceGuid>
+        <type>Catalog</type>
+    </modifiergroupfilter>
+    <modifiergroupfilter>
+        <modifiercode>productTestGroup2</modifiercode>
+        <referenceGuid>Syndication2StoresCatalog</referenceGuid>
+        <type>Catalog</type>
+    </modifiergroupfilter>
+</modifiergroupfilters>

@@ -6,8 +6,10 @@ package com.elasticpath.datapopulation.core.service.filtering;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
 
@@ -23,14 +25,20 @@ public class FilteredPropertiesFactoryTest {
 	public static final String TEST_KEY_ONE = "test.key.one";
 	public static final String TEST_KEY_ONE_REPEATED = TEST_KEY_ONE + ".repeated";
 	public static final String TEST_KEY_TWO = "test.key.two";
+	public static final String TEST_KEY_THREE = "test.key.three";
+	public static final String TEST_KEY_FOUR = "test.key.four";
 	public static final String PROPERTY1_HAS_VALUE_STMT = "The 1st property should have a value";
 	public static final String PROPERTY2_HAS_VALUE_STMT = "The 2nd property should have a value";
 	public static final int EXPECTED = 6;
 	public static final String CONFIG_DIRECTORY_TEST_LOADING_PROPERTIES_FILE = "configDirectory/testLoadingProperties.properties";
+	public static final String SECURE_PROPERTIES_LOCATION = "configDirectory/testSecureProperties.properties";
+	public static final String SECURE_PROPERTIES_LOCATION_NOT_FOUND = "nonexistent_path";
 	public static final String PROPERTY3_HAS_VALUE_STMT = "The 3rd property should have a value";
 	public static final String DUMMYVALUE_ONE = "dummyvalueOne";
 	public static final String DUMMYVALUE_TWO = "dummyvalueTwo";
 	public static final String DUMMYVALUE_THREE = "dummyvalueThree";
+	public static final String DUMMYVALUE_FOUR = "dummyvalueFour";
+	public static final String OVERRIDDEN = "overridden.";
 
 	@Test
 	public void testCombineSourcesWithNoReplacementAndNoFiltering() throws IOException {
@@ -246,5 +254,62 @@ public class FilteredPropertiesFactoryTest {
 				.as("The property new.liquibase.contexts is dummyValuedefault,test-data")
 				.isEqualTo("dummyValuedefault,test-data");
 
+	}
+
+	@Test
+	public void testSecurePropertiesHaveHigherPrecedence() throws IOException {
+		Properties unfilteredProperties = new Properties();
+		unfilteredProperties.setProperty(TEST_KEY_ONE, DUMMYVALUE_ONE);
+		unfilteredProperties.setProperty(TEST_KEY_TWO, DUMMYVALUE_TWO);
+		unfilteredProperties.setProperty(TEST_KEY_THREE, DUMMYVALUE_THREE);
+
+		List<Resource> secureProperties = Collections.singletonList(new ClassPathResource(SECURE_PROPERTIES_LOCATION));
+
+		FilteredPropertiesFactory filteredPropertiesFactory = new FilteredPropertiesFactory();
+		filteredPropertiesFactory.setPropertiesToFilter(unfilteredProperties);
+		filteredPropertiesFactory.setSecureLocationsToFilter(secureProperties);
+		Properties results = filteredPropertiesFactory.getObject();
+
+		assertThat(results.getProperty(TEST_KEY_ONE))
+				.as("The secure properties didn't override filtering properties.")
+				.isEqualTo(OVERRIDDEN + DUMMYVALUE_ONE);
+
+		assertThat(results.getProperty(TEST_KEY_TWO))
+				.as("The secure properties didn't override filtering properties.")
+				.isEqualTo(OVERRIDDEN + DUMMYVALUE_TWO);
+
+		assertThat(results.getProperty(TEST_KEY_THREE))
+				.as("The property should be untouched.")
+				.isEqualTo(DUMMYVALUE_THREE);
+
+		assertThat(results.getProperty(TEST_KEY_FOUR))
+				.as("The secure properties should've added a new property")
+				.isEqualTo(DUMMYVALUE_FOUR);
+	}
+
+	@Test(expected = FileNotFoundException.class)
+	public void testSecurePropertiesLocationNotFoundWhenRequired() throws IOException {
+		FilteredPropertiesFactory filteredPropertiesFactory = new FilteredPropertiesFactory();
+
+		List<Resource> secureProperties = Collections.singletonList(new ClassPathResource(SECURE_PROPERTIES_LOCATION_NOT_FOUND));
+
+		filteredPropertiesFactory.setIgnoreSecureLocationToFilterNotFound(false);
+		filteredPropertiesFactory.setSecureLocationsToFilter(secureProperties);
+
+		filteredPropertiesFactory.getObject();
+	}
+
+	@Test
+	public void testSecurePropertiesLocationIsOptional() throws IOException {
+		FilteredPropertiesFactory filteredPropertiesFactory = new FilteredPropertiesFactory();
+
+		List<Resource> secureProperties = Collections.singletonList(new ClassPathResource(SECURE_PROPERTIES_LOCATION_NOT_FOUND));
+
+		filteredPropertiesFactory.setIgnoreSecureLocationToFilterNotFound(true);
+		filteredPropertiesFactory.setSecureLocationsToFilter(secureProperties);
+
+		assertThat(filteredPropertiesFactory.getObject().size())
+				.as("Secure Properties file should be optional.")
+				.isEqualTo(0);
 	}
 }

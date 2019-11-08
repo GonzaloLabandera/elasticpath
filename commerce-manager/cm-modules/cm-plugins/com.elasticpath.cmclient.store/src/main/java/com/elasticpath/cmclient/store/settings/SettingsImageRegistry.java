@@ -22,7 +22,7 @@ public final class SettingsImageRegistry extends AbstractImageRegistry {
 	/**
 	 * Settings tab icon.
 	 */
-	public static final ImageDescriptor IMAGE_SETTING_TAB = getImageDescriptor(PLUGIN_ID, "system-configuration_default_22.png"); //$NON-NLS-1$
+	public static final ImageDescriptor IMAGE_SETTING_TAB = getImageDescriptor(PLUGIN_ID, "system-configuration_default_22"); //$NON-NLS-1$
 
 	/**
 	 * Store image.

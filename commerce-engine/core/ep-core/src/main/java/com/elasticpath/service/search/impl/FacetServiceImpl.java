@@ -189,6 +189,6 @@ public class FacetServiceImpl extends AbstractEpPersistenceServiceImpl implement
 	public List<String> findAllGuids() {
 		sanityCheck();
 
-		return getPersistenceEngine().retrieveByNamedQuery("SELECT_ALL_GUIDS");
+		return getPersistenceEngine().retrieveByNamedQuery("SELECT_ALL_FACET_GUIDS");
 	}
 }

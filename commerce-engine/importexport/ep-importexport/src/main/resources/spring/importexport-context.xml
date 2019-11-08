@@ -7,6 +7,7 @@
 		">
 
 	<import resource="classpath:spring/prototypes/prototypes.xml"/>
+	<import resource="classpath:spring/dataaccess/noop-datasource.xml" />
 
 	<import resource="classpath:spring/models/domainModel.xml" />
 
@@ -24,10 +25,11 @@
 	<import resource="classpath:spring/dataaccess/openjpa/openjpa.xml" />
 
 	<import resource="importexport-adapters.xml" />
-	
+
 	<import resource="importexport-domain.xml" />
 
-	<alias name="basePersistenceUnitManager" alias="persistenceUnitManager"/>
+	<alias alias="persistenceUnitManager" name="basePersistenceUnitManager"/>
+	<alias alias="readOnlyPersistenceUnitManager" name="basePersistenceUnitManager"/>
 
 	<bean id="entityManagerFactory" parent="abstractEntityManagerFactory">
 		<property name="jpaPropertyMap">
@@ -38,12 +40,14 @@
             </map>
 		</property>
 	</bean>
-	
+
+	<alias alias="readOnlyEntityManagerFactory" name="entityManagerFactory"/>
+
 	 <bean id="utility" class="com.elasticpath.importexport.common.util.ExtendedUtility" scope="singleton">
 		<property name="dateFormatterPattern"  value="EEE MMM dd HH:mm:ss yyyy" />
-		<property name="dateFormatterLocale"> 
-		 	<bean class= "java.util.Locale"> 
-		 		<constructor-arg value="en" /> 
+		<property name="dateFormatterLocale">
+		 	<bean class= "java.util.Locale">
+		 		<constructor-arg value="en" />
 		 	</bean>
 		 </property>
 		<property name="beanFactory" ref="coreBeanFactory"/>
@@ -51,10 +55,14 @@
 
 	<import resource="classpath*:META-INF/elasticpath/conf/spring/plugin.xml"/>
 
+	<import resource="classpath*:META-INF/elasticpath/conf/spring/jta-plugin.xml"/>
+
+	<bean id="jmsConnectionFactory" class="org.apache.activemq.ActiveMQConnectionFactory"/>
+
+	<bean id="pooledConnectionFactory" class="org.apache.activemq.pool.PooledConnectionFactory" destroy-method="stop"/>
+
 	<!-- Opt out of messaging. -->
-	<bean id="eventMessageFactory" class="com.elasticpath.commons.beanframework.NoOpProxyFactoryBean">
-		<property name="serviceInterface" value="com.elasticpath.messaging.factory.EventMessageFactory"/>
-	</bean>
+	<bean id="catalogEventMessagePublisher" class="com.elasticpath.messaging.stub.EventMessagePublisherStubImpl"/>
 
 	<bean id="customerEventMessagePublisher" class="com.elasticpath.commons.beanframework.NoOpProxyFactoryBean">
 		<property name="serviceInterface" value="com.elasticpath.messaging.EventMessagePublisher" />
@@ -62,6 +70,10 @@
 
 	<bean id="customerEventExternalEndpoint" class="org.apache.camel.spring.CamelEndpointFactoryBean">
 		<property name="uri" value="direct:/dev/null" />
+	</bean>
+
+	<bean id="catalogEventExternalEndpoint" class="org.apache.camel.spring.CamelEndpointFactoryBean">
+		<property name="uri" value="direct:/dev/null"/>
 	</bean>
 
 	<bean id="orderEventMessagePublisher" class="com.elasticpath.commons.beanframework.NoOpProxyFactoryBean">
@@ -75,4 +87,34 @@
 	<import resource="classpath*:META-INF/conf/ep-core-plugin.xml" />
 	<import resource="classpath*:META-INF/conf/ep-importexport-plugin.xml" />
 
+	<beans profile="default">
+		<bean id="xaJmsConnectionFactory" class="org.apache.activemq.ActiveMQXAConnectionFactory">
+			<property name="brokerURL" value="${jms.url}"/>
+		</bean>
+
+		<bean id="xaDataSource" class="${db.connection.xaDriver_class}">
+			<property name="URL" value="${db.connection.url}"/>
+			<property name="user" value="${db.connection.username}"/>
+			<property name="password" value="${db.connection.password}"/>
+		</bean>
+
+		<bean id="entityManagerFactory" parent="abstractEntityManagerFactory" depends-on="elasticPath,coreBeanFactory">
+			<property name="dataSource" ref="atomikosJdbcDataSource"/>
+			<property name="jpaProperties">
+				<map>
+					<entry key="javax.persistence.transactionType" value="JTA"/>
+					<entry key="openjpa.TransactionMode" value="managed"/>
+					<entry key="openjpa.ConnectionFactoryMode" value="managed"/>
+					<entry key="openjpa.ConnectionFactory" value-ref="atomikosJdbcDataSource"/>
+					<entry key="openjpa.ConnectionFactory2" value-ref="dataSource"/>
+					<entry key="openjpa.ManagedRuntime"
+						   value="invocation(TransactionManagerMethod=com.atomikos.icatch.jta.TransactionManagerImp.getTransactionManager)"/>
+					<entry key="openjpa.MetaDataRepository" value="Preload=true"/>
+					<entry key="openjpa.Compatibility"
+						   value="QuotedNumbersInQueries=true,convertPositionalParametersToNamed=true,ignoreDetachedStateFieldForProxySerialization=true"/>
+					<entry key="openjpa.ConnectionFactoryProperties" value="PrettyPrint=true, PrettyPrintLineLength=80, PrintParameters=true"/>
+				</map>
+			</property>
+		</bean>
+	</beans>
 </beans>

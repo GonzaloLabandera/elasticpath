@@ -20,6 +20,10 @@ if [ -n "$JAVA_HOME" ] ; then
 	JAVA_CMD="$JAVA_HOME/bin/java"
 fi
 
+if [ -z "$PROFILE" ] ; then
+	PROFILE="default"
+fi
+
 # Setup Java debug parms if the environment variable is set
 JAVA_DEBUG_PARMS=""
 if [ "$DATA_POPULATION_DEBUG" = "true" ]; then

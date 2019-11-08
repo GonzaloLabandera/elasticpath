@@ -27,6 +27,7 @@ public class CatalogDTO implements Dto {
 
 	private static final long serialVersionUID = 1L;
 
+
 	/**
 	 * The name of root element in xml representation.
 	 */
@@ -47,10 +48,6 @@ public class CatalogDTO implements Dto {
 
 	@XmlElement(name = "defaultlanguage", required = true)
 	private String defaultLanguage;
-
-	@XmlElementWrapper(name = "cartitemmodifiergroups")
-	@XmlElement(name = "cartitemmodifiergroup")
-	private List<CartItemModifierGroupDTO> cartItemModifierGroups;
 
 	@XmlElementWrapper(name = "attributes")
 	@XmlElement(name = "attribute")
@@ -292,23 +289,6 @@ public class CatalogDTO implements Dto {
 		this.attributes = attributes;
 	}
 
-	/**
-	 * Gets the cartItemModifierGroupDTOs.
-	 *
-	 * @return the cartItemModifierGroupDTOs
-	 */
-	public List<CartItemModifierGroupDTO> getCartItemModifierGroups() {
-		return cartItemModifierGroups;
-	}
-
-	/**
-	 * Sets the cartItemModifierGroupDTOs.
-	 *
-	 * @param cartItemModifierGroups the cartItemModifierGroupDTOs to set
-	 */
-	public void setCartItemModifierGroups(final List<CartItemModifierGroupDTO> cartItemModifierGroups) {
-		this.cartItemModifierGroups = cartItemModifierGroups;
-	}
 
 	@Override
 	public String toString() {
@@ -324,7 +304,6 @@ public class CatalogDTO implements Dto {
 			.append("brands", getBrands())
 			.append("synonymGroups", getSynonymGroups())
 			.append("attributes", getAttributes())
-			.append("cartItemModifierGroups", getCartItemModifierGroups())
 			.toString();
 	}
 

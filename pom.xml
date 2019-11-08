@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>com.elasticpath</groupId>
 		<artifactId>grandparent</artifactId>
-		<version>105</version>
+		<version>112</version>
 		<relativePath/>
 	</parent>
 
@@ -22,7 +22,7 @@
 		<org.apache.camel.version>2.21.1</org.apache.camel.version>
 		<hamcrest.version>1.3</hamcrest.version>
 
-		<api-platform.version>1.24.0.0e39d44361</api-platform.version>
+		<api-platform.version>1.38.0.cdc4382051</api-platform.version>
 
 		<cmclient.version>0.0.0-SNAPSHOT</cmclient.version>
 		<cortex.ep.integration.version>0.0.0-SNAPSHOT</cortex.ep.integration.version>
@@ -45,6 +45,7 @@
 		<ep.batch.tomcat.port.http>8080</ep.batch.tomcat.port.http>
 		<ep.cortex.tomcat.port.http>8080</ep.cortex.tomcat.port.http>
 		<ep.studio.tomcat.port.http>8080</ep.studio.tomcat.port.http>
+		<ep.mock.tomcat.port.http>8080</ep.mock.tomcat.port.http>
 
 		<!--Jacoco-->
 		<jacoco-plugin.version>0.7.5.201505241946</jacoco-plugin.version>
@@ -86,13 +87,15 @@
 
 		<!-- Integration Server Settings -->
 		<ep.integration.context>/integration</ep.integration.context>
-		<ep.integration.secure.channel>http</ep.integration.secure.channel>
 
 		<!-- Batch Server Settings -->
 		<ep.batch.context>/batch</ep.batch.context>
 
 		<!-- Data Sync Server Settings -->
 		<ep.datasync.context>/datasync</ep.datasync.context>
+
+		<!-- Wiremock Server Settings -->
+		<ep.mock.context>/mock</ep.mock.context>
 
 		<!-- Where your assets are located on your machine during development. -->
 		<!-- This setting it put into your configured database by the snapitup-data artifact. -->
@@ -158,6 +161,8 @@
 		<ep.health.monitoring.tomcat.port.http>8080</ep.health.monitoring.tomcat.port.http>
 		<ep.health.monitoring.tomcat.port.https>8443</ep.health.monitoring.tomcat.port.https>
 
+		<!-- db properties -->
+		<epdb.validation.interval>60000</epdb.validation.interval>
 		<dependency.directory>lib</dependency.directory>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
@@ -166,7 +171,7 @@
 		<pmd.ruleset>rulesets/pmd-elasticpath-rules.xml</pmd.ruleset>
 		<pmd.itest.ruleset>rulesets/pmd-elasticpath-itest-rules.xml</pmd.itest.ruleset>
 
-		<jaxb.version>2.2.11</jaxb.version>
+		<jaxb.version>2.3.0</jaxb.version>
 		<jetty.version>8.1.4.v20120524</jetty.version>
 
 		<lifecycle-mapping-plugin.version>1.0.0</lifecycle-mapping-plugin.version>
@@ -234,6 +239,7 @@
 				<ep.datasync.tomcat.port.http>8085</ep.datasync.tomcat.port.http>
 				<ep.cortex.tomcat.port.http>9080</ep.cortex.tomcat.port.http>
 				<ep.studio.tomcat.port.http>9081</ep.studio.tomcat.port.http>
+				<ep.mock.tomcat.port.http>8086</ep.mock.tomcat.port.http>
 
 			</properties>
 		</profile>
@@ -258,6 +264,7 @@
 				<ep.datasync.port.http>${ep.datasync.tomcat.port.http}</ep.datasync.port.http>
 				<ep.cortex.port.http>${ep.cortex.tomcat.port.http}</ep.cortex.port.http>
 				<ep.studio.port.http>${ep.studio.tomcat.port.http}</ep.studio.port.http>
+				<ep.mock.port.http>${ep.mock.tomcat.port.http}</ep.mock.port.http>
 			</properties>
 		</profile>
 
@@ -267,7 +274,13 @@
 				<env>default</env>
 				<ep.jms.type>org.apache.activemq.pool.PooledConnectionFactory</ep.jms.type>
 				<ep.jms.factory>org.apache.activemq.jndi.JNDIReferenceFactory</ep.jms.factory>
+				<ep.jms.xa.type>org.apache.activemq.ActiveMQXAConnectionFactory</ep.jms.xa.type>
+				<ep.jms.xa.factory>org.apache.activemq.jndi.JNDIReferenceFactory</ep.jms.xa.factory>
+				<epdb.data.source.type>javax.sql.DataSource</epdb.data.source.type>
+				<epdb.data.source.factory>org.apache.tomcat.jdbc.pool.DataSourceFactory</epdb.data.source.factory>
+				<epdb.data.source.xa.factory>org.apache.tomcat.jdbc.naming.GenericNamingResourcesFactory</epdb.data.source.xa.factory>
 				<ep.jms.url>tcp://localhost:61616</ep.jms.url>
+				<ep.synctarget.jms.url>tcp://localhost:61616</ep.synctarget.jms.url>
 			</properties>
 		</profile>
 
@@ -315,7 +328,7 @@
 				<epdb.synctarget.username>ep</epdb.synctarget.username>
 				<epdb.synctarget.password>ep</epdb.synctarget.password>
 				<epdb.synctarget.params>?characterEncoding=UTF-8</epdb.synctarget.params>
-				<epdb.synctarget.validation.query>SELECT 1</epdb.synctarget.validation.query>
+				<epdb.synctarget.validation.query>/* ping */</epdb.synctarget.validation.query>
 				<epdb.synctarget.removeabandonedtimeout>86400</epdb.synctarget.removeabandonedtimeout>
 				<epdb.synctarget.url>
 					jdbc:mysql://${epdb.synctarget.host}:${epdb.synctarget.port}/${epdb.synctarget.databasename}${epdb.synctarget.params}

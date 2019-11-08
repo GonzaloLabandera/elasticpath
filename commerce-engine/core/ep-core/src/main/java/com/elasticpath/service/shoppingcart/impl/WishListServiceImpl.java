@@ -29,8 +29,8 @@ import com.elasticpath.messaging.EventMessage;
 import com.elasticpath.messaging.EventMessagePublisher;
 import com.elasticpath.messaging.factory.EventMessageFactory;
 import com.elasticpath.sellingchannel.director.CartDirector;
-import com.elasticpath.service.cartitemmodifier.CartItemModifierService;
 import com.elasticpath.service.catalog.ProductSkuLookup;
+import com.elasticpath.service.modifier.ModifierService;
 import com.elasticpath.service.shoppingcart.WishListService;
 import com.elasticpath.service.shoppingcart.dao.WishListDao;
 import com.elasticpath.service.store.StoreService;
@@ -87,7 +87,7 @@ public class WishListServiceImpl implements WishListService {
 
 	private EventMessagePublisher eventMessagePublisher;
 
-	private CartItemModifierService cartItemModifierService;
+	private ModifierService modifierService;
 
 	@Override
 	public WishList createWishList(final Shopper shopper) {
@@ -113,9 +113,9 @@ public class WishListServiceImpl implements WishListService {
 		ShoppingItem item = cartDirector.createShoppingItem(productSku, store, QUANTITY_ONE);
 
 		ProductType productType = productSkuLookup.findBySkuCode(productSku).getProduct().getProductType();
-		cartItemModifierService
-				.findCartItemModifierFieldsByProductType(productType)
-				.forEach(cartItemModifierField -> item.setFieldValue(cartItemModifierField.getCode(), ""));
+		modifierService
+				.findModifierFieldsByProductType(productType)
+				.forEach(modifierField -> item.setFieldValue(modifierField.getCode(), ""));
 
 		AddToWishlistResult addToWishlistResult = addItem(wishList, item);
 		save(wishList);
@@ -329,7 +329,7 @@ public class WishListServiceImpl implements WishListService {
 		this.cartDirector = cartDirector;
 	}
 
-	public void setCartItemModifierService(final CartItemModifierService cartItemModifierService) {
-		this.cartItemModifierService = cartItemModifierService;
+	public void setModifierService(final ModifierService cartItemModifierService) {
+		this.modifierService = cartItemModifierService;
 	}
 }

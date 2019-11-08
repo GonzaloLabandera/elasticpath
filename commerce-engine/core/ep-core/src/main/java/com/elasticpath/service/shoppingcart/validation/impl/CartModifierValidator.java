@@ -10,18 +10,18 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import com.elasticpath.base.common.dto.StructuredErrorMessage;
-import com.elasticpath.domain.cartmodifier.CartItemModifierField;
-import com.elasticpath.domain.cartmodifier.CartItemModifierGroup;
-import com.elasticpath.validation.service.CartItemModifierFieldValidationService;
+import com.elasticpath.domain.modifier.ModifierField;
+import com.elasticpath.domain.modifier.ModifierGroup;
+import com.elasticpath.validation.service.ModifierFieldValidationService;
 
 /**
- * Base class for CartItemModifier*Validator classes.
+ * Base class for Modifier*Validator classes.
  */
 public class CartModifierValidator {
-	private CartItemModifierFieldValidationService cartItemModifierFieldValidationService;
+	private ModifierFieldValidationService modifierFieldValidationService;
 
-	private Set<CartItemModifierField> getCartItemModifierFields(final Set<CartItemModifierGroup> cartItemModifierGroups) {
-		return cartItemModifierGroups.stream().map(CartItemModifierGroup::getCartItemModifierFields)
+	private Set<ModifierField> getModifierFields(final Set<ModifierGroup> cartItemModifierGroups) {
+		return cartItemModifierGroups.stream().map(ModifierGroup::getModifierFields)
 				.flatMap(Set::stream)
 				.collect(Collectors.toCollection(LinkedHashSet::new));
 	}
@@ -33,16 +33,16 @@ public class CartModifierValidator {
 	 * @return list of structured error messages
 	 */
 	protected List<StructuredErrorMessage> baseValidate(final Map<String, String> itemsToValidate,
-			final Set<CartItemModifierGroup> cartItemModifierGroups) {
-		return cartItemModifierFieldValidationService.validate(itemsToValidate,
-				getCartItemModifierFields(cartItemModifierGroups));
+			final Set<ModifierGroup> cartItemModifierGroups) {
+		return modifierFieldValidationService.validate(itemsToValidate,
+				getModifierFields(cartItemModifierGroups));
 	}
 
-	protected CartItemModifierFieldValidationService getCartItemModifierFieldValidationService() {
-		return cartItemModifierFieldValidationService;
+	protected ModifierFieldValidationService getModifierFieldValidationService() {
+		return modifierFieldValidationService;
 	}
 
-	public void setCartItemModifierFieldValidationService(final CartItemModifierFieldValidationService cartItemModifierFieldValidationService) {
-		this.cartItemModifierFieldValidationService = cartItemModifierFieldValidationService;
+	public void setModifierFieldValidationService(final ModifierFieldValidationService modifierFieldValidationService) {
+		this.modifierFieldValidationService = modifierFieldValidationService;
 	}
 }

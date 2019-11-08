@@ -11,7 +11,7 @@ import org.apache.commons.lang3.StringUtils;
 
 /**
  * Util class for getting an array of invalid options for
- * {@link com.elasticpath.domain.cartmodifier.CartItemModifierType#PICK_MULTI_OPTION} type.
+ * {@link com.elasticpath.domain.modifier.ModifierType#PICK_MULTI_OPTION} type.
  */
 public final class MultiOptionHandler {
 

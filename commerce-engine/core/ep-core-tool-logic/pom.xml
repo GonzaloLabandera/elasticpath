@@ -29,6 +29,14 @@
 				</exclusion>
 				<exclusion>
 					<groupId>com.elasticpath</groupId>
+					<artifactId>ep-core-domain-messaging</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>com.elasticpath</groupId>
+					<artifactId>ep-catalog-message-handler</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>com.elasticpath</groupId>
 					<artifactId>ep-core-order-messaging</artifactId>
 				</exclusion>
 			</exclusions>

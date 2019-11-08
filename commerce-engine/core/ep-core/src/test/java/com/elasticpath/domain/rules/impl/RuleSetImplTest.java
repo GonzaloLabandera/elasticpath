@@ -6,9 +6,12 @@ package com.elasticpath.domain.rules.impl;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.function.Consumer;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -50,7 +53,53 @@ public class RuleSetImplTest {
 		basicCodeCheck(code);
 	}
 
-	
+	/**
+	 * Test to ensure disabled rules are not included in code.
+	 */
+	@Test
+	public void testFilteringOutDisabledRules() {
+		assertCodeForStoreContainsNoRules(ruleSet, rule -> rule.setEnabled(false));
+	}
+
+
+	/**
+	 * Test to ensure rules that are started are included in code.
+	 */
+	@Test
+	public void testIncludingStartedRules() {
+		assertCodeForStoreContainsAtLeastOneRule(ruleSet,
+				rule -> rule.setStartDate(Date.from(Instant.now().minus(1, ChronoUnit.DAYS))));
+	}
+
+	/**
+	 * Test to ensure rules that are started are included in code.
+	 */
+	@Test
+	public void testAlwaysIncludingFuturePromotionsInCaseTheyBecomeActive() {
+		assertCodeForStoreContainsAtLeastOneRule(ruleSet, rule -> rule.setStartDate(Date.from(Instant.now().plus(1, ChronoUnit.DAYS))));
+	}
+
+	/**
+	 * Test to ensure currently live rules are included in the the code.
+	 */
+	@Test
+	public void testIncludingLiveRules() {
+		assertCodeForStoreContainsAtLeastOneRule(ruleSet, rule -> {
+			rule.setStartDate(Date.from(Instant.now().minus(1, ChronoUnit.DAYS)));
+			rule.setEndDate(Date.from(Instant.now().plus(1, ChronoUnit.DAYS)));
+		});
+	}
+
+
+	/**
+	 * Test to ensure rules that are expired are included in code.
+	 */
+	@Test
+	public void testExcludingExpiredRules() {
+		assertCodeForStoreContainsNoRules(ruleSet, rule -> rule.setEndDate(Date.from(Instant.now().minus(1, ChronoUnit.DAYS))));
+	}
+
+
 	/**
 	 * Test method for rule set code generation.
 	 */
@@ -103,27 +152,28 @@ public class RuleSetImplTest {
 		Rule promotionRule = new PromotionRuleImpl() {
 			private static final long serialVersionUID = -3370693769057123352L;
 			private final Set<RuleAction> actions = new HashSet<>();
-			
+
 			@Override
 			public void addAction(final RuleAction ruleAction) { //NOPMD
 				this.actions.add(ruleAction);
 			}
-			
+
 			@Override
 			public void removeAction(final RuleAction ruleAction) {
 				this.actions.remove(ruleAction);
 			}
-			
+
 			@Override
 			public Set<RuleAction> getActions() {
 				return this.actions;
 			}
-			
+
 		};
 
+		promotionRule.setEnabled(true);
 		promotionRule.setName("Car Sale");
 		promotionRule.setCatalog(new CatalogImpl());
-		
+
 		// Create a condition that the product is in a particular category
 		RuleCondition categoryCondition = new ProductCategoryConditionImpl();
 		categoryCondition.addParameter(new RuleParameterImpl(RuleParameter.CATEGORY_CODE_KEY, "8"));
@@ -162,28 +212,29 @@ public class RuleSetImplTest {
 		Rule promotionRule = new PromotionRuleImpl() {
 			private static final long serialVersionUID = 514782683364386900L;
 			private final Set<RuleAction> actions = new HashSet<>();
-		
+
 			@Override
 			public void addAction(final RuleAction ruleAction) { //NOPMD
 				this.actions.add(ruleAction);
 			}
-			
+
 			@Override
 			public void removeAction(final RuleAction ruleAction) {
 				this.actions.remove(ruleAction);
 			}
-			
+
 			@Override
 			public Set<RuleAction> getActions() {
 				return this.actions;
 			}
-			
+
 		};
-		
+
+		promotionRule.setEnabled(true);
 		promotionRule.setName("Order Sale");
-		
+
 		promotionRule.setStore(new StoreImpl());
-		
+
 		// Create a condition that the product is in a particular category
 		RuleCondition subtotalCondition = new CartSubtotalConditionImpl();
 		RuleParameter subtotalAmountParam = new RuleParameterImpl();
@@ -240,5 +291,23 @@ public class RuleSetImplTest {
 		ruleSet.setLastModifiedDate(date);
 		assertEquals(date, ruleSet.getLastModifiedDate());
 	}
-	
+
+	private void assertCodeForStoreContainsNoRules(final RuleSet ruleSet, final Consumer<Rule> modifier) {
+		if (modifier != null) {
+			modifier.accept(ruleSet.getRules().iterator().next());
+		}
+
+		String code = ruleSet.getRuleCode(RuleSetTestUtility.STORE);
+		assertTrue("Generated code should contain no rules (at last one found)", code.indexOf(WHEN) == -1);
+	}
+
+	private void assertCodeForStoreContainsAtLeastOneRule(final RuleSet ruleSet, final Consumer<Rule> modifier) {
+		if (modifier != null) {
+			modifier.accept(ruleSet.getRules().iterator().next());
+		}
+
+		String code = ruleSet.getRuleCode(RuleSetTestUtility.STORE);
+		assertTrue("At least one rule should be included (non-found)", code.indexOf(WHEN) > -1);
+	}
+
 }

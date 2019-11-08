@@ -10,7 +10,6 @@ import java.util.List;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.collections.Predicate;
-import org.apache.commons.collections.PredicateUtils;
 import org.apache.commons.lang.time.DateUtils;
 import org.apache.log4j.Logger;
 
@@ -53,11 +52,9 @@ public class SessionCleanupJob {
 		private final Date beforeDate;
 		private final int batchSize;
 
-		private final Predicate shopperWithCustomerPredicate = object -> {
-			// Note: Not bothering to check if object == shopper because this is all private and
-			// whoever is writing/updating this better make sure this is the case.
+		private final Predicate publicUserPredicate = object -> {
 			final ShopperMemento shopperMemento = (ShopperMemento) object;
-			return shopperMemento.getCustomer() != null;
+			return shopperMemento.getCustomer() == null || shopperMemento.getCustomer().isAnonymous();
 		};
 
 		SessionCleanupRunner(final Date beforeDate, final int batchSize) {
@@ -72,12 +69,8 @@ public class SessionCleanupJob {
 			deleteOldCustomerSessions();
 
 			final List<ShopperMemento> orphanedShoppers = shopperCleanupService.findShoppersOrphanedFromCustomerSessions(batchSize);
-			final List<ShopperMemento> registeredShoppers = getNewFilteredList(orphanedShoppers, shopperWithCustomerPredicate);
-			final List<ShopperMemento> anonymousShoppers = getNewFilteredList(orphanedShoppers,
-					PredicateUtils.notPredicate(shopperWithCustomerPredicate));
-			
-			deleteCascadeOnShopperList(anonymousShoppers);
-			deleteCascadeEmptyOnShopperList(registeredShoppers);
+			final List<ShopperMemento> publicShoppers = getNewFilteredList(orphanedShoppers, publicUserPredicate);
+			deleteCascadeEmptyOnShopperList(publicShoppers);
 		}
 
 		private void deleteOldCustomerSessions() {
@@ -95,19 +88,6 @@ public class SessionCleanupJob {
 		}
 
 		/**
-		 * Blindly delete all shoppingcarts, wishlists and shoppers based on the list of shoppers.
-		 *
-		 * @param shopperList
-		 */
-		private void deleteCascadeOnShopperList(final List<ShopperMemento> shopperList) {
-			final List<Long> shopperUids = makeShopperUidList(shopperList);
-
-			totalShoppingCartsDeleted += shoppingCartService.deleteAllShoppingCartsByShopperUids(shopperUids);
-			totalWishListsDeleted += wishlistService.deleteAllWishListsByShopperUids(shopperUids);
-			totalShoppersDeleted += shopperCleanupService.removeShoppersByUidList(shopperUids);
-		}
-
-		/**
 		 * Only delete non-empty shoppingcarts and wishlists and then only shoppers that don't
 		 * have a shoppingcart or wishlists associated with it.
 		 *
@@ -116,7 +96,7 @@ public class SessionCleanupJob {
 		private void deleteCascadeEmptyOnShopperList(final List<ShopperMemento> shopperList) {
 			final List<Long> shopperUids = makeShopperUidList(shopperList);
 
-			totalShoppingCartsDeleted += shoppingCartService.deleteEmptyShoppingCartsByShopperUids(shopperUids);
+			totalShoppingCartsDeleted += shoppingCartService.deleteDefaultEmptyShoppingCartsByShopperUids(shopperUids);
 			totalWishListsDeleted += wishlistService.deleteEmptyWishListsByShopperUids(shopperUids);
 			totalShoppersDeleted += shopperCleanupService.removeShoppersByUidList(shopperUids);
 		}

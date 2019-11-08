@@ -579,6 +579,7 @@ public interface Order extends Entity, ShoppingItemContainer<OrderSku> {
 	/**
 	 * Sets the order status to FAILED.
 	 * Sets the order shipment status to FAILED_ORDER.
+	 * Sets the cart order GUID to null.
 	 * This method should be called by the OrderService only.
 	 */
 	void failOrder();

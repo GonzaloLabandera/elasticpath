@@ -38,7 +38,7 @@ import com.elasticpath.cmclient.catalog.CatalogMessages;
 import com.elasticpath.cmclient.catalog.dialogs.catalog.CatalogAttributesAddEditDialog;
 import com.elasticpath.cmclient.catalog.editors.catalog.tablelabelprovider.CatalogAttributeTableLabelProviderDecorator;
 import com.elasticpath.cmclient.catalog.editors.catalog.tablelabelprovider.ChangeSetTableLabelProviderDecorator;
-import com.elasticpath.cmclient.catalog.editors.catalog.tablelabelprovider.TableLabelProviderAdapter;
+import com.elasticpath.cmclient.core.tablelableprovider.TableLabelProviderAdapter;
 import com.elasticpath.cmclient.catalog.editors.model.CatalogModel;
 import com.elasticpath.cmclient.core.CoreMessages;
 import com.elasticpath.cmclient.core.EpUiException;

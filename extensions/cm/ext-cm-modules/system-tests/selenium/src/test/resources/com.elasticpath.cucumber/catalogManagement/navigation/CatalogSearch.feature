@@ -21,11 +21,11 @@ Feature: Catalog Search
 
   Scenario Outline: Product search by product sku
     When I search for product by sku <productSku>
-    Then Product with sku <productSku> should appear in result
+    Then Product with code <productCode> and sku <productSku> should appear in result
 
     Examples:
-      | productSku |
-      | alien_sku  |
+      | productCode | productSku |
+      | alien       | alien_sku  |
 
   Scenario Outline: Bundle search by bundle code
     When I search for bundle by code <bundleCode>

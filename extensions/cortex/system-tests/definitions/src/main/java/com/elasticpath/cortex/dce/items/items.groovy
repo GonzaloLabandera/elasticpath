@@ -1,6 +1,7 @@
 package com.elasticpath.cortex.dce.items
 
 import static com.elasticpath.cortex.dce.ClasspathFluentRelosClientFactory.getClient
+import static com.elasticpath.cortex.dce.SharedConstants.DISPLAY_NAME_FIELD
 import static com.elasticpath.rest.ws.assertions.RelosAssert.assertLinkExists
 import static org.assertj.core.api.Assertions.assertThat
 
@@ -83,15 +84,6 @@ class Items {
 		CommonMethods.lookup(itemCode)
 	}
 
-	@Given('^(?:item|category) (?:.+) has (?:.+) (?:of|with) (?:.+) in language (?:.+)$')
-	static void viewItem() {}
-
-	@Given('^an item with code (?:.+) has an attribute with name (?:.+) with no value defined$')
-	static void viewItemAttributeByName() {}
-
-	@Given('^(?:item|category) (?:.+) has no attributes$')
-	static void verifyItemHasNoAttributes() {}
-
 	@Then('^the details do not contain an element with name (.+)$')
 	static void verifyAttributeDetailsNotContainElement(def attributeName) {
 		boolean found = false
@@ -124,15 +116,6 @@ class Items {
 				.as("Attribute $keyValue was not found in the cortex response")
 				.isTrue()
 	}
-
-	@Then('^a bundle item with code (?:.+) that has (?:.+) constituents$')
-	static void verifyBundleItemHasConstituents() {}
-
-	@Then('^a (?:nested bundle|bundle) with code (?:.+) that has a bundle constituent with name (?:.+)$')
-	static void verifyNestedBundleHasConstituents() {}
-
-	@Then('^nested bundle (?:.+) has a component (?:.+) that is not sold separately$')
-	static void verifyBundleHasComponent() {}
 
 	@Then('^the item has (.+) components$')
 	static void verifyComponentQty(int expected) {
@@ -185,12 +168,6 @@ class Items {
 		CommonMethods.openLinkRelWithFieldWithValue("element", "display-name", component)
 		Item.standaloneitem()
 	}
-
-	@Then('^a product with items having codes (?:.+) and (?:.+) distinguished by option (?:.+)$')
-	static void distinguishTwoItemsByOption() {}
-
-	@Then('^item with code (?:.+) has (?:.+) value (?:.+)$')
-	static void verifyItemValue() {}
 
 	@Then('^I view the list of options$')
 	static void viewItemOptionList() {
@@ -339,6 +316,13 @@ class Items {
 				.components()
 				.stopIfFailure()
 		CommonMethods.verifyNumberOfElements(2)
+	}
+
+	@Then('^I should see offer name is (.+?)$')
+	static void verifyOfferName(String offerName) {
+		assertThat(client.offer().definition()[DISPLAY_NAME_FIELD])
+				.as("Offer name is not as expected")
+				.isEqualTo(offerName)
 	}
 
 }

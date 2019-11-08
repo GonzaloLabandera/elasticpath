@@ -9,7 +9,6 @@ import java.util.Optional;
 
 import io.reactivex.Completable;
 import io.reactivex.Single;
-
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 import org.slf4j.Logger;
@@ -21,6 +20,7 @@ import com.elasticpath.domain.shoppingcart.ShoppingItem;
 import com.elasticpath.rest.ResourceOperationFailure;
 import com.elasticpath.rest.advise.Message;
 import com.elasticpath.rest.definition.carts.CartIdentifier;
+import com.elasticpath.rest.definition.carts.CartsIdentifier;
 import com.elasticpath.rest.definition.carts.LineItemConfigurationEntity;
 import com.elasticpath.rest.definition.carts.LineItemEntity;
 import com.elasticpath.rest.definition.carts.LineItemIdentifier;
@@ -164,7 +164,9 @@ public class MoveToCartServiceImpl implements MoveToCartService {
 	private CartIdentifier buildCartIdentifier(final ShoppingCart cart) {
 		return CartIdentifier.builder()
 				.withCartId(StringIdentifier.of(cart.getGuid()))
-				.withScope(StringIdentifier.of(cart.getStore().getCode()))
+				.withCarts(CartsIdentifier.builder()
+						.withScope(StringIdentifier.of(cart.getStore().getCode()))
+						.build())
 				.build();
 	}
 

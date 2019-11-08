@@ -5,14 +5,20 @@ import static org.assertj.core.api.Assertions.fail;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 import cucumber.api.java.After;
 import cucumber.api.java.en.And;
 import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
+import org.apache.commons.lang.time.DateUtils;
 import org.openqa.selenium.InvalidElementStateException;
 import org.openqa.selenium.WebDriver;
 
@@ -27,11 +33,18 @@ import com.elasticpath.selenium.dialogs.EditDecimalValueAttributeDialog;
 import com.elasticpath.selenium.dialogs.SelectACategoryDialog;
 import com.elasticpath.selenium.dialogs.SelectAProductDialog;
 import com.elasticpath.selenium.dialogs.SelectASkuDialog;
+import com.elasticpath.selenium.domainobjects.Brand;
 import com.elasticpath.selenium.domainobjects.Catalog;
 import com.elasticpath.selenium.domainobjects.Category;
 import com.elasticpath.selenium.domainobjects.DST;
 import com.elasticpath.selenium.domainobjects.Product;
+import com.elasticpath.selenium.domainobjects.ProductSkuItem;
 import com.elasticpath.selenium.domainobjects.ProductType;
+import com.elasticpath.selenium.domainobjects.SkuOption;
+import com.elasticpath.selenium.domainobjects.containers.AttributeContainer;
+import com.elasticpath.selenium.domainobjects.containers.CategoryContainer;
+import com.elasticpath.selenium.domainobjects.containers.ProductContainer;
+import com.elasticpath.selenium.domainobjects.containers.SkuOptionContainer;
 import com.elasticpath.selenium.editor.OrderEditor;
 import com.elasticpath.selenium.editor.SkuDetailsEditor;
 import com.elasticpath.selenium.editor.product.ProductEditor;
@@ -57,8 +70,10 @@ import com.elasticpath.selenium.wizards.CreateProductWizard;
 /**
  * Product Definition.
  */
-@SuppressWarnings({"PMD.GodClass", "PMD.TooManyMethods", "PMD.TooManyFields", "PMD.ExcessiveClassLength"})
+@SuppressWarnings({"PMD.GodClass", "PMD.TooManyMethods", "PMD.TooManyFields", "PMD.ExcessiveClassLength", "PMD.ExcessiveParameterList",
+		"PMD.ExcessiveImports"})
 public class ProductAndBundleDefinition {
+	private static final String FALSE_VALUE = "false";
 	private final CatalogManagement catalogManagement;
 	private CreateBundleWizard createBundleWizard;
 	private AddItemDialog addItemDialog;
@@ -90,18 +105,33 @@ public class ProductAndBundleDefinition {
 	private final ChangeSetActionToolbar changeSetActionToolbar;
 	private CatalogSkuSearchResultPane catalogSkuSearchResultPane;
 	private static String dependentLineItem;
+	private final ProductContainer container;
+	private final SkuOptionContainer skuOptionContainer;
+	private final AttributeContainer attributeContainer;
+	private final Brand brand;
+	private final CategoryContainer categoryContainer;
+	private final static String CATEGORY_ASSIGNMENT = "Category Assignment";
+	private final static String ENGLISH = "English";
+	private final static String ENABLE_DATE = "enableDate";
+	private final static String DISABLE_DATE = "disableDate";
+	private final static String SKU_DETAILS = "SKU Details";
 
 	/**
 	 * Constructor.
 	 *
-	 * @param catalog     Catalog object.
-	 * @param category    Category object.
-	 * @param productType ProductType object.
-	 * @param product     Product object.
-	 * @param dst         DST object.
+	 * @param catalog            Catalog object.
+	 * @param category           Category object.
+	 * @param productType        ProductType object.
+	 * @param product            Product object.
+	 * @param dst                DST object.
+	 * @param categoryContainer  CategoryContainer object.
+	 * @param skuOptionContainer SkuOptionContainer object.
+	 * @param attributeContainer AttributeContainer object.
 	 */
 	public ProductAndBundleDefinition(final Catalog catalog, final Category category, final ProductType productType, final Product product,
-									  final DST dst) {
+									  final DST dst, final ProductContainer container, final Brand brand,
+									  final AttributeContainer attributeContainer, final CategoryContainer categoryContainer,
+									  final SkuOptionContainer skuOptionContainer) {
 		final WebDriver driver = SetUp.getDriver();
 		catalogManagement = new CatalogManagement(driver);
 		bundleItemsTab = new BundleItemsTab(driver);
@@ -121,6 +151,11 @@ public class ProductAndBundleDefinition {
 		this.product.setProductName("");
 		this.catalogManagementActionToolbar = new CatalogManagementActionToolbar(driver);
 		this.dst = dst;
+		this.container = container;
+		this.brand = brand;
+		this.attributeContainer = attributeContainer;
+		this.categoryContainer = categoryContainer;
+		this.skuOptionContainer = skuOptionContainer;
 	}
 
 	/**
@@ -142,6 +177,19 @@ public class ProductAndBundleDefinition {
 	}
 
 	/**
+	 * Create new product for existing category.
+	 *
+	 * @param productInfoList the product info list.
+	 */
+	@When("^(?:I create|a) new product with following attributes for current catalog and created category$")
+	public void createNewProductAndRefreshCatalog(final List<Product> productInfoList) {
+		Optional.ofNullable(this.catalog).ifPresent(currentCatalog -> currentCatalog.setCatalogName(productInfoList.get(0).getCatalog()));
+		Optional.ofNullable(this.catalog).ifPresent(currentCatalog -> currentCatalog.setBrand(productInfoList.get(0).getBrand()));
+
+		createNewProduct(productInfoList);
+	}
+
+	/**
 	 * Create new product for existing subcategory.
 	 *
 	 * @param parentCategory  a parent category for subcategory
@@ -154,6 +202,49 @@ public class ProductAndBundleDefinition {
 		this.product.setCategory(this.category.getCategoryName());
 		navigateToSubcategoryAndOpenProductList(product.getCatalog(), parentCategory, product.getCategory());
 		createProduct(product);
+	}
+
+	/**
+	 * Create new product for specific category.
+	 *
+	 * @param subCategory     subCategory name.
+	 * @param parentCategory  parent Category name.
+	 * @param productInfoList information about product to comparing with.
+	 */
+	@When("^(?:I create|a) new product for created subcategory (.+) where parent category is (.+) with following attributes$")
+	public void createNewProductForSpecificSubcategory(final String subCategory, final String parentCategory, final List<Product> productInfoList) {
+		Product product = productInfoList.get(0);
+		String subCategoryFullName = categoryContainer.getFullCategoryNameByPartialName(subCategory);
+		String parentCategoryFullName = categoryContainer.getFullCategoryNameByPartialName(parentCategory);
+		product.setCategory(subCategoryFullName);
+		catalog.setBrand(product.getBrand());
+		this.product.setCategory(subCategoryFullName);
+		navigateToSubcategoryAndOpenProductList(product.getCatalog(), parentCategoryFullName, product.getCategory());
+		createProduct(product);
+		final Product productForContainer = createProductForContainer();
+		container.addProducts(productForContainer);
+	}
+
+	/**
+	 * Create new product for existing category.
+	 *
+	 * @param productInfoList the product info list.
+	 */
+	@When("^(?:I create|a) new product for category (.+) with following attributes$")
+	public void createNewProductForCategory(final String categoryName, final List<Product> productInfoList) {
+		Product product = productInfoList.get(0);
+		String categoryFullName = categoryContainer.getFullCategoryNameByPartialName(categoryName);
+		this.category.setCategoryName(categoryFullName);
+		if (product.getCatalog() == null || product.getCategory() == null) {
+			catalogManagement.expandCatalogAndVerifyCategory(this.catalog.getCatalogName(), this.category.getCategoryName());
+			catalogManagement.doubleClickCategory(this.category.getCategoryName());
+		} else {
+			catalogManagement.expandCatalogAndVerifyCategory(product.getCatalog(), product.getCategory());
+			catalogManagement.doubleClickCategory(product.getCategory());
+		}
+		createProduct(product);
+		final Product productForContainer = createProductForContainer();
+		container.addProducts(productForContainer);
 	}
 
 	/**
@@ -182,6 +273,24 @@ public class ProductAndBundleDefinition {
 	}
 
 	/**
+	 * Deletes all created products, that exists in ProductContainer.
+	 */
+	@When("^I delete all created (?:products|bundles)$")
+	public void deleteAllCreatedProducts() {
+		final List<Product> products = container.getProducts();
+		for (final Product item : products) {
+			verifyProductByName(item.getProductName());
+			if (activityToolbar.isChangeSetEnabled()) {
+				changeSetActionToolbar.clickAddItemToChangeSet();
+				catalogSearchResultPane.isProductNameInList(item.getProductName());
+			}
+			catalogSearchResultPane.clickDeleteProductButton();
+			new ConfirmDialog(SetUp.getDriver()).clickOKButton("CatalogMessages.DeleteProduct");
+		}
+
+	}
+
+	/**
 	 * Searches for product and verifies it is displayed in a result list.
 	 *
 	 * @param productName product name.
@@ -204,6 +313,15 @@ public class ProductAndBundleDefinition {
 	@Then("^the (?:product|bundle) is deleted$")
 	public void verifyProductIsDeleted() {
 		verifyProductIsDeleted(this.product.getProductName());
+	}
+
+	/**
+	 * Verify, that all products is deleted.
+	 */
+	@Then("^the all (?:products|bundles) is deleted$")
+	public void verifyAllProductIsDeleted() {
+		final List<Product> products = container.getProducts();
+		products.forEach(item -> verifyProductIsDeleted(item.getProductName()));
 	}
 
 	/**
@@ -359,7 +477,7 @@ public class ProductAndBundleDefinition {
 		} else {
 			assertThat(product.getStoreVisible())
 					.as("Store visible value is invalid - " + product.getStoreVisible())
-					.isEqualToIgnoringCase("false");
+					.isEqualToIgnoringCase(FALSE_VALUE);
 		}
 
 		createBundleWizard.clickNextInDialog();
@@ -392,6 +510,36 @@ public class ProductAndBundleDefinition {
 		createBundleWizard.enterSkuCode(getUniqueSkuCode());
 		addBundlePrice(product);
 		createBundleWizard.clickFinish();
+	}
+
+	/**
+	 * Assign cetegory for newly crated product.
+	 *
+	 * @param categoryName name of the category.
+	 */
+	@Then("^I assign (.+) category to the newly created product")
+	public void assignCategoryToNewlyCreatedProduct(final String categoryName) {
+		this.searchForProductByCode(this.product.getProductCode());
+		this.verifyProductSearchResultCode(this.product.getProductCode());
+		productEditor = catalogSearchResultPane.openProductEditorWithProductCode(this.product.getProductCode());
+		productEditor.selectTab(CATEGORY_ASSIGNMENT);
+		addCategoryAssignment(categoryContainer.getCategoryMap().get(categoryContainer.getFullCategoryNameByPartialName(categoryName))
+				.getCategoryCode());
+	}
+
+	/**
+	 * Define primary category for newly created product.
+	 *
+	 * @param categoryName category name.
+	 */
+	@And("^I define (.+) as Primary category for newly created product")
+	public void definePrimaryCategoryToNewlyCreatedProduct(final String categoryName) {
+		productEditor = catalogSearchResultPane.openProductEditorWithProductCode(this.product.getProductCode());
+		productEditor.selectPrimaryCategory(categoryContainer.getCategoryMap().get(categoryContainer.getFullCategoryNameByPartialName(categoryName))
+				.getCategoryName());
+		catalogManagementActionToolbar.saveAll();
+		catalogManagementActionToolbar.clickReloadActiveEditor();
+		catalogSearchResultPane.closeProductSearchResultsPane();
 	}
 
 
@@ -493,7 +641,7 @@ public class ProductAndBundleDefinition {
 		} else {
 			assertThat(product.getStoreVisible())
 					.as("Store visible value is invalid - " + product.getStoreVisible())
-					.isEqualToIgnoringCase("false");
+					.isEqualToIgnoringCase(FALSE_VALUE);
 		}
 	}
 
@@ -645,6 +793,15 @@ public class ProductAndBundleDefinition {
 	}
 
 	/**
+	 * Search for new product by code.
+	 */
+	@When("^I search for new (?:product|bundle) by code$")
+	public void searchForNewProductByCode() {
+		activityToolbar.clickCatalogManagementButton();
+		searchForProductByCode(this.product.getProductCode());
+	}
+
+	/**
 	 * Search for product by sku.
 	 *
 	 * @param productSku product sku.
@@ -716,19 +873,33 @@ public class ProductAndBundleDefinition {
 	}
 
 	/**
+	 * Verifies that product code is not in search result table.
+	 */
+	@Then("^the new product should not appear in the result$")
+	public void verifyProductCodeIsNotPresent() {
+		catalogSearchResultPane.sleep(Constants.SLEEP_THREE_SECONDS_IN_MILLIS);
+		catalogSearchResultPane.setWebDriverImplicitWait(Constants.IMPLICIT_WAIT_FOR_ELEMENT_NOT_EXISTS);
+		assertThat(catalogSearchResultPane.isProductCodeInList(product.getProductCode()))
+				.as("Product should not be present")
+				.isFalse();
+		catalogSearchResultPane.setWebDriverImplicitWaitToDefault();
+	}
+
+	/**
 	 * Verifies that product with specified sku appears in a search result table.
 	 *
+	 * @param productCode the product code
 	 * @param expectedSku expected product sku.
 	 */
-	@Then("^Product with sku (.*) should appear in result$")
-	public void verifyProductSearchResultSku(final String expectedSku) {
+	@Then("^Product with code (.+) and sku (.*) should appear in result$")
+	public void verifyProductSearchResultSku(final String productCode, final String expectedSku) {
 		int index = 0;
 		while (catalogSearchResultPane.isSearchResultTableEmpty() && index < Constants.UUID_END_INDEX) {
 			catalogSearchResultPane.sleep(Constants.SLEEP_HALFSECOND_IN_MILLIS);
 			searchForProductSku(expectedSku);
 			index++;
 		}
-		productEditor = catalogSearchResultPane.openProductEditorForFirstSearchResultEntry();
+		productEditor = catalogSearchResultPane.openProductEditorForFirstSearchResultEntry(productCode);
 		productEditor.selectTab(ProductEditor.SKU_DETAILS_TAB_ID);
 		assertThat(productEditor.getSkuCode())
 				.as("Unexpected sku code in the search results")
@@ -827,12 +998,55 @@ public class ProductAndBundleDefinition {
 	}
 
 	/**
+	 * Search and open an existing Product with the given name.
+	 */
+	@When("^I search and open an existing product with product name$")
+	public void searchOpenProductWithName() {
+		searchForProductName(product.getProductName());
+		verifyProductSearchResultCode(product.getProductName());
+		productEditor = catalogSearchResultPane.openProductEditorWithProductCode(product.getProductName());
+	}
+
+	/**
 	 * Saves new future date in Enable Date/Time field
 	 */
 	@When("^I enter future date in Enable Date / Time field and save changes$")
 	public void changeEnableDate() throws ParseException {
 		this.product.setEnableDateTime(productEditor.getDateTimeFromEpFormattedString(productEditor.getEnableDate()));
 		productEditor.setEnableDate(productEditor.getFormattedDateTime(2));
+		clickSaveAllIcon();
+	}
+
+	/**
+	 * Saves new past date in Disable Date/Time field
+	 */
+	@When("^I enter past date in Disable Date / Time field and save changes$")
+	public void changeDisableDateToPast() throws ParseException {
+		this.product.setEnableDateTime(productEditor.getDateTimeFromEpFormattedString(productEditor.getEnableDate()));
+		productEditor.setEnableDate(productEditor.getFormattedDateTime(-2));
+
+		productEditor.setDisableDate(productEditor.getFormattedDateTime(-1));
+		this.product.setDisableDateTime(productEditor.getDateTimeFromEpFormattedString(productEditor.getDisableDate()));
+		clickSaveAllIcon();
+	}
+
+	/**
+	 * Saves new future date in Disable Date/Time field
+	 */
+	@When("^I enter future date in Disable Date / Time field and save changes$")
+	public void changeDisableDateToFuture() throws ParseException {
+		productEditor.setDisableDate(productEditor.getFormattedDateTime(1));
+		this.product.setDisableDateTime(productEditor.getDateTimeFromEpFormattedString(productEditor.getDisableDate()));
+		clickSaveAllIcon();
+	}
+
+	/**
+	 * Unable / disable store visible
+	 */
+	@When("^I click store visible$")
+	public void changeStoreVisibleUnchecked() {
+		this.product.setStoreVisible(FALSE_VALUE);
+		productEditor.clickStoreVisible();
 		clickSaveAllIcon();
 	}
 
@@ -859,6 +1073,7 @@ public class ProductAndBundleDefinition {
 	 */
 	@Then("^the new price tier with List Price of (.+) exists in the pricing table$")
 	public void verifyAddedPriceTierExists(final String listPrice) {
+		catalogManagementActionToolbar.clickReloadActiveEditor();
 		priceTierTab.verifyAddedPriceTierExists(listPrice);
 	}
 
@@ -956,6 +1171,18 @@ public class ProductAndBundleDefinition {
 		skuDetailsEditor = productEditor.clickOpenSkuButton();
 		skuDetailsEditor.verifySkuDetails(productSkuCode);
 		skuDetailsEditor.closeSkuDetailsEditor();
+	}
+
+	/**
+	 * Closes previously opened sku editor.
+	 *
+	 * @param skuCode sku code opened in editor.
+	 *
+	 */
+	@Then("^I close opened previously sku editor for sku (.+)$")
+	public void closeSkuEditor(final String skuCode) {
+		final String productSkuOptionCode = this.product.getSkuOptionCodeByPartialCode(skuCode);
+		skuDetailsEditor.closeSkuDetailsEditorWithCheck(productSkuOptionCode);
 	}
 
 	/**
@@ -1211,6 +1438,191 @@ public class ProductAndBundleDefinition {
 	}
 
 	/**
+	 * Add product to Merchandising Associations Tab.
+	 *
+	 * @param productCode Product Code.
+	 * @param tabName     Merchandising Associations Tab.
+	 */
+	@When("^I add code (.+) to merchandising association (.+)$")
+	public void addProductToMerchandisingTabWithSpecificCode(final String productCode, final String tabName) {
+		final String code = container.getProductCodeByPartialCode(productCode);
+		merchandisingTab.clickMerchandisingTab(tabName);
+		addEditMerchandisingAssociationsDialog = merchandisingTab.clickAddMerchandisingAssociationsButton();
+		addEditMerchandisingAssociationsDialog.enterProductCode(code);
+		addEditMerchandisingAssociationsDialog.clickAddButton();
+	}
+
+	/**
+	 * Select Merchandising Associations Tab.
+	 */
+	@When("^I select merchandising associations tab$")
+	public void addProductToMerchandisingTabWithSpecificCode() {
+		merchandisingTab.selectMerchandisingTab();
+	}
+
+	/**
+	 * Add product to Merchandising Associations Tab with values.
+	 *
+	 * @param productCode   Product Code.
+	 * @param productValues product values for adding.
+	 */
+	@When("^I add code (.+) to merchandising and with values?$")
+	public void addProductToMerchandisingTabWithSpecificCodeAndValues(final String productCode, final Map<String, String> productValues) {
+		final String code = container.getProductCodeByPartialCode(productCode);
+		merchandisingTab.clickMerchandisingTab(productValues.get("association"));
+		addEditMerchandisingAssociationsDialog = merchandisingTab.clickAddMerchandisingAssociationsButton();
+		addEditMerchandisingAssociationsDialog.addEnableDate(productValues.get(ENABLE_DATE));
+		addEditMerchandisingAssociationsDialog.addDisableDate(productValues.get(DISABLE_DATE));
+		addEditMerchandisingAssociationsDialog.enterProductCode(code);
+		addEditMerchandisingAssociationsDialog.clickAddButton();
+	}
+
+	/**
+	 * Move product down in Merchandising Associations Tab.
+	 *
+	 * @param productCode Product Code.
+	 * @param tabName     Merchandising Associations Tab.
+	 */
+	@When("^I move product (.+) down to merchandising association (.+)$")
+	public void addProductToMerchandisingTabDown(final String productCode, final String tabName) {
+		final String code = container.getProductCodeByPartialCode(productCode);
+		merchandisingTab.clickMerchandisingTab(tabName);
+		merchandisingTab.verifySelectProductCode(code);
+		merchandisingTab.selectMerchandisingTabDown();
+	}
+
+	/**
+	 * Update product in Merchandising Associations Tab.
+	 *
+	 * @param productCode   Product Code.
+	 * @param tabName       Merchandising Associations Tab.
+	 * @param productValues product values for updating.
+	 */
+	@When("^I update product (.+) merchandising association (.+) with values?$")
+	public void addProductToMerchandisingChangeDate(final String productCode, final String tabName, final Map<String, String> productValues) {
+		final String code = container.getProductCodeByPartialCode(productCode);
+		merchandisingTab.clickMerchandisingTab(tabName);
+		merchandisingTab.verifySelectProductCode(code);
+		merchandisingTab.clickEditMerchandisingAssociationsButton();
+		addEditMerchandisingAssociationsDialog.addEnableDate(productValues.get(ENABLE_DATE));
+		addEditMerchandisingAssociationsDialog.addDisableDate(productValues.get(DISABLE_DATE));
+		addEditMerchandisingAssociationsDialog.clickSetButton();
+	}
+
+	/**
+	 * Delete product from Merchandising Associations Tab.
+	 *
+	 * @param productCode Product Code.
+	 * @param tabName     Merchandising Associations Tab.
+	 */
+	@When("^I delete code (.+) merchandising association (.+)$")
+	public void deleteMerchandisingTabProductWithSpecificCode(final String productCode, final String tabName) {
+		final String code = container.getProductCodeByPartialCode(productCode);
+		merchandisingTab.clickMerchandisingTab(tabName);
+		merchandisingTab.verifySelectProductCode(code);
+		merchandisingTab.clickRemoveMerchandisingAssociationsButton();
+		new ConfirmDialog(SetUp.getDriver()).clickOKButton("CatalogMessages.ProductMerchandisingAssociationDialog_RemoveTitle");
+		catalogManagementActionToolbar.saveAll();
+		catalogManagementActionToolbar.clickReloadActiveEditor();
+	}
+
+	/**
+	 * Clears and Edit attribute value.
+	 *
+	 * @param attributeName name of attribute.
+	 */
+	@Then("^I edit (.+) attribute value for product$")
+	public void editAttributeValueForProduct(final String attributeName) {
+		attributesTab.selectTab("Attribute");
+		attributesTab.clickClearAttribute(attributeContainer.getAttributeNameByPartialCodeAndLanguage(attributeName, ENGLISH));
+		editDecimalValueAttributeDialog = attributesTab.clickEditAttributeButtonDecimalValue();
+		editDecimalValueAttributeDialog.enterValue("value");
+		editDecimalValueAttributeDialog.clickOKOnAttributeDialog();
+	}
+
+	/**
+	 * Create new product.
+	 *
+	 * @param productInfoList the product info list.
+	 */
+	@When("^I create new product with following values?$")
+	public void createProduct(final List<Product> productInfoList) {
+		Product product = productInfoList.get(0);
+		if (categoryCodeStartsWith(product.getCategory())) {
+			catalogManagement.expandCatalogAndVerifyCategory(product.getCatalog(), category.getCategoryName());
+			catalogManagement.doubleClickCategory(category.getCategoryName());
+		}
+		container.addProducts(createNewProduct(product));
+	}
+
+	/**
+	 * Update product.
+	 *
+	 * @param productInfoList the product info list.
+	 */
+	@When("^I update product with following values?$")
+	public void updateProduct(final List<Product> productInfoList) {
+		Product product = productInfoList.get(0);
+		verifyProductByName(this.product.getProductName());
+		productEditor = catalogSearchResultPane.openProductEditorWithProductName(this.product.getProductName());
+		productEditor.selectLanguage("French");
+		productEditor.enterProductNameWithoutLoadedCheck(product.getProductName());
+		productEditor.selectTaxCode(product.getTaxCode());
+		productEditor.enterMinimumOrderQuantity(product.getMinimumOrderQuantity());
+		selectNotSoldSeparately(product);
+		final Date enableDate = Utility.getDateTimePlusDays(Integer.parseInt(product.getEnableDateTimeDays()));
+		this.product.setEnableDateTime(enableDate);
+		productEditor.setEnableDate(Utility.convertToDateFormat(enableDate));
+		final Date disableDate = Utility.getDateTimePlusDays(Integer.parseInt(product.getDisableDateTimeDays()));
+		this.product.setDisableDateTime(disableDate);
+		productEditor.setDisableDate(Utility.convertToDateFormat(disableDate));
+		productEditor.selectTab(SKU_DETAILS);
+		productEditor.selectShippableType(product.getShippableType());
+	}
+
+	/**
+	 * Update sku in product.
+	 *
+	 * @param offer the product info list.
+	 */
+	@When("^I update sku in product with following values?$")
+	public void updateSkuInProduct(final Map<String, String> offer) {
+		verifyProductByName(this.product.getProductName());
+		productEditor = catalogSearchResultPane.openProductEditorWithProductName(this.product.getProductName());
+		productEditor.selectTabInOpenedEditor(SKU_DETAILS);
+		final String productSkuOptionCode = this.product.getSkuOptionCodeByPartialCode(offer.get("skuCode"));
+		productEditor.selectSkuDetails(productSkuOptionCode);
+		skuDetailsEditor = productEditor.clickOpenSkuButton();
+		if (offer.get(ENABLE_DATE) != null) {
+			skuDetailsEditor.selectTab(SKU_DETAILS);
+			updateSkuEnableDate(offer.get(ENABLE_DATE), productSkuOptionCode);
+		}
+		if (offer.get("taxCode") != null) {
+			skuDetailsEditor.selectTaxCode(offer.get("taxCode"));
+		}
+		if (offer.get("shippableType") != null) {
+			skuDetailsEditor.selectShippableType(offer.get("shippableType"));
+		}
+		if (offer.get("attributeCode") != null) {
+			clearAttributeValue(offer.get("attributeCode"));
+		}
+		if (offer.get(DISABLE_DATE) != null) {
+			skuDetailsEditor.selectTab(SKU_DETAILS);
+			updateSkuDisableDate(offer.get(DISABLE_DATE), productSkuOptionCode);
+		}
+	}
+
+	/**
+	 * Clear attribute value.
+	 *
+	 * @param attributeCode attribute code.
+	 */
+	private void clearAttributeValue(final String attributeCode) {
+		skuDetailsEditor.selectTab("Attributes");
+		attributesTab.clickClearAttribute(attributeContainer.getAttributeNameByPartialCodeAndLanguage(attributeCode, ENGLISH));
+	}
+
+	/**
 	 * Adds bundle product price.
 	 *
 	 * @param product Product.
@@ -1340,6 +1752,22 @@ public class ProductAndBundleDefinition {
 	}
 
 	/**
+	 * Creates new product.
+	 *
+	 * @return new product.
+	 */
+	private Product createProductForContainer() {
+		final Product productToContainer = new Product();
+
+		productToContainer.setProductCode(this.product.getProductCode());
+		productToContainer.setProductName(this.product.getProductName());
+		productToContainer.setCatalog(this.product.getCatalog());
+		productToContainer.setCategory(this.product.getCategory());
+
+		return productToContainer;
+	}
+
+	/**
 	 * reverts changed Enable date for a product using DB
 	 */
 	@After(value = "@cleanUpProductEnableDateDB", order = Constants.CLEANUP_ORDER_FIRST)
@@ -1352,5 +1780,237 @@ public class ProductAndBundleDefinition {
 		calendar.add(Calendar.DAY_OF_MONTH, 1);
 		dbc.updateProductEnableDate(
 				this.product.getProductCode(), dbDateFormat.format(this.product.getEnableDateTime()), dbDateFormat.format(calendar.getTime()));
+	}
+
+	/**
+	 * Check not sold separately box.
+	 *
+	 * @param product a product instance.
+	 */
+	private void selectNotSoldSeparately(final Product product) {
+		if (product.getNotSoldSeparately().equalsIgnoreCase("true")) {
+			productEditor.checkNotSoldSeparatelyBox();
+		} else {
+			assertThat(product.getStoreVisible())
+					.as("Store visible value is invalid - " + product.getStoreVisible())
+					.isEqualToIgnoringCase(FALSE_VALUE);
+		}
+	}
+
+	/**
+	 * Check that category code exist with a partial code.
+	 *
+	 * @param partialCode a category partial code.
+	 */
+	private Boolean categoryCodeStartsWith(final String partialCode) {
+		return category.getCategoryName().startsWith(partialCode);
+	}
+
+	/**
+	 * Creates a new product.
+	 *
+	 * @param product a product instance.
+	 */
+	private Product createNewProduct(final Product product) {
+		createProductWizard = catalogManagement.clickCreateProductButton();
+		final String prodCode = product.getProductCode() + Utility.getRandomUUID();
+		this.product.setProductCode(prodCode);
+		product.setProductCode(prodCode);
+		createProductWizard.enterProductCode(prodCode);
+		enterProductName(product, prodCode);
+		createProductWizard.selectProductType(this.productType.getProductTypeName());
+		createProductWizard.selectBrand(this.brand.getName(ENGLISH));
+		createProductWizard.selectTaxCode(product.getTaxCode());
+		selectStoreVisiblity(product);
+		createProductWizard.enterMinimumOrderQuantity(Optional.ofNullable(product.getMinimumOrderQuantity()).orElse(null));
+		createProductWizard.selectAvailabilityRule(product.getAvailability());
+		enterEnableDate(product);
+		Optional.ofNullable(product.getDisableDateTimeDays()).ifPresent(this::enterDisableDate);
+		Optional.ofNullable(product.getReleaseDateTimeDays()).ifPresent(this::enterReleaseDate);
+		createProductWizard.clickNextInDialog();
+		if (product.getAttributesCodeList() != null) {
+			List<String> attributeNameList = getAttributeNames(product);
+			attributeNameList.forEach(name -> createProductWizard.enterAttributeText("attributeValue", name));
+		}
+		createProductWizard.clickNextInDialog();
+		if (!createProductWizard.isAddSKUButtonPresent()) {
+			enterSkuCode(product);
+			createProductWizard.selectShippableType(product.getShippableType());
+			enterShippingDetails(product);
+			createProductWizard.clickFinish();
+		}
+		return product;
+	}
+
+	/**
+	 * Get all attribute names.
+	 *
+	 * @param product a product instance.
+	 */
+	private List<String> getAttributeNames(final Product product) {
+		return product.getAttributesCodeList().stream()
+				.map(attributeName -> attributeContainer.getAttributeNameByPartialCodeAndLanguage(attributeName, ENGLISH))
+				.collect(Collectors.toList());
+	}
+
+	/**
+	 * Enter and create product name.
+	 *
+	 * @param product a product instance.
+	 */
+	private void enterProductName(final Product product, final String prodCode) {
+		final String prodName = product.getProductName() + "-" + prodCode;
+		this.product.setProductName(prodName);
+		product.setProductName(prodName);
+		createProductWizard.enterProductName(prodName);
+	}
+
+	/**
+	 * Enter sku code.
+	 *
+	 * @param product a product instance.
+	 */
+	private void enterSkuCode(final Product product) {
+		uniqueSkuCode = product.getSkuCode() + Utility.getRandomUUID();
+		createProductWizard.enterSkuCode(uniqueSkuCode);
+		this.product.setSkuCode(uniqueSkuCode);
+	}
+
+	/**
+	 * Enter disable date.
+	 *
+	 * @param days count of days.
+	 */
+	private void enterDisableDate(final String days) {
+		final Date disableDateTime = Utility.getDateTimePlusDays(Integer.parseInt(days));
+		this.product.setDisableDateTime(disableDateTime);
+		createProductWizard.enterDisableDateTime(Utility.convertToDateFormat(disableDateTime));
+	}
+
+	/**
+	 * Enter disable date.
+	 *
+	 * @param days count of days.
+	 */
+	private void enterReleaseDate(final String days) {
+		final Date releaseDateTime = Utility.getDateTimePlusDays(Integer.parseInt(days));
+		this.product.setReleaseDateTime(DateUtils.truncate(releaseDateTime, Calendar.DATE));
+		createProductWizard.enterReleaseDateTime(Utility.convertToSimpleDateFormat(releaseDateTime));
+	}
+
+	/**
+	 * Enter enable date.
+	 *
+	 * @param product a product instance.
+	 */
+	private void enterEnableDate(final Product product) {
+		final Date enableDateTime = Utility.getDateTimePlusDays(Integer.parseInt(Optional.ofNullable(product.getEnableDateTimeDays()).orElse("0")));
+		this.product.setEnableDateTime(enableDateTime);
+		createProductWizard.enterEnableDateTime(Utility.convertToDateFormat(enableDateTime));
+	}
+
+	/**
+	 * Enter shipping details in creating product.
+	 *
+	 * @param product a product instance.
+	 */
+	private void enterShippingDetails(final Product product) {
+		createProductWizard.enterShippingWeight(Optional.ofNullable(product.getShippingWeight()).orElse(null));
+		createProductWizard.enterShippingWidth(Optional.ofNullable(product.getShippingWidth()).orElse(null));
+		createProductWizard.enterShippingLength(Optional.ofNullable(product.getShippingLength()).orElse(null));
+		createProductWizard.enterShippingHeight(Optional.ofNullable(product.getShippingHeight()).orElse(null));
+	}
+
+	/**
+	 * Enter sku shipping details in creating product.
+	 *
+	 * @param names values for the new localized names.
+	 */
+	private void enterSkuShippingDetails(final Map<String, String> names) {
+		addSkuWizard.enterShippingHeight(Optional.ofNullable(names.get("height")).orElse(null));
+		addSkuWizard.enterShippingLength(Optional.ofNullable(names.get("length")).orElse(null));
+		addSkuWizard.enterShippingWeight(Optional.ofNullable(names.get("weight")).orElse(null));
+		addSkuWizard.enterShippingWidth(Optional.ofNullable(names.get("width")).orElse(null));
+	}
+
+	/**
+	 * Create SkuOption.
+	 *
+	 * @param names values for the new localized names.
+	 */
+	@When("^I add sku option in product with following values$")
+	public void addSkuOptionWithoutSaving(final Map<String, String> names) {
+		final ProductSkuItem productSkuItem = new ProductSkuItem();
+		addSkuWizard = createProductWizard.clickAddSkuButton();
+		final String skuCode = names.get("prodSkuCode") + Utility.getRandomUUID();
+		productSkuItem.setItemCode(skuCode);
+		addSkuWizard.enterSkuCode(skuCode);
+		for (Map.Entry<String, String> option : names.entrySet()) {
+			final SkuOption productSku = skuOptionContainer.getSkuOptionByPartialCode(option.getKey());
+			if (productSku != null) {
+				final String skuValueCode = productSku.getSkuOptionValueCodeByPartialCode(option.getValue());
+				final Map<String, String> skuOptionValueName = productSku.getSkuOptionValueName(skuValueCode);
+				addSkuWizard.selectSkuOptions(productSku.getCode(), skuValueCode + " - " + skuOptionValueName.get(ENGLISH));
+			}
+		}
+		enterSkuShippingDetails(names);
+		final Date enableDateTime = Utility.getDateTimePlusDays(Integer.parseInt(Optional.ofNullable(names.get("enableDateTimeDays"))
+				.orElse("0")));
+		addSkuWizard.enterEnableDateTime(Utility.convertToSimpleDateFormat(enableDateTime));
+		productSkuItem.setEnableDate(DateUtils.truncate(enableDateTime, Calendar.DATE));
+		if (names.get("disableDateTimeDays") != null) {
+			final Date disableDateTime = Utility.getDateTimePlusDays(Integer.parseInt(names.get("disableDateTimeDays")));
+			addSkuWizard.enterDisableDateTime(Utility.convertToSimpleDateFormat(disableDateTime));
+			productSkuItem.setDisableDate(DateUtils.truncate(disableDateTime, Calendar.DATE));
+		}
+		addSkuWizard.selectShippableType(names.get("shippableType"));
+		addSkuWizard.selectTaxCode(names.get("taxCode"));
+		addSkuWizard.clickNextButton();
+		Optional.ofNullable(names.get("attributesCodeList")).ifPresent(this::enterAttributesValue);
+		product.setSkuOption(productSkuItem);
+		addSkuWizard.clickFinish();
+	}
+
+	/**
+	 * Enter attribute values in creating sku option in offer.
+	 *
+	 * @param nameList list of names.
+	 */
+	private void enterAttributesValue(final String nameList) {
+		Arrays.stream(nameList.split(","))
+				.map(attributeName -> attributeContainer.getAttributeNameByPartialCodeAndLanguage(attributeName, ENGLISH))
+				.forEach(attributeName -> addSkuWizard.enterAttributeShortText("attributeValue", attributeName));
+	}
+
+	/**
+	 * Update enable date.
+	 *
+	 * @param days a count of days.
+	 * @param code product item code.
+	 */
+	private void updateSkuEnableDate(final String days, final String code) {
+		final Date enableDateTime = Utility.getDateTimePlusDays(Integer.parseInt(days));
+		this.product.findProductSkuOptionItemByCode(code).setEnableDate(enableDateTime);
+		skuDetailsEditor.enterEnableDateTime(Utility.convertToDateFormat(enableDateTime));
+	}
+
+	/**
+	 * Update disable date.
+	 *
+	 * @param days a count of days.
+	 * @param code product item code.
+	 */
+	private void updateSkuDisableDate(final String days, final String code) {
+		final Date disableDateTime = Utility.getDateTimePlusDays(Integer.parseInt(days));
+		this.product.findProductSkuOptionItemByCode(code).setDisableDate(disableDateTime);
+		skuDetailsEditor.enterDisableDateTime(Utility.convertToDateFormat(disableDateTime));
+	}
+
+	/**
+	 * Tab finish button in product.
+	 */
+	@When("^I finish creating sku product")
+	public void finishCreatingSkuProduct() {
+		createProductWizard.clickFinish();
 	}
 }

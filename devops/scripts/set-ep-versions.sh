@@ -111,9 +111,6 @@ function set_commerce_parent_version() {
   # extensions
   set_parent_version "${platform_version}" "${project_dir}/extensions/pom.xml"
 
-  # devops
-  set_parent_version "${platform_version}" "${project_dir}/devops/pom.xml"
-
   # health-monitoring
   set_parent_version "${platform_version}" "${project_dir}/health-monitoring/pom.xml"
 
@@ -134,6 +131,7 @@ function set_commerce_engine_version() {
 
   # extensions
   set_property_version "dce.version" "${platform_version}" "${project_dir}/extensions/pom.xml"
+  set_property_version "dce.version" "${platform_version}" "${project_dir}/extensions/catalog/system-tests/syndication-test-definitions/pom.xml"
 
   # SET BOM REFERENCES
 
@@ -247,11 +245,6 @@ function set_extensions_version() {
   local maven_settings="$2"
   local extensions_version="$3"
 
-  # SET DOWNSTREAM REFERENCES
-
-  # devops
-  set_parent_version "${extensions_version}" "${project_dir}/devops/pom.xml"
-
   # SET BOM REFERENCES
 
   set_property_version "commerce.extensions.version" "${extensions_version}" "${project_dir}/bill-of-materials/pom.xml"
@@ -277,6 +270,12 @@ function set_extensions_version() {
   set_parent_version "${extensions_version}" "${project_dir}/extensions/cm/ext-cm-modules/ext-cm-webapp-runner/pom.xml"
   set_parent_version "${extensions_version}" "${project_dir}/extensions/cm/ext-cm-modules/ext-system-tests/pom.xml"
   set_parent_version "${extensions_version}" "${project_dir}/extensions/cm/ext-cm-modules/ext-system-tests/selenium/pom.xml"
+  set_parent_version "${extensions_version}" "${project_dir}/extensions/catalog/pom.xml"
+  set_parent_version "${extensions_version}" "${project_dir}/extensions/catalog/ext-catalog/pom.xml"
+  set_parent_version "${extensions_version}" "${project_dir}/extensions/catalog/ext-system-tests/pom.xml"
+  set_parent_version "${extensions_version}" "${project_dir}/extensions/catalog/system-tests/pom.xml"
+  set_parent_version "${extensions_version}" "${project_dir}/extensions/catalog/system-tests/syndication-test-definitions/pom.xml"
+  set_parent_version "${extensions_version}" "${project_dir}/extensions/catalog/system-tests/cucumber/pom.xml"
 
   # Set project version
   mvn ${maven_settings} org.codehaus.mojo:versions-maven-plugin:2.1:set org.codehaus.mojo:versions-maven-plugin:2.1:commit \
@@ -286,18 +285,6 @@ function set_extensions_version() {
   # Update parent versions of modules not in main reactor
   set_parent_version "${extensions_version}" "${project_dir}/extensions/cortex/ext-system-tests/pom.xml"
   set_parent_version "${extensions_version}" "${project_dir}/extensions/cortex/ext-system-tests/cucumber/pom.xml"
-}
-
-function set_devops_version() {
-  local project_dir="$1"
-  local maven_settings="$2"
-  local extensions_version="$3"
-
-  # SET PROJECT VERSION
-
-  mvn ${maven_settings} org.codehaus.mojo:versions-maven-plugin:2.1:set org.codehaus.mojo:versions-maven-plugin:2.1:commit \
-    -f "${project_dir}/devops/pom.xml" \
-    -DnewVersion="${extensions_version}"
 }
 
 function build_project() {
@@ -354,8 +341,6 @@ function main() {
   # Start setting versions from leaf nodes of a dependency tree to avoid having
   # to build projects in between set version steps.
   install_bom_pom "${project_base_dir}" "${maven_settings}"
-
-  set_devops_version "${project_base_dir}" "${maven_settings}" "${EXTENSION_VERSION}"
 
   set_extensions_version "${project_base_dir}" "${maven_settings}" "${EXTENSION_VERSION}"
 

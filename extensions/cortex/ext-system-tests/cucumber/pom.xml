@@ -19,7 +19,6 @@
 
 	<properties>
 		<groovy.http-builder>0.7.1</groovy.http-builder>
-		<fluent.relos.client.version>1.10.44</fluent.relos.client.version>
 		<ep.rest.authtype>OAuth2</ep.rest.authtype>
 
 		<!-- Cortex properties -->
@@ -41,6 +40,10 @@
 			<artifactId>ep-cortex-common-test-definitions</artifactId>
 		</dependency>
 		<dependency>
+			<groupId>com.elasticpath.extensions</groupId>
+			<artifactId>ext-cortex-common-test-definitions</artifactId>
+		</dependency>
+		<dependency>
 			<groupId>commons-validator</groupId>
 			<artifactId>commons-validator</artifactId>
 			<version>1.4.0</version>
@@ -48,12 +51,10 @@
 		<dependency>
 			<groupId>com.elasticpath.rest.tests</groupId>
 			<artifactId>fluent-relos-client</artifactId>
-			<version>${fluent.relos.client.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
-			<version>${junit.version}</version>
 			<scope>compile</scope>
 		</dependency>
 		<dependency>

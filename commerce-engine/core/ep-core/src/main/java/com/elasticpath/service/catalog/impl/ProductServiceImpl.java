@@ -111,6 +111,27 @@ public class ProductServiceImpl implements ProductService {
 	}
 
 	/**
+	 * Set a <code>ProductCategory</code> as a featured product, if the featuredProductOrder is set to be greater than 0, means this
+	 * productCategory is featured.
+	 *
+	 * @param productUid           the unique identifier for the product.
+	 * @param categoryUid 		   the unique identifier for the category.
+	 * @param featuredProductOrder the feature product order.
+	 */
+	@Override
+	public void refreshProductCategoryFeaturedField(final long productUid, final long categoryUid, final int featuredProductOrder) {
+		final Product product = getProductLookup().findByUid(productUid);
+		Category categoryToFeatureProduct = getCategoryFromProductByUid(product, categoryUid);
+		if (categoryToFeatureProduct == null) {
+			categoryToFeatureProduct = getCategoryLookup().findByUid(categoryUid);
+			product.addCategory(categoryToFeatureProduct);
+		}
+
+		product.setFeaturedRank(categoryToFeatureProduct, featuredProductOrder);
+		productDao.saveOrUpdate(product);
+	}
+
+	/**
 	 * Remove the "featured" status of a given product in a given category.
 	 * This implementation calls {@link #getCategoryFromProductByUid(Product, long)}.
 	 *

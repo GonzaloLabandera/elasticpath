@@ -7,6 +7,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 
+import org.apache.openjpa.meta.FetchGroup;
+import org.apache.openjpa.persistence.FetchPlan;
+
 import com.elasticpath.domain.impl.AbstractEpDomainImpl;
 import com.elasticpath.persistence.api.FetchGroupLoadTuner;
 import com.elasticpath.persistence.api.LoadTuner;
@@ -18,6 +21,7 @@ public class FetchGroupLoadTunerImpl extends AbstractEpDomainImpl implements Fet
 
 	/** Serial version id. */
 	private static final long serialVersionUID = 5000000001L;
+	private static final ThreadLocal<Boolean> CLEAN_EXISTING_GROUPS = ThreadLocal.withInitial(() -> Boolean.TRUE);
 
 	private Collection<String> fetchGroups;
 
@@ -88,5 +92,25 @@ public class FetchGroupLoadTunerImpl extends AbstractEpDomainImpl implements Fet
 		}
 
 		return mergedFetchGroupLoadTuner;
+	}
+
+	@Override
+	public void configure(final FetchPlan fetchPlan) {
+		if (CLEAN_EXISTING_GROUPS.get()) {
+			fetchPlan.clearFetchGroups();
+			fetchPlan.removeFetchGroup(FetchGroup.NAME_DEFAULT);
+		}
+
+		CLEAN_EXISTING_GROUPS.remove();
+
+		for (String fetchGroup : this) {
+			fetchPlan.addFetchGroup(fetchGroup);
+		}
+	}
+
+	@Override
+	public FetchGroupLoadTuner setCleanExistingGroups(final boolean cleanExistingGroups) {
+		CLEAN_EXISTING_GROUPS.set(cleanExistingGroups);
+		return this;
 	}
 }

@@ -53,7 +53,7 @@ public class AttributeFacetConfigurationStrategy implements FacetConfigurationSt
 	@Override
 	public boolean shouldProcess(final Facet facet) {
 		return facet.getFacetGroup() != FacetGroup.SKU_OPTION.getOrdinal()
-				|| facet.getFacetGroup() != FacetGroup.OTHERS.getOrdinal();
+				|| facet.getFacetGroup() != FacetGroup.FIELD.getOrdinal();
 	}
 
 	@Override

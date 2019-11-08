@@ -61,6 +61,7 @@ public class AddToCartIntegrationTest extends AbstractCartIntegrationTestParent 
 		Product product = persistProductWithSku();
 		CustomerSession customerSession = createCustomerSession();
 		ShoppingCart shoppingCart = createShoppingCart(customerSession);
+		shoppingCart.setDefault(true);
 		ShoppingItemDto dto = new ShoppingItemDto(product.getDefaultSku().getSkuCode(), 1);
 
 		final ShoppingItem addedCartItem = cartDirectorService.addItemToCart(shoppingCart, dto);

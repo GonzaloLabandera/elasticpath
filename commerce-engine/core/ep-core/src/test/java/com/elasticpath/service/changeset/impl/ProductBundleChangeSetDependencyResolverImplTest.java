@@ -18,6 +18,7 @@ import com.elasticpath.commons.beanframework.BeanFactory;
 import com.elasticpath.domain.catalog.BundleConstituent;
 import com.elasticpath.domain.catalog.Product;
 import com.elasticpath.domain.catalog.ProductBundle;
+import com.elasticpath.domain.catalog.ProductConstituent;
 import com.elasticpath.domain.catalog.impl.BundleConstituentImpl;
 import com.elasticpath.domain.catalog.impl.ProductBundleImpl;
 import com.elasticpath.domain.catalog.impl.ProductConstituentImpl;
@@ -43,7 +44,7 @@ public class ProductBundleChangeSetDependencyResolverImplTest {
 	public void setUp() {
 		beanFactory = context.mock(BeanFactory.class);
 		expectationsFactory = new BeanFactoryExpectationsFactory(context, beanFactory);
-		expectationsFactory.allowingBeanFactoryGetBean("productConstituent", ProductConstituentImpl.class);
+		expectationsFactory.allowingBeanFactoryGetPrototypeBean("productConstituent", ProductConstituent.class, ProductConstituentImpl.class);
 	}
 
 	@After

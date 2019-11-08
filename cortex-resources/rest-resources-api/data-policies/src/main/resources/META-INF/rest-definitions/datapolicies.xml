@@ -3,7 +3,7 @@
 
 	<family>
 		<name>datapolicies</name>
-		<description><![CDATA[The data policies resource retrieves the data policies associated with a customer]]></description>
+		<description><![CDATA[The data policies resource retrieves the data policies associated with a customer.]]></description>
 
 		<uri-part>
 			<name>policy-id</name>
@@ -72,6 +72,13 @@
 			<description>Advisor for the addresses resource</description>
 			<linked-to>data-policy-consent-form</linked-to>
 			<blocks>addresses.address-form</blocks>
+		</advisor>
+
+		<advisor>
+			<name>data-policy-for-profiles</name>
+			<description>Advisor for the profile resource</description>
+			<linked-to>data-policy-consent-form</linked-to>
+			<advises>profiles.profile</advises>
 		</advisor>
 
 		<entity>

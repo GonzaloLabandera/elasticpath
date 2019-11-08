@@ -10,6 +10,7 @@ import java.util.Locale;
 import java.util.Map;
 
 import com.elasticpath.base.exception.EpServiceException;
+import com.elasticpath.domain.attribute.Attribute;
 import com.elasticpath.domain.catalog.Brand;
 import com.elasticpath.domain.catalog.Product;
 import com.elasticpath.domain.catalog.ProductLoadTuner;
@@ -241,6 +242,14 @@ public interface ProductDao {
 	 * @return list of product uids
 	 */
 	List<Long> findUidsByCategoryUids(Collection<Long> categoryUids);
+
+	/**
+	 * Find a list of product uids that use the given attribute.
+	 *
+	 * @param attribute the attribute to search by
+	 * @return a list of product uids.
+	 */
+	List<Long> findUidsByAttribute(Attribute attribute);
 
 	/**
 	 * Retrieves list of product uids where the deleted date is later than the specified date.

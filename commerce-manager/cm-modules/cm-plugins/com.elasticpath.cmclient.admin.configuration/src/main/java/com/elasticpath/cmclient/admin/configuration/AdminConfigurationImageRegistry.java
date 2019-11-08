@@ -26,6 +26,11 @@ public final class AdminConfigurationImageRegistry extends AbstractImageRegistry
 	 */
 	public static final ImageDescriptor IMAGE_SEARCH_INDEXES = getImageDescriptor(PLUGIN_ID, "search-indexes_default_22.png"); //$NON-NLS-1$
 	/**
+	 * Section item images image.
+	 */
+	public static final ImageDescriptor IMAGE_TAG_CONFIGURATION =
+			getImageDescriptor(PLUGIN_ID, "tag_default_22.png"); //$NON-NLS-1$
+	/**
 	 * Search Index rebuild image.
 	 */
 	public static final ImageDescriptor IMAGE_SEARCH_INDEX_REBUILD =

@@ -31,7 +31,7 @@ public class SimpleTimeoutCache<K, V> {
 	 *         <tt>null</tt> if there is no associated value or it is timed out.
 	 */
 	@SuppressWarnings("unchecked")
-	public synchronized V get(final K key) {
+	public V get(final K key) {
 
 		final Element cacheObject = cache.get(key);
 
@@ -48,7 +48,7 @@ public class SimpleTimeoutCache<K, V> {
 	 * @param key - The identifier to associate the value with in the cache.
 	 * @param value - The value to be stored in the cache.
 	 */
-	public synchronized void put(final K key, final V value) {
+	public void put(final K key, final V value) {
 
 		final Element cacheElement = new Element(key, value);
 		cache.put(cacheElement);
@@ -57,7 +57,7 @@ public class SimpleTimeoutCache<K, V> {
 	/**
 	 * Clears the cache.
 	 */
-	public synchronized void clear() {
+	public void clear() {
 		this.cache.removeAll();
 	}
 

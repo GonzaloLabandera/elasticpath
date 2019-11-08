@@ -17,59 +17,9 @@
 	<name>Batch Server JUnit Integration Tests</name>
 
 	<dependencies>
-
-		<dependency>
-			<groupId>com.elasticpath</groupId>
-			<artifactId>ep-core</artifactId>
-		</dependency>
-
-		<dependency>
-			<groupId>com.elasticpath</groupId>
-			<artifactId>ep-base</artifactId>
-		</dependency>
-
-		<dependency>
-			<groupId>com.elasticpath</groupId>
-			<artifactId>ep-money</artifactId>
-		</dependency>
-
-		<dependency>
-			<groupId>com.elasticpath</groupId>
-			<artifactId>ep-persistence-api</artifactId>
-		</dependency>
-
 		<dependency>
 			<groupId>com.elasticpath</groupId>
 			<artifactId>ep-test-application</artifactId>
-		</dependency>
-
-		<dependency>
-			<groupId>com.elasticpath</groupId>
-			<artifactId>ep-jms</artifactId>
-		</dependency>
-
-		<dependency>
-			<groupId>com.elasticpath</groupId>
-			<artifactId>ep-core-order-messaging</artifactId>
-			<scope>runtime</scope>
-		</dependency>
-		
-		<dependency>
-			<groupId>com.elasticpath</groupId>
-			<artifactId>ep-core-customer-messaging</artifactId>
-			<scope>runtime</scope>
-		</dependency>
-
-		<dependency>
-			<groupId>com.elasticpath</groupId>
-			<artifactId>openjpa-osgi-wrapper</artifactId>
-			<scope>runtime</scope>
-		</dependency>
-
-		<dependency>
-			<groupId>com.elasticpath</groupId>
-			<artifactId>ep-messaging-camel</artifactId>
-			<scope>runtime</scope>
 		</dependency>
 
 		<dependency>
@@ -78,39 +28,16 @@
 		</dependency>
 
 		<dependency>
-			<groupId>org.springframework</groupId>
-			<artifactId>spring-beans</artifactId>
-		</dependency>
-
-		<dependency>
-			<groupId>org.springframework</groupId>
-			<artifactId>spring-context</artifactId>
-		</dependency>
-
-		<dependency>
-			<groupId>org.springframework</groupId>
-			<artifactId>spring-context-support</artifactId>
-		</dependency>
-
-		<dependency>
-			<groupId>org.springframework</groupId>
-			<artifactId>spring-aop</artifactId>
-		</dependency>
-
-		<dependency>
-			<groupId>org.springframework</groupId>
-			<artifactId>spring-tx</artifactId>
-		</dependency>
-
-		<dependency>
-			<groupId>log4j</groupId>
-			<artifactId>log4j</artifactId>
-		</dependency>
-
-		<dependency>
 			<groupId>org.assertj</groupId>
 			<artifactId>assertj-core</artifactId>
 		</dependency>
+
+		<dependency>
+			<groupId>org.apache.activemq</groupId>
+			<artifactId>activemq-kahadb-store</artifactId>
+			<scope>test</scope>
+		</dependency>
+
 	</dependencies>
 
 	<build>

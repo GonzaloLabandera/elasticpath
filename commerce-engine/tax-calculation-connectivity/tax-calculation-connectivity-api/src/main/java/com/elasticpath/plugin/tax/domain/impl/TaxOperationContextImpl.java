@@ -14,6 +14,7 @@ import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.commons.lang.builder.ToStringStyle;
 
+import com.elasticpath.plugin.tax.common.TaxCacheKeyHashCodeBuilder;
 import com.elasticpath.plugin.tax.common.TaxItemObjectType;
 import com.elasticpath.plugin.tax.common.TaxJournalType;
 import com.elasticpath.plugin.tax.common.TaxTransactionType;
@@ -202,4 +203,16 @@ public class TaxOperationContextImpl implements TaxOperationContext, Serializabl
 		return HashCodeBuilder.reflectionHashCode(this);
 	}
 
+	@Override
+	public int getTaxCacheKeyHash() {
+		return new TaxCacheKeyHashCodeBuilder()
+				.append(currency)
+				.append(journalType)
+				.append(transactionType)
+				.append(itemObjectType)
+				.append(taxOverrideContext)
+				.append(fieldValues)
+				.append(taxExemption)
+				.toHashCode();
+	}
 }

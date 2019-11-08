@@ -15,7 +15,7 @@
 
 	<properties>
 		<cargo.jvmargs>-ea -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.ssl=false
-			-Dcom.sun.management.jmxremote.authenticate=false</cargo.jvmargs>
+			-Dcom.sun.management.jmxremote.authenticate=false -Xmx2000m</cargo.jvmargs>
 		<start.remote.jmx.port>7000</start.remote.jmx.port>
 		<stop.remote.jmx.port>7001</stop.remote.jmx.port>
 		<assetsLocation>${project.build.directory}/assets</assetsLocation>
@@ -23,9 +23,13 @@
 		<ep.activemq.configUri>broker:(tcp://localhost:${ep.activemq.port})?useJmx=true&amp;persistent=false&amp;useShutdownHook=false</ep.activemq.configUri>
 		<ep.jms.url>tcp://localhost:${ep.activemq.port}</ep.jms.url>
 		<ep.activemq.context>/jms</ep.activemq.context>
-		<cargo.timeout>300000</cargo.timeout>
+		<cargo.timeout>600000</cargo.timeout>
 		<ping.timeout>600000</ping.timeout>
 		<cargo.plugin.version>1.6.8</cargo.plugin.version>
+		<spring.non.jta.profile>NonJtaProfile</spring.non.jta.profile>
+		<ep.catalog.batch.database.drop.script>CLASSPATH:org/springframework/batch/core/schema-drop-h2.sql</ep.catalog.batch.database.drop.script>
+		<ep.catalog.batch.database.create.script>CLASSPATH:org/springframework/batch/core/schema-h2.sql</ep.catalog.batch.database.create.script>
+		<ep.catalog.batch.non.jta.datasource>dataSource</ep.catalog.batch.non.jta.datasource>
 
 	</properties>
 
@@ -326,6 +330,12 @@
 			<scope>runtime</scope>
 		</dependency>
 		<dependency>
+			<groupId>com.elasticpath.extensions</groupId>
+			<artifactId>ext-mock-webapp</artifactId>
+			<type>war</type>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
 			<groupId>net.sourceforge.htmlunit</groupId>
 			<artifactId>htmlunit</artifactId>
 			<version>2.9</version>
@@ -475,6 +485,7 @@
 				<plugin>
 					<groupId>org.codehaus.cargo</groupId>
 					<artifactId>cargo-maven2-plugin</artifactId>
+					<version>${cargo.plugin.version}</version>
 					<configuration>
 						<!-- This project is not designed to run cargo standalone, use tomcat:run-war in the war project you want. -->
 						<wait>${cargo.wait}</wait>
@@ -583,20 +594,56 @@
 								<cargo.tomcat.ajp.port>${cargo.tomcat.ajp.port}</cargo.tomcat.ajp.port>
 								<cargo.rmi.port>${cargo.rmi.port}</cargo.rmi.port>
 								<cargo.tomcat.shutdown.port>${cargo.tomcat.shutdown.port}</cargo.tomcat.shutdown.port>
-								<cargo.datasource.datasource>
-									<![CDATA[cargo.datasource.url=jdbc:h2:tcp://localhost:${h2.port}/SMOKETESTDB;DB_CLOSE_DELAY=-1|
-									cargo.datasource.driver=org.h2.Driver|
-									cargo.datasource.username=sa|
-									cargo.datasource.password=sa|
-									cargo.datasource.properties=scope=Shareable;factory=${ep.jndi.factory};maxActive=250;maxIdle=30;maxWait=10000;removeAbandoned=true;testWhileIdle=true;validationQuery=${epdb.validation.query};removeAbandoned=true|
-									cargo.datasource.jndi=jdbc/epjndi]]>
-								</cargo.datasource.datasource>
-								<cargo.resource.resource>
-										cargo.resource.name=jms/JMSConnectionFactory|
-										cargo.resource.type=${ep.jms.type}|
-										cargo.resource.parameters=factory=${ep.jms.factory};brokerURL=${ep.jms.url}
-								</cargo.resource.resource>
+
+								<cargo.datasource.url>jdbc:h2:tcp://localhost:${h2.port}/SMOKETESTDB;DB_CLOSE_DELAY=-1</cargo.datasource.url>
+								<cargo.datasource.driver>org.h2.Driver</cargo.datasource.driver>
+								<cargo.datasource.username>sa</cargo.datasource.username>
+								<cargo.datasource.password>sa</cargo.datasource.password>
+								<cargo.datasource.jndi>jdbc/epjndi</cargo.datasource.jndi>
+								<cargo.datasource.factory>${ep.jndi.factory}</cargo.datasource.factory>
+								<cargo.datasource.scope>Shareable</cargo.datasource.scope>
+								<cargo.datasource.maxActive>250</cargo.datasource.maxActive>
+								<cargo.datasource.maxIdle>30</cargo.datasource.maxIdle>
+								<cargo.datasource.maxWait>10000</cargo.datasource.maxWait>
+								<cargo.datasource.removeAbandoned>true</cargo.datasource.removeAbandoned>
+								<cargo.datasource.testWhileIdle>true</cargo.datasource.testWhileIdle>
+								<cargo.datasource.validationQuery>${epdb.validation.query}</cargo.datasource.validationQuery>
+
+								<cargo.ep.jms.jndi>jms/JMSConnectionFactory</cargo.ep.jms.jndi>
+								<cargo.ep.jms.type>${ep.jms.type}</cargo.ep.jms.type>
+								<cargo.ep.jms.factory>${ep.jms.factory}</cargo.ep.jms.factory>
+								<cargo.ep.jms.url>${ep.jms.url}</cargo.ep.jms.url>
+								<cargo.start.jvmargs>
+									-Dspring.profiles.active=${spring.non.jta.profile}
+									-Dep.spring.profile=${spring.non.jta.profile}
+									-Dep.tomcat.maxcachesize=${ep.tomcat.maxcachesize}
+									-Dep.catalog.batch.datasource=${ep.catalog.batch.non.jta.datasource}
+									-Dep.catalog.batch.database.drop.script=${ep.catalog.batch.database.drop.script}
+									-Dep.catalog.batch.database.create.script=${ep.catalog.batch.database.create.script}
+									-Dep.jms.factory=org.apache.activemq.jndi.JNDIReferenceFactory
+									-Dep.jms.xa.factory=org.apache.activemq.jndi.JNDIReferenceFactory
+									-Dep.jms.xa.type=org.apache.activemq.ActiveMQXAConnectionFactory
+									-Depdb.data.source.xa.factory=org.apache.tomcat.jdbc.pool.DataSourceFactory
+									-Depdb.data.source.xa.type=com.mysql.jdbc.jdbc2.optional.MysqlXADataSource
+									-Depdb.synctarget.removeabandonedtimeout=500
+									-Depdb.synctarget.jdbc.driver=org.h2.Driver
+									-Depdb.synctarget.username=sa
+									-Depdb.synctarget.password=sa
+									-Depdb.synctarget.url=jdbc:h2:tcp://localhost:${h2.port}/SMOKETESTDB;DB_CLOSE_DELAY=-1
+									-Dep.jms.type=${ep.jms.type}
+									-Dep.jms.url=${ep.jms.url}
+									-Dep.synctarget.jms.url=${ep.jms.url}
+								</cargo.start.jvmargs>
+
 							</properties>
+							<files>
+								<copy>
+									<file>${project.basedir}/src/test/resources/tomcat9x/context.xml</file>
+									<tofile>conf/context.xml</tofile>
+									<configfile>true</configfile>
+									<overwrite>true</overwrite>
+								</copy>
+							</files>
 						</configuration>
 					</configuration>
 					<executions>
@@ -674,6 +721,15 @@
 										<pingTimeout>${ping.timeout}</pingTimeout>
 										<properties>
 											<context>${ep.datasync.context}</context>
+										</properties>
+									</deployable>
+									<deployable>
+										<groupId>com.elasticpath.extensions</groupId>
+										<artifactId>ext-mock-webapp</artifactId>
+										<type>war</type>
+										<pingTimeout>${ping.timeout}</pingTimeout>
+										<properties>
+											<context>${ep.mock.context}</context>
 										</properties>
 									</deployable>
 

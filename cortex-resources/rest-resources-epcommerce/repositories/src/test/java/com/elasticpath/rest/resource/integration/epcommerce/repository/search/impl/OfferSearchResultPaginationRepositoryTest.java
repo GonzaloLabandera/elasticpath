@@ -4,10 +4,11 @@
 package com.elasticpath.rest.resource.integration.epcommerce.repository.search.impl;
 
 import static com.elasticpath.rest.resource.integration.epcommerce.repository.search.OffersResourceConstants.DEFAULT_APPLIED_FACETS;
+import static com.elasticpath.rest.resource.integration.epcommerce.repository.search.OffersResourceConstants.SORT;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.anyMap;
-import static org.mockito.ArgumentMatchers.nullable;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
 import java.util.Collection;
@@ -24,6 +25,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import com.elasticpath.domain.search.SortAttributeGroup;
+import com.elasticpath.domain.search.SortValue;
 import com.elasticpath.rest.ResourceOperationFailure;
 import com.elasticpath.rest.ResourceStatus;
 import com.elasticpath.rest.definition.base.ScopeIdentifierPart;
@@ -44,6 +47,9 @@ import com.elasticpath.rest.resource.integration.epcommerce.repository.paginatio
 import com.elasticpath.rest.resource.integration.epcommerce.repository.search.SearchRepository;
 import com.elasticpath.service.search.ProductCategorySearchCriteria;
 import com.elasticpath.service.search.query.ProductSearchCriteria;
+import com.elasticpath.service.search.query.SortBy;
+import com.elasticpath.service.search.query.SortOrder;
+import com.elasticpath.service.search.query.StandardSortBy;
 
 /**
  * Test class for {@link OfferSearchResultPaginationRepository}.
@@ -90,6 +96,34 @@ public class OfferSearchResultPaginationRepositoryTest {
 				.assertValue(offerSearchData -> "scope".equals(offerSearchData.getScope()))
 				.assertValue(offerSearchData -> SEARCHTERM.equals(offerSearchData.getSearchKeyword()));
 	}
+
+	@Test
+	public void validateSearchDataWithSorting() {
+		String sortGuid = "guid";
+		String displayName = "name";
+		Map<String, String> searchId = new HashMap<>();
+		searchId.put(PaginationEntity.PAGE_SIZE_PROPERTY, "2");
+		searchId.put(SearchOfferEntity.KEYWORDS_PROPERTY, SEARCHTERM);
+		searchId.put(SORT, sortGuid);
+		OfferSearchResultIdentifier offerSearchResultIdentifier = OfferSearchResultIdentifier.builder()
+				.withPageId(IntegerIdentifier.of(1))
+				.withSearchId(CompositeIdentifier.of(searchId))
+				.withScope(SCOPE)
+				.withAppliedFacets(CompositeIdentifier.of(DEFAULT_APPLIED_FACETS))
+				.build();
+
+		SortValue sortValue = new SortValue("Product Name", false, SortAttributeGroup.FIELD_TYPE, displayName);
+
+		shouldFindSubject();
+		when(searchRepository.getSortValueByGuidAndLocaleCode(anyString(), anyString())).thenReturn(Single.just(sortValue));
+
+		paginationRepository.validateSearchData(offerSearchResultIdentifier)
+				.test()
+				.assertValue(offerSearchData -> offerSearchData.getSortBy().getSortString().equals("productName"))
+				.assertValue(offerSearchData -> offerSearchData.getSortOrder() == SortOrder.ASCENDING);
+	}
+
+
 
 	@Test
 	public void validateSearchDataNormalizeNullPageSize() {
@@ -326,7 +360,56 @@ public class OfferSearchResultPaginationRepositoryTest {
 				);
 	}
 
+	@Test
+	public void testGetSortTypeReturnsCorrectSortByForDefault() {
+		InnerTestGetSortBy innerTestGetSortBy = new InnerTestGetSortBy();
+		SortBy result = innerTestGetSortBy.getSortType("Other", SortAttributeGroup.FIELD_TYPE);
+		assertThat(result).isEqualTo(StandardSortBy.RELEVANCE);
+	}
 
+	@Test
+	public void testGetSortTypeReturnsCorrectSortByAttributeType() {
+		InnerTestGetSortBy innerTestGetSortBy = new InnerTestGetSortBy();
+		SortBy result = innerTestGetSortBy.getSortType("test", SortAttributeGroup.ATTRIBUTE_TYPE);
+		assertThat(result).isEqualTo(StandardSortBy.ATTRIBUTE);
+	}
+
+	@Test
+	public void testGetSortTypeReturnsCorrectSortByForProductName() {
+		InnerTestGetSortBy innerTestGetSortBy = new InnerTestGetSortBy();
+		SortBy result = innerTestGetSortBy.getSortType("Product Name", SortAttributeGroup.FIELD_TYPE);
+		assertThat(result).isEqualTo(StandardSortBy.PRODUCT_NAME);
+	}
+
+	@Test
+	public void testGetSortTypeReturnsCorrectSortByForPrice() {
+		InnerTestGetSortBy innerTestGetSortBy = new InnerTestGetSortBy();
+		SortBy result = innerTestGetSortBy.getSortType("Price", SortAttributeGroup.FIELD_TYPE);
+		assertThat(result).isEqualTo(StandardSortBy.PRICE);
+	}
+
+	@Test
+	public void testGetSortTypeReturnsCorrectSortByForFeatured() {
+		InnerTestGetSortBy innerTestGetSortBy = new InnerTestGetSortBy();
+		SortBy result = innerTestGetSortBy.getSortType("Featured", SortAttributeGroup.FIELD_TYPE);
+		assertThat(result).isEqualTo(StandardSortBy.FEATURED_ANYWHERE);
+	}
+
+	@Test
+	public void testGetSortTypeReturnsCorrectSortByForSalesCount() {
+		InnerTestGetSortBy innerTestGetSortBy = new InnerTestGetSortBy();
+		SortBy result = innerTestGetSortBy.getSortType("Sales Count", SortAttributeGroup.FIELD_TYPE);
+		assertThat(result).isEqualTo(StandardSortBy.TOP_SELLER);
+	}
+
+	/**
+	 * Exposes getSortBy method to test.
+	 */
+	private class InnerTestGetSortBy  extends OfferSearchResultPaginationRepository {
+
+		//no-op
+	}
+	
 	private void shouldFindSubject() {
 		Subject subject = TestSubjectFactory.createWithScopeAndUserIdAndLocaleAndCurrency(
 				STORE_CODE, USERID, Locale.ENGLISH, Currency.getInstance("CAD"));
@@ -336,7 +419,7 @@ public class OfferSearchResultPaginationRepositoryTest {
 
 	private void mockSearchCriteria(final Single<ProductCategorySearchCriteria> searchCriteria) {
 		when(searchRepository.getSearchCriteria(
-				nullable(String.class), any(String.class), any(Locale.class), any(Currency.class), anyMap(), any(String.class)))
+				any(OfferSearchData.class), any(Locale.class), any(Currency.class)))
 				.thenReturn(searchCriteria);
 	}
 

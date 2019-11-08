@@ -17,6 +17,7 @@ import org.apache.openjpa.persistence.OpenJPAPersistence;
 
 import com.elasticpath.base.exception.EpServiceException;
 import com.elasticpath.commons.constants.ContextIdNames;
+import com.elasticpath.domain.attribute.Attribute;
 import com.elasticpath.domain.catalog.Brand;
 import com.elasticpath.domain.catalog.Product;
 import com.elasticpath.domain.catalog.ProductAssociation;
@@ -33,7 +34,6 @@ import com.elasticpath.persistence.dao.ProductDao;
 import com.elasticpath.persistence.openjpa.JpaPersistenceSession;
 import com.elasticpath.persistence.openjpa.JpaQuery;
 import com.elasticpath.persistence.support.FetchGroupConstants;
-import com.elasticpath.service.misc.FetchPlanHelper;
 import com.elasticpath.service.misc.TimeService;
 
 /**
@@ -58,8 +58,6 @@ public class ProductDaoImpl extends AbstractDaoImpl implements ProductDao {
 	private ProductLoadTuner productLoadTunerAll;
 
 	private ProductLoadTuner productLoadTunerMinimal;
-
-	private FetchPlanHelper fetchPlanHelper;
 
 	private TimeService timeService;
 
@@ -145,16 +143,10 @@ public class ProductDaoImpl extends AbstractDaoImpl implements ProductDao {
 	@Deprecated
 	public List<Product> findByBrandUid(final long brandUid, final ProductLoadTuner loadTuner) {
 		sanityCheck();
-		if (loadTuner == null) {
-			getFetchPlanHelper().configureProductFetchPlan(productLoadTunerAll);
-		} else {
-			getFetchPlanHelper().configureProductFetchPlan(loadTuner);
-		}
-		final List<Product> result =
-				getPersistenceEngine().retrieveByNamedQuery("PRODUCT_SELECT_BY_BRAND_UID", Long.valueOf(brandUid));
-		getFetchPlanHelper().clearFetchPlan();
 
-		return result;
+		return getPersistenceEngine()
+			.withLoadTuners(getLoadTuner(loadTuner))
+			.retrieveByNamedQuery("PRODUCT_SELECT_BY_BRAND_UID", Long.valueOf(brandUid));
 	}
 
 	/**
@@ -185,15 +177,14 @@ public class ProductDaoImpl extends AbstractDaoImpl implements ProductDao {
 	@Deprecated
 	public Collection<Product> findByCategoryUid(final long categoryUid, final FetchGroupLoadTuner loadTuner) {
 		sanityCheck();
-		final FetchGroupLoadTuner configuredLoadTuner = loadTuner;
+		FetchGroupLoadTuner configuredLoadTuner = loadTuner;
 		if (configuredLoadTuner == null) {
-			final FetchGroupLoadTuner defaultLoadTuner = getBean(ContextIdNames.FETCH_GROUP_LOAD_TUNER);
-			defaultLoadTuner.addFetchGroup(FetchGroupConstants.DEFAULT);
+			configuredLoadTuner = getBean(ContextIdNames.FETCH_GROUP_LOAD_TUNER);
+			configuredLoadTuner.addFetchGroup(FetchGroupConstants.DEFAULT);
 		}
-		getFetchPlanHelper().configureFetchGroupLoadTuner(configuredLoadTuner, true);
-		final Collection<Product> result = getPersistenceEngine().retrieveByNamedQuery("PRODUCT_SELECT_BY_CATEGORY_UID", categoryUid);
-		getFetchPlanHelper().clearFetchPlan();
-		return result;
+		return getPersistenceEngine()
+			.withLoadTuners(configuredLoadTuner)
+			.retrieveByNamedQuery("PRODUCT_SELECT_BY_CATEGORY_UID", categoryUid);
 	}
 
 	/**
@@ -209,14 +200,10 @@ public class ProductDaoImpl extends AbstractDaoImpl implements ProductDao {
 	@Deprecated
 	public List<Product> findByCategoryUid(final long categoryUid, final ProductLoadTuner loadTuner) {
 		sanityCheck();
-		if (loadTuner == null) {
-			getFetchPlanHelper().configureProductFetchPlan(productLoadTunerAll);
-		} else {
-			getFetchPlanHelper().configureProductFetchPlan(loadTuner);
-		}
-		final List<Product> result = getPersistenceEngine().retrieveByNamedQuery("PRODUCT_SELECT_BY_CATEGORY_UID", Long.valueOf(categoryUid));
-		getFetchPlanHelper().clearFetchPlan();
-		return result;
+
+		return getPersistenceEngine()
+			.withLoadTuners(getLoadTuner(loadTuner))
+			.retrieveByNamedQuery("PRODUCT_SELECT_BY_CATEGORY_UID", Long.valueOf(categoryUid));
 	}
 
 	/**
@@ -235,7 +222,7 @@ public class ProductDaoImpl extends AbstractDaoImpl implements ProductDao {
 			final ProductLoadTuner loadTuner) {
 		sanityCheck();
 		final List<Long> productUids = getPersistenceEngine().retrieveByNamedQuery("PRODUCT_UID_SELECT_BY_CATEGORY_UID",
-				new Object[] { Long.valueOf(categoryUid) }, startIndex, numProducts);
+				new Object[] { categoryUid }, startIndex, numProducts);
 
 		if (productUids.isEmpty()) {
 			return new ArrayList<>(0);
@@ -256,23 +243,20 @@ public class ProductDaoImpl extends AbstractDaoImpl implements ProductDao {
 	@Override
 	@Deprecated
 	public Product findByGuid(final String guid, final LoadTuner productLoadTuner) {
-		if (productLoadTuner == null) {
-			getFetchPlanHelper().configureLoadTuner(productLoadTunerAll);
-		} else {
-			getFetchPlanHelper().configureLoadTuner(productLoadTuner);
-		}
-
 		if (guid == null) {
 			throw new EpServiceException("Cannot retrieve null code.");
 		}
-		final List<Product> results = getPersistenceEngine().retrieveByNamedQuery("PRODUCT_SELECT_BY_GUID", guid);
+
+		final List<Product> results = getPersistenceEngine()
+			.withLoadTuners(getLoadTuner(productLoadTuner))
+			.retrieveByNamedQuery("PRODUCT_SELECT_BY_GUID", guid);
+
 		Product product = null;
 		if (results.size() == 1) {
 			product = results.get(0);
 		} else if (results.size() > 1) {
 			throw new EpServiceException("Inconsistent data -- duplicate product code exist -- " + guid);
 		}
-		getFetchPlanHelper().clearFetchPlan();
 		return product;
 	}
 
@@ -287,11 +271,10 @@ public class ProductDaoImpl extends AbstractDaoImpl implements ProductDao {
 	@Deprecated
 	public List<Product> findByModifiedDate(final Date date) {
 		sanityCheck();
-		List<Product> result;
-		getFetchPlanHelper().configureProductFetchPlan(productLoadTunerAll);
-		result = getPersistenceEngine().retrieveByNamedQuery("PRODUCT_SELECT_BY_MODIFIED_DATE", date);
-		getFetchPlanHelper().clearFetchPlan();
-		return result;
+
+		return getPersistenceEngine()
+			.withLoadTuners(productLoadTunerAll)
+			.retrieveByNamedQuery("PRODUCT_SELECT_BY_MODIFIED_DATE", date);
 	}
 
 	/**
@@ -311,10 +294,9 @@ public class ProductDaoImpl extends AbstractDaoImpl implements ProductDao {
 			return Collections.emptyList();
 		}
 
-		getFetchPlanHelper().configureProductFetchPlan(productLoadTuner);
-		final List<Product> result = getPersistenceEngine().retrieveByNamedQueryWithList("PRODUCT_BY_UIDS", PLACEHOLDER_FOR_LIST, productUids);
-		getFetchPlanHelper().clearFetchPlan();
-		return result;
+		return getPersistenceEngine()
+			.withLoadTuners(productLoadTuner)
+			.retrieveByNamedQueryWithList("PRODUCT_BY_UIDS", PLACEHOLDER_FOR_LIST, productUids);
 	}
 
 	/**
@@ -335,10 +317,9 @@ public class ProductDaoImpl extends AbstractDaoImpl implements ProductDao {
 			return Collections.emptyList();
 		}
 
-		getFetchPlanHelper().configureFetchGroupLoadTuner(fetchGroupLoadTuner);
-		final List<Product> result = getPersistenceEngine().retrieveByNamedQueryWithList("PRODUCT_BY_UIDS", PLACEHOLDER_FOR_LIST, productUids);
-		getFetchPlanHelper().clearFetchPlan();
-		return result;
+		return getPersistenceEngine()
+			.withLoadTuners(fetchGroupLoadTuner)
+			.retrieveByNamedQueryWithList("PRODUCT_BY_UIDS", PLACEHOLDER_FOR_LIST, productUids);
 	}
 
 	/**
@@ -373,7 +354,7 @@ public class ProductDaoImpl extends AbstractDaoImpl implements ProductDao {
 	@Override
 	public List<Object[]> findEnrichingData(final String queryName, final Collection<String> guids,
 			final Locale locale) {
-		return getPersistenceEngine().retrievePartByNamedQueryWithList(
+		return getPersistenceEngine().retrieveByNamedQueryWithList(
 				queryName,
 				PLACEHOLDER_FOR_LIST,
 				guids,
@@ -402,11 +383,9 @@ public class ProductDaoImpl extends AbstractDaoImpl implements ProductDao {
 	 */
 	@Override
 	public List<Product> findProductTopSeller(final int topCount, final ProductLoadTuner productLoadTuner) throws EpServiceException {
-		getFetchPlanHelper().configureProductFetchPlan(productLoadTuner);
-		final List<Product> result = getPersistenceEngine().retrieveByNamedQuery("PRODUCT_SELECT_TOP_SELLERS", 0, topCount);
-		getFetchPlanHelper().clearFetchPlan();
-
-		return result;
+		return getPersistenceEngine()
+			.withLoadTuners(productLoadTuner)
+			.retrieveByNamedQuery("PRODUCT_SELECT_TOP_SELLERS", 0, topCount);
 	}
 
 	@Override
@@ -481,6 +460,17 @@ public class ProductDaoImpl extends AbstractDaoImpl implements ProductDao {
 		}
 
 		return getPersistenceEngine().retrieveByNamedQueryWithList("PRODUCT_UID_SELECT_BY_CATEGORY_UIDS", PLACEHOLDER_FOR_LIST, categoryUids);
+	}
+
+	/**
+	 * Find a list of product uids that use the given attribute.
+	 *
+	 * @param attribute the attribute to search by.
+	 * @return a list of product uids.
+	 */
+	@Override
+	public List<Long> findUidsByAttribute(final Attribute attribute) {
+		return getPersistenceEngine().retrieveByNamedQuery("PRODUCT_UIDS_BY_ATTRIBUTE", Long.valueOf(attribute.getUidPk()));
 	}
 
 	/**
@@ -602,10 +592,9 @@ public class ProductDaoImpl extends AbstractDaoImpl implements ProductDao {
 		if (productUid <= 0) {
 			return null;
 		}
-		getFetchPlanHelper().configureFetchGroupLoadTuner(loadTuner);
-		final Product product = getPersistentBeanFinder().get(ContextIdNames.PRODUCT, productUid);
-		getFetchPlanHelper().clearFetchPlan();
-		return product;
+		return getPersistentBeanFinder()
+			.withLoadTuners(loadTuner)
+			.get(ContextIdNames.PRODUCT, productUid);
 	}
 
 	/**
@@ -624,14 +613,9 @@ public class ProductDaoImpl extends AbstractDaoImpl implements ProductDao {
 			return null;
 		}
 
-		getFetchPlanHelper().configureProductFetchPlan(loadTuner);
-		final Product product = getPersistentBeanFinder().get(ContextIdNames.PRODUCT, productUid);
-		getFetchPlanHelper().clearFetchPlan();
-		if (product == null) {
-			return null;
-		}
-
-		return product;
+		return getPersistentBeanFinder()
+			.withLoadTuners(loadTuner)
+			.get(ContextIdNames.PRODUCT, productUid);
 	}
 
 	/**
@@ -667,15 +651,6 @@ public class ProductDaoImpl extends AbstractDaoImpl implements ProductDao {
 		sanityCheck();
 		final Long count = (Long) getPersistenceEngine().retrieveByNamedQuery("COUNT_PRODUCTS_IN_CATEGORY", categoryUid).get(0);
 		return count.intValue() > 0;
-	}
-
-	/**
-	 * Getter method for {@link FetchPlanHelper}.
-	 *
-	 * @return {@link FetchPlanHelper}, never null.
-	 */
-	public FetchPlanHelper getFetchPlanHelper() {
-		return fetchPlanHelper;
 	}
 
 	/**
@@ -894,15 +869,6 @@ public class ProductDaoImpl extends AbstractDaoImpl implements ProductDao {
 	}
 
 	/**
-	 * Sets the fetch plan helper.
-	 *
-	 * @param fetchPlanHelper the fetch plan helper
-	 */
-	public void setFetchPlanHelper(final FetchPlanHelper fetchPlanHelper) {
-		this.fetchPlanHelper = fetchPlanHelper;
-	}
-
-	/**
 	 * Sets the <code>ProductLoadTuner</code> for populating all data.
 	 *
 	 * @param productLoadTunerAll the <code>ProductLoadTuner</code> for populating all data.
@@ -934,5 +900,12 @@ public class ProductDaoImpl extends AbstractDaoImpl implements ProductDao {
 	 */
 	protected TimeService getTimeService() {
 		return timeService;
+	}
+
+	private LoadTuner getLoadTuner(final LoadTuner inLoadTuner) {
+		if (inLoadTuner == null) {
+			return productLoadTunerAll;
+		}
+		return inLoadTuner;
 	}
 }

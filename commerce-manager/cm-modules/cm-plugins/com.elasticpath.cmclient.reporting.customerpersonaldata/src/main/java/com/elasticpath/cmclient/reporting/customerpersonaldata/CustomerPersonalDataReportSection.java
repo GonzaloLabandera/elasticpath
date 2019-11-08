@@ -32,6 +32,7 @@ import com.elasticpath.cmclient.core.ui.framework.CompositeFactory;
 import com.elasticpath.cmclient.core.ui.framework.EpControlFactory.EpState;
 import com.elasticpath.cmclient.core.ui.framework.IEpLayoutComposite;
 import com.elasticpath.cmclient.core.ui.framework.IEpLayoutData;
+import com.elasticpath.cmclient.core.util.DateTimeUtilFactory;
 import com.elasticpath.cmclient.core.validation.EpValidatorFactory;
 import com.elasticpath.cmclient.reporting.AbstractReportSection;
 import com.elasticpath.cmclient.reporting.common.SavedReportParameters;
@@ -52,6 +53,8 @@ public class CustomerPersonalDataReportSection extends AbstractReportSection {
 	public static final String PARAMETER_STORE = "store"; //$NON-NLS-1$
 	/** The key for the "userId" query parameter. */
 	public static final String PARAMETER_USER_ID = "userId"; //$NON-NLS-1$
+	/** The key for the "dateFormat" query parameter. */
+	public static final String PARAMETER_DATE_FORMAT = "dateFormat"; //$NON-NLS-1$
 
 	/** The key for the parameters object. */
 	public static final String PARAMETER_PARAMETERS = "parameters"; //$NON-NLS-1$
@@ -71,6 +74,7 @@ public class CustomerPersonalDataReportSection extends AbstractReportSection {
 	 */
 	public CustomerPersonalDataReportSection() {
 		super();
+		parameters.setDateFormat(DateTimeUtilFactory.getDateUtil().getFormatters()[1]);
 	}
 
 
@@ -119,6 +123,8 @@ public class CustomerPersonalDataReportSection extends AbstractReportSection {
 		paramsMap.put(PARAMETER_STORE, parameters.getStore());
 
 		paramsMap.put(PARAMETER_USER_ID, parameters.getUserId());
+
+		paramsMap.put(PARAMETER_DATE_FORMAT, parameters.getDateFormat());
 
 		paramsMap.put(PARAMETER_PARAMETERS, parameters);
 		return paramsMap;

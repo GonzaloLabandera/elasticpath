@@ -1,5 +1,5 @@
 @example
-Feature: Purchase
+Feature: Ext - Purchase
 
   Scenario: Purchase has purchase number and same total as the order
     Given I login as a registered shopper

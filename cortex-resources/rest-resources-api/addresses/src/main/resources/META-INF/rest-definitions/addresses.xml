@@ -5,23 +5,20 @@
 		<name>addresses</name>
 		<description><![CDATA[
 The Addresses resource family is responsible for the customer's shipping and billing address. This resource allows you to
-retrieve a logged in customer's addresses, edit existing addresses, and create new addresses.
+retrieve a logged in customer's addresses, edit existing addresses, create new addresses, and set default billing and shipping addresses.
 
-#### Shipping Address vs. Billing Addresses
+Shipping Address vs. Billing Addresses
 
 A shipping address is where you ship the physical goods that you purchased in the store. A billing address is the address
-associated with the [paymentmethods][paymentmethods] used for a purchase. For example, the billing address would be the
+associated with the [paymentmethods](paymentmethods.md) used for a purchase. For example, the billing address would be the
 address on the credit card that is being used for a purchase. Customers choose which billing and shipping address to use
-for a purchase through the [orders][orders] resources.
+for a purchase through the [orders](orders.md) resources.
 
-Currently you cannot create an address and label it as a shipping only address or label it as a billing
-only address. Cortex does not make a distinction between the shipping and billing addresses. Read Billing Address
-billing addresses retrieves a list of all the customer's addresses; similarly, Read Shipping Address
-retrieves a list of all the customer's addresses. Future versions of the API may allow the possibility to label what the
+Currently you cannot create an `address` and label it as a shipping only address or label it as a billing
+only address. Cortex does not make a distinction between the shipping and billing addresses.
+Read Billing Addresses retrieves a list of all the customer's addresses; similarly,
+Read Shipping Addresses retrieves a list of all the customer's addresses. Future versions of the API may allow the possibility to label what the
 address is for, but out of the box this API version does not support this functionality.
-
-[paymentmethods]: #paymentmethods
-[orders]: #orders
 ]]></description>
 
 
@@ -165,7 +162,7 @@ address is for, but out of the box this API version does not support this functi
 			<property>
 				<name>address</name>
 				<description>
-					<![CDATA[The customer address. Address field names are based on the v.card specification. For more information on this specification, see [v.card](http://tools.ietf.org/html/rfc2426).]]></description>
+					<![CDATA[The customer address. Address field names are based on the v.card specification. For more information on this specification, see [v.card](https://www.ietf.org/rfc/rfc2426.txt).]]></description>
 				<is-a>address-detail</is-a>
 			</property>
 			<entity-type>addresses.address</entity-type>
@@ -197,9 +194,7 @@ address is for, but out of the box this API version does not support this functi
 			</property>
 			<property>
 				<name>region</name>
-				<description><![CDATA[Valid region codes for this field can be retrieved using the [Geographies][geographies] Resource.
-
-[geographies]: #geographies
+				<description><![CDATA[Valid region codes for this field can be retrieved using the [Geographies](geographies.md) Resource.
 ]]></description>
 				<string/>
 			</property>
@@ -210,9 +205,7 @@ address is for, but out of the box this API version does not support this functi
 			</property>
 			<property>
 				<name>country-name</name>
-				<description><![CDATA[Valid country codes for this field can be retrieved using the [Geographies][geographies] Resource.
-
-[geographies]: #geographies
+				<description><![CDATA[Valid country codes for this field can be retrieved using the [Geographies](geographies.md) Resource.
 ]]></description>
 				<string/>
 			</property>

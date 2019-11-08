@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright (c) Elastic Path Software Inc., 2018
+  -->
+<beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	   xmlns="http://www.springframework.org/schema/beans"
+	   xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd">
+
+	<bean id="catalogProjectionPluginProvider" class="com.elasticpath.catalog.connectivity.impl.CatalogProjectionPluginProviderImpl">
+		<constructor-arg ref="catalogProjectionPlugin"/>
+	</bean>
+
+	<bean id="attributeContentValidator" class="com.elasticpath.catalog.validator.impl.ProjectionValidator">
+		<constructor-arg value="/schema/attribute.schema.json"/>
+	</bean>
+
+	<bean id="brandContentValidator" class="com.elasticpath.catalog.validator.impl.ProjectionValidator">
+		<constructor-arg value="/schema/brand.schema.json"/>
+	</bean>
+
+	<bean id="fieldMetadataContentValidator" class="com.elasticpath.catalog.validator.impl.ProjectionValidator">
+		<constructor-arg value="/schema/fieldMetadata.schema.json"/>
+	</bean>
+
+	<bean id="optionContentValidator" class="com.elasticpath.catalog.validator.impl.ProjectionValidator">
+		<constructor-arg value="/schema/option.schema.json"/>
+	</bean>
+
+	<bean id="offerContentValidator" class="com.elasticpath.catalog.validator.impl.ProjectionValidator">
+		<constructor-arg value="/schema/offer.schema.json"/>
+	</bean>
+
+	<bean id="categoryContentValidator" class="com.elasticpath.catalog.validator.impl.ProjectionValidator">
+		<constructor-arg value="/schema/category.schema.json"/>
+	</bean>
+</beans>

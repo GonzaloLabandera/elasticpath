@@ -13,20 +13,20 @@
       <view
             allowMultiple="false"
             class="com.elasticpath.cmclient.admin.users.views.UserListView"
-            icon="icons/user_default_22.png"
+            icon="icons/empty_1x1.png"
             id="com.elasticpath.cmclient.admin.users.views.UserListView"
             name="%usersView.name">
       </view>
       <view
             class="com.elasticpath.cmclient.admin.users.views.RoleListView"
-            icon="icons/user-role_default_22.png"
+            icon="icons/empty_1x1.png"
             id="com.elasticpath.cmclient.admin.users.views.RoleListView"
             name="%rolesView.name">
       </view>
       <view
             allowMultiple="false"
             class="com.elasticpath.cmclient.admin.users.views.UserSearchView"
-            icon="icons/search_default_22.png"
+            icon="icons/empty_1x1.png"
             id="com.elasticpath.cmclient.admin.users.views.UserSearchView"
             name="User Search">
       </view>

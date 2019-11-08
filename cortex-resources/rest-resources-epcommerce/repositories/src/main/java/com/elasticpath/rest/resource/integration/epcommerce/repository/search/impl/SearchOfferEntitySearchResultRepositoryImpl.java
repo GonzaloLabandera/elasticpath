@@ -4,9 +4,12 @@
 package com.elasticpath.rest.resource.integration.epcommerce.repository.search.impl;
 
 import static com.elasticpath.rest.resource.integration.epcommerce.repository.search.OffersResourceConstants.DEFAULT_APPLIED_FACETS;
+import static com.elasticpath.rest.resource.integration.epcommerce.repository.search.OffersResourceConstants.SORT;
 import static com.elasticpath.rest.resource.integration.epcommerce.repository.search.impl.SearchRepositoryImpl.FIRST_PAGE;
 
-import com.google.common.collect.ImmutableMap;
+import java.util.HashMap;
+import java.util.Map;
+
 import io.reactivex.Single;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -47,16 +50,20 @@ public class SearchOfferEntitySearchResultRepositoryImpl<E extends SearchOfferEn
 	private OfferSearchResultIdentifier buildKeywordSearchResultIdentifier(final SearchOfferEntity searchKeywordsEntity,
 																			 final IdentifierPart<String> scope) {
 		return OfferSearchResultIdentifier.builder()
-				.withSearchId(CompositeIdentifier.of(ImmutableMap.of(
-						SearchKeywordsEntity.KEYWORDS_PROPERTY, searchKeywordsEntity.getKeywords(),
-						SearchKeywordsEntity.PAGE_SIZE_PROPERTY, String.valueOf(searchKeywordsEntity.getPageSize())
-				)))
+				.withSearchId(CompositeIdentifier.of(createSearchId(scope.getValue(), searchKeywordsEntity)))
 				.withPageId(IntegerIdentifier.of(FIRST_PAGE))
 				.withScope(scope)
 				.withAppliedFacets(CompositeIdentifier.of(DEFAULT_APPLIED_FACETS))
 				.build();
 	}
 
+	private Map<String, String> createSearchId(final String scope, final SearchOfferEntity searchOfferEntity) {
+		Map<String, String> searchId = new HashMap<>();
+		searchId.put(SearchKeywordsEntity.KEYWORDS_PROPERTY, searchOfferEntity.getKeywords());
+		searchId.put(SearchKeywordsEntity.PAGE_SIZE_PROPERTY, String.valueOf(searchOfferEntity.getPageSize()));
+		searchRepository.getDefaultSortAttributeForStore(scope).subscribe(sortAttribute -> searchId.put(SORT, sortAttribute.getGuid()));
+		return searchId;
+	}
 	@Reference
 	public void setSearchRepository(final SearchRepository searchRepository) {
 		this.searchRepository = searchRepository;

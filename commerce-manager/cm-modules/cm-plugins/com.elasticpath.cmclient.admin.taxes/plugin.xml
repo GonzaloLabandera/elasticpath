@@ -9,13 +9,13 @@
             allowMultiple="false"
             class="com.elasticpath.cmclient.admin.taxes.views.TaxCodeListView"
             id="com.elasticpath.cmclient.admin.taxes.views.TaxCodeListView"
-            icon="icons/tax-code_default_22.png"
+            icon="icons/empty_1x1.png"
             name="%taxesView.name">
       </view>
       <view
             class="com.elasticpath.cmclient.admin.taxes.views.TaxJurisdictionsListView"
             id="com.elasticpath.cmclient.admin.taxes.views.TaxJurisdictionListView"
-			icon="icons/tax-jurisdiction_default_22.png"
+			icon="icons/empty_1x1.png"
             name="%taxJurisdictionsView.name">
       </view>
    </extension>

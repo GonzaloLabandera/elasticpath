@@ -28,6 +28,12 @@ class ClearCartSteps {
 				.isEqualTo(204)
 	}
 
+	@Then('^I remove default cart$')
+	static void removeDefaultCart() {
+		Cart.getCart()
+		client.DELETE(client.body.self.uri)
+	}
+
 	@Then('^there are no lineitems in the cart$')
 	static void verifyCartHasNoLineitems() {
 		Cart.lineitems()

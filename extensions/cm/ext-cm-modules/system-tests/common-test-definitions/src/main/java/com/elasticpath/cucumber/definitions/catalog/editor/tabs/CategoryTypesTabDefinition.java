@@ -1,5 +1,6 @@
 package com.elasticpath.cucumber.definitions.catalog.editor.tabs;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import cucumber.api.java.en.And;
@@ -10,9 +11,13 @@ import org.openqa.selenium.WebDriver;
 import com.elasticpath.selenium.dialogs.AddEditCategoryTypeDialog;
 import com.elasticpath.selenium.dialogs.ConfirmDialog;
 import com.elasticpath.selenium.dialogs.EditLongTextAttributeDialog;
+import com.elasticpath.selenium.dialogs.SelectAFeaturedProductDialog;
+import com.elasticpath.selenium.domainobjects.containers.AttributeContainer;
 import com.elasticpath.selenium.domainobjects.Catalog;
 import com.elasticpath.selenium.domainobjects.Category;
 import com.elasticpath.selenium.domainobjects.CategoryType;
+import com.elasticpath.selenium.domainobjects.containers.CategoryContainer;
+import com.elasticpath.selenium.domainobjects.containers.ProductContainer;
 import com.elasticpath.selenium.editor.CategoryEditor;
 import com.elasticpath.selenium.editor.catalog.tabs.CategoryTypesTab;
 import com.elasticpath.selenium.navigations.CatalogManagement;
@@ -24,6 +29,7 @@ import com.elasticpath.selenium.wizards.CreateCategoryWizard;
 /**
  * Category Types Tab Definitions.
  */
+@SuppressWarnings("PMD.TooManyMethods")
 public class CategoryTypesTabDefinition {
 
 	private final CatalogManagementActionToolbar catalogManagementActionToolbar;
@@ -37,15 +43,29 @@ public class CategoryTypesTabDefinition {
 	private String categoryCode;
 	private final Category category;
 	private final CategoryType categoryType;
+	private final CategoryContainer categoryContainer;
+	private final ProductContainer productContainer;
+	private SelectAFeaturedProductDialog selectAFeaturedProductDialog;
+	private final AttributeContainer attributeContainer;
+
+	public CategoryType getCategoryType() {
+		return categoryType;
+	}
 
 	/**
 	 * Constructor.
 	 *
-	 * @param catalog      the catalog object to be used in current session.
-	 * @param category     the category object to be used in current session.
-	 * @param categoryType Category Type oebject.
+	 * @param catalog            the catalog object to be used in current session.
+	 * @param category           the category object to be used in current session.
+	 * @param categoryType       Category Type object.
+	 * @param categoryContainer  CategoryContainer object.
+	 * @param productContainer   ProductContainer object.
+	 * @param attributeContainer Attribute Container object.
 	 */
-	public CategoryTypesTabDefinition(final Catalog catalog, final Category category, final CategoryType categoryType) {
+	public CategoryTypesTabDefinition(final Catalog catalog, final Category category, final CategoryType categoryType,
+									  final CategoryContainer categoryContainer, final ProductContainer productContainer,
+									  final AttributeContainer attributeContainer) {
+		this.productContainer = productContainer;
 		final WebDriver driver = SetUp.getDriver();
 		this.categoryTypesTab = new CategoryTypesTab(driver);
 		this.catalogManagementActionToolbar = new CatalogManagementActionToolbar(driver);
@@ -54,6 +74,8 @@ public class CategoryTypesTabDefinition {
 		this.category = category;
 		this.categoryEditor = new CategoryEditor(driver);
 		this.categoryType = categoryType;
+		this.categoryContainer = categoryContainer;
+		this.attributeContainer = attributeContainer;
 	}
 
 	/**
@@ -72,6 +94,33 @@ public class CategoryTypesTabDefinition {
 			addEditCategoryTypeDialog.selectAvailableAttribute(attribute);
 			addEditCategoryTypeDialog.clickMoveRightButton();
 			addEditCategoryTypeDialog.verifyAssignedAttribute(attribute);
+		}
+		addEditCategoryTypeDialog.clickAddButton();
+		catalogManagementActionToolbar.saveAll();
+		catalogManagementActionToolbar.clickReloadActiveEditor();
+	}
+
+	/**
+	 * Create category type.
+	 *
+	 * @param categoryTypeName the category type name
+	 * @param attributeList    the list of attributes
+	 */
+	@When("^I create a category type (.*) with following attributes?$")
+	public void createNewCategoryType(final String categoryTypeName, final List<String> attributeList) {
+		addEditCategoryTypeDialog = categoryTypesTab.clickAddCategoryTypeButton();
+		this.categoryType.setCategoryTypeName(categoryTypeName + Utility.getRandomUUID());
+		addEditCategoryTypeDialog.enterCategoryTypeName(this.categoryType.getCategoryTypeName());
+		List<String> newAttributeList = new ArrayList<>();
+		for (String s : attributeList) {
+			newAttributeList.add(this.attributeContainer.getAttributeKeyByPartialCode(s));
+		}
+		this.categoryType.setAttribute(newAttributeList);
+		for (String attribute : this.categoryType.getAttribute()) {
+			String attributeName = this.attributeContainer.getAttributeNameByPartialCodeAndLanguage(attribute, "English");
+			addEditCategoryTypeDialog.selectAvailableAttribute(attributeName);
+			addEditCategoryTypeDialog.clickMoveRightButton();
+			addEditCategoryTypeDialog.verifyAssignedAttribute(attributeName);
 		}
 		addEditCategoryTypeDialog.clickAddButton();
 		catalogManagementActionToolbar.saveAll();
@@ -100,6 +149,27 @@ public class CategoryTypesTabDefinition {
 			createCategoryWizard.clickNextInDialog();
 			createCategoryWizard.enterAttributeLongText(category.getAttrLongTextValue(), category.getAttrLongTextName());
 			createCategoryWizard.enterAttributeShortText(category.getAttrShortTextValue(), category.getAttrShortTextName());
+			createCategoryWizard.clickFinish();
+		}
+	}
+
+
+	@When("^I create category of the category type for (.*)")
+	public void createCategoryForCatalog(final String catalogName, final List<Category> categoryInfoList) {
+		for (Category category : categoryInfoList) {
+			catalogManagement.selectCatalog(catalogName);
+			createCategoryWizard = catalogManagement.clickCreateCategoryIcon();
+			categoryCode = Utility.getRandomUUID();
+			createCategoryWizard.enterCategoryCode(categoryCode);
+			this.category.setCategoryName(category.getCategoryName() + " - " + categoryCode);
+			createCategoryWizard.enterCategoryName(this.category.getCategoryName());
+			createCategoryWizard.selectCategoryType(this.categoryType.getCategoryTypeName());
+			createCategoryWizard.enterCurrentEnableDateTime();
+			if (category.getStoreVisible().equalsIgnoreCase("true")) {
+				createCategoryWizard.checkStoreVisibleBox();
+			}
+			createCategoryWizard.clickNextInDialog();
+			createCategoryWizard.enterAttributeLongText(category.getAttrLongTextValue(), category.getAttrLongTextName());
 			createCategoryWizard.clickFinish();
 		}
 	}
@@ -158,11 +228,91 @@ public class CategoryTypesTabDefinition {
 	}
 
 	/**
+	 * Add two featured products to opened category.
+	 *
+	 * @param productPartialCode partial code for first product.
+	 */
+	@When("^I add (.+) as the featured product to opened category")
+	public void addFeaturedProductToCategory(final String productPartialCode) {
+		selectAFeaturedProductDialog = categoryEditor.clickAddFeaturedProductButton(this.category.getCategoryName());
+		final String fullProductName = productContainer.getProductByPartialName(productPartialCode).getProductName();
+
+		selectAFeaturedProductDialog.enterProductName(fullProductName);
+		selectAFeaturedProductDialog.clickSearchButton();
+		selectAFeaturedProductDialog.selectProductByName(fullProductName);
+		selectAFeaturedProductDialog.clickOKButton();
+
+		catalogManagementActionToolbar.clickSaveButton();
+		catalogManagementActionToolbar.clickReloadActiveEditor();
+	}
+
+	/**
+	 * Removes all feature products in previously opened category editor.
+	 */
+	@When("^I remove all feature products for opened category")
+	public void removeAllFeatureProducts() {
+		categoryEditor.removeAllFeaturedProducts();
+	}
+
+	/**
+	 * Moves featured product up in product list.
+	 *
+	 * @param productPartialName partial name of the product.
+	 * @param count              how many times move the featured product up.
+	 */
+	@When("^I move (.+) featured product up (\\d+) times in product list in opened category$")
+	public void changeOrderOfFeaturedProducts(final String productPartialName, final Integer count) {
+		for (int i = 0; i < count; i++) {
+			categoryEditor.moveUpFeaturedProductByName(productContainer.getProductByPartialName(productPartialName).getProductName());
+		}
+
+		catalogManagementActionToolbar.clickSaveButton();
+		catalogManagementActionToolbar.clickReloadActiveEditor();
+	}
+
+	/**
+	 * Remove product from featured product list.
+	 *
+	 * @param productPartialName partial name of the product.
+	 */
+	@When("^I remove (.+) from featured products list in opened category$")
+	public void removeProductFromFeaturedProductList(final String productPartialName) {
+		categoryEditor.removeFeaturedProductByName(productContainer.getProductByPartialName(productPartialName).getProductName());
+
+		catalogManagementActionToolbar.clickSaveButton();
+		catalogManagementActionToolbar.clickReloadActiveEditor();
+	}
+
+	/**
+	 * Close category editor by category name.
+	 *
+	 * @param partialName partial name of the category.
+	 */
+	@When("^I close category editor for (.+) category$")
+	public void closeCategoryEditor(final String partialName) {
+		String categoryEditorTabName =
+				categoryContainer.getCategoryMap().get(categoryContainer.getFullCategoryNameByPartialName(partialName)).getCategoryCode();
+		categoryEditor.closePane(categoryEditorTabName);
+	}
+
+	/**
 	 * verify newly created category type exists.
 	 */
 	@Then("^(?:newly created|updated) category type is in the list$")
 	public void verifyNewlyCreatedCategoryTypeExists() {
 		categoryTypesTab.verifyCategoryType(this.categoryType.getCategoryTypeName());
+	}
+
+	/**
+	 * Open category editor for.
+	 *
+	 * @param categoryPartialName partial name of the category.
+	 */
+	@When("^I open category in editor by partial name (.+)$")
+	public void openCategoryEditorForSpecificCategory(final String categoryPartialName) {
+		catalogManagement.clickCatalogBrowseTab();
+		catalogManagement.selectCategory(categoryContainer.getFullCategoryNameByPartialName(categoryPartialName));
+		categoryEditor = catalogManagement.clickOpenCategoryIcon();
 	}
 
 	/**

@@ -70,6 +70,13 @@
 				INNER JOIN cp.attribute att
 			</query>
 		</named-query>
+		<named-query name="ATTRIBUTE_IN_USE_STORE_ATTRIBUTES">
+			<query>
+				SELECT DISTINCT att.uidPk
+				FROM StoreCustomerAttributeImpl sca, AttributeImpl att
+				WHERE sca.attributeKey = att.key
+			</query>
+		</named-query>
 		<named-query name="ATTRIBUTE_SELECT_CATALOG_OR_GLOBAL_ALL">
 			<query>
 				SELECT a

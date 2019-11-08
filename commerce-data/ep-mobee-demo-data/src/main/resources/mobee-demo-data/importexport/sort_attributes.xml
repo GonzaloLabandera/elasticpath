@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<sort_attributes>
+	<sort_attribute>
+		<sort_attribute_guid>b4096c65-d00f-4dc6-9946-eb74c486652c</sort_attribute_guid>
+		<business_object_id>Product Name</business_object_id>
+		<store_code>MOBEE</store_code>
+		<descending>false</descending>
+		<sort_attribute_group>FIELD</sort_attribute_group>
+		<sort_attribute_type>STRING</sort_attribute_type>
+		<default_attribute>false</default_attribute>
+		<display_value>
+			<value language="en">name A-Z</value>
+			<value language="fr">name FR A-Z</value>
+		</display_value>
+	</sort_attribute>
+
+	<sort_attribute>
+		<sort_attribute_guid>ff7b153b-479b-402c-9295-ac5c500f4e56</sort_attribute_guid>
+		<business_object_id>Product Name</business_object_id>
+		<store_code>MOBEE</store_code>
+		<descending>true</descending>
+		<sort_attribute_group>FIELD</sort_attribute_group>
+		<sort_attribute_type>STRING</sort_attribute_type>
+		<default_attribute>false</default_attribute>
+		<display_value>
+			<value language="en">name Z-A</value>
+			<value language="fr">name FR Z-A</value>
+		</display_value>
+	</sort_attribute>
+
+	<sort_attribute>
+		<sort_attribute_guid>8b6cf74e-c6eb-476d-978f-6e0390975dba</sort_attribute_guid>
+		<business_object_id>A00009</business_object_id>
+		<store_code>MOBEE</store_code>
+		<descending>true</descending>
+		<sort_attribute_group>ATTRIBUTE</sort_attribute_group>
+		<sort_attribute_type>NUMBER</sort_attribute_type>
+		<default_attribute>false</default_attribute>
+		<display_value>
+			<value language="en">rating high to low</value>
+			<value language="fr">rating FR high to low</value>
+		</display_value>
+	</sort_attribute>
+
+	<sort_attribute>
+		<sort_attribute_guid>6db48b21-c374-4530-aaea-69c1fdd95f50</sort_attribute_guid>
+		<business_object_id>A00009</business_object_id>
+		<store_code>MOBEE</store_code>
+		<descending>false</descending>
+		<sort_attribute_group>ATTRIBUTE</sort_attribute_group>
+		<sort_attribute_type>NUMBER</sort_attribute_type>
+		<default_attribute>false</default_attribute>
+		<display_value>
+			<value language="en">rating low to high</value>
+			<value language="fr">rating FR low to high</value>
+		</display_value>
+	</sort_attribute>
+
+	<sort_attribute>
+		<sort_attribute_guid>97a83240-ffa8-41a9-8505-f19934045772</sort_attribute_guid>
+		<business_object_id>Featured</business_object_id>
+		<store_code>MOBEE</store_code>
+		<descending>true</descending>
+		<sort_attribute_group>FIELD</sort_attribute_group>
+		<sort_attribute_type>BOOLEAN</sort_attribute_type>
+		<default_attribute>false</default_attribute>
+		<display_value>
+			<value language="en">featured</value>
+			<value language="fr">featuredFR</value>
+		</display_value>
+	</sort_attribute>
+
+	<sort_attribute>
+		<sort_attribute_guid>c84e871b-924d-4d36-82d3-609c37cfe487</sort_attribute_guid>
+		<business_object_id>Featured</business_object_id>
+		<store_code>MOBEE</store_code>
+		<descending>false</descending>
+		<sort_attribute_group>FIELD</sort_attribute_group>
+		<sort_attribute_type>BOOLEAN</sort_attribute_type>
+		<default_attribute>false</default_attribute>
+		<display_value>
+			<value language="en">Not Featured</value>
+			<value language="fr">FR Not Featured</value>
+		</display_value>
+	</sort_attribute>
+
+	<sort_attribute>
+		<sort_attribute_guid>92e88795-c602-45c2-99fa-7f062a806226</sort_attribute_guid>
+		<business_object_id>Price</business_object_id>
+		<store_code>MOBEE</store_code>
+		<descending>false</descending>
+		<sort_attribute_group>FIELD</sort_attribute_group>
+		<sort_attribute_type>NUMBER</sort_attribute_type>
+		<default_attribute>false</default_attribute>
+		<display_value>
+			<value language="en">Price low to high</value>
+			<value language="fr">FR Price low to high</value>
+		</display_value>
+	</sort_attribute>
+
+	<sort_attribute>
+		<sort_attribute_guid>d9a1d8bd-d00d-4d8c-a83a-c398bf542597</sort_attribute_guid>
+		<business_object_id>Price</business_object_id>
+		<store_code>MOBEE</store_code>
+		<descending>true</descending>
+		<sort_attribute_group>FIELD</sort_attribute_group>
+		<sort_attribute_type>NUMBER</sort_attribute_type>
+		<default_attribute>false</default_attribute>
+		<display_value>
+			<value language="en">Price high to low</value>
+			<value language="fr">FR Price high to low</value>
+		</display_value>
+	</sort_attribute>
+
+	<sort_attribute>
+		<sort_attribute_guid>5462caef-3b73-47b0-84a5-61c3def95fa3</sort_attribute_guid>
+		<business_object_id>Relevance</business_object_id>
+		<store_code>MOBEE</store_code>
+		<descending>true</descending>
+		<sort_attribute_group>FIELD</sort_attribute_group>
+		<sort_attribute_type>STRING</sort_attribute_type>
+		<default_attribute>true</default_attribute>
+		<display_value>
+			<value language="en">Best Match</value>
+			<value language="fr">FR Best Match</value>
+		</display_value>
+	</sort_attribute>
+
+</sort_attributes>

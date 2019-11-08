@@ -27,7 +27,7 @@ import com.elasticpath.commons.beanframework.BeanFactory;
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.attribute.AttributeGroup;
 import com.elasticpath.domain.attribute.AttributeGroupAttribute;
-import com.elasticpath.domain.cartmodifier.CartItemModifierGroup;
+import com.elasticpath.domain.modifier.ModifierGroup;
 import com.elasticpath.domain.catalog.ProductType;
 import com.elasticpath.domain.catalog.impl.ProductTypeImpl;
 import com.elasticpath.domain.skuconfiguration.SkuOption;
@@ -37,7 +37,7 @@ import com.elasticpath.importexport.common.caching.CachingService;
 import com.elasticpath.importexport.common.dto.catalogs.MultiSkuDTO;
 import com.elasticpath.importexport.common.dto.catalogs.ProductTypeDTO;
 import com.elasticpath.importexport.common.exception.runtime.PopulationRollbackException;
-import com.elasticpath.service.cartitemmodifier.CartItemModifierService;
+import com.elasticpath.service.modifier.ModifierService;
 
 /**
  * Verify that ProductTypeAdapterTest populates catalog domain object from DTO properly and vice versa. 
@@ -56,16 +56,16 @@ public class ProductTypeAdapterTest {
 
 	@Mock private BeanFactory mockBeanFactory;
 	@Mock private CachingService mockCachingService;
-	@Mock private CartItemModifierService mockCartItemModifierService;
+	@Mock private ModifierService mockModifierService;
 	@Mock private SkuOption mockSkuOption;
 	@Mock private TaxCode mockTaxCode;
 	@Mock private AttributeGroupHelper mockAttributeGroupHelper;
-	@Mock private CartItemModifierGroup mockCartItemModifierGroup;
+	@Mock private ModifierGroup mockModifierGroup;
 
 	@Before
 	public void setUp() throws Exception {
 		when(mockTaxCode.getCode()).thenReturn(PRODUCT_TAX_CODE);
-		when(mockBeanFactory.getBean(ContextIdNames.PRODUCT_TYPE)).thenReturn(new ProductTypeImpl());
+		when(mockBeanFactory.getPrototypeBean(ContextIdNames.PRODUCT_TYPE, ProductType.class)).thenReturn(new ProductTypeImpl());
 		when(mockCachingService.findTaxCodeByCode(PRODUCT_TAX_CODE)).thenReturn(mockTaxCode);
 	}
 
@@ -81,8 +81,8 @@ public class ProductTypeAdapterTest {
 		when(mockDomain.getTaxCode()).thenReturn(mockTaxCode);
 		when(mockDomain.isMultiSku()).thenReturn(true);
 		when(mockDomain.isExcludedFromDiscount()).thenReturn(false);
-		when(mockDomain.getCartItemModifierGroups()).thenReturn(ImmutableSet.of(mockCartItemModifierGroup));
-		when(mockCartItemModifierGroup.getCode()).thenReturn(CARTITEM_MODIFIER_GROUP_CODE);
+		when(mockDomain.getModifierGroups()).thenReturn(ImmutableSet.of(mockModifierGroup));
+		when(mockModifierGroup.getCode()).thenReturn(CARTITEM_MODIFIER_GROUP_CODE);
 
 		final ProductTypeAdapter productTypeAdapter = new ProductTypeAdapter() {
 			@Override
@@ -114,7 +114,7 @@ public class ProductTypeAdapterTest {
 		assertEquals(Collections.singletonList(ASSIGNED_SKU_OPTION), productTypeDTO.getMultiSku().getAssignedSkuOptions());
 		assertEquals(Collections.singletonList(ASSIGNED_ATTRIBUTE), productTypeDTO.getAssignedAttributes());
 
-		assertThat(productTypeDTO.getAssignedCartItemModifierGroups(), contains(CARTITEM_MODIFIER_GROUP_CODE));
+		assertThat(productTypeDTO.getAssignedModifierGroups(), contains(CARTITEM_MODIFIER_GROUP_CODE));
 	}
 
 	private void setUpProductTypeAdapter(
@@ -122,7 +122,7 @@ public class ProductTypeAdapterTest {
 		productTypeAdapter.setBeanFactory(mockBeanFactory);
 		productTypeAdapter.setCachingService(mockCachingService);
 		productTypeAdapter.setAttributeGroupHelper(mockAttributeGroupHelper);
-		productTypeAdapter.setCartItemModifierService(mockCartItemModifierService);
+		productTypeAdapter.setModifierService(mockModifierService);
 	}
 
 	private ProductTypeAdapter createDefaultProductTypeAdapter() {
@@ -142,7 +142,7 @@ public class ProductTypeAdapterTest {
 		dto.setDefaultTaxCode(PRODUCT_TAX_CODE);
 		dto.setMultiSku(multiSku);
 		dto.setNoDiscount(Boolean.FALSE);
-		dto.setAssignedCartItemModifierGroups(Collections.singletonList(CARTITEM_MODIFIER_GROUP_CODE));
+		dto.setAssignedModifierGroups(Collections.singletonList(CARTITEM_MODIFIER_GROUP_CODE));
 		return dto;
 	}
 
@@ -177,9 +177,9 @@ public class ProductTypeAdapterTest {
 		};
 		setUpProductTypeAdapter(productTypeAdapter);
 
-		final HashSet<CartItemModifierGroup> cartItemModifierGroups = new HashSet<>();
-		when(mockDomain.getCartItemModifierGroups()).thenReturn(cartItemModifierGroups);
-		when(mockCartItemModifierService.findCartItemModifierGroupByCode(CARTITEM_MODIFIER_GROUP_CODE)).thenReturn(mockCartItemModifierGroup);
+		final HashSet<ModifierGroup> cartItemModifierGroups = new HashSet<>();
+		when(mockDomain.getModifierGroups()).thenReturn(cartItemModifierGroups);
+		when(mockModifierService.findModifierGroupByCode(CARTITEM_MODIFIER_GROUP_CODE)).thenReturn(mockModifierGroup);
 		
 		final ProductTypeDTO dto = createProductTypeDTO();
 		productTypeAdapter.populateDomain(dto, mockDomain);
@@ -194,7 +194,7 @@ public class ProductTypeAdapterTest {
 		verify(mockDomain).addOrUpdateSkuOption(mockSkuOption);
 		verify(mockDomain).setExcludedFromDiscount(Boolean.FALSE);
 
-		assertThat(cartItemModifierGroups, contains(mockCartItemModifierGroup));
+		assertThat(cartItemModifierGroups, contains(mockModifierGroup));
 
 	}
 

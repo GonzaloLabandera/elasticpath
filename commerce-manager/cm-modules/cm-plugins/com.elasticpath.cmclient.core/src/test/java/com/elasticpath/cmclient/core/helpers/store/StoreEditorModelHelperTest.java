@@ -33,6 +33,7 @@ import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 
 import com.elasticpath.base.exception.EpServiceException;
+import com.elasticpath.domain.customer.StoreCustomerAttribute;
 import com.elasticpath.domain.payment.PaymentGateway;
 import com.elasticpath.domain.store.CreditCardType;
 import com.elasticpath.domain.store.Store;
@@ -141,6 +142,11 @@ public class StoreEditorModelHelperTest {
 
 			@Override
 			List<SettingModel> getSystemSettings(final StoreEditorModel model) {
+				return Collections.emptyList();
+			}
+
+			@Override
+			List<StoreCustomerAttributeModel> getStoreCustomerAttributes(final StoreEditorModel model) {
 				return Collections.emptyList();
 			}
 		};
@@ -349,6 +355,11 @@ public class StoreEditorModelHelperTest {
 		final StoreEditorModelHelper editorModelHelper = new StoreEditorModelHelper() {
 			@Override
 			Map<String, String> getSettingsMap(final StoreEditorModel model) {
+				return Collections.emptyMap();
+			}
+
+			@Override
+			Map<String, StoreCustomerAttribute> getStoreCustomerAttributeMap(final StoreEditorModel model) {
 				return Collections.emptyMap();
 			}
 		};

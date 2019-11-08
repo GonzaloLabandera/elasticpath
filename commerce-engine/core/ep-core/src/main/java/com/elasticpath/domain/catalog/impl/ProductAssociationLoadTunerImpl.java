@@ -6,6 +6,10 @@
  */
 package com.elasticpath.domain.catalog.impl;
 
+import static com.elasticpath.persistence.support.FetchFieldConstants.CATALOG;
+
+import org.apache.openjpa.persistence.FetchPlan;
+
 import com.elasticpath.domain.catalog.ProductAssociationLoadTuner;
 import com.elasticpath.domain.catalog.ProductLoadTuner;
 import com.elasticpath.domain.impl.AbstractEpDomainImpl;
@@ -74,4 +78,14 @@ public class ProductAssociationLoadTunerImpl extends AbstractEpDomainImpl implem
 		return this;
 	}
 
+	@Override
+	public void configure(final FetchPlan fetchPlan) {
+		if (isLoadingCatalog()) {
+			fetchPlan.addField(ProductAssociationImpl.class, CATALOG);
+		}
+
+		if (productLoadTuner != null) {
+			productLoadTuner.configure(fetchPlan);
+		}
+	}
 }

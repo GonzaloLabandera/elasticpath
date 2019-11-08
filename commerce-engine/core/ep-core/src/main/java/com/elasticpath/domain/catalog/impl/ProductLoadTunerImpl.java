@@ -3,10 +3,18 @@
  */
 package com.elasticpath.domain.catalog.impl;
 
+import static com.elasticpath.persistence.support.FetchFieldConstants.ATTRIBUTE_VALUE_MAP;
+import static com.elasticpath.persistence.support.FetchFieldConstants.LOCALE_DEPENDANT_FIELDS;
+import static com.elasticpath.persistence.support.FetchFieldConstants.LOCALIZED_PROPERTIES_MAP;
+import static com.elasticpath.persistence.support.FetchFieldConstants.PRODUCT_CATEGORIES;
+import static com.elasticpath.persistence.support.FetchFieldConstants.PRODUCT_SKUS_INTERNAL;
+import static com.elasticpath.persistence.support.FetchFieldConstants.PRODUCT_TYPE;
+
 import java.util.Objects;
 
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.commons.lang.builder.ToStringStyle;
+import org.apache.openjpa.persistence.FetchPlan;
 
 import com.elasticpath.commons.constants.ContextIdNames;
 import com.elasticpath.domain.catalog.CategoryLoadTuner;
@@ -15,6 +23,7 @@ import com.elasticpath.domain.catalog.ProductSkuLoadTuner;
 import com.elasticpath.domain.catalog.ProductTypeLoadTuner;
 import com.elasticpath.domain.impl.AbstractEpDomainImpl;
 import com.elasticpath.persistence.api.LoadTuner;
+import com.elasticpath.persistence.support.FetchGroupConstants;
 
 /**
  * Represents a tuner to control product load. A product load tuner can be used in some services to fine control what data to be loaded for a
@@ -348,6 +357,51 @@ public class ProductLoadTunerImpl extends AbstractEpDomainImpl implements Produc
 		mergedProductLoadTuner.productTypeLoadTuner = productTypeLoadTuner.merge(productLoadTuner.getProductTypeLoadTuner());
 
 		return mergedProductLoadTuner;
+	}
+
+	@Override
+	public void configure(final FetchPlan fetchPlan) {
+		// Assume we'll always want locale dependant fields
+		fetchPlan.addField(ProductImpl.class, LOCALE_DEPENDANT_FIELDS);
+
+		// Assume we'll always want Brand localized properties
+		fetchPlan.addField(BrandImpl.class, LOCALIZED_PROPERTIES_MAP);
+
+		// Assume we'll always want bundle constituents if the product is a bundle
+		fetchPlan.addFetchGroup(FetchGroupConstants.BUNDLE_CONSTITUENTS);
+
+		if (isLoadingAttributeValue()) {
+			fetchPlan.addField(ProductImpl.class, ATTRIBUTE_VALUE_MAP);
+		}
+		if (isLoadingCategories()) {
+			fetchPlan.addField(ProductImpl.class, PRODUCT_CATEGORIES);
+			if (categoryLoadTuner != null) {
+				categoryLoadTuner.configure(fetchPlan);
+			}
+		}
+		if (isLoadingDefaultSku() && productSkuLoadTuner != null) {
+			productSkuLoadTuner.configure(fetchPlan);
+		}
+		if (isLoadingProductType()) {
+			fetchPlan.addField(ProductImpl.class, PRODUCT_TYPE);
+
+			if (productTypeLoadTuner != null) {
+				productTypeLoadTuner.configure(fetchPlan);
+			}
+		}
+		if (isLoadingSkus()) {
+			fetchPlan.addField(ProductImpl.class, PRODUCT_SKUS_INTERNAL);
+			// Adding these two fetch groups works around some strange OpenJPA issues with fully loading skus
+			// as bundle constituents
+			fetchPlan.addFetchGroup(FetchGroupConstants.PRODUCT_INDEX);
+			fetchPlan.addFetchGroup(FetchGroupConstants.PRODUCT_SKU_INDEX);
+
+			if (productSkuLoadTuner != null) {
+				productSkuLoadTuner.configure(fetchPlan);
+			}
+		}
+
+		fetchPlan.setMaxFetchDepth(FetchPlan.DEPTH_INFINITE);
 	}
 
 	/**

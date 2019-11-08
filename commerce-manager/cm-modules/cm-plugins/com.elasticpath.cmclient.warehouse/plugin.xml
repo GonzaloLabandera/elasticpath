@@ -7,7 +7,7 @@
    <extension point="org.eclipse.ui.perspectives">
       <perspective
             class="com.elasticpath.cmclient.warehouse.perspective.WarehousePerspectiveFactory"
-	    	icon="icons/return_default_22.png"
+	    	icon="icons/empty_1x1.png"
             id="com.elasticpath.cmclient.warehouse.perspective"
             name="%warehousePerspective.name">
       </perspective>
@@ -21,7 +21,7 @@
       <view
 	   category="com.elasticpath.cmclient.warehouse.views.category"
 	   class="com.elasticpath.cmclient.warehouse.views.orderreturn.OrderReturnSearchResultsView"
-	   icon="icons/return_default_22.png"
+	   icon="icons/empty_1x1.png"
 	   id="com.elasticpath.cmclient.warehouse.views.orderreturn.OrderReturnSearchResultsView"
 	   name="%orderReturnSearchResultsView.name">
       </view>
@@ -29,7 +29,7 @@
 	   allowMultiple="true"
 	   category="com.elasticpath.cmclient.warehouse.views.category"
 	   class="com.elasticpath.cmclient.warehouse.views.SearchView"
-	   icon="icons/search_default_22.png"
+	   icon="icons/empty_1x1.png"
 	   id="com.elasticpath.cmclient.warehouse.views.SearchView"
 	   name="%searchView.name">
       </view>
@@ -38,14 +38,14 @@
    <extension point="org.eclipse.ui.editors">
 	   <editor
 		  name="%orderReturnEditor.name"
-		  icon="icons/order_default_22.png"
+		  icon="icons/empty_1x1.png"
 		  class="com.elasticpath.cmclient.warehouse.editors.orderreturn.OrderReturnEditor"
 		  id="com.elasticpath.cmclient.warehouse.editors.orderreturn.OrderReturnEditor"
 		  contributorClass="com.elasticpath.cmclient.core.editors.BaseCmClientEditorContributor">
 	   </editor>
 	   <editor
 		  name="%inventoryEditor.name"
-		  icon="icons/inventory_default_22.png"
+		  icon="icons/empty_1x1.png"
 		  class="com.elasticpath.cmclient.warehouse.editors.inventory.InventoryEditor"
 		  id="com.elasticpath.cmclient.warehouse.editors.inventory.InventoryEditor"
 		  contributorClass="com.elasticpath.cmclient.core.editors.BaseCmClientEditorContributor">
@@ -108,7 +108,8 @@
 				  label="%SwitchWarehouseAction.name"
 				  style="pulldown"
 				  toolbarPath="com.elasticpath.cmclient.core.toolbars.actions/com.elasticpath.cmclient.warehouse.toolbarMenus.CompleteShipment"
-				  tooltip="%SwitchWarehouseAction.name">
+				  tooltip="%SwitchWarehouseAction.name"
+					mode="FORCE_TEXT">
      	</action>
       </actionSet>
    </extension>
@@ -138,7 +139,8 @@
 			       icon="icons/shipping-complete_default_34.png"
 			       id="com.elasticpath.cmclient.warehouse.toolbarMenus.CompleteShipment"
 			       label="%CompleteShipmentAction.name"
-			       tooltip="%CompleteShipmentAction.name">
+			       tooltip="%CompleteShipmentAction.name"
+						 mode="FORCE_TEXT">
 			       <visibleWhen>
 				       <with
 					    variable="activeContexts">

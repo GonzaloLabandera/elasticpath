@@ -4,7 +4,7 @@
 	<family>
 		<name>lookups</name>
 		<description>
-			<![CDATA[A lookup is a means of looking up an [item][items], [navigation node][navigations] or [purchase][purchases].]]>
+			<![CDATA[A lookup is a means of looking up an [item](items.md), [navigation node](navigations.md) or [purchase](purchases.md).]]>
 		</description>
 
 		<resource>

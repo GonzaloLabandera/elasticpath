@@ -1,0 +1,217 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans
+		xmlns="http://www.springframework.org/schema/beans"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xmlns:camel="http://camel.apache.org/schema/spring"
+		xsi:schemaLocation="
+				http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+				http://camel.apache.org/schema/spring http://camel.apache.org/schema/spring/camel-spring.xsd
+		">
+
+	<camel:camelContext id="ep-domain-handler" errorHandlerRef="domainDeadLetterErrorHandler" xmlns="http://camel.apache.org/schema/spring"
+						threadNamePattern="Camel (#camelId#) thread ##counter#">
+		<route id="domainEventMessageRoute">
+			<from ref="epDomainHandlerInternalEndpoint"/>
+			<unmarshal ref="eventMessageDataFormat"/>
+			<process ref="domainEventMessageProcessor"/>
+		</route>
+		<route id="domainEventMessageDeadLetterRoute">
+			<from ref="domainDeadLetterEventExternalEndpoint"/>
+			<process ref="domainExceptionHandler"/>
+		</route>
+	</camel:camelContext>
+
+	<bean id="domainDeadLetterErrorHandler" class="org.apache.camel.builder.DeadLetterChannelBuilder">
+		<constructor-arg name="deadLetter" ref="domainDeadLetterEventExternalEndpoint"/>
+		<property name="useOriginalMessage" value="true"/>
+	</bean>
+
+	<bean id="epDomainHandlerInternalEndpoint" parent="domainEventExternalEndpoint">
+		<property name="camelContextId" value="ep-domain-handler"/>
+		<property name="context" value="domainProjectionBuilderHandler"/>
+	</bean>
+
+	<bean id="domainDeadLetterEventExternalEndpoint" class="com.elasticpath.messaging.camel.SettingValueBackedCamelEndpointFactoryBean">
+		<property name="path" value="COMMERCE/SYSTEM/MESSAGING/DOMAIN/deadLetterChannelUri"/>
+		<property name="camelContextId" value="ep-domain-handler"/>
+		<property name="settingsReader" ref="settingsReader"/>
+	</bean>
+
+	<bean name="domainEventMessageProcessor" class="com.elasticpath.domain.message.handler.domain.DomainEventMessageProcessor">
+		<constructor-arg name="eventMessageHandlerFactory" ref="domainEventMessageRouter"/>
+	</bean>
+
+	<bean name="domainEventMessageRouter" class="com.elasticpath.domain.message.handler.domain.DomainEventMessageHandlerFactory">
+		<constructor-arg name="eventMessageHandlers" ref="domainEventMessageHandlers"/>
+	</bean>
+
+	<bean id="domainEventMessageHandlers" class="org.springframework.beans.factory.config.MapFactoryBean">
+		<property name="sourceMap">
+			<map>
+				<entry key="SKU_OPTION_CREATED" value-ref="skuOptionCreatedHandler"/>
+				<entry key="SKU_OPTION_UPDATED" value-ref="skuOptionUpdatedHandler"/>
+				<entry key="SKU_OPTION_DELETED" value-ref="skuOptionDeletedHandler"/>
+				<entry key="BRAND_CREATED" value-ref="brandCreatedHandler"/>
+				<entry key="BRAND_UPDATED" value-ref="brandUpdatedHandler"/>
+				<entry key="BRAND_DELETED" value-ref="brandDeletedHandler"/>
+				<entry key="MODIFIER_GROUP_CREATED" value-ref="modifierGroupCreatedHandler"/>
+				<entry key="MODIFIER_GROUP_UPDATED" value-ref="modifierGroupUpdatedHandler"/>
+				<entry key="MODIFIER_GROUP_DELETED" value-ref="modifierGroupDeletedHandler"/>
+				<entry key="ATTRIBUTE_CREATED" value-ref="attributeCreatedHandler"/>
+				<entry key="ATTRIBUTE_UPDATED" value-ref="attributeUpdatedHandler"/>
+				<entry key="ATTRIBUTE_DELETED" value-ref="attributeDeletedHandler"/>
+				<entry key="PRODUCT_CREATED" value-ref="productCreatedEventHandler"/>
+				<entry key="PRODUCT_UPDATED" value-ref="productUpdatedEventHandler"/>
+				<entry key="PRODUCT_DELETED" value-ref="productDeletedEventHandler"/>
+				<entry key="CATEGORY_CREATED" value-ref="categoryCreatedHandler"/>
+				<entry key="CATEGORY_UPDATED" value-ref="categoryUpdatedHandler"/>
+				<entry key="CATEGORY_DELETED" value-ref="categoryDeletedHandler"/>
+				<entry key="CATEGORY_LINK_CREATED" value-ref="categoryLinkedHandler"/>
+				<entry key="CATEGORY_LINK_UPDATED" value-ref="linkedCategoryUpdatedHandler"/>
+				<entry key="CATEGORY_LINK_DELETED" value-ref="categoryUnlinkedHandler"/>
+			</map>
+		</property>
+	</bean>
+
+	<bean name="skuOptionCreatedHandler" class="com.elasticpath.domain.message.handler.skuoption.handler.SkuOptionCreatedEventHandler">
+		<constructor-arg name="eventMessageHandlerHelper" ref="skuOptionEventMessageHandlerHelper"/>
+		<constructor-arg name="skuOptionUpdateProcessor" ref="skuOptionUpdateProcessor"/>
+	</bean>
+
+	<bean name="skuOptionUpdatedHandler" class="com.elasticpath.domain.message.handler.skuoption.handler.SkuOptionUpdatedEventHandler">
+		<constructor-arg name="eventMessageHandlerHelper" ref="skuOptionEventMessageHandlerHelper"/>
+		<constructor-arg name="skuOptionUpdateProcessor" ref="skuOptionUpdateProcessor"/>
+	</bean>
+
+	<bean name="skuOptionDeletedHandler" class="com.elasticpath.domain.message.handler.skuoption.handler.SkuOptionDeletedEventHandler">
+		<constructor-arg name="skuOptionUpdateProcessor" ref="skuOptionUpdateProcessor"/>
+	</bean>
+
+	<bean name="brandCreatedHandler" class="com.elasticpath.domain.message.handler.brand.handler.BrandCreatedEventHandler">
+		<constructor-arg name="eventMessageHandlerHelper" ref="brandEventMessageHandlerHelper"/>
+		<constructor-arg name="brandUpdateProcessor" ref="brandUpdateProcessor"/>
+	</bean>
+
+	<bean name="brandUpdatedHandler" class="com.elasticpath.domain.message.handler.brand.handler.BrandUpdatedEventHandler">
+		<constructor-arg name="eventMessageHandlerHelper" ref="brandEventMessageHandlerHelper"/>
+		<constructor-arg name="brandUpdateProcessor" ref="brandUpdateProcessor"/>
+	</bean>
+
+	<bean name="brandDeletedHandler" class="com.elasticpath.domain.message.handler.brand.handler.BrandDeletedEventHandler">
+		<constructor-arg name="brandUpdateProcessor" ref="brandUpdateProcessor"/>
+	</bean>
+
+	<bean name="modifierGroupCreatedHandler" class="com.elasticpath.domain.message.handler.fieldmetadata.handler.ModifierGroupCreatedEventHandler">
+		<constructor-arg name="eventMessageHandlerHelper" ref="modifierGroupEventMessageHandlerHelper"/>
+		<constructor-arg name="modifierGroupUpdateProcessor" ref="modifierGroupUpdateProcessor"/>
+	</bean>
+
+	<bean name="modifierGroupUpdatedHandler" class="com.elasticpath.domain.message.handler.fieldmetadata.handler.ModifierGroupUpdatedEventHandler">
+		<constructor-arg name="eventMessageHandlerHelper" ref="modifierGroupEventMessageHandlerHelper"/>
+		<constructor-arg name="modifierGroupUpdateProcessor" ref="modifierGroupUpdateProcessor"/>
+	</bean>
+
+	<bean name="modifierGroupDeletedHandler" class="com.elasticpath.domain.message.handler.fieldmetadata.handler.ModifierGroupDeletedEventHandler">
+		<constructor-arg name="modifierGroupUpdateProcessor" ref="modifierGroupUpdateProcessor"/>
+	</bean>
+
+	<bean name="productCreatedEventHandler" class="com.elasticpath.domain.message.handler.offer.handler.ProductCreatedEventHandler">
+		<constructor-arg name="eventMessageHandlerHelper" ref="productMessageHandlerHelper"/>
+		<constructor-arg name="productUpdateProcessor" ref="productUpdateProcessor"/>
+	</bean>
+
+	<bean name="productUpdatedEventHandler" class="com.elasticpath.domain.message.handler.offer.handler.ProductUpdatedEventHandler">
+		<constructor-arg name="productEventMessageHandlerHelper" ref="productMessageHandlerHelper"/>
+		<constructor-arg name="productBundleEventMessageHandlerHelper" ref="productBundleMessageHandlerHelper"/>
+		<constructor-arg name="productUpdateProcessor" ref="productUpdateProcessor"/>
+	</bean>
+
+	<bean name="productDeletedEventHandler" class="com.elasticpath.domain.message.handler.offer.handler.ProductDeletedEventHandler">
+		<constructor-arg name="productUpdateProcessor" ref="productUpdateProcessor"/>
+	</bean>
+
+	<bean name="skuOptionEventMessageHandlerHelper"
+		  class="com.elasticpath.domain.message.handler.skuoption.helper.SkuOptionEventMessageHandlerHelper">
+		<constructor-arg ref="skuOptionService"/>
+	</bean>
+
+	<bean name="brandEventMessageHandlerHelper"
+		  class="com.elasticpath.domain.message.handler.brand.helper.BrandEventMessageHandlerHelper">
+		<constructor-arg ref="brandService"/>
+	</bean>
+
+	<bean name="modifierGroupEventMessageHandlerHelper"
+		  class="com.elasticpath.domain.message.handler.fieldmetadata.helper.ModifierGroupEventMessageHandlerHelper">
+		<constructor-arg ref="modifierService"/>
+	</bean>
+
+	<bean name="productMessageHandlerHelper" class="com.elasticpath.domain.message.handler.offer.helper.ProductEventMessageHandlerHelper">
+		<constructor-arg name="productLookup" ref="productLookup"/>
+	</bean>
+
+	<bean name="productBundleMessageHandlerHelper" class="com.elasticpath.domain.message.handler.offer.helper.ProductBundleEventMessageHandlerHelper">
+		<constructor-arg name="productBundleService" ref="productBundleService"/>
+	</bean>
+
+	<bean name="domainExceptionHandler" class="com.elasticpath.domain.message.handler.exception.DomainExceptionHandler"/>
+
+	<bean name="attributeCreatedHandler" class="com.elasticpath.domain.message.handler.attribute.handler.AttributeCreatedEventHandler">
+		<constructor-arg name="eventMessageHandlerHelper" ref="attributeEventMessageHandlerHelper"/>
+		<constructor-arg name="attributeUpdateProcessor" ref="attributeUpdateProcessor"/>
+	</bean>
+
+	<bean name="attributeUpdatedHandler" class="com.elasticpath.domain.message.handler.attribute.handler.AttributeUpdatedEventHandler">
+		<constructor-arg name="eventMessageHandlerHelper" ref="attributeEventMessageHandlerHelper"/>
+		<constructor-arg name="attributeUpdateProcessor" ref="attributeUpdateProcessor"/>
+	</bean>
+
+	<bean name="attributeDeletedHandler" class="com.elasticpath.domain.message.handler.attribute.handler.AttributeDeletedEventHandler">
+		<constructor-arg name="attributeUpdateProcessor" ref="attributeUpdateProcessor"/>
+	</bean>
+
+	<bean name="attributeEventMessageHandlerHelper"
+		  class="com.elasticpath.domain.message.handler.attribute.helper.AttributeEventMessageHandlerHelper">
+		<constructor-arg ref="attributeService"/>
+	</bean>
+
+	<bean name="categoryCreatedHandler" class="com.elasticpath.domain.message.handler.category.handler.CategoryCreatedEventHandler">
+		<constructor-arg name="eventMessageHandlerHelper" ref="categoryEventMessageHandlerHelper"/>
+		<constructor-arg name="categoryUpdateProcessor" ref="categoryUpdateProcessor"/>
+	</bean>
+
+	<bean name="categoryUpdatedHandler" class="com.elasticpath.domain.message.handler.category.handler.CategoryUpdatedEventHandler">
+		<constructor-arg name="eventMessageHandlerHelper" ref="categoryEventMessageHandlerHelper"/>
+		<constructor-arg name="categoryUpdateProcessor" ref="categoryUpdateProcessor"/>
+	</bean>
+
+	<bean name="categoryDeletedHandler" class="com.elasticpath.domain.message.handler.category.handler.CategoryDeletedEventHandler">
+		<constructor-arg name="categoryUpdateProcessor" ref="categoryUpdateProcessor"/>
+		<constructor-arg name="linkedCategoryEventMessageHelper" ref="linkedCategoryEventMessageHelper"/>
+	</bean>
+
+	<bean name="categoryLinkedHandler" class="com.elasticpath.domain.message.handler.category.handler.CategoryLinkedEventHandler">
+		<constructor-arg name="eventMessageHandlerHelper" ref="categoryEventMessageHandlerHelper"/>
+		<constructor-arg name="categoryUpdateProcessor" ref="categoryUpdateProcessor"/>
+	</bean>
+
+	<bean name="linkedCategoryUpdatedHandler" class="com.elasticpath.domain.message.handler.category.handler.LinkedCategoryUpdatedEventHandler">
+		<constructor-arg name="eventMessageHandlerHelper" ref="categoryEventMessageHandlerHelper"/>
+		<constructor-arg name="linkedCategoryEventMessageHelper" ref="linkedCategoryEventMessageHelper"/>
+		<constructor-arg name="categoryUpdateProcessor" ref="categoryUpdateProcessor"/>
+	</bean>
+
+	<bean name="categoryUnlinkedHandler" class="com.elasticpath.domain.message.handler.category.handler.CategoryUnlinkedEventHandler">
+		<constructor-arg name="categoryUpdateProcessor" ref="categoryUpdateProcessor"/>
+		<constructor-arg name="linkedCategoryEventMessageHelper" ref="linkedCategoryEventMessageHelper"/>
+	</bean>
+
+	<bean name="categoryEventMessageHandlerHelper"
+		  class="com.elasticpath.domain.message.handler.category.helper.CategoryEventMessageHandlerHelper">
+		<constructor-arg ref="categoryLookup"/>
+	</bean>
+
+	<bean id="linkedCategoryEventMessageHelper" class="com.elasticpath.domain.message.handler.category.helper.LinkedCategoryEventMessageHelperImpl">
+		<constructor-arg name="storeService" ref="storeService"/>
+	</bean>
+
+</beans>

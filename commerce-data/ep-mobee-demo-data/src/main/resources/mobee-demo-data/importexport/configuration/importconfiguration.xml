@@ -120,14 +120,23 @@
 	  <importer type="CUSTOMER_CONSENT">
 		  <importstrategy>INSERT</importstrategy>
 	  </importer>
+	  <importer type="STORE_CUSTOMER_ATTRIBUTE">
+		  <importstrategy>INSERT_OR_UPDATE</importstrategy>
+	  </importer>
+	  <importer type="ATTRIBUTE_POLICY">
+		  <importstrategy>INSERT_OR_UPDATE</importstrategy>
+	  </importer>
 	  <importer type="FACET">
+		  <importstrategy>INSERT_OR_UPDATE</importstrategy>
+	  </importer>
+	  <importer type="SORT_ATTRIBUTE">
 		  <importstrategy>INSERT_OR_UPDATE</importstrategy>
 	  </importer>
   </importstrategy>
   <packager type="NONE"/>
   <retrieval>
     <method>FILE</method>
-    		<source>${data.population.data.directory}/mobee-demo-data/importexport/</source>
+    		<source>${data.population.data.directory}/mobee-demo-data/mobee-demo-data/importexport/</source>
   </retrieval>
   <transformerschain/>
 </importconfiguration>

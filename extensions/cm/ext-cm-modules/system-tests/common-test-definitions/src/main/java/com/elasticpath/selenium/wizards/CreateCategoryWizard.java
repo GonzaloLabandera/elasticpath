@@ -1,3 +1,6 @@
+/*
+ * Copyright (c) Elastic Path Software Inc., 2019
+ */
 package com.elasticpath.selenium.wizards;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -8,6 +11,7 @@ import org.openqa.selenium.WebDriver;
 import com.elasticpath.selenium.dialogs.EditDecimalValueAttributeDialog;
 import com.elasticpath.selenium.dialogs.EditLongTextAttributeDialog;
 import com.elasticpath.selenium.dialogs.EditShortTextAttributeDialog;
+import com.elasticpath.selenium.util.Utility;
 
 /**
  * Create Category Wizard.
@@ -20,6 +24,8 @@ public class CreateCategoryWizard extends AbstractWizard {
 	private static final String CATEGORY_TYPE_COMBO_CSS = CREATE_CATEGORY_PARENT_CSS + "div[widget-id='Category Type'][widget-type='CCombo']";
 	private static final String ENABLE_DATE_TIME_CALENDAR_ICON_CSS = CREATE_CATEGORY_PARENT_CSS + "div[widget-id='Enable Date/Time'] "
 			+ "div[style*='.png']";
+	private static final String ENABLE_DATE_TIME_INPUT_CSS = CREATE_CATEGORY_PARENT_CSS + "div[widget-id='Enable Date/Time'] input";
+	private static final String DISABLE_DATE_TIME_INPUT_CSS = CREATE_CATEGORY_PARENT_CSS + "div[widget-id='Disable Date/Time'] input";
 	private static final String STORE_VISIBLE_CHECKBOX_CSS = CREATE_CATEGORY_PARENT_CSS + "div[widget-type='Button'] > div[style*='e53cf03a.png']";
 	private static final String CALENDAR_OK_BUTTON_CSS = "div[widget-id= 'Edit Date and Time Value'] div[widget-id='OK'][seeable='true']";
 	private static final String CREATE_CATEGORY_ATTRIBUTE_PARENT_CSS = "div[widget-id='Attributes'] ";
@@ -71,6 +77,24 @@ public class CreateCategoryWizard extends AbstractWizard {
 	public void enterCurrentEnableDateTime() {
 		click(getDriver().findElement(By.cssSelector(ENABLE_DATE_TIME_CALENDAR_ICON_CSS)));
 		click(getWaitDriver().waitForElementToBeClickable(By.cssSelector(CALENDAR_OK_BUTTON_CSS)));
+	}
+
+	/**
+	 * Enters enable date/time.
+	 *
+	 * @param datePlus number that we add to the current date
+	 */
+	public void enterEnableDateTime(final Integer datePlus) {
+		clearAndType(ENABLE_DATE_TIME_INPUT_CSS, Utility.getDateTimeWithPlus(datePlus));
+	}
+
+	/**
+	 * Enters disable date/time.
+	 *
+	 * @param datePlus number that we add to the current date
+	 */
+	public void enterDisableDateTime(final Integer datePlus) {
+		clearAndType(DISABLE_DATE_TIME_INPUT_CSS, Utility.getDateTimeWithPlus(datePlus));
 	}
 
 	/**
@@ -128,7 +152,26 @@ public class CreateCategoryWizard extends AbstractWizard {
 				ATTRIBUTE_NAME_COLUMNNAME))
 				.as("Unable to find attribute - " + attributeName)
 				.isTrue();
+		enterLongTextSelectedAttr(value);
+	}
 
+	/**
+	 * Enters long text attribute value without scrolling.
+	 *
+	 * @param value         the value.
+	 * @param attributeName the attribute name.
+	 */
+	public void enterLongTextAttribute(final String value, final String attributeName) {
+		getDriver().findElement(By.cssSelector(String.format(CREATE_CATEGORY_ATTRIBUTE_COLUMN_CSS, attributeName))).click();
+		enterLongTextSelectedAttr(value);
+	}
+
+	/**
+	 * Opens dialog and enters long text attribute value without scrolling.
+	 *
+	 * @param value short text value to be entered
+	 */
+	private void enterLongTextSelectedAttr(final String value) {
 		EditLongTextAttributeDialog editLongTextAttributeDialog = clickEditAttributeButtonLongText();
 		editLongTextAttributeDialog.enterLongTextValue(value);
 		editLongTextAttributeDialog.clickOKButton();
@@ -162,10 +205,42 @@ public class CreateCategoryWizard extends AbstractWizard {
 				ATTRIBUTE_NAME_COLUMNNAME))
 				.as("Unable to find attribute - " + attributeName)
 				.isTrue();
+		enterShortTextSelectedAttr(value);
+	}
 
+	/**
+	 * Enters short text attribute value without scrolling.
+	 *
+	 * @param value         the value.
+	 * @param attributeName the attribute name.
+	 */
+	public void enterShortTextAttribute(final String value, final String attributeName) {
+		getDriver().findElement(By.cssSelector(String.format(CREATE_CATEGORY_ATTRIBUTE_COLUMN_CSS, attributeName))).click();
+		enterShortTextSelectedAttr(value);
+	}
+
+	/**
+	 * Opens dialog and enters short text attribute value without scrolling.
+	 *
+	 * @param value short text value to be entered
+	 */
+	private void enterShortTextSelectedAttr(final String value) {
 		EditShortTextAttributeDialog editShortTextAttributeDialog = clickEditAttributeButtonShortText();
 		editShortTextAttributeDialog.enterShortTextValue(value);
 		editShortTextAttributeDialog.clickOKButton();
 	}
 
+	/**
+	 * Enters enable date/time.
+	 */
+	public void enterEnableDateTime(final String date) {
+		clearAndType(ENABLE_DATE_TIME_INPUT_CSS, date);
+	}
+
+	/**
+	 * Enters disable date/time.
+	 */
+	public void enterDisableDateTime(final String date) {
+		clearAndType(DISABLE_DATE_TIME_INPUT_CSS, date);
+	}
 }

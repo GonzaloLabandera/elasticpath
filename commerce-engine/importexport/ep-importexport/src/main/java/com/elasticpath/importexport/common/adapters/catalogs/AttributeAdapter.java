@@ -129,7 +129,7 @@ public class AttributeAdapter extends AbstractDomainAdapterImpl<Attribute, Attri
 
 	@Override
 	public Attribute createDomainObject() {
-		return getBeanFactory().getBean(ContextIdNames.ATTRIBUTE);
+		return getBeanFactory().getPrototypeBean(ContextIdNames.ATTRIBUTE, Attribute.class);
 	}
 
 	@Override

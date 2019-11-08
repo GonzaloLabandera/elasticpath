@@ -35,7 +35,7 @@ public class CartToOrderLinkRepositoryImpl<I extends CartIdentifier, LI extends 
 
 	@Override
 	public Observable<OrderIdentifier> getElements(final CartIdentifier identifier) {
-		IdentifierPart<String> scope = identifier.getScope();
+		IdentifierPart<String> scope = identifier.getCarts().getScope();
 		String cartId = identifier.getCartId().getValue();
 
 		return getOrderByCartId(scope.getValue(), cartId)

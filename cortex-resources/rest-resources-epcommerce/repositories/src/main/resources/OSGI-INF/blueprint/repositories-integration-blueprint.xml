@@ -83,6 +83,9 @@
 	<reference id="facetService"
 			   interface="com.elasticpath.service.search.FacetService"/>
 
+	<reference id="sortAttributeService"
+			   interface="com.elasticpath.service.search.SortAttributeService"/>
+
 	<reference id="productService"
 			interface="com.elasticpath.service.catalog.ProductService"/>
 
@@ -147,9 +150,8 @@
 	<reference id="couponService"
 			interface="com.elasticpath.service.rules.CouponService" />
 
-	<reference id="validCouponUseSpecification"
-			interface="com.elasticpath.domain.specifications.Specification"
-			component-name="validCouponUseSpecification"/>
+	<reference id="couponUsageService"
+			interface="com.elasticpath.service.rules.CouponUsageService" />
 
 	<reference id="categoryLookup"
 			   interface="com.elasticpath.service.catalog.CategoryLookup" filter="(caching=true)"/>
@@ -193,8 +195,8 @@
 				unbind-method="unloadStrategy"/>
 	</reference-list>
 
-	<reference id="cartItemModifierService"
-			   interface="com.elasticpath.service.cartitemmodifier.CartItemModifierService"/>
+	<reference id="modifierService"
+			   interface="com.elasticpath.service.modifier.ModifierService"/>
 
 	<reference id="shippingOptionService"
 			   interface="com.elasticpath.service.shipping.ShippingOptionService"/>
@@ -220,6 +222,14 @@
 	<reference id="purchaseCartValidationService"
 			 interface="com.elasticpath.service.shoppingcart.validation.PurchaseCartValidationService" />
 
+	<reference id="customerProfileAttributeService"
+			   interface="com.elasticpath.service.customer.CustomerProfileAttributeService"/>
+
+
+	<reference id="createCartValidationService"
+			 interface="com.elasticpath.service.shoppingcart.validation.CreateShoppingCartValidationService">
+	</reference>
+
 	<!-- export services -->
 
 	<service ref="paginatedResultTransformer"
@@ -243,8 +253,8 @@
 	<service ref="cartOrderRepository"
 			interface="com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder.CartOrderRepository"/>
 
-	<service ref="cartItemModifiersRepository"
-			 interface="com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder.CartItemModifiersRepository"/>
+	<service ref="modifiersRepository"
+			 interface="com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder.ModifiersRepository"/>
 
 	<service ref="customerPaymentMethodsRepository"
 			interface="com.elasticpath.rest.resource.integration.epcommerce.repository.customer.paymentmethods.CustomerPaymentMethodsRepository"/>
@@ -390,5 +400,12 @@
 
 	<service ref="cartPostProcessor"
 			 interface="com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder.CartPostProcessor"/>
+
+	<service ref="profileAttributeFieldTransformer"
+			 interface="com.elasticpath.rest.resource.integration.epcommerce.repository.customer.ProfileAttributeFieldTransformer"/>
+
+	<service ref="multicartResolutionStrategyListHolder"
+		  interface="com.elasticpath.rest.resource.integration.epcommerce.repository.cartorder.MultiCartResolutionStrategyHolder"
+		/>
 
 </blueprint>

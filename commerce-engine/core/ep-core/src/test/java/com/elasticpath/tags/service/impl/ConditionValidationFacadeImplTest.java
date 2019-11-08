@@ -65,7 +65,7 @@ public class ConditionValidationFacadeImplTest  {
 	 */
 	@Test
 	public void testValidateSingleNullTagDefinitionOfCondition() {
-		final Condition condition = new Condition(null, "", "");
+		final Condition condition = new Condition(null, "", "", "");
 		assertThatThrownBy(() -> validationFacade.validate(condition))
 			.as("Must not evaluate on conditions with null tag definition")
 			.isInstanceOf(IllegalArgumentException.class);
@@ -80,7 +80,7 @@ public class ConditionValidationFacadeImplTest  {
 		final TagDefinition tagDefinition = mock(TagDefinition.class, "tagDefinition");
 		when(tagDefinition.getValueType()).thenReturn(null);
 
-		final Condition condition = new Condition(tagDefinition, "", "");
+		final Condition condition = new Condition(tagDefinition, "", "", "");
 		assertThatThrownBy(() -> validationFacade.validate(condition))
 			.as("Must not evaluate on conditions with null tag definition")
 			.isInstanceOf(IllegalArgumentException.class);
@@ -94,7 +94,7 @@ public class ConditionValidationFacadeImplTest  {
 		final TagDefinition tagDefinition = mock(TagDefinition.class, "tagDefinition");
 		final TagValueType tagValueType = mock(TagValueType.class, "tagValueType");
 		final ValidationResult result = mock(ValidationResult.class, "validationResult");
-		final Condition condition = new Condition(tagDefinition, "", "");
+		final Condition condition = new Condition(tagDefinition, "", "", "");
 
 		when(tagDefinition.getValueType()).thenReturn(tagValueType);
 		when(tagValueType.getValidationConstraints()).thenReturn(null);
@@ -125,22 +125,22 @@ public class ConditionValidationFacadeImplTest  {
 		final TagDefinition tagDefinition11 = mock(TagDefinition.class, "tagDefinition11");
 		final TagValueType tagValueType11 = mock(TagValueType.class, "tagValueType11");
 		final ValidationResult result11 = mock(ValidationResult.class, "validationResult11");
-		final Condition condition11 = new Condition(tagDefinition11, "", "");
+		final Condition condition11 = new Condition(tagDefinition11, "", "", "");
 
 		final TagDefinition tagDefinition12 = mock(TagDefinition.class, "tagDefinition12");
 		final TagValueType tagValueType12 = mock(TagValueType.class, "tagValueType12");
 		final ValidationResult result12 = mock(ValidationResult.class, "validationResult12");
-		final Condition condition12 = new Condition(tagDefinition12, "", "");
+		final Condition condition12 = new Condition(tagDefinition12, "", "", "");
 
 		final TagDefinition tagDefinition21 = mock(TagDefinition.class, "tagDefinition21");
 		final TagValueType tagValueType21 = mock(TagValueType.class, "tagValueType21");
 		final ValidationResult result21 = mock(ValidationResult.class, "validationResult21");
-		final Condition condition21 = new Condition(tagDefinition21, "", "");
+		final Condition condition21 = new Condition(tagDefinition21, "", "", "");
 
 		final TagDefinition tagDefinition31 = mock(TagDefinition.class, "tagDefinition31");
 		final TagValueType tagValueType31 = mock(TagValueType.class, "tagValueType31");
 		final ValidationResult result31 = mock(ValidationResult.class, "validationResult31");
-		final Condition condition31 = new Condition(tagDefinition31, "", "");
+		final Condition condition31 = new Condition(tagDefinition31, "", "", "");
 
 		final LogicalOperator root = new LogicalOperator(LogicalOperatorType.AND);
 		root.addCondition(condition11);
@@ -198,22 +198,22 @@ public class ConditionValidationFacadeImplTest  {
 		final TagDefinition tagDefinition11 = mock(TagDefinition.class, "tagDefinition11");
 		final TagValueType tagValueType11 = mock(TagValueType.class, "tagValueType11");
 		final ValidationResult result11 = mock(ValidationResult.class, "validationResult11");
-		final Condition condition11 = new Condition(tagDefinition11, "", "");
+		final Condition condition11 = new Condition(tagDefinition11, "", "", "");
 
 		final TagDefinition tagDefinition12 = mock(TagDefinition.class, "tagDefinition12");
 		final TagValueType tagValueType12 = mock(TagValueType.class, "tagValueType12");
 		final ValidationResult result12 = mock(ValidationResult.class, "validationResult12");
-		final Condition condition12 = new Condition(tagDefinition12, "", "");
+		final Condition condition12 = new Condition(tagDefinition12, "", "", "");
 
 		final TagDefinition tagDefinition21 = mock(TagDefinition.class, "tagDefinition21");
 		final TagValueType tagValueType21 = mock(TagValueType.class, "tagValueType21");
 		final ValidationResult result21 = mock(ValidationResult.class, "validationResult21");
-		final Condition condition21 = new Condition(tagDefinition21, "", "");
+		final Condition condition21 = new Condition(tagDefinition21, "", "", "");
 
 		final TagDefinition tagDefinition31 = mock(TagDefinition.class, "tagDefinition31");
 		final TagValueType tagValueType31 = mock(TagValueType.class, "tagValueType31");
 		final ValidationResult result31 = mock(ValidationResult.class, "validationResult31");
-		final Condition condition31 = new Condition(tagDefinition31, "", "");
+		final Condition condition31 = new Condition(tagDefinition31, "", "", "");
 
 		final LogicalOperator root = new LogicalOperator(LogicalOperatorType.AND);
 		root.addCondition(condition11);
@@ -273,22 +273,22 @@ public class ConditionValidationFacadeImplTest  {
 		final TagDefinition tagDefinition11 = mock(TagDefinition.class, "tagDefinition11");
 		final TagValueType tagValueType11 = mock(TagValueType.class, "tagValueType11");
 		final ValidationResult result11 = mock(ValidationResult.class, "validationResult11");
-		final Condition condition11 = new Condition(tagDefinition11, "", "");
+		final Condition condition11 = new Condition(tagDefinition11, "", "", "");
 
 		final TagDefinition tagDefinition12 = mock(TagDefinition.class, "tagDefinition12");
 		final TagValueType tagValueType12 = mock(TagValueType.class, "tagValueType12");
 		final ValidationResult result12 = mock(ValidationResult.class, "validationResult12");
-		final Condition condition12 = new Condition(tagDefinition12, "", "");
+		final Condition condition12 = new Condition(tagDefinition12, "", "", "");
 
 		final TagDefinition tagDefinition21 = mock(TagDefinition.class, "tagDefinition21");
 		final TagValueType tagValueType21 = mock(TagValueType.class, "tagValueType21");
 		final ValidationResult result21 = mock(ValidationResult.class, "validationResult21");
-		final Condition condition21 = new Condition(tagDefinition21, "", "");
+		final Condition condition21 = new Condition(tagDefinition21, "", "", "");
 
 		final TagDefinition tagDefinition31 = mock(TagDefinition.class, "tagDefinition31");
 		final TagValueType tagValueType31 = mock(TagValueType.class, "tagValueType31");
 		final ValidationResult result31 = mock(ValidationResult.class, "validationResult31");
-		final Condition condition31 = new Condition(tagDefinition31, "", "");
+		final Condition condition31 = new Condition(tagDefinition31, "", "", "");
 
 		final LogicalOperator root = new LogicalOperator(LogicalOperatorType.AND);
 		root.addCondition(condition11);

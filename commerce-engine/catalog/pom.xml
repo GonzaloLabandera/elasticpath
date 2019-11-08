@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright (c) Elastic Path Software Inc., 2018
+  -->
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		 xmlns="http://maven.apache.org/POM/4.0.0"
+		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<artifactId>parent</artifactId>
+		<groupId>com.elasticpath</groupId>
+		<version>0.0.0-SNAPSHOT</version>
+	</parent>
+
+	<artifactId>catalog</artifactId>
+	<name>Catalog Parent</name>
+	<packaging>pom</packaging>
+
+	<modules>
+		<module>ep-catalog-api</module>
+		<module>ep-catalog-connectivity</module>
+		<module>ep-catalog-projection-spi</module>
+		<module>ep-catalog-projection-spring-data</module>
+		<module>ep-catalog-message-handler</module>
+		<module>ep-catalog-webservice</module>
+		<module>ep-domain-bulk</module>
+	</modules>
+
+</project>

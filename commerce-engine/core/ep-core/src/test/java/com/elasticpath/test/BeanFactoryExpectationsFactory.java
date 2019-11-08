@@ -64,6 +64,26 @@ public class BeanFactoryExpectationsFactory {
 	}
 
 	/**
+	 * Allow calls to getPrototypeBean on the BeanFactory for a particular bean name, creating a new instance of the bean.
+	 * Will also call setElasticPath on the bean if necessary, with an ElasticPath that supports getBean using the same BeanFactory.
+	 *
+	 * @param beanName  the bean name to allow getBean for
+	 * @param beanInterface the interface of the bean to create   
+	 * @param beanClass the class of the bean to create
+	 */
+	public void allowingBeanFactoryGetPrototypeBean(final String beanName, final Class<?> beanInterface, final Class<?> beanClass) {
+		mockery.checking(new Expectations() {
+			{
+				allowing(beanFactory).getPrototypeBean(beanName, beanInterface);
+				will(new PrototypeBeanCustomStub(beanClass));
+
+				allowing(beanFactory).getBeanImplClass(beanName);
+				will(returnValue(beanClass));
+			}
+		});
+	}
+
+	/**
 	 * Allow calls to getBean on the BeanFactory for a particular bean name, creating a new instance of the bean.
 	 * Will also call setElasticPath on the bean if necessary, with an ElasticPath that supports getBean using the same BeanFactory.
 	 * @param beanName the bean name to allow getBean for

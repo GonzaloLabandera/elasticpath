@@ -18,6 +18,7 @@ import com.elasticpath.domain.catalog.ProductBundle;
 public final class CoreImageRegistry extends AbstractImageRegistry {
 
 	private static final String PLUGIN_ID = CorePlugin.PLUGIN_ID;
+	private static final String EMPTY_IMAGE = "empty_1x1.png";
 
 	/** inline error image. */
 	public static final ImageDescriptor IMAGE_ERROR_SMALL = getImageDescriptor(PLUGIN_ID, "error_active_16.png"); //$NON-NLS-1$
@@ -47,7 +48,7 @@ public final class CoreImageRegistry extends AbstractImageRegistry {
 	public static final ImageDescriptor IMAGE_RESULTSET_LAST = getImageDescriptor(PLUGIN_ID, "resultset-last_default_22.png"); //$NON-NLS-1$
 
 	/** Order image. */
-	public static final ImageDescriptor IMAGE_ORDER = getImageDescriptor(PLUGIN_ID, "order_default_22.png"); //$NON-NLS-1$
+	public static final ImageDescriptor IMAGE_ORDER = getImageDescriptor(PLUGIN_ID, EMPTY_IMAGE); //$NON-NLS-1$
 
 	/** Product image. */
 	public static final ImageDescriptor IMAGE_PRODUCT = getImageDescriptor(PLUGIN_ID, "product_default_22.png"); //$NON-NLS-1$
@@ -56,7 +57,7 @@ public final class CoreImageRegistry extends AbstractImageRegistry {
 	public static final ImageDescriptor IMAGE_PRODUCT_SKU = getImageDescriptor(PLUGIN_ID, "sku_default_22.png"); //$NON-NLS-1$
 
 	/** user image. */
-	public static final ImageDescriptor IMAGE_USER = getImageDescriptor(PLUGIN_ID, "user_default_22.png"); //$NON-NLS-1$
+	public static final ImageDescriptor IMAGE_USER = getImageDescriptor(PLUGIN_ID, EMPTY_IMAGE); //$NON-NLS-1$
 
 	/** user table image. */
 	public static final ImageDescriptor IMAGE_USER_SMALL = getImageDescriptor(PLUGIN_ID, "user_default_16.png"); //$NON-NLS-1$
@@ -171,13 +172,13 @@ public final class CoreImageRegistry extends AbstractImageRegistry {
 	public static final ImageDescriptor IMAGE_EDIT_CELL_SMALL = getImageDescriptor(PLUGIN_ID, "edit-cell_default_16.png"); //$NON-NLS-1$
 
 	/** Product sku Icon. * */
-	public static final ImageDescriptor PRODUCT_SKU = getImageDescriptor(PLUGIN_ID, "sku_default_22.png"); //$NON-NLS-1$
+	public static final ImageDescriptor PRODUCT_SKU = getImageDescriptor(PLUGIN_ID, EMPTY_IMAGE); //$NON-NLS-1$
 
 	/** Inline product sku Icon. * */
 	public static final ImageDescriptor PRODUCT_SKU_SMALL = getImageDescriptor(PLUGIN_ID, "sku_default_16.png"); //$NON-NLS-1$
 
 	/** Product Icon. * */
-	public static final ImageDescriptor PRODUCT = getImageDescriptor(PLUGIN_ID, "product_default_22.png"); //$NON-NLS-1$
+	public static final ImageDescriptor PRODUCT = getImageDescriptor(PLUGIN_ID, EMPTY_IMAGE); //$NON-NLS-1$
 
 	/** Product inline icon. * */
 	public static final ImageDescriptor PRODUCT_SMALL = getImageDescriptor(PLUGIN_ID, "product_default_16.png"); //$NON-NLS-1$
@@ -262,9 +263,19 @@ public final class CoreImageRegistry extends AbstractImageRegistry {
 	public static final ImageDescriptor ARROW_RIGHT_ICON = getImageDescriptor(PLUGIN_ID, "arrow_right_16.png"); //$NON-NLS-1$
 
 	/**
-	 * Arrow right image.
+	 * Arrow left image.
 	 */
 	public static final ImageDescriptor ARROW_LEFT_ICON = getImageDescriptor(PLUGIN_ID, "arrow_left_16.png"); //$NON-NLS-1$
+
+		/**
+	 * Arrow add all image.
+	 */
+	public static final ImageDescriptor ARROW_FORWARD_ICON = getImageDescriptor(PLUGIN_ID, "arrow_forward_16.png"); //$NON-NLS-1$
+
+	/**
+	 * Arrow remove all image.
+	 */
+	public static final ImageDescriptor ARROW_REWIND_ICON = getImageDescriptor(PLUGIN_ID, "arrow_rewind_16.png"); //$NON-NLS-1$
 
 
 	/**

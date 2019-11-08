@@ -2,11 +2,9 @@
 <beans
 		xmlns="http://www.springframework.org/schema/beans"
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-		xmlns:util="http://www.springframework.org/schema/util"
 		xmlns:settings="http://www.elasticpath.com/schema/settings"
 		xsi:schemaLocation="
 			http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
-			http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-4.0.xsd
             http://www.elasticpath.com/schema/settings http://www.elasticpath.com/schema/settings/settings.xsd
 	">
 
@@ -103,6 +101,22 @@
 		</property>
 	</bean>
 
+
+
+	<bean id="modifierGroupImporter" class="com.elasticpath.importexport.importer.importers.impl.ModifierGroupImporterImpl"
+		  parent="abstractImporter">
+		<property name="modifierService" ref="modifierService" />
+		<property name="modifierGroupAdapter" ref="modifierGroupAdapter" />
+		<property name="schemaPath" value="schema/schemaModifier.xsd" />
+	</bean>
+
+	<bean id="modifierGroupFilterImporter" class="com.elasticpath.importexport.importer.importers.impl.ModifierGroupFilterImporterImpl"
+		  parent="abstractImporter">
+		<property name="modifierService" ref="modifierService" />
+		<property name="domainAdapter" ref="modifierGroupFilterAdapter" />
+		<property name="schemaPath" value="schema/schemaModifier.xsd" />
+	</bean>
+
 	<bean id="catalogImporter" class="com.elasticpath.importexport.importer.importers.impl.CatalogImporterImpl"
 		parent="abstractImporter">
 		<property name="catalogAdapter">
@@ -150,12 +164,7 @@
 		<property name="synonymGroupService">
 			<ref bean="synonymGroupService" />
 		</property>
-		<property name="cartItemModifierService">
-			<ref bean="cartItemModifierService"/>
-		</property>
-		<property name="cartItemModifierGroupAdapter">
-			<ref bean="cartItemModifierGroupAdapter"/>
-		</property>
+
 		<property name="schemaPath">
 			<value>schema/schemaCatalog.xsd</value>
 		</property>
@@ -369,7 +378,7 @@
 		<property name="contentSpaceService" ref="contentspaceService" />
         <property name="schemaPath" value="schema/schemaContentSpace.xsd" />
 	</bean>
-	
+
 	<bean id="shippingServiceLevelImporter" class="com.elasticpath.importexport.importer.importers.impl.ShippingServiceLevelImporterImpl" parent="abstractImporter">
 		<property name="domainAdapter" ref="shippingServiceLevelAdapter" />
 		<property name="shippingServiceLevelService" ref="shippingServiceLevelService" />
@@ -380,7 +389,7 @@
 		<property name="domainAdapter" ref="savedConditionAdapter" />
 		<property name="tagConditionService" ref="tagConditionService" />
         <property name="schemaPath" value="schema/schemaSavedCondition.xsd" />
-	</bean>	
+	</bean>
 
 	<bean id="shippingRegionImporter" class="com.elasticpath.importexport.importer.importers.impl.ShippingRegionImporterImpl" parent="abstractImporter">
 		<property name="domainAdapter" ref="shippingRegionAdapter" />
@@ -388,7 +397,7 @@
         <property name="schemaPath" value="schema/schemaShippingRegion.xsd" />
 	</bean>
 
-	
+
 	<bean id="taxJurisdictionImporter" class="com.elasticpath.importexport.importer.importers.impl.TaxJurisdictionImporter"
 		parent="abstractImporter">
 		<property name="taxJurisdictionAdapter" ref="taxJurisdictionAdapter" />
@@ -423,6 +432,20 @@
 		<property name="schemaPath" value="schema/schemaFacet.xsd" />
 	</bean>
 
+	<bean id="sortAttributeImporter" class="com.elasticpath.importexport.importer.importers.impl.SortAttributeImporterImpl"
+		  parent="abstractImporter">
+		<property name="sortAttributeService" ref="sortAttributeService" />
+		<property name="sortAttributeAdapter" ref="sortAttributeAdapter" />
+		<property name="schemaPath" value="schema/schemaSortAttribute.xsd" />
+	</bean>
+
+	<bean id="tagGroupImporter" class="com.elasticpath.importexport.importer.importers.impl.TagGroupImporter"
+		  parent="abstractImporter">
+		<property name="tagGroupService" ref="tagGroupService" />
+		<property name="tagGroupAdapter" ref="tagGroupAdapter" />
+		<property name="schemaPath" value="schema/schemaTagGroup.xsd" />
+	</bean>
+
 	<bean id="storeImporter" class="com.elasticpath.importexport.importer.importers.impl.StoreImporter" parent="abstractImporter">
 		<property name="storeService" ref="nonCachingStoreService" />
 		<property name="storeAdapter" ref="storeAdapter" />
@@ -446,6 +469,20 @@
 		<property name="attributeAdapter" ref="attributeAdapter" />
 		<property name="attributeService" ref="attributeService" />
 		<property name="schemaPath" value="schema/schemaCustomerProfileAttribute.xsd" />
+	</bean>
+
+	<bean id="attributePolicyImporter"
+		  class="com.elasticpath.importexport.importer.importers.impl.AttributePolicyImporter" parent="abstractImporter">
+		<property name="domainAdapter" ref="attributePolicyAdapter" />
+		<property name="attributePolicyService" ref="attributePolicyService" />
+		<property name="schemaPath" value="schema/schemaAttributePolicy.xsd" />
+	</bean>
+
+	<bean id="storeCustomerAttributeImporter" class="com.elasticpath.importexport.importer.importers.impl.StoreCustomerAttributeImporter"
+		  parent="abstractImporter">
+		<property name="domainAdapter" ref="storeCustomerAttributeAdapter" />
+		<property name="storeCustomerAttributeService" ref="storeCustomerAttributeService" />
+		<property name="schemaPath" value="schema/schemaStoreCustomerProfileAttribute.xsd" />
 	</bean>
 
 	<bean id="customerImporter" class="com.elasticpath.importexport.importer.importers.impl.CustomerImporter" parent="abstractImporter">
@@ -567,6 +604,12 @@
 				<entry key="PRODUCTBUNDLE">
 					<ref bean="productBundleImporter" />
 				</entry>
+				<entry key="MODIFIERGROUP">
+					<ref bean="modifierGroupImporter" />
+				</entry>
+				<entry key="MODIFIERGROUPFILTER">
+					<ref bean="modifierGroupFilterImporter" />
+				</entry>
 				<entry key="CATALOG">
 					<ref bean="catalogImporter" />
 				</entry>
@@ -644,6 +687,18 @@
 				</entry>
 				<entry key="FACET">
 					<ref bean="facetImporter"/>
+				</entry>
+				<entry key="SORT_ATTRIBUTE">
+					<ref bean="sortAttributeImporter"/>
+				</entry>
+				<entry key="STORE_CUSTOMER_ATTRIBUTE">
+					<ref bean="storeCustomerAttributeImporter" />
+				</entry>
+				<entry key="ATTRIBUTE_POLICY">
+					<ref bean="attributePolicyImporter" />
+				</entry>
+				<entry key="TAGGROUP">
+					<ref bean="tagGroupImporter"/>
 				</entry>
 			</map>
 		</property>
@@ -732,6 +787,16 @@
 						<ref bean="productCategoryExporter" />
 						<ref bean="categoryExporter" />
 						<ref bean="catalogExporter" />
+					</list>
+				</entry>
+				<entry key="MODIFIERGROUP">
+					<list>
+						<ref bean="modifierExporter"/>
+					</list>
+				</entry>
+				<entry key="MODIFIERGROUPFILTER">
+					<list>
+						<ref bean="modifierGroupFilterExporter"/>
 					</list>
 				</entry>
 				<entry key="CATALOG">
@@ -857,9 +922,29 @@
 						<ref bean="customerConsentExporter" />
 					</list>
 				</entry>
+				<entry key="STORE_CUSTOMER_ATTRIBUTE">
+					<list>
+						<ref bean="storeCustomerAttributeExporter" />
+					</list>
+				</entry>
+				<entry key="ATTRIBUTE_POLICY">
+					<list>
+						<ref bean="attributePolicyExporter" />
+					</list>
+				</entry>
 				<entry key="FACET">
 					<list>
 						<ref bean="facetExporter"/>
+					</list>
+				</entry>
+				<entry key="SORT_ATTRIBUTE">
+					<list>
+						<ref bean="sortAttributeExporter"/>
+					</list>
+				</entry>
+				<entry key="TAGGROUP">
+					<list>
+						<ref bean="tagGroupExporter"/>
 					</list>
 				</entry>
 			</map>
@@ -954,12 +1039,24 @@
 		<property name="facetService" ref="facetService" />
 	</bean>
 
+	<bean id="sortAttributeExporter" class="com.elasticpath.importexport.exporter.exporters.impl.SortAttributeExporter">
+		<property name="importExportSearcher" ref="importExportSearcher" />
+		<property name="sortAttributeAdapter" ref="sortAttributeAdapter" />
+		<property name="sortAttributeService" ref="sortAttributeService" />
+	</bean>
+
+	<bean id="tagGroupExporter" class="com.elasticpath.importexport.exporter.exporters.impl.TagGroupExporter">
+		<property name="importExportSearcher" ref="importExportSearcher" />
+		<property name="tagGroupAdapter" ref="tagGroupAdapter" />
+		<property name="tagGroupService" ref="tagGroupService" />
+	</bean>
+
 	<bean id="storeExporter" class="com.elasticpath.importexport.exporter.exporters.impl.StoreExporter">
 		<property name="importExportSearcher" ref="importExportSearcher" />
 		<property name="storeAdapter" ref="storeAdapter" />
 		<property name="storeAssociationAdapter" ref="storeAssociationAdapter" />
 		<property name="storeService" ref="nonCachingStoreService" />
-		<property name="storeAssociationService" ref="storeAssociationService" />	
+		<property name="storeAssociationService" ref="storeAssociationService" />
 	</bean>
 
 	<bean id="storeAssociationExporter" class="com.elasticpath.importexport.exporter.exporters.impl.StoreAssociationExporter">
@@ -984,6 +1081,17 @@
         <property name="importExportSearcher" ref="importExportSearcher" />
 	</bean>
 
+	<bean id="storeCustomerAttributeExporter" class="com.elasticpath.importexport.exporter.exporters.impl.StoreCustomerAttributeExporter">
+		<property name="storeCustomerAttributeAdapter" ref="storeCustomerAttributeAdapter"/>
+		<property name="storeCustomerAttributeService" ref="storeCustomerAttributeService"/>
+		<property name="attributePolicyService" ref="attributePolicyService"/>
+	</bean>
+
+	<bean id="attributePolicyExporter" class="com.elasticpath.importexport.exporter.exporters.impl.AttributePolicyExporter">
+		<property name="attributePolicyAdapter" ref="attributePolicyAdapter"/>
+		<property name="attributePolicyService" ref="attributePolicyService"/>
+	</bean>
+
 	<bean id="savedConditionExporter" class="com.elasticpath.importexport.exporter.exporters.impl.SavedConditionExporterImpl">
 		<property name="adapter" ref="savedConditionAdapter" />
 		<property name="tagConditionService" ref="tagConditionService" />
@@ -995,7 +1103,7 @@
 		<property name="dynamicContentDeliveryService" ref="dynamicContentDeliveryService" />
         <property name="importExportSearcher" ref="importExportSearcher" />
 	</bean>
-	
+
 	<bean id="contentSpaceExporter" class="com.elasticpath.importexport.exporter.exporters.impl.ContentSpaceExporterImpl">
 		<property name="domainAdapter" ref="contentSpaceAdapter" />
 		<property name="contentSpaceService" ref="contentspaceService" />
@@ -1075,7 +1183,6 @@
 				<ref bean="catalogSkuOptionExporter" />
 				<ref bean="catalogAttributeExporter" />
 				<ref bean="catalogSynonymGroupExporter" />
-				<ref bean="catalogCartItemModifierExporter" />
 			</list>
 		</property>
 	</bean>
@@ -1111,11 +1218,14 @@
 		<property name="synonymGroupService" ref="synonymGroupService" />
 	</bean>
 
-	<bean id="catalogCartItemModifierExporter" class="com.elasticpath.importexport.exporter.exporters.impl.CartItemModifierExporterImpl">
-		<property name="domainAdapter" ref="cartItemModifierGroupAdapter" />
-		<property name="cartItemModifierService" ref="cartItemModifierService" />
+	<bean id="modifierExporter" class="com.elasticpath.importexport.exporter.exporters.impl.ModifierExporterImpl">
+		<property name="domainAdapter" ref="modifierGroupAdapter" />
+		<property name="modifierService" ref="modifierService" />
 	</bean>
-
+	<bean id="modifierGroupFilterExporter" class="com.elasticpath.importexport.exporter.exporters.impl.ModifierGroupFilterExporterImpl">
+		<property name="domainAdapter" ref="modifierGroupFilterAdapter" />
+		<property name="modifierService" ref="modifierService" />
+	</bean>
 	<bean id="dataPolicyExporter" class="com.elasticpath.importexport.exporter.exporters.impl.DataPolicyExporterImpl">
 		<property name="importExportSearcher" ref="importExportSearcher" />
 		<property name="dataPolicyAdapter" ref="dataPolicyAdapter" />
@@ -1211,7 +1321,7 @@
 	<bean id="cmUserExporter" class="com.elasticpath.importexport.exporter.exporters.impl.CmUserExporter" parent="abstractExporter">
 		<property name="cmUserService" ref="cmUserService" />
 		<property name="cmUserAdapter" ref="cmUserAdapter" />
-		<property name="importExportSearcher" ref="importExportSearcher" />        
+		<property name="importExportSearcher" ref="importExportSearcher" />
 	</bean>
 
 	<bean id="userRoleExporter" class="com.elasticpath.importexport.exporter.exporters.impl.UserRoleExporter" parent="abstractExporter">
@@ -1242,7 +1352,7 @@
 		<property name="shippingServiceLevelService" ref="shippingServiceLevelService" />
         <property name="importExportSearcher" ref="importExportSearcher" />
 	</bean>
-	
+
 		<bean id="shippingRegionExporter" class="com.elasticpath.importexport.exporter.exporters.impl.ShippingRegionExporterImpl">
 		<property name="domainAdapter" ref="shippingRegionAdapter" />
 		<property name="shippingRegionService" ref="shippingRegionService" />
@@ -1254,7 +1364,7 @@
 		<property name="importService" ref="importService" />
         <property name="importExportSearcher" ref="importExportSearcher" />
 	</bean>
-	
+
 	<bean id="transformerFactory" class="com.elasticpath.importexport.common.transformers.impl.TransformersChainFactoryImpl" />
 
 	<bean id="fileDeliveryMethod" class="com.elasticpath.importexport.exporter.delivery.impl.FileDeliveryMethodImpl" />
@@ -1472,6 +1582,8 @@
 				<value>TAXJURISDICTION</value>
 				<value>WAREHOUSE</value>
 				<value>PAYMENTGATEWAY</value>
+				<value>MODIFIERGROUP</value>
+				<value>MODIFIERGROUPFILTER</value>
 				<value>CATALOG</value>
 				<value>CATEGORY</value>
 				<value>STORE</value>
@@ -1504,7 +1616,11 @@
 				<value>CM_IMPORT_JOB</value>
 				<value>DATA_POLICY</value>
 				<value>CUSTOMER_CONSENT</value>
+				<value>ATTRIBUTE_POLICY</value>
+				<value>STORE_CUSTOMER_ATTRIBUTE</value>
 				<value>FACET</value>
+				<value>SORT_ATTRIBUTE</value>
+				<value>TAGGROUP</value>
 			</list>
 		</property>
 	</bean>
@@ -1604,9 +1720,9 @@
 		</property>
 	</bean>
 
-	<!-- 
-		 The categoryServiceUsingDefaultPlusAttributes bean naming is a reflection of the distinction between the core definition 
-	     and the import export definition which includes attributes in the categoryLoadTunerDefault. 
+	<!--
+		 The categoryServiceUsingDefaultPlusAttributes bean naming is a reflection of the distinction between the core definition
+	     and the import export definition which includes attributes in the categoryLoadTunerDefault.
     -->
 	<bean id="categoryServiceUsingDefaultPlusAttributes" parent="txProxyTemplate">
 		<property name="target">
@@ -1628,10 +1744,10 @@
 	<bean id="applicationProperties" class="org.springframework.beans.factory.config.PropertiesFactoryBean">
 		<property name="location" value="${configLocation:classpath:importexporttool.config}" />
 	</bean>
-	
-	<bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">  
-          <property name="ignoreUnresolvablePlaceholders" value="true"></property>  
-    </bean>  
+
+	<bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+          <property name="ignoreUnresolvablePlaceholders" value="true"></property>
+    </bean>
 
 	<!-- Initializer which will be called before the persistence engine bean is created. -->
 	<!-- this allows the datasource to be overridden -->
@@ -1662,5 +1778,18 @@
 	<bean id="savingManager" class="com.elasticpath.importexport.importer.importers.impl.PersistenceSessionSavingManagerImpl">
 		<property name="persistenceEngine" ref="persistenceEngine" />
 	</bean>
+
+	<beans profile="default">
+		<bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+			<property name="locations" value="${configLocation:classpath:importexporttool.config}"></property>
+			<property name="ignoreUnresolvablePlaceholders" value="true"></property>
+		</bean>
+
+		<bean id="applicationInitialization" class="com.elasticpath.importexport.client.DataSourceProperties" factory-method="getInstance">
+			<property name="properties" ref="applicationProperties"/>
+		</bean>
+
+		<bean id="dataSource" class="com.elasticpath.importexport.client.JPADataSource"/>
+	</beans>
 
 </beans>

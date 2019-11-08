@@ -3,13 +3,6 @@
 
 	<family>
 		<name>purchases</name>
-		<description>
-			<![CDATA[
-Purchase line items are collections of items the customer purchased. Each line item can contain one or more of the same item,
-but will not have two different items. For example, one line item can have 7 Rock-Star t-shirts or one Rock-Star t-shirt,
-but it won't have one Rock-Star t-shirt and a Song track. The Song track and t-shirt would be in separate line items.
-			]]>
-		</description>
 
 		<uri-part>
 			<name>line-item-id</name>
@@ -24,12 +17,10 @@ but it won't have one Rock-Star t-shirt and a Song track. The Song track and t-s
 		<resource>
 			<name>purchase-line-items</name>
 			<description>
-				<![CDATA[
-Retrieves a list of all the line items in a purchase. Each line item contains an item that was bought during the purchase.
+				<![CDATA[Retrieves a list of all the line items in a purchase. Each line item contains an item that was bought during the purchase.
 Line items can contain one or more of the same item, but will not have two different items. For example, one line item can
 have 7 Rock-Star t-shirts or one Rock-Star t-shirt, but it won't have one Rock-Star t-shirt and a Song track. The Song
-track and t-shirt would be in separate line items.
-				]]>
+track and t-shirt would be in separate line items.]]>
 			</description>
 			<uri>{purchase}/lineitems</uri>
 			<list-of>purchase-line-item</list-of>
@@ -41,6 +32,31 @@ track and t-shirt would be in separate line items.
 			<uri>{purchase-line-items}/{line-item-id}</uri>
 			<entity>purchase-line-item</entity>
 		</resource>
+
+		<resource>
+			<name>dependent-purchase-line-items</name>
+			<description>
+				<![CDATA[Retrieves a list of all dependent line items of a parent line item. ]]>
+			</description>
+			<uri>{purchase-line-item}/lineitems</uri>
+			<list-of>purchase-line-item</list-of>
+		</resource>
+
+		<relationship>
+			<name>dependent-purchase-line-item-to-parent-purchase-line-item</name>
+			<description><![CDATA[A link from a dependent purchase Line Item resource to its parent purchase Line Item resource.]]></description>
+			<rel>parent</rel>
+			<from>purchases.purchase-line-item</from>
+			<to>purchases.purchase-line-item</to>
+		</relationship>
+
+		<relationship>
+			<name>dependent-purchase-line-items-for-parent-purchase-line-item</name>
+			<description><![CDATA[A list of dependent purchase line items for the parent purchase line item.]]></description>
+			<rel>dependentlineitems</rel>
+			<from>purchase-line-item</from>
+			<to>dependent-purchase-line-items</to>
+		</relationship>
 
 		<relationship>
 			<name>line-items-for-purchase</name>

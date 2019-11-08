@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xsd:schema xmlns="http://www.elasticpath.com/schema/extensibleList"
+			xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+			xmlns:beans="http://www.springframework.org/schema/beans"
+			targetNamespace="http://www.elasticpath.com/schema/extensibleList"
+			elementFormDefault="qualified"
+			attributeFormDefault="unqualified">
+
+	<xsd:import namespace="http://www.springframework.org/schema/beans"/>
+
+	<xsd:element name="create">
+		<xsd:complexType>
+			<xsd:choice minOccurs="0" maxOccurs="unbounded">
+				<xsd:element ref="beans:ref"/>
+			</xsd:choice>
+			<xsd:attribute name="id" type="xsd:ID"/>
+			<xsd:attribute name="overridableId" use="required" type="xsd:string"/>
+			<xsd:attribute name="valueType" use="required" type="xsd:string"/>
+		</xsd:complexType>
+	</xsd:element>
+	<xsd:element name="modify">
+		<xsd:complexType>
+			<xsd:choice minOccurs="0" maxOccurs="unbounded">
+				<xsd:element name="addToList">
+					<xsd:complexType>
+						<xsd:choice minOccurs="0" maxOccurs="unbounded">
+							<xsd:element ref="beans:ref"/>
+						</xsd:choice>
+					</xsd:complexType>
+				</xsd:element>
+				<xsd:element name="removeFromList">
+					<xsd:complexType>
+						<xsd:choice minOccurs="0" maxOccurs="unbounded">
+							<xsd:element ref="beans:ref"/>
+						</xsd:choice>
+					</xsd:complexType>
+				</xsd:element>
+			</xsd:choice>
+			<xsd:attribute name="id" type="xsd:ID"/>
+			<xsd:attribute type="xsd:string" name="parent"/>
+		</xsd:complexType>
+	</xsd:element>
+</xsd:schema>

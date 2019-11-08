@@ -18,6 +18,7 @@
 	<properties>
 		<!-- Dependency versions -->
 		<ep.selenium.framework.version>1.5.3</ep.selenium.framework.version>
+		<sonar.skip>true</sonar.skip>
 	</properties>
 
 	<dependencies>

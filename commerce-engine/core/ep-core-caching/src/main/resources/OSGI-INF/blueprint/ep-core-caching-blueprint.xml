@@ -47,7 +47,24 @@
 			   filter="(caching=false)"/>
 
 
+	<reference id="sortAttributeService" interface="com.elasticpath.service.search.SortAttributeService"
+			   filter="(caching=false)"/>
+
+
+	<reference id="storeProductService" interface="com.elasticpath.service.catalogview.StoreProductService"
+			   filter="(caching=false)"/>
+
 	<!-- Exported Services  -->
+
+	<service ref="cachingStoreProductService"
+			 interface="com.elasticpath.service.catalogview.StoreProductService" ranking="200">
+		<service-properties>
+			<entry key="caching">
+				<value type="java.lang.Boolean">true</value>
+			</entry>
+		</service-properties>
+	</service>
+
 	<service ref="cachingStoreService"
 			 interface="com.elasticpath.service.store.StoreService" ranking="200">
 		<service-properties>
@@ -176,4 +193,13 @@
 		</service-properties>
 	</service>
 
+
+
+	<service ref="cachingSortAttributeService" interface="com.elasticpath.service.search.SortAttributeService" ranking="200">
+		<service-properties>
+			<entry key="caching">
+				<value type="java.lang.Boolean">true</value>
+			</entry>
+		</service-properties>
+	</service>
 </blueprint>

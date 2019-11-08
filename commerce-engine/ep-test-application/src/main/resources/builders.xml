@@ -9,6 +9,10 @@
 
 	<bean id="customerGroupBuilder" class="com.elasticpath.domain.builder.customer.CustomerGroupBuilder"/>
 
+	<bean id="attributePolicyBuilder" class="com.elasticpath.domain.builder.customer.AttributePolicyBuilder"/>
+
+	<bean id="storeCustomerAttributeBuilder" class="com.elasticpath.domain.builder.customer.StoreCustomerAttributeBuilder"/>
+
 	<bean id="paymentGatewayBuilder" class="com.elasticpath.domain.builder.payment.gateway.PaymentGatewayBuilder" scope="prototype"/>
 	
 	<bean id="customerAddressBuilder" class="com.elasticpath.domain.builder.customer.CustomerAddressBuilder" scope="prototype"/>

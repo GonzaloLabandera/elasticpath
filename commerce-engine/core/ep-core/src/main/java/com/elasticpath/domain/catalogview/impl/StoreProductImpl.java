@@ -5,6 +5,7 @@
 package com.elasticpath.domain.catalogview.impl;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -17,12 +18,15 @@ import java.util.Set;
 
 import com.elasticpath.common.dto.SkuInventoryDetails;
 import com.elasticpath.domain.catalog.Availability;
+import com.elasticpath.domain.catalog.Category;
 import com.elasticpath.domain.catalog.LocaleDependantFields;
 import com.elasticpath.domain.catalog.Product;
 import com.elasticpath.domain.catalog.ProductAssociation;
 import com.elasticpath.domain.catalog.ProductAssociationType;
+import com.elasticpath.domain.catalog.ProductCategory;
 import com.elasticpath.domain.catalog.ProductSku;
 import com.elasticpath.domain.catalogview.StoreProduct;
+import com.elasticpath.domain.catalogview.StoreProductSku;
 import com.elasticpath.service.catalogview.impl.AbstractWrappedProductImpl;
 import com.elasticpath.service.catalogview.impl.InventoryMessage;
 
@@ -38,6 +42,7 @@ public class StoreProductImpl extends AbstractWrappedProductImpl implements Stor
 
 	private boolean productAvailable;
 	private boolean productDisplayable;
+	private boolean syndicate;
 
 	private final Map<String, Boolean> skuAvailableMap = new HashMap<>();
 	private final Map<String, Boolean> skuDisplayableMap = new HashMap<>();
@@ -49,6 +54,7 @@ public class StoreProductImpl extends AbstractWrappedProductImpl implements Stor
 
 	private Availability productAvailability;
 	private final Map<String, Availability> skuAvailability = new HashMap<>();
+	private Set<StoreProductSku> storeProductSkus;
 
 	/**
 	 * Constructor.
@@ -75,6 +81,15 @@ public class StoreProductImpl extends AbstractWrappedProductImpl implements Stor
 
 	public void setProductDisplayable(final boolean productDisplayable) {
 		this.productDisplayable = productDisplayable;
+	}
+
+	@Override
+	public Set<StoreProductSku> getStoreProductSkus() {
+		return storeProductSkus;
+	}
+
+	public void setStoreProductSkus(final Set<StoreProductSku> storeProductSkus) {
+		this.storeProductSkus = Collections.unmodifiableSet(storeProductSkus);
 	}
 
 	/**
@@ -291,6 +306,46 @@ public class StoreProductImpl extends AbstractWrappedProductImpl implements Stor
 		return defaultSku;
 	}
 
+	@Override
+	public Set<StoreAvailabilityRule> getDiscoverRules() {
+		if (isHidden() || isNotSoldSeparately()) {
+			return Collections.emptySet();
+		}
+
+		switch (getAvailabilityCriteria()) {
+			case ALWAYS_AVAILABLE: return Collections.singleton(StoreAvailabilityRule.ALWAYS);
+			case AVAILABLE_WHEN_IN_STOCK: return Collections.singleton(StoreAvailabilityRule.HAS_STOCK);
+			case AVAILABLE_FOR_PRE_ORDER: return new HashSet<>(Arrays.asList(StoreAvailabilityRule.PRE_ORDER, StoreAvailabilityRule.HAS_STOCK));
+			case AVAILABLE_FOR_BACK_ORDER: return new HashSet<>(Arrays.asList(StoreAvailabilityRule.HAS_STOCK, StoreAvailabilityRule.BACK_ORDER));
+			default: return Collections.emptySet();
+		}
+
+	}
+
+	@Override
+	public Set<StoreAvailabilityRule> getViewRules() {
+		if (isHidden()) {
+			return Collections.emptySet();
+		}
+
+		return Collections.singleton(StoreAvailabilityRule.ALWAYS);
+	}
+
+	@Override
+	public Set<StoreAvailabilityRule> getAddToCartRules() {
+		if (isHidden() || isNotSoldSeparately()) {
+			return Collections.emptySet();
+		}
+
+		switch (getAvailabilityCriteria()) {
+			case ALWAYS_AVAILABLE: return Collections.singleton(StoreAvailabilityRule.ALWAYS);
+			case AVAILABLE_WHEN_IN_STOCK: return Collections.singleton(StoreAvailabilityRule.HAS_STOCK);
+			case AVAILABLE_FOR_PRE_ORDER: return new HashSet<>(Arrays.asList(StoreAvailabilityRule.PRE_ORDER, StoreAvailabilityRule.HAS_STOCK));
+			case AVAILABLE_FOR_BACK_ORDER: return new HashSet<>(Arrays.asList(StoreAvailabilityRule.HAS_STOCK, StoreAvailabilityRule.BACK_ORDER));
+			default: return Collections.emptySet();
+		}
+
+	}
 
 	@Override
 	public LocaleDependantFields getLocaleDependantFields(final Locale locale) {
@@ -340,6 +395,20 @@ public class StoreProductImpl extends AbstractWrappedProductImpl implements Stor
 		this.skuAvailability.put(skuCode, skuAvailability);
 	}
 
+	public void setProductSyndicate(final boolean syndicate) {
+		this.syndicate = syndicate;
+	}
+
+	/**
+	 * Returns <code>true</code> if the StoreProduct can be syndicated.
+	 *
+	 * @return <code>true</code> if the StoreProduct can be syndicated, <code>false</code> otherwise
+	 */
+	@Override
+	public boolean canSyndicate() {
+		return syndicate;
+	}
+
 	@Override
 	public boolean equals(final Object obj) {
 		return (this == obj)
@@ -358,5 +427,15 @@ public class StoreProductImpl extends AbstractWrappedProductImpl implements Stor
 		String displayName = getDisplayName(defaultLocale);
 		return String.format("StoreProduct: code [%s], guid [%s], name [%s], brand [%s]",
 				getCode(), getGuid(), displayName, getBrand());
+	}
+
+	/**
+	 * Get the ProductCategory association object that contains the given Category.
+	 *
+	 * @param category the category to search for.
+	 * @return productCategory the <code>ProductCategory</code>.
+	 */
+	public ProductCategory getProductCategory(final Category category) {
+		return this.getWrappedProduct().getProductCategory(category);
 	}
 }

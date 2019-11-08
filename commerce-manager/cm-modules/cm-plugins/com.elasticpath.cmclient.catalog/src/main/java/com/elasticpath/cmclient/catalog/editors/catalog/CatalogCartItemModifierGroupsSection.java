@@ -29,7 +29,7 @@ import com.elasticpath.cmclient.catalog.CatalogMessages;
 import com.elasticpath.cmclient.catalog.dialogs.cartitemmodifier.AddEditCartItemModifierGroupDialog;
 import com.elasticpath.cmclient.catalog.editors.catalog.tablelabelprovider.CatalogCartItemModifierGroupsTableLabelProviderDecorator;
 import com.elasticpath.cmclient.catalog.editors.catalog.tablelabelprovider.ChangeSetTableLabelProviderDecorator;
-import com.elasticpath.cmclient.catalog.editors.catalog.tablelabelprovider.TableLabelProviderAdapter;
+import com.elasticpath.cmclient.core.tablelableprovider.TableLabelProviderAdapter;
 import com.elasticpath.cmclient.catalog.editors.model.CatalogModel;
 import com.elasticpath.cmclient.core.EpUiException;
 import com.elasticpath.cmclient.core.ServiceLocator;
@@ -43,25 +43,26 @@ import com.elasticpath.cmclient.core.ui.framework.IEpTableViewer;
 import com.elasticpath.cmclient.policy.StatePolicy;
 import com.elasticpath.cmclient.policy.ui.AbstractPolicyAwareEpTableSection;
 import com.elasticpath.commons.constants.ContextIdNames;
-import com.elasticpath.domain.cartmodifier.CartItemModifierGroup;
-import com.elasticpath.domain.cartmodifier.CartItemModifierGroupLdf;
-import com.elasticpath.service.cartitemmodifier.CartItemModifierService;
+import com.elasticpath.domain.catalog.Catalog;
+import com.elasticpath.domain.modifier.ModifierGroup;
+import com.elasticpath.domain.modifier.ModifierGroupLdf;
+import com.elasticpath.service.modifier.ModifierService;
 import com.elasticpath.service.changeset.ChangeSetMemberAction;
 
 /**
  * Implements a section of the <code>CatalogCategoryPage</code> providing
- * {@link com.elasticpath.domain.cartmodifier.CartItemModifierGroup}s within a catalog.
+ * {@link com.elasticpath.domain.modifier.ModifierGroup}s within a catalog.
  */
 @SuppressWarnings({"PMD.GodClass"})
-public class CatalogCartItemModifierGroupsSection extends AbstractPolicyAwareEpTableSection<CartItemModifierGroup> {
+public class CatalogCartItemModifierGroupsSection extends AbstractPolicyAwareEpTableSection<ModifierGroup> {
 
 
 	private static final String CATALOG_CART_ITEM_TABLE = "Catalog Cart Item"; //$NON-NLS-1$
-	private final CartItemModifierService cartItemModifierService = ServiceLocator.getService(ContextIdNames.CART_ITEM_MODIFIER_SERVICE);
+	private final ModifierService modifierService = ServiceLocator.getService(ContextIdNames.MODIFIER_SERVICE);
 	private final ChangeSetHelper changeSetHelper = ServiceLocator.getService(ChangeSetHelper.BEAN_ID);
 
 	private final ChangeSetColumnDecorator changeSetColumnDecorator = new ChangeSetColumnDecorator();
-	private List<CartItemModifierGroup> catalogCartItemModifierGroups;
+	private List<ModifierGroup> catalogCartItemModifierGroups;
 
 	/**
 	 * Default constructor.
@@ -81,7 +82,7 @@ public class CatalogCartItemModifierGroupsSection extends AbstractPolicyAwareEpT
 	 * @param catalogCartItemModifierGroups the list of groups
 	 */
 	public CatalogCartItemModifierGroupsSection(final FormPage formPage, final AbstractCmClientFormEditor editor,
-												final List<CartItemModifierGroup> catalogCartItemModifierGroups) {
+												final List<ModifierGroup> catalogCartItemModifierGroups) {
 		super(formPage, editor);
 		this.catalogCartItemModifierGroups = catalogCartItemModifierGroups;
 		setTableItems(getModel().getCartItemModifierGroupTableItems());
@@ -98,10 +99,15 @@ public class CatalogCartItemModifierGroupsSection extends AbstractPolicyAwareEpT
 		addColumns(table);
 		getViewer().setContentProvider(new TableContentProvider());
 		addLabelProvider();
-		final List<CartItemModifierGroup> readOnlyCartItemModifierGroup =
-				cartItemModifierService.findCartItemModifierGroupByCatalogUid(getModel().getCatalog().getUidPk());
-		catalogCartItemModifierGroups = new ArrayList<>(readOnlyCartItemModifierGroup.size());
-		catalogCartItemModifierGroups.addAll(readOnlyCartItemModifierGroup);
+
+		/**
+		 * TODO: Filter this by catalog?
+		 */
+		final List<ModifierGroup> readOnlyModifierGroup =
+		modifierService.getFilteredModifierGroups(Catalog.class.getSimpleName(), getModel().getCatalog().getGuid());
+
+		catalogCartItemModifierGroups = new ArrayList<>(readOnlyModifierGroup.size());
+		catalogCartItemModifierGroups.addAll(readOnlyModifierGroup);
 		refreshViewerInput();
 	}
 
@@ -146,34 +152,37 @@ public class CatalogCartItemModifierGroupsSection extends AbstractPolicyAwareEpT
 	@Override
 	public void commit(final boolean onSave) {
 		if (onSave) {
-			final Set<CartItemModifierGroup> additionCartItemModifierGroup = getAddedItems();
-			for (final CartItemModifierGroup group : additionCartItemModifierGroup) {
-				cartItemModifierService.add(group);
+			final Set<ModifierGroup> additionModifierGroup = getAddedItems();
+			for (final ModifierGroup group : additionModifierGroup) {
+				ModifierGroup createdGroup = modifierService.add(group);
+				modifierService.addGroupFilter(Catalog.class.getSimpleName(), getModel().getCatalog().getGuid(),
+						createdGroup.getCode());
 				changeSetHelper.addObjectToChangeSet(group, ChangeSetMemberAction.ADD);
 				CatalogEventService.getInstance().notifyGroupChanged(
 						new ItemChangeEvent<>(this, group, ItemChangeEvent.EventType.ADD));
 			}
-			additionCartItemModifierGroup.clear();
+			additionModifierGroup.clear();
 
-			final Set<CartItemModifierGroup> modifiedCartItemModifierGroup = getModifiedItems();
-			for (final CartItemModifierGroup group : modifiedCartItemModifierGroup) {
-				cartItemModifierService.update(group);
+			final Set<ModifierGroup> modifiedModifierGroup = getModifiedItems();
+			for (final ModifierGroup group : modifiedModifierGroup) {
+				modifierService.update(group);
 				changeSetHelper.addObjectToChangeSet(group, ChangeSetMemberAction.EDIT);
 				CatalogEventService.getInstance().notifyGroupChanged(
 						new ItemChangeEvent<>(this, group, ItemChangeEvent.EventType.CHANGE));
 			}
-			modifiedCartItemModifierGroup.clear();
+			modifiedModifierGroup.clear();
 
-			final Set<CartItemModifierGroup> removedCartItemModifierGroup = getRemovedItems();
-			for (final CartItemModifierGroup group : removedCartItemModifierGroup) {
+			final Set<ModifierGroup> removedModifierGroup = getRemovedItems();
+			for (final ModifierGroup group : removedModifierGroup) {
 				if (group.isPersisted()) {
 					changeSetHelper.addObjectToChangeSet(group, ChangeSetMemberAction.DELETE);
-					cartItemModifierService.remove(group);
+					modifierService.remove(group);
 					CatalogEventService.getInstance().notifyGroupChanged(
 							new ItemChangeEvent<>(this, group, ItemChangeEvent.EventType.REMOVE));
 				}
 			}
-			removedCartItemModifierGroup.clear();
+			removedModifierGroup.clear();
+
 
 			refreshViewerInput();
 			super.commit(onSave);
@@ -191,33 +200,31 @@ public class CatalogCartItemModifierGroupsSection extends AbstractPolicyAwareEpT
 	}
 
 	@Override
-	protected String getRemoveDialogDescription(final CartItemModifierGroup item) {
+	protected String getRemoveDialogDescription(final ModifierGroup item) {
 		return
 			NLS.bind(CatalogMessages.get().CatalogGroupsSection_RemoveDialog_description,
 			getItemName(item));
 	}
 
 	@Override
-	protected CartItemModifierGroup addItemAction() {
+	protected ModifierGroup addItemAction() {
 		final CatalogCartItemModifierGroupsPage page = (CatalogCartItemModifierGroupsPage) getFormPage();
 		final AddEditCartItemModifierGroupDialog dialog = new AddEditCartItemModifierGroupDialog(page.getSelectedLocale(), null, getModel());
 		if (dialog.open() == Window.OK) {
-			CartItemModifierGroup cartItemModifierGroup = dialog.getCartItemModifierGroup();
-			cartItemModifierGroup.setCatalog(getModel().getCatalog());
-			return cartItemModifierGroup;
+			return dialog.getCartItemModifierGroup();
 		}
 		return null;
 	}
 
 	@Override
-	protected boolean editItemAction(final CartItemModifierGroup object) {
+	protected boolean editItemAction(final ModifierGroup object) {
 		final CatalogCartItemModifierGroupsPage page = (CatalogCartItemModifierGroupsPage) getFormPage();
 		final AddEditCartItemModifierGroupDialog dialog = new AddEditCartItemModifierGroupDialog(page.getSelectedLocale(), object, getModel());
 		return dialog.open() == Window.OK;
 	}
 
 	@Override
-	protected boolean removeItemAction(final CartItemModifierGroup object) {
+	protected boolean removeItemAction(final ModifierGroup object) {
 		final ParameterPasser passer = new ParameterPasser();
 		passer.canRemove = false;
 		final IProgressService progressService = PlatformUI.getWorkbench().getProgressService();
@@ -226,7 +233,7 @@ public class CatalogCartItemModifierGroupsSection extends AbstractPolicyAwareEpT
 			progressService.busyCursorWhile(new IRunnableWithProgress() {
 				@Override
 				public void run(final IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
-					if (cartItemModifierService.isInUse(object.getUidPk())) {
+					if (modifierService.isInUse(object.getUidPk())) {
 						passer.canRemove = false;
 					} else {
 						passer.canRemove = true;
@@ -234,8 +241,8 @@ public class CatalogCartItemModifierGroupsSection extends AbstractPolicyAwareEpT
 					}
 				}
 
-				private void updateChangeSetListsOnRemove(final CartItemModifierGroup object) {
-					Set<CartItemModifierGroup> addedItems = getAddedItems();
+				private void updateChangeSetListsOnRemove(final ModifierGroup object) {
+					Set<ModifierGroup> addedItems = getAddedItems();
 					if (isNewObjectAndInList(object, addedItems)) {
 						addedItems.remove(object);
 						catalogCartItemModifierGroups.remove(object);
@@ -244,7 +251,7 @@ public class CatalogCartItemModifierGroupsSection extends AbstractPolicyAwareEpT
 					}
 				}
 
-				private boolean isNewObjectAndInList(final CartItemModifierGroup object, final Set<CartItemModifierGroup> list) {
+				private boolean isNewObjectAndInList(final ModifierGroup object, final Set<ModifierGroup> list) {
 					return list.contains(object) && !object.isPersisted();
 				}
 			});
@@ -262,27 +269,27 @@ public class CatalogCartItemModifierGroupsSection extends AbstractPolicyAwareEpT
 	}
 
 	@Override
-	protected String getItemName(final CartItemModifierGroup group) {
+	protected String getItemName(final ModifierGroup group) {
 		final Locale selectedLocale = ((AbstractCmClientEditorPage) getPage()).getSelectedLocale();
-		CartItemModifierGroupLdf cartItemModifierGroupLdfByLocale = group.getCartItemModifierGroupLdfByLocale(selectedLocale.toString());
+		ModifierGroupLdf cartItemModifierGroupLdfByLocale = group.getModifierGroupLdfByLocale(selectedLocale.toString());
 		return String.format("%1$s - %2$s", group.getCode(), cartItemModifierGroupLdfByLocale.getDisplayName()); //$NON-NLS-1$
 	}
 
 	@Override
-	protected void addAddedItem(final CartItemModifierGroup item) {
+	protected void addAddedItem(final ModifierGroup item) {
 		super.addAddedItem(item);
 		catalogCartItemModifierGroups.add(item);
 		markDirty();
 	}
 
 	@Override
-	protected void addModifiedItem(final CartItemModifierGroup item) {
+	protected void addModifiedItem(final ModifierGroup item) {
 		super.addModifiedItem(item);
 		markDirty();
 	}
 
 	@Override
-	protected void addRemovedItem(final CartItemModifierGroup item) {
+	protected void addRemovedItem(final ModifierGroup item) {
 		super.addRemovedItem(item);
 		if (!changeSetHelper.isChangeSetsEnabled()) {
 			catalogCartItemModifierGroups.remove(item);
@@ -319,26 +326,26 @@ public class CatalogCartItemModifierGroupsSection extends AbstractPolicyAwareEpT
 	}
 
 	/**
-	 * CartItemModifierGroup specific sorter to sort on the name.
+	 * ModifierGroup specific sorter to sort on the name.
 	 */
 	private class Comparator extends ViewerComparator {
 
 		@Override
 		public int compare(final Viewer viewer, final Object object1, final Object object2) {
-			final CartItemModifierGroup cartItemModifierGroup1 = (CartItemModifierGroup) object1;
-			final CartItemModifierGroup cartItemModifierGroup2 = (CartItemModifierGroup) object2;
+			final ModifierGroup cartItemModifierGroup1 = (ModifierGroup) object1;
+			final ModifierGroup cartItemModifierGroup2 = (ModifierGroup) object2;
 			return cartItemModifierGroup1.getCode().compareToIgnoreCase(cartItemModifierGroup2.getCode());
 		}
 	}
 
 	@Override
 	public void selectionChanged(final SelectionChangedEvent event) {
-		final CartItemModifierGroup cartItemModifierGroup =
-				(CartItemModifierGroup) ((IStructuredSelection) getViewer().getSelection()).getFirstElement();
+		final ModifierGroup cartItemModifierGroup =
+				(ModifierGroup) ((IStructuredSelection) getViewer().getSelection()).getFirstElement();
 		applyStatePolicyForCartItemModifierGroup(getStatePolicy(), cartItemModifierGroup);
 	}
 
-	private void applyStatePolicyForCartItemModifierGroup(final StatePolicy statePolicy, final CartItemModifierGroup cartItemModifierGroup) {
+	private void applyStatePolicyForCartItemModifierGroup(final StatePolicy statePolicy, final ModifierGroup cartItemModifierGroup) {
 		setStatePolicy(statePolicy);
 		updatePoliciesWithDependentObject(cartItemModifierGroup);
 		applyStatePolicy();

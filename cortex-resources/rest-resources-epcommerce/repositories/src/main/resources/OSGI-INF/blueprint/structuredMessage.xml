@@ -6,11 +6,11 @@
 				http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-4.0.xsd
 		">
 
-	<bean id="structuredErrorMessageTransformerTemplate"
-		  class="com.elasticpath.rest.resource.integration.epcommerce.repository.transform.impl.StructuredErrorMessageTransformerImpl"
-		  abstract="true">
-		<property name="fieldMap">
-			<map>
+	<bean id="structuredErrorMessageFieldMap"
+		  parent="profileAttributeToFieldNameMap"
+		  class="org.springframework.beans.factory.config.MapFactoryBean">
+		<property name="sourceMap">
+			<map merge="true">
 				<entry key="customerProfile.profileValueMap[CP_FIRST_NAME]" value="given-name"/>
 				<entry key="customerProfile.profileValueMap[CP_LAST_NAME]" value="family-name"/>
 				<entry key="customerProfile.profileValueMap[CP_EMAIL]" value="email"/>
@@ -23,6 +23,12 @@
 				<entry key="street1" value="street-address"/>
 			</map>
 		</property>
+	</bean>
+
+	<bean id="structuredErrorMessageTransformerTemplate"
+		  class="com.elasticpath.rest.resource.integration.epcommerce.repository.transform.impl.StructuredErrorMessageTransformerImpl"
+		  abstract="true">
+		<property name="fieldMap" ref="structuredErrorMessageFieldMap"/>
 		<property name="resolutionStrategies" ref="resolutionStrategiesList"/>
 	</bean>
 

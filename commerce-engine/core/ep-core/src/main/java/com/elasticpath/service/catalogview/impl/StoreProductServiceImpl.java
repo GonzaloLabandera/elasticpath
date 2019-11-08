@@ -8,6 +8,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import com.elasticpath.common.dto.SkuInventoryDetails;
@@ -19,6 +20,9 @@ import com.elasticpath.domain.catalog.ProductAssociation;
 import com.elasticpath.domain.catalog.ProductBundle;
 import com.elasticpath.domain.catalog.ProductSku;
 import com.elasticpath.domain.catalogview.StoreProduct;
+import com.elasticpath.domain.catalogview.StoreProductSku;
+import com.elasticpath.domain.catalogview.StoreProductSkuFactory;
+import com.elasticpath.domain.catalogview.impl.PerStoreProductSkuAvailabilityImpl;
 import com.elasticpath.domain.catalogview.impl.StoreProductImpl;
 import com.elasticpath.domain.store.Store;
 import com.elasticpath.persistence.api.FetchGroupLoadTuner;
@@ -47,6 +51,7 @@ public class StoreProductServiceImpl implements StoreProductService {
 	private ShoppingItemDtoFactory shoppingItemDtoFactory;
 	private BundleIdentifier bundleIdentifier;
 	private List<AvailabilityStrategy> availabilityStrategies;
+	private StoreProductSkuFactory storeProductSkuFactory;
 
 	@Override
 	public StoreProduct getProductForStore(final long uidPk, final Store store, final boolean loadProductAssociations) {
@@ -69,6 +74,32 @@ public class StoreProductServiceImpl implements StoreProductService {
 	@Override
 	public StoreProduct getProductForStore(final Product product, final Store store) {
 		return wrapProduct(product, store);
+	}
+
+	@Override
+	public Optional<StoreProductSku> getProductSkuForStore(final ProductSku productSku, final Store store) {
+		final Product product = productSku.getProduct();
+
+		final StoreProductSku storeProductSku = createStoreProductSku(product,
+				store,
+				productInventoryShoppingService.getSkuInventoryDetails(productSku, store),
+				productSku);
+
+		if (skuExistsInStore(storeProductSku, store)) {
+			return Optional.of(storeProductSku);
+		} else {
+			return Optional.empty();
+		}
+	}
+
+	/**
+	 * Factory method for producing new {@link com.elasticpath.domain.catalogview.PerStoreProductSkuAvailability PerStoreProductSkuAvailability}
+	 * instances.
+	 *
+	 * @return a new {@link com.elasticpath.domain.catalogview.PerStoreProductSkuAvailability PerStoreProductSkuAvailability} instance
+	 */
+	protected PerStoreProductSkuAvailabilityImpl createPerStoreProductSkuAvailability() {
+		return new PerStoreProductSkuAvailabilityImpl();
 	}
 
 	/**
@@ -297,13 +328,18 @@ public class StoreProductServiceImpl implements StoreProductService {
 											 final StoreProductImpl storeProductImpl) {
 		for (ProductSku sku : skus) {
 			SkuInventoryDetails inventoryDetails = skuInventoryDetails.get(sku.getSkuCode());
-			boolean hasUnallocatedInventory = false;
+
 			if (inventoryDetails != null) {
 				storeProductImpl.addInventoryDetails(sku.getSkuCode(), inventoryDetails);
-				hasUnallocatedInventory = inventoryDetails.hasSufficientUnallocatedQty();
 			}
-			storeProductImpl.setSkuAvailable(sku.getSkuCode(), hasUnallocatedInventory && sku.isWithinDateRange());
+
+			storeProductImpl.setSkuAvailable(sku.getSkuCode(), isSkuAvailable(sku, inventoryDetails));
 		}
+	}
+
+	private boolean isSkuAvailable(final ProductSku sku, final SkuInventoryDetails skuInventoryDetailsInventory) {
+		return (skuInventoryDetailsInventory != null && skuInventoryDetailsInventory.hasSufficientUnallocatedQty())
+				&& sku.isWithinDateRange();
 	}
 
 	/**
@@ -332,27 +368,86 @@ public class StoreProductServiceImpl implements StoreProductService {
 			storeProductImpl.setProductAvailable(isAvailable);
 			storeProductImpl.setProductDisplayable(isDisplayable);
 			storeProductImpl.setProductAvailability(getProductAvailability(product, isAvailable, isDisplayable));
+			populateStoreProductSkus(product, store, storeProductImpl, skuInventoryDetails);
 
-			for (ProductSku sku : product.getProductSkus().values()) {
-				setSkuDetails(product, store, storeProductImpl, skuInventoryDetails, sku);
-			}
 		}
-
+		final boolean canSyndicate = getProductAvailabilityService().canProductSyndicate(product);
+		storeProductImpl.setProductSyndicate(canSyndicate);
 		storeProductImpl.setNotSoldSeparately(product.isNotSoldSeparately());
 
 		return storeProductImpl;
 	}
 
-	private void setSkuDetails(final Product product, final Store store, final StoreProductImpl storeProductImpl,
-							   final Map<String, SkuInventoryDetails> skuInventoryDetails, final ProductSku sku) {
-		final String skuCode = sku.getSkuCode();
-		SkuInventoryDetails skuInventory = skuInventoryDetails.get(skuCode);
-		boolean isSkuAvailable = getProductAvailabilityService().isSkuAvailable(product, sku, skuInventory);
-		boolean isSkuDisplayable = getProductAvailabilityService().isSkuDisplayable(product, sku, store, skuInventory);
+	/**
+	 * Populates the set of {@link StoreProductSku} instances within the Store Product.
+	 *
+	 * @param product             the underlying product within the Store Product
+	 * @param store               the store within which the Store Product is created
+	 * @param storeProductImpl    the Store Product to populate
+	 * @param skuInventoryDetails the sku inventory details map for all skus of the product
+	 */
+	protected void populateStoreProductSkus(final Product product,
+											final Store store,
+											final StoreProductImpl storeProductImpl,
+											final Map<String, SkuInventoryDetails> skuInventoryDetails) {
+		final Set<StoreProductSku> storeProductSkus = new HashSet<>();
+		for (final ProductSku sku : product.getProductSkus().values()) {
+			final StoreProductSku storeProductSku = createStoreProductSku(product, store, skuInventoryDetails.get(sku.getSkuCode()), sku);
 
-		storeProductImpl.setSkuAvailable(skuCode, isSkuAvailable);
-		storeProductImpl.setSkuDisplayable(skuCode, isSkuDisplayable);
-		storeProductImpl.setSkuAvailability(skuCode, getProductAvailability(product, isSkuAvailable, isSkuDisplayable));
+			final String skuCode = sku.getSkuCode();
+			storeProductImpl.setSkuAvailable(skuCode, storeProductSku.isProductSkuAvailable());
+			storeProductImpl.setSkuDisplayable(skuCode, storeProductSku.isProductSkuDisplayable());
+			storeProductImpl.setSkuAvailability(skuCode, storeProductSku.getSkuAvailability());
+
+			if (skuExistsInStore(storeProductSku, store)) {
+				storeProductSkus.add(storeProductSku);
+			}
+		}
+
+		storeProductImpl.setStoreProductSkus(storeProductSkus);
+	}
+
+	/**
+	 * Creates a new {@link StoreProductSku} instance from the given parameters.
+	 *
+	 * @param product      the product within which the underlying SKU exists
+	 * @param store        the store for which the {@link StoreProductSku} should be created
+	 * @param skuInventory the sku inventory details
+	 * @param sku          the underlying SKU
+	 * @return a new {@link StoreProductSku} instance
+	 */
+	protected StoreProductSku createStoreProductSku(final Product product,
+													final Store store,
+													final SkuInventoryDetails skuInventory,
+													final ProductSku sku) {
+		final boolean isSkuAvailable = getProductAvailabilityService().isSkuAvailable(product, sku, skuInventory);
+		final boolean isSkuDisplayable = getProductAvailabilityService().isSkuDisplayable(product, sku, store, skuInventory);
+		final boolean canSyndicate = getProductAvailabilityService().canSkuSyndicate(sku);
+		final Availability skuAvailability = getProductAvailability(product, isSkuAvailable, isSkuDisplayable);
+
+		final PerStoreProductSkuAvailabilityImpl perStoreSkuAvailability = createPerStoreProductSkuAvailability();
+		perStoreSkuAvailability.setInventoryDetails(skuInventory);
+		perStoreSkuAvailability.setMessageCode(skuInventory == null ? null : skuInventory.getMessageCode());
+		perStoreSkuAvailability.setProductSkuAvailable(isSkuAvailable);
+		perStoreSkuAvailability.setSkuAvailability(skuAvailability);
+		perStoreSkuAvailability.setProductSkuDisplayable(isSkuDisplayable);
+		perStoreSkuAvailability.setSkuSyndicate(canSyndicate);
+
+		return getStoreProductSkuFactory().createStoreProductSku(sku, perStoreSkuAvailability);
+	}
+
+	/**
+	 * Determines whether or not a given {@link StoreProductSku} exists in the given {@link Store}.
+	 *
+	 * @param storeProductSku the {@link StoreProductSku} to examine
+	 * @param store           the store
+	 * @return true if this {@link StoreProductSku} exists in the given {@link Store}
+	 */
+	protected boolean skuExistsInStore(final StoreProductSku storeProductSku, final Store store) {
+		// In the current catalog domain model we do not have a way to express that a given SKU exists in one store but not another.
+		// This method has been provided as an extension hook for developers to implement their own strategy for determining SKU inclusion per store.
+		// Such implementations typically utilise SKU attributes to set a comma-separated list of acceptable Store codes.
+		return true;
 	}
 
 	/**
@@ -470,4 +565,13 @@ public class StoreProductServiceImpl implements StoreProductService {
 	protected ProductLookup getProductLookup() {
 		return productLookup;
 	}
+
+	public StoreProductSkuFactory getStoreProductSkuFactory() {
+		return storeProductSkuFactory;
+	}
+
+	public void setStoreProductSkuFactory(final StoreProductSkuFactory storeProductSkuFactory) {
+		this.storeProductSkuFactory = storeProductSkuFactory;
+	}
+
 }

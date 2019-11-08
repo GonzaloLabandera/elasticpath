@@ -23,60 +23,7 @@
         <language>fr</language>
     </languages>
     <defaultlanguage>en</defaultlanguage>
-    <cartitemmodifiergroups>
-        <cartitemmodifiergroup>
-            <code>giftCertificate</code>
-            <displayname>
-                <value language="en">giftCertificate</value>
-            </displayname>
-            <cartitemmodifierfields>
-                <cartitemmodifierfield>
-                    <code>senderName</code>
-                    <type>ShortText</type>
-                    <required>true</required>
-                    <maxSize>255</maxSize>
-                    <ordering>3</ordering>
-                    <displayname>
-                        <value language="en">Sender Name</value>
-                    </displayname>
-                    <options/>
-                </cartitemmodifierfield>
-                <cartitemmodifierfield>
-                    <code>giftCertificateMessage</code>
-                    <type>ShortText</type>
-                    <required>false</required>
-                    <maxSize>500</maxSize>
-                    <ordering>4</ordering>
-                    <displayname>
-                        <value language="en">Message</value>
-                    </displayname>
-                    <options/>
-                </cartitemmodifierfield>
-                <cartitemmodifierfield>
-                    <code>recipientName</code>
-                    <type>ShortText</type>
-                    <required>true</required>
-                    <maxSize>255</maxSize>
-                    <ordering>2</ordering>
-                    <displayname>
-                        <value language="en">Recipient Name</value>
-                    </displayname>
-                    <options/>
-                </cartitemmodifierfield>
-                <cartitemmodifierfield>
-                    <code>recipientEmail</code>
-                    <type>ShortText</type>
-                    <required>true</required>
-                    <maxSize>255</maxSize>
-                    <ordering>1</ordering>
-                    <displayname>
-                        <value language="en">Recipient Email</value>
-                    </displayname>
-                    <options/>
-                </cartitemmodifierfield>
-            </cartitemmodifierfields>
-        </cartitemmodifiergroup>
-    </cartitemmodifiergroups>
+
     <attributes>
         <attribute>
             <key>A01010</key>

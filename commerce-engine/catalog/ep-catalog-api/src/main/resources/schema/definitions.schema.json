@@ -1,0 +1,114 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "description": "Subschemas used by multiple projections.",
+
+  "deletedObject": {
+    "description": "A deleted object. This is a tombstone that contains no details about the catalog object.",
+    "type": "object",
+    "required": [ "identity", "modifiedDateTime", "deleted" ],
+    "additionalProperties": false,
+    "properties": {
+      "identity": { "$ref": "definitions.schema.json#/nameIdentity" },
+      "modifiedDateTime": {
+        "description": "The date/time that the projection was modified.",
+        "type": "string"
+      },
+      "deleted": {
+        "description": "Indicates whether the projection is available.",
+        "type": "boolean",
+        "enum": [ true ]
+      }
+    }
+  },
+
+  "nameIdentity": {
+    "description": "The identity header used in all projections.",
+    "type": "object",
+    "oneOf": [
+      {
+        "properties": {
+          "type": {
+            "description": "The projection type.",
+            "type": "string"
+          },
+          "code": {
+            "description": "A unique code of the projection within store and projection type.",
+            "type": "string"
+          },
+          "store": {
+            "description": "The store code.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "code",
+          "store"
+        ]
+      }
+    ]
+  },
+
+  "translatedValues": {
+    "description": "An array of values with translations.",
+    "type": "array",
+    "items": [
+      {
+        "type": "object",
+        "properties": {
+          "value": {
+            "description": "The non-localized value.",
+            "type": "string"
+          },
+          "displayValue": {
+            "description": "The localized value.",
+            "type": "string"
+          }
+        },
+        "required": [
+          "value",
+          "displayValue"
+        ]
+      }
+    ]
+  },
+
+  "attributes": {
+    "description": "An array of attributes.",
+    "type": "array",
+    "items": [
+      {
+        "type": "object",
+        "required": [ "displayValues", "values", "displayName", "name" ],
+        "properties": {
+          "displayValues": {
+            "description": "Array of localized attribute values.",
+            "type": "array",
+            "items": [
+              {
+                "type": "string"
+              }
+            ]
+          },
+          "values": {
+            "description": "Array of non-localized attribute values.",
+            "type": "array",
+            "items": [
+              {
+                "type": [ "string", "number", "boolean" ]
+              }
+            ]
+          },
+          "displayName": {
+            "description": "The localized attribute name.",
+            "type": "string"
+          },
+          "name": {
+            "description": "The non-localized attribute name.",
+            "type": "string"
+          }
+        }
+      }
+    ]
+  }
+}

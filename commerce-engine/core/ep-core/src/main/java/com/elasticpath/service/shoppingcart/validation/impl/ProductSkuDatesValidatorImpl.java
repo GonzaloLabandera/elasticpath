@@ -34,7 +34,7 @@ public class ProductSkuDatesValidatorImpl implements ProductSkuValidator {
 
 	private TimeService timeService;
 
-	private final DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
+	private final DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd H:m", Locale.US);
 
 	@Override
 	public Collection<StructuredErrorMessage> validate(final ProductSkuValidationContext context) {

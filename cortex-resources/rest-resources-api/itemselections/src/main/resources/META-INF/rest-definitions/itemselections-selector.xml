@@ -3,7 +3,6 @@
 
 	<family>
 		<name>itemselections</name>
-		<description><![CDATA[The Items selections resource provides a selector to allow customers to select item option's value.]]></description>
 
 		<uri-part>
 			<name>option-id</name>

@@ -13,7 +13,7 @@ import com.elasticpath.cmclient.core.service.AuthorizationService;
 import com.elasticpath.cmclient.core.ui.framework.EpControlFactory;
 import com.elasticpath.cmclient.policy.StateDeterminer;
 import com.elasticpath.cmclient.policy.common.PolicyActionContainer;
-import com.elasticpath.domain.cartmodifier.CartItemModifierGroup;
+import com.elasticpath.domain.modifier.ModifierGroup;
 import com.elasticpath.domain.catalog.Catalog;
 
 /**
@@ -89,9 +89,9 @@ public class CatalogCartItemModifierGroupsSectionPolicy extends AbstractCatalogD
 				return EpControlFactory.EpState.READ_ONLY;
 			}
 
-			CartItemModifierGroup group = null;
-			if (targetContainer.getPolicyDependent() instanceof CartItemModifierGroup) {
-				group = (CartItemModifierGroup) targetContainer.getPolicyDependent();
+			ModifierGroup group = null;
+			if (targetContainer.getPolicyDependent() instanceof ModifierGroup) {
+				group = (ModifierGroup) targetContainer.getPolicyDependent();
 			}
 
 			if (groupCannotBeEdited(group)) {
@@ -102,14 +102,14 @@ public class CatalogCartItemModifierGroupsSectionPolicy extends AbstractCatalogD
 		}
 	}
 
-	private boolean groupCannotBeEdited(final CartItemModifierGroup group) {
+	private boolean groupCannotBeEdited(final ModifierGroup group) {
 		if (group == null) {
 			return true;
 		}
 		return isInRemovalList(group);
 	}
 
-	private boolean isInRemovalList(final CartItemModifierGroup group) {
+	private boolean isInRemovalList(final ModifierGroup group) {
 		return catalogModel != null && catalogModel.getBrandTableItems().getRemovedItems().contains(group);
 	}
 

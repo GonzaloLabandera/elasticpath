@@ -75,7 +75,7 @@ public class GroovyConditionDSLBuilderImpl implements ConditionDSLBuilder {
 							+ "import com.elasticpath.tags.domain.*\n"
 
 							+ "def propertyMissing(String name) {\n"
-							+ "	   new BuilderString(tagDefinitionsMap.get(name))\n"
+							+ "	   new BuilderString(tagDefinitionsMap.get(name), name)\n"
 							+ "}\n"
 
 							+ "def methodMissing(String name, args) { \n"

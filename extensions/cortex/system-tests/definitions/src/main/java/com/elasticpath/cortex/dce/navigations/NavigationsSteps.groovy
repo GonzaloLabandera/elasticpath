@@ -138,33 +138,6 @@ class NavigationsSteps {
 				.isEqualTo(count)
 	}
 
-	@Given('^(?:.+) is missing a value for (?:.+)')
-	static void isMissingValue() { }
-
-	@Given('^category (?:.+) has a subcategory and no parent category$')
-	static void verifyCategoryHasSubNoParent() { }
-
-	@Given('^the (?:catalog|category) (?:.+) has (?:.+) (?:categories|subcategories|subcategory)$')
-	static void verifyCategoryHas() { }
-
-	@Given('^the category (?:.+) is a top level category with no subcategories')
-	static void verifyCategoryIsTopLevel() { }
-
-	@Given('^the category (?:.+) contains (?:.+) (?:item|items)')
-	static void verifyCategoryContains() { }
-
-	@Given('^the category (?:.+) contains (?:item|items) (?:.+)$')
-	static void verifyCategoryContainsItem() { }
-
-	@Given('^the item (?:.+) belongs to a subcategory of (?:.+)')
-	static void verifyItemBelongsToCategory() { }
-
-	@Given('^featured items are configured for the category (?:.+)')
-	static void verifyFeaturedItemsForCategory() { }
-
-	@Given('^that (?:.+) does not belong to the current scope')
-	static void verifyNotBelongToScope() { }
-
 	@When('^I look up navigation item with (?:category|sub-category) code (.*)$')
 	static void lookupNavigationWithCode(final String categoryCode) {
 		CommonMethods.navigationLookupCode(categoryCode)

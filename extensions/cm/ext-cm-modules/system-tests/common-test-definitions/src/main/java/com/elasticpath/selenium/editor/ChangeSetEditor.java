@@ -37,6 +37,7 @@ public class ChangeSetEditor extends AbstractPageObject {
 			+ "div[row-id='alien'][widget-id='alien'] div[style*='themes']";
 	private static final String MOVE_SELECTED_OBJECTS_BUTTON_CSS = "div[automation-id='com.elasticpath.cmclient.changeset."
 			+ "ChangeSetMessages.ChangeSetEditor_Objects_MoveObjects";
+	private static final String OBJECT_COLUMN_NAME_CSS = OBJECT_TABLE_PARENT_CSS + "div[widget-id='%s']";
 
 	/**
 	 * Constructor.
@@ -87,6 +88,15 @@ public class ChangeSetEditor extends AbstractPageObject {
 	 */
 	public void selectChangeSetEditor(final String changeSetName) {
 		click(getWaitDriver().waitForElementToBeClickable(By.cssSelector(String.format(CHANGE_SET_EDITOR, changeSetName))));
+	}
+
+	/**
+	 * Clicks objects column.
+	 *
+	 * @param columnName the column name
+	 */
+	public void clickObjectColumn(final String columnName) {
+		click(getWaitDriver().waitForElementToBeClickable(By.cssSelector(String.format(OBJECT_COLUMN_NAME_CSS, columnName))));
 	}
 
 	/**

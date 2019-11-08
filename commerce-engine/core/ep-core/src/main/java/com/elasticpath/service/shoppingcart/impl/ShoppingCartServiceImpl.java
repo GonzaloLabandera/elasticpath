@@ -3,7 +3,9 @@
  */
 package com.elasticpath.service.shoppingcart.impl;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -12,15 +14,10 @@ import java.util.stream.Collectors;
 
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
-
 import org.apache.log4j.Logger;
 
 import com.elasticpath.base.exception.EpServiceException;
 import com.elasticpath.commons.constants.ContextIdNames;
-import com.elasticpath.domain.catalog.CategoryLoadTuner;
-import com.elasticpath.domain.catalog.ProductLoadTuner;
-import com.elasticpath.domain.catalog.ProductSkuLoadTuner;
-import com.elasticpath.domain.catalog.ShoppingItemLoadTuner;
 import com.elasticpath.domain.customer.CustomerSession;
 import com.elasticpath.domain.shopper.Shopper;
 import com.elasticpath.domain.shoppingcart.ItemType;
@@ -28,9 +25,10 @@ import com.elasticpath.domain.shoppingcart.ShoppingCart;
 import com.elasticpath.domain.shoppingcart.ShoppingCartMemento;
 import com.elasticpath.domain.shoppingcart.ShoppingCartMementoHolder;
 import com.elasticpath.domain.shoppingcart.ShoppingItem;
+import com.elasticpath.domain.shoppingcart.impl.CartData;
 import com.elasticpath.domain.store.Store;
+import com.elasticpath.persistence.api.LoadTuner;
 import com.elasticpath.service.impl.AbstractEpPersistenceServiceImpl;
-import com.elasticpath.service.misc.FetchPlanHelper;
 import com.elasticpath.service.misc.TimeService;
 import com.elasticpath.service.shopper.ShopperService;
 import com.elasticpath.service.shoppingcart.ShoppingCartService;
@@ -38,7 +36,7 @@ import com.elasticpath.service.shoppingcart.actions.FinalizeCheckoutActionContex
 import com.elasticpath.service.store.StoreService;
 
 /** Service for retrieving and saving Shopping Carts. */
-@SuppressWarnings("PMD.GodClass")
+@SuppressWarnings({"PMD.GodClass", "PMD.TooManyMethods"})
 public class ShoppingCartServiceImpl extends AbstractEpPersistenceServiceImpl implements ShoppingCartService {
 	private static final String LIST_PARAMETER = "list";
 	private static final Logger LOG = Logger.getLogger(ShoppingCartServiceImpl.class);
@@ -46,18 +44,15 @@ public class ShoppingCartServiceImpl extends AbstractEpPersistenceServiceImpl im
 	/** OpenJPA Query Name. */
 	protected static final String SHOPPING_CART_FIND_BY_GUID_EAGER = "SHOPPING_CART_FIND_BY_GUID_EAGER";
 	/** OpenJPA Query Name. */
-	protected static final String ACTIVE_SHOPPING_CART_FIND_BY_SHOPPER_UID = "ACTIVE_SHOPPING_CART_FIND_BY_SHOPPER_UID";
+	protected static final String DEFAULT_SHOPPING_CART_FIND_BY_SHOPPER_UID = "DEFAULT_SHOPPING_CART_FIND_BY_SHOPPER_UID";
 	/** A list with valid types for root items having children. */
 	protected static final List<ItemType> ROOT_ITEM_WITH_CHILDREN_TYPES = Lists.newArrayList(ItemType.BUNDLE, ItemType.SKU_WITH_DEPENDENTS);
+	private static final String SHOPPER_UIDS_NULL_ERROR_MESSAGE = "shopperUids must not be null";
 
-	private FetchPlanHelper fetchPlanHelper;
-	private ProductSkuLoadTuner productSkuLoadTuner;
-	private ProductLoadTuner productLoadTuner;
-	private CategoryLoadTuner categoryLoadTuner;
-	private ShoppingItemLoadTuner shoppingItemLoadTuner;
 	private ShopperService shopperService;
 	private StoreService storeService;
 	private TimeService timeService;
+	private LoadTuner[] loadTuners;
 
 	/**
 	 * Updates the given shopping cart.
@@ -85,29 +80,17 @@ public class ShoppingCartServiceImpl extends AbstractEpPersistenceServiceImpl im
 	 */
 	protected ShoppingCart saveOrUpdate(final ShoppingCart shoppingCart, final ShoppingCartMementoHolder mementoContainer) {
 		LOG.debug("saving shopping cart...");
-		configureLoadTuners();
-		try {
-			final ShoppingCartMemento shoppingCartMemento = mementoContainer.getShoppingCartMemento();
-			shoppingCartMemento.setStoreCode(shoppingCart.getStore().getCode());
 
-			final ShoppingCartMemento updatedShoppingCartMemento = getPersistenceEngine().saveOrUpdate(shoppingCartMemento);
-			mementoContainer.setShoppingCartMemento(updatedShoppingCartMemento);
+		final ShoppingCartMemento shoppingCartMemento = mementoContainer.getShoppingCartMemento();
+		shoppingCartMemento.setStoreCode(shoppingCart.getStore().getCode());
 
-			if (shoppingCart.isActive()) {
-				// when cart is deactivated in the final checkout phase, there is no need to set store
+		final ShoppingCartMemento updatedShoppingCartMemento = getPersistenceEngine().saveOrUpdate(shoppingCartMemento);
+		mementoContainer.setShoppingCartMemento(updatedShoppingCartMemento);
 
-				shoppingCart.setStore(storeService.findStoreWithCode(shoppingCartMemento.getStoreCode()));
-			}
-		} catch (RuntimeException e) {
-			// If the update fails then re-read the memento from the database,
-			// the one we tried to write will be broken and no longer usable.
-			if (mementoContainer.getShoppingCartMemento().isPersisted()) {
-				final ShoppingCartMemento freshlyReadMemento = loadMemento(mementoContainer.getShoppingCartMemento().getUidPk());
-				mementoContainer.setShoppingCartMemento(freshlyReadMemento);
-			}
-			throw e;
-		} finally {
-			fetchPlanHelper.clearFetchPlan();
+		if (shoppingCart.isActive()) {
+			// when cart is deactivated in the final checkout phase, there is no need to set store
+
+			shoppingCart.setStore(storeService.findStoreWithCode(shoppingCartMemento.getStoreCode()));
 		}
 
 		return shoppingCart;
@@ -122,19 +105,26 @@ public class ShoppingCartServiceImpl extends AbstractEpPersistenceServiceImpl im
 
 		ShoppingCartMementoHolder newCartMementoContainer = null;
 
-		configureLoadTuners();
-
 		try {
 
 			Shopper shopper = oldCart.getShopper();
 			shopper.setStoreCode(oldCart.getStore().getCode());
 			//create a new cart
 			ShoppingCart newShoppingCart = createShoppingCart(shopper, null);
+
 			newCartMementoContainer = (ShoppingCartMementoHolder) newShoppingCart;
 
 			//update new cart memento with store code
 			final ShoppingCartMemento shoppingCartMemento = newCartMementoContainer.getShoppingCartMemento();
 			shoppingCartMemento.setStoreCode(newShoppingCart.getStore().getCode());
+
+
+			//connect new cart with cart data, or set to default cart
+			newShoppingCart.setDefault(oldCart.isDefault());
+
+			oldCart.getCartData().values()
+					.forEach(oldCartValue -> newShoppingCart.setCartDataFieldValue(oldCartValue.getKey(), oldCartValue.getValue()));
+
 
 			//save new cart memento and update the memento container (i.e. the cart) with saved memento
 			final ShoppingCartMemento updatedShoppingCartMemento = getPersistenceEngine().saveOrUpdate(shoppingCartMemento);
@@ -156,8 +146,6 @@ public class ShoppingCartServiceImpl extends AbstractEpPersistenceServiceImpl im
 				newCartMementoContainer.setShoppingCartMemento(freshlyReadMemento);
 			}
 			throw e;
-		} finally {
-			fetchPlanHelper.clearFetchPlan();
 		}
 	}
 
@@ -199,7 +187,9 @@ public class ShoppingCartServiceImpl extends AbstractEpPersistenceServiceImpl im
 	 * @return the requested memento , or null if it cannot be found.
 	 */
 	private ShoppingCartMemento loadMemento(final long uidPk) {
-		return getPersistentBeanFinder().load(ContextIdNames.SHOPPING_CART_MEMENTO, uidPk);
+		return getPersistentBeanFinder()
+			.withLoadTuners(getLoadTuners())
+			.load(ContextIdNames.SHOPPING_CART_MEMENTO, uidPk);
 	}
 
 	/**
@@ -300,14 +290,12 @@ public class ShoppingCartServiceImpl extends AbstractEpPersistenceServiceImpl im
 
 	@Override
 	public ShoppingCart findByGuid(final String guid) throws EpServiceException {
-		configureLoadTuners();
+		getFetchPlanHelper().setLoadTuners(getLoadTuners());
 
 		final ShoppingCartMemento shoppingCartMemento = loadShoppingCartMemento(guid);
 		if (shoppingCartMemento == null) {
 			return null;
 		}
-
-		fetchPlanHelper.clearFetchPlan();
 
 		return createShoppingCart(shoppingCartMemento);
 	}
@@ -342,19 +330,23 @@ public class ShoppingCartServiceImpl extends AbstractEpPersistenceServiceImpl im
 		return shoppingCart;
 	}
 
-	@Override 
-	public String findDefaultShoppingCartGuidByShopper(final Shopper shopper) throws EpServiceException {
-		fetchPlanHelper.clearFetchPlan();
+	@Override
+	public String findDefaultShoppingCartGuidByCustomerSession(final CustomerSession customerSession) throws EpServiceException {
 
-		final List<String> carts = getPersistenceEngine().retrieveByNamedQuery("ACTIVE_SHOPPING_CARTGUID_FIND_BY_SHOPPER_UID",
-			new Object[]{shopper.getUidPk()}, 0, 1);
-		return Iterables.getFirst(carts, null);
+		final List<String> cartGuids = getPersistenceEngine().retrieveByNamedQuery("DEFAULT_SHOPPING_CARTGUID_FIND_BY_SHOPPER_UID",
+			new Object[]{customerSession.getShopper().getUidPk()}, 0, 1);
+		if (cartGuids.isEmpty()) {
+			ShoppingCart shoppingCart = findOrCreateDefaultCartByCustomerSession(customerSession);
+
+			// Call via getShoppingCartService necessary so that a transaction can be started
+			getShoppingCartService().saveIfNotPersisted(shoppingCart);
+			return shoppingCart.getGuid();
+		}
+		return cartGuids.get(0);
 	}
 
 	@Override
 	public String findStoreCodeByCartGuid(final String cartGuid) {
-		fetchPlanHelper.clearFetchPlan();
-
 		final List<String> stores = getPersistenceEngine().retrieveByNamedQuery("STORE_BY_CARTGUID",
 				new Object[]{cartGuid}, 0, 1);
 		return Iterables.getFirst(stores, null);
@@ -365,12 +357,11 @@ public class ShoppingCartServiceImpl extends AbstractEpPersistenceServiceImpl im
 	@Deprecated
 	@Override
 	public ShoppingCart findOrCreateByShopper(final Shopper shopper) throws EpServiceException {
-		configureLoadTuners();
 
-		final List<ShoppingCartMemento> carts = getPersistenceEngine().retrieveByNamedQuery(getFindOrCreateByShopperNamedQuery(),
+		final List<ShoppingCartMemento> carts = getPersistenceEngine()
+			.withLoadTuners(getLoadTuners())
+			.retrieveByNamedQuery(getFindOrCreateByShopperNamedQuery(),
 			new Object[]{shopper.getUidPk()}, 0, 1);
-
-		fetchPlanHelper.clearFetchPlan();
 
 		ShoppingCartMemento shoppingCartMemento = Iterables.getFirst(carts, null);
 
@@ -385,7 +376,7 @@ public class ShoppingCartServiceImpl extends AbstractEpPersistenceServiceImpl im
 	 * @return the default query name
 	 */
 	protected String getFindOrCreateByShopperNamedQuery() {
-		return ACTIVE_SHOPPING_CART_FIND_BY_SHOPPER_UID;
+		return DEFAULT_SHOPPING_CART_FIND_BY_SHOPPER_UID;
 	}
 
 	/**
@@ -398,10 +389,19 @@ public class ShoppingCartServiceImpl extends AbstractEpPersistenceServiceImpl im
 	}
 
 	@Override
-	public ShoppingCart findOrCreateByCustomerSession(final CustomerSession customerSession) throws EpServiceException {
+	public ShoppingCart findOrCreateDefaultCartByCustomerSession(final CustomerSession customerSession) throws EpServiceException {
 		ShoppingCart shoppingCart = findOrCreateByShopper(customerSession.getShopper());
 		shoppingCart.setCustomerSession(customerSession);
+		shoppingCart.setDefault(true);
 		return shoppingCart;
+	}
+
+	@Override
+	public ShoppingCart createByCustomerSession(final CustomerSession customerSession) {
+		ShoppingCart shoppingCart = createShoppingCart(customerSession.getShopper(), null);
+		shoppingCart.setShopper(customerSession.getShopper());
+		return shoppingCart;
+
 	}
 
 	@Override
@@ -422,27 +422,15 @@ public class ShoppingCartServiceImpl extends AbstractEpPersistenceServiceImpl im
 		if (uid <= 0) {
 			shoppingCart = getBean(ContextIdNames.SHOPPING_CART);
 		} else {
-			configureLoadTuners();
 			final ShoppingCartMemento memento = loadMemento(uid);
 			if (memento == null) {
 				shoppingCart = getBean(ContextIdNames.SHOPPING_CART);
 			} else {
 				shoppingCart = createShoppingCart(memento);
 			}
-			fetchPlanHelper.clearFetchPlan();
 		}
 
 		return shoppingCart;
-	}
-
-	/**
-	 * Configure the load tuners.
-	 */
-	protected void configureLoadTuners() {
-		fetchPlanHelper.configureLoadTuner(productLoadTuner);
-		fetchPlanHelper.configureLoadTuner(productSkuLoadTuner);
-		fetchPlanHelper.configureLoadTuner(categoryLoadTuner);
-		fetchPlanHelper.configureLoadTuner(shoppingItemLoadTuner);
 	}
 
 	@Override
@@ -456,21 +444,21 @@ public class ShoppingCartServiceImpl extends AbstractEpPersistenceServiceImpl im
 	}
 
 	@Override
-	public int deleteEmptyShoppingCartsByShopperUids(final List<Long> shopperUids) {
+	public int deleteDefaultEmptyShoppingCartsByShopperUids(final List<Long> shopperUids) {
 		if (shopperUids == null) {
-			throw new EpServiceException("shopperUids must not be null");
+			throw new EpServiceException(SHOPPER_UIDS_NULL_ERROR_MESSAGE);
 		}
 		if (shopperUids.isEmpty()) {
 			return 0;
 		}
 
-		return getPersistenceEngine().executeNamedQueryWithList("DELETE_EMPTY_SHOPPING_CARTS_BY_SHOPPER_UID", LIST_PARAMETER, shopperUids);
+		return getPersistenceEngine().executeNamedQueryWithList("DELETE_DEFAULT_EMPTY_SHOPPING_CARTS_BY_SHOPPER_UID", LIST_PARAMETER, shopperUids);
 	}
 
 	@Override
 	public int deleteAllShoppingCartsByShopperUids(final List<Long> shopperUids) {
 		if (shopperUids == null) {
-			throw new EpServiceException("shopperUids must not be null");
+			throw new EpServiceException(SHOPPER_UIDS_NULL_ERROR_MESSAGE);
 		}
 		if (shopperUids.isEmpty()) {
 			return 0;
@@ -483,7 +471,7 @@ public class ShoppingCartServiceImpl extends AbstractEpPersistenceServiceImpl im
 	@Override
 	public int deleteAllInactiveShoppingCartsByShopperUids(final List<Long> shopperUids) {
 		if (shopperUids == null) {
-			throw new EpServiceException("shopperUids must not be null");
+			throw new EpServiceException(SHOPPER_UIDS_NULL_ERROR_MESSAGE);
 		}
 		if (shopperUids.isEmpty()) {
 			return 0;
@@ -491,6 +479,11 @@ public class ShoppingCartServiceImpl extends AbstractEpPersistenceServiceImpl im
 
 		getPersistenceEngine().executeNamedQueryWithList("DELETE_ALL_INACTIVE_CART_ORDERS_BY_SHOPPER_UID", LIST_PARAMETER, shopperUids);
 		return getPersistenceEngine().executeNamedQueryWithList("DELETE_ALL_INACTIVE_SHOPPING_CARTS_BY_SHOPPER_UID", LIST_PARAMETER, shopperUids);
+	}
+
+	@Override
+	public int deleteShoppingCartsByGuid(final List<String> shoppingCartGuids) {
+		return getPersistenceEngine().executeNamedQueryWithList("SHOPPING_CART_DELETE_BY_GUID", LIST_PARAMETER, shoppingCartGuids);
 	}
 
 	@Override
@@ -523,50 +516,37 @@ public class ShoppingCartServiceImpl extends AbstractEpPersistenceServiceImpl im
 		return ((ShoppingCartMementoHolder) shoppingCart).getShoppingCartMemento().isPersisted();
 	}
 
-	// BEGIN - SPRING SETTERS
+	@Override
+	public Map<String, List<CartData>> findCartDataForCarts(final List<String> cartGuids) {
 
-	/**
-	 * Set the category load tuner through spring.
-	 * @param categoryLoadTuner category load tuner
-	 */
-	public void setCategoryLoadTuner(final CategoryLoadTuner categoryLoadTuner) {
-		this.categoryLoadTuner = categoryLoadTuner;
+		Map<String, List<CartData>> result = new HashMap<>();
+		List<Object[]> data = getPersistenceEngine().retrieveByNamedQueryWithList("FIND_CART_DATA_FOR_CARTS", "list", cartGuids);
+		data.forEach(objects -> {
+
+			Object key = objects[0];
+			Object value = objects[1];
+			if (!(key instanceof String) || !(value instanceof CartData)) {
+				throw new EpServiceException("Data retrieved from database not in correct format");
+			}
+			String cartGuid = (String) key;
+			CartData cartData = (CartData) value;
+			List<CartData> cartDataList = result.get(cartGuid);
+			if (cartDataList == null) {
+				cartDataList = new ArrayList<>();
+			}
+			cartDataList.add(cartData);
+			result.put(cartGuid, cartDataList);
+
+		});
+		return result;
 	}
 
 	/**
-	 * Setter for spring.
-	 *
-	 * @param shoppingItemLoadTuner a shopping item load tuner
+	 * Used for retrieving a txProxyTemplate wrapped copy of this service.
+	 * @return shopping cart service
 	 */
-	public void setShoppingItemLoadTuner(final ShoppingItemLoadTuner shoppingItemLoadTuner) {
-		this.shoppingItemLoadTuner = shoppingItemLoadTuner;
-	}
-
-	/**
-	 * Sets the <code>ProductLoadTuner</code> for populating all data.
-	 *
-	 * @param productLoadTuner the <code>ProductLoadTuner</code> for populating all data.
-	 */
-	public void setProductLoadTuner(final ProductLoadTuner productLoadTuner) {
-		this.productLoadTuner = productLoadTuner;
-	}
-
-	/**
-	 * Sets the <code>ProductSkuLoadTuner</code> for populating all data.
-	 *
-	 * @param productSkuLoadTuner the <code>ProductSkuLoadTuner</code> for populating all data.
-	 */
-	public void setProductSkuLoadTuner(final ProductSkuLoadTuner productSkuLoadTuner) {
-		this.productSkuLoadTuner = productSkuLoadTuner;
-	}
-
-	/**
-	 * Set the fetch plan helper.
-	 *
-	 * @param fetchPlanHelper the fetchPlanHelper to set
-	 */
-	public void setFetchPlanHelper(final FetchPlanHelper fetchPlanHelper) {
-		this.fetchPlanHelper = fetchPlanHelper;
+	protected ShoppingCartService getShoppingCartService() {
+		return getSingletonBean(ContextIdNames.SHOPPING_CART_SERVICE, ShoppingCartService.class);
 	}
 
 	/**
@@ -605,5 +585,15 @@ public class ShoppingCartServiceImpl extends AbstractEpPersistenceServiceImpl im
 		this.timeService = timeService;
 	}
 
-	// END - SPRING SETTERS
+	// This warning had to suppressed because the code is correct as per
+	// https://pmd.github.io/latest/pmd_rules_java_performance.html#optimizabletoarraycall
+	//TODO remove @SuppressWarnings after upgrading the PMD to 6.x
+	@SuppressWarnings("PMD.OptimizableToArrayCall")
+	public void setLoadTuners(final List<LoadTuner> loadTuners) {
+		this.loadTuners = loadTuners.toArray(new LoadTuner[0]);
+	}
+
+	private LoadTuner[] getLoadTuners() {
+		return loadTuners;
+	}
 }

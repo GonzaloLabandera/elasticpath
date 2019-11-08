@@ -36,7 +36,7 @@ public class UpdatableRuleServiceImpl extends RuleServiceImpl {
 		if (rule == null) {
 			return null;
 		}
-		RuleWrapper ruleWrapper = getBean(ImportExportContextIdNames.RULE_WRAPPER);
+		RuleWrapper ruleWrapper = getPrototypeBean(ImportExportContextIdNames.RULE_WRAPPER, RuleWrapper.class);
 		ruleWrapper.setUpdatedRule(rule);
 		ruleWrapper.takeSnapshot();
 		return ruleWrapper;

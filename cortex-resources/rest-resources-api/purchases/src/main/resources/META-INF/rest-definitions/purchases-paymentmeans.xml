@@ -3,14 +3,6 @@
 
 	<family>
 		<name>purchases</name>
-		<description>
-			<![CDATA[
-The Paymentmeans resource is responsible for recording a purchase's billing details, such as a customer's billing address and
-[paymentmethod][paymentmethods].
-
-[paymentmethods]: #paymentmethods
-			]]>
-		</description>
 
 		<uri-part>
 			<name>paymentmeans-id</name>

@@ -12,6 +12,9 @@
 	<packaging>pom</packaging>
 
 	<name>Extension Data Sync Tool CLI</name>
+	<properties>
+		<ep.spring.profile>non-xa</ep.spring.profile>
+	</properties>
 
 	<dependencies>
 		<dependency>
@@ -20,6 +23,15 @@
 			<version>${project.version}</version>
 			<scope>runtime</scope>
 		</dependency>
+		<dependency>
+			<groupId>javax.jms</groupId>
+			<artifactId>javax.jms-api</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.camel</groupId>
+			<artifactId>camel-jms</artifactId>
+		</dependency>
+
 		<!-- Include JDBC driver dependency -->
 		<dependency>
 			<groupId>${epdb.maven.groupId}</groupId>

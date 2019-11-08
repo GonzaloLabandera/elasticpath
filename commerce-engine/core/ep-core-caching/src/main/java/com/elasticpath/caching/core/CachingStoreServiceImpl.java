@@ -8,6 +8,7 @@ import java.util.Collection;
 import java.util.List;
 
 import com.elasticpath.base.exception.EpServiceException;
+import com.elasticpath.cache.Cache;
 import com.elasticpath.domain.cmuser.CmUser;
 import com.elasticpath.domain.store.Store;
 import com.elasticpath.domain.store.StoreState;
@@ -23,6 +24,8 @@ public class CachingStoreServiceImpl implements StoreService {
 
 	private StoreRetrieveStrategy storeCache;
 	private StoreService fallbackStoreService;
+	private Cache<String, Collection<String>> storeCartTypeCache;
+
 
 	/**
 	 * When caching is involved, ignore the load tuner and cache the whole thing.
@@ -87,6 +90,17 @@ public class CachingStoreServiceImpl implements StoreService {
 	@Override
 	public String findValidStoreCode(final String storeCode) {
 		return getFallbackStoreService().findValidStoreCode(storeCode);
+	}
+
+	@Override
+	public Collection<String> getCartTypeNamesForStore(final String storeCode) {
+
+		Collection<String> result = getStoreCartTypeCache().get(storeCode);
+		if (result == null) {
+			result = getFallbackStoreService().getCartTypeNamesForStore(storeCode);
+			getStoreCartTypeCache().put(storeCode, result);
+		}
+		return result;
 	}
 
 	@Override
@@ -220,5 +234,13 @@ public class CachingStoreServiceImpl implements StoreService {
 	@Override
 	public Object getObject(final long uid, final Collection<String> fieldsToLoad) throws EpServiceException {
 		return getStore(uid);
+	}
+
+	public Cache<String, Collection<String>> getStoreCartTypeCache() {
+		return storeCartTypeCache;
+	}
+
+	public void setStoreCartTypeCache(final Cache<String, Collection<String>> storeCartTypeCache) {
+		this.storeCartTypeCache = storeCartTypeCache;
 	}
 }

@@ -1,0 +1,19 @@
+{
+	"status": "P",
+	"code": "ABC",
+	"submitDate": "2019-03-28",
+	"requestLines": [
+		{
+			"id" : "a1",
+			"optionA": 1,
+			"isValid": true
+		},
+		{
+			"id" : "a2",
+			"optionA": 2,
+			"isValid": false
+		}
+
+	]
+
+}

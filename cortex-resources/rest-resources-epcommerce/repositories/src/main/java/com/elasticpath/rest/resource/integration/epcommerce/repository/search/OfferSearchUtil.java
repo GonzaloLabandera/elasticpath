@@ -22,6 +22,8 @@ import com.elasticpath.rest.id.IdentifierPart;
 import com.elasticpath.rest.id.type.CompositeIdentifier;
 import com.elasticpath.service.search.query.KeywordSearchCriteria;
 import com.elasticpath.service.search.query.ProductSearchCriteria;
+import com.elasticpath.service.search.query.SortBy;
+import com.elasticpath.service.search.query.SortOrder;
 
 /**
  * Utility class for offer search.
@@ -39,11 +41,13 @@ public final class OfferSearchUtil {
 	 * @param appliedFacets selected facets that will be filtered
 	 * @param locale locale
 	 * @param currency currency
-	 * @param facetingEnabled facet enabled
+	 * @param sortOrder ascending or descending
+	 * @param sortBy the attribute to sort by
 	 * @return an offer search criteria
 	 */
 	public static KeywordSearchCriteria createSearchCriteria(final String keyword, final Store store, final Map<String, String> appliedFacets,
-															 final Locale locale, final Currency currency, final boolean facetingEnabled) {
+															 final Locale locale, final Currency currency, final SortBy sortBy,
+															 final SortOrder sortOrder) {
 		KeywordSearchCriteria offerSearchCriteria = new KeywordSearchCriteria();
 		offerSearchCriteria.setStoreCode(store.getCode());
 		offerSearchCriteria.setCatalogCode(store.getCatalog().getCode());
@@ -52,9 +56,11 @@ public final class OfferSearchUtil {
 		offerSearchCriteria.setLocale(locale);
 		offerSearchCriteria.setDisplayableOnly(true);
 		offerSearchCriteria.setActiveOnly(true);
-		offerSearchCriteria.setFacetingEnabled(facetingEnabled);
+		offerSearchCriteria.setFacetingEnabled(true);
 		offerSearchCriteria.setAppliedFacets(appliedFacets);
 		offerSearchCriteria.setOfferSearch(true);
+		offerSearchCriteria.setSortingType(sortBy);
+		offerSearchCriteria.setSortingOrder(sortOrder);
 		return offerSearchCriteria;
 	}
 
@@ -63,20 +69,21 @@ public final class OfferSearchUtil {
 	 * @param appliedFacets selected facets that will be filtered
 	 * @param locale locale
 	 * @param currency currency
-	 * @param facetingEnabled facet enabled
 	 * @param category category
 	 * @param storeCode store code
+	 * @param sortOrder ascending or descending
+	 * @param sortBy the attribute to sort by
 	 * @return an offer search criteria
 	 */
 	public static ProductSearchCriteria createNavigationSearchCriteria(final Map<String, String> appliedFacets, final Locale locale,
-																	   final Currency currency, final boolean facetingEnabled,
-																	   final Category category, final String storeCode) {
+																	   final Currency currency, final Category category, final String storeCode,
+																	   final SortBy sortBy, final SortOrder sortOrder) {
 		ProductSearchCriteria criteria = new ProductSearchCriteria();
 		criteria.setCurrency(currency);
 		criteria.setLocale(locale);
 		criteria.setDisplayableOnly(true);
 		criteria.setActiveOnly(true);
-		criteria.setFacetingEnabled(facetingEnabled);
+		criteria.setFacetingEnabled(true);
 		criteria.setAppliedFacets(appliedFacets);
 		criteria.setFuzzySearchDisabled(true);
 		criteria.setOnlyWithinDirectCategory(false);
@@ -84,6 +91,8 @@ public final class OfferSearchUtil {
 		criteria.setDirectCategoryUid(category.getUidPk());
 		criteria.setCatalogCode(category.getCatalog().getCode());
 		criteria.setStoreCode(storeCode);
+		criteria.setSortingOrder(sortOrder);
+		criteria.setSortingType(sortBy);
 		return criteria;
 	}
 

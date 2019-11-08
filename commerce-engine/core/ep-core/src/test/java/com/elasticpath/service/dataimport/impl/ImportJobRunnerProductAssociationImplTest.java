@@ -12,17 +12,15 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-
 import javax.persistence.EntityManager;
 import javax.persistence.FlushModeType;
 
+import org.hamcrest.collection.IsArray;
 import org.jmock.Expectations;
 import org.jmock.integration.junit4.JUnitRuleMockery;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-
-import org.hamcrest.collection.IsArray;
 
 import com.elasticpath.base.exception.EpServiceException;
 import com.elasticpath.commons.constants.ContextIdNames;
@@ -37,6 +35,7 @@ import com.elasticpath.domain.catalog.impl.ProductAssociationImpl;
 import com.elasticpath.domain.catalog.impl.ProductImpl;
 import com.elasticpath.domain.cmuser.CmUser;
 import com.elasticpath.domain.dataimport.ImportBadRow;
+import com.elasticpath.domain.dataimport.ImportFault;
 import com.elasticpath.domain.dataimport.ImportJob;
 import com.elasticpath.domain.dataimport.ImportJobRequest;
 import com.elasticpath.domain.dataimport.ImportJobState;
@@ -69,8 +68,8 @@ public class ImportJobRunnerProductAssociationImplTest {
 	private static final String TARGET_PRODUCT2_CODE = "10000888";
 	private static final String SOURCE_PRODUCT_CODE = "10020228";
 	private static final String IMPORT_PROCESS_ID = "id1";
-	private static final String[] CSV_LINE1 = new String[] { SOURCE_PRODUCT_CODE, TARGET_PRODUCT1_CODE, "4", "0", "1", "1" };
-	private static final String[] CSV_LINE2 = new String[] { SOURCE_PRODUCT_CODE, TARGET_PRODUCT2_CODE, "4", "0", "1", "2" };
+	private static final String[] CSV_LINE1 = new String[]{SOURCE_PRODUCT_CODE, TARGET_PRODUCT1_CODE, "4", "0", "1", "1"};
+	private static final String[] CSV_LINE2 = new String[]{SOURCE_PRODUCT_CODE, TARGET_PRODUCT2_CODE, "4", "0", "1", "2"};
 
 	@Rule
 	public final JUnitRuleMockery context = new JUnitRuleMockery();
@@ -93,7 +92,6 @@ public class ImportJobRunnerProductAssociationImplTest {
 
 	/**
 	 * Test initialization.
-	 *
 	 */
 	@Before
 	public void setUp() {
@@ -120,38 +118,53 @@ public class ImportJobRunnerProductAssociationImplTest {
 		mapping.put("sourceProductCode", 0);
 		context.checking(new Expectations() {
 			{
-				allowing(elasticPath).getBean(ContextIdNames.PRODUCT_ASSOCIATION); will(returnValue(new ProductAssociationImpl()));
-				allowing(elasticPath).getBean(ContextIdNames.IMPORT_BAD_ROW); will(returnValue(new ImportBadRowImpl()));
-				allowing(elasticPath).getBean(ContextIdNames.IMPORT_FAULT); will(returnValue(new ImportFaultImpl()));
+				allowing(elasticPath).getPrototypeBean(ContextIdNames.PRODUCT_ASSOCIATION, ProductAssociation.class);
+				will(returnValue(new ProductAssociationImpl()));
+				allowing(elasticPath).getPrototypeBean(ContextIdNames.IMPORT_BAD_ROW, ImportBadRow.class);
+				will(returnValue(new ImportBadRowImpl()));
+				allowing(elasticPath).getPrototypeBean(ContextIdNames.IMPORT_FAULT, ImportFault.class);
+				will(returnValue(new ImportFaultImpl()));
 
-				allowing(importService).findImportDataType(with(any(String.class))); will(returnValue(importDataType));
+				allowing(importService).findImportDataType(with(any(String.class)));
+				will(returnValue(importDataType));
 				allowing(importService).initImportDataTypeLocalesAndCurrencies(importDataType, importJob);
 
 				allowing(transaction).commit();
-				allowing(persistenceSession).beginTransaction(); will(returnValue(transaction));
+				allowing(persistenceSession).beginTransaction();
+				will(returnValue(transaction));
 				allowing(persistenceSession).close();
 
-				allowing(persistenceEngine).getSharedPersistenceSession(); will(returnValue(persistenceSession));
-				allowing(persistenceEngine).isCacheEnabled(); will(returnValue(false));
-				allowing(persistenceEngine).getEntityManager();	will(returnValue(entityManager));
+				allowing(persistenceEngine).getSharedPersistenceSession();
+				will(returnValue(persistenceSession));
+				allowing(persistenceEngine).isCacheEnabled();
+				will(returnValue(false));
+				allowing(persistenceEngine).getEntityManager();
+				will(returnValue(entityManager));
 
 				allowing(entityManager).setFlushMode(with(any(FlushModeType.class)));
 
-				allowing(importJob).getImportDataTypeName(); will(returnValue("Test Product Association Import Data Type"));
-				allowing(importJob).getMappings(); will(returnValue(mapping));
-				allowing(importJob).getCatalog(); will(returnValue(catalog));
+				allowing(importJob).getImportDataTypeName();
+				will(returnValue("Test Product Association Import Data Type"));
+				allowing(importJob).getMappings();
+				will(returnValue(mapping));
+				allowing(importJob).getCatalog();
+				will(returnValue(catalog));
 
-				allowing(catalog).getCode(); will(returnValue("Test_Catalog"));
+				allowing(catalog).getCode();
+				will(returnValue("Test_Catalog"));
 
 				allowing(jobStatusHandler).getImportJobStatus(IMPORT_PROCESS_ID);
 				allowing(jobStatusHandler).reportCurrentRow(with(any(String.class)), with(any(int.class)));
 				allowing(jobStatusHandler).reportImportJobState(with(any(String.class)), with(any(ImportJobState.class)));
-				allowing(jobStatusHandler).isImportJobCancelled(IMPORT_PROCESS_ID); will(returnValue(true));
+				allowing(jobStatusHandler).isImportJobCancelled(IMPORT_PROCESS_ID);
+				will(returnValue(true));
 
-				allowing(cmUser).getGuid(); will(returnValue("GUID-1"));
+				allowing(cmUser).getGuid();
+				will(returnValue("GUID-1"));
 
 				allowing(csvFileReader).close();
-				allowing(changeSetService).isChangeSetEnabled(); will(returnValue(false));
+				allowing(changeSetService).isChangeSetEnabled();
+				will(returnValue(false));
 			}
 		});
 
@@ -176,8 +189,10 @@ public class ImportJobRunnerProductAssociationImplTest {
 			{
 				int lineIndex = 0;
 
-				allowing(csvFileReader).readNext(); will(returnValue(csvLines.get(lineIndex++)));
-				oneOf(csvFileReader).getTopLines(importJobRunnerImpl.getCommitUnit()); will(returnValue(csvLines));
+				allowing(csvFileReader).readNext();
+				will(returnValue(csvLines.get(lineIndex++)));
+				oneOf(csvFileReader).getTopLines(importJobRunnerImpl.getCommitUnit());
+				will(returnValue(csvLines));
 
 				never(jobStatusHandler).reportBadRows(with(equal(IMPORT_PROCESS_ID)), with(IsArray.<ImportBadRow>array(anything())));
 				never(jobStatusHandler).reportFailedRows(with(any(String.class)), with(any(int.class)));
@@ -214,8 +229,10 @@ public class ImportJobRunnerProductAssociationImplTest {
 			{
 				int lineIndex = 0;
 
-				allowing(csvFileReader).readNext(); will(returnValue(csvLines.get(lineIndex++)));
-				oneOf(csvFileReader).getTopLines(importJobRunnerImpl.getCommitUnit()); will(returnValue(csvLines));
+				allowing(csvFileReader).readNext();
+				will(returnValue(csvLines.get(lineIndex++)));
+				oneOf(csvFileReader).getTopLines(importJobRunnerImpl.getCommitUnit());
+				will(returnValue(csvLines));
 
 				exactly(2).of(jobStatusHandler).reportBadRows(with(equal(IMPORT_PROCESS_ID)), with(IsArray.<ImportBadRow>array(anything())));
 				exactly(2).of(jobStatusHandler).reportFailedRows(with(any(String.class)), with(any(int.class)));
@@ -377,9 +394,9 @@ public class ImportJobRunnerProductAssociationImplTest {
 	}
 
 	private ProductAssociation createProductAssociation(final String sourceProductCode,
-			final String targetProductCode,
-			final Integer associationTypeOrdinal,
-			final Date startDate) {
+														final String targetProductCode,
+														final Integer associationTypeOrdinal,
+														final Date startDate) {
 		ProductAssociation productAssociation = new ProductAssociationImpl();
 		Product sourceProduct = new ProductImpl();
 		sourceProduct.setCode(sourceProductCode);

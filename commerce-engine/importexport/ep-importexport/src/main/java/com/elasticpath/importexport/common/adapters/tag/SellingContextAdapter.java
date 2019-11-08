@@ -100,7 +100,7 @@ public class SellingContextAdapter extends AbstractDomainAdapterImpl<SellingCont
 	public SellingContext getDomainObject(final String guid) {
 		SellingContext sellingContext = sellingContextService.getByGuid(guid);
 		if (sellingContext == null) {
-			sellingContext = getBeanFactory().getBean(ContextIdNames.SELLING_CONTEXT);
+			sellingContext = getBeanFactory().getPrototypeBean(ContextIdNames.SELLING_CONTEXT, SellingContext.class);
 		}
 		return sellingContext;
 	}
@@ -138,7 +138,7 @@ public class SellingContextAdapter extends AbstractDomainAdapterImpl<SellingCont
 	private ConditionalExpression getConditionalExpression(final String guid) {
 		ConditionalExpression conditionalExpression = tagConditionService.findByGuid(guid);
 		if (conditionalExpression == null) {
-			conditionalExpression = getBeanFactory().getBean(ContextIdNames.CONDITIONAL_EXPRESSION);
+			conditionalExpression = getBeanFactory().getPrototypeBean(ContextIdNames.CONDITIONAL_EXPRESSION, ConditionalExpression.class);
 		}
 		return conditionalExpression;
 	}

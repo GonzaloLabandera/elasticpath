@@ -1,0 +1,13 @@
+{
+	"request": {
+		"method": "POST",
+		"urlPattern": "/simple"
+	},
+	"response": {
+		"status": 200,
+		"transformers": ["example-simple-transformer"],
+		"headers": {
+			"Content-Type": "application/json"
+		}
+	}
+}

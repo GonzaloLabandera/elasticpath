@@ -5,7 +5,7 @@
 		<name>geographies</name>
 		<description>
 			<![CDATA[
-####Entry Point: /geographies/{scope}/countries
+**Entry Point:** `/geographies/{scope}/countries`
 
 The geographies resource family provides access to location related data, including lists of countries, and lists of regions by country.
 			]]>

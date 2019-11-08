@@ -1,0 +1,25 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "description": "Subschemas for extension points within projections.",
+
+  "categoryExtensions": {
+    "description": "Extension point for custom category fields.",
+    "type": "object",
+    "properties": {
+    }
+  },
+
+  "itemExtensions": {
+    "description": "Extension point for custom item fields.",
+    "type": "object",
+    "properties": {
+    }
+  },
+
+  "offerExtensions": {
+    "description": "Extension point for custom offer fields.",
+    "type": "object",
+    "properties": {
+    }
+  }
+}

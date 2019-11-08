@@ -106,6 +106,8 @@ public class StandardSortBy extends AbstractExtensibleEnum<SortBy> implements So
 	public static final int STATE_ORDINAL = 44;
 	/** Ordinal constant for USER ID. */
 	public static final int USER_ID_ORDINAL = 45;
+	/** Ordinal constant for ATTRIBUTE. */
+	public static final int ATTRIBUTE_ORDINAL = 46;
 
 	/** Sorts via highest match (relevance). */
 	public static final SortBy RELEVANCE = new StandardSortBy(RELEVANCE_ORDINAL, "RELEVANCE", "relevance");
@@ -253,7 +255,10 @@ public class StandardSortBy extends AbstractExtensibleEnum<SortBy> implements So
 	/** User Id. */
 	public static final SortBy USER_ID = new StandardSortBy(USER_ID_ORDINAL, "USER_ID", "userId");
 
-	private final String sortString;
+	/** Attribute. */
+	public static final SortBy ATTRIBUTE = new StandardSortBy(ATTRIBUTE_ORDINAL, "ATTRIBUTE", "attribute");
+
+	private String sortString;
 
 
 	/**
@@ -270,6 +275,11 @@ public class StandardSortBy extends AbstractExtensibleEnum<SortBy> implements So
 	@Override
 	public String getSortString() {
 		return sortString;
+	}
+
+	@Override
+	public void setSortString(final String sortString) {
+		this.sortString = sortString;
 	}
 
 	@Override

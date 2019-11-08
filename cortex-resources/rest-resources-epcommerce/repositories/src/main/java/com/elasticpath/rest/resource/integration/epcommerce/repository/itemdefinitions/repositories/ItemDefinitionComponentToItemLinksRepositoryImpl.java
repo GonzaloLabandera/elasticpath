@@ -9,6 +9,8 @@ import java.util.Map;
 import io.reactivex.Observable;
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.elasticpath.repository.LinksRepository;
 import com.elasticpath.rest.definition.itemdefinitions.ItemDefinitionComponentIdentifier;
@@ -26,6 +28,7 @@ import com.elasticpath.rest.resource.integration.epcommerce.repository.item.Item
 public class ItemDefinitionComponentToItemLinksRepositoryImpl<I extends ItemDefinitionComponentIdentifier, LI extends ItemIdentifier>
 		implements LinksRepository<ItemDefinitionComponentIdentifier, ItemIdentifier> {
 
+	private static final Logger LOG = LoggerFactory.getLogger(ItemDefinitionComponentToItemLinksRepositoryImpl.class);
 	private ItemRepository itemRepository;
 
 	@Override
@@ -36,6 +39,7 @@ public class ItemDefinitionComponentToItemLinksRepositoryImpl<I extends ItemDefi
 		Iterator<String> guidPathFromRootItem = identifier.getComponentId().getValue().iterator();
 
 		return itemRepository.findBundleConstituentAtPathEnd(itemIdMap, guidPathFromRootItem)
+				.doOnError(throwable -> LOG.info("No bundle constituent found for item id '{}'.", itemIdMap))
 				.map(bundleConstituent -> bundleConstituent.getConstituent().getProductSku().getSkuCode())
 				.map(skuCode -> itemRepository.getItemIdMap(skuCode))
 				.flatMapObservable(itemId -> buildItemIdentifier(itemId, scope))

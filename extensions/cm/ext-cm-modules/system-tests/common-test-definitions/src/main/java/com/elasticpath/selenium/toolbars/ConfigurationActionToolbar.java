@@ -13,6 +13,7 @@ import com.elasticpath.selenium.resultspane.SearchIndexesResultPane;
 import com.elasticpath.selenium.resultspane.ShippingRegionsPane;
 import com.elasticpath.selenium.resultspane.StoresResultPane;
 import com.elasticpath.selenium.resultspane.SystemConfigurationResultPane;
+import com.elasticpath.selenium.resultspane.TagsResultPane;
 import com.elasticpath.selenium.resultspane.TaxCodesPane;
 import com.elasticpath.selenium.resultspane.TaxJurisdictionsPane;
 import com.elasticpath.selenium.resultspane.UserRolesResultPane;
@@ -28,6 +29,8 @@ public class ConfigurationActionToolbar extends AbstractToolbar {
 			+ ".ConfigurationAdminSection_SystemConfiguration']";
 	private static final String SEARCH_INDEXES = "div[automation-id='com.elasticpath.cmclient.admin.configuration.AdminConfigurationMessages"
 			+ ".ConfigurationAdminSection_SearchIndexes']";
+	private static final String TAGS_LINK_CSS = "div[automation-id='com.elasticpath.cmclient.admin.configuration.AdminConfigurationMessages"
+			+ ".ConfigurationAdminSection_TagConfiguration']";
 	private static final String USER_ROLES_LINK_CSS = "div[automation-id='com.elasticpath.cmclient.admin.users"
 			+ ".AdminUsersMessages.UserAdminSection_RoleAdmin']";
 	private static final String WAREHOUSE_LINK_CSS = "div[automation-id='com.elasticpath.cmclient.admin.warehouses.AdminWarehousesMessages"
@@ -196,6 +199,10 @@ public class ConfigurationActionToolbar extends AbstractToolbar {
 		getWaitDriver().waitForElementToBeClickable(By.cssSelector(RELOAD_ACTIVE_EDITOR_BUTTON_CSS));
 	}
 
+	public void clickSaveButtonNoWait() {
+		clickButton(SAVE_BUTTON_CSS, "Save Button");
+	}
+
 	/**
 	 * Clicks on Data Policies link.
 	 *
@@ -224,5 +231,10 @@ public class ConfigurationActionToolbar extends AbstractToolbar {
 		assertThat(isButtonEnabled(String.format(CONFIGURATION_SECTION_LINK_CSS, configuration)))
 				.as("Expected configuration disabled - " + configuration)
 				.isTrue();
+	}
+
+	public TagsResultPane clickTags() {
+		click(getWaitDriver().waitForElementToBeClickable(By.cssSelector(TAGS_LINK_CSS)));
+		return new TagsResultPane(getDriver());
 	}
 }

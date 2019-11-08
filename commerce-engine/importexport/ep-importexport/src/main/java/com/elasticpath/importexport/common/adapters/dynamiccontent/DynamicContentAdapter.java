@@ -88,7 +88,7 @@ public class DynamicContentAdapter extends AbstractDomainAdapterImpl<DynamicCont
 
 	@Override
 	public DynamicContent createDomainObject() {
-		return getBeanFactory().getBean(ContextIdNames.DYNAMIC_CONTENT);
+		return getBeanFactory().getPrototypeBean(ContextIdNames.DYNAMIC_CONTENT, DynamicContent.class);
 	}
 
 	@Override

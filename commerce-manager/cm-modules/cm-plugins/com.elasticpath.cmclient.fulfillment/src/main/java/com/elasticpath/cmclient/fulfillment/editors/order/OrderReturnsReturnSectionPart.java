@@ -404,6 +404,9 @@ public class OrderReturnsReturnSectionPart extends AbstractCmClientEditorPageSec
 	}
 
 	private static String getDisplayableUserName(final CmUser user) {
+		if (user == null) {
+			return FulfillmentMessages.get().OrderReturn_Default_CMUser_Shopper;
+		}
 		return user.getFirstName()
 				+ ' ' //$NON-NLS-1$
 				+ user.getLastName();

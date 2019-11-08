@@ -72,7 +72,7 @@ public class CatalogAdapterTest {
 
 		context.checking(new Expectations() {
 			{
-				allowing(mockBeanFactory).getBean(ContextIdNames.CATALOG);
+				allowing(mockBeanFactory).getPrototypeBean(ContextIdNames.CATALOG, Catalog.class);
 				will(returnValue(mockCatalogDomain));
 			}
 		});

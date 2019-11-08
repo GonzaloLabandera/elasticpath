@@ -7,8 +7,14 @@
 		xsi:schemaLocation="http://www.springframework.org/schema/beans
 			http://www.springframework.org/schema/beans/spring-beans-4.0.xsd">
 
+	<!-- used for health monitoring -->
 	<bean id="dataSource" class="org.springframework.jndi.JndiObjectFactoryBean">
 		<property name="jndiName" value="java:comp/env/jdbc/epjndi" />
+		<property name="resourceRef" value="true" />
+	</bean>
+
+	<bean id="readOnlyDataSource" class="org.springframework.jndi.JndiObjectFactoryBean">
+		<property name="jndiName" value="java:comp/env/jdbc/epjndiReadOnly" />
 		<property name="resourceRef" value="true" />
 	</bean>
 
@@ -16,11 +22,13 @@
 		<constructor-arg value="Cortex"/>
 	</bean>
 
+	<!-- needed for tests -->
 	<bean name="jndiMap" class="java.util.HashMap">
 		<constructor-arg>
 			<map key-type="java.lang.String" value-type="java.lang.String">
 				<entry key="java:comp/env/jms/JMSConnectionFactory" value="javax.jms.ConnectionFactory"/>
 				<entry key="java:comp/env/jdbc/epjndi" value="javax.sql.DataSource"/>
+				<entry key="java:comp/env/jdbc/epjndiReadOnly" value="javax.sql.DataSource"/>
 			</map>
 		</constructor-arg>
 	</bean>

@@ -132,7 +132,7 @@ public class AttributeGroupHelperImplTest {
 
 		context.checking(new Expectations() {
 			{
-				oneOf(mockBeanFactory).getBean(with(any(String.class)));
+				oneOf(mockBeanFactory).getPrototypeBean(with(any(String.class)), with(equal(AttributeGroupAttribute.class)));
 				will(returnValue(mockAttributeGroupAttribute));
 				oneOf(mockAttributeGroupAttribute).setAttribute(mockAttribute);
 			}

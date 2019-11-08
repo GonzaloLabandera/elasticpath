@@ -51,7 +51,7 @@ public class ParameterValueAdapter extends AbstractDomainAdapterImpl<ParameterVa
 
 	@Override
 	public ParameterValue createDomainObject() {
-		return getBeanFactory().getBean(ContextIdNames.DYNAMIC_CONTENT_WRAPPER_PARAMETER_VALUE);
+		return getBeanFactory().getPrototypeBean(ContextIdNames.DYNAMIC_CONTENT_WRAPPER_PARAMETER_VALUE, ParameterValue.class);
 	}
 
 	@Override

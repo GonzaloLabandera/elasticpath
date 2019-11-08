@@ -14,12 +14,26 @@
 			interface="javax.sql.DataSource"
 			filter="(jndiName=jdbc/epjndi)"/>
 
+	<reference id="readOnlyDataSource"
+			   interface="javax.sql.DataSource"
+			   filter="(jndiName=jdbc/epjndiReadOnly)"/>
+
 	<reference id="eventMessageFactory"
 			   availability="optional"
 			   interface="com.elasticpath.messaging.factory.EventMessageFactory"/>
 
 	<reference id="customerEventMessagePublisher"
 			   filter="(name=customerEventMessagePublisher)"
+			   availability="optional"
+			   interface="com.elasticpath.messaging.EventMessagePublisher"/>
+
+	<reference id="domainEventMessagePublisher"
+			   filter="(name=domainEventMessagePublisher)"
+			   availability="optional"
+			   interface="com.elasticpath.messaging.EventMessagePublisher"/>
+
+	<reference id="catalogEventMessagePublisher"
+			   filter="(name=catalogEventMessagePublisher)"
 			   availability="optional"
 			   interface="com.elasticpath.messaging.EventMessagePublisher"/>
 
@@ -245,6 +259,14 @@
     <service ref="customerRegistrationService"
              interface="com.elasticpath.service.customer.CustomerRegistrationService" />
 
+	<service ref="attributePolicyService" interface="com.elasticpath.service.customer.AttributePolicyService"/>
+
+	<service ref="storeCustomerAttributeService" interface="com.elasticpath.service.customer.StoreCustomerAttributeService"/>
+
+	<service ref="customerProfileAttributeService" interface="com.elasticpath.service.customer.CustomerProfileAttributeService"/>
+
+	<service ref="attributeService" interface="com.elasticpath.service.attribute.AttributeService"/>
+
 	<service ref="settingsService"
 			 interface="com.elasticpath.settings.SettingsService" />
 
@@ -283,7 +305,13 @@
 	</service>
 
 	<service ref="storeProductService"
-			 interface="com.elasticpath.service.catalogview.StoreProductService" />
+			 interface="com.elasticpath.service.catalogview.StoreProductService" >
+		<service-properties>
+			<entry key="caching">
+				<value type="java.lang.Boolean">false</value>
+			</entry>
+		</service-properties>
+	</service>
 
 	<service ref="oAuth2AccessTokenService"
 			 interface="com.elasticpath.service.auth.OAuth2AccessTokenService" />
@@ -409,9 +437,6 @@
 	<service ref="geography"
 			 interface="com.elasticpath.domain.misc.Geography" />
 
-	<service ref="validCouponUseSpecification"
-			interface="com.elasticpath.domain.specifications.Specification"/>
-
 	<service ref="customerAgePresentation"
 			interface="com.elasticpath.presentation.customer.CustomerAgePresentation"/>
 
@@ -439,14 +464,20 @@
 	<service ref="couponAutoApplierAdapter"
 		interface="com.elasticpath.service.rules.CartOrderCouponAutoApplier" />
 
-	<service ref="cartItemModifierService"
-			 interface="com.elasticpath.service.cartitemmodifier.CartItemModifierService"/>
+	<service ref="modifierService"
+			 interface="com.elasticpath.service.modifier.ModifierService"/>
 
 	<service ref="validator"
 			 interface="javax.validation.Validator"/>
 
-	<service ref="cartItemModifierFieldValidationService"
-			 interface="com.elasticpath.validation.service.CartItemModifierFieldValidationService"/>
+	<service ref="modifierFieldValidationService"
+			 interface="com.elasticpath.validation.service.ModifierFieldValidationService"/>
+
+
+	<service ref="createCartValidationService"
+			 interface="com.elasticpath.service.shoppingcart.validation.CreateShoppingCartValidationService">
+	</service>
+
 
 	<service ref="shippingServiceLevelService"
 			 interface="com.elasticpath.service.shipping.ShippingServiceLevelService"/>
@@ -497,6 +528,15 @@
 		</service-properties>
 	</service>
 
+	<service ref="sortAttributeService"
+			 interface="com.elasticpath.service.search.SortAttributeService">
+		<service-properties>
+			<entry key="caching">
+				<value type="java.lang.Boolean">false</value>
+			</entry>
+		</service-properties>
+	</service>
+
 	<service ref="attributeService"
 			 interface="com.elasticpath.service.attribute.AttributeService" >
 		<service-properties>
@@ -525,5 +565,6 @@
 		</service-properties>
 	</service>
 
+	<service ref="hdsSupportBean" interface="com.elasticpath.persistence.openjpa.routing.HDSSupportBean"/>
 
 </blueprint>

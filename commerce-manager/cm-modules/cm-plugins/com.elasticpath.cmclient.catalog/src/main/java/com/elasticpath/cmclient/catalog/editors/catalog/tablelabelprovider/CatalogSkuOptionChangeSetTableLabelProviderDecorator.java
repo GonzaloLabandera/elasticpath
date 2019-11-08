@@ -7,6 +7,7 @@ import org.eclipse.swt.graphics.Image;
 
 import com.elasticpath.cmclient.core.CoreImageRegistry;
 import com.elasticpath.cmclient.core.editors.TableItems;
+import com.elasticpath.cmclient.core.tablelableprovider.ExtensibleTableLabelProvider;
 import com.elasticpath.domain.skuconfiguration.SkuOption;
 import com.elasticpath.domain.skuconfiguration.SkuOptionValue;
 

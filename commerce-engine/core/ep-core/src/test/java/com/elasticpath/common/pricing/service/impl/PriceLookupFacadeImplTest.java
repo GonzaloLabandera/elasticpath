@@ -17,7 +17,6 @@ import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
-import com.elasticpath.sellingchannel.ProductUnavailableException;
 import org.jmock.Expectations;
 import org.jmock.auto.Mock;
 import org.jmock.integration.junit4.JUnitRuleMockery;
@@ -33,6 +32,7 @@ import com.elasticpath.domain.catalog.Price;
 import com.elasticpath.domain.catalog.PriceTier;
 import com.elasticpath.domain.catalog.Product;
 import com.elasticpath.domain.catalog.ProductBundle;
+import com.elasticpath.domain.catalog.ProductConstituent;
 import com.elasticpath.domain.catalog.ProductSku;
 import com.elasticpath.domain.catalog.impl.BundleConstituentImpl;
 import com.elasticpath.domain.catalog.impl.ProductBundleImpl;
@@ -45,6 +45,7 @@ import com.elasticpath.domain.shopper.Shopper;
 import com.elasticpath.domain.shoppingcart.ShoppingItem;
 import com.elasticpath.domain.shoppingcart.impl.ShoppingItemImpl;
 import com.elasticpath.money.Money;
+import com.elasticpath.sellingchannel.ProductUnavailableException;
 import com.elasticpath.service.catalog.ProductSkuLookup;
 import com.elasticpath.service.pricing.PriceLookupService;
 import com.elasticpath.test.BeanFactoryExpectationsFactory;
@@ -210,7 +211,7 @@ public class PriceLookupFacadeImplTest {
 	 */
 	@Test (expected = ProductUnavailableException.class)
 	public void testIterateChildrenWrongOrdering() {
-		expectationsFactory.allowingBeanFactoryGetBean("productConstituent", ProductConstituentImpl.class);
+		expectationsFactory.allowingBeanFactoryGetPrototypeBean("productConstituent", ProductConstituent.class, ProductConstituentImpl.class);
 		final ProductSku productSku = context.mock(ProductSku.class, "productSku");
 
 		ProductBundle bundle = new ProductBundleImpl();

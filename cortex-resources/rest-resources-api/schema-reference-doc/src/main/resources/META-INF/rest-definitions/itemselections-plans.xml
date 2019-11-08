@@ -5,9 +5,7 @@
 		<name>itemselections</name>
 		<description>
 			<![CDATA[
-The Items selections resource provides [Selectors][selectors] to allow customers to select item options.
-
-[selectors]: #selectors
+The Items selections resource provides selectors to allow customers to select item options.
 			]]>
 		</description>
 

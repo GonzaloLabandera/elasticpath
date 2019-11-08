@@ -38,7 +38,7 @@ public class ProductSkuDatesValidatorTest {
 
 	private static final int DAYS_DELTA = 5;
 
-	private final DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
+	private final DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd H:m", Locale.US);
 
 	@InjectMocks
 	private ProductSkuDatesValidatorImpl validator;

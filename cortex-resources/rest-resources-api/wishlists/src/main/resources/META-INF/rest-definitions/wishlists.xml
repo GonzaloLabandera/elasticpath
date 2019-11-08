@@ -4,7 +4,7 @@
 	<family>
 		<name>wishlists</name>
 		<description><![CDATA[
-####Entry Point: /wishlists/{scope}/default
+**Entry Point:** `/wishlists/{scope}/default`
 
 A wishlist is a list that customers build up containing items that they are interested in, or desire to purchase.
 This applies even to items which are out of stock, which allows a customer to track the item.
@@ -12,11 +12,6 @@ A wishlist is similar to a cart in that items can be added or removed.
 Items can also be moved between the wishlist and the cart.
 Only one wishlist is available per shopper. This default wishlist is automatically available
 and cannot be deleted.
-
-
-[items]: #items
-[orders]: #orders
-[totals]: #totals
 		]]>
 		</description>
 

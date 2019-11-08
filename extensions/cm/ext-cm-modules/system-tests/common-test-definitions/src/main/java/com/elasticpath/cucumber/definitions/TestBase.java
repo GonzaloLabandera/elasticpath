@@ -37,7 +37,7 @@ public class TestBase {
 	@After(order = 1)
 	public void tearDown(final Scenario scenario) {
 		try {
-			if (scenario.isFailed() && !screenShotTaken) {
+			if (scenario.isFailed() && !screenShotTaken && SetUp.getDriverInstance() != null) {
 				final byte[] screenshot = ((TakesScreenshot) SetUp.getDriver()).getScreenshotAs(OutputType.BYTES);
 				scenario.embed(screenshot, "image/png");
 			}
@@ -66,7 +66,7 @@ public class TestBase {
 	@After(order = Constants.SCREENSHOT_ORDER_NUMBER)
 	public void tearDown1(final Scenario scenario) {
 
-		if (scenario.isFailed()) {
+		if (scenario.isFailed() && SetUp.getDriverInstance() != null) {
 			handleProblemOccuredDialogPresent();
 
 			LOGGER.debug("START of failure logs for scenario " + scenario.getName());
@@ -75,6 +75,11 @@ public class TestBase {
 			try {
 				final byte[] screenshot = ((TakesScreenshot) SetUp.getDriver()).getScreenshotAs(OutputType.BYTES);
 				scenario.embed(screenshot, "image/png");
+
+				String html = "<b>Page Source</b><br>"
+						+ "<textarea rows='50' cols='150'>" + SetUp.getDriver().getPageSource() + "</textarea> ";
+				scenario.embed(html.getBytes(), "text/html");
+
 				screenShotTaken = true;
 			} catch (UnhandledAlertException uae) {
 				SetUp.getDriver().switchTo().alert().accept();

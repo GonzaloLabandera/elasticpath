@@ -51,6 +51,21 @@ public class SignInDefinition {
 		signInDialog.signInToPublish(adminID, adminPassword);
 	}
 
+	/**
+	 * Sign In to export environment CM as admin user.
+	 */
+	@Given("^I sign in to the export environment CM as admin user$")
+	public void signInToExportServerAsAdmin() {
+		signInDialog.signInToExport(adminID, adminPassword);
+	}
+
+	/**
+	 * Sign In to import environment CM as admin user.
+	 */
+	@Given("^I sign in to the import environment CM as admin user$")
+	public void signInToImportServerAsAdmin() {
+		signInDialog.signInToImport(adminID, adminPassword);
+	}
 
 	/**
 	 * Switches to Author window.

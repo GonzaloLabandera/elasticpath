@@ -296,6 +296,18 @@ public interface ShoppingItem extends Entity, TreeNode<ShoppingItem>, DatabaseLa
 	}
 
 	/**
+	 * This method is exposed only for the needs of the dynamic-bundle accelerator,
+	 * to ensure its proper operation while maintaining the performance.
+	 * In normal cases, it should NEVER be used unless extensive testing is conducted
+	 * because it modifies FK PARENT_ITEM_UID outside of JPA relationship.
+	 *
+	 * @param newParentItemUid the parent id
+	 */
+	default void setParentItemUid(Long newParentItemUid) {
+		//do nothing
+	}
+
+	/**
 	 * See {@ItemType} for all available types.
 	 *
 	 * @return the item type.
@@ -313,4 +325,12 @@ public interface ShoppingItem extends Entity, TreeNode<ShoppingItem>, DatabaseLa
 	default void setItemType(ItemType itemType) {
 		//do nothing - intended for optimization of fetching orders
 	}
+
+	/**
+	 * Check if item is a calculated (dynamic) bundle.
+	 *
+	 * @param productSkuLookup the product SKU lookup
+	 * @return true if item is dynamic bundle
+	 */
+	boolean isCalculatedBundle(ProductSkuLookup productSkuLookup);
 }
